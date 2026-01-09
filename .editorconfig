@@ -1,0 +1,27 @@
+root = true
+
+[*]
+end_of_line = lf
+trim_trailing_whitespace = true
+insert_final_newline = true
+charset = utf-8
+max_line_length = 80
+
+indent_size = 4
+indent_style = space
+
+[{**.yml,**.json}]
+indent_size = 2
+
+[*.md]
+# Markdown에서 순서 있는 리스트(ol) 아래에 순서 없는 리스트(ul)를 중첩할 때,
+# indent_style = space 이고 indent_size = 2 이면 자동 포맷팅 시 공백이 제거되어
+# 하위 리스트가 상위 리스트와 동일한 레벨로 정렬되는 문제가 발생함.
+# 이를 방지하고 CommonMark 또는 GFM 규격에 맞게 4칸 들여쓰기를 유지하기 위해 tab을 사용하거나
+# indent_size를 조정해야 함. 현재는 tab으로 설정하여 공백 제거를 방지함.
+#
+# 예시:
+# 1. Ordered List
+#    - Unordered List (이 앞의 공백이 사라지는 문제)
+indent_style = tab
+indent_size = 2
