@@ -1,0 +1,19 @@
+.plantuml-diagram {
+  margin: 1.5rem 0;
+  overflow-x: auto;
+}
+
+.plantuml-diagram img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.plantuml-diagram figcaption {
+  margin-top: 0.5rem;
+  color: #64748b;
+  font-size: 0.875rem;
+  text-align: center;
+}

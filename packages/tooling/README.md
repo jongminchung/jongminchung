@@ -11,6 +11,11 @@ npm install --save-dev @jongminchung/tooling
 Install the actual formatter and linter in each consuming project. This package only centralizes the
 shared settings.
 
+## Version Policy
+
+This package intentionally stays on `1.0.0`. Consumers should reuse `@jongminchung/tooling@1.0.0`;
+do not publish replacement versions such as `1.0.1` or `1.0.2`.
+
 ## Package scripts
 
 ```json

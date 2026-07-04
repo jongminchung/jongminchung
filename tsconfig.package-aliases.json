@@ -2,6 +2,12 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     "paths": {
+      "@jongminchung/remark-plantuml": ["./packages/remark-plantuml/src/index.ts"],
+      "@jongminchung/remark-plantuml/astro": ["./packages/remark-plantuml/src/astro.ts"],
+      "@jongminchung/remark-plantuml/starlight.css": [
+        "./packages/remark-plantuml/src/starlight.css"
+      ],
+      "@jongminchung/remark-plantuml/styles.css": ["./packages/remark-plantuml/src/styles.css"],
       "@jongminchung/tooling/oxfmt": ["./packages/tooling/src/oxfmt/index.ts"],
       "@jongminchung/tooling/oxlint": ["./packages/tooling/src/oxlint/index.ts"],
       "@jongminchung/tooling/oxlint.json": ["./packages/tooling/src/oxlint/base.json"],

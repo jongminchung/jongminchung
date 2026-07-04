@@ -6,14 +6,15 @@
   ],
   "type": "module",
   "scripts": {
-    "build": "bun run build:tooling && bun run build:ui",
+    "build": "bun run build:remark-plantuml && bun run build:tooling && bun run build:ui",
+    "build:remark-plantuml": "bun run --cwd packages/remark-plantuml build",
     "build:tooling": "bun run --cwd packages/tooling build",
     "build:ui": "bun run --cwd packages/ui build",
     "check": "bun run build && bun run lint && bun run fmt:check && bun run typecheck && bun run test",
     "fmt": "oxfmt --config .oxfmtrc.mjs packages package.json tsconfig.json tsconfig.base.json tsconfig.package-aliases.json vitest.config.ts .oxfmtrc.mjs .oxlintrc.json .github/workflows/publish-packages.yml",
     "fmt:check": "oxfmt --config .oxfmtrc.mjs --check packages package.json tsconfig.json tsconfig.base.json tsconfig.package-aliases.json vitest.config.ts .oxfmtrc.mjs .oxlintrc.json .github/workflows/publish-packages.yml",
     "lint": "oxlint packages vitest.config.ts",
-    "publish:dry-run": "bun run --cwd packages/tooling publish:dry-run && bun run --cwd packages/ui publish:dry-run",
+    "publish:dry-run": "bun run --cwd packages/remark-plantuml publish:dry-run && bun run --cwd packages/tooling publish:dry-run && bun run --cwd packages/ui publish:dry-run",
     "test": "vitest run",
     "typecheck": "bunx tsc --noEmit"
   },

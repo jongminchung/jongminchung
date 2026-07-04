@@ -17,10 +17,31 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - run: bun run check
+      - name: Guard fixed package versions
+        run: |
+          node <<'NODE'
+          const { readFileSync } = require("node:fs");
+
+          for (const filePath of [
+            "packages/remark-plantuml/package.json",
+            "packages/tooling/package.json",
+            "packages/ui/package.json",
+          ]) {
+            const packageJson = JSON.parse(readFileSync(filePath, "utf8"));
+
+            if (packageJson.version !== "1.0.0") {
+              throw new Error(`${packageJson.name} must reuse version 1.0.0`);
+            }
+          }
+          NODE
+      - run: bun publish --dry-run --access public
+        working-directory: packages/remark-plantuml
       - run: bun publish --dry-run --access public
         working-directory: packages/tooling
       - run: bun publish --dry-run --access public
         working-directory: packages/ui
+      - run: bun publish --access public
+        working-directory: packages/remark-plantuml
       - run: bun publish --access public
         working-directory: packages/tooling
       - run: bun publish --access public

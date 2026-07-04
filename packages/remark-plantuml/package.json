@@ -1,0 +1,75 @@
+{
+  "name": "@jongminchung/remark-plantuml",
+  "version": "1.0.0",
+  "description": "Remark plugin for rendering PlantUML diagrams in Markdown",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jongminchung/jongminchung.git",
+    "directory": "packages/remark-plantuml"
+  },
+  "files": [
+    "dist",
+    "src/index.ts",
+    "src/astro.ts",
+    "src/styles.css",
+    "src/starlight.css",
+    "LICENSE",
+    "README.md"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "./dist/styles.css",
+    "./dist/starlight.css",
+    "./src/styles.css",
+    "./src/starlight.css"
+  ],
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./astro": {
+      "source": "./src/astro.ts",
+      "types": "./dist/astro.d.ts",
+      "import": "./dist/astro.js",
+      "default": "./dist/astro.js"
+    },
+    "./styles.css": {
+      "source": "./src/styles.css",
+      "default": "./dist/styles.css"
+    },
+    "./starlight.css": {
+      "source": "./src/starlight.css",
+      "default": "./dist/starlight.css"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.pkg.github.com"
+  },
+  "scripts": {
+    "build": "tsdown --log-level error --no-report",
+    "prepack": "bun run build",
+    "publish:dry-run": "bun publish --dry-run --access public",
+    "test": "vitest run --root ../.. packages/remark-plantuml",
+    "typecheck": "bunx tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.1",
+    "remark-parse": "^11.0.0",
+    "remark-stringify": "^11.0.0",
+    "tsdown": "^0.22.3",
+    "typescript": "^6.0.3",
+    "unified": "^11.0.5",
+    "vitest": "^4.1.9"
+  },
+  "nx": {
+    "tags": [
+      "pkg:remark-plantuml"
+    ]
+  }
+}

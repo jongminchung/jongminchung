@@ -1,0 +1,5 @@
+@import "./styles.css";
+
+.plantuml-diagram figcaption {
+  color: var(--sl-color-gray-3);
+}

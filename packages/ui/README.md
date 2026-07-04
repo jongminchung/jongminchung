@@ -2,6 +2,11 @@
 
 OSS-neutral React and Tailwind design primitives based on the repository design system.
 
+## Version Policy
+
+This package intentionally stays on `1.0.0`. Consumers should reuse `@jongminchung/ui@1.0.0`; do
+not publish replacement versions such as `1.0.1` or `1.0.2`.
+
 ## Install
 
 ```bash
