@@ -4,8 +4,7 @@
     "packages/*/*.ts",
     "packages/*/src/**/*.ts",
     "packages/*/src/**/*.tsx",
-    "*.config.ts",
-    "eslint.config.mjs"
+    "*.config.ts"
   ],
   "exclude": ["node_modules", "dist", ".bun"]
 }

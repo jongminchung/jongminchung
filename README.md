@@ -2,7 +2,7 @@
 
 This repository owns the shared `@jongminchung` packages used by downstream projects.
 
-- `@jongminchung/tooling`: shared `oxfmt`, `oxlint`, and package-boundary ESLint helpers.
+- `@jongminchung/tooling`: shared `oxfmt`, `oxlint`, and package-map configuration.
 - `@jongminchung/ui`: React and Tailwind design primitives.
 
 Packages are published to GitHub Packages. Consumers need the `@jongminchung` scope mapped to

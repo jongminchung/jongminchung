@@ -38,10 +38,10 @@ async function withWorkspace<T>(callback: (rootDir: string) => Promise<T>): Prom
     writeJson(join(rootDir, "packages", "tooling", "package.json"), {
       name: "@scope/tooling",
       exports: {
-        "./eslint": {
-          source: "./src/eslint/index.ts",
-          types: "./dist/eslint/index.d.ts",
-          default: "./dist/eslint/index.js",
+        "./oxfmt": {
+          source: "./src/oxfmt/index.ts",
+          types: "./dist/oxfmt/index.d.ts",
+          default: "./dist/oxfmt/index.js",
         },
         "./package.json": "./package.json",
       },
@@ -88,7 +88,7 @@ describe("workspace package map", () => {
   it("derives TypeScript paths from exported package subpaths", async () => {
     await withWorkspace(async (rootDir) => {
       expect(createTsconfigPaths({ rootDir })).toEqual({
-        "@scope/tooling/eslint": ["./packages/tooling/src/eslint/index.ts"],
+        "@scope/tooling/oxfmt": ["./packages/tooling/src/oxfmt/index.ts"],
         "@scope/ui": ["./packages/ui/src/index.ts"],
         "@scope/ui/button": ["./packages/ui/src/button.tsx"],
         "@scope/ui/styles.css": ["./packages/ui/src/styles.css"],
@@ -103,7 +103,7 @@ describe("workspace package map", () => {
         process.chdir(rootDir);
 
         expect(createTsconfigPaths()).toEqual({
-          "@scope/tooling/eslint": ["./packages/tooling/src/eslint/index.ts"],
+          "@scope/tooling/oxfmt": ["./packages/tooling/src/oxfmt/index.ts"],
           "@scope/ui": ["./packages/ui/src/index.ts"],
           "@scope/ui/button": ["./packages/ui/src/button.tsx"],
           "@scope/ui/styles.css": ["./packages/ui/src/styles.css"],
@@ -123,8 +123,8 @@ describe("workspace package map", () => {
 
       expect(aliases).toEqual([
         {
-          find: "/^@scope\\/tooling\\/eslint$/",
-          replacement: "<root>/packages/tooling/src/eslint/index.ts",
+          find: "/^@scope\\/tooling\\/oxfmt$/",
+          replacement: "<root>/packages/tooling/src/oxfmt/index.ts",
         },
         { find: "/^@scope\\/ui$/", replacement: "<root>/packages/ui/src/index.ts" },
         {
@@ -143,7 +143,7 @@ describe("workspace package map", () => {
     await withWorkspace(async (rootDir) => {
       expect(createTsconfigPaths({ rootDir, localSourceAliases: websiteSourceAlias })).toEqual({
         "@/*": ["./website/src/*"],
-        "@scope/tooling/eslint": ["./packages/tooling/src/eslint/index.ts"],
+        "@scope/tooling/oxfmt": ["./packages/tooling/src/oxfmt/index.ts"],
         "@scope/ui": ["./packages/ui/src/index.ts"],
         "@scope/ui/button": ["./packages/ui/src/button.tsx"],
         "@scope/ui/styles.css": ["./packages/ui/src/styles.css"],

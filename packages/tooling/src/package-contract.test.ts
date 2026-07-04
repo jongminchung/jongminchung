@@ -48,13 +48,10 @@ describe("@jongminchung/tooling package contract", () => {
     expect(packageJson.scripts?.build).toBe("tsdown --log-level error --no-report");
     expect(packageJson.scripts?.["publish:dry-run"]).toBe("bun publish --dry-run --access public");
     expect(packageJson.devDependencies?.tsdown).toBe("^0.22.3");
+    expect(packageJson.dependencies).toBeUndefined();
     expect(collectDependencyRanges(packageJson)).not.toContain("catalog:");
     expect(packageJson.files).toEqual([
       "dist",
-      "src/config-priority.ts",
-      "src/tool-runner.ts",
-      "src/eslint/default.ts",
-      "src/eslint/index.ts",
       "src/oxfmt/index.ts",
       "src/**/*.json",
       "src/oxlint/index.ts",
@@ -63,7 +60,6 @@ describe("@jongminchung/tooling package contract", () => {
       "README.md",
     ]);
     expect(Object.keys(packageJson.exports ?? {})).toEqual([
-      "./eslint",
       "./oxlint",
       "./oxfmt",
       "./package-map",

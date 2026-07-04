@@ -1,6 +1,6 @@
 # @jongminchung/tooling
 
-Shared lint and format tooling for TypeScript workspaces.
+Shared lint, format, and package-map configuration for TypeScript workspaces.
 
 ## Install
 
@@ -8,50 +8,19 @@ Shared lint and format tooling for TypeScript workspaces.
 npm install --save-dev @jongminchung/tooling
 ```
 
-The binaries load a project-local config first. If no local config exists, they use this package's
-generic defaults.
-
-The maintained source is TypeScript. Published package entrypoints and CLI binaries run from built
-JavaScript under `dist`, with declarations generated from the same source.
+Install the actual formatter and linter in each consuming project. This package only centralizes the
+shared settings.
 
 ## Package scripts
 
 ```json
 {
   "scripts": {
-    "lint": "jongminchung-oxlint",
-    "fmt": "jongminchung-oxfmt",
-    "fmt:check": "jongminchung-oxfmt --check",
-    "check:package-boundaries": "jongminchung-eslint packages website"
+    "lint": "oxlint",
+    "fmt": "oxfmt --config .oxfmtrc.mjs",
+    "fmt:check": "oxfmt --config .oxfmtrc.mjs --check"
   }
 }
-```
-
-Config files that take priority:
-
-- ESLint: `eslint.config.{js,mjs,cjs,ts,mts,cts}`
-- oxlint: `.oxlintrc.{json,jsonc}` or `oxlint.config.{js,mjs,cjs,ts}`
-- oxfmt: `.oxfmtrc.{json,jsonc,js,mjs,cjs,ts}` or `oxfmt.config.{js,mjs,cjs,ts}`
-
-## ESLint package boundaries
-
-Project-specific package tags stay in the consuming repo:
-
-```js
-import { createPackageBoundaryEslintConfig } from "@jongminchung/tooling/eslint";
-
-export default createPackageBoundaryEslintConfig({
-  depConstraints: [
-    {
-      sourceTag: "pkg:web",
-      onlyDependOnLibsWithTags: ["pkg:web", "pkg:ui"],
-    },
-    {
-      sourceTag: "pkg:ui",
-      onlyDependOnLibsWithTags: ["pkg:ui"],
-    },
-  ],
-});
 ```
 
 ## oxlint
@@ -135,8 +104,8 @@ bun run build
 npm pack --dry-run
 ```
 
-`bun run build` uses `tsdown` in unbundle mode so the published `dist` tree mirrors the
-TypeScript source module structure while still shipping JavaScript runtime files.
+`bun run build` uses `tsdown` in unbundle mode so the published `dist` tree mirrors the TypeScript
+source module structure while still shipping JavaScript runtime files.
 
-The npm package includes built CLI bins, compiled ESM JavaScript, generated declarations,
+The npm package includes compiled ESM JavaScript, generated declarations, source config files,
 `LICENSE`, `README.md`, and `package.json`.

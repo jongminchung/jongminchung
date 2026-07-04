@@ -208,18 +208,13 @@ describe("npm package tarball contracts", () => {
     }
   }, 240_000);
 
-  it("packs @jongminchung/tooling with bins, runtime modules, and declarations", async () => {
+  it("packs @jongminchung/tooling with config modules and declarations", async () => {
     const packed = await packWorkspace("@jongminchung/tooling");
     try {
       expect(packed.files).toEqual(
         expect.arrayContaining([
           "LICENSE",
           "README.md",
-          "dist/bin/jongminchung-eslint.js",
-          "dist/bin/jongminchung-oxfmt.js",
-          "dist/bin/jongminchung-oxlint.js",
-          "dist/eslint/index.d.ts",
-          "dist/eslint/index.js",
           "dist/oxfmt/index.d.ts",
           "dist/oxfmt/index.js",
           "dist/oxlint/base.json",
@@ -228,16 +223,23 @@ describe("npm package tarball contracts", () => {
           "dist/package-map.d.ts",
           "dist/package-map.js",
           "package.json",
-          "src/eslint/index.ts",
           "src/oxfmt/index.ts",
           "src/oxlint/base.json",
           "src/oxlint/index.ts",
           "src/package-map.ts",
         ]),
       );
+      expect(packed.files.some((file) => file.startsWith("dist/bin/"))).toBe(false);
+      expect(packed.files.some((file) => file.startsWith("dist/eslint/"))).toBe(false);
       expect(packed.files.some((file) => file.endsWith(".mjs"))).toBe(false);
       expect(packed.files.some((file) => file.endsWith(".test.ts"))).toBe(false);
 
+      expect(
+        await importKeysFromConsumer(packed.consumerRoot, "@jongminchung/tooling/oxfmt"),
+      ).toEqual(expect.arrayContaining(["defaultOxfmtConfig", "defineOxfmtConfig"]));
+      expect(
+        await importKeysFromConsumer(packed.consumerRoot, "@jongminchung/tooling/oxlint"),
+      ).toEqual(expect.arrayContaining(["defaultOxlintConfig", "defineOxlintConfig"]));
       expect(
         await importKeysFromConsumer(packed.consumerRoot, "@jongminchung/tooling/package-map"),
       ).toEqual(expect.arrayContaining(["createTsconfigAliasConfig"]));
@@ -264,15 +266,6 @@ describe("npm package tarball contracts", () => {
       expect(JSON.parse(aliasStdout)).toMatchObject({
         "@consumer/app": ["./packages/app/src/index.ts"],
       });
-      const { stdout } = await execFileAsync(
-        join(consumerRoot, "node_modules", ".bin", "jongminchung-oxlint"),
-        ["--print-config"],
-        {
-          cwd: consumerRoot,
-          timeout: 30_000,
-        },
-      );
-      expect(stdout).toContain("typescript/no-floating-promises");
     } finally {
       await rm(packed.tempDir, { force: true, recursive: true });
     }
