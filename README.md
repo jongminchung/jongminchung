@@ -1,3 +1,19 @@
+## Packages
+
+This repository owns the shared `@jongminchung` packages used by downstream projects.
+
+- `@jongminchung/tooling`: shared `oxfmt`, `oxlint`, and package-boundary ESLint helpers.
+- `@jongminchung/ui`: React and Tailwind design primitives.
+
+Packages are published to GitHub Packages. Consumers need the `@jongminchung` scope mapped to
+`https://npm.pkg.github.com`.
+
+```bash
+bun install
+bun run check
+bun run publish:dry-run
+```
+
 <!--START_SECTION:waka-->
 **I'm a Night 🦉** 
 

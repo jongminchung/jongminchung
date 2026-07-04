@@ -1,0 +1,91 @@
+{
+  "name": "@jongminchung/tooling",
+  "version": "1.0.0",
+  "description": "Shared lint, format, and package-boundary tooling for TypeScript workspaces",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jongminchung/jongminchung.git",
+    "directory": "packages/tooling"
+  },
+  "bin": {
+    "jongminchung-eslint": "./dist/bin/jongminchung-eslint.js",
+    "jongminchung-oxfmt": "./dist/bin/jongminchung-oxfmt.js",
+    "jongminchung-oxlint": "./dist/bin/jongminchung-oxlint.js"
+  },
+  "files": [
+    "dist",
+    "src/config-priority.ts",
+    "src/tool-runner.ts",
+    "src/eslint/default.ts",
+    "src/eslint/index.ts",
+    "src/oxfmt/index.ts",
+    "src/**/*.json",
+    "src/oxlint/index.ts",
+    "src/package-map.ts",
+    "LICENSE",
+    "README.md"
+  ],
+  "type": "module",
+  "exports": {
+    "./eslint": {
+      "source": "./src/eslint/index.ts",
+      "types": "./dist/eslint/index.d.ts",
+      "import": "./dist/eslint/index.js",
+      "default": "./dist/eslint/index.js"
+    },
+    "./oxlint": {
+      "source": "./src/oxlint/index.ts",
+      "types": "./dist/oxlint/index.d.ts",
+      "import": "./dist/oxlint/index.js",
+      "default": "./dist/oxlint/index.js"
+    },
+    "./oxfmt": {
+      "source": "./src/oxfmt/index.ts",
+      "types": "./dist/oxfmt/index.d.ts",
+      "import": "./dist/oxfmt/index.js",
+      "default": "./dist/oxfmt/index.js"
+    },
+    "./package-map": {
+      "source": "./src/package-map.ts",
+      "types": "./dist/package-map.d.ts",
+      "import": "./dist/package-map.js",
+      "default": "./dist/package-map.js"
+    },
+    "./oxlint.json": {
+      "source": "./src/oxlint/base.json",
+      "default": "./dist/oxlint/base.json"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.pkg.github.com"
+  },
+  "scripts": {
+    "build": "tsdown --log-level error --no-report",
+    "prepack": "bun run build",
+    "publish:dry-run": "bun publish --dry-run --access public",
+    "test": "vitest run --root ../.. packages/tooling",
+    "typecheck": "bunx tsc --noEmit"
+  },
+  "dependencies": {
+    "@nx/eslint-plugin": "^23.0.1",
+    "@typescript-eslint/parser": "^8.62.1",
+    "eslint": "^10.6.0",
+    "oxfmt": "^0.57.0",
+    "oxlint": "^1.72.0",
+    "oxlint-tsgolint": "^0.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.1",
+    "tsdown": "^0.22.3",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  },
+  "nx": {
+    "tags": [
+      "pkg:tooling"
+    ]
+  }
+}

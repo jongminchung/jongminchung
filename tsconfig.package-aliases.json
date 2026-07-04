@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "paths": {
+      "@jongminchung/tooling/eslint": ["./packages/tooling/src/eslint/index.ts"],
+      "@jongminchung/tooling/oxfmt": ["./packages/tooling/src/oxfmt/index.ts"],
+      "@jongminchung/tooling/oxlint": ["./packages/tooling/src/oxlint/index.ts"],
+      "@jongminchung/tooling/oxlint.json": ["./packages/tooling/src/oxlint/base.json"],
+      "@jongminchung/tooling/package-map": ["./packages/tooling/src/package-map.ts"],
+      "@jongminchung/ui": ["./packages/ui/src/index.ts"],
+      "@jongminchung/ui/baseline.css": ["./packages/ui/src/baseline.css"],
+      "@jongminchung/ui/styles.css": ["./packages/ui/src/styles.css"],
+      "@jongminchung/ui/tokens.css": ["./packages/ui/src/styles.css"]
+    }
+  }
+}

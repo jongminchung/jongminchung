@@ -1,0 +1,12 @@
+{
+  "options": {
+    "typeAware": true
+  },
+  "rules": {
+    "eslint/no-unused-vars": "error",
+    "eslint/prefer-const": "error",
+    "typescript/no-explicit-any": "warn",
+    "typescript/no-floating-promises": "error",
+    "typescript/no-misused-promises": "error"
+  }
+}

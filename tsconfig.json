@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.base.json",
+  "include": [
+    "packages/*/*.ts",
+    "packages/*/src/**/*.ts",
+    "packages/*/src/**/*.tsx",
+    "*.config.ts",
+    "eslint.config.mjs"
+  ],
+  "exclude": ["node_modules", "dist", ".bun"]
+}

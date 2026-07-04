@@ -1,0 +1,27 @@
+name: Publish Packages
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run check
+      - run: bun publish --dry-run --access public
+        working-directory: packages/tooling
+      - run: bun publish --dry-run --access public
+        working-directory: packages/ui
+      - run: bun publish --access public
+        working-directory: packages/tooling
+      - run: bun publish --access public
+        working-directory: packages/ui
