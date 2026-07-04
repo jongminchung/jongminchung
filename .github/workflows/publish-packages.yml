@@ -17,6 +17,8 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - run: bun run check
+      - name: Configure GitHub Packages auth
+        run: npm config set //npm.pkg.github.com/:_authToken "$NODE_AUTH_TOKEN"
       - name: Guard fixed package versions
         run: |
           node <<'NODE'
