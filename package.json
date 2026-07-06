@@ -2,23 +2,30 @@
   "name": "jongminchung",
   "private": true,
   "workspaces": [
+    "apps/*",
     "packages/*"
   ],
   "type": "module",
   "scripts": {
-    "build": "bun run build:remark-plantuml && bun run build:tooling && bun run build:ui",
+    "build": "bun run build:remark-plantuml && bun run build:tooling && bun run build:ui && bun run build:immersive",
+    "build:immersive": "bun run --cwd apps/immersive-translate build",
     "build:remark-plantuml": "bun run --cwd packages/remark-plantuml build",
     "build:tooling": "bun run --cwd packages/tooling build",
     "build:ui": "bun run --cwd packages/ui build",
     "check": "bun run build && bun run lint && bun run fmt:check && bun run typecheck && bun run test",
-    "fmt": "oxfmt --config .oxfmtrc.mjs packages package.json tsconfig.json tsconfig.base.json tsconfig.package-aliases.json vitest.config.ts .oxfmtrc.mjs .oxlintrc.json .github/workflows/publish-packages.yml",
-    "fmt:check": "oxfmt --config .oxfmtrc.mjs --check packages package.json tsconfig.json tsconfig.base.json tsconfig.package-aliases.json vitest.config.ts .oxfmtrc.mjs .oxlintrc.json .github/workflows/publish-packages.yml",
-    "lint": "oxlint packages vitest.config.ts",
-    "publish:dry-run": "bun run --cwd packages/remark-plantuml publish:dry-run && bun run --cwd packages/tooling publish:dry-run && bun run --cwd packages/ui publish:dry-run",
     "deps:check": "bunx npm-check-updates --workspaces --target latest --packageManager bun",
     "deps:update": "bunx npm-check-updates -u --workspaces --target latest --packageManager bun && bun install",
+    "fmt": "oxfmt --config .oxfmtrc.mjs apps packages package.json tsconfig.json tsconfig.base.json tsconfig.package-aliases.json vitest.config.ts .oxfmtrc.mjs .oxlintrc.json .github/workflows/publish-packages.yml",
+    "fmt:check": "oxfmt --config .oxfmtrc.mjs --check apps packages package.json tsconfig.json tsconfig.base.json tsconfig.package-aliases.json vitest.config.ts .oxfmtrc.mjs .oxlintrc.json .github/workflows/publish-packages.yml",
+    "lint": "oxlint apps packages vitest.config.ts",
+    "mlx:install:immersive": "uv tool install --force 'mlx-lm==0.29.1' --with 'transformers<5' --with 'mlx<0.31.2' --with 'mlx-metal<0.31.2'",
+    "publish:dry-run": "bun run --cwd packages/remark-plantuml publish:dry-run && bun run --cwd packages/tooling publish:dry-run && bun run --cwd packages/ui publish:dry-run",
     "test": "vitest run",
-    "typecheck": "bunx tsc --noEmit"
+    "test:live:immersive": "bun run --cwd apps/immersive-translate test:live",
+    "typecheck": "bun run typecheck:packages && bun run typecheck:immersive",
+    "typecheck:immersive": "bun run --cwd apps/immersive-translate compile",
+    "typecheck:packages": "bunx tsc --noEmit",
+    "zip:immersive": "bun run --cwd apps/immersive-translate zip"
   },
   "devDependencies": {
     "@jongminchung/tooling": "workspace:*",

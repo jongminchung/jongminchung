@@ -4,7 +4,14 @@ import { defineConfig } from "vitest/config";
 
 const rootDir = fileURLToPath(new URL(".", import.meta.url));
 
-const vitestExclude = ["**/node_modules/**", "**/dist/**", "**/.tmp-*/**"];
+const vitestExclude = [
+  "**/node_modules/**",
+  "**/dist/**",
+  "**/.output/**",
+  "**/.tmp-*/**",
+  "**/.wxt/**",
+  "**/tests/live/**",
+];
 
 export default defineConfig({
   resolve: {
@@ -30,6 +37,13 @@ export default defineConfig({
           fileParallelism: false,
           include: ["packages/**/*.integration.test.ts"],
           name: "integration",
+        },
+      },
+      {
+        extends: true,
+        test: {
+          include: ["apps/**/*.test.ts"],
+          name: "apps",
         },
       },
     ],

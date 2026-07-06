@@ -1,6 +1,10 @@
 node_modules/
 .nx/
 .tmp*/
+**/.output/
+**/.wxt/
+**/test-results/
+playwright-report/
 
 *.bak
 *.old

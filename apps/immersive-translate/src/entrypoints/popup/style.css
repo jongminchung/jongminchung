@@ -1,0 +1,142 @@
+@import "tailwindcss";
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+:root {
+  --background: #f7f8fa;
+  --foreground: #17202a;
+  --card: #ffffff;
+  --card-strong: #ffffff;
+  --card-foreground: #17202a;
+  --panel-strong: #ffffff;
+  --popover: #ffffff;
+  --popover-foreground: #17202a;
+  --border: #dce3ec;
+  --input: #ffffff;
+  --muted: #647184;
+  --muted-panel: #eef2f6;
+  --muted-foreground: #647184;
+  --accent: #2f7d68;
+  --accent-soft: #eaf6f1;
+  --primary: #287c67;
+  --primary-foreground: #ffffff;
+  --secondary: #eaf6f1;
+  --secondary-foreground: #246955;
+  --destructive: #b42318;
+  --ring: rgba(40, 124, 103, 0.32);
+  --shadow-lg: 0 20px 48px rgba(20, 31, 46, 0.12);
+}
+
+:root[data-theme="light"] {
+  --background: #f3efe6;
+  --foreground: #171412;
+  --card: rgba(17, 17, 17, 0.03);
+  --card-foreground: #171412;
+  --panel-strong: rgba(255, 255, 255, 0.96);
+  --popover: rgba(255, 255, 255, 0.96);
+  --popover-foreground: #171412;
+  --border: rgba(34, 34, 34, 0.08);
+  --input: rgba(17, 17, 17, 0.03);
+  --muted: rgba(34, 34, 34, 0.62);
+  --muted-foreground: rgba(34, 34, 34, 0.62);
+  --accent: #be7f22;
+  --accent-soft: rgba(190, 127, 34, 0.1);
+  --primary: #be7f22;
+  --primary-foreground: #171412;
+  --secondary: rgba(190, 127, 34, 0.1);
+  --secondary-foreground: #be7f22;
+  --destructive: #f28482;
+  --ring: rgba(190, 127, 34, 0.55);
+  --shadow-lg: 0 24px 80px rgba(60, 45, 20, 0.12);
+  color: #171412;
+}
+
+body[data-theme="light"] {
+  background:
+    radial-gradient(circle at top left, rgba(190, 127, 34, 0.1), transparent 28%),
+    radial-gradient(circle at top right, rgba(92, 125, 116, 0.12), transparent 24%),
+    radial-gradient(circle at bottom, rgba(132, 144, 190, 0.1), transparent 30%), var(--background);
+  color: var(--foreground);
+}
+
+.display-font {
+  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@utility animate-fade-in {
+  animation: fade-in 0.5s ease-out;
+}
+
+@utility animate-scale-in {
+  animation: scale-in 0.2s ease-out;
+}
+
+@utility surface-elevated {
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+}
+
+@utility glass-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+}
+
+@utility surface-popover {
+  background: var(--popover);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+}
+
+@utility scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ring) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ring);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}

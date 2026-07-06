@@ -1,0 +1,13 @@
+{
+  "extends": "./.wxt/tsconfig.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "jsx": "react-jsx",
+    "libReplacement": false,
+    "noUncheckedSideEffectImports": true,
+    "rootDir": ".",
+    "types": ["react", "react-dom"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "wxt.config.ts"],
+  "exclude": ["src/**/*.test.ts", "scripts", "tests"]
+}

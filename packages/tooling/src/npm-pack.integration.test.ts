@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
 import { isAbsolute, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
@@ -43,7 +43,13 @@ function isPackResult(value: unknown): value is PackResult {
 }
 
 function parsePackResult(stdout: string): PackResult {
-  const parsed: unknown = JSON.parse(stdout);
+  const trimmed = stdout.trim();
+  const jsonStart = trimmed.startsWith("[") ? 0 : trimmed.lastIndexOf("\n[");
+  if (jsonStart === -1) {
+    throw new Error("expected npm pack --json output");
+  }
+
+  const parsed: unknown = JSON.parse(trimmed.slice(jsonStart === 0 ? 0 : jsonStart + 1));
   if (!Array.isArray(parsed) || !parsed.every(isPackResult)) {
     throw new Error("expected npm pack --json result");
   }
@@ -54,6 +60,17 @@ function parsePackResult(stdout: string): PackResult {
   }
 
   return result;
+}
+
+async function resolveTarballPath(tempDir: string, filename: string): Promise<string> {
+  if (isAbsolute(filename)) return filename;
+
+  const tarballFiles = (await readdir(tempDir)).filter((file) => file.endsWith(".tgz"));
+  if (tarballFiles.length === 1 && tarballFiles[0] !== undefined) {
+    return join(tempDir, tarballFiles[0]);
+  }
+
+  return join(tempDir, filename);
 }
 
 async function packWorkspace(workspace: string): Promise<PackedWorkspace> {
@@ -69,9 +86,7 @@ async function packWorkspace(workspace: string): Promise<PackedWorkspace> {
       },
     );
     const result = parsePackResult(stdout);
-    const tarballPath = isAbsolute(result.filename)
-      ? result.filename
-      : join(tempDir, result.filename);
+    const tarballPath = await resolveTarballPath(tempDir, result.filename);
     const consumerRoot = join(tempDir, "consumer");
     const packageDir = join(consumerRoot, "node_modules", ...workspace.split("/"));
 

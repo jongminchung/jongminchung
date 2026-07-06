@@ -1,0 +1,40 @@
+{
+  "name": "@jongminchung/immersive-translate",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local translation Chrome extension for bilingual DOCX and EPUB documents",
+  "type": "module",
+  "scripts": {
+    "build": "wxt build",
+    "clean": "bun scripts/clean.ts",
+    "compile": "wxt prepare && tsc --noEmit && tsc --noEmit --project gateway/tsconfig.json",
+    "dev": "wxt",
+    "docker:down": "docker compose -f docker/docker-compose.yml down",
+    "docker:logs": "docker compose -f docker/docker-compose.yml logs -f gateway libretranslate",
+    "docker:up": "docker compose -f docker/docker-compose.yml up -d",
+    "docker:up:mlx": "TRANSLATION_PROFILE=mlx docker compose -f docker/docker-compose.yml up -d",
+    "mlx:serve": "sh -c 'MLX_MODEL=${MLX_MODEL:-mlx-community/Qwen3-4B-Instruct-2507-4bit}; MLX_HOST=${MLX_HOST:-0.0.0.0}; MLX_PORT=${MLX_PORT:-8000}; mlx_lm.server --model \"$MLX_MODEL\" --host \"$MLX_HOST\" --port \"$MLX_PORT\"'",
+    "test:live": "bun run build && playwright test -c playwright.config.ts tests/live/immersive-translate.spec.ts",
+    "test:unit": "vitest run --config vitest.config.ts src/lib gateway",
+    "verify:artifacts": "bun scripts/verify-extension-artifacts.ts",
+    "zip": "wxt zip"
+  },
+  "dependencies": {
+    "jszip": "^3.10.1",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1",
+    "@tailwindcss/vite": "^4.3.2",
+    "@types/bun": "^1.3.14",
+    "@types/node": "^26.1.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@wxt-dev/module-react": "^1.2.2",
+    "tailwindcss": "^4.3.2",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9",
+    "wxt": "^0.20.27"
+  }
+}
