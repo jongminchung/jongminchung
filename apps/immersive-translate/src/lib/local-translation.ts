@@ -520,6 +520,12 @@ interface TranslationRequestBatch {
   readonly languagePair: TranslationLanguagePair;
 }
 
+interface TranslationInputGroup {
+  readonly key: string;
+  readonly representative: TranslationInput;
+  readonly inputs: readonly TranslationInput[];
+}
+
 function sameLanguagePair(left: TranslationLanguagePair, right: TranslationLanguagePair): boolean {
   return (
     left.sourceLanguage === right.sourceLanguage && left.targetLanguage === right.targetLanguage
@@ -544,7 +550,11 @@ function createBatches(
       currentLanguagePair !== null && !sameLanguagePair(currentLanguagePair, languagePair);
     if (current.length >= batchSize || formatChanged || languageChanged) {
       if (currentLanguagePair && currentFormat) {
-        batches.push({ inputs: current, format: currentFormat, languagePair: currentLanguagePair });
+        batches.push({
+          inputs: current,
+          format: currentFormat,
+          languagePair: currentLanguagePair,
+        });
       }
       current = [];
     }
@@ -557,6 +567,32 @@ function createBatches(
     batches.push({ inputs: current, format: currentFormat, languagePair: currentLanguagePair });
   }
   return batches;
+}
+
+function createMissGroups(
+  inputs: readonly TranslationInput[],
+  settings: LocalTranslationSettings,
+): readonly TranslationInputGroup[] {
+  const groupsByKey = new Map<string, TranslationInput[]>();
+  for (const input of inputs) {
+    const key = createCacheKey(settings, input);
+    const current = groupsByKey.get(key);
+    if (current) {
+      current.push(input);
+    } else {
+      groupsByKey.set(key, [input]);
+    }
+  }
+  return [...groupsByKey.entries()].flatMap(([key, inputs]) => {
+    const representative = inputs[0];
+    return representative ? [{ key, representative, inputs }] : [];
+  });
+}
+
+function createInputGroupsByRepresentativeId(
+  groups: readonly TranslationInputGroup[],
+): ReadonlyMap<string, TranslationInputGroup> {
+  return new Map(groups.map((group) => [group.representative.id, group]));
 }
 
 async function requestTranslations(
@@ -732,15 +768,28 @@ export class LocalTranslationService {
       }
     }
 
-    for (const batch of createBatches(misses, settings, settings.batchSize)) {
+    const missGroups = createMissGroups(misses, settings);
+    const uniqueMisses = missGroups.map((group) => group.representative);
+    const groupsByRepresentativeId = createInputGroupsByRepresentativeId(missGroups);
+
+    for (const batch of createBatches(uniqueMisses, settings, settings.batchSize)) {
       const result = await requestTranslations(settings, batch, fetcher, options.signal);
       if (!("code" in result)) {
-        translations.push(...result);
+        for (const output of result) {
+          const group = groupsByRepresentativeId.get(output.id);
+          if (!group) continue;
+          translations.push(
+            ...group.inputs.map((input) => ({
+              id: input.id,
+              text: output.text,
+            })),
+          );
+        }
         if (cache) {
           for (const output of result) {
-            const input = batch.inputs.find((item) => item.id === output.id);
-            if (input) {
-              cache.entries[createCacheKey(settings, input)] = {
+            const group = groupsByRepresentativeId.get(output.id);
+            if (group) {
+              cache.entries[group.key] = {
                 text: output.text,
                 createdAt: now,
               };
@@ -749,10 +798,12 @@ export class LocalTranslationService {
         }
       } else {
         for (const inputId of result.inputIds) {
+          const group = groupsByRepresentativeId.get(inputId);
+          const failedInputIds = group?.inputs.map((input) => input.id) ?? [inputId];
           errors.push({
             code: result.code,
             message: result.message,
-            inputIds: [inputId],
+            inputIds: failedInputIds,
           });
         }
       }

@@ -21,12 +21,23 @@ class MemoryStorageArea {
 }
 
 describe("local translation setup", () => {
-  test("defaults to the Docker LibreTranslate provider for the floating toggle flow", () => {
+  test("defaults to bidirectional Korean and English translation", () => {
     expect(DEFAULT_LOCAL_TRANSLATION_SETTINGS).toMatchObject({
       enabled: true,
       endpoint: "http://127.0.0.1:5000/translate",
       sourceLanguage: "auto",
       targetLanguage: "ko-en",
+    });
+  });
+
+  test("resolves Korean text to English and non-Korean text to Korean by default", () => {
+    expect(resolveTranslationLanguagePair(DEFAULT_LOCAL_TRANSLATION_SETTINGS, "한국어")).toEqual({
+      sourceLanguage: "ko",
+      targetLanguage: "en",
+    });
+    expect(resolveTranslationLanguagePair(DEFAULT_LOCAL_TRANSLATION_SETTINGS, "English")).toEqual({
+      sourceLanguage: "en",
+      targetLanguage: "ko",
     });
   });
 
@@ -515,6 +526,52 @@ describe("local translation setup", () => {
       progress: { cacheHits: 0, cacheMisses: 1 },
     });
     expect(calls).toBe(3);
+  });
+
+  test("deduplicates identical uncached inputs inside one translation job", async () => {
+    const requests: Array<readonly string[]> = [];
+
+    const result = await LocalTranslationService.runJob(
+      {
+        ...DEFAULT_LOCAL_TRANSLATION_SETTINGS,
+        enabled: true,
+        endpoint: "http://127.0.0.1:5000/translate",
+        sourceLanguage: "en",
+        targetLanguage: "ko",
+        batchSize: 10,
+        cacheEnabled: false,
+      },
+      [
+        { id: "caption-1", text: "Repeated caption" },
+        { id: "caption-2", text: "Repeated caption" },
+      ],
+      {
+        fetcher: async (_input, init) => {
+          const body = typeof init.body === "string" ? JSON.parse(init.body) : {};
+          requests.push(Array.isArray(body.q) ? body.q : []);
+          return new Response(JSON.stringify({ translatedText: ["반복 자막"] }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
+        },
+      },
+    );
+
+    expect(requests).toEqual([["Repeated caption"]]);
+    expect(result).toMatchObject({
+      status: "succeeded",
+      translations: [
+        { id: "caption-1", text: "반복 자막" },
+        { id: "caption-2", text: "반복 자막" },
+      ],
+      progress: {
+        total: 2,
+        completed: 2,
+        cacheHits: 0,
+        cacheMisses: 2,
+        failures: 0,
+      },
+    });
   });
 
   test("clears local translation cache through the public repository and service APIs", async () => {

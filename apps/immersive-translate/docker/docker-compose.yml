@@ -12,16 +12,16 @@ services:
       GATEWAY_PORT: 5000
       LIBRETRANSLATE_URL: ${LIBRETRANSLATE_URL:-http://libretranslate:5000/translate}
       MLX_BASE_URL: ${MLX_BASE_URL:-http://host.docker.internal:8000/v1}
-      MLX_MODEL: ${MLX_MODEL:-mlx-community/Qwen3-4B-Instruct-2507-4bit}
+      MLX_MODEL: ${MLX_MODEL:-mlx-community/Qwen3-1.7B-4bit}
       MLX_FALLBACK_MODEL: ${MLX_FALLBACK_MODEL:-mlx-community/Qwen3-1.7B-4bit}
       MLX_TEMPERATURE: ${MLX_TEMPERATURE:-0}
       MLX_MAX_TOKENS: ${MLX_MAX_TOKENS:-1024}
+      GATEWAY_LOG_REQUESTS: ${GATEWAY_LOG_REQUESTS:-true}
+      GATEWAY_LOG_FILE: ${GATEWAY_LOG_FILE:-/app/.output/gateway-requests.log}
     volumes:
       - ..:/app:ro
+      - ../.output:/app/.output
     command: ["bun", "gateway/server.ts"]
-    depends_on:
-      libretranslate:
-        condition: service_healthy
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:

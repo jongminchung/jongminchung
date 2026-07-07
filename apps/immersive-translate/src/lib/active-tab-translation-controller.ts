@@ -6,6 +6,7 @@ import {
   ACTIVE_TAB_TRANSLATION_PAGE_SCOPE,
   ACTIVE_TAB_WEBPAGE_IDLE_STATE,
   type ActiveTabCaptionState,
+  type ActiveTabCaptionCollectionResponse,
   type ActiveTabGeneratedCaptionState,
   type ActiveTabTranslationControlRequest,
   type ActiveTabTranslationStatus,
@@ -17,6 +18,10 @@ import {
 } from "./active-tab-translation";
 import { ActiveTabTranslationStateStore } from "./active-tab-translation-state-store";
 import { type CaptionTrackLike, runCaptionTranslationPipeline } from "./caption-translation";
+import {
+  runPrioritizedCaptionTranslationPipeline,
+  type PrioritizedCaptionTranslationResult,
+} from "./caption-priority-translation";
 import { fetchGeneratedCaptionTrack, GeneratedCaptionError } from "./generated-captions";
 import {
   installTranslationBridgeInPage,
@@ -29,6 +34,7 @@ import {
   isBidirectionalKoEnTargetLanguage,
   LocalTranslationRepository,
   LocalTranslationService,
+  type LocalTranslationSettings,
   type TranslationJobProgress,
 } from "./local-translation";
 import {
@@ -36,7 +42,7 @@ import {
   composeTranslatedWebpageBlocks,
   type WebpageDisplayMode,
 } from "./webpage-translation";
-import { selectInitialCaptionWindow } from "./youtube-captions";
+import { preferredYouTubeCaptionLanguageCodes } from "./youtube-captions";
 
 interface BrowserTab {
   readonly id?: number;
@@ -50,6 +56,108 @@ export interface ActiveTabTranslationRequestContext {
 
 const localTranslationRepository = LocalTranslationRepository.ofStorage(browser.storage.local);
 const stateStore = ActiveTabTranslationStateStore.create();
+const INITIAL_YOUTUBE_CAPTION_WINDOW_CUE_COUNT = 3;
+const FOLLOWUP_YOUTUBE_CAPTION_WINDOW_CUE_COUNT = 8;
+const CAPTION_TRANSLATION_BATCH_SIZE = 4;
+const INITIAL_CAPTION_TRANSLATION_BATCH_SIZE = 3;
+const BACKGROUND_CAPTION_TRANSLATION_BATCH_SIZE = 8;
+const PAGE_CAPTION_COLLECTION_TIMEOUT_MS = 4_000;
+const LOCAL_TRANSLATION_WARMUP_TIMEOUT_MS = 4_000;
+const LOCAL_TRANSLATION_WARMUP_TTL_MS = 10 * 60_000;
+const localTranslationWarmups = new Map<string, number>();
+
+interface YouTubePlayerSnapshot {
+  readonly playerResponse: unknown;
+  readonly selectedBaseUrl?: string;
+  readonly selectedLabel?: string;
+  readonly selectedLanguageCode?: string;
+  readonly videoTitle?: string;
+}
+
+type CaptionCollectionCandidate =
+  | {
+      readonly source: "page";
+      readonly collection: ActiveTabCaptionCollectionResponse | null;
+    }
+  | {
+      readonly source: "background";
+      readonly track: CaptionTrackLike | null;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function youtubeCaptionEndpointFromTranslationEndpoint(endpoint: string): string | null {
+  try {
+    const url = new URL(endpoint);
+    url.pathname = "/youtube-captions";
+    url.search = "";
+    url.hash = "";
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
+function youtubeVideoIdFromUrl(value: string | undefined): string | null {
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    return url.hostname.includes("youtube.com") ? (url.searchParams.get("v") ?? null) : null;
+  } catch {
+    return null;
+  }
+}
+
+function settingsForCaptionTranslation(
+  settings: LocalTranslationSettings,
+): LocalTranslationSettings {
+  return {
+    ...settings,
+    batchSize: Math.min(settings.batchSize, CAPTION_TRANSLATION_BATCH_SIZE),
+  };
+}
+
+async function warmLocalTranslationEndpoint(settings: LocalTranslationSettings): Promise<void> {
+  if (!settings.enabled) return;
+  const endpoint = youtubeCaptionEndpointFromTranslationEndpoint(settings.endpoint);
+  if (!endpoint) return;
+  const url = new URL(endpoint);
+  url.pathname = "/health";
+  url.search = "";
+  const key = JSON.stringify({
+    endpoint: url.toString(),
+  });
+  const now = Date.now();
+  const warmedUntil = localTranslationWarmups.get(key) ?? 0;
+  if (warmedUntil > now) return;
+  localTranslationWarmups.set(key, now + 30_000);
+
+  const controller = new AbortController();
+  const timeoutId = globalThis.setTimeout(
+    () => controller.abort(),
+    LOCAL_TRANSLATION_WARMUP_TIMEOUT_MS,
+  );
+  try {
+    const result = await fetch(url.toString(), { signal: controller.signal });
+    localTranslationWarmups.set(
+      key,
+      now + (result.ok ? LOCAL_TRANSLATION_WARMUP_TTL_MS : 60_000),
+    );
+  } catch {
+    localTranslationWarmups.set(key, now + 60_000);
+  } finally {
+    globalThis.clearTimeout(timeoutId);
+  }
+}
+
+async function withTimeout<T>(request: Promise<T>, timeoutMs: number): Promise<T | null> {
+  return await Promise.race([
+    request,
+    new Promise<null>((resolve) => globalThis.setTimeout(() => resolve(null), timeoutMs)),
+  ]);
+}
 
 async function findActiveTargetTab(
   context: ActiveTabTranslationRequestContext = {},
@@ -97,17 +205,233 @@ async function readStatus(
   });
 }
 
-async function readYouTubePlayerResponse(tabId: number): Promise<unknown> {
+function readOptionalNonEmptyString(
+  record: Record<string, unknown>,
+  key: string,
+): string | undefined {
+  const value = record[key];
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
+function parseYouTubePlayerSnapshot(value: unknown): YouTubePlayerSnapshot {
+  if (!isRecord(value)) return { playerResponse: value };
+  const hasSnapshotShape =
+    "playerResponse" in value ||
+    "selectedBaseUrl" in value ||
+    "selectedLabel" in value ||
+    "selectedLanguageCode" in value ||
+    "videoTitle" in value;
+  if (!hasSnapshotShape) return { playerResponse: value };
+  return {
+    playerResponse: value.playerResponse,
+    selectedBaseUrl: readOptionalNonEmptyString(value, "selectedBaseUrl"),
+    selectedLabel: readOptionalNonEmptyString(value, "selectedLabel"),
+    selectedLanguageCode: readOptionalNonEmptyString(value, "selectedLanguageCode"),
+    videoTitle: readOptionalNonEmptyString(value, "videoTitle"),
+  };
+}
+
+async function readYouTubePlayerSnapshot(tabId: number): Promise<YouTubePlayerSnapshot> {
   try {
-    const [result] = await browser.scripting.executeScript({
+    const request = browser.scripting.executeScript({
       target: { tabId },
       world: "MAIN",
       func: readYouTubePlayerResponseInMainWorld,
     });
-    return result?.result ?? null;
+    const results = await withTimeout(request, 2_500);
+    const [result] = results ?? [];
+    return parseYouTubePlayerSnapshot(result?.result ?? null);
   } catch (error) {
-    return { error: error instanceof Error ? error.message : "Could not read player data." };
+    return {
+      playerResponse: {
+        error: error instanceof Error ? error.message : "Could not read player data.",
+      },
+    };
   }
+}
+
+function readVideoCurrentTimeInPage(): number | null {
+  const video = document.querySelector("video");
+  const currentTimeSeconds = video?.currentTime;
+  return typeof currentTimeSeconds === "number" && Number.isFinite(currentTimeSeconds)
+    ? currentTimeSeconds
+    : null;
+}
+
+async function readPageVideoCurrentTime(tabId: number): Promise<number | null> {
+  try {
+    const request = browser.scripting.executeScript({
+      target: { tabId },
+      func: readVideoCurrentTimeInPage,
+    });
+    const results = await withTimeout(request, 1_500);
+    const [result] = results ?? [];
+    return typeof result?.result === "number" && Number.isFinite(result.result)
+      ? result.result
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function textFromYouTubeJson3Segments(value: unknown): string {
+  if (!Array.isArray(value)) return "";
+  return value
+    .map((segment) => (isRecord(segment) && typeof segment.utf8 === "string" ? segment.utf8 : ""))
+    .join("")
+    .trim();
+}
+
+function parseYouTubeJson3CaptionTrack(input: {
+  readonly payload: string;
+  readonly videoId: string;
+  readonly languageCode: string;
+  readonly label: string;
+}): CaptionTrackLike | null {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(input.payload);
+  } catch {
+    return null;
+  }
+  if (!isRecord(parsed) || !Array.isArray(parsed.events)) return null;
+  const trackId = `youtube:${input.videoId}:${input.languageCode}`;
+  const language = {
+    code: input.languageCode,
+    label: input.label,
+    autoGenerated: true,
+  };
+  const cues = parsed.events
+    .map((event) => {
+      if (!isRecord(event)) return null;
+      if (typeof event.tStartMs !== "number" || !Number.isFinite(event.tStartMs)) return null;
+      if (
+        typeof event.dDurationMs !== "number" ||
+        !Number.isFinite(event.dDurationMs) ||
+        event.dDurationMs <= 0
+      ) {
+        return null;
+      }
+      const text = textFromYouTubeJson3Segments(event.segs);
+      if (!text) return null;
+      return {
+        text,
+        startTimeSeconds: event.tStartMs / 1000,
+        endTimeSeconds: (event.tStartMs + event.dDurationMs) / 1000,
+        language,
+      };
+    })
+    .filter((cue) => cue !== null)
+    .sort((left, right) => left.startTimeSeconds - right.startTimeSeconds)
+    .map((cue, index) => ({
+      ...cue,
+      id: `${trackId}:${index}`,
+      source: { platform: "youtube", trackId, cueId: `${trackId}:${index}` },
+    }));
+  if (cues.length === 0) return null;
+  return {
+    id: trackId,
+    label: input.label,
+    language,
+    source: { platform: "youtube", trackId },
+    cues,
+  };
+}
+
+async function fetchBackgroundYouTubeCaptionTrack(input: {
+  readonly settingsEndpoint: string;
+  readonly tabUrl?: string;
+  readonly languageCode: string;
+}): Promise<CaptionTrackLike | null> {
+  const endpoint = youtubeCaptionEndpointFromTranslationEndpoint(input.settingsEndpoint);
+  const videoId = youtubeVideoIdFromUrl(input.tabUrl);
+  if (!endpoint || !videoId) return null;
+  const url = new URL(endpoint);
+  url.searchParams.set("videoId", videoId);
+  url.searchParams.set("languageCode", input.languageCode);
+  const response = await fetch(url.toString());
+  if (!response.ok) return null;
+  const parsed: unknown = await response.json();
+  if (!isRecord(parsed) || typeof parsed.payload !== "string") return null;
+  const languageCode =
+    typeof parsed.languageCode === "string" && parsed.languageCode.trim()
+      ? parsed.languageCode.trim()
+      : input.languageCode;
+  const label =
+    typeof parsed.label === "string" && parsed.label.trim()
+      ? parsed.label.trim()
+      : `YouTube ${languageCode} captions`;
+  return parseYouTubeJson3CaptionTrack({
+    payload: parsed.payload,
+    videoId,
+    languageCode,
+    label,
+  });
+}
+
+async function collectBackgroundYouTubeCaptionTrack(input: {
+  readonly settingsEndpoint: string;
+  readonly tabUrl?: string;
+  readonly selectedLanguageCode?: string;
+  readonly selectedLabel?: string;
+  readonly videoTitle?: string;
+}): Promise<CaptionTrackLike | null> {
+  const languageCodes = preferredYouTubeCaptionLanguageCodes({
+    selectedLanguageCode: input.selectedLanguageCode,
+    selectedLabel: input.selectedLabel,
+    videoTitle: input.videoTitle,
+  });
+  for (const languageCode of languageCodes) {
+    const track = await fetchBackgroundYouTubeCaptionTrack({ ...input, languageCode });
+    if (track) return track;
+  }
+  return null;
+}
+
+function captionCollectionFromBackgroundTrack(input: {
+  readonly track: CaptionTrackLike;
+  readonly currentTimeSeconds: number | null;
+}): ActiveTabCaptionCollectionResponse {
+  return {
+    ok: true,
+    state: "captions",
+    track: input.track,
+    currentTimeSeconds: input.currentTimeSeconds ?? 0,
+  };
+}
+
+async function resolveCaptionCollection(input: {
+  readonly pageCollectionPromise: Promise<ActiveTabCaptionCollectionResponse | null>;
+  readonly backgroundTrackPromise: Promise<CaptionTrackLike | null>;
+  readonly backgroundCurrentTimePromise: Promise<number | null>;
+}): Promise<ActiveTabCaptionCollectionResponse | null> {
+  const first = await Promise.race<CaptionCollectionCandidate>([
+    input.pageCollectionPromise.then((collection) => ({ source: "page", collection })),
+    input.backgroundTrackPromise.then((track) => ({ source: "background", track })),
+  ]);
+
+  if (first.source === "page" && first.collection?.state === "captions") {
+    return first.collection;
+  }
+  if (first.source === "background" && first.track) {
+    return captionCollectionFromBackgroundTrack({
+      track: first.track,
+      currentTimeSeconds: await input.backgroundCurrentTimePromise,
+    });
+  }
+
+  const [pageCollection, backgroundTrack] = await Promise.all([
+    input.pageCollectionPromise,
+    input.backgroundTrackPromise,
+  ]);
+  if (pageCollection?.state === "captions") return pageCollection;
+  if (backgroundTrack) {
+    return captionCollectionFromBackgroundTrack({
+      track: backgroundTrack,
+      currentTimeSeconds: await input.backgroundCurrentTimePromise,
+    });
+  }
+  return pageCollection;
 }
 
 async function installBridge(
@@ -173,6 +497,37 @@ function buildGeneratedCaptionState(input: {
   };
 }
 
+function parseRenderCaptionOverlayResponse(value: unknown): {
+  readonly ok: boolean;
+  readonly message: string | null;
+  readonly renderedCueCount: number;
+  readonly translatedCueCount: number;
+} {
+  if (!isRecord(value)) {
+    return {
+      ok: false,
+      message: "자막 번역을 표시하지 못했습니다.",
+      renderedCueCount: 0,
+      translatedCueCount: 0,
+    };
+  }
+  const renderedCueCount =
+    typeof value.renderedCueCount === "number" && Number.isFinite(value.renderedCueCount)
+      ? value.renderedCueCount
+      : 0;
+  const translatedCueCount =
+    typeof value.translatedCueCount === "number" && Number.isFinite(value.translatedCueCount)
+      ? value.translatedCueCount
+      : 0;
+  return {
+    ok: value.ok === true,
+    message:
+      typeof value.message === "string" && value.message.trim() ? value.message.trim() : null,
+    renderedCueCount,
+    translatedCueCount,
+  };
+}
+
 async function updateCaptionState(tabId: number, state: ActiveTabCaptionState): Promise<void> {
   stateStore.setCaptionState(tabId, state);
   await sendPageMessage(tabId, {
@@ -189,7 +544,8 @@ function rememberProgress(tabId: number, state: ActiveTabCaptionState): void {
     type: "show-caption-state",
     captionState: state,
   }).catch((error: unknown) => {
-    const message = error instanceof Error ? error.message : "Could not update caption progress.";
+    const message =
+      error instanceof Error ? error.message : "자막 번역 상태를 업데이트하지 못했습니다.";
     stateStore.setLastError(tabId, message);
   });
 }
@@ -217,7 +573,7 @@ function rememberGeneratedCaptionProgress(
     generatedCaptionState: state,
   }).catch((error: unknown) => {
     const message =
-      error instanceof Error ? error.message : "Could not update generated caption progress.";
+      error instanceof Error ? error.message : "생성 자막 상태를 업데이트하지 못했습니다.";
     stateStore.setLastError(tabId, message);
   });
 }
@@ -234,7 +590,7 @@ async function runCaptionTranslation(
   if (!settings.enabled) {
     const failedState = buildCaptionState({
       name: "failed",
-      message: "Enable local translation in settings before translating captions.",
+      message: "번역 준비가 완료되지 않아 자막을 번역할 수 없습니다.",
     });
     stateStore.setCaptionState(tabId, failedState);
     stateStore.setLastError(tabId, failedState.message);
@@ -242,7 +598,9 @@ async function runCaptionTranslation(
     return readStatus(context);
   }
 
-  stateStore.abortCaptionController(tabId);
+  const activeController = stateStore.getCaptionController(tabId);
+  if (activeController && !activeController.signal.aborted) activeController.abort();
+
   const controller = new AbortController();
   stateStore.setCaptionController(tabId, controller);
   stateStore.clearLastError(tabId);
@@ -251,22 +609,44 @@ async function runCaptionTranslation(
     tabId,
     buildCaptionState({
       name: "detecting",
-      message: "Looking for browser-detectable captions...",
+      message: "영상 자막을 찾는 중...",
     }),
   );
 
-  const collection = parseCaptionCollectionResponse(
-    await sendPageMessage(tabId, {
+  const warmupPromise = warmLocalTranslationEndpoint(settings);
+  const playerSnapshot = await readYouTubePlayerSnapshot(tabId);
+  const pageCollectionPromise = withTimeout(
+    sendPageMessage(tabId, {
       scope: ACTIVE_TAB_TRANSLATION_PAGE_SCOPE,
       type: "collect-caption-track",
-      youtubePlayerResponse: await readYouTubePlayerResponse(tabId),
+      youtubePlayerResponse: playerSnapshot.playerResponse,
+      selectedBaseUrl: playerSnapshot.selectedBaseUrl,
+      selectedLabel: playerSnapshot.selectedLabel,
+      selectedLanguageCode: playerSnapshot.selectedLanguageCode,
+      videoTitle: playerSnapshot.videoTitle ?? status.tabTitle,
     }),
-  );
+    PAGE_CAPTION_COLLECTION_TIMEOUT_MS,
+  )
+    .then(parseCaptionCollectionResponse)
+    .catch(() => null);
+  const backgroundCurrentTimePromise = readPageVideoCurrentTime(tabId).catch(() => null);
+  const backgroundTrackPromise = collectBackgroundYouTubeCaptionTrack({
+    settingsEndpoint: settings.endpoint,
+    tabUrl: status.tabUrl ?? undefined,
+    selectedLanguageCode: playerSnapshot.selectedLanguageCode,
+    selectedLabel: playerSnapshot.selectedLabel,
+    videoTitle: playerSnapshot.videoTitle ?? status.tabTitle,
+  }).catch(() => null);
+  const collection = await resolveCaptionCollection({
+    pageCollectionPromise,
+    backgroundTrackPromise,
+    backgroundCurrentTimePromise,
+  });
 
   if (!collection) {
     const failedState = buildCaptionState({
       name: "failed",
-      message: "The injected bridge returned malformed caption data.",
+      message: "영상 자막 정보를 읽지 못했습니다.",
     });
     stateStore.setCaptionState(tabId, failedState);
     stateStore.setLastError(tabId, failedState.message);
@@ -278,7 +658,7 @@ async function runCaptionTranslation(
   if (collection.state === "no-captions") {
     const noCaptionState = buildCaptionState({
       name: "no-captions",
-      message: collection.message,
+      message: "사용할 수 있는 영상 자막이 없습니다.",
     });
     await updateCaptionState(tabId, noCaptionState);
     stateStore.deleteCaptionController(tabId);
@@ -286,7 +666,10 @@ async function runCaptionTranslation(
   }
 
   if (!collection.ok) {
-    const failedState = buildCaptionState({ name: "failed", message: collection.message });
+    const failedState = buildCaptionState({
+      name: "failed",
+      message: "영상 자막 정보를 읽지 못했습니다.",
+    });
     stateStore.setCaptionState(tabId, failedState);
     stateStore.setLastError(tabId, failedState.message);
     await updateCaptionState(tabId, failedState);
@@ -294,31 +677,99 @@ async function runCaptionTranslation(
     return readStatus(context);
   }
 
-  const translateTrack =
-    collection.track.source?.platform === "youtube"
-      ? selectInitialCaptionWindow(collection.track, {
-          currentTimeSeconds: collection.currentTimeSeconds,
-          maxCueCount: 4,
-        })
-      : collection.track;
-  const trackLabel = translateTrack.label?.trim() || "Browser captions";
-  const cueCount = translateTrack.cues.length;
-  const result = await runCaptionTranslationPipeline(settings, translateTrack, {
-    repository: localTranslationRepository,
-    signal: controller.signal,
-    onProgress: (progressResult) => {
-      rememberProgress(
-        tabId,
-        buildCaptionState({
-          name: "translating",
-          message: `Translating ${cueCount} caption cues...`,
-          cueCount,
-          trackLabel,
-          progress: progressResult.progress,
-        }),
-      );
-    },
-  });
+  const isYouTubeTrack = collection.track.source?.platform === "youtube";
+  const visibleCueCount = isYouTubeTrack
+    ? Math.min(collection.track.cues.length, FOLLOWUP_YOUTUBE_CAPTION_WINDOW_CUE_COUNT)
+    : collection.track.cues.length;
+  const initialCueCount = Math.min(
+    visibleCueCount,
+    isYouTubeTrack ? INITIAL_YOUTUBE_CAPTION_WINDOW_CUE_COUNT : INITIAL_CAPTION_TRANSLATION_BATCH_SIZE,
+  );
+  const trackLabel = collection.track.label?.trim() || "Browser captions";
+  await updateCaptionState(
+    tabId,
+    buildCaptionState({
+      name: "translating",
+      message: "자막을 번역하는 중...",
+      cueCount: visibleCueCount,
+      trackLabel,
+      progress: {
+        total: visibleCueCount,
+        completed: 0,
+        cacheHits: 0,
+        cacheMisses: 0,
+        failures: 0,
+      },
+    }),
+  );
+
+  let result: PrioritizedCaptionTranslationResult;
+  try {
+    result = await runPrioritizedCaptionTranslationPipeline(
+      settingsForCaptionTranslation(settings),
+      collection.track,
+      {
+        repository: localTranslationRepository,
+        signal: controller.signal,
+        currentTimeSeconds: collection.currentTimeSeconds,
+        initialCueCount,
+        visibleCueCount,
+        initialBatchSize: INITIAL_CAPTION_TRANSLATION_BATCH_SIZE,
+        backgroundBatchSize: BACKGROUND_CAPTION_TRANSLATION_BATCH_SIZE,
+        onSnapshot: async (snapshot) => {
+          if (stateStore.getCaptionController(tabId) !== controller || controller.signal.aborted) {
+            return;
+          }
+          const renderResponse = parseRenderCaptionOverlayResponse(
+            await sendPageMessage(tabId, {
+              scope: ACTIVE_TAB_TRANSLATION_PAGE_SCOPE,
+              type: "render-caption-overlay",
+              trackLabel,
+              cues: snapshot.displayCues,
+              preferences: captionDisplayPreferencesFromSettings(settings),
+            }),
+          );
+          if (!renderResponse.ok || renderResponse.renderedCueCount === 0) {
+            throw new Error(renderResponse.message ?? "자막 번역을 표시하지 못했습니다.");
+          }
+          const stateName =
+            snapshot.jobResult.progress.completed >= snapshot.jobResult.progress.total &&
+            snapshot.jobResult.progress.total > 0
+              ? "rendered"
+              : "translating";
+          rememberProgress(
+            tabId,
+            buildCaptionState({
+              name: stateName,
+              message:
+                stateName === "rendered"
+                  ? "자막 번역이 표시되었습니다."
+                  : "자막을 번역하는 중...",
+              cueCount: snapshot.displayCues.length,
+              trackLabel,
+              progress: snapshot.jobResult.progress,
+            }),
+          );
+        },
+      },
+    );
+  } catch (error) {
+    if (stateStore.getCaptionController(tabId) !== controller) return readStatus(context);
+    stateStore.deleteCaptionController(tabId);
+    const message = error instanceof Error ? error.message : "영상 자막 번역에 실패했습니다.";
+    const failedState = buildCaptionState({
+      name: "failed",
+      message,
+      cueCount: visibleCueCount,
+      trackLabel,
+    });
+    stateStore.setCaptionState(tabId, failedState);
+    stateStore.setLastError(tabId, failedState.message);
+    await updateCaptionState(tabId, failedState);
+    return readStatus(context);
+  } finally {
+    void warmupPromise;
+  }
 
   if (stateStore.getCaptionController(tabId) !== controller) return readStatus(context);
   stateStore.deleteCaptionController(tabId);
@@ -326,8 +777,8 @@ async function runCaptionTranslation(
   if (result.jobResult.status === "cancelled" || controller.signal.aborted) {
     const cancelledState = buildCaptionState({
       name: "cancelled",
-      message: "Caption translation was cancelled.",
-      cueCount,
+      message: "자막 번역을 취소했습니다.",
+      cueCount: result.displayCues.length,
       trackLabel,
       progress: result.jobResult.progress,
     });
@@ -336,11 +787,10 @@ async function runCaptionTranslation(
   }
 
   if (result.jobResult.status === "failed") {
-    const [error] = result.jobResult.errors;
     const failedState = buildCaptionState({
       name: "failed",
-      message: error?.message ?? "Caption translation failed.",
-      cueCount,
+      message: "영상 자막 번역에 실패했습니다.",
+      cueCount: result.displayCues.length,
       trackLabel,
       progress: result.jobResult.progress,
     });
@@ -350,18 +800,11 @@ async function runCaptionTranslation(
     return readStatus(context);
   }
 
-  await sendPageMessage(tabId, {
-    scope: ACTIVE_TAB_TRANSLATION_PAGE_SCOPE,
-    type: "render-caption-overlay",
-    trackLabel,
-    cues: result.displayCues,
-    preferences: captionDisplayPreferencesFromSettings(settings),
-  });
   await updateCaptionState(
     tabId,
     buildCaptionState({
       name: "rendered",
-      message: `Rendered ${result.displayCues.length} bilingual caption cues.`,
+      message: "자막 번역이 표시되었습니다.",
       cueCount: result.displayCues.length,
       trackLabel,
       progress: result.jobResult.progress,
@@ -406,9 +849,7 @@ async function cancelCaptionTranslation(
     status.tabId,
     buildCaptionState({
       name: "cancelled",
-      message: controller
-        ? "Caption translation was cancelled."
-        : "No caption translation is running.",
+      message: controller ? "자막 번역을 취소했습니다." : "진행 중인 자막 번역이 없습니다.",
       cueCount: status.captionState.cueCount,
       trackLabel: status.captionState.trackLabel,
       progress: status.captionState.progress,
@@ -429,7 +870,7 @@ async function runGeneratedCaptionTranslation(
   if (!settings.enabled) {
     const failedState = buildGeneratedCaptionState({
       name: "failed",
-      message: "Enable local translation in settings before generating captions.",
+      message: "번역 준비가 완료되지 않아 자막을 생성할 수 없습니다.",
     });
     stateStore.setGeneratedCaptionState(tabId, failedState);
     stateStore.setLastError(tabId, failedState.message);
@@ -450,14 +891,14 @@ async function runGeneratedCaptionTranslation(
     tabId,
     buildGeneratedCaptionState({
       name: "transcribing",
-      message: "Requesting generated captions from the local STT endpoint...",
+      message: "영상 음성을 자막으로 준비하는 중...",
     }),
   );
   await updateCaptionState(
     tabId,
     buildCaptionState({
       name: "detecting",
-      message: "Generating captions from local STT endpoint...",
+      message: "영상 음성을 자막으로 변환하는 중...",
     }),
   );
 
@@ -471,9 +912,10 @@ async function runGeneratedCaptionTranslation(
       signal: controller.signal,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Generated caption STT failed.";
     const stateName =
       error instanceof GeneratedCaptionError && error.code === "cancelled" ? "cancelled" : "failed";
+    const message =
+      stateName === "cancelled" ? "자막 생성을 취소했습니다." : "자막 생성에 실패했습니다.";
     const failedState = buildGeneratedCaptionState({ name: stateName, message });
     stateStore.deleteGeneratedCaptionController(tabId);
     stateStore.setGeneratedCaptionState(tabId, failedState);
@@ -485,22 +927,26 @@ async function runGeneratedCaptionTranslation(
 
   const trackLabel = track.label?.trim() || "Generated captions";
   const cueCount = track.cues.length;
-  const result = await runCaptionTranslationPipeline(settings, track, {
-    repository: localTranslationRepository,
-    signal: controller.signal,
-    onProgress: (progressResult) => {
-      rememberGeneratedCaptionProgress(
-        tabId,
-        buildGeneratedCaptionState({
-          name: "translating",
-          message: `Translating ${cueCount} generated caption cues...`,
-          cueCount,
-          trackLabel,
-          progress: progressResult.progress,
-        }),
-      );
+  const result = await runCaptionTranslationPipeline(
+    settingsForCaptionTranslation(settings),
+    track,
+    {
+      repository: localTranslationRepository,
+      signal: controller.signal,
+      onProgress: (progressResult) => {
+        rememberGeneratedCaptionProgress(
+          tabId,
+          buildGeneratedCaptionState({
+            name: "translating",
+            message: "생성한 자막을 번역하는 중...",
+            cueCount,
+            trackLabel,
+            progress: progressResult.progress,
+          }),
+        );
+      },
     },
-  });
+  );
 
   if (stateStore.getGeneratedCaptionController(tabId) !== controller) return readStatus(context);
   stateStore.deleteGeneratedCaptionController(tabId);
@@ -508,7 +954,7 @@ async function runGeneratedCaptionTranslation(
   if (result.jobResult.status === "cancelled" || controller.signal.aborted) {
     const cancelledState = buildGeneratedCaptionState({
       name: "cancelled",
-      message: "Generated caption run was cancelled.",
+      message: "자막 생성을 취소했습니다.",
       cueCount,
       trackLabel,
       progress: result.jobResult.progress,
@@ -528,8 +974,7 @@ async function runGeneratedCaptionTranslation(
   }
 
   if (result.jobResult.status === "failed") {
-    const [error] = result.jobResult.errors;
-    const message = error?.message ?? "Generated caption translation failed.";
+    const message = "생성 자막 번역에 실패했습니다.";
     const failedState = buildGeneratedCaptionState({
       name: "failed",
       message,
@@ -560,7 +1005,7 @@ async function runGeneratedCaptionTranslation(
     cues: result.displayCues,
     preferences: captionDisplayPreferencesFromSettings(settings),
   });
-  const renderedMessage = `Rendered ${result.displayCues.length} generated bilingual caption cues.`;
+  const renderedMessage = "생성 자막 번역이 표시되었습니다.";
   await updateGeneratedCaptionState(
     tabId,
     buildGeneratedCaptionState({
@@ -593,9 +1038,7 @@ async function cancelGeneratedCaptionTranslation(
   const controller = stateStore.abortGeneratedCaptionController(status.tabId);
   const cancelledState = buildGeneratedCaptionState({
     name: "cancelled",
-    message: controller
-      ? "Generated caption run was cancelled."
-      : "No generated caption run is active.",
+    message: controller ? "자막 생성을 취소했습니다." : "진행 중인 자막 생성이 없습니다.",
     cueCount: status.generatedCaptionState.cueCount,
     trackLabel: status.generatedCaptionState.trackLabel,
     progress: status.generatedCaptionState.progress,
@@ -680,7 +1123,7 @@ async function runWebpageTranslation(
   if (!settings.enabled) {
     const failedState = buildWebpageState({
       name: "failed",
-      message: "Enable local translation in settings before translating webpage text.",
+      message: "번역 준비가 완료되지 않아 페이지를 번역할 수 없습니다.",
       displayMode,
     });
     stateStore.setWebpageState(tabId, failedState);
@@ -698,7 +1141,7 @@ async function runWebpageTranslation(
     tabId,
     buildWebpageState({
       name: "collecting",
-      message: "Collecting readable webpage text blocks...",
+      message: "번역할 페이지 본문을 수집하는 중...",
       displayMode,
     }),
   );
@@ -713,7 +1156,7 @@ async function runWebpageTranslation(
   if (!collection) {
     const failedState = buildWebpageState({
       name: "failed",
-      message: "The injected bridge returned malformed webpage text data.",
+      message: "페이지 본문을 읽지 못했습니다.",
       displayMode,
     });
     stateStore.setWebpageState(tabId, failedState);
@@ -726,7 +1169,7 @@ async function runWebpageTranslation(
   if (collection.state === "no-content") {
     const noContentState = buildWebpageState({
       name: "no-content",
-      message: collection.message,
+      message: "번역할 페이지 본문을 찾지 못했습니다.",
       displayMode,
     });
     await updateWebpageState(tabId, noContentState);
@@ -737,7 +1180,7 @@ async function runWebpageTranslation(
   if (!collection.ok) {
     const failedState = buildWebpageState({
       name: "failed",
-      message: collection.message,
+      message: "페이지 본문을 읽지 못했습니다.",
       displayMode,
     });
     stateStore.setWebpageState(tabId, failedState);
@@ -754,7 +1197,7 @@ async function runWebpageTranslation(
     tabId,
     buildWebpageState({
       name: "translating",
-      message: `Translating ${blockCount} webpage text blocks...`,
+      message: "페이지 본문을 번역하는 중...",
       blockCount,
       displayMode,
     }),
@@ -769,7 +1212,7 @@ async function runWebpageTranslation(
           tabId,
           buildWebpageState({
             name: "translating",
-            message: `Translating ${blockCount} webpage text blocks...`,
+            message: "페이지 본문을 번역하는 중...",
             blockCount,
             displayMode,
             progress: progressResult.progress,
@@ -784,7 +1227,7 @@ async function runWebpageTranslation(
     if (result.status === "cancelled" || controller.signal.aborted) {
       const cancelledState = buildWebpageState({
         name: "cancelled",
-        message: "Webpage translation was cancelled.",
+        message: "페이지 번역을 취소했습니다.",
         blockCount,
         displayMode,
         progress: result.progress,
@@ -794,10 +1237,9 @@ async function runWebpageTranslation(
     }
 
     if (result.status === "failed") {
-      const [error] = result.errors;
       const failedState = buildWebpageState({
         name: "failed",
-        message: error?.message ?? "Webpage translation failed.",
+        message: "페이지 번역에 실패했습니다.",
         blockCount,
         displayMode,
         progress: result.progress,
@@ -822,15 +1264,15 @@ async function runWebpageTranslation(
       tabId,
       buildWebpageState({
         name: "rendered",
-        message: `Rendered ${renderedBlocks.length} translated webpage text blocks.`,
+        message: "페이지 번역이 표시되었습니다.",
         blockCount: renderedBlocks.length,
         displayMode,
         progress: result.progress,
       }),
     );
     stateStore.clearLastError(tabId);
-  })().catch((error: unknown) => {
-    const message = error instanceof Error ? error.message : "Webpage translation failed.";
+  })().catch(() => {
+    const message = "페이지 번역에 실패했습니다.";
     stateStore.setLastError(tabId, message);
     void updateWebpageState(
       tabId,
@@ -868,9 +1310,7 @@ async function cancelWebpageTranslation(
       tabId,
       buildWebpageState({
         name: "cancelled",
-        message: controller
-          ? "Webpage translation was cancelled."
-          : "No webpage translation is running.",
+        message: controller ? "페이지 번역을 취소했습니다." : "진행 중인 페이지 번역이 없습니다.",
         blockCount: currentState.blockCount,
         displayMode: currentState.displayMode,
         progress: currentState.progress,

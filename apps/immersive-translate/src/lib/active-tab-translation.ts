@@ -80,6 +80,8 @@ export type ActiveTabTranslationBridgeRequest =
       readonly youtubePlayerResponse?: unknown;
       readonly selectedBaseUrl?: string;
       readonly selectedLabel?: string;
+      readonly selectedLanguageCode?: string;
+      readonly videoTitle?: string;
     }
   | {
       readonly scope: typeof ACTIVE_TAB_TRANSLATION_PAGE_SCOPE;
@@ -223,7 +225,7 @@ export type ActiveTabWebpageCollectionResponse =
 
 export const ACTIVE_TAB_CAPTION_IDLE_STATE: ActiveTabCaptionState = {
   name: "idle",
-  message: "Caption translation has not run yet.",
+  message: "영상 자막 번역을 대기 중입니다.",
   cueCount: 0,
   trackLabel: null,
   progress: null,
@@ -231,7 +233,7 @@ export const ACTIVE_TAB_CAPTION_IDLE_STATE: ActiveTabCaptionState = {
 
 export const ACTIVE_TAB_WEBPAGE_IDLE_STATE: ActiveTabWebpageState = {
   name: "idle",
-  message: "Webpage translation has not run yet.",
+  message: "페이지 번역을 대기 중입니다.",
   blockCount: 0,
   displayMode: "bilingual",
   progress: null,
@@ -239,7 +241,7 @@ export const ACTIVE_TAB_WEBPAGE_IDLE_STATE: ActiveTabWebpageState = {
 
 export const ACTIVE_TAB_GENERATED_CAPTION_IDLE_STATE: ActiveTabGeneratedCaptionState = {
   name: "idle",
-  message: "Generated captions have not run yet.",
+  message: "자막 생성을 대기 중입니다.",
   cueCount: 0,
   trackLabel: null,
   progress: null,
@@ -572,7 +574,7 @@ export function getActiveTabPageSupport(url: string | undefined): ActiveTabPageS
   if (!url) {
     return {
       supported: false,
-      reason: "No active page is available for translation.",
+      reason: "번역할 수 있는 현재 페이지가 없습니다.",
     };
   }
 
@@ -582,28 +584,28 @@ export function getActiveTabPageSupport(url: string | undefined): ActiveTabPageS
   } catch {
     return {
       supported: false,
-      reason: "The active page URL is not available for translation.",
+      reason: "현재 페이지 주소를 확인할 수 없어 번역할 수 없습니다.",
     };
   }
 
   if (parsed.protocol === "chrome-extension:") {
     return {
       supported: false,
-      reason: "Extension pages cannot be translated from the current-page translator.",
+      reason: "이 페이지에서는 번역을 사용할 수 없습니다.",
     };
   }
 
   if (BROWSER_PAGE_PROTOCOLS.has(parsed.protocol)) {
     return {
       supported: false,
-      reason: "Browser pages do not allow extension translation scripts.",
+      reason: "이 페이지에서는 번역을 사용할 수 없습니다.",
     };
   }
 
   if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
     return {
       supported: false,
-      reason: "Only http:// and https:// pages can use current-page translation.",
+      reason: "이 페이지에서는 번역을 사용할 수 없습니다.",
     };
   }
 
@@ -663,6 +665,9 @@ export function parseBridgeRequest(value: unknown): ActiveTabTranslationBridgeRe
       selectedBaseUrl:
         typeof value.selectedBaseUrl === "string" ? value.selectedBaseUrl : undefined,
       selectedLabel: typeof value.selectedLabel === "string" ? value.selectedLabel : undefined,
+      selectedLanguageCode:
+        typeof value.selectedLanguageCode === "string" ? value.selectedLanguageCode : undefined,
+      videoTitle: typeof value.videoTitle === "string" ? value.videoTitle : undefined,
     };
   }
 
@@ -771,7 +776,7 @@ export function parseCaptionCollectionResponse(
     return {
       ok: false,
       state: "failed",
-      message: value.message.trim() || "Caption detection failed.",
+      message: value.message.trim() || "영상 자막을 찾지 못했습니다.",
     };
   }
   if (value.ok !== true) return null;
@@ -779,7 +784,7 @@ export function parseCaptionCollectionResponse(
     return {
       ok: true,
       state: "no-captions",
-      message: value.message.trim() || "No browser-detectable captions were found.",
+      message: value.message.trim() || "사용할 수 있는 영상 자막이 없습니다.",
     };
   }
   if (value.state === "captions") {
@@ -806,7 +811,7 @@ export function parseWebpageCollectionResponse(
     return {
       ok: false,
       state: "failed",
-      message: value.message.trim() || "Webpage text collection failed.",
+      message: value.message.trim() || "페이지 본문을 읽지 못했습니다.",
     };
   }
   if (value.ok !== true) return null;
@@ -814,7 +819,7 @@ export function parseWebpageCollectionResponse(
     return {
       ok: true,
       state: "no-content",
-      message: value.message.trim() || "No readable webpage text was found.",
+      message: value.message.trim() || "번역할 페이지 본문을 찾지 못했습니다.",
     };
   }
   if (value.state === "blocks") {

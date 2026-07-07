@@ -79,7 +79,40 @@ Udemy VTT second line
                     segs: [{ utf8: "Beta opening caption" }],
                   },
                 ]
-              : [
+              : videoId === "batch"
+                ? [
+                    {
+                      tStartMs: 0,
+                      dDurationMs: 2000,
+                      segs: [{ utf8: "YouTube hello" }, { utf8: "\ncaption" }],
+                    },
+                    {
+                      tStartMs: 2000,
+                      dDurationMs: 2000,
+                      segs: [{ utf8: "Second YouTube cue" }],
+                    },
+                    {
+                      tStartMs: 4000,
+                      dDurationMs: 2000,
+                      segs: [{ utf8: "Third YouTube cue" }],
+                    },
+                    {
+                      tStartMs: 6000,
+                      dDurationMs: 2000,
+                      segs: [{ utf8: "Fourth YouTube cue" }],
+                    },
+                    {
+                      tStartMs: 8000,
+                      dDurationMs: 2000,
+                      segs: [{ utf8: "Fifth YouTube cue" }],
+                    },
+                    {
+                      tStartMs: 10000,
+                      dDurationMs: 2000,
+                      segs: [{ utf8: "Sixth YouTube cue" }],
+                    },
+                  ]
+                : [
                   {
                     tStartMs: 0,
                     dDurationMs: 2000,
@@ -412,7 +445,8 @@ VTT opening caption
                             }
                         };
                     }
-                    window.ytInitialPlayerResponse = playerResponse('alpha');
+                    const initialVideoId = new URL(window.location.href).searchParams.get('v') || 'alpha';
+                    window.ytInitialPlayerResponse = playerResponse(initialVideoId);
                     document.querySelector('#movie_player').getPlayerResponse = () => window.ytInitialPlayerResponse;
                     document.querySelector('#navigate-beta').addEventListener('click', () => {
                         window.ytInitialPlayerResponse = playerResponse('beta');

@@ -16,6 +16,10 @@ type AutoCaptionControlType = Extract<
   "status" | "run-caption-translation"
 >;
 
+const VIDEO_CONTEXT_WAIT_ATTEMPTS = 16;
+const VIDEO_CONTEXT_WAIT_INTERVAL_MS = 250;
+const PLAYER_DATA_SETTLE_DELAY_MS = 900;
+
 function isTranslationStatusLike(value: unknown): value is AutoCaptionStatusLike {
   if (typeof value !== "object" || value === null) return false;
   const record = value as Record<string, unknown>;
@@ -42,11 +46,16 @@ function hasVideoContext(): boolean {
 }
 
 async function waitForVideoContext(): Promise<boolean> {
-  for (let attempt = 0; attempt < 12; attempt += 1) {
+  for (let attempt = 0; attempt < VIDEO_CONTEXT_WAIT_ATTEMPTS; attempt += 1) {
     if (hasVideoContext()) return true;
-    await new Promise((resolve) => window.setTimeout(resolve, 500));
+    await new Promise((resolve) => window.setTimeout(resolve, VIDEO_CONTEXT_WAIT_INTERVAL_MS));
   }
   return false;
+}
+
+async function waitForPlayerDataToSettle(currentUrl: string): Promise<boolean> {
+  await new Promise((resolve) => window.setTimeout(resolve, PLAYER_DATA_SETTLE_DELAY_MS));
+  return location.href === currentUrl;
 }
 
 export default defineContentScript({
@@ -59,24 +68,34 @@ export default defineContentScript({
     );
 
     let lastAutoCaptionUrl: string | null = null;
+    let autoCaptionInFlight = false;
 
     const autoEnableCaptions = async (): Promise<void> => {
-      if (!(await waitForVideoContext())) return;
-      if (lastAutoCaptionUrl === location.href) return;
-      const status = await sendControlMessage("status");
-      if (!isTranslationStatusLike(status)) return;
-      if (
-        !shouldAutoStartCaptionTranslation({
-          status,
-          currentUrl: location.href,
-          lastAutoCaptionUrl,
-          hasVideoContext: true,
-        })
-      ) {
-        return;
+      if (autoCaptionInFlight) return;
+      autoCaptionInFlight = true;
+      try {
+        if (!(await waitForVideoContext())) return;
+        const currentUrl = location.href;
+        if (lastAutoCaptionUrl === currentUrl) return;
+        if (!(await waitForPlayerDataToSettle(currentUrl))) return;
+        if (lastAutoCaptionUrl === currentUrl) return;
+        const status = await sendControlMessage("status");
+        if (!isTranslationStatusLike(status)) return;
+        if (
+          !shouldAutoStartCaptionTranslation({
+            status,
+            currentUrl,
+            lastAutoCaptionUrl,
+            hasVideoContext: true,
+          })
+        ) {
+          return;
+        }
+        lastAutoCaptionUrl = currentUrl;
+        await sendControlMessage("run-caption-translation");
+      } finally {
+        autoCaptionInFlight = false;
       }
-      lastAutoCaptionUrl = location.href;
-      await sendControlMessage("run-caption-translation");
     };
 
     void autoEnableCaptions();
@@ -85,6 +104,10 @@ export default defineContentScript({
       void autoEnableCaptions();
     });
     window.addEventListener("yt-player-updated", () => {
+      lastAutoCaptionUrl = null;
+      void autoEnableCaptions();
+    });
+    window.addEventListener("yt-page-data-updated", () => {
       lastAutoCaptionUrl = null;
       void autoEnableCaptions();
     });

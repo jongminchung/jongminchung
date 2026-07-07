@@ -70,29 +70,30 @@ bun run docker:up:mlx
 The recommended M1 Pro 16GB default is:
 
 ```bash
-mlx-community/Qwen3-4B-Instruct-2507-4bit
+mlx-community/Qwen3-1.7B-4bit
 ```
 
-If latency is too high, switch the host model only:
+If you want to trade latency for a larger model, switch both the host model and gateway model:
 
 ```bash
-MLX_MODEL=mlx-community/Qwen3-1.7B-4bit bun run mlx:serve
+MLX_MODEL=mlx-community/Qwen3-4B-Instruct-2507-4bit bun run mlx:serve
+MLX_MODEL=mlx-community/Qwen3-4B-Instruct-2507-4bit bun run docker:up:mlx
 ```
 
 No extension code or UI change is needed. The extension still calls `http://127.0.0.1:5000/translate`.
 
 ## Environment
 
-| Variable                    | Default                                     |
-| --------------------------- | ------------------------------------------- |
-| `TRANSLATION_PROFILE`       | `libretranslate`                            |
-| `LIBRETRANSLATE_URL`        | `http://libretranslate:5000/translate`      |
-| `MLX_BASE_URL`              | `http://host.docker.internal:8000/v1`       |
-| `MLX_MODEL`                 | `mlx-community/Qwen3-4B-Instruct-2507-4bit` |
-| `MLX_FALLBACK_MODEL`        | `mlx-community/Qwen3-1.7B-4bit`             |
-| `MLX_TEMPERATURE`           | `0`                                         |
-| `MLX_MAX_TOKENS`            | `1024`                                      |
-| `LIBRETRANSLATE_DEBUG_PORT` | `5001`                                      |
+| Variable                    | Default                                |
+| --------------------------- | -------------------------------------- |
+| `TRANSLATION_PROFILE`       | `libretranslate`                       |
+| `LIBRETRANSLATE_URL`        | `http://libretranslate:5000/translate` |
+| `MLX_BASE_URL`              | `http://host.docker.internal:8000/v1`  |
+| `MLX_MODEL`                 | `mlx-community/Qwen3-1.7B-4bit`        |
+| `MLX_FALLBACK_MODEL`        | `mlx-community/Qwen3-1.7B-4bit`        |
+| `MLX_TEMPERATURE`           | `0`                                    |
+| `MLX_MAX_TOKENS`            | `1024`                                 |
+| `LIBRETRANSLATE_DEBUG_PORT` | `5001`                                 |
 
 ## Stop
 

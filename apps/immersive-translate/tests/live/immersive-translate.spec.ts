@@ -23,7 +23,7 @@ async function openImmersivePopup(context: BrowserContext, extensionId: string):
   const page = await context.newPage();
   await page.goto(`chrome-extension://${extensionId}/popup.html`);
   await expect(page.locator("#immersive-translate-popup")).toBeVisible();
-  await expect(page.getByText("오른쪽 번역 버튼을 사용하세요")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "페이지 번역" })).toBeVisible();
   return page;
 }
 
@@ -60,6 +60,21 @@ function realTranslationEndpoint(): string {
 
 function expectKoreanText(text: string): void {
   expect(text).toMatch(/[가-힣]/);
+}
+
+function hasKoreanText(text: string): boolean {
+  return /[가-힣]/.test(text);
+}
+
+function expectOppositeKoEnCaptionTranslation(input: {
+  readonly originalText: string;
+  readonly translatedText: string;
+}): void {
+  if (hasKoreanText(input.originalText)) {
+    expect(input.translatedText).toMatch(/[A-Za-z]/);
+    return;
+  }
+  expectKoreanText(input.translatedText);
 }
 
 function localSettings(
@@ -113,9 +128,10 @@ async function translateWithFloatingToggle(page: Page): Promise<void> {
 }
 
 async function showActiveCaptionCue(page: Page, seconds: number): Promise<void> {
-  await expect(page.getByTestId("video-auto-subtitle-status")).toContainText(/Render/i, {
-    timeout: 60_000,
-  });
+  await expect(page.getByTestId("video-auto-subtitle-status")).toContainText(
+    /자막 번역(을 표시하는 중|이 표시되었습니다)/,
+    { timeout: 60_000 },
+  );
   await page.evaluate(async (fallbackTimeSeconds) => {
     const video = document.querySelector("video");
     if (!video) throw new Error("Caption video element is missing.");
@@ -148,10 +164,47 @@ async function showActiveCaptionCue(page: Page, seconds: number): Promise<void> 
   }, seconds);
 }
 
+async function showAfterRenderedCaptionWindow(page: Page): Promise<void> {
+  await page.evaluate(async () => {
+    const video = document.querySelector("video");
+    if (!video) throw new Error("Caption video element is missing.");
+    const bridge = (
+      window as Window & {
+        __tabShelfTranslationBridge?: {
+          renderedCues?: readonly {
+            readonly endTimeSeconds?: unknown;
+          }[];
+        };
+      }
+    ).__tabShelfTranslationBridge;
+    const lastCueEnd = Math.max(
+      0,
+      ...(bridge?.renderedCues ?? [])
+        .map((cue) => cue.endTimeSeconds)
+        .filter(
+          (endTimeSeconds): endTimeSeconds is number =>
+            typeof endTimeSeconds === "number" && Number.isFinite(endTimeSeconds),
+        ),
+    );
+    video.currentTime = lastCueEnd + 10;
+    for (let index = 0; index < 3; index += 1) {
+      video.dispatchEvent(new Event("timeupdate"));
+      await new Promise((resolve) => window.setTimeout(resolve, 50));
+    }
+  });
+}
+
 async function assertMinimalPopup(popup: Page): Promise<void> {
-  await expect(popup.getByText("오른쪽 번역 버튼을 사용하세요")).toBeVisible();
-  await expect(popup.getByTestId("popup-floating-toggle-guidance")).toContainText("클릭 번역");
-  await expect(popup.getByTestId("popup-provider-status")).toContainText("Default Docker");
+  await expect(popup.getByRole("heading", { name: "페이지 번역" })).toBeVisible();
+  await expect(popup.getByTestId("popup-floating-toggle-guidance")).toContainText(
+    "오른쪽 번역 버튼",
+  );
+  await expect(popup.getByTestId("popup-translation-status")).toContainText(
+    /번역 준비 상태 확인 중|로컬 번역 준비됨|번역 꺼짐/,
+  );
+  await expect(popup.locator("body")).not.toContainText(
+    /provider|MLX|LibreTranslate|browser-detectable|caption cues|script|스크립트|브라우저|endpoint/i,
+  );
   await expect(popup.getByTestId("translation-service-select")).toHaveCount(0);
   await expect(popup.getByTestId("target-language-select")).toHaveCount(0);
   await expect(popup.getByTestId("provider-settings-local-endpoint")).toHaveCount(0);
@@ -354,13 +407,303 @@ test.describe("Immersive Translate floating toggle QA", () => {
       "youtube-auto-subtitle-translation.png",
       { fullPage: false },
     );
+    await showAfterRenderedCaptionWindow(youtubePage);
+    await expect(youtubePage.getByTestId("caption-original-line")).toHaveCount(0);
+    await expect(youtubePage.getByTestId("caption-translated-line")).toHaveCount(0);
     expect(Math.max(...requestBatchSizes)).toBeLessThanOrEqual(4);
+  });
+
+  test("uses the background YouTube caption gateway when page caption tracks are missing", async ({
+    context,
+  }) => {
+    const captionLanguages: string[] = [];
+    await context.route(/https:\/\/www\.youtube\.com\/watch\?/, async (route: Route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "text/html; charset=utf-8",
+        body: `<!doctype html><html><head><title>YouTube Gateway Caption Fixture</title></head><body>
+                <main>
+                    <h1>YouTube Gateway Caption Fixture</h1>
+                    <div id="movie_player"></div>
+                    <video id="youtube-video" controls muted width="640"></video>
+                </main>
+                <script>
+                    window.ytInitialPlayerResponse = { videoDetails: { videoId: 'background-fallback' } };
+                    document.querySelector('#movie_player').getPlayerResponse = () => window.ytInitialPlayerResponse;
+                </script>
+            </body></html>`,
+      });
+    });
+    await context.route("**/youtube-captions**", async (route: Route) => {
+      const url = new URL(route.request().url());
+      const languageCode = url.searchParams.get("languageCode") ?? "en";
+      captionLanguages.push(languageCode);
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          videoId: url.searchParams.get("videoId") ?? "background-fallback",
+          languageCode,
+          label: `YouTube ${languageCode} captions`,
+          source: "yt-dlp",
+          payload: JSON.stringify({
+            events: [
+              {
+                tStartMs: 0,
+                dDurationMs: 2000,
+                segs: [{ utf8: "Gateway fallback first caption" }],
+              },
+              {
+                tStartMs: 2000,
+                dDurationMs: 2000,
+                segs: [{ utf8: "Gateway fallback second caption" }],
+              },
+            ],
+          }),
+        }),
+      });
+    });
+    await context.route(DEFAULT_TRANSLATION_ENDPOINT, async (route: Route) => {
+      const payload = JSON.parse(route.request().postData() ?? "{}") as {
+        readonly q?: unknown;
+      };
+      const sourceTexts = Array.isArray(payload.q)
+        ? payload.q.filter((text): text is string => typeof text === "string")
+        : [];
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          translatedText: sourceTexts.map((text) =>
+            text.includes("second")
+              ? "백그라운드 두 번째 자막 번역"
+              : "백그라운드 첫 번째 자막 번역",
+          ),
+        }),
+      });
+    });
+
+    const youtubePage = await context.newPage();
+    await youtubePage.setViewportSize(VIDEO_REFERENCE_VIEWPORT);
+    await youtubePage.goto("https://www.youtube.com/watch?v=background-fallback");
+    await expect(youtubePage.getByTestId("floating-translate-control")).toHaveCount(1);
+    await youtubePage.getByTestId("floating-translate-control").click();
+
+    await showActiveCaptionCue(youtubePage, 1.2);
+    await expect(youtubePage.getByText("백그라운드 첫 번째 자막 번역")).toBeVisible();
+    expect(captionLanguages).toContain("en");
+  });
+
+  test("uses the currently selected Korean YouTube caption for background gateway captions", async ({
+    context,
+  }) => {
+    const captionLanguages: string[] = [];
+    const translationRequests: unknown[] = [];
+    await context.route(/https:\/\/www\.youtube\.com\/watch\?/, async (route: Route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "text/html; charset=utf-8",
+        body: `<!doctype html><html><head><title>한국어 영상 자막 Fixture</title></head><body>
+                <main>
+                    <h1>한국어 영상 자막 Fixture</h1>
+                    <div id="movie_player"></div>
+                    <video id="youtube-video" controls muted width="640"></video>
+                </main>
+                <script>
+                    window.ytInitialPlayerResponse = { videoDetails: { videoId: 'selected-korean-fallback' } };
+                    const player = document.querySelector('#movie_player');
+                    player.getPlayerResponse = () => window.ytInitialPlayerResponse;
+                    player.getOption = (namespace, option) => {
+                        if (namespace === 'captions' && option === 'track') {
+                            return { languageCode: 'ko', label: 'Korean' };
+                        }
+                        return null;
+                    };
+                </script>
+            </body></html>`,
+      });
+    });
+    await context.route("**/youtube-captions**", async (route: Route) => {
+      const url = new URL(route.request().url());
+      const languageCode = url.searchParams.get("languageCode") ?? "en";
+      captionLanguages.push(languageCode);
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          videoId: url.searchParams.get("videoId") ?? "selected-korean-fallback",
+          languageCode,
+          label: `YouTube ${languageCode} captions`,
+          source: "yt-dlp",
+          payload: JSON.stringify({
+            events: [
+              {
+                tStartMs: 0,
+                dDurationMs: 2000,
+                segs: [
+                  {
+                    utf8:
+                      languageCode === "ko"
+                        ? "한국어 게이트웨이 첫 자막"
+                        : "English gateway first caption",
+                  },
+                ],
+              },
+            ],
+          }),
+        }),
+      });
+    });
+    await context.route(DEFAULT_TRANSLATION_ENDPOINT, async (route: Route) => {
+      const payload = JSON.parse(route.request().postData() ?? "{}") as {
+        readonly q?: unknown;
+        readonly source?: unknown;
+        readonly target?: unknown;
+      };
+      translationRequests.push(payload);
+      const sourceTexts = Array.isArray(payload.q)
+        ? payload.q.filter((text): text is string => typeof text === "string")
+        : [];
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          translatedText: sourceTexts.map(() =>
+            payload.target === "en"
+              ? "Korean gateway caption translation"
+              : "잘못된 영어 자막 재번역",
+          ),
+        }),
+      });
+    });
+
+    const youtubePage = await context.newPage();
+    await youtubePage.setViewportSize(VIDEO_REFERENCE_VIEWPORT);
+    await youtubePage.goto("https://www.youtube.com/watch?v=selected-korean-fallback");
+    await expect(youtubePage.getByTestId("floating-translate-control")).toHaveCount(1);
+    await youtubePage.getByTestId("floating-translate-control").click();
+
+    await showActiveCaptionCue(youtubePage, 1.2);
+    await expect(youtubePage.getByText("Korean gateway caption translation")).toBeVisible();
+    expect(captionLanguages[0]).toBe("ko");
+    expect(translationRequests[0]).toMatchObject({ source: "ko", target: "en" });
+  });
+
+  test("keeps YouTube subtitle translation requests small for fast first render", async ({
+    context,
+    localSite,
+  }) => {
+    const requestBatchSizes: number[] = [];
+    await context.route(DEFAULT_TRANSLATION_ENDPOINT, async (route: Route) => {
+      const payload = JSON.parse(route.request().postData() ?? "{}") as {
+        readonly q?: unknown;
+      };
+      const sourceTexts = Array.isArray(payload.q)
+        ? payload.q.filter((text): text is string => typeof text === "string")
+        : [];
+      requestBatchSizes.push(sourceTexts.length);
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          translatedText: sourceTexts.map((text) => `번역: ${text}`),
+        }),
+      });
+    });
+
+    const youtubePage = await context.newPage();
+    await youtubePage.setViewportSize(VIDEO_REFERENCE_VIEWPORT);
+    await youtubePage.goto(`${localSite.origin}/youtube-watch?v=batch`);
+    await expect(youtubePage.getByTestId("floating-translate-control")).toHaveCount(1);
+    await youtubePage.getByTestId("floating-translate-control").click();
+
+    await expect(youtubePage.getByTestId("caption-translated-line").first()).toBeVisible({
+      timeout: 60_000,
+    });
+    expect(requestBatchSizes[0]).toBe(3);
+    expect(Math.max(...requestBatchSizes)).toBeLessThanOrEqual(4);
+  });
+
+  test("does not open the YouTube transcript panel when caption payloads are unavailable", async ({
+    context,
+    localSite,
+  }) => {
+    await context.route("**/youtube-captions**", async (route: Route) => {
+      await route.fulfill({
+        status: 404,
+        contentType: "application/json",
+        body: JSON.stringify({ error: "captions unavailable" }),
+      });
+    });
+
+    const youtubePage = await context.newPage();
+    await youtubePage.setViewportSize(VIDEO_REFERENCE_VIEWPORT);
+    await youtubePage.goto(`${localSite.origin}/youtube-transcript-fallback`);
+    await expect(youtubePage.getByTestId("floating-translate-control")).toHaveCount(1);
+    await youtubePage.getByTestId("floating-translate-control").click();
+
+    await expect(youtubePage.getByTestId("video-auto-subtitle-status")).toContainText(
+      /사용할 수 있는 영상 자막이 없습니다|영상 자막 정보를 읽지 못했습니다/,
+      { timeout: 60_000 },
+    );
+    await expect(youtubePage.locator("#transcript-section")).toHaveCSS("display", "none");
+    await expect(youtubePage.locator("#transcript-panel")).toHaveAttribute("hidden", "");
+    await expect(youtubePage.getByTestId("caption-original-line")).toHaveCount(0);
+    await expect(youtubePage.getByTestId("caption-translated-line")).toHaveCount(0);
+  });
+
+  test("does not read visible YouTube caption DOM when payloads are unavailable", async ({
+    context,
+    localSite,
+  }) => {
+    let translationRequestCount = 0;
+    await context.route(DEFAULT_TRANSLATION_ENDPOINT, async (route: Route) => {
+      translationRequestCount += 1;
+      const payload = JSON.parse(route.request().postData() ?? "{}") as {
+        readonly q?: unknown;
+      };
+      const sourceTexts = Array.isArray(payload.q)
+        ? payload.q.filter((text): text is string => typeof text === "string")
+        : [];
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          translatedText: sourceTexts.map(() => "화면 자막 DOM fallback 번역"),
+        }),
+      });
+    });
+    await context.route("**/youtube-captions**", async (route: Route) => {
+      await route.fulfill({
+        status: 404,
+        contentType: "application/json",
+        body: JSON.stringify({ error: "captions unavailable" }),
+      });
+    });
+
+    const youtubePage = await context.newPage();
+    await youtubePage.setViewportSize(VIDEO_REFERENCE_VIEWPORT);
+    await youtubePage.goto(`${localSite.origin}/youtube-cc-fallback`);
+    await expect(youtubePage.getByTestId("floating-translate-control")).toHaveCount(1);
+    await youtubePage.getByTestId("floating-translate-control").click();
+
+    await expect(youtubePage.getByTestId("video-auto-subtitle-status")).toContainText(
+      /사용할 수 있는 영상 자막이 없습니다|영상 자막 정보를 읽지 못했습니다/,
+      { timeout: 60_000 },
+    );
+    await expect(youtubePage.locator(".ytp-subtitles-button")).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+    await expect(youtubePage.getByTestId("caption-original-line")).toHaveCount(0);
+    await expect(youtubePage.getByTestId("caption-translated-line")).toHaveCount(0);
+    expect(translationRequestCount).toBe(0);
   });
 });
 
 if (envFlag("REAL_TRANSLATION_QA")) {
-  test.describe("Immersive Translate Docker provider QA", () => {
-    test("uses Docker LibreTranslate for Go documentation fixture translation", async ({
+  test.describe("Immersive Translate local translation QA", () => {
+    test("uses local translation for Go documentation fixture translation", async ({
       context,
       extensionId,
       localSite,
@@ -387,7 +730,7 @@ if (envFlag("REAL_TRANSLATION_QA")) {
       );
     });
 
-    test("uses Docker LibreTranslate for automatic YouTube-style subtitle translation", async ({
+    test("uses local translation for automatic YouTube-style subtitle translation", async ({
       context,
       extensionId,
       localSite,
@@ -406,7 +749,11 @@ if (envFlag("REAL_TRANSLATION_QA")) {
       const translatedText = await youtubePage
         .getByTestId("caption-translated-line")
         .allTextContents();
-      expectKoreanText(translatedText.join("\n"));
+      const originalText = await youtubePage.getByTestId("caption-original-line").allTextContents();
+      expectOppositeKoEnCaptionTranslation({
+        originalText: originalText.join("\n"),
+        translatedText: translatedText.join("\n"),
+      });
       await captureQaScreenshot(
         testInfo,
         youtubePage,
@@ -456,10 +803,7 @@ if (envFlag("REAL_YOUTUBE_CAPTION_QA")) {
     }, testInfo) => {
       test.setTimeout(240_000);
 
-      await seedSettingsFromPopup(context, extensionId, {
-        ...realProviderSettings(),
-        targetLanguage: "ko",
-      });
+      await seedSettingsFromPopup(context, extensionId, realProviderSettings());
       const youtubePage = await context.newPage();
       await youtubePage.setViewportSize(VIDEO_REFERENCE_VIEWPORT);
       await youtubePage.goto(realYouTubeUrl(), { waitUntil: "domcontentloaded" });

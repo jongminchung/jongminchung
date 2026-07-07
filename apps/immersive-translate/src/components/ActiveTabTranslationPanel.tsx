@@ -1,5 +1,5 @@
 import type { JSX } from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { browser } from "wxt/browser";
 import {
   ACTIVE_TAB_TRANSLATION_CONTROL_SCOPE,
@@ -16,8 +16,18 @@ interface ProgressLike {
   readonly failures: number;
 }
 
+interface TranslationReadinessStatus {
+  readonly enabled: boolean;
+}
+
 function cx(...values: readonly (string | false | null | undefined)[]): string {
   return values.filter(Boolean).join(" ");
+}
+
+function translationReadinessLabel(readinessStatus: TranslationReadinessStatus | null): string {
+  if (readinessStatus === null) return "번역 준비 상태 확인 중";
+  if (!readinessStatus.enabled) return "번역 꺼짐";
+  return "로컬 번역 준비됨";
 }
 
 function pageStatusLabel(status: ActiveTabTranslationStatus | null): string {
@@ -27,8 +37,8 @@ function pageStatusLabel(status: ActiveTabTranslationStatus | null): string {
   if (status.webpageState.name === "translating") return "현재 페이지를 번역하는 중입니다.";
   if (status.webpageState.name === "collecting") return "번역할 본문을 수집하는 중입니다.";
   if (status.webpageState.name === "failed") return "현재 페이지 번역에 실패했습니다.";
-  if (status.localTranslationState === "disabled") return "번역 provider가 꺼져 있습니다.";
-  return "오른쪽의 클릭 번역 버튼을 사용할 수 있습니다.";
+  if (status.localTranslationState === "disabled") return "번역이 꺼져 있습니다.";
+  return "오른쪽 번역 버튼을 사용할 수 있습니다.";
 }
 
 function captionStatusLabel(status: ActiveTabTranslationStatus | null): string {
@@ -47,6 +57,17 @@ function progressLabel(progress: ProgressLike | null | undefined): string | null
   return `${progress.completed}/${progress.total} 처리됨 · 캐시 ${progress.cacheHits} · 실패 ${progress.failures}`;
 }
 
+function userVisibleErrorMessage(message: string | null | undefined): string | null {
+  if (!message) return null;
+  if (
+    /provider|mlx|libretranslate|browser-detectable|caption cues|script|endpoint/i.test(message) ||
+    /스크립트|브라우저/.test(message)
+  ) {
+    return "번역 상태를 확인하지 못했습니다.";
+  }
+  return message;
+}
+
 async function readStatus(): Promise<ActiveTabTranslationStatus> {
   return browser.runtime.sendMessage({
     scope: ACTIVE_TAB_TRANSLATION_CONTROL_SCOPE,
@@ -56,13 +77,16 @@ async function readStatus(): Promise<ActiveTabTranslationStatus> {
 
 export function ActiveTabTranslationPanel(): JSX.Element {
   const [status, setStatus] = useState<ActiveTabTranslationStatus | null>(null);
-  const [providerReady, setProviderReady] = useState<boolean | null>(null);
+  const [readinessStatus, setReadinessStatus] = useState<TranslationReadinessStatus | null>(null);
   const [statusError, setStatusError] = useState<string | null>(null);
 
   const refreshStatus = useCallback(async (): Promise<void> => {
     try {
       setStatusError(null);
-      setProviderReady((await localTranslationRepository.load()).enabled);
+      const settings = await localTranslationRepository.load();
+      setReadinessStatus({
+        enabled: settings.enabled,
+      });
       setStatus(await readStatus());
     } catch (error) {
       setStatusError(error instanceof Error ? error.message : "상태를 읽을 수 없습니다.");
@@ -90,12 +114,10 @@ export function ActiveTabTranslationPanel(): JSX.Element {
     return () => window.clearInterval(intervalId);
   }, [refreshStatus, status?.captionState.name, status?.webpageState.name]);
 
-  const providerLabel = useMemo(() => {
-    if (providerReady === null) return "Default Docker 확인 중";
-    return providerReady ? "Default Docker 켜짐" : "Default Docker 꺼짐";
-  }, [providerReady]);
+  const readinessLabel = translationReadinessLabel(readinessStatus);
   const pageProgress = progressLabel(status?.webpageState.progress);
   const captionProgress = progressLabel(status?.captionState.progress);
+  const visibleError = userVisibleErrorMessage(status?.lastError ?? statusError);
 
   return (
     <section className="w-[360px] max-w-full p-3 text-[inherit]">
@@ -105,20 +127,19 @@ export function ActiveTabTranslationPanel(): JSX.Element {
             <div className="text-[10px] uppercase tracking-[0.18em] text-(--muted-foreground)">
               Tobi Immersive Translate
             </div>
-            <h1 className="mt-2 text-lg font-semibold tracking-normal">
-              오른쪽 번역 버튼을 사용하세요
-            </h1>
+            <h1 className="mt-2 text-lg font-semibold tracking-normal">페이지 번역</h1>
           </div>
           <span
-            data-testid="popup-provider-status"
+            data-testid="popup-translation-status"
+            title="번역 준비 상태"
             className={cx(
               "shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-semibold",
-              providerReady
+              readinessStatus?.enabled
                 ? "border-(--primary) bg-(--secondary) text-(--secondary-foreground)"
                 : "border-(--border) text-(--muted-foreground)",
             )}
           >
-            {providerLabel}
+            {readinessLabel}
           </span>
         </div>
 
@@ -126,8 +147,8 @@ export function ActiveTabTranslationPanel(): JSX.Element {
           data-testid="popup-floating-toggle-guidance"
           className="mt-4 rounded-lg border border-(--border) bg-(--card) p-3 text-sm leading-6"
         >
-          페이지 오른쪽의 <strong>클릭 번역</strong> 버튼을 누르면 본문 번역이 시작됩니다. 영상
-          페이지는 열리면 자막 번역을 자동으로 시도합니다.
+          페이지에서는 오른쪽 번역 버튼으로 본문을 번역합니다. 영상 페이지는 자막 번역을 자동으로
+          시도합니다.
         </div>
 
         <div
@@ -161,9 +182,9 @@ export function ActiveTabTranslationPanel(): JSX.Element {
           )}
         </div>
 
-        {(status?.lastError || statusError) && (
+        {visibleError && (
           <div className="mt-3 rounded-md border border-(--destructive) bg-(--card) px-3 py-2 text-xs text-(--destructive)">
-            {status?.lastError ?? statusError}
+            {visibleError}
           </div>
         )}
 

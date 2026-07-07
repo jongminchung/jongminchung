@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import { shouldAutoStartCaptionTranslation } from "./video-auto-activation";
 
 describe("video auto caption activation", () => {
-  test("starts only for enabled providers on a video page once per URL", () => {
+  test("starts only when local translation is enabled on a video page once per URL", () => {
     const readyStatus = {
       localTranslationState: "enabled" as const,
       captionState: { name: "idle" },
