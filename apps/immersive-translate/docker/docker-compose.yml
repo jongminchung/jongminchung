@@ -2,7 +2,10 @@ name: immersive-translate
 
 services:
   gateway:
-    image: oven/bun:1.3.3
+    build:
+      context: ..
+      dockerfile: docker/gateway.Dockerfile
+    image: immersive-translate-gateway:local
     working_dir: /app
     ports:
       - "127.0.0.1:5000:5000"

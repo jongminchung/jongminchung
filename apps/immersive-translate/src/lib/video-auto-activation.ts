@@ -22,3 +22,12 @@ export function shouldAutoStartCaptionTranslation(input: AutoCaptionActivationIn
     input.status.captionState.name !== "rendered"
   );
 }
+
+export function shouldRetryAutoCaptionTranslation(status: AutoCaptionStatusLike): boolean {
+  if (status.localTranslationState !== "enabled") return false;
+  return (
+    status.captionState.name === "idle" ||
+    status.captionState.name === "failed" ||
+    status.captionState.name === "no-captions"
+  );
+}

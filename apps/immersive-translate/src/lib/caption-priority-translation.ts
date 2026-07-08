@@ -31,6 +31,33 @@ export interface PrioritizedCaptionWindow {
   readonly initialTrack: CaptionTrack;
 }
 
+export interface CaptionPrefetchWindowOptions {
+  readonly currentTimeSeconds?: number | null;
+  readonly lookAheadSeconds: number;
+  readonly minimumCueCount: number;
+}
+
+export interface CaptionPrefetchWindow {
+  readonly track: CaptionTrack;
+  readonly cues: readonly CaptionCue[];
+  readonly activeCue: CaptionCue | null;
+  readonly startTimeSeconds: number | null;
+  readonly endTimeSeconds: number | null;
+}
+
+export interface PrioritizedCaptionInputPlanOptions {
+  readonly translatedCueIds?: ReadonlySet<string>;
+  readonly pendingCueIds?: ReadonlySet<string>;
+  readonly failedCueIds?: ReadonlySet<string>;
+  readonly highPriorityCueCount: number;
+}
+
+export interface PrioritizedCaptionInputPlan {
+  readonly highPriorityInputs: readonly TranslationInput[];
+  readonly backgroundInputs: readonly TranslationInput[];
+  readonly orderedInputs: readonly TranslationInput[];
+}
+
 export interface PrioritizedCaptionTranslationSnapshot {
   readonly track: CaptionTrack;
   readonly translationInputs: readonly TranslationInput[];
@@ -80,18 +107,110 @@ function sortedByPlaybackPriority(
     .map((entry) => entry.cue);
 }
 
+function normalizedCurrentTimeSeconds(value: number | null | undefined): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
 function trackWithCues(track: CaptionTrack, cues: readonly CaptionCue[]): CaptionTrack {
   return { ...track, cues: [...cues].sort((left, right) => left.index - right.index) };
+}
+
+function activeCaptionCue(
+  cues: readonly CaptionCue[],
+  currentTimeSeconds: number | null,
+): CaptionCue | null {
+  if (currentTimeSeconds === null) return cues[0] ?? null;
+  let activeCue: CaptionCue | null = null;
+  for (const cue of cues) {
+    if (cue.startTimeSeconds > currentTimeSeconds || currentTimeSeconds >= cue.endTimeSeconds) {
+      continue;
+    }
+    if (!activeCue || cue.startTimeSeconds >= activeCue.startTimeSeconds) activeCue = cue;
+  }
+  return activeCue;
+}
+
+function playbackStartIndex(
+  cues: readonly CaptionCue[],
+  currentTimeSeconds: number | null,
+): number {
+  if (currentTimeSeconds === null) return 0;
+  const index = cues.findIndex((cue) => cue.endTimeSeconds > currentTimeSeconds);
+  return index >= 0 ? index : cues.length;
+}
+
+export function selectCaptionPrefetchWindow(
+  track: CaptionTrack,
+  options: CaptionPrefetchWindowOptions,
+): CaptionPrefetchWindow {
+  const orderedCues = [...track.cues].sort((left, right) => left.index - right.index);
+  const currentTimeSeconds = normalizedCurrentTimeSeconds(options.currentTimeSeconds);
+  const startIndex = playbackStartIndex(orderedCues, currentTimeSeconds);
+  const baseTimeSeconds =
+    currentTimeSeconds ??
+    orderedCues[startIndex]?.startTimeSeconds ??
+    orderedCues[0]?.startTimeSeconds ??
+    0;
+  const targetEndTimeSeconds = baseTimeSeconds + Math.max(0, options.lookAheadSeconds);
+  const minimumCueCount = Math.max(0, options.minimumCueCount);
+  const selectedCues: CaptionCue[] = [];
+
+  for (let index = startIndex; index < orderedCues.length; index += 1) {
+    const cue = orderedCues[index];
+    if (!cue) continue;
+    if (selectedCues.length >= minimumCueCount && cue.startTimeSeconds > targetEndTimeSeconds) {
+      break;
+    }
+    selectedCues.push(cue);
+  }
+
+  const firstCue = selectedCues[0] ?? null;
+  const lastCue = selectedCues[selectedCues.length - 1] ?? null;
+  return {
+    track: trackWithCues(track, selectedCues),
+    cues: selectedCues,
+    activeCue: activeCaptionCue(selectedCues, currentTimeSeconds),
+    startTimeSeconds: firstCue?.startTimeSeconds ?? null,
+    endTimeSeconds: lastCue?.endTimeSeconds ?? null,
+  };
+}
+
+export function prioritizeCaptionInputs(
+  cues: readonly CaptionCue[],
+  currentTimeSeconds?: number | null,
+): readonly TranslationInput[] {
+  return buildCaptionTranslationInputs(
+    sortedByPlaybackPriority(cues, normalizedCurrentTimeSeconds(currentTimeSeconds)),
+  );
+}
+
+export function planCaptionTranslationInputs(
+  cues: readonly CaptionCue[],
+  currentTimeSeconds: number | null | undefined,
+  options: PrioritizedCaptionInputPlanOptions,
+): PrioritizedCaptionInputPlan {
+  const translatedCueIds = options.translatedCueIds ?? new Set<string>();
+  const pendingCueIds = options.pendingCueIds ?? new Set<string>();
+  const failedCueIds = options.failedCueIds ?? new Set<string>();
+  const orderedInputs = prioritizeCaptionInputs(cues, currentTimeSeconds).filter(
+    (input) =>
+      !translatedCueIds.has(input.id) &&
+      !pendingCueIds.has(input.id) &&
+      !failedCueIds.has(input.id),
+  );
+  const highPriorityCueCount = Math.max(0, options.highPriorityCueCount);
+  return {
+    highPriorityInputs: orderedInputs.slice(0, highPriorityCueCount),
+    backgroundInputs: orderedInputs.slice(highPriorityCueCount),
+    orderedInputs,
+  };
 }
 
 export function selectPrioritizedCaptionWindow(
   track: CaptionTrack,
   options: PrioritizedCaptionWindowOptions,
 ): PrioritizedCaptionWindow {
-  const currentTimeSeconds =
-    typeof options.currentTimeSeconds === "number" && Number.isFinite(options.currentTimeSeconds)
-      ? options.currentTimeSeconds
-      : null;
+  const currentTimeSeconds = normalizedCurrentTimeSeconds(options.currentTimeSeconds);
   const prioritizedCues = sortedByPlaybackPriority(track.cues, currentTimeSeconds);
   const visibleCues = prioritizedCues.slice(0, options.visibleCueCount);
   const visibleCueIds = new Set(visibleCues.map((cue) => cue.id));

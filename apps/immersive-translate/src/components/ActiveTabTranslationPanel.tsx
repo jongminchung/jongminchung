@@ -5,9 +5,24 @@ import {
   ACTIVE_TAB_TRANSLATION_CONTROL_SCOPE,
   type ActiveTabTranslationStatus,
 } from "../lib/active-tab-translation";
-import { LocalTranslationRepository } from "../lib/local-translation";
+import {
+  LocalTranslationRepository,
+  LocalTranslationService,
+  type LocalTranslationFetch,
+  type LocalTranslationSettings,
+} from "../lib/local-translation";
+import {
+  checkingTranslationReadinessStatus,
+  disabledTranslationReadinessStatus,
+  translationReadinessDetail,
+  translationReadinessLabel,
+  translationReadinessStatusFromSelfTest,
+  type TranslationReadinessStatus,
+  userVisibleTranslationErrorMessage,
+} from "../lib/translation-readiness";
 
 const localTranslationRepository = LocalTranslationRepository.ofStorage(browser.storage.local);
+const TRANSLATION_READINESS_TIMEOUT_MS = 10_000;
 
 interface ProgressLike {
   readonly total: number;
@@ -16,18 +31,12 @@ interface ProgressLike {
   readonly failures: number;
 }
 
-interface TranslationReadinessStatus {
-  readonly enabled: boolean;
+interface RefreshStatusOptions {
+  readonly checkEndpoint: boolean;
 }
 
 function cx(...values: readonly (string | false | null | undefined)[]): string {
   return values.filter(Boolean).join(" ");
-}
-
-function translationReadinessLabel(readinessStatus: TranslationReadinessStatus | null): string {
-  if (readinessStatus === null) return "번역 준비 상태 확인 중";
-  if (!readinessStatus.enabled) return "번역 꺼짐";
-  return "로컬 번역 준비됨";
 }
 
 function pageStatusLabel(status: ActiveTabTranslationStatus | null): string {
@@ -57,17 +66,6 @@ function progressLabel(progress: ProgressLike | null | undefined): string | null
   return `${progress.completed}/${progress.total} 처리됨 · 캐시 ${progress.cacheHits} · 실패 ${progress.failures}`;
 }
 
-function userVisibleErrorMessage(message: string | null | undefined): string | null {
-  if (!message) return null;
-  if (
-    /provider|mlx|libretranslate|browser-detectable|caption cues|script|endpoint/i.test(message) ||
-    /스크립트|브라우저/.test(message)
-  ) {
-    return "번역 상태를 확인하지 못했습니다.";
-  }
-  return message;
-}
-
 async function readStatus(): Promise<ActiveTabTranslationStatus> {
   return browser.runtime.sendMessage({
     scope: ACTIVE_TAB_TRANSLATION_CONTROL_SCOPE,
@@ -75,26 +73,61 @@ async function readStatus(): Promise<ActiveTabTranslationStatus> {
   });
 }
 
+const fetchWithTimeout: LocalTranslationFetch = async (
+  input: string,
+  init: RequestInit,
+): Promise<Response> => {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => {
+    controller.abort();
+  }, TRANSLATION_READINESS_TIMEOUT_MS);
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+};
+
+async function checkTranslationReadiness(
+  settings: LocalTranslationSettings,
+): Promise<TranslationReadinessStatus> {
+  if (!settings.enabled) return disabledTranslationReadinessStatus(settings);
+  const result = await LocalTranslationService.selfTest(settings, fetchWithTimeout);
+  return translationReadinessStatusFromSelfTest(settings, result);
+}
+
 export function ActiveTabTranslationPanel(): JSX.Element {
   const [status, setStatus] = useState<ActiveTabTranslationStatus | null>(null);
   const [readinessStatus, setReadinessStatus] = useState<TranslationReadinessStatus | null>(null);
   const [statusError, setStatusError] = useState<string | null>(null);
 
-  const refreshStatus = useCallback(async (): Promise<void> => {
+  const refreshStatus = useCallback(async (options: RefreshStatusOptions): Promise<void> => {
     try {
       setStatusError(null);
       const settings = await localTranslationRepository.load();
-      setReadinessStatus({
-        enabled: settings.enabled,
-      });
-      setStatus(await readStatus());
+      if (!settings.enabled) {
+        setReadinessStatus(disabledTranslationReadinessStatus(settings));
+        setStatus(await readStatus());
+        return;
+      }
+
+      if (!options.checkEndpoint) {
+        setStatus(await readStatus());
+        return;
+      }
+
+      setReadinessStatus(checkingTranslationReadinessStatus(settings));
+      const nextStatusPromise = readStatus();
+      const nextReadinessStatusPromise = checkTranslationReadiness(settings);
+      setStatus(await nextStatusPromise);
+      setReadinessStatus(await nextReadinessStatusPromise);
     } catch (error) {
       setStatusError(error instanceof Error ? error.message : "상태를 읽을 수 없습니다.");
     }
   }, []);
 
   useEffect(() => {
-    void refreshStatus();
+    void refreshStatus({ checkEndpoint: true });
   }, [refreshStatus]);
 
   useEffect(() => {
@@ -109,15 +142,16 @@ export function ActiveTabTranslationPanel(): JSX.Element {
       return;
     }
     const intervalId = window.setInterval(() => {
-      void refreshStatus();
+      void refreshStatus({ checkEndpoint: false });
     }, 500);
     return () => window.clearInterval(intervalId);
   }, [refreshStatus, status?.captionState.name, status?.webpageState.name]);
 
   const readinessLabel = translationReadinessLabel(readinessStatus);
+  const readinessError = translationReadinessDetail(readinessStatus);
   const pageProgress = progressLabel(status?.webpageState.progress);
   const captionProgress = progressLabel(status?.captionState.progress);
-  const visibleError = userVisibleErrorMessage(status?.lastError ?? statusError);
+  const visibleError = userVisibleTranslationErrorMessage(status?.lastError ?? statusError);
 
   return (
     <section className="w-[360px] max-w-full p-3 text-[inherit]">
@@ -131,11 +165,17 @@ export function ActiveTabTranslationPanel(): JSX.Element {
           </div>
           <span
             data-testid="popup-translation-status"
-            title="번역 준비 상태"
+            title={
+              readinessStatus?.endpoint
+                ? `번역 서버 URL: ${readinessStatus.endpoint}`
+                : "번역 연결 상태"
+            }
             className={cx(
               "shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-semibold",
-              readinessStatus?.enabled
+              readinessStatus?.state === "ready"
                 ? "border-(--primary) bg-(--secondary) text-(--secondary-foreground)"
+                : readinessStatus?.state === "failed"
+                  ? "border-(--destructive) bg-(--card) text-(--destructive)"
                 : "border-(--border) text-(--muted-foreground)",
             )}
           >
@@ -150,6 +190,19 @@ export function ActiveTabTranslationPanel(): JSX.Element {
           페이지에서는 오른쪽 번역 버튼으로 본문을 번역합니다. 영상 페이지는 자막 번역을 자동으로
           시도합니다.
         </div>
+
+        {readinessError && readinessStatus?.state === "failed" && (
+          <div
+            data-testid="popup-translation-readiness-error"
+            className="mt-3 rounded-md border border-(--destructive) bg-(--card) px-3 py-2 text-xs leading-5 text-(--destructive)"
+          >
+            <div className="font-semibold">로컬 번역 연결 실패</div>
+            <div className="mt-1">{readinessError}</div>
+            <div className="mt-1 break-all text-(--muted-foreground)">
+              URL: {readinessStatus.endpoint}
+            </div>
+          </div>
+        )}
 
         <div
           data-testid="popup-current-page-status"
@@ -190,7 +243,7 @@ export function ActiveTabTranslationPanel(): JSX.Element {
 
         <button
           type="button"
-          onClick={() => void refreshStatus()}
+          onClick={() => void refreshStatus({ checkEndpoint: true })}
           className="mt-3 h-9 w-full rounded-md border border-(--border) bg-(--card) px-3 text-xs font-semibold text-(--muted-foreground)"
         >
           상태 새로고침

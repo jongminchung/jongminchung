@@ -1,7 +1,10 @@
 import { describe, expect, test } from "vitest";
 import { mapCaptionTrack, type CaptionTrackLike } from "./caption-translation";
 import {
+  planCaptionTranslationInputs,
+  prioritizeCaptionInputs,
   runPrioritizedCaptionTranslationPipeline,
+  selectCaptionPrefetchWindow,
   selectPrioritizedCaptionWindow,
 } from "./caption-priority-translation";
 import { DEFAULT_LOCAL_TRANSLATION_SETTINGS } from "./local-translation";
@@ -21,6 +24,37 @@ function trackWithCues(count: number): CaptionTrackLike {
 }
 
 describe("prioritized caption translation", () => {
+  test("selects an active cue plus a future prefetch buffer", () => {
+    const window = selectCaptionPrefetchWindow(mapCaptionTrack(trackWithCues(12)), {
+      currentTimeSeconds: 22,
+      lookAheadSeconds: 60,
+      minimumCueCount: 5,
+    });
+
+    expect(window.activeCue?.id).toBe("cue-2");
+    expect(window.cues.map((cue) => cue.id)).toEqual([
+      "cue-2",
+      "cue-3",
+      "cue-4",
+      "cue-5",
+      "cue-6",
+      "cue-7",
+      "cue-8",
+    ]);
+    expect(window.startTimeSeconds).toBe(20);
+    expect(window.endTimeSeconds).toBe(85);
+  });
+
+  test("keeps minimum cue count when the time lookahead is shorter", () => {
+    const window = selectCaptionPrefetchWindow(mapCaptionTrack(trackWithCues(12)), {
+      currentTimeSeconds: 22,
+      lookAheadSeconds: 5,
+      minimumCueCount: 4,
+    });
+
+    expect(window.cues.map((cue) => cue.id)).toEqual(["cue-2", "cue-3", "cue-4", "cue-5"]);
+  });
+
   test("prioritizes active and upcoming cues around playback time", () => {
     const window = selectPrioritizedCaptionWindow(mapCaptionTrack(trackWithCues(8)), {
       currentTimeSeconds: 22,
@@ -35,6 +69,44 @@ describe("prioritized caption translation", () => {
       "cue-4",
       "cue-5",
       "cue-6",
+    ]);
+  });
+
+  test("skips translated and pending cues when planning session batches", () => {
+    const track = mapCaptionTrack(trackWithCues(8));
+    const plan = planCaptionTranslationInputs(track.cues.slice(2, 7), 22, {
+      translatedCueIds: new Set(["cue-2"]),
+      pendingCueIds: new Set(["cue-3"]),
+      highPriorityCueCount: 3,
+    });
+
+    expect(plan.highPriorityInputs.map((input) => input.id)).toEqual([
+      "cue-4",
+      "cue-5",
+      "cue-6",
+    ]);
+    expect(plan.backgroundInputs).toEqual([]);
+  });
+
+  test("orders high-priority inputs before background inputs", () => {
+    const track = mapCaptionTrack(trackWithCues(8));
+    const inputs = prioritizeCaptionInputs(track.cues.slice(1, 6), 22);
+    const plan = planCaptionTranslationInputs(track.cues.slice(1, 6), 22, {
+      highPriorityCueCount: 2,
+    });
+
+    expect(inputs.map((input) => input.id)).toEqual([
+      "cue-2",
+      "cue-3",
+      "cue-4",
+      "cue-5",
+      "cue-1",
+    ]);
+    expect(plan.highPriorityInputs.map((input) => input.id)).toEqual(["cue-2", "cue-3"]);
+    expect(plan.backgroundInputs.map((input) => input.id)).toEqual([
+      "cue-4",
+      "cue-5",
+      "cue-1",
     ]);
   });
 

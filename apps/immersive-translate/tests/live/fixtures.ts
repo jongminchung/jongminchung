@@ -79,6 +79,19 @@ Udemy VTT second line
                     segs: [{ utf8: "Beta opening caption" }],
                   },
                 ]
+              : videoId === "overlap"
+                ? [
+                    {
+                      tStartMs: 0,
+                      dDurationMs: 3000,
+                      segs: [{ utf8: "Overlap first caption" }],
+                    },
+                    {
+                      tStartMs: 1000,
+                      dDurationMs: 3000,
+                      segs: [{ utf8: "Overlap second caption" }],
+                    },
+                  ]
               : videoId === "batch"
                 ? [
                     {
@@ -112,6 +125,12 @@ Udemy VTT second line
                       segs: [{ utf8: "Sixth YouTube cue" }],
                     },
                   ]
+                : videoId === "long-buffer"
+                  ? Array.from({ length: 32 }, (_, index) => ({
+                      tStartMs: index * 2000,
+                      dDurationMs: 1800,
+                      segs: [{ utf8: `Long cue ${index}` }],
+                    }))
                 : [
                   {
                     tStartMs: 0,

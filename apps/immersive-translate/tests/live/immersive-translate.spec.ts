@@ -120,7 +120,9 @@ async function translateWithFloatingToggle(page: Page): Promise<void> {
   const controlBox = await control.boundingBox();
   expect(controlBox?.width).toBeLessThanOrEqual(42);
   expect(controlBox?.height).toBeLessThanOrEqual(42);
-  await expect(page.getByTestId("floating-translate-tooltip")).toHaveText("클릭 번역");
+  await expect(control).toHaveAttribute("data-state", "ready");
+  await expect(page.getByTestId("floating-translate-tooltip")).toHaveText("번역 활성화됨");
+  await expect(page.getByTestId("floating-translate-status")).toContainText("번역 활성화됨");
   await expect(page.getByTestId("translated-block")).toHaveCount(0);
   await control.click();
   await expect(page.getByTestId("floating-translate-control")).toHaveCount(1);
@@ -129,7 +131,7 @@ async function translateWithFloatingToggle(page: Page): Promise<void> {
 
 async function showActiveCaptionCue(page: Page, seconds: number): Promise<void> {
   await expect(page.getByTestId("video-auto-subtitle-status")).toContainText(
-    /자막 번역(을 표시하는 중|이 표시되었습니다)/,
+    /자막 번역(을 표시하는 중|이 표시되었습니다| 버퍼를 준비하는 중)/,
     { timeout: 60_000 },
   );
   await page.evaluate(async (fallbackTimeSeconds) => {
@@ -200,7 +202,7 @@ async function assertMinimalPopup(popup: Page): Promise<void> {
     "오른쪽 번역 버튼",
   );
   await expect(popup.getByTestId("popup-translation-status")).toContainText(
-    /번역 준비 상태 확인 중|로컬 번역 준비됨|번역 꺼짐/,
+    /번역 연결 확인 중|로컬 번역 연결됨|번역 연결 실패|번역 꺼짐/,
   );
   await expect(popup.locator("body")).not.toContainText(
     /provider|MLX|LibreTranslate|browser-detectable|caption cues|script|스크립트|브라우저|endpoint/i,
@@ -266,6 +268,13 @@ test.describe("Immersive Translate floating toggle QA", () => {
     await translateWithFloatingToggle(articlePage);
 
     await expect(articlePage.getByText("웹페이지 번역 첫 문단")).toBeVisible();
+    await expect(articlePage.getByTestId("floating-translate-control")).toHaveAttribute(
+      "data-state",
+      "active",
+    );
+    await expect(articlePage.getByTestId("floating-translate-status")).toContainText(
+      "페이지 번역이 표시되었습니다.",
+    );
     await expect(articlePage.getByTestId("source-block").first()).toBeVisible();
     await expect(articlePage.getByTestId("translated-block").first()).toBeVisible();
     await captureQaScreenshot(
@@ -277,7 +286,11 @@ test.describe("Immersive Translate floating toggle QA", () => {
     );
     expect(requests[0]).toMatchObject({ source: "en", target: "ko" });
 
+    await articlePage.getByTestId("floating-translate-close").click();
+    await expect(articlePage.getByTestId("floating-translate-control")).toBeVisible();
+    await expect(articlePage.getByTestId("floating-translate-status")).not.toBeVisible();
     await articlePage.getByTestId("floating-translate-control").click();
+    await expect(articlePage.getByTestId("floating-translate-status")).toBeVisible();
     await expect(articlePage.getByTestId("translated-block").first()).not.toBeVisible();
     await articlePage.getByTestId("floating-translate-control").click();
     await expect(articlePage.getByTestId("translated-block").first()).toBeVisible();
@@ -410,7 +423,58 @@ test.describe("Immersive Translate floating toggle QA", () => {
     await showAfterRenderedCaptionWindow(youtubePage);
     await expect(youtubePage.getByTestId("caption-original-line")).toHaveCount(0);
     await expect(youtubePage.getByTestId("caption-translated-line")).toHaveCount(0);
-    expect(Math.max(...requestBatchSizes)).toBeLessThanOrEqual(4);
+    expect(Math.max(...requestBatchSizes)).toBeLessThanOrEqual(8);
+  });
+
+  test("renders only the latest active caption when YouTube cues overlap", async ({
+    context,
+    localSite,
+  }) => {
+    await context.route(DEFAULT_TRANSLATION_ENDPOINT, async (route: Route) => {
+      const payload = JSON.parse(route.request().postData() ?? "{}") as {
+        readonly q?: unknown;
+      };
+      const sourceTexts = Array.isArray(payload.q)
+        ? payload.q.filter((text): text is string => typeof text === "string")
+        : [];
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          translatedText: sourceTexts.map((text) =>
+            text.includes("second") ? "두 번째 겹침 자막" : "첫 번째 겹침 자막",
+          ),
+        }),
+      });
+    });
+
+    const youtubePage = await context.newPage();
+    await youtubePage.setViewportSize(VIDEO_REFERENCE_VIEWPORT);
+    await youtubePage.goto(`${localSite.origin}/youtube-watch?v=overlap`);
+    await youtubePage.getByTestId("floating-translate-control").click();
+    await expect(youtubePage.getByTestId("video-auto-subtitle-status")).toContainText(
+      /자막 번역(을 표시하는 중|이 표시되었습니다| 버퍼를 준비하는 중)/,
+      { timeout: 60_000 },
+    );
+
+    await youtubePage.evaluate(async () => {
+      const video = document.querySelector("video");
+      if (!video) throw new Error("Caption video element is missing.");
+      video.currentTime = 1.2;
+      for (let index = 0; index < 3; index += 1) {
+        video.dispatchEvent(new Event("timeupdate"));
+        await new Promise((resolve) => window.setTimeout(resolve, 50));
+      }
+    });
+
+    await expect(youtubePage.getByTestId("caption-original-line")).toHaveCount(1);
+    await expect(youtubePage.getByTestId("caption-translated-line")).toHaveCount(1);
+    await expect(youtubePage.getByTestId("caption-original-line")).toHaveText(
+      "Overlap second caption",
+    );
+    await expect(youtubePage.getByTestId("caption-translated-line")).toHaveText(
+      "두 번째 겹침 자막",
+    );
   });
 
   test("uses the background YouTube caption gateway when page caption tracks are missing", async ({
@@ -621,7 +685,113 @@ test.describe("Immersive Translate floating toggle QA", () => {
       timeout: 60_000,
     });
     expect(requestBatchSizes[0]).toBe(3);
-    expect(Math.max(...requestBatchSizes)).toBeLessThanOrEqual(4);
+    expect(Math.max(...requestBatchSizes)).toBeLessThanOrEqual(8);
+  });
+
+  test("keeps a long YouTube caption buffer visible after seeking past the midpoint", async ({
+    context,
+    localSite,
+  }) => {
+    const requestBatchSizes: number[] = [];
+    await context.route(DEFAULT_TRANSLATION_ENDPOINT, async (route: Route) => {
+      const payload = JSON.parse(route.request().postData() ?? "{}") as {
+        readonly q?: unknown;
+      };
+      const sourceTexts = Array.isArray(payload.q)
+        ? payload.q.filter((text): text is string => typeof text === "string")
+        : [];
+      requestBatchSizes.push(sourceTexts.length);
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          translatedText: sourceTexts.map((text) => `번역: ${text}`),
+        }),
+      });
+    });
+
+    const youtubePage = await context.newPage();
+    await youtubePage.setViewportSize(VIDEO_REFERENCE_VIEWPORT);
+    await youtubePage.goto(`${localSite.origin}/youtube-watch?v=long-buffer`);
+    await expect(youtubePage.getByTestId("floating-translate-control")).toHaveCount(1);
+    await youtubePage.getByTestId("floating-translate-control").click();
+    await expect(youtubePage.getByTestId("caption-original-line").first()).toBeVisible({
+      timeout: 60_000,
+    });
+
+    await expect
+      .poll(
+        () => requestBatchSizes.reduce((total, batchSize) => total + batchSize, 0),
+        { timeout: 60_000 },
+      )
+      .toBeGreaterThanOrEqual(20);
+
+    await youtubePage.evaluate(async () => {
+      const video = document.querySelector("video");
+      if (!video) throw new Error("Caption video element is missing.");
+      video.currentTime = 40.05;
+      for (let index = 0; index < 3; index += 1) {
+        video.dispatchEvent(new Event("timeupdate"));
+        await new Promise((resolve) => window.setTimeout(resolve, 50));
+      }
+    });
+
+    await expect(youtubePage.getByTestId("caption-original-line")).toHaveCount(1);
+    await expect(youtubePage.getByTestId("caption-original-line")).toHaveText("Long cue 20");
+    expect(requestBatchSizes[0]).toBe(3);
+    expect(Math.max(...requestBatchSizes)).toBeLessThanOrEqual(8);
+  });
+
+  test("shows original captions while delayed translation fills the buffer", async ({
+    context,
+    localSite,
+  }) => {
+    let releaseFirstBatch: (() => void) | null = null;
+    let resolveFirstRequest: (() => void) | null = null;
+    const firstRequest = new Promise<void>((resolve) => {
+      resolveFirstRequest = resolve;
+    });
+    const firstBatchRelease = new Promise<void>((resolve) => {
+      releaseFirstBatch = resolve;
+    });
+
+    await context.route(DEFAULT_TRANSLATION_ENDPOINT, async (route: Route) => {
+      const payload = JSON.parse(route.request().postData() ?? "{}") as {
+        readonly q?: unknown;
+      };
+      const sourceTexts = Array.isArray(payload.q)
+        ? payload.q.filter((text): text is string => typeof text === "string")
+        : [];
+      if (sourceTexts.includes("Long cue 0")) {
+        resolveFirstRequest?.();
+        await firstBatchRelease;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          translatedText: sourceTexts.map((text) => `번역: ${text}`),
+        }),
+      });
+    });
+
+    const youtubePage = await context.newPage();
+    await youtubePage.setViewportSize(VIDEO_REFERENCE_VIEWPORT);
+    await youtubePage.goto(`${localSite.origin}/youtube-watch?v=long-buffer`);
+    await expect(youtubePage.getByTestId("floating-translate-control")).toHaveCount(1);
+    await youtubePage.getByTestId("floating-translate-control").click();
+    await firstRequest;
+
+    await expect(youtubePage.getByTestId("caption-original-line")).toHaveText("Long cue 0", {
+      timeout: 10_000,
+    });
+    await expect(youtubePage.getByTestId("caption-translated-line")).toHaveCount(0);
+
+    releaseFirstBatch?.();
+    await expect(youtubePage.getByTestId("caption-translated-line")).toHaveText(
+      "번역: Long cue 0",
+      { timeout: 60_000 },
+    );
   });
 
   test("does not open the YouTube transcript panel when caption payloads are unavailable", async ({
@@ -645,6 +815,13 @@ test.describe("Immersive Translate floating toggle QA", () => {
     await expect(youtubePage.getByTestId("video-auto-subtitle-status")).toContainText(
       /사용할 수 있는 영상 자막이 없습니다|영상 자막 정보를 읽지 못했습니다/,
       { timeout: 60_000 },
+    );
+    await expect(youtubePage.getByTestId("floating-translate-control")).toHaveAttribute(
+      "data-state",
+      "error",
+    );
+    await expect(youtubePage.getByTestId("floating-translate-status")).toContainText(
+      /사용할 수 있는 영상 자막이 없습니다|영상 자막 정보를 읽지 못했습니다/,
     );
     await expect(youtubePage.locator("#transcript-section")).toHaveCSS("display", "none");
     await expect(youtubePage.locator("#transcript-panel")).toHaveAttribute("hidden", "");
@@ -690,6 +867,10 @@ test.describe("Immersive Translate floating toggle QA", () => {
     await expect(youtubePage.getByTestId("video-auto-subtitle-status")).toContainText(
       /사용할 수 있는 영상 자막이 없습니다|영상 자막 정보를 읽지 못했습니다/,
       { timeout: 60_000 },
+    );
+    await expect(youtubePage.getByTestId("floating-translate-control")).toHaveAttribute(
+      "data-state",
+      "error",
     );
     await expect(youtubePage.locator(".ytp-subtitles-button")).toHaveAttribute(
       "aria-pressed",

@@ -17,10 +17,17 @@ import {
   parseWebpageCollectionResponse,
 } from "./active-tab-translation";
 import { ActiveTabTranslationStateStore } from "./active-tab-translation-state-store";
-import { type CaptionTrackLike, runCaptionTranslationPipeline } from "./caption-translation";
 import {
-  runPrioritizedCaptionTranslationPipeline,
-  type PrioritizedCaptionTranslationResult,
+  composeBilingualCaptionCues,
+  mapCaptionTrack,
+  type CaptionCue,
+  type CaptionTrack,
+  type CaptionTrackLike,
+  runCaptionTranslationPipeline,
+} from "./caption-translation";
+import {
+  planCaptionTranslationInputs,
+  selectCaptionPrefetchWindow,
 } from "./caption-priority-translation";
 import { fetchGeneratedCaptionTrack, GeneratedCaptionError } from "./generated-captions";
 import {
@@ -34,8 +41,12 @@ import {
   isBidirectionalKoEnTargetLanguage,
   LocalTranslationRepository,
   LocalTranslationService,
+  type LocalTranslationError,
   type LocalTranslationSettings,
+  type TranslationInput,
   type TranslationJobProgress,
+  type TranslationJobResult,
+  type TranslationOutput,
 } from "./local-translation";
 import {
   buildWebpageTranslationInputs,
@@ -43,6 +54,7 @@ import {
   type WebpageDisplayMode,
 } from "./webpage-translation";
 import { preferredYouTubeCaptionLanguageCodes } from "./youtube-captions";
+import { youtubeVideoIdFromUrl } from "./youtube-url";
 
 interface BrowserTab {
   readonly id?: number;
@@ -56,15 +68,16 @@ export interface ActiveTabTranslationRequestContext {
 
 const localTranslationRepository = LocalTranslationRepository.ofStorage(browser.storage.local);
 const stateStore = ActiveTabTranslationStateStore.create();
-const INITIAL_YOUTUBE_CAPTION_WINDOW_CUE_COUNT = 3;
-const FOLLOWUP_YOUTUBE_CAPTION_WINDOW_CUE_COUNT = 8;
 const CAPTION_TRANSLATION_BATCH_SIZE = 4;
 const INITIAL_CAPTION_TRANSLATION_BATCH_SIZE = 3;
 const BACKGROUND_CAPTION_TRANSLATION_BATCH_SIZE = 8;
+const CAPTION_PREFETCH_LOOKAHEAD_SECONDS = 60;
+const CAPTION_PREFETCH_MINIMUM_CUE_COUNT = 20;
 const PAGE_CAPTION_COLLECTION_TIMEOUT_MS = 4_000;
 const LOCAL_TRANSLATION_WARMUP_TIMEOUT_MS = 4_000;
 const LOCAL_TRANSLATION_WARMUP_TTL_MS = 10 * 60_000;
 const localTranslationWarmups = new Map<string, number>();
+const captionSessionsByTabId = new Map<number, CaptionTranslationSession>();
 
 interface YouTubePlayerSnapshot {
   readonly playerResponse: unknown;
@@ -82,10 +95,52 @@ type CaptionCollectionCandidate =
   | {
       readonly source: "background";
       readonly track: CaptionTrackLike | null;
-};
+    };
+
+interface CaptionTranslationSession {
+  readonly key: string;
+  readonly tabId: number;
+  readonly controller: AbortController;
+  readonly track: CaptionTrack;
+  readonly trackLabel: string;
+  readonly translationsByCueId: Map<string, string>;
+  readonly pendingCueIds: Set<string>;
+  readonly failedCueIds: Set<string>;
+  readonly errors: LocalTranslationError[];
+  bufferCueIds: readonly string[];
+  fillPromise: Promise<void> | null;
+  queuedFillRequest: { readonly currentTimeSeconds: number | null } | null;
+  cacheHits: number;
+  cacheMisses: number;
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
+}
+
+function firstFailureMessage(
+  errors: readonly LocalTranslationError[],
+  fallback: string,
+): string {
+  const firstMessage = errors.find((error) => error.message.trim())?.message.trim();
+  return firstMessage ? `로컬 번역 실패: ${firstMessage}` : fallback;
+}
+
+async function readResponseErrorMessage(response: Response): Promise<string> {
+  const text = await response.text();
+  if (!text.trim()) return response.statusText || "요청 실패";
+  try {
+    const parsed: unknown = JSON.parse(text);
+    if (isRecord(parsed) && typeof parsed.error === "string" && parsed.error.trim()) {
+      return parsed.error.trim();
+    }
+    if (isRecord(parsed) && typeof parsed.message === "string" && parsed.message.trim()) {
+      return parsed.message.trim();
+    }
+  } catch {
+    return text.trim();
+  }
+  return text.trim();
 }
 
 function youtubeCaptionEndpointFromTranslationEndpoint(endpoint: string): string | null {
@@ -95,16 +150,6 @@ function youtubeCaptionEndpointFromTranslationEndpoint(endpoint: string): string
     url.search = "";
     url.hash = "";
     return url.toString();
-  } catch {
-    return null;
-  }
-}
-
-function youtubeVideoIdFromUrl(value: string | undefined): string | null {
-  if (!value) return null;
-  try {
-    const url = new URL(value);
-    return url.hostname.includes("youtube.com") ? (url.searchParams.get("v") ?? null) : null;
   } catch {
     return null;
   }
@@ -350,7 +395,11 @@ async function fetchBackgroundYouTubeCaptionTrack(input: {
   url.searchParams.set("videoId", videoId);
   url.searchParams.set("languageCode", input.languageCode);
   const response = await fetch(url.toString());
-  if (!response.ok) return null;
+  if (!response.ok) {
+    if (response.status === 404) return null;
+    const detail = await readResponseErrorMessage(response);
+    throw new Error(`로컬 자막 수집 서비스 오류 (${response.status}): ${detail}`);
+  }
   const parsed: unknown = await response.json();
   if (!isRecord(parsed) || typeof parsed.payload !== "string") return null;
   const languageCode =
@@ -528,6 +577,347 @@ function parseRenderCaptionOverlayResponse(value: unknown): {
   };
 }
 
+function splitTranslationInputs(
+  inputs: readonly TranslationInput[],
+  batchSize: number,
+): readonly (readonly TranslationInput[])[] {
+  const chunks: TranslationInput[][] = [];
+  const safeBatchSize = Math.max(1, Math.round(batchSize));
+  for (let index = 0; index < inputs.length; index += safeBatchSize) {
+    chunks.push(inputs.slice(index, index + safeBatchSize));
+  }
+  return chunks;
+}
+
+function captionSessionKey(input: {
+  readonly tabId: number;
+  readonly tabUrl: string | null;
+  readonly track: CaptionTrack;
+}): string {
+  const videoIdentity =
+    youtubeVideoIdFromUrl(input.tabUrl ?? undefined) ??
+    input.track.source?.trackId ??
+    input.tabUrl ??
+    "unknown";
+  const trackIdentity = input.track.source?.trackId ?? input.track.id;
+  return `${input.tabId}:${videoIdentity}:${trackIdentity}`;
+}
+
+function clearCaptionSession(tabId: number): void {
+  const session = captionSessionsByTabId.get(tabId);
+  if (session && !session.controller.signal.aborted) session.controller.abort();
+  captionSessionsByTabId.delete(tabId);
+  stateStore.abortCaptionController(tabId);
+}
+
+function createCaptionSession(input: {
+  readonly tabId: number;
+  readonly tabUrl: string | null;
+  readonly track: CaptionTrack;
+  readonly trackLabel: string;
+}): CaptionTranslationSession {
+  const key = captionSessionKey(input);
+  const currentSession = captionSessionsByTabId.get(input.tabId);
+  if (
+    currentSession &&
+    currentSession.key === key &&
+    !currentSession.controller.signal.aborted
+  ) {
+    return currentSession;
+  }
+
+  clearCaptionSession(input.tabId);
+  const controller = new AbortController();
+  const session: CaptionTranslationSession = {
+    key,
+    tabId: input.tabId,
+    controller,
+    track: input.track,
+    trackLabel: input.trackLabel,
+    translationsByCueId: new Map(),
+    pendingCueIds: new Set(),
+    failedCueIds: new Set(),
+    errors: [],
+    bufferCueIds: [],
+    fillPromise: null,
+    queuedFillRequest: null,
+    cacheHits: 0,
+    cacheMisses: 0,
+  };
+  captionSessionsByTabId.set(input.tabId, session);
+  stateStore.setCaptionController(input.tabId, controller);
+  return session;
+}
+
+function isCaptionSessionActive(session: CaptionTranslationSession): boolean {
+  return (
+    captionSessionsByTabId.get(session.tabId) === session && !session.controller.signal.aborted
+  );
+}
+
+function translatedOutputsForCues(
+  session: CaptionTranslationSession,
+  cues: readonly CaptionCue[],
+): readonly TranslationOutput[] {
+  return cues.flatMap((cue): TranslationOutput[] => {
+    const text = session.translationsByCueId.get(cue.id);
+    return text === undefined ? [] : [{ id: cue.id, text }];
+  });
+}
+
+function captionSessionProgress(
+  session: CaptionTranslationSession,
+  cues: readonly CaptionCue[],
+): TranslationJobProgress {
+  const cueIds = new Set(cues.map((cue) => cue.id));
+  const completed = cues.filter((cue) => session.translationsByCueId.has(cue.id)).length;
+  const failures = [...session.failedCueIds].filter((cueId) => cueIds.has(cueId)).length;
+  return {
+    total: cues.length,
+    completed,
+    cacheHits: session.cacheHits,
+    cacheMisses: session.cacheMisses,
+    failures,
+  };
+}
+
+function captionSessionState(input: {
+  readonly progress: TranslationJobProgress;
+  readonly pendingCount: number;
+  readonly errors: readonly LocalTranslationError[];
+}): Pick<ActiveTabCaptionState, "name" | "message"> {
+  if (
+    input.progress.total > 0 &&
+    input.pendingCount === 0 &&
+    input.progress.completed === 0 &&
+    input.progress.failures >= input.progress.total
+  ) {
+    return {
+      name: "failed",
+      message: firstFailureMessage(input.errors, "자막 번역에 실패해 원문 자막을 표시합니다."),
+    };
+  }
+  if (
+    input.progress.total > 0 &&
+    input.pendingCount === 0 &&
+    input.progress.completed + input.progress.failures >= input.progress.total
+  ) {
+    return {
+      name: "rendered",
+      message:
+        input.progress.failures > 0
+          ? "일부 자막은 원문으로 표시됩니다."
+          : "자막 번역이 표시되었습니다.",
+    };
+  }
+  return {
+    name: "translating",
+    message: "자막 번역 버퍼를 준비하는 중...",
+  };
+}
+
+async function publishCaptionSessionSnapshot(input: {
+  readonly session: CaptionTranslationSession;
+  readonly settings: LocalTranslationSettings;
+  readonly cues: readonly CaptionCue[];
+}): Promise<void> {
+  if (!isCaptionSessionActive(input.session)) return;
+  const displayCues = composeBilingualCaptionCues(
+    input.cues,
+    translatedOutputsForCues(input.session, input.cues),
+  );
+  const renderResponse = parseRenderCaptionOverlayResponse(
+    await sendPageMessage(input.session.tabId, {
+      scope: ACTIVE_TAB_TRANSLATION_PAGE_SCOPE,
+      type: "render-caption-overlay",
+      trackLabel: input.session.trackLabel,
+      cues: displayCues,
+      preferences: captionDisplayPreferencesFromSettings(input.settings),
+    }),
+  );
+  if (!renderResponse.ok || renderResponse.renderedCueCount === 0) {
+    throw new Error(renderResponse.message ?? "자막 번역을 표시하지 못했습니다.");
+  }
+
+  const progress = captionSessionProgress(input.session, input.cues);
+  const cueIds = new Set(input.cues.map((cue) => cue.id));
+  const pendingCount = [...input.session.pendingCueIds].filter((cueId) =>
+    cueIds.has(cueId),
+  ).length;
+  const state = captionSessionState({
+    progress,
+    pendingCount,
+    errors: input.session.errors,
+  });
+  rememberProgress(
+    input.session.tabId,
+    buildCaptionState({
+      name: state.name,
+      message: state.message,
+      cueCount: displayCues.length,
+      trackLabel: input.session.trackLabel,
+      progress,
+    }),
+  );
+  if (state.name === "failed") {
+    stateStore.setLastError(input.session.tabId, state.message);
+  } else if (input.session.errors.length === 0) {
+    stateStore.clearLastError(input.session.tabId);
+  }
+}
+
+function applyCaptionSessionResult(
+  session: CaptionTranslationSession,
+  result: TranslationJobResult,
+): void {
+  for (const translation of result.translations) {
+    session.translationsByCueId.set(translation.id, translation.text);
+    session.failedCueIds.delete(translation.id);
+  }
+  for (const error of result.errors) {
+    session.errors.push(error);
+    for (const inputId of error.inputIds) {
+      session.failedCueIds.add(inputId);
+    }
+  }
+  session.cacheHits += result.progress.cacheHits;
+  session.cacheMisses += result.progress.cacheMisses;
+}
+
+async function translateCaptionSessionChunks(input: {
+  readonly session: CaptionTranslationSession;
+  readonly settings: LocalTranslationSettings;
+  readonly chunks: readonly (readonly TranslationInput[])[];
+  readonly bufferCues: readonly CaptionCue[];
+}): Promise<void> {
+  for (const chunk of input.chunks) {
+    if (chunk.length === 0) continue;
+    if (!isCaptionSessionActive(input.session)) return;
+
+    try {
+      const result = await LocalTranslationService.runJob(
+        { ...settingsForCaptionTranslation(input.settings), batchSize: chunk.length },
+        chunk,
+        {
+          repository: localTranslationRepository,
+          signal: input.session.controller.signal,
+        },
+      );
+      applyCaptionSessionResult(input.session, result);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "영상 자막 번역에 실패했습니다.";
+      input.session.errors.push({
+        code: "offline_endpoint",
+        message,
+        inputIds: chunk.map((item) => item.id),
+      });
+      for (const item of chunk) input.session.failedCueIds.add(item.id);
+      stateStore.setLastError(input.session.tabId, message);
+    } finally {
+      for (const item of chunk) input.session.pendingCueIds.delete(item.id);
+    }
+
+    await publishCaptionSessionSnapshot({
+      session: input.session,
+      settings: input.settings,
+      cues: input.bufferCues,
+    });
+  }
+}
+
+async function fillCaptionSessionBuffer(input: {
+  readonly session: CaptionTranslationSession;
+  readonly settings: LocalTranslationSettings;
+  readonly currentTimeSeconds: number | null;
+}): Promise<void> {
+  const prefetchWindow = selectCaptionPrefetchWindow(input.session.track, {
+    currentTimeSeconds: input.currentTimeSeconds,
+    lookAheadSeconds: CAPTION_PREFETCH_LOOKAHEAD_SECONDS,
+    minimumCueCount: CAPTION_PREFETCH_MINIMUM_CUE_COUNT,
+  });
+  input.session.bufferCueIds = prefetchWindow.cues.map((cue) => cue.id);
+  await publishCaptionSessionSnapshot({
+    session: input.session,
+    settings: input.settings,
+    cues: prefetchWindow.cues,
+  });
+
+  const plan = planCaptionTranslationInputs(prefetchWindow.cues, input.currentTimeSeconds, {
+    translatedCueIds: new Set(input.session.translationsByCueId.keys()),
+    pendingCueIds: input.session.pendingCueIds,
+    highPriorityCueCount: INITIAL_CAPTION_TRANSLATION_BATCH_SIZE,
+  });
+  for (const item of plan.orderedInputs) input.session.pendingCueIds.add(item.id);
+  if (plan.orderedInputs.length === 0) {
+    await publishCaptionSessionSnapshot({
+      session: input.session,
+      settings: input.settings,
+      cues: prefetchWindow.cues,
+    });
+    return;
+  }
+
+  await publishCaptionSessionSnapshot({
+    session: input.session,
+    settings: input.settings,
+    cues: prefetchWindow.cues,
+  });
+
+  await translateCaptionSessionChunks({
+    session: input.session,
+    settings: input.settings,
+    bufferCues: prefetchWindow.cues,
+    chunks: [
+      ...splitTranslationInputs(
+        plan.highPriorityInputs,
+        INITIAL_CAPTION_TRANSLATION_BATCH_SIZE,
+      ),
+      ...splitTranslationInputs(plan.backgroundInputs, BACKGROUND_CAPTION_TRANSLATION_BATCH_SIZE),
+    ],
+  });
+}
+
+function startCaptionSessionFill(input: {
+  readonly session: CaptionTranslationSession;
+  readonly settings: LocalTranslationSettings;
+  readonly currentTimeSeconds: number | null;
+}): void {
+  if (input.session.fillPromise) {
+    input.session.queuedFillRequest = { currentTimeSeconds: input.currentTimeSeconds };
+    return;
+  }
+  const fillPromise = fillCaptionSessionBuffer(input)
+    .catch((error: unknown) => {
+      if (!isCaptionSessionActive(input.session)) return;
+      const message = error instanceof Error ? error.message : "영상 자막 번역에 실패했습니다.";
+      stateStore.setLastError(input.session.tabId, message);
+      rememberProgress(
+        input.session.tabId,
+        buildCaptionState({
+          name: "failed",
+          message,
+          cueCount: input.session.bufferCueIds.length,
+          trackLabel: input.session.trackLabel,
+          progress: stateStore.getCaptionState(input.session.tabId)?.progress ?? null,
+        }),
+      );
+    })
+    .finally(() => {
+      if (input.session.fillPromise !== fillPromise) return;
+      input.session.fillPromise = null;
+      const queuedFillRequest = input.session.queuedFillRequest;
+      input.session.queuedFillRequest = null;
+      if (queuedFillRequest && isCaptionSessionActive(input.session)) {
+        startCaptionSessionFill({
+          session: input.session,
+          settings: input.settings,
+          currentTimeSeconds: queuedFillRequest.currentTimeSeconds,
+        });
+      }
+    });
+  input.session.fillPromise = fillPromise;
+}
+
 async function updateCaptionState(tabId: number, state: ActiveTabCaptionState): Promise<void> {
   stateStore.setCaptionState(tabId, state);
   await sendPageMessage(tabId, {
@@ -598,11 +988,6 @@ async function runCaptionTranslation(
     return readStatus(context);
   }
 
-  const activeController = stateStore.getCaptionController(tabId);
-  if (activeController && !activeController.signal.aborted) activeController.abort();
-
-  const controller = new AbortController();
-  stateStore.setCaptionController(tabId, controller);
   stateStore.clearLastError(tabId);
 
   await updateCaptionState(
@@ -630,13 +1015,18 @@ async function runCaptionTranslation(
     .then(parseCaptionCollectionResponse)
     .catch(() => null);
   const backgroundCurrentTimePromise = readPageVideoCurrentTime(tabId).catch(() => null);
+  let captionCollectionFailureMessage: string | null = null;
   const backgroundTrackPromise = collectBackgroundYouTubeCaptionTrack({
     settingsEndpoint: settings.endpoint,
     tabUrl: status.tabUrl ?? undefined,
     selectedLanguageCode: playerSnapshot.selectedLanguageCode,
     selectedLabel: playerSnapshot.selectedLabel,
     videoTitle: playerSnapshot.videoTitle ?? status.tabTitle,
-  }).catch(() => null);
+  }).catch((error: unknown) => {
+    captionCollectionFailureMessage =
+      error instanceof Error ? error.message : "로컬 자막 수집 서비스가 응답하지 않습니다.";
+    return null;
+  });
   const collection = await resolveCaptionCollection({
     pageCollectionPromise,
     backgroundTrackPromise,
@@ -646,116 +1036,80 @@ async function runCaptionTranslation(
   if (!collection) {
     const failedState = buildCaptionState({
       name: "failed",
-      message: "영상 자막 정보를 읽지 못했습니다.",
+      message: captionCollectionFailureMessage ?? "영상 자막 정보를 읽지 못했습니다.",
     });
     stateStore.setCaptionState(tabId, failedState);
     stateStore.setLastError(tabId, failedState.message);
     await updateCaptionState(tabId, failedState);
-    stateStore.deleteCaptionController(tabId);
+    clearCaptionSession(tabId);
     return readStatus(context);
   }
 
   if (collection.state === "no-captions") {
+    const message = collection.message
+      ? `사용할 수 있는 영상 자막이 없습니다: ${collection.message}`
+      : "사용할 수 있는 영상 자막이 없습니다.";
     const noCaptionState = buildCaptionState({
       name: "no-captions",
-      message: "사용할 수 있는 영상 자막이 없습니다.",
+      message,
     });
     await updateCaptionState(tabId, noCaptionState);
-    stateStore.deleteCaptionController(tabId);
+    clearCaptionSession(tabId);
     return readStatus(context);
   }
 
   if (!collection.ok) {
     const failedState = buildCaptionState({
       name: "failed",
-      message: "영상 자막 정보를 읽지 못했습니다.",
+      message: collection.message || "영상 자막 정보를 읽지 못했습니다.",
     });
     stateStore.setCaptionState(tabId, failedState);
     stateStore.setLastError(tabId, failedState.message);
     await updateCaptionState(tabId, failedState);
-    stateStore.deleteCaptionController(tabId);
+    clearCaptionSession(tabId);
     return readStatus(context);
   }
 
-  const isYouTubeTrack = collection.track.source?.platform === "youtube";
-  const visibleCueCount = isYouTubeTrack
-    ? Math.min(collection.track.cues.length, FOLLOWUP_YOUTUBE_CAPTION_WINDOW_CUE_COUNT)
-    : collection.track.cues.length;
-  const initialCueCount = Math.min(
-    visibleCueCount,
-    isYouTubeTrack ? INITIAL_YOUTUBE_CAPTION_WINDOW_CUE_COUNT : INITIAL_CAPTION_TRANSLATION_BATCH_SIZE,
-  );
+  const track = mapCaptionTrack(collection.track);
   const trackLabel = collection.track.label?.trim() || "Browser captions";
+  const session = createCaptionSession({
+    tabId,
+    tabUrl: status.tabUrl,
+    track,
+    trackLabel,
+  });
+  const prefetchWindow = selectCaptionPrefetchWindow(track, {
+    currentTimeSeconds: collection.currentTimeSeconds,
+    lookAheadSeconds: CAPTION_PREFETCH_LOOKAHEAD_SECONDS,
+    minimumCueCount: CAPTION_PREFETCH_MINIMUM_CUE_COUNT,
+  });
+  const visibleCueCount = prefetchWindow.cues.length;
   await updateCaptionState(
     tabId,
     buildCaptionState({
       name: "translating",
-      message: "자막을 번역하는 중...",
+      message: "자막 번역 버퍼를 준비하는 중...",
       cueCount: visibleCueCount,
       trackLabel,
       progress: {
         total: visibleCueCount,
-        completed: 0,
-        cacheHits: 0,
-        cacheMisses: 0,
-        failures: 0,
+        completed: prefetchWindow.cues.filter((cue) =>
+          session.translationsByCueId.has(cue.id),
+        ).length,
+        cacheHits: session.cacheHits,
+        cacheMisses: session.cacheMisses,
+        failures: prefetchWindow.cues.filter((cue) => session.failedCueIds.has(cue.id)).length,
       },
     }),
   );
 
-  let result: PrioritizedCaptionTranslationResult;
   try {
-    result = await runPrioritizedCaptionTranslationPipeline(
-      settingsForCaptionTranslation(settings),
-      collection.track,
-      {
-        repository: localTranslationRepository,
-        signal: controller.signal,
-        currentTimeSeconds: collection.currentTimeSeconds,
-        initialCueCount,
-        visibleCueCount,
-        initialBatchSize: INITIAL_CAPTION_TRANSLATION_BATCH_SIZE,
-        backgroundBatchSize: BACKGROUND_CAPTION_TRANSLATION_BATCH_SIZE,
-        onSnapshot: async (snapshot) => {
-          if (stateStore.getCaptionController(tabId) !== controller || controller.signal.aborted) {
-            return;
-          }
-          const renderResponse = parseRenderCaptionOverlayResponse(
-            await sendPageMessage(tabId, {
-              scope: ACTIVE_TAB_TRANSLATION_PAGE_SCOPE,
-              type: "render-caption-overlay",
-              trackLabel,
-              cues: snapshot.displayCues,
-              preferences: captionDisplayPreferencesFromSettings(settings),
-            }),
-          );
-          if (!renderResponse.ok || renderResponse.renderedCueCount === 0) {
-            throw new Error(renderResponse.message ?? "자막 번역을 표시하지 못했습니다.");
-          }
-          const stateName =
-            snapshot.jobResult.progress.completed >= snapshot.jobResult.progress.total &&
-            snapshot.jobResult.progress.total > 0
-              ? "rendered"
-              : "translating";
-          rememberProgress(
-            tabId,
-            buildCaptionState({
-              name: stateName,
-              message:
-                stateName === "rendered"
-                  ? "자막 번역이 표시되었습니다."
-                  : "자막을 번역하는 중...",
-              cueCount: snapshot.displayCues.length,
-              trackLabel,
-              progress: snapshot.jobResult.progress,
-            }),
-          );
-        },
-      },
-    );
+    startCaptionSessionFill({
+      session,
+      settings,
+      currentTimeSeconds: collection.currentTimeSeconds,
+    });
   } catch (error) {
-    if (stateStore.getCaptionController(tabId) !== controller) return readStatus(context);
-    stateStore.deleteCaptionController(tabId);
     const message = error instanceof Error ? error.message : "영상 자막 번역에 실패했습니다.";
     const failedState = buildCaptionState({
       name: "failed",
@@ -768,49 +1122,9 @@ async function runCaptionTranslation(
     await updateCaptionState(tabId, failedState);
     return readStatus(context);
   } finally {
-    void warmupPromise;
+    void warmupPromise.catch(() => undefined);
   }
 
-  if (stateStore.getCaptionController(tabId) !== controller) return readStatus(context);
-  stateStore.deleteCaptionController(tabId);
-
-  if (result.jobResult.status === "cancelled" || controller.signal.aborted) {
-    const cancelledState = buildCaptionState({
-      name: "cancelled",
-      message: "자막 번역을 취소했습니다.",
-      cueCount: result.displayCues.length,
-      trackLabel,
-      progress: result.jobResult.progress,
-    });
-    await updateCaptionState(tabId, cancelledState);
-    return readStatus(context);
-  }
-
-  if (result.jobResult.status === "failed") {
-    const failedState = buildCaptionState({
-      name: "failed",
-      message: "영상 자막 번역에 실패했습니다.",
-      cueCount: result.displayCues.length,
-      trackLabel,
-      progress: result.jobResult.progress,
-    });
-    stateStore.setCaptionState(tabId, failedState);
-    stateStore.setLastError(tabId, failedState.message);
-    await updateCaptionState(tabId, failedState);
-    return readStatus(context);
-  }
-
-  await updateCaptionState(
-    tabId,
-    buildCaptionState({
-      name: "rendered",
-      message: "자막 번역이 표시되었습니다.",
-      cueCount: result.displayCues.length,
-      trackLabel,
-      progress: result.jobResult.progress,
-    }),
-  );
-  stateStore.clearLastError(tabId);
   return readStatus(context);
 }
 
@@ -844,7 +1158,8 @@ async function cancelCaptionTranslation(
 ): Promise<ActiveTabTranslationStatus> {
   const status = await readStatus(context);
   if (status.tabId === null) return status;
-  const controller = stateStore.abortCaptionController(status.tabId);
+  const controller = stateStore.getCaptionController(status.tabId);
+  clearCaptionSession(status.tabId);
   await updateCaptionState(
     status.tabId,
     buildCaptionState({
@@ -1062,7 +1377,7 @@ async function clearCaptionOverlay(
 ): Promise<ActiveTabTranslationStatus> {
   const status = await installBridge(context);
   if (status.tabId === null) return status;
-  stateStore.abortCaptionController(status.tabId);
+  clearCaptionSession(status.tabId);
   await sendPageMessage(status.tabId, {
     scope: ACTIVE_TAB_TRANSLATION_PAGE_SCOPE,
     type: "clear-caption-overlay",
@@ -1237,9 +1552,10 @@ async function runWebpageTranslation(
     }
 
     if (result.status === "failed") {
+      const message = firstFailureMessage(result.errors, "페이지 번역에 실패했습니다.");
       const failedState = buildWebpageState({
         name: "failed",
-        message: "페이지 번역에 실패했습니다.",
+        message,
         blockCount,
         displayMode,
         progress: result.progress,
@@ -1271,8 +1587,8 @@ async function runWebpageTranslation(
       }),
     );
     stateStore.clearLastError(tabId);
-  })().catch(() => {
-    const message = "페이지 번역에 실패했습니다.";
+  })().catch((error: unknown) => {
+    const message = error instanceof Error ? error.message : "페이지 번역에 실패했습니다.";
     stateStore.setLastError(tabId, message);
     void updateWebpageState(
       tabId,
@@ -1397,5 +1713,6 @@ export function buildFailureStatus(error: unknown): ActiveTabTranslationStatus {
 }
 
 export function clearTabState(tabId: number): void {
+  clearCaptionSession(tabId);
   stateStore.clearTab(tabId);
 }

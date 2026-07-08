@@ -61,6 +61,14 @@ bun run mlx:serve
 
 This binds MLX-LM to `0.0.0.0:8000` by default so Docker can reach it through `host.docker.internal:8000`.
 
+Detached mode:
+
+```bash
+bun run mlx:serve:detach
+bun run mlx:serve:logs
+bun run mlx:serve:stop
+```
+
 Start the Docker gateway in MLX mode:
 
 ```bash

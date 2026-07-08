@@ -1,5 +1,8 @@
 import { describe, expect, test } from "vitest";
-import { shouldAutoStartCaptionTranslation } from "./video-auto-activation";
+import {
+  shouldAutoStartCaptionTranslation,
+  shouldRetryAutoCaptionTranslation,
+} from "./video-auto-activation";
 
 describe("video auto caption activation", () => {
   test("starts only when local translation is enabled on a video page once per URL", () => {
@@ -46,6 +49,33 @@ describe("video auto caption activation", () => {
         currentUrl: "https://www.youtube.com/watch?v=alpha",
         lastAutoCaptionUrl: null,
         hasVideoContext: true,
+      }),
+    ).toBe(false);
+  });
+
+  test("retries only transient failed auto caption states", () => {
+    expect(
+      shouldRetryAutoCaptionTranslation({
+        localTranslationState: "enabled",
+        captionState: { name: "failed" },
+      }),
+    ).toBe(true);
+    expect(
+      shouldRetryAutoCaptionTranslation({
+        localTranslationState: "enabled",
+        captionState: { name: "no-captions" },
+      }),
+    ).toBe(true);
+    expect(
+      shouldRetryAutoCaptionTranslation({
+        localTranslationState: "enabled",
+        captionState: { name: "translating" },
+      }),
+    ).toBe(false);
+    expect(
+      shouldRetryAutoCaptionTranslation({
+        localTranslationState: "disabled",
+        captionState: { name: "failed" },
       }),
     ).toBe(false);
   });
