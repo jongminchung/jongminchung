@@ -18,6 +18,10 @@ import {
 } from "./active-tab-translation";
 import { ActiveTabTranslationStateStore } from "./active-tab-translation-state-store";
 import {
+  planCaptionTranslationInputs,
+  selectCaptionPrefetchWindow,
+} from "./caption-priority-translation";
+import {
   composeBilingualCaptionCues,
   mapCaptionTrack,
   type CaptionCue,
@@ -25,10 +29,6 @@ import {
   type CaptionTrackLike,
   runCaptionTranslationPipeline,
 } from "./caption-translation";
-import {
-  planCaptionTranslationInputs,
-  selectCaptionPrefetchWindow,
-} from "./caption-priority-translation";
 import { fetchGeneratedCaptionTrack, GeneratedCaptionError } from "./generated-captions";
 import {
   installTranslationBridgeInPage,
@@ -171,10 +171,7 @@ async function saveWebpageTranslationSessionActive(active: boolean): Promise<voi
   }
 }
 
-function firstFailureMessage(
-  errors: readonly LocalTranslationError[],
-  fallback: string,
-): string {
+function firstFailureMessage(errors: readonly LocalTranslationError[], fallback: string): string {
   const firstMessage = errors.find((error) => error.message.trim())?.message.trim();
   return firstMessage ? `로컬 번역 실패: ${firstMessage}` : fallback;
 }
@@ -239,10 +236,7 @@ async function warmLocalTranslationEndpoint(settings: LocalTranslationSettings):
   );
   try {
     const result = await fetch(url.toString(), { signal: controller.signal });
-    localTranslationWarmups.set(
-      key,
-      now + (result.ok ? LOCAL_TRANSLATION_WARMUP_TTL_MS : 60_000),
-    );
+    localTranslationWarmups.set(key, now + (result.ok ? LOCAL_TRANSLATION_WARMUP_TTL_MS : 60_000));
   } catch {
     localTranslationWarmups.set(key, now + 60_000);
   } finally {
@@ -680,11 +674,7 @@ function createCaptionSession(input: {
 }): CaptionTranslationSession {
   const key = captionSessionKey(input);
   const currentSession = captionSessionsByTabId.get(input.tabId);
-  if (
-    currentSession &&
-    currentSession.key === key &&
-    !currentSession.controller.signal.aborted
-  ) {
+  if (currentSession && currentSession.key === key && !currentSession.controller.signal.aborted) {
     return currentSession;
   }
 
@@ -803,9 +793,7 @@ async function publishCaptionSessionSnapshot(input: {
 
   const progress = captionSessionProgress(input.session, input.cues);
   const cueIds = new Set(input.cues.map((cue) => cue.id));
-  const pendingCount = [...input.session.pendingCueIds].filter((cueId) =>
-    cueIds.has(cueId),
-  ).length;
+  const pendingCount = [...input.session.pendingCueIds].filter((cueId) => cueIds.has(cueId)).length;
   const state = captionSessionState({
     progress,
     pendingCount,
@@ -930,10 +918,7 @@ async function fillCaptionSessionBuffer(input: {
     settings: input.settings,
     bufferCues: prefetchWindow.cues,
     chunks: [
-      ...splitTranslationInputs(
-        plan.highPriorityInputs,
-        INITIAL_CAPTION_TRANSLATION_BATCH_SIZE,
-      ),
+      ...splitTranslationInputs(plan.highPriorityInputs, INITIAL_CAPTION_TRANSLATION_BATCH_SIZE),
       ...splitTranslationInputs(plan.backgroundInputs, BACKGROUND_CAPTION_TRANSLATION_BATCH_SIZE),
     ],
   });
@@ -1155,9 +1140,8 @@ async function runCaptionTranslation(
       trackLabel,
       progress: {
         total: visibleCueCount,
-        completed: prefetchWindow.cues.filter((cue) =>
-          session.translationsByCueId.has(cue.id),
-        ).length,
+        completed: prefetchWindow.cues.filter((cue) => session.translationsByCueId.has(cue.id))
+          .length,
         cacheHits: session.cacheHits,
         cacheMisses: session.cacheMisses,
         failures: prefetchWindow.cues.filter((cue) => session.failedCueIds.has(cue.id)).length,
@@ -1474,10 +1458,7 @@ async function updateWebpageState(tabId: number, state: ActiveTabWebpageState): 
   });
 }
 
-async function updateWebpageTranslationSessionState(
-  tabId: number,
-  active: boolean,
-): Promise<void> {
+async function updateWebpageTranslationSessionState(tabId: number, active: boolean): Promise<void> {
   await sendPageMessage(tabId, {
     scope: ACTIVE_TAB_TRANSLATION_PAGE_SCOPE,
     type: "show-webpage-session-state",
@@ -1508,9 +1489,7 @@ function selectInitialWebpageBlockIds(
 ): ReadonlySet<string> {
   const initialWindowBottom = Math.max(1, viewportHeight) * INITIAL_WEBPAGE_VIEWPORT_MULTIPLIER;
   const ids = new Set(
-    blocks
-      .filter((block) => block.documentTop <= initialWindowBottom)
-      .map((block) => block.id),
+    blocks.filter((block) => block.documentTop <= initialWindowBottom).map((block) => block.id),
   );
   for (const block of blocks.slice(0, INITIAL_WEBPAGE_MIN_BLOCKS)) {
     ids.add(block.id);
@@ -1592,10 +1571,7 @@ async function runWebpageTranslation(
     return status;
   const tabId = status.tabId;
   const displayMode = status.webpageState.displayMode;
-  await updateWebpageTranslationSessionState(
-    tabId,
-    await loadWebpageTranslationSessionActive(),
-  );
+  await updateWebpageTranslationSessionState(tabId, await loadWebpageTranslationSessionActive());
 
   const settings = await localTranslationRepository.load();
   if (!settings.enabled) {
@@ -1852,7 +1828,10 @@ async function runWebpageTranslation(
       }),
     );
     if (errors.length > 0) {
-      stateStore.setLastError(tabId, firstFailureMessage(errors, "일부 페이지 번역에 실패했습니다."));
+      stateStore.setLastError(
+        tabId,
+        firstFailureMessage(errors, "일부 페이지 번역에 실패했습니다."),
+      );
     } else {
       stateStore.clearLastError(tabId);
     }

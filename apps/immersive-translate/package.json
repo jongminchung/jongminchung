@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "wxt build",
-    "clean": "bun scripts/clean.ts",
+    "clean": "pnpm node scripts/clean.ts",
     "compile": "wxt prepare && tsc --noEmit && tsc --noEmit --project gateway/tsconfig.json",
     "dev": "wxt",
     "docker:build": "docker compose -f docker/docker-compose.yml build gateway",
@@ -18,9 +18,9 @@
     "mlx:serve:detach": "sh scripts/run-mlx-server-detached.sh",
     "mlx:serve:logs": "tail -f .output/mlx-server.log",
     "mlx:serve:stop": "sh scripts/stop-mlx-server.sh",
-    "test:live": "bun run build && playwright test -c playwright.config.ts tests/live/immersive-translate.spec.ts",
+    "test:live": "pnpm run build && playwright test -c playwright.config.ts tests/live/immersive-translate.spec.ts",
     "test:unit": "vitest run --config vitest.config.ts src/lib gateway",
-    "verify:artifacts": "bun scripts/verify-extension-artifacts.ts",
+    "verify:artifacts": "pnpm node scripts/verify-extension-artifacts.ts",
     "zip": "wxt zip"
   },
   "dependencies": {
@@ -31,7 +31,6 @@
   "devDependencies": {
     "@playwright/test": "^1.61.1",
     "@tailwindcss/vite": "^4.3.2",
-    "@types/bun": "^1.3.14",
     "@types/node": "^26.1.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",

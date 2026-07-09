@@ -9,12 +9,8 @@ describe("youtubeVideoIdFromUrl", () => {
     expect(youtubeVideoIdFromUrl("https://www.youtube.com/watch?v=v4Ijkq6Myfc")).toBe(
       "v4Ijkq6Myfc",
     );
-    expect(youtubeVideoIdFromUrl("https://m.youtube.com/shorts/v4Ijkq6Myfc")).toBe(
-      "v4Ijkq6Myfc",
-    );
-    expect(youtubeVideoIdFromUrl("https://www.youtube.com/embed/v4Ijkq6Myfc")).toBe(
-      "v4Ijkq6Myfc",
-    );
+    expect(youtubeVideoIdFromUrl("https://m.youtube.com/shorts/v4Ijkq6Myfc")).toBe("v4Ijkq6Myfc");
+    expect(youtubeVideoIdFromUrl("https://www.youtube.com/embed/v4Ijkq6Myfc")).toBe("v4Ijkq6Myfc");
     expect(youtubeVideoIdFromUrl("https://www.youtube.com/watch?v=selected-korean-fallback")).toBe(
       "selected-korean-fallback",
     );

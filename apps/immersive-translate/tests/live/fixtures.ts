@@ -92,57 +92,57 @@ Udemy VTT second line
                       segs: [{ utf8: "Overlap second caption" }],
                     },
                   ]
-              : videoId === "batch"
-                ? [
-                    {
-                      tStartMs: 0,
-                      dDurationMs: 2000,
-                      segs: [{ utf8: "YouTube hello" }, { utf8: "\ncaption" }],
-                    },
-                    {
-                      tStartMs: 2000,
-                      dDurationMs: 2000,
-                      segs: [{ utf8: "Second YouTube cue" }],
-                    },
-                    {
-                      tStartMs: 4000,
-                      dDurationMs: 2000,
-                      segs: [{ utf8: "Third YouTube cue" }],
-                    },
-                    {
-                      tStartMs: 6000,
-                      dDurationMs: 2000,
-                      segs: [{ utf8: "Fourth YouTube cue" }],
-                    },
-                    {
-                      tStartMs: 8000,
-                      dDurationMs: 2000,
-                      segs: [{ utf8: "Fifth YouTube cue" }],
-                    },
-                    {
-                      tStartMs: 10000,
-                      dDurationMs: 2000,
-                      segs: [{ utf8: "Sixth YouTube cue" }],
-                    },
-                  ]
-                : videoId === "long-buffer"
-                  ? Array.from({ length: 32 }, (_, index) => ({
-                      tStartMs: index * 2000,
-                      dDurationMs: 1800,
-                      segs: [{ utf8: `Long cue ${index}` }],
-                    }))
-                : [
-                  {
-                    tStartMs: 0,
-                    dDurationMs: 2000,
-                    segs: [{ utf8: "YouTube hello" }, { utf8: "\ncaption" }],
-                  },
-                  {
-                    tStartMs: 2000,
-                    dDurationMs: 2000,
-                    segs: [{ utf8: "Second YouTube cue" }],
-                  },
-                ],
+                : videoId === "batch"
+                  ? [
+                      {
+                        tStartMs: 0,
+                        dDurationMs: 2000,
+                        segs: [{ utf8: "YouTube hello" }, { utf8: "\ncaption" }],
+                      },
+                      {
+                        tStartMs: 2000,
+                        dDurationMs: 2000,
+                        segs: [{ utf8: "Second YouTube cue" }],
+                      },
+                      {
+                        tStartMs: 4000,
+                        dDurationMs: 2000,
+                        segs: [{ utf8: "Third YouTube cue" }],
+                      },
+                      {
+                        tStartMs: 6000,
+                        dDurationMs: 2000,
+                        segs: [{ utf8: "Fourth YouTube cue" }],
+                      },
+                      {
+                        tStartMs: 8000,
+                        dDurationMs: 2000,
+                        segs: [{ utf8: "Fifth YouTube cue" }],
+                      },
+                      {
+                        tStartMs: 10000,
+                        dDurationMs: 2000,
+                        segs: [{ utf8: "Sixth YouTube cue" }],
+                      },
+                    ]
+                  : videoId === "long-buffer"
+                    ? Array.from({ length: 32 }, (_, index) => ({
+                        tStartMs: index * 2000,
+                        dDurationMs: 1800,
+                        segs: [{ utf8: `Long cue ${index}` }],
+                      }))
+                    : [
+                        {
+                          tStartMs: 0,
+                          dDurationMs: 2000,
+                          segs: [{ utf8: "YouTube hello" }, { utf8: "\ncaption" }],
+                        },
+                        {
+                          tStartMs: 2000,
+                          dDurationMs: 2000,
+                          segs: [{ utf8: "Second YouTube cue" }],
+                        },
+                      ],
         }),
       );
       return;

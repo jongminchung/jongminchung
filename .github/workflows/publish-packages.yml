@@ -14,9 +14,15 @@ jobs:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-      - run: bun install --frozen-lockfile
-      - run: bun run check
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.7.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run check
       - name: Configure GitHub Packages auth
         run: npm config set //npm.pkg.github.com/:_authToken "$NODE_AUTH_TOKEN"
       - name: Guard fixed package versions
@@ -36,15 +42,15 @@ jobs:
             }
           }
           NODE
-      - run: bun publish --dry-run --access public
+      - run: pnpm publish --dry-run --access public
         working-directory: packages/remark-plantuml
-      - run: bun publish --dry-run --access public
+      - run: pnpm publish --dry-run --access public
         working-directory: packages/tooling
-      - run: bun publish --dry-run --access public
+      - run: pnpm publish --dry-run --access public
         working-directory: packages/ui
-      - run: bun publish --access public
+      - run: pnpm publish --access public
         working-directory: packages/remark-plantuml
-      - run: bun publish --access public
+      - run: pnpm publish --access public
         working-directory: packages/tooling
-      - run: bun publish --access public
+      - run: pnpm publish --access public
         working-directory: packages/ui

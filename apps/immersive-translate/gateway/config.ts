@@ -1,4 +1,4 @@
-import type { TranslationGatewayConfig, TranslationProfile } from "./types";
+import type { TranslationGatewayConfig, TranslationProfile } from "./types.ts";
 
 const DEFAULT_LIBRETRANSLATE_URL = "http://libretranslate:5000/translate";
 const DEFAULT_MLX_BASE_URL = "http://host.docker.internal:8000/v1";

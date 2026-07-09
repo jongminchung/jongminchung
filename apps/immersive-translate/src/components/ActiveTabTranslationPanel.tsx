@@ -176,7 +176,7 @@ export function ActiveTabTranslationPanel(): JSX.Element {
                 ? "border-(--primary) bg-(--secondary) text-(--secondary-foreground)"
                 : readinessStatus?.state === "failed"
                   ? "border-(--destructive) bg-(--card) text-(--destructive)"
-                : "border-(--border) text-(--muted-foreground)",
+                  : "border-(--border) text-(--muted-foreground)",
             )}
           >
             {readinessLabel}

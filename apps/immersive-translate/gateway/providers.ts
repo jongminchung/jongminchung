@@ -1,11 +1,11 @@
-import { GatewayError } from "./errors";
-import { normalizeTranslations } from "./http";
+import { GatewayError } from "./errors.ts";
+import { normalizeTranslations } from "./http.ts";
 import type {
   TranslationGatewayConfig,
   TranslationProvider,
   TranslationProviderRequest,
-} from "./types";
-import { delay, isRecord, logGatewayEvent, previewText, readErrorMessage } from "./utils";
+} from "./types.ts";
+import { delay, isRecord, logGatewayEvent, previewText, readErrorMessage } from "./utils.ts";
 
 interface OpenAiChatMessage {
   readonly role: "system" | "user";

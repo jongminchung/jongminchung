@@ -519,9 +519,7 @@ test.describe("Immersive Translate floating toggle QA", () => {
         contentType: "application/json",
         body: JSON.stringify({
           translatedText: sourceTexts.map((text) =>
-            text.includes("paragraph 12")
-              ? "긴 문서 마지막 문단까지 번역됨"
-              : "긴 문서 본문 번역",
+            text.includes("paragraph 12") ? "긴 문서 마지막 문단까지 번역됨" : "긴 문서 본문 번역",
           ),
         }),
       });
@@ -1002,10 +1000,9 @@ test.describe("Immersive Translate floating toggle QA", () => {
     });
 
     await expect
-      .poll(
-        () => requestBatchSizes.reduce((total, batchSize) => total + batchSize, 0),
-        { timeout: 60_000 },
-      )
+      .poll(() => requestBatchSizes.reduce((total, batchSize) => total + batchSize, 0), {
+        timeout: 60_000,
+      })
       .toBeGreaterThanOrEqual(20);
 
     await youtubePage.evaluate(async () => {

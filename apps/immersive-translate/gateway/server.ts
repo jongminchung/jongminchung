@@ -1,22 +1,24 @@
-import { readGatewayConfig } from "./config";
-import { GatewayError } from "./errors";
-import { parseTranslateRequest, readJson } from "./http";
-import { createProvider } from "./providers";
+import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import { pathToFileURL } from "node:url";
+import { readGatewayConfig } from "./config.ts";
+import { GatewayError } from "./errors.ts";
+import { parseTranslateRequest, readJson } from "./http.ts";
+import { createProvider } from "./providers.ts";
 import type {
   TranslationGatewayConfig,
   TranslationProvider,
   YouTubeCaptionFetcher,
   YouTubeCaptionRequest,
-} from "./types";
-import { jsonResponse, logGatewayEvent, previewText, textResponse } from "./utils";
+} from "./types.ts";
+import { jsonResponse, logGatewayEvent, previewText, textResponse } from "./utils.ts";
 import {
   fetchYouTubeCaptionsWithYtDlp,
   normalizeYouTubeLanguageCode,
   normalizeYouTubeVideoId,
-} from "./youtube-captions";
+} from "./youtube-captions.ts";
 
-export { readGatewayConfig } from "./config";
-export { LibreTranslateProvider, MlxLmProvider, createProvider } from "./providers";
+export { readGatewayConfig } from "./config.ts";
+export { LibreTranslateProvider, MlxLmProvider, createProvider } from "./providers.ts";
 export type {
   TranslationGatewayConfig,
   TranslationProvider,
@@ -24,17 +26,73 @@ export type {
   YouTubeCaptionFetcher,
   YouTubeCaptionPayload,
   YouTubeCaptionRequest,
-} from "./types";
+} from "./types.ts";
 export {
   buildYouTubeCaptionArgs,
   fetchYouTubeCaptionsWithYtDlp,
   pickYouTubeCaptionFile,
   preferredYouTubeSubtitleLanguages,
-} from "./youtube-captions";
+} from "./youtube-captions.ts";
 
 interface GatewayHandlerOptions {
   readonly logRequests?: boolean;
   readonly youtubeCaptionFetcher?: YouTubeCaptionFetcher;
+}
+
+async function readIncomingBody(request: IncomingMessage): Promise<Buffer | null> {
+  if (request.method === "GET" || request.method === "HEAD") return null;
+
+  const chunks: Buffer[] = [];
+  for await (const chunk of request) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks);
+}
+
+function incomingHeaders(request: IncomingMessage): Headers {
+  const headers = new Headers();
+  for (const [name, value] of Object.entries(request.headers)) {
+    if (value === undefined) continue;
+    if (Array.isArray(value)) {
+      for (const item of value) headers.append(name, item);
+      continue;
+    }
+    headers.set(name, value);
+  }
+  return headers;
+}
+
+async function toFetchRequest(request: IncomingMessage): Promise<Request> {
+  const host = request.headers.host ?? "127.0.0.1";
+  const url = new URL(request.url ?? "/", `http://${host}`);
+  const body = await readIncomingBody(request);
+  return new Request(url, {
+    body:
+      body === null
+        ? undefined
+        : (body.buffer.slice(body.byteOffset, body.byteOffset + body.byteLength) as ArrayBuffer),
+    headers: incomingHeaders(request),
+    method: request.method,
+  });
+}
+
+async function sendNodeResponse(response: ServerResponse, fetchResponse: Response): Promise<void> {
+  response.statusCode = fetchResponse.status;
+  response.statusMessage = fetchResponse.statusText;
+  for (const [name, value] of fetchResponse.headers) response.setHeader(name, value);
+  response.end(Buffer.from(await fetchResponse.arrayBuffer()));
+}
+
+async function handleNodeRequest(
+  request: IncomingMessage,
+  response: ServerResponse,
+  handler: (request: Request) => Promise<Response>,
+): Promise<void> {
+  try {
+    await sendNodeResponse(response, await handler(await toFetchRequest(request)));
+  } catch (error) {
+    await sendNodeResponse(response, errorResponse(error));
+  }
 }
 
 async function handleTranslate(
@@ -150,17 +208,16 @@ export function createGatewayHandler(
 export function startGateway(config: TranslationGatewayConfig = readGatewayConfig()): void {
   const provider = createProvider(config);
   const handler = createGatewayHandler(provider, { logRequests: config.logRequests });
-  Bun.serve({
-    hostname: config.host,
-    port: config.port,
-    idleTimeout: 120,
-    fetch: handler,
+  const server = createServer((request, response) => {
+    void handleNodeRequest(request, response, handler);
   });
+  server.keepAliveTimeout = 120_000;
+  server.listen(config.port, config.host);
   console.log(
     `translation-gateway listening on ${config.host}:${config.port} profile=${provider.name}`,
   );
 }
 
-if (typeof Bun !== "undefined" && import.meta.main) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   startGateway();
 }

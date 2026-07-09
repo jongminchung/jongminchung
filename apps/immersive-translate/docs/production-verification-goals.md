@@ -35,15 +35,15 @@ MCP 검증은 다음 산출물을 남긴다.
 
 통과한 명령:
 
-- `bun run --cwd apps/immersive-translate compile`
-- `bun run --cwd apps/immersive-translate test:unit`
-- `bun run --cwd apps/immersive-translate build`
-- `bun run --cwd apps/immersive-translate verify:artifacts`
-- `bun run --cwd apps/immersive-translate test:live`
-- `REAL_TRANSLATION_QA=1 LOCAL_TRANSLATION_ENDPOINT=http://127.0.0.1:5000/translate bun run --cwd apps/immersive-translate test:live`
-- `REAL_NETWORK_QA=1 LOCAL_TRANSLATION_ENDPOINT=http://127.0.0.1:5000/translate bun run --cwd apps/immersive-translate test:live`
-- `REAL_TRANSLATION_QA=1 REAL_NETWORK_QA=1 LOCAL_TRANSLATION_ENDPOINT=http://127.0.0.1:5000/translate bun run --cwd apps/immersive-translate test:live`
-- `bun run check`
+- `pnpm --filter @jongminchung/immersive-translate run compile`
+- `pnpm --filter @jongminchung/immersive-translate run test:unit`
+- `pnpm --filter @jongminchung/immersive-translate run build`
+- `pnpm --filter @jongminchung/immersive-translate run verify:artifacts`
+- `pnpm --filter @jongminchung/immersive-translate run test:live`
+- `REAL_TRANSLATION_QA=1 LOCAL_TRANSLATION_ENDPOINT=http://127.0.0.1:5000/translate pnpm --filter @jongminchung/immersive-translate run test:live`
+- `REAL_NETWORK_QA=1 LOCAL_TRANSLATION_ENDPOINT=http://127.0.0.1:5000/translate pnpm --filter @jongminchung/immersive-translate run test:live`
+- `REAL_TRANSLATION_QA=1 REAL_NETWORK_QA=1 LOCAL_TRANSLATION_ENDPOINT=http://127.0.0.1:5000/translate pnpm --filter @jongminchung/immersive-translate run test:live`
+- `pnpm run check`
 
 최종 통합 live QA 결과:
 
@@ -65,7 +65,7 @@ MCP 검증은 다음 산출물을 남긴다.
 
 실제 YouTube caption hard gate:
 
-- `REAL_YOUTUBE_CAPTION_QA=1 REAL_YOUTUBE_URL='https://www.youtube.com/watch?v=IroPQ150F6c' LOCAL_TRANSLATION_ENDPOINT=http://127.0.0.1:5000/translate bunx playwright test -c playwright.config.ts tests/live/immersive-translate.spec.ts -g 'actual YouTube'`는 2026-07-06 KST 기준 통과했다.
+- `REAL_YOUTUBE_CAPTION_QA=1 REAL_YOUTUBE_URL='https://www.youtube.com/watch?v=IroPQ150F6c' LOCAL_TRANSLATION_ENDPOINT=http://127.0.0.1:5000/translate pnpm exec playwright test -c playwright.config.ts tests/live/immersive-translate.spec.ts -g 'actual YouTube'`는 2026-07-06 KST 기준 통과했다.
 - 기존 실패 문구는 `YouTube caption payload is empty.`였다. 원인은 `timedtext` 빈 payload 이후 새 YouTube transcript DOM인 `transcript-segment-view-model`을 parser가 읽지 못한 것이다.
 - 현재 hard gate는 popup이나 page translation fallback 없이 실제 YouTube transcript cue를 수집하고, Docker 번역 결과를 영상 위 이중 자막 overlay로 표시해야 통과한다.
 - `timedtext`와 Innertube transcript API는 여전히 불안정한 fallback이다. 실제 pass 기준은 접근 가능한 YouTube transcript DOM 또는 player caption DOM에서 온 원문 cue와 한국어 번역 overlay다.
@@ -234,7 +234,7 @@ Actual YouTube 필수 assert:
 
 필수 assert:
 
-- `bun run --cwd apps/immersive-translate build`가 성공한다.
+- `pnpm --filter @jongminchung/immersive-translate run build`가 성공한다.
 - `.output/chrome-mv3/manifest.json`이 존재한다.
 - manifest version은 3이다.
 - manifest name은 `Tobi Immersive Translate`이다.
@@ -269,15 +269,15 @@ Actual YouTube 필수 assert:
 
 ## MCP 실행 순서
 
-1. `bun install`
-2. `bun run --cwd apps/immersive-translate compile`
-3. `bun run --cwd apps/immersive-translate test:unit`
-4. `bun run --cwd apps/immersive-translate build`
-5. `bun run --cwd apps/immersive-translate verify:artifacts`
-6. `bun run --cwd apps/immersive-translate test:live`
-7. `REAL_TRANSLATION_QA=1 LOCAL_TRANSLATION_ENDPOINT=http://127.0.0.1:5000/translate bun run --cwd apps/immersive-translate test:live`
-8. `REAL_NETWORK_QA=1 LOCAL_TRANSLATION_ENDPOINT=http://127.0.0.1:5000/translate bun run --cwd apps/immersive-translate test:live`
-9. 필요 시 `REAL_YOUTUBE_CAPTION_QA=1 LOCAL_TRANSLATION_ENDPOINT=http://127.0.0.1:5000/translate bun run --cwd apps/immersive-translate test:live`
+1. `pnpm install`
+2. `pnpm --filter @jongminchung/immersive-translate run compile`
+3. `pnpm --filter @jongminchung/immersive-translate run test:unit`
+4. `pnpm --filter @jongminchung/immersive-translate run build`
+5. `pnpm --filter @jongminchung/immersive-translate run verify:artifacts`
+6. `pnpm --filter @jongminchung/immersive-translate run test:live`
+7. `REAL_TRANSLATION_QA=1 LOCAL_TRANSLATION_ENDPOINT=http://127.0.0.1:5000/translate pnpm --filter @jongminchung/immersive-translate run test:live`
+8. `REAL_NETWORK_QA=1 LOCAL_TRANSLATION_ENDPOINT=http://127.0.0.1:5000/translate pnpm --filter @jongminchung/immersive-translate run test:live`
+9. 필요 시 `REAL_YOUTUBE_CAPTION_QA=1 LOCAL_TRANSLATION_ENDPOINT=http://127.0.0.1:5000/translate pnpm --filter @jongminchung/immersive-translate run test:live`
 10. MCP `node_repl` file/build/screenshot 검증
 
 ## 최소 통과선

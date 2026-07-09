@@ -1,4 +1,12 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
+
+import { execFile } from "node:child_process";
+import type { Dirent } from "node:fs";
+import { readdir, readFile, stat } from "node:fs/promises";
+import { join } from "node:path";
+import { promisify } from "node:util";
+
+const execFileAsync = promisify(execFile);
 
 interface ExtensionApp {
   readonly id: string;
@@ -28,7 +36,7 @@ const apps: readonly ExtensionApp[] = [
 ];
 
 function hasFlag(name: string): boolean {
-  return Bun.argv.includes(name);
+  return process.argv.includes(name);
 }
 
 function asObject(value: unknown, file: string): JsonObject {
@@ -40,7 +48,7 @@ function asObject(value: unknown, file: string): JsonObject {
 }
 
 async function readJsonObject(file: string): Promise<JsonObject> {
-  return asObject(await Bun.file(file).json(), file);
+  return asObject(JSON.parse(await readFile(file, "utf8")) as unknown, file);
 }
 
 function readString(value: unknown): string | null {
@@ -52,35 +60,40 @@ function readNumber(value: unknown): number | null {
 }
 
 async function fileExists(path: string): Promise<boolean> {
-  return await Bun.file(path).exists();
+  try {
+    return (await stat(path)).isFile();
+  } catch {
+    return false;
+  }
 }
 
 async function listZipFiles(app: ExtensionApp): Promise<readonly string[]> {
   const outputDir = `${app.dir}/.output`;
-  const result = await Bun.$`find ${outputDir} -maxdepth 1 -type f -name '*.zip' -print`
-    .quiet()
-    .nothrow();
+  let entries: Dirent[];
+  try {
+    entries = await readdir(outputDir, { withFileTypes: true });
+  } catch {
+    return [];
+  }
 
-  if (result.exitCode !== 0) return [];
-
-  return new TextDecoder()
-    .decode(result.stdout)
-    .split("\n")
-    .filter((path) => path.length > 0)
-    .sort();
+  return entries
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".zip"))
+    .map((entry) => join(outputDir, entry.name))
+    .sort((left, right) => left.localeCompare(right));
 }
 
 async function listZipEntries(zipFile: string): Promise<readonly string[]> {
-  const result = await Bun.$`unzip -Z1 ${zipFile}`.quiet().nothrow();
-  if (result.exitCode !== 0) {
-    const stderr = new TextDecoder().decode(result.stderr).trim();
+  try {
+    const { stdout } = await execFileAsync("unzip", ["-Z1", zipFile]);
+    return String(stdout)
+      .split("\n")
+      .filter((entry) => entry.length > 0);
+  } catch (error) {
+    const stderrValue =
+      typeof error === "object" && error !== null && "stderr" in error ? error.stderr : "";
+    const stderr = String(stderrValue).trim();
     throw new Error(`Unable to inspect ${zipFile}${stderr ? `: ${stderr}` : "."}`);
   }
-
-  return new TextDecoder()
-    .decode(result.stdout)
-    .split("\n")
-    .filter((entry) => entry.length > 0);
 }
 
 async function verifyBuildDirectory(app: ExtensionApp): Promise<readonly string[]> {

@@ -13,7 +13,7 @@ Docker now exposes that endpoint through the `gateway` service. The gateway choo
 Start the reliable local Docker profile:
 
 ```bash
-bun run docker:up
+pnpm run docker:up
 ```
 
 This starts:
@@ -56,7 +56,7 @@ This pin avoids the current `transformers>=5` tokenizer registration failure in 
 Start the host model server:
 
 ```bash
-bun run mlx:serve
+pnpm run mlx:serve
 ```
 
 This binds MLX-LM to `0.0.0.0:8000` by default so Docker can reach it through `host.docker.internal:8000`.
@@ -64,15 +64,15 @@ This binds MLX-LM to `0.0.0.0:8000` by default so Docker can reach it through `h
 Detached mode:
 
 ```bash
-bun run mlx:serve:detach
-bun run mlx:serve:logs
-bun run mlx:serve:stop
+pnpm run mlx:serve:detach
+pnpm run mlx:serve:logs
+pnpm run mlx:serve:stop
 ```
 
 Start the Docker gateway in MLX mode:
 
 ```bash
-bun run docker:up:mlx
+pnpm run docker:up:mlx
 ```
 
 The recommended M1 Pro 16GB default is:
@@ -84,8 +84,8 @@ mlx-community/Qwen3-1.7B-4bit
 If you want to trade latency for a larger model, switch both the host model and gateway model:
 
 ```bash
-MLX_MODEL=mlx-community/Qwen3-4B-Instruct-2507-4bit bun run mlx:serve
-MLX_MODEL=mlx-community/Qwen3-4B-Instruct-2507-4bit bun run docker:up:mlx
+MLX_MODEL=mlx-community/Qwen3-4B-Instruct-2507-4bit pnpm run mlx:serve
+MLX_MODEL=mlx-community/Qwen3-4B-Instruct-2507-4bit pnpm run docker:up:mlx
 ```
 
 No extension code or UI change is needed. The extension still calls `http://127.0.0.1:5000/translate`.
@@ -106,5 +106,5 @@ No extension code or UI change is needed. The extension still calls `http://127.
 ## Stop
 
 ```bash
-bun run docker:down
+pnpm run docker:down
 ```

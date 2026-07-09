@@ -105,11 +105,11 @@ consumers use the standard `types`, `import`, and `default` conditions.
 ## Build and pack
 
 ```bash
-bun run build
+pnpm run build
 npm pack --dry-run
 ```
 
-`bun run build` uses `tsdown` in unbundle mode so the published `dist` tree mirrors the TypeScript
+`pnpm run build` uses `tsdown` in unbundle mode so the published `dist` tree mirrors the TypeScript
 source module structure while still shipping JavaScript runtime files.
 
 The npm package includes compiled ESM JavaScript, generated declarations, source config files,

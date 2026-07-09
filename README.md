@@ -16,9 +16,9 @@ on `1.0.0`. Reuse and republish `1.0.0` when correcting package contents. Do not
 `1.0.2`, or other replacement versions for these packages.
 
 ```bash
-bun install
-bun run check
-bun run publish:dry-run
+pnpm install
+pnpm run check
+pnpm run publish:dry-run
 ```
 
 <!--START_SECTION:waka-->

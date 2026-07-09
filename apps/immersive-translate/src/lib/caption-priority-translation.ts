@@ -14,7 +14,6 @@ import {
   LocalTranslationService,
   type LocalTranslationSettings,
   type TranslationInput,
-  type TranslationJobProgress,
   type TranslationJobResult,
   type TranslationJobStatus,
   type TranslationOutput,
@@ -74,13 +73,10 @@ export interface RunPrioritizedCaptionTranslationOptions {
   readonly initialBatchSize: number;
   readonly backgroundBatchSize: number;
   readonly fetcher?: LocalTranslationFetch;
-  readonly onSnapshot?: (
-    snapshot: PrioritizedCaptionTranslationSnapshot,
-  ) => void | Promise<void>;
+  readonly onSnapshot?: (snapshot: PrioritizedCaptionTranslationSnapshot) => void | Promise<void>;
 }
 
-export interface PrioritizedCaptionTranslationResult
-  extends PrioritizedCaptionTranslationSnapshot {}
+export interface PrioritizedCaptionTranslationResult extends PrioritizedCaptionTranslationSnapshot {}
 
 function cuePriority(
   cue: Pick<CaptionCue, "startTimeSeconds" | "endTimeSeconds">,
@@ -222,10 +218,6 @@ export function selectPrioritizedCaptionWindow(
     visibleTrack: trackWithCues(track, visibleCues),
     initialTrack: trackWithCues(track, initialCues),
   };
-}
-
-function emptyProgress(total: number): TranslationJobProgress {
-  return { total, completed: 0, cacheHits: 0, cacheMisses: 0, failures: 0 };
 }
 
 function resolveStatus(input: {

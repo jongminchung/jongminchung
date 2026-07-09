@@ -27,7 +27,7 @@ async function loadConfigAliases(
     }))));
   `;
 
-  const { stdout } = await execFileAsync("bun", ["--eval", script], {
+  const { stdout } = await execFileAsync("pnpm", ["node", "--eval", script], {
     cwd: rootDir,
     timeout: 30_000,
   });
@@ -67,11 +67,15 @@ describe("workspace package map integration", () => {
   });
 
   it("exposes generated aliases through the real TypeScript project config", async () => {
-    const { stdout } = await execFileAsync("bunx", ["tsc", "--showConfig", "--project", "."], {
-      cwd: rootDir,
-      maxBuffer: 4 * 1024 * 1024,
-      timeout: 30_000,
-    });
+    const { stdout } = await execFileAsync(
+      "pnpm",
+      ["exec", "tsc", "--showConfig", "--project", "."],
+      {
+        cwd: rootDir,
+        maxBuffer: 4 * 1024 * 1024,
+        timeout: 30_000,
+      },
+    );
 
     const shownConfig = JSON.parse(stdout);
     expect(shownConfig.compilerOptions.paths).toEqual(

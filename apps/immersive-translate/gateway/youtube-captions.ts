@@ -2,8 +2,8 @@ import { spawn } from "node:child_process";
 import { mkdtemp, readdir, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { GatewayError } from "./errors";
-import type { YouTubeCaptionPayload, YouTubeCaptionRequest } from "./types";
+import { GatewayError } from "./errors.ts";
+import type { YouTubeCaptionPayload, YouTubeCaptionRequest } from "./types.ts";
 
 const YOUTUBE_CAPTION_CACHE_TTL_MS = 10 * 60 * 1000;
 const youtubeCaptionCache = new Map<

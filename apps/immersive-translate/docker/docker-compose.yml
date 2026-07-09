@@ -24,14 +24,14 @@ services:
     volumes:
       - ..:/app:ro
       - ../.output:/app/.output
-    command: ["bun", "gateway/server.ts"]
+    command: ["pnpm", "node", "gateway/server.ts"]
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          'bun -e "const r=await fetch(''http://127.0.0.1:5000/health''); if(!r.ok) process.exit(1)"',
+          'pnpm node -e "const r=await fetch(''http://127.0.0.1:5000/health''); if(!r.ok) process.exit(1)"',
         ]
       interval: 10s
       timeout: 5s

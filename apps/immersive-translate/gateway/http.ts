@@ -1,9 +1,6 @@
-import { GatewayError } from "./errors";
-import type {
-  IncomingTranslateRequest,
-  TranslationFormat,
-} from "./types";
-import { isRecord } from "./utils";
+import { GatewayError } from "./errors.ts";
+import type { IncomingTranslateRequest, TranslationFormat } from "./types.ts";
+import { isRecord } from "./utils.ts";
 
 function normalizeFormat(value: unknown): TranslationFormat {
   return value === "html" ? "html" : "text";

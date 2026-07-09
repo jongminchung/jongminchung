@@ -26,8 +26,7 @@ const AUTO_WEBPAGE_NAVIGATION_DELAYS_MS = [250, 1_500] as const;
 const AUTO_WEBPAGE_RETRY_LIMIT = 2;
 const WEBPAGE_URL_POLL_INTERVAL_MS = 500;
 const FLOATING_CONTROL_SELECTOR = '[data-testid="floating-translate-control"]';
-const FLOATING_ACTIVE_INDICATOR_SELECTOR =
-  '[data-testid="floating-translate-active-indicator"]';
+const FLOATING_ACTIVE_INDICATOR_SELECTOR = '[data-testid="floating-translate-active-indicator"]';
 const AUTO_CAPTION_CONTROL_FAILURE_MESSAGE =
   "영상 자막 자동 시작 실패: 확장 번역 컨트롤이 응답하지 않습니다.";
 
@@ -42,9 +41,7 @@ function isTranslationStatusLike(value: unknown): value is AutoCaptionStatusLike
   return typeof (captionState as Record<string, unknown>).name === "string";
 }
 
-function isWebpageSessionStatusLike(
-  value: unknown,
-): value is {
+function isWebpageSessionStatusLike(value: unknown): value is {
   readonly webpageTranslationSessionActive: boolean;
   readonly webpageState: { readonly name: string };
 } {
@@ -139,10 +136,7 @@ export default defineContentScript({
       autoCaptionRetryTimer = null;
     };
 
-    const scheduleAutoCaptionRetry = (
-      currentUrl: string,
-      failureMessage?: string,
-    ): boolean => {
+    const scheduleAutoCaptionRetry = (currentUrl: string, failureMessage?: string): boolean => {
       const retryCount = autoCaptionRetryCountsByUrl.get(currentUrl) ?? 0;
       if (retryCount >= AUTO_CAPTION_RETRY_LIMIT) {
         if (failureMessage) showAutoCaptionFailure(failureMessage);

@@ -16,10 +16,14 @@ describe("translation readiness view model", () => {
   test("labels connection states without treating enabled as connected", () => {
     expect(translationReadinessLabel(null)).toBe("번역 연결 확인 중");
     expect(
-      translationReadinessLabel(checkingTranslationReadinessStatus(DEFAULT_LOCAL_TRANSLATION_SETTINGS)),
+      translationReadinessLabel(
+        checkingTranslationReadinessStatus(DEFAULT_LOCAL_TRANSLATION_SETTINGS),
+      ),
     ).toBe("번역 연결 확인 중");
     expect(
-      translationReadinessLabel(disabledTranslationReadinessStatus(DEFAULT_LOCAL_TRANSLATION_SETTINGS)),
+      translationReadinessLabel(
+        disabledTranslationReadinessStatus(DEFAULT_LOCAL_TRANSLATION_SETTINGS),
+      ),
     ).toBe("번역 꺼짐");
     expect(
       translationReadinessLabel(

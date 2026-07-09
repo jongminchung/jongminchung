@@ -1,5 +1,4 @@
 import { describe, expect, test } from "vitest";
-import { mapCaptionTrack, type CaptionTrackLike } from "./caption-translation";
 import {
   planCaptionTranslationInputs,
   prioritizeCaptionInputs,
@@ -7,6 +6,7 @@ import {
   selectCaptionPrefetchWindow,
   selectPrioritizedCaptionWindow,
 } from "./caption-priority-translation";
+import { mapCaptionTrack, type CaptionTrackLike } from "./caption-translation";
 import { DEFAULT_LOCAL_TRANSLATION_SETTINGS } from "./local-translation";
 
 function trackWithCues(count: number): CaptionTrackLike {
@@ -80,11 +80,7 @@ describe("prioritized caption translation", () => {
       highPriorityCueCount: 3,
     });
 
-    expect(plan.highPriorityInputs.map((input) => input.id)).toEqual([
-      "cue-4",
-      "cue-5",
-      "cue-6",
-    ]);
+    expect(plan.highPriorityInputs.map((input) => input.id)).toEqual(["cue-4", "cue-5", "cue-6"]);
     expect(plan.backgroundInputs).toEqual([]);
   });
 
@@ -95,19 +91,9 @@ describe("prioritized caption translation", () => {
       highPriorityCueCount: 2,
     });
 
-    expect(inputs.map((input) => input.id)).toEqual([
-      "cue-2",
-      "cue-3",
-      "cue-4",
-      "cue-5",
-      "cue-1",
-    ]);
+    expect(inputs.map((input) => input.id)).toEqual(["cue-2", "cue-3", "cue-4", "cue-5", "cue-1"]);
     expect(plan.highPriorityInputs.map((input) => input.id)).toEqual(["cue-2", "cue-3"]);
-    expect(plan.backgroundInputs.map((input) => input.id)).toEqual([
-      "cue-4",
-      "cue-5",
-      "cue-1",
-    ]);
+    expect(plan.backgroundInputs.map((input) => input.id)).toEqual(["cue-4", "cue-5", "cue-1"]);
   });
 
   test("publishes original captions before translating priority and background chunks", async () => {
@@ -145,9 +131,7 @@ describe("prioritized caption translation", () => {
         },
         onSnapshot: (snapshot) => {
           snapshots.push({
-            translated: snapshot.displayCues.flatMap((cue) =>
-              cue.translatedText ? [cue.id] : [],
-            ),
+            translated: snapshot.displayCues.flatMap((cue) => (cue.translatedText ? [cue.id] : [])),
             completed: snapshot.jobResult.progress.completed,
             total: snapshot.jobResult.progress.total,
           });

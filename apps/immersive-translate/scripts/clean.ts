@@ -1,4 +1,6 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
+
+import { rm } from "node:fs/promises";
 
 const outputTargets = [".output"] as const;
 const testTargets = ["test-results", "playwright-report"] as const;
@@ -6,13 +8,13 @@ const wxtTargets = [".wxt"] as const;
 const viteTargets = ["node_modules/.vite", ".vite"] as const;
 
 function hasFlag(name: string): boolean {
-  return Bun.argv.includes(name);
+  return process.argv.includes(name);
 }
 
 function selectedTargets(): readonly string[] {
   const cleanAll = hasFlag("--all");
-  const cleanOutputs = cleanAll || hasFlag("--outputs") || Bun.argv.length === 2;
-  const cleanTests = cleanAll || hasFlag("--tests") || Bun.argv.length === 2;
+  const cleanOutputs = cleanAll || hasFlag("--outputs") || process.argv.length === 2;
+  const cleanTests = cleanAll || hasFlag("--tests") || process.argv.length === 2;
   const cleanWxt = cleanAll || hasFlag("--wxt");
   const cleanVite = cleanAll || hasFlag("--vite");
 
@@ -32,7 +34,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  await Bun.$`rm -rf ${targets}`;
+  await Promise.all(targets.map((target) => rm(target, { force: true, recursive: true })));
   console.log(`Removed ${targets.join(", ")}`);
 }
 

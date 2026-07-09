@@ -1,7 +1,4 @@
-import type {
-  LocalTranslationSelfTestResult,
-  LocalTranslationSettings,
-} from "./local-translation";
+import type { LocalTranslationSelfTestResult, LocalTranslationSettings } from "./local-translation";
 
 export type TranslationReadinessStatus =
   | {

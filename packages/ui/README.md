@@ -58,11 +58,11 @@ module so the internal shadcn layout can change without changing the public inte
 ## Build and pack
 
 ```bash
-bun run build
+pnpm run build
 npm pack --dry-run
 ```
 
-`bun run build` uses `tsdown` in unbundle mode so the published `dist` tree keeps the same public
+`pnpm run build` uses `tsdown` in unbundle mode so the published `dist` tree keeps the same public
 module shape as the TypeScript source while shipping JavaScript runtime files.
 
 The npm package includes `dist`, the source files referenced by the `source` export condition,

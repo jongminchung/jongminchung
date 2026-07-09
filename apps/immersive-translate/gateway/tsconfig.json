@@ -7,7 +7,7 @@
     "moduleResolution": "Bundler",
     "noEmit": true,
     "rootDir": "..",
-    "types": ["bun", "node"]
+    "types": ["node"]
   },
   "include": ["./server.ts"]
 }

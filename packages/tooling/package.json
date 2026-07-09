@@ -49,10 +49,10 @@
   },
   "scripts": {
     "build": "tsdown --log-level error --no-report",
-    "prepack": "bun run build",
-    "publish:dry-run": "bun publish --dry-run --access public",
+    "prepack": "pnpm run build",
+    "publish:dry-run": "pnpm publish --dry-run --access public",
     "test": "vitest run --root ../.. packages/tooling",
-    "typecheck": "bunx tsc --noEmit"
+    "typecheck": "pnpm exec tsc --noEmit"
   },
   "devDependencies": {
     "@types/node": "^26.1.0",

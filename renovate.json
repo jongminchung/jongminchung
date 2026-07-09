@@ -9,72 +9,37 @@
     ":semanticCommitTypeAll(chore)"
   ],
   "timezone": "Asia/Seoul",
-  "enabledManagers": [
-    "bun",
-    "custom.jsonata",
-    "github-actions"
-  ],
-  "labels": [
-    "dependencies"
-  ],
+  "enabledManagers": ["pnpm", "github-actions"],
+  "labels": ["dependencies"],
   "dependencyDashboardTitle": "Dependency Dashboard",
   "prConcurrentLimit": 5,
   "prHourlyLimit": 2,
   "lockFileMaintenance": {
     "enabled": true,
-    "schedule": [
-      "before 4am on monday"
-    ]
+    "schedule": ["before 4am on monday"]
   },
-  "customManagers": [
-    {
-      "customType": "jsonata",
-      "fileFormat": "json",
-      "managerFilePatterns": [
-        "/(^|/)package\\.json$/"
-      ],
-      "matchStrings": [
-        "$exists(catalog) ? $each(catalog, function($v, $k) { {\"depName\": $k, \"currentValue\": $v, \"depType\": \"catalog\"} }) : []"
-      ],
-      "datasourceTemplate": "npm",
-      "versioningTemplate": "npm"
-    }
-  ],
   "packageRules": [
     {
       "description": "Keep workspace package ranges moving without pinning published package dependencies.",
-      "matchManagers": [
-        "bun"
-      ],
+      "matchManagers": ["pnpm"],
       "rangeStrategy": "bump"
     },
     {
-      "description": "Group non-major Bun dependency updates across the monorepo.",
-      "matchDatasources": [
-        "npm"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "groupName": "Bun dependencies",
-      "groupSlug": "bun-dependencies"
+      "description": "Group non-major pnpm dependency updates across the monorepo.",
+      "matchDatasources": ["npm"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "pnpm dependencies",
+      "groupSlug": "pnpm-dependencies"
     },
     {
-      "description": "Require dashboard approval before opening major Bun dependency updates.",
-      "matchDatasources": [
-        "npm"
-      ],
-      "matchUpdateTypes": [
-        "major"
-      ],
+      "description": "Require dashboard approval before opening major pnpm dependency updates.",
+      "matchDatasources": ["npm"],
+      "matchUpdateTypes": ["major"],
       "dependencyDashboardApproval": true
     },
     {
       "description": "Group GitHub Actions updates.",
-      "matchManagers": [
-        "github-actions"
-      ],
+      "matchManagers": ["github-actions"],
       "groupName": "GitHub Actions",
       "groupSlug": "github-actions"
     }

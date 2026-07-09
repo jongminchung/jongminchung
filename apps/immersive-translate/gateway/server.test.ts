@@ -7,7 +7,7 @@ import {
   pickYouTubeCaptionFile,
   preferredYouTubeSubtitleLanguages,
   type TranslationProvider,
-} from "./server";
+} from "./server.ts";
 
 const MLX_MODEL = "mlx-community/Qwen3-1.7B-4bit";
 
@@ -156,12 +156,8 @@ describe("translation gateway", () => {
     ];
 
     expect(pickYouTubeCaptionFile(files, "ko")).toBe("SSIGI9mm0DU.ko-ko.json3");
-    expect(pickYouTubeCaptionFile(files, "en")).toBe(
-      "SSIGI9mm0DU.en-zh-Hans-xmBv0MfmNEY.json3",
-    );
-    expect(pickYouTubeCaptionFile(files, "ja")).toBe(
-      "SSIGI9mm0DU.en-zh-Hans-xmBv0MfmNEY.json3",
-    );
+    expect(pickYouTubeCaptionFile(files, "en")).toBe("SSIGI9mm0DU.en-zh-Hans-xmBv0MfmNEY.json3");
+    expect(pickYouTubeCaptionFile(files, "ja")).toBe("SSIGI9mm0DU.en-zh-Hans-xmBv0MfmNEY.json3");
   });
 
   test("handles local gateway CORS preflight", async () => {
