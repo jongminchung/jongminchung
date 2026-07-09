@@ -38,7 +38,19 @@ if command -v screen >/dev/null 2>&1; then
 fi
 
 if command -v lsof >/dev/null 2>&1 && lsof -nP -iTCP:"$MLX_PORT" -sTCP:LISTEN >/dev/null 2>&1; then
-  echo "port $MLX_PORT is already listening; not starting another mlx-lm server" >&2
+  for listener_pid in $(lsof -nP -iTCP:"$MLX_PORT" -sTCP:LISTEN -t 2>/dev/null); do
+    listener_command=$(ps -p "$listener_pid" -o command= 2>/dev/null || true)
+    case "$listener_command" in
+      *mlx_lm.server*)
+        echo "$listener_pid" > "$MLX_PID_FILE"
+        echo "mlx-lm server is already listening on port $MLX_PORT with pid $listener_pid"
+        echo "log: $MLX_LOG_FILE"
+        echo "health: curl http://127.0.0.1:$MLX_PORT/v1/models"
+        exit 0
+        ;;
+    esac
+  done
+  echo "port $MLX_PORT is already listening, but it is not an mlx-lm server; not starting another mlx-lm server" >&2
   exit 1
 fi
 

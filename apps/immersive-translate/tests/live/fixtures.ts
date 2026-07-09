@@ -557,6 +557,76 @@ VTT opening caption
       return;
     }
 
+    if (pathname.includes("article-table")) {
+      response.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+      response.end(`<!doctype html><html><head><title>Table Article Fixture</title></head><body>
+                <main>
+                    <h1>Provider Table Fixture</h1>
+                    <p>The table below lists supported DNS providers.</p>
+                    <table>
+                        <thead>
+                            <tr><th>Provider</th><th>Maintainers</th><th>Tutorials</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="/providers/aws-route53">AWS Route 53</a></td>
+                                <td>@dnsmaintainer</td>
+                                <td><a href="/tutorials/route53">Route 53 public and private zones guide</a></td>
+                            </tr>
+                            <tr>
+                                <td><a href="/providers/google-cloud-dns">Google Cloud DNS</a></td>
+                                <td></td>
+                                <td><a href="/tutorials/gke">GKE default ingress tutorial</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </main>
+            </body></html>`);
+      return;
+    }
+
+    if (pathname.includes("article-priority")) {
+      response.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+      response.end(`<!doctype html><html><head><title>Priority Article Fixture</title>
+                <style>
+                    .priority-spacer { height: 1200px; }
+                </style></head><body>
+                <main>
+                    <h1>Priority Article Fixture</h1>
+                    <p>Immediate paragraph for prioritized translation.</p>
+                    <p>Second immediate paragraph for prioritized translation.</p>
+                    <p>Third immediate paragraph for prioritized translation.</p>
+                    <p>Fourth immediate paragraph for prioritized translation.</p>
+                    <p>Fifth immediate paragraph for prioritized translation.</p>
+                    <p>Sixth immediate paragraph for prioritized translation.</p>
+                    <p>Seventh immediate paragraph for prioritized translation.</p>
+                    <p>Eighth immediate paragraph for prioritized translation.</p>
+                    <div class="priority-spacer" aria-hidden="true"></div>
+                    <p>Deferred bottom paragraph for background translation.</p>
+                    <p>Second deferred bottom paragraph for background translation.</p>
+                </main>
+            </body></html>`);
+      return;
+    }
+
+    if (pathname.includes("article-spa")) {
+      response.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+      response.end(`<!doctype html><html><head><title>SPA Article Fixture</title></head><body>
+                <main id="spa-content">
+                    <h1>SPA Article Fixture</h1>
+                    <p>SPA first page body for session translation.</p>
+                    <button id="spa-route" type="button">Navigate SPA article</button>
+                </main>
+                <script>
+                    document.querySelector('#spa-route').addEventListener('click', () => {
+                        history.pushState({}, '', '/article-spa-next');
+                        document.querySelector('#spa-content').innerHTML = '<h1>SPA Next Article Fixture</h1><p>SPA second page body after route change.</p>';
+                    });
+                </script>
+            </body></html>`);
+      return;
+    }
+
     if (pathname.includes("article-empty")) {
       response.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
       response.end(`<!doctype html><html><head><title>Control Heavy Article</title></head><body>
@@ -581,6 +651,28 @@ VTT opening caption
                     <p>Second slow paragraph for cancellation testing.</p>
                     <p>Third slow paragraph for cancellation testing.</p>
                 </article>
+            </body></html>`);
+      return;
+    }
+
+    if (pathname.includes("article-many")) {
+      response.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+      response.end(`<!doctype html><html><head><title>Long Scroll Article Fixture</title></head><body>
+                <main>
+                    <h1>Long Scroll Article Fixture</h1>
+                    <p>Long article paragraph 01 for full page translation.</p>
+                    <p>Long article paragraph 02 for full page translation.</p>
+                    <p>Long article paragraph 03 for full page translation.</p>
+                    <p>Long article paragraph 04 for full page translation.</p>
+                    <p>Long article paragraph 05 for full page translation.</p>
+                    <p>Long article paragraph 06 for full page translation.</p>
+                    <p>Long article paragraph 07 for full page translation.</p>
+                    <p>Long article paragraph 08 for full page translation.</p>
+                    <p>Long article paragraph 09 for full page translation.</p>
+                    <p>Long article paragraph 10 for full page translation.</p>
+                    <p>Long article paragraph 11 for full page translation.</p>
+                    <p>Long article paragraph 12 for full page translation.</p>
+                </main>
             </body></html>`);
       return;
     }

@@ -36,7 +36,7 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
   type PageCaptionLineOrder = "original-first" | "translated-first";
   type PageCaptionFontSize = "small" | "medium" | "large";
   type PageCaptionOverlayPosition = "top" | "bottom";
-  type FloatingStatusKind = "ready" | "running" | "active" | "error";
+  type FloatingStatusKind = "inactive" | "running" | "active" | "error";
 
   interface PageCaptionDisplayPreferences {
     readonly displayMode: PageCaptionDisplayMode;
@@ -53,6 +53,8 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
     readonly index: number;
     readonly tagName: string;
     readonly text: string;
+    readonly documentTop: number;
+    readonly documentBottom: number;
     readonly translatedText: string | null;
     readonly displayText: string;
   }
@@ -81,6 +83,7 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
       captionPreferences: PageCaptionDisplayPreferences;
       webpageBlocks: readonly PageWebpageBlock[];
       webpageDisplayMode: PageWebpageDisplayMode;
+      webpageTranslationSessionActive: boolean;
     };
   };
 
@@ -88,7 +91,6 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
   const floatingControlId = "immersive-translate-floating-control";
   const floatingRailSelector = `#${floatingRailId}, [data-testid="floating-translate-rail"]`;
   const floatingControlSelector = `#${floatingControlId}, [data-testid="floating-translate-control"]`;
-  const floatingStatusSelector = '[data-testid="floating-translate-status"]';
   const defaultYouTubeCaptionLanguageCodes = ["en", "ko"] as const;
   const koreanTextPattern = /[\u3131-\u318e\uac00-\ud7a3]/;
 
@@ -127,15 +129,8 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
     pruneDuplicateFloatingTargets();
     const rail = document.querySelector(floatingRailSelector);
     const control = document.querySelector(floatingControlSelector);
-    const status = document.querySelector(floatingStatusSelector);
-    if (
-      !showExistingFloatingTarget(rail) ||
-      !showExistingFloatingTarget(control) ||
-      !showExistingFloatingTarget(status)
-    ) {
-      return false;
-    }
-    if (control instanceof HTMLElement && !control.dataset.state) control.dataset.state = "ready";
+    if (!showExistingFloatingTarget(rail) || !showExistingFloatingTarget(control)) return false;
+    if (control instanceof HTMLElement && !control.dataset.state) control.dataset.state = "inactive";
     return true;
   }
 
@@ -165,6 +160,7 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
     },
     webpageBlocks: [] as readonly PageWebpageBlock[],
     webpageDisplayMode: "bilingual",
+    webpageTranslationSessionActive: false,
   };
 
   function assignStyles(element: HTMLElement, styles: Partial<CSSStyleDeclaration>): void {
@@ -195,8 +191,14 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
     if (value === "detecting" || value === "collecting" || value === "translating") {
       return "running";
     }
-    if (value === "rendered") return "active";
-    return "ready";
+    return bridgeState.webpageTranslationSessionActive ? "active" : "inactive";
+  }
+
+  function floatingStatusLabelForKind(kind: FloatingStatusKind): string {
+    if (kind === "error") return "번역 장애";
+    if (kind === "running") return "페이지 번역 중";
+    if (kind === "active") return "페이지 번역 끄기";
+    return "페이지 번역 켜기";
   }
 
   function isPageRecord(value: unknown): value is Record<string, unknown> {
@@ -867,10 +869,6 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
       "footer",
       "header",
       "input",
-      "table",
-      "tbody",
-      "tfoot",
-      "thead",
       "textarea",
       "select",
       "script",
@@ -886,6 +884,10 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
     if (element.closest(skippedSelector)) return true;
     const link = element.closest("a");
     return link !== null && element.textContent?.trim() === link.textContent?.trim();
+  }
+
+  function isTableCellWebpageElement(element: Element): boolean {
+    return /^(td|th)$/i.test(element.tagName);
   }
 
   function isLinkOnlyWebpageElement(element: Element, text: string): boolean {
@@ -928,7 +930,9 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
     if (isElementHidden(element) || isInsideSkippedWebpageElement(element)) return false;
     const text = normalizePageText(element.textContent ?? "");
     if (text.length < 2) return false;
-    if (isLinkOnlyWebpageElement(element, text)) return false;
+    if (isLinkOnlyWebpageElement(element, text) && !isTableCellWebpageElement(element)) {
+      return false;
+    }
     return true;
   }
 
@@ -942,6 +946,8 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
       "h6",
       "p",
       "li",
+      "th",
+      "td",
       "blockquote",
       "figcaption",
       "summary",
@@ -980,17 +986,22 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
     if (!root) {
       return { ok: false, state: "failed", message: "The page body is not available." };
     }
+    const viewportHeight =
+      window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight || 1;
     const candidates = collectReadableWebpageElements(root);
-    const blocks = candidates.slice(0, 8).flatMap((element, sourceIndex) => {
+    const blocks = candidates.flatMap((element, sourceIndex) => {
       if (isElementHidden(element) || isInsideSkippedWebpageElement(element)) return [];
       const text = normalizePageText(element.textContent ?? "");
       if (!text) return [];
       const tagName = element.tagName.toLowerCase();
       const id = `webpage-block-${sourceIndex}-${hashPageBlockId(`${tagName}:${text}`)}`;
+      const rect = element.getBoundingClientRect();
+      const documentTop = Math.max(0, window.scrollY + rect.top);
+      const documentBottom = Math.max(documentTop, window.scrollY + rect.bottom);
       element.dataset.tabShelfWebpageSourceId = id;
       element.dataset.immersiveTranslateSourceBlock = "true";
       if (!element.getAttribute("data-testid")) element.setAttribute("data-testid", "source-block");
-      return [{ id, index: sourceIndex, tagName, text }];
+      return [{ id, index: sourceIndex, tagName, text, documentTop, documentBottom }];
     });
     if (blocks.length === 0) {
       return {
@@ -999,7 +1010,7 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
         message: "No readable article-like text blocks were found on this page.",
       };
     }
-    return { ok: true, state: "blocks", blocks };
+    return { ok: true, state: "blocks", blocks, viewportHeight };
   }
 
   function parsePageWebpageBlock(value: unknown): PageWebpageBlock | null {
@@ -1008,6 +1019,10 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
     if (typeof value.index !== "number") return null;
     if (typeof value.tagName !== "string") return null;
     if (typeof value.text !== "string") return null;
+    if (typeof value.documentTop !== "number" || !Number.isFinite(value.documentTop)) return null;
+    if (typeof value.documentBottom !== "number" || !Number.isFinite(value.documentBottom)) {
+      return null;
+    }
     if (value.translatedText !== null && typeof value.translatedText !== "string") return null;
     if (typeof value.displayText !== "string") return null;
     return {
@@ -1015,6 +1030,8 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
       index: value.index,
       tagName: value.tagName,
       text: value.text,
+      documentTop: value.documentTop,
+      documentBottom: value.documentBottom,
       translatedText: value.translatedText,
       displayText: value.displayText,
     };
@@ -1079,6 +1096,25 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
     block: PageWebpageBlock,
     targetLanguage: string,
   ): HTMLElement {
+    if (isTableCellWebpageElement(source)) {
+      const existing = source.querySelector(
+        `[data-tab-shelf-webpage-translation="true"][data-tab-shelf-webpage-block-id="${CSS.escape(
+          block.id,
+        )}"]`,
+      );
+      if (existing instanceof HTMLElement) return existing;
+      const node = document.createElement("div");
+      node.dataset.testid = "translated-block";
+      node.dataset.tabShelfWebpageTranslation = "true";
+      node.dataset.tabShelfWebpageBlockId = block.id;
+      node.dataset.webpageParagraphTranslation = "true";
+      node.setAttribute("data-webpage-paragraph-translation", "true");
+      node.setAttribute("lang", targetLanguage);
+      syncWebpageTranslationStyle(source, node);
+      source.append(node);
+      return node;
+    }
+
     if (isHeadingWebpageElement(source)) {
       const inline = source.querySelector(
         `[data-tab-shelf-webpage-translation="true"][data-tab-shelf-webpage-block-id="${CSS.escape(
@@ -1774,17 +1810,27 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
   assignVisuallyHiddenStyles(badge);
   document.documentElement.append(badge);
 
-  let updateFloatingStatus = (_kind: FloatingStatusKind, _message: string): void => {};
+  let updateFloatingStatus = (_kind: FloatingStatusKind, _message?: string): void => {};
 
   function sendControlRequest(message: Record<string, unknown>): void {
     if (!controlScope) return;
     const runtime = (globalThis as typeof globalThis & { chrome: ContentScriptChromeApi }).chrome
       .runtime;
-    void runtime.sendMessage({ scope: controlScope, ...message }).catch(() => {
-      const messageText = "번역 요청을 보낼 수 없습니다.";
-      badge.textContent = messageText;
-      updateFloatingStatus("error", messageText);
-    });
+    void runtime
+      .sendMessage({ scope: controlScope, ...message })
+      .then((response: unknown) => {
+        if (!isPageRecord(response)) return;
+        if (typeof response.webpageTranslationSessionActive !== "boolean") return;
+        bridgeState.webpageTranslationSessionActive = response.webpageTranslationSessionActive;
+        updateFloatingStatus(
+          bridgeState.webpageTranslationSessionActive ? "active" : "inactive",
+        );
+      })
+      .catch(() => {
+        const messageText = "번역 요청을 보낼 수 없습니다.";
+        badge.textContent = messageText;
+        updateFloatingStatus("error");
+      });
   }
 
   function runFloatingPrimaryAction(): void {
@@ -1792,22 +1838,15 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
       sendControlRequest({ type: "run-caption-translation" });
       const message = "영상 자막 번역을 시작합니다.";
       badge.textContent = message;
-      updateFloatingStatus("running", message);
+      updateFloatingStatus("running");
       return;
     }
-    if (bridgeState.webpageBlocks.length === 0) {
-      sendControlRequest({ type: "run-webpage-translation" });
-      const message = "페이지 번역을 시작합니다.";
-      badge.textContent = message;
-      updateFloatingStatus("running", message);
-      return;
-    }
-    const displayMode = bridgeState.webpageDisplayMode === "original" ? "bilingual" : "original";
-    sendControlRequest({ type: "set-webpage-display-mode", displayMode });
-    updateFloatingStatus(
-      displayMode === "original" ? "ready" : "active",
-      displayMode === "original" ? "페이지 번역을 숨겼습니다." : "페이지 번역이 활성화되었습니다.",
-    );
+    const active = !bridgeState.webpageTranslationSessionActive;
+    bridgeState.webpageTranslationSessionActive = active;
+    sendControlRequest({ type: "set-webpage-translation-session-active", active });
+    const message = active ? "페이지 번역을 시작합니다." : "페이지 번역을 끕니다.";
+    badge.textContent = message;
+    updateFloatingStatus(active ? "running" : "inactive");
   }
 
   const floatingRail = document.createElement("section");
@@ -1815,110 +1854,69 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
   floatingRail.dataset.testid = "floating-translate-rail";
   assignStyles(floatingRail, {
     position: "fixed",
-    right: "0",
+    right: "14px",
     top: "34%",
     zIndex: "2147483647",
-    display: "grid",
-    justifyItems: "end",
-    gap: "2px",
-    font: '500 12px/1.35 "Avenir Next", "Segoe UI", sans-serif',
-  });
-
-  const floatingClose = document.createElement("button");
-  floatingClose.type = "button";
-  floatingClose.dataset.testid = "floating-translate-close";
-  floatingClose.setAttribute("aria-label", "번역 상태 접기");
-  floatingClose.textContent = "×";
-  assignStyles(floatingClose, {
-    width: "16px",
-    height: "16px",
-    marginRight: "4px",
-    border: "0",
-    borderRadius: "999px",
-    background: "rgba(224, 226, 230, 0.88)",
-    color: "#ffffff",
-    font: '700 13px/1 "Avenir Next", "Segoe UI", sans-serif',
-    cursor: "pointer",
-    boxShadow: "0 8px 18px rgba(20, 31, 46, 0.12)",
+    width: "34px",
+    height: "34px",
+    font: '700 12px/1 "Avenir Next", "Segoe UI", sans-serif',
   });
 
   const floatingCluster = document.createElement("div");
   assignStyles(floatingCluster, {
     position: "relative",
-    display: "grid",
-    justifyItems: "end",
+    width: "34px",
+    height: "34px",
   });
 
   const floatingControl = document.createElement("button");
   floatingControl.id = floatingControlId;
   floatingControl.dataset.testid = "floating-translate-control";
   floatingControl.type = "button";
-  floatingControl.textContent = "A";
-  floatingControl.setAttribute("aria-label", "클릭 번역");
+  floatingControl.textContent = "TR";
+  floatingControl.setAttribute("aria-label", "페이지 번역 켜기");
   assignStyles(floatingControl, {
-    width: "40px",
-    height: "40px",
+    width: "34px",
+    height: "34px",
     border: "0",
-    borderRadius: "999px 0 0 999px",
-    background: "#22805f",
+    borderRadius: "999px",
+    background: "#f28bb4",
     color: "#ffffff",
-    font: '800 18px/1 "Avenir Next", "Segoe UI", sans-serif',
-    boxShadow: "0 8px 18px rgba(34, 128, 95, 0.28)",
+    font: '800 12px/1 "Avenir Next", "Segoe UI", sans-serif',
+    boxShadow: "0 10px 24px rgba(242, 139, 180, 0.26)",
     cursor: "pointer",
+    padding: "0",
+    textAlign: "center",
   });
 
-  const floatingTooltip = document.createElement("div");
-  floatingTooltip.dataset.testid = "floating-translate-tooltip";
-  floatingTooltip.textContent = "클릭 번역";
-  assignStyles(floatingTooltip, {
+  const floatingActiveIndicator = document.createElement("span");
+  floatingActiveIndicator.dataset.testid = "floating-translate-active-indicator";
+  floatingActiveIndicator.setAttribute("aria-hidden", "true");
+  assignStyles(floatingActiveIndicator, {
     position: "absolute",
-    right: "16px",
-    top: "28px",
-    minWidth: "72px",
-    padding: "4px 6px",
-    border: "1px solid rgba(20, 31, 46, 0.12)",
-    borderRadius: "2px",
-    background: "#eef0f3",
-    color: "#30343b",
-    boxShadow: "0 8px 22px rgba(20, 31, 46, 0.14)",
-    font: '500 12px/1.2 "Avenir Next", "Segoe UI", sans-serif',
-    whiteSpace: "nowrap",
-  });
-
-  const floatingStatus = document.createElement("div");
-  floatingStatus.dataset.testid = "floating-translate-status";
-  floatingStatus.textContent = "번역 활성화됨";
-  assignStyles(floatingStatus, {
-    position: "absolute",
-    right: "48px",
-    top: "0",
-    boxSizing: "border-box",
-    minWidth: "150px",
-    maxWidth: "min(280px, calc(100vw - 72px))",
-    padding: "8px 10px",
-    border: "1px solid rgba(34, 128, 95, 0.32)",
-    borderRadius: "6px",
-    background: "#ecf8f2",
-    color: "#165f47",
-    boxShadow: "0 12px 28px rgba(20, 31, 46, 0.16)",
-    font: '700 12px/1.35 "Avenir Next", "Segoe UI", sans-serif',
-    whiteSpace: "normal",
-    overflowWrap: "break-word",
+    right: "-1px",
+    bottom: "-1px",
+    width: "10px",
+    height: "10px",
+    border: "2px solid #ffffff",
+    borderRadius: "999px",
+    background: "#5ee48b",
+    boxShadow: "0 4px 10px rgba(94, 228, 139, 0.32)",
   });
 
   function styleFloatingStatus(kind: FloatingStatusKind): void {
     const styles: Record<FloatingStatusKind, Partial<CSSStyleDeclaration>> = {
-      ready: {
-        background: "#22805f",
-        boxShadow: "0 8px 18px rgba(34, 128, 95, 0.28)",
+      inactive: {
+        background: "#f28bb4",
+        boxShadow: "0 10px 24px rgba(242, 139, 180, 0.26)",
       },
       active: {
-        background: "#128453",
-        boxShadow: "0 10px 22px rgba(18, 132, 83, 0.32)",
+        background: "#f28bb4",
+        boxShadow: "0 10px 24px rgba(242, 139, 180, 0.26)",
       },
       running: {
-        background: "#b7791f",
-        boxShadow: "0 10px 22px rgba(183, 121, 31, 0.26)",
+        background: "#f28bb4",
+        boxShadow: "0 10px 24px rgba(242, 139, 180, 0.32)",
       },
       error: {
         background: "#b42318",
@@ -1927,50 +1925,24 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
     };
     assignStyles(floatingControl, styles[kind]);
     floatingControl.dataset.state = kind;
-
-    if (kind === "error") {
-      assignStyles(floatingStatus, {
-        border: "1px solid rgba(180, 35, 24, 0.35)",
-        background: "#fff1f0",
-        color: "#9f1f17",
-        display: "",
-      });
-      return;
+    if (bridgeState.webpageTranslationSessionActive) {
+      if (!floatingActiveIndicator.isConnected) floatingCluster.append(floatingActiveIndicator);
+    } else {
+      floatingActiveIndicator.remove();
     }
-    if (kind === "running") {
-      assignStyles(floatingStatus, {
-        border: "1px solid rgba(183, 121, 31, 0.34)",
-        background: "#fff7e8",
-        color: "#825312",
-        display: "",
-      });
-      return;
-    }
-    assignStyles(floatingStatus, {
-      border: "1px solid rgba(34, 128, 95, 0.32)",
-      background: "#ecf8f2",
-      color: "#165f47",
-      display: "",
-    });
   }
 
-  updateFloatingStatus = (kind, message): void => {
-    const label =
-      kind === "error" ? "번역 장애" : kind === "running" ? "번역 처리 중" : "번역 활성화됨";
+  updateFloatingStatus = (kind): void => {
+    const label = floatingStatusLabelForKind(kind);
     floatingControl.setAttribute("aria-label", label);
-    floatingTooltip.textContent = label;
-    floatingStatus.textContent = message;
     styleFloatingStatus(kind);
   };
 
   floatingControl.addEventListener("click", runFloatingPrimaryAction);
-  floatingClose.addEventListener("click", () => {
-    floatingStatus.style.display = "none";
-  });
-  floatingCluster.append(floatingControl, floatingTooltip, floatingStatus);
-  floatingRail.append(floatingClose, floatingCluster);
+  floatingCluster.append(floatingControl);
+  floatingRail.append(floatingCluster);
   document.documentElement.append(floatingRail);
-  updateFloatingStatus("ready", "번역 활성화됨");
+  updateFloatingStatus("inactive");
 
   window.addEventListener("yt-navigate-finish", clearStaleYouTubeStateFromEvent);
   window.addEventListener("yt-player-updated", clearStaleYouTubeStateFromEvent);
@@ -1996,7 +1968,14 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
           : "페이지 번역 상태가 변경되었습니다.";
       const stateName = typeof record.webpageState.name === "string" ? record.webpageState.name : "";
       badge.textContent = messageText;
-      updateFloatingStatus(floatingStatusKindForStateName(stateName), messageText);
+      updateFloatingStatus(floatingStatusKindForStateName(stateName));
+      sendResponse({ ok: true });
+      return true;
+    }
+
+    if (record.type === "show-webpage-session-state" && typeof record.active === "boolean") {
+      bridgeState.webpageTranslationSessionActive = record.active;
+      updateFloatingStatus(record.active ? "active" : "inactive");
       sendResponse({ ok: true });
       return true;
     }
@@ -2033,7 +2012,9 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
     if (record.type === "clear-webpage-translation") {
       clearWebpageTranslation();
       badge.textContent = "페이지 번역을 지웠습니다.";
-      updateFloatingStatus("ready", "페이지 번역을 지웠습니다.");
+      updateFloatingStatus(
+        bridgeState.webpageTranslationSessionActive ? "active" : "inactive",
+      );
       sendResponse({ ok: true });
       return true;
     }
@@ -2053,8 +2034,9 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
       if (stateName !== "detecting" && stateName !== "translating") {
         bridgeState.captionRefreshPending = false;
       }
+      badge.textContent = messageText;
       setCaptionState(messageText);
-      updateFloatingStatus(floatingStatusKindForStateName(stateName), messageText);
+      updateFloatingStatus(floatingStatusKindForStateName(stateName));
       sendResponse({ ok: true });
       return true;
     }
@@ -2067,11 +2049,12 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
         typeof record.generatedCaptionState.message === "string"
           ? record.generatedCaptionState.message
           : "자막 생성 상태가 변경되었습니다.";
+      badge.textContent = messageText;
       ensureOverlay();
       if (bridgeState.statusLine) bridgeState.statusLine.textContent = messageText;
       const stateName =
         typeof record.generatedCaptionState.name === "string" ? record.generatedCaptionState.name : "";
-      updateFloatingStatus(floatingStatusKindForStateName(stateName), messageText);
+      updateFloatingStatus(floatingStatusKindForStateName(stateName));
       sendResponse({ ok: true });
       return true;
     }
@@ -2100,7 +2083,7 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
         if (video) attachVideo(video);
       }
       setCaptionState("자막 번역을 표시하는 중...");
-      updateFloatingStatus("active", "자막 번역을 표시하는 중...");
+      updateFloatingStatus("active");
       renderActiveCues();
       sendResponse({
         ok: true,

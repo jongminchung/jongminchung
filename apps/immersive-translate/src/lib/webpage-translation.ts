@@ -7,6 +7,8 @@ export interface WebpageTextBlockDraft {
   readonly index?: number;
   readonly tagName?: string;
   readonly text: string;
+  readonly documentTop?: number;
+  readonly documentBottom?: number;
 }
 
 export interface WebpageTextBlock {
@@ -14,6 +16,8 @@ export interface WebpageTextBlock {
   readonly index: number;
   readonly tagName: string;
   readonly text: string;
+  readonly documentTop: number;
+  readonly documentBottom: number;
 }
 
 export interface TranslatedWebpageTextBlock extends WebpageTextBlock {
@@ -28,6 +32,10 @@ function normalizeWhitespace(text: string): string {
 function normalizeTagName(tagName: string | undefined): string {
   const normalized = tagName?.trim().toLowerCase() ?? "";
   return normalized || "div";
+}
+
+function normalizeDocumentOffset(value: number | undefined): number {
+  return typeof value === "number" && Number.isFinite(value) ? Math.max(0, value) : 0;
 }
 
 function hashStableId(value: string): string {
@@ -59,7 +67,9 @@ export function normalizeReadableTextBlocks(
         : sourceIndex;
     const tagName = normalizeTagName(draft.tagName);
     const id = draft.id?.trim() || blockId(index, tagName, text);
-    return [{ id, index, tagName, text }];
+    const documentTop = normalizeDocumentOffset(draft.documentTop);
+    const documentBottom = Math.max(documentTop, normalizeDocumentOffset(draft.documentBottom));
+    return [{ id, index, tagName, text, documentTop, documentBottom }];
   });
 }
 

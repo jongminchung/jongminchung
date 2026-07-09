@@ -8,15 +8,7 @@ export default defineConfig({
     name: "Tobi Immersive Translate",
     description: "Translate webpages, captions, DOCX, and EPUB documents with a local endpoint.",
     permissions: ["storage", "tabs", "activeTab", "scripting"],
-    host_permissions: [
-      "http://127.0.0.1/*",
-      "http://localhost/*",
-      "https://local-translation.test/*",
-      "https://go.dev/*",
-      "https://www.youtube.com/*",
-      "https://youtube.com/*",
-      "https://m.youtube.com/*",
-    ],
+    host_permissions: ["http://*/*", "https://*/*"],
     action: {
       default_title: "Tobi Immersive Translate",
     },

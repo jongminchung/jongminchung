@@ -19,6 +19,55 @@ interface ExtensionStorage {
   };
 }
 
+interface ElementBox {
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+}
+
+function requireElementBox(box: ElementBox | null, label: string): ElementBox {
+  if (box === null) throw new Error(`${label} is not visible.`);
+  return box;
+}
+
+async function assertFloatingOverlayLayout(page: Page): Promise<void> {
+  const controlBox = await page.getByTestId("floating-translate-control").boundingBox();
+  const control = requireElementBox(controlBox, "floating control");
+  await expect(page.getByTestId("floating-translate-control")).toHaveText("TR");
+  expect(control.width).toBeLessThanOrEqual(36);
+  expect(control.height).toBeLessThanOrEqual(36);
+  expect(control.x).toBeGreaterThanOrEqual(0);
+  expect(control.y).toBeGreaterThanOrEqual(0);
+  await expect(page.getByTestId("floating-translate-status")).toHaveCount(0);
+  await expect(page.getByTestId("floating-translate-tooltip")).toHaveCount(0);
+  await expect(page.getByTestId("floating-translate-close")).toHaveCount(0);
+}
+
+async function expectFloatingSessionInactive(page: Page): Promise<void> {
+  await expect(page.getByTestId("floating-translate-control")).toHaveAttribute(
+    "data-state",
+    "inactive",
+  );
+  await expect(page.getByTestId("floating-translate-control")).toHaveAttribute(
+    "aria-label",
+    "페이지 번역 켜기",
+  );
+  await expect(page.getByTestId("floating-translate-active-indicator")).toHaveCount(0);
+}
+
+async function expectFloatingSessionActive(page: Page): Promise<void> {
+  await expect(page.getByTestId("floating-translate-control")).toHaveAttribute(
+    "data-state",
+    "active",
+  );
+  await expect(page.getByTestId("floating-translate-control")).toHaveAttribute(
+    "aria-label",
+    "페이지 번역 끄기",
+  );
+  await expect(page.getByTestId("floating-translate-active-indicator")).toBeVisible();
+}
+
 async function openImmersivePopup(context: BrowserContext, extensionId: string): Promise<Page> {
   const page = await context.newPage();
   await page.goto(`chrome-extension://${extensionId}/popup.html`);
@@ -117,12 +166,8 @@ async function translateWithFloatingToggle(page: Page): Promise<void> {
   const control = page.getByTestId("floating-translate-control");
   await expect(control).toHaveCount(1);
   await expect(control).toBeVisible({ timeout: 30_000 });
-  const controlBox = await control.boundingBox();
-  expect(controlBox?.width).toBeLessThanOrEqual(42);
-  expect(controlBox?.height).toBeLessThanOrEqual(42);
-  await expect(control).toHaveAttribute("data-state", "ready");
-  await expect(page.getByTestId("floating-translate-tooltip")).toHaveText("번역 활성화됨");
-  await expect(page.getByTestId("floating-translate-status")).toContainText("번역 활성화됨");
+  await assertFloatingOverlayLayout(page);
+  await expectFloatingSessionInactive(page);
   await expect(page.getByTestId("translated-block")).toHaveCount(0);
   await control.click();
   await expect(page.getByTestId("floating-translate-control")).toHaveCount(1);
@@ -268,13 +313,8 @@ test.describe("Immersive Translate floating toggle QA", () => {
     await translateWithFloatingToggle(articlePage);
 
     await expect(articlePage.getByText("웹페이지 번역 첫 문단")).toBeVisible();
-    await expect(articlePage.getByTestId("floating-translate-control")).toHaveAttribute(
-      "data-state",
-      "active",
-    );
-    await expect(articlePage.getByTestId("floating-translate-status")).toContainText(
-      "페이지 번역이 표시되었습니다.",
-    );
+    await expectFloatingSessionActive(articlePage);
+    await assertFloatingOverlayLayout(articlePage);
     await expect(articlePage.getByTestId("source-block").first()).toBeVisible();
     await expect(articlePage.getByTestId("translated-block").first()).toBeVisible();
     await captureQaScreenshot(
@@ -286,16 +326,255 @@ test.describe("Immersive Translate floating toggle QA", () => {
     );
     expect(requests[0]).toMatchObject({ source: "en", target: "ko" });
 
-    await articlePage.getByTestId("floating-translate-close").click();
-    await expect(articlePage.getByTestId("floating-translate-control")).toBeVisible();
-    await expect(articlePage.getByTestId("floating-translate-status")).not.toBeVisible();
     await articlePage.getByTestId("floating-translate-control").click();
-    await expect(articlePage.getByTestId("floating-translate-status")).toBeVisible();
-    await expect(articlePage.getByTestId("translated-block").first()).not.toBeVisible();
-    await articlePage.getByTestId("floating-translate-control").click();
-    await expect(articlePage.getByTestId("translated-block").first()).toBeVisible();
+    await expectFloatingSessionInactive(articlePage);
+    await expect(articlePage.getByTestId("translated-block")).toHaveCount(0);
     await expect(articlePage.getByTestId("floating-translate-gear")).toHaveCount(0);
     await expect(articlePage.getByTestId("translation-service-select")).toHaveCount(0);
+  });
+
+  test("keeps webpage translation enabled for the browser session", async ({
+    context,
+    localSite,
+  }) => {
+    await context.route(DEFAULT_TRANSLATION_ENDPOINT, async (route: Route) => {
+      const payload = JSON.parse(route.request().postData() ?? "{}") as {
+        readonly q?: unknown;
+      };
+      const sourceTexts = Array.isArray(payload.q)
+        ? payload.q.filter((text): text is string => typeof text === "string")
+        : [];
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          translatedText: sourceTexts.map((text) => {
+            if (text.includes("Second page opening")) return "세션 두 번째 페이지 번역";
+            if (text.includes("Third page should")) return "세션 꺼짐 후 번역되면 안 됨";
+            if (text.includes("Opening paragraph")) return "세션 첫 페이지 번역";
+            return "세션 페이지 번역";
+          }),
+        }),
+      });
+    });
+
+    const firstPage = await context.newPage();
+    await firstPage.goto(`${localSite.origin}/article`);
+    await translateWithFloatingToggle(firstPage);
+    await expect(firstPage.getByText("세션 첫 페이지 번역")).toBeVisible();
+    await expectFloatingSessionActive(firstPage);
+
+    const secondPage = await context.newPage();
+    await secondPage.goto(`${localSite.origin}/article-next`);
+    await expect(secondPage.getByText("세션 두 번째 페이지 번역")).toBeVisible({
+      timeout: 30_000,
+    });
+    await expectFloatingSessionActive(secondPage);
+
+    await secondPage.getByTestId("floating-translate-control").click();
+    await expectFloatingSessionInactive(secondPage);
+    await expect(secondPage.getByTestId("translated-block")).toHaveCount(0);
+
+    const thirdPage = await context.newPage();
+    await thirdPage.goto(`${localSite.origin}/article-third`);
+    await expect(thirdPage.getByTestId("floating-translate-control")).toBeVisible({
+      timeout: 30_000,
+    });
+    await expectFloatingSessionInactive(thirdPage);
+    await expect(thirdPage.getByTestId("translated-block")).toHaveCount(0);
+    await expect(thirdPage.getByText("세션 꺼짐 후 번역되면 안 됨")).toHaveCount(0);
+  });
+
+  test("auto-translates active sessions after same-tab and SPA navigation", async ({
+    context,
+    localSite,
+  }) => {
+    await context.route(DEFAULT_TRANSLATION_ENDPOINT, async (route: Route) => {
+      const payload = JSON.parse(route.request().postData() ?? "{}") as {
+        readonly q?: unknown;
+      };
+      const sourceTexts = Array.isArray(payload.q)
+        ? payload.q.filter((text): text is string => typeof text === "string")
+        : [];
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          translatedText: sourceTexts.map((text) => {
+            if (text.includes("Second page opening")) return "같은 탭 두 번째 페이지 번역";
+            if (text.includes("SPA first page body")) return "SPA 첫 페이지 자동 번역";
+            if (text.includes("SPA second page body")) return "SPA 두 번째 페이지 자동 번역";
+            if (text.includes("Opening paragraph")) return "같은 탭 첫 페이지 번역";
+            return "자동 이동 번역";
+          }),
+        }),
+      });
+    });
+
+    const page = await context.newPage();
+    await page.goto(`${localSite.origin}/article`);
+    await translateWithFloatingToggle(page);
+    await expect(page.getByText("같은 탭 첫 페이지 번역")).toBeVisible();
+    await expectFloatingSessionActive(page);
+
+    await page.goto(`${localSite.origin}/article-next`);
+    await expect(page.getByText("같은 탭 두 번째 페이지 번역")).toBeVisible({
+      timeout: 30_000,
+    });
+    await expectFloatingSessionActive(page);
+
+    await page.goto(`${localSite.origin}/article-spa`);
+    await expect(page.getByText("SPA 첫 페이지 자동 번역")).toBeVisible({ timeout: 30_000 });
+    await page.locator("#spa-route").click();
+    await expect(page).toHaveURL(/\/article-spa-next$/);
+    await expect(page.getByText("SPA 두 번째 페이지 자동 번역")).toBeVisible({
+      timeout: 30_000,
+    });
+    await expectFloatingSessionActive(page);
+  });
+
+  test("renders the first two viewport range before background webpage chunks", async ({
+    context,
+    localSite,
+  }) => {
+    const requests: (readonly string[])[] = [];
+    let releaseSecondRequest: (() => void) | null = null;
+    const secondRequestRelease = new Promise<void>((resolve) => {
+      releaseSecondRequest = resolve;
+    });
+    let deferredRequestCount = 0;
+    let releaseDeferredRequest: (() => void) | null = null;
+    const deferredRequestRelease = new Promise<void>((resolve) => {
+      releaseDeferredRequest = resolve;
+    });
+    const requestTextsAt = (index: number): readonly string[] => {
+      const request = requests[index];
+      if (!request) throw new Error(`Translation request ${index + 1} was not captured.`);
+      return request;
+    };
+    await context.route(DEFAULT_TRANSLATION_ENDPOINT, async (route: Route) => {
+      const payload = JSON.parse(route.request().postData() ?? "{}") as {
+        readonly q?: unknown;
+      };
+      const sourceTexts = Array.isArray(payload.q)
+        ? payload.q.filter((text): text is string => typeof text === "string")
+        : [];
+      requests.push(sourceTexts);
+      if (requests.length === 2) {
+        await secondRequestRelease;
+      }
+      if (sourceTexts.some((text) => text.includes("Deferred bottom paragraph"))) {
+        deferredRequestCount += 1;
+        await deferredRequestRelease;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          translatedText: sourceTexts.map((text) => {
+            if (text === "Priority Article Fixture") return "첫 렌더 제목 번역";
+            if (text.includes("Immediate paragraph")) return "우선순위 상단 문단 번역";
+            if (text.includes("Deferred bottom paragraph")) return "백그라운드 하단 문단 번역";
+            return "우선순위 문서 번역";
+          }),
+        }),
+      });
+    });
+
+    const priorityPage = await context.newPage();
+    await priorityPage.setViewportSize({ width: 900, height: 360 });
+    await priorityPage.goto(`${localSite.origin}/article-priority`);
+    await translateWithFloatingToggle(priorityPage);
+
+    await expect.poll(() => requests.length, { timeout: 10_000 }).toBeGreaterThanOrEqual(2);
+    expect(requestTextsAt(0)).toHaveLength(1);
+    expect(requestTextsAt(1)).toHaveLength(1);
+    await expect(priorityPage.getByText("첫 렌더 제목 번역")).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(priorityPage.getByText("우선순위 상단 문단 번역")).toHaveCount(0);
+    releaseSecondRequest?.();
+    await expect(priorityPage.getByText("우선순위 상단 문단 번역").first()).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(priorityPage.getByText("백그라운드 하단 문단 번역")).toHaveCount(0);
+    await expect.poll(() => deferredRequestCount, { timeout: 10_000 }).toBeGreaterThan(0);
+    releaseDeferredRequest?.();
+    await expect(priorityPage.getByText("백그라운드 하단 문단 번역").first()).toBeVisible({
+      timeout: 10_000,
+    });
+    await expectFloatingSessionActive(priorityPage);
+  });
+
+  test("translates webpage blocks below the initial viewport", async ({ context, localSite }) => {
+    await context.route(DEFAULT_TRANSLATION_ENDPOINT, async (route: Route) => {
+      const payload = JSON.parse(route.request().postData() ?? "{}") as {
+        readonly q?: unknown;
+      };
+      const sourceTexts = Array.isArray(payload.q)
+        ? payload.q.filter((text): text is string => typeof text === "string")
+        : [];
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          translatedText: sourceTexts.map((text) =>
+            text.includes("paragraph 12")
+              ? "긴 문서 마지막 문단까지 번역됨"
+              : "긴 문서 본문 번역",
+          ),
+        }),
+      });
+    });
+
+    const longPage = await context.newPage();
+    await longPage.setViewportSize({ width: 900, height: 360 });
+    await longPage.goto(`${localSite.origin}/article-many`);
+    await translateWithFloatingToggle(longPage);
+
+    const finalTranslation = longPage.getByText("긴 문서 마지막 문단까지 번역됨");
+    await finalTranslation.scrollIntoViewIfNeeded();
+    await expect(finalTranslation).toBeVisible();
+    await expect(longPage.getByTestId("translated-block")).toHaveCount(13);
+    await expectFloatingSessionActive(longPage);
+  });
+
+  test("translates readable table cells in documentation pages", async ({ context, localSite }) => {
+    await context.route(DEFAULT_TRANSLATION_ENDPOINT, async (route: Route) => {
+      const payload = JSON.parse(route.request().postData() ?? "{}") as {
+        readonly q?: unknown;
+      };
+      const sourceTexts = Array.isArray(payload.q)
+        ? payload.q.filter((text): text is string => typeof text === "string")
+        : [];
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          translatedText: sourceTexts.map((text) => {
+            if (text === "Provider") return "제공자";
+            if (text.includes("AWS Route 53")) return "AWS Route 53 번역";
+            if (text.includes("Route 53 public")) return "Route 53 튜토리얼 번역";
+            if (text.includes("Google Cloud DNS")) return "Google Cloud DNS 번역";
+            return "테이블 문서 번역";
+          }),
+        }),
+      });
+    });
+
+    const tablePage = await context.newPage();
+    await tablePage.goto(`${localSite.origin}/article-table`);
+    await translateWithFloatingToggle(tablePage);
+
+    const table = tablePage.locator("table");
+    await expect(table.getByText("제공자")).toBeVisible();
+    await expect(table.getByText("AWS Route 53 번역")).toBeVisible();
+    await expect(table.getByText("Route 53 튜토리얼 번역")).toBeVisible();
+    await expect(table.getByText("Google Cloud DNS 번역")).toBeVisible();
+    await expect
+      .poll(() => table.locator('[data-tab-shelf-webpage-translation="true"]').count())
+      .toBeGreaterThan(5);
+    await expectFloatingSessionActive(tablePage);
   });
 
   test("translates Korean webpages to English through the same floating toggle", async ({
@@ -330,6 +609,7 @@ test.describe("Immersive Translate floating toggle QA", () => {
     await expect(
       koreanPage.getByText("The first paragraph verifies Korean webpage translation."),
     ).toBeVisible();
+    await expectFloatingSessionActive(koreanPage);
   });
 
   test("places Go documentation translations naturally inside the document", async ({
@@ -369,6 +649,8 @@ test.describe("Immersive Translate floating toggle QA", () => {
       goDocsPage.locator("[data-webpage-paragraph-translation='true']").first(),
     ).toBeVisible();
     await expect(goDocsPage.getByRole("navigation")).toBeVisible();
+    await expectFloatingSessionActive(goDocsPage);
+    await assertFloatingOverlayLayout(goDocsPage);
     await captureQaScreenshot(
       testInfo,
       goDocsPage,
@@ -820,9 +1102,10 @@ test.describe("Immersive Translate floating toggle QA", () => {
       "data-state",
       "error",
     );
-    await expect(youtubePage.getByTestId("floating-translate-status")).toContainText(
+    await expect(youtubePage.locator("#tab-shelf-translation-bridge-status")).toContainText(
       /사용할 수 있는 영상 자막이 없습니다|영상 자막 정보를 읽지 못했습니다/,
     );
+    await assertFloatingOverlayLayout(youtubePage);
     await expect(youtubePage.locator("#transcript-section")).toHaveCSS("display", "none");
     await expect(youtubePage.locator("#transcript-panel")).toHaveAttribute("hidden", "");
     await expect(youtubePage.getByTestId("caption-original-line")).toHaveCount(0);
@@ -900,6 +1183,7 @@ if (envFlag("REAL_TRANSLATION_QA")) {
       await expect(goDocsPage.getByTestId("translated-block").first()).toBeVisible({
         timeout: 90_000,
       });
+      await assertFloatingOverlayLayout(goDocsPage);
       const translatedText = await goDocsPage.getByTestId("translated-block").allTextContents();
       expectKoreanText(translatedText.join("\n"));
       await captureQaScreenshot(
@@ -964,6 +1248,9 @@ if (envFlag("REAL_NETWORK_QA")) {
       await expect(goDocsPage.getByTestId("translated-block").first()).toBeVisible({
         timeout: 210_000,
       });
+      await assertFloatingOverlayLayout(goDocsPage);
+      const translatedBlockCount = await goDocsPage.getByTestId("translated-block").count();
+      expect(translatedBlockCount).toBeGreaterThan(8);
       const translatedText = await goDocsPage.getByTestId("translated-block").allTextContents();
       expectKoreanText(translatedText.join("\n"));
       await captureQaScreenshot(

@@ -41,6 +41,7 @@ import {
   isBidirectionalKoEnTargetLanguage,
   LocalTranslationRepository,
   LocalTranslationService,
+  type StorageAreaLike,
   type LocalTranslationError,
   type LocalTranslationSettings,
   type TranslationInput,
@@ -51,7 +52,9 @@ import {
 import {
   buildWebpageTranslationInputs,
   composeTranslatedWebpageBlocks,
+  type TranslatedWebpageTextBlock,
   type WebpageDisplayMode,
+  type WebpageTextBlock,
 } from "./webpage-translation";
 import { preferredYouTubeCaptionLanguageCodes } from "./youtube-captions";
 import { youtubeVideoIdFromUrl } from "./youtube-url";
@@ -68,16 +71,25 @@ export interface ActiveTabTranslationRequestContext {
 
 const localTranslationRepository = LocalTranslationRepository.ofStorage(browser.storage.local);
 const stateStore = ActiveTabTranslationStateStore.create();
+const WEBPAGE_TRANSLATION_SESSION_STORAGE_KEY = "TS_webpageTranslationSession";
 const CAPTION_TRANSLATION_BATCH_SIZE = 4;
 const INITIAL_CAPTION_TRANSLATION_BATCH_SIZE = 3;
 const BACKGROUND_CAPTION_TRANSLATION_BATCH_SIZE = 8;
 const CAPTION_PREFETCH_LOOKAHEAD_SECONDS = 60;
 const CAPTION_PREFETCH_MINIMUM_CUE_COUNT = 20;
+const INITIAL_WEBPAGE_VIEWPORT_MULTIPLIER = 2;
+const INITIAL_WEBPAGE_MIN_BLOCKS = 8;
+const INITIAL_WEBPAGE_FIRST_PAINT_BLOCKS = 4;
 const PAGE_CAPTION_COLLECTION_TIMEOUT_MS = 4_000;
 const LOCAL_TRANSLATION_WARMUP_TIMEOUT_MS = 4_000;
 const LOCAL_TRANSLATION_WARMUP_TTL_MS = 10 * 60_000;
 const localTranslationWarmups = new Map<string, number>();
 const captionSessionsByTabId = new Map<number, CaptionTranslationSession>();
+let fallbackWebpageTranslationSessionActive = false;
+
+interface BrowserStorageWithSession {
+  readonly session?: StorageAreaLike;
+}
 
 interface YouTubePlayerSnapshot {
   readonly playerResponse: unknown;
@@ -116,6 +128,47 @@ interface CaptionTranslationSession {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
+}
+
+function sessionStorageArea(): StorageAreaLike | null {
+  const storage = browser.storage as typeof browser.storage & BrowserStorageWithSession;
+  return storage.session ?? null;
+}
+
+function readWebpageTranslationSessionActive(value: unknown): boolean | null {
+  if (!isRecord(value)) return null;
+  return typeof value.active === "boolean" ? value.active : null;
+}
+
+async function loadWebpageTranslationSessionActive(): Promise<boolean> {
+  const storage = sessionStorageArea();
+  if (!storage) return fallbackWebpageTranslationSessionActive;
+
+  try {
+    const result = await storage.get(WEBPAGE_TRANSLATION_SESSION_STORAGE_KEY);
+    const active = readWebpageTranslationSessionActive(
+      result[WEBPAGE_TRANSLATION_SESSION_STORAGE_KEY],
+    );
+    if (active === null) return fallbackWebpageTranslationSessionActive;
+    fallbackWebpageTranslationSessionActive = active;
+    return active;
+  } catch {
+    return fallbackWebpageTranslationSessionActive;
+  }
+}
+
+async function saveWebpageTranslationSessionActive(active: boolean): Promise<void> {
+  fallbackWebpageTranslationSessionActive = active;
+  const storage = sessionStorageArea();
+  if (!storage) return;
+
+  try {
+    await storage.set({
+      [WEBPAGE_TRANSLATION_SESSION_STORAGE_KEY]: { active },
+    });
+  } catch {
+    fallbackWebpageTranslationSessionActive = active;
+  }
 }
 
 function firstFailureMessage(
@@ -228,7 +281,10 @@ async function readStatus(
   context: ActiveTabTranslationRequestContext = {},
 ): Promise<ActiveTabTranslationStatus> {
   const tab = await findActiveTargetTab(context);
-  const settings = await localTranslationRepository.load();
+  const [settings, webpageTranslationSessionActive] = await Promise.all([
+    localTranslationRepository.load(),
+    loadWebpageTranslationSessionActive(),
+  ]);
   const tabId = tab?.id;
   return buildActiveTabTranslationStatus({
     tab,
@@ -246,6 +302,7 @@ async function readStatus(
       typeof tabId === "number"
         ? (stateStore.getWebpageState(tabId) ?? ACTIVE_TAB_WEBPAGE_IDLE_STATE)
         : ACTIVE_TAB_WEBPAGE_IDLE_STATE,
+    webpageTranslationSessionActive,
     lastError: typeof tabId === "number" ? stateStore.getLastError(tabId) : null,
   });
 }
@@ -502,6 +559,11 @@ async function installBridge(
     });
     stateStore.markBridgeReady(tabId);
     stateStore.clearLastError(tabId);
+    await sendPageMessage(tabId, {
+      scope: ACTIVE_TAB_TRANSLATION_PAGE_SCOPE,
+      type: "show-webpage-session-state",
+      active: await loadWebpageTranslationSessionActive(),
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Could not install bridge.";
     stateStore.setLastError(tabId, message);
@@ -1412,6 +1474,17 @@ async function updateWebpageState(tabId: number, state: ActiveTabWebpageState): 
   });
 }
 
+async function updateWebpageTranslationSessionState(
+  tabId: number,
+  active: boolean,
+): Promise<void> {
+  await sendPageMessage(tabId, {
+    scope: ACTIVE_TAB_TRANSLATION_PAGE_SCOPE,
+    type: "show-webpage-session-state",
+    active,
+  });
+}
+
 function rememberWebpageProgress(tabId: number, state: ActiveTabWebpageState): void {
   stateStore.setWebpageState(tabId, state);
   void sendPageMessage(tabId, {
@@ -1425,6 +1498,92 @@ function rememberWebpageProgress(tabId: number, state: ActiveTabWebpageState): v
   });
 }
 
+function safeWebpageChunkSize(batchSize: number): number {
+  return Math.max(1, Math.round(batchSize));
+}
+
+function selectInitialWebpageBlockIds(
+  blocks: readonly WebpageTextBlock[],
+  viewportHeight: number,
+): ReadonlySet<string> {
+  const initialWindowBottom = Math.max(1, viewportHeight) * INITIAL_WEBPAGE_VIEWPORT_MULTIPLIER;
+  const ids = new Set(
+    blocks
+      .filter((block) => block.documentTop <= initialWindowBottom)
+      .map((block) => block.id),
+  );
+  for (const block of blocks.slice(0, INITIAL_WEBPAGE_MIN_BLOCKS)) {
+    ids.add(block.id);
+  }
+  return ids;
+}
+
+function chunkWebpageBlocks(
+  blocks: readonly WebpageTextBlock[],
+  chunkSize: number,
+): readonly (readonly WebpageTextBlock[])[] {
+  const chunks: (readonly WebpageTextBlock[])[] = [];
+  for (let index = 0; index < blocks.length; index += chunkSize) {
+    chunks.push(blocks.slice(index, index + chunkSize));
+  }
+  return chunks;
+}
+
+function chunkInitialWebpageBlocksForFirstPaint(
+  blocks: readonly WebpageTextBlock[],
+  chunkSize: number,
+): readonly (readonly WebpageTextBlock[])[] {
+  const firstPaintBlocks = blocks
+    .slice(0, INITIAL_WEBPAGE_FIRST_PAINT_BLOCKS)
+    .map((block) => [block]);
+  return [
+    ...firstPaintBlocks,
+    ...chunkWebpageBlocks(blocks.slice(INITIAL_WEBPAGE_FIRST_PAINT_BLOCKS), chunkSize),
+  ];
+}
+
+function prioritizeWebpageTranslationChunks(input: {
+  readonly blocks: readonly WebpageTextBlock[];
+  readonly viewportHeight: number;
+  readonly batchSize: number;
+}): readonly (readonly WebpageTextBlock[])[] {
+  const initialIds = selectInitialWebpageBlockIds(input.blocks, input.viewportHeight);
+  const initialBlocks = input.blocks.filter((block) => initialIds.has(block.id));
+  const remainingBlocks = input.blocks.filter((block) => !initialIds.has(block.id));
+  const chunkSize = safeWebpageChunkSize(input.batchSize);
+  return [
+    ...chunkInitialWebpageBlocksForFirstPaint(initialBlocks, chunkSize),
+    ...chunkWebpageBlocks(remainingBlocks, chunkSize),
+  ];
+}
+
+function translatedWebpageBlocksForRender(input: {
+  readonly blocks: readonly WebpageTextBlock[];
+  readonly translationsById: ReadonlyMap<string, TranslationOutput>;
+}): readonly TranslatedWebpageTextBlock[] {
+  return composeTranslatedWebpageBlocks(input.blocks, [...input.translationsById.values()]).filter(
+    (block) => block.translatedText !== null,
+  );
+}
+
+async function renderCumulativeWebpageTranslations(input: {
+  readonly tabId: number;
+  readonly blocks: readonly WebpageTextBlock[];
+  readonly translationsById: ReadonlyMap<string, TranslationOutput>;
+  readonly displayMode: WebpageDisplayMode;
+  readonly targetLanguage: string;
+}): Promise<number> {
+  const renderedBlocks = translatedWebpageBlocksForRender(input);
+  await sendPageMessage(input.tabId, {
+    scope: ACTIVE_TAB_TRANSLATION_PAGE_SCOPE,
+    type: "render-webpage-translation",
+    blocks: renderedBlocks,
+    displayMode: input.displayMode,
+    targetLanguage: input.targetLanguage,
+  });
+  return renderedBlocks.length;
+}
+
 async function runWebpageTranslation(
   context: ActiveTabTranslationRequestContext = {},
 ): Promise<ActiveTabTranslationStatus> {
@@ -1433,6 +1592,10 @@ async function runWebpageTranslation(
     return status;
   const tabId = status.tabId;
   const displayMode = status.webpageState.displayMode;
+  await updateWebpageTranslationSessionState(
+    tabId,
+    await loadWebpageTranslationSessionActive(),
+  );
 
   const settings = await localTranslationRepository.load();
   if (!settings.enabled) {
@@ -1507,7 +1670,6 @@ async function runWebpageTranslation(
 
   const blocks = collection.blocks;
   const blockCount = blocks.length;
-  const inputs = buildWebpageTranslationInputs(blocks);
   await updateWebpageState(
     tabId,
     buildWebpageState({
@@ -1519,46 +1681,153 @@ async function runWebpageTranslation(
   );
 
   void (async (): Promise<void> => {
-    const result = await LocalTranslationService.runJob(settings, inputs, {
-      repository: localTranslationRepository,
-      signal: controller.signal,
-      onProgress: (progressResult) => {
-        rememberWebpageProgress(
+    const targetLanguage = isBidirectionalKoEnTargetLanguage(settings.targetLanguage)
+      ? "und"
+      : settings.targetLanguage;
+    const chunks = prioritizeWebpageTranslationChunks({
+      blocks,
+      viewportHeight: collection.viewportHeight,
+      batchSize: settings.batchSize,
+    });
+    const translationsById = new Map<string, TranslationOutput>();
+    const errors: LocalTranslationError[] = [];
+    let cacheHits = 0;
+    let cacheMisses = 0;
+    let failures = 0;
+    let renderedBlockCount = 0;
+
+    for (const chunk of chunks) {
+      if (controller.signal.aborted) break;
+      const completedBeforeChunk = translationsById.size;
+      const cacheHitsBeforeChunk = cacheHits;
+      const cacheMissesBeforeChunk = cacheMisses;
+      const failuresBeforeChunk = failures;
+      const result = await LocalTranslationService.runJob(
+        { ...settings, batchSize: Math.min(settings.batchSize, Math.max(1, chunk.length)) },
+        buildWebpageTranslationInputs(chunk),
+        {
+          repository: localTranslationRepository,
+          signal: controller.signal,
+          onProgress: (progressResult) => {
+            rememberWebpageProgress(
+              tabId,
+              buildWebpageState({
+                name: translationsById.size > 0 ? "rendered" : "translating",
+                message:
+                  translationsById.size > 0
+                    ? "페이지 번역이 표시되었습니다."
+                    : "페이지 본문을 번역하는 중...",
+                blockCount,
+                displayMode,
+                progress: {
+                  total: blockCount,
+                  completed: completedBeforeChunk + progressResult.progress.completed,
+                  cacheHits: cacheHitsBeforeChunk + progressResult.progress.cacheHits,
+                  cacheMisses: cacheMissesBeforeChunk + progressResult.progress.cacheMisses,
+                  failures: failuresBeforeChunk + progressResult.progress.failures,
+                },
+              }),
+            );
+          },
+        },
+      );
+
+      if (stateStore.getWebpageController(tabId) !== controller) return;
+
+      for (const translation of result.translations) {
+        translationsById.set(translation.id, translation);
+      }
+      errors.push(...result.errors);
+      cacheHits += result.progress.cacheHits;
+      cacheMisses += result.progress.cacheMisses;
+      failures += result.progress.failures;
+
+      if (result.status === "cancelled" || controller.signal.aborted) {
+        stateStore.deleteWebpageController(tabId);
+        const cancelledState = buildWebpageState({
+          name: "cancelled",
+          message: "페이지 번역을 취소했습니다.",
+          blockCount,
+          displayMode,
+          progress: {
+            total: blockCount,
+            completed: translationsById.size,
+            cacheHits,
+            cacheMisses,
+            failures,
+          },
+        });
+        await updateWebpageState(tabId, cancelledState);
+        return;
+      }
+
+      if (result.status === "failed" && translationsById.size === 0) {
+        const message = firstFailureMessage(result.errors, "페이지 번역에 실패했습니다.");
+        stateStore.deleteWebpageController(tabId);
+        const failedState = buildWebpageState({
+          name: "failed",
+          message,
+          blockCount,
+          displayMode,
+          progress: {
+            total: blockCount,
+            completed: 0,
+            cacheHits,
+            cacheMisses,
+            failures,
+          },
+        });
+        stateStore.setWebpageState(tabId, failedState);
+        stateStore.setLastError(tabId, failedState.message);
+        await updateWebpageState(tabId, failedState);
+        return;
+      }
+
+      if (translationsById.size > renderedBlockCount) {
+        renderedBlockCount = await renderCumulativeWebpageTranslations({
+          tabId,
+          blocks,
+          translationsById,
+          displayMode,
+          targetLanguage,
+        });
+        await updateWebpageState(
           tabId,
           buildWebpageState({
-            name: "translating",
-            message: "페이지 본문을 번역하는 중...",
+            name: "rendered",
+            message: "페이지 번역이 표시되었습니다.",
             blockCount,
             displayMode,
-            progress: progressResult.progress,
+            progress: {
+              total: blockCount,
+              completed: translationsById.size,
+              cacheHits,
+              cacheMisses,
+              failures,
+            },
           }),
         );
-      },
-    });
+      }
+
+      if (result.status === "failed") break;
+    }
 
     if (stateStore.getWebpageController(tabId) !== controller) return;
     stateStore.deleteWebpageController(tabId);
 
-    if (result.status === "cancelled" || controller.signal.aborted) {
-      const cancelledState = buildWebpageState({
-        name: "cancelled",
-        message: "페이지 번역을 취소했습니다.",
-        blockCount,
-        displayMode,
-        progress: result.progress,
-      });
-      await updateWebpageState(tabId, cancelledState);
-      return;
-    }
-
-    if (result.status === "failed") {
-      const message = firstFailureMessage(result.errors, "페이지 번역에 실패했습니다.");
+    if (translationsById.size === 0) {
       const failedState = buildWebpageState({
         name: "failed",
-        message,
+        message: firstFailureMessage(errors, "페이지 번역에 실패했습니다."),
         blockCount,
         displayMode,
-        progress: result.progress,
+        progress: {
+          total: blockCount,
+          completed: 0,
+          cacheHits,
+          cacheMisses,
+          failures,
+        },
       });
       stateStore.setWebpageState(tabId, failedState);
       stateStore.setLastError(tabId, failedState.message);
@@ -1566,29 +1835,32 @@ async function runWebpageTranslation(
       return;
     }
 
-    const renderedBlocks = composeTranslatedWebpageBlocks(blocks, result.translations);
-    await sendPageMessage(tabId, {
-      scope: ACTIVE_TAB_TRANSLATION_PAGE_SCOPE,
-      type: "render-webpage-translation",
-      blocks: renderedBlocks,
-      displayMode,
-      targetLanguage: isBidirectionalKoEnTargetLanguage(settings.targetLanguage)
-        ? "und"
-        : settings.targetLanguage,
-    });
     await updateWebpageState(
       tabId,
       buildWebpageState({
         name: "rendered",
         message: "페이지 번역이 표시되었습니다.",
-        blockCount: renderedBlocks.length,
+        blockCount,
         displayMode,
-        progress: result.progress,
+        progress: {
+          total: blockCount,
+          completed: translationsById.size,
+          cacheHits,
+          cacheMisses,
+          failures,
+        },
       }),
     );
-    stateStore.clearLastError(tabId);
+    if (errors.length > 0) {
+      stateStore.setLastError(tabId, firstFailureMessage(errors, "일부 페이지 번역에 실패했습니다."));
+    } else {
+      stateStore.clearLastError(tabId);
+    }
   })().catch((error: unknown) => {
     const message = error instanceof Error ? error.message : "페이지 번역에 실패했습니다.";
+    if (stateStore.getWebpageController(tabId) === controller) {
+      stateStore.deleteWebpageController(tabId);
+    }
     stateStore.setLastError(tabId, message);
     void updateWebpageState(
       tabId,
@@ -1651,6 +1923,18 @@ async function clearWebpageTranslation(
   return readStatus(context);
 }
 
+async function setWebpageTranslationSessionActive(
+  active: boolean,
+  context: ActiveTabTranslationRequestContext = {},
+): Promise<ActiveTabTranslationStatus> {
+  await saveWebpageTranslationSessionActive(active);
+  const status = await installBridge(context);
+  if (!status.pageSupported || status.bridgeState !== "ready" || status.tabId === null)
+    return readStatus(context);
+  await updateWebpageTranslationSessionState(status.tabId, active);
+  return active ? runWebpageTranslation(context) : clearWebpageTranslation(context);
+}
+
 async function setWebpageDisplayMode(
   displayMode: WebpageDisplayMode,
   context: ActiveTabTranslationRequestContext = {},
@@ -1690,6 +1974,9 @@ export async function handleControlRequest(
   if (request.type === "run-webpage-translation") return runWebpageTranslation(context);
   if (request.type === "cancel-webpage-translation") return cancelWebpageTranslation(context);
   if (request.type === "clear-webpage-translation") return clearWebpageTranslation(context);
+  if (request.type === "set-webpage-translation-session-active") {
+    return setWebpageTranslationSessionActive(request.active, context);
+  }
   if (request.type === "set-webpage-display-mode") {
     return setWebpageDisplayMode(request.displayMode, context);
   }

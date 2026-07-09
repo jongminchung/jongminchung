@@ -64,6 +64,11 @@ export type ActiveTabTranslationControlRequest =
     }
   | {
       readonly scope: typeof ACTIVE_TAB_TRANSLATION_CONTROL_SCOPE;
+      readonly type: "set-webpage-translation-session-active";
+      readonly active: boolean;
+    }
+  | {
+      readonly scope: typeof ACTIVE_TAB_TRANSLATION_CONTROL_SCOPE;
       readonly type: "set-webpage-display-mode";
       readonly displayMode: WebpageDisplayMode;
     }
@@ -124,6 +129,11 @@ export type ActiveTabTranslationBridgeRequest =
       readonly scope: typeof ACTIVE_TAB_TRANSLATION_PAGE_SCOPE;
       readonly type: "show-webpage-state";
       readonly webpageState: ActiveTabWebpageState;
+    }
+  | {
+      readonly scope: typeof ACTIVE_TAB_TRANSLATION_PAGE_SCOPE;
+      readonly type: "show-webpage-session-state";
+      readonly active: boolean;
     }
   | {
       readonly scope: typeof ACTIVE_TAB_TRANSLATION_PAGE_SCOPE;
@@ -211,6 +221,7 @@ export type ActiveTabWebpageCollectionResponse =
       readonly ok: true;
       readonly state: "blocks";
       readonly blocks: readonly WebpageTextBlock[];
+      readonly viewportHeight: number;
     }
   | {
       readonly ok: true;
@@ -259,6 +270,7 @@ export interface ActiveTabTranslationStatus {
   readonly captionState: ActiveTabCaptionState;
   readonly generatedCaptionState: ActiveTabGeneratedCaptionState;
   readonly webpageState: ActiveTabWebpageState;
+  readonly webpageTranslationSessionActive: boolean;
   readonly lastError: string | null;
 }
 
@@ -273,6 +285,7 @@ export interface ActiveTabTranslationStatusInput {
   readonly captionState?: ActiveTabCaptionState | null;
   readonly generatedCaptionState?: ActiveTabGeneratedCaptionState | null;
   readonly webpageState?: ActiveTabWebpageState | null;
+  readonly webpageTranslationSessionActive?: boolean;
   readonly lastError: string | null;
 }
 
@@ -534,11 +547,17 @@ function parseWebpageTextBlock(value: unknown): WebpageTextBlock | null {
   if (!isFiniteNumber(value.index) || value.index < 0) return null;
   if (typeof value.tagName !== "string" || !value.tagName.trim()) return null;
   if (typeof value.text !== "string" || !value.text.trim()) return null;
+  if (!isFiniteNumber(value.documentTop) || value.documentTop < 0) return null;
+  if (!isFiniteNumber(value.documentBottom) || value.documentBottom < value.documentTop) {
+    return null;
+  }
   return {
     id: value.id.trim(),
     index: value.index,
     tagName: value.tagName.trim().toLowerCase(),
     text: value.text.trim(),
+    documentTop: value.documentTop,
+    documentBottom: value.documentBottom,
   };
 }
 
@@ -629,6 +648,17 @@ export function parseControlRequest(value: unknown): ActiveTabTranslationControl
     value.type === "clear-webpage-translation"
   ) {
     return { scope: ACTIVE_TAB_TRANSLATION_CONTROL_SCOPE, type: value.type };
+  }
+
+  if (
+    value.type === "set-webpage-translation-session-active" &&
+    typeof value.active === "boolean"
+  ) {
+    return {
+      scope: ACTIVE_TAB_TRANSLATION_CONTROL_SCOPE,
+      type: "set-webpage-translation-session-active",
+      active: value.active,
+    };
   }
 
   if (value.type === "set-webpage-display-mode" && isWebpageDisplayMode(value.displayMode)) {
@@ -749,6 +779,14 @@ export function parseBridgeRequest(value: unknown): ActiveTabTranslationBridgeRe
     }
   }
 
+  if (value.type === "show-webpage-session-state" && typeof value.active === "boolean") {
+    return {
+      scope: ACTIVE_TAB_TRANSLATION_PAGE_SCOPE,
+      type: "show-webpage-session-state",
+      active: value.active,
+    };
+  }
+
   if (value.type === "render-webpage-translation" && isWebpageDisplayMode(value.displayMode)) {
     const blocks = parseTranslatedWebpageBlocks(value.blocks);
     if (blocks) {
@@ -825,7 +863,9 @@ export function parseWebpageCollectionResponse(
   if (value.state === "blocks") {
     const blocks = parseWebpageTextBlocks(value.blocks);
     if (!blocks || blocks.length === 0) return null;
-    return { ok: true, state: "blocks", blocks };
+    const viewportHeight =
+      isFiniteNumber(value.viewportHeight) && value.viewportHeight > 0 ? value.viewportHeight : 1;
+    return { ok: true, state: "blocks", blocks, viewportHeight };
   }
   return null;
 }
@@ -868,6 +908,7 @@ export function buildActiveTabTranslationStatus(
     captionState: input.captionState ?? ACTIVE_TAB_CAPTION_IDLE_STATE,
     generatedCaptionState: input.generatedCaptionState ?? ACTIVE_TAB_GENERATED_CAPTION_IDLE_STATE,
     webpageState: input.webpageState ?? ACTIVE_TAB_WEBPAGE_IDLE_STATE,
+    webpageTranslationSessionActive: input.webpageTranslationSessionActive ?? false,
     lastError: input.lastError,
   };
 }
