@@ -135,6 +135,28 @@
     "order": 3
   },
   {
+    "id": "handbook/app-icons",
+    "locale": "ko",
+    "section": "handbook",
+    "title": "앱 아이콘 시스템",
+    "description": "앱 사이에 경로를 복사하지 않고 하나의 오픈 위브 원본에서 모든 앱 아이콘을 생성합니다.",
+    "href": "/ko/handbook/app-icons",
+    "headings": [
+      "하나의 원본과 여러 소비자",
+      "산출물 작업",
+      "접근성과 새 앱"
+    ],
+    "tags": [
+      "brand",
+      "icon",
+      "accessibility",
+      "generated-assets"
+    ],
+    "apiSymbols": [],
+    "body": "Jamie 아이콘 패밀리는 열린 중심을 감싸는 두 개의 정밀한 리본을 기반으로 합니다. 개인 마크는 개방성과 신뢰할 수 있는 구조를 나타내고, Immersive Translate는 같은 비례를 서로 정보를 교환하는 두 언어 레인으로 변형합니다. 하나의 원본과 여러 소비자 @jongminchung/icon 이 팔레트, 도형, 승인된 변형, 미리보기 크기와 앱 산출물 매핑을 소유합니다. 앱은 SVG 경로를 복사하거나 PNG 스냅샷을 원본으로 사용하지 않습니다. 소비자 변형 사용처 ------------------- --------------------- ------------------------------------- README personal 헤더, favicon, 소셜 프리뷰 Docs personal 데스크톱·모바일 탐색, favicon Immersive Translate immersive-translate Chrome 확장 마스터 SVG와 해상도별 PNG 추적되는 앱 SVG와 PNG는 Next.js 메타데이터와 Chrome 확장이 실제 파일을 요구하기 때문에 존재하는 호환 산출물입니다. 산출물 작업 중앙 패키지를 변경한 뒤에만 생성기를 실행합니다. 빌드는 드리프트 검사를 수행하며 앱 산출물이 없거나 오래되면 중단됩니다. Playwright 사이즈 시트는 검토 기록이므로 의도적인 시각 승인 후에만 갱신합니다. 접근성과 새 앱 JAMIE , Docs , 제품명 같은 기존 텍스트를 접근 가능한 레이블로 유지하고 장식용 마크에는 빈 대체 텍스트를 사용합니다. 새 앱은 승인된 변형을 선택하고 필요한 파일을 중앙 대상 맵에 등록하며, 런타임 API를 가져오면 워크스페이스 의존성을 선언합니다. 마지막으로 실제 사용 크기를 검증한 뒤 시각 스냅샷을 갱신합니다.",
+    "order": 2
+  },
+  {
     "id": "handbook/collaboration",
     "locale": "ko",
     "section": "handbook",

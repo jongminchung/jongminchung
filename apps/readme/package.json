@@ -1,0 +1,29 @@
+{
+  "name": "@jongminchung/readme",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm run icon:check && tsc --noEmit && next build",
+    "dev": "pnpm run icon:check && next dev --port 3200",
+    "icon:check": "pnpm --dir ../.. run icon:check",
+    "start": "next start",
+    "test:e2e": "playwright test",
+    "test:e2e:update": "playwright test --update-snapshots",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@jongminchung/icon": "workspace:*",
+    "next": "16.2.10",
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.11.0",
+    "@playwright/test": "1.61.1",
+    "@types/node": "26.1.0",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "typescript": "catalog:"
+  }
+}

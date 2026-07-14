@@ -1,6 +1,20 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
+test("uses the canonical decorative brand mark for navigation and metadata", async ({
+  page,
+  request,
+}) => {
+  await page.goto("/en/overview");
+  const personalIcon = page.getByRole("link", { name: "Jongmin Chung Docs" }).locator("img");
+  await expect(personalIcon).toHaveAttribute("alt", "");
+  await expect(personalIcon).toHaveAttribute("src", /^data:image\/svg\+xml;base64,/u);
+
+  const favicon = await request.get("/icon.svg");
+  expect(favicon.ok()).toBe(true);
+  expect(await favicon.text()).not.toContain("<text");
+});
+
 test("global navigation, breadcrumb, outline, and explained search work by keyboard", async ({
   page,
 }) => {

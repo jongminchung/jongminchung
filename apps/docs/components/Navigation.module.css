@@ -12,25 +12,28 @@
   background: var(--color-background-body);
 }
 
-.brand,
-.mobileBrand {
+.brand {
   display: grid;
   width: 38px;
   height: 38px;
   place-items: center;
-  border-radius: 4px;
-  background: linear-gradient(135deg, #ff2d8d 0%, #7c3aed 52%, #2787ff 100%);
-  color: white;
-  font-family: var(--font-inter-tight), sans-serif;
-  font-size: 22px;
-  font-weight: 800;
   text-decoration: none;
+}
+
+.brandIcon,
+.mobileBrand {
+  display: block;
+  flex: 0 0 auto;
+}
+
+.brandIcon {
+  width: 38px;
+  height: 38px;
 }
 
 .mobileBrand {
   width: 30px;
   height: 30px;
-  font-size: 17px;
 }
 
 .version {

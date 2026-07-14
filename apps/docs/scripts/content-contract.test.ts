@@ -14,7 +14,7 @@ describe("documentation content contract", () => {
       locales.add(document.locale);
       localesById.set(document.id, locales);
     }
-    expect(manifest).toHaveLength(22);
+    expect(manifest).toHaveLength(24);
     for (const locales of localesById.values()) expect([...locales].sort()).toEqual(["en", "ko"]);
   });
 
@@ -23,6 +23,6 @@ describe("documentation content contract", () => {
       cwd: resolve(appRoot, "../.."),
       encoding: "utf8",
     });
-    expect(output).toContain("Validated 22 localized documents.");
+    expect(output).toContain("Validated 24 localized documents.");
   });
 });

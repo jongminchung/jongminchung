@@ -6,6 +6,7 @@ import { Icon, type IconType } from "@astryxdesign/core/Icon";
 import { SideNav, SideNavHeading, SideNavItem, SideNavSection } from "@astryxdesign/core/SideNav";
 import type { ThemeMode } from "@astryxdesign/core/theme";
 import { TopNav, TopNavHeading } from "@astryxdesign/core/TopNav";
+import { createIconDataUrl } from "@jongminchung/icon";
 import Link from "next/link";
 import { useState } from "react";
 import {
@@ -43,6 +44,7 @@ const sectionIcons: Readonly<Record<DocSection, IconType>> = {
 };
 
 const allSections = ["overview", "handbook", "packages", "deep-dive"] as const;
+const personalIcon = createIconDataUrl("personal");
 
 function sectionHref(
   locale: Locale,
@@ -149,8 +151,19 @@ export function GlobalRail({
       className={styles.globalRail}
       aria-label={locale === "ko" ? "전체 문서" : "All documentation"}
     >
-      <Link href={`/${locale}/overview`} className={styles.brand} aria-label="Jongmin Chung Docs">
-        J
+      <Link
+        href={`/${locale}/overview`}
+        className={styles.brand}
+        aria-label="Jongmin Chung Docs"
+      >
+        <img
+          alt=""
+          aria-hidden="true"
+          className={styles.brandIcon}
+          height="38"
+          src={personalIcon}
+          width="38"
+        />
       </Link>
       <span className={styles.version}>v1</span>
       <div className={styles.railSearch}>
@@ -276,7 +289,16 @@ export function MobileTopNavigation({ locale }: { readonly locale: Locale }) {
         <TopNavHeading
           heading="Docs"
           headingHref={`/${locale}/overview`}
-          logo={<span className={styles.mobileBrand}>J</span>}
+          logo={
+            <img
+              alt=""
+              aria-hidden="true"
+              className={styles.mobileBrand}
+              height="30"
+              src={personalIcon}
+              width="30"
+            />
+          }
         />
       }
       endContent={<SearchTrigger compact showShortcut={false} />}

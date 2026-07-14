@@ -135,6 +135,28 @@
     "order": 3
   },
   {
+    "id": "handbook/app-icons",
+    "locale": "en",
+    "section": "handbook",
+    "title": "App icon system",
+    "description": "Generate every app icon from one Open Weave source without copying paths between apps.",
+    "href": "/en/handbook/app-icons",
+    "headings": [
+      "One source, multiple consumers",
+      "Working with assets",
+      "Accessibility and new apps"
+    ],
+    "tags": [
+      "brand",
+      "icon",
+      "accessibility",
+      "generated-assets"
+    ],
+    "apiSymbols": [],
+    "body": "The Jamie icon family is built around two precise ribbons surrounding an open center. The personal mark represents openness and dependable structure. Immersive Translate uses the same proportions as two language lanes exchanging information. One source, multiple consumers @jongminchung/icon owns the palette, geometry, approved variants, preview sizes, and app output map. Apps must not copy SVG paths or treat a PNG snapshot as a source. Consumer Variant Use ------------------- --------------------- -------------------------------------------- README personal Header, favicon, and social preview Docs personal Desktop and mobile navigation, favicon Immersive Translate immersive-translate Chrome extension master SVG and raster sizes The tracked app SVG and PNG files exist because Next.js metadata and Chrome extensions require physical files. They are generated compatibility assets. Working with assets Run the generator only after changing the canonical package. Builds run the drift check and stop if an app asset is missing or stale. The Playwright size sheet is a review record and changes only after an intentional visual approval. Accessibility and new apps Keep JAMIE , Docs , or the product name as the accessible label. Decorative marks use empty alternative text. A new app selects an approved variant, registers every required output in the central target map, declares the workspace dependency when importing the runtime API, and verifies the icon at production sizes before updating a visual snapshot.",
+    "order": 2
+  },
+  {
     "id": "handbook/collaboration",
     "locale": "en",
     "section": "handbook",

@@ -9,6 +9,7 @@ const isProduction = process.env.NODE_ENV === "production";
 const nextConfig = {
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
   reactStrictMode: true,
+  transpilePackages: ["@jongminchung/icon"],
   ...(isProduction
     ? {
         turbopack: {

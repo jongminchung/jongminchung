@@ -19,6 +19,7 @@ catalog:
   "oxlint-tsgolint": "0.24.0"
   "react": "19.2.7"
   "react-dom": "19.2.7"
+  "sharp": "0.34.5"
   "tailwind-merge": "3.6.0"
   "tailwindcss": "4.3.2"
   "tsdown": "0.22.7"
