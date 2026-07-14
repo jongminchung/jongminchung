@@ -5,7 +5,6 @@ import { CommandPalette, CommandPaletteInput } from "@astryxdesign/core/CommandP
 import { Icon } from "@astryxdesign/core/Icon";
 import { Kbd } from "@astryxdesign/core/Kbd";
 import type { SearchSource, SearchableItem } from "@astryxdesign/core/Typeahead";
-import { useRouter } from "next/navigation";
 import {
   createContext,
   type ReactNode,
@@ -19,6 +18,7 @@ import {
 import type { DocSection, Locale, SearchDocument } from "@/lib/content-model";
 import { isLocale, sections } from "@/lib/content-model";
 import { searchDocuments, type SearchHit, type SearchMatchField } from "@/lib/search";
+import { useDocsNavigation } from "./RouteTransition";
 import styles from "./SearchPalette.module.css";
 
 interface SearchItemData {
@@ -183,7 +183,7 @@ export function SearchProvider({
   readonly locale: Locale;
   readonly children: ReactNode;
 }) {
-  const router = useRouter();
+  const { navigate } = useDocsNavigation();
   const lastTriggerRef = useRef<HTMLButtonElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const source = useMemo(() => DocsSearchSource.of(locale), [locale]);
@@ -211,7 +211,7 @@ export function SearchProvider({
 
   const selectItem = (href: string): void => {
     setOpen(false);
-    router.push(href);
+    navigate(href);
   };
 
   return (

@@ -23,7 +23,7 @@
       "navigation"
     ],
     "apiSymbols": [],
-    "body": "CSS 레이어와 Theme reset, core base, Neutral theme 순서를 명시해 토큰 우선순위를 예측 가능하게 만듭니다. defineTheme 의 extends 로 Neutral을 확장하면 기본 아이콘과 컴포넌트 계약을 유지하면서 색, 타입, 반경, 모션만 교체할 수 있습니다. 프레임 구성 AppShell 이 전체 높이와 모바일 내비게이션을 소유하고 TopNav , SideNav 를 slot으로 받습니다. 문서처럼 긴 페이지는 height=\"auto\" 를 사용해 페이지 스크롤을 유지합니다. LinkProvider 로 Next Link를 연결하면 Astryx 내비게이션도 클라이언트 전환을 사용합니다. 상호작용 컴포넌트 MobileNav 와 CommandPalette 는 네이티브 dialog 기반 동작을 제공해 포커스 트랩, Escape, backdrop, 스크롤 잠금을 일관되게 처리합니다. Outline 은 heading id를 대상으로 내장 scroll spy와 활성 indicator를 제공합니다. 실전 팁 - core, theme-neutral, cli 버전을 같은 0.1.5로 고정합니다. - 앱 고유 배치만 CSS Modules에 두고 상호작용 상태는 컴포넌트 API를 사용합니다. - Theme mode는 light dark system 하나의 상태로 관리합니다. - Tier 1에서는 의미와 기능을 완전히 유지하고, Tier 2는 시각 효과가 줄어도 탐색 가능해야 합니다. 실패 사례 CSS로 내부 DOM을 강제 변경 컴포넌트 내부 클래스와 구조에 의존하면 작은 라이브러리 변경에도 깨집니다. 공개 prop, token, defineTheme component override를 먼저 사용합니다. 중복 포커스 관리 네이티브 dialog가 제공하는 포커스와 scroll lock 위에 별도 전역 로직을 얹으면 복원 순서가 꼬입니다. Astryx의 open state와 callback만 제어합니다.",
+    "body": "CSS 레이어와 Theme reset, core base, Neutral theme 순서를 명시해 토큰 우선순위를 예측 가능하게 만듭니다. defineTheme 의 extends 로 Neutral을 확장하면 기본 색과 컴포넌트 계약을 유지하면서 타입, 반경, 모션만 교체할 수 있습니다. 프레임 구성 AppShell 이 전체 높이와 모바일 내비게이션을 소유하고 TopNav , SideNav 를 slot으로 받습니다. 문서처럼 긴 페이지는 height=\"auto\" 를 사용해 페이지 스크롤을 유지합니다. LinkProvider 로 Next Link를 연결하면 Astryx 내비게이션도 클라이언트 전환을 사용합니다. 상호작용 컴포넌트 MobileNav 와 CommandPalette 는 네이티브 dialog 기반 동작을 제공해 포커스 트랩, Escape, backdrop, 스크롤 잠금을 일관되게 처리합니다. Outline 은 heading id를 대상으로 내장 scroll spy와 활성 indicator를 제공합니다. 실전 팁 - core, theme-neutral, cli 버전을 같은 0.1.5로 고정합니다. - 배치는 Tailwind token bridge로 작성하고 중첩 문서 콘텐츠에만 안정적인 컴포넌트 selector를 사용합니다. - Theme mode는 light dark system 하나의 상태로 관리합니다. - Tier 1에서는 의미와 기능을 완전히 유지하고, Tier 2는 시각 효과가 줄어도 탐색 가능해야 합니다. 실패 사례 CSS로 내부 DOM을 강제 변경 컴포넌트 내부 클래스와 구조에 의존하면 작은 라이브러리 변경에도 깨집니다. 공개 prop, token, defineTheme component override를 먼저 사용합니다. 중복 포커스 관리 네이티브 dialog가 제공하는 포커스와 scroll lock 위에 별도 전역 로직을 얹으면 복원 순서가 꼬입니다. Astryx의 open state와 callback만 제어합니다.",
     "order": 4
   },
   {
@@ -220,11 +220,10 @@
     "locale": "ko",
     "section": "overview",
     "title": "Jongmin Chung Docs",
-    "description": "핸드북, 공개 패키지, 기반 기술을 하나의 지식 경로로 연결합니다.",
+    "description": "핸드북, 공개 패키지, 기반 기술 문서를 한곳에서 찾을 수 있습니다.",
     "href": "/ko/overview",
     "headings": [
       "가장 짧은 시작 경로",
-      "지식이 코드로 이어지는 방식",
       "필요한 깊이부터 선택하세요",
       "함께 다듬는 문서"
     ],
@@ -235,7 +234,7 @@
       "deep-dive"
     ],
     "apiSymbols": [],
-    "body": "가장 짧은 시작 경로 지식이 코드로 이어지는 방식 필요한 깊이부터 선택하세요 함께 다듬는 문서",
+    "body": "가장 짧은 시작 경로 필요한 깊이부터 선택하세요 함께 다듬는 문서",
     "order": 0
   },
   {

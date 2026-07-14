@@ -1,14 +1,8 @@
-import { CodeBlock } from "@astryxdesign/core/CodeBlock";
 import { Link } from "@astryxdesign/core/Link";
 import type { MDXComponents } from "mdx/types";
 import { isValidElement, type ComponentProps, type ReactNode } from "react";
-import {
-  KnowledgePath,
-  OverviewCards,
-  OverviewCta,
-  OverviewHero,
-  QuickStart,
-} from "@/components/OverviewBlocks";
+import { DocsCodeBlock } from "@/components/DocsCodeBlock";
+import { OverviewCards, OverviewCta, OverviewHero, QuickStart } from "@/components/OverviewBlocks";
 
 interface CodeElementProps {
   readonly children?: ReactNode;
@@ -19,7 +13,7 @@ function MdxPre({ children }: ComponentProps<"pre">) {
   if (!isValidElement<CodeElementProps>(children)) return <pre>{children}</pre>;
   const code = typeof children.props.children === "string" ? children.props.children.trimEnd() : "";
   const language = children.props.className?.replace("language-", "") ?? "text";
-  return <CodeBlock code={code} language={language} hasCopyButton hasLanguageLabel width="100%" />;
+  return <DocsCodeBlock code={code} language={language} />;
 }
 
 function MdxLink({ href = "", children }: ComponentProps<"a">) {
@@ -34,7 +28,6 @@ function MdxLink({ href = "", children }: ComponentProps<"a">) {
 const components = {
   a: MdxLink,
   pre: MdxPre,
-  KnowledgePath,
   OverviewCards,
   OverviewCta,
   OverviewHero,

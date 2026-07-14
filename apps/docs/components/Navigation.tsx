@@ -7,7 +7,6 @@ import { SideNav, SideNavHeading, SideNavItem, SideNavSection } from "@astryxdes
 import type { ThemeMode } from "@astryxdesign/core/theme";
 import { TopNav, TopNavHeading } from "@astryxdesign/core/TopNav";
 import { createIconDataUrl } from "@jongminchung/icon";
-import Link from "next/link";
 import { useState } from "react";
 import {
   displayTitleFor,
@@ -17,6 +16,7 @@ import {
 } from "@/lib/content-model";
 import { DeepDiveIcon, HandbookIcon, OverviewIcon, PackageIcon, RepositoryIcon } from "./DocsIcons";
 import { LocaleSwitcher } from "./LocaleSwitcher";
+import { TransitionLink } from "./RouteTransition";
 import { SearchTrigger } from "./SearchPalette";
 import { ThemeControl } from "./ThemeControl";
 import styles from "./Navigation.module.css";
@@ -151,7 +151,7 @@ export function GlobalRail({
       className={styles.globalRail}
       aria-label={locale === "ko" ? "전체 문서" : "All documentation"}
     >
-      <Link
+      <TransitionLink
         href={`/${locale}/overview`}
         className={styles.brand}
         aria-label="Jongmin Chung Docs"
@@ -164,14 +164,14 @@ export function GlobalRail({
           src={personalIcon}
           width="38"
         />
-      </Link>
+      </TransitionLink>
       <span className={styles.version}>v1</span>
       <div className={styles.railSearch}>
         <SearchTrigger compact />
       </div>
       <div className={styles.sectionLinks}>
         {allSections.map((section) => (
-          <Link
+          <TransitionLink
             key={section}
             href={sectionHref(locale, section, documents)}
             className={current.section === section ? styles.sectionLinkActive : styles.sectionLink}
@@ -179,7 +179,7 @@ export function GlobalRail({
           >
             <Icon icon={sectionIcons[section]} size="md" />
             <span>{sectionLabels[locale][section]}</span>
-          </Link>
+          </TransitionLink>
         ))}
       </div>
       <div className={styles.railFooter}>

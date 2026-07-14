@@ -92,7 +92,7 @@
     "locale": "en",
     "section": "overview",
     "title": "Jongmin Chung Docs",
-    "description": "Connect the handbook, public packages, and platform knowledge through one learning path.",
+    "description": "Find the handbook, public packages, and platform knowledge in one documentation hub.",
     "order": 0,
     "updatedAt": "2026-07-14",
     "tags": [
@@ -108,11 +108,6 @@
       {
         "id": "the-shortest-path-to-a-working-change",
         "label": "The shortest path to a working change",
-        "level": 2
-      },
-      {
-        "id": "how-knowledge-becomes-code",
-        "label": "How knowledge becomes code",
         "level": 2
       },
       {
@@ -746,7 +741,7 @@
     "locale": "ko",
     "section": "overview",
     "title": "Jongmin Chung Docs",
-    "description": "핸드북, 공개 패키지, 기반 기술을 하나의 지식 경로로 연결합니다.",
+    "description": "핸드북, 공개 패키지, 기반 기술 문서를 한곳에서 찾을 수 있습니다.",
     "order": 0,
     "updatedAt": "2026-07-14",
     "tags": [
@@ -762,11 +757,6 @@
       {
         "id": "가장-짧은-시작-경로",
         "label": "가장 짧은 시작 경로",
-        "level": 2
-      },
-      {
-        "id": "지식이-코드로-이어지는-방식",
-        "label": "지식이 코드로 이어지는 방식",
         "level": 2
       },
       {

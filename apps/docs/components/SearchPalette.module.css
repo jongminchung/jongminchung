@@ -9,6 +9,11 @@
   padding-inline: 7px;
 }
 
+.trigger :global(kbd),
+.compactTrigger :global(kbd) {
+  color: var(--color-text-primary);
+}
+
 .triggerLabel {
   display: inline-flex;
   align-items: center;
@@ -40,6 +45,6 @@
 
 .matchReason > span {
   flex: none;
-  color: var(--color-text-accent);
+  color: var(--color-text-purple);
   font-weight: 600;
 }

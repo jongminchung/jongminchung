@@ -1,0 +1,23 @@
+.progress {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 1000;
+  height: 3px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.progress > div {
+  gap: 0;
+}
+
+.progress [role="progressbar"] {
+  height: 3px;
+  border-radius: 0;
+  background: transparent;
+}
+
+.content {
+  width: 100%;
+  min-width: 0;
+}

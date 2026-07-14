@@ -1,10 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-test("uses the canonical decorative brand mark for navigation and metadata", async ({
-  page,
-  request,
-}) => {
+test("uses the canonical app icon for navigation and metadata", async ({ page, request }) => {
   await page.goto("/en/overview");
   const personalIcon = page.getByRole("link", { name: "Jongmin Chung Docs" }).locator("img");
   await expect(personalIcon).toHaveAttribute("alt", "");
@@ -39,6 +36,51 @@ test("global navigation, breadcrumb, outline, and explained search work by keybo
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/\/en\/packages\/tooling$/u);
+});
+
+test("internal navigation keeps the shell fixed while transitioning document content", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const measuredWindow = window as Window & { __docsViewTransitions: number };
+    measuredWindow.__docsViewTransitions = 0;
+    if (typeof document.startViewTransition !== "function") return;
+
+    const startViewTransition = document.startViewTransition.bind(document);
+    Object.defineProperty(document, "startViewTransition", {
+      configurable: true,
+      value: (callback: Parameters<Document["startViewTransition"]>[0]) => {
+        measuredWindow.__docsViewTransitions += 1;
+        return startViewTransition(callback);
+      },
+    });
+  });
+
+  await page.goto("/en/deep-dive/nextjs-16");
+  const rail = page.locator('nav[aria-label="All documentation"]');
+  const initialRail = await rail.boundingBox();
+  const content = page.locator("[data-docs-transition-content]");
+  await expect
+    .poll(() => content.evaluate((element) => getComputedStyle(element).viewTransitionName))
+    .toBe("docs-content");
+
+  await page
+    .locator('nav[aria-label="Side navigation"]:visible')
+    .getByRole("link", { name: "pnpm 11", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/en\/deep-dive\/pnpm-11$/u);
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => (window as Window & { __docsViewTransitions: number }).__docsViewTransitions,
+      ),
+    )
+    .toBeGreaterThan(0);
+
+  const finalRail = await rail.boundingBox();
+  expect(finalRail?.x).toBe(initialRail?.x);
+  expect(finalRail?.width).toBe(initialRail?.width);
+  await expect(page.locator("[data-docs-navigation-progress]")).toHaveCount(0);
 });
 
 test("short display titles preserve full SEO titles and consolidate source metadata", async ({
@@ -76,20 +118,108 @@ test("single-document overview navigation uses page headings without a duplicate
     }),
   ).toBeVisible();
   await expect(page.getByRole("complementary", { name: "On this page" })).toHaveCount(0);
+  await expect(page.locator("article figure")).toHaveCount(0);
+  await expect(page.getByText(/knowledge path|지식 경로/iu)).toHaveCount(0);
+  await expect
+    .poll(() =>
+      page
+        .locator('[data-overview-hero="true"]')
+        .evaluate((element) => getComputedStyle(element).backgroundImage),
+    )
+    .toBe("none");
 });
 
-test("locale, theme, deprecated banner, and 404 contracts remain visible", async ({ page }) => {
-  await page.goto("/en/packages/ui");
-  await expect(page.getByText("Deprecated: do not adopt for new work")).toBeVisible();
+test("locale, theme, removed package, and 404 contracts remain visible", async ({ page }) => {
+  await page.goto("/en/packages/remark-plantuml");
   await page.getByRole("link", { name: "한국어로 읽기" }).click();
-  await expect(page).toHaveURL(/\/ko\/packages\/ui$/u);
+  await expect(page).toHaveURL(/\/ko\/packages\/remark-plantuml$/u);
 
   const themeButton = page.getByRole("button", { name: /테마:/u });
   await themeButton.click();
   await expect.poll(() => page.locator("html").getAttribute("data-theme")).toBe("light");
 
+  for (const locale of ["en", "ko"] as const) {
+    const response = await page.goto(`/${locale}/packages/ui`);
+    expect(response?.status()).toBe(404);
+    await expect(
+      page.getByRole("heading", {
+        name: "Document not found",
+      }),
+    ).toBeVisible();
+  }
+
   await page.goto("/en/not-a-document");
   await expect(page.getByRole("heading", { name: "Document not found" })).toBeVisible();
+});
+
+test("document typography uses the Angular metric contract in both locales", async ({
+  browser,
+}) => {
+  const cases = [
+    { locale: "en", width: 1440 },
+    { locale: "ko", width: 1024 },
+    { locale: "en", width: 390 },
+  ] as const;
+
+  for (const { locale, width } of cases) {
+    const context = await browser.newContext({ viewport: { width, height: 900 } });
+    const page = await context.newPage();
+    await page.goto(`/${locale}/packages/remark-plantuml`);
+    const metrics = await page.evaluate(() => {
+      const article = document.querySelector("article");
+      const prose = document.querySelector('[data-docs-prose="true"]');
+      const title = article?.querySelector("h1");
+      const heading = prose?.querySelector("h2");
+      const paragraph = prose?.querySelector("p");
+      const listItem = prose?.querySelector("li");
+      const code = prose?.querySelector("pre code");
+      if (
+        !(article instanceof HTMLElement) ||
+        !(title instanceof HTMLElement) ||
+        !(heading instanceof HTMLElement) ||
+        !(paragraph instanceof HTMLElement) ||
+        !(listItem instanceof HTMLElement) ||
+        !(code instanceof HTMLElement)
+      ) {
+        throw new Error("Expected representative document typography elements.");
+      }
+      const titleStyle = getComputedStyle(title);
+      const headingStyle = getComputedStyle(heading);
+      const paragraphStyle = getComputedStyle(paragraph);
+      const listStyle = getComputedStyle(listItem);
+      const codeStyle = getComputedStyle(code);
+      return {
+        articleWidth: article.getBoundingClientRect().width,
+        bodyFontFamily: paragraphStyle.fontFamily,
+        bodyFontSize: paragraphStyle.fontSize,
+        bodyLetterSpacing: paragraphStyle.letterSpacing,
+        bodyLineHeight: paragraphStyle.lineHeight,
+        codeFontFamily: codeStyle.fontFamily,
+        codeFontSize: codeStyle.fontSize,
+        headingFontSize: headingStyle.fontSize,
+        headingFontWeight: headingStyle.fontWeight,
+        listLetterSpacing: listStyle.letterSpacing,
+        titleFontFamily: titleStyle.fontFamily,
+        titleFontSize: titleStyle.fontSize,
+        titleFontWeight: titleStyle.fontWeight,
+      };
+    });
+
+    expect(metrics.articleWidth).toBeLessThanOrEqual(710);
+    expect(metrics.bodyFontFamily).toContain("Inter");
+    expect(metrics.bodyFontSize).toBe("14px");
+    expect(metrics.bodyLineHeight).toBe("22.4px");
+    expect(metrics.bodyLetterSpacing).toBe("-0.14px");
+    expect(metrics.listLetterSpacing).toBe("-0.16px");
+    expect(metrics.titleFontFamily).toContain("Inter Tight");
+    expect(metrics.titleFontSize).toBe("36px");
+    expect(metrics.titleFontWeight).toBe("500");
+    expect(metrics.headingFontSize).toBe("32px");
+    expect(metrics.headingFontWeight).toBe("500");
+    expect(metrics.codeFontFamily).toContain("DM Mono");
+    expect(metrics.codeFontSize).toBe("14px");
+    await context.close();
+  }
 });
 
 test("mobile drawer follows current section, root tree, another section, and document flow", async ({
@@ -214,7 +344,9 @@ test("code preserves tokens and scrolls horizontally instead of breaking words",
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/en/deep-dive/nextjs-16");
-  const codeScroller = page.locator("pre code").first().locator("..").locator("..");
+  const codeBlock = page.locator(".astryx-codeblock.docs-code-block").first();
+  const codeScroller = codeBlock.locator('[role="group"]');
+  const firstLine = codeBlock.locator("[data-line]").first();
   const metrics = await codeScroller.evaluate((element) => ({
     clientWidth: element.clientWidth,
     overflowX: getComputedStyle(element).overflowX,
@@ -226,6 +358,18 @@ test("code preserves tokens and scrolls horizontally instead of breaking words",
   expect(metrics.overflowX).toBe("auto");
   expect(metrics.whiteSpace).toBe("pre");
   expect(metrics.wordBreak).toBe("normal");
+  await expect(codeBlock).toHaveCSS("border-radius", "4px");
+  await expect(codeBlock.locator("code")).toHaveCSS("font-size", "14px");
+  await expect(firstLine).toHaveCSS("padding-left", "16px");
+  await expect(firstLine).toHaveCSS("padding-top", "4px");
+
+  const copyButton = codeBlock.getByRole("button", { name: "Copy code" });
+  await expect(copyButton).toHaveCSS("opacity", "0");
+  await codeBlock.hover();
+  await expect(copyButton).toHaveCSS("opacity", "1");
+  await page.mouse.move(0, 0);
+  await copyButton.focus();
+  await expect(copyButton).toHaveCSS("opacity", "1");
 });
 
 test("representative pages have no Axe violations or console warnings", async ({ page }) => {
@@ -234,7 +378,11 @@ test("representative pages have no Axe violations or console warnings", async ({
     if (message.type() === "warning" || message.type() === "error") messages.push(message.text());
   });
 
-  for (const path of ["/en/handbook/ddd", "/en/packages/ui", "/en/deep-dive/pnpm-11"]) {
+  for (const path of [
+    "/en/handbook/ddd",
+    "/en/packages/remark-plantuml",
+    "/en/deep-dive/pnpm-11",
+  ]) {
     await page.goto(path, { waitUntil: "networkidle" });
     const results = await new AxeBuilder({ page }).analyze();
     expect(results.violations, `Axe violations at ${path}`).toEqual([]);

@@ -9,7 +9,7 @@
   align-items: center;
   padding: 18px 10px 12px;
   border-right: 1px solid var(--color-border);
-  background: var(--color-background-body);
+  background: var(--color-background-card);
 }
 
 .brand {
@@ -77,8 +77,8 @@
 }
 
 .sectionLinkActive {
-  color: var(--color-text-accent);
-  box-shadow: inset 3px 0 var(--color-accent);
+  color: var(--color-text-purple);
+  box-shadow: inset 3px 0 var(--color-text-purple);
 }
 
 .railFooter {
@@ -116,8 +116,8 @@
 
 .contextNavigation :global(.astryx-side-nav-item[data-selected="selected"]) {
   background: transparent;
-  color: var(--color-text-accent);
-  box-shadow: inset 3px 0 var(--color-accent);
+  color: var(--color-text-purple);
+  box-shadow: inset 3px 0 var(--color-text-purple);
 }
 
 .mobileNavigation {
@@ -137,7 +137,7 @@
   color: var(--color-text-primary);
   font-family: var(--font-inter-tight), sans-serif;
   font-size: 26px;
-  font-weight: 650;
+  font-weight: 500;
 }
 
 .mobileSectionTree {
@@ -170,7 +170,7 @@
   background: var(--color-background-surface);
   color: var(--color-text-primary);
   font-size: 17px;
-  font-weight: 650;
+  font-weight: 500;
 }
 
 .mobileContextNavigation {
@@ -184,8 +184,8 @@
 
 .mobileContextNavigation :global(.astryx-side-nav-item[data-selected="selected"]) {
   background: transparent;
-  color: var(--color-text-accent);
-  box-shadow: inset 3px 0 var(--color-accent);
+  color: var(--color-text-purple);
+  box-shadow: inset 3px 0 var(--color-text-purple);
 }
 
 .mobileUtilities {

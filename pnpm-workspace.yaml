@@ -8,12 +8,14 @@ allowBuilds:
   spawn-sync: true
 
 catalog:
+  "@tailwindcss/postcss": "4.3.2"
   "@types/node": "26.1.0"
   "@types/react": "19.2.17"
   "@types/react-dom": "19.2.3"
   "oxfmt": "0.57.0"
   "oxlint": "1.72.0"
   "oxlint-tsgolint": "0.24.0"
+  "postcss": "8.5.19"
   "react": "19.2.7"
   "react-dom": "19.2.7"
   "sharp": "0.34.5"
@@ -26,6 +28,7 @@ minimumReleaseAgeExclude:
   - "@astryxdesign/cli@0.1.5"
   - "@astryxdesign/core@0.1.5"
   - "@astryxdesign/theme-neutral@0.1.5"
+  - postcss@8.5.19
 
 onlyBuiltDependencies:
   - "esbuild"

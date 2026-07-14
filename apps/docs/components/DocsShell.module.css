@@ -1,6 +1,6 @@
 .shell {
   min-height: 100vh;
-  background: var(--color-background-body);
+  background: var(--color-background-card);
 }
 
 .navigationFrame {
@@ -28,7 +28,7 @@
   position: sticky;
   top: 0;
   z-index: 2;
-  background: color-mix(in srgb, var(--color-background-body) 90%, transparent);
+  background: color-mix(in srgb, var(--color-background-card) 90%, transparent);
   backdrop-filter: blur(12px);
 }
 

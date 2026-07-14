@@ -31,7 +31,7 @@ const cases = [
   },
   {
     name: "package-dark",
-    path: "/en/packages/ui",
+    path: "/en/packages/remark-plantuml",
     width: 1440,
     height: 1000,
     theme: "dark",

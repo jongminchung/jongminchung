@@ -6,12 +6,12 @@ import { Icon } from "@astryxdesign/core/Icon";
 import { LinkProvider } from "@astryxdesign/core/Link";
 import { MobileNav } from "@astryxdesign/core/MobileNav";
 import { Theme, type ThemeMode } from "@astryxdesign/core/theme";
-import NextLink from "next/link";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import { jongminDocsTheme } from "@/generated/jongmin-docs";
 import type { ContentManifestEntry, Locale } from "@/lib/content-model";
 import { ContextNavigation, GlobalRail, MobileNavigation, MobileTopNavigation } from "./Navigation";
+import { RouteTransitionContent, RouteTransitionProvider, TransitionLink } from "./RouteTransition";
 import { SearchProvider } from "./SearchPalette";
 import styles from "./DocsShell.module.css";
 
@@ -102,41 +102,43 @@ export function DocsShell({
 
   return (
     <Theme theme={jongminDocsTheme} mode={mode}>
-      <LinkProvider component={NextLink}>
-        <SearchProvider locale={locale}>
-          <AppShell
-            className={styles.shell}
-            variant="section"
-            height="auto"
-            contentPadding={0}
-            topNav={<MobileTopNavigation locale={locale} />}
-            sideNav={navigation}
-            mobileNav={{
-              breakpoint: "md",
-              content: (
-                <MobileNav
-                  header="Jongmin Chung Docs"
-                  label={locale === "ko" ? "모바일 문서 탐색" : "Mobile documentation navigation"}
-                  width={360}
-                  side="start"
-                >
-                  <MobileNavigation
-                    key={`${locale}:${current.section}`}
-                    locale={locale}
-                    current={current}
-                    documents={documents}
-                    mode={mode}
-                    onModeChange={changeMode}
-                  />
-                </MobileNav>
-              ),
-            }}
-          >
-            <TabletContextDrawer locale={locale} current={current} documents={documents} />
-            {children}
-          </AppShell>
-        </SearchProvider>
-      </LinkProvider>
+      <RouteTransitionProvider locale={locale}>
+        <LinkProvider component={TransitionLink}>
+          <SearchProvider locale={locale}>
+            <AppShell
+              className={styles.shell}
+              variant="section"
+              height="auto"
+              contentPadding={0}
+              topNav={<MobileTopNavigation locale={locale} />}
+              sideNav={navigation}
+              mobileNav={{
+                breakpoint: "md",
+                content: (
+                  <MobileNav
+                    header="Jongmin Chung Docs"
+                    label={locale === "ko" ? "모바일 문서 탐색" : "Mobile documentation navigation"}
+                    width={360}
+                    side="start"
+                  >
+                    <MobileNavigation
+                      key={`${locale}:${current.section}`}
+                      locale={locale}
+                      current={current}
+                      documents={documents}
+                      mode={mode}
+                      onModeChange={changeMode}
+                    />
+                  </MobileNav>
+                ),
+              }}
+            >
+              <TabletContextDrawer locale={locale} current={current} documents={documents} />
+              <RouteTransitionContent>{children}</RouteTransitionContent>
+            </AppShell>
+          </SearchProvider>
+        </LinkProvider>
+      </RouteTransitionProvider>
     </Theme>
   );
 }

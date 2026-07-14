@@ -23,7 +23,7 @@
       "navigation"
     ],
     "apiSymbols": [],
-    "body": "CSS layers and Theme Declare reset, core base, and Neutral theme order so token precedence is predictable. Extend Neutral through defineTheme to retain icons and component contracts while changing color, type, radii, and motion. Compose the frame AppShell owns page height and mobile navigation and receives TopNav and SideNav slots. Long documents use height=\"auto\" for page scrolling. LinkProvider connects Astryx navigation to Next Link. Interaction components MobileNav and CommandPalette use native dialog behavior for focus trapping, Escape, backdrop, and scroll locking. Outline targets heading IDs and supplies scroll spy and an active indicator. Practical tips - Pin core, theme-neutral, and cli to the same 0.1.5 release. - Keep app-specific layout in CSS Modules and interaction states in component APIs. - Model theme mode as one light dark system value. - Preserve complete meaning and function in Tier 1; Tier 2 may simplify effects but must remain navigable. Failure cases Overriding internal DOM with CSS Internal classes and structure are not a stable contract. Prefer public props, tokens, and defineTheme component overrides. Duplicating focus management Extra global focus and scroll-lock logic can conflict with native dialogs. Control Astryx open state and callbacks instead.",
+    "body": "CSS layers and Theme Declare reset, core base, and Neutral theme order so token precedence is predictable. Extend Neutral through defineTheme to retain its color and component contracts while changing type, radii, and motion. Compose the frame AppShell owns page height and mobile navigation and receives TopNav and SideNav slots. Long documents use height=\"auto\" for page scrolling. LinkProvider connects Astryx navigation to Next Link. Interaction components MobileNav and CommandPalette use native dialog behavior for focus trapping, Escape, backdrop, and scroll locking. Outline targets heading IDs and supplies scroll spy and an active indicator. Practical tips - Pin core, theme-neutral, and cli to the same 0.1.5 release. - Use the Tailwind token bridge for layout and stable component selectors only where nested document content requires them. - Model theme mode as one light dark system value. - Preserve complete meaning and function in Tier 1; Tier 2 may simplify effects but must remain navigable. Failure cases Overriding internal DOM with CSS Internal classes and structure are not a stable contract. Prefer public props, tokens, and defineTheme component overrides. Duplicating focus management Extra global focus and scroll-lock logic can conflict with native dialogs. Control Astryx open state and callbacks instead.",
     "order": 4
   },
   {
@@ -220,11 +220,10 @@
     "locale": "en",
     "section": "overview",
     "title": "Jongmin Chung Docs",
-    "description": "Connect the handbook, public packages, and platform knowledge through one learning path.",
+    "description": "Find the handbook, public packages, and platform knowledge in one documentation hub.",
     "href": "/en/overview",
     "headings": [
       "The shortest path to a working change",
-      "How knowledge becomes code",
       "Choose the depth you need",
       "Documentation shaped together"
     ],
@@ -235,7 +234,7 @@
       "deep-dive"
     ],
     "apiSymbols": [],
-    "body": "The shortest path to a working change How knowledge becomes code Choose the depth you need Documentation shaped together",
+    "body": "The shortest path to a working change Choose the depth you need Documentation shaped together",
     "order": 0
   },
   {

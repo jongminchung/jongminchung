@@ -58,10 +58,17 @@ export function DocumentPage({
   const title = displayTitleFor(metadata);
   const sectionHref = `/${locale}/${sectionFirstDocument[metadata.section]}`;
   return (
-    <div className={styles.pageFrame}>
-      <article className={isOverview ? styles.overviewArticle : styles.article} lang={locale}>
+    <div className="mx-auto grid w-full max-w-[1160px] grid-cols-[minmax(0,1fr)_224px] gap-8 px-[50px] pt-[50px] pb-24 max-[1400px]:block max-[1400px]:max-w-[860px] max-[1400px]:px-8 min-[769px]:max-[1024px]:pt-7 max-[600px]:px-4 max-[600px]:pt-8 max-[600px]:pb-[72px]">
+      <article
+        className={
+          isOverview
+            ? "col-span-full min-w-0"
+            : "min-w-0 w-full max-w-[80ch] justify-self-center text-[14px]"
+        }
+        lang={locale}
+      >
         {isOverview ? null : (
-          <header className={styles.documentHeader}>
+          <header className="border-b border-border pb-8">
             <Breadcrumbs
               label={locale === "ko" ? "현재 위치" : "Breadcrumb"}
               variant="supporting"
@@ -73,22 +80,26 @@ export function DocumentPage({
               </BreadcrumbItem>
               <BreadcrumbItem isCurrent>{title}</BreadcrumbItem>
             </Breadcrumbs>
-            <div className={styles.badges}>
+            <div className="mt-6 mb-4 flex gap-1.5">
               <Badge label={versionFor(document)} variant="purple" />
               <Badge
                 label={metadata.status}
                 variant={metadata.status === "deprecated" ? "warning" : "neutral"}
               />
             </div>
-            <div className={styles.titleRow}>
-              <h1>{title}</h1>
+            <div className="flex items-start gap-3">
+              <h1 className="m-0 flex-1 font-[family-name:var(--font-inter-tight)] text-[36px] leading-[1.1] font-medium tracking-[-0.025em] text-primary">
+                {title}
+              </h1>
               <EditPageLink
                 label={locale === "ko" ? "이 페이지 편집" : "Edit this page"}
                 href={editHref(locale, metadata.id)}
               />
             </div>
-            <p className={styles.description}>{metadata.description}</p>
-            <div className={styles.metadata}>
+            <p className="mt-4 mb-0 max-w-[720px] text-base leading-[1.55] text-secondary">
+              {metadata.description}
+            </p>
+            <div className="mt-5 flex flex-wrap gap-x-[18px] gap-y-2 text-xs text-secondary">
               <span>
                 {metadata.verifiedAt === undefined
                   ? locale === "ko"
@@ -101,18 +112,23 @@ export function DocumentPage({
                   {metadata.verifiedAt ?? metadata.updatedAt}
                 </time>
               </span>
-              <a href={metadata.sourceUrl} target="_blank" rel="noreferrer">
+              <a
+                className="inline-flex items-center gap-1 text-primary"
+                href={metadata.sourceUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
                 {locale === "ko" ? "공식 출처" : "Official source"}
                 <Icon icon="externalLink" size="xsm" />
               </a>
             </div>
           </header>
         )}
-        <div className={styles.prose}>
+        <div className={`${styles.prose} ${isOverview ? "" : "pt-[18px]"}`} data-docs-prose="true">
           <Content />
         </div>
         <nav
-          className={styles.pagination}
+          className="mt-[72px] grid grid-cols-2 gap-3 border-t border-border pt-6 max-[600px]:grid-cols-1 [&>*]:min-h-[68px]"
           aria-label={locale === "ko" ? "이전 및 다음 문서" : "Previous and next documents"}
         >
           {previous === null ? (
@@ -124,8 +140,10 @@ export function DocumentPage({
               variant="secondary"
               size="lg"
             >
-              <span className={styles.pageLink}>
-                <small>{locale === "ko" ? "이전" : "Previous"}</small>
+              <span className="grid w-full gap-0.5 text-left">
+                <small className="text-primary text-[10px] font-medium uppercase">
+                  {locale === "ko" ? "이전" : "Previous"}
+                </small>
                 {displayTitleFor(previous)}
               </span>
             </Button>
@@ -134,8 +152,10 @@ export function DocumentPage({
             <span />
           ) : (
             <Button label={displayTitleFor(next)} href={next.href} variant="secondary" size="lg">
-              <span className={`${styles.pageLink} ${styles.pageLinkNext}`}>
-                <small>{locale === "ko" ? "다음" : "Next"}</small>
+              <span className="grid w-full gap-0.5 text-right">
+                <small className="text-primary text-[10px] font-medium uppercase">
+                  {locale === "ko" ? "다음" : "Next"}
+                </small>
                 {displayTitleFor(next)}
               </span>
             </Button>

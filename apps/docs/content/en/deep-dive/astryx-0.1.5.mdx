@@ -15,13 +15,13 @@ sourceUrl: https://astryx.atmeta.com/docs/getting-started
 
 ## CSS layers and Theme
 
-Declare reset, core base, and Neutral theme order so token precedence is predictable. Extend Neutral through `defineTheme` to retain icons and component contracts while changing color, type, radii, and motion.
+Declare reset, core base, and Neutral theme order so token precedence is predictable. Extend Neutral through `defineTheme` to retain its color and component contracts while changing type, radii, and motion.
 
 ```tsx
 const docsTheme = defineTheme({
   name: "jongmin-docs",
   extends: neutralTheme,
-  color: { accent: "#7c3aed", neutralStyle: "cool", contrast: "standard" },
+  typography: { scale: { base: 14, ratio: 1.2 } },
   radius: { base: 4, multiplier: 1 },
   motion: { fast: 120, medium: 300, slow: 600, ratio: 0.75 },
 });
@@ -38,7 +38,7 @@ const docsTheme = defineTheme({
 ## Practical tips
 
 - Pin core, theme-neutral, and cli to the same 0.1.5 release.
-- Keep app-specific layout in CSS Modules and interaction states in component APIs.
+- Use the Tailwind token bridge for layout and stable component selectors only where nested document content requires them.
 - Model theme mode as one `light | dark | system` value.
 - Preserve complete meaning and function in Tier 1; Tier 2 may simplify effects but must remain navigable.
 
