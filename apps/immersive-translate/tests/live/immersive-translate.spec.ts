@@ -277,6 +277,30 @@ test.describe("Immersive Translate floating toggle QA", () => {
     });
   });
 
+  test("uses the Neutral system theme without browser warnings", async ({
+    context,
+    extensionId,
+  }) => {
+    const popup = await context.newPage();
+    const browserProblems: string[] = [];
+    popup.on("pageerror", (error) => browserProblems.push(error.message));
+    popup.on("console", (message) => {
+      if (message.type() === "error" || message.type() === "warning") {
+        if (message.location().url.startsWith(DEFAULT_TRANSLATION_ENDPOINT)) return;
+        browserProblems.push(message.text());
+      }
+    });
+
+    await popup.emulateMedia({ colorScheme: "dark" });
+    await popup.goto(`chrome-extension://${extensionId}/popup.html`);
+    await expect(popup.locator("#immersive-translate-popup")).toBeVisible();
+    await expect(popup.locator("body")).toHaveCSS("background-color", "rgb(27, 27, 27)");
+
+    await popup.emulateMedia({ colorScheme: "light" });
+    await expect(popup.locator("body")).toHaveCSS("background-color", "rgb(241, 241, 241)");
+    expect(browserProblems).toEqual([]);
+  });
+
   test("uses the right-side floating toggle to translate and toggle a webpage", async ({
     context,
     localSite,

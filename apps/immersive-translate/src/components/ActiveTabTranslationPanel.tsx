@@ -1,3 +1,9 @@
+import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
+import { Icon } from "@astryxdesign/core/Icon";
+import { ProgressBar } from "@astryxdesign/core/ProgressBar";
+import { StatusDot, type StatusDotVariant } from "@astryxdesign/core/StatusDot";
+import { Heading, Text } from "@astryxdesign/core/Text";
 import type { JSX } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { browser } from "wxt/browser";
@@ -20,6 +26,7 @@ import {
   type TranslationReadinessStatus,
   userVisibleTranslationErrorMessage,
 } from "../lib/translation-readiness";
+import { RefreshIcon } from "./TranslationIcons";
 
 const localTranslationRepository = LocalTranslationRepository.ofStorage(browser.storage.local);
 const TRANSLATION_READINESS_TIMEOUT_MS = 10_000;
@@ -33,10 +40,6 @@ interface ProgressLike {
 
 interface RefreshStatusOptions {
   readonly checkEndpoint: boolean;
-}
-
-function cx(...values: readonly (string | false | null | undefined)[]): string {
-  return values.filter(Boolean).join(" ");
 }
 
 function pageStatusLabel(status: ActiveTabTranslationStatus | null): string {
@@ -61,9 +64,44 @@ function captionStatusLabel(status: ActiveTabTranslationStatus | null): string {
   return "영상 페이지에서는 자막 번역을 자동으로 시도합니다.";
 }
 
-function progressLabel(progress: ProgressLike | null | undefined): string | null {
+function readinessVariant(status: TranslationReadinessStatus | null): StatusDotVariant {
+  if (status?.state === "ready") return "success";
+  if (status?.state === "failed") return "error";
+  if (status?.state === "disabled") return "neutral";
+  return "accent";
+}
+
+function isReadinessPending(status: TranslationReadinessStatus | null): boolean {
+  return status === null || status.state === "checking";
+}
+
+function progressValueLabel(value: number, max: number): string {
+  return `${value}/${max}`;
+}
+
+function TranslationProgress({
+  label,
+  progress,
+}: {
+  readonly label: string;
+  readonly progress: ProgressLike | null | undefined;
+}) {
   if (!progress || progress.total === 0) return null;
-  return `${progress.completed}/${progress.total} 처리됨 · 캐시 ${progress.cacheHits} · 실패 ${progress.failures}`;
+  return (
+    <div className="mt-3 grid gap-1.5">
+      <ProgressBar
+        label={label}
+        value={progress.completed}
+        max={progress.total}
+        hasValueLabel
+        formatValueLabel={progressValueLabel}
+        variant={progress.failures > 0 ? "warning" : "accent"}
+      />
+      <Text type="supporting" display="block">
+        캐시 {progress.cacheHits} · 실패 {progress.failures}
+      </Text>
+    </div>
+  );
 }
 
 async function readStatus(): Promise<ActiveTabTranslationStatus> {
@@ -117,10 +155,12 @@ export function ActiveTabTranslationPanel(): JSX.Element {
       }
 
       setReadinessStatus(checkingTranslationReadinessStatus(settings));
-      const nextStatusPromise = readStatus();
-      const nextReadinessStatusPromise = checkTranslationReadiness(settings);
-      setStatus(await nextStatusPromise);
-      setReadinessStatus(await nextReadinessStatusPromise);
+      const [nextStatus, nextReadinessStatus] = await Promise.all([
+        readStatus(),
+        checkTranslationReadiness(settings),
+      ]);
+      setStatus(nextStatus);
+      setReadinessStatus(nextReadinessStatus);
     } catch (error) {
       setStatusError(error instanceof Error ? error.message : "상태를 읽을 수 없습니다.");
     }
@@ -148,106 +188,91 @@ export function ActiveTabTranslationPanel(): JSX.Element {
   }, [refreshStatus, status?.captionState.name, status?.webpageState.name]);
 
   const readinessLabel = translationReadinessLabel(readinessStatus);
-  const readinessError = translationReadinessDetail(readinessStatus);
-  const pageProgress = progressLabel(status?.webpageState.progress);
-  const captionProgress = progressLabel(status?.captionState.progress);
-  const visibleError = userVisibleTranslationErrorMessage(status?.lastError ?? statusError);
+  const errorMessage =
+    translationReadinessDetail(readinessStatus) ??
+    userVisibleTranslationErrorMessage(status?.lastError ?? statusError);
 
   return (
-    <section className="w-[360px] max-w-full p-3 text-[inherit]">
-      <div className="surface-elevated rounded-lg p-4">
-        <div className="flex items-start justify-between gap-3">
+    <section className="w-[360px] max-w-full bg-body p-3 text-primary">
+      <div className="rounded-lg border border-border bg-surface p-4 shadow-sm">
+        <header className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <div className="text-[10px] uppercase tracking-[0.18em] text-(--muted-foreground)">
+            <Text type="supporting" display="block">
               Tobi Immersive Translate
-            </div>
-            <h1 className="mt-2 text-lg font-semibold tracking-normal">페이지 번역</h1>
+            </Text>
+            <Heading level={1} className="mt-1.5">
+              페이지 번역
+            </Heading>
           </div>
-          <span
+          <div
+            className="flex shrink-0 items-center gap-2 pt-1"
             data-testid="popup-translation-status"
-            title={
-              readinessStatus?.endpoint
-                ? `번역 서버 URL: ${readinessStatus.endpoint}`
-                : "번역 연결 상태"
-            }
-            className={cx(
-              "shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-semibold",
-              readinessStatus?.state === "ready"
-                ? "border-(--primary) bg-(--secondary) text-(--secondary-foreground)"
-                : readinessStatus?.state === "failed"
-                  ? "border-(--destructive) bg-(--card) text-(--destructive)"
-                  : "border-(--border) text-(--muted-foreground)",
-            )}
           >
-            {readinessLabel}
-          </span>
-        </div>
+            <StatusDot
+              variant={readinessVariant(readinessStatus)}
+              label={readinessLabel}
+              isPulsing={isReadinessPending(readinessStatus)}
+              tooltip={readinessLabel}
+            />
+            <Text type="supporting">{readinessLabel}</Text>
+          </div>
+        </header>
 
         <div
           data-testid="popup-floating-toggle-guidance"
-          className="mt-4 rounded-lg border border-(--border) bg-(--card) p-3 text-sm leading-6"
+          className="mt-4 border-y border-border py-3"
         >
-          페이지에서는 오른쪽 번역 버튼으로 본문을 번역합니다. 영상 페이지는 자막 번역을 자동으로
-          시도합니다.
+          <Text type="body" display="block">
+            페이지에서는 오른쪽 번역 버튼으로 본문을 번역합니다. 영상 페이지는 자막 번역을 자동으로
+            시도합니다.
+          </Text>
         </div>
 
-        {readinessError && readinessStatus?.state === "failed" && (
-          <div
-            data-testid="popup-translation-readiness-error"
-            className="mt-3 rounded-md border border-(--destructive) bg-(--card) px-3 py-2 text-xs leading-5 text-(--destructive)"
-          >
-            <div className="font-semibold">로컬 번역 연결 실패</div>
-            <div className="mt-1">{readinessError}</div>
-            <div className="mt-1 break-all text-(--muted-foreground)">
-              URL: {readinessStatus.endpoint}
-            </div>
+        {errorMessage ? (
+          <div className="mt-3">
+            <Banner status="error" title="번역 연결을 확인하세요" description={errorMessage} />
           </div>
-        )}
+        ) : null}
 
-        <div
-          data-testid="popup-current-page-status"
-          className="mt-3 rounded-lg border border-(--border) bg-(--card) p-3"
-        >
-          <div className="text-[10px] uppercase tracking-[0.18em] text-(--muted-foreground)">
+        <section data-testid="popup-current-page-status" className="border-b border-border py-4">
+          <Text type="label" display="block">
             현재 페이지
-          </div>
-          <div className="mt-1 truncate text-sm font-semibold">
+          </Text>
+          <Text type="body" weight="semibold" display="block" maxLines={1} className="mt-1.5">
             {status?.tabTitle || pageStatusLabel(status)}
-          </div>
-          {status?.tabUrl && (
-            <div className="mt-1 truncate text-xs text-(--muted-foreground)">{status.tabUrl}</div>
-          )}
-          <div className="mt-2 text-xs text-(--muted-foreground)">{pageStatusLabel(status)}</div>
-          {pageProgress && (
-            <div className="mt-2 rounded-md bg-(--secondary) px-2 py-1 text-xs">{pageProgress}</div>
-          )}
-        </div>
+          </Text>
+          {status?.tabUrl ? (
+            <Text type="supporting" display="block" maxLines={1} className="mt-1">
+              {status.tabUrl}
+            </Text>
+          ) : null}
+          <Text type="supporting" display="block" className="mt-2">
+            {pageStatusLabel(status)}
+          </Text>
+          <TranslationProgress
+            label="페이지 번역 진행률"
+            progress={status?.webpageState.progress}
+          />
+        </section>
 
-        <div className="mt-3 rounded-lg border border-(--border) bg-(--card) p-3">
-          <div className="text-[10px] uppercase tracking-[0.18em] text-(--muted-foreground)">
+        <section className="py-4">
+          <Text type="label" display="block">
             영상 자막
-          </div>
-          <div className="mt-2 text-xs text-(--muted-foreground)">{captionStatusLabel(status)}</div>
-          {captionProgress && (
-            <div className="mt-2 rounded-md bg-(--secondary) px-2 py-1 text-xs">
-              {captionProgress}
-            </div>
-          )}
-        </div>
+          </Text>
+          <Text type="supporting" display="block" className="mt-2">
+            {captionStatusLabel(status)}
+          </Text>
+          <TranslationProgress label="자막 번역 진행률" progress={status?.captionState.progress} />
+        </section>
 
-        {visibleError && (
-          <div className="mt-3 rounded-md border border-(--destructive) bg-(--card) px-3 py-2 text-xs text-(--destructive)">
-            {visibleError}
-          </div>
-        )}
-
-        <button
-          type="button"
-          onClick={() => void refreshStatus({ checkEndpoint: true })}
-          className="mt-3 h-9 w-full rounded-md border border-(--border) bg-(--card) px-3 text-xs font-semibold text-(--muted-foreground)"
-        >
-          상태 새로고침
-        </button>
+        <Button
+          label="상태 새로고침"
+          variant="secondary"
+          size="lg"
+          className="w-full"
+          icon={<Icon icon={RefreshIcon} size="sm" />}
+          clickAction={() => refreshStatus({ checkEndpoint: true })}
+        />
       </div>
     </section>
   );
