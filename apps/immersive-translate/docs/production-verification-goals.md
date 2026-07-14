@@ -251,7 +251,7 @@ Actual YouTube 필수 assert:
 - package metadata:
   - package name은 `@jongminchung/immersive-translate`.
   - `private: true`.
-  - dependency에 `jszip`이 있다.
+  - document archive parser dependency가 없다.
   - 이관 전 shared translation core dependency/import가 없다.
 - grep guard:
   - target 전체에 이관 전 translation core package alias가 없다.
@@ -260,6 +260,7 @@ Actual YouTube 필수 assert:
   - MV3.
   - content script 또는 equivalent auto-injection path.
   - required files present.
+  - WXT starter asset이 build와 zip에 없다.
 - screenshot guard:
   - `popup-minimal-status.png`.
   - `article-floating-toggle-translation.png`.

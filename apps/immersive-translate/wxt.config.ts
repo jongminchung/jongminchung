@@ -6,7 +6,7 @@ export default defineConfig({
   modules: ["@wxt-dev/module-react"],
   manifest: {
     name: "Tobi Immersive Translate",
-    description: "Translate webpages, captions, DOCX, and EPUB documents with a local endpoint.",
+    description: "Translate webpages and video captions with a local endpoint.",
     permissions: ["storage", "tabs", "activeTab", "scripting"],
     host_permissions: ["http://*/*", "https://*/*"],
     action: {

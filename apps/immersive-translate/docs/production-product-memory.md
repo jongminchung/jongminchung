@@ -168,13 +168,13 @@ Immersive Translate는 소비자용 브라우저 확장 및 모바일 읽기 제
 
 관찰된 초기 구현:
 
-- `src/entrypoints/popup/App.tsx`는 `DocumentTranslationPanel`과 `ActiveTabTranslationPanel`만 렌더링한다.
-- `DocumentTranslationPanel`은 로컬 LibreTranslate endpoint 설정과 DOCX/EPUB 업로드를 첫 화면에 둔다.
+- `src/entrypoints/popup/App.tsx`는 `ActiveTabTranslationPanel`만 렌더링한다.
+- 사용되지 않는 `DocumentTranslationPanel`과 DOCX/EPUB 파서가 소스와 dependency에 남아 있었다.
 - `ActiveTabTranslationPanel`은 active-tab bridge, install bridge, smoke translation 같은 개발/QA 용어를 노출한다.
 - 로컬 provider 설정이 주요 사용자 여정처럼 보인다.
 - 현재 페이지 번역 command center가 없다.
 - 번역 서비스, 대상 언어, 표시 모드, 페이지 플로팅 컨트롤이 중심 모델로 잡혀 있지 않다.
-- 문서 번역이 웹페이지 읽기보다 더 중요해 보인다.
+- 사용되지 않는 문서 번역 코드가 실제 제품 범위를 불명확하게 만들었다.
 - 영상 자막, 호버 번역, 입력창 번역, 이미지 번역, provider 개인정보, 사이트별 모드는 1급 제품 개념으로 나타나지 않는다.
 
 즉, 초기 UI는 프로덕션 Immersive Translate에 가까운 사용자 제품이라기보다 로컬 QA/dev 유틸리티에 가까웠다.

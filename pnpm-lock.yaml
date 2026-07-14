@@ -177,9 +177,6 @@ importers:
 
   apps/immersive-translate:
     dependencies:
-      jszip:
-        specifier: ^3.10.1
-        version: 3.10.1
       react:
         specifier: ^19.2.7
         version: 19.2.7

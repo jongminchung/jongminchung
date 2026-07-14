@@ -13,6 +13,7 @@ interface ExtensionApp {
   readonly dir: string;
   readonly expectedName: string;
   readonly requiredFiles: readonly string[];
+  readonly forbiddenFiles: readonly string[];
 }
 
 type JsonObject = Record<string, unknown>;
@@ -32,6 +33,7 @@ const apps: readonly ExtensionApp[] = [
       "icon/96.png",
       "icon/128.png",
     ],
+    forbiddenFiles: ["wxt.svg"],
   },
 ];
 
@@ -126,6 +128,11 @@ async function verifyBuildDirectory(app: ExtensionApp): Promise<readonly string[
     if (!(await fileExists(path))) failures.push(`${path} is missing.`);
   }
 
+  for (const file of app.forbiddenFiles) {
+    const path = `${outputDir}/${file}`;
+    if (await fileExists(path)) failures.push(`${path} must not be included.`);
+  }
+
   return failures;
 }
 
@@ -142,6 +149,9 @@ async function verifyZipFiles(app: ExtensionApp, requireZips: boolean): Promise<
     const entries = await listZipEntries(zipFile);
     for (const file of app.requiredFiles) {
       if (!entries.includes(file)) failures.push(`${zipFile} is missing ${file}.`);
+    }
+    for (const file of app.forbiddenFiles) {
+      if (entries.includes(file)) failures.push(`${zipFile} must not include ${file}.`);
     }
   }
 
