@@ -1,0 +1,24 @@
+.container {
+  position: sticky;
+  top: 24px;
+  display: grid;
+  max-height: calc(100vh - 48px);
+  align-self: start;
+  gap: 10px;
+  padding: 12px 0 18px 18px;
+  overflow: auto;
+  border-left: 1px solid var(--color-border);
+}
+
+.label {
+  margin: 0 0 2px;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+@media (max-width: 1399px) {
+  .container {
+    display: none;
+  }
+}

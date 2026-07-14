@@ -1,0 +1,53 @@
+---
+id: deep-dive/pnpm-11
+locale: ko
+section: deep-dive
+title: pnpm 11 Deep Dive
+displayTitle: pnpm 11
+description: pnpm 11 워크스페이스, catalog, 공급망 정책을 재현 가능한 모노레포 운영에 적용합니다.
+order: 1
+updatedAt: "2026-07-14"
+verifiedAt: "2026-07-14"
+tags: [pnpm, workspace, catalog, lockfile, supply-chain]
+status: stable
+sourceUrl: https://pnpm.io/
+---
+
+## 워크스페이스 계약
+
+`pnpm-workspace.yaml`은 패키지 탐색뿐 아니라 catalog, 빌드 스크립트 허용, 공급망 정책의 중심입니다. 공통 버전은 catalog에 고정하고 내부 의존성은 `workspace:*`로 선언해 로컬 패키지가 아닌 레지스트리 버전을 잘못 설치하는 일을 막습니다.
+
+```yaml
+packages:
+  - "apps/*"
+  - "packages/*"
+
+catalog:
+  typescript: "6.0.3"
+  react: "19.2.7"
+```
+
+## 잠금 파일과 재현성
+
+CI에서는 lockfile 변경을 허용하지 않는 설치를 사용합니다. 패키지 manifest를 바꾼 뒤 lockfile을 갱신하지 않은 상태를 통과시키지 않습니다. Node와 pnpm 버전도 `engines`, `packageManager`, 버전 파일에 함께 기록합니다.
+
+## 빌드 스크립트 정책
+
+네이티브 패키지의 install script는 공급망 위험이 될 수 있습니다. 필요한 패키지만 `allowBuilds` 또는 승인 목록에 명시하고, 새 스크립트가 등장하면 출처와 필요성을 검토합니다.
+
+## 실전 팁
+
+- `pnpm --filter @scope/name run build`로 앱별 명령을 만들고 루트는 조합만 담당합니다.
+- 고정이 계약인 도구는 caret 없이 정확한 버전을 사용합니다.
+- peer 문제는 설치 경고로 남겨두지 말고 `pnpm peers check`로 원인을 확인합니다.
+- generated artifact가 패키지 build에 필요한지 source condition으로 대체 가능한지 먼저 판단합니다.
+
+## 실패 사례
+
+### 전역 pnpm에 의존
+
+개발자마다 다른 pnpm이 lockfile 형식과 정책을 바꿀 수 있습니다. `packageManager`를 고정하고 CI와 로컬에서 같은 버전을 실행합니다.
+
+### 모든 install script 허용
+
+편의를 위해 정책을 해제하면 간접 의존성도 임의 코드를 실행합니다. `esbuild`, `sharp`처럼 실제로 필요한 항목만 좁게 허용합니다.

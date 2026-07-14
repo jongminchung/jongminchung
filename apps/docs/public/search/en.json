@@ -1,0 +1,355 @@
+[
+  {
+    "id": "deep-dive/astryx-0.1.5",
+    "locale": "en",
+    "section": "deep-dive",
+    "title": "Astryx 0.1.5 Deep Dive",
+    "description": "Build an accessible documentation UI with the Astryx app shell, theme tokens, and native dialogs.",
+    "href": "/en/deep-dive/astryx-0.1.5",
+    "headings": [
+      "CSS layers and Theme",
+      "Compose the frame",
+      "Interaction components",
+      "Practical tips",
+      "Failure cases",
+      "Overriding internal DOM with CSS",
+      "Duplicating focus management"
+    ],
+    "tags": [
+      "astryx",
+      "design-system",
+      "theme",
+      "accessibility",
+      "navigation"
+    ],
+    "apiSymbols": [],
+    "body": "CSS layers and Theme Declare reset, core base, and Neutral theme order so token precedence is predictable. Extend Neutral through defineTheme to retain icons and component contracts while changing color, type, radii, and motion. Compose the frame AppShell owns page height and mobile navigation and receives TopNav and SideNav slots. Long documents use height=\"auto\" for page scrolling. LinkProvider connects Astryx navigation to Next Link. Interaction components MobileNav and CommandPalette use native dialog behavior for focus trapping, Escape, backdrop, and scroll locking. Outline targets heading IDs and supplies scroll spy and an active indicator. Practical tips - Pin core, theme-neutral, and cli to the same 0.1.5 release. - Keep app-specific layout in CSS Modules and interaction states in component APIs. - Model theme mode as one light dark system value. - Preserve complete meaning and function in Tier 1; Tier 2 may simplify effects but must remain navigable. Failure cases Overriding internal DOM with CSS Internal classes and structure are not a stable contract. Prefer public props, tokens, and defineTheme component overrides. Duplicating focus management Extra global focus and scroll-lock logic can conflict with native dialogs. Control Astryx open state and callbacks instead.",
+    "order": 4
+  },
+  {
+    "id": "deep-dive/nextjs-16",
+    "locale": "en",
+    "section": "deep-dive",
+    "title": "Next.js 16 Deep Dive",
+    "description": "Design a Next.js 16 documentation app around App Router and Server Components while avoiding common failures.",
+    "href": "/en/deep-dive/nextjs-16",
+    "headings": [
+      "Choose rendering boundaries first",
+      "MDX pipeline",
+      "Caching and parallelism",
+      "Practical tips",
+      "Failure cases",
+      "Making the whole layout a Client Component",
+      "Runtime file-system discovery"
+    ],
+    "tags": [
+      "nextjs",
+      "app-router",
+      "rsc",
+      "mdx",
+      "performance"
+    ],
+    "apiSymbols": [],
+    "body": "Choose rendering boundaries first Server Components are the App Router default. Build document content, navigation data, and SEO metadata on the server. Keep only browser state—search dialogs, theme selection, and scroll spy—in small Client Component boundaries. This reduces initial JavaScript and serialization. MDX pipeline @next/mdx requires a root mdx-components.tsx with App Router. Process GFM and frontmatter with remark and heading IDs with rehype. Prefer a static loader map over arbitrary dynamic import paths so tracing and 404 behavior stay analyzable. Caching and parallelism Start independent I/O together and await it with Promise.all . Use cache for repeated server reads within a request. Never store mutable request or user state in module globals. Practical tips - Pair generateStaticParams with dynamicParams = false for deterministic 404s. - Generate canonical and alternates.languages from the same document ID. - Load search code and indexes only when search opens. - Do not serialize entire source documents into Client Component props. Failure cases Making the whole layout a Client Component A root provider does not require every descendant to become client code. Isolate a small ClientShell and pass server-rendered children through a slot. Runtime file-system discovery Scanning content on every request makes deployment tracing and caching brittle. Generate a manifest and search indexes before build, then load content from static module paths.",
+    "order": 0
+  },
+  {
+    "id": "deep-dive/node-26",
+    "locale": "en",
+    "section": "deep-dive",
+    "title": "Node.js 26 Deep Dive",
+    "description": "Apply Node.js 26 ESM, type-stripped execution, and runtime boundaries to build tools and servers.",
+    "href": "/en/deep-dive/node-26",
+    "headings": [
+      "Make ESM the explicit contract",
+      "Run TypeScript tools directly",
+      "Async I/O and failure",
+      "Practical tips",
+      "Failure cases",
+      "Implicitly mixing CommonJS and ESM",
+      "Replacing type checking with type stripping"
+    ],
+    "tags": [
+      "nodejs",
+      "esm",
+      "typescript",
+      "runtime",
+      "security"
+    ],
+    "apiSymbols": [],
+    "body": "Make ESM the explicit contract In a \"type\": \"module\" package, include relative import extensions and derive file locations from import.meta.url . process.cwd is the invocation location and should not be the sole anchor for a content script. Run TypeScript tools directly Node 26 can execute .ts scripts that use erasable type syntax. Do not assume it transforms enums, parameter properties, or TypeScript path aliases. Application bundles still need framework compilation and tsc --noEmit . Async I/O and failure Use node:fs/promises and parallelize independent reads. Treat JSON and frontmatter as unknown , validate them, and only then construct internal models. A broken build contract should fail immediately with a precise path. Practical tips - Use node: specifiers to distinguish built-ins. - Connect AbortSignal-aware APIs to request cancellation and shutdown. - Keep per-user mutable state out of server globals. - Update lockfile and runtime versions together, then run the full regression suite. Failure cases Implicitly mixing CommonJS and ESM Interop and extension rules vary across environments. State the package format and export conditions, then verify with real Node execution. Replacing type checking with type stripping Successful execution is not a type check. Keep script execution and tsc --noEmit as separate gates.",
+    "order": 2
+  },
+  {
+    "id": "deep-dive/pnpm-11",
+    "locale": "en",
+    "section": "deep-dive",
+    "title": "pnpm 11 Deep Dive",
+    "description": "Apply pnpm 11 workspaces, catalogs, and supply-chain policy to a reproducible monorepo.",
+    "href": "/en/deep-dive/pnpm-11",
+    "headings": [
+      "The workspace contract",
+      "Lockfiles and reproducibility",
+      "Build-script policy",
+      "Practical tips",
+      "Failure cases",
+      "Depending on a global pnpm",
+      "Allowing every install script"
+    ],
+    "tags": [
+      "pnpm",
+      "workspace",
+      "catalog",
+      "lockfile",
+      "supply-chain"
+    ],
+    "apiSymbols": [],
+    "body": "The workspace contract pnpm-workspace.yaml controls package discovery, catalogs, build-script permission, and supply-chain policy. Pin common versions in a catalog and use workspace: for internal dependencies so a registry copy cannot silently replace a local package. Lockfiles and reproducibility CI should reject an install that needs to change the lockfile. Update it whenever a package manifest changes. Record Node and pnpm in engines , packageManager , and the runtime version file. Build-script policy Native install scripts can be a supply-chain risk. Explicitly allow only required packages and review any newly introduced script. Practical tips - Give each app a filtered command such as pnpm --filter @scope/name run build . - Use exact versions, without a caret, when pinning is part of the contract. - Investigate peer warnings with pnpm peers check . - Decide whether a generated artifact is truly required or a source export is enough. Failure cases Depending on a global pnpm Different pnpm versions can rewrite lockfiles and policies. Pin packageManager and run that version locally and in CI. Allowing every install script A blanket exception also permits transitive code. Allow only known requirements such as esbuild and sharp .",
+    "order": 1
+  },
+  {
+    "id": "deep-dive/typescript-6",
+    "locale": "en",
+    "section": "deep-dive",
+    "title": "TypeScript 6 Deep Dive",
+    "description": "Apply strict boundaries and public API modeling with TypeScript 6 across the monorepo.",
+    "href": "/en/deep-dive/typescript-6",
+    "headings": [
+      "Upgrade as one workspace",
+      "Validate external values",
+      "Verify public APIs",
+      "Practical tips",
+      "Failure cases",
+      "Spreading any during migration",
+      "Exporting implementation types"
+    ],
+    "tags": [
+      "typescript",
+      "types",
+      "api",
+      "validation",
+      "migration"
+    ],
+    "apiSymbols": [],
+    "body": "Upgrade as one workspace A compiler major belongs in the root catalog and every workspace manifest together. Separate local errors from dependency declaration errors. Do not add assertions just to pass the upgrade; repair contracts and translation boundaries. Validate external values Frontmatter, JSON, and HTTP responses are not trustworthy because they have a TypeScript type assertion. Start with unknown , verify required fields and union values, then return an immutable internal model. Represent intentional absence with null or a discriminated union. Narrow the undefined naturally returned by lookups. noUncheckedIndexedAccess helps expose those boundaries. Verify public APIs Package exports and documentation drift easily. Use the Compiler API to read export symbols from source entry modules and compare them with frontmatter apiSymbols . The build can then reject missing or stale API docs. Practical tips - Use interface for object shapes and type for unions and mapped types. - Default domain data and returned collections to readonly. - Use satisfies to validate contracts without widening literals. - Use Promise.all for independent work and explicit void for intentional fire-and-forget. Failure cases Spreading any during migration Temporary any escapes cross boundaries quickly. Validate unknown in a narrow adapter and keep only checked values in the domain. Exporting implementation types Leaking framework or database types makes replacement expensive. Publish the smallest consumer-facing interface and explicit converters.",
+    "order": 3
+  },
+  {
+    "id": "handbook/collaboration",
+    "locale": "en",
+    "section": "handbook",
+    "title": "Collaboration guide",
+    "description": "Baseline rules for managing issues and pull requests as small, verifiable changes.",
+    "href": "/en/handbook/collaboration",
+    "headings": [
+      "Issues",
+      "Reference"
+    ],
+    "tags": [
+      "collaboration",
+      "issue",
+      "pull-request",
+      "testing"
+    ],
+    "apiSymbols": [],
+    "body": "Issues 1. Before submitting an issue, check whether it already exists in the issue tracker. 2. When submitting a bug, provide a minimal reproduction scenario. 3. When submitting an issue, pull request, or merge request, clearly describe the problem being solved or document the design of the feature being added. 4. Pull requests and merge requests should be linked to an issue, although this is not mandatory. If no issue is linked, include enough issue context in the description. 5. Every change must be tested: unit tests, integration tests, and E2E tests when possible. Reference - https://github.com/angular/angular/tree/main/contributing-docs",
+    "order": 0
+  },
+  {
+    "id": "handbook/ddd",
+    "locale": "en",
+    "section": "handbook",
+    "title": "Practical Domain-Driven Design handbook",
+    "description": "A single-page guide for turning problem-space language into boundaries, models, and testable code.",
+    "href": "/en/handbook/ddd",
+    "headings": [
+      "Start in the problem space",
+      "Questions that reveal the domain",
+      "Build a ubiquitous language",
+      "Find bounded contexts",
+      "Models and invariants",
+      "Entities and value objects",
+      "Why value objects help",
+      "Aggregates and transaction boundaries",
+      "Repositories and domain services",
+      "Events and integration",
+      "Application flow",
+      "Testing strategy",
+      "Common failures and corrections",
+      "Anemic models behind layers",
+      "One giant shared model",
+      "Events as asynchronous function calls",
+      "Patterns everywhere",
+      "Adoption checklist"
+    ],
+    "tags": [
+      "ddd",
+      "domain",
+      "bounded-context",
+      "aggregate",
+      "architecture"
+    ],
+    "apiSymbols": [],
+    "body": "Author: Jongmin Chung · Original: Korean edition Domain-Driven Design is not a folder convention or a layered template. It is a way for a team to describe the problem in shared language and make code protect the boundaries of that language. This handbook connects strategic design and tactical patterns into one working flow. Start in the problem space Starting with a feature list hardens screens and APIs before the user's goal is understood. Record the outcome the user needs, the constraints that can prevent it, and who decides what when failure occurs. If domain experts and developers cannot use the same sentence, it is too early to build the model. Questions that reveal the domain - Who decides that this work is complete? - Which transitions are irreversible, and who authorizes them? - Which words carry different meanings across teams? - Which values enter from outside the system and cannot be trusted? Look for verbs that express decisions and rules. “Confirm an order,” “authorize a payment,” and “reserve stock” reveal more responsibility than the noun “order.” Build a ubiquitous language A glossary alone does not create ubiquitous language. It works only when meetings, issues, test names, APIs, and code use the same terms. Every term should include examples and counterexamples. Term Meaning Does not mean ------------ --------------------------------------------------------------------------- ----------------------------------------- Reservation A limited resource is unavailable to other requests for a bounded period Payment complete or ownership transferred Confirmation Required validation and approval are complete, preventing arbitrary changes A database row was saved Cancellation Effects are compensated according to policy A row was deleted Do not force one meaning when terms collide. The collision may be evidence that separate models are needed. Find bounded contexts A bounded context is the scope in which a model and its language remain consistent. It does not have to match an org chart or deployment unit. Look for these axes of change: 1. The same data has different rules or lifecycles. 2. Change reasons and release cadence differ. 3. Different people own failure recovery. 4. One side values correctness while another values availability. Name the relationship between contexts. A shared model creates the strongest coupling. Prefer a published language, translation layer, event, or explicit API. Validate and translate external models in an anti-corruption layer before they enter internal types. Models and invariants A domain model is valuable because it makes invalid states difficult to construct. Do not create incomplete objects that setters later finish, or require callers to remember a separate validate call. Represent state combinations with discriminated unions instead of several booleans. Return recoverable domain failures as values. Reserve fast failure for programming errors and broken invariants. Entities and value objects An entity keeps its identity as attributes change. A value object is identified by all its attributes and should be immutable whenever possible. Not every database table needs to become an entity. Why value objects help - Parsing and validation live at one construction boundary. - Units cannot be mixed accidentally. - Equality semantics become explicit. - Serialization is separated from internal representation. Values with rules, such as Money , EmailAddress , and DateRange , benefit from value objects. Wrapping every display string in a class only makes the model heavy. Aggregates and transaction boundaries An aggregate is a cluster that must remain consistent in one transaction. Only the root is referenced externally, and state transitions flow through root commands. An aggregate is not an entire screen or a database join result. Keep the boundary small: - Place only immediately enforced invariants in the same aggregate. - Refer to other aggregates by identity, not an object reference. - Use domain events for follow-up work that can be eventually consistent. - Reconsider the boundary when one request repeatedly modifies several aggregates. Repositories and domain services A repository is a storage boundary that behaves like an aggregate collection. It should not expose raw SQL rows or HTTP responses. Translate persisted representations into validated models and let callers distinguish absence from infrastructure failure. Use a domain service only for a domain rule that does not belong naturally to one entity. If CRUD, formatting, and time access all become services, behavior becomes anemic again. Application services coordinate I/O; the domain owns pure policy. Events and integration A domain event describes a business fact that already happened. SendEmail is a command; OrderConfirmed is an event. Its schema is a contract with consumers, not a dump of an internal class. Assume duplicate delivery, reordering, delay, and partial failure are normal. Use event IDs and idempotency keys. Consider an outbox when publishing and state persistence must be atomic. Retries should be an observable policy, not a way to hide failure. Application flow The application layer coordinates a use case: 1. Parse external input and check identity and authorization. 2. Load the required aggregates. 3. Invoke domain commands. 4. Persist changes and events. 5. Translate the result into an external representation. Move pricing and transition rules into the domain. Keep database and broker calls outside domain objects so tests and transaction boundaries stay visible. Testing strategy Model tests verify observable rules, not private fields. Use examples to explain representative scenarios, and consider property-based tests when an invariant has many boundary combinations. Repository contract tests ensure an in-memory implementation and real adapter preserve the same meaning. E2E tests should cover critical paths across context boundaries rather than repeat every domain combination. Common failures and corrections Anemic models behind layers A controller → service → repository structure is not DDD when every rule lives in a long service conditional. Move transitions and invariants into named domain operations. One giant shared model When teams share one Customer type, every change blocks everyone. Let each context own the customer representation it needs and translate at the boundary. Events as asynchronous function calls Events without a known owner, contract, and failure policy make behavior difficult to trace. Document the fact's owner, consumers, retry behavior, and observability. Patterns everywhere Do not force aggregates and events into a simple CRUD supporting domain. Spend design effort where complexity and change concentrate; choose simpler models elsewhere. Adoption checklist - Did we choose one costly misunderstanding to fix? - Is ubiquitous language, including examples and counterexamples, present in code and tests? - Are ownership and translation between contexts explicit? - Do construction and transition APIs enforce invariants? - Is the transaction boundary no larger than required consistency? - Can we observe integration failure, retry, and idempotency? - Is there a measure showing that the model improved a user outcome? The output of DDD is not a diagram. It is faster, safer decisions. The model is working when language becomes precise, invalid states decrease, and the impact of change stays inside a boundary.",
+    "order": 1
+  },
+  {
+    "id": "overview",
+    "locale": "en",
+    "section": "overview",
+    "title": "Jongmin Chung Docs",
+    "description": "Connect the handbook, public packages, and platform knowledge through one learning path.",
+    "href": "/en/overview",
+    "headings": [
+      "The shortest path to a working change",
+      "How knowledge becomes code",
+      "Choose the depth you need",
+      "Documentation shaped together"
+    ],
+    "tags": [
+      "overview",
+      "handbook",
+      "packages",
+      "deep-dive"
+    ],
+    "apiSymbols": [],
+    "body": "The shortest path to a working change How knowledge becomes code Choose the depth you need Documentation shaped together",
+    "order": 0
+  },
+  {
+    "id": "packages/remark-plantuml",
+    "locale": "en",
+    "section": "packages",
+    "title": "remark-plantuml",
+    "description": "Turn PlantUML code in Markdown and Astro documents into safe SVG diagrams.",
+    "href": "/en/packages/remark-plantuml",
+    "headings": [
+      "Overview",
+      "Installation",
+      "Markdown usage",
+      "Astro usage",
+      "Styling",
+      "API",
+      "Main entry",
+      "Astro entry"
+    ],
+    "tags": [
+      "remark",
+      "plantuml",
+      "markdown",
+      "astro",
+      "unified"
+    ],
+    "apiSymbols": [
+      "@jongminchung/remark-plantuml#RemarkPlantUmlOptions",
+      "@jongminchung/remark-plantuml#RemarkPlantUmlTransformer",
+      "@jongminchung/remark-plantuml#default",
+      "@jongminchung/remark-plantuml#createPlantUmlSvgUrl",
+      "@jongminchung/remark-plantuml#encodePlantUmlSource",
+      "@jongminchung/remark-plantuml#publicPlantUmlSvgServerBaseUrl",
+      "@jongminchung/remark-plantuml/astro#AstroRemarkPlantUmlPlugin",
+      "@jongminchung/remark-plantuml/astro#createPlantUmlRemarkPlugin"
+    ],
+    "body": "Overview @jongminchung/remark-plantuml is an asynchronous remark plugin that converts fenced code or local .puml links into PlantUML server SVG URLs. It deflates and PlantUML-encodes source while HTML-escaping captions and alternative text. Installation The package is distributed through GitHub Packages, so map the @jongminchung scope in the consuming project's .npmrc . Markdown usage The default fenced languages are plantuml and puml . Local .puml links resolve from the current Markdown file. Keep resolved files within contentRoot . Astro usage Styling The default figure class is plantuml-diagram . Import styles.css , the Starlight-specific starlight.css , or provide a custom className . API Main entry - remarkPlantUml options : default export that creates a unified transformer - createPlantUmlSvgUrl source, serverBaseUrl : creates an SVG URL for a selected server - encodePlantUmlSource source : creates the encoded PlantUML path segment - publicPlantUmlSvgServerBaseUrl : public SVG server base URL - RemarkPlantUmlOptions : server, root, extension, language, and class options Astro entry - createPlantUmlRemarkPlugin options : creates an Astro remark tuple - AstroRemarkPlantUmlPlugin : tuple type",
+    "order": 0
+  },
+  {
+    "id": "packages/tooling",
+    "locale": "en",
+    "section": "packages",
+    "title": "tooling",
+    "description": "Shared configuration for oxlint, oxfmt, and workspace package maps.",
+    "href": "/en/packages/tooling",
+    "headings": [
+      "Overview",
+      "oxlint",
+      "oxfmt",
+      "package-map",
+      "API"
+    ],
+    "tags": [
+      "tooling",
+      "oxlint",
+      "oxfmt",
+      "workspace",
+      "package-map"
+    ],
+    "apiSymbols": [
+      "@jongminchung/tooling/oxfmt#OxfmtConfig",
+      "@jongminchung/tooling/oxfmt#OxfmtOverride",
+      "@jongminchung/tooling/oxfmt#ResolvedOxfmtConfig",
+      "@jongminchung/tooling/oxfmt#default",
+      "@jongminchung/tooling/oxfmt#defaultOxfmtConfig",
+      "@jongminchung/tooling/oxfmt#defineOxfmtConfig",
+      "@jongminchung/tooling/oxlint#OxlintConfig",
+      "@jongminchung/tooling/oxlint#ResolvedOxlintConfig",
+      "@jongminchung/tooling/oxlint#default",
+      "@jongminchung/tooling/oxlint#defaultOxlintConfig",
+      "@jongminchung/tooling/oxlint#defineOxlintConfig",
+      "@jongminchung/tooling/package-map#LocalSourceAlias",
+      "@jongminchung/tooling/package-map#PackageExportAlias",
+      "@jongminchung/tooling/package-map#TsconfigAliasConfig",
+      "@jongminchung/tooling/package-map#TsconfigPaths",
+      "@jongminchung/tooling/package-map#ViteResolveAlias",
+      "@jongminchung/tooling/package-map#WorkspacePackage",
+      "@jongminchung/tooling/package-map#WorkspacePackageMap",
+      "@jongminchung/tooling/package-map#createPackageExportAliases",
+      "@jongminchung/tooling/package-map#createTsconfigAliasConfig",
+      "@jongminchung/tooling/package-map#createTsconfigPaths",
+      "@jongminchung/tooling/package-map#createViteResolveAliases",
+      "@jongminchung/tooling/package-map#formatTsconfigAliasConfig",
+      "@jongminchung/tooling/package-map#loadWorkspacePackageMap",
+      "@jongminchung/tooling/package-map#writeTsconfigAliasConfig"
+    ],
+    "body": "Overview @jongminchung/tooling centralizes formatter and linter defaults plus aliases derived from package exports. Consumers declare small overrides instead of copying configuration. oxlint The default enables type-aware analysis and checks unused values, floating promises, and misused promises. Override only rules for which the caller has an intentional exception. oxfmt Base ignore patterns and overrides remain in place, with caller arrays appended. JSON uses two spaces, and package scripts and imports are sorted. package-map The package reads root workspaces and package exports to generate TypeScript paths or Vite aliases. It resolves source , default , import , and types conditions in order while preserving CSS and JSON subpaths. API - defineOxlintConfig , defineOxfmtConfig : merge defaults and overrides - loadWorkspacePackageMap : read workspace packages and manifests - createPackageExportAliases : connect public subpaths to real targets - createTsconfigPaths , createTsconfigAliasConfig : generate TypeScript paths - createViteResolveAliases : generate regular-expression Vite aliases - formatTsconfigAliasConfig , writeTsconfigAliasConfig : serialize and write alias files",
+    "order": 1
+  },
+  {
+    "id": "packages/ui",
+    "locale": "en",
+    "section": "packages",
+    "title": "ui 1.0.0 archive",
+    "description": "Archived @jongminchung/ui API and the migration path to Astryx.",
+    "href": "/en/packages/ui",
+    "headings": [
+      "Status",
+      "Migrate to Astryx",
+      "1.0.0 API",
+      "Components",
+      "Design tokens and utilities",
+      "CSS subpaths"
+    ],
+    "tags": [
+      "ui",
+      "deprecated",
+      "migration",
+      "astryx",
+      "react"
+    ],
+    "apiSymbols": [
+      "@jongminchung/ui#Badge",
+      "@jongminchung/ui#BadgeProps",
+      "@jongminchung/ui#Button",
+      "@jongminchung/ui#ButtonProps",
+      "@jongminchung/ui#Card",
+      "@jongminchung/ui#CardContent",
+      "@jongminchung/ui#CardContentProps",
+      "@jongminchung/ui#CardDescription",
+      "@jongminchung/ui#CardDescriptionProps",
+      "@jongminchung/ui#CardFooter",
+      "@jongminchung/ui#CardFooterProps",
+      "@jongminchung/ui#CardHeader",
+      "@jongminchung/ui#CardHeaderProps",
+      "@jongminchung/ui#CardProps",
+      "@jongminchung/ui#CardTitle",
+      "@jongminchung/ui#CardTitleProps",
+      "@jongminchung/ui#DesignSystem",
+      "@jongminchung/ui#badgeVariants",
+      "@jongminchung/ui#buttonVariants",
+      "@jongminchung/ui#cn",
+      "@jongminchung/ui#designSystem"
+    ],
+    "body": "Status @jongminchung/ui 1.0.0 preserves its API and distribution contract for existing consumers but receives no new features. Use Astryx for new UI. Removing the package or changing a 1.0.0 public export is outside this migration. Migrate to Astryx 1. Wrap the app in Astryx Theme and AppShell . 2. Declare reset, base, and Neutral theme CSS layers. 3. Replace Button , Badge , and Card one surface at a time. 4. Remove Tailwind token dependencies, then verify keyboard, dark mode, and responsive behavior. 1.0.0 API Components - Button , buttonVariants , ButtonProps - Badge , badgeVariants , BadgeProps - Card , its six composition components, and their prop types Design tokens and utilities - designSystem , DesignSystem : color, type, and spacing data from the archived design analysis - cn : class merging with clsx and tailwind-merge CSS subpaths styles.css , tokens.css , and baseline.css remain available for 1.0.0 consumers. Do not import them into an Astryx app.",
+    "order": 2
+  }
+]

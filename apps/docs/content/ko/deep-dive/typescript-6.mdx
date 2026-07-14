@@ -1,0 +1,51 @@
+---
+id: deep-dive/typescript-6
+locale: ko
+section: deep-dive
+title: TypeScript 6 Deep Dive
+displayTitle: TypeScript 6
+description: TypeScript 6의 엄격한 경계와 공개 API 모델링을 모노레포 전체에 적용합니다.
+order: 3
+updatedAt: "2026-07-14"
+verifiedAt: "2026-07-14"
+tags: [typescript, types, api, validation, migration]
+status: stable
+sourceUrl: https://www.typescriptlang.org/docs/
+---
+
+## 업그레이드 전략
+
+컴파일러 메이저 업그레이드는 패키지 하나가 아니라 루트 catalog와 모든 workspace manifest에서 동시에 수행합니다. 먼저 `skipLibCheck` 밖의 자체 오류를 구분하고, assertion을 늘려 통과시키기보다 공개 계약과 변환 경계를 바로잡습니다.
+
+## 외부 값 검증
+
+frontmatter, JSON, HTTP 응답은 타입 단언으로 신뢰하지 않습니다. `unknown`을 받아 필수 필드와 union 값을 확인한 뒤 불변 내부 모델을 반환합니다.
+
+```ts
+function isLocale(value: string): value is "ko" | "en" {
+  return value === "ko" || value === "en";
+}
+```
+
+의도적 부재는 `null` 또는 판별 가능한 union으로 표현하고, 배열 lookup에서 자연스럽게 생기는 `undefined`는 사용 전에 좁힙니다. `noUncheckedIndexedAccess`는 이런 경계를 찾는 데 유용합니다.
+
+## 공개 API 검사
+
+패키지 `exports`와 문서는 쉽게 어긋납니다. Compiler API로 각 source entry module의 export symbol을 읽고 문서 frontmatter의 `apiSymbols`와 집합 비교하면 새 API 누락과 삭제된 API 문서를 빌드에서 막을 수 있습니다.
+
+## 실전 팁
+
+- 객체 shape에는 interface, union과 mapped type에는 type을 사용합니다.
+- 도메인 데이터와 반환 컬렉션은 readonly를 기본으로 합니다.
+- `satisfies`로 리터럴 추론을 보존하면서 계약을 검사합니다.
+- 독립 promise는 `Promise.all`, fire-and-forget은 의도적인 `void`로 표시합니다.
+
+## 실패 사례
+
+### 마이그레이션 중 `any` 확산
+
+오류를 잠시 숨기려 넣은 `any`는 경계를 넘어 전파됩니다. 좁은 어댑터에서 `unknown`을 검증하고 도메인 내부에는 검증된 타입만 허용합니다.
+
+### 구현 타입을 공개 계약으로 노출
+
+프레임워크나 데이터베이스 타입을 그대로 export하면 교체 비용이 커집니다. 소비자가 필요한 최소 인터페이스와 변환 함수를 공개합니다.

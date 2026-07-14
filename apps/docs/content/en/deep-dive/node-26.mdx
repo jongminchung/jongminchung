@@ -1,0 +1,51 @@
+---
+id: deep-dive/node-26
+locale: en
+section: deep-dive
+title: Node.js 26 Deep Dive
+displayTitle: Node.js 26
+description: Apply Node.js 26 ESM, type-stripped execution, and runtime boundaries to build tools and servers.
+order: 2
+updatedAt: "2026-07-14"
+verifiedAt: "2026-07-14"
+tags: [nodejs, esm, typescript, runtime, security]
+status: stable
+sourceUrl: https://nodejs.org/docs/latest-v26.x/api/
+---
+
+## Make ESM the explicit contract
+
+In a `"type": "module"` package, include relative import extensions and derive file locations from `import.meta.url`. `process.cwd()` is the invocation location and should not be the sole anchor for a content script.
+
+```ts
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const currentDirectory = dirname(fileURLToPath(import.meta.url));
+const contentRoot = resolve(currentDirectory, "../content");
+```
+
+## Run TypeScript tools directly
+
+Node 26 can execute `.ts` scripts that use erasable type syntax. Do not assume it transforms enums, parameter properties, or TypeScript path aliases. Application bundles still need framework compilation and `tsc --noEmit`.
+
+## Async I/O and failure
+
+Use `node:fs/promises` and parallelize independent reads. Treat JSON and frontmatter as `unknown`, validate them, and only then construct internal models. A broken build contract should fail immediately with a precise path.
+
+## Practical tips
+
+- Use `node:` specifiers to distinguish built-ins.
+- Connect AbortSignal-aware APIs to request cancellation and shutdown.
+- Keep per-user mutable state out of server globals.
+- Update lockfile and runtime versions together, then run the full regression suite.
+
+## Failure cases
+
+### Implicitly mixing CommonJS and ESM
+
+Interop and extension rules vary across environments. State the package format and export conditions, then verify with real Node execution.
+
+### Replacing type checking with type stripping
+
+Successful execution is not a type check. Keep script execution and `tsc --noEmit` as separate gates.

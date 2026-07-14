@@ -1,0 +1,51 @@
+---
+id: deep-dive/node-26
+locale: ko
+section: deep-dive
+title: Node.js 26 Deep Dive
+displayTitle: Node.js 26
+description: Node.js 26의 ESM, 타입 제거 실행, 런타임 경계를 빌드 도구와 서버 코드에 적용합니다.
+order: 2
+updatedAt: "2026-07-14"
+verifiedAt: "2026-07-14"
+tags: [nodejs, esm, typescript, runtime, security]
+status: stable
+sourceUrl: https://nodejs.org/docs/latest-v26.x/api/
+---
+
+## ESM을 기본 계약으로 사용하기
+
+`"type": "module"` 패키지에서는 상대 import 확장자를 명시하고 `import.meta.url`로 현재 파일 위치를 계산합니다. `process.cwd()`는 명령 실행 위치이므로 콘텐츠 스크립트의 기준 경로로 단독 사용하지 않습니다.
+
+```ts
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const currentDirectory = dirname(fileURLToPath(import.meta.url));
+const contentRoot = resolve(currentDirectory, "../content");
+```
+
+## TypeScript 직접 실행
+
+Node 26은 지울 수 있는 타입 문법을 사용하는 `.ts` 도구 스크립트를 직접 실행할 수 있습니다. 다만 TypeScript 변환이 필요한 enum, parameter property, path alias를 런타임이 자동으로 해결한다고 가정하지 않습니다. 앱 번들은 여전히 프레임워크와 TypeScript 검사를 거칩니다.
+
+## 비동기 I/O와 실패
+
+파일 탐색과 읽기는 `node:fs/promises`를 사용하고 독립 작업을 병렬화합니다. JSON과 frontmatter 같은 외부 입력은 `unknown`에서 검증한 뒤 내부 타입으로 바꿉니다. 복구 불가능한 빌드 계약 위반은 명확한 경로와 함께 즉시 실패시킵니다.
+
+## 실전 팁
+
+- `node:` specifier로 내장 모듈과 npm 패키지를 구분합니다.
+- AbortSignal을 지원하는 API는 요청 취소와 종료 흐름에 연결합니다.
+- 서버 프로세스에 사용자별 mutable 전역 상태를 두지 않습니다.
+- lockfile과 런타임 버전을 함께 갱신하고 전체 회귀 테스트를 실행합니다.
+
+## 실패 사례
+
+### CJS와 ESM 경계를 암묵적으로 섞기
+
+`require`, default export interop, 확장자 생략이 환경마다 다르게 동작할 수 있습니다. 패키지 형식과 export condition을 명시하고 실제 Node 실행으로 검증합니다.
+
+### 타입 검사를 런타임 실행으로 대체
+
+타입 제거 실행은 `tsc --noEmit`을 대신하지 않습니다. 스크립트 실행과 타입 검사를 별도 단계로 유지합니다.

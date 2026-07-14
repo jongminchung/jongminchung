@@ -4,6 +4,7 @@ packages:
 
 allowBuilds:
   esbuild: true
+  sharp: true
   spawn-sync: true
 
 catalog:
@@ -24,6 +25,12 @@ catalog:
   "typescript": "6.0.3"
   "vitest": "4.1.9"
 
+minimumReleaseAgeExclude:
+  - "@astryxdesign/cli@0.1.5"
+  - "@astryxdesign/core@0.1.5"
+  - "@astryxdesign/theme-neutral@0.1.5"
+
 onlyBuiltDependencies:
   - "esbuild"
+  - "sharp"
   - "spawn-sync"

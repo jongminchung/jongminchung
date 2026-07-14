@@ -1,10 +1,15 @@
 node_modules/
 .nx/
+.next/
 .tmp*/
 **/.output/
 **/.wxt/
 **/test-results/
 playwright-report/
+apps/docs/generated/docs-theme.css
+apps/docs/generated/jongmin-docs.d.ts
+apps/docs/generated/jongmin-docs.js
+apps/docs/generated/jongmin-docs.variants.d.ts
 
 *.bak
 *.old

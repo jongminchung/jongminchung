@@ -1,0 +1,45 @@
+.trigger {
+  width: 100%;
+  justify-content: space-between;
+}
+
+.compactTrigger {
+  min-width: 44px;
+  min-height: 44px;
+  padding-inline: 7px;
+}
+
+.triggerLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.result {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.result strong,
+.result > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.result > span {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.matchReason {
+  display: flex;
+  gap: 6px;
+}
+
+.matchReason > span {
+  flex: none;
+  color: var(--color-text-accent);
+  font-weight: 600;
+}

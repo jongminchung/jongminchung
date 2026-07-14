@@ -1,0 +1,80 @@
+---
+id: packages/ui
+locale: en
+section: packages
+title: ui 1.0.0 archive
+description: Archived @jongminchung/ui API and the migration path to Astryx.
+order: 2
+updatedAt: "2026-07-14"
+tags: [ui, deprecated, migration, astryx, react]
+status: deprecated
+sourceUrl: https://github.com/jongminchung/jongminchung/tree/main/packages/ui
+packageName: "@jongminchung/ui"
+packageVersion: 1.0.0
+apiSymbols:
+  - "@jongminchung/ui#Badge"
+  - "@jongminchung/ui#BadgeProps"
+  - "@jongminchung/ui#Button"
+  - "@jongminchung/ui#ButtonProps"
+  - "@jongminchung/ui#Card"
+  - "@jongminchung/ui#CardContent"
+  - "@jongminchung/ui#CardContentProps"
+  - "@jongminchung/ui#CardDescription"
+  - "@jongminchung/ui#CardDescriptionProps"
+  - "@jongminchung/ui#CardFooter"
+  - "@jongminchung/ui#CardFooterProps"
+  - "@jongminchung/ui#CardHeader"
+  - "@jongminchung/ui#CardHeaderProps"
+  - "@jongminchung/ui#CardProps"
+  - "@jongminchung/ui#CardTitle"
+  - "@jongminchung/ui#CardTitleProps"
+  - "@jongminchung/ui#DesignSystem"
+  - "@jongminchung/ui#badgeVariants"
+  - "@jongminchung/ui#buttonVariants"
+  - "@jongminchung/ui#cn"
+  - "@jongminchung/ui#designSystem"
+---
+
+<DeprecatedBanner locale="en" />
+
+## Status
+
+`@jongminchung/ui` 1.0.0 preserves its API and distribution contract for existing consumers but receives no new features. Use Astryx for new UI. Removing the package or changing a 1.0.0 public export is outside this migration.
+
+## Migrate to Astryx
+
+1. Wrap the app in Astryx `Theme` and `AppShell`.
+2. Declare reset, base, and Neutral theme CSS layers.
+3. Replace `Button`, `Badge`, and `Card` one surface at a time.
+4. Remove Tailwind token dependencies, then verify keyboard, dark mode, and responsive behavior.
+
+```tsx
+import { Card } from "@astryxdesign/core/Card";
+import { Theme } from "@astryxdesign/core/theme";
+import { neutralTheme } from "@astryxdesign/theme-neutral";
+
+export function App() {
+  return (
+    <Theme theme={neutralTheme} mode="system">
+      <Card padding={4}>Migrated content</Card>
+    </Theme>
+  );
+}
+```
+
+## 1.0.0 API
+
+### Components
+
+- `Button`, `buttonVariants`, `ButtonProps`
+- `Badge`, `badgeVariants`, `BadgeProps`
+- `Card`, its six composition components, and their prop types
+
+### Design tokens and utilities
+
+- `designSystem`, `DesignSystem`: color, type, and spacing data from the archived design analysis
+- `cn`: class merging with `clsx` and `tailwind-merge`
+
+### CSS subpaths
+
+`styles.css`, `tokens.css`, and `baseline.css` remain available for 1.0.0 consumers. Do not import them into an Astryx app.

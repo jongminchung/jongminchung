@@ -1,0 +1,90 @@
+---
+id: packages/tooling
+locale: ko
+section: packages
+title: tooling
+description: oxlint, oxfmt, 워크스페이스 패키지 맵을 위한 공유 설정 패키지입니다.
+order: 1
+updatedAt: "2026-07-14"
+tags: [tooling, oxlint, oxfmt, workspace, package-map]
+status: stable
+sourceUrl: https://github.com/jongminchung/jongminchung/tree/main/packages/tooling
+packageName: "@jongminchung/tooling"
+packageVersion: 1.0.0
+apiSymbols:
+  - "@jongminchung/tooling/oxfmt#OxfmtConfig"
+  - "@jongminchung/tooling/oxfmt#OxfmtOverride"
+  - "@jongminchung/tooling/oxfmt#ResolvedOxfmtConfig"
+  - "@jongminchung/tooling/oxfmt#default"
+  - "@jongminchung/tooling/oxfmt#defaultOxfmtConfig"
+  - "@jongminchung/tooling/oxfmt#defineOxfmtConfig"
+  - "@jongminchung/tooling/oxlint#OxlintConfig"
+  - "@jongminchung/tooling/oxlint#ResolvedOxlintConfig"
+  - "@jongminchung/tooling/oxlint#default"
+  - "@jongminchung/tooling/oxlint#defaultOxlintConfig"
+  - "@jongminchung/tooling/oxlint#defineOxlintConfig"
+  - "@jongminchung/tooling/package-map#LocalSourceAlias"
+  - "@jongminchung/tooling/package-map#PackageExportAlias"
+  - "@jongminchung/tooling/package-map#TsconfigAliasConfig"
+  - "@jongminchung/tooling/package-map#TsconfigPaths"
+  - "@jongminchung/tooling/package-map#ViteResolveAlias"
+  - "@jongminchung/tooling/package-map#WorkspacePackage"
+  - "@jongminchung/tooling/package-map#WorkspacePackageMap"
+  - "@jongminchung/tooling/package-map#createPackageExportAliases"
+  - "@jongminchung/tooling/package-map#createTsconfigAliasConfig"
+  - "@jongminchung/tooling/package-map#createTsconfigPaths"
+  - "@jongminchung/tooling/package-map#createViteResolveAliases"
+  - "@jongminchung/tooling/package-map#formatTsconfigAliasConfig"
+  - "@jongminchung/tooling/package-map#loadWorkspacePackageMap"
+  - "@jongminchung/tooling/package-map#writeTsconfigAliasConfig"
+---
+
+## 개요
+
+`@jongminchung/tooling`은 저장소마다 반복되는 formatter·linter 기본값과 패키지 export 기반 별칭 생성을 한곳에서 관리합니다. 설정을 복사하지 않고 작은 override만 선언하는 것이 목표입니다.
+
+## oxlint
+
+```ts
+import { defineOxlintConfig } from "@jongminchung/tooling/oxlint";
+
+export default defineOxlintConfig({
+  rules: { "eslint/no-console": "warn" },
+});
+```
+
+기본 설정은 type-aware 분석, 미사용 변수, floating promise와 잘못 사용한 promise 검사를 활성화합니다. 복구 가능한 예외가 필요한 규칙만 호출자 설정에서 덮어씁니다.
+
+## oxfmt
+
+```ts
+import { defineOxfmtConfig } from "@jongminchung/tooling/oxfmt";
+
+export default defineOxfmtConfig({
+  printWidth: 100,
+  ignorePatterns: ["generated/"],
+});
+```
+
+기본 ignore와 override는 유지되고 호출자의 배열이 뒤에 합쳐집니다. JSON은 2칸 들여쓰기를 사용하며 package script와 import 정렬을 활성화합니다.
+
+## package-map
+
+```ts
+import { createViteResolveAliases } from "@jongminchung/tooling/package-map";
+
+export default {
+  resolve: { alias: createViteResolveAliases({ rootDir: process.cwd() }) },
+};
+```
+
+루트 `workspaces`와 각 패키지의 `exports`를 읽어 TypeScript paths 또는 Vite alias를 만듭니다. `source`, `default`, `import`, `types` 조건을 순서대로 해석하며 CSS·JSON subpath도 보존합니다.
+
+## API
+
+- `defineOxlintConfig`, `defineOxfmtConfig`: 기본값과 override 병합
+- `loadWorkspacePackageMap`: 워크스페이스 패키지와 manifest 조회
+- `createPackageExportAliases`: 공개 subpath와 실제 target 연결
+- `createTsconfigPaths`, `createTsconfigAliasConfig`: TypeScript paths 생성
+- `createViteResolveAliases`: 정규식 기반 Vite alias 생성
+- `formatTsconfigAliasConfig`, `writeTsconfigAliasConfig`: 별칭 파일 직렬화와 기록

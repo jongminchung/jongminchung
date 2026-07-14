@@ -1,0 +1,1392 @@
+[
+  {
+    "id": "deep-dive/nextjs-16",
+    "locale": "en",
+    "section": "deep-dive",
+    "title": "Next.js 16 Deep Dive",
+    "displayTitle": "Next.js 16",
+    "description": "Design a Next.js 16 documentation app around App Router and Server Components while avoiding common failures.",
+    "order": 0,
+    "updatedAt": "2026-07-14",
+    "verifiedAt": "2026-07-14",
+    "tags": [
+      "nextjs",
+      "app-router",
+      "rsc",
+      "mdx",
+      "performance"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://nextjs.org/docs/app",
+    "href": "/en/deep-dive/nextjs-16",
+    "outline": [
+      {
+        "id": "choose-rendering-boundaries-first",
+        "label": "Choose rendering boundaries first",
+        "level": 2
+      },
+      {
+        "id": "mdx-pipeline",
+        "label": "MDX pipeline",
+        "level": 2
+      },
+      {
+        "id": "caching-and-parallelism",
+        "label": "Caching and parallelism",
+        "level": 2
+      },
+      {
+        "id": "practical-tips",
+        "label": "Practical tips",
+        "level": 2
+      },
+      {
+        "id": "failure-cases",
+        "label": "Failure cases",
+        "level": 2
+      },
+      {
+        "id": "making-the-whole-layout-a-client-component",
+        "label": "Making the whole layout a Client Component",
+        "level": 3
+      },
+      {
+        "id": "runtime-file-system-discovery",
+        "label": "Runtime file-system discovery",
+        "level": 3
+      }
+    ]
+  },
+  {
+    "id": "handbook/collaboration",
+    "locale": "en",
+    "section": "handbook",
+    "title": "Collaboration guide",
+    "description": "Baseline rules for managing issues and pull requests as small, verifiable changes.",
+    "order": 0,
+    "updatedAt": "2026-07-14",
+    "tags": [
+      "collaboration",
+      "issue",
+      "pull-request",
+      "testing"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://github.com/jongminchung/jongminchung/blob/main/docs/handbook/%ED%98%91%EC%97%85.md",
+    "href": "/en/handbook/collaboration",
+    "outline": [
+      {
+        "id": "issues",
+        "label": "Issues",
+        "level": 2
+      },
+      {
+        "id": "reference",
+        "label": "Reference",
+        "level": 2
+      }
+    ]
+  },
+  {
+    "id": "overview",
+    "locale": "en",
+    "section": "overview",
+    "title": "Jongmin Chung Docs",
+    "description": "Connect the handbook, public packages, and platform knowledge through one learning path.",
+    "order": 0,
+    "updatedAt": "2026-07-14",
+    "tags": [
+      "overview",
+      "handbook",
+      "packages",
+      "deep-dive"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://github.com/jongminchung/jongminchung",
+    "href": "/en/overview",
+    "outline": [
+      {
+        "id": "the-shortest-path-to-a-working-change",
+        "label": "The shortest path to a working change",
+        "level": 2
+      },
+      {
+        "id": "how-knowledge-becomes-code",
+        "label": "How knowledge becomes code",
+        "level": 2
+      },
+      {
+        "id": "choose-the-depth-you-need",
+        "label": "Choose the depth you need",
+        "level": 2
+      },
+      {
+        "id": "documentation-shaped-together",
+        "label": "Documentation shaped together",
+        "level": 2
+      }
+    ]
+  },
+  {
+    "id": "packages/remark-plantuml",
+    "locale": "en",
+    "section": "packages",
+    "title": "remark-plantuml",
+    "description": "Turn PlantUML code in Markdown and Astro documents into safe SVG diagrams.",
+    "order": 0,
+    "updatedAt": "2026-07-14",
+    "tags": [
+      "remark",
+      "plantuml",
+      "markdown",
+      "astro",
+      "unified"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://github.com/jongminchung/jongminchung/tree/main/packages/remark-plantuml",
+    "packageName": "@jongminchung/remark-plantuml",
+    "packageVersion": "1.0.0",
+    "apiSymbols": [
+      "@jongminchung/remark-plantuml#RemarkPlantUmlOptions",
+      "@jongminchung/remark-plantuml#RemarkPlantUmlTransformer",
+      "@jongminchung/remark-plantuml#default",
+      "@jongminchung/remark-plantuml#createPlantUmlSvgUrl",
+      "@jongminchung/remark-plantuml#encodePlantUmlSource",
+      "@jongminchung/remark-plantuml#publicPlantUmlSvgServerBaseUrl",
+      "@jongminchung/remark-plantuml/astro#AstroRemarkPlantUmlPlugin",
+      "@jongminchung/remark-plantuml/astro#createPlantUmlRemarkPlugin"
+    ],
+    "href": "/en/packages/remark-plantuml",
+    "outline": [
+      {
+        "id": "overview",
+        "label": "Overview",
+        "level": 2
+      },
+      {
+        "id": "installation",
+        "label": "Installation",
+        "level": 2
+      },
+      {
+        "id": "markdown-usage",
+        "label": "Markdown usage",
+        "level": 2
+      },
+      {
+        "id": "astro-usage",
+        "label": "Astro usage",
+        "level": 2
+      },
+      {
+        "id": "styling",
+        "label": "Styling",
+        "level": 2
+      },
+      {
+        "id": "api",
+        "label": "API",
+        "level": 2
+      },
+      {
+        "id": "main-entry",
+        "label": "Main entry",
+        "level": 3
+      },
+      {
+        "id": "astro-entry",
+        "label": "Astro entry",
+        "level": 3
+      }
+    ]
+  },
+  {
+    "id": "deep-dive/pnpm-11",
+    "locale": "en",
+    "section": "deep-dive",
+    "title": "pnpm 11 Deep Dive",
+    "displayTitle": "pnpm 11",
+    "description": "Apply pnpm 11 workspaces, catalogs, and supply-chain policy to a reproducible monorepo.",
+    "order": 1,
+    "updatedAt": "2026-07-14",
+    "verifiedAt": "2026-07-14",
+    "tags": [
+      "pnpm",
+      "workspace",
+      "catalog",
+      "lockfile",
+      "supply-chain"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://pnpm.io/",
+    "href": "/en/deep-dive/pnpm-11",
+    "outline": [
+      {
+        "id": "the-workspace-contract",
+        "label": "The workspace contract",
+        "level": 2
+      },
+      {
+        "id": "lockfiles-and-reproducibility",
+        "label": "Lockfiles and reproducibility",
+        "level": 2
+      },
+      {
+        "id": "build-script-policy",
+        "label": "Build-script policy",
+        "level": 2
+      },
+      {
+        "id": "practical-tips",
+        "label": "Practical tips",
+        "level": 2
+      },
+      {
+        "id": "failure-cases",
+        "label": "Failure cases",
+        "level": 2
+      },
+      {
+        "id": "depending-on-a-global-pnpm",
+        "label": "Depending on a global pnpm",
+        "level": 3
+      },
+      {
+        "id": "allowing-every-install-script",
+        "label": "Allowing every install script",
+        "level": 3
+      }
+    ]
+  },
+  {
+    "id": "handbook/ddd",
+    "locale": "en",
+    "section": "handbook",
+    "title": "Practical Domain-Driven Design handbook",
+    "description": "A single-page guide for turning problem-space language into boundaries, models, and testable code.",
+    "order": 1,
+    "updatedAt": "2026-07-14",
+    "tags": [
+      "ddd",
+      "domain",
+      "bounded-context",
+      "aggregate",
+      "architecture"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://github.com/jongminchung/jongminchung/blob/main/apps/docs/content/ko/handbook/ddd.mdx",
+    "href": "/en/handbook/ddd",
+    "outline": [
+      {
+        "id": "start-in-the-problem-space",
+        "label": "Start in the problem space",
+        "level": 2
+      },
+      {
+        "id": "questions-that-reveal-the-domain",
+        "label": "Questions that reveal the domain",
+        "level": 3
+      },
+      {
+        "id": "build-a-ubiquitous-language",
+        "label": "Build a ubiquitous language",
+        "level": 2
+      },
+      {
+        "id": "find-bounded-contexts",
+        "label": "Find bounded contexts",
+        "level": 2
+      },
+      {
+        "id": "models-and-invariants",
+        "label": "Models and invariants",
+        "level": 2
+      },
+      {
+        "id": "entities-and-value-objects",
+        "label": "Entities and value objects",
+        "level": 2
+      },
+      {
+        "id": "why-value-objects-help",
+        "label": "Why value objects help",
+        "level": 3
+      },
+      {
+        "id": "aggregates-and-transaction-boundaries",
+        "label": "Aggregates and transaction boundaries",
+        "level": 2
+      },
+      {
+        "id": "repositories-and-domain-services",
+        "label": "Repositories and domain services",
+        "level": 2
+      },
+      {
+        "id": "events-and-integration",
+        "label": "Events and integration",
+        "level": 2
+      },
+      {
+        "id": "application-flow",
+        "label": "Application flow",
+        "level": 2
+      },
+      {
+        "id": "testing-strategy",
+        "label": "Testing strategy",
+        "level": 2
+      },
+      {
+        "id": "common-failures-and-corrections",
+        "label": "Common failures and corrections",
+        "level": 2
+      },
+      {
+        "id": "anemic-models-behind-layers",
+        "label": "Anemic models behind layers",
+        "level": 3
+      },
+      {
+        "id": "one-giant-shared-model",
+        "label": "One giant shared model",
+        "level": 3
+      },
+      {
+        "id": "events-as-asynchronous-function-calls",
+        "label": "Events as asynchronous function calls",
+        "level": 3
+      },
+      {
+        "id": "patterns-everywhere",
+        "label": "Patterns everywhere",
+        "level": 3
+      },
+      {
+        "id": "adoption-checklist",
+        "label": "Adoption checklist",
+        "level": 2
+      }
+    ]
+  },
+  {
+    "id": "packages/tooling",
+    "locale": "en",
+    "section": "packages",
+    "title": "tooling",
+    "description": "Shared configuration for oxlint, oxfmt, and workspace package maps.",
+    "order": 1,
+    "updatedAt": "2026-07-14",
+    "tags": [
+      "tooling",
+      "oxlint",
+      "oxfmt",
+      "workspace",
+      "package-map"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://github.com/jongminchung/jongminchung/tree/main/packages/tooling",
+    "packageName": "@jongminchung/tooling",
+    "packageVersion": "1.0.0",
+    "apiSymbols": [
+      "@jongminchung/tooling/oxfmt#OxfmtConfig",
+      "@jongminchung/tooling/oxfmt#OxfmtOverride",
+      "@jongminchung/tooling/oxfmt#ResolvedOxfmtConfig",
+      "@jongminchung/tooling/oxfmt#default",
+      "@jongminchung/tooling/oxfmt#defaultOxfmtConfig",
+      "@jongminchung/tooling/oxfmt#defineOxfmtConfig",
+      "@jongminchung/tooling/oxlint#OxlintConfig",
+      "@jongminchung/tooling/oxlint#ResolvedOxlintConfig",
+      "@jongminchung/tooling/oxlint#default",
+      "@jongminchung/tooling/oxlint#defaultOxlintConfig",
+      "@jongminchung/tooling/oxlint#defineOxlintConfig",
+      "@jongminchung/tooling/package-map#LocalSourceAlias",
+      "@jongminchung/tooling/package-map#PackageExportAlias",
+      "@jongminchung/tooling/package-map#TsconfigAliasConfig",
+      "@jongminchung/tooling/package-map#TsconfigPaths",
+      "@jongminchung/tooling/package-map#ViteResolveAlias",
+      "@jongminchung/tooling/package-map#WorkspacePackage",
+      "@jongminchung/tooling/package-map#WorkspacePackageMap",
+      "@jongminchung/tooling/package-map#createPackageExportAliases",
+      "@jongminchung/tooling/package-map#createTsconfigAliasConfig",
+      "@jongminchung/tooling/package-map#createTsconfigPaths",
+      "@jongminchung/tooling/package-map#createViteResolveAliases",
+      "@jongminchung/tooling/package-map#formatTsconfigAliasConfig",
+      "@jongminchung/tooling/package-map#loadWorkspacePackageMap",
+      "@jongminchung/tooling/package-map#writeTsconfigAliasConfig"
+    ],
+    "href": "/en/packages/tooling",
+    "outline": [
+      {
+        "id": "overview",
+        "label": "Overview",
+        "level": 2
+      },
+      {
+        "id": "oxlint",
+        "label": "oxlint",
+        "level": 2
+      },
+      {
+        "id": "oxfmt",
+        "label": "oxfmt",
+        "level": 2
+      },
+      {
+        "id": "package-map",
+        "label": "package-map",
+        "level": 2
+      },
+      {
+        "id": "api",
+        "label": "API",
+        "level": 2
+      }
+    ]
+  },
+  {
+    "id": "deep-dive/node-26",
+    "locale": "en",
+    "section": "deep-dive",
+    "title": "Node.js 26 Deep Dive",
+    "displayTitle": "Node.js 26",
+    "description": "Apply Node.js 26 ESM, type-stripped execution, and runtime boundaries to build tools and servers.",
+    "order": 2,
+    "updatedAt": "2026-07-14",
+    "verifiedAt": "2026-07-14",
+    "tags": [
+      "nodejs",
+      "esm",
+      "typescript",
+      "runtime",
+      "security"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://nodejs.org/docs/latest-v26.x/api/",
+    "href": "/en/deep-dive/node-26",
+    "outline": [
+      {
+        "id": "make-esm-the-explicit-contract",
+        "label": "Make ESM the explicit contract",
+        "level": 2
+      },
+      {
+        "id": "run-typescript-tools-directly",
+        "label": "Run TypeScript tools directly",
+        "level": 2
+      },
+      {
+        "id": "async-io-and-failure",
+        "label": "Async I/O and failure",
+        "level": 2
+      },
+      {
+        "id": "practical-tips",
+        "label": "Practical tips",
+        "level": 2
+      },
+      {
+        "id": "failure-cases",
+        "label": "Failure cases",
+        "level": 2
+      },
+      {
+        "id": "implicitly-mixing-commonjs-and-esm",
+        "label": "Implicitly mixing CommonJS and ESM",
+        "level": 3
+      },
+      {
+        "id": "replacing-type-checking-with-type-stripping",
+        "label": "Replacing type checking with type stripping",
+        "level": 3
+      }
+    ]
+  },
+  {
+    "id": "packages/ui",
+    "locale": "en",
+    "section": "packages",
+    "title": "ui 1.0.0 archive",
+    "description": "Archived @jongminchung/ui API and the migration path to Astryx.",
+    "order": 2,
+    "updatedAt": "2026-07-14",
+    "tags": [
+      "ui",
+      "deprecated",
+      "migration",
+      "astryx",
+      "react"
+    ],
+    "status": "deprecated",
+    "sourceUrl": "https://github.com/jongminchung/jongminchung/tree/main/packages/ui",
+    "packageName": "@jongminchung/ui",
+    "packageVersion": "1.0.0",
+    "apiSymbols": [
+      "@jongminchung/ui#Badge",
+      "@jongminchung/ui#BadgeProps",
+      "@jongminchung/ui#Button",
+      "@jongminchung/ui#ButtonProps",
+      "@jongminchung/ui#Card",
+      "@jongminchung/ui#CardContent",
+      "@jongminchung/ui#CardContentProps",
+      "@jongminchung/ui#CardDescription",
+      "@jongminchung/ui#CardDescriptionProps",
+      "@jongminchung/ui#CardFooter",
+      "@jongminchung/ui#CardFooterProps",
+      "@jongminchung/ui#CardHeader",
+      "@jongminchung/ui#CardHeaderProps",
+      "@jongminchung/ui#CardProps",
+      "@jongminchung/ui#CardTitle",
+      "@jongminchung/ui#CardTitleProps",
+      "@jongminchung/ui#DesignSystem",
+      "@jongminchung/ui#badgeVariants",
+      "@jongminchung/ui#buttonVariants",
+      "@jongminchung/ui#cn",
+      "@jongminchung/ui#designSystem"
+    ],
+    "href": "/en/packages/ui",
+    "outline": [
+      {
+        "id": "status",
+        "label": "Status",
+        "level": 2
+      },
+      {
+        "id": "migrate-to-astryx",
+        "label": "Migrate to Astryx",
+        "level": 2
+      },
+      {
+        "id": "100-api",
+        "label": "1.0.0 API",
+        "level": 2
+      },
+      {
+        "id": "components",
+        "label": "Components",
+        "level": 3
+      },
+      {
+        "id": "design-tokens-and-utilities",
+        "label": "Design tokens and utilities",
+        "level": 3
+      },
+      {
+        "id": "css-subpaths",
+        "label": "CSS subpaths",
+        "level": 3
+      }
+    ]
+  },
+  {
+    "id": "deep-dive/typescript-6",
+    "locale": "en",
+    "section": "deep-dive",
+    "title": "TypeScript 6 Deep Dive",
+    "displayTitle": "TypeScript 6",
+    "description": "Apply strict boundaries and public API modeling with TypeScript 6 across the monorepo.",
+    "order": 3,
+    "updatedAt": "2026-07-14",
+    "verifiedAt": "2026-07-14",
+    "tags": [
+      "typescript",
+      "types",
+      "api",
+      "validation",
+      "migration"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://www.typescriptlang.org/docs/",
+    "href": "/en/deep-dive/typescript-6",
+    "outline": [
+      {
+        "id": "upgrade-as-one-workspace",
+        "label": "Upgrade as one workspace",
+        "level": 2
+      },
+      {
+        "id": "validate-external-values",
+        "label": "Validate external values",
+        "level": 2
+      },
+      {
+        "id": "verify-public-apis",
+        "label": "Verify public APIs",
+        "level": 2
+      },
+      {
+        "id": "practical-tips",
+        "label": "Practical tips",
+        "level": 2
+      },
+      {
+        "id": "failure-cases",
+        "label": "Failure cases",
+        "level": 2
+      },
+      {
+        "id": "spreading-any-during-migration",
+        "label": "Spreading any during migration",
+        "level": 3
+      },
+      {
+        "id": "exporting-implementation-types",
+        "label": "Exporting implementation types",
+        "level": 3
+      }
+    ]
+  },
+  {
+    "id": "deep-dive/astryx-0.1.5",
+    "locale": "en",
+    "section": "deep-dive",
+    "title": "Astryx 0.1.5 Deep Dive",
+    "displayTitle": "Astryx 0.1.5",
+    "description": "Build an accessible documentation UI with the Astryx app shell, theme tokens, and native dialogs.",
+    "order": 4,
+    "updatedAt": "2026-07-14",
+    "verifiedAt": "2026-07-14",
+    "tags": [
+      "astryx",
+      "design-system",
+      "theme",
+      "accessibility",
+      "navigation"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://astryx.atmeta.com/docs/getting-started",
+    "href": "/en/deep-dive/astryx-0.1.5",
+    "outline": [
+      {
+        "id": "css-layers-and-theme",
+        "label": "CSS layers and Theme",
+        "level": 2
+      },
+      {
+        "id": "compose-the-frame",
+        "label": "Compose the frame",
+        "level": 2
+      },
+      {
+        "id": "interaction-components",
+        "label": "Interaction components",
+        "level": 2
+      },
+      {
+        "id": "practical-tips",
+        "label": "Practical tips",
+        "level": 2
+      },
+      {
+        "id": "failure-cases",
+        "label": "Failure cases",
+        "level": 2
+      },
+      {
+        "id": "overriding-internal-dom-with-css",
+        "label": "Overriding internal DOM with CSS",
+        "level": 3
+      },
+      {
+        "id": "duplicating-focus-management",
+        "label": "Duplicating focus management",
+        "level": 3
+      }
+    ]
+  },
+  {
+    "id": "deep-dive/nextjs-16",
+    "locale": "ko",
+    "section": "deep-dive",
+    "title": "Next.js 16 Deep Dive",
+    "displayTitle": "Next.js 16",
+    "description": "App Router와 Server Components 중심으로 Next.js 16 문서 앱을 설계하고 실패를 피합니다.",
+    "order": 0,
+    "updatedAt": "2026-07-14",
+    "verifiedAt": "2026-07-14",
+    "tags": [
+      "nextjs",
+      "app-router",
+      "rsc",
+      "mdx",
+      "performance"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://nextjs.org/docs/app",
+    "href": "/ko/deep-dive/nextjs-16",
+    "outline": [
+      {
+        "id": "렌더링-경계를-먼저-정하기",
+        "label": "렌더링 경계를 먼저 정하기",
+        "level": 2
+      },
+      {
+        "id": "mdx-파이프라인",
+        "label": "MDX 파이프라인",
+        "level": 2
+      },
+      {
+        "id": "캐시와-병렬성",
+        "label": "캐시와 병렬성",
+        "level": 2
+      },
+      {
+        "id": "실전-팁",
+        "label": "실전 팁",
+        "level": 2
+      },
+      {
+        "id": "실패-사례",
+        "label": "실패 사례",
+        "level": 2
+      },
+      {
+        "id": "전체-레이아웃을-client-component로-만들기",
+        "label": "전체 레이아웃을 Client Component로 만들기",
+        "level": 3
+      },
+      {
+        "id": "런타임-파일-시스템-의존",
+        "label": "런타임 파일 시스템 의존",
+        "level": 3
+      }
+    ]
+  },
+  {
+    "id": "handbook/collaboration",
+    "locale": "ko",
+    "section": "handbook",
+    "title": "협업 가이드",
+    "description": "이슈와 풀 리퀘스트를 작고 검증 가능한 단위로 운영하는 기본 규칙입니다.",
+    "order": 0,
+    "updatedAt": "2026-07-14",
+    "tags": [
+      "collaboration",
+      "issue",
+      "pull-request",
+      "testing"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://github.com/jongminchung/jongminchung/blob/main/docs/handbook/%ED%98%91%EC%97%85.md",
+    "href": "/ko/handbook/collaboration",
+    "outline": [
+      {
+        "id": "이슈",
+        "label": "이슈",
+        "level": 2
+      },
+      {
+        "id": "참고",
+        "label": "참고",
+        "level": 2
+      }
+    ]
+  },
+  {
+    "id": "overview",
+    "locale": "ko",
+    "section": "overview",
+    "title": "Jongmin Chung Docs",
+    "description": "핸드북, 공개 패키지, 기반 기술을 하나의 지식 경로로 연결합니다.",
+    "order": 0,
+    "updatedAt": "2026-07-14",
+    "tags": [
+      "overview",
+      "handbook",
+      "packages",
+      "deep-dive"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://github.com/jongminchung/jongminchung",
+    "href": "/ko/overview",
+    "outline": [
+      {
+        "id": "가장-짧은-시작-경로",
+        "label": "가장 짧은 시작 경로",
+        "level": 2
+      },
+      {
+        "id": "지식이-코드로-이어지는-방식",
+        "label": "지식이 코드로 이어지는 방식",
+        "level": 2
+      },
+      {
+        "id": "필요한-깊이부터-선택하세요",
+        "label": "필요한 깊이부터 선택하세요",
+        "level": 2
+      },
+      {
+        "id": "함께-다듬는-문서",
+        "label": "함께 다듬는 문서",
+        "level": 2
+      }
+    ]
+  },
+  {
+    "id": "packages/remark-plantuml",
+    "locale": "ko",
+    "section": "packages",
+    "title": "remark-plantuml",
+    "description": "Markdown과 Astro 문서의 PlantUML 코드를 안전한 SVG 다이어그램으로 변환합니다.",
+    "order": 0,
+    "updatedAt": "2026-07-14",
+    "tags": [
+      "remark",
+      "plantuml",
+      "markdown",
+      "astro",
+      "unified"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://github.com/jongminchung/jongminchung/tree/main/packages/remark-plantuml",
+    "packageName": "@jongminchung/remark-plantuml",
+    "packageVersion": "1.0.0",
+    "apiSymbols": [
+      "@jongminchung/remark-plantuml#RemarkPlantUmlOptions",
+      "@jongminchung/remark-plantuml#RemarkPlantUmlTransformer",
+      "@jongminchung/remark-plantuml#default",
+      "@jongminchung/remark-plantuml#createPlantUmlSvgUrl",
+      "@jongminchung/remark-plantuml#encodePlantUmlSource",
+      "@jongminchung/remark-plantuml#publicPlantUmlSvgServerBaseUrl",
+      "@jongminchung/remark-plantuml/astro#AstroRemarkPlantUmlPlugin",
+      "@jongminchung/remark-plantuml/astro#createPlantUmlRemarkPlugin"
+    ],
+    "href": "/ko/packages/remark-plantuml",
+    "outline": [
+      {
+        "id": "개요",
+        "label": "개요",
+        "level": 2
+      },
+      {
+        "id": "설치",
+        "label": "설치",
+        "level": 2
+      },
+      {
+        "id": "markdown-사용법",
+        "label": "Markdown 사용법",
+        "level": 2
+      },
+      {
+        "id": "astro-사용법",
+        "label": "Astro 사용법",
+        "level": 2
+      },
+      {
+        "id": "스타일",
+        "label": "스타일",
+        "level": 2
+      },
+      {
+        "id": "api",
+        "label": "API",
+        "level": 2
+      },
+      {
+        "id": "기본-엔트리",
+        "label": "기본 엔트리",
+        "level": 3
+      },
+      {
+        "id": "astro-엔트리",
+        "label": "Astro 엔트리",
+        "level": 3
+      }
+    ]
+  },
+  {
+    "id": "deep-dive/pnpm-11",
+    "locale": "ko",
+    "section": "deep-dive",
+    "title": "pnpm 11 Deep Dive",
+    "displayTitle": "pnpm 11",
+    "description": "pnpm 11 워크스페이스, catalog, 공급망 정책을 재현 가능한 모노레포 운영에 적용합니다.",
+    "order": 1,
+    "updatedAt": "2026-07-14",
+    "verifiedAt": "2026-07-14",
+    "tags": [
+      "pnpm",
+      "workspace",
+      "catalog",
+      "lockfile",
+      "supply-chain"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://pnpm.io/",
+    "href": "/ko/deep-dive/pnpm-11",
+    "outline": [
+      {
+        "id": "워크스페이스-계약",
+        "label": "워크스페이스 계약",
+        "level": 2
+      },
+      {
+        "id": "잠금-파일과-재현성",
+        "label": "잠금 파일과 재현성",
+        "level": 2
+      },
+      {
+        "id": "빌드-스크립트-정책",
+        "label": "빌드 스크립트 정책",
+        "level": 2
+      },
+      {
+        "id": "실전-팁",
+        "label": "실전 팁",
+        "level": 2
+      },
+      {
+        "id": "실패-사례",
+        "label": "실패 사례",
+        "level": 2
+      },
+      {
+        "id": "전역-pnpm에-의존",
+        "label": "전역 pnpm에 의존",
+        "level": 3
+      },
+      {
+        "id": "모든-install-script-허용",
+        "label": "모든 install script 허용",
+        "level": 3
+      }
+    ]
+  },
+  {
+    "id": "handbook/ddd",
+    "locale": "ko",
+    "section": "handbook",
+    "title": "실전 도메인 주도 설계 핸드북",
+    "description": "문제 공간의 언어를 경계와 모델, 테스트 가능한 코드로 옮기는 단일 페이지 실전 가이드입니다.",
+    "order": 1,
+    "updatedAt": "2026-07-14",
+    "tags": [
+      "ddd",
+      "domain",
+      "bounded-context",
+      "aggregate",
+      "architecture"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://github.com/jongminchung/jongminchung/blob/main/apps/docs/content/ko/handbook/ddd.mdx",
+    "href": "/ko/handbook/ddd",
+    "outline": [
+      {
+        "id": "문제-공간에서-시작하기",
+        "label": "문제 공간에서 시작하기",
+        "level": 2
+      },
+      {
+        "id": "좋은-탐색-질문",
+        "label": "좋은 탐색 질문",
+        "level": 3
+      },
+      {
+        "id": "보편-언어-만들기",
+        "label": "보편 언어 만들기",
+        "level": 2
+      },
+      {
+        "id": "경계-컨텍스트-찾기",
+        "label": "경계 컨텍스트 찾기",
+        "level": 2
+      },
+      {
+        "id": "모델과-불변식",
+        "label": "모델과 불변식",
+        "level": 2
+      },
+      {
+        "id": "엔티티와-값-객체",
+        "label": "엔티티와 값 객체",
+        "level": 2
+      },
+      {
+        "id": "값-객체가-주는-이점",
+        "label": "값 객체가 주는 이점",
+        "level": 3
+      },
+      {
+        "id": "애그리게이트와-트랜잭션-경계",
+        "label": "애그리게이트와 트랜잭션 경계",
+        "level": 2
+      },
+      {
+        "id": "리포지토리와-도메인-서비스",
+        "label": "리포지토리와 도메인 서비스",
+        "level": 2
+      },
+      {
+        "id": "이벤트와-통합",
+        "label": "이벤트와 통합",
+        "level": 2
+      },
+      {
+        "id": "애플리케이션-흐름",
+        "label": "애플리케이션 흐름",
+        "level": 2
+      },
+      {
+        "id": "테스트-전략",
+        "label": "테스트 전략",
+        "level": 2
+      },
+      {
+        "id": "흔한-실패와-교정",
+        "label": "흔한 실패와 교정",
+        "level": 2
+      },
+      {
+        "id": "계층만-복제한-빈약한-모델",
+        "label": "계층만 복제한 빈약한 모델",
+        "level": 3
+      },
+      {
+        "id": "거대한-공유-모델",
+        "label": "거대한 공유 모델",
+        "level": 3
+      },
+      {
+        "id": "이벤트를-비동기-함수-호출로-사용",
+        "label": "이벤트를 비동기 함수 호출로 사용",
+        "level": 3
+      },
+      {
+        "id": "모든-것을-패턴으로-만들기",
+        "label": "모든 것을 패턴으로 만들기",
+        "level": 3
+      },
+      {
+        "id": "도입-체크리스트",
+        "label": "도입 체크리스트",
+        "level": 2
+      }
+    ]
+  },
+  {
+    "id": "packages/tooling",
+    "locale": "ko",
+    "section": "packages",
+    "title": "tooling",
+    "description": "oxlint, oxfmt, 워크스페이스 패키지 맵을 위한 공유 설정 패키지입니다.",
+    "order": 1,
+    "updatedAt": "2026-07-14",
+    "tags": [
+      "tooling",
+      "oxlint",
+      "oxfmt",
+      "workspace",
+      "package-map"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://github.com/jongminchung/jongminchung/tree/main/packages/tooling",
+    "packageName": "@jongminchung/tooling",
+    "packageVersion": "1.0.0",
+    "apiSymbols": [
+      "@jongminchung/tooling/oxfmt#OxfmtConfig",
+      "@jongminchung/tooling/oxfmt#OxfmtOverride",
+      "@jongminchung/tooling/oxfmt#ResolvedOxfmtConfig",
+      "@jongminchung/tooling/oxfmt#default",
+      "@jongminchung/tooling/oxfmt#defaultOxfmtConfig",
+      "@jongminchung/tooling/oxfmt#defineOxfmtConfig",
+      "@jongminchung/tooling/oxlint#OxlintConfig",
+      "@jongminchung/tooling/oxlint#ResolvedOxlintConfig",
+      "@jongminchung/tooling/oxlint#default",
+      "@jongminchung/tooling/oxlint#defaultOxlintConfig",
+      "@jongminchung/tooling/oxlint#defineOxlintConfig",
+      "@jongminchung/tooling/package-map#LocalSourceAlias",
+      "@jongminchung/tooling/package-map#PackageExportAlias",
+      "@jongminchung/tooling/package-map#TsconfigAliasConfig",
+      "@jongminchung/tooling/package-map#TsconfigPaths",
+      "@jongminchung/tooling/package-map#ViteResolveAlias",
+      "@jongminchung/tooling/package-map#WorkspacePackage",
+      "@jongminchung/tooling/package-map#WorkspacePackageMap",
+      "@jongminchung/tooling/package-map#createPackageExportAliases",
+      "@jongminchung/tooling/package-map#createTsconfigAliasConfig",
+      "@jongminchung/tooling/package-map#createTsconfigPaths",
+      "@jongminchung/tooling/package-map#createViteResolveAliases",
+      "@jongminchung/tooling/package-map#formatTsconfigAliasConfig",
+      "@jongminchung/tooling/package-map#loadWorkspacePackageMap",
+      "@jongminchung/tooling/package-map#writeTsconfigAliasConfig"
+    ],
+    "href": "/ko/packages/tooling",
+    "outline": [
+      {
+        "id": "개요",
+        "label": "개요",
+        "level": 2
+      },
+      {
+        "id": "oxlint",
+        "label": "oxlint",
+        "level": 2
+      },
+      {
+        "id": "oxfmt",
+        "label": "oxfmt",
+        "level": 2
+      },
+      {
+        "id": "package-map",
+        "label": "package-map",
+        "level": 2
+      },
+      {
+        "id": "api",
+        "label": "API",
+        "level": 2
+      }
+    ]
+  },
+  {
+    "id": "deep-dive/node-26",
+    "locale": "ko",
+    "section": "deep-dive",
+    "title": "Node.js 26 Deep Dive",
+    "displayTitle": "Node.js 26",
+    "description": "Node.js 26의 ESM, 타입 제거 실행, 런타임 경계를 빌드 도구와 서버 코드에 적용합니다.",
+    "order": 2,
+    "updatedAt": "2026-07-14",
+    "verifiedAt": "2026-07-14",
+    "tags": [
+      "nodejs",
+      "esm",
+      "typescript",
+      "runtime",
+      "security"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://nodejs.org/docs/latest-v26.x/api/",
+    "href": "/ko/deep-dive/node-26",
+    "outline": [
+      {
+        "id": "esm을-기본-계약으로-사용하기",
+        "label": "ESM을 기본 계약으로 사용하기",
+        "level": 2
+      },
+      {
+        "id": "typescript-직접-실행",
+        "label": "TypeScript 직접 실행",
+        "level": 2
+      },
+      {
+        "id": "비동기-io와-실패",
+        "label": "비동기 I/O와 실패",
+        "level": 2
+      },
+      {
+        "id": "실전-팁",
+        "label": "실전 팁",
+        "level": 2
+      },
+      {
+        "id": "실패-사례",
+        "label": "실패 사례",
+        "level": 2
+      },
+      {
+        "id": "cjs와-esm-경계를-암묵적으로-섞기",
+        "label": "CJS와 ESM 경계를 암묵적으로 섞기",
+        "level": 3
+      },
+      {
+        "id": "타입-검사를-런타임-실행으로-대체",
+        "label": "타입 검사를 런타임 실행으로 대체",
+        "level": 3
+      }
+    ]
+  },
+  {
+    "id": "packages/ui",
+    "locale": "ko",
+    "section": "packages",
+    "title": "ui 1.0.0 보관 문서",
+    "description": "기존 @jongminchung/ui API와 Astryx로 이전하는 방법을 보관합니다.",
+    "order": 2,
+    "updatedAt": "2026-07-14",
+    "tags": [
+      "ui",
+      "deprecated",
+      "migration",
+      "astryx",
+      "react"
+    ],
+    "status": "deprecated",
+    "sourceUrl": "https://github.com/jongminchung/jongminchung/tree/main/packages/ui",
+    "packageName": "@jongminchung/ui",
+    "packageVersion": "1.0.0",
+    "apiSymbols": [
+      "@jongminchung/ui#Badge",
+      "@jongminchung/ui#BadgeProps",
+      "@jongminchung/ui#Button",
+      "@jongminchung/ui#ButtonProps",
+      "@jongminchung/ui#Card",
+      "@jongminchung/ui#CardContent",
+      "@jongminchung/ui#CardContentProps",
+      "@jongminchung/ui#CardDescription",
+      "@jongminchung/ui#CardDescriptionProps",
+      "@jongminchung/ui#CardFooter",
+      "@jongminchung/ui#CardFooterProps",
+      "@jongminchung/ui#CardHeader",
+      "@jongminchung/ui#CardHeaderProps",
+      "@jongminchung/ui#CardProps",
+      "@jongminchung/ui#CardTitle",
+      "@jongminchung/ui#CardTitleProps",
+      "@jongminchung/ui#DesignSystem",
+      "@jongminchung/ui#badgeVariants",
+      "@jongminchung/ui#buttonVariants",
+      "@jongminchung/ui#cn",
+      "@jongminchung/ui#designSystem"
+    ],
+    "href": "/ko/packages/ui",
+    "outline": [
+      {
+        "id": "상태",
+        "label": "상태",
+        "level": 2
+      },
+      {
+        "id": "astryx-마이그레이션",
+        "label": "Astryx 마이그레이션",
+        "level": 2
+      },
+      {
+        "id": "100-api",
+        "label": "1.0.0 API",
+        "level": 2
+      },
+      {
+        "id": "컴포넌트",
+        "label": "컴포넌트",
+        "level": 3
+      },
+      {
+        "id": "디자인-토큰과-유틸리티",
+        "label": "디자인 토큰과 유틸리티",
+        "level": 3
+      },
+      {
+        "id": "css-subpath",
+        "label": "CSS subpath",
+        "level": 3
+      }
+    ]
+  },
+  {
+    "id": "deep-dive/typescript-6",
+    "locale": "ko",
+    "section": "deep-dive",
+    "title": "TypeScript 6 Deep Dive",
+    "displayTitle": "TypeScript 6",
+    "description": "TypeScript 6의 엄격한 경계와 공개 API 모델링을 모노레포 전체에 적용합니다.",
+    "order": 3,
+    "updatedAt": "2026-07-14",
+    "verifiedAt": "2026-07-14",
+    "tags": [
+      "typescript",
+      "types",
+      "api",
+      "validation",
+      "migration"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://www.typescriptlang.org/docs/",
+    "href": "/ko/deep-dive/typescript-6",
+    "outline": [
+      {
+        "id": "업그레이드-전략",
+        "label": "업그레이드 전략",
+        "level": 2
+      },
+      {
+        "id": "외부-값-검증",
+        "label": "외부 값 검증",
+        "level": 2
+      },
+      {
+        "id": "공개-api-검사",
+        "label": "공개 API 검사",
+        "level": 2
+      },
+      {
+        "id": "실전-팁",
+        "label": "실전 팁",
+        "level": 2
+      },
+      {
+        "id": "실패-사례",
+        "label": "실패 사례",
+        "level": 2
+      },
+      {
+        "id": "마이그레이션-중-any-확산",
+        "label": "마이그레이션 중 any 확산",
+        "level": 3
+      },
+      {
+        "id": "구현-타입을-공개-계약으로-노출",
+        "label": "구현 타입을 공개 계약으로 노출",
+        "level": 3
+      }
+    ]
+  },
+  {
+    "id": "deep-dive/astryx-0.1.5",
+    "locale": "ko",
+    "section": "deep-dive",
+    "title": "Astryx 0.1.5 Deep Dive",
+    "displayTitle": "Astryx 0.1.5",
+    "description": "Astryx 앱 셸, 테마 토큰, 네이티브 대화상자로 접근 가능한 문서 UI를 구성합니다.",
+    "order": 4,
+    "updatedAt": "2026-07-14",
+    "verifiedAt": "2026-07-14",
+    "tags": [
+      "astryx",
+      "design-system",
+      "theme",
+      "accessibility",
+      "navigation"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://astryx.atmeta.com/docs/getting-started",
+    "href": "/ko/deep-dive/astryx-0.1.5",
+    "outline": [
+      {
+        "id": "css-레이어와-theme",
+        "label": "CSS 레이어와 Theme",
+        "level": 2
+      },
+      {
+        "id": "프레임-구성",
+        "label": "프레임 구성",
+        "level": 2
+      },
+      {
+        "id": "상호작용-컴포넌트",
+        "label": "상호작용 컴포넌트",
+        "level": 2
+      },
+      {
+        "id": "실전-팁",
+        "label": "실전 팁",
+        "level": 2
+      },
+      {
+        "id": "실패-사례",
+        "label": "실패 사례",
+        "level": 2
+      },
+      {
+        "id": "css로-내부-dom을-강제-변경",
+        "label": "CSS로 내부 DOM을 강제 변경",
+        "level": 3
+      },
+      {
+        "id": "중복-포커스-관리",
+        "label": "중복 포커스 관리",
+        "level": 3
+      }
+    ]
+  }
+]

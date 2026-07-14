@@ -1,0 +1,46 @@
+{
+  "name": "@jongminchung/docs",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm run theme:build && node scripts/build-content.ts && tsc --noEmit && next build",
+    "dev": "pnpm run theme:build && node scripts/build-content.ts && next dev",
+    "pretest": "pnpm run theme:build",
+    "pretypecheck": "pnpm run theme:build",
+    "start": "next start",
+    "test": "vitest run --root ../.. apps/docs",
+    "test:e2e": "playwright test",
+    "test:e2e:update": "playwright test --update-snapshots",
+    "theme:build": "astryx theme build lib/docs-theme.ts -o generated/docs-theme.css",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@astryxdesign/core": "0.1.5",
+    "@astryxdesign/theme-neutral": "0.1.5",
+    "@mdx-js/loader": "3.1.1",
+    "@mdx-js/react": "3.1.1",
+    "@next/mdx": "16.2.10",
+    "@stylexjs/stylex": "0.19.0",
+    "next": "16.2.10",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "tailwindcss": "catalog:"
+  },
+  "devDependencies": {
+    "@astryxdesign/cli": "0.1.5",
+    "@axe-core/playwright": "4.11.0",
+    "@playwright/test": "1.61.1",
+    "@types/mdx": "2.0.14",
+    "@types/node": "26.1.0",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "gray-matter": "4.0.3",
+    "rehype-slug": "6.0.0",
+    "remark-frontmatter": "5.0.0",
+    "remark-gfm": "4.0.1",
+    "remark-mdx-frontmatter": "5.2.0",
+    "typescript": "catalog:",
+    "vitest": "4.1.9"
+  }
+}

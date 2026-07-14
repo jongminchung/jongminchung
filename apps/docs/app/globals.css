@@ -1,0 +1,85 @@
+@layer reset, theme, base, astryx-base, astryx-theme, components, utilities;
+
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "@astryxdesign/core/reset.css";
+@import "@astryxdesign/core/astryx.css";
+@import "@astryxdesign/theme-neutral/theme.css";
+@import "@astryxdesign/core/tailwind-theme.css";
+@import "tailwindcss/utilities.css" layer(utilities);
+
+:root {
+  color-scheme: light dark;
+  background: var(--color-background-body, #fbfbfd);
+}
+
+html {
+  min-width: 320px;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: var(--color-background-body, #fbfbfd);
+  color: var(--color-text-primary, #19171f);
+  font-family:
+    var(--font-inter),
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-accent, #7c3aed) 24%, transparent);
+}
+
+:where(a, button, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-accent, #7c3aed);
+  outline-offset: 3px;
+}
+
+.not-found {
+  display: grid;
+  min-height: 100vh;
+  place-content: center;
+  justify-items: start;
+  padding: 32px;
+}
+
+.not-found__mark {
+  margin: 0;
+  background: linear-gradient(90deg, #ff2d8d, #7c3aed, #2787ff);
+  background-clip: text;
+  color: transparent;
+  font-family: var(--font-dm-mono), monospace;
+  font-size: 18px;
+}
+
+.not-found h1 {
+  margin: 12px 0;
+  font-family: var(--font-inter-tight), sans-serif;
+  font-size: clamp(42px, 8vw, 80px);
+  letter-spacing: -0.05em;
+}
+
+.not-found p {
+  color: var(--color-text-secondary, #666170);
+}
+
+.not-found a {
+  margin-top: 18px;
+  color: var(--color-accent, #7c3aed);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

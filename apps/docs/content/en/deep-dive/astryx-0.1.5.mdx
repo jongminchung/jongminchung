@@ -1,0 +1,53 @@
+---
+id: deep-dive/astryx-0.1.5
+locale: en
+section: deep-dive
+title: Astryx 0.1.5 Deep Dive
+displayTitle: Astryx 0.1.5
+description: Build an accessible documentation UI with the Astryx app shell, theme tokens, and native dialogs.
+order: 4
+updatedAt: "2026-07-14"
+verifiedAt: "2026-07-14"
+tags: [astryx, design-system, theme, accessibility, navigation]
+status: stable
+sourceUrl: https://astryx.atmeta.com/docs/getting-started
+---
+
+## CSS layers and Theme
+
+Declare reset, core base, and Neutral theme order so token precedence is predictable. Extend Neutral through `defineTheme` to retain icons and component contracts while changing color, type, radii, and motion.
+
+```tsx
+const docsTheme = defineTheme({
+  name: "jongmin-docs",
+  extends: neutralTheme,
+  color: { accent: "#7c3aed", neutralStyle: "cool", contrast: "standard" },
+  radius: { base: 4, multiplier: 1 },
+  motion: { fast: 120, medium: 300, slow: 600, ratio: 0.75 },
+});
+```
+
+## Compose the frame
+
+`AppShell` owns page height and mobile navigation and receives `TopNav` and `SideNav` slots. Long documents use `height="auto"` for page scrolling. `LinkProvider` connects Astryx navigation to Next Link.
+
+## Interaction components
+
+`MobileNav` and `CommandPalette` use native dialog behavior for focus trapping, Escape, backdrop, and scroll locking. `Outline` targets heading IDs and supplies scroll spy and an active indicator.
+
+## Practical tips
+
+- Pin core, theme-neutral, and cli to the same 0.1.5 release.
+- Keep app-specific layout in CSS Modules and interaction states in component APIs.
+- Model theme mode as one `light | dark | system` value.
+- Preserve complete meaning and function in Tier 1; Tier 2 may simplify effects but must remain navigable.
+
+## Failure cases
+
+### Overriding internal DOM with CSS
+
+Internal classes and structure are not a stable contract. Prefer public props, tokens, and `defineTheme` component overrides.
+
+### Duplicating focus management
+
+Extra global focus and scroll-lock logic can conflict with native dialogs. Control Astryx open state and callbacks instead.

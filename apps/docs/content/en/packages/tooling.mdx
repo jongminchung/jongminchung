@@ -1,0 +1,90 @@
+---
+id: packages/tooling
+locale: en
+section: packages
+title: tooling
+description: Shared configuration for oxlint, oxfmt, and workspace package maps.
+order: 1
+updatedAt: "2026-07-14"
+tags: [tooling, oxlint, oxfmt, workspace, package-map]
+status: stable
+sourceUrl: https://github.com/jongminchung/jongminchung/tree/main/packages/tooling
+packageName: "@jongminchung/tooling"
+packageVersion: 1.0.0
+apiSymbols:
+  - "@jongminchung/tooling/oxfmt#OxfmtConfig"
+  - "@jongminchung/tooling/oxfmt#OxfmtOverride"
+  - "@jongminchung/tooling/oxfmt#ResolvedOxfmtConfig"
+  - "@jongminchung/tooling/oxfmt#default"
+  - "@jongminchung/tooling/oxfmt#defaultOxfmtConfig"
+  - "@jongminchung/tooling/oxfmt#defineOxfmtConfig"
+  - "@jongminchung/tooling/oxlint#OxlintConfig"
+  - "@jongminchung/tooling/oxlint#ResolvedOxlintConfig"
+  - "@jongminchung/tooling/oxlint#default"
+  - "@jongminchung/tooling/oxlint#defaultOxlintConfig"
+  - "@jongminchung/tooling/oxlint#defineOxlintConfig"
+  - "@jongminchung/tooling/package-map#LocalSourceAlias"
+  - "@jongminchung/tooling/package-map#PackageExportAlias"
+  - "@jongminchung/tooling/package-map#TsconfigAliasConfig"
+  - "@jongminchung/tooling/package-map#TsconfigPaths"
+  - "@jongminchung/tooling/package-map#ViteResolveAlias"
+  - "@jongminchung/tooling/package-map#WorkspacePackage"
+  - "@jongminchung/tooling/package-map#WorkspacePackageMap"
+  - "@jongminchung/tooling/package-map#createPackageExportAliases"
+  - "@jongminchung/tooling/package-map#createTsconfigAliasConfig"
+  - "@jongminchung/tooling/package-map#createTsconfigPaths"
+  - "@jongminchung/tooling/package-map#createViteResolveAliases"
+  - "@jongminchung/tooling/package-map#formatTsconfigAliasConfig"
+  - "@jongminchung/tooling/package-map#loadWorkspacePackageMap"
+  - "@jongminchung/tooling/package-map#writeTsconfigAliasConfig"
+---
+
+## Overview
+
+`@jongminchung/tooling` centralizes formatter and linter defaults plus aliases derived from package exports. Consumers declare small overrides instead of copying configuration.
+
+## oxlint
+
+```ts
+import { defineOxlintConfig } from "@jongminchung/tooling/oxlint";
+
+export default defineOxlintConfig({
+  rules: { "eslint/no-console": "warn" },
+});
+```
+
+The default enables type-aware analysis and checks unused values, floating promises, and misused promises. Override only rules for which the caller has an intentional exception.
+
+## oxfmt
+
+```ts
+import { defineOxfmtConfig } from "@jongminchung/tooling/oxfmt";
+
+export default defineOxfmtConfig({
+  printWidth: 100,
+  ignorePatterns: ["generated/"],
+});
+```
+
+Base ignore patterns and overrides remain in place, with caller arrays appended. JSON uses two spaces, and package scripts and imports are sorted.
+
+## package-map
+
+```ts
+import { createViteResolveAliases } from "@jongminchung/tooling/package-map";
+
+export default {
+  resolve: { alias: createViteResolveAliases({ rootDir: process.cwd() }) },
+};
+```
+
+The package reads root workspaces and package `exports` to generate TypeScript paths or Vite aliases. It resolves `source`, `default`, `import`, and `types` conditions in order while preserving CSS and JSON subpaths.
+
+## API
+
+- `defineOxlintConfig`, `defineOxfmtConfig`: merge defaults and overrides
+- `loadWorkspacePackageMap`: read workspace packages and manifests
+- `createPackageExportAliases`: connect public subpaths to real targets
+- `createTsconfigPaths`, `createTsconfigAliasConfig`: generate TypeScript paths
+- `createViteResolveAliases`: generate regular-expression Vite aliases
+- `formatTsconfigAliasConfig`, `writeTsconfigAliasConfig`: serialize and write alias files

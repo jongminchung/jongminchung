@@ -1,0 +1,85 @@
+---
+id: packages/remark-plantuml
+locale: ko
+section: packages
+title: remark-plantuml
+description: Markdown과 Astro 문서의 PlantUML 코드를 안전한 SVG 다이어그램으로 변환합니다.
+order: 0
+updatedAt: "2026-07-14"
+tags: [remark, plantuml, markdown, astro, unified]
+status: stable
+sourceUrl: https://github.com/jongminchung/jongminchung/tree/main/packages/remark-plantuml
+packageName: "@jongminchung/remark-plantuml"
+packageVersion: 1.0.0
+apiSymbols:
+  - "@jongminchung/remark-plantuml#RemarkPlantUmlOptions"
+  - "@jongminchung/remark-plantuml#RemarkPlantUmlTransformer"
+  - "@jongminchung/remark-plantuml#default"
+  - "@jongminchung/remark-plantuml#createPlantUmlSvgUrl"
+  - "@jongminchung/remark-plantuml#encodePlantUmlSource"
+  - "@jongminchung/remark-plantuml#publicPlantUmlSvgServerBaseUrl"
+  - "@jongminchung/remark-plantuml/astro#AstroRemarkPlantUmlPlugin"
+  - "@jongminchung/remark-plantuml/astro#createPlantUmlRemarkPlugin"
+---
+
+## 개요
+
+`@jongminchung/remark-plantuml`은 fenced code 또는 로컬 `.puml` 링크를 PlantUML 서버의 SVG URL로 변환하는 비동기 remark 플러그인입니다. 원문을 deflate하고 PlantUML 6-bit 형식으로 인코딩하며, 캡션과 대체 텍스트를 HTML 이스케이프합니다.
+
+## 설치
+
+```bash
+pnpm add @jongminchung/remark-plantuml
+```
+
+GitHub Packages를 사용하므로 프로젝트의 `.npmrc`에 `@jongminchung` 레지스트리 매핑이 필요합니다.
+
+## Markdown 사용법
+
+```ts
+import remarkParse from "remark-parse";
+import { unified } from "unified";
+import remarkPlantUml, { publicPlantUmlSvgServerBaseUrl } from "@jongminchung/remark-plantuml";
+
+const processor = unified().use(remarkParse).use(remarkPlantUml, {
+  serverBaseUrl: publicPlantUmlSvgServerBaseUrl,
+});
+```
+
+`plantuml`과 `puml` fenced code가 기본 대상입니다. 로컬 `.puml` 파일을 링크하면 현재 Markdown 파일을 기준으로 읽습니다. `contentRoot` 밖으로 벗어나는 경로는 허용하지 마세요.
+
+## Astro 사용법
+
+```ts
+import { defineConfig } from "astro/config";
+import { createPlantUmlRemarkPlugin } from "@jongminchung/remark-plantuml/astro";
+
+export default defineConfig({
+  markdown: {
+    remarkPlugins: [
+      createPlantUmlRemarkPlugin({
+        serverBaseUrl: "https://www.plantuml.com/plantuml/svg",
+      }),
+    ],
+  },
+});
+```
+
+## 스타일
+
+기본 figure 클래스는 `plantuml-diagram`입니다. `@jongminchung/remark-plantuml/styles.css` 또는 Starlight용 `starlight.css`를 가져오거나 `className`으로 자체 스타일을 연결할 수 있습니다.
+
+## API
+
+### 기본 엔트리
+
+- `remarkPlantUml(options)`: unified transformer를 반환하는 기본 export
+- `createPlantUmlSvgUrl(source, serverBaseUrl)`: 지정한 서버의 SVG URL 생성
+- `encodePlantUmlSource(source)`: PlantUML 서버 경로용 문자열 생성
+- `publicPlantUmlSvgServerBaseUrl`: 공개 SVG 서버 기본 URL
+- `RemarkPlantUmlOptions`: 서버 URL, 루트, 확장자, 언어, 클래스 설정
+
+### Astro 엔트리
+
+- `createPlantUmlRemarkPlugin(options)`: Astro remark tuple 생성
+- `AstroRemarkPlantUmlPlugin`: tuple 타입

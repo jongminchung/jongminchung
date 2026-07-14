@@ -1,0 +1,66 @@
+.shell {
+  min-height: 100vh;
+  background: var(--color-background-body);
+}
+
+.navigationFrame {
+  display: flex;
+  width: 372px;
+  min-width: 372px;
+  align-items: stretch;
+}
+
+.contextInline {
+  position: sticky;
+  top: 0;
+  width: 260px;
+  min-width: 260px;
+  height: 100vh;
+  border-right: 1px solid var(--color-border);
+  background: var(--color-background-surface);
+}
+
+.tabletContext {
+  display: none;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 16px 32px 0;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: color-mix(in srgb, var(--color-background-body) 90%, transparent);
+  backdrop-filter: blur(12px);
+}
+
+@media (min-width: 769px) and (max-width: 1023px) {
+  .navigationFrame {
+    width: 112px;
+    min-width: 112px;
+  }
+
+  .contextInline {
+    display: none;
+  }
+
+  .tabletContext {
+    display: block;
+  }
+}
+
+@media (max-width: 768px) {
+  .navigationFrame {
+    display: none;
+    width: 0;
+    min-width: 0;
+  }
+
+  .tabletContext {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .tabletContext {
+    padding-inline: 18px;
+  }
+}

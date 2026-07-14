@@ -1,0 +1,85 @@
+---
+id: packages/remark-plantuml
+locale: en
+section: packages
+title: remark-plantuml
+description: Turn PlantUML code in Markdown and Astro documents into safe SVG diagrams.
+order: 0
+updatedAt: "2026-07-14"
+tags: [remark, plantuml, markdown, astro, unified]
+status: stable
+sourceUrl: https://github.com/jongminchung/jongminchung/tree/main/packages/remark-plantuml
+packageName: "@jongminchung/remark-plantuml"
+packageVersion: 1.0.0
+apiSymbols:
+  - "@jongminchung/remark-plantuml#RemarkPlantUmlOptions"
+  - "@jongminchung/remark-plantuml#RemarkPlantUmlTransformer"
+  - "@jongminchung/remark-plantuml#default"
+  - "@jongminchung/remark-plantuml#createPlantUmlSvgUrl"
+  - "@jongminchung/remark-plantuml#encodePlantUmlSource"
+  - "@jongminchung/remark-plantuml#publicPlantUmlSvgServerBaseUrl"
+  - "@jongminchung/remark-plantuml/astro#AstroRemarkPlantUmlPlugin"
+  - "@jongminchung/remark-plantuml/astro#createPlantUmlRemarkPlugin"
+---
+
+## Overview
+
+`@jongminchung/remark-plantuml` is an asynchronous remark plugin that converts fenced code or local `.puml` links into PlantUML server SVG URLs. It deflates and PlantUML-encodes source while HTML-escaping captions and alternative text.
+
+## Installation
+
+```bash
+pnpm add @jongminchung/remark-plantuml
+```
+
+The package is distributed through GitHub Packages, so map the `@jongminchung` scope in the consuming project's `.npmrc`.
+
+## Markdown usage
+
+```ts
+import remarkParse from "remark-parse";
+import { unified } from "unified";
+import remarkPlantUml, { publicPlantUmlSvgServerBaseUrl } from "@jongminchung/remark-plantuml";
+
+const processor = unified().use(remarkParse).use(remarkPlantUml, {
+  serverBaseUrl: publicPlantUmlSvgServerBaseUrl,
+});
+```
+
+The default fenced languages are `plantuml` and `puml`. Local `.puml` links resolve from the current Markdown file. Keep resolved files within `contentRoot`.
+
+## Astro usage
+
+```ts
+import { defineConfig } from "astro/config";
+import { createPlantUmlRemarkPlugin } from "@jongminchung/remark-plantuml/astro";
+
+export default defineConfig({
+  markdown: {
+    remarkPlugins: [
+      createPlantUmlRemarkPlugin({
+        serverBaseUrl: "https://www.plantuml.com/plantuml/svg",
+      }),
+    ],
+  },
+});
+```
+
+## Styling
+
+The default figure class is `plantuml-diagram`. Import `styles.css`, the Starlight-specific `starlight.css`, or provide a custom `className`.
+
+## API
+
+### Main entry
+
+- `remarkPlantUml(options)`: default export that creates a unified transformer
+- `createPlantUmlSvgUrl(source, serverBaseUrl)`: creates an SVG URL for a selected server
+- `encodePlantUmlSource(source)`: creates the encoded PlantUML path segment
+- `publicPlantUmlSvgServerBaseUrl`: public SVG server base URL
+- `RemarkPlantUmlOptions`: server, root, extension, language, and class options
+
+### Astro entry
+
+- `createPlantUmlRemarkPlugin(options)`: creates an Astro remark tuple
+- `AstroRemarkPlantUmlPlugin`: tuple type

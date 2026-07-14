@@ -1,0 +1,164 @@
+---
+id: handbook/ddd
+locale: en
+section: handbook
+title: Practical Domain-Driven Design handbook
+description: A single-page guide for turning problem-space language into boundaries, models, and testable code.
+order: 1
+updatedAt: "2026-07-14"
+tags: [ddd, domain, bounded-context, aggregate, architecture]
+status: stable
+sourceUrl: https://github.com/jongminchung/jongminchung/blob/main/apps/docs/content/ko/handbook/ddd.mdx
+---
+
+> Author: Jongmin Chung · Original: Korean edition
+
+Domain-Driven Design is not a folder convention or a layered template. It is a way for a team to describe the problem in shared language and make code protect the boundaries of that language. This handbook connects strategic design and tactical patterns into one working flow.
+
+## Start in the problem space
+
+Starting with a feature list hardens screens and APIs before the user's goal is understood. Record the outcome the user needs, the constraints that can prevent it, and who decides what when failure occurs. If domain experts and developers cannot use the same sentence, it is too early to build the model.
+
+### Questions that reveal the domain
+
+- Who decides that this work is complete?
+- Which transitions are irreversible, and who authorizes them?
+- Which words carry different meanings across teams?
+- Which values enter from outside the system and cannot be trusted?
+
+Look for verbs that express decisions and rules. “Confirm an order,” “authorize a payment,” and “reserve stock” reveal more responsibility than the noun “order.”
+
+## Build a ubiquitous language
+
+A glossary alone does not create ubiquitous language. It works only when meetings, issues, test names, APIs, and code use the same terms. Every term should include examples and counterexamples.
+
+| Term         | Meaning                                                                     | Does not mean                             |
+| ------------ | --------------------------------------------------------------------------- | ----------------------------------------- |
+| Reservation  | A limited resource is unavailable to other requests for a bounded period    | Payment complete or ownership transferred |
+| Confirmation | Required validation and approval are complete, preventing arbitrary changes | A database row was saved                  |
+| Cancellation | Effects are compensated according to policy                                 | A row was deleted                         |
+
+Do not force one meaning when terms collide. The collision may be evidence that separate models are needed.
+
+## Find bounded contexts
+
+A bounded context is the scope in which a model and its language remain consistent. It does not have to match an org chart or deployment unit. Look for these axes of change:
+
+1. The same data has different rules or lifecycles.
+2. Change reasons and release cadence differ.
+3. Different people own failure recovery.
+4. One side values correctness while another values availability.
+
+Name the relationship between contexts. A shared model creates the strongest coupling. Prefer a published language, translation layer, event, or explicit API. Validate and translate external models in an anti-corruption layer before they enter internal types.
+
+## Models and invariants
+
+A domain model is valuable because it makes invalid states difficult to construct. Do not create incomplete objects that setters later finish, or require callers to remember a separate `validate()` call.
+
+```ts
+type ConfirmedOrder = Readonly<{
+  kind: "confirmed";
+  orderId: string;
+  confirmedAt: Date;
+}>;
+
+type ConfirmationResult =
+  | Readonly<{ kind: "accepted"; order: ConfirmedOrder }>
+  | Readonly<{ kind: "rejected"; reason: "empty" | "already-confirmed" }>;
+```
+
+Represent state combinations with discriminated unions instead of several booleans. Return recoverable domain failures as values. Reserve fast failure for programming errors and broken invariants.
+
+## Entities and value objects
+
+An entity keeps its identity as attributes change. A value object is identified by all its attributes and should be immutable whenever possible. Not every database table needs to become an entity.
+
+### Why value objects help
+
+- Parsing and validation live at one construction boundary.
+- Units cannot be mixed accidentally.
+- Equality semantics become explicit.
+- Serialization is separated from internal representation.
+
+Values with rules, such as `Money`, `EmailAddress`, and `DateRange`, benefit from value objects. Wrapping every display string in a class only makes the model heavy.
+
+## Aggregates and transaction boundaries
+
+An aggregate is a cluster that must remain consistent in one transaction. Only the root is referenced externally, and state transitions flow through root commands. An aggregate is not an entire screen or a database join result.
+
+Keep the boundary small:
+
+- Place only immediately enforced invariants in the same aggregate.
+- Refer to other aggregates by identity, not an object reference.
+- Use domain events for follow-up work that can be eventually consistent.
+- Reconsider the boundary when one request repeatedly modifies several aggregates.
+
+## Repositories and domain services
+
+A repository is a storage boundary that behaves like an aggregate collection. It should not expose raw SQL rows or HTTP responses. Translate persisted representations into validated models and let callers distinguish absence from infrastructure failure.
+
+Use a domain service only for a domain rule that does not belong naturally to one entity. If CRUD, formatting, and time access all become services, behavior becomes anemic again. Application services coordinate I/O; the domain owns pure policy.
+
+## Events and integration
+
+A domain event describes a business fact that already happened. `SendEmail` is a command; `OrderConfirmed` is an event. Its schema is a contract with consumers, not a dump of an internal class.
+
+Assume duplicate delivery, reordering, delay, and partial failure are normal. Use event IDs and idempotency keys. Consider an outbox when publishing and state persistence must be atomic. Retries should be an observable policy, not a way to hide failure.
+
+## Application flow
+
+The application layer coordinates a use case:
+
+1. Parse external input and check identity and authorization.
+2. Load the required aggregates.
+3. Invoke domain commands.
+4. Persist changes and events.
+5. Translate the result into an external representation.
+
+Move pricing and transition rules into the domain. Keep database and broker calls outside domain objects so tests and transaction boundaries stay visible.
+
+## Testing strategy
+
+Model tests verify observable rules, not private fields. Use examples to explain representative scenarios, and consider property-based tests when an invariant has many boundary combinations.
+
+```ts
+it("does not confirm an order twice", () => {
+  const first = order.confirm(clock.now());
+  expect(first.kind).toBe("accepted");
+
+  const second = order.confirm(clock.now());
+  expect(second).toEqual({ kind: "rejected", reason: "already-confirmed" });
+});
+```
+
+Repository contract tests ensure an in-memory implementation and real adapter preserve the same meaning. E2E tests should cover critical paths across context boundaries rather than repeat every domain combination.
+
+## Common failures and corrections
+
+### Anemic models behind layers
+
+A `controller → service → repository` structure is not DDD when every rule lives in a long service conditional. Move transitions and invariants into named domain operations.
+
+### One giant shared model
+
+When teams share one `Customer` type, every change blocks everyone. Let each context own the customer representation it needs and translate at the boundary.
+
+### Events as asynchronous function calls
+
+Events without a known owner, contract, and failure policy make behavior difficult to trace. Document the fact's owner, consumers, retry behavior, and observability.
+
+### Patterns everywhere
+
+Do not force aggregates and events into a simple CRUD supporting domain. Spend design effort where complexity and change concentrate; choose simpler models elsewhere.
+
+## Adoption checklist
+
+- Did we choose one costly misunderstanding to fix?
+- Is ubiquitous language, including examples and counterexamples, present in code and tests?
+- Are ownership and translation between contexts explicit?
+- Do construction and transition APIs enforce invariants?
+- Is the transaction boundary no larger than required consistency?
+- Can we observe integration failure, retry, and idempotency?
+- Is there a measure showing that the model improved a user outcome?
+
+The output of DDD is not a diagram. It is faster, safer decisions. The model is working when language becomes precise, invalid states decrease, and the impact of change stays inside a boundary.

@@ -1,0 +1,51 @@
+---
+id: deep-dive/nextjs-16
+locale: en
+section: deep-dive
+title: Next.js 16 Deep Dive
+displayTitle: Next.js 16
+description: Design a Next.js 16 documentation app around App Router and Server Components while avoiding common failures.
+order: 0
+updatedAt: "2026-07-14"
+verifiedAt: "2026-07-14"
+tags: [nextjs, app-router, rsc, mdx, performance]
+status: stable
+sourceUrl: https://nextjs.org/docs/app
+---
+
+## Choose rendering boundaries first
+
+Server Components are the App Router default. Build document content, navigation data, and SEO metadata on the server. Keep only browser state—search dialogs, theme selection, and scroll spy—in small Client Component boundaries. This reduces initial JavaScript and serialization.
+
+```tsx
+export default async function Page({ params }: PageProps) {
+  const { locale, slug } = await params;
+  const document = await getDocument(locale, slug);
+  return <DocumentPage document={document} />;
+}
+```
+
+## MDX pipeline
+
+`@next/mdx` requires a root `mdx-components.tsx` with App Router. Process GFM and frontmatter with remark and heading IDs with rehype. Prefer a static loader map over arbitrary dynamic import paths so tracing and 404 behavior stay analyzable.
+
+## Caching and parallelism
+
+Start independent I/O together and await it with `Promise.all`. Use `cache()` for repeated server reads within a request. Never store mutable request or user state in module globals.
+
+## Practical tips
+
+- Pair `generateStaticParams` with `dynamicParams = false` for deterministic 404s.
+- Generate canonical and `alternates.languages` from the same document ID.
+- Load search code and indexes only when search opens.
+- Do not serialize entire source documents into Client Component props.
+
+## Failure cases
+
+### Making the whole layout a Client Component
+
+A root provider does not require every descendant to become client code. Isolate a small `ClientShell` and pass server-rendered children through a slot.
+
+### Runtime file-system discovery
+
+Scanning content on every request makes deployment tracing and caching brittle. Generate a manifest and search indexes before build, then load content from static module paths.

@@ -1,0 +1,53 @@
+---
+id: deep-dive/pnpm-11
+locale: en
+section: deep-dive
+title: pnpm 11 Deep Dive
+displayTitle: pnpm 11
+description: Apply pnpm 11 workspaces, catalogs, and supply-chain policy to a reproducible monorepo.
+order: 1
+updatedAt: "2026-07-14"
+verifiedAt: "2026-07-14"
+tags: [pnpm, workspace, catalog, lockfile, supply-chain]
+status: stable
+sourceUrl: https://pnpm.io/
+---
+
+## The workspace contract
+
+`pnpm-workspace.yaml` controls package discovery, catalogs, build-script permission, and supply-chain policy. Pin common versions in a catalog and use `workspace:*` for internal dependencies so a registry copy cannot silently replace a local package.
+
+```yaml
+packages:
+  - "apps/*"
+  - "packages/*"
+
+catalog:
+  typescript: "6.0.3"
+  react: "19.2.7"
+```
+
+## Lockfiles and reproducibility
+
+CI should reject an install that needs to change the lockfile. Update it whenever a package manifest changes. Record Node and pnpm in `engines`, `packageManager`, and the runtime version file.
+
+## Build-script policy
+
+Native install scripts can be a supply-chain risk. Explicitly allow only required packages and review any newly introduced script.
+
+## Practical tips
+
+- Give each app a filtered command such as `pnpm --filter @scope/name run build`.
+- Use exact versions, without a caret, when pinning is part of the contract.
+- Investigate peer warnings with `pnpm peers check`.
+- Decide whether a generated artifact is truly required or a source export is enough.
+
+## Failure cases
+
+### Depending on a global pnpm
+
+Different pnpm versions can rewrite lockfiles and policies. Pin `packageManager` and run that version locally and in CI.
+
+### Allowing every install script
+
+A blanket exception also permits transitive code. Allow only known requirements such as `esbuild` and `sharp`.

@@ -1,0 +1,51 @@
+---
+id: deep-dive/typescript-6
+locale: en
+section: deep-dive
+title: TypeScript 6 Deep Dive
+displayTitle: TypeScript 6
+description: Apply strict boundaries and public API modeling with TypeScript 6 across the monorepo.
+order: 3
+updatedAt: "2026-07-14"
+verifiedAt: "2026-07-14"
+tags: [typescript, types, api, validation, migration]
+status: stable
+sourceUrl: https://www.typescriptlang.org/docs/
+---
+
+## Upgrade as one workspace
+
+A compiler major belongs in the root catalog and every workspace manifest together. Separate local errors from dependency declaration errors. Do not add assertions just to pass the upgrade; repair contracts and translation boundaries.
+
+## Validate external values
+
+Frontmatter, JSON, and HTTP responses are not trustworthy because they have a TypeScript type assertion. Start with `unknown`, verify required fields and union values, then return an immutable internal model.
+
+```ts
+function isLocale(value: string): value is "ko" | "en" {
+  return value === "ko" || value === "en";
+}
+```
+
+Represent intentional absence with `null` or a discriminated union. Narrow the `undefined` naturally returned by lookups. `noUncheckedIndexedAccess` helps expose those boundaries.
+
+## Verify public APIs
+
+Package exports and documentation drift easily. Use the Compiler API to read export symbols from source entry modules and compare them with frontmatter `apiSymbols`. The build can then reject missing or stale API docs.
+
+## Practical tips
+
+- Use interface for object shapes and type for unions and mapped types.
+- Default domain data and returned collections to readonly.
+- Use `satisfies` to validate contracts without widening literals.
+- Use `Promise.all` for independent work and explicit `void` for intentional fire-and-forget.
+
+## Failure cases
+
+### Spreading `any` during migration
+
+Temporary `any` escapes cross boundaries quickly. Validate `unknown` in a narrow adapter and keep only checked values in the domain.
+
+### Exporting implementation types
+
+Leaking framework or database types makes replacement expensive. Publish the smallest consumer-facing interface and explicit converters.
