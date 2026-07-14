@@ -1,5 +1,9 @@
+import { createElement } from "react";
+import { createRoot } from "react-dom/client";
 import { browser } from "wxt/browser";
+import { createShadowRootUi } from "wxt/utils/content-script-ui/shadow-root";
 import { defineContentScript } from "wxt/utils/define-content-script";
+import { InjectedTranslationUi } from "../components/InjectedTranslationUi";
 import {
   ACTIVE_TAB_TRANSLATION_CONTROL_SCOPE,
   ACTIVE_TAB_TRANSLATION_PAGE_SCOPE,
@@ -7,10 +11,17 @@ import {
 } from "../lib/active-tab-translation";
 import { installTranslationBridgeInPage } from "../lib/injected-translation-bridge";
 import {
+  createInjectedTranslationUiStore,
+  INJECTED_TRANSLATION_UI_EVENT,
+  parseInjectedTranslationUiEvent,
+  type InjectedTranslationUiStore,
+} from "../lib/injected-ui-events";
+import {
   shouldAutoStartCaptionTranslation,
   shouldRetryAutoCaptionTranslation,
   type AutoCaptionStatusLike,
 } from "../lib/video-auto-activation";
+import "../styles/content-ui.css";
 
 type AutoCaptionControlType = Extract<
   ActiveTabTranslationControlRequest["type"],
@@ -25,8 +36,6 @@ const AUTO_CAPTION_RETRY_DELAY_MS = 2_500;
 const AUTO_WEBPAGE_NAVIGATION_DELAYS_MS = [250, 1_500] as const;
 const AUTO_WEBPAGE_RETRY_LIMIT = 2;
 const WEBPAGE_URL_POLL_INTERVAL_MS = 500;
-const FLOATING_CONTROL_SELECTOR = '[data-testid="floating-translate-control"]';
-const FLOATING_ACTIVE_INDICATOR_SELECTOR = '[data-testid="floating-translate-active-indicator"]';
 const AUTO_CAPTION_CONTROL_FAILURE_MESSAGE =
   "영상 자막 자동 시작 실패: 확장 번역 컨트롤이 응답하지 않습니다.";
 
@@ -91,20 +100,8 @@ async function waitForPlayerDataToSettle(currentUrl: string): Promise<boolean> {
   return location.href === currentUrl;
 }
 
-function showAutoCaptionFailure(message: string): void {
-  const control = document.querySelector(FLOATING_CONTROL_SELECTOR);
-  const activeIndicator = document.querySelector(FLOATING_ACTIVE_INDICATOR_SELECTOR);
-  if (control instanceof HTMLElement) {
-    control.dataset.state = "error";
-    control.setAttribute("aria-label", "번역 장애");
-    Object.assign(control.style, {
-      background: "#b42318",
-      boxShadow: "0 10px 22px rgba(180, 35, 24, 0.28)",
-    });
-  }
-  activeIndicator?.remove();
-  const hiddenStatus = document.querySelector("#tab-shelf-translation-bridge-status");
-  if (hiddenStatus instanceof HTMLElement) hiddenStatus.textContent = message;
+function showAutoCaptionFailure(message: string, store: InjectedTranslationUiStore): void {
+  store.setFloating({ status: "error", active: false, message });
 }
 
 function hasRenderedWebpageTranslation(): boolean {
@@ -114,10 +111,89 @@ function hasRenderedWebpageTranslation(): boolean {
 export default defineContentScript({
   matches: ["http://*/*", "https://*/*"],
   runAt: "document_idle",
-  main(): void {
+  cssInjectionMode: "ui",
+  async main(ctx): Promise<void> {
+    const uiStore = createInjectedTranslationUiStore();
+    const receiveUiEvent = (event: Event): void => {
+      const parsed = parseInjectedTranslationUiEvent((event as CustomEvent<unknown>).detail);
+      if (parsed) uiStore.receive(parsed);
+    };
+    ctx.addEventListener(window, INJECTED_TRANSLATION_UI_EVENT, receiveUiEvent);
+
+    const runPrimaryAction = async (): Promise<void> => {
+      if (isVideoTranslationPage()) {
+        uiStore.setFloating({
+          status: "running",
+          active: false,
+          message: "영상 자막 번역을 시작합니다.",
+        });
+        try {
+          await sendControlMessage("run-caption-translation");
+        } catch {
+          showAutoCaptionFailure(AUTO_CAPTION_CONTROL_FAILURE_MESSAGE, uiStore);
+        }
+        return;
+      }
+
+      const active = !uiStore.getSnapshot().floating.active;
+      uiStore.setFloating({
+        status: active ? "running" : "inactive",
+        active,
+        message: active ? "페이지 번역을 시작합니다." : "페이지 번역을 끕니다.",
+      });
+      try {
+        const response = await browser.runtime.sendMessage({
+          scope: ACTIVE_TAB_TRANSLATION_CONTROL_SCOPE,
+          type: "set-webpage-translation-session-active",
+          active,
+        });
+        if (isWebpageSessionStatusLike(response)) {
+          uiStore.setFloating({
+            status: response.webpageTranslationSessionActive ? "active" : "inactive",
+            active: response.webpageTranslationSessionActive,
+            message: response.webpageTranslationSessionActive
+              ? "페이지 번역이 켜져 있습니다."
+              : "페이지 번역이 꺼져 있습니다.",
+          });
+        }
+      } catch {
+        uiStore.setFloating({
+          status: "error",
+          active: false,
+          message: "번역 요청을 보낼 수 없습니다.",
+        });
+      }
+    };
+
+    const ui = await createShadowRootUi(ctx, {
+      name: "tobi-immersive-translate",
+      position: "overlay",
+      anchor: document.documentElement,
+      append: "last",
+      zIndex: 2_147_483_647,
+      mode: "open",
+      isolateEvents: true,
+      onMount(uiContainer) {
+        const root = createRoot(uiContainer);
+        root.render(
+          createElement(InjectedTranslationUi, {
+            store: uiStore,
+            onPrimaryAction: runPrimaryAction,
+          }),
+        );
+        return root;
+      },
+      onRemove(root) {
+        root?.unmount();
+      },
+    });
+    ui.mount();
+    ctx.onInvalidated(() => ui.remove());
+
     installTranslationBridgeInPage(
       ACTIVE_TAB_TRANSLATION_PAGE_SCOPE,
       ACTIVE_TAB_TRANSLATION_CONTROL_SCOPE,
+      INJECTED_TRANSLATION_UI_EVENT,
     );
 
     let lastAutoCaptionUrl: string | null = null;
@@ -139,7 +215,7 @@ export default defineContentScript({
     const scheduleAutoCaptionRetry = (currentUrl: string, failureMessage?: string): boolean => {
       const retryCount = autoCaptionRetryCountsByUrl.get(currentUrl) ?? 0;
       if (retryCount >= AUTO_CAPTION_RETRY_LIMIT) {
-        if (failureMessage) showAutoCaptionFailure(failureMessage);
+        if (failureMessage) showAutoCaptionFailure(failureMessage, uiStore);
         return false;
       }
       autoCaptionRetryCountsByUrl.set(currentUrl, retryCount + 1);

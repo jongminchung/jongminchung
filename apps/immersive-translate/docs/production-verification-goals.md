@@ -50,7 +50,7 @@ MCP 검증은 다음 산출물을 남긴다.
 - fixture + Docker + actual Go official docs: 8 passed.
 - Docker compose service `libretranslate`는 `127.0.0.1:5000`에서 healthy 상태다.
 - 최종 metadata: `test-results/qa-evidence/metadata.json`.
-- MCP `node_repl` 검증은 package metadata, MV3 manifest, content script, built asset 금지 문자열, `클릭 번역` tooltip, screenshot evidence를 모두 pass로 확인했다.
+- 자동 검증은 package metadata, MV3 manifest, content script, built asset 금지 문자열, `페이지 번역 켜기` tooltip, screenshot evidence를 모두 확인한다.
 
 생성된 핵심 screenshot evidence:
 
@@ -87,13 +87,13 @@ MCP 검증은 다음 산출물을 남긴다.
 - 원문은 사라지지 않는다.
 - 오른쪽 floating control은 본문 텍스트를 영구적으로 가리지 않는다.
 - popup/settings 창을 열지 않아도 번역이 시작된다.
-- `클릭 번역` tooltip이 보인다.
+- `페이지 번역 켜기` tooltip이 보인다.
 
 MCP screenshot assertions:
 
 - `article-floating-toggle-translation.png`는 `1440x1000` fixture에서 생성한다.
 - `[data-testid="floating-translate-control"]`가 visible이다.
-- `[data-testid="floating-translate-tooltip"]` text는 정확히 `클릭 번역`이다.
+- floating control의 tooltip과 접근성 이름은 `페이지 번역 켜기`다.
 - 첫 클릭 전 `[data-testid="translated-block"]`는 없다.
 - 첫 클릭 후 `[data-testid="source-block"]`와 `[data-testid="translated-block"]`가 모두 visible이다.
 - translated block의 top은 대응 source block 근처에 있어야 한다.
@@ -130,7 +130,7 @@ MCP screenshot assertions:
 
 - `#immersive-translate-popup`가 visible이다.
 - `[data-testid="popup-current-page-status"]`가 visible이다.
-- `[data-testid="popup-floating-toggle-guidance"]`가 visible이고 `클릭 번역`을 포함한다.
+- `[data-testid="popup-floating-toggle-guidance"]`가 visible이고 오른쪽 번역 버튼 안내를 포함한다.
 - `[data-testid="popup-provider-status"]`가 visible이고 `Default Docker` 상태를 표시한다.
 - 제거 대상 selector가 popup에 없어야 한다:
   - `[data-testid="translation-service-select"]`
@@ -148,9 +148,8 @@ MCP screenshot assertions:
 필수 assert:
 
 - article fixture 로드 후 popup을 열지 않아도 `[data-testid="floating-translate-control"]`가 visible이다.
-- `[data-testid="floating-translate-tooltip"]` text는 정확히 `클릭 번역`이다.
-- `[data-testid="floating-translate-close"]`가 visible이다.
-- `[data-testid="floating-translate-gear"]`가 visible이다.
+- floating control은 최소 `44x44px`이고 `페이지 번역 켜기` tooltip과 접근성 이름을 제공한다.
+- 주입 UI는 열린 Shadow DOM에 한 번만 마운트되고 host 문서의 theme 속성을 변경하지 않는다.
 - 첫 클릭 후 background translation request는 sender tab에만 적용된다.
 - 번역 완료 후 클릭하면 translated block이 숨겨지고, 다시 클릭하면 보인다.
 
@@ -226,7 +225,7 @@ Actual YouTube 필수 assert:
 - built popup/content asset에 Han script 문자가 없다. 한국어 Hangul은 허용한다.
 - built popup/content asset에 `translation-service-select`, `target-language-select`, `provider-settings-local-endpoint`, `document-tool-entry`, `more-menu`가 없다.
 - built popup/content asset에 `bridge`, `smoke translation`, `install bridge`, `active-tab bridge`가 visible UI copy로 남지 않는다.
-- built content asset에 `클릭 번역`이 존재한다.
+- built content asset에 `페이지 번역 켜기`가 존재한다.
 
 ## G08. Build Artifact And Manifest Integrity
 

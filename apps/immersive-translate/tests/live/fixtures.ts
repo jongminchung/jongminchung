@@ -703,7 +703,7 @@ VTT opening caption
 
     if (pathname.includes("article") && !pathname.includes("korean-article")) {
       response.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
-      response.end(`<!doctype html><html><head><title>Readable Article Fixture</title></head><body>
+      response.end(`<!doctype html><html data-theme="host-owned"><head><title>Readable Article Fixture</title></head><body>
                 <main>
                     <h1>Readable Article Fixture</h1>
                     <p>Opening paragraph for webpage translation.</p>

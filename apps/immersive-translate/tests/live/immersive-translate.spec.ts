@@ -34,9 +34,11 @@ function requireElementBox(box: ElementBox | null, label: string): ElementBox {
 async function assertFloatingOverlayLayout(page: Page): Promise<void> {
   const controlBox = await page.getByTestId("floating-translate-control").boundingBox();
   const control = requireElementBox(controlBox, "floating control");
-  await expect(page.getByTestId("floating-translate-control")).toHaveText("TR");
-  expect(control.width).toBeLessThanOrEqual(36);
-  expect(control.height).toBeLessThanOrEqual(36);
+  await expect(page.getByTestId("floating-translate-control").locator("svg")).toBeVisible();
+  expect(control.width).toBeGreaterThanOrEqual(44);
+  expect(control.height).toBeGreaterThanOrEqual(44);
+  expect(control.width).toBeLessThanOrEqual(48);
+  expect(control.height).toBeLessThanOrEqual(48);
   expect(control.x).toBeGreaterThanOrEqual(0);
   expect(control.y).toBeGreaterThanOrEqual(0);
   await expect(page.getByTestId("floating-translate-status")).toHaveCount(0);
@@ -262,6 +264,52 @@ async function assertMinimalPopup(popup: Page): Promise<void> {
 }
 
 test.describe("Immersive Translate floating toggle QA", () => {
+  test("isolates one keyboard-operable Astryx UI from the host theme", async ({
+    context,
+    localSite,
+  }) => {
+    await context.route(DEFAULT_TRANSLATION_ENDPOINT, async (route: Route) => {
+      const payload = JSON.parse(route.request().postData() ?? "{}") as { readonly q?: unknown };
+      const sourceTexts = Array.isArray(payload.q)
+        ? payload.q.filter((text): text is string => typeof text === "string")
+        : [];
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ translatedText: sourceTexts.map(() => "격리된 키보드 번역") }),
+      });
+    });
+
+    const page = await context.newPage();
+    await page.goto(`${localSite.origin}/article`);
+    await expect(page.locator("tobi-immersive-translate")).toHaveCount(1);
+    expect(await page.evaluate(() => document.documentElement.dataset.theme)).toBe("host-owned");
+    expect(
+      await page.evaluate(() => document.documentElement.hasAttribute("data-astryx-theme")),
+    ).toBe(false);
+
+    const control = page.getByTestId("floating-translate-control");
+    await page.emulateMedia({ colorScheme: "dark" });
+    const darkBackground = await control.evaluate(
+      (element) => window.getComputedStyle(element).backgroundColor,
+    );
+    await page.emulateMedia({ colorScheme: "light" });
+    await expect
+      .poll(() => control.evaluate((element) => window.getComputedStyle(element).backgroundColor))
+      .not.toBe(darkBackground);
+    await control.hover();
+    await expect(page.getByRole("tooltip", { name: "페이지 번역 켜기" })).toBeVisible();
+    await control.focus();
+    await expect(control).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(page.getByText("격리된 키보드 번역").first()).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.dataset.theme)).toBe("host-owned");
+    expect(
+      await page.evaluate(() => document.documentElement.hasAttribute("data-astryx-theme")),
+    ).toBe(false);
+    await expect(page.locator("tobi-immersive-translate")).toHaveCount(1);
+  });
+
   test("shows a minimal popup and removes settings/document command-center controls", async ({
     context,
     extensionId,

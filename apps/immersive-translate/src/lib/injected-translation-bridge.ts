@@ -20,7 +20,11 @@ interface ContentScriptChromeApi {
   };
 }
 
-export function installTranslationBridgeInPage(pageScope: string, controlScope?: string): boolean {
+export function installTranslationBridgeInPage(
+  pageScope: string,
+  controlScope?: string,
+  uiEventName?: string,
+): boolean {
   interface PageCaptionCue {
     readonly id: string;
     readonly trackId: string;
@@ -74,9 +78,6 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
       readonly ready: true;
       trackedVideo: HTMLVideoElement | null;
       renderedCues: readonly PageCaptionCue[];
-      overlay: HTMLElement | null;
-      cueList: HTMLElement | null;
-      statusLine: HTMLElement | null;
       videoListeners: readonly HTMLVideoElement[];
       videoIdentity: string | null;
       captionRefreshPending: boolean;
@@ -87,68 +88,19 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
     };
   };
 
-  const floatingRailId = "immersive-translate-floating-rail";
-  const floatingControlId = "immersive-translate-floating-control";
-  const floatingRailSelector = `#${floatingRailId}, [data-testid="floating-translate-rail"]`;
-  const floatingControlSelector = `#${floatingControlId}, [data-testid="floating-translate-control"]`;
   const defaultYouTubeCaptionLanguageCodes = ["en", "ko"] as const;
   const koreanTextPattern = /[\u3131-\u318e\uac00-\ud7a3]/;
-
-  function collectExistingFloatingTargets(): readonly Element[] {
-    const targets = new Set<Element>();
-    for (const element of document.querySelectorAll(
-      `${floatingRailSelector}, ${floatingControlSelector}`,
-    )) {
-      targets.add(element.closest(floatingRailSelector) ?? element);
-    }
-    return [...targets];
-  }
-
-  function removeExistingFloatingTargets(): void {
-    for (const element of collectExistingFloatingTargets()) {
-      element.remove();
-    }
-  }
-
-  function pruneDuplicateFloatingTargets(): void {
-    for (const element of collectExistingFloatingTargets().slice(1)) {
-      element.remove();
-    }
-  }
-
-  function showExistingFloatingTarget(element: Element | null): boolean {
-    if (!(element instanceof HTMLElement)) return false;
-    element.hidden = false;
-    element.style.removeProperty("display");
-    element.style.removeProperty("visibility");
-    element.style.removeProperty("opacity");
-    return true;
-  }
-
-  function restoreExistingFloatingUi(): boolean {
-    pruneDuplicateFloatingTargets();
-    const rail = document.querySelector(floatingRailSelector);
-    const control = document.querySelector(floatingControlSelector);
-    if (!showExistingFloatingTarget(rail) || !showExistingFloatingTarget(control)) return false;
-    if (control instanceof HTMLElement && !control.dataset.state)
-      control.dataset.state = "inactive";
-    return true;
-  }
 
   const bridgeWindow = window as BridgeWindow;
   if (bridgeWindow.__tabShelfTranslationBridge?.ready) {
     bridgeWindow.__tabShelfTranslationBridge.captionRefreshPending = false;
-    if (restoreExistingFloatingUi()) return true;
+    return true;
   }
-  removeExistingFloatingTargets();
 
   const bridgeState: NonNullable<BridgeWindow["__tabShelfTranslationBridge"]> = {
     ready: true as const,
     trackedVideo: null,
     renderedCues: [] as readonly PageCaptionCue[],
-    overlay: null,
-    cueList: null,
-    statusLine: null,
     videoListeners: [] as readonly HTMLVideoElement[],
     videoIdentity: null,
     captionRefreshPending: false,
@@ -168,25 +120,6 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
     Object.assign(element.style, styles);
   }
 
-  function assignVisuallyHiddenStyles(element: HTMLElement): void {
-    assignStyles(element, {
-      position: "fixed",
-      top: "0",
-      left: "0",
-      width: "1px",
-      height: "1px",
-      margin: "-1px",
-      padding: "0",
-      border: "0",
-      overflow: "hidden",
-      clip: "rect(0 0 0 0)",
-      clipPath: "inset(50%)",
-      whiteSpace: "nowrap",
-      pointerEvents: "none",
-      opacity: "0",
-    });
-  }
-
   function floatingStatusKindForStateName(value: string): FloatingStatusKind {
     if (value === "failed" || value === "no-captions" || value === "no-content") return "error";
     if (value === "detecting" || value === "collecting" || value === "translating") {
@@ -195,11 +128,24 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
     return bridgeState.webpageTranslationSessionActive ? "active" : "inactive";
   }
 
-  function floatingStatusLabelForKind(kind: FloatingStatusKind): string {
-    if (kind === "error") return "번역 장애";
-    if (kind === "running") return "페이지 번역 중";
-    if (kind === "active") return "페이지 번역 끄기";
-    return "페이지 번역 켜기";
+  function dispatchUiEvent(event: Record<string, unknown>): void {
+    if (!uiEventName) return;
+    window.dispatchEvent(
+      new CustomEvent(uiEventName, {
+        detail: JSON.stringify({ version: 1, ...event }),
+      }),
+    );
+  }
+
+  function dispatchFloatingState(kind: FloatingStatusKind, message: string): void {
+    dispatchUiEvent({
+      type: "floating",
+      state: {
+        status: kind,
+        active: bridgeState.webpageTranslationSessionActive,
+        message,
+      },
+    });
   }
 
   function isPageRecord(value: unknown): value is Record<string, unknown> {
@@ -746,65 +692,6 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
     return buildUdemyTrackInPage(drafts, metadata);
   }
 
-  function ensureOverlay(): HTMLElement {
-    if (bridgeState.overlay && document.documentElement.contains(bridgeState.overlay)) {
-      return bridgeState.overlay;
-    }
-
-    const overlay = document.createElement("section");
-    overlay.id = "tab-shelf-caption-overlay";
-    overlay.dataset.testid = "caption-container";
-    overlay.dataset.tabShelfCaptionOverlay = "true";
-    overlay.setAttribute("aria-live", "polite");
-    overlay.setAttribute("role", "status");
-    assignStyles(overlay, {
-      position: "fixed",
-      left: "50%",
-      bottom: "28px",
-      transform: "translateX(-50%)",
-      zIndex: "2147483647",
-      width: "min(760px, calc(100vw - 32px))",
-      pointerEvents: "none",
-      font: '500 28px/1.28 "Avenir Next", "Segoe UI", Arial, sans-serif',
-      color: "#ffffff",
-    });
-
-    const shell = document.createElement("div");
-    assignStyles(shell, {
-      display: "grid",
-      gap: "0",
-      justifyItems: "center",
-    });
-
-    const eyebrow = document.createElement("div");
-    eyebrow.textContent = "Immersive Translate captions";
-    assignStyles(eyebrow, {
-      display: "none",
-    });
-
-    const statusLine = document.createElement("div");
-    statusLine.dataset.tabShelfCaptionStatus = "true";
-    statusLine.dataset.testid = "video-auto-subtitle-status";
-    assignVisuallyHiddenStyles(statusLine);
-
-    const cueList = document.createElement("div");
-    cueList.dataset.testid = "reference-bilingual-caption";
-    cueList.dataset.tabShelfCaptionCues = "true";
-    assignStyles(cueList, {
-      display: "grid",
-      gap: "8px",
-      justifyItems: "center",
-    });
-
-    shell.append(eyebrow, statusLine, cueList);
-    overlay.append(shell);
-    document.documentElement.append(overlay);
-    bridgeState.overlay = overlay;
-    bridgeState.statusLine = statusLine;
-    bridgeState.cueList = cueList;
-    return overlay;
-  }
-
   function readCueText(cue: TextTrackCue): string {
     const textCue = cue as TextTrackCue & { readonly text?: unknown };
     if (typeof textCue.text === "string") return textCue.text.replace(/<[^>]+>/g, "").trim();
@@ -845,10 +732,10 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
     detachVideoListeners();
     bridgeState.trackedVideo = null;
     bridgeState.renderedCues = [];
-    if (bridgeState.cueList) bridgeState.cueList.replaceChildren();
-    if (bridgeState.statusLine) {
-      bridgeState.statusLine.textContent = "Caption state cleared for the current video.";
-    }
+    dispatchUiEvent({
+      type: "caption-clear",
+      message: "Caption state cleared for the current video.",
+    });
   }
 
   function isElementHidden(element: Element): boolean {
@@ -1204,10 +1091,6 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
       location.hostname === "m.youtube.com" ||
       location.pathname.includes("youtube")
     );
-  }
-
-  function isVideoTranslationPage(): boolean {
-    return isYouTubeLikePage() || isUdemyLikePage() || document.querySelector("video") !== null;
   }
 
   function isUdemyLikePage(): boolean {
@@ -1671,27 +1554,30 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
     return 18;
   }
 
-  function applyCaptionOverlayPreferences(preferences: PageCaptionDisplayPreferences): void {
-    const overlay = ensureOverlay();
+  function captionOverlayPlacement(preferences: PageCaptionDisplayPreferences): {
+    readonly left: number;
+    readonly width: number;
+    readonly top: number | null;
+    readonly bottom: number | null;
+  } {
     const isTop = preferences.captionOverlayPosition === "top";
     const video = bridgeState.trackedVideo ?? document.querySelector("video");
     if (video) {
       const rect = video.getBoundingClientRect();
       const usableWidth = Math.max(280, Math.min(900, rect.width * 0.56, rect.width - 96));
-      assignStyles(overlay, {
-        left: `${rect.left + rect.width / 2}px`,
-        width: `${usableWidth}px`,
-        top: isTop ? `${Math.max(16, rect.top + 24)}px` : "",
-        bottom: isTop
-          ? ""
-          : `${Math.max(16, window.innerHeight - rect.bottom + rect.height * 0.04)}px`,
-      });
-      return;
+      return {
+        left: rect.left + rect.width / 2,
+        width: usableWidth,
+        top: isTop ? Math.max(16, rect.top + 24) : null,
+        bottom: isTop ? null : Math.max(16, window.innerHeight - rect.bottom + rect.height * 0.04),
+      };
     }
-    assignStyles(overlay, {
-      top: isTop ? "28px" : "",
-      bottom: isTop ? "" : "28px",
-    });
+    return {
+      left: window.innerWidth / 2,
+      width: Math.min(760, Math.max(280, window.innerWidth - 32)),
+      top: isTop ? 28 : null,
+      bottom: isTop ? null : 28,
+    };
   }
 
   function pageCaptionDisplayLines(cue: PageCaptionCue): readonly {
@@ -1713,11 +1599,7 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
   }
 
   function setCaptionState(message: string): void {
-    ensureOverlay();
-    if (bridgeState.statusLine) bridgeState.statusLine.textContent = message;
-    if (bridgeState.cueList && bridgeState.renderedCues.length === 0) {
-      bridgeState.cueList.replaceChildren();
-    }
+    dispatchUiEvent({ type: "caption-status", message });
   }
 
   function maybeRequestNextCaptionWindow(currentTimeSeconds: number): void {
@@ -1752,65 +1634,30 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
   }
 
   function renderActiveCues(): void {
-    ensureOverlay();
-    applyCaptionOverlayPreferences(bridgeState.captionPreferences);
-    const cueList = bridgeState.cueList;
     const video = bridgeState.trackedVideo ?? document.querySelector("video");
-    if (!cueList || !video) return;
+    if (!video) return;
     const currentTime = video.currentTime;
     const activeCue = selectVisibleCaptionCue(currentTime);
-    cueList.replaceChildren();
     maybeRequestNextCaptionWindow(currentTime);
-    if (!activeCue) return;
-
-    const card = document.createElement("article");
-    card.dataset.tabShelfCaptionCue = activeCue.id;
-    const opacity = bridgeState.captionPreferences.captionBackgroundOpacity / 100;
-    assignStyles(card, {
-      boxSizing: "border-box",
-      width: "fit-content",
-      maxWidth: "100%",
-      minWidth: "min(260px, 100%)",
-      border: "0",
-      borderRadius: "2px",
-      background: `rgba(31, 31, 31, ${Math.min(0.82, Math.max(0.62, opacity - 0.08))})`,
-      padding: "8px 16px 10px",
-      textAlign: "left",
-    });
-
-    for (const [lineIndex, line] of pageCaptionDisplayLines(activeCue).entries()) {
-      const lineElement = document.createElement("div");
-      lineElement.dataset.testid =
-        line.kind === "translated" ? "caption-translated-line" : "caption-original-line";
-      lineElement.dataset.tabShelfCaptionLine = line.kind;
-      lineElement.textContent = line.text;
-      const responsiveSize = Math.round(Math.max(20, Math.min(34, cueList.clientWidth / 24)));
-      const preferenceSize = captionFontPixels(bridgeState.captionPreferences.captionFontSize);
-      const baseSize = Math.max(preferenceSize, responsiveSize);
-      assignStyles(lineElement, {
-        marginTop: lineIndex === 0 ? "0" : "4px",
-        fontSize: `${baseSize}px`,
-        lineHeight: "1.25",
-        color: "#ffffff",
-        fontWeight: "500",
-        letterSpacing: "0",
-        overflowWrap: "normal",
-        whiteSpace: "normal",
-        textShadow: "0 2px 8px rgba(0, 0, 0, 0.78)",
-      });
-      card.append(lineElement);
+    if (!activeCue) {
+      dispatchUiEvent({ type: "caption-clear", message: "활성 자막을 기다리는 중입니다." });
+      return;
     }
-    cueList.append(card);
+    const placement = captionOverlayPlacement(bridgeState.captionPreferences);
+    const responsiveSize = Math.round(Math.max(20, Math.min(34, placement.width / 24)));
+    const preferenceSize = captionFontPixels(bridgeState.captionPreferences.captionFontSize);
+    dispatchUiEvent({
+      type: "caption-cue",
+      message: "자막 번역이 표시되었습니다.",
+      cue: {
+        id: activeCue.id,
+        lines: pageCaptionDisplayLines(activeCue),
+        placement,
+        fontSize: Math.max(preferenceSize, responsiveSize),
+        backgroundOpacity: bridgeState.captionPreferences.captionBackgroundOpacity,
+      },
+    });
   }
-
-  const badge = document.createElement("div");
-  badge.id = "tab-shelf-translation-bridge-status";
-  badge.textContent = "페이지 번역 준비됨";
-  badge.setAttribute("aria-hidden", "true");
-  assignVisuallyHiddenStyles(badge);
-  document.documentElement.append(badge);
-
-  let updateFloatingStatus = (_kind: FloatingStatusKind, _message?: string): void => {};
 
   function sendControlRequest(message: Record<string, unknown>): void {
     if (!controlScope) return;
@@ -1822,125 +1669,18 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
         if (!isPageRecord(response)) return;
         if (typeof response.webpageTranslationSessionActive !== "boolean") return;
         bridgeState.webpageTranslationSessionActive = response.webpageTranslationSessionActive;
-        updateFloatingStatus(bridgeState.webpageTranslationSessionActive ? "active" : "inactive");
+        dispatchFloatingState(
+          bridgeState.webpageTranslationSessionActive ? "active" : "inactive",
+          bridgeState.webpageTranslationSessionActive
+            ? "페이지 번역이 켜져 있습니다."
+            : "페이지 번역이 꺼져 있습니다.",
+        );
       })
       .catch(() => {
-        const messageText = "번역 요청을 보낼 수 없습니다.";
-        badge.textContent = messageText;
-        updateFloatingStatus("error");
+        dispatchFloatingState("error", "번역 요청을 보낼 수 없습니다.");
       });
   }
-
-  function runFloatingPrimaryAction(): void {
-    if (isVideoTranslationPage()) {
-      sendControlRequest({ type: "run-caption-translation" });
-      const message = "영상 자막 번역을 시작합니다.";
-      badge.textContent = message;
-      updateFloatingStatus("running");
-      return;
-    }
-    const active = !bridgeState.webpageTranslationSessionActive;
-    bridgeState.webpageTranslationSessionActive = active;
-    sendControlRequest({ type: "set-webpage-translation-session-active", active });
-    const message = active ? "페이지 번역을 시작합니다." : "페이지 번역을 끕니다.";
-    badge.textContent = message;
-    updateFloatingStatus(active ? "running" : "inactive");
-  }
-
-  const floatingRail = document.createElement("section");
-  floatingRail.id = floatingRailId;
-  floatingRail.dataset.testid = "floating-translate-rail";
-  assignStyles(floatingRail, {
-    position: "fixed",
-    right: "14px",
-    top: "34%",
-    zIndex: "2147483647",
-    width: "34px",
-    height: "34px",
-    font: '700 12px/1 "Avenir Next", "Segoe UI", sans-serif',
-  });
-
-  const floatingCluster = document.createElement("div");
-  assignStyles(floatingCluster, {
-    position: "relative",
-    width: "34px",
-    height: "34px",
-  });
-
-  const floatingControl = document.createElement("button");
-  floatingControl.id = floatingControlId;
-  floatingControl.dataset.testid = "floating-translate-control";
-  floatingControl.type = "button";
-  floatingControl.textContent = "TR";
-  floatingControl.setAttribute("aria-label", "페이지 번역 켜기");
-  assignStyles(floatingControl, {
-    width: "34px",
-    height: "34px",
-    border: "0",
-    borderRadius: "999px",
-    background: "#f28bb4",
-    color: "#ffffff",
-    font: '800 12px/1 "Avenir Next", "Segoe UI", sans-serif',
-    boxShadow: "0 10px 24px rgba(242, 139, 180, 0.26)",
-    cursor: "pointer",
-    padding: "0",
-    textAlign: "center",
-  });
-
-  const floatingActiveIndicator = document.createElement("span");
-  floatingActiveIndicator.dataset.testid = "floating-translate-active-indicator";
-  floatingActiveIndicator.setAttribute("aria-hidden", "true");
-  assignStyles(floatingActiveIndicator, {
-    position: "absolute",
-    right: "-1px",
-    bottom: "-1px",
-    width: "10px",
-    height: "10px",
-    border: "2px solid #ffffff",
-    borderRadius: "999px",
-    background: "#5ee48b",
-    boxShadow: "0 4px 10px rgba(94, 228, 139, 0.32)",
-  });
-
-  function styleFloatingStatus(kind: FloatingStatusKind): void {
-    const styles: Record<FloatingStatusKind, Partial<CSSStyleDeclaration>> = {
-      inactive: {
-        background: "#f28bb4",
-        boxShadow: "0 10px 24px rgba(242, 139, 180, 0.26)",
-      },
-      active: {
-        background: "#f28bb4",
-        boxShadow: "0 10px 24px rgba(242, 139, 180, 0.26)",
-      },
-      running: {
-        background: "#f28bb4",
-        boxShadow: "0 10px 24px rgba(242, 139, 180, 0.32)",
-      },
-      error: {
-        background: "#b42318",
-        boxShadow: "0 10px 22px rgba(180, 35, 24, 0.28)",
-      },
-    };
-    assignStyles(floatingControl, styles[kind]);
-    floatingControl.dataset.state = kind;
-    if (bridgeState.webpageTranslationSessionActive) {
-      if (!floatingActiveIndicator.isConnected) floatingCluster.append(floatingActiveIndicator);
-    } else {
-      floatingActiveIndicator.remove();
-    }
-  }
-
-  updateFloatingStatus = (kind): void => {
-    const label = floatingStatusLabelForKind(kind);
-    floatingControl.setAttribute("aria-label", label);
-    styleFloatingStatus(kind);
-  };
-
-  floatingControl.addEventListener("click", runFloatingPrimaryAction);
-  floatingCluster.append(floatingControl);
-  floatingRail.append(floatingCluster);
-  document.documentElement.append(floatingRail);
-  updateFloatingStatus("inactive");
+  dispatchFloatingState("inactive", "페이지 번역 준비됨");
 
   window.addEventListener("yt-navigate-finish", clearStaleYouTubeStateFromEvent);
   window.addEventListener("yt-player-updated", clearStaleYouTubeStateFromEvent);
@@ -1966,15 +1706,17 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
           : "페이지 번역 상태가 변경되었습니다.";
       const stateName =
         typeof record.webpageState.name === "string" ? record.webpageState.name : "";
-      badge.textContent = messageText;
-      updateFloatingStatus(floatingStatusKindForStateName(stateName));
+      dispatchFloatingState(floatingStatusKindForStateName(stateName), messageText);
       sendResponse({ ok: true });
       return true;
     }
 
     if (record.type === "show-webpage-session-state" && typeof record.active === "boolean") {
       bridgeState.webpageTranslationSessionActive = record.active;
-      updateFloatingStatus(record.active ? "active" : "inactive");
+      dispatchFloatingState(
+        record.active ? "active" : "inactive",
+        record.active ? "페이지 번역이 켜져 있습니다." : "페이지 번역이 꺼져 있습니다.",
+      );
       sendResponse({ ok: true });
       return true;
     }
@@ -2010,8 +1752,10 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
 
     if (record.type === "clear-webpage-translation") {
       clearWebpageTranslation();
-      badge.textContent = "페이지 번역을 지웠습니다.";
-      updateFloatingStatus(bridgeState.webpageTranslationSessionActive ? "active" : "inactive");
+      dispatchFloatingState(
+        bridgeState.webpageTranslationSessionActive ? "active" : "inactive",
+        "페이지 번역을 지웠습니다.",
+      );
       sendResponse({ ok: true });
       return true;
     }
@@ -2031,9 +1775,8 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
       if (stateName !== "detecting" && stateName !== "translating") {
         bridgeState.captionRefreshPending = false;
       }
-      badge.textContent = messageText;
       setCaptionState(messageText);
-      updateFloatingStatus(floatingStatusKindForStateName(stateName));
+      dispatchFloatingState(floatingStatusKindForStateName(stateName), messageText);
       sendResponse({ ok: true });
       return true;
     }
@@ -2046,14 +1789,12 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
         typeof record.generatedCaptionState.message === "string"
           ? record.generatedCaptionState.message
           : "자막 생성 상태가 변경되었습니다.";
-      badge.textContent = messageText;
-      ensureOverlay();
-      if (bridgeState.statusLine) bridgeState.statusLine.textContent = messageText;
+      setCaptionState(messageText);
       const stateName =
         typeof record.generatedCaptionState.name === "string"
           ? record.generatedCaptionState.name
           : "";
-      updateFloatingStatus(floatingStatusKindForStateName(stateName));
+      dispatchFloatingState(floatingStatusKindForStateName(stateName), messageText);
       sendResponse({ ok: true });
       return true;
     }
@@ -2082,7 +1823,7 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
         if (video) attachVideo(video);
       }
       setCaptionState("자막 번역을 표시하는 중...");
-      updateFloatingStatus("active");
+      dispatchFloatingState("active", "자막 번역을 표시하는 중...");
       renderActiveCues();
       sendResponse({
         ok: true,
@@ -2109,10 +1850,7 @@ export function installTranslationBridgeInPage(pageScope: string, controlScope?:
       bridgeState.renderedCues = [];
       bridgeState.trackedVideo = null;
       bridgeState.captionRefreshPending = false;
-      bridgeState.overlay?.remove();
-      bridgeState.overlay = null;
-      bridgeState.cueList = null;
-      bridgeState.statusLine = null;
+      dispatchUiEvent({ type: "caption-clear", message: "자막 표시를 지웠습니다." });
       sendResponse({ ok: true });
       return true;
     }

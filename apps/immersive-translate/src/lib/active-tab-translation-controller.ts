@@ -34,6 +34,7 @@ import {
   installTranslationBridgeInPage,
   readYouTubePlayerResponseInMainWorld,
 } from "./injected-translation-bridge";
+import { INJECTED_TRANSLATION_UI_EVENT } from "./injected-ui-events";
 import {
   type CaptionDisplayPreferences,
   captionDisplayPreferencesFromSettings,
@@ -549,7 +550,11 @@ async function installBridge(
     await browser.scripting.executeScript({
       target: { tabId },
       func: installTranslationBridgeInPage,
-      args: [ACTIVE_TAB_TRANSLATION_PAGE_SCOPE, ACTIVE_TAB_TRANSLATION_CONTROL_SCOPE],
+      args: [
+        ACTIVE_TAB_TRANSLATION_PAGE_SCOPE,
+        ACTIVE_TAB_TRANSLATION_CONTROL_SCOPE,
+        INJECTED_TRANSLATION_UI_EVENT,
+      ],
     });
     stateStore.markBridgeReady(tabId);
     stateStore.clearLastError(tabId);

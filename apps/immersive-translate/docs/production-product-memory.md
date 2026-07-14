@@ -139,11 +139,10 @@ Immersive Translate는 소비자용 브라우저 확장 및 모바일 읽기 제
 페이지 안 UI의 주 책임:
 
 - 번역 가능한 페이지에 오른쪽 floating toggle을 자동 주입한다.
-- idle tooltip은 정확히 `클릭 번역`이어야 한다.
+- idle tooltip과 접근성 이름은 정확히 `페이지 번역 켜기`여야 한다.
 - 첫 클릭은 현재 웹페이지의 smart content 번역을 시작한다.
 - 번역 완료 후 클릭은 원문/번역 표시를 토글한다.
-- close 버튼과 gear 아이콘은 보조 affordance로만 둔다.
-- gear 아이콘은 v1에서 settings panel을 열지 않는다.
+- 최소 44px 아이콘 버튼과 활성 상태 점만 제공한다.
 - 번역문을 원문 가까이에 유지하고, 웹페이지 번역 block과 영상 자막 block의 DOM/test selector/style을 분리한다.
 
 팝업의 주 책임:
@@ -187,9 +186,8 @@ Immersive Translate는 소비자용 브라우저 확장 및 모바일 읽기 제
 - 대상 언어, 번역 서비스, raw endpoint, More menu, PDF/ePub/document entry, provider settings form은 popup에서 제거한다.
 - Default Docker provider는 기본 활성화되어 별도 UI 설정 없이 동작한다.
 - 일반 웹페이지 번역은 오른쪽 `data-testid="floating-translate-control"` 클릭으로 시작한다.
-- idle tooltip은 `data-testid="floating-translate-tooltip"`에서 정확히 `클릭 번역`으로 표시한다.
-- close affordance는 `data-testid="floating-translate-close"`, gear affordance는 `data-testid="floating-translate-gear"`로 검증한다.
-- gear affordance는 settings panel을 열지 않는다.
+- floating control은 열린 Shadow DOM 내부의 44px Astryx `IconButton`이며 `페이지 번역 켜기` tooltip과 접근성 이름을 제공한다.
+- host 문서의 `data-theme`, CSS 변수와 전역 스타일은 변경하지 않는다.
 - 일반 웹페이지 번역은 원문 block 아래 또는 heading 옆에 번역 block을 붙이는 이중 언어 읽기를 기본으로 한다.
 - 영상 문맥에서는 provider enabled 상태이면 popup 클릭 없이 `run-caption-translation`을 자동 실행한다.
 - 영상 overlay는 `data-testid="caption-original-line"`, `data-testid="caption-translated-line"`, `data-testid="video-auto-subtitle-status"`로 검증한다.
@@ -217,7 +215,7 @@ Immersive Translate는 소비자용 브라우저 확장 및 모바일 읽기 제
 7. 사용자가 번역문만 보기 모드를 고르기 전에는 원문을 유지한다.
 8. 주요 본문 번역이 기본이고 전체 페이지 번역은 보조다.
 9. 페이지 안 플로팅 컨트롤은 장식이 아니라 핵심 기능이다.
-10. `클릭 번역` tooltip 문구는 정확히 유지한다.
+10. `페이지 번역 켜기` tooltip 문구는 정확히 유지한다.
 11. 사용자-facing UI에 중국어 문구를 넣지 않는다.
 12. bridge, smoke translation 같은 개발/QA 용어는 사용자 UI에 노출하지 않는다.
 13. 개인정보 문구는 선택된 번역 provider의 실제 동작과 맞아야 한다.
@@ -231,7 +229,7 @@ Immersive Translate는 소비자용 브라우저 확장 및 모바일 읽기 제
 
 - Header: 제품명과 provider 상태.
 - Status: 현재 페이지 상태, 영상 자막 상태.
-- Guidance: 페이지 오른쪽 `클릭 번역` 버튼 안내.
+- Guidance: 페이지 오른쪽 번역 버튼 안내.
 - Excluded: 대상 언어 selector, 번역 서비스 selector, raw endpoint input, PDF/ePub/document entry, More menu, provider settings form.
 
 ### In-page floating control v1
@@ -239,13 +237,11 @@ Immersive Translate는 소비자용 브라우저 확장 및 모바일 읽기 제
 페이지 overlay는 다음을 제공한다.
 
 - 오른쪽 자동 주입.
-- idle tooltip `클릭 번역`.
+- idle tooltip `페이지 번역 켜기`.
 - 첫 클릭 번역 시작.
 - 번역 완료 후 클릭 원문/번역 토글.
-- close affordance.
-- gear affordance. v1에서는 settings panel을 열지 않는다.
-- 번역 진행률과 retry/error 상태.
-- 미지원 사이트 리포트 또는 debug detail 진입.
+- Astryx 상태 점과 retry/error 상태.
+- 열린 Shadow DOM의 단일 React root와 host 스타일 격리.
 
 ### Settings v1
 

@@ -1,0 +1,40 @@
+@layer reset, theme, base, astryx-base, astryx-theme, components, utilities;
+
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "@astryxdesign/core/reset.css";
+@import "@astryxdesign/core/astryx.css";
+@import "@astryxdesign/theme-neutral/theme.css";
+@import "@astryxdesign/core/tailwind-theme.css";
+@import "tailwindcss/utilities.css" layer(utilities);
+
+@layer components {
+  :host {
+    all: initial;
+  }
+
+  .immersive-translation-scope {
+    color-scheme: light dark;
+    font-family: var(--font-family-body);
+  }
+
+  #tab-shelf-translation-bridge-status {
+    opacity: 0;
+  }
+
+  .caption-card {
+    background: color-mix(
+      in srgb,
+      var(--color-background-inverted) var(--caption-background-opacity),
+      transparent
+    );
+  }
+
+  .caption-line {
+    color: var(--color-on-dark);
+    letter-spacing: 0;
+    overflow-wrap: normal;
+    text-shadow: 0 2px 8px rgb(0 0 0 / 78%);
+    white-space: normal;
+  }
+}
