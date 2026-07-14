@@ -6,14 +6,16 @@ import { Icon } from "@astryxdesign/core/Icon";
 import { LinkProvider } from "@astryxdesign/core/Link";
 import { MobileNav } from "@astryxdesign/core/MobileNav";
 import { Theme, type ThemeMode } from "@astryxdesign/core/theme";
+import { neutralTheme } from "@astryxdesign/theme-neutral/built";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
-import { jongminDocsTheme } from "@/generated/jongmin-docs";
 import type { ContentManifestEntry, Locale } from "@/lib/content-model";
 import { ContextNavigation, GlobalRail, MobileNavigation, MobileTopNavigation } from "./Navigation";
 import { RouteTransitionContent, RouteTransitionProvider, TransitionLink } from "./RouteTransition";
 import { SearchProvider } from "./SearchPalette";
 import styles from "./DocsShell.module.css";
+
+const docsTheme = Object.freeze({ ...neutralTheme, icons: {} });
 
 function isThemeMode(value: string | null): value is ThemeMode {
   return value === "light" || value === "dark" || value === "system";
@@ -101,7 +103,7 @@ export function DocsShell({
   );
 
   return (
-    <Theme theme={jongminDocsTheme} mode={mode}>
+    <Theme theme={docsTheme} mode={mode}>
       <RouteTransitionProvider locale={locale}>
         <LinkProvider component={TransitionLink}>
           <SearchProvider locale={locale}>

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { DM_Mono, Inter, Inter_Tight } from "next/font/google";
 import type { ReactNode } from "react";
 import "./globals.css";
-import "@/generated/docs-theme.css";
 
 const inter = Inter({
   subsets: ["latin"],

@@ -15,17 +15,19 @@ sourceUrl: https://astryx.atmeta.com/docs/getting-started
 
 ## CSS 레이어와 Theme
 
-reset, core base, Neutral theme 순서를 명시해 토큰 우선순위를 예측 가능하게 만듭니다. `defineTheme`의 `extends`로 Neutral을 확장하면 기본 색과 컴포넌트 계약을 유지하면서 타입, 반경, 모션만 교체할 수 있습니다.
+reset, core base, Neutral theme 순서를 명시해 토큰 우선순위를 예측 가능하게 만듭니다. Tailwind와 일반 CSS 환경에서는 Astryx CLI를 실행하지 않고 pre-built Neutral 테마를 직접 사용할 수 있습니다.
 
 ```tsx
-const docsTheme = defineTheme({
-  name: "jongmin-docs",
-  extends: neutralTheme,
-  typography: { scale: { base: 14, ratio: 1.2 } },
-  radius: { base: 4, multiplier: 1 },
-  motion: { fast: 120, medium: 300, slow: 600, ratio: 0.75 },
-});
+import { Theme } from "@astryxdesign/core/theme";
+import { neutralTheme } from "@astryxdesign/theme-neutral/built";
+import "@astryxdesign/theme-neutral/theme.css";
+
+export function App({ children }: { children: React.ReactNode }) {
+  return <Theme theme={neutralTheme}>{children}</Theme>;
+}
 ```
+
+글꼴, 반경, 모션 값이 달라야 하면 테마 import 뒤에서 공개 CSS token만 덮어씁니다.
 
 ## 프레임 구성
 
@@ -37,7 +39,7 @@ const docsTheme = defineTheme({
 
 ## 실전 팁
 
-- core, theme-neutral, cli 버전을 같은 0.1.5로 고정합니다.
+- core와 theme-neutral 버전을 같은 0.1.5로 고정합니다.
 - 배치는 Tailwind token bridge로 작성하고 중첩 문서 콘텐츠에만 안정적인 컴포넌트 selector를 사용합니다.
 - Theme mode는 `light | dark | system` 하나의 상태로 관리합니다.
 - Tier 1에서는 의미와 기능을 완전히 유지하고, Tier 2는 시각 효과가 줄어도 탐색 가능해야 합니다.
@@ -46,7 +48,7 @@ const docsTheme = defineTheme({
 
 ### CSS로 내부 DOM을 강제 변경
 
-컴포넌트 내부 클래스와 구조에 의존하면 작은 라이브러리 변경에도 깨집니다. 공개 prop, token, `defineTheme` component override를 먼저 사용합니다.
+컴포넌트 내부 클래스와 구조에 의존하면 작은 라이브러리 변경에도 깨집니다. 공개 prop, token과 문서화된 안정 selector를 먼저 사용합니다.
 
 ### 중복 포커스 관리
 

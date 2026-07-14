@@ -4,16 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "pnpm run icon:check && pnpm run theme:build && node scripts/build-content.ts && tsc --noEmit && next build",
-    "dev": "pnpm run icon:check && pnpm run theme:build && node scripts/build-content.ts && next dev",
+    "build": "pnpm run icon:check && node scripts/build-content.ts && tsc --noEmit && next build",
+    "dev": "pnpm run icon:check && node scripts/build-content.ts && next dev",
     "icon:check": "pnpm --dir ../.. run icon:check",
-    "pretest": "pnpm run theme:build",
-    "pretypecheck": "pnpm run theme:build",
     "start": "next start",
     "test": "vitest run --root ../.. apps/docs",
     "test:e2e": "playwright test",
     "test:e2e:update": "playwright test --update-snapshots",
-    "theme:build": "astryx theme build lib/docs-theme.ts -o generated/docs-theme.css",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -30,7 +27,6 @@
     "tailwindcss": "catalog:"
   },
   "devDependencies": {
-    "@astryxdesign/cli": "0.1.5",
     "@axe-core/playwright": "4.11.0",
     "@playwright/test": "1.61.1",
     "@tailwindcss/postcss": "catalog:",

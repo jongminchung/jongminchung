@@ -8,6 +8,48 @@
 @import "@astryxdesign/core/tailwind-theme.css";
 @import "tailwindcss/utilities.css" layer(utilities);
 
+@layer reset {
+  @scope ([data-astryx-theme="neutral"]) to ([data-astryx-theme]) {
+    :where(h1, h2, h3, h4, h5, h6) {
+      font-family: var(--font-family-heading);
+      font-weight: var(--font-weight-medium);
+    }
+  }
+}
+
+@layer astryx-theme {
+  @scope ([data-astryx-theme="neutral"]) to ([data-astryx-theme]) {
+    :scope {
+      --text-heading-1-weight: var(--font-weight-medium);
+      --text-heading-2-weight: var(--font-weight-medium);
+      --text-heading-3-weight: var(--font-weight-medium);
+      --text-heading-4-weight: var(--font-weight-medium);
+      --text-heading-5-weight: var(--font-weight-medium);
+      --text-heading-6-weight: var(--font-weight-medium);
+      --duration-fast-min: 90ms;
+      --duration-fast: 120ms;
+      --duration-fast-max: 160ms;
+      --duration-slow-min: 450ms;
+      --duration-slow: 600ms;
+      --duration-slow-max: 800ms;
+      --font-family-body: var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-family-heading: var(--font-inter-tight), var(--font-inter), sans-serif;
+      --font-family-code: var(--font-dm-mono), "SFMono-Regular", Consolas, monospace;
+      --radius-none: 0px;
+      --radius-inner: 4px;
+      --radius-element: 8px;
+    }
+
+    .astryx-card {
+      border-width: 1px;
+      box-shadow: none;
+      transition:
+        border-color 300ms ease,
+        transform 300ms ease;
+    }
+  }
+}
+
 :root {
   color-scheme: light dark;
   background: light-dark(#ffffff, #1b1b1b);

@@ -15,17 +15,19 @@ sourceUrl: https://astryx.atmeta.com/docs/getting-started
 
 ## CSS layers and Theme
 
-Declare reset, core base, and Neutral theme order so token precedence is predictable. Extend Neutral through `defineTheme` to retain its color and component contracts while changing type, radii, and motion.
+Declare reset, core base, and Neutral theme order so token precedence is predictable. Tailwind and plain CSS consumers can use the pre-built Neutral theme directly without running the Astryx CLI.
 
 ```tsx
-const docsTheme = defineTheme({
-  name: "jongmin-docs",
-  extends: neutralTheme,
-  typography: { scale: { base: 14, ratio: 1.2 } },
-  radius: { base: 4, multiplier: 1 },
-  motion: { fast: 120, medium: 300, slow: 600, ratio: 0.75 },
-});
+import { Theme } from "@astryxdesign/core/theme";
+import { neutralTheme } from "@astryxdesign/theme-neutral/built";
+import "@astryxdesign/theme-neutral/theme.css";
+
+export function App({ children }: { children: React.ReactNode }) {
+  return <Theme theme={neutralTheme}>{children}</Theme>;
+}
 ```
+
+Override public CSS tokens after the theme import when the application needs different fonts, radii, or motion values.
 
 ## Compose the frame
 
@@ -37,7 +39,7 @@ const docsTheme = defineTheme({
 
 ## Practical tips
 
-- Pin core, theme-neutral, and cli to the same 0.1.5 release.
+- Pin core and theme-neutral to the same 0.1.5 release.
 - Use the Tailwind token bridge for layout and stable component selectors only where nested document content requires them.
 - Model theme mode as one `light | dark | system` value.
 - Preserve complete meaning and function in Tier 1; Tier 2 may simplify effects but must remain navigable.
@@ -46,7 +48,7 @@ const docsTheme = defineTheme({
 
 ### Overriding internal DOM with CSS
 
-Internal classes and structure are not a stable contract. Prefer public props, tokens, and `defineTheme` component overrides.
+Internal classes and structure are not a stable contract. Prefer public props, tokens, and documented stable selectors.
 
 ### Duplicating focus management
 
