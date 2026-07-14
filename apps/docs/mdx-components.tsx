@@ -2,7 +2,6 @@ import { CodeBlock } from "@astryxdesign/core/CodeBlock";
 import { Link } from "@astryxdesign/core/Link";
 import type { MDXComponents } from "mdx/types";
 import { isValidElement, type ComponentProps, type ReactNode } from "react";
-import { DeprecatedBanner } from "@/components/DeprecatedBanner";
 import {
   KnowledgePath,
   OverviewCards,
@@ -35,7 +34,6 @@ function MdxLink({ href = "", children }: ComponentProps<"a">) {
 const components = {
   a: MdxLink,
   pre: MdxPre,
-  DeprecatedBanner,
   KnowledgePath,
   OverviewCards,
   OverviewCta,

@@ -124,30 +124,6 @@ async function importKeysFromConsumer(
   return JSON.parse(stdout) as readonly string[];
 }
 
-async function installTarballInConsumer(
-  packed: PackedWorkspace,
-  consumerName: string,
-): Promise<string> {
-  const consumerRoot = join(packed.tempDir, consumerName);
-  await mkdir(consumerRoot, { recursive: true });
-  await writeFile(
-    join(consumerRoot, "package.json"),
-    `${JSON.stringify({ private: true, type: "module" }, null, 2)}\n`,
-    "utf8",
-  );
-  await execFileAsync(
-    "npm",
-    ["install", "--ignore-scripts", "--package-lock=false", packed.tarballPath],
-    {
-      cwd: consumerRoot,
-      maxBuffer: 8 * 1024 * 1024,
-      timeout: 180_000,
-    },
-  );
-
-  return consumerRoot;
-}
-
 async function installToolingTarballInWorkspaceConsumer(packed: PackedWorkspace): Promise<string> {
   const consumerRoot = join(packed.tempDir, "tooling-npm-consumer");
   await mkdir(join(consumerRoot, "packages", "app", "src"), { recursive: true });
@@ -191,38 +167,6 @@ async function installToolingTarballInWorkspaceConsumer(packed: PackedWorkspace)
 }
 
 describe("npm package tarball contracts", () => {
-  it("packs @jongminchung/ui with built assets and source-condition files", async () => {
-    const packed = await packWorkspace("@jongminchung/ui");
-    try {
-      expect(packed.files).toEqual(
-        expect.arrayContaining([
-          "LICENSE",
-          "README.md",
-          "dist/index.d.ts",
-          "dist/index.js",
-          "dist/baseline.css",
-          "dist/styles.css",
-          "package.json",
-          "src/baseline.css",
-          "src/components/ui/button.tsx",
-          "src/design-system.ts",
-          "src/index.ts",
-          "src/lib/utils.ts",
-          "src/styles.css",
-        ]),
-      );
-      expect(packed.files).not.toContain("components.json");
-      expect(packed.files.some((file) => file.endsWith(".test.ts"))).toBe(false);
-
-      const consumerRoot = await installTarballInConsumer(packed, "ui-npm-consumer");
-      expect(await importKeysFromConsumer(consumerRoot, "@jongminchung/ui")).toEqual(
-        expect.arrayContaining(["Badge", "Button", "Card", "buttonVariants", "cn"]),
-      );
-    } finally {
-      await rm(packed.tempDir, { force: true, recursive: true });
-    }
-  }, 240_000);
-
   it("packs @jongminchung/tooling with config modules and declarations", async () => {
     const packed = await packWorkspace("@jongminchung/tooling");
     try {

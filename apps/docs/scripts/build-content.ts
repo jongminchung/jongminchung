@@ -235,7 +235,7 @@ async function readPackageApi(packageDirectory: string): Promise<readonly string
 }
 
 async function validatePackageApi(documents: readonly SourceDocument[]): Promise<void> {
-  for (const packageDirectory of ["remark-plantuml", "tooling", "ui"]) {
+  for (const packageDirectory of ["remark-plantuml", "tooling"] as const) {
     const packageName = `@jongminchung/${packageDirectory}`;
     const documented = new Set(
       documents

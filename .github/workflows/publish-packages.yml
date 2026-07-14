@@ -33,7 +33,6 @@ jobs:
           for (const filePath of [
             "packages/remark-plantuml/package.json",
             "packages/tooling/package.json",
-            "packages/ui/package.json",
           ]) {
             const packageJson = JSON.parse(readFileSync(filePath, "utf8"));
 
@@ -46,11 +45,7 @@ jobs:
         working-directory: packages/remark-plantuml
       - run: pnpm publish --dry-run --access public
         working-directory: packages/tooling
-      - run: pnpm publish --dry-run --access public
-        working-directory: packages/ui
       - run: pnpm publish --access public
         working-directory: packages/remark-plantuml
       - run: pnpm publish --access public
         working-directory: packages/tooling
-      - run: pnpm publish --access public
-        working-directory: packages/ui

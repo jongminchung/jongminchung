@@ -25,7 +25,7 @@ const copy = {
       [
         "Packages",
         "실제로 배포되는 API",
-        "세 패키지의 설치, 예제, 공개 symbol을 확인합니다.",
+        "두 패키지의 설치, 예제, 공개 symbol을 확인합니다.",
         "/ko/packages/remark-plantuml",
       ],
       [
@@ -66,7 +66,7 @@ const copy = {
       [
         "Packages",
         "APIs that actually ship",
-        "Inspect installation, examples, and public symbols for three packages.",
+        "Inspect installation, examples, and public symbols for two packages.",
         "/en/packages/remark-plantuml",
       ],
       [
@@ -184,7 +184,7 @@ export function KnowledgePath({ locale }: { readonly locale: Locale }) {
           tooling
         </text>
         <text x="696" y="211" textAnchor="middle" className={styles.packageLabel}>
-          ui → Astryx
+          Astryx
         </text>
       </svg>
     </figure>

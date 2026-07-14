@@ -4,16 +4,15 @@ This repository owns the shared `@jongminchung` packages used by downstream proj
 
 - `@jongminchung/tooling`: shared `oxfmt`, `oxlint`, and package-map configuration.
 - `@jongminchung/remark-plantuml`: shared PlantUML rendering for Markdown and Astro docs.
-- `@jongminchung/ui`: React and Tailwind design primitives.
 
 Packages are published to GitHub Packages. Consumers need the `@jongminchung` scope mapped to
 `https://npm.pkg.github.com`.
 
 ## Version Policy
 
-`@jongminchung/tooling`, `@jongminchung/remark-plantuml`, and `@jongminchung/ui` intentionally stay
-on `1.0.0`. Reuse and republish `1.0.0` when correcting package contents. Do not publish `1.0.1`,
-`1.0.2`, or other replacement versions for these packages.
+`@jongminchung/tooling` and `@jongminchung/remark-plantuml` intentionally stay on `1.0.0`. Reuse
+and republish `1.0.0` when correcting package contents. Do not publish `1.0.1`, `1.0.2`, or other
+replacement versions for these packages.
 
 ```bash
 pnpm install

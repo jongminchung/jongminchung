@@ -325,53 +325,5 @@
     ],
     "body": "Overview @jongminchung/tooling centralizes formatter and linter defaults plus aliases derived from package exports. Consumers declare small overrides instead of copying configuration. oxlint The default enables type-aware analysis and checks unused values, floating promises, and misused promises. Override only rules for which the caller has an intentional exception. oxfmt Base ignore patterns and overrides remain in place, with caller arrays appended. JSON uses two spaces, and package scripts and imports are sorted. package-map The package reads root workspaces and package exports to generate TypeScript paths or Vite aliases. It resolves source , default , import , and types conditions in order while preserving CSS and JSON subpaths. API - defineOxlintConfig , defineOxfmtConfig : merge defaults and overrides - loadWorkspacePackageMap : read workspace packages and manifests - createPackageExportAliases : connect public subpaths to real targets - createTsconfigPaths , createTsconfigAliasConfig : generate TypeScript paths - createViteResolveAliases : generate regular-expression Vite aliases - formatTsconfigAliasConfig , writeTsconfigAliasConfig : serialize and write alias files",
     "order": 1
-  },
-  {
-    "id": "packages/ui",
-    "locale": "en",
-    "section": "packages",
-    "title": "ui 1.0.0 archive",
-    "description": "Archived @jongminchung/ui API and the migration path to Astryx.",
-    "href": "/en/packages/ui",
-    "headings": [
-      "Status",
-      "Migrate to Astryx",
-      "1.0.0 API",
-      "Components",
-      "Design tokens and utilities",
-      "CSS subpaths"
-    ],
-    "tags": [
-      "ui",
-      "deprecated",
-      "migration",
-      "astryx",
-      "react"
-    ],
-    "apiSymbols": [
-      "@jongminchung/ui#Badge",
-      "@jongminchung/ui#BadgeProps",
-      "@jongminchung/ui#Button",
-      "@jongminchung/ui#ButtonProps",
-      "@jongminchung/ui#Card",
-      "@jongminchung/ui#CardContent",
-      "@jongminchung/ui#CardContentProps",
-      "@jongminchung/ui#CardDescription",
-      "@jongminchung/ui#CardDescriptionProps",
-      "@jongminchung/ui#CardFooter",
-      "@jongminchung/ui#CardFooterProps",
-      "@jongminchung/ui#CardHeader",
-      "@jongminchung/ui#CardHeaderProps",
-      "@jongminchung/ui#CardProps",
-      "@jongminchung/ui#CardTitle",
-      "@jongminchung/ui#CardTitleProps",
-      "@jongminchung/ui#DesignSystem",
-      "@jongminchung/ui#badgeVariants",
-      "@jongminchung/ui#buttonVariants",
-      "@jongminchung/ui#cn",
-      "@jongminchung/ui#designSystem"
-    ],
-    "body": "Status @jongminchung/ui 1.0.0 preserves its API and distribution contract for existing consumers but receives no new features. Use Astryx for new UI. Removing the package or changing a 1.0.0 public export is outside this migration. Migrate to Astryx 1. Wrap the app in Astryx Theme and AppShell . 2. Declare reset, base, and Neutral theme CSS layers. 3. Replace Button , Badge , and Card one surface at a time. 4. Remove Tailwind token dependencies, then verify keyboard, dark mode, and responsive behavior. 1.0.0 API Components - Button , buttonVariants , ButtonProps - Badge , badgeVariants , BadgeProps - Card , its six composition components, and their prop types Design tokens and utilities - designSystem , DesignSystem : color, type, and spacing data from the archived design analysis - cn : class merging with clsx and tailwind-merge CSS subpaths styles.css , tokens.css , and baseline.css remain available for 1.0.0 consumers. Do not import them into an Astryx app.",
-    "order": 2
   }
 ]

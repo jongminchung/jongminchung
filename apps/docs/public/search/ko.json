@@ -325,53 +325,5 @@
     ],
     "body": "개요 @jongminchung/tooling 은 저장소마다 반복되는 formatter·linter 기본값과 패키지 export 기반 별칭 생성을 한곳에서 관리합니다. 설정을 복사하지 않고 작은 override만 선언하는 것이 목표입니다. oxlint 기본 설정은 type-aware 분석, 미사용 변수, floating promise와 잘못 사용한 promise 검사를 활성화합니다. 복구 가능한 예외가 필요한 규칙만 호출자 설정에서 덮어씁니다. oxfmt 기본 ignore와 override는 유지되고 호출자의 배열이 뒤에 합쳐집니다. JSON은 2칸 들여쓰기를 사용하며 package script와 import 정렬을 활성화합니다. package-map 루트 workspaces 와 각 패키지의 exports 를 읽어 TypeScript paths 또는 Vite alias를 만듭니다. source , default , import , types 조건을 순서대로 해석하며 CSS·JSON subpath도 보존합니다. API - defineOxlintConfig , defineOxfmtConfig : 기본값과 override 병합 - loadWorkspacePackageMap : 워크스페이스 패키지와 manifest 조회 - createPackageExportAliases : 공개 subpath와 실제 target 연결 - createTsconfigPaths , createTsconfigAliasConfig : TypeScript paths 생성 - createViteResolveAliases : 정규식 기반 Vite alias 생성 - formatTsconfigAliasConfig , writeTsconfigAliasConfig : 별칭 파일 직렬화와 기록",
     "order": 1
-  },
-  {
-    "id": "packages/ui",
-    "locale": "ko",
-    "section": "packages",
-    "title": "ui 1.0.0 보관 문서",
-    "description": "기존 @jongminchung/ui API와 Astryx로 이전하는 방법을 보관합니다.",
-    "href": "/ko/packages/ui",
-    "headings": [
-      "상태",
-      "Astryx 마이그레이션",
-      "1.0.0 API",
-      "컴포넌트",
-      "디자인 토큰과 유틸리티",
-      "CSS subpath"
-    ],
-    "tags": [
-      "ui",
-      "deprecated",
-      "migration",
-      "astryx",
-      "react"
-    ],
-    "apiSymbols": [
-      "@jongminchung/ui#Badge",
-      "@jongminchung/ui#BadgeProps",
-      "@jongminchung/ui#Button",
-      "@jongminchung/ui#ButtonProps",
-      "@jongminchung/ui#Card",
-      "@jongminchung/ui#CardContent",
-      "@jongminchung/ui#CardContentProps",
-      "@jongminchung/ui#CardDescription",
-      "@jongminchung/ui#CardDescriptionProps",
-      "@jongminchung/ui#CardFooter",
-      "@jongminchung/ui#CardFooterProps",
-      "@jongminchung/ui#CardHeader",
-      "@jongminchung/ui#CardHeaderProps",
-      "@jongminchung/ui#CardProps",
-      "@jongminchung/ui#CardTitle",
-      "@jongminchung/ui#CardTitleProps",
-      "@jongminchung/ui#DesignSystem",
-      "@jongminchung/ui#badgeVariants",
-      "@jongminchung/ui#buttonVariants",
-      "@jongminchung/ui#cn",
-      "@jongminchung/ui#designSystem"
-    ],
-    "body": "상태 @jongminchung/ui 1.0.0은 기존 소비자를 위해 API와 배포 계약을 유지하지만 신규 기능을 받지 않습니다. 새 UI는 Astryx를 사용하세요. 패키지를 제거하거나 1.0.0 공개 export를 바꾸는 변경은 이 마이그레이션 범위에 포함되지 않습니다. Astryx 마이그레이션 1. 앱 루트를 Astryx Theme 과 AppShell 로 감쌉니다. 2. reset, base, Neutral theme CSS 레이어를 명시합니다. 3. Button , Badge , Card 를 화면 단위로 교체합니다. 4. Tailwind 토큰 의존을 제거한 뒤 키보드·다크 모드·반응형 동작을 확인합니다. 1.0.0 API 컴포넌트 - Button , buttonVariants , ButtonProps - Badge , badgeVariants , BadgeProps - Card , CardHeader , CardTitle , CardDescription , CardContent , CardFooter 와 각 props 타입 디자인 토큰과 유틸리티 - designSystem , DesignSystem : Vercel 분석 기반 색상·타입·간격 객체 - cn : clsx 와 tailwind-merge 를 합친 클래스 병합 함수 CSS subpath styles.css , tokens.css , baseline.css 는 1.0.0 소비자를 위해 유지됩니다. Astryx 앱에서는 가져오지 마세요.",
-    "order": 2
   }
 ]
