@@ -61,28 +61,95 @@
     "id": "handbook/collaboration",
     "locale": "en",
     "section": "handbook",
-    "title": "Collaboration guide",
-    "description": "Baseline rules for managing issues and pull requests as small, verifiable changes.",
+    "title": "Collaboration",
+    "description": "Connect respectful conduct, questions, bugs, and feature proposals to the right channel and verifiable records.",
     "order": 0,
     "updatedAt": "2026-07-14",
     "tags": [
       "collaboration",
+      "conduct",
+      "question",
       "issue",
-      "pull-request",
-      "testing"
+      "feature",
+      "pull-request"
     ],
     "status": "stable",
-    "sourceUrl": "https://github.com/jongminchung/jongminchung/blob/main/docs/handbook/%ED%98%91%EC%97%85.md",
+    "sourceUrl": "https://github.com/jongminchung/jongminchung/blob/main/apps/docs/content/en/handbook/collaboration.mdx",
     "href": "/en/handbook/collaboration",
     "outline": [
       {
-        "id": "issues",
-        "label": "Issues",
+        "id": "distinguish-four-signals",
+        "label": "Distinguish four signals",
         "level": 2
       },
       {
-        "id": "reference",
-        "label": "Reference",
+        "id": "protect-people-first",
+        "label": "Protect people first",
+        "level": 2
+      },
+      {
+        "id": "preserve-questions-as-learning",
+        "label": "Preserve questions as learning",
+        "level": 2
+      },
+      {
+        "id": "goal",
+        "label": "Goal",
+        "level": 3
+      },
+      {
+        "id": "blocker",
+        "label": "Blocker",
+        "level": 3
+      },
+      {
+        "id": "environment",
+        "label": "Environment",
+        "level": 3
+      },
+      {
+        "id": "describe-a-bug-as-a-reproducible-difference",
+        "label": "Describe a bug as a reproducible difference",
+        "level": 2
+      },
+      {
+        "id": "agree-on-the-problem-before-a-feature",
+        "label": "Agree on the problem before a feature",
+        "level": 2
+      },
+      {
+        "id": "issues-own-the-reason;-pull-requests-own-the-evidence",
+        "label": "Issues own the reason; pull requests own the evidence",
+        "level": 2
+      },
+      {
+        "id": "problem-and-intent",
+        "label": "Problem and intent",
+        "level": 3
+      },
+      {
+        "id": "change-and-non-goals",
+        "label": "Change and non-goals",
+        "level": 3
+      },
+      {
+        "id": "validation",
+        "label": "Validation",
+        "level": 3
+      },
+      {
+        "id": "impact-and-follow-up",
+        "label": "Impact and follow-up",
+        "level": 3
+      },
+      {
+        "id": "experience-connected-through-documentation",
+        "label": "Experience connected through documentation",
+        "level": 2
+      },
+      {
+        "id": "references",
+        "label": "References",
         "level": 2
       }
     ]
@@ -710,23 +777,90 @@
     "id": "handbook/collaboration",
     "locale": "ko",
     "section": "handbook",
-    "title": "협업 가이드",
-    "description": "이슈와 풀 리퀘스트를 작고 검증 가능한 단위로 운영하는 기본 규칙입니다.",
+    "title": "협업",
+    "description": "사람을 존중하고 질문, 버그, 기능 제안을 적합한 채널과 검증 가능한 기록으로 연결합니다.",
     "order": 0,
     "updatedAt": "2026-07-14",
     "tags": [
       "collaboration",
+      "conduct",
+      "question",
       "issue",
-      "pull-request",
-      "testing"
+      "feature",
+      "pull-request"
     ],
     "status": "stable",
-    "sourceUrl": "https://github.com/jongminchung/jongminchung/blob/main/docs/handbook/%ED%98%91%EC%97%85.md",
+    "sourceUrl": "https://github.com/jongminchung/jongminchung/blob/main/apps/docs/content/ko/handbook/collaboration.mdx",
     "href": "/ko/handbook/collaboration",
     "outline": [
       {
-        "id": "이슈",
-        "label": "이슈",
+        "id": "네-가지-신호를-구분한다",
+        "label": "네 가지 신호를 구분한다",
+        "level": 2
+      },
+      {
+        "id": "사람을-먼저-보호한다",
+        "label": "사람을 먼저 보호한다",
+        "level": 2
+      },
+      {
+        "id": "질문은-학습의-기록으로-남긴다",
+        "label": "질문은 학습의 기록으로 남긴다",
+        "level": 2
+      },
+      {
+        "id": "하려는-일",
+        "label": "하려는 일",
+        "level": 3
+      },
+      {
+        "id": "막힌-지점",
+        "label": "막힌 지점",
+        "level": 3
+      },
+      {
+        "id": "환경",
+        "label": "환경",
+        "level": 3
+      },
+      {
+        "id": "버그는-재현-가능한-차이로-설명한다",
+        "label": "버그는 재현 가능한 차이로 설명한다",
+        "level": 2
+      },
+      {
+        "id": "기능은-해결책보다-문제를-먼저-합의한다",
+        "label": "기능은 해결책보다 문제를 먼저 합의한다",
+        "level": 2
+      },
+      {
+        "id": "이슈는-이유를-풀-리퀘스트는-증거를-소유한다",
+        "label": "이슈는 이유를, 풀 리퀘스트는 증거를 소유한다",
+        "level": 2
+      },
+      {
+        "id": "문제와-의도",
+        "label": "문제와 의도",
+        "level": 3
+      },
+      {
+        "id": "변경과-비범위",
+        "label": "변경과 비범위",
+        "level": 3
+      },
+      {
+        "id": "검증",
+        "label": "검증",
+        "level": 3
+      },
+      {
+        "id": "영향과-후속-작업",
+        "label": "영향과 후속 작업",
+        "level": 3
+      },
+      {
+        "id": "문서로-연결된-경험",
+        "label": "문서로 연결된 경험",
         "level": 2
       },
       {

@@ -2,23 +2,182 @@
 id: handbook/collaboration
 locale: en
 section: handbook
-title: Collaboration guide
-description: Baseline rules for managing issues and pull requests as small, verifiable changes.
+title: Collaboration
+description: Connect respectful conduct, questions, bugs, and feature proposals to the right channel and verifiable records.
 order: 0
 updatedAt: "2026-07-14"
-tags: [collaboration, issue, pull-request, testing]
+tags: [collaboration, conduct, question, issue, feature, pull-request]
 status: stable
-sourceUrl: https://github.com/jongminchung/jongminchung/blob/main/docs/handbook/%ED%98%91%EC%97%85.md
+sourceUrl: https://github.com/jongminchung/jongminchung/blob/main/apps/docs/content/en/handbook/collaboration.mdx
 ---
 
-## Issues
+Collaboration does not begin with a pull request. It has already begun when people can disagree
+safely, confirm that they are looking at the same problem, and agree on the evidence needed for the
+next decision. This guide starts with Angular's separation of conduct, questions, bugs, and feature
+requests, then connects it to the working principles I use while building documentation and packages.
 
-1. Before submitting an issue, check whether it already exists in the issue tracker.
-2. When submitting a bug, provide a minimal reproduction scenario.
-3. When submitting an issue, pull request, or merge request, clearly describe the problem being solved or document the design of the feature being added.
-4. Pull requests and merge requests should be linked to an issue, although this is not mandatory. If no issue is linked, include enough issue context in the description.
-5. Every change must be tested: unit tests, integration tests, and E2E tests when possible.
+## Distinguish four signals
 
-## Reference
+| Signal                                | What is needed first                              | What should remain                     |
+| ------------------------------------- | ------------------------------------------------- | -------------------------------------- |
+| A relationship is unsafe              | A code of conduct and a private reporting path    | Action that protects people            |
+| Usage or a decision rule is unclear   | A question and a publicly reusable answer         | An answer or documentation             |
+| Promised and observed behavior differ | A minimal reproduction and expected result        | A bug issue and regression test        |
+| A needed outcome does not exist yet   | Agreement on the problem, scope, and alternatives | A feature proposal and validation plan |
 
-- https://github.com/angular/angular/tree/main/contributing-docs
+This distinction is not a mechanism for sending people away. It reduces the back-and-forth caused
+by treating a question as a bug or beginning a feature proposal with implementation, and it gives
+each conversation a clear next action.
+
+## Protect people first
+
+Open collaboration is measured not by how forcefully people argue, but by whether participants can
+disagree safely. Apply the same respect regardless of background, identity, experience, or language,
+and do not disguise harassment or insults as technical debate. When safety is at risk, do not force
+the affected person to litigate the facts in public. Use the project's private reporting path to
+contact its maintainers.
+
+These are the standards I try to follow in review:
+
+- Discuss the observable change and its impact, not a person's ability or intent.
+- Do not stop at “this does not work”; name the broken contract and how to verify it.
+- Separate improvements required by the current change from follow-up work outside its scope.
+- When evidence changes my understanding, update both the conclusion and its documentation.
+- Record important decisions publicly so that later participants can reconstruct the context.
+
+Maintaining Korean and English documents together is part of the same principle. Translation is not
+an appendix; it is a second entrance to the same decision. When terminology diverges, use the method
+in the [DDD handbook](/en/handbook/ddd) to check the language used across meetings, issues, tests,
+and code.
+
+## Preserve questions as learning
+
+Keep general usage and design questions separate from bug reports. A question should state the
+desired outcome, the current understanding, what has already been tried, and the point where progress
+stopped. An answer should give an actionable next step and explain the assumptions behind it. If the
+conversation reveals a reproducible gap between promised and observed behavior, turn it into a bug
+issue then.
+
+Do not leave an answer that others will need again inside a one-off conversation. In this repository,
+questions about Next.js, pnpm, Node.js, TypeScript, and Astryx become versioned Deep Dives with their
+sources and verification dates. For example, [Next.js 16](/en/deep-dive/nextjs-16) makes rendering
+boundaries and the MDX pipeline reusable, while [pnpm 11](/en/deep-dive/pnpm-11) does the same for
+workspace and supply-chain policy.
+
+A useful question provides this context briefly:
+
+```md
+### Goal
+
+The outcome you need and why it matters
+
+### Blocker
+
+Observed result, expected result, and what you already tried
+
+### Environment
+
+Relevant versions, execution context, and the smallest required configuration
+```
+
+## Describe a bug as a reproducible difference
+
+Before opening an issue, search open and closed issues as well as active pull requests. If the same
+behavior is already under discussion, add the new reproduction condition to that record instead of
+scattering the context. When a new issue is needed, include the following:
+
+1. State the expected and observed behavior in one sentence each.
+2. Remove code and data that are not required to reproduce the problem.
+3. Record steps, versions, operating system, and other environment details that may change the result.
+4. Attach logs and screenshots as observations rather than conclusions, with sensitive values removed.
+5. Propose the smallest validation boundary that can prevent a regression.
+
+A minimal reproduction is not a demand rooted in distrust. It gives contributors and maintainers a
+shared way to observe the same failure and decide whether the same path passes after a fix. Reducing a
+reproduction often reveals either a usage problem or the system's actual failure boundary.
+
+In my work, the validation scope follows the problem boundary. Document metadata and external-value
+conversion use unit tests; Korean-English pairs, internal links, and search indexes use content
+contract tests; real navigation and accessibility use Playwright. Instead of adding E2E coverage to
+every change, choose the closest stable test that reproduces the failure, then add integration or E2E
+coverage when the behavior crosses a user flow. [TypeScript 6](/en/deep-dive/typescript-6) shows the
+boundary where external values are validated from `unknown`, while the
+[app icon system](/en/handbook/app-icons) shows generated-asset drift being rejected during the build.
+
+## Agree on the problem before a feature
+
+A feature proposal begins with an unmet outcome, not an implementation idea. Discuss major features
+that affect multiple consumers, public APIs, data models, or operations in an issue first. Adding a
+new documentation topic or substantially rewriting one belongs in the same category. Starting a large
+implementation before the direction is agreed can produce good code for a problem the project did not
+choose to solve.
+
+A major feature proposal should state:
+
+- who experiences the problem, in what situation, and the current workaround;
+- the outcome the feature must provide and its explicit non-goals;
+- alternatives considered and the criteria used to choose among them;
+- impact on existing users, public contracts, and migration;
+- tests, measures, or usage scenarios that will demonstrate success.
+
+A small feature may be proposed directly as a pull request. “Small” is not a line count. It means the
+change follows an agreed direction, has local impact, is easy to reverse, and has an obvious method of
+validation.
+
+The [DDD handbook](/en/handbook/ddd) explains how to define the problem space and language before a
+feature list. The [app icon system](/en/handbook/app-icons) names the responsibilities of one source
+and multiple consumers, while the [tooling package](/en/packages/tooling) turns repeated repository
+policy into a public contract. These experiences led me to favor feature documents that show
+boundaries, consumers, compatibility, and validation before a list of screens; implementation and
+review become shorter when those decisions are visible.
+
+## Issues own the reason; pull requests own the evidence
+
+An issue records why the work matters and which outcomes are acceptable. A pull request records the
+chosen implementation, trade-offs, test results, and remaining risk. Linking the two is ideal, but a
+separate issue is not always necessary. Without a linked issue, the pull request description must also
+contain the problem statement and acceptance criteria.
+
+A reviewable change has one purpose. After responding to review feedback, rerun the relevant tests;
+when the design changes, update its explanation and documentation too. Demonstrate performance work
+with a benchmark under matching conditions, not an impression, and demonstrate behavior changes with
+a reproducible user scenario.
+
+```md
+### Problem and intent
+
+Why this change is needed now and what it solves
+
+### Change and non-goals
+
+The chosen implementation and work intentionally left out
+
+### Validation
+
+Commands and results, plus scenarios checked manually
+
+### Impact and follow-up
+
+Compatibility, remaining risk, and separately tracked work
+```
+
+## Experience connected through documentation
+
+| Document                                        | Experience reused in collaboration                                            |
+| ----------------------------------------------- | ----------------------------------------------------------------------------- |
+| [DDD handbook](/en/handbook/ddd)                | Align the problem and ubiquitous language before implementation.              |
+| [App icon system](/en/handbook/app-icons)       | Make ownership of sources, consumers, and generated assets visible.           |
+| [tooling](/en/packages/tooling)                 | Turn repeated team rules into an executable shared contract.                  |
+| [remark-plantuml](/en/packages/remark-plantuml) | Document input, transformation, security, and public API boundaries together. |
+| [Deep Dives](/en/deep-dive/nextjs-16)           | Make technical answers reusable with a version and verification date.         |
+
+These documents cover different subjects but follow the same flow: understand people and problems
+first, make boundaries explicit, and leave executable evidence. Collaboration rules are not meant to
+add procedure. They let the next person continue the same decision with less guesswork.
+
+## References
+
+- [Angular Code of Conduct](https://github.com/angular/angular/blob/main/CONTRIBUTING.md#coc)
+- [Angular: Got a Question or Problem?](https://github.com/angular/angular/blob/main/CONTRIBUTING.md#question)
+- [Angular: Found a Bug?](https://github.com/angular/angular/blob/main/CONTRIBUTING.md#issue)
+- [Angular: Missing a Feature?](https://github.com/angular/angular/blob/main/CONTRIBUTING.md#feature)
