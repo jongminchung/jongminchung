@@ -4,9 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "pnpm run icon:check && node scripts/build-content.ts && tsc --noEmit && next build",
-    "dev": "pnpm run icon:check && node scripts/build-content.ts && next dev",
-    "icon:check": "pnpm --dir ../.. run icon:check",
+    "build": "pnpm run content:check && next build",
+    "content:build": "node scripts/build-content.ts --write",
+    "content:check": "node scripts/build-content.ts --check",
+    "dev": "next dev",
     "start": "next start",
     "test": "vitest run --root ../.. apps/docs",
     "test:e2e": "playwright test",

@@ -3,6 +3,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import manifest from "../generated/content-manifest.json";
+import { checkGeneratedFiles } from "./build-content";
 
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -19,10 +20,29 @@ describe("documentation content contract", () => {
   });
 
   it("validates schema, URLs, order, links, search output, and package API coverage", () => {
-    const output = execFileSync(process.execPath, [resolve(appRoot, "scripts/build-content.ts")], {
-      cwd: resolve(appRoot, "../.."),
-      encoding: "utf8",
-    });
+    const output = execFileSync(
+      process.execPath,
+      [resolve(appRoot, "scripts/build-content.ts"), "--check"],
+      {
+        cwd: resolve(appRoot, "../.."),
+        encoding: "utf8",
+      },
+    );
     expect(output).toContain("Validated 22 localized documents.");
+  });
+
+  it("rejects stale generated documentation data", async () => {
+    const readStaleFile = (): Promise<string> => Promise.resolve("stale\n");
+    await expect(
+      checkGeneratedFiles(
+        [
+          {
+            filePath: resolve(appRoot, "generated/content-manifest.json"),
+            contents: "current\n",
+          },
+        ],
+        readStaleFile,
+      ),
+    ).rejects.toThrow(/content-manifest\.json.*content:build/su);
   });
 });

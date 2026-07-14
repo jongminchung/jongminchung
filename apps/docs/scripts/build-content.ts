@@ -33,6 +33,14 @@ interface PackageManifest {
   readonly exports?: unknown;
 }
 
+export interface GeneratedFile {
+  readonly filePath: string;
+  readonly contents: string;
+}
+
+type GenerationMode = "check" | "write";
+type ReadTextFile = (filePath: string) => Promise<string | null>;
+
 function toPosixPath(value: string): string {
   return value.split(sep).join("/");
 }
@@ -259,7 +267,7 @@ async function validatePackageApi(documents: readonly SourceDocument[]): Promise
   }
 }
 
-async function writeGeneratedFiles(documents: readonly SourceDocument[]): Promise<void> {
+function createGeneratedFiles(documents: readonly SourceDocument[]): readonly GeneratedFile[] {
   const manifest: readonly ContentManifestEntry[] = documents
     .map(({ metadata, outline }) => ({
       ...metadata,
@@ -268,42 +276,96 @@ async function writeGeneratedFiles(documents: readonly SourceDocument[]): Promis
     }))
     .sort((left, right) => left.locale.localeCompare(right.locale) || left.order - right.order);
 
-  await mkdir(dirname(manifestPath), { recursive: true });
-  await mkdir(searchRoot, { recursive: true });
-  await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+  const searchFiles = locales.map((locale): GeneratedFile => {
+    const searchDocuments: readonly SearchDocument[] = documents
+      .filter(({ metadata }) => metadata.locale === locale)
+      .map(({ metadata, body, outline }) => ({
+        id: metadata.id,
+        locale: metadata.locale,
+        section: metadata.section,
+        title: metadata.title,
+        description: metadata.description,
+        href: createDocHref(metadata.locale, metadata.id),
+        headings: outline.map((item) => item.label),
+        tags: metadata.tags,
+        apiSymbols: metadata.apiSymbols ?? [],
+        body: createSearchBody(body),
+        order: metadata.order,
+      }));
+    return {
+      filePath: resolve(searchRoot, `${locale}.json`),
+      contents: `${JSON.stringify(searchDocuments, null, 2)}\n`,
+    };
+  });
 
+  return [
+    { filePath: manifestPath, contents: `${JSON.stringify(manifest, null, 2)}\n` },
+    ...searchFiles,
+  ];
+}
+
+async function writeGeneratedFiles(files: readonly GeneratedFile[]): Promise<void> {
   await Promise.all(
-    locales.map(async (locale) => {
-      const searchDocuments: readonly SearchDocument[] = documents
-        .filter(({ metadata }) => metadata.locale === locale)
-        .map(({ metadata, body, outline }) => ({
-          id: metadata.id,
-          locale: metadata.locale,
-          section: metadata.section,
-          title: metadata.title,
-          description: metadata.description,
-          href: createDocHref(metadata.locale, metadata.id),
-          headings: outline.map((item) => item.label),
-          tags: metadata.tags,
-          apiSymbols: metadata.apiSymbols ?? [],
-          body: createSearchBody(body),
-          order: metadata.order,
-        }));
-      await writeFile(
-        resolve(searchRoot, `${locale}.json`),
-        `${JSON.stringify(searchDocuments, null, 2)}\n`,
-        "utf8",
-      );
+    files.map(async ({ filePath, contents }) => {
+      await mkdir(dirname(filePath), { recursive: true });
+      await writeFile(filePath, contents, "utf8");
     }),
   );
 }
 
-async function main(): Promise<void> {
+function hasErrorCode(error: unknown, code: string): boolean {
+  return typeof error === "object" && error !== null && "code" in error && error.code === code;
+}
+
+async function readGeneratedFile(filePath: string): Promise<string | null> {
+  try {
+    return await readFile(filePath, "utf8");
+  } catch (error: unknown) {
+    if (hasErrorCode(error, "ENOENT")) return null;
+    throw error;
+  }
+}
+
+export async function checkGeneratedFiles(
+  files: readonly GeneratedFile[],
+  readTextFile: ReadTextFile = readGeneratedFile,
+): Promise<void> {
+  const comparisons = await Promise.all(
+    files.map(async (file) => ({ file, current: await readTextFile(file.filePath) })),
+  );
+  const staleFiles = comparisons
+    .filter(({ file, current }) => current !== file.contents)
+    .map(({ file }) => relative(workspaceRoot, file.filePath));
+  if (staleFiles.length === 0) return;
+  throw new Error(
+    [
+      "Generated documentation data is stale:",
+      ...staleFiles.map((filePath) => `- ${filePath}`),
+      "Run `pnpm --filter @jongminchung/docs content:build`.",
+    ].join("\n"),
+  );
+}
+
+function parseGenerationMode(args: readonly string[]): GenerationMode {
+  if (args.length === 1 && args[0] === "--check") return "check";
+  if (args.length === 1 && args[0] === "--write") return "write";
+  throw new Error("Usage: node scripts/build-content.ts --check|--write");
+}
+
+async function main(args: readonly string[]): Promise<void> {
+  const mode = parseGenerationMode(args);
   const documents = await readDocuments();
   validateDocuments(documents);
   await validatePackageApi(documents);
-  await writeGeneratedFiles(documents);
+  const files = createGeneratedFiles(documents);
+  if (mode === "write") await writeGeneratedFiles(files);
+  else await checkGeneratedFiles(files);
   process.stdout.write(`Validated ${documents.length} localized documents.\n`);
 }
 
-await main();
+function isMainModule(): boolean {
+  const entryPath = process.argv[1];
+  return entryPath !== undefined && resolve(entryPath) === fileURLToPath(import.meta.url);
+}
+
+if (isMainModule()) await main(process.argv.slice(2));
