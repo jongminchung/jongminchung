@@ -7,7 +7,6 @@
   "scripts": {
     "build": "pnpm run icon:check && wxt build",
     "clean": "pnpm node scripts/clean.ts",
-    "compile": "wxt prepare && tsc --noEmit && tsc --noEmit --project gateway/tsconfig.json",
     "dev": "pnpm run icon:check && wxt",
     "docker:build": "docker compose -f docker/docker-compose.yml build gateway",
     "docker:down": "docker compose -f docker/docker-compose.yml down",
@@ -21,6 +20,7 @@
     "mlx:serve:stop": "sh scripts/stop-mlx-server.sh",
     "test:live": "pnpm run build && playwright test -c playwright.config.ts tests/live/immersive-translate.spec.ts",
     "test:unit": "vitest run --config vitest.config.ts src/lib gateway",
+    "typecheck": "wxt prepare && tsc --noEmit && tsc --noEmit --project gateway/tsconfig.json",
     "verify:artifacts": "pnpm run icon:check && pnpm node scripts/verify-extension-artifacts.ts",
     "zip": "pnpm run icon:check && wxt zip"
   },

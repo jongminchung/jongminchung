@@ -52,7 +52,7 @@
     "prepack": "pnpm run build",
     "publish:dry-run": "pnpm publish --dry-run --access public",
     "test": "vitest run --root ../.. packages/tooling",
-    "typecheck": "pnpm exec tsc --noEmit"
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/node": "^26.1.0",

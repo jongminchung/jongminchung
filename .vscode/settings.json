@@ -14,7 +14,7 @@
     "buildFlags": ["-tags=integration,e2e"]
   },
   "oxc.typeAware": true,
-  "oxc.fmt.configPath": ".oxfmtrc.jsonc",
+  "oxc.fmt.configPath": ".oxfmtrc.mjs",
   "[markdown]": {
     "editor.defaultFormatter": "oxc.oxc-vscode"
   },

@@ -35,7 +35,7 @@ MCP 검증은 다음 산출물을 남긴다.
 
 통과한 명령:
 
-- `pnpm --filter @jongminchung/immersive-translate run compile`
+- `pnpm --filter @jongminchung/immersive-translate run typecheck`
 - `pnpm --filter @jongminchung/immersive-translate run test:unit`
 - `pnpm --filter @jongminchung/immersive-translate run build`
 - `pnpm --filter @jongminchung/immersive-translate run verify:artifacts`
@@ -270,7 +270,7 @@ Actual YouTube 필수 assert:
 ## MCP 실행 순서
 
 1. `pnpm install`
-2. `pnpm --filter @jongminchung/immersive-translate run compile`
+2. `pnpm --filter @jongminchung/immersive-translate run typecheck`
 3. `pnpm --filter @jongminchung/immersive-translate run test:unit`
 4. `pnpm --filter @jongminchung/immersive-translate run build`
 5. `pnpm --filter @jongminchung/immersive-translate run verify:artifacts`

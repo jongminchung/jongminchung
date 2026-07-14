@@ -8,6 +8,26 @@ This repository owns the shared `@jongminchung` packages used by downstream proj
 Packages are published to GitHub Packages. Consumers need the `@jongminchung` scope mapped to
 `https://npm.pkg.github.com`.
 
+## Workspace scripts
+
+Repository-wide scripts are owned by the workspace root. Use `-w` so they resolve to the root even
+when the current directory is inside an app or package:
+
+```bash
+pnpm -w run fmt
+pnpm -w run check
+```
+
+Always include `run` for package scripts. The shorter `pnpm fmt` form can fall through to an
+unrelated system command when the current package does not define `fmt`.
+
+Each workspace owns its build, typecheck, and test commands. Select one with a filter instead of
+adding a package-specific wrapper to the root manifest:
+
+```bash
+pnpm --filter @jongminchung/docs run build
+```
+
 ## Version Policy
 
 `@jongminchung/tooling` and `@jongminchung/remark-plantuml` intentionally stay on `1.0.0`. Reuse
@@ -21,26 +41,25 @@ pnpm run publish:dry-run
 ```
 
 <!--START_SECTION:waka-->
-**I'm a Night 🦉** 
+
+**I'm a Night 🦉**
 
 ```text
-🌞 Morning                819 commits         ██░░░░░░░░░░░░░░░░░░░░░░░   09.55 % 
-🌆 Daytime                1770 commits        █████░░░░░░░░░░░░░░░░░░░░   20.65 % 
-🌃 Evening                3505 commits        ██████████░░░░░░░░░░░░░░░   40.89 % 
-🌙 Night                  2478 commits        ███████░░░░░░░░░░░░░░░░░░   28.91 % 
+🌞 Morning                819 commits         ██░░░░░░░░░░░░░░░░░░░░░░░   09.55 %
+🌆 Daytime                1770 commits        █████░░░░░░░░░░░░░░░░░░░░   20.65 %
+🌃 Evening                3505 commits        ██████████░░░░░░░░░░░░░░░   40.89 %
+🌙 Night                  2478 commits        ███████░░░░░░░░░░░░░░░░░░   28.91 %
 ```
 
-
-📊 **This Week I Spent My Time On** 
+📊 **This Week I Spent My Time On**
 
 ```text
-💬 Programming Languages: 
-Java                     11 hrs 42 mins      ███████░░░░░░░░░░░░░░░░░░   28.64 % 
-YAML                     8 hrs 20 mins       █████░░░░░░░░░░░░░░░░░░░░   20.38 % 
-TypeScript               7 hrs 57 mins       █████░░░░░░░░░░░░░░░░░░░░   19.47 % 
-Markdown                 6 hrs 11 mins       ████░░░░░░░░░░░░░░░░░░░░░   15.15 % 
-Other                    3 hrs 3 mins        ██░░░░░░░░░░░░░░░░░░░░░░░   07.48 % 
+💬 Programming Languages:
+Java                     11 hrs 42 mins      ███████░░░░░░░░░░░░░░░░░░   28.64 %
+YAML                     8 hrs 20 mins       █████░░░░░░░░░░░░░░░░░░░░   20.38 %
+TypeScript               7 hrs 57 mins       █████░░░░░░░░░░░░░░░░░░░░   19.47 %
+Markdown                 6 hrs 11 mins       ████░░░░░░░░░░░░░░░░░░░░░   15.15 %
+Other                    3 hrs 3 mins        ██░░░░░░░░░░░░░░░░░░░░░░░   07.48 %
 ```
-
 
 <!--END_SECTION:waka-->
