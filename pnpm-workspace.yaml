@@ -20,7 +20,7 @@ catalog:
   "react-dom": "19.2.7"
   "tailwind-merge": "3.6.0"
   "tailwindcss": "4.3.2"
-  "tsdown": "0.22.3"
+  "tsdown": "0.22.7"
   "typescript": "6.0.3"
   "vitest": "4.1.9"
 

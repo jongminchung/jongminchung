@@ -62,8 +62,8 @@
     "@types/node": "^26.1.0",
     "remark-parse": "^11.0.0",
     "remark-stringify": "^11.0.0",
-    "tsdown": "^0.22.3",
-    "typescript": "^6.0.3",
+    "tsdown": "^0.22.7",
+    "typescript": "6.0.3",
     "unified": "^11.0.5",
     "vitest": "^4.1.9"
   },
