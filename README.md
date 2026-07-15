@@ -44,9 +44,9 @@ pnpm run publish:dry-run
 **I'm a Night 🦉** 
 
 ```text
-🌞 Morning                785 commits         ██░░░░░░░░░░░░░░░░░░░░░░░   09.23 % 
+🌞 Morning                786 commits         ██░░░░░░░░░░░░░░░░░░░░░░░   09.24 % 
 🌆 Daytime                1757 commits        █████░░░░░░░░░░░░░░░░░░░░   20.66 % 
-🌃 Evening                3486 commits        ██████████░░░░░░░░░░░░░░░   41.00 % 
+🌃 Evening                3485 commits        ██████████░░░░░░░░░░░░░░░   40.99 % 
 🌙 Night                  2475 commits        ███████░░░░░░░░░░░░░░░░░░   29.11 % 
 ```
 
@@ -55,11 +55,11 @@ pnpm run publish:dry-run
 
 ```text
 💬 Programming Languages: 
-YAML                     6 hrs 34 mins       ██████░░░░░░░░░░░░░░░░░░░   23.54 % 
-TypeScript               6 hrs 26 mins       ██████░░░░░░░░░░░░░░░░░░░   23.09 % 
-Java                     6 hrs 16 mins       ██████░░░░░░░░░░░░░░░░░░░   22.47 % 
-Markdown                 4 hrs 5 mins        ████░░░░░░░░░░░░░░░░░░░░░   14.67 % 
-Other                    1 hr 42 mins        ██░░░░░░░░░░░░░░░░░░░░░░░   06.09 % 
+YAML                     7 hrs 58 mins       ███████░░░░░░░░░░░░░░░░░░   26.82 % 
+Java                     5 hrs 42 mins       █████░░░░░░░░░░░░░░░░░░░░   19.24 % 
+Markdown                 4 hrs 53 mins       ████░░░░░░░░░░░░░░░░░░░░░   16.49 % 
+TypeScript               4 hrs 8 mins        ███░░░░░░░░░░░░░░░░░░░░░░   13.94 % 
+Other                    2 hrs 9 mins        ██░░░░░░░░░░░░░░░░░░░░░░░   07.26 % 
 ```
 
 
