@@ -74,6 +74,7 @@ jobs:
         with:
           workspaces: apps/git-client/src-tauri
       - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @jongminchung/tooling build
       - run: pnpm exec oxfmt --config .oxfmtrc.mjs --check apps/git-client nx.json '!apps/git-client/src/generated/**' '!apps/git-client/src-tauri/gen/**'
       - run: pnpm exec oxlint apps/git-client/src apps/git-client/tests apps/git-client/scripts
       - run: pnpm --filter @jongminchung/git-client typecheck
