@@ -347,7 +347,10 @@ async fn run_git(repository: &Path, args: &[String]) -> AppResult<()> {
 }
 
 async fn run_git_capture(repository: &Path, args: &[String]) -> AppResult<Vec<u8>> {
-    let output = git_command_owned(repository, args).output().await?;
+    let output = git_command_owned(repository, args)
+        .env("GIT_OPTIONAL_LOCKS", "0")
+        .output()
+        .await?;
     if output.status.success() {
         Ok(output.stdout)
     } else {
@@ -364,6 +367,7 @@ fn git_command(repository: &Path, args: &[&str]) -> Command {
         .current_dir(repository)
         .env("GIT_TERMINAL_PROMPT", "0")
         .env("GIT_PAGER", "cat")
+        .env("GIT_OPTIONAL_LOCKS", "0")
         .env("LC_ALL", "C")
         .stdin(Stdio::null())
         .stdout(Stdio::piped())

@@ -23,13 +23,14 @@ export function RepositoryManagementDialog({
   onSynchronizedOperation,
   onRollback,
   onClose,
+  embedded = false,
 }: {
   readonly remotes: readonly RemoteInfo[];
   readonly worktrees: readonly WorktreeInfo[];
   readonly onOperation: (operation: GitOperation) => Promise<void>;
   readonly onOpenWorktree: (path: string) => Promise<void>;
   readonly openRepositories: readonly RepositorySnapshot[];
-  readonly currentRepositoryId: string;
+  readonly currentRepositoryId: string | null;
   readonly onSwitchRepository: (repositoryId: string) => Promise<void>;
   readonly onAddRoot: () => Promise<void>;
   readonly onSynchronizedOperation: (
@@ -39,11 +40,12 @@ export function RepositoryManagementDialog({
   readonly onRollback: (
     steps: readonly MultiRootRollbackStep[],
   ) => Promise<readonly MultiRootOutcome[]>;
-  readonly onClose: () => void;
+  readonly onClose?: () => void;
+  readonly embedded?: boolean;
 }) {
   const [tab, setTab] = useState<"roots" | "remotes" | "worktrees">("roots");
   const [selectedRoots, setSelectedRoots] = useState<ReadonlySet<string>>(
-    new Set([currentRepositoryId]),
+    new Set(currentRepositoryId ? [currentRepositoryId] : []),
   );
   const [multiRootResult, setMultiRootResult] = useState<MultiRootResult>();
   const toggleRoot = (repositoryId: string) => {
@@ -55,8 +57,16 @@ export function RepositoryManagementDialog({
     });
   };
   return (
-    <div className={styles.dialogBackdrop} role="presentation">
-      <section className={styles.managementDialog} role="dialog" aria-modal="true">
+    <div
+      className={embedded ? styles.embeddedManagement : styles.dialogBackdrop}
+      role="presentation"
+    >
+      <section
+        className={styles.managementDialog}
+        role={embedded ? "region" : "dialog"}
+        aria-modal={embedded ? undefined : "true"}
+        aria-label="Repository Management"
+      >
         <header>
           <Icon
             name={tab === "roots" ? "folder" : tab === "remotes" ? "remote" : "worktree"}
@@ -64,9 +74,11 @@ export function RepositoryManagementDialog({
           />
           <strong>Repository Management</strong>
           <span />
-          <button className={styles.iconButton} aria-label="Close management" onClick={onClose}>
-            <Icon name="close" size={15} />
-          </button>
+          {onClose && (
+            <button className={styles.iconButton} aria-label="Close management" onClick={onClose}>
+              <Icon name="close" size={15} />
+            </button>
+          )}
         </header>
         <aside>
           <button

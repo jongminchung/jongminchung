@@ -1,4 +1,12 @@
-import type { BlameLine, Commit, FileChange, Ref, StatusModel, TreeEntry } from "./types";
+import type {
+  BlameLine,
+  Commit,
+  FileChange,
+  Ref,
+  StashEntry,
+  StatusModel,
+  TreeEntry,
+} from "./types";
 
 const STATUS_MAP: Readonly<Record<string, FileChange["status"]>> = {
   A: "added",
@@ -178,6 +186,50 @@ export function parseCommitFiles(output: string): FileChange[] {
       additions: binary ? undefined : Number(added),
       deletions: binary ? undefined : Number(deleted),
       binary,
+    });
+  }
+  return changes;
+}
+
+export function parseStashList(output: string): StashEntry[] {
+  return output
+    .split("\x1e")
+    .map((record) => record.replace(/^\n+|\n+$/g, ""))
+    .filter(Boolean)
+    .map((record) => {
+      const [selector = "", oid = "", subject = "", author = "", email = "", createdAt = "0"] =
+        record.split("\0");
+      return {
+        selector,
+        oid,
+        subject,
+        author,
+        email,
+        createdAt: Number(createdAt),
+        files: [],
+      } satisfies StashEntry;
+    });
+}
+
+export function parseNameStatus(output: string): FileChange[] {
+  const records = output.split("\0").filter(Boolean);
+  const changes: FileChange[] = [];
+  for (let index = 0; index < records.length; index += 1) {
+    const status = records[index] ?? "";
+    const code = status.charAt(0);
+    const firstPath = records[index + 1] ?? "";
+    if (!firstPath) break;
+    index += 1;
+    const renamed = code === "R" || code === "C";
+    const path = renamed ? (records[index + 1] ?? "") : firstPath;
+    if (renamed) index += 1;
+    if (!path) continue;
+    changes.push({
+      path,
+      oldPath: renamed ? firstPath : undefined,
+      status: STATUS_MAP[code] ?? "modified",
+      staged: false,
+      worktree: false,
     });
   }
   return changes;

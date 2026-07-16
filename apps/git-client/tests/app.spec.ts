@@ -2,7 +2,18 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
+  await page.goto("/?fixture=qa");
+});
+
+test("keeps the normal browser start screen free of repository fixtures", async ({ page }) => {
   await page.goto("/");
+  await expect(page.getByRole("button", { name: "Manage", exact: true })).toBeVisible();
+  await expect(page.getByText("Browser preview has no native Git bridge")).toBeVisible();
+  await expect(page.getByRole("region", { name: "Commit log" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Open QA fixture" })).toHaveAttribute(
+    "href",
+    "/?fixture=qa",
+  );
 });
 
 test("renders the dense three-pane Git log fixture", async ({ page }) => {
@@ -43,6 +54,26 @@ test("offers open, clone, and initialize repository flows", async ({ page }) => 
   await expect(dialog.getByText("Remote URL")).toBeVisible();
   await dialog.getByRole("button", { name: "Initialize" }).click();
   await expect(dialog.getByText("Bare repository")).toBeVisible();
+});
+
+test("keeps Manage fixed and separates Git Console from the native Terminal", async ({ page }) => {
+  await expect(page.getByRole("button", { name: "Manage", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Terminal", exact: true }).click();
+  await expect(page.getByText("Native Terminal")).toBeVisible();
+  await expect(page.getByText("The QA fixture does not start a shell.")).toBeVisible();
+  await page.getByRole("button", { name: "Git Console", exact: true }).click();
+  await expect(
+    page.getByText("Git commands and credential-redacted output appear here."),
+  ).toBeVisible();
+});
+
+test("opens a read-only file viewer from local changes", async ({ page }) => {
+  await page.getByRole("button", { name: "Commit 5" }).click();
+  const viewButton = page.getByRole("button", { name: "View src-tauri/src/git.rs", exact: true });
+  await viewButton.click();
+  await expect(page.getByRole("dialog")).toContainText("Working Tree");
+  await expect(page.locator(".cm-editor")).toBeVisible();
+  await expect(page.locator(".cm-content")).toHaveAttribute("contenteditable", "false");
 });
 
 test("has no serious automated accessibility violations", async ({ page }) => {

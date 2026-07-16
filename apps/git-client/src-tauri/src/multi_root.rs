@@ -168,6 +168,7 @@ async fn git_optional(repository: &Path, args: &[&str]) -> Option<String> {
         .args(args)
         .current_dir(repository)
         .env("GIT_TERMINAL_PROMPT", "0")
+        .env("GIT_OPTIONAL_LOCKS", "0")
         .stdin(Stdio::null())
         .output()
         .await

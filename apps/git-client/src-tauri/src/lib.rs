@@ -1,6 +1,7 @@
 mod changelist;
 mod conflict;
 mod error;
+mod file_content;
 mod git;
 mod management;
 mod model;
@@ -8,6 +9,9 @@ mod multi_root;
 mod recovery;
 pub mod sequence_editor;
 mod shelf;
+mod terminal;
+
+use tauri::Manager;
 
 pub fn run() {
     tauri::Builder::default()
@@ -15,6 +19,12 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_store::Builder::default().build())
         .manage(git::AppState::default())
+        .manage(terminal::TerminalState::default())
+        .on_window_event(|window, event| {
+            if matches!(event, tauri::WindowEvent::Destroyed) {
+                window.state::<terminal::TerminalState>().close_all();
+            }
+        })
         .invoke_handler(tauri::generate_handler![
             git::open_repository,
             git::initialize_repository,
@@ -24,6 +34,13 @@ pub fn run() {
             git::cancel,
             git::watch_repository,
             git::unwatch_repository,
+            file_content::read_file,
+            file_content::open_working_tree_file,
+            terminal::create_terminal,
+            terminal::write_terminal,
+            terminal::resize_terminal,
+            terminal::close_terminal,
+            terminal::close_repository_terminals,
             shelf::create_shelf,
             shelf::list_shelves,
             shelf::apply_shelf,

@@ -25,14 +25,16 @@ jobs:
     outputs:
       git_client: ${{ steps.scope.outputs.git_client }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
         with:
-          node-version: 26
+          node-version-file: .node-version
           cache: pnpm
+      - name: Verify configured Node.js
+        run: test "v$(cat .node-version)" = "$(node --version)"
       - run: pnpm install --frozen-lockfile
       - id: scope
         name: Detect affected Git Client project
@@ -61,12 +63,14 @@ jobs:
     needs: affected
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
         with:
-          node-version: 26
+          node-version-file: .node-version
           cache: pnpm
+      - name: Verify configured Node.js
+        run: test "v$(cat .node-version)" = "$(node --version)"
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy,rustfmt
@@ -92,7 +96,7 @@ jobs:
         run: |
           size_mb=$(du -sm apps/git-client/src-tauri/target/release/bundle/macos/*.app | awk '{print $1}')
           test "$size_mb" -le 75
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: git-client-macos-arm64
           path: |
@@ -109,14 +113,16 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
         with:
-          node-version: 26
+          node-version-file: .node-version
           cache: pnpm
+      - name: Verify configured Node.js
+        run: test "v$(cat .node-version)" = "$(node --version)"
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:

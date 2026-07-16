@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import type { BlameLine, Commit, TreeEntry } from "../domain/types";
+import type { FileContent, FileSource } from "../generated";
 import { Icon } from "./Icon";
 import styles from "../styles/App.module.css";
 
-export type InspectorTab = "tree" | "history" | "blame";
+const CodeMirrorFile = lazy(() => import("./CodeMirrorFile"));
+
+export type InspectorTab = "tree" | "file" | "history" | "blame";
 
 export function RepositoryInspectorDialog({
   revision,
@@ -13,6 +16,9 @@ export function RepositoryInspectorDialog({
   loadTree,
   loadFileHistory,
   loadBlame,
+  readFile,
+  openWorkingTreeFile,
+  source,
 }: {
   readonly revision: string;
   readonly initialPath?: string;
@@ -21,6 +27,9 @@ export function RepositoryInspectorDialog({
   readonly loadTree: (revision: string, path?: string) => Promise<readonly TreeEntry[]>;
   readonly loadFileHistory: (path: string) => Promise<readonly Commit[]>;
   readonly loadBlame: (path: string, revision?: string) => Promise<readonly BlameLine[]>;
+  readonly readFile: (source: FileSource, path: string) => Promise<FileContent>;
+  readonly openWorkingTreeFile: (path: string) => Promise<void>;
+  readonly source: FileSource;
 }) {
   const [tab, setTab] = useState<InspectorTab>(initialTab);
   const [path, setPath] = useState(initialPath ?? "");
@@ -28,61 +37,76 @@ export function RepositoryInspectorDialog({
   const [tree, setTree] = useState<readonly TreeEntry[]>([]);
   const [history, setHistory] = useState<readonly Commit[]>([]);
   const [blame, setBlame] = useState<readonly BlameLine[]>([]);
+  const [content, setContent] = useState<FileContent>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
-  const reload = (activeTab = tab) => {
+  const [reloadToken, setReloadToken] = useState(0);
+
+  useEffect(() => {
     let active = true;
-    setLoading(true);
-    setError(undefined);
-    const task =
-      activeTab === "tree"
-        ? loadTree(revision, treePath || undefined).then((value) => {
-            if (active) setTree(value);
-          })
-        : activeTab === "history"
-          ? path
-            ? loadFileHistory(path).then((value) => {
-                if (active) setHistory(value);
-              })
-            : Promise.resolve()
-          : path
-            ? loadBlame(path, revision).then((value) => {
-                if (active) setBlame(value);
-              })
-            : Promise.resolve();
-    void task
-      .catch((reason) => {
+    const load = async (): Promise<void> => {
+      setLoading(true);
+      setError(undefined);
+      try {
+        if (tab === "tree") setTree(await loadTree(revision, treePath || undefined));
+        else if (tab === "file" && path) setContent(await readFile(source, path));
+        else if (tab === "history" && path) setHistory(await loadFileHistory(path));
+        else if (path) {
+          setBlame(await loadBlame(path, source.kind === "workingTree" ? undefined : revision));
+        }
+      } catch (reason) {
         if (active) setError(reason instanceof Error ? reason.message : String(reason));
-      })
-      .finally(() => {
+      } finally {
         if (active) setLoading(false);
-      });
+      }
+    };
+    void load();
     return () => {
       active = false;
     };
-  };
-
-  useEffect(() => reload(tab), [tab, treePath]);
+  }, [
+    loadBlame,
+    loadFileHistory,
+    loadTree,
+    readFile,
+    reloadToken,
+    revision,
+    source,
+    tab,
+    treePath,
+  ]);
 
   return (
     <div className={styles.dialogBackdrop} role="presentation">
       <section className={styles.inspectorDialog} role="dialog" aria-modal="true">
         <header>
           <Icon name="folder" size={16} />
-          <strong>Repository at {revision.slice(0, 10)}</strong>
+          <strong>
+            {source.kind === "workingTree"
+              ? "Working Tree"
+              : source.kind === "index"
+                ? "Git Index"
+                : `Repository at ${revision.slice(0, 10)}`}
+          </strong>
           <span />
           <button className={styles.iconButton} aria-label="Close inspector" onClick={onClose}>
             <Icon name="close" size={15} />
           </button>
         </header>
         <nav>
-          {(["tree", "history", "blame"] as const).map((item) => (
+          {(["tree", "file", "history", "blame"] as const).map((item) => (
             <button
               className={tab === item ? styles.activeButton : undefined}
               key={item}
               onClick={() => setTab(item)}
             >
-              {item === "tree" ? "Tree" : item === "history" ? "File History" : "Blame"}
+              {item === "tree"
+                ? "Tree"
+                : item === "file"
+                  ? "File"
+                  : item === "history"
+                    ? "File History"
+                    : "Blame"}
             </button>
           ))}
           {tab === "tree" ? (
@@ -99,7 +123,7 @@ export function RepositoryInspectorDialog({
             <form
               onSubmit={(event) => {
                 event.preventDefault();
-                reload(tab);
+                setReloadToken((value) => value + 1);
               }}
             >
               <input
@@ -127,7 +151,7 @@ export function RepositoryInspectorDialog({
                       setTreePath([treePath, entry.path].filter(Boolean).join("/"));
                     } else {
                       setPath([treePath, entry.path].filter(Boolean).join("/"));
-                      setTab("blame");
+                      setTab("file");
                     }
                   }}
                 >
@@ -141,6 +165,35 @@ export function RepositoryInspectorDialog({
                 </button>
               ))}
             </div>
+          ) : tab === "file" ? (
+            !content ? (
+              <div className={styles.emptyState}>Select a file to view its contents.</div>
+            ) : content.kind === "text" ? (
+              <Suspense fallback={<div className={styles.emptyState}>Loading viewer…</div>}>
+                <CodeMirrorFile path={content.path} value={content.content} />
+              </Suspense>
+            ) : (
+              <div className={styles.emptyState}>
+                <strong>{content.path}</strong>
+                <span>
+                  {content.kind === "binary"
+                    ? "Binary file"
+                    : content.kind === "invalidUtf8"
+                      ? "Not valid UTF-8"
+                      : content.kind === "tooLarge"
+                        ? "File exceeds the 5 MiB or 50,000 line viewer limit"
+                        : "File does not exist at this source"}
+                </span>
+                {"sizeBytes" in content && (
+                  <small>{content.sizeBytes.toLocaleString()} bytes</small>
+                )}
+                {source.kind === "workingTree" && content.kind !== "missing" && (
+                  <button onClick={() => void openWorkingTreeFile(content.path)}>
+                    Open in default application
+                  </button>
+                )}
+              </div>
+            )
           ) : tab === "history" ? (
             <div className={styles.historyList}>
               {history.map((commit) => (

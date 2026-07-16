@@ -295,7 +295,11 @@ fn manifest_path(app: &tauri::AppHandle, repository_id: &RepositoryId) -> AppRes
 }
 
 async fn capture_optional(repository: &Path, args: &[&str]) -> Option<String> {
-    let output = git_command(repository, args).output().await.ok()?;
+    let output = git_command(repository, args)
+        .env("GIT_OPTIONAL_LOCKS", "0")
+        .output()
+        .await
+        .ok()?;
     output
         .status
         .success()

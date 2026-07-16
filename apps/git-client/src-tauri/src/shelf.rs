@@ -326,6 +326,7 @@ async fn capture_git(repository: &Path, arguments: Vec<String>) -> AppResult<Vec
         .current_dir(repository)
         .env("GIT_TERMINAL_PROMPT", "0")
         .env("GIT_PAGER", "cat")
+        .env("GIT_OPTIONAL_LOCKS", "0")
         .env("LC_ALL", "C")
         .output()
         .await?;

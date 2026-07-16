@@ -1,4 +1,4 @@
-import type { RepositorySnapshot } from "../generated";
+import type { OutputStream, RepositorySnapshot } from "../generated";
 
 export type RefKind = "local" | "remote" | "tag";
 
@@ -89,6 +89,16 @@ export interface StatusModel {
   readonly changes: readonly FileChange[];
 }
 
+export interface StashEntry {
+  readonly selector: string;
+  readonly oid: string;
+  readonly subject: string;
+  readonly author: string;
+  readonly email: string;
+  readonly createdAt: number;
+  readonly files: readonly FileChange[];
+}
+
 export interface SelectionContext {
   readonly selectedCommits: readonly Commit[];
   readonly currentBranch?: string;
@@ -131,11 +141,19 @@ export interface OperationState {
 
 export interface ConsoleEntry {
   readonly id: string;
+  readonly requestId: string | null;
   readonly command: string;
   readonly startedAt: number;
   readonly duration?: number;
+  readonly exitCode?: number;
   readonly status: "running" | "success" | "failure" | "cancelled";
-  readonly output: string;
+  readonly chunks: readonly ConsoleChunk[];
+}
+
+export interface ConsoleChunk {
+  readonly sequence: number;
+  readonly stream: OutputStream;
+  readonly data: string;
 }
 
 export interface RepositoryView {

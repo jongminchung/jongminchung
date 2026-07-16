@@ -100,6 +100,7 @@ async fn git_bytes(repository: &Path, args: &[&str]) -> AppResult<Vec<u8>> {
         .args(args)
         .current_dir(repository)
         .env("GIT_TERMINAL_PROMPT", "0")
+        .env("GIT_OPTIONAL_LOCKS", "0")
         .stdin(Stdio::null())
         .output()
         .await?;

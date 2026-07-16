@@ -8,6 +8,9 @@ pub struct RepositoryId(pub String);
 pub struct RequestId(pub String);
 
 #[derive(Clone, Debug, Deserialize, Serialize, TS)]
+pub struct TerminalId(pub String);
+
+#[derive(Clone, Debug, Deserialize, Serialize, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct GitVersion {
     pub major: u16,
@@ -39,6 +42,49 @@ pub struct RepositorySnapshot {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, TS)]
+#[serde(
+    tag = "kind",
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase"
+)]
+pub enum FileSource {
+    WorkingTree,
+    Index,
+    Revision { revision: String },
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, TS)]
+#[serde(
+    tag = "kind",
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase"
+)]
+pub enum FileContent {
+    Text {
+        path: String,
+        content: String,
+        size_bytes: u64,
+        line_count: u32,
+    },
+    Binary {
+        path: String,
+        size_bytes: u64,
+    },
+    InvalidUtf8 {
+        path: String,
+        size_bytes: u64,
+    },
+    TooLarge {
+        path: String,
+        size_bytes: u64,
+        line_count: Option<u32>,
+    },
+    Missing {
+        path: String,
+    },
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct ShelfFile {
     pub path: String,
@@ -58,11 +104,21 @@ pub struct ShelfEntry {
     pub worktree_patch_checksum: String,
 }
 
+#[derive(Clone, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize, TS)]
+#[serde(rename_all = "camelCase")]
+pub enum RepositoryInvalidation {
+    Status,
+    History,
+    Stash,
+    Operation,
+    Management,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, TS)]
 #[serde(rename_all = "camelCase")]
-pub struct FileWatchEvent {
+pub struct RepositoryChangedEvent {
     pub repository_id: RepositoryId,
-    pub paths: Vec<String>,
+    pub invalidations: Vec<RepositoryInvalidation>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, TS)]
@@ -206,6 +262,13 @@ pub enum LogOrder {
     FirstParent,
 }
 
+#[derive(Clone, Debug, Deserialize, Serialize, TS)]
+#[serde(rename_all = "camelCase")]
+pub enum StashShowMode {
+    Files,
+    Patch,
+}
+
 #[derive(Clone, Debug, Default, Deserialize, Serialize, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct LogFilters {
@@ -265,6 +328,14 @@ pub enum GitRequest {
         revision: Option<String>,
         path: String,
     },
+    StashList {
+        repository_id: RepositoryId,
+    },
+    StashShow {
+        repository_id: RepositoryId,
+        stash: String,
+        mode: StashShowMode,
+    },
     Operation {
         repository_id: RepositoryId,
         operation: GitOperation,
@@ -282,6 +353,8 @@ impl GitRequest {
             | Self::Tree { repository_id, .. }
             | Self::FileHistory { repository_id, .. }
             | Self::Blame { repository_id, .. }
+            | Self::StashList { repository_id }
+            | Self::StashShow { repository_id, .. }
             | Self::Operation { repository_id, .. } => repository_id,
         }
     }
@@ -498,11 +571,32 @@ pub enum GitEvent {
     Failed {
         request_id: RequestId,
         message: String,
+        exit_code: Option<i32>,
         duration_ms: u64,
     },
     Cancelled {
         request_id: RequestId,
         duration_ms: u64,
+    },
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, TS)]
+#[serde(
+    tag = "kind",
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase"
+)]
+pub enum TerminalEvent {
+    Output {
+        sequence: u64,
+        data: Vec<u8>,
+    },
+    Exited {
+        exit_code: u32,
+        signal: Option<String>,
+    },
+    Failed {
+        message: String,
     },
 }
 
@@ -514,9 +608,10 @@ mod tests {
 
     use super::{
         Changelist, ChangelistCommitOptions, ChangelistCommitResult, ConflictContent, ConflictFile,
-        FileWatchEvent, GitEvent, GitRequest, MultiRootOutcome, MultiRootResult,
+        FileContent, FileSource, GitEvent, GitRequest, MultiRootOutcome, MultiRootResult,
         MultiRootRollbackStep, RecoveryEntry, RecoveryRestoreResult, RemoteInfo,
-        RepositorySnapshot, ShelfEntry, WorktreeInfo,
+        RepositoryChangedEvent, RepositoryInvalidation, RepositorySnapshot, ShelfEntry,
+        TerminalEvent, TerminalId, WorktreeInfo,
     };
 
     #[test]
@@ -528,8 +623,15 @@ mod tests {
         GitRequest::export_all(&config).expect("export GitRequest bindings");
         GitEvent::export_all(&config).expect("export GitEvent bindings");
         RepositorySnapshot::export_all(&config).expect("export RepositorySnapshot bindings");
+        FileSource::export_all(&config).expect("export FileSource bindings");
+        FileContent::export_all(&config).expect("export FileContent bindings");
+        TerminalId::export_all(&config).expect("export TerminalId bindings");
+        TerminalEvent::export_all(&config).expect("export TerminalEvent bindings");
         ShelfEntry::export_all(&config).expect("export ShelfEntry bindings");
-        FileWatchEvent::export_all(&config).expect("export FileWatchEvent bindings");
+        RepositoryInvalidation::export_all(&config)
+            .expect("export RepositoryInvalidation bindings");
+        RepositoryChangedEvent::export_all(&config)
+            .expect("export RepositoryChangedEvent bindings");
         Changelist::export_all(&config).expect("export Changelist bindings");
         ChangelistCommitResult::export_all(&config)
             .expect("export ChangelistCommitResult bindings");

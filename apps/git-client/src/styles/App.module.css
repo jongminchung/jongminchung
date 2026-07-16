@@ -19,6 +19,9 @@
 .titlebar nav {
   align-items: stretch;
   display: flex;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 .titlebar nav button {
   align-items: center;
@@ -46,8 +49,27 @@
   padding-left: 6px;
 }
 .titlebar .closeTab {
+  border-left: 0;
   font-size: 16px;
-  padding: 0 7px;
+  padding: 0 6px;
+}
+.workspaceTab {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+.workspaceTab > button:first-child {
+  border-right: 0;
+  max-width: 210px;
+  overflow: hidden;
+  padding-right: 5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.workspaceTab em {
+  color: var(--coral);
+  font-size: 15px;
+  font-style: normal;
+  line-height: 1;
 }
 .titleRepo {
   align-self: center;
@@ -181,6 +203,58 @@
   background: transparent;
   color: inherit;
   text-decoration: underline;
+}
+.manageWorkspace,
+.repositoryErrorView {
+  grid-row: 2 / -1;
+  min-height: 0;
+}
+.manageWorkspace {
+  background: var(--surface);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+}
+.browserModeNotice {
+  align-items: center;
+  background: color-mix(in srgb, var(--blue) 8%, var(--surface));
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 10px;
+  padding: 10px 16px;
+}
+.browserModeNotice > div {
+  flex: 1;
+}
+.browserModeNotice p {
+  color: var(--text-muted);
+  margin: 3px 0 0;
+}
+.browserModeNotice a {
+  background: var(--violet);
+  border-radius: 4px;
+  color: white;
+  padding: 7px 10px;
+  text-decoration: none;
+}
+.repositoryErrorView {
+  align-items: center;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px;
+  text-align: center;
+}
+.repositoryErrorView h1 {
+  color: var(--text);
+  margin: 10px 0 4px;
+}
+.repositoryErrorView button {
+  background: var(--violet);
+  border-radius: 4px;
+  color: white;
+  padding: 7px 12px;
 }
 .workspace {
   display: grid;
@@ -1006,6 +1080,18 @@
   overflow: hidden;
   width: min(900px, calc(100vw - 90px));
 }
+.embeddedManagement {
+  grid-row: 2;
+  min-height: 0;
+  overflow: hidden;
+}
+.embeddedManagement .managementDialog {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  height: 100%;
+  width: 100%;
+}
 .managementDialog > header {
   align-items: center;
   border-bottom: 1px solid var(--border);
@@ -1141,19 +1227,65 @@
   color: var(--text-muted);
   margin: 2px 0 0;
 }
+.collectionError {
+  background: color-mix(in srgb, var(--coral) 10%, var(--surface));
+  color: var(--coral);
+  padding: 6px 14px;
+}
 .collectionRow small {
   color: var(--text-faint);
   display: block;
   margin-top: 3px;
 }
+.stashEntry {
+  border-bottom: 1px solid var(--border);
+}
+.stashEntry .collectionRow {
+  border-bottom: 0;
+}
+.stashFiles {
+  background: var(--surface-sunken);
+  display: grid;
+  gap: 3px;
+  padding: 6px 14px 8px 48px;
+}
+.stashFiles span {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+.stashFiles strong {
+  color: var(--violet);
+  display: inline-block;
+  margin-right: 8px;
+  width: 12px;
+}
 .consoleTool {
   height: 100%;
   overflow: auto;
-  padding: 5px 8px;
+}
+.consoleToolbar {
+  align-items: center;
+  background: var(--surface-sunken);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 5px;
+  min-height: 31px;
+  padding: 3px 8px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.consoleToolbar button,
+.consoleTool article header button {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  min-height: 24px;
+  padding: 0 7px;
 }
 .consoleTool article {
   border-bottom: 1px solid var(--border);
-  padding: 5px;
+  padding: 5px 9px;
 }
 .consoleTool article header {
   align-items: center;
@@ -1175,13 +1307,97 @@
   max-height: 120px;
   overflow: auto;
   padding: 6px;
+}
+.consoleWrapped {
   white-space: pre-wrap;
+  word-break: break-word;
+}
+.consoleUnwrapped {
+  white-space: pre;
+}
+.consoleTool pre span {
+  display: inline;
+}
+.stderr {
+  color: var(--coral);
 }
 .consoleStatus {
   background: var(--blue);
   border-radius: 50%;
   height: 7px;
   width: 7px;
+}
+.consoleStatus.starting,
+.consoleStatus.running {
+  background: var(--blue);
+}
+.consoleStatus.exited {
+  background: var(--mint);
+}
+.consoleStatus.failed {
+  background: var(--coral);
+}
+.terminalTool {
+  display: grid;
+  grid-template-rows: 30px minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+}
+.terminalTabs {
+  align-items: stretch;
+  background: var(--surface-sunken);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  overflow-x: auto;
+}
+.terminalTabs > button {
+  align-items: center;
+  background: transparent;
+  border-right: 1px solid var(--border);
+  color: var(--text-muted);
+  display: flex;
+  gap: 6px;
+  padding: 0 9px;
+}
+.terminalTabs > .activeTerminalTab {
+  background: var(--surface);
+  color: var(--text);
+}
+.terminalTabs > button > span[role="button"] {
+  color: var(--text-faint);
+  font-size: 15px;
+  margin-left: 4px;
+}
+.terminalSurface {
+  background: #0f1117;
+  min-height: 0;
+  overflow: hidden;
+}
+.terminalSurface > div:not(.terminalEmpty) {
+  height: 100%;
+}
+.terminalEmpty {
+  align-items: center;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: center;
+  text-align: center;
+}
+.terminalEmpty strong {
+  color: var(--text);
+  margin-top: 7px;
+}
+.terminalEmpty p {
+  margin: 5px 0;
+}
+.terminalEmpty button {
+  background: var(--violet);
+  border-radius: 4px;
+  color: white;
+  margin-top: 8px;
+  padding: 6px 10px;
 }
 .consoleStatus.success {
   background: var(--mint);

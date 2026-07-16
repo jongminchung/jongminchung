@@ -37,7 +37,7 @@ export const DetailsPane = memo(function DetailsPane({
   readonly loading: boolean;
   readonly onOpenDiff: (file: FileChange) => void;
   readonly onOpenTree: () => void;
-  readonly onInspectFile: (file: FileChange, view: "history" | "blame") => void;
+  readonly onInspectFile: (file: FileChange, view: "file" | "history" | "blame") => void;
 }) {
   const [treeMode, setTreeMode] = useState(true);
   const [selectedPath, setSelectedPath] = useState<string>();
@@ -54,6 +54,14 @@ export const DetailsPane = memo(function DetailsPane({
         <span className={styles.toolbarDivider} />
         <button className={styles.iconButton} onClick={onOpenTree} title="Repository at revision">
           <Icon name="external" size={14} />
+        </button>
+        <button
+          className={styles.iconButton}
+          disabled={!selectedFile}
+          onClick={() => selectedFile && onInspectFile(selectedFile, "file")}
+          title="View file"
+        >
+          <Icon name="file" size={14} />
         </button>
         <button
           className={styles.iconButton}

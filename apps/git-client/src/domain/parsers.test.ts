@@ -10,7 +10,9 @@ import {
   parseDiffHunks,
   parseLog,
   parseFileHistory,
+  parseNameStatus,
   parseRefs,
+  parseStashList,
   parseStatusV2,
   parseTree,
   placeGraphLanes,
@@ -84,6 +86,26 @@ describe("porcelain parsers", () => {
         oldPath: "old name.ts",
         status: "renamed",
       }),
+    ]);
+  });
+
+  it("parses native stash metadata and NUL-delimited changed files", () => {
+    const stashes = parseStashList(
+      `\x1e${["stash@{0}", "abc123", "On main: work in progress", "Jamie", "j@example.com", "1700000000", ""].join("\0")}` +
+        `\x1e${["stash@{1}", "def456", "On feat: 한글 메시지", "Min", "m@example.com", "1700000100", ""].join("\0")}`,
+    );
+    expect(stashes).toEqual([
+      expect.objectContaining({
+        selector: "stash@{0}",
+        oid: "abc123",
+        subject: "On main: work in progress",
+        createdAt: 1_700_000_000,
+      }),
+      expect.objectContaining({ selector: "stash@{1}", subject: "On feat: 한글 메시지" }),
+    ]);
+    expect(parseNameStatus("M\0src/a file.ts\0R100\0old.ts\0new.ts\0")).toEqual([
+      expect.objectContaining({ path: "src/a file.ts", status: "modified" }),
+      expect.objectContaining({ path: "new.ts", oldPath: "old.ts", status: "renamed" }),
     ]);
   });
 });

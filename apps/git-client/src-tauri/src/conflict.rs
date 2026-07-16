@@ -86,7 +86,7 @@ pub async fn resolve_binary_conflict(
 }
 
 async fn list_conflicts_in(repository: &Path) -> AppResult<Vec<ConflictFile>> {
-    let output = git_output(repository, &["ls-files", "--unmerged", "-z"]).await?;
+    let output = git_query_output(repository, &["ls-files", "--unmerged", "-z"]).await?;
     let mut conflicts = BTreeMap::<String, ConflictBuilder>::new();
     for record in output
         .split(|byte| *byte == 0)
@@ -205,6 +205,7 @@ async fn read_stage(repository: &Path, path: &str, stage: u8) -> AppResult<Optio
         .args(["cat-file", "blob", &revision])
         .current_dir(repository)
         .env("GIT_TERMINAL_PROMPT", "0")
+        .env("GIT_OPTIONAL_LOCKS", "0")
         .stdin(Stdio::null())
         .output()
         .await?;
@@ -215,7 +216,7 @@ async fn read_stage(repository: &Path, path: &str, stage: u8) -> AppResult<Optio
 }
 
 async fn is_text_blob(repository: &Path, oid: &str) -> AppResult<bool> {
-    let output = git_output(repository, &["cat-file", "blob", oid]).await?;
+    let output = git_query_output(repository, &["cat-file", "blob", oid]).await?;
     Ok(text_from_bytes(&output).is_some())
 }
 
@@ -275,7 +276,7 @@ fn checked_worktree_path(repository: &Path, path: &str) -> AppResult<PathBuf> {
 
 async fn conflict_labels(repository: &Path) -> AppResult<(String, String)> {
     let git_directory =
-        String::from_utf8(git_output(repository, &["rev-parse", "--git-dir"]).await?)
+        String::from_utf8(git_query_output(repository, &["rev-parse", "--git-dir"]).await?)
             .map_err(|_| AppError::CommandFailed("non-UTF-8 Git directory".into()))?;
     let raw_path = PathBuf::from(git_directory.trim());
     let git_directory = if raw_path.is_absolute() {
@@ -308,6 +309,24 @@ async fn git_output(repository: &Path, args: &[&str]) -> AppResult<Vec<u8>> {
         .args(args)
         .current_dir(repository)
         .env("GIT_TERMINAL_PROMPT", "0")
+        .stdin(Stdio::null())
+        .output()
+        .await?;
+    if output.status.success() {
+        Ok(output.stdout)
+    } else {
+        Err(AppError::CommandFailed(
+            String::from_utf8_lossy(&output.stderr).trim().to_owned(),
+        ))
+    }
+}
+
+async fn git_query_output(repository: &Path, args: &[&str]) -> AppResult<Vec<u8>> {
+    let output = Command::new("git")
+        .args(args)
+        .current_dir(repository)
+        .env("GIT_TERMINAL_PROMPT", "0")
+        .env("GIT_OPTIONAL_LOCKS", "0")
         .stdin(Stdio::null())
         .output()
         .await?;

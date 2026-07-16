@@ -1,5 +1,5 @@
 import type { RepositorySnapshot, ShelfEntry } from "../generated";
-import type { Commit, FileChange, Ref, RepositoryView, StatusModel } from "./types";
+import type { Commit, FileChange, Ref, RepositoryView, StashEntry, StatusModel } from "./types";
 
 const SUBJECTS = [
   "feat: add workspace-aware repository sessions",
@@ -281,5 +281,26 @@ export const sampleShelves: readonly ShelfEntry[] = [
     ],
     indexPatchChecksum: "4ad0",
     worktreePatchChecksum: "9ce1",
+  },
+];
+
+export const sampleStashes: readonly StashEntry[] = [
+  {
+    selector: "stash@{0}",
+    oid: oid(40),
+    subject: "WIP on main: feat: terminal sessions",
+    author: "Jongmin Chung",
+    email: "jongmin@example.com",
+    createdAt: now - 7_200,
+    files: sampleCommitFiles.slice(0, 2),
+  },
+  {
+    selector: "stash@{1}",
+    oid: oid(41),
+    subject: "On feat/merge-editor: conflict layout experiment",
+    author: "Jongmin Chung",
+    email: "jongmin@example.com",
+    createdAt: now - 172_800,
+    files: sampleCommitFiles.slice(2, 4),
   },
 ];

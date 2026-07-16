@@ -1,5 +1,5 @@
 use std::{
-    collections::HashMap,
+    collections::{BTreeSet, HashMap},
     path::{Component, Path, PathBuf},
     process::Stdio,
     sync::{Arc, Mutex, RwLock},
@@ -23,9 +23,10 @@ use uuid::Uuid;
 use crate::{
     error::{AppError, AppResult},
     model::{
-        AbortableOperation, ContinuableOperation, FileWatchEvent, GitEvent, GitOperation,
-        GitRequest, GitVersion, InProgressOperation, LogOrder, OutputStream, RepositoryId,
-        RepositorySnapshot, RequestId, ResetMode, SkippableOperation,
+        AbortableOperation, ContinuableOperation, GitEvent, GitOperation, GitRequest, GitVersion,
+        InProgressOperation, LogOrder, OutputStream, RepositoryChangedEvent, RepositoryId,
+        RepositoryInvalidation, RepositorySnapshot, RequestId, ResetMode, SkippableOperation,
+        StashShowMode,
     },
 };
 
@@ -38,6 +39,8 @@ const CHUNK_SIZE: usize = 32 * 1024;
 #[derive(Clone)]
 pub(crate) struct RepositoryRecord {
     pub(crate) path: PathBuf,
+    git_directory: PathBuf,
+    common_directory: PathBuf,
     pub(crate) operation_lock: Arc<AsyncMutex<()>>,
 }
 
@@ -60,7 +63,7 @@ impl CommandSpec {
     fn query(args: Vec<String>) -> Self {
         Self {
             args,
-            env: Vec::new(),
+            env: vec![("GIT_OPTIONAL_LOCKS".into(), "0".into())],
             stdin: None,
             mutation: false,
             timeout: QUERY_TIMEOUT,
@@ -105,10 +108,7 @@ pub async fn open_repository(
         .expect("repository lock poisoned")
         .insert(
             snapshot.id.0.clone(),
-            RepositoryRecord {
-                path: root,
-                operation_lock: Arc::new(AsyncMutex::new(())),
-            },
+            repository_record_from(snapshot.clone(), root),
         );
     Ok(snapshot)
 }
@@ -192,12 +192,18 @@ async fn register_repository(path: &Path, state: &AppState) -> AppResult<Reposit
         .expect("repository lock poisoned")
         .insert(
             snapshot.id.0.clone(),
-            RepositoryRecord {
-                path: root,
-                operation_lock: Arc::new(AsyncMutex::new(())),
-            },
+            repository_record_from(snapshot.clone(), root),
         );
     Ok(snapshot)
+}
+
+fn repository_record_from(snapshot: RepositorySnapshot, path: PathBuf) -> RepositoryRecord {
+    RepositoryRecord {
+        path,
+        git_directory: PathBuf::from(snapshot.git_directory),
+        common_directory: PathBuf::from(snapshot.common_directory),
+        operation_lock: Arc::new(AsyncMutex::new(())),
+    }
 }
 
 async fn run_global_command(mut command: Command) -> AppResult<()> {
@@ -260,6 +266,7 @@ pub async fn execute(
             let _ = on_event.send(GitEvent::Failed {
                 request_id: request_id_for_task.clone(),
                 message: format!("Could not create recovery entry: {error}"),
+                exit_code: None,
                 duration_ms: 0,
             });
             cancellations
@@ -302,39 +309,146 @@ pub fn cancel(request_id: RequestId, state: tauri::State<'_, AppState>) -> AppRe
 #[tauri::command]
 pub fn watch_repository(
     repository_id: RepositoryId,
-    on_event: Channel<FileWatchEvent>,
+    on_event: Channel<RepositoryChangedEvent>,
     state: tauri::State<'_, AppState>,
 ) -> AppResult<()> {
     let record = repository_record(&state, &repository_id)?;
     let event_repository_id = repository_id.clone();
-    let mut debouncer = new_debouncer(
-        Duration::from_millis(250),
-        move |result: notify_debouncer_mini::DebounceEventResult| {
-            if let Ok(events) = result {
-                let mut paths = events
-                    .into_iter()
-                    .map(|event| event.path.to_string_lossy().into_owned())
-                    .collect::<Vec<_>>();
-                paths.sort();
-                paths.dedup();
-                let _ = on_event.send(FileWatchEvent {
-                    repository_id: event_repository_id.clone(),
-                    paths,
-                });
-            }
-        },
-    )
-    .map_err(|error| AppError::Io(std::io::Error::other(error)))?;
-    debouncer
-        .watcher()
-        .watch(&record.path, RecursiveMode::Recursive)
-        .map_err(|error| AppError::Io(std::io::Error::other(error)))?;
+    let debouncer = create_repository_watcher(&record, move |invalidations| {
+        let _ = on_event.send(RepositoryChangedEvent {
+            repository_id: event_repository_id.clone(),
+            invalidations,
+        });
+    })?;
     state
         .watchers
         .lock()
         .expect("watcher lock poisoned")
         .insert(repository_id.0, debouncer);
     Ok(())
+}
+
+fn create_repository_watcher(
+    record: &RepositoryRecord,
+    on_event: impl Fn(Vec<RepositoryInvalidation>) + Send + 'static,
+) -> AppResult<Debouncer<RecommendedWatcher>> {
+    let root = record.path.clone();
+    let git_directory = record.git_directory.clone();
+    let common_directory = record.common_directory.clone();
+    let mut debouncer = new_debouncer(
+        Duration::from_millis(250),
+        move |result: notify_debouncer_mini::DebounceEventResult| {
+            if let Ok(events) = result {
+                let invalidations = events
+                    .into_iter()
+                    .flat_map(|event| {
+                        classify_repository_path(
+                            &root,
+                            &git_directory,
+                            &common_directory,
+                            &event.path,
+                        )
+                    })
+                    .collect::<BTreeSet<_>>()
+                    .into_iter()
+                    .collect::<Vec<_>>();
+                if !invalidations.is_empty() {
+                    on_event(invalidations);
+                }
+            }
+        },
+    )
+    .map_err(|error| AppError::Io(std::io::Error::other(error)))?;
+    let mut watched_roots = Vec::<PathBuf>::new();
+    for path in [
+        &record.path,
+        &record.common_directory,
+        &record.git_directory,
+    ] {
+        if watched_roots.iter().any(|root| path.starts_with(root)) {
+            continue;
+        }
+        debouncer
+            .watcher()
+            .watch(path, RecursiveMode::Recursive)
+            .map_err(|error| AppError::Io(std::io::Error::other(error)))?;
+        watched_roots.push(path.clone());
+    }
+    Ok(debouncer)
+}
+
+fn classify_repository_path(
+    root: &Path,
+    git_directory: &Path,
+    common_directory: &Path,
+    path: &Path,
+) -> Vec<RepositoryInvalidation> {
+    let metadata_path = path
+        .strip_prefix(git_directory)
+        .ok()
+        .map(|path| (path, true))
+        .or_else(|| {
+            path.strip_prefix(common_directory)
+                .ok()
+                .map(|path| (path, false))
+        });
+    if let Some((relative, current_worktree)) = metadata_path {
+        let value = relative.to_string_lossy();
+        if value.ends_with(".lock")
+            || relative.starts_with("objects")
+            || relative.starts_with("logs")
+        {
+            return Vec::new();
+        }
+        if relative == Path::new("index") {
+            return vec![RepositoryInvalidation::Status];
+        }
+        if relative == Path::new("refs/stash") {
+            return vec![
+                RepositoryInvalidation::Status,
+                RepositoryInvalidation::History,
+                RepositoryInvalidation::Stash,
+            ];
+        }
+        if relative == Path::new("HEAD") {
+            return vec![
+                RepositoryInvalidation::Status,
+                RepositoryInvalidation::History,
+            ];
+        }
+        if relative == Path::new("packed-refs")
+            || relative == Path::new("shallow")
+            || relative.starts_with("refs")
+        {
+            return vec![RepositoryInvalidation::History];
+        }
+        if is_operation_metadata(relative) {
+            return vec![
+                RepositoryInvalidation::Status,
+                RepositoryInvalidation::Operation,
+            ];
+        }
+        if relative == Path::new("config")
+            || relative == Path::new("config.worktree")
+            || (!current_worktree && relative.starts_with("worktrees"))
+        {
+            return vec![RepositoryInvalidation::Management];
+        }
+        return Vec::new();
+    }
+    path.starts_with(root)
+        .then_some(RepositoryInvalidation::Status)
+        .into_iter()
+        .collect()
+}
+
+fn is_operation_metadata(path: &Path) -> bool {
+    matches!(
+        path.to_string_lossy().as_ref(),
+        "MERGE_HEAD" | "CHERRY_PICK_HEAD" | "REVERT_HEAD" | "BISECT_LOG" | "AUTO_MERGE"
+    ) || path.starts_with("rebase-merge")
+        || path.starts_with("rebase-apply")
+        || path.starts_with("sequencer")
 }
 
 #[tauri::command]
@@ -567,6 +681,7 @@ fn git_command(path: &Path, args: &[&str]) -> Command {
         .current_dir(path)
         .env("GIT_TERMINAL_PROMPT", "0")
         .env("GIT_PAGER", "cat")
+        .env("GIT_OPTIONAL_LOCKS", "0")
         .env("LC_ALL", "C")
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
@@ -619,6 +734,7 @@ async fn run_streaming(
             let _ = on_event.send(GitEvent::Failed {
                 request_id,
                 message: error.to_string(),
+                exit_code: None,
                 duration_ms: started.elapsed().as_millis() as u64,
             });
             return;
@@ -702,6 +818,7 @@ async fn run_streaming(
             let _ = on_event.send(GitEvent::Failed {
                 request_id,
                 message: format!("Git exited with status {}", status.code().unwrap_or(-1)),
+                exit_code: status.code(),
                 duration_ms,
             });
         }
@@ -709,6 +826,7 @@ async fn run_streaming(
             let _ = on_event.send(GitEvent::Failed {
                 request_id,
                 message: error.to_string(),
+                exit_code: None,
                 duration_ms,
             });
         }
@@ -882,6 +1000,33 @@ fn command_for_request(request: &GitRequest) -> AppResult<CommandSpec> {
                 args.push(revision.clone());
             }
             args.extend(["--".into(), path.clone()]);
+            Ok(CommandSpec::query(args))
+        }
+        GitRequest::StashList { .. } => Ok(CommandSpec::query(strings(&[
+            "stash",
+            "list",
+            "--format=%x1e%gd%x00%H%x00%gs%x00%an%x00%ae%x00%at%x00",
+        ]))),
+        GitRequest::StashShow { stash, mode, .. } => {
+            validate_revision(stash, "stash")?;
+            let args = match mode {
+                StashShowMode::Files => strings(&[
+                    "stash",
+                    "show",
+                    "--include-untracked",
+                    "--name-status",
+                    "-z",
+                    stash,
+                ]),
+                StashShowMode::Patch => strings(&[
+                    "stash",
+                    "show",
+                    "--include-untracked",
+                    "--patch",
+                    "--no-color",
+                    stash,
+                ]),
+            };
             Ok(CommandSpec::query(args))
         }
         GitRequest::Operation { operation, .. } => command_for_operation(operation),
@@ -1351,7 +1496,7 @@ fn validate_worktree_path(value: &str) -> AppResult<()> {
     Ok(())
 }
 
-fn validate_revision(value: &str, field: &'static str) -> AppResult<()> {
+pub(crate) fn validate_revision(value: &str, field: &'static str) -> AppResult<()> {
     validate_text(value, field)?;
     if value.is_empty() || value.starts_with('-') {
         return Err(invalid(field, "must be a non-option Git revision"));
@@ -1448,7 +1593,7 @@ fn redact_credentials(value: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use std::{fs, path::Path};
+    use std::{fs, path::Path, sync::mpsc as std_mpsc, time::Duration as StdDuration};
 
     use tempfile::TempDir;
 
@@ -1490,6 +1635,164 @@ mod tests {
         let command = command_for_request(&request).expect("status command");
         assert_eq!(command.args.first().map(String::as_str), Some("status"));
         assert!(!command.mutation);
+    }
+
+    #[test]
+    fn disables_optional_git_locks_only_for_queries() {
+        let query = command_for_request(&GitRequest::Status {
+            repository_id: repository_id(),
+        })
+        .expect("status command");
+        assert!(
+            query
+                .env
+                .contains(&("GIT_OPTIONAL_LOCKS".into(), "0".into()))
+        );
+
+        let mutation = command_for_operation(&GitOperation::Stage {
+            paths: vec!["file.txt".into()],
+        })
+        .expect("stage command");
+        assert!(
+            !mutation
+                .env
+                .iter()
+                .any(|(key, _)| key == "GIT_OPTIONAL_LOCKS")
+        );
+    }
+
+    #[test]
+    fn classifies_repository_changes_without_refreshing_unrelated_data() {
+        let root = Path::new("/repo");
+        let git_directory = root.join(".git");
+
+        assert_eq!(
+            classify_repository_path(
+                root,
+                &git_directory,
+                &git_directory,
+                &root.join("src/lib.rs")
+            ),
+            vec![RepositoryInvalidation::Status]
+        );
+        assert_eq!(
+            classify_repository_path(
+                root,
+                &git_directory,
+                &git_directory,
+                &git_directory.join("index")
+            ),
+            vec![RepositoryInvalidation::Status]
+        );
+        assert!(
+            classify_repository_path(
+                root,
+                &git_directory,
+                &git_directory,
+                &git_directory.join("index.lock"),
+            )
+            .is_empty()
+        );
+        assert!(
+            classify_repository_path(
+                root,
+                &git_directory,
+                &git_directory,
+                &git_directory.join("objects/ab/cdef"),
+            )
+            .is_empty()
+        );
+    }
+
+    #[test]
+    fn classifies_git_metadata_by_visible_repository_effect() {
+        let root = Path::new("/repo/worktree");
+        let git_directory = Path::new("/repo/common/worktrees/feature");
+        let common_directory = Path::new("/repo/common");
+        let classify = |path: &str| {
+            classify_repository_path(root, git_directory, common_directory, Path::new(path))
+        };
+
+        assert_eq!(
+            classify("/repo/common/worktrees/feature/HEAD"),
+            vec![
+                RepositoryInvalidation::Status,
+                RepositoryInvalidation::History,
+            ]
+        );
+        assert_eq!(
+            classify("/repo/common/refs/heads/main"),
+            vec![RepositoryInvalidation::History]
+        );
+        assert_eq!(
+            classify("/repo/common/refs/stash"),
+            vec![
+                RepositoryInvalidation::Status,
+                RepositoryInvalidation::History,
+                RepositoryInvalidation::Stash,
+            ]
+        );
+        assert_eq!(
+            classify("/repo/common/worktrees/feature/MERGE_HEAD"),
+            vec![
+                RepositoryInvalidation::Status,
+                RepositoryInvalidation::Operation,
+            ]
+        );
+        assert_eq!(
+            classify("/repo/common/config"),
+            vec![RepositoryInvalidation::Management]
+        );
+        assert_eq!(
+            classify("/repo/common/worktrees/another/HEAD"),
+            vec![RepositoryInvalidation::Management]
+        );
+    }
+
+    #[test]
+    fn watcher_emits_one_status_refresh_without_reacting_to_git_queries() {
+        let fixture = TempDir::new().expect("fixture");
+        let repository = fixture.path().canonicalize().expect("canonical repository");
+        let init = std::process::Command::new("git")
+            .args(["init", "--initial-branch=main"])
+            .current_dir(&repository)
+            .output()
+            .expect("initialize repository");
+        assert!(init.status.success());
+        let record = RepositoryRecord {
+            path: repository.clone(),
+            git_directory: repository.join(".git"),
+            common_directory: repository.join(".git"),
+            operation_lock: Arc::new(AsyncMutex::new(())),
+        };
+        let (sender, receiver) = std_mpsc::channel();
+        let _watcher = create_repository_watcher(&record, move |invalidations| {
+            sender.send(invalidations).expect("send invalidations");
+        })
+        .expect("create watcher");
+
+        std::thread::sleep(StdDuration::from_millis(100));
+        fs::write(repository.join("run.sh"), "echo changed\n").expect("write worktree file");
+        assert_eq!(
+            receiver
+                .recv_timeout(StdDuration::from_secs(3))
+                .expect("status invalidation"),
+            vec![RepositoryInvalidation::Status]
+        );
+        assert!(receiver.try_recv().is_err());
+
+        let status = std::process::Command::new("git")
+            .args(["status", "--porcelain=v2", "-z"])
+            .current_dir(&repository)
+            .env("GIT_OPTIONAL_LOCKS", "0")
+            .output()
+            .expect("query status");
+        assert!(status.status.success());
+        assert!(
+            receiver
+                .recv_timeout(StdDuration::from_millis(600))
+                .is_err()
+        );
     }
 
     #[test]
@@ -1546,6 +1849,19 @@ mod tests {
                 .expect("write operation input");
         }
         child.wait_with_output().await.expect("operation output")
+    }
+
+    async fn run_request(repo: &Path, request: GitRequest) -> std::process::Output {
+        let spec = command_for_request(&request).expect("build allowlisted request");
+        assert!(!spec.mutation);
+        Command::new("git")
+            .args(spec.args)
+            .current_dir(repo)
+            .envs(spec.env)
+            .stdin(Stdio::null())
+            .output()
+            .await
+            .expect("run request")
     }
 
     fn assert_success(output: &std::process::Output) {
@@ -1712,6 +2028,42 @@ mod tests {
             )
             .await,
         );
+        let stash_list = run_request(
+            &repo,
+            GitRequest::StashList {
+                repository_id: repository_id(),
+            },
+        )
+        .await;
+        assert_success(&stash_list);
+        assert!(String::from_utf8_lossy(&stash_list.stdout).contains("test stash"));
+        let stash_files = run_request(
+            &repo,
+            GitRequest::StashShow {
+                repository_id: repository_id(),
+                stash: "stash@{0}".into(),
+                mode: StashShowMode::Files,
+            },
+        )
+        .await;
+        assert_success(&stash_files);
+        assert!(
+            stash_files
+                .stdout
+                .windows(file.len())
+                .any(|value| value == file.as_bytes())
+        );
+        let stash_patch = run_request(
+            &repo,
+            GitRequest::StashShow {
+                repository_id: repository_id(),
+                stash: "stash@{0}".into(),
+                mode: StashShowMode::Patch,
+            },
+        )
+        .await;
+        assert_success(&stash_patch);
+        assert!(String::from_utf8_lossy(&stash_patch.stdout).contains("+stashed"));
         assert_success(
             &run_operation(
                 &repo,
