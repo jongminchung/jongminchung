@@ -11,6 +11,9 @@ describe("first Git Client release verification", () => {
     expect(parseVerificationArguments(["--confirm", "git-client-1.0.0"])).toEqual({
       confirmation: "git-client-1.0.0",
     });
+    expect(parseVerificationArguments(["--", "--confirm", "git-client-1.0.0"])).toEqual({
+      confirmation: "git-client-1.0.0",
+    });
     expect(() => parseVerificationArguments([])).toThrow("--confirm git-client-1.0.0");
   });
 

@@ -25,7 +25,12 @@ const activeWorkflowStatuses = new Set([
 ]);
 
 export function parseVerificationArguments(arguments_) {
-  if (arguments_.length !== 2 || arguments_[0] !== "--confirm" || arguments_[1] !== confirmation) {
+  const normalizedArguments = arguments_.filter((argument) => argument !== "--");
+  if (
+    normalizedArguments.length !== 2 ||
+    normalizedArguments[0] !== "--confirm" ||
+    normalizedArguments[1] !== confirmation
+  ) {
     throw new Error(`Pass --confirm ${confirmation} to recreate the public first release`);
   }
   return { confirmation };
