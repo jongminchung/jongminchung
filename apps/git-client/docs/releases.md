@@ -1,0 +1,137 @@
+# GitHub Release 배포 가이드
+
+Git Client는 GitHub Releases에서 직접 내려받는 macOS DMG로 배포한다. 인앱 자동 업데이트, Tauri Updater 서명 키, `latest.json`은 사용하지 않는다.
+
+## 지원 범위
+
+- macOS 13 이상
+- Apple Silicon ARM64
+- unsigned DMG
+
+Intel Mac, Windows, Linux와 Apple Developer ID 서명·공증은 현재 배포 범위에 포함하지 않는다.
+
+## 다운로드와 checksum 검증
+
+1. [GitHub Releases](https://github.com/jongminchung/jongminchung/releases)에서 같은 버전의 파일 두 개를 내려받는다.
+   - `Git-Client_<version>_macos_aarch64.dmg`
+   - `Git-Client_<version>_macos_aarch64.dmg.sha256`
+2. 두 파일이 있는 디렉터리에서 checksum을 검증한다.
+
+```sh
+shasum -a 256 -c Git-Client_<version>_macos_aarch64.dmg.sha256
+```
+
+출력에 `OK`가 표시된 DMG만 연다. checksum이 일치하지 않으면 파일을 실행하지 말고 다시 내려받는다.
+
+## unsigned 앱 열기
+
+현재 DMG는 Developer ID 서명과 Apple 공증을 하지 않으므로 macOS Gatekeeper가 첫 실행을 차단할 수 있다. 출처와 checksum을 확인한 뒤 다음 절차를 사용한다.
+
+1. DMG를 열어 Git Client를 Applications 폴더로 옮긴다.
+2. Git Client를 한 번 실행해 macOS 경고를 확인한다.
+3. 시스템 설정에서 **개인정보 보호 및 보안**을 연다.
+4. 보안 영역의 **그래도 열기**를 누르고 다시 **열기**를 선택한다.
+
+이 예외는 해당 앱에 저장된다. 자세한 보안 의미와 최신 절차는 [Apple의 Mac에서 앱 안전하게 열기](https://support.apple.com/ko-kr/102445)를 따른다.
+
+## 자동 릴리스 규칙
+
+`main`에 Git Client 또는 Git Client가 사용하는 workspace package 변경이 병합되고 전체 검증이 통과하면 Nx Release가 다음 버전과 릴리스 노트를 계산한다. 실제 GitHub 게시와 asset 업로드는 `gh` CLI가 담당한다.
+
+| 항목          | 규칙                                                  |
+| ------------- | ----------------------------------------------------- |
+| 분석 범위     | `@jongminchung/git-client`의 Nx affected graph        |
+| 릴리스 브랜치 | `main`                                                |
+| 태그          | `git-client-${version}`                               |
+| 제목          | `Git Client <version>`                                |
+| 최초 버전     | `1.0.0`                                               |
+| 게시 상태     | 검증된 draft를 Draft가 아닌 공개 Release로 전환       |
+| 배포 파일     | ARM64 DMG와 SHA-256 checksum                          |
+| 미사용 기능   | npm publish, release commit, Nx Git tag, updater 서명 |
+
+`feat`는 minor, `fix`와 `perf`는 patch, `BREAKING CHANGE`는 major 버전을 만든다. `docs`, `test`, `chore`, `ci`, `refactor`만 있는 변경은 독립적으로 새 버전을 만들지 않는다. 커밋 scope가 아니라 실제 변경 파일과 Nx project graph를 기준으로 판정한다.
+
+예시는 다음과 같다.
+
+```text
+feat(git-client): add commit search
+fix(git-client): preserve selection after refresh
+perf(git-client): reduce graph rendering work
+```
+
+Git Client가 의존하는 workspace package의 커밋은 dependency-aware renderer가 릴리스 노트에 포함한다. 다른 앱과 무관한 package의 커밋은 제외한다. root 파일이나 lockfile을 변경한 커밋은 `nx show projects --affected` 결과에서 Git Client가 실제로 영향받은 경우에만 포함한다. 이 과정에서 앱 전용 `git diff-tree`나 경로 파서를 사용하지 않는다.
+
+Nx fixed group은 첫 changelog 기준을 저장소 최초 커밋으로 잡으므로 과거 다른 앱 변경이 섞일 수 있다. 이를 방지하기 위해 `1.0.0` 노트는 `Initial Git Client release.`로 고정하고 `1.0.0` 이후부터 Nx가 태그 사이의 프로젝트별 노트를 생성한다.
+
+## GitHub Actions 흐름
+
+`.github/workflows/git-client.yml`은 다음 순서로 동작한다.
+
+1. 모든 PR과 `main` push에서 Nx affected project를 계산한다.
+2. Git Client가 영향받지 않았으면 나머지 Git Client job을 생략한다.
+3. 영향받았으면 format, lint, typecheck, Vitest와 프런트엔드 build를 실행한다.
+4. Rust fmt, clippy, test, binding drift, Playwright와 unsigned Tauri app/DMG build를 실행한다.
+5. `main` push이거나 명시적인 최초 릴리스 재현 dispatch일 때만 Nx dry-run으로 다음 버전을 계산한다.
+6. 버전을 Tauri config overlay로 주입해 ARM64 DMG와 checksum을 만든다.
+7. 정확한 태그·제목·노트·asset을 가진 draft Release를 만들고 검증한 뒤 공개한다.
+
+동시에 들어온 `main` push는 직렬화한다. CI는 내장 `GITHUB_TOKEN`을 현재 step의 `GH_TOKEN`으로 매핑하며 `contents: write` 외에 updater 또는 Apple 서명 secret을 읽지 않는다.
+
+## 로컬 검증
+
+일반 앱 build는 다음 명령으로 확인한다.
+
+```sh
+pnpm --filter @jongminchung/git-client exec tauri build \
+  --ci \
+  --no-sign \
+  --bundles app,dmg
+```
+
+Apple Silicon Mac에서 릴리스 staging까지 재현하려면 버전을 명시한다.
+
+```sh
+pnpm --filter @jongminchung/git-client release:build -- 1.0.0
+```
+
+결과는 `apps/git-client/release-artifacts`에 만들어진다. 스크립트는 stable SemVer, macOS ARM64, 단일 DMG와 75MiB 크기 제한을 확인하고, DMG를 다시 마운트해 앱 버전과 단일 `arm64` 실행 파일까지 검증한 뒤 checksum을 게시 대상으로 넘긴다.
+
+현재 태그와 Git 이력을 기준으로 버전과 노트만 확인할 때는 토큰이 필요 없다. Nx version 단계도 dry-run이므로 source manifest와 lockfile을 수정하지 않는다.
+
+```sh
+pnpm --filter @jongminchung/git-client release:dry-run
+```
+
+로컬에서 실제 게시 스크립트를 실행해야 한다면 repository contents 쓰기 권한이 있는 PAT를 현재 shell의 `GH_PAT`에 secret manager로 주입한다. 스크립트는 자식 `gh` 프로세스에만 `GH_TOKEN`으로 전달한다.
+
+```sh
+GH_PAT='<token>' pnpm --filter @jongminchung/git-client release
+```
+
+## 최초 1.0.0 멱등 재현
+
+이 검증은 공개 `git-client-1.0.0` Release와 태그를 삭제하고 같은 `origin/main` SHA에서 다시 만든다. `main` branch를 force-push하거나 커밋을 변경하지 않는다. `1.0.0`보다 새로운 Git Client 태그, 실행 중인 workflow, 다른 origin 또는 로컬/원격 SHA 불일치가 있으면 중단한다.
+
+```sh
+GH_PAT='<token>' pnpm --filter @jongminchung/git-client release:verify-first -- \
+  --confirm git-client-1.0.0
+```
+
+스크립트는 workflow 완료 후 다음 항목을 확인한다.
+
+- 태그가 정확히 `origin/main` SHA를 가리킴
+- 제목이 `Git Client 1.0.0`이고 공개 상태임
+- DMG와 checksum 외 asset이 없음
+- 재다운로드한 checksum이 일치함
+- DMG가 75MiB 이하이고 앱 버전이 `1.0.0`임
+- 앱 실행 파일 아키텍처가 `arm64` 하나뿐임
+
+동일 명령을 두 번 연속 실행해 삭제·dispatch·재생성·검증이 반복 가능함을 확인한다.
+
+## 게시 후 확인
+
+- 태그가 `git-client-<version>`인지 확인한다.
+- 제목이 `Git Client <version>`인지 확인한다.
+- Release가 Draft가 아니며 DMG와 checksum을 모두 포함하는지 확인한다.
+- 공개 Release에서 파일을 다시 내려받아 checksum 검증을 수행한다.
+- 깨끗한 macOS 사용자 환경에서 DMG mount, Applications 복사와 Gatekeeper 절차를 확인한다.

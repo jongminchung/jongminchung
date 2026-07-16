@@ -1,0 +1,104 @@
+:root {
+  color-scheme: light;
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  --font-mono: "SFMono-Regular", "SF Mono", Menlo, Consolas, monospace;
+  --bg: #f5f4f7;
+  --surface: #fbfafc;
+  --surface-raised: #ffffff;
+  --surface-sunken: #efedf2;
+  --text: #292632;
+  --text-muted: #77727f;
+  --text-faint: #aaa5b0;
+  --border: #dedbe3;
+  --border-strong: #c9c4d0;
+  --selection: #dfdaf5;
+  --selection-strong: #cfc6f2;
+  --violet: #715bd1;
+  --violet-dark: #5542b3;
+  --mint: #2f9c74;
+  --coral: #cf624f;
+  --blue: #3e86b7;
+  --shadow: 0 16px 44px rgb(24 20 35 / 18%), 0 3px 12px rgb(24 20 35 / 12%);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #1d1b23;
+  --surface: #24222b;
+  --surface-raised: #2b2933;
+  --surface-sunken: #19171e;
+  --text: #e8e5ec;
+  --text-muted: #aaa5b2;
+  --text-faint: #706b79;
+  --border: #3b3843;
+  --border-strong: #514c5a;
+  --selection: #3d365c;
+  --selection-strong: #4c4177;
+  --violet: #9c8af0;
+  --violet-dark: #b2a4f4;
+  --mint: #69c89d;
+  --coral: #ed8a77;
+  --blue: #71add5;
+  --shadow: 0 16px 44px rgb(0 0 0 / 40%), 0 3px 12px rgb(0 0 0 / 30%);
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  -webkit-font-smoothing: antialiased;
+}
+button,
+input,
+textarea,
+select {
+  color: inherit;
+  font: inherit;
+}
+button {
+  border: 0;
+  cursor: default;
+}
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--violet) 65%, transparent);
+  outline-offset: -2px;
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.38;
+}
+code,
+pre,
+kbd {
+  font-family: var(--font-mono);
+}
+::selection {
+  background: var(--selection-strong);
+}
+::-webkit-scrollbar {
+  height: 11px;
+  width: 11px;
+}
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--text-muted) 45%, transparent);
+  background-clip: padding-box;
+  border: 3px solid transparent;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}

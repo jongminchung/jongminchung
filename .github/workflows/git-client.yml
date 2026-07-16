@@ -1,0 +1,127 @@
+name: Git Client
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      recreate_first_release:
+        description: Recreate and publish git-client-1.0.0 after external preflight checks
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: git-client-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  affected:
+    runs-on: ubuntu-latest
+    outputs:
+      git_client: ${{ steps.scope.outputs.git_client }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - id: scope
+        name: Detect affected Git Client project
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "git_client=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          base="$BASE_SHA"
+          if [[ -z "$base" || "$base" == "0000000000000000000000000000000000000000" ]]; then
+            base="$(git rev-list --max-parents=0 "$HEAD_SHA")"
+          fi
+
+          if pnpm exec nx show projects --affected --base="$base" --head="$HEAD_SHA" | grep -Fxq '@jongminchung/git-client'; then
+            echo "git_client=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "git_client=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  verify:
+    if: needs.affected.outputs.git_client == 'true'
+    needs: affected
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: pnpm
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy,rustfmt
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/git-client/src-tauri
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec oxfmt --config .oxfmtrc.mjs --check apps/git-client nx.json '!apps/git-client/src/generated/**' '!apps/git-client/src-tauri/gen/**'
+      - run: pnpm exec oxlint apps/git-client/src apps/git-client/tests apps/git-client/scripts
+      - run: pnpm --filter @jongminchung/git-client typecheck
+      - run: pnpm --filter @jongminchung/git-client test
+      - run: pnpm --filter @jongminchung/git-client build
+      - run: cargo fmt --manifest-path apps/git-client/src-tauri/Cargo.toml --check
+      - run: cargo clippy --manifest-path apps/git-client/src-tauri/Cargo.toml --all-targets -- -D warnings
+      - run: cargo test --manifest-path apps/git-client/src-tauri/Cargo.toml
+      - name: Verify generated TypeScript bindings
+        run: git diff --exit-code -- apps/git-client/src/generated
+      - run: pnpm --filter @jongminchung/git-client exec playwright install chromium
+      - run: pnpm --filter @jongminchung/git-client test:e2e
+      - run: pnpm --filter @jongminchung/git-client exec tauri build --ci --no-sign --bundles app,dmg
+      - name: Enforce app bundle size
+        run: |
+          size_mb=$(du -sm apps/git-client/src-tauri/target/release/bundle/macos/*.app | awk '{print $1}')
+          test "$size_mb" -le 75
+      - uses: actions/upload-artifact@v4
+        with:
+          name: git-client-macos-arm64
+          path: |
+            apps/git-client/src-tauri/target/release/bundle/macos/*.app
+            apps/git-client/src-tauri/target/release/bundle/dmg/*.dmg
+
+  release:
+    if: >-
+      needs.affected.outputs.git_client == 'true' &&
+      ((github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && inputs.recreate_first_release))
+    needs: [affected, verify]
+    runs-on: macos-15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: pnpm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/git-client/src-tauri
+      - run: pnpm install --frozen-lockfile
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm --filter @jongminchung/git-client release

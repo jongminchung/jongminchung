@@ -12,6 +12,8 @@ playwright-report/
 .env*
 
 **/dist/
+**/release-artifacts/
+**/target/
 *.tsbuildinfo
 
 .DS_STORE

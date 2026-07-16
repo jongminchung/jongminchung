@@ -1,0 +1,80 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "extends": "nx/presets/npm.json",
+  "defaultBase": "main",
+  "pluginsConfig": {
+    "@nx/js": {
+      "projectsAffectedByDependencyUpdates": "auto"
+    }
+  },
+  "release": {
+    "conventionalCommits": {
+      "useCommitScope": false,
+      "types": {
+        "feat": {
+          "semverBump": "minor",
+          "changelog": {
+            "title": "Features"
+          }
+        },
+        "fix": {
+          "semverBump": "patch",
+          "changelog": {
+            "title": "Bug Fixes"
+          }
+        },
+        "perf": {
+          "semverBump": "patch",
+          "changelog": {
+            "title": "Performance Improvements"
+          }
+        }
+      }
+    },
+    "version": {
+      "git": {
+        "commit": false,
+        "push": false,
+        "stageChanges": false,
+        "tag": false
+      }
+    },
+    "changelog": {
+      "git": {
+        "commit": false,
+        "push": false,
+        "stageChanges": false,
+        "tag": false
+      },
+      "workspaceChangelog": false
+    },
+    "groups": {
+      "git-client": {
+        "projects": ["@jongminchung/git-client"],
+        "projectsRelationship": "fixed",
+        "releaseTag": {
+          "pattern": "git-client-{version}",
+          "requireSemver": true
+        },
+        "version": {
+          "adjustSemverBumpsForZeroMajorVersion": false,
+          "currentVersionResolver": "git-tag",
+          "fallbackCurrentVersionResolver": "disk",
+          "specifierSource": "conventional-commits",
+          "versionActionsOptions": {
+            "skipLockFileUpdate": true
+          }
+        },
+        "changelog": {
+          "createRelease": false,
+          "entryWhenNoChanges": false,
+          "file": false,
+          "renderOptions": {
+            "authors": false,
+            "versionTitleDate": false
+          }
+        }
+      }
+    }
+  }
+}

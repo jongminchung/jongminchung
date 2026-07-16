@@ -6,6 +6,7 @@ export default defineOxfmtConfig({
     "**/.wxt/",
     "apps/docs/generated/",
     "apps/docs/public/search/",
+    "apps/git-client/src-tauri/gen/",
     "playwright-report/",
     "test-results/",
   ],

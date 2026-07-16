@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "libReplacement": false,
+    "noUncheckedSideEffectImports": true,
+    "rootDir": ".",
+    "types": ["vite/client", "node", "react", "react-dom"]
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "tests/**/*.ts",
+    "playwright.config.ts",
+    "vite.config.ts"
+  ]
+}
