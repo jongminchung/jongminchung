@@ -54,5 +54,15 @@
     "typescript": "catalog:",
     "vite": "catalog:",
     "vitest": "catalog:"
+  },
+  "nx": {
+    "targets": {
+      "release": {
+        "inputs": [
+          "{projectRoot}/**/*",
+          "{workspaceRoot}/.github/workflows/git-client.yml"
+        ]
+      }
+    }
   }
 }

@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 const nxConfig = JSON.parse(readFileSync(new URL("../../../nx.json", import.meta.url), "utf8"));
+const packageConfig = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 
 describe("Nx release configuration", () => {
   it("isolates Git Client in a fixed release group", () => {
@@ -47,5 +48,12 @@ describe("Nx release configuration", () => {
       createRelease: false,
       file: false,
     });
+  });
+
+  it("treats changes to the Git Client workflow as affecting only its release target", () => {
+    expect(packageConfig.nx.targets.release.inputs).toEqual([
+      "{projectRoot}/**/*",
+      "{workspaceRoot}/.github/workflows/git-client.yml",
+    ]);
   });
 });
