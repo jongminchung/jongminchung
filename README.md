@@ -55,11 +55,11 @@ pnpm run publish:dry-run
 
 ```text
 💬 Programming Languages: 
-Java                     6 hrs 32 mins       ██████░░░░░░░░░░░░░░░░░░░   22.56 % 
-YAML                     5 hrs 18 mins       █████░░░░░░░░░░░░░░░░░░░░   18.31 % 
-TypeScript               4 hrs 49 mins       ████░░░░░░░░░░░░░░░░░░░░░   16.64 % 
-JSON                     3 hrs 1 min         ███░░░░░░░░░░░░░░░░░░░░░░   10.44 % 
-Markdown                 2 hrs 12 mins       ██░░░░░░░░░░░░░░░░░░░░░░░   07.63 % 
+Java                     6 hrs 32 mins       ██████░░░░░░░░░░░░░░░░░░░   22.58 % 
+YAML                     5 hrs 14 mins       █████░░░░░░░░░░░░░░░░░░░░   18.10 % 
+TypeScript               4 hrs 55 mins       ████░░░░░░░░░░░░░░░░░░░░░   17.01 % 
+JSON                     2 hrs 58 mins       ███░░░░░░░░░░░░░░░░░░░░░░   10.29 % 
+Markdown                 2 hrs 16 mins       ██░░░░░░░░░░░░░░░░░░░░░░░   07.84 % 
 ```
 
 
