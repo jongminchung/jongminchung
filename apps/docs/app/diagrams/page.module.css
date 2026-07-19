@@ -1,0 +1,98 @@
+.page {
+  width: min(880px, 100%);
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: clamp(48px, 8vw, 96px) clamp(20px, 5vw, 48px);
+  background: var(--color-background-card);
+}
+
+.header {
+  margin-bottom: 32px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--color-text-secondary);
+  font-family: var(--font-dm-mono), monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-inter-tight), sans-serif;
+  font-size: clamp(32px, 6vw, 52px);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.list {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-background-surface);
+}
+
+.diagramLink {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-text-primary);
+  font-family: var(--font-dm-mono), monospace;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.diagramLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.download {
+  flex: none;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.download:hover {
+  color: var(--color-text-primary);
+}
+
+.diagramLink:focus-visible,
+.download:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid currentcolor;
+  outline-offset: 4px;
+}
+
+.empty {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 520px) {
+  .item {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+}

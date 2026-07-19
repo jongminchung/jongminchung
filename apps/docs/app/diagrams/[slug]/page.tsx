@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ExcalidrawDiagram } from "@/components/ExcalidrawDiagram";
 import {
@@ -38,6 +39,9 @@ export default async function StandaloneExcalidrawPage({
   return (
     <main className={styles.page}>
       <header className={styles.header}>
+        <Link aria-label="All diagrams" className={styles.backLink} href="/diagrams">
+          Diagrams
+        </Link>
         <h1 className={styles.title}>{asset.filename}</h1>
       </header>
       <div className={styles.viewer}>

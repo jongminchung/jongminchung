@@ -12,9 +12,29 @@
   display: flex;
   min-height: 52px;
   align-items: center;
+  gap: 12px;
   padding: 8px 16px;
   border-bottom: 1px solid var(--color-border);
   background: var(--color-background-surface);
+}
+
+.backLink {
+  flex: none;
+  padding-right: 12px;
+  border-right: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.backLink:hover {
+  color: var(--color-text-primary);
+}
+
+.backLink:focus-visible {
+  border-radius: 2px;
+  outline: 2px solid currentcolor;
+  outline-offset: 4px;
 }
 
 .title {

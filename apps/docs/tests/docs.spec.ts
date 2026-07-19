@@ -4,6 +4,30 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { parseExcalidrawSource } from "../lib/excalidraw-scene";
 
+test("diagram index discovers standalone Excalidraw sources", async ({ page }) => {
+  await page.goto("/diagrams");
+
+  await expect(page.getByRole("heading", { level: 1, name: "Diagrams" })).toBeVisible();
+  const diagramLink = page.getByRole("link", { name: "operating-system.excalidraw", exact: true });
+  await expect(diagramLink).toHaveAttribute("href", "/diagrams/operating-system");
+  await expect(
+    page.getByRole("link", { name: "Download operating-system.excalidraw" }),
+  ).toHaveAttribute("href", "/diagrams/operating-system.excalidraw");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+  await page.setViewportSize({ width: 1280, height: 800 });
+
+  await diagramLink.focus();
+  await expect(diagramLink).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/\/diagrams\/operating-system$/u);
+  await expect(page.locator('figure[aria-label="operating-system.excalidraw"]')).toHaveAttribute(
+    "data-excalidraw-state",
+    "ready",
+    { timeout: 20_000 },
+  );
+});
+
 test("standalone Excalidraw files render from one source without document chrome", async ({
   page,
   request,
@@ -17,6 +41,10 @@ test("standalone Excalidraw files render from one source without document chrome
   await expect(
     page.getByRole("heading", { level: 1, name: "operating-system.excalidraw" }),
   ).toBeVisible();
+  await expect(page.getByRole("link", { name: "All diagrams" })).toHaveAttribute(
+    "href",
+    "/diagrams",
+  );
   await expect(page.getByRole("navigation", { name: "All documentation" })).toHaveCount(0);
 
   const diagram = page.locator('figure[aria-label="operating-system.excalidraw"]');
@@ -474,6 +502,7 @@ test("representative pages have no Axe violations or console warnings", async ({
   });
 
   for (const path of [
+    "/diagrams",
     "/diagrams/operating-system",
     "/en/handbook/ddd",
     "/en/packages/remark-plantuml",
