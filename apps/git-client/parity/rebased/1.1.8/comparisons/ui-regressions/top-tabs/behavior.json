@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "candidate": "Electron 43.1.1 packaged macOS ARM64 app",
+  "assertions": {
+    "workspaceTabTextLegible": true,
+    "repositoryTabTextLegible": true,
+    "labelsNotOverlapping": true,
+    "activeTabDistinguishable": true
+  },
+  "scope": "Candidate regression validation through Computer Use",
+  "rebasedReferenceComparison": "pending",
+  "evidence": [
+    "candidate-electron-43.1.1.jpeg",
+    "candidate.ax.json"
+  ]
+}

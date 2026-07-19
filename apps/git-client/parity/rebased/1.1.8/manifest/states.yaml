@@ -1,0 +1,30 @@
+schemaVersion: 1
+repository:
+  - no-project
+  - unborn
+  - clean
+  - dirty
+  - staged
+  - partially-staged
+  - untracked
+  - shallow
+  - submodule
+  - multiple-worktrees
+  - stale-worktree
+selection: [none, single, multiple]
+reference: [current-branch, local-branch, remote-branch, tag, detached-head]
+sync: [no-remote, ahead, behind, diverged]
+operation:
+  - idle
+  - merge-conflict
+  - rebase-conflict
+  - cherry-pick-conflict
+  - revert-conflict
+account: [none, authenticated, expired, offline, server-error]
+appearance:
+  themes: [islands-light, islands-dark, islands-darcula, high-contrast]
+  density: [regular, compact]
+  zoomPercent: [100, 125, 150]
+  window: [minimum, canonical-1184x768, large-1440x900]
+  activation: [active, inactive]
+async: [empty, loading, populated, error, cancelled]

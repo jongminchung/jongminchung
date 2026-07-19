@@ -1,0 +1,66 @@
+import type { ITheme } from "@xterm/xterm";
+import type { ColorScheme } from "./appearance";
+
+const TERMINAL_THEMES = {
+  light: {
+    background: "#ffffff",
+    foreground: "#1f2329",
+    cursor: "#315fba",
+    cursorAccent: "#ffffff",
+    selectionBackground: "#d8e4ff",
+    selectionForeground: "#20201e",
+    selectionInactiveBackground: "#e8eefc",
+    scrollbarSliderBackground: "#96968e55",
+    scrollbarSliderHoverBackground: "#6f6f6888",
+    scrollbarSliderActiveBackground: "#6f6f68aa",
+    black: "#20201e",
+    red: "#c2413b",
+    green: "#27845e",
+    yellow: "#a16207",
+    blue: "#2563eb",
+    magenta: "#7c3aed",
+    cyan: "#0e7490",
+    white: "#f0f0ed",
+    brightBlack: "#6f6f68",
+    brightRed: "#dc2626",
+    brightGreen: "#16a34a",
+    brightYellow: "#ca8a04",
+    brightBlue: "#3b82f6",
+    brightMagenta: "#9333ea",
+    brightCyan: "#0891b2",
+    brightWhite: "#ffffff",
+  },
+  dark: {
+    // IslandSchemeDark.xml console and caret roles from Rebased 1.1.8.
+    background: "#191a1c",
+    foreground: "#bcbec4",
+    cursor: "#ced0d6",
+    cursorAccent: "#191a1c",
+    selectionBackground: "#31466d",
+    selectionForeground: "#f3f3ef",
+    selectionInactiveBackground: "#283650",
+    scrollbarSliderBackground: "#77776f66",
+    scrollbarSliderHoverBackground: "#aaa9a188",
+    scrollbarSliderActiveBackground: "#aaa9a1aa",
+    black: "#141413",
+    red: "#f75464",
+    green: "#6aab73",
+    yellow: "#e1aa53",
+    blue: "#6e9fff",
+    magenta: "#c4a7e7",
+    cyan: "#67c9d4",
+    white: "#d6d6d0",
+    brightBlack: "#77776f",
+    brightRed: "#ff9a91",
+    brightGreen: "#82d5a6",
+    brightYellow: "#f2c66d",
+    brightBlue: "#8bb2ff",
+    brightMagenta: "#d7baf5",
+    brightCyan: "#86dce5",
+    brightWhite: "#ffffff",
+  },
+} as const satisfies Readonly<Record<ColorScheme, Readonly<ITheme>>>;
+
+export function terminalThemeFor(colorScheme: ColorScheme): ITheme {
+  return { ...TERMINAL_THEMES[colorScheme] };
+}

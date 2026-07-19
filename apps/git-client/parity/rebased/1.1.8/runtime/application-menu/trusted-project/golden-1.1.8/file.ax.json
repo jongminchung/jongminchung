@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-19T04:29:03.175Z",
+  "reference": {
+    "product": "Rebased",
+    "version": "1.1.8",
+    "build": "IC-262.8665.SNAPSHOT",
+    "artifactSha256": "fd3bc8bd7f80be16294d424b25ca390ceb13960bba33422dfa8ac4632c3412c0"
+  },
+  "execution": {
+    "profile": "/private/tmp/rebased-1.1.8-profile",
+    "repository": "/private/tmp/rebased-parity-1.1.8.TPwGXl/reference",
+    "trusted": true,
+    "testBundleId": "io.github.detachhead.rebased.goldenstable118"
+  },
+  "normalization": {
+    "appName": "Rebased Golden Stable 1.1.8 is a Computer Use harness bundle name; normalize only generated macOS app-name labels to Rebased."
+  },
+  "menu": "file",
+  "state": "Window: \"reference\", App: Rebased Golden Stable 1.1.8.\n0 File, ID: handleAction:, Secondary Actions: Cancel, Pick\n\t1 메뉴 Secondary Actions: Cancel\n\t\t2 New, ID: handleAction:\n\t\t\t3 메뉴 Secondary Actions: Cancel\n\t\t\t\t4 Project from Version Control…, ID: handleAction:\n\t\t\t\t5 New Project, ID: handleAction:\n\t\t\t\t6 Scratch File, ID: handleAction:\n\t\t7 Open…, ID: handleAction:\n\t\t8 Recent Projects, ID: handleAction:\n\t\t\t9 메뉴 Secondary Actions: Cancel\n\t\t\t\t10 Manage Projects…, ID: handleAction:\n\t\t11 Close Project, ID: handleAction:\n\t\t12 File Properties, ID: handleAction:\n\t\t\t13 메뉴 Secondary Actions: Cancel\n\t\t\t\t14 (disabled) Remove BOM, ID: handleAction:\n\t\t\t\t15 (disabled) Add BOM, ID: handleAction:\n\t\t\t\t16 (disabled) Associate with File Type…, ID: handleAction:\n\t\t17 Local History, ID: handleAction:\n\t\t\t18 메뉴 Secondary Actions: Cancel\n\t\t\t\t19 (disabled) Show History…, ID: handleAction:\n\t\t\t\t20 Show Project History…, ID: handleAction:\n\t\t\t\t21 Recent Changes, ID: handleAction:\n\t\t\t\t22 Put Label…, ID: handleAction:\n\t\t23 Save All, ID: handleAction:\n\t\t24 Reload All from Disk, ID: handleAction:\n\t\t25 Repair IDE, ID: handleAction:\n\t\t26 Invalidate Caches…, ID: handleAction:\n\t\t27 Manage IDE Settings, ID: handleAction:\n\t\t\t28 메뉴 Secondary Actions: Cancel\n\t\t\t\t29 Import Settings…, ID: handleAction:\n\t\t\t\t30 Export Settings…, ID: handleAction:\n\t\t\t\t31 Restore Default Settings…, ID: handleAction:\n\t\t\t\t32 Backup and Sync…, ID: handleAction:\n\t\t33 New Projects Setup, ID: handleAction:\n\t\t\t34 메뉴 Secondary Actions: Cancel\n\t\t\t\t35 Settings for New Projects…, ID: handleAction:\n\t\t\t\t36 Run Configuration Templates…, ID: handleAction:\n\t\t37 (disabled) Save File as Template…, ID: handleAction:\n\t\t38 Export, ID: handleAction:\n\t\t\t39 메뉴 Secondary Actions: Cancel\n\t\t\t\t40 Files or Selection to HTML…, ID: handleAction:\n\t\t41 (disabled) Print…, ID: handleAction:\n\t\t42 Power Save Mode, ID: handleAction:\n"
+}

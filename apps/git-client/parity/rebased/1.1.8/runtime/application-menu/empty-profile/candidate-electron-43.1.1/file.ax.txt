@@ -1,0 +1,43 @@
+Window: "Git Client", App: Git Client.
+0 File, Secondary Actions: Cancel, Pick
+	1 메뉴 Secondary Actions: Cancel
+		2 New
+			3 메뉴 Secondary Actions: Cancel
+				4 Project from Version Control…, ID: itemSelected:
+				5 (disabled) New Project, ID: itemSelected:
+				6 (disabled) Scratch File, ID: itemSelected:
+		7 Open…, ID: itemSelected:
+		8 Recent Projects
+			9 메뉴 Secondary Actions: Cancel
+				10 (disabled) Manage Projects…, ID: itemSelected:
+		11 (disabled) Close Project, ID: itemSelected:
+		12 File Properties
+			13 메뉴 Secondary Actions: Cancel
+				14 (disabled) Remove BOM, ID: itemSelected:
+				15 (disabled) Add BOM, ID: itemSelected:
+				16 (disabled) Associate with File Type…, ID: itemSelected:
+		17 Local History
+			18 메뉴 Secondary Actions: Cancel
+				19 (disabled) Show History…, ID: itemSelected:
+				20 (disabled) Show Project History…, ID: itemSelected:
+				21 (disabled) Recent Changes, ID: itemSelected:
+				22 (disabled) Put Label…, ID: itemSelected:
+		23 (disabled) Save All, ID: itemSelected:
+		24 (disabled) Reload All from Disk, ID: itemSelected:
+		25 (disabled) Repair IDE, ID: itemSelected:
+		26 (disabled) Invalidate Caches…, ID: itemSelected:
+		27 Manage IDE Settings
+			28 메뉴 Secondary Actions: Cancel
+				29 (disabled) Import Settings…, ID: itemSelected:
+				30 (disabled) Export Settings…, ID: itemSelected:
+				31 (disabled) Restore Default Settings…, ID: itemSelected:
+		32 New Projects Setup
+			33 메뉴 Secondary Actions: Cancel
+				34 (disabled) Settings for New Projects…, ID: itemSelected:
+				35 (disabled) Run Configuration Templates…, ID: itemSelected:
+		36 (disabled) Save File as Template…, ID: itemSelected:
+		37 Export
+			38 메뉴 Secondary Actions: Cancel
+				39 (disabled) Files or Selection to HTML…, ID: itemSelected:
+		40 (disabled) Print…, ID: itemSelected:
+		41 (disabled) Power Save Mode, ID: itemSelected:

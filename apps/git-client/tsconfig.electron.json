@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ESNext"],
+    "module": "Preserve",
+    "moduleResolution": "bundler",
+    "rootDir": ".",
+    "types": ["node"]
+  },
+  "include": [
+    "electron/**/*.ts",
+    "src/shared/contracts/**/*.ts",
+    "forge.config.ts",
+    "forge.env.d.ts",
+    "vite.main.config.ts",
+    "vite.preload.config.ts",
+    "vite.renderer.config.ts",
+    "vite.utility.config.ts",
+    "vite.terminal.config.ts"
+  ]
+}

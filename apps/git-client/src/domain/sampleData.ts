@@ -1,4 +1,4 @@
-import type { RepositorySnapshot, ShelfEntry } from "../generated";
+import type { FileSource, RepositorySnapshot, ShelfEntry } from "../generated";
 import type { Commit, FileChange, Ref, RepositoryView, StashEntry, StatusModel } from "./types";
 
 const SUBJECTS = [
@@ -54,7 +54,7 @@ export const sampleRefs: readonly Ref[] = [
     kind: "local",
     current: true,
     upstream: "refs/remotes/origin/main",
-    tracking: "",
+    tracking: "[ahead 1]",
     subject: SUBJECTS[0],
     author: AUTHORS[0],
     timestamp: now,
@@ -153,7 +153,7 @@ export const sampleStatus: StatusModel = {
       deletions: 0,
     },
     {
-      path: "src-tauri/src/git.rs",
+      path: "electron/utility/git/git-service.ts",
       status: "modified",
       staged: false,
       worktree: true,
@@ -224,7 +224,7 @@ export const sampleCommitFiles: readonly FileChange[] = [
     deletions: 3,
   },
   {
-    path: "src-tauri/src/git.rs",
+    path: "electron/utility/git/git-service.ts",
     status: "added",
     staged: false,
     worktree: false,
@@ -232,7 +232,7 @@ export const sampleCommitFiles: readonly FileChange[] = [
     deletions: 0,
   },
   {
-    path: "src/styles/App.module.css",
+    path: "src/styles/tailwind.ts",
     status: "modified",
     staged: false,
     worktree: false,
@@ -267,6 +267,27 @@ index 9c3a912..21254b1 100644
 +  };
  }
 `;
+
+function fixtureSourceLabel(source: FileSource): string {
+  if (source.kind === "revision") return `revision ${source.revision.slice(0, 8)}`;
+  return source.kind === "index" ? "index" : "working tree";
+}
+
+/**
+ * QA fixtures model the same boundary as the native read_file command: complete
+ * file contents, never a patch. Keeping the source label in the document makes
+ * every HEAD/index/worktree or revision pair exercise a real semantic change.
+ */
+export function sampleFileContent(path: string, source: FileSource): string {
+  const label = fixtureSourceLabel(source);
+  if (path.endsWith(".md")) {
+    return `# ${path.split("/").at(-1) ?? path}\n\nPreviewed from **${label}**.\n\n- Semantic diff\n- Full-file content\n`;
+  }
+  if (path.endsWith(".rs")) {
+    return `pub fn preview_source() -> &'static str {\n    "${label}"\n}\n\npub fn exact_lease_required() -> bool {\n    true\n}\n`;
+  }
+  return `export interface SelectionContext {\n  readonly currentBranch: string | null;\n  readonly operationInProgress: boolean;\n}\n\nexport function deriveActionAvailability(context: SelectionContext) {\n  const canRewrite = Boolean(context.currentBranch) &&\n    !context.operationInProgress;\n  const source = "${label}";\n\n  return {\n    source,\n    reset: canRewrite,\n    interactiveRebase: canRewrite,\n  };\n}\n`;
+}
 
 export const sampleShelves: readonly ShelfEntry[] = [
   {

@@ -1,0 +1,91 @@
+Window: "reference", App: Rebased.
+0 표준 윈도우 reference, Secondary Actions: Raise
+	1 container (selectable) Description: Root Pane, Value: 0
+		2 텍스트 (selectable) Shortcuts conflicts
+		3 링크 (selectable)
+		4 스크롤 영역 (selectable) 0
+			5 텍스트 필드 (selectable, settable, string) Help: text/html, Description: Find Action… and 16 more shortcut conflict with macOS shortcuts. Modify these shortcuts or change macOS system settings., Value: 
+Find Action… and 16 more shortcut conflict with macOS shortcuts. Modify these shortcuts or change macOS system settings.
+				6 텍스트 필드 (selectable) text/html
+				7 텍스트 필드 (selectable) text/html
+				8 텍스트 필드 (selectable) text/html
+			9 스크롤 막대 (selectable)
+			10 스크롤 막대 (selectable)
+		11 링크 (selectable) Modify Shortcuts
+		12 링크 (selectable) Don't Show Again
+		13 링크 (selectable) More
+		14 container (selectable) 0
+			15 container (selectable) Description: Main Toolbar ⌥⇞, Value: 0
+				16 container (selectable) 0
+					17 버튼 (selectable) Description: Project: reference, menu, Help: /private/tmp/rebased-parity-1.1.8.TPwGXl/reference
+					18 container (selectable)
+				19 container (selectable)
+				20 container (selectable) 0
+					21 container (selectable)
+					22 버튼 (selectable) Search Everywhere
+					23 버튼 (selectable) IDE and Project Settings
+		24 container (selectable) Description: Local Tool Window, Value: 0
+			25 텍스트 (selectable) Terminal
+			26 텍스트 (selectable) Local
+			27 container (selectable) Description: Action Toolbar, Value: 0
+				28 버튼 (selectable) New Tab
+				29 버튼 (selectable) New Predefined Session
+			30 container (selectable) Description: Action Toolbar, Value: 0
+				31 버튼 (selectable) AI Agents
+				32 버튼 (selectable) Options
+				33 버튼 (selectable) Hide
+			34 container (selectable)
+			35 container (selectable)
+			36 스크롤 영역 (selectable) 0
+				37 container (selectable)
+				38 텍스트 (selectable)
+				39 스크롤 막대 (selectable)
+				40 스크롤 막대 (selectable)
+				41 container (selectable)
+				42 텍스트 엔트리 영역 (selectable, settable, string) Editor
+		43 container (selectable) Description: Left Toolbar, Value: 0
+			44 버튼 (selectable) Project
+			45 버튼 (selectable) More
+			46 버튼 (selectable) Terminal
+		47 container (selectable) Description: Right Toolbar, Value: 0
+			48 버튼 (selectable) Notifications
+			49 버튼 (selectable, disabled) More
+		50 container (selectable) Description: Status Bar, Value: 0
+			51 스크롤 영역 (selectable) 0
+				52 container (selectable) Description: Navigation Bar, Value: 0
+					53 버튼 (selectable) Project(name=reference, containerState=COMPONENT_CREATED, componentStore=/private/tmp/rebased-parity-1.1.8.TPwGXl/reference)
+				54 스크롤 막대 (selectable)
+				55 스크롤 막대 (selectable)
+			56 진행 과정 표시기 (selectable) Description: Background process, Help: Click to see all running processes, Value: 0
+				57 버튼 (selectable)
+				58 텍스트 (selectable)
+			59 버튼 (selectable)
+			60 버튼 (selectable)
+			61 버튼 (selectable) Go to Line
+			62 버튼 (selectable) Language Services Button
+			63 버튼 (selectable)
+			64 버튼 (selectable)
+			65 버튼 (selectable) Column selection mode
+			66 버튼 (selectable)
+				67 텍스트 (selectable)
+				68 버튼 (selectable)
+			69 버튼 (selectable)
+			70 버튼 (selectable) Make file read-only
+			71 버튼 (selectable) Description: IDE error occurred, Help: See details and submit report
+				72 이미지 (selectable)
+	73 닫기 버튼
+	74 전체 화면 버튼 Help: 이 버튼을 누르면 윈도우를 확대/축소합니다., Secondary Actions: 윈도우 확대/축소
+	75 최소화 버튼
+76 menu bar
+	77 Rebased
+	78 File, ID: handleAction:
+	79 Edit, ID: handleAction:
+	80 View, ID: handleAction:
+	81 Navigate, ID: handleAction:
+	82 Code, ID: handleAction:
+	83 Run, ID: handleAction:
+	84 Tools, ID: handleAction:
+	85 Window, ID: handleAction:
+	86 Help, ID: handleAction:
+
+The focused UI element is 42 텍스트 엔트리 영역 (selectable, settable, string) Editor

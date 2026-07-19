@@ -1,0 +1,47 @@
+Window: "Welcome to Rebased", App: Rebased Golden 1.1.8.
+0 표준 윈도우 Welcome to Rebased, Secondary Actions: Raise
+	1 이미지 (selectable)
+	2 텍스트 (selectable) Rebased
+	3 링크 (selectable) Copy About
+	4 텍스트 (selectable) 1.1.8
+	5 윤곽체 (selectable) Description: Welcome screen categories, Value: 0
+		6 row (selected) Description: Projects, Value: 0
+			7 JavaAxIgnore (selectable) 0
+				8 텍스트 (selectable) Projects
+		9 row (selected) Description: Customize, Value: 0
+			10 JavaAxIgnore (selectable) 0
+				11 텍스트 (selectable) Customize
+		12 row (selected) Description: Plugins, Value: 0
+			13 JavaAxIgnore (selectable) 0
+				14 텍스트 (selectable) Plugins
+				15 텍스트 (selectable)
+	16 container (selectable) Description: Action Toolbar, Value: 0
+		17 버튼 (selectable) Options Menu
+	18 텍스트 (selectable) Welcome to Rebased
+	19 텍스트 필드 (selectable, settable, string) Description: text/html, Value: 
+Create a new project to start from scratch.
+		20 텍스트 필드 (selectable) text/html
+		21 텍스트 필드 (selectable) text/html
+		22 텍스트 필드 (selectable) text/html
+	23 텍스트 필드 (selectable, settable, string) Description: text/html, Value: 
+Open existing project from disk or version control.
+		24 텍스트 필드 (selectable) text/html
+		25 텍스트 필드 (selectable) text/html
+		26 텍스트 필드 (selectable) text/html
+	27 container (selectable) Description: Action Toolbar, Value: 0
+		28 버튼 (selectable) New Project
+		29 텍스트 (selectable) New Project
+		30 버튼 (selectable) Open
+		31 텍스트 (selectable) Open
+		32 버튼 (selectable) Clone Repository
+		33 텍스트 (selectable) Clone Repository
+	34 container (selectable) Description: Action Toolbar, Value: 0
+		35 링크 (selectable) More Actions
+	36 container (selectable)
+	37 닫기 버튼
+	38 전체 화면 버튼 Help: 이 버튼을 누르면 윈도우를 확대/축소합니다., Secondary Actions: 윈도우 확대/축소
+	39 최소화 버튼
+	40 텍스트 Welcome to Rebased
+41 menu bar
+	42 Rebased Golden 1.1.8
+

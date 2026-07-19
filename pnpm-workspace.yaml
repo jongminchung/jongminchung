@@ -2,8 +2,20 @@ packages:
   - "apps/*"
   - "packages/*"
 
+hoistPattern:
+  - "*"
+
+overrides:
+  "@electron/rebuild": "4.2.0"
+  "extract-zip": "npm:@electron-internal/extract-zip@1.0.4"
+
 allowBuilds:
+  "@vscode/ripgrep": true
+  electron: true
   esbuild: true
+  fs-xattr: true
+  macos-alias: true
+  node-pty: true
   nx: true
   sharp: true
   spawn-sync: true
@@ -25,11 +37,6 @@ catalog:
   "@playwright/test": "1.61.1"
   "@nx/devkit": "23.1.0"
   "@nx/js": "23.1.0"
-  "@tauri-apps/api": "2.11.1"
-  "@tauri-apps/cli": "2.11.4"
-  "@tauri-apps/plugin-dialog": "2.7.1"
-  "@tauri-apps/plugin-opener": "2.5.4"
-  "@tauri-apps/plugin-store": "2.4.3"
   "@tailwindcss/postcss": "4.3.2"
   "@tanstack/react-virtual": "3.14.6"
   "@types/node": "26.1.0"
@@ -58,7 +65,12 @@ minimumReleaseAgeExclude:
   - postcss@8.5.19
 
 onlyBuiltDependencies:
+  - "@vscode/ripgrep"
+  - "electron"
   - "esbuild"
+  - "fs-xattr"
+  - "macos-alias"
+  - "node-pty"
   - "nx"
   - "sharp"
   - "spawn-sync"

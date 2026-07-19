@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "referenceVersion": "1.1.8",
+  "complete": false,
+  "blockingGates": [
+    "source-to-runtime: 219/7260 resolved; 7041 unresolved",
+    "runtime-to-source: 14/22 mapped; actionable-node enumeration incomplete",
+    "GitBridge package verification: 14/43",
+    "GitBridge Rebased verification: 0/43",
+    "query and operation package scenario matrices are incomplete",
+    "application menus, context menus, dialogs, notifications, settings, editor/diff, Git mutation flows, and forge flows are not exhaustively captured",
+    "candidate-to-reference visual, AX, focus, behavior, and side-effect comparisons are incomplete",
+    "performance p95 comparison is pending",
+    "eight-hour soak is pending",
+    "Developer ID identity and notarization credentials are unavailable"
+  ],
+  "releaseDecision": "blocked",
+  "message": "Rebased 패리티 미완료"
+}

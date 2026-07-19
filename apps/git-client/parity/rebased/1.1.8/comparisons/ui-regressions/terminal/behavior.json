@@ -1,0 +1,22 @@
+{
+  "status": "passed",
+  "assertions": {
+    "terminalOpens": true,
+    "textIsLegible": true,
+    "realPtyAcceptsInput": true,
+    "returnExecutesCommand": true,
+    "promptReturns": true,
+    "repositoryWorkingDirectory": true
+  },
+  "scope": "Packaged macOS ARM64 app; disposable repository; visual/AX black-box validation",
+  "limitations": [
+    "xterm terminal output is canvas-rendered and is not fully exposed in the AX tree; screenshot is the output oracle"
+  ],
+  "evidence": [
+    "candidate-empty-electron-43.1.1.jpeg",
+    "candidate-real-pty-electron-43.1.1.jpeg",
+    "candidate-empty.ax.json",
+    "candidate.ax.json",
+    "interaction-trace.json"
+  ]
+}

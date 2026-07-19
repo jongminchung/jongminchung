@@ -89,8 +89,8 @@ describe("Nx Git Client release publisher", () => {
     const metadata = parseReleaseMetadata(
       JSON.stringify({
         assets: [
-          { name: "Git-Client_1.2.3_macos_aarch64.dmg" },
-          { name: "Git-Client_1.2.3_macos_aarch64.dmg.sha256" },
+          { name: "Git-Client_1.2.3_macos_arm64.dmg" },
+          { name: "Git-Client_1.2.3_macos_arm64.dmg.sha256" },
         ],
         isDraft: true,
         isPrerelease: false,

@@ -1,5 +1,14 @@
-import { TauriTerminalBridge, type TerminalBridge } from "../bridge/TerminalBridge";
+import type { TerminalBridge } from "../bridge/TerminalBridge";
+import { createTerminalBridge } from "../bridge/createTerminalBridge";
 import type { RepositoryId, TerminalEvent, TerminalId } from "../generated";
+import { readNativeSetting, writeNativeSettings } from "../platform/nativeSettings";
+import {
+  DEFAULT_TERMINAL_LAUNCH_TARGET,
+  TerminalLaunchTargetSchema,
+  type TerminalLaunchTarget,
+  type TerminalLaunchTargets,
+} from "../shared/contracts/terminal";
+import { z } from "zod";
 
 const MAX_BACKLOG_BYTES = 2 * 1024 * 1024;
 
@@ -11,6 +20,7 @@ export interface TerminalSessionSnapshot {
   readonly status: "starting" | "running" | "exited" | "failed";
   readonly exitCode: number | null;
   readonly error: string | null;
+  readonly target: TerminalLaunchTarget;
 }
 
 interface TerminalSessionRecord {
@@ -21,6 +31,7 @@ interface TerminalSessionRecord {
   status: "starting" | "running" | "exited" | "failed";
   exitCode: number | null;
   error: string | null;
+  target: TerminalLaunchTarget;
   events: TerminalEvent[];
   backlogBytes: number;
 }
@@ -28,12 +39,25 @@ interface TerminalSessionRecord {
 type Listener = () => void;
 type EventListener = (event: TerminalEvent) => void;
 
+export interface TerminalSessionCreateOptions {
+  readonly target?: TerminalLaunchTarget;
+  readonly title?: string;
+}
+
+const PersistedTerminalSessionSchema = z
+  .object({
+    title: z.string().min(1).max(128),
+    target: TerminalLaunchTargetSchema,
+  })
+  .strict()
+  .readonly();
+
 export class TerminalService {
   readonly #bridge: TerminalBridge;
   readonly #sessions = new Map<string, TerminalSessionRecord>();
   readonly #listeners = new Set<Listener>();
   readonly #eventListeners = new Map<string, Set<EventListener>>();
-  readonly #restoredRepositories = new Set<string>();
+  readonly #repositoryRestorations = new Map<string, Promise<void>>();
   #version = 0;
 
   private constructor(bridge: TerminalBridge) {
@@ -71,29 +95,48 @@ export class TerminalService {
     };
   }
 
-  async create(repositoryId: RepositoryId, title?: string): Promise<string> {
+  listLaunchTargets(): Promise<TerminalLaunchTargets> {
+    return this.#bridge.listLaunchTargets();
+  }
+
+  async create(
+    repositoryId: RepositoryId,
+    options: TerminalSessionCreateOptions = {},
+  ): Promise<string> {
     const key = crypto.randomUUID();
+    const target = TerminalLaunchTargetSchema.parse(
+      options.target ?? DEFAULT_TERMINAL_LAUNCH_TARGET,
+    );
     const record: TerminalSessionRecord = {
       key,
       repositoryId,
-      title: title ?? `Terminal ${this.sessions(repositoryId).length + 1}`,
+      title:
+        options.title ??
+        (this.sessions(repositoryId).length === 0
+          ? "Local"
+          : `Local (${this.sessions(repositoryId).length + 1})`),
       terminalId: null,
       status: "starting",
       exitCode: null,
       error: null,
+      target,
       events: [],
       backlogBytes: 0,
     };
     this.#sessions.set(key, record);
     this.#notify();
     try {
-      const terminalId = await this.#bridge.create(repositoryId, 100, 28, (event) =>
-        this.#receive(key, event),
+      const terminalId = await this.#bridge.create(
+        repositoryId,
+        100,
+        28,
+        target,
+        (event) => this.#receive(key, event),
       );
       const session = this.#sessions.get(key);
       if (session) {
         session.terminalId = terminalId;
-        session.status = "running";
+        if (session.status === "starting") session.status = "running";
         this.#notify();
         void this.#persist();
       } else {
@@ -101,9 +144,10 @@ export class TerminalService {
       }
       return key;
     } catch (error) {
-      record.status = "failed";
-      record.error = error instanceof Error ? error.message : String(error);
-      this.#notify();
+      this.#receive(key, {
+        kind: "failed",
+        message: error instanceof Error ? error.message : String(error),
+      });
       return key;
     }
   }
@@ -141,18 +185,27 @@ export class TerminalService {
     return this.sessions(repositoryId).filter((session) => session.status === "running").length;
   }
 
-  async restore(repositoryId: RepositoryId): Promise<void> {
-    if (this.#restoredRepositories.has(repositoryId)) return;
-    this.#restoredRepositories.add(repositoryId);
+  restore(repositoryId: RepositoryId): Promise<void> {
+    const active = this.#repositoryRestorations.get(repositoryId);
+    if (active !== undefined) return active;
+    const restoration = this.#restore(repositoryId);
+    this.#repositoryRestorations.set(repositoryId, restoration);
+    return restoration;
+  }
+
+  async #restore(repositoryId: RepositoryId): Promise<void> {
     try {
-      const { load } = await import("@tauri-apps/plugin-store");
-      const store = await load("settings.json", { autoSave: 200, defaults: {} });
-      const stored = await store.get<unknown>("terminalTabsByRepository");
+      const stored = await readNativeSetting("terminalTabsByRepository");
       if (!stored || typeof stored !== "object" || Array.isArray(stored)) return;
-      const titles = Reflect.get(stored, repositoryId);
-      if (!Array.isArray(titles)) return;
-      for (const title of titles.filter((value): value is string => typeof value === "string")) {
-        await this.create(repositoryId, title);
+      const sessions = Reflect.get(stored, repositoryId);
+      if (!Array.isArray(sessions)) return;
+      for (const value of sessions) {
+        if (typeof value === "string") {
+          await this.create(repositoryId, { title: value });
+          continue;
+        }
+        const parsed = PersistedTerminalSessionSchema.safeParse(value);
+        if (parsed.success) await this.create(repositoryId, parsed.data);
       }
     } catch {
       // Terminal restoration is non-critical; a new session can still be created manually.
@@ -187,17 +240,21 @@ export class TerminalService {
 
   async #persist(): Promise<void> {
     try {
-      const { load } = await import("@tauri-apps/plugin-store");
-      const store = await load("settings.json", { autoSave: 200, defaults: {} });
-      const value: Record<string, string[]> = {};
+      const value: Record<
+        string,
+        Array<Readonly<{ title: string; target: TerminalLaunchTarget }>>
+      > = {};
       for (const session of this.#sessions.values()) {
-        value[session.repositoryId] = [...(value[session.repositoryId] ?? []), session.title];
+        value[session.repositoryId] = [
+          ...(value[session.repositoryId] ?? []),
+          { title: session.title, target: session.target },
+        ];
       }
-      await store.set("terminalTabsByRepository", value);
+      await writeNativeSettings({ terminalTabsByRepository: value });
     } catch {
       // Live terminal sessions remain usable when metadata persistence fails.
     }
   }
 }
 
-export const terminalService = TerminalService.of(new TauriTerminalBridge());
+export const terminalService = TerminalService.of(createTerminalBridge());

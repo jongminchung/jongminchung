@@ -15,7 +15,7 @@ export default defineConfig({
     viewport: { width: 1600, height: 960 },
   },
   webServer: {
-    command: "pnpm run dev --host 127.0.0.1",
+    command: "pnpm run dev:web --host 127.0.0.1",
     reuseExistingServer: true,
     url: "http://127.0.0.1:1420",
   },

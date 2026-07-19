@@ -1,1 +1,0 @@
-{"main-capability":{"identifier":"main-capability","description":"Permissions for the local Git client window","local":true,"windows":["main"],"permissions":["core:default","dialog:default","store:default",{"identifier":"opener:allow-open-url","allow":[{"url":"https://*"}]}]}}

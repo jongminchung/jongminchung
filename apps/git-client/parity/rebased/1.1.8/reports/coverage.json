@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 3,
+  "referenceVersion": "1.1.8",
+  "sourceInventory": {
+    "generated": true,
+    "unresolvedIncludes": 0,
+    "unresolvedModules": 0,
+    "actions": 1960,
+    "groups": 707,
+    "addToGroups": 371,
+    "dynamicProviders": 283,
+    "toolWindows": 12,
+    "configurables": 66,
+    "keymaps": 10,
+    "themes": 10,
+    "icons": 285
+  },
+  "sourceToRuntime": {
+    "status": "in-progress",
+    "total": 7260,
+    "observed": 17,
+    "classified": 202,
+    "resolved": 219,
+    "unresolved": 7041,
+    "coverage": 3.016529,
+    "note": "Project, Terminal, Log, the native application-menu actions, and ten trusted-project top-level menu groups are evidence-backed. A further 202 action/group obligations are classified internal/test-only because every 1.1.8 source declaration marks internal=true. The remaining 7041 obligations are unresolved."
+  },
+  "runtimeToSource": {
+    "status": "in-progress",
+    "total": 22,
+    "mapped": 14,
+    "coverage": 63.636364,
+    "note": "Project, Log, Terminal, and eleven native menu surfaces are mapped. Eight runtime scopes and actionable-node enumeration remain incomplete; individual controls inside captured menus are not yet exhaustively reverse-mapped."
+  },
+  "implementationProgress": {
+    "countsAsParityCoverage": false,
+    "sourceEndToEndImplemented": [
+      "GitBridge public contract: 43/43 methods",
+      "GitRequest queries: 17/17 variants",
+      "GitRequest.operation: 50/50 variants",
+      "open/refresh/initialize/clone/close",
+      "diff/file/file-preview/submodule-diff/open-file/watcher",
+      "patch/shelf/changelist/conflict/recovery/multi-root",
+      "Terminal real PTY/tabs/context-actions/repository-cwd",
+      "GitHub/GitLab HTTP and safeStorage account boundary",
+      "Electron ARM64 local and production release pipeline"
+    ],
+    "packageVerified": [
+      "Packaged Electron E2E: 12/12 scenarios",
+      "GitBridge black-box package paths: 43/43 methods",
+      "GitRequest queries through packaged IPC: 17/17 variants",
+      "GitRequest.operation through packaged IPC with disposable side effects: 50/50 variants",
+      "repository initialize and clone",
+      "real diff/file loading and macOS watcher isolation",
+      "index, commit, ref, stash, config, remote, and worktree mutations",
+      "Terminal real PTY in repository working directory",
+      "GitHub/GitLab loopback IPC, net.fetch, safeStorage, persistence, and redaction",
+      "byte-reproducible local ad-hoc macOS ARM64 DMG"
+    ],
+    "sourceRegressionFixedAndVerified": [
+      "sandboxed preload no longer imports node:crypto",
+      "workspace and repository top-tab text remains measurable and non-overlapping",
+      "Terminal xterm surface, tab actions, keyboard navigation, and focus restoration"
+    ],
+    "inProgress": [
+      "generated ActionRegistry coverage for all 7260 source obligations; 47 current candidate commands are source-bound",
+      "Rebased welcome Projects and Customize surfaces implemented from stored screenshot and AX evidence; final golden capture pending",
+      "Terminal predefined-shell and installed-agent toolbar parity",
+      "Recovery staged-object long-term GC hardening",
+      "Rebased reference scenario and visual/effects comparisons"
+    ],
+    "bridgeContractAudit": "electron-bridge-support.json"
+  },
+  "packaging": {
+    "electronVersion": "43.1.1",
+    "latestStableRechecked": true,
+    "latestStableRecheckedAt": "2026-07-19",
+    "latestStableSource": "https://releases.electronjs.org/",
+    "rebuiltPackage": "passed",
+    "packageE2e": "passed-12-of-12",
+    "localAdHocDmg": "passed-byte-reproducible",
+    "artifact": "release-artifacts/Git-Client_0.1.0_macos_arm64_adhoc.dmg",
+    "artifactBytes": 106694849,
+    "artifactSha256": "05f241b616b57351f88e260c382759e7d995112e2f1b0a765de80e0c79b883d5",
+    "reproductionComparison": "byte-identical",
+    "adHocCodesign": "passed",
+    "developerId": "blocked-no-identity",
+    "notarization": "blocked-no-credentials"
+  },
+  "unresolved": [
+    "source-to-runtime-mapping-incomplete",
+    "runtime-crawl-incomplete",
+    "runtime-to-source-mapping-incomplete",
+    "rebased-reference-terminal-visual-parity-pending",
+    "rebased-reference-top-tab-geometry-parity-pending",
+    "github-gitlab-live-runtime-flows-unverified",
+    "git-network-side-effect-matrix-incomplete",
+    "performance-comparison-pending",
+    "eight-hour-soak-pending",
+    "developer-id-signing-and-notarization-blocked"
+  ],
+  "complete": false
+}

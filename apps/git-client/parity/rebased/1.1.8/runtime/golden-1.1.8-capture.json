@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "reference": {
+    "product": "Rebased",
+    "version": "1.1.8",
+    "build": "IC-262.8665.SNAPSHOT",
+    "artifact": "rebased-aarch64.dmg",
+    "artifactSizeBytes": 346075281,
+    "artifactSha256": "fd3bc8bd7f80be16294d424b25ca390ceb13960bba33422dfa8ac4632c3412c0"
+  },
+  "execution": {
+    "appPath": "/private/tmp/rebased-1.1.8-volume/Rebased.app",
+    "profilePolicy": "isolated",
+    "repositoryPolicy": "disposable-clone",
+    "repositoryPath": "/private/tmp/rebased-parity-1.1.8.TPwGXl/reference",
+    "computerUseTarget": "/tmp/rebased-1.1.8-volume/Rebased.app"
+  },
+  "captures": [
+    {
+      "surface": "welcome.projects",
+      "screenshot": "welcome/projects/golden-1.1.8/reference.png",
+      "rawCapture": "welcome/projects/golden-1.1.8/reference.jpeg",
+      "accessibility": "welcome/projects/golden-1.1.8/reference.ax.json",
+      "rawAccessibility": "welcome/projects/golden-1.1.8/reference.ax.txt",
+      "authority": "golden-1.1.8",
+      "capturedAt": "2026-07-19T00:57:22+09:00",
+      "pixelWidth": 1183,
+      "pixelHeight": 768
+    },
+    {
+      "surface": "workbench.log",
+      "screenshot": "workbench/log/golden-1.1.8/reference.png",
+      "rawCapture": "workbench/log/golden-1.1.8/reference.jpeg",
+      "accessibility": "workbench/log/golden-1.1.8/reference.ax.json",
+      "rawAccessibility": "workbench/log/golden-1.1.8/reference.ax.txt",
+      "authority": "golden-1.1.8",
+      "capturedAt": "2026-07-19T01:00:58+09:00",
+      "pixelWidth": 1183,
+      "pixelHeight": 768
+    },
+    {
+      "surface": "terminal.local.empty",
+      "screenshot": "terminal/local/golden-1.1.8/reference-empty.png",
+      "rawCapture": "terminal/local/golden-1.1.8/reference-empty.jpeg",
+      "accessibility": "terminal/local/golden-1.1.8/reference-empty.ax.json",
+      "rawAccessibility": "terminal/local/golden-1.1.8/reference-empty.ax.txt",
+      "authority": "golden-1.1.8",
+      "capturedAt": "2026-07-19T01:16:46+09:00",
+      "pixelWidth": 1183,
+      "pixelHeight": 768,
+      "context": {
+        "projectSafeMode": true,
+        "shortcutConflictNotificationVisible": true
+      },
+      "useFor": [
+        "Terminal tool-window hierarchy",
+        "Local tab naming",
+        "toolbar actions",
+        "focus role"
+      ],
+      "excludeFrom": [
+        "whole-window visual comparison"
+      ]
+    },
+    {
+      "surface": "terminal.local.pwd",
+      "screenshot": "terminal/local/golden-1.1.8/reference-pwd.png",
+      "rawCapture": "terminal/local/golden-1.1.8/reference-pwd.jpeg",
+      "accessibility": "terminal/local/golden-1.1.8/reference-pwd.ax.json",
+      "rawAccessibility": "terminal/local/golden-1.1.8/reference-pwd.ax.txt",
+      "authority": "golden-1.1.8",
+      "capturedAt": "2026-07-19T01:16:56+09:00",
+      "pixelWidth": 1183,
+      "pixelHeight": 768,
+      "assertions": [
+        "Terminal input accepts pwd",
+        "Return executes the command",
+        "cwd is the disposable repository",
+        "focus returns to the terminal editor"
+      ]
+    }
+  ],
+  "notes": [
+    "The installed Rebased 1.1.7 application was not overwritten and was reopened after capture.",
+    "The golden 1.1.8 instance was the only running Rebased instance while Terminal input was captured because both versions share one bundle identifier."
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-19T04:29:03.175Z",
+  "reference": {
+    "product": "Rebased",
+    "version": "1.1.8",
+    "build": "IC-262.8665.SNAPSHOT",
+    "artifactSha256": "fd3bc8bd7f80be16294d424b25ca390ceb13960bba33422dfa8ac4632c3412c0"
+  },
+  "execution": {
+    "profile": "/private/tmp/rebased-1.1.8-profile",
+    "repository": "/private/tmp/rebased-parity-1.1.8.TPwGXl/reference",
+    "trusted": true,
+    "testBundleId": "io.github.detachhead.rebased.goldenstable118"
+  },
+  "normalization": {
+    "appName": "Rebased Golden Stable 1.1.8 is a Computer Use harness bundle name; normalize only generated macOS app-name labels to Rebased."
+  },
+  "menu": "edit",
+  "state": "Window: \"reference\", App: Rebased Golden Stable 1.1.8.\n0 Edit, ID: handleAction:, Secondary Actions: Cancel, Pick\n\t1 메뉴 Secondary Actions: Cancel\n\t\t2 (disabled) Undo, ID: handleAction:\n\t\t3 (disabled) Redo, ID: handleAction:\n\t\t4 (disabled) Cut, ID: handleAction:\n\t\t5 (disabled) Copy, ID: handleAction:\n\t\t6 (disabled) Copy as Plain Text, ID: handleAction:\n\t\t7 (disabled) Delete, ID: handleAction:\n\t\t8 (disabled) Search In Selection, ID: handleAction:\n\t\t9 Find, ID: handleAction:\n\t\t\t10 메뉴 Secondary Actions: Cancel\n\t\t\t\t11 (disabled) Find…, ID: handleAction:\n\t\t\t\t12 (disabled) Replace…, ID: handleAction:\n\t\t\t\t13 (disabled) Find Next Occurrence, ID: handleAction:\n\t\t\t\t14 (disabled) Find Previous Occurrence, ID: handleAction:\n\t\t\t\t15 (disabled) Select All Occurrences, ID: handleAction:\n\t\t\t\t16 (disabled) Add Selection for Next Occurrence, ID: handleAction:\n\t\t\t\t17 (disabled) Unselect Occurrence, ID: handleAction:\n\t\t\t\t18 (disabled) Search In Selection, ID: handleAction:\n\t\t\t\t19 Scroll to Results During Typing, ID: handleAction:\n\t\t\t\t20 (disabled) Next Occurrence of the Word at Caret, ID: handleAction:\n\t\t\t\t21 (disabled) Previous Occurrence of the Word at Caret, ID: handleAction:\n\t\t\t\t22 Find in Files…, ID: handleAction:\n\t\t\t\t23 Replace in Files…, ID: handleAction:\n\t\t24 Find Usages, ID: handleAction:\n\t\t\t25 메뉴 Secondary Actions: Cancel\n\t\t\t\t26 (disabled) Find Usages, ID: handleAction:\n\t\t\t\t27 (disabled) Find Usages Settings…, ID: handleAction:\n\t\t\t\t28 (disabled) Show Usages, ID: handleAction:\n\t\t\t\t29 (disabled) Find Usages in File, ID: handleAction:\n\t\t\t\t30 (disabled) Highlight Usages in File, ID: handleAction:\n\t\t\t\t31 (disabled) Next Highlighted Usage, ID: handleAction:\n\t\t\t\t32 (disabled) Previous Highlighted Usage, ID: handleAction:\n\t\t\t\t33 Recent Find Usages, ID: handleAction:\n\t\t34 (disabled) Select All, ID: handleAction:\n\t\t35 (disabled) Add Carets to Ends of Selected Lines, ID: handleAction:\n\t\t36 (disabled) Extend Selection, ID: handleAction:\n\t\t37 (disabled) Shrink Selection, ID: handleAction:\n\t\t38 (disabled) Toggle Case, ID: handleAction:\n\t\t39 (disabled) Join Lines, ID: handleAction:\n\t\t40 (disabled) Duplicate Line or Selection, ID: handleAction:\n\t\t41 (disabled) Fill Paragraph, ID: handleAction:\n\t\t42 (disabled) Sort Lines, ID: handleAction:\n\t\t43 (disabled) Reverse Lines, ID: handleAction:\n\t\t44 (disabled) Transpose, ID: handleAction:\n\t\t45 (disabled) Indent Selection, ID: handleAction:\n\t\t46 (disabled) Unindent Line or Selection, ID: handleAction:\n\t\t47 Convert Indents, ID: handleAction:\n\t\t\t48 메뉴 Secondary Actions: Cancel\n\t\t\t\t49 (disabled) To Spaces, ID: handleAction:\n\t\t\t\t50 (disabled) To Tabs, ID: handleAction:\n\t\t51 Macros, ID: handleAction:\n\t\t\t52 메뉴 Secondary Actions: Cancel\n\t\t\t\t53 (disabled) Play Back Last Macro, ID: handleAction:\n\t\t\t\t54 Start Macro Recording, ID: handleAction:\n\t\t\t\t55 (disabled) Edit Macros, ID: handleAction:\n\t\t\t\t56 Play Saved Macros…, ID: handleAction:\n\t\t57 Bookmarks, ID: handleAction:\n\t\t\t58 메뉴 Secondary Actions: Cancel\n\t\t\t\t59 (disabled) Previous Line Bookmark, ID: handleAction:\n\t\t\t\t60 (disabled) Next Line Bookmark, ID: handleAction:\n\t\t\t\t61 Show Line Bookmarks…, ID: handleAction:\n\t\t\t\t62 (disabled) Go to Mnemonic…, ID: handleAction:\n\t\t63 Emoji & Symbols, ID: handleAction:\n\t\t64 (disabled) Encode XML/HTML Special Characters, ID: handleAction:\n"
+}

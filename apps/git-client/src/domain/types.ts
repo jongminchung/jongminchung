@@ -1,4 +1,4 @@
-import type { OutputStream, RepositorySnapshot } from "../generated";
+import type { RepositorySnapshot } from "../generated";
 
 export type RefKind = "local" | "remote" | "tag";
 
@@ -106,6 +106,8 @@ export interface SelectionContext {
   readonly upstream?: string;
   readonly selectedIsAncestorOfHead: boolean;
   readonly selectedIsAheadOfUpstream: boolean;
+  readonly selectedAreContiguousFirstParent: boolean;
+  readonly selectedIncludesMerge: boolean;
   readonly hasChild: boolean;
   readonly repositoryHasCommits: boolean;
   readonly operationInProgress: boolean;
@@ -114,46 +116,25 @@ export interface SelectionContext {
 export interface ActionAvailability {
   readonly copyRevision: boolean;
   readonly createPatch: boolean;
+  readonly copyPatch: boolean;
   readonly cherryPick: boolean;
   readonly showRepositoryAtRevision: boolean;
   readonly compareVersions: boolean;
   readonly reset: boolean;
   readonly revert: boolean;
+  readonly undoCommit: boolean;
+  readonly reword: boolean;
+  readonly fixup: boolean;
+  readonly squashInto: boolean;
   readonly drop: boolean;
   readonly squash: boolean;
+  readonly interactiveRebase: boolean;
   readonly pushUpTo: boolean;
   readonly newBranch: boolean;
   readonly newTag: boolean;
   readonly goToChild: boolean;
   readonly goToParent: boolean;
   readonly viewInBrowser: boolean;
-}
-
-export type OperationPhase = "idle" | "queued" | "running" | "succeeded" | "failed" | "cancelled";
-
-export interface OperationState {
-  readonly requestId?: string;
-  readonly phase: OperationPhase;
-  readonly label?: string;
-  readonly progress?: number;
-  readonly error?: string;
-}
-
-export interface ConsoleEntry {
-  readonly id: string;
-  readonly requestId: string | null;
-  readonly command: string;
-  readonly startedAt: number;
-  readonly duration?: number;
-  readonly exitCode?: number;
-  readonly status: "running" | "success" | "failure" | "cancelled";
-  readonly chunks: readonly ConsoleChunk[];
-}
-
-export interface ConsoleChunk {
-  readonly sequence: number;
-  readonly stream: OutputStream;
-  readonly data: string;
 }
 
 export interface RepositoryView {

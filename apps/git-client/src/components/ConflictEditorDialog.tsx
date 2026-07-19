@@ -1,8 +1,14 @@
+import { Button } from "@astryxdesign/core/Button";
+import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
+import { Selector } from "@astryxdesign/core/Selector";
 import { lazy, Suspense, useMemo, useState } from "react";
 import { parseConflictBlocks, resolveConflictBlock } from "../domain/conflicts";
 import type { ConflictContent, InProgressOperation } from "../generated";
 import { Icon } from "./Icon";
-import styles from "../styles/App.module.css";
+import { tw } from "../styles/tailwind";
+import { useAppDialog } from "./AppDialog";
+import { useCommandDefinitions, useDismissLayer } from "./CommandProvider";
+import { COMMAND_ENABLED, commandDefinition, type CommandDefinition } from "../domain/commands";
 
 const CodeMirrorText = lazy(() => import("./CodeMirrorText"));
 
@@ -16,13 +22,13 @@ function TextPane({
   readonly onAccept?: () => void;
 }) {
   return (
-    <section className={styles.conflictPane}>
+    <section className={tw.conflictPane}>
       <header>
         <strong>{label}</strong>
-        {onAccept && <button onClick={onAccept}>Accept file</button>}
+        {onAccept && <Button label="Accept file" onClick={onAccept} size="sm" variant="ghost" />}
       </header>
       <div>
-        <Suspense fallback={<div className={styles.emptyState}>Loading editor…</div>}>
+        <Suspense fallback={<div className={tw.emptyState}>Loading editor…</div>}>
           <CodeMirrorText readOnly value={value ?? "File does not exist on this side."} />
         </Suspense>
       </div>
@@ -49,6 +55,7 @@ export function ConflictEditorDialog({
 }) {
   const [result, setResult] = useState(content.result ?? "");
   const [blockIndex, setBlockIndex] = useState(0);
+  const dialog = useAppDialog();
   const blocks = useMemo(() => parseConflictBlocks(result), [result]);
   const selectedBlock = blocks[Math.min(blockIndex, Math.max(0, blocks.length - 1))];
   const resolveBlock = (choice: "local" | "remote" | "both") => {
@@ -56,42 +63,86 @@ export function ConflictEditorDialog({
     setResult(resolveConflictBlock(result, selectedBlock, choice));
     setBlockIndex(Math.min(blockIndex, Math.max(0, blocks.length - 2)));
   };
+  const requestClose = async (): Promise<void> => {
+    if (result !== (content.result ?? "")) {
+      const accepted = await dialog.confirm({
+        title: "Discard conflict result edits?",
+        description: "The repository is unchanged, but edits made in the conflict result pane will be lost.",
+        confirmLabel: "Discard result",
+        dangerous: true,
+      });
+      if (!accepted) return;
+    }
+    onClose();
+  };
+  useDismissLayer(useMemo(() => ({
+    id: "conflict-editor",
+    priority: 125,
+    active: true,
+    dismiss: requestClose,
+  }), [requestClose]));
+  const commands = useMemo<readonly CommandDefinition[]>(() => [{
+    ...commandDefinition("changes.save", () => onSave(result), () => COMMAND_ENABLED),
+    allowInEditor: true,
+    allowInCodeEditor: true,
+    label: "Save and Stage Conflict Result",
+    priority: 100,
+  }], [onSave, result]);
+  useCommandDefinitions(commands);
   return (
-    <div className={styles.dialogBackdrop} role="presentation">
-      <section className={styles.conflictDialog} role="dialog" aria-modal="true">
-        <header>
-          <Icon name="warning" size={16} />
-          <strong>{content.path}</strong>
-          <small>{blocks.length} unresolved blocks</small>
-          <span />
+    <>
+      <Dialog
+        aria-label={`Resolve conflict in ${content.path}`}
+        isOpen
+        maxHeight="calc(100vh - 50px)"
+        onOpenChange={(isOpen) => {
+          if (!isOpen) void requestClose();
+        }}
+        padding={0}
+        purpose="form"
+        width="min(1440px, calc(100vw - 50px))"
+      >
+        <section className="grid h-[min(760px,calc(100vh-50px))] min-h-0 grid-rows-[auto_minmax(0,1fr)] overflow-hidden">
+          <div className="flex min-w-0 items-center gap-2 border-b border-border pr-3">
+            <div className="min-w-0 flex-1">
+              <DialogHeader
+                hasDivider={false}
+                subtitle={`${blocks.length} unresolved blocks`}
+                title={content.path}
+              />
+            </div>
           {operation && operation !== "bisect" && (
             <>
-              <button onClick={() => void onContinue()}>Continue {operation}</button>
-              <button onClick={() => void onAbort()}>Abort</button>
+                <Button
+                  clickAction={onContinue}
+                  label={`Continue ${operation}`}
+                  size="sm"
+                  variant="secondary"
+                />
+                <Button clickAction={onAbort} label="Abort" size="sm" variant="destructive" />
             </>
           )}
-          <button
-            className={styles.iconButton}
-            aria-label="Close conflict editor"
-            onClick={onClose}
-          >
-            <Icon name="close" size={15} />
-          </button>
-        </header>
+            <Button
+              icon={<Icon name="close" size={15} />}
+              isIconOnly
+              label="Close conflict editor"
+              onClick={() => void requestClose()}
+              size="sm"
+              variant="ghost"
+            />
+          </div>
         {content.binary ? (
-          <div className={styles.binaryConflict}>
+          <div className={tw.binaryConflict}>
             <Icon name="warning" size={32} />
             <strong>Binary or oversized conflict</strong>
             <p>The file cannot be safely represented as UTF-8 text. Choose one complete side.</p>
             <div>
-              <button onClick={() => void onResolveBinary("ours")}>Use {content.localLabel}</button>
-              <button onClick={() => void onResolveBinary("theirs")}>
-                Use {content.remoteLabel}
-              </button>
+                <Button clickAction={() => onResolveBinary("ours")} label={`Use ${content.localLabel}`} variant="secondary" />
+                <Button clickAction={() => onResolveBinary("theirs")} label={`Use ${content.remoteLabel}`} variant="secondary" />
             </div>
           </div>
         ) : (
-          <div className={styles.conflictGrid}>
+          <div className={tw.conflictGrid}>
             <TextPane
               label="Base"
               value={content.base}
@@ -107,40 +158,46 @@ export function ConflictEditorDialog({
               value={content.remote}
               onAccept={() => setResult(content.remote ?? "")}
             />
-            <section className={styles.conflictPane}>
+            <section className={tw.conflictPane}>
               <header>
                 <strong>Result</strong>
                 {blocks.length > 0 && (
                   <>
-                    <select
-                      aria-label="Conflict block"
-                      value={Math.min(blockIndex, blocks.length - 1)}
-                      onChange={(event) => setBlockIndex(Number(event.target.value))}
-                    >
-                      {blocks.map((block) => (
-                        <option key={`${block.start}-${block.end}`} value={block.index}>
-                          Block {block.index + 1}
-                        </option>
-                      ))}
-                    </select>
-                    <button onClick={() => resolveBlock("local")}>Local</button>
-                    <button onClick={() => resolveBlock("remote")}>Remote</button>
-                    <button onClick={() => resolveBlock("both")}>Both</button>
+                      <Selector
+                        aria-label="Conflict block"
+                        isLabelHidden
+                        label="Conflict block"
+                        onChange={(value) => {
+                          const nextBlock = Number(value);
+                          if (Number.isInteger(nextBlock) && nextBlock >= 0 && nextBlock < blocks.length) {
+                            setBlockIndex(nextBlock);
+                          }
+                        }}
+                        options={blocks.map((block) => ({
+                          label: `Block ${block.index + 1}`,
+                          value: String(block.index),
+                        }))}
+                        size="sm"
+                        value={String(Math.min(blockIndex, blocks.length - 1))}
+                      />
+                      <Button label="Local" onClick={() => resolveBlock("local")} size="sm" variant="ghost" />
+                      <Button label="Remote" onClick={() => resolveBlock("remote")} size="sm" variant="ghost" />
+                      <Button label="Both" onClick={() => resolveBlock("both")} size="sm" variant="ghost" />
                   </>
                 )}
-                <button className={styles.primaryButton} onClick={() => void onSave(result)}>
-                  Save and stage
-                </button>
+                  <Button clickAction={() => onSave(result)} label="Save and stage" size="sm" variant="primary" />
               </header>
               <div>
-                <Suspense fallback={<div className={styles.emptyState}>Loading editor…</div>}>
+                <Suspense fallback={<div className={tw.emptyState}>Loading editor…</div>}>
                   <CodeMirrorText onChange={setResult} readOnly={false} value={result} />
                 </Suspense>
               </div>
             </section>
           </div>
         )}
-      </section>
-    </div>
+        </section>
+      </Dialog>
+      {dialog.node}
+    </>
   );
 }

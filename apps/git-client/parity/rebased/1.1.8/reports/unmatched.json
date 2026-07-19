@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "referenceVersion": "1.1.8",
+  "complete": false,
+  "unresolved": [
+    {
+      "count": 7041,
+      "ledger": "mappings/source-to-runtime.json",
+      "description": "Source obligations without an authoritative classification or Rebased 1.1.8 runtime link"
+    }
+  ],
+  "unmappedRuntime": [
+    {
+      "count": 8,
+      "ledger": "mappings/runtime-to-source.json",
+      "description": "Runtime capture scopes whose actionable nodes have not been exhaustively enumerated"
+    }
+  ],
+  "provisional": [],
+  "ambiguous": [],
+  "uncaptured": [
+    "application-menus",
+    "context-menus",
+    "dialogs",
+    "notifications",
+    "settings",
+    "editor-diff",
+    "git-flows",
+    "forge-flows"
+  ],
+  "unverified": [
+    "GitBridge package paths 29/43",
+    "GitBridge Rebased paths 43/43",
+    "reference visual/AX/focus/behavior/effects comparisons",
+    "performance p95",
+    "eight-hour soak",
+    "Developer ID signing and notarization"
+  ]
+}

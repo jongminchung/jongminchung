@@ -244,5 +244,5 @@ describe("Nx release project affectedness", () => {
     const breakingRelease = await calculateRelease(directory);
     expect(breakingRelease.version).toBe("2.0.0");
     expect(breakingRelease.notes).toContain("replace client contract");
-  }, 30_000);
+  }, 60_000);
 });

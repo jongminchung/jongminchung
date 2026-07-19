@@ -2,6 +2,12 @@ import { defaultKeymap } from "@codemirror/commands";
 import { EditorState } from "@codemirror/state";
 import { EditorView, keymap, lineNumbers } from "@codemirror/view";
 import { useEffect, useRef } from "react";
+import {
+  codeMirrorSearchExtensions,
+  codeMirrorEditingExtensions,
+  installCodeMirrorActionBridge,
+  installCodeMirrorSearchBridge,
+} from "./codeMirrorSearch";
 
 export default function CodeMirrorText({
   value,
@@ -21,8 +27,8 @@ export default function CodeMirrorText({
     if (!parent.current) return;
     const theme = EditorView.theme({
       "&": { height: "100%", fontSize: "11px", background: "var(--surface)" },
-      ".cm-scroller": { fontFamily: "var(--font-mono)", lineHeight: "1.5" },
-      ".cm-gutters": { background: "var(--surface-sunken)", border: "0" },
+      ".cm-scroller": { fontFamily: "var(--font-family-code)", lineHeight: "1.5" },
+      ".cm-gutters": { background: "var(--color-background-muted)", border: "0" },
     });
     const editor = new EditorView({
       state: EditorState.create({
@@ -30,6 +36,8 @@ export default function CodeMirrorText({
         extensions: [
           lineNumbers(),
           keymap.of(defaultKeymap),
+          ...codeMirrorEditingExtensions,
+          ...codeMirrorSearchExtensions,
           EditorView.lineWrapping,
           EditorState.readOnly.of(readOnly),
           EditorView.editable.of(!readOnly),
@@ -42,7 +50,11 @@ export default function CodeMirrorText({
       parent: parent.current,
     });
     view.current = editor;
+    const removeSearchBridge = installCodeMirrorSearchBridge(() => view.current);
+    const removeActionBridge = installCodeMirrorActionBridge(() => view.current);
     return () => {
+      removeSearchBridge();
+      removeActionBridge();
       view.current = null;
       editor.destroy();
     };

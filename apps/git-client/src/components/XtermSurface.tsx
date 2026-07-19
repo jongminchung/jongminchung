@@ -1,12 +1,76 @@
 import { FitAddon } from "@xterm/addon-fit";
 import { Terminal } from "@xterm/xterm";
 import "@xterm/xterm/css/xterm.css";
-import { useEffect, useRef } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, type MouseEventHandler } from "react";
+import {
+  TerminalActionExecutor,
+  terminalActionForKeyboard,
+  type TerminalActionId,
+  type TerminalActionResult,
+  type TerminalClipboardPort,
+  type TerminalSurfaceActionId,
+} from "../domain/terminalActions";
 import { terminalService } from "../domain/TerminalService";
+import { terminalThemeFor } from "../domain/terminalTheme";
 import type { TerminalEvent } from "../generated";
+import { useAppearance } from "./AppearanceProvider";
 
-export default function XtermSurface({ sessionKey }: { readonly sessionKey: string }) {
+export interface XtermSurfaceCapabilities {
+  readonly hasSelection: boolean;
+  readonly hasClipboard: boolean;
+}
+
+export interface XtermSurfaceHandle {
+  capabilities(): XtermSurfaceCapabilities;
+  execute(action: TerminalSurfaceActionId): Promise<TerminalActionResult>;
+  focus(): void;
+}
+
+interface XtermSurfaceProps {
+  readonly sessionKey: string;
+  readonly onAction: (action: TerminalActionId) => void;
+  readonly onContextMenu: MouseEventHandler<HTMLDivElement>;
+}
+
+function browserClipboard(): TerminalClipboardPort | null {
+  return typeof navigator === "undefined" || navigator.clipboard === undefined
+    ? null
+    : navigator.clipboard;
+}
+
+const XtermSurface = forwardRef<XtermSurfaceHandle, XtermSurfaceProps>(function XtermSurface(
+  { sessionKey, onAction, onContextMenu },
+  forwardedRef,
+) {
   const container = useRef<HTMLDivElement>(null);
+  const terminalRef = useRef<Terminal | null>(null);
+  const onActionRef = useRef(onAction);
+  onActionRef.current = onAction;
+  const { colorScheme } = useAppearance();
+  const colorSchemeRef = useRef(colorScheme);
+  colorSchemeRef.current = colorScheme;
+
+  useImperativeHandle(
+    forwardedRef,
+    () => ({
+      capabilities: (): XtermSurfaceCapabilities => ({
+        hasSelection: terminalRef.current?.hasSelection() ?? false,
+        hasClipboard: browserClipboard() !== null,
+      }),
+      execute: (action: TerminalSurfaceActionId): Promise<TerminalActionResult> => {
+        const terminal = terminalRef.current;
+        if (terminal === null) {
+          return Promise.resolve({
+            kind: "unavailable",
+            reason: "Terminal is not ready.",
+          });
+        }
+        return TerminalActionExecutor.of(terminal, browserClipboard()).execute(action);
+      },
+      focus: (): void => terminalRef.current?.focus(),
+    }),
+    [],
+  );
 
   useEffect(() => {
     const parent = container.current;
@@ -15,19 +79,25 @@ export default function XtermSurface({ sessionKey }: { readonly sessionKey: stri
       allowProposedApi: false,
       convertEol: false,
       cursorBlink: true,
-      fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-      fontSize: 12,
+      fontFamily: '"JetBrains Mono Rebased", "JetBrains Mono", Menlo, monospace',
+      fontSize: 13,
+      lineHeight: 1,
       scrollback: 10_000,
-      theme: {
-        background: "#17171b",
-        foreground: "#e6e6ea",
-        cursor: "#a78bfa",
-        selectionBackground: "#5b4a8a88",
-      },
+      theme: terminalThemeFor(colorSchemeRef.current),
+    });
+    terminalRef.current = terminal;
+    terminal.attachCustomKeyEventHandler((event) => {
+      const action = terminalActionForKeyboard(event);
+      if (action === null) return true;
+      onActionRef.current(action);
+      return false;
     });
     const fit = new FitAddon();
     terminal.loadAddon(fit);
     terminal.open(parent);
+    parent
+      .querySelector<HTMLTextAreaElement>(".xterm-helper-textarea")
+      ?.setAttribute("aria-label", "Editor");
     fit.fit();
     let lastSequence = -1;
     const renderEvent = (event: TerminalEvent): void => {
@@ -57,8 +127,27 @@ export default function XtermSurface({ sessionKey }: { readonly sessionKey: stri
       input.dispose();
       unsubscribe();
       terminal.dispose();
+      if (terminalRef.current === terminal) terminalRef.current = null;
     };
   }, [sessionKey]);
 
-  return <div ref={container} style={{ height: "100%", minHeight: 0, width: "100%" }} />;
-}
+  useEffect(() => {
+    const terminal = terminalRef.current;
+    if (!terminal) return;
+    terminal.options.theme = terminalThemeFor(colorScheme);
+  }, [colorScheme]);
+
+  return (
+    <div
+      data-command-scope="terminal"
+      data-terminal-session={sessionKey}
+      onContextMenu={onContextMenu}
+      ref={container}
+      style={{ height: "100%", minHeight: 0, width: "100%" }}
+    />
+  );
+});
+
+XtermSurface.displayName = "XtermSurface";
+
+export default XtermSurface;

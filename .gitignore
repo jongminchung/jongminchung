@@ -4,7 +4,9 @@ node_modules/
 .tmp*/
 **/.output/
 **/.wxt/
+**/.vite/
 **/test-results/
+**/out/
 playwright-report/
 apps/docs/public/excalidraw-assets/
 *.bak
@@ -17,4 +19,4 @@ apps/docs/public/excalidraw-assets/
 **/target/
 *.tsbuildinfo
 
-.DS_STORE
+.idea/

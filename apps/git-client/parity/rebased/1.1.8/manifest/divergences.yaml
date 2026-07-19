@@ -1,0 +1,30 @@
+schemaVersion: 1
+approved:
+  - id: product-brand
+    category: brand
+    rule: Git Client owns its name, icon, bundle identity, and About content.
+  - id: trademarks
+    category: brand
+    rule: Rebased and JetBrains product marks are not reused.
+  - id: marketplace
+    category: external-service
+    rule: IntelliJ binary plugins and JetBrains Marketplace are excluded.
+  - id: cloud-sync
+    category: external-service
+    rule: JetBrains Backup and Sync is removed; local settings and ZIP import/export remain.
+  - id: vendor-services
+    category: external-service
+    rule: Rebased and JetBrains update, telemetry, and bug-report services are excluded.
+  - id: terminal-agent-installation
+    category: external-service
+    rule: JetBrains-hosted AI-agent installation and resolver services are excluded; already-installed allowlisted Codex, Claude Code, and Junie executables remain discoverable and launchable.
+  - id: reference-defects
+    category: reference-defect-fix
+    rule: crashes, data loss, stale destructive targets, and unbounded resource use are fixed and regression-tested.
+  - id: leftover-directories-safe-selection
+    category: reference-defect-fix
+    rule: Delete Leftover IDE Directories lists only non-primary Git Client Electron profiles, never preselects destructive targets, revalidates every selected direct child before deletion, and never scans Tauri or unrelated application data.
+  - id: electron-rendering
+    category: framework-rendering
+    rule: only reviewed rasterization differences inside the visual thresholds are allowed.
+forbidUnclassified: true

@@ -1,17 +1,25 @@
-import { Channel, invoke } from "@tauri-apps/api/core";
 import type {
     Changelist,
     ChangelistCommitResult,
+    BranchComparison,
+    CloneOptions,
     ConflictContent,
     ConflictFile,
     FileContent,
+    FilePreview,
     FileSource,
     GitEvent,
+    GitConfig,
     GitOperation,
+    IgnoreRules,
     GitRequest,
     MultiRootOutcome,
     MultiRootResult,
     MultiRootRollbackStep,
+    PatchExportResult,
+    PreCommitCheck,
+    PushPreview,
+    HistoryRewritePreview,
     RecoveryEntry,
     RecoveryRestoreResult,
     RemoteInfo,
@@ -19,26 +27,87 @@ import type {
     RepositorySnapshot,
     RequestId,
     ShelfEntry,
+    SubmoduleInfo,
+    SubmoduleDiff,
+    CommitSignature,
     WorktreeInfo,
 } from "../generated";
+import type { GitCreationEventListener } from "../shared/contracts/git-utility";
+import type { GitLocalHistoryEntry } from "../shared/contracts/git-utility";
 
 export interface GitBridge {
     openRepository(path: string): Promise<RepositorySnapshot>;
     initializeRepository(
         path: string,
         bare: boolean,
+        onEvent?: GitCreationEventListener,
     ): Promise<RepositorySnapshot>;
     cloneRepository(
         url: string,
         path: string,
-        depth: number | null,
+        options: CloneOptions,
+        onEvent?: GitCreationEventListener,
     ): Promise<RepositorySnapshot>;
     refreshRepository(repositoryId: string): Promise<RepositorySnapshot>;
+    loadPushPreview(
+        repositoryId: string,
+        remote: string | null,
+        remoteRef: string | null,
+        localRevision: string,
+    ): Promise<PushPreview>;
+    loadHistoryRewritePreview(
+        repositoryId: string,
+        fromRevision: string,
+    ): Promise<HistoryRewritePreview>;
+    preCommitCheck(repositoryId: string): Promise<PreCommitCheck>;
+    compareBranches(
+        repositoryId: string,
+        left: string,
+        right: string,
+    ): Promise<BranchComparison>;
+    loadCommitSignature(
+        repositoryId: string,
+        revision: string,
+    ): Promise<CommitSignature>;
+    listGitConfig(repositoryId: string): Promise<readonly GitConfig[]>;
+    listSubmodules(repositoryId: string): Promise<readonly SubmoduleInfo[]>;
+    listMergedBranches(
+        repositoryId: string,
+        target: string,
+    ): Promise<readonly string[]>;
+    readIgnoreRules(repositoryId: string): Promise<IgnoreRules>;
+    writeIgnoreRules(repositoryId: string, rules: IgnoreRules): Promise<void>;
+    exportPatch(
+        repositoryId: string,
+        revisions: readonly string[],
+        targetPath: string,
+    ): Promise<PatchExportResult>;
+    createPatchText(
+        repositoryId: string,
+        revisions: readonly string[],
+    ): Promise<string>;
+    importPatch(repositoryId: string, path: string): Promise<void>;
     readFile(
         repositoryId: string,
         source: FileSource,
         path: string,
     ): Promise<FileContent>;
+    readFilePreview(
+        repositoryId: string,
+        source: FileSource,
+        path: string,
+    ): Promise<FilePreview>;
+    writeWorkingTreeFile?(
+        repositoryId: string,
+        path: string,
+        content: string,
+    ): Promise<void>;
+    loadSubmoduleDiff(
+        repositoryId: string,
+        before: FileSource,
+        after: FileSource,
+        path: string,
+    ): Promise<SubmoduleDiff>;
     openWorkingTreeFile(repositoryId: string, path: string): Promise<void>;
     execute(
         request: GitRequest,
@@ -85,6 +154,29 @@ export interface GitBridge {
         repositoryId: string,
         entryId: string,
     ): Promise<RecoveryRestoreResult>;
+    captureLocalHistory?(
+        repositoryId: string,
+        label: string | null,
+    ): Promise<GitLocalHistoryEntry>;
+    listLocalHistory?(
+        repositoryId: string,
+        path: string | null,
+    ): Promise<readonly GitLocalHistoryEntry[]>;
+    readLocalHistoryDiff?(
+        repositoryId: string,
+        entryId: string,
+        path: string,
+    ): Promise<string>;
+    restoreLocalHistory?(
+        repositoryId: string,
+        entryId: string,
+        path: string,
+    ): Promise<void>;
+    labelLocalHistory?(
+        repositoryId: string,
+        entryId: string,
+        label: string,
+    ): Promise<GitLocalHistoryEntry>;
     listConflicts(repositoryId: string): Promise<readonly ConflictFile[]>;
     readConflict(repositoryId: string, path: string): Promise<ConflictContent>;
     writeConflictResult(
@@ -107,204 +199,4 @@ export interface GitBridge {
     applyMultiRootRollback(
         steps: readonly MultiRootRollbackStep[],
     ): Promise<readonly MultiRootOutcome[]>;
-}
-
-export class TauriGitBridge implements GitBridge {
-    readonly #watchChannels = new Map<
-        string,
-        Channel<RepositoryChangedEvent>
-    >();
-
-    openRepository(path: string): Promise<RepositorySnapshot> {
-        return invoke("open_repository", { path });
-    }
-
-    initializeRepository(
-        path: string,
-        bare: boolean,
-    ): Promise<RepositorySnapshot> {
-        return invoke("initialize_repository", { path, bare });
-    }
-
-    cloneRepository(
-        url: string,
-        path: string,
-        depth: number | null,
-    ): Promise<RepositorySnapshot> {
-        return invoke("clone_repository", { url, path, depth });
-    }
-
-    refreshRepository(repositoryId: string): Promise<RepositorySnapshot> {
-        return invoke("refresh_repository", { repositoryId });
-    }
-
-    readFile(
-        repositoryId: string,
-        source: FileSource,
-        path: string,
-    ): Promise<FileContent> {
-        return invoke("read_file", { repositoryId, source, path });
-    }
-
-    openWorkingTreeFile(repositoryId: string, path: string): Promise<void> {
-        return invoke("open_working_tree_file", { repositoryId, path });
-    }
-
-    execute(
-        request: GitRequest,
-        onEvent: (event: GitEvent) => void,
-    ): Promise<RequestId> {
-        const channel = new Channel<GitEvent>();
-        channel.onmessage = onEvent;
-        return invoke("execute", { request, onEvent: channel });
-    }
-
-    cancel(requestId: RequestId): Promise<void> {
-        return invoke("cancel", { requestId });
-    }
-
-    createShelf(
-        repositoryId: string,
-        message: string,
-        paths: readonly string[],
-    ): Promise<ShelfEntry> {
-        return invoke("create_shelf", { repositoryId, message, paths });
-    }
-
-    listShelves(repositoryId: string): Promise<readonly ShelfEntry[]> {
-        return invoke("list_shelves", { repositoryId });
-    }
-
-    applyShelf(
-        repositoryId: string,
-        shelfId: string,
-        dropAfterApply: boolean,
-    ): Promise<void> {
-        return invoke("apply_shelf", { repositoryId, shelfId, dropAfterApply });
-    }
-
-    deleteShelf(repositoryId: string, shelfId: string): Promise<void> {
-        return invoke("delete_shelf", { repositoryId, shelfId });
-    }
-
-    async watchRepository(
-        repositoryId: string,
-        onEvent: (event: RepositoryChangedEvent) => void,
-    ): Promise<void> {
-        const channel = new Channel<RepositoryChangedEvent>();
-        channel.onmessage = onEvent;
-        this.#watchChannels.set(repositoryId, channel);
-        await invoke("watch_repository", { repositoryId, onEvent: channel });
-    }
-
-    async unwatchRepository(repositoryId: string): Promise<void> {
-        await invoke("unwatch_repository", { repositoryId });
-        this.#watchChannels.delete(repositoryId);
-    }
-
-    listChangelists(repositoryId: string): Promise<readonly Changelist[]> {
-        return invoke("list_changelists", { repositoryId });
-    }
-
-    saveChangelist(
-        repositoryId: string,
-        id: string | null,
-        name: string,
-        paths: readonly string[],
-    ): Promise<Changelist> {
-        return invoke("save_changelist", { repositoryId, id, name, paths });
-    }
-
-    deleteChangelist(
-        repositoryId: string,
-        changelistId: string,
-    ): Promise<void> {
-        return invoke("delete_changelist", { repositoryId, changelistId });
-    }
-
-    commitChangelist(
-        repositoryId: string,
-        changelistId: string,
-        message: string,
-        amend: boolean,
-        signOff: boolean,
-        gpgSign: boolean,
-    ): Promise<ChangelistCommitResult> {
-        return invoke("commit_changelist", {
-            repositoryId,
-            changelistId,
-            options: { message, amend, signOff, gpgSign },
-        });
-    }
-
-    listRecoveryEntries(
-        repositoryId: string,
-    ): Promise<readonly RecoveryEntry[]> {
-        return invoke("list_recovery_entries", { repositoryId });
-    }
-
-    restoreRecoveryEntry(
-        repositoryId: string,
-        entryId: string,
-    ): Promise<RecoveryRestoreResult> {
-        return invoke("restore_recovery_entry", { repositoryId, entryId });
-    }
-
-    listConflicts(repositoryId: string): Promise<readonly ConflictFile[]> {
-        return invoke("list_conflicts", { repositoryId });
-    }
-
-    readConflict(repositoryId: string, path: string): Promise<ConflictContent> {
-        return invoke("read_conflict", { repositoryId, path });
-    }
-
-    writeConflictResult(
-        repositoryId: string,
-        path: string,
-        result: string,
-        stage: boolean,
-    ): Promise<void> {
-        return invoke("write_conflict_result", {
-            repositoryId,
-            path,
-            result,
-            stage,
-        });
-    }
-
-    resolveBinaryConflict(
-        repositoryId: string,
-        path: string,
-        side: "ours" | "theirs",
-    ): Promise<void> {
-        return invoke("resolve_binary_conflict", { repositoryId, path, side });
-    }
-
-    listRemotes(repositoryId: string): Promise<readonly RemoteInfo[]> {
-        return invoke("list_remotes", { repositoryId });
-    }
-
-    listWorktrees(repositoryId: string): Promise<readonly WorktreeInfo[]> {
-        return invoke("list_worktrees", { repositoryId });
-    }
-
-    executeSynchronizedBranchOperation(
-        repositoryIds: readonly string[],
-        operation: GitOperation,
-    ): Promise<MultiRootResult> {
-        return invoke("execute_synchronized_branch_operation", {
-            repositoryIds,
-            operation,
-        });
-    }
-
-    applyMultiRootRollback(
-        steps: readonly MultiRootRollbackStep[],
-    ): Promise<readonly MultiRootOutcome[]> {
-        return invoke("apply_multi_root_rollback", { steps });
-    }
-}
-
-export function isTauriRuntime(): boolean {
-    return "__TAURI_INTERNALS__" in window;
 }

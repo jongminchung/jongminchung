@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import type { TerminalBridge } from "../bridge/TerminalBridge";
 import type { RepositoryId, TerminalEvent, TerminalId } from "../generated";
+import type {
+  TerminalLaunchTarget,
+  TerminalLaunchTargets,
+} from "../shared/contracts/terminal";
 import { TerminalService } from "./TerminalService";
 
 class FakeTerminalBridge implements TerminalBridge {
@@ -11,10 +15,15 @@ class FakeTerminalBridge implements TerminalBridge {
   readonly repositoryCloses: string[] = [];
   onEvent?: (event: TerminalEvent) => void;
 
+  listLaunchTargets(): Promise<TerminalLaunchTargets> {
+    return Promise.resolve({ shells: [], agents: [] });
+  }
+
   async create(
     repositoryId: RepositoryId,
     cols: number,
     rows: number,
+    _target: TerminalLaunchTarget,
     onEvent: (event: TerminalEvent) => void,
   ): Promise<TerminalId> {
     this.createCalls.push({ repositoryId, cols, rows });
@@ -44,7 +53,7 @@ describe("TerminalService", () => {
     vi.stubGlobal("crypto", { randomUUID: () => "ui-session-1" });
     const bridge = new FakeTerminalBridge();
     const service = TerminalService.of(bridge);
-    const key = await service.create("repository-a", "Feature shell");
+    const key = await service.create("repository-a", { title: "Feature shell" });
 
     expect(key).toBe("ui-session-1");
     expect(bridge.createCalls).toEqual([{ repositoryId: "repository-a", cols: 100, rows: 28 }]);
@@ -74,6 +83,85 @@ describe("TerminalService", () => {
     await service.closeRepository("repository-a");
     expect(service.sessions("repository-a")).toHaveLength(0);
     expect(bridge.repositoryCloses).toEqual(["repository-a"]);
+    vi.unstubAllGlobals();
+  });
+
+  it("does not overwrite an exit delivered before Electron create resolves", async () => {
+    vi.stubGlobal("crypto", { randomUUID: () => "ui-session-2" });
+    const bridge = new FakeTerminalBridge();
+    bridge.create = async (
+      repositoryId: RepositoryId,
+      cols: number,
+      rows: number,
+      _target: TerminalLaunchTarget,
+      onEvent: (event: TerminalEvent) => void,
+    ): Promise<TerminalId> => {
+      bridge.createCalls.push({ repositoryId, cols, rows });
+      onEvent({ kind: "exited", exitCode: 0, signal: null });
+      return "terminal-2";
+    };
+    const service = TerminalService.of(bridge);
+
+    await service.create("repository-a");
+
+    expect(service.sessions("repository-a")[0]).toMatchObject({
+      title: "Local",
+      terminalId: "terminal-2",
+      status: "exited",
+      exitCode: 0,
+    });
+    vi.unstubAllGlobals();
+  });
+
+  it("makes concurrent restore callers wait for the same restored terminal state", async () => {
+    vi.stubGlobal("crypto", { randomUUID: () => "ui-session-restored" });
+    let finishRead: (value: unknown) => void = () => undefined;
+    const read = new Promise<unknown>((resolve) => {
+      finishRead = resolve;
+    });
+    const get = vi.fn(async () => read);
+    const set = vi.fn(async () => undefined);
+    vi.stubGlobal("window", {
+      gitClient: { settings: { get, set, delete: vi.fn() } },
+    });
+    const bridge = new FakeTerminalBridge();
+    const service = TerminalService.of(bridge);
+
+    const first = service.restore("repository-a");
+    let secondSettled = false;
+    const second = service.restore("repository-a").finally(() => {
+      secondSettled = true;
+    });
+    await Promise.resolve();
+    expect(secondSettled).toBe(false);
+
+    finishRead({ "repository-a": ["Local"] });
+    await Promise.all([first, second]);
+    expect(get).toHaveBeenCalledTimes(1);
+    expect(bridge.createCalls).toEqual([
+      { repositoryId: "repository-a", cols: 100, rows: 28 },
+    ]);
+    expect(service.sessions("repository-a")).toHaveLength(1);
+    vi.unstubAllGlobals();
+  });
+
+  it("retains a create failure as a terminal event for the xterm surface", async () => {
+    vi.stubGlobal("crypto", { randomUUID: () => "ui-session-failed" });
+    const bridge = new FakeTerminalBridge();
+    bridge.create = async (): Promise<TerminalId> => {
+      throw new Error("Unable to start terminal shell: EACCES");
+    };
+    const service = TerminalService.of(bridge);
+
+    const key = await service.create("repository-a");
+
+    expect(service.sessions("repository-a")[0]).toMatchObject({
+      status: "failed",
+      error: "Unable to start terminal shell: EACCES",
+    });
+    expect(service.events(key)).toEqual([
+      { kind: "failed", message: "Unable to start terminal shell: EACCES" },
+    ]);
     vi.unstubAllGlobals();
   });
 });

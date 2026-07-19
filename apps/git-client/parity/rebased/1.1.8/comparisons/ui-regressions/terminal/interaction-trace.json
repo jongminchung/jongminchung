@@ -1,0 +1,26 @@
+{
+  "scenario": "packaged-terminal-real-pty",
+  "repository": "/private/tmp/git-client-cua.MDWFY8/repository",
+  "steps": [
+    {
+      "action": "open-terminal-tool-window",
+      "result": "terminal prompt rendered"
+    },
+    {
+      "action": "type-text",
+      "value": "pwd",
+      "result": "input rendered"
+    },
+    {
+      "action": "press-key",
+      "value": "Return",
+      "result": "command executed through packaged PTY"
+    },
+    {
+      "action": "observe",
+      "result": "working directory output rendered and prompt returned"
+    }
+  ],
+  "computerUse": "Codex Computer Use",
+  "candidate": "Electron 43.1.1 packaged app"
+}

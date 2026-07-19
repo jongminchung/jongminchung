@@ -85,4 +85,18 @@ describe("Node.js workflow configuration", () => {
     expect(nodeVersion).toBe("26.5.0");
     expect(readNodeEngine(packageConfig)).toBe(">=26.5.0");
   });
+
+  it("uses Electron ARM64 artifacts and fail-closed production signing in Git Client CI", () => {
+    const contents = readFileSync(
+      new URL(".github/workflows/git-client.yml", workspaceRoot),
+      "utf8",
+    );
+
+    expect(contents).toContain("release:validate-local -- 0.1.0");
+    expect(contents).toContain("git-client-macos-arm64-adhoc");
+    expect(contents).toContain("GIT_CLIENT_CODESIGN_IDENTITY");
+    expect(contents).toContain("GIT_CLIENT_NOTARY_KEYCHAIN_PROFILE: git-client-ci");
+    expect(contents).toContain("xcrun notarytool store-credentials git-client-ci");
+    expect(contents).toContain("pnpm --filter @jongminchung/git-client release:validate-local");
+  });
 });

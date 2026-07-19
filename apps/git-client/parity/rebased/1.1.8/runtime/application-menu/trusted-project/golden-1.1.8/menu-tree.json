@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-19T04:29:03.175Z",
+  "referenceVersion": "1.1.8",
+  "menus": [
+    "application",
+    "file",
+    "edit",
+    "view",
+    "appearance",
+    "navigate",
+    "code",
+    "run",
+    "tools",
+    "git",
+    "gitExpanded",
+    "window",
+    "help"
+  ],
+  "complete": false,
+  "note": "Top-level menus and the observed recursive submenus are captured in a trusted disposable project state. Dynamic providers, shortcuts, separators, and additional semantic states remain incomplete."
+}

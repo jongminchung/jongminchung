@@ -1,0 +1,1107 @@
+{
+  "baseline": {
+    "build": "262.8665.SNAPSHOT",
+    "commit": "12fb12778a5ad8b7c52b64931a81c648629c9e23",
+    "tag": "1.1.8"
+  },
+  "configurables": [
+    {
+      "attributes": {
+        "bundle": "messages.IdeBundle",
+        "groupId": "tools",
+        "id": "actions.on.save",
+        "key": "actions.on.save.page.title",
+        "nonDefaultProject": "false",
+        "provider": "com.intellij.ide.actionsOnSave.ActionsOnSaveConfigurable$ActionsOnSaveConfigurableProvider"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
+        "line": 1414,
+        "path": "platform/platform-resources/src/META-INF/PlatformExtensions.xml"
+      },
+      "stableId": "configurable:actions.on.save"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.ApplicationBundle",
+        "groupId": "root",
+        "id": "advanced.settings",
+        "instance": "com.intellij.openapi.options.advanced.AdvancedSettingsConfigurable",
+        "key": "title.advanced.settings"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
+        "line": 1726,
+        "path": "platform/platform-resources/src/META-INF/PlatformExtensions.xml"
+      },
+      "stableId": "configurable:advanced.settings"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.CredentialStoreBundle",
+        "id": "application.passwordSafe",
+        "instance": "com.intellij.credentialStore.PasswordSafeConfigurable",
+        "key": "password.safe.configurable",
+        "parentId": "preferences.general"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "bfd629ab65aef92b1bc0737783c4e8016dca186f",
+        "line": 29,
+        "path": "platform/credential-store-impl/resources/intellij.platform.credentialStore.impl.xml"
+      },
+      "stableId": "configurable:application.passwordSafe"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.ExternalSystemBundle",
+        "groupId": "build",
+        "id": "build.tools",
+        "instance": "com.intellij.openapi.externalSystem.service.settings.ExternalSystemGroupConfigurable",
+        "key": "settings.build.tools.display.name"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "4df0a0a9cb8f859c7c1e977f1f5720543f5cdd98",
+        "line": 24,
+        "path": "platform/external-system-impl/resources/META-INF/ExternalSystemExtensions.xml"
+      },
+      "stableId": "configurable:build.tools"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.IdeBundle",
+        "groupId": "editor",
+        "groupWeight": "188",
+        "key": "configurable.console.font.name",
+        "parentId": "editor.preferences.fonts.default",
+        "provider": "com.intellij.application.options.editor.fonts.AppConsoleFontConfigurable$Provider"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
+        "line": 874,
+        "path": "platform/platform-resources/src/META-INF/PlatformExtensions.xml"
+      },
+      "stableId": "configurable:com.intellij.application.options.editor.fonts.AppConsoleFontConfigurable$Provider"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.IdeBundle",
+        "groupId": "editor",
+        "groupWeight": "188",
+        "instance": "com.intellij.application.options.editor.fonts.AppEditorFontConfigurable",
+        "key": "configurable.font.name"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
+        "line": 866,
+        "path": "platform/platform-resources/src/META-INF/PlatformExtensions.xml"
+      },
+      "stableId": "configurable:com.intellij.application.options.editor.fonts.AppEditorFontConfigurable"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.LangBundle",
+        "groupId": "build",
+        "key": "run.toolbar.configurable.title",
+        "provider": "com.intellij.execution.runToolbar.RunToolbarSettingsConfigurableProvider"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "c91525097ddd5c0b0f45a67d0c89d106435d5278",
+        "line": 78,
+        "path": "platform/execution-impl/resources/META-INF/PlatformExecutionActions.xml"
+      },
+      "stableId": "configurable:com.intellij.execution.runToolbar.RunToolbarSettingsConfigurableProvider"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.MinimapBundle",
+        "id": "com.intellij.minimap",
+        "key": "settings.name",
+        "parentId": "editor",
+        "provider": "com.intellij.ide.minimap.settings.MinimapConfigurableProvider"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "9e5255d621807e66e084e5f7d2b6b98c9e83c4f9",
+        "line": 6,
+        "path": "platform/platform-resources/src/META-INF/MinimapExtensions.xml"
+      },
+      "stableId": "configurable:com.intellij.minimap"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.IdeBundle",
+        "groupId": "appearance",
+        "groupWeight": "-15",
+        "instance": "com.intellij.platform.ide.impl.presentationAssistant.PresentationAssistantConfigurable",
+        "key": "presentation.assistant.settings"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
+        "line": 1866,
+        "path": "platform/platform-resources/src/META-INF/PlatformExtensions.xml"
+      },
+      "stableId": "configurable:com.intellij.platform.ide.impl.presentationAssistant.PresentationAssistantConfigurable"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.IdeBundle",
+        "id": "Console",
+        "instance": "com.intellij.execution.console.ConsoleConfigurable",
+        "key": "configurable.Console.display.name",
+        "parentId": "preferences.editor"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "a7d5ec332a7e12fb1e6f2d8a94e95f7ebb7afe91",
+        "line": 500,
+        "path": "platform/platform-resources/src/META-INF/LangExtensions.xml"
+      },
+      "stableId": "configurable:Console"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.CoverageBundle",
+        "groupId": "build",
+        "id": "coverage",
+        "instance": "com.intellij.coverage.CoverageOptionsConfigurable",
+        "key": "configurable.CoverageOptionsConfigurable.display.name"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "aa830965e03676918b27c71e2e7a7f30b596e040",
+        "line": 43,
+        "path": "plugins/coverage-common/resources/intellij.platform.coverage.xml"
+      },
+      "stableId": "configurable:coverage"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.DataGridBundle",
+        "groupId": "tools",
+        "id": "database.data.csv.formats",
+        "instance": "com.intellij.database.settings.CsvSettingsConfigurable",
+        "key": "configurable.DatabaseSettingsConfigurable.CsvFormats.display.name"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "c9dfcc49dbf8c39ffe915c53747ed16dc1735b17",
+        "line": 78,
+        "path": "grid/impl/resources/intellij.grid.impl.xml"
+      },
+      "stableId": "configurable:database.data.csv.formats"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.IdeBundle",
+        "groupId": "appearance",
+        "groupWeight": "100",
+        "id": "database.data.views.appearance",
+        "instance": "com.intellij.database.settings.DataGridAppearanceConfigurable",
+        "key": "configurable.DatabaseSettingsConfigurable.DataViews.display.name"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "c9dfcc49dbf8c39ffe915c53747ed16dc1735b17",
+        "line": 83,
+        "path": "grid/impl/resources/intellij.grid.impl.xml"
+      },
+      "stableId": "configurable:database.data.views.appearance"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.DiffBundle",
+        "groupId": "tools",
+        "id": "diff.base",
+        "instance": "com.intellij.diff.settings.DiffSettingsConfigurable",
+        "key": "configurable.DiffSettingsConfigurable.display.name"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
+        "line": 379,
+        "path": "platform/platform-resources/src/META-INF/PlatformExtensions.xml"
+      },
+      "stableId": "configurable:diff.base"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.CodeInsightBundle",
+        "groupId": "editor",
+        "groupWeight": "130",
+        "id": "editing.templates",
+        "instance": "com.intellij.codeInsight.template.impl.LiveTemplatesConfigurable",
+        "key": "templates.settings.page.title"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "a7d5ec332a7e12fb1e6f2d8a94e95f7ebb7afe91",
+        "line": 522,
+        "path": "platform/platform-resources/src/META-INF/LangExtensions.xml"
+      },
+      "stableId": "configurable:editing.templates"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.ApplicationBundle",
+        "id": "editor.breadcrumbs",
+        "instance": "com.intellij.xml.breadcrumbs.BreadcrumbsConfigurable",
+        "key": "configurable.breadcrumbs",
+        "parentId": "preferences.editor"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
+        "line": 1218,
+        "path": "platform/platform-resources/src/META-INF/PlatformExtensions.xml"
+      },
+      "stableId": "configurable:editor.breadcrumbs"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.ApplicationBundle",
+        "groupWeight": "1",
+        "id": "editor.preferences.import",
+        "instance": "com.intellij.application.options.editor.AutoImportOptionsConfigurable",
+        "key": "auto.import",
+        "parentId": "preferences.editor"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "a7d5ec332a7e12fb1e6f2d8a94e95f7ebb7afe91",
+        "line": 834,
+        "path": "platform/platform-resources/src/META-INF/LangExtensions.xml"
+      },
+      "stableId": "configurable:editor.preferences.import"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.LangBundle",
+        "groupId": "editor",
+        "id": "editor.reader.mode",
+        "key": "title.reader.mode",
+        "order": "after editor.preferences.import",
+        "provider": "com.intellij.codeInsight.actions.ReaderModeConfigurableProvider"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "a7d5ec332a7e12fb1e6f2d8a94e95f7ebb7afe91",
+        "line": 286,
+        "path": "platform/platform-resources/src/META-INF/LangExtensions.xml"
+      },
+      "stableId": "configurable:editor.reader.mode"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.ApplicationBundle",
+        "id": "editor.stickyLines",
+        "instance": "com.intellij.openapi.editor.impl.stickyLines.configurable.StickyLinesConfigurable",
+        "key": "configurable.sticky.lines",
+        "parentId": "preferences.editor"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
+        "line": 1225,
+        "path": "platform/platform-resources/src/META-INF/PlatformExtensions.xml"
+      },
+      "stableId": "configurable:editor.stickyLines"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.CodeInsightBundle",
+        "groupId": "editor",
+        "groupWeight": "160",
+        "id": "Errors",
+        "key": "configurable.InspectionToolsConfigurable.display.name",
+        "order": "before preferences.intentionPowerPack",
+        "provider": "com.intellij.profile.codeInspection.ui.ErrorsConfigurableProviderImpl"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "285022d760c89b4a0f8edf40b3feece58dd34a66",
+        "line": 90,
+        "path": "platform/platform-resources/src/META-INF/PlatformLangPlugin.xml"
+      },
+      "stableId": "configurable:Errors"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.IdeBundle",
+        "groupId": "editor",
+        "groupWeight": "140",
+        "id": "File.Encoding",
+        "key": "file.encodings.configurable",
+        "provider": "com.intellij.openapi.vfs.encoding.FileEncodingConfigurableProvider"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "a7d5ec332a7e12fb1e6f2d8a94e95f7ebb7afe91",
+        "line": 1036,
+        "path": "platform/platform-resources/src/META-INF/LangExtensions.xml"
+      },
+      "stableId": "configurable:File.Encoding"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.IdeBundle",
+        "groupId": "editor",
+        "groupWeight": "150",
+        "id": "fileTemplates",
+        "key": "title.file.templates",
+        "provider": "com.intellij.ide.fileTemplates.impl.AllFileTemplatesConfigurable$Provider"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "a7d5ec332a7e12fb1e6f2d8a94e95f7ebb7afe91",
+        "line": 534,
+        "path": "platform/platform-resources/src/META-INF/LangExtensions.xml"
+      },
+      "stableId": "configurable:fileTemplates"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.UIBundle",
+        "id": "http.certificates",
+        "instance": "com.intellij.util.net.ssl.CertificateConfigurable",
+        "key": "configurable.CertificateConfigurable.display.name",
+        "parentId": "preferences.general"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
+        "line": 811,
+        "path": "platform/platform-resources/src/META-INF/PlatformExtensions.xml"
+      },
+      "stableId": "configurable:http.certificates"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.IdeBundle",
+        "id": "http.proxy",
+        "instance": "com.intellij.util.net.HttpProxyConfigurable",
+        "key": "http.proxy.configurable",
+        "parentId": "preferences.general"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
+        "line": 803,
+        "path": "platform/platform-resources/src/META-INF/PlatformExtensions.xml"
+      },
+      "stableId": "configurable:http.proxy"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.IdeBundle",
+        "id": "ide.date.format",
+        "instance": "com.intellij.ide.ui.text.DateTimeFormatConfigurable",
+        "key": "date.time.format.configurable",
+        "parentId": "preferences.general"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
+        "line": 798,
+        "path": "platform/platform-resources/src/META-INF/PlatformExtensions.xml"
+      },
+      "stableId": "configurable:ide.date.format"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.ApplicationBundle",
+        "dynamic": "true",
+        "groupWeight": "1",
+        "id": "inlay.hints",
+        "key": "settings.hints",
+        "parentId": "editor",
+        "provider": "com.intellij.codeInsight.hints.settings.InlaySettingsConfigurableProvider"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "a7d5ec332a7e12fb1e6f2d8a94e95f7ebb7afe91",
+        "line": 436,
+        "path": "platform/platform-resources/src/META-INF/LangExtensions.xml"
+      },
+      "stableId": "configurable:inlay.hints"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.IntelliLangBundle",
+        "dynamic": "true",
+        "groupId": "editor",
+        "id": "IntelliLang.Configuration",
+        "instance": "org.intellij.plugins.intelliLang.InjectionsSettingsUI",
+        "key": "configurable.InjectionsSettingsUI.display.name",
+        "nonDefaultProject": "true"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "26e58385395ac25b432419e6817e306ac570d422",
+        "line": 28,
+        "path": "plugins/IntelliLang/backend/resources/intellij.platform.langInjection.backend.xml"
+      },
+      "stableId": "configurable:IntelliLang.Configuration"
+    },
+    {
+      "attributes": {
+        "groupWeight": "-500",
+        "instance": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable",
+        "key": "settings.configurable.display.name",
+        "parentId": "project.propVCSSupport.Mappings"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "4ee88d3c0c9cd9c77fab5db70ccb8b560e1c2f01",
+        "line": 55,
+        "path": "plugins/github/github-core/resources/intellij.vcs.github.xml"
+      },
+      "stableId": "configurable:org.jetbrains.plugins.github.ui.GithubSettingsConfigurable"
+    },
+    {
+      "attributes": {
+        "displayName": "GitLab",
+        "groupWeight": "-500",
+        "instance": "org.jetbrains.plugins.gitlab.GitLabSettingsConfigurable",
+        "parentId": "project.propVCSSupport.Mappings"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "ade25669ef11145ee810839b85d3ae9c3951e369",
+        "line": 38,
+        "path": "plugins/gitlab/gitlab-core/resources/intellij.vcs.gitlab.xml"
+      },
+      "stableId": "configurable:org.jetbrains.plugins.gitlab.GitLabSettingsConfigurable"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.IdeBundle",
+        "groupId": "appearance",
+        "groupWeight": "130",
+        "id": "preferences.customizations",
+        "instance": "com.intellij.ide.ui.customization.CustomizationConfigurable",
+        "key": "title.customizations"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
+        "line": 771,
+        "path": "platform/platform-resources/src/META-INF/PlatformExtensions.xml"
+      },
+      "stableId": "configurable:preferences.customizations"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.ApplicationBundle",
+        "childrenEPName": "com.intellij.editorOptionsProvider",
+        "groupId": "editor",
+        "groupWeight": "190",
+        "id": "preferences.editor",
+        "instance": "com.intellij.application.options.editor.EditorOptionsPanel",
+        "key": "title.editor",
+        "order": "after preferences.lookFeel"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "a7d5ec332a7e12fb1e6f2d8a94e95f7ebb7afe91",
+        "line": 490,
+        "path": "platform/platform-resources/src/META-INF/LangExtensions.xml"
+      },
+      "stableId": "configurable:preferences.editor"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.ApplicationBundle",
+        "groupId": "editor",
+        "groupWeight": "189",
+        "id": "preferences.editor.code.editing",
+        "instance": "com.intellij.application.options.editor.EditorCodeEditingConfigurable",
+        "key": "title.code.editing"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "a7d5ec332a7e12fb1e6f2d8a94e95f7ebb7afe91",
+        "line": 496,
+        "path": "platform/platform-resources/src/META-INF/LangExtensions.xml"
+      },
+      "stableId": "configurable:preferences.editor.code.editing"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.IdeBundle",
+        "groupId": "appearance",
+        "id": "preferences.externalDependencies",
+        "key": "configurable.ExternalDependenciesConfigurable.display.name",
+        "provider": "com.intellij.externalDependencies.impl.ExternalDependenciesConfigurableProvider"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
+        "line": 842,
+        "path": "platform/platform-resources/src/META-INF/PlatformExtensions.xml"
+      },
+      "stableId": "configurable:preferences.externalDependencies"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.XmlBundle",
+        "groupId": "language",
+        "id": "preferences.externalResources",
+        "instance": "com.intellij.javaee.ExternalResourceConfigurable",
+        "key": "xml.external.resource.display.name"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "e61840209854e78738e2357e743d23c52efe67b4",
+        "line": 108,
+        "path": "xml/impl/resources/intellij.xml.impl.xml"
+      },
+      "stableId": "configurable:preferences.externalResources"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.ToolsBundle",
+        "groupId": "tools",
+        "id": "preferences.externalTools",
+        "instance": "com.intellij.tools.ToolConfigurable",
+        "key": "tools.settings.title"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "a7d5ec332a7e12fb1e6f2d8a94e95f7ebb7afe91",
+        "line": 540,
+        "path": "platform/platform-resources/src/META-INF/LangExtensions.xml"
+      },
+      "stableId": "configurable:preferences.externalTools"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.FileTypesBundle",
+        "groupId": "editor",
+        "groupWeight": "120",
+        "id": "preferences.fileTypes",
+        "instance": "com.intellij.openapi.fileTypes.impl.FileTypeConfigurable",
+        "key": "filetype.settings.title"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "a7d5ec332a7e12fb1e6f2d8a94e95f7ebb7afe91",
+        "line": 512,
+        "path": "platform/platform-resources/src/META-INF/LangExtensions.xml"
+      },
+      "stableId": "configurable:preferences.fileTypes"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.IdeBundle",
+        "groupId": "appearance",
+        "groupWeight": "120",
+        "id": "preferences.general",
+        "instance": "com.intellij.ide.GeneralSettingsConfigurable",
+        "key": "title.general"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
+        "line": 754,
+        "path": "platform/platform-resources/src/META-INF/PlatformExtensions.xml"
+      },
+      "stableId": "configurable:preferences.general"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.CodeInsightBundle",
+        "groupId": "editor",
+        "id": "preferences.intentionPowerPack",
+        "key": "intention.settings",
+        "provider": "com.intellij.codeInsight.intention.impl.config.IntentionsConfigurableProviderImpl"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "a7d5ec332a7e12fb1e6f2d8a94e95f7ebb7afe91",
+        "line": 516,
+        "path": "platform/platform-resources/src/META-INF/LangExtensions.xml"
+      },
+      "stableId": "configurable:preferences.intentionPowerPack"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.KeyMapBundle",
+        "groupId": "root",
+        "groupWeight": "65",
+        "id": "preferences.keymap",
+        "instance": "com.intellij.openapi.keymap.impl.ui.KeymapPanel",
+        "key": "keymap.display.name"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
+        "line": 762,
+        "path": "platform/platform-resources/src/META-INF/PlatformExtensions.xml"
+      },
+      "stableId": "configurable:preferences.keymap"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.IdeBundle",
+        "id": "preferences.language.and.region",
+        "instance": "com.intellij.ide.ui.LanguageAndRegionConfigurable",
+        "key": "title.language.and.region",
+        "parentId": "preferences.general"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
+        "line": 807,
+        "path": "platform/platform-resources/src/META-INF/PlatformExtensions.xml"
+      },
+      "stableId": "configurable:preferences.language.and.region"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.IdeBundle",
+        "groupId": "appearance",
+        "groupWeight": "150",
+        "id": "preferences.lookFeel",
+        "instance": "com.intellij.ide.ui.AppearanceConfigurable",
+        "key": "title.appearance"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
+        "line": 758,
+        "path": "platform/platform-resources/src/META-INF/PlatformExtensions.xml"
+      },
+      "stableId": "configurable:preferences.lookFeel"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.ApplicationBundle",
+        "groupId": "appearance",
+        "groupWeight": "-10",
+        "id": "preferences.pathVariables",
+        "instance": "com.intellij.application.options.pathMacros.PathMacroConfigurable",
+        "key": "title.path.variables"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
+        "line": 388,
+        "path": "platform/platform-resources/src/META-INF/PlatformExtensions.xml"
+      },
+      "stableId": "configurable:preferences.pathVariables"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.IdeBundle",
+        "groupId": "root",
+        "groupWeight": "55",
+        "id": "preferences.pluginManager",
+        "instance": "com.intellij.ide.plugins.PluginManagerConfigurable",
+        "key": "title.plugins",
+        "searchableInActions": "false",
+        "treeRenderer": "com.intellij.ide.plugins.PluginManagerConfigurableTreeRenderer"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
+        "line": 785,
+        "path": "platform/platform-resources/src/META-INF/PlatformExtensions.xml"
+      },
+      "stableId": "configurable:preferences.pluginManager"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.IdeBundle",
+        "dynamic": "true",
+        "groupId": "editor",
+        "groupWeight": "170",
+        "id": "preferences.sourceCode",
+        "instance": "com.intellij.application.options.CodeStyleSchemesConfigurable",
+        "key": "configurable.CodeStyle.display.name",
+        "order": "after colors"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "a7d5ec332a7e12fb1e6f2d8a94e95f7ebb7afe91",
+        "line": 506,
+        "path": "platform/platform-resources/src/META-INF/LangExtensions.xml"
+      },
+      "stableId": "configurable:preferences.sourceCode"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.ExecutionBundle",
+        "groupId": "tools",
+        "id": "preferences.startup.tasks",
+        "key": "configurable.ProjectStartupConfigurable.display.name",
+        "nonDefaultProject": "true",
+        "provider": "com.intellij.execution.startup.ProjectStartupConfigurable$ProjectStartupConfigurableProvider"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "a58217347c6803bbfb17c375ac66219065c9ab37",
+        "line": 76,
+        "path": "platform/platform-resources/src/META-INF/PlatformExecutionExtensions.xml"
+      },
+      "stableId": "configurable:preferences.startup.tasks"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.IdeBundle",
+        "id": "preferences.updates",
+        "instance": "com.intellij.openapi.updateSettings.impl.UpdateSettingsConfigurable",
+        "key": "updates.settings.title",
+        "parentId": "preferences.general"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
+        "line": 847,
+        "path": "platform/platform-resources/src/META-INF/PlatformExtensions.xml"
+      },
+      "stableId": "configurable:preferences.updates"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.XDebuggerBundle",
+        "dynamic": "true",
+        "groupId": "build",
+        "id": "project.propDebugger",
+        "key": "debugger.configurable.display.name",
+        "provider": "com.intellij.xdebugger.impl.settings.DebuggerConfigurableProvider"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "6656ad29df3e448055c1365b5b9584580e020d99",
+        "line": 67,
+        "path": "platform/xdebugger-impl/ui/resources/intellij.platform.debugger.impl.ui.xml"
+      },
+      "stableId": "configurable:project.propDebugger"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.VcsBundle",
+        "dynamic": "true",
+        "groupId": "root",
+        "groupWeight": "45",
+        "id": "project.propVCSSupport.Mappings",
+        "key": "version.control.main.configurable.name",
+        "provider": "com.intellij.openapi.vcs.configurable.VcsManagerConfigurableProvider"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "c3ea9a1e9e6919551c0c7e0ad6799687e4c2ab3a",
+        "line": 167,
+        "path": "platform/vcs-impl/resources/META-INF/VcsExtensions.xml"
+      },
+      "stableId": "configurable:project.propVCSSupport.Mappings"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.IdeBundle",
+        "groupId": "appearance",
+        "groupWeight": "111",
+        "id": "project.scopes",
+        "instance": "com.intellij.ide.util.scopeChooser.ScopeChooserConfigurable",
+        "key": "scopes.display.name"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "285022d760c89b4a0f8edf40b3feece58dd34a66",
+        "line": 92,
+        "path": "platform/platform-resources/src/META-INF/PlatformLangPlugin.xml"
+      },
+      "stableId": "configurable:project.scopes"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.XmlEmmetBundle",
+        "dynamic": "true",
+        "groupId": "editor",
+        "id": "reference.idesettings.emmet",
+        "key": "emmet.configuration.title",
+        "provider": "com.intellij.application.options.emmet.EmmetConfigurableProvider"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "0d04cd193b5b86cbe57360af3abb489dd70c50b4",
+        "line": 9,
+        "path": "xml/emmet/backend/resources/intellij.xml.emmet.backend.xml"
+      },
+      "stableId": "configurable:reference.idesettings.emmet"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.IdeBundle",
+        "groupId": "appearance",
+        "id": "reference.idesettings.quicklists",
+        "instance": "com.intellij.openapi.keymap.impl.ui.QuickListsPanel",
+        "key": "configurable.quick.lists.name"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
+        "line": 765,
+        "path": "platform/platform-resources/src/META-INF/PlatformExtensions.xml"
+      },
+      "stableId": "configurable:reference.idesettings.quicklists"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.IdeBundle",
+        "groupId": "appearance",
+        "groupWeight": "112",
+        "id": "reference.settings.ide.settings.file-colors",
+        "instance": "com.intellij.ui.tabs.FileColorsConfigurable",
+        "key": "configurable.file.colors"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "a7d5ec332a7e12fb1e6f2d8a94e95f7ebb7afe91",
+        "line": 1042,
+        "path": "platform/platform-resources/src/META-INF/LangExtensions.xml"
+      },
+      "stableId": "configurable:reference.settings.ide.settings.file-colors"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.IdeBundle",
+        "groupId": "appearance",
+        "groupWeight": "110",
+        "id": "reference.settings.ide.settings.notifications",
+        "key": "configurable.notifications.name",
+        "provider": "com.intellij.notification.impl.NotificationsConfigurableProvider"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
+        "line": 776,
+        "path": "platform/platform-resources/src/META-INF/PlatformExtensions.xml"
+      },
+      "stableId": "configurable:reference.settings.ide.settings.notifications"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.IdeBundle",
+        "groupId": "tools",
+        "id": "reference.settings.ide.settings.web.browsers",
+        "instance": "com.intellij.ide.browsers.BrowserSettings",
+        "key": "browsers.settings"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
+        "line": 1404,
+        "path": "platform/platform-resources/src/META-INF/PlatformExtensions.xml"
+      },
+      "stableId": "configurable:reference.settings.ide.settings.web.browsers"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.ApplicationBundle",
+        "dynamic": "true",
+        "groupId": "editor",
+        "groupWeight": "180",
+        "id": "reference.settingsdialog.IDE.editor.colors",
+        "instance": "com.intellij.application.options.colors.ColorAndFontOptions",
+        "key": "title.colors.and.fonts"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "a7d5ec332a7e12fb1e6f2d8a94e95f7ebb7afe91",
+        "line": 814,
+        "path": "platform/platform-resources/src/META-INF/LangExtensions.xml"
+      },
+      "stableId": "configurable:reference.settingsdialog.IDE.editor.colors"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.IdeBundle",
+        "groupId": "editor",
+        "id": "reference.settingsdialog.textmate.bundles",
+        "key": "configurable.TextMateConfigurableProvider.display.name",
+        "provider": "org.jetbrains.plugins.textmate.configuration.TextMateConfigurableProvider"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "9ab16aeaf5e229c125b0b706e56d12fb7136b369",
+        "line": 14,
+        "path": "plugins/textmate/backend/resources/intellij.textmate.backend.xml"
+      },
+      "stableId": "configurable:reference.settingsdialog.textmate.bundles"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.CloudBundle",
+        "groupId": "build",
+        "id": "RemoteServers",
+        "key": "configurable.display.name.clouds",
+        "provider": "com.intellij.remoteServer.impl.configuration.RemoteServerListConfigurableProvider"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "211ef38d314bf3247e4edbb2a4c3e8d0d1f86e33",
+        "line": 54,
+        "path": "platform/remote-servers/impl/resources/intellij.platform.remoteServers.impl.xml"
+      },
+      "stableId": "configurable:RemoteServers"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.IdeBundle",
+        "groupId": "build",
+        "id": "Runtime.Targets.Configurable",
+        "key": "configurable.Runtime.Targets.Configurable.display.name",
+        "provider": "com.intellij.execution.target.TargetEnvironmentsConfigurableProvider"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "a58217347c6803bbfb17c375ac66219065c9ab37",
+        "line": 72,
+        "path": "platform/platform-resources/src/META-INF/PlatformExecutionExtensions.xml"
+      },
+      "stableId": "configurable:Runtime.Targets.Configurable"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.JsonBundle",
+        "groupId": "preferences.externalResources",
+        "id": "settings.json.schema",
+        "instance": "com.jetbrains.jsonSchema.settings.mappings.JsonSchemaMappingsConfigurable",
+        "key": "configurable.JsonSchemaMappingsConfigurable.display.name",
+        "nonDefaultProject": "true"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "28b944ce4c5b8993e56c1f45dbd55cef275b6205",
+        "line": 89,
+        "path": "json/backend/resources/intellij.json.backend.xml"
+      },
+      "stableId": "configurable:settings.json.schema"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.JsonBundle",
+        "groupId": "preferences.externalResources",
+        "id": "settings.json.schema.catalog",
+        "instance": "com.jetbrains.jsonSchema.JsonSchemaCatalogConfigurable",
+        "key": "configurable.JsonSchemaCatalogConfigurable.display.name",
+        "nonDefaultProject": "true"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "28b944ce4c5b8993e56c1f45dbd55cef275b6205",
+        "line": 93,
+        "path": "json/backend/resources/intellij.json.backend.xml"
+      },
+      "stableId": "configurable:settings.json.schema.catalog"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.SettingsSyncBundle",
+        "groupId": "root",
+        "groupWeight": "5",
+        "id": "settings.sync",
+        "key": "title.settings.sync",
+        "provider": "com.intellij.settingsSync.core.config.SettingsSyncConfigurableProvider"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "28cf19494a8831cbfe090f548c3e32189235e0e5",
+        "line": 43,
+        "path": "platform/settings-sync-core/resources/intellij.settingsSync.core.xml"
+      },
+      "stableId": "configurable:settings.sync"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.LangBundle",
+        "groupId": "language",
+        "id": "Template Data Languages",
+        "instance": "com.intellij.psi.templateLanguages.TemplateDataLanguageConfigurable",
+        "key": "template.data.language.configurable",
+        "nonDefaultProject": "true"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "4f68b0fbda7d2cc33ee8ee1d54d6d289570f3135",
+        "line": 12,
+        "path": "idea/customization/min/resources/intellij.platform.customization.min.xml"
+      },
+      "stableId": "configurable:Template Data Languages"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.IdeBundle",
+        "groupId": "tools",
+        "id": "terminal",
+        "instance": "com.intellij.terminal.frontend.settings.TerminalOptionsConfigurable",
+        "key": "configurable.TerminalOptionsConfigurable.display.name"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "faf8aae8573a235b2a9e74e19e7650722140f47b",
+        "line": 20,
+        "path": "plugins/terminal/frontend/resources/intellij.terminal.frontend.xml"
+      },
+      "stableId": "configurable:terminal"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.IdeBundle",
+        "groupId": "appearance",
+        "id": "trusted.hosts",
+        "instance": "com.intellij.ide.impl.TrustedHostsConfigurable",
+        "key": "configurable.trusted.hosts.display.name"
+      },
+      "scope": "application",
+      "source": {
+        "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
+        "line": 393,
+        "path": "platform/platform-resources/src/META-INF/PlatformExtensions.xml"
+      },
+      "stableId": "configurable:trusted.hosts"
+    },
+    {
+      "attributes": {
+        "groupWeight": "-500",
+        "id": "vcs.Git",
+        "instance": "git4idea.config.GitVcsPanel",
+        "key": "settings.git.option.group",
+        "parentId": "project.propVCSSupport.Mappings"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 772,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      },
+      "stableId": "configurable:vcs.Git"
+    },
+    {
+      "attributes": {
+        "bundle": "messages.VcsLogBundle",
+        "id": "vcs.log",
+        "key": "vcs.log.settings.group.title",
+        "parentId": "project.propVCSSupport.Mappings",
+        "provider": "com.intellij.vcs.log.ui.VcsLogConfigurableProvider"
+      },
+      "scope": "project",
+      "source": {
+        "blob": "52b4286ec9234cec2b958452d204e956f4c41766",
+        "line": 80,
+        "path": "platform/vcs-log/impl/resources/intellij.platform.vcs.log.impl.xml"
+      },
+      "stableId": "configurable:vcs.log"
+    }
+  ],
+  "schemaVersion": 1
+}

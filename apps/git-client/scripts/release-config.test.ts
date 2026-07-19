@@ -1,59 +1,93 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-const nxConfig = JSON.parse(readFileSync(new URL("../../../nx.json", import.meta.url), "utf8"));
-const packageConfig = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+const nxConfig = JSON.parse(
+    readFileSync(new URL("../../../nx.json", import.meta.url), "utf8"),
+);
+const packageConfig = JSON.parse(
+    readFileSync(new URL("../package.json", import.meta.url), "utf8"),
+);
 
 describe("Nx release configuration", () => {
-  it("isolates Git Client in a fixed release group", () => {
-    const group = nxConfig.release.groups["git-client"];
+    it("isolates Git Client in a fixed release group", () => {
+        const group = nxConfig.release.groups["git-client"];
 
-    expect(group.projects).toEqual(["@jongminchung/git-client"]);
-    expect(group.projectsRelationship).toBe("fixed");
-    expect(group.releaseTag).toEqual({
-      pattern: "git-client-{version}",
-      requireSemver: true,
+        expect(group.projects).toEqual(["@jongminchung/git-client"]);
+        expect(group.projectsRelationship).toBe("fixed");
+        expect(group.releaseTag).toEqual({
+            pattern: "git-client-{version}",
+            requireSemver: true,
+        });
     });
-  });
 
-  it("uses file affectedness and the agreed conventional commit bumps", () => {
-    expect(nxConfig.release.conventionalCommits).toMatchObject({
-      useCommitScope: false,
-      types: {
-        feat: { semverBump: "minor" },
-        fix: { semverBump: "patch" },
-        perf: { semverBump: "patch" },
-      },
+    it("uses file affectedness and the agreed conventional commit bumps", () => {
+        expect(nxConfig.release.conventionalCommits).toMatchObject({
+            useCommitScope: false,
+            types: {
+                feat: { semverBump: "minor" },
+                fix: { semverBump: "patch" },
+                perf: { semverBump: "patch" },
+            },
+        });
+        expect(nxConfig.release.groups["git-client"].version).toMatchObject({
+            adjustSemverBumpsForZeroMajorVersion: false,
+            currentVersionResolver: "git-tag",
+            fallbackCurrentVersionResolver: "disk",
+            specifierSource: "conventional-commits",
+            versionActionsOptions: { skipLockFileUpdate: true },
+        });
     });
-    expect(nxConfig.release.groups["git-client"].version).toMatchObject({
-      adjustSemverBumpsForZeroMajorVersion: false,
-      currentVersionResolver: "git-tag",
-      fallbackCurrentVersionResolver: "disk",
-      specifierSource: "conventional-commits",
-      versionActionsOptions: { skipLockFileUpdate: true },
-    });
-  });
 
-  it("avoids broad lockfile invalidation and Nx git mutations", () => {
-    expect(nxConfig.pluginsConfig["@nx/js"].projectsAffectedByDependencyUpdates).toBe("auto");
-    const disabledGitMutations = {
-      commit: false,
-      push: false,
-      stageChanges: false,
-      tag: false,
-    };
-    expect(nxConfig.release.version.git).toEqual(disabledGitMutations);
-    expect(nxConfig.release.changelog.git).toEqual(disabledGitMutations);
-    expect(nxConfig.release.groups["git-client"].changelog).toMatchObject({
-      createRelease: false,
-      file: false,
+    it("avoids broad lockfile invalidation and Nx git mutations", () => {
+        expect(
+            nxConfig.pluginsConfig["@nx/js"]
+                .projectsAffectedByDependencyUpdates,
+        ).toBe("auto");
+        const disabledGitMutations = {
+            commit: false,
+            push: false,
+            stageChanges: false,
+            tag: false,
+        };
+        expect(nxConfig.release.version.git).toEqual(disabledGitMutations);
+        expect(nxConfig.release.changelog.git).toEqual(disabledGitMutations);
+        expect(nxConfig.release.groups["git-client"].changelog).toMatchObject({
+            createRelease: false,
+            file: false,
+        });
     });
-  });
 
-  it("treats changes to the Git Client workflow as affecting only its release target", () => {
-    expect(packageConfig.nx.targets.release.inputs).toEqual([
-      "{projectRoot}/**/*",
-      "{workspaceRoot}/.github/workflows/git-client.yml",
-    ]);
-  });
+    it("treats changes to the Git Client workflow as affecting only its release target", () => {
+        expect(packageConfig.nx.targets.release.inputs).toEqual([
+            "{projectRoot}/**/*",
+            "{workspaceRoot}/.github/workflows/git-client.yml",
+        ]);
+    });
+
+    it("exposes production and explicit ad-hoc Electron release commands without an updater", () => {
+        expect(packageConfig.scripts["release:build"]).toBe(
+            "node scripts/release.mjs",
+        );
+        expect(packageConfig.scripts["release:validate-local"]).toBe(
+            "node scripts/release.mjs --local-ad-hoc",
+        );
+        expect(packageConfig.scripts["electron:make"]).toBe(
+            "electron-forge make",
+        );
+        expect(packageConfig.devDependencies["fs-xattr"]).toBe("0.3.1");
+        expect(packageConfig.devDependencies["macos-alias"]).toBe("0.2.12");
+        expect(packageConfig.devDependencies["node-gyp"]).toBe("12.4.0");
+        expect(packageConfig.dependencies).not.toHaveProperty(
+            "electron-updater",
+        );
+        expect(packageConfig.dependencies).not.toHaveProperty(
+            "update-electron-app",
+        );
+        expect(packageConfig.devDependencies).not.toHaveProperty(
+            "electron-updater",
+        );
+        expect(packageConfig.devDependencies).not.toHaveProperty(
+            "update-electron-app",
+        );
+    });
 });

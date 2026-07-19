@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-19T04:29:03.175Z",
+  "reference": {
+    "product": "Rebased",
+    "version": "1.1.8",
+    "build": "IC-262.8665.SNAPSHOT",
+    "artifactSha256": "fd3bc8bd7f80be16294d424b25ca390ceb13960bba33422dfa8ac4632c3412c0"
+  },
+  "execution": {
+    "profile": "/private/tmp/rebased-1.1.8-profile",
+    "repository": "/private/tmp/rebased-parity-1.1.8.TPwGXl/reference",
+    "trusted": true,
+    "testBundleId": "io.github.detachhead.rebased.goldenstable118"
+  },
+  "normalization": {
+    "appName": "Rebased Golden Stable 1.1.8 is a Computer Use harness bundle name; normalize only generated macOS app-name labels to Rebased."
+  },
+  "menu": "tools",
+  "state": "Window: \"reference\", App: Rebased Golden Stable 1.1.8.\n0 Tools, ID: handleAction:, Secondary Actions: Cancel, Pick\n\t1 메뉴 Secondary Actions: Cancel\n\t\t2 Create Command Line Launcher…, ID: handleAction:\n\t\t3 (disabled) Services, ID: handleAction:\n\t\t\t4 메뉴 Secondary Actions: Cancel\n\t\t5 XML Actions, ID: handleAction:\n\t\t\t6 메뉴 Secondary Actions: Cancel\n\t\t\t\t7 (disabled) Convert Schema..., ID: handleAction:\n"
+}

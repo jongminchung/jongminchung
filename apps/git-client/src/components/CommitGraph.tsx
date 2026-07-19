@@ -3,18 +3,21 @@ import { placeGraphLanes } from "../domain/parsers";
 import type { Commit } from "../domain/types";
 
 const COLORS = ["#745fd6", "#28a477", "#dc6f58", "#438fc4", "#c5902e", "#b461a5"] as const;
-const ROW_HEIGHT = 29;
+const ROW_HEIGHT = 22;
 const LANE_WIDTH = 12;
 
 export const CommitGraph = memo(function CommitGraph({
   commits,
-  width = 72,
+  width = 58,
+  showLongEdges = true,
 }: {
   readonly commits: readonly Commit[];
   readonly width?: number;
+  readonly showLongEdges?: boolean;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rows = useMemo(() => placeGraphLanes(commits), [commits]);
+  const visibleOids = useMemo(() => new Set(commits.map((commit) => commit.oid)), [commits]);
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -33,6 +36,7 @@ export const CommitGraph = memo(function CommitGraph({
       const y = index * ROW_HEIGHT + ROW_HEIGHT / 2;
       row.activeLanes.forEach((oid, lane) => {
         if (!oid) return;
+        if (!showLongEdges && !visibleOids.has(oid)) return;
         context.strokeStyle = COLORS[lane % COLORS.length] ?? COLORS[0]!;
         context.beginPath();
         context.moveTo(10 + lane * LANE_WIDTH, y);
@@ -62,6 +66,6 @@ export const CommitGraph = memo(function CommitGraph({
       context.arc(10 + row.lane * LANE_WIDTH, y, 1.55, 0, Math.PI * 2);
       context.fill();
     });
-  }, [commits.length, rows, width]);
+  }, [commits.length, rows, showLongEdges, visibleOids, width]);
   return <canvas ref={canvasRef} style={{ display: "block", pointerEvents: "none" }} />;
 });

@@ -2,7 +2,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { memo, useMemo, useRef, useState } from "react";
 import type { Ref, RefKind } from "../domain/types";
 import { Icon } from "./Icon";
-import styles from "../styles/App.module.css";
+import { tw } from "../styles/tailwind";
 
 type TreeRow =
   | {
@@ -19,16 +19,28 @@ const groupLabels: Readonly<Record<RefKind, string>> = {
   tag: "Tags",
 };
 
+function trackingLabel(tracking?: string): string | null {
+  if (!tracking) return null;
+  const ahead = /ahead (\d+)/.exec(tracking)?.[1];
+  const behind = /behind (\d+)/.exec(tracking)?.[1];
+  if (!ahead && !behind) return tracking.replace(/^\[|\]$/g, "");
+  return [ahead ? `${ahead}↑` : null, behind ? `${behind}↓` : null].filter(Boolean).join(" ");
+}
+
 export const BranchTree = memo(function BranchTree({
   refs,
   selected,
   onSelect,
   onAdd,
+  compact = false,
+  onActivate,
 }: {
   readonly refs: readonly Ref[];
   readonly selected?: string;
   readonly onSelect: (ref: Ref) => void;
   readonly onAdd: () => void;
+  readonly compact?: boolean;
+  readonly onActivate?: () => void;
 }) {
   const parentRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState("");
@@ -64,15 +76,26 @@ export const BranchTree = memo(function BranchTree({
       return next;
     });
 
+  if (compact) {
+    return (
+      <aside className={tw.branchRail} aria-label="Branches and tags">
+        <button aria-label="Branches" onClick={onActivate} title="Branches">
+          <Icon name="chevron" size={10} />
+          <span>Branches</span>
+        </button>
+      </aside>
+    );
+  }
+
   return (
-    <aside className={styles.branchPane} aria-label="Branches and tags">
-      <div className={styles.paneTitle}>
+    <aside className={tw.branchPane} aria-label="Branches and tags">
+      <div className={tw.paneTitle}>
         <span>Repositories</span>
-        <button className={styles.iconButton} onClick={onAdd} title="Add repository">
+        <button className={tw.iconButton} onClick={onAdd} title="Add repository">
           <Icon name="plus" size={14} />
         </button>
       </div>
-      <div className={styles.treeSearch}>
+      <div className={tw.treeSearch}>
         <Icon name="search" size={14} />
         <input
           aria-label="Filter branches"
@@ -81,26 +104,26 @@ export const BranchTree = memo(function BranchTree({
           value={query}
         />
       </div>
-      <div className={styles.headRow}>
+      <div className={tw.headRow}>
         <Icon name="commit" size={14} />
         <strong>HEAD</strong>
-        <span className={styles.muted}>(Current Branch)</span>
+        <span className={tw.muted}>(Current Branch)</span>
       </div>
-      <div className={styles.virtualTree} ref={parentRef}>
+      <div className={tw.virtualTree} ref={parentRef}>
         <div style={{ height: virtualizer.getTotalSize(), position: "relative" }}>
           {virtualizer.getVirtualItems().map((item) => {
             const row = rows[item.index];
             if (!row) return null;
             return (
               <div
-                className={styles.treeVirtualRow}
+                className={tw.treeVirtualRow}
                 key={row.type === "group" ? row.key : row.ref.name}
                 style={{ transform: `translateY(${item.start}px)` }}
               >
                 {row.type === "group" ? (
-                  <button className={styles.treeGroup} onClick={() => toggle(row.key)}>
+                  <button className={tw.treeGroup} onClick={() => toggle(row.key)}>
                     <Icon
-                      className={collapsed.has(row.key) ? undefined : styles.rotated}
+                      className={collapsed.has(row.key) ? undefined : tw.rotated}
                       name="chevron"
                       size={13}
                     />
@@ -115,18 +138,19 @@ export const BranchTree = memo(function BranchTree({
                   </button>
                 ) : (
                   <button
-                    className={`${styles.refRow} ${selected === row.ref.name ? styles.selected : ""}`}
+                    className={`${tw.refRow} ${selected === row.ref.name ? tw.selected : ""}`}
                     onClick={() => onSelect(row.ref)}
-                    title={row.ref.subject}
+                    title={[row.ref.subject, row.ref.tracking].filter(Boolean).join(" · ")}
                   >
-                    <span className={styles.refIndent} />
+                    <span className={tw.refIndent} />
                     {row.ref.favorite ? (
-                      <Icon className={styles.favorite} name="star" size={13} />
+                      <Icon className={tw.favorite} name="star" size={13} />
                     ) : (
                       <Icon name="branch" size={13} />
                     )}
-                    <span className={styles.ellipsis}>{row.ref.shortName}</span>
-                    {row.ref.current && <span className={styles.headPill}>HEAD</span>}
+                    <span className={tw.ellipsis}>{row.ref.shortName}</span>
+                    {trackingLabel(row.ref.tracking) && <small className="text-[10px] text-secondary">{trackingLabel(row.ref.tracking)}</small>}
+                    {row.ref.current && <span className={tw.headPill}>HEAD</span>}
                   </button>
                 )}
               </div>

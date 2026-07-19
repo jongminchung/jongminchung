@@ -6,7 +6,7 @@ import {
     useRef,
     useState,
 } from "react";
-import { isTauriRuntime, TauriGitBridge } from "../bridge/GitBridge";
+import { createGitBridge } from "../bridge/createGitBridge";
 import {
     parseBlame,
     parseCommitFiles,
@@ -18,7 +18,23 @@ import {
     parseStatusV2,
     parseTree,
 } from "../domain/parsers";
-import { gitConsoleStore } from "../domain/GitConsoleStore";
+import {
+    GitRequestCancelledError,
+    isGitRequestCancelled,
+    isRetryableOperation,
+    operationActivityLabel,
+    sanitizeGitError,
+} from "../domain/gitActivity";
+import type { GitActivity } from "../domain/gitActivity";
+import { GitRequestEventBuffer } from "../domain/gitRequestEvents";
+import { recordGitConsoleEvent } from "../domain/gitConsole";
+import type { GitConsoleEntry } from "../domain/gitConsole";
+import {
+    parseProjectTextMatches,
+    type ProjectSearchOptions,
+    type ProjectTextMatch,
+} from "../domain/projectSearch";
+import { assertLiveRepositoryActionAllowed } from "../domain/fixtureMode";
 import { RefreshCoordinator } from "../domain/RefreshCoordinator";
 import { updateRepositoryView } from "../domain/repositoryView";
 import { terminalService } from "../domain/TerminalService";
@@ -31,31 +47,60 @@ import type {
     TreeEntry,
 } from "../domain/types";
 import {
+    isManagementSection,
     restoredWorkspaceTab,
+    WORKSPACE_SCHEMA_VERSION,
     workspacePaths,
 } from "../domain/workspacePersistence";
+import type { ManagementSection } from "../domain/workspacePersistence";
 import type {
     Changelist,
+    BranchComparison,
     ChangelistCommitResult,
+    CloneOptions,
+    CommitSignature,
     ConflictContent,
     ConflictFile,
+    DiffOptions,
     FileContent,
+    FilePreview,
     FileSource,
     GitEvent,
+    GitConfig,
     GitOperation,
     GitRequest,
+    LogFilters,
+    LogOrder,
+    IgnoreRules,
     MultiRootOutcome,
     MultiRootResult,
     MultiRootRollbackStep,
+    PatchExportResult,
+    PreCommitCheck,
+    PushPreview,
+    HistoryRewritePreview,
     RecoveryEntry,
     RemoteInfo,
+    RequestId,
     RepositoryInvalidation,
     RepositorySnapshot,
     ShelfEntry,
+    SubmoduleInfo,
+    SubmoduleDiff,
     WorktreeInfo,
 } from "../generated";
+import type {
+    GitCreationEventListener,
+    GitLocalHistoryEntry,
+} from "../shared/contracts/git-utility";
+import { isElectronRuntime, isNativeRuntime } from "../platform/electron";
+import {
+    readNativeSetting,
+    writeNativeSettings,
+} from "../platform/nativeSettings";
+import { RepositoryWatchSession } from "./repository-watch-session";
 
-const gitBridge = new TauriGitBridge();
+const gitBridge = createGitBridge();
 const EMPTY_ARRAY: readonly never[] = [];
 
 interface RawRepositoryData {
@@ -82,6 +127,9 @@ export interface RepositorySession {
     readonly remotes: readonly RemoteInfo[];
     readonly worktrees: readonly WorktreeInfo[];
     readonly stale: boolean;
+    readonly hasMoreCommits: boolean;
+    readonly logLoading: boolean;
+    readonly logError: string | null;
     readonly error: string | null;
 }
 
@@ -103,12 +151,12 @@ interface WorkspaceState {
     readonly recentRepositories: readonly string[];
     readonly restoring: boolean;
     readonly error: string | null;
+    readonly managementSection: ManagementSection;
 }
 
 function fixtureEnabled(): boolean {
     return (
-        import.meta.env.DEV &&
-        !isTauriRuntime() &&
+        (import.meta.env.DEV || isElectronRuntime()) &&
         new URLSearchParams(window.location.search).get("fixture") === "qa"
     );
 }
@@ -140,19 +188,18 @@ function loadingSession(snapshot: RepositorySnapshot): RepositorySession {
         remotes: [],
         worktrees: [],
         stale: false,
+        hasMoreCommits: false,
+        logLoading: false,
+        logError: null,
         error: null,
     };
 }
 
 type FixtureData = typeof import("../domain/sampleData");
-const loadFixtureData: (() => Promise<FixtureData>) | undefined = import.meta
-    .env.DEV
-    ? () => import("../domain/sampleData")
-    : undefined;
+const loadFixtureData = (): Promise<FixtureData> =>
+    import("../domain/sampleData");
 
 async function requireFixtureData(): Promise<FixtureData> {
-    if (!loadFixtureData)
-        throw new Error("QA fixtures are available only in development mode");
     return loadFixtureData();
 }
 
@@ -169,6 +216,9 @@ function fixtureSession(fixtureData: FixtureData): RepositorySession {
         remotes: [],
         worktrees: [],
         stale: false,
+        hasMoreCommits: false,
+        logLoading: false,
+        logError: null,
         error: null,
     };
 }
@@ -178,13 +228,10 @@ function initialState(): WorkspaceState {
         sessions: [],
         activeTab: { kind: "manage" },
         recentRepositories: [],
-        restoring: fixtureEnabled() || isTauriRuntime(),
+        restoring: fixtureEnabled() || isNativeRuntime(),
         error: null,
+        managementSection: "roots",
     };
-}
-
-function errorMessage(error: unknown): string {
-    return error instanceof Error ? error.message : String(error);
 }
 
 function updateRepositorySession(
@@ -206,22 +253,58 @@ function updateRepositorySession(
     return changed ? { ...state, sessions } : state;
 }
 
-function createLogRequest(repositoryId: string): GitRequest {
+const DEFAULT_LOG_FILTERS: LogFilters = {
+    query: null,
+    branch: null,
+    author: null,
+    since: null,
+    until: null,
+    paths: [],
+    noMerges: false,
+};
+
+interface LogSelection {
+    readonly filters: LogFilters;
+    readonly order: LogOrder;
+}
+
+interface RunRequestOptions {
+    readonly activityId?: string;
+    readonly onStarted?: (requestId: RequestId) => void;
+}
+
+type ActivityRetry =
+    | { readonly kind: "reload"; readonly repositoryId: string }
+    | {
+          readonly kind: "log";
+          readonly repositoryId: string;
+          readonly filters: LogFilters;
+          readonly order: LogOrder;
+          readonly append: boolean;
+      }
+    | {
+          readonly kind: "operation";
+          readonly repositoryId: string;
+          readonly operation: GitOperation;
+      };
+
+const DEFAULT_LOG_SELECTION: LogSelection = {
+    filters: DEFAULT_LOG_FILTERS,
+    order: "topology",
+};
+
+function createLogRequest(
+    repositoryId: string,
+    selection: LogSelection = DEFAULT_LOG_SELECTION,
+    skip = 0,
+): GitRequest {
     return {
         kind: "log",
         repositoryId,
-        skip: 0,
+        skip,
         limit: 500,
-        order: "topology",
-        filters: {
-            query: null,
-            branch: null,
-            author: null,
-            since: null,
-            until: null,
-            paths: [],
-            noMerges: false,
-        },
+        order: selection.order,
+        filters: selection.filters,
     };
 }
 
@@ -234,7 +317,11 @@ function invalidationsForOperation(
 ): readonly RepositoryInvalidation[] {
     if (
         operation.kind === "stage" ||
+        operation.kind === "stageAll" ||
+        operation.kind === "stageTracked" ||
+        operation.kind === "addIntent" ||
         operation.kind === "unstage" ||
+        operation.kind === "removeCached" ||
         operation.kind === "discard" ||
         operation.kind === "applyPatch" ||
         operation.kind === "partialPatch"
@@ -244,7 +331,9 @@ function invalidationsForOperation(
     if (
         operation.kind === "stashPush" ||
         operation.kind === "stashApply" ||
-        operation.kind === "stashDrop"
+        operation.kind === "stashDrop" ||
+        operation.kind === "stashClear" ||
+        operation.kind === "stashBranch"
     ) {
         return ["status", "history", "stash"];
     }
@@ -257,7 +346,7 @@ function invalidationsForOperation(
     ) {
         return ["status", "history", "management"];
     }
-    if (operation.kind === "push" || operation.kind === "pushTo") {
+    if (operation.kind === "push") {
         return ["status", "history"];
     }
     return ["status", "history", "operation"];
@@ -266,13 +355,19 @@ function invalidationsForOperation(
 function recordsRecovery(operation: GitOperation): boolean {
     return (
         operation.kind === "commit" ||
+        operation.kind === "commitAdvanced" ||
         operation.kind === "reset" ||
         operation.kind === "revert" ||
         operation.kind === "cherryPick" ||
         operation.kind === "merge" ||
         operation.kind === "rebase" ||
+        operation.kind === "interactiveRebase" ||
         operation.kind === "dropCommits" ||
         operation.kind === "squashCommits" ||
+        operation.kind === "rewordCommit" ||
+        operation.kind === "undoCommit" ||
+        operation.kind === "createFixupCommit" ||
+        operation.kind === "createSquashCommit" ||
         operation.kind === "continue" ||
         operation.kind === "skip" ||
         operation.kind === "abort" ||
@@ -283,7 +378,9 @@ function recordsRecovery(operation: GitOperation): boolean {
         operation.kind === "deleteTag" ||
         operation.kind === "stashPush" ||
         operation.kind === "stashApply" ||
-        operation.kind === "stashDrop"
+        operation.kind === "stashDrop" ||
+        operation.kind === "stashClear" ||
+        operation.kind === "stashBranch"
     );
 }
 
@@ -294,18 +391,37 @@ function validStoredPaths(value: unknown): readonly string[] {
     );
 }
 
+async function cancelRequests(
+    requestIds: readonly RequestId[],
+): Promise<readonly PromiseSettledResult<void>[]> {
+    return Promise.allSettled(
+        requestIds.map((requestId) => gitBridge.cancel(requestId)),
+    );
+}
+
 export function useGitSession() {
     const fixture = fixtureEnabled();
     const [state, setState] = useState<WorkspaceState>(initialState);
+    const [activity, setActivity] = useState<GitActivity | null>(null);
+    const [gitConsoleEntries, setGitConsoleEntries] = useState<readonly GitConsoleEntry[]>([]);
     const activeRepositoryId = useRef<string | null>(
         state.activeTab.kind === "repository"
             ? state.activeTab.repositoryId
             : null,
     );
     const activeSnapshotRef = useRef<RepositorySnapshot | null>(null);
-    const watchedRepositories = useRef(new Set<string>());
+    const repositoryWatchSession = useRef(new RepositoryWatchSession());
     const refreshInFlight = useRef(new Map<string, Promise<void>>());
     const rawRepositoryData = useRef(new Map<string, RawRepositoryData>());
+    const logSelections = useRef(new Map<string, LogSelection>());
+    const logCommitCounts = useRef(new Map<string, number>());
+    const logGenerations = useRef(new Map<string, number>());
+    const activeLogRequests = useRef(new Map<string, RequestId>());
+    const activeSearchRequest = useRef<RequestId | null>(null);
+    const activityRetry = useRef<{
+        readonly activityId: string;
+        readonly retry: ActivityRetry;
+    } | null>(null);
     const restored = useRef(false);
 
     const activeSession = useMemo(() => {
@@ -351,7 +467,14 @@ export function useGitSession() {
             activeSession?.repository.snapshot ??
             managementSession?.repository.snapshot ??
             null;
+        if (activeSession) {
+            logCommitCounts.current.set(
+                activeSession.repository.snapshot.id,
+                activeSession.repository.commits.length,
+            );
+        }
     }, [
+        activeSession?.repository.commits.length,
         activeSession?.repository.snapshot,
         managementSession?.repository.snapshot,
     ]);
@@ -369,42 +492,163 @@ export function useGitSession() {
                 recentRepositories: [],
                 restoring: false,
                 error: null,
+                managementSection: "roots",
             });
         };
         void load();
     }, [fixture]);
 
+    const beginActivity = useCallback(
+        (
+            repositoryId: string,
+            label: string,
+            retry: ActivityRetry | null,
+        ): string => {
+            const id = crypto.randomUUID();
+            activityRetry.current = retry ? { activityId: id, retry } : null;
+            setActivity({
+                id,
+                repositoryId,
+                label,
+                status: "running",
+                startedAt: Date.now(),
+                requestIds: [],
+                error: null,
+                canRetry: retry !== null,
+            });
+            return id;
+        },
+        [],
+    );
+
+    const attachActivityRequest = useCallback(
+        (activityId: string, requestId: RequestId): void => {
+            setActivity((current) => {
+                if (
+                    current?.id !== activityId ||
+                    current.requestIds.includes(requestId)
+                )
+                    return current;
+                return {
+                    ...current,
+                    requestIds: [...current.requestIds, requestId],
+                };
+            });
+        },
+        [],
+    );
+
+    const finishActivity = useCallback(
+        (
+            activityId: string,
+            status: Exclude<GitActivity["status"], "running">,
+            error: string | null = null,
+        ): void => {
+            setActivity((current) =>
+                current?.id === activityId
+                    ? { ...current, status, requestIds: [], error }
+                    : current,
+            );
+        },
+        [],
+    );
+
+    const dismissActivity = useCallback((activityId?: string): void => {
+        setActivity((current) => {
+            if (!current || (activityId && current.id !== activityId))
+                return current;
+            if (activityRetry.current?.activityId === current.id)
+                activityRetry.current = null;
+            return null;
+        });
+    }, []);
+
+    const recordConsoleEvent = useCallback(
+        (request: GitRequest, event: GitEvent): void => {
+            setGitConsoleEntries((current) =>
+                recordGitConsoleEvent(current, request, event, Date.now()),
+            );
+        },
+        [],
+    );
+
+    const clearGitConsole = useCallback((repositoryId?: string): void => {
+        const target = repositoryId ?? activeRepositoryId.current;
+        if (!target) return;
+        setGitConsoleEntries((current) =>
+            current.filter((entry) => entry.repositoryId !== target),
+        );
+    }, []);
+
+    useEffect(() => {
+        if (
+            !activity ||
+            (activity.status !== "succeeded" && activity.status !== "cancelled")
+        )
+            return;
+        const timeout = window.setTimeout(
+            () => dismissActivity(activity.id),
+            2_000,
+        );
+        return () => window.clearTimeout(timeout);
+    }, [activity, dismissActivity]);
+
     const runRequest = useCallback(
-        async (request: GitRequest): Promise<string> => {
+        async (
+            request: GitRequest,
+            options: RunRequestOptions = {},
+        ): Promise<string> => {
             if (fixture) {
                 const { samplePatch } = await requireFixtureData();
                 return request.kind === "diff" ? samplePatch : "";
             }
             return new Promise((resolve, reject) => {
-                let output = "";
+                const eventBuffer = new GitRequestEventBuffer();
+                let settled = false;
+                let announcedRequestId: RequestId | null = null;
+                const announceRequest = (requestId: RequestId): void => {
+                    if (announcedRequestId === requestId) return;
+                    announcedRequestId = requestId;
+                    options.onStarted?.(requestId);
+                    if (options.activityId)
+                        attachActivityRequest(options.activityId, requestId);
+                };
+                const resolveOnce = (output: string): void => {
+                    if (settled) return;
+                    settled = true;
+                    resolve(output);
+                };
+                const rejectOnce = (error: unknown): void => {
+                    if (settled) return;
+                    settled = true;
+                    eventBuffer.clear();
+                    reject(error);
+                };
                 const onEvent = (event: GitEvent): void => {
-                    gitConsoleStore.accept(request.repositoryId, event);
-                    if (event.kind === "output") {
-                        output += event.data;
-                    } else if (event.kind === "completed") {
-                        resolve(output);
-                    } else if (event.kind === "cancelled") {
-                        reject(new Error("Git request cancelled"));
-                    } else if (event.kind === "failed") {
-                        reject(new Error(event.message));
+                    announceRequest(event.requestId);
+                    recordConsoleEvent(request, event);
+                    const result = eventBuffer.consume(event);
+                    if (result.kind === "completed") {
+                        resolveOnce(result.output);
+                    } else if (result.kind === "cancelled") {
+                        rejectOnce(new GitRequestCancelledError());
+                    } else if (result.kind === "failed") {
+                        rejectOnce(new Error(result.message));
                     }
                 };
                 const execute = async (): Promise<void> => {
                     try {
-                        await gitBridge.execute(request, onEvent);
+                        announceRequest(
+                            await gitBridge.execute(request, onEvent),
+                        );
                     } catch (error) {
-                        reject(error);
+                        rejectOnce(error);
                     }
                 };
                 void execute();
             });
         },
-        [fixture],
+        [attachActivityRequest, fixture, recordConsoleEvent],
     );
 
     const refreshAll = useCallback(
@@ -423,7 +667,12 @@ export function useGitSession() {
                 worktrees,
             ] = await Promise.all([
                 runRequest({ kind: "refs", repositoryId }),
-                runRequest(createLogRequest(repositoryId)),
+                runRequest(
+                    createLogRequest(
+                        repositoryId,
+                        logSelections.current.get(repositoryId),
+                    ),
+                ),
                 runRequest({ kind: "status", repositoryId }),
                 runRequest({ kind: "stashList", repositoryId }),
                 gitBridge.listShelves(repositoryId),
@@ -459,6 +708,9 @@ export function useGitSession() {
                     remotes,
                     worktrees,
                     stale: false,
+                    hasMoreCommits: parseLog(logOutput).length === 500,
+                    logLoading: false,
+                    logError: null,
                     error: null,
                 })),
             );
@@ -481,7 +733,7 @@ export function useGitSession() {
                             (session) => ({
                                 ...session,
                                 status: "ready",
-                                error: errorMessage(error),
+                                error: sanitizeGitError(error),
                             }),
                         ),
                     );
@@ -525,7 +777,12 @@ export function useGitSession() {
                     ? runRequest({ kind: "refs", repositoryId })
                     : Promise.resolve<string | null>(null),
                 refreshHistory
-                    ? runRequest(createLogRequest(repositoryId))
+                    ? runRequest(
+                          createLogRequest(
+                              repositoryId,
+                              logSelections.current.get(repositoryId),
+                          ),
+                      )
                     : Promise.resolve<string | null>(null),
                 refreshStash
                     ? runRequest({ kind: "stashList", repositoryId })
@@ -629,6 +886,10 @@ export function useGitSession() {
                                 remotes: nextRemotes,
                                 worktrees: nextWorktrees,
                                 stale: false,
+                                hasMoreCommits:
+                                    logOutput === null
+                                        ? session.hasMoreCommits
+                                        : nextCommits.length === 500,
                                 error: null,
                             };
                         },
@@ -656,7 +917,7 @@ export function useGitSession() {
                             repositoryId,
                             (session) => ({
                                 ...session,
-                                error: errorMessage(error),
+                                error: sanitizeGitError(error),
                             }),
                         ),
                     );
@@ -667,28 +928,52 @@ export function useGitSession() {
 
     const watch = useCallback(
         async (snapshot: RepositorySnapshot): Promise<void> => {
-            if (fixture || watchedRepositories.current.has(snapshot.id)) return;
-            watchedRepositories.current.add(snapshot.id);
-            await gitBridge.watchRepository(snapshot.id, (event) => {
-                if (activeRepositoryId.current === snapshot.id) {
-                    refreshCoordinator.invalidate(
-                        snapshot.id,
-                        event.invalidations,
-                    );
-                } else {
-                    refreshCoordinator.defer(snapshot.id, event.invalidations);
-                    setState((current) =>
-                        updateRepositorySession(
-                            current,
-                            snapshot.id,
-                            (session) => ({
-                                ...session,
-                                stale: true,
-                            }),
-                        ),
-                    );
-                }
-            });
+            if (fixture) return;
+            await repositoryWatchSession.current.ensure(snapshot.id, () =>
+                gitBridge.watchRepository(snapshot.id, (event) => {
+                    const recordAndRefresh = async (): Promise<void> => {
+                        try {
+                            await gitBridge.captureLocalHistory?.(
+                                snapshot.id,
+                                null,
+                            );
+                        } catch (error) {
+                            setState((current) =>
+                                updateRepositorySession(
+                                    current,
+                                    snapshot.id,
+                                    (session) => ({
+                                        ...session,
+                                        error: sanitizeGitError(error),
+                                    }),
+                                ),
+                            );
+                        }
+                        if (activeRepositoryId.current === snapshot.id) {
+                            refreshCoordinator.invalidate(
+                                snapshot.id,
+                                event.invalidations,
+                            );
+                        } else {
+                            refreshCoordinator.defer(
+                                snapshot.id,
+                                event.invalidations,
+                            );
+                            setState((current) =>
+                                updateRepositorySession(
+                                    current,
+                                    snapshot.id,
+                                    (session) => ({
+                                        ...session,
+                                        stale: true,
+                                    }),
+                                ),
+                            );
+                        }
+                    };
+                    void recordAndRefresh();
+                }),
+            );
         },
         [fixture, refreshCoordinator],
     );
@@ -720,30 +1005,41 @@ export function useGitSession() {
                 error: null,
             }));
             await refreshOnce(snapshot.id);
+            try {
+                await gitBridge.captureLocalHistory?.(snapshot.id, null);
+            } catch (error) {
+                setState((current) =>
+                    updateRepositorySession(
+                        current,
+                        snapshot.id,
+                        (session) => ({
+                            ...session,
+                            error: sanitizeGitError(error),
+                        }),
+                    ),
+                );
+            }
             await watch(snapshot);
         },
         [refreshOnce, watch],
     );
 
     useEffect(() => {
-        if (!isTauriRuntime() || restored.current) return;
+        if (fixture || !isNativeRuntime() || restored.current) return;
         restored.current = true;
         const restore = async (): Promise<void> => {
             try {
-                const { load } = await import("@tauri-apps/plugin-store");
-                const store = await load("settings.json", {
-                    autoSave: 200,
-                    defaults: {},
-                });
                 const paths = validStoredPaths(
-                    await store.get<unknown>("openRepositoryPaths"),
+                    await readNativeSetting("openRepositoryPaths"),
                 );
-                const activePath = await store.get<unknown>(
+                const activePath = await readNativeSetting(
                     "activeRepositoryPath",
                 );
                 const recentRepositories = validStoredPaths(
-                    await store.get<unknown>("recentRepositories"),
+                    await readNativeSetting("recentRepositories"),
                 );
+                const storedManagementSection =
+                    await readNativeSetting("managementSection");
                 const results = await Promise.allSettled(
                     paths.map(
                         async (path): Promise<RepositorySnapshot> =>
@@ -763,7 +1059,7 @@ export function useGitSession() {
                             status: "error",
                             id: `error:${path}`,
                             path,
-                            message: errorMessage(result.reason),
+                            message: sanitizeGitError(result.reason),
                         };
                     },
                 );
@@ -773,6 +1069,11 @@ export function useGitSession() {
                     recentRepositories,
                     restoring: false,
                     error: null,
+                    managementSection: isManagementSection(
+                        storedManagementSection,
+                    )
+                        ? storedManagementSection
+                        : "roots",
                 });
                 await Promise.allSettled(
                     snapshots.map(async (snapshot) => {
@@ -784,44 +1085,38 @@ export function useGitSession() {
                 setState((current) => ({
                     ...current,
                     restoring: false,
-                    error: errorMessage(error),
+                    error: sanitizeGitError(error),
                 }));
             }
         };
         void restore();
-    }, [refreshOnce, watch]);
+    }, [fixture, refreshOnce, watch]);
 
     useEffect(() => {
-        if (!isTauriRuntime() || state.restoring) return;
+        if (fixture || !isNativeRuntime() || state.restoring) return;
         const persist = async (): Promise<void> => {
-            const { load } = await import("@tauri-apps/plugin-store");
-            const store = await load("settings.json", {
-                autoSave: 200,
-                defaults: {},
+            await writeNativeSettings({
+                schemaVersion: WORKSPACE_SCHEMA_VERSION,
+                openRepositoryPaths: JSON.parse(openRepositoryPathsJson),
+                activeRepositoryPath,
+                recentRepositories: JSON.parse(recentRepositoriesJson),
+                managementSection: state.managementSection,
             });
-            await Promise.all([
-                store.set(
-                    "openRepositoryPaths",
-                    JSON.parse(openRepositoryPathsJson),
-                ),
-                store.set("activeRepositoryPath", activeRepositoryPath),
-                store.set(
-                    "recentRepositories",
-                    JSON.parse(recentRepositoriesJson),
-                ),
-            ]);
         };
         void persist();
     }, [
         activeRepositoryPath,
+        fixture,
         openRepositoryPathsJson,
         recentRepositoriesJson,
         state.restoring,
+        state.managementSection,
     ]);
 
     useEffect(
         () => () => {
-            for (const repositoryId of watchedRepositories.current) {
+            for (const repositoryId of repositoryWatchSession.current.trackedRepositoryIds()) {
+                repositoryWatchSession.current.forget(repositoryId);
                 void gitBridge.unwatchRepository(repositoryId);
             }
         },
@@ -831,53 +1126,77 @@ export function useGitSession() {
     const openRepository = useCallback(
         async (path: string): Promise<void> => {
             try {
+                assertLiveRepositoryActionAllowed(fixture);
                 await addSnapshot(await gitBridge.openRepository(path), true);
             } catch (error) {
                 setState((current) => ({
                     ...current,
-                    error: errorMessage(error),
+                    error: sanitizeGitError(error),
                 }));
             }
         },
-        [addSnapshot],
+        [addSnapshot, fixture],
     );
 
     const initializeRepository = useCallback(
-        async (path: string, bare: boolean): Promise<void> => {
+        async (
+            path: string,
+            bare: boolean,
+            onEvent?: GitCreationEventListener,
+        ): Promise<void> => {
             try {
+                assertLiveRepositoryActionAllowed(fixture);
                 await addSnapshot(
-                    await gitBridge.initializeRepository(path, bare),
+                    await gitBridge.initializeRepository(path, bare, onEvent),
                     true,
                 );
             } catch (error) {
+                const message = sanitizeGitError(error);
                 setState((current) => ({
                     ...current,
-                    error: errorMessage(error),
+                    error: message,
                 }));
+                throw new Error(message);
             }
         },
-        [addSnapshot],
+        [addSnapshot, fixture],
     );
 
     const cloneRepository = useCallback(
         async (
             url: string,
             path: string,
-            depth: number | null,
+            options: CloneOptions,
+            onEvent?: GitCreationEventListener,
         ): Promise<void> => {
             try {
+                assertLiveRepositoryActionAllowed(fixture);
                 await addSnapshot(
-                    await gitBridge.cloneRepository(url, path, depth),
+                    await gitBridge.cloneRepository(
+                        url,
+                        path,
+                        options,
+                        onEvent,
+                    ),
                     true,
                 );
             } catch (error) {
+                const message = sanitizeGitError(error);
                 setState((current) => ({
                     ...current,
-                    error: errorMessage(error),
+                    error: message,
                 }));
+                throw new Error(message);
             }
         },
-        [addSnapshot],
+        [addSnapshot, fixture],
+    );
+
+    const cancelRepositoryCreation = useCallback(
+        async (requestId: RequestId): Promise<void> => {
+            await gitBridge.cancel(requestId);
+        },
+        [],
     );
 
     const activateTab = useCallback(
@@ -907,6 +1226,15 @@ export function useGitSession() {
         [refreshCoordinator, state.sessions],
     );
 
+    const openManagement = useCallback((section: ManagementSection): void => {
+        activeRepositoryId.current = null;
+        setState((current) => ({
+            ...current,
+            activeTab: { kind: "manage" },
+            managementSection: section,
+        }));
+    }, []);
+
     const switchRepository = useCallback(
         async (repositoryId: string): Promise<void> =>
             activateTab({ kind: "repository", repositoryId }),
@@ -926,10 +1254,13 @@ export function useGitSession() {
                     gitBridge.unwatchRepository(sessionId),
                     terminalService.closeRepository(sessionId),
                 ]);
-                watchedRepositories.current.delete(sessionId);
-                gitConsoleStore.remove(sessionId);
+                repositoryWatchSession.current.forget(sessionId);
                 refreshCoordinator.forget(sessionId);
                 rawRepositoryData.current.delete(sessionId);
+                logSelections.current.delete(sessionId);
+                logCommitCounts.current.delete(sessionId);
+                logGenerations.current.delete(sessionId);
+                activeLogRequests.current.delete(sessionId);
             }
             setState((current) => ({
                 ...current,
@@ -957,21 +1288,40 @@ export function useGitSession() {
     }, []);
 
     const executeOperation = useCallback(
-        async (operation: GitOperation): Promise<void> => {
+        async (
+            operation: GitOperation,
+            throwOnError = false,
+        ): Promise<void> => {
             if (fixture) return;
             const snapshot = activeSnapshot();
+            const activityId = beginActivity(
+                snapshot.id,
+                operationActivityLabel(operation),
+                isRetryableOperation(operation)
+                    ? {
+                          kind: "operation",
+                          repositoryId: snapshot.id,
+                          operation,
+                      }
+                    : null,
+            );
             try {
-                await runRequest({
-                    kind: "operation",
-                    repositoryId: snapshot.id,
-                    operation,
-                });
+                await runRequest(
+                    {
+                        kind: "operation",
+                        repositoryId: snapshot.id,
+                        operation,
+                    },
+                    { activityId },
+                );
                 refreshCoordinator.invalidate(
                     snapshot.id,
                     invalidationsForOperation(operation),
                 );
                 const recoveryEntries = recordsRecovery(operation)
-                    ? await gitBridge.listRecoveryEntries(snapshot.id)
+                    ? fixture
+                        ? null
+                        : await gitBridge.listRecoveryEntries(snapshot.id)
                     : null;
                 await refreshCoordinator.flush(snapshot.id);
                 if (recoveryEntries) {
@@ -989,28 +1339,477 @@ export function useGitSession() {
                         ),
                     );
                 }
+                finishActivity(activityId, "succeeded");
             } catch (error) {
+                if (isGitRequestCancelled(error)) {
+                    refreshCoordinator.invalidate(snapshot.id, [
+                        "status",
+                        "history",
+                        "stash",
+                        "operation",
+                        "management",
+                    ]);
+                    try {
+                        await refreshCoordinator.flush(snapshot.id);
+                    } catch (refreshError) {
+                        const message = sanitizeGitError(refreshError);
+                        setState((current) =>
+                            updateRepositorySession(
+                                current,
+                                snapshot.id,
+                                (session) => ({ ...session, error: message }),
+                            ),
+                        );
+                    }
+                    finishActivity(activityId, "cancelled");
+                    return;
+                }
+                refreshCoordinator.invalidate(snapshot.id, [
+                    "status",
+                    "history",
+                    "operation",
+                    "management",
+                ]);
+                try {
+                    await refreshCoordinator.flush(snapshot.id);
+                } catch {
+                    // Preserve the original mutation failure; the next watcher refresh retries state hydration.
+                }
+                const message = sanitizeGitError(error);
                 setState((current) =>
                     updateRepositorySession(
                         current,
                         snapshot.id,
                         (session) => ({
                             ...session,
-                            error: errorMessage(error),
+                            error: message,
                         }),
                     ),
                 );
+                finishActivity(activityId, "failed", message);
+                if (throwOnError) throw new Error(message);
             }
         },
-        [activeSnapshot, fixture, refreshCoordinator, runRequest],
+        [
+            activeSnapshot,
+            beginActivity,
+            finishActivity,
+            fixture,
+            refreshCoordinator,
+            runRequest,
+        ],
+    );
+
+    const loadPushPreview = useCallback(
+        async (
+            remote: string | null = null,
+            remoteRef: string | null = null,
+            localRevision = "HEAD",
+        ): Promise<PushPreview> => {
+            if (fixture) {
+                const snapshot = activeSnapshot();
+                const branch = snapshot.currentBranch ?? "main";
+                const oid =
+                    snapshot.headOid ??
+                    "0000000000000000000000000000000000000000";
+                const destination = remoteRef ?? `refs/heads/${branch}`;
+                const destinationBranch = destination.replace(
+                    /^refs\/heads\//,
+                    "",
+                );
+                const diverged = destinationBranch === "diverged";
+                const divergedRemoteOid =
+                    "fedcba9876543210fedcba9876543210fedcba98";
+                const reviewedRemoteOid = diverged
+                    ? divergedRemoteOid
+                    : snapshot.upstream
+                      ? oid
+                      : null;
+                return {
+                    sourceBranch: snapshot.currentBranch,
+                    sourceRevision: localRevision,
+                    localOid: oid,
+                    remote: remote ?? "origin",
+                    remoteRef: destination,
+                    upstreamConfigured: Boolean(snapshot.upstream),
+                    setUpstreamDefault: !snapshot.upstream,
+                    remoteOid: reviewedRemoteOid,
+                    expectedLeaseOid: reviewedRemoteOid,
+                    ahead: diverged ? 2 : snapshot.ahead,
+                    behind: diverged ? 1 : snapshot.behind,
+                    fastForward: diverged ? false : true,
+                    newBranch: false,
+                    commits: [],
+                    remoteOnlyCommits: diverged
+                        ? [
+                              {
+                                  oid: divergedRemoteOid,
+                                  subject: "Remote-only fixture commit",
+                              },
+                          ]
+                        : [],
+                    protectedBranch: [
+                        "main",
+                        "master",
+                        "production",
+                        "release",
+                    ].includes(destinationBranch),
+                    checkedAtMs: Date.now(),
+                    remoteStateError: null,
+                    warnings: diverged
+                        ? [
+                              "QA fixture: destination contains remote-only history.",
+                          ]
+                        : [],
+                };
+            }
+            return gitBridge.loadPushPreview(
+                activeSnapshot().id,
+                remote,
+                remoteRef,
+                localRevision,
+            );
+        },
+        [activeSnapshot, fixture],
+    );
+
+    const loadHistoryRewritePreview = useCallback(
+        async (fromRevision: string): Promise<HistoryRewritePreview> => {
+            if (fixture) {
+                const repository = activeSession?.repository;
+                if (!repository) throw new Error("Open a repository first");
+                const start = repository.commits.findIndex(
+                    (commit) => commit.oid === fromRevision,
+                );
+                const commits = (
+                    start < 0
+                        ? repository.commits
+                        : repository.commits.slice(0, start + 1)
+                ).toReversed();
+                const upstreamBoundary = repository.status.ahead;
+                return {
+                    branch: repository.snapshot.currentBranch ?? "main",
+                    headOid:
+                        repository.snapshot.headOid ??
+                        commits.at(-1)?.oid ??
+                        fromRevision,
+                    base: commits[0]?.parents[0] ?? null,
+                    root: (commits[0]?.parents.length ?? 0) === 0,
+                    entries: commits.map((commit, index) => ({
+                        oid: commit.oid,
+                        subject: commit.subject,
+                        parents: [...commit.parents],
+                        action: "pick",
+                        message: null,
+                        published:
+                            index <
+                            Math.max(0, commits.length - upstreamBoundary),
+                        mergeCommit: commit.parents.length > 1,
+                    })),
+                    publishedCommitCount: Math.max(
+                        0,
+                        commits.length - upstreamBoundary,
+                    ),
+                    descendantCount: commits.length,
+                    dependentRefs: [],
+                    hasMerges: commits.some(
+                        (commit) => commit.parents.length > 1,
+                    ),
+                    protectedBranch: [
+                        "main",
+                        "master",
+                        "production",
+                        "release",
+                    ].includes(repository.snapshot.currentBranch ?? ""),
+                    warnings: [],
+                };
+            }
+            return gitBridge.loadHistoryRewritePreview(
+                activeSnapshot().id,
+                fromRevision,
+            );
+        },
+        [activeSession?.repository, activeSnapshot, fixture],
     );
 
     const reload = useCallback(async (): Promise<void> => {
         if (!activeSession) return;
         const repositoryId = activeSession.repository.snapshot.id;
-        await refreshCoordinator.flush(repositoryId);
-        await refreshOnce(repositoryId);
-    }, [activeSession, refreshCoordinator, refreshOnce]);
+        const activityId = beginActivity(
+            repositoryId,
+            "Refreshing repository",
+            {
+                kind: "reload",
+                repositoryId,
+            },
+        );
+        try {
+            await refreshCoordinator.flush(repositoryId);
+            await refreshAll(repositoryId);
+            finishActivity(activityId, "succeeded");
+        } catch (error) {
+            const message = sanitizeGitError(error);
+            setState((current) =>
+                updateRepositorySession(current, repositoryId, (session) => ({
+                    ...session,
+                    status: "ready",
+                    error: message,
+                })),
+            );
+            finishActivity(activityId, "failed", message);
+        }
+    }, [
+        activeSession,
+        beginActivity,
+        finishActivity,
+        refreshAll,
+        refreshCoordinator,
+    ]);
+
+    const loadLog = useCallback(
+        async (
+            filters: LogFilters,
+            order: LogOrder,
+            append: boolean,
+        ): Promise<void> => {
+            if (fixture) return;
+            const snapshot = activeSnapshot();
+            const selection = { filters, order } satisfies LogSelection;
+            const activityId = beginActivity(
+                snapshot.id,
+                append ? "Loading more history" : "Searching history",
+                {
+                    kind: "log",
+                    repositoryId: snapshot.id,
+                    filters,
+                    order,
+                    append,
+                },
+            );
+            logSelections.current.set(snapshot.id, selection);
+            const generation =
+                (logGenerations.current.get(snapshot.id) ?? 0) + 1;
+            logGenerations.current.set(snapshot.id, generation);
+            const previousRequest = activeLogRequests.current.get(snapshot.id);
+            if (previousRequest) await cancelRequests([previousRequest]);
+            setState((current) =>
+                updateRepositorySession(current, snapshot.id, (session) => ({
+                    ...session,
+                    logLoading: true,
+                    logError: null,
+                })),
+            );
+            const skip = append
+                ? (logCommitCounts.current.get(snapshot.id) ?? 0)
+                : 0;
+            try {
+                const output = await runRequest(
+                    createLogRequest(snapshot.id, selection, skip),
+                    {
+                        activityId,
+                        onStarted: (requestId) => {
+                            if (
+                                logGenerations.current.get(snapshot.id) ===
+                                generation
+                            ) {
+                                activeLogRequests.current.set(
+                                    snapshot.id,
+                                    requestId,
+                                );
+                            } else {
+                                void cancelRequests([requestId]);
+                            }
+                        },
+                    },
+                );
+                if (logGenerations.current.get(snapshot.id) !== generation)
+                    return;
+                const page = parseLog(output);
+                setState((current) =>
+                    updateRepositorySession(current, snapshot.id, (session) => {
+                        const known = new Set(
+                            session.repository.commits.map(
+                                (commit) => commit.oid,
+                            ),
+                        );
+                        const commits = append
+                            ? [
+                                  ...session.repository.commits,
+                                  ...page.filter(
+                                      (commit) => !known.has(commit.oid),
+                                  ),
+                              ]
+                            : page;
+                        return {
+                            ...session,
+                            repository: { ...session.repository, commits },
+                            hasMoreCommits: page.length === 500,
+                        };
+                    }),
+                );
+                finishActivity(activityId, "succeeded");
+            } catch (error) {
+                if (isGitRequestCancelled(error)) {
+                    finishActivity(activityId, "cancelled");
+                }
+                if (
+                    logGenerations.current.get(snapshot.id) === generation &&
+                    !isGitRequestCancelled(error)
+                ) {
+                    const message = sanitizeGitError(error);
+                    setState((current) =>
+                        updateRepositorySession(
+                            current,
+                            snapshot.id,
+                            (session) => ({
+                                ...session,
+                                logError: message,
+                            }),
+                        ),
+                    );
+                    finishActivity(activityId, "failed", message);
+                }
+            } finally {
+                if (logGenerations.current.get(snapshot.id) === generation) {
+                    activeLogRequests.current.delete(snapshot.id);
+                    setState((current) =>
+                        updateRepositorySession(
+                            current,
+                            snapshot.id,
+                            (session) => ({
+                                ...session,
+                                logLoading: false,
+                            }),
+                        ),
+                    );
+                }
+            }
+        },
+        [activeSnapshot, beginActivity, finishActivity, fixture, runRequest],
+    );
+
+    const indexLog = useCallback(
+        async (filters: LogFilters, order: LogOrder): Promise<void> => {
+            if (fixture) return;
+            const snapshot = activeSnapshot();
+            const selection = { filters, order } satisfies LogSelection;
+            const activityId = beginActivity(
+                snapshot.id,
+                "Indexing Git history",
+                {
+                    kind: "log",
+                    repositoryId: snapshot.id,
+                    filters,
+                    order,
+                    append: false,
+                },
+            );
+            logSelections.current.set(snapshot.id, selection);
+            const generation =
+                (logGenerations.current.get(snapshot.id) ?? 0) + 1;
+            logGenerations.current.set(snapshot.id, generation);
+            const previousRequest = activeLogRequests.current.get(snapshot.id);
+            if (previousRequest) await cancelRequests([previousRequest]);
+            setState((current) =>
+                updateRepositorySession(current, snapshot.id, (session) => ({
+                    ...session,
+                    logLoading: true,
+                    logError: null,
+                })),
+            );
+            try {
+                let skip = 0;
+                let indexed: readonly Commit[] = [];
+                let hasMore = true;
+                while (
+                    hasMore &&
+                    logGenerations.current.get(snapshot.id) === generation
+                ) {
+                    const output = await runRequest(
+                        createLogRequest(snapshot.id, selection, skip),
+                        {
+                            activityId,
+                            onStarted: (requestId) => {
+                                if (
+                                    logGenerations.current.get(snapshot.id) ===
+                                    generation
+                                ) {
+                                    activeLogRequests.current.set(
+                                        snapshot.id,
+                                        requestId,
+                                    );
+                                } else {
+                                    void cancelRequests([requestId]);
+                                }
+                            },
+                        },
+                    );
+                    if (
+                        logGenerations.current.get(snapshot.id) !== generation
+                    ) {
+                        return;
+                    }
+                    const page = parseLog(output);
+                    const known = new Set(indexed.map((commit) => commit.oid));
+                    indexed = [
+                        ...indexed,
+                        ...page.filter((commit) => !known.has(commit.oid)),
+                    ];
+                    skip += page.length;
+                    hasMore = page.length === 500;
+                    setState((current) =>
+                        updateRepositorySession(
+                            current,
+                            snapshot.id,
+                            (session) => ({
+                                ...session,
+                                repository: {
+                                    ...session.repository,
+                                    commits: indexed,
+                                },
+                                hasMoreCommits: hasMore,
+                            }),
+                        ),
+                    );
+                }
+                finishActivity(activityId, "succeeded");
+            } catch (error) {
+                if (isGitRequestCancelled(error)) {
+                    finishActivity(activityId, "cancelled");
+                } else if (
+                    logGenerations.current.get(snapshot.id) === generation
+                ) {
+                    const message = sanitizeGitError(error);
+                    setState((current) =>
+                        updateRepositorySession(
+                            current,
+                            snapshot.id,
+                            (session) => ({
+                                ...session,
+                                logError: message,
+                            }),
+                        ),
+                    );
+                    finishActivity(activityId, "failed", message);
+                }
+            } finally {
+                if (logGenerations.current.get(snapshot.id) === generation) {
+                    activeLogRequests.current.delete(snapshot.id);
+                    setState((current) =>
+                        updateRepositorySession(
+                            current,
+                            snapshot.id,
+                            (session) => ({
+                                ...session,
+                                logLoading: false,
+                            }),
+                        ),
+                    );
+                }
+            }
+        },
+        [activeSnapshot, beginActivity, finishActivity, fixture, runRequest],
+    );
 
     const loadCommitFiles = useCallback(
         async (revision: string): Promise<readonly FileChange[]> => {
@@ -1028,25 +1827,36 @@ export function useGitSession() {
     );
 
     const loadCommitDiff = useCallback(
-        async (commit: Commit, path: string): Promise<string> => {
+        async (
+            commit: Commit,
+            path: string,
+            options: DiffOptions,
+            parentRevision?: string,
+        ): Promise<string> => {
             if (fixture) return (await requireFixtureData()).samplePatch;
             const snapshot = activeSnapshot();
             return runRequest({
                 kind: "diff",
                 repositoryId: snapshot.id,
                 from:
+                    parentRevision ??
                     commit.parents[0] ??
                     "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
                 to: commit.oid,
                 paths: [path],
                 staged: false,
+                options,
             });
         },
         [activeSnapshot, fixture, runRequest],
     );
 
     const loadWorkingDiff = useCallback(
-        async (path: string, staged: boolean): Promise<string> => {
+        async (
+            path: string,
+            staged: boolean,
+            options: DiffOptions,
+        ): Promise<string> => {
             if (fixture) return (await requireFixtureData()).samplePatch;
             const snapshot = activeSnapshot();
             return runRequest({
@@ -1056,9 +1866,135 @@ export function useGitSession() {
                 to: null,
                 paths: [path],
                 staged,
+                options,
             });
         },
         [activeSnapshot, fixture, runRequest],
+    );
+
+    const loadLocalChangesPatch = useCallback(async (): Promise<string> => {
+        if (fixture) return (await requireFixtureData()).samplePatch;
+        const snapshot = activeSnapshot();
+        return runRequest({
+            kind: "diff",
+            repositoryId: snapshot.id,
+            from: snapshot.hasCommits
+                ? "HEAD"
+                : "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+            to: null,
+            paths: [],
+            staged: false,
+            options: { whitespace: "show", contextLines: 3 },
+        });
+    }, [activeSnapshot, fixture, runRequest]);
+
+    const loadRevisionDiff = useCallback(
+        async (
+            from: string,
+            to: string | null,
+            options: DiffOptions,
+            paths: readonly string[] = [],
+        ): Promise<string> => {
+            if (fixture) return (await requireFixtureData()).samplePatch;
+            const snapshot = activeSnapshot();
+            return runRequest({
+                kind: "diff",
+                repositoryId: snapshot.id,
+                from,
+                to,
+                paths: [...paths],
+                staged: false,
+                options,
+            });
+        },
+        [activeSnapshot, fixture, runRequest],
+    );
+
+    const captureLocalHistory = useCallback(
+        async (label: string | null): Promise<GitLocalHistoryEntry> => {
+            if (fixture)
+                throw new Error("Local History requires the native app");
+            if (gitBridge.captureLocalHistory === undefined)
+                throw new Error("Local History is unavailable");
+            return gitBridge.captureLocalHistory(activeSnapshot().id, label);
+        },
+        [activeSnapshot, fixture],
+    );
+
+    const listLocalHistory = useCallback(
+        async (
+            path: string | null,
+        ): Promise<readonly GitLocalHistoryEntry[]> => {
+            if (fixture) return [];
+            if (gitBridge.listLocalHistory === undefined)
+                throw new Error("Local History is unavailable");
+            return gitBridge.listLocalHistory(activeSnapshot().id, path);
+        },
+        [activeSnapshot, fixture],
+    );
+
+    const loadLocalHistoryDiff = useCallback(
+        async (entryId: string, path: string): Promise<string> => {
+            if (fixture) return (await requireFixtureData()).samplePatch;
+            if (gitBridge.readLocalHistoryDiff === undefined)
+                throw new Error("Local History is unavailable");
+            return gitBridge.readLocalHistoryDiff(
+                activeSnapshot().id,
+                entryId,
+                path,
+            );
+        },
+        [activeSnapshot, fixture],
+    );
+
+    const restoreLocalHistory = useCallback(
+        async (entryId: string, path: string): Promise<void> => {
+            if (fixture)
+                throw new Error("Local History requires the native app");
+            if (gitBridge.restoreLocalHistory === undefined)
+                throw new Error("Local History is unavailable");
+            const snapshot = activeSnapshot();
+            await gitBridge.restoreLocalHistory(snapshot.id, entryId, path);
+            await gitBridge.captureLocalHistory?.(
+                snapshot.id,
+                `Reverted ${path}`,
+            );
+            await refreshAll(snapshot.id);
+        },
+        [activeSnapshot, fixture, refreshAll],
+    );
+
+    const exportPatch = useCallback(
+        async (
+            revisions: readonly string[],
+            targetPath: string,
+        ): Promise<PatchExportResult> => {
+            if (fixture)
+                throw new Error("Patch export requires the native app");
+            return gitBridge.exportPatch(
+                activeSnapshot().id,
+                revisions,
+                targetPath,
+            );
+        },
+        [activeSnapshot, fixture],
+    );
+
+    const createPatchText = useCallback(
+        async (revisions: readonly string[]): Promise<string> => {
+            return gitBridge.createPatchText(activeSnapshot().id, revisions);
+        },
+        [activeSnapshot],
+    );
+
+    const importPatch = useCallback(
+        async (path: string): Promise<void> => {
+            const snapshot = activeSnapshot();
+            await gitBridge.importPatch(snapshot.id, path);
+            refreshCoordinator.invalidate(snapshot.id, ["status", "history"]);
+            await refreshCoordinator.flush(snapshot.id);
+        },
+        [activeSnapshot, refreshCoordinator],
     );
 
     const loadTree = useCallback(
@@ -1076,6 +2012,59 @@ export function useGitSession() {
                     path: path ?? null,
                 }),
             );
+        },
+        [activeSnapshot, fixture, runRequest],
+    );
+
+    const loadFiles = useCallback(async (): Promise<readonly string[]> => {
+        if (fixture) return [];
+        const snapshot = activeSnapshot();
+        const output = await runRequest({
+            kind: "files",
+            repositoryId: snapshot.id,
+        });
+        return [...new Set(output.split("\0").filter(Boolean))].sort((left, right) =>
+            left.localeCompare(right),
+        );
+    }, [activeSnapshot, fixture, runRequest]);
+
+    const searchProjectText = useCallback(
+        async (
+            query: string,
+            options: ProjectSearchOptions,
+        ): Promise<readonly ProjectTextMatch[]> => {
+            const previousRequest = activeSearchRequest.current;
+            if (previousRequest !== null) {
+                activeSearchRequest.current = null;
+                void gitBridge.cancel(previousRequest);
+            }
+            if (fixture || query.length === 0) return [];
+            const snapshot = activeSnapshot();
+            let requestId: RequestId | null = null;
+            try {
+                const output = await runRequest(
+                    {
+                        kind: "searchText",
+                        repositoryId: snapshot.id,
+                        query,
+                        options,
+                    },
+                    {
+                        onStarted: (startedRequestId) => {
+                            requestId = startedRequestId;
+                            activeSearchRequest.current = startedRequestId;
+                        },
+                    },
+                );
+                return parseProjectTextMatches(output);
+            } finally {
+                if (
+                    requestId !== null &&
+                    activeSearchRequest.current === requestId
+                ) {
+                    activeSearchRequest.current = null;
+                }
+            }
         },
         [activeSnapshot, fixture, runRequest],
     );
@@ -1122,16 +2111,68 @@ export function useGitSession() {
     const readFile = useCallback(
         async (source: FileSource, path: string): Promise<FileContent> => {
             if (fixture) {
-                const { samplePatch } = await requireFixtureData();
+                const { sampleFileContent } = await requireFixtureData();
+                const content = sampleFileContent(path, source);
                 return {
                     kind: "text",
                     path,
-                    content: samplePatch,
-                    sizeBytes: samplePatch.length,
-                    lineCount: samplePatch.split("\n").length,
+                    content,
+                    sizeBytes: new TextEncoder().encode(content).byteLength,
+                    lineCount: content.split("\n").length,
                 };
             }
             return gitBridge.readFile(activeSnapshot().id, source, path);
+        },
+        [activeSnapshot, fixture],
+    );
+
+    const readFilePreview = useCallback(
+        async (source: FileSource, path: string): Promise<FilePreview> => {
+            if (fixture) {
+                return { kind: "binary", path, sizeBytes: 0 };
+            }
+            return gitBridge.readFilePreview(activeSnapshot().id, source, path);
+        },
+        [activeSnapshot, fixture],
+    );
+
+    const writeWorkingTreeFile = useCallback(
+        async (path: string, content: string): Promise<void> => {
+            if (fixture)
+                throw new Error("Editing files requires the native app");
+            if (gitBridge.writeWorkingTreeFile === undefined)
+                throw new Error("File editing is unavailable");
+            const snapshot = activeSnapshot();
+            await gitBridge.writeWorkingTreeFile(snapshot.id, path, content);
+            refreshCoordinator.invalidate(snapshot.id, ["status"]);
+            await refreshCoordinator.flush(snapshot.id);
+        },
+        [activeSnapshot, fixture, refreshCoordinator],
+    );
+
+    const loadSubmoduleDiff = useCallback(
+        async (
+            before: FileSource,
+            after: FileSource,
+            path: string,
+        ): Promise<SubmoduleDiff> => {
+            if (fixture) {
+                return {
+                    path,
+                    beforeOid: null,
+                    afterOid: null,
+                    beforeSubject: null,
+                    afterSubject: null,
+                    ahead: null,
+                    behind: null,
+                };
+            }
+            return gitBridge.loadSubmoduleDiff(
+                activeSnapshot().id,
+                before,
+                after,
+                path,
+            );
         },
         [activeSnapshot, fixture],
     );
@@ -1310,6 +2351,8 @@ export function useGitSession() {
             changelistId: string,
             message: string,
             amend: boolean,
+            signOff: boolean,
+            gpgSign: boolean,
         ): Promise<ChangelistCommitResult> => {
             const snapshot = activeSnapshot();
             const result = await gitBridge.commitChangelist(
@@ -1317,14 +2360,66 @@ export function useGitSession() {
                 changelistId,
                 message,
                 amend,
-                false,
-                false,
+                signOff,
+                gpgSign,
             );
             refreshCoordinator.invalidate(snapshot.id, ["status", "history"]);
             await refreshCoordinator.flush(snapshot.id);
             return result;
         },
         [activeSnapshot, refreshCoordinator],
+    );
+
+    const preCommitCheck = useCallback(async (): Promise<PreCommitCheck> => {
+        const snapshot = activeSnapshot();
+        return gitBridge.preCommitCheck(snapshot.id);
+    }, [activeSnapshot]);
+
+    const loadGitConfig = useCallback(async (): Promise<
+        readonly GitConfig[]
+    > => {
+        return gitBridge.listGitConfig(activeSnapshot().id);
+    }, [activeSnapshot]);
+
+    const loadSubmodules = useCallback(async (): Promise<
+        readonly SubmoduleInfo[]
+    > => {
+        return gitBridge.listSubmodules(activeSnapshot().id);
+    }, [activeSnapshot]);
+
+    const loadMergedBranches = useCallback(
+        async (target: string): Promise<readonly string[]> => {
+            return gitBridge.listMergedBranches(activeSnapshot().id, target);
+        },
+        [activeSnapshot],
+    );
+
+    const readIgnoreRules = useCallback(async (): Promise<IgnoreRules> => {
+        return gitBridge.readIgnoreRules(activeSnapshot().id);
+    }, [activeSnapshot]);
+
+    const writeIgnoreRules = useCallback(
+        async (rules: IgnoreRules): Promise<void> => {
+            const snapshot = activeSnapshot();
+            await gitBridge.writeIgnoreRules(snapshot.id, rules);
+            refreshCoordinator.invalidate(snapshot.id, ["status"]);
+            await refreshCoordinator.flush(snapshot.id);
+        },
+        [activeSnapshot, refreshCoordinator],
+    );
+
+    const compareBranches = useCallback(
+        async (left: string, right: string): Promise<BranchComparison> => {
+            return gitBridge.compareBranches(activeSnapshot().id, left, right);
+        },
+        [activeSnapshot],
+    );
+
+    const loadCommitSignature = useCallback(
+        async (revision: string): Promise<CommitSignature> => {
+            return gitBridge.loadCommitSignature(activeSnapshot().id, revision);
+        },
+        [activeSnapshot],
     );
 
     const restoreRecoveryEntry = useCallback(
@@ -1421,17 +2516,76 @@ export function useGitSession() {
         [activeSession, refreshCoordinator],
     );
 
-    const cancelConsoleRequest = useCallback(
-        async (requestId: string): Promise<void> => {
-            await gitBridge.cancel(requestId);
-        },
-        [],
-    );
+    const cancelActivity = useCallback(async (): Promise<void> => {
+        if (!activity || activity.status !== "running") return;
+        const requestIds = activity.requestIds;
+        if (requestIds.length === 0) return;
+        setActivity((current) =>
+            current?.id === activity.id
+                ? { ...current, requestIds: [] }
+                : current,
+        );
+        const results = await cancelRequests(requestIds);
+        const failed = results.find(
+            (result): result is PromiseRejectedResult =>
+                result.status === "rejected",
+        );
+        if (failed)
+            finishActivity(
+                activity.id,
+                "failed",
+                sanitizeGitError(failed.reason),
+            );
+    }, [activity, finishActivity]);
 
-    const clearConsole = useCallback((): void => {
-        if (!activeSession) return;
-        gitConsoleStore.clear(activeSession.repository.snapshot.id);
-    }, [activeSession]);
+    const retryActivity = useCallback(async (): Promise<void> => {
+        const retry = activityRetry.current;
+        if (!activity || retry?.activityId !== activity.id) return;
+        if (activeSnapshotRef.current?.id !== retry.retry.repositoryId) {
+            finishActivity(
+                activity.id,
+                "failed",
+                "Open the repository before retrying this operation.",
+            );
+            return;
+        }
+        dismissActivity(activity.id);
+        if (retry.retry.kind === "operation") {
+            await executeOperation(retry.retry.operation);
+        } else if (retry.retry.kind === "log") {
+            await loadLog(
+                retry.retry.filters,
+                retry.retry.order,
+                retry.retry.append,
+            );
+        } else {
+            await reload();
+        }
+    }, [
+        activity,
+        dismissActivity,
+        executeOperation,
+        loadPushPreview,
+        loadHistoryRewritePreview,
+        finishActivity,
+        loadLog,
+        reload,
+    ]);
+
+    const dismissError = useCallback((): void => {
+        setState((current) => {
+            const repositoryId = activeRepositoryId.current;
+            const withoutRepositoryError = repositoryId
+                ? updateRepositorySession(current, repositoryId, (session) => ({
+                      ...session,
+                      error: null,
+                  }))
+                : current;
+            return withoutRepositoryError.error === null
+                ? withoutRepositoryError
+                : { ...withoutRepositoryError, error: null };
+        });
+    }, []);
 
     const openRepositories = state.sessions.flatMap((session) =>
         session.kind === "repository" ? [session.repository.snapshot] : [],
@@ -1441,6 +2595,7 @@ export function useGitSession() {
         sessions: state.sessions,
         activeTab: state.activeTab,
         recentRepositories: state.recentRepositories,
+        managementSection: state.managementSection,
         restoring: state.restoring,
         error: state.error ?? activeSession?.error ?? null,
         fixture,
@@ -1449,7 +2604,17 @@ export function useGitSession() {
         managementRepository: managementSession?.repository ?? null,
         loading: activeSession?.status === "loading",
         stale: activeSession?.stale ?? false,
-        consoleStore: gitConsoleStore,
+        hasMoreCommits: activeSession?.hasMoreCommits ?? false,
+        logLoading: activeSession?.logLoading ?? false,
+        logError: activeSession?.logError ?? null,
+        activity:
+            activity?.repositoryId === activeSession?.repository.snapshot.id
+                ? activity
+                : null,
+        gitConsoleEntries: gitConsoleEntries.filter(
+            (entry) =>
+                entry.repositoryId === activeSession?.repository.snapshot.id,
+        ),
         shelves: activeSession?.shelves ?? EMPTY_ARRAY,
         stashes: activeSession?.stashes ?? EMPTY_ARRAY,
         changelists: activeSession?.changelists ?? EMPTY_ARRAY,
@@ -1462,34 +2627,65 @@ export function useGitSession() {
         openRepository,
         initializeRepository,
         cloneRepository,
+        cancelRepositoryCreation,
         activateTab,
+        openManagement,
         closeRepository,
         switchRepository,
         reload,
+        loadLog,
+        indexLog,
         loadCommitFiles,
         loadCommitDiff,
         loadWorkingDiff,
+        loadLocalChangesPatch,
+        loadRevisionDiff,
+        captureLocalHistory,
+        listLocalHistory,
+        loadLocalHistoryDiff,
+        restoreLocalHistory,
+        exportPatch,
+        createPatchText,
+        importPatch,
+        loadFiles,
+        searchProjectText,
         loadTree,
         loadFileHistory,
         loadBlame,
         readFile,
+        readFilePreview,
+        writeWorkingTreeFile,
+        loadSubmoduleDiff,
         openWorkingTreeFile,
         loadStashFiles,
         loadStashPatch,
         executeOperation,
+        loadPushPreview,
+        loadHistoryRewritePreview,
         createShelf,
         applyShelf,
         deleteShelf,
         saveChangelist,
         deleteChangelist,
         commitChangelist,
+        preCommitCheck,
+        loadGitConfig,
+        loadSubmodules,
+        loadMergedBranches,
+        readIgnoreRules,
+        writeIgnoreRules,
+        compareBranches,
+        loadCommitSignature,
         restoreRecoveryEntry,
         readConflict,
         saveConflictResult,
         resolveBinaryConflict,
         executeSynchronizedBranchOperation,
         applyMultiRootRollback,
-        cancelConsoleRequest,
-        clearConsole,
+        cancelActivity,
+        retryActivity,
+        dismissActivity,
+        dismissError,
+        clearGitConsole,
     };
 }

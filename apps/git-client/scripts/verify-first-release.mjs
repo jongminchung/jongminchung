@@ -11,7 +11,7 @@ import {
   initialReleaseVersion,
   parseReleaseMetadata,
 } from "./publish-release.mjs";
-import { createReleaseArtifactNames } from "./release.mjs";
+import { MAX_RELEASE_DMG_BYTES, createReleaseArtifactNames } from "./release.mjs";
 
 const workflowFile = "git-client.yml";
 const confirmation = createReleaseTag(initialReleaseVersion);
@@ -220,8 +220,8 @@ async function verifyDownloadedRelease(environment) {
 
     await executeCommand("shasum", ["-a", "256", "-c", names.checksum], { cwd: directory });
     const dmg = join(directory, names.dmg);
-    if ((await stat(dmg)).size > 75 * 1024 * 1024) {
-      throw new Error("Published DMG exceeds the 75 MiB budget");
+    if ((await stat(dmg)).size > MAX_RELEASE_DMG_BYTES) {
+      throw new Error("Published DMG exceeds the 160 MiB budget");
     }
 
     const mountOutput = await captureCommand("hdiutil", ["attach", dmg, "-nobrowse", "-readonly"], {

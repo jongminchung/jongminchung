@@ -21,6 +21,8 @@ const context = (overrides: Partial<SelectionContext> = {}): SelectionContext =>
   upstream: "origin/main",
   selectedIsAncestorOfHead: true,
   selectedIsAheadOfUpstream: true,
+  selectedAreContiguousFirstParent: true,
+  selectedIncludesMerge: false,
   hasChild: true,
   repositoryHasCommits: true,
   operationInProgress: false,
@@ -60,6 +62,17 @@ describe("deriveActionAvailability", () => {
       copyRevision: false,
       reset: false,
     });
+  });
+
+  it("rejects quick squash across a merge or non-contiguous first-parent range", () => {
+    expect(deriveActionAvailability(context({
+      selectedCommits: [commit("a"), commit("b")],
+      selectedAreContiguousFirstParent: false,
+    })).squash).toBe(false);
+    expect(deriveActionAvailability(context({
+      selectedCommits: [commit("a"), commit("b")],
+      selectedIncludesMerge: true,
+    })).squash).toBe(false);
   });
 
   it("does not drop or cherry-pick HEAD and checks upstream ancestry before partial push", () => {

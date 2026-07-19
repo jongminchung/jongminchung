@@ -1,0 +1,25 @@
+schemaVersion: 1
+reference: rebased-1.1.8
+featureGroups:
+  - id: shell
+    surfaces: [welcome, main-toolbar, native-menu, tool-stripes, status-bar]
+  - id: project
+    surfaces: [open, clone, initialize, recent-projects, project-tree, editor, image-preview]
+  - id: log
+    surfaces: [graph, filters, commit-details, file-details, diff, history, blame]
+  - id: changes
+    surfaces: [commit, staging, changelists, partial-changes, patch, shelf, stash]
+  - id: refs
+    surfaces: [branches, tags, remotes, worktrees]
+  - id: synchronization
+    surfaces: [fetch, pull, push, update-project]
+  - id: history-rewrite
+    surfaces: [merge, rebase, cherry-pick, revert, reset, conflicts, recovery]
+  - id: github
+    surfaces: [accounts, pull-requests, review, discussions, viewed-files]
+  - id: gitlab
+    surfaces: [accounts, merge-requests, review, discussions, viewed-files]
+  - id: platform
+    surfaces: [terminal, git-console, local-history, settings, keymap, notifications]
+lifecycle: [discovered, specified, implemented, verified]
+completionRule: every in-scope feature must be verified

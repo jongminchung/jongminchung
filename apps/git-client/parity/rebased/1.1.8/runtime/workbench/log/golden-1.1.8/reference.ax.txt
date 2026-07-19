@@ -1,0 +1,191 @@
+Window: "reference – Log", App: Rebased.
+0 표준 윈도우 reference – Log, Secondary Actions: Raise
+	1 container (selectable) Description: Root Pane, Value: 0
+		2 container (selectable) 0
+			3 container (selectable) Description: Main Toolbar ⌥⇞, Value: 0
+				4 container (selectable) 0
+					5 버튼 (selectable) Description: Project: reference, menu, Help: /private/tmp/rebased-parity-1.1.8.TPwGXl/reference
+					6 버튼 (selectable) Description: main, menu, Help: Git Branch: main
+					7 container (selectable)
+					8 버튼 (selectable) Update Project...
+					9 버튼 (selectable) Push…
+				10 container (selectable)
+				11 container (selectable) 0
+					12 container (selectable)
+					13 버튼 (selectable) Search Everywhere
+					14 버튼 (selectable) IDE and Project Settings
+		15 탭 그룹 (selectable, settable, unknown) Log
+			16 버튼 (selectable)
+			17 container (selectable) 0
+				18 이미지 (selectable)
+			19 텍스트 필드 (selectable, settable, string) Description: Search, Help: Branch or tag
+			20 텍스트 (selectable)
+			21 스크롤 영역 (selectable) 0
+				22 윤곽체 (selectable) Git branches
+				23 스크롤 막대 (selectable)
+				24 스크롤 막대 (selectable)
+			25 텍스트 필드 (selectable, settable, string) Description: Search, Help: <html>Filter by Commit Message or Hashes&nbsp;&nbsp;<font color="#9fa2a8">⌘L</font></html>
+			26 container (selectable) Description: Action Toolbar, Value: 0
+				27 버튼 (selectable) Regex
+				28 버튼 (selectable) Match Case
+			29 container (selectable) Description: Action Toolbar, Value: 0
+				30 메뉴 (selectable) Branch:
+Branch
+				31 메뉴 (selectable) User:
+User
+				32 메뉴 (selectable) Date:
+Date
+				33 메뉴 (selectable) Paths:
+Paths
+				34 버튼 (selectable) Graph Options
+				35 버튼 (selectable) Open New Git Log Tab
+			36 container (selectable) Description: Action Toolbar, Value: 0
+				37 버튼 (selectable) Enable Git Log Indexing
+				38 버튼 (selectable) Refresh
+				39 버튼 (selectable, disabled) Cherry-Pick
+				40 버튼 (selectable) View Options
+				41 버튼 (selectable) Go To Hash/Branch/Tag
+			42 이미지 (selectable)
+				43 이미지 (selectable)
+				44 텍스트 필드 (selectable, settable, string) text/html
+					45 텍스트 필드 (selectable) text/html
+			46 텍스트 (selectable)
+			47 스크롤 영역 (selectable) 0
+				48 표 (selectable) Description: Git log, Value: 0 (showing 0-500 of 2516 items)
+					49 JavaAxIgnore (selectable) 0
+						50 셀 (selectable) Description: feat: change bun to pnpm, Value: 0
+							51 텍스트 (selectable) feat: change bun to pnpm
+					52 JavaAxIgnore (selectable) 0
+						53 셀 (selectable) Description: Jongmin Chung, Value: 0
+							54 텍스트 (selectable) Jongmin Chung
+					55 JavaAxIgnore (selectable) 0
+						56 셀 (selectable) Description: 2026. 7. 9. 오후 10:41, Value: 0
+							57 텍스트 (selectable) 2026. 7. 9. 오후 10:41
+				58 스크롤 막대 (selectable)
+				59 스크롤 막대 (selectable)
+				60 텍스트 Subject
+				61 텍스트 Author
+				62 텍스트 Date
+			63 container (selectable) Description: Action Toolbar, Value: 0
+				64 버튼 (selectable, disabled) Show Diff
+				65 버튼 (selectable, disabled) Revert Selected Changes
+				66 버튼 (selectable) View Options
+			67 container (selectable) Description: Action Toolbar, Value: 0
+				68 버튼 (selectable, disabled) Expand All
+				69 버튼 (selectable, disabled) Collapse All
+			70 스크롤 영역 (selectable) 0
+				71 윤곽체 (selectable) Changes
+				72 스크롤 막대 (selectable)
+				73 스크롤 막대 (selectable)
+			74 스크롤 영역 (selectable) 0
+				75 스크롤 막대 (selectable)
+				76 스크롤 막대 (selectable)
+		77 container (selectable) Description: Project Tool Window, Value: 0
+			78 텍스트 (selectable) Project
+			79 버튼 (selectable) Project
+			80 container (selectable)
+			81 container (selectable) Description: Action Toolbar, Value: 0
+				82 버튼 (selectable) New File or Directory…
+				83 버튼 (selectable) Select Opened File (⌥F1, 1)
+				84 버튼 (selectable) Expand Selected
+				85 버튼 (selectable) Collapse All
+				86 버튼 (selectable) Options
+				87 버튼 (selectable) Hide
+			88 스크롤 영역 (selectable) 0
+				89 윤곽체 (selectable) Description: Project structure tree, Value: 0
+					90 row (selected) Description: reference  /private/tmp/rebased-parity-1.1.8.TPwGXl/reference, Value: 0
+						91 텍스트 (selectable) Description: reference  /private/tmp/rebased-parity-1.1.8.TPwGXl/reference
+.github
+.vscode
+apps
+packages
+.editorconfig
+.gitignore
+.node-version
+.npmrc
+.oxfmtrc.mjs
+.oxlintrc.json, JSON file
+nx.json, JSON file
+package.json, JSON file
+pnpm-lock.yaml, YAML file
+pnpm-workspace.yaml, YAML file
+README.md
+renovate.json, JSON file
+tsconfig.base.json, JSON file
+tsconfig.json, JSON file
+tsconfig.package-aliases.json, JSON file
+vitest.config.ts, Value: .github
+.vscode
+apps
+packages
+.editorconfig
+.gitignore
+.node-version
+.npmrc
+.oxfmtrc.mjs
+.oxlintrc.json, JSON file
+nx.json, JSON file
+package.json, JSON file
+pnpm-lock.yaml, YAML file
+pnpm-workspace.yaml, YAML file
+README.md
+renovate.json, JSON file
+tsconfig.base.json, JSON file
+tsconfig.json, JSON file
+tsconfig.package-aliases.json, JSON file
+vitest.config.ts
+					92 row (selected) Description: loading…, Value: 0
+						93 텍스트 (selectable) loading…
+					94 row (selected) Description: Scratches and Consoles, Value: 0
+						95 텍스트 (selectable) Scratches and Consoles
+				96 스크롤 막대 (selectable)
+				97 스크롤 막대 (selectable)
+		98 container (selectable) Description: Left Toolbar, Value: 0
+			99 버튼 (selectable) Project
+			100 버튼 (selectable) Commit
+			101 버튼 (selectable) More
+			102 버튼 (selectable) Terminal
+			103 버튼 (selectable) Git
+		104 container (selectable) Description: Right Toolbar, Value: 0
+			105 버튼 (selectable) Notifications
+			106 버튼 (selectable, disabled) More
+		107 container (selectable) Description: Status Bar, Value: 0
+			108 스크롤 영역 (selectable) 0
+				109 container (selectable) Description: Navigation Bar, Value: 0
+					110 버튼 (selectable) PsiDirectory:/private/tmp/rebased-parity-1.1.8.TPwGXl/reference
+				111 스크롤 막대 (selectable)
+				112 스크롤 막대 (selectable)
+			113 진행 과정 표시기 (selectable) Description: Background process, Help: Click to see all running processes, Value: 0
+				114 버튼 (selectable) Hide processes (1)
+				115 텍스트 (selectable)
+			116 버튼 (selectable)
+			117 버튼 (selectable)
+			118 버튼 (selectable) Go to Line
+			119 버튼 (selectable) Language Services Button
+			120 버튼 (selectable)
+			121 버튼 (selectable)
+			122 버튼 (selectable) Column selection mode
+			123 버튼 (selectable)
+				124 텍스트 (selectable)
+				125 버튼 (selectable)
+			126 버튼 (selectable)
+			127 버튼 (selectable) Make file writable
+			128 버튼 (selectable) Description: IDE error occurred, Help: See details and submit report
+				129 이미지 (selectable)
+	130 닫기 버튼
+	131 전체 화면 버튼 Help: 이 버튼을 누르면 윈도우를 확대/축소합니다., Secondary Actions: 윈도우 확대/축소
+	132 최소화 버튼
+133 menu bar
+	134 Rebased
+	135 File, ID: handleAction:
+	136 Edit, ID: handleAction:
+	137 View, ID: handleAction:
+	138 Navigate, ID: handleAction:
+	139 Code, ID: handleAction:
+	140 Run, ID: handleAction:
+	141 Tools, ID: handleAction:
+	142 Git, ID: handleAction:
+	143 Window, ID: handleAction:
+	144 Help, ID: handleAction:
+
+The focused UI element is 89 윤곽체 (selectable) Description: Project structure tree, Value: 0

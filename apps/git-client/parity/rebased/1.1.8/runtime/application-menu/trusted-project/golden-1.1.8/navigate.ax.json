@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-19T04:29:03.175Z",
+  "reference": {
+    "product": "Rebased",
+    "version": "1.1.8",
+    "build": "IC-262.8665.SNAPSHOT",
+    "artifactSha256": "fd3bc8bd7f80be16294d424b25ca390ceb13960bba33422dfa8ac4632c3412c0"
+  },
+  "execution": {
+    "profile": "/private/tmp/rebased-1.1.8-profile",
+    "repository": "/private/tmp/rebased-parity-1.1.8.TPwGXl/reference",
+    "trusted": true,
+    "testBundleId": "io.github.detachhead.rebased.goldenstable118"
+  },
+  "normalization": {
+    "appName": "Rebased Golden Stable 1.1.8 is a Computer Use harness bundle name; normalize only generated macOS app-name labels to Rebased."
+  },
+  "menu": "navigate",
+  "state": "Window: \"reference\", App: Rebased Golden Stable 1.1.8.\n0 Navigate, ID: handleAction:, Secondary Actions: Cancel, Pick\n\t1 메뉴 Secondary Actions: Cancel\n\t\t2 (disabled) Back, ID: handleAction:\n\t\t3 (disabled) Forward, ID: handleAction:\n\t\t4 Search Everywhere, ID: handleAction:\n\t\t5 Class..., ID: handleAction:\n\t\t6 File…, ID: handleAction:\n\t\t7 Symbol…, ID: handleAction:\n\t\t8 Text…, ID: handleAction:\n\t\t9 (disabled) Next Highlighted Error, ID: handleAction:\n\t\t10 (disabled) Previous Highlighted Error, ID: handleAction:\n\t\t11 (disabled) Next Emmet Edit Point, ID: handleAction:\n\t\t12 (disabled) Previous Emmet Edit Point, ID: handleAction:\n\t\t13 (disabled) Last Edit Location, ID: handleAction:\n\t\t14 (disabled) Next Edit Location, ID: handleAction:\n\t\t15 Navigate in File, ID: handleAction:\n\t\t\t16 메뉴 Secondary Actions: Cancel\n\t\t\t\t17 (disabled) Next Method, ID: handleAction:\n\t\t\t\t18 (disabled) Previous Method, ID: handleAction:\n\t\t\t\t19 (disabled) Move Caret to Matching Brace, ID: handleAction:\n\t\t\t\t20 (disabled) Next Live Template Parameter, ID: handleAction:\n\t\t\t\t21 (disabled) Previous Live Template Parameter, ID: handleAction:\n\t\t22 Jump to Navigation Bar, ID: handleAction:\n\t\t23 (disabled) Declaration or Usages, ID: handleAction:\n\t\t24 (disabled) Implementation(s), ID: handleAction:\n\t\t25 (disabled) Super Method, ID: handleAction:\n\t\t26 (disabled) Related Symbol…, ID: handleAction:\n\t\t27 (disabled) File Structure, ID: handleAction:\n\t\t28 (disabled) Type Hierarchy, ID: handleAction:\n\t\t29 (disabled) Call Hierarchy, ID: handleAction:\n"
+}

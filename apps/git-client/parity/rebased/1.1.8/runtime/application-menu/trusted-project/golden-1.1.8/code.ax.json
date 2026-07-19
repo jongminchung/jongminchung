@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-19T04:29:03.175Z",
+  "reference": {
+    "product": "Rebased",
+    "version": "1.1.8",
+    "build": "IC-262.8665.SNAPSHOT",
+    "artifactSha256": "fd3bc8bd7f80be16294d424b25ca390ceb13960bba33422dfa8ac4632c3412c0"
+  },
+  "execution": {
+    "profile": "/private/tmp/rebased-1.1.8-profile",
+    "repository": "/private/tmp/rebased-parity-1.1.8.TPwGXl/reference",
+    "trusted": true,
+    "testBundleId": "io.github.detachhead.rebased.goldenstable118"
+  },
+  "normalization": {
+    "appName": "Rebased Golden Stable 1.1.8 is a Computer Use harness bundle name; normalize only generated macOS app-name labels to Rebased."
+  },
+  "menu": "code",
+  "state": "Window: \"reference\", App: Rebased Golden Stable 1.1.8.\n0 Code, ID: handleAction:, Secondary Actions: Cancel, Pick\n\t1 메뉴 Secondary Actions: Cancel\n\t\t2 (disabled) Code Completion, ID: handleAction:\n\t\t\t3 메뉴 Secondary Actions: Cancel\n\t\t\t\t4 (disabled) Basic, ID: handleAction:\n\t\t\t\t5 (disabled) Type-Matching, ID: handleAction:\n\t\t\t\t6 (disabled) Complete Current Statement, ID: handleAction:\n\t\t\t\t7 (disabled) Cyclic Expand Word, ID: handleAction:\n\t\t\t\t8 (disabled) Cyclic Expand Word (Backward), ID: handleAction:\n\t\t\t\t9 (disabled) Call Inline Completion, ID: handleAction:\n\t\t\t\t10 (disabled) Insert Inline Proposal, ID: handleAction:\n\t\t\t\t11 (disabled) Insert Inline Proposal's Word, ID: handleAction:\n\t\t\t\t12 (disabled) Insert Inline Proposal's Line, ID: handleAction:\n\t\t\t\t13 (disabled) Enable Command Completion, ID: handleAction:\n\t\t14 Inspect Code…, ID: handleAction:\n\t\t15 Code Cleanup…, ID: handleAction:\n\t\t16 Analyze Code, ID: handleAction:\n\t\t\t17 메뉴 Secondary Actions: Cancel\n\t\t\t\t18 Silent Code Cleanup, ID: handleAction:\n\t\t\t\t19 Run Inspection by Name…, ID: handleAction:\n\t\t\t\t20 (disabled) Configure Current File Analysis…, ID: handleAction:\n\t\t\t\t21 View Offline Inspection Results…, ID: handleAction:\n\t\t22 Analyze Stack Trace or Thread Dump…, ID: handleAction:\n\t\t23 (disabled) Insert Live Template…, ID: handleAction:\n\t\t24 (disabled) Save as Live Template…, ID: handleAction:\n\t\t25 (disabled) Surround With…, ID: handleAction:\n\t\t26 (disabled) Unwrap/Remove…, ID: handleAction:\n\t\t27 Folding, ID: handleAction:\n\t\t\t28 메뉴 Secondary Actions: Cancel\n\t\t\t\t29 (disabled) Expand, ID: handleAction:\n\t\t\t\t30 (disabled) Expand Recursively, ID: handleAction:\n\t\t\t\t31 (disabled) Expand All, ID: handleAction:\n\t\t\t\t32 (disabled) Collapse, ID: handleAction:\n\t\t\t\t33 (disabled) Collapse Recursively, ID: handleAction:\n\t\t\t\t34 (disabled) Collapse All, ID: handleAction:\n\t\t\t\t35 Expand to Level, ID: handleAction:\n\t\t\t\t\t36 메뉴 Secondary Actions: Cancel\n\t\t\t\t\t\t37 (disabled) 1, ID: handleAction:\n\t\t\t\t\t\t38 (disabled) 2, ID: handleAction:\n\t\t\t\t\t\t39 (disabled) 3, ID: handleAction:\n\t\t\t\t\t\t40 (disabled) 4, ID: handleAction:\n\t\t\t\t\t\t41 (disabled) 5, ID: handleAction:\n\t\t\t\t42 Expand All to Level, ID: handleAction:\n\t\t\t\t\t43 메뉴 Secondary Actions: Cancel\n\t\t\t\t\t\t44 (disabled) 1, ID: handleAction:\n\t\t\t\t\t\t45 (disabled) 2, ID: handleAction:\n\t\t\t\t\t\t46 (disabled) 3, ID: handleAction:\n\t\t\t\t\t\t47 (disabled) 4, ID: handleAction:\n\t\t\t\t\t\t48 (disabled) 5, ID: handleAction:\n\t\t\t\t49 (disabled) Expand Doc Comments, ID: handleAction:\n\t\t\t\t50 (disabled) Collapse Doc Comments, ID: handleAction:\n\t\t\t\t51 (disabled) Toggle Folding, ID: handleAction:\n\t\t\t\t52 (disabled) Fold Selection / Remove Region, ID: handleAction:\n\t\t\t\t53 (disabled) Fold Code Block, ID: handleAction:\n\t\t54 (disabled) Comment with Line Comment, ID: handleAction:\n\t\t55 (disabled) Comment with Block Comment, ID: handleAction:\n\t\t56 (disabled) Move Statement Down, ID: handleAction:\n\t\t57 (disabled) Move Statement Up, ID: handleAction:\n\t\t58 (disabled) Move Element Left, ID: handleAction:\n\t\t59 (disabled) Move Element Right, ID: handleAction:\n\t\t60 (disabled) Move Line Down, ID: handleAction:\n\t\t61 (disabled) Move Line Up, ID: handleAction:\n"
+}

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-19T04:29:03.175Z",
+  "reference": {
+    "product": "Rebased",
+    "version": "1.1.8",
+    "build": "IC-262.8665.SNAPSHOT",
+    "artifactSha256": "fd3bc8bd7f80be16294d424b25ca390ceb13960bba33422dfa8ac4632c3412c0"
+  },
+  "execution": {
+    "profile": "/private/tmp/rebased-1.1.8-profile",
+    "repository": "/private/tmp/rebased-parity-1.1.8.TPwGXl/reference",
+    "trusted": true,
+    "testBundleId": "io.github.detachhead.rebased.goldenstable118"
+  },
+  "normalization": {
+    "appName": "Rebased Golden Stable 1.1.8 is a Computer Use harness bundle name; normalize only generated macOS app-name labels to Rebased."
+  },
+  "menu": "help",
+  "state": "Window: \"reference\", App: Rebased Golden Stable 1.1.8.\n0 Help, ID: handleAction:, Secondary Actions: Cancel, Pick\n\t1 메뉴 Secondary Actions: Cancel\n\t\t2 Find Action…, ID: handleAction:\n\t\t3 Help, ID: handleAction:\n\t\t4 What's New in Rebased, ID: handleAction:\n\t\t5 Keyboard Shortcuts PDF, ID: handleAction:\n\t\t6 Submit a Bug Report…, ID: handleAction:\n\t\t7 Show Log in Finder, ID: handleAction:\n\t\t8 Collect Logs and Diagnostic Data, ID: handleAction:\n\t\t9 Diagnostic Tools, ID: handleAction:\n\t\t\t10 메뉴 Secondary Actions: Cancel\n\t\t\t\t11 Activity Monitor…, ID: handleAction:\n\t\t\t\t12 Dump Threads, ID: handleAction:\n\t\t\t\t13 Debug Log Settings…, ID: handleAction:\n\t\t\t\t14 Special Files and Folders…, ID: handleAction:\n\t\t15 Change Memory Settings, ID: handleAction:\n\t\t16 Edit Custom Properties…, ID: handleAction:\n\t\t17 Edit Custom VM Options…, ID: handleAction:\n\t\t18 Delete Leftover IDE Directories…, ID: handleAction:\n"
+}

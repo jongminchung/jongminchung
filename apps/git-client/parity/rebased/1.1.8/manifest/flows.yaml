@@ -1,0 +1,30 @@
+schemaVersion: 1
+highRiskFlows:
+  - git.push.normal
+  - git.push.new-upstream
+  - git.push.force-with-lease
+  - git.reset
+  - git.interactive-rebase
+  - git.merge-conflict
+  - git.rebase-conflict
+  - git.cherry-pick-conflict
+  - git.revert-conflict
+  - github.review.submit
+  - gitlab.review.submit
+sideEffectSnapshot:
+  - status-porcelain-v2
+  - worktree-diff
+  - index-diff
+  - refs
+  - upstreams
+  - head
+  - reflog
+  - operation-metadata
+  - remotes
+  - config-origins
+  - worktrees
+  - submodules
+  - stashes
+  - file-hashes
+  - commit-topology
+cancelRule: before and after snapshots must be identical

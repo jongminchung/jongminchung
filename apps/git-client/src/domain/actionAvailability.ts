@@ -10,13 +10,24 @@ export function deriveActionAvailability(context: SelectionContext): ActionAvail
   return {
     copyRevision: exactlyOne,
     createPatch: selectedCount > 0,
+    copyPatch: selectedCount > 0,
     cherryPick: selectedCount > 0 && hasWritableBranch && !selectedIsHead,
     showRepositoryAtRevision: exactlyOne,
     compareVersions: selectedCount === 2,
     reset: exactlyOne && hasWritableBranch,
     revert: selectedCount > 0 && hasWritableBranch,
+    undoCommit: exactlyOne && hasWritableBranch && Boolean(selectedIsHead),
+    reword: exactlyOne && hasWritableBranch && context.selectedIsAncestorOfHead,
+    fixup: exactlyOne && hasWritableBranch && !selectedIsHead,
+    squashInto: exactlyOne && hasWritableBranch && !selectedIsHead,
     drop: exactlyOne && hasWritableBranch && context.selectedIsAncestorOfHead && !selectedIsHead,
-    squash: selectedCount > 1 && hasWritableBranch && context.selectedIsAncestorOfHead,
+    squash:
+      selectedCount > 1 &&
+      hasWritableBranch &&
+      context.selectedIsAncestorOfHead &&
+      context.selectedAreContiguousFirstParent &&
+      !context.selectedIncludesMerge,
+    interactiveRebase: exactlyOne && hasWritableBranch && context.selectedIsAncestorOfHead,
     pushUpTo:
       exactlyOne &&
       hasWritableBranch &&

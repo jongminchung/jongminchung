@@ -1,0 +1,494 @@
+{
+  "schemaVersion": 3,
+  "referenceVersion": "1.1.8",
+  "electronVersion": "43.1.1",
+  "definitions": {
+    "supported": "The renderer, preload, main, utility, and public ElectronGitBridge path is connected with strict validation and does not reject as unsupported.",
+    "packageVerification": "A source implementation is not package evidence until the rebuilt application passes black-box Electron tests.",
+    "rebasedParity": "Implementation coverage is not Rebased parity coverage until the matching reference scenario and effects comparison pass."
+  },
+  "summary": {
+    "contractMethods": 43,
+    "supported": 43,
+    "partial": 0,
+    "unsupported": 0,
+    "emptyFallback": 0,
+    "noOp": 0,
+    "packageVerified": 43,
+    "rebasedVerified": 0,
+    "complete": false
+  },
+  "methods": [
+    {
+      "method": "openRepository",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "initializeRepository",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "cloneRepository",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "refreshRepository",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "loadPushPreview",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "loadHistoryRewritePreview",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "preCommitCheck",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "compareBranches",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "loadCommitSignature",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "listGitConfig",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "listSubmodules",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "listMergedBranches",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "readIgnoreRules",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "writeIgnoreRules",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "exportPatch",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "createPatchText",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "importPatch",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "readFile",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "readFilePreview",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "loadSubmoduleDiff",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "openWorkingTreeFile",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "execute",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "cancel",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "createShelf",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "listShelves",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "applyShelf",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "deleteShelf",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "watchRepository",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "unwatchRepository",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "listChangelists",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "saveChangelist",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "deleteChangelist",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "commitChangelist",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "listRecoveryEntries",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "restoreRecoveryEntry",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "listConflicts",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "readConflict",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "writeConflictResult",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "resolveBinaryConflict",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "listRemotes",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "listWorktrees",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "executeSynchronizedBranchOperation",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    {
+      "method": "applyMultiRootRollback",
+      "status": "supported",
+      "transportConnected": true,
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    }
+  ],
+  "implementationSlices": {
+    "queries": {
+      "stage": "end-to-end-implemented",
+      "requestKinds": 17,
+      "packageVerification": "passed",
+      "packageVerifiedKinds": [
+        "status",
+        "refs",
+        "log",
+        "commitDetails",
+        "diff",
+        "tree",
+        "fileHistory",
+        "blame",
+        "stashList",
+        "stashShow",
+        "configList",
+        "submoduleStatus",
+        "signature",
+        "checkIgnored",
+        "mergedBranches",
+        "pushPreview",
+        "historyRewritePreview"
+      ],
+      "rebasedParity": "unverified"
+    },
+    "operations": {
+      "stage": "end-to-end-implemented",
+      "operationKinds": 50,
+      "packageVerification": "passed",
+      "packageVerifiedKinds": [
+        "stage",
+        "stageAll",
+        "stageTracked",
+        "addIntent",
+        "unstage",
+        "discard",
+        "applyPatch",
+        "partialPatch",
+        "commit",
+        "commitAdvanced",
+        "fetch",
+        "pull",
+        "push",
+        "createBranch",
+        "renameBranch",
+        "deleteBranch",
+        "setUpstream",
+        "deleteRemoteBranch",
+        "checkout",
+        "createTag",
+        "deleteTag",
+        "pushTag",
+        "reset",
+        "revert",
+        "cherryPick",
+        "merge",
+        "rebase",
+        "interactiveRebase",
+        "dropCommits",
+        "squashCommits",
+        "rewordCommit",
+        "undoCommit",
+        "createFixupCommit",
+        "createSquashCommit",
+        "continue",
+        "skip",
+        "abort",
+        "stashPush",
+        "stashApply",
+        "stashDrop",
+        "stashClear",
+        "stashBranch",
+        "unshallow",
+        "updateSubmodules",
+        "setConfig",
+        "worktreeAdd",
+        "worktreeRemove",
+        "remoteAdd",
+        "remoteRemove",
+        "remoteSetUrl"
+      ],
+      "rebasedParity": "unverified"
+    },
+    "repositoryLifecycle": {
+      "stage": "end-to-end-implemented",
+      "features": ["open", "refresh", "initialize", "clone", "close"],
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    "filesAndWatcher": {
+      "stage": "end-to-end-implemented",
+      "features": [
+        "diff",
+        "file",
+        "preview",
+        "submodule-diff",
+        "open-file",
+        "watch",
+        "unwatch"
+      ],
+      "packageVerification": "passed",
+      "packageVerifiedFeatures": [
+        "diff",
+        "file",
+        "preview",
+        "submodule-diff",
+        "open-file-security-boundary",
+        "watch",
+        "unwatch"
+      ],
+      "rebasedParity": "unverified"
+    },
+    "specialGit": {
+      "stage": "end-to-end-implemented",
+      "features": [
+        "patch",
+        "shelf",
+        "changelist",
+        "conflict",
+        "recovery",
+        "multi-root"
+      ],
+      "packageVerification": "passed",
+      "rebasedParity": "unverified"
+    },
+    "terminal": {
+      "stage": "end-to-end-implemented-toolbar-extension-in-progress",
+      "packageVerification": "passed-real-pty",
+      "rebasedParity": "unverified"
+    },
+    "hosting": {
+      "stage": "end-to-end-implemented-loopback-verified",
+      "providers": ["gitHub", "gitLab"],
+      "liveAccountVerification": "pending",
+      "packageVerification": "passed-loopback",
+      "rebasedParity": "unverified"
+    },
+    "release": {
+      "stage": "electron-arm64-local-adhoc-validated",
+      "productionSigning": "blocked-no-developer-id",
+      "notarization": "blocked-no-credentials",
+      "localAdHocArtifact": "passed-byte-reproducible",
+      "sha256": "05f241b616b57351f88e260c382759e7d995112e2f1b0a765de80e0c79b883d5",
+      "bytes": 106694849
+    }
+  },
+  "evidence": [
+    { "file": "src/bridge/GitBridge.ts" },
+    { "file": "src/bridge/ElectronGitBridge.ts" },
+    { "file": "src/bridge/ElectronGitBridge.integration.test.ts" },
+    { "file": "electron-tests/app.spec.ts" },
+    { "file": "electron-tests/operation-matrix.spec.ts" },
+    { "file": "electron-tests/packaged-app-harness.ts" },
+    { "file": "electron-tests/hosting.spec.ts" },
+    { "file": "parity/rebased/1.1.8/reports/release-validation.json" },
+    { "file": "parity/rebased/1.1.8/comparisons/ui-regressions/top-tabs/candidate-electron-43.1.1.jpeg" },
+    { "file": "parity/rebased/1.1.8/comparisons/ui-regressions/terminal/candidate-real-pty-electron-43.1.1.jpeg" },
+    { "file": "parity/rebased/1.1.8/comparisons/ui-regressions/terminal/behavior.json" },
+    { "file": "release-artifacts/Git-Client_0.1.0_macos_arm64_adhoc.dmg" },
+    { "file": "release-artifacts/Git-Client_0.1.0_macos_arm64_adhoc.dmg.sha256" }
+  ],
+  "unresolved": [
+    "rebased-reference-scenario-verification",
+    "bidirectional-source-runtime-mapping",
+    "live-github-gitlab-account-flows",
+    "performance-and-eight-hour-soak",
+    "developer-id-signing-and-notarization"
+  ],
+  "complete": false
+}

@@ -1,0 +1,38 @@
+{
+  "baseline": {
+    "build": "262.8665.SNAPSHOT",
+    "commit": "12fb12778a5ad8b7c52b64931a81c648629c9e23",
+    "tag": "1.1.8"
+  },
+  "counts": {
+    "actions": 1960,
+    "activeModules": 532,
+    "addToGroups": 371,
+    "bundledPlugins": 14,
+    "configurables": 66,
+    "descriptors": 496,
+    "dynamicProviders": 283,
+    "groups": 707,
+    "icons": 285,
+    "keymaps": 10,
+    "nonImlModules": 13,
+    "themes": 10,
+    "toolWindows": 12,
+    "unresolvedIncludes": 0,
+    "unresolvedModules": 0
+  },
+  "generatedFiles": [
+    "actions.json",
+    "add-to-groups.json",
+    "configurables.json",
+    "dynamic-providers.json",
+    "groups.json",
+    "icons.json",
+    "keymaps.json",
+    "product-closure.json",
+    "summary.json",
+    "themes.json",
+    "tool-windows.json"
+  ],
+  "schemaVersion": 1
+}

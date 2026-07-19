@@ -1,0 +1,4462 @@
+{
+  "baseline": {
+    "build": "262.8665.SNAPSHOT",
+    "commit": "12fb12778a5ad8b7c52b64931a81c648629c9e23",
+    "tag": "1.1.8"
+  },
+  "placements": [
+    {
+      "anchor": "last",
+      "groupId": "ActivateToolWindowActions",
+      "ownerId": "ActivateCommitToolWindow",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 620,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "ActivateToolWindowActions",
+      "ownerId": "ActivateDebugToolWindow",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "b3961fdb2dd5ebceff4bdcc2f71333790d9e3268",
+        "line": 199,
+        "path": "platform/xdebugger-impl/resources/intellij.platform.debugger.impl.content.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "ActivateToolWindowActions",
+      "ownerId": "ActivateHierarchyToolWindow",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 1131,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "ActivateToolWindowActions",
+      "ownerId": "ActivateRunToolWindow",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "5c73442683f671a79f355f01f4ee0a6ab72015fe",
+        "line": 183,
+        "path": "platform/platform-resources/src/idea/ExecutionActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "AdditionalRunningOptionsGroupMain",
+      "ownerId": "AdditionalRunningOptionsGroupMainDebuggerPart",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "b3961fdb2dd5ebceff4bdcc2f71333790d9e3268",
+        "line": 183,
+        "path": "platform/xdebugger-impl/resources/intellij.platform.debugger.impl.content.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "AnalyzeStacktraceToolbar",
+      "ownerId": "AnnotateStackTraceAction.show.files.modification.info",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 641,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "CallHierarchyPopupMenu",
+      "ownerId": "HierarchyPopupMenu.Common",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 927,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "ChangeScheme",
+      "ownerId": "ChangeCodeStyleScheme",
+      "ownerType": "action",
+      "relativeToAction": "ChangeColorScheme",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 896,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "ChangeScheme",
+      "ownerId": "ChangeInspectionProfile",
+      "ownerType": "action",
+      "relativeToAction": "ChangeCodeStyleScheme",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 900,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "ChangesView.GroupBy",
+      "ownerId": "ChangesView.GroupBy.Repository",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "f4766f5d6c3be7e0158ab7108f88d81fc3bf4d0c",
+        "line": 22,
+        "path": "platform/dvcs-impl/shared/resources/intellij.platform.vcs.dvcs.impl.shared.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "ChangesViewPopupMenu",
+      "ownerId": "Git.ChangesView.Conflicts",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 428,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "ChangesViewPopupMenu",
+      "ownerId": "Git.Ignore.File",
+      "ownerType": "group",
+      "relativeToAction": "ChangesView.AddUnversioned",
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 381,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "ChangesViewPopupMenu",
+      "ownerId": "Git.RevertResolved",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 166,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "ChangesViewPopupMenuShared",
+      "ownerId": "ChangesViewPopupMenu",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 216,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "ChangesViewToolbar.Shared",
+      "ownerId": "ChangesViewToolbar",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 160,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "ChangesViewToolbar.Shared.Other",
+      "ownerId": "ChangesView.SingleClickPreview",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 83,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "CloseEditorsGroup",
+      "ownerId": "CloseAllUnmodifiedEditors",
+      "ownerType": "action",
+      "relativeToAction": "CloseAllEditors",
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 437,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "Code.Review.Diff.Editor.Popup",
+      "ownerId": "Code.Review.Editor.New.Comment",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "659c40ddec73d83e6a7573fe3c2f83cbe28d937b",
+        "line": 100,
+        "path": "platform/collaboration-tools/resources/intellij.platform.collaborationTools.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "Code.Review.Diff.Editor.Popup",
+      "ownerId": "Github.PullRequest.Changed.MarkViewed.Toggle",
+      "ownerType": "action",
+      "relativeToAction": "Code.Review.Editor.New.Comment",
+      "source": {
+        "blob": "4ee88d3c0c9cd9c77fab5db70ccb8b560e1c2f01",
+        "line": 259,
+        "path": "plugins/github/github-core/resources/intellij.vcs.github.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "CodeFormatGroup",
+      "ownerId": "JsonJacksonReformatAction",
+      "ownerType": "action",
+      "relativeToAction": "ReformatCode",
+      "source": {
+        "blob": "28b944ce4c5b8993e56c1f45dbd55cef275b6205",
+        "line": 21,
+        "path": "json/backend/resources/intellij.json.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "CommitView.GearActions",
+      "ownerId": "CommitView.CloseWindowedFloatingTwOnCommit",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 628,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "CommitView.GearActions",
+      "ownerId": "Git.Stage.Configure",
+      "ownerType": "group",
+      "relativeToAction": "CommitView.ShowOnDoubleClick",
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 437,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "CommitView.GearActions",
+      "ownerId": "Git.Stage.ToggleCommitAll",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 410,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "compositeResumeGroup",
+      "ownerId": "com.intellij.xdebugger.impl.runToolbar.ConfigurationXDebuggerResumeAction",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "b3961fdb2dd5ebceff4bdcc2f71333790d9e3268",
+        "line": 166,
+        "path": "platform/xdebugger-impl/resources/intellij.platform.debugger.impl.content.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "ConsoleEditorPopupMenu",
+      "ownerId": "ConsoleView.FoldLinesLikeThis",
+      "ownerType": "action",
+      "relativeToAction": "$SearchWeb",
+      "source": {
+        "blob": "4f68b0fbda7d2cc33ee8ee1d54d6d289570f3135",
+        "line": 51,
+        "path": "idea/customization/min/resources/intellij.platform.customization.min.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "ConsoleEditorPopupMenu",
+      "ownerId": "ConsoleView.ShowAsJsonAction",
+      "ownerType": "action",
+      "relativeToAction": "ConsoleView.FoldLinesLikeThis",
+      "source": {
+        "blob": "28b944ce4c5b8993e56c1f45dbd55cef275b6205",
+        "line": 17,
+        "path": "json/backend/resources/intellij.json.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "ConsoleEditorPopupMenu",
+      "ownerId": "Github.Create.Gist",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4ee88d3c0c9cd9c77fab5db70ccb8b560e1c2f01",
+        "line": 196,
+        "path": "plugins/github/github-core/resources/intellij.vcs.github.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "ConsoleEditorPopupMenu",
+      "ownerId": "GitLab.Create.Snippet",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "ade25669ef11145ee810839b85d3ae9c3951e369",
+        "line": 168,
+        "path": "plugins/gitlab/gitlab-core/resources/intellij.vcs.gitlab.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "ConsoleEditorPopupMenu",
+      "ownerId": "NewScratchFile",
+      "ownerType": "action",
+      "relativeToAction": "CompareClipboardWithSelection",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 534,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "Copy.Paste.Special",
+      "ownerId": "CopyAsPlainText",
+      "ownerType": "action",
+      "relativeToAction": "CopyReference",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 112,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "Copy.Paste.Special",
+      "ownerId": "CopyReference",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 102,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "Copy.Paste.Special",
+      "ownerId": "Git.Hosting.Copy.Link.Group",
+      "ownerType": "group",
+      "relativeToAction": "CopyReference",
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 565,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "CopyFileReference",
+      "ownerId": "CopyPathFromRepositoryRootProvider",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 388,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "CopyFileReference",
+      "ownerId": "Git.Hosting.Copy.Link.Group",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 564,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "CopyReferencePopupGroup",
+      "ownerId": "CopyReference",
+      "ownerType": "action",
+      "relativeToAction": "CopyExternalReferenceGroup",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 100,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "CutCopyPasteGroup",
+      "ownerId": "CopyAsPlainText",
+      "ownerType": "action",
+      "relativeToAction": "CopyPaths",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 111,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "CutCopyPasteGroup",
+      "ownerId": "CopyAsRichText",
+      "ownerType": "action",
+      "relativeToAction": "CopyPaths",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 106,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "CutCopyPasteGroup",
+      "ownerId": "CopyReferencePopupGroup",
+      "ownerType": "group",
+      "relativeToAction": "CopyPaths",
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1785,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "CutCopyPasteGroup",
+      "ownerId": "JsonCopyPointer",
+      "ownerType": "action",
+      "relativeToAction": "CopyReference",
+      "source": {
+        "blob": "28b944ce4c5b8993e56c1f45dbd55cef275b6205",
+        "line": 12,
+        "path": "json/backend/resources/intellij.json.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "DebugReloadGroup",
+      "ownerId": "UpdateRunningApplication",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 1085,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Diff.Binary.Settings",
+      "ownerId": "Vcs.Diff.ShowDiffInEditorTab",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 458,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Diff.Binary.Settings",
+      "ownerId": "Vcs.Diff.ShowDiffInNewWindow",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 464,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Diff.DiffModes",
+      "ownerId": "Vcs.Diff.EnableDisableCombinedDiff",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 469,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "Diff.DiffModes",
+      "ownerId": "Vcs.Diff.ShowDiffInEditorTab",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 457,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Diff.DiffModes",
+      "ownerId": "Vcs.Diff.ShowDiffInNewWindow",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 463,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "Diff.EditorGutterPopupMenu",
+      "ownerId": "Annotate",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 24,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Diff.EditorPopupMenu",
+      "ownerId": "Annotate",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 23,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Diff.EditorPopupMenu",
+      "ownerId": "BlankDiffViewerEditorPopupMenu",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1661,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "Diff.EditorPopupMenu",
+      "ownerId": "Code.Review.Diff.Editor.Popup",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "659c40ddec73d83e6a7573fe3c2f83cbe28d937b",
+        "line": 89,
+        "path": "platform/collaboration-tools/resources/intellij.platform.collaborationTools.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "Diff.KeymapGroup",
+      "ownerId": "BlankDiffViewerEditorPopupMenu",
+      "ownerType": "group",
+      "relativeToAction": "ShowBlankDiffWindow",
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1662,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "Diff.KeymapGroup",
+      "ownerId": "Diff.CompareWith.KeymapGroup",
+      "ownerType": "group",
+      "relativeToAction": "CompareClipboardWithSelection",
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 614,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Diff.KeymapGroup",
+      "ownerId": "DirDiffMenu",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1639,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "Diff.KeymapGroup",
+      "ownerId": "SwapSidesInDiffWindow",
+      "ownerType": "action",
+      "relativeToAction": "BlankDiffViewerEditorPopupMenu",
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1647,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "Diff.KeymapGroup",
+      "ownerId": "SwapThreeWayColorModeInDiffWindow",
+      "ownerType": "action",
+      "relativeToAction": "BlankDiffViewerEditorPopupMenu",
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1652,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "Diff.KeymapGroup",
+      "ownerId": "Vcs.Diff.Commit.KeymapGroup",
+      "ownerType": "group",
+      "relativeToAction": "Diff.ResolveConflict",
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 446,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Diff.KeymapGroup",
+      "ownerId": "Vcs.Diff.KeymapGroup",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 479,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Diff.ViewerSettings",
+      "ownerId": "Github.PullRequest.Diff.Thread.View.Options",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4ee88d3c0c9cd9c77fab5db70ccb8b560e1c2f01",
+        "line": 291,
+        "path": "plugins/github/github-core/resources/intellij.vcs.github.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Diff.ViewerSettings",
+      "ownerId": "GitLab.Merge.Request.Diff.Discussions.View.Options",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "ade25669ef11145ee810839b85d3ae9c3951e369",
+        "line": 236,
+        "path": "plugins/gitlab/gitlab-core/resources/intellij.vcs.gitlab.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Diff.ViewerSettings",
+      "ownerId": "Vcs.Diff.EditorTabs.Group",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 476,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Diff.ViewerToolbar",
+      "ownerId": "SwapSidesInDiffWindow",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1646,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Diff.ViewerToolbar",
+      "ownerId": "SwapThreeWayColorModeInDiffWindow",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1651,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "DocCommentGutterIconContextMenu",
+      "ownerId": "ShowGutterIconsSettings",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 202,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "EditMenu",
+      "ownerId": "EditBookmarksGroup",
+      "ownerType": "group",
+      "relativeToAction": "Macros",
+      "source": {
+        "blob": "7ae83da64f710cb5f59cbfb3c9f2a9342855319c",
+        "line": 241,
+        "path": "platform/bookmarks/resources/intellij.platform.bookmarks.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "EditMenu",
+      "ownerId": "EmojiPicker.Open",
+      "ownerType": "action",
+      "relativeToAction": "EmojiAndSymbols",
+      "source": {
+        "blob": "1a6914ca9b1a2b1ea110af08f168de62d98aa2d0",
+        "line": 20,
+        "path": "plugins/emojipicker/resources/intellij.emojipicker.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "EditMenu",
+      "ownerId": "EscapeEntities",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e61840209854e78738e2357e743d23c52efe67b4",
+        "line": 88,
+        "path": "xml/impl/resources/intellij.xml.impl.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "EditMenu",
+      "ownerId": "FindUsagesMenuGroup",
+      "ownerType": "group",
+      "relativeToAction": "FindMenuGroup",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 130,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Editor.Search.Filter.Results",
+      "ownerId": "Vcs.Diff.ToggleSearchInChanges",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 483,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "EditorActions",
+      "ownerId": "CodeInsightEditorActions",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 62,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "EditorActions",
+      "ownerId": "EditorIndentLineOrSelection",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 40,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "EditorActions",
+      "ownerId": "LangCodeInsightActions",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 13,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "EditorGutterPopupMenu",
+      "ownerId": "EditorGutterVcsPopupMenu",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 375,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "EditorGutterPopupMenu",
+      "ownerId": "popup@BookmarkContextMenu",
+      "ownerType": "group",
+      "relativeToAction": "EditorToggleUseSoftWraps",
+      "source": {
+        "blob": "7ae83da64f710cb5f59cbfb3c9f2a9342855319c",
+        "line": 214,
+        "path": "platform/bookmarks/resources/intellij.platform.bookmarks.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "EditorGutterPopupMenu",
+      "ownerId": "ShowGutterIconsSettings",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 201,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "EditorGutterPopupMenu",
+      "ownerId": "XDebugger.DisableAllButThisBreakpoint",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "6656ad29df3e448055c1365b5b9584580e020d99",
+        "line": 173,
+        "path": "platform/xdebugger-impl/ui/resources/intellij.platform.debugger.impl.ui.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "EditorGutterPopupMenu",
+      "ownerId": "XDebugger.RemoveAllButThisBreakpoint",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "6656ad29df3e448055c1365b5b9584580e020d99",
+        "line": 170,
+        "path": "platform/xdebugger-impl/ui/resources/intellij.platform.debugger.impl.ui.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "EditorGutterPopupMenu.Appearance",
+      "ownerId": "EditorBreadcrumbsSettings",
+      "ownerType": "group",
+      "relativeToAction": "EditorGutterToggleGlobalStickyLines",
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1800,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "EditorGutterPopupMenu.Appearance",
+      "ownerId": "XDebugger.Show.Breakpoints.Over.Line.Numbers",
+      "ownerType": "action",
+      "relativeToAction": "EditorGutterToggleGlobalLineNumbers",
+      "source": {
+        "blob": "6656ad29df3e448055c1365b5b9584580e020d99",
+        "line": 202,
+        "path": "platform/xdebugger-impl/ui/resources/intellij.platform.debugger.impl.ui.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "EditorLangPopupMenu",
+      "ownerId": "EditorPopupMenuDebug",
+      "ownerType": "group",
+      "relativeToAction": "EditorPopupMenu.Run",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 958,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "EditorLangPopupMenu",
+      "ownerId": "EmmetUpdateTag",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "15f7996880f7b3200c8716ce6f8c8d80ac1bb6b9",
+        "line": 46,
+        "path": "xml/emmet/resources/intellij.xml.emmet.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "EditorPopupMenu",
+      "ownerId": "ChangeTemplateDataLanguage",
+      "ownerType": "action",
+      "relativeToAction": "ToggleReadOnlyAttribute",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 81,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "EditorPopupMenu",
+      "ownerId": "Code.Review.Editor.New.Comment",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "659c40ddec73d83e6a7573fe3c2f83cbe28d937b",
+        "line": 99,
+        "path": "platform/collaboration-tools/resources/intellij.platform.collaborationTools.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "EditorPopupMenu",
+      "ownerId": "Code.Review.Editor.Show.Diff",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "659c40ddec73d83e6a7573fe3c2f83cbe28d937b",
+        "line": 84,
+        "path": "platform/collaboration-tools/resources/intellij.platform.collaborationTools.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "EditorPopupMenu",
+      "ownerId": "CopyAsRichText",
+      "ownerType": "action",
+      "relativeToAction": "$Copy",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 107,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "EditorPopupMenu",
+      "ownerId": "EditorLangPopupMenu",
+      "ownerType": "group",
+      "relativeToAction": "CompareClipboardWithSelection",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 854,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "EditorPopupMenu",
+      "ownerId": "Git.Stage.Index.File.Menu",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 485,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "EditorPopupMenu",
+      "ownerId": "Github.Create.Gist",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4ee88d3c0c9cd9c77fab5db70ccb8b560e1c2f01",
+        "line": 193,
+        "path": "plugins/github/github-core/resources/intellij.vcs.github.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "EditorPopupMenu",
+      "ownerId": "Github.PullRequest.Changed.MarkViewed.Toggle",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4ee88d3c0c9cd9c77fab5db70ccb8b560e1c2f01",
+        "line": 258,
+        "path": "plugins/github/github-core/resources/intellij.vcs.github.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "EditorPopupMenu",
+      "ownerId": "GitLab.Create.Snippet",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "ade25669ef11145ee810839b85d3ae9c3951e369",
+        "line": 165,
+        "path": "plugins/gitlab/gitlab-core/resources/intellij.vcs.gitlab.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "EditorPopupMenu",
+      "ownerId": "JsonCopyPointer",
+      "ownerType": "action",
+      "relativeToAction": "Copy.Paste.Special",
+      "source": {
+        "blob": "28b944ce4c5b8993e56c1f45dbd55cef275b6205",
+        "line": 14,
+        "path": "json/backend/resources/intellij.json.backend.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "EditorPopupMenu",
+      "ownerId": "LightEditModePopup",
+      "ownerType": "group",
+      "relativeToAction": "ShowIntentionsGroup",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 89,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "EditorPopupMenu",
+      "ownerId": "ShowIntentionsGroup",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 32,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "EditorPopupMenu.GoTo",
+      "ownerId": "Console.TableResult.GotoReferencingResult",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c9dfcc49dbf8c39ffe915c53747ed16dc1735b17",
+        "line": 137,
+        "path": "grid/impl/resources/intellij.grid.impl.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "EditorPopupMenu.GoTo",
+      "ownerId": "Console.TableResult.Navigate.Group",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c9dfcc49dbf8c39ffe915c53747ed16dc1735b17",
+        "line": 252,
+        "path": "grid/impl/resources/intellij.grid.impl.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "EditorPopupMenu.GoTo",
+      "ownerId": "GotoRow",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c9dfcc49dbf8c39ffe915c53747ed16dc1735b17",
+        "line": 133,
+        "path": "grid/impl/resources/intellij.grid.impl.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "EditorPopupMenu.GoTo",
+      "ownerId": "ShowNavBar",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "5ad2acd447db530292a8c3c7744ac9473fff04f1",
+        "line": 40,
+        "path": "platform/navbar/frontend/resources/intellij.platform.navbar.frontend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "EditorPopupMenu1",
+      "ownerId": "EditorPopupMenu1.FindRefactor",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 835,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "EditorPopupMenu2",
+      "ownerId": "Scratch.ChangeLanguage",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 539,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "EditorPopupMenu3",
+      "ownerId": "Images.SetBackgroundImage",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "307645a47d8921c15d40d2456255bbfd663d87d1",
+        "line": 88,
+        "path": "images/resources/META-INF/plugin.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "EditorTabPopupMenu",
+      "ownerId": "ChangeTemplateDataLanguage",
+      "ownerType": "action",
+      "relativeToAction": "CopyReference",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 82,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "EditorTabPopupMenu",
+      "ownerId": "CopyReference",
+      "ownerType": "action",
+      "relativeToAction": "CopyPaths",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 101,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "EditorTabPopupMenu",
+      "ownerId": "CopyReferencePopupGroup",
+      "ownerType": "group",
+      "relativeToAction": "CopyPaths",
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1786,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "EditorTabPopupMenu",
+      "ownerId": "EditorTabPopupMenuEx",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 870,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "EditorTabPopupMenu",
+      "ownerId": "Github.Create.Gist",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4ee88d3c0c9cd9c77fab5db70ccb8b560e1c2f01",
+        "line": 195,
+        "path": "plugins/github/github-core/resources/intellij.vcs.github.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "EditorTabPopupMenu",
+      "ownerId": "GitLab.Create.Snippet",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "ade25669ef11145ee810839b85d3ae9c3951e369",
+        "line": 167,
+        "path": "plugins/gitlab/gitlab-core/resources/intellij.vcs.gitlab.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "EditorTabPopupMenu",
+      "ownerId": "JsonCopyPointer",
+      "ownerType": "action",
+      "relativeToAction": "CopyReference",
+      "source": {
+        "blob": "28b944ce4c5b8993e56c1f45dbd55cef275b6205",
+        "line": 13,
+        "path": "json/backend/resources/intellij.json.backend.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "EditorTabPopupMenu",
+      "ownerId": "popup@ExpandableBookmarkContextMenu",
+      "ownerType": "group",
+      "relativeToAction": "ReopenClosedTab",
+      "source": {
+        "blob": "7ae83da64f710cb5f59cbfb3c9f2a9342855319c",
+        "line": 221,
+        "path": "platform/bookmarks/resources/intellij.platform.bookmarks.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "EditorTabPopupMenu",
+      "ownerId": "Vcs.Diff.EditorTabs.Group",
+      "ownerType": "group",
+      "relativeToAction": "SplitVertically",
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 475,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "EditorTabPopupMenu",
+      "ownerId": "Vcs.Diff.EnableDisableCombinedDiff",
+      "ownerType": "action",
+      "relativeToAction": "SplitVertically",
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 470,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "EditorTabPopupMenu",
+      "ownerId": "Vcs.Diff.ShowDiffInNewWindow",
+      "ownerType": "action",
+      "relativeToAction": "SplitVertically",
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 465,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "EditorTabPopupMenuEx",
+      "ownerId": "RenameFile",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 1080,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "EditorTabsEntryPoint",
+      "ownerId": "BookmarkOpenTabsGroup",
+      "ownerType": "group",
+      "relativeToAction": "ConfigureEditorTabs",
+      "source": {
+        "blob": "7ae83da64f710cb5f59cbfb3c9f2a9342855319c",
+        "line": 228,
+        "path": "platform/bookmarks/resources/intellij.platform.bookmarks.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "EditorTabsEntryPoint",
+      "ownerId": "CloseAllUnmodifiedEditors",
+      "ownerType": "action",
+      "relativeToAction": "CloseAllEditors",
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 438,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "EditorTabsEntryPoint",
+      "ownerId": "RecentFiles",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "0c64701addd0756bd234fc9d5b55c531268fc5e2",
+        "line": 61,
+        "path": "platform/recentFiles/frontend/resources/intellij.platform.recentFiles.frontend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "EditorTabsEntryPoint",
+      "ownerId": "ToggleMinimap",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1964,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "EditorTabsEntryPoint",
+      "ownerId": "Vcs.Log.OpenAnotherTabInEditor",
+      "ownerType": "action",
+      "relativeToAction": "RecentFiles",
+      "source": {
+        "blob": "52b4286ec9234cec2b958452d204e956f4c41766",
+        "line": 209,
+        "path": "platform/vcs-log/impl/resources/intellij.platform.vcs.log.impl.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "EditorToggleActions",
+      "ownerId": "EditorToggleShowBreadcrumbs",
+      "ownerType": "action",
+      "relativeToAction": "EditorToggleShowIndentLines",
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1792,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "EditorToggleActions",
+      "ownerId": "ViewImportPopups",
+      "ownerType": "action",
+      "relativeToAction": "EditorToggleShowIndentLines",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 230,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "EditSelectGroup",
+      "ownerId": "EditSelectWordGroup",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 137,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "ExportImportGroup",
+      "ownerId": "SettingsSyncOpenSettingsAction",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "28cf19494a8831cbfe090f548c3e32189235e0e5",
+        "line": 103,
+        "path": "platform/settings-sync-core/resources/intellij.settingsSync.core.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "FileChooserToolbar",
+      "ownerId": "FileChooser.LightEditGotoOpenedFile",
+      "ownerType": "action",
+      "relativeToAction": "FileChooser.GotoDesktop",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 1127,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "FileHistory.KeymapGroup",
+      "ownerId": "Log.FileHistory.KeymapGroup",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "52b4286ec9234cec2b958452d204e956f4c41766",
+        "line": 418,
+        "path": "platform/vcs-log/impl/resources/intellij.platform.vcs.log.impl.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "FileMenu",
+      "ownerId": "LocalHistory.MainMenuGroup",
+      "ownerType": "group",
+      "relativeToAction": "SaveAll",
+      "source": {
+        "blob": "a44c6c1bdd4fe4f18160fe76945f212407182c51",
+        "line": 63,
+        "path": "platform/lvcs-impl/resources/intellij.platform.lvcs.impl.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "FileMenu",
+      "ownerId": "SaveFileAsTemplate",
+      "ownerType": "action",
+      "relativeToAction": "FileOtherSettingsGroup",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 75,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "FileOpenGroup",
+      "ownerId": "OpenProjectGroup",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4f68b0fbda7d2cc33ee8ee1d54d6d289570f3135",
+        "line": 35,
+        "path": "idea/customization/min/resources/intellij.platform.customization.min.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "FileOtherSettingsGroup",
+      "ownerId": "RunConfigurationTemplatesForNewProjects",
+      "ownerType": "action",
+      "relativeToAction": "FileSettingsGroup",
+      "source": {
+        "blob": "c91525097ddd5c0b0f45a67d0c89d106435d5278",
+        "line": 24,
+        "path": "platform/execution-impl/resources/META-INF/PlatformExecutionActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "FilePropertiesGroup",
+      "ownerId": "AddBom.Group",
+      "ownerType": "group",
+      "relativeToAction": "RemoveBom.Group",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 665,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "FilePropertiesGroup",
+      "ownerId": "ChangeTemplateDataLanguage",
+      "ownerType": "action",
+      "relativeToAction": "ToggleReadOnlyAttribute",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 80,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "FilePropertiesGroup",
+      "ownerId": "RemoveBom.Group",
+      "ownerType": "group",
+      "relativeToAction": "ChangeFileEncodingAction",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 661,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "Floating.CodeToolbar",
+      "ownerId": "CommentByLineComment",
+      "ownerType": "action",
+      "relativeToAction": "Floating.CodeToolbar.Surround",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 439,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "Floating.CodeToolbar",
+      "ownerId": "ReformatCode",
+      "ownerType": "action",
+      "relativeToAction": "CommentByLineComment",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 447,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "Floating.CodeToolbar",
+      "ownerId": "XDebugger.Code.Toolbar",
+      "ownerType": "group",
+      "relativeToAction": "Floating.CodeToolbar.Surround",
+      "source": {
+        "blob": "6656ad29df3e448055c1365b5b9584580e020d99",
+        "line": 334,
+        "path": "platform/xdebugger-impl/ui/resources/intellij.platform.debugger.impl.ui.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "Floating.CodeToolbar.Extract",
+      "ownerId": "ExtractMethod",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 507,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Floating.CodeToolbar.Extract",
+      "ownerId": "IntroduceConstant",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 497,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Floating.CodeToolbar.Extract",
+      "ownerId": "IntroduceParameter",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 501,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Floating.CodeToolbar.Extract",
+      "ownerId": "IntroduceVariable",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 494,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "GenerateGroup",
+      "ownerId": "GenerateXmlTag",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e61840209854e78738e2357e743d23c52efe67b4",
+        "line": 84,
+        "path": "xml/impl/resources/intellij.xml.impl.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "Git.Branch.Checkout",
+      "ownerId": "Git.Branch.Backend.Checkout",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 256,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Git.Branch.Placeholder",
+      "ownerId": "Git.Branch.Backend",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 282,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "Git.ContextMenu",
+      "ownerId": "Git.Stage.Local.File.Menu",
+      "ownerType": "group",
+      "relativeToAction": "ChangesView.RevertFiles",
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 477,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Git.Experimental.Branch.Popup.Actions",
+      "ownerId": "Github.Pull.Request.Branch.Popup.Actions",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4ee88d3c0c9cd9c77fab5db70ccb8b560e1c2f01",
+        "line": 308,
+        "path": "plugins/github/github-core/resources/intellij.vcs.github.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Git.Experimental.Branch.Popup.Actions",
+      "ownerId": "GitLab.Merge.Request.Review.Editor.Branch.Popup.Actions",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "ade25669ef11145ee810839b85d3ae9c3951e369",
+        "line": 270,
+        "path": "plugins/gitlab/gitlab-core/resources/intellij.vcs.gitlab.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "Git.FileActions",
+      "ownerId": "Git.Ignore.File",
+      "ownerType": "group",
+      "relativeToAction": "Git.Add",
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 382,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Git.Hosting.Copy.Link.Group",
+      "ownerId": "GitHub.Copy.Link",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4ee88d3c0c9cd9c77fab5db70ccb8b560e1c2f01",
+        "line": 173,
+        "path": "plugins/github/github-core/resources/intellij.vcs.github.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Git.Hosting.Copy.Link.Group",
+      "ownerId": "GitLab.Copy.Link",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "ade25669ef11145ee810839b85d3ae9c3951e369",
+        "line": 253,
+        "path": "plugins/gitlab/gitlab-core/resources/intellij.vcs.gitlab.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Git.Hosting.Open.In.Browser.Group",
+      "ownerId": "Github.Open.In.Browser",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4ee88d3c0c9cd9c77fab5db70ccb8b560e1c2f01",
+        "line": 168,
+        "path": "plugins/github/github-core/resources/intellij.vcs.github.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Git.Hosting.Open.In.Browser.Group",
+      "ownerId": "GitLab.Open.In.Browser",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "ade25669ef11145ee810839b85d3ae9c3951e369",
+        "line": 247,
+        "path": "plugins/gitlab/gitlab-core/resources/intellij.vcs.gitlab.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "Git.MainMenu",
+      "ownerId": "Git.Commit.Stage",
+      "ownerType": "action",
+      "relativeToAction": "CheckinProject",
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 394,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "Git.MainMenu",
+      "ownerId": "GitHub.MainMenu",
+      "ownerType": "group",
+      "relativeToAction": "Git.Configure.Remotes",
+      "source": {
+        "blob": "4ee88d3c0c9cd9c77fab5db70ccb8b560e1c2f01",
+        "line": 208,
+        "path": "plugins/github/github-core/resources/intellij.vcs.github.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "Git.MainMenu",
+      "ownerId": "GitLab.Main.Group",
+      "ownerType": "group",
+      "relativeToAction": "Git.Configure.Remotes",
+      "source": {
+        "blob": "ade25669ef11145ee810839b85d3ae9c3951e369",
+        "line": 181,
+        "path": "plugins/gitlab/gitlab-core/resources/intellij.vcs.gitlab.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "Git.MainMenu.LocalChanges",
+      "ownerId": "Git.Show.Stash",
+      "ownerType": "action",
+      "relativeToAction": "Vcs.Show.Shelf",
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 495,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Git.Menu",
+      "ownerId": "Github.Create.Pull.Request",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4ee88d3c0c9cd9c77fab5db70ccb8b560e1c2f01",
+        "line": 178,
+        "path": "plugins/github/github-core/resources/intellij.vcs.github.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Git.Menu",
+      "ownerId": "Github.Sync.Fork",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4ee88d3c0c9cd9c77fab5db70ccb8b560e1c2f01",
+        "line": 147,
+        "path": "plugins/github/github-core/resources/intellij.vcs.github.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Git.Menu",
+      "ownerId": "Github.View.Pull.Request",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4ee88d3c0c9cd9c77fab5db70ccb8b560e1c2f01",
+        "line": 184,
+        "path": "plugins/github/github-core/resources/intellij.vcs.github.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Git.Menu",
+      "ownerId": "GitLab.Merge.Request.Create",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "ade25669ef11145ee810839b85d3ae9c3951e369",
+        "line": 146,
+        "path": "plugins/gitlab/gitlab-core/resources/intellij.vcs.gitlab.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Git.Stage.Tree.Menu",
+      "ownerId": "Git.Stage.Tree.Menu.LocalHistory",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "f7797ce69ae578c0005cd86deda2b95027e822a0",
+        "line": 12,
+        "path": "plugins/git4idea/localHistory/resources/intellij.vcs.git.localHistory.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "GitHub.MainMenu",
+      "ownerId": "Github.Share",
+      "ownerType": "action",
+      "relativeToAction": "Github.Clone",
+      "source": {
+        "blob": "5966971c798527ffae0ca40202810c495f8bb0bb",
+        "line": 17,
+        "path": "plugins/github/github-git/resources/intellij.vcs.github.git.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "GitLab.Main.Group",
+      "ownerId": "GitLab.Share",
+      "ownerType": "action",
+      "relativeToAction": "GitLab.Clone",
+      "source": {
+        "blob": "2889400b33f5797000c9a159c23b3fbcc5271009",
+        "line": 15,
+        "path": "plugins/gitlab/gitlab-git/resources/intellij.vcs.gitlab.git.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "GitRepositoryActions",
+      "ownerId": "GitHub.MainMenu",
+      "ownerType": "group",
+      "relativeToAction": "Git.Configure.Remotes",
+      "source": {
+        "blob": "4ee88d3c0c9cd9c77fab5db70ccb8b560e1c2f01",
+        "line": 209,
+        "path": "plugins/github/github-core/resources/intellij.vcs.github.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "GoToCodeGroup",
+      "ownerId": "FileStructurePopup",
+      "ownerType": "action",
+      "relativeToAction": "ShowFilePath",
+      "source": {
+        "blob": "37838d0beb258a1bfa94653e342b909b90a341a1",
+        "line": 39,
+        "path": "platform/structure-view-impl/resources/intellij.platform.structureView.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "GoToCodeGroup",
+      "ownerId": "ShowNavBar",
+      "ownerType": "action",
+      "relativeToAction": "SelectIn",
+      "source": {
+        "blob": "5ad2acd447db530292a8c3c7744ac9473fff04f1",
+        "line": 41,
+        "path": "platform/navbar/frontend/resources/intellij.platform.navbar.frontend.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "GoToMenu",
+      "ownerId": "GoToCodeGroup",
+      "ownerType": "group",
+      "relativeToAction": "NavigateInFileGroup",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 286,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "GoToMenu",
+      "ownerId": "GoToEditPointGroup",
+      "ownerType": "group",
+      "relativeToAction": "GoToErrorGroup",
+      "source": {
+        "blob": "15f7996880f7b3200c8716ce6f8c8d80ac1bb6b9",
+        "line": 51,
+        "path": "xml/emmet/resources/intellij.xml.emmet.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "GoToMenu",
+      "ownerId": "GotoRow",
+      "ownerType": "action",
+      "relativeToAction": "GotoLine",
+      "source": {
+        "blob": "c9dfcc49dbf8c39ffe915c53747ed16dc1735b17",
+        "line": 132,
+        "path": "grid/impl/resources/intellij.grid.impl.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "GoToTargetEx",
+      "ownerId": "GotoClass",
+      "ownerType": "action",
+      "relativeToAction": "GotoFile",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 237,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "GoToTargetEx",
+      "ownerId": "GotoSymbol",
+      "ownerType": "action",
+      "relativeToAction": "GotoFile",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 241,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "GoToTargetEx",
+      "ownerId": "TextSearchAction",
+      "ownerType": "action",
+      "relativeToAction": "GotoSymbol",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 244,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "HelpMenu",
+      "ownerId": "WhatsNewAction",
+      "ownerType": "action",
+      "relativeToAction": "LearnGroup",
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1245,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Internal",
+      "ownerId": "CompletionQualityStats",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 1118,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Internal",
+      "ownerId": "Internal.Dump",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 1159,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Internal",
+      "ownerId": "Internal.HeapAnalysis",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1757,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Internal",
+      "ownerId": "Internal.VFS",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1918,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Internal",
+      "ownerId": "ShowControlFlowAction",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 1121,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Internal",
+      "ownerId": "TestJbProtocolCommand",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "f2f732032e26ab84857189c116b68c758c8222ed",
+        "line": 94,
+        "path": "platform/built-in-server/resources/intellij.platform.builtInServer.impl.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Internal",
+      "ownerId": "Vcs.Internal",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 677,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Internal.Performance",
+      "ownerId": "RetypeFile",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 1115,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Internal.Performance",
+      "ownerId": "TypingLatencyReport",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 1112,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Internal.UI",
+      "ownerId": "FeedbackDialogGroup",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "2310c814a50c5fc6cd75437beb2f81e861c7c95b",
+        "line": 99,
+        "path": "platform/feedback/resources/intellij.platform.feedback.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Internal.VFS",
+      "ownerId": "MarkFileDirty",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 673,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Internal.VFS",
+      "ownerId": "ValidateLocalHistory",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "a44c6c1bdd4fe4f18160fe76945f212407182c51",
+        "line": 67,
+        "path": "platform/lvcs-impl/resources/intellij.platform.lvcs.impl.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "LocalChangesView.TabActions",
+      "ownerId": "Vcs.Log.ToolWindow.TabActions",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "52b4286ec9234cec2b958452d204e956f4c41766",
+        "line": 326,
+        "path": "platform/vcs-log/impl/resources/intellij.platform.vcs.log.impl.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "MainMenu",
+      "ownerId": "BuildMenu",
+      "ownerType": "group",
+      "relativeToAction": "RunMenu",
+      "source": {
+        "blob": "5c73442683f671a79f355f01f4ee0a6ab72015fe",
+        "line": 67,
+        "path": "platform/platform-resources/src/idea/ExecutionActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "MainMenu",
+      "ownerId": "CodeMenu",
+      "ownerType": "group",
+      "relativeToAction": "GoToMenu",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 466,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "MainMenu",
+      "ownerId": "RefactoringMenu",
+      "ownerType": "group",
+      "relativeToAction": "CodeMenu",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 526,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "MainMenu",
+      "ownerId": "RunMenu",
+      "ownerType": "group",
+      "relativeToAction": "RefactoringMenu",
+      "source": {
+        "blob": "5c73442683f671a79f355f01f4ee0a6ab72015fe",
+        "line": 61,
+        "path": "platform/platform-resources/src/idea/ExecutionActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "MainMenu",
+      "ownerId": "VcsGroups",
+      "ownerType": "group",
+      "relativeToAction": "ToolsMenu",
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 119,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "MaintenanceGroup",
+      "ownerId": "DumpLookupElementWeights",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 968,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "MaintenanceGroup",
+      "ownerId": "IdeScriptingConsole",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 1108,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "MainToolBar",
+      "ownerId": "ToolbarFindGroup",
+      "ownerType": "group",
+      "relativeToAction": "Back",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 570,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "MainToolBar",
+      "ownerId": "ToolbarRunGroup",
+      "ownerType": "group",
+      "relativeToAction": "Forward",
+      "source": {
+        "blob": "5c73442683f671a79f355f01f4ee0a6ab72015fe",
+        "line": 97,
+        "path": "platform/platform-resources/src/idea/ExecutionActions.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "MainToolbarLeft",
+      "ownerId": "MainToolbarVCSGroup",
+      "ownerType": "group",
+      "relativeToAction": "MainToolbarGeneralActionsGroup",
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1088,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "MainToolbarQuickActionsRaw",
+      "ownerId": "GitMainToolbarQuickActions",
+      "ownerType": "group",
+      "relativeToAction": "MainToolbarQuickActions.Run",
+      "source": {
+        "blob": "cd3caf68cec40f0888c095631e6260be84300000",
+        "line": 17,
+        "path": "plugins/git4idea/frontend/resources/intellij.vcs.git.frontend.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "MainToolbarRight",
+      "ownerId": "ExecutionTargetsToolbarGroup",
+      "ownerType": "group",
+      "relativeToAction": "NewUiRunWidget",
+      "source": {
+        "blob": "5c73442683f671a79f355f01f4ee0a6ab72015fe",
+        "line": 89,
+        "path": "platform/platform-resources/src/idea/ExecutionActions.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "MainToolbarRight",
+      "ownerId": "NewUiRunWidget",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "5c73442683f671a79f355f01f4ee0a6ab72015fe",
+        "line": 72,
+        "path": "platform/platform-resources/src/idea/ExecutionActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "MainToolBarSettings",
+      "ownerId": "VcsToolbarActions",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 421,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "MainToolbarVCSGroup",
+      "ownerId": "main.toolbar.git.Branches",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "cd3caf68cec40f0888c095631e6260be84300000",
+        "line": 13,
+        "path": "plugins/git4idea/frontend/resources/intellij.vcs.git.frontend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "MainToolbarVCSGroup",
+      "ownerId": "main.toolbar.git.MergeRebase",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 540,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "MainToolbarVCSGroup",
+      "ownerId": "Vcs.Push",
+      "ownerType": "action",
+      "relativeToAction": "main.toolbar.git.MergeRebase",
+      "source": {
+        "blob": "e7f548b36555e645ea8b7933628ee627acb56a47",
+        "line": 73,
+        "path": "platform/dvcs-impl/resources/intellij.platform.vcs.dvcs.impl.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "MainToolbarVCSGroup",
+      "ownerId": "Vcs.UpdateProject",
+      "ownerType": "action",
+      "relativeToAction": "Vcs.Push",
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 49,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "MarkRootGroup",
+      "ownerId": "MarkContentRootGroup",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4f68b0fbda7d2cc33ee8ee1d54d6d289570f3135",
+        "line": 59,
+        "path": "idea/customization/min/resources/intellij.platform.customization.min.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "MethodHierarchyPopupMenu",
+      "ownerId": "HierarchyPopupMenu.Common",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 926,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "NavbarPopupMenu",
+      "ownerId": "ChangesView.ApplyPatch.LangGroup",
+      "ownerType": "group",
+      "relativeToAction": "EditSource",
+      "source": {
+        "blob": "e0109618214785ea5921dd6b1a9abb79a37bd21a",
+        "line": 11,
+        "path": "platform/vcs-impl/lang/actions/resources/intellij.platform.vcs.impl.lang.actions.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "NavBarVcsGroup",
+      "ownerId": "VcsNavBarToolbarActions",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 432,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "NavigateInFileGroup",
+      "ownerId": "EditorMatchBrace",
+      "ownerType": "action",
+      "relativeToAction": "MethodUp",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 56,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "NavigateInFileGroup",
+      "ownerId": "GoToChangeMarkerGroup",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 65,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "NewGroup",
+      "ownerId": "NewXmlDescriptor",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e61840209854e78738e2357e743d23c52efe67b4",
+        "line": 80,
+        "path": "xml/impl/resources/intellij.xml.impl.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "NewProjectOrModuleGroup",
+      "ownerId": "WelcomeScreen.DefaultNewProjectAction",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4f68b0fbda7d2cc33ee8ee1d54d6d289570f3135",
+        "line": 43,
+        "path": "idea/customization/min/resources/intellij.platform.customization.min.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "NewWebDevelopment",
+      "ownerId": "NewXml",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e61840209854e78738e2357e743d23c52efe67b4",
+        "line": 76,
+        "path": "xml/impl/resources/intellij.xml.impl.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "OpenInBrowserEditorContextBarGroup",
+      "ownerId": "OpenInBrowserEditorContextBarGroupAction",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1955,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Other.KeymapGroup",
+      "ownerId": "ArrangementRulesGroup",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 1020,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Other.KeymapGroup",
+      "ownerId": "Bookmarks",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "7ae83da64f710cb5f59cbfb3c9f2a9342855319c",
+        "line": 203,
+        "path": "platform/bookmarks/resources/intellij.platform.bookmarks.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Other.KeymapGroup",
+      "ownerId": "Documentation.Navigation",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 161,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Other.KeymapGroup",
+      "ownerId": "EditorBreadcrumbsSettings",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1799,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Other.KeymapGroup",
+      "ownerId": "FileChooserSettings",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1336,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Other.KeymapGroup",
+      "ownerId": "FileChooserToolbar",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1328,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Other.KeymapGroup",
+      "ownerId": "ImagesRootGroup",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "307645a47d8921c15d40d2456255bbfd663d87d1",
+        "line": 129,
+        "path": "images/resources/META-INF/plugin.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Other.KeymapGroup",
+      "ownerId": "ListActions",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 41,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Other.KeymapGroup",
+      "ownerId": "NavBarActions",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "5ad2acd447db530292a8c3c7744ac9473fff04f1",
+        "line": 36,
+        "path": "platform/navbar/frontend/resources/intellij.platform.navbar.frontend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Other.KeymapGroup",
+      "ownerId": "PopupMenuActions",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 135,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Other.KeymapGroup",
+      "ownerId": "ProjectView.ToolWindow.SecondaryActions",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 800,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Other.KeymapGroup",
+      "ownerId": "ScrollPaneActions",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 149,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Other.KeymapGroup",
+      "ownerId": "SearchEverywhereActions",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1748,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Other.KeymapGroup",
+      "ownerId": "SwitcherAndRecentFiles",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "0c64701addd0756bd234fc9d5b55c531268fc5e2",
+        "line": 66,
+        "path": "platform/recentFiles/frontend/resources/intellij.platform.recentFiles.frontend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Other.KeymapGroup",
+      "ownerId": "SwitcherAndRecentFilesFallback",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 167,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Other.KeymapGroup",
+      "ownerId": "TableActions",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 88,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Other.KeymapGroup",
+      "ownerId": "TabsActions",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1720,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Other.KeymapGroup",
+      "ownerId": "TouchBar",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1184,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Other.KeymapGroup",
+      "ownerId": "TreeActions",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 125,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Other.KeymapGroup",
+      "ownerId": "TWViewModes",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1728,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Other.KeymapGroup",
+      "ownerId": "TWViewModesLegacy",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1736,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "Other.KeymapGroup",
+      "ownerId": "UsageFilteringActionGroup",
+      "ownerType": "group",
+      "relativeToAction": "UsageGroupingActionGroup",
+      "source": {
+        "blob": "849541e215ccade4024bf5eeaffe60c40bad7970",
+        "line": 65,
+        "path": "platform/usageView/resources/idea/UsageViewActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Other.KeymapGroup",
+      "ownerId": "UsageGroupingActionGroup",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "849541e215ccade4024bf5eeaffe60c40bad7970",
+        "line": 47,
+        "path": "platform/usageView/resources/idea/UsageViewActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Other.KeymapGroup",
+      "ownerId": "WelcomeScreen.KeymapGroup",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1281,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "ProblemsView.Frontend.Toolbar",
+      "ownerId": "ProblemsView.Frontend.QuickFixes",
+      "ownerType": "action",
+      "relativeToAction": "ProblemsView.Frontend.ShowPreview",
+      "source": {
+        "blob": "bb8389d60bfa3fe1b538cb7d316ff5a10067c217",
+        "line": 85,
+        "path": "platform/problemsView/frontend/resources/intellij.platform.problemsView.frontend.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "ProblemsView.Frontend.TreePopup",
+      "ownerId": "ProblemsView.Frontend.CopyProblemDescription",
+      "ownerType": "action",
+      "relativeToAction": "ProblemsView.Frontend.QuickFixes",
+      "source": {
+        "blob": "bb8389d60bfa3fe1b538cb7d316ff5a10067c217",
+        "line": 92,
+        "path": "platform/problemsView/frontend/resources/intellij.platform.problemsView.frontend.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "ProblemsView.Frontend.TreePopup",
+      "ownerId": "ProblemsView.Frontend.EditSource",
+      "ownerType": "action",
+      "relativeToAction": "ProblemsView.Frontend.CopyProblemDescription",
+      "source": {
+        "blob": "bb8389d60bfa3fe1b538cb7d316ff5a10067c217",
+        "line": 99,
+        "path": "platform/problemsView/frontend/resources/intellij.platform.problemsView.frontend.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "ProblemsView.Frontend.TreePopup",
+      "ownerId": "ProblemsView.Frontend.QuickFixes",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "bb8389d60bfa3fe1b538cb7d316ff5a10067c217",
+        "line": 84,
+        "path": "platform/problemsView/frontend/resources/intellij.platform.problemsView.frontend.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "ProjectViewPopupMenu",
+      "ownerId": "ChangesView.ApplyPatch.LangGroup",
+      "ownerType": "group",
+      "relativeToAction": "ProjectViewEditSource",
+      "source": {
+        "blob": "e0109618214785ea5921dd6b1a9abb79a37bd21a",
+        "line": 10,
+        "path": "platform/vcs-impl/lang/actions/resources/intellij.platform.vcs.impl.lang.actions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "ProjectViewPopupMenu",
+      "ownerId": "Github.Create.Gist",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4ee88d3c0c9cd9c77fab5db70ccb8b560e1c2f01",
+        "line": 194,
+        "path": "plugins/github/github-core/resources/intellij.vcs.github.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "ProjectViewPopupMenu",
+      "ownerId": "GitLab.Create.Snippet",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "ade25669ef11145ee810839b85d3ae9c3951e369",
+        "line": 166,
+        "path": "plugins/gitlab/gitlab-core/resources/intellij.vcs.gitlab.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "ProjectViewPopupMenu",
+      "ownerId": "Images.ConvertSvgToPng",
+      "ownerType": "action",
+      "relativeToAction": "EditSource",
+      "source": {
+        "blob": "307645a47d8921c15d40d2456255bbfd663d87d1",
+        "line": 77,
+        "path": "images/resources/META-INF/plugin.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "ProjectViewPopupMenu",
+      "ownerId": "Images.EditExternally",
+      "ownerType": "action",
+      "relativeToAction": "EditSource",
+      "source": {
+        "blob": "307645a47d8921c15d40d2456255bbfd663d87d1",
+        "line": 70,
+        "path": "images/resources/META-INF/plugin.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "ProjectViewPopupMenu",
+      "ownerId": "Images.SetBackgroundImage",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "307645a47d8921c15d40d2456255bbfd663d87d1",
+        "line": 87,
+        "path": "images/resources/META-INF/plugin.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "ProjectViewPopupMenu",
+      "ownerId": "InspectCodeActionInPopupMenus",
+      "ownerType": "group",
+      "relativeToAction": "ReplaceInPath",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 656,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "ProjectViewPopupMenu",
+      "ownerId": "popup@ExpandableBookmarkContextMenu",
+      "ownerType": "group",
+      "relativeToAction": "ProjectViewPopupMenuRefactoringGroup",
+      "source": {
+        "blob": "7ae83da64f710cb5f59cbfb3c9f2a9342855319c",
+        "line": 222,
+        "path": "platform/bookmarks/resources/intellij.platform.bookmarks.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "ProjectViewPopupMenuModifyGroup",
+      "ownerId": "JsonJacksonReformatAction",
+      "ownerType": "action",
+      "relativeToAction": "ReformatCode",
+      "source": {
+        "blob": "28b944ce4c5b8993e56c1f45dbd55cef275b6205",
+        "line": 20,
+        "path": "json/backend/resources/intellij.json.backend.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "ProjectViewToolbar",
+      "ownerId": "NewElement",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4f68b0fbda7d2cc33ee8ee1d54d6d289570f3135",
+        "line": 30,
+        "path": "idea/customization/min/resources/intellij.platform.customization.min.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "ProjectWidget.Actions",
+      "ownerId": "OpenFile",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 496,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "ProjectWidget.Actions",
+      "ownerId": "ProjectFromVersionControl",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 70,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "RevealGroup",
+      "ownerId": "Git.Hosting.Open.In.Browser.Group",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 556,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "RevealGroup",
+      "ownerId": "OpenInBrowserGroup",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1949,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "RevealGroup",
+      "ownerId": "ShowFilePath",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 277,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "RevealGroup",
+      "ownerId": "Terminal.OpenInReworkedTerminal",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "faf8aae8573a235b2a9e74e19e7650722140f47b",
+        "line": 136,
+        "path": "plugins/terminal/frontend/resources/intellij.terminal.frontend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "RevealGroup",
+      "ownerId": "Terminal.OpenInTerminal",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "886ee31df410cc520149c09ae9011d4f3b8620a3",
+        "line": 61,
+        "path": "plugins/terminal/resources/META-INF/plugin.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "RunMenu",
+      "ownerId": "DebugMainMenu",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "5c73442683f671a79f355f01f4ee0a6ab72015fe",
+        "line": 147,
+        "path": "platform/platform-resources/src/idea/ExecutionActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "RunMenu",
+      "ownerId": "RunTestGroup",
+      "ownerType": "group",
+      "relativeToAction": "DebugMainMenu",
+      "source": {
+        "blob": "5c73442683f671a79f355f01f4ee0a6ab72015fe",
+        "line": 179,
+        "path": "platform/platform-resources/src/idea/ExecutionActions.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "RunMenu",
+      "ownerId": "XDebugger.AttachGroup",
+      "ownerType": "group",
+      "relativeToAction": "editRunConfigurations",
+      "source": {
+        "blob": "b3961fdb2dd5ebceff4bdcc2f71333790d9e3268",
+        "line": 170,
+        "path": "platform/xdebugger-impl/resources/intellij.platform.debugger.impl.content.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "RunTab.TopToolbar",
+      "ownerId": "Rerun",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "5c73442683f671a79f355f01f4ee0a6ab72015fe",
+        "line": 41,
+        "path": "platform/platform-resources/src/idea/ExecutionActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "RunTab.TopToolbar",
+      "ownerId": "Stop",
+      "ownerType": "action",
+      "relativeToAction": "Rerun",
+      "source": {
+        "blob": "5c73442683f671a79f355f01f4ee0a6ab72015fe",
+        "line": 55,
+        "path": "platform/platform-resources/src/idea/ExecutionActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "RunTab.TopToolbar.Old",
+      "ownerId": "Rerun",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "5c73442683f671a79f355f01f4ee0a6ab72015fe",
+        "line": 42,
+        "path": "platform/platform-resources/src/idea/ExecutionActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "RunTab.TopToolbar.Old",
+      "ownerId": "Stop",
+      "ownerType": "action",
+      "relativeToAction": "Rerun",
+      "source": {
+        "blob": "5c73442683f671a79f355f01f4ee0a6ab72015fe",
+        "line": 56,
+        "path": "platform/platform-resources/src/idea/ExecutionActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "RunToolbarAdditionalProcessActions",
+      "ownerId": "RunToolbarDebuggerAdditionalActions",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "b3961fdb2dd5ebceff4bdcc2f71333790d9e3268",
+        "line": 189,
+        "path": "platform/xdebugger-impl/resources/intellij.platform.debugger.impl.content.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "RunToolbarMainMoreActionGroup",
+      "ownerId": "RunToolbarMainMoreActionGroupDebuggerPart",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "b3961fdb2dd5ebceff4bdcc2f71333790d9e3268",
+        "line": 177,
+        "path": "platform/xdebugger-impl/resources/intellij.platform.debugger.impl.content.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "SegmentedVcsActionsBarGroup",
+      "ownerId": "ChangesView.ToggleCommitUi",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 14,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "SegmentedVcsActionsBarGroup",
+      "ownerId": "CheckinProject",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 10,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "SegmentedVcsActionsBarGroup",
+      "ownerId": "Git.ShowBranches",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 315,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "SegmentedVcsActionsBarGroup",
+      "ownerId": "Git.Toolbar.ShowMoreActions",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 319,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "SegmentedVcsActionsBarGroup",
+      "ownerId": "Vcs.Push",
+      "ownerType": "action",
+      "relativeToAction": "ChangesView.ToggleCommitUi",
+      "source": {
+        "blob": "e7f548b36555e645ea8b7933628ee627acb56a47",
+        "line": 72,
+        "path": "platform/dvcs-impl/resources/intellij.platform.vcs.dvcs.impl.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "SegmentedVcsActionsBarGroup",
+      "ownerId": "Vcs.Toolbar.ShowMoreActions",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 52,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "SegmentedVcsActionsBarGroup",
+      "ownerId": "Vcs.UpdateProject",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 48,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "SettingsEntryPointGroup",
+      "ownerId": "SettingsSyncSeparator",
+      "ownerType": "action",
+      "relativeToAction": "ShowPlugins",
+      "source": {
+        "blob": "28cf19494a8831cbfe090f548c3e32189235e0e5",
+        "line": 95,
+        "path": "platform/settings-sync-core/resources/intellij.settingsSync.core.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "SettingsEntryPointGroup",
+      "ownerId": "SettingsSyncStatusAction",
+      "ownerType": "action",
+      "relativeToAction": "SettingsSyncSeparator",
+      "source": {
+        "blob": "28cf19494a8831cbfe090f548c3e32189235e0e5",
+        "line": 99,
+        "path": "platform/settings-sync-core/resources/intellij.settingsSync.core.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "StructureViewPopupMenu",
+      "ownerId": "Console.TableResult.ColumnActions",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c9dfcc49dbf8c39ffe915c53747ed16dc1735b17",
+        "line": 184,
+        "path": "grid/impl/resources/intellij.grid.impl.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "ToolsMenu",
+      "ownerId": "ExternalToolsGroup",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 545,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "ToolsMenu",
+      "ownerId": "Internal",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1580,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "ToolsMenu",
+      "ownerId": "ToolsBasicGroup",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 531,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "ToolsMenu",
+      "ownerId": "ToolsXmlGroup",
+      "ownerType": "group",
+      "relativeToAction": "ExternalToolsGroup",
+      "source": {
+        "blob": "e61840209854e78738e2357e743d23c52efe67b4",
+        "line": 71,
+        "path": "xml/impl/resources/intellij.xml.impl.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "ToolsXmlGroup",
+      "ownerId": "ConvertSchemaAction",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c4778442cde5d7aead2121438de01aed45f2a76f",
+        "line": 87,
+        "path": "xml/relaxng/resources/intellij.relaxng.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "ToolWindowContextMenu",
+      "ownerId": "Documentation.KeepTab",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 182,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "ToolWindowContextMenu",
+      "ownerId": "Terminal.MoveToEditor",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "faf8aae8573a235b2a9e74e19e7650722140f47b",
+        "line": 144,
+        "path": "plugins/terminal/frontend/resources/intellij.terminal.frontend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "ToolWindowContextMenu",
+      "ownerId": "Terminal.RenameSession",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "faf8aae8573a235b2a9e74e19e7650722140f47b",
+        "line": 141,
+        "path": "plugins/terminal/frontend/resources/intellij.terminal.frontend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "TouchBar",
+      "ownerId": "TouchBarDebug",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "5c73442683f671a79f355f01f4ee0a6ab72015fe",
+        "line": 215,
+        "path": "platform/platform-resources/src/idea/ExecutionActions.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "TouchBar",
+      "ownerId": "TouchBarEditorSearch",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 1102,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "TouchBarDebug",
+      "ownerId": "XDebugger.Touchbar.Debug",
+      "ownerType": "group",
+      "relativeToAction": "Stop",
+      "source": {
+        "blob": "6656ad29df3e448055c1365b5b9584580e020d99",
+        "line": 330,
+        "path": "platform/xdebugger-impl/ui/resources/intellij.platform.debugger.impl.ui.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "TouchBarDefault_alt",
+      "ownerId": "Terminal.OpenInReworkedTerminal",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "faf8aae8573a235b2a9e74e19e7650722140f47b",
+        "line": 138,
+        "path": "plugins/terminal/frontend/resources/intellij.terminal.frontend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "TouchBarDefault_alt",
+      "ownerId": "Terminal.OpenInTerminal",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "886ee31df410cc520149c09ae9011d4f3b8620a3",
+        "line": 63,
+        "path": "plugins/terminal/resources/META-INF/plugin.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "TouchBarDefault",
+      "ownerId": "TouchBarDefaultExecution",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "5c73442683f671a79f355f01f4ee0a6ab72015fe",
+        "line": 227,
+        "path": "platform/platform-resources/src/idea/ExecutionActions.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "TouchBarDefaultOptionalGroup",
+      "ownerId": "VcsTouchBarGroup",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 73,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "TypeHierarchyPopupMenu",
+      "ownerId": "HierarchyPopupMenu.Common",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 925,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "UIToggleActions",
+      "ownerId": "ViewMembersInNavigationBar",
+      "ownerType": "action",
+      "relativeToAction": "NavbarLocationGroup",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 225,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "Unversioned.Files.Dialog.Popup",
+      "ownerId": "Git.Ignore.File",
+      "ownerType": "group",
+      "relativeToAction": "$Delete",
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 383,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Vcs.Browse",
+      "ownerId": "Git.Log",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 34,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Vcs.Commit.PrimaryCommitActions",
+      "ownerId": "Git.Commit.And.Push.Executor",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 102,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "Vcs.FileHistory.ContextMenu",
+      "ownerId": "Dvcs.FileHistory.ContextMenu",
+      "ownerType": "group",
+      "relativeToAction": "ChangesView.CreatePatchFromChanges",
+      "source": {
+        "blob": "e7f548b36555e645ea8b7933628ee627acb56a47",
+        "line": 89,
+        "path": "platform/dvcs-impl/resources/intellij.platform.vcs.dvcs.impl.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "Vcs.FileHistory.ContextMenu",
+      "ownerId": "Git.FileHistory.ContextMenu",
+      "ownerType": "group",
+      "relativeToAction": "VcsHistoryActionsGroup",
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 334,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Vcs.Import",
+      "ownerId": "Git.Init",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 27,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Vcs.Import",
+      "ownerId": "Github.Share",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "5966971c798527ffae0ca40202810c495f8bb0bb",
+        "line": 18,
+        "path": "plugins/github/github-git/resources/intellij.vcs.github.git.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Vcs.Import",
+      "ownerId": "GitLab.Share",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "2889400b33f5797000c9a159c23b3fbcc5271009",
+        "line": 16,
+        "path": "plugins/gitlab/gitlab-git/resources/intellij.vcs.gitlab.git.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Vcs.Internal",
+      "ownerId": "Git.Cleanup.Branches",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 124,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Vcs.Internal",
+      "ownerId": "Vcs.Log.Internal",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "52b4286ec9234cec2b958452d204e956f4c41766",
+        "line": 370,
+        "path": "platform/vcs-log/impl/resources/intellij.platform.vcs.log.impl.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Vcs.KeymapGroup",
+      "ownerId": "ChangesView.GroupBy",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "83337d15e0dbca0a96949bb946b1633ce880303f",
+        "line": 100,
+        "path": "platform/vcs-impl/shared/resources/intellij.platform.vcs.impl.shared.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Vcs.KeymapGroup",
+      "ownerId": "Diff.KeymapGroup",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 450,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Vcs.KeymapGroup",
+      "ownerId": "FileHistory.KeymapGroup",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 529,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Vcs.KeymapGroup",
+      "ownerId": "Log.KeymapGroup",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "52b4286ec9234cec2b958452d204e956f4c41766",
+        "line": 398,
+        "path": "platform/vcs-log/impl/resources/intellij.platform.vcs.log.impl.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "Vcs.KeymapGroup",
+      "ownerId": "Shelve.KeymapGroup",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 522,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "Vcs.Log.ContextMenu",
+      "ownerId": "Dvcs.Log.ContextMenu",
+      "ownerType": "group",
+      "relativeToAction": "ChangesView.CreatePatchFromChanges",
+      "source": {
+        "blob": "e7f548b36555e645ea8b7933628ee627acb56a47",
+        "line": 85,
+        "path": "platform/dvcs-impl/resources/intellij.platform.vcs.dvcs.impl.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Vcs.Log.ContextMenu",
+      "ownerId": "Git.Hosting.Open.In.Browser.Group",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 557,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "Vcs.Log.ContextMenu",
+      "ownerId": "Git.Log.ContextMenu",
+      "ownerType": "group",
+      "relativeToAction": "Vcs.Log.GoToChild",
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 366,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "Vcs.Log.ContextMenu",
+      "ownerId": "Git.Log.ContextMenu.CheckoutBrowse",
+      "ownerType": "group",
+      "relativeToAction": "Vcs.Log.CompareRevisions",
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 341,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Vcs.Log.Internal",
+      "ownerId": "Git.Log.Internal",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 376,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "Vcs.Log.PresentationSettings",
+      "ownerId": "Git.Log.Toolbar",
+      "ownerType": "group",
+      "relativeToAction": "Vcs.Log.HighlightersActionGroup",
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 371,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Vcs.Log.Toolbar",
+      "ownerId": "Dvcs.Log.Toolbar",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e7f548b36555e645ea8b7933628ee627acb56a47",
+        "line": 94,
+        "path": "platform/dvcs-impl/resources/intellij.platform.vcs.dvcs.impl.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "Vcs.Log.ToolWindow.TabActions.DropDown",
+      "ownerId": "Git.Show.WorkingTrees",
+      "ownerType": "action",
+      "relativeToAction": "Vcs.ShowConsoleTab",
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 54,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "Vcs.Operations.Popup",
+      "ownerId": "LocalHistory.ShowHistory",
+      "ownerType": "action",
+      "relativeToAction": "ShowAnnotateOperationsPopupGroup",
+      "source": {
+        "blob": "a44c6c1bdd4fe4f18160fe76945f212407182c51",
+        "line": 31,
+        "path": "platform/lvcs-impl/resources/intellij.platform.lvcs.impl.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "Vcs.Operations.Popup.NonVcsAware",
+      "ownerId": "Git.Init",
+      "ownerType": "action",
+      "relativeToAction": "Start.Use.Vcs",
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 28,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "Vcs.RepositoryChangesBrowserMenu",
+      "ownerId": "Git.Drop.Selected.Changes",
+      "ownerType": "action",
+      "relativeToAction": "Vcs.ApplySelectedChanges",
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 59,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "Vcs.RepositoryChangesBrowserMenu",
+      "ownerId": "Git.InMemory.Extract.Selected.Changes",
+      "ownerType": "action",
+      "relativeToAction": "Vcs.ApplySelectedChanges",
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 63,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Vcs.SavedPatches.ChangesBrowser.ContextMenu",
+      "ownerId": "Git.Stash.ChangesBrowser.ContextMenu",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 516,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Vcs.SavedPatches.ChangesBrowser.Toolbar",
+      "ownerId": "Git.Stash.Toggle.Split.Preview",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 499,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "Vcs.SavedPatches.ContextMenu",
+      "ownerId": "Git.Stash.Operations.ContextMenu",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 508,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Vcs.Show.Toolwindow.Tab",
+      "ownerId": "Git.Show.Stash",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 494,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Vcs.Show.Toolwindow.Tab",
+      "ownerId": "Vcs.Show.Log",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "52b4286ec9234cec2b958452d204e956f4c41766",
+        "line": 183,
+        "path": "platform/vcs-log/impl/resources/intellij.platform.vcs.log.impl.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Vcs.ToolbarWidget.CreateRepository",
+      "ownerId": "Vcs.ToolbarWidget.CreateRepository.LocalHistory",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "f7797ce69ae578c0005cd86deda2b95027e822a0",
+        "line": 17,
+        "path": "plugins/git4idea/localHistory/resources/intellij.vcs.git.localHistory.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "Vcs.ToolbarWidget.ShareProject",
+      "ownerId": "Github.Share",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "5966971c798527ffae0ca40202810c495f8bb0bb",
+        "line": 19,
+        "path": "plugins/github/github-git/resources/intellij.vcs.github.git.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Vcs.ToolbarWidget.ShareProject",
+      "ownerId": "GitLab.Share",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "2889400b33f5797000c9a159c23b3fbcc5271009",
+        "line": 17,
+        "path": "plugins/gitlab/gitlab-git/resources/intellij.vcs.gitlab.git.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "Vcs.ToolWindow.CreateRepository",
+      "ownerId": "Git.Init",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 29,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "VcsGeneral.KeymapGroup",
+      "ownerId": "CommitView.GearActions",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "83337d15e0dbca0a96949bb946b1633ce880303f",
+        "line": 115,
+        "path": "platform/vcs-impl/shared/resources/intellij.platform.vcs.impl.shared.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "VcsGeneral.KeymapGroup",
+      "ownerId": "LocalChangesView.GearActions",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "83337d15e0dbca0a96949bb946b1633ce880303f",
+        "line": 124,
+        "path": "platform/vcs-impl/shared/resources/intellij.platform.vcs.impl.shared.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "VcsGeneral.KeymapGroup",
+      "ownerId": "Vcs.CherryPick.KeymapGroup",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e7f548b36555e645ea8b7933628ee627acb56a47",
+        "line": 102,
+        "path": "platform/dvcs-impl/resources/intellij.platform.vcs.dvcs.impl.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "VcsGeneral.KeymapGroup",
+      "ownerId": "Vcs.Operations.Popup.Annotate",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 645,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "VcsGeneral.KeymapGroup",
+      "ownerId": "Vcs.Push.Actions",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e7f548b36555e645ea8b7933628ee627acb56a47",
+        "line": 80,
+        "path": "platform/dvcs-impl/resources/intellij.platform.vcs.dvcs.impl.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "VcsGeneral.KeymapGroup",
+      "ownerId": "Vcs.Show.Toolwindow.Tab",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 634,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "VcsGeneral.KeymapGroup",
+      "ownerId": "VcsActions.KeymapGroup",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 603,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "VcsGlobalGroup",
+      "ownerId": "Git.Menu",
+      "ownerType": "group",
+      "relativeToAction": "Vcs.Specific",
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 293,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "VcsGroups",
+      "ownerId": "Git.MainMenu",
+      "ownerType": "group",
+      "relativeToAction": "Vcs.MainMenu",
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 195,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "VcsHistoryActionsGroup",
+      "ownerId": "Git.Hosting.Open.In.Browser.Group",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 558,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "VcsHistoryActionsGroup.Toolbar",
+      "ownerId": "Git.Hosting.Open.In.Browser.Group",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 559,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "VcsNavBarToolbarActions",
+      "ownerId": "Git.Commit.Stage",
+      "ownerType": "action",
+      "relativeToAction": "CheckinProject",
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 396,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "VcsNavBarToolbarActions",
+      "ownerId": "Vcs.Push",
+      "ownerType": "action",
+      "relativeToAction": "ChangesView.ToggleCommitUi",
+      "source": {
+        "blob": "e7f548b36555e645ea8b7933628ee627acb56a47",
+        "line": 71,
+        "path": "platform/dvcs-impl/resources/intellij.platform.vcs.dvcs.impl.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "VcsSelectionHistoryDialog.Popup",
+      "ownerId": "Git.Hosting.Open.In.Browser.Group",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 560,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "VcsSelectionHistoryDialog.Popup",
+      "ownerId": "Vcs.Log.SelectInLog",
+      "ownerType": "action",
+      "relativeToAction": "Vcs.CopyRevisionNumberAction",
+      "source": {
+        "blob": "52b4286ec9234cec2b958452d204e956f4c41766",
+        "line": 237,
+        "path": "platform/vcs-log/impl/resources/intellij.platform.vcs.log.impl.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "VcsToolbarActions",
+      "ownerId": "Git.Commit.Stage",
+      "ownerType": "action",
+      "relativeToAction": "CheckinProject",
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 395,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "VcsToolbarActions",
+      "ownerId": "Vcs.Push",
+      "ownerType": "action",
+      "relativeToAction": "ChangesView.ToggleCommitUi",
+      "source": {
+        "blob": "e7f548b36555e645ea8b7933628ee627acb56a47",
+        "line": 70,
+        "path": "platform/dvcs-impl/resources/intellij.platform.vcs.dvcs.impl.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "VersionControlsGroup",
+      "ownerId": "Git.ContextMenu",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "4d43a8e7f656a26841e67893af01d01939aa105e",
+        "line": 310,
+        "path": "plugins/git4idea/backend/resources/intellij.vcs.git.backend.xml"
+      }
+    },
+    {
+      "anchor": "first",
+      "groupId": "VersionControlsGroup",
+      "ownerId": "LocalHistory",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "a44c6c1bdd4fe4f18160fe76945f212407182c51",
+        "line": 56,
+        "path": "platform/lvcs-impl/resources/intellij.platform.lvcs.impl.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "VersionControlsGroup",
+      "ownerId": "VcsFileGroupPopup",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "401e41aadb66d2abda1298dcbb59a1ed8125980f",
+        "line": 55,
+        "path": "platform/vcs-impl/resources/META-INF/VcsActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "ViewMenu",
+      "ownerId": "CodeEditorBaseGroup",
+      "ownerType": "group",
+      "relativeToAction": "QuickActions",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 195,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "ViewMenu",
+      "ownerId": "OpenInBrowserGroup",
+      "ownerType": "group",
+      "relativeToAction": "ViewSource",
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1948,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "ViewMenu",
+      "ownerId": "QuickActions",
+      "ownerType": "group",
+      "relativeToAction": "ViewAppearanceGroup",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 150,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "ViewRecentActions",
+      "ownerId": "RecentChangedFiles",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "0c64701addd0756bd234fc9d5b55c531268fc5e2",
+        "line": 64,
+        "path": "platform/recentFiles/frontend/resources/intellij.platform.recentFiles.frontend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "ViewRecentActions",
+      "ownerId": "RecentChanges",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "a44c6c1bdd4fe4f18160fe76945f212407182c51",
+        "line": 44,
+        "path": "platform/lvcs-impl/resources/intellij.platform.lvcs.impl.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "ViewRecentActions",
+      "ownerId": "RecentFiles",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "0c64701addd0756bd234fc9d5b55c531268fc5e2",
+        "line": 60,
+        "path": "platform/recentFiles/frontend/resources/intellij.platform.recentFiles.frontend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "ViewRecentActions",
+      "ownerId": "SwitcherIterateItems",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "0c64701addd0756bd234fc9d5b55c531268fc5e2",
+        "line": 57,
+        "path": "platform/recentFiles/frontend/resources/intellij.platform.recentFiles.frontend.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "ViewRecentActions",
+      "ownerId": "SwitcherRecentEditedChangedToggleCheckBox",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "0c64701addd0756bd234fc9d5b55c531268fc5e2",
+        "line": 54,
+        "path": "platform/recentFiles/frontend/resources/intellij.platform.recentFiles.frontend.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "ViewToolbarActionsGroup",
+      "ownerId": "NavbarLocationGroup",
+      "ownerType": "group",
+      "relativeToAction": "ViewNavigationBar",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 216,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "after",
+      "groupId": "ViewToolbarActionsGroup",
+      "ownerId": "ViewNavigationBar",
+      "ownerType": "action",
+      "relativeToAction": "ViewToolBar",
+      "source": {
+        "blob": "c2c8e2b1818f314085f510e82ed1e96545aeb592",
+        "line": 211,
+        "path": "platform/platform-resources/src/idea/LangActions.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "WelcomeScreen.Configure",
+      "ownerId": "RunConfigurationTemplatesForNewProjects",
+      "ownerType": "action",
+      "relativeToAction": "WelcomeScreen.Configure.Import",
+      "source": {
+        "blob": "c91525097ddd5c0b0f45a67d0c89d106435d5278",
+        "line": 25,
+        "path": "platform/execution-impl/resources/META-INF/PlatformExecutionActions.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "WelcomeScreen.QuickStart",
+      "ownerId": "WelcomeScreen.DefaultNewProjectActionGroup",
+      "ownerType": "group",
+      "relativeToAction": "WelcomeScreen.OpenProject",
+      "source": {
+        "blob": "4f68b0fbda7d2cc33ee8ee1d54d6d289570f3135",
+        "line": 39,
+        "path": "idea/customization/min/resources/intellij.platform.customization.min.xml"
+      }
+    },
+    {
+      "anchor": "before",
+      "groupId": "WelcomeScreen.QuickStart",
+      "ownerId": "WelcomeScreen.OpenProject",
+      "ownerType": "action",
+      "relativeToAction": "Vcs.VcsClone",
+      "source": {
+        "blob": "4f68b0fbda7d2cc33ee8ee1d54d6d289570f3135",
+        "line": 47,
+        "path": "idea/customization/min/resources/intellij.platform.customization.min.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "WelcomeScreen.QuickStart.EmptyState",
+      "ownerId": "WelcomeScreen.QuickStart",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1198,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "WelcomeScreen.QuickStart.ProjectsState",
+      "ownerId": "WelcomeScreen.QuickStart",
+      "ownerType": "group",
+      "relativeToAction": null,
+      "source": {
+        "blob": "e51c176c6f577fd3372abac639c06a2e4cdf6c0f",
+        "line": 1199,
+        "path": "platform/platform-resources/src/idea/PlatformActions.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "XDebugger.Actions",
+      "ownerId": "Debugger.FreezeActiveThreadAction",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "b3961fdb2dd5ebceff4bdcc2f71333790d9e3268",
+        "line": 118,
+        "path": "platform/xdebugger-impl/resources/intellij.platform.debugger.impl.content.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "XDebugger.Actions",
+      "ownerId": "Debugger.FreezeInactiveThreadsAction",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "b3961fdb2dd5ebceff4bdcc2f71333790d9e3268",
+        "line": 128,
+        "path": "platform/xdebugger-impl/resources/intellij.platform.debugger.impl.content.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "XDebugger.Actions",
+      "ownerId": "Debugger.FreezeInactiveThreadsAmongSelected",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "b3961fdb2dd5ebceff4bdcc2f71333790d9e3268",
+        "line": 138,
+        "path": "platform/xdebugger-impl/resources/intellij.platform.debugger.impl.content.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "XDebugger.Actions",
+      "ownerId": "Debugger.FreezeSelectedThreads",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "b3961fdb2dd5ebceff4bdcc2f71333790d9e3268",
+        "line": 143,
+        "path": "platform/xdebugger-impl/resources/intellij.platform.debugger.impl.content.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "XDebugger.Actions",
+      "ownerId": "Debugger.RemoveAllBreakpoints",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "b3961fdb2dd5ebceff4bdcc2f71333790d9e3268",
+        "line": 110,
+        "path": "platform/xdebugger-impl/resources/intellij.platform.debugger.impl.content.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "XDebugger.Actions",
+      "ownerId": "Debugger.RemoveAllBreakpointsInFile",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "b3961fdb2dd5ebceff4bdcc2f71333790d9e3268",
+        "line": 113,
+        "path": "platform/xdebugger-impl/resources/intellij.platform.debugger.impl.content.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "XDebugger.Actions",
+      "ownerId": "Debugger.ThawActiveThreadAction",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "b3961fdb2dd5ebceff4bdcc2f71333790d9e3268",
+        "line": 123,
+        "path": "platform/xdebugger-impl/resources/intellij.platform.debugger.impl.content.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "XDebugger.Actions",
+      "ownerId": "Debugger.ThawAllThreadsAction",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "b3961fdb2dd5ebceff4bdcc2f71333790d9e3268",
+        "line": 133,
+        "path": "platform/xdebugger-impl/resources/intellij.platform.debugger.impl.content.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "XDebugger.Actions",
+      "ownerId": "Debugger.ThawSelectedThreads",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "b3961fdb2dd5ebceff4bdcc2f71333790d9e3268",
+        "line": 148,
+        "path": "platform/xdebugger-impl/resources/intellij.platform.debugger.impl.content.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "XDebugger.Attach.Dialog.Settings",
+      "ownerId": "XDebugger.Attach.Dialog.ShowOnlyMyProcessesToggleAction",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "b3961fdb2dd5ebceff4bdcc2f71333790d9e3268",
+        "line": 205,
+        "path": "platform/xdebugger-impl/resources/intellij.platform.debugger.impl.content.xml"
+      }
+    },
+    {
+      "anchor": "last",
+      "groupId": "XDebugger.ValueGroup",
+      "ownerId": "XDebugger.PinToTop",
+      "ownerType": "action",
+      "relativeToAction": null,
+      "source": {
+        "blob": "6656ad29df3e448055c1365b5b9584580e020d99",
+        "line": 273,
+        "path": "platform/xdebugger-impl/ui/resources/intellij.platform.debugger.impl.ui.xml"
+      }
+    }
+  ],
+  "schemaVersion": 1
+}

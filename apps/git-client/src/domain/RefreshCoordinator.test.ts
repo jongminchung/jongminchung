@@ -6,8 +6,8 @@ describe("RefreshCoordinator", () => {
         let finishFirst: (() => void) | undefined;
         const refresh = vi.fn(
             (
-                repositoryId: string,
-                invalidations: readonly string[],
+                _repositoryId: string,
+                _invalidations: readonly string[],
             ): Promise<void> => {
                 if (refresh.mock.calls.length === 1) {
                     return new Promise((resolve) => {

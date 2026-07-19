@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "reference": {
+    "product": "Rebased",
+    "version": "1.1.8",
+    "build": "IC-262.8665.SNAPSHOT",
+    "tag": "1.1.8",
+    "tagSha": "12fb12778a5ad8b7c52b64931a81c648629c9e23",
+    "sourceRepository": "../../../../../rebased",
+    "artifact": {
+      "name": "rebased-aarch64.dmg",
+      "sizeBytes": 346075281,
+      "sha256": "fd3bc8bd7f80be16294d424b25ca390ceb13960bba33422dfa8ac4632c3412c0"
+    }
+  },
+  "environment": {
+    "platform": "macOS",
+    "platformVersion": "26.5.2",
+    "platformBuild": "25F84",
+    "architecture": "arm64",
+    "gitVersion": "2.55.0",
+    "locale": "ko_KR",
+    "processLocale": "C.UTF-8",
+    "timezone": "Asia/Seoul",
+    "displayScale": null
+  },
+  "runtime": {
+    "profilePolicy": "isolated",
+    "initialTheme": "Islands Dark",
+    "initialCompactMode": false,
+    "initialZoomPercent": 100,
+    "status": "observed-1.1.8-authoritative"
+  },
+  "discoveryOnly": {
+    "installedVersion": "1.1.7",
+    "installedBuild": "IC-261.26222.SNAPSHOT",
+    "status": "observed-1.1.7-only"
+  }
+}

@@ -1,104 +1,382 @@
-:root {
-  color-scheme: light;
-  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-  --font-mono: "SFMono-Regular", "SF Mono", Menlo, Consolas, monospace;
-  --bg: #f5f4f7;
-  --surface: #fbfafc;
-  --surface-raised: #ffffff;
-  --surface-sunken: #efedf2;
-  --text: #292632;
-  --text-muted: #77727f;
-  --text-faint: #aaa5b0;
-  --border: #dedbe3;
-  --border-strong: #c9c4d0;
-  --selection: #dfdaf5;
-  --selection-strong: #cfc6f2;
-  --violet: #715bd1;
-  --violet-dark: #5542b3;
-  --mint: #2f9c74;
-  --coral: #cf624f;
-  --blue: #3e86b7;
-  --shadow: 0 16px 44px rgb(24 20 35 / 18%), 0 3px 12px rgb(24 20 35 / 12%);
+@layer reset, theme, base, astryx-base, astryx-theme, components, utilities;
+
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "@astryxdesign/core/reset.css";
+@import "@astryxdesign/core/astryx.css";
+@import "@astryxdesign/theme-neutral/theme.css";
+@import "@astryxdesign/core/tailwind-theme.css";
+@import "tailwindcss/utilities.css" layer(utilities);
+
+@source not "../../.vite/**/*";
+@source not "../../out/**/*";
+
+@font-face {
+  font-display: swap;
+  font-family: "JetBrains Mono Rebased";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../assets/fonts/JetBrainsMono-Regular.ttf") format("truetype");
 }
 
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --bg: #1d1b23;
-  --surface: #24222b;
-  --surface-raised: #2b2933;
-  --surface-sunken: #19171e;
-  --text: #e8e5ec;
-  --text-muted: #aaa5b2;
-  --text-faint: #706b79;
-  --border: #3b3843;
-  --border-strong: #514c5a;
-  --selection: #3d365c;
-  --selection-strong: #4c4177;
-  --violet: #9c8af0;
-  --violet-dark: #b2a4f4;
-  --mint: #69c89d;
-  --coral: #ed8a77;
-  --blue: #71add5;
-  --shadow: 0 16px 44px rgb(0 0 0 / 40%), 0 3px 12px rgb(0 0 0 / 30%);
+@font-face {
+  font-display: swap;
+  font-family: "JetBrains Mono Rebased";
+  font-style: normal;
+  font-weight: 700;
+  src: url("../assets/fonts/JetBrainsMono-Bold.ttf") format("truetype");
 }
 
-* {
-  box-sizing: border-box;
+@layer astryx-theme {
+  @scope ([data-astryx-theme="neutral"]) to ([data-astryx-theme]) {
+    :scope {
+      /* ManyIslandsLight/Dark.theme.json role tokens from Rebased 1.1.8. */
+      --color-background-body: light-dark(#e9eaee, #26282c);
+      --color-background-surface: light-dark(#ffffff, #191a1c);
+      --color-background-card: light-dark(#f7f8f9, #212326);
+      --color-background-popover: light-dark(#ffffff, #26282c);
+      --color-background-feedback: light-dark(#ffffff, #33353b);
+      --color-background-muted: light-dark(#e9eaee, #212326);
+      --color-background-inverted: light-dark(#191a1c, #f7f8f9);
+      --color-text-primary: light-dark(#000000, #d1d3d9);
+      --color-text-secondary: light-dark(#5f6269, #9fa2a8);
+      --color-text-disabled: light-dark(#9fa2a8, #73767c);
+      --color-text-accent: light-dark(#2f5eb9, #71a1fe);
+      --color-icon-primary: var(--color-text-primary);
+      --color-icon-secondary: var(--color-text-secondary);
+      --color-icon-disabled: var(--color-text-disabled);
+      --color-icon-accent: light-dark(#2f5eb9, #71a1fe);
+      --color-accent: #3871e1;
+      --color-accent-muted: light-dark(#e3ebfe, #233558);
+      --color-on-accent: #ffffff;
+      --color-tab-selected-background: light-dark(#e9eaee, #26282c);
+      --color-tab-selected-border: light-dark(#d1d3d9, #40434a);
+      --color-tab-hover-background: light-dark(#00000012, #ffffff17);
+      --color-neutral: light-dark(#20201e0f, #ffffff1a);
+      --color-overlay: light-dark(#20201e66, #000000b3);
+      --color-overlay-hover: light-dark(#20201e0a, #ffffff0d);
+      --color-overlay-pressed: light-dark(#20201e14, #ffffff1a);
+      --color-tint-hover: light-dark(black, white);
+      --color-border: light-dark(#e9eaee, #26282c);
+      --color-border-emphasized: light-dark(#c3c5cb, #40434a);
+      --color-success: light-dark(#338555, #6db083);
+      --color-error: light-dark(#c54e58, #f57e84);
+      --color-warning: light-dark(#a56906, #d59637);
+      --color-success-muted: light-dark(#f5faf3, #203b2a);
+      --color-error-muted: light-dark(#fff6f5, #56272b);
+      --color-warning-muted: light-dark(#fff6e9, #44321d);
+      --color-skeleton: light-dark(#dddfe4, #33353b);
+      --color-shadow: light-dark(#20201e1f, #0000005c);
+      --font-family-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+      --font-family-heading: var(--font-family-body);
+      --font-family-code: "JetBrains Mono Rebased", "JetBrains Mono", Menlo, monospace;
+      --font-size-base: 0.75rem;
+      --font-size-sm: 0.6875rem;
+      --font-size-xs: 0.625rem;
+      --radius-none: 0;
+      --radius-inner: 4px;
+      --radius-element: 8px;
+      --radius-container: 8px;
+      --radius-page: 8px;
+      --duration-fast-min: 80ms;
+      --duration-fast: 120ms;
+      --duration-fast-max: 160ms;
+      --shadow-low: 0 1px 2px light-dark(#20201e12, #00000038);
+      --shadow-med: 0 12px 32px light-dark(#20201e1f, #00000070), 0 2px 8px light-dark(#20201e14, #00000052);
+      --shadow-high: 0 16px 48px light-dark(#20201e29, #0000008f), 0 4px 12px light-dark(#20201e1a, #00000066);
+
+      --terminal-bg: light-dark(#ffffff, #191a1c);
+    }
+  }
+
+  html[data-appearance-mode="darcula"] [data-astryx-theme="neutral"] {
+    --color-background-body: #3c3f41;
+    --color-background-surface: #2b2b2b;
+    --color-background-card: #2b2b2b;
+    --color-background-popover: #333333;
+    --color-background-feedback: #3c3f41;
+    --color-background-muted: #3c3f41;
+    --color-text-primary: #bbbbbb;
+    --color-text-secondary: #9da0a8;
+    --color-text-disabled: #777a7d;
+    --color-text-accent: #589df6;
+    --color-accent: #4e94ce;
+    --color-accent-muted: #2d4059;
+    --color-border: #404040;
+    --color-border-emphasized: #515151;
+    --terminal-bg: #2b2b2b;
+  }
+
+  html[data-appearance-mode="highContrast"] [data-astryx-theme="neutral"] {
+    --color-background-body: #000000;
+    --color-background-surface: #000000;
+    --color-background-card: #080808;
+    --color-background-popover: #101010;
+    --color-background-feedback: #101010;
+    --color-background-muted: #171717;
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #e6e6e6;
+    --color-text-disabled: #a8a8a8;
+    --color-text-accent: #67c8ff;
+    --color-accent: #00a8ff;
+    --color-accent-muted: #003a57;
+    --color-border: #ffffff;
+    --color-border-emphasized: #ffffff;
+    --color-success: #65ff9a;
+    --color-error: #ff7373;
+    --color-warning: #ffd45a;
+    --terminal-bg: #000000;
+  }
+
+  html[data-adjust-red-green-vision="true"] [data-astryx-theme="neutral"] {
+    --color-success: #4c9ff8;
+    --color-success-muted: #4c9ff826;
+    --color-error: #d79b42;
+    --color-error-muted: #d79b4226;
+  }
 }
-html,
-body,
-#root {
-  height: 100%;
-  margin: 0;
-  overflow: hidden;
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  #root {
+    zoom: var(--product-zoom, 1);
+  }
+
+  html[data-compact="true"] {
+    --radius-element: 6px;
+    --radius-container: 8px;
+  }
+
+  html[data-compact="true"] .toolStripe button,
+  html[data-compact="true"] .rightToolStripe button {
+    min-height: 24px;
+  }
+
+  html[data-compact="true"] .projectTreeRow,
+  html[data-compact="true"] .commitRow {
+    height: 22px;
+  }
+
+  body {
+    background: var(--color-background-body);
+    color: var(--color-text-primary);
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-base);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  code,
+  pre,
+  kbd {
+    font-family: var(--font-family-code);
+  }
+
+  html[data-bidi-text-direction="content"] .cm-content {
+    unicode-bidi: plaintext;
+  }
+
+  html[data-bidi-text-direction="ltr"] .cm-content {
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+
+  html[data-bidi-text-direction="rtl"] .cm-content {
+    direction: rtl;
+    unicode-bidi: isolate;
+  }
+
+  ::selection {
+    background: var(--color-accent-muted);
+  }
+
+  ::-webkit-scrollbar {
+    width: 11px;
+    height: 11px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border: 3px solid transparent;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--color-text-secondary) 45%, transparent);
+    background-clip: padding-box;
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
 }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-ui);
-  font-size: 12px;
-  -webkit-font-smoothing: antialiased;
-}
-button,
-input,
-textarea,
-select {
-  color: inherit;
-  font: inherit;
-}
-button {
-  border: 0;
-  cursor: default;
-}
-button:focus-visible,
-input:focus-visible,
-textarea:focus-visible,
-select:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--violet) 65%, transparent);
-  outline-offset: -2px;
-}
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.38;
-}
-code,
-pre,
-kbd {
-  font-family: var(--font-mono);
-}
-::selection {
-  background: var(--selection-strong);
-}
-::-webkit-scrollbar {
-  height: 11px;
-  width: 11px;
-}
-::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--text-muted) 45%, transparent);
-  background-clip: padding-box;
-  border: 3px solid transparent;
-  border-radius: 8px;
-}
-::-webkit-scrollbar-corner {
-  background: transparent;
+
+@layer components {
+  /* Rebased uses the layer-1 main-window color around layer-0 islands. */
+  .titlebar,
+  .toolStripe,
+  .rightToolStripe,
+  .statusbar {
+    background: var(--color-background-body);
+    border-color: transparent;
+  }
+
+  .notificationBalloon {
+    background: var(--color-background-feedback);
+  }
+
+  .commandbar {
+    background: var(--color-background-surface);
+  }
+
+  .editorTabs button[aria-current="page"] {
+    background: var(--color-tab-selected-background) !important;
+    border-radius: 4px;
+    box-shadow: inset 0 0 0 1px var(--color-tab-selected-border) !important;
+    color: var(--color-text-primary) !important;
+  }
+
+  .editorTabs button:hover:not([aria-current="page"]) {
+    background: var(--color-tab-hover-background);
+    border-radius: 4px;
+  }
+
+  [data-preview="true"] > button:first-child {
+    font-style: italic;
+  }
+
+  [data-pinned="true"] > button:first-child::after {
+    content: "";
+    width: 4px;
+    height: 4px;
+    border-radius: 999px;
+    background: currentColor;
+    opacity: 0.55;
+  }
+  @keyframes skeletonPulse {
+    from {
+      opacity: 0.48;
+    }
+    to {
+      opacity: 0.9;
+    }
+  }
+
+  @keyframes activitySpin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .appShell .cm-editor {
+    background: var(--color-background-muted) !important;
+  }
+
+  .appShell .cm-gutters {
+    background: var(--color-background-surface) !important;
+    border-color: var(--color-border) !important;
+    color: var(--color-text-disabled) !important;
+  }
+
+  .appShell .cm-lineActionGutter {
+    min-width: 22px;
+  }
+
+  .appShell .cm-lineActionMarker {
+    align-items: center;
+    color: var(--color-accent);
+    cursor: pointer;
+    display: flex;
+    font-size: 10px;
+    height: 100%;
+    justify-content: center;
+    width: 20px;
+  }
+
+  .appShell .cm-mergeView,
+  .appShell .cm-mergeViewEditors,
+  .appShell .cm-mergeViewEditor {
+    height: 100%;
+    min-height: 0;
+  }
+
+  .appShell .cm-mergeViewEditors {
+    overflow: hidden;
+  }
+
+  .appShell .xterm-viewport,
+  .appShell .xterm-screen {
+    background: var(--terminal-bg) !important;
+  }
+
+  /* JediTerm 3.72 draws column zero at getInsetX() == 4. */
+  .appShell .terminalSurface > div:not(.terminalEmpty) {
+    box-sizing: border-box;
+    padding-left: 4px;
+  }
+
+  html[data-status-bar-visible="false"] .appShell,
+  html[data-presentation-mode="true"] .appShell {
+    grid-template-rows: 30px 29px minmax(0, 1fr) 0 !important;
+  }
+
+  html[data-toolbar-visible="false"] .titlebar > :not(.trafficSpace):not(.mainToolbarDragRegion),
+  html[data-distraction-free-mode="true"] .titlebar > :not(.trafficSpace):not(.mainToolbarDragRegion),
+  html[data-presentation-mode="true"] .titlebar > :not(.trafficSpace):not(.mainToolbarDragRegion) {
+    display: none !important;
+  }
+
+  html[data-tool-window-bars-visible="false"] .toolStripe,
+  html[data-tool-window-bars-visible="false"] .rightToolStripe,
+  html[data-distraction-free-mode="true"] .toolStripe,
+  html[data-distraction-free-mode="true"] .rightToolStripe,
+  html[data-presentation-mode="true"] .toolStripe,
+  html[data-presentation-mode="true"] .rightToolStripe {
+    display: none !important;
+  }
+
+  html[data-tool-window-bars-visible="false"] .workbench,
+  html[data-distraction-free-mode="true"] .workbench,
+  html[data-presentation-mode="true"] .workbench {
+    grid-template-columns: 0 minmax(0, 1fr) 0 !important;
+  }
+
+  html[data-tool-window-bars-visible="false"] .commandbar,
+  html[data-distraction-free-mode="true"] .commandbar,
+  html[data-presentation-mode="true"] .commandbar {
+    left: 0 !important;
+    right: 0 !important;
+  }
+
+  html[data-distraction-free-mode="true"] .projectToolWindow,
+  html[data-presentation-mode="true"] .projectToolWindow,
+  html[data-distraction-free-mode="true"] .mainPanes > :first-child,
+  html[data-distraction-free-mode="true"] .mainPanes > :last-child,
+  html[data-presentation-mode="true"] .mainPanes > :first-child,
+  html[data-presentation-mode="true"] .mainPanes > :last-child {
+    display: none !important;
+  }
+
+  html[data-distraction-free-mode="true"] .workbenchContent,
+  html[data-presentation-mode="true"] .workbenchContent,
+  html[data-distraction-free-mode="true"] .mainPanes,
+  html[data-presentation-mode="true"] .mainPanes {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  html[data-distraction-free-mode="true"] .commandbar,
+  html[data-presentation-mode="true"] .commandbar,
+  html[data-presentation-mode="true"] .topNavigationBar {
+    display: none !important;
+  }
+
+  html[data-navigation-bar="top"] .workspace {
+    padding-top: 29px !important;
+  }
+
+  html[data-navigation-bar="top"] .commandbar {
+    top: 59px !important;
+  }
 }

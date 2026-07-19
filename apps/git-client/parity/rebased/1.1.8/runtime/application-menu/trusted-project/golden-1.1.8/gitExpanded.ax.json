@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-19T04:29:03.175Z",
+  "reference": {
+    "product": "Rebased",
+    "version": "1.1.8",
+    "build": "IC-262.8665.SNAPSHOT",
+    "artifactSha256": "fd3bc8bd7f80be16294d424b25ca390ceb13960bba33422dfa8ac4632c3412c0"
+  },
+  "execution": {
+    "profile": "/private/tmp/rebased-1.1.8-profile",
+    "repository": "/private/tmp/rebased-parity-1.1.8.TPwGXl/reference",
+    "trusted": true,
+    "testBundleId": "io.github.detachhead.rebased.goldenstable118"
+  },
+  "normalization": {
+    "appName": "Rebased Golden Stable 1.1.8 is a Computer Use harness bundle name; normalize only generated macOS app-name labels to Rebased."
+  },
+  "menu": "gitExpanded",
+  "state": "Window: \"reference – Log\", App: Rebased Golden Stable 1.1.8.\n0 메뉴 Secondary Actions: Cancel\n\t1 Commit…, ID: handleAction:\n\t2 Push…, ID: handleAction:\n\t3 Update Project..., ID: handleAction:\n\t4 Pull…, ID: handleAction:\n\t5 Fetch, ID: handleAction:\n\t6 Merge…, ID: handleAction:\n\t7 Rebase…, ID: handleAction:\n\t8 Branches…, ID: handleAction:\n\t9 New Branch…, ID: handleAction:\n\t10 New Tag…, ID: handleAction:\n\t11 Reset HEAD…, ID: handleAction:\n\t12 New Worktree…, ID: handleAction:\n\t13 Worktrees…, ID: handleAction:\n\t14 Show Git Log, ID: handleAction:\n\t15 Patch, ID: handleAction:\n\t\t16 메뉴 Secondary Actions: Cancel\n\t\t\t17 Create Patch from Local Changes…, ID: handleAction:\n\t\t\t18 Apply Patch…, ID: handleAction:\n\t\t\t19 Apply Patch from Clipboard…, ID: handleAction:\n\t20 Uncommitted Changes, ID: handleAction:\n\t\t21 메뉴 Secondary Actions: Cancel\n\t\t\t22 Shelve Changes…, ID: handleAction:\n\t\t\t23 Show Shelf, ID: handleAction:\n\t\t\t24 Stash Changes…, ID: handleAction:\n\t\t\t25 (disabled) Unstash Changes…, ID: handleAction:\n\t\t\t26 (disabled) Rollback…, ID: handleAction:\n\t27 Current File, ID: handleAction:\n\t\t28 메뉴 Secondary Actions: Cancel\n\t\t\t29 (disabled) Commit…, ID: handleAction:\n\t\t\t30 (disabled) Add, ID: handleAction:\n\t\t\t31 (disabled) Show Diff, ID: handleAction:\n\t\t\t32 (disabled) Compare with Revision…, ID: handleAction:\n\t\t\t33 (disabled) Compare with Branch or Tag…, ID: handleAction:\n\t\t\t34 (disabled) Show History, ID: handleAction:\n\t35 GitLab, ID: handleAction:\n\t\t36 메뉴 Secondary Actions: Cancel\n\t\t\t37 Share Project on GitLab, ID: handleAction:\n\t\t\t38 Clone Repository…, ID: handleAction:\n\t\t\t39 Manage Accounts…, ID: handleAction:\n\t40 GitHub, ID: handleAction:\n\t\t41 메뉴 Secondary Actions: Cancel\n\t\t\t42 Share Project on GitHub, ID: handleAction:\n\t\t\t43 Clone Repository…, ID: handleAction:\n\t\t\t44 Manage Accounts…, ID: handleAction:\n\t45 Manage Remotes…, ID: handleAction:\n\t46 Clone…, ID: handleAction:\n\t47 VCS Operations Popup…, ID: handleAction:\n"
+}

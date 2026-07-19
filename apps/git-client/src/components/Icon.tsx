@@ -1,6 +1,6 @@
 import type { SVGProps } from "react";
 
-type IconName =
+export type IconName =
   | "branch"
   | "tag"
   | "remote"
@@ -20,6 +20,9 @@ type IconName =
   | "shelf"
   | "chevron"
   | "star"
+  | "bookmark"
+  | "bookmarkFilled"
+  | "bookmarksList"
   | "more"
   | "copy"
   | "patch"
@@ -36,8 +39,10 @@ type IconName =
   | "split"
   | "moon"
   | "sun"
+  | "appearance"
   | "settings"
   | "worktree"
+  | "checkout"
   | "external";
 
 const paths: Record<IconName, readonly string[]> = {
@@ -64,6 +69,9 @@ const paths: Record<IconName, readonly string[]> = {
   shelf: ["M4 4v16", "M20 4v16", "M4 16h16", "M7 7h10v6H7V7Z"],
   chevron: ["m9 6 6 6-6 6"],
   star: ["m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z"],
+  bookmark: [],
+  bookmarkFilled: [],
+  bookmarksList: [],
   more: ["M5 12h.01", "M12 12h.01", "M19 12h.01"],
   copy: ["M8 8h12v12H8V8Z", "M4 16V4h12"],
   patch: ["M12 3v18", "M3 12h18"],
@@ -94,6 +102,7 @@ const paths: Record<IconName, readonly string[]> = {
     "m4.9 19.1 1.4-1.4",
     "m17.7 6.3-1.4 1.4",
   ],
+  appearance: ["M3 4h18v13H3V4Z", "M8 21h8", "M12 17v4"],
   settings: [
     "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z",
     "M4 12H2",
@@ -106,6 +115,7 @@ const paths: Record<IconName, readonly string[]> = {
     "m4.9 19.1 1.4-1.4",
   ],
   worktree: ["M5 4v16", "M5 8h8", "M13 8v5h6", "M13 8l4-4", "M13 8l4 4"],
+  checkout: ["M4 5h8v5", "M4 19h8v-5", "M11 12h10", "m17 8 4 4-4 4"],
   external: ["M14 4h6v6", "m20 4-9 9", "M18 13v7H4V6h7"],
 };
 
@@ -114,6 +124,28 @@ export function Icon({
   size = 16,
   ...props
 }: { readonly name: IconName; readonly size?: number } & SVGProps<SVGSVGElement>) {
+  if (name === "bookmark") {
+    return (
+      <svg aria-hidden="true" height={size} viewBox="0 0 20 20" width={size} {...props}>
+        <path d="M15.5 3C15.5 2.72386 15.2761 2.5 15 2.5H5C4.72386 2.5 4.5 2.72386 4.5 3L4.50037 16.959L9.06678 13.3262L9.17127 13.25C9.70875 12.8931 10.4214 12.9185 10.934 13.3262L15.5004 16.959L15.5 3ZM17.0004 17.9961C17.0004 18.781 16.1504 19.2403 15.5043 18.8652L15.3773 18.7793L10.0004 14.5L4.62342 18.7793L4.49646 18.8652C3.85035 19.2403 3.00037 18.781 3.00037 17.9961L3 3C3 1.89543 3.89543 1 5 1H15C16.1046 1 17 1.89543 17 3L17.0004 17.9961Z" fill="currentColor" />
+      </svg>
+    );
+  }
+  if (name === "bookmarkFilled") {
+    return (
+      <svg aria-hidden="true" height={size} viewBox="0 0 16 16" width={size} {...props}>
+        <path d="M3 3.5C3 2.39543 3.89543 1.5 5 1.5H10.9989C12.1034 1.5 12.9989 2.39543 12.9989 3.5V14.9184C12.9989 15.3379 12.5134 15.5709 12.1861 15.3085L7.99943 11.9524L3.81273 15.3085C3.48543 15.5709 3 15.3379 3 14.9184V3.5Z" fill="#FFAF0F" />
+      </svg>
+    );
+  }
+  if (name === "bookmarksList") {
+    return (
+      <svg aria-hidden="true" height={size} viewBox="0 0 16 16" width={size} {...props}>
+        <path d="M10 10C10 9.44772 10.4477 9 11 9H13.9994C14.5517 9 14.9994 9.44772 14.9994 10V15.7092C14.9994 15.9189 14.7567 16.0354 14.5931 15.9042L12.4997 14.2262L10.4064 15.9042C10.2427 16.0354 10 15.9189 10 15.7092V10Z" fill="#FFAF0F" />
+        <path d="M2 12.5H8M2 6.5H14M2 9.5H8M2 3.5H14" stroke="currentColor" strokeLinecap="round" />
+      </svg>
+    );
+  }
   return (
     <svg aria-hidden="true" fill="none" height={size} viewBox="0 0 24 24" width={size} {...props}>
       {paths[name].map((path, index) => (

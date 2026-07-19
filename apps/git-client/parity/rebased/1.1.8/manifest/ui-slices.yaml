@@ -1,0 +1,227 @@
+schemaVersion: 1
+reference: rebased-1.1.8
+workflow:
+  order: [capture, specify, implement, component-test, final-golden]
+  packagePolicy: package once after every implementation slice is complete
+  intermediateCapturePolicy: use stored golden evidence and tag source only; do not restart either application
+  completionRule: no slice is complete until every visual, interaction, and effect obligation is verified
+
+slices:
+  - id: shell.welcome
+    featureGroup: shell
+    status: implementing
+    captureNext: final-golden
+    evidence:
+      projectsScreenshot: runtime/welcome/projects/default/reference.png
+      projectsAccessibility: runtime/welcome/projects/default/reference.ax.json
+      customizeScreenshot: runtime/welcome/customize/default/reference.png
+      customizeAccessibility: runtime/welcome/customize/default/reference.ax.json
+    componentTests:
+      - src/components/WelcomeWorkspace.test.ts
+      - src/domain/productSettings.test.ts
+    states: [empty-profile, recent-projects, customize, plugins, islands-dark]
+    visual:
+      - welcome titlebar and 224px Projects, Customize, and Plugins category rail match the reference
+      - product branding is the only intentional header and icon divergence
+      - New Project, Open, and Clone Repository use the reference action geometry
+      - Customize matches Appearance, Language and Region, Accessibility, and Keymap grouping
+    interaction:
+      - New Project opens initialize, Open opens existing, and Clone Repository opens clone
+      - persisted recent projects reopen from the Projects page
+      - theme, IDE font size, compact mode, zoom, notifications, and keymap share one persisted settings owner
+
+  - id: shell.loading-workbench
+    featureGroup: shell
+    status: implementing
+    captureNext: final-golden
+    evidence:
+      screenshot: runtime/welcome/projects/golden-1.1.8/reference.png
+      accessibility: runtime/welcome/projects/golden-1.1.8/reference.ax.json
+    states: [loading, islands-light, canonical-1184x768]
+    visual:
+      - hidden-inset traffic lights and 30px main toolbar
+      - project selector, search, settings, and notification controls
+      - 29px Log editor tab row and left tool stripe
+      - single rounded workbench island with centered Loading VCS Log text
+      - 20px status bar
+    interaction:
+      - toolbar and tool-window controls retain native focus order
+      - loading surface blocks repository actions without moving focus
+
+  - id: shell.project-log
+    featureGroup: shell
+    status: implementing
+    captureNext: final-golden
+    evidence:
+      screenshot: runtime/workbench/log/golden-1.1.8/reference.png
+      accessibility: runtime/workbench/log/golden-1.1.8/reference.ax.json
+    states: [clean, populated, selection-none, islands-dark, canonical-1184x768]
+    visual:
+      - project tool window occupies the left island and has its own toolbar
+      - Log is the active editor tab
+      - collapsed Branches rail separates Project and Log
+      - graph and subject precede author and date columns
+      - revision review is split into changes and commit-details empty regions
+      - Terminal and Git Console live on the left stripe, not a permanent bottom tab bar
+    interaction:
+      - Project tool-window button toggles the Project island
+      - Log rows support mouse, keyboard, single, and multiple selection
+      - selecting a commit populates changed files, details, and diff
+      - Escape restores selection or closes the highest-priority surface
+
+  - id: log.filters-and-graph
+    featureGroup: log
+    status: implementing
+    captureNext: final-golden
+    evidence:
+      screenshot: runtime/workbench/log/golden-1.1.8/reference.png
+      accessibility: runtime/workbench/log/golden-1.1.8/reference.ax.json
+    states: [populated, selection-none, islands-dark]
+    visual:
+      - Text or hash, Branch, User, Date, and Paths controls match reference order
+      - refresh, sort, graph options, and search actions match reference placement
+      - 22px rows use graph, subject, author, and absolute date geometry
+    interaction:
+      - every filter updates the Git query and can be cleared
+      - graph order and first-parent modes preserve selection when possible
+      - incremental loading keeps scroll and focus stable
+
+  - id: project.editor
+    featureGroup: project-editor
+    status: implementing
+    captureNext: final-golden
+    componentTests:
+      - electron/utility/git/file-service.test.ts
+      - electron/main/git-utility-client.test.ts
+      - src/components/ProjectToolWindow.test.ts
+    states: [working-tree-text, revision-text, image, binary, too-large, missing]
+    visual:
+      - Log and file tabs share the Rebased editor-tab row
+      - Project remains a separate left tool-window island while files render in the editor island
+      - text, image, binary, too-large, and missing states use the matching editor surface
+    interaction:
+      - multiple file tabs preserve their editor state while switching to Log or another file
+      - working-tree text files save with Cmd+S while index and revision files remain read-only
+      - Tree, File History, and Blame remain reachable inside the selected editor tab
+      - every save records Local History first, validates repository containment, replaces atomically, and preserves the Git index
+      - New File creates an unstaged worktree file through the same contained atomic writer
+      - Project toolbar exposes Select Opened File, Expand Selected, Collapse All, Options, and Hide in reference order
+
+  - id: log.commit-review
+    featureGroup: log
+    status: implementing
+    captureNext: final-golden
+    sourceEvidence:
+      - platform/vcs-log/impl/src/com/intellij/vcs/log/ui/details/commit/CommitDetailsPanel.kt
+    componentTests:
+      - src/components/DetailsPane.test.ts
+    states: [selection-single, populated, islands-dark]
+    visual:
+      - changed-file list, commit metadata, and diff match selected Rebased commit
+      - parent selector and previous/next controls match reference state
+    interaction:
+      - file selection loads the matching parent diff
+      - Space focuses diff; Escape returns focus to the file list
+      - previous and next difference shortcuts route to the diff only
+
+  - id: refs.branch-popup
+    featureGroup: refs
+    status: implementing
+    captureNext: final-golden
+    componentTests:
+      - src/components/GitBranchesPopup.test.ts
+      - src/domain/refActions.test.ts
+    states: [current-branch, local-branch, remote-branch, tag, detached-head]
+    visual:
+      - popup position, search, grouping, row metrics, favorites, and action toolbar match Rebased
+    interaction:
+      - Arrow, Home, End, Enter, Space, Escape, and type-ahead match Rebased
+      - checkout, new branch, tag, compare, rename, delete, and remote actions use state-specific enablement
+
+  - id: changes.commit-tool-window
+    featureGroup: changes
+    status: implementing
+    captureNext: final-golden
+    sourceEvidence:
+      - platform/vcs-impl/src/com/intellij/openapi/vcs/changes/ChangesViewCommitPanelSplitter.kt
+      - platform/vcs-impl/src/com/intellij/openapi/vcs/changes/ChangesViewManager.kt
+      - platform/vcs-impl/src/com/intellij/vcs/commit/NonModalCommitPanel.kt
+    componentTests:
+      - src/components/ChangesWorkspace.test.ts
+    states: [clean, dirty, staged, partially-staged, untracked, conflict]
+    visual:
+      - Commit tool window, changelist tree, diff, message field, and action row match Rebased
+    interaction:
+      - stage, unstage, partial hunk, changelist, commit, amend, and hook flows match Rebased
+      - every cancel path leaves worktree and index snapshots unchanged
+
+  - id: platform.terminal
+    featureGroup: platform
+    status: implementing
+    captureNext: final-golden
+    evidence:
+      emptyScreenshot: runtime/terminal/local/golden-1.1.8/reference-empty.png
+      emptyAccessibility: runtime/terminal/local/golden-1.1.8/reference-empty.ax.json
+      populatedScreenshot: runtime/terminal/local/golden-1.1.8/reference-pwd.png
+      populatedAccessibility: runtime/terminal/local/golden-1.1.8/reference-pwd.ax.json
+    states: [empty, populated, islands-dark]
+    visual:
+      - Terminal opens as a bottom island with a 30px tool-window header
+      - Local tab, plus, selector, AI Agents, more, and minimize controls match reference
+      - terminal background, font, cursor, selection, and scrollbar use Islands tokens
+    interaction:
+      - opening Terminal transfers focus to the PTY
+      - copy, paste, select all, clear, new tab, close tab, resize, and shell exit match reference
+      - terminal shortcuts do not leak into editor or application commands
+
+  - id: platform.remaining
+    featureGroup: platform
+    status: implementing
+    states: [git-console, local-history, settings, keymap, notification]
+    componentTests:
+      - src/components/GitConsolePanel.test.ts
+      - src/components/LocalHistoryPanel.test.ts
+      - src/components/NotificationToolWindow.test.ts
+      - src/domain/gitConsole.test.ts
+      - src/domain/productSettings.test.ts
+      - electron/utility/git/file-service.test.ts
+    interaction:
+      - Git Console records the exact redacted native command lifecycle and supports expand, copy, and clear
+      - Settings persists appearance, compact mode, zoom, notification preference, and searchable keymap state
+      - Notifications surface operation completion, cancellation, and error state
+      - Local History records utility-owned worktree snapshots on open and watcher changes, supports labels and path filtering, and restores one path without changing the Git index
+      - View and Git native-menu actions route to the implemented Project, Notifications, Terminal, Git Console, branch/tag/reset/worktree, shelf/stash, remotes, and account surfaces
+
+  - id: hosting.github-gitlab
+    featureGroup: hosting
+    status: implementing
+    captureNext: final-golden
+    sourceEvidence:
+      - plugins/github/github-core/src/org/jetbrains/plugins/github/pullrequest/data/provider/GHPRViewedStateDataProviderImpl.kt
+      - plugins/github/github-core/src/org/jetbrains/plugins/github/pullrequest/action/GHPRViewedStateToggleAction.kt
+      - plugins/gitlab/gitlab-core/src/org/jetbrains/plugins/gitlab/mergerequest/ui/details/model/GitLabPersistentMergeRequestChangesViewedState.kt
+      - plugins/gitlab/gitlab-core/src/org/jetbrains/plugins/gitlab/mergerequest/ui/details/GitLabMergeRequestViewedStateAction.kt
+    componentTests:
+      - src/domain/hostingView.test.ts
+      - src/bridge/ElectronHostingBridge.test.ts
+      - src/components/HostingPanel.persistence.test.ts
+      - electron/hosting/hosting-foundation.test.ts
+    states: [no-account, authenticated, expired, offline, server-error]
+    interaction:
+      - account, list, detail, diff, review, discussion, and viewed-file flows use sandbox repositories
+      - GitHub viewed state uses GraphQL viewerViewedState and mark/unmark mutations
+      - GitLab viewed state remains workspace-local, matching the 1.1.8 source implementation
+
+finalGolden:
+  prerequisites:
+    - every slice status is implemented
+    - component and domain tests pass
+    - source-to-runtime and runtime-to-source ledgers have no provisional entries for implemented slices
+  gates:
+    - one production-like Electron package build
+    - packaged E2E and side-effect matrix
+    - Computer Use capture for every reference scenario
+    - geometry tolerance is at most 1 CSS px
+    - structural SSIM is at least 0.995
+    - mismatch is at most 0.5 percent
+    - accessibility name, state, shortcut, and focus order match

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-18T21:36:00+09:00",
+  "workspaceCommit": "18c5e2d67ba171466948dbf060139dd4e6f5dfa5",
+  "preservation": {
+    "trackedChanges": 57,
+    "untrackedFiles": 76,
+    "policy": "preserve-existing-changes",
+    "forbiddenOperations": [
+      "git reset",
+      "git checkout --",
+      "git stash",
+      "rebased checkout mutation"
+    ]
+  },
+  "verification": {
+    "vitest": {
+      "testFiles": 24,
+      "tests": 93,
+      "status": "passed"
+    },
+    "rendererBuild": {
+      "typecheck": "passed",
+      "vite": "passed"
+    }
+  }
+}

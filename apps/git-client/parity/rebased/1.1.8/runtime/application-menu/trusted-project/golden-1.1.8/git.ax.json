@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-19T04:29:03.175Z",
+  "reference": {
+    "product": "Rebased",
+    "version": "1.1.8",
+    "build": "IC-262.8665.SNAPSHOT",
+    "artifactSha256": "fd3bc8bd7f80be16294d424b25ca390ceb13960bba33422dfa8ac4632c3412c0"
+  },
+  "execution": {
+    "profile": "/private/tmp/rebased-1.1.8-profile",
+    "repository": "/private/tmp/rebased-parity-1.1.8.TPwGXl/reference",
+    "trusted": true,
+    "testBundleId": "io.github.detachhead.rebased.goldenstable118"
+  },
+  "normalization": {
+    "appName": "Rebased Golden Stable 1.1.8 is a Computer Use harness bundle name; normalize only generated macOS app-name labels to Rebased."
+  },
+  "menu": "git",
+  "state": "Window: \"reference – Log\", App: Rebased Golden Stable 1.1.8.\n0 Git, ID: handleAction:, Secondary Actions: Cancel, Pick\n\t1 메뉴 Secondary Actions: Cancel\n\t\t2 Commit…, ID: handleAction:\n\t\t3 Push…, ID: handleAction:\n\t\t4 Update Project..., ID: handleAction:\n\t\t5 Pull…, ID: handleAction:\n\t\t6 Fetch, ID: handleAction:\n\t\t7 Merge…, ID: handleAction:\n\t\t8 Rebase…, ID: handleAction:\n\t\t9 Branches…, ID: handleAction:\n\t\t10 New Branch…, ID: handleAction:\n\t\t11 New Tag…, ID: handleAction:\n\t\t12 Reset HEAD…, ID: handleAction:\n\t\t13 New Worktree…, ID: handleAction:\n\t\t14 Worktrees…, ID: handleAction:\n\t\t15 Show Git Log, ID: handleAction:\n\t\t16 Patch, ID: handleAction:\n\t\t\t17 메뉴 Secondary Actions: Cancel\n\t\t\t\t18 Create Patch from Local Changes…, ID: handleAction:\n\t\t\t\t19 Apply Patch…, ID: handleAction:\n\t\t\t\t20 Apply Patch from Clipboard…, ID: handleAction:\n\t\t21 Uncommitted Changes, ID: handleAction:\n\t\t\t22 메뉴 Secondary Actions: Cancel\n\t\t23 Current File, ID: handleAction:\n\t\t\t24 메뉴 Secondary Actions: Cancel\n\t\t25 GitLab, ID: handleAction:\n\t\t\t26 메뉴 Secondary Actions: Cancel\n\t\t\t\t27 Share Project on GitLab, ID: handleAction:\n\t\t\t\t28 Clone Repository…, ID: handleAction:\n\t\t\t\t29 Manage Accounts…, ID: handleAction:\n\t\t30 GitHub, ID: handleAction:\n\t\t\t31 메뉴 Secondary Actions: Cancel\n\t\t\t\t32 Share Project on GitHub\n\t\t\t\t33 Clone Repository…\n\t\t\t\t34 Manage Accounts…\n\t\t35 Manage Remotes…, ID: handleAction:\n\t\t36 Clone…, ID: handleAction:\n\t\t37 VCS Operations Popup…, ID: handleAction:\n"
+}

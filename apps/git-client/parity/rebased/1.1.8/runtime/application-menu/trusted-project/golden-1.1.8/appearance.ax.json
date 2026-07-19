@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-19T04:29:03.175Z",
+  "reference": {
+    "product": "Rebased",
+    "version": "1.1.8",
+    "build": "IC-262.8665.SNAPSHOT",
+    "artifactSha256": "fd3bc8bd7f80be16294d424b25ca390ceb13960bba33422dfa8ac4632c3412c0"
+  },
+  "execution": {
+    "profile": "/private/tmp/rebased-1.1.8-profile",
+    "repository": "/private/tmp/rebased-parity-1.1.8.TPwGXl/reference",
+    "trusted": true,
+    "testBundleId": "io.github.detachhead.rebased.goldenstable118"
+  },
+  "normalization": {
+    "appName": "Rebased Golden Stable 1.1.8 is a Computer Use harness bundle name; normalize only generated macOS app-name labels to Rebased."
+  },
+  "menu": "appearance",
+  "state": "Window: \"reference\", App: Rebased Golden Stable 1.1.8.\n0 메뉴 Secondary Actions: Cancel\n\t1 Tool Windows, ID: handleAction:\n\t\t2 메뉴 Secondary Actions: Cancel\n\t\t\t3 Project, ID: handleAction:\n\t\t\t4 Bookmarks, ID: handleAction:\n\t\t\t5 Find, ID: handleAction:\n\t\t\t6 (disabled) Version Control, ID: handleAction:\n\t\t\t7 (disabled) Backup and Sync History, ID: handleAction:\n\t\t\t8 (disabled) Merge Requests, ID: handleAction:\n\t\t\t9 Notifications, ID: handleAction:\n\t\t\t10 (disabled) Pull Requests, ID: handleAction:\n\t\t\t11 Terminal, ID: handleAction:\n\t12 Appearance, ID: handleAction:\n\t\t13 메뉴 Secondary Actions: Cancel\n\t\t\t14 Enter Presentation Mode, ID: handleAction:\n\t\t\t15 Enter Distraction Free Mode, ID: handleAction:\n\t\t\t16 Enter Full Screen, ID: handleAction:\n\t\t\t17 Enter Zen Mode, ID: handleAction:\n\t\t\t18 Compact Mode, ID: handleAction:\n\t\t\t19 Zoom IDE (Current: 100%)…, ID: handleAction:\n\t\t\t20 Presentation Assistant, ID: handleAction:\n\t\t\t21 Toolbar, ID: handleAction:\n\t\t\t22 Navigation Bar, ID: handleAction:\n\t\t\t\t23 메뉴 Secondary Actions: Cancel\n\t\t\t\t\t24 Top, ID: handleAction:\n\t\t\t\t\t25 In Status Bar, ID: handleAction:\n\t\t\t\t\t26 Don't Show, ID: handleAction:\n\t\t\t\t\t27 Show Members, ID: handleAction:\n\t\t\t28 Tool Window Bars, ID: handleAction:\n\t\t\t29 Status Bar, ID: handleAction:\n\t\t\t30 Status Bar Widgets, ID: handleAction:\n\t\t\t\t31 메뉴 Secondary Actions: Cancel\n\t\t\t\t\t32 Status Text, ID: handleAction:\n\t\t\t\t\t33 File System Sync, ID: handleAction:\n\t\t\t\t\t34 Aggregator, ID: handleAction:\n\t\t\t\t\t35 Grid Position, ID: handleAction:\n\t\t\t\t\t36 Line:Column Number, ID: handleAction:\n\t\t\t\t\t37 Language Services, ID: handleAction:\n\t\t\t\t\t38 Line Separator, ID: handleAction:\n\t\t\t\t\t39 File Encoding, ID: handleAction:\n\t\t\t\t\t40 Power Save Mode, ID: handleAction:\n\t\t\t\t\t41 Editor Selection Mode, ID: handleAction:\n\t\t\t\t\t42 Indentation, ID: handleAction:\n\t\t\t\t\t43 Read-Only Attribute, ID: handleAction:\n\t\t\t\t\t44 Memory Indicator, ID: handleAction:\n\t45 Quick Definition, ID: handleAction:\n\t46 Quick Type Definition, ID: handleAction:\n\t47 Recent Locations, ID: handleAction:\n\t48 Recent Files, ID: handleAction:\n\t49 Recently Changed Files, ID: handleAction:\n\t50 Recent Changes, ID: handleAction:\n\t51 Quick Switch Scheme…, ID: handleAction:\n\t52 Reset Font Size in All Editors, ID: handleAction:\n\t53 Bidi Text Base Direction, ID: handleAction:\n\t\t54 메뉴 Secondary Actions: Cancel\n\t\t\t55 Content-Based, ID: handleAction:\n\t\t\t56 Left-to-Right, ID: handleAction:\n\t\t\t57 Right-to-Left, ID: handleAction:\n"
+}

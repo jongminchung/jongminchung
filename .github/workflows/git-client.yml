@@ -91,17 +91,15 @@ jobs:
         run: git diff --exit-code -- apps/git-client/src/generated
       - run: pnpm --filter @jongminchung/git-client exec playwright install chromium
       - run: pnpm --filter @jongminchung/git-client test:e2e
-      - run: pnpm --filter @jongminchung/git-client exec tauri build --ci --no-sign --bundles app,dmg
-      - name: Enforce app bundle size
-        run: |
-          size_mb=$(du -sm apps/git-client/src-tauri/target/release/bundle/macos/*.app | awk '{print $1}')
-          test "$size_mb" -le 75
+      - name: Build and validate local ad-hoc Electron ARM64 artifacts
+        run: pnpm --filter @jongminchung/git-client release:validate-local -- 0.1.0
       - uses: actions/upload-artifact@v7
         with:
-          name: git-client-macos-arm64
+          name: git-client-macos-arm64-adhoc
           path: |
-            apps/git-client/src-tauri/target/release/bundle/macos/*.app
-            apps/git-client/src-tauri/target/release/bundle/dmg/*.dmg
+            apps/git-client/out/Git Client-darwin-arm64/Git Client.app
+            apps/git-client/release-artifacts/*_adhoc.dmg
+            apps/git-client/release-artifacts/*_adhoc.dmg.sha256
 
   release:
     if: >-
@@ -123,12 +121,53 @@ jobs:
           cache: pnpm
       - name: Verify configured Node.js
         run: test "v$(cat .node-version)" = "$(node --version)"
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: apps/git-client/src-tauri
       - run: pnpm install --frozen-lockfile
+      - name: Configure Developer ID signing and Apple notarization
+        env:
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.GIT_CLIENT_APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_ID: ${{ secrets.GIT_CLIENT_APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.GIT_CLIENT_APPLE_TEAM_ID }}
+          CERTIFICATE_BASE64: ${{ secrets.GIT_CLIENT_CODESIGN_CERTIFICATE_BASE64 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.GIT_CLIENT_CODESIGN_CERTIFICATE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          test -n "$APPLE_APP_SPECIFIC_PASSWORD"
+          test -n "$APPLE_ID"
+          test -n "$APPLE_TEAM_ID"
+          test -n "$CERTIFICATE_BASE64"
+          test -n "$CERTIFICATE_PASSWORD"
+
+          signing_keychain="${RUNNER_TEMP}/git-client-signing.keychain-db"
+          signing_certificate="${RUNNER_TEMP}/git-client-signing.p12"
+          keychain_password="$(openssl rand -hex 32)"
+
+          printf '%s' "$CERTIFICATE_BASE64" | base64 -D > "$signing_certificate"
+          security create-keychain -p "$keychain_password" "$signing_keychain"
+          security set-keychain-settings -lut 21600 "$signing_keychain"
+          security unlock-keychain -p "$keychain_password" "$signing_keychain"
+          security import "$signing_certificate" \
+            -k "$signing_keychain" \
+            -P "$CERTIFICATE_PASSWORD" \
+            -T /usr/bin/codesign
+          security set-key-partition-list \
+            -S apple-tool:,apple:,codesign: \
+            -s \
+            -k "$keychain_password" \
+            "$signing_keychain"
+          security list-keychains -d user -s "$signing_keychain"
+          xcrun notarytool store-credentials git-client-ci \
+            --apple-id "$APPLE_ID" \
+            --password "$APPLE_APP_SPECIFIC_PASSWORD" \
+            --team-id "$APPLE_TEAM_ID" \
+            --keychain "$signing_keychain"
+          rm "$signing_certificate"
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GIT_CLIENT_CODESIGN_IDENTITY: ${{ secrets.GIT_CLIENT_CODESIGN_IDENTITY }}
+          GIT_CLIENT_NOTARY_KEYCHAIN: ${{ runner.temp }}/git-client-signing.keychain-db
+          GIT_CLIENT_NOTARY_KEYCHAIN_PROFILE: git-client-ci
         run: pnpm --filter @jongminchung/git-client release
+      - name: Remove ephemeral signing keychain
+        if: always()
+        run: security delete-keychain "${RUNNER_TEMP}/git-client-signing.keychain-db" || true

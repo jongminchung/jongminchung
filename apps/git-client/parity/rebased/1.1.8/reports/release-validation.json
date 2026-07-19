@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "validatedAt": "2026-07-19",
+  "candidate": {
+    "version": "0.1.0",
+    "platform": "macOS ARM64",
+    "electronVersion": "43.1.1",
+    "latestElectronStableRechecked": true,
+    "latestElectronStableSource": "https://releases.electronjs.org/"
+  },
+  "package": {
+    "path": "out/Git Client-darwin-arm64/Git Client.app",
+    "policyChecks": "passed-4-of-4",
+    "unitAndIntegrationTests": "passed-679-of-679",
+    "testFiles": "passed-85-of-85",
+    "typeChecks": "passed",
+    "codesign": "passed-ad-hoc",
+    "developerId": "blocked-no-identity",
+    "notarization": "blocked-no-credentials"
+  },
+  "packageE2e": {
+    "status": "passed",
+    "scenarios": 12,
+    "passed": 12,
+    "failed": 0,
+    "scope": [
+      "legible workspace and repository tabs",
+      "real packaged PTY in repository working directory",
+      "repository initialize and clone",
+      "diff rendering and macOS watcher isolation after close",
+      "GitHub/GitLab loopback IPC, net.fetch, safeStorage, persistence, and redaction",
+      "index, commit, ref, stash, config, remote, and worktree mutations",
+      "repository inspection, ignore rules, image preview, and patch import/export",
+      "shelf, changelist, recovery, and conflict resolution",
+      "submodule diff and unsafe working-tree file boundary",
+      "synchronized multi-root operation and rollback",
+      "in-flight Git query cancellation and event ordering",
+      "all 17 query and all 50 operation variants with disposable side effects"
+    ]
+  },
+  "dmg": {
+    "path": "release-artifacts/Git-Client_0.1.0_macos_arm64_adhoc.dmg",
+    "bytes": 106694849,
+    "sha256": "05f241b616b57351f88e260c382759e7d995112e2f1b0a765de80e0c79b883d5",
+    "hdiutilVerify": "passed",
+    "mountedPackageValidation": "passed",
+    "reproduction": {
+      "status": "passed-byte-identical",
+      "comparisonSha256": "05f241b616b57351f88e260c382759e7d995112e2f1b0a765de80e0c79b883d5",
+      "comparisonBytes": 106694849,
+      "cmpExitCode": 0,
+      "normalizedHfsRecords": 260,
+      "hfsTimestamp": 3660681600,
+      "hfsUuid": "676974636c69656e",
+      "udifUuid": "676974636c69656e742d646d672d7631"
+    }
+  },
+  "computerUse": {
+    "status": "passed-candidate-regressions",
+    "disposableRepository": true,
+    "topTabs": {
+      "textLegible": true,
+      "evidence": "parity/rebased/1.1.8/comparisons/ui-regressions/top-tabs/candidate-electron-43.1.1.jpeg"
+    },
+    "terminal": {
+      "textLegible": true,
+      "realPty": true,
+      "pwdExecuted": true,
+      "promptReturned": true,
+      "evidence": "parity/rebased/1.1.8/comparisons/ui-regressions/terminal/behavior.json"
+    },
+    "rebasedReferenceComparison": "pending"
+  },
+  "parityComplete": false
+}

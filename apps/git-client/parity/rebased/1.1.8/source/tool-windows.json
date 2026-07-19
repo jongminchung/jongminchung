@@ -1,0 +1,200 @@
+{
+  "baseline": {
+    "build": "262.8665.SNAPSHOT",
+    "commit": "12fb12778a5ad8b7c52b64931a81c648629c9e23",
+    "tag": "1.1.8"
+  },
+  "schemaVersion": 1,
+  "toolWindows": [
+    {
+      "attributes": {
+        "anchor": "left",
+        "factoryClass": "com.intellij.settingsSync.core.git.SettingsHistoryToolWindowFactory",
+        "icon": "AllIcons.Toolwindows.SettingSync",
+        "id": "Backup and Sync History",
+        "secondary": "false"
+      },
+      "kind": "toolWindow",
+      "source": {
+        "blob": "28cf19494a8831cbfe090f548c3e32189235e0e5",
+        "line": 69,
+        "path": "platform/settings-sync-core/resources/intellij.settingsSync.core.xml"
+      },
+      "stableId": "toolwindow:Backup and Sync History"
+    },
+    {
+      "attributes": {
+        "anchor": "left",
+        "factoryClass": "com.intellij.ide.bookmark.ui.BookmarksViewFactory",
+        "icon": "AllIcons.Toolwindows.ToolWindowBookmarks",
+        "id": "Bookmarks",
+        "order": "after Structure",
+        "secondary": "true"
+      },
+      "kind": "toolWindow",
+      "source": {
+        "blob": "7ae83da64f710cb5f59cbfb3c9f2a9342855319c",
+        "line": 42,
+        "path": "platform/bookmarks/resources/intellij.platform.bookmarks.xml"
+      },
+      "stableId": "toolwindow:Bookmarks"
+    },
+    {
+      "attributes": {
+        "id": "Bookmarks",
+        "mode": "per_client"
+      },
+      "kind": "toolWindowExtractorMode",
+      "source": {
+        "blob": "7ae83da64f710cb5f59cbfb3c9f2a9342855319c",
+        "line": 44,
+        "path": "platform/bookmarks/resources/intellij.platform.bookmarks.xml"
+      },
+      "stableId": "toolwindow:Bookmarks"
+    },
+    {
+      "attributes": {
+        "implementation": "com.intellij.terminal.frontend.toolwindow.impl.TerminalToolWindowTabsManagerImpl$Initializer"
+      },
+      "kind": "toolWindowInitializer",
+      "source": {
+        "blob": "faf8aae8573a235b2a9e74e19e7650722140f47b",
+        "line": 78,
+        "path": "plugins/terminal/frontend/resources/intellij.terminal.frontend.xml"
+      },
+      "stableId": "toolwindow:com.intellij.terminal.frontend.toolwindow.impl.TerminalToolWindowTabsManagerImpl$Initializer"
+    },
+    {
+      "attributes": {
+        "anchor": "left",
+        "factoryClass": "com.intellij.openapi.vcs.changes.ui.CommitToolWindowFactory",
+        "icon": "AllIcons.Toolwindows.ToolWindowCommit",
+        "id": "Commit"
+      },
+      "kind": "toolWindow",
+      "source": {
+        "blob": "c3ea9a1e9e6919551c0c7e0ad6799687e4c2ab3a",
+        "line": 179,
+        "path": "platform/vcs-impl/resources/META-INF/VcsExtensions.xml"
+      },
+      "stableId": "toolwindow:Commit"
+    },
+    {
+      "attributes": {
+        "anchor": "left",
+        "canCloseContents": "true",
+        "doNotActivateOnStart": "true",
+        "factoryClass": "org.jetbrains.plugins.gitlab.mergerequest.ui.toolwindow.GitLabToolWindowFactory",
+        "icon": "com.intellij.vcs.gitlab.icons.GitlabIcons.GitLabToolWindow",
+        "id": "Merge Requests"
+      },
+      "kind": "toolWindow",
+      "source": {
+        "blob": "ade25669ef11145ee810839b85d3ae9c3951e369",
+        "line": 43,
+        "path": "plugins/gitlab/gitlab-core/resources/intellij.vcs.gitlab.xml"
+      },
+      "stableId": "toolwindow:Merge Requests"
+    },
+    {
+      "attributes": {
+        "anchor": "right",
+        "factoryClass": "com.intellij.notification.impl.NotificationsToolWindowFactory",
+        "icon": "AllIcons.Toolwindows.Notifications",
+        "id": "Notifications",
+        "secondary": "true"
+      },
+      "kind": "toolWindow",
+      "source": {
+        "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
+        "line": 1199,
+        "path": "platform/platform-resources/src/META-INF/PlatformExtensions.xml"
+      },
+      "stableId": "toolwindow:Notifications"
+    },
+    {
+      "attributes": {
+        "anchor": "left",
+        "doNotActivateOnStart": "true",
+        "factoryClass": "com.intellij.ide.projectView.impl.ProjectViewToolWindowFactory",
+        "icon": "AllIcons.Toolwindows.ToolWindowProject",
+        "id": "Project",
+        "secondary": "true"
+      },
+      "kind": "toolWindow",
+      "source": {
+        "blob": "a7d5ec332a7e12fb1e6f2d8a94e95f7ebb7afe91",
+        "line": 1026,
+        "path": "platform/platform-resources/src/META-INF/LangExtensions.xml"
+      },
+      "stableId": "toolwindow:Project"
+    },
+    {
+      "attributes": {
+        "anchor": "left",
+        "canCloseContents": "true",
+        "doNotActivateOnStart": "true",
+        "factoryClass": "org.jetbrains.plugins.github.pullrequest.ui.toolwindow.GHPRToolWindowFactory",
+        "icon": "org.jetbrains.plugins.github.GithubIcons.PullRequestsToolWindow",
+        "id": "Pull Requests"
+      },
+      "kind": "toolWindow",
+      "source": {
+        "blob": "4ee88d3c0c9cd9c77fab5db70ccb8b560e1c2f01",
+        "line": 86,
+        "path": "plugins/github/github-core/resources/intellij.vcs.github.xml"
+      },
+      "stableId": "toolwindow:Pull Requests"
+    },
+    {
+      "attributes": {
+        "anchor": "bottom",
+        "canCloseContents": "true",
+        "factoryClass": "org.jetbrains.plugins.terminal.TerminalToolWindowFactory",
+        "icon": "com.intellij.terminal.icons.TerminalIcons.OpenTerminal_13x13",
+        "id": "Terminal",
+        "secondary": "false"
+      },
+      "kind": "toolWindow",
+      "source": {
+        "blob": "37b2c03a476e0895b71730fd027f8ae9678d4c52",
+        "line": 3,
+        "path": "plugins/terminal/resources/META-INF/terminal.xml"
+      },
+      "stableId": "toolwindow:Terminal"
+    },
+    {
+      "attributes": {
+        "anchor": "right",
+        "canCloseContents": "false",
+        "doNotActivateOnStart": "true",
+        "factoryClass": "com.intellij.internal.inspector.themePicker.UiThemeColorPickerToolWindowFactory",
+        "icon": "AllIcons.Toolwindows.ToolWindowPalette",
+        "id": "UI Theme Color Picker"
+      },
+      "kind": "toolWindow",
+      "source": {
+        "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
+        "line": 605,
+        "path": "platform/platform-resources/src/META-INF/PlatformExtensions.xml"
+      },
+      "stableId": "toolwindow:UI Theme Color Picker"
+    },
+    {
+      "attributes": {
+        "anchor": "bottom",
+        "canCloseContents": "true",
+        "factoryClass": "com.intellij.openapi.vcs.changes.ui.ChangeViewToolWindowFactory",
+        "icon": "AllIcons.Toolwindows.ToolWindowChanges",
+        "id": "Version Control"
+      },
+      "kind": "toolWindow",
+      "source": {
+        "blob": "c3ea9a1e9e6919551c0c7e0ad6799687e4c2ab3a",
+        "line": 187,
+        "path": "platform/vcs-impl/resources/META-INF/VcsExtensions.xml"
+      },
+      "stableId": "toolwindow:Version Control"
+    }
+  ]
+}

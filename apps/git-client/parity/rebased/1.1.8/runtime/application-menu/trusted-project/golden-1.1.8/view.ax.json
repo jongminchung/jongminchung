@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-19T04:29:03.175Z",
+  "reference": {
+    "product": "Rebased",
+    "version": "1.1.8",
+    "build": "IC-262.8665.SNAPSHOT",
+    "artifactSha256": "fd3bc8bd7f80be16294d424b25ca390ceb13960bba33422dfa8ac4632c3412c0"
+  },
+  "execution": {
+    "profile": "/private/tmp/rebased-1.1.8-profile",
+    "repository": "/private/tmp/rebased-parity-1.1.8.TPwGXl/reference",
+    "trusted": true,
+    "testBundleId": "io.github.detachhead.rebased.goldenstable118"
+  },
+  "normalization": {
+    "appName": "Rebased Golden Stable 1.1.8 is a Computer Use harness bundle name; normalize only generated macOS app-name labels to Rebased."
+  },
+  "menu": "view",
+  "state": "Window: \"reference\", App: Rebased Golden Stable 1.1.8.\n0 View, ID: handleAction:, Secondary Actions: Cancel, Pick\n\t1 메뉴 Secondary Actions: Cancel\n\t\t2 Tool Windows, ID: handleAction:\n\t\t\t3 메뉴 Secondary Actions: Cancel\n\t\t\t\t4 Project, ID: handleAction:\n\t\t\t\t5 Bookmarks, ID: handleAction:\n\t\t\t\t6 Find, ID: handleAction:\n\t\t\t\t7 (disabled) Version Control, ID: handleAction:\n\t\t\t\t8 (disabled) Backup and Sync History, ID: handleAction:\n\t\t\t\t9 (disabled) Merge Requests, ID: handleAction:\n\t\t\t\t10 Notifications, ID: handleAction:\n\t\t\t\t11 (disabled) Pull Requests, ID: handleAction:\n\t\t\t\t12 Terminal, ID: handleAction:\n\t\t13 Appearance, ID: handleAction:\n\t\t\t14 메뉴 Secondary Actions: Cancel\n\t\t15 Quick Definition, ID: handleAction:\n\t\t16 Quick Type Definition, ID: handleAction:\n\t\t17 Recent Locations, ID: handleAction:\n\t\t18 Recent Files, ID: handleAction:\n\t\t19 Recently Changed Files, ID: handleAction:\n\t\t20 Recent Changes, ID: handleAction:\n\t\t21 Quick Switch Scheme…, ID: handleAction:\n\t\t22 Reset Font Size in All Editors, ID: handleAction:\n\t\t23 Bidi Text Base Direction, ID: handleAction:\n\t\t\t24 메뉴 Secondary Actions: Cancel\n\t\t\t\t25 Content-Based, ID: handleAction:\n\t\t\t\t26 Left-to-Right, ID: handleAction:\n\t\t\t\t27 Right-to-Left, ID: handleAction:\n"
+}
