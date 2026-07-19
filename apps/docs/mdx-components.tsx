@@ -1,19 +1,23 @@
 import { Link } from "@astryxdesign/core/Link";
 import type { MDXComponents } from "mdx/types";
 import { isValidElement, type ComponentProps, type ReactNode } from "react";
-import { DocsCodeBlock } from "@/components/DocsCodeBlock";
-import { OverviewCards, OverviewCta, OverviewHero, QuickStart } from "@/components/OverviewBlocks";
+import { DocsCodeBlock } from "./components/DocsCodeBlock";
+import { ExcalidrawDiagram } from "./components/ExcalidrawDiagram";
+import { OverviewCards, OverviewCta, OverviewHero, QuickStart } from "./components/OverviewBlocks";
+import { classifyMdxCodeBlock } from "./lib/mdx-code";
 
 interface CodeElementProps {
   readonly children?: ReactNode;
   readonly className?: string;
 }
 
-function MdxPre({ children }: ComponentProps<"pre">) {
+export function MdxPre({ children }: ComponentProps<"pre">) {
   if (!isValidElement<CodeElementProps>(children)) return <pre>{children}</pre>;
-  const code = typeof children.props.children === "string" ? children.props.children.trimEnd() : "";
-  const language = children.props.className?.replace("language-", "") ?? "text";
-  return <DocsCodeBlock code={code} language={language} />;
+  const block = classifyMdxCodeBlock(children.props.className, children.props.children);
+  if (block.kind === "excalidraw") {
+    return <ExcalidrawDiagram source={block.source} />;
+  }
+  return <DocsCodeBlock code={block.source} language={block.language} />;
 }
 
 function MdxLink({ href = "", children }: ComponentProps<"a">) {
@@ -28,6 +32,7 @@ function MdxLink({ href = "", children }: ComponentProps<"a">) {
 const components = {
   a: MdxLink,
   pre: MdxPre,
+  ExcalidrawDiagram,
   OverviewCards,
   OverviewCta,
   OverviewHero,

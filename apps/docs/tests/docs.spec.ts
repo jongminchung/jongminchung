@@ -1,5 +1,100 @@
+import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { parseExcalidrawSource } from "../lib/excalidraw-scene";
+
+test("standalone Excalidraw files render from one source without document chrome", async ({
+  page,
+  request,
+}) => {
+  const source = await readFile(
+    resolve(process.cwd(), "public/diagrams/operating-system.excalidraw"),
+  );
+  const expectedScene = parseExcalidrawSource(source.toString("utf8"));
+
+  await page.goto("/diagrams/operating-system");
+  await expect(
+    page.getByRole("heading", { level: 1, name: "operating-system.excalidraw" }),
+  ).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "All documentation" })).toHaveCount(0);
+
+  const diagram = page.locator('figure[aria-label="operating-system.excalidraw"]');
+  await expect(diagram).toHaveAttribute("data-excalidraw-state", "ready", { timeout: 20_000 });
+  await expect(diagram).toHaveAttribute(
+    "data-source-element-count",
+    String(expectedScene.elementCount),
+  );
+  await expect(diagram).toHaveAttribute(
+    "data-rendered-element-count",
+    String(expectedScene.elementCount),
+  );
+  await expect(diagram.locator('[data-excalidraw-text="true"]')).toContainText(
+    expectedScene.textContent.join(" · "),
+  );
+  await expect(diagram.getByRole("button", { name: "Zoom out" })).toBeVisible();
+  await expect(diagram.getByRole("button", { name: "Zoom in" })).toBeVisible();
+  await expect(diagram.getByRole("button", { name: "Help" })).toHaveCount(0);
+  await expect(diagram.locator('[data-testid="main-menu-trigger"]:visible')).toHaveCount(0);
+  await expect(diagram.locator(".disable-zen-mode:visible")).toHaveCount(0);
+
+  const hasRenderedInk = await diagram.locator("canvas").evaluateAll((canvases) =>
+    canvases.some((canvas) => {
+      const context = canvas.getContext("2d");
+      if (context === null || canvas.width === 0 || canvas.height === 0) return false;
+      const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+      const first = [pixels[0], pixels[1], pixels[2], pixels[3]];
+      for (let index = 4; index < pixels.length; index += 4) {
+        if (
+          pixels[index] !== first[0] ||
+          pixels[index + 1] !== first[1] ||
+          pixels[index + 2] !== first[2] ||
+          pixels[index + 3] !== first[3]
+        ) {
+          return true;
+        }
+      }
+      return false;
+    }),
+  );
+  expect(hasRenderedInk).toBe(true);
+
+  const zoom = diagram.getByRole("button", { name: "Reset zoom" });
+  const initialZoom = await zoom.textContent();
+  await diagram.getByRole("button", { name: "Zoom out" }).click();
+  await expect(zoom).not.toHaveText(initialZoom ?? "");
+
+  const fullscreen = diagram.getByRole("button", { name: "Full screen" });
+  await fullscreen.focus();
+  await expect(fullscreen).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(diagram.getByRole("button", { name: "Exit full screen" })).toBeVisible();
+  await page.keyboard.press("Enter");
+  await expect(fullscreen).toBeVisible();
+
+  const download = page.getByRole("link", { name: "Download source" });
+  await expect(download).toHaveAttribute("download", "");
+  await expect(download).toHaveAttribute("href", "/diagrams/operating-system.excalidraw");
+  await download.focus();
+  await expect(download).toBeFocused();
+  const response = await request.get("/diagrams/operating-system.excalidraw");
+  expect(response.ok()).toBe(true);
+  expect(await response.body()).toEqual(source);
+  const excalifontRequest = await request.get(
+    "/excalidraw-assets/fonts/Excalifont/Excalifont-Regular-a88b72a24fb54c9f94e3b5fdaa7481c9.woff2",
+  );
+  expect(excalifontRequest.ok()).toBe(true);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.evaluate(() => localStorage.setItem("docs-theme", "dark"));
+  await page.reload();
+  await expect(diagram).toHaveAttribute("data-excalidraw-state", "ready", { timeout: 20_000 });
+  await expect.poll(() => page.evaluate(() => document.documentElement.dataset.theme)).toBe("dark");
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBe(1280);
+});
 
 test("uses the canonical app icon for navigation and metadata", async ({ page, request }) => {
   await page.goto("/en/overview");
@@ -379,6 +474,7 @@ test("representative pages have no Axe violations or console warnings", async ({
   });
 
   for (const path of [
+    "/diagrams/operating-system",
     "/en/handbook/ddd",
     "/en/packages/remark-plantuml",
     "/en/deep-dive/pnpm-11",

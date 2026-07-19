@@ -6,6 +6,7 @@ node_modules/
 **/.wxt/
 **/test-results/
 playwright-report/
+apps/docs/public/excalidraw-assets/
 *.bak
 *.old
 

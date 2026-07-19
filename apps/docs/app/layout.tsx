@@ -30,12 +30,14 @@ export const metadata: Metadata = {
 };
 
 const themeScript = `(()=>{try{const m=localStorage.getItem("docs-theme")||"system";const d=m==="system"?(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):m;document.documentElement.dataset.theme=d;document.documentElement.style.colorScheme=d}catch{}})()`;
+const excalidrawAssetScript = `window.EXCALIDRAW_ASSET_PATH="/excalidraw-assets/"`;
 
 export default function RootLayout({ children }: { readonly children: ReactNode }) {
   return (
     <html lang="en" data-theme="light" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script dangerouslySetInnerHTML={{ __html: excalidrawAssetScript }} />
       </head>
       <body className={`${inter.variable} ${interTight.variable} ${dmMono.variable}`}>
         {children}

@@ -4,10 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "pnpm run content:check && next build",
+    "build": "node scripts/prepare-excalidraw-assets.ts && node scripts/check-excalidraw.ts && pnpm run content:check && next build",
     "content:build": "node scripts/build-content.ts --write",
     "content:check": "node scripts/build-content.ts --check",
-    "dev": "next dev",
+    "dev": "node scripts/prepare-excalidraw-assets.ts && next dev",
+    "excalidraw:assets": "node scripts/prepare-excalidraw-assets.ts",
+    "excalidraw:check": "node scripts/check-excalidraw.ts",
     "start": "next start",
     "test": "vitest run --root ../.. apps/docs",
     "test:e2e": "playwright test",
@@ -17,6 +19,7 @@
   "dependencies": {
     "@astryxdesign/core": "0.1.5",
     "@astryxdesign/theme-neutral": "0.1.5",
+    "@excalidraw/excalidraw": "0.18.1",
     "@jongminchung/icon": "workspace:*",
     "@mdx-js/loader": "3.1.1",
     "@mdx-js/react": "3.1.1",
