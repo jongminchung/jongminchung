@@ -1,12 +1,10 @@
 "use client";
 
-import { Button } from "@astryxdesign/core/Button";
-import { CommandPalette, CommandPaletteInput } from "@astryxdesign/core/CommandPalette";
-import { Icon } from "@astryxdesign/core/Icon";
-import { Kbd } from "@astryxdesign/core/Kbd";
-import type { SearchSource, SearchableItem } from "@astryxdesign/core/Typeahead";
+import { Button } from "@jongminchung/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@jongminchung/ui/dialog";
 import {
   createContext,
+  type KeyboardEvent,
   type ReactNode,
   use,
   useCallback,
@@ -18,26 +16,20 @@ import {
 import type { DocSection, Locale, SearchDocument } from "@/lib/content-model";
 import { isLocale, sections } from "@/lib/content-model";
 import { searchDocuments, type SearchHit, type SearchMatchField } from "@/lib/search";
+import { Icon } from "./Icon";
 import { useDocsNavigation } from "./RouteTransition";
 import styles from "./SearchPalette.module.css";
 
-interface SearchItemData {
-  readonly group: string;
+interface SearchItem {
   readonly href: string;
+  readonly label: string;
   readonly matchLabel: string;
   readonly matchText: string;
-  readonly section: DocSection;
+  readonly group: string;
 }
 
-type SearchItem = SearchableItem<SearchItemData>;
-
 const sectionLabels: Readonly<Record<Locale, Readonly<Record<DocSection, string>>>> = {
-  ko: {
-    overview: "개요",
-    handbook: "핸드북",
-    packages: "패키지",
-    "deep-dive": "Deep Dive",
-  },
+  ko: { overview: "개요", handbook: "핸드북", packages: "패키지", "deep-dive": "Deep Dive" },
   en: {
     overview: "Overview",
     handbook: "Handbook",
@@ -94,9 +86,8 @@ function parseSearchDocument(value: unknown): SearchDocument {
     !Array.isArray(apiSymbols) ||
     !apiSymbols.every((item) => typeof item === "string") ||
     typeof body !== "string"
-  ) {
+  )
     throw new Error("Search index contains an invalid item.");
-  }
   return Object.freeze({
     id,
     locale,
@@ -112,56 +103,14 @@ function parseSearchDocument(value: unknown): SearchDocument {
   });
 }
 
-function parseSearchIndex(value: unknown): readonly SearchDocument[] {
-  if (!Array.isArray(value)) throw new Error("Search index must be an array.");
-  return Object.freeze(value.map(parseSearchDocument));
-}
-
-class DocsSearchSource implements SearchSource<SearchItem> {
-  private indexPromise: Promise<readonly SearchDocument[]> | null = null;
-
-  private constructor(private readonly locale: Locale) {}
-
-  static of(locale: Locale): DocsSearchSource {
-    return new DocsSearchSource(locale);
-  }
-
-  async search(query: string): Promise<SearchItem[]> {
-    const documents = await this.load();
-    return searchDocuments(documents, query).map((hit) => this.toItem(hit));
-  }
-
-  async bootstrap(): Promise<SearchItem[]> {
-    const documents = await this.load();
-    return searchDocuments(documents, "", 8).map((hit) => this.toItem(hit));
-  }
-
-  private async load(): Promise<readonly SearchDocument[]> {
-    this.indexPromise ??= this.fetchIndex();
-    return this.indexPromise;
-  }
-
-  private async fetchIndex(): Promise<readonly SearchDocument[]> {
-    const response = await fetch(`/search/${this.locale}.json`);
-    if (!response.ok) throw new Error(`Search index request failed with ${response.status}.`);
-    const value: unknown = await response.json();
-    return parseSearchIndex(value);
-  }
-
-  private toItem(hit: SearchHit): SearchItem {
-    const { document, match } = hit;
-    return Object.freeze({
-      id: document.href,
-      label: document.title,
-      auxiliaryData: {
-        group: sectionLabels[this.locale][document.section],
-        href: document.href,
-        matchLabel: matchLabels[this.locale][match.field],
-        matchText: match.text,
-        section: document.section,
-      },
-    });
-  }
+function toItem(locale: Locale, hit: SearchHit): SearchItem {
+  return {
+    href: hit.document.href,
+    label: hit.document.title,
+    group: sectionLabels[locale][hit.document.section],
+    matchLabel: matchLabels[locale][hit.match.field],
+    matchText: hit.match.text,
+  };
 }
 
 interface SearchContextValue {
@@ -172,8 +121,11 @@ interface SearchContextValue {
 const SearchContext = createContext<SearchContextValue | null>(null);
 
 function findVisibleTrigger(): HTMLButtonElement | null {
-  const triggers = document.querySelectorAll<HTMLButtonElement>("[data-docs-search-trigger]");
-  return Array.from(triggers).find((trigger) => trigger.getClientRects().length > 0) ?? null;
+  return (
+    Array.from(document.querySelectorAll<HTMLButtonElement>("[data-docs-search-trigger]")).find(
+      (trigger) => trigger.getClientRects().length > 0,
+    ) ?? null
+  );
 }
 
 export function SearchProvider({
@@ -184,64 +136,127 @@ export function SearchProvider({
   readonly children: ReactNode;
 }) {
   const { navigate } = useDocsNavigation();
-  const lastTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const source = useMemo(() => DocsSearchSource.of(locale), [locale]);
+  const [query, setQuery] = useState("");
+  const [documents, setDocuments] = useState<readonly SearchDocument[]>([]);
+  const [selected, setSelected] = useState(-1);
+  const items = useMemo(
+    () =>
+      searchDocuments(documents, query, query === "" ? 8 : undefined).map((hit) =>
+        toItem(locale, hit),
+      ),
+    [documents, locale, query],
+  );
   const open = useCallback((trigger: HTMLButtonElement | null): void => {
-    lastTriggerRef.current = trigger ?? findVisibleTrigger();
+    triggerRef.current = trigger ?? findVisibleTrigger();
     setIsOpen(true);
   }, []);
-  const contextValue = useMemo(() => ({ locale, open }), [locale, open]);
 
   useEffect(() => {
-    const openSearch = (event: KeyboardEvent): void => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLocaleLowerCase() === "k") {
+    void fetch(`/search/${locale}.json`).then(async (response) => {
+      if (!response.ok) throw new Error(`Search index request failed with ${response.status}.`);
+      const value: unknown = await response.json();
+      if (!Array.isArray(value)) throw new Error("Search index must be an array.");
+      setDocuments(Object.freeze(value.map(parseSearchDocument)));
+    });
+  }, [locale]);
+
+  useEffect(() => {
+    const handleShortcut = (event: globalThis.KeyboardEvent): void => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
         open(null);
       }
     };
-    window.addEventListener("keydown", openSearch);
-    return () => window.removeEventListener("keydown", openSearch);
+    window.addEventListener("keydown", handleShortcut);
+    return () => window.removeEventListener("keydown", handleShortcut);
   }, [open]);
 
-  const setOpen = (nextOpen: boolean): void => {
+  const changeOpen = (nextOpen: boolean): void => {
     setIsOpen(nextOpen);
-    if (!nextOpen) requestAnimationFrame(() => lastTriggerRef.current?.focus());
+    if (!nextOpen) {
+      setQuery("");
+      setSelected(-1);
+      requestAnimationFrame(() => triggerRef.current?.focus());
+    }
   };
-
-  const selectItem = (href: string): void => {
-    setOpen(false);
-    navigate(href);
+  const select = (item: SearchItem): void => {
+    changeOpen(false);
+    navigate(item.href);
+  };
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>): void => {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setSelected((current) => Math.min(current + 1, items.length - 1));
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setSelected((current) => Math.max(current - 1, 0));
+    } else if (event.key === "Enter" && items.length > 0) {
+      event.preventDefault();
+      const item = items[selected < 0 ? 0 : selected];
+      if (item !== undefined) select(item);
+    }
   };
 
   return (
-    <SearchContext value={contextValue}>
+    <SearchContext value={{ locale, open }}>
       {children}
-      <CommandPalette<SearchItem>
-        isOpen={isOpen}
-        onOpenChange={setOpen}
-        onValueChange={selectItem}
-        searchSource={source}
-        label={locale === "ko" ? "문서 검색" : "Search documentation"}
-        emptySearchText={locale === "ko" ? "검색 결과가 없습니다" : "No matching documents"}
-        emptyBootstrapText={locale === "ko" ? "검색어를 입력하세요" : "Type to search"}
-        input={
-          <CommandPaletteInput
-            placeholder={
-              locale === "ko" ? "제목, API, 주제 검색" : "Search titles, APIs, and topics"
-            }
-          />
-        }
-        renderItem={(item) => (
-          <span className={styles.result}>
-            <strong>{item.label}</strong>
-            <span className={styles.matchReason}>
-              <span>{item.auxiliaryData?.matchLabel}</span>
-              {item.auxiliaryData?.matchText}
-            </span>
-          </span>
-        )}
-      />
+      <Dialog open={isOpen} onOpenChange={changeOpen}>
+        <DialogContent className={styles.dialog} aria-describedby={undefined}>
+          <DialogTitle className="sr-only">
+            {locale === "ko" ? "문서 검색" : "Search documentation"}
+          </DialogTitle>
+          <label className={styles.inputRow}>
+            <Icon icon="search" />
+            <input
+              autoFocus
+              value={query}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setSelected(-1);
+              }}
+              onKeyDown={handleKeyDown}
+              placeholder={
+                locale === "ko" ? "제목, API, 주제 검색" : "Search titles, APIs, and topics"
+              }
+            />
+            <kbd>Esc</kbd>
+          </label>
+          <div
+            className={styles.list}
+            role="listbox"
+            aria-label={locale === "ko" ? "검색 결과" : "Search results"}
+          >
+            {items.length === 0 ? (
+              <p className={styles.empty}>
+                {locale === "ko" ? "검색 결과가 없습니다" : "No matching documents"}
+              </p>
+            ) : (
+              items.map((item, index) => (
+                <button
+                  key={item.href}
+                  type="button"
+                  role="option"
+                  aria-selected={selected === index}
+                  className={styles.item}
+                  onMouseMove={() => setSelected(index)}
+                  onClick={() => select(item)}
+                >
+                  <span className={styles.result}>
+                    <strong>{item.label}</strong>
+                    <span className={styles.matchReason}>
+                      <span>{item.matchLabel}</span>
+                      {item.matchText}
+                    </span>
+                  </span>
+                  <small>{item.group}</small>
+                </button>
+              ))
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </SearchContext>
   );
 }
@@ -256,22 +271,20 @@ export function SearchTrigger({
   const context = use(SearchContext);
   if (context === null) throw new Error("SearchTrigger must be rendered inside SearchProvider.");
   const label = context.locale === "ko" ? "문서 검색" : "Search documentation";
-
   return (
     <Button
       data-docs-search-trigger="true"
-      label={label}
+      aria-label={label}
       variant="ghost"
-      size="sm"
+      size={compact ? "icon" : "sm"}
       className={compact ? styles.compactTrigger : styles.trigger}
       onClick={(event) => context.open(event.currentTarget)}
-      endContent={!compact && showShortcut ? <Kbd keys="mod+k" /> : undefined}
     >
       <span className={styles.triggerLabel}>
-        <Icon icon="search" size="sm" />
+        <Icon icon="search" />
         {compact ? null : <span>{context.locale === "ko" ? "검색" : "Search"}</span>}
-        {compact && showShortcut ? <Kbd keys="mod+k" /> : null}
       </span>
+      {showShortcut && !compact ? <kbd>⌘K</kbd> : null}
     </Button>
   );
 }

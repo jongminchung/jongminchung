@@ -7,17 +7,23 @@
   pointer-events: none;
 }
 
-.progress > div {
-  gap: 0;
-}
-
-.progress [role="progressbar"] {
+.progressBar {
+  width: 35%;
   height: 3px;
-  border-radius: 0;
-  background: transparent;
+  background: var(--color-accent);
+  animation: docs-progress 1s ease-in-out infinite;
 }
 
 .content {
   width: 100%;
   min-width: 0;
+}
+
+@keyframes docs-progress {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(310%);
+  }
 }

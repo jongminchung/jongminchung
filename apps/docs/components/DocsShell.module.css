@@ -1,6 +1,19 @@
 .shell {
+  display: flex;
   min-height: 100vh;
   background: var(--color-background-card);
+}
+
+.main {
+  min-width: 0;
+  flex: 1;
+}
+
+.mobileTitle {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .navigationFrame {

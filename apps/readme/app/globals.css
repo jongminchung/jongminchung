@@ -1,3 +1,19 @@
+@import "tailwindcss";
+@source "../../../packages/ui/src";
+
+@theme inline {
+  --color-background: var(--paper);
+  --color-foreground: var(--ink);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--ink);
+  --color-primary: var(--blue);
+  --color-primary-foreground: #ffffff;
+  --color-muted: #e5eafa;
+  --color-muted-foreground: var(--muted);
+  --color-border: var(--rule);
+  --color-ring: var(--pink);
+}
+
 :root {
   --paper: #f3f6ff;
   --surface: #ffffff;

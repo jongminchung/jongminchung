@@ -1,13 +1,8 @@
 "use client";
 
-import { Badge } from "@astryxdesign/core/Badge";
-import { Button } from "@astryxdesign/core/Button";
-import { Icon, type IconType } from "@astryxdesign/core/Icon";
-import { SideNav, SideNavHeading, SideNavItem, SideNavSection } from "@astryxdesign/core/SideNav";
-import type { ThemeMode } from "@astryxdesign/core/theme";
-import { TopNav, TopNavHeading } from "@astryxdesign/core/TopNav";
 import { createIconDataUrl } from "@jongminchung/icon";
-import { useState } from "react";
+import { Button } from "@jongminchung/ui/button";
+import { type Ref, useState } from "react";
 import {
   displayTitleFor,
   type ContentManifestEntry,
@@ -15,10 +10,12 @@ import {
   type Locale,
 } from "@/lib/content-model";
 import { DeepDiveIcon, HandbookIcon, OverviewIcon, PackageIcon, RepositoryIcon } from "./DocsIcons";
+import { Icon, type IconType } from "./Icon";
 import { LocaleSwitcher } from "./LocaleSwitcher";
+import { SideNav, SideNavHeading, SideNavItem, SideNavSection } from "./NavigationPrimitives";
 import { TransitionLink } from "./RouteTransition";
 import { SearchTrigger } from "./SearchPalette";
-import { ThemeControl } from "./ThemeControl";
+import { ThemeControl, type ThemeMode } from "./ThemeControl";
 import styles from "./Navigation.module.css";
 
 const sectionLabels: Readonly<Record<Locale, Readonly<Record<DocSection, string>>>> = {
@@ -123,7 +120,6 @@ export function ContextNavigation({
           heading={sectionLabels[locale][current.section]}
           superheading="Jongmin Chung Docs"
           headingHref={sectionHref(locale, current.section, documents)}
-          headerEndContent={<Badge label="v1" variant="purple" />}
         />
       }
     >
@@ -177,7 +173,7 @@ export function GlobalRail({
             className={current.section === section ? styles.sectionLinkActive : styles.sectionLink}
             aria-current={current.section === section ? "page" : undefined}
           >
-            <Icon icon={sectionIcons[section]} size="md" />
+            <Icon icon={sectionIcons[section]} />
             <span>{sectionLabels[locale][section]}</span>
           </TransitionLink>
         ))}
@@ -190,7 +186,7 @@ export function GlobalRail({
           rel="noreferrer"
           aria-label="GitHub"
         >
-          <Icon icon={RepositoryIcon} size="sm" />
+          <Icon icon={RepositoryIcon} />
         </a>
         <ThemeControl locale={locale} mode={mode} onModeChange={onModeChange} />
         <span className={styles.localeSwitch}>
@@ -227,27 +223,28 @@ export function MobileNavigation({
               {allSections.map((item) => (
                 <Button
                   key={item}
-                  label={sectionLabels[locale][item]}
                   variant="ghost"
                   size="lg"
                   className={styles.mobileSectionButton}
-                  icon={<Icon icon={sectionIcons[item]} size="md" />}
-                  endContent={<Icon icon="chevronRight" size="sm" />}
                   onClick={() => setSection(item)}
-                />
+                >
+                  <Icon icon={sectionIcons[item]} />
+                  {sectionLabels[locale][item]}
+                  <Icon icon="chevronRight" />
+                </Button>
               ))}
             </div>
           </nav>
         ) : (
           <div className={styles.mobileSectionView}>
             <Button
-              label={locale === "ko" ? "전체 문서로 돌아가기" : "Back to all documentation"}
+              aria-label={locale === "ko" ? "전체 문서로 돌아가기" : "Back to all documentation"}
               variant="ghost"
               size="lg"
               className={styles.mobileBackButton}
-              icon={<Icon icon="chevronLeft" size="md" />}
               onClick={() => setSection(null)}
             >
+              <Icon icon="chevronLeft" />
               {sectionLabels[locale][section]}
             </Button>
             <SideNav className={styles.mobileContextNavigation}>
@@ -280,28 +277,38 @@ export function MobileNavigation({
   );
 }
 
-export function MobileTopNavigation({ locale }: { readonly locale: Locale }) {
+export function MobileTopNavigation({
+  locale,
+  onMenuClick,
+  triggerRef,
+}: {
+  readonly locale: Locale;
+  readonly onMenuClick: () => void;
+  readonly triggerRef: Ref<HTMLButtonElement>;
+}) {
   return (
-    <TopNav
-      className={styles.mobileTopNav}
-      label={locale === "ko" ? "모바일 문서 탐색" : "Mobile documentation navigation"}
-      heading={
-        <TopNavHeading
-          heading="Docs"
-          headingHref={`/${locale}/overview`}
-          logo={
-            <img
-              alt=""
-              aria-hidden="true"
-              className={styles.mobileBrand}
-              height="30"
-              src={personalIcon}
-              width="30"
-            />
-          }
+    <header className={styles.mobileTopNav}>
+      <Button
+        ref={triggerRef}
+        variant="ghost"
+        size="icon"
+        onClick={onMenuClick}
+        aria-label={locale === "ko" ? "탐색 열기" : "Open navigation"}
+      >
+        <Icon icon="menu" />
+      </Button>
+      <TransitionLink href={`/${locale}/overview`} className={styles.mobileHeading}>
+        <img
+          alt=""
+          aria-hidden="true"
+          className={styles.mobileBrand}
+          height="30"
+          src={personalIcon}
+          width="30"
         />
-      }
-      endContent={<SearchTrigger compact showShortcut={false} />}
-    />
+        <span>Docs</span>
+      </TransitionLink>
+      <SearchTrigger compact showShortcut={false} />
+    </header>
   );
 }

@@ -658,64 +658,6 @@
     ]
   },
   {
-    "id": "deep-dive/astryx-0.1.5",
-    "locale": "en",
-    "section": "deep-dive",
-    "title": "Astryx 0.1.5 Deep Dive",
-    "displayTitle": "Astryx 0.1.5",
-    "description": "Build an accessible documentation UI with the Astryx app shell, theme tokens, and native dialogs.",
-    "order": 4,
-    "updatedAt": "2026-07-14",
-    "verifiedAt": "2026-07-14",
-    "tags": [
-      "astryx",
-      "design-system",
-      "theme",
-      "accessibility",
-      "navigation"
-    ],
-    "status": "stable",
-    "sourceUrl": "https://astryx.atmeta.com/docs/getting-started",
-    "href": "/en/deep-dive/astryx-0.1.5",
-    "outline": [
-      {
-        "id": "css-layers-and-theme",
-        "label": "CSS layers and Theme",
-        "level": 2
-      },
-      {
-        "id": "compose-the-frame",
-        "label": "Compose the frame",
-        "level": 2
-      },
-      {
-        "id": "interaction-components",
-        "label": "Interaction components",
-        "level": 2
-      },
-      {
-        "id": "practical-tips",
-        "label": "Practical tips",
-        "level": 2
-      },
-      {
-        "id": "failure-cases",
-        "label": "Failure cases",
-        "level": 2
-      },
-      {
-        "id": "overriding-internal-dom-with-css",
-        "label": "Overriding internal DOM with CSS",
-        "level": 3
-      },
-      {
-        "id": "duplicating-focus-management",
-        "label": "Duplicating focus management",
-        "level": 3
-      }
-    ]
-  },
-  {
     "id": "deep-dive/nextjs-16",
     "locale": "ko",
     "section": "deep-dive",
@@ -1369,64 +1311,6 @@
       {
         "id": "구현-타입을-공개-계약으로-노출",
         "label": "구현 타입을 공개 계약으로 노출",
-        "level": 3
-      }
-    ]
-  },
-  {
-    "id": "deep-dive/astryx-0.1.5",
-    "locale": "ko",
-    "section": "deep-dive",
-    "title": "Astryx 0.1.5 Deep Dive",
-    "displayTitle": "Astryx 0.1.5",
-    "description": "Astryx 앱 셸, 테마 토큰, 네이티브 대화상자로 접근 가능한 문서 UI를 구성합니다.",
-    "order": 4,
-    "updatedAt": "2026-07-14",
-    "verifiedAt": "2026-07-14",
-    "tags": [
-      "astryx",
-      "design-system",
-      "theme",
-      "accessibility",
-      "navigation"
-    ],
-    "status": "stable",
-    "sourceUrl": "https://astryx.atmeta.com/docs/getting-started",
-    "href": "/ko/deep-dive/astryx-0.1.5",
-    "outline": [
-      {
-        "id": "css-레이어와-theme",
-        "label": "CSS 레이어와 Theme",
-        "level": 2
-      },
-      {
-        "id": "프레임-구성",
-        "label": "프레임 구성",
-        "level": 2
-      },
-      {
-        "id": "상호작용-컴포넌트",
-        "label": "상호작용 컴포넌트",
-        "level": 2
-      },
-      {
-        "id": "실전-팁",
-        "label": "실전 팁",
-        "level": 2
-      },
-      {
-        "id": "실패-사례",
-        "label": "실패 사례",
-        "level": 2
-      },
-      {
-        "id": "css로-내부-dom을-강제-변경",
-        "label": "CSS로 내부 DOM을 강제 변경",
-        "level": 3
-      },
-      {
-        "id": "중복-포커스-관리",
-        "label": "중복 포커스 관리",
         "level": 3
       }
     ]

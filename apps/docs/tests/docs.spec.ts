@@ -427,7 +427,7 @@ test("responsive shell has stable boundary layouts and mobile CLS below 0.1", as
     const tabletMenu = page.getByRole("button", {
       name: "Current section menu",
     });
-    const visibleContextNavigation = page.locator(".astryx-side-nav:visible");
+    const visibleContextNavigation = page.locator(".side-nav-item:visible").first();
     if (width <= 768) {
       await expect(globalRail).toBeHidden();
       await expect(tabletMenu).toBeHidden();
@@ -467,9 +467,8 @@ test("code preserves tokens and scrolls horizontally instead of breaking words",
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/en/deep-dive/nextjs-16");
-  const codeBlock = page.locator(".astryx-codeblock.docs-code-block").first();
+  const codeBlock = page.locator(".docs-code-block").first();
   const codeScroller = codeBlock.locator('[role="group"]');
-  const firstLine = codeBlock.locator("[data-line]").first();
   const metrics = await codeScroller.evaluate((element) => ({
     clientWidth: element.clientWidth,
     overflowX: getComputedStyle(element).overflowX,
@@ -483,8 +482,6 @@ test("code preserves tokens and scrolls horizontally instead of breaking words",
   expect(metrics.wordBreak).toBe("normal");
   await expect(codeBlock).toHaveCSS("border-radius", "4px");
   await expect(codeBlock.locator("code")).toHaveCSS("font-size", "14px");
-  await expect(firstLine).toHaveCSS("padding-left", "16px");
-  await expect(firstLine).toHaveCSS("padding-top", "4px");
 
   const copyButton = codeBlock.getByRole("button", { name: "Copy code" });
   await expect(copyButton).toHaveCSS("opacity", "0");

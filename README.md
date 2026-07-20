@@ -40,6 +40,8 @@ pnpm run check
 pnpm run publish:dry-run
 ```
 
+<!-- prettier-ignore-start -->
+
 <!--START_SECTION:waka-->
 **I'm a Night 🦉** 
 
@@ -64,3 +66,5 @@ Markdown                 2 hrs 16 mins       ██░░░░░░░░░�
 
 
 <!--END_SECTION:waka-->
+
+<!-- prettier-ignore-end -->

@@ -64,7 +64,7 @@
   letter-spacing: normal;
 }
 
-.prose :global(.astryx-codeblock.docs-code-block) {
+.prose :global(.docs-code-block) {
   position: relative;
   max-width: 100%;
   margin-block: 16px;
@@ -89,6 +89,10 @@
   white-space: pre;
 }
 
+.prose :global(.docs-code-block pre) {
+  margin: 0;
+}
+
 .prose :global(.docs-code-block code) {
   min-width: max-content;
   padding: 0;
@@ -101,14 +105,25 @@
   white-space: pre;
 }
 
-.prose :global(.docs-code-block [data-line]) {
-  min-height: 1.375em;
-  padding: 4px 16px;
-}
-
 .prose :global(.docs-code-block > button) {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-background-surface);
+  color: var(--color-text-secondary);
   opacity: 0;
   transition: opacity var(--duration-fast, 120ms) ease;
+}
+
+.prose :global(.docs-code-block > button svg) {
+  width: 14px;
+  height: 14px;
 }
 
 .prose :global(.docs-code-block:hover > button),

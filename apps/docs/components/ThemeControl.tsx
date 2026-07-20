@@ -1,10 +1,11 @@
 "use client";
 
-import { Button } from "@astryxdesign/core/Button";
-import { Icon, type IconType } from "@astryxdesign/core/Icon";
-import type { ThemeMode } from "@astryxdesign/core/theme";
+import { Button } from "@jongminchung/ui/button";
 import type { Locale } from "@/lib/content-model";
 import { DarkThemeIcon, LightThemeIcon, SystemThemeIcon } from "./DocsIcons";
+import { Icon, type IconType } from "./Icon";
+
+export type ThemeMode = "light" | "dark" | "system";
 
 const nextMode: Readonly<Record<ThemeMode, ThemeMode>> = {
   system: "light",
@@ -30,13 +31,13 @@ export function ThemeControl({
   const label = locale === "ko" ? `테마: ${mode}` : `Theme: ${mode}`;
   return (
     <Button
-      label={label}
-      tooltip={label}
-      icon={<Icon icon={modeIcon[mode]} size="sm" />}
-      isIconOnly
+      aria-label={label}
+      title={label}
       variant="ghost"
-      size="sm"
+      size="icon"
       onClick={() => onModeChange(nextMode[mode])}
-    />
+    >
+      <Icon icon={modeIcon[mode]} />
+    </Button>
   );
 }

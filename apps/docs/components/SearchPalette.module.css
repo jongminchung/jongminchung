@@ -3,6 +3,79 @@
   justify-content: space-between;
 }
 
+.dialog {
+  overflow: hidden;
+}
+
+.inputRow {
+  display: flex;
+  min-height: 54px;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.inputRow input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  font: inherit;
+  outline: none;
+}
+
+.inputRow kbd,
+.trigger kbd {
+  padding: 2px 6px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  color: var(--color-text-secondary);
+  font-size: 10px;
+}
+
+.list {
+  display: grid;
+  max-height: min(460px, 60vh);
+  gap: 2px;
+  padding: 6px;
+  overflow-y: auto;
+}
+
+.item {
+  display: flex;
+  width: 100%;
+  min-height: 58px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text-primary);
+  font: inherit;
+  text-align: left;
+}
+
+.item[aria-selected="true"],
+.item:hover {
+  background: var(--color-background-muted);
+}
+
+.item small {
+  flex: none;
+  color: var(--color-text-secondary);
+}
+
+.empty {
+  margin: 0;
+  padding: 30px 16px;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
 .compactTrigger {
   min-width: 44px;
   min-height: 44px;

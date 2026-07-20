@@ -18,16 +18,11 @@
     "icon:check": "pnpm --filter @jongminchung/icon run check",
     "icon:generate": "pnpm --filter @jongminchung/icon run generate",
     "lint": "oxlint .",
-    "mlx:gateway:immersive": "pnpm --filter @jongminchung/immersive-translate run docker:up:mlx",
-    "mlx:install:immersive": "UV_SYSTEM_CERTS=1 uv tool install --force 'mlx-lm==0.29.1' --with 'transformers<5' --with 'mlx<0.31.2' --with 'mlx-metal<0.31.2'",
-    "mlx:serve:immersive": "pnpm --filter @jongminchung/immersive-translate run mlx:serve",
     "publish:dry-run": "pnpm --filter @jongminchung/remark-plantuml run publish:dry-run && pnpm --filter @jongminchung/tooling run publish:dry-run",
     "test": "vitest run",
     "test:docs": "pnpm --filter @jongminchung/docs run test",
-    "test:live:immersive": "pnpm --filter @jongminchung/immersive-translate run test:live",
     "test:readme": "pnpm --filter @jongminchung/readme run test:e2e",
-    "typecheck": "tsc --noEmit && pnpm -r --if-present run typecheck",
-    "zip:immersive": "pnpm --filter @jongminchung/immersive-translate run zip && pnpm --filter @jongminchung/immersive-translate run build && pnpm --filter @jongminchung/immersive-translate run verify:artifacts --require-zips"
+    "typecheck": "tsc --noEmit && pnpm -r --if-present run typecheck"
   },
   "devDependencies": {
     "@jongminchung/tooling": "workspace:*",
@@ -50,5 +45,5 @@
     "node": ">=26.5.0",
     "pnpm": ">=11.13.0"
   },
-  "packageManager": "pnpm@11.15.0"
+  "packageManager": "pnpm@11.15.1"
 }

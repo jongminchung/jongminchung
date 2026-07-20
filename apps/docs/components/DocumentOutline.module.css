@@ -17,6 +17,32 @@
   font-weight: 600;
 }
 
+.list {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.list a {
+  display: block;
+  padding: 6px 8px;
+  border-radius: 6px;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.list li[data-level="3"] a {
+  padding-left: 20px;
+}
+
+.list a:hover {
+  background: var(--color-background-muted);
+  color: var(--color-text-primary);
+}
+
 @media (max-width: 1399px) {
   .container {
     display: none;

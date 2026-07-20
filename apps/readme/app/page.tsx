@@ -1,4 +1,5 @@
 import { createIconDataUrl } from "@jongminchung/icon";
+import { Button } from "@jongminchung/ui/button";
 import type { ReactElement } from "react";
 import styles from "./page.module.css";
 
@@ -20,7 +21,7 @@ const projects = [
     title: "Jongmin Chung Docs",
     description:
       "A bilingual path through collaboration rules, public package contracts, and the platform failures behind them.",
-    tags: ["Next.js", "MDX", "Astryx"],
+    tags: ["Next.js", "MDX", "shadcn/ui"],
     href: "https://jongminchung.dev/en/overview",
   },
   {
@@ -176,17 +177,16 @@ export default function HomePage(): ReactElement {
               what changed.
             </p>
             <div className={styles.heroActions}>
-              <a className={styles.primaryAction} href="#work">
-                Read the work <span aria-hidden="true">↓</span>
-              </a>
-              <a
-                className={styles.textAction}
-                href="https://jongminchung.dev/en/overview"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Open the docs <span aria-hidden="true">↗</span>
-              </a>
+              <Button asChild className={styles.primaryAction}>
+                <a href="#work">
+                  Read the work <span aria-hidden="true">↓</span>
+                </a>
+              </Button>
+              <Button asChild variant="ghost" className={styles.textAction}>
+                <a href="https://jongminchung.dev/en/overview" target="_blank" rel="noreferrer">
+                  Open the docs <span aria-hidden="true">↗</span>
+                </a>
+              </Button>
             </div>
           </div>
 

@@ -1,21 +1,15 @@
 "use client";
 
-import { Button } from "@astryxdesign/core/Button";
-import { Icon } from "@astryxdesign/core/Icon";
+import { Button } from "@jongminchung/ui/button";
 import { EditIcon } from "./DocsIcons";
+import { Icon } from "./Icon";
 
 export function EditPageLink({ label, href }: { readonly label: string; readonly href: string }) {
   return (
-    <Button
-      label={label}
-      tooltip={label}
-      href={href}
-      target="_blank"
-      rel="noreferrer"
-      variant="ghost"
-      size="sm"
-      isIconOnly
-      icon={<Icon icon={EditIcon} size="sm" />}
-    />
+    <Button asChild variant="ghost" size="icon">
+      <a aria-label={label} title={label} href={href} target="_blank" rel="noreferrer">
+        <Icon icon={EditIcon} />
+      </a>
+    </Button>
   );
 }

@@ -33,7 +33,6 @@ const docLoaders = {
   "ko/deep-dive/pnpm-11": () => import("@/content/ko/deep-dive/pnpm-11.mdx"),
   "ko/deep-dive/node-26": () => import("@/content/ko/deep-dive/node-26.mdx"),
   "ko/deep-dive/typescript-6": () => import("@/content/ko/deep-dive/typescript-6.mdx"),
-  "ko/deep-dive/astryx-0.1.5": () => import("@/content/ko/deep-dive/astryx-0.1.5.mdx"),
   "en/overview": () => import("@/content/en/overview.mdx"),
   "en/handbook/collaboration": () => import("@/content/en/handbook/collaboration.mdx"),
   "en/handbook/ddd": () => import("@/content/en/handbook/ddd.mdx"),
@@ -43,7 +42,6 @@ const docLoaders = {
   "en/deep-dive/pnpm-11": () => import("@/content/en/deep-dive/pnpm-11.mdx"),
   "en/deep-dive/node-26": () => import("@/content/en/deep-dive/node-26.mdx"),
   "en/deep-dive/typescript-6": () => import("@/content/en/deep-dive/typescript-6.mdx"),
-  "en/deep-dive/astryx-0.1.5": () => import("@/content/en/deep-dive/astryx-0.1.5.mdx"),
 } satisfies Readonly<Record<string, () => Promise<MdxModule>>>;
 
 function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {

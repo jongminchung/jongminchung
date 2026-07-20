@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@astryxdesign/core/Button";
+import { Button } from "@jongminchung/ui/button";
 import type { Locale } from "@/lib/content-model";
 
 export function LocaleSwitcher({
@@ -19,13 +19,10 @@ export function LocaleSwitcher({
     document.cookie = `docs-locale=${nextLocale}; Path=/; Max-Age=31536000; SameSite=Lax`;
   };
   return (
-    <Button
-      label={label}
-      href={href}
-      variant="ghost"
-      size="sm"
-      onClick={rememberLocale}
-      {...(compact ? { children: nextLocale.toUpperCase() } : {})}
-    />
+    <Button asChild variant="ghost" size="sm">
+      <a href={href} onClick={rememberLocale} aria-label={label}>
+        {compact ? nextLocale.toUpperCase() : label}
+      </a>
+    </Button>
   );
 }

@@ -1,5 +1,5 @@
-import { Link } from "@astryxdesign/core/Link";
 import type { MDXComponents } from "mdx/types";
+import Link from "next/link";
 import { isValidElement, type ComponentProps, type ReactNode } from "react";
 import { DocsCodeBlock } from "./components/DocsCodeBlock";
 import { ExcalidrawDiagram } from "./components/ExcalidrawDiagram";
@@ -23,7 +23,11 @@ export function MdxPre({ children }: ComponentProps<"pre">) {
 function MdxLink({ href = "", children }: ComponentProps<"a">) {
   const isExternal = href.startsWith("http://") || href.startsWith("https://");
   return (
-    <Link href={href} isExternalLink={isExternal} hasUnderline>
+    <Link
+      href={href}
+      target={isExternal ? "_blank" : undefined}
+      rel={isExternal ? "noreferrer" : undefined}
+    >
       {children}
     </Link>
   );

@@ -1,58 +1,66 @@
-@layer reset, theme, base, astryx-base, astryx-theme, components, utilities;
+@import "tailwindcss";
+@source "../../../packages/ui/src";
 
-@import "tailwindcss/theme.css" layer(theme);
-@import "tailwindcss/preflight.css" layer(base);
-@import "@astryxdesign/core/reset.css";
-@import "@astryxdesign/core/astryx.css";
-@import "@astryxdesign/theme-neutral/theme.css";
-@import "@astryxdesign/core/tailwind-theme.css";
-@import "tailwindcss/utilities.css" layer(utilities);
-
-@layer reset {
-  @scope ([data-astryx-theme="neutral"]) to ([data-astryx-theme]) {
-    :where(h1, h2, h3, h4, h5, h6) {
-      font-family: var(--font-family-heading);
-      font-weight: var(--font-weight-medium);
-    }
-  }
-}
-
-@layer astryx-theme {
-  @scope ([data-astryx-theme="neutral"]) to ([data-astryx-theme]) {
-    :scope {
-      --text-heading-1-weight: var(--font-weight-medium);
-      --text-heading-2-weight: var(--font-weight-medium);
-      --text-heading-3-weight: var(--font-weight-medium);
-      --text-heading-4-weight: var(--font-weight-medium);
-      --text-heading-5-weight: var(--font-weight-medium);
-      --text-heading-6-weight: var(--font-weight-medium);
-      --duration-fast-min: 90ms;
-      --duration-fast: 120ms;
-      --duration-fast-max: 160ms;
-      --duration-slow-min: 450ms;
-      --duration-slow: 600ms;
-      --duration-slow-max: 800ms;
-      --font-family-body: var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-family-heading: var(--font-inter-tight), var(--font-inter), sans-serif;
-      --font-family-code: var(--font-dm-mono), "SFMono-Regular", Consolas, monospace;
-      --radius-none: 0px;
-      --radius-inner: 4px;
-      --radius-element: 8px;
-    }
-
-    .astryx-card {
-      border-width: 1px;
-      box-shadow: none;
-      transition:
-        border-color 300ms ease,
-        transform 300ms ease;
-    }
-  }
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-body: var(--background);
 }
 
 :root {
-  color-scheme: light dark;
-  background: light-dark(#ffffff, #1b1b1b);
+  --background: #f8f8fa;
+  --foreground: #17171b;
+  --card: #ffffff;
+  --card-foreground: #17171b;
+  --popover: #ffffff;
+  --popover-foreground: #17171b;
+  --primary: #5b4ee8;
+  --primary-foreground: #ffffff;
+  --muted: #f0eff5;
+  --muted-foreground: #686873;
+  --border: #dedee6;
+  --ring: #6d5df2;
+  --color-background-card: var(--background);
+  --color-background-surface: var(--card);
+  --color-background-muted: var(--muted);
+  --color-background-purple: #ebe9ff;
+  --color-text-primary: var(--foreground);
+  --color-text-secondary: var(--muted-foreground);
+  --color-text-purple: var(--primary);
+  --color-border: var(--border);
+  --color-border-emphasized: #a8a7b2;
+  --color-accent: var(--primary);
+  --color-syntax-background: #f3f2f7;
+  --duration-fast: 120ms;
+}
+
+:root[data-theme="dark"] {
+  --background: #151519;
+  --foreground: #f4f4f5;
+  --card: #1c1c21;
+  --card-foreground: #f4f4f5;
+  --popover: #202026;
+  --popover-foreground: #f4f4f5;
+  --primary: #a89fff;
+  --primary-foreground: #19152f;
+  --muted: #292930;
+  --muted-foreground: #aaaab5;
+  --border: #37373f;
+  --ring: #a89fff;
+  --color-background-purple: #302b59;
+  --color-border-emphasized: #676772;
+  --color-syntax-background: #111115;
 }
 
 html {
@@ -63,8 +71,8 @@ html {
 body {
   min-height: 100vh;
   margin: 0;
-  background: light-dark(#ffffff, #1b1b1b);
-  color: light-dark(#171717, #fafafa);
+  background: var(--background);
+  color: var(--foreground);
   font-family:
     var(--font-inter),
     -apple-system,
@@ -74,11 +82,10 @@ body {
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--color-accent) 18%, transparent);
+  background: color-mix(in srgb, var(--primary) 22%, transparent);
 }
-
 :where(a, button, input, [tabindex]):focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--ring);
   outline-offset: 3px;
 }
 
@@ -89,14 +96,12 @@ body {
   justify-items: start;
   padding: 32px;
 }
-
 .not-found__mark {
   margin: 0;
-  color: light-dark(#737373, #a3a3a3);
+  color: var(--muted-foreground);
   font-family: var(--font-dm-mono), monospace;
   font-size: 18px;
 }
-
 .not-found h1 {
   margin: 12px 0;
   font-family: var(--font-inter-tight), sans-serif;
@@ -105,14 +110,12 @@ body {
   line-height: 1.1;
   letter-spacing: -0.025em;
 }
-
 .not-found p {
-  color: light-dark(#737373, #a3a3a3);
+  color: var(--muted-foreground);
 }
-
 .not-found a {
   margin-top: 18px;
-  color: light-dark(#171717, #fafafa);
+  color: var(--foreground);
 }
 
 @keyframes docs-view-exit {
@@ -121,27 +124,22 @@ body {
     transform: translateY(-3px);
   }
 }
-
 @keyframes docs-view-enter {
   from {
     opacity: 0;
     transform: translateY(6px);
   }
 }
-
 [data-docs-transition-content] {
   view-transition-name: docs-content;
 }
-
 ::view-transition-group(docs-content) {
   animation-duration: 280ms;
   animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-
 ::view-transition-old(docs-content) {
   animation: docs-view-exit 120ms ease-out both;
 }
-
 ::view-transition-new(docs-content) {
   animation: docs-view-enter 280ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
@@ -155,11 +153,9 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-
   [data-docs-transition-content] {
     view-transition-name: none;
   }
-
   ::view-transition-group(docs-content),
   ::view-transition-old(docs-content),
   ::view-transition-new(docs-content) {

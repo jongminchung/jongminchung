@@ -1,6 +1,5 @@
 "use client";
 
-import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import NextLink from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -137,11 +136,10 @@ export function RouteTransitionProvider({
     <DocsNavigationContext value={value}>
       {isProgressVisible ? (
         <div className={styles.progress} data-docs-navigation-progress="true">
-          <ProgressBar
-            isIndeterminate
-            isLabelHidden
-            label={locale === "ko" ? "문서 불러오는 중" : "Loading document"}
-            variant="accent"
+          <div
+            className={styles.progressBar}
+            role="progressbar"
+            aria-label={locale === "ko" ? "문서 불러오는 중" : "Loading document"}
           />
         </div>
       ) : null}

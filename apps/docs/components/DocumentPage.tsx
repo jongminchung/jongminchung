@@ -1,11 +1,11 @@
-import { Badge } from "@astryxdesign/core/Badge";
-import { BreadcrumbItem, Breadcrumbs } from "@astryxdesign/core/Breadcrumbs";
-import { Button } from "@astryxdesign/core/Button";
-import { Icon } from "@astryxdesign/core/Icon";
+import { Badge } from "@jongminchung/ui/badge";
+import { Button } from "@jongminchung/ui/button";
 import { displayTitleFor, type DocSection, type Locale } from "@/lib/content-model";
 import type { LoadedDocument } from "@/lib/documents";
 import { DocumentOutline } from "./DocumentOutline";
 import { EditPageLink } from "./EditPageLink";
+import { Icon } from "./Icon";
+import { TransitionLink } from "./RouteTransition";
 import styles from "./DocumentPage.module.css";
 
 const versionById: Readonly<Record<string, string>> = {
@@ -13,7 +13,6 @@ const versionById: Readonly<Record<string, string>> = {
   "deep-dive/pnpm-11": "11.13.0",
   "deep-dive/node-26": "26.5.0",
   "deep-dive/typescript-6": "6.0.3",
-  "deep-dive/astryx-0.1.5": "0.1.5",
 };
 
 const sectionLabels: Readonly<Record<Locale, Readonly<Record<DocSection, string>>>> = {
@@ -69,23 +68,32 @@ export function DocumentPage({
       >
         {isOverview ? null : (
           <header className="border-b border-border pb-8">
-            <Breadcrumbs
-              label={locale === "ko" ? "현재 위치" : "Breadcrumb"}
-              variant="supporting"
-              separator={<Icon icon="chevronRight" size="xsm" />}
-            >
-              <BreadcrumbItem href={`/${locale}/overview`}>Docs</BreadcrumbItem>
-              <BreadcrumbItem href={sectionHref}>
-                {sectionLabels[locale][metadata.section]}
-              </BreadcrumbItem>
-              <BreadcrumbItem isCurrent>{title}</BreadcrumbItem>
-            </Breadcrumbs>
+            <nav aria-label={locale === "ko" ? "현재 위치" : "Breadcrumb"}>
+              <ol className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                <li>
+                  <TransitionLink href={`/${locale}/overview`}>Docs</TransitionLink>
+                </li>
+                <li aria-hidden="true">
+                  <Icon icon="chevronRight" className="size-3" />
+                </li>
+                <li>
+                  <TransitionLink href={sectionHref}>
+                    {sectionLabels[locale][metadata.section]}
+                  </TransitionLink>
+                </li>
+                <li aria-hidden="true">
+                  <Icon icon="chevronRight" className="size-3" />
+                </li>
+                <li aria-current="page" className="text-foreground">
+                  {title}
+                </li>
+              </ol>
+            </nav>
             <div className="mt-6 mb-4 flex gap-1.5">
-              <Badge label={versionFor(document)} variant="purple" />
-              <Badge
-                label={metadata.status}
-                variant={metadata.status === "deprecated" ? "warning" : "neutral"}
-              />
+              <Badge variant="default">{versionFor(document)}</Badge>
+              <Badge variant={metadata.status === "deprecated" ? "warning" : "secondary"}>
+                {metadata.status}
+              </Badge>
             </div>
             <div className="flex items-start gap-3">
               <h1 className="m-0 flex-1 font-[family-name:var(--font-inter-tight)] text-[36px] leading-[1.1] font-medium tracking-[-0.025em] text-primary">
@@ -119,7 +127,7 @@ export function DocumentPage({
                 rel="noreferrer"
               >
                 {locale === "ko" ? "공식 출처" : "Official source"}
-                <Icon icon="externalLink" size="xsm" />
+                <Icon icon="externalLink" className="size-3" />
               </a>
             </div>
           </header>
@@ -134,30 +142,29 @@ export function DocumentPage({
           {previous === null ? (
             <span />
           ) : (
-            <Button
-              label={displayTitleFor(previous)}
-              href={previous.href}
-              variant="secondary"
-              size="lg"
-            >
-              <span className="grid w-full gap-0.5 text-left">
-                <small className="text-primary text-[10px] font-medium uppercase">
-                  {locale === "ko" ? "이전" : "Previous"}
-                </small>
-                {displayTitleFor(previous)}
-              </span>
+            <Button asChild variant="secondary" size="lg">
+              <TransitionLink href={previous.href} className="h-auto min-h-[68px] justify-start">
+                <span className="grid w-full gap-0.5 text-left">
+                  <small className="text-primary text-[10px] font-medium uppercase">
+                    {locale === "ko" ? "이전" : "Previous"}
+                  </small>
+                  {displayTitleFor(previous)}
+                </span>
+              </TransitionLink>
             </Button>
           )}
           {next === null ? (
             <span />
           ) : (
-            <Button label={displayTitleFor(next)} href={next.href} variant="secondary" size="lg">
-              <span className="grid w-full gap-0.5 text-right">
-                <small className="text-primary text-[10px] font-medium uppercase">
-                  {locale === "ko" ? "다음" : "Next"}
-                </small>
-                {displayTitleFor(next)}
-              </span>
+            <Button asChild variant="secondary" size="lg">
+              <TransitionLink href={next.href} className="h-auto min-h-[68px] justify-end">
+                <span className="grid w-full gap-0.5 text-right">
+                  <small className="text-primary text-[10px] font-medium uppercase">
+                    {locale === "ko" ? "다음" : "Next"}
+                  </small>
+                  {displayTitleFor(next)}
+                </span>
+              </TransitionLink>
             </Button>
           )}
         </nav>

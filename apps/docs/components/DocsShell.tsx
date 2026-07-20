@@ -1,21 +1,17 @@
 "use client";
 
-import { AppShell } from "@astryxdesign/core/AppShell";
-import { Button } from "@astryxdesign/core/Button";
-import { Icon } from "@astryxdesign/core/Icon";
-import { LinkProvider } from "@astryxdesign/core/Link";
-import { MobileNav } from "@astryxdesign/core/MobileNav";
-import { Theme, type ThemeMode } from "@astryxdesign/core/theme";
-import { neutralTheme } from "@astryxdesign/theme-neutral/built";
+import { Button } from "@jongminchung/ui/button";
+import { Sheet, SheetContent, SheetTitle } from "@jongminchung/ui/sheet";
+import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import type { ContentManifestEntry, Locale } from "@/lib/content-model";
+import { Icon } from "./Icon";
 import { ContextNavigation, GlobalRail, MobileNavigation, MobileTopNavigation } from "./Navigation";
-import { RouteTransitionContent, RouteTransitionProvider, TransitionLink } from "./RouteTransition";
+import { RouteTransitionContent, RouteTransitionProvider } from "./RouteTransition";
 import { SearchProvider } from "./SearchPalette";
+import type { ThemeMode } from "./ThemeControl";
 import styles from "./DocsShell.module.css";
-
-const docsTheme = Object.freeze({ ...neutralTheme, icons: {} });
 
 function isThemeMode(value: string | null): value is ThemeMode {
   return value === "light" || value === "dark" || value === "system";
@@ -30,8 +26,10 @@ function TabletContextDrawer({
   readonly current: ContentManifestEntry;
   readonly documents: readonly ContentManifestEntry[];
 }) {
+  const pathname = usePathname();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [isOpen, setIsOpen] = useState(false);
+  useEffect(() => setIsOpen(false), [pathname]);
   const setOpen = (nextOpen: boolean): void => {
     setIsOpen(nextOpen);
     if (!nextOpen) requestAnimationFrame(() => triggerRef.current?.focus());
@@ -40,22 +38,22 @@ function TabletContextDrawer({
     <div className={styles.tabletContext}>
       <Button
         ref={triggerRef}
-        label={locale === "ko" ? "현재 섹션 메뉴" : "Current section menu"}
+        aria-label={locale === "ko" ? "현재 섹션 메뉴" : "Current section menu"}
         variant="secondary"
         size="sm"
         onClick={() => setOpen(true)}
-        icon={<Icon icon="menu" size="sm" />}
-      />
-      <MobileNav
-        isOpen={isOpen}
-        onOpenChange={setOpen}
-        header={locale === "ko" ? "현재 섹션" : "Current section"}
-        label={locale === "ko" ? "현재 섹션 탐색" : "Current section navigation"}
-        width={320}
-        side="start"
       >
-        <ContextNavigation locale={locale} current={current} documents={documents} />
-      </MobileNav>
+        <Icon icon="menu" />
+        {locale === "ko" ? "현재 섹션" : "Current section"}
+      </Button>
+      <Sheet open={isOpen} onOpenChange={setOpen}>
+        <SheetContent className="w-80">
+          <SheetTitle className="sr-only">
+            {locale === "ko" ? "현재 섹션" : "Current section"}
+          </SheetTitle>
+          <ContextNavigation locale={locale} current={current} documents={documents} />
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
@@ -71,13 +69,36 @@ export function DocsShell({
   readonly documents: readonly ContentManifestEntry[];
   readonly children: ReactNode;
 }) {
+  const pathname = usePathname();
   const [mode, setMode] = useState<ThemeMode>("system");
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const mobileTriggerRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => setIsMobileOpen(false), [pathname]);
+
+  const changeMobileOpen = (nextOpen: boolean): void => {
+    setIsMobileOpen(nextOpen);
+    if (!nextOpen) requestAnimationFrame(() => mobileTriggerRef.current?.focus());
+  };
 
   useEffect(() => {
     document.documentElement.lang = locale;
     const storedMode = localStorage.getItem("docs-theme");
     if (isThemeMode(storedMode)) setMode(storedMode);
   }, [locale]);
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const applyTheme = (): void => {
+      document.documentElement.dataset.theme =
+        mode === "system" ? (media.matches ? "dark" : "light") : mode;
+      document.documentElement.style.colorScheme =
+        mode === "system" ? (media.matches ? "dark" : "light") : mode;
+    };
+    applyTheme();
+    if (mode !== "system") return;
+    media.addEventListener("change", applyTheme);
+    return () => media.removeEventListener("change", applyTheme);
+  }, [mode]);
 
   const changeMode = (nextMode: ThemeMode): void => {
     setMode(nextMode);
@@ -103,44 +124,36 @@ export function DocsShell({
   );
 
   return (
-    <Theme theme={docsTheme} mode={mode}>
-      <RouteTransitionProvider locale={locale}>
-        <LinkProvider component={TransitionLink}>
-          <SearchProvider locale={locale}>
-            <AppShell
-              className={styles.shell}
-              variant="section"
-              height="auto"
-              contentPadding={0}
-              topNav={<MobileTopNavigation locale={locale} />}
-              sideNav={navigation}
-              mobileNav={{
-                breakpoint: "md",
-                content: (
-                  <MobileNav
-                    header="Jongmin Chung Docs"
-                    label={locale === "ko" ? "모바일 문서 탐색" : "Mobile documentation navigation"}
-                    width={360}
-                    side="start"
-                  >
-                    <MobileNavigation
-                      key={`${locale}:${current.section}`}
-                      locale={locale}
-                      current={current}
-                      documents={documents}
-                      mode={mode}
-                      onModeChange={changeMode}
-                    />
-                  </MobileNav>
-                ),
-              }}
-            >
-              <TabletContextDrawer locale={locale} current={current} documents={documents} />
-              <RouteTransitionContent>{children}</RouteTransitionContent>
-            </AppShell>
-          </SearchProvider>
-        </LinkProvider>
-      </RouteTransitionProvider>
-    </Theme>
+    <RouteTransitionProvider locale={locale}>
+      <SearchProvider locale={locale}>
+        <div className={styles.shell}>
+          {navigation}
+          <main className={styles.main}>
+            <MobileTopNavigation
+              locale={locale}
+              onMenuClick={() => changeMobileOpen(true)}
+              triggerRef={mobileTriggerRef}
+            />
+            <Sheet open={isMobileOpen} onOpenChange={changeMobileOpen}>
+              <SheetContent>
+                <SheetTitle className={styles.mobileTitle}>
+                  {locale === "ko" ? "모바일 문서 탐색" : "Mobile documentation navigation"}
+                </SheetTitle>
+                <MobileNavigation
+                  key={`${locale}:${current.section}`}
+                  locale={locale}
+                  current={current}
+                  documents={documents}
+                  mode={mode}
+                  onModeChange={changeMode}
+                />
+              </SheetContent>
+            </Sheet>
+            <TabletContextDrawer locale={locale} current={current} documents={documents} />
+            <RouteTransitionContent>{children}</RouteTransitionContent>
+          </main>
+        </div>
+      </SearchProvider>
+    </RouteTransitionProvider>
   );
 }
