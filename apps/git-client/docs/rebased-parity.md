@@ -23,7 +23,7 @@ Every flow follows `reference capture → scenario manifest → implementation �
 
 ## Current difference snapshot
 
-As of 2026-07-20, Git Client is not identical to Rebased 1.1.8. The checked-in reports are the source of truth and intentionally fail closed:
+As of 2026-07-20, Git Client is not identical to Rebased 1.1.8. Checked-in reports are migration inputs only; the current-build test result is the source of truth and intentionally fails closed:
 
 - Rebased is a JetBrains IDE product; Git Client is an Electron workbench. Rebased supplies the full IDE editor/language/platform surface, while Git Client currently owns a narrower Git, hosting, diff, terminal, and repository-management surface.
 - The primary layout is structurally close: Rebased uses a dense Log center, Commit tool window, revision details, side tool stripes, status bar, and bottom Terminal. Git Client implements the same workbench vocabulary but does not yet prove every popup, focus transition, geometry, native menu, or platform state.
@@ -41,7 +41,9 @@ Rebased 1.1.8 is a frozen oracle, so rebuilding or driving Rebased for every Git
 1. **Capture once per oracle version.** Verify the Rebased artifact checksum, then record canonical scenario traces: inputs, visible/enabled/checked state, accessibility names and focus order, geometry, screenshots, Git/file/network effects, and cancellation invariants. Re-capture only when the pinned Rebased version, macOS baseline, locale, scale, or capture schema changes.
 2. **Run contract replay on relevant pull requests.** Changes to commands, state models, Git/hosting bridges, or UI primitives replay only the affected deterministic scenarios against the checked-in oracle. This is a test target, not part of the ordinary renderer build. Structural/AX assertions are primary; screenshots cover a small set of stable workbench states.
 3. **Run broad differential checks on a schedule.** A nightly or weekly macOS job exercises the full scenario corpus, visual thresholds, focus navigation, and disposable-repository side effects. Failures produce evidence artifacts for review but do not make unrelated builds slower.
-4. **Run packaged checks at release.** The release gate runs the complete bidirectional inventory, packaged Electron E2E, bridge matrix, performance comparison, soak evidence, signing, and notarization. `pnpm parity:check` remains release-only and fails closed.
+4. **Run packaged checks at release.** `pnpm parity:full` runs renderer and packaged Electron checks before the complete inventory, bridge, performance, soak, signing, and notarization gate. `pnpm parity:check` recomputes completion from individual results for the exact candidate build and fails closed.
+
+Local investigation uses `parity:test --scenario <id>`, `parity:next --limit 5`, and `parity:explain <id>`. Standard output is capped to a compact summary; full command logs and evidence stay in `test-results/parity/` and are opened only for the selected failure.
 
 The key is differential contract testing, not pixel-only snapshots. A screenshot can match while a shortcut, disabled state, destructive target, or Git side effect differs. Each scenario therefore compares four channels together: semantic UI/AX, geometry/visuals, behavior/focus, and external effects. Allowed differences stay explicit in `manifest/divergences.yaml`; updating a golden requires review of the corresponding oracle evidence rather than a blanket snapshot refresh.
 

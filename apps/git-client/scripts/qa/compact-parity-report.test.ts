@@ -2,42 +2,29 @@ import { describe, expect, it } from "vitest";
 import { buildCompactParityReport } from "./compact-parity-report.mjs";
 
 describe("compact parity report", () => {
-  it("keeps gate counts and blockers without copying inventories", () => {
-    expect(
-      buildCompactParityReport(
-        {
-          sourceToRuntime: {
-            resolved: 219,
-            total: 7_260,
-            coverage: 3.016529,
-          },
-          runtimeToSource: {
-            mapped: 14,
-            total: 22,
-            coverage: 63.636364,
-          },
-        },
-        {
-          summary: {
-            contractMethods: 43,
-            packageVerified: 43,
-            rebasedVerified: 0,
-          },
-        },
-        {
-          complete: false,
-          releaseDecision: "blocked",
-          blockingGates: ["visual comparison pending"],
-        },
-      ),
-    ).toEqual({
-      schemaVersion: 1,
-      complete: false,
-      releaseDecision: "blocked",
-      sourceToRuntime: { resolved: 219, total: 7_260, percent: 3.016529 },
-      runtimeToSource: { mapped: 14, total: 22, percent: 63.636364 },
-      gitBridge: { packageVerified: 43, rebasedVerified: 0, total: 43 },
-      blockers: ["visual comparison pending"],
+  it("uses derived current-build counts and caps failures at five", () => {
+    const report = buildCompactParityReport(
+      { referenceVersion: "1.1.8", expectedBuildHash: "candidate-build" },
+      {
+        complete: false,
+        counts: { total: 7_260, passed: 3, failed: 1, unverified: 7_256, invalid: 0 },
+        bridge: { total: 43, passed: 14, unverified: 29 },
+        failures: Array.from({ length: 8 }, (_, index) => `failure-${index}`),
+      },
+    );
+
+    expect(report).toEqual({
+      schemaVersion: 2,
+      status: "failed",
+      referenceVersion: "1.1.8",
+      build: "candidate-build",
+      total: 7_260,
+      passed: 3,
+      failed: 1,
+      unverified: 7_256,
+      invalid: 0,
+      gitBridge: { total: 43, passed: 14, unverified: 29 },
+      failures: ["failure-0", "failure-1", "failure-2", "failure-3", "failure-4"],
     });
   });
 });

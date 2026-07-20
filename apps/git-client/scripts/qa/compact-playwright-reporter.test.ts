@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { compactTestResult, summarizeResults } from "./compact-playwright-reporter.mjs";
+import {
+  compactFailureLines,
+  compactTestResult,
+  summarizeResults,
+} from "./compact-playwright-reporter.mjs";
 
 function fakeTest(outcome: "expected" | "unexpected" | "flaky" | "skipped") {
   return {
@@ -52,5 +56,19 @@ describe("compact Playwright reporter", () => {
         { outcome: "skipped" },
       ]),
     ).toEqual({ passed: 1, failed: 1, flaky: 1, skipped: 1 });
+  });
+
+  it("prints at most five bounded failure lines", () => {
+    const failures = Array.from({ length: 8 }, (_, index) => ({
+      file: "tests/app.spec.ts",
+      line: index + 1,
+      title: `failure-${index}`,
+      message: "x".repeat(2_000),
+    }));
+
+    const lines = compactFailureLines(failures);
+
+    expect(lines).toHaveLength(5);
+    expect(lines.every((line) => line.length < 700)).toBe(true);
   });
 });

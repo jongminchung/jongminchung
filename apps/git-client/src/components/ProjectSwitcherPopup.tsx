@@ -95,9 +95,23 @@ export function ProjectSwitcherPopup({
     itemRefs.current[next]?.focus();
   };
 
+  const activateItem = (index: number): void => {
+    if (index === 0) {
+      onClose();
+      onOpen();
+      return;
+    }
+    if (index === 1) {
+      onClose();
+      onClone();
+      return;
+    }
+    const item = items[index - 2];
+    if (item) void runItem(item);
+  };
+
   return (
     <section
-      aria-label="Projects"
       className={tw.projectSwitcherPopup}
       onKeyDown={(event) => {
         if (event.key === "Escape") {
@@ -115,70 +129,94 @@ export function ProjectSwitcherPopup({
         } else if (event.key === "End") {
           event.preventDefault();
           focusItem(items.length + 1);
+        } else if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          activateItem(activeIndex);
+        } else if (event.key === "Delete" || event.key === "Backspace") {
+          const item = items[activeIndex - 2];
+          if (item?.kind === "recent") {
+            event.preventDefault();
+            onRemoveRecent(item.project.path);
+          }
         }
       }}
-      role="dialog"
     >
-      <div className={tw.projectSwitcherActions}>
-        <button
-          onClick={() => {
-            onClose();
-            onOpen();
-          }}
-          ref={(node) => {
-            itemRefs.current[0] = node;
-          }}
-        >
-          <Icon name="folder" size={16} />
-          <span>Open…</span>
-        </button>
-        <button
-          onClick={() => {
-            onClose();
-            onClone();
-          }}
-          ref={(node) => {
-            itemRefs.current[1] = node;
-          }}
-        >
-          <Icon name="branch" size={16} />
-          <span>Clone Repository…</span>
-        </button>
-      </div>
+      <div aria-label="Projects" role="listbox">
+        <div className={tw.projectSwitcherActions} role="presentation">
+          <button
+            aria-selected={activeIndex === 0}
+            onClick={() => {
+              onClose();
+              onOpen();
+            }}
+            onFocus={() => setActiveIndex(0)}
+            ref={(node) => {
+              itemRefs.current[0] = node;
+            }}
+            role="option"
+          >
+            <Icon name="folder" size={16} />
+            <span>Open…</span>
+          </button>
+          <button
+            aria-selected={activeIndex === 1}
+            onClick={() => {
+              onClose();
+              onClone();
+            }}
+            onFocus={() => setActiveIndex(1)}
+            ref={(node) => {
+              itemRefs.current[1] = node;
+            }}
+            role="option"
+          >
+            <Icon name="branch" size={16} />
+            <span>Clone Repository…</span>
+          </button>
+        </div>
 
-      {openRepositories.length > 0 && <strong>Open Projects</strong>}
-      {openRepositories.map((repository, index) => (
-        <button
-          aria-current={repository.id === activeRepositoryId ? "true" : undefined}
-          className={tw.projectSwitcherRow}
-          disabled={busy}
-          key={repository.id}
-          onClick={() => void runItem({ kind: "open", repository })}
-          ref={(node) => {
-            itemRefs.current[index + 2] = node;
-          }}
-        >
-          <span className={tw.projectMark}>{repository.name.charAt(0).toUpperCase()}</span>
-          <span>
-            <b>{repository.name}</b>
-            <small>{displayPath(repository.path)}</small>
-          </span>
-          {repository.id === activeRepositoryId && <Icon name="check" size={14} />}
-        </button>
-      ))}
+        {openRepositories.length > 0 && <strong data-project-section>Open Projects</strong>}
+        {openRepositories.map((repository, index) => (
+          <button
+            aria-current={repository.id === activeRepositoryId ? "true" : undefined}
+            aria-selected={activeIndex === index + 2}
+            className={tw.projectSwitcherRow}
+            disabled={busy}
+            key={repository.id}
+            onClick={() => void runItem({ kind: "open", repository })}
+            onFocus={() => setActiveIndex(index + 2)}
+            ref={(node) => {
+              itemRefs.current[index + 2] = node;
+            }}
+            role="option"
+          >
+            <span className={tw.projectMark}>{repository.name.charAt(0).toUpperCase()}</span>
+            <span>
+              <b>{repository.name}</b>
+              <small>{displayPath(repository.path)}</small>
+            </span>
+            {repository.id === activeRepositoryId && <Icon name="check" size={14} />}
+          </button>
+        ))}
 
-      {availableRecentProjects.length > 0 && <strong>Recent Projects</strong>}
-      {availableRecentProjects.map((project, recentIndex) => {
-        const index = openRepositories.length + recentIndex + 2;
-        return (
-          <div className={tw.projectSwitcherRecentRow} key={project.path}>
+        {availableRecentProjects.length > 0 && (
+          <strong data-project-section>Recent Projects</strong>
+        )}
+        {availableRecentProjects.map((project, recentIndex) => {
+          const index = openRepositories.length + recentIndex + 2;
+          return (
             <button
+              aria-description="Press Delete to remove from Recent Projects"
+              aria-selected={activeIndex === index}
               className={tw.projectSwitcherRow}
               disabled={busy}
+              key={project.path}
               onClick={() => void runItem({ kind: "recent", project })}
+              onFocus={() => setActiveIndex(index)}
               ref={(node) => {
                 itemRefs.current[index] = node;
               }}
+              role="option"
             >
               <span className={tw.projectMark}>{project.name.charAt(0).toUpperCase()}</span>
               <span>
@@ -186,17 +224,9 @@ export function ProjectSwitcherPopup({
                 <small>{displayPath(project.path)}</small>
               </span>
             </button>
-            <button
-              aria-label={`Remove ${project.name} from Recent Projects`}
-              className={tw.projectSwitcherRemove}
-              onClick={() => onRemoveRecent(project.path)}
-              title="Remove from Recent Projects"
-            >
-              <Icon name="close" size={13} />
-            </button>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
 
       {error && <p role="alert">{error}</p>}
     </section>

@@ -35,9 +35,9 @@ Keyboard commands are defined once in `src/command-manifest.json` and shared by 
 
 `pnpm qa:compact` runs type checks, unit tests, and renderer Playwright tests. Playwright uses a compact reporter by default: stdout contains only aggregate counts and one line per failed contract, while bounded error details and trace, screenshot, and diff paths are written to `test-results/qa/renderer.json`. Packaged Electron tests use the same format in `test-results/qa/electron.json` through `pnpm qa:compact:electron`. Set `GIT_CLIENT_VERBOSE_TESTS=1` or run `pnpm qa:verbose` only when an individual failure needs the full live reporter.
 
-`pnpm parity:compact` emits one gate line and writes the full compact gate record to `test-results/qa/parity.json`. It retains the same failing exit status as the full parity gate when coverage is incomplete.
+`pnpm parity:compact` emits one gate line and writes the compact, current-build gate record to `test-results/qa/parity.json`. `pnpm parity:next --limit 5` lists only the next five divergent or unverified obligations, while `pnpm parity:explain <id>` opens one structured result. Full AX, Git, trace, and screenshot evidence remains under `test-results/parity/<build-hash>/`.
 
-Rebased UI contracts that are stable enough for automation live in `tests/contracts/rebased-1.1.8.json`. Candidate tests consume those role, accessible-name, focus, order, and keyboard contracts directly. Reference screenshots and full accessibility captures remain stored parity artifacts; automated comparisons and test reporters return only mismatch metrics and artifact paths, so Computer Use is reserved for previously uncaptured native states or conflicting evidence.
+Pinned Rebased evidence and generated contracts live under `parity/rebased/1.1.8/`; candidate-only observers live under `tests/parity/observers/`. The gate derives every count from individual current-build results and never trusts a stored `complete` flag. The project and branch popup contracts remain explicitly unverified until raw Rebased evidence is attached, so their candidate regression tests cannot inflate parity completion. Computer Use is reserved for previously uncaptured native states or conflicting evidence.
 
 ## Safety model
 

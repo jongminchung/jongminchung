@@ -4,6 +4,8 @@ import { stripVTControlCharacters } from "node:util";
 
 const MAX_MESSAGE_LENGTH = 2_000;
 const MAX_STACK_LENGTH = 4_000;
+const MAX_CONSOLE_FAILURES = 5;
+const MAX_CONSOLE_MESSAGE_LENGTH = 500;
 
 function truncate(value, limit) {
   if (typeof value !== "string") return null;
@@ -49,6 +51,13 @@ export function summarizeResults(results) {
   return counts;
 }
 
+export function compactFailureLines(failures) {
+  return failures.slice(0, MAX_CONSOLE_FAILURES).map((failure) => {
+    const firstLine = failure.message?.split("\n", 1)[0] ?? "Unknown failure";
+    return `- ${failure.file}:${failure.line} ${failure.title}: ${truncate(firstLine, MAX_CONSOLE_MESSAGE_LENGTH)}`;
+  });
+}
+
 export default class CompactPlaywrightReporter {
   constructor(options = {}) {
     this.options = options;
@@ -91,9 +100,6 @@ export default class CompactPlaywrightReporter {
 
     const summary = `${counts.passed} passed, ${counts.failed} failed, ${counts.flaky} flaky, ${counts.skipped} skipped`;
     console.log(`[qa:${suite}] ${summary}; report=${relative(process.cwd(), outputFile)}`);
-    for (const failure of report.failures) {
-      const firstLine = failure.message?.split("\n", 1)[0] ?? "Unknown failure";
-      console.log(`- ${failure.file}:${failure.line} ${failure.title}: ${firstLine}`);
-    }
+    for (const line of compactFailureLines(report.failures)) console.log(line);
   }
 }

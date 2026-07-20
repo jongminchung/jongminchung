@@ -18,6 +18,7 @@ export function GitBranchesPopup({
   onCheckout,
   onOperation,
   onCompare,
+  onCommit,
   remotes = [],
   onOpenSettings,
   onClose,
@@ -27,6 +28,7 @@ export function GitBranchesPopup({
   readonly onCheckout: (target: string) => Promise<void>;
   readonly onOperation?: (operation: GitOperation) => Promise<void>;
   readonly onCompare?: (left: string, right: string) => Promise<BranchComparison>;
+  readonly onCommit?: () => void;
   readonly remotes?: readonly RemoteInfo[];
   readonly onOpenSettings: () => void;
   readonly onClose: () => void;
@@ -37,6 +39,7 @@ export function GitBranchesPopup({
   const [comparison, setComparison] = useState<BranchComparison | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const dialog = useAppDialog();
   const normalizedQuery = query.trim().toLowerCase();
   const rows = useMemo<readonly BranchPopupRow[]>(
@@ -94,6 +97,8 @@ export function GitBranchesPopup({
   };
 
   const activeRef = rows[activeIndex]?.ref ?? null;
+  const actionMatches = (label: string): boolean =>
+    !normalizedQuery || label.toLowerCase().includes(normalizedQuery);
 
   const run = async (operation: GitOperation, close = true): Promise<void> => {
     if (!onOperation) {
@@ -263,7 +268,6 @@ export function GitBranchesPopup({
 
   return (
     <div
-      aria-label="Git Branches"
       className={tw.gitBranchesPopup}
       onKeyDown={(event) => {
         if (event.key === "Escape") {
@@ -284,86 +288,146 @@ export function GitBranchesPopup({
         } else if (event.key === " ") {
           event.preventDefault();
           void checkoutActive();
+        } else if (event.key === "ArrowRight" && activeRef) {
+          event.preventDefault();
+          setDetailsOpen(true);
+        } else if (event.key === "ArrowLeft" && detailsOpen) {
+          event.preventDefault();
+          setDetailsOpen(false);
         }
       }}
-      role="dialog"
     >
-      <header>
-        <strong>Git Branches</strong>
-        <button aria-label="Branches Settings" onClick={onOpenSettings} title="Settings">
-          <Icon name="settings" size={14} />
-        </button>
-      </header>
-      <label className={tw.gitBranchesSearch}>
-        <Icon name="search" size={14} />
-        <input
-          aria-activedescendant={rows[activeIndex] ? `branch-${activeIndex}` : undefined}
-          aria-controls="git-branches-list"
-          aria-label="Search branches"
-          onChange={(event) => {
-            setQuery(event.target.value);
-            setActiveIndex(0);
-          }}
-          placeholder="Search branches"
-          ref={search}
-          role="combobox"
-          value={query}
-        />
-      </label>
-      <div className={tw.gitBranchesActions}>
-        <button disabled={busy} onClick={() => void createBranch()}>
-          <Icon name="plus" size={14} />
-          New Branch…
-        </button>
-        <button disabled={busy} onClick={() => void checkoutRevision()}>
-          <Icon name="checkout" size={14} />
-          Checkout Tag or Revision…
-        </button>
+      <div className={tw.gitBranchesSearch}>
+        <label>
+          <Icon name="search" size={14} />
+          <input
+            aria-activedescendant={rows[activeIndex] ? `branch-${activeIndex}` : undefined}
+            aria-controls="git-branches-list"
+            aria-label="Search"
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setActiveIndex(0);
+              setDetailsOpen(false);
+            }}
+            placeholder="Search for branches and actions"
+            ref={search}
+            role="textbox"
+            value={query}
+          />
+        </label>
+        <div aria-label="Action Toolbar" data-branch-toolbar="true" role="toolbar">
+          <button
+            aria-label="Fetch"
+            disabled={busy}
+            onClick={() => void run({ kind: "fetch", remote: null, prune: false }, false)}
+            title="Fetch"
+          >
+            <Icon name="fetch" size={14} />
+          </button>
+          <button aria-label="Settings" onClick={onOpenSettings} title="Settings">
+            <Icon name="settings" size={14} />
+          </button>
+        </div>
       </div>
-      <div className={tw.gitBranchesList} id="git-branches-list" role="listbox">
+      <div
+        aria-label="Branches Tree"
+        className={tw.gitBranchesList}
+        id="git-branches-list"
+        role="tree"
+      >
+        {actionMatches("Commit…") && (
+          <button
+            data-branch-action="true"
+            disabled={busy}
+            onClick={() => {
+              onClose();
+              onCommit?.();
+            }}
+            role="treeitem"
+          >
+            <Icon name="commit" size={14} />
+            <span>Commit…</span>
+            <kbd>⌘K</kbd>
+          </button>
+        )}
+        <div role="separator" />
+        {actionMatches("New Branch…") && (
+          <button
+            data-branch-action="true"
+            disabled={busy}
+            onClick={() => void createBranch()}
+            role="treeitem"
+          >
+            <Icon name="plus" size={14} />
+            <span>New Branch…</span>
+            <kbd>⌥⌘N</kbd>
+          </button>
+        )}
+        {actionMatches("Checkout Tag or Revision…") && (
+          <button
+            data-branch-action="true"
+            disabled={busy}
+            onClick={() => void checkoutRevision()}
+            role="treeitem"
+          >
+            <Icon name="checkout" size={14} />
+            <span>Checkout Tag or Revision…</span>
+          </button>
+        )}
+        <div role="separator" />
         {(["local", "remote", "tag"] as const).map((kind) => {
           const group = rows
             .map((row, index) => ({ row, index }))
             .filter(({ row }) => row.ref.kind === kind);
           if (group.length === 0) return null;
+          const label = kind === "local" ? "Local" : kind === "remote" ? "Remote" : "Tags";
           return (
-            <section
-              aria-label={kind === "local" ? "Local" : kind === "remote" ? "Remote" : "Tags"}
-              key={kind}
-            >
-              <h3>{kind === "local" ? "Local" : kind === "remote" ? "Remote" : "Tags"}</h3>
-              {group.map(({ row, index }) => (
-                <button
-                  aria-selected={index === activeIndex}
-                  className={index === activeIndex ? tw.selected : undefined}
-                  id={`branch-${index}`}
-                  key={row.ref.name}
-                  onClick={() => {
-                    setActiveIndex(index);
-                  }}
-                  onDoubleClick={() => void checkoutActive()}
-                  onMouseEnter={() => setActiveIndex(index)}
-                  role="option"
-                  title={row.ref.subject}
-                >
-                  <Icon
-                    name={
-                      row.ref.kind === "remote"
-                        ? "remote"
-                        : row.ref.kind === "tag"
-                          ? "tag"
-                          : "branch"
-                    }
-                    size={14}
-                  />
-                  <span>{row.label}</span>
-                  {row.ref.favorite && <Icon className={tw.favorite} name="star" size={12} />}
-                  {(row.ref.current || row.ref.shortName === currentBranch) && (
-                    <small>Current</small>
-                  )}
-                </button>
-              ))}
-            </section>
+            <div key={kind} role="none">
+              <div aria-expanded="true" data-branch-group="true" role="treeitem">
+                <Icon className={tw.rotated} name="chevron" size={11} />
+                <span>{label}</span>
+              </div>
+              <div role="group">
+                {group.map(({ row, index }) => (
+                  <button
+                    aria-selected={index === activeIndex}
+                    className={index === activeIndex ? tw.selected : undefined}
+                    id={`branch-${index}`}
+                    key={row.ref.name}
+                    onClick={() => {
+                      if (index === activeIndex) setDetailsOpen(true);
+                      else {
+                        setActiveIndex(index);
+                        setDetailsOpen(false);
+                      }
+                    }}
+                    onDoubleClick={() => void checkoutActive()}
+                    onMouseEnter={() => setActiveIndex(index)}
+                    role="treeitem"
+                    title={row.ref.subject}
+                  >
+                    <Icon
+                      name={
+                        row.ref.kind === "remote"
+                          ? "remote"
+                          : row.ref.kind === "tag"
+                            ? "tag"
+                            : "branch"
+                      }
+                      size={14}
+                    />
+                    <span>{row.label}</span>
+                    {row.ref.favorite && <Icon className={tw.favorite} name="star" size={12} />}
+                    {(row.ref.current || row.ref.shortName === currentBranch) && (
+                      <small>
+                        {row.ref.upstream?.replace(/^refs\/remotes\//, "") ?? "Current"}
+                      </small>
+                    )}
+                    <Icon name="chevron" size={10} />
+                  </button>
+                ))}
+              </div>
+            </div>
           );
         })}
         {rows.length === 0 && <p>No branches found</p>}
@@ -373,7 +437,7 @@ export function GitBranchesPopup({
           {error}
         </p>
       )}
-      {activeRef && (
+      {detailsOpen && activeRef && (
         <div
           className={tw.gitBranchSelectedActions}
           aria-label={`Actions for ${activeRef.shortName}`}
@@ -429,10 +493,6 @@ export function GitBranchesPopup({
           </span>
         </div>
       )}
-      <footer>
-        <span>{rows.length} references</span>
-        <kbd>↩ Checkout</kbd>
-      </footer>
       {dialog.node}
     </div>
   );

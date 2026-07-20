@@ -6,7 +6,7 @@ import { CommandProvider } from "./CommandProvider";
 import { GitBranchesPopup } from "./GitBranchesPopup";
 
 describe("GitBranchesPopup", () => {
-  it("keeps branch actions and grouped refs in the popup surface", () => {
+  it("renders the Rebased search, action toolbar, and branches tree", () => {
     const markup = renderToStaticMarkup(
       createElement(
         CommandProvider,
@@ -24,6 +24,7 @@ describe("GitBranchesPopup", () => {
               rightOnly: [],
             }),
           ),
+          onCommit: vi.fn(),
           onOpenSettings: vi.fn(),
           onClose: vi.fn(),
           remotes: [
@@ -37,19 +38,18 @@ describe("GitBranchesPopup", () => {
       ),
     );
 
-    expect(markup).toContain('aria-label="Git Branches"');
-    expect(markup).toContain('aria-label="Search branches"');
+    expect(markup).toContain('aria-label="Search"');
+    expect(markup).toContain('placeholder="Search for branches and actions"');
+    expect(markup).toContain('aria-label="Branches Tree"');
+    expect(markup).toContain('role="tree"');
+    expect(markup).toContain('role="treeitem"');
+    expect(markup).toContain("Commit…");
     expect(markup).toContain("New Branch…");
     expect(markup).toContain("Checkout Tag or Revision…");
-    expect(markup).toContain('aria-label="Local"');
-    expect(markup).toContain('aria-label="Remote"');
-    expect(markup).toContain('aria-label="Tags"');
-    expect(markup).toContain("Current");
-    expect(markup).toContain("New Branch from…");
-    expect(markup).toContain("Rename…");
-    expect(markup).toContain("Delete…");
-    expect(markup).toContain("Set Upstream…");
-    expect(markup).toContain("New Tag…");
-    expect(markup).toContain("New Worktree…");
+    expect(markup).toContain('aria-label="Fetch"');
+    expect(markup).toContain('aria-label="Settings"');
+    expect(markup).toContain(">Local<");
+    expect(markup).toContain(">Remote<");
+    expect(markup).not.toContain("New Branch from…");
   });
 });

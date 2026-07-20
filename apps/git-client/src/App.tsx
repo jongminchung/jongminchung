@@ -536,6 +536,13 @@ function WorkspaceTitlebar({
                   })
                 }
                 onCompare={session.compareBranches}
+                onCommit={() =>
+                  window.dispatchEvent(
+                    new CustomEvent("git-client:repository-view-request", {
+                      detail: "changes",
+                    }),
+                  )
+                }
                 onOperation={session.executeOperation}
                 onClose={() => setBranchesOpen(false)}
                 onOpenSettings={() => {
@@ -826,6 +833,16 @@ function RepositoryWorkspace({
     repository.refs.find((ref) => ref.current)?.name,
   );
   const [repositoryViewMode, setRepositoryViewMode] = useState<RepositoryViewMode>("history");
+  useEffect(() => {
+    const openRequestedView = (event: Event): void => {
+      if (event instanceof CustomEvent && event.detail === "changes") {
+        setRepositoryViewMode("changes");
+      }
+    };
+    window.addEventListener("git-client:repository-view-request", openRequestedView);
+    return () =>
+      window.removeEventListener("git-client:repository-view-request", openRequestedView);
+  }, []);
   const [changeSelection, setChangeSelection] = useState<ChangeSelection | null>(null);
   const [historySelectedPath, setHistorySelectedPath] = useState<string | null>(null);
   const [historyParentRevision, setHistoryParentRevision] = useState<string | null>(null);

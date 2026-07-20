@@ -8,6 +8,7 @@ import { basename, join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { expect, test } from "@playwright/test";
 import type { Locator, Page } from "@playwright/test";
+import { captureGitState } from "../scripts/parity/git-state-oracle.mjs";
 import type { GitExecutionRequest } from "../src/shared/contracts/git-utility";
 import type { DesktopApi } from "../src/shared/contracts/ipc";
 import type { GitOperation } from "../src/shared/contracts/model";
@@ -1169,6 +1170,7 @@ test("cancels a packaged in-flight Git query with terminal event ordering", asyn
     throw new Error("Unable to start the hanging Git HTTP fixture");
   }
   git(repository, "remote", "add", "origin", `http://127.0.0.1:${address.port}/repository.git`);
+  const stateBeforeCancellation = captureGitState(repository);
 
   const app = await launchPackaged(["--qa-isolated-profile"]);
   try {
@@ -1208,6 +1210,7 @@ test("cancels a packaged in-flight Git query with terminal event ordering", asyn
     expect(result.eventKinds[0]).toBe("started");
     expect(result.eventKinds.at(-1)).toBe("cancelled");
     expect(result.terminalKind).toBe("cancelled");
+    expect(captureGitState(repository)).toEqual(stateBeforeCancellation);
   } finally {
     await app.close();
     for (const socket of sockets) socket.destroy();

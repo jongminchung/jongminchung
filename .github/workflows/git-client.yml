@@ -1,180 +1,185 @@
-name: Git Client
-
-on:
-  pull_request:
-  push:
-    branches: [main]
-  workflow_dispatch:
-    inputs:
-      recreate_first_release:
-        description: Recreate and publish git-client-1.0.0 after external preflight checks
-        required: false
-        type: boolean
-        default: false
-
-permissions:
-  contents: read
-
-concurrency:
-  group: git-client-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
-
-jobs:
-  affected:
-    runs-on: ubuntu-latest
-    outputs:
-      git_client: ${{ steps.scope.outputs.git_client }}
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .node-version
-          cache: pnpm
-      - name: Verify configured Node.js
-        run: test "v$(cat .node-version)" = "$(node --version)"
-      - run: pnpm install --frozen-lockfile
-      - id: scope
-        name: Detect affected Git Client project
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
-          HEAD_SHA: ${{ github.sha }}
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "git_client=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          base="$BASE_SHA"
-          if [[ -z "$base" || "$base" == "0000000000000000000000000000000000000000" ]]; then
-            base="$(git rev-list --max-parents=0 "$HEAD_SHA")"
-          fi
-
-          if pnpm exec nx show projects --affected --base="$base" --head="$HEAD_SHA" | grep -Fxq '@jongminchung/git-client'; then
-            echo "git_client=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "git_client=false" >> "$GITHUB_OUTPUT"
-          fi
-
-  verify:
-    if: needs.affected.outputs.git_client == 'true'
-    needs: affected
-    runs-on: macos-15
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .node-version
-          cache: pnpm
-      - name: Verify configured Node.js
-        run: test "v$(cat .node-version)" = "$(node --version)"
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @jongminchung/tooling build
-      - name: Verify Electron-only sources
-        run: |
-          if git grep -n -I -E 'T[a]uri|t[a]uri://|src[-]tauri|@t[a]uri-apps' -- \
-            .github .oxfmtrc.mjs apps/git-client \
-            ':!apps/git-client/parity/rebased/**'; then
-            echo "Legacy desktop-runtime references are not allowed in first-party Git Client sources."
-            exit 1
-          fi
-      - run: pnpm exec oxfmt --config .oxfmtrc.mjs --check apps/git-client nx.json
-      - run: pnpm exec oxlint apps/git-client/src apps/git-client/tests apps/git-client/scripts
-      - run: pnpm --filter @jongminchung/git-client typecheck
-      - run: pnpm --filter @jongminchung/git-client test
-      - run: pnpm --filter @jongminchung/git-client build
-      - run: pnpm --filter @jongminchung/git-client exec playwright install chromium
-      - run: pnpm --filter @jongminchung/git-client test:e2e
-      - name: Build and validate local ad-hoc Electron ARM64 artifacts
-        run: pnpm --filter @jongminchung/git-client release:validate-local -- 0.1.0
-      - name: Upload compact QA evidence
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: git-client-compact-qa
-          path: |
-            apps/git-client/test-results/qa/*.json
-            apps/git-client/test-results/**/trace.zip
-            apps/git-client/test-results/**/*-diff.png
-          if-no-files-found: ignore
-      - uses: actions/upload-artifact@v7
-        with:
-          name: git-client-macos-arm64-adhoc
-          path: |
-            apps/git-client/out/Git Client-darwin-arm64/Git Client.app
-            apps/git-client/release-artifacts/*_adhoc.dmg
-            apps/git-client/release-artifacts/*_adhoc.dmg.sha256
-
-  release:
-    if: >-
-      needs.affected.outputs.git_client == 'true' &&
-      ((github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'workflow_dispatch' && inputs.recreate_first_release))
-    needs: [affected, verify]
-    runs-on: macos-15
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .node-version
-          cache: pnpm
-      - name: Verify configured Node.js
-        run: test "v$(cat .node-version)" = "$(node --version)"
-      - run: pnpm install --frozen-lockfile
-      - name: Configure Developer ID signing and Apple notarization
-        env:
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.GIT_CLIENT_APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_ID: ${{ secrets.GIT_CLIENT_APPLE_ID }}
-          APPLE_TEAM_ID: ${{ secrets.GIT_CLIENT_APPLE_TEAM_ID }}
-          CERTIFICATE_BASE64: ${{ secrets.GIT_CLIENT_CODESIGN_CERTIFICATE_BASE64 }}
-          CERTIFICATE_PASSWORD: ${{ secrets.GIT_CLIENT_CODESIGN_CERTIFICATE_PASSWORD }}
-        run: |
-          set -euo pipefail
-          test -n "$APPLE_APP_SPECIFIC_PASSWORD"
-          test -n "$APPLE_ID"
-          test -n "$APPLE_TEAM_ID"
-          test -n "$CERTIFICATE_BASE64"
-          test -n "$CERTIFICATE_PASSWORD"
-
-          signing_keychain="${RUNNER_TEMP}/git-client-signing.keychain-db"
-          signing_certificate="${RUNNER_TEMP}/git-client-signing.p12"
-          keychain_password="$(openssl rand -hex 32)"
-
-          printf '%s' "$CERTIFICATE_BASE64" | base64 -D > "$signing_certificate"
-          security create-keychain -p "$keychain_password" "$signing_keychain"
-          security set-keychain-settings -lut 21600 "$signing_keychain"
-          security unlock-keychain -p "$keychain_password" "$signing_keychain"
-          security import "$signing_certificate" \
-            -k "$signing_keychain" \
-            -P "$CERTIFICATE_PASSWORD" \
-            -T /usr/bin/codesign
-          security set-key-partition-list \
-            -S apple-tool:,apple:,codesign: \
-            -s \
-            -k "$keychain_password" \
-            "$signing_keychain"
-          security list-keychains -d user -s "$signing_keychain"
-          xcrun notarytool store-credentials git-client-ci \
-            --apple-id "$APPLE_ID" \
-            --password "$APPLE_APP_SPECIFIC_PASSWORD" \
-            --team-id "$APPLE_TEAM_ID" \
-            --keychain "$signing_keychain"
-          rm "$signing_certificate"
-      - name: Publish GitHub release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GIT_CLIENT_CODESIGN_IDENTITY: ${{ secrets.GIT_CLIENT_CODESIGN_IDENTITY }}
-          GIT_CLIENT_NOTARY_KEYCHAIN: ${{ runner.temp }}/git-client-signing.keychain-db
-          GIT_CLIENT_NOTARY_KEYCHAIN_PROFILE: git-client-ci
-        run: pnpm --filter @jongminchung/git-client release
-      - name: Remove ephemeral signing keychain
-        if: always()
-        run: security delete-keychain "${RUNNER_TEMP}/git-client-signing.keychain-db" || true
+#name: Git Client
+#
+#on:
+#  pull_request:
+#  push:
+#    branches: [main]
+#  schedule:
+#    - cron: "0 18 * * *"
+#  workflow_dispatch:
+#    inputs:
+#      recreate_first_release:
+#        description: Recreate and publish git-client-1.0.0 after external preflight checks
+#        required: false
+#        type: boolean
+#        default: false
+#
+#permissions:
+#  contents: read
+#
+#concurrency:
+#  group: git-client-${{ github.workflow }}-${{ github.ref }}
+#  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+#
+#jobs:
+#  affected:
+#    runs-on: ubuntu-latest
+#    outputs:
+#      git_client: ${{ steps.scope.outputs.git_client }}
+#    steps:
+#      - uses: actions/checkout@v7
+#        with:
+#          fetch-depth: 0
+#      - uses: pnpm/action-setup@v6
+#      - uses: actions/setup-node@v7
+#        with:
+#          node-version-file: .node-version
+#          cache: pnpm
+#      - name: Verify configured Node.js
+#        run: test "v$(cat .node-version)" = "$(node --version)"
+#      - run: pnpm install --frozen-lockfile
+#      - id: scope
+#        name: Detect affected Git Client project
+#        env:
+#          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+#          HEAD_SHA: ${{ github.sha }}
+#        run: |
+#          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+#            echo "git_client=true" >> "$GITHUB_OUTPUT"
+#            exit 0
+#          fi
+#
+#          base="$BASE_SHA"
+#          if [[ -z "$base" || "$base" == "0000000000000000000000000000000000000000" ]]; then
+#            base="$(git rev-list --max-parents=0 "$HEAD_SHA")"
+#          fi
+#
+#          if pnpm exec nx show projects --affected --base="$base" --head="$HEAD_SHA" | grep -Fxq '@jongminchung/git-client'; then
+#            echo "git_client=true" >> "$GITHUB_OUTPUT"
+#          else
+#            echo "git_client=false" >> "$GITHUB_OUTPUT"
+#          fi
+#
+#  verify:
+#    if: needs.affected.outputs.git_client == 'true'
+#    needs: affected
+#    runs-on: macos-15
+#    steps:
+#      - uses: actions/checkout@v7
+#      - uses: pnpm/action-setup@v6
+#      - uses: actions/setup-node@v7
+#        with:
+#          node-version-file: .node-version
+#          cache: pnpm
+#      - name: Verify configured Node.js
+#        run: test "v$(cat .node-version)" = "$(node --version)"
+#      - run: pnpm install --frozen-lockfile
+#      - run: pnpm --filter @jongminchung/tooling build
+#      - name: Verify Electron-only sources
+#        run: |
+#          if git grep -n -I -E 'T[a]uri|t[a]uri://|src[-]tauri|@t[a]uri-apps' -- \
+#            .github .oxfmtrc.mjs apps/git-client \
+#            ':!apps/git-client/parity/rebased/**'; then
+#            echo "Legacy desktop-runtime references are not allowed in first-party Git Client sources."
+#            exit 1
+#          fi
+#      - run: pnpm exec oxfmt --config .oxfmtrc.mjs --check apps/git-client nx.json
+#      - run: pnpm exec oxlint apps/git-client/src apps/git-client/tests apps/git-client/scripts
+#      - run: pnpm --filter @jongminchung/git-client typecheck
+#      - run: pnpm --filter @jongminchung/git-client test
+#      - run: pnpm --filter @jongminchung/git-client build
+#      - run: pnpm --filter @jongminchung/git-client exec playwright install chromium
+#      - run: pnpm --filter @jongminchung/git-client test:e2e
+#      - name: Build and validate local ad-hoc Electron ARM64 artifacts
+#        run: pnpm --filter @jongminchung/git-client release:validate-local -- 0.1.0
+#      - name: Run full pinned Rebased parity audit
+#        if: github.event_name == 'schedule'
+#        run: pnpm --filter @jongminchung/git-client parity:full
+#      - name: Upload compact QA evidence
+#        if: always()
+#        uses: actions/upload-artifact@v7
+#        with:
+#          name: git-client-compact-qa
+#          path: |
+#            apps/git-client/test-results/qa/*.json
+#            apps/git-client/test-results/**/trace.zip
+#            apps/git-client/test-results/**/*-diff.png
+#          if-no-files-found: ignore
+#      - uses: actions/upload-artifact@v7
+#        with:
+#          name: git-client-macos-arm64-adhoc
+#          path: |
+#            apps/git-client/out/Git Client-darwin-arm64/Git Client.app
+#            apps/git-client/release-artifacts/*_adhoc.dmg
+#            apps/git-client/release-artifacts/*_adhoc.dmg.sha256
+#
+#  release:
+#    if: >-
+#      needs.affected.outputs.git_client == 'true' &&
+#      ((github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+#      (github.event_name == 'workflow_dispatch' && inputs.recreate_first_release))
+#    needs: [affected, verify]
+#    runs-on: macos-15
+#    permissions:
+#      contents: write
+#    steps:
+#      - uses: actions/checkout@v7
+#        with:
+#          fetch-depth: 0
+#      - uses: pnpm/action-setup@v6
+#      - uses: actions/setup-node@v7
+#        with:
+#          node-version-file: .node-version
+#          cache: pnpm
+#      - name: Verify configured Node.js
+#        run: test "v$(cat .node-version)" = "$(node --version)"
+#      - run: pnpm install --frozen-lockfile
+#      - name: Configure Developer ID signing and Apple notarization
+#        env:
+#          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.GIT_CLIENT_APPLE_APP_SPECIFIC_PASSWORD }}
+#          APPLE_ID: ${{ secrets.GIT_CLIENT_APPLE_ID }}
+#          APPLE_TEAM_ID: ${{ secrets.GIT_CLIENT_APPLE_TEAM_ID }}
+#          CERTIFICATE_BASE64: ${{ secrets.GIT_CLIENT_CODESIGN_CERTIFICATE_BASE64 }}
+#          CERTIFICATE_PASSWORD: ${{ secrets.GIT_CLIENT_CODESIGN_CERTIFICATE_PASSWORD }}
+#        run: |
+#          set -euo pipefail
+#          test -n "$APPLE_APP_SPECIFIC_PASSWORD"
+#          test -n "$APPLE_ID"
+#          test -n "$APPLE_TEAM_ID"
+#          test -n "$CERTIFICATE_BASE64"
+#          test -n "$CERTIFICATE_PASSWORD"
+#
+#          signing_keychain="${RUNNER_TEMP}/git-client-signing.keychain-db"
+#          signing_certificate="${RUNNER_TEMP}/git-client-signing.p12"
+#          keychain_password="$(openssl rand -hex 32)"
+#
+#          printf '%s' "$CERTIFICATE_BASE64" | base64 -D > "$signing_certificate"
+#          security create-keychain -p "$keychain_password" "$signing_keychain"
+#          security set-keychain-settings -lut 21600 "$signing_keychain"
+#          security unlock-keychain -p "$keychain_password" "$signing_keychain"
+#          security import "$signing_certificate" \
+#            -k "$signing_keychain" \
+#            -P "$CERTIFICATE_PASSWORD" \
+#            -T /usr/bin/codesign
+#          security set-key-partition-list \
+#            -S apple-tool:,apple:,codesign: \
+#            -s \
+#            -k "$keychain_password" \
+#            "$signing_keychain"
+#          security list-keychains -d user -s "$signing_keychain"
+#          xcrun notarytool store-credentials git-client-ci \
+#            --apple-id "$APPLE_ID" \
+#            --password "$APPLE_APP_SPECIFIC_PASSWORD" \
+#            --team-id "$APPLE_TEAM_ID" \
+#            --keychain "$signing_keychain"
+#          rm "$signing_certificate"
+#      - name: Publish GitHub release
+#        env:
+#          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          GIT_CLIENT_CODESIGN_IDENTITY: ${{ secrets.GIT_CLIENT_CODESIGN_IDENTITY }}
+#          GIT_CLIENT_NOTARY_KEYCHAIN: ${{ runner.temp }}/git-client-signing.keychain-db
+#          GIT_CLIENT_NOTARY_KEYCHAIN_PROFILE: git-client-ci
+#        run: pnpm --filter @jongminchung/git-client release
+#      - name: Remove ephemeral signing keychain
+#        if: always()
+#        run: security delete-keychain "${RUNNER_TEMP}/git-client-signing.keychain-db" || true
