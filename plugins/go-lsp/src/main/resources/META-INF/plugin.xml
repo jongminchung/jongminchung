@@ -1,0 +1,70 @@
+<idea-plugin>
+    <id>kr.jamie.golsp</id>
+    <name>Go LSP</name>
+    <vendor url="https://github.com/jongminchung">Jongmin Chung</vendor>
+
+    <description><![CDATA[
+        Community-friendly Go language support powered by gopls.
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lsp</depends>
+    <depends>com.intellij.modules.xdebugger</depends>
+    <depends optional="true" config-file="kr.jamie.golsp-with-smRunner.xml">intellij.platform.smRunner</depends>
+    <incompatible-with>org.jetbrains.plugins.go</incompatible-with>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType
+            name="Go LSP"
+            language="GoLsp"
+            implementationClass="kr.jamie.golsp.lang.GoFileType"
+            fieldName="INSTANCE"
+            extensions="go"/>
+        <fileType
+            name="Go Workspace"
+            language="GoWorkspaceLsp"
+            implementationClass="kr.jamie.golsp.lang.GoWorkspaceFileType"
+            fieldName="INSTANCE"
+            fileNames="go.mod;go.sum;go.work"/>
+        <lang.parserDefinition
+            language="GoLsp"
+            implementationClass="kr.jamie.golsp.lang.GoParserDefinition"/>
+        <lang.syntaxHighlighterFactory
+            language="GoLsp"
+            implementationClass="kr.jamie.golsp.lang.GoSyntaxHighlighterFactory"/>
+        <lang.syntaxHighlighterFactory
+            language="GoWorkspaceLsp"
+            implementationClass="kr.jamie.golsp.lang.GoSyntaxHighlighterFactory"/>
+        <applicationConfigurable
+            id="kr.jamie.golsp.settings"
+            displayName="Go LSP"
+            instance="kr.jamie.golsp.settings.GoLspConfigurable"/>
+        <platform.lsp.serverSupportProvider
+            implementation="kr.jamie.golsp.lsp.GoLspIntegrationProvider"/>
+        <postStartupActivity
+            implementation="kr.jamie.golsp.workspace.GoProjectActivity"/>
+        <notificationGroup
+            id="Go LSP"
+            displayType="BALLOON"/>
+        <configurationType implementation="kr.jamie.golsp.run.GoConfigurationType"/>
+        <runConfigurationProducer implementation="kr.jamie.golsp.run.GoRunConfigurationProducer"/>
+        <runLineMarkerContributor
+            language="GoLsp"
+            implementationClass="kr.jamie.golsp.run.GoRunLineMarkerContributor"/>
+        <programRunner implementation="kr.jamie.golsp.debug.GoDebugRunner"/>
+        <xdebugger.breakpointType implementation="kr.jamie.golsp.debug.GoLineBreakpointType"/>
+    </extensions>
+
+    <actions>
+        <group id="GoLsp.ToolsGroup" text="Go Tools" popup="true">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+            <action id="GoLsp.InstallGopls" class="kr.jamie.golsp.tools.InstallGoplsAction"
+                    text="Install or Update gopls"/>
+            <action id="GoLsp.InstallDelve" class="kr.jamie.golsp.tools.InstallDelveAction"
+                    text="Install or Update Delve"/>
+            <separator/>
+            <action id="GoLsp.RestartGopls" class="kr.jamie.golsp.tools.RestartGoplsAction"
+                    text="Restart gopls"/>
+        </group>
+    </actions>
+</idea-plugin>

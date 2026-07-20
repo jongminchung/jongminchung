@@ -22,13 +22,14 @@ class GoDebugRunner : GenericProgramRunner<RunnerSettings>() {
     override fun doExecute(state: RunProfileState, environment: ExecutionEnvironment): RunContentDescriptor {
         val configuration = environment.runProfile as? GoRunConfiguration
             ?: throw ExecutionException("A Go run configuration is required.")
-        val started = XDebuggerManager.getInstance(environment.project)
-            .newSessionBuilder(object : XDebugProcessStarter() {
+        @Suppress("DEPRECATION")
+        val session = XDebuggerManager.getInstance(environment.project).startSession(
+            environment,
+            object : XDebugProcessStarter() {
                 override fun start(session: XDebugSession) = GoDapDebugProcess(session, configuration)
-            })
-            .environment(environment)
-            .startSession()
-        return started.runContentDescriptor
-            ?: throw ExecutionException("The IntelliJ debugger did not create a run content descriptor.")
+            },
+        )
+        @Suppress("DEPRECATION")
+        return session.runContentDescriptor
     }
 }

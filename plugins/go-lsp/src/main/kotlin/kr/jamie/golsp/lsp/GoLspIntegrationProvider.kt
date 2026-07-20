@@ -4,16 +4,16 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.platform.lsp.api.LspIntegrationProvider
+import com.intellij.platform.lsp.api.LspServerSupportProvider
 
-class GoLspIntegrationProvider : LspIntegrationProvider {
+class GoLspIntegrationProvider : LspServerSupportProvider {
     override fun fileOpened(
         project: Project,
         file: VirtualFile,
-        clientStarter: LspIntegrationProvider.LspClientStarter,
+        serverStarter: LspServerSupportProvider.LspServerStarter,
     ) {
         if (GoLspFileSupport.isSupported(file)) {
-            clientStarter.ensureClientStarted(project.service<GoLspDescriptorService>().descriptor)
+            serverStarter.ensureServerStarted(project.service<GoLspDescriptorService>().descriptor)
         }
     }
 }

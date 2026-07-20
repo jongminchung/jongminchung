@@ -4,7 +4,7 @@ import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.platform.lsp.api.LspClientDescriptor
+import com.intellij.platform.lsp.api.LspServerDescriptor
 import kr.jamie.golsp.settings.GoLspSettings
 import kr.jamie.golsp.tools.GoTool
 import kr.jamie.golsp.tools.GoToolchainService
@@ -12,7 +12,7 @@ import kr.jamie.golsp.workspace.GoWorkspaceService
 import org.eclipse.lsp4j.ConfigurationItem
 import java.nio.charset.StandardCharsets
 
-class GoLspClientDescriptor(project: Project) : LspClientDescriptor(
+class GoLspClientDescriptor(project: Project) : LspServerDescriptor(
     project,
     "gopls",
     *project.service<GoWorkspaceService>().lspRoots(),

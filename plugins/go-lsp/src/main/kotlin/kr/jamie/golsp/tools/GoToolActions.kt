@@ -6,7 +6,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
-import com.intellij.platform.lsp.api.LspClientManager
+import com.intellij.platform.lsp.api.LspServerManager
 import kr.jamie.golsp.lsp.GoLspIntegrationProvider
 
 object GoToolActions {
@@ -30,7 +30,7 @@ object GoToolActions {
     }
 
     fun restartGopls(project: Project) {
-        LspClientManager.getInstance(project).stopAndRestartClientsIfNeeded(GoLspIntegrationProvider::class.java)
+        LspServerManager.getInstance(project).stopAndRestartIfNeeded(GoLspIntegrationProvider::class.java)
     }
 
     private fun toolVersion(project: Project, tool: GoTool): String =
