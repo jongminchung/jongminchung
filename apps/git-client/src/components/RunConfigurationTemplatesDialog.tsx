@@ -1,6 +1,3 @@
-import { Button } from "@astryxdesign/core/Button";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
-import { TextInput } from "@astryxdesign/core/TextInput";
 import { useMemo, useState } from "react";
 import type {
   RunConfigurationTemplate,
@@ -8,6 +5,9 @@ import type {
 } from "../domain/runConfigurationTemplates";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
+import { Button } from "./ui";
+import { Dialog, DialogHeader } from "./ui";
+import { TextInput } from "./ui";
 
 export function RunConfigurationTemplatesDialog({
   onChange,
@@ -27,9 +27,11 @@ export function RunConfigurationTemplatesDialog({
   );
   const update = (patch: Partial<RunConfigurationTemplate>): void => {
     if (!selected) return;
-    onChange(templates.map((template) =>
-      template.kind === selected.kind ? { ...template, ...patch } : template,
-    ));
+    onChange(
+      templates.map((template) =>
+        template.kind === selected.kind ? { ...template, ...patch } : template,
+      ),
+    );
   };
 
   return (

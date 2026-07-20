@@ -22,10 +22,7 @@ function escapedRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 }
 
-export function replacementExpression(
-  query: string,
-  options: ProjectSearchOptions,
-): RegExp {
+export function replacementExpression(query: string, options: ProjectSearchOptions): RegExp {
   const source = options.regex ? query : escapedRegExp(query);
   const bounded = options.words ? `\\b(?:${source})\\b` : source;
   return new RegExp(bounded, options.matchCase ? "gu" : "giu");
@@ -47,16 +44,28 @@ const RESULT_LIMIT = 500;
 const IDENTIFIER = "[A-Za-z_$][A-Za-z0-9_$]*";
 
 const CLASS_DECLARATIONS = [
-  new RegExp(`\\b(?:class|interface|enum|struct|trait|record|object|protocol|actor|namespace|module)\\s+(${IDENTIFIER})`, "u"),
+  new RegExp(
+    `\\b(?:class|interface|enum|struct|trait|record|object|protocol|actor|namespace|module)\\s+(${IDENTIFIER})`,
+    "u",
+  ),
   new RegExp(`\\btype(?:alias)?\\s+(${IDENTIFIER})(?:\\s|=|<)`, "u"),
 ] as const;
 
 const SYMBOL_DECLARATIONS = [
   ...CLASS_DECLARATIONS,
-  new RegExp(`\\b(?:async\\s+)?(?:function|func|fn|def)\\s*(?:\\([^)]*\\)\\s*)?(${IDENTIFIER})`, "u"),
+  new RegExp(
+    `\\b(?:async\\s+)?(?:function|func|fn|def)\\s*(?:\\([^)]*\\)\\s*)?(${IDENTIFIER})`,
+    "u",
+  ),
   new RegExp(`\\b(?:const|let|var|val)\\s+(${IDENTIFIER})`, "u"),
-  new RegExp(`^\\s*(?:export\\s+)?(?:default\\s+)?(${IDENTIFIER})\\s*\\([^)]*\\)\\s*(?::[^={]+)?(?:=>|\\{)`, "u"),
-  new RegExp(`^\\s*(?:(?:public|private|protected|internal|static|final|abstract|override|open|suspend|async)\\s+)*(?:${IDENTIFIER}(?:[<>,.?\\[\\]: ]+${IDENTIFIER})?)\\s+(${IDENTIFIER})\\s*\\(`, "u"),
+  new RegExp(
+    `^\\s*(?:export\\s+)?(?:default\\s+)?(${IDENTIFIER})\\s*\\([^)]*\\)\\s*(?::[^={]+)?(?:=>|\\{)`,
+    "u",
+  ),
+  new RegExp(
+    `^\\s*(?:(?:public|private|protected|internal|static|final|abstract|override|open|suspend|async)\\s+)*(?:${IDENTIFIER}(?:[<>,.?\\[\\]: ]+${IDENTIFIER})?)\\s+(${IDENTIFIER})\\s*\\(`,
+    "u",
+  ),
 ] as const;
 
 function resultFields(value: string): readonly [number, number, string] | null {
@@ -70,11 +79,7 @@ function resultFields(value: string): readonly [number, number, string] | null {
   }
   const separatedFields = value.match(/^:?(\d+)(?:\0|:)(\d+)(?:\0|:)(.*)$/u);
   if (!separatedFields) return null;
-  return [
-    Number(separatedFields[1]),
-    Number(separatedFields[2]),
-    separatedFields[3] ?? "",
-  ];
+  return [Number(separatedFields[1]), Number(separatedFields[2]), separatedFields[3] ?? ""];
 }
 
 export function parseProjectTextMatches(output: string): readonly ProjectTextMatch[] {
@@ -133,14 +138,18 @@ export function projectSearchResults(
     }));
   }
   const expressions = mode === "class" ? CLASS_DECLARATIONS : SYMBOL_DECLARATIONS;
-  return matches.flatMap((match): readonly ProjectSearchResult[] => {
-    const symbol = declaration(match.content, expressions);
-    if (!symbol || !nameMatches(symbol.name, query, matchCase)) return [];
-    return [{
-      ...match,
-      kind: mode,
-      name: symbol.name,
-      column: symbol.column,
-    }];
-  }).slice(0, RESULT_LIMIT);
+  return matches
+    .flatMap((match): readonly ProjectSearchResult[] => {
+      const symbol = declaration(match.content, expressions);
+      if (!symbol || !nameMatches(symbol.name, query, matchCase)) return [];
+      return [
+        {
+          ...match,
+          kind: mode,
+          name: symbol.name,
+          column: symbol.column,
+        },
+      ];
+    })
+    .slice(0, RESULT_LIMIT);
 }

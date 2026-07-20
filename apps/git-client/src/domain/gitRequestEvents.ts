@@ -1,4 +1,4 @@
-import type { GitEvent, RequestId } from "../generated";
+import type { GitEvent, RequestId } from "../shared/contracts/model";
 
 export type GitRequestEventResult =
   | { readonly kind: "started"; readonly requestId: RequestId }

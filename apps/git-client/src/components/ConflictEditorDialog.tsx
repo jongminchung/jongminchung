@@ -1,14 +1,14 @@
-import { Button } from "@astryxdesign/core/Button";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
-import { Selector } from "@astryxdesign/core/Selector";
 import { lazy, Suspense, useMemo, useState } from "react";
+import { COMMAND_ENABLED, commandDefinition, type CommandDefinition } from "../domain/commands";
 import { parseConflictBlocks, resolveConflictBlock } from "../domain/conflicts";
-import type { ConflictContent, InProgressOperation } from "../generated";
-import { Icon } from "./Icon";
+import type { ConflictContent, InProgressOperation } from "../shared/contracts/model";
 import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
 import { useCommandDefinitions, useDismissLayer } from "./CommandProvider";
-import { COMMAND_ENABLED, commandDefinition, type CommandDefinition } from "../domain/commands";
+import { Icon } from "./Icon";
+import { Button } from "./ui";
+import { Dialog, DialogHeader } from "./ui";
+import { Selector } from "./ui";
 
 const CodeMirrorText = lazy(() => import("./CodeMirrorText"));
 
@@ -67,7 +67,8 @@ export function ConflictEditorDialog({
     if (result !== (content.result ?? "")) {
       const accepted = await dialog.confirm({
         title: "Discard conflict result edits?",
-        description: "The repository is unchanged, but edits made in the conflict result pane will be lost.",
+        description:
+          "The repository is unchanged, but edits made in the conflict result pane will be lost.",
         confirmLabel: "Discard result",
         dangerous: true,
       });
@@ -75,19 +76,33 @@ export function ConflictEditorDialog({
     }
     onClose();
   };
-  useDismissLayer(useMemo(() => ({
-    id: "conflict-editor",
-    priority: 125,
-    active: true,
-    dismiss: requestClose,
-  }), [requestClose]));
-  const commands = useMemo<readonly CommandDefinition[]>(() => [{
-    ...commandDefinition("changes.save", () => onSave(result), () => COMMAND_ENABLED),
-    allowInEditor: true,
-    allowInCodeEditor: true,
-    label: "Save and Stage Conflict Result",
-    priority: 100,
-  }], [onSave, result]);
+  useDismissLayer(
+    useMemo(
+      () => ({
+        id: "conflict-editor",
+        priority: 125,
+        active: true,
+        dismiss: requestClose,
+      }),
+      [requestClose],
+    ),
+  );
+  const commands = useMemo<readonly CommandDefinition[]>(
+    () => [
+      {
+        ...commandDefinition(
+          "changes.save",
+          () => onSave(result),
+          () => COMMAND_ENABLED,
+        ),
+        allowInEditor: true,
+        allowInCodeEditor: true,
+        label: "Save and Stage Conflict Result",
+        priority: 100,
+      },
+    ],
+    [onSave, result],
+  );
   useCommandDefinitions(commands);
   return (
     <>
@@ -111,8 +126,8 @@ export function ConflictEditorDialog({
                 title={content.path}
               />
             </div>
-          {operation && operation !== "bisect" && (
-            <>
+            {operation && operation !== "bisect" && (
+              <>
                 <Button
                   clickAction={onContinue}
                   label={`Continue ${operation}`}
@@ -120,8 +135,8 @@ export function ConflictEditorDialog({
                   variant="secondary"
                 />
                 <Button clickAction={onAbort} label="Abort" size="sm" variant="destructive" />
-            </>
-          )}
+              </>
+            )}
             <Button
               icon={<Icon name="close" size={15} />}
               isIconOnly
@@ -131,45 +146,57 @@ export function ConflictEditorDialog({
               variant="ghost"
             />
           </div>
-        {content.binary ? (
-          <div className={tw.binaryConflict}>
-            <Icon name="warning" size={32} />
-            <strong>Binary or oversized conflict</strong>
-            <p>The file cannot be safely represented as UTF-8 text. Choose one complete side.</p>
-            <div>
-                <Button clickAction={() => onResolveBinary("ours")} label={`Use ${content.localLabel}`} variant="secondary" />
-                <Button clickAction={() => onResolveBinary("theirs")} label={`Use ${content.remoteLabel}`} variant="secondary" />
+          {content.binary ? (
+            <div className={tw.binaryConflict}>
+              <Icon name="warning" size={32} />
+              <strong>Binary or oversized conflict</strong>
+              <p>The file cannot be safely represented as UTF-8 text. Choose one complete side.</p>
+              <div>
+                <Button
+                  clickAction={() => onResolveBinary("ours")}
+                  label={`Use ${content.localLabel}`}
+                  variant="secondary"
+                />
+                <Button
+                  clickAction={() => onResolveBinary("theirs")}
+                  label={`Use ${content.remoteLabel}`}
+                  variant="secondary"
+                />
+              </div>
             </div>
-          </div>
-        ) : (
-          <div className={tw.conflictGrid}>
-            <TextPane
-              label="Base"
-              value={content.base}
-              onAccept={() => setResult(content.base ?? "")}
-            />
-            <TextPane
-              label={content.localLabel}
-              value={content.local}
-              onAccept={() => setResult(content.local ?? "")}
-            />
-            <TextPane
-              label={content.remoteLabel}
-              value={content.remote}
-              onAccept={() => setResult(content.remote ?? "")}
-            />
-            <section className={tw.conflictPane}>
-              <header>
-                <strong>Result</strong>
-                {blocks.length > 0 && (
-                  <>
+          ) : (
+            <div className={tw.conflictGrid}>
+              <TextPane
+                label="Base"
+                value={content.base}
+                onAccept={() => setResult(content.base ?? "")}
+              />
+              <TextPane
+                label={content.localLabel}
+                value={content.local}
+                onAccept={() => setResult(content.local ?? "")}
+              />
+              <TextPane
+                label={content.remoteLabel}
+                value={content.remote}
+                onAccept={() => setResult(content.remote ?? "")}
+              />
+              <section className={tw.conflictPane}>
+                <header>
+                  <strong>Result</strong>
+                  {blocks.length > 0 && (
+                    <>
                       <Selector
                         aria-label="Conflict block"
                         isLabelHidden
                         label="Conflict block"
                         onChange={(value) => {
                           const nextBlock = Number(value);
-                          if (Number.isInteger(nextBlock) && nextBlock >= 0 && nextBlock < blocks.length) {
+                          if (
+                            Number.isInteger(nextBlock) &&
+                            nextBlock >= 0 &&
+                            nextBlock < blocks.length
+                          ) {
                             setBlockIndex(nextBlock);
                           }
                         }}
@@ -180,21 +207,41 @@ export function ConflictEditorDialog({
                         size="sm"
                         value={String(Math.min(blockIndex, blocks.length - 1))}
                       />
-                      <Button label="Local" onClick={() => resolveBlock("local")} size="sm" variant="ghost" />
-                      <Button label="Remote" onClick={() => resolveBlock("remote")} size="sm" variant="ghost" />
-                      <Button label="Both" onClick={() => resolveBlock("both")} size="sm" variant="ghost" />
-                  </>
-                )}
-                  <Button clickAction={() => onSave(result)} label="Save and stage" size="sm" variant="primary" />
-              </header>
-              <div>
-                <Suspense fallback={<div className={tw.emptyState}>Loading editor…</div>}>
-                  <CodeMirrorText onChange={setResult} readOnly={false} value={result} />
-                </Suspense>
-              </div>
-            </section>
-          </div>
-        )}
+                      <Button
+                        label="Local"
+                        onClick={() => resolveBlock("local")}
+                        size="sm"
+                        variant="ghost"
+                      />
+                      <Button
+                        label="Remote"
+                        onClick={() => resolveBlock("remote")}
+                        size="sm"
+                        variant="ghost"
+                      />
+                      <Button
+                        label="Both"
+                        onClick={() => resolveBlock("both")}
+                        size="sm"
+                        variant="ghost"
+                      />
+                    </>
+                  )}
+                  <Button
+                    clickAction={() => onSave(result)}
+                    label="Save and stage"
+                    size="sm"
+                    variant="primary"
+                  />
+                </header>
+                <div>
+                  <Suspense fallback={<div className={tw.emptyState}>Loading editor…</div>}>
+                    <CodeMirrorText onChange={setResult} readOnly={false} value={result} />
+                  </Suspense>
+                </div>
+              </section>
+            </div>
+          )}
         </section>
       </Dialog>
       {dialog.node}

@@ -1,11 +1,11 @@
-import { Button } from "@astryxdesign/core/Button";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
-import { List, ListItem } from "@astryxdesign/core/List";
-import { TextArea } from "@astryxdesign/core/TextArea";
 import { useMemo, useState } from "react";
 import { stackTraceFrames, type StackTraceFrame } from "../domain/codeAnalysis";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
+import { Button } from "./ui";
+import { Dialog, DialogHeader } from "./ui";
+import { List, ListItem } from "./ui";
+import { TextArea } from "./ui";
 
 export function StackTraceDialog({
   onClose,
@@ -17,9 +17,21 @@ export function StackTraceDialog({
   const [value, setValue] = useState("");
   const frames = useMemo(() => stackTraceFrames(value), [value]);
   return (
-    <Dialog aria-label="Analyze Stack Trace" isOpen maxHeight="min(720px, calc(100vh - 70px))" onOpenChange={(open) => !open && onClose()} padding={0} purpose="form" width="min(820px, calc(100vw - 70px))">
+    <Dialog
+      aria-label="Analyze Stack Trace"
+      isOpen
+      maxHeight="min(720px, calc(100vh - 70px))"
+      onOpenChange={(open) => !open && onClose()}
+      padding={0}
+      purpose="form"
+      width="min(820px, calc(100vw - 70px))"
+    >
       <section className={tw.stackTraceDialog}>
-        <DialogHeader hasDivider onOpenChange={(open) => !open && onClose()} title="Analyze Stack Trace" />
+        <DialogHeader
+          hasDivider
+          onOpenChange={(open) => !open && onClose()}
+          title="Analyze Stack Trace"
+        />
         <main>
           <TextArea
             hasAutoFocus
@@ -33,7 +45,9 @@ export function StackTraceDialog({
           <List aria-label="Stack frames" density="compact" role="listbox">
             {frames.map((frame, index) => (
               <ListItem
-                description={frame.path && frame.line ? `${frame.path}:${frame.line}` : "No source location"}
+                description={
+                  frame.path && frame.line ? `${frame.path}:${frame.line}` : "No source location"
+                }
                 aria-disabled={!frame.path || !frame.line}
                 key={`${frame.text}:${index}`}
                 label={frame.text.trim()}
@@ -44,7 +58,9 @@ export function StackTraceDialog({
             ))}
           </List>
         </main>
-        <footer><Button label="Close" onClick={onClose} variant="primary" /></footer>
+        <footer>
+          <Button label="Close" onClick={onClose} variant="primary" />
+        </footer>
       </section>
     </Dialog>
   );

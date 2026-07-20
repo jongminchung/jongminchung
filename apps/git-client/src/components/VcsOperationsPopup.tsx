@@ -1,8 +1,8 @@
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
-import { List, ListItem } from "@astryxdesign/core/List";
 import type { CommandId } from "../domain/commands";
 import { tw } from "../styles/tailwind";
 import { Icon, type IconName } from "./Icon";
+import { Dialog, DialogHeader } from "./ui";
+import { List, ListItem } from "./ui";
 
 export interface VcsOperationItem {
   readonly commandId: CommandId;
@@ -52,25 +52,15 @@ export function VcsOperationsPopup({
           {groups.map((group, groupIndex) => (
             <section key={`${group.label ?? "operations"}:${groupIndex}`}>
               {group.label && <h3>{group.label}</h3>}
-              <List
-                aria-label={group.label ?? "VCS operations"}
-                density="compact"
-                role="listbox"
-              >
+              <List aria-label={group.label ?? "VCS operations"} density="compact" role="listbox">
                 {group.items.map((item) => (
                   <ListItem
-                    endContent={
-                      item.shortcut ? <kbd>{item.shortcut}</kbd> : undefined
-                    }
+                    endContent={item.shortcut ? <kbd>{item.shortcut}</kbd> : undefined}
                     description={item.disabledReason}
                     isDisabled={Boolean(item.disabledReason)}
                     key={`${item.commandId}:${item.label}`}
                     label={item.label}
-                    onClick={
-                      item.disabledReason
-                        ? undefined
-                        : () => void activate(item)
-                    }
+                    onClick={item.disabledReason ? undefined : () => void activate(item)}
                     role="option"
                     startContent={<Icon name={item.icon} size={14} />}
                   />

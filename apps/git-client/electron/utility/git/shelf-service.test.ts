@@ -27,10 +27,7 @@ import {
   type PatchProcessRunnerLike,
   type PatchProcessSpec,
 } from "./patch-service";
-import {
-  MAX_SHELF_PATCH_BYTES,
-  ShelfService,
-} from "./shelf-service";
+import { MAX_SHELF_PATCH_BYTES, ShelfService } from "./shelf-service";
 
 const temporaryDirectories: string[] = [];
 const GIT_ENVIRONMENT = {
@@ -92,7 +89,8 @@ function repositoryRecord(path: string): RepositoryRecord {
 function registry(record: RepositoryRecord): Readonly<{ get(id: RepositoryId): RepositoryRecord }> {
   return {
     get(id) {
-      if (id !== record.id) throw new GitUtilityError("repositoryNotOpen", "Repository is not open");
+      if (id !== record.id)
+        throw new GitUtilityError("repositoryNotOpen", "Repository is not open");
       return record;
     },
   };
@@ -183,7 +181,10 @@ describe("ShelfService", () => {
     );
     const service = new ShelfService(registry(record), storageRoot, new PatchProcessRunner());
 
-    const entry = await service.create(record.id, "layered changes", ["tracked.txt", untrackedPath]);
+    const entry = await service.create(record.id, "layered changes", [
+      "tracked.txt",
+      untrackedPath,
+    ]);
     const directory = join(storageRoot, "shelves", record.id, entry.id);
 
     expect(await readFile(join(directory, "index.patch"))).toEqual(expectedIndexPatch);
@@ -236,11 +237,13 @@ describe("ShelfService", () => {
       ["restore", "--source=HEAD", "--staged", "--worktree", "--", "tracked.txt"],
     ]);
     expect(runner.specs.every((spec) => spec.cwd === repository)).toBe(true);
-    expect(runner.specs.slice(0, 2).every((spec) => spec.stdoutLimitBytes === MAX_SHELF_PATCH_BYTES + 1))
-      .toBe(true);
+    expect(
+      runner.specs.slice(0, 2).every((spec) => spec.stdoutLimitBytes === MAX_SHELF_PATCH_BYTES + 1),
+    ).toBe(true);
     expect(runner.signals.every((signal) => signal === controller.signal)).toBe(true);
-    expect(await readFile(join(storageRoot, "shelves", record.id, entry.id, "index.patch")))
-      .toEqual(indexPatch);
+    expect(
+      await readFile(join(storageRoot, "shelves", record.id, entry.id, "index.patch")),
+    ).toEqual(indexPatch);
   });
 
   it("rejects invalid messages and pathspecs before Git or filesystem side effects", async () => {
@@ -379,11 +382,9 @@ describe("ShelfService", () => {
       completed(Buffer.alloc(MAX_SHELF_PATCH_BYTES + 1, 0x78)),
     ]);
     await expect(
-      new ShelfService(registry(record), storageRoot, tooLargeRunner).create(
-        record.id,
-        "large",
-        ["tracked.txt"],
-      ),
+      new ShelfService(registry(record), storageRoot, tooLargeRunner).create(record.id, "large", [
+        "tracked.txt",
+      ]),
     ).rejects.toMatchObject({ code: "outputLimit" });
 
     const secret = `https://alice:password@example.invalid token=secret-${randomUUID()}`;

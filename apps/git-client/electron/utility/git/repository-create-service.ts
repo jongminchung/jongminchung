@@ -1,9 +1,9 @@
 import { z } from "zod";
-import type { CloneOptions } from "../../../src/generated/CloneOptions";
 import {
   GIT_OUTPUT_LIMIT_BYTES,
   GIT_QUERY_TIMEOUT_MS,
 } from "../../../src/shared/contracts/git-utility";
+import type { CloneOptions } from "../../../src/shared/contracts/model/CloneOptions";
 import { displayGitCommand, type GitProcessOutcome } from "./git-process";
 import { redactCredentials, safeErrorMessage } from "./redaction";
 import {

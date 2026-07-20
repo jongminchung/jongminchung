@@ -56,6 +56,7 @@ export interface GitUtilityServiceLike {
     repositoryId: RepositoryId,
     path: string,
     content: string,
+    activityName?: string,
   ): Promise<void>;
   watchRepository(repositoryId: RepositoryId, listener: RepositoryChangedListener): Promise<void>;
   unwatchRepository(repositoryId: RepositoryId): Promise<void>;
@@ -239,6 +240,7 @@ export class GitUtilityProtocolServer {
           message.request.repositoryId,
           message.request.path,
           message.request.content,
+          message.request.activityName ?? undefined,
         );
         this.#post({
           kind: "writeWorkingTreeFileResult",

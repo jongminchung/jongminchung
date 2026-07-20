@@ -1,16 +1,15 @@
-import {
-  CommandPaletteInput,
-  CommandPaletteItem,
-  CommandPaletteList,
-} from "@astryxdesign/core/CommandPalette";
-import { Dialog } from "@astryxdesign/core/Dialog";
 import { useEffect, useId, useMemo, useState } from "react";
 import type { KeyboardEvent, ReactNode } from "react";
 import { sortPaletteItems } from "../domain/commands";
 import type { PaletteItem, PaletteScope } from "../domain/commands";
+import { CommandPaletteInput, CommandPaletteItem, CommandPaletteList } from "./ui";
+import { Dialog } from "./ui";
 
 const PALETTE_COPY = {
-  all: { label: "Search Everywhere", placeholder: "Type a command, repository, ref, commit, file, or change" },
+  all: {
+    label: "Search Everywhere",
+    placeholder: "Type a command, repository, ref, commit, file, or change",
+  },
   files: { label: "Go to File", placeholder: "Enter file name" },
   recentFiles: { label: "Recent Files", placeholder: "Search recent files" },
   recentLocations: { label: "Recent Locations", placeholder: "Search recent locations" },
@@ -18,7 +17,9 @@ const PALETTE_COPY = {
   classes: { label: "Go to Class", placeholder: "Enter class name" },
   symbols: { label: "Go to Symbol", placeholder: "Enter symbol name" },
   text: { label: "Go to Text", placeholder: "Enter text to search" },
-} as const satisfies Readonly<Record<PaletteScope, Readonly<{ label: string; placeholder: string }>>>;
+} as const satisfies Readonly<
+  Record<PaletteScope, Readonly<{ label: string; placeholder: string }>>
+>;
 
 export function CommandPalette({
   items,
@@ -37,7 +38,7 @@ export function CommandPalette({
   const [activeIndex, setActiveIndex] = useState(0);
   const listId = useId();
   const scopedItems = useMemo(
-    () => scope === "all" ? items : items.filter((item) => item.scopes?.includes(scope)),
+    () => (scope === "all" ? items : items.filter((item) => item.scopes?.includes(scope))),
     [items, scope],
   );
   const results = useMemo(() => sortPaletteItems(scopedItems, query), [query, scopedItems]);
@@ -116,7 +117,9 @@ export function CommandPalette({
                 <span className="grid min-w-0 flex-1 gap-0.5">
                   <strong className="truncate">{item.label}</strong>
                   <small className="truncate text-secondary">
-                    {item.availability.status === "disabled" ? item.availability.reason : item.detail}
+                    {item.availability.status === "disabled"
+                      ? item.availability.reason
+                      : item.detail}
                   </small>
                 </span>
                 <em className="not-italic text-secondary">{item.category}</em>

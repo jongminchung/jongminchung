@@ -1,13 +1,13 @@
 import { randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
-import {
-  TERMINAL_UTILITY_PROTOCOL_VERSION,
-  TerminalUtilityToMainMessageSchema,
-} from "../../../src/shared/contracts/terminal-utility-process";
 import type {
   TerminalCreateResult,
   TerminalEventEnvelope,
 } from "../../../src/shared/contracts/terminal";
+import {
+  TERMINAL_UTILITY_PROTOCOL_VERSION,
+  TerminalUtilityToMainMessageSchema,
+} from "../../../src/shared/contracts/terminal-utility-process";
 import {
   TerminalUtilityProtocolServer,
   type TerminalUtilityServerPort,
@@ -39,7 +39,10 @@ class FakeServerPort implements TerminalUtilityServerPort {
 class FakeTerminalUtility implements TerminalUtilityServiceLike {
   disposeCount = 0;
 
-  create(_request: unknown, listener: (event: TerminalEventEnvelope) => void): TerminalCreateResult {
+  create(
+    _request: unknown,
+    listener: (event: TerminalEventEnvelope) => void,
+  ): TerminalCreateResult {
     listener({
       kind: "output",
       requestId: REQUEST_ID,

@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { build } from "vite";
 import { afterEach, describe, expect, it } from "vitest";
-import type { GitOperation, RebasePlanEntry } from "../../../src/generated";
+import type { GitOperation, RebasePlanEntry } from "../../../src/shared/contracts/model";
 import { SequenceEditorSession } from "./sequence-editor";
 import { createSequenceEditorCommand } from "./sequence-editor-cli";
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { sampleRefs } from "./sampleData";
 import { checkoutTarget, deleteRefOperation } from "./refActions";
+import { sampleRefs } from "./sampleData";
 
 describe("reference actions", () => {
   it("checks out user-facing local, remote, and tag names instead of full refs", () => {

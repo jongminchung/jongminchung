@@ -1,10 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { TerminalBridge } from "../bridge/TerminalBridge";
-import type { RepositoryId, TerminalEvent, TerminalId } from "../generated";
-import type {
-  TerminalLaunchTarget,
-  TerminalLaunchTargets,
-} from "../shared/contracts/terminal";
+import type { RepositoryId, TerminalEvent, TerminalId } from "../shared/contracts/model";
+import type { TerminalLaunchTarget, TerminalLaunchTargets } from "../shared/contracts/terminal";
 import { TerminalService } from "./TerminalService";
 
 class FakeTerminalBridge implements TerminalBridge {
@@ -138,9 +135,7 @@ describe("TerminalService", () => {
     finishRead({ "repository-a": ["Local"] });
     await Promise.all([first, second]);
     expect(get).toHaveBeenCalledTimes(1);
-    expect(bridge.createCalls).toEqual([
-      { repositoryId: "repository-a", cols: 100, rows: 28 },
-    ]);
+    expect(bridge.createCalls).toEqual([{ repositoryId: "repository-a", cols: 100, rows: 28 }]);
     expect(service.sessions("repository-a")).toHaveLength(1);
     vi.unstubAllGlobals();
   });

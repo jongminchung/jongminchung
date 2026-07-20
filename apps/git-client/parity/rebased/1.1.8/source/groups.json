@@ -141,9 +141,7 @@
       },
       "bundle": {
         "name": "messages.LocalHistoryBundle",
-        "paths": [
-          "platform/lvcs-impl/resources/messages/LocalHistoryBundle.properties"
-        ],
+        "paths": ["platform/lvcs-impl/resources/messages/LocalHistoryBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -182,9 +180,7 @@
       },
       "bundle": {
         "name": "messages.LocalHistoryBundle",
-        "paths": [
-          "platform/lvcs-impl/resources/messages/LocalHistoryBundle.properties"
-        ],
+        "paths": ["platform/lvcs-impl/resources/messages/LocalHistoryBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -225,9 +221,7 @@
       },
       "bundle": {
         "name": "messages.LocalHistoryBundle",
-        "paths": [
-          "platform/lvcs-impl/resources/messages/LocalHistoryBundle.properties"
-        ],
+        "paths": ["platform/lvcs-impl/resources/messages/LocalHistoryBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -256,9 +250,7 @@
       },
       "bundle": {
         "name": "messages.LocalHistoryBundle",
-        "paths": [
-          "platform/lvcs-impl/resources/messages/LocalHistoryBundle.properties"
-        ],
+        "paths": ["platform/lvcs-impl/resources/messages/LocalHistoryBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -315,9 +307,7 @@
       },
       "bundle": {
         "name": "messages.LocalHistoryBundle",
-        "paths": [
-          "platform/lvcs-impl/resources/messages/LocalHistoryBundle.properties"
-        ],
+        "paths": ["platform/lvcs-impl/resources/messages/LocalHistoryBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -451,9 +441,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerImplBundle",
-        "paths": [
-          "platform/xdebugger-impl/resources/messages/XDebuggerImplBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/resources/messages/XDebuggerImplBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -611,9 +599,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -679,9 +665,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -766,9 +750,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -1285,9 +1267,7 @@
       },
       "bundle": {
         "name": "messages.ActionsBundle",
-        "paths": [
-          "platform/platform-resources-en/src/messages/ActionsBundle.properties"
-        ],
+        "paths": ["platform/platform-resources-en/src/messages/ActionsBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -1335,9 +1315,7 @@
       },
       "bundle": {
         "name": "messages.ActionsBundle",
-        "paths": [
-          "platform/platform-resources-en/src/messages/ActionsBundle.properties"
-        ],
+        "paths": ["platform/platform-resources-en/src/messages/ActionsBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -1367,9 +1345,7 @@
       },
       "bundle": {
         "name": "messages.ActionsBundle",
-        "paths": [
-          "platform/platform-resources-en/src/messages/ActionsBundle.properties"
-        ],
+        "paths": ["platform/platform-resources-en/src/messages/ActionsBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -1399,9 +1375,7 @@
       },
       "bundle": {
         "name": "messages.ActionsBundle",
-        "paths": [
-          "platform/platform-resources-en/src/messages/ActionsBundle.properties"
-        ],
+        "paths": ["platform/platform-resources-en/src/messages/ActionsBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -1430,9 +1404,7 @@
       },
       "bundle": {
         "name": "messages.ActionsBundle",
-        "paths": [
-          "platform/platform-resources-en/src/messages/ActionsBundle.properties"
-        ],
+        "paths": ["platform/platform-resources-en/src/messages/ActionsBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -1478,9 +1450,7 @@
       },
       "bundle": {
         "name": "messages.ActionsBundle",
-        "paths": [
-          "platform/platform-resources-en/src/messages/ActionsBundle.properties"
-        ],
+        "paths": ["platform/platform-resources-en/src/messages/ActionsBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -1509,9 +1479,7 @@
       },
       "bundle": {
         "name": "messages.ActionsBundle",
-        "paths": [
-          "platform/platform-resources-en/src/messages/ActionsBundle.properties"
-        ],
+        "paths": ["platform/platform-resources-en/src/messages/ActionsBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -1719,9 +1687,7 @@
       },
       "bundle": {
         "name": "messages.LangBundle",
-        "paths": [
-          "platform/lang-api/resources/messages/LangBundle.properties"
-        ],
+        "paths": ["platform/lang-api/resources/messages/LangBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -1750,9 +1716,7 @@
       },
       "bundle": {
         "name": "messages.LangBundle",
-        "paths": [
-          "platform/lang-api/resources/messages/LangBundle.properties"
-        ],
+        "paths": ["platform/lang-api/resources/messages/LangBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -2123,9 +2087,7 @@
       },
       "bundle": {
         "name": "messages.VcsBundle",
-        "paths": [
-          "platform/vcs-api/vcs-api-core/resources/messages/VcsBundle.properties"
-        ],
+        "paths": ["platform/vcs-api/vcs-api-core/resources/messages/VcsBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -2470,9 +2432,7 @@
       },
       "bundle": {
         "name": "messages.VcsBundle",
-        "paths": [
-          "platform/vcs-api/vcs-api-core/resources/messages/VcsBundle.properties"
-        ],
+        "paths": ["platform/vcs-api/vcs-api-core/resources/messages/VcsBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -2536,9 +2496,7 @@
       },
       "bundle": {
         "name": "messages.VcsBundle",
-        "paths": [
-          "platform/vcs-api/vcs-api-core/resources/messages/VcsBundle.properties"
-        ],
+        "paths": ["platform/vcs-api/vcs-api-core/resources/messages/VcsBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -3165,9 +3123,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -3206,9 +3162,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -3272,9 +3226,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -3347,9 +3299,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -3380,9 +3330,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -3412,9 +3360,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -3445,9 +3391,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -3477,9 +3421,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -3508,9 +3450,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -3549,9 +3489,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -3581,9 +3519,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -3613,9 +3549,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -3784,9 +3718,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -3825,9 +3757,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -3857,9 +3787,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -3907,9 +3835,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -3959,9 +3885,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -3990,9 +3914,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -4031,9 +3953,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -4074,9 +3994,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -4124,9 +4042,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -4165,9 +4081,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -4214,9 +4128,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -4245,9 +4157,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -4278,9 +4188,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -4337,9 +4245,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -4378,9 +4284,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -4428,9 +4332,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -4477,9 +4379,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -4519,9 +4419,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -4595,9 +4493,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -4681,9 +4577,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -4773,9 +4667,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -4814,9 +4706,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -4845,9 +4735,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -4877,9 +4765,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -4908,9 +4794,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -5149,9 +5033,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -5192,9 +5074,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -5225,9 +5105,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -5590,9 +5468,7 @@
       },
       "bundle": {
         "name": "messages.CoverageBundle",
-        "paths": [
-          "plugins/coverage-common/resources/messages/CoverageBundle.properties"
-        ],
+        "paths": ["plugins/coverage-common/resources/messages/CoverageBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -5631,9 +5507,7 @@
       },
       "bundle": {
         "name": "messages.CoverageBundle",
-        "paths": [
-          "plugins/coverage-common/resources/messages/CoverageBundle.properties"
-        ],
+        "paths": ["plugins/coverage-common/resources/messages/CoverageBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -5970,9 +5844,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerUiBundle",
-        "paths": [
-          "platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -6607,9 +6479,7 @@
       },
       "bundle": {
         "name": "messages.XmlDomBundle",
-        "paths": [
-          "xml/dom-openapi/resources/messages/XmlDomBundle.properties"
-        ],
+        "paths": ["xml/dom-openapi/resources/messages/XmlDomBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -6745,9 +6615,7 @@
       },
       "bundle": {
         "name": "messages.ActionsBundle",
-        "paths": [
-          "platform/platform-resources-en/src/messages/ActionsBundle.properties"
-        ],
+        "paths": ["platform/platform-resources-en/src/messages/ActionsBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -10611,9 +10479,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -10642,9 +10508,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -10731,9 +10595,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -10762,9 +10624,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -10793,9 +10653,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -10826,9 +10684,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -10857,9 +10713,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -10908,9 +10762,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -10941,9 +10793,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -10990,9 +10840,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -11041,9 +10889,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -11072,9 +10918,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -11114,9 +10958,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -11147,9 +10989,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -11218,9 +11058,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -11320,9 +11158,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -11370,9 +11206,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -11464,9 +11298,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -11549,9 +11381,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -11581,9 +11411,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -11613,9 +11441,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -11646,9 +11472,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -11689,9 +11513,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -11746,9 +11568,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -11777,9 +11597,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -11941,9 +11759,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -11992,9 +11808,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -12033,9 +11847,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -12064,9 +11876,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -12097,9 +11907,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -12304,9 +12112,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -12346,9 +12152,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -12416,9 +12220,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -12449,9 +12251,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -12483,9 +12283,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -12559,9 +12357,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -12655,9 +12451,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -12687,9 +12481,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -12747,9 +12539,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -12816,9 +12606,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -12875,9 +12663,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -12943,9 +12729,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -13181,9 +12965,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -13240,9 +13022,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -13309,9 +13089,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -13387,9 +13165,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -13445,9 +13221,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -13532,9 +13306,7 @@
       },
       "bundle": {
         "name": "messages.GithubBundle",
-        "paths": [
-          "plugins/github/github-core/resources/messages/GithubBundle.properties"
-        ],
+        "paths": ["plugins/github/github-core/resources/messages/GithubBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -13565,9 +13337,7 @@
       },
       "bundle": {
         "name": "messages.GithubBundle",
-        "paths": [
-          "plugins/github/github-core/resources/messages/GithubBundle.properties"
-        ],
+        "paths": ["plugins/github/github-core/resources/messages/GithubBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -13677,9 +13447,7 @@
       },
       "bundle": {
         "name": "messages.GithubBundle",
-        "paths": [
-          "plugins/github/github-core/resources/messages/GithubBundle.properties"
-        ],
+        "paths": ["plugins/github/github-core/resources/messages/GithubBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -13708,9 +13476,7 @@
       },
       "bundle": {
         "name": "messages.GithubBundle",
-        "paths": [
-          "plugins/github/github-core/resources/messages/GithubBundle.properties"
-        ],
+        "paths": ["plugins/github/github-core/resources/messages/GithubBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -13757,9 +13523,7 @@
       },
       "bundle": {
         "name": "messages.GithubBundle",
-        "paths": [
-          "plugins/github/github-core/resources/messages/GithubBundle.properties"
-        ],
+        "paths": ["plugins/github/github-core/resources/messages/GithubBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -13788,9 +13552,7 @@
       },
       "bundle": {
         "name": "messages.GithubBundle",
-        "paths": [
-          "plugins/github/github-core/resources/messages/GithubBundle.properties"
-        ],
+        "paths": ["plugins/github/github-core/resources/messages/GithubBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -13908,9 +13670,7 @@
       },
       "bundle": {
         "name": "messages.GithubBundle",
-        "paths": [
-          "plugins/github/github-core/resources/messages/GithubBundle.properties"
-        ],
+        "paths": ["plugins/github/github-core/resources/messages/GithubBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -13968,9 +13728,7 @@
       },
       "bundle": {
         "name": "messages.GithubBundle",
-        "paths": [
-          "plugins/github/github-core/resources/messages/GithubBundle.properties"
-        ],
+        "paths": ["plugins/github/github-core/resources/messages/GithubBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -14009,9 +13767,7 @@
       },
       "bundle": {
         "name": "messages.GithubBundle",
-        "paths": [
-          "plugins/github/github-core/resources/messages/GithubBundle.properties"
-        ],
+        "paths": ["plugins/github/github-core/resources/messages/GithubBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -14071,9 +13827,7 @@
       },
       "bundle": {
         "name": "messages.GithubBundle",
-        "paths": [
-          "plugins/github/github-core/resources/messages/GithubBundle.properties"
-        ],
+        "paths": ["plugins/github/github-core/resources/messages/GithubBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -14102,9 +13856,7 @@
       },
       "bundle": {
         "name": "messages.GithubBundle",
-        "paths": [
-          "plugins/github/github-core/resources/messages/GithubBundle.properties"
-        ],
+        "paths": ["plugins/github/github-core/resources/messages/GithubBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -14152,9 +13904,7 @@
       },
       "bundle": {
         "name": "messages.GithubBundle",
-        "paths": [
-          "plugins/github/github-core/resources/messages/GithubBundle.properties"
-        ],
+        "paths": ["plugins/github/github-core/resources/messages/GithubBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -14212,9 +13962,7 @@
       },
       "bundle": {
         "name": "messages.GitLabBundle",
-        "paths": [
-          "plugins/gitlab/gitlab-core/resources/messages/GitLabBundle.properties"
-        ],
+        "paths": ["plugins/gitlab/gitlab-core/resources/messages/GitLabBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -14246,9 +13994,7 @@
       },
       "bundle": {
         "name": "messages.GitLabBundle",
-        "paths": [
-          "plugins/gitlab/gitlab-core/resources/messages/GitLabBundle.properties"
-        ],
+        "paths": ["plugins/gitlab/gitlab-core/resources/messages/GitLabBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -14339,9 +14085,7 @@
       },
       "bundle": {
         "name": "messages.GitLabBundle",
-        "paths": [
-          "plugins/gitlab/gitlab-core/resources/messages/GitLabBundle.properties"
-        ],
+        "paths": ["plugins/gitlab/gitlab-core/resources/messages/GitLabBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -14459,9 +14203,7 @@
       },
       "bundle": {
         "name": "messages.GitLabBundle",
-        "paths": [
-          "plugins/gitlab/gitlab-core/resources/messages/GitLabBundle.properties"
-        ],
+        "paths": ["plugins/gitlab/gitlab-core/resources/messages/GitLabBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -14492,9 +14234,7 @@
       },
       "bundle": {
         "name": "messages.GitLabBundle",
-        "paths": [
-          "plugins/gitlab/gitlab-core/resources/messages/GitLabBundle.properties"
-        ],
+        "paths": ["plugins/gitlab/gitlab-core/resources/messages/GitLabBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -14533,9 +14273,7 @@
       },
       "bundle": {
         "name": "messages.GitLabBundle",
-        "paths": [
-          "plugins/gitlab/gitlab-core/resources/messages/GitLabBundle.properties"
-        ],
+        "paths": ["plugins/gitlab/gitlab-core/resources/messages/GitLabBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -14595,9 +14333,7 @@
       },
       "bundle": {
         "name": "messages.GitLabBundle",
-        "paths": [
-          "plugins/gitlab/gitlab-core/resources/messages/GitLabBundle.properties"
-        ],
+        "paths": ["plugins/gitlab/gitlab-core/resources/messages/GitLabBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -14626,9 +14362,7 @@
       },
       "bundle": {
         "name": "messages.GitLabBundle",
-        "paths": [
-          "plugins/gitlab/gitlab-core/resources/messages/GitLabBundle.properties"
-        ],
+        "paths": ["plugins/gitlab/gitlab-core/resources/messages/GitLabBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -14702,9 +14436,7 @@
       },
       "bundle": {
         "name": "messages.GitLabBundle",
-        "paths": [
-          "plugins/gitlab/gitlab-core/resources/messages/GitLabBundle.properties"
-        ],
+        "paths": ["plugins/gitlab/gitlab-core/resources/messages/GitLabBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -14751,9 +14483,7 @@
       },
       "bundle": {
         "name": "messages.GitLabBundle",
-        "paths": [
-          "plugins/gitlab/gitlab-core/resources/messages/GitLabBundle.properties"
-        ],
+        "paths": ["plugins/gitlab/gitlab-core/resources/messages/GitLabBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -14801,9 +14531,7 @@
       },
       "bundle": {
         "name": "messages.GitLabBundle",
-        "paths": [
-          "plugins/gitlab/gitlab-core/resources/messages/GitLabBundle.properties"
-        ],
+        "paths": ["plugins/gitlab/gitlab-core/resources/messages/GitLabBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -14870,9 +14598,7 @@
       },
       "bundle": {
         "name": "messages.GitLabBundle",
-        "paths": [
-          "plugins/gitlab/gitlab-core/resources/messages/GitLabBundle.properties"
-        ],
+        "paths": ["plugins/gitlab/gitlab-core/resources/messages/GitLabBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -14903,9 +14629,7 @@
       },
       "bundle": {
         "name": "messages.GitFrontendBundle",
-        "paths": [
-          "plugins/git4idea/frontend/resources/messages/GitFrontendBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/frontend/resources/messages/GitFrontendBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -14934,9 +14658,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -15047,9 +14769,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -15849,9 +15569,7 @@
       },
       "bundle": {
         "name": "messages.ImagesBundle",
-        "paths": [
-          "images/resources/messages/ImagesBundle.properties"
-        ],
+        "paths": ["images/resources/messages/ImagesBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -16011,9 +15729,7 @@
       },
       "bundle": {
         "name": "messages.ImagesBundle",
-        "paths": [
-          "images/resources/messages/ImagesBundle.properties"
-        ],
+        "paths": ["images/resources/messages/ImagesBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -16142,9 +15858,7 @@
       },
       "bundle": {
         "name": "messages.ImagesBundle",
-        "paths": [
-          "images/resources/messages/ImagesBundle.properties"
-        ],
+        "paths": ["images/resources/messages/ImagesBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -16173,9 +15887,7 @@
       },
       "bundle": {
         "name": "messages.ImagesBundle",
-        "paths": [
-          "images/resources/messages/ImagesBundle.properties"
-        ],
+        "paths": ["images/resources/messages/ImagesBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -16204,9 +15916,7 @@
       },
       "bundle": {
         "name": "messages.ImagesBundle",
-        "paths": [
-          "images/resources/messages/ImagesBundle.properties"
-        ],
+        "paths": ["images/resources/messages/ImagesBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -16262,9 +15972,7 @@
       },
       "bundle": {
         "name": "messages.ImagesBundle",
-        "paths": [
-          "images/resources/messages/ImagesBundle.properties"
-        ],
+        "paths": ["images/resources/messages/ImagesBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -16330,9 +16038,7 @@
       },
       "bundle": {
         "name": "messages.ImagesBundle",
-        "paths": [
-          "images/resources/messages/ImagesBundle.properties"
-        ],
+        "paths": ["images/resources/messages/ImagesBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -16361,9 +16067,7 @@
       },
       "bundle": {
         "name": "messages.ImagesBundle",
-        "paths": [
-          "images/resources/messages/ImagesBundle.properties"
-        ],
+        "paths": ["images/resources/messages/ImagesBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -17630,9 +17334,7 @@
       },
       "bundle": {
         "name": "messages.LocalHistoryBundle",
-        "paths": [
-          "platform/lvcs-impl/resources/messages/LocalHistoryBundle.properties"
-        ],
+        "paths": ["platform/lvcs-impl/resources/messages/LocalHistoryBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -17715,9 +17417,7 @@
       },
       "bundle": {
         "name": "messages.LocalHistoryBundle",
-        "paths": [
-          "platform/lvcs-impl/resources/messages/LocalHistoryBundle.properties"
-        ],
+        "paths": ["platform/lvcs-impl/resources/messages/LocalHistoryBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -17773,9 +17473,7 @@
       },
       "bundle": {
         "name": "messages.VcsLogBundle",
-        "paths": [
-          "platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"
-        ],
+        "paths": ["platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -17940,9 +17638,7 @@
       },
       "bundle": {
         "name": "messages.VcsLogBundle",
-        "paths": [
-          "platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"
-        ],
+        "paths": ["platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -18158,9 +17854,7 @@
       },
       "bundle": {
         "name": "messages.VcsLogBundle",
-        "paths": [
-          "platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"
-        ],
+        "paths": ["platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -18710,9 +18404,7 @@
       },
       "bundle": {
         "name": "messages.GitFrontendBundle",
-        "paths": [
-          "plugins/git4idea/frontend/resources/messages/GitFrontendBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/frontend/resources/messages/GitFrontendBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -18863,9 +18555,7 @@
       },
       "bundle": {
         "name": "messages.ActionsBundle",
-        "paths": [
-          "platform/platform-resources-en/src/messages/ActionsBundle.properties"
-        ],
+        "paths": ["platform/platform-resources-en/src/messages/ActionsBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -18946,9 +18636,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerImplBundle",
-        "paths": [
-          "platform/xdebugger-impl/resources/messages/XDebuggerImplBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/resources/messages/XDebuggerImplBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -19021,9 +18709,7 @@
       },
       "bundle": {
         "name": "messages.MinimapBundle",
-        "paths": [
-          "platform/platform-impl/resources/messages/MinimapBundle.properties"
-        ],
+        "paths": ["platform/platform-impl/resources/messages/MinimapBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -19089,9 +18775,7 @@
       },
       "bundle": {
         "name": "messages.NavBarFrontendBundle",
-        "paths": [
-          "platform/navbar/frontend/resources/messages/NavBarFrontendBundle.properties"
-        ],
+        "paths": ["platform/navbar/frontend/resources/messages/NavBarFrontendBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -19121,9 +18805,7 @@
       },
       "bundle": {
         "name": "messages.NavBarFrontendBundle",
-        "paths": [
-          "platform/navbar/frontend/resources/messages/NavBarFrontendBundle.properties"
-        ],
+        "paths": ["platform/navbar/frontend/resources/messages/NavBarFrontendBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -19631,9 +19313,7 @@
       },
       "bundle": {
         "name": "messages.ActionsBundle",
-        "paths": [
-          "platform/platform-resources-en/src/messages/ActionsBundle.properties"
-        ],
+        "paths": ["platform/platform-resources-en/src/messages/ActionsBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -20008,9 +19688,7 @@
       },
       "bundle": {
         "name": "messages.ActionsBundle",
-        "paths": [
-          "platform/platform-resources-en/src/messages/ActionsBundle.properties"
-        ],
+        "paths": ["platform/platform-resources-en/src/messages/ActionsBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -20347,9 +20025,7 @@
       },
       "bundle": {
         "name": "messages.ActionsBundle",
-        "paths": [
-          "platform/platform-resources-en/src/messages/ActionsBundle.properties"
-        ],
+        "paths": ["platform/platform-resources-en/src/messages/ActionsBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -20434,9 +20110,7 @@
       },
       "bundle": {
         "name": "messages.ActionsBundle",
-        "paths": [
-          "platform/platform-resources-en/src/messages/ActionsBundle.properties"
-        ],
+        "paths": ["platform/platform-resources-en/src/messages/ActionsBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -22656,9 +22330,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerImplBundle",
-        "paths": [
-          "platform/xdebugger-impl/resources/messages/XDebuggerImplBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/resources/messages/XDebuggerImplBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -22687,9 +22359,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerImplBundle",
-        "paths": [
-          "platform/xdebugger-impl/resources/messages/XDebuggerImplBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/resources/messages/XDebuggerImplBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -22845,9 +22515,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerImplBundle",
-        "paths": [
-          "platform/xdebugger-impl/resources/messages/XDebuggerImplBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/resources/messages/XDebuggerImplBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -23269,9 +22937,7 @@
       },
       "bundle": {
         "name": "messages.SettingsSyncBundle",
-        "paths": [
-          "platform/settings-sync-core/resources/messages/SettingsSyncBundle.properties"
-        ],
+        "paths": ["platform/settings-sync-core/resources/messages/SettingsSyncBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -23921,9 +23587,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -24231,9 +23895,7 @@
       },
       "bundle": {
         "name": "messages.ActionsBundle",
-        "paths": [
-          "platform/platform-resources-en/src/messages/ActionsBundle.properties"
-        ],
+        "paths": ["platform/platform-resources-en/src/messages/ActionsBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -24314,9 +23976,7 @@
       },
       "bundle": {
         "name": "messages.DataGridBundle",
-        "paths": [
-          "grid/core-impl/resources/messages/DataGridBundle.properties"
-        ],
+        "paths": ["grid/core-impl/resources/messages/DataGridBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -24476,9 +24136,7 @@
       },
       "bundle": {
         "name": "messages.TerminalBundle",
-        "paths": [
-          "plugins/terminal/resources/messages/TerminalBundle.properties"
-        ],
+        "paths": ["plugins/terminal/resources/messages/TerminalBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -24508,9 +24166,7 @@
       },
       "bundle": {
         "name": "messages.TerminalBundle",
-        "paths": [
-          "plugins/terminal/resources/messages/TerminalBundle.properties"
-        ],
+        "paths": ["plugins/terminal/resources/messages/TerminalBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -24539,9 +24195,7 @@
       },
       "bundle": {
         "name": "messages.TerminalBundle",
-        "paths": [
-          "plugins/terminal/resources/messages/TerminalBundle.properties"
-        ],
+        "paths": ["plugins/terminal/resources/messages/TerminalBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -24607,9 +24261,7 @@
       },
       "bundle": {
         "name": "messages.TerminalBundle",
-        "paths": [
-          "plugins/terminal/resources/messages/TerminalBundle.properties"
-        ],
+        "paths": ["plugins/terminal/resources/messages/TerminalBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -24685,9 +24337,7 @@
       },
       "bundle": {
         "name": "messages.TerminalBundle",
-        "paths": [
-          "plugins/terminal/resources/messages/TerminalBundle.properties"
-        ],
+        "paths": ["plugins/terminal/resources/messages/TerminalBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -24716,9 +24366,7 @@
       },
       "bundle": {
         "name": "messages.TerminalBundle",
-        "paths": [
-          "plugins/terminal/resources/messages/TerminalBundle.properties"
-        ],
+        "paths": ["plugins/terminal/resources/messages/TerminalBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -24747,9 +24395,7 @@
       },
       "bundle": {
         "name": "messages.TerminalBundle",
-        "paths": [
-          "plugins/terminal/resources/messages/TerminalBundle.properties"
-        ],
+        "paths": ["plugins/terminal/resources/messages/TerminalBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -24928,9 +24574,7 @@
       },
       "bundle": {
         "name": "messages.TerminalBundle",
-        "paths": [
-          "plugins/terminal/resources/messages/TerminalBundle.properties"
-        ],
+        "paths": ["plugins/terminal/resources/messages/TerminalBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -24969,9 +24613,7 @@
       },
       "bundle": {
         "name": "messages.TerminalBundle",
-        "paths": [
-          "plugins/terminal/resources/messages/TerminalBundle.properties"
-        ],
+        "paths": ["plugins/terminal/resources/messages/TerminalBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -25000,9 +24642,7 @@
       },
       "bundle": {
         "name": "messages.ActionsBundle",
-        "paths": [
-          "platform/platform-resources-en/src/messages/ActionsBundle.properties"
-        ],
+        "paths": ["platform/platform-resources-en/src/messages/ActionsBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -25324,9 +24964,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerUiBundle",
-        "paths": [
-          "platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -26720,9 +26358,7 @@
       },
       "bundle": {
         "name": "messages.UsageViewBundle",
-        "paths": [
-          "platform/usageView/resources/messages/UsageViewBundle.properties"
-        ],
+        "paths": ["platform/usageView/resources/messages/UsageViewBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -26751,9 +26387,7 @@
       },
       "bundle": {
         "name": "messages.UsageViewBundle",
-        "paths": [
-          "platform/usageView/resources/messages/UsageViewBundle.properties"
-        ],
+        "paths": ["platform/usageView/resources/messages/UsageViewBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -27143,9 +26777,7 @@
       },
       "bundle": {
         "name": "messages.VcsLogBundle",
-        "paths": [
-          "platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"
-        ],
+        "paths": ["platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -27285,9 +26917,7 @@
       },
       "bundle": {
         "name": "messages.VcsLogBundle",
-        "paths": [
-          "platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"
-        ],
+        "paths": ["platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -27352,9 +26982,7 @@
       },
       "bundle": {
         "name": "messages.VcsLogBundle",
-        "paths": [
-          "platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"
-        ],
+        "paths": ["platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -27454,9 +27082,7 @@
       },
       "bundle": {
         "name": "messages.VcsLogBundle",
-        "paths": [
-          "platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"
-        ],
+        "paths": ["platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -27600,9 +27226,7 @@
       },
       "bundle": {
         "name": "messages.VcsLogBundle",
-        "paths": [
-          "platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"
-        ],
+        "paths": ["platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -27658,9 +27282,7 @@
       },
       "bundle": {
         "name": "messages.VcsLogBundle",
-        "paths": [
-          "platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"
-        ],
+        "paths": ["platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -27710,9 +27332,7 @@
       },
       "bundle": {
         "name": "messages.VcsLogBundle",
-        "paths": [
-          "platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"
-        ],
+        "paths": ["platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -27769,9 +27389,7 @@
       },
       "bundle": {
         "name": "messages.VcsLogBundle",
-        "paths": [
-          "platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"
-        ],
+        "paths": ["platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -27828,9 +27446,7 @@
       },
       "bundle": {
         "name": "messages.VcsLogBundle",
-        "paths": [
-          "platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"
-        ],
+        "paths": ["platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -27940,9 +27556,7 @@
       },
       "bundle": {
         "name": "messages.VcsLogBundle",
-        "paths": [
-          "platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"
-        ],
+        "paths": ["platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -27991,9 +27605,7 @@
       },
       "bundle": {
         "name": "messages.VcsLogBundle",
-        "paths": [
-          "platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"
-        ],
+        "paths": ["platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -28024,9 +27636,7 @@
       },
       "bundle": {
         "name": "messages.VcsLogBundle",
-        "paths": [
-          "platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"
-        ],
+        "paths": ["platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -28095,9 +27705,7 @@
       },
       "bundle": {
         "name": "messages.VcsLogBundle",
-        "paths": [
-          "platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"
-        ],
+        "paths": ["platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -28165,9 +27773,7 @@
       },
       "bundle": {
         "name": "messages.VcsLogBundle",
-        "paths": [
-          "platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"
-        ],
+        "paths": ["platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -28286,9 +27892,7 @@
       },
       "bundle": {
         "name": "messages.VcsLogBundle",
-        "paths": [
-          "platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"
-        ],
+        "paths": ["platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -28337,9 +27941,7 @@
       },
       "bundle": {
         "name": "messages.VcsLogBundle",
-        "paths": [
-          "platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"
-        ],
+        "paths": ["platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -28368,9 +27970,7 @@
       },
       "bundle": {
         "name": "messages.VcsLogBundle",
-        "paths": [
-          "platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"
-        ],
+        "paths": ["platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -28399,9 +27999,7 @@
       },
       "bundle": {
         "name": "messages.VcsLogBundle",
-        "paths": [
-          "platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"
-        ],
+        "paths": ["platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -28440,9 +28038,7 @@
       },
       "bundle": {
         "name": "messages.VcsLogBundle",
-        "paths": [
-          "platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"
-        ],
+        "paths": ["platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -28508,9 +28104,7 @@
       },
       "bundle": {
         "name": "messages.VcsLogBundle",
-        "paths": [
-          "platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"
-        ],
+        "paths": ["platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -28542,9 +28136,7 @@
       },
       "bundle": {
         "name": "messages.VcsLogBundle",
-        "paths": [
-          "platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"
-        ],
+        "paths": ["platform/vcs-log/impl/resources/messages/VcsLogBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -29432,9 +29024,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -29527,9 +29117,7 @@
       },
       "bundle": {
         "name": "messages.GitBundle",
-        "paths": [
-          "plugins/git4idea/shared/resources/messages/GitBundle.properties"
-        ],
+        "paths": ["plugins/git4idea/shared/resources/messages/GitBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -31315,9 +30903,7 @@
       },
       "bundle": {
         "name": "messages.ActionsBundle",
-        "paths": [
-          "platform/platform-resources-en/src/messages/ActionsBundle.properties"
-        ],
+        "paths": ["platform/platform-resources-en/src/messages/ActionsBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -31880,9 +31466,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerUiBundle",
-        "paths": [
-          "platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -31913,9 +31497,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerImplBundle",
-        "paths": [
-          "platform/xdebugger-impl/resources/messages/XDebuggerImplBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/resources/messages/XDebuggerImplBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -31944,9 +31526,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerImplBundle",
-        "paths": [
-          "platform/xdebugger-impl/resources/messages/XDebuggerImplBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/resources/messages/XDebuggerImplBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -31976,9 +31556,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerUiBundle",
-        "paths": [
-          "platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -32034,9 +31612,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerUiBundle",
-        "paths": [
-          "platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -32084,9 +31660,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerUiBundle",
-        "paths": [
-          "platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -32125,9 +31699,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerUiBundle",
-        "paths": [
-          "platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -32166,9 +31738,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerUiBundle",
-        "paths": [
-          "platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -32216,9 +31786,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerUiBundle",
-        "paths": [
-          "platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -32247,9 +31815,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerUiBundle",
-        "paths": [
-          "platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -32288,9 +31854,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerImplBundle",
-        "paths": [
-          "platform/xdebugger-impl/resources/messages/XDebuggerImplBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/resources/messages/XDebuggerImplBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -32319,9 +31883,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerImplBundle",
-        "paths": [
-          "platform/xdebugger-impl/resources/messages/XDebuggerImplBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/resources/messages/XDebuggerImplBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -32395,9 +31957,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerImplBundle",
-        "paths": [
-          "platform/xdebugger-impl/resources/messages/XDebuggerImplBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/resources/messages/XDebuggerImplBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -32426,9 +31986,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerImplBundle",
-        "paths": [
-          "platform/xdebugger-impl/resources/messages/XDebuggerImplBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/resources/messages/XDebuggerImplBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -32459,9 +32017,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerUiBundle",
-        "paths": [
-          "platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -32516,9 +32072,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerUiBundle",
-        "paths": [
-          "platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -32557,9 +32111,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerUiBundle",
-        "paths": [
-          "platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -32650,9 +32202,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerUiBundle",
-        "paths": [
-          "platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -32752,9 +32302,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerUiBundle",
-        "paths": [
-          "platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -32882,9 +32430,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerUiBundle",
-        "paths": [
-          "platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -33010,9 +32556,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerUiBundle",
-        "paths": [
-          "platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -33060,9 +32604,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerUiBundle",
-        "paths": [
-          "platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -33224,9 +32766,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerUiBundle",
-        "paths": [
-          "platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -33265,9 +32805,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerUiBundle",
-        "paths": [
-          "platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -33297,9 +32835,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerUiBundle",
-        "paths": [
-          "platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"],
         "resolved": true
       },
       "children": [],
@@ -33328,9 +32864,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerUiBundle",
-        "paths": [
-          "platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"],
         "resolved": true
       },
       "children": [
@@ -33422,9 +32956,7 @@
       },
       "bundle": {
         "name": "messages.XDebuggerUiBundle",
-        "paths": [
-          "platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"
-        ],
+        "paths": ["platform/xdebugger-impl/ui/resources/messages/XDebuggerUiBundle.properties"],
         "resolved": true
       },
       "children": [

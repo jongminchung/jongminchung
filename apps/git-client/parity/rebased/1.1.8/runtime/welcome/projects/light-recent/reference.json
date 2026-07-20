@@ -1,0 +1,9 @@
+{
+  "product": "Rebased",
+  "version": "1.1.8",
+  "scenario": "welcome-projects-light-recent",
+  "capturedAt": "2026-07-20T12:35:12+09:00",
+  "window": { "width": 800, "height": 650 },
+  "referenceSha256": "a6940ff611a3626570c3b056febb8c3eec9aa5f2d57893ae855e8d0b6364e398",
+  "allowedMasks": ["window-controls", "product-brand"]
+}

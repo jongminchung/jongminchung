@@ -1,11 +1,11 @@
-import { Button } from "@astryxdesign/core/Button";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
-import { List, ListItem } from "@astryxdesign/core/List";
-import { TextArea } from "@astryxdesign/core/TextArea";
 import { useMemo, useState } from "react";
 import type { FileChange } from "../domain/types";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
+import { Button } from "./ui";
+import { Dialog, DialogHeader } from "./ui";
+import { List, ListItem } from "./ui";
+import { TextArea } from "./ui";
 
 export interface InitialCommitSelection {
   readonly paths: readonly string[];
@@ -13,9 +13,7 @@ export interface InitialCommitSelection {
 }
 
 function defaultSelection(files: readonly FileChange[]): ReadonlySet<string> {
-  return new Set(
-    files.filter((file) => file.status !== "untracked").map((file) => file.path),
-  );
+  return new Set(files.filter((file) => file.status !== "untracked").map((file) => file.path));
 }
 
 export function ShareInitialCommitDialog({
@@ -62,7 +60,9 @@ export function ShareInitialCommitDialog({
           title="Add Files For Initial Commit"
         />
         <header>
-          <span>{selectedPaths.size} of {sortedFiles.length} files selected</span>
+          <span>
+            {selectedPaths.size} of {sortedFiles.length} files selected
+          </span>
           {sortedFiles.length > 0 && (
             <Button
               label={selectedPaths.size === sortedFiles.length ? "Unselect All" : "Select All"}

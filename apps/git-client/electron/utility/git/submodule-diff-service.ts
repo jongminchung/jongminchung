@@ -1,13 +1,13 @@
 import type { Stats } from "node:fs";
 import { realpath, stat } from "node:fs/promises";
 import { isAbsolute, join, relative, sep } from "node:path";
-import type { SubmoduleDiff } from "../../../src/generated";
 import {
   FileSourceSchema,
   type FileSource,
   type GitSubmoduleInfo,
   type RepositoryId,
 } from "../../../src/shared/contracts/git-utility";
+import type { SubmoduleDiff } from "../../../src/shared/contracts/model";
 import { GitUtilityError } from "./git-error";
 import { GitProcessRunner, type GitProcessOutcome, type GitProcessRunnerLike } from "./git-process";
 import type { RepositoryRegistry } from "./repository-registry";

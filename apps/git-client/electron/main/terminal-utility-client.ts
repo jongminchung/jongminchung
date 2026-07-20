@@ -54,12 +54,7 @@ export interface TerminalUtilityClientConnectOptions {
   readonly handshakeTimeoutMs?: number;
 }
 
-type TerminalUtilityClientState =
-  | "connecting"
-  | "ready"
-  | "disposing"
-  | "disposed"
-  | "crashed";
+type TerminalUtilityClientState = "connecting" | "ready" | "disposing" | "disposed" | "crashed";
 
 interface PendingCommand {
   readonly expectedKind:
@@ -214,10 +209,7 @@ export class TerminalUtilityClient {
       }
       const session = this.#sessions.get(request.requestId);
       if (session !== undefined) {
-        if (
-          session.terminalId !== null &&
-          session.terminalId !== response.result.terminalId
-        ) {
+        if (session.terminalId !== null && session.terminalId !== response.result.terminalId) {
           throw new TerminalUtilityTransportError(
             "protocolViolation",
             "Terminal create response changed the terminal identity",
@@ -302,27 +294,20 @@ export class TerminalUtilityClient {
     return this.#state;
   }
 
-  async #finishDispose(
-    responsePromise: Promise<TerminalUtilityToMainMessage>,
-  ): Promise<void> {
+  async #finishDispose(responsePromise: Promise<TerminalUtilityToMainMessage>): Promise<void> {
     try {
       const response = await responsePromise;
       if (response.kind !== "disposeResult") throw this.#unexpected(response.kind);
       this.#state = "disposed";
       this.#clearHandshakeTimer();
       this.#rejectOutstanding(
-        new TerminalUtilityTransportError(
-          "disposed",
-          "Terminal utility client was disposed",
-        ),
+        new TerminalUtilityTransportError("disposed", "Terminal utility client was disposed"),
       );
       this.#cleanUpSubscriptions();
       this.#transport.kill();
     } catch (error) {
       const failure =
-        error instanceof Error
-          ? error
-          : new Error("Unable to dispose Terminal utility");
+        error instanceof Error ? error : new Error("Unable to dispose Terminal utility");
       this.#crash(failure);
       throw failure;
     }
@@ -340,9 +325,7 @@ export class TerminalUtilityClient {
       } catch (error) {
         this.#pending.delete(message.correlationId);
         reject(
-          error instanceof Error
-            ? error
-            : new Error("Unable to send Terminal utility message"),
+          error instanceof Error ? error : new Error("Unable to send Terminal utility message"),
         );
       }
     });
@@ -396,12 +379,7 @@ export class TerminalUtilityClient {
     }
   }
 
-  #ready(
-    message: Extract<
-      TerminalUtilityToMainMessage,
-      Readonly<{ kind: "ready" }>
-    >,
-  ): void {
+  #ready(message: Extract<TerminalUtilityToMainMessage, Readonly<{ kind: "ready" }>>): void {
     if (this.#state !== "connecting" || this.#instanceId !== null) {
       throw new TerminalUtilityTransportError(
         "protocolViolation",
@@ -421,10 +399,7 @@ export class TerminalUtilityClient {
   }
 
   #handshakeAck(
-    message: Extract<
-      TerminalUtilityToMainMessage,
-      Readonly<{ kind: "handshakeAck" }>
-    >,
+    message: Extract<TerminalUtilityToMainMessage, Readonly<{ kind: "handshakeAck" }>>,
   ): void {
     if (
       this.#state !== "connecting" ||
@@ -511,10 +486,7 @@ export class TerminalUtilityClient {
     if (correlationId === null) {
       throw error;
     }
-    if (
-      correlationId === this.#handshakeCorrelationId &&
-      this.#state === "connecting"
-    ) {
+    if (correlationId === this.#handshakeCorrelationId && this.#state === "connecting") {
       throw error;
     }
     const pending = this.#pending.get(correlationId);
@@ -540,10 +512,7 @@ export class TerminalUtilityClient {
   }
 
   #processErrored(message: string): void {
-    this.#crash(
-      new TerminalUtilityTransportError("utilityFatalError", message),
-      false,
-    );
+    this.#crash(new TerminalUtilityTransportError("utilityFatalError", message), false);
   }
 
   #removeTerminal(terminalId: string): void {

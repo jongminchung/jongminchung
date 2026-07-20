@@ -1,9 +1,9 @@
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
-import { EmptyState } from "@astryxdesign/core/EmptyState";
-import { List, ListItem } from "@astryxdesign/core/List";
+import { tw } from "../styles/tailwind";
 import type { FindResultsSession } from "./FindResultsPanel";
 import { Icon } from "./Icon";
-import { tw } from "../styles/tailwind";
+import { Dialog, DialogHeader } from "./ui";
+import { EmptyState } from "./ui";
+import { List, ListItem } from "./ui";
 
 export function RecentFindUsagesDialog({
   history,

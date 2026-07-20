@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  normalizeHfsImageBuffer,
-  normalizeUdifTrailerBuffer,
-} from "./reproducible-dmg.mjs";
+import { normalizeHfsImageBuffer, normalizeUdifTrailerBuffer } from "./reproducible-dmg.mjs";
 
 const IMAGE_BYTES = 16_384;
 const NODE_SIZE = 512;
@@ -67,9 +64,7 @@ describe("reproducible HFS+ image normalization", () => {
     });
     for (const header of [1_024, IMAGE_BYTES - 1_024]) {
       expect(image.readUInt32BE(header + 16)).toBe(FIXED_HFS_TIMESTAMP);
-      expect(image.subarray(header + 104, header + 112).toString("hex")).toBe(
-        "676974636c69656e",
-      );
+      expect(image.subarray(header + 104, header + 112).toString("hex")).toBe("676974636c69656e");
     }
     for (const dataOffset of [CATALOG_OFFSET + NODE_SIZE + 22, CATALOG_OFFSET + NODE_SIZE + 88]) {
       for (const offset of [12, 16, 20, 24, 28]) {
@@ -98,14 +93,10 @@ describe("reproducible UDIF normalization", () => {
       uuid: "676974636c69656e742d646d672d7631",
     });
     expect(trailer.subarray(0, 64)).toEqual(prefix);
-    expect(trailer.subarray(64, 80).toString("hex")).toBe(
-      "676974636c69656e742d646d672d7631",
-    );
+    expect(trailer.subarray(64, 80).toString("hex")).toBe("676974636c69656e742d646d672d7631");
   });
 
   it("rejects a container without the UDIF trailer signature", () => {
-    expect(() => normalizeUdifTrailerBuffer(Buffer.alloc(512))).toThrow(
-      /koly/u,
-    );
+    expect(() => normalizeUdifTrailerBuffer(Buffer.alloc(512))).toThrow(/koly/u);
   });
 });

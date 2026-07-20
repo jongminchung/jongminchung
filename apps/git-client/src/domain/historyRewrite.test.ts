@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { HistoryRewritePreview, RebasePlanEntry } from "../generated";
+import type { HistoryRewritePreview, RebasePlanEntry } from "../shared/contracts/model";
 import { historyPlanError, moveHistoryPlanEntry, prepareHistoryPlan } from "./historyRewrite";
 
 const entry = (oid: string, overrides: Partial<RebasePlanEntry> = {}): RebasePlanEntry => ({
@@ -29,7 +29,10 @@ const preview = (entries: RebasePlanEntry[]): HistoryRewritePreview => ({
 
 describe("history rewrite plan", () => {
   it("prepares quick squash oldest-first with an editable final message", () => {
-    const plan = prepareHistoryPlan(preview([entry("a"), entry("b"), entry("c")]), new Set(["a", "b"]));
+    const plan = prepareHistoryPlan(
+      preview([entry("a"), entry("b"), entry("c")]),
+      new Set(["a", "b"]),
+    );
     expect(plan.map((item) => [item.oid, item.action, item.message])).toEqual([
       ["a", "reword", "a"],
       ["b", "squash", null],
@@ -42,7 +45,11 @@ describe("history rewrite plan", () => {
     expect(historyPlanError([entry("a", { action: "fixup" })])).toMatch(/earlier picked/);
     expect(historyPlanError([entry("m", { mergeCommit: true, action: "drop" })])).toMatch(/Merge/);
     const original = [entry("a"), entry("b"), entry("c")];
-    expect(moveHistoryPlanEntry(original, "c", "a").map((item) => item.oid)).toEqual(["c", "a", "b"]);
+    expect(moveHistoryPlanEntry(original, "c", "a").map((item) => item.oid)).toEqual([
+      "c",
+      "a",
+      "b",
+    ]);
     expect(original.map((item) => item.oid)).toEqual(["a", "b", "c"]);
   });
 });

@@ -10,9 +10,7 @@
         "id": "Darcula Contrast",
         "path": "themes/expUI/expUI_darculaContrastScheme.xml"
       },
-      "paths": [
-        "platform/platform-resources/src/themes/expUI/expUI_darculaContrastScheme.xml"
-      ],
+      "paths": ["platform/platform-resources/src/themes/expUI/expUI_darculaContrastScheme.xml"],
       "source": {
         "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
         "line": 732,
@@ -24,9 +22,7 @@
         "id": "Dark",
         "path": "themes/expUI/expUI_darkScheme.xml"
       },
-      "paths": [
-        "platform/platform-resources/src/themes/expUI/expUI_darkScheme.xml"
-      ],
+      "paths": ["platform/platform-resources/src/themes/expUI/expUI_darkScheme.xml"],
       "source": {
         "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
         "line": 731,
@@ -38,9 +34,7 @@
         "id": "High contrast",
         "path": "themes/islands/highContrastScheme.xml"
       },
-      "paths": [
-        "platform/platform-resources/src/themes/islands/highContrastScheme.xml"
-      ],
+      "paths": ["platform/platform-resources/src/themes/islands/highContrastScheme.xml"],
       "source": {
         "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
         "line": 735,
@@ -52,9 +46,7 @@
         "id": "IntelliJ Light",
         "path": "themes/Light.xml"
       },
-      "paths": [
-        "platform/platform-resources/src/themes/Light.xml"
-      ],
+      "paths": ["platform/platform-resources/src/themes/Light.xml"],
       "source": {
         "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
         "line": 724,
@@ -66,9 +58,7 @@
         "id": "Islands Dark",
         "path": "/themes/islands/IslandSchemeDark.xml"
       },
-      "paths": [
-        "platform/platform-resources/src/themes/islands/IslandSchemeDark.xml"
-      ],
+      "paths": ["platform/platform-resources/src/themes/islands/IslandSchemeDark.xml"],
       "source": {
         "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
         "line": 737,
@@ -80,9 +70,7 @@
         "id": "Light",
         "path": "themes/expUI/expUI_lightScheme.xml"
       },
-      "paths": [
-        "platform/platform-resources/src/themes/expUI/expUI_lightScheme.xml"
-      ],
+      "paths": ["platform/platform-resources/src/themes/expUI/expUI_lightScheme.xml"],
       "source": {
         "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
         "line": 728,

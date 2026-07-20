@@ -13,7 +13,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
-import type { CloneOptions } from "../../../src/generated/CloneOptions";
+import type { CloneOptions } from "../../../src/shared/contracts/model/CloneOptions";
 import type { GitProcessOutcome, GitProcessOutput, GitProcessSpec } from "./git-process";
 import type { RepositoryCreateProcessRunnerLike } from "./repository-create-process";
 import { RepositoryCreateService, type RepositoryCreateEvent } from "./repository-create-service";

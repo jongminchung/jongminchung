@@ -16,10 +16,12 @@ const entry: GitConsoleEntry = {
 
 describe("GitConsolePanel", () => {
   it("renders command lifecycle controls and the recorded command", () => {
-    const markup = renderToStaticMarkup(createElement(GitConsolePanel, {
-      entries: [entry],
-      onClear: vi.fn(),
-    }));
+    const markup = renderToStaticMarkup(
+      createElement(GitConsolePanel, {
+        entries: [entry],
+        onClear: vi.fn(),
+      }),
+    );
 
     expect(markup).toContain('aria-label="Git Console"');
     expect(markup).toContain("git status --porcelain=v2");

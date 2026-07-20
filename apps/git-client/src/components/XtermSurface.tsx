@@ -12,7 +12,7 @@ import {
 } from "../domain/terminalActions";
 import { terminalService } from "../domain/TerminalService";
 import { terminalThemeFor } from "../domain/terminalTheme";
-import type { TerminalEvent } from "../generated";
+import type { TerminalEvent } from "../shared/contracts/model";
 import { useAppearance } from "./AppearanceProvider";
 
 export interface XtermSurfaceCapabilities {

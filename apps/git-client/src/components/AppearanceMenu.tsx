@@ -1,29 +1,28 @@
-import { Button } from "@astryxdesign/core/Button";
-import { Popover } from "@astryxdesign/core/Popover";
-import { RadioList, RadioListItem } from "@astryxdesign/core/RadioList";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { AppearanceMode } from "../domain/appearance";
+import type { AppearancePreference, AppearanceTheme } from "../domain/appearance";
 import { useAppearance } from "./AppearanceProvider";
 import { useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
+import { Button } from "./ui";
+import { Popover } from "./ui";
+import { RadioList, RadioListItem } from "./ui";
 
 const APPEARANCE_OPTIONS = [
-  { mode: "system", label: "System Appearance", icon: "appearance" },
+  { mode: "system", label: "Sync with OS", icon: "appearance" },
   { mode: "light", label: "Islands Light", icon: "sun" },
   { mode: "dark", label: "Islands Dark", icon: "moon" },
-  { mode: "darcula", label: "Darcula", icon: "moon" },
-  { mode: "highContrast", label: "High Contrast", icon: "appearance" },
 ] as const satisfies readonly {
-  readonly mode: AppearanceMode;
+  readonly mode: AppearanceTheme | "system";
   readonly label: string;
   readonly icon: "appearance" | "sun" | "moon";
 }[];
 
 export function AppearanceMenu(): React.ReactNode {
-  const { mode, setMode } = useAppearance();
+  const { preference, setPreference } = useAppearance();
   const [isOpen, setOpen] = useState(false);
   const options = useRef<HTMLDivElement>(null);
-  const selected = APPEARANCE_OPTIONS.find((option) => option.mode === mode);
+  const selection = preference.syncWithOs ? "system" : preference.theme;
+  const selected = APPEARANCE_OPTIONS.find((option) => option.mode === selection);
   const close = (): void => setOpen(false);
 
   useDismissLayer(
@@ -41,14 +40,18 @@ export function AppearanceMenu(): React.ReactNode {
   const select = (value: string): void => {
     const option = APPEARANCE_OPTIONS.find((candidate) => candidate.mode === value);
     if (!option) return;
-    setMode(option.mode);
+    const nextPreference: AppearancePreference =
+      option.mode === "system"
+        ? { ...preference, syncWithOs: true }
+        : { theme: option.mode, syncWithOs: false };
+    setPreference(nextPreference);
     setOpen(false);
   };
 
   useEffect(() => {
     if (!isOpen) return;
     const frame = requestAnimationFrame(() => {
-      options.current?.querySelector<HTMLInputElement>('input[type="radio"]:checked')?.focus();
+      options.current?.querySelector<HTMLElement>('[role="radio"][aria-checked="true"]')?.focus();
     });
     return () => cancelAnimationFrame(frame);
   }, [isOpen]);
@@ -66,14 +69,21 @@ export function AppearanceMenu(): React.ReactNode {
         content={
           <div
             onKeyDown={(event) => {
-              if (event.key === "Enter" && event.target instanceof HTMLInputElement && event.target.type === "radio") {
-                select(event.target.value);
+              const radios = options.current?.querySelectorAll<HTMLElement>('[role="radio"]');
+              const radio =
+                event.target instanceof HTMLElement
+                  ? event.target.closest<HTMLElement>('[role="radio"]')
+                  : null;
+              if (event.key === "Enter" && radio !== null) {
+                const index = [...(radios ?? [])].indexOf(radio);
+                const mode = APPEARANCE_OPTIONS[index]?.mode;
+                if (mode !== undefined) select(mode);
                 event.preventDefault();
                 return;
               }
               if (event.key !== "Home" && event.key !== "End") return;
-              const radios = options.current?.querySelectorAll<HTMLInputElement>('input[type="radio"]:not(:disabled)');
-              const target = event.key === "Home" ? radios?.item(0) : radios?.item((radios?.length ?? 1) - 1);
+              const target =
+                event.key === "Home" ? radios?.item(0) : radios?.item((radios?.length ?? 1) - 1);
               target?.focus();
               event.preventDefault();
             }}
@@ -84,7 +94,7 @@ export function AppearanceMenu(): React.ReactNode {
               label="Appearance"
               onChange={select}
               size="sm"
-              value={mode}
+              value={selection}
             >
               {APPEARANCE_OPTIONS.map((option) => (
                 <RadioListItem
@@ -101,7 +111,7 @@ export function AppearanceMenu(): React.ReactNode {
         <Button
           icon={<Icon name={selected?.icon ?? "appearance"} size={14} />}
           isIconOnly
-          label={`Appearance: ${selected?.label ?? "System Appearance"}`}
+          label={`Appearance: ${selected?.label ?? "Sync with OS"}`}
           size="sm"
           tooltip="Appearance"
           variant="ghost"

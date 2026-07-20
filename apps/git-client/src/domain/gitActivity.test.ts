@@ -9,9 +9,9 @@ import {
 
 describe("Git activity", () => {
   it("uses safe user-facing operation labels", () => {
-    expect(
-      operationActivityLabel({ kind: "fetch", remote: "origin", prune: false }),
-    ).toBe("Fetching");
+    expect(operationActivityLabel({ kind: "fetch", remote: "origin", prune: false })).toBe(
+      "Fetching",
+    );
     expect(
       operationActivityLabel({
         kind: "setConfig",
@@ -22,12 +22,8 @@ describe("Git activity", () => {
   });
 
   it("allows retry only for the idempotent fetch operation", () => {
-    expect(
-      isRetryableOperation({ kind: "fetch", remote: null, prune: false }),
-    ).toBe(true);
-    expect(
-      isRetryableOperation({ kind: "pull", rebase: false }),
-    ).toBe(false);
+    expect(isRetryableOperation({ kind: "fetch", remote: null, prune: false })).toBe(true);
+    expect(isRetryableOperation({ kind: "pull", rebase: false })).toBe(false);
   });
 
   it("redacts credentials and control characters from errors", () => {

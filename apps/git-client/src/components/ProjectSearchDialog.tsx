@@ -1,9 +1,3 @@
-import { Button } from "@astryxdesign/core/Button";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
-import { List, ListItem } from "@astryxdesign/core/List";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { ToggleButton } from "@astryxdesign/core/ToggleButton";
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import {
   projectSearchResults,
@@ -15,8 +9,27 @@ import {
 import { tw } from "../styles/tailwind";
 import { useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
+import { Button } from "./ui";
+import { Dialog, DialogHeader } from "./ui";
+import { List, ListItem } from "./ui";
+import { Spinner } from "./ui";
+import { TextInput } from "./ui";
+import { ToggleButton } from "./ui";
 
-export type ProjectSearchSurface = "find" | "class" | "symbol" | "text" | "definition" | "typeDefinition" | "usages" | "usagesFile" | "implementation" | "related" | "structure" | "typeHierarchy" | "callHierarchy";
+export type ProjectSearchSurface =
+  | "find"
+  | "class"
+  | "symbol"
+  | "text"
+  | "definition"
+  | "typeDefinition"
+  | "usages"
+  | "usagesFile"
+  | "implementation"
+  | "related"
+  | "structure"
+  | "typeHierarchy"
+  | "callHierarchy";
 
 const SURFACE_COPY = {
   find: {
@@ -97,12 +110,17 @@ const SURFACE_COPY = {
     mode: "symbol",
     empty: "Place the caret on a symbol or enter its name.",
   },
-} as const satisfies Readonly<Record<ProjectSearchSurface, Readonly<{
-  title: string;
-  placeholder: string;
-  mode: ProjectSearchMode;
-  empty: string;
-}>>>;
+} as const satisfies Readonly<
+  Record<
+    ProjectSearchSurface,
+    Readonly<{
+      title: string;
+      placeholder: string;
+      mode: ProjectSearchMode;
+      empty: string;
+    }>
+  >
+>;
 
 const DEFAULT_OPTIONS: ProjectSearchOptions = {
   matchCase: false,
@@ -145,12 +163,17 @@ export function ProjectSearchDialog({
   const [activeIndex, setActiveIndex] = useState(0);
   const generation = useRef(0);
   useEffect(() => setQuery(initialQuery), [initialQuery, surface]);
-  useDismissLayer(useMemo(() => ({
-    id: "project-search-dialog",
-    priority: 135,
-    active: true,
-    dismiss: onClose,
-  }), [onClose]));
+  useDismissLayer(
+    useMemo(
+      () => ({
+        id: "project-search-dialog",
+        priority: 135,
+        active: true,
+        dismiss: onClose,
+      }),
+      [onClose],
+    ),
+  );
 
   useEffect(
     () => () => {
@@ -192,8 +215,10 @@ export function ProjectSearchDialog({
   }, [options, query, search]);
 
   const results = useMemo(
-    () => projectSearchResults(matches, copy.mode, query.trim(), options.matchCase)
-      .filter((result) => pathScope === undefined || result.path === pathScope),
+    () =>
+      projectSearchResults(matches, copy.mode, query.trim(), options.matchCase).filter(
+        (result) => pathScope === undefined || result.path === pathScope,
+      ),
     [copy.mode, matches, options.matchCase, pathScope, query],
   );
   const resultFileCount = useMemo(
@@ -239,11 +264,7 @@ export function ProjectSearchDialog({
       width="min(760px, calc(100vw - 72px))"
     >
       <section className={tw.projectSearchDialog}>
-        <DialogHeader
-          hasDivider
-          onOpenChange={(open) => !open && onClose()}
-          title={copy.title}
-        />
+        <DialogHeader hasDivider onOpenChange={(open) => !open && onClose()} title={copy.title} />
         <div className={tw.projectSearchQuery}>
           <TextInput
             hasAutoFocus
@@ -269,7 +290,9 @@ export function ProjectSearchDialog({
               <ToggleButton
                 isPressed={options.matchCase}
                 label="Match case"
-                onPressedChange={(matchCase) => setOptions((current) => ({ ...current, matchCase }))}
+                onPressedChange={(matchCase) =>
+                  setOptions((current) => ({ ...current, matchCase }))
+                }
                 size="sm"
               >
                 Aa
@@ -329,7 +352,11 @@ export function ProjectSearchDialog({
                 <ListItem
                   aria-selected={index === activeIndex}
                   description={result.content.trim() || " "}
-                  endContent={<code>{result.path}:{result.line}:{result.column}</code>}
+                  endContent={
+                    <code>
+                      {result.path}:{result.line}:{result.column}
+                    </code>
+                  }
                   id={`project-search-result-${index}`}
                   isSelected={index === activeIndex}
                   key={`${result.path}:${result.line}:${result.column}:${index}`}
@@ -337,7 +364,9 @@ export function ProjectSearchDialog({
                   onClick={() => activate(result)}
                   onMouseEnter={() => setActiveIndex(index)}
                   role="option"
-                  startContent={<Icon name={result.kind === "class" ? "file" : "search"} size={14} />}
+                  startContent={
+                    <Icon name={result.kind === "class" ? "file" : "search"} size={14} />
+                  }
                 />
               ))}
             </List>

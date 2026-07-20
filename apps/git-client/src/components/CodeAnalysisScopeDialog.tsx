@@ -1,10 +1,10 @@
-import { Button } from "@astryxdesign/core/Button";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
-import { RadioList, RadioListItem } from "@astryxdesign/core/RadioList";
-import { Selector } from "@astryxdesign/core/Selector";
 import { useState } from "react";
 import type { CodeInspectionId } from "../domain/codeAnalysis";
 import { tw } from "../styles/tailwind";
+import { Button } from "./ui";
+import { Dialog, DialogHeader } from "./ui";
+import { RadioList, RadioListItem } from "./ui";
+import { Selector } from "./ui";
 
 export type CodeAnalysisScope = "project" | "file";
 
@@ -25,7 +25,8 @@ export function CodeAnalysisScopeDialog({
   const [profile, setProfile] = useState("project-default");
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string>();
-  const title = mode === "cleanup" ? "Code Cleanup" : inspectionId ? "Run Inspection" : "Inspection";
+  const title =
+    mode === "cleanup" ? "Code Cleanup" : inspectionId ? "Run Inspection" : "Inspection";
   const run = async (): Promise<void> => {
     if (running) return;
     setRunning(true);
@@ -41,7 +42,14 @@ export function CodeAnalysisScopeDialog({
   };
 
   return (
-    <Dialog aria-label={title} isOpen onOpenChange={(open) => !open && onClose()} padding={0} purpose="form" width={560}>
+    <Dialog
+      aria-label={title}
+      isOpen
+      onOpenChange={(open) => !open && onClose()}
+      padding={0}
+      purpose="form"
+      width={560}
+    >
       <section className={tw.codeAnalysisScopeDialog}>
         <DialogHeader hasDivider onOpenChange={(open) => !open && onClose()} title={title} />
         <main>

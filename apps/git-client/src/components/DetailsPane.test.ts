@@ -21,7 +21,7 @@ function renderDetails(commitIndex: number | null): string {
         beforeContent: null,
         afterContent: null,
         submoduleDiff: null,
-        selectedPath: commit ? sampleCommitFiles[0]?.path ?? null : null,
+        selectedPath: commit ? (sampleCommitFiles[0]?.path ?? null) : null,
         patch: "",
         diffLoading: false,
         preferences: DEFAULT_DIFF_PREFERENCES,

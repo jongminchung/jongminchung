@@ -1,10 +1,7 @@
-import { List, ListItem } from "@astryxdesign/core/List";
-import type {
-  ProjectSearchOptions,
-  ProjectSearchResult,
-} from "../domain/projectSearch";
+import type { ProjectSearchOptions, ProjectSearchResult } from "../domain/projectSearch";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
+import { List, ListItem } from "./ui";
 
 export interface FindResultsSession {
   readonly query: string;
@@ -43,7 +40,11 @@ export function FindResultsPanel({
           {session.results.map((result, index) => (
             <ListItem
               description={result.content.trim() || " "}
-              endContent={<code>{result.line}:{result.column}</code>}
+              endContent={
+                <code>
+                  {result.line}:{result.column}
+                </code>
+              }
               key={`${result.path}:${result.line}:${result.column}:${index}`}
               label={result.path}
               onClick={() => onOpenResult(result)}

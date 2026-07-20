@@ -1,17 +1,17 @@
 import { Buffer, isUtf8 } from "node:buffer";
 import { spawn } from "node:child_process";
 import type { ChildProcessWithoutNullStreams } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { constants } from "node:fs";
 import type { Stats } from "node:fs";
-import { randomUUID } from "node:crypto";
 import { chmod, lstat, open, realpath, rename, rm } from "node:fs/promises";
 import { basename, dirname, isAbsolute, join } from "node:path";
-import type { PatchExportResult } from "../../../src/generated";
 import type {
   GitFailureCode,
   RepositoryId,
   RepositoryRecord,
 } from "../../../src/shared/contracts/git-utility";
+import type { PatchExportResult } from "../../../src/shared/contracts/model";
 import { GitUtilityError } from "./git-error";
 import { redactCredentials, safeErrorMessage } from "./redaction";
 import { validateRevision } from "./validation";
@@ -430,10 +430,7 @@ async function atomicWritePatch(
   if (!sameDestination(target.destination, await destinationState(target.canonicalTarget))) {
     throw invalidPath("Patch target changed during the operation");
   }
-  const temporaryPath = join(
-    target.canonicalParent,
-    `.git-client-patch-${randomUUID()}.tmp`,
-  );
+  const temporaryPath = join(target.canonicalParent, `.git-client-patch-${randomUUID()}.tmp`);
   try {
     const temporaryIdentity = await (async (): Promise<FileIdentity> => {
       const handle = await open(
@@ -535,7 +532,9 @@ function validatedRevisions(untrustedRevisions: unknown): readonly string[] {
   return Object.freeze(revisions);
 }
 
-function processFailure(outcome: Exclude<PatchProcessOutcome, PatchProcessCompleted>): GitUtilityError {
+function processFailure(
+  outcome: Exclude<PatchProcessOutcome, PatchProcessCompleted>,
+): GitUtilityError {
   if (outcome.kind === "cancelled") {
     const message =
       outcome.reason === "timeout"
@@ -633,14 +632,7 @@ export class PatchService {
       const outcome = await this.#runner.run(
         {
           cwd,
-          args: [
-            "format-patch",
-            "--stdout",
-            "--binary",
-            "-1",
-            "--end-of-options",
-            revision,
-          ],
+          args: ["format-patch", "--stdout", "--binary", "-1", "--end-of-options", revision],
           timeoutMs: PATCH_COMMAND_TIMEOUT_MS,
           stdoutLimitBytes: maximumBytes - totalBytes + 1,
           stderrLimitBytes: MAX_PATCH_DIAGNOSTIC_BYTES,

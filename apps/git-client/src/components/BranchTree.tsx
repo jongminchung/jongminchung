@@ -1,8 +1,8 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { memo, useMemo, useRef, useState } from "react";
 import type { Ref, RefKind } from "../domain/types";
-import { Icon } from "./Icon";
 import { tw } from "../styles/tailwind";
+import { Icon } from "./Icon";
 
 type TreeRow =
   | {
@@ -149,7 +149,11 @@ export const BranchTree = memo(function BranchTree({
                       <Icon name="branch" size={13} />
                     )}
                     <span className={tw.ellipsis}>{row.ref.shortName}</span>
-                    {trackingLabel(row.ref.tracking) && <small className="text-[10px] text-secondary">{trackingLabel(row.ref.tracking)}</small>}
+                    {trackingLabel(row.ref.tracking) && (
+                      <small className="text-[10px] text-secondary">
+                        {trackingLabel(row.ref.tracking)}
+                      </small>
+                    )}
                     {row.ref.current && <span className={tw.headPill}>HEAD</span>}
                   </button>
                 )}

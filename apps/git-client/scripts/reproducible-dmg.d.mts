@@ -14,12 +14,8 @@ export interface ReproducibleDmgReport {
 
 export function normalizeHfsImageBuffer(image: Buffer): HfsNormalizationReport;
 export function normalizeHfsImage(filePath: string): Promise<HfsNormalizationReport>;
-export function normalizeUdifTrailerBuffer(
-  trailer: Buffer,
-): { readonly uuid: string };
-export function normalizeUdifImage(
-  filePath: string,
-): Promise<{ readonly uuid: string }>;
+export function normalizeUdifTrailerBuffer(trailer: Buffer): { readonly uuid: string };
+export function normalizeUdifImage(filePath: string): Promise<{ readonly uuid: string }>;
 export function createReproducibleDmg(
   appPath: string,
   targetPath: string,

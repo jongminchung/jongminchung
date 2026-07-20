@@ -34,7 +34,7 @@ export const DEFAULT_TOOL_WINDOW_LAYOUT: ToolWindowLayout = {
   bottomPanelTab: "shelf",
   changesNavigatorWidth: 250,
   commitRailWidth: 315,
-  historyReviewWidth: 760,
+  historyReviewWidth: 210,
   sideToolWindowWidth: DEFAULT_SIDE_TOOL_WINDOW_WIDTH,
   logOpen: true,
   projectOpen: true,
@@ -60,12 +60,7 @@ function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function boundedNumber(
-  value: unknown,
-  fallback: number,
-  minimum: number,
-  maximum: number,
-): number {
+function boundedNumber(value: unknown, fallback: number, minimum: number, maximum: number): number {
   return typeof value === "number" && Number.isFinite(value)
     ? Math.min(maximum, Math.max(minimum, Math.round(value)))
     : fallback;
@@ -75,10 +70,8 @@ export function parseToolWindowLayout(value: unknown): ToolWindowLayout {
   if (!isRecord(value)) return DEFAULT_TOOL_WINDOW_LAYOUT;
   const tab = BOTTOM_PANEL_TABS.find((candidate) => candidate === value.bottomPanelTab);
   return {
-    bookmarksOpen:
-      typeof value.bookmarksOpen === "boolean" ? value.bookmarksOpen : false,
-    bottomCollapsed:
-      typeof value.bottomCollapsed === "boolean" ? value.bottomCollapsed : true,
+    bookmarksOpen: typeof value.bookmarksOpen === "boolean" ? value.bookmarksOpen : false,
+    bottomCollapsed: typeof value.bottomCollapsed === "boolean" ? value.bottomCollapsed : true,
     bottomPanelHeight: boundedNumber(
       value.bottomPanelHeight,
       DEFAULT_BOTTOM_PANEL_HEIGHT,
@@ -86,19 +79,12 @@ export function parseToolWindowLayout(value: unknown): ToolWindowLayout {
       420,
     ),
     bottomPanelTab: tab ?? "shelf",
-    changesNavigatorWidth: boundedNumber(
-      value.changesNavigatorWidth,
-      250,
-      190,
-      420,
-    ),
+    changesNavigatorWidth: boundedNumber(value.changesNavigatorWidth, 250, 190, 420),
     commitRailWidth: boundedNumber(value.commitRailWidth, 315, 280, 480),
-    historyReviewWidth: boundedNumber(
-      value.historyReviewWidth,
-      760,
-      640,
-      1_000,
-    ),
+    historyReviewWidth:
+      typeof value.historyReviewWidth === "number" && value.historyReviewWidth >= 640
+        ? 210
+        : boundedNumber(value.historyReviewWidth, 210, 180, 480),
     sideToolWindowWidth: boundedNumber(
       value.sideToolWindowWidth,
       DEFAULT_SIDE_TOOL_WINDOW_WIDTH,
@@ -106,8 +92,7 @@ export function parseToolWindowLayout(value: unknown): ToolWindowLayout {
       MAX_SIDE_TOOL_WINDOW_WIDTH,
     ),
     logOpen: typeof value.logOpen === "boolean" ? value.logOpen : true,
-    projectOpen:
-      typeof value.projectOpen === "boolean" ? value.projectOpen : true,
+    projectOpen: typeof value.projectOpen === "boolean" ? value.projectOpen : true,
   };
 }
 
@@ -117,9 +102,7 @@ export function parseNamedToolWindowLayout(value: unknown): NamedToolWindowLayou
   }
   return {
     id:
-      typeof value.id === "string" && /^[A-Za-z0-9_-]{1,80}$/u.test(value.id)
-        ? value.id
-        : "custom",
+      typeof value.id === "string" && /^[A-Za-z0-9_-]{1,80}$/u.test(value.id) ? value.id : "custom",
     name:
       typeof value.name === "string" && value.name.trim() !== ""
         ? value.name.trim().slice(0, 64)
@@ -128,16 +111,13 @@ export function parseNamedToolWindowLayout(value: unknown): NamedToolWindowLayou
   };
 }
 
-export function parseNamedToolWindowLayouts(
-  value: unknown,
-): readonly NamedToolWindowLayout[] {
+export function parseNamedToolWindowLayouts(value: unknown): readonly NamedToolWindowLayout[] {
   if (!Array.isArray(value)) return [DEFAULT_NAMED_TOOL_WINDOW_LAYOUT];
   const layouts = value
     .slice(0, 32)
     .map(parseNamedToolWindowLayout)
     .filter(
-      (layout, index, all) =>
-        all.findIndex((candidate) => candidate.id === layout.id) === index,
+      (layout, index, all) => all.findIndex((candidate) => candidate.id === layout.id) === index,
     );
   return layouts.length > 0 ? layouts : [DEFAULT_NAMED_TOOL_WINDOW_LAYOUT];
 }

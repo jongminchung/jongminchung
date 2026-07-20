@@ -1,10 +1,6 @@
 export const RUN_CONFIGURATION_TEMPLATES_KEY = "runConfigurationTemplates";
 
-export type RunConfigurationTemplateKind =
-  | "application"
-  | "node"
-  | "npm"
-  | "shell";
+export type RunConfigurationTemplateKind = "application" | "node" | "npm" | "shell";
 
 export interface RunConfigurationTemplate {
   readonly kind: RunConfigurationTemplateKind;
@@ -29,19 +25,24 @@ function isKind(value: unknown): value is RunConfigurationTemplateKind {
   return value === "application" || value === "node" || value === "npm" || value === "shell";
 }
 
-export function parseRunConfigurationTemplates(value: unknown): readonly RunConfigurationTemplate[] {
+export function parseRunConfigurationTemplates(
+  value: unknown,
+): readonly RunConfigurationTemplate[] {
   if (!Array.isArray(value)) return DEFAULT_RUN_CONFIGURATION_TEMPLATES;
   const parsed = value.flatMap((candidate): readonly RunConfigurationTemplate[] => {
-    if (!isRecord(candidate) || !isKind(candidate.kind) || typeof candidate.name !== "string") return [];
+    if (!isRecord(candidate) || !isKind(candidate.kind) || typeof candidate.name !== "string")
+      return [];
     const text = (key: "workingDirectory" | "environment" | "options"): string =>
       typeof candidate[key] === "string" ? candidate[key].slice(0, 16_384) : "";
-    return [{
-      kind: candidate.kind,
-      name: candidate.name.slice(0, 128),
-      workingDirectory: text("workingDirectory"),
-      environment: text("environment"),
-      options: text("options"),
-    }];
+    return [
+      {
+        kind: candidate.kind,
+        name: candidate.name.slice(0, 128),
+        workingDirectory: text("workingDirectory"),
+        environment: text("environment"),
+        options: text("options"),
+      },
+    ];
   });
   const byKind = new Map(parsed.map((template) => [template.kind, template]));
   return DEFAULT_RUN_CONFIGURATION_TEMPLATES.map(

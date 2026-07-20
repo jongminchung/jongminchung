@@ -1,9 +1,9 @@
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
-import { TextInput } from "@astryxdesign/core/TextInput";
 import { useMemo, useState } from "react";
 import type { ScratchLanguage } from "../domain/scratchFiles";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
+import { Dialog, DialogHeader } from "./ui";
+import { TextInput } from "./ui";
 
 export function ScratchFileChooserDialog({
   languages,
@@ -17,8 +17,10 @@ export function ScratchFileChooserDialog({
   const [query, setQuery] = useState("");
   const filtered = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase();
-    return languages.filter((language) =>
-      !normalized || `${language.label} ${language.extension}`.toLocaleLowerCase().includes(normalized),
+    return languages.filter(
+      (language) =>
+        !normalized ||
+        `${language.label} ${language.extension}`.toLocaleLowerCase().includes(normalized),
     );
   }, [languages, query]);
 

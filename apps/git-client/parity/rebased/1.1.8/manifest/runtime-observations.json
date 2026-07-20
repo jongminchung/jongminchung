@@ -6,7 +6,17 @@
       "kind": "tool-window-surface",
       "sourceIds": ["toolwindow:Project"],
       "label": "Project",
-      "evidence": [{"accessibility":"runtime/workbench/log/golden-1.1.8/reference.ax.json","screenshot":"runtime/workbench/log/golden-1.1.8/reference.png","fingerprint":{"accessibleName":"Project Tool Window","role":"AXGroup","surface":"workbench.log"}}],
+      "evidence": [
+        {
+          "accessibility": "runtime/workbench/log/golden-1.1.8/reference.ax.json",
+          "screenshot": "runtime/workbench/log/golden-1.1.8/reference.png",
+          "fingerprint": {
+            "accessibleName": "Project Tool Window",
+            "role": "AXGroup",
+            "surface": "workbench.log"
+          }
+        }
+      ],
       "mappingBasis": "The authoritative 1.1.8 AX capture exposes the Project Tool Window and its Project structure tree."
     },
     {
@@ -15,8 +25,24 @@
       "sourceIds": ["toolwindow:Terminal"],
       "label": "Terminal / Local",
       "evidence": [
-        {"accessibility":"runtime/terminal/local/golden-1.1.8/reference-empty.ax.json","screenshot":"runtime/terminal/local/golden-1.1.8/reference-empty.png","fingerprint":{"accessibleName":"Local Tool Window","role":"AXGroup","surface":"terminal.local.empty"}},
-        {"accessibility":"runtime/terminal/local/golden-1.1.8/reference-pwd.ax.json","screenshot":"runtime/terminal/local/golden-1.1.8/reference-pwd.png","fingerprint":{"accessibleName":"Local Tool Window","role":"AXGroup","surface":"terminal.local.pwd"}}
+        {
+          "accessibility": "runtime/terminal/local/golden-1.1.8/reference-empty.ax.json",
+          "screenshot": "runtime/terminal/local/golden-1.1.8/reference-empty.png",
+          "fingerprint": {
+            "accessibleName": "Local Tool Window",
+            "role": "AXGroup",
+            "surface": "terminal.local.empty"
+          }
+        },
+        {
+          "accessibility": "runtime/terminal/local/golden-1.1.8/reference-pwd.ax.json",
+          "screenshot": "runtime/terminal/local/golden-1.1.8/reference-pwd.png",
+          "fingerprint": {
+            "accessibleName": "Local Tool Window",
+            "role": "AXGroup",
+            "surface": "terminal.local.pwd"
+          }
+        }
       ],
       "mappingBasis": "The authoritative captures expose the Terminal tool window, Local tab, terminal editor focus, and a completed pwd interaction."
     },
@@ -25,7 +51,17 @@
       "kind": "tool-window-content-surface",
       "sourceIds": ["toolwindow:Version Control"],
       "label": "Log",
-      "evidence": [{"accessibility":"runtime/workbench/log/golden-1.1.8/reference.ax.json","screenshot":"runtime/workbench/log/golden-1.1.8/reference.png","fingerprint":{"accessibleName":"Log","role":"AXTabGroup","surface":"workbench.log"}}],
+      "evidence": [
+        {
+          "accessibility": "runtime/workbench/log/golden-1.1.8/reference.ax.json",
+          "screenshot": "runtime/workbench/log/golden-1.1.8/reference.png",
+          "fingerprint": {
+            "accessibleName": "Log",
+            "role": "AXTabGroup",
+            "surface": "workbench.log"
+          }
+        }
+      ],
       "mappingBasis": "The authoritative workbench capture exposes the Log content hosted by the Version Control tool window. Individual Log controls are not mapped by this entry."
     },
     {
@@ -33,18 +69,216 @@
       "kind": "native-application-menu",
       "sourceIds": ["action:About", "action:CheckForUpdate", "action:ShowSettings", "action:Exit"],
       "label": "Rebased application menu",
-      "evidence": [{"accessibility":"runtime/application-menu/trusted-project/golden-1.1.8/application.ax.json","screenshot":"runtime/application-menu/trusted-project/golden-1.1.8/reference.png","fingerprint":{"accessibleName":"About Rebased Golden Stable 1.1.8","role":"AXMenuItem","surface":"application-menu.application"}}],
+      "evidence": [
+        {
+          "accessibility": "runtime/application-menu/trusted-project/golden-1.1.8/application.ax.json",
+          "screenshot": "runtime/application-menu/trusted-project/golden-1.1.8/reference.png",
+          "fingerprint": {
+            "accessibleName": "About Rebased Golden Stable 1.1.8",
+            "role": "AXMenuItem",
+            "surface": "application-menu.application"
+          }
+        }
+      ],
       "mappingBasis": "The isolated 1.1.8 harness exposes About, Check for Updates, Settings, and Quit. Only harness-generated app-name fragments are normalized to Rebased."
     },
-    {"runtimeId":"runtime-menu:file","kind":"native-application-menu","sourceIds":["group:FileMenu"],"label":"File","evidence":[{"accessibility":"runtime/application-menu/trusted-project/golden-1.1.8/file.ax.json","screenshot":"runtime/application-menu/trusted-project/golden-1.1.8/reference.png","fingerprint":{"accessibleName":"File, ID: handleAction:","role":"AXMenu","surface":"application-menu.file"}}],"mappingBasis":"Trusted-project Rebased 1.1.8 File menu and recursively exposed submenus were captured through Computer Use."},
-    {"runtimeId":"runtime-menu:edit","kind":"native-application-menu","sourceIds":["group:EditMenu"],"label":"Edit","evidence":[{"accessibility":"runtime/application-menu/trusted-project/golden-1.1.8/edit.ax.json","screenshot":"runtime/application-menu/trusted-project/golden-1.1.8/reference.png","fingerprint":{"accessibleName":"Edit, ID: handleAction:","role":"AXMenu","surface":"application-menu.edit"}}],"mappingBasis":"Trusted-project Rebased 1.1.8 Edit menu and recursively exposed submenus were captured through Computer Use."},
-    {"runtimeId":"runtime-menu:view","kind":"native-application-menu","sourceIds":["group:ViewMenu"],"label":"View","evidence":[{"accessibility":"runtime/application-menu/trusted-project/golden-1.1.8/view.ax.json","screenshot":"runtime/application-menu/trusted-project/golden-1.1.8/reference.png","fingerprint":{"accessibleName":"View, ID: handleAction:","role":"AXMenu","surface":"application-menu.view"}},{"accessibility":"runtime/application-menu/trusted-project/golden-1.1.8/appearance.ax.json","screenshot":"runtime/application-menu/trusted-project/golden-1.1.8/reference.png","fingerprint":{"accessibleName":"Compact Mode","role":"AXMenuItem","surface":"application-menu.view.appearance"}}],"mappingBasis":"Trusted-project Rebased 1.1.8 View menu and Appearance submenu were captured through Computer Use."},
-    {"runtimeId":"runtime-menu:navigate","kind":"native-application-menu","sourceIds":["group:GoToMenu"],"label":"Navigate","evidence":[{"accessibility":"runtime/application-menu/trusted-project/golden-1.1.8/navigate.ax.json","screenshot":"runtime/application-menu/trusted-project/golden-1.1.8/reference.png","fingerprint":{"accessibleName":"Navigate, ID: handleAction:","role":"AXMenu","surface":"application-menu.navigate"}}],"mappingBasis":"Trusted-project Rebased 1.1.8 Navigate menu and recursively exposed submenus were captured through Computer Use."},
-    {"runtimeId":"runtime-menu:code","kind":"native-application-menu","sourceIds":["group:CodeMenu"],"label":"Code","evidence":[{"accessibility":"runtime/application-menu/trusted-project/golden-1.1.8/code.ax.json","screenshot":"runtime/application-menu/trusted-project/golden-1.1.8/reference.png","fingerprint":{"accessibleName":"Code, ID: handleAction:","role":"AXMenu","surface":"application-menu.code"}}],"mappingBasis":"Trusted-project Rebased 1.1.8 Code menu and recursively exposed submenus were captured through Computer Use."},
-    {"runtimeId":"runtime-menu:run","kind":"native-application-menu","sourceIds":["group:RunMenu"],"label":"Run","evidence":[{"accessibility":"runtime/application-menu/trusted-project/golden-1.1.8/run.ax.json","screenshot":"runtime/application-menu/trusted-project/golden-1.1.8/reference.png","fingerprint":{"accessibleName":"Run, ID: handleAction:","role":"AXMenu","surface":"application-menu.run"}}],"mappingBasis":"Trusted-project Rebased 1.1.8 Run menu was captured through Computer Use."},
-    {"runtimeId":"runtime-menu:tools","kind":"native-application-menu","sourceIds":["group:ToolsMenu"],"label":"Tools","evidence":[{"accessibility":"runtime/application-menu/trusted-project/golden-1.1.8/tools.ax.json","screenshot":"runtime/application-menu/trusted-project/golden-1.1.8/reference.png","fingerprint":{"accessibleName":"Tools, ID: handleAction:","role":"AXMenu","surface":"application-menu.tools"}}],"mappingBasis":"Trusted-project Rebased 1.1.8 Tools menu and recursively exposed submenus were captured through Computer Use."},
-    {"runtimeId":"runtime-menu:git","kind":"native-application-menu","sourceIds":["group:Git.Menu"],"label":"Git","evidence":[{"accessibility":"runtime/application-menu/trusted-project/golden-1.1.8/git.ax.json","screenshot":"runtime/application-menu/trusted-project/golden-1.1.8/reference.png","fingerprint":{"accessibleName":"Git, ID: handleAction:","role":"AXMenu","surface":"application-menu.git"}},{"accessibility":"runtime/application-menu/trusted-project/golden-1.1.8/gitExpanded.ax.json","screenshot":"runtime/application-menu/trusted-project/golden-1.1.8/reference.png","fingerprint":{"accessibleName":"Shelve Changes…","role":"AXMenuItem","surface":"application-menu.git.uncommitted"}}],"mappingBasis":"Trusted-project Rebased 1.1.8 Git menu, Patch, Uncommitted Changes, Current File, GitHub, and GitLab submenus were captured through Computer Use."},
-    {"runtimeId":"runtime-menu:window","kind":"native-application-menu","sourceIds":["group:WindowMenu"],"label":"Window","evidence":[{"accessibility":"runtime/application-menu/trusted-project/golden-1.1.8/window.ax.json","screenshot":"runtime/application-menu/trusted-project/golden-1.1.8/reference.png","fingerprint":{"accessibleName":"Window, ID: handleAction:","role":"AXMenu","surface":"application-menu.window"}}],"mappingBasis":"Trusted-project Rebased 1.1.8 Window menu and recursively exposed submenus were captured through Computer Use."},
-    {"runtimeId":"runtime-menu:help","kind":"native-application-menu","sourceIds":["group:HelpMenu"],"label":"Help","evidence":[{"accessibility":"runtime/application-menu/trusted-project/golden-1.1.8/help.ax.json","screenshot":"runtime/application-menu/trusted-project/golden-1.1.8/reference.png","fingerprint":{"accessibleName":"Help, ID: handleAction:","role":"AXMenu","surface":"application-menu.help"}}],"mappingBasis":"Trusted-project Rebased 1.1.8 Help menu and Diagnostic Tools submenu were captured through Computer Use."}
+    {
+      "runtimeId": "runtime-menu:file",
+      "kind": "native-application-menu",
+      "sourceIds": ["group:FileMenu"],
+      "label": "File",
+      "evidence": [
+        {
+          "accessibility": "runtime/application-menu/trusted-project/golden-1.1.8/file.ax.json",
+          "screenshot": "runtime/application-menu/trusted-project/golden-1.1.8/reference.png",
+          "fingerprint": {
+            "accessibleName": "File, ID: handleAction:",
+            "role": "AXMenu",
+            "surface": "application-menu.file"
+          }
+        }
+      ],
+      "mappingBasis": "Trusted-project Rebased 1.1.8 File menu and recursively exposed submenus were captured through Computer Use."
+    },
+    {
+      "runtimeId": "runtime-menu:edit",
+      "kind": "native-application-menu",
+      "sourceIds": ["group:EditMenu"],
+      "label": "Edit",
+      "evidence": [
+        {
+          "accessibility": "runtime/application-menu/trusted-project/golden-1.1.8/edit.ax.json",
+          "screenshot": "runtime/application-menu/trusted-project/golden-1.1.8/reference.png",
+          "fingerprint": {
+            "accessibleName": "Edit, ID: handleAction:",
+            "role": "AXMenu",
+            "surface": "application-menu.edit"
+          }
+        }
+      ],
+      "mappingBasis": "Trusted-project Rebased 1.1.8 Edit menu and recursively exposed submenus were captured through Computer Use."
+    },
+    {
+      "runtimeId": "runtime-menu:view",
+      "kind": "native-application-menu",
+      "sourceIds": ["group:ViewMenu"],
+      "label": "View",
+      "evidence": [
+        {
+          "accessibility": "runtime/application-menu/trusted-project/golden-1.1.8/view.ax.json",
+          "screenshot": "runtime/application-menu/trusted-project/golden-1.1.8/reference.png",
+          "fingerprint": {
+            "accessibleName": "View, ID: handleAction:",
+            "role": "AXMenu",
+            "surface": "application-menu.view"
+          }
+        },
+        {
+          "accessibility": "runtime/application-menu/trusted-project/golden-1.1.8/appearance.ax.json",
+          "screenshot": "runtime/application-menu/trusted-project/golden-1.1.8/reference.png",
+          "fingerprint": {
+            "accessibleName": "Compact Mode",
+            "role": "AXMenuItem",
+            "surface": "application-menu.view.appearance"
+          }
+        }
+      ],
+      "mappingBasis": "Trusted-project Rebased 1.1.8 View menu and Appearance submenu were captured through Computer Use."
+    },
+    {
+      "runtimeId": "runtime-menu:navigate",
+      "kind": "native-application-menu",
+      "sourceIds": ["group:GoToMenu"],
+      "label": "Navigate",
+      "evidence": [
+        {
+          "accessibility": "runtime/application-menu/trusted-project/golden-1.1.8/navigate.ax.json",
+          "screenshot": "runtime/application-menu/trusted-project/golden-1.1.8/reference.png",
+          "fingerprint": {
+            "accessibleName": "Navigate, ID: handleAction:",
+            "role": "AXMenu",
+            "surface": "application-menu.navigate"
+          }
+        }
+      ],
+      "mappingBasis": "Trusted-project Rebased 1.1.8 Navigate menu and recursively exposed submenus were captured through Computer Use."
+    },
+    {
+      "runtimeId": "runtime-menu:code",
+      "kind": "native-application-menu",
+      "sourceIds": ["group:CodeMenu"],
+      "label": "Code",
+      "evidence": [
+        {
+          "accessibility": "runtime/application-menu/trusted-project/golden-1.1.8/code.ax.json",
+          "screenshot": "runtime/application-menu/trusted-project/golden-1.1.8/reference.png",
+          "fingerprint": {
+            "accessibleName": "Code, ID: handleAction:",
+            "role": "AXMenu",
+            "surface": "application-menu.code"
+          }
+        }
+      ],
+      "mappingBasis": "Trusted-project Rebased 1.1.8 Code menu and recursively exposed submenus were captured through Computer Use."
+    },
+    {
+      "runtimeId": "runtime-menu:run",
+      "kind": "native-application-menu",
+      "sourceIds": ["group:RunMenu"],
+      "label": "Run",
+      "evidence": [
+        {
+          "accessibility": "runtime/application-menu/trusted-project/golden-1.1.8/run.ax.json",
+          "screenshot": "runtime/application-menu/trusted-project/golden-1.1.8/reference.png",
+          "fingerprint": {
+            "accessibleName": "Run, ID: handleAction:",
+            "role": "AXMenu",
+            "surface": "application-menu.run"
+          }
+        }
+      ],
+      "mappingBasis": "Trusted-project Rebased 1.1.8 Run menu was captured through Computer Use."
+    },
+    {
+      "runtimeId": "runtime-menu:tools",
+      "kind": "native-application-menu",
+      "sourceIds": ["group:ToolsMenu"],
+      "label": "Tools",
+      "evidence": [
+        {
+          "accessibility": "runtime/application-menu/trusted-project/golden-1.1.8/tools.ax.json",
+          "screenshot": "runtime/application-menu/trusted-project/golden-1.1.8/reference.png",
+          "fingerprint": {
+            "accessibleName": "Tools, ID: handleAction:",
+            "role": "AXMenu",
+            "surface": "application-menu.tools"
+          }
+        }
+      ],
+      "mappingBasis": "Trusted-project Rebased 1.1.8 Tools menu and recursively exposed submenus were captured through Computer Use."
+    },
+    {
+      "runtimeId": "runtime-menu:git",
+      "kind": "native-application-menu",
+      "sourceIds": ["group:Git.Menu"],
+      "label": "Git",
+      "evidence": [
+        {
+          "accessibility": "runtime/application-menu/trusted-project/golden-1.1.8/git.ax.json",
+          "screenshot": "runtime/application-menu/trusted-project/golden-1.1.8/reference.png",
+          "fingerprint": {
+            "accessibleName": "Git, ID: handleAction:",
+            "role": "AXMenu",
+            "surface": "application-menu.git"
+          }
+        },
+        {
+          "accessibility": "runtime/application-menu/trusted-project/golden-1.1.8/gitExpanded.ax.json",
+          "screenshot": "runtime/application-menu/trusted-project/golden-1.1.8/reference.png",
+          "fingerprint": {
+            "accessibleName": "Shelve Changes…",
+            "role": "AXMenuItem",
+            "surface": "application-menu.git.uncommitted"
+          }
+        }
+      ],
+      "mappingBasis": "Trusted-project Rebased 1.1.8 Git menu, Patch, Uncommitted Changes, Current File, GitHub, and GitLab submenus were captured through Computer Use."
+    },
+    {
+      "runtimeId": "runtime-menu:window",
+      "kind": "native-application-menu",
+      "sourceIds": ["group:WindowMenu"],
+      "label": "Window",
+      "evidence": [
+        {
+          "accessibility": "runtime/application-menu/trusted-project/golden-1.1.8/window.ax.json",
+          "screenshot": "runtime/application-menu/trusted-project/golden-1.1.8/reference.png",
+          "fingerprint": {
+            "accessibleName": "Window, ID: handleAction:",
+            "role": "AXMenu",
+            "surface": "application-menu.window"
+          }
+        }
+      ],
+      "mappingBasis": "Trusted-project Rebased 1.1.8 Window menu and recursively exposed submenus were captured through Computer Use."
+    },
+    {
+      "runtimeId": "runtime-menu:help",
+      "kind": "native-application-menu",
+      "sourceIds": ["group:HelpMenu"],
+      "label": "Help",
+      "evidence": [
+        {
+          "accessibility": "runtime/application-menu/trusted-project/golden-1.1.8/help.ax.json",
+          "screenshot": "runtime/application-menu/trusted-project/golden-1.1.8/reference.png",
+          "fingerprint": {
+            "accessibleName": "Help, ID: handleAction:",
+            "role": "AXMenu",
+            "surface": "application-menu.help"
+          }
+        }
+      ],
+      "mappingBasis": "Trusted-project Rebased 1.1.8 Help menu and Diagnostic Tools submenu were captured through Computer Use."
+    }
   ]
 }

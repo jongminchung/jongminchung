@@ -1,9 +1,3 @@
-import { Button } from "@astryxdesign/core/Button";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
-import { List, ListItem } from "@astryxdesign/core/List";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { ToggleButton } from "@astryxdesign/core/ToggleButton";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   replacementExpression,
@@ -12,6 +6,12 @@ import {
 } from "../domain/projectSearch";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
+import { Button } from "./ui";
+import { Dialog, DialogHeader } from "./ui";
+import { List, ListItem } from "./ui";
+import { Spinner } from "./ui";
+import { TextInput } from "./ui";
+import { ToggleButton } from "./ui";
 
 const DEFAULT_OPTIONS: ProjectSearchOptions = {
   matchCase: false,
@@ -88,10 +88,7 @@ export function ReplaceInFilesDialog({
     return () => window.clearTimeout(timer);
   }, [options, query, search]);
 
-  const files = useMemo(
-    () => [...new Set(matches.map((match) => match.path))],
-    [matches],
-  );
+  const files = useMemo(() => [...new Set(matches.map((match) => match.path))], [matches]);
   const replace = async (): Promise<void> => {
     if (query === "" || selectedPaths.size === 0 || replacing) return;
     setReplacing(true);
@@ -117,7 +114,11 @@ export function ReplaceInFilesDialog({
       width="min(820px, calc(100vw - 70px))"
     >
       <section className={tw.replaceInFilesDialog}>
-        <DialogHeader hasDivider onOpenChange={(open) => !open && onClose()} title="Replace in Files" />
+        <DialogHeader
+          hasDivider
+          onOpenChange={(open) => !open && onClose()}
+          title="Replace in Files"
+        />
         <div className={tw.replaceInFilesQuery}>
           <TextInput
             hasAutoFocus
@@ -133,24 +134,48 @@ export function ReplaceInFilesDialog({
             width="100%"
           />
           <div>
-            <ToggleButton isPressed={options.matchCase} label="Match case" onPressedChange={(matchCase) => setOptions((current) => ({ ...current, matchCase }))}>Aa</ToggleButton>
-            <ToggleButton isPressed={options.words} label="Words" onPressedChange={(words) => setOptions((current) => ({ ...current, words }))}>W</ToggleButton>
-            <ToggleButton isPressed={options.regex} label="Regex" onPressedChange={(regex) => setOptions((current) => ({ ...current, regex }))}>.*</ToggleButton>
+            <ToggleButton
+              isPressed={options.matchCase}
+              label="Match case"
+              onPressedChange={(matchCase) => setOptions((current) => ({ ...current, matchCase }))}
+            >
+              Aa
+            </ToggleButton>
+            <ToggleButton
+              isPressed={options.words}
+              label="Words"
+              onPressedChange={(words) => setOptions((current) => ({ ...current, words }))}
+            >
+              W
+            </ToggleButton>
+            <ToggleButton
+              isPressed={options.regex}
+              label="Regex"
+              onPressedChange={(regex) => setOptions((current) => ({ ...current, regex }))}
+            >
+              .*
+            </ToggleButton>
           </div>
         </div>
         <div className={tw.replaceInFilesStatus}>
-          <span>{loading ? "Searching…" : `${matches.length} matches in ${files.length} files`}</span>
+          <span>
+            {loading ? "Searching…" : `${matches.length} matches in ${files.length} files`}
+          </span>
           {files.length > 0 && (
             <Button
               label={selectedPaths.size === files.length ? "Unselect All" : "Select All"}
-              onClick={() => setSelectedPaths(new Set(selectedPaths.size === files.length ? [] : files))}
+              onClick={() =>
+                setSelectedPaths(new Set(selectedPaths.size === files.length ? [] : files))
+              }
               size="sm"
               variant="ghost"
             />
           )}
         </div>
         <div className={tw.replaceInFilesResults}>
-          {loading ? <Spinner label="Searching project…" size="lg" /> : error ? (
+          {loading ? (
+            <Spinner label="Searching project…" size="lg" />
+          ) : error ? (
             <p role="alert">{error}</p>
           ) : matches.length === 0 ? (
             <p>{query ? "Nothing found" : "Enter text to find in the project."}</p>
@@ -159,16 +184,22 @@ export function ReplaceInFilesDialog({
               {matches.map((match, index) => (
                 <ListItem
                   description={match.content.trim() || " "}
-                  endContent={<code>{match.path}:{match.line}:{match.column}</code>}
+                  endContent={
+                    <code>
+                      {match.path}:{match.line}:{match.column}
+                    </code>
+                  }
                   id={`replace-match-${index}`}
                   key={`${match.path}:${match.line}:${match.column}:${index}`}
                   label={match.path}
-                  onClick={() => setSelectedPaths((current) => {
-                    const next = new Set(current);
-                    if (next.has(match.path)) next.delete(match.path);
-                    else next.add(match.path);
-                    return next;
-                  })}
+                  onClick={() =>
+                    setSelectedPaths((current) => {
+                      const next = new Set(current);
+                      if (next.has(match.path)) next.delete(match.path);
+                      else next.add(match.path);
+                      return next;
+                    })
+                  }
                   onDoubleClick={() => onOpenResult(match)}
                   startContent={
                     <Icon

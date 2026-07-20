@@ -71,28 +71,35 @@ jobs:
           cache: pnpm
       - name: Verify configured Node.js
         run: test "v$(cat .node-version)" = "$(node --version)"
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy,rustfmt
-      - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: apps/git-client/src-tauri
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @jongminchung/tooling build
-      - run: pnpm exec oxfmt --config .oxfmtrc.mjs --check apps/git-client nx.json '!apps/git-client/src/generated/**' '!apps/git-client/src-tauri/gen/**'
+      - name: Verify Electron-only sources
+        run: |
+          if git grep -n -I -E 'T[a]uri|t[a]uri://|src[-]tauri|@t[a]uri-apps' -- \
+            .github .oxfmtrc.mjs apps/git-client \
+            ':!apps/git-client/parity/rebased/**'; then
+            echo "Legacy desktop-runtime references are not allowed in first-party Git Client sources."
+            exit 1
+          fi
+      - run: pnpm exec oxfmt --config .oxfmtrc.mjs --check apps/git-client nx.json
       - run: pnpm exec oxlint apps/git-client/src apps/git-client/tests apps/git-client/scripts
       - run: pnpm --filter @jongminchung/git-client typecheck
       - run: pnpm --filter @jongminchung/git-client test
       - run: pnpm --filter @jongminchung/git-client build
-      - run: cargo fmt --manifest-path apps/git-client/src-tauri/Cargo.toml --check
-      - run: cargo clippy --manifest-path apps/git-client/src-tauri/Cargo.toml --all-targets -- -D warnings
-      - run: cargo test --manifest-path apps/git-client/src-tauri/Cargo.toml
-      - name: Verify generated TypeScript bindings
-        run: git diff --exit-code -- apps/git-client/src/generated
       - run: pnpm --filter @jongminchung/git-client exec playwright install chromium
       - run: pnpm --filter @jongminchung/git-client test:e2e
       - name: Build and validate local ad-hoc Electron ARM64 artifacts
         run: pnpm --filter @jongminchung/git-client release:validate-local -- 0.1.0
+      - name: Upload compact QA evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: git-client-compact-qa
+          path: |
+            apps/git-client/test-results/qa/*.json
+            apps/git-client/test-results/**/trace.zip
+            apps/git-client/test-results/**/*-diff.png
+          if-no-files-found: ignore
       - uses: actions/upload-artifact@v7
         with:
           name: git-client-macos-arm64-adhoc

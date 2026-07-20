@@ -1,14 +1,11 @@
 import { describe, expect, it } from "vitest";
-import type { RepositoryId, TerminalEvent, TerminalId } from "../generated";
+import type { RepositoryId, TerminalEvent, TerminalId } from "../shared/contracts/model";
 import {
   DEFAULT_TERMINAL_LAUNCH_TARGET,
   type TerminalLaunchTarget,
   type TerminalLaunchTargets,
 } from "../shared/contracts/terminal";
-import {
-  ElectronTerminalBridge,
-  type ElectronTerminalApi,
-} from "./ElectronTerminalBridge";
+import { ElectronTerminalBridge, type ElectronTerminalApi } from "./ElectronTerminalBridge";
 
 class FakeElectronTerminalApi implements ElectronTerminalApi {
   readonly writes: Array<{ readonly terminalId: string; readonly data: string }> = [];
@@ -77,14 +74,10 @@ describe("ElectronTerminalBridge", () => {
     await bridge.close(terminalId);
     await bridge.closeRepository("dfca5b34-8cce-4e7f-a497-646bca8ed42d");
 
-    expect(events).toEqual([
-      { kind: "output", sequence: 0, data: [112, 119, 100, 13, 10] },
-    ]);
+    expect(events).toEqual([{ kind: "output", sequence: 0, data: [112, 119, 100, 13, 10] }]);
     expect(api.writes).toEqual([{ terminalId, data: "pwd\r" }]);
     expect(api.resizes).toEqual([{ terminalId, cols: 120, rows: 36 }]);
     expect(api.closed).toEqual([terminalId]);
-    expect(api.closedRepositories).toEqual([
-      "dfca5b34-8cce-4e7f-a497-646bca8ed42d",
-    ]);
+    expect(api.closedRepositories).toEqual(["dfca5b34-8cce-4e7f-a497-646bca8ed42d"]);
   });
 });

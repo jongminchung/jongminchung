@@ -1,12 +1,9 @@
-import { Button } from "@astryxdesign/core/Button";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
-import { TextInput } from "@astryxdesign/core/TextInput";
 import { useState, type KeyboardEvent } from "react";
-import {
-  isBookmarkMnemonic,
-  type BookmarkMnemonic,
-} from "../domain/bookmarks";
+import { isBookmarkMnemonic, type BookmarkMnemonic } from "../domain/bookmarks";
 import { tw } from "../styles/tailwind";
+import { Button } from "./ui";
+import { Dialog, DialogHeader } from "./ui";
+import { TextInput } from "./ui";
 
 const MNEMONICS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("") as BookmarkMnemonic[];
 
@@ -58,11 +55,7 @@ export function BookmarkMnemonicDialog({
       width={430}
     >
       <section className={tw.bookmarkMnemonicDialog} onKeyDown={onKeyDown}>
-        <DialogHeader
-          hasDivider
-          onOpenChange={(open) => !open && onClose()}
-          title={title}
-        />
+        <DialogHeader hasDivider onOpenChange={(open) => !open && onClose()} title={title} />
         <div className={tw.bookmarkMnemonicGrid} role="listbox" aria-label="Bookmark mnemonics">
           {MNEMONICS.map((mnemonic) => (
             <button

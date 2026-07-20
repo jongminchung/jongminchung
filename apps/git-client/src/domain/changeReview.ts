@@ -72,10 +72,7 @@ export function changeEntries(status: StatusModel): readonly ChangeEntry[] {
   });
 }
 
-export function hasSameChangeSelection(
-  left: ChangeSelection,
-  right: ChangeSelection,
-): boolean {
+export function hasSameChangeSelection(left: ChangeSelection, right: ChangeSelection): boolean {
   return left.path === right.path && left.layer === right.layer;
 }
 
@@ -121,18 +118,21 @@ export function revisionDiffEntries(patch: string): readonly RevisionDiffEntry[]
           ? "renamed"
           : "modified";
     const binary = /\n(?:Binary files .* differ|GIT binary patch)(?:\n|$)/.test(filePatch);
-    const submodule = /(?:old mode 160000|new mode 160000|index [0-9a-f]+\.\.[0-9a-f]+ 160000)/.test(filePatch);
-    return [{
-      file: {
-        path,
-        status,
-        staged: false,
-        worktree: false,
-        binary,
-        submodule,
+    const submodule =
+      /(?:old mode 160000|new mode 160000|index [0-9a-f]+\.\.[0-9a-f]+ 160000)/.test(filePatch);
+    return [
+      {
+        file: {
+          path,
+          status,
+          staged: false,
+          worktree: false,
+          binary,
+          submodule,
+        },
+        patch: `${filePatch}\n`,
       },
-      patch: `${filePatch}\n`,
-    }];
+    ];
   });
 }
 

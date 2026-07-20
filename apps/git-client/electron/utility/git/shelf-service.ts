@@ -2,23 +2,11 @@ import { Buffer, isUtf8 } from "node:buffer";
 import { createHash, randomUUID } from "node:crypto";
 import { constants } from "node:fs";
 import type { Stats } from "node:fs";
-import {
-  lstat,
-  mkdir,
-  open,
-  readdir,
-  realpath,
-  rename,
-  rm,
-  unlink,
-} from "node:fs/promises";
+import { lstat, mkdir, open, readdir, realpath, rename, rm, unlink } from "node:fs/promises";
 import { dirname, isAbsolute, join, normalize, sep } from "node:path";
 import { z } from "zod";
-import type { ShelfEntry, ShelfFile } from "../../../src/generated";
-import type {
-  RepositoryId,
-  RepositoryRecord,
-} from "../../../src/shared/contracts/git-utility";
+import type { RepositoryId, RepositoryRecord } from "../../../src/shared/contracts/git-utility";
+import type { ShelfEntry, ShelfFile } from "../../../src/shared/contracts/model";
 import { GitUtilityError } from "./git-error";
 import {
   PATCH_COMMAND_TIMEOUT_MS,
@@ -110,7 +98,9 @@ function invalid(message: string): GitUtilityError {
 }
 
 function isErrno(error: unknown, code: string): boolean {
-  return error instanceof Error && "code" in error && (error as NodeJS.ErrnoException).code === code;
+  return (
+    error instanceof Error && "code" in error && (error as NodeJS.ErrnoException).code === code
+  );
 }
 
 function filesystemError(error: unknown, fallback: string): GitUtilityError {
@@ -160,7 +150,9 @@ function pathComponents(untrustedPath: unknown): readonly string[] {
   const components = untrustedPath.split(sep);
   if (
     normalized !== untrustedPath ||
-    components.some((component) => component.length === 0 || component === "." || component === "..")
+    components.some(
+      (component) => component.length === 0 || component === "." || component === "..",
+    )
   ) {
     throw invalid("Shelf paths must be normalized relative paths");
   }
@@ -328,7 +320,9 @@ async function readContainedFile(
   try {
     handle = await open(path, constants.O_RDONLY | constants.O_NOFOLLOW);
   } catch (error) {
-    throw invalid(`${label} could not be opened without following a symbolic link (${safeErrorMessage(error instanceof Error ? error.message : "open failed")})`);
+    throw invalid(
+      `${label} could not be opened without following a symbolic link (${safeErrorMessage(error instanceof Error ? error.message : "open failed")})`,
+    );
   }
   try {
     const opened = await handle.stat();
@@ -379,7 +373,9 @@ async function writeContainedFile(
       mode,
     );
   } catch (error) {
-    throw invalid(`${label} could not be created safely (${safeErrorMessage(error instanceof Error ? error.message : "open failed")})`);
+    throw invalid(
+      `${label} could not be created safely (${safeErrorMessage(error instanceof Error ? error.message : "open failed")})`,
+    );
   }
   let identity: FileIdentity;
   try {
@@ -418,7 +414,9 @@ async function syncDirectory(directory: PinnedDirectory): Promise<void> {
   }
 }
 
-function processFailure(outcome: Exclude<PatchProcessOutcome, PatchProcessCompleted>): GitUtilityError {
+function processFailure(
+  outcome: Exclude<PatchProcessOutcome, PatchProcessCompleted>,
+): GitUtilityError {
   if (outcome.kind === "cancelled") {
     const suffix =
       outcome.reason === "timeout"
@@ -507,7 +505,10 @@ function validateManifestEntry(
   if (entry.id !== shelfId || entry.repositoryId !== repositoryId) {
     throw invalid("Shelf manifest identity does not match its directory");
   }
-  if (entry.message.includes("\0") || Buffer.byteLength(entry.message, "utf8") > MAX_SHELF_MESSAGE_BYTES) {
+  if (
+    entry.message.includes("\0") ||
+    Buffer.byteLength(entry.message, "utf8") > MAX_SHELF_MESSAGE_BYTES
+  ) {
     throw invalid("Shelf manifest message is invalid");
   }
   const seen = new Set<string>();
@@ -686,15 +687,7 @@ export class ShelfService {
         const indexPatch = await captureGit(
           this.#runner,
           repository.path,
-          [
-            "diff",
-            "--binary",
-            "--full-index",
-            "--no-color",
-            "--cached",
-            "--",
-            ...input.paths,
-          ],
+          ["diff", "--binary", "--full-index", "--no-color", "--cached", "--", ...input.paths],
           MAX_SHELF_PATCH_BYTES,
           signal,
         );
@@ -749,7 +742,10 @@ export class ShelfService {
         }
         const allPaths = [...new Set([...input.paths, ...untrackedPaths])].sort();
         if (allPaths.length > MAX_SHELF_PATHS) {
-          throw new GitUtilityError("outputLimit", `Shelf contains more than ${MAX_SHELF_PATHS} paths`);
+          throw new GitUtilityError(
+            "outputLimit",
+            `Shelf contains more than ${MAX_SHELF_PATHS} paths`,
+          );
         }
         const files: ShelfFile[] = allPaths.map((path) => ({
           path,
@@ -806,9 +802,11 @@ export class ShelfService {
     const shelves = await this.#repositoryShelves(validatedRepositoryId, false);
     if (shelves === null) return Object.freeze([]);
     const entries: ShelfEntry[] = [];
-    const children = await readdir(shelves.path, { withFileTypes: true }).catch((error: unknown) => {
-      throw filesystemError(error, "Unable to list shelves");
-    });
+    const children = await readdir(shelves.path, { withFileTypes: true }).catch(
+      (error: unknown) => {
+        throw filesystemError(error, "Unable to list shelves");
+      },
+    );
     for (const child of children) {
       if (!child.isDirectory() || !UuidSchema.safeParse(child.name).success) continue;
       try {
@@ -949,7 +947,11 @@ export class ShelfService {
       const metadata = await lstat(path).catch((error: unknown) => {
         throw filesystemError(error, `Untracked file is not accessible (${stored.path})`);
       });
-      if (metadata.isSymbolicLink() || !metadata.isFile() || !sameIdentity(metadata, stored.identity)) {
+      if (
+        metadata.isSymbolicLink() ||
+        !metadata.isFile() ||
+        !sameIdentity(metadata, stored.identity)
+      ) {
         throw invalid(`Untracked file changed while shelving (${stored.path})`);
       }
       await unlink(path).catch((error: unknown) => {

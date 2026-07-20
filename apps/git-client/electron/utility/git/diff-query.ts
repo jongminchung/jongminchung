@@ -1,4 +1,4 @@
-import type { DiffOptions } from "../../../src/generated";
+import type { DiffOptions } from "../../../src/shared/contracts/model";
 import { GitUtilityError } from "./git-error";
 import { validateRelativePath, validateRevision } from "./validation";
 

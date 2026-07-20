@@ -5,12 +5,7 @@ import { lstat, realpath } from "node:fs/promises";
 import { basename, dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
-import {
-  FuseState,
-  FuseV1Options,
-  FuseVersion,
-  getCurrentFuseWire,
-} from "@electron/fuses";
+import { FuseState, FuseV1Options, FuseVersion, getCurrentFuseWire } from "@electron/fuses";
 import {
   packagedElectronFrameworkResourcesPath,
   verifyElectronLocales,
@@ -136,7 +131,9 @@ async function verifyTerminalRuntime(appPath) {
 
 export async function verifyElectronPackage(inputPath) {
   if (process.platform !== "darwin") {
-    throw new Error("Electron package verification currently supports the macOS ARM64 release target only");
+    throw new Error(
+      "Electron package verification currently supports the macOS ARM64 release target only",
+    );
   }
   if (typeof inputPath !== "string" || !isAbsolute(inputPath) || !inputPath.endsWith(".app")) {
     throw new Error("Package verification requires an absolute .app path");

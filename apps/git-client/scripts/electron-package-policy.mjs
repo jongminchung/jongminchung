@@ -97,7 +97,9 @@ async function assertContainedLocaleDirectory(resourcesPath, localeName) {
     dirname(localeRealPath) !== resourcesRealPath ||
     basename(localeRealPath) !== localeName
   ) {
-    throw new Error(`Electron locale resolved outside the expected resources directory: ${localeName}`);
+    throw new Error(
+      `Electron locale resolved outside the expected resources directory: ${localeName}`,
+    );
   }
 
   return localeRealPath;
@@ -126,7 +128,10 @@ export async function verifyElectronLocales(resourcesPath) {
     await assertContainedLocaleDirectory(resolvedResourcesPath, localeName);
   }
 
-  return Object.freeze({ resourcesPath: resolvedResourcesPath, locales: Object.freeze(localeNames) });
+  return Object.freeze({
+    resourcesPath: resolvedResourcesPath,
+    locales: Object.freeze(localeNames),
+  });
 }
 
 export async function pruneElectronLocales({ buildPath, platform }) {

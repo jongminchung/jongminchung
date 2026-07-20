@@ -1,9 +1,9 @@
-import { Button } from "@astryxdesign/core/Button";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
-import { List, ListItem } from "@astryxdesign/core/List";
 import type { DiagnosticPathKind } from "../shared/contracts/ipc";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
+import { Button } from "./ui";
+import { Dialog, DialogHeader } from "./ui";
+import { List, ListItem } from "./ui";
 
 const FILES: readonly Readonly<{
   description: string;
@@ -14,8 +14,16 @@ const FILES: readonly Readonly<{
   { kind: "logs", label: "Logs", description: "Application and diagnostic logs" },
   { kind: "caches", label: "Caches", description: "Electron session and renderer caches" },
   { kind: "crashDumps", label: "Crash Dumps", description: "Native crash reports" },
-  { kind: "customProperties", label: "Custom Properties", description: "Git Client property overrides" },
-  { kind: "vmOptions", label: "Custom VM Options", description: "Allowlisted renderer memory options" },
+  {
+    kind: "customProperties",
+    label: "Custom Properties",
+    description: "Git Client property overrides",
+  },
+  {
+    kind: "vmOptions",
+    label: "Custom VM Options",
+    description: "Allowlisted renderer memory options",
+  },
 ];
 
 export function SpecialFilesDialog({

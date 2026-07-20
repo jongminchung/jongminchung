@@ -1,8 +1,40 @@
 export type BookmarkMnemonic =
-  | "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
-  | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J"
-  | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T"
-  | "U" | "V" | "W" | "X" | "Y" | "Z";
+  | "0"
+  | "1"
+  | "2"
+  | "3"
+  | "4"
+  | "5"
+  | "6"
+  | "7"
+  | "8"
+  | "9"
+  | "A"
+  | "B"
+  | "C"
+  | "D"
+  | "E"
+  | "F"
+  | "G"
+  | "H"
+  | "I"
+  | "J"
+  | "K"
+  | "L"
+  | "M"
+  | "N"
+  | "O"
+  | "P"
+  | "Q"
+  | "R"
+  | "S"
+  | "T"
+  | "U"
+  | "V"
+  | "W"
+  | "X"
+  | "Y"
+  | "Z";
 
 export interface LineBookmark {
   readonly id: string;
@@ -63,7 +95,8 @@ function parseLineBookmark(value: unknown): LineBookmark | null {
     Number(value.column) < 1 ||
     typeof value.description !== "string" ||
     (value.mnemonic !== null && !isBookmarkMnemonic(value.mnemonic))
-  ) return null;
+  )
+    return null;
   return {
     id: value.id,
     path: value.path,
@@ -83,10 +116,7 @@ function fallbackGroup(projectName: string): BookmarkGroup {
   };
 }
 
-export function parseProjectBookmarks(
-  value: unknown,
-  projectName: string,
-): ProjectBookmarks {
+export function parseProjectBookmarks(value: unknown, projectName: string): ProjectBookmarks {
   if (!isRecord(value) || value.schemaVersion !== 1 || !Array.isArray(value.groups)) {
     return {
       schemaVersion: 1,
@@ -106,7 +136,8 @@ export function parseProjectBookmarks(
       typeof candidate.isDefault !== "boolean" ||
       !Array.isArray(candidate.bookmarks) ||
       names.has(candidate.name)
-    ) return [];
+    )
+      return [];
     names.add(candidate.name);
     const isDefault = candidate.isDefault && !hasDefault;
     if (isDefault) hasDefault = true;
@@ -116,12 +147,14 @@ export function parseProjectBookmarks(
       bookmarkIds.add(parsed.id);
       return [parsed];
     });
-    return [{
-      id: candidate.id,
-      name: candidate.name,
-      isDefault,
-      bookmarks,
-    }];
+    return [
+      {
+        id: candidate.id,
+        name: candidate.name,
+        isDefault,
+        bookmarks,
+      },
+    ];
   });
   return {
     schemaVersion: 1,
@@ -132,12 +165,13 @@ export function parseProjectBookmarks(
           autoscrollToSource: value.view.autoscrollToSource === true,
         }
       : DEFAULT_BOOKMARK_VIEW_OPTIONS,
-    groups: groups.length > 0
-      ? [
-          ...groups.filter((group) => group.isDefault),
-          ...groups.filter((group) => !group.isDefault),
-        ]
-      : [fallbackGroup(projectName)],
+    groups:
+      groups.length > 0
+        ? [
+            ...groups.filter((group) => group.isDefault),
+            ...groups.filter((group) => !group.isDefault),
+          ]
+        : [fallbackGroup(projectName)],
   };
 }
 
@@ -149,9 +183,11 @@ export function bookmarkAt(
   state: ProjectBookmarks,
   location: Pick<BookmarkLocation, "path" | "line">,
 ): LineBookmark | null {
-  return allLineBookmarks(state).find(
-    (bookmark) => bookmark.path === location.path && bookmark.line === location.line,
-  ) ?? null;
+  return (
+    allLineBookmarks(state).find(
+      (bookmark) => bookmark.path === location.path && bookmark.line === location.line,
+    ) ?? null
+  );
 }
 
 export function toggleLineBookmark(
@@ -163,9 +199,7 @@ export function toggleLineBookmark(
   const existing = bookmarkAt(state, location);
   if (existing) return removeBookmark(state, existing.id);
   const group = state.groups.find((candidate) => candidate.isDefault) ?? state.groups[0];
-  return group
-    ? addLineBookmarkToGroup(state, location, id, group.id, mnemonic)
-    : state;
+  return group ? addLineBookmarkToGroup(state, location, id, group.id, mnemonic) : state;
 }
 
 export function addLineBookmarkToGroup(
@@ -187,17 +221,12 @@ export function addLineBookmarkToGroup(
   return {
     ...state,
     groups: state.groups.map((group) =>
-      group.id === groupId
-        ? { ...group, bookmarks: [...group.bookmarks, next] }
-        : group,
+      group.id === groupId ? { ...group, bookmarks: [...group.bookmarks, next] } : group,
     ),
   };
 }
 
-export function removeBookmark(
-  state: ProjectBookmarks,
-  bookmarkId: string,
-): ProjectBookmarks {
+export function removeBookmark(state: ProjectBookmarks, bookmarkId: string): ProjectBookmarks {
   return {
     ...state,
     groups: state.groups.map((group) => ({
@@ -305,7 +334,8 @@ export function renameBookmarkGroup(
   if (
     !normalized ||
     state.groups.some((group) => group.id !== groupId && group.name === normalized)
-  ) return state;
+  )
+    return state;
   return {
     ...state,
     groups: state.groups.map((group) =>
@@ -314,10 +344,7 @@ export function renameBookmarkGroup(
   };
 }
 
-export function deleteBookmarkGroup(
-  state: ProjectBookmarks,
-  groupId: string,
-): ProjectBookmarks {
+export function deleteBookmarkGroup(state: ProjectBookmarks, groupId: string): ProjectBookmarks {
   if (state.groups.length <= 1) return state;
   return {
     ...state,
@@ -360,8 +387,11 @@ export function relativeBookmark(
         (bookmark) => bookmark.path === current.path && bookmark.line === current.line,
       )
     : -1;
-  const index = currentIndex < 0
-    ? offset > 0 ? 0 : bookmarks.length - 1
-    : (currentIndex + offset + bookmarks.length) % bookmarks.length;
+  const index =
+    currentIndex < 0
+      ? offset > 0
+        ? 0
+        : bookmarks.length - 1
+      : (currentIndex + offset + bookmarks.length) % bookmarks.length;
   return bookmarks[index] ?? null;
 }

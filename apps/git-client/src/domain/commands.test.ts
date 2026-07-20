@@ -31,23 +31,41 @@ const keyboardEvent = (overrides: Partial<KeyboardEventLike> = {}): KeyboardEven
 describe("command manifest", () => {
   it("has unique IDs and accelerators and renders macOS shortcuts", () => {
     expect(COMMAND_MANIFEST.commands.length).toBeGreaterThan(15);
-    expect(new Set(COMMAND_MANIFEST.commands.map((command) => command.id)).size).toBe(COMMAND_MANIFEST.commands.length);
+    expect(new Set(COMMAND_MANIFEST.commands.map((command) => command.id)).size).toBe(
+      COMMAND_MANIFEST.commands.length,
+    );
     expect(displayAccelerator("CmdOrCtrl+Option+Shift+C")).toBe("⌥⇧⌘C");
     expect(displayAccelerator(null)).toBe("");
-    expect(COMMAND_MANIFEST.commands.some((command) => command.accelerator === "CmdOrCtrl+C")).toBe(false);
+    expect(COMMAND_MANIFEST.commands.some((command) => command.accelerator === "CmdOrCtrl+C")).toBe(
+      false,
+    );
   });
 
   it("rejects malformed external values", () => {
-    expect(() => parseCommandManifest({ schemaVersion: 2, commands: [] })).toThrow(/schema version/);
-    expect(() => parseCommandManifest({ schemaVersion: 1, commands: [{ id: "bad" }] })).toThrow(/invalid/);
+    expect(() => parseCommandManifest({ schemaVersion: 2, commands: [] })).toThrow(
+      /schema version/,
+    );
+    expect(() => parseCommandManifest({ schemaVersion: 1, commands: [{ id: "bad" }] })).toThrow(
+      /invalid/,
+    );
   });
 });
 
 describe("shortcut matching", () => {
   it("normalizes command, shift, option and enter", () => {
     expect(matchesKeyboardShortcut(keyboardEvent(), "CmdOrCtrl+P")).toBe(true);
-    expect(matchesKeyboardShortcut(keyboardEvent({ key: "Enter", shiftKey: true }), "CmdOrCtrl+Shift+Enter")).toBe(true);
-    expect(matchesKeyboardShortcut(keyboardEvent({ key: "c", shiftKey: true, altKey: true }), "CmdOrCtrl+Option+Shift+C")).toBe(true);
+    expect(
+      matchesKeyboardShortcut(
+        keyboardEvent({ key: "Enter", shiftKey: true }),
+        "CmdOrCtrl+Shift+Enter",
+      ),
+    ).toBe(true);
+    expect(
+      matchesKeyboardShortcut(
+        keyboardEvent({ key: "c", shiftKey: true, altKey: true }),
+        "CmdOrCtrl+Option+Shift+C",
+      ),
+    ).toBe(true);
   });
 
   it("captures and resolves user keymap overrides", () => {
@@ -69,15 +87,13 @@ describe("shortcut matching", () => {
         altKey: false,
       }),
     ).toBeNull();
-    const project = COMMAND_MANIFEST.commands.find(
-      (command) => command.id === "view.project",
-    );
+    const project = COMMAND_MANIFEST.commands.find((command) => command.id === "view.project");
     expect(project).toBeDefined();
     if (!project) return;
     expect(resolvedAccelerator(project, { "view.project": null })).toBeNull();
-    expect(
-      resolvedAccelerator(project, { "view.project": "CmdOrCtrl+Shift+K" }),
-    ).toBe("CmdOrCtrl+Shift+K");
+    expect(resolvedAccelerator(project, { "view.project": "CmdOrCtrl+Shift+K" })).toBe(
+      "CmdOrCtrl+Shift+K",
+    );
   });
 
   it("protects IME and repeated mutations", () => {
@@ -100,7 +116,7 @@ describe("CommandRegistry", () => {
     const definition = (execute: () => void, enabled = true): CommandDefinition => ({
       ...entry,
       execute,
-      availability: () => enabled ? COMMAND_ENABLED : commandDisabled("Not now"),
+      availability: () => (enabled ? COMMAND_ENABLED : commandDisabled("Not now")),
     });
     registry.register("one", [definition(first)]);
     registry.register("two", [definition(second, false)]);
@@ -125,7 +141,10 @@ describe("palette ranking", () => {
   });
 
   it("ranks exact and prefix matches while keeping disabled results", () => {
-    const sorted = sortPaletteItems([item("fetch", "Fetch", false), item("open", "Open Repository"), item("refresh", "Refresh")], "fetch");
+    const sorted = sortPaletteItems(
+      [item("fetch", "Fetch", false), item("open", "Open Repository"), item("refresh", "Refresh")],
+      "fetch",
+    );
     expect(sorted.map((value) => value.id)).toEqual(["fetch"]);
     expect(sorted[0]?.availability).toEqual(commandDisabled("No repository"));
   });

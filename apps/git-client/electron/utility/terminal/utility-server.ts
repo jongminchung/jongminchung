@@ -21,10 +21,7 @@ export interface TerminalUtilityServerPort {
 }
 
 export interface TerminalUtilityServiceLike {
-  create(
-    request: unknown,
-    listener: (event: TerminalEventEnvelope) => void,
-  ): TerminalCreateResult;
+  create(request: unknown, listener: (event: TerminalEventEnvelope) => void): TerminalCreateResult;
   listLaunchTargets(): TerminalLaunchTargets;
   write(request: unknown): void;
   resize(request: unknown): void;
@@ -101,17 +98,10 @@ export class TerminalUtilityProtocolServer {
   }
 
   #handshake(
-    message: Extract<
-      MainToTerminalUtilityMessage,
-      Readonly<{ kind: "handshake" }>
-    >,
+    message: Extract<MainToTerminalUtilityMessage, Readonly<{ kind: "handshake" }>>,
   ): void {
     if (this.#handshaken) {
-      this.#postError(
-        message.correlationId,
-        "invalidRequest",
-        "Handshake has already completed",
-      );
+      this.#postError(message.correlationId, "invalidRequest", "Handshake has already completed");
       return;
     }
     if (
@@ -134,12 +124,7 @@ export class TerminalUtilityProtocolServer {
     });
   }
 
-  #route(
-    message: Exclude<
-      MainToTerminalUtilityMessage,
-      Readonly<{ kind: "handshake" }>
-    >,
-  ): void {
+  #route(message: Exclude<MainToTerminalUtilityMessage, Readonly<{ kind: "handshake" }>>): void {
     switch (message.kind) {
       case "create": {
         const result = this.#utility.create(message.request, (event) => {
@@ -211,11 +196,7 @@ export class TerminalUtilityProtocolServer {
     this.#port.postMessage(TerminalUtilityToMainMessageSchema.parse(message));
   }
 
-  #postError(
-    correlationId: string | null,
-    code: TerminalUtilityErrorCode,
-    message: string,
-  ): void {
+  #postError(correlationId: string | null, code: TerminalUtilityErrorCode, message: string): void {
     this.#post({
       kind: "error",
       correlationId,

@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import type { FileChange, StatusModel } from "./types";
 import {
   DEFAULT_DIFF_PREFERENCES,
   changeEntries,
@@ -10,6 +9,7 @@ import {
   reconcileChangeSelection,
   revisionDiffEntries,
 } from "./changeReview";
+import type { FileChange, StatusModel } from "./types";
 
 const file = (overrides: Partial<FileChange>): FileChange => ({
   path: "src/app.ts",
@@ -36,14 +36,12 @@ describe("change review state", () => {
 
   it("restores the opposite layer before selecting a neighboring file", () => {
     const entries = changeEntries(
-      status([
-        file({ staged: true, worktree: false }),
-        file({ path: "src/next.ts" }),
-      ]),
+      status([file({ staged: true, worktree: false }), file({ path: "src/next.ts" })]),
     );
-    expect(
-      reconcileChangeSelection({ path: "src/app.ts", layer: "worktree" }, entries),
-    ).toEqual({ path: "src/app.ts", layer: "index" });
+    expect(reconcileChangeSelection({ path: "src/app.ts", layer: "worktree" }, entries)).toEqual({
+      path: "src/app.ts",
+      layer: "index",
+    });
   });
 
   it("selects the first entry initially and clears an empty repository", () => {
@@ -89,22 +87,24 @@ describe("change review state", () => {
   });
 
   it("splits revision comparisons into navigable text, binary, and submodule files", () => {
-    const entries = revisionDiffEntries([
-      "diff --git a/src/app.ts b/src/app.ts",
-      "index 1111111..2222222 100644",
-      "--- a/src/app.ts",
-      "+++ b/src/app.ts",
-      "@@ -1 +1 @@",
-      "-old",
-      "+new",
-      "diff --git a/assets/logo.png b/assets/logo.png",
-      "new file mode 100644",
-      "GIT binary patch",
-      "diff --git a/vendor/library b/vendor/library",
-      "index 3333333..4444444 160000",
-      "--- a/vendor/library",
-      "+++ b/vendor/library",
-    ].join("\n"));
+    const entries = revisionDiffEntries(
+      [
+        "diff --git a/src/app.ts b/src/app.ts",
+        "index 1111111..2222222 100644",
+        "--- a/src/app.ts",
+        "+++ b/src/app.ts",
+        "@@ -1 +1 @@",
+        "-old",
+        "+new",
+        "diff --git a/assets/logo.png b/assets/logo.png",
+        "new file mode 100644",
+        "GIT binary patch",
+        "diff --git a/vendor/library b/vendor/library",
+        "index 3333333..4444444 160000",
+        "--- a/vendor/library",
+        "+++ b/vendor/library",
+      ].join("\n"),
+    );
     expect(entries.map((entry) => entry.file.path)).toEqual([
       "src/app.ts",
       "assets/logo.png",

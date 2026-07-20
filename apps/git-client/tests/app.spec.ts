@@ -5,22 +5,148 @@ test.beforeEach(async ({ page }) => {
     await page.goto("/?fixture=qa");
 });
 
-test("keeps the normal browser start screen free of repository fixtures", async ({
+test("matches the 800 by 650 Rebased recent-project geometry", async ({
+    page,
+}) => {
+    await page.setViewportSize({ width: 800, height: 650 });
+    await page.goto("/?fixture=welcome-recent");
+    await expect(page).toHaveTitle("Welcome to Git Client");
+    await expect(
+        page.getByRole("textbox", { name: "Search projects" }),
+    ).toBeVisible();
+    await expect(
+        page.getByRole("option", { name: /gcloud-cloudlog/ }),
+    ).toContainText("feat/opensearch");
+    await expect(
+        page.getByRole("button", { name: "New Project" }),
+    ).toBeVisible();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+    await expect(page.getByTestId("welcome-sidebar")).toHaveCSS(
+        "width",
+        "225px",
+    );
+    await expect(page.getByTestId("welcome-titlebar")).toHaveCSS(
+        "height",
+        "27px",
+    );
+    await expect(page.getByTestId("welcome-project-toolbar")).toHaveCSS(
+        "height",
+        "68px",
+    );
+    await expect(page).toHaveScreenshot(
+        "welcome-projects-light-recent-800x650.png",
+    );
+
+    const search = page.getByRole("textbox", { name: "Search projects" });
+    await search.fill("opensearch");
+    await expect(
+        page.getByRole("option", { name: /gcloud-cloudlog/ }),
+    ).toBeVisible();
+    await search.fill("missing-project");
+    await expect(page.getByRole("option")).toHaveCount(0);
+
+    await page.goto("/");
+    await expect(page.getByText("gcloud-cloudlog")).toHaveCount(0);
+});
+
+test("keeps the Rebased empty-project state at 800 by 650", async ({
+    page,
+}) => {
+    await page.setViewportSize({ width: 800, height: 650 });
+    await page.goto("/");
+    await expect(
+        page.getByRole("heading", { name: "Welcome to Git Client" }),
+    ).toBeVisible();
+    await expect(page).toHaveScreenshot(
+        "welcome-projects-light-empty-800x650.png",
+    );
+});
+
+test("matches the focused Rebased Customize geometry", async ({ page }) => {
+    await page.setViewportSize({ width: 800, height: 650 });
+    await page.goto("/");
+    await page.getByRole("treeitem", { name: "Projects" }).focus();
+    await page.keyboard.press("ArrowDown");
+    await expect(
+        page.getByRole("treeitem", { name: "Customize" }),
+    ).toBeFocused();
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await expect(
+        page.getByRole("heading", { name: "Appearance" }),
+    ).toBeVisible();
+    await expect(page.getByLabel("Theme:")).toHaveValue("light");
+    await expect(page.getByText("Plugins", { exact: true })).toHaveCount(0);
+    await expect(
+        page.getByText("Editor color scheme", { exact: true }),
+    ).toHaveCount(0);
+    await expect(
+        page.getByText("Language and Region", { exact: true }),
+    ).toHaveCount(0);
+    await page.getByLabel("Theme:").focus();
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await expect(page.getByLabel("Theme:")).toBeFocused();
+    await expect(page).toHaveScreenshot(
+        "welcome-customize-light-focused-800x650.png",
+    );
+
+    const accessibility = await new AxeBuilder({ page }).analyze();
+    expect(accessibility.violations).toEqual([]);
+});
+
+test("applies and restores Welcome appearance preferences", async ({
     page,
 }) => {
     await page.goto("/");
-    await expect(
-        page.getByRole("button", { name: "Manage", exact: true }),
-    ).toBeVisible();
-    await expect(
-        page.getByText("Browser preview has no native Git bridge"),
-    ).toBeVisible();
-    await expect(page.getByRole("region", { name: "Commit log" })).toHaveCount(
-        0,
+    await page.getByRole("treeitem", { name: "Customize" }).click();
+    const root = page.locator("html");
+    const theme = page.getByLabel("Theme:");
+    const syncWithOs = page.getByRole("checkbox", { name: "Sync with OS" });
+
+    await theme.selectOption("dark");
+    await expect(root).toHaveAttribute("data-theme", "dark");
+    await expect(root).toHaveAttribute("data-appearance-mode", "dark");
+    await expect(root).toHaveCSS("color-scheme", "dark");
+    await page.reload();
+    await page.getByRole("treeitem", { name: "Customize" }).click();
+    await expect(theme).toHaveValue("dark");
+    await expect(root).toHaveAttribute("data-theme", "dark");
+
+    await page.emulateMedia({ colorScheme: "light" });
+    await syncWithOs.check();
+    await expect(theme).toHaveValue("light");
+    await expect(root).toHaveAttribute("data-theme", "light");
+    await expect(root).toHaveAttribute("data-appearance-mode", "system");
+    await page.emulateMedia({ colorScheme: "dark" });
+    await expect(theme).toHaveValue("dark");
+    await expect(root).toHaveAttribute("data-theme", "dark");
+    await page.emulateMedia({ colorScheme: "light" });
+    await expect(theme).toHaveValue("light");
+    await expect(root).toHaveAttribute("data-theme", "light");
+    await syncWithOs.uncheck();
+    await expect(theme).toHaveValue("light");
+    await expect(root).toHaveAttribute("data-theme", "light");
+    await expect(root).toHaveAttribute("data-appearance-mode", "light");
+    await expect(root).toHaveCSS("color-scheme", "light");
+    await expect
+        .poll(() =>
+            page.evaluate(() =>
+                window.localStorage.getItem("git-client.appearance-mode"),
+            ),
+        )
+        .toBe('{"theme":"light","syncWithOs":false}');
+
+    await page.reload();
+    await page.getByRole("treeitem", { name: "Customize" }).click();
+    await expect(theme).toHaveValue("light");
+    await expect(syncWithOs).not.toBeChecked();
+    await expect(root).toHaveAttribute("data-theme", "light");
+});
+
+test("keeps the workspace titlebar at 30px", async ({ page }) => {
+    await expect(page.getByRole("banner", { name: "Main Toolbar" })).toHaveCSS(
+        "height",
+        "30px",
     );
-    await expect(
-        page.getByRole("link", { name: "Open QA fixture" }),
-    ).toHaveAttribute("href", "/?fixture=qa");
 });
 
 test("renders the dense three-pane Git log fixture", async ({ page }) => {
@@ -34,10 +160,17 @@ test("renders the dense three-pane Git log fixture", async ({ page }) => {
     await expect(
         page.getByRole("complementary", { name: "Revision review" }),
     ).toBeVisible();
+    await expect(page.getByText("Select commit to view changes")).toBeVisible();
+    await page
+        .getByRole("row", {
+            name: /Jongmin Chung now.*feat: add workspace-aware repository sessions 0000000/,
+        })
+        .click();
     await expect(
-        page.getByRole("region", {
-            name: "Diff for src/components/CommitLog.tsx",
-        }),
+        page.getByRole("navigation", { name: "Changed files" }),
+    ).toBeVisible();
+    await expect(
+        page.getByText("Commit details", { exact: true }),
     ).toBeVisible();
     await expect(page.getByTitle("Local-only commit to push")).toBeVisible();
     await expect(
@@ -51,34 +184,46 @@ test("renders the dense three-pane Git log fixture", async ({ page }) => {
 test("renders the Codex neutral dark theme", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.getByRole("button", { name: /Appearance:/ }).click();
-    await page.getByRole("radio", { name: "Black", exact: true }).click();
+    await page
+        .getByRole("radio", { name: "Islands Dark", exact: true })
+        .click();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
     await expect(page).toHaveScreenshot("git-log-workbench-dark.png", {
         fullPage: true,
     });
 });
 
-test("supports persisted System Appearance, White, and Black modes", async ({
+test("supports persisted Sync with OS, Islands Light, and Islands Dark modes", async ({
     page,
 }) => {
     const appearance = page.getByRole("button", { name: /Appearance:/ });
 
     await appearance.click();
-    await page.getByRole("radio", { name: "Black", exact: true }).click();
+    await page
+        .getByRole("radio", { name: "Islands Dark", exact: true })
+        .click();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-    await expect(appearance).toHaveAttribute("aria-label", "Appearance: Black");
+    await expect(appearance).toHaveAttribute(
+        "aria-label",
+        "Appearance: Islands Dark",
+    );
     await page.reload();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-    await expect(appearance).toHaveAttribute("aria-label", "Appearance: Black");
+    await expect(appearance).toHaveAttribute(
+        "aria-label",
+        "Appearance: Islands Dark",
+    );
 
     await appearance.click();
-    await page.getByRole("radio", { name: "White", exact: true }).click();
+    await page
+        .getByRole("radio", { name: "Islands Light", exact: true })
+        .click();
     await page.emulateMedia({ colorScheme: "dark" });
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 
     await appearance.click();
     await page
-        .getByRole("radio", { name: "System Appearance", exact: true })
+        .getByRole("radio", { name: "Sync with OS", exact: true })
         .click();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
     await page.emulateMedia({ colorScheme: "light" });
@@ -97,10 +242,13 @@ test("navigates the Appearance menu with the keyboard", async ({ page }) => {
     });
     await page.keyboard.press("End");
     await expect(
-        page.getByRole("radio", { name: "Black", exact: true }),
+        page.getByRole("radio", { name: "Islands Dark", exact: true }),
     ).toBeFocused();
     await page.keyboard.press("Enter");
-    await expect(appearance).toHaveAttribute("aria-label", "Appearance: Black");
+    await expect(appearance).toHaveAttribute(
+        "aria-label",
+        "Appearance: Islands Dark",
+    );
     await page.keyboard.press("Enter");
     await page.keyboard.press("Escape");
     await expect(page.getByRole("dialog", { name: "Appearance" })).toHaveCount(
@@ -113,7 +261,8 @@ test("keeps core panes usable at the minimum window size", async ({ page }) => {
     await page.setViewportSize({ width: 960, height: 640 });
     await expect(
         page.getByRole("complementary", { name: "Branches and tags" }),
-    ).toHaveCount(0);
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Branches" })).toBeVisible();
     await expect(
         page.getByRole("region", { name: "Commit log" }),
     ).toBeVisible();
@@ -130,7 +279,7 @@ test("keeps core panes usable at the minimum window size", async ({ page }) => {
 test("uses an in-app validated dialog for history rewrites", async ({
     page,
 }) => {
-    const head = page.getByRole("button", {
+    const head = page.getByRole("row", {
         name: /Jongmin Chung now.*feat: add workspace-aware repository sessions 0000000/,
     });
     await head.click({ button: "right" });
@@ -139,15 +288,17 @@ test("uses an in-app validated dialog for history rewrites", async ({
     await expect(dialog).toBeVisible();
     await dialog.getByLabel("New commit message").fill("");
     await dialog.getByRole("button", { name: "Apply" }).click();
-    await expect(dialog.getByRole("alert")).toHaveText(
-        "New commit message is required.",
+    await expect(dialog.getByLabel("New commit message")).toHaveAttribute(
+        "required",
+        "",
     );
+    await expect(dialog).toBeVisible();
 });
 
 test("shares action availability with the commit context menu", async ({
     page,
 }) => {
-    const head = page.getByRole("button", {
+    const head = page.getByRole("row", {
         name: /Jongmin Chung now.*feat: add workspace-aware repository sessions 0000000/,
     });
     await head.click({ button: "right" });
@@ -162,39 +313,22 @@ test("shares action availability with the commit context menu", async ({
     ).toBeEnabled();
 });
 
-test("auto-selects the first history file and keeps diff review inline", async ({
+test("selects the first changed file and keeps commit details inline", async ({
     page,
 }) => {
-    await expect(
-        page.getByRole("region", {
-            name: "Diff for src/components/CommitLog.tsx",
-        }),
-    ).toBeVisible();
-    await expect(page.getByRole("dialog", { name: /Diff for/ })).toHaveCount(0);
-    await expect(
-        page.getByText("1 differences", { exact: true }),
-    ).toBeVisible();
+    await page
+        .getByRole("row", {
+            name: /Jongmin Chung now.*feat: add workspace-aware repository sessions 0000000/,
+        })
+        .click();
     await expect(
         page
-            .locator(".cm-changedText, .cm-deletedLine, .cm-insertedLine")
+            .getByRole("navigation", { name: "Changed files" })
+            .getByRole("button")
             .first(),
-    ).toBeVisible();
-    await page.getByLabel("Diff view mode").selectOption("split");
-    await expect(page.locator(".cm-mergeView")).toBeVisible();
-    const search = page.getByRole("textbox", { name: "Search diff" });
-    await search.fill("revision");
-    await expect(page.getByText("1/2", { exact: true })).toBeVisible();
-    await page.keyboard.press("Meta+g");
-    await expect(page.getByText("2/2", { exact: true })).toBeVisible();
-    await page.keyboard.press("Meta+Shift+g");
-    await expect(page.getByText("1/2", { exact: true })).toBeVisible();
-    await page.getByRole("button", { name: "Focus diff" }).click();
+    ).toHaveAttribute("aria-current", "true");
     await expect(
-        page.getByRole("button", { name: "Exit focused diff" }),
-    ).toBeVisible();
-    await page.keyboard.press("Escape");
-    await expect(
-        page.getByRole("button", { name: "Focus diff" }),
+        page.getByText("Commit details", { exact: true }),
     ).toBeVisible();
 });
 
@@ -202,7 +336,12 @@ test("opens a file navigator automatically for exactly two revisions", async ({
     page,
 }) => {
     await page
-        .getByRole("button", { name: /Suh Junmin.*fix\(graph\)/ })
+        .getByRole("row", {
+            name: /Jongmin Chung now.*feat: add workspace-aware repository sessions 0000000/,
+        })
+        .click();
+    await page
+        .getByRole("row", { name: /Suh Junmin.*fix\(graph\)/ })
         .first()
         .click({ modifiers: ["Meta"] });
     await expect(
@@ -221,7 +360,7 @@ test("opens a file navigator automatically for exactly two revisions", async ({
 test("opens Changes with the first layer selected and restores selection after staging", async ({
     page,
 }) => {
-    await page.getByRole("button", { name: /Changes 5/ }).click();
+    await page.getByRole("button", { name: "Commit", exact: true }).click();
     await expect(
         page.getByRole("region", {
             name: "Diff for src/domain/actionAvailability.ts",
@@ -229,12 +368,14 @@ test("opens Changes with the first layer selected and restores selection after s
     ).toBeVisible();
     await page
         .getByRole("button", {
-            name: /M git\.rs src-tauri\/src \+22 −9/,
+            name: /M git-service\.ts electron\/utility\/git \+22 −9/,
             exact: true,
         })
         .click();
     await expect(
-        page.getByRole("region", { name: "Diff for src-tauri/src/git.rs" }),
+        page.getByRole("region", {
+            name: "Diff for electron/utility/git/git-service.ts",
+        }),
     ).toBeVisible();
     await expect(
         page.getByRole("button", { name: "Stage file" }),
@@ -244,7 +385,7 @@ test("opens Changes with the first layer selected and restores selection after s
 test("opens one reviewed Push dialog and requires exact lease confirmation", async ({
     page,
 }) => {
-    await page.getByRole("button", { name: "Push 1", exact: true }).click();
+    await page.getByRole("button", { name: "Push…", exact: true }).click();
     const dialog = page.getByRole("dialog", { name: "Push" });
     await expect(dialog).toBeVisible();
     await expect(
@@ -273,7 +414,7 @@ test("opens one reviewed Push dialog and requires exact lease confirmation", asy
     await dialog.getByRole("button", { name: "Cancel" }).click();
     await expect(dialog).toHaveCount(0);
 
-    await page.getByRole("button", { name: "Push 1", exact: true }).click();
+    await page.getByRole("button", { name: "Push…", exact: true }).click();
     const reopened = page.getByRole("dialog", { name: "Push" });
     await expect(
         reopened.getByRole("radio", { name: /Normal push/ }),
@@ -287,7 +428,7 @@ test("opens one reviewed Push dialog and requires exact lease confirmation", asy
 test("opens published commits in the visual interactive rebase workspace", async ({
     page,
 }) => {
-    const commit = page.getByRole("button", {
+    const commit = page.getByRole("row", {
         name: /Jamie 2h ago refactor: isolate credential redaction/,
     });
     await commit.click({ button: "right" });
@@ -329,10 +470,11 @@ test("opens published commits in the visual interactive rebase workspace", async
 test("offers open, clone, and initialize repository flows", async ({
     page,
 }) => {
-    await page.getByRole("button", { name: "Add repository" }).click();
-    const dialog = page.getByRole("dialog", { name: "Add repository" });
+    await page.getByRole("button", { name: /Project:/ }).click();
+    await page.getByRole("button", { name: "Clone Repository…" }).click();
+    const dialog = page.getByRole("dialog", { name: "Repository" });
     await expect(dialog).toBeVisible();
-    await dialog.getByRole("radio", { name: "Clone" }).click();
+    await expect(dialog.getByRole("radio", { name: "Clone" })).toBeChecked();
     await expect(dialog.getByText("Remote URL")).toBeVisible();
     await dialog.getByRole("button", { name: "Clone", exact: true }).click();
     await expect(
@@ -355,11 +497,8 @@ test("offers open, clone, and initialize repository flows", async ({
 
 test("keeps the browser fixture terminal shell-free", async ({ page }) => {
     await expect(
-        page.getByRole("button", { name: "Manage", exact: true }),
-    ).toBeVisible();
-    await expect(
-        page.getByRole("button", { name: "Recovery", exact: true }),
-    ).toBeVisible();
+        page.getByRole("dialog", { name: "Repository Management" }),
+    ).toHaveCount(0);
     const terminalTab = page.getByRole("button", {
         name: "Terminal",
         exact: true,
@@ -384,137 +523,46 @@ test("keeps the browser fixture terminal shell-free", async ({ page }) => {
     ).toHaveCount(0);
 });
 
-test("keeps workspace and repository tab labels visually separated", async ({
+test("keeps the repository workbench visible without a Manage tab", async ({
     page,
 }) => {
-    const workspaceTabs = page.getByRole("navigation", {
-        name: "Workspace tabs",
-    });
-    const manageTab = workspaceTabs.getByRole("button", {
-        name: "Manage",
-        exact: true,
-    });
-    const repositoryTab = workspaceTabs.getByRole("button", {
-        name: "git-client",
-        exact: true,
-    });
-    await expect(manageTab).toHaveText("Manage");
-    await expect(repositoryTab).toHaveText("git-client");
-    await expect(repositoryTab).toHaveCSS("display", "flex");
-    await expect(repositoryTab).toHaveCSS("gap", "6px");
-    await expect(repositoryTab).toHaveCSS("padding-left", "13px");
-
-    for (const tab of [manageTab, repositoryTab]) {
-        const metrics = await tab.evaluate((element) => {
-            const style = getComputedStyle(element);
-            return {
-                clientHeight: element.clientHeight,
-                clientWidth: element.clientWidth,
-                color: style.color,
-                fontSize: Number.parseFloat(style.fontSize),
-                lineHeight: Number.parseFloat(style.lineHeight),
-                opacity: Number.parseFloat(style.opacity),
-                scrollHeight: element.scrollHeight,
-                scrollWidth: element.scrollWidth,
-            };
-        });
-        expect(metrics.clientWidth).toBeGreaterThan(0);
-        expect(metrics.clientHeight).toBeGreaterThan(0);
-        expect(metrics.scrollWidth).toBeLessThanOrEqual(
-            metrics.clientWidth + 1,
-        );
-        expect(metrics.scrollHeight).toBeLessThanOrEqual(
-            metrics.clientHeight + 1,
-        );
-        expect(metrics.fontSize).toBeGreaterThanOrEqual(12);
-        expect(metrics.lineHeight).toBeGreaterThanOrEqual(metrics.fontSize);
-        expect(metrics.opacity).toBe(1);
-        expect(metrics.color).not.toBe("rgba(0, 0, 0, 0)");
-    }
-
-    const [manageBounds, repositoryBounds] = await Promise.all([
-        manageTab.boundingBox(),
-        repositoryTab.boundingBox(),
-    ]);
-    expect(manageBounds).not.toBeNull();
-    expect(repositoryBounds).not.toBeNull();
-    expect(repositoryBounds?.x ?? 0).toBeGreaterThanOrEqual(
-        (manageBounds?.x ?? 0) + (manageBounds?.width ?? 0),
-    );
-
-    const repositoryViews = page.getByRole("navigation", {
-        name: "Repository views",
-    });
-    const history = repositoryViews.getByRole("button", {
-        name: "History",
-        exact: true,
-    });
-    const changes = repositoryViews.getByRole("button", {
-        name: "Changes 5",
-        exact: true,
-    });
-    await expect(history).toHaveCSS("display", "flex");
-    await expect(history).toHaveCSS("min-height", "27px");
-    await expect(history).toHaveCSS("padding-left", "10px");
-    await expect(changes).toHaveCSS("gap", "6px");
-
-    for (const tab of [history, changes]) {
-        const metrics = await tab.evaluate((element) => ({
-            clientHeight: element.clientHeight,
-            clientWidth: element.clientWidth,
-            scrollHeight: element.scrollHeight,
-            scrollWidth: element.scrollWidth,
-        }));
-        expect(metrics.scrollWidth).toBeLessThanOrEqual(
-            metrics.clientWidth + 1,
-        );
-        expect(metrics.scrollHeight).toBeLessThanOrEqual(
-            metrics.clientHeight + 1,
-        );
-    }
-
-    const changeCount = changes.locator("em");
-    // An inline-flex item is blockified to `flex` inside the flex tab button.
-    await expect(changeCount).toHaveCSS("display", "flex");
-    await expect(changeCount).toHaveCSS("min-width", "16px");
+    await expect(
+        page.getByRole("button", { name: "Manage", exact: true }),
+    ).toHaveCount(0);
+    await expect(
+        page.getByRole("region", { name: "Commit log" }),
+    ).toBeVisible();
+    await expect(
+        page.getByRole("banner", { name: "Main Toolbar" }),
+    ).toBeVisible();
 });
 
-test("keeps repository management toolbar actions visually separated", async ({
+test("opens a Rebased-style project switcher and restores focus on dismiss", async ({
     page,
 }) => {
-    await page.getByRole("button", { name: "Manage", exact: true }).click();
-
-    const toolbar = page.locator(".managementToolbar").filter({
-        hasText: "Multi-root Session",
+    const projectButton = page.getByRole("button", {
+        name: "Project: git-client",
     });
-    await expect(toolbar).toHaveCSS("display", "flex");
-    await expect(toolbar).toHaveCSS("gap", "5px");
-    await expect(toolbar).toHaveCSS("padding-left", "11px");
-    await expect(toolbar).toHaveCSS("padding-right", "11px");
+    await projectButton.click();
 
-    const actions = ["Add repository", "Sync checkout", "Sync new branch"].map(
-        (name) => toolbar.getByRole("button", { name, exact: true }),
-    );
-    for (const action of actions) {
-        await expect(action).toHaveCSS("display", "flex");
-        await expect(action).toHaveCSS("gap", "5px");
-        await expect(action).toHaveCSS("min-height", "27px");
-        await expect(action).toHaveCSS("padding-left", "8px");
-        await expect(action).toHaveCSS("padding-right", "8px");
-    }
+    const popup = page.getByRole("dialog", { name: "Projects" });
+    await expect(popup).toBeVisible();
+    await expect(popup.getByRole("button", { name: "Open…" })).toBeVisible();
+    await expect(popup.getByRole("button", { name: "Open…" })).toBeFocused();
+    await expect(
+        popup.getByRole("button", { name: "Clone Repository…" }),
+    ).toBeVisible();
+    await expect(
+        popup.getByText("Open Projects", { exact: true }),
+    ).toBeVisible();
+    await expect(popup.getByText("git-client", { exact: true })).toBeVisible();
+    await expect(
+        page.getByRole("dialog", { name: "Repository Management" }),
+    ).toHaveCount(0);
 
-    const boxes = await Promise.all(
-        actions.map((action) => action.boundingBox()),
-    );
-    for (let index = 1; index < boxes.length; index += 1) {
-        const previous = boxes[index - 1];
-        const current = boxes[index];
-        expect(previous).not.toBeNull();
-        expect(current).not.toBeNull();
-        expect(
-            current!.x - (previous!.x + previous!.width),
-        ).toBeGreaterThanOrEqual(4.9);
-    }
+    await page.keyboard.press("Escape");
+    await expect(popup).toHaveCount(0);
+    await expect(projectButton).toBeFocused();
 });
 
 test("keeps log filters and commit options available in compact popovers", async ({
@@ -527,7 +575,7 @@ test("keeps log filters and commit options available in compact popovers", async
     await page.keyboard.press("Escape");
     await expect(authorFilter).not.toBeVisible();
 
-    await page.getByRole("button", { name: /Changes 5/ }).click();
+    await page.getByRole("button", { name: "Commit", exact: true }).click();
     await expect(
         page.getByRole("region", {
             name: "Diff for src/domain/actionAvailability.ts",
@@ -564,10 +612,10 @@ test("resizes and exposes v4 review panes with accessible separators", async ({
     const review = page.getByRole("separator", {
         name: "Resize revision review",
     });
-    await expect(review).toHaveAttribute("aria-valuenow", "760");
+    await expect(review).toHaveAttribute("aria-valuenow", "210");
     await review.focus();
     await page.keyboard.press("ArrowLeft");
-    await expect(review).toHaveAttribute("aria-valuenow", "772");
+    await expect(review).toHaveAttribute("aria-valuenow", "222");
 
     await page.getByRole("button", { name: /Changes 5/ }).click();
     const navigator = page.getByRole("separator", {
@@ -578,16 +626,25 @@ test("resizes and exposes v4 review panes with accessible separators", async ({
     await expect(navigator).toHaveAttribute("aria-valuenow", "262");
 });
 
-test("routes toolbar shortcuts and management settings tabs", async ({
+test("routes branch operations to a focused repository tool", async ({
     page,
 }) => {
-    await page.getByTitle("Branch operations").click();
+    await page
+        .getByRole("banner", { name: "Main Toolbar" })
+        .getByRole("button", { name: "main" })
+        .click();
+    const branchesPopup = page.getByRole("dialog", { name: "Git Branches" });
+    await expect(branchesPopup).toBeVisible();
+    await branchesPopup
+        .getByRole("button", { name: "Branches Settings" })
+        .click();
+    const dialog = page.getByRole("dialog", { name: "Branches & Tags" });
+    await expect(dialog).toBeVisible();
     await expect(
-        page.getByText("Branches & Tags", { exact: true }),
-    ).toBeVisible();
-    await page.getByRole("button", { name: /Config & Ignore/ }).click();
-    await page.getByRole("button", { name: "Git Config", exact: true }).click();
-    await expect(page.getByLabel("Filter Git config scope")).toBeVisible();
+        page.getByRole("dialog", { name: "Repository Management" }),
+    ).toHaveCount(0);
+    await dialog.getByRole("button", { name: "Close Branches & Tags" }).click();
+    await expect(dialog).toHaveCount(0);
 });
 
 test("uses the command registry for palette, views, search, drawer, and settings", async ({
@@ -669,7 +726,7 @@ test("uses the command registry for palette, views, search, drawer, and settings
 test("dismisses context, popover, and multi-selection one layer at a time", async ({
     page,
 }) => {
-    const head = page.getByRole("button", {
+    const head = page.getByRole("row", {
         name: /Jongmin Chung now.*feat: add workspace-aware repository sessions 0000000/,
     });
     await head.click({ button: "right" });
@@ -688,7 +745,7 @@ test("dismisses context, popover, and multi-selection one layer at a time", asyn
     await expect(filters).toBeFocused();
 
     await page
-        .getByRole("button", { name: /Suh Junmin.*fix\(graph\)/ })
+        .getByRole("row", { name: /Suh Junmin.*fix\(graph\)/ })
         .first()
         .click({ modifiers: ["Meta"] });
     await expect(
@@ -707,7 +764,7 @@ test("opens a read-only file viewer from local changes", async ({ page }) => {
     await page.getByRole("button", { name: /Changes 5/ }).click();
     await page
         .getByRole("button", {
-            name: /M git\.rs src-tauri\/src \+22 −9/,
+            name: /M git-service\.ts electron\/utility\/git \+22 −9/,
             exact: true,
         })
         .click();

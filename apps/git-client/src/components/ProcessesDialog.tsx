@@ -1,10 +1,10 @@
-import { Button } from "@astryxdesign/core/Button";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
-import { EmptyState } from "@astryxdesign/core/EmptyState";
-import { List, ListItem } from "@astryxdesign/core/List";
 import type { GitActivity } from "../domain/gitActivity";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
+import { Button } from "./ui";
+import { Dialog, DialogHeader } from "./ui";
+import { EmptyState } from "./ui";
+import { List, ListItem } from "./ui";
 
 export function ProcessesDialog({
   activity,
@@ -26,11 +26,7 @@ export function ProcessesDialog({
       width={520}
     >
       <section className={tw.processesDialog}>
-        <DialogHeader
-          hasDivider
-          onOpenChange={(open) => !open && onClose()}
-          title="Processes"
-        />
+        <DialogHeader hasDivider onOpenChange={(open) => !open && onClose()} title="Processes" />
         <main>
           {runningActivity === null ? (
             <EmptyState title="No processes are running" />
@@ -55,12 +51,7 @@ export function ProcessesDialog({
             />
           )}
           <span />
-          <Button
-            label="Close"
-            onClick={onClose}
-            size="md"
-            variant="primary"
-          />
+          <Button label="Close" onClick={onClose} size="md" variant="primary" />
         </footer>
       </section>
     </Dialog>

@@ -7,12 +7,13 @@ Appearance supports System Appearance, White, and Black. System mode follows mac
 ## Stack
 
 - Electron 43.1.1, React 19, Vite 8, TypeScript 6, pnpm 11
+- Tailwind CSS 4 and locally owned shadcn/ui primitives on unified Radix UI
 - Sandboxed renderer and a typed preload API; no renderer Node.js access
 - System Git 2.39+ through an allowlisted Electron utility-process bridge
 - TanStack Virtual for refs and 500-row log pages
 - Canvas commit graph and lazy-language CodeMirror 6 semantic split/unified diff
 - Lazily loaded xterm.js UI backed by a repository-scoped native PTY
-- `ts-rs` generated wire contracts in `src/generated`
+- Electron-owned TypeScript and Zod wire contracts in `src/shared/contracts`
 
 ## Development
 
@@ -24,11 +25,19 @@ pnpm --filter @jongminchung/git-client test
 pnpm --filter @jongminchung/git-client build
 ```
 
-`pnpm dev` launches Electron Forge. `pnpm dev:web` starts only the browser development server; its normal URL starts on an empty Manage screen because a browser has no native Git bridge. A deterministic fixture is available only at `http://localhost:1420/?fixture=qa` for visual and Playwright testing. In Electron, **Open Repository** uses the native directory picker and all requests cross the context-isolated preload as validated discriminated unions. The renderer never receives an arbitrary Git command, path, URL, or IPC channel API.
+`pnpm dev` launches Electron Forge. `pnpm dev:web` starts only the browser development server; its normal URL starts on the Welcome screen because a browser has no native Git bridge. A deterministic fixture is available only at `http://localhost:1420/?fixture=qa` for visual and Playwright testing. In Electron, **Open Repository** uses the native directory picker and all requests cross the context-isolated preload as validated discriminated unions. The renderer never receives an arbitrary Git command, path, URL, or IPC channel API.
 
-Open repositories are kept as independent workspace tabs next to the fixed Manage tab. Their order, active tab, recent paths, selected management section, and repository UI state are restored from the Electron settings store. The resizable bottom tool window contains Shelf, Stash, Recovery, and a real repository-scoped PTY Terminal. Git operations expose only temporary redacted progress, failure, and cancellation state; command output is not retained by the renderer.
+Open repositories, their order, the active project, recent paths, and repository UI state are restored from the Electron settings store. The project selector mirrors Rebased with Open, Clone Repository, Open Projects, and Recent Projects entries; branch, remote, worktree, hosting, and repository settings remain available through focused tools. The resizable bottom tool window contains Shelf, Stash, Recovery, and a real repository-scoped PTY Terminal. Git operations expose only temporary redacted progress, failure, and cancellation state; command output is not retained by the renderer.
 
 Keyboard commands are defined once in `src/command-manifest.json` and shared by the renderer registry, command palette, tooltips, context menus, and the native macOS menu. `⌘P` searches commands plus loaded repositories, refs, commits, and changed files. `Esc` closes only the highest active UI layer; it never clears a commit draft or modifies repository data. Standard Edit menu items keep macOS Undo, Cut, Copy, Paste, and Select All behavior, while revision copying uses `⌥⇧⌘C`.
+
+## Token-efficient QA
+
+`pnpm qa:compact` runs type checks, unit tests, and renderer Playwright tests. Playwright uses a compact reporter by default: stdout contains only aggregate counts and one line per failed contract, while bounded error details and trace, screenshot, and diff paths are written to `test-results/qa/renderer.json`. Packaged Electron tests use the same format in `test-results/qa/electron.json` through `pnpm qa:compact:electron`. Set `GIT_CLIENT_VERBOSE_TESTS=1` or run `pnpm qa:verbose` only when an individual failure needs the full live reporter.
+
+`pnpm parity:compact` emits one gate line and writes the full compact gate record to `test-results/qa/parity.json`. It retains the same failing exit status as the full parity gate when coverage is incomplete.
+
+Rebased UI contracts that are stable enough for automation live in `tests/contracts/rebased-1.1.8.json`. Candidate tests consume those role, accessible-name, focus, order, and keyboard contracts directly. Reference screenshots and full accessibility captures remain stored parity artifacts; automated comparisons and test reporters return only mismatch metrics and artifact paths, so Computer Use is reserved for previously uncaptured native states or conflicting evidence.
 
 ## Safety model
 

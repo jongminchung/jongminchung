@@ -61,7 +61,9 @@ export class SettingsStore {
   }
 
   async delete(key: string): Promise<void> {
-    this.values = Object.fromEntries(Object.entries(this.values).filter(([entryKey]) => entryKey !== key));
+    this.values = Object.fromEntries(
+      Object.entries(this.values).filter(([entryKey]) => entryKey !== key),
+    );
     await this.enqueueFlush();
   }
 
@@ -78,9 +80,7 @@ export class SettingsStore {
 
   private enqueueFlush(): Promise<void> {
     const snapshot = this.createSnapshot();
-    const write = this.writeQueue
-      .catch(() => undefined)
-      .then(async () => this.flush(snapshot));
+    const write = this.writeQueue.catch(() => undefined).then(async () => this.flush(snapshot));
     this.writeQueue = write;
     return write;
   }

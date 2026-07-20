@@ -24910,9 +24910,7 @@
   "registrations": [
     {
       "file": "$default.xml",
-      "paths": [
-        "platform/platform-resources/src/keymaps/$default.xml"
-      ],
+      "paths": ["platform/platform-resources/src/keymaps/$default.xml"],
       "source": {
         "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
         "line": 972,
@@ -24921,9 +24919,7 @@
     },
     {
       "file": "Mac OS X 10.5+.xml",
-      "paths": [
-        "platform/platform-resources/src/keymaps/Mac OS X 10.5+.xml"
-      ],
+      "paths": ["platform/platform-resources/src/keymaps/Mac OS X 10.5+.xml"],
       "source": {
         "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
         "line": 973,
@@ -24932,9 +24928,7 @@
     },
     {
       "file": "Mac OS X.xml",
-      "paths": [
-        "platform/platform-resources/src/keymaps/Mac OS X.xml"
-      ],
+      "paths": ["platform/platform-resources/src/keymaps/Mac OS X.xml"],
       "source": {
         "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
         "line": 974,
@@ -24943,9 +24937,7 @@
     },
     {
       "file": "macOS System Shortcuts.xml",
-      "paths": [
-        "platform/platform-resources/src/keymaps/macOS System Shortcuts.xml"
-      ],
+      "paths": ["platform/platform-resources/src/keymaps/macOS System Shortcuts.xml"],
       "source": {
         "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
         "line": 975,
@@ -24954,9 +24946,7 @@
     },
     {
       "file": "Default for XWin.xml",
-      "paths": [
-        "platform/platform-resources/src/keymaps/Default for XWin.xml"
-      ],
+      "paths": ["platform/platform-resources/src/keymaps/Default for XWin.xml"],
       "source": {
         "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
         "line": 976,
@@ -24965,9 +24955,7 @@
     },
     {
       "file": "Default for GNOME.xml",
-      "paths": [
-        "platform/platform-resources/src/keymaps/Default for GNOME.xml"
-      ],
+      "paths": ["platform/platform-resources/src/keymaps/Default for GNOME.xml"],
       "source": {
         "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
         "line": 977,
@@ -24976,9 +24964,7 @@
     },
     {
       "file": "Default for KDE.xml",
-      "paths": [
-        "platform/platform-resources/src/keymaps/Default for KDE.xml"
-      ],
+      "paths": ["platform/platform-resources/src/keymaps/Default for KDE.xml"],
       "source": {
         "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
         "line": 978,
@@ -24987,9 +24973,7 @@
     },
     {
       "file": "Emacs.xml",
-      "paths": [
-        "platform/platform-resources/src/keymaps/Emacs.xml"
-      ],
+      "paths": ["platform/platform-resources/src/keymaps/Emacs.xml"],
       "source": {
         "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
         "line": 979,
@@ -24998,9 +24982,7 @@
     },
     {
       "file": "Sublime Text.xml",
-      "paths": [
-        "platform/platform-resources/src/keymaps/Sublime Text.xml"
-      ],
+      "paths": ["platform/platform-resources/src/keymaps/Sublime Text.xml"],
       "source": {
         "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
         "line": 980,
@@ -25009,9 +24991,7 @@
     },
     {
       "file": "Sublime Text (Mac OS X).xml",
-      "paths": [
-        "platform/platform-resources/src/keymaps/Sublime Text (Mac OS X).xml"
-      ],
+      "paths": ["platform/platform-resources/src/keymaps/Sublime Text (Mac OS X).xml"],
       "source": {
         "blob": "e1d7bca7d2f0a1f03fd5e62c08978e460377b387",
         "line": 981,

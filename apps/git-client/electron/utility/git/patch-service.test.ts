@@ -87,7 +87,8 @@ function repositoryRecord(path: string): RepositoryRecord {
 function registry(record: RepositoryRecord): Readonly<{ get(id: RepositoryId): RepositoryRecord }> {
   return {
     get(id) {
-      if (id !== record.id) throw new GitUtilityError("repositoryNotOpen", "Repository is not open");
+      if (id !== record.id)
+        throw new GitUtilityError("repositoryNotOpen", "Repository is not open");
       return record;
     },
   };
@@ -197,8 +198,9 @@ describe("PatchService contracts", () => {
       "utf8",
     );
     const success = new RecordingPatchRunner([completed(payload)]);
-    await expect(new PatchService(registry(record), success).createPatchText(record.id, ["HEAD"]))
-      .resolves.toBe(payload.toString("utf8"));
+    await expect(
+      new PatchService(registry(record), success).createPatchText(record.id, ["HEAD"]),
+    ).resolves.toBe(payload.toString("utf8"));
 
     const secretDiagnostic = "https://bob:password@example.invalid token=secret-value";
     const failure = new RecordingPatchRunner([
@@ -255,7 +257,10 @@ describe("PatchService contracts", () => {
     ]);
     await expect(
       new PatchService(registry(record), cancelled).createPatchText(record.id, ["HEAD"]),
-    ).rejects.toMatchObject({ code: "commandFailed", message: expect.stringContaining("cancelled") });
+    ).rejects.toMatchObject({
+      code: "commandFailed",
+      message: expect.stringContaining("cancelled"),
+    });
 
     const timedOut = new RecordingPatchRunner([
       {
@@ -268,7 +273,10 @@ describe("PatchService contracts", () => {
     ]);
     await expect(
       new PatchService(registry(record), timedOut).createPatchText(record.id, ["HEAD"]),
-    ).rejects.toMatchObject({ code: "commandFailed", message: expect.stringContaining("timed out") });
+    ).rejects.toMatchObject({
+      code: "commandFailed",
+      message: expect.stringContaining("timed out"),
+    });
 
     const limited = new RecordingPatchRunner([
       failed("outputLimit", "Git patch output exceeded its limit"),
@@ -305,9 +313,7 @@ describe("PatchService contracts", () => {
 
     const existingTarget = join(root, "existing.patch");
     await writeFile(existingTarget, "previous patch\n", "utf8");
-    const failedRunner = new RecordingPatchRunner([
-      failed("commandFailed", "format-patch failed"),
-    ]);
+    const failedRunner = new RecordingPatchRunner([failed("commandFailed", "format-patch failed")]);
     await expect(
       new PatchService(registry(record), failedRunner).exportPatch(
         record.id,
@@ -350,18 +356,17 @@ describe("PatchService contracts", () => {
     const movedParent = join(root, "race-parent-original");
     await mkdir(originalParent);
     const raceTarget = join(originalParent, "result.patch");
-    const raceRunner = new RecordingPatchRunner(
-      [completed(Buffer.from("patch\n"))],
-      async () => {
-        await rename(originalParent, movedParent);
-        await mkdir(originalParent);
-      },
-    );
+    const raceRunner = new RecordingPatchRunner([completed(Buffer.from("patch\n"))], async () => {
+      await rename(originalParent, movedParent);
+      await mkdir(originalParent);
+    });
     await expect(
       new PatchService(registry(record), raceRunner).exportPatch(record.id, ["HEAD"], raceTarget),
     ).rejects.toMatchObject({ code: "invalidInput" });
     await expect(access(raceTarget)).rejects.toMatchObject({ code: "ENOENT" });
-    await expect(access(join(movedParent, "result.patch"))).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(access(join(movedParent, "result.patch"))).rejects.toMatchObject({
+      code: "ENOENT",
+    });
   });
 
   it("imports only a selected regular file and sends its raw bytes through fixed apply argv", async () => {
@@ -523,9 +528,9 @@ describe("PatchService real Git round trip", () => {
 
     const marker = join(exportDirectory, `shell-marker-${randomUUID()}`);
     const shellMetaRevision = `HEAD;touch\u0024{IFS}${marker}`;
-    await expect(service.createPatchText(sourceRecord.id, [shellMetaRevision])).rejects.toBeInstanceOf(
-      GitUtilityError,
-    );
+    await expect(
+      service.createPatchText(sourceRecord.id, [shellMetaRevision]),
+    ).rejects.toBeInstanceOf(GitUtilityError);
     await expect(access(marker)).rejects.toMatchObject({ code: "ENOENT" });
   });
 });

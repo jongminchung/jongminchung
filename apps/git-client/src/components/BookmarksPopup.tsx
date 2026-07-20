@@ -1,9 +1,9 @@
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
-import { List, ListItem } from "@astryxdesign/core/List";
 import { useEffect, useState, type KeyboardEvent } from "react";
 import type { LineBookmark, ProjectBookmarks } from "../domain/bookmarks";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
+import { Dialog, DialogHeader } from "./ui";
+import { List, ListItem } from "./ui";
 
 export type BookmarksPopupMode = "lines" | "mnemonics";
 
@@ -53,11 +53,7 @@ export function BookmarksPopup({
       width={mode === "lines" ? "min(760px, calc(100vw - 72px))" : "min(640px, calc(100vw - 72px))"}
     >
       <section className={tw.bookmarksPopup} onKeyDown={onKeyDown}>
-        <DialogHeader
-          hasDivider
-          onOpenChange={(open) => !open && onClose()}
-          title={title}
-        />
+        <DialogHeader hasDivider onOpenChange={(open) => !open && onClose()} title={title} />
         {bookmarks.length === 0 ? (
           <div className={tw.bookmarksEmptyState}>
             <strong>No bookmarks added.</strong>

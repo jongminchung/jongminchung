@@ -1,10 +1,10 @@
-import { Button } from "@astryxdesign/core/Button";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
-import { FieldStatus } from "@astryxdesign/core/FieldStatus";
-import { TextInput } from "@astryxdesign/core/TextInput";
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { useDismissLayer } from "./CommandProvider";
+import { Button } from "./ui";
+import { Dialog, DialogHeader } from "./ui";
+import { FieldStatus } from "./ui";
+import { TextInput } from "./ui";
 
 interface InputOptions {
   readonly title: string;
@@ -169,10 +169,14 @@ export function useAppDialog(): AppDialogController {
         <footer className="flex justify-end gap-2 border-t border-border p-3">
           <Button label="Cancel" onClick={cancel} size="sm" variant="ghost" />
           <Button
-            label={request.options.confirmLabel ?? (request.kind === "confirm" ? "Continue" : "Apply")}
+            label={
+              request.options.confirmLabel ?? (request.kind === "confirm" ? "Continue" : "Apply")
+            }
             size="sm"
             type="submit"
-            variant={request.kind === "confirm" && request.options.dangerous ? "destructive" : "primary"}
+            variant={
+              request.kind === "confirm" && request.options.dangerous ? "destructive" : "primary"
+            }
           />
         </footer>
       </form>

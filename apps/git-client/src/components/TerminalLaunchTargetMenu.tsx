@@ -1,5 +1,3 @@
-import { DropdownMenuItem } from "@astryxdesign/core/DropdownMenu";
-import { useLayer } from "@astryxdesign/core/Layer";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { nextTerminalMenuIndex, type TerminalNavigationKey } from "../domain/terminalActions";
 import type {
@@ -8,6 +6,8 @@ import type {
 } from "../shared/contracts/terminal";
 import { tw } from "../styles/tailwind";
 import { useDismissLayer } from "./CommandProvider";
+import { DropdownMenuItem } from "./ui";
+import { useLayer } from "./ui";
 
 type TerminalLaunchDescriptor = TerminalShellDescriptor | TerminalAgentDescriptor;
 
@@ -96,7 +96,9 @@ export function TerminalLaunchTargetMenu({
         }
         const navigationKey = menuNavigationKey(event.key);
         if (navigationKey === null) return;
-        const menuItems = [...event.currentTarget.querySelectorAll<HTMLElement>('[role="menuitem"]')];
+        const menuItems = [
+          ...event.currentTarget.querySelectorAll<HTMLElement>('[role="menuitem"]'),
+        ];
         const currentIndex = menuItems.findIndex((item) => item === document.activeElement);
         const nextIndex = nextTerminalMenuIndex(menuItems.length, currentIndex, navigationKey);
         if (nextIndex !== null) menuItems[nextIndex]?.focus();

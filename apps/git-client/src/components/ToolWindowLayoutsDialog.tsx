@@ -1,8 +1,8 @@
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
-import { List, ListItem } from "@astryxdesign/core/List";
 import type { NamedToolWindowLayout } from "../domain/toolWindowLayouts";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
+import { Dialog, DialogHeader } from "./ui";
+import { List, ListItem } from "./ui";
 
 export function ToolWindowLayoutsDialog({
   layouts,
@@ -25,11 +25,7 @@ export function ToolWindowLayoutsDialog({
       width={420}
     >
       <section className={tw.toolWindowLayoutsDialog}>
-        <DialogHeader
-          hasDivider
-          onOpenChange={(open) => !open && onClose()}
-          title={title}
-        />
+        <DialogHeader hasDivider onOpenChange={(open) => !open && onClose()} title={title} />
         <List aria-label="Saved layouts" density="compact" role="listbox">
           {layouts.map((layout) => (
             <ListItem

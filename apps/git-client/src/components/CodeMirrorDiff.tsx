@@ -1,4 +1,3 @@
-import { EditorState, type Extension } from "@codemirror/state";
 import {
   diff,
   getChunks,
@@ -7,11 +6,8 @@ import {
   MergeView,
   unifiedMergeView,
 } from "@codemirror/merge";
-import {
-  search,
-  SearchQuery,
-  setSearchQuery,
-} from "@codemirror/search";
+import { search, SearchQuery, setSearchQuery } from "@codemirror/search";
+import { EditorState, type Extension } from "@codemirror/state";
 import { EditorView, GutterMarker, gutter, lineNumbers } from "@codemirror/view";
 import { useEffect, useRef } from "react";
 import { languageExtensionForPath } from "./codeMirrorLanguage";
@@ -42,7 +38,9 @@ class LineActionMarker extends GutterMarker {
     const marker = document.createElement("span");
     marker.className = "cm-lineActionMarker";
     marker.textContent = this.selected ? "●" : "○";
-    marker.title = this.selected ? "Remove line from partial operation" : "Add line to partial operation";
+    marker.title = this.selected
+      ? "Remove line from partial operation"
+      : "Add line to partial operation";
     return marker;
   }
 }
@@ -66,7 +64,9 @@ function lineActionGutter(
     lineMarker: (view, line) => {
       const lineActions = byLine.get(view.state.doc.lineAt(line.from).number);
       return lineActions
-        ? (lineActions.every((action) => action.selected) ? SELECTED_LINE_MARKER : AVAILABLE_LINE_MARKER)
+        ? lineActions.every((action) => action.selected)
+          ? SELECTED_LINE_MARKER
+          : AVAILABLE_LINE_MARKER
         : null;
     },
     domEventHandlers: {
@@ -116,7 +116,10 @@ function countMatches(value: string, query: string): number {
   return count;
 }
 
-function matchOffsets(value: string, query: string): readonly { readonly from: number; readonly to: number }[] {
+function matchOffsets(
+  value: string,
+  query: string,
+): readonly { readonly from: number; readonly to: number }[] {
   if (!query) return [];
   const needle = query.toLocaleLowerCase();
   const haystack = value.toLocaleLowerCase();
@@ -148,9 +151,13 @@ function editorTheme(wordWrap: boolean): readonly Extension[] {
     ".cm-deletedLine": { background: "color-mix(in srgb, var(--color-danger) 10%, transparent)" },
     ".cm-insertedLine": { background: "color-mix(in srgb, var(--color-success) 12%, transparent)" },
     ".cm-changedText": { background: "color-mix(in srgb, var(--color-success) 22%, transparent)" },
-    ".cm-deletedChunk .cm-changedText": { background: "color-mix(in srgb, var(--color-danger) 22%, transparent)" },
+    ".cm-deletedChunk .cm-changedText": {
+      background: "color-mix(in srgb, var(--color-danger) 22%, transparent)",
+    },
     ".cm-searchMatch": { background: "color-mix(in srgb, var(--color-warning) 35%, transparent)" },
-    ".cm-searchMatch-selected": { background: "color-mix(in srgb, var(--color-accent) 28%, transparent)" },
+    ".cm-searchMatch-selected": {
+      background: "color-mix(in srgb, var(--color-accent) 28%, transparent)",
+    },
   });
   return [
     lineNumbers(),
@@ -195,7 +202,10 @@ export default function CodeMirrorDiff({
   readonly differenceNavigation: DiffNavigationRequest;
   readonly selectableLines: readonly SelectableDiffLine[];
   readonly onToggleLine: (patchLineIndexes: readonly number[]) => void;
-  readonly onStatisticsChange: (statistics: { readonly differences: number; readonly matches: number }) => void;
+  readonly onStatisticsChange: (statistics: {
+    readonly differences: number;
+    readonly matches: number;
+  }) => void;
 }) {
   const parent = useRef<HTMLDivElement>(null);
   const handle = useRef<DiffEditorHandle | null>(null);
@@ -243,7 +253,9 @@ export default function CodeMirrorDiff({
           synchronizing = true;
           target.scrollDOM.scrollTop = source.scrollDOM.scrollTop;
           target.scrollDOM.scrollLeft = source.scrollDOM.scrollLeft;
-          requestAnimationFrame(() => { synchronizing = false; });
+          requestAnimationFrame(() => {
+            synchronizing = false;
+          });
         };
         const syncFromA = () => sync(merge.a, merge.b);
         const syncFromB = () => sync(merge.b, merge.a);
@@ -320,7 +332,9 @@ export default function CodeMirrorDiff({
     updateSearch(current, searchQuery);
     onStatisticsChange({
       differences: getChunks(current.primary.state)?.chunks.length ?? 0,
-      matches: countMatches(after, searchQuery) + (current.secondary ? countMatches(before, searchQuery) : 0),
+      matches:
+        countMatches(after, searchQuery) +
+        (current.secondary ? countMatches(before, searchQuery) : 0),
     });
   }, [after, before, onStatisticsChange, searchQuery]);
 

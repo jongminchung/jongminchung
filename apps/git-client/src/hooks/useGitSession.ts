@@ -7,6 +7,18 @@ import {
     useState,
 } from "react";
 import { createGitBridge } from "../bridge/createGitBridge";
+import { assertLiveRepositoryActionAllowed } from "../domain/fixtureMode";
+import {
+    GitRequestCancelledError,
+    isGitRequestCancelled,
+    isRetryableOperation,
+    operationActivityLabel,
+    sanitizeGitError,
+} from "../domain/gitActivity";
+import type { GitActivity } from "../domain/gitActivity";
+import { recordGitConsoleEvent } from "../domain/gitConsole";
+import type { GitConsoleEntry } from "../domain/gitConsole";
+import { GitRequestEventBuffer } from "../domain/gitRequestEvents";
 import {
     parseBlame,
     parseCommitFiles,
@@ -18,23 +30,14 @@ import {
     parseStatusV2,
     parseTree,
 } from "../domain/parsers";
-import {
-    GitRequestCancelledError,
-    isGitRequestCancelled,
-    isRetryableOperation,
-    operationActivityLabel,
-    sanitizeGitError,
-} from "../domain/gitActivity";
-import type { GitActivity } from "../domain/gitActivity";
-import { GitRequestEventBuffer } from "../domain/gitRequestEvents";
-import { recordGitConsoleEvent } from "../domain/gitConsole";
-import type { GitConsoleEntry } from "../domain/gitConsole";
+import { closeProjectResources } from "../domain/projectClose";
 import {
     parseProjectTextMatches,
     type ProjectSearchOptions,
     type ProjectTextMatch,
 } from "../domain/projectSearch";
-import { assertLiveRepositoryActionAllowed } from "../domain/fixtureMode";
+import { updateRecentProjects } from "../domain/recentProjects";
+import type { RecentProject } from "../domain/recentProjects";
 import { RefreshCoordinator } from "../domain/RefreshCoordinator";
 import { updateRepositoryView } from "../domain/repositoryView";
 import { terminalService } from "../domain/TerminalService";
@@ -47,12 +50,27 @@ import type {
     TreeEntry,
 } from "../domain/types";
 import {
-    isManagementSection,
+    loadWorkspaceStartupState,
+    recentProjectsWithRestoreFailures,
+} from "../domain/welcomeStartup";
+import {
     restoredWorkspaceTab,
     WORKSPACE_SCHEMA_VERSION,
     workspacePaths,
+    workspaceTabAfterClose,
 } from "../domain/workspacePersistence";
-import type { ManagementSection } from "../domain/workspacePersistence";
+import { electronApi, isElectronRuntime } from "../platform/electron";
+import {
+    readElectronSetting,
+    writeElectronSettings,
+} from "../platform/electronSettings";
+import type {
+    GitCreationEventListener,
+    GitLocalHistoryActivitiesPage,
+    GitLocalHistoryActivity,
+    GitLocalHistoryActivityDetail,
+    GitLocalHistoryScope,
+} from "../shared/contracts/git-utility";
 import type {
     Changelist,
     BranchComparison,
@@ -88,16 +106,7 @@ import type {
     SubmoduleInfo,
     SubmoduleDiff,
     WorktreeInfo,
-} from "../generated";
-import type {
-    GitCreationEventListener,
-    GitLocalHistoryEntry,
-} from "../shared/contracts/git-utility";
-import { isElectronRuntime, isNativeRuntime } from "../platform/electron";
-import {
-    readNativeSetting,
-    writeNativeSettings,
-} from "../platform/nativeSettings";
+} from "../shared/contracts/model";
 import { RepositoryWatchSession } from "./repository-watch-session";
 
 const gitBridge = createGitBridge();
@@ -111,7 +120,7 @@ interface RawRepositoryData {
 }
 
 export type WorkspaceTab =
-    | { readonly kind: "manage" }
+    | { readonly kind: "welcome" }
     | { readonly kind: "repository"; readonly repositoryId: string }
     | { readonly kind: "error"; readonly sessionId: string };
 
@@ -148,16 +157,30 @@ export type WorkspaceRepositorySession =
 interface WorkspaceState {
     readonly sessions: readonly WorkspaceRepositorySession[];
     readonly activeTab: WorkspaceTab;
-    readonly recentRepositories: readonly string[];
+    readonly recentProjects: readonly RecentProject[];
     readonly restoring: boolean;
     readonly error: string | null;
-    readonly managementSection: ManagementSection;
+    readonly notice?: string | null;
 }
 
 function fixtureEnabled(): boolean {
+    const api = electronApi();
+    if (api !== null) return api.runtime.qaFixture;
+    return new URLSearchParams(window.location.search).get("fixture") === "qa";
+}
+
+const WELCOME_RECENT_PROJECT_FIXTURE: RecentProject = Object.freeze({
+    path: "/Users/jaime/workspace/gcloud-manifest/services/gcloud-cloudlog",
+    name: "gcloud-cloudlog",
+    branch: "feat/opensearch",
+    lastOpenedAt: 1,
+});
+
+function welcomeRecentFixtureEnabled(): boolean {
     return (
-        (import.meta.env.DEV || isElectronRuntime()) &&
-        new URLSearchParams(window.location.search).get("fixture") === "qa"
+        !isElectronRuntime() &&
+        new URLSearchParams(window.location.search).get("fixture") ===
+            "welcome-recent"
     );
 }
 
@@ -224,13 +247,16 @@ function fixtureSession(fixtureData: FixtureData): RepositorySession {
 }
 
 function initialState(): WorkspaceState {
+    const welcomeRecentFixture = welcomeRecentFixtureEnabled();
     return {
         sessions: [],
-        activeTab: { kind: "manage" },
-        recentRepositories: [],
-        restoring: fixtureEnabled() || isNativeRuntime(),
+        activeTab: { kind: "welcome" },
+        recentProjects: welcomeRecentFixture
+            ? [WELCOME_RECENT_PROJECT_FIXTURE]
+            : [],
+        restoring:
+            fixtureEnabled() || (!welcomeRecentFixture && isElectronRuntime()),
         error: null,
-        managementSection: "roots",
     };
 }
 
@@ -261,6 +287,8 @@ const DEFAULT_LOG_FILTERS: LogFilters = {
     until: null,
     paths: [],
     noMerges: false,
+    regex: false,
+    matchCase: false,
 };
 
 interface LogSelection {
@@ -384,13 +412,6 @@ function recordsRecovery(operation: GitOperation): boolean {
     );
 }
 
-function validStoredPaths(value: unknown): readonly string[] {
-    if (!Array.isArray(value)) return [];
-    return value.filter(
-        (item): item is string => typeof item === "string" && item.length > 0,
-    );
-}
-
 async function cancelRequests(
     requestIds: readonly RequestId[],
 ): Promise<readonly PromiseSettledResult<void>[]> {
@@ -401,9 +422,12 @@ async function cancelRequests(
 
 export function useGitSession() {
     const fixture = fixtureEnabled();
+    const welcomeRecentFixture = welcomeRecentFixtureEnabled();
     const [state, setState] = useState<WorkspaceState>(initialState);
     const [activity, setActivity] = useState<GitActivity | null>(null);
-    const [gitConsoleEntries, setGitConsoleEntries] = useState<readonly GitConsoleEntry[]>([]);
+    const [gitConsoleEntries, setGitConsoleEntries] = useState<
+        readonly GitConsoleEntry[]
+    >([]);
     const activeRepositoryId = useRef<string | null>(
         state.activeTab.kind === "repository"
             ? state.activeTab.repositoryId
@@ -454,7 +478,7 @@ export function useGitSession() {
     const openRepositoryPathsJson = JSON.stringify(
         workspacePaths(state.sessions),
     );
-    const recentRepositoriesJson = JSON.stringify(state.recentRepositories);
+    const recentProjectsJson = JSON.stringify(state.recentProjects);
     const activeRepositoryPath =
         activeSession?.repository.snapshot.path ??
         activeErrorSession?.path ??
@@ -489,10 +513,9 @@ export function useGitSession() {
                     kind: "repository",
                     repositoryId: fixtureData.sampleRepository.snapshot.id,
                 },
-                recentRepositories: [],
+                recentProjects: [WELCOME_RECENT_PROJECT_FIXTURE],
                 restoring: false,
                 error: null,
-                managementSection: "roots",
             });
         };
         void load();
@@ -626,8 +649,15 @@ export function useGitSession() {
                 };
                 const onEvent = (event: GitEvent): void => {
                     announceRequest(event.requestId);
-                    recordConsoleEvent(request, event);
                     const result = eventBuffer.consume(event);
+                    try {
+                        recordConsoleEvent(request, event);
+                    } catch (error) {
+                        console.warn(
+                            "Could not record Git console event",
+                            error,
+                        );
+                    }
                     if (result.kind === "completed") {
                         resolveOnce(result.output);
                     } else if (result.kind === "cancelled") {
@@ -690,30 +720,52 @@ export function useGitSession() {
                 status: statusOutput,
                 stash: stashOutput,
             });
-            setState((current) =>
-                updateRepositorySession(current, repositoryId, (session) => ({
-                    ...session,
-                    status: "ready",
-                    repository: {
-                        snapshot: refreshedSnapshot,
-                        refs: parseRefs(refsOutput),
-                        commits: parseLog(logOutput),
-                        status: parseStatusV2(statusOutput),
-                    },
-                    shelves,
-                    stashes: parseStashList(stashOutput),
-                    changelists,
-                    recoveryEntries,
-                    conflicts,
-                    remotes,
-                    worktrees,
-                    stale: false,
-                    hasMoreCommits: parseLog(logOutput).length === 500,
-                    logLoading: false,
-                    logError: null,
-                    error: null,
-                })),
-            );
+            setState((current) => {
+                const previousProject = current.recentProjects.find(
+                    (project) => project.path === refreshedSnapshot.path,
+                );
+                const updated = updateRepositorySession(
+                    current,
+                    repositoryId,
+                    (session) => ({
+                        ...session,
+                        status: "ready",
+                        repository: {
+                            snapshot: refreshedSnapshot,
+                            refs: parseRefs(refsOutput),
+                            commits: parseLog(logOutput),
+                            status: parseStatusV2(statusOutput),
+                        },
+                        shelves,
+                        stashes: parseStashList(stashOutput),
+                        changelists,
+                        recoveryEntries,
+                        conflicts,
+                        remotes,
+                        worktrees,
+                        stale: false,
+                        hasMoreCommits: parseLog(logOutput).length === 500,
+                        logLoading: false,
+                        logError: null,
+                        error: null,
+                    }),
+                );
+                if (previousProject?.branch === refreshedSnapshot.currentBranch)
+                    return updated;
+                return {
+                    ...updated,
+                    recentProjects: updateRecentProjects(
+                        updated.recentProjects,
+                        {
+                            path: refreshedSnapshot.path,
+                            name: refreshedSnapshot.name,
+                            branch: refreshedSnapshot.currentBranch,
+                            lastOpenedAt:
+                                previousProject?.lastOpenedAt ?? Date.now(),
+                        },
+                    ),
+                };
+            });
         },
         [fixture, runRequest],
     );
@@ -932,23 +984,6 @@ export function useGitSession() {
             await repositoryWatchSession.current.ensure(snapshot.id, () =>
                 gitBridge.watchRepository(snapshot.id, (event) => {
                     const recordAndRefresh = async (): Promise<void> => {
-                        try {
-                            await gitBridge.captureLocalHistory?.(
-                                snapshot.id,
-                                null,
-                            );
-                        } catch (error) {
-                            setState((current) =>
-                                updateRepositorySession(
-                                    current,
-                                    snapshot.id,
-                                    (session) => ({
-                                        ...session,
-                                        error: sanitizeGitError(error),
-                                    }),
-                                ),
-                            );
-                        }
                         if (activeRepositoryId.current === snapshot.id) {
                             refreshCoordinator.invalidate(
                                 snapshot.id,
@@ -996,84 +1031,70 @@ export function useGitSession() {
                 activeTab: activate
                     ? { kind: "repository", repositoryId: snapshot.id }
                     : current.activeTab,
-                recentRepositories: [
-                    snapshot.path,
-                    ...current.recentRepositories.filter(
-                        (path) => path !== snapshot.path,
-                    ),
-                ].slice(0, 12),
+                recentProjects: updateRecentProjects(current.recentProjects, {
+                    path: snapshot.path,
+                    name: snapshot.name,
+                    branch: snapshot.currentBranch,
+                    lastOpenedAt: Date.now(),
+                }),
                 error: null,
             }));
             await refreshOnce(snapshot.id);
-            try {
-                await gitBridge.captureLocalHistory?.(snapshot.id, null);
-            } catch (error) {
-                setState((current) =>
-                    updateRepositorySession(
-                        current,
-                        snapshot.id,
-                        (session) => ({
-                            ...session,
-                            error: sanitizeGitError(error),
-                        }),
-                    ),
-                );
-            }
             await watch(snapshot);
         },
         [refreshOnce, watch],
     );
 
     useEffect(() => {
-        if (fixture || !isNativeRuntime() || restored.current) return;
+        if (
+            fixture ||
+            welcomeRecentFixture ||
+            !isElectronRuntime() ||
+            restored.current
+        )
+            return;
         restored.current = true;
         const restore = async (): Promise<void> => {
             try {
-                const paths = validStoredPaths(
-                    await readNativeSetting("openRepositoryPaths"),
-                );
-                const activePath = await readNativeSetting(
-                    "activeRepositoryPath",
-                );
-                const recentRepositories = validStoredPaths(
-                    await readNativeSetting("recentRepositories"),
-                );
-                const storedManagementSection =
-                    await readNativeSetting("managementSection");
+                const startup =
+                    await loadWorkspaceStartupState(readElectronSetting);
                 const results = await Promise.allSettled(
-                    paths.map(
-                        async (path): Promise<RepositorySnapshot> =>
-                            gitBridge.openRepository(path),
+                    startup.openRepositoryPaths.map((path) =>
+                        gitBridge.openRepository(path),
                     ),
                 );
-                const snapshots: RepositorySnapshot[] = [];
-                const sessions = results.map(
-                    (result, index): WorkspaceRepositorySession => {
-                        const path = paths[index] ?? "Unknown repository";
-                        if (result.status === "fulfilled") {
-                            snapshots.push(result.value);
-                            return loadingSession(result.value);
-                        }
-                        return {
-                            kind: "error",
-                            status: "error",
-                            id: `error:${path}`,
-                            path,
-                            message: sanitizeGitError(result.reason),
-                        };
-                    },
+                const snapshots = results.flatMap((result) =>
+                    result.status === "fulfilled" ? [result.value] : [],
+                );
+                const sessions = snapshots.map(loadingSession);
+                const failures = results.flatMap((result, index) =>
+                    result.status === "rejected"
+                        ? [
+                              `${startup.openRepositoryPaths[index] ?? "Unknown repository"}: ${sanitizeGitError(result.reason)}`,
+                          ]
+                        : [],
+                );
+                const failedPaths = results.flatMap((result, index) =>
+                    result.status === "rejected" &&
+                    startup.openRepositoryPaths[index]
+                        ? [startup.openRepositoryPaths[index]]
+                        : [],
                 );
                 setState({
                     sessions,
-                    activeTab: restoredWorkspaceTab(sessions, activePath),
-                    recentRepositories,
+                    activeTab: restoredWorkspaceTab(
+                        sessions,
+                        startup.activeRepositoryPath,
+                    ),
+                    recentProjects: recentProjectsWithRestoreFailures(
+                        startup.recentProjects,
+                        failedPaths,
+                    ),
                     restoring: false,
-                    error: null,
-                    managementSection: isManagementSection(
-                        storedManagementSection,
-                    )
-                        ? storedManagementSection
-                        : "roots",
+                    error:
+                        failures.length > 0
+                            ? `Could not reopen ${failures.length} project(s): ${failures.join("; ")}`
+                            : null,
                 });
                 await Promise.allSettled(
                     snapshots.map(async (snapshot) => {
@@ -1090,17 +1111,22 @@ export function useGitSession() {
             }
         };
         void restore();
-    }, [fixture, refreshOnce, watch]);
+    }, [fixture, refreshOnce, watch, welcomeRecentFixture]);
 
     useEffect(() => {
-        if (fixture || !isNativeRuntime() || state.restoring) return;
+        if (
+            fixture ||
+            welcomeRecentFixture ||
+            !isElectronRuntime() ||
+            state.restoring
+        )
+            return;
         const persist = async (): Promise<void> => {
-            await writeNativeSettings({
+            await writeElectronSettings({
                 schemaVersion: WORKSPACE_SCHEMA_VERSION,
                 openRepositoryPaths: JSON.parse(openRepositoryPathsJson),
                 activeRepositoryPath,
-                recentRepositories: JSON.parse(recentRepositoriesJson),
-                managementSection: state.managementSection,
+                recentProjects: JSON.parse(recentProjectsJson),
             });
         };
         void persist();
@@ -1108,9 +1134,9 @@ export function useGitSession() {
         activeRepositoryPath,
         fixture,
         openRepositoryPathsJson,
-        recentRepositoriesJson,
+        recentProjectsJson,
         state.restoring,
-        state.managementSection,
+        welcomeRecentFixture,
     ]);
 
     useEffect(
@@ -1226,15 +1252,6 @@ export function useGitSession() {
         [refreshCoordinator, state.sessions],
     );
 
-    const openManagement = useCallback((section: ManagementSection): void => {
-        activeRepositoryId.current = null;
-        setState((current) => ({
-            ...current,
-            activeTab: { kind: "manage" },
-            managementSection: section,
-        }));
-    }, []);
-
     const switchRepository = useCallback(
         async (repositoryId: string): Promise<void> =>
             activateTab({ kind: "repository", repositoryId }),
@@ -1269,17 +1286,49 @@ export function useGitSession() {
                         ? candidate.repository.snapshot.id !== sessionId
                         : candidate.id !== sessionId,
                 ),
-                activeTab:
-                    (current.activeTab.kind === "repository" &&
-                        current.activeTab.repositoryId === sessionId) ||
-                    (current.activeTab.kind === "error" &&
-                        current.activeTab.sessionId === sessionId)
-                        ? { kind: "manage" }
-                        : current.activeTab,
+                activeTab: workspaceTabAfterClose(
+                    current.sessions,
+                    current.activeTab,
+                    sessionId,
+                ),
             }));
         },
         [fixture, refreshCoordinator, state.sessions],
     );
+
+    const closeProject = useCallback(async (): Promise<void> => {
+        const repositoryIds = state.sessions.flatMap((session) =>
+            session.kind === "repository"
+                ? [session.repository.snapshot.id]
+                : [],
+        );
+        await closeProjectResources(repositoryIds, {
+            unwatchRepository: (repositoryId) =>
+                fixture
+                    ? Promise.resolve()
+                    : gitBridge.unwatchRepository(repositoryId),
+            closeRepositoryTerminals: (repositoryId) =>
+                fixture
+                    ? Promise.resolve()
+                    : terminalService.closeRepository(repositoryId),
+            forgetRepository: (repositoryId) => {
+                repositoryWatchSession.current.forget(repositoryId);
+                refreshCoordinator.forget(repositoryId);
+                rawRepositoryData.current.delete(repositoryId);
+                logSelections.current.delete(repositoryId);
+                logCommitCounts.current.delete(repositoryId);
+                logGenerations.current.delete(repositoryId);
+                activeLogRequests.current.delete(repositoryId);
+            },
+        });
+        activeRepositoryId.current = null;
+        activeSnapshotRef.current = null;
+        setState((current) => ({
+            ...current,
+            sessions: [],
+            activeTab: { kind: "welcome" },
+        }));
+    }, [fixture, refreshCoordinator, state.sessions]);
 
     const activeSnapshot = useCallback((): RepositorySnapshot => {
         const snapshot = activeSnapshotRef.current;
@@ -1357,7 +1406,10 @@ export function useGitSession() {
                             updateRepositorySession(
                                 current,
                                 snapshot.id,
-                                (session) => ({ ...session, error: message }),
+                                (session) => ({
+                                    ...session,
+                                    error: message,
+                                }),
                             ),
                         );
                     }
@@ -1910,58 +1962,105 @@ export function useGitSession() {
         [activeSnapshot, fixture, runRequest],
     );
 
-    const captureLocalHistory = useCallback(
-        async (label: string | null): Promise<GitLocalHistoryEntry> => {
-            if (fixture)
-                throw new Error("Local History requires the native app");
-            if (gitBridge.captureLocalHistory === undefined)
+    const listLocalHistoryActivities = useCallback(
+        async (
+            scope: GitLocalHistoryScope,
+            cursor: string | null,
+            limit: number,
+            query: string,
+            showSystemEvents: boolean,
+        ): Promise<GitLocalHistoryActivitiesPage> => {
+            if (fixture) return { activities: [], nextCursor: null };
+            if (gitBridge.listLocalHistoryActivities === undefined)
                 throw new Error("Local History is unavailable");
-            return gitBridge.captureLocalHistory(activeSnapshot().id, label);
+            return gitBridge.listLocalHistoryActivities(
+                scope,
+                cursor,
+                limit,
+                query,
+                showSystemEvents,
+            );
         },
-        [activeSnapshot, fixture],
+        [fixture],
     );
 
-    const listLocalHistory = useCallback(
-        async (
-            path: string | null,
-        ): Promise<readonly GitLocalHistoryEntry[]> => {
-            if (fixture) return [];
-            if (gitBridge.listLocalHistory === undefined)
+    const readLocalHistoryActivity = useCallback(
+        async (activityId: string): Promise<GitLocalHistoryActivityDetail> => {
+            if (fixture)
+                throw new Error("Local History requires the native app");
+            if (gitBridge.readLocalHistoryActivity === undefined)
                 throw new Error("Local History is unavailable");
-            return gitBridge.listLocalHistory(activeSnapshot().id, path);
+            return gitBridge.readLocalHistoryActivity(
+                activeSnapshot().id,
+                activityId,
+            );
         },
         [activeSnapshot, fixture],
     );
 
     const loadLocalHistoryDiff = useCallback(
-        async (entryId: string, path: string): Promise<string> => {
+        async (activityId: string, path: string): Promise<string> => {
             if (fixture) return (await requireFixtureData()).samplePatch;
             if (gitBridge.readLocalHistoryDiff === undefined)
                 throw new Error("Local History is unavailable");
             return gitBridge.readLocalHistoryDiff(
                 activeSnapshot().id,
-                entryId,
+                activityId,
                 path,
             );
         },
         [activeSnapshot, fixture],
     );
 
-    const restoreLocalHistory = useCallback(
-        async (entryId: string, path: string): Promise<void> => {
+    const revertLocalHistory = useCallback(
+        async (
+            activityId: string,
+            paths: readonly string[],
+            includeLater: boolean,
+        ): Promise<void> => {
             if (fixture)
                 throw new Error("Local History requires the native app");
-            if (gitBridge.restoreLocalHistory === undefined)
+            if (gitBridge.revertLocalHistory === undefined)
                 throw new Error("Local History is unavailable");
             const snapshot = activeSnapshot();
-            await gitBridge.restoreLocalHistory(snapshot.id, entryId, path);
-            await gitBridge.captureLocalHistory?.(
+            await gitBridge.revertLocalHistory(
                 snapshot.id,
-                `Reverted ${path}`,
+                activityId,
+                paths,
+                includeLater,
             );
             await refreshAll(snapshot.id);
         },
         [activeSnapshot, fixture, refreshAll],
+    );
+
+    const createLocalHistoryPatch = useCallback(
+        async (
+            activityId: string,
+            paths: readonly string[],
+        ): Promise<string> => {
+            if (fixture)
+                throw new Error("Local History requires the native app");
+            if (gitBridge.createLocalHistoryPatch === undefined)
+                throw new Error("Local History is unavailable");
+            return gitBridge.createLocalHistoryPatch(
+                activeSnapshot().id,
+                activityId,
+                paths,
+            );
+        },
+        [activeSnapshot, fixture],
+    );
+
+    const putLocalHistoryLabel = useCallback(
+        async (label: string): Promise<GitLocalHistoryActivity> => {
+            if (fixture)
+                throw new Error("Local History requires the native app");
+            if (gitBridge.putLocalHistoryLabel === undefined)
+                throw new Error("Local History is unavailable");
+            return gitBridge.putLocalHistoryLabel(activeSnapshot().id, label);
+        },
+        [activeSnapshot, fixture],
     );
 
     const exportPatch = useCallback(
@@ -2023,8 +2122,8 @@ export function useGitSession() {
             kind: "files",
             repositoryId: snapshot.id,
         });
-        return [...new Set(output.split("\0").filter(Boolean))].sort((left, right) =>
-            left.localeCompare(right),
+        return [...new Set(output.split("\0").filter(Boolean))].sort(
+            (left, right) => left.localeCompare(right),
         );
     }, [activeSnapshot, fixture, runRequest]);
 
@@ -2137,13 +2236,22 @@ export function useGitSession() {
     );
 
     const writeWorkingTreeFile = useCallback(
-        async (path: string, content: string): Promise<void> => {
+        async (
+            path: string,
+            content: string,
+            activityName?: string,
+        ): Promise<void> => {
             if (fixture)
                 throw new Error("Editing files requires the native app");
             if (gitBridge.writeWorkingTreeFile === undefined)
                 throw new Error("File editing is unavailable");
             const snapshot = activeSnapshot();
-            await gitBridge.writeWorkingTreeFile(snapshot.id, path, content);
+            await gitBridge.writeWorkingTreeFile(
+                snapshot.id,
+                path,
+                content,
+                activityName,
+            );
             refreshCoordinator.invalidate(snapshot.id, ["status"]);
             await refreshCoordinator.flush(snapshot.id);
         },
@@ -2587,6 +2695,19 @@ export function useGitSession() {
         });
     }, []);
 
+    const dismissNotice = useCallback((): void => {
+        setState((current) => ({ ...current, notice: null }));
+    }, []);
+
+    const removeRecentProject = useCallback((path: string): void => {
+        setState((current) => ({
+            ...current,
+            recentProjects: current.recentProjects.filter(
+                (project) => project.path !== path,
+            ),
+        }));
+    }, []);
+
     const openRepositories = state.sessions.flatMap((session) =>
         session.kind === "repository" ? [session.repository.snapshot] : [],
     );
@@ -2594,14 +2715,13 @@ export function useGitSession() {
     return {
         sessions: state.sessions,
         activeTab: state.activeTab,
-        recentRepositories: state.recentRepositories,
-        managementSection: state.managementSection,
+        recentProjects: state.recentProjects,
         restoring: state.restoring,
         error: state.error ?? activeSession?.error ?? null,
+        notice: state.notice ?? null,
         fixture,
         repository: activeSession?.repository ?? null,
         repositoryError: activeErrorSession,
-        managementRepository: managementSession?.repository ?? null,
         loading: activeSession?.status === "loading",
         stale: activeSession?.stale ?? false,
         hasMoreCommits: activeSession?.hasMoreCommits ?? false,
@@ -2629,9 +2749,10 @@ export function useGitSession() {
         cloneRepository,
         cancelRepositoryCreation,
         activateTab,
-        openManagement,
         closeRepository,
+        closeProject,
         switchRepository,
+        removeRecentProject,
         reload,
         loadLog,
         indexLog,
@@ -2640,10 +2761,12 @@ export function useGitSession() {
         loadWorkingDiff,
         loadLocalChangesPatch,
         loadRevisionDiff,
-        captureLocalHistory,
-        listLocalHistory,
+        listLocalHistoryActivities,
+        readLocalHistoryActivity,
         loadLocalHistoryDiff,
-        restoreLocalHistory,
+        revertLocalHistory,
+        createLocalHistoryPatch,
+        putLocalHistoryLabel,
         exportPatch,
         createPatchText,
         importPatch,
@@ -2686,6 +2809,7 @@ export function useGitSession() {
         retryActivity,
         dismissActivity,
         dismissError,
+        dismissNotice,
         clearGitConsole,
     };
 }

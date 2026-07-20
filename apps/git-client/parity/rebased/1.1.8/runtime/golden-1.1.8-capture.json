@@ -58,9 +58,7 @@
         "toolbar actions",
         "focus role"
       ],
-      "excludeFrom": [
-        "whole-window visual comparison"
-      ]
+      "excludeFrom": ["whole-window visual comparison"]
     },
     {
       "surface": "terminal.local.pwd",

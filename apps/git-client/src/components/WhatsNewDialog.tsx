@@ -1,23 +1,26 @@
-import { Button } from "@astryxdesign/core/Button";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
-import { List, ListItem } from "@astryxdesign/core/List";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
+import { Button } from "./ui";
+import { Dialog, DialogHeader } from "./ui";
+import { List, ListItem } from "./ui";
 
 const UPDATES = [
   {
     title: "Electron workspace",
-    description: "Native macOS menus, isolated profiles, secure preload APIs, and restored window state.",
+    description:
+      "Native macOS menus, isolated profiles, secure preload APIs, and restored window state.",
     icon: "settings" as const,
   },
   {
     title: "Project, Log, Commit, and editor",
-    description: "Browse files and history, review diffs, stage partial work, and commit from one workbench.",
+    description:
+      "Browse files and history, review diffs, stage partial work, and commit from one workbench.",
     icon: "file" as const,
   },
   {
     title: "Git operations and recovery",
-    description: "Branch, merge, rebase, worktree, stash, shelf, conflict, patch, and recovery workflows.",
+    description:
+      "Branch, merge, rebase, worktree, stash, shelf, conflict, patch, and recovery workflows.",
     icon: "branch" as const,
   },
   {
@@ -27,7 +30,8 @@ const UPDATES = [
   },
   {
     title: "Terminal and diagnostics",
-    description: "PTY terminal tabs, Git Console, Local History, Activity Monitor, and local support bundles.",
+    description:
+      "PTY terminal tabs, Git Console, Local History, Activity Monitor, and local support bundles.",
     icon: "console" as const,
   },
 ] as const;

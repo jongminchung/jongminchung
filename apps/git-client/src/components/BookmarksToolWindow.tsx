@@ -1,5 +1,3 @@
-import { CheckboxInput } from "@astryxdesign/core/CheckboxInput";
-import { Popover } from "@astryxdesign/core/Popover";
 import { useMemo, useState, type KeyboardEvent } from "react";
 import type {
   BookmarkGroup,
@@ -9,8 +7,10 @@ import type {
 } from "../domain/bookmarks";
 import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
-import { Icon } from "./Icon";
 import { BookmarkGroupCreateDialog } from "./BookmarkGroupCreateDialog";
+import { Icon } from "./Icon";
+import { CheckboxInput } from "./ui";
+import { Popover } from "./ui";
 
 export function BookmarksToolWindow({
   state,
@@ -42,10 +42,7 @@ export function BookmarksToolWindow({
   const [collapsedGroups, setCollapsedGroups] = useState<ReadonlySet<string>>(new Set());
   const [optionsOpen, setOptionsOpen] = useState(false);
   const [creatingGroup, setCreatingGroup] = useState(false);
-  const bookmarks = useMemo(
-    () => state.groups.flatMap((group) => group.bookmarks),
-    [state.groups],
-  );
+  const bookmarks = useMemo(() => state.groups.flatMap((group) => group.bookmarks), [state.groups]);
   const selectedBookmark = bookmarks.find((bookmark) => bookmark.id === selectedBookmarkId);
 
   const renameGroup = async (group: BookmarkGroup): Promise<void> => {
@@ -77,10 +74,7 @@ export function BookmarksToolWindow({
     if (description !== null) onDescribeBookmark(bookmark.id, description);
   };
 
-  const onRowKeyDown = (
-    event: KeyboardEvent<HTMLButtonElement>,
-    bookmark: LineBookmark,
-  ): void => {
+  const onRowKeyDown = (event: KeyboardEvent<HTMLButtonElement>, bookmark: LineBookmark): void => {
     const index = bookmarks.findIndex((candidate) => candidate.id === bookmark.id);
     if (event.key === "Enter") onOpenBookmark(bookmark);
     else if (event.key === "Delete" || event.key === "Backspace") {
@@ -113,15 +107,25 @@ export function BookmarksToolWindow({
       >
         <span>{bookmark.mnemonic ?? <Icon name="bookmarkFilled" size={11} />}</span>
         <strong>{bookmark.description || bookmark.path.split("/").at(-1)}</strong>
-        <small>{bookmark.path}, line {bookmark.line}</small>
+        <small>
+          {bookmark.path}, line {bookmark.line}
+        </small>
       </button>
       <button aria-label="Move Up" onClick={() => onMoveBookmark(bookmark.id, -1)} title="Move Up">
         <Icon name="chevron" size={11} />
       </button>
-      <button aria-label="Move Down" onClick={() => onMoveBookmark(bookmark.id, 1)} title="Move Down">
+      <button
+        aria-label="Move Down"
+        onClick={() => onMoveBookmark(bookmark.id, 1)}
+        title="Move Down"
+      >
         <Icon name="chevron" size={11} />
       </button>
-      <button aria-label="Delete Bookmark" onClick={() => onDeleteBookmark(bookmark.id)} title="Delete">
+      <button
+        aria-label="Delete Bookmark"
+        onClick={() => onDeleteBookmark(bookmark.id)}
+        title="Delete"
+      >
         <Icon name="close" size={11} />
       </button>
     </div>
@@ -149,9 +153,15 @@ export function BookmarksToolWindow({
   return (
     <section aria-label="Bookmarks Tool Window" className={tw.bookmarksToolWindow}>
       <header className={tw.projectToolHeader}>
-        <button aria-label="Bookmarks" title="Bookmarks"><strong>Bookmarks</strong></button>
+        <button aria-label="Bookmarks" title="Bookmarks">
+          <strong>Bookmarks</strong>
+        </button>
         <span />
-        <button aria-label="Create Bookmark List" onClick={() => setCreatingGroup(true)} title="Create Bookmark List">
+        <button
+          aria-label="Create Bookmark List"
+          onClick={() => setCreatingGroup(true)}
+          title="Create Bookmark List"
+        >
           <Icon name="plus" size={14} />
         </button>
         <button
@@ -212,7 +222,9 @@ export function BookmarksToolWindow({
             </div>
           }
         >
-          <button aria-label="Options" title="Options"><Icon name="more" size={14} /></button>
+          <button aria-label="Options" title="Options">
+            <Icon name="more" size={14} />
+          </button>
         </Popover>
         <button aria-label="Close Bookmarks" onClick={onClose} title="Close">
           <Icon name="close" size={13} />
@@ -226,12 +238,14 @@ export function BookmarksToolWindow({
               <div className={tw.bookmarkGroupRow}>
                 <button
                   aria-expanded={!collapsed}
-                  onClick={() => setCollapsedGroups((current) => {
-                    const next = new Set(current);
-                    if (next.has(group.id)) next.delete(group.id);
-                    else next.add(group.id);
-                    return next;
-                  })}
+                  onClick={() =>
+                    setCollapsedGroups((current) => {
+                      const next = new Set(current);
+                      if (next.has(group.id)) next.delete(group.id);
+                      else next.add(group.id);
+                      return next;
+                    })
+                  }
                 >
                   <Icon name="chevron" size={12} />
                   <Icon name="bookmarksList" size={14} />
@@ -246,7 +260,11 @@ export function BookmarksToolWindow({
                 >
                   <Icon name="check" size={12} />
                 </button>
-                <button aria-label={`Rename ${group.name}`} onClick={() => void renameGroup(group)} title="Rename Bookmark List…">
+                <button
+                  aria-label={`Rename ${group.name}`}
+                  onClick={() => void renameGroup(group)}
+                  title="Rename Bookmark List…"
+                >
                   <Icon name="appearance" size={12} />
                 </button>
                 <button

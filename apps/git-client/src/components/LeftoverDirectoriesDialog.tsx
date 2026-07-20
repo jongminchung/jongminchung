@@ -1,13 +1,12 @@
-import { Button } from "@astryxdesign/core/Button";
-import { CheckboxInput } from "@astryxdesign/core/CheckboxInput";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
-import { EmptyState } from "@astryxdesign/core/EmptyState";
-import { List, ListItem } from "@astryxdesign/core/List";
 import { useCallback, useEffect, useState } from "react";
 import type { DiagnosticLeftoverDirectory } from "../shared/contracts/ipc";
 import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
-import { Icon } from "./Icon";
+import { Button } from "./ui";
+import { CheckboxInput } from "./ui";
+import { Dialog, DialogHeader } from "./ui";
+import { EmptyState } from "./ui";
+import { List, ListItem } from "./ui";
 
 function sizeLabel(bytes: number): string {
   if (bytes < 1_024) return `${bytes} B`;
@@ -101,8 +100,8 @@ export function LeftoverDirectoriesDialog({
             title="Delete Leftover IDE Directories"
           />
           <p>
-            Select obsolete Git Client Electron profiles to delete. The active and primary
-            profiles, plus data from other applications, are never listed.
+            Select obsolete Git Client Electron profiles to delete. The active and primary profiles,
+            plus data from other applications, are never listed.
           </p>
           <header aria-hidden="true">
             <span>Name</span>

@@ -1,9 +1,9 @@
-import { Button } from "@astryxdesign/core/Button";
-import { CheckboxInput } from "@astryxdesign/core/CheckboxInput";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
-import { TextInput } from "@astryxdesign/core/TextInput";
 import { useState } from "react";
 import { tw } from "../styles/tailwind";
+import { Button } from "./ui";
+import { CheckboxInput } from "./ui";
+import { Dialog, DialogHeader } from "./ui";
+import { TextInput } from "./ui";
 
 export function BookmarkGroupCreateDialog({
   existingNames,
@@ -17,11 +17,12 @@ export function BookmarkGroupCreateDialog({
   const [name, setName] = useState("New List");
   const [isDefault, setIsDefault] = useState(false);
   const normalized = name.trim();
-  const error = normalized === ""
-    ? "Enter a bookmark list name."
-    : existingNames.has(normalized)
-      ? "A list with the specified name already exists"
-      : null;
+  const error =
+    normalized === ""
+      ? "Enter a bookmark list name."
+      : existingNames.has(normalized)
+        ? "A list with the specified name already exists"
+        : null;
   const submit = (): void => {
     if (error) return;
     onCreate(normalized, isDefault);
@@ -62,10 +63,19 @@ export function BookmarkGroupCreateDialog({
           size="sm"
           value={isDefault}
         />
-        <p>New bookmarks will be added here automatically. You can change the default list at any time in the Bookmarks tool window.</p>
+        <p>
+          New bookmarks will be added here automatically. You can change the default list at any
+          time in the Bookmarks tool window.
+        </p>
         <footer>
           <Button label="Cancel" onClick={onClose} size="md" type="button" variant="secondary" />
-          <Button isDisabled={error !== null} label="Create" size="md" type="submit" variant="primary" />
+          <Button
+            isDisabled={error !== null}
+            label="Create"
+            size="md"
+            type="submit"
+            variant="primary"
+          />
         </footer>
       </form>
     </Dialog>

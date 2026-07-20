@@ -1,17 +1,24 @@
-import { Button } from "@astryxdesign/core/Button";
-import { CheckboxInput } from "@astryxdesign/core/CheckboxInput";
-import { Popover } from "@astryxdesign/core/Popover";
-import { Selector } from "@astryxdesign/core/Selector";
-import { TextInput } from "@astryxdesign/core/TextInput";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
-import { useDismissLayer } from "./CommandProvider";
 import type { Commit, Ref } from "../domain/types";
-import type { LogFilters, LogOrder } from "../generated";
+import type { LogFilters, LogOrder } from "../shared/contracts/model";
+import { tw } from "../styles/tailwind";
+import { useDismissLayer } from "./CommandProvider";
 import { CommitGraph } from "./CommitGraph";
 import { Icon } from "./Icon";
-import { tw } from "../styles/tailwind";
+import { Button } from "./ui";
+import { CheckboxInput } from "./ui";
+import { Popover } from "./ui";
+import { Selector } from "./ui";
+import { TextInput } from "./ui";
+
+const LOG_ROW_HEIGHT = 20;
 
 function commitTime(timestamp: number): string {
+  const elapsedSeconds = Math.max(0, Math.floor(Date.now() / 1000 - timestamp));
+  if (elapsedSeconds < 60) return "now";
+  if (elapsedSeconds < 3_600) return `${Math.floor(elapsedSeconds / 60)}m ago`;
+  if (elapsedSeconds < 86_400) return `${Math.floor(elapsedSeconds / 3_600)}h ago`;
+  if (elapsedSeconds < 604_800) return `${Math.floor(elapsedSeconds / 86_400)}d ago`;
   return new Intl.DateTimeFormat(undefined, {
     year: "numeric",
     month: "numeric",
@@ -110,8 +117,8 @@ export const CommitLog = memo(function CommitLog({
             (regex
               ? queryPattern?.test(`${commit.subject}\n${commit.oid}`) === true
               : (matchCase ? commit.subject : commit.subject.toLowerCase()).includes(
-                    matchCase ? normalizedQuery : normalizedQuery.toLowerCase(),
-                  ) ||
+                  matchCase ? normalizedQuery : normalizedQuery.toLowerCase(),
+                ) ||
                 (matchCase ? commit.oid : commit.oid.toLowerCase()).startsWith(
                   matchCase ? normalizedQuery : normalizedQuery.toLowerCase(),
                 ))) &&
@@ -134,8 +141,10 @@ export const CommitLog = memo(function CommitLog({
       until: null,
       paths: path.trim() ? [path.trim()] : [],
       noMerges: false,
+      regex,
+      matchCase,
     }),
-    [author, branch, normalizedQuery, path, since],
+    [author, branch, matchCase, normalizedQuery, path, regex, since],
   );
 
   const activeFilterCount =
@@ -170,7 +179,9 @@ export const CommitLog = memo(function CommitLog({
   useEffect(() => {
     const find = (event: Event): void => {
       if (!(event instanceof CustomEvent) || !normalizedQuery || filtered.length === 0) return;
-      const ownsSearch = searchInput.current === document.activeElement || parentRef.current?.contains(document.activeElement);
+      const ownsSearch =
+        searchInput.current === document.activeElement ||
+        parentRef.current?.contains(document.activeElement);
       if (!ownsSearch) return;
       const direction = event.detail?.direction === -1 ? -1 : 1;
       const current = filtered.findIndex((commit) => commit.oid === selectedOids[0]);
@@ -201,24 +212,52 @@ export const CommitLog = memo(function CommitLog({
   const navigateCommit = (direction: "parent" | "child"): void => {
     const selected = commits.find((commit) => commit.oid === selectedOids[0]);
     if (!selected) return;
-    const oid = direction === "parent"
-      ? selected.parents[0]
-      : commits.find((commit) => commit.parents.includes(selected.oid))?.oid;
+    const oid =
+      direction === "parent"
+        ? selected.parents[0]
+        : commits.find((commit) => commit.parents.includes(selected.oid))?.oid;
     if (oid) onSelectionChange([oid]);
   };
 
-  useDismissLayer(useMemo(() => ({
-    id: "log-filters",
-    priority: 110,
-    active: filtersOpen,
-    dismiss: () => setFiltersOpen(false),
-  }), [filtersOpen]));
-  useDismissLayer(useMemo(() => ({
-    id: "log-view-options",
-    priority: 110,
-    active: viewOptionsOpen,
-    dismiss: () => setViewOptionsOpen(false),
-  }), [viewOptionsOpen]));
+  const navigateRow = (offset: number): void => {
+    if (filtered.length === 0) return;
+    const current = filtered.findIndex((commit) => commit.oid === selectedOids[0]);
+    const nextIndex = Math.max(
+      0,
+      Math.min(filtered.length - 1, (current < 0 ? 0 : current) + offset),
+    );
+    const next = filtered[nextIndex];
+    if (!next) return;
+    onSelectionChange([next.oid]);
+    window.requestAnimationFrame(() => {
+      parentRef.current
+        ?.querySelector<HTMLElement>(`[data-oid="${next.oid}"]`)
+        ?.scrollIntoView({ block: "nearest" });
+    });
+  };
+
+  useDismissLayer(
+    useMemo(
+      () => ({
+        id: "log-filters",
+        priority: 110,
+        active: filtersOpen,
+        dismiss: () => setFiltersOpen(false),
+      }),
+      [filtersOpen],
+    ),
+  );
+  useDismissLayer(
+    useMemo(
+      () => ({
+        id: "log-view-options",
+        priority: 110,
+        active: viewOptionsOpen,
+        dismiss: () => setViewOptionsOpen(false),
+      }),
+      [viewOptionsOpen],
+    ),
+  );
 
   return (
     <section className={tw.logPane} aria-busy={loading} aria-label="Commit log">
@@ -264,12 +303,15 @@ export const CommitLog = memo(function CommitLog({
           onChange={setBranch}
           options={[
             { value: "all", label: "Branch" },
-            ...refs.map((ref) => ({ value: ref.name, label: ref.shortName })),
+            ...refs.map((ref) => ({
+              value: ref.name,
+              label: ref.shortName,
+            })),
           ]}
           placement="below"
           size="sm"
           value={branch}
-          width={56}
+          width={62}
         />
         <Selector
           isLabelHidden
@@ -277,12 +319,15 @@ export const CommitLog = memo(function CommitLog({
           onChange={setAuthor}
           options={[
             { value: "all", label: "User" },
-            ...authors.map((name) => ({ value: name, label: name })),
+            ...authors.map((name) => ({
+              value: name,
+              label: name,
+            })),
           ]}
           placement="below"
           size="sm"
           value={author}
-          width={50}
+          width={55}
         />
         <Selector
           isLabelHidden
@@ -297,7 +342,7 @@ export const CommitLog = memo(function CommitLog({
           placement="below"
           size="sm"
           value={since}
-          width={50}
+          width={55}
         />
         <TextInput
           isLabelHidden
@@ -306,7 +351,7 @@ export const CommitLog = memo(function CommitLog({
           placeholder="Paths"
           size="sm"
           value={path}
-          width={54}
+          width={65}
         />
         <span className={tw.filterSpacer} />
         <Popover
@@ -324,7 +369,10 @@ export const CommitLog = memo(function CommitLog({
                 onChange={setAuthor}
                 options={[
                   { value: "all", label: "All authors" },
-                  ...authors.map((name) => ({ value: name, label: name })),
+                  ...authors.map((name) => ({
+                    value: name,
+                    label: name,
+                  })),
                 ]}
                 placement="below"
                 size="sm"
@@ -338,7 +386,10 @@ export const CommitLog = memo(function CommitLog({
                   { value: "all", label: "All dates" },
                   { value: "1 day ago", label: "Last day" },
                   { value: "1 week ago", label: "Last week" },
-                  { value: "1 month ago", label: "Last month" },
+                  {
+                    value: "1 month ago",
+                    label: "Last month",
+                  },
                 ]}
                 placement="below"
                 size="sm"
@@ -361,7 +412,10 @@ export const CommitLog = memo(function CommitLog({
                 options={[
                   { value: "topology", label: "Topology" },
                   { value: "date", label: "Date" },
-                  { value: "firstParent", label: "First parent" },
+                  {
+                    value: "firstParent",
+                    label: "First parent",
+                  },
                 ]}
                 placement="below"
                 size="sm"
@@ -462,15 +516,45 @@ export const CommitLog = memo(function CommitLog({
           content={
             <div className={tw.logViewOptions}>
               <CheckboxInput isDisabled label="Root Names" size="sm" value={false} />
-              <CheckboxInput label="Compact References View" onChange={setCompactReferences} size="sm" value={compactReferences} />
-              <CheckboxInput label="Tag Names" onChange={setShowTagNames} size="sm" value={showTagNames} />
-              <CheckboxInput label="Long Edges" onChange={setShowLongEdges} size="sm" value={showLongEdges} />
-              <CheckboxInput label="Commit Timestamp" onChange={setPreferCommitDate} size="sm" value={preferCommitDate} />
-              <CheckboxInput label="References on the Left" onChange={setReferencesOnLeft} size="sm" value={referencesOnLeft} />
+              <CheckboxInput
+                label="Compact References View"
+                onChange={setCompactReferences}
+                size="sm"
+                value={compactReferences}
+              />
+              <CheckboxInput
+                label="Tag Names"
+                onChange={setShowTagNames}
+                size="sm"
+                value={showTagNames}
+              />
+              <CheckboxInput
+                label="Long Edges"
+                onChange={setShowLongEdges}
+                size="sm"
+                value={showLongEdges}
+              />
+              <CheckboxInput
+                label="Commit Timestamp"
+                onChange={setPreferCommitDate}
+                size="sm"
+                value={preferCommitDate}
+              />
+              <CheckboxInput
+                label="References on the Left"
+                onChange={setReferencesOnLeft}
+                size="sm"
+                value={referencesOnLeft}
+              />
               <strong>Columns</strong>
               <CheckboxInput label="Author" onChange={setShowAuthor} size="sm" value={showAuthor} />
               <CheckboxInput label="Date" onChange={setShowDate} size="sm" value={showDate} />
-              <CheckboxInput label="Commit Hash" onChange={setShowHash} size="sm" value={showHash} />
+              <CheckboxInput
+                label="Commit Hash"
+                onChange={setShowHash}
+                size="sm"
+                value={showHash}
+              />
             </div>
           }
         >
@@ -498,13 +582,8 @@ export const CommitLog = memo(function CommitLog({
           Import Patch
         </button>
       </div>
-      <div className={tw.logHeader} role="row">
-        <span role="columnheader">Subject</span>
-        <span role="columnheader">Author</span>
-        <span role="columnheader">Date</span>
-      </div>
       <div
-        aria-colcount={3}
+        aria-colcount={4}
         aria-label="Git log"
         aria-rowcount={filtered.length}
         className={tw.commitScroller}
@@ -515,7 +594,9 @@ export const CommitLog = memo(function CommitLog({
           }
         }}
         onKeyDown={(event) => {
-          if (event.key === "ArrowRight") navigateCommit("parent");
+          if (event.key === "ArrowDown") navigateRow(1);
+          else if (event.key === "ArrowUp") navigateRow(-1);
+          else if (event.key === "ArrowRight") navigateCommit("parent");
           else if (event.key === "ArrowLeft") navigateCommit("child");
           else return;
           event.preventDefault();
@@ -524,6 +605,12 @@ export const CommitLog = memo(function CommitLog({
         role="table"
         tabIndex={0}
       >
+        <div className={tw.srOnly} role="row">
+          <span role="columnheader">Graph</span>
+          <span role="columnheader">Commit</span>
+          <span role="columnheader">Author</span>
+          <span role="columnheader">Date</span>
+        </div>
         {filtered.length === 0 ? (
           <div className={tw.logEmpty} role="status">
             {loading
@@ -535,58 +622,100 @@ export const CommitLog = memo(function CommitLog({
                   : "This repository has no commits yet."}
           </div>
         ) : (
-        <div style={{ height: filtered.length * 22, position: "relative" }}>
-          <div className={tw.graphCanvas}>
-            <CommitGraph commits={filtered} width={34} showLongEdges={showLongEdges} />
-          </div>
-          {filtered.map((commit, index) => {
-            const selected = selectedOids.includes(commit.oid);
-            const toPush = toPushOids.has(commit.oid);
-            const toPull = behind > 0 && upstreamRef !== null && commit.refs.includes(upstreamRef);
-            const references = commit.refs.filter(
-              (ref) => showTagNames || !ref.startsWith("tag: refs/tags/"),
-            );
-            const visibleReferences = compactReferences ? references.slice(0, 1) : references;
-            const referenceBadges = visibleReferences.map((ref) => (
-              <em key={ref}>
-                {ref
-                  .replace("HEAD -> refs/heads/", "")
-                  .replace("refs/remotes/", "")
-                  .replace("refs/heads/", "")
-                  .replace("tag: refs/tags/", "")}
-              </em>
-            ));
-            return (
-              <button
-                aria-rowindex={index + 1}
-                aria-selected={selected}
-                className={`${tw.commitRow} ${selected ? tw.selectedCommit : ""}`}
-                data-oid={commit.oid}
-                key={commit.oid}
-                onClick={(event) => select(event, commit)}
-                onContextMenu={(event) => onContextMenu(event, commit)}
-                role="row"
+          <div
+            style={{
+              height: filtered.length * LOG_ROW_HEIGHT + (loading || error ? LOG_ROW_HEIGHT : 0),
+              position: "relative",
+            }}
+          >
+            <div className={tw.graphCanvas}>
+              <CommitGraph commits={filtered} width={34} showLongEdges={showLongEdges} />
+            </div>
+            {filtered.map((commit, index) => {
+              const selected = selectedOids.includes(commit.oid);
+              const toPush = toPushOids.has(commit.oid);
+              const toPull =
+                behind > 0 && upstreamRef !== null && commit.refs.includes(upstreamRef);
+              const references = commit.refs.filter(
+                (ref) => showTagNames || !ref.startsWith("tag: refs/tags/"),
+              );
+              const visibleReferences = compactReferences ? references.slice(0, 1) : references;
+              const displayedTime = commitTime(
+                preferCommitDate ? commit.committedAt : commit.authoredAt,
+              );
+              const referenceBadges = visibleReferences.map((ref) => (
+                <em key={ref}>
+                  {ref
+                    .replace("HEAD -> refs/heads/", "")
+                    .replace("refs/remotes/", "")
+                    .replace("refs/heads/", "")
+                    .replace("tag: refs/tags/", "")}
+                </em>
+              ));
+              return (
+                <button
+                  aria-label={`${commit.author} ${displayedTime} ${commit.subject} ${commit.oid.slice(0, 7)}`}
+                  aria-rowindex={index + 1}
+                  aria-selected={selected}
+                  className={`${tw.commitRow} ${selected ? tw.selectedCommit : ""}`}
+                  data-oid={commit.oid}
+                  key={commit.oid}
+                  onClick={(event) => select(event, commit)}
+                  onContextMenu={(event) => onContextMenu(event, commit)}
+                  role="row"
+                  style={{
+                    gridTemplateColumns: rowColumns,
+                    transform: `translateY(${index * LOG_ROW_HEIGHT}px)`,
+                  }}
+                >
+                  <span
+                    aria-hidden="true"
+                    className="relative z-[3] justify-end gap-0.5 pr-1 text-[9px] font-semibold"
+                  >
+                    {toPush && (
+                      <em
+                        className="rounded bg-success/15 px-1 text-success"
+                        title="Local-only commit to push"
+                      >
+                        ↑ push
+                      </em>
+                    )}
+                    {toPull && (
+                      <em
+                        className="rounded bg-accent/15 px-1 text-accent"
+                        title="Remote-only history to pull"
+                      >
+                        ↓ pull
+                      </em>
+                    )}
+                  </span>
+                  <span aria-label={commit.subject} className={tw.commitSubject} role="cell">
+                    {referencesOnLeft && referenceBadges}
+                    <span className={tw.ellipsis}>{commit.subject}</span>
+                    {!referencesOnLeft && referenceBadges}
+                    {showHash && <code>{commit.oid.slice(0, 7)}</code>}
+                  </span>
+                  <strong className={tw.ellipsis} hidden={!showAuthor} role="cell">
+                    {commit.author}
+                  </strong>
+                  <span hidden={!showDate} role="cell">
+                    {displayedTime}
+                  </span>
+                </button>
+              );
+            })}
+            {(loading || error) && (
+              <div
+                className={tw.logLoadMore}
+                role={error ? "alert" : "status"}
                 style={{
-                  gridTemplateColumns: rowColumns,
-                  transform: `translateY(${index * 22}px)`,
+                  transform: `translateY(${filtered.length * LOG_ROW_HEIGHT}px)`,
                 }}
               >
-                <span aria-hidden="true" className="relative z-[3] justify-end gap-0.5 pr-1 text-[9px] font-semibold">
-                  {toPush && <em className="rounded bg-success/15 px-1 text-success" title="Local-only commit to push">↑ push</em>}
-                  {toPull && <em className="rounded bg-accent/15 px-1 text-accent" title="Remote-only history to pull">↓ pull</em>}
-                </span>
-                <span aria-label={commit.subject} className={tw.commitSubject} role="cell">
-                  {referencesOnLeft && referenceBadges}
-                  <span className={tw.ellipsis}>{commit.subject}</span>
-                  {!referencesOnLeft && referenceBadges}
-                  {showHash && <code>{commit.oid.slice(0, 7)}</code>}
-                </span>
-                <strong className={tw.ellipsis} hidden={!showAuthor} role="cell">{commit.author}</strong>
-                <span hidden={!showDate} role="cell">{commitTime(preferCommitDate ? commit.committedAt : commit.authoredAt)}</span>
-              </button>
-            );
-          })}
-        </div>
+                {error ?? "Loading commits…"}
+              </div>
+            )}
+          </div>
         )}
       </div>
       <div className={tw.logFooter}>

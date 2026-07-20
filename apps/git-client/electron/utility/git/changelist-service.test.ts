@@ -15,8 +15,8 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import type { ChangelistCommitOptions } from "../../../src/generated";
 import type { RepositoryId } from "../../../src/shared/contracts/git-utility";
+import type { ChangelistCommitOptions } from "../../../src/shared/contracts/model";
 import {
   ChangelistService,
   MAX_CHANGELIST_MANIFEST_BYTES,
@@ -95,9 +95,7 @@ async function pathExists(path: string): Promise<boolean> {
 async function createFixture(
   runner: PatchProcessRunnerLike = new PatchProcessRunner(),
 ): Promise<Fixture> {
-  const temporaryDirectory = await mkdtemp(
-    join(tmpdir(), "git-client-changelist-"),
-  );
+  const temporaryDirectory = await mkdtemp(join(tmpdir(), "git-client-changelist-"));
   temporaryDirectories.push(temporaryDirectory);
   const root = join(temporaryDirectory, "repository");
   const storageRoot = join(temporaryDirectory, "app-data");
@@ -127,11 +125,7 @@ async function writeBase(root: string): Promise<void> {
 }
 
 function manifestPath(fixture: Fixture): string {
-  return join(
-    fixture.storageRoot,
-    "changelists",
-    `${fixture.repositoryId}.json`,
-  );
+  return join(fixture.storageRoot, "changelists", `${fixture.repositoryId}.json`);
 }
 
 async function indexBytes(root: string): Promise<Buffer> {
@@ -189,24 +183,20 @@ describe("ChangelistService metadata", () => {
     const fixture = await createFixture();
 
     await expect(fixture.service.list(fixture.repositoryId)).resolves.toEqual([]);
-    const first = await fixture.service.save(
-      fixture.repositoryId,
-      null,
-      "  Feature work  ",
-      ["z.txt", "a.txt", "z.txt"],
-    );
+    const first = await fixture.service.save(fixture.repositoryId, null, "  Feature work  ", [
+      "z.txt",
+      "a.txt",
+      "z.txt",
+    ]);
     expect(first).toMatchObject({
       repositoryId: fixture.repositoryId,
       name: "Feature work",
       paths: ["a.txt", "z.txt"],
     });
 
-    const renamed = await fixture.service.save(
-      fixture.repositoryId,
-      first.id,
-      "Renamed",
-      ["a.txt"],
-    );
+    const renamed = await fixture.service.save(fixture.repositoryId, first.id, "Renamed", [
+      "a.txt",
+    ]);
     expect(renamed).toMatchObject({
       id: first.id,
       name: "Renamed",
@@ -216,41 +206,24 @@ describe("ChangelistService metadata", () => {
     expect(renamed.updatedAtMs).toBeGreaterThanOrEqual(first.updatedAtMs);
 
     await fixture.service.delete(fixture.repositoryId, randomUUID());
-    await expect(fixture.service.list(fixture.repositoryId)).resolves.toEqual([
-      renamed,
-    ]);
+    await expect(fixture.service.list(fixture.repositoryId)).resolves.toEqual([renamed]);
     await fixture.service.delete(fixture.repositoryId, first.id);
     await expect(fixture.service.list(fixture.repositoryId)).resolves.toEqual([]);
   });
 
   it("uses whole-path replacement for add/remove/move semantics and preserves duplicate assignment behavior", async () => {
     const fixture = await createFixture();
-    const left = await fixture.service.save(
-      fixture.repositoryId,
-      null,
-      "Left",
-      ["a.txt", "move.txt"],
-    );
-    const right = await fixture.service.save(
-      fixture.repositoryId,
-      null,
-      "Right",
-      [],
-    );
-
-    await fixture.service.save(fixture.repositoryId, left.id, left.name, [
+    const left = await fixture.service.save(fixture.repositoryId, null, "Left", [
       "a.txt",
-    ]);
-    await fixture.service.save(fixture.repositoryId, right.id, right.name, [
       "move.txt",
-      "new.txt",
     ]);
-    const duplicate = await fixture.service.save(
-      fixture.repositoryId,
-      null,
-      "Duplicate",
-      ["move.txt"],
-    );
+    const right = await fixture.service.save(fixture.repositoryId, null, "Right", []);
+
+    await fixture.service.save(fixture.repositoryId, left.id, left.name, ["a.txt"]);
+    await fixture.service.save(fixture.repositoryId, right.id, right.name, ["move.txt", "new.txt"]);
+    const duplicate = await fixture.service.save(fixture.repositoryId, null, "Duplicate", [
+      "move.txt",
+    ]);
 
     await expect(fixture.service.list(fixture.repositoryId)).resolves.toMatchObject([
       { id: left.id, paths: ["a.txt"] },
@@ -263,12 +236,7 @@ describe("ChangelistService metadata", () => {
     const fixture = await createFixture();
     const saved = await Promise.all(
       Array.from({ length: 40 }, (_, index) =>
-        fixture.service.save(
-          fixture.repositoryId,
-          null,
-          `Change ${index}`,
-          [`file-${index}.txt`],
-        ),
+        fixture.service.save(fixture.repositoryId, null, `Change ${index}`, [`file-${index}.txt`]),
       ),
     );
 
@@ -295,10 +263,7 @@ describe("ChangelistService metadata", () => {
 
   it("fails closed for checksum damage and valid-checksum invariant damage", async () => {
     const fixture = await createFixture();
-    await fixture.service.save(fixture.repositoryId, null, "Original", [
-      "a.txt",
-      "b.txt",
-    ]);
+    await fixture.service.save(fixture.repositoryId, null, "Original", ["a.txt", "b.txt"]);
     const path = manifestPath(fixture);
     const envelope = JSON.parse(await readFile(path, "utf8")) as {
       version: 1;
@@ -313,18 +278,14 @@ describe("ChangelistService metadata", () => {
 
     envelope.changelists[0]!.name = "Tampered";
     await writeFile(path, JSON.stringify(envelope), "utf8");
-    await expect(fixture.service.list(fixture.repositoryId)).rejects.toThrow(
-      /checksum mismatch/u,
-    );
+    await expect(fixture.service.list(fixture.repositoryId)).rejects.toThrow(/checksum mismatch/u);
 
     const restored = JSON.parse(original.toString("utf8")) as typeof envelope;
     restored.changelists[0]!.paths = ["b.txt", "a.txt"];
     const { checksum: _oldChecksum, ...payload } = restored;
     restored.checksum = checksumPayload(payload);
     await writeFile(path, JSON.stringify(restored), "utf8");
-    await expect(fixture.service.list(fixture.repositoryId)).rejects.toThrow(
-      /sorted and unique/u,
-    );
+    await expect(fixture.service.list(fixture.repositoryId)).rejects.toThrow(/sorted and unique/u);
   });
 
   it("rejects oversized and symlinked manifests and symlink-traversing storage roots", async () => {
@@ -334,9 +295,7 @@ describe("ChangelistService metadata", () => {
     const original = `${path}.original`;
     await rename(path, original);
     await symlink(original, path);
-    await expect(fixture.service.list(fixture.repositoryId)).rejects.toThrow(
-      /symbolic link/u,
-    );
+    await expect(fixture.service.list(fixture.repositoryId)).rejects.toThrow(/symbolic link/u);
 
     await rm(path);
     await writeFile(path, Buffer.alloc(MAX_CHANGELIST_MANIFEST_BYTES + 1));
@@ -366,13 +325,7 @@ describe("ChangelistService metadata", () => {
     const cancellation = new AbortController();
     cancellation.abort("requested");
     await expect(
-      fixture.service.save(
-        fixture.repositoryId,
-        null,
-        "Cancelled",
-        [],
-        cancellation.signal,
-      ),
+      fixture.service.save(fixture.repositoryId, null, "Cancelled", [], cancellation.signal),
     ).rejects.toThrow(/cancelled/u);
     expect(await pathExists(manifestPath(fixture))).toBe(false);
   });
@@ -390,36 +343,25 @@ describe("ChangelistService selected commits", () => {
     await writeFile(join(fixture.root, "유니코드.txt"), "unicode worktree\n", "utf8");
     const shellPath = "new;touch injected.txt";
     await writeFile(join(fixture.root, shellPath), Buffer.from([0x00, 0x41, 0xff]));
-    const unrelatedIndexBefore = git(
-      fixture.root,
-      "ls-files",
-      "--stage",
-      "--",
-      "staged.txt",
-    );
-    const changelist = await fixture.service.save(
-      fixture.repositoryId,
-      null,
-      "Selected",
-      ["selected.txt", shellPath, "유니코드.txt"],
-    );
+    const unrelatedIndexBefore = git(fixture.root, "ls-files", "--stage", "--", "staged.txt");
+    const changelist = await fixture.service.save(fixture.repositoryId, null, "Selected", [
+      "selected.txt",
+      shellPath,
+      "유니코드.txt",
+    ]);
 
-    const result = await fixture.service.commit(
-      fixture.repositoryId,
-      changelist.id,
-      { ...DEFAULT_OPTIONS, message: "Selected files", signOff: true },
-    );
+    const result = await fixture.service.commit(fixture.repositoryId, changelist.id, {
+      ...DEFAULT_OPTIONS,
+      message: "Selected files",
+      signOff: true,
+    });
 
     expect(result).toEqual({
       changelistId: changelist.id,
       commitOid: git(fixture.root, "rev-parse", "HEAD").trim(),
     });
-    expect(git(fixture.root, "show", "HEAD:selected.txt")).toBe(
-      "selected worktree\n",
-    );
-    expect(git(fixture.root, "show", "HEAD:유니코드.txt")).toBe(
-      "unicode worktree\n",
-    );
+    expect(git(fixture.root, "show", "HEAD:selected.txt")).toBe("selected worktree\n");
+    expect(git(fixture.root, "show", "HEAD:유니코드.txt")).toBe("unicode worktree\n");
     expect(
       Buffer.from(
         spawnSync("git", ["show", `HEAD:${shellPath}`], {
@@ -430,9 +372,7 @@ describe("ChangelistService selected commits", () => {
     ).toEqual(Buffer.from([0x00, 0x41, 0xff]));
     expect(git(fixture.root, "show", "HEAD:staged.txt")).toBe("base staged\n");
     expect(git(fixture.root, "show", ":staged.txt")).toBe("unrelated staged\n");
-    expect(
-      git(fixture.root, "ls-files", "--stage", "--", "staged.txt"),
-    ).toBe(unrelatedIndexBefore);
+    expect(git(fixture.root, "ls-files", "--stage", "--", "staged.txt")).toBe(unrelatedIndexBefore);
     expect(git(fixture.root, "status", "--short")).toBe("M  staged.txt\n");
     expect(git(fixture.root, "log", "-1", "--pretty=%B")).toContain(
       "Signed-off-by: Git Client Test <git-client@example.invalid>",
@@ -447,12 +387,9 @@ describe("ChangelistService selected commits", () => {
     await writeFile(join(fixture.root, "staged.txt"), "staged\n", "utf8");
     git(fixture.root, "add", "--", "staged.txt");
     await writeFile(join(fixture.root, "new.txt"), "new\n", "utf8");
-    const changelist = await fixture.service.save(
-      fixture.repositoryId,
-      null,
-      "Rejected",
-      ["new.txt"],
-    );
+    const changelist = await fixture.service.save(fixture.repositoryId, null, "Rejected", [
+      "new.txt",
+    ]);
     const headBefore = git(fixture.root, "rev-parse", "HEAD");
     const indexBefore = await indexBytes(fixture.root);
     const hook = join(fixture.root, ".git", "hooks", "pre-commit");
@@ -465,9 +402,7 @@ describe("ChangelistService selected commits", () => {
 
     expect(git(fixture.root, "rev-parse", "HEAD")).toBe(headBefore);
     await expect(indexBytes(fixture.root)).resolves.toEqual(indexBefore);
-    expect(git(fixture.root, "status", "--short")).toBe(
-      "M  staged.txt\n?? new.txt\n",
-    );
+    expect(git(fixture.root, "status", "--short")).toBe("M  staged.txt\n?? new.txt\n");
     await expect(fixture.service.list(fixture.repositoryId)).resolves.toMatchObject([
       { id: changelist.id, paths: ["new.txt"] },
     ]);
@@ -490,11 +425,7 @@ describe("ChangelistService selected commits", () => {
       const headBefore = git(fixture.root, "rev-parse", "HEAD");
 
       await expect(
-        fixture.service.commit(
-          fixture.repositoryId,
-          changelist.id,
-          DEFAULT_OPTIONS,
-        ),
+        fixture.service.commit(fixture.repositoryId, changelist.id, DEFAULT_OPTIONS),
       ).rejects.toMatchObject({
         code: terminal === "outputLimit" ? "outputLimit" : "commandFailed",
       });
@@ -510,12 +441,9 @@ describe("ChangelistService selected commits", () => {
     const fixture = await createFixture();
     await writeBase(fixture.root);
     await writeFile(join(fixture.root, "selected.txt"), "changed\n", "utf8");
-    const changelist = await fixture.service.save(
-      fixture.repositoryId,
-      null,
-      "Unsafe repository",
-      ["selected.txt"],
-    );
+    const changelist = await fixture.service.save(fixture.repositoryId, null, "Unsafe repository", [
+      "selected.txt",
+    ]);
     const index = join(fixture.root, ".git", "index");
     const realIndex = join(fixture.root, ".git", "index.real");
     await rename(index, realIndex);
@@ -539,12 +467,9 @@ describe("ChangelistService selected commits", () => {
   it("leaves HEAD, index, and metadata untouched for a clean selected path", async () => {
     const fixture = await createFixture();
     await writeBase(fixture.root);
-    const changelist = await fixture.service.save(
-      fixture.repositoryId,
-      null,
-      "No changes",
-      ["selected.txt"],
-    );
+    const changelist = await fixture.service.save(fixture.repositoryId, null, "No changes", [
+      "selected.txt",
+    ]);
     const headBefore = git(fixture.root, "rev-parse", "HEAD");
     const indexBefore = await indexBytes(fixture.root);
     const manifestBefore = await readFile(manifestPath(fixture));
@@ -560,12 +485,7 @@ describe("ChangelistService selected commits", () => {
 
   it("validates ids, messages, options, and empty changelists before Git mutation", async () => {
     const fixture = await createFixture();
-    const empty = await fixture.service.save(
-      fixture.repositoryId,
-      null,
-      "Empty",
-      [],
-    );
+    const empty = await fixture.service.save(fixture.repositoryId, null, "Empty", []);
     await expect(
       fixture.service.commit(fixture.repositoryId, empty.id, DEFAULT_OPTIONS),
     ).rejects.toThrow(/no files/u);

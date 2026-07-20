@@ -1,10 +1,10 @@
-import { Button } from "@astryxdesign/core/Button";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
-import { EmptyState } from "@astryxdesign/core/EmptyState";
-import { List, ListItem } from "@astryxdesign/core/List";
 import type { SavedMacro } from "../domain/macros";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
+import { Button } from "./ui";
+import { Dialog, DialogHeader } from "./ui";
+import { EmptyState } from "./ui";
+import { List, ListItem } from "./ui";
 
 export function SavedMacrosDialog({
   macros,
@@ -27,10 +27,17 @@ export function SavedMacrosDialog({
       width={520}
     >
       <section className={tw.savedMacrosDialog}>
-        <DialogHeader hasDivider onOpenChange={(open) => !open && onClose()} title="Play Saved Macros" />
+        <DialogHeader
+          hasDivider
+          onOpenChange={(open) => !open && onClose()}
+          title="Play Saved Macros"
+        />
         <main>
           {macros.length === 0 ? (
-            <EmptyState description="Record commands with Edit > Macros > Start Macro Recording." title="No saved macros" />
+            <EmptyState
+              description="Record commands with Edit > Macros > Start Macro Recording."
+              title="No saved macros"
+            />
           ) : (
             <List aria-label="Saved macros" density="compact">
               {macros.map((macro) => (
@@ -57,7 +64,9 @@ export function SavedMacrosDialog({
             </List>
           )}
         </main>
-        <footer><Button label="Close" onClick={onClose} variant="primary" /></footer>
+        <footer>
+          <Button label="Close" onClick={onClose} variant="primary" />
+        </footer>
       </section>
     </Dialog>
   );

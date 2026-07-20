@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { GitOperation, RebasePlanEntry } from "../../generated";
+import type { GitOperation, RebasePlanEntry } from "../../shared/contracts/model";
 import {
   GitOperationSchema,
   MAX_GIT_OPERATION_PATCH_BYTES,

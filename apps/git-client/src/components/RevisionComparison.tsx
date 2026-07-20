@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { DiffPreferences } from "../domain/changeReview";
 import { revisionDiffEntries } from "../domain/changeReview";
-import type { FileContent, FileSource } from "../generated";
+import type { FileContent, FileSource } from "../shared/contracts/model";
+import { tw } from "../styles/tailwind";
 import { DiffViewer } from "./DiffViewer";
 import { VerticalResizeHandle } from "./VerticalResizeHandle";
-import { tw } from "../styles/tailwind";
 
 export function RevisionComparison({
   from,
@@ -30,7 +30,11 @@ export function RevisionComparison({
   const entries = useMemo(() => revisionDiffEntries(patch), [patch]);
   const error = patch.startsWith("Unable to compare revisions:") ? patch : null;
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
-  const [content, setContent] = useState<{ readonly before: FileContent | null; readonly after: FileContent | null; readonly loading: boolean }>({ before: null, after: null, loading: false });
+  const [content, setContent] = useState<{
+    readonly before: FileContent | null;
+    readonly after: FileContent | null;
+    readonly loading: boolean;
+  }>({ before: null, after: null, loading: false });
   const generation = useRef(0);
   const selected = entries.find((entry) => entry.file.path === selectedPath) ?? entries[0] ?? null;
   const selectedIndex = selected ? entries.indexOf(selected) : -1;
@@ -39,7 +43,7 @@ export function RevisionComparison({
     setSelectedPath((current) =>
       current && entries.some((entry) => entry.file.path === current)
         ? current
-        : entries[0]?.file.path ?? null,
+        : (entries[0]?.file.path ?? null),
     );
   }, [entries]);
 
@@ -59,7 +63,8 @@ export function RevisionComparison({
         if (generation.current === current) setContent({ before, after, loading: false });
       },
       () => {
-        if (generation.current === current) setContent({ before: null, after: null, loading: false });
+        if (generation.current === current)
+          setContent({ before: null, after: null, loading: false });
       },
     );
     return () => {
@@ -113,7 +118,9 @@ export function RevisionComparison({
             file={selected?.file ?? null}
             loading={content.loading}
             mode="readOnly"
-            onNextFile={selectedIndex >= 0 && selectedIndex < entries.length - 1 ? () => move(1) : undefined}
+            onNextFile={
+              selectedIndex >= 0 && selectedIndex < entries.length - 1 ? () => move(1) : undefined
+            }
             onPreferencesChange={onPreferencesChange}
             onPreviousFile={selectedIndex > 0 ? () => move(-1) : undefined}
             patch={selected?.patch ?? ""}

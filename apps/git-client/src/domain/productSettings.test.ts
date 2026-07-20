@@ -7,16 +7,36 @@ describe("product settings", () => {
   });
 
   it("accepts only supported compact, zoom, and notification values", () => {
-    expect(parseProductSettings({ compactMode: true, zoom: 125, showNotifications: false })).toEqual({
+    expect(
+      parseProductSettings({ compactMode: true, zoom: 125, showNotifications: false }),
+    ).toEqual({
+      ...DEFAULT_PRODUCT_SETTINGS,
       compactMode: true,
-      ideFontSize: 13,
       zoom: 125,
       showNotifications: false,
-      showShortcutConflictWarning: true,
-      keymapPreset: "macOS",
-      keymapOverrides: {},
     });
-    expect(parseProductSettings({ compactMode: "yes", zoom: 110, showNotifications: 1 })).toEqual(DEFAULT_PRODUCT_SETTINGS);
+    expect(parseProductSettings({ compactMode: "yes", zoom: 110, showNotifications: 1 })).toEqual(
+      DEFAULT_PRODUCT_SETTINGS,
+    );
+  });
+
+  it("restores welcome appearance, language, and region values", () => {
+    expect(
+      parseProductSettings({
+        editorColorScheme: "dark",
+        language: "English",
+        region: "asiaExceptChinaMainland",
+      }),
+    ).toMatchObject({
+      editorColorScheme: "dark",
+      language: "English",
+      region: "asiaExceptChinaMainland",
+    });
+  });
+
+  it("defaults new settings to Asia while preserving an explicitly saved region", () => {
+    expect(parseProductSettings({}).region).toBe("asiaExceptChinaMainland");
+    expect(parseProductSettings({ region: "notSpecified" }).region).toBe("notSpecified");
   });
 
   it("accepts only bounded IDE font sizes", () => {
@@ -26,13 +46,15 @@ describe("product settings", () => {
   });
 
   it("keeps only bounded shortcut overrides", () => {
-    expect(parseProductSettings({
-      keymapOverrides: {
-        "view.project": "CmdOrCtrl+1",
-        "view.notifications": null,
-        tooLong: "x".repeat(129),
-      },
-    }).keymapOverrides).toEqual({
+    expect(
+      parseProductSettings({
+        keymapOverrides: {
+          "view.project": "CmdOrCtrl+1",
+          "view.notifications": null,
+          tooLong: "x".repeat(129),
+        },
+      }).keymapOverrides,
+    ).toEqual({
       "view.project": "CmdOrCtrl+1",
       "view.notifications": null,
     });

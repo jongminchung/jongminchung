@@ -1,11 +1,11 @@
-import { Button } from "@astryxdesign/core/Button";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
-import { EmptyState } from "@astryxdesign/core/EmptyState";
-import { List, ListItem } from "@astryxdesign/core/List";
 import { useEffect, useState } from "react";
 import type { DiagnosticSnapshot } from "../shared/contracts/ipc";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
+import { Button } from "./ui";
+import { Dialog, DialogHeader } from "./ui";
+import { EmptyState } from "./ui";
+import { List, ListItem } from "./ui";
 
 function bytesLabel(bytes: number): string {
   if (bytes < 1_048_576) return `${Math.round(bytes / 1_024)} KiB`;
@@ -90,9 +90,7 @@ export function ActivityMonitorDialog({
           )}
         </main>
         <footer>
-          <span>
-            Uptime {snapshot ? Math.floor(snapshot.uptimeSeconds) : 0}s
-          </span>
+          <span>Uptime {snapshot ? Math.floor(snapshot.uptimeSeconds) : 0}s</span>
           <Button label="Close" onClick={onClose} variant="primary" />
         </footer>
       </section>

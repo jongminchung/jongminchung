@@ -1,16 +1,22 @@
-import { CheckboxInput } from "@astryxdesign/core/CheckboxInput";
-import { Popover } from "@astryxdesign/core/Popover";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import type { DiffPreferences } from "../domain/changeReview";
 import type { Commit, FileChange } from "../domain/types";
-import type { CommitSignature, FileContent, FilePreview, FileSource, SubmoduleDiff } from "../generated";
-import { DiffViewer } from "./DiffViewer";
-import { useDismissLayer } from "./CommandProvider";
-import { Icon } from "./Icon";
-import { VerticalResizeHandle } from "./VerticalResizeHandle";
+import type {
+  CommitSignature,
+  FileContent,
+  FilePreview,
+  FileSource,
+  SubmoduleDiff,
+} from "../shared/contracts/model";
 import { tw } from "../styles/tailwind";
+import { useDismissLayer } from "./CommandProvider";
+import { DiffViewer } from "./DiffViewer";
+import { Icon } from "./Icon";
+import { CheckboxInput } from "./ui";
+import { Popover } from "./ui";
+import { VerticalResizeHandle } from "./VerticalResizeHandle";
 
 function statusLetter(status: FileChange["status"]): string {
   return {
@@ -51,7 +57,10 @@ function ReviewAllRow({
   readonly onPreferencesChange: (preferences: DiffPreferences) => void;
 }) {
   const [patch, setPatch] = useState("");
-  const [content, setContent] = useState<{ readonly before: FileContent | null; readonly after: FileContent | null }>({ before: null, after: null });
+  const [content, setContent] = useState<{
+    readonly before: FileContent | null;
+    readonly after: FileContent | null;
+  }>({ before: null, after: null });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -90,7 +99,9 @@ function ReviewAllRow({
         </span>
         <strong>{file.path}</strong>
         <span />
-        <small>+{file.additions ?? 0} −{file.deletions ?? 0}</small>
+        <small>
+          +{file.additions ?? 0} −{file.deletions ?? 0}
+        </small>
       </header>
       {loading ? (
         <div className={tw.emptyState}>Loading diff…</div>
@@ -148,9 +159,21 @@ function ReviewAll({
               data-index={item.index}
               key={file.path}
               ref={virtualizer.measureElement}
-              style={{ position: "absolute", transform: `translateY(${item.start}px)`, width: "100%" }}
+              style={{
+                position: "absolute",
+                transform: `translateY(${item.start}px)`,
+                width: "100%",
+              }}
             >
-              <ReviewAllRow commit={commit} file={file} loadDiff={loadDiff} onPreferencesChange={onPreferencesChange} parentRevision={parentRevision} preferences={preferences} readFile={readFile} />
+              <ReviewAllRow
+                commit={commit}
+                file={file}
+                loadDiff={loadDiff}
+                onPreferencesChange={onPreferencesChange}
+                parentRevision={parentRevision}
+                preferences={preferences}
+                readFile={readFile}
+              />
             </div>
           );
         })}
@@ -227,12 +250,17 @@ export const DetailsPane = memo(function DetailsPane({
   };
 
   useEffect(() => setReviewAll(false), [commit?.oid]);
-  useDismissLayer(useMemo(() => ({
-    id: "history-focused-diff",
-    priority: 70,
-    active: focused,
-    dismiss: () => setFocused(false),
-  }), [focused]));
+  useDismissLayer(
+    useMemo(
+      () => ({
+        id: "history-focused-diff",
+        priority: 70,
+        active: focused,
+        dismiss: () => setFocused(false),
+      }),
+      [focused],
+    ),
+  );
 
   return (
     <aside
@@ -284,9 +312,7 @@ export const DetailsPane = memo(function DetailsPane({
               />
               <CheckboxInput
                 label="Word Wrap"
-                onChange={(wordWrap) =>
-                  onPreferencesChange({ ...preferences, wordWrap })
-                }
+                onChange={(wordWrap) => onPreferencesChange({ ...preferences, wordWrap })}
                 size="sm"
                 value={preferences.wordWrap}
               />
@@ -302,20 +328,10 @@ export const DetailsPane = memo(function DetailsPane({
           </button>
         </Popover>
         <span className={tw.filterSpacer} />
-        <button
-          aria-label="Expand All"
-          className={tw.iconButton}
-          disabled
-          title="Expand All"
-        >
+        <button aria-label="Expand All" className={tw.iconButton} disabled title="Expand All">
           <Icon name="plus" size={13} />
         </button>
-        <button
-          aria-label="Collapse All"
-          className={tw.iconButton}
-          disabled
-          title="Collapse All"
-        >
+        <button aria-label="Collapse All" className={tw.iconButton} disabled title="Collapse All">
           <Icon name="minus" size={13} />
         </button>
       </div>
@@ -325,7 +341,15 @@ export const DetailsPane = memo(function DetailsPane({
           <div>Commit details</div>
         </div>
       ) : reviewAll ? (
-        <ReviewAll commit={commit} files={files} loadDiff={onLoadDiff} onPreferencesChange={onPreferencesChange} parentRevision={parentRevision ?? "4b825dc642cb6eb9a060e54bf8d69288fbee4904"} preferences={preferences} readFile={onReadFile} />
+        <ReviewAll
+          commit={commit}
+          files={files}
+          loadDiff={onLoadDiff}
+          onPreferencesChange={onPreferencesChange}
+          parentRevision={parentRevision ?? "4b825dc642cb6eb9a060e54bf8d69288fbee4904"}
+          preferences={preferences}
+          readFile={onReadFile}
+        />
       ) : (
         <div className={tw.revisionSummary}>
           <nav aria-label="Changed files" className={tw.revisionFileList}>
@@ -350,9 +374,15 @@ export const DetailsPane = memo(function DetailsPane({
                   </span>
                   <span className={`${tw.ellipsis} grid`} title={file.path}>
                     <strong className="truncate">{file.path.split("/").at(-1)}</strong>
-                    {file.path.includes("/") && <small className="truncate">{file.path.slice(0, file.path.lastIndexOf("/"))}</small>}
+                    {file.path.includes("/") && (
+                      <small className="truncate">
+                        {file.path.slice(0, file.path.lastIndexOf("/"))}
+                      </small>
+                    )}
                   </span>
-                  <small>+{file.additions ?? 0} −{file.deletions ?? 0}</small>
+                  <small>
+                    +{file.additions ?? 0} −{file.deletions ?? 0}
+                  </small>
                 </button>
               ))
             )}
@@ -360,8 +390,12 @@ export const DetailsPane = memo(function DetailsPane({
           <section className={tw.revisionCommitDetails}>
             <header>
               <strong>Commit details</strong>
-              <button onClick={onPrevious} title="Previous commit">↑</button>
-              <button onClick={onNext} title="Next commit">↓</button>
+              <button onClick={onPrevious} title="Previous commit">
+                ↑
+              </button>
+              <button onClick={onNext} title="Next commit">
+                ↓
+              </button>
             </header>
             <strong>{commit.subject}</strong>
             <span>{commit.author}</span>
@@ -374,18 +408,34 @@ export const DetailsPane = memo(function DetailsPane({
                 value={parentRevision ?? commit.parents[0]}
               >
                 {commit.parents.map((parent, index) => (
-                  <option key={parent} value={parent}>Parent {index + 1} · {parent.slice(0, 8)}</option>
+                  <option key={parent} value={parent}>
+                    Parent {index + 1} · {parent.slice(0, 8)}
+                  </option>
                 ))}
               </select>
             )}
             {signature && (
-              <span className={signature.status === "G" ? tw.signatureGood : signature.status === "N" ? tw.muted : tw.signatureBad}>
-                {signature.status === "G" ? "Verified signature" : signature.status === "N" ? "Unsigned" : `Signature ${signature.status}`}
+              <span
+                className={
+                  signature.status === "G"
+                    ? tw.signatureGood
+                    : signature.status === "N"
+                      ? tw.muted
+                      : tw.signatureBad
+                }
+              >
+                {signature.status === "G"
+                  ? "Verified signature"
+                  : signature.status === "N"
+                    ? "Unsigned"
+                    : `Signature ${signature.status}`}
               </span>
             )}
             <footer>
               <button onClick={onOpenTree}>Browse Repository</button>
-              {selectedFile && <button onClick={() => onInspectFile(selectedFile, "file")}>View File</button>}
+              {selectedFile && (
+                <button onClick={() => onInspectFile(selectedFile, "file")}>View File</button>
+              )}
             </footer>
           </section>
           {focused && selectedFile && (
@@ -399,13 +449,21 @@ export const DetailsPane = memo(function DetailsPane({
               focused
               loading={diffLoading}
               mode="readOnly"
-              onNextFile={selectedIndex >= 0 && selectedIndex < files.length - 1 ? () => moveFile(1) : undefined}
+              onNextFile={
+                selectedIndex >= 0 && selectedIndex < files.length - 1
+                  ? () => moveFile(1)
+                  : undefined
+              }
               onPreferencesChange={onPreferencesChange}
               onPreviousFile={selectedIndex > 0 ? () => moveFile(-1) : undefined}
               onToggleFocus={() => setFocused(false)}
               patch={patch}
               preferences={preferences}
-              sourceLabel={parentRevision ? `${parentRevision.slice(0, 8)} → ${commit.oid.slice(0, 8)}` : "Revision"}
+              sourceLabel={
+                parentRevision
+                  ? `${parentRevision.slice(0, 8)} → ${commit.oid.slice(0, 8)}`
+                  : "Revision"
+              }
             />
           )}
         </div>

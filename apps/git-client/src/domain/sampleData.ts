@@ -1,4 +1,4 @@
-import type { FileSource, RepositorySnapshot, ShelfEntry } from "../generated";
+import type { FileSource, RepositorySnapshot, ShelfEntry } from "../shared/contracts/model";
 import type { Commit, FileChange, Ref, RepositoryView, StashEntry, StatusModel } from "./types";
 
 const SUBJECTS = [
@@ -6,7 +6,7 @@ const SUBJECTS = [
   "fix(graph): preserve lanes across page boundaries",
   "refactor: isolate credential redaction",
   "test: cover rebase conflict recovery",
-  "chore(deps): update tauri to 2.11.5",
+  "chore(deps): update electron to 43.1.1",
   "feat(diff): support line-level staging",
   "fix: debounce duplicate status refreshes",
   "docs: record destructive operation safeguards",
@@ -196,7 +196,12 @@ export const sampleSnapshot: RepositorySnapshot = {
   isDetached: false,
   hasCommits: true,
   operation: null,
-  gitVersion: { major: 2, minor: 55, patch: 0, display: "git version 2.55.0" },
+  gitVersion: {
+    major: 2,
+    minor: 55,
+    patch: 0,
+    display: "git version 2.55.0",
+  },
 };
 
 export const sampleRepository: RepositoryView = {
@@ -296,7 +301,11 @@ export const sampleShelves: readonly ShelfEntry[] = [
     message: "WIP: merge editor result model",
     createdAtMs: Date.now() - 3_600_000,
     files: [
-      { path: "src/components/MergeEditor.tsx", checksum: "", untracked: false },
+      {
+        path: "src/components/MergeEditor.tsx",
+        checksum: "",
+        untracked: false,
+      },
       { path: "src/domain/conflicts.ts", checksum: "", untracked: false },
       { path: "notes/merge-cases.md", checksum: "a5e", untracked: true },
     ],

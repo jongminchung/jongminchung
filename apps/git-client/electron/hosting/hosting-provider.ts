@@ -561,10 +561,7 @@ export function parseHostingResponse(
       const groupItems = array(groups.nodes, "namespace groups").flatMap((item) => {
         if (item === null) return [];
         const group = record(item, "namespace group");
-        const permissions = record(
-          group.userPermissions,
-          "namespace group permissions",
-        );
+        const permissions = record(group.userPermissions, "namespace group permissions");
         if (!optionalBoolean(permissions, "createProjects")) return [];
         return [
           Object.freeze({
@@ -596,9 +593,10 @@ export function parseHostingResponse(
       const profile = record(data.profile, "share repository profile");
       const repositories = array(data.repositories, "owned share repositories");
       const planValue = profile.plan;
-      const plan = planValue === null || planValue === undefined
-        ? null
-        : record(planValue, "GitHub user plan");
+      const plan =
+        planValue === null || planValue === undefined
+          ? null
+          : record(planValue, "GitHub user plan");
       const ownedPrivate = optionalNumber(profile, "owned_private_repos");
       const privateLimit = plan === null ? null : optionalNumber(plan, "private_repos");
       return Object.freeze({

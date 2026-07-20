@@ -76,18 +76,50 @@ export function inspectText(
   for (const [index, content] of text.split("\n").entries()) {
     const line = index + 1;
     if (enabled.has("conflictMarkers") && /^(?:<{7}|={7}|>{7})(?:\s|$)/u.test(content)) {
-      issues.push(issue("conflictMarkers", "error", path, line, 1, "Unresolved merge conflict marker", content));
+      issues.push(
+        issue(
+          "conflictMarkers",
+          "error",
+          path,
+          line,
+          1,
+          "Unresolved merge conflict marker",
+          content,
+        ),
+      );
     }
     const trailing = /[\t ]+$/u.exec(content);
     if (enabled.has("trailingWhitespace") && trailing) {
-      issues.push(issue("trailingWhitespace", "warning", path, line, trailing.index + 1, "Trailing whitespace", content));
+      issues.push(
+        issue(
+          "trailingWhitespace",
+          "warning",
+          path,
+          line,
+          trailing.index + 1,
+          "Trailing whitespace",
+          content,
+        ),
+      );
     }
     if (enabled.has("longLines") && content.length > 120) {
-      issues.push(issue("longLines", "warning", path, line, 121, `Line is ${content.length} characters long`, content));
+      issues.push(
+        issue(
+          "longLines",
+          "warning",
+          path,
+          line,
+          121,
+          `Line is ${content.length} characters long`,
+          content,
+        ),
+      );
     }
     const todo = /\b(?:TODO|FIXME)\b/u.exec(content);
     if (enabled.has("todoComments") && todo) {
-      issues.push(issue("todoComments", "info", path, line, todo.index + 1, `${todo[0]} comment`, content));
+      issues.push(
+        issue("todoComments", "info", path, line, todo.index + 1, `${todo[0]} comment`, content),
+      );
     }
   }
   return issues;
@@ -114,11 +146,13 @@ export function stackTraceFrames(value: string): readonly StackTraceFrame[] {
     const parenthesized = /\(([^()]+):(\d+)(?::\d+)?\)\s*$/u.exec(text);
     const direct = /(?:^|\s)([^\s():]+):(\d+)(?::\d+)?\s*$/u.exec(text);
     const match = parenthesized ?? direct;
-    return [{
-      text,
-      path: match?.[1] ?? null,
-      line: match?.[2] ? Number(match[2]) : null,
-    }];
+    return [
+      {
+        text,
+        path: match?.[1] ?? null,
+        line: match?.[2] ? Number(match[2]) : null,
+      },
+    ];
   });
 }
 
@@ -136,16 +170,14 @@ function xmlTag(block: string, name: string): string {
   return decodedXml(match?.[1]?.trim() ?? "");
 }
 
-export function parseOfflineInspectionXml(
-  name: string,
-  content: string,
-): readonly CodeIssue[] {
+export function parseOfflineInspectionXml(name: string, content: string): readonly CodeIssue[] {
   const issues: CodeIssue[] = [];
   for (const match of content.matchAll(/<problem(?:\s[^>]*)?>([\s\S]*?)<\/problem>/giu)) {
     const block = match[1] ?? "";
     const path = xmlTag(block, "file").replace(/^file:\/\//u, "") || name;
     const line = Number(xmlTag(block, "line")) || 1;
-    const description = xmlTag(block, "description") || xmlTag(block, "problem_class") || "Inspection problem";
+    const description =
+      xmlTag(block, "description") || xmlTag(block, "problem_class") || "Inspection problem";
     issues.push(issue("offline", "warning", path, line, 1, description, ""));
   }
   return issues;

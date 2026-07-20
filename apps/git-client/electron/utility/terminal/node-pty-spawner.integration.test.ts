@@ -13,9 +13,9 @@ const temporaryDirectories: string[] = [];
 
 afterEach(async () => {
   await Promise.all(
-    temporaryDirectories.splice(0).map((directory) =>
-      rm(directory, { recursive: true, force: true }),
-    ),
+    temporaryDirectories
+      .splice(0)
+      .map((directory) => rm(directory, { recursive: true, force: true })),
   );
 });
 
@@ -61,10 +61,7 @@ describe.runIf(process.platform !== "win32")("NodePtySpawner integration", () =>
     const timeoutFailure = new Promise<never>((_resolve, reject) => {
       rejectTimeout = reject;
     });
-    const timeout = setTimeout(
-      () => rejectTimeout(new Error("PTY did not exit")),
-      5_000,
-    );
+    const timeout = setTimeout(() => rejectTimeout(new Error("PTY did not exit")), 5_000);
     timeout.unref();
     try {
       await Promise.race([exited, timeoutFailure]);
@@ -72,9 +69,7 @@ describe.runIf(process.platform !== "win32")("NodePtySpawner integration", () =>
       clearTimeout(timeout);
     }
     const output = new TextDecoder().decode(
-      Uint8Array.from(
-        events.flatMap((event) => (event.kind === "output" ? event.data : [])),
-      ),
+      Uint8Array.from(events.flatMap((event) => (event.kind === "output" ? event.data : []))),
     );
     expect(output).toContain("__GIT_CLIENT_PREDEFINED__");
     expect(output).toContain(repository);

@@ -1,9 +1,9 @@
-import { DropdownMenuItem } from "@astryxdesign/core/DropdownMenu";
-import { useLayer } from "@astryxdesign/core/Layer";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import type { ActionAvailability } from "../domain/types";
-import { Icon } from "./Icon";
 import { useDismissLayer } from "./CommandProvider";
+import { Icon } from "./Icon";
+import { DropdownMenuItem } from "./ui";
+import { useLayer } from "./ui";
 
 interface MenuItem {
   readonly id: keyof ActionAvailability | "separator";
@@ -28,7 +28,12 @@ const menu: readonly MenuItem[] = [
   { id: "fixup", label: "Create Fixup Commit", icon: "commit" },
   { id: "squashInto", label: "Create Squash Commit", icon: "commit" },
   { id: "separator" },
-  { id: "interactiveRebase", label: "Interactive Rebase from Here…", icon: "compare", danger: true },
+  {
+    id: "interactiveRebase",
+    label: "Interactive Rebase from Here…",
+    icon: "compare",
+    danger: true,
+  },
   { id: "drop", label: "Drop Commits", icon: "trash", danger: true },
   { id: "squash", label: "Squash Commits…", icon: "commit", danger: true },
   { id: "pushUpTo", label: "Push All up to Here…", icon: "push" },
@@ -66,23 +71,31 @@ export function CommitContextMenu({
     lightDismiss: true,
     onHide: handleHide,
   });
-  useDismissLayer(useMemo(() => ({
-    id: "commit-context-menu",
-    priority: 115,
-    active: true,
-    dismiss: () => {
-      layer.hide();
-    },
-  }), [layer.hide]));
+  useDismissLayer(
+    useMemo(
+      () => ({
+        id: "commit-context-menu",
+        priority: 115,
+        active: true,
+        dismiss: () => {
+          layer.hide();
+        },
+      }),
+      [layer.hide],
+    ),
+  );
   useEffect(() => {
-    previousFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    previousFocus.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
     layer.show();
     return () => previousFocus.current?.focus();
   }, [layer.show]);
   useEffect(() => {
     if (!layer.isOpen) return;
     const frame = requestAnimationFrame(() => {
-      root.current?.querySelector<HTMLElement>('[role="menuitem"]:not([aria-disabled="true"])')?.focus();
+      root.current
+        ?.querySelector<HTMLElement>('[role="menuitem"]:not([aria-disabled="true"])')
+        ?.focus();
     });
     return () => cancelAnimationFrame(frame);
   }, [layer.isOpen]);
@@ -92,15 +105,20 @@ export function CommitContextMenu({
       className="grid max-h-[min(520px,calc(100vh-24px))] min-w-[290px] gap-0.5 overflow-auto rounded-lg border border-border bg-popover p-1 shadow-med"
       onKeyDown={(event) => {
         if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
-        const items = [...event.currentTarget.querySelectorAll<HTMLElement>('[role="menuitem"]:not([aria-disabled="true"])')];
+        const items = [
+          ...event.currentTarget.querySelectorAll<HTMLElement>(
+            '[role="menuitem"]:not([aria-disabled="true"])',
+          ),
+        ];
         const current = items.findIndex((item) => item === document.activeElement);
-        const next = event.key === "Home"
-          ? 0
-          : event.key === "End"
-            ? items.length - 1
-            : event.key === "ArrowDown"
-              ? (current + 1) % items.length
-              : (current - 1 + items.length) % items.length;
+        const next =
+          event.key === "Home"
+            ? 0
+            : event.key === "End"
+              ? items.length - 1
+              : event.key === "ArrowDown"
+                ? (current + 1) % items.length
+                : (current - 1 + items.length) % items.length;
         items[next]?.focus();
         event.preventDefault();
       }}
@@ -108,7 +126,8 @@ export function CommitContextMenu({
       role="menu"
     >
       {menu.map((item, index) => {
-        if (item.id === "separator") return <hr className="my-1 border-0 border-t border-border" key={index} />;
+        if (item.id === "separator")
+          return <hr className="my-1 border-0 border-t border-border" key={index} />;
         const action = item.id;
         return (
           <DropdownMenuItem

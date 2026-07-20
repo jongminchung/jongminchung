@@ -9,15 +9,17 @@ import {
 } from "react";
 import {
   AppearanceStorage,
-  resolveAppearance,
-  type AppearanceMode,
+  synchronizeAppearancePreference,
+  type AppearancePreference,
+  type AppearanceTheme,
   type ColorScheme,
 } from "../domain/appearance";
 
 interface AppearanceContextValue {
-  readonly mode: AppearanceMode;
+  readonly preference: AppearancePreference;
   readonly colorScheme: ColorScheme;
-  readonly setMode: (mode: AppearanceMode) => void;
+  readonly systemTheme: AppearanceTheme;
+  readonly setPreference: (preference: AppearancePreference) => void;
 }
 
 const AppearanceContext = createContext<AppearanceContextValue | null>(null);
@@ -25,34 +27,45 @@ const AppearanceContext = createContext<AppearanceContextValue | null>(null);
 export function AppearanceProvider({ children }: { readonly children: ReactNode }) {
   const mediaQuery = useMemo(() => window.matchMedia("(prefers-color-scheme: dark)"), []);
   const storage = useMemo(() => AppearanceStorage.of(window.localStorage), []);
-  const [mode, setModeState] = useState<AppearanceMode>(() => storage.load());
+  const [preference, setPreferenceState] = useState<AppearancePreference>(() =>
+    synchronizeAppearancePreference(storage.load(), mediaQuery.matches ? "dark" : "light"),
+  );
   const [systemDark, setSystemDark] = useState(mediaQuery.matches);
-  const colorScheme = resolveAppearance(mode, systemDark);
+  const systemTheme: AppearanceTheme = systemDark ? "dark" : "light";
+  const colorScheme = preference.theme;
 
   useEffect(() => {
-    if (mode !== "system") return;
-    setSystemDark(mediaQuery.matches);
-    const update = (event: MediaQueryListEvent): void => setSystemDark(event.matches);
+    const update = (event: MediaQueryListEvent): void => {
+      const nextSystemTheme = event.matches ? "dark" : "light";
+      setSystemDark(event.matches);
+      setPreferenceState((current) => synchronizeAppearancePreference(current, nextSystemTheme));
+    };
     mediaQuery.addEventListener("change", update);
     return () => mediaQuery.removeEventListener("change", update);
-  }, [mediaQuery, mode]);
+  }, [mediaQuery]);
 
-  const setMode = useCallback(
-    (nextMode: AppearanceMode): void => {
-      storage.save(nextMode);
-      setModeState(nextMode);
+  const setPreference = useCallback(
+    (nextPreference: AppearancePreference): void => {
+      setPreferenceState(
+        synchronizeAppearancePreference(nextPreference, mediaQuery.matches ? "dark" : "light"),
+      );
     },
-    [storage],
+    [mediaQuery],
   );
 
+  useEffect(() => storage.save(preference), [preference, storage]);
+
   const value = useMemo<AppearanceContextValue>(
-    () => ({ mode, colorScheme, setMode }),
-    [colorScheme, mode, setMode],
+    () => ({ preference, colorScheme, systemTheme, setPreference }),
+    [colorScheme, preference, setPreference, systemTheme],
   );
 
   useEffect(() => {
-    document.documentElement.dataset.appearanceMode = mode;
-  }, [mode]);
+    const root = document.documentElement;
+    root.dataset.appearanceMode = preference.syncWithOs ? "system" : preference.theme;
+    root.dataset.theme = colorScheme;
+    root.style.colorScheme = colorScheme;
+  }, [colorScheme, preference]);
 
   return <AppearanceContext.Provider value={value}>{children}</AppearanceContext.Provider>;
 }

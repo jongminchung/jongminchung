@@ -392,12 +392,7 @@ export async function buildRelease(value, options = {}) {
     await validateApp(forgeOutputs.app, version, validationOptions);
     await createDmg(forgeOutputs.app, reproducibleDmg, { runCommand });
     await validateDmg(reproducibleDmg, version, validationOptions);
-    const artifacts = await stageReleaseArtifact(
-      reproducibleDmg,
-      outputDirectory,
-      version,
-      mode,
-    );
+    const artifacts = await stageReleaseArtifact(reproducibleDmg, outputDirectory, version, mode);
     return Object.freeze({ ...artifacts, app: forgeOutputs.app });
   } finally {
     await rm(reproducibleDirectory, { force: true, recursive: true });

@@ -30,7 +30,9 @@ export function GitConsolePanel({
       setSelectedRequestId(null);
       return;
     }
-    setSelectedRequestId((current) => entries.some((entry) => entry.requestId === current) ? current : latest.requestId);
+    setSelectedRequestId((current) =>
+      entries.some((entry) => entry.requestId === current) ? current : latest.requestId,
+    );
   }, [entries]);
 
   return (
@@ -39,15 +41,27 @@ export function GitConsolePanel({
         <strong>Git Console</strong>
         <span>{entries.length} commands</span>
         <i />
-        <button disabled={entries.length === 0} onClick={() => setExpanded(new Set(entries.map((entry) => entry.requestId)))}>Expand All</button>
-        <button disabled={expanded.size === 0} onClick={() => setExpanded(new Set())}>Collapse All</button>
+        <button
+          disabled={entries.length === 0}
+          onClick={() => setExpanded(new Set(entries.map((entry) => entry.requestId)))}
+        >
+          Expand All
+        </button>
+        <button disabled={expanded.size === 0} onClick={() => setExpanded(new Set())}>
+          Collapse All
+        </button>
         <button
           disabled={!selected}
-          onClick={() => selected && void navigator.clipboard.writeText(`${selected.command}\n${selected.output}`)}
+          onClick={() =>
+            selected &&
+            void navigator.clipboard.writeText(`${selected.command}\n${selected.output}`)
+          }
         >
           Copy
         </button>
-        <button disabled={entries.length === 0} onClick={onClear}>Clear All</button>
+        <button disabled={entries.length === 0} onClick={onClear}>
+          Clear All
+        </button>
       </header>
       {entries.length === 0 ? (
         <div className={tw.emptyState}>Git commands will be shown here.</div>
@@ -55,9 +69,14 @@ export function GitConsolePanel({
         <div className={tw.gitConsoleList} role="listbox" aria-label="Git command history">
           {entries.map((entry) => {
             const isExpanded = expanded.has(entry.requestId);
-            const duration = entry.completedAt === null ? null : Math.max(0, entry.completedAt - entry.startedAt);
+            const duration =
+              entry.completedAt === null ? null : Math.max(0, entry.completedAt - entry.startedAt);
             return (
-              <article aria-selected={selected?.requestId === entry.requestId} key={entry.requestId} role="option">
+              <article
+                aria-selected={selected?.requestId === entry.requestId}
+                key={entry.requestId}
+                role="option"
+              >
                 <button
                   aria-expanded={isExpanded}
                   onClick={() => {
@@ -75,7 +94,14 @@ export function GitConsolePanel({
                   <small>{new Date(entry.startedAt).toLocaleTimeString()}</small>
                   <small>{duration === null ? "Running…" : `${duration} ms`}</small>
                 </button>
-                {isExpanded && <pre>{entry.output || (entry.status === "running" ? "Waiting for output…" : "Process finished with no output.")}</pre>}
+                {isExpanded && (
+                  <pre>
+                    {entry.output ||
+                      (entry.status === "running"
+                        ? "Waiting for output…"
+                        : "Process finished with no output.")}
+                  </pre>
+                )}
               </article>
             );
           })}

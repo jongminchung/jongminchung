@@ -18,16 +18,21 @@ export function parseSavedMacros(value: unknown): readonly SavedMacro[] {
       typeof candidate.id !== "string" ||
       typeof candidate.name !== "string" ||
       !Array.isArray(candidate.commandIds)
-    ) return [];
+    )
+      return [];
     const commandIds = candidate.commandIds
-      .filter((commandId): commandId is string =>
-        typeof commandId === "string" && /^[a-z]+(?:[A-Z][a-z]+|\.[a-z][A-Za-z]+)+$/u.test(commandId),
+      .filter(
+        (commandId): commandId is string =>
+          typeof commandId === "string" &&
+          /^[a-z]+(?:[A-Z][a-z]+|\.[a-z][A-Za-z]+)+$/u.test(commandId),
       )
       .slice(0, 1_000);
-    return [{
-      id: candidate.id.slice(0, 128),
-      name: candidate.name.slice(0, 128),
-      commandIds,
-    }];
+    return [
+      {
+        id: candidate.id.slice(0, 128),
+        name: candidate.name.slice(0, 128),
+        commandIds,
+      },
+    ];
   });
 }

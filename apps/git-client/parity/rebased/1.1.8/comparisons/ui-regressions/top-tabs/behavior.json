@@ -9,8 +9,5 @@
   },
   "scope": "Candidate regression validation through Computer Use",
   "rebasedReferenceComparison": "pending",
-  "evidence": [
-    "candidate-electron-43.1.1.jpeg",
-    "candidate.ax.json"
-  ]
+  "evidence": ["candidate-electron-43.1.1.jpeg", "candidate.ax.json"]
 }

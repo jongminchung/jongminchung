@@ -1,5 +1,3 @@
-import { DropdownMenuItem } from "@astryxdesign/core/DropdownMenu";
-import { useLayer } from "@astryxdesign/core/Layer";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   TERMINAL_ACTION_MENU,
@@ -11,6 +9,8 @@ import {
 } from "../domain/terminalActions";
 import { tw } from "../styles/tailwind";
 import { useDismissLayer } from "./CommandProvider";
+import { DropdownMenuItem } from "./ui";
+import { useLayer } from "./ui";
 
 function menuNavigationKey(value: string): TerminalNavigationKey | null {
   if (value === "ArrowDown" || value === "ArrowUp" || value === "Home" || value === "End") {

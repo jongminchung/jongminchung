@@ -1,25 +1,62 @@
 export const APPEARANCE_STORAGE_KEY = "git-client.appearance-mode";
 
-export type AppearanceMode = "system" | "light" | "dark" | "darcula" | "highContrast";
-export type ColorScheme = "light" | "dark";
+export type AppearanceTheme = "light" | "dark";
+export type ColorScheme = AppearanceTheme;
 
-export function isAppearanceMode(value: unknown): value is AppearanceMode {
-  return (
-    value === "system" ||
-    value === "light" ||
-    value === "dark" ||
-    value === "darcula" ||
-    value === "highContrast"
-  );
+export interface AppearancePreference {
+  readonly theme: AppearanceTheme;
+  readonly syncWithOs: boolean;
 }
 
-export function storedAppearanceMode(value: unknown): AppearanceMode {
-  return isAppearanceMode(value) ? value : "dark";
+export const DEFAULT_APPEARANCE_PREFERENCE: AppearancePreference = {
+  theme: "light",
+  syncWithOs: false,
+};
+
+export function isAppearanceTheme(value: unknown): value is AppearanceTheme {
+  return value === "light" || value === "dark";
 }
 
-export function resolveAppearance(mode: AppearanceMode, systemDark: boolean): ColorScheme {
-  if (mode === "system") return systemDark ? "dark" : "light";
-  return mode === "light" ? "light" : "dark";
+function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+export function storedAppearancePreference(value: unknown): AppearancePreference {
+  if (value === "light" || value === "dark") {
+    return { theme: value, syncWithOs: false };
+  }
+  if (value === "system") return { theme: "light", syncWithOs: true };
+  if (value === "darcula" || value === "highContrast") {
+    return { theme: "dark", syncWithOs: false };
+  }
+  if (isRecord(value) && isAppearanceTheme(value.theme) && typeof value.syncWithOs === "boolean") {
+    return { theme: value.theme, syncWithOs: value.syncWithOs };
+  }
+  return DEFAULT_APPEARANCE_PREFERENCE;
+}
+
+export function resolveAppearance(
+  preference: AppearancePreference,
+  systemDark: boolean,
+): ColorScheme {
+  return preference.syncWithOs ? (systemDark ? "dark" : "light") : preference.theme;
+}
+
+export function synchronizeAppearancePreference(
+  preference: AppearancePreference,
+  systemTheme: AppearanceTheme,
+): AppearancePreference {
+  if (!preference.syncWithOs || preference.theme === systemTheme) return preference;
+  return { theme: systemTheme, syncWithOs: true };
+}
+
+function parseStoredPreference(value: string | null): AppearancePreference {
+  if (value === null) return DEFAULT_APPEARANCE_PREFERENCE;
+  try {
+    return storedAppearancePreference(JSON.parse(value));
+  } catch {
+    return storedAppearancePreference(value);
+  }
 }
 
 export class AppearanceStorage {
@@ -33,17 +70,17 @@ export class AppearanceStorage {
     return new AppearanceStorage(storage);
   }
 
-  load(): AppearanceMode {
+  load(): AppearancePreference {
     try {
-      return storedAppearanceMode(this.#storage.getItem(APPEARANCE_STORAGE_KEY));
+      return parseStoredPreference(this.#storage.getItem(APPEARANCE_STORAGE_KEY));
     } catch {
-      return "dark";
+      return DEFAULT_APPEARANCE_PREFERENCE;
     }
   }
 
-  save(mode: AppearanceMode): void {
+  save(preference: AppearancePreference): void {
     try {
-      this.#storage.setItem(APPEARANCE_STORAGE_KEY, mode);
+      this.#storage.setItem(APPEARANCE_STORAGE_KEY, JSON.stringify(preference));
     } catch {
       // Appearance remains active for this session when browser storage is unavailable.
     }

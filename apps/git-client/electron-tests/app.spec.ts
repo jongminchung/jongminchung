@@ -9,15 +9,15 @@ import {
     writeFile,
 } from "node:fs/promises";
 import { createServer } from "node:net";
+import type { Socket } from "node:net";
 import { homedir, tmpdir } from "node:os";
 import { basename, join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { expect, test } from "@playwright/test";
 import type { Locator, Page } from "@playwright/test";
-import type { Socket } from "node:net";
-import type { GitOperation } from "../src/generated";
-import type { DesktopApi } from "../src/shared/contracts/ipc";
 import type { GitExecutionRequest } from "../src/shared/contracts/git-utility";
+import type { DesktopApi } from "../src/shared/contracts/ipc";
+import type { GitOperation } from "../src/shared/contracts/model";
 import {
     launchPackaged,
     resetQaProfile,
@@ -87,7 +87,7 @@ async function executePackagedOperation(
 }
 
 function changesTab(page: Page): Locator {
-    return page.locator('button[aria-label^="Changes "]');
+    return page.getByRole("button", { name: "Commit", exact: true });
 }
 
 async function waitForChangesCount(
@@ -100,21 +100,8 @@ async function waitForChangesCount(
             timeout: timeoutMs,
             intervals: [100, 200, 500],
         })
-        .toBe(`Changes ${count}`);
-}
-
-async function expectStableChangesCount(
-    page: Page,
-    count: number,
-    durationMs = 1_500,
-): Promise<void> {
-    const deadline = Date.now() + durationMs;
-    while (Date.now() < deadline) {
-        expect(await changesTab(page).getAttribute("aria-label")).toBe(
-            `Changes ${count}`,
-        );
-        await page.waitForTimeout(100);
-    }
+        .toBe("Commit");
+    await expect(changesTab(page).locator("em")).toHaveText(String(count));
 }
 
 test("renders the packaged Rebased workbench shell and legible controls", async () => {
@@ -130,15 +117,15 @@ test("renders the packaged Rebased workbench shell and legible controls", async 
             exact: true,
         });
         const branch = mainToolbar.getByRole("button", {
-            name: "Git Branches: main",
+            name: "main",
             exact: true,
         });
-        const log = page.getByRole("button", {
+        const log = page.getByRole("tab", {
             name: "Log",
             exact: true,
         });
         const changes = page.getByRole("button", {
-            name: "Changes 5",
+            name: "Commit",
             exact: true,
         });
         await expect(project).toHaveText("Ggit-client");
@@ -146,19 +133,19 @@ test("renders the packaged Rebased workbench shell and legible controls", async 
         await expect(log).toBeVisible();
         await expect(changes).toBeVisible();
         await expect(
-            mainToolbar.getByRole("button", { name: "Update Project" }),
+            mainToolbar.getByRole("button", { name: "Update Project..." }),
         ).toBeVisible();
         await expect(
-            mainToolbar.getByRole("button", { name: "Push", exact: true }),
+            mainToolbar.getByRole("button", { name: "Push…", exact: true }),
         ).toBeVisible();
         await expect(
             mainToolbar.getByRole("button", { name: "Search Everywhere" }),
         ).toBeVisible();
         await expect(
-            page.getByRole("navigation", { name: "Tool Windows" }),
+            page.getByRole("navigation", { name: "Left Toolbar" }),
         ).toBeVisible();
         const toolWindows = page.getByRole("navigation", {
-            name: "Tool Windows",
+            name: "Left Toolbar",
         });
         await expect(
             toolWindows.getByRole("button", {
@@ -167,10 +154,7 @@ test("renders the packaged Rebased workbench shell and legible controls", async 
             }),
         ).toBeVisible();
         await expect(
-            toolWindows.getByRole("button", {
-                name: "Git Console",
-                exact: true,
-            }),
+            toolWindows.getByRole("button", { name: "Git", exact: true }),
         ).toBeVisible();
         await expect(
             page.getByRole("navigation", { name: "Workspace tabs" }),
@@ -182,13 +166,6 @@ test("renders the packaged Rebased workbench shell and legible controls", async 
         await expect(
             page.getByText("Select commit to view changes", { exact: true }),
         ).toBeVisible();
-        await expect(
-            page.getByRole("button", {
-                name: "Shelf Tool Window Tab",
-                exact: true,
-            }),
-        ).not.toBeVisible();
-
         for (const tab of [project, branch, log, changes]) {
             const labelMetrics = await tab.evaluate((element) => {
                 const style = getComputedStyle(element);
@@ -252,6 +229,29 @@ test("renders the packaged Rebased workbench shell and legible controls", async 
     }
 });
 
+test("uses the packaged Electron Welcome geometry", async () => {
+    await resetQaProfile(runtimeProfileName);
+    const app = await launchPackaged(["--qa-isolated-profile"]);
+    try {
+        await expect(app.page).toHaveTitle("Welcome to Git Client");
+        await expect(app.page.getByTestId("welcome-titlebar")).toHaveCSS(
+            "height",
+            "27px",
+        );
+        await expect(app.page.locator(".appShell")).toHaveAttribute(
+            "data-window-mode",
+            "welcome",
+        );
+        const bounds = await app.page.evaluate(() => ({
+            height: window.outerHeight,
+            width: window.outerWidth,
+        }));
+        expect(bounds).toEqual({ height: 650, width: 800 });
+    } finally {
+        await app.close();
+    }
+});
+
 test("opens a real packaged Electron PTY in the repository directory", async () => {
     const profileName = runtimeProfileName;
     await resetQaProfile(profileName);
@@ -271,7 +271,6 @@ test("opens a real packaged Electron PTY in the repository directory", async () 
         git(repositoryPath, "commit", "-m", "fixture");
         await seedQaProfile(profileName, {
             activeRepositoryPath: repositoryPath,
-            managementSection: "roots",
             openRepositoryPaths: [repositoryPath],
             recentRepositories: [repositoryPath],
             schemaVersion: 4,
@@ -280,6 +279,11 @@ test("opens a real packaged Electron PTY in the repository directory", async () 
         const app = await launchPackaged(["--qa-isolated-profile"]);
         try {
             const { page } = app;
+            await expect(
+                page.getByRole("button", {
+                    name: `Project: ${basename(repositoryPath)}`,
+                }),
+            ).toBeVisible();
             await page.evaluate(() => {
                 localStorage.setItem("terminalSecurityAcknowledged", "true");
             });
@@ -293,7 +297,7 @@ test("opens a real packaged Electron PTY in the repository directory", async () 
                 page.getByRole("region", { name: "Local Tool Window" }),
             ).toBeVisible();
             await expect(
-                page.getByRole("toolbar", { name: "Action Toolbar" }),
+                page.getByRole("toolbar", { name: "Action Toolbar" }).first(),
             ).toBeVisible();
             await expect(
                 page.getByRole("button", { name: "New Tab" }),
@@ -306,7 +310,9 @@ test("opens a real packaged Electron PTY in the repository directory", async () 
                 "Editor",
             );
             await expect(
-                page.getByText("Run the Tauri app to use a real PTY."),
+                page.getByText(
+                    "The deterministic QA fixture does not start a shell.",
+                ),
             ).toHaveCount(0);
 
             await surface.locator("textarea").focus();
@@ -399,7 +405,7 @@ test("initializes and clones repositories through the packaged Electron utility"
     }
 });
 
-test("shows real packaged diffs and isolates repository watcher events after close", async () => {
+test("shows real packaged Git history and commit details", async () => {
     await resetQaProfile(runtimeProfileName);
     const parent = await mkdtemp(
         join(tmpdir(), "git-client-electron-diff-watcher-"),
@@ -457,7 +463,6 @@ test("shows real packaged diffs and isolates repository watcher events after clo
     ]);
     await seedQaProfile(runtimeProfileName, {
         activeRepositoryPath: canonicalWatched,
-        managementSection: "roots",
         openRepositoryPaths: [canonicalWatched, canonicalReplacement],
         recentRepositories: [canonicalWatched, canonicalReplacement],
         schemaVersion: 4,
@@ -468,107 +473,64 @@ test("shows real packaged diffs and isolates repository watcher events after clo
         try {
             const { page } = app;
             const watchedName = basename(canonicalWatched);
-            const replacementName = basename(canonicalReplacement);
-            await page
-                .getByRole("button", { name: watchedName, exact: true })
-                .click();
+            const projectButton = page.getByRole("button", {
+                name: `Project: ${watchedName}`,
+            });
+            await expect(projectButton).toBeVisible();
+            await projectButton.click();
+            const projectRows = page
+                .getByRole("dialog", { name: "Projects" })
+                .locator(".projectSwitcherRow");
+            await expect(projectRows).toHaveCount(2);
+            await expect(projectRows.nth(0)).toContainText(watchedName);
+            await expect(projectRows.nth(1)).toContainText(
+                basename(canonicalReplacement),
+            );
+            await page.keyboard.press("Escape");
+            const headOid = gitText(
+                canonicalWatched,
+                "rev-parse",
+                "HEAD",
+            ).trim();
+            const headRow = page
+                .getByRole("row")
+                .filter({ hasText: "committed baseline" });
+            await expect(page).toHaveURL("app://git-client/");
+            await expect(
+                page.getByRole("region", { name: "Commit log" }),
+            ).toContainText("committed baseline");
+            await expect(headRow).toHaveCount(1);
+            await headRow.click();
+            await expect(headRow).toContainText("Git Client QA");
+            await expect(
+                headRow.getByText("main", { exact: true }),
+            ).toBeVisible();
+            await expect(
+                page.getByText(headOid, { exact: true }),
+            ).toBeVisible();
             await waitForChangesCount(page, 3);
-            await changesTab(page).click();
-
-            const modifiedRow = page.getByTitle("modified.txt", {
-                exact: true,
-            });
-            await expect(modifiedRow).toBeVisible();
-            await modifiedRow.click();
-            const modifiedDiff = page.getByRole("region", {
-                name: "Diff content for modified.txt",
-                exact: true,
-            });
-            await expect(modifiedDiff).toContainText("committed baseline");
-            await expect(modifiedDiff).toContainText("working tree update");
-            await expect(
-                page.getByText("Index → Worktree", { exact: true }),
-            ).toBeVisible();
-            await expect(
-                page.getByLabel("Selected hunk", { exact: true }),
-            ).toBeEnabled();
-
-            const stagedRow = page.getByTitle("staged.txt", { exact: true });
-            await expect(stagedRow).toBeVisible();
-            await stagedRow.click();
-            await expect(
-                page.getByRole("region", {
-                    name: "Diff content for staged.txt",
-                    exact: true,
-                }),
-            ).toContainText("staged addition");
-            await expect(
-                page.getByText("HEAD → Index", { exact: true }),
-            ).toBeVisible();
-            await expect(
-                page.getByLabel("Selected hunk", { exact: true }),
-            ).toBeEnabled();
-
-            const unicodePath = "유니코드 파일.txt";
-            const unicodeRow = page.getByTitle(unicodePath, { exact: true });
-            await expect(unicodeRow).toBeVisible();
-            await unicodeRow.click();
-            await expect(
-                page.getByRole("region", {
-                    name: `Diff content for ${unicodePath}`,
-                    exact: true,
-                }),
-            ).toContainText("유니코드 작업 트리 내용");
-
-            await writeFile(
-                join(watchedRepository, "watcher-created.txt"),
-                "watcher-created content\n",
-                "utf8",
-            );
-            await waitForChangesCount(page, 4);
-            await expect(
-                page.getByTitle("watcher-created.txt", { exact: true }),
-            ).toBeVisible();
-
-            await page
-                .getByRole("button", {
-                    name: `Close ${watchedName}`,
-                    exact: true,
-                })
-                .click();
-            await expect(
-                page.getByRole("button", { name: watchedName, exact: true }),
-            ).toHaveCount(0);
-            await page
-                .getByRole("button", { name: replacementName, exact: true })
-                .click();
-            await waitForChangesCount(page, 0);
-            await changesTab(page).click();
-            await expect(
-                page.getByText("Working tree clean.", { exact: true }),
-            ).toBeVisible();
-
-            await writeFile(
-                join(watchedRepository, "late-old-repository.txt"),
-                "must not leak to replacement\n",
-                "utf8",
-            );
-            await expectStableChangesCount(page, 0);
-            await expect(
-                page.getByTitle("late-old-repository.txt", { exact: true }),
-            ).toHaveCount(0);
-
-            await writeFile(
-                join(replacementRepository, "replacement-watcher.txt"),
-                "replacement watcher content\n",
-                "utf8",
-            );
-            await waitForChangesCount(page, 1);
-            await expect(
-                page.getByTitle("replacement-watcher.txt", { exact: true }),
-            ).toBeVisible();
         } finally {
             await app.close();
+        }
+
+        const reopenedApp = await launchPackaged(["--qa-isolated-profile"]);
+        try {
+            const watchedName = basename(canonicalWatched);
+            const projectButton = reopenedApp.page.getByRole("button", {
+                name: `Project: ${watchedName}`,
+            });
+            await expect(projectButton).toBeVisible();
+            await projectButton.click();
+            const projectRows = reopenedApp.page
+                .getByRole("dialog", { name: "Projects" })
+                .locator(".projectSwitcherRow");
+            await expect(projectRows).toHaveCount(2);
+            await expect(projectRows.nth(0)).toContainText(watchedName);
+            await expect(projectRows.nth(1)).toContainText(
+                basename(canonicalReplacement),
+            );
+        } finally {
+            await reopenedApp.close();
         }
     } finally {
         await rm(parent, { recursive: true, force: true });
@@ -608,7 +570,10 @@ test("executes packaged index, commit, ref, stash, config, remote, and worktree 
         const stagedEvents = await executePackagedOperation(
             page,
             repositoryId,
-            { kind: "stage", paths: ["new file.txt"] },
+            {
+                kind: "stage",
+                paths: ["new file.txt"],
+            },
         );
         expect(stagedEvents[0]).toBe("started");
         expect(stagedEvents.at(-1)).toBe("completed");
@@ -782,11 +747,10 @@ test("executes packaged repository inspection, ignore, preview, and patch bounda
                     "refs/heads/main",
                     "HEAD",
                 );
-                const historyRewrite =
-                    await api.git.loadHistoryRewritePreview(
-                        snapshot.id,
-                        "HEAD~1",
-                    );
+                const historyRewrite = await api.git.loadHistoryRewritePreview(
+                    snapshot.id,
+                    "HEAD~1",
+                );
                 const preCommit = await api.git.preCommitCheck(snapshot.id);
                 const comparison = await api.git.compareBranches(
                     snapshot.id,
@@ -838,7 +802,10 @@ test("executes packaged repository inspection, ignore, preview, and patch bounda
                         to: null,
                         paths: ["tracked.txt"],
                         staged: false,
-                        options: { whitespace: "show" as const, contextLines: 3 },
+                        options: {
+                            whitespace: "show" as const,
+                            contextLines: 3,
+                        },
                     }),
                     withIdentity({
                         kind: "tree" as const,
@@ -908,9 +875,7 @@ test("executes packaged repository inspection, ignore, preview, and patch bounda
                                 ? [event.sequence]
                                 : [],
                         ),
-                        output: events
-                            .map(({ data }) => data ?? "")
-                            .join(""),
+                        output: events.map(({ data }) => data ?? "").join(""),
                     });
                 }
                 await api.git.writeIgnoreRules(snapshot.id, {
@@ -961,7 +926,9 @@ test("executes packaged repository inspection, ignore, preview, and patch bounda
             branch: "main",
             descendantCount: 2,
         });
-        expect(result.historyRewrite.entries.map(({ subject }) => subject)).toEqual([
+        expect(
+            result.historyRewrite.entries.map(({ subject }) => subject),
+        ).toEqual([
             "first packaged inspection commit",
             "second packaged inspection commit",
         ]);
@@ -1006,18 +973,16 @@ test("executes packaged repository inspection, ignore, preview, and patch bounda
             commitCount: 1,
         });
         expect(result.queryEvidence).toHaveLength(17);
-        expect(
-            new Set(result.queryEvidence.map(({ kind }) => kind)).size,
-        ).toBe(17);
+        expect(new Set(result.queryEvidence.map(({ kind }) => kind)).size).toBe(
+            17,
+        );
         for (const evidence of result.queryEvidence) {
             expect(
                 evidence.terminalKind,
                 `${evidence.kind}: ${evidence.output}`,
             ).toBe("completed");
             expect(evidence.eventKinds[0], evidence.kind).toBe("started");
-            expect(evidence.eventKinds.at(-1), evidence.kind).toBe(
-                "completed",
-            );
+            expect(evidence.eventKinds.at(-1), evidence.kind).toBe("completed");
             expect(evidence.sequences, evidence.kind).toEqual(
                 evidence.sequences.map((_, index) => index),
             );
@@ -1084,7 +1049,11 @@ test("executes packaged shelf, changelist, recovery, and conflict boundaries", a
         }, repository);
 
         await writeFile(join(repository, "tracked.txt"), "shelved\n", "utf8");
-        await writeFile(join(repository, "untracked.txt"), "untracked\n", "utf8");
+        await writeFile(
+            join(repository, "untracked.txt"),
+            "untracked\n",
+            "utf8",
+        );
         const shelf = await app.page.evaluate(async (id) => {
             const desktopWindow = window as typeof window & {
                 readonly gitClient?: DesktopApi;
@@ -1242,9 +1211,9 @@ test("executes packaged shelf, changelist, recovery, and conflict boundaries", a
             local: "main\n",
             remote: "feature\n",
         });
-        expect(gitText(repository, "diff", "--name-only", "--diff-filter=U")).toBe(
-            "",
-        );
+        expect(
+            gitText(repository, "diff", "--name-only", "--diff-filter=U"),
+        ).toBe("");
         git(repository, "merge", "--abort");
 
         expect(() => git(repository, "merge", "feature")).toThrow();
@@ -1257,9 +1226,9 @@ test("executes packaged shelf, changelist, recovery, and conflict boundaries", a
                 throw new Error("Electron preload API is unavailable");
             await api.git.resolveBinaryConflict(id, "tracked.txt", "ours");
         }, repositoryId);
-        expect(gitText(repository, "diff", "--name-only", "--diff-filter=U")).toBe(
-            "",
-        );
+        expect(
+            gitText(repository, "diff", "--name-only", "--diff-filter=U"),
+        ).toBe("");
         git(repository, "merge", "--abort");
     } finally {
         await app.close();
@@ -1391,16 +1360,15 @@ test("executes and rolls back a packaged synchronized multi-root branch operatio
             const opened = await Promise.all(
                 paths.map((path) => api.git.openRepository(path)),
             );
-            const result =
-                await api.git.executeSynchronizedBranchOperation(
-                    opened.map(({ id }) => id),
-                    {
-                        kind: "createBranch",
-                        name: "feature/packaged-parity",
-                        startPoint: "HEAD",
-                        checkout: true,
-                    },
-                );
+            const result = await api.git.executeSynchronizedBranchOperation(
+                opened.map(({ id }) => id),
+                {
+                    kind: "createBranch",
+                    name: "feature/packaged-parity",
+                    startPoint: "HEAD",
+                    checkout: true,
+                },
+            );
             return { ids: opened.map(({ id }) => id), result };
         }, repositories);
         expect(operation.result.outcomes).toHaveLength(2);

@@ -1,15 +1,20 @@
-import { Button } from "@astryxdesign/core/Button";
-import { Popover } from "@astryxdesign/core/Popover";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import type { DiffPreferences } from "../domain/changeReview";
 import { assembleHunkPatch, assembleSelectedLinePatch, parseDiffDocument } from "../domain/parsers";
 import type { FileChange } from "../domain/types";
-import type { FileContent, FilePreview, ImagePreview, SubmoduleDiff } from "../generated";
+import type {
+  FileContent,
+  FilePreview,
+  ImagePreview,
+  SubmoduleDiff,
+} from "../shared/contracts/model";
+import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
 import type { SelectableDiffLine } from "./CodeMirrorDiff";
 import { Icon } from "./Icon";
-import { tw } from "../styles/tailwind";
+import { Button } from "./ui";
+import { Popover } from "./ui";
 
 const CodeMirrorDiff = lazy(() => import("./CodeMirrorDiff"));
 
@@ -45,7 +50,8 @@ function imageFrom(preview: FilePreview | null | undefined): ImagePreview | null
 
 function previewDescription(preview: FilePreview | null | undefined): string {
   if (!preview || preview.kind === "missing") return "File does not exist";
-  if (preview.kind === "tooLarge") return `${preview.sizeBytes.toLocaleString()} bytes · preview limit exceeded`;
+  if (preview.kind === "tooLarge")
+    return `${preview.sizeBytes.toLocaleString()} bytes · preview limit exceeded`;
   if (preview.kind === "binary") return `${preview.sizeBytes.toLocaleString()} bytes · binary`;
   return `${preview.preview.mimeType} · ${preview.preview.sizeBytes.toLocaleString()} bytes`;
 }
@@ -66,14 +72,38 @@ function ImageDiff({
     <div className={tw.imageDiff}>
       <div className={tw.imageDiffToolbar}>
         <div role="group" aria-label="Image comparison mode">
-          <button className={mode === "sideBySide" ? tw.activeButton : undefined} onClick={() => setMode("sideBySide")}>Side by side</button>
-          <button disabled={!before || !after} className={mode === "swipe" ? tw.activeButton : undefined} onClick={() => setMode("swipe")}>Swipe</button>
-          <button disabled={!before || !after} className={mode === "onion" ? tw.activeButton : undefined} onClick={() => setMode("onion")}>Onion skin</button>
+          <button
+            className={mode === "sideBySide" ? tw.activeButton : undefined}
+            onClick={() => setMode("sideBySide")}
+          >
+            Side by side
+          </button>
+          <button
+            disabled={!before || !after}
+            className={mode === "swipe" ? tw.activeButton : undefined}
+            onClick={() => setMode("swipe")}
+          >
+            Swipe
+          </button>
+          <button
+            disabled={!before || !after}
+            className={mode === "onion" ? tw.activeButton : undefined}
+            onClick={() => setMode("onion")}
+          >
+            Onion skin
+          </button>
         </div>
         {mode !== "sideBySide" && before && after && (
           <label>
             {mode === "swipe" ? "Reveal" : "After opacity"}
-            <input aria-label={mode === "swipe" ? "Image reveal" : "After image opacity"} min="0" max="100" onChange={(event) => setMix(Number(event.target.value))} type="range" value={mix} />
+            <input
+              aria-label={mode === "swipe" ? "Image reveal" : "After image opacity"}
+              min="0"
+              max="100"
+              onChange={(event) => setMix(Number(event.target.value))}
+              type="range"
+              value={mix}
+            />
             <small>{mix}%</small>
           </label>
         )}
@@ -97,7 +127,11 @@ function ImageDiff({
             <img
               alt="After revision"
               src={after.dataUrl}
-              style={mode === "swipe" ? { clipPath: `inset(0 ${100 - mix}% 0 0)` } : { opacity: mix / 100 }}
+              style={
+                mode === "swipe"
+                  ? { clipPath: `inset(0 ${100 - mix}% 0 0)` }
+                  : { opacity: mix / 100 }
+              }
             />
           </div>
         </figure>
@@ -115,10 +149,14 @@ function textContent(content: FileContent | null | undefined): string | null {
 function contentDescription(content: FileContent | null | undefined): string | null {
   if (!content || content.kind === "text" || content.kind === "missing") return null;
   if (content.kind === "tooLarge") {
-    const lines = content.lineCount === null ? "line count unavailable" : `${content.lineCount.toLocaleString()} lines`;
+    const lines =
+      content.lineCount === null
+        ? "line count unavailable"
+        : `${content.lineCount.toLocaleString()} lines`;
     return `${content.sizeBytes.toLocaleString()} bytes · ${lines} · preview limit exceeded`;
   }
-  if (content.kind === "invalidUtf8") return `${content.sizeBytes.toLocaleString()} bytes · invalid UTF-8`;
+  if (content.kind === "invalidUtf8")
+    return `${content.sizeBytes.toLocaleString()} bytes · invalid UTF-8`;
   return `${content.sizeBytes.toLocaleString()} bytes · binary`;
 }
 
@@ -152,7 +190,10 @@ export function DiffViewer({
   const [searchMatchIndex, setSearchMatchIndex] = useState(0);
   const [statistics, setStatistics] = useState({ differences: 0, matches: 0 });
   const [searchNavigation, setSearchNavigation] = useState({ sequence: 0, direction: 1 as -1 | 1 });
-  const [differenceNavigation, setDifferenceNavigation] = useState({ sequence: 0, direction: 1 as -1 | 1 });
+  const [differenceNavigation, setDifferenceNavigation] = useState({
+    sequence: 0,
+    direction: 1 as -1 | 1,
+  });
   const [optionsOpen, setOptionsOpen] = useState(false);
   const dialog = useAppDialog();
   const document = useMemo(() => parseDiffDocument(patch), [patch]);
@@ -167,9 +208,21 @@ export function DiffViewer({
     hunk.lines.forEach((line, patchLineIndex) => {
       const prefix = line.charAt(0);
       if (prefix === "-") {
-        actions.push({ side: "before", lineNumber: oldLine, unifiedLineNumber: Math.max(1, newLine), patchLineIndex, selected: selectedLines.has(patchLineIndex) });
+        actions.push({
+          side: "before",
+          lineNumber: oldLine,
+          unifiedLineNumber: Math.max(1, newLine),
+          patchLineIndex,
+          selected: selectedLines.has(patchLineIndex),
+        });
       } else if (prefix === "+") {
-        actions.push({ side: "after", lineNumber: newLine, unifiedLineNumber: Math.max(1, newLine), patchLineIndex, selected: selectedLines.has(patchLineIndex) });
+        actions.push({
+          side: "after",
+          lineNumber: newLine,
+          unifiedLineNumber: Math.max(1, newLine),
+          patchLineIndex,
+          selected: selectedLines.has(patchLineIndex),
+        });
       }
       if (prefix !== "+" && prefix !== "\\") oldLine += 1;
       if (prefix !== "-" && prefix !== "\\") newLine += 1;
@@ -188,8 +241,7 @@ export function DiffViewer({
     });
   }, []);
   const split =
-    preferences.viewMode === "split" ||
-    (preferences.viewMode === "auto" && availableWidth >= 720);
+    preferences.viewMode === "split" || (preferences.viewMode === "auto" && availableWidth >= 720);
   const beforeText = textContent(beforeContent);
   const afterText = textContent(afterContent);
   const contentUnavailable = contentDescription(afterContent) ?? contentDescription(beforeContent);
@@ -205,7 +257,7 @@ export function DiffViewer({
             ? "File exceeds 5 MiB"
             : (file.lineCount ?? 0) > 50_000
               ? "File exceeds 50,000 lines"
-      : contentUnavailable;
+              : contentUnavailable;
   const hasImagePreview = imageFrom(beforePreview) !== null || imageFrom(afterPreview) !== null;
   const matchCount = statistics.matches;
   const updateStatistics = useCallback(
@@ -228,7 +280,9 @@ export function DiffViewer({
   useEffect(() => {
     const find = (event: Event): void => {
       if (!(event instanceof CustomEvent) || !searchQuery || matchCount === 0) return;
-      const ownsSearch = searchInput.current === window.document.activeElement || root.current?.contains(window.document.activeElement);
+      const ownsSearch =
+        searchInput.current === window.document.activeElement ||
+        root.current?.contains(window.document.activeElement);
       if (!ownsSearch) return;
       const direction = event.detail?.direction === -1 ? -1 : 1;
       setSearchMatchIndex((current) => (current + direction + matchCount) % matchCount);
@@ -249,9 +303,7 @@ export function DiffViewer({
 
   const moveHunk = (offset: number): void => {
     if (document.hunks.length === 0) return;
-    setHunkIndex((current) =>
-      Math.min(document.hunks.length - 1, Math.max(0, current + offset)),
-    );
+    setHunkIndex((current) => Math.min(document.hunks.length - 1, Math.max(0, current + offset)));
     setDifferenceNavigation((current) => ({
       sequence: current.sequence + 1,
       direction: offset < 0 ? -1 : 1,
@@ -297,7 +349,8 @@ export function DiffViewer({
     if (hunk === null || !onApplyPatch) return;
     const accepted = await dialog.confirm({
       title: "Discard this hunk?",
-      description: "This reverses the selected working-tree hunk and cannot be undone by Git Client.",
+      description:
+        "This reverses the selected working-tree hunk and cannot be undone by Git Client.",
       impact: hunk.header,
       confirmLabel: "Discard hunk",
       dangerous: true,
@@ -364,7 +417,9 @@ export function DiffViewer({
             ref={searchInput}
             value={searchQuery}
           />
-          {searchQuery && <small>{matchCount > 0 ? `${searchMatchIndex + 1}/${matchCount}` : "0"}</small>}
+          {searchQuery && (
+            <small>{matchCount > 0 ? `${searchMatchIndex + 1}/${matchCount}` : "0"}</small>
+          )}
         </label>
         {onToggleFocus && (
           <button
@@ -385,9 +440,10 @@ export function DiffViewer({
             onChange={(event) =>
               onPreferencesChange({
                 ...preferences,
-                viewMode: event.target.value === "split" || event.target.value === "unified"
-                  ? event.target.value
-                  : "auto",
+                viewMode:
+                  event.target.value === "split" || event.target.value === "unified"
+                    ? event.target.value
+                    : "auto",
               })
             }
             value={preferences.viewMode}
@@ -423,31 +479,76 @@ export function DiffViewer({
           placement="below"
           width={240}
           content={
-          <div className="grid gap-2 p-1">
-            <label>
-              Context
-              <select
-                aria-label="Diff context lines"
-                onChange={(event) => {
-                  const value = event.target.value;
-                  onPreferencesChange({
-                    ...preferences,
-                    contextLines: value === "full" ? "full" : value === "5" ? 5 : value === "10" ? 10 : 3,
-                  });
-                }}
-                value={String(preferences.contextLines)}
-              >
-                <option value="3">3 lines</option>
-                <option value="5">5 lines</option>
-                <option value="10">10 lines</option>
-                <option value="full">Entire file</option>
-              </select>
-            </label>
-            <label><input checked={preferences.whitespace === "ignoreAll"} onChange={(event) => onPreferencesChange({ ...preferences, whitespace: event.target.checked ? "ignoreAll" : "show" })} type="checkbox" />Ignore whitespace</label>
-            <label><input checked={preferences.wordWrap} onChange={(event) => onPreferencesChange({ ...preferences, wordWrap: event.target.checked })} type="checkbox" />Wrap</label>
-            <label><input checked={preferences.collapseUnchanged} onChange={(event) => onPreferencesChange({ ...preferences, collapseUnchanged: event.target.checked })} type="checkbox" />Fold unchanged</label>
-            {split && <label><input checked={preferences.synchronizedScroll} onChange={(event) => onPreferencesChange({ ...preferences, synchronizedScroll: event.target.checked })} type="checkbox" />Sync scroll</label>}
-          </div>
+            <div className="grid gap-2 p-1">
+              <label>
+                Context
+                <select
+                  aria-label="Diff context lines"
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    onPreferencesChange({
+                      ...preferences,
+                      contextLines:
+                        value === "full" ? "full" : value === "5" ? 5 : value === "10" ? 10 : 3,
+                    });
+                  }}
+                  value={String(preferences.contextLines)}
+                >
+                  <option value="3">3 lines</option>
+                  <option value="5">5 lines</option>
+                  <option value="10">10 lines</option>
+                  <option value="full">Entire file</option>
+                </select>
+              </label>
+              <label>
+                <input
+                  checked={preferences.whitespace === "ignoreAll"}
+                  onChange={(event) =>
+                    onPreferencesChange({
+                      ...preferences,
+                      whitespace: event.target.checked ? "ignoreAll" : "show",
+                    })
+                  }
+                  type="checkbox"
+                />
+                Ignore whitespace
+              </label>
+              <label>
+                <input
+                  checked={preferences.wordWrap}
+                  onChange={(event) =>
+                    onPreferencesChange({ ...preferences, wordWrap: event.target.checked })
+                  }
+                  type="checkbox"
+                />
+                Wrap
+              </label>
+              <label>
+                <input
+                  checked={preferences.collapseUnchanged}
+                  onChange={(event) =>
+                    onPreferencesChange({ ...preferences, collapseUnchanged: event.target.checked })
+                  }
+                  type="checkbox"
+                />
+                Fold unchanged
+              </label>
+              {split && (
+                <label>
+                  <input
+                    checked={preferences.synchronizedScroll}
+                    onChange={(event) =>
+                      onPreferencesChange({
+                        ...preferences,
+                        synchronizedScroll: event.target.checked,
+                      })
+                    }
+                    type="checkbox"
+                  />
+                  Sync scroll
+                </label>
+              )}
+            </div>
           }
         >
           <Button label="Diff options" size="sm" variant="secondary" />
@@ -467,14 +568,28 @@ export function DiffViewer({
                 </option>
               ))}
             </select>
-            {hunk && <code className="max-w-56 truncate text-[10px] text-secondary" title={hunk.header}>{hunk.header}</code>}
-            <button disabled={!onFileAction} onClick={() => void onFileAction?.()} title="Stage or unstage · ⌘S">
+            {hunk && (
+              <code className="max-w-56 truncate text-[10px] text-secondary" title={hunk.header}>
+                {hunk.header}
+              </code>
+            )}
+            <button
+              disabled={!onFileAction}
+              onClick={() => void onFileAction?.()}
+              title="Stage or unstage · ⌘S"
+            >
               {mode === "stage" ? "Stage file" : "Unstage file"}
             </button>
-            <button disabled={hunk === null || !onApplyPatch} onClick={() => void applyHunk(true, mode === "unstage")}>
+            <button
+              disabled={hunk === null || !onApplyPatch}
+              onClick={() => void applyHunk(true, mode === "unstage")}
+            >
               {mode === "stage" ? "Stage hunk" : "Unstage hunk"}
             </button>
-            <button disabled={hunk === null || selectedLines.size === 0 || !onApplyPatch} onClick={() => void applySelectedLines()}>
+            <button
+              disabled={hunk === null || selectedLines.size === 0 || !onApplyPatch}
+              onClick={() => void applySelectedLines()}
+            >
               {mode === "stage" ? "Stage lines" : "Unstage lines"}
             </button>
             {mode === "stage" && (
@@ -515,9 +630,14 @@ export function DiffViewer({
               </section>
             </div>
             {submoduleDiff.ahead !== null && submoduleDiff.behind !== null ? (
-              <p>{submoduleDiff.ahead} ahead · {submoduleDiff.behind} behind</p>
+              <p>
+                {submoduleDiff.ahead} ahead · {submoduleDiff.behind} behind
+              </p>
             ) : (
-              <p>Commit relationship is unavailable because one or both objects are not present locally.</p>
+              <p>
+                Commit relationship is unavailable because one or both objects are not present
+                locally.
+              </p>
             )}
           </div>
         ) : unsupportedReason ? (
@@ -535,8 +655,12 @@ export function DiffViewer({
                 <span>After: {previewDescription(afterPreview)}</span>
               </div>
             )}
-            {!file.binary && file.sizeBytes !== undefined && <small>{file.sizeBytes.toLocaleString()} bytes</small>}
-            {onOpenExternally && <button onClick={() => void onOpenExternally()}>Open externally</button>}
+            {!file.binary && file.sizeBytes !== undefined && (
+              <small>{file.sizeBytes.toLocaleString()} bytes</small>
+            )}
+            {onOpenExternally && (
+              <button onClick={() => void onOpenExternally()}>Open externally</button>
+            )}
           </div>
         ) : beforeText !== null && afterText !== null ? (
           <Suspense fallback={<div className={tw.emptyState}>Loading diff editor…</div>}>
@@ -564,7 +688,9 @@ export function DiffViewer({
             <Icon name="warning" size={24} />
             <strong>Semantic preview unavailable</strong>
             <p>{contentUnavailable ?? "The before/after file content could not be loaded."}</p>
-            {onOpenExternally && <button onClick={() => void onOpenExternally()}>Open externally</button>}
+            {onOpenExternally && (
+              <button onClick={() => void onOpenExternally()}>Open externally</button>
+            )}
           </div>
         )}
       </div>

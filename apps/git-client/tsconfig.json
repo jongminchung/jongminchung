@@ -3,6 +3,9 @@
   "compilerOptions": {
     "libReplacement": false,
     "noUncheckedSideEffectImports": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    },
     "rootDir": ".",
     "types": ["vite/client", "node", "react", "react-dom"]
   },

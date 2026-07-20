@@ -1,7 +1,7 @@
-import { Button } from "@astryxdesign/core/Button";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
 import { useState } from "react";
 import { tw } from "../styles/tailwind";
+import { Button } from "./ui";
+import { Dialog, DialogHeader } from "./ui";
 
 type RepairState =
   | { readonly kind: "idle" }
@@ -43,17 +43,18 @@ export function RepairIdeDialog({
       width={560}
     >
       <section className={tw.repairIdeDialog}>
-        <DialogHeader
-          hasDivider
-          onOpenChange={(open) => !open && onClose()}
-          title="Repair IDE"
-        />
+        <DialogHeader hasDivider onOpenChange={(open) => !open && onClose()} title="Repair IDE" />
         <main aria-busy={state.kind === "running"}>
           <h3>Rescan project files and indexes</h3>
-          <p>Refresh the repository snapshot, file inventory, Git log indexes, and editor metadata without changing project files.</p>
+          <p>
+            Refresh the repository snapshot, file inventory, Git log indexes, and editor metadata
+            without changing project files.
+          </p>
           {state.kind === "running" && <p role="status">Repairing project indexes…</p>}
           {state.kind === "completed" && (
-            <p role="status">The recovery step completed. Check whether the problem is resolved before continuing.</p>
+            <p role="status">
+              The recovery step completed. Check whether the problem is resolved before continuing.
+            </p>
           )}
           {state.kind === "failed" && <p role="alert">{state.message}</p>}
         </main>
@@ -61,7 +62,11 @@ export function RepairIdeDialog({
           {state.kind === "completed" ? (
             <>
               <Button label="Stop" onClick={onClose} variant="secondary" />
-              <Button label="Invalidate Caches and Restart" onClick={onContinueToInvalidate} variant="primary" />
+              <Button
+                label="Invalidate Caches and Restart"
+                onClick={onContinueToInvalidate}
+                variant="primary"
+              />
             </>
           ) : (
             <>

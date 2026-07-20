@@ -2,35 +2,19 @@ import { Buffer, isUtf8 } from "node:buffer";
 import { createHash, randomUUID } from "node:crypto";
 import { constants } from "node:fs";
 import type { Stats } from "node:fs";
-import {
-  chmod,
-  lstat,
-  mkdir,
-  open,
-  realpath,
-  rename,
-  unlink,
-} from "node:fs/promises";
-import {
-  dirname,
-  isAbsolute,
-  join,
-  normalize,
-  relative,
-  resolve,
-  sep,
-} from "node:path";
+import { chmod, lstat, mkdir, open, realpath, rename, unlink } from "node:fs/promises";
+import { dirname, isAbsolute, join, normalize, relative, resolve, sep } from "node:path";
 import { z } from "zod";
-import type {
-  Changelist,
-  ChangelistCommitOptions,
-  ChangelistCommitResult,
-} from "../../../src/generated";
 import {
   RepositoryIdSchema,
   type RepositoryId,
   type RepositoryRecord,
 } from "../../../src/shared/contracts/git-utility";
+import type {
+  Changelist,
+  ChangelistCommitOptions,
+  ChangelistCommitResult,
+} from "../../../src/shared/contracts/model";
 import { GitUtilityError } from "./git-error";
 import {
   PATCH_COMMAND_TIMEOUT_MS,
@@ -121,9 +105,7 @@ interface PresentIndexBackup extends IndexBackupBase {
 
 type IndexBackup = MissingIndexBackup | PresentIndexBackup;
 
-type OptionalBytes =
-  | Readonly<{ kind: "missing" }>
-  | Readonly<{ kind: "present"; bytes: Buffer }>;
+type OptionalBytes = Readonly<{ kind: "missing" }> | Readonly<{ kind: "present"; bytes: Buffer }>;
 
 interface OriginalHead {
   readonly oid: string | null;
@@ -146,9 +128,7 @@ function invalid(message: string): GitUtilityError {
 
 function isErrno(error: unknown, code: string): boolean {
   return (
-    error instanceof Error &&
-    "code" in error &&
-    (error as NodeJS.ErrnoException).code === code
+    error instanceof Error && "code" in error && (error as NodeJS.ErrnoException).code === code
   );
 }
 
@@ -158,10 +138,7 @@ function filesystemError(error: unknown, fallback: string): GitUtilityError {
   return new GitUtilityError("commandFailed", safeErrorMessage(detail));
 }
 
-function sameIdentity(
-  metadata: Stats,
-  identity: PinnedDirectory | FileIdentity,
-): boolean {
+function sameIdentity(metadata: Stats, identity: PinnedDirectory | FileIdentity): boolean {
   return metadata.dev === identity.device && metadata.ino === identity.inode;
 }
 
@@ -195,24 +172,15 @@ function encodedManifest(payload: ManifestPayload): Buffer {
   };
   const bytes = Buffer.from(JSON.stringify(envelope, null, 2), "utf8");
   if (bytes.byteLength > MAX_CHANGELIST_MANIFEST_BYTES) {
-    throw new GitUtilityError(
-      "outputLimit",
-      "Changelist manifest exceeds 16 MiB",
-    );
+    throw new GitUtilityError("outputLimit", "Changelist manifest exceeds 16 MiB");
   }
   return bytes;
 }
 
 function assertNotAborted(signal: AbortSignal | undefined): void {
   if (signal?.aborted !== true) return;
-  const suffix =
-    signal.reason === "repositoryClosed"
-      ? " because the repository closed"
-      : "";
-  throw new GitUtilityError(
-    "commandFailed",
-    `Changelist command cancelled${suffix}`,
-  );
+  const suffix = signal.reason === "repositoryClosed" ? " because the repository closed" : "";
+  throw new GitUtilityError("commandFailed", `Changelist command cancelled${suffix}`);
 }
 
 function validateRepositoryId(untrusted: unknown): RepositoryId {
@@ -237,8 +205,7 @@ function normalizedPath(untrusted: unknown): string {
   if (
     normalized !== untrusted ||
     components.some(
-      (component) =>
-        component.length === 0 || component === "." || component === "..",
+      (component) => component.length === 0 || component === "." || component === "..",
     )
   ) {
     throw invalid("Changelist paths must be normalized relative paths");
@@ -248,9 +215,7 @@ function normalizedPath(untrusted: unknown): string {
 
 function validatePaths(untrusted: unknown): readonly string[] {
   if (!Array.isArray(untrusted) || untrusted.length > MAX_CHANGELIST_PATHS) {
-    throw invalid(
-      `Changelist paths must contain at most ${MAX_CHANGELIST_PATHS} entries`,
-    );
+    throw invalid(`Changelist paths must contain at most ${MAX_CHANGELIST_PATHS} entries`);
   }
   const paths = new Set<string>();
   let totalBytes = 0;
@@ -258,10 +223,7 @@ function validatePaths(untrusted: unknown): readonly string[] {
     const path = normalizedPath(value);
     totalBytes += Buffer.byteLength(path, "utf8");
     if (totalBytes > MAX_CHANGELIST_PATH_BYTES) {
-      throw new GitUtilityError(
-        "outputLimit",
-        "Changelist paths exceed 1 MiB",
-      );
+      throw new GitUtilityError("outputLimit", "Changelist paths exceed 1 MiB");
     }
     paths.add(path);
   }
@@ -286,9 +248,7 @@ function validateSaveInput(
     name.includes("\0") ||
     Buffer.byteLength(name, "utf8") > MAX_CHANGELIST_NAME_BYTES
   ) {
-    throw invalid(
-      "Changelist name must be non-empty, contain no NUL, and not exceed 1 MiB",
-    );
+    throw invalid("Changelist name must be non-empty, contain no NUL, and not exceed 1 MiB");
   }
   return { id, name, paths: validatePaths(untrustedPaths) };
 }
@@ -314,10 +274,7 @@ function clonePayload(payload: ManifestPayload): ManifestPayload {
   };
 }
 
-function validatePayload(
-  untrusted: unknown,
-  repositoryId: RepositoryId,
-): ManifestPayload {
+function validatePayload(untrusted: unknown, repositoryId: RepositoryId): ManifestPayload {
   const parsed = ManifestEnvelopeSchema.safeParse(untrusted);
   if (!parsed.success) throw invalid("Changelist manifest is invalid");
   const { checksum: storedChecksum, ...rawPayload } = parsed.data;
@@ -388,18 +345,11 @@ async function pinDirectory(path: string, label: string): Promise<PinnedDirector
   return pinnedDirectory(canonical, after);
 }
 
-async function assertPinnedDirectory(
-  directory: PinnedDirectory,
-  label: string,
-): Promise<void> {
+async function assertPinnedDirectory(directory: PinnedDirectory, label: string): Promise<void> {
   const metadata = await lstat(directory.path).catch((error: unknown) => {
     throw filesystemError(error, `${label} changed during the operation`);
   });
-  if (
-    metadata.isSymbolicLink() ||
-    !metadata.isDirectory() ||
-    !sameIdentity(metadata, directory)
-  ) {
+  if (metadata.isSymbolicLink() || !metadata.isDirectory() || !sameIdentity(metadata, directory)) {
     throw invalid(`${label} changed during the operation`);
   }
 }
@@ -521,17 +471,12 @@ async function readContainedFile(
 
 async function syncDirectory(directory: PinnedDirectory): Promise<void> {
   await assertPinnedDirectory(directory, "Changelist directory");
-  const handle = await open(directory.path, constants.O_RDONLY).catch(
-    (error: unknown) => {
-      throw filesystemError(error, "Changelist directory cannot be synchronized");
-    },
-  );
+  const handle = await open(directory.path, constants.O_RDONLY).catch((error: unknown) => {
+    throw filesystemError(error, "Changelist directory cannot be synchronized");
+  });
   try {
     await handle.sync().catch((error: unknown) => {
-      throw filesystemError(
-        error,
-        "Changelist directory cannot be synchronized",
-      );
+      throw filesystemError(error, "Changelist directory cannot be synchronized");
     });
   } finally {
     await handle.close().catch(() => undefined);
@@ -551,26 +496,19 @@ async function atomicWriteContainedFile(
   let handle;
   let temporaryIdentity: FileIdentity | null = null;
   try {
-    const destinationBefore = await lstat(destination).catch(
-      (error: unknown) => {
-        if (isErrno(error, "ENOENT")) return null;
-        throw filesystemError(error, "Changelist manifest is not accessible");
-      },
-    );
+    const destinationBefore = await lstat(destination).catch((error: unknown) => {
+      if (isErrno(error, "ENOENT")) return null;
+      throw filesystemError(error, "Changelist manifest is not accessible");
+    });
     if (
       destinationBefore !== null &&
       (destinationBefore.isSymbolicLink() || !destinationBefore.isFile())
     ) {
-      throw invalid(
-        "Changelist manifest must be a regular file, not a symbolic link",
-      );
+      throw invalid("Changelist manifest must be a regular file, not a symbolic link");
     }
     handle = await open(
       temporary,
-      constants.O_WRONLY |
-        constants.O_CREAT |
-        constants.O_EXCL |
-        constants.O_NOFOLLOW,
+      constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | constants.O_NOFOLLOW,
       0o600,
     );
     await handle.writeFile(bytes);
@@ -591,16 +529,13 @@ async function atomicWriteContainedFile(
     ) {
       throw invalid("Temporary changelist manifest changed before commit");
     }
-    const destinationBeforeRename = await lstat(destination).catch(
-      (error: unknown) => {
-        if (isErrno(error, "ENOENT")) return null;
-        throw filesystemError(error, "Changelist manifest is not accessible");
-      },
-    );
+    const destinationBeforeRename = await lstat(destination).catch((error: unknown) => {
+      if (isErrno(error, "ENOENT")) return null;
+      throw filesystemError(error, "Changelist manifest is not accessible");
+    });
     if (
       destinationBeforeRename !== null &&
-      (destinationBeforeRename.isSymbolicLink() ||
-        !destinationBeforeRename.isFile())
+      (destinationBeforeRename.isSymbolicLink() || !destinationBeforeRename.isFile())
     ) {
       throw invalid("Changelist manifest changed before commit");
     }
@@ -648,15 +583,8 @@ function processFailure(
           : " cancelled";
     return new GitUtilityError("commandFailed", `Changelist Git command${suffix}`);
   }
-  const detail =
-    outcome.stderr.byteLength > 0
-      ? outcome.stderr.toString("utf8")
-      : outcome.message;
-  return new GitUtilityError(
-    outcome.code,
-    safeErrorMessage(detail),
-    outcome.exitCode,
-  );
+  const detail = outcome.stderr.byteLength > 0 ? outcome.stderr.toString("utf8") : outcome.message;
+  return new GitUtilityError(outcome.code, safeErrorMessage(detail), outcome.exitCode);
 }
 
 async function gitOutcome(
@@ -686,13 +614,7 @@ async function captureGit(
   signal: AbortSignal | undefined,
   stdoutLimitBytes = MAX_GIT_OUTPUT_BYTES,
 ): Promise<Buffer> {
-  const outcome = await gitOutcome(
-    runner,
-    repository,
-    args,
-    signal,
-    stdoutLimitBytes,
-  );
+  const outcome = await gitOutcome(runner, repository, args, signal, stdoutLimitBytes);
   if (outcome.kind !== "completed") throw processFailure(outcome);
   return outcome.stdout;
 }
@@ -732,10 +654,7 @@ async function pinRepository(repository: RepositoryRecord): Promise<PinnedDirect
   if (repository.isBare) throw invalid("Changelists require a working tree");
   const root = await pinDirectory(repository.path, "Repository root");
   if (root.path !== repository.path) {
-    throw new GitUtilityError(
-      "repositoryNotOpen",
-      "Canonical repository path changed",
-    );
+    throw new GitUtilityError("repositoryNotOpen", "Canonical repository path changed");
   }
   return root;
 }
@@ -817,11 +736,9 @@ async function backupIndex(
   const path = isAbsolute(displayedPath)
     ? normalize(displayedPath)
     : resolve(repository.path, displayedPath);
-  const canonicalGitDirectory = await realpath(repository.gitDirectory).catch(
-    (error: unknown) => {
-      throw filesystemError(error, "Git directory is not accessible");
-    },
-  );
+  const canonicalGitDirectory = await realpath(repository.gitDirectory).catch((error: unknown) => {
+    throw filesystemError(error, "Git directory is not accessible");
+  });
   const parent = await pinDirectory(dirname(path), "Git index parent");
   if (!isContainedPath(canonicalGitDirectory, parent.path)) {
     throw invalid("Git index path escaped the repository Git directory");
@@ -855,19 +772,13 @@ async function restoreIndex(backup: IndexBackup): Promise<void> {
     return;
   }
 
-  const temporary = join(
-    backup.parent.path,
-    `.index.${randomUUID()}.changelist-rollback`,
-  );
+  const temporary = join(backup.parent.path, `.index.${randomUUID()}.changelist-rollback`);
   let handle;
   let identity: FileIdentity | null = null;
   try {
     handle = await open(
       temporary,
-      constants.O_WRONLY |
-        constants.O_CREAT |
-        constants.O_EXCL |
-        constants.O_NOFOLLOW,
+      constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | constants.O_NOFOLLOW,
       backup.mode,
     );
     await handle.writeFile(backup.bytes);
@@ -891,10 +802,7 @@ async function restoreIndex(backup: IndexBackup): Promise<void> {
       if (isErrno(error, "ENOENT")) return null;
       throw filesystemError(error, "Git index is not accessible during rollback");
     });
-    if (
-      destination !== null &&
-      (destination.isSymbolicLink() || !destination.isFile())
-    ) {
+    if (destination !== null && (destination.isSymbolicLink() || !destination.isFile())) {
       throw invalid("Git index changed to an unsafe file during rollback");
     }
     await rename(temporary, backup.path);
@@ -925,10 +833,7 @@ function selectedPath(path: string, selected: ReadonlySet<string>): boolean {
   return false;
 }
 
-function parseIndexEntries(
-  bytes: Buffer,
-  paths: readonly string[],
-): ReadonlyMap<string, string> {
+function parseIndexEntries(bytes: Buffer, paths: readonly string[]): ReadonlyMap<string, string> {
   if (!isUtf8(bytes)) throw invalid("Git returned non-UTF-8 index paths");
   const selected = new Set(paths);
   const entries = new Map<string, string>();
@@ -967,9 +872,7 @@ function parseNulPaths(bytes: Buffer): readonly string[] {
   if (paths.length > MAX_CHANGELIST_PATHS) {
     throw new GitUtilityError("outputLimit", "Too many untracked changelist paths");
   }
-  return Object.freeze(
-    [...new Set(paths)].sort(compareUtf8),
-  );
+  return Object.freeze([...new Set(paths)].sort(compareUtf8));
 }
 
 function parsedObjectId(bytes: Buffer, label: string): string {
@@ -985,24 +888,11 @@ async function captureHead(
   signal: AbortSignal | undefined,
 ): Promise<OriginalHead> {
   const [head, symbolicRef] = await Promise.all([
-    captureOptionalGit(
-      runner,
-      repository,
-      ["rev-parse", "--verify", "--quiet", "HEAD"],
-      signal,
-    ),
-    captureOptionalGit(
-      runner,
-      repository,
-      ["symbolic-ref", "--quiet", "HEAD"],
-      signal,
-    ),
+    captureOptionalGit(runner, repository, ["rev-parse", "--verify", "--quiet", "HEAD"], signal),
+    captureOptionalGit(runner, repository, ["symbolic-ref", "--quiet", "HEAD"], signal),
   ]);
   return {
-    oid:
-      head.kind === "missing"
-        ? null
-        : parsedObjectId(head.bytes, "HEAD"),
+    oid: head.kind === "missing" ? null : parsedObjectId(head.bytes, "HEAD"),
     symbolicRef:
       symbolicRef.kind === "missing"
         ? null
@@ -1018,10 +908,7 @@ async function rollbackHead(
   const current = await captureHead(runner, repository, undefined);
   if (current.oid === original.oid) return;
   if (current.oid === null) {
-    throw new GitUtilityError(
-      "commandFailed",
-      "Committed changelist disappeared before rollback",
-    );
+    throw new GitUtilityError("commandFailed", "Committed changelist disappeared before rollback");
   }
   let args: readonly string[];
   if (original.symbolicRef !== null) {
@@ -1141,10 +1028,7 @@ export class ChangelistService {
     return new ChangelistService(registry, storageRoot, runner);
   }
 
-  async list(
-    repositoryId: RepositoryId,
-    signal?: AbortSignal,
-  ): Promise<readonly Changelist[]> {
+  async list(repositoryId: RepositoryId, signal?: AbortSignal): Promise<readonly Changelist[]> {
     const validatedRepositoryId = validateRepositoryId(repositoryId);
     return this.#mutex.run(validatedRepositoryId, signal, async () => {
       this.#repository(validatedRepositoryId);
@@ -1187,17 +1071,11 @@ export class ChangelistService {
         };
         changelists = [...manifest.changelists.map(cloneChangelist), saved];
       } else {
-        const index = manifest.changelists.findIndex(
-          (entry) => entry.id === input.id,
-        );
+        const index = manifest.changelists.findIndex((entry) => entry.id === input.id);
         if (index < 0) throw invalid("Changelist does not exist");
         const existing = manifest.changelists[index];
         if (existing === undefined) throw invalid("Changelist does not exist");
-        const updatedAtMs = Math.max(
-          now,
-          existing.createdAtMs,
-          existing.updatedAtMs,
-        );
+        const updatedAtMs = Math.max(now, existing.createdAtMs, existing.updatedAtMs);
         saved = {
           ...existing,
           name: input.name,
@@ -1255,21 +1133,14 @@ export class ChangelistService {
       const repository = this.#repository(validatedRepositoryId);
       const repositoryRoot = await pinRepository(repository);
       const manifest = await this.#readManifest(validatedRepositoryId, true);
-      const changelist = manifest.changelists.find(
-        (entry) => entry.id === validatedChangelistId,
-      );
+      const changelist = manifest.changelists.find((entry) => entry.id === validatedChangelistId);
       if (changelist === undefined) throw invalid("Changelist does not exist");
       if (changelist.paths.length === 0) throw invalid("Changelist has no files");
 
       const originalHead = await captureHead(this.#runner, repository, signal);
       const indexBackup = await backupIndex(this.#runner, repository, signal);
       const unselectedBefore = parseIndexEntries(
-        await captureGit(
-          this.#runner,
-          repository,
-          ["ls-files", "--stage", "-z"],
-          signal,
-        ),
+        await captureGit(this.#runner, repository, ["ls-files", "--stage", "-z"], signal),
         changelist.paths,
       );
 
@@ -1278,14 +1149,7 @@ export class ChangelistService {
           await captureGit(
             this.#runner,
             repository,
-            [
-              "ls-files",
-              "--others",
-              "--exclude-standard",
-              "-z",
-              "--",
-              ...changelist.paths,
-            ],
+            ["ls-files", "--others", "--exclude-standard", "-z", "--", ...changelist.paths],
             signal,
           ),
         );
@@ -1298,23 +1162,12 @@ export class ChangelistService {
             MAX_GIT_DIAGNOSTIC_BYTES,
           );
         }
-        const arguments_: string[] = [
-          "commit",
-          "--only",
-          "--message",
-          validatedOptions.message,
-        ];
+        const arguments_: string[] = ["commit", "--only", "--message", validatedOptions.message];
         if (validatedOptions.amend) arguments_.push("--amend");
         if (validatedOptions.signOff) arguments_.push("--signoff");
         if (validatedOptions.gpgSign) arguments_.push("--gpg-sign");
         arguments_.push("--", ...changelist.paths);
-        await captureGit(
-          this.#runner,
-          repository,
-          arguments_,
-          signal,
-          MAX_GIT_DIAGNOSTIC_BYTES,
-        );
+        await captureGit(this.#runner, repository, arguments_, signal, MAX_GIT_DIAGNOSTIC_BYTES);
         assertNotAborted(signal);
         await assertPinnedDirectory(repositoryRoot, "Repository root");
         const commitOid = parsedObjectId(
@@ -1328,12 +1181,7 @@ export class ChangelistService {
           "the changelist commit",
         );
         const unselectedAfter = parseIndexEntries(
-          await captureGit(
-            this.#runner,
-            repository,
-            ["ls-files", "--stage", "-z"],
-            signal,
-          ),
+          await captureGit(this.#runner, repository, ["ls-files", "--stage", "-z"], signal),
           changelist.paths,
         );
         if (!equalEntries(unselectedBefore, unselectedAfter)) {
@@ -1353,13 +1201,7 @@ export class ChangelistService {
         );
         return { changelistId: validatedChangelistId, commitOid };
       } catch (error) {
-        return rollbackTransaction(
-          this.#runner,
-          repository,
-          originalHead,
-          indexBackup,
-          error,
-        );
+        return rollbackTransaction(this.#runner, repository, originalHead, indexBackup, error);
       }
     });
   }
@@ -1367,10 +1209,7 @@ export class ChangelistService {
   #repository(repositoryId: RepositoryId): RepositoryRecord {
     const repository = this.#registry.get(repositoryId);
     if (repository.id !== repositoryId) {
-      throw new GitUtilityError(
-        "repositoryNotOpen",
-        "Repository registry identity changed",
-      );
+      throw new GitUtilityError("repositoryNotOpen", "Repository registry identity changed");
     }
     return repository;
   }
@@ -1419,19 +1258,11 @@ export class ChangelistService {
     return validatePayload(decoded, repositoryId);
   }
 
-  async #writeManifest(
-    payload: ManifestPayload,
-    signal: AbortSignal | undefined,
-  ): Promise<void> {
+  async #writeManifest(payload: ManifestPayload, signal: AbortSignal | undefined): Promise<void> {
     const directory = await this.#manifestDirectory(true);
     if (directory === null) throw invalid("Unable to create changelist directory");
     const bytes = encodedManifest(clonePayload(payload));
-    await atomicWriteContainedFile(
-      directory,
-      `${payload.repositoryId}.json`,
-      bytes,
-      signal,
-    );
+    await atomicWriteContainedFile(directory, `${payload.repositoryId}.json`, bytes, signal);
     const persisted = await this.#readManifest(payload.repositoryId, false);
     if (checksum(payloadBytes(persisted)) !== checksum(payloadBytes(payload))) {
       throw invalid("Changelist manifest failed semantic verification");

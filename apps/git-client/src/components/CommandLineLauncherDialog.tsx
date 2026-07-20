@@ -1,9 +1,9 @@
-import { Button } from "@astryxdesign/core/Button";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
-import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { useEffect, useState } from "react";
 import type { CommandLineLauncherInfo } from "../shared/contracts/ipc";
 import { tw } from "../styles/tailwind";
+import { Button } from "./ui";
+import { Dialog, DialogHeader } from "./ui";
+import { EmptyState } from "./ui";
 
 export function CommandLineLauncherDialog({
   loadInfo,

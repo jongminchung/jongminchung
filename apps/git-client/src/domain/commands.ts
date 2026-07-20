@@ -1,9 +1,25 @@
 import rawManifest from "../command-manifest.json";
 
 export type CommandId = `${string}.${string}`;
-export type CommandCategory = "app" | "workspace" | "view" | "bookmarks" | "repository" | "changes" | "history" | "localHistory";
+export type CommandCategory =
+  | "app"
+  | "workspace"
+  | "view"
+  | "bookmarks"
+  | "repository"
+  | "changes"
+  | "history"
+  | "localHistory";
 export type CommandMenu = "app" | "file" | "edit" | "view" | "code" | "repository" | "actions";
-export type PaletteScope = "all" | "files" | "recentFiles" | "recentLocations" | "recentlyChangedFiles" | "classes" | "symbols" | "text";
+export type PaletteScope =
+  | "all"
+  | "files"
+  | "recentFiles"
+  | "recentLocations"
+  | "recentlyChangedFiles"
+  | "classes"
+  | "symbols"
+  | "text";
 
 export interface KeyboardShortcut {
   readonly key: string;
@@ -45,7 +61,16 @@ export interface CommandDefinition extends CommandManifestEntry {
 
 export interface PaletteItem {
   readonly id: string;
-  readonly kind: "command" | "repository" | "ref" | "commit" | "change" | "file" | "location" | "symbol" | "text";
+  readonly kind:
+    | "command"
+    | "repository"
+    | "ref"
+    | "commit"
+    | "change"
+    | "file"
+    | "location"
+    | "symbol"
+    | "text";
   readonly label: string;
   readonly detail: string;
   readonly category: string;
@@ -82,8 +107,31 @@ export interface KeyboardEventLike {
   readonly isComposing: boolean;
 }
 
-const categories: readonly CommandCategory[] = ["app", "workspace", "view", "bookmarks", "repository", "changes", "history", "localHistory"];
-const menus: readonly CommandMenu[] = ["app", "file", "edit", "view", "code", "repository", "actions"];
+const categories: readonly CommandCategory[] = [
+  "app",
+  "workspace",
+  "view",
+  "bookmarks",
+  "repository",
+  "changes",
+  "history",
+  "localHistory",
+];
+const menus: readonly CommandMenu[] = [
+  "app",
+  "file",
+  "edit",
+  "view",
+  "code",
+  "repository",
+  "actions",
+];
+const ACCELERATOR_KEY_ALIASES: Readonly<Record<string, string>> = {
+  left: "arrowleft",
+  right: "arrowright",
+  up: "arrowup",
+  down: "arrowdown",
+};
 
 function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -99,11 +147,24 @@ function includesString<T extends string>(values: readonly T[], value: unknown):
 
 function parseManifestEntry(value: unknown): CommandManifestEntry | null {
   if (!isRecord(value)) return null;
-  if (!isCommandId(value.id) || typeof value.label !== "string" || value.label.trim() === "") return null;
-  if (!includesString(categories, value.category) || !includesString(menus, value.menu)) return null;
-  if (value.accelerator !== null && (typeof value.accelerator !== "string" || keyboardShortcutFromAccelerator(value.accelerator) === null)) return null;
-  if (typeof value.allowInTerminal !== "boolean" || typeof value.allowInEditor !== "boolean" || typeof value.mutation !== "boolean") return null;
-  if (value.allowInCodeEditor !== undefined && typeof value.allowInCodeEditor !== "boolean") return null;
+  if (!isCommandId(value.id) || typeof value.label !== "string" || value.label.trim() === "")
+    return null;
+  if (!includesString(categories, value.category) || !includesString(menus, value.menu))
+    return null;
+  if (
+    value.accelerator !== null &&
+    (typeof value.accelerator !== "string" ||
+      keyboardShortcutFromAccelerator(value.accelerator) === null)
+  )
+    return null;
+  if (
+    typeof value.allowInTerminal !== "boolean" ||
+    typeof value.allowInEditor !== "boolean" ||
+    typeof value.mutation !== "boolean"
+  )
+    return null;
+  if (value.allowInCodeEditor !== undefined && typeof value.allowInCodeEditor !== "boolean")
+    return null;
   return {
     id: value.id,
     label: value.label,
@@ -122,13 +183,17 @@ export function parseCommandManifest(value: unknown): CommandManifest {
     throw new Error("Command manifest must use schema version 1");
   }
   const commands = value.commands.map(parseManifestEntry);
-  if (commands.some((command) => command === null)) throw new Error("Command manifest contains an invalid command");
+  if (commands.some((command) => command === null))
+    throw new Error("Command manifest contains an invalid command");
   const validated = commands.filter((command): command is CommandManifestEntry => command !== null);
   const ids = new Set(validated.map((command) => command.id));
-  const acceleratorValues = validated.flatMap((command) => command.accelerator ? [normalizeAccelerator(command.accelerator)] : []);
+  const acceleratorValues = validated.flatMap((command) =>
+    command.accelerator ? [normalizeAccelerator(command.accelerator)] : [],
+  );
   const accelerators = new Set(acceleratorValues);
   if (ids.size !== validated.length) throw new Error("Command manifest contains duplicate IDs");
-  if (accelerators.size !== acceleratorValues.length) throw new Error("Command manifest contains duplicate accelerators");
+  if (accelerators.size !== acceleratorValues.length)
+    throw new Error("Command manifest contains duplicate accelerators");
   return { schemaVersion: 1, commands: validated };
 }
 
@@ -164,7 +229,7 @@ export function resolvedAccelerator(
   overrides: Readonly<Record<string, string | null>>,
 ): string | null {
   return Object.hasOwn(overrides, command.id)
-    ? overrides[command.id] ?? null
+    ? (overrides[command.id] ?? null)
     : command.accelerator;
 }
 
@@ -181,10 +246,9 @@ export function acceleratorFromKeyboardEvent(
   )
     return null;
   const parts: string[] = [];
-  if (event.ctrlKey) parts.push("Control");
+  if (event.metaKey || event.ctrlKey) parts.push("CmdOrCtrl");
   if (event.altKey) parts.push("Option");
   if (event.shiftKey) parts.push("Shift");
-  if (event.metaKey) parts.push("Command");
   const key =
     event.key === " "
       ? "Space"
@@ -195,19 +259,33 @@ export function acceleratorFromKeyboardEvent(
   return parts.join("+");
 }
 
-const ACCELERATOR_KEY_ALIASES: Readonly<Record<string, string>> = {
-  left: "arrowleft",
-  right: "arrowright",
-  up: "arrowup",
-  down: "arrowdown",
-};
-
-export function keyboardShortcutFromAccelerator(accelerator: string | null): KeyboardShortcut | null {
+export function keyboardShortcutFromAccelerator(
+  accelerator: string | null,
+): KeyboardShortcut | null {
   if (accelerator === null) return null;
-  const parts = accelerator.split("+").map((part) => part.trim()).filter(Boolean);
+  const parts = accelerator
+    .split("+")
+    .map((part) => part.trim())
+    .filter(Boolean);
   if (parts.length < 1) return null;
   const modifiers = new Set(parts.slice(0, -1).map((part) => part.toLocaleLowerCase()));
-  if ([...modifiers].some((part) => !["cmdorctrl", "command", "cmd", "meta", "control", "ctrl", "shift", "option", "alt"].includes(part))) return null;
+  if (
+    [...modifiers].some(
+      (part) =>
+        ![
+          "cmdorctrl",
+          "command",
+          "cmd",
+          "meta",
+          "control",
+          "ctrl",
+          "shift",
+          "option",
+          "alt",
+        ].includes(part),
+    )
+  )
+    return null;
   const key = parts.at(-1);
   if (!key) return null;
   const lowerKey = key.toLocaleLowerCase();
@@ -226,32 +304,41 @@ export function keyboardShortcutFromAccelerator(accelerator: string | null): Key
   };
 }
 
-export function matchesKeyboardShortcut(event: KeyboardEventLike, accelerator: string | null): boolean {
+export function matchesKeyboardShortcut(
+  event: KeyboardEventLike,
+  accelerator: string | null,
+): boolean {
   const shortcut = keyboardShortcutFromAccelerator(accelerator);
   if (shortcut === null) return false;
   const primaryMatches = shortcut.platform
     ? event.metaKey !== event.ctrlKey
     : event.metaKey === shortcut.meta && event.ctrlKey === shortcut.ctrl;
-  return event.key.toLocaleLowerCase() === shortcut.key && primaryMatches && event.shiftKey === shortcut.shift && event.altKey === shortcut.alt;
+  return (
+    event.key.toLocaleLowerCase() === shortcut.key &&
+    primaryMatches &&
+    event.shiftKey === shortcut.shift &&
+    event.altKey === shortcut.alt
+  );
 }
 
 export function displayAccelerator(accelerator: string | null): string {
   if (accelerator === null) return "";
   const shortcut = keyboardShortcutFromAccelerator(accelerator);
   if (shortcut === null) return accelerator;
-  const key = shortcut.key === "enter"
-    ? "↩"
-    : shortcut.key === "arrowleft"
-      ? "←"
-      : shortcut.key === "arrowright"
-        ? "→"
-        : shortcut.key === "arrowup"
-          ? "↑"
-          : shortcut.key === "arrowdown"
-            ? "↓"
-            : shortcut.key.length === 1 || /^f\d+$/u.test(shortcut.key)
-              ? shortcut.key.toLocaleUpperCase()
-              : shortcut.key;
+  const key =
+    shortcut.key === "enter"
+      ? "↩"
+      : shortcut.key === "arrowleft"
+        ? "←"
+        : shortcut.key === "arrowright"
+          ? "→"
+          : shortcut.key === "arrowup"
+            ? "↑"
+            : shortcut.key === "arrowdown"
+              ? "↓"
+              : shortcut.key.length === 1 || /^f\d+$/u.test(shortcut.key)
+                ? shortcut.key.toLocaleUpperCase()
+                : shortcut.key;
   return `${shortcut.ctrl ? "⌃" : ""}${shortcut.alt ? "⌥" : ""}${shortcut.shift ? "⇧" : ""}${shortcut.meta || shortcut.platform ? "⌘" : ""}${key}`;
 }
 
@@ -269,10 +356,16 @@ export function isCommandSearchElement(target: EventTarget | null): boolean {
 }
 
 export function isTerminalElement(target: EventTarget | null): boolean {
-  return target instanceof HTMLElement && target.closest('[data-command-scope="terminal"]') !== null;
+  return (
+    target instanceof HTMLElement && target.closest('[data-command-scope="terminal"]') !== null
+  );
 }
 
-export function canHandleShortcut(event: KeyboardEventLike, command: CommandManifestEntry, target: EventTarget | null): boolean {
+export function canHandleShortcut(
+  event: KeyboardEventLike,
+  command: CommandManifestEntry,
+  target: EventTarget | null,
+): boolean {
   if (event.isComposing) return false;
   if (event.repeat && command.mutation) return false;
   if (isTerminalElement(target) && !command.allowInTerminal) return false;
@@ -281,8 +374,12 @@ export function canHandleShortcut(event: KeyboardEventLike, command: CommandMani
     isEditableElement(target) &&
     !isCodeEditorElement(target) &&
     !command.allowInEditor &&
-    !(isCommandSearchElement(target) && (command.id === "view.findNext" || command.id === "view.findPrevious"))
-  ) return false;
+    !(
+      isCommandSearchElement(target) &&
+      (command.id === "view.findNext" || command.id === "view.findPrevious")
+    )
+  )
+    return false;
   return true;
 }
 
@@ -309,11 +406,16 @@ export function paletteScore(item: PaletteItem, rawQuery: string): number {
   return Number.NEGATIVE_INFINITY;
 }
 
-export function sortPaletteItems(items: readonly PaletteItem[], query: string): readonly PaletteItem[] {
+export function sortPaletteItems(
+  items: readonly PaletteItem[],
+  query: string,
+): readonly PaletteItem[] {
   return items
     .map((item) => ({ item, score: paletteScore(item, query) }))
     .filter(({ score }) => Number.isFinite(score))
-    .sort((left, right) => right.score - left.score || left.item.label.localeCompare(right.item.label))
+    .sort(
+      (left, right) => right.score - left.score || left.item.label.localeCompare(right.item.label),
+    )
     .map(({ item }) => item);
 }
 
@@ -321,9 +423,12 @@ export function selectDismissLayer<T extends DismissLayer>(
   layers: readonly T[],
   inputOwnsEscape: boolean,
 ): T | null {
-  const layer = [...layers]
-    .filter((candidate) => candidate.active)
-    .sort((left, right) => right.priority - left.priority || (right.order ?? 0) - (left.order ?? 0))[0] ?? null;
+  const layer =
+    [...layers]
+      .filter((candidate) => candidate.active)
+      .sort(
+        (left, right) => right.priority - left.priority || (right.order ?? 0) - (left.order ?? 0),
+      )[0] ?? null;
   if (layer === null || (inputOwnsEscape && layer.priority < 100)) return null;
   return layer;
 }
@@ -348,7 +453,10 @@ export class CommandRegistry {
     this.unregister(owner);
     for (const definition of definitions) {
       const registrations = this.#definitions.get(definition.id) ?? [];
-      this.#definitions.set(definition.id, [...registrations, { owner, order: this.#order, definition }]);
+      this.#definitions.set(definition.id, [
+        ...registrations,
+        { owner, order: this.#order, definition },
+      ]);
       this.#order += 1;
     }
   }
@@ -364,9 +472,13 @@ export class CommandRegistry {
   find(id: CommandId): CommandDefinition | null {
     const definitions = this.#definitions.get(id);
     if (!definitions || definitions.length === 0) return null;
-    return [...definitions].sort((left, right) =>
-      (right.definition.priority ?? 0) - (left.definition.priority ?? 0) || right.order - left.order,
-    )[0]?.definition ?? null;
+    return (
+      [...definitions].sort(
+        (left, right) =>
+          (right.definition.priority ?? 0) - (left.definition.priority ?? 0) ||
+          right.order - left.order,
+      )[0]?.definition ?? null
+    );
   }
 
   createSnapshot(): readonly CommandDefinition[] {

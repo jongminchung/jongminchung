@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
+import type { TerminalEventEnvelope } from "../../src/shared/contracts/terminal";
 import {
   MainToTerminalUtilityMessageSchema,
   TERMINAL_UTILITY_PROTOCOL_VERSION,
   type MainToTerminalUtilityMessage,
 } from "../../src/shared/contracts/terminal-utility-process";
-import type { TerminalEventEnvelope } from "../../src/shared/contracts/terminal";
 import {
   TerminalUtilityClient,
   type TerminalUtilityProcessTransport,

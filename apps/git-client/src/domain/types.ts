@@ -1,4 +1,4 @@
-import type { RepositorySnapshot } from "../generated";
+import type { RepositorySnapshot } from "../shared/contracts/model";
 
 export type RefKind = "local" | "remote" | "tag";
 

@@ -1,24 +1,21 @@
-import { Button } from "@astryxdesign/core/Button";
-import { CheckboxInput } from "@astryxdesign/core/CheckboxInput";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
-import { Selector } from "@astryxdesign/core/Selector";
-import { TextArea } from "@astryxdesign/core/TextArea";
-import { TextInput } from "@astryxdesign/core/TextInput";
 import { useEffect, useMemo, useState } from "react";
 import { createHostingBridge } from "../bridge/createHostingBridge";
-import { loadHostingAccounts } from "./hosting-persistence";
+import type { FileChange } from "../domain/types";
 import type {
   HostingAccount,
   HostingNamespace,
   HostingProviderKind,
-} from "../generated";
-import type { FileChange } from "../domain/types";
+} from "../shared/contracts/model";
 import { tw } from "../styles/tailwind";
+import { loadHostingAccounts } from "./hosting-persistence";
 import { Icon } from "./Icon";
-import {
-  ShareInitialCommitDialog,
-  type InitialCommitSelection,
-} from "./ShareInitialCommitDialog";
+import { ShareInitialCommitDialog, type InitialCommitSelection } from "./ShareInitialCommitDialog";
+import { Button } from "./ui";
+import { CheckboxInput } from "./ui";
+import { Dialog, DialogHeader } from "./ui";
+import { Selector } from "./ui";
+import { TextArea } from "./ui";
+import { TextInput } from "./ui";
 
 interface CreatedRepository {
   readonly project: string;
@@ -43,9 +40,7 @@ function message(reason: unknown): string {
 }
 
 function namespaceKey(namespace: HostingNamespace): string {
-  return namespace.id === null
-    ? `personal:${namespace.fullPath}`
-    : `group:${namespace.id}`;
+  return namespace.id === null ? `personal:${namespace.fullPath}` : `group:${namespace.id}`;
 }
 
 export function ShareProjectDialog({
@@ -313,7 +308,7 @@ export function ShareProjectDialog({
           name: repositoryName.trim(),
           description,
           private: isPrivate,
-          namespaceId: provider === "gitLab" ? selectedNamespace?.id ?? null : null,
+          namespaceId: provider === "gitLab" ? (selectedNamespace?.id ?? null) : null,
         });
         if (response.kind !== "repository") {
           throw new Error(`${service} did not return the created repository.`);
@@ -360,11 +355,7 @@ export function ShareProjectDialog({
       width={530}
     >
       <section className={tw.shareProjectDialog}>
-        <DialogHeader
-          hasDivider
-          onOpenChange={(open) => !open && onClose()}
-          title={title}
-        />
+        <DialogHeader hasDivider onOpenChange={(open) => !open && onClose()} title={title} />
         <main>
           {provider === "gitLab" && (
             <div className={tw.shareProjectAccount}>
@@ -400,9 +391,7 @@ export function ShareProjectDialog({
                 }))}
                 placeholder="No namespaces loaded"
                 status={
-                  namespaceError === null
-                    ? undefined
-                    : { type: "error", message: namespaceError }
+                  namespaceError === null ? undefined : { type: "error", message: namespaceError }
                 }
                 value={selectedNamespaceKey}
                 width="100%"
@@ -437,9 +426,7 @@ export function ShareProjectDialog({
             />
             <CheckboxInput
               disabledMessage={
-                !canCreatePrivate
-                  ? "Your account doesn't support private repositories."
-                  : undefined
+                !canCreatePrivate ? "Your account doesn't support private repositories." : undefined
               }
               isDisabled={busy || created !== null || !canCreatePrivate}
               label="Private"
@@ -493,8 +480,8 @@ export function ShareProjectDialog({
           )}
           {created && (
             <p role="status">
-              Remote repository created at <code>{created.project}</code>. Retrying will only
-              finish local Git setup.
+              Remote repository created at <code>{created.project}</code>. Retrying will only finish
+              local Git setup.
             </p>
           )}
           {error && <p role="alert">{error}</p>}

@@ -25,7 +25,10 @@ class LineBookmarkMarker extends GutterMarker {
     marker.setAttribute("height", "12");
     marker.setAttribute("aria-label", "Bookmark");
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute("d", "M2 2.48828C2 1.65985 2.67157 0.988281 3.5 0.988281H10.5C11.3284 0.988281 12 1.65985 12 2.48828V13.5968C12 13.917 11.6425 14.1075 11.3768 13.9289L7 10.9883L2.62343 13.9322C2.35765 14.111 2 13.9205 2 13.6002V2.48828Z");
+    path.setAttribute(
+      "d",
+      "M2 2.48828C2 1.65985 2.67157 0.988281 3.5 0.988281H10.5C11.3284 0.988281 12 1.65985 12 2.48828V13.5968C12 13.917 11.6425 14.1075 11.3768 13.9289L7 10.9883L2.62343 13.9322C2.35765 14.111 2 13.9205 2 13.6002V2.48828Z",
+    );
     path.setAttribute("fill", "#FFAF0F");
     marker.append(path);
     return marker;
@@ -37,7 +40,8 @@ const lineBookmarkMarker = new LineBookmarkMarker();
 function languageName(path: string): string {
   const extension = path.split(".").at(-1)?.toLocaleLowerCase();
   if (extension === "ts" || extension === "tsx") return "TypeScript";
-  if (extension === "js" || extension === "jsx" || extension === "mjs" || extension === "cjs") return "JavaScript";
+  if (extension === "js" || extension === "jsx" || extension === "mjs" || extension === "cjs")
+    return "JavaScript";
   if (extension === "json" || extension === "jsonc") return "JSON";
   if (extension === "css" || extension === "scss" || extension === "less") return "CSS";
   if (extension === "html" || extension === "htm") return "HTML";
@@ -88,7 +92,9 @@ export default function CodeMirrorFile({
   onSaveRef.current = onSave;
   onToggleBookmarkRef.current = onToggleBookmark;
   valueRef.current = value;
-  const bookmarkedLineKey = [...new Set(bookmarkedLines)].sort((left, right) => left - right).join(",");
+  const bookmarkedLineKey = [...new Set(bookmarkedLines)]
+    .sort((left, right) => left - right)
+    .join(",");
 
   useEffect(() => {
     let disposed = false;
@@ -99,37 +105,32 @@ export default function CodeMirrorFile({
       const line = editor.state.doc.lineAt(head);
       const word = editor.state.wordAt(head);
       const selection = editor.state.selection.main;
-      window.dispatchEvent(new CustomEvent("git-client:editor-status", {
-        detail: {
-          path,
-          line: line.number,
-          column: head - line.from + 1,
-          readOnly: !editable,
-          language: languageName(path),
-          lineSeparator: editor.state.doc.toString().includes("\r\n") ? "CRLF" : "LF",
-          indentation: indentationLabel(editor.state.doc.toString()),
-          columnSelection: columnSelectionRef.current,
-          symbol: word
-            ? editor.state.doc.sliceString(word.from, word.to)
-            : undefined,
-          selectedText: selection.empty
-            ? undefined
-            : editor.state.doc.sliceString(selection.from, selection.to),
-        },
-      }));
+      window.dispatchEvent(
+        new CustomEvent("git-client:editor-status", {
+          detail: {
+            path,
+            line: line.number,
+            column: head - line.from + 1,
+            readOnly: !editable,
+            language: languageName(path),
+            lineSeparator: editor.state.doc.toString().includes("\r\n") ? "CRLF" : "LF",
+            indentation: indentationLabel(editor.state.doc.toString()),
+            columnSelection: columnSelectionRef.current,
+            symbol: word ? editor.state.doc.sliceString(word.from, word.to) : undefined,
+            selectedText: selection.empty
+              ? undefined
+              : editor.state.doc.sliceString(selection.from, selection.to),
+          },
+        }),
+      );
     };
     const goToLine = (event: Event): void => {
       if (!active || !(event instanceof CustomEvent) || view === null) return;
       const requestedLine = Number(event.detail?.line);
       const requestedColumn = Number(event.detail?.column ?? 1);
       if (!Number.isInteger(requestedLine) || !Number.isInteger(requestedColumn)) return;
-      const line = view.state.doc.line(
-        Math.min(view.state.doc.lines, Math.max(1, requestedLine)),
-      );
-      const position = Math.min(
-        line.to,
-        line.from + Math.max(0, requestedColumn - 1),
-      );
+      const line = view.state.doc.line(Math.min(view.state.doc.lines, Math.max(1, requestedLine)));
+      const position = Math.min(line.to, line.from + Math.max(0, requestedColumn - 1));
       view.dispatch({
         selection: { anchor: position },
         effects: EditorView.scrollIntoView(position, { y: "center" }),
@@ -147,10 +148,7 @@ export default function CodeMirrorFile({
       if (event.detail !== editorIdRef.current) active = false;
     };
     window.addEventListener("git-client:go-to-line", goToLine);
-    window.addEventListener(
-      "git-client:toggle-column-selection",
-      toggleColumnSelection,
-    );
+    window.addEventListener("git-client:toggle-column-selection", toggleColumnSelection);
     window.addEventListener("git-client:editor-activated", editorActivated);
     const removeSearchBridge = installCodeMirrorSearchBridge(() => view);
     const removeActionBridge = installCodeMirrorActionBridge(() => view);
@@ -172,12 +170,7 @@ export default function CodeMirrorFile({
           display: "block",
         },
       });
-      const bookmarkedLineSet = new Set(
-        bookmarkedLineKey
-          .split(",")
-          .filter(Boolean)
-          .map(Number),
-      );
+      const bookmarkedLineSet = new Set(bookmarkedLineKey.split(",").filter(Boolean).map(Number));
       view = new EditorView({
         parent: container.current,
         state: EditorState.create({
@@ -194,10 +187,11 @@ export default function CodeMirrorFile({
               domEventHandlers: {
                 mousedown: (editor, block) => {
                   const line = editor.state.doc.lineAt(block.from);
-                  const column = editor.state.selection.main.head >= line.from &&
+                  const column =
+                    editor.state.selection.main.head >= line.from &&
                     editor.state.selection.main.head <= line.to
-                    ? editor.state.selection.main.head - line.from + 1
-                    : 1;
+                      ? editor.state.selection.main.head - line.from + 1
+                      : 1;
                   onToggleBookmarkRef.current?.(line.number, column);
                   editor.focus();
                   publishStatus(editor);
@@ -228,13 +222,15 @@ export default function CodeMirrorFile({
             }),
             keymap.of(
               editable && onSaveRef.current
-                ? [{
-                    key: "Mod-s",
-                    run: (editor) => {
-                      void onSaveRef.current?.(editor.state.doc.toString());
-                      return true;
+                ? [
+                    {
+                      key: "Mod-s",
+                      run: (editor) => {
+                        void onSaveRef.current?.(editor.state.doc.toString());
+                        return true;
+                      },
                     },
-                  }]
+                  ]
                 : [],
             ),
             EditorView.contentAttributes.of({ "aria-label": `File contents for ${path}` }),
@@ -246,13 +242,8 @@ export default function CodeMirrorFile({
       });
       viewRef.current = view;
       if (initialLine !== undefined) {
-        const line = view.state.doc.line(
-          Math.min(view.state.doc.lines, Math.max(1, initialLine)),
-        );
-        const position = Math.min(
-          line.to,
-          line.from + Math.max(0, (initialColumn ?? 1) - 1),
-        );
+        const line = view.state.doc.line(Math.min(view.state.doc.lines, Math.max(1, initialLine)));
+        const position = Math.min(line.to, line.from + Math.max(0, (initialColumn ?? 1) - 1));
         view.dispatch({
           selection: { anchor: position },
           effects: EditorView.scrollIntoView(position, { y: "center" }),
@@ -265,17 +256,12 @@ export default function CodeMirrorFile({
     return () => {
       disposed = true;
       window.removeEventListener("git-client:go-to-line", goToLine);
-      window.removeEventListener(
-        "git-client:toggle-column-selection",
-        toggleColumnSelection,
-      );
+      window.removeEventListener("git-client:toggle-column-selection", toggleColumnSelection);
       window.removeEventListener("git-client:editor-activated", editorActivated);
       removeSearchBridge();
       removeActionBridge();
       if (active) {
-        window.dispatchEvent(
-          new CustomEvent("git-client:editor-status", { detail: null }),
-        );
+        window.dispatchEvent(new CustomEvent("git-client:editor-status", { detail: null }));
       }
       view?.destroy();
       if (viewRef.current === view) viewRef.current = null;

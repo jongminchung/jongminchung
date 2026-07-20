@@ -1,6 +1,6 @@
-import { createRequire } from "node:module";
 import { cp, lstat, mkdir, mkdtemp, rm, stat, symlink } from "node:fs/promises";
 import { readFile, writeFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { basename, dirname, join } from "node:path";
 import { executeCommand } from "./process.mjs";
@@ -14,8 +14,7 @@ const HFS_CATALOG_FORK_OFFSET = 272;
 const HFS_FORK_EXTENTS_OFFSET = 16;
 const HFS_EXTENT_COUNT = 8;
 const HFS_EXTENT_BYTES = 8;
-const HFS_FIXED_TIMESTAMP =
-  Math.floor(Date.UTC(2020, 0, 1, 0, 0, 0) / 1_000) + 2_082_844_800;
+const HFS_FIXED_TIMESTAMP = Math.floor(Date.UTC(2020, 0, 1, 0, 0, 0) / 1_000) + 2_082_844_800;
 const HFS_FIXED_UUID = Buffer.from("676974636c69656e", "hex");
 const UDIF_FIXED_UUID = Buffer.from("676974636c69656e742d646d672d7631", "hex");
 const UDIF_TRAILER_BYTES = 512;

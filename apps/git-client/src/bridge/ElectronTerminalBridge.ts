@@ -1,8 +1,5 @@
-import type { RepositoryId, TerminalEvent, TerminalId } from "../generated";
-import type {
-  TerminalLaunchTarget,
-  TerminalLaunchTargets,
-} from "../shared/contracts/terminal";
+import type { RepositoryId, TerminalEvent, TerminalId } from "../shared/contracts/model";
+import type { TerminalLaunchTarget, TerminalLaunchTargets } from "../shared/contracts/terminal";
 import type { TerminalBridge } from "./TerminalBridge";
 
 export interface ElectronTerminalApi {

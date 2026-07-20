@@ -1,6 +1,9 @@
 export const PRODUCT_SETTINGS_KEY = "productSettings";
 
 export type ProductZoom = 100 | 125 | 150;
+export type EditorColorScheme = "themeDefault" | "light" | "dark" | "highContrast";
+export type ProductLanguage = "English";
+export type ProductRegion = "notSpecified" | "asiaExceptChinaMainland";
 export type NavigationBarLocation = "top" | "status" | "hidden";
 export type BidiTextDirection = "content" | "ltr" | "rtl";
 export type StatusBarWidget =
@@ -49,6 +52,9 @@ export interface ProductSettings {
   readonly bidiTextDirection: BidiTextDirection;
   readonly scrollToSearchResults: boolean;
   readonly processWindowAutoShow: boolean;
+  readonly editorColorScheme: EditorColorScheme;
+  readonly language: ProductLanguage;
+  readonly region: ProductRegion;
 }
 
 export const DEFAULT_STATUS_BAR_WIDGETS: Readonly<Record<StatusBarWidget, boolean>> = {
@@ -91,6 +97,9 @@ export const DEFAULT_PRODUCT_SETTINGS: ProductSettings = {
   bidiTextDirection: "content",
   scrollToSearchResults: true,
   processWindowAutoShow: false,
+  editorColorScheme: "themeDefault",
+  language: "English",
+  region: "asiaExceptChinaMainland",
 };
 
 function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
@@ -108,6 +117,16 @@ export function isProductKeymapPreset(value: unknown): value is ProductKeymapPre
   );
 }
 
+export function isEditorColorScheme(value: unknown): value is EditorColorScheme {
+  return (
+    value === "themeDefault" || value === "light" || value === "dark" || value === "highContrast"
+  );
+}
+
+export function isProductRegion(value: unknown): value is ProductRegion {
+  return value === "notSpecified" || value === "asiaExceptChinaMainland";
+}
+
 export function parseProductSettings(value: unknown): ProductSettings {
   if (!isRecord(value)) return DEFAULT_PRODUCT_SETTINGS;
   const zoom = value.zoom === 125 || value.zoom === 150 ? value.zoom : 100;
@@ -117,28 +136,24 @@ export function parseProductSettings(value: unknown): ProductSettings {
     value.navigationBar === "status"
       ? value.navigationBar
       : "status";
-  const rawWidgets = isRecord(value.statusBarWidgets)
-    ? value.statusBarWidgets
-    : {};
+  const rawWidgets = isRecord(value.statusBarWidgets) ? value.statusBarWidgets : {};
   const statusBarWidgets = Object.fromEntries(
     Object.entries(DEFAULT_STATUS_BAR_WIDGETS).map(([key, fallback]) => [
       key,
       typeof rawWidgets[key] === "boolean" ? rawWidgets[key] : fallback,
     ]),
   ) as Readonly<Record<StatusBarWidget, boolean>>;
-  const keymapOverrides: Readonly<Record<string, string | null>> =
-    isRecord(value.keymapOverrides)
-      ? Object.fromEntries(
-          Object.entries(value.keymapOverrides).flatMap(
-            ([id, accelerator]): readonly [string, string | null][] =>
-              id.length <= 256 &&
-              (accelerator === null ||
-                (typeof accelerator === "string" && accelerator.length <= 128))
-                ? [[id, accelerator]]
-                : [],
-          ),
-        )
-      : {};
+  const keymapOverrides: Readonly<Record<string, string | null>> = isRecord(value.keymapOverrides)
+    ? Object.fromEntries(
+        Object.entries(value.keymapOverrides).flatMap(
+          ([id, accelerator]): readonly [string, string | null][] =>
+            id.length <= 256 &&
+            (accelerator === null || (typeof accelerator === "string" && accelerator.length <= 128))
+              ? [[id, accelerator]]
+              : [],
+        ),
+      )
+    : {};
   return {
     compactMode: typeof value.compactMode === "boolean" ? value.compactMode : false,
     ideFontSize:
@@ -156,53 +171,43 @@ export function parseProductSettings(value: unknown): ProductSettings {
         ? value.editorFontSize
         : 13,
     zoom,
-    presentationMode:
-      typeof value.presentationMode === "boolean" ? value.presentationMode : false,
+    presentationMode: typeof value.presentationMode === "boolean" ? value.presentationMode : false,
     distractionFreeMode:
       typeof value.distractionFreeMode === "boolean" ? value.distractionFreeMode : false,
     zenMode: typeof value.zenMode === "boolean" ? value.zenMode : false,
     presentationAssistant:
       typeof value.presentationAssistant === "boolean" ? value.presentationAssistant : false,
-    powerSaveMode:
-      typeof value.powerSaveMode === "boolean" ? value.powerSaveMode : false,
-    toolbarVisible:
-      typeof value.toolbarVisible === "boolean" ? value.toolbarVisible : true,
+    powerSaveMode: typeof value.powerSaveMode === "boolean" ? value.powerSaveMode : false,
+    toolbarVisible: typeof value.toolbarVisible === "boolean" ? value.toolbarVisible : true,
     navigationBar,
     navigationBarShowMembers:
-      typeof value.navigationBarShowMembers === "boolean"
-        ? value.navigationBarShowMembers
-        : false,
+      typeof value.navigationBarShowMembers === "boolean" ? value.navigationBarShowMembers : false,
     toolWindowBarsVisible:
-      typeof value.toolWindowBarsVisible === "boolean"
-        ? value.toolWindowBarsVisible
-        : true,
-    statusBarVisible:
-      typeof value.statusBarVisible === "boolean" ? value.statusBarVisible : true,
+      typeof value.toolWindowBarsVisible === "boolean" ? value.toolWindowBarsVisible : true,
+    statusBarVisible: typeof value.statusBarVisible === "boolean" ? value.statusBarVisible : true,
     statusBarWidgets,
     adjustRedGreenVision:
-      typeof value.adjustRedGreenVision === "boolean"
-        ? value.adjustRedGreenVision
-        : false,
-    showNotifications: typeof value.showNotifications === "boolean" ? value.showNotifications : true,
+      typeof value.adjustRedGreenVision === "boolean" ? value.adjustRedGreenVision : false,
+    showNotifications:
+      typeof value.showNotifications === "boolean" ? value.showNotifications : true,
     showShortcutConflictWarning:
       typeof value.showShortcutConflictWarning === "boolean"
         ? value.showShortcutConflictWarning
         : true,
-    keymapPreset: isProductKeymapPreset(value.keymapPreset)
-      ? value.keymapPreset
-      : "macOS",
+    keymapPreset: isProductKeymapPreset(value.keymapPreset) ? value.keymapPreset : "macOS",
     keymapOverrides,
     bidiTextDirection:
       value.bidiTextDirection === "ltr" || value.bidiTextDirection === "rtl"
         ? value.bidiTextDirection
         : "content",
     scrollToSearchResults:
-      typeof value.scrollToSearchResults === "boolean"
-        ? value.scrollToSearchResults
-        : true,
+      typeof value.scrollToSearchResults === "boolean" ? value.scrollToSearchResults : true,
     processWindowAutoShow:
-      typeof value.processWindowAutoShow === "boolean"
-        ? value.processWindowAutoShow
-        : false,
+      typeof value.processWindowAutoShow === "boolean" ? value.processWindowAutoShow : false,
+    editorColorScheme: isEditorColorScheme(value.editorColorScheme)
+      ? value.editorColorScheme
+      : "themeDefault",
+    language: "English",
+    region: isProductRegion(value.region) ? value.region : "asiaExceptChinaMainland",
   };
 }

@@ -1,7 +1,4 @@
-import { Button } from "@astryxdesign/core/Button";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
-import { RadioList, RadioListItem } from "@astryxdesign/core/RadioList";
-import type { AppearanceMode } from "../domain/appearance";
+import type { AppearancePreference, AppearanceTheme } from "../domain/appearance";
 import {
   isProductKeymapPreset,
   type ProductKeymapPreset,
@@ -9,13 +6,14 @@ import {
   type ProductZoom,
 } from "../domain/productSettings";
 import { tw } from "../styles/tailwind";
+import { Button } from "./ui";
+import { Dialog, DialogHeader } from "./ui";
+import { RadioList, RadioListItem } from "./ui";
 
-const THEMES: readonly { readonly value: AppearanceMode; readonly label: string }[] = [
-  { value: "system", label: "System" },
+const THEMES: readonly { readonly value: AppearanceTheme | "system"; readonly label: string }[] = [
+  { value: "system", label: "Sync with OS" },
   { value: "light", label: "Islands Light" },
   { value: "dark", label: "Islands Dark" },
-  { value: "darcula", label: "Islands Darcula" },
-  { value: "highContrast", label: "High Contrast" },
 ];
 
 const KEYMAPS: readonly ProductKeymapPreset[] = [
@@ -28,15 +26,15 @@ const KEYMAPS: readonly ProductKeymapPreset[] = [
 ];
 
 export function QuickSwitchSchemeDialog({
-  appearanceMode,
+  appearancePreference,
   settings,
-  onAppearanceModeChange,
+  onAppearancePreferenceChange,
   onClose,
   onSettingsChange,
 }: {
-  readonly appearanceMode: AppearanceMode;
+  readonly appearancePreference: AppearancePreference;
   readonly settings: ProductSettings;
-  readonly onAppearanceModeChange: (mode: AppearanceMode) => void;
+  readonly onAppearancePreferenceChange: (preference: AppearancePreference) => void;
   readonly onClose: () => void;
   readonly onSettingsChange: (settings: ProductSettings) => void;
 }) {
@@ -50,20 +48,21 @@ export function QuickSwitchSchemeDialog({
       width={520}
     >
       <section className={tw.quickSwitchSchemeDialog}>
-        <DialogHeader
-          hasDivider
-          onOpenChange={(open) => !open && onClose()}
-          title="Switch"
-        />
+        <DialogHeader hasDivider onOpenChange={(open) => !open && onClose()} title="Switch" />
         <div>
           <h3>Theme and Color Scheme</h3>
           <RadioList
             label="Theme and Color Scheme"
             onChange={(value) => {
-              const mode = THEMES.find((theme) => theme.value === value)?.value;
-              if (mode) onAppearanceModeChange(mode);
+              const selection = THEMES.find((theme) => theme.value === value)?.value;
+              if (selection === undefined) return;
+              onAppearancePreferenceChange(
+                selection === "system"
+                  ? { ...appearancePreference, syncWithOs: true }
+                  : { theme: selection, syncWithOs: false },
+              );
             }}
-            value={appearanceMode}
+            value={appearancePreference.syncWithOs ? "system" : appearancePreference.theme}
           >
             {THEMES.map((theme) => (
               <RadioListItem key={theme.value} label={theme.label} value={theme.value} />
@@ -82,7 +81,9 @@ export function QuickSwitchSchemeDialog({
             }}
             value={settings.keymapPreset}
           >
-            {KEYMAPS.map((keymap) => <option key={keymap}>{keymap}</option>)}
+            {KEYMAPS.map((keymap) => (
+              <option key={keymap}>{keymap}</option>
+            ))}
           </select>
         </div>
         <div>

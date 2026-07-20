@@ -1,11 +1,11 @@
-import { Button } from "@astryxdesign/core/Button";
-import { CheckboxInput } from "@astryxdesign/core/CheckboxInput";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
-import { List, ListItem } from "@astryxdesign/core/List";
 import { useState } from "react";
 import type { BookmarkGroup } from "../domain/bookmarks";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
+import { Button } from "./ui";
+import { CheckboxInput } from "./ui";
+import { Dialog, DialogHeader } from "./ui";
+import { List, ListItem } from "./ui";
 
 export function BookmarkGroupSelectDialog({
   groups,
@@ -55,10 +55,19 @@ export function BookmarkGroupSelectDialog({
           size="sm"
           value={useAsDefault}
         />
-        <p>New bookmarks will be added here automatically. You can change the default list at any time in the Bookmarks tool window.</p>
+        <p>
+          New bookmarks will be added here automatically. You can change the default list at any
+          time in the Bookmarks tool window.
+        </p>
         <footer>
           <Button label="Cancel" onClick={onClose} size="md" variant="secondary" />
-          <Button isDisabled={!selectedId} label="Select" onClick={submit} size="md" variant="primary" />
+          <Button
+            isDisabled={!selectedId}
+            label="Select"
+            onClick={submit}
+            size="md"
+            variant="primary"
+          />
         </footer>
       </section>
     </Dialog>

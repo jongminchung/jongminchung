@@ -413,15 +413,7 @@
     },
     "filesAndWatcher": {
       "stage": "end-to-end-implemented",
-      "features": [
-        "diff",
-        "file",
-        "preview",
-        "submodule-diff",
-        "open-file",
-        "watch",
-        "unwatch"
-      ],
+      "features": ["diff", "file", "preview", "submodule-diff", "open-file", "watch", "unwatch"],
       "packageVerification": "passed",
       "packageVerifiedFeatures": [
         "diff",
@@ -436,14 +428,7 @@
     },
     "specialGit": {
       "stage": "end-to-end-implemented",
-      "features": [
-        "patch",
-        "shelf",
-        "changelist",
-        "conflict",
-        "recovery",
-        "multi-root"
-      ],
+      "features": ["patch", "shelf", "changelist", "conflict", "recovery", "multi-root"],
       "packageVerification": "passed",
       "rebasedParity": "unverified"
     },
@@ -477,8 +462,12 @@
     { "file": "electron-tests/packaged-app-harness.ts" },
     { "file": "electron-tests/hosting.spec.ts" },
     { "file": "parity/rebased/1.1.8/reports/release-validation.json" },
-    { "file": "parity/rebased/1.1.8/comparisons/ui-regressions/top-tabs/candidate-electron-43.1.1.jpeg" },
-    { "file": "parity/rebased/1.1.8/comparisons/ui-regressions/terminal/candidate-real-pty-electron-43.1.1.jpeg" },
+    {
+      "file": "parity/rebased/1.1.8/comparisons/ui-regressions/top-tabs/candidate-electron-43.1.1.jpeg"
+    },
+    {
+      "file": "parity/rebased/1.1.8/comparisons/ui-regressions/terminal/candidate-real-pty-electron-43.1.1.jpeg"
+    },
     { "file": "parity/rebased/1.1.8/comparisons/ui-regressions/terminal/behavior.json" },
     { "file": "release-artifacts/Git-Client_0.1.0_macos_arm64_adhoc.dmg" },
     { "file": "release-artifacts/Git-Client_0.1.0_macos_arm64_adhoc.dmg.sha256" }

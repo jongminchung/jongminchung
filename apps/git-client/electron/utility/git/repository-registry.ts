@@ -92,7 +92,8 @@ export class RepositoryRegistry {
   get(repositoryId: RepositoryId): RepositoryRecord {
     const id = RepositoryIdSchema.parse(repositoryId);
     const record = this.#repositories.get(id);
-    if (record === undefined) throw new GitUtilityError("repositoryNotOpen", "Repository is not open");
+    if (record === undefined)
+      throw new GitUtilityError("repositoryNotOpen", "Repository is not open");
     return record;
   }
 
@@ -107,13 +108,17 @@ export class RepositoryRegistry {
       const detail = outputText(outcome, "stderr");
       throw new GitUtilityError(
         "gitUnavailable",
-        safeErrorMessage(detail || (outcome.kind === "failed" ? outcome.message : "Git version check was cancelled")),
+        safeErrorMessage(
+          detail ||
+            (outcome.kind === "failed" ? outcome.message : "Git version check was cancelled"),
+        ),
         outcome.kind === "failed" ? outcome.exitCode : null,
       );
     }
     const display = outputText(outcome, "stdout").trim();
     const match = /(?:^|\s)(\d+)\.(\d+)(?:\.(\d+))?/u.exec(display);
-    if (match === null) throw new GitUtilityError("gitUnavailable", `Unrecognized Git version: ${display}`);
+    if (match === null)
+      throw new GitUtilityError("gitUnavailable", `Unrecognized Git version: ${display}`);
     const version: GitVersion = Object.freeze({
       major: Number(match[1]),
       minor: Number(match[2]),

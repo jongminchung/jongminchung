@@ -1,9 +1,9 @@
-import { Button } from "@astryxdesign/core/Button";
-import { CheckboxInput } from "@astryxdesign/core/CheckboxInput";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
-import { RadioList, RadioListItem } from "@astryxdesign/core/RadioList";
 import { useState } from "react";
 import { tw } from "../styles/tailwind";
+import { Button } from "./ui";
+import { CheckboxInput } from "./ui";
+import { Dialog, DialogHeader } from "./ui";
+import { RadioList, RadioListItem } from "./ui";
 
 export type HtmlExportScope = "file" | "selection" | "directory";
 
@@ -64,24 +64,18 @@ export function ExportToHtmlDialog({
           <RadioList
             label="Export scope"
             onChange={(value) => {
-              if (value === "file" || value === "selection" || value === "directory") setScope(value);
+              if (value === "file" || value === "selection" || value === "directory")
+                setScope(value);
             }}
             value={scope}
           >
-            <RadioListItem
-              isDisabled={!fileName}
-              label={`File ${fileName ?? ""}`}
-              value="file"
-            />
+            <RadioListItem isDisabled={!fileName} label={`File ${fileName ?? ""}`} value="file" />
             <RadioListItem
               isDisabled={!selectionAvailable}
               label="Selected text"
               value="selection"
             />
-            <RadioListItem
-              label={`All files in directory ${directoryName}`}
-              value="directory"
-            />
+            <RadioListItem label={`All files in directory ${directoryName}`} value="directory" />
           </RadioList>
           <label>
             Output directory

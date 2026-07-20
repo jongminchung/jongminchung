@@ -1,4 +1,4 @@
-import type { GitOperation, PushPreview } from "../generated";
+import type { GitOperation, PushPreview } from "../shared/contracts/model";
 
 export type PushChoice = "normal" | "forceWithLease";
 
@@ -21,8 +21,9 @@ export function requiresPushConfirmation(
   choice: PushChoice,
   knownRewrite: boolean,
 ): boolean {
-  return choice === "forceWithLease" && (
-    preview.protectedBranch || (preview.fastForward === false && !knownRewrite)
+  return (
+    choice === "forceWithLease" &&
+    (preview.protectedBranch || (preview.fastForward === false && !knownRewrite))
   );
 }
 
@@ -45,8 +46,9 @@ export function createPushOperation(
       localRevision: preview.sourceRevision,
       setUpstream,
     },
-    mode: choice === "normal"
-      ? { kind: "normal" }
-      : { kind: "forceWithLease", expectedRemoteOid: preview.expectedLeaseOid ?? "" },
+    mode:
+      choice === "normal"
+        ? { kind: "normal" }
+        : { kind: "forceWithLease", expectedRemoteOid: preview.expectedLeaseOid ?? "" },
   };
 }

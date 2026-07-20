@@ -1,4 +1,3 @@
-import { Button } from "@astryxdesign/core/Button";
 import { useRef, type MouseEvent } from "react";
 import {
   terminalTabAfterClose,
@@ -8,6 +7,7 @@ import {
 import type { TerminalSessionSnapshot } from "../domain/TerminalService";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
+import { Button } from "./ui";
 
 const TERMINAL_STATUS_CLASS = {
   starting: "bg-accent-bg",

@@ -1,15 +1,13 @@
-import { CheckboxInput } from "@astryxdesign/core/CheckboxInput";
-import { Popover } from "@astryxdesign/core/Popover";
-import { Selector } from "@astryxdesign/core/Selector";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { FileChange, TreeEntry } from "../domain/types";
+import { mergeProjectTreeEntries, type ProjectTreeEntry } from "../domain/projectTree";
 import type { ScratchFile } from "../domain/scratchFiles";
-import {
-  mergeProjectTreeEntries,
-  type ProjectTreeEntry,
-} from "../domain/projectTree";
+import type { FileChange, TreeEntry } from "../domain/types";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
+import { CheckboxInput } from "./ui";
+import { Popover } from "./ui";
+import { Selector } from "./ui";
+import { VerticalResizeHandle } from "./VerticalResizeHandle";
 
 interface VisibleProjectRow {
   readonly entry: ProjectTreeEntry;
@@ -32,8 +30,8 @@ function sortProjectEntries(
       return left.kind === "tree" ? -1 : 1;
     }
     if (sortKey === "type") {
-      const leftExtension = left.kind === "tree" ? "" : left.name.split(".").at(-1) ?? "";
-      const rightExtension = right.kind === "tree" ? "" : right.name.split(".").at(-1) ?? "";
+      const leftExtension = left.kind === "tree" ? "" : (left.name.split(".").at(-1) ?? "");
+      const rightExtension = right.kind === "tree" ? "" : (right.name.split(".").at(-1) ?? "");
       const typeOrder = leftExtension.localeCompare(rightExtension, undefined, {
         numeric: true,
         sensitivity: "base",
@@ -69,6 +67,8 @@ export function ProjectToolWindow({
   onOpenScratch,
   onClose,
   scratches,
+  width,
+  onWidthChange,
 }: {
   readonly activePath?: string;
   readonly repositoryName: string;
@@ -82,6 +82,8 @@ export function ProjectToolWindow({
   readonly onOpenScratch: (scratch: ScratchFile) => void;
   readonly onClose: () => void;
   readonly scratches: readonly ScratchFile[];
+  readonly width: number;
+  readonly onWidthChange: (width: number) => void;
 }) {
   const [children, setChildren] = useState<ReadonlyMap<string, readonly ProjectTreeEntry[]>>(
     new Map(),
@@ -122,7 +124,10 @@ export function ProjectToolWindow({
   );
 
   const changeFingerprint = useMemo(
-    () => changes.map((change) => `${change.path}:${change.status}:${change.staged}:${change.worktree}`).join("\0"),
+    () =>
+      changes
+        .map((change) => `${change.path}:${change.status}:${change.staged}:${change.worktree}`)
+        .join("\0"),
     [changes],
   );
 
@@ -135,9 +140,7 @@ export function ProjectToolWindow({
       (left, right) => left.split("/").length - right.split("/").length,
     );
     for (const path of ordered) {
-      const parentPath = path.includes("/")
-        ? path.slice(0, path.lastIndexOf("/"))
-        : "";
+      const parentPath = path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : "";
       if (path === "" || children.has(parentPath)) void loadDirectory(path);
     }
   }, [children, expanded, loadDirectory]);
@@ -190,17 +193,13 @@ export function ProjectToolWindow({
       return;
     }
     const segments = activePath.split("/");
-    const parents = segments.slice(0, -1).map((_, index) =>
-      segments.slice(0, index + 1).join("/"),
-    );
+    const parents = segments.slice(0, -1).map((_, index) => segments.slice(0, index + 1).join("/"));
     await Promise.all([loadDirectory(""), ...parents.map(loadDirectory)]);
     setExpanded((current) => new Set([...current, "", ...parents]));
     setSelectedPath(activePath);
     window.requestAnimationFrame(() =>
       document
-        .querySelector<HTMLElement>(
-          `[data-project-path="${CSS.escape(activePath)}"]`,
-        )
+        .querySelector<HTMLElement>(`[data-project-path="${CSS.escape(activePath)}"]`)
         ?.focus(),
     );
   };
@@ -229,7 +228,10 @@ export function ProjectToolWindow({
       focusRelative(path, event.key === "ArrowDown" ? 1 : -1);
     } else if (event.key === "Home" || event.key === "End") {
       event.preventDefault();
-      focusRelative(path, event.key === "Home" ? -Number.MAX_SAFE_INTEGER : Number.MAX_SAFE_INTEGER);
+      focusRelative(
+        path,
+        event.key === "Home" ? -Number.MAX_SAFE_INTEGER : Number.MAX_SAFE_INTEGER,
+      );
     } else if (event.key === "ArrowRight" && (entry?.kind === "tree" || !entry)) {
       event.preventDefault();
       if (!expanded.has(path)) toggle(path);
@@ -244,16 +246,24 @@ export function ProjectToolWindow({
 
   return (
     <section aria-label="Project Tool Window" className={tw.projectToolWindow}>
+      <VerticalResizeHandle
+        direction={1}
+        label="Resize Project tool window"
+        onChange={onWidthChange}
+        value={width}
+      />
       <header className={tw.projectToolHeader}>
-        <button aria-label="Project" title="Project"><strong>Project</strong></button>
+        <button aria-label="Project" title="Project">
+          <strong>Project</strong>
+        </button>
         <span />
         <button aria-label="New File or Directory…" onClick={onNew} title="New File or Directory…">
           <Icon name="plus" size={14} />
         </button>
         <button
-          aria-label="Select Opened File (⌥F1, 1)"
+          aria-label="Select Opened File"
           onClick={() => void revealActiveFile()}
-          title="Select Opened File"
+          title="Select Opened File (⌥F1, 1)"
         >
           <Icon name="checkout" size={14} />
         </button>
@@ -432,23 +442,25 @@ export function ProjectToolWindow({
             <span>Scratches and Consoles</span>
           </button>
         )}
-        {showScratches && scratchesExpanded && scratches.map((scratch) => (
-          <button
-            aria-level={2}
-            className={tw.projectScratchFile}
-            key={scratch.id}
-            onDoubleClick={() => onOpenScratch(scratch)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") onOpenScratch(scratch);
-            }}
-            role="treeitem"
-            title={scratch.name}
-          >
-            <span />
-            <Icon name="file" size={14} />
-            <span>{scratch.name}</span>
-          </button>
-        ))}
+        {showScratches &&
+          scratchesExpanded &&
+          scratches.map((scratch) => (
+            <button
+              aria-level={2}
+              className={tw.projectScratchFile}
+              key={scratch.id}
+              onDoubleClick={() => onOpenScratch(scratch)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") onOpenScratch(scratch);
+              }}
+              role="treeitem"
+              title={scratch.name}
+            >
+              <span />
+              <Icon name="file" size={14} />
+              <span>{scratch.name}</span>
+            </button>
+          ))}
       </div>
     </section>
   );

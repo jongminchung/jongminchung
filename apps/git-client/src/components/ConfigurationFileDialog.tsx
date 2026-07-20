@@ -1,8 +1,8 @@
-import { Button } from "@astryxdesign/core/Button";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
-import { TextArea } from "@astryxdesign/core/TextArea";
 import { useEffect, useState } from "react";
 import { tw } from "../styles/tailwind";
+import { Button } from "./ui";
+import { Dialog, DialogHeader } from "./ui";
+import { TextArea } from "./ui";
 
 export function ConfigurationFileDialog({
   description,
@@ -65,11 +65,7 @@ export function ConfigurationFileDialog({
       width="min(720px, calc(100vw - 70px))"
     >
       <section className={tw.configurationFileDialog}>
-        <DialogHeader
-          hasDivider
-          onOpenChange={(open) => !open && onClose()}
-          title={title}
-        />
+        <DialogHeader hasDivider onOpenChange={(open) => !open && onClose()} title={title} />
         <main>
           <p>{description}</p>
           <TextArea

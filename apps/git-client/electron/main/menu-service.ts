@@ -45,18 +45,13 @@ export class NativeMenuService {
     );
     if (acceleratorSignature !== this.#acceleratorSignature) {
       this.#acceleratorSignature = acceleratorSignature;
-      this.#accelerators = new Map(
-        states.map((state) => [state.id, state.accelerator]),
-      );
+      this.#accelerators = new Map(states.map((state) => [state.id, state.accelerator]));
       this.install();
     }
     for (const state of states) {
       const items = this.#items.get(state.id) ?? [];
       for (const item of items) {
-        if (
-          state.label !== undefined &&
-          DYNAMIC_LABEL_COMMANDS.has(state.id)
-        ) {
+        if (state.label !== undefined && DYNAMIC_LABEL_COMMANDS.has(state.id)) {
           item.label = state.label;
         }
         item.enabled = state.enabled;
@@ -83,9 +78,13 @@ export class NativeMenuService {
     for (const item of this.#gitMenus) item.visible = gitMenuVisible;
   }
 
+  dispatch(command: NativeCommand): void {
+    this.send(command);
+  }
+
   private command(id: string, label: string, accelerator?: string): MenuTemplateItem {
     const resolvedAccelerator = this.#accelerators.has(id)
-      ? this.#accelerators.get(id) ?? undefined
+      ? (this.#accelerators.get(id) ?? undefined)
       : accelerator;
     return {
       id,
@@ -115,11 +114,7 @@ export class NativeMenuService {
     return { label, submenu };
   }
 
-  private commandGroup(
-    id: string,
-    label: string,
-    submenu: MenuTemplateItem[],
-  ): MenuTemplateItem {
+  private commandGroup(id: string, label: string, submenu: MenuTemplateItem[]): MenuTemplateItem {
     return { id, label, submenu };
   }
 
@@ -171,7 +166,7 @@ export class NativeMenuService {
           this.group("Local History", [
             this.command("localHistory.show", "Show History…"),
             this.command("localHistory.showProject", "Show Project History…"),
-            this.command("localHistory.recent", "Recent Changes"),
+            this.command("localHistory.recent", "Recent Changes", "Option+Shift+C"),
             this.command("localHistory.putLabel", "Put Label…"),
           ]),
           { type: "separator" },
@@ -182,17 +177,16 @@ export class NativeMenuService {
           this.group("Manage IDE Settings", [
             this.command("workspace.importSettings", "Import Settings…"),
             this.command("workspace.exportSettings", "Export Settings…"),
-            this.command(
-              "workspace.restoreDefaultSettings",
-              "Restore Default Settings…",
-            ),
+            this.command("workspace.restoreDefaultSettings", "Restore Default Settings…"),
           ]),
           this.group("New Projects Setup", [
             this.command("workspace.settingsNewProjects", "Settings for New Projects…"),
             this.command("workspace.runConfigurationTemplates", "Run Configuration Templates…"),
           ]),
           this.unavailable("Save File as Template…"),
-          this.group("Export", [this.command("workspace.exportHtml", "Files or Selection to HTML…")]),
+          this.group("Export", [
+            this.command("workspace.exportHtml", "Files or Selection to HTML…"),
+          ]),
           this.unavailable("Print…"),
           this.toggleCommand("view.powerSaveMode", "Power Save Mode"),
         ],
@@ -213,19 +207,39 @@ export class NativeMenuService {
             this.command("edit.replace", "Replace…", "Control+R"),
             this.command("view.findNext", "Find Next Occurrence"),
             this.command("view.findPrevious", "Find Previous Occurrence"),
-            this.command("edit.selectAllOccurrences", "Select All Occurrences", "Control+Command+G"),
-            this.command("edit.selectNextOccurrence", "Add Selection for Next Occurrence", "Control+G"),
+            this.command(
+              "edit.selectAllOccurrences",
+              "Select All Occurrences",
+              "Control+Command+G",
+            ),
+            this.command(
+              "edit.selectNextOccurrence",
+              "Add Selection for Next Occurrence",
+              "Control+G",
+            ),
             this.command("edit.unselectOccurrence", "Unselect Occurrence", "Control+Shift+G"),
             this.command("view.searchInSelection", "Search In Selection", "Control+Option+E"),
             this.toggleCommand("view.scrollSearchResults", "Scroll to Results During Typing"),
-            this.command("view.findWordAtCaret", "Next Occurrence of the Word at Caret", "Control+F3"),
-            this.command("view.findPrevWordAtCaret", "Previous Occurrence of the Word at Caret", "Control+Shift+F3"),
+            this.command(
+              "view.findWordAtCaret",
+              "Next Occurrence of the Word at Caret",
+              "Control+F3",
+            ),
+            this.command(
+              "view.findPrevWordAtCaret",
+              "Previous Occurrence of the Word at Caret",
+              "Control+Shift+F3",
+            ),
             this.command("view.findInFiles", "Find in Files…", "Command+Shift+F"),
             this.command("view.replaceInFiles", "Replace in Files…", "Command+Shift+R"),
           ]),
           this.group("Find Usages", [
             this.command("edit.findUsages", "Find Usages", "Option+F7"),
-            this.command("edit.findUsagesSettings", "Find Usages Settings…", "Command+Shift+Option+F7"),
+            this.command(
+              "edit.findUsagesSettings",
+              "Find Usages Settings…",
+              "Command+Shift+Option+F7",
+            ),
             this.command("edit.showUsages", "Show Usages", "Command+Option+F7"),
             this.command("edit.findUsagesFile", "Find Usages in File", "Command+F7"),
             this.command("edit.highlightUsages", "Highlight Usages in File", "Command+Shift+F7"),
@@ -234,7 +248,11 @@ export class NativeMenuService {
             this.command("edit.recentFindUsages", "Recent Find Usages"),
           ]),
           { role: "selectAll" },
-          this.command("edit.addCaretsToLineEnds", "Add Carets to Ends of Selected Lines", "Option+Shift+G"),
+          this.command(
+            "edit.addCaretsToLineEnds",
+            "Add Carets to Ends of Selected Lines",
+            "Option+Shift+G",
+          ),
           this.command("edit.extendSelection", "Extend Selection", "Option+Up"),
           this.command("edit.shrinkSelection", "Shrink Selection", "Option+Down"),
           this.command("edit.toggleCase", "Toggle Case", "Control+Shift+U"),
@@ -263,10 +281,7 @@ export class NativeMenuService {
             this.command("bookmarks.showMnemonics", "Go to Mnemonic…"),
           ]),
           this.acceleratorCommand("bookmarks.toggle", "Toggle Bookmark"),
-          this.acceleratorCommand(
-            "bookmarks.toggleMnemonic",
-            "Toggle Bookmark Mnemonic…",
-          ),
+          this.acceleratorCommand("bookmarks.toggleMnemonic", "Toggle Bookmark Mnemonic…"),
           { label: "Emoji & Symbols", click: () => app.showEmojiPanel() },
           this.unavailable("Encode XML/HTML Special Characters"),
         ],
@@ -437,10 +452,7 @@ export class NativeMenuService {
       {
         label: "Tools",
         submenu: [
-          this.command(
-            "tools.commandLineLauncher",
-            "Create Command Line Launcher…",
-          ),
+          this.command("tools.commandLineLauncher", "Create Command Line Launcher…"),
           this.group("Services", []),
           this.group("XML Actions", [this.unavailable("Convert Schema...")]),
         ],
@@ -478,14 +490,8 @@ export class NativeMenuService {
             this.command("repository.commitCurrentFile", "Commit…"),
             this.command("repository.addCurrentFile", "Add"),
             this.command("repository.showCurrentFileDiff", "Show Diff"),
-            this.command(
-              "repository.compareCurrentFileRevision",
-              "Compare with Revision…",
-            ),
-            this.command(
-              "repository.compareCurrentFileRef",
-              "Compare with Branch or Tag…",
-            ),
+            this.command("repository.compareCurrentFileRevision", "Compare with Revision…"),
+            this.command("repository.compareCurrentFileRef", "Compare with Branch or Tag…"),
             this.command("repository.showFileHistory", "Show History"),
           ]),
           this.group("GitLab", [
@@ -500,11 +506,7 @@ export class NativeMenuService {
           ]),
           this.command("repository.manageRemotes", "Manage Remotes…"),
           this.command("workspace.clone", "Clone…"),
-          this.command(
-            "repository.operationsPopup",
-            "VCS Operations Popup…",
-            "Control+V",
-          ),
+          this.command("repository.operationsPopup", "VCS Operations Popup…", "Control+V"),
         ],
       },
       {
@@ -523,50 +525,26 @@ export class NativeMenuService {
             this.command("window.layoutSaveNew", "Save Current Layout as New…"),
           ]),
           this.group("Active Tool Window", [
-            this.command(
-              "window.hideActiveToolWindow",
-              "Hide Active Tool Window",
-              "Shift+Escape",
-            ),
+            this.command("window.hideActiveToolWindow", "Hide Active Tool Window", "Shift+Escape"),
             this.command("window.hideSideToolWindows", "Hide Side Tool Windows"),
             this.command("window.hideBottomToolWindows", "Hide Bottom Tool Windows"),
-            this.command(
-              "window.hideAllToolWindows",
-              "Hide All Tool Windows",
-              "Control+Shift+F12",
-            ),
+            this.command("window.hideAllToolWindows", "Hide All Tool Windows", "Control+Shift+F12"),
             this.command("window.jumpLastToolWindow", "Jump to Last Tool Window", "F12"),
-            this.command(
-              "window.maximizeToolWindow",
-              "Maximize Tool Window",
-              "Control+Shift+'",
-            ),
+            this.command("window.maximizeToolWindow", "Maximize Tool Window", "Control+Shift+'"),
             this.command("view.nextEditorTab", "Select Next Tab"),
             this.command("view.previousEditorTab", "Select Previous Tab"),
-            this.command(
-              "window.closeActiveToolWindowTab",
-              "Close Active Tab",
-              "Control+Shift+F4",
-            ),
+            this.command("window.closeActiveToolWindowTab", "Close Active Tab", "Control+Shift+F4"),
             this.group("View Mode", []),
             this.group("Move to", []),
             this.unavailable("Group Tabs"),
             this.commandGroup("window.resizeToolWindowGroup", "Resize", [
-              this.command(
-                "window.resizeToolWindowLeft",
-                "Stretch to Left",
-                "Control+Option+Left",
-              ),
+              this.command("window.resizeToolWindowLeft", "Stretch to Left", "Control+Option+Left"),
               this.command(
                 "window.resizeToolWindowRight",
                 "Stretch to Right",
                 "Control+Option+Right",
               ),
-              this.command(
-                "window.resizeToolWindowUp",
-                "Stretch to Top",
-                "Control+Option+Up",
-              ),
+              this.command("window.resizeToolWindowUp", "Stretch to Top", "Control+Option+Up"),
               this.command(
                 "window.resizeToolWindowDown",
                 "Stretch to Bottom",
@@ -634,10 +612,7 @@ export class NativeMenuService {
           this.command("help.changeMemorySettings", "Change Memory Settings"),
           this.command("help.customProperties", "Edit Custom Properties…"),
           this.command("help.customVmOptions", "Edit Custom VM Options…"),
-          this.command(
-            "help.deleteLeftovers",
-            "Delete Leftover IDE Directories…",
-          ),
+          this.command("help.deleteLeftovers", "Delete Leftover IDE Directories…"),
         ],
       },
     ];

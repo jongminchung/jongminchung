@@ -19,4 +19,10 @@ apps/docs/public/excalidraw-assets/
 **/target/
 *.tsbuildinfo
 
+# node
+.nx
+
+# Intellij
 .idea/
+
+#rebased/

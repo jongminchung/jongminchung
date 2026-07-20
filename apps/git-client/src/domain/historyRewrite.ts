@@ -1,4 +1,4 @@
-import type { HistoryRewritePreview, RebasePlanEntry } from "../generated";
+import type { HistoryRewritePreview, RebasePlanEntry } from "../shared/contracts/model";
 
 export function prepareHistoryPlan(
   preview: HistoryRewritePreview,
@@ -19,7 +19,8 @@ export function prepareHistoryPlan(
 export function historyPlanError(entries: readonly RebasePlanEntry[]): string | null {
   let hasTarget = false;
   for (const entry of entries) {
-    if (entry.mergeCommit && entry.action !== "pick") return "Merge commits must remain pick entries.";
+    if (entry.mergeCommit && entry.action !== "pick")
+      return "Merge commits must remain pick entries.";
     if ((entry.action === "squash" || entry.action === "fixup") && !hasTarget) {
       return "Squash and fixup require an earlier picked commit.";
     }

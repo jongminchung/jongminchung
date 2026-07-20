@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { RepositoryIdSchema } from "./git-utility";
 import {
   DEFAULT_TERMINAL_LAUNCH_TARGET,
   TerminalCloseRepositoryRequestSchema,
@@ -13,30 +14,29 @@ import {
   TerminalWriteRequestSchema,
   TerminalRequestIdSchema,
 } from "./terminal";
-import { RepositoryIdSchema } from "./git-utility";
 
 export const TERMINAL_UTILITY_PROTOCOL_VERSION = 1;
 export const TERMINAL_UTILITY_HANDSHAKE_TIMEOUT_MS = 10_000;
 
 export const TerminalUtilityCorrelationIdSchema = z.uuid();
-export type TerminalUtilityCorrelationId = z.infer<
-  typeof TerminalUtilityCorrelationIdSchema
->;
+export type TerminalUtilityCorrelationId = z.infer<typeof TerminalUtilityCorrelationIdSchema>;
 
 export const TerminalUtilityCreateSpecSchema = z
   .object({
     requestId: TerminalRequestIdSchema,
     repositoryId: RepositoryIdSchema,
-    cwd: z.string().min(1).max(16_384).refine((value) => !value.includes("\0")),
+    cwd: z
+      .string()
+      .min(1)
+      .max(16_384)
+      .refine((value) => !value.includes("\0")),
     cols: TerminalColumnsSchema,
     rows: TerminalRowsSchema,
     target: TerminalLaunchTargetSchema.default(DEFAULT_TERMINAL_LAUNCH_TARGET),
   })
   .strict()
   .readonly();
-export type TerminalUtilityCreateSpec = Readonly<
-  z.infer<typeof TerminalUtilityCreateSpecSchema>
->;
+export type TerminalUtilityCreateSpec = Readonly<z.infer<typeof TerminalUtilityCreateSpecSchema>>;
 
 const CorrelatedMessageSchema = {
   correlationId: TerminalUtilityCorrelationIdSchema,
@@ -108,9 +108,7 @@ export const TerminalUtilityErrorCodeSchema = z.enum([
   "internalError",
   "unsupportedProtocol",
 ]);
-export type TerminalUtilityErrorCode = z.infer<
-  typeof TerminalUtilityErrorCodeSchema
->;
+export type TerminalUtilityErrorCode = z.infer<typeof TerminalUtilityErrorCodeSchema>;
 
 export const TerminalUtilityToMainMessageSchema = z
   .discriminatedUnion("kind", [
@@ -143,15 +141,9 @@ export const TerminalUtilityToMainMessageSchema = z
         targets: TerminalLaunchTargetsSchema,
       })
       .strict(),
-    z
-      .object({ kind: z.literal("writeResult"), ...CorrelatedMessageSchema })
-      .strict(),
-    z
-      .object({ kind: z.literal("resizeResult"), ...CorrelatedMessageSchema })
-      .strict(),
-    z
-      .object({ kind: z.literal("closeResult"), ...CorrelatedMessageSchema })
-      .strict(),
+    z.object({ kind: z.literal("writeResult"), ...CorrelatedMessageSchema }).strict(),
+    z.object({ kind: z.literal("resizeResult"), ...CorrelatedMessageSchema }).strict(),
+    z.object({ kind: z.literal("closeResult"), ...CorrelatedMessageSchema }).strict(),
     z
       .object({
         kind: z.literal("closeRepositoryResult"),
@@ -159,9 +151,7 @@ export const TerminalUtilityToMainMessageSchema = z
         closed: z.number().int().nonnegative(),
       })
       .strict(),
-    z
-      .object({ kind: z.literal("disposeResult"), ...CorrelatedMessageSchema })
-      .strict(),
+    z.object({ kind: z.literal("disposeResult"), ...CorrelatedMessageSchema }).strict(),
     z
       .object({
         kind: z.literal("terminalEvent"),

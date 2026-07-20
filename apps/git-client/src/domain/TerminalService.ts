@@ -1,14 +1,14 @@
-import type { TerminalBridge } from "../bridge/TerminalBridge";
+import { z } from "zod";
 import { createTerminalBridge } from "../bridge/createTerminalBridge";
-import type { RepositoryId, TerminalEvent, TerminalId } from "../generated";
-import { readNativeSetting, writeNativeSettings } from "../platform/nativeSettings";
+import type { TerminalBridge } from "../bridge/TerminalBridge";
+import { readElectronSetting, writeElectronSettings } from "../platform/electronSettings";
+import type { RepositoryId, TerminalEvent, TerminalId } from "../shared/contracts/model";
 import {
   DEFAULT_TERMINAL_LAUNCH_TARGET,
   TerminalLaunchTargetSchema,
   type TerminalLaunchTarget,
   type TerminalLaunchTargets,
 } from "../shared/contracts/terminal";
-import { z } from "zod";
 
 const MAX_BACKLOG_BYTES = 2 * 1024 * 1024;
 
@@ -126,12 +126,8 @@ export class TerminalService {
     this.#sessions.set(key, record);
     this.#notify();
     try {
-      const terminalId = await this.#bridge.create(
-        repositoryId,
-        100,
-        28,
-        target,
-        (event) => this.#receive(key, event),
+      const terminalId = await this.#bridge.create(repositoryId, 100, 28, target, (event) =>
+        this.#receive(key, event),
       );
       const session = this.#sessions.get(key);
       if (session) {
@@ -195,7 +191,7 @@ export class TerminalService {
 
   async #restore(repositoryId: RepositoryId): Promise<void> {
     try {
-      const stored = await readNativeSetting("terminalTabsByRepository");
+      const stored = await readElectronSetting("terminalTabsByRepository");
       if (!stored || typeof stored !== "object" || Array.isArray(stored)) return;
       const sessions = Reflect.get(stored, repositoryId);
       if (!Array.isArray(sessions)) return;
@@ -250,7 +246,7 @@ export class TerminalService {
           { title: session.title, target: session.target },
         ];
       }
-      await writeNativeSettings({ terminalTabsByRepository: value });
+      await writeElectronSettings({ terminalTabsByRepository: value });
     } catch {
       // Live terminal sessions remain usable when metadata persistence fails.
     }

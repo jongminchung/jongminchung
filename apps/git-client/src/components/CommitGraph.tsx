@@ -3,7 +3,7 @@ import { placeGraphLanes } from "../domain/parsers";
 import type { Commit } from "../domain/types";
 
 const COLORS = ["#745fd6", "#28a477", "#dc6f58", "#438fc4", "#c5902e", "#b461a5"] as const;
-const ROW_HEIGHT = 22;
+const ROW_HEIGHT = 20;
 const LANE_WIDTH = 12;
 
 export const CommitGraph = memo(function CommitGraph({

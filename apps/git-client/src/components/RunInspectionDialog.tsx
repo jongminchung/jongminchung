@@ -1,11 +1,11 @@
-import { Button } from "@astryxdesign/core/Button";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
-import { List, ListItem } from "@astryxdesign/core/List";
-import { TextInput } from "@astryxdesign/core/TextInput";
 import { useMemo, useState } from "react";
 import { CODE_INSPECTIONS, type CodeInspectionId } from "../domain/codeAnalysis";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
+import { Button } from "./ui";
+import { Dialog, DialogHeader } from "./ui";
+import { List, ListItem } from "./ui";
+import { TextInput } from "./ui";
 
 export function RunInspectionDialog({
   onChoose,
@@ -25,9 +25,20 @@ export function RunInspectionDialog({
   }, [query]);
 
   return (
-    <Dialog aria-label="Run Inspection by Name" isOpen onOpenChange={(open) => !open && onClose()} padding={0} purpose="info" width={600}>
+    <Dialog
+      aria-label="Run Inspection by Name"
+      isOpen
+      onOpenChange={(open) => !open && onClose()}
+      padding={0}
+      purpose="info"
+      width={600}
+    >
       <section className={tw.runInspectionDialog}>
-        <DialogHeader hasDivider onOpenChange={(open) => !open && onClose()} title="Run Inspection by Name" />
+        <DialogHeader
+          hasDivider
+          onOpenChange={(open) => !open && onClose()}
+          title="Run Inspection by Name"
+        />
         <TextInput
           hasAutoFocus
           hasClear
@@ -46,11 +57,15 @@ export function RunInspectionDialog({
               label={inspection.name}
               onClick={() => onChoose(inspection.id)}
               role="option"
-              startContent={<Icon name={inspection.severity === "error" ? "warning" : "search"} size={14} />}
+              startContent={
+                <Icon name={inspection.severity === "error" ? "warning" : "search"} size={14} />
+              }
             />
           ))}
         </List>
-        <footer><Button label="Cancel" onClick={onClose} variant="secondary" /></footer>
+        <footer>
+          <Button label="Cancel" onClick={onClose} variant="secondary" />
+        </footer>
       </section>
     </Dialog>
   );

@@ -40,24 +40,24 @@ export function parseScratchFiles(value: unknown): readonly ScratchFile[] {
       typeof candidate.name !== "string" ||
       typeof candidate.languageId !== "string" ||
       typeof candidate.content !== "string"
-    ) return [];
-    return [{
-      id: candidate.id.slice(0, 128),
-      name: candidate.name.slice(0, 256),
-      languageId: candidate.languageId.slice(0, 64),
-      content: candidate.content.slice(0, 5_242_880),
-      updatedAtMs:
-        typeof candidate.updatedAtMs === "number" && Number.isFinite(candidate.updatedAtMs)
-          ? candidate.updatedAtMs
-          : 0,
-    }];
+    )
+      return [];
+    return [
+      {
+        id: candidate.id.slice(0, 128),
+        name: candidate.name.slice(0, 256),
+        languageId: candidate.languageId.slice(0, 64),
+        content: candidate.content.slice(0, 5_242_880),
+        updatedAtMs:
+          typeof candidate.updatedAtMs === "number" && Number.isFinite(candidate.updatedAtMs)
+            ? candidate.updatedAtMs
+            : 0,
+      },
+    ];
   });
 }
 
-export function nextScratchName(
-  files: readonly ScratchFile[],
-  language: ScratchLanguage,
-): string {
+export function nextScratchName(files: readonly ScratchFile[], language: ScratchLanguage): string {
   const names = new Set(files.map((file) => file.name));
   for (let index = 1; index < 10_000; index += 1) {
     const name = `scratch_${index}.${language.extension}`;

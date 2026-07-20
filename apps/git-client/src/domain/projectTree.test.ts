@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { FileChange, TreeEntry } from "./types";
 import { mergeProjectTreeEntries } from "./projectTree";
+import type { FileChange, TreeEntry } from "./types";
 
 const tracked: readonly TreeEntry[] = [
   { mode: "040000", kind: "tree", oid: "tree-src", path: "src" },
@@ -41,4 +41,3 @@ describe("project tree", () => {
     ]);
   });
 });
-
