@@ -1,3 +1,4 @@
+import { Button as ButtonPrimitive } from "@base-ui/react/button";
 import { cva } from "class-variance-authority";
 import type { VariantProps } from "class-variance-authority";
 import { LoaderCircle } from "lucide-react";
@@ -13,7 +14,8 @@ const buttonVariants = cva(
         primary: "border-primary bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
         secondary: "border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent",
         ghost: "border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground",
-        destructive: "border-destructive bg-destructive text-white hover:bg-destructive/90",
+        destructive:
+          "border-destructive bg-destructive text-destructive-foreground hover:bg-destructive/90",
       },
       size: {
         sm: "h-7 px-2.5",
@@ -79,7 +81,7 @@ export function Button({
   };
 
   return (
-    <button
+    <ButtonPrimitive
       aria-busy={loading || undefined}
       aria-label={isIconOnly ? label : undefined}
       className={cn(
@@ -97,7 +99,7 @@ export function Button({
       {loading ? <LoaderCircle aria-hidden className="size-3.5 animate-spin" /> : icon}
       {isIconOnly ? null : (children ?? label)}
       {isIconOnly ? null : endContent}
-    </button>
+    </ButtonPrimitive>
   );
 }
 

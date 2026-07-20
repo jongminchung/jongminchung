@@ -175,15 +175,12 @@ export function WelcomeWorkspace({
       )}
 
       {section === "projects" && recentProjects.length > 0 && (
-        <section
-          aria-label="Projects"
-          className="min-h-0 overflow-auto bg-[var(--color-background-surface)] px-[11px]"
-        >
+        <section aria-label="Projects" className="min-h-0 overflow-auto bg-[var(--card)] px-[11px]">
           <div
-            className="flex h-[68px] items-center gap-2 border-b border-[var(--color-border)] pr-[10px]"
+            className="flex h-[68px] items-center gap-2 border-b border-[var(--border)] pr-[10px]"
             data-testid="welcome-project-toolbar"
           >
-            <label className="flex min-w-0 flex-1 items-center gap-[9px] px-[9px] text-[var(--color-text-secondary)]">
+            <label className="flex min-w-0 flex-1 items-center gap-[9px] px-[9px] text-[var(--muted-foreground)]">
               <Icon name="search" size={15} />
               <span className={tw.srOnly}>Search projects</span>
               <input
@@ -197,19 +194,19 @@ export function WelcomeWorkspace({
               />
             </label>
             <button
-              className="h-7 w-[102px] whitespace-nowrap rounded border border-[var(--color-border-emphasized)] bg-[var(--color-background-surface)] px-[13px] text-[12px]"
+              className="h-7 w-[102px] whitespace-nowrap rounded border border-[var(--input)] bg-[var(--card)] px-[13px] text-[12px]"
               onClick={onNewProject}
             >
               New Project
             </button>
             <button
-              className="h-7 w-[71px] whitespace-nowrap rounded border border-[var(--color-border-emphasized)] bg-[var(--color-background-surface)] px-[14px] text-[12px]"
+              className="h-7 w-[71px] whitespace-nowrap rounded border border-[var(--input)] bg-[var(--card)] px-[14px] text-[12px]"
               onClick={onOpenRepository}
             >
               Open
             </button>
             <button
-              className="h-7 w-[133px] whitespace-nowrap rounded border border-[var(--color-border-emphasized)] bg-[var(--color-background-surface)] px-[13px] text-[12px]"
+              className="h-7 w-[133px] whitespace-nowrap rounded border border-[var(--input)] bg-[var(--card)] px-[13px] text-[12px]"
               onClick={onCloneRepository}
             >
               Clone Repository
@@ -236,7 +233,7 @@ export function WelcomeWorkspace({
             {filteredProjects.map((project, index) => (
               <button
                 aria-selected={selectedProject === index}
-                className="flex min-h-[58px] w-full items-start gap-[13px] rounded px-[23px] py-[8px] text-left hover:bg-[var(--color-background-muted)] focus-visible:bg-[var(--color-accent-muted)]"
+                className="flex min-h-[58px] w-full items-start gap-[13px] rounded px-[23px] py-[8px] text-left hover:bg-[var(--muted)] focus-visible:bg-[var(--accent)]"
                 key={project.path}
                 onClick={() => setSelectedProject(index)}
                 onDoubleClick={() => onOpenRecent(project.path)}
@@ -249,11 +246,11 @@ export function WelcomeWorkspace({
                   <strong className="block text-[13px] font-medium leading-[18px]">
                     {project.name}
                   </strong>
-                  <small className="block truncate text-[12px] leading-[17px] text-[var(--color-text-secondary)]">
+                  <small className="block truncate text-[12px] leading-[17px] text-[var(--muted-foreground)]">
                     {displayPath(project.path)}
                   </small>
                   {project.branch !== null && (
-                    <small className="flex items-center gap-1 text-[12px] leading-[17px] text-[var(--color-text-secondary)]">
+                    <small className="flex items-center gap-1 text-[12px] leading-[17px] text-[var(--muted-foreground)]">
                       <GitBranch aria-hidden size={12} strokeWidth={1.5} />
                       {project.branch}
                     </small>
@@ -262,7 +259,7 @@ export function WelcomeWorkspace({
               </button>
             ))}
             {filteredProjects.length === 0 && (
-              <p className="px-5 py-3 text-[var(--color-text-secondary)]">No projects found.</p>
+              <p className="px-5 py-3 text-[var(--muted-foreground)]">No projects found.</p>
             )}
           </div>
         </section>
@@ -277,7 +274,7 @@ export function WelcomeWorkspace({
                 Theme:
               </label>
               <Selector
-                className="rounded-[4px] bg-[var(--color-background-surface)] text-[13px]"
+                className="rounded-[4px] bg-[var(--card)] text-[13px]"
                 id="welcome-theme"
                 isLabelHidden
                 label="Theme"

@@ -1,15 +1,20 @@
 {
   "$schema": "https://ui.shadcn.com/schema.json",
-  "style": "new-york",
+  "style": "base-nova",
   "rsc": true,
   "tsx": true,
   "tailwind": {
+    "config": "",
+    "css": "src/styles/tokens.css",
     "cssVariables": true,
     "baseColor": "neutral"
   },
   "aliases": {
     "components": "@jongminchung/ui",
+    "hooks": "@jongminchung/ui/hooks",
+    "lib": "@jongminchung/ui",
     "utils": "@jongminchung/ui/utils",
     "ui": "@jongminchung/ui"
-  }
+  },
+  "iconLibrary": "lucide"
 }

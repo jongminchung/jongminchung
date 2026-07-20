@@ -22,6 +22,7 @@ allowBuilds:
 
 catalog:
   "@axe-core/playwright": "4.12.1"
+  "@base-ui/react": "1.6.0"
   "@codemirror/commands": "6.10.4"
   "@codemirror/lang-css": "6.3.1"
   "@codemirror/lang-html": "6.4.11"
@@ -60,6 +61,7 @@ catalog:
   "vite": "8.1.5"
 
 minimumReleaseAgeExclude:
+  - "@base-ui/react@1.6.0"
   - postcss@8.5.19
   - "@radix-ui/primitive@1.1.6"
   - "@radix-ui/react-accessible-icon@1.1.12"

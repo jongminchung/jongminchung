@@ -1,5 +1,6 @@
-import { Popover as PopoverPrimitive } from "radix-ui";
+import { Popover as PopoverPrimitive } from "@base-ui/react/popover";
 import { useCallback, useRef, useState } from "react";
+import { isValidElement } from "react";
 import type { CSSProperties, HTMLAttributes, ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "../../lib/utils";
@@ -16,7 +17,12 @@ interface PopoverProps {
   readonly hasAutoFocus?: boolean;
 }
 
-const SIDES = { above: "top", below: "bottom", left: "left", right: "right" } as const;
+const SIDES = {
+  above: "top",
+  below: "bottom",
+  left: "left",
+  right: "right",
+} as const;
 
 export function Popover({
   isOpen,
@@ -29,23 +35,26 @@ export function Popover({
   width,
   hasAutoFocus = false,
 }: PopoverProps): ReactNode {
+  const trigger = isValidElement(children) ? children : <button type="button">{children}</button>;
   return (
     <PopoverPrimitive.Root onOpenChange={onOpenChange} open={isOpen}>
-      <PopoverPrimitive.Trigger asChild>{children}</PopoverPrimitive.Trigger>
+      <PopoverPrimitive.Trigger render={trigger} />
       <PopoverPrimitive.Portal>
-        <PopoverPrimitive.Content
+        <PopoverPrimitive.Positioner
           align={alignment}
-          aria-label={label}
-          className="z-[110] max-h-[min(70vh,560px)] overflow-auto rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-lg outline-none data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
-          onOpenAutoFocus={(event: { preventDefault: () => void }) => {
-            if (!hasAutoFocus) event.preventDefault();
-          }}
+          className="z-[110]"
           side={SIDES[placement]}
           sideOffset={5}
-          style={{ width }}
         >
-          {content}
-        </PopoverPrimitive.Content>
+          <PopoverPrimitive.Popup
+            aria-label={label}
+            className="max-h-[min(70vh,560px)] overflow-auto rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-lg outline-none data-ending-style:animate-out data-starting-style:animate-in data-ending-style:fade-out-0 data-starting-style:fade-in-0"
+            initialFocus={hasAutoFocus ? true : false}
+            style={{ width }}
+          >
+            {content}
+          </PopoverPrimitive.Popup>
+        </PopoverPrimitive.Positioner>
       </PopoverPrimitive.Portal>
     </PopoverPrimitive.Root>
   );
@@ -92,7 +101,15 @@ export function useLayer({
             if (lightDismiss && event.target === event.currentTarget) hide();
           }}
         >
-          <div style={{ left: position.x, position: mode, top: position.y } as CSSProperties}>
+          <div
+            style={
+              {
+                left: position.x,
+                position: mode,
+                top: position.y,
+              } as CSSProperties
+            }
+          >
             {content}
           </div>
         </div>,

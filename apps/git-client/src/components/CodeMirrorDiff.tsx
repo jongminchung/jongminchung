@@ -136,27 +136,27 @@ function matchOffsets(
 
 function editorTheme(wordWrap: boolean): readonly Extension[] {
   const theme = EditorView.theme({
-    "&": { height: "100%", fontSize: "12px", background: "var(--color-background-surface)" },
+    "&": { height: "100%", fontSize: "12px", background: "var(--card)" },
     ".cm-scroller": {
       fontFamily: "var(--font-family-code)",
       lineHeight: "1.55",
       overflow: "auto",
     },
     ".cm-gutters": {
-      background: "var(--color-background-muted)",
-      borderRight: "1px solid var(--color-border)",
-      color: "var(--color-text-disabled)",
+      background: "var(--muted)",
+      borderRight: "1px solid var(--border)",
+      color: "var(--disabled-foreground)",
     },
-    ".cm-changedLine": { background: "color-mix(in srgb, var(--color-success) 10%, transparent)" },
-    ".cm-deletedLine": { background: "color-mix(in srgb, var(--color-danger) 10%, transparent)" },
-    ".cm-insertedLine": { background: "color-mix(in srgb, var(--color-success) 12%, transparent)" },
-    ".cm-changedText": { background: "color-mix(in srgb, var(--color-success) 22%, transparent)" },
+    ".cm-changedLine": { background: "color-mix(in srgb, var(--success) 10%, transparent)" },
+    ".cm-deletedLine": { background: "color-mix(in srgb, var(--destructive) 10%, transparent)" },
+    ".cm-insertedLine": { background: "color-mix(in srgb, var(--success) 12%, transparent)" },
+    ".cm-changedText": { background: "color-mix(in srgb, var(--success) 22%, transparent)" },
     ".cm-deletedChunk .cm-changedText": {
-      background: "color-mix(in srgb, var(--color-danger) 22%, transparent)",
+      background: "color-mix(in srgb, var(--destructive) 22%, transparent)",
     },
-    ".cm-searchMatch": { background: "color-mix(in srgb, var(--color-warning) 35%, transparent)" },
+    ".cm-searchMatch": { background: "color-mix(in srgb, var(--warning) 35%, transparent)" },
     ".cm-searchMatch-selected": {
-      background: "color-mix(in srgb, var(--color-accent) 28%, transparent)",
+      background: "color-mix(in srgb, var(--primary) 28%, transparent)",
     },
   });
   return [

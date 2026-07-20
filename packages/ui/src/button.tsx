@@ -1,5 +1,6 @@
+import { Button as ButtonPrimitive } from "@base-ui/react/button";
 import { cva, type VariantProps } from "class-variance-authority";
-import { Slot } from "radix-ui";
+import { isValidElement } from "react";
 import type { ButtonHTMLAttributes, ReactNode, Ref } from "react";
 import { cn } from "./utils";
 
@@ -31,7 +32,25 @@ export interface ButtonProps
   readonly ref?: Ref<HTMLButtonElement>;
 }
 
-export function Button({ asChild = false, className, size, variant, ...props }: ButtonProps) {
-  const Component = asChild ? Slot.Root : "button";
-  return <Component className={cn(buttonVariants({ size, variant }), className)} {...props} />;
+export function Button({
+  asChild = false,
+  children,
+  className,
+  size,
+  variant,
+  ...props
+}: ButtonProps): ReactNode {
+  const classes = cn(buttonVariants({ size, variant }), className);
+  if (asChild) {
+    if (!isValidElement(children))
+      throw new Error("Button with asChild requires one React element.");
+    return (
+      <ButtonPrimitive className={classes} nativeButton={false} render={children} {...props} />
+    );
+  }
+  return (
+    <ButtonPrimitive className={classes} {...props}>
+      {children}
+    </ButtonPrimitive>
+  );
 }

@@ -8,6 +8,8 @@
     "./button": "./src/button.tsx",
     "./card": "./src/card.tsx",
     "./dialog": "./src/dialog.tsx",
+    "./git-client.css": "./src/styles/git-client.css",
+    "./tokens.css": "./src/styles/tokens.css",
     "./sheet": "./src/sheet.tsx",
     "./utils": "./src/utils.ts",
     "./package.json": "./package.json"
@@ -16,9 +18,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@base-ui/react": "catalog:",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
-    "radix-ui": "1.6.4",
+    "lucide-react": "1.25.0",
     "tailwind-merge": "3.6.0"
   },
   "devDependencies": {

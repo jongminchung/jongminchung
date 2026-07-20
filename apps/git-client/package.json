@@ -38,6 +38,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@base-ui/react": "catalog:",
     "@codemirror/commands": "catalog:",
     "@codemirror/lang-css": "catalog:",
     "@codemirror/lang-html": "catalog:",
@@ -50,6 +51,7 @@
     "@codemirror/search": "catalog:",
     "@codemirror/state": "catalog:",
     "@codemirror/view": "catalog:",
+    "@jongminchung/ui": "workspace:*",
     "@tanstack/react-virtual": "catalog:",
     "@vscode/ripgrep": "1.18.0",
     "@xterm/addon-fit": "catalog:",
@@ -60,7 +62,6 @@
     "fflate": "0.8.3",
     "lucide-react": "1.25.0",
     "node-pty": "1.1.0",
-    "radix-ui": "1.6.4",
     "react": "catalog:",
     "react-dom": "catalog:",
     "scheduler": "0.27.0",

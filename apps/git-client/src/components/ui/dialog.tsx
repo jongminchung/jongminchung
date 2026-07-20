@@ -1,5 +1,5 @@
+import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { X } from "lucide-react";
-import { Dialog as DialogPrimitive } from "radix-ui";
 import type { CSSProperties, HTMLAttributes, ReactNode } from "react";
 import { cn } from "../../lib/utils";
 
@@ -64,23 +64,27 @@ export function Dialog({
 
   if (isInline) return isOpen ? content : null;
   return (
-    <DialogPrimitive.Root open={isOpen} onOpenChange={onOpenChange}>
+    <DialogPrimitive.Root
+      disablePointerDismissal={purpose !== "info"}
+      open={isOpen}
+      onOpenChange={(open, eventDetails) => {
+        if (!open && purpose === "required" && eventDetails.reason === "escape-key") {
+          eventDetails.cancel();
+          return;
+        }
+        onOpenChange(open);
+      }}
+    >
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-[120] bg-black/45 backdrop-blur-[1px] data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <DialogPrimitive.Content
+        <DialogPrimitive.Backdrop className="fixed inset-0 z-[120] bg-black/45 backdrop-blur-[1px] data-ending-style:animate-out data-starting-style:animate-in data-ending-style:fade-out-0 data-starting-style:fade-in-0" />
+        <DialogPrimitive.Popup
           aria-describedby={undefined}
-          asChild
-          onEscapeKeyDown={(event: { preventDefault: () => void }) => {
-            if (purpose === "required") event.preventDefault();
-          }}
-          onPointerDownOutside={(event: { preventDefault: () => void }) => {
-            if (purpose !== "info") event.preventDefault();
-          }}
+          render={
+            <div className="fixed left-1/2 top-1/2 z-[121] -translate-x-1/2 -translate-y-1/2" />
+          }
         >
-          <div className="fixed left-1/2 top-1/2 z-[121] -translate-x-1/2 -translate-y-1/2">
-            {content}
-          </div>
-        </DialogPrimitive.Content>
+          {content}
+        </DialogPrimitive.Popup>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>
   );

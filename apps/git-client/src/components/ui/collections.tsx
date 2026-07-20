@@ -1,5 +1,9 @@
+import { Radio } from "@base-ui/react/radio";
+import { RadioGroup } from "@base-ui/react/radio-group";
+import { Tabs } from "@base-ui/react/tabs";
+import { Toggle } from "@base-ui/react/toggle";
+import { ToggleGroup } from "@base-ui/react/toggle-group";
 import { LoaderCircle } from "lucide-react";
-import { RadioGroup, Tabs, ToggleGroup } from "radix-ui";
 import type { HTMLAttributes, ReactNode } from "react";
 import { cn } from "../../lib/utils";
 
@@ -134,13 +138,13 @@ export function RadioList({
       <legend className={cn("mb-1 text-xs font-medium", isLabelHidden && "sr-only")}>
         {label}
       </legend>
-      <RadioGroup.Root
+      <RadioGroup
         className={cn("grid", size === "sm" ? "gap-0.5" : "gap-1")}
         onValueChange={onChange}
         value={value}
       >
         {children}
-      </RadioGroup.Root>
+      </RadioGroup>
     </fieldset>
   );
 }
@@ -163,13 +167,13 @@ export function RadioListItem({
         isDisabled && "opacity-45",
       )}
     >
-      <RadioGroup.Item
+      <Radio.Root
         className="grid size-4 place-items-center rounded-full border border-input bg-background outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
         disabled={isDisabled}
         value={value}
       >
-        <RadioGroup.Indicator className="size-2 rounded-full bg-primary" />
-      </RadioGroup.Item>
+        <Radio.Indicator className="size-2 rounded-full bg-primary" />
+      </Radio.Root>
       {startContent}
       <span>{label}</span>
     </label>
@@ -195,21 +199,21 @@ export function SegmentedControl({
   layout = "hug",
 }: SegmentedControlProps): ReactNode {
   return (
-    <ToggleGroup.Root
+    <ToggleGroup
       aria-label={label}
       className={cn(
         "inline-flex rounded-md border border-border bg-muted p-0.5",
         layout === "fill" && "flex w-full",
       )}
       disabled={isDisabled}
-      onValueChange={(next: string) => {
-        if (next) onChange(next);
+      onValueChange={(next: string[]) => {
+        const selected = next[0];
+        if (selected !== undefined) onChange(selected);
       }}
-      type="single"
-      value={value}
+      value={[value]}
     >
       {children}
-    </ToggleGroup.Root>
+    </ToggleGroup>
   );
 }
 
@@ -221,12 +225,12 @@ export function SegmentedControlItem({
   readonly value: string;
 }): ReactNode {
   return (
-    <ToggleGroup.Item
-      className="h-7 flex-1 rounded px-2.5 text-xs outline-none hover:bg-background/60 data-[state=on]:bg-background data-[state=on]:shadow-xs focus-visible:ring-2 focus-visible:ring-ring/45"
+    <Toggle
+      className="h-7 flex-1 rounded px-2.5 text-xs outline-none hover:bg-background/60 data-pressed:bg-background data-pressed:shadow-xs focus-visible:ring-2 focus-visible:ring-ring/45"
       value={value}
     >
       {label}
-    </ToggleGroup.Item>
+    </Toggle>
   );
 }
 
@@ -269,12 +273,12 @@ export function Tab({
   readonly value: string;
 }): ReactNode {
   return (
-    <Tabs.Trigger
-      className="h-full rounded px-2.5 text-xs text-muted-foreground outline-none hover:text-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs focus-visible:ring-2 focus-visible:ring-ring/45"
+    <Tabs.Tab
+      className="h-full rounded px-2.5 text-xs text-muted-foreground outline-none hover:text-foreground data-active:bg-background data-active:text-foreground data-active:shadow-xs focus-visible:ring-2 focus-visible:ring-ring/45"
       value={value}
     >
       {label}
-    </Tabs.Trigger>
+    </Tabs.Tab>
   );
 }
 
@@ -303,7 +307,7 @@ export function ToggleButton({
   readonly tooltip?: string;
 }): ReactNode {
   return (
-    <button
+    <Toggle
       aria-label={isIconOnly ? label : undefined}
       aria-pressed={isPressed}
       className={cn(
@@ -313,10 +317,11 @@ export function ToggleButton({
       )}
       disabled={isDisabled}
       onClick={(event) => onPressedChange?.(!isPressed, event)}
+      pressed={isPressed}
       type="button"
     >
       {isPressed ? (pressedIcon ?? icon) : icon}
       {isIconOnly ? null : (children ?? label)}
-    </button>
+    </Toggle>
   );
 }

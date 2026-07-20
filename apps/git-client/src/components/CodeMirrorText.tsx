@@ -28,7 +28,7 @@ export default function CodeMirrorText({
     const theme = EditorView.theme({
       "&": { height: "100%", fontSize: "11px", background: "var(--surface)" },
       ".cm-scroller": { fontFamily: "var(--font-family-code)", lineHeight: "1.5" },
-      ".cm-gutters": { background: "var(--color-background-muted)", border: "0" },
+      ".cm-gutters": { background: "var(--muted)", border: "0" },
     });
     const editor = new EditorView({
       state: EditorState.create({
