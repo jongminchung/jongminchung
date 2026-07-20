@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "product": "Rebased",
+  "version": "1.1.8",
+  "capture": {
+    "method": "macOS accessibility tree via Computer Use",
+    "capturedAt": "2026-07-20",
+    "surface": "project switcher popup"
+  },
+  "normalizedTree": {
+    "role": "list",
+    "rows": [
+      { "name": "Open…", "selected": true },
+      { "name": "Clone Repository…", "selected": false },
+      { "section": "Open Projects", "namePattern": "<project> - <display-path>" },
+      { "section": "Recent Projects", "namePattern": "<project> - <display-path>" }
+    ]
+  },
+  "interaction": {
+    "initialFocus": "Open…",
+    "arrowDownFocus": "Clone Repository…",
+    "escapeRestoresInvokerFocus": true
+  }
+}

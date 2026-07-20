@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "referenceVersion": "1.1.8",
+  "scenarios": [
+    {
+      "id": "project-switcher.keyboard",
+      "testId": "parity:project-switcher.keyboard",
+      "obligationIds": ["action:OpenFile", "action:Git.Clone", "action:ManageRecentProjects"],
+      "requiredDimensions": ["structure", "accessibility", "interaction"],
+      "reference": {
+        "authority": "golden",
+        "evidenceIds": ["project-switcher.ax"],
+        "evidenceVerified": true,
+        "expected": {
+          "structure": {
+            "list": "Projects",
+            "actions": ["Open…", "Clone Repository…"],
+            "sections": ["Open Projects", "Recent Projects"]
+          },
+          "accessibility": {
+            "containerRole": "listbox",
+            "itemRole": "option",
+            "initialSelected": "Open…"
+          },
+          "interaction": {
+            "initialFocus": "Open…",
+            "arrowDownFocus": "Clone Repository…",
+            "escapeRestoresFocus": true
+          }
+        }
+      }
+    },
+    {
+      "id": "branch-popup.structure",
+      "testId": "parity:branch-popup.structure",
+      "obligationIds": ["action:Git.Branches", "action:Git.CreateNewBranch"],
+      "requiredDimensions": ["structure", "accessibility"],
+      "reference": {
+        "authority": "golden",
+        "evidenceIds": ["branch-popup.ax"],
+        "evidenceVerified": true,
+        "expected": {
+          "structure": {
+            "tree": "Branches Tree",
+            "search": "Search",
+            "searchHelp": "Search for branches and actions",
+            "actions": ["Commit…", "New Branch…", "Checkout Tag or Revision…"],
+            "groups": ["Local", "Remote"],
+            "toolbar": ["Fetch", "Settings"]
+          },
+          "accessibility": {
+            "treeRole": "tree",
+            "itemRole": "treeitem",
+            "searchRole": "textbox"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "reference": {
+    "product": "Rebased",
+    "version": "1.1.8",
+    "build": "IC-262.8665.SNAPSHOT",
+    "sourceCommit": "12fb12778a5ad8b7c52b64931a81c648629c9e23",
+    "artifact": {
+      "name": "rebased-aarch64.dmg",
+      "sha256": "fd3bc8bd7f80be16294d424b25ca390ceb13960bba33422dfa8ac4632c3412c0"
+    }
+  },
+  "evidence": [
+    {
+      "id": "welcome.projects.ax",
+      "kind": "accessibility",
+      "path": "runtime/welcome/projects/golden-1.1.8/reference.ax.json",
+      "sha256": "094a6a26d37aa0f9152247f6a5bb7ff592633db374b9213a8976a86fbcd41c41"
+    },
+    {
+      "id": "welcome.projects.visual",
+      "kind": "screenshot",
+      "path": "runtime/welcome/projects/golden-1.1.8/reference.png",
+      "sha256": "617be34a1737223805876868f34e39a64a52b493aa8375d540049e03f4fcf1f4"
+    },
+    {
+      "id": "workbench.log.ax",
+      "kind": "accessibility",
+      "path": "runtime/workbench/log/golden-1.1.8/reference.ax.json",
+      "sha256": "d86214202a17bf5acd899573bfcbfd383a2bcd243e09243eae67930338644c63"
+    },
+    {
+      "id": "workbench.log.visual",
+      "kind": "screenshot",
+      "path": "runtime/workbench/log/golden-1.1.8/reference.png",
+      "sha256": "de2cd979f329b2603d35b5055b0b3965af8b0a8c7412f67900296deb443a44bb"
+    },
+    {
+      "id": "terminal.empty.ax",
+      "kind": "accessibility",
+      "path": "runtime/terminal/local/golden-1.1.8/reference-empty.ax.json",
+      "sha256": "2e0e341e67be6918aff64591415ce0b926dbb37471c5a917f4ae8b60ba1563e7"
+    },
+    {
+      "id": "terminal.empty.visual",
+      "kind": "screenshot",
+      "path": "runtime/terminal/local/golden-1.1.8/reference-empty.png",
+      "sha256": "0426d2d50300dfb486d1c99f0611a5e3e977ed67bd6579cd1bb321c52d18cac4"
+    },
+    {
+      "id": "terminal.pwd.ax",
+      "kind": "accessibility",
+      "path": "runtime/terminal/local/golden-1.1.8/reference-pwd.ax.json",
+      "sha256": "eec238bcea4ebaeaf76812ce1fcfd7e83caa39859ecfb6e90dec3c3302c70b1c"
+    },
+    {
+      "id": "terminal.pwd.visual",
+      "kind": "screenshot",
+      "path": "runtime/terminal/local/golden-1.1.8/reference-pwd.png",
+      "sha256": "8967e0889244d035a22f8d0197d1f044594ef913aa11e4b9f48b6f573fb706a4"
+    },
+    {
+      "id": "application-menu.tree",
+      "kind": "accessibility",
+      "path": "runtime/application-menu/trusted-project/golden-1.1.8/menu-tree.json",
+      "sha256": "9a61e207c99835821219921dcf5e3771a3921ed126bbcfef4aa483ea523d20f1"
+    },
+    {
+      "id": "project-switcher.ax",
+      "kind": "accessibility",
+      "path": "runtime/project-switcher/golden-1.1.8/reference.ax.json",
+      "sha256": "1b6ac8ed5e1c10e9cd378f488b3d631ed16a723608ed6fa4c2635e2061750934"
+    },
+    {
+      "id": "branch-popup.ax",
+      "kind": "accessibility",
+      "path": "runtime/branch-popup/golden-1.1.8/reference.ax.json",
+      "sha256": "308409e3e18543ca553b44ac56470660f470972c7963125ebdb465122917518f"
+    }
+  ]
+}

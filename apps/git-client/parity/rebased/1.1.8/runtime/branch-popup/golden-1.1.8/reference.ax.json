@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "product": "Rebased",
+  "version": "1.1.8",
+  "capture": {
+    "method": "macOS accessibility tree via Computer Use",
+    "capturedAt": "2026-07-20",
+    "surface": "branches popup"
+  },
+  "normalizedTree": {
+    "search": {
+      "role": "text field",
+      "name": "Search",
+      "help": "Search for branches and actions"
+    },
+    "toolbar": ["Fetch", "Settings"],
+    "tree": {
+      "role": "outline",
+      "name": "Branches Tree",
+      "rows": [
+        "Commit…",
+        "separator",
+        "New Branch…",
+        "Checkout Tag or Revision…",
+        "separator",
+        { "name": "Local", "expanded": true, "children": ["<local-branch>"] },
+        {
+          "name": "Remote",
+          "expanded": true,
+          "children": [
+            { "name": "<remote>", "expanded": true, "children": ["<remote-branch>"] }
+          ]
+        }
+      ]
+    }
+  }
+}
