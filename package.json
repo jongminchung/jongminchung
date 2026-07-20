@@ -10,7 +10,7 @@
     "build": "pnpm run icon:check && pnpm -r --if-present run build",
     "check": "pnpm run fmt:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build",
     "deps:check": "pnpm dlx npm-check-updates --workspaces --target latest --packageManager pnpm",
-    "deps:update": "pnpm dlx npm-check-updates -u --workspaces --target latest --packageManager pnpm && pnpm install",
+    "deps:update": "pnpm dlx npm-check-updates -u --workspaces --target latest --packageManager pnpm --reject typescript && pnpm install",
     "dev:docs": "pnpm --filter @jongminchung/docs run dev",
     "dev:readme": "pnpm --filter @jongminchung/readme run dev",
     "fmt": "oxfmt --config .oxfmtrc.mjs .",
