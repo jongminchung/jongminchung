@@ -139,7 +139,7 @@ export function Icon({
       <svg aria-hidden="true" height={size} viewBox="0 0 16 16" width={size} {...props}>
         <path
           d="M3 3.5C3 2.39543 3.89543 1.5 5 1.5H10.9989C12.1034 1.5 12.9989 2.39543 12.9989 3.5V14.9184C12.9989 15.3379 12.5134 15.5709 12.1861 15.3085L7.99943 11.9524L3.81273 15.3085C3.48543 15.5709 3 15.3379 3 14.9184V3.5Z"
-          fill="#FFAF0F"
+          fill="var(--bookmark)"
         />
       </svg>
     );
@@ -149,7 +149,7 @@ export function Icon({
       <svg aria-hidden="true" height={size} viewBox="0 0 16 16" width={size} {...props}>
         <path
           d="M10 10C10 9.44772 10.4477 9 11 9H13.9994C14.5517 9 14.9994 9.44772 14.9994 10V15.7092C14.9994 15.9189 14.7567 16.0354 14.5931 15.9042L12.4997 14.2262L10.4064 15.9042C10.2427 16.0354 10 15.9189 10 15.7092V10Z"
-          fill="#FFAF0F"
+          fill="var(--bookmark)"
         />
         <path d="M2 12.5H8M2 6.5H14M2 9.5H8M2 3.5H14" stroke="currentColor" strokeLinecap="round" />
       </svg>

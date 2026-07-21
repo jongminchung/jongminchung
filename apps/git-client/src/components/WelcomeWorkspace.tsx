@@ -239,7 +239,7 @@ export function WelcomeWorkspace({
                 onDoubleClick={() => onOpenRecent(project.path)}
                 role="option"
               >
-                <span className="mt-[1px] flex h-5 w-5 shrink-0 items-center justify-center rounded bg-[#5a91d8] text-[9px] font-bold text-white">
+                <span className="mt-[1px] flex h-5 w-5 shrink-0 items-center justify-center rounded bg-[var(--project-avatar)] text-[9px] font-bold text-primary-foreground">
                   {projectMonogram(project.name)}
                 </span>
                 <span className="min-w-0">

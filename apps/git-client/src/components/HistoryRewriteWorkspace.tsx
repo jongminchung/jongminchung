@@ -224,7 +224,7 @@ export function HistoryRewriteWorkspace({
                       <td className="p-2">
                         <select
                           aria-label={`Action for ${entry.subject}`}
-                          className="min-h-7 rounded-md border border-border bg-surface px-2"
+                          className="min-h-7 rounded-md border border-border bg-card px-2"
                           disabled={entry.mergeCommit}
                           onChange={(event) =>
                             changeAction(entry.oid, event.target.value as RebasePlanAction)
@@ -246,7 +246,7 @@ export function HistoryRewriteWorkspace({
                         {entry.action === "reword" && (
                           <input
                             aria-label={`New message for ${entry.subject}`}
-                            className="mt-2 min-h-8 w-full rounded-md border border-border bg-surface px-2"
+                            className="mt-2 min-h-8 w-full rounded-md border border-border bg-card px-2"
                             onChange={(event) =>
                               setEntries((current) =>
                                 current.map((candidate) =>
@@ -276,7 +276,9 @@ export function HistoryRewriteWorkspace({
                             </span>
                           )}
                           {entry.oid === preview.headOid && (
-                            <span className="rounded bg-accent px-1.5 py-0.5 text-white">HEAD</span>
+                            <span className="rounded bg-accent px-1.5 py-0.5 text-accent-foreground">
+                              HEAD
+                            </span>
                           )}
                         </div>
                       </td>
@@ -352,7 +354,7 @@ export function HistoryRewriteWorkspace({
           </div>
         ) : (
           <div
-            className="m-auto max-w-lg rounded-lg border border-danger bg-danger/10 p-4"
+            className="m-auto max-w-lg rounded-lg border border-destructive bg-destructive-muted p-4"
             role="alert"
           >
             {error ?? "History rewrite preview is unavailable."}
@@ -362,8 +364,8 @@ export function HistoryRewriteWorkspace({
           {preview && !completed && (
             <small className="text-secondary">{changedCount} plan change(s)</small>
           )}
-          {validation && <small className="text-error">{validation}</small>}
-          {error && preview && <small className="text-error">{error}</small>}
+          {validation && <small className="text-destructive">{validation}</small>}
+          {error && preview && <small className="text-destructive">{error}</small>}
           <span className="flex-1" />
           <Button isDisabled={running} label="Cancel" onClick={onClose} size="sm" variant="ghost" />
           {!completed && (

@@ -1,10 +1,10 @@
 "use client";
 
-import { Button } from "@jongminchung/ui/button";
-import { Sheet, SheetContent, SheetTitle } from "@jongminchung/ui/sheet";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import type { ContentManifestEntry, Locale } from "@/lib/content-model";
 import { Icon } from "./Icon";
 import { ContextNavigation, GlobalRail, MobileNavigation, MobileTopNavigation } from "./Navigation";

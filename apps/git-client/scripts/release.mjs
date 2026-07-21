@@ -69,6 +69,7 @@ export function createReleaseSourceGateCommands(mode = RELEASE_MODES.production)
   const commonGates = [
     Object.freeze({ command: "pnpm", arguments: Object.freeze(["test"]) }),
     Object.freeze({ command: "pnpm", arguments: Object.freeze(["build"]) }),
+    Object.freeze({ command: "pnpm", arguments: Object.freeze(["parity:theme"]) }),
     Object.freeze({
       command: "pnpm",
       arguments: Object.freeze(["test:electron-package-policy"]),

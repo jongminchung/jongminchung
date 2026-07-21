@@ -10,10 +10,10 @@ import { Icon } from "./Icon";
 import { Button } from "./ui";
 
 const TERMINAL_STATUS_CLASS = {
-  starting: "bg-accent-bg",
-  running: "bg-accent-bg",
+  starting: "bg-primary",
+  running: "bg-primary",
   exited: "bg-success",
-  failed: "bg-error",
+  failed: "bg-destructive",
 } as const satisfies Readonly<Record<TerminalSessionSnapshot["status"], string>>;
 
 function tabNavigationKey(value: string): TerminalNavigationKey | null {

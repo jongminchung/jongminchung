@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@jongminchung/ui/button";
+import { Button } from "@/components/ui/button";
 import type { Locale } from "@/lib/content-model";
 
 export function LocaleSwitcher({

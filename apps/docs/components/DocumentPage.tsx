@@ -1,5 +1,5 @@
-import { Badge } from "@jongminchung/ui/badge";
-import { Button } from "@jongminchung/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { displayTitleFor, type DocSection, type Locale } from "@/lib/content-model";
 import type { LoadedDocument } from "@/lib/documents";
 import { DocumentOutline } from "./DocumentOutline";
@@ -104,10 +104,10 @@ export function DocumentPage({
                 href={editHref(locale, metadata.id)}
               />
             </div>
-            <p className="mt-4 mb-0 max-w-[720px] text-base leading-[1.55] text-secondary">
+            <p className="mt-4 mb-0 max-w-[720px] text-base leading-[1.55] text-muted-foreground">
               {metadata.description}
             </p>
-            <div className="mt-5 flex flex-wrap gap-x-[18px] gap-y-2 text-xs text-secondary">
+            <div className="mt-5 flex flex-wrap gap-x-[18px] gap-y-2 text-xs text-muted-foreground">
               <span>
                 {metadata.verifiedAt === undefined
                   ? locale === "ko"

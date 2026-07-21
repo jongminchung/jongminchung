@@ -1,7 +1,5 @@
 "use client";
 
-import { Button } from "@jongminchung/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@jongminchung/ui/dialog";
 import {
   createContext,
   type KeyboardEvent,
@@ -13,6 +11,8 @@ import {
   useRef,
   useState,
 } from "react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import type { DocSection, Locale, SearchDocument } from "@/lib/content-model";
 import { isLocale, sections } from "@/lib/content-model";
 import { searchDocuments, type SearchHit, type SearchMatchField } from "@/lib/search";

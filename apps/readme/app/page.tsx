@@ -1,6 +1,6 @@
 import { createIconDataUrl } from "@jongminchung/icon";
-import { Button } from "@jongminchung/ui/button";
 import type { ReactElement } from "react";
+import { Button } from "@/components/ui/button";
 import styles from "./page.module.css";
 
 const personalIcon = createIconDataUrl("personal");
@@ -91,9 +91,9 @@ function RouteMap(): ReactElement {
       <svg viewBox="0 0 1000 350" role="img" aria-label="Language becomes a model, code, and proof">
         <defs>
           <linearGradient id="route-gradient" x1="0" x2="1">
-            <stop offset="0" stopColor="#ed2b83" />
-            <stop offset="0.48" stopColor="#6c3eff" />
-            <stop offset="1" stopColor="#2457ff" />
+            <stop offset="0" stopColor="var(--pink)" />
+            <stop offset="0.48" stopColor="var(--route-mid)" />
+            <stop offset="1" stopColor="var(--blue)" />
           </linearGradient>
         </defs>
         <path className={styles.routeGhost} d="M90 72H430v100c0 76 62 120 140 120h350" />

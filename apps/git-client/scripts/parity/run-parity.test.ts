@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { explainParityItem, selectNextParityItems } from "./run-parity.mjs";
+import {
+  explainParityItem,
+  mvpVerificationSteps,
+  selectNextParityItems,
+  selectScenarioTestFile,
+  verificationCounts,
+} from "./run-parity.mjs";
 
 const details = {
   scenarioResults: [
@@ -27,5 +33,36 @@ describe("low-token parity selection", () => {
       obligations: [details.obligations[1]],
     });
     expect(explainParityItem(details, "missing")).toBe(null);
+  });
+
+  it("routes MVP slices to their isolated renderer contract suite", () => {
+    expect(selectScenarioTestFile("shell.welcome")).toBe("tests/mvp-parity.spec.ts");
+    expect(selectScenarioTestFile("shell.project-log")).toBe("tests/mvp-parity.spec.ts");
+    expect(selectScenarioTestFile("branch-popup.structure")).toBe(
+      "tests/rebased-contracts.spec.ts",
+    );
+  });
+
+  it("keeps renderer work parallel and packaged Electron work serial", () => {
+    const steps = mvpVerificationSteps();
+    expect(steps.map((step) => step.label)).toEqual([
+      "unit-integration",
+      "renderer",
+      "package",
+      "electron",
+    ]);
+    expect(steps[1]?.args).toContain("--workers=4");
+    expect(steps[3]?.args).toContain("playwright.electron.config.ts");
+    expect(steps[3]?.args).not.toContain("--workers=4");
+  });
+
+  it("does not leak full-parity failures into a passing scoped result", () => {
+    expect(
+      verificationCounts(
+        { total: 7_260, passed: 3, failed: 2, unverified: 7_255, invalid: 0 },
+        true,
+        true,
+      ),
+    ).toEqual({ total: 1, passed: 1, failed: 0, unverified: 0, invalid: 0 });
   });
 });

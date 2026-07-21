@@ -1,6 +1,6 @@
 const nextConfig = {
   reactStrictMode: true,
-  transpilePackages: ["@jongminchung/icon", "@jongminchung/ui"],
+  transpilePackages: ["@jongminchung/icon"],
 };
 
 export default nextConfig;

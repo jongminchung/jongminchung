@@ -43,9 +43,15 @@ Rebased 1.1.8 is a frozen oracle, so rebuilding or driving Rebased for every Git
 3. **Run broad differential checks on a schedule.** A nightly or weekly macOS job exercises the full scenario corpus, visual thresholds, focus navigation, and disposable-repository side effects. Failures produce evidence artifacts for review but do not make unrelated builds slower.
 4. **Run packaged checks at release.** `pnpm parity:full` runs renderer and packaged Electron checks before the complete inventory, bridge, performance, soak, signing, and notarization gate. `pnpm parity:check` recomputes completion from individual results for the exact candidate build and fails closed.
 
-Local investigation uses `parity:test --scenario <id>`, `parity:next --limit 5`, and `parity:explain <id>`. Standard output is capped to a compact summary; full command logs and evidence stay in `test-results/parity/` and are opened only for the selected failure.
+Local investigation uses `parity:test --scenario <id>`, `parity:next --limit 5`, and `parity:explain <id>`. `parity:mvp` independently verifies the frozen Welcome, Log, Changes, and Terminal slices with deterministic unit/integration tests, four parallel renderer workers, and serial packaged Electron Git/PTY checks. Standard output is capped to a compact summary; MVP reports stay under `test-results/parity/1.1.8/`, while full command logs and evidence stay in `test-results/parity/` and are opened only for the selected failure.
 
 The key is differential contract testing, not pixel-only snapshots. A screenshot can match while a shortcut, disabled state, destructive target, or Git side effect differs. Each scenario therefore compares four channels together: semantic UI/AX, geometry/visuals, behavior/focus, and external effects. Allowed differences stay explicit in `manifest/divergences.yaml`; updating a golden requires review of the corresponding oracle evidence rather than a blanket snapshot refresh.
+
+### Theme contract gate
+
+`pnpm parity:theme` independently verifies the product-supported Islands Light and Islands Dark themes. `manifest/theme-contract.json` maps Git Client semantic CSS tokens to the extracted Rebased color roles, pins the approved Light/Dark evidence hashes, and fixes the 30/29/22/20px geometry contract. The browser converts both the source colors and computed OKLCH variables to sRGB pixels, then runs the standard SSIM and mismatch comparator. Static checks reject literal UI colors and Tailwind palette utilities outside the app-owned theme stylesheet and approved test fixtures.
+
+This command uses only checked-in files and deterministic browser fixtures. It does not launch Rebased, access the network, call an AI service, or update goldens. A golden change requires the explicit Playwright snapshot-update command and review of the pinned Rebased evidence.
 
 ## Allowed differences
 
@@ -71,4 +77,4 @@ Editor, language-facing file presentation, and Local History are not excluded. E
 - Candidate p95 performance is at most 1.25× the reference and the eight-hour soak has no leak or persistence loss.
 - The macOS ARM64 artifact meets size limits, strict Developer ID signing, notarization, and stapling validation.
 
-The production release pipeline invokes this gate. Local ad-hoc packages remain available for ongoing implementation and Computer Use validation, but are not release artifacts. Until every gate passes, reports must retain `complete:false` and the message “Rebased 패리티 미완료”.
+The release source checks run `pnpm parity:theme` before packaging, and the production pipeline additionally invokes the complete parity gate. Local ad-hoc packages remain available for ongoing implementation and Computer Use validation, but are not release artifacts. Until every complete-parity gate passes, reports must retain `complete:false` and the message “Rebased 패리티 미완료”.

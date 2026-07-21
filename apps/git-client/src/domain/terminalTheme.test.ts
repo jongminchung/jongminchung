@@ -21,8 +21,10 @@ const ANSI_COLORS = [
 ] as const;
 
 describe("terminal themes", () => {
-  it.each(["light", "dark"] as const)("defines a complete %s ANSI palette", (scheme) => {
-    const theme = terminalThemeFor(scheme);
+  const resolveColor = () => "#123456";
+
+  it("defines a complete ANSI palette from semantic CSS tokens", () => {
+    const theme = terminalThemeFor(resolveColor);
     for (const color of ANSI_COLORS) expect(theme[color]).toMatch(/^#[0-9a-f]{6}$/i);
     expect(theme.background).toMatch(/^#[0-9a-f]{6}$/i);
     expect(theme.foreground).toMatch(/^#[0-9a-f]{6}$/i);
@@ -30,16 +32,17 @@ describe("terminal themes", () => {
     expect(theme.selectionBackground).toMatch(/^#[0-9a-f]{6}$/i);
   });
 
-  it("keeps light and dark terminal surfaces visually distinct", () => {
-    const light = terminalThemeFor("light");
-    const dark = terminalThemeFor("dark");
-    expect(light.background).not.toBe(dark.background);
-    expect(light.foreground).not.toBe(dark.foreground);
-    expect(light.cursor).not.toBe(dark.cursor);
-    expect(light.selectionBackground).not.toBe(dark.selectionBackground);
+  it("requests only terminal-prefixed tokens", () => {
+    const requested: string[] = [];
+    terminalThemeFor((token) => {
+      requested.push(token);
+      return "#123456";
+    });
+    expect(requested).toHaveLength(26);
+    expect(requested.every((token) => token.startsWith("--terminal-"))).toBe(true);
   });
 
   it("returns a fresh theme object for xterm option updates", () => {
-    expect(terminalThemeFor("dark")).not.toBe(terminalThemeFor("dark"));
+    expect(terminalThemeFor(resolveColor)).not.toBe(terminalThemeFor(resolveColor));
   });
 });

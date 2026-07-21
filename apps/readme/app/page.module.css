@@ -5,7 +5,7 @@
   left: 12px;
   padding: 10px 14px;
   background: var(--ink);
-  color: white;
+  color: var(--on-dark);
   font-family: var(--mono);
   font-size: 12px;
   transform: translateY(-160%);
@@ -51,7 +51,7 @@
 .brand small {
   display: block;
   margin-top: 4px;
-  color: var(--muted);
+  color: var(--muted-copy);
   font-family: var(--mono);
   font-size: 8px;
   font-weight: 400;
@@ -134,7 +134,7 @@
   max-width: 100%;
   margin: 0.08em 0 0.1em;
   background: var(--blue);
-  color: white;
+  color: var(--on-dark);
   line-height: 0.9;
   box-shadow:
     0.08em 0 0 var(--blue),
@@ -145,7 +145,7 @@
 .heroLead {
   max-width: 720px;
   margin: 36px 0 0;
-  color: var(--muted);
+  color: var(--muted-copy);
   font-size: clamp(18px, 1.8vw, 26px);
   line-height: 1.55;
 }
@@ -166,7 +166,7 @@
   padding: 0 18px;
   border: 1px solid var(--ink);
   background: var(--ink);
-  color: white;
+  color: var(--on-dark);
   font-family: var(--mono);
   font-size: 12px;
   transition:
@@ -194,7 +194,7 @@
   padding: 22px;
   overflow: hidden;
   background: var(--blue);
-  color: white;
+  color: var(--on-dark);
   box-shadow: 12px 12px 0 var(--cyan);
 }
 
@@ -230,7 +230,7 @@
 }
 
 .thesis strong {
-  color: #bdf5ff;
+  color: var(--on-dark-accent);
   font-weight: 700;
 }
 
@@ -259,7 +259,7 @@
 }
 
 .routeCaption span:last-child {
-  color: var(--muted);
+  color: var(--muted-copy);
   letter-spacing: 0;
   text-transform: none;
 }
@@ -278,7 +278,7 @@
 }
 
 .routeGhost {
-  stroke: color-mix(in srgb, var(--rule) 60%, white);
+  stroke: color-mix(in srgb, var(--rule) 60%, var(--surface));
   stroke-width: 34;
 }
 
@@ -336,7 +336,7 @@
 .sectionHeading > p,
 .principlesIntro > p:last-child {
   margin: 0;
-  color: var(--muted);
+  color: var(--muted-copy);
   font-size: 17px;
   line-height: 1.7;
 }
@@ -360,7 +360,7 @@
 .project:hover {
   padding-right: 18px;
   padding-left: 18px;
-  background: color-mix(in srgb, var(--paper) 70%, white);
+  background: color-mix(in srgb, var(--paper) 70%, var(--surface));
 }
 
 .projectIdentity {
@@ -382,7 +382,7 @@
 }
 
 .projectCategory {
-  color: var(--muted);
+  color: var(--muted-copy);
 }
 
 .project h3 {
@@ -397,7 +397,7 @@
 
 .project > p {
   margin: 0;
-  color: var(--muted);
+  color: var(--muted-copy);
   font-size: 15px;
   line-height: 1.65;
 }
@@ -442,7 +442,7 @@
 
 .project:hover .projectArrow {
   background: var(--blue);
-  color: white;
+  color: var(--on-dark);
   transform: rotate(8deg);
 }
 
@@ -452,23 +452,23 @@
   gap: clamp(54px, 9vw, 150px);
   padding: clamp(82px, 11vw, 170px) clamp(20px, 4vw, 64px);
   background: var(--blue);
-  color: white;
+  color: var(--on-dark);
 }
 
 .principles .eyebrow {
-  color: #bdf5ff;
+  color: var(--on-dark-accent);
 }
 
 .principlesIntro > p:last-child {
   max-width: 580px;
   margin-top: 34px;
-  color: white;
+  color: var(--on-dark);
 }
 
 .principleList {
   margin: 0;
   padding: 0;
-  border-top: 1px solid color-mix(in srgb, white 54%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--on-dark) 54%, transparent);
   list-style: none;
 }
 
@@ -477,11 +477,11 @@
   grid-template-columns: 54px 1fr;
   gap: 18px;
   padding: 30px 0;
-  border-bottom: 1px solid color-mix(in srgb, white 32%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--on-dark) 32%, transparent);
 }
 
 .principleList > li > span {
-  color: #bdf5ff;
+  color: var(--on-dark-accent);
   font-family: var(--mono);
   font-size: 11px;
 }
@@ -494,7 +494,7 @@
 
 .principleList p {
   margin: 0;
-  color: white;
+  color: var(--on-dark);
   font-size: 15px;
   line-height: 1.6;
 }
@@ -503,12 +503,12 @@
   padding: clamp(72px, 9vw, 130px) clamp(20px, 4vw, 64px) 28px;
   overflow: hidden;
   background: var(--ink);
-  color: white;
+  color: var(--on-dark);
 }
 
 .footerPrompt {
   margin: 0 0 16px;
-  color: #aeb6c8;
+  color: var(--on-dark-muted);
   font-family: var(--mono);
   font-size: 11px;
   letter-spacing: 0.07em;
@@ -529,7 +529,7 @@
   font-size: clamp(90px, 20vw, 320px);
   letter-spacing: -0.095em;
   line-height: 0.72;
-  -webkit-text-stroke: 2px color-mix(in srgb, white 26%, transparent);
+  -webkit-text-stroke: 2px color-mix(in srgb, var(--on-dark) 26%, transparent);
   white-space: nowrap;
 }
 
@@ -538,8 +538,8 @@
   justify-content: space-between;
   gap: 18px;
   padding-top: 26px;
-  border-top: 1px solid color-mix(in srgb, white 24%, transparent);
-  color: #aeb6c8;
+  border-top: 1px solid color-mix(in srgb, var(--on-dark) 24%, transparent);
+  color: var(--on-dark-muted);
   font-family: var(--mono);
   font-size: 9px;
   letter-spacing: 0.08em;

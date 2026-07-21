@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "reference": {
+    "product": "Rebased",
+    "version": "1.1.8"
+  },
+  "thresholds": {
+    "maximumChannelDelta": 0,
+    "maximumGeometryDeltaCssPixels": 1,
+    "maximumMismatchPercent": 0.5,
+    "minimumStructuralSsim": 0.995
+  },
+  "themes": {
+    "light": {
+      "sourceTheme": "Islands Light",
+      "tokens": {
+        "background": "main-window-bg",
+        "foreground": "text-default",
+        "card": "tool-window-bg",
+        "card-foreground": "text-default",
+        "popover": "popup-bg",
+        "popover-foreground": "text-default",
+        "primary": "control-brand-bg",
+        "primary-foreground": "text-over-accent",
+        "secondary": "dialog-bg",
+        "secondary-foreground": "text-default",
+        "muted": "main-window-bg",
+        "muted-foreground": "text-muted",
+        "accent": "tab-selected-bg-active",
+        "accent-foreground": "text-default",
+        "destructive": "text-error",
+        "destructive-foreground": "text-over-accent",
+        "border": "dialog-border",
+        "input": "gray-120",
+        "ring": "control-brand-bg",
+        "success": "text-success",
+        "success-muted": "feedback-success-bg",
+        "warning": "text-warning",
+        "warning-muted": "feedback-warning-bg",
+        "destructive-muted": "feedback-error-bg",
+        "feedback": "feedback-bg",
+        "feedback-foreground": "text-default",
+        "inverse": "gray-10",
+        "inverse-foreground": "dialog-bg",
+        "disabled-foreground": "text-disabled",
+        "overlay-hover": "toolbar-bg-hovered",
+        "overlay-pressed": "toolbar-bg-pressed",
+        "skeleton": "control-bg-small"
+      }
+    },
+    "dark": {
+      "sourceTheme": "Islands Dark",
+      "tokens": {
+        "background": "main-window-bg",
+        "foreground": "text-default",
+        "card": "tool-window-bg",
+        "card-foreground": "text-default",
+        "popover": "popup-bg",
+        "popover-foreground": "text-default",
+        "primary": "control-brand-bg",
+        "primary-foreground": "text-over-accent",
+        "secondary": "dialog-bg-inline",
+        "secondary-foreground": "text-default",
+        "muted": "dialog-bg-inline",
+        "muted-foreground": "text-muted",
+        "accent": "accent-brand-bg-secondary",
+        "accent-foreground": "text-default",
+        "destructive": "text-error",
+        "destructive-foreground": "dialog-bg",
+        "border": "dialog-border",
+        "input": "control-border",
+        "ring": "control-brand-bg",
+        "success": "text-success",
+        "success-muted": "feedback-success-bg",
+        "warning": "text-warning",
+        "warning-muted": "feedback-warning-bg",
+        "destructive-muted": "feedback-error-bg",
+        "feedback": "feedback-bg",
+        "feedback-foreground": "text-default",
+        "inverse": "gray-160",
+        "inverse-foreground": "dialog-bg",
+        "disabled-foreground": "text-disabled",
+        "overlay-hover": "toolbar-bg-hovered",
+        "overlay-pressed": "toolbar-bg-pressed",
+        "skeleton": "feedback-bg"
+      }
+    }
+  },
+  "geometry": {
+    "mainToolbar": 30,
+    "logTab": 29,
+    "compactRow": 22,
+    "statusBar": 20
+  },
+  "goldens": [
+    {
+      "path": "runtime/welcome/projects/light-recent/reference.png",
+      "sha256": "a6940ff611a3626570c3b056febb8c3eec9aa5f2d57893ae855e8d0b6364e398",
+      "width": 800,
+      "height": 650,
+      "theme": "light"
+    },
+    {
+      "path": "runtime/welcome/customize/light-focused/reference.png",
+      "sha256": "d72b6396dba3d067999882608ba8dee3c9c75f96a96c0432fccfde8ee0004098",
+      "width": 800,
+      "height": 650,
+      "theme": "light"
+    },
+    {
+      "path": "runtime/workbench/log/golden-1.1.8/reference.png",
+      "sha256": "de2cd979f329b2603d35b5055b0b3965af8b0a8c7412f67900296deb443a44bb",
+      "width": 1183,
+      "height": 768,
+      "theme": "dark"
+    },
+    {
+      "path": "runtime/terminal/local/golden-1.1.8/reference-empty.png",
+      "sha256": "0426d2d50300dfb486d1c99f0611a5e3e977ed67bd6579cd1bb321c52d18cac4",
+      "width": 1183,
+      "height": 768,
+      "theme": "dark"
+    }
+  ]
+}

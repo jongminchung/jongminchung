@@ -76,7 +76,7 @@ export function Dialog({
       }}
     >
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Backdrop className="fixed inset-0 z-[120] bg-black/45 backdrop-blur-[1px] data-ending-style:animate-out data-starting-style:animate-in data-ending-style:fade-out-0 data-starting-style:fade-in-0" />
+        <DialogPrimitive.Backdrop className="fixed inset-0 z-[120] bg-overlay backdrop-blur-[1px] data-ending-style:animate-out data-starting-style:animate-in data-ending-style:fade-out-0 data-starting-style:fade-in-0" />
         <DialogPrimitive.Popup
           aria-describedby={undefined}
           render={

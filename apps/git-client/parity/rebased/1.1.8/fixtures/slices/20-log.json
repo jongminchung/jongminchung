@@ -1,0 +1,7 @@
+{
+  "id": "shell.project-log",
+  "lane": "log",
+  "repositoryState": "clean",
+  "themes": ["light", "dark"],
+  "densities": ["regular", "compact"]
+}

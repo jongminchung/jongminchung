@@ -131,7 +131,7 @@ export function CommitContextMenu({
         const action = item.id;
         return (
           <DropdownMenuItem
-            className={item.danger ? "text-error" : undefined}
+            className={item.danger ? "text-destructive" : undefined}
             endContent={item.shortcut ? <kbd>{item.shortcut}</kbd> : undefined}
             icon={item.icon ? <Icon name={item.icon} size={16} /> : undefined}
             isDisabled={!availability[action]}

@@ -29,7 +29,7 @@ class LineBookmarkMarker extends GutterMarker {
       "d",
       "M2 2.48828C2 1.65985 2.67157 0.988281 3.5 0.988281H10.5C11.3284 0.988281 12 1.65985 12 2.48828V13.5968C12 13.917 11.6425 14.1075 11.3768 13.9289L7 10.9883L2.62343 13.9322C2.35765 14.111 2 13.9205 2 13.6002V2.48828Z",
     );
-    path.setAttribute("fill", "#FFAF0F");
+    path.setAttribute("fill", "var(--bookmark)");
     marker.append(path);
     return marker;
   }

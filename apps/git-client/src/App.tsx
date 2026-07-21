@@ -337,8 +337,8 @@ const EMPTY_CONTENT_PAIR: DiffContentPair = {
 const ACTIVITY_STATUS_CLASS = {
   running: "",
   succeeded: "text-success",
-  failed: "border-error text-error",
-  cancelled: "text-disabled",
+  failed: "border-destructive text-destructive",
+  cancelled: "text-disabled-foreground",
 } as const satisfies Readonly<Record<ActivityStatus, string>>;
 
 const STATUS_BAR_WIDGET_COMMANDS = [
@@ -5017,6 +5017,9 @@ function RepositoryWorkspace({
                           indexing={logIndexing}
                           indexingEnabled={logIndexingEnabled}
                           powerSaveMode={productSettings.powerSaveMode}
+                          relativeTimeBaseSeconds={
+                            session.fixture ? repository.commits[0]?.authoredAt : undefined
+                          }
                           onEnableIndexing={async (filters, order) => {
                             setLogIndexing(true);
                             try {

@@ -288,7 +288,7 @@ export function RepositoryDialog({
             />
           )}
           {openError !== null && (
-            <div className="rounded-md border border-error p-3 text-error" role="alert">
+            <div className="rounded-md border border-destructive p-3 text-destructive" role="alert">
               {openError}
             </div>
           )}
@@ -316,7 +316,7 @@ export function RepositoryDialog({
             </div>
           )}
           {creation.kind === "failed" && (
-            <div className="rounded-md border border-error p-3 text-error" role="alert">
+            <div className="rounded-md border border-destructive p-3 text-destructive" role="alert">
               {creation.message}
             </div>
           )}
@@ -326,7 +326,7 @@ export function RepositoryDialog({
             </div>
           )}
           {cancelError !== null && (
-            <div className="rounded-md border border-error p-3 text-error" role="alert">
+            <div className="rounded-md border border-destructive p-3 text-destructive" role="alert">
               {cancelError}
             </div>
           )}

@@ -77,8 +77,10 @@ export async function computeCandidateBuildHash(appRoot) {
   return hash.digest("hex").slice(0, 16);
 }
 
-async function loadCandidateObservations(appRoot) {
-  const observationRoot = resolve(appRoot, "test-results/parity-observations");
+async function loadCandidateObservations(appRoot, observationRootOverride) {
+  const observationRoot = resolve(
+    observationRootOverride ?? resolve(appRoot, "test-results/parity-observations"),
+  );
   const files = (await collectFiles(observationRoot))
     .filter((path) => path.endsWith(".json"))
     .sort((left, right) => left.localeCompare(right));
@@ -132,7 +134,7 @@ export async function buildCurrentCompletionInput(options = {}) {
   }
 
   const buildHash = await computeCandidateBuildHash(appRoot);
-  const observations = await loadCandidateObservations(appRoot);
+  const observations = await loadCandidateObservations(appRoot, options.observationRoot);
   const observationByScenario = new Map(
     observations.map((observation) => [observation.scenarioId, observation]),
   );

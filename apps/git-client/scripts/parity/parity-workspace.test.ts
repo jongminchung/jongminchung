@@ -18,8 +18,10 @@ describe("parity workspace", () => {
   });
 
   it("builds a fail-closed current report from individual repository evidence", async () => {
+    const observationRoot = mkdtempSync(join(tmpdir(), "git-client-parity-observations-"));
     const input = await buildCurrentCompletionInput({
       appRoot: resolve(import.meta.dirname, "../.."),
+      observationRoot,
     });
 
     expect(input.referenceVerified).toBe(true);

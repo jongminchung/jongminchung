@@ -1,66 +1,72 @@
 import type { ITheme } from "@xterm/xterm";
-import type { ColorScheme } from "./appearance";
 
-const TERMINAL_THEMES = {
-  light: {
-    background: "#ffffff",
-    foreground: "#1f2329",
-    cursor: "#315fba",
-    cursorAccent: "#ffffff",
-    selectionBackground: "#d8e4ff",
-    selectionForeground: "#20201e",
-    selectionInactiveBackground: "#e8eefc",
-    scrollbarSliderBackground: "#96968e55",
-    scrollbarSliderHoverBackground: "#6f6f6888",
-    scrollbarSliderActiveBackground: "#6f6f68aa",
-    black: "#20201e",
-    red: "#c2413b",
-    green: "#27845e",
-    yellow: "#a16207",
-    blue: "#2563eb",
-    magenta: "#7c3aed",
-    cyan: "#0e7490",
-    white: "#f0f0ed",
-    brightBlack: "#6f6f68",
-    brightRed: "#dc2626",
-    brightGreen: "#16a34a",
-    brightYellow: "#ca8a04",
-    brightBlue: "#3b82f6",
-    brightMagenta: "#9333ea",
-    brightCyan: "#0891b2",
-    brightWhite: "#ffffff",
-  },
-  dark: {
-    // IslandSchemeDark.xml console and caret roles from Rebased 1.1.8.
-    background: "#191a1c",
-    foreground: "#bcbec4",
-    cursor: "#ced0d6",
-    cursorAccent: "#191a1c",
-    selectionBackground: "#31466d",
-    selectionForeground: "#f3f3ef",
-    selectionInactiveBackground: "#283650",
-    scrollbarSliderBackground: "#77776f66",
-    scrollbarSliderHoverBackground: "#aaa9a188",
-    scrollbarSliderActiveBackground: "#aaa9a1aa",
-    black: "#141413",
-    red: "#f75464",
-    green: "#6aab73",
-    yellow: "#e1aa53",
-    blue: "#6e9fff",
-    magenta: "#c4a7e7",
-    cyan: "#67c9d4",
-    white: "#d6d6d0",
-    brightBlack: "#77776f",
-    brightRed: "#ff9a91",
-    brightGreen: "#82d5a6",
-    brightYellow: "#f2c66d",
-    brightBlue: "#8bb2ff",
-    brightMagenta: "#d7baf5",
-    brightCyan: "#86dce5",
-    brightWhite: "#ffffff",
-  },
-} as const satisfies Readonly<Record<ColorScheme, Readonly<ITheme>>>;
+const TERMINAL_COLOR_TOKENS = {
+  background: "--terminal-background",
+  foreground: "--terminal-foreground",
+  cursor: "--terminal-cursor",
+  cursorAccent: "--terminal-cursor-accent",
+  selectionBackground: "--terminal-selection-background",
+  selectionForeground: "--terminal-selection-foreground",
+  selectionInactiveBackground: "--terminal-selection-inactive-background",
+  scrollbarSliderBackground: "--terminal-scrollbar",
+  scrollbarSliderHoverBackground: "--terminal-scrollbar-hover",
+  scrollbarSliderActiveBackground: "--terminal-scrollbar-active",
+  black: "--terminal-black",
+  red: "--terminal-red",
+  green: "--terminal-green",
+  yellow: "--terminal-yellow",
+  blue: "--terminal-blue",
+  magenta: "--terminal-magenta",
+  cyan: "--terminal-cyan",
+  white: "--terminal-white",
+  brightBlack: "--terminal-bright-black",
+  brightRed: "--terminal-bright-red",
+  brightGreen: "--terminal-bright-green",
+  brightYellow: "--terminal-bright-yellow",
+  brightBlue: "--terminal-bright-blue",
+  brightMagenta: "--terminal-bright-magenta",
+  brightCyan: "--terminal-bright-cyan",
+  brightWhite: "--terminal-bright-white",
+} as const satisfies Readonly<Partial<Record<keyof ITheme, `--terminal-${string}`>>>;
 
-export function terminalThemeFor(colorScheme: ColorScheme): ITheme {
-  return { ...TERMINAL_THEMES[colorScheme] };
+export type TerminalColorResolver = (token: `--terminal-${string}`) => string;
+
+function hexadecimal(value: number): string {
+  return value.toString(16).padStart(2, "0");
+}
+
+export function browserTerminalColorResolver(): TerminalColorResolver {
+  const style = getComputedStyle(document.documentElement);
+  const canvas = document.createElement("canvas");
+  canvas.width = 1;
+  canvas.height = 1;
+  const context = canvas.getContext("2d", { willReadFrequently: true });
+  if (context === null) throw new Error("Terminal theme requires a 2D canvas context");
+
+  return (token): string => {
+    const value = style.getPropertyValue(token).trim();
+    if (value === "") throw new Error(`Terminal theme token is missing: ${token}`);
+    context.clearRect(0, 0, 1, 1);
+    context.fillStyle = value;
+    context.fillRect(0, 0, 1, 1);
+    const pixels = context.getImageData(0, 0, 1, 1).data;
+    const red = pixels[0];
+    const green = pixels[1];
+    const blue = pixels[2];
+    const alpha = pixels[3];
+    if (red === undefined || green === undefined || blue === undefined || alpha === undefined) {
+      throw new Error(`Terminal theme token could not be converted: ${token}`);
+    }
+    const channels = [red, green, blue, alpha].map(hexadecimal);
+    return `#${channels.slice(0, alpha === 255 ? 3 : 4).join("")}`;
+  };
+}
+
+export function terminalThemeFor(resolveColor = browserTerminalColorResolver()): ITheme {
+  return Object.fromEntries(
+    Object.entries(TERMINAL_COLOR_TOKENS).map(([property, token]) => [
+      property,
+      resolveColor(token),
+    ]),
+  );
 }

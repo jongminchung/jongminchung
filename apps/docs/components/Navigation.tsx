@@ -1,8 +1,8 @@
 "use client";
 
 import { createIconDataUrl } from "@jongminchung/icon";
-import { Button } from "@jongminchung/ui/button";
 import { type Ref, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   displayTitleFor,
   type ContentManifestEntry,

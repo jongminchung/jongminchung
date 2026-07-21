@@ -2,7 +2,10 @@ import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ensureDmgMakerNativeBinding } from "./ensure-dmg-maker-native.mjs";
+import {
+  ensureDmgMakerNativeBinding,
+  resolveNativeModuleRoot,
+} from "./ensure-dmg-maker-native.mjs";
 
 const temporaryDirectories: string[] = [];
 
@@ -25,6 +28,11 @@ afterEach(async () => {
 });
 
 describe("DMG maker native binding preflight", () => {
+  it("resolves native package roots without importing private package.json subpaths", () => {
+    expect(resolveNativeModuleRoot("macos-alias")).toMatch(/macos-alias$/u);
+    expect(resolveNativeModuleRoot("fs-xattr")).toMatch(/fs-xattr$/u);
+  });
+
   it("builds a missing binding before Forge loads the maker", async () => {
     const { binding, root } = await fixture();
     const build = vi.fn(async (_nodeGypScript: string, moduleRoot: string) => {

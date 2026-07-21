@@ -1,5 +1,5 @@
-import { Badge } from "@jongminchung/ui/badge";
 import type { ReactNode } from "react";
+import { Badge } from "@/components/ui/badge";
 import { TransitionLink } from "./RouteTransition";
 
 export function SideNav({

@@ -83,12 +83,14 @@ describe("Electron release build contract", () => {
     expect(createReleaseSourceGateCommands()).toEqual([
       { command: "pnpm", arguments: ["test"] },
       { command: "pnpm", arguments: ["build"] },
+      { command: "pnpm", arguments: ["parity:theme"] },
       { command: "pnpm", arguments: ["test:electron-package-policy"] },
       { command: "pnpm", arguments: ["parity:check"] },
     ]);
     expect(createReleaseSourceGateCommands(RELEASE_MODES.localAdHoc)).toEqual([
       { command: "pnpm", arguments: ["test"] },
       { command: "pnpm", arguments: ["build"] },
+      { command: "pnpm", arguments: ["parity:theme"] },
       { command: "pnpm", arguments: ["test:electron-package-policy"] },
     ]);
     expect(createElectronMakeArguments()).toEqual([
@@ -345,6 +347,7 @@ describe("Electron release build contract", () => {
         ["/usr/bin/security", ["find-identity", "-v", "-p", "codesigning"]],
         ["pnpm", ["test"]],
         ["pnpm", ["build"]],
+        ["pnpm", ["parity:theme"]],
         ["pnpm", ["test:electron-package-policy"]],
         ["pnpm", ["parity:check"]],
         ["pnpm", createElectronMakeArguments()],

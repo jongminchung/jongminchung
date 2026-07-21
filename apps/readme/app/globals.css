@@ -1,33 +1,6 @@
 @import "tailwindcss";
-@source "../../../packages/ui/src";
-
-@theme inline {
-  --color-background: var(--paper);
-  --color-foreground: var(--ink);
-  --color-card: var(--surface);
-  --color-card-foreground: var(--ink);
-  --color-primary: var(--blue);
-  --color-primary-foreground: #ffffff;
-  --color-muted: #e5eafa;
-  --color-muted-foreground: var(--muted);
-  --color-border: var(--rule);
-  --color-ring: var(--pink);
-}
-
-:root {
-  --paper: #f3f6ff;
-  --surface: #ffffff;
-  --ink: #11131a;
-  --muted: #596174;
-  --rule: #cdd5e7;
-  --blue: #2457ff;
-  --blue-dark: #1739a8;
-  --pink: #ed2b83;
-  --cyan: #19b8d1;
-  --display: "Arial Black", "Helvetica Neue", Arial, sans-serif;
-  --body: "Avenir Next", Avenir, "Segoe UI", sans-serif;
-  --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-}
+@import "@jongminchung/theme-contract/tokens.css";
+@import "./theme.css";
 
 * {
   box-sizing: border-box;
@@ -53,7 +26,7 @@ a {
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--pink) 35%, white);
+  background: color-mix(in srgb, var(--pink) 35%, var(--surface));
 }
 
 :where(a, button):focus-visible {

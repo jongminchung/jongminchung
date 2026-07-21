@@ -1,67 +1,6 @@
 @import "tailwindcss";
-@source "../../../packages/ui/src";
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-border: var(--border);
-  --color-ring: var(--ring);
-  --color-body: var(--background);
-}
-
-:root {
-  --background: #f8f8fa;
-  --foreground: #17171b;
-  --card: #ffffff;
-  --card-foreground: #17171b;
-  --popover: #ffffff;
-  --popover-foreground: #17171b;
-  --primary: #5b4ee8;
-  --primary-foreground: #ffffff;
-  --muted: #f0eff5;
-  --muted-foreground: #686873;
-  --border: #dedee6;
-  --ring: #6d5df2;
-  --color-background-card: var(--background);
-  --color-background-surface: var(--card);
-  --color-background-muted: var(--muted);
-  --color-background-purple: #ebe9ff;
-  --color-text-primary: var(--foreground);
-  --color-text-secondary: var(--muted-foreground);
-  --color-text-purple: var(--primary);
-  --color-border: var(--border);
-  --color-border-emphasized: #a8a7b2;
-  --color-accent: var(--primary);
-  --color-syntax-background: #f3f2f7;
-  --duration-fast: 120ms;
-}
-
-:root[data-theme="dark"] {
-  --background: #151519;
-  --foreground: #f4f4f5;
-  --card: #1c1c21;
-  --card-foreground: #f4f4f5;
-  --popover: #202026;
-  --popover-foreground: #f4f4f5;
-  --primary: #a89fff;
-  --primary-foreground: #19152f;
-  --muted: #292930;
-  --muted-foreground: #aaaab5;
-  --border: #37373f;
-  --ring: #a89fff;
-  --color-background-purple: #302b59;
-  --color-border-emphasized: #676772;
-  --color-syntax-background: #111115;
-}
+@import "@jongminchung/theme-contract/tokens.css";
+@import "./theme.css";
 
 html {
   min-width: 320px;

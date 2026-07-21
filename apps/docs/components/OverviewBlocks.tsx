@@ -1,5 +1,5 @@
-import { Button } from "@jongminchung/ui/button";
-import { Card } from "@jongminchung/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import type { Locale } from "@/lib/content-model";
 import { Icon } from "./Icon";
 import { TransitionLink } from "./RouteTransition";
@@ -100,20 +100,22 @@ export function OverviewHero({ locale }: { readonly locale: Locale }) {
       data-overview-hero="true"
     >
       <div
-        className="pointer-events-none absolute inset-y-0 right-0 hidden w-[34%] border-l border-border bg-body lg:block"
+        className="pointer-events-none absolute inset-y-0 right-0 hidden w-[34%] border-l border-border bg-background lg:block"
         aria-hidden="true"
       >
         <span className="absolute inset-y-0 left-1/3 border-l border-border" />
         <span className="absolute inset-y-0 left-2/3 border-l border-border" />
       </div>
       <div className="relative z-[1] max-w-[720px]">
-        <p className="m-0 font-[family-name:var(--font-dm-mono)] text-[11px] font-medium tracking-[0.08em] text-secondary uppercase">
+        <p className="m-0 font-[family-name:var(--font-dm-mono)] text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase">
           {text.eyebrow}
         </p>
         <h1 className="mt-[18px] mb-4 font-[family-name:var(--font-inter-tight)] text-[40px] leading-[1.08] font-medium tracking-[-0.03em] text-primary max-[760px]:text-[36px]">
           {text.title}
         </h1>
-        <p className="m-0 max-w-[620px] text-base leading-[1.55] text-secondary">{text.lead}</p>
+        <p className="m-0 max-w-[620px] text-base leading-[1.55] text-muted-foreground">
+          {text.lead}
+        </p>
         <div className="mt-8 flex flex-wrap gap-2.5">
           <Button asChild size="lg">
             <TransitionLink href={`/${locale}/handbook/collaboration`}>{text.start}</TransitionLink>
@@ -134,13 +136,13 @@ export function QuickStart({ locale }: { readonly locale: Locale }) {
     <div className="grid grid-cols-3 gap-5 max-[760px]:grid-cols-1">
       {copy[locale].steps.map(([number, title, description]) => (
         <Card key={number} className="p-6">
-          <span className="grid size-7 place-items-center rounded-full border border-strong font-[family-name:var(--font-dm-mono)] text-xs text-primary">
+          <span className="grid size-7 place-items-center rounded-full border border-input font-[family-name:var(--font-dm-mono)] text-xs text-primary">
             {number}
           </span>
           <h3 className="mt-[18px] mb-2 font-[family-name:var(--font-inter-tight)] text-xl leading-[1.25] font-medium text-primary">
             {title}
           </h3>
-          <p className="m-0 text-[14px] leading-[1.4rem] text-secondary">{description}</p>
+          <p className="m-0 text-[14px] leading-[1.4rem] text-muted-foreground">{description}</p>
         </Card>
       ))}
     </div>
@@ -153,13 +155,13 @@ export function OverviewCards({ locale }: { readonly locale: Locale }) {
     <div className="grid grid-cols-2 gap-5 max-[760px]:grid-cols-1">
       {text.cards.map(([category, title, description, href]) => (
         <Card key={category} className="flex min-h-[208px] flex-col p-6">
-          <p className="m-0 font-[family-name:var(--font-dm-mono)] text-[11px] font-medium tracking-[0.08em] text-secondary uppercase">
+          <p className="m-0 font-[family-name:var(--font-dm-mono)] text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase">
             {category}
           </p>
           <h3 className="mt-4 mb-2 font-[family-name:var(--font-inter-tight)] text-xl leading-[1.25] font-medium text-primary">
             {title}
           </h3>
-          <p className="m-0 text-[14px] leading-[1.4rem] text-secondary">{description}</p>
+          <p className="m-0 text-[14px] leading-[1.4rem] text-muted-foreground">{description}</p>
           <Button asChild variant="ghost" size="sm" className="mt-auto self-start">
             <TransitionLink href={href} aria-label={`${text.open}: ${title}`}>
               {text.open}
@@ -180,7 +182,7 @@ export function OverviewCta({ locale }: { readonly locale: Locale }) {
         <h3 className="m-0 font-[family-name:var(--font-inter-tight)] text-2xl leading-[1.25] font-medium text-primary">
           {text.ctaTitle}
         </h3>
-        <p className="mt-2 mb-0 max-w-[640px] text-[14px] leading-[1.4rem] text-secondary">
+        <p className="mt-2 mb-0 max-w-[640px] text-[14px] leading-[1.4rem] text-muted-foreground">
           {text.ctaBody}
         </p>
       </div>

@@ -50,7 +50,7 @@
   position: relative;
   min-height: 0;
   flex: 1;
-  background: light-dark(#ffffff, #121212);
+  background: var(--excalidraw-canvas);
 }
 
 .canvas :global(.main-menu-trigger),

@@ -1,0 +1,7 @@
+{
+  "id": "changes.commit-tool-window",
+  "lane": "changes",
+  "repositoryState": "dirty",
+  "themes": ["light", "dark"],
+  "densities": ["regular", "compact"]
+}

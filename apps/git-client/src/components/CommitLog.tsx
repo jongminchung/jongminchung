@@ -13,8 +13,9 @@ import { TextInput } from "./ui";
 
 const LOG_ROW_HEIGHT = 20;
 
-function commitTime(timestamp: number): string {
-  const elapsedSeconds = Math.max(0, Math.floor(Date.now() / 1000 - timestamp));
+function commitTime(timestamp: number, relativeTimeBaseSeconds?: number): string {
+  const nowSeconds = relativeTimeBaseSeconds ?? Date.now() / 1000;
+  const elapsedSeconds = Math.max(0, Math.floor(nowSeconds - timestamp));
   if (elapsedSeconds < 60) return "now";
   if (elapsedSeconds < 3_600) return `${Math.floor(elapsedSeconds / 60)}m ago`;
   if (elapsedSeconds < 86_400) return `${Math.floor(elapsedSeconds / 3_600)}h ago`;
@@ -54,6 +55,7 @@ export const CommitLog = memo(function CommitLog({
   behind,
   upstream,
   powerSaveMode,
+  relativeTimeBaseSeconds,
 }: {
   readonly commits: readonly Commit[];
   readonly selectedOids: readonly string[];
@@ -76,6 +78,7 @@ export const CommitLog = memo(function CommitLog({
   readonly behind: number;
   readonly upstream?: string;
   readonly powerSaveMode: boolean;
+  readonly relativeTimeBaseSeconds?: number;
 }) {
   const parentRef = useRef<HTMLDivElement>(null);
   const searchInput = useRef<HTMLInputElement>(null);
@@ -642,6 +645,7 @@ export const CommitLog = memo(function CommitLog({
               const visibleReferences = compactReferences ? references.slice(0, 1) : references;
               const displayedTime = commitTime(
                 preferCommitDate ? commit.committedAt : commit.authoredAt,
+                relativeTimeBaseSeconds,
               );
               const referenceBadges = visibleReferences.map((ref) => (
                 <em key={ref}>

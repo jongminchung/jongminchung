@@ -1,4 +1,5 @@
 import { execFile } from "node:child_process";
+import { existsSync } from "node:fs";
 import { lstat } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
@@ -6,6 +7,16 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 const require = createRequire(import.meta.url);
+
+export function resolveNativeModuleRoot(moduleName) {
+  let directory = dirname(require.resolve(moduleName));
+  while (true) {
+    if (existsSync(join(directory, "package.json"))) return directory;
+    const parent = dirname(directory);
+    if (parent === directory) throw new Error(`Unable to resolve package root for ${moduleName}`);
+    directory = parent;
+  }
+}
 
 async function fileState(path) {
   try {
@@ -46,12 +57,12 @@ export async function ensureDmgMakerNativeBinding(options = {}) {
     {
       bindingName: "volume.node",
       moduleName: "macos-alias",
-      moduleRoot: dirname(require.resolve("macos-alias/package.json")),
+      moduleRoot: resolveNativeModuleRoot("macos-alias"),
     },
     {
       bindingName: "xattr.node",
       moduleName: "fs-xattr",
-      moduleRoot: dirname(require.resolve("fs-xattr/package.json")),
+      moduleRoot: resolveNativeModuleRoot("fs-xattr"),
     },
   ];
   const bindings = [];

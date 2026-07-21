@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@jongminchung/ui/button";
+import { Button } from "@/components/ui/button";
 import type { Locale, OutlineEntry } from "@/lib/content-model";
 import { Icon } from "./Icon";
 import styles from "./DocumentOutline.module.css";

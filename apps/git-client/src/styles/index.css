@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "@jongminchung/ui/git-client.css";
+@import "@jongminchung/theme-contract/tokens.css";
+@import "./theme.css";
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
@@ -47,7 +48,7 @@
 
   html[data-compact="true"] .projectTreeRow,
   html[data-compact="true"] .commitRow {
-    height: 22px;
+    height: 22px !important;
   }
 
   body {

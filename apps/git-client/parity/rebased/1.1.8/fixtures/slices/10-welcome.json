@@ -1,0 +1,7 @@
+{
+  "id": "shell.welcome",
+  "lane": "welcome",
+  "repositoryState": null,
+  "themes": ["light", "dark"],
+  "densities": ["regular", "compact"]
+}

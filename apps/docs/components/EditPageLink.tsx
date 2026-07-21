@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@jongminchung/ui/button";
+import { Button } from "@/components/ui/button";
 import { EditIcon } from "./DocsIcons";
 import { Icon } from "./Icon";
 

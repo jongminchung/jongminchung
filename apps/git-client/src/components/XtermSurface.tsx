@@ -47,8 +47,6 @@ const XtermSurface = forwardRef<XtermSurfaceHandle, XtermSurfaceProps>(function 
   const onActionRef = useRef(onAction);
   onActionRef.current = onAction;
   const { colorScheme } = useAppearance();
-  const colorSchemeRef = useRef(colorScheme);
-  colorSchemeRef.current = colorScheme;
 
   useImperativeHandle(
     forwardedRef,
@@ -83,7 +81,7 @@ const XtermSurface = forwardRef<XtermSurfaceHandle, XtermSurfaceProps>(function 
       fontSize: 13,
       lineHeight: 1,
       scrollback: 10_000,
-      theme: terminalThemeFor(colorSchemeRef.current),
+      theme: terminalThemeFor(),
     });
     terminalRef.current = terminal;
     terminal.attachCustomKeyEventHandler((event) => {
@@ -134,7 +132,10 @@ const XtermSurface = forwardRef<XtermSurfaceHandle, XtermSurfaceProps>(function 
   useEffect(() => {
     const terminal = terminalRef.current;
     if (!terminal) return;
-    terminal.options.theme = terminalThemeFor(colorScheme);
+    const frame = requestAnimationFrame(() => {
+      terminal.options.theme = terminalThemeFor();
+    });
+    return () => cancelAnimationFrame(frame);
   }, [colorScheme]);
 
   return (

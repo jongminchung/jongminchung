@@ -8,5 +8,6 @@ export default defineOxfmtConfig({
     "apps/docs/public/search/",
     "playwright-report/",
     "test-results/",
+    "rebased/",
   ],
 });

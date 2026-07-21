@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@jongminchung/ui/button";
+import { Button } from "@/components/ui/button";
 import type { Locale } from "@/lib/content-model";
 import { DarkThemeIcon, LightThemeIcon, SystemThemeIcon } from "./DocsIcons";
 import { Icon, type IconType } from "./Icon";

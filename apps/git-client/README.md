@@ -37,6 +37,10 @@ Keyboard commands are defined once in `src/command-manifest.json` and shared by 
 
 `pnpm parity:compact` emits one gate line and writes the compact, current-build gate record to `test-results/qa/parity.json`. `pnpm parity:next --limit 5` lists only the next five divergent or unverified obligations, while `pnpm parity:explain <id>` opens one structured result. Full AX, Git, trace, and screenshot evidence remains under `test-results/parity/<build-hash>/`.
 
+`pnpm parity:theme` is the independent Islands Light/Dark design-system gate. It validates the Rebased-to-semantic-token mapping, rejects literal UI colors, checks 30/29/22/20px geometry and interactive states, and writes deterministic sRGB comparison reports to `test-results/theme-parity/`. It uses checked-in evidence only and consumes no AI tokens.
+
+`pnpm parity:mvp` verifies the frozen Rebased 1.1.8 MVP contract. It runs deterministic fixture and real Git integration tests, four parallel renderer lanes, one production Electron package, and the serial native Git/PTY checks. Results and bounded command logs are written below `test-results/parity/1.1.8/`; the command does not launch Rebased, access external services, update goldens, or call an AI service. Run one lane with `pnpm parity:test --scenario <id>`.
+
 Pinned Rebased evidence and generated contracts live under `parity/rebased/1.1.8/`; candidate-only observers live under `tests/parity/observers/`. The gate derives every count from individual current-build results and never trusts a stored `complete` flag. The project and branch popup contracts remain explicitly unverified until raw Rebased evidence is attached, so their candidate regression tests cannot inflate parity completion. Computer Use is reserved for previously uncaptured native states or conflicting evidence.
 
 ## Safety model

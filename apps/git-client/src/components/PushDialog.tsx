@@ -154,7 +154,7 @@ export function PushDialog({
             <label className="grid gap-1 text-xs text-secondary">
               Remote
               <select
-                className="min-h-8 rounded-md border border-border bg-surface px-2 text-primary"
+                className="min-h-8 rounded-md border border-border bg-card px-2 text-primary"
                 onChange={(event) => setRemote(event.target.value)}
                 value={remote}
               >
@@ -171,7 +171,7 @@ export function PushDialog({
             <label className="grid gap-1 text-xs text-secondary">
               Destination branch
               <input
-                className="min-h-8 rounded-md border border-border bg-surface px-2 font-mono text-primary"
+                className="min-h-8 rounded-md border border-border bg-card px-2 font-mono text-primary"
                 onChange={(event) => setRemoteRef(event.target.value)}
                 value={remoteRef}
               />
@@ -241,7 +241,7 @@ export function PushDialog({
               )}
               {preview.fastForward === false && (
                 <div
-                  className="flex gap-2 rounded-lg border border-danger bg-danger/10 p-3 text-sm"
+                  className="flex gap-2 rounded-lg border border-destructive bg-destructive-muted p-3 text-sm"
                   role="alert"
                 >
                   <Icon name="warning" size={16} />
@@ -301,7 +301,7 @@ export function PushDialog({
               </fieldset>
 
               {choice === "forceWithLease" && (
-                <section className="grid gap-2 rounded-lg border border-danger bg-danger/5 p-3 text-sm">
+                <section className="grid gap-2 rounded-lg border border-destructive bg-destructive-muted p-3 text-sm">
                   <strong>Remote impact</strong>
                   <span>
                     {shortOid(preview.remoteOid)} → {shortOid(preview.localOid)} on{" "}
@@ -320,7 +320,7 @@ export function PushDialog({
                     <label className="grid gap-1 text-xs">
                       Type <strong>{destinationBranch}</strong> to confirm
                       <input
-                        className="min-h-8 rounded-md border border-danger bg-surface px-2 font-mono"
+                        className="min-h-8 rounded-md border border-destructive bg-card px-2 font-mono"
                         onChange={(event) => setConfirmation(event.target.value)}
                         value={confirmation}
                       />
@@ -357,7 +357,10 @@ export function PushDialog({
             </>
           ) : null}
           {error && (
-            <div className="rounded-lg border border-danger bg-danger/10 p-3 text-sm" role="alert">
+            <div
+              className="rounded-lg border border-destructive bg-destructive-muted p-3 text-sm"
+              role="alert"
+            >
               {error}
             </div>
           )}

@@ -201,7 +201,7 @@ test("uses the packaged Electron Welcome geometry", async () => {
   }
 });
 
-test("opens a real packaged Electron PTY in the repository directory", async () => {
+test("[parity:mvp] opens a real packaged Electron PTY in the repository directory", async () => {
   const profileName = runtimeProfileName;
   await resetQaProfile(profileName);
   const repositoryPath = await mkdtemp(join(tmpdir(), "git-client-electron-terminal-"));
@@ -418,7 +418,7 @@ test("shows real packaged Git history and commit details", async () => {
   }
 });
 
-test("executes packaged index, commit, ref, stash, config, remote, and worktree mutations", async () => {
+test("[parity:mvp] executes packaged index, commit, ref, stash, config, remote, and worktree mutations", async () => {
   test.setTimeout(60_000);
   await resetQaProfile(runtimeProfileName);
   const parent = await mkdtemp(join(tmpdir(), "git-client-electron-mutation-e2e-"));

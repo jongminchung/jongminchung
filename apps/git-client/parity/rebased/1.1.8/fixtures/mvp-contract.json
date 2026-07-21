@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "referenceVersion": "1.1.8",
+  "clock": {
+    "iso": "2025-01-15T12:00:00.000Z",
+    "timezone": "UTC",
+    "locale": "en-US"
+  },
+  "gitIdentity": {
+    "name": "Rebased Parity",
+    "email": "rebased-parity@example.invalid"
+  }
+}
