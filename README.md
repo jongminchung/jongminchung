@@ -43,6 +43,27 @@ pnpm run publish:dry-run
 <!-- prettier-ignore-start -->
 
 <!--START_SECTION:waka-->
+**I'm a Night 🦉** 
+
+```text
+🌞 Morning                823 commits         ██░░░░░░░░░░░░░░░░░░░░░░░   09.53 % 
+🌆 Daytime                1796 commits        █████░░░░░░░░░░░░░░░░░░░░   20.80 % 
+🌃 Evening                3529 commits        ██████████░░░░░░░░░░░░░░░   40.87 % 
+🌙 Night                  2487 commits        ███████░░░░░░░░░░░░░░░░░░   28.80 % 
+```
+
+
+📊 **This Week I Spent My Time On** 
+
+```text
+💬 Programming Languages: 
+TypeScript               13 hrs 17 mins      ███████░░░░░░░░░░░░░░░░░░   29.07 % 
+YAML                     8 hrs 24 mins       █████░░░░░░░░░░░░░░░░░░░░   18.39 % 
+Java                     4 hrs 54 mins       ███░░░░░░░░░░░░░░░░░░░░░░   10.75 % 
+Bash                     3 hrs 57 mins       ██░░░░░░░░░░░░░░░░░░░░░░░   08.67 % 
+Other                    2 hrs 41 mins       █░░░░░░░░░░░░░░░░░░░░░░░░   05.88 % 
+```
+
 
 <!--END_SECTION:waka-->
 
