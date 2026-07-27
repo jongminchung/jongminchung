@@ -119,7 +119,7 @@ describe("Git Client design system boundary", () => {
   });
 
   test("keeps app components out of the theme contract package", () => {
-    const contractFiles = sourceFiles(themeContractRoot);
+    const contractFiles = sourceFiles(join(themeContractRoot, "src"));
     expect(contractFiles.every((file) => !/\.(?:ts|tsx)$/.test(file))).toBe(true);
 
     for (const app of ["docs", "git-client", "readme"] as const) {
@@ -187,14 +187,49 @@ describe("Git Client design system boundary", () => {
     const dialog = readFileSync(join(componentsRoot, "dialog.tsx"), "utf8");
     const collections = readFileSync(join(componentsRoot, "collections.tsx"), "utf8");
     const overlays = readFileSync(join(componentsRoot, "overlays.tsx"), "utf8");
+    const tooltip = readFileSync(join(componentsRoot, "tooltip.tsx"), "utf8");
+    const main = readFileSync(join(sourceRoot, "main.tsx"), "utf8");
+    const terminalTabs = readFileSync(
+      join(sourceRoot, "components", "TerminalTabStrip.tsx"),
+      "utf8",
+    );
 
     expect(dialog).toContain('eventDetails.reason === "escape-key"');
     expect(dialog).toContain("eventDetails.cancel()");
     expect(dialog).toContain('disablePointerDismissal={purpose !== "info"}');
-    expect(collections).toContain("data-active:");
+    expect(collections).toContain('from "@base-ui/react/toggle"');
+    expect(collections).toContain('from "@base-ui/react/toggle-group"');
     expect(collections).toContain("data-pressed:");
+    expect(terminalTabs).toContain('from "@base-ui/react/tabs"');
+    expect(terminalTabs).toContain("<Tabs.List");
+    expect(terminalTabs).toContain("activateOnFocus");
+    expect(overlays).toContain('from "@base-ui/react/menu"');
+    expect(overlays).toContain("<Menu.Item");
+    expect(overlays).not.toContain("useLayer");
     expect(overlays).toContain("<PopoverPrimitive.Positioner");
     expect(overlays).toContain('className="z-[110]"');
+    expect(tooltip).toContain('from "@base-ui/react/tooltip"');
+    expect(tooltip).toContain("<TooltipPrimitive.Trigger");
+    expect(tooltip).toContain("<TooltipPrimitive.Positioner");
+    expect(tooltip).toContain("<TooltipPrimitive.Popup");
+    expect(main).toContain("<TooltipProvider>");
+  });
+
+  test("composes supplemental Button help with shadcn Tooltip", () => {
+    const tooltipConsumers = [
+      "AppearanceMenu.tsx",
+      "ChangesWorkspace.tsx",
+      "CommitLog.tsx",
+      "ShareProjectDialog.tsx",
+      "TerminalTabStrip.tsx",
+    ] as const;
+
+    for (const file of tooltipConsumers) {
+      const contents = readFileSync(join(sourceRoot, "components", file), "utf8");
+      expect(contents, file).toContain("<Tooltip");
+      expect(contents, file).toContain("<TooltipTrigger");
+      expect(contents, file).toContain("<TooltipContent");
+    }
   });
 
   test("does not escape quotes inside Tailwind selector variants", () => {

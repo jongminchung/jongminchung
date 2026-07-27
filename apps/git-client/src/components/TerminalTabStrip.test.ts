@@ -48,6 +48,11 @@ describe("TerminalTabStrip", () => {
     expect(markup).toContain(">AI Agents<");
     expect(markup).toContain('aria-label="Options"');
     expect(markup).toContain('aria-label="Hide"');
+    expect(markup).not.toContain('title="Close Local"');
+    expect(markup).not.toContain('title="New Tab"');
+    expect(markup).not.toContain('title="New Predefined Session"');
+    expect(markup).not.toContain('title="Options"');
+    expect(markup).not.toContain('title="Hide"');
 
     const buttons = markup.match(/<button\b[\s\S]*?<\/button>/gu) ?? [];
     expect(buttons).toHaveLength(7);

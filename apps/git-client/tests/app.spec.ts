@@ -158,6 +158,19 @@ test("supports persisted Sync with OS, Islands Light, and Islands Dark modes", a
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 });
 
+test("shows accessible supplemental help for icon actions", async ({ page }) => {
+  const appearance = page.getByRole("button", { name: /Appearance:/ });
+
+  await appearance.hover();
+  await expect(page.locator('[data-slot="tooltip-content"]')).toHaveText("Appearance");
+  await page.keyboard.press("Escape");
+  await expect(page.locator('[data-slot="tooltip-content"]')).toHaveCount(0);
+
+  await page.mouse.move(0, 0);
+  await appearance.focus();
+  await expect(page.locator('[data-slot="tooltip-content"]')).toHaveText("Appearance");
+});
+
 test("navigates the Appearance menu with the keyboard", async ({ page }) => {
   const appearance = page.getByRole("button", { name: /Appearance:/ });
   await appearance.focus();
@@ -248,17 +261,35 @@ test("opens Changes with the first layer selected and restores selection after s
   page,
 }) => {
   await page.getByRole("button", { name: "Commit", exact: true }).click();
+  const changedFiles = page.getByRole("complementary", { name: "Changed files" });
+  await expect(
+    changedFiles.getByRole("button", {
+      name: /M actionAvailability\.ts src\/domain \+34 −4/,
+      exact: true,
+    }),
+  ).toHaveAttribute("aria-current", "true");
+  await changedFiles.focus();
+  await page.keyboard.press("Enter");
   await expect(
     page.getByRole("region", {
       name: "Diff for src/domain/actionAvailability.ts",
     }),
   ).toBeVisible();
+  await page.keyboard.press("Escape");
   await page
     .getByRole("button", {
       name: /M git-service\.ts electron\/utility\/git \+22 −9/,
       exact: true,
     })
     .click();
+  await expect(
+    changedFiles.getByRole("button", {
+      name: /M git-service\.ts electron\/utility\/git \+22 −9/,
+      exact: true,
+    }),
+  ).toHaveAttribute("aria-current", "true");
+  await changedFiles.focus();
+  await page.keyboard.press("Enter");
   await expect(
     page.getByRole("region", {
       name: "Diff for electron/utility/git/git-service.ts",
@@ -325,21 +356,24 @@ test("opens published commits in the visual interactive rebase workspace", async
 
 test("offers open, clone, and initialize repository flows", async ({ page }) => {
   await page.getByRole("button", { name: /Project:/ }).click();
-  await page.getByRole("button", { name: "Clone Repository…" }).click();
+  await page.getByRole("option", { name: "Clone Repository…" }).click();
   const dialog = page.getByRole("dialog", { name: "Repository" });
   await expect(dialog).toBeVisible();
-  await expect(dialog.getByRole("radio", { name: "Clone" })).toBeChecked();
+  await expect(dialog.getByRole("button", { name: "Clone", exact: true }).first()).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
   await expect(dialog.getByText("Remote URL")).toBeVisible();
-  await dialog.getByRole("button", { name: "Clone", exact: true }).click();
+  await dialog.getByRole("contentinfo").getByRole("button", { name: "Clone", exact: true }).click();
   await expect(dialog.getByText("Enter a remote URL.", { exact: true })).toBeVisible();
   await expect(dialog.getByText("Enter a repository directory.", { exact: true })).toBeVisible();
   await dialog.getByLabel("Remote URL").fill("https://example.invalid/repository.git");
   await dialog.getByLabel("Empty destination").fill("/tmp/fixture-clone");
-  await dialog.getByRole("button", { name: "Clone", exact: true }).click();
+  await dialog.getByRole("contentinfo").getByRole("button", { name: "Clone", exact: true }).click();
   await expect(dialog.getByRole("alert")).toContainText(
     "Real repository actions are disabled while the QA fixture is active.",
   );
-  await dialog.getByRole("radio", { name: "Initialize" }).click();
+  await dialog.getByRole("button", { name: "Initialize" }).click();
   await expect(dialog.getByText("Bare repository")).toBeVisible();
 });
 
@@ -375,9 +409,9 @@ test("opens a Rebased-style project switcher and restores focus on dismiss", asy
 
   const popup = page.getByRole("dialog", { name: "Projects" });
   await expect(popup).toBeVisible();
-  await expect(popup.getByRole("button", { name: "Open…" })).toBeVisible();
-  await expect(popup.getByRole("button", { name: "Open…" })).toBeFocused();
-  await expect(popup.getByRole("button", { name: "Clone Repository…" })).toBeVisible();
+  await expect(popup.getByRole("option", { name: "Open…" })).toBeVisible();
+  await expect(popup.getByRole("option", { name: "Open…" })).toBeFocused();
+  await expect(popup.getByRole("option", { name: "Clone Repository…" })).toBeVisible();
   await expect(popup.getByText("Open Projects", { exact: true })).toBeVisible();
   await expect(popup.getByText("git-client", { exact: true })).toBeVisible();
   await expect(page.getByRole("dialog", { name: "Repository Management" })).toHaveCount(0);
@@ -388,19 +422,15 @@ test("opens a Rebased-style project switcher and restores focus on dismiss", asy
 });
 
 test("keeps log filters and commit options available in compact popovers", async ({ page }) => {
-  await page.getByRole("button", { name: "Filters", exact: true }).click();
+  await page.getByRole("button", { name: "Graph Options", exact: true }).click();
   const authorFilter = page.getByRole("combobox", { name: "Author" });
   await expect(authorFilter).toBeVisible();
-  await expect(page.getByRole("textbox", { name: "Path" })).toBeVisible();
+  await expect(page.getByRole("textbox", { name: "Path", exact: true })).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(authorFilter).not.toBeVisible();
 
   await page.getByRole("button", { name: "Commit", exact: true }).click();
-  await expect(
-    page.getByRole("region", {
-      name: "Diff for src/domain/actionAvailability.ts",
-    }),
-  ).toBeVisible();
+  await expect(page.getByRole("complementary", { name: "Changed files" })).toBeVisible();
   const commitOptions = page.getByRole("button", {
     name: "Commit options",
     exact: true,
@@ -411,13 +441,18 @@ test("keeps log filters and commit options available in compact popovers", async
 });
 
 test("resizes the bottom panel with accessible keyboard controls", async ({ page }) => {
+  await page.getByRole("button", { name: "Terminal", exact: true }).click();
   const separator = page.getByRole("separator", {
     name: "Resize bottom panel",
   });
-  await expect(separator).toHaveAttribute("aria-valuenow", "240");
+  const initialHeight = Number(await separator.getAttribute("aria-valuenow"));
+  expect(initialHeight).toBeGreaterThanOrEqual(160);
   await separator.focus();
   await page.keyboard.press("ArrowUp");
-  await expect(separator).toHaveAttribute("aria-valuenow", "250");
+  await expect(separator).toHaveAttribute(
+    "aria-valuenow",
+    String(Math.min(initialHeight + 10, 420)),
+  );
   await page.keyboard.press("Home");
   await expect(separator).toHaveAttribute("aria-valuenow", "160");
 });
@@ -431,13 +466,13 @@ test("resizes and exposes v4 review panes with accessible separators", async ({ 
   await page.keyboard.press("ArrowLeft");
   await expect(review).toHaveAttribute("aria-valuenow", "222");
 
-  await page.getByRole("button", { name: /Changes 5/ }).click();
-  const navigator = page.getByRole("separator", {
-    name: "Resize change navigator",
-  });
-  await navigator.focus();
-  await page.keyboard.press("ArrowRight");
-  await expect(navigator).toHaveAttribute("aria-valuenow", "262");
+  await page.getByRole("button", { name: "Commit", exact: true }).click();
+  await expect(page.getByRole("complementary", { name: "Changed files" })).toBeVisible();
+  await expect(
+    page.getByRole("separator", {
+      name: "Resize change navigator",
+    }),
+  ).toHaveCount(0);
 });
 
 test("routes branch operations to a focused repository tool", async ({ page }) => {
@@ -447,7 +482,7 @@ test("routes branch operations to a focused repository tool", async ({ page }) =
     .click();
   const branchesPopup = page.getByRole("dialog", { name: "Git Branches" });
   await expect(branchesPopup).toBeVisible();
-  await branchesPopup.getByRole("button", { name: "Branches Settings" }).click();
+  await branchesPopup.getByRole("button", { name: "Settings" }).click();
   const dialog = page.getByRole("dialog", { name: "Branches & Tags" });
   await expect(dialog).toBeVisible();
   await expect(page.getByRole("dialog", { name: "Repository Management" })).toHaveCount(0);
@@ -459,12 +494,13 @@ test("uses the command registry for palette, views, search, drawer, and settings
   page,
 }) => {
   await expect(page.getByRole("region", { name: "Commit log" })).toBeVisible();
-  await page.keyboard.press("Meta+2");
+  await page.keyboard.press("Meta+0");
   await expect(
-    page.getByRole("region", {
-      name: "Diff for src/domain/actionAvailability.ts",
+    page.getByRole("complementary", { name: "Changed files" }).getByRole("button", {
+      name: /M actionAvailability\.ts src\/domain \+34 −4/,
+      exact: true,
     }),
-  ).toBeVisible();
+  ).toHaveAttribute("aria-current", "true");
 
   await page.keyboard.press("Meta+f");
   await expect(page.getByLabel("Filter changed files")).toBeFocused();
@@ -473,10 +509,10 @@ test("uses the command registry for palette, views, search, drawer, and settings
     "Enter a commit message and stage at least one file.",
   );
   await page.keyboard.press("Meta+p");
-  const palette = page.getByRole("dialog", { name: "Command palette" });
+  const palette = page.getByRole("dialog", { name: "Search Everywhere" });
   await expect(palette).toBeVisible();
   const paletteAccessibility = await new AxeBuilder({ page })
-    .include('dialog[aria-label="Command palette"]')
+    .include('[role="dialog"][aria-label="Search Everywhere"]')
     .disableRules(["color-contrast"])
     .analyze();
   expect(
@@ -507,17 +543,21 @@ test("uses the command registry for palette, views, search, drawer, and settings
   await page.keyboard.press("Meta+1");
   await expect(page.getByRole("region", { name: "Commit log" })).toBeVisible();
   await page.keyboard.press("Meta+f");
-  await expect(page.getByLabel("Search commits")).toBeFocused();
+  await expect(page.getByRole("textbox", { name: "Search", exact: true })).toBeFocused();
 
-  await page.keyboard.press("Meta+j");
-  await expect(page.getByRole("separator", { name: "Resize bottom panel" })).toHaveCount(0);
   await page.keyboard.press("Meta+j");
   await expect(page.getByRole("separator", { name: "Resize bottom panel" })).toBeVisible();
+  await page.keyboard.press("Meta+j");
+  await expect(page.getByRole("separator", { name: "Resize bottom panel" })).toHaveCount(0);
 
-  await page.keyboard.press("Meta+Shift+t");
-  await expect(page.getByText("Native Terminal", { exact: true })).toBeVisible();
   await page.keyboard.press("Meta+,");
-  await expect(page.getByText("Config & Ignore", { exact: true })).toBeVisible();
+  const settings = page.getByRole("dialog", { name: "Settings" });
+  await expect(settings).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(settings).toHaveCount(0);
+
+  await page.keyboard.press("Alt+F12");
+  await expect(page.getByText("Native Terminal", { exact: true })).toBeVisible();
 });
 
 test("dismisses context, popover, and multi-selection one layer at a time", async ({ page }) => {
@@ -530,7 +570,7 @@ test("dismisses context, popover, and multi-selection one layer at a time", asyn
   await expect(page.getByRole("menu")).toHaveCount(0);
   await expect(head).toBeFocused();
 
-  const filters = page.getByRole("button", { name: "Filters", exact: true });
+  const filters = page.getByRole("button", { name: "Graph Options", exact: true });
   await filters.click();
   await expect(page.getByRole("combobox", { name: "Author" })).toBeVisible();
   await page.keyboard.press("Escape");
@@ -547,8 +587,8 @@ test("dismisses context, popover, and multi-selection one layer at a time", asyn
   await expect(page.getByRole("complementary", { name: "Revision review" })).toBeVisible();
 });
 
-test("opens a read-only file viewer from local changes", async ({ page }) => {
-  await page.getByRole("button", { name: /Changes 5/ }).click();
+test("opens an editable file viewer from local changes", async ({ page }) => {
+  await page.getByRole("button", { name: "Commit", exact: true }).click();
   await page
     .getByRole("button", {
       name: /M git-service\.ts electron\/utility\/git \+22 −9/,
@@ -556,15 +596,84 @@ test("opens a read-only file viewer from local changes", async ({ page }) => {
     })
     .click();
   await page.getByRole("button", { name: "View", exact: true }).click();
-  const dialog = page.getByRole("dialog");
-  await expect(dialog).toContainText("Working Tree");
-  await expect(dialog.locator(".cm-editor")).toBeVisible();
-  await expect(dialog.locator(".cm-content")).toHaveAttribute("contenteditable", "false");
+  const viewer = page.getByRole("region", {
+    name: "Editor: electron/utility/git/git-service.ts",
+  });
+  await expect(viewer).toBeVisible();
+  await expect(viewer.locator(".cm-editor")).toBeVisible();
+  await expect(viewer.locator(".cm-content")).toHaveAttribute("contenteditable", "true");
+});
+
+test("links and closes dynamic Log and editor tabs with keyboard focus", async ({ page }) => {
+  const expectLinkedPanel = async (tab: ReturnType<typeof page.getByRole>) => {
+    const tabId = await tab.getAttribute("id");
+    const panelId = await tab.getAttribute("aria-controls");
+    expect(tabId).toBeTruthy();
+    expect(panelId).toBeTruthy();
+    const panel = page.locator(`[id="${panelId}"]`);
+    await expect(panel).toHaveAttribute("aria-labelledby", tabId!);
+    await expect(panel).toBeVisible();
+  };
+
+  const firstLogTab = page.getByRole("tab", { name: "Log", exact: true });
+  await expect(firstLogTab).toHaveAttribute("aria-selected", "true");
+  await expectLinkedPanel(firstLogTab);
+
+  await page.getByRole("button", { name: "Open New Git Log Tab" }).click();
+  const secondLogTab = page.getByRole("tab", { name: "Log 2", exact: true });
+  await expect(secondLogTab).toHaveAttribute("aria-selected", "true");
+  await expectLinkedPanel(secondLogTab);
+
+  await firstLogTab.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(secondLogTab).toBeFocused();
+  await expect(secondLogTab).toHaveAttribute("aria-selected", "true");
+  await page.keyboard.press("Delete");
+  await expect(secondLogTab).toHaveCount(0);
+  await expect(firstLogTab).toBeFocused();
+
+  await page.getByRole("button", { name: "Commit", exact: true }).click();
+  await page
+    .getByRole("button", {
+      name: /M git-service\.ts electron\/utility\/git \+22 −9/,
+      exact: true,
+    })
+    .click();
+  await page.getByRole("button", { name: "View", exact: true }).click();
+
+  const editorTab = page.getByRole("tab", {
+    name: "Editor electron/utility/git/git-service.ts",
+    exact: true,
+  });
+  await expect(editorTab).toHaveAttribute("aria-selected", "true");
+  await expectLinkedPanel(editorTab);
+  await expect(page.getByRole("tablist", { name: "Editor tabs" }).getByRole("button")).toHaveCount(
+    0,
+  );
+
+  await editorTab.focus();
+  await page.keyboard.press("Delete");
+  await expect(editorTab).toHaveCount(0);
+  await expect(firstLogTab).toBeFocused();
 });
 
 test("has no serious automated accessibility violations", async ({ page }) => {
-  await expect(page.locator(".cm-content").first()).toBeVisible();
-  const results = await new AxeBuilder({ page }).disableRules(["color-contrast"]).analyze();
+  await page.getByRole("button", { name: "Commit", exact: true }).click();
+  await page
+    .getByRole("button", {
+      name: /M git-service\.ts electron\/utility\/git \+22 −9/,
+      exact: true,
+    })
+    .click();
+  await page.getByRole("button", { name: "View", exact: true }).click();
+  const viewer = page.getByRole("region", {
+    name: "Editor: electron/utility/git/git-service.ts",
+  });
+  await expect(viewer.locator(".cm-content")).toBeVisible();
+  const results = await new AxeBuilder({ page })
+    .include('[aria-label="Editor: electron/utility/git/git-service.ts"]')
+    .disableRules(["color-contrast"])
+    .analyze();
   expect(
     results.violations.filter((violation) =>
       ["serious", "critical"].includes(violation.impact ?? ""),

@@ -141,7 +141,7 @@ test("keeps visual thresholds synchronized with the parity comparator", () => {
 
 test("matches Rebased geometry, density, and interactive states", async ({ page }) => {
   const toolbar = page.getByRole("banner", { name: "Main Toolbar" });
-  const logTabs = page.getByRole("tablist", { name: "Log" }).locator("..");
+  const logTabs = page.locator(".commandbar");
   const statusBar = page.getByRole("contentinfo", { name: "Status Bar" });
   await expect(toolbar).toHaveCSS("height", `${contract.geometry.mainToolbar}px`);
   await expect(logTabs).toHaveCSS("height", `${contract.geometry.logTab}px`);
