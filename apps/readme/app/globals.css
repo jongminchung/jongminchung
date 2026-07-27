@@ -2,6 +2,10 @@
 @import "@jongminchung/theme-contract/tokens.css";
 @import "./theme.css";
 
+@theme inline {
+  --color-inverse-foreground: var(--inverse-foreground);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -14,9 +18,9 @@ html {
 body {
   min-height: 100vh;
   margin: 0;
-  background: var(--paper);
-  color: var(--ink);
-  font-family: var(--body);
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-family-body);
   text-rendering: optimizeLegibility;
 }
 
@@ -26,11 +30,11 @@ a {
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--pink) 35%, var(--surface));
+  background: color-mix(in oklch, var(--brand-highlight) 35%, var(--card));
 }
 
 :where(a, button):focus-visible {
-  outline: 3px solid var(--pink);
+  outline: 3px solid var(--ring);
   outline-offset: 4px;
 }
 

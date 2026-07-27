@@ -1,6 +1,6 @@
 import { createIconDataUrl } from "@jongminchung/icon";
 import type { ReactElement } from "react";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import styles from "./page.module.css";
 
 const personalIcon = createIconDataUrl("personal");
@@ -91,9 +91,9 @@ function RouteMap(): ReactElement {
       <svg viewBox="0 0 1000 350" role="img" aria-label="Language becomes a model, code, and proof">
         <defs>
           <linearGradient id="route-gradient" x1="0" x2="1">
-            <stop offset="0" stopColor="var(--pink)" />
-            <stop offset="0.48" stopColor="var(--route-mid)" />
-            <stop offset="1" stopColor="var(--blue)" />
+            <stop offset="0" stopColor="var(--brand-highlight)" />
+            <stop offset="0.48" stopColor="var(--brand-gradient-mid)" />
+            <stop offset="1" stopColor="var(--primary)" />
           </linearGradient>
         </defs>
         <path className={styles.routeGhost} d="M90 72H430v100c0 76 62 120 140 120h350" />
@@ -177,16 +177,28 @@ export default function HomePage(): ReactElement {
               what changed.
             </p>
             <div className={styles.heroActions}>
-              <Button asChild className={styles.primaryAction}>
-                <a href="#work">
-                  Read the work <span aria-hidden="true">↓</span>
-                </a>
-              </Button>
-              <Button asChild variant="ghost" className={styles.textAction}>
-                <a href="https://jongminchung.dev/en/overview" target="_blank" rel="noreferrer">
-                  Open the docs <span aria-hidden="true">↗</span>
-                </a>
-              </Button>
+              <a
+                className={cn(
+                  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md border text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/60",
+                  "border-foreground bg-foreground font-mono text-xs text-inverse-foreground transition-[background,color,transform] hover:-translate-x-[3px] hover:-translate-y-[3px] hover:bg-accent hover:text-accent-foreground",
+                  "min-h-[50px] gap-[26px] px-[18px]",
+                )}
+                href="#work"
+              >
+                Read the work <span aria-hidden="true">↓</span>
+              </a>
+              <a
+                className={cn(
+                  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md border text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/60",
+                  "border-x-0 border-t-0 border-b border-foreground bg-transparent font-mono text-xs leading-[1.8] text-foreground hover:bg-muted hover:text-foreground",
+                  "h-9 px-4",
+                )}
+                href="https://jongminchung.dev/en/overview"
+                rel="noreferrer"
+                target="_blank"
+              >
+                Open the docs <span aria-hidden="true">↗</span>
+              </a>
             </div>
           </div>
 

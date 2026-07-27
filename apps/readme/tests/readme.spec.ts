@@ -20,6 +20,21 @@ test("presents Jamie's work with valid metadata", async ({ page }) => {
   );
 });
 
+test("renders editorial actions with working destinations", async ({ page }) => {
+  await page.goto("/");
+
+  const workAction = page.getByRole("link", { name: "Read the work" });
+  const docsAction = page.getByRole("link", { name: "Open the docs" });
+
+  await expect(workAction).toHaveAttribute("href", "#work");
+  await expect(workAction).toHaveCSS("min-height", "50px");
+  await expect(docsAction).toHaveAttribute("href", "https://jongminchung.dev/en/overview");
+  await expect(docsAction).toHaveAttribute("target", "_blank");
+
+  await workAction.click();
+  await expect(page).toHaveURL(/#work$/u);
+});
+
 test("publishes domain discovery files", async ({ request }) => {
   const [favicon, robots, sitemap, socialImage] = await Promise.all([
     request.get("/icon.svg"),

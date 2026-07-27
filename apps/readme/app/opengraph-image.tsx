@@ -7,6 +7,16 @@ export const contentType = "image/png";
 
 const personalIcon = createIconDataUrl("personal");
 
+// ImageResponse does not parse OKLCH values, so this output boundary keeps an sRGB palette.
+const imageTheme = {
+  background: "#f3f6ff",
+  border: "#cdd5e7",
+  foreground: "#11131a",
+  mutedForeground: "#596174",
+  primary: "#2457ff",
+  primaryForeground: "#ffffff",
+} as const;
+
 export default function OpenGraphImage(): ImageResponse {
   return new ImageResponse(
     <div
@@ -17,8 +27,8 @@ export default function OpenGraphImage(): ImageResponse {
         flexDirection: "column",
         justifyContent: "space-between",
         padding: "66px 72px",
-        background: "#f3f6ff",
-        color: "#11131a",
+        background: imageTheme.background,
+        color: imageTheme.foreground,
         fontFamily: "Arial, sans-serif",
       }}
     >
@@ -34,7 +44,7 @@ export default function OpenGraphImage(): ImageResponse {
           <span style={{ fontSize: 24 }}>JAMIE</span>
           <span
             style={{
-              color: "#596174",
+              color: imageTheme.mutedForeground,
               fontSize: 13,
               letterSpacing: 3,
             }}
@@ -61,8 +71,8 @@ export default function OpenGraphImage(): ImageResponse {
             alignSelf: "flex-start",
             marginTop: 10,
             padding: "2px 14px 8px",
-            background: "#2457ff",
-            color: "white",
+            background: imageTheme.primary,
+            color: imageTheme.primaryForeground,
             fontSize: 78,
             fontWeight: 900,
             letterSpacing: -5,
@@ -77,9 +87,9 @@ export default function OpenGraphImage(): ImageResponse {
         style={{
           display: "flex",
           justifyContent: "space-between",
-          borderTop: "2px solid #cdd5e7",
+          borderTop: `2px solid ${imageTheme.border}`,
           paddingTop: 22,
-          color: "#596174",
+          color: imageTheme.mutedForeground,
           fontSize: 16,
           letterSpacing: 2,
         }}
