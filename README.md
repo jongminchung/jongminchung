@@ -4,9 +4,13 @@ This repository owns the shared `@jongminchung` packages used by downstream proj
 
 - `@jongminchung/tooling`: shared `oxfmt`, `oxlint`, and package-map configuration.
 - `@jongminchung/remark-plantuml`: shared PlantUML rendering for Markdown and Astro docs.
+- `@jongminchung/theme-contract`: private CSS-only adapter for the apps' shared semantic vocabulary.
 
-Packages are published to GitHub Packages. Consumers need the `@jongminchung` scope mapped to
-`https://npm.pkg.github.com`.
+Public packages are published to GitHub Packages. Consumers need the `@jongminchung` scope mapped
+to `https://npm.pkg.github.com`.
+
+The apps own their theme values and components. See [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) for the
+token contract, component ownership rules, and runtime exception policy.
 
 ## Workspace scripts
 

@@ -9,6 +9,7 @@
         "./packages/remark-plantuml/src/starlight.css"
       ],
       "@jongminchung/remark-plantuml/styles.css": ["./packages/remark-plantuml/src/styles.css"],
+      "@jongminchung/theme-contract/tokens.css": ["./packages/theme-contract/src/tokens.css"],
       "@jongminchung/tooling/oxfmt": ["./packages/tooling/src/oxfmt/index.ts"],
       "@jongminchung/tooling/oxlint": ["./packages/tooling/src/oxlint/index.ts"],
       "@jongminchung/tooling/oxlint.json": ["./packages/tooling/src/oxlint/base.json"],
