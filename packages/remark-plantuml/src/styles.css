@@ -13,7 +13,7 @@
 
 .plantuml-diagram figcaption {
   margin-top: 0.5rem;
-  color: #64748b;
+  color: var(--plantuml-caption-foreground, var(--muted-foreground, oklch(0.5544 0.0407 257.42)));
   font-size: 0.875rem;
   text-align: center;
 }
