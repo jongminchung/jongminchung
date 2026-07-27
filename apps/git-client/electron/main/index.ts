@@ -14,6 +14,7 @@ import { registerPlatformHandlers, unregisterPlatformHandlers } from "./platform
 import { registerAppProtocol, registerPrivilegedScheme } from "./protocol";
 import { resolveRuntimeProfile, trustsQaHostingCertificate } from "./runtime-profile";
 import { SettingsStore } from "./settings-store";
+import { NATIVE_WINDOW_BACKGROUND } from "./static-color-boundary";
 import { TerminalUtilityClient } from "./terminal-utility-client";
 import {
   shouldQuitAfterLastWindow,
@@ -81,7 +82,7 @@ async function createMainWindow(
     minWidth: 800,
     minHeight: 650,
     show: false,
-    backgroundColor: "#26282c",
+    backgroundColor: NATIVE_WINDOW_BACKGROUND,
     title: "Git Client",
     titleBarStyle: "hiddenInset",
     trafficLightPosition: WELCOME_TRAFFIC_LIGHT_POSITION,
@@ -108,7 +109,7 @@ async function createMainWindow(
         height: 720,
         minWidth: 760,
         minHeight: 480,
-        backgroundColor: "#26282c",
+        backgroundColor: NATIVE_WINDOW_BACKGROUND,
         titleBarStyle: "hiddenInset",
         trafficLightPosition: { x: 12, y: 14 },
         webPreferences: {

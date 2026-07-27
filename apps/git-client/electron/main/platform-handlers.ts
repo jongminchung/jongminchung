@@ -90,6 +90,7 @@ import type { DiagnosticsService } from "./diagnostics-service";
 import type { GitUtilityClient } from "./git-utility-client";
 import type { NativeMenuService } from "./menu-service";
 import type { SettingsStore } from "./settings-store";
+import { EXPORTED_DOCUMENT_COLOR_VARIABLES } from "./static-color-boundary";
 import type { TerminalUtilityClient } from "./terminal-utility-client";
 
 interface PlatformHandlerDependencies {
@@ -130,7 +131,7 @@ function exportedHtml(path: string, content: string, lineNumbers: boolean): stri
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${escapeHtml(path)}</title><style>
-:root{color-scheme:light dark}body{margin:0;background:#1e1f22;color:#bcbec4;font:13px/1.55 "JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace}header{position:sticky;top:0;padding:9px 14px;background:#2b2d30;border-bottom:1px solid #393b40;color:#dfe1e5}pre{margin:0;padding:12px 0;tab-size:4}.line{display:grid;grid-template-columns:52px minmax(0,1fr);min-height:20px}.number{box-sizing:border-box;padding-right:12px;color:#6f737a;text-align:right;user-select:none}.source{padding-right:16px;white-space:pre-wrap}@media(prefers-color-scheme:light){body{background:#fff;color:#1f2328}header{background:#f2f3f5;border-color:#d8dadd}.number{color:#8c8f94}}</style></head>
+:root{color-scheme:light dark;${EXPORTED_DOCUMENT_COLOR_VARIABLES}}body{margin:0;background:var(--document-background-dark);color:var(--document-foreground-dark);font:13px/1.55 "JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace}header{position:sticky;top:0;padding:9px 14px;background:var(--document-header-dark);border-bottom:1px solid var(--document-border-dark);color:var(--document-header-foreground-dark)}pre{margin:0;padding:12px 0;tab-size:4}.line{display:grid;grid-template-columns:52px minmax(0,1fr);min-height:20px}.number{box-sizing:border-box;padding-right:12px;color:var(--document-line-number-dark);text-align:right;user-select:none}.source{padding-right:16px;white-space:pre-wrap}@media(prefers-color-scheme:light){body{background:var(--document-background-light);color:var(--document-foreground-light)}header{background:var(--document-header-light);border-color:var(--document-border-light)}.number{color:var(--document-line-number-light)}}</style></head>
 <body><header>${escapeHtml(path)}</header><pre>${body}</pre></body></html>`;
 }
 

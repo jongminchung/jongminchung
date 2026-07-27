@@ -20,6 +20,7 @@ import type {
   RuntimeInfo,
 } from "../../src/shared/contracts/ipc";
 import { DiagnosticSnapshotSchema } from "../../src/shared/contracts/ipc";
+import { SHORTCUT_DOCUMENT_COLOR_VARIABLES } from "./static-color-boundary";
 
 const MAX_LOG_ARCHIVE_INPUT_BYTES = 32 * 1_024 * 1_024;
 const MAX_CONFIGURATION_BYTES = 1_048_576;
@@ -135,7 +136,7 @@ function shortcutDocument(): string {
     .map(([action, shortcut]) => `<tr><td>${action}</td><td>${shortcut}</td></tr>`)
     .join("");
   return `<!doctype html><html><head><meta charset="utf-8"><style>
-body{font:13px -apple-system,BlinkMacSystemFont,sans-serif;margin:44px;color:#202124}h1{font-size:24px;margin:0 0 6px}p{color:#5f6368;margin:0 0 24px}table{border-collapse:collapse;width:100%}td{border-bottom:1px solid #dadce0;padding:9px 4px}td:last-child{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;text-align:right}</style></head><body><h1>Git Client Keyboard Shortcuts</h1><p>macOS keymap</p><table>${body}</table></body></html>`;
+:root{${SHORTCUT_DOCUMENT_COLOR_VARIABLES}}body{font:13px -apple-system,BlinkMacSystemFont,sans-serif;margin:44px;color:var(--document-foreground)}h1{font-size:24px;margin:0 0 6px}p{color:var(--document-muted-foreground);margin:0 0 24px}table{border-collapse:collapse;width:100%}td{border-bottom:1px solid var(--document-border);padding:9px 4px}td:last-child{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;text-align:right}</style></head><body><h1>Git Client Keyboard Shortcuts</h1><p>macOS keymap</p><table>${body}</table></body></html>`;
 }
 
 function reportSection(report: unknown, key: string): unknown {
