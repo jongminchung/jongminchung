@@ -1,5 +1,8 @@
+import { Button } from "@base-ui/react/button";
+import { cn } from "../lib/utils";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui";
 
 export interface ProductNotification {
   readonly id: string;
@@ -43,17 +46,49 @@ export function NotificationBalloon({
         <p>{notification.message}</p>
         {notification.actions && (
           <footer>
-            {notification.actions.map((action) => (
-              <button key={action} onClick={() => onAction(action)}>
-                {actionLabel[action]}
-              </button>
-            ))}
+            {notification.actions.map((action) =>
+              action === "openUrl" && notification.url ? (
+                <a
+                  className={cn(
+                    "inline-flex min-h-[26px] min-w-[26px] items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent p-1 text-xs text-muted-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/55",
+                  )}
+                  href={notification.url}
+                  key={action}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    onAction(action);
+                  }}
+                >
+                  {actionLabel[action]}
+                </a>
+              ) : (
+                <Button
+                  data-slot="button"
+                  key={action}
+                  onClick={() => onAction(action)}
+                  type="button"
+                  className={cn(
+                    "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {actionLabel[action]}
+                </Button>
+              ),
+            )}
           </footer>
         )}
       </div>
-      <button aria-label={`Hide ${notification.title}`} onClick={onDismiss}>
+      <Button
+        data-slot="button"
+        aria-label={`Hide ${notification.title}`}
+        onClick={onDismiss}
+        type="button"
+        className={cn(
+          "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+        )}
+      >
         <Icon name="chevron" size={11} />
-      </button>
+      </Button>
     </aside>
   );
 }
@@ -72,17 +107,43 @@ export function NotificationToolWindow({
       <header>
         <strong>Notifications</strong>
         <span>{notifications.length || ""}</span>
-        <button
-          aria-label="Clear Notifications"
-          disabled={notifications.length === 0}
-          onClick={onClear}
-          title="Clear All"
-        >
-          <Icon name="trash" size={13} />
-        </button>
-        <button aria-label="Close Notifications" onClick={onClose} title="Close">
-          <Icon name="close" size={13} />
-        </button>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                aria-label="Clear Notifications"
+                disabled={notifications.length === 0}
+                onClick={onClear}
+                type="button"
+                className={cn(
+                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <Icon name="trash" size={13} />
+              </Button>
+            }
+          />
+          <TooltipContent>Clear All</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                aria-label="Close Notifications"
+                onClick={onClose}
+                type="button"
+                className={cn(
+                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <Icon name="close" size={13} />
+              </Button>
+            }
+          />
+          <TooltipContent>Close</TooltipContent>
+        </Tooltip>
       </header>
       <div role="feed" aria-label="Notification history">
         {notifications.length === 0 ? (

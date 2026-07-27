@@ -1,12 +1,14 @@
+import { Button } from "@base-ui/react/button";
+import { LoaderCircle } from "lucide-react";
 import { lazy, Suspense, useMemo, useState } from "react";
 import { COMMAND_ENABLED, commandDefinition, type CommandDefinition } from "../domain/commands";
 import { parseConflictBlocks, resolveConflictBlock } from "../domain/conflicts";
+import { cn } from "../lib/utils";
 import type { ConflictContent, InProgressOperation } from "../shared/contracts/model";
 import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
 import { useCommandDefinitions, useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
-import { Button } from "./ui";
 import { Dialog, DialogHeader } from "./ui";
 import { Selector } from "./ui";
 
@@ -25,7 +27,18 @@ function TextPane({
     <section className={tw.conflictPane}>
       <header>
         <strong>{label}</strong>
-        {onAccept && <Button label="Accept file" onClick={onAccept} size="sm" variant="ghost" />}
+        {onAccept && (
+          <Button
+            data-slot="button"
+            onClick={onAccept}
+            type="button"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+            )}
+          >
+            Accept file
+          </Button>
+        )}
       </header>
       <div>
         <Suspense fallback={<div className={tw.emptyState}>Loading editor…</div>}>
@@ -55,6 +68,9 @@ export function ConflictEditorDialog({
 }) {
   const [result, setResult] = useState(content.result ?? "");
   const [blockIndex, setBlockIndex] = useState(0);
+  const [pendingAction, setPendingAction] = useState<
+    "continue" | "abort" | "ours" | "theirs" | "save" | null
+  >(null);
   const dialog = useAppDialog();
   const blocks = useMemo(() => parseConflictBlocks(result), [result]);
   const selectedBlock = blocks[Math.min(blockIndex, Math.max(0, blocks.length - 1))];
@@ -129,22 +145,54 @@ export function ConflictEditorDialog({
             {operation && operation !== "bisect" && (
               <>
                 <Button
-                  clickAction={onContinue}
-                  label={`Continue ${operation}`}
-                  size="sm"
-                  variant="secondary"
-                />
-                <Button clickAction={onAbort} label="Abort" size="sm" variant="destructive" />
+                  data-slot="button"
+                  aria-busy={pendingAction === "continue"}
+                  disabled={pendingAction !== null}
+                  type="button"
+                  onClick={() => {
+                    setPendingAction("continue");
+                    void onContinue().finally(() => setPendingAction(null));
+                  }}
+                  className={cn(
+                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
+                  )}
+                >
+                  {pendingAction === "continue" ? (
+                    <LoaderCircle aria-hidden className="size-3.5 animate-spin" />
+                  ) : null}
+                  {`Continue ${operation}`}
+                </Button>
+                <Button
+                  data-slot="button"
+                  aria-busy={pendingAction === "abort"}
+                  disabled={pendingAction !== null}
+                  type="button"
+                  onClick={() => {
+                    setPendingAction("abort");
+                    void onAbort().finally(() => setPendingAction(null));
+                  }}
+                  className={cn(
+                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-destructive bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/80",
+                  )}
+                >
+                  {pendingAction === "abort" ? (
+                    <LoaderCircle aria-hidden className="size-3.5 animate-spin" />
+                  ) : null}
+                  Abort
+                </Button>
               </>
             )}
             <Button
-              icon={<Icon name="close" size={15} />}
-              isIconOnly
-              label="Close conflict editor"
+              data-slot="button"
               onClick={() => void requestClose()}
-              size="sm"
-              variant="ghost"
-            />
+              type="button"
+              aria-label={"Close conflict editor"}
+              className={cn(
+                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 aspect-square px-0 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+              )}
+            >
+              <Icon name="close" size={15} />
+            </Button>
           </div>
           {content.binary ? (
             <div className={tw.binaryConflict}>
@@ -153,15 +201,41 @@ export function ConflictEditorDialog({
               <p>The file cannot be safely represented as UTF-8 text. Choose one complete side.</p>
               <div>
                 <Button
-                  clickAction={() => onResolveBinary("ours")}
-                  label={`Use ${content.localLabel}`}
-                  variant="secondary"
-                />
+                  data-slot="button"
+                  aria-busy={pendingAction === "ours"}
+                  disabled={pendingAction !== null}
+                  type="button"
+                  onClick={() => {
+                    setPendingAction("ours");
+                    void onResolveBinary("ours").finally(() => setPendingAction(null));
+                  }}
+                  className={cn(
+                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
+                  )}
+                >
+                  {pendingAction === "ours" ? (
+                    <LoaderCircle aria-hidden className="size-3.5 animate-spin" />
+                  ) : null}
+                  {`Use ${content.localLabel}`}
+                </Button>
                 <Button
-                  clickAction={() => onResolveBinary("theirs")}
-                  label={`Use ${content.remoteLabel}`}
-                  variant="secondary"
-                />
+                  data-slot="button"
+                  aria-busy={pendingAction === "theirs"}
+                  disabled={pendingAction !== null}
+                  type="button"
+                  onClick={() => {
+                    setPendingAction("theirs");
+                    void onResolveBinary("theirs").finally(() => setPendingAction(null));
+                  }}
+                  className={cn(
+                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
+                  )}
+                >
+                  {pendingAction === "theirs" ? (
+                    <LoaderCircle aria-hidden className="size-3.5 animate-spin" />
+                  ) : null}
+                  {`Use ${content.remoteLabel}`}
+                </Button>
               </div>
             </div>
           ) : (
@@ -208,31 +282,55 @@ export function ConflictEditorDialog({
                         value={String(Math.min(blockIndex, blocks.length - 1))}
                       />
                       <Button
-                        label="Local"
+                        data-slot="button"
                         onClick={() => resolveBlock("local")}
-                        size="sm"
-                        variant="ghost"
-                      />
+                        type="button"
+                        className={cn(
+                          "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+                        )}
+                      >
+                        Local
+                      </Button>
                       <Button
-                        label="Remote"
+                        data-slot="button"
                         onClick={() => resolveBlock("remote")}
-                        size="sm"
-                        variant="ghost"
-                      />
+                        type="button"
+                        className={cn(
+                          "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+                        )}
+                      >
+                        Remote
+                      </Button>
                       <Button
-                        label="Both"
+                        data-slot="button"
                         onClick={() => resolveBlock("both")}
-                        size="sm"
-                        variant="ghost"
-                      />
+                        type="button"
+                        className={cn(
+                          "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+                        )}
+                      >
+                        Both
+                      </Button>
                     </>
                   )}
                   <Button
-                    clickAction={() => onSave(result)}
-                    label="Save and stage"
-                    size="sm"
-                    variant="primary"
-                  />
+                    data-slot="button"
+                    aria-busy={pendingAction === "save"}
+                    disabled={pendingAction !== null}
+                    type="button"
+                    onClick={() => {
+                      setPendingAction("save");
+                      void onSave(result).finally(() => setPendingAction(null));
+                    }}
+                    className={cn(
+                      "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-primary bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 active:bg-primary/80",
+                    )}
+                  >
+                    {pendingAction === "save" ? (
+                      <LoaderCircle aria-hidden className="size-3.5 animate-spin" />
+                    ) : null}
+                    Save and stage
+                  </Button>
                 </header>
                 <div>
                   <Suspense fallback={<div className={tw.emptyState}>Loading editor…</div>}>

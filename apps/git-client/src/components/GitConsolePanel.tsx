@@ -1,5 +1,7 @@
+import { Button } from "@base-ui/react/button";
 import { useEffect, useMemo, useState } from "react";
 import type { GitConsoleEntry } from "../domain/gitConsole";
+import { cn } from "../lib/utils";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
 
@@ -41,27 +43,53 @@ export function GitConsolePanel({
         <strong>Git Console</strong>
         <span>{entries.length} commands</span>
         <i />
-        <button
+        <Button
+          data-slot="button"
           disabled={entries.length === 0}
           onClick={() => setExpanded(new Set(entries.map((entry) => entry.requestId)))}
+          type="button"
+          className={cn(
+            "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
+          )}
         >
           Expand All
-        </button>
-        <button disabled={expanded.size === 0} onClick={() => setExpanded(new Set())}>
+        </Button>
+        <Button
+          data-slot="button"
+          disabled={expanded.size === 0}
+          onClick={() => setExpanded(new Set())}
+          type="button"
+          className={cn(
+            "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
+          )}
+        >
           Collapse All
-        </button>
-        <button
+        </Button>
+        <Button
+          data-slot="button"
           disabled={!selected}
           onClick={() =>
             selected &&
             void navigator.clipboard.writeText(`${selected.command}\n${selected.output}`)
           }
+          type="button"
+          className={cn(
+            "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
+          )}
         >
           Copy
-        </button>
-        <button disabled={entries.length === 0} onClick={onClear}>
+        </Button>
+        <Button
+          data-slot="button"
+          disabled={entries.length === 0}
+          onClick={onClear}
+          type="button"
+          className={cn(
+            "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
+          )}
+        >
           Clear All
-        </button>
+        </Button>
       </header>
       {entries.length === 0 ? (
         <div className={tw.emptyState}>Git commands will be shown here.</div>
@@ -77,7 +105,8 @@ export function GitConsolePanel({
                 key={entry.requestId}
                 role="option"
               >
-                <button
+                <Button
+                  data-slot="button"
                   aria-expanded={isExpanded}
                   onClick={() => {
                     setSelectedRequestId(entry.requestId);
@@ -88,12 +117,16 @@ export function GitConsolePanel({
                       return next;
                     });
                   }}
+                  type="button"
+                  className={cn(
+                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                  )}
                 >
                   <Icon name={statusIcon(entry.status)} size={13} />
                   <code>{entry.command}</code>
                   <small>{new Date(entry.startedAt).toLocaleTimeString()}</small>
                   <small>{duration === null ? "Running…" : `${duration} ms`}</small>
-                </button>
+                </Button>
                 {isExpanded && (
                   <pre>
                     {entry.output ||

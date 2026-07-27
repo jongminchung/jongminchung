@@ -1,3 +1,4 @@
+import { Button } from "@base-ui/react/button";
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { X } from "lucide-react";
 import type { CSSProperties, HTMLAttributes, ReactNode } from "react";
@@ -37,6 +38,9 @@ export function Dialog({
   children,
   className,
   style,
+  "aria-describedby": ariaDescribedBy,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledBy,
   ...props
 }: DialogProps): ReactNode {
   const contentStyle: CSSProperties =
@@ -78,7 +82,9 @@ export function Dialog({
       <DialogPrimitive.Portal>
         <DialogPrimitive.Backdrop className="fixed inset-0 z-[120] bg-overlay backdrop-blur-[1px] data-ending-style:animate-out data-starting-style:animate-in data-ending-style:fade-out-0 data-starting-style:fade-in-0" />
         <DialogPrimitive.Popup
-          aria-describedby={undefined}
+          aria-describedby={ariaDescribedBy}
+          aria-label={ariaLabel}
+          aria-labelledby={ariaLabelledBy}
           render={
             <div className="fixed left-1/2 top-1/2 z-[121] -translate-x-1/2 -translate-y-1/2" />
           }
@@ -121,15 +127,58 @@ export function DialogHeader({
         ) : null}
       </div>
       {onOpenChange ? (
-        <button
+        <Button
+          data-slot="button"
           aria-label="Close"
-          className="grid size-7 place-items-center rounded-md text-muted-foreground outline-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/55"
           onClick={() => onOpenChange(false)}
           type="button"
+          className={cn(
+            "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+            "grid size-7 place-items-center rounded-md text-muted-foreground outline-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/55",
+          )}
         >
           <X aria-hidden className="size-4" />
-        </button>
+        </Button>
       ) : null}
     </header>
+  );
+}
+
+interface DialogBodyProps extends HTMLAttributes<HTMLDivElement> {
+  readonly isScrollable?: boolean;
+}
+
+export function DialogBody({
+  isScrollable = true,
+  className,
+  ...props
+}: DialogBodyProps): ReactNode {
+  return <div className={cn("min-h-0", isScrollable && "overflow-auto", className)} {...props} />;
+}
+
+interface DialogFooterProps extends HTMLAttributes<HTMLElement> {
+  readonly alignment?: "start" | "between" | "end";
+}
+
+const footerAlignment = {
+  start: "justify-start",
+  between: "justify-between",
+  end: "justify-end",
+} as const;
+
+export function DialogFooter({
+  alignment = "end",
+  className,
+  ...props
+}: DialogFooterProps): ReactNode {
+  return (
+    <footer
+      className={cn(
+        "flex items-center gap-2 border-t border-border p-3",
+        footerAlignment[alignment],
+        className,
+      )}
+      {...props}
+    />
   );
 }

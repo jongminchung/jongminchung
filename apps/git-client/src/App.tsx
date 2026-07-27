@@ -1,4 +1,15 @@
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { Button } from "@base-ui/react/button";
+import { Tabs } from "@base-ui/react/tabs";
+import { Toggle } from "@base-ui/react/toggle";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import type { CSSProperties } from "react";
 import { ActivityMonitorDialog } from "./components/ActivityMonitorDialog";
 import { useAppDialog } from "./components/AppDialog";
@@ -75,6 +86,7 @@ import { ShareProjectDialog, type ShareProjectBinding } from "./components/Share
 import { SpecialFilesDialog } from "./components/SpecialFilesDialog";
 import { StackTraceDialog } from "./components/StackTraceDialog";
 import { ToolWindowLayoutsDialog } from "./components/ToolWindowLayoutsDialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./components/ui";
 import { VcsOperationsPopup, type VcsOperationGroup } from "./components/VcsOperationsPopup";
 import { WelcomeWorkspace } from "./components/WelcomeWorkspace";
 import { WhatsNewDialog } from "./components/WhatsNewDialog";
@@ -191,6 +203,7 @@ import {
   migrateRepositoryUiState,
 } from "./domain/workspacePersistence";
 import { useGitSession, type WorkspaceRepositorySession } from "./hooks/useGitSession";
+import { cn } from "./lib/utils";
 import { selectOfflineInspectionFiles } from "./platform/codeAnalysis";
 import { electronApi, isElectronRuntime } from "./platform/electron";
 import {
@@ -420,6 +433,14 @@ function inspectorKey(inspector: InspectorState): string {
   return `${source}:${inspector.path ?? ""}`;
 }
 
+function editorTabDomId(scope: string, value: string): string {
+  return `${scope}-tab-${encodeURIComponent(value)}`;
+}
+
+function editorPanelDomId(scope: string, value: string): string {
+  return `${scope}-panel-${encodeURIComponent(value)}`;
+}
+
 type GitSession = ReturnType<typeof useGitSession>;
 const commitFilesCache = new Map<string, readonly FileChange[]>();
 const COMMIT_FILES_CACHE_LIMIT = 200;
@@ -482,20 +503,30 @@ function WorkspaceTitlebar({
     <header className={tw.titlebar} aria-label="Main Toolbar">
       <div className={tw.trafficSpace} />
       <div className={tw.mainToolbarPopupAnchor}>
-        <button
-          aria-expanded={projectSwitcherOpen}
-          aria-label={`Project: ${repository?.snapshot.name ?? "Git Client"}`}
-          className={tw.projectSelector}
-          onClick={() => onProjectSwitcherOpenChange(!projectSwitcherOpen)}
-          ref={projectButton}
-          title={repository?.snapshot.path ?? "Projects"}
-        >
-          <span className={tw.projectMark}>
-            {repository?.snapshot.name.trim().charAt(0).toUpperCase() || "G"}
-          </span>
-          <span>{repository?.snapshot.name ?? "Git Client"}</span>
-          <Icon name="chevron" size={10} />
-        </button>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                aria-expanded={projectSwitcherOpen}
+                aria-label={`Project: ${repository?.snapshot.name ?? "Git Client"}`}
+                className={cn(
+                  "group/button inline-flex h-[26px] shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding text-xs font-medium text-muted-foreground outline-none transition-all select-none hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                  tw.projectSelector,
+                )}
+                data-slot="button"
+                onClick={() => onProjectSwitcherOpenChange(!projectSwitcherOpen)}
+                ref={projectButton}
+              >
+                <span className={tw.projectMark}>
+                  {repository?.snapshot.name.trim().charAt(0).toUpperCase() || "G"}
+                </span>
+                <span>{repository?.snapshot.name ?? "Git Client"}</span>
+                <Icon name="chevron" size={10} />
+              </Button>
+            }
+          />
+          <TooltipContent>{repository?.snapshot.path ?? "Projects"}</TooltipContent>
+        </Tooltip>
         {projectSwitcherOpen && repository && (
           <ProjectSwitcherPopup
             activeRepositoryId={repository.snapshot.id}
@@ -513,18 +544,28 @@ function WorkspaceTitlebar({
       {showRepositoryActions && (
         <>
           <div className={tw.mainToolbarPopupAnchor}>
-            <button
-              aria-expanded={branchesOpen}
-              aria-label={repository?.snapshot.currentBranch ?? "No branch"}
-              className={tw.mainToolbarAction}
-              disabled={!repository}
-              onClick={() => setBranchesOpen((value) => !value)}
-              title={`Git Branch: ${repository?.snapshot.currentBranch ?? "No branch"}`}
-            >
-              <Icon name="branch" size={14} />
-              <span>{repository?.snapshot.currentBranch ?? "No branch"}</span>
-              <Icon name="chevron" size={10} />
-            </button>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    aria-expanded={branchesOpen}
+                    aria-label={repository?.snapshot.currentBranch ?? "No branch"}
+                    className={cn(
+                      "group/button inline-flex h-[26px] shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding text-xs font-medium text-muted-foreground outline-none transition-all select-none hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                      tw.mainToolbarAction,
+                    )}
+                    data-slot="button"
+                    disabled={!repository}
+                    onClick={() => setBranchesOpen((value) => !value)}
+                  >
+                    <Icon name="branch" size={14} />
+                    <span>{repository?.snapshot.currentBranch ?? "No branch"}</span>
+                    <Icon name="chevron" size={10} />
+                  </Button>
+                }
+              />
+              <TooltipContent>{`Git Branch: ${repository?.snapshot.currentBranch ?? "No branch"}`}</TooltipContent>
+            </Tooltip>
             {branchesOpen && repository && (
               <GitBranchesPopup
                 currentBranch={repository.snapshot.currentBranch}
@@ -554,49 +595,89 @@ function WorkspaceTitlebar({
               />
             )}
           </div>
-          <button
-            aria-label="Update Project..."
-            className={tw.mainToolbarIcon}
-            disabled={!repository}
-            onClick={() =>
-              void session.executeOperation({
-                kind: "pull",
-                rebase: false,
-              })
-            }
-            title="Update Project..."
-          >
-            <Icon name="pull" size={15} />
-          </button>
-          <button
-            aria-label="Push…"
-            className={tw.mainToolbarIcon}
-            disabled={!repository}
-            onClick={onOpenPush}
-            title="Push…"
-          >
-            <Icon name="push" size={15} />
-          </button>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  aria-label="Update Project..."
+                  className={cn(
+                    "group/button inline-flex h-[26px] w-7 shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding text-xs font-medium text-muted-foreground outline-none transition-all select-none hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                    tw.mainToolbarIcon,
+                  )}
+                  data-slot="button"
+                  disabled={!repository}
+                  onClick={() =>
+                    void session.executeOperation({
+                      kind: "pull",
+                      rebase: false,
+                    })
+                  }
+                >
+                  <Icon name="pull" size={15} />
+                </Button>
+              }
+            />
+            <TooltipContent>Update Project...</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  aria-label="Push…"
+                  className={cn(
+                    "group/button inline-flex h-[26px] w-7 shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding text-xs font-medium text-muted-foreground outline-none transition-all select-none hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                    tw.mainToolbarIcon,
+                  )}
+                  data-slot="button"
+                  disabled={!repository}
+                  onClick={onOpenPush}
+                >
+                  <Icon name="push" size={15} />
+                </Button>
+              }
+            />
+            <TooltipContent>Push…</TooltipContent>
+          </Tooltip>
         </>
       )}
       <span className={tw.mainToolbarDragRegion} />
-      <button
-        aria-label="Search Everywhere"
-        className={tw.mainToolbarIcon}
-        onClick={openPalette}
-        title="Search Everywhere"
-      >
-        <Icon name="search" size={14} />
-      </button>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Button
+              aria-label="Search Everywhere"
+              className={cn(
+                "group/button inline-flex h-[26px] w-7 shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding text-xs font-medium text-muted-foreground outline-none transition-all select-none hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                tw.mainToolbarIcon,
+              )}
+              data-slot="button"
+              onClick={openPalette}
+            >
+              <Icon name="search" size={14} />
+            </Button>
+          }
+        />
+        <TooltipContent>Search Everywhere</TooltipContent>
+      </Tooltip>
       <AppearanceMenu />
-      <button
-        aria-label="IDE and Project Settings"
-        className={tw.mainToolbarIcon}
-        onClick={onOpenSettings}
-        title="IDE and Project Settings"
-      >
-        <Icon name="settings" size={14} />
-      </button>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Button
+              aria-label="IDE and Project Settings"
+              className={cn(
+                "group/button inline-flex h-[26px] w-7 shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding text-xs font-medium text-muted-foreground outline-none transition-all select-none hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                tw.mainToolbarIcon,
+              )}
+              data-slot="button"
+              onClick={onOpenSettings}
+            >
+              <Icon name="settings" size={14} />
+            </Button>
+          }
+        />
+        <TooltipContent>IDE and Project Settings</TooltipContent>
+      </Tooltip>
     </header>
   );
 }
@@ -636,61 +717,120 @@ function RepositoryToolStripe({
   return (
     <nav aria-label="Left Toolbar" className={tw.toolStripe}>
       <div>
-        <button
-          aria-label="Project"
-          aria-pressed={projectOpen}
-          disabled={disabled}
-          onClick={onOpenProject}
-          title="Project"
-        >
-          <Icon name="folder" size={17} />
-        </button>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Toggle
+                aria-label="Project"
+                className="group/toggle relative inline-flex h-[31px] w-[30px] shrink-0 items-center justify-center rounded-md bg-transparent text-muted-foreground outline-none transition-all hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 data-pressed:text-primary [&_svg]:pointer-events-none [&_svg]:shrink-0"
+                data-slot="toggle"
+                disabled={disabled}
+                onPressedChange={onOpenProject}
+                pressed={projectOpen}
+              >
+                <Icon name="folder" size={17} />
+              </Toggle>
+            }
+          />
+          <TooltipContent>Project</TooltipContent>
+        </Tooltip>
         {bookmarksOpen && (
-          <button
-            aria-label="Bookmarks"
-            aria-pressed
-            disabled={disabled}
-            onClick={onOpenBookmarks}
-            title="Bookmarks"
-          >
-            <Icon name="bookmark" size={17} />
-          </button>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Toggle
+                  aria-label="Bookmarks"
+                  className="group/toggle relative inline-flex h-[31px] w-[30px] shrink-0 items-center justify-center rounded-md bg-transparent text-primary outline-none transition-all hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 data-pressed:text-primary [&_svg]:pointer-events-none [&_svg]:shrink-0"
+                  data-slot="toggle"
+                  disabled={disabled}
+                  onPressedChange={onOpenBookmarks}
+                  pressed
+                >
+                  <Icon name="bookmark" size={17} />
+                </Toggle>
+              }
+            />
+            <TooltipContent>Bookmarks</TooltipContent>
+          </Tooltip>
         )}
         {!terminalFocused && (
-          <button
-            aria-label="Commit"
-            aria-pressed={mode === "changes"}
-            disabled={disabled}
-            onClick={() => onModeChange("changes")}
-            title="Commit"
-          >
-            <Icon name="changes" size={17} />
-            {changes > 0 && <em>{changes}</em>}
-          </button>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Toggle
+                  aria-label="Commit"
+                  className="group/toggle relative inline-flex h-[31px] w-[30px] shrink-0 items-center justify-center rounded-md bg-transparent text-muted-foreground outline-none transition-all hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 data-pressed:text-primary [&_svg]:pointer-events-none [&_svg]:shrink-0"
+                  data-slot="toggle"
+                  disabled={disabled}
+                  onPressedChange={() => onModeChange("changes")}
+                  pressed={mode === "changes"}
+                >
+                  <Icon name="changes" size={17} />
+                  {changes > 0 && <em>{changes}</em>}
+                </Toggle>
+              }
+            />
+            <TooltipContent>Commit</TooltipContent>
+          </Tooltip>
         )}
-        <button
-          aria-label="More"
-          disabled={disabled}
-          onClick={openPalette}
-          title="More Tool Windows"
-        >
-          <Icon name="more" size={17} />
-        </button>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                aria-label="More"
+                className={cn(
+                  "group/button relative inline-flex h-[31px] w-[30px] shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding text-xs font-medium text-muted-foreground outline-none transition-all select-none hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                )}
+                data-slot="button"
+                disabled={disabled}
+                onClick={openPalette}
+              >
+                <Icon name="more" size={17} />
+              </Button>
+            }
+          />
+          <TooltipContent>More Tool Windows</TooltipContent>
+        </Tooltip>
       </div>
       <div>
-        <button
-          aria-label="Terminal"
-          aria-pressed={terminalFocused}
-          disabled={disabled}
-          onClick={() => window.dispatchEvent(new CustomEvent("git-client:open-terminal"))}
-          title="Terminal"
-        >
-          <Icon name="console" size={17} />
-        </button>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Toggle
+                aria-label="Terminal"
+                className="group/toggle relative inline-flex h-[31px] w-[30px] shrink-0 items-center justify-center rounded-md bg-transparent text-muted-foreground outline-none transition-all hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 data-pressed:text-primary [&_svg]:pointer-events-none [&_svg]:shrink-0"
+                data-slot="toggle"
+                disabled={disabled}
+                onPressedChange={() =>
+                  window.dispatchEvent(new CustomEvent("git-client:open-terminal"))
+                }
+                pressed={terminalFocused}
+              >
+                <Icon name="console" size={17} />
+              </Toggle>
+            }
+          />
+          <TooltipContent>Terminal</TooltipContent>
+        </Tooltip>
         {!terminalFocused && (
-          <button aria-label="Git" disabled={disabled} onClick={onOpenGitConsole} title="Git">
-            <Icon name="branch" size={17} />
-          </button>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  aria-label="Git"
+                  className={cn(
+                    "group/button relative inline-flex h-[31px] w-[30px] shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding text-xs font-medium text-muted-foreground outline-none transition-all select-none hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                  )}
+                  data-slot="button"
+                  disabled={disabled}
+                  onClick={onOpenGitConsole}
+                >
+                  <Icon name="branch" size={17} />
+                </Button>
+              }
+            />
+            <TooltipContent>Git</TooltipContent>
+          </Tooltip>
         )}
       </div>
     </nav>
@@ -708,19 +848,41 @@ function RepositoryRightToolStripe({
 } = {}) {
   return (
     <nav aria-label="Right Toolbar" className={tw.rightToolStripe}>
-      <button
-        aria-label="Notifications"
-        aria-pressed={notificationsOpen}
-        disabled={!onToggleNotifications}
-        onClick={onToggleNotifications}
-        title="Notifications"
-      >
-        <Icon name="warning" size={15} />
-        {notificationCount > 0 && <em aria-hidden="true" />}
-      </button>
-      <button aria-label="More" disabled title="More Tool Windows">
-        <Icon name="more" size={15} />
-      </button>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Toggle
+              aria-label="Notifications"
+              className="group/toggle relative inline-flex h-[31px] w-[30px] shrink-0 items-center justify-center rounded-md bg-transparent text-muted-foreground outline-none transition-all hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0 data-pressed:bg-accent data-pressed:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0"
+              data-slot="toggle"
+              disabled={!onToggleNotifications}
+              onPressedChange={onToggleNotifications}
+              pressed={notificationsOpen}
+            >
+              <Icon name="warning" size={15} />
+              {notificationCount > 0 && <em aria-hidden="true" />}
+            </Toggle>
+          }
+        />
+        <TooltipContent>Notifications</TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Button
+              aria-label="More"
+              className={cn(
+                "group/button relative inline-flex h-[31px] w-[30px] shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding text-xs font-medium text-muted-foreground outline-none transition-all select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+              )}
+              data-slot="button"
+              disabled
+            >
+              <Icon name="more" size={15} />
+            </Button>
+          }
+        />
+        <TooltipContent>More Tool Windows</TooltipContent>
+      </Tooltip>
     </nav>
   );
 }
@@ -828,6 +990,7 @@ function RepositoryWorkspace({
   readonly onChromeModeChange: (mode: "editor" | "terminal") => void;
 }) {
   const { execute: executeCommand, openPaletteFor } = useCommands();
+  const editorTabsId = useId();
   const [selectedOids, setSelectedOids] = useState<readonly string[]>([]);
   const [selectedRef, setSelectedRef] = useState<string | undefined>(
     repository.refs.find((ref) => ref.current)?.name,
@@ -1724,22 +1887,45 @@ function RepositoryWorkspace({
     setRepositoryViewMode("history");
     setLogOpen(true);
   }, [logOpen, logTabIds, openNewLogTab]);
+  const focusEditorTab = useCallback(
+    (value: string | undefined): void => {
+      window.requestAnimationFrame(() => {
+        if (value) {
+          document.getElementById(editorTabDomId(editorTabsId, value))?.focus();
+          return;
+        }
+        document.querySelector<HTMLElement>("[data-open-git-log]")?.focus();
+      });
+    },
+    [editorTabsId],
+  );
   const closeLogTab = useCallback(
     (tabId: string): void => {
       const index = logTabIds.indexOf(tabId);
       const next = logTabIds.filter((candidate) => candidate !== tabId);
+      const wasActive = activeInspectorKey === undefined && activeLogTabId === tabId;
       if (next.length === 0) {
+        const fallbackInspector = inspectorTabs[0];
         setLogTabIds(["log-1"]);
         setActiveLogTabId("log-1");
         setLogOpen(false);
+        if (fallbackInspector) {
+          const fallbackKey = inspectorKey(fallbackInspector);
+          setActiveInspectorKey(fallbackKey);
+          if (wasActive) focusEditorTab(`inspector:${fallbackKey}`);
+        } else if (wasActive) {
+          focusEditorTab(undefined);
+        }
         return;
       }
       setLogTabIds(next);
       if (activeLogTabId === tabId) {
-        setActiveLogTabId(next[Math.min(Math.max(index, 0), next.length - 1)] ?? next[0]!);
+        const fallbackId = next[Math.min(Math.max(index, 0), next.length - 1)] ?? next[0]!;
+        setActiveLogTabId(fallbackId);
+        if (wasActive) focusEditorTab(`log:${fallbackId}`);
       }
     },
-    [activeLogTabId, logTabIds],
+    [activeInspectorKey, activeLogTabId, focusEditorTab, inspectorTabs, logTabIds],
   );
   const requestOpenRepositoryTool = useCallback(
     async (kind: RepositoryToolKind): Promise<void> => {
@@ -4430,6 +4616,47 @@ function RepositoryWorkspace({
   );
   const leftToolWindowOpen = repositoryViewMode === "changes" || projectOpen || bookmarksOpen;
   const hasEditorTabs = logOpen || inspectorTabs.length > 0;
+  const activeEditorTabValue =
+    activeInspectorKey === undefined ? `log:${activeLogTabId}` : `inspector:${activeInspectorKey}`;
+  const closeInspectorEditorTab = useCallback(
+    async (key: string): Promise<void> => {
+      const closingIndex = inspectorTabs.findIndex((candidate) => inspectorKey(candidate) === key);
+      const remaining = inspectorTabs.filter((candidate) => inspectorKey(candidate) !== key);
+      const replacement =
+        remaining[Math.min(Math.max(closingIndex, 0), remaining.length - 1)] ?? remaining.at(-1);
+      const fallbackValue = replacement
+        ? `inspector:${inspectorKey(replacement)}`
+        : logOpen
+          ? `log:${activeLogTabId}`
+          : undefined;
+      const wasActive = activeInspectorKey === key;
+
+      await requestCloseInspector(key);
+      if (!wasActive) return;
+      window.requestAnimationFrame(() => {
+        const retainedTab = document.getElementById(
+          editorTabDomId(editorTabsId, `inspector:${key}`),
+        );
+        if (retainedTab) {
+          retainedTab.focus();
+          return;
+        }
+        if (fallbackValue) {
+          document.getElementById(editorTabDomId(editorTabsId, fallbackValue))?.focus();
+          return;
+        }
+        document.querySelector<HTMLElement>("[data-open-git-log]")?.focus();
+      });
+    },
+    [
+      activeInspectorKey,
+      activeLogTabId,
+      editorTabsId,
+      inspectorTabs,
+      logOpen,
+      requestCloseInspector,
+    ],
+  );
   const terminalFocused = !hasEditorTabs && !bottomCollapsed && bottomPanelTab === "terminal";
   const baseNavigationStatus =
     session.loading || terminalFocused
@@ -4637,706 +4864,842 @@ function RepositoryWorkspace({
       )}
       {productSettings.navigationBar === "top" && !productSettings.presentationMode && (
         <nav aria-label="Navigation Bar" className={tw.topNavigationBar}>
-          <button aria-label={navigationStatus} title={navigationStatus}>
-            <Icon name="folder" size={12} />
-            <span>{navigationStatus}</span>
-          </button>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  aria-label={navigationStatus}
+                  className={cn(
+                    "group/button inline-flex min-w-0 shrink-0 items-center justify-center gap-1 whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding text-[10px] font-medium text-muted-foreground outline-none transition-all select-none hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                  )}
+                  data-slot="button"
+                >
+                  <Icon name="folder" size={12} />
+                  <span className="min-w-0 truncate">{navigationStatus}</span>
+                </Button>
+              }
+            />
+            <TooltipContent>{navigationStatus}</TooltipContent>
+          </Tooltip>
         </nav>
       )}
-      {hasEditorTabs && (
-        <div
-          className={tw.commandbar}
-          style={
-            {
-              "--editor-left": leftToolWindowOpen && !session.loading ? "422px" : "30px",
-            } as CSSProperties
+      <Tabs.Root
+        className="contents"
+        onValueChange={(value) => {
+          if (value.startsWith("log:")) {
+            setActiveLogTabId(value.slice("log:".length));
+            setActiveInspectorKey(undefined);
+            setRepositoryViewMode("history");
+            return;
           }
-        >
-          <nav
-            aria-label={!inspector ? "Log" : "Editor tabs"}
-            className={tw.editorTabs}
-            onKeyDown={(event) => {
-              if (
-                event.key !== "ArrowLeft" &&
-                event.key !== "ArrowRight" &&
-                event.key !== "Home" &&
-                event.key !== "End"
-              ) {
-                return;
-              }
-              const tabs = [
-                ...event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
-              ];
-              const current = tabs.indexOf(event.target as HTMLButtonElement);
-              if (current < 0 || tabs.length === 0) return;
-              const next =
-                event.key === "Home"
-                  ? 0
-                  : event.key === "End"
-                    ? tabs.length - 1
-                    : (current + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
-              tabs[next]?.focus();
-              tabs[next]?.click();
-              event.preventDefault();
-            }}
-            role="tablist"
+          if (value.startsWith("inspector:")) {
+            setActiveInspectorKey(value.slice("inspector:".length));
+          }
+        }}
+        value={hasEditorTabs ? activeEditorTabValue : null}
+      >
+        {hasEditorTabs && (
+          <div
+            className={tw.commandbar}
+            style={
+              {
+                "--editor-left": leftToolWindowOpen && !session.loading ? "422px" : "30px",
+              } as CSSProperties
+            }
           >
-            {logOpen &&
-              logTabIds.map((tabId, index) => (
-                <span className={tw.workspaceTab} key={tabId} role="presentation">
-                  <button
-                    aria-label={index === 0 ? "Log" : `Log ${index + 1}`}
-                    aria-selected={!inspector && activeLogTabId === tabId}
-                    className={!inspector && activeLogTabId === tabId ? tw.activeButton : undefined}
-                    onClick={() => {
-                      setActiveLogTabId(tabId);
-                      setActiveInspectorKey(undefined);
-                      setRepositoryViewMode("history");
-                    }}
-                    title={index === 0 ? "Log" : `Log ${index + 1}`}
-                    role="tab"
-                    tabIndex={!inspector && activeLogTabId === tabId ? 0 : -1}
+            <Tabs.List
+              render={
+                <nav aria-label={!inspector ? "Log" : "Editor tabs"} className={tw.editorTabs} />
+              }
+            >
+              {logOpen &&
+                logTabIds.map((tabId, index) => {
+                  const label = index === 0 ? "Log" : `Log ${index + 1}`;
+                  const value = `log:${tabId}`;
+                  return (
+                    <span className={cn("group", tw.workspaceTab)} key={tabId} role="presentation">
+                      <Tooltip>
+                        <TooltipTrigger
+                          render={
+                            <Tabs.Tab
+                              aria-controls={editorPanelDomId(editorTabsId, value)}
+                              aria-keyshortcuts="Delete"
+                              aria-label={label}
+                              id={editorTabDomId(editorTabsId, value)}
+                              onKeyDown={(event) => {
+                                if (event.key !== "Delete" && event.key !== "Backspace") return;
+                                event.preventDefault();
+                                event.stopPropagation();
+                                closeLogTab(tabId);
+                              }}
+                              render={
+                                <Button
+                                  className={cn(
+                                    "group/button inline-flex h-6 max-w-[210px] shrink-0 items-center justify-center gap-1 overflow-hidden whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding py-0 pr-1 pl-2 text-xs font-medium text-ellipsis text-muted-foreground outline-none transition-all select-none hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 data-active:bg-accent data-active:text-foreground disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                                    !inspector && activeLogTabId === tabId && tw.activeButton,
+                                  )}
+                                  data-slot="button"
+                                />
+                              }
+                              value={value}
+                            >
+                              <Icon name="branch" size={14} />
+                              <span className="truncate">{label}</span>
+                              <span
+                                aria-hidden="true"
+                                className="inline-flex h-6 shrink-0 items-center justify-center rounded-md px-1 text-muted-foreground opacity-0 transition-all hover:bg-muted hover:text-foreground group-hover:opacity-100 group-focus-within:opacity-100"
+                                data-close-tab={value}
+                                onClick={(event) => {
+                                  event.preventDefault();
+                                  event.stopPropagation();
+                                  closeLogTab(tabId);
+                                }}
+                                onPointerDown={(event) => {
+                                  event.preventDefault();
+                                  event.stopPropagation();
+                                }}
+                              >
+                                <Icon name="close" size={10} />
+                              </span>
+                            </Tabs.Tab>
+                          }
+                        />
+                        <TooltipContent>{`${label} · Delete to close`}</TooltipContent>
+                      </Tooltip>
+                    </span>
+                  );
+                })}
+              {inspectorTabs.map((tab) => {
+                const key = inspectorKey(tab);
+                const label = tab.path?.split("/").at(-1) ?? "Repository";
+                const value = `inspector:${key}`;
+                return (
+                  <span
+                    className={cn("group", tw.workspaceTab)}
+                    data-pinned={pinnedInspectorKeys.has(key)}
+                    data-preview={previewInspectorKey === key}
+                    key={key}
+                    role="presentation"
                   >
-                    <Icon name="branch" size={14} />
-                    {index === 0 ? "Log" : `Log ${index + 1}`}
-                  </button>
-                  <button
-                    aria-label={`Close ${index === 0 ? "Log" : `Log ${index + 1}`}`}
-                    onClick={() => closeLogTab(tabId)}
-                    title={`Close ${index === 0 ? "Log" : `Log ${index + 1}`}`}
-                  >
-                    <Icon name="close" size={10} />
-                  </button>
-                </span>
-              ))}
-            {inspectorTabs.map((tab) => {
-              const key = inspectorKey(tab);
-              const label = tab.path?.split("/").at(-1) ?? "Repository";
-              return (
-                <span
-                  className={tw.workspaceTab}
-                  data-pinned={pinnedInspectorKeys.has(key)}
-                  data-preview={previewInspectorKey === key}
-                  key={key}
-                  role="presentation"
-                >
-                  <button
-                    aria-label={`Editor ${tab.path ?? "Repository"}`}
-                    aria-selected={key === activeInspectorKey}
-                    onClick={() => setActiveInspectorKey(key)}
-                    role="tab"
-                    tabIndex={key === activeInspectorKey ? 0 : -1}
-                    title={tab.path ?? "Repository"}
-                  >
-                    <Icon name={tab.tab === "tree" ? "folder" : "file"} size={14} />
-                    {label}
-                    {dirtyInspectorKeys.has(key) && <span aria-label="Modified">*</span>}
-                  </button>
-                  <button
-                    aria-label={`Close editor ${tab.path ?? "Repository"}`}
-                    onClick={() => void requestCloseInspector(key)}
-                    title={`Close ${label}`}
-                  >
-                    <Icon name="close" size={10} />
-                  </button>
-                </span>
-              );
-            })}
-          </nav>
-          <span className={tw.editorToolbarSpacer} />
-          {session.stale && <span className={tw.statePill}>Changed</span>}
-          {repository.snapshot.isShallow && <span className={tw.statePill}>Shallow</span>}
-          {repository.snapshot.isBare && <span className={tw.statePill}>Bare</span>}
-          {repository.snapshot.operation && (
-            <span className={tw.operationPill}>
-              <Icon name="warning" size={13} />
-              {repository.snapshot.operation} in progress
-            </span>
-          )}
-          {repository.snapshot.operation && repository.snapshot.operation !== "bisect" && (
-            <>
-              <button
-                onClick={() =>
-                  void session.executeOperation({
-                    kind: "continue",
-                    operation: repository.snapshot.operation as
-                      | "merge"
-                      | "rebase"
-                      | "cherryPick"
-                      | "revert",
-                  })
-                }
-              >
-                Continue
-              </button>
-              {(repository.snapshot.operation === "rebase" ||
-                repository.snapshot.operation === "cherryPick") && (
-                <button
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <Tabs.Tab
+                            aria-controls={editorPanelDomId(editorTabsId, value)}
+                            aria-keyshortcuts="Delete"
+                            aria-label={`Editor ${tab.path ?? "Repository"}`}
+                            id={editorTabDomId(editorTabsId, value)}
+                            onKeyDown={(event) => {
+                              if (event.key !== "Delete" && event.key !== "Backspace") return;
+                              event.preventDefault();
+                              event.stopPropagation();
+                              void closeInspectorEditorTab(key);
+                            }}
+                            render={
+                              <Button
+                                className={cn(
+                                  "group/button inline-flex h-6 max-w-[210px] shrink-0 items-center justify-center gap-1 overflow-hidden whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding py-0 pr-1 pl-2 text-xs font-medium text-ellipsis text-muted-foreground outline-none transition-all select-none hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 data-active:bg-accent data-active:text-foreground disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                                )}
+                                data-slot="button"
+                              />
+                            }
+                            value={value}
+                          >
+                            <Icon name={tab.tab === "tree" ? "folder" : "file"} size={14} />
+                            <span className="truncate">{label}</span>
+                            {dirtyInspectorKeys.has(key) && <span aria-label="Modified">*</span>}
+                            <span
+                              aria-hidden="true"
+                              className="inline-flex h-6 shrink-0 items-center justify-center rounded-md px-1 text-muted-foreground opacity-0 transition-all hover:bg-muted hover:text-foreground group-hover:opacity-100 group-focus-within:opacity-100"
+                              data-close-tab={value}
+                              onClick={(event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                void closeInspectorEditorTab(key);
+                              }}
+                              onPointerDown={(event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                              }}
+                            >
+                              <Icon name="close" size={10} />
+                            </span>
+                          </Tabs.Tab>
+                        }
+                      />
+                      <TooltipContent>{`${tab.path ?? "Repository"} · Delete to close`}</TooltipContent>
+                    </Tooltip>
+                  </span>
+                );
+              })}
+            </Tabs.List>
+            <span className={tw.editorToolbarSpacer} />
+            {session.stale && <span className={tw.statePill}>Changed</span>}
+            {repository.snapshot.isShallow && <span className={tw.statePill}>Shallow</span>}
+            {repository.snapshot.isBare && <span className={tw.statePill}>Bare</span>}
+            {repository.snapshot.operation && (
+              <span className={tw.operationPill}>
+                <Icon name="warning" size={13} />
+                {repository.snapshot.operation} in progress
+              </span>
+            )}
+            {repository.snapshot.operation && repository.snapshot.operation !== "bisect" && (
+              <>
+                <Button
+                  className={cn(
+                    "group/button inline-flex h-6 shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-border bg-secondary bg-clip-padding px-2 text-xs font-medium text-secondary-foreground shadow-xs outline-none transition-all select-none hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                  )}
+                  data-slot="button"
                   onClick={() =>
                     void session.executeOperation({
-                      kind: "skip",
-                      operation: repository.snapshot.operation as "rebase" | "cherryPick",
+                      kind: "continue",
+                      operation: repository.snapshot.operation as
+                        | "merge"
+                        | "rebase"
+                        | "cherryPick"
+                        | "revert",
                     })
                   }
                 >
-                  Skip
-                </button>
-              )}
-              <button
-                onClick={toVoidHandler(async () => {
-                  const accepted = await dialog.confirm({
-                    title: `Abort ${repository.snapshot.operation}?`,
-                    description:
-                      "Restores the state recorded before the in-progress Git operation.",
-                    confirmLabel: "Abort operation",
-                    dangerous: true,
-                  });
-                  if (
-                    accepted &&
-                    repository.snapshot.operation &&
-                    repository.snapshot.operation !== "bisect"
-                  ) {
-                    void session.executeOperation({
-                      kind: "abort",
-                      operation: repository.snapshot.operation,
+                  Continue
+                </Button>
+                {(repository.snapshot.operation === "rebase" ||
+                  repository.snapshot.operation === "cherryPick") && (
+                  <Button
+                    className={cn(
+                      "group/button inline-flex h-6 shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-border bg-secondary bg-clip-padding px-2 text-xs font-medium text-secondary-foreground shadow-xs outline-none transition-all select-none hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                    )}
+                    data-slot="button"
+                    onClick={() =>
+                      void session.executeOperation({
+                        kind: "skip",
+                        operation: repository.snapshot.operation as "rebase" | "cherryPick",
+                      })
+                    }
+                  >
+                    Skip
+                  </Button>
+                )}
+                <Button
+                  className={cn(
+                    "group/button inline-flex h-6 shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-destructive bg-destructive bg-clip-padding px-2 text-xs font-medium text-destructive-foreground shadow-xs outline-none transition-all select-none hover:bg-destructive/90 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                  )}
+                  data-slot="button"
+                  onClick={toVoidHandler(async () => {
+                    const accepted = await dialog.confirm({
+                      title: `Abort ${repository.snapshot.operation}?`,
+                      description:
+                        "Restores the state recorded before the in-progress Git operation.",
+                      confirmLabel: "Abort operation",
+                      dangerous: true,
                     });
-                  }
-                })}
-              >
-                Abort
-              </button>
-            </>
-          )}
-          <button
-            aria-label="View Options"
-            className={tw.editorToolbarIcon}
-            onClick={() => void session.reload()}
-            title="View Options"
-          >
-            <Icon name="more" size={16} />
-          </button>
-        </div>
-      )}
-      <main className={tw.workspace} aria-busy={session.loading}>
-        {session.loading ? (
-          <RepositoryLoadingSkeleton />
-        ) : (
-          <div className={tw.workbench}>
-            <RepositoryToolStripe
-              bookmarksOpen={bookmarksOpen}
-              changes={repository.status.changes.length}
-              mode={repositoryViewMode}
-              onModeChange={(mode) => {
-                if (mode === "changes") {
-                  setProjectOpen(false);
-                  setBookmarksOpen(false);
-                  setRepositoryViewMode((current) =>
-                    current === "changes" ? "history" : "changes",
-                  );
-                  return;
-                }
-                setRepositoryViewMode("history");
-              }}
-              onOpenGitConsole={() =>
-                window.dispatchEvent(new CustomEvent("git-client:open-git-console"))
-              }
-              onOpenBookmarks={() => {
-                setRepositoryViewMode("history");
-                setProjectOpen(false);
-                setBookmarksOpen((value) => !value);
-              }}
-              onOpenProject={() => {
-                if (repositoryViewMode === "changes") {
-                  setRepositoryViewMode("history");
-                  setProjectOpen(true);
-                  setBookmarksOpen(false);
-                  return;
-                }
-                if (bookmarksOpen) {
-                  setBookmarksOpen(false);
-                  setProjectOpen(true);
-                  return;
-                }
-                setProjectOpen((value) => !value);
-              }}
-              projectOpen={projectOpen && repositoryViewMode === "history"}
-              terminalFocused={terminalFocused}
-            />
-            <div
-              className={`${tw.workbenchSurface} ${maximizedToolWindow === "bottom" ? tw.maximizedBottomTool : ""}`}
-            >
-              <div
-                className={`${tw.workbenchContent} ${leftToolWindowOpen ? tw.projectToolOpen : ""} ${maximizedToolWindow === "project" || maximizedToolWindow === "bookmarks" ? tw.maximizedSideTool : ""}`}
-                style={
-                  {
-                    "--side-tool-window-width": `${sideToolWindowWidth}px`,
-                    "--details-pane-width": `${historyReviewWidth}px`,
-                  } as CSSProperties
-                }
-              >
-                {bookmarksOpen && repositoryViewMode === "history" && (
-                  <BookmarksToolWindow
-                    onClose={() => setBookmarksOpen(false)}
-                    onCreateGroup={(name, isDefault) =>
-                      setBookmarks((current) =>
-                        createBookmarkGroup(current, crypto.randomUUID(), name, isDefault),
-                      )
-                    }
-                    onDeleteBookmark={(bookmarkId) =>
-                      setBookmarks((current) => removeBookmark(current, bookmarkId))
-                    }
-                    onDeleteGroup={(group) => {
-                      void dialog
-                        .confirm({
-                          title: "Delete Bookmark List",
-                          description: `Are you sure you want to delete ‘${group.name}’ bookmark list? This action can't be undone.`,
-                          impact: `${group.bookmarks.length} bookmark${group.bookmarks.length === 1 ? "" : "s"} will be deleted.`,
-                          confirmLabel: "Delete",
-                          dangerous: true,
-                        })
-                        .then((accepted) => {
-                          if (accepted) {
-                            setBookmarks((current) => deleteBookmarkGroup(current, group.id));
-                          }
-                        });
-                    }}
-                    onDescribeBookmark={(bookmarkId, description) =>
-                      setBookmarks((current) => describeBookmark(current, bookmarkId, description))
-                    }
-                    onMoveBookmark={(bookmarkId, offset) =>
-                      setBookmarks((current) => moveBookmark(current, bookmarkId, offset))
-                    }
-                    onOpenBookmark={openLineBookmark}
-                    onRenameGroup={(groupId, name) =>
-                      setBookmarks((current) => renameBookmarkGroup(current, groupId, name))
-                    }
-                    onSetDefaultGroup={(groupId) =>
-                      setBookmarks((current) => setDefaultBookmarkGroup(current, groupId))
-                    }
-                    onViewOptionsChange={(view) =>
-                      setBookmarks((current) => ({
-                        ...current,
-                        view,
-                      }))
-                    }
-                    state={bookmarks}
-                  />
-                )}
-                {projectOpen && repositoryViewMode === "history" && (
-                  <ProjectToolWindow
-                    activePath={inspector?.path}
-                    changes={repository.status.changes}
-                    hasCommits={repository.snapshot.hasCommits}
-                    loadTree={session.loadTree}
-                    onClose={() => setProjectOpen(false)}
-                    onNew={toVoidHandler(async () => {
-                      const path = await dialog.input({
-                        title: "New File",
-                        label: "Path relative to the project",
-                        placeholder: "src/new-file.ts",
-                        confirmLabel: "Create",
+                    if (
+                      accepted &&
+                      repository.snapshot.operation &&
+                      repository.snapshot.operation !== "bisect"
+                    ) {
+                      void session.executeOperation({
+                        kind: "abort",
+                        operation: repository.snapshot.operation,
                       });
-                      if (!path) return;
-                      try {
-                        await session.writeWorkingTreeFile(path, "");
-                        openInspector({
-                          revision: repository.snapshot.headOid ?? "HEAD",
-                          source: {
-                            kind: "workingTree",
-                          },
-                          path,
-                          tab: "file",
-                        });
-                      } catch (error) {
-                        setToast(error instanceof Error ? error.message : String(error));
-                      }
-                    })}
-                    onNewScratch={() => setScratchFileChooserOpen(true)}
-                    onOpenFile={(path, keepOpen = true) =>
-                      openInspector(
-                        {
-                          revision: repository.snapshot.headOid ?? "HEAD",
-                          source: {
-                            kind: "workingTree",
-                          },
-                          path,
-                          tab: "file",
-                        },
-                        keepOpen,
-                      )
                     }
-                    onOpenScratch={openScratchFile}
-                    repositoryName={repository.snapshot.name}
-                    repositoryPath={repository.snapshot.path}
-                    scratches={scratchFiles}
-                    width={sideToolWindowWidth}
-                    onWidthChange={(width) =>
-                      setSideToolWindowWidth(
-                        Math.min(
-                          MAX_SIDE_TOOL_WINDOW_WIDTH,
-                          Math.max(MIN_SIDE_TOOL_WINDOW_WIDTH, Math.round(width)),
-                        ),
-                      )
-                    }
-                  />
-                )}
-                {repositoryViewMode === "changes" && commitToolWindow}
-                <div
-                  className={`${tw.activeWorkspace} ${!hasEditorTabs ? tw.activeWorkspaceNoTabs : ""}`}
-                  data-workspace-main
-                >
-                  {logOpen && (
-                    <div className={tw.editorSurface} hidden={Boolean(inspector)}>
-                      <div
-                        className={tw.mainPanes}
-                        style={
-                          {
-                            "--history-review-width": `${historyReviewWidth}px`,
-                          } as CSSProperties
-                        }
-                      >
-                        <BranchTree
-                          compact
-                          onAdd={onAddRepository}
-                          onActivate={() => void requestOpenRepositoryTool("refs")}
-                          onSelect={selectRef}
-                          refs={repository.refs}
-                          selected={selectedRef}
-                        />
-                        <CommitLog
-                          ahead={repository.status.ahead}
-                          behind={repository.status.behind}
-                          canCherryPick={availability.cherryPick}
-                          commits={repository.commits}
-                          hasMore={session.hasMoreCommits}
-                          loading={session.logLoading}
-                          error={session.logError}
-                          refs={repository.refs}
-                          onLoad={session.loadLog}
-                          onOpenNewTab={openNewLogTab}
-                          indexing={logIndexing}
-                          indexingEnabled={logIndexingEnabled}
-                          powerSaveMode={productSettings.powerSaveMode}
-                          relativeTimeBaseSeconds={
-                            session.fixture ? repository.commits[0]?.authoredAt : undefined
-                          }
-                          onEnableIndexing={async (filters, order) => {
-                            setLogIndexing(true);
-                            try {
-                              await session.indexLog(filters, order);
-                              setLogIndexingEnabled(true);
-                            } finally {
-                              setLogIndexing(false);
-                            }
-                          }}
-                          onCherryPick={() => void runAction("cherryPick")}
-                          onImportPatch={toVoidHandler(async () => {
-                            const selectedPath = await selectPatchImportPath();
-                            if (selectedPath === null) return;
-                            await session.importPatch(selectedPath);
-                            setToast("Patch applied to the index and working tree.");
-                          })}
-                          onRefresh={() => void session.reload()}
-                          onContextMenu={(event, commit) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            if (!selectedOids.includes(commit.oid)) setSelectedOids([commit.oid]);
-                            setContextPosition({
-                              x: event.clientX,
-                              y: event.clientY,
-                            });
-                          }}
-                          onSelectionChange={setSelectedOids}
-                          selectedOids={selectedOids}
-                          upstream={repository.status.upstream}
-                        />
-                        {revisionComparison ? (
-                          <RevisionComparison
-                            from={revisionComparison.from}
-                            loading={revisionComparison.loading}
-                            onPreferencesChange={setDiffPreferences}
-                            onReviewWidthChange={(width) =>
-                              setHistoryReviewWidth(Math.min(480, Math.max(180, Math.round(width))))
-                            }
-                            patch={revisionComparison.patch}
-                            preferences={diffPreferences}
-                            reviewWidth={historyReviewWidth}
-                            readFile={session.readFile}
-                            to={revisionComparison.to}
-                          />
-                        ) : (
-                          <DetailsPane
-                            afterContent={historyContent.after}
-                            afterPreview={historyPreview.after}
-                            beforeContent={historyContent.before}
-                            beforePreview={historyPreview.before}
-                            submoduleDiff={historySubmodule.value}
-                            commit={primaryCommit}
-                            diffLoading={
-                              historyDiff.loading ||
-                              historyContent.loading ||
-                              historyPreview.loading ||
-                              historySubmodule.loading
-                            }
-                            files={commitFiles}
-                            loading={commitFilesLoading}
-                            onLoadDiff={(commit, file) =>
-                              session.loadCommitDiff(
-                                commit,
-                                file.path,
-                                nativeDiffOptions(diffPreferences),
-                                historyParentRevision ?? undefined,
-                              )
-                            }
-                            onReadFile={session.readFile}
-                            onRevertSelectedChanges={async () => {
-                              if (!historyDiff.patch || !historySelectedPath) {
-                                return;
-                              }
-                              const accepted = await dialog.confirm({
-                                title: "Revert selected changes?",
-                                description:
-                                  "Applies the inverse of this file change to the working tree.",
-                                impact: historySelectedPath,
-                                confirmLabel: "Revert selected changes",
-                                dangerous: true,
-                              });
-                              if (!accepted) return;
-                              await session.executeOperation({
-                                kind: "applyPatch",
-                                patch: historyDiff.patch,
-                                cached: false,
-                                reverse: true,
-                              });
-                            }}
-                            signature={commitSignature}
-                            parentRevision={historyParentRevision}
-                            patch={historyDiff.patch}
-                            preferences={diffPreferences}
-                            reviewWidth={historyReviewWidth}
-                            selectedPath={historySelectedPath}
-                            onNext={() => selectRelative("child")}
-                            onPrevious={() => selectRelative("parent")}
-                            onReviewWidthChange={(width) =>
-                              setHistoryReviewWidth(Math.min(480, Math.max(180, Math.round(width))))
-                            }
-                            onParentRevisionChange={setHistoryParentRevision}
-                            onPreferencesChange={setDiffPreferences}
-                            onSelectFile={(file) => setHistorySelectedPath(file.path)}
-                            onInspectFile={(file, tab) => {
-                              if (primaryCommit) {
-                                openInspector({
-                                  revision: primaryCommit.oid,
-                                  source: {
-                                    kind: "revision",
-                                    revision: primaryCommit.oid,
-                                  },
-                                  path: file.path,
-                                  tab,
-                                });
-                              }
-                            }}
-                            onOpenTree={() => {
-                              if (primaryCommit) {
-                                openInspector({
-                                  revision: primaryCommit.oid,
-                                  source: {
-                                    kind: "revision",
-                                    revision: primaryCommit.oid,
-                                  },
-                                  tab: "tree",
-                                });
-                              }
-                            }}
-                          />
-                        )}
-                      </div>
-                    </div>
-                  )}
-                  {!inspector && !logOpen && (
-                    <div className={tw.editorEmptyWorkspace}>
-                      <button onClick={openGitLogTab}>
-                        Open Git Log <kbd>⌥G</kbd>
-                      </button>
-                      <button onClick={() => setRepositoryViewMode("changes")}>
-                        Commit <kbd>⌘0</kbd>
-                      </button>
-                    </div>
-                  )}
-                  {inspectorTabs.map((tab) => {
-                    const key = inspectorKey(tab);
-                    const scratch = tab.scratchId
-                      ? scratchFiles.find((candidate) => candidate.id === tab.scratchId)
-                      : undefined;
-                    return (
-                      <div
-                        className={tw.editorSurface}
-                        hidden={key !== activeInspectorKey}
-                        key={key}
-                      >
-                        {scratch ? (
-                          <ScratchEditor
-                            bookmarkedLines={allLineBookmarks(bookmarks)
-                              .filter((bookmark) => bookmark.path === `Scratches/${scratch.name}`)
-                              .map((bookmark) => bookmark.line)}
-                            file={scratch}
-                            initialColumn={tab.column}
-                            initialLine={tab.line}
-                            onChange={(content) =>
-                              setScratchFiles((current) =>
-                                current.map((candidate) =>
-                                  candidate.id === scratch.id
-                                    ? {
-                                        ...candidate,
-                                        content,
-                                        updatedAtMs: Date.now(),
-                                      }
-                                    : candidate,
-                                ),
-                              )
-                            }
-                            onToggleBookmark={(line, column) =>
-                              requestToggleBookmark({
-                                path: `Scratches/${scratch.name}`,
-                                line,
-                                column,
-                              })
-                            }
-                          />
-                        ) : (
-                          <RepositoryInspectorDialog
-                            bookmarkedLines={
-                              tab.path
-                                ? allLineBookmarks(bookmarks)
-                                    .filter((bookmark) => bookmark.path === tab.path)
-                                    .map((bookmark) => bookmark.line)
-                                : []
-                            }
-                            embedded
-                            initialPath={tab.path}
-                            initialColumn={tab.column}
-                            initialLine={tab.line}
-                            initialTab={tab.tab}
-                            loadBlame={session.loadBlame}
-                            loadFileHistory={session.loadFileHistory}
-                            loadTree={session.loadTree}
-                            onClose={() => void requestCloseInspector(key)}
-                            onDirtyChange={(dirty) => setInspectorDirty(key, dirty)}
-                            onToggleBookmark={(path, line, column) =>
-                              requestToggleBookmark({
-                                path,
-                                line,
-                                column,
-                              })
-                            }
-                            openWorkingTreeFile={session.openWorkingTreeFile}
-                            readFile={session.readFile}
-                            readFilePreview={session.readFilePreview}
-                            writeWorkingTreeFile={session.writeWorkingTreeFile}
-                            revision={tab.revision}
-                            source={tab.source}
-                          />
-                        )}
-                      </div>
-                    );
                   })}
-                </div>
-              </div>
-              <BottomPanel
-                collapsed={bottomCollapsed}
-                height={bottomPanelHeight}
-                active={bottomPanelTab}
-                fixture={session.fixture}
-                onApplyShelf={(shelfId, drop) => void session.applyShelf(shelfId, drop)}
-                onCreateShelf={(message, paths) => void session.createShelf(message, paths)}
-                onDeleteShelf={(shelfId) => void session.deleteShelf(shelfId)}
-                onLoadStashFiles={(stash) => session.loadStashFiles(stash.selector)}
-                onOpenStashDiff={openStashDiff}
-                onOperation={session.executeOperation}
-                onRestoreRecovery={session.restoreRecoveryEntry}
-                onToggle={() => setBottomCollapsed((value) => !value)}
-                onHeightChange={setBottomPanelHeight}
-                onActiveChange={setBottomPanelTab}
-                recoveryEntries={session.recoveryEntries}
-                gitConsoleEntries={session.gitConsoleEntries}
-                onClearGitConsole={session.clearGitConsole}
-                onLoadLocalHistoryActivities={session.listLocalHistoryActivities}
-                onLoadLocalHistoryActivity={session.readLocalHistoryActivity}
-                onLoadLocalHistoryDiff={session.loadLocalHistoryDiff}
-                onCreateLocalHistoryPatch={session.createLocalHistoryPatch}
-                onPutLocalHistoryLabel={session.putLocalHistoryLabel}
-                findResults={findResults}
-                onOpenFindResult={(result) => {
-                  setRepositoryViewMode("history");
-                  openInspector({
-                    revision: repository.snapshot.headOid ?? "HEAD",
-                    source: { kind: "workingTree" },
-                    path: result.path,
-                    tab: "file",
-                    line: result.line,
-                    column: result.column,
-                  });
-                }}
-                onSearchAgain={() => {
-                  setProjectSearchInitialQuery("");
-                  setProjectSearchSurface("find");
-                }}
-                onRevertLocalHistory={session.revertLocalHistory}
-                repositoryId={repository.snapshot.id}
-                repositoryName={repository.snapshot.name}
-                shelves={session.shelves}
-                stashes={session.stashes}
-                status={repository.status}
-              />
-            </div>
-            {notificationOpen && (
-              <NotificationToolWindow
-                notifications={notifications}
-                onClear={() => setNotifications([])}
-                onClose={() => setNotificationOpen(false)}
-              />
+                >
+                  Abort
+                </Button>
+              </>
             )}
-            {balloonId &&
-              (() => {
-                const notification = notifications.find((item) => item.id === balloonId);
-                return notification ? (
-                  <NotificationBalloon
-                    notification={notification}
-                    onAction={(action) => {
-                      if (action === "modifyShortcuts") {
-                        onOpenSettings();
-                      } else if (action === "openUrl" && notification.url) {
-                        void openExternalUrl(notification.url);
-                      } else if (action === "dismiss") {
-                        onDismissShortcutConflictWarning();
-                        setNotifications((current) =>
-                          current.filter((item) => item.id !== notification.id),
-                        );
-                      } else {
-                        setNotificationOpen(true);
-                      }
-                      setBalloonId(undefined);
-                    }}
-                    onDismiss={() => setBalloonId(undefined)}
-                  />
-                ) : null;
-              })()}
-            <RepositoryRightToolStripe
-              notificationCount={notifications.length}
-              notificationsOpen={notificationOpen}
-              onToggleNotifications={() => setNotificationOpen((current) => !current)}
-            />
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    aria-label="View Options"
+                    className={cn(
+                      "group/button inline-flex h-6 w-[30px] shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-y-0 border-r border-l-0 border-border bg-transparent bg-clip-padding p-0 text-xs font-medium text-muted-foreground outline-none transition-all select-none hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                      tw.editorToolbarIcon,
+                    )}
+                    data-slot="button"
+                    onClick={() => void session.reload()}
+                  >
+                    <Icon name="more" size={16} />
+                  </Button>
+                }
+              />
+              <TooltipContent>View Options</TooltipContent>
+            </Tooltip>
           </div>
         )}
-      </main>
+        <main className={tw.workspace} aria-busy={session.loading}>
+          {session.loading ? (
+            <RepositoryLoadingSkeleton />
+          ) : (
+            <div className={tw.workbench}>
+              <RepositoryToolStripe
+                bookmarksOpen={bookmarksOpen}
+                changes={repository.status.changes.length}
+                mode={repositoryViewMode}
+                onModeChange={(mode) => {
+                  if (mode === "changes") {
+                    setProjectOpen(false);
+                    setBookmarksOpen(false);
+                    setRepositoryViewMode((current) =>
+                      current === "changes" ? "history" : "changes",
+                    );
+                    return;
+                  }
+                  setRepositoryViewMode("history");
+                }}
+                onOpenGitConsole={() =>
+                  window.dispatchEvent(new CustomEvent("git-client:open-git-console"))
+                }
+                onOpenBookmarks={() => {
+                  setRepositoryViewMode("history");
+                  setProjectOpen(false);
+                  setBookmarksOpen((value) => !value);
+                }}
+                onOpenProject={() => {
+                  if (repositoryViewMode === "changes") {
+                    setRepositoryViewMode("history");
+                    setProjectOpen(true);
+                    setBookmarksOpen(false);
+                    return;
+                  }
+                  if (bookmarksOpen) {
+                    setBookmarksOpen(false);
+                    setProjectOpen(true);
+                    return;
+                  }
+                  setProjectOpen((value) => !value);
+                }}
+                projectOpen={projectOpen && repositoryViewMode === "history"}
+                terminalFocused={terminalFocused}
+              />
+              <div
+                className={`${tw.workbenchSurface} ${maximizedToolWindow === "bottom" ? tw.maximizedBottomTool : ""}`}
+              >
+                <div
+                  className={`${tw.workbenchContent} ${leftToolWindowOpen ? tw.projectToolOpen : ""} ${maximizedToolWindow === "project" || maximizedToolWindow === "bookmarks" ? tw.maximizedSideTool : ""}`}
+                  style={
+                    {
+                      "--side-tool-window-width": `${sideToolWindowWidth}px`,
+                      "--details-pane-width": `${historyReviewWidth}px`,
+                    } as CSSProperties
+                  }
+                >
+                  {bookmarksOpen && repositoryViewMode === "history" && (
+                    <BookmarksToolWindow
+                      onClose={() => setBookmarksOpen(false)}
+                      onCreateGroup={(name, isDefault) =>
+                        setBookmarks((current) =>
+                          createBookmarkGroup(current, crypto.randomUUID(), name, isDefault),
+                        )
+                      }
+                      onDeleteBookmark={(bookmarkId) =>
+                        setBookmarks((current) => removeBookmark(current, bookmarkId))
+                      }
+                      onDeleteGroup={(group) => {
+                        void dialog
+                          .confirm({
+                            title: "Delete Bookmark List",
+                            description: `Are you sure you want to delete ‘${group.name}’ bookmark list? This action can't be undone.`,
+                            impact: `${group.bookmarks.length} bookmark${group.bookmarks.length === 1 ? "" : "s"} will be deleted.`,
+                            confirmLabel: "Delete",
+                            dangerous: true,
+                          })
+                          .then((accepted) => {
+                            if (accepted) {
+                              setBookmarks((current) => deleteBookmarkGroup(current, group.id));
+                            }
+                          });
+                      }}
+                      onDescribeBookmark={(bookmarkId, description) =>
+                        setBookmarks((current) =>
+                          describeBookmark(current, bookmarkId, description),
+                        )
+                      }
+                      onMoveBookmark={(bookmarkId, offset) =>
+                        setBookmarks((current) => moveBookmark(current, bookmarkId, offset))
+                      }
+                      onOpenBookmark={openLineBookmark}
+                      onRenameGroup={(groupId, name) =>
+                        setBookmarks((current) => renameBookmarkGroup(current, groupId, name))
+                      }
+                      onSetDefaultGroup={(groupId) =>
+                        setBookmarks((current) => setDefaultBookmarkGroup(current, groupId))
+                      }
+                      onViewOptionsChange={(view) =>
+                        setBookmarks((current) => ({
+                          ...current,
+                          view,
+                        }))
+                      }
+                      state={bookmarks}
+                    />
+                  )}
+                  {projectOpen && repositoryViewMode === "history" && (
+                    <ProjectToolWindow
+                      activePath={inspector?.path}
+                      changes={repository.status.changes}
+                      hasCommits={repository.snapshot.hasCommits}
+                      loadTree={session.loadTree}
+                      onClose={() => setProjectOpen(false)}
+                      onNew={toVoidHandler(async () => {
+                        const path = await dialog.input({
+                          title: "New File",
+                          label: "Path relative to the project",
+                          placeholder: "src/new-file.ts",
+                          confirmLabel: "Create",
+                        });
+                        if (!path) return;
+                        try {
+                          await session.writeWorkingTreeFile(path, "");
+                          openInspector({
+                            revision: repository.snapshot.headOid ?? "HEAD",
+                            source: {
+                              kind: "workingTree",
+                            },
+                            path,
+                            tab: "file",
+                          });
+                        } catch (error) {
+                          setToast(error instanceof Error ? error.message : String(error));
+                        }
+                      })}
+                      onNewScratch={() => setScratchFileChooserOpen(true)}
+                      onOpenFile={(path, keepOpen = true) =>
+                        openInspector(
+                          {
+                            revision: repository.snapshot.headOid ?? "HEAD",
+                            source: {
+                              kind: "workingTree",
+                            },
+                            path,
+                            tab: "file",
+                          },
+                          keepOpen,
+                        )
+                      }
+                      onOpenScratch={openScratchFile}
+                      repositoryName={repository.snapshot.name}
+                      repositoryPath={repository.snapshot.path}
+                      scratches={scratchFiles}
+                      width={sideToolWindowWidth}
+                      onWidthChange={(width) =>
+                        setSideToolWindowWidth(
+                          Math.min(
+                            MAX_SIDE_TOOL_WINDOW_WIDTH,
+                            Math.max(MIN_SIDE_TOOL_WINDOW_WIDTH, Math.round(width)),
+                          ),
+                        )
+                      }
+                    />
+                  )}
+                  {repositoryViewMode === "changes" && commitToolWindow}
+                  <div
+                    className={`${tw.activeWorkspace} ${!hasEditorTabs ? tw.activeWorkspaceNoTabs : ""}`}
+                    data-workspace-main
+                  >
+                    {logOpen &&
+                      logTabIds.map((tabId) => {
+                        const value = `log:${tabId}`;
+                        return (
+                          <Tabs.Panel
+                            aria-labelledby={editorTabDomId(editorTabsId, value)}
+                            className={tw.editorSurface}
+                            id={editorPanelDomId(editorTabsId, value)}
+                            keepMounted
+                            key={tabId}
+                            value={value}
+                          >
+                            {tabId === activeLogTabId && (
+                              <div
+                                className={tw.mainPanes}
+                                style={
+                                  {
+                                    "--history-review-width": `${historyReviewWidth}px`,
+                                  } as CSSProperties
+                                }
+                              >
+                                <BranchTree
+                                  compact
+                                  onAdd={onAddRepository}
+                                  onActivate={() => void requestOpenRepositoryTool("refs")}
+                                  onSelect={selectRef}
+                                  refs={repository.refs}
+                                  selected={selectedRef}
+                                />
+                                <CommitLog
+                                  ahead={repository.status.ahead}
+                                  behind={repository.status.behind}
+                                  canCherryPick={availability.cherryPick}
+                                  commits={repository.commits}
+                                  hasMore={session.hasMoreCommits}
+                                  loading={session.logLoading}
+                                  error={session.logError}
+                                  refs={repository.refs}
+                                  onLoad={session.loadLog}
+                                  onOpenNewTab={openNewLogTab}
+                                  indexing={logIndexing}
+                                  indexingEnabled={logIndexingEnabled}
+                                  powerSaveMode={productSettings.powerSaveMode}
+                                  relativeTimeBaseSeconds={
+                                    session.fixture ? repository.commits[0]?.authoredAt : undefined
+                                  }
+                                  onEnableIndexing={async (filters, order) => {
+                                    setLogIndexing(true);
+                                    try {
+                                      await session.indexLog(filters, order);
+                                      setLogIndexingEnabled(true);
+                                    } finally {
+                                      setLogIndexing(false);
+                                    }
+                                  }}
+                                  onCherryPick={() => void runAction("cherryPick")}
+                                  onImportPatch={toVoidHandler(async () => {
+                                    const selectedPath = await selectPatchImportPath();
+                                    if (selectedPath === null) return;
+                                    await session.importPatch(selectedPath);
+                                    setToast("Patch applied to the index and working tree.");
+                                  })}
+                                  onRefresh={() => void session.reload()}
+                                  onContextMenu={(event, commit) => {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    if (!selectedOids.includes(commit.oid))
+                                      setSelectedOids([commit.oid]);
+                                    setContextPosition({
+                                      x: event.clientX,
+                                      y: event.clientY,
+                                    });
+                                  }}
+                                  onSelectionChange={setSelectedOids}
+                                  selectedOids={selectedOids}
+                                  upstream={repository.status.upstream}
+                                />
+                                {revisionComparison ? (
+                                  <RevisionComparison
+                                    from={revisionComparison.from}
+                                    loading={revisionComparison.loading}
+                                    onPreferencesChange={setDiffPreferences}
+                                    onReviewWidthChange={(width) =>
+                                      setHistoryReviewWidth(
+                                        Math.min(480, Math.max(180, Math.round(width))),
+                                      )
+                                    }
+                                    patch={revisionComparison.patch}
+                                    preferences={diffPreferences}
+                                    reviewWidth={historyReviewWidth}
+                                    readFile={session.readFile}
+                                    to={revisionComparison.to}
+                                  />
+                                ) : (
+                                  <DetailsPane
+                                    afterContent={historyContent.after}
+                                    afterPreview={historyPreview.after}
+                                    beforeContent={historyContent.before}
+                                    beforePreview={historyPreview.before}
+                                    submoduleDiff={historySubmodule.value}
+                                    commit={primaryCommit}
+                                    diffLoading={
+                                      historyDiff.loading ||
+                                      historyContent.loading ||
+                                      historyPreview.loading ||
+                                      historySubmodule.loading
+                                    }
+                                    files={commitFiles}
+                                    loading={commitFilesLoading}
+                                    onLoadDiff={(commit, file) =>
+                                      session.loadCommitDiff(
+                                        commit,
+                                        file.path,
+                                        nativeDiffOptions(diffPreferences),
+                                        historyParentRevision ?? undefined,
+                                      )
+                                    }
+                                    onReadFile={session.readFile}
+                                    onRevertSelectedChanges={async () => {
+                                      if (!historyDiff.patch || !historySelectedPath) {
+                                        return;
+                                      }
+                                      const accepted = await dialog.confirm({
+                                        title: "Revert selected changes?",
+                                        description:
+                                          "Applies the inverse of this file change to the working tree.",
+                                        impact: historySelectedPath,
+                                        confirmLabel: "Revert selected changes",
+                                        dangerous: true,
+                                      });
+                                      if (!accepted) return;
+                                      await session.executeOperation({
+                                        kind: "applyPatch",
+                                        patch: historyDiff.patch,
+                                        cached: false,
+                                        reverse: true,
+                                      });
+                                    }}
+                                    signature={commitSignature}
+                                    parentRevision={historyParentRevision}
+                                    patch={historyDiff.patch}
+                                    preferences={diffPreferences}
+                                    reviewWidth={historyReviewWidth}
+                                    selectedPath={historySelectedPath}
+                                    onNext={() => selectRelative("child")}
+                                    onPrevious={() => selectRelative("parent")}
+                                    onReviewWidthChange={(width) =>
+                                      setHistoryReviewWidth(
+                                        Math.min(480, Math.max(180, Math.round(width))),
+                                      )
+                                    }
+                                    onParentRevisionChange={setHistoryParentRevision}
+                                    onPreferencesChange={setDiffPreferences}
+                                    onSelectFile={(file) => setHistorySelectedPath(file.path)}
+                                    onInspectFile={(file, tab) => {
+                                      if (primaryCommit) {
+                                        openInspector({
+                                          revision: primaryCommit.oid,
+                                          source: {
+                                            kind: "revision",
+                                            revision: primaryCommit.oid,
+                                          },
+                                          path: file.path,
+                                          tab,
+                                        });
+                                      }
+                                    }}
+                                    onOpenTree={() => {
+                                      if (primaryCommit) {
+                                        openInspector({
+                                          revision: primaryCommit.oid,
+                                          source: {
+                                            kind: "revision",
+                                            revision: primaryCommit.oid,
+                                          },
+                                          tab: "tree",
+                                        });
+                                      }
+                                    }}
+                                  />
+                                )}
+                              </div>
+                            )}
+                          </Tabs.Panel>
+                        );
+                      })}
+                    {!inspector && !logOpen && (
+                      <div className={tw.editorEmptyWorkspace}>
+                        <Button
+                          className={cn(
+                            "group/button inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding p-0 text-[13px] font-medium text-muted-foreground outline-none transition-all select-none hover:text-foreground hover:underline focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                          )}
+                          data-open-git-log
+                          data-slot="button"
+                          onClick={openGitLogTab}
+                        >
+                          Open Git Log <kbd>⌥G</kbd>
+                        </Button>
+                        <Button
+                          className={cn(
+                            "group/button inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding p-0 text-[13px] font-medium text-muted-foreground outline-none transition-all select-none hover:text-foreground hover:underline focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                          )}
+                          data-slot="button"
+                          onClick={() => setRepositoryViewMode("changes")}
+                        >
+                          Commit <kbd>⌘0</kbd>
+                        </Button>
+                      </div>
+                    )}
+                    {inspectorTabs.map((tab) => {
+                      const key = inspectorKey(tab);
+                      const value = `inspector:${key}`;
+                      const scratch = tab.scratchId
+                        ? scratchFiles.find((candidate) => candidate.id === tab.scratchId)
+                        : undefined;
+                      return (
+                        <Tabs.Panel
+                          aria-labelledby={editorTabDomId(editorTabsId, value)}
+                          className={tw.editorSurface}
+                          id={editorPanelDomId(editorTabsId, value)}
+                          keepMounted
+                          key={key}
+                          value={value}
+                        >
+                          {scratch ? (
+                            <ScratchEditor
+                              bookmarkedLines={allLineBookmarks(bookmarks)
+                                .filter((bookmark) => bookmark.path === `Scratches/${scratch.name}`)
+                                .map((bookmark) => bookmark.line)}
+                              file={scratch}
+                              initialColumn={tab.column}
+                              initialLine={tab.line}
+                              onChange={(content) =>
+                                setScratchFiles((current) =>
+                                  current.map((candidate) =>
+                                    candidate.id === scratch.id
+                                      ? {
+                                          ...candidate,
+                                          content,
+                                          updatedAtMs: Date.now(),
+                                        }
+                                      : candidate,
+                                  ),
+                                )
+                              }
+                              onToggleBookmark={(line, column) =>
+                                requestToggleBookmark({
+                                  path: `Scratches/${scratch.name}`,
+                                  line,
+                                  column,
+                                })
+                              }
+                            />
+                          ) : (
+                            <RepositoryInspectorDialog
+                              bookmarkedLines={
+                                tab.path
+                                  ? allLineBookmarks(bookmarks)
+                                      .filter((bookmark) => bookmark.path === tab.path)
+                                      .map((bookmark) => bookmark.line)
+                                  : []
+                              }
+                              embedded
+                              initialPath={tab.path}
+                              initialColumn={tab.column}
+                              initialLine={tab.line}
+                              initialTab={tab.tab}
+                              loadBlame={session.loadBlame}
+                              loadFileHistory={session.loadFileHistory}
+                              loadTree={session.loadTree}
+                              onClose={() => void requestCloseInspector(key)}
+                              onDirtyChange={(dirty) => setInspectorDirty(key, dirty)}
+                              onToggleBookmark={(path, line, column) =>
+                                requestToggleBookmark({
+                                  path,
+                                  line,
+                                  column,
+                                })
+                              }
+                              openWorkingTreeFile={session.openWorkingTreeFile}
+                              readFile={session.readFile}
+                              readFilePreview={session.readFilePreview}
+                              writeWorkingTreeFile={session.writeWorkingTreeFile}
+                              revision={tab.revision}
+                              source={tab.source}
+                            />
+                          )}
+                        </Tabs.Panel>
+                      );
+                    })}
+                  </div>
+                </div>
+                <BottomPanel
+                  collapsed={bottomCollapsed}
+                  height={bottomPanelHeight}
+                  active={bottomPanelTab}
+                  fixture={session.fixture}
+                  onApplyShelf={(shelfId, drop) => void session.applyShelf(shelfId, drop)}
+                  onCreateShelf={(message, paths) => void session.createShelf(message, paths)}
+                  onDeleteShelf={(shelfId) => void session.deleteShelf(shelfId)}
+                  onLoadStashFiles={(stash) => session.loadStashFiles(stash.selector)}
+                  onOpenStashDiff={openStashDiff}
+                  onOperation={session.executeOperation}
+                  onRestoreRecovery={session.restoreRecoveryEntry}
+                  onToggle={() => setBottomCollapsed((value) => !value)}
+                  onHeightChange={setBottomPanelHeight}
+                  onActiveChange={setBottomPanelTab}
+                  recoveryEntries={session.recoveryEntries}
+                  gitConsoleEntries={session.gitConsoleEntries}
+                  onClearGitConsole={session.clearGitConsole}
+                  onLoadLocalHistoryActivities={session.listLocalHistoryActivities}
+                  onLoadLocalHistoryActivity={session.readLocalHistoryActivity}
+                  onLoadLocalHistoryDiff={session.loadLocalHistoryDiff}
+                  onCreateLocalHistoryPatch={session.createLocalHistoryPatch}
+                  onPutLocalHistoryLabel={session.putLocalHistoryLabel}
+                  findResults={findResults}
+                  onOpenFindResult={(result) => {
+                    setRepositoryViewMode("history");
+                    openInspector({
+                      revision: repository.snapshot.headOid ?? "HEAD",
+                      source: { kind: "workingTree" },
+                      path: result.path,
+                      tab: "file",
+                      line: result.line,
+                      column: result.column,
+                    });
+                  }}
+                  onSearchAgain={() => {
+                    setProjectSearchInitialQuery("");
+                    setProjectSearchSurface("find");
+                  }}
+                  onRevertLocalHistory={session.revertLocalHistory}
+                  repositoryId={repository.snapshot.id}
+                  repositoryName={repository.snapshot.name}
+                  shelves={session.shelves}
+                  stashes={session.stashes}
+                  status={repository.status}
+                />
+              </div>
+              {notificationOpen && (
+                <NotificationToolWindow
+                  notifications={notifications}
+                  onClear={() => setNotifications([])}
+                  onClose={() => setNotificationOpen(false)}
+                />
+              )}
+              {balloonId &&
+                (() => {
+                  const notification = notifications.find((item) => item.id === balloonId);
+                  return notification ? (
+                    <NotificationBalloon
+                      notification={notification}
+                      onAction={(action) => {
+                        if (action === "modifyShortcuts") {
+                          onOpenSettings();
+                        } else if (action === "openUrl" && notification.url) {
+                          void openExternalUrl(notification.url);
+                        } else if (action === "dismiss") {
+                          onDismissShortcutConflictWarning();
+                          setNotifications((current) =>
+                            current.filter((item) => item.id !== notification.id),
+                          );
+                        } else {
+                          setNotificationOpen(true);
+                        }
+                        setBalloonId(undefined);
+                      }}
+                      onDismiss={() => setBalloonId(undefined)}
+                    />
+                  ) : null;
+                })()}
+              <RepositoryRightToolStripe
+                notificationCount={notifications.length}
+                notificationsOpen={notificationOpen}
+                onToggleNotifications={() => setNotificationOpen((current) => !current)}
+              />
+            </div>
+          )}
+        </main>
+      </Tabs.Root>
       {productSettings.statusBarVisible && !productSettings.presentationMode && (
         <footer aria-label="Status Bar" className={tw.statusbar}>
           {productSettings.navigationBar === "status" && (
             <nav aria-label="Navigation Bar">
-              <button aria-label={navigationStatus} title={navigationStatus}>
-                <Icon name="folder" size={12} />
-                <span>{navigationStatus}</span>
-              </button>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      aria-label={navigationStatus}
+                      className={cn(
+                        "group/button inline-flex min-w-0 shrink-0 items-center justify-center gap-1 whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding p-0 text-[9px] font-medium text-muted-foreground outline-none transition-all select-none hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                      )}
+                      data-slot="button"
+                    >
+                      <Icon name="folder" size={12} />
+                      <span className="min-w-0 truncate">{navigationStatus}</span>
+                    </Button>
+                  }
+                />
+                <TooltipContent>{navigationStatus}</TooltipContent>
+              </Tooltip>
             </nav>
           )}
           {productSettings.navigationBar !== "status" && <span className={tw.statusbarSpacer} />}
@@ -5361,142 +5724,275 @@ function RepositoryWorkspace({
                   )}
                   {session.activity.status === "running" &&
                     session.activity.requestIds.length > 0 && (
-                      <button onClick={() => void session.cancelActivity()}>Cancel</button>
+                      <Button
+                        className={cn(
+                          "group/button inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding p-0 text-[9px] font-medium text-inherit underline outline-none transition-all select-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                        )}
+                        data-slot="button"
+                        onClick={() => void session.cancelActivity()}
+                      >
+                        Cancel
+                      </Button>
                     )}
                   {session.activity.status === "failed" && session.activity.canRetry && (
-                    <button onClick={() => void session.retryActivity()}>Retry</button>
+                    <Button
+                      className={cn(
+                        "group/button inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding p-0 text-[9px] font-medium text-inherit underline outline-none transition-all select-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                      )}
+                      data-slot="button"
+                      onClick={() => void session.retryActivity()}
+                    >
+                      Retry
+                    </Button>
                   )}
                 </span>
               )}
           </span>
           <span className={tw.statusbarWidgets}>
             {productSettings.statusBarWidgets.fileSystemSync && (
-              <button onClick={() => void session.reload()}>
+              <Button
+                aria-label="Refresh repository"
+                className={cn(
+                  "group/button inline-flex h-full min-w-5 shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding px-1 text-[9px] font-medium text-muted-foreground outline-none transition-all select-none hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                )}
+                data-slot="button"
+                onClick={() => void session.reload()}
+              >
                 <Icon name="refresh" size={11} />
-              </button>
+              </Button>
             )}
             {productSettings.statusBarWidgets.aggregator && (
-              <button onClick={() => setNotificationOpen(true)}>
+              <Button
+                aria-label="Open notifications"
+                className={cn(
+                  "group/button inline-flex h-full min-w-5 shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding px-1 text-[9px] font-medium text-muted-foreground outline-none transition-all select-none hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                )}
+                data-slot="button"
+                onClick={() => setNotificationOpen(true)}
+              >
                 <Icon name="warning" size={11} />
-              </button>
+              </Button>
             )}
             {productSettings.statusBarWidgets.lineColumn && (
-              <button
-                aria-label="Go to Line"
-                onClick={toVoidHandler(async () => {
-                  const value = await dialog.input({
-                    title: "Go to Line",
-                    label: "Line and column",
-                    initialValue: editorStatus
-                      ? `${editorStatus.line}:${editorStatus.column}`
-                      : "1:1",
-                    placeholder: "42:1",
-                    confirmLabel: "Go",
-                    validate: (candidate) =>
-                      /^[1-9]\d*(?::[1-9]\d*)?$/u.test(candidate)
-                        ? null
-                        : "Enter a line or line:column value.",
-                  });
-                  if (value === null) return;
-                  const [line, column = "1"] = value.split(":");
-                  window.dispatchEvent(
-                    new CustomEvent("git-client:go-to-line", {
-                      detail: {
-                        line: Number(line),
-                        column: Number(column),
-                      },
-                    }),
-                  );
-                })}
-                title="Go to Line"
-              >
-                {editorStatus ? `${editorStatus.line}:${editorStatus.column}` : ""}
-              </button>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      aria-label="Go to Line"
+                      className={cn(
+                        "group/button inline-flex h-full min-w-5 shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding px-1 text-[9px] font-medium text-muted-foreground outline-none transition-all select-none hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                      )}
+                      data-slot="button"
+                      onClick={toVoidHandler(async () => {
+                        const value = await dialog.input({
+                          title: "Go to Line",
+                          label: "Line and column",
+                          initialValue: editorStatus
+                            ? `${editorStatus.line}:${editorStatus.column}`
+                            : "1:1",
+                          placeholder: "42:1",
+                          confirmLabel: "Go",
+                          validate: (candidate) =>
+                            /^[1-9]\d*(?::[1-9]\d*)?$/u.test(candidate)
+                              ? null
+                              : "Enter a line or line:column value.",
+                        });
+                        if (value === null) return;
+                        const [line, column = "1"] = value.split(":");
+                        window.dispatchEvent(
+                          new CustomEvent("git-client:go-to-line", {
+                            detail: {
+                              line: Number(line),
+                              column: Number(column),
+                            },
+                          }),
+                        );
+                      })}
+                    >
+                      {editorStatus ? `${editorStatus.line}:${editorStatus.column}` : ""}
+                    </Button>
+                  }
+                />
+                <TooltipContent>Go to Line</TooltipContent>
+              </Tooltip>
             )}
             {productSettings.statusBarWidgets.languageServices && (
-              <button
-                aria-label="Language Services Button"
-                onClick={() =>
-                  setToast(
-                    editorStatus
-                      ? `${editorStatus.language} language services are active.`
-                      : "No language service is active for the Git Log.",
-                  )
-                }
-                title="Language Services"
-              >
-                {editorStatus?.language ?? ""}
-              </button>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      aria-label="Language Services Button"
+                      className={cn(
+                        "group/button inline-flex h-full min-w-5 shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding px-1 text-[9px] font-medium text-muted-foreground outline-none transition-all select-none hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                      )}
+                      data-slot="button"
+                      onClick={() =>
+                        setToast(
+                          editorStatus
+                            ? `${editorStatus.language} language services are active.`
+                            : "No language service is active for the Git Log.",
+                        )
+                      }
+                    >
+                      {editorStatus?.language ?? ""}
+                    </Button>
+                  }
+                />
+                <TooltipContent>Language Services</TooltipContent>
+              </Tooltip>
             )}
             {productSettings.statusBarWidgets.gridPosition && (
-              <button>{editorStatus ? "1 × 1" : ""}</button>
+              <Button
+                aria-label="Grid position"
+                className={cn(
+                  "group/button inline-flex h-full min-w-5 shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding px-1 text-[9px] font-medium text-muted-foreground outline-none transition-all select-none hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                )}
+                data-slot="button"
+              >
+                {editorStatus ? "1 × 1" : ""}
+              </Button>
             )}
             {productSettings.statusBarWidgets.lineSeparator && (
-              <button>{editorStatus?.lineSeparator ?? ""}</button>
+              <Button
+                aria-label="Line separator"
+                className={cn(
+                  "group/button inline-flex h-full min-w-5 shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding px-1 text-[9px] font-medium text-muted-foreground outline-none transition-all select-none hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                )}
+                data-slot="button"
+              >
+                {editorStatus?.lineSeparator ?? ""}
+              </Button>
             )}
             {productSettings.statusBarWidgets.fileEncoding && (
-              <button>{editorStatus ? "UTF-8" : ""}</button>
+              <Button
+                aria-label="File encoding"
+                className={cn(
+                  "group/button inline-flex h-full min-w-5 shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding px-1 text-[9px] font-medium text-muted-foreground outline-none transition-all select-none hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                )}
+                data-slot="button"
+              >
+                {editorStatus ? "UTF-8" : ""}
+              </Button>
             )}
             {productSettings.statusBarWidgets.editorSelectionMode && (
-              <button
-                aria-label="Column selection mode"
-                aria-pressed={editorStatus?.columnSelection ?? false}
-                onClick={() =>
-                  window.dispatchEvent(new CustomEvent("git-client:toggle-column-selection"))
-                }
-                title="Column selection mode"
-              >
-                {editorStatus?.columnSelection ? "Column" : ""}
-              </button>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Toggle
+                      aria-label="Column selection mode"
+                      className="group/toggle inline-flex h-full min-w-5 shrink-0 items-center justify-center rounded-none bg-transparent px-1 text-[9px] font-medium text-muted-foreground outline-none transition-all hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0 data-pressed:bg-accent data-pressed:text-foreground"
+                      data-slot="toggle"
+                      onPressedChange={() =>
+                        window.dispatchEvent(new CustomEvent("git-client:toggle-column-selection"))
+                      }
+                      pressed={editorStatus?.columnSelection ?? false}
+                    >
+                      {editorStatus?.columnSelection ? "Column" : ""}
+                    </Toggle>
+                  }
+                />
+                <TooltipContent>Column selection mode</TooltipContent>
+              </Tooltip>
             )}
             {productSettings.statusBarWidgets.powerSaveMode && (
-              <button
-                aria-label="Power Save Mode"
-                title={
-                  productSettings.powerSaveMode ? "Power Save Mode is enabled" : "Power Save Mode"
-                }
-              >
-                {productSettings.powerSaveMode ? "Power Save Mode" : ""}
-              </button>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      aria-label="Power Save Mode"
+                      className={cn(
+                        "group/button inline-flex h-full min-w-5 shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding px-1 text-[9px] font-medium text-muted-foreground outline-none transition-all select-none hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                      )}
+                      data-slot="button"
+                    >
+                      {productSettings.powerSaveMode ? "Power Save Mode" : ""}
+                    </Button>
+                  }
+                />
+                <TooltipContent>
+                  {productSettings.powerSaveMode ? "Power Save Mode is enabled" : "Power Save Mode"}
+                </TooltipContent>
+              </Tooltip>
             )}
             {productSettings.statusBarWidgets.indentation && (
-              <button>{editorStatus?.indentation ?? ""}</button>
+              <Button
+                aria-label="Indentation"
+                className={cn(
+                  "group/button inline-flex h-full min-w-5 shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding px-1 text-[9px] font-medium text-muted-foreground outline-none transition-all select-none hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                )}
+                data-slot="button"
+              >
+                {editorStatus?.indentation ?? ""}
+              </Button>
             )}
             {productSettings.statusBarWidgets.readOnlyAttribute && (
-              <button
-                aria-label={
-                  terminalFocused || editorStatus?.readOnly === false
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      aria-label={
+                        terminalFocused || editorStatus?.readOnly === false
+                          ? "Make file read-only"
+                          : "Make file writable"
+                      }
+                      className={cn(
+                        "group/button inline-flex h-full min-w-5 shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding px-1 text-[9px] font-medium text-muted-foreground outline-none transition-all select-none hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                      )}
+                      data-slot="button"
+                      onClick={() =>
+                        setToast(
+                          editorStatus?.readOnly
+                            ? "Revision content is read-only. Open its working-tree file to edit it."
+                            : "The current surface is already writable.",
+                        )
+                      }
+                    >
+                      {editorStatus?.readOnly ? "RO" : ""}
+                    </Button>
+                  }
+                />
+                <TooltipContent>
+                  {terminalFocused || editorStatus?.readOnly === false
                     ? "Make file read-only"
-                    : "Make file writable"
-                }
-                onClick={() =>
-                  setToast(
-                    editorStatus?.readOnly
-                      ? "Revision content is read-only. Open its working-tree file to edit it."
-                      : "The current surface is already writable.",
-                  )
-                }
-                title={
-                  terminalFocused || editorStatus?.readOnly === false
-                    ? "Make file read-only"
-                    : "Make file writable"
-                }
-              >
-                {editorStatus?.readOnly ? "RO" : ""}
-              </button>
+                    : "Make file writable"}
+                </TooltipContent>
+              </Tooltip>
             )}
             {productSettings.statusBarWidgets.memoryIndicator && (
-              <button aria-label="Memory Indicator" title="Memory Indicator">
-                Memory
-              </button>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      aria-label="Memory Indicator"
+                      className={cn(
+                        "group/button inline-flex h-full min-w-5 shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding px-1 text-[9px] font-medium text-muted-foreground outline-none transition-all select-none hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                      )}
+                      data-slot="button"
+                    >
+                      Memory
+                    </Button>
+                  }
+                />
+                <TooltipContent>Memory Indicator</TooltipContent>
+              </Tooltip>
             )}
-            <button
-              aria-label="IDE error occurred"
-              onClick={() => setNotificationOpen(true)}
-              title="See details"
-            >
-              <Icon name="warning" size={11} />
-            </button>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    aria-label="IDE error occurred"
+                    className={cn(
+                      "group/button inline-flex h-full min-w-5 shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding px-1 text-[9px] font-medium text-destructive outline-none transition-all select-none hover:bg-destructive-muted focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                    )}
+                    data-slot="button"
+                    onClick={() => setNotificationOpen(true)}
+                  >
+                    <Icon name="warning" size={11} />
+                  </Button>
+                }
+              />
+              <TooltipContent>See details</TooltipContent>
+            </Tooltip>
           </span>
         </footer>
       )}
@@ -5514,7 +6010,15 @@ function RepositoryWorkspace({
           <header>
             <strong>Comparison</strong>
             <span />
-            <button onClick={() => setDiffState(undefined)}>Back to workspace</button>
+            <Button
+              className={cn(
+                "group/button inline-flex min-h-7 shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-border bg-secondary bg-clip-padding px-2 text-xs font-medium text-secondary-foreground shadow-xs outline-none transition-all select-none hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+              )}
+              data-slot="button"
+              onClick={() => setDiffState(undefined)}
+            >
+              Back to workspace
+            </Button>
           </header>
           <DiffViewer
             file={diffState.file}
@@ -6930,9 +7434,21 @@ function AppContent() {
           <Icon name="warning" size={14} />
           <span>{session.error}</span>
           {session.activity?.status === "failed" && session.activity.canRetry && (
-            <button onClick={() => void session.retryActivity()}>Retry</button>
+            <Button
+              className={cn(
+                "group/button inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding p-0 text-xs font-medium text-inherit underline outline-none transition-all select-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+              )}
+              data-slot="button"
+              onClick={() => void session.retryActivity()}
+            >
+              Retry
+            </Button>
           )}
-          <button
+          <Button
+            className={cn(
+              "group/button inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding p-0 text-xs font-medium text-inherit underline outline-none transition-all select-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+            )}
+            data-slot="button"
             onClick={() => {
               session.dismissError();
               if (session.activity?.status === "failed")
@@ -6940,14 +7456,22 @@ function AppContent() {
             }}
           >
             Dismiss
-          </button>
+          </Button>
         </div>
       )}
       {session.notice && (
         <div className={tw.errorBanner} role="status">
           <Icon name="history" size={14} />
           <span>{session.notice}</span>
-          <button onClick={session.dismissNotice}>Dismiss</button>
+          <Button
+            className={cn(
+              "group/button inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding p-0 text-xs font-medium text-inherit underline outline-none transition-all select-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+            )}
+            data-slot="button"
+            onClick={session.dismissNotice}
+          >
+            Dismiss
+          </Button>
         </div>
       )}
       {activeError?.kind === "error" ? (
@@ -6956,9 +7480,15 @@ function AppContent() {
           <h1>Repository unavailable</h1>
           <code>{activeError.path}</code>
           <p>{activeError.message}</p>
-          <button onClick={() => void session.activateTab({ kind: "welcome" })}>
+          <Button
+            className={cn(
+              "group/button inline-flex min-h-8 shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-primary bg-primary bg-clip-padding px-3 text-xs font-medium text-primary-foreground shadow-xs outline-none transition-all select-none hover:bg-primary/80 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+            )}
+            data-slot="button"
+            onClick={() => void session.activateTab({ kind: "welcome" })}
+          >
             Back to Welcome
-          </button>
+          </Button>
         </main>
       ) : session.activeTab.kind === "welcome" || !session.repository ? (
         <StartupWorkspace

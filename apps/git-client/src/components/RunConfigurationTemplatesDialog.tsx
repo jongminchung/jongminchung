@@ -1,11 +1,13 @@
-import { useMemo, useState } from "react";
+import { Button } from "@base-ui/react/button";
+import { Tabs } from "@base-ui/react/tabs";
+import { useState } from "react";
 import type {
   RunConfigurationTemplate,
   RunConfigurationTemplateKind,
 } from "../domain/runConfigurationTemplates";
+import { cn } from "../lib/utils";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
-import { Button } from "./ui";
 import { Dialog, DialogHeader } from "./ui";
 import { TextInput } from "./ui";
 
@@ -21,16 +23,16 @@ export function RunConfigurationTemplatesDialog({
   const [selectedKind, setSelectedKind] = useState<RunConfigurationTemplateKind>(
     templates[0]?.kind ?? "application",
   );
-  const selected = useMemo(
-    () => templates.find((template) => template.kind === selectedKind) ?? templates[0],
-    [selectedKind, templates],
-  );
-  const update = (patch: Partial<RunConfigurationTemplate>): void => {
-    if (!selected) return;
+  const activeKind =
+    templates.find((template) => template.kind === selectedKind)?.kind ??
+    templates[0]?.kind ??
+    selectedKind;
+  const update = (
+    kind: RunConfigurationTemplateKind,
+    patch: Partial<RunConfigurationTemplate>,
+  ): void => {
     onChange(
-      templates.map((template) =>
-        template.kind === selected.kind ? { ...template, ...patch } : template,
-      ),
+      templates.map((template) => (template.kind === kind ? { ...template, ...patch } : template)),
     );
   };
 
@@ -50,51 +52,69 @@ export function RunConfigurationTemplatesDialog({
           onOpenChange={(open) => !open && onClose()}
           title="Run Configuration Templates"
         />
-        <aside aria-label="Run configuration template types">
-          <strong>Templates</strong>
+        <Tabs.Root
+          className="contents"
+          onValueChange={(value) => {
+            const kind = templates.find((template) => template.kind === value)?.kind;
+            if (kind !== undefined) setSelectedKind(kind);
+          }}
+          orientation="vertical"
+          value={activeKind}
+        >
+          <Tabs.List aria-label="Run configuration template types" render={<aside />}>
+            <strong>Templates</strong>
+            {templates.map((template) => (
+              <Tabs.Tab
+                key={template.kind}
+                value={template.kind}
+                className={cn(
+                  "inline-flex h-7 items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent px-2.5 text-xs text-muted-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 data-active:bg-accent data-active:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                )}
+              >
+                <Icon name={template.kind === "shell" ? "console" : "file"} size={15} />
+                {template.name}
+              </Tabs.Tab>
+            ))}
+          </Tabs.List>
           {templates.map((template) => (
-            <button
-              aria-current={template.kind === selectedKind ? "page" : undefined}
-              className={template.kind === selectedKind ? tw.activeButton : undefined}
-              key={template.kind}
-              onClick={() => setSelectedKind(template.kind)}
-            >
-              <Icon name={template.kind === "shell" ? "console" : "file"} size={15} />
-              {template.name}
-            </button>
-          ))}
-        </aside>
-        <main>
-          {selected && (
-            <>
-              <h2>{selected.name}</h2>
-              <p>Default settings used for new {selected.name} run configurations.</p>
+            <Tabs.Panel key={template.kind} render={<main />} value={template.kind}>
+              <h2>{template.name}</h2>
+              <p>Default settings used for new {template.name} run configurations.</p>
               <TextInput
                 label="Working directory"
-                onChange={(workingDirectory) => update({ workingDirectory })}
+                onChange={(workingDirectory) => update(template.kind, { workingDirectory })}
                 placeholder="Project directory"
-                value={selected.workingDirectory}
+                value={template.workingDirectory}
                 width="100%"
               />
               <TextInput
                 label="Environment variables"
-                onChange={(environment) => update({ environment })}
+                onChange={(environment) => update(template.kind, { environment })}
                 placeholder="NAME=value;OTHER=value"
-                value={selected.environment}
+                value={template.environment}
                 width="100%"
               />
               <TextInput
                 label="Options"
-                onChange={(options) => update({ options })}
+                onChange={(options) => update(template.kind, { options })}
                 placeholder="Default command or runtime options"
-                value={selected.options}
+                value={template.options}
                 width="100%"
               />
-            </>
-          )}
-        </main>
+            </Tabs.Panel>
+          ))}
+        </Tabs.Root>
         <footer>
-          <Button label="OK" onClick={onClose} variant="primary" />
+          <Button
+            data-slot="button"
+            onClick={onClose}
+            type="button"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-primary bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 active:bg-primary/80",
+            )}
+          >
+            OK
+          </Button>
         </footer>
       </section>
     </Dialog>

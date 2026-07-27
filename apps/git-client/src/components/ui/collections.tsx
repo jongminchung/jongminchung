@@ -1,6 +1,5 @@
 import { Radio } from "@base-ui/react/radio";
 import { RadioGroup } from "@base-ui/react/radio-group";
-import { Tabs } from "@base-ui/react/tabs";
 import { Toggle } from "@base-ui/react/toggle";
 import { ToggleGroup } from "@base-ui/react/toggle-group";
 import { LoaderCircle } from "lucide-react";
@@ -230,98 +229,6 @@ export function SegmentedControlItem({
       value={value}
     >
       {label}
-    </Toggle>
-  );
-}
-
-interface TabListProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange"> {
-  readonly value: string;
-  readonly onChange: (value: string) => void;
-  readonly size?: "sm" | "md";
-  readonly children: ReactNode;
-}
-
-export function TabList({
-  value,
-  onChange,
-  size = "md",
-  children,
-  className,
-  ...props
-}: TabListProps): ReactNode {
-  return (
-    <Tabs.Root onValueChange={onChange} value={value}>
-      <Tabs.List
-        className={cn(
-          "inline-flex items-center rounded-md bg-muted p-0.5",
-          size === "sm" ? "h-7" : "h-8",
-          className,
-        )}
-        {...props}
-      >
-        {children}
-      </Tabs.List>
-    </Tabs.Root>
-  );
-}
-
-export function Tab({
-  label,
-  value,
-}: {
-  readonly label: string;
-  readonly value: string;
-}): ReactNode {
-  return (
-    <Tabs.Tab
-      className="h-full rounded px-2.5 text-xs text-muted-foreground outline-none hover:text-foreground data-active:bg-background data-active:text-foreground data-active:shadow-xs focus-visible:ring-2 focus-visible:ring-ring/45"
-      value={value}
-    >
-      {label}
-    </Tabs.Tab>
-  );
-}
-
-export function ToggleButton({
-  label,
-  isPressed = false,
-  onPressedChange,
-  isDisabled = false,
-  icon,
-  pressedIcon,
-  isIconOnly = false,
-  children,
-  className,
-}: {
-  readonly label: string;
-  readonly isPressed?: boolean;
-  readonly onPressedChange?: (pressed: boolean, event: React.MouseEvent<HTMLButtonElement>) => void;
-  readonly isDisabled?: boolean;
-  readonly icon?: ReactNode;
-  readonly pressedIcon?: ReactNode;
-  readonly isIconOnly?: boolean;
-  readonly children?: ReactNode;
-  readonly className?: string;
-  readonly size?: "sm" | "md" | "lg";
-  readonly isLoading?: boolean;
-  readonly tooltip?: string;
-}): ReactNode {
-  return (
-    <Toggle
-      aria-label={isIconOnly ? label : undefined}
-      aria-pressed={isPressed}
-      className={cn(
-        "inline-flex h-7 items-center justify-center gap-1.5 rounded-md px-2 text-xs outline-none hover:bg-accent aria-pressed:bg-accent aria-pressed:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/45 disabled:opacity-45",
-        isIconOnly && "aspect-square px-0",
-        className,
-      )}
-      disabled={isDisabled}
-      onClick={(event) => onPressedChange?.(!isPressed, event)}
-      pressed={isPressed}
-      type="button"
-    >
-      {isPressed ? (pressedIcon ?? icon) : icon}
-      {isIconOnly ? null : (children ?? label)}
     </Toggle>
   );
 }

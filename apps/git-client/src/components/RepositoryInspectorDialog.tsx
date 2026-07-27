@@ -1,14 +1,15 @@
+import { Button } from "@base-ui/react/button";
+import { Tabs } from "@base-ui/react/tabs";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { BlameLine, Commit, TreeEntry } from "../domain/types";
+import { cn } from "../lib/utils";
 import type { FileContent, FilePreview, FileSource } from "../shared/contracts/model";
 import { tw } from "../styles/tailwind";
 import { useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
-import { Button } from "./ui";
 import { Dialog, DialogHeader } from "./ui";
 import { EmptyState } from "./ui";
 import { Spinner } from "./ui";
-import { Tab, TabList } from "./ui";
 import { TextInput } from "./ui";
 
 const CodeMirrorFile = lazy(() => import("./CodeMirrorFile"));
@@ -155,7 +156,12 @@ export function RepositoryInspectorDialog({
           value.length === 0
             ? 0
             : (value.match(/\n/gu)?.length ?? 0) + (value.endsWith("\n") ? 0 : 1);
-        setContent({ ...content, content: value, sizeBytes, lineCount });
+        setContent({
+          ...content,
+          content: value,
+          sizeBytes,
+          lineCount,
+        });
         setEditorValue(value);
       } catch (reason) {
         setError(reason instanceof Error ? reason.message : String(reason));
@@ -185,6 +191,14 @@ export function RepositoryInspectorDialog({
     };
   }, [editorDirty, editorValue, saveEditor]);
 
+  const inspectorStatus = error ? (
+    <EmptyState description={error} title="Unable to load Git data" />
+  ) : loading ? (
+    <div className="grid h-full place-items-center">
+      <Spinner label="Loading Git data…" size="lg" />
+    </div>
+  ) : null;
+
   const surface = (
     <section
       aria-label={embedded ? `Editor: ${path || "Repository"}` : undefined}
@@ -208,166 +222,236 @@ export function RepositoryInspectorDialog({
           title="Repository inspector"
         />
       )}
-      <nav className="flex min-w-0 items-center gap-2 border-b border-border bg-muted px-3 py-1.5">
-        <TabList
-          aria-label="Repository inspector views"
-          onChange={(value) => {
-            if (isInspectorTab(value)) setTab(value);
-          }}
-          size="sm"
-          value={tab}
-        >
-          <Tab label="Tree" value="tree" />
-          <Tab label="File" value="file" />
-          <Tab label="File History" value="history" />
-          <Tab label="Blame" value="blame" />
-        </TabList>
-        {tab === "tree" ? (
-          <>
-            <Button
-              isDisabled={!treePath}
-              label="Up"
-              onClick={() => setTreePath(treePath.split("/").slice(0, -1).join("/"))}
-              size="sm"
-              variant="ghost"
-            />
-            <code className="min-w-0 flex-1 truncate text-secondary">/{treePath}</code>
-          </>
-        ) : (
-          <form
-            className="ml-2 grid min-w-48 flex-1 grid-cols-[minmax(0,1fr)_auto] items-end gap-2"
-            onSubmit={(event) => {
-              event.preventDefault();
-              setReloadToken((value) => value + 1);
-            }}
+      <Tabs.Root
+        className="contents"
+        onValueChange={(value) => {
+          if (isInspectorTab(value)) setTab(value);
+        }}
+        value={tab}
+      >
+        <nav className="flex min-w-0 items-center gap-2 border-b border-border bg-muted px-3 py-1.5">
+          <Tabs.List
+            aria-label="Repository inspector views"
+            className="inline-flex h-7 items-center rounded-md bg-muted p-0.5"
           >
-            <TextInput
-              isLabelHidden
-              label="Repository file path"
-              onChange={setPath}
-              placeholder="src/path/to/file.ts"
-              size="sm"
-              value={path}
-              width="100%"
-            />
-            <Button label="Load" size="sm" type="submit" variant="secondary" />
-          </form>
-        )}
-        {tab === "file" && source.kind === "workingTree" && content?.kind === "text" && (
-          <Button
-            isDisabled={saving || editorValue === content.content}
-            label={saving ? "Saving…" : "Save"}
-            onClick={() => void saveEditor(editorValue)}
-            size="sm"
-            variant="secondary"
-          />
-        )}
-      </nav>
-      <div className={tw.inspectorContent} aria-busy={loading}>
-        {error ? (
-          <EmptyState description={error} title="Unable to load Git data" />
-        ) : loading ? (
-          <div className="grid h-full place-items-center">
-            <Spinner label="Loading Git data…" size="lg" />
-          </div>
-        ) : tab === "tree" ? (
-          <div className={tw.inspectorTree}>
-            {tree.map((entry) => (
-              <button
-                key={`${entry.kind}-${entry.path}`}
-                onDoubleClick={() => {
-                  if (entry.kind === "tree") {
-                    setTreePath([treePath, entry.path].filter(Boolean).join("/"));
-                  } else {
-                    setPath([treePath, entry.path].filter(Boolean).join("/"));
-                    setTab("file");
-                  }
-                }}
-              >
-                <Icon name={entry.kind === "tree" ? "folder" : "file"} size={14} />
-                <span>{entry.path}</span>
-                <small>{entry.mode}</small>
-                <small>{entry.size === undefined ? "" : `${entry.size.toLocaleString()} B`}</small>
-                <code>{entry.oid.slice(0, 8)}</code>
-              </button>
-            ))}
-          </div>
-        ) : tab === "file" ? (
-          !content ? (
-            <div className={tw.emptyState}>Select a file to view its contents.</div>
-          ) : content.kind === "text" ? (
-            <Suspense fallback={<div className={tw.emptyState}>Loading viewer…</div>}>
-              <CodeMirrorFile
-                bookmarkedLines={bookmarkedLines}
-                editable={source.kind === "workingTree"}
-                initialColumn={initialColumn}
-                initialLine={initialLine}
-                onChange={setEditorValue}
-                onSave={saveEditor}
-                onToggleBookmark={(line, column) => onToggleBookmark?.(content.path, line, column)}
-                path={content.path}
-                value={content.content}
-              />
-            </Suspense>
-          ) : preview?.kind === "image" ? (
-            <figure className={tw.imageViewer}>
-              <img alt={preview.preview.path} src={preview.preview.dataUrl} />
-              <figcaption>
-                <strong>{preview.preview.path}</strong>
-                <span>
-                  {preview.preview.mimeType} · {preview.preview.sizeBytes.toLocaleString()} bytes
-                </span>
-                {source.kind === "workingTree" && (
-                  <button onClick={() => void openWorkingTreeFile(preview.preview.path)}>
-                    Open in default application
-                  </button>
+            <Tabs.Tab
+              className="h-full rounded px-2.5 text-xs text-muted-foreground outline-none hover:text-foreground data-active:bg-background data-active:text-foreground data-active:shadow-xs focus-visible:ring-2 focus-visible:ring-ring/45"
+              value="tree"
+            >
+              Tree
+            </Tabs.Tab>
+            <Tabs.Tab
+              className="h-full rounded px-2.5 text-xs text-muted-foreground outline-none hover:text-foreground data-active:bg-background data-active:text-foreground data-active:shadow-xs focus-visible:ring-2 focus-visible:ring-ring/45"
+              value="file"
+            >
+              File
+            </Tabs.Tab>
+            <Tabs.Tab
+              className="h-full rounded px-2.5 text-xs text-muted-foreground outline-none hover:text-foreground data-active:bg-background data-active:text-foreground data-active:shadow-xs focus-visible:ring-2 focus-visible:ring-ring/45"
+              value="history"
+            >
+              File History
+            </Tabs.Tab>
+            <Tabs.Tab
+              className="h-full rounded px-2.5 text-xs text-muted-foreground outline-none hover:text-foreground data-active:bg-background data-active:text-foreground data-active:shadow-xs focus-visible:ring-2 focus-visible:ring-ring/45"
+              value="blame"
+            >
+              Blame
+            </Tabs.Tab>
+          </Tabs.List>
+          {tab === "tree" ? (
+            <>
+              <Button
+                data-slot="button"
+                onClick={() => setTreePath(treePath.split("/").slice(0, -1).join("/"))}
+                type="button"
+                disabled={!treePath}
+                className={cn(
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
                 )}
-              </figcaption>
-            </figure>
+              >
+                Up
+              </Button>
+              <code className="min-w-0 flex-1 truncate text-muted-foreground">/{treePath}</code>
+            </>
           ) : (
-            <div className={tw.emptyState}>
-              <strong>{content.path}</strong>
-              <span>
-                {content.kind === "binary"
-                  ? "Binary file"
-                  : content.kind === "invalidUtf8"
-                    ? "Not valid UTF-8"
-                    : content.kind === "tooLarge"
-                      ? "File exceeds the 5 MiB or 50,000 line viewer limit"
-                      : "File does not exist at this source"}
-              </span>
-              {"sizeBytes" in content && <small>{content.sizeBytes.toLocaleString()} bytes</small>}
-              {source.kind === "workingTree" && content.kind !== "missing" && (
-                <button onClick={() => void openWorkingTreeFile(content.path)}>
-                  Open in default application
-                </button>
+            <form
+              className="ml-2 grid min-w-48 flex-1 grid-cols-[minmax(0,1fr)_auto] items-end gap-2"
+              onSubmit={(event) => {
+                event.preventDefault();
+                setReloadToken((value) => value + 1);
+              }}
+            >
+              <TextInput
+                isLabelHidden
+                label="Repository file path"
+                onChange={setPath}
+                placeholder="src/path/to/file.ts"
+                size="sm"
+                value={path}
+                width="100%"
+              />
+              <Button
+                data-slot="button"
+                type="submit"
+                className={cn(
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
+                )}
+              >
+                Load
+              </Button>
+            </form>
+          )}
+          {tab === "file" && source.kind === "workingTree" && content?.kind === "text" && (
+            <Button
+              data-slot="button"
+              onClick={() => void saveEditor(editorValue)}
+              type="button"
+              disabled={saving || editorValue === content.content}
+              className={cn(
+                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
               )}
+            >
+              {saving ? "Saving…" : "Save"}
+            </Button>
+          )}
+        </nav>
+        <Tabs.Panel aria-busy={loading} className={tw.inspectorContent} value="tree">
+          {inspectorStatus ?? (
+            <div className={tw.inspectorTree}>
+              {tree.map((entry) => (
+                <Button
+                  data-slot="button"
+                  key={`${entry.kind}-${entry.path}`}
+                  onDoubleClick={() => {
+                    if (entry.kind === "tree") {
+                      setTreePath([treePath, entry.path].filter(Boolean).join("/"));
+                    } else {
+                      setPath([treePath, entry.path].filter(Boolean).join("/"));
+                      setTab("file");
+                    }
+                  }}
+                  type="button"
+                  className={cn(
+                    "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+                  )}
+                >
+                  <Icon name={entry.kind === "tree" ? "folder" : "file"} size={14} />
+                  <span>{entry.path}</span>
+                  <small>{entry.mode}</small>
+                  <small>
+                    {entry.size === undefined ? "" : `${entry.size.toLocaleString()} B`}
+                  </small>
+                  <code>{entry.oid.slice(0, 8)}</code>
+                </Button>
+              ))}
             </div>
-          )
-        ) : tab === "history" ? (
-          <div className={tw.historyList}>
-            {history.map((commit) => (
-              <article key={commit.oid}>
-                <code>{commit.oid.slice(0, 8)}</code>
-                <strong>{commit.subject}</strong>
-                <span>{commit.author}</span>
-                <time>{new Date(commit.authoredAt * 1000).toLocaleString()}</time>
-              </article>
-            ))}
-          </div>
-        ) : (
-          <div className={tw.blameView}>
-            {blame.map((line) => (
-              <div key={`${line.finalLine}-${line.oid}`} title={`${line.summary} · ${line.email}`}>
-                <code>{line.finalLine}</code>
-                <code>{line.oid.slice(0, 8)}</code>
-                <span>{line.author}</span>
-                <pre>{line.content || " "}</pre>
+          )}
+        </Tabs.Panel>
+        <Tabs.Panel aria-busy={loading} className={tw.inspectorContent} value="file">
+          {inspectorStatus ??
+            (!content ? (
+              <div className={tw.emptyState}>Select a file to view its contents.</div>
+            ) : content.kind === "text" ? (
+              <Suspense fallback={<div className={tw.emptyState}>Loading viewer…</div>}>
+                <CodeMirrorFile
+                  bookmarkedLines={bookmarkedLines}
+                  editable={source.kind === "workingTree"}
+                  initialColumn={initialColumn}
+                  initialLine={initialLine}
+                  onChange={setEditorValue}
+                  onSave={saveEditor}
+                  onToggleBookmark={(line, column) =>
+                    onToggleBookmark?.(content.path, line, column)
+                  }
+                  path={content.path}
+                  value={content.content}
+                />
+              </Suspense>
+            ) : preview?.kind === "image" ? (
+              <figure className={tw.imageViewer}>
+                <img alt={preview.preview.path} src={preview.preview.dataUrl} />
+                <figcaption>
+                  <strong>{preview.preview.path}</strong>
+                  <span>
+                    {preview.preview.mimeType} · {preview.preview.sizeBytes.toLocaleString()} bytes
+                  </span>
+                  {source.kind === "workingTree" && (
+                    <Button
+                      data-slot="button"
+                      onClick={() => void openWorkingTreeFile(preview.preview.path)}
+                      type="button"
+                      className={cn(
+                        "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                      )}
+                    >
+                      Open in default application
+                    </Button>
+                  )}
+                </figcaption>
+              </figure>
+            ) : (
+              <div className={tw.emptyState}>
+                <strong>{content.path}</strong>
+                <span>
+                  {content.kind === "binary"
+                    ? "Binary file"
+                    : content.kind === "invalidUtf8"
+                      ? "Not valid UTF-8"
+                      : content.kind === "tooLarge"
+                        ? "File exceeds the 5 MiB or 50,000 line viewer limit"
+                        : "File does not exist at this source"}
+                </span>
+                {"sizeBytes" in content && (
+                  <small>{content.sizeBytes.toLocaleString()} bytes</small>
+                )}
+                {source.kind === "workingTree" && content.kind !== "missing" && (
+                  <Button
+                    data-slot="button"
+                    onClick={() => void openWorkingTreeFile(content.path)}
+                    type="button"
+                    className={cn(
+                      "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                    )}
+                  >
+                    Open in default application
+                  </Button>
+                )}
               </div>
             ))}
-          </div>
-        )}
-      </div>
+        </Tabs.Panel>
+        <Tabs.Panel aria-busy={loading} className={tw.inspectorContent} value="history">
+          {inspectorStatus ?? (
+            <div className={tw.historyList}>
+              {history.map((commit) => (
+                <article key={commit.oid}>
+                  <code>{commit.oid.slice(0, 8)}</code>
+                  <strong>{commit.subject}</strong>
+                  <span>{commit.author}</span>
+                  <time>{new Date(commit.authoredAt * 1000).toLocaleString()}</time>
+                </article>
+              ))}
+            </div>
+          )}
+        </Tabs.Panel>
+        <Tabs.Panel aria-busy={loading} className={tw.inspectorContent} value="blame">
+          {inspectorStatus ?? (
+            <div className={tw.blameView}>
+              {blame.map((line) => (
+                <div
+                  key={`${line.finalLine}-${line.oid}`}
+                  title={`${line.summary} · ${line.email}`}
+                >
+                  <code>{line.finalLine}</code>
+                  <code>{line.oid.slice(0, 8)}</code>
+                  <span>{line.author}</span>
+                  <pre>{line.content || " "}</pre>
+                </div>
+              ))}
+            </div>
+          )}
+        </Tabs.Panel>
+      </Tabs.Root>
     </section>
   );
 

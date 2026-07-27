@@ -1,3 +1,5 @@
+import { Button } from "@base-ui/react/button";
+import { Toggle } from "@base-ui/react/toggle";
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import {
   projectSearchResults,
@@ -6,15 +8,14 @@ import {
   type ProjectSearchResult,
   type ProjectTextMatch,
 } from "../domain/projectSearch";
+import { cn } from "../lib/utils";
 import { tw } from "../styles/tailwind";
 import { useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
-import { Button } from "./ui";
 import { Dialog, DialogHeader } from "./ui";
 import { List, ListItem } from "./ui";
 import { Spinner } from "./ui";
 import { TextInput } from "./ui";
-import { ToggleButton } from "./ui";
 
 export type ProjectSearchSurface =
   | "find"
@@ -281,38 +282,57 @@ export function ProjectSearchDialog({
           />
           {surface === "find" && (
             <>
-              <ToggleButton
-                icon={<Icon name="folder" size={14} />}
-                isPressed
-                label="In Project"
-                size="sm"
-              />
-              <ToggleButton
-                isPressed={options.matchCase}
-                label="Match case"
+              <Toggle
+                aria-label="In Project"
+                className="inline-flex h-7 items-center justify-center gap-1.5 rounded-md px-2 text-xs outline-none hover:bg-accent data-pressed:bg-accent data-pressed:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/45 disabled:opacity-45"
+                pressed
+                type="button"
+              >
+                <Icon name="folder" size={14} />
+                In Project
+              </Toggle>
+              <Toggle
+                aria-label="Match case"
+                className="inline-flex h-7 items-center justify-center gap-1.5 rounded-md px-2 text-xs outline-none hover:bg-accent data-pressed:bg-accent data-pressed:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/45 disabled:opacity-45"
                 onPressedChange={(matchCase) =>
-                  setOptions((current) => ({ ...current, matchCase }))
+                  setOptions((current) => ({
+                    ...current,
+                    matchCase,
+                  }))
                 }
-                size="sm"
+                pressed={options.matchCase}
+                type="button"
               >
                 Aa
-              </ToggleButton>
-              <ToggleButton
-                isPressed={options.words}
-                label="Words"
-                onPressedChange={(words) => setOptions((current) => ({ ...current, words }))}
-                size="sm"
+              </Toggle>
+              <Toggle
+                aria-label="Words"
+                className="inline-flex h-7 items-center justify-center gap-1.5 rounded-md px-2 text-xs outline-none hover:bg-accent data-pressed:bg-accent data-pressed:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/45 disabled:opacity-45"
+                onPressedChange={(words) =>
+                  setOptions((current) => ({
+                    ...current,
+                    words,
+                  }))
+                }
+                pressed={options.words}
+                type="button"
               >
                 W
-              </ToggleButton>
-              <ToggleButton
-                isPressed={options.regex}
-                label="Regex"
-                onPressedChange={(regex) => setOptions((current) => ({ ...current, regex }))}
-                size="sm"
+              </Toggle>
+              <Toggle
+                aria-label="Regex"
+                className="inline-flex h-7 items-center justify-center gap-1.5 rounded-md px-2 text-xs outline-none hover:bg-accent data-pressed:bg-accent data-pressed:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/45 disabled:opacity-45"
+                onPressedChange={(regex) =>
+                  setOptions((current) => ({
+                    ...current,
+                    regex,
+                  }))
+                }
+                pressed={options.regex}
+                type="button"
               >
                 .*
-              </ToggleButton>
+              </Toggle>
             </>
           )}
         </div>
@@ -328,15 +348,19 @@ export function ProjectSearchDialog({
           </span>
           {surface === "find" && onOpenInFindWindow && (
             <Button
-              isDisabled={loading || results.length === 0}
-              label="Open in Find Window"
+              data-slot="button"
               onClick={() => {
                 onOpenInFindWindow(query.trim(), options, results);
                 onClose();
               }}
-              size="sm"
-              variant="ghost"
-            />
+              type="button"
+              disabled={loading || results.length === 0}
+              className={cn(
+                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+              )}
+            >
+              Open in Find Window
+            </Button>
           )}
         </div>
         <div className={tw.projectSearchResults}>

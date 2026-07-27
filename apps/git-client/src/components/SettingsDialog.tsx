@@ -1,3 +1,5 @@
+import { Button } from "@base-ui/react/button";
+import { Tabs } from "@base-ui/react/tabs";
 import { useMemo, useState } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import type { AppearancePreference, AppearanceTheme } from "../domain/appearance";
@@ -10,16 +12,25 @@ import {
 } from "../domain/commands";
 import { isProductKeymapPreset } from "../domain/productSettings";
 import { type ProductSettings, type ProductZoom } from "../domain/productSettings";
+import { cn } from "../lib/utils";
 import { tw } from "../styles/tailwind";
 import { useAppearance } from "./AppearanceProvider";
 import { Icon } from "./Icon";
-import { Button } from "./ui";
 import { CheckboxInput } from "./ui";
 import { Dialog, DialogHeader } from "./ui";
 import { RadioList, RadioListItem } from "./ui";
 import { TextInput } from "./ui";
 
 type SettingsSection = "appearance" | "keymap" | "versionControl" | "notifications";
+
+function isSettingsSection(value: unknown): value is SettingsSection {
+  return (
+    value === "appearance" ||
+    value === "keymap" ||
+    value === "versionControl" ||
+    value === "notifications"
+  );
+}
 
 const APPEARANCE_MODES: readonly {
   readonly value: AppearanceTheme | "system";
@@ -83,7 +94,10 @@ export function SettingsDialog({
     if (event.key === "Backspace" || event.key === "Delete") {
       onSettingsChange({
         ...settings,
-        keymapOverrides: { ...settings.keymapOverrides, [commandId]: null },
+        keymapOverrides: {
+          ...settings.keymapOverrides,
+          [commandId]: null,
+        },
       });
       setCapturingCommand(undefined);
       setKeymapError(undefined);
@@ -130,34 +144,49 @@ export function SettingsDialog({
     >
       <section className={tw.settingsDialog}>
         <DialogHeader hasDivider onOpenChange={(open) => !open && onClose()} title={title} />
-        <aside aria-label="Settings categories">
-          <button
-            className={section === "appearance" ? tw.activeButton : undefined}
-            onClick={() => setSection("appearance")}
-          >
-            <Icon name="appearance" size={15} /> Appearance & Behavior
-          </button>
-          <button
-            className={section === "keymap" ? tw.activeButton : undefined}
-            onClick={() => setSection("keymap")}
-          >
-            <Icon name="settings" size={15} /> Keymap
-          </button>
-          <button
-            className={section === "versionControl" ? tw.activeButton : undefined}
-            onClick={() => setSection("versionControl")}
-          >
-            <Icon name="branch" size={15} /> Version Control
-          </button>
-          <button
-            className={section === "notifications" ? tw.activeButton : undefined}
-            onClick={() => setSection("notifications")}
-          >
-            <Icon name="warning" size={15} /> Notifications
-          </button>
-        </aside>
-        <main>
-          {section === "appearance" && (
+        <Tabs.Root
+          className="contents"
+          onValueChange={(value) => {
+            if (isSettingsSection(value)) setSection(value);
+          }}
+          orientation="vertical"
+          value={section}
+        >
+          <Tabs.List aria-label="Settings categories" render={<aside />}>
+            <Tabs.Tab
+              value="appearance"
+              className={cn(
+                "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 text-muted-foreground data-active:bg-accent data-active:text-foreground",
+              )}
+            >
+              <Icon name="appearance" size={15} /> Appearance & Behavior
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="keymap"
+              className={cn(
+                "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 text-muted-foreground data-active:bg-accent data-active:text-foreground",
+              )}
+            >
+              <Icon name="settings" size={15} /> Keymap
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="versionControl"
+              className={cn(
+                "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 text-muted-foreground data-active:bg-accent data-active:text-foreground",
+              )}
+            >
+              <Icon name="branch" size={15} /> Version Control
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="notifications"
+              className={cn(
+                "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 text-muted-foreground data-active:bg-accent data-active:text-foreground",
+              )}
+            >
+              <Icon name="warning" size={15} /> Notifications
+            </Tabs.Tab>
+          </Tabs.List>
+          <Tabs.Panel render={<main />} value="appearance">
             <div className={tw.settingsPage}>
               <h2>Appearance</h2>
               <RadioList
@@ -167,8 +196,14 @@ export function SettingsDialog({
                   if (selection === undefined) return;
                   setPreference(
                     selection === "system"
-                      ? { theme: appearance.systemTheme, syncWithOs: true }
-                      : { theme: selection, syncWithOs: false },
+                      ? {
+                          theme: appearance.systemTheme,
+                          syncWithOs: true,
+                        }
+                      : {
+                          theme: selection,
+                          syncWithOs: false,
+                        },
                   );
                 }}
                 value={appearanceSelection}
@@ -179,13 +214,21 @@ export function SettingsDialog({
               </RadioList>
               <CheckboxInput
                 label="Compact mode"
-                onChange={(compactMode) => onSettingsChange({ ...settings, compactMode })}
+                onChange={(compactMode) =>
+                  onSettingsChange({
+                    ...settings,
+                    compactMode,
+                  })
+                }
                 value={settings.compactMode}
               />
               <CheckboxInput
                 label="Adjust colors for red-green vision deficiency"
                 onChange={(adjustRedGreenVision) =>
-                  onSettingsChange({ ...settings, adjustRedGreenVision })
+                  onSettingsChange({
+                    ...settings,
+                    adjustRedGreenVision,
+                  })
                 }
                 value={settings.adjustRedGreenVision}
               />
@@ -232,7 +275,10 @@ export function SettingsDialog({
               <RadioList
                 label="IDE zoom"
                 onChange={(value) =>
-                  onSettingsChange({ ...settings, zoom: Number(value) as ProductZoom })
+                  onSettingsChange({
+                    ...settings,
+                    zoom: Number(value) as ProductZoom,
+                  })
                 }
                 value={String(settings.zoom)}
               >
@@ -241,8 +287,8 @@ export function SettingsDialog({
                 <RadioListItem label="150%" value="150" />
               </RadioList>
             </div>
-          )}
-          {section === "keymap" && (
+          </Tabs.Panel>
+          <Tabs.Panel render={<main />} value="keymap">
             <div className={tw.settingsPage}>
               <h2>Keymap</h2>
               <label>
@@ -251,7 +297,10 @@ export function SettingsDialog({
                   onChange={(event) => {
                     const value = event.currentTarget.value;
                     if (isProductKeymapPreset(value)) {
-                      onSettingsChange({ ...settings, keymapPreset: value });
+                      onSettingsChange({
+                        ...settings,
+                        keymapPreset: value,
+                      });
                     }
                   }}
                   value={settings.keymapPreset}
@@ -284,39 +333,56 @@ export function SettingsDialog({
                       <strong>{command.label}</strong>
                       <small>{command.id}</small>
                     </span>
-                    <button
-                      aria-label={`Shortcut for ${command.label}`}
-                      onClick={() => setCapturingCommand(command.id)}
-                      onKeyDown={(event) =>
-                        capturingCommand === command.id && captureShortcut(command.id, event)
-                      }
-                      role="cell"
-                    >
-                      {capturingCommand === command.id
-                        ? "Press shortcut…"
-                        : displayAccelerator(
-                            resolvedAccelerator(command, settings.keymapOverrides),
-                          ) || "—"}
-                    </button>
-                    {Object.hasOwn(settings.keymapOverrides, command.id) && (
-                      <button
-                        aria-label={`Reset shortcut for ${command.label}`}
-                        onClick={() => {
-                          const keymapOverrides = { ...settings.keymapOverrides };
-                          delete keymapOverrides[command.id];
-                          onSettingsChange({ ...settings, keymapOverrides });
-                        }}
-                        role="cell"
+                    <span className="contents" role="cell">
+                      <Button
+                        data-slot="button"
+                        aria-label={`Shortcut for ${command.label}`}
+                        onClick={() => setCapturingCommand(command.id)}
+                        onKeyDown={(event) =>
+                          capturingCommand === command.id && captureShortcut(command.id, event)
+                        }
+                        type="button"
+                        className={cn(
+                          "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                        )}
                       >
-                        Reset
-                      </button>
+                        {capturingCommand === command.id
+                          ? "Press shortcut…"
+                          : displayAccelerator(
+                              resolvedAccelerator(command, settings.keymapOverrides),
+                            ) || "—"}
+                      </Button>
+                    </span>
+                    {Object.hasOwn(settings.keymapOverrides, command.id) && (
+                      <span className="contents" role="cell">
+                        <Button
+                          data-slot="button"
+                          aria-label={`Reset shortcut for ${command.label}`}
+                          onClick={() => {
+                            const keymapOverrides = {
+                              ...settings.keymapOverrides,
+                            };
+                            delete keymapOverrides[command.id];
+                            onSettingsChange({
+                              ...settings,
+                              keymapOverrides,
+                            });
+                          }}
+                          type="button"
+                          className={cn(
+                            "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                          )}
+                        >
+                          Reset
+                        </Button>
+                      </span>
                     )}
                   </div>
                 ))}
               </div>
             </div>
-          )}
-          {section === "versionControl" && (
+          </Tabs.Panel>
+          <Tabs.Panel render={<main />} value="versionControl">
             <div className={tw.settingsPage}>
               <h2>Version Control</h2>
               {showRepositorySettings && onOpenRepositorySettings ? (
@@ -326,10 +392,15 @@ export function SettingsDialog({
                     Git config.
                   </p>
                   <Button
-                    label="Open Repository Settings"
+                    data-slot="button"
                     onClick={onOpenRepositorySettings}
-                    variant="secondary"
-                  />
+                    type="button"
+                    className={cn(
+                      "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
+                    )}
+                  >
+                    Open Repository Settings
+                  </Button>
                 </>
               ) : (
                 <p>
@@ -338,21 +409,27 @@ export function SettingsDialog({
                 </p>
               )}
             </div>
-          )}
-          {section === "notifications" && (
+          </Tabs.Panel>
+          <Tabs.Panel render={<main />} value="notifications">
             <div className={tw.settingsPage}>
               <h2>Notifications</h2>
               <CheckboxInput
                 label="Show operation notifications"
                 onChange={(showNotifications) =>
-                  onSettingsChange({ ...settings, showNotifications })
+                  onSettingsChange({
+                    ...settings,
+                    showNotifications,
+                  })
                 }
                 value={settings.showNotifications}
               />
               <CheckboxInput
                 label="Show macOS shortcut conflict warning"
                 onChange={(showShortcutConflictWarning) =>
-                  onSettingsChange({ ...settings, showShortcutConflictWarning })
+                  onSettingsChange({
+                    ...settings,
+                    showShortcutConflictWarning,
+                  })
                 }
                 value={settings.showShortcutConflictWarning}
               />
@@ -361,10 +438,19 @@ export function SettingsDialog({
                 notifications are hidden.
               </p>
             </div>
-          )}
-        </main>
+          </Tabs.Panel>
+        </Tabs.Root>
         <footer>
-          <Button label="Close" onClick={onClose} variant="primary" />
+          <Button
+            data-slot="button"
+            onClick={onClose}
+            type="button"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-primary bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 active:bg-primary/80",
+            )}
+          >
+            Close
+          </Button>
         </footer>
       </section>
     </Dialog>

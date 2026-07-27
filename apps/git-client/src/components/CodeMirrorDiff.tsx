@@ -147,16 +147,26 @@ function editorTheme(wordWrap: boolean): readonly Extension[] {
       borderRight: "1px solid var(--border)",
       color: "var(--disabled-foreground)",
     },
-    ".cm-changedLine": { background: "color-mix(in srgb, var(--success) 10%, transparent)" },
-    ".cm-deletedLine": { background: "color-mix(in srgb, var(--destructive) 10%, transparent)" },
-    ".cm-insertedLine": { background: "color-mix(in srgb, var(--success) 12%, transparent)" },
-    ".cm-changedText": { background: "color-mix(in srgb, var(--success) 22%, transparent)" },
-    ".cm-deletedChunk .cm-changedText": {
-      background: "color-mix(in srgb, var(--destructive) 22%, transparent)",
+    ".cm-changedLine": {
+      background: "color-mix(in oklch, var(--success) 10%, transparent)",
     },
-    ".cm-searchMatch": { background: "color-mix(in srgb, var(--warning) 35%, transparent)" },
+    ".cm-deletedLine": {
+      background: "color-mix(in oklch, var(--destructive) 10%, transparent)",
+    },
+    ".cm-insertedLine": {
+      background: "color-mix(in oklch, var(--success) 12%, transparent)",
+    },
+    ".cm-changedText": {
+      background: "color-mix(in oklch, var(--success) 22%, transparent)",
+    },
+    ".cm-deletedChunk .cm-changedText": {
+      background: "color-mix(in oklch, var(--destructive) 22%, transparent)",
+    },
+    ".cm-searchMatch": {
+      background: "color-mix(in oklch, var(--warning) 35%, transparent)",
+    },
     ".cm-searchMatch-selected": {
-      background: "color-mix(in srgb, var(--primary) 28%, transparent)",
+      background: "color-mix(in oklch, var(--primary) 28%, transparent)",
     },
   });
   return [
@@ -217,7 +227,10 @@ export default function CodeMirrorDiff({
       if (disposed || !parent.current) return;
       const common = [...editorTheme(wordWrap), ...(language ? [language] : [])];
       const collapse = collapseUnchanged
-        ? { margin: contextLines === "full" ? 3 : contextLines, minSize: 6 }
+        ? {
+            margin: contextLines === "full" ? 3 : contextLines,
+            minSize: 6,
+          }
         : undefined;
       const diffConfig = ignoreWhitespace
         ? { override: ignoreWhitespaceDiff, timeout: 1_000 }
@@ -229,7 +242,9 @@ export default function CodeMirrorDiff({
             doc: before,
             extensions: [
               ...common,
-              EditorView.contentAttributes.of({ "aria-label": `Before changes for ${path}` }),
+              EditorView.contentAttributes.of({
+                "aria-label": `Before changes for ${path}`,
+              }),
               lineActionGutter("before", selectableLines, onToggleLine),
             ],
           },
@@ -237,7 +252,9 @@ export default function CodeMirrorDiff({
             doc: after,
             extensions: [
               ...common,
-              EditorView.contentAttributes.of({ "aria-label": `After changes for ${path}` }),
+              EditorView.contentAttributes.of({
+                "aria-label": `After changes for ${path}`,
+              }),
               lineActionGutter("after", selectableLines, onToggleLine),
             ],
           },
@@ -259,8 +276,12 @@ export default function CodeMirrorDiff({
         };
         const syncFromA = () => sync(merge.a, merge.b);
         const syncFromB = () => sync(merge.b, merge.a);
-        merge.a.scrollDOM.addEventListener("scroll", syncFromA, { passive: true });
-        merge.b.scrollDOM.addEventListener("scroll", syncFromB, { passive: true });
+        merge.a.scrollDOM.addEventListener("scroll", syncFromA, {
+          passive: true,
+        });
+        merge.b.scrollDOM.addEventListener("scroll", syncFromB, {
+          passive: true,
+        });
         handle.current = {
           primary: merge.b,
           secondary: merge.a,
@@ -282,7 +303,9 @@ export default function CodeMirrorDiff({
             doc: after,
             extensions: [
               ...common,
-              EditorView.contentAttributes.of({ "aria-label": `Changes for ${path}` }),
+              EditorView.contentAttributes.of({
+                "aria-label": `Changes for ${path}`,
+              }),
               lineActionGutter("unified", selectableLines, onToggleLine),
               unifiedMergeView({
                 original: before,
@@ -297,7 +320,10 @@ export default function CodeMirrorDiff({
             ],
           }),
         });
-        handle.current = { primary: view, destroy: () => view.destroy() };
+        handle.current = {
+          primary: view,
+          destroy: () => view.destroy(),
+        };
         updateSearch(handle.current, searchQuery);
         onStatisticsChange({
           differences: getChunks(view.state)?.chunks.length ?? 0,
@@ -345,8 +371,14 @@ export default function CodeMirrorDiff({
     const beforeMatches = current.secondary ? matchOffsets(before, searchQuery) : [];
     const afterMatches = matchOffsets(after, searchQuery);
     const matches = [
-      ...beforeMatches.map((match) => ({ ...match, view: current.secondary! })),
-      ...afterMatches.map((match) => ({ ...match, view: current.primary })),
+      ...beforeMatches.map((match) => ({
+        ...match,
+        view: current.secondary!,
+      })),
+      ...afterMatches.map((match) => ({
+        ...match,
+        view: current.primary,
+      })),
     ];
     const selected = matches[searchMatchIndex];
     if (!selected) return;

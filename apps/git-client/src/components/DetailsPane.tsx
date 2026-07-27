@@ -1,8 +1,10 @@
+import { Button } from "@base-ui/react/button";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import type { DiffPreferences } from "../domain/changeReview";
 import type { Commit, FileChange } from "../domain/types";
+import { cn } from "../lib/utils";
 import type {
   CommitSignature,
   FileContent,
@@ -16,6 +18,7 @@ import { DiffViewer } from "./DiffViewer";
 import { Icon } from "./Icon";
 import { CheckboxInput } from "./ui";
 import { Popover } from "./ui";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui";
 import { VerticalResizeHandle } from "./VerticalResizeHandle";
 
 function statusLetter(status: FileChange["status"]): string {
@@ -150,7 +153,12 @@ function ReviewAll({
   });
   return (
     <div className={tw.reviewAll} ref={parent}>
-      <div style={{ height: virtualizer.getTotalSize(), position: "relative" }}>
+      <div
+        style={{
+          height: virtualizer.getTotalSize(),
+          position: "relative",
+        }}
+      >
         {virtualizer.getVirtualItems().map((item) => {
           const file = files[item.index];
           if (!file) return null;
@@ -266,7 +274,11 @@ export const DetailsPane = memo(function DetailsPane({
     <aside
       className={tw.detailsPane}
       aria-label="Revision review"
-      style={{ "--history-review-width": `${reviewWidth}px` } as CSSProperties}
+      style={
+        {
+          "--history-review-width": `${reviewWidth}px`,
+        } as CSSProperties
+      }
     >
       <VerticalResizeHandle
         direction={-1}
@@ -275,65 +287,135 @@ export const DetailsPane = memo(function DetailsPane({
         value={reviewWidth}
       />
       <div className={tw.detailsToolbar}>
-        <button
-          aria-label="Show Diff"
-          className={tw.iconButton}
-          disabled={!selectedFile}
-          onClick={() => setFocused(true)}
-          title="Show Diff"
-        >
-          <Icon name="compare" size={14} />
-        </button>
-        <button
-          aria-label="Revert Selected Changes"
-          className={tw.iconButton}
-          disabled={!selectedFile || !patch || diffLoading}
-          onClick={() => void onRevertSelectedChanges()}
-          title="Revert Selected Changes"
-        >
-          <Icon name="undo" size={14} />
-        </button>
-        <Popover
-          alignment="end"
-          hasAutoFocus
-          isOpen={optionsOpen}
-          label="View Options"
-          onOpenChange={setOptionsOpen}
-          placement="below"
-          width={250}
-          content={
-            <div className={tw.detailsViewOptions}>
-              <CheckboxInput
-                isDisabled={!commit || files.length === 0}
-                label="Show All Changes"
-                onChange={setReviewAll}
-                size="sm"
-                value={reviewAll}
-              />
-              <CheckboxInput
-                label="Word Wrap"
-                onChange={(wordWrap) => onPreferencesChange({ ...preferences, wordWrap })}
-                size="sm"
-                value={preferences.wordWrap}
-              />
-            </div>
-          }
-        >
-          <button
-            aria-label="View Options"
-            className={reviewAll ? tw.activeButton : tw.iconButton}
-            title="View Options"
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                aria-label="Show Diff"
+                disabled={!selectedFile}
+                onClick={() => setFocused(true)}
+                type="button"
+                className={cn(
+                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  tw.iconButton,
+                )}
+              >
+                <Icon name="compare" size={14} />
+              </Button>
+            }
+          />
+          <TooltipContent>Show Diff</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                aria-label="Revert Selected Changes"
+                disabled={!selectedFile || !patch || diffLoading}
+                onClick={() => void onRevertSelectedChanges()}
+                type="button"
+                className={cn(
+                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  tw.iconButton,
+                )}
+              >
+                <Icon name="undo" size={14} />
+              </Button>
+            }
+          />
+          <TooltipContent>Revert Selected Changes</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <Popover
+            alignment="end"
+            hasAutoFocus
+            isOpen={optionsOpen}
+            label="View Options"
+            onOpenChange={setOptionsOpen}
+            placement="below"
+            width={250}
+            content={
+              <div className={tw.detailsViewOptions}>
+                <CheckboxInput
+                  isDisabled={!commit || files.length === 0}
+                  label="Show All Changes"
+                  onChange={setReviewAll}
+                  size="sm"
+                  value={reviewAll}
+                />
+                <CheckboxInput
+                  label="Word Wrap"
+                  onChange={(wordWrap) =>
+                    onPreferencesChange({
+                      ...preferences,
+                      wordWrap,
+                    })
+                  }
+                  size="sm"
+                  value={preferences.wordWrap}
+                />
+              </div>
+            }
           >
-            <Icon name="more" size={14} />
-          </button>
-        </Popover>
+            <TooltipTrigger
+              render={
+                <Button
+                  data-slot="button"
+                  aria-label="View Options"
+                  type="button"
+                  className={cn(
+                    "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                    reviewAll ? tw.activeButton : tw.iconButton,
+                  )}
+                >
+                  <Icon name="more" size={14} />
+                </Button>
+              }
+            />
+          </Popover>
+          <TooltipContent>View Options</TooltipContent>
+        </Tooltip>
         <span className={tw.filterSpacer} />
-        <button aria-label="Expand All" className={tw.iconButton} disabled title="Expand All">
-          <Icon name="plus" size={13} />
-        </button>
-        <button aria-label="Collapse All" className={tw.iconButton} disabled title="Collapse All">
-          <Icon name="minus" size={13} />
-        </button>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                aria-label="Expand All"
+                disabled
+                type="button"
+                className={cn(
+                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  tw.iconButton,
+                )}
+              >
+                <Icon name="plus" size={13} />
+              </Button>
+            }
+          />
+          <TooltipContent>Expand All</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                aria-label="Collapse All"
+                disabled
+                type="button"
+                className={cn(
+                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  tw.iconButton,
+                )}
+              >
+                <Icon name="minus" size={13} />
+              </Button>
+            }
+          />
+          <TooltipContent>Collapse All</TooltipContent>
+        </Tooltip>
       </div>
       {!commit ? (
         <div className={tw.detailsEmpty}>
@@ -359,15 +441,20 @@ export const DetailsPane = memo(function DetailsPane({
               <div className={tw.emptyState}>This commit has no file changes.</div>
             ) : (
               files.map((file) => (
-                <button
+                <Button
+                  data-slot="button"
                   aria-current={selectedPath === file.path ? "true" : undefined}
-                  className={selectedPath === file.path ? tw.selected : undefined}
                   key={file.path}
                   onClick={() => onSelectFile(file)}
                   onDoubleClick={() => {
                     onSelectFile(file);
                     setFocused(true);
                   }}
+                  type="button"
+                  className={cn(
+                    "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+                    selectedPath === file.path ? tw.selected : undefined,
+                  )}
                 >
                   <span className={`${tw.statusBadge} ${statusClass(file.status)}`}>
                     {statusLetter(file.status)}
@@ -383,19 +470,49 @@ export const DetailsPane = memo(function DetailsPane({
                   <small>
                     +{file.additions ?? 0} −{file.deletions ?? 0}
                   </small>
-                </button>
+                </Button>
               ))
             )}
           </nav>
           <section className={tw.revisionCommitDetails}>
             <header>
               <strong>Commit details</strong>
-              <button onClick={onPrevious} title="Previous commit">
-                ↑
-              </button>
-              <button onClick={onNext} title="Next commit">
-                ↓
-              </button>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      data-slot="button"
+                      aria-label="Previous commit"
+                      onClick={onPrevious}
+                      type="button"
+                      className={cn(
+                        "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                      )}
+                    >
+                      ↑
+                    </Button>
+                  }
+                />
+                <TooltipContent>Previous commit</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      data-slot="button"
+                      aria-label="Next commit"
+                      onClick={onNext}
+                      type="button"
+                      className={cn(
+                        "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                      )}
+                    >
+                      ↓
+                    </Button>
+                  }
+                />
+                <TooltipContent>Next commit</TooltipContent>
+              </Tooltip>
             </header>
             <strong>{commit.subject}</strong>
             <span>{commit.author}</span>
@@ -432,9 +549,27 @@ export const DetailsPane = memo(function DetailsPane({
               </span>
             )}
             <footer>
-              <button onClick={onOpenTree}>Browse Repository</button>
+              <Button
+                data-slot="button"
+                onClick={onOpenTree}
+                type="button"
+                className={cn(
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                )}
+              >
+                Browse Repository
+              </Button>
               {selectedFile && (
-                <button onClick={() => onInspectFile(selectedFile, "file")}>View File</button>
+                <Button
+                  data-slot="button"
+                  onClick={() => onInspectFile(selectedFile, "file")}
+                  type="button"
+                  className={cn(
+                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                  )}
+                >
+                  View File
+                </Button>
               )}
             </footer>
           </section>

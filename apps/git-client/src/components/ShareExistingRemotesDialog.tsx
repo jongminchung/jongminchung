@@ -1,6 +1,7 @@
+import { Button } from "@base-ui/react/button";
+import { cn } from "../lib/utils";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
-import { Button } from "./ui";
 import { Dialog, DialogHeader } from "./ui";
 import { List, ListItem } from "./ui";
 
@@ -54,8 +55,26 @@ export function ShareExistingRemotesDialog({
           </section>
         </main>
         <footer>
-          <Button label="Cancel" onClick={onCancel} variant="secondary" />
-          <Button label="Share Anyway" onClick={onShareAnyway} variant="primary" />
+          <Button
+            data-slot="button"
+            onClick={onCancel}
+            type="button"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
+            )}
+          >
+            Cancel
+          </Button>
+          <Button
+            data-slot="button"
+            onClick={onShareAnyway}
+            type="button"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-primary bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 active:bg-primary/80",
+            )}
+          >
+            Share Anyway
+          </Button>
         </footer>
       </section>
     </Dialog>

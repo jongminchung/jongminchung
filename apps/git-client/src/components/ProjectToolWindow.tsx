@@ -1,12 +1,12 @@
+import { Button } from "@base-ui/react/button";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { mergeProjectTreeEntries, type ProjectTreeEntry } from "../domain/projectTree";
 import type { ScratchFile } from "../domain/scratchFiles";
 import type { FileChange, TreeEntry } from "../domain/types";
+import { cn } from "../lib/utils";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
-import { CheckboxInput } from "./ui";
-import { Popover } from "./ui";
-import { Selector } from "./ui";
+import { CheckboxInput, Popover, Selector, Tooltip, TooltipContent, TooltipTrigger } from "./ui";
 import { VerticalResizeHandle } from "./VerticalResizeHandle";
 
 interface VisibleProjectRow {
@@ -253,116 +253,208 @@ export function ProjectToolWindow({
         value={width}
       />
       <header className={tw.projectToolHeader}>
-        <button aria-label="Project" title="Project">
-          <strong>Project</strong>
-        </button>
-        <span />
-        <button aria-label="New File or Directory…" onClick={onNew} title="New File or Directory…">
-          <Icon name="plus" size={14} />
-        </button>
-        <button
-          aria-label="Select Opened File"
-          onClick={() => void revealActiveFile()}
-          title="Select Opened File (⌥F1, 1)"
-        >
-          <Icon name="checkout" size={14} />
-        </button>
-        <button
-          aria-label="Expand Selected"
-          onClick={() => {
-            if (selectedPath === "") {
-              if (!expanded.has("")) toggle("");
-              return;
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                aria-label="Project"
+                type="button"
+                className={cn(
+                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <strong>Project</strong>
+              </Button>
             }
-            const selected = rows.find((row) => row.entry.path === selectedPath)?.entry;
-            if (selected?.kind === "tree" && !expanded.has(selectedPath)) toggle(selectedPath);
-          }}
-          title="Expand Selected"
-        >
-          <Icon name="chevron" size={14} />
-        </button>
-        <button
-          aria-label="Collapse All"
-          onClick={() => setExpanded(new Set())}
-          title="Collapse All"
-        >
-          <Icon name="minus" size={14} />
-        </button>
-        <Popover
-          alignment="end"
-          hasAutoFocus
-          isOpen={optionsOpen}
-          label="Project View Options"
-          onOpenChange={setOptionsOpen}
-          placement="below"
-          width={286}
-          content={
-            <div className={tw.projectViewOptions}>
-              <strong>Behavior</strong>
-              <CheckboxInput
-                label="Open Files with Single Click"
-                onChange={setOpenFilesWithSingleClick}
-                size="sm"
-                value={openFilesWithSingleClick}
-              />
-              <CheckboxInput
-                label="Always Select Opened File"
-                onChange={setAlwaysSelectOpenedFile}
-                size="sm"
-                value={alwaysSelectOpenedFile}
-              />
-              <strong>Appearance</strong>
-              <CheckboxInput
-                label="Scratches and Consoles"
-                onChange={setShowScratches}
-                size="sm"
-                value={showScratches}
-              />
-              <CheckboxInput
-                label="Compact Directories"
-                onChange={setCompactDirectories}
-                size="sm"
-                value={compactDirectories}
-              />
-              <strong>Sort</strong>
-              <Selector
-                isLabelHidden
-                label="Sort project files"
-                onChange={(value) => {
-                  if (isProjectSortKey(value)) setSortKey(value);
+          />
+          <TooltipContent>Project</TooltipContent>
+        </Tooltip>
+        <span />
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                aria-label="New File or Directory…"
+                onClick={onNew}
+                type="button"
+                className={cn(
+                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <Icon name="plus" size={14} />
+              </Button>
+            }
+          />
+          <TooltipContent>New File or Directory…</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                aria-label="Select Opened File"
+                onClick={() => void revealActiveFile()}
+                type="button"
+                className={cn(
+                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <Icon name="checkout" size={14} />
+              </Button>
+            }
+          />
+          <TooltipContent>Select Opened File (⌥F1, 1)</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                aria-label="Expand Selected"
+                onClick={() => {
+                  if (selectedPath === "") {
+                    if (!expanded.has("")) toggle("");
+                    return;
+                  }
+                  const selected = rows.find((row) => row.entry.path === selectedPath)?.entry;
+                  if (selected?.kind === "tree" && !expanded.has(selectedPath))
+                    toggle(selectedPath);
                 }}
-                options={[
-                  { value: "name", label: "Name" },
-                  { value: "type", label: "Type" },
-                ]}
-                placement="below"
-                size="sm"
-                value={sortKey}
-                width="100%"
-              />
-              <CheckboxInput
-                label="Folders Always on Top"
-                onChange={setFoldersAlwaysOnTop}
-                size="sm"
-                value={foldersAlwaysOnTop}
-              />
-            </div>
-          }
-        >
-          <button aria-label="Options" title="Options">
-            <Icon name="more" size={14} />
-          </button>
-        </Popover>
-        <button aria-label="Hide" onClick={onClose} title="Hide">
-          <Icon name="close" size={13} />
-        </button>
+                type="button"
+                className={cn(
+                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <Icon name="chevron" size={14} />
+              </Button>
+            }
+          />
+          <TooltipContent>Expand Selected</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                aria-label="Collapse All"
+                onClick={() => setExpanded(new Set())}
+                type="button"
+                className={cn(
+                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <Icon name="minus" size={14} />
+              </Button>
+            }
+          />
+          <TooltipContent>Collapse All</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <Popover
+            alignment="end"
+            hasAutoFocus
+            isOpen={optionsOpen}
+            label="Project View Options"
+            onOpenChange={setOptionsOpen}
+            placement="below"
+            width={286}
+            content={
+              <div className={tw.projectViewOptions}>
+                <strong>Behavior</strong>
+                <CheckboxInput
+                  label="Open Files with Single Click"
+                  onChange={setOpenFilesWithSingleClick}
+                  size="sm"
+                  value={openFilesWithSingleClick}
+                />
+                <CheckboxInput
+                  label="Always Select Opened File"
+                  onChange={setAlwaysSelectOpenedFile}
+                  size="sm"
+                  value={alwaysSelectOpenedFile}
+                />
+                <strong>Appearance</strong>
+                <CheckboxInput
+                  label="Scratches and Consoles"
+                  onChange={setShowScratches}
+                  size="sm"
+                  value={showScratches}
+                />
+                <CheckboxInput
+                  label="Compact Directories"
+                  onChange={setCompactDirectories}
+                  size="sm"
+                  value={compactDirectories}
+                />
+                <strong>Sort</strong>
+                <Selector
+                  isLabelHidden
+                  label="Sort project files"
+                  onChange={(value) => {
+                    if (isProjectSortKey(value)) setSortKey(value);
+                  }}
+                  options={[
+                    { value: "name", label: "Name" },
+                    { value: "type", label: "Type" },
+                  ]}
+                  placement="below"
+                  size="sm"
+                  value={sortKey}
+                  width="100%"
+                />
+                <CheckboxInput
+                  label="Folders Always on Top"
+                  onChange={setFoldersAlwaysOnTop}
+                  size="sm"
+                  value={foldersAlwaysOnTop}
+                />
+              </div>
+            }
+          >
+            <TooltipTrigger
+              render={
+                <Button
+                  data-slot="button"
+                  aria-label="Options"
+                  type="button"
+                  className={cn(
+                    "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <Icon name="more" size={14} />
+                </Button>
+              }
+            />
+          </Popover>
+          <TooltipContent>Options</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                aria-label="Hide"
+                onClick={onClose}
+                type="button"
+                className={cn(
+                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <Icon name="close" size={13} />
+              </Button>
+            }
+          />
+          <TooltipContent>Hide</TooltipContent>
+        </Tooltip>
       </header>
       <div aria-label="Project structure tree" className={tw.projectTree} role="tree">
-        <button
+        <Button
+          data-slot="button"
           aria-expanded={expanded.has("")}
           aria-level={1}
           aria-selected={selectedPath === ""}
-          className={tw.projectTreeRow}
           data-project-path=""
           onClick={() => {
             setSelectedPath("");
@@ -371,6 +463,11 @@ export function ProjectToolWindow({
           onKeyDown={(event) => onRowKeyDown(event)}
           role="treeitem"
           style={{ "--tree-depth": 0 } as React.CSSProperties}
+          type="button"
+          className={cn(
+            "grid min-h-0 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 whitespace-normal text-left aria-selected:bg-accent aria-current:bg-accent aria-expanded:text-foreground",
+            tw.projectTreeRow,
+          )}
         >
           <Icon className={expanded.has("") ? tw.rotated : undefined} name="chevron" size={12} />
           <Icon className={tw.projectFolderIcon} name="folder" size={15} />
@@ -379,87 +476,122 @@ export function ProjectToolWindow({
             <small>{repositoryPath}</small>
           </span>
           <small>{loading.has("") ? "Loading…" : ""}</small>
-        </button>
+        </Button>
         {rows.map(({ entry, depth }) => {
           const directory = entry.kind === "tree";
           const label = statusLabel(entry.status);
           return (
-            <button
-              aria-expanded={directory ? expanded.has(entry.path) : undefined}
-              aria-level={depth + 1}
-              aria-selected={selectedPath === entry.path}
-              className={tw.projectTreeRow}
-              data-project-path={entry.path}
-              key={entry.path}
-              onClick={() => {
-                setSelectedPath(entry.path);
-                if (directory) toggle(entry.path);
-                else if (openFilesWithSingleClick) onOpenFile(entry.path, false);
-              }}
-              onDoubleClick={() => !directory && onOpenFile(entry.path, true)}
-              onKeyDown={(event) => onRowKeyDown(event, entry)}
-              role="treeitem"
-              style={{ "--tree-depth": depth } as React.CSSProperties}
-              title={entry.path}
-            >
-              {directory ? (
-                <Icon
-                  className={expanded.has(entry.path) ? tw.rotated : undefined}
-                  name="chevron"
-                  size={12}
-                />
-              ) : (
-                <span className={tw.projectTreeIndent} />
-              )}
-              <Icon
-                className={directory ? tw.projectFolderIcon : tw.projectFileIcon}
-                name={directory ? "folder" : "file"}
-                size={15}
+            <Tooltip key={entry.path}>
+              <TooltipTrigger
+                render={
+                  <Button
+                    data-slot="button"
+                    aria-expanded={directory ? expanded.has(entry.path) : undefined}
+                    aria-level={depth + 1}
+                    aria-selected={selectedPath === entry.path}
+                    data-project-path={entry.path}
+                    onClick={() => {
+                      setSelectedPath(entry.path);
+                      if (directory) toggle(entry.path);
+                      else if (openFilesWithSingleClick) onOpenFile(entry.path, false);
+                    }}
+                    onDoubleClick={() => !directory && onOpenFile(entry.path, true)}
+                    onKeyDown={(event) => onRowKeyDown(event, entry)}
+                    role="treeitem"
+                    style={{ "--tree-depth": depth } as React.CSSProperties}
+                    type="button"
+                    className={cn(
+                      "grid min-h-0 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 whitespace-normal text-left aria-selected:bg-accent aria-current:bg-accent aria-expanded:text-foreground",
+                      tw.projectTreeRow,
+                    )}
+                  >
+                    {directory ? (
+                      <Icon
+                        className={expanded.has(entry.path) ? tw.rotated : undefined}
+                        name="chevron"
+                        size={12}
+                      />
+                    ) : (
+                      <span className={tw.projectTreeIndent} />
+                    )}
+                    <Icon
+                      className={directory ? tw.projectFolderIcon : tw.projectFileIcon}
+                      name={directory ? "folder" : "file"}
+                      size={15}
+                    />
+                    <span>{entry.name}</span>
+                    {loading.has(entry.path) && <small>Loading…</small>}
+                    {label && <em data-status={entry.status}>{label}</em>}
+                  </Button>
+                }
               />
-              <span>{entry.name}</span>
-              {loading.has(entry.path) && <small>Loading…</small>}
-              {label && <em data-status={entry.status}>{label}</em>}
-            </button>
+              <TooltipContent>{entry.path}</TooltipContent>
+            </Tooltip>
           );
         })}
         {error && <p className={tw.projectTreeError}>{error}</p>}
         {showScratches && (
-          <button
-            aria-expanded={scratchesExpanded}
-            aria-level={1}
-            aria-selected="false"
-            className={tw.projectScratches}
-            onClick={() => setScratchesExpanded((value) => !value)}
-            onDoubleClick={(event) => {
-              event.stopPropagation();
-              onNewScratch();
-            }}
-            role="treeitem"
-            title="Scratches and Consoles"
-          >
-            <Icon className={scratchesExpanded ? tw.rotated : undefined} name="chevron" size={12} />
-            <Icon name="folder" size={14} />
-            <span>Scratches and Consoles</span>
-          </button>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  data-slot="button"
+                  aria-expanded={scratchesExpanded}
+                  aria-level={1}
+                  aria-selected="false"
+                  onClick={() => setScratchesExpanded((value) => !value)}
+                  onDoubleClick={(event) => {
+                    event.stopPropagation();
+                    onNewScratch();
+                  }}
+                  role="treeitem"
+                  type="button"
+                  className={cn(
+                    "flex min-h-0 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 whitespace-normal text-left aria-selected:bg-accent aria-current:bg-accent aria-expanded:text-foreground",
+                    tw.projectScratches,
+                  )}
+                >
+                  <Icon
+                    className={scratchesExpanded ? tw.rotated : undefined}
+                    name="chevron"
+                    size={12}
+                  />
+                  <Icon name="folder" size={14} />
+                  <span>Scratches and Consoles</span>
+                </Button>
+              }
+            />
+            <TooltipContent>Scratches and Consoles</TooltipContent>
+          </Tooltip>
         )}
         {showScratches &&
           scratchesExpanded &&
           scratches.map((scratch) => (
-            <button
-              aria-level={2}
-              className={tw.projectScratchFile}
-              key={scratch.id}
-              onDoubleClick={() => onOpenScratch(scratch)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") onOpenScratch(scratch);
-              }}
-              role="treeitem"
-              title={scratch.name}
-            >
-              <span />
-              <Icon name="file" size={14} />
-              <span>{scratch.name}</span>
-            </button>
+            <Tooltip key={scratch.id}>
+              <TooltipTrigger
+                render={
+                  <Button
+                    data-slot="button"
+                    aria-level={2}
+                    onDoubleClick={() => onOpenScratch(scratch)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") onOpenScratch(scratch);
+                    }}
+                    role="treeitem"
+                    type="button"
+                    className={cn(
+                      "grid min-h-0 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 whitespace-normal text-left aria-selected:bg-accent aria-current:bg-accent aria-expanded:text-foreground",
+                      tw.projectScratchFile,
+                    )}
+                  >
+                    <span />
+                    <Icon name="file" size={14} />
+                    <span>{scratch.name}</span>
+                  </Button>
+                }
+              />
+              <TooltipContent>{scratch.name}</TooltipContent>
+            </Tooltip>
           ))}
       </div>
     </section>

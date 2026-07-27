@@ -1,3 +1,5 @@
+import { Button } from "@base-ui/react/button";
+import { Toggle } from "@base-ui/react/toggle";
 import { useMemo, useState, type KeyboardEvent } from "react";
 import type {
   BookmarkGroup,
@@ -5,12 +7,12 @@ import type {
   LineBookmark,
   ProjectBookmarks,
 } from "../domain/bookmarks";
+import { cn } from "../lib/utils";
 import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
 import { BookmarkGroupCreateDialog } from "./BookmarkGroupCreateDialog";
 import { Icon } from "./Icon";
-import { CheckboxInput } from "./ui";
-import { Popover } from "./ui";
+import { CheckboxInput, Popover, Tooltip, TooltipContent, TooltipTrigger } from "./ui";
 
 export function BookmarksToolWindow({
   state,
@@ -92,7 +94,8 @@ export function BookmarksToolWindow({
 
   const renderBookmark = (bookmark: LineBookmark) => (
     <div className={tw.bookmarkRow} key={bookmark.id}>
-      <button
+      <Button
+        data-slot="button"
         aria-selected={selectedBookmarkId === bookmark.id}
         data-bookmark-id={bookmark.id}
         onClick={() => {
@@ -104,30 +107,71 @@ export function BookmarksToolWindow({
         onDoubleClick={() => onOpenBookmark(bookmark)}
         onKeyDown={(event) => onRowKeyDown(event, bookmark)}
         role="treeitem"
+        type="button"
+        className={cn(
+          "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent aria-expanded:text-foreground",
+        )}
       >
         <span>{bookmark.mnemonic ?? <Icon name="bookmarkFilled" size={11} />}</span>
         <strong>{bookmark.description || bookmark.path.split("/").at(-1)}</strong>
         <small>
           {bookmark.path}, line {bookmark.line}
         </small>
-      </button>
-      <button aria-label="Move Up" onClick={() => onMoveBookmark(bookmark.id, -1)} title="Move Up">
-        <Icon name="chevron" size={11} />
-      </button>
-      <button
-        aria-label="Move Down"
-        onClick={() => onMoveBookmark(bookmark.id, 1)}
-        title="Move Down"
-      >
-        <Icon name="chevron" size={11} />
-      </button>
-      <button
-        aria-label="Delete Bookmark"
-        onClick={() => onDeleteBookmark(bookmark.id)}
-        title="Delete"
-      >
-        <Icon name="close" size={11} />
-      </button>
+      </Button>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Button
+              data-slot="button"
+              aria-label="Move Up"
+              onClick={() => onMoveBookmark(bookmark.id, -1)}
+              type="button"
+              className={cn(
+                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+              )}
+            >
+              <Icon name="chevron" size={11} />
+            </Button>
+          }
+        />
+        <TooltipContent>Move Up</TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Button
+              data-slot="button"
+              aria-label="Move Down"
+              onClick={() => onMoveBookmark(bookmark.id, 1)}
+              type="button"
+              className={cn(
+                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+              )}
+            >
+              <Icon name="chevron" size={11} />
+            </Button>
+          }
+        />
+        <TooltipContent>Move Down</TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Button
+              data-slot="button"
+              aria-label="Delete Bookmark"
+              onClick={() => onDeleteBookmark(bookmark.id)}
+              type="button"
+              className={cn(
+                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+              )}
+            >
+              <Icon name="close" size={11} />
+            </Button>
+          }
+        />
+        <TooltipContent>Delete</TooltipContent>
+      </Tooltip>
     </div>
   );
 
@@ -153,82 +197,178 @@ export function BookmarksToolWindow({
   return (
     <section aria-label="Bookmarks Tool Window" className={tw.bookmarksToolWindow}>
       <header className={tw.projectToolHeader}>
-        <button aria-label="Bookmarks" title="Bookmarks">
-          <strong>Bookmarks</strong>
-        </button>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                aria-label="Bookmarks"
+                type="button"
+                className={cn(
+                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <strong>Bookmarks</strong>
+              </Button>
+            }
+          />
+          <TooltipContent>Bookmarks</TooltipContent>
+        </Tooltip>
         <span />
-        <button
-          aria-label="Create Bookmark List"
-          onClick={() => setCreatingGroup(true)}
-          title="Create Bookmark List"
-        >
-          <Icon name="plus" size={14} />
-        </button>
-        <button
-          aria-label="Edit"
-          disabled={!selectedBookmark}
-          onClick={() => selectedBookmark && void editBookmark(selectedBookmark)}
-          title="Edit"
-        >
-          <Icon name="appearance" size={14} />
-        </button>
-        <button
-          aria-label="Expand All"
-          onClick={() => setCollapsedGroups(new Set())}
-          title="Expand All"
-        >
-          <Icon name="chevron" size={14} />
-        </button>
-        <button
-          aria-label="Collapse All"
-          onClick={() => setCollapsedGroups(new Set(state.groups.map((group) => group.id)))}
-          title="Collapse All"
-        >
-          <Icon name="minus" size={14} />
-        </button>
-        <Popover
-          alignment="end"
-          isOpen={optionsOpen}
-          label="Bookmarks View Options"
-          onOpenChange={setOptionsOpen}
-          placement="below"
-          width={260}
-          content={
-            <div className={tw.bookmarkOptions}>
-              <CheckboxInput
-                label="Group Line Bookmarks by File"
-                onChange={(groupLineBookmarks) =>
-                  onViewOptionsChange({ ...state.view, groupLineBookmarks })
-                }
-                size="sm"
-                value={state.view.groupLineBookmarks}
-              />
-              <CheckboxInput
-                label="Open Files in Preview Tab"
-                onChange={(openInPreviewTab) =>
-                  onViewOptionsChange({ ...state.view, openInPreviewTab })
-                }
-                size="sm"
-                value={state.view.openInPreviewTab}
-              />
-              <CheckboxInput
-                label="Autoscroll to Source"
-                onChange={(autoscrollToSource) =>
-                  onViewOptionsChange({ ...state.view, autoscrollToSource })
-                }
-                size="sm"
-                value={state.view.autoscrollToSource}
-              />
-            </div>
-          }
-        >
-          <button aria-label="Options" title="Options">
-            <Icon name="more" size={14} />
-          </button>
-        </Popover>
-        <button aria-label="Close Bookmarks" onClick={onClose} title="Close">
-          <Icon name="close" size={13} />
-        </button>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                aria-label="Create Bookmark List"
+                onClick={() => setCreatingGroup(true)}
+                type="button"
+                className={cn(
+                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <Icon name="plus" size={14} />
+              </Button>
+            }
+          />
+          <TooltipContent>Create Bookmark List</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                aria-label="Edit"
+                disabled={!selectedBookmark}
+                onClick={() => selectedBookmark && void editBookmark(selectedBookmark)}
+                type="button"
+                className={cn(
+                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <Icon name="appearance" size={14} />
+              </Button>
+            }
+          />
+          <TooltipContent>Edit</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                aria-label="Expand All"
+                onClick={() => setCollapsedGroups(new Set())}
+                type="button"
+                className={cn(
+                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <Icon name="chevron" size={14} />
+              </Button>
+            }
+          />
+          <TooltipContent>Expand All</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                aria-label="Collapse All"
+                onClick={() => setCollapsedGroups(new Set(state.groups.map((group) => group.id)))}
+                type="button"
+                className={cn(
+                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <Icon name="minus" size={14} />
+              </Button>
+            }
+          />
+          <TooltipContent>Collapse All</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <Popover
+            alignment="end"
+            isOpen={optionsOpen}
+            label="Bookmarks View Options"
+            onOpenChange={setOptionsOpen}
+            placement="below"
+            width={260}
+            content={
+              <div className={tw.bookmarkOptions}>
+                <CheckboxInput
+                  label="Group Line Bookmarks by File"
+                  onChange={(groupLineBookmarks) =>
+                    onViewOptionsChange({
+                      ...state.view,
+                      groupLineBookmarks,
+                    })
+                  }
+                  size="sm"
+                  value={state.view.groupLineBookmarks}
+                />
+                <CheckboxInput
+                  label="Open Files in Preview Tab"
+                  onChange={(openInPreviewTab) =>
+                    onViewOptionsChange({
+                      ...state.view,
+                      openInPreviewTab,
+                    })
+                  }
+                  size="sm"
+                  value={state.view.openInPreviewTab}
+                />
+                <CheckboxInput
+                  label="Autoscroll to Source"
+                  onChange={(autoscrollToSource) =>
+                    onViewOptionsChange({
+                      ...state.view,
+                      autoscrollToSource,
+                    })
+                  }
+                  size="sm"
+                  value={state.view.autoscrollToSource}
+                />
+              </div>
+            }
+          >
+            <TooltipTrigger
+              render={
+                <Button
+                  data-slot="button"
+                  aria-label="Options"
+                  type="button"
+                  className={cn(
+                    "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <Icon name="more" size={14} />
+                </Button>
+              }
+            />
+          </Popover>
+          <TooltipContent>Options</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                aria-label="Close Bookmarks"
+                onClick={onClose}
+                type="button"
+                className={cn(
+                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <Icon name="close" size={13} />
+              </Button>
+            }
+          />
+          <TooltipContent>Close</TooltipContent>
+        </Tooltip>
       </header>
       <div className={tw.bookmarksTree} role="tree">
         {state.groups.map((group) => {
@@ -236,7 +376,8 @@ export function BookmarksToolWindow({
           return (
             <section key={group.id} role="group">
               <div className={tw.bookmarkGroupRow}>
-                <button
+                <Button
+                  data-slot="button"
                   aria-expanded={!collapsed}
                   onClick={() =>
                     setCollapsedGroups((current) => {
@@ -246,35 +387,75 @@ export function BookmarksToolWindow({
                       return next;
                     })
                   }
+                  type="button"
+                  className={cn(
+                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                  )}
                 >
                   <Icon name="chevron" size={12} />
                   <Icon name="bookmarksList" size={14} />
                   <strong>{group.name}</strong>
                   {group.isDefault && <small>Default</small>}
-                </button>
-                <button
-                  aria-label={`Mark ${group.name} as Default`}
-                  aria-pressed={group.isDefault}
-                  onClick={() => onSetDefaultGroup(group.id)}
-                  title={group.isDefault ? "Unmark List as Default" : "Mark List as Default"}
-                >
-                  <Icon name="check" size={12} />
-                </button>
-                <button
-                  aria-label={`Rename ${group.name}`}
-                  onClick={() => void renameGroup(group)}
-                  title="Rename Bookmark List…"
-                >
-                  <Icon name="appearance" size={12} />
-                </button>
-                <button
-                  aria-label={`Delete ${group.name}`}
-                  disabled={state.groups.length <= 1}
-                  onClick={() => onDeleteGroup(group)}
-                  title="Delete Bookmark List"
-                >
-                  <Icon name="trash" size={12} />
-                </button>
+                </Button>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Toggle
+                        aria-label={
+                          group.isDefault ? "Unmark List as Default" : "Mark List as Default"
+                        }
+                        onPressedChange={() => onSetDefaultGroup(group.id)}
+                        pressed={group.isDefault}
+                        type="button"
+                        className={cn(
+                          "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                        )}
+                      >
+                        <Icon name="check" size={12} />
+                      </Toggle>
+                    }
+                  />
+                  <TooltipContent>
+                    {group.isDefault ? "Unmark List as Default" : "Mark List as Default"}
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        data-slot="button"
+                        aria-label={`Rename ${group.name}`}
+                        onClick={() => void renameGroup(group)}
+                        type="button"
+                        className={cn(
+                          "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                        )}
+                      >
+                        <Icon name="appearance" size={12} />
+                      </Button>
+                    }
+                  />
+                  <TooltipContent>Rename Bookmark List…</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        data-slot="button"
+                        aria-label={`Delete ${group.name}`}
+                        disabled={state.groups.length <= 1}
+                        onClick={() => onDeleteGroup(group)}
+                        type="button"
+                        className={cn(
+                          "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                        )}
+                      >
+                        <Icon name="trash" size={12} />
+                      </Button>
+                    }
+                  />
+                  <TooltipContent>Delete Bookmark List</TooltipContent>
+                </Tooltip>
               </div>
               {!collapsed && renderGroupBookmarks(group)}
             </section>

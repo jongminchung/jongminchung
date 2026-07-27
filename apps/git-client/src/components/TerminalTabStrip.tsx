@@ -1,13 +1,12 @@
+import { Button } from "@base-ui/react/button";
+import { Tabs } from "@base-ui/react/tabs";
 import { useRef, type MouseEvent } from "react";
-import {
-  terminalTabAfterClose,
-  terminalTabTarget,
-  type TerminalNavigationKey,
-} from "../domain/terminalActions";
+import { terminalTabAfterClose } from "../domain/terminalActions";
 import type { TerminalSessionSnapshot } from "../domain/TerminalService";
+import { cn } from "../lib/utils";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
-import { Button } from "./ui";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui";
 
 const TERMINAL_STATUS_CLASS = {
   starting: "bg-primary",
@@ -15,13 +14,6 @@ const TERMINAL_STATUS_CLASS = {
   exited: "bg-success",
   failed: "bg-destructive",
 } as const satisfies Readonly<Record<TerminalSessionSnapshot["status"], string>>;
-
-function tabNavigationKey(value: string): TerminalNavigationKey | null {
-  if (value === "ArrowLeft" || value === "ArrowRight" || value === "Home" || value === "End") {
-    return value;
-  }
-  return null;
-}
 
 export function TerminalTabStrip({
   sessions,
@@ -54,18 +46,9 @@ export function TerminalTabStrip({
   readonly onOpenOptions: (event: MouseEvent<HTMLButtonElement>) => void;
   readonly onOpenPredefined: (event: MouseEvent<HTMLButtonElement>) => void;
 }): React.ReactNode {
-  const tabs = useRef(new Map<string, HTMLButtonElement>());
+  const tabs = useRef(new Map<string, HTMLElement>());
   const newTab = useRef<HTMLButtonElement>(null);
   const keys = sessions.map((session) => session.key);
-
-  const activateFromKeyboard = (sessionKey: string, value: string): void => {
-    const navigationKey = tabNavigationKey(value);
-    if (navigationKey === null) return;
-    const target = terminalTabTarget(keys, sessionKey, navigationKey);
-    if (target === null) return;
-    onActivate(target);
-    window.requestAnimationFrame(() => tabs.current.get(target)?.focus());
-  };
 
   const close = async (sessionKey: string): Promise<void> => {
     const focusKey = terminalTabAfterClose(keys, sessionKey);
@@ -79,105 +62,181 @@ export function TerminalTabStrip({
   return (
     <div className={tw.terminalTabs}>
       <strong className={tw.terminalToolTitle}>Terminal</strong>
-      <div aria-label="Terminal tabs" className={tw.terminalTabList} role="tablist">
-        {sessions.map((session) => (
-          <div className={tw.terminalTabItem} key={session.key}>
-            <button
-              aria-label={session.title}
-              aria-selected={activeKey === session.key}
-              className={`${tw.terminalTab}${activeKey === session.key ? ` ${tw.activeTerminalTab}` : ""}`}
-              data-terminal-tab-key={session.key}
-              onClick={() => onActivate(session.key)}
-              onKeyDown={(event) => {
-                activateFromKeyboard(session.key, event.key);
-                if (tabNavigationKey(event.key) !== null) event.preventDefault();
-              }}
-              ref={(element) => {
-                if (element === null) tabs.current.delete(session.key);
-                else tabs.current.set(session.key, element);
-              }}
-              role="tab"
-              tabIndex={activeKey === session.key ? 0 : -1}
-              type="button"
-            >
-              <span
-                aria-hidden="true"
-                className={`${tw.terminalStatus} ${TERMINAL_STATUS_CLASS[session.status]}`}
-                title={session.error ?? session.status}
-              />
-              <span>{session.title}</span>
-            </button>
-            <Button
-              className={tw.terminalTabClose}
-              icon={<Icon name="close" size={11} />}
-              isIconOnly
-              label={`Close ${session.title}`}
-              onClick={() => void close(session.key)}
-              size="sm"
-              tooltip={`Close ${session.title}`}
-              variant="ghost"
-            />
+      <Tabs.Root
+        className="contents"
+        onValueChange={(value) => {
+          if (typeof value === "string") onActivate(value);
+        }}
+        value={activeKey}
+      >
+        <div className={cn("relative", tw.terminalTabList)}>
+          <Tabs.List
+            activateOnFocus
+            aria-label="Terminal tabs"
+            className="flex min-w-max items-stretch"
+          >
+            {sessions.map((session) => (
+              <div className={tw.terminalTabItem} key={session.key} role="presentation">
+                <Tabs.Tab
+                  aria-label={session.title}
+                  data-terminal-tab-key={session.key}
+                  ref={(element) => {
+                    if (element === null) tabs.current.delete(session.key);
+                    else tabs.current.set(session.key, element);
+                  }}
+                  type="button"
+                  value={session.key}
+                  className={cn(
+                    "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 text-muted-foreground data-active:bg-accent data-active:text-foreground",
+                    `${tw.terminalTab}${activeKey === session.key ? ` ${tw.activeTerminalTab}` : ""}`,
+                  )}
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`${tw.terminalStatus} ${TERMINAL_STATUS_CLASS[session.status]}`}
+                    title={session.error ?? session.status}
+                  />
+                  <span>{session.title}</span>
+                  <span aria-hidden="true" className="-ml-1.5 h-6 w-6 shrink-0" />
+                </Tabs.Tab>
+              </div>
+            ))}
+          </Tabs.List>
+          <div
+            aria-label="Terminal tab close actions"
+            className="pointer-events-none absolute inset-y-0 left-0 flex min-w-max items-stretch"
+            role="toolbar"
+          >
+            {sessions.map((session) => (
+              <div className="my-[3px] flex min-w-0 items-center" key={session.key}>
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "invisible inline-flex h-7 items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent px-2.5 text-xs text-muted-foreground [&_svg]:shrink-0",
+                    `${tw.terminalTab}${activeKey === session.key ? ` ${tw.activeTerminalTab}` : ""}`,
+                  )}
+                >
+                  <span
+                    className={`${tw.terminalStatus} ${TERMINAL_STATUS_CLASS[session.status]}`}
+                  />
+                  <span>{session.title}</span>
+                </span>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        data-slot="button"
+                        onClick={() => void close(session.key)}
+                        type="button"
+                        aria-label={`Close ${session.title}`}
+                        className={cn(
+                          "pointer-events-auto inline-flex h-6 min-w-5 shrink-0 aspect-square items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-transparent bg-transparent px-0 text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/55 active:bg-[var(--overlay-pressed)] disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                        )}
+                      >
+                        <Icon name="close" size={11} />
+                      </Button>
+                    }
+                  />
+                  <TooltipContent>{`Close ${session.title}`}</TooltipContent>
+                </Tooltip>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      </Tabs.Root>
       <div aria-label="Action Toolbar" className={tw.terminalToolbar} role="toolbar">
-        <Button
-          className={tw.terminalToolbarAction}
-          icon={<Icon name="plus" size={13} />}
-          isIconOnly
-          label="New Tab"
-          onClick={() => void onCreate()}
-          ref={newTab}
-          size="sm"
-          tooltip="New Tab"
-          variant="ghost"
-        />
-        <Button
-          className={tw.terminalToolbarAction}
-          icon={<Icon name="chevron" size={12} />}
-          isDisabled={!hasPredefinedSessions}
-          isIconOnly
-          label="New Predefined Session"
-          onClick={onOpenPredefined}
-          ref={predefinedButtonRef}
-          size="sm"
-          tooltip="New Predefined Session"
-          variant="ghost"
-        />
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                onClick={() => void onCreate()}
+                ref={newTab}
+                type="button"
+                aria-label="New Tab"
+                className={cn(
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-[29px] min-w-[29px] px-[7px] aspect-square px-0 rounded-none border-l border-y-0 border-r-0 border-border bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+                )}
+              >
+                <Icon name="plus" size={13} />
+              </Button>
+            }
+          />
+          <TooltipContent>New Tab</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                onClick={onOpenPredefined}
+                ref={predefinedButtonRef}
+                type="button"
+                aria-label="New Predefined Session"
+                disabled={!hasPredefinedSessions}
+                className={cn(
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-[29px] min-w-[29px] px-[7px] aspect-square px-0 rounded-none border-l border-y-0 border-r-0 border-border bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+                )}
+              >
+                <Icon name="chevron" size={12} />
+              </Button>
+            }
+          />
+          <TooltipContent>New Predefined Session</TooltipContent>
+        </Tooltip>
       </div>
       <div aria-label="Action Toolbar" className={tw.terminalToolbar} role="toolbar">
         {showAgents && (
           <Button
-            className={tw.terminalAgentToolbarAction}
-            endContent={<Icon name="chevron" size={10} />}
-            label="AI Agents"
+            data-slot="button"
             onClick={onOpenAgents}
             ref={agentsButtonRef}
-            size="sm"
-            variant="ghost"
-          />
+            type="button"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-[29px] min-w-[29px] px-[7px] rounded-none border-l border-y-0 border-r-0 border-border bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+            )}
+          >
+            AI Agents
+            <Icon name="chevron" size={10} />
+          </Button>
         )}
-        <Button
-          className={tw.terminalToolbarAction}
-          icon={<Icon name="more" size={13} />}
-          isIconOnly
-          label="Options"
-          onClick={onOpenOptions}
-          ref={optionsButtonRef}
-          size="sm"
-          tooltip="Options"
-          variant="ghost"
-        />
-        <Button
-          className={tw.terminalToolbarAction}
-          icon={<Icon name="chevron" size={12} />}
-          isIconOnly
-          label="Hide"
-          onClick={onHide}
-          size="sm"
-          tooltip="Hide"
-          variant="ghost"
-        />
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                onClick={onOpenOptions}
+                ref={optionsButtonRef}
+                type="button"
+                aria-label="Options"
+                className={cn(
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-[29px] min-w-[29px] px-[7px] aspect-square px-0 rounded-none border-l border-y-0 border-r-0 border-border bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+                )}
+              >
+                <Icon name="more" size={13} />
+              </Button>
+            }
+          />
+          <TooltipContent>Options</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                onClick={onHide}
+                type="button"
+                aria-label="Hide"
+                className={cn(
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-[29px] min-w-[29px] px-[7px] aspect-square px-0 rounded-none border-l border-y-0 border-r-0 border-border bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+                )}
+              >
+                <Icon name="chevron" size={12} />
+              </Button>
+            }
+          />
+          <TooltipContent>Hide</TooltipContent>
+        </Tooltip>
       </div>
     </div>
   );

@@ -1,4 +1,7 @@
+import { Button } from "@base-ui/react/button";
+import { Toggle } from "@base-ui/react/toggle";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { cn } from "../lib/utils";
 import type {
   GitLocalHistoryActivitiesPage,
   GitLocalHistoryActivity,
@@ -7,6 +10,7 @@ import type {
 } from "../shared/contracts/git-utility";
 import { useAppDialog } from "./AppDialog";
 import { Icon } from "./Icon";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui";
 
 interface LocalHistoryPanelProps {
   readonly initialPath?: string;
@@ -241,7 +245,9 @@ export function LocalHistoryPanel({
       className="local-history-activity"
       aria-busy={loading}
       aria-label="Local History"
-      style={{ gridTemplateColumns: `${leftWidth}px 4px minmax(360px, 1fr)` }}
+      style={{
+        gridTemplateColumns: `${leftWidth}px 4px minmax(360px, 1fr)`,
+      }}
     >
       <div className="local-history-left">
         <header className="local-history-searchbar">
@@ -253,25 +259,55 @@ export function LocalHistoryPanel({
             ref={searchInput}
             value={query}
           />
-          <button aria-label="Put Label" onClick={() => void putLabel()} title="Put Label…">
-            <Icon name="plus" size={13} />
-          </button>
-          <button
-            aria-label="View Options"
-            aria-pressed={showSystemEvents}
-            onClick={() => setShowSystemEvents((value) => !value)}
-            title="Show System Events"
-          >
-            <Icon name="more" size={13} />
-          </button>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  data-slot="button"
+                  aria-label="Put Label"
+                  onClick={() => void putLabel()}
+                  type="button"
+                  className={cn(
+                    "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <Icon name="plus" size={13} />
+                </Button>
+              }
+            />
+            <TooltipContent>Put Label…</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Toggle
+                  aria-label="Show System Events"
+                  onPressedChange={setShowSystemEvents}
+                  pressed={showSystemEvents}
+                  type="button"
+                  className={cn(
+                    "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <Icon name="more" size={13} />
+                </Toggle>
+              }
+            />
+            <TooltipContent>Show System Events</TooltipContent>
+          </Tooltip>
         </header>
         <div className="local-history-activities" role="listbox" aria-label="Activity History">
           {activities.map((activity) => (
-            <button
+            <Button
+              data-slot="button"
               aria-selected={activity.id === selectedId}
               key={activity.id}
               onClick={() => setSelectedId(activity.id)}
               role="option"
+              type="button"
+              className={cn(
+                "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+              )}
             >
               <Icon name={activity.label === null ? "history" : "bookmark"} size={14} />
               <span>
@@ -281,45 +317,91 @@ export function LocalHistoryPanel({
                   {activity.changeCount === 1 ? "" : "s"}
                 </small>
               </span>
-            </button>
+            </Button>
           ))}
           {!loading && activities.length === 0 && (
             <div className="local-history-empty">No activity in {repositoryName} detected</div>
           )}
           {nextCursor !== null && (
-            <button className="local-history-load-more" onClick={() => void loadMore()}>
+            <Button
+              data-slot="button"
+              onClick={() => void loadMore()}
+              type="button"
+              className={cn(
+                "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+                "local-history-load-more",
+              )}
+            >
               Load More
-            </button>
+            </Button>
           )}
         </div>
         <div className="local-history-activity-actions">
-          <button disabled={selectedId === null} onClick={() => void revert(true)}>
+          <Button
+            data-slot="button"
+            disabled={selectedId === null}
+            onClick={() => void revert(true)}
+            type="button"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+            )}
+          >
             Revert Selected and Later Changes
-          </button>
-          <button disabled={selectedId === null} onClick={() => void createPatch()}>
+          </Button>
+          <Button
+            data-slot="button"
+            disabled={selectedId === null}
+            onClick={() => void createPatch()}
+            type="button"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+            )}
+          >
             Create Patch…
-          </button>
+          </Button>
         </div>
         <header className="local-history-changes-toolbar">
           <strong>Changes</strong>
-          <button
-            aria-pressed={groupByDirectory}
-            onClick={() => setGroupByDirectory((value) => !value)}
-            title="Group By Directory"
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Toggle
+                  onPressedChange={setGroupByDirectory}
+                  pressed={groupByDirectory}
+                  type="button"
+                  className={cn(
+                    "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  Group By
+                </Toggle>
+              }
+            />
+            <TooltipContent>Group By Directory</TooltipContent>
+          </Tooltip>
+          <Toggle
+            onPressedChange={setShowDiff}
+            pressed={showDiff}
+            type="button"
+            className={cn(
+              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
+            )}
           >
-            Group By
-          </button>
-          <button aria-pressed={showDiff} onClick={() => setShowDiff((value) => !value)}>
             Show Diff
-          </button>
+          </Toggle>
         </header>
         <div className="local-history-changes" role="tree" aria-label="Changes">
           {detail?.changes.map((change) => (
-            <button
+            <Button
+              data-slot="button"
               aria-selected={change.path === selectedPath}
               key={`${change.kind}:${change.path}`}
               onClick={() => setSelectedPath(change.path)}
               role="treeitem"
+              type="button"
+              className={cn(
+                "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent aria-expanded:text-foreground",
+              )}
             >
               <Icon
                 name={change.contentAvailability === "unavailable" ? "warning" : "file"}
@@ -331,7 +413,7 @@ export function LocalHistoryPanel({
                   : change.path.slice(change.path.lastIndexOf("/") + 1)}
               </span>
               <small>{changeLabel(change.kind)}</small>
-            </button>
+            </Button>
           ))}
           {detail !== null && detail.changes.length === 0 && (
             <div className="local-history-empty">Label has no file changes</div>
@@ -351,29 +433,58 @@ export function LocalHistoryPanel({
       />
       <main className="local-history-diff">
         <header>
-          <button
-            disabled={selectedChangeIndex <= 0}
-            onClick={() => navigateChange(-1)}
-            title="Previous file"
-          >
-            ↑
-          </button>
-          <button
-            disabled={detail === null || selectedChangeIndex >= detail.changes.length - 1}
-            onClick={() => navigateChange(1)}
-            title="Next file"
-          >
-            ↓
-          </button>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  data-slot="button"
+                  aria-label="Previous file"
+                  disabled={selectedChangeIndex <= 0}
+                  onClick={() => navigateChange(-1)}
+                  type="button"
+                  className={cn(
+                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                  )}
+                >
+                  ↑
+                </Button>
+              }
+            />
+            <TooltipContent>Previous file</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  data-slot="button"
+                  aria-label="Next file"
+                  disabled={detail === null || selectedChangeIndex >= detail.changes.length - 1}
+                  onClick={() => navigateChange(1)}
+                  type="button"
+                  className={cn(
+                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                  )}
+                >
+                  ↓
+                </Button>
+              }
+            />
+            <TooltipContent>Next file</TooltipContent>
+          </Tooltip>
           <strong>{selectedPath || "No files"}</strong>
-          <button
+          <Button
+            data-slot="button"
             disabled={
               selectedChange === null || selectedChange.contentAvailability === "unavailable"
             }
             onClick={() => void revert(false)}
+            type="button"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+            )}
           >
             Revert Selection
-          </button>
+          </Button>
         </header>
         {!showDiff ? (
           <div className="local-history-empty">Nothing to show</div>

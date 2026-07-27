@@ -1,8 +1,8 @@
+import { Button } from "@base-ui/react/button";
+import { Menu } from "@base-ui/react/menu";
 import { Popover as PopoverPrimitive } from "@base-ui/react/popover";
-import { useCallback, useRef, useState } from "react";
 import { isValidElement } from "react";
-import type { CSSProperties, HTMLAttributes, ReactNode } from "react";
-import { createPortal } from "react-dom";
+import type { ComponentProps, ReactNode } from "react";
 import { cn } from "../../lib/utils";
 
 interface PopoverProps {
@@ -35,7 +35,19 @@ export function Popover({
   width,
   hasAutoFocus = false,
 }: PopoverProps): ReactNode {
-  const trigger = isValidElement(children) ? children : <button type="button">{children}</button>;
+  const trigger = isValidElement(children) ? (
+    children
+  ) : (
+    <Button
+      data-slot="button"
+      type="button"
+      className={cn(
+        "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+      )}
+    >
+      {children}
+    </Button>
+  );
   return (
     <PopoverPrimitive.Root onOpenChange={onOpenChange} open={isOpen}>
       <PopoverPrimitive.Trigger render={trigger} />
@@ -60,68 +72,10 @@ export function Popover({
   );
 }
 
-interface LayerOptions {
-  readonly mode?: "fixed" | "absolute";
-  readonly lightDismiss?: boolean;
-  readonly onHide?: () => void;
-}
-
-interface LayerPosition {
-  readonly x: number;
-  readonly y: number;
-}
-
-interface LayerController {
-  readonly isOpen: boolean;
-  readonly show: () => void;
-  readonly hide: () => void;
-  readonly render: (content: ReactNode, position: LayerPosition) => ReactNode;
-}
-
-export function useLayer({
-  mode = "fixed",
-  lightDismiss = false,
-  onHide,
-}: LayerOptions): LayerController {
-  const [isOpen, setOpen] = useState(false);
-  const onHideRef = useRef(onHide);
-  onHideRef.current = onHide;
-  const show = useCallback((): void => setOpen(true), []);
-  const hide = useCallback((): void => {
-    setOpen(false);
-    onHideRef.current?.();
-  }, []);
-  const render = useCallback(
-    (content: ReactNode, position: LayerPosition): ReactNode => {
-      if (!isOpen) return null;
-      return createPortal(
-        <div
-          className="fixed inset-0 z-[130]"
-          onMouseDown={(event) => {
-            if (lightDismiss && event.target === event.currentTarget) hide();
-          }}
-        >
-          <div
-            style={
-              {
-                left: position.x,
-                position: mode,
-                top: position.y,
-              } as CSSProperties
-            }
-          >
-            {content}
-          </div>
-        </div>,
-        document.body,
-      );
-    },
-    [hide, isOpen, lightDismiss, mode],
-  );
-  return { hide, isOpen, render, show };
-}
-
-interface DropdownMenuItemProps extends Omit<HTMLAttributes<HTMLButtonElement>, "onClick"> {
+interface DropdownMenuItemProps extends Omit<
+  ComponentProps<typeof Menu.Item>,
+  "children" | "disabled" | "label" | "onClick"
+> {
   readonly label?: string;
   readonly icon?: ReactNode;
   readonly endContent?: ReactNode;
@@ -139,21 +93,19 @@ export function DropdownMenuItem({
   ...props
 }: DropdownMenuItemProps): ReactNode {
   return (
-    <button
-      aria-disabled={isDisabled || undefined}
+    <Menu.Item
+      disabled={isDisabled}
+      label={label}
+      onClick={onClick}
+      {...props}
       className={cn(
-        "grid min-h-7 w-full grid-cols-[18px_minmax(0,1fr)_auto] items-center gap-2 rounded-md px-2 text-left text-xs outline-none hover:bg-accent focus:bg-accent focus-visible:ring-2 focus-visible:ring-ring/45 aria-disabled:pointer-events-none aria-disabled:opacity-45",
+        "grid min-h-7 w-full cursor-default grid-cols-[18px_minmax(0,1fr)_auto] items-center gap-2 rounded-md px-2 text-left text-xs text-popover-foreground outline-none transition-colors data-disabled:pointer-events-none data-disabled:opacity-45 data-highlighted:bg-accent data-highlighted:text-accent-foreground",
         className,
       )}
-      onClick={isDisabled ? undefined : onClick}
-      role="menuitem"
-      tabIndex={-1}
-      type="button"
-      {...props}
     >
       <span className="text-muted-foreground">{icon}</span>
       <span>{label}</span>
       <span className="text-[10px] text-muted-foreground">{endContent}</span>
-    </button>
+    </Menu.Item>
   );
 }

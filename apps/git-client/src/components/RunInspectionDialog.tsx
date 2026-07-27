@@ -1,8 +1,9 @@
+import { Button } from "@base-ui/react/button";
 import { useMemo, useState } from "react";
 import { CODE_INSPECTIONS, type CodeInspectionId } from "../domain/codeAnalysis";
+import { cn } from "../lib/utils";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
-import { Button } from "./ui";
 import { Dialog, DialogHeader } from "./ui";
 import { List, ListItem } from "./ui";
 import { TextInput } from "./ui";
@@ -64,7 +65,16 @@ export function RunInspectionDialog({
           ))}
         </List>
         <footer>
-          <Button label="Cancel" onClick={onClose} variant="secondary" />
+          <Button
+            data-slot="button"
+            onClick={onClose}
+            type="button"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
+            )}
+          >
+            Cancel
+          </Button>
         </footer>
       </section>
     </Dialog>

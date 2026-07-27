@@ -1,6 +1,8 @@
+import { Button } from "@base-ui/react/button";
 import { useEffect, useMemo, useState } from "react";
 import { createHostingBridge } from "../bridge/createHostingBridge";
 import type { FileChange } from "../domain/types";
+import { cn } from "../lib/utils";
 import type {
   HostingAccount,
   HostingNamespace,
@@ -10,12 +12,12 @@ import { tw } from "../styles/tailwind";
 import { loadHostingAccounts } from "./hosting-persistence";
 import { Icon } from "./Icon";
 import { ShareInitialCommitDialog, type InitialCommitSelection } from "./ShareInitialCommitDialog";
-import { Button } from "./ui";
 import { CheckboxInput } from "./ui";
 import { Dialog, DialogHeader } from "./ui";
 import { Selector } from "./ui";
 import { TextArea } from "./ui";
 import { TextInput } from "./ui";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui";
 
 interface CreatedRepository {
   readonly project: string;
@@ -131,7 +133,9 @@ export function ShareProjectDialog({
       setNamespaceLoading(true);
       setNamespaceError(null);
       try {
-        const response = await bridge.execute(accountId, { kind: "listNamespaces" });
+        const response = await bridge.execute(accountId, {
+          kind: "listNamespaces",
+        });
         if (!active) return;
         if (response.kind !== "namespaces") {
           throw new Error(`${service} did not return project namespaces.`);
@@ -175,7 +179,9 @@ export function ShareProjectDialog({
       setAccountInformationLoading(true);
       setAccountInformationError(null);
       try {
-        const response = await bridge.execute(accountId, { kind: "listShareRepositories" });
+        const response = await bridge.execute(accountId, {
+          kind: "listShareRepositories",
+        });
         if (!active) return;
         if (response.kind !== "shareRepositories") {
           throw new Error("GitHub did not return repository information.");
@@ -371,7 +377,16 @@ export function ShareProjectDialog({
                 value={accountId}
                 width="100%"
               />
-              <Button label="Add account" onClick={onManageAccounts} variant="secondary" />
+              <Button
+                data-slot="button"
+                onClick={onManageAccounts}
+                type="button"
+                className={cn(
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
+                )}
+              >
+                Add account
+              </Button>
             </div>
           )}
           {provider === "gitLab" && (
@@ -391,20 +406,35 @@ export function ShareProjectDialog({
                 }))}
                 placeholder="No namespaces loaded"
                 status={
-                  namespaceError === null ? undefined : { type: "error", message: namespaceError }
+                  namespaceError === null
+                    ? undefined
+                    : {
+                        type: "error",
+                        message: namespaceError,
+                      }
                 }
                 value={selectedNamespaceKey}
                 width="100%"
               />
-              <Button
-                icon={<Icon name="refresh" size={14} />}
-                isDisabled={namespaceLoading || busy || created !== null || !accountId}
-                isIconOnly
-                label="Refresh namespaces"
-                onClick={() => setNamespaceRefreshToken((value) => value + 1)}
-                tooltip="Refresh namespaces"
-                variant="secondary"
-              />
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      data-slot="button"
+                      onClick={() => setNamespaceRefreshToken((value) => value + 1)}
+                      type="button"
+                      aria-label="Refresh namespaces"
+                      disabled={namespaceLoading || busy || created !== null || !accountId}
+                      className={cn(
+                        "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 aspect-square px-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
+                      )}
+                    >
+                      <Icon name="refresh" size={14} />
+                    </Button>
+                  }
+                />
+                <TooltipContent>Refresh namespaces</TooltipContent>
+              </Tooltip>
             </div>
           )}
           <div className={tw.shareProjectCoordinates}>
@@ -416,10 +446,16 @@ export function ShareProjectDialog({
               onChange={setRepositoryName}
               status={
                 remoteRepositoryExists
-                  ? { type: "error", message: "Repository with selected name already exists." }
+                  ? {
+                      type: "error",
+                      message: "Repository with selected name already exists.",
+                    }
                   : repositoryCheckError === null
                     ? undefined
-                    : { type: "error", message: repositoryCheckError }
+                    : {
+                        type: "error",
+                        message: repositoryCheckError,
+                      }
               }
               value={repositoryName}
               width="100%"
@@ -474,7 +510,16 @@ export function ShareProjectDialog({
                 width="100%"
               />
               {accounts.length === 0 && (
-                <Button label="Add account" onClick={onManageAccounts} variant="secondary" />
+                <Button
+                  data-slot="button"
+                  onClick={onManageAccounts}
+                  type="button"
+                  className={cn(
+                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
+                  )}
+                >
+                  Add account
+                </Button>
               )}
             </div>
           )}
@@ -487,9 +532,21 @@ export function ShareProjectDialog({
           {error && <p role="alert">{error}</p>}
         </main>
         <footer>
-          <Button label="Cancel" onClick={onClose} variant="secondary" />
           <Button
-            isDisabled={
+            data-slot="button"
+            onClick={onClose}
+            type="button"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
+            )}
+          >
+            Cancel
+          </Button>
+          <Button
+            data-slot="button"
+            onClick={() => void share()}
+            type="button"
+            disabled={
               loading ||
               namespaceLoading ||
               accountInformationLoading ||
@@ -501,10 +558,12 @@ export function ShareProjectDialog({
               repositoryCheckError !== null ||
               remoteRepositoryExists
             }
-            label={busy ? "Sharing…" : created ? "Retry Local Setup" : "Share"}
-            onClick={() => void share()}
-            variant="primary"
-          />
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-primary bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 active:bg-primary/80",
+            )}
+          >
+            {busy ? "Sharing…" : created ? "Retry Local Setup" : "Share"}
+          </Button>
         </footer>
       </section>
     </Dialog>

@@ -19,12 +19,14 @@ export function CommandPaletteInput({
     <label className="flex h-12 items-center gap-2 border-b border-border px-3">
       <Search aria-hidden className="size-4 text-muted-foreground" />
       <input
+        aria-autocomplete="list"
         autoFocus
         className={cn(
           "min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground",
           className,
         )}
         onChange={(event) => onValueChange(event.target.value)}
+        role="combobox"
         value={value}
         {...props}
       />

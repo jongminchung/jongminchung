@@ -1,8 +1,11 @@
+import { Button } from "@base-ui/react/button";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { memo, useMemo, useRef, useState } from "react";
 import type { Ref, RefKind } from "../domain/types";
+import { cn } from "../lib/utils";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui";
 
 type TreeRow =
   | {
@@ -56,7 +59,12 @@ export const BranchTree = memo(function BranchTree({
         ? []
         : group.map((ref) => ({ type: "ref" as const, ref }));
       return [
-        { type: "group", key: kind, label: groupLabels[kind], count: group.length },
+        {
+          type: "group",
+          key: kind,
+          label: groupLabels[kind],
+          count: group.length,
+        },
         ...children,
       ];
     });
@@ -79,10 +87,25 @@ export const BranchTree = memo(function BranchTree({
   if (compact) {
     return (
       <aside className={tw.branchRail} aria-label="Branches and tags">
-        <button aria-label="Branches" onClick={onActivate} title="Branches">
-          <Icon name="chevron" size={10} />
-          <span>Branches</span>
-        </button>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                aria-label="Branches"
+                onClick={onActivate}
+                type="button"
+                className={cn(
+                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-[31px] w-[30px] rounded-none p-0 text-muted-foreground hover:text-foreground aria-pressed:text-primary",
+                )}
+              >
+                <Icon name="chevron" size={10} />
+                <span>Branches</span>
+              </Button>
+            }
+          />
+          <TooltipContent>Branches</TooltipContent>
+        </Tooltip>
       </aside>
     );
   }
@@ -91,9 +114,25 @@ export const BranchTree = memo(function BranchTree({
     <aside className={tw.branchPane} aria-label="Branches and tags">
       <div className={tw.paneTitle}>
         <span>Repositories</span>
-        <button className={tw.iconButton} onClick={onAdd} title="Add repository">
-          <Icon name="plus" size={14} />
-        </button>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                aria-label="Add repository"
+                onClick={onAdd}
+                type="button"
+                className={cn(
+                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  tw.iconButton,
+                )}
+              >
+                <Icon name="plus" size={14} />
+              </Button>
+            }
+          />
+          <TooltipContent>Add repository</TooltipContent>
+        </Tooltip>
       </div>
       <div className={tw.treeSearch}>
         <Icon name="search" size={14} />
@@ -110,7 +149,12 @@ export const BranchTree = memo(function BranchTree({
         <span className={tw.muted}>(Current Branch)</span>
       </div>
       <div className={tw.virtualTree} ref={parentRef}>
-        <div style={{ height: virtualizer.getTotalSize(), position: "relative" }}>
+        <div
+          style={{
+            height: virtualizer.getTotalSize(),
+            position: "relative",
+          }}
+        >
           {virtualizer.getVirtualItems().map((item) => {
             const row = rows[item.index];
             if (!row) return null;
@@ -118,10 +162,20 @@ export const BranchTree = memo(function BranchTree({
               <div
                 className={tw.treeVirtualRow}
                 key={row.type === "group" ? row.key : row.ref.name}
-                style={{ transform: `translateY(${item.start}px)` }}
+                style={{
+                  transform: `translateY(${item.start}px)`,
+                }}
               >
                 {row.type === "group" ? (
-                  <button className={tw.treeGroup} onClick={() => toggle(row.key)}>
+                  <Button
+                    data-slot="button"
+                    onClick={() => toggle(row.key)}
+                    type="button"
+                    className={cn(
+                      "flex min-h-0 shrink-0 whitespace-nowrap rounded-sm border border-transparent bg-transparent text-xs font-medium text-muted-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                      tw.treeGroup,
+                    )}
+                  >
                     <Icon
                       className={collapsed.has(row.key) ? undefined : tw.rotated}
                       name="chevron"
@@ -135,27 +189,40 @@ export const BranchTree = memo(function BranchTree({
                     />
                     <span>{row.label}</span>
                     <small>{row.count}</small>
-                  </button>
+                  </Button>
                 ) : (
-                  <button
-                    className={`${tw.refRow} ${selected === row.ref.name ? tw.selected : ""}`}
-                    onClick={() => onSelect(row.ref)}
-                    title={[row.ref.subject, row.ref.tracking].filter(Boolean).join(" · ")}
-                  >
-                    <span className={tw.refIndent} />
-                    {row.ref.favorite ? (
-                      <Icon className={tw.favorite} name="star" size={13} />
-                    ) : (
-                      <Icon name="branch" size={13} />
-                    )}
-                    <span className={tw.ellipsis}>{row.ref.shortName}</span>
-                    {trackingLabel(row.ref.tracking) && (
-                      <small className="text-[10px] text-secondary">
-                        {trackingLabel(row.ref.tracking)}
-                      </small>
-                    )}
-                    {row.ref.current && <span className={tw.headPill}>HEAD</span>}
-                  </button>
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          data-slot="button"
+                          onClick={() => onSelect(row.ref)}
+                          type="button"
+                          className={cn(
+                            "flex min-h-0 shrink-0 whitespace-nowrap rounded-sm border border-transparent bg-transparent text-xs font-medium text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                            `${tw.refRow} ${selected === row.ref.name ? tw.selected : ""}`,
+                          )}
+                        >
+                          <span className={tw.refIndent} />
+                          {row.ref.favorite ? (
+                            <Icon className={tw.favorite} name="star" size={13} />
+                          ) : (
+                            <Icon name="branch" size={13} />
+                          )}
+                          <span className={tw.ellipsis}>{row.ref.shortName}</span>
+                          {trackingLabel(row.ref.tracking) && (
+                            <small className="text-[10px] text-muted-foreground">
+                              {trackingLabel(row.ref.tracking)}
+                            </small>
+                          )}
+                          {row.ref.current && <span className={tw.headPill}>HEAD</span>}
+                        </Button>
+                      }
+                    />
+                    <TooltipContent>
+                      {[row.ref.subject, row.ref.tracking].filter(Boolean).join(" · ")}
+                    </TooltipContent>
+                  </Tooltip>
                 )}
               </div>
             );

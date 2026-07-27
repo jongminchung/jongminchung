@@ -1,5 +1,7 @@
+import { Button } from "@base-ui/react/button";
 import { toVoidHandler } from "../domain/toVoidHandler";
 import type { Ref } from "../domain/types";
+import { cn } from "../lib/utils";
 import type {
   BranchComparison,
   GitConfig,
@@ -75,13 +77,18 @@ export function RepositoryToolDialog({
           <Icon name={presentation.icon} size={16} />
           <strong>{presentation.title}</strong>
           <span />
-          <button
+          <Button
+            data-slot="button"
             aria-label={`Close ${presentation.title}`}
-            className={tw.iconButton}
             onClick={onClose}
+            type="button"
+            className={cn(
+              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+              tw.iconButton,
+            )}
           >
             <Icon name="close" size={15} />
-          </button>
+          </Button>
         </header>
         <main>
           {kind === "refs" ? (
@@ -99,7 +106,8 @@ export function RepositoryToolDialog({
               <div className={tw.managementToolbar}>
                 <strong>Remotes</strong>
                 <span />
-                <button
+                <Button
+                  data-slot="button"
                   onClick={toVoidHandler(async () => {
                     const name = await dialog.input({
                       title: "Add remote",
@@ -119,9 +127,13 @@ export function RepositoryToolDialog({
                       url,
                     });
                   })}
+                  type="button"
+                  className={cn(
+                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                  )}
                 >
                   <Icon name="plus" size={13} /> Add remote
-                </button>
+                </Button>
               </div>
               {remotes.map((remote) => (
                 <article className={tw.managementRow} key={remote.name}>
@@ -131,7 +143,8 @@ export function RepositoryToolDialog({
                     <small>Fetch · {remote.fetchUrl}</small>
                     <small>Push · {remote.pushUrl}</small>
                   </div>
-                  <button
+                  <Button
+                    data-slot="button"
                     onClick={toVoidHandler(async () => {
                       const url = await dialog.input({
                         title: `Edit ${remote.name}`,
@@ -145,10 +158,15 @@ export function RepositoryToolDialog({
                           url,
                         });
                     })}
+                    type="button"
+                    className={cn(
+                      "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                    )}
                   >
                     Edit URL
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    data-slot="button"
                     onClick={toVoidHandler(async () => {
                       const accepted = await dialog.confirm({
                         title: `Remove remote “${remote.name}”?`,
@@ -163,9 +181,13 @@ export function RepositoryToolDialog({
                           name: remote.name,
                         });
                     })}
+                    type="button"
+                    className={cn(
+                      "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                    )}
                   >
                     Remove
-                  </button>
+                  </Button>
                 </article>
               ))}
             </>
@@ -174,7 +196,8 @@ export function RepositoryToolDialog({
               <div className={tw.managementToolbar}>
                 <strong>Worktrees</strong>
                 <span />
-                <button
+                <Button
+                  data-slot="button"
                   onClick={toVoidHandler(async () => {
                     const path = await dialog.input({
                       title: "Add worktree",
@@ -200,9 +223,13 @@ export function RepositoryToolDialog({
                       startPoint,
                     });
                   })}
+                  type="button"
+                  className={cn(
+                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                  )}
                 >
                   <Icon name="plus" size={13} /> Add worktree
-                </button>
+                </Button>
               </div>
               {worktrees.map((worktree) => (
                 <article className={tw.managementRow} key={worktree.path}>
@@ -219,8 +246,18 @@ export function RepositoryToolDialog({
                       {worktree.isMain ? " · main worktree" : ""}
                     </small>
                   </div>
-                  <button onClick={() => void onOpenWorktree(worktree.path)}>Open</button>
-                  <button
+                  <Button
+                    data-slot="button"
+                    onClick={() => void onOpenWorktree(worktree.path)}
+                    type="button"
+                    className={cn(
+                      "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                    )}
+                  >
+                    Open
+                  </Button>
+                  <Button
+                    data-slot="button"
                     disabled={worktree.isMain}
                     onClick={toVoidHandler(async () => {
                       const accepted = await dialog.confirm({
@@ -239,9 +276,13 @@ export function RepositoryToolDialog({
                         });
                       }
                     })}
+                    type="button"
+                    className={cn(
+                      "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                    )}
                   >
                     Remove
-                  </button>
+                  </Button>
                 </article>
               ))}
             </>

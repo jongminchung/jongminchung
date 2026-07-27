@@ -1,4 +1,3 @@
-export { Button, buttonVariants } from "./button";
 export { CommandPaletteInput, CommandPaletteItem, CommandPaletteList } from "./command";
 export {
   EmptyState,
@@ -9,10 +8,9 @@ export {
   SegmentedControl,
   SegmentedControlItem,
   Spinner,
-  Tab,
-  TabList,
-  ToggleButton,
 } from "./collections";
-export { Dialog, DialogHeader } from "./dialog";
+export { Dialog, DialogBody, DialogFooter, DialogHeader } from "./dialog";
+export { Notice } from "./notice";
 export { CheckboxInput, FieldStatus, Selector, TextArea, TextInput } from "./form-controls";
-export { DropdownMenuItem, Popover, useLayer } from "./overlays";
+export { DropdownMenuItem, Popover } from "./overlays";
+export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";

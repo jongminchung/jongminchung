@@ -1,3 +1,4 @@
+import { Button } from "@base-ui/react/button";
 import { useEffect, useMemo, useState } from "react";
 import { sanitizeGitError } from "../domain/gitActivity";
 import {
@@ -5,6 +6,7 @@ import {
   moveHistoryPlanEntry,
   prepareHistoryPlan,
 } from "../domain/historyRewrite";
+import { cn } from "../lib/utils";
 import type {
   GitOperation,
   HistoryRewritePreview,
@@ -13,8 +15,7 @@ import type {
 } from "../shared/contracts/model";
 import { useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
-import { Button } from "./ui";
-import { Dialog, DialogHeader } from "./ui";
+import { Dialog, DialogFooter, DialogHeader, Notice } from "./ui";
 
 const ACTIONS: readonly RebasePlanAction[] = ["pick", "reword", "edit", "squash", "fixup", "drop"];
 
@@ -167,15 +168,18 @@ export function HistoryRewriteWorkspace({
           title="History Rewrite"
         />
         {loading ? (
-          <div className="flex items-center justify-center gap-2 text-secondary" role="status">
+          <div
+            className="flex items-center justify-center gap-2 text-muted-foreground"
+            role="status"
+          >
             <span className="activitySpinner" />
             Inspecting branch history…
           </div>
         ) : completed && preview ? (
-          <div className="m-auto grid max-w-xl gap-4 rounded-xl border border-border bg-card p-6 text-center">
+          <div className="m-auto grid max-w-xl gap-4 rounded-lg border border-border bg-card p-6 text-center">
             <Icon name="check" size={32} />
             <h2 className="m-0">History rewrite completed</h2>
-            <p className="m-0 text-secondary">
+            <p className="m-0 text-muted-foreground">
               {preview.branch} was rewritten locally. A Recovery entry was recorded before the
               operation.
             </p>
@@ -189,15 +193,33 @@ export function HistoryRewriteWorkspace({
               </p>
             )}
             <div className="flex justify-center gap-2">
-              <Button label="Back to history" onClick={onClose} size="sm" variant="secondary" />
-              <Button label="Push…" onClick={onOpenPush} size="sm" variant="primary" />
+              <Button
+                data-slot="button"
+                onClick={onClose}
+                type="button"
+                className={cn(
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
+                )}
+              >
+                Back to history
+              </Button>
+              <Button
+                data-slot="button"
+                onClick={onOpenPush}
+                type="button"
+                className={cn(
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-primary bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 active:bg-primary/80",
+                )}
+              >
+                Push…
+              </Button>
             </div>
           </div>
         ) : preview ? (
           <div className="grid min-h-0 grid-cols-[minmax(0,1fr)_320px] max-[900px]:grid-cols-1 max-[900px]:grid-rows-[minmax(0,1fr)_auto]">
             <div className="min-h-0 overflow-auto border-r border-border max-[900px]:border-b max-[900px]:border-r-0">
               <table className="w-full border-collapse text-left text-xs">
-                <thead className="sticky top-0 z-10 bg-card text-secondary">
+                <thead className="sticky top-0 z-10 bg-card text-muted-foreground">
                   <tr>
                     <th className="w-8 p-2" />
                     <th className="w-28 p-2">Action</th>
@@ -218,7 +240,7 @@ export function HistoryRewriteWorkspace({
                       onDragStart={() => setDraggedOid(entry.oid)}
                       onDrop={() => dropOn(entry.oid)}
                     >
-                      <td className="cursor-grab p-2 text-secondary">
+                      <td className="cursor-grab p-2 text-muted-foreground">
                         <Icon name="more" size={14} />
                       </td>
                       <td className="p-2">
@@ -271,7 +293,7 @@ export function HistoryRewriteWorkspace({
                             </span>
                           )}
                           {entry.mergeCommit && (
-                            <span className="rounded bg-accent/10 px-1.5 py-0.5 text-accent">
+                            <span className="rounded bg-accent/10 px-1.5 py-0.5 text-primary">
                               Merge · preserved
                             </span>
                           )}
@@ -346,38 +368,49 @@ export function HistoryRewriteWorkspace({
                   ))}
                 </section>
               )}
-              <small className="text-secondary">
+              <small className="text-muted-foreground">
                 Conflicts and edit stops continue in Changes / Recovery with Continue, Skip, or
                 Abort.
               </small>
             </aside>
           </div>
         ) : (
-          <div
-            className="m-auto max-w-lg rounded-lg border border-destructive bg-destructive-muted p-4"
-            role="alert"
-          >
+          <Notice className="m-auto max-w-lg" role="alert" tone="destructive">
             {error ?? "History rewrite preview is unavailable."}
-          </div>
+          </Notice>
         )}
-        <footer className="flex items-center gap-2 border-t border-border p-3">
+        <DialogFooter alignment="start">
           {preview && !completed && (
-            <small className="text-secondary">{changedCount} plan change(s)</small>
+            <small className="text-muted-foreground">{changedCount} plan change(s)</small>
           )}
           {validation && <small className="text-destructive">{validation}</small>}
           {error && preview && <small className="text-destructive">{error}</small>}
           <span className="flex-1" />
-          <Button isDisabled={running} label="Cancel" onClick={onClose} size="sm" variant="ghost" />
+          <Button
+            data-slot="button"
+            onClick={onClose}
+            type="button"
+            disabled={running}
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+            )}
+          >
+            Cancel
+          </Button>
           {!completed && (
             <Button
-              isDisabled={!preview || Boolean(validation) || running}
-              label={running ? "Rewriting…" : "Start Rebase"}
+              data-slot="button"
               onClick={() => void execute()}
-              size="sm"
-              variant="destructive"
-            />
+              type="button"
+              disabled={!preview || Boolean(validation) || running}
+              className={cn(
+                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-destructive bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/80",
+              )}
+            >
+              {running ? "Rewriting…" : "Start Rebase"}
+            </Button>
           )}
-        </footer>
+        </DialogFooter>
       </section>
     </Dialog>
   );

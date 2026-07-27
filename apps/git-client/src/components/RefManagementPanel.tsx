@@ -1,7 +1,9 @@
+import { Button } from "@base-ui/react/button";
 import { useMemo, useState } from "react";
 import { deleteRefOperation } from "../domain/refActions";
 import { toVoidHandler } from "../domain/toVoidHandler";
 import type { Ref } from "../domain/types";
+import { cn } from "../lib/utils";
 import type { BranchComparison, GitOperation, RemoteInfo } from "../shared/contracts/model";
 import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
@@ -104,10 +106,19 @@ export function RefManagementPanel({
       <div className={tw.managementToolbar}>
         <strong>Branches & tags</strong>
         <span />
-        <button disabled={!currentBranch || busy} onClick={onOpenPush}>
+        <Button
+          data-slot="button"
+          disabled={!currentBranch || busy}
+          onClick={onOpenPush}
+          type="button"
+          className={cn(
+            "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+          )}
+        >
           <Icon name="push" size={13} /> Push…
-        </button>
-        <button
+        </Button>
+        <Button
+          data-slot="button"
           disabled={!currentBranch || busy}
           onClick={() =>
             currentBranch &&
@@ -119,9 +130,13 @@ export function RefManagementPanel({
               ),
             )
           }
+          type="button"
+          className={cn(
+            "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+          )}
         >
           Clean merged branches
-        </button>
+        </Button>
       </div>
       {error && (
         <div className={tw.collectionError} role="alert">
@@ -154,7 +169,8 @@ export function RefManagementPanel({
             ))}
           </select>
         </label>
-        <button
+        <Button
+          data-slot="button"
           disabled={!selected || busy}
           onClick={() =>
             selected &&
@@ -164,20 +180,38 @@ export function RefManagementPanel({
               force: false,
             })
           }
+          type="button"
+          className={cn(
+            "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+          )}
         >
           Checkout
-        </button>
-        <button
+        </Button>
+        <Button
+          data-slot="button"
           disabled={!selected || !currentBranch || selected.name === currentBranch || busy}
           onClick={() => void compare()}
+          type="button"
+          className={cn(
+            "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+          )}
         >
           Compare with current
-        </button>
-        <button disabled={!selected || selected.current || busy} onClick={() => void remove()}>
+        </Button>
+        <Button
+          data-slot="button"
+          disabled={!selected || selected.current || busy}
+          onClick={() => void remove()}
+          type="button"
+          className={cn(
+            "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+          )}
+        >
           Delete…
-        </button>
+        </Button>
         {selected?.kind === "tag" && (
-          <button
+          <Button
+            data-slot="button"
             disabled={!remote || busy}
             onClick={() =>
               void run({
@@ -186,9 +220,13 @@ export function RefManagementPanel({
                 name: selected.shortName,
               })
             }
+            type="button"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+            )}
           >
             Push tag
-          </button>
+          </Button>
         )}
       </section>
       <section className={tw.refForms}>
@@ -211,7 +249,16 @@ export function RefManagementPanel({
             placeholder="feat/name"
             value={newName}
           />
-          <button disabled={!newName.trim() || busy}>Create & checkout</button>
+          <Button
+            data-slot="button"
+            disabled={!newName.trim() || busy}
+            type="submit"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+            )}
+          >
+            Create & checkout
+          </Button>
         </form>
         <form
           onSubmit={(event) => {
@@ -231,9 +278,16 @@ export function RefManagementPanel({
             placeholder="new/name"
             value={renameName}
           />
-          <button disabled={selected?.kind !== "local" || !renameName.trim() || busy}>
+          <Button
+            data-slot="button"
+            disabled={selected?.kind !== "local" || !renameName.trim() || busy}
+            type="submit"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+            )}
+          >
             Rename
-          </button>
+          </Button>
         </form>
         <form
           onSubmit={(event) => {
@@ -253,9 +307,16 @@ export function RefManagementPanel({
             placeholder="origin/main"
             value={upstream}
           />
-          <button disabled={selected?.kind !== "local" || !upstream.trim() || busy}>
+          <Button
+            data-slot="button"
+            disabled={selected?.kind !== "local" || !upstream.trim() || busy}
+            type="submit"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+            )}
+          >
             Set upstream
-          </button>
+          </Button>
         </form>
         <form
           onSubmit={(event) => {
@@ -285,7 +346,16 @@ export function RefManagementPanel({
             placeholder="Message (optional)"
             value={tagMessage}
           />
-          <button disabled={!tagName.trim() || busy}>Create tag</button>
+          <Button
+            data-slot="button"
+            disabled={!tagName.trim() || busy}
+            type="submit"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+            )}
+          >
+            Create tag
+          </Button>
         </form>
       </section>
       <section className={tw.mergeOptions}>
@@ -307,7 +377,8 @@ export function RefManagementPanel({
           Squash changes without committing
         </label>
         <span />
-        <button
+        <Button
+          data-slot="button"
           disabled={!selected || busy}
           onClick={() =>
             selected &&
@@ -318,10 +389,15 @@ export function RefManagementPanel({
               squash: squashMerge,
             })
           }
+          type="button"
+          className={cn(
+            "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+          )}
         >
           Merge selected
-        </button>
-        <button
+        </Button>
+        <Button
+          data-slot="button"
           disabled={!selected || !currentBranch || busy}
           onClick={toVoidHandler(async () => {
             if (!selected || !currentBranch) return;
@@ -339,9 +415,13 @@ export function RefManagementPanel({
                 branch: currentBranch,
               });
           })}
+          type="button"
+          className={cn(
+            "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+          )}
         >
           Rebase current
-        </button>
+        </Button>
       </section>
       {comparison && (
         <section className={tw.branchComparison}>
@@ -368,7 +448,16 @@ export function RefManagementPanel({
           {mergedBranches.map((branch) => (
             <span key={branch}>
               <code>{branch}</code>
-              <button onClick={() => void deleteMerged(branch)}>Delete</button>
+              <Button
+                data-slot="button"
+                onClick={() => void deleteMerged(branch)}
+                type="button"
+                className={cn(
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                )}
+              >
+                Delete
+              </Button>
             </span>
           ))}
         </section>

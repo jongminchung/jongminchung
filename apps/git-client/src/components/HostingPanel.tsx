@@ -1,3 +1,4 @@
+import { Button } from "@base-ui/react/button";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import { createHostingBridge } from "../bridge/createHostingBridge";
@@ -6,6 +7,7 @@ import {
   filterHostingChangeRequests,
   type HostingListScope,
 } from "../domain/hostingView";
+import { cn } from "../lib/utils";
 import { isElectronRuntime } from "../platform/electron";
 import type {
   HostingAccount,
@@ -26,6 +28,7 @@ import {
   persistViewedFiles,
 } from "./hosting-persistence";
 import { Icon } from "./Icon";
+import { Notice } from "./ui";
 
 interface RemoteCoordinates {
   readonly project: string;
@@ -410,19 +413,42 @@ export function HostingPanel({
             value={project}
           />
         </label>
-        <button disabled={!accountId || Boolean(busy)} onClick={() => void loadList()}>
+        <Button
+          data-slot="button"
+          disabled={!accountId || Boolean(busy)}
+          onClick={() => void loadList()}
+          type="button"
+          className={cn(
+            "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+          )}
+        >
           <Icon name="refresh" size={13} /> Load
-        </button>
-        <button
+        </Button>
+        <Button
+          data-slot="button"
+          aria-controls="hosting-create-request"
+          aria-expanded={showCreate}
           disabled={!accountId || !project.trim()}
           onClick={() => setShowCreate((value) => !value)}
+          type="button"
+          className={cn(
+            "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+          )}
         >
           <Icon name="plus" size={13} /> New PR / MR
-        </button>
+        </Button>
         {selectedAccount?.provider === "gitHub" && currentBranch && (
-          <button disabled={Boolean(busy) || !project.trim()} onClick={() => void syncFork()}>
+          <Button
+            data-slot="button"
+            disabled={Boolean(busy) || !project.trim()}
+            onClick={() => void syncFork()}
+            type="button"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+            )}
+          >
             <Icon name="refresh" size={13} /> Sync fork
-          </button>
+          </Button>
         )}
       </section>
 
@@ -456,9 +482,17 @@ export function HostingPanel({
               value={token}
             />
           </label>
-          <button disabled={Boolean(busy)} onClick={() => void connect()}>
+          <Button
+            data-slot="button"
+            disabled={Boolean(busy)}
+            onClick={() => void connect()}
+            type="button"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+            )}
+          >
             {busy === "Verifying account" ? "Verifying…" : "Connect and store in Keychain"}
-          </button>
+          </Button>
         </div>
         {selectedAccount && (
           <div className={tw.hostingAccountMeta}>
@@ -468,32 +502,57 @@ export function HostingPanel({
             {removeAccountId === selectedAccount.id ? (
               <>
                 <span>Removes metadata and the Keychain credential.</span>
-                <button onClick={() => void removeAccount(selectedAccount.id)}>
+                <Button
+                  data-slot="button"
+                  onClick={() => void removeAccount(selectedAccount.id)}
+                  type="button"
+                  className={cn(
+                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                  )}
+                >
                   Confirm remove
-                </button>
-                <button onClick={() => setRemoveAccountId(undefined)}>Cancel</button>
+                </Button>
+                <Button
+                  data-slot="button"
+                  onClick={() => setRemoveAccountId(undefined)}
+                  type="button"
+                  className={cn(
+                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                  )}
+                >
+                  Cancel
+                </Button>
               </>
             ) : (
-              <button onClick={() => setRemoveAccountId(selectedAccount.id)}>Remove account</button>
+              <Button
+                data-slot="button"
+                onClick={() => setRemoveAccountId(selectedAccount.id)}
+                type="button"
+                className={cn(
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                )}
+              >
+                Remove account
+              </Button>
             )}
           </div>
         )}
       </details>
 
       {error && (
-        <div className={tw.collectionError} role="alert">
+        <Notice role="alert" size="sm" tone="destructive">
           {error}
-        </div>
+        </Notice>
       )}
       {notice && (
-        <div className={tw.hostingNotice} role="status">
+        <Notice role="status" size="sm" tone="success">
           {notice}
-        </div>
+        </Notice>
       )}
       {busy && <div className={tw.hostingProgress}>{busy}…</div>}
 
       {showCreate && (
-        <section className={tw.hostingComposer}>
+        <section className={tw.hostingComposer} id="hosting-create-request">
           <strong>Create change request</strong>
           <label>
             Title
@@ -528,13 +587,27 @@ export function HostingPanel({
             </label>
           </div>
           <footer>
-            <button onClick={() => setShowCreate(false)}>Cancel</button>
-            <button
+            <Button
+              data-slot="button"
+              onClick={() => setShowCreate(false)}
+              type="button"
+              className={cn(
+                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+              )}
+            >
+              Cancel
+            </Button>
+            <Button
+              data-slot="button"
               disabled={!title.trim() || !sourceBranch.trim() || !targetBranch.trim()}
               onClick={() => void create()}
+              type="button"
+              className={cn(
+                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+              )}
             >
               Create
-            </button>
+            </Button>
           </footer>
         </section>
       )}
@@ -574,11 +647,16 @@ export function HostingPanel({
             <p className={tw.emptyState}>No pull or merge requests match the filter.</p>
           )}
           {visibleItems.map((item) => (
-            <button
-              aria-selected={selected?.number === item.number}
-              className={selected?.number === item.number ? tw.hostingSelected : undefined}
+            <Button
+              data-slot="button"
+              aria-current={selected?.number === item.number ? "true" : undefined}
               key={item.number}
               onClick={() => void inspect(item)}
+              type="button"
+              className={cn(
+                "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-current:bg-accent",
+                selected?.number === item.number ? tw.hostingSelected : undefined,
+              )}
             >
               <span>
                 #{item.number} · {item.state}
@@ -588,12 +666,20 @@ export function HostingPanel({
               <small>
                 {item.author} · {item.sourceBranch} → {item.targetBranch}
               </small>
-            </button>
+            </Button>
           ))}
           {nextPage && (
-            <button className={tw.hostingMore} onClick={() => void loadList(nextPage, true)}>
+            <Button
+              data-slot="button"
+              onClick={() => void loadList(nextPage, true)}
+              type="button"
+              className={cn(
+                "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+                tw.hostingMore,
+              )}
+            >
               Load more
-            </button>
+            </Button>
           )}
         </section>
 
@@ -609,13 +695,38 @@ export function HostingPanel({
                   </strong>
                   <small>{selected.webUrl}</small>
                 </div>
-                <button onClick={() => void navigator.clipboard.writeText(selected.webUrl)}>
+                <Button
+                  data-slot="button"
+                  onClick={() => void navigator.clipboard.writeText(selected.webUrl)}
+                  type="button"
+                  className={cn(
+                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                  )}
+                >
                   <Icon name="copy" size={13} /> Copy link
-                </button>
-                <button onClick={() => void openHostingUrl(selected.webUrl)}>
+                </Button>
+                <a
+                  href={selected.webUrl}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    void openHostingUrl(selected.webUrl);
+                  }}
+                  className={cn(
+                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                  )}
+                >
                   <Icon name="external" size={13} /> Open
-                </button>
-                <button onClick={() => void updateBranch()}>Update branch</button>
+                </a>
+                <Button
+                  data-slot="button"
+                  onClick={() => void updateBranch()}
+                  type="button"
+                  className={cn(
+                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                  )}
+                >
+                  Update branch
+                </Button>
               </header>
               <div className={tw.hostingReviewBar}>
                 <textarea
@@ -624,14 +735,37 @@ export function HostingPanel({
                   placeholder="Review or comment"
                   value={reviewBody}
                 />
-                <button onClick={() => void submitReview("comment")}>Comment</button>
-                <button onClick={() => void submitReview("approve")}>Approve</button>
-                <button
+                <Button
+                  data-slot="button"
+                  onClick={() => void submitReview("comment")}
+                  type="button"
+                  className={cn(
+                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                  )}
+                >
+                  Comment
+                </Button>
+                <Button
+                  data-slot="button"
+                  onClick={() => void submitReview("approve")}
+                  type="button"
+                  className={cn(
+                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                  )}
+                >
+                  Approve
+                </Button>
+                <Button
+                  data-slot="button"
                   disabled={!reviewBody.trim()}
                   onClick={() => void submitReview("requestChanges")}
+                  type="button"
+                  className={cn(
+                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                  )}
                 >
                   Request changes
-                </button>
+                </Button>
               </div>
               <h3>Changed files · {files.length}</h3>
               {files.map((file) => (
@@ -670,9 +804,17 @@ export function HostingPanel({
                   placeholder="Add a comment"
                   value={discussionBody}
                 />
-                <button disabled={!discussionBody.trim()} onClick={() => void postComment()}>
+                <Button
+                  data-slot="button"
+                  disabled={!discussionBody.trim()}
+                  onClick={() => void postComment()}
+                  type="button"
+                  className={cn(
+                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                  )}
+                >
                   Comment
-                </button>
+                </Button>
               </div>
             </>
           )}

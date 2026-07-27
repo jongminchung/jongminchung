@@ -1,5 +1,7 @@
+import { Button } from "@base-ui/react/button";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { RecentProject } from "../domain/recentProjects";
+import { cn } from "../lib/utils";
 import type { RepositorySnapshot } from "../shared/contracts/model";
 import { tw } from "../styles/tailwind";
 import { useDismissLayer } from "./CommandProvider";
@@ -34,7 +36,7 @@ export function ProjectSwitcherPopup({
   readonly openRepositories: readonly RepositorySnapshot[];
   readonly recentProjects: readonly RecentProject[];
 }) {
-  const itemRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const itemRefs = useRef<Array<HTMLElement | null>>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -112,6 +114,7 @@ export function ProjectSwitcherPopup({
 
   return (
     <section
+      aria-label="Projects"
       className={tw.projectSwitcherPopup}
       onKeyDown={(event) => {
         if (event.key === "Escape") {
@@ -140,10 +143,12 @@ export function ProjectSwitcherPopup({
           }
         }
       }}
+      role="dialog"
     >
       <div aria-label="Projects" role="listbox">
         <div className={tw.projectSwitcherActions} role="presentation">
-          <button
+          <Button
+            data-slot="button"
             aria-selected={activeIndex === 0}
             onClick={() => {
               onClose();
@@ -154,11 +159,16 @@ export function ProjectSwitcherPopup({
               itemRefs.current[0] = node;
             }}
             role="option"
+            type="button"
+            className={cn(
+              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+            )}
           >
             <Icon name="folder" size={16} />
             <span>Open…</span>
-          </button>
-          <button
+          </Button>
+          <Button
+            data-slot="button"
             aria-selected={activeIndex === 1}
             onClick={() => {
               onClose();
@@ -169,18 +179,22 @@ export function ProjectSwitcherPopup({
               itemRefs.current[1] = node;
             }}
             role="option"
+            type="button"
+            className={cn(
+              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+            )}
           >
             <Icon name="branch" size={16} />
             <span>Clone Repository…</span>
-          </button>
+          </Button>
         </div>
 
         {openRepositories.length > 0 && <strong data-project-section>Open Projects</strong>}
         {openRepositories.map((repository, index) => (
-          <button
+          <Button
+            data-slot="button"
             aria-current={repository.id === activeRepositoryId ? "true" : undefined}
             aria-selected={activeIndex === index + 2}
-            className={tw.projectSwitcherRow}
             disabled={busy}
             key={repository.id}
             onClick={() => void runItem({ kind: "open", repository })}
@@ -189,6 +203,11 @@ export function ProjectSwitcherPopup({
               itemRefs.current[index + 2] = node;
             }}
             role="option"
+            type="button"
+            className={cn(
+              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+              tw.projectSwitcherRow,
+            )}
           >
             <span className={tw.projectMark}>{repository.name.charAt(0).toUpperCase()}</span>
             <span>
@@ -196,7 +215,7 @@ export function ProjectSwitcherPopup({
               <small>{displayPath(repository.path)}</small>
             </span>
             {repository.id === activeRepositoryId && <Icon name="check" size={14} />}
-          </button>
+          </Button>
         ))}
 
         {availableRecentProjects.length > 0 && (
@@ -205,10 +224,10 @@ export function ProjectSwitcherPopup({
         {availableRecentProjects.map((project, recentIndex) => {
           const index = openRepositories.length + recentIndex + 2;
           return (
-            <button
+            <Button
+              data-slot="button"
               aria-description="Press Delete to remove from Recent Projects"
               aria-selected={activeIndex === index}
-              className={tw.projectSwitcherRow}
               disabled={busy}
               key={project.path}
               onClick={() => void runItem({ kind: "recent", project })}
@@ -217,13 +236,18 @@ export function ProjectSwitcherPopup({
                 itemRefs.current[index] = node;
               }}
               role="option"
+              type="button"
+              className={cn(
+                "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+                tw.projectSwitcherRow,
+              )}
             >
               <span className={tw.projectMark}>{project.name.charAt(0).toUpperCase()}</span>
               <span>
                 <b>{project.name}</b>
                 <small>{displayPath(project.path)}</small>
               </span>
-            </button>
+            </Button>
           );
         })}
       </div>

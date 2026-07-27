@@ -12,8 +12,14 @@ const PALETTE_COPY = {
   },
   files: { label: "Go to File", placeholder: "Enter file name" },
   recentFiles: { label: "Recent Files", placeholder: "Search recent files" },
-  recentLocations: { label: "Recent Locations", placeholder: "Search recent locations" },
-  recentlyChangedFiles: { label: "Recently Changed Files", placeholder: "Search changed files" },
+  recentLocations: {
+    label: "Recent Locations",
+    placeholder: "Search recent locations",
+  },
+  recentlyChangedFiles: {
+    label: "Recently Changed Files",
+    placeholder: "Search changed files",
+  },
   classes: { label: "Go to Class", placeholder: "Enter class name" },
   symbols: { label: "Go to Symbol", placeholder: "Enter symbol name" },
   text: { label: "Go to Text", placeholder: "Enter text to search" },
@@ -89,6 +95,8 @@ export function CommandPalette({
         <CommandPaletteInput
           aria-activedescendant={results[activeIndex] ? `palette-option-${activeIndex}` : undefined}
           aria-controls={listId}
+          aria-expanded="true"
+          aria-label={copy.label}
           endContent={<kbd>Esc</kbd>}
           onValueChange={setQuery}
           placeholder={copy.placeholder}
@@ -101,7 +109,7 @@ export function CommandPalette({
           tabIndex={0}
         >
           {results.length === 0 ? (
-            <p className="m-0 p-6 text-center text-secondary">
+            <p className="m-0 p-6 text-center text-muted-foreground">
               No commands or loaded items match “{query}”.
             </p>
           ) : (
@@ -116,13 +124,13 @@ export function CommandPalette({
               >
                 <span className="grid min-w-0 flex-1 gap-0.5">
                   <strong className="truncate">{item.label}</strong>
-                  <small className="truncate text-secondary">
+                  <small className="truncate text-muted-foreground">
                     {item.availability.status === "disabled"
                       ? item.availability.reason
                       : item.detail}
                   </small>
                 </span>
-                <em className="not-italic text-secondary">{item.category}</em>
+                <em className="not-italic text-muted-foreground">{item.category}</em>
                 {item.shortcut && <kbd>{item.shortcut}</kbd>}
               </CommandPaletteItem>
             ))

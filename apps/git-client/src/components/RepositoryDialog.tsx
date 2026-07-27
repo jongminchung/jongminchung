@@ -1,3 +1,4 @@
+import { Button } from "@base-ui/react/button";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   applyRepositoryCreationEvent,
@@ -9,15 +10,22 @@ import {
   startRepositoryCreation,
   type RepositoryCreationState,
 } from "../domain/repositoryCreation";
+import { cn } from "../lib/utils";
 import { electronApi, isElectronRuntime } from "../platform/electron";
 import type { GitCreationEventListener } from "../shared/contracts/git-utility";
 import type { CloneOptions } from "../shared/contracts/model";
 import { useDismissLayer } from "./CommandProvider";
-import { Button } from "./ui";
-import { CheckboxInput } from "./ui";
-import { Dialog, DialogHeader } from "./ui";
-import { SegmentedControl, SegmentedControlItem } from "./ui";
-import { TextInput } from "./ui";
+import {
+  CheckboxInput,
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  DialogHeader,
+  Notice,
+  SegmentedControl,
+  SegmentedControlItem,
+  TextInput,
+} from "./ui";
 
 export type RepositoryDialogMode = "open" | "clone" | "init";
 
@@ -216,7 +224,7 @@ export function RepositoryDialog({
             <SegmentedControlItem label="Initialize" value="init" />
           </SegmentedControl>
         </div>
-        <div className="grid min-h-0 gap-4 overflow-auto p-4">
+        <DialogBody className="grid gap-4 p-4">
           {mode === "clone" && (
             <TextInput
               isRequired
@@ -247,12 +255,16 @@ export function RepositoryDialog({
               status={pathError === null ? undefined : { type: "error", message: pathError }}
             />
             <Button
-              isDisabled={fieldsLocked}
-              label="Browse…"
+              data-slot="button"
               onClick={() => void browse()}
-              size="sm"
-              variant="secondary"
-            />
+              type="button"
+              disabled={fieldsLocked}
+              className={cn(
+                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
+              )}
+            >
+              Browse…
+            </Button>
           </div>
           {mode === "clone" && (
             <>
@@ -288,82 +300,107 @@ export function RepositoryDialog({
             />
           )}
           {openError !== null && (
-            <div className="rounded-md border border-destructive p-3 text-destructive" role="alert">
+            <Notice role="alert" tone="destructive">
               {openError}
-            </div>
+            </Notice>
           )}
           {creation.kind === "running" && (
-            <section
+            <Notice
               aria-label="Repository creation progress"
               aria-live="polite"
-              className="grid gap-2 rounded-md border border-border p-3"
               role="status"
+              tone="neutral"
             >
-              <strong>{creation.phase}</strong>
-              {creation.percent !== null && (
-                <progress max={100} value={creation.percent}>
-                  {creation.percent}%
-                </progress>
-              )}
-              {creation.percent !== null && <span>{creation.percent}%</span>}
-              {creation.requestId === null && <small>Waiting for Git to start…</small>}
-              {creation.cancellation === "requested" && <small>Cancellation requested…</small>}
-            </section>
+              <section className="grid gap-2">
+                <strong>{creation.phase}</strong>
+                {creation.percent !== null && (
+                  <progress max={100} value={creation.percent}>
+                    {creation.percent}%
+                  </progress>
+                )}
+                {creation.percent !== null && <span>{creation.percent}%</span>}
+                {creation.requestId === null && <small>Waiting for Git to start…</small>}
+                {creation.cancellation === "requested" && <small>Cancellation requested…</small>}
+              </section>
+            </Notice>
           )}
           {creation.kind === "completed" && (
-            <div className="rounded-md border border-success p-3 text-success" role="status">
+            <Notice role="status" tone="success">
               {creation.message}
-            </div>
+            </Notice>
           )}
           {creation.kind === "failed" && (
-            <div className="rounded-md border border-destructive p-3 text-destructive" role="alert">
+            <Notice role="alert" tone="destructive">
               {creation.message}
-            </div>
+            </Notice>
           )}
           {creation.kind === "cancelled" && (
-            <div className="rounded-md border border-border p-3" role="status">
+            <Notice role="status" tone="neutral">
               {creation.message}
-            </div>
+            </Notice>
           )}
           {cancelError !== null && (
-            <div className="rounded-md border border-destructive p-3 text-destructive" role="alert">
+            <Notice role="alert" tone="destructive">
               {cancelError}
-            </div>
+            </Notice>
           )}
-        </div>
-        <footer className="flex justify-end gap-2 border-t border-border p-3">
+        </DialogBody>
+        <DialogFooter>
           {creation.kind === "running" ? (
             <Button
-              isDisabled={creation.requestId === null || creation.cancellation === "requested"}
-              label={creation.cancellation === "requested" ? "Cancelling…" : "Cancel operation"}
+              data-slot="button"
               onClick={() => void cancelCreation()}
-              size="sm"
-              variant="ghost"
-            />
+              type="button"
+              disabled={creation.requestId === null || creation.cancellation === "requested"}
+              className={cn(
+                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+              )}
+            >
+              {creation.cancellation === "requested" ? "Cancelling…" : "Cancel operation"}
+            </Button>
           ) : creation.kind === "completed" ? (
-            <Button label="Done" onClick={onClose} size="sm" variant="primary" />
+            <Button
+              data-slot="button"
+              onClick={onClose}
+              type="button"
+              className={cn(
+                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-primary bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 active:bg-primary/80",
+              )}
+            >
+              Done
+            </Button>
           ) : (
             <>
-              <Button label="Cancel" onClick={onClose} size="sm" variant="ghost" />
               <Button
-                label={
-                  mode === "open"
-                    ? "Open"
-                    : creation.kind === "failed" || creation.kind === "cancelled"
-                      ? mode === "clone"
-                        ? "Retry Clone"
-                        : "Retry Initialize"
-                      : mode === "clone"
-                        ? "Clone"
-                        : "Initialize"
-                }
-                size="sm"
+                data-slot="button"
+                onClick={onClose}
+                type="button"
+                className={cn(
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+                )}
+              >
+                Cancel
+              </Button>
+              <Button
+                data-slot="button"
                 type="submit"
-                variant="primary"
-              />
+                className={cn(
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-primary bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 active:bg-primary/80",
+                )}
+              >
+                {mode === "open"
+                  ? "Open"
+                  : creation.kind === "failed" || creation.kind === "cancelled"
+                    ? mode === "clone"
+                      ? "Retry Clone"
+                      : "Retry Initialize"
+                    : mode === "clone"
+                      ? "Clone"
+                      : "Initialize"}
+              </Button>
             </>
           )}
-        </footer>
+        </DialogFooter>
       </form>
     </Dialog>
   );

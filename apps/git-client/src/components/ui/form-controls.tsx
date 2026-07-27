@@ -1,3 +1,4 @@
+import { Button } from "@base-ui/react/button";
 import { Check, ChevronDown, LoaderCircle, Search, X } from "lucide-react";
 import { useId, useRef } from "react";
 import type {
@@ -177,9 +178,9 @@ export function TextInput({
         />
         {isLoading ? <LoaderCircle aria-hidden className="size-3.5 animate-spin" /> : null}
         {hasClear && value ? (
-          <button
+          <Button
+            data-slot="button"
             aria-label={`Clear ${label}`}
-            className="grid size-5 place-items-center rounded-sm hover:bg-accent"
             onClick={() => {
               const input = inputRef.current;
               if (input === null) return;
@@ -192,9 +193,13 @@ export function TextInput({
               input.focus();
             }}
             type="button"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+              "grid size-5 place-items-center rounded-sm hover:bg-accent",
+            )}
           >
             <X aria-hidden className="size-3" />
-          </button>
+          </Button>
         ) : null}
       </span>
     </FieldShell>

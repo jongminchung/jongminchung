@@ -1,3 +1,4 @@
+import { Button } from "@base-ui/react/button";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { sanitizeGitError } from "../domain/gitActivity";
 import {
@@ -7,11 +8,11 @@ import {
   requiresPushConfirmation,
   type PushChoice,
 } from "../domain/push";
+import { cn } from "../lib/utils";
 import type { GitOperation, PushPreview, RemoteInfo } from "../shared/contracts/model";
 import { useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
-import { Button } from "./ui";
-import { Dialog, DialogHeader } from "./ui";
+import { Dialog, DialogBody, DialogFooter, DialogHeader, Notice } from "./ui";
 
 function branchName(remoteRef: string): string {
   return remoteRef.replace(/^refs\/heads\//, "");
@@ -149,12 +150,12 @@ export function PushDialog({
           subtitle="Review the exact source, destination, and remote state before pushing."
           title="Push"
         />
-        <div className="grid min-h-0 gap-4 overflow-auto p-4">
+        <DialogBody className="grid gap-4 p-4">
           <section className="grid grid-cols-2 gap-3 max-[600px]:grid-cols-1">
-            <label className="grid gap-1 text-xs text-secondary">
+            <label className="grid gap-1 text-xs text-muted-foreground">
               Remote
               <select
-                className="min-h-8 rounded-md border border-border bg-card px-2 text-primary"
+                className="min-h-8 rounded-md border border-border bg-card px-2 text-foreground"
                 onChange={(event) => setRemote(event.target.value)}
                 value={remote}
               >
@@ -168,24 +169,28 @@ export function PushDialog({
                 )}
               </select>
             </label>
-            <label className="grid gap-1 text-xs text-secondary">
+            <label className="grid gap-1 text-xs text-muted-foreground">
               Destination branch
               <input
-                className="min-h-8 rounded-md border border-border bg-card px-2 font-mono text-primary"
+                className="min-h-8 rounded-md border border-border bg-card px-2 font-mono text-foreground"
                 onChange={(event) => setRemoteRef(event.target.value)}
                 value={remoteRef}
               />
             </label>
             <div className="col-span-2 flex items-center gap-2 max-[600px]:col-span-1">
               <Button
-                isDisabled={!remote || !remoteRef || loading}
-                label={loading ? "Checking remote…" : "Review destination"}
+                data-slot="button"
                 onClick={() => void load(remote, remoteRef)}
-                size="sm"
-                variant="secondary"
-              />
+                type="button"
+                disabled={!remote || !remoteRef || loading}
+                className={cn(
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
+                )}
+              >
+                {loading ? "Checking remote…" : "Review destination"}
+              </Button>
               {preview && (
-                <small className="text-secondary">
+                <small className="text-muted-foreground">
                   Checked {new Date(preview.checkedAtMs).toLocaleTimeString()}
                 </small>
               )}
@@ -194,7 +199,7 @@ export function PushDialog({
 
           {loading ? (
             <div
-              className="flex min-h-24 items-center justify-center gap-2 text-secondary"
+              className="flex min-h-24 items-center justify-center gap-2 text-muted-foreground"
               role="status"
             >
               <span className="activitySpinner" />
@@ -203,15 +208,15 @@ export function PushDialog({
           ) : preview ? (
             <>
               <section className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 rounded-lg border border-border bg-muted p-3 text-xs">
-                <span className="text-secondary">Source</span>
+                <span className="text-muted-foreground">Source</span>
                 <strong>
                   {preview.sourceBranch ?? preview.sourceRevision} · {shortOid(preview.localOid)}
                 </strong>
-                <span className="text-secondary">Destination</span>
+                <span className="text-muted-foreground">Destination</span>
                 <strong>
                   {preview.remote}/{branchName(preview.remoteRef)} · {shortOid(preview.remoteOid)}
                 </strong>
-                <span className="text-secondary">State</span>
+                <span className="text-muted-foreground">State</span>
                 <strong>
                   {preview.newBranch
                     ? "New branch"
@@ -221,30 +226,22 @@ export function PushDialog({
                         ? "Diverged / rewritten"
                         : "Needs fetch"}
                 </strong>
-                <span className="text-secondary">Relationship</span>
+                <span className="text-muted-foreground">Relationship</span>
                 <strong>
                   {preview.ahead} ahead · {preview.behind} behind
                 </strong>
               </section>
 
               {preview.remoteStateError && (
-                <div
-                  className="flex gap-2 rounded-lg border border-warning bg-warning/10 p-3 text-sm"
-                  role="status"
-                >
-                  <Icon name="warning" size={16} />
+                <Notice icon={<Icon name="warning" size={16} />} role="status" tone="warning">
                   <span>
                     {preview.remoteStateError} Normal push remains available; force push is
                     disabled.
                   </span>
-                </div>
+                </Notice>
               )}
               {preview.fastForward === false && (
-                <div
-                  className="flex gap-2 rounded-lg border border-destructive bg-destructive-muted p-3 text-sm"
-                  role="alert"
-                >
-                  <Icon name="warning" size={16} />
+                <Notice icon={<Icon name="warning" size={16} />} role="alert" tone="destructive">
                   <span>
                     <strong>
                       {knownRewrite
@@ -253,10 +250,10 @@ export function PushDialog({
                     </strong>{" "}
                     Normal push cannot update this destination.
                   </span>
-                </div>
+                </Notice>
               )}
               {preview.warnings.map((warning) => (
-                <p className="m-0 text-xs text-secondary" key={warning}>
+                <p className="m-0 text-xs text-muted-foreground" key={warning}>
                   • {warning}
                 </p>
               ))}
@@ -276,7 +273,7 @@ export function PushDialog({
                   />
                   <span>
                     <strong>Normal push</strong>
-                    <small className="block text-secondary">
+                    <small className="block text-muted-foreground">
                       Updates only when the destination is a fast-forward.
                     </small>
                   </span>
@@ -292,7 +289,7 @@ export function PushDialog({
                     />
                     <span>
                       <strong>Force push with lease</strong>
-                      <small className="block text-secondary">
+                      <small className="block text-muted-foreground">
                         Uses the exact reviewed remote OID. It is rejected if the remote changes.
                       </small>
                     </span>
@@ -301,32 +298,34 @@ export function PushDialog({
               </fieldset>
 
               {choice === "forceWithLease" && (
-                <section className="grid gap-2 rounded-lg border border-destructive bg-destructive-muted p-3 text-sm">
-                  <strong>Remote impact</strong>
-                  <span>
-                    {shortOid(preview.remoteOid)} → {shortOid(preview.localOid)} on{" "}
-                    {preview.remoteRef}
-                  </span>
-                  <span>
-                    {preview.remoteOnlyCommits.length} remote-only commit(s) may no longer be
-                    reachable from this branch.
-                  </span>
-                  {preview.remoteOnlyCommits.slice(0, 8).map((commit) => (
-                    <code key={commit.oid}>
-                      {commit.oid.slice(0, 8)} {commit.subject}
-                    </code>
-                  ))}
-                  {requiresTypedConfirmation && (
-                    <label className="grid gap-1 text-xs">
-                      Type <strong>{destinationBranch}</strong> to confirm
-                      <input
-                        className="min-h-8 rounded-md border border-destructive bg-card px-2 font-mono"
-                        onChange={(event) => setConfirmation(event.target.value)}
-                        value={confirmation}
-                      />
-                    </label>
-                  )}
-                </section>
+                <Notice role="alert" tone="destructive">
+                  <section className="grid gap-2">
+                    <strong>Remote impact</strong>
+                    <span>
+                      {shortOid(preview.remoteOid)} → {shortOid(preview.localOid)} on{" "}
+                      {preview.remoteRef}
+                    </span>
+                    <span>
+                      {preview.remoteOnlyCommits.length} remote-only commit(s) may no longer be
+                      reachable from this branch.
+                    </span>
+                    {preview.remoteOnlyCommits.slice(0, 8).map((commit) => (
+                      <code key={commit.oid}>
+                        {commit.oid.slice(0, 8)} {commit.subject}
+                      </code>
+                    ))}
+                    {requiresTypedConfirmation && (
+                      <label className="grid gap-1 text-xs">
+                        Type <strong>{destinationBranch}</strong> to confirm
+                        <input
+                          className="min-h-8 rounded-md border border-destructive bg-card px-2 font-mono"
+                          onChange={(event) => setConfirmation(event.target.value)}
+                          value={confirmation}
+                        />
+                      </label>
+                    )}
+                  </section>
+                </Notice>
               )}
 
               <section className="grid gap-2">
@@ -344,7 +343,7 @@ export function PushDialog({
                 </div>
                 <div className="grid max-h-36 gap-1 overflow-auto rounded-lg border border-border bg-muted p-2 font-mono text-xs">
                   {preview.commits.length === 0 ? (
-                    <span className="text-secondary">No local-only commits.</span>
+                    <span className="text-muted-foreground">No local-only commits.</span>
                   ) : (
                     preview.commits.map((commit) => (
                       <span key={commit.oid}>
@@ -357,26 +356,36 @@ export function PushDialog({
             </>
           ) : null}
           {error && (
-            <div
-              className="rounded-lg border border-destructive bg-destructive-muted p-3 text-sm"
-              role="alert"
-            >
+            <Notice role="alert" tone="destructive">
               {error}
-            </div>
+            </Notice>
           )}
-        </div>
-        <footer className="flex justify-end gap-2 border-t border-border p-3">
-          <Button label="Cancel" onClick={onClose} size="sm" variant="ghost" />
+        </DialogBody>
+        <DialogFooter>
           <Button
-            isDisabled={!canSubmit}
-            label={
-              pushing ? "Pushing…" : choice === "forceWithLease" ? "Force Push with Lease" : "Push"
-            }
-            size="sm"
+            data-slot="button"
+            onClick={onClose}
+            type="button"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+            )}
+          >
+            Cancel
+          </Button>
+          <Button
+            data-slot="button"
             type="submit"
-            variant={choice === "forceWithLease" ? "destructive" : "primary"}
-          />
-        </footer>
+            disabled={!canSubmit}
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5",
+              choice === "forceWithLease"
+                ? "border-destructive bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/80"
+                : "border-primary bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 active:bg-primary/80",
+            )}
+          >
+            {pushing ? "Pushing…" : choice === "forceWithLease" ? "Force Push with Lease" : "Push"}
+          </Button>
+        </DialogFooter>
       </form>
     </Dialog>
   );

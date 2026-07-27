@@ -1,11 +1,14 @@
+import { Button } from "@base-ui/react/button";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { checkoutTarget, deleteRefOperation } from "../domain/refActions";
 import type { Ref } from "../domain/types";
+import { cn } from "../lib/utils";
 import type { BranchComparison, GitOperation, RemoteInfo } from "../shared/contracts/model";
 import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
 import { useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui";
 
 interface BranchPopupRow {
   readonly ref: Ref;
@@ -268,6 +271,7 @@ export function GitBranchesPopup({
 
   return (
     <div
+      aria-label="Git Branches"
       className={tw.gitBranchesPopup}
       onKeyDown={(event) => {
         if (event.key === "Escape") {
@@ -296,6 +300,7 @@ export function GitBranchesPopup({
           setDetailsOpen(false);
         }
       }}
+      role="dialog"
     >
       <div className={tw.gitBranchesSearch}>
         <label>
@@ -316,17 +321,43 @@ export function GitBranchesPopup({
           />
         </label>
         <div aria-label="Action Toolbar" data-branch-toolbar="true" role="toolbar">
-          <button
-            aria-label="Fetch"
-            disabled={busy}
-            onClick={() => void run({ kind: "fetch", remote: null, prune: false }, false)}
-            title="Fetch"
-          >
-            <Icon name="fetch" size={14} />
-          </button>
-          <button aria-label="Settings" onClick={onOpenSettings} title="Settings">
-            <Icon name="settings" size={14} />
-          </button>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  data-slot="button"
+                  aria-label="Fetch"
+                  disabled={busy}
+                  onClick={() => void run({ kind: "fetch", remote: null, prune: false }, false)}
+                  type="button"
+                  className={cn(
+                    "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <Icon name="fetch" size={14} />
+                </Button>
+              }
+            />
+            <TooltipContent>Fetch</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  data-slot="button"
+                  aria-label="Settings"
+                  onClick={onOpenSettings}
+                  type="button"
+                  className={cn(
+                    "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <Icon name="settings" size={14} />
+                </Button>
+              }
+            />
+            <TooltipContent>Settings</TooltipContent>
+          </Tooltip>
         </div>
       </div>
       <div
@@ -336,7 +367,8 @@ export function GitBranchesPopup({
         role="tree"
       >
         {actionMatches("Commit…") && (
-          <button
+          <Button
+            data-slot="button"
             data-branch-action="true"
             disabled={busy}
             onClick={() => {
@@ -344,35 +376,49 @@ export function GitBranchesPopup({
               onCommit?.();
             }}
             role="treeitem"
+            type="button"
+            className={cn(
+              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent aria-expanded:text-foreground",
+            )}
           >
             <Icon name="commit" size={14} />
             <span>Commit…</span>
             <kbd>⌘K</kbd>
-          </button>
+          </Button>
         )}
         <div role="separator" />
         {actionMatches("New Branch…") && (
-          <button
+          <Button
+            data-slot="button"
             data-branch-action="true"
             disabled={busy}
             onClick={() => void createBranch()}
             role="treeitem"
+            type="button"
+            className={cn(
+              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent aria-expanded:text-foreground",
+            )}
           >
             <Icon name="plus" size={14} />
             <span>New Branch…</span>
             <kbd>⌥⌘N</kbd>
-          </button>
+          </Button>
         )}
         {actionMatches("Checkout Tag or Revision…") && (
-          <button
+          <Button
+            data-slot="button"
             data-branch-action="true"
             disabled={busy}
             onClick={() => void checkoutRevision()}
             role="treeitem"
+            type="button"
+            className={cn(
+              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent aria-expanded:text-foreground",
+            )}
           >
             <Icon name="checkout" size={14} />
             <span>Checkout Tag or Revision…</span>
-          </button>
+          </Button>
         )}
         <div role="separator" />
         {(["local", "remote", "tag"] as const).map((kind) => {
@@ -389,42 +435,54 @@ export function GitBranchesPopup({
               </div>
               <div role="group">
                 {group.map(({ row, index }) => (
-                  <button
-                    aria-selected={index === activeIndex}
-                    className={index === activeIndex ? tw.selected : undefined}
-                    id={`branch-${index}`}
-                    key={row.ref.name}
-                    onClick={() => {
-                      if (index === activeIndex) setDetailsOpen(true);
-                      else {
-                        setActiveIndex(index);
-                        setDetailsOpen(false);
+                  <Tooltip key={row.ref.name}>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          data-slot="button"
+                          aria-selected={index === activeIndex}
+                          id={`branch-${index}`}
+                          onClick={() => {
+                            if (index === activeIndex) setDetailsOpen(true);
+                            else {
+                              setActiveIndex(index);
+                              setDetailsOpen(false);
+                            }
+                          }}
+                          onDoubleClick={() => void checkoutActive()}
+                          onMouseEnter={() => setActiveIndex(index)}
+                          role="treeitem"
+                          type="button"
+                          className={cn(
+                            "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent aria-expanded:text-foreground",
+                            index === activeIndex ? tw.selected : undefined,
+                          )}
+                        >
+                          <Icon
+                            name={
+                              row.ref.kind === "remote"
+                                ? "remote"
+                                : row.ref.kind === "tag"
+                                  ? "tag"
+                                  : "branch"
+                            }
+                            size={14}
+                          />
+                          <span>{row.label}</span>
+                          {row.ref.favorite && (
+                            <Icon className={tw.favorite} name="star" size={12} />
+                          )}
+                          {(row.ref.current || row.ref.shortName === currentBranch) && (
+                            <small>
+                              {row.ref.upstream?.replace(/^refs\/remotes\//, "") ?? "Current"}
+                            </small>
+                          )}
+                          <Icon name="chevron" size={10} />
+                        </Button>
                       }
-                    }}
-                    onDoubleClick={() => void checkoutActive()}
-                    onMouseEnter={() => setActiveIndex(index)}
-                    role="treeitem"
-                    title={row.ref.subject}
-                  >
-                    <Icon
-                      name={
-                        row.ref.kind === "remote"
-                          ? "remote"
-                          : row.ref.kind === "tag"
-                            ? "tag"
-                            : "branch"
-                      }
-                      size={14}
                     />
-                    <span>{row.label}</span>
-                    {row.ref.favorite && <Icon className={tw.favorite} name="star" size={12} />}
-                    {(row.ref.current || row.ref.shortName === currentBranch) && (
-                      <small>
-                        {row.ref.upstream?.replace(/^refs\/remotes\//, "") ?? "Current"}
-                      </small>
-                    )}
-                    <Icon name="chevron" size={10} />
-                  </button>
+                    <TooltipContent>{row.ref.subject}</TooltipContent>
+                  </Tooltip>
                 ))}
               </div>
             </div>
@@ -442,45 +500,111 @@ export function GitBranchesPopup({
           className={tw.gitBranchSelectedActions}
           aria-label={`Actions for ${activeRef.shortName}`}
         >
-          <button disabled={activeRef.current || busy} onClick={() => void checkoutActive()}>
+          <Button
+            data-slot="button"
+            disabled={activeRef.current || busy}
+            onClick={() => void checkoutActive()}
+            type="button"
+            className={cn(
+              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
+            )}
+          >
             Checkout
-          </button>
-          <button disabled={busy} onClick={() => void createBranch()}>
+          </Button>
+          <Button
+            data-slot="button"
+            disabled={busy}
+            onClick={() => void createBranch()}
+            type="button"
+            className={cn(
+              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
+            )}
+          >
             New Branch from…
-          </button>
-          <button
+          </Button>
+          <Button
+            data-slot="button"
             disabled={!onCompare || !currentBranch || activeRef.current || busy}
             onClick={() => void compareActive()}
+            type="button"
+            className={cn(
+              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
+            )}
           >
             Compare
-          </button>
+          </Button>
           {activeRef.kind === "local" && (
-            <button disabled={busy} onClick={() => void renameActive()}>
+            <Button
+              data-slot="button"
+              disabled={busy}
+              onClick={() => void renameActive()}
+              type="button"
+              className={cn(
+                "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
+              )}
+            >
               Rename…
-            </button>
+            </Button>
           )}
           {activeRef.kind === "local" && (
-            <button disabled={busy} onClick={() => void setUpstream()}>
+            <Button
+              data-slot="button"
+              disabled={busy}
+              onClick={() => void setUpstream()}
+              type="button"
+              className={cn(
+                "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
+              )}
+            >
               Set Upstream…
-            </button>
+            </Button>
           )}
-          <button disabled={busy || !onOperation} onClick={() => void createTag()}>
+          <Button
+            data-slot="button"
+            disabled={busy || !onOperation}
+            onClick={() => void createTag()}
+            type="button"
+            className={cn(
+              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
+            )}
+          >
             New Tag…
-          </button>
+          </Button>
           {activeRef.kind === "tag" && (
-            <button disabled={busy || remotes.length === 0} onClick={() => void pushActiveTag()}>
+            <Button
+              data-slot="button"
+              disabled={busy || remotes.length === 0}
+              onClick={() => void pushActiveTag()}
+              type="button"
+              className={cn(
+                "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
+              )}
+            >
               Push Tag
-            </button>
+            </Button>
           )}
-          <button disabled={busy || !onOperation} onClick={() => void addWorktree()}>
+          <Button
+            data-slot="button"
+            disabled={busy || !onOperation}
+            onClick={() => void addWorktree()}
+            type="button"
+            className={cn(
+              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
+            )}
+          >
             New Worktree…
-          </button>
-          <button
+          </Button>
+          <Button
+            data-slot="button"
             disabled={activeRef.current || busy || !onOperation}
             onClick={() => void deleteActive()}
+            type="button"
+            className={cn(
+              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
+            )}
           >
             Delete…
-          </button>
+          </Button>
         </div>
       )}
       {comparison && activeRef && (

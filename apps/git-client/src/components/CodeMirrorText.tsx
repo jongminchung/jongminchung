@@ -26,8 +26,15 @@ export default function CodeMirrorText({
   useEffect(() => {
     if (!parent.current) return;
     const theme = EditorView.theme({
-      "&": { height: "100%", fontSize: "11px", background: "var(--surface)" },
-      ".cm-scroller": { fontFamily: "var(--font-family-code)", lineHeight: "1.5" },
+      "&": {
+        height: "100%",
+        fontSize: "11px",
+        background: "var(--card)",
+      },
+      ".cm-scroller": {
+        fontFamily: "var(--font-family-code)",
+        lineHeight: "1.5",
+      },
       ".cm-gutters": { background: "var(--muted)", border: "0" },
     });
     const editor = new EditorView({
@@ -63,7 +70,9 @@ export default function CodeMirrorText({
   useEffect(() => {
     const editor = view.current;
     if (!editor || editor.state.doc.toString() === value) return;
-    editor.dispatch({ changes: { from: 0, to: editor.state.doc.length, insert: value } });
+    editor.dispatch({
+      changes: { from: 0, to: editor.state.doc.length, insert: value },
+    });
   }, [value]);
 
   return <div ref={parent} style={{ height: "100%", minHeight: 0 }} />;

@@ -1,8 +1,9 @@
+import { Button } from "@base-ui/react/button";
 import { useMemo, useState } from "react";
 import type { FileChange } from "../domain/types";
+import { cn } from "../lib/utils";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
-import { Button } from "./ui";
 import { Dialog, DialogHeader } from "./ui";
 import { List, ListItem } from "./ui";
 import { TextArea } from "./ui";
@@ -65,7 +66,7 @@ export function ShareInitialCommitDialog({
           </span>
           {sortedFiles.length > 0 && (
             <Button
-              label={selectedPaths.size === sortedFiles.length ? "Unselect All" : "Select All"}
+              data-slot="button"
               onClick={() =>
                 setSelectedPaths(
                   selectedPaths.size === sortedFiles.length
@@ -73,9 +74,13 @@ export function ShareInitialCommitDialog({
                     : new Set(sortedFiles.map((file) => file.path)),
                 )
               }
-              size="sm"
-              variant="ghost"
-            />
+              type="button"
+              className={cn(
+                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+              )}
+            >
+              {selectedPaths.size === sortedFiles.length ? "Unselect All" : "Select All"}
+            </Button>
           )}
         </header>
         <main>
@@ -114,10 +119,18 @@ export function ShareInitialCommitDialog({
           width="100%"
         />
         <footer>
-          <Button label="Cancel" onClick={onCancel} variant="secondary" />
           <Button
-            isDisabled={selectedPaths.size === 0 || commitMessage.trim().length === 0}
-            label="Add"
+            data-slot="button"
+            onClick={onCancel}
+            type="button"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
+            )}
+          >
+            Cancel
+          </Button>
+          <Button
+            data-slot="button"
             onClick={() =>
               onAdd({
                 paths: sortedFiles
@@ -126,8 +139,14 @@ export function ShareInitialCommitDialog({
                 message: commitMessage.trim(),
               })
             }
-            variant="primary"
-          />
+            type="button"
+            disabled={selectedPaths.size === 0 || commitMessage.trim().length === 0}
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-primary bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 active:bg-primary/80",
+            )}
+          >
+            Add
+          </Button>
         </footer>
       </section>
     </Dialog>

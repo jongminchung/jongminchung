@@ -1,15 +1,18 @@
+import { Button } from "@base-ui/react/button";
+import { Toggle } from "@base-ui/react/toggle";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import type { Commit, Ref } from "../domain/types";
+import { cn } from "../lib/utils";
 import type { LogFilters, LogOrder } from "../shared/contracts/model";
 import { tw } from "../styles/tailwind";
 import { useDismissLayer } from "./CommandProvider";
 import { CommitGraph } from "./CommitGraph";
 import { Icon } from "./Icon";
-import { Button } from "./ui";
 import { CheckboxInput } from "./ui";
 import { Popover } from "./ui";
 import { Selector } from "./ui";
 import { TextInput } from "./ui";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui";
 
 const LOG_ROW_HEIGHT = 20;
 
@@ -134,6 +137,11 @@ export const CommitLog = memo(function CommitLog({
     [ahead, commits],
   );
   const upstreamRef = upstream ? `refs/remotes/${upstream}` : null;
+  const indexingLabel = powerSaveMode
+    ? "Git Log Indexing is unavailable in Power Save Mode"
+    : indexing
+      ? "Indexing Git Log"
+      : "Enable Git Log Indexing";
 
   const filters = useMemo<LogFilters>(
     () => ({
@@ -279,26 +287,28 @@ export const CommitLog = memo(function CommitLog({
             value={query}
             width="100%"
           />
-          <Button
-            aria-pressed={regex}
-            className={tw.logSearchToggle}
-            label="Regex"
-            onClick={() => setRegex((current) => !current)}
-            size="sm"
-            variant="ghost"
+          <Toggle
+            aria-label="Use regular expression"
+            onPressedChange={setRegex}
+            pressed={regex}
+            type="button"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-6 min-w-5 px-1 border-transparent bg-transparent font-mono text-[9px] text-muted-foreground hover:bg-accent hover:text-accent-foreground data-pressed:bg-accent data-pressed:text-foreground",
+            )}
           >
             .*
-          </Button>
-          <Button
-            aria-pressed={matchCase}
-            className={tw.logSearchToggle}
-            label="Match Case"
-            onClick={() => setMatchCase((current) => !current)}
-            size="sm"
-            variant="ghost"
+          </Toggle>
+          <Toggle
+            aria-label="Match case"
+            onPressedChange={setMatchCase}
+            pressed={matchCase}
+            type="button"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-6 min-w-5 px-1 border-transparent bg-transparent font-mono text-[9px] text-muted-foreground hover:bg-accent hover:text-accent-foreground data-pressed:bg-accent data-pressed:text-foreground",
+            )}
           >
             Cc
-          </Button>
+          </Toggle>
         </div>
         <Selector
           isLabelHidden
@@ -426,8 +436,7 @@ export const CommitLog = memo(function CommitLog({
                 width="100%"
               />
               <Button
-                isDisabled={activeFilterCount === 0 && order === "topology"}
-                label="Reset filters"
+                data-slot="button"
                 onClick={() => {
                   setQuery("");
                   setBranch("all");
@@ -436,154 +445,210 @@ export const CommitLog = memo(function CommitLog({
                   setPath("");
                   setOrder("topology");
                 }}
-                size="sm"
-                variant="ghost"
-              />
+                type="button"
+                disabled={activeFilterCount === 0 && order === "topology"}
+                className={cn(
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+                )}
+              >
+                Reset filters
+              </Button>
             </div>
           }
         >
           <Button
-            className={tw.logActionIcon}
-            endContent={activeFilterCount > 0 ? <em>{activeFilterCount}</em> : undefined}
-            icon={<Icon name="filter" size={14} />}
-            isIconOnly
-            label="Graph Options"
-            size="sm"
-            variant="ghost"
-          />
+            data-slot="button"
+            type="button"
+            aria-label={"Graph Options"}
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-6 min-w-5 px-1 aspect-square px-0 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+            )}
+          >
+            <Icon name="filter" size={14} />
+          </Button>
         </Popover>
-        <Button
-          className={tw.logActionIcon}
-          icon={<Icon name="plus" size={14} />}
-          isIconOnly
-          label="Open New Git Log Tab"
-          onClick={onOpenNewTab}
-          size="sm"
-          tooltip="Open New Git Log Tab"
-          variant="ghost"
-        />
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                onClick={onOpenNewTab}
+                type="button"
+                aria-label="Open New Git Log Tab"
+                className={cn(
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-6 min-w-5 px-1 aspect-square px-0 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+                )}
+              >
+                <Icon name="plus" size={14} />
+              </Button>
+            }
+          />
+          <TooltipContent>Open New Git Log Tab</TooltipContent>
+        </Tooltip>
         {!indexingEnabled && (
-          <Button
-            className={tw.logActionIcon}
-            icon={<Icon name="search" size={14} />}
-            isDisabled={indexing || powerSaveMode}
-            isIconOnly
-            label={
-              powerSaveMode
-                ? "Git Log Indexing is unavailable in Power Save Mode"
-                : indexing
-                  ? "Indexing Git Log"
-                  : "Enable Git Log Indexing"
-            }
-            onClick={() => void onEnableIndexing(filters, order)}
-            size="sm"
-            tooltip={
-              powerSaveMode
-                ? "Git Log Indexing is unavailable in Power Save Mode"
-                : indexing
-                  ? "Indexing Git Log"
-                  : "Enable Git Log Indexing"
-            }
-            variant="ghost"
-          />
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  data-slot="button"
+                  onClick={() => void onEnableIndexing(filters, order)}
+                  type="button"
+                  aria-label={indexingLabel}
+                  disabled={indexing || powerSaveMode}
+                  className={cn(
+                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-6 min-w-5 px-1 aspect-square px-0 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+                  )}
+                >
+                  <Icon name="search" size={14} />
+                </Button>
+              }
+            />
+            <TooltipContent>{indexingLabel}</TooltipContent>
+          </Tooltip>
         )}
-        <Button
-          className={tw.logActionIcon}
-          icon={<Icon name="refresh" size={14} />}
-          isIconOnly
-          label="Refresh"
-          onClick={onRefresh}
-          size="sm"
-          tooltip="Refresh"
-          variant="ghost"
-        />
-        <Button
-          className={tw.logActionIcon}
-          icon={<Icon name="cherry" size={14} />}
-          isDisabled={!canCherryPick}
-          isIconOnly
-          label="Cherry-Pick"
-          onClick={() => onCherryPick(selectedOids)}
-          size="sm"
-          tooltip="Cherry-Pick"
-          variant="ghost"
-        />
-        <Popover
-          alignment="end"
-          hasAutoFocus
-          isOpen={viewOptionsOpen}
-          label="View Options"
-          onOpenChange={setViewOptionsOpen}
-          placement="below"
-          width={264}
-          content={
-            <div className={tw.logViewOptions}>
-              <CheckboxInput isDisabled label="Root Names" size="sm" value={false} />
-              <CheckboxInput
-                label="Compact References View"
-                onChange={setCompactReferences}
-                size="sm"
-                value={compactReferences}
-              />
-              <CheckboxInput
-                label="Tag Names"
-                onChange={setShowTagNames}
-                size="sm"
-                value={showTagNames}
-              />
-              <CheckboxInput
-                label="Long Edges"
-                onChange={setShowLongEdges}
-                size="sm"
-                value={showLongEdges}
-              />
-              <CheckboxInput
-                label="Commit Timestamp"
-                onChange={setPreferCommitDate}
-                size="sm"
-                value={preferCommitDate}
-              />
-              <CheckboxInput
-                label="References on the Left"
-                onChange={setReferencesOnLeft}
-                size="sm"
-                value={referencesOnLeft}
-              />
-              <strong>Columns</strong>
-              <CheckboxInput label="Author" onChange={setShowAuthor} size="sm" value={showAuthor} />
-              <CheckboxInput label="Date" onChange={setShowDate} size="sm" value={showDate} />
-              <CheckboxInput
-                label="Commit Hash"
-                onChange={setShowHash}
-                size="sm"
-                value={showHash}
-              />
-            </div>
-          }
-        >
-          <Button
-            className={tw.logActionIcon}
-            icon={<Icon name="more" size={14} />}
-            isIconOnly
-            label="View Options"
-            size="sm"
-            tooltip="View Options"
-            variant="ghost"
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                onClick={onRefresh}
+                type="button"
+                aria-label="Refresh"
+                className={cn(
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-6 min-w-5 px-1 aspect-square px-0 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+                )}
+              >
+                <Icon name="refresh" size={14} />
+              </Button>
+            }
           />
-        </Popover>
+          <TooltipContent>Refresh</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                onClick={() => onCherryPick(selectedOids)}
+                type="button"
+                aria-label="Cherry-Pick"
+                disabled={!canCherryPick}
+                className={cn(
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-6 min-w-5 px-1 aspect-square px-0 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+                )}
+              >
+                <Icon name="cherry" size={14} />
+              </Button>
+            }
+          />
+          <TooltipContent>Cherry-Pick</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <Popover
+            alignment="end"
+            hasAutoFocus
+            isOpen={viewOptionsOpen}
+            label="View Options"
+            onOpenChange={setViewOptionsOpen}
+            placement="below"
+            width={264}
+            content={
+              <div className={tw.logViewOptions}>
+                <CheckboxInput isDisabled label="Root Names" size="sm" value={false} />
+                <CheckboxInput
+                  label="Compact References View"
+                  onChange={setCompactReferences}
+                  size="sm"
+                  value={compactReferences}
+                />
+                <CheckboxInput
+                  label="Tag Names"
+                  onChange={setShowTagNames}
+                  size="sm"
+                  value={showTagNames}
+                />
+                <CheckboxInput
+                  label="Long Edges"
+                  onChange={setShowLongEdges}
+                  size="sm"
+                  value={showLongEdges}
+                />
+                <CheckboxInput
+                  label="Commit Timestamp"
+                  onChange={setPreferCommitDate}
+                  size="sm"
+                  value={preferCommitDate}
+                />
+                <CheckboxInput
+                  label="References on the Left"
+                  onChange={setReferencesOnLeft}
+                  size="sm"
+                  value={referencesOnLeft}
+                />
+                <strong>Columns</strong>
+                <CheckboxInput
+                  label="Author"
+                  onChange={setShowAuthor}
+                  size="sm"
+                  value={showAuthor}
+                />
+                <CheckboxInput label="Date" onChange={setShowDate} size="sm" value={showDate} />
+                <CheckboxInput
+                  label="Commit Hash"
+                  onChange={setShowHash}
+                  size="sm"
+                  value={showHash}
+                />
+              </div>
+            }
+          >
+            <TooltipTrigger
+              render={
+                <Button
+                  data-slot="button"
+                  type="button"
+                  aria-label="View Options"
+                  className={cn(
+                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-6 min-w-5 px-1 aspect-square px-0 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+                  )}
+                >
+                  <Icon name="more" size={14} />
+                </Button>
+              }
+            />
+          </Popover>
+          <TooltipContent>View Options</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                onClick={() => searchInput.current?.focus()}
+                type="button"
+                aria-label="Go To Hash/Branch/Tag"
+                className={cn(
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-6 min-w-5 px-1 aspect-square px-0 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+                )}
+              >
+                <Icon name="search" size={14} />
+              </Button>
+            }
+          />
+          <TooltipContent>Go To Hash/Branch/Tag</TooltipContent>
+        </Tooltip>
         <Button
-          className={tw.logActionIcon}
-          icon={<Icon name="search" size={14} />}
-          isIconOnly
-          label="Go To Hash/Branch/Tag"
-          onClick={() => searchInput.current?.focus()}
-          size="sm"
-          tooltip="Go To Hash/Branch/Tag"
-          variant="ghost"
-        />
-        <button className={tw.srOnly} onClick={onImportPatch} tabIndex={-1}>
+          data-slot="button"
+          onClick={onImportPatch}
+          tabIndex={-1}
+          type="button"
+          className={cn(
+            "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+            tw.srOnly,
+          )}
+        >
           Import Patch
-        </button>
+        </Button>
       </div>
       <div
         aria-colcount={4}
@@ -657,11 +722,11 @@ export const CommitLog = memo(function CommitLog({
                 </em>
               ));
               return (
-                <button
+                <Button
+                  data-slot="button"
                   aria-label={`${commit.author} ${displayedTime} ${commit.subject} ${commit.oid.slice(0, 7)}`}
                   aria-rowindex={index + 1}
                   aria-selected={selected}
-                  className={`${tw.commitRow} ${selected ? tw.selectedCommit : ""}`}
                   data-oid={commit.oid}
                   key={commit.oid}
                   onClick={(event) => select(event, commit)}
@@ -671,6 +736,11 @@ export const CommitLog = memo(function CommitLog({
                     gridTemplateColumns: rowColumns,
                     transform: `translateY(${index * LOG_ROW_HEIGHT}px)`,
                   }}
+                  type="button"
+                  className={cn(
+                    "grid min-h-0 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 whitespace-normal text-left aria-selected:bg-accent aria-current:bg-accent",
+                    `${tw.commitRow} ${selected ? tw.selectedCommit : ""}`,
+                  )}
                 >
                   <span
                     aria-hidden="true"
@@ -686,7 +756,7 @@ export const CommitLog = memo(function CommitLog({
                     )}
                     {toPull && (
                       <em
-                        className="rounded bg-accent/15 px-1 text-accent"
+                        className="rounded bg-accent/15 px-1 text-primary"
                         title="Remote-only history to pull"
                       >
                         ↓ pull
@@ -705,7 +775,7 @@ export const CommitLog = memo(function CommitLog({
                   <span hidden={!showDate} role="cell">
                     {displayedTime}
                   </span>
-                </button>
+                </Button>
               );
             })}
             {(loading || error) && (
@@ -725,7 +795,16 @@ export const CommitLog = memo(function CommitLog({
       <div className={tw.logFooter}>
         <span>{loading ? "Loading…" : `${filtered.length.toLocaleString()} commits`}</span>
         {hasMore ? (
-          <button onClick={() => void loadMore()}>Load 500 more</button>
+          <Button
+            data-slot="button"
+            onClick={() => void loadMore()}
+            type="button"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+            )}
+          >
+            Load 500 more
+          </Button>
         ) : (
           <span>{order === "firstParent" ? "First parent" : order} order</span>
         )}

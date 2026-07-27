@@ -1,4 +1,7 @@
+import { Button } from "@base-ui/react/button";
+import { Tabs } from "@base-ui/react/tabs";
 import { useEffect, useMemo, useState } from "react";
+import { cn } from "../lib/utils";
 import type {
   GitConfig,
   GitOperation,
@@ -8,6 +11,13 @@ import type {
 import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
 import { Icon } from "./Icon";
+import { Notice } from "./ui";
+
+type RepositorySettingsTab = "ignore" | "submodules" | "config";
+
+function isRepositorySettingsTab(value: unknown): value is RepositorySettingsTab {
+  return value === "ignore" || value === "submodules" || value === "config";
+}
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
@@ -30,8 +40,11 @@ export function RepositorySettingsPanel({
 }) {
   const [config, setConfig] = useState<readonly GitConfig[]>([]);
   const [submodules, setSubmodules] = useState<readonly SubmoduleInfo[]>([]);
-  const [rules, setRules] = useState<IgnoreRules>({ gitignore: "", infoExclude: "" });
-  const [tab, setTab] = useState<"ignore" | "submodules" | "config">("ignore");
+  const [rules, setRules] = useState<IgnoreRules>({
+    gitignore: "",
+    infoExclude: "",
+  });
+  const [tab, setTab] = useState<RepositorySettingsTab>("ignore");
   const [filter, setFilter] = useState("");
   const [scopeFilter, setScopeFilter] = useState<"all" | "local" | "global" | "system">("all");
   const [key, setKey] = useState("");
@@ -125,52 +138,86 @@ export function RepositorySettingsPanel({
         <strong>Repository settings</strong>
         <span />
         {isShallow && (
-          <button disabled={busy} onClick={() => void onOperation({ kind: "unshallow" })}>
+          <Button
+            data-slot="button"
+            disabled={busy}
+            onClick={() => void onOperation({ kind: "unshallow" })}
+            type="button"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+            )}
+          >
             Unshallow
-          </button>
+          </Button>
         )}
-        <button disabled={busy} onClick={() => void reload()}>
+        <Button
+          data-slot="button"
+          disabled={busy}
+          onClick={() => void reload()}
+          type="button"
+          className={cn(
+            "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+          )}
+        >
           Reload
-        </button>
+        </Button>
       </div>
       {error && (
-        <div className={tw.collectionError} role="alert">
+        <Notice role="alert" size="sm" tone="destructive">
           {error}
-        </div>
+        </Notice>
       )}
       {notice && (
-        <div className={tw.hostingNotice} role="status">
+        <Notice role="status" size="sm" tone="success">
           {notice}
-        </div>
+        </Notice>
       )}
-      <nav className={tw.settingsTabs} aria-label="Repository settings sections">
-        <button
-          className={tab === "ignore" ? tw.activeButton : undefined}
-          onClick={() => setTab("ignore")}
+      <Tabs.Root
+        className="contents"
+        onValueChange={(value) => {
+          if (isRepositorySettingsTab(value)) setTab(value);
+        }}
+        value={tab}
+      >
+        <Tabs.List
+          aria-label="Repository settings sections"
+          className={tw.settingsTabs}
+          render={<nav />}
         >
-          Ignore
-        </button>
-        <button
-          className={tab === "submodules" ? tw.activeButton : undefined}
-          onClick={() => setTab("submodules")}
-        >
-          Submodules <em>{submodules.length}</em>
-        </button>
-        <button
-          className={tab === "config" ? tw.activeButton : undefined}
-          onClick={() => setTab("config")}
-        >
-          Git Config
-        </button>
-      </nav>
-      {tab === "ignore" && (
-        <section className={tw.settingsSection}>
+          <Tabs.Tab
+            className="inline-flex h-7 items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent px-2.5 text-xs text-muted-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 data-active:bg-accent data-active:text-foreground"
+            value="ignore"
+          >
+            Ignore
+          </Tabs.Tab>
+          <Tabs.Tab
+            className="inline-flex h-7 items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent px-2.5 text-xs text-muted-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 data-active:bg-accent data-active:text-foreground"
+            value="submodules"
+          >
+            Submodules <em>{submodules.length}</em>
+          </Tabs.Tab>
+          <Tabs.Tab
+            className="inline-flex h-7 items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent px-2.5 text-xs text-muted-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 data-active:bg-accent data-active:text-foreground"
+            value="config"
+          >
+            Git Config
+          </Tabs.Tab>
+        </Tabs.List>
+        <Tabs.Panel className={tw.settingsSection} render={<section />} value="ignore">
           <header>
             <strong>Ignore rules</strong>
             <span />{" "}
-            <button disabled={busy} onClick={() => void saveIgnoreRules()}>
+            <Button
+              data-slot="button"
+              disabled={busy}
+              onClick={() => void saveIgnoreRules()}
+              type="button"
+              className={cn(
+                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+              )}
+            >
               Save rules
-            </button>
+            </Button>
           </header>
           <div className={tw.ignoreEditors}>
             <label>
@@ -178,7 +225,10 @@ export function RepositorySettingsPanel({
               <textarea
                 value={rules.gitignore}
                 onChange={(event) =>
-                  setRules((current) => ({ ...current, gitignore: event.target.value }))
+                  setRules((current) => ({
+                    ...current,
+                    gitignore: event.target.value,
+                  }))
                 }
               />
             </label>
@@ -187,28 +237,36 @@ export function RepositorySettingsPanel({
               <textarea
                 value={rules.infoExclude}
                 onChange={(event) =>
-                  setRules((current) => ({ ...current, infoExclude: event.target.value }))
+                  setRules((current) => ({
+                    ...current,
+                    infoExclude: event.target.value,
+                  }))
                 }
               />
             </label>
           </div>
-        </section>
-      )}
-      {tab === "submodules" && (
-        <section className={tw.settingsSection}>
+        </Tabs.Panel>
+        <Tabs.Panel className={tw.settingsSection} render={<section />} value="submodules">
           <header>
             <strong>Submodules · {submodules.length}</strong>
             <span />
-            <button
+            <Button
+              data-slot="button"
               disabled={busy}
               onClick={() =>
-                void onOperation({ kind: "updateSubmodules", init: true, recursive: true }).then(
-                  () => reload(),
-                )
+                void onOperation({
+                  kind: "updateSubmodules",
+                  init: true,
+                  recursive: true,
+                }).then(() => reload())
               }
+              type="button"
+              className={cn(
+                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+              )}
             >
               <Icon name="refresh" size={13} /> Update recursively
-            </button>
+            </Button>
           </header>
           {submodules.length === 0 ? (
             <p className={tw.emptyState}>No submodules configured.</p>
@@ -226,10 +284,8 @@ export function RepositorySettingsPanel({
               </article>
             ))
           )}
-        </section>
-      )}
-      {tab === "config" && (
-        <section className={tw.settingsSection}>
+        </Tabs.Panel>
+        <Tabs.Panel className={tw.settingsSection} render={<section />} value="config">
           <header>
             <strong>Git config</strong>
             <span />
@@ -263,9 +319,17 @@ export function RepositorySettingsPanel({
               placeholder="value"
               value={value}
             />
-            <button disabled={busy || !key.trim()} onClick={() => void saveConfig()}>
+            <Button
+              data-slot="button"
+              disabled={busy || !key.trim()}
+              onClick={() => void saveConfig()}
+              type="button"
+              className={cn(
+                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+              )}
+            >
               Set local value
-            </button>
+            </Button>
           </div>
           <div className={tw.configTable} role="table" aria-label="Git config values">
             <div role="row">
@@ -283,14 +347,23 @@ export function RepositorySettingsPanel({
                 <small role="cell">{entry.origin}</small>
                 <span>
                   {entry.scope === "local" && (
-                    <button onClick={() => void removeConfig(entry)}>Unset</button>
+                    <Button
+                      data-slot="button"
+                      onClick={() => void removeConfig(entry)}
+                      type="button"
+                      className={cn(
+                        "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                      )}
+                    >
+                      Unset
+                    </Button>
                   )}
                 </span>
               </div>
             ))}
           </div>
-        </section>
-      )}
+        </Tabs.Panel>
+      </Tabs.Root>
       {dialog.node}
     </div>
   );

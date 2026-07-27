@@ -1,3 +1,5 @@
+import { Button } from "@base-ui/react/button";
+import { Toggle } from "@base-ui/react/toggle";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   CSSProperties,
@@ -18,6 +20,7 @@ import {
   type CommandDefinition,
 } from "../domain/commands";
 import type { FileChange, StatusModel } from "../domain/types";
+import { cn } from "../lib/utils";
 import type {
   Changelist,
   FileContent,
@@ -31,11 +34,12 @@ import { useAppDialog } from "./AppDialog";
 import { useCommandDefinitions, useDismissLayer } from "./CommandProvider";
 import { DiffViewer } from "./DiffViewer";
 import { Icon } from "./Icon";
-import { Button } from "./ui";
 import { CheckboxInput } from "./ui";
 import { Popover } from "./ui";
 import { Selector } from "./ui";
+import { Spinner } from "./ui";
 import { TextArea } from "./ui";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui";
 import { VerticalResizeHandle } from "./VerticalResizeHandle";
 
 interface ChangesWorkspaceProps {
@@ -106,6 +110,8 @@ function statusClass(file: FileChange): string {
   return tw.statusModified;
 }
 
+type ChangelistMutation = "create" | "delete";
+
 export function ChangesWorkspace({
   toolWindow = false,
   status,
@@ -147,11 +153,13 @@ export function ChangesWorkspace({
   const [selectedKeys, setSelectedKeys] = useState<ReadonlySet<string>>(new Set());
   const [selectionAnchor, setSelectionAnchor] = useState<string | null>(null);
   const [committing, setCommitting] = useState(false);
+  const [changelistMutation, setChangelistMutation] = useState<ChangelistMutation | null>(null);
   const [focused, setFocused] = useState(false);
   const [commitRailOpen, setCommitRailOpen] = useState(false);
   const [commitOptionsOpen, setCommitOptionsOpen] = useState(false);
   const searchInput = useRef<HTMLInputElement>(null);
   const navigator = useRef<HTMLElement>(null);
+  const changelistMutationRef = useRef<ChangelistMutation | null>(null);
   const dialog = useAppDialog();
   const normalizedQuery = query.trim().toLocaleLowerCase();
   const filteredEntries = useMemo(
@@ -348,6 +356,50 @@ export function ChangesWorkspace({
     onDraftChange({ ...draft, changelistId: saved.id });
   };
 
+  const createChangelist = async (): Promise<void> => {
+    if (changelistMutationRef.current !== null) return;
+    changelistMutationRef.current = "create";
+    setChangelistMutation("create");
+    try {
+      const name = await dialog.input({
+        title: "New changelist",
+        label: "Changelist name",
+        initialValue: "Feature work",
+        description: "Creates a local grouping without modifying the Git index.",
+      });
+      if (!name?.trim()) return;
+      const saved = await onSaveChangelist(null, name.trim(), []);
+      onDraftChange({
+        ...draft,
+        changelistId: saved.id,
+      });
+    } finally {
+      changelistMutationRef.current = null;
+      setChangelistMutation(null);
+    }
+  };
+
+  const deleteSelectedChangelist = async (): Promise<void> => {
+    if (changelistMutationRef.current !== null || selectedChangelist === null) return;
+    changelistMutationRef.current = "delete";
+    setChangelistMutation("delete");
+    try {
+      const accepted = await dialog.confirm({
+        title: `Delete changelist “${selectedChangelist.name}”?`,
+        description: "Files remain unchanged and return to the default group.",
+        impact: `${selectedChangelist.paths.length} assigned files`,
+        confirmLabel: "Delete changelist",
+        dangerous: true,
+      });
+      if (!accepted) return;
+      await onDeleteChangelist(selectedChangelist.id);
+      onDraftChange({ ...draft, changelistId: null });
+    } finally {
+      changelistMutationRef.current = null;
+      setChangelistMutation(null);
+    }
+  };
+
   const commit = async (push: boolean): Promise<void> => {
     const message = draft.message.trim();
     if (!message) return;
@@ -488,7 +540,8 @@ export function ChangesWorkspace({
         <strong>{label}</strong>
         <small>{group.length}</small>
         <span />
-        <button
+        <Button
+          data-slot="button"
           disabled={group.length === 0}
           onClick={() =>
             void onOperation({
@@ -496,9 +549,13 @@ export function ChangesWorkspace({
               paths: group.map((entry) => entry.file.path),
             })
           }
+          type="button"
+          className={cn(
+            "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+          )}
         >
           {label === "Staged" ? "Unstage all" : "Stage all"}
-        </button>
+        </Button>
       </header>
       {group.map((entry) => {
         const folders = entry.file.path.split("/");
@@ -506,30 +563,39 @@ export function ChangesWorkspace({
         const active = selection ? hasSameChangeSelection(entry.selection, selection) : false;
         const multiSelected = selectedKeys.has(selectionKey(entry.selection));
         return (
-          <button
-            aria-current={active ? "true" : undefined}
-            aria-pressed={multiSelected}
-            className={`${tw.changeNavigatorRow} ${active ? tw.selected : ""} ${multiSelected && !active ? tw.multiSelected : ""}`}
-            key={selectionKey(entry.selection)}
-            onClick={(event) => selectEntry(event, entry)}
-            onDoubleClick={() => setFocused(true)}
-            title={entry.file.path}
-          >
-            <span className={`${tw.statusBadge} ${statusClass(entry.file)}`}>
-              {statusLetter(entry.file)}
-            </span>
-            <Icon name={entry.file.submodule ? "worktree" : "file"} size={13} />
-            <span className={`${tw.ellipsis} grid`}>
-              <strong className="truncate">{treeMode ? filename : entry.file.path}</strong>
-              {treeMode && folders.length > 0 && (
-                <small className="truncate">{folders.join("/")}</small>
-              )}
-            </span>
-            <span className={tw.diffStat}>
-              <i>+{entry.file.additions ?? 0}</i>
-              <b>−{entry.file.deletions ?? 0}</b>
-            </span>
-          </button>
+          <Tooltip key={selectionKey(entry.selection)}>
+            <TooltipTrigger
+              render={
+                <Toggle
+                  aria-current={active ? "true" : undefined}
+                  onClick={(event) => selectEntry(event, entry)}
+                  onDoubleClick={() => setFocused(true)}
+                  pressed={multiSelected}
+                  type="button"
+                  className={cn(
+                    "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+                    `${tw.changeNavigatorRow} ${active ? tw.selected : ""} ${multiSelected && !active ? tw.multiSelected : ""}`,
+                  )}
+                >
+                  <span className={`${tw.statusBadge} ${statusClass(entry.file)}`}>
+                    {statusLetter(entry.file)}
+                  </span>
+                  <Icon name={entry.file.submodule ? "worktree" : "file"} size={13} />
+                  <span className={`${tw.ellipsis} grid`}>
+                    <strong className="truncate">{treeMode ? filename : entry.file.path}</strong>
+                    {treeMode && folders.length > 0 && (
+                      <small className="truncate">{folders.join("/")}</small>
+                    )}
+                  </span>
+                  <span className={tw.diffStat}>
+                    <i>+{entry.file.additions ?? 0}</i>
+                    <b>−{entry.file.deletions ?? 0}</b>
+                  </span>
+                </Toggle>
+              }
+            />
+            <TooltipContent>{entry.file.path}</TooltipContent>
+          </Tooltip>
         );
       })}
     </section>
@@ -561,13 +627,15 @@ export function ChangesWorkspace({
       }
     >
       <Button
-        className={tw.iconButton}
-        icon={<Icon name="more" size={14} />}
-        isIconOnly
-        label="View Options"
-        size="sm"
-        variant="ghost"
-      />
+        data-slot="button"
+        type="button"
+        aria-label={"View Options"}
+        className={cn(
+          "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-[26px] min-w-[26px] px-2 aspect-square px-0 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+        )}
+      >
+        <Icon name="more" size={14} />
+      </Button>
     </Popover>
   );
 
@@ -586,14 +654,25 @@ export function ChangesWorkspace({
           <strong>Commit</strong>
           <span />
           {viewOptions}
-          <button
-            aria-label="Close Commit"
-            className={tw.iconButton}
-            onClick={onCloseToolWindow}
-            title="Close"
-          >
-            <Icon name="close" size={13} />
-          </button>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  data-slot="button"
+                  aria-label="Close Commit"
+                  onClick={onCloseToolWindow}
+                  type="button"
+                  className={cn(
+                    "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                    tw.iconButton,
+                  )}
+                >
+                  <Icon name="close" size={13} />
+                </Button>
+              }
+            />
+            <TooltipContent>Close</TooltipContent>
+          </Tooltip>
         </header>
       )}
       <aside
@@ -623,22 +702,32 @@ export function ChangesWorkspace({
               value={query}
             />
           </label>
-          <button
+          <Toggle
             aria-label={treeMode ? "Show flat list" : "Show tree paths"}
-            className={tw.iconButton}
-            onClick={() => setTreeMode((current) => !current)}
+            onPressedChange={setTreeMode}
+            pressed={treeMode}
+            type="button"
+            className={cn(
+              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+              tw.iconButton,
+            )}
           >
             <Icon name={treeMode ? "folder" : "changes"} size={13} />
-          </button>
+          </Toggle>
           {!toolWindow && viewOptions}
-          <button
+          <Button
+            data-slot="button"
             aria-label="Open commit composer"
-            className={`${tw.iconButton} ${tw.commitRailToggle}`}
             hidden={toolWindow}
             onClick={() => setCommitRailOpen(true)}
+            type="button"
+            className={cn(
+              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+              `${tw.iconButton} ${tw.commitRailToggle}`,
+            )}
           >
             <Icon name="commit" size={13} />
-          </button>
+          </Button>
         </header>
         <div className={tw.changeNavigatorList}>
           {entries.length === 0 ? (
@@ -655,7 +744,8 @@ export function ChangesWorkspace({
         {selectedEntry && (
           <footer className={tw.changeNavigatorActions}>
             {effectiveSelectedEntries.some((entry) => entry.selection.layer === "worktree") && (
-              <button
+              <Button
+                data-slot="button"
                 onClick={() =>
                   void onOperation({
                     kind: "stage",
@@ -664,12 +754,17 @@ export function ChangesWorkspace({
                       .map((entry) => entry.file.path),
                   })
                 }
+                type="button"
+                className={cn(
+                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
+                )}
               >
                 Stage selected
-              </button>
+              </Button>
             )}
             {effectiveSelectedEntries.some((entry) => entry.selection.layer === "index") && (
-              <button
+              <Button
+                data-slot="button"
                 onClick={() =>
                   void onOperation({
                     kind: "unstage",
@@ -678,33 +773,61 @@ export function ChangesWorkspace({
                       .map((entry) => entry.file.path),
                   })
                 }
+                type="button"
+                className={cn(
+                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
+                )}
               >
                 Unstage selected
-              </button>
+              </Button>
             )}
-            <button
+            <Button
+              data-slot="button"
               onClick={() =>
                 onInspectFile(selectedEntry.file, selectedEntry.selection.layer, "file")
               }
+              type="button"
+              className={cn(
+                "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
+              )}
             >
               View
-            </button>
-            <button
+            </Button>
+            <Button
+              data-slot="button"
               onClick={() =>
                 onInspectFile(selectedEntry.file, selectedEntry.selection.layer, "history")
               }
+              type="button"
+              className={cn(
+                "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
+              )}
             >
               History
-            </button>
-            <button
+            </Button>
+            <Button
+              data-slot="button"
               onClick={() =>
                 onInspectFile(selectedEntry.file, selectedEntry.selection.layer, "blame")
               }
+              type="button"
+              className={cn(
+                "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
+              )}
             >
               Blame
-            </button>
+            </Button>
             {selectedEntry.selection.layer === "worktree" && (
-              <button onClick={() => void assign(selectedEntry.file)}>Changelist</button>
+              <Button
+                data-slot="button"
+                onClick={() => void assign(selectedEntry.file)}
+                type="button"
+                className={cn(
+                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
+                )}
+              >
+                Changelist
+              </Button>
             )}
           </footer>
         )}
@@ -721,7 +844,12 @@ export function ChangesWorkspace({
           loading={diffLoading}
           mode={selection?.layer === "index" ? "unstage" : "stage"}
           onApplyPatch={async (partialPatch, cached, reverse) => {
-            await onOperation({ kind: "partialPatch", patch: partialPatch, cached, reverse });
+            await onOperation({
+              kind: "partialPatch",
+              patch: partialPatch,
+              cached,
+              reverse,
+            });
           }}
           onFileAction={selectedEntry ? runFileAction : undefined}
           onNextFile={
@@ -742,11 +870,15 @@ export function ChangesWorkspace({
           <Icon name="changes" size={28} />
           <p>Diff preview is hidden.</p>
           <Button
-            label="Show Diff Preview"
+            data-slot="button"
             onClick={() => setDiffPreviewVisible(true)}
-            size="sm"
-            variant="ghost"
-          />
+            type="button"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+            )}
+          >
+            Show Diff Preview
+          </Button>
         </section>
       )}
       <aside className={tw.commitRail}>
@@ -763,21 +895,29 @@ export function ChangesWorkspace({
           <small>{stagedFiles.length} staged</small>
           {!toolWindow && (
             <Button
-              className={tw.commitRailClose}
-              icon={<Icon name="close" size={13} />}
-              isIconOnly
-              label="Close commit composer"
+              data-slot="button"
               onClick={() => setCommitRailOpen(false)}
-              size="sm"
-              variant="ghost"
-            />
+              type="button"
+              aria-label={"Close commit composer"}
+              className={cn(
+                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-[26px] min-w-[26px] px-2 aspect-square px-0 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+                tw.commitRailClose,
+              )}
+            >
+              <Icon name="close" size={13} />
+            </Button>
           )}
         </header>
         <div className={tw.changelistBar}>
           <Selector
             isLabelHidden
             label="Commit changelist"
-            onChange={(value) => onDraftChange({ ...draft, changelistId: value || null })}
+            onChange={(value) =>
+              onDraftChange({
+                ...draft,
+                changelistId: value || null,
+              })
+            }
             options={[
               { value: "", label: "Default · staged index" },
               ...changelists.map((changelist) => ({
@@ -791,41 +931,40 @@ export function ChangesWorkspace({
             width="100%"
           />
           <Button
-            clickAction={async () => {
-              const name = await dialog.input({
-                title: "New changelist",
-                label: "Changelist name",
-                initialValue: "Feature work",
-                description: "Creates a local grouping without modifying the Git index.",
-              });
-              if (!name?.trim()) return;
-              const saved = await onSaveChangelist(null, name.trim(), []);
-              onDraftChange({ ...draft, changelistId: saved.id });
-            }}
-            label="New"
-            size="sm"
-            variant="ghost"
-          />
+            data-slot="button"
+            type="button"
+            aria-busy={changelistMutation === "create"}
+            disabled={changelistMutation !== null}
+            onClick={() => void createChangelist()}
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+            )}
+          >
+            {changelistMutation === "create" ? (
+              <Spinner label="Creating changelist…" size="sm" />
+            ) : (
+              "New"
+            )}
+          </Button>
         </div>
         {selectedChangelist && (
           <Button
-            className={tw.deleteChangelist}
-            clickAction={async () => {
-              const accepted = await dialog.confirm({
-                title: `Delete changelist “${selectedChangelist.name}”?`,
-                description: "Files remain unchanged and return to the default group.",
-                impact: `${selectedChangelist.paths.length} assigned files`,
-                confirmLabel: "Delete changelist",
-                dangerous: true,
-              });
-              if (!accepted) return;
-              await onDeleteChangelist(selectedChangelist.id);
-              onDraftChange({ ...draft, changelistId: null });
-            }}
-            label="Delete selected changelist"
-            size="sm"
-            variant="destructive"
-          />
+            data-slot="button"
+            type="button"
+            aria-busy={changelistMutation === "delete"}
+            disabled={changelistMutation !== null}
+            onClick={() => void deleteSelectedChangelist()}
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-border bg-secondary text-destructive shadow-xs hover:border-destructive hover:bg-destructive-muted active:bg-destructive-muted/80",
+              "w-full",
+            )}
+          >
+            {changelistMutation === "delete" ? (
+              <Spinner label="Deleting changelist…" size="sm" />
+            ) : (
+              "Delete selected changelist"
+            )}
+          </Button>
         )}
         <TextArea
           isLabelHidden
@@ -875,7 +1014,12 @@ export function ChangesWorkspace({
                 {!selectedChangelist && (
                   <CheckboxInput
                     label="Commit tracked"
-                    onChange={(commitAll) => onDraftChange({ ...draft, commitAll })}
+                    onChange={(commitAll) =>
+                      onDraftChange({
+                        ...draft,
+                        commitAll,
+                      })
+                    }
                     size="sm"
                     value={draft.commitAll}
                   />
@@ -884,29 +1028,54 @@ export function ChangesWorkspace({
             }
           >
             <Button
-              endContent={commitOptionCount > 0 ? <em>{commitOptionCount}</em> : undefined}
-              label="Commit options"
-              size="sm"
-              variant="ghost"
-            />
+              data-slot="button"
+              type="button"
+              className={cn(
+                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+              )}
+            >
+              Commit options
+              {commitOptionCount > 0 ? <em>{commitOptionCount}</em> : undefined}
+            </Button>
           </Popover>
-          <Button
-            isDisabled={commitDisabled}
-            isLoading={committing}
-            label={committing ? "Checking…" : "Commit"}
-            onClick={() => void commit(false)}
-            size="sm"
-            tooltip="Commit · ⌘↩"
-          />
-          <Button
-            isDisabled={commitDisabled}
-            isLoading={committing}
-            label={committing ? "Checking…" : "Commit & Push"}
-            onClick={() => void commit(true)}
-            size="sm"
-            tooltip="Commit & Push · ⇧⌘↩"
-            variant="primary"
-          />
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  data-slot="button"
+                  onClick={() => void commit(false)}
+                  type="button"
+                  aria-busy={committing}
+                  disabled={commitDisabled || committing}
+                  className={cn(
+                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
+                  )}
+                >
+                  {committing ? "Checking…" : "Commit"}
+                </Button>
+              }
+            />
+            <TooltipContent>Commit · ⌘↩</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  data-slot="button"
+                  onClick={() => void commit(true)}
+                  type="button"
+                  aria-busy={committing}
+                  disabled={commitDisabled || committing}
+                  className={cn(
+                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-primary bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 active:bg-primary/80",
+                  )}
+                >
+                  {committing ? "Checking…" : "Commit & Push"}
+                </Button>
+              }
+            />
+            <TooltipContent>Commit &amp; Push · ⇧⌘↩</TooltipContent>
+          </Tooltip>
         </footer>
       </aside>
       {dialog.node}

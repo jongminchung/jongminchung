@@ -1,8 +1,12 @@
+import { Button } from "@base-ui/react/button";
+import { Toggle } from "@base-ui/react/toggle";
+import { ToggleGroup } from "@base-ui/react/toggle-group";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import type { DiffPreferences } from "../domain/changeReview";
 import { assembleHunkPatch, assembleSelectedLinePatch, parseDiffDocument } from "../domain/parsers";
 import type { FileChange } from "../domain/types";
+import { cn } from "../lib/utils";
 import type {
   FileContent,
   FilePreview,
@@ -13,8 +17,7 @@ import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
 import type { SelectableDiffLine } from "./CodeMirrorDiff";
 import { Icon } from "./Icon";
-import { Button } from "./ui";
-import { Popover } from "./ui";
+import { Popover, Tooltip, TooltipContent, TooltipTrigger } from "./ui";
 
 const CodeMirrorDiff = lazy(() => import("./CodeMirrorDiff"));
 
@@ -71,28 +74,44 @@ function ImageDiff({
   return (
     <div className={tw.imageDiff}>
       <div className={tw.imageDiffToolbar}>
-        <div role="group" aria-label="Image comparison mode">
-          <button
-            className={mode === "sideBySide" ? tw.activeButton : undefined}
-            onClick={() => setMode("sideBySide")}
+        <ToggleGroup
+          aria-label="Image comparison mode"
+          onValueChange={(value: ImageDiffMode[]) => {
+            const selected = value[0];
+            if (selected !== undefined) setMode(selected);
+          }}
+          value={[mode]}
+        >
+          <Toggle
+            value="sideBySide"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+              "data-pressed:bg-accent data-pressed:text-accent-foreground",
+            )}
           >
             Side by side
-          </button>
-          <button
+          </Toggle>
+          <Toggle
             disabled={!before || !after}
-            className={mode === "swipe" ? tw.activeButton : undefined}
-            onClick={() => setMode("swipe")}
+            value="swipe"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+              "data-pressed:bg-accent data-pressed:text-accent-foreground",
+            )}
           >
             Swipe
-          </button>
-          <button
+          </Toggle>
+          <Toggle
             disabled={!before || !after}
-            className={mode === "onion" ? tw.activeButton : undefined}
-            onClick={() => setMode("onion")}
+            value="onion"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+              "data-pressed:bg-accent data-pressed:text-accent-foreground",
+            )}
           >
             Onion skin
-          </button>
-        </div>
+          </Toggle>
+        </ToggleGroup>
         {mode !== "sideBySide" && before && after && (
           <label>
             {mode === "swipe" ? "Reveal" : "After opacity"}
@@ -188,8 +207,14 @@ export function DiffViewer({
   const [selectedLines, setSelectedLines] = useState<ReadonlySet<number>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [searchMatchIndex, setSearchMatchIndex] = useState(0);
-  const [statistics, setStatistics] = useState({ differences: 0, matches: 0 });
-  const [searchNavigation, setSearchNavigation] = useState({ sequence: 0, direction: 1 as -1 | 1 });
+  const [statistics, setStatistics] = useState({
+    differences: 0,
+    matches: 0,
+  });
+  const [searchNavigation, setSearchNavigation] = useState({
+    sequence: 0,
+    direction: 1 as -1 | 1,
+  });
   const [differenceNavigation, setDifferenceNavigation] = useState({
     sequence: 0,
     direction: 1 as -1 | 1,
@@ -286,7 +311,10 @@ export function DiffViewer({
       if (!ownsSearch) return;
       const direction = event.detail?.direction === -1 ? -1 : 1;
       setSearchMatchIndex((current) => (current + direction + matchCount) % matchCount);
-      setSearchNavigation((current) => ({ sequence: current.sequence + 1, direction }));
+      setSearchNavigation((current) => ({
+        sequence: current.sequence + 1,
+        direction,
+      }));
     };
     window.addEventListener("git-client:find", find);
     return () => window.removeEventListener("git-client:find", find);
@@ -369,24 +397,46 @@ export function DiffViewer({
       tabIndex={0}
     >
       <header className={tw.diffViewerHeader}>
-        <button
-          aria-label="Previous changed file"
-          className={tw.iconButton}
-          disabled={!onPreviousFile}
-          onClick={onPreviousFile}
-          title="Previous file · ↑"
-        >
-          ↑
-        </button>
-        <button
-          aria-label="Next changed file"
-          className={tw.iconButton}
-          disabled={!onNextFile}
-          onClick={onNextFile}
-          title="Next file · ↓"
-        >
-          ↓
-        </button>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                aria-label="Previous changed file"
+                disabled={!onPreviousFile}
+                onClick={onPreviousFile}
+                type="button"
+                className={cn(
+                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  tw.iconButton,
+                )}
+              >
+                ↑
+              </Button>
+            }
+          />
+          <TooltipContent>Previous file · ↑</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                aria-label="Next changed file"
+                disabled={!onNextFile}
+                onClick={onNextFile}
+                type="button"
+                className={cn(
+                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  tw.iconButton,
+                )}
+              >
+                ↓
+              </Button>
+            }
+          />
+          <TooltipContent>Next file · ↓</TooltipContent>
+        </Tooltip>
         {file ? (
           <>
             <span className={tw.statusBadge}>{file.status.charAt(0).toUpperCase()}</span>
@@ -410,7 +460,10 @@ export function DiffViewer({
               if (event.key !== "Enter" || matchCount === 0) return;
               const direction = event.shiftKey ? -1 : 1;
               setSearchMatchIndex((current) => (current + direction + matchCount) % matchCount);
-              setSearchNavigation((current) => ({ sequence: current.sequence + 1, direction }));
+              setSearchNavigation((current) => ({
+                sequence: current.sequence + 1,
+                direction,
+              }));
               event.preventDefault();
             }}
             placeholder="Find"
@@ -422,14 +475,25 @@ export function DiffViewer({
           )}
         </label>
         {onToggleFocus && (
-          <button
-            aria-label={focused ? "Exit focused diff" : "Focus diff"}
-            className={tw.iconButton}
-            onClick={onToggleFocus}
-            title="Focus diff · Space"
-          >
-            <Icon name="external" size={13} />
-          </button>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Toggle
+                  aria-label={focused ? "Exit focused diff" : "Focus diff"}
+                  onPressedChange={onToggleFocus}
+                  pressed={focused}
+                  type="button"
+                  className={cn(
+                    "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                    tw.iconButton,
+                  )}
+                >
+                  <Icon name="external" size={13} />
+                </Toggle>
+              }
+            />
+            <TooltipContent>Focus diff · Space</TooltipContent>
+          </Tooltip>
         )}
       </header>
       <div className={tw.diffViewerToolbar}>
@@ -453,22 +517,44 @@ export function DiffViewer({
             <option value="unified">Unified</option>
           </select>
         </label>
-        <button
-          aria-label="Previous difference"
-          disabled={statistics.differences === 0}
-          onClick={() => moveHunk(-1)}
-          title="Previous difference · ⌥↑"
-        >
-          ↑ Difference
-        </button>
-        <button
-          aria-label="Next difference"
-          disabled={statistics.differences === 0}
-          onClick={() => moveHunk(1)}
-          title="Next difference · ⌥↓"
-        >
-          ↓ Difference
-        </button>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                aria-label="Previous difference"
+                disabled={statistics.differences === 0}
+                onClick={() => moveHunk(-1)}
+                type="button"
+                className={cn(
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                )}
+              >
+                ↑ Difference
+              </Button>
+            }
+          />
+          <TooltipContent>Previous difference · ⌥↑</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                data-slot="button"
+                aria-label="Next difference"
+                disabled={statistics.differences === 0}
+                onClick={() => moveHunk(1)}
+                type="button"
+                className={cn(
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                )}
+              >
+                ↓ Difference
+              </Button>
+            }
+          />
+          <TooltipContent>Next difference · ⌥↓</TooltipContent>
+        </Tooltip>
         <small>{statistics.differences} differences</small>
         <Popover
           alignment="end"
@@ -517,7 +603,10 @@ export function DiffViewer({
                 <input
                   checked={preferences.wordWrap}
                   onChange={(event) =>
-                    onPreferencesChange({ ...preferences, wordWrap: event.target.checked })
+                    onPreferencesChange({
+                      ...preferences,
+                      wordWrap: event.target.checked,
+                    })
                   }
                   type="checkbox"
                 />
@@ -527,7 +616,10 @@ export function DiffViewer({
                 <input
                   checked={preferences.collapseUnchanged}
                   onChange={(event) =>
-                    onPreferencesChange({ ...preferences, collapseUnchanged: event.target.checked })
+                    onPreferencesChange({
+                      ...preferences,
+                      collapseUnchanged: event.target.checked,
+                    })
                   }
                   type="checkbox"
                 />
@@ -551,7 +643,15 @@ export function DiffViewer({
             </div>
           }
         >
-          <Button label="Diff options" size="sm" variant="secondary" />
+          <Button
+            data-slot="button"
+            type="button"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
+            )}
+          >
+            Diff options
+          </Button>
         </Popover>
         <span />
         {mode !== "readOnly" && (
@@ -569,33 +669,65 @@ export function DiffViewer({
               ))}
             </select>
             {hunk && (
-              <code className="max-w-56 truncate text-[10px] text-secondary" title={hunk.header}>
+              <code
+                className="max-w-56 truncate text-[10px] text-muted-foreground"
+                title={hunk.header}
+              >
                 {hunk.header}
               </code>
             )}
-            <button
-              disabled={!onFileAction}
-              onClick={() => void onFileAction?.()}
-              title="Stage or unstage · ⌘S"
-            >
-              {mode === "stage" ? "Stage file" : "Unstage file"}
-            </button>
-            <button
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    data-slot="button"
+                    disabled={!onFileAction}
+                    onClick={() => void onFileAction?.()}
+                    type="button"
+                    className={cn(
+                      "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                    )}
+                  >
+                    {mode === "stage" ? "Stage file" : "Unstage file"}
+                  </Button>
+                }
+              />
+              <TooltipContent>Stage or unstage · ⌘S</TooltipContent>
+            </Tooltip>
+            <Button
+              data-slot="button"
               disabled={hunk === null || !onApplyPatch}
               onClick={() => void applyHunk(true, mode === "unstage")}
+              type="button"
+              className={cn(
+                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+              )}
             >
               {mode === "stage" ? "Stage hunk" : "Unstage hunk"}
-            </button>
-            <button
+            </Button>
+            <Button
+              data-slot="button"
               disabled={hunk === null || selectedLines.size === 0 || !onApplyPatch}
               onClick={() => void applySelectedLines()}
+              type="button"
+              className={cn(
+                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+              )}
             >
               {mode === "stage" ? "Stage lines" : "Unstage lines"}
-            </button>
+            </Button>
             {mode === "stage" && (
-              <button disabled={hunk === null || !onApplyPatch} onClick={() => void discardHunk()}>
+              <Button
+                data-slot="button"
+                disabled={hunk === null || !onApplyPatch}
+                onClick={() => void discardHunk()}
+                type="button"
+                className={cn(
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                )}
+              >
                 Discard hunk
-              </button>
+              </Button>
             )}
           </>
         )}
@@ -659,7 +791,16 @@ export function DiffViewer({
               <small>{file.sizeBytes.toLocaleString()} bytes</small>
             )}
             {onOpenExternally && (
-              <button onClick={() => void onOpenExternally()}>Open externally</button>
+              <Button
+                data-slot="button"
+                onClick={() => void onOpenExternally()}
+                type="button"
+                className={cn(
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                )}
+              >
+                Open externally
+              </Button>
             )}
           </div>
         ) : beforeText !== null && afterText !== null ? (
@@ -689,7 +830,16 @@ export function DiffViewer({
             <strong>Semantic preview unavailable</strong>
             <p>{contentUnavailable ?? "The before/after file content could not be loaded."}</p>
             {onOpenExternally && (
-              <button onClick={() => void onOpenExternally()}>Open externally</button>
+              <Button
+                data-slot="button"
+                onClick={() => void onOpenExternally()}
+                type="button"
+                className={cn(
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                )}
+              >
+                Open externally
+              </Button>
             )}
           </div>
         )}

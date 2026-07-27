@@ -1,3 +1,4 @@
+import { Button } from "@base-ui/react/button";
 import { GitBranch } from "lucide-react";
 import {
   useDeferredValue,
@@ -9,6 +10,7 @@ import {
 } from "react";
 import { isAppearanceTheme, type AppearancePreference } from "../domain/appearance";
 import type { RecentProject } from "../domain/recentProjects";
+import { cn } from "../lib/utils";
 import { writeClipboardText } from "../platform/electronActions";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
@@ -59,7 +61,7 @@ export function WelcomeWorkspace({
   const [query, setQuery] = useState("");
   const [selectedProject, setSelectedProject] = useState(0);
   const deferredQuery = useDeferredValue(query.trim().toLocaleLowerCase());
-  const navRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const navRefs = useRef<Array<HTMLElement | null>>([]);
 
   const filteredProjects = useMemo(() => {
     if (deferredQuery.length === 0) return recentProjects;
@@ -120,7 +122,8 @@ export function WelcomeWorkspace({
         </div>
         <div aria-label="Welcome screen categories" className={tw.welcomeNavigation} role="tree">
           {SECTIONS.map((item, index) => (
-            <button
+            <Button
+              data-slot="button"
               aria-current={section === item ? "page" : undefined}
               aria-selected={section === item}
               key={item}
@@ -130,18 +133,27 @@ export function WelcomeWorkspace({
                 navRefs.current[index] = node;
               }}
               role="treeitem"
+              type="button"
+              className={cn(
+                "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 text-muted-foreground aria-selected:bg-accent aria-selected:text-foreground aria-current:bg-accent aria-current:text-foreground",
+              )}
             >
               {sectionLabel(item)}
-            </button>
+            </Button>
           ))}
         </div>
-        <button
+        <Button
+          data-slot="button"
           aria-label="Options Menu"
-          className={tw.welcomeSettingsButton}
           onClick={onOpenSettings}
+          type="button"
+          className={cn(
+            "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+            tw.welcomeSettingsButton,
+          )}
         >
           <Icon name="settings" size={16} />
-        </button>
+        </Button>
       </aside>
 
       {section === "projects" && recentProjects.length === 0 && (
@@ -152,24 +164,45 @@ export function WelcomeWorkspace({
             <p>Open an existing project from disk or version control.</p>
           </header>
           <div aria-label="Project actions" className={tw.welcomeProjectActions}>
-            <button onClick={onNewProject}>
+            <Button
+              data-slot="button"
+              onClick={onNewProject}
+              type="button"
+              className={cn(
+                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+              )}
+            >
               <span>
                 <Icon name="plus" size={24} />
               </span>
               New Project
-            </button>
-            <button onClick={onOpenRepository}>
+            </Button>
+            <Button
+              data-slot="button"
+              onClick={onOpenRepository}
+              type="button"
+              className={cn(
+                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+              )}
+            >
               <span>
                 <Icon name="folder" size={24} />
               </span>
               Open
-            </button>
-            <button onClick={onCloneRepository}>
+            </Button>
+            <Button
+              data-slot="button"
+              onClick={onCloneRepository}
+              type="button"
+              className={cn(
+                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+              )}
+            >
               <span>
                 <Icon name="branch" size={24} />
               </span>
               Clone Repository
-            </button>
+            </Button>
           </div>
         </section>
       )}
@@ -193,24 +226,39 @@ export function WelcomeWorkspace({
                 value={query}
               />
             </label>
-            <button
-              className="h-7 w-[102px] whitespace-nowrap rounded border border-[var(--input)] bg-[var(--card)] px-[13px] text-[12px]"
+            <Button
+              data-slot="button"
               onClick={onNewProject}
+              type="button"
+              className={cn(
+                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                "h-7 w-[102px] whitespace-nowrap rounded border border-[var(--input)] bg-[var(--card)] px-[13px] text-[12px]",
+              )}
             >
               New Project
-            </button>
-            <button
-              className="h-7 w-[71px] whitespace-nowrap rounded border border-[var(--input)] bg-[var(--card)] px-[14px] text-[12px]"
+            </Button>
+            <Button
+              data-slot="button"
               onClick={onOpenRepository}
+              type="button"
+              className={cn(
+                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                "h-7 w-[71px] whitespace-nowrap rounded border border-[var(--input)] bg-[var(--card)] px-[14px] text-[12px]",
+              )}
             >
               Open
-            </button>
-            <button
-              className="h-7 w-[133px] whitespace-nowrap rounded border border-[var(--input)] bg-[var(--card)] px-[13px] text-[12px]"
+            </Button>
+            <Button
+              data-slot="button"
               onClick={onCloneRepository}
+              type="button"
+              className={cn(
+                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                "h-7 w-[133px] whitespace-nowrap rounded border border-[var(--input)] bg-[var(--card)] px-[13px] text-[12px]",
+              )}
             >
               Clone Repository
-            </button>
+            </Button>
           </div>
           <div
             aria-label="Recent Projects"
@@ -231,13 +279,18 @@ export function WelcomeWorkspace({
             tabIndex={0}
           >
             {filteredProjects.map((project, index) => (
-              <button
+              <Button
+                data-slot="button"
                 aria-selected={selectedProject === index}
-                className="flex min-h-[58px] w-full items-start gap-[13px] rounded px-[23px] py-[8px] text-left hover:bg-[var(--muted)] focus-visible:bg-[var(--accent)]"
                 key={project.path}
                 onClick={() => setSelectedProject(index)}
                 onDoubleClick={() => onOpenRecent(project.path)}
                 role="option"
+                type="button"
+                className={cn(
+                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+                  "flex min-h-[58px] w-full items-start gap-[13px] rounded px-[23px] py-[8px] text-left hover:bg-[var(--muted)] focus-visible:bg-[var(--accent)]",
+                )}
               >
                 <span className="mt-[1px] flex h-5 w-5 shrink-0 items-center justify-center rounded bg-[var(--project-avatar)] text-[9px] font-bold text-primary-foreground">
                   {projectMonogram(project.name)}
@@ -256,7 +309,7 @@ export function WelcomeWorkspace({
                     </small>
                   )}
                 </span>
-              </button>
+              </Button>
             ))}
             {filteredProjects.length === 0 && (
               <p className="px-5 py-3 text-[var(--muted-foreground)]">No projects found.</p>
@@ -274,7 +327,7 @@ export function WelcomeWorkspace({
                 Theme:
               </label>
               <Selector
-                className="rounded-[4px] bg-[var(--card)] text-[13px]"
+                className="rounded-sm bg-[var(--card)] text-[13px]"
                 id="welcome-theme"
                 isLabelHidden
                 label="Theme"

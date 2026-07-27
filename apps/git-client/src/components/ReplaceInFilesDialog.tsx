@@ -1,17 +1,18 @@
+import { Button } from "@base-ui/react/button";
+import { Toggle } from "@base-ui/react/toggle";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   replacementExpression,
   type ProjectSearchOptions,
   type ProjectTextMatch,
 } from "../domain/projectSearch";
+import { cn } from "../lib/utils";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
-import { Button } from "./ui";
 import { Dialog, DialogHeader } from "./ui";
 import { List, ListItem } from "./ui";
 import { Spinner } from "./ui";
 import { TextInput } from "./ui";
-import { ToggleButton } from "./ui";
 
 const DEFAULT_OPTIONS: ProjectSearchOptions = {
   matchCase: false,
@@ -134,27 +135,38 @@ export function ReplaceInFilesDialog({
             width="100%"
           />
           <div>
-            <ToggleButton
-              isPressed={options.matchCase}
-              label="Match case"
-              onPressedChange={(matchCase) => setOptions((current) => ({ ...current, matchCase }))}
+            <Toggle
+              aria-label="Match case"
+              className="inline-flex h-7 items-center justify-center gap-1.5 rounded-md px-2 text-xs outline-none hover:bg-accent data-pressed:bg-accent data-pressed:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/45 disabled:opacity-45"
+              onPressedChange={(matchCase) =>
+                setOptions((current) => ({
+                  ...current,
+                  matchCase,
+                }))
+              }
+              pressed={options.matchCase}
+              type="button"
             >
               Aa
-            </ToggleButton>
-            <ToggleButton
-              isPressed={options.words}
-              label="Words"
+            </Toggle>
+            <Toggle
+              aria-label="Words"
+              className="inline-flex h-7 items-center justify-center gap-1.5 rounded-md px-2 text-xs outline-none hover:bg-accent data-pressed:bg-accent data-pressed:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/45 disabled:opacity-45"
               onPressedChange={(words) => setOptions((current) => ({ ...current, words }))}
+              pressed={options.words}
+              type="button"
             >
               W
-            </ToggleButton>
-            <ToggleButton
-              isPressed={options.regex}
-              label="Regex"
+            </Toggle>
+            <Toggle
+              aria-label="Regex"
+              className="inline-flex h-7 items-center justify-center gap-1.5 rounded-md px-2 text-xs outline-none hover:bg-accent data-pressed:bg-accent data-pressed:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/45 disabled:opacity-45"
               onPressedChange={(regex) => setOptions((current) => ({ ...current, regex }))}
+              pressed={options.regex}
+              type="button"
             >
               .*
-            </ToggleButton>
+            </Toggle>
           </div>
         </div>
         <div className={tw.replaceInFilesStatus}>
@@ -163,13 +175,17 @@ export function ReplaceInFilesDialog({
           </span>
           {files.length > 0 && (
             <Button
-              label={selectedPaths.size === files.length ? "Unselect All" : "Select All"}
+              data-slot="button"
               onClick={() =>
                 setSelectedPaths(new Set(selectedPaths.size === files.length ? [] : files))
               }
-              size="sm"
-              variant="ghost"
-            />
+              type="button"
+              className={cn(
+                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+              )}
+            >
+              {selectedPaths.size === files.length ? "Unselect All" : "Select All"}
+            </Button>
           )}
         </div>
         <div className={tw.replaceInFilesResults}>
@@ -214,13 +230,27 @@ export function ReplaceInFilesDialog({
           )}
         </div>
         <footer>
-          <Button label="Cancel" onClick={onClose} variant="secondary" />
           <Button
-            isDisabled={loading || replacing || selectedPaths.size === 0 || query === ""}
-            label={replacing ? "Replacing…" : "Replace All"}
+            data-slot="button"
+            onClick={onClose}
+            type="button"
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
+            )}
+          >
+            Cancel
+          </Button>
+          <Button
+            data-slot="button"
             onClick={() => void replace()}
-            variant="primary"
-          />
+            type="button"
+            disabled={loading || replacing || selectedPaths.size === 0 || query === ""}
+            className={cn(
+              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-primary bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 active:bg-primary/80",
+            )}
+          >
+            {replacing ? "Replacing…" : "Replace All"}
+          </Button>
         </footer>
       </section>
     </Dialog>

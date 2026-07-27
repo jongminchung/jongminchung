@@ -1,4 +1,6 @@
+import { Button } from "@base-ui/react/button";
 import type { ProjectSearchOptions, ProjectSearchResult } from "../domain/projectSearch";
+import { cn } from "../lib/utils";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
 import { List, ListItem } from "./ui";
@@ -29,7 +31,16 @@ export function FindResultsPanel({
             {session.results.length.toLocaleString()} matches in {fileCount.toLocaleString()} files
           </span>
         )}
-        <button onClick={onSearchAgain}>Find in Files…</button>
+        <Button
+          data-slot="button"
+          onClick={onSearchAgain}
+          type="button"
+          className={cn(
+            "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+          )}
+        >
+          Find in Files…
+        </Button>
       </header>
       {!session || session.results.length === 0 ? (
         <div className={tw.emptyState}>
