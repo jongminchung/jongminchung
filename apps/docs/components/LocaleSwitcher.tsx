@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import type { Locale } from "@/lib/content-model";
+import { cn } from "@/lib/utils";
 
 export function LocaleSwitcher({
   locale,
@@ -19,10 +19,16 @@ export function LocaleSwitcher({
     document.cookie = `docs-locale=${nextLocale}; Path=/; Max-Age=31536000; SameSite=Lax`;
   };
   return (
-    <Button asChild variant="ghost" size="sm">
-      <a href={href} onClick={rememberLocale} aria-label={label}>
-        {compact ? nextLocale.toUpperCase() : label}
-      </a>
-    </Button>
+    <a
+      aria-label={label}
+      className={cn(
+        "inline-flex h-8 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-transparent bg-transparent px-3 text-xs font-medium outline-none transition-colors",
+        "hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60",
+      )}
+      href={href}
+      onClick={rememberLocale}
+    >
+      {compact ? nextLocale.toUpperCase() : label}
+    </a>
   );
 }

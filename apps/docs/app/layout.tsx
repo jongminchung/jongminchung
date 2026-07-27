@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Mono, Inter, Inter_Tight } from "next/font/google";
 import type { ReactNode } from "react";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
 const inter = Inter({
@@ -34,13 +35,18 @@ const excalidrawAssetScript = `window.EXCALIDRAW_ASSET_PATH="/excalidraw-assets/
 
 export default function RootLayout({ children }: { readonly children: ReactNode }) {
   return (
-    <html lang="en" data-theme="light" suppressHydrationWarning>
+    <html
+      className={`${inter.variable} ${interTight.variable} ${dmMono.variable}`}
+      lang="en"
+      data-theme="light"
+      suppressHydrationWarning
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <script dangerouslySetInnerHTML={{ __html: excalidrawAssetScript }} />
       </head>
-      <body className={`${inter.variable} ${interTight.variable} ${dmMono.variable}`}>
-        {children}
+      <body>
+        <TooltipProvider>{children}</TooltipProvider>
       </body>
     </html>
   );

@@ -1,11 +1,12 @@
 "use client";
 
+import { Button } from "@base-ui/react/button";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import type { ContentManifestEntry, Locale } from "@/lib/content-model";
+import { cn } from "@/lib/utils";
 import { Icon } from "./Icon";
 import { ContextNavigation, GlobalRail, MobileNavigation, MobileTopNavigation } from "./Navigation";
 import { RouteTransitionContent, RouteTransitionProvider } from "./RouteTransition";
@@ -39,8 +40,11 @@ function TabletContextDrawer({
       <Button
         ref={triggerRef}
         aria-label={locale === "ko" ? "현재 섹션 메뉴" : "Current section menu"}
-        variant="secondary"
-        size="sm"
+        className={cn(
+          "inline-flex h-8 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-border bg-card px-3 text-xs font-medium text-card-foreground outline-none transition-colors",
+          "hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/60 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+        )}
+        data-slot="button"
         onClick={() => setOpen(true)}
       >
         <Icon icon="menu" />

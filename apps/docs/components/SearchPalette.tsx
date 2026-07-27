@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@base-ui/react/button";
 import {
   createContext,
   type KeyboardEvent,
@@ -11,13 +12,13 @@ import {
   useRef,
   useState,
 } from "react";
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import type { DocSection, Locale, SearchDocument } from "@/lib/content-model";
 import { isLocale, sections } from "@/lib/content-model";
 import { searchDocuments, type SearchHit, type SearchMatchField } from "@/lib/search";
+import { cn } from "@/lib/utils";
 import { Icon } from "./Icon";
-import { useDocsNavigation } from "./RouteTransition";
+import { TransitionLink, useDocsNavigation } from "./RouteTransition";
 import styles from "./SearchPalette.module.css";
 
 interface SearchItem {
@@ -225,7 +226,7 @@ export function SearchProvider({
           </label>
           <div
             className={styles.list}
-            role="listbox"
+            role="list"
             aria-label={locale === "ko" ? "검색 결과" : "Search results"}
           >
             {items.length === 0 ? (
@@ -234,14 +235,17 @@ export function SearchProvider({
               </p>
             ) : (
               items.map((item, index) => (
-                <button
+                <TransitionLink
+                  className={cn(
+                    "flex min-h-[58px] w-full items-center justify-between gap-4 rounded-sm border-0 bg-transparent px-2.5 py-2 text-left font-[inherit] text-foreground outline-none transition-colors disabled:pointer-events-none disabled:opacity-50",
+                    "hover:bg-muted data-active:bg-muted focus-visible:ring-2 focus-visible:ring-ring/60",
+                    "[&_small]:shrink-0 [&_small]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                  )}
+                  data-active={selected === index ? "" : undefined}
+                  href={item.href}
                   key={item.href}
-                  type="button"
-                  role="option"
-                  aria-selected={selected === index}
-                  className={styles.item}
                   onMouseMove={() => setSelected(index)}
-                  onClick={() => select(item)}
+                  onNavigate={() => changeOpen(false)}
                 >
                   <span className={styles.result}>
                     <strong>{item.label}</strong>
@@ -251,7 +255,7 @@ export function SearchProvider({
                     </span>
                   </span>
                   <small>{item.group}</small>
-                </button>
+                </TransitionLink>
               ))
             )}
           </div>
@@ -273,14 +277,18 @@ export function SearchTrigger({
   const label = context.locale === "ko" ? "문서 검색" : "Search documentation";
   return (
     <Button
-      data-docs-search-trigger="true"
       aria-label={label}
-      variant="ghost"
-      size={compact ? "icon" : "sm"}
-      className={compact ? styles.compactTrigger : styles.trigger}
+      className={cn(
+        "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-transparent bg-transparent font-medium outline-none transition-colors",
+        "hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+        "[&_kbd]:rounded-xs [&_kbd]:border [&_kbd]:border-border [&_kbd]:px-1.5 [&_kbd]:py-0.5 [&_kbd]:text-[10px] [&_kbd]:text-foreground",
+        compact ? "min-h-11 min-w-11 px-[7px] text-sm" : "h-8 w-full justify-between px-3 text-xs",
+      )}
+      data-docs-search-trigger="true"
+      data-slot="button"
       onClick={(event) => context.open(event.currentTarget)}
     >
-      <span className={styles.triggerLabel}>
+      <span className="inline-flex items-center gap-[7px]">
         <Icon icon="search" />
         {compact ? null : <span>{context.locale === "ko" ? "검색" : "Search"}</span>}
       </span>

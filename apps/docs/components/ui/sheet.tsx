@@ -19,6 +19,7 @@ export function SheetContent({
     <SheetPrimitive.Portal>
       <SheetPrimitive.Backdrop className="fixed inset-0 z-50 bg-overlay backdrop-blur-[2px]" />
       <SheetPrimitive.Popup
+        data-slot="sheet-content"
         className={cn(
           "fixed inset-y-0 left-0 z-50 flex w-[min(360px,calc(100vw-2rem))] flex-col border-r border-border bg-background text-foreground shadow-xl outline-none",
           className,

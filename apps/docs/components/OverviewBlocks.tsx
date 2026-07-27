@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { Locale } from "@/lib/content-model";
+import { cn } from "@/lib/utils";
 import { Icon } from "./Icon";
 import { TransitionLink } from "./RouteTransition";
 
@@ -117,14 +117,24 @@ export function OverviewHero({ locale }: { readonly locale: Locale }) {
           {text.lead}
         </p>
         <div className="mt-8 flex flex-wrap gap-2.5">
-          <Button asChild size="lg">
-            <TransitionLink href={`/${locale}/handbook/collaboration`}>{text.start}</TransitionLink>
-          </Button>
-          <Button asChild variant="secondary" size="lg">
-            <TransitionLink href={`/${locale}/packages/remark-plantuml`}>
-              {text.packages}
-            </TransitionLink>
-          </Button>
+          <TransitionLink
+            className={cn(
+              "inline-flex h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-primary bg-primary px-5 text-sm font-medium text-primary-foreground outline-none transition-colors",
+              "hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/60",
+            )}
+            href={`/${locale}/handbook/collaboration`}
+          >
+            {text.start}
+          </TransitionLink>
+          <TransitionLink
+            className={cn(
+              "inline-flex h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-border bg-card px-5 text-sm font-medium text-card-foreground outline-none transition-colors",
+              "hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/60",
+            )}
+            href={`/${locale}/packages/remark-plantuml`}
+          >
+            {text.packages}
+          </TransitionLink>
         </div>
       </div>
     </header>
@@ -162,12 +172,17 @@ export function OverviewCards({ locale }: { readonly locale: Locale }) {
             {title}
           </h3>
           <p className="m-0 text-[14px] leading-[1.4rem] text-muted-foreground">{description}</p>
-          <Button asChild variant="ghost" size="sm" className="mt-auto self-start">
-            <TransitionLink href={href} aria-label={`${text.open}: ${title}`}>
-              {text.open}
-              <Icon icon="chevronRight" className="size-3.5" />
-            </TransitionLink>
-          </Button>
+          <TransitionLink
+            aria-label={`${text.open}: ${title}`}
+            className={cn(
+              "mt-auto inline-flex h-8 shrink-0 items-center justify-center self-start gap-2 whitespace-nowrap rounded-md border border-transparent bg-transparent px-3 text-xs font-medium outline-none transition-colors",
+              "hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60",
+            )}
+            href={href}
+          >
+            {text.open}
+            <Icon icon="chevronRight" className="size-3.5" />
+          </TransitionLink>
         </Card>
       ))}
     </div>
@@ -186,11 +201,17 @@ export function OverviewCta({ locale }: { readonly locale: Locale }) {
           {text.ctaBody}
         </p>
       </div>
-      <Button asChild size="lg">
-        <a href="https://github.com/jongminchung/jongminchung" target="_blank" rel="noreferrer">
-          {text.edit}
-        </a>
-      </Button>
+      <a
+        className={cn(
+          "inline-flex h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-primary bg-primary px-5 text-sm font-medium text-primary-foreground outline-none transition-colors",
+          "hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/60",
+        )}
+        href="https://github.com/jongminchung/jongminchung"
+        rel="noreferrer"
+        target="_blank"
+      >
+        {text.edit}
+      </a>
     </Card>
   );
 }

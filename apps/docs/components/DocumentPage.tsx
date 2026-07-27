@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { displayTitleFor, type DocSection, type Locale } from "@/lib/content-model";
 import type { LoadedDocument } from "@/lib/documents";
+import { cn } from "@/lib/utils";
 import { DocumentOutline } from "./DocumentOutline";
 import { EditPageLink } from "./EditPageLink";
 import { Icon } from "./Icon";
@@ -142,30 +142,38 @@ export function DocumentPage({
           {previous === null ? (
             <span />
           ) : (
-            <Button asChild variant="secondary" size="lg">
-              <TransitionLink href={previous.href} className="h-auto min-h-[68px] justify-start">
-                <span className="grid w-full gap-0.5 text-left">
-                  <small className="text-primary text-[10px] font-medium uppercase">
-                    {locale === "ko" ? "이전" : "Previous"}
-                  </small>
-                  {displayTitleFor(previous)}
-                </span>
-              </TransitionLink>
-            </Button>
+            <TransitionLink
+              className={cn(
+                "inline-flex h-auto min-h-[68px] shrink-0 items-center justify-start gap-2 whitespace-nowrap rounded-md border border-border bg-card px-5 text-sm font-medium text-card-foreground outline-none transition-colors",
+                "hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/60",
+              )}
+              href={previous.href}
+            >
+              <span className="grid w-full gap-0.5 text-left">
+                <small className="text-primary text-[10px] font-medium uppercase">
+                  {locale === "ko" ? "이전" : "Previous"}
+                </small>
+                {displayTitleFor(previous)}
+              </span>
+            </TransitionLink>
           )}
           {next === null ? (
             <span />
           ) : (
-            <Button asChild variant="secondary" size="lg">
-              <TransitionLink href={next.href} className="h-auto min-h-[68px] justify-end">
-                <span className="grid w-full gap-0.5 text-right">
-                  <small className="text-primary text-[10px] font-medium uppercase">
-                    {locale === "ko" ? "다음" : "Next"}
-                  </small>
-                  {displayTitleFor(next)}
-                </span>
-              </TransitionLink>
-            </Button>
+            <TransitionLink
+              className={cn(
+                "inline-flex h-auto min-h-[68px] shrink-0 items-center justify-end gap-2 whitespace-nowrap rounded-md border border-border bg-card px-5 text-sm font-medium text-card-foreground outline-none transition-colors",
+                "hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/60",
+              )}
+              href={next.href}
+            >
+              <span className="grid w-full gap-0.5 text-right">
+                <small className="text-primary text-[10px] font-medium uppercase">
+                  {locale === "ko" ? "다음" : "Next"}
+                </small>
+                {displayTitleFor(next)}
+              </span>
+            </TransitionLink>
           )}
         </nav>
       </article>

@@ -250,6 +250,14 @@ test("single-document overview navigation uses page headings without a duplicate
         .evaluate((element) => getComputedStyle(element).backgroundImage),
     )
     .toBe("none");
+
+  const handbookAction = page.getByRole("link", { name: "Start with the handbook" });
+  await expect(handbookAction).toHaveAttribute("href", "/en/handbook/collaboration");
+  await expect(page.getByRole("button", { name: "Start with the handbook" })).toHaveCount(0);
+  await handbookAction.focus();
+  await expect(handbookAction).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/\/en\/handbook\/collaboration$/u);
 });
 
 test("locale, theme, removed package, and 404 contracts remain visible", async ({ page }) => {

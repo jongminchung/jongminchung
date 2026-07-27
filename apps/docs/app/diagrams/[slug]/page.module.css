@@ -5,7 +5,7 @@
   min-height: 480px;
   flex-direction: column;
   overflow: hidden;
-  background: var(--color-background-card);
+  background: var(--background);
 }
 
 .header {
@@ -14,25 +14,25 @@
   align-items: center;
   gap: 12px;
   padding: 8px 16px;
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-background-surface);
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
 }
 
 .backLink {
   flex: none;
   padding-right: 12px;
-  border-right: 1px solid var(--color-border);
-  color: var(--color-text-secondary);
+  border-right: 1px solid var(--border);
+  color: var(--muted-foreground);
   font-size: 12px;
   text-decoration: none;
 }
 
 .backLink:hover {
-  color: var(--color-text-primary);
+  color: var(--foreground);
 }
 
 .backLink:focus-visible {
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
   outline: 2px solid currentcolor;
   outline-offset: 4px;
 }
@@ -41,8 +41,8 @@
   min-width: 0;
   margin: 0;
   overflow: hidden;
-  color: var(--color-text-primary);
-  font-family: var(--font-dm-mono), monospace;
+  color: var(--foreground);
+  font-family: var(--font-family-code);
   font-size: 14px;
   font-weight: 500;
   line-height: 1.4;

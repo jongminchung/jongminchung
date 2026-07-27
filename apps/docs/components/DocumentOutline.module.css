@@ -7,12 +7,12 @@
   gap: 10px;
   padding: 12px 0 18px 18px;
   overflow: auto;
-  border-left: 1px solid var(--color-border);
+  border-left: 1px solid var(--border);
 }
 
 .label {
   margin: 0 0 2px;
-  color: var(--color-text-secondary);
+  color: var(--muted-foreground);
   font-size: 12px;
   font-weight: 600;
 }
@@ -28,8 +28,8 @@
 .list a {
   display: block;
   padding: 6px 8px;
-  border-radius: 6px;
-  color: var(--color-text-secondary);
+  border-radius: var(--radius-sm);
+  color: var(--muted-foreground);
   font-size: 12px;
   text-decoration: none;
 }
@@ -39,8 +39,8 @@
 }
 
 .list a:hover {
-  background: var(--color-background-muted);
-  color: var(--color-text-primary);
+  background: var(--muted);
+  color: var(--foreground);
 }
 
 @media (max-width: 1399px) {

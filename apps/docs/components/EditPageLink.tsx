@@ -1,15 +1,23 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { EditIcon } from "./DocsIcons";
 import { Icon } from "./Icon";
 
 export function EditPageLink({ label, href }: { readonly label: string; readonly href: string }) {
   return (
-    <Button asChild variant="ghost" size="icon">
-      <a aria-label={label} title={label} href={href} target="_blank" rel="noreferrer">
-        <Icon icon={EditIcon} />
-      </a>
-    </Button>
+    <a
+      aria-label={label}
+      className={cn(
+        "inline-flex size-9 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-transparent bg-transparent p-0 text-sm font-medium outline-none transition-colors",
+        "hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60",
+      )}
+      href={href}
+      rel="noreferrer"
+      target="_blank"
+      title={label}
+    >
+      <Icon icon={EditIcon} />
+    </a>
   );
 }

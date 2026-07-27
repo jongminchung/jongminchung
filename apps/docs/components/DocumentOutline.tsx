@@ -1,7 +1,8 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@base-ui/react/button";
 import type { Locale, OutlineEntry } from "@/lib/content-model";
+import { cn } from "@/lib/utils";
 import { Icon } from "./Icon";
 import styles from "./DocumentOutline.module.css";
 
@@ -28,8 +29,11 @@ export function DocumentOutline({
         </ul>
       </nav>
       <Button
-        variant="ghost"
-        size="sm"
+        className={cn(
+          "inline-flex h-8 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-transparent bg-transparent px-3 text-xs font-medium outline-none transition-colors",
+          "hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+        )}
+        data-slot="button"
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
       >
         <Icon icon="arrowUp" />

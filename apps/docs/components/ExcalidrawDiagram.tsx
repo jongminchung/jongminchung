@@ -1,7 +1,9 @@
 "use client";
 
+import { Button } from "@base-ui/react/button";
 import type { ComponentType } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
 import {
   parseExcalidrawAssetSrc,
   parseExcalidrawSource,
@@ -153,15 +155,29 @@ export function ExcalidrawDiagram(props: ExcalidrawDiagramProps): React.JSX.Elem
           </span>
         )}
         {src === undefined ? null : (
-          <a className={styles.action} download href={src}>
+          <a
+            className={cn(
+              "inline-flex min-h-[30px] shrink-0 cursor-pointer items-center justify-center rounded-sm border border-border bg-background px-2.5 py-[5px] text-xs leading-[1.2] font-[inherit] text-foreground no-underline outline-none transition-colors",
+              "hover:border-input focus-visible:ring-2 focus-visible:ring-ring/60",
+            )}
+            download
+            href={src}
+          >
             {localizedText(isKorean, "원본 다운로드", "Download source")}
           </a>
         )}
-        <button className={styles.action} type="button" onClick={() => void toggleFullscreen()}>
+        <Button
+          className={cn(
+            "inline-flex min-h-[30px] shrink-0 cursor-pointer items-center justify-center rounded-sm border border-border bg-background px-2.5 py-[5px] text-xs leading-[1.2] font-[inherit] text-foreground outline-none transition-colors",
+            "hover:border-input focus-visible:ring-2 focus-visible:ring-ring/60 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+          )}
+          data-slot="button"
+          onClick={() => void toggleFullscreen()}
+        >
           {isFullscreen
             ? localizedText(isKorean, "전체 화면 종료", "Exit full screen")
             : localizedText(isKorean, "전체 화면", "Full screen")}
-        </button>
+        </Button>
       </div>
       <div className={styles.canvas}>
         {error === null && sceneState.kind === "ready" && Canvas !== null ? (
@@ -181,7 +197,14 @@ export function ExcalidrawDiagram(props: ExcalidrawDiagramProps): React.JSX.Elem
             </p>
             <p>{error}</p>
             {src === undefined ? null : (
-              <a className={styles.action} download href={src}>
+              <a
+                className={cn(
+                  "inline-flex min-h-[30px] shrink-0 cursor-pointer items-center justify-center rounded-sm border border-border bg-background px-2.5 py-[5px] text-xs leading-[1.2] font-[inherit] text-foreground no-underline outline-none transition-colors",
+                  "hover:border-input focus-visible:ring-2 focus-visible:ring-ring/60",
+                )}
+                download
+                href={src}
+              >
                 {localizedText(isKorean, "원본 다운로드", "Download source")}
               </a>
             )}

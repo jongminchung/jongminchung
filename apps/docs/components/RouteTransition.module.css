@@ -10,7 +10,7 @@
 .progressBar {
   width: 35%;
   height: 3px;
-  background: var(--color-accent);
+  background: var(--primary);
   animation: docs-progress 1s ease-in-out infinite;
 }
 
