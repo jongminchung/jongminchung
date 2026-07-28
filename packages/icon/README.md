@@ -11,7 +11,7 @@ extension. Do not edit those files directly.
 | App                        | Variant               | Generated assets                          |
 | -------------------------- | --------------------- | ----------------------------------------- |
 | `apps/readme`              | `personal`            | `app/icon.svg`                            |
-| `apps/docs`                | `personal`            | `app/icon.svg`                            |
+| `apps/engineering-docs`    | `personal`            | `app/icon.svg`                            |
 | `apps/immersive-translate` | `immersive-translate` | master SVG and 16, 32, 48, 96, 128px PNGs |
 
 ```sh

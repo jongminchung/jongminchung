@@ -1,6 +1,6 @@
 import type { IconVariant } from "./index.ts";
 
-export const iconApplicationIds = ["docs", "immersive-translate", "readme"] as const;
+export const iconApplicationIds = ["engineering-docs", "immersive-translate", "readme"] as const;
 
 export type IconApplicationId = (typeof iconApplicationIds)[number];
 
@@ -29,9 +29,9 @@ export const iconAssetTargets = [
     variant: "personal",
   },
   {
-    app: "docs",
+    app: "engineering-docs",
     kind: "svg",
-    path: "apps/docs/app/icon.svg",
+    path: "apps/engineering-docs/app/icon.svg",
     variant: "personal",
   },
   {

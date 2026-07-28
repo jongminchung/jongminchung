@@ -8,7 +8,7 @@ node_modules/
 **/test-results/
 **/out/
 playwright-report/
-apps/docs/public/excalidraw-assets/
+apps/engineering-docs/public/excalidraw-assets/
 *.bak
 *.old
 

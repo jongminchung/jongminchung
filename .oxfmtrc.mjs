@@ -4,8 +4,8 @@ export default defineOxfmtConfig({
   ignorePatterns: [
     "**/.output/",
     "**/.wxt/",
-    "apps/docs/generated/",
-    "apps/docs/public/search/",
+    "apps/engineering-docs/generated/",
+    "apps/engineering-docs/public/search/",
     "playwright-report/",
     "test-results/",
     "rebased/",

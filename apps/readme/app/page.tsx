@@ -18,7 +18,7 @@ const projects = [
   {
     index: "01",
     category: "Knowledge system",
-    title: "Jongmin Chung Docs",
+    title: "Jongmin Chung Engineering Docs",
     description:
       "A bilingual path through collaboration rules, public package contracts, and the platform failures behind them.",
     tags: ["Next.js", "MDX", "shadcn/ui"],

@@ -11,7 +11,7 @@
     "check": "pnpm run fmt:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build",
     "deps:check": "pnpm dlx npm-check-updates --workspaces --target latest --packageManager pnpm",
     "deps:update": "pnpm dlx npm-check-updates -u --workspaces --target latest --packageManager pnpm --reject typescript && pnpm install",
-    "dev:docs": "pnpm --filter @jongminchung/docs run dev",
+    "dev:engineering-docs": "pnpm --filter @jongminchung/engineering-docs run dev",
     "dev:readme": "pnpm --filter @jongminchung/readme run dev",
     "fmt": "oxfmt --config .oxfmtrc.mjs .",
     "fmt:check": "oxfmt --config .oxfmtrc.mjs --check .",
@@ -20,7 +20,7 @@
     "lint": "oxlint .",
     "publish:dry-run": "pnpm --filter @jongminchung/remark-plantuml run publish:dry-run && pnpm --filter @jongminchung/tooling run publish:dry-run",
     "test": "vitest run",
-    "test:docs": "pnpm --filter @jongminchung/docs run test",
+    "test:engineering-docs": "pnpm --filter @jongminchung/engineering-docs run test",
     "test:readme": "pnpm --filter @jongminchung/readme run test:e2e",
     "typecheck": "tsc --noEmit && pnpm -r --if-present run typecheck"
   },

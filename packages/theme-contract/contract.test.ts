@@ -32,7 +32,7 @@ const coreColorTokens = [
 const coreColorTokenSet = new Set<string>(coreColorTokens);
 
 const appThemes = [
-  "apps/docs/app/theme.css",
+  "apps/engineering-docs/app/theme.css",
   "apps/git-client/src/styles/theme.css",
   "apps/readme/app/theme.css",
 ] as const;
@@ -66,7 +66,10 @@ const literalColorBoundaries = new Map<string, string>([
     "Electron native surfaces and standalone HTML require centralized sRGB values",
   ],
   ["apps/git-client/index.html", "browser theme-color metadata requires an sRGB value"],
-  ["apps/docs/app/icon.svg", "generated app icon uses the canonical sRGB asset palette"],
+  [
+    "apps/engineering-docs/app/icon.svg",
+    "generated app icon uses the canonical sRGB asset palette",
+  ],
   ["apps/readme/app/icon.svg", "generated app icon uses the canonical sRGB asset palette"],
   ["apps/readme/app/opengraph-image.tsx", "Next ImageResponse does not parse OKLCH colors"],
   ["packages/icon/src/index.ts", "canonical SVG and PNG assets require an sRGB palette"],
@@ -306,8 +309,8 @@ describe("@jongminchung/theme-contract", () => {
   test("requires every app-local Tailwind color mapping to have a provider", () => {
     const localMappings = [
       {
-        mappingPath: "apps/docs/app/globals.css",
-        themePath: "apps/docs/app/theme.css",
+        mappingPath: "apps/engineering-docs/app/globals.css",
+        themePath: "apps/engineering-docs/app/theme.css",
       },
       {
         mappingPath: "apps/git-client/src/styles/index.css",
@@ -347,7 +350,7 @@ describe("@jongminchung/theme-contract", () => {
   test("requires every production CSS variable use to have a provider", () => {
     const sharedProviders = declarations(readFileSync(contractPath, "utf8"));
 
-    for (const app of ["docs", "git-client", "readme"] as const) {
+    for (const app of ["engineering-docs", "git-client", "readme"] as const) {
       const files = sourceFiles(join(workspaceRoot, "apps", app));
       const contents = files.map((file) => readFileSync(file, "utf8")).join("\n");
       const providers = new Set([...sharedProviders, ...assignedVariables(contents)]);
@@ -431,7 +434,7 @@ describe("@jongminchung/theme-contract", () => {
 
   test("uses Base UI Button directly with call-site cn recipes", () => {
     const removedButtonModules = [
-      "apps/docs/components/ui/button.tsx",
+      "apps/engineering-docs/components/ui/button.tsx",
       "apps/git-client/src/components/ui/button.tsx",
       "apps/readme/components/ui/button.tsx",
     ] as const;

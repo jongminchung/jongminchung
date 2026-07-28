@@ -65,7 +65,7 @@ describe("Git Client design system boundary", () => {
     const theme = readFileSync(join(sourceRoot, "styles", "theme.css"), "utf8");
     const tokenContract = readFileSync(join(themeContractRoot, "src", "tokens.css"), "utf8");
     const docsTheme = readFileSync(
-      join(workspaceRoot, "apps", "docs", "app", "globals.css"),
+      join(workspaceRoot, "apps", "engineering-docs", "app", "globals.css"),
       "utf8",
     );
     const requiredPairs = [
@@ -122,7 +122,7 @@ describe("Git Client design system boundary", () => {
     const contractFiles = sourceFiles(join(themeContractRoot, "src"));
     expect(contractFiles.every((file) => !/\.(?:ts|tsx)$/.test(file))).toBe(true);
 
-    for (const app of ["docs", "git-client", "readme"] as const) {
+    for (const app of ["engineering-docs", "git-client", "readme"] as const) {
       const appRoot = join(workspaceRoot, "apps", app);
       const packageJson = readFileSync(join(appRoot, "package.json"), "utf8");
       const shadcnConfig = readFileSync(join(appRoot, "components.json"), "utf8");
@@ -136,7 +136,7 @@ describe("Git Client design system boundary", () => {
 
   test("keeps theme values local and OKLCH-based", () => {
     const themePaths = [
-      join(workspaceRoot, "apps", "docs", "app", "theme.css"),
+      join(workspaceRoot, "apps", "engineering-docs", "app", "theme.css"),
       join(workspaceRoot, "apps", "git-client", "src", "styles", "theme.css"),
       join(workspaceRoot, "apps", "readme", "app", "theme.css"),
     ] as const;
@@ -168,7 +168,7 @@ describe("Git Client design system boundary", () => {
     const paletteUtility =
       /\b(?:bg|border|ring|text)-(?:amber|blue|green|purple|red|white|black)(?:-\d+)?(?:\/\d+)?\b/;
 
-    for (const app of ["docs", "git-client", "readme"] as const) {
+    for (const app of ["engineering-docs", "git-client", "readme"] as const) {
       const appRoot = join(workspaceRoot, "apps", app);
       const componentsRoot =
         app === "git-client"
