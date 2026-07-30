@@ -11,6 +11,12 @@
   border-bottom: 1px solid var(--border);
 }
 
+.inputRow > [data-slot="command-input-wrapper"] {
+  min-width: 0;
+  flex: 1;
+  padding: 0;
+}
+
 .inputRow input {
   min-width: 0;
   flex: 1;
@@ -42,6 +48,10 @@
   padding: 30px 16px;
   color: var(--muted-foreground);
   text-align: center;
+}
+
+.empty p {
+  margin: 0 0 12px;
 }
 
 .result {

@@ -1,5 +1,5 @@
+import { Badge } from "@jongminchung/ui/components/badge";
 import type { ReactNode } from "react";
-import { Badge } from "@/components/ui/badge";
 import { TransitionLink } from "./RouteTransition";
 
 export function SideNav({
@@ -40,7 +40,7 @@ export function SideNavHeading({
         >
           {heading}
         </TransitionLink>
-        <Badge>v1</Badge>
+        <Badge variant="secondary">v1</Badge>
       </div>
     </header>
   );

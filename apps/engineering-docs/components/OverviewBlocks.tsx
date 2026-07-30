@@ -1,6 +1,7 @@
-import { Card } from "@/components/ui/card";
+import { buttonVariants } from "@jongminchung/ui/components/button";
+import { Card } from "@jongminchung/ui/components/card";
+import { cn } from "@jongminchung/ui/lib/utils";
 import type { Locale } from "@/lib/content-model";
-import { cn } from "@/lib/utils";
 import { Icon } from "./Icon";
 import { TransitionLink } from "./RouteTransition";
 
@@ -118,19 +119,13 @@ export function OverviewHero({ locale }: { readonly locale: Locale }) {
         </p>
         <div className="mt-8 flex flex-wrap gap-2.5">
           <TransitionLink
-            className={cn(
-              "inline-flex h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-primary bg-primary px-5 text-sm font-medium text-primary-foreground outline-none transition-colors",
-              "hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/60",
-            )}
+            className={cn(buttonVariants({ variant: "default", size: "lg" }), "h-11 px-5")}
             href={`/${locale}/handbook/collaboration`}
           >
             {text.start}
           </TransitionLink>
           <TransitionLink
-            className={cn(
-              "inline-flex h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-border bg-card px-5 text-sm font-medium text-card-foreground outline-none transition-colors",
-              "hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/60",
-            )}
+            className={cn(buttonVariants({ variant: "outline", size: "lg" }), "h-11 px-5")}
             href={`/${locale}/packages/remark-plantuml`}
           >
             {text.packages}
@@ -145,7 +140,7 @@ export function QuickStart({ locale }: { readonly locale: Locale }) {
   return (
     <div className="grid grid-cols-3 gap-5 max-[760px]:grid-cols-1">
       {copy[locale].steps.map(([number, title, description]) => (
-        <Card key={number} className="p-6">
+        <Card key={number} className="rounded-lg border border-border p-6">
           <span className="grid size-7 place-items-center rounded-full border border-input font-[family-name:var(--font-dm-mono)] text-xs text-primary">
             {number}
           </span>
@@ -164,7 +159,10 @@ export function OverviewCards({ locale }: { readonly locale: Locale }) {
   return (
     <div className="grid grid-cols-2 gap-5 max-[760px]:grid-cols-1">
       {text.cards.map(([category, title, description, href]) => (
-        <Card key={category} className="flex min-h-[208px] flex-col p-6">
+        <Card
+          key={category}
+          className="flex min-h-[208px] flex-col rounded-lg border border-border p-6"
+        >
           <p className="m-0 font-[family-name:var(--font-dm-mono)] text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase">
             {category}
           </p>
@@ -175,8 +173,8 @@ export function OverviewCards({ locale }: { readonly locale: Locale }) {
           <TransitionLink
             aria-label={`${text.open}: ${title}`}
             className={cn(
-              "mt-auto inline-flex h-8 shrink-0 items-center justify-center self-start gap-2 whitespace-nowrap rounded-md border border-transparent bg-transparent px-3 text-xs font-medium outline-none transition-colors",
-              "hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60",
+              buttonVariants({ variant: "ghost", size: "sm" }),
+              "mt-auto h-8 self-start px-3 text-xs",
             )}
             href={href}
           >
@@ -192,7 +190,7 @@ export function OverviewCards({ locale }: { readonly locale: Locale }) {
 export function OverviewCta({ locale }: { readonly locale: Locale }) {
   const text = copy[locale];
   return (
-    <Card className="flex items-center justify-between gap-8 p-8 max-[760px]:items-start max-[760px]:flex-col">
+    <Card className="flex items-center justify-between gap-8 rounded-lg border border-border p-8 max-[760px]:items-start max-[760px]:flex-col">
       <div>
         <h3 className="m-0 font-[family-name:var(--font-inter-tight)] text-2xl leading-[1.25] font-medium text-primary">
           {text.ctaTitle}
@@ -202,10 +200,7 @@ export function OverviewCta({ locale }: { readonly locale: Locale }) {
         </p>
       </div>
       <a
-        className={cn(
-          "inline-flex h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-primary bg-primary px-5 text-sm font-medium text-primary-foreground outline-none transition-colors",
-          "hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/60",
-        )}
+        className={cn(buttonVariants({ variant: "default", size: "lg" }), "h-11 px-5")}
         href="https://github.com/jongminchung/jongminchung"
         rel="noreferrer"
         target="_blank"

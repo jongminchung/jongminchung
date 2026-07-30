@@ -1,12 +1,12 @@
 "use client";
 
-import { Button } from "@base-ui/react/button";
+import { Button } from "@jongminchung/ui/components/button";
+import { Sheet, SheetContent, SheetTitle } from "@jongminchung/ui/components/sheet";
+import { TooltipProvider } from "@jongminchung/ui/components/tooltip";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import type { ContentManifestEntry, Locale } from "@/lib/content-model";
-import { cn } from "@/lib/utils";
 import { Icon } from "./Icon";
 import { ContextNavigation, GlobalRail, MobileNavigation, MobileTopNavigation } from "./Navigation";
 import { RouteTransitionContent, RouteTransitionProvider } from "./RouteTransition";
@@ -40,18 +40,16 @@ function TabletContextDrawer({
       <Button
         ref={triggerRef}
         aria-label={locale === "ko" ? "현재 섹션 메뉴" : "Current section menu"}
-        className={cn(
-          "inline-flex h-8 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-border bg-card px-3 text-xs font-medium text-card-foreground outline-none transition-colors",
-          "hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/60 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-        )}
-        data-slot="button"
+        className={"h-8 gap-2 px-3 text-xs"}
         onClick={() => setOpen(true)}
+        variant="outline"
+        size="default"
       >
         <Icon icon="menu" />
         {locale === "ko" ? "현재 섹션" : "Current section"}
       </Button>
       <Sheet open={isOpen} onOpenChange={setOpen}>
-        <SheetContent className="w-80">
+        <SheetContent className="w-80" side="left">
           <SheetTitle className="sr-only">
             {locale === "ko" ? "현재 섹션" : "Current section"}
           </SheetTitle>
@@ -130,33 +128,35 @@ export function DocsShell({
   return (
     <RouteTransitionProvider locale={locale}>
       <SearchProvider locale={locale}>
-        <div className={styles.shell}>
-          {navigation}
-          <main className={styles.main}>
-            <MobileTopNavigation
-              locale={locale}
-              onMenuClick={() => changeMobileOpen(true)}
-              triggerRef={mobileTriggerRef}
-            />
-            <Sheet open={isMobileOpen} onOpenChange={changeMobileOpen}>
-              <SheetContent>
-                <SheetTitle className={styles.mobileTitle}>
-                  {locale === "ko" ? "모바일 문서 탐색" : "Mobile documentation navigation"}
-                </SheetTitle>
-                <MobileNavigation
-                  key={`${locale}:${current.section}`}
-                  locale={locale}
-                  current={current}
-                  documents={documents}
-                  mode={mode}
-                  onModeChange={changeMode}
-                />
-              </SheetContent>
-            </Sheet>
-            <TabletContextDrawer locale={locale} current={current} documents={documents} />
-            <RouteTransitionContent>{children}</RouteTransitionContent>
-          </main>
-        </div>
+        <TooltipProvider>
+          <div className={styles.shell}>
+            {navigation}
+            <main className={styles.main}>
+              <MobileTopNavigation
+                locale={locale}
+                onMenuClick={() => changeMobileOpen(true)}
+                triggerRef={mobileTriggerRef}
+              />
+              <Sheet open={isMobileOpen} onOpenChange={changeMobileOpen}>
+                <SheetContent side="left">
+                  <SheetTitle className={styles.mobileTitle}>
+                    {locale === "ko" ? "모바일 문서 탐색" : "Mobile documentation navigation"}
+                  </SheetTitle>
+                  <MobileNavigation
+                    key={`${locale}:${current.section}`}
+                    locale={locale}
+                    current={current}
+                    documents={documents}
+                    mode={mode}
+                    onModeChange={changeMode}
+                  />
+                </SheetContent>
+              </Sheet>
+              <TabletContextDrawer locale={locale} current={current} documents={documents} />
+              <RouteTransitionContent>{children}</RouteTransitionContent>
+            </main>
+          </div>
+        </TooltipProvider>
       </SearchProvider>
     </RouteTransitionProvider>
   );

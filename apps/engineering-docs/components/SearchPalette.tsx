@@ -1,9 +1,18 @@
 "use client";
 
-import { Button } from "@base-ui/react/button";
+import { Button } from "@jongminchung/ui/components/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@jongminchung/ui/components/command";
+import { Dialog, DialogContent, DialogTitle } from "@jongminchung/ui/components/dialog";
+import { cn } from "@jongminchung/ui/lib/utils";
 import {
   createContext,
-  type KeyboardEvent,
   type ReactNode,
   use,
   useCallback,
@@ -12,13 +21,11 @@ import {
   useRef,
   useState,
 } from "react";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import type { DocSection, Locale, SearchDocument } from "@/lib/content-model";
 import { isLocale, sections } from "@/lib/content-model";
 import { searchDocuments, type SearchHit, type SearchMatchField } from "@/lib/search";
-import { cn } from "@/lib/utils";
 import { Icon } from "./Icon";
-import { TransitionLink, useDocsNavigation } from "./RouteTransition";
+import { useDocsNavigation } from "./RouteTransition";
 import styles from "./SearchPalette.module.css";
 
 interface SearchItem {
@@ -28,6 +35,14 @@ interface SearchItem {
   readonly matchText: string;
   readonly group: string;
 }
+
+type SearchIndexState =
+  | { readonly kind: "idle" }
+  | { readonly kind: "loading" }
+  | { readonly kind: "ready"; readonly documents: readonly SearchDocument[] }
+  | { readonly kind: "error"; readonly message: string };
+
+const searchIndexCache = new Map<Locale, readonly SearchDocument[]>();
 
 const sectionLabels: Readonly<Record<Locale, Readonly<Record<DocSection, string>>>> = {
   ko: { overview: "개요", handbook: "핸드북", packages: "패키지", "deep-dive": "Deep Dive" },
@@ -87,8 +102,9 @@ function parseSearchDocument(value: unknown): SearchDocument {
     !Array.isArray(apiSymbols) ||
     !apiSymbols.every((item) => typeof item === "string") ||
     typeof body !== "string"
-  )
+  ) {
     throw new Error("Search index contains an invalid item.");
+  }
   return Object.freeze({
     id,
     locale,
@@ -102,6 +118,14 @@ function parseSearchDocument(value: unknown): SearchDocument {
     apiSymbols,
     body,
   });
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : "Search index request failed.";
+}
+
+function isAbortError(error: unknown): boolean {
+  return error instanceof DOMException && error.name === "AbortError";
 }
 
 function toItem(locale: Locale, hit: SearchHit): SearchItem {
@@ -138,30 +162,68 @@ export function SearchProvider({
 }) {
   const { navigate } = useDocsNavigation();
   const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const requestRef = useRef<AbortController | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [documents, setDocuments] = useState<readonly SearchDocument[]>([]);
-  const [selected, setSelected] = useState(-1);
-  const items = useMemo(
-    () =>
-      searchDocuments(documents, query, query === "" ? 8 : undefined).map((hit) =>
-        toItem(locale, hit),
-      ),
-    [documents, locale, query],
-  );
+  const [indexState, setIndexState] = useState<SearchIndexState>(() => {
+    const documents = searchIndexCache.get(locale);
+    return documents === undefined ? { kind: "idle" } : { kind: "ready", documents };
+  });
+
+  const loadIndex = useCallback(async (): Promise<void> => {
+    const cached = searchIndexCache.get(locale);
+    if (cached !== undefined) {
+      setIndexState({ kind: "ready", documents: cached });
+      return;
+    }
+
+    requestRef.current?.abort();
+    const controller = new AbortController();
+    requestRef.current = controller;
+    setIndexState({ kind: "loading" });
+
+    try {
+      const response = await fetch(`/search/${locale}.json`, { signal: controller.signal });
+      if (!response.ok) throw new Error(`Search index request failed with ${response.status}.`);
+      const value: unknown = await response.json();
+      if (!Array.isArray(value)) throw new Error("Search index must be an array.");
+      const documents = Object.freeze(value.map(parseSearchDocument));
+      if (controller.signal.aborted) return;
+      searchIndexCache.set(locale, documents);
+      setIndexState({ kind: "ready", documents });
+    } catch (error: unknown) {
+      if (!controller.signal.aborted && !isAbortError(error)) {
+        setIndexState({ kind: "error", message: errorMessage(error) });
+      }
+    } finally {
+      if (requestRef.current === controller) requestRef.current = null;
+    }
+  }, [locale]);
+
+  const items = useMemo(() => {
+    if (indexState.kind !== "ready") return [];
+    return searchDocuments(indexState.documents, query, query === "" ? 8 : undefined).map((hit) =>
+      toItem(locale, hit),
+    );
+  }, [indexState, locale, query]);
+
   const open = useCallback((trigger: HTMLButtonElement | null): void => {
     triggerRef.current = trigger ?? findVisibleTrigger();
     setIsOpen(true);
   }, []);
 
   useEffect(() => {
-    void fetch(`/search/${locale}.json`).then(async (response) => {
-      if (!response.ok) throw new Error(`Search index request failed with ${response.status}.`);
-      const value: unknown = await response.json();
-      if (!Array.isArray(value)) throw new Error("Search index must be an array.");
-      setDocuments(Object.freeze(value.map(parseSearchDocument)));
-    });
+    requestRef.current?.abort();
+    const documents = searchIndexCache.get(locale);
+    setIndexState(documents === undefined ? { kind: "idle" } : { kind: "ready", documents });
+    setQuery("");
   }, [locale]);
+
+  useEffect(() => {
+    if (isOpen && indexState.kind === "idle") void loadIndex();
+  }, [indexState.kind, isOpen, loadIndex]);
+
+  useEffect(() => () => requestRef.current?.abort(), []);
 
   useEffect(() => {
     const handleShortcut = (event: globalThis.KeyboardEvent): void => {
@@ -178,87 +240,86 @@ export function SearchProvider({
     setIsOpen(nextOpen);
     if (!nextOpen) {
       setQuery("");
-      setSelected(-1);
       requestAnimationFrame(() => triggerRef.current?.focus());
     }
   };
+
   const select = (item: SearchItem): void => {
     changeOpen(false);
     navigate(item.href);
-  };
-  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>): void => {
-    if (event.key === "ArrowDown") {
-      event.preventDefault();
-      setSelected((current) => Math.min(current + 1, items.length - 1));
-    } else if (event.key === "ArrowUp") {
-      event.preventDefault();
-      setSelected((current) => Math.max(current - 1, 0));
-    } else if (event.key === "Enter" && items.length > 0) {
-      event.preventDefault();
-      const item = items[selected < 0 ? 0 : selected];
-      if (item !== undefined) select(item);
-    }
   };
 
   return (
     <SearchContext value={{ locale, open }}>
       {children}
       <Dialog open={isOpen} onOpenChange={changeOpen}>
-        <DialogContent className={styles.dialog} aria-describedby={undefined}>
+        <DialogContent
+          className={cn(styles.dialog, "max-w-xl p-0")}
+          aria-describedby={undefined}
+          showCloseButton={false}
+        >
           <DialogTitle className="sr-only">
             {locale === "ko" ? "문서 검색" : "Search documentation"}
           </DialogTitle>
-          <label className={styles.inputRow}>
-            <Icon icon="search" />
-            <input
-              autoFocus
-              value={query}
-              onChange={(event) => {
-                setQuery(event.target.value);
-                setSelected(-1);
-              }}
-              onKeyDown={handleKeyDown}
-              placeholder={
-                locale === "ko" ? "제목, API, 주제 검색" : "Search titles, APIs, and topics"
-              }
-            />
-            <kbd>Esc</kbd>
-          </label>
-          <div
-            className={styles.list}
-            role="list"
-            aria-label={locale === "ko" ? "검색 결과" : "Search results"}
-          >
-            {items.length === 0 ? (
-              <p className={styles.empty}>
-                {locale === "ko" ? "검색 결과가 없습니다" : "No matching documents"}
-              </p>
-            ) : (
-              items.map((item, index) => (
-                <TransitionLink
-                  className={cn(
-                    "flex min-h-[58px] w-full items-center justify-between gap-4 rounded-sm border-0 bg-transparent px-2.5 py-2 text-left font-[inherit] text-foreground outline-none transition-colors disabled:pointer-events-none disabled:opacity-50",
-                    "hover:bg-muted data-active:bg-muted focus-visible:ring-2 focus-visible:ring-ring/60",
-                    "[&_small]:shrink-0 [&_small]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
-                  )}
-                  data-active={selected === index ? "" : undefined}
-                  href={item.href}
-                  key={item.href}
-                  onMouseMove={() => setSelected(index)}
-                  onNavigate={() => changeOpen(false)}
-                >
-                  <span className={styles.result}>
-                    <strong>{item.label}</strong>
-                    <span className={styles.matchReason}>
-                      <span>{item.matchLabel}</span>
-                      {item.matchText}
-                    </span>
-                  </span>
-                  <small>{item.group}</small>
-                </TransitionLink>
-              ))
-            )}
-          </div>
+          <Command key={locale} shouldFilter={false} className="rounded-lg">
+            <div className={styles.inputRow}>
+              <CommandInput
+                autoFocus
+                value={query}
+                onValueChange={setQuery}
+                placeholder={
+                  locale === "ko" ? "제목, API, 주제 검색" : "Search titles, APIs, and topics"
+                }
+              />
+              <kbd>Esc</kbd>
+            </div>
+            <CommandList
+              className={styles.list}
+              aria-label={locale === "ko" ? "검색 결과" : "Search results"}
+            >
+              {indexState.kind === "loading" ? (
+                <p className={styles.empty} role="status">
+                  {locale === "ko" ? "검색 색인을 불러오는 중" : "Loading search index"}
+                </p>
+              ) : null}
+              {indexState.kind === "error" ? (
+                <div className={styles.empty} role="alert">
+                  <p>
+                    {locale === "ko" ? "검색 색인을 불러오지 못했습니다" : "Search index failed"}
+                  </p>
+                  <Button variant="outline" size="sm" onClick={() => void loadIndex()}>
+                    {locale === "ko" ? "다시 시도" : "Retry"}
+                  </Button>
+                </div>
+              ) : null}
+              {indexState.kind === "ready" ? (
+                <>
+                  <CommandEmpty>
+                    {locale === "ko" ? "검색 결과가 없습니다" : "No matching documents"}
+                  </CommandEmpty>
+                  <CommandGroup>
+                    {items.map((item) => (
+                      <CommandItem
+                        className="min-h-[58px] justify-between gap-4"
+                        key={item.href}
+                        value={`${item.href} ${item.label} ${item.matchText}`}
+                        onSelect={() => select(item)}
+                      >
+                        <span className={styles.result}>
+                          <strong>{item.label}</strong>
+                          <span className={styles.matchReason}>
+                            <span>{item.matchLabel}</span>
+                            {item.matchText}
+                          </span>
+                        </span>
+                        <small>{item.group}</small>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </>
+              ) : null}
+            </CommandList>
+          </Command>
         </DialogContent>
       </Dialog>
     </SearchContext>
@@ -279,14 +340,13 @@ export function SearchTrigger({
     <Button
       aria-label={label}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-transparent bg-transparent font-medium outline-none transition-colors",
-        "hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
         "[&_kbd]:rounded-xs [&_kbd]:border [&_kbd]:border-border [&_kbd]:px-1.5 [&_kbd]:py-0.5 [&_kbd]:text-[10px] [&_kbd]:text-foreground",
-        compact ? "min-h-11 min-w-11 px-[7px] text-sm" : "h-8 w-full justify-between px-3 text-xs",
+        compact ? "min-h-11 min-w-11 px-[7px]" : "h-8 w-full justify-between px-3 text-xs",
       )}
       data-docs-search-trigger="true"
-      data-slot="button"
       onClick={(event) => context.open(event.currentTarget)}
+      size={compact ? "icon" : "default"}
+      variant="ghost"
     >
       <span className="inline-flex items-center gap-[7px]">
         <Icon icon="search" />

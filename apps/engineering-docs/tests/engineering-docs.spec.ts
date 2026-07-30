@@ -163,6 +163,75 @@ test("global navigation, breadcrumb, outline, and explained search work by keybo
   await expect(page).toHaveURL(/\/en\/packages\/tooling$/u);
 });
 
+test("search exposes loading, retry, keyboard, focus, and accessibility states", async ({
+  page,
+}) => {
+  const searchIndex = await readFile(resolve(process.cwd(), "public/search/en.json"), "utf8");
+  let attempts = 0;
+  await page.route("**/search/en.json", async (route) => {
+    attempts += 1;
+    if (attempts === 1) {
+      await new Promise((resolveDelay) => setTimeout(resolveDelay, 150));
+      await route.fulfill({ status: 503 });
+      return;
+    }
+    await route.fulfill({ body: searchIndex, contentType: "application/json" });
+  });
+
+  await page.goto("/en/overview");
+  const trigger = page.locator("[data-docs-search-trigger]:visible").first();
+  await trigger.click();
+  const dialog = page.getByRole("dialog", { name: "Search documentation" });
+  const input = dialog.getByRole("combobox");
+
+  await expect(dialog.getByRole("status")).toContainText("Loading search index");
+  await expect(dialog.getByRole("alert")).toContainText("Search index failed");
+  await dialog.getByRole("button", { name: "Retry" }).click();
+  await input.fill("createTsconfigPaths");
+  const option = dialog.getByRole("option", { name: /createTsconfigPaths/u });
+  await expect(option).toBeVisible();
+  await page.keyboard.press("ArrowDown");
+  await expect(input).toHaveAttribute("aria-activedescendant", /.+/u);
+
+  const accessibility = await new AxeBuilder({ page }).include('[role="dialog"]').analyze();
+  expect(
+    accessibility.violations.filter((violation) =>
+      ["serious", "critical"].includes(violation.impact ?? ""),
+    ),
+  ).toEqual([]);
+
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(trigger).toBeFocused();
+});
+
+test("search cancels a stale locale request before accepting the next locale", async ({ page }) => {
+  const englishIndex = await readFile(resolve(process.cwd(), "public/search/en.json"), "utf8");
+  const koreanIndex = await readFile(resolve(process.cwd(), "public/search/ko.json"), "utf8");
+  await page.route("**/search/en.json", async (route) => {
+    await new Promise((resolveDelay) => setTimeout(resolveDelay, 500));
+    await route.fulfill({ body: englishIndex, contentType: "application/json" });
+  });
+  await page.route("**/search/ko.json", (route) =>
+    route.fulfill({ body: koreanIndex, contentType: "application/json" }),
+  );
+
+  await page.goto("/en/packages/tooling");
+  await page.locator("[data-docs-search-trigger]:visible").first().click();
+  await expect(page.getByRole("status")).toContainText("Loading search index");
+  await page.keyboard.press("Escape");
+  await page.getByRole("link", { name: "한국어로 읽기" }).click();
+  await expect(page).toHaveURL(/\/ko\/packages\/tooling$/u);
+
+  await page.locator("[data-docs-search-trigger]:visible").first().click();
+  const dialog = page.getByRole("dialog", { name: "문서 검색" });
+  await dialog.getByRole("combobox").fill("createTsconfigPaths");
+  await expect(dialog.getByText("API 심볼", { exact: true })).toBeVisible();
+  await page.waitForTimeout(550);
+  await expect(dialog.getByText("API 심볼", { exact: true })).toBeVisible();
+  await expect(dialog.getByText("검색 색인을 불러오지 못했습니다")).toHaveCount(0);
+});
+
 test("internal navigation keeps the shell fixed while transitioning document content", async ({
   page,
 }) => {

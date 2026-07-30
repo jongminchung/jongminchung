@@ -1,6 +1,5 @@
-"use client";
-
-import { cn } from "@/lib/utils";
+import { buttonVariants } from "@jongminchung/ui/components/button";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { EditIcon } from "./DocsIcons";
 import { Icon } from "./Icon";
 
@@ -8,10 +7,7 @@ export function EditPageLink({ label, href }: { readonly label: string; readonly
   return (
     <a
       aria-label={label}
-      className={cn(
-        "inline-flex size-9 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-transparent bg-transparent p-0 text-sm font-medium outline-none transition-colors",
-        "hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60",
-      )}
+      className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "size-9")}
       href={href}
       rel="noreferrer"
       target="_blank"

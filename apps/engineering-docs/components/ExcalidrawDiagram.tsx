@@ -1,9 +1,9 @@
 "use client";
 
-import { Button } from "@base-ui/react/button";
+import { Button, buttonVariants } from "@jongminchung/ui/components/button";
+import { cn } from "@jongminchung/ui/lib/utils";
 import type { ComponentType } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
 import {
   parseExcalidrawAssetSrc,
   parseExcalidrawSource,
@@ -157,8 +157,8 @@ export function ExcalidrawDiagram(props: ExcalidrawDiagramProps): React.JSX.Elem
         {src === undefined ? null : (
           <a
             className={cn(
-              "inline-flex min-h-[30px] shrink-0 cursor-pointer items-center justify-center rounded-sm border border-border bg-background px-2.5 py-[5px] text-xs leading-[1.2] font-[inherit] text-foreground no-underline outline-none transition-colors",
-              "hover:border-input focus-visible:ring-2 focus-visible:ring-ring/60",
+              buttonVariants({ variant: "outline", size: "sm" }),
+              "min-h-[30px] cursor-pointer px-2.5 py-[5px] text-xs leading-[1.2] font-[inherit] no-underline hover:border-input",
             )}
             download
             href={src}
@@ -168,11 +168,12 @@ export function ExcalidrawDiagram(props: ExcalidrawDiagramProps): React.JSX.Elem
         )}
         <Button
           className={cn(
-            "inline-flex min-h-[30px] shrink-0 cursor-pointer items-center justify-center rounded-sm border border-border bg-background px-2.5 py-[5px] text-xs leading-[1.2] font-[inherit] text-foreground outline-none transition-colors",
-            "hover:border-input focus-visible:ring-2 focus-visible:ring-ring/60 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+            "min-h-[30px] cursor-pointer px-2.5 py-[5px] text-xs leading-[1.2] font-[inherit]",
+            "hover:border-input",
           )}
-          data-slot="button"
           onClick={() => void toggleFullscreen()}
+          variant="outline"
+          size="default"
         >
           {isFullscreen
             ? localizedText(isKorean, "전체 화면 종료", "Exit full screen")
@@ -199,8 +200,8 @@ export function ExcalidrawDiagram(props: ExcalidrawDiagramProps): React.JSX.Elem
             {src === undefined ? null : (
               <a
                 className={cn(
-                  "inline-flex min-h-[30px] shrink-0 cursor-pointer items-center justify-center rounded-sm border border-border bg-background px-2.5 py-[5px] text-xs leading-[1.2] font-[inherit] text-foreground no-underline outline-none transition-colors",
-                  "hover:border-input focus-visible:ring-2 focus-visible:ring-ring/60",
+                  buttonVariants({ variant: "outline", size: "sm" }),
+                  "min-h-[30px] cursor-pointer px-2.5 py-[5px] text-xs leading-[1.2] font-[inherit] no-underline hover:border-input",
                 )}
                 download
                 href={src}

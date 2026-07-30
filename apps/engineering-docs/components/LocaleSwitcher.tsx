@@ -1,7 +1,7 @@
 "use client";
 
+import { cn } from "@jongminchung/ui/lib/utils";
 import type { Locale } from "@/lib/content-model";
-import { cn } from "@/lib/utils";
 
 export function LocaleSwitcher({
   locale,

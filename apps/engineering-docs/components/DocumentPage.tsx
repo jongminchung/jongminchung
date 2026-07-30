@@ -1,7 +1,7 @@
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@jongminchung/ui/components/badge";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { displayTitleFor, type DocSection, type Locale } from "@/lib/content-model";
 import type { LoadedDocument } from "@/lib/documents";
-import { cn } from "@/lib/utils";
 import { DocumentOutline } from "./DocumentOutline";
 import { EditPageLink } from "./EditPageLink";
 import { Icon } from "./Icon";
@@ -91,7 +91,14 @@ export function DocumentPage({
             </nav>
             <div className="mt-6 mb-4 flex gap-1.5">
               <Badge variant="default">{versionFor(document)}</Badge>
-              <Badge variant={metadata.status === "deprecated" ? "warning" : "secondary"}>
+              <Badge
+                className={
+                  metadata.status === "deprecated"
+                    ? "border-warning/30 bg-warning-muted text-warning-muted-foreground"
+                    : undefined
+                }
+                variant={metadata.status === "deprecated" ? "outline" : "secondary"}
+              >
                 {metadata.status}
               </Badge>
             </div>

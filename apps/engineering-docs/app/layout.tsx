@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Mono, Inter, Inter_Tight } from "next/font/google";
 import type { ReactNode } from "react";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
 const inter = Inter({
@@ -45,9 +44,7 @@ export default function RootLayout({ children }: { readonly children: ReactNode 
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <script dangerouslySetInnerHTML={{ __html: excalidrawAssetScript }} />
       </head>
-      <body>
-        <TooltipProvider>{children}</TooltipProvider>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

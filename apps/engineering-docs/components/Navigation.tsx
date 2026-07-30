@@ -1,7 +1,8 @@
 "use client";
 
-import { Button } from "@base-ui/react/button";
 import { createIconDataUrl } from "@jongminchung/icon";
+import { Button } from "@jongminchung/ui/components/button";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { type Ref, useState } from "react";
 import {
   displayTitleFor,
@@ -9,7 +10,6 @@ import {
   type DocSection,
   type Locale,
 } from "@/lib/content-model";
-import { cn } from "@/lib/utils";
 import { DeepDiveIcon, HandbookIcon, OverviewIcon, PackageIcon, RepositoryIcon } from "./DocsIcons";
 import { Icon, type IconType } from "./Icon";
 import { LocaleSwitcher } from "./LocaleSwitcher";
@@ -225,12 +225,12 @@ export function MobileNavigation({
                 <Button
                   key={item}
                   className={cn(
-                    "inline-flex min-h-[52px] w-full shrink-0 items-center justify-start gap-2 whitespace-nowrap rounded-md border border-transparent bg-transparent px-5 text-sm font-medium outline-none transition-colors",
-                    "hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                    "min-h-[52px] w-full justify-start gap-2 px-5 text-sm",
                     "[&>:last-child]:ml-auto",
                   )}
-                  data-slot="button"
                   onClick={() => setSection(item)}
+                  variant="ghost"
+                  size="default"
                 >
                   <Icon icon={sectionIcons[item]} />
                   {sectionLabels[locale][item]}
@@ -243,12 +243,12 @@ export function MobileNavigation({
           <div className={styles.mobileSectionView}>
             <Button
               aria-label={locale === "ko" ? "전체 문서로 돌아가기" : "Back to all documentation"}
-              className={cn(
-                "sticky top-0 z-[1] inline-flex min-h-[52px] w-full shrink-0 items-center justify-start gap-2 whitespace-nowrap rounded-none border border-transparent border-b-border bg-card px-5 text-[17px] font-medium text-foreground outline-none transition-colors",
-                "hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/60 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-              )}
-              data-slot="button"
+              className={
+                "sticky top-0 z-[1] min-h-[52px] w-full justify-start gap-2 rounded-none border-b-border px-5 text-[17px]"
+              }
               onClick={() => setSection(null)}
+              variant="outline"
+              size="default"
             >
               <Icon icon="chevronLeft" />
               {sectionLabels[locale][section]}
@@ -297,12 +297,10 @@ export function MobileTopNavigation({
       <Button
         ref={triggerRef}
         aria-label={locale === "ko" ? "탐색 열기" : "Open navigation"}
-        className={cn(
-          "inline-flex size-9 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-transparent bg-transparent p-0 text-sm font-medium outline-none transition-colors",
-          "hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-        )}
-        data-slot="button"
+        className={"size-9 gap-2 p-0 text-sm"}
         onClick={onMenuClick}
+        variant="ghost"
+        size="icon"
       >
         <Icon icon="menu" />
       </Button>
