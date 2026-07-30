@@ -18,6 +18,7 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-overlay: var(--overlay);
   --font-sans: var(--font-family-body);
   --font-mono: var(--font-family-code);
   --radius-xs: calc(var(--radius) * 0.4);

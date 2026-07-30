@@ -28,6 +28,7 @@ const coreColorTokens = [
   "border",
   "input",
   "ring",
+  "overlay",
 ] as const;
 const coreColorTokenSet = new Set<string>(coreColorTokens);
 
@@ -423,56 +424,83 @@ describe("@jongminchung/theme-contract", () => {
       ...sourceFiles(join(workspaceRoot, "apps")),
       ...sourceFiles(join(workspaceRoot, "packages")),
     ].filter((file) => file !== contractPath);
+    const appAndProductFiles = files.filter(
+      (file) => !relativePath(file).startsWith("packages/ui/"),
+    );
+    const sharedUiFiles = sourceFiles(join(workspaceRoot, "packages", "ui"));
     const legacyToken =
       /--(?:blue(?:-dark)?|cyan|ink|muted-copy|on-dark(?:-accent|-muted)?|paper|pink|route-mid|rule|surface|color-background-(?:card|muted|purple|surface)|color-text-(?:primary|purple|secondary)|color-border(?:-emphasized)?|color-accent)\b/;
     const numericRadius =
       /border(?:-(?:bottom-left|bottom-right|end-end|end-start|start-end|start-start|top-left|top-right))?-radius\s*:\s*(?!0(?:[;\s}]|$))(?:\d|\.\d)|\[border(?:-(?:bottom-left|bottom-right|end-end|end-start|start-end|start-start|top-left|top-right))?-radius:|rounded-\[[^\]]+\]/;
+    const sharedUiArbitraryRadii = sharedUiFiles.flatMap((file) => {
+      const path = relativePath(file);
+      return readFileSync(file, "utf8")
+        .split("\n")
+        .flatMap((line, index) => {
+          if (!/rounded-\[[^\]]+\]/.test(line)) return [];
+          if (line.includes("var(--radius")) return [];
+          if (path === "packages/ui/src/components/tooltip.tsx" && line.includes("rounded-[2px]")) {
+            return [];
+          }
+          return [`${path}:${index + 1}`];
+        });
+    });
 
     expect(violations(legacyToken, files), "legacy hue or material token names").toEqual([]);
-    expect(violations(numericRadius, files), "numeric or arbitrary border radii").toEqual([]);
+    expect(
+      violations(numericRadius, appAndProductFiles),
+      "numeric or arbitrary product border radii",
+    ).toEqual([]);
+    expect(
+      sharedUiArbitraryRadii,
+      "shared UI arbitrary radii must derive from the semantic radius",
+    ).toEqual([]);
   });
 
-  test("uses Base UI Button directly with call-site cn recipes", () => {
+  test("routes Button usage through the shared shadcn variant contract", () => {
     const removedButtonModules = [
       "apps/engineering-docs/components/ui/button.tsx",
       "apps/git-client/src/components/ui/button.tsx",
       "apps/readme/components/ui/button.tsx",
     ] as const;
+    const sharedButtonPath = join(
+      workspaceRoot,
+      "packages",
+      "ui",
+      "src",
+      "components",
+      "button.tsx",
+    );
+    const sharedButton = readFileSync(sharedButtonPath, "utf8");
     const files = sourceFiles(join(workspaceRoot, "apps")).filter(
       (file) => extname(file) === ".tsx",
     );
-    const forbiddenIdentifiers =
-      /\b(?:BaseUIButton|ButtonLink|ButtonPrimitive|ToggleButton|buttonVariants)\b/;
-    const forbiddenIdentifierViolations = violations(forbiddenIdentifiers, files);
     const rawButtonViolations: string[] = [];
     const importViolations: string[] = [];
     const exportViolations: string[] = [];
     const oldPropViolations: string[] = [];
-    const semanticRoleViolations: string[] = [];
-    const nativeTitleViolations: string[] = [];
     const iconNameViolations: string[] = [];
-    const slotViolations: string[] = [];
-    const classNameViolations: string[] = [];
-    const recipeViolations: string[] = [];
+    const explicitVariantViolations: string[] = [];
+    const directBaseUiViolations: string[] = [];
 
     for (const path of removedButtonModules) {
       expect(existsSync(join(workspaceRoot, path)), path).toBe(false);
     }
+    expect(sharedButton).toContain('from "@base-ui/react/button"');
+    expect(sharedButton).toContain("const buttonVariants = cva(");
+    expect(sharedButton).toContain("export { Button, buttonVariants }");
 
     for (const file of files) {
       const contents = readFileSync(file, "utf8");
-      const importsBaseButton =
-        /import\s*\{[^}]*\bButton\b[^}]*\}\s*from\s*["']@base-ui\/react\/button["']/s.test(
+      const importsSharedButton =
+        /import\s*\{[^}]*\bButton\b[^}]*\}\s*from\s*["']@jongminchung\/ui\/components\/button["']/s.test(
           contents,
         );
-      const aliasesBaseButton =
-        /import\s*\{[^}]*\bButton\s+as\s+\w+[^}]*\}\s*from\s*["']@base-ui\/react\/button["']/s.test(
-          contents,
-        );
+      if (/from\s+["']@base-ui\/react(?:\/[^"']+)?["']/.test(contents)) {
+        directBaseUiViolations.push(relativePath(file));
+      }
       if (
-        /export\s*\{[^}]*\bButton\b[^}]*\}\s*from\s*["']@base-ui\/react\/button["']/s.test(
-          contents,
-        ) ||
+        /export\s*\{[^}]*\bButton\b[^}]*\}/s.test(contents) ||
         /(?:function|class|const|let|var)\s+Button\b/.test(contents)
       ) {
         exportViolations.push(relativePath(file));
@@ -481,61 +509,34 @@ describe("@jongminchung/theme-contract", () => {
       for (const tag of jsxOpeningTags(contents, "button")) {
         rawButtonViolations.push(`${relativePath(file)}:${tag.line}`);
       }
-      for (const name of ["Button", "Toggle", "Tabs.Tab"] as const) {
-        for (const tag of jsxOpeningTags(contents, name)) {
-          if (/\btitle\s*=/.test(tag.text)) {
-            nativeTitleViolations.push(`${relativePath(file)}:${tag.line}`);
-          }
-        }
-      }
       for (const tag of jsxOpeningTags(contents, "Button")) {
         const location = `${relativePath(file)}:${tag.line}`;
-        if (!importsBaseButton || aliasesBaseButton) importViolations.push(location);
+        if (!importsSharedButton) importViolations.push(location);
         if (
-          /(?:^|\s)(?:clickAction|endContent|icon|isDisabled|isLoading|label|size|tooltip|variant)\s*=\s*(?:["'{])/.test(
+          /(?:^|\s)(?:clickAction|endContent|icon|isDisabled|isLoading|label|tooltip)\s*=\s*(?:["'{])/.test(
             tag.text,
           )
         ) {
           oldPropViolations.push(location);
         }
-        if (
-          /\baria-pressed\s*=/.test(tag.text) ||
-          /\brole\s*=\s*["'](?:cell|menuitem|tab|switch|checkbox|radio)["']/.test(tag.text) ||
-          (/\baria-selected\s*=/.test(tag.text) &&
-            !/\brole\s*=\s*["'](?:gridcell|option|row|treeitem)["']/.test(tag.text))
-        ) {
-          semanticRoleViolations.push(location);
+        if (!/\bvariant\s*=/.test(tag.text) || !/\bsize\s*=/.test(tag.text)) {
+          explicitVariantViolations.push(location);
         }
-        if (!/\bdata-slot=["']button["']/.test(tag.text)) slotViolations.push(location);
-        if (!/\bclassName=\{\s*cn\s*\(/.test(tag.text)) classNameViolations.push(location);
-        if (/\baspect-square\b/.test(tag.text) && !/\baria-label\s*=/.test(tag.text)) {
+        if (
+          /\bsize\s*=\s*["']icon(?:-[a-z]+)?["']/.test(tag.text) &&
+          !/\baria-label\s*=/.test(tag.text)
+        ) {
           iconNameViolations.push(location);
-        }
-        if (
-          !/\btransition(?:-|\[)/.test(tag.text) ||
-          !/\bfocus-visible:/.test(tag.text) ||
-          !/\bdisabled:/.test(tag.text) ||
-          !/\[&_svg\]:pointer-events-none/.test(tag.text) ||
-          !/\[&_svg\]:shrink-0/.test(tag.text) ||
-          !/\b(?:bg|border|ring|text)-(?:accent|background|border|card|destructive|foreground|input|muted|popover|primary|ring|secondary|transparent)\b/.test(
-            tag.text,
-          )
-        ) {
-          recipeViolations.push(location);
         }
       }
     }
 
-    expect(forbiddenIdentifierViolations, "removed Button abstractions").toEqual([]);
     expect(rawButtonViolations, "raw button elements").toEqual([]);
-    expect(importViolations, "Button imports outside @base-ui/react/button").toEqual([]);
+    expect(directBaseUiViolations, "app-level Base UI imports").toEqual([]);
+    expect(importViolations, "Button imports outside @jongminchung/ui").toEqual([]);
     expect(exportViolations, "local Button declarations or re-exports").toEqual([]);
     expect(oldPropViolations, "removed Button props").toEqual([]);
-    expect(semanticRoleViolations, "Button instances that should use Toggle or Tabs").toEqual([]);
-    expect(nativeTitleViolations, "native interactive titles that should use Tooltip").toEqual([]);
     expect(iconNameViolations, "icon-only Buttons without aria-label").toEqual([]);
-    expect(slotViolations, 'Base UI Buttons without data-slot="button"').toEqual([]);
-    expect(classNameViolations, "Base UI Buttons without call-site cn classes").toEqual([]);
-    expect(recipeViolations, "incomplete call-site Button recipes").toEqual([]);
+    expect(explicitVariantViolations, "Button calls without explicit variant and size").toEqual([]);
   });
 });

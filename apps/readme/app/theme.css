@@ -19,6 +19,7 @@
   --border: oklch(0.8724 0.0263 266.59);
   --input: var(--border);
   --ring: oklch(0.6284 0.232 359.97);
+  --overlay: oklch(0 0 0 / 0.45);
   --primary-emphasis: oklch(0.4023 0.1816 265.25);
   --brand-highlight: var(--ring);
   --brand-gradient-mid: oklch(0.5468 0.2627 284.56);

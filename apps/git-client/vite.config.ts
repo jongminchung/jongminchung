@@ -8,6 +8,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: [{ find: "@", replacement: resolve(import.meta.dirname, "src") }],
+    dedupe: ["react", "react-dom"],
     preserveSymlinks: false,
   },
   server: {

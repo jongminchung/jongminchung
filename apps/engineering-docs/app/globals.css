@@ -1,9 +1,9 @@
-@import "tailwindcss";
-@import "@jongminchung/theme-contract/tokens.css";
+@import "@jongminchung/ui/globals.css";
 @import "./theme.css";
 
+@source "../**/*.{ts,tsx,mdx}";
+
 @theme inline {
-  --color-overlay: var(--overlay);
   --color-warning: var(--warning);
   --color-warning-muted: var(--warning-muted);
   --color-warning-muted-foreground: var(--warning-muted-foreground);

@@ -71,6 +71,15 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function wildcardRegExp(value: string): RegExp {
+  return new RegExp(`^${value.split("*").map(escapeRegExp).join("(.+)")}$`);
+}
+
+function wildcardReplacement(value: string): string {
+  let capture = 0;
+  return value.replaceAll("*", () => `$${++capture}`);
+}
+
 function expandWorkspacePattern(rootDir: string, pattern: string): string[] {
   if (!pattern.endsWith("/*")) return [resolve(rootDir, pattern)];
 
@@ -266,8 +275,8 @@ export function createViteResolveAliases({
       replacement: `${resolve(resolvedRootDir, alias.replacementPath)}/`,
     })),
     ...createPackageExportAliases({ rootDir: resolvedRootDir }).map((alias) => ({
-      find: new RegExp(`^${escapeRegExp(alias.specifier)}$`),
-      replacement: alias.target,
+      find: wildcardRegExp(alias.specifier),
+      replacement: wildcardReplacement(alias.target),
     })),
   ];
 }

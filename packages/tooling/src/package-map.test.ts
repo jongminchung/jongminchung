@@ -59,6 +59,8 @@ async function withWorkspace<T>(callback: (rootDir: string) => Promise<T>): Prom
           types: "./dist/button.d.ts",
           default: "./dist/button.js",
         },
+        "./components/*": "./src/components/*.tsx",
+        "./lib/*": "./src/lib/*.ts",
         "./styles.css": "./src/styles.css",
         "./package.json": "./package.json",
       },
@@ -91,6 +93,8 @@ describe("workspace package map", () => {
         "@scope/tooling/oxfmt": ["./packages/tooling/src/oxfmt/index.ts"],
         "@scope/ui": ["./packages/ui/src/index.ts"],
         "@scope/ui/button": ["./packages/ui/src/button.tsx"],
+        "@scope/ui/components/*": ["./packages/ui/src/components/*.tsx"],
+        "@scope/ui/lib/*": ["./packages/ui/src/lib/*.ts"],
         "@scope/ui/styles.css": ["./packages/ui/src/styles.css"],
       });
     });
@@ -106,6 +110,8 @@ describe("workspace package map", () => {
           "@scope/tooling/oxfmt": ["./packages/tooling/src/oxfmt/index.ts"],
           "@scope/ui": ["./packages/ui/src/index.ts"],
           "@scope/ui/button": ["./packages/ui/src/button.tsx"],
+          "@scope/ui/components/*": ["./packages/ui/src/components/*.tsx"],
+          "@scope/ui/lib/*": ["./packages/ui/src/lib/*.ts"],
           "@scope/ui/styles.css": ["./packages/ui/src/styles.css"],
         });
       } finally {
@@ -132,10 +138,33 @@ describe("workspace package map", () => {
           replacement: "<root>/packages/ui/src/button.tsx",
         },
         {
+          find: "/^@scope\\/ui\\/components\\/(.+)$/",
+          replacement: "<root>/packages/ui/src/components/$1.tsx",
+        },
+        {
+          find: "/^@scope\\/ui\\/lib\\/(.+)$/",
+          replacement: "<root>/packages/ui/src/lib/$1.ts",
+        },
+        {
           find: "/^@scope\\/ui\\/styles\\.css$/",
           replacement: "<root>/packages/ui/src/styles.css",
         },
       ]);
+    });
+  });
+
+  it("preserves wildcard captures when Vite resolves nested package exports", async () => {
+    await withWorkspace(async (rootDir) => {
+      const alias = createViteResolveAliases({ rootDir }).find((candidate) =>
+        candidate.find.test("@scope/ui/components/dialog"),
+      );
+
+      expect(alias).toBeDefined();
+      expect("@scope/ui/components/dialog".replace(alias!.find, alias!.replacement)).toBe(
+        join(rootDir, "packages", "ui", "src", "components", "dialog.tsx"),
+      );
+      expect(alias!.find.test("@scope/ui/components")).toBe(false);
+      expect(alias!.find.test("@scope/ui/components/dialog/internal")).toBe(true);
     });
   });
 
@@ -146,6 +175,8 @@ describe("workspace package map", () => {
         "@scope/tooling/oxfmt": ["./packages/tooling/src/oxfmt/index.ts"],
         "@scope/ui": ["./packages/ui/src/index.ts"],
         "@scope/ui/button": ["./packages/ui/src/button.tsx"],
+        "@scope/ui/components/*": ["./packages/ui/src/components/*.tsx"],
+        "@scope/ui/lib/*": ["./packages/ui/src/lib/*.ts"],
         "@scope/ui/styles.css": ["./packages/ui/src/styles.css"],
       });
 
@@ -169,6 +200,7 @@ describe("workspace package map", () => {
 
       expect(specifiers).toContain("@scope/ui");
       expect(specifiers).toContain("@scope/ui/button");
+      expect(specifiers).toContain("@scope/ui/components/*");
       expect(specifiers).not.toContain("@scope/ui/internal");
       expect(specifiers).not.toContain("@scope/ui/package.json");
       expect(specifiers).not.toContain("@scope/website");

@@ -3,7 +3,7 @@ import createMDX from "@next/mdx";
 const nextConfig = {
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
   reactStrictMode: true,
-  transpilePackages: ["@jongminchung/icon"],
+  transpilePackages: ["@jongminchung/icon", "@jongminchung/ui"],
 };
 
 const withMDX = createMDX({
