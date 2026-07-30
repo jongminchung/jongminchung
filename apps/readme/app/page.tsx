@@ -1,6 +1,7 @@
 import { createIconDataUrl } from "@jongminchung/icon";
+import { buttonVariants } from "@jongminchung/ui/components/button";
+import { cn } from "@jongminchung/ui/lib/utils";
 import type { ReactElement } from "react";
-import { cn } from "@/lib/utils";
 import styles from "./page.module.css";
 
 const personalIcon = createIconDataUrl("personal");
@@ -179,7 +180,8 @@ export default function HomePage(): ReactElement {
             <div className={styles.heroActions}>
               <a
                 className={cn(
-                  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md border text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/60",
+                  buttonVariants({ variant: "default", size: "lg" }),
+                  styles.heroPrimaryAction,
                   "border-foreground bg-foreground font-mono text-xs text-inverse-foreground transition-[background,color,transform] hover:-translate-x-[3px] hover:-translate-y-[3px] hover:bg-accent hover:text-accent-foreground",
                   "min-h-[50px] gap-[26px] px-[18px]",
                 )}
@@ -189,7 +191,7 @@ export default function HomePage(): ReactElement {
               </a>
               <a
                 className={cn(
-                  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md border text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/60",
+                  buttonVariants({ variant: "outline", size: "lg" }),
                   "border-x-0 border-t-0 border-b border-foreground bg-transparent font-mono text-xs leading-[1.8] text-foreground hover:bg-muted hover:text-foreground",
                   "h-9 px-4",
                 )}

@@ -158,6 +158,10 @@
   margin-top: 34px;
 }
 
+.heroPrimaryAction {
+  color: var(--inverse-foreground);
+}
+
 .thesis {
   position: relative;
   align-self: end;
