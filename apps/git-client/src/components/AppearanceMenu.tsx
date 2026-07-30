@@ -1,12 +1,13 @@
-import { Button } from "@base-ui/react/button";
+import { Button } from "@jongminchung/ui/components/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { AppearancePreference, AppearanceTheme } from "../domain/appearance";
-import { cn } from "../lib/utils";
 import { useAppearance } from "./AppearanceProvider";
 import { useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
-import { Popover, Tooltip, TooltipContent, TooltipTrigger } from "./ui";
-import { RadioList, RadioListItem } from "./ui";
+import { RadioList, RadioListItem } from "./ProductCollections";
+import { Popover } from "./ProductOverlays";
 
 const APPEARANCE_OPTIONS = [
   { mode: "system", label: "Sync with OS", icon: "appearance" },
@@ -113,12 +114,11 @@ export function AppearanceMenu(): React.ReactNode {
           <TooltipTrigger
             render={
               <Button
-                data-slot="button"
                 type="button"
                 aria-label={`Appearance: ${selected?.label ?? "Sync with OS"}`}
-                className={cn(
-                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 aspect-square px-0 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
-                )}
+                className={cn("h-7 px-2.5 aspect-square px-0")}
+                variant="ghost"
+                size="icon-sm"
               >
                 <Icon name={selected?.icon ?? "appearance"} size={14} />
               </Button>

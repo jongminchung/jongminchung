@@ -45,7 +45,7 @@ test("matches the focused Rebased Customize geometry", async ({ page }) => {
   await expect(page.getByRole("treeitem", { name: "Customize" })).toBeFocused();
   await page.evaluate(() => window.scrollTo(0, 0));
   await expect(page.getByRole("heading", { name: "Appearance" })).toBeVisible();
-  await expect(page.getByLabel("Theme:")).toHaveValue("light");
+  await expect(page.getByLabel("Theme:")).toContainText("Islands Light");
   await expect(page.getByText("Plugins", { exact: true })).toHaveCount(0);
   await expect(page.getByText("Editor color scheme", { exact: true })).toHaveCount(0);
   await expect(page.getByText("Language and Region", { exact: true })).toHaveCount(0);
@@ -65,28 +65,29 @@ test("applies and restores Welcome appearance preferences", async ({ page }) => 
   const theme = page.getByLabel("Theme:");
   const syncWithOs = page.getByRole("checkbox", { name: "Sync with OS" });
 
-  await theme.selectOption("dark");
+  await theme.click();
+  await page.getByRole("option", { name: "Islands Dark" }).click();
   await expect(root).toHaveAttribute("data-theme", "dark");
   await expect(root).toHaveAttribute("data-appearance-mode", "dark");
   await expect(root).toHaveCSS("color-scheme", "dark");
   await page.reload();
   await page.getByRole("treeitem", { name: "Customize" }).click();
-  await expect(theme).toHaveValue("dark");
+  await expect(theme).toContainText("Islands Dark");
   await expect(root).toHaveAttribute("data-theme", "dark");
 
   await page.emulateMedia({ colorScheme: "light" });
   await syncWithOs.check();
-  await expect(theme).toHaveValue("light");
+  await expect(theme).toContainText("Islands Light");
   await expect(root).toHaveAttribute("data-theme", "light");
   await expect(root).toHaveAttribute("data-appearance-mode", "system");
   await page.emulateMedia({ colorScheme: "dark" });
-  await expect(theme).toHaveValue("dark");
+  await expect(theme).toContainText("Islands Dark");
   await expect(root).toHaveAttribute("data-theme", "dark");
   await page.emulateMedia({ colorScheme: "light" });
-  await expect(theme).toHaveValue("light");
+  await expect(theme).toContainText("Islands Light");
   await expect(root).toHaveAttribute("data-theme", "light");
   await syncWithOs.uncheck();
-  await expect(theme).toHaveValue("light");
+  await expect(theme).toContainText("Islands Light");
   await expect(root).toHaveAttribute("data-theme", "light");
   await expect(root).toHaveAttribute("data-appearance-mode", "light");
   await expect(root).toHaveCSS("color-scheme", "light");
@@ -96,7 +97,7 @@ test("applies and restores Welcome appearance preferences", async ({ page }) => 
 
   await page.reload();
   await page.getByRole("treeitem", { name: "Customize" }).click();
-  await expect(theme).toHaveValue("light");
+  await expect(theme).toContainText("Islands Light");
   await expect(syncWithOs).not.toBeChecked();
   await expect(root).toHaveAttribute("data-theme", "light");
 });
@@ -536,9 +537,21 @@ test("uses the command registry for palette, views, search, drawer, and settings
       })
       .first(),
   ).toBeVisible();
+  await page.keyboard.press("ArrowDown");
+  await expect(palette.getByRole("combobox")).toHaveAttribute("aria-activedescendant", /.+/u);
   await page.keyboard.press("Escape");
   await expect(palette).toHaveCount(0);
   await expect(page.getByLabel("Filter changed files")).toBeFocused();
+
+  await page.keyboard.press("Meta+p");
+  const executablePalette = page.getByRole("dialog", { name: "Search Everywhere" });
+  await executablePalette.getByRole("combobox").fill("Settings");
+  await expect(executablePalette.getByRole("option", { name: /Settings/u }).first()).toBeVisible();
+  await page.keyboard.press("Enter");
+  const paletteSettings = page.getByRole("dialog", { name: "Settings" });
+  await expect(paletteSettings).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(paletteSettings).toHaveCount(0);
 
   await page.keyboard.press("Meta+1");
   await expect(page.getByRole("region", { name: "Commit log" })).toBeVisible();

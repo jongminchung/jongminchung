@@ -1,9 +1,15 @@
-import { useEffect, useId, useMemo, useState } from "react";
-import type { KeyboardEvent, ReactNode } from "react";
+import {
+  Command,
+  CommandEmpty,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@jongminchung/ui/components/command";
+import { useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import { sortPaletteItems } from "../domain/commands";
 import type { PaletteItem, PaletteScope } from "../domain/commands";
-import { CommandPaletteInput, CommandPaletteItem, CommandPaletteList } from "./ui";
-import { Dialog } from "./ui";
+import { Dialog } from "./ProductDialog";
 
 const PALETTE_COPY = {
   all: {
@@ -41,16 +47,12 @@ export function CommandPalette({
   readonly scope: PaletteScope;
 }): ReactNode {
   const [query, setQuery] = useState("");
-  const [activeIndex, setActiveIndex] = useState(0);
-  const listId = useId();
   const scopedItems = useMemo(
     () => (scope === "all" ? items : items.filter((item) => item.scopes?.includes(scope))),
     [items, scope],
   );
   const results = useMemo(() => sortPaletteItems(scopedItems, query), [query, scopedItems]);
   const copy = PALETTE_COPY[scope];
-
-  useEffect(() => setActiveIndex(0), [query]);
 
   const activate = async (item: PaletteItem): Promise<void> => {
     if (item.availability.status === "disabled") {
@@ -59,24 +61,6 @@ export function CommandPalette({
     }
     onClose();
     await onExecute(item);
-  };
-
-  const navigate = (event: KeyboardEvent<HTMLDivElement>): void => {
-    if (event.key === "ArrowDown") {
-      setActiveIndex((current) => Math.min(results.length - 1, current + 1));
-    } else if (event.key === "ArrowUp") {
-      setActiveIndex((current) => Math.max(0, current - 1));
-    } else if (event.key === "Home") {
-      setActiveIndex(0);
-    } else if (event.key === "End") {
-      setActiveIndex(Math.max(0, results.length - 1));
-    } else if (event.key === "Enter") {
-      const item = results[activeIndex];
-      if (item) void activate(item);
-    } else {
-      return;
-    }
-    event.preventDefault();
   };
 
   return (
@@ -91,52 +75,39 @@ export function CommandPalette({
       purpose="info"
       width={680}
     >
-      <div className="flex min-h-0 flex-col" onKeyDown={navigate}>
-        <CommandPaletteInput
-          aria-activedescendant={results[activeIndex] ? `palette-option-${activeIndex}` : undefined}
-          aria-controls={listId}
-          aria-expanded="true"
-          aria-label={copy.label}
-          endContent={<kbd>Esc</kbd>}
-          onValueChange={setQuery}
-          placeholder={copy.placeholder}
-          value={query}
-        />
-        <CommandPaletteList
-          className="min-h-0 overflow-auto"
-          id={listId}
-          label={copy.label}
-          tabIndex={0}
-        >
-          {results.length === 0 ? (
-            <p className="m-0 p-6 text-center text-muted-foreground">
-              No commands or loaded items match “{query}”.
-            </p>
-          ) : (
-            results.map((item, index) => (
-              <CommandPaletteItem
-                id={`palette-option-${index}`}
-                isDisabled={item.availability.status === "disabled"}
-                isHighlighted={index === activeIndex}
-                key={item.id}
-                onSelect={() => void activate(item)}
-                value={item.id}
-              >
-                <span className="grid min-w-0 flex-1 gap-0.5">
-                  <strong className="truncate">{item.label}</strong>
-                  <small className="truncate text-muted-foreground">
-                    {item.availability.status === "disabled"
-                      ? item.availability.reason
-                      : item.detail}
-                  </small>
-                </span>
-                <em className="not-italic text-muted-foreground">{item.category}</em>
-                {item.shortcut && <kbd>{item.shortcut}</kbd>}
-              </CommandPaletteItem>
-            ))
-          )}
-        </CommandPaletteList>
-      </div>
+      <Command className="min-h-0 rounded-lg" shouldFilter={false}>
+        <div className="relative border-b border-border pr-12">
+          <CommandInput
+            aria-label={copy.label}
+            autoFocus
+            onValueChange={setQuery}
+            placeholder={copy.placeholder}
+            value={query}
+          />
+          <kbd className="absolute right-3 top-1/2 -translate-y-1/2">Esc</kbd>
+        </div>
+        <CommandList aria-label={copy.label} className="min-h-0 max-h-[492px] overflow-auto">
+          <CommandEmpty>No commands or loaded items match “{query}”.</CommandEmpty>
+          {results.map((item) => (
+            <CommandItem
+              className="min-h-11 gap-3 px-2.5 text-xs"
+              disabled={item.availability.status === "disabled"}
+              key={item.id}
+              onSelect={() => void activate(item)}
+              value={item.id}
+            >
+              <span className="grid min-w-0 flex-1 gap-0.5">
+                <strong className="truncate">{item.label}</strong>
+                <small className="truncate text-muted-foreground">
+                  {item.availability.status === "disabled" ? item.availability.reason : item.detail}
+                </small>
+              </span>
+              <em className="not-italic text-muted-foreground">{item.category}</em>
+              {item.shortcut && <kbd>{item.shortcut}</kbd>}
+            </CommandItem>
+          ))}
+        </CommandList>
+      </Command>
     </Dialog>
   );
 }

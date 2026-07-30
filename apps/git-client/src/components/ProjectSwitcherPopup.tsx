@@ -1,7 +1,7 @@
-import { Button } from "@base-ui/react/button";
+import { Button } from "@jongminchung/ui/components/button";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { RecentProject } from "../domain/recentProjects";
-import { cn } from "../lib/utils";
 import type { RepositorySnapshot } from "../shared/contracts/model";
 import { tw } from "../styles/tailwind";
 import { useDismissLayer } from "./CommandProvider";
@@ -148,7 +148,6 @@ export function ProjectSwitcherPopup({
       <div aria-label="Projects" role="listbox">
         <div className={tw.projectSwitcherActions} role="presentation">
           <Button
-            data-slot="button"
             aria-selected={activeIndex === 0}
             onClick={() => {
               onClose();
@@ -161,14 +160,15 @@ export function ProjectSwitcherPopup({
             role="option"
             type="button"
             className={cn(
-              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+              "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
             )}
+            variant="ghost"
+            size="default"
           >
             <Icon name="folder" size={16} />
             <span>Open…</span>
           </Button>
           <Button
-            data-slot="button"
             aria-selected={activeIndex === 1}
             onClick={() => {
               onClose();
@@ -181,8 +181,10 @@ export function ProjectSwitcherPopup({
             role="option"
             type="button"
             className={cn(
-              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+              "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
             )}
+            variant="ghost"
+            size="default"
           >
             <Icon name="branch" size={16} />
             <span>Clone Repository…</span>
@@ -192,7 +194,6 @@ export function ProjectSwitcherPopup({
         {openRepositories.length > 0 && <strong data-project-section>Open Projects</strong>}
         {openRepositories.map((repository, index) => (
           <Button
-            data-slot="button"
             aria-current={repository.id === activeRepositoryId ? "true" : undefined}
             aria-selected={activeIndex === index + 2}
             disabled={busy}
@@ -205,9 +206,11 @@ export function ProjectSwitcherPopup({
             role="option"
             type="button"
             className={cn(
-              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+              "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
               tw.projectSwitcherRow,
             )}
+            variant="ghost"
+            size="default"
           >
             <span className={tw.projectMark}>{repository.name.charAt(0).toUpperCase()}</span>
             <span>
@@ -225,7 +228,6 @@ export function ProjectSwitcherPopup({
           const index = openRepositories.length + recentIndex + 2;
           return (
             <Button
-              data-slot="button"
               aria-description="Press Delete to remove from Recent Projects"
               aria-selected={activeIndex === index}
               disabled={busy}
@@ -238,9 +240,11 @@ export function ProjectSwitcherPopup({
               role="option"
               type="button"
               className={cn(
-                "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+                "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
                 tw.projectSwitcherRow,
               )}
+              variant="ghost"
+              size="default"
             >
               <span className={tw.projectMark}>{project.name.charAt(0).toUpperCase()}</span>
               <span>

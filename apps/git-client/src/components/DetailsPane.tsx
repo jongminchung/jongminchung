@@ -1,10 +1,11 @@
-import { Button } from "@base-ui/react/button";
+import { Button } from "@jongminchung/ui/components/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import type { DiffPreferences } from "../domain/changeReview";
 import type { Commit, FileChange } from "../domain/types";
-import { cn } from "../lib/utils";
 import type {
   CommitSignature,
   FileContent,
@@ -16,9 +17,8 @@ import { tw } from "../styles/tailwind";
 import { useDismissLayer } from "./CommandProvider";
 import { DiffViewer } from "./DiffViewer";
 import { Icon } from "./Icon";
-import { CheckboxInput } from "./ui";
-import { Popover } from "./ui";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui";
+import { CheckboxInput } from "./ProductFormControls";
+import { Popover } from "./ProductOverlays";
 import { VerticalResizeHandle } from "./VerticalResizeHandle";
 
 function statusLetter(status: FileChange["status"]): string {
@@ -291,15 +291,16 @@ export const DetailsPane = memo(function DetailsPane({
           <TooltipTrigger
             render={
               <Button
-                data-slot="button"
                 aria-label="Show Diff"
                 disabled={!selectedFile}
                 onClick={() => setFocused(true)}
                 type="button"
                 className={cn(
-                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
                   tw.iconButton,
                 )}
+                variant="ghost"
+                size="icon-sm"
               >
                 <Icon name="compare" size={14} />
               </Button>
@@ -311,15 +312,16 @@ export const DetailsPane = memo(function DetailsPane({
           <TooltipTrigger
             render={
               <Button
-                data-slot="button"
                 aria-label="Revert Selected Changes"
                 disabled={!selectedFile || !patch || diffLoading}
                 onClick={() => void onRevertSelectedChanges()}
                 type="button"
                 className={cn(
-                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
                   tw.iconButton,
                 )}
+                variant="ghost"
+                size="icon-sm"
               >
                 <Icon name="undo" size={14} />
               </Button>
@@ -362,13 +364,14 @@ export const DetailsPane = memo(function DetailsPane({
             <TooltipTrigger
               render={
                 <Button
-                  data-slot="button"
                   aria-label="View Options"
                   type="button"
                   className={cn(
-                    "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                    "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
                     reviewAll ? tw.activeButton : tw.iconButton,
                   )}
+                  variant="ghost"
+                  size="icon-sm"
                 >
                   <Icon name="more" size={14} />
                 </Button>
@@ -382,14 +385,15 @@ export const DetailsPane = memo(function DetailsPane({
           <TooltipTrigger
             render={
               <Button
-                data-slot="button"
                 aria-label="Expand All"
                 disabled
                 type="button"
                 className={cn(
-                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
                   tw.iconButton,
                 )}
+                variant="ghost"
+                size="icon-sm"
               >
                 <Icon name="plus" size={13} />
               </Button>
@@ -401,14 +405,15 @@ export const DetailsPane = memo(function DetailsPane({
           <TooltipTrigger
             render={
               <Button
-                data-slot="button"
                 aria-label="Collapse All"
                 disabled
                 type="button"
                 className={cn(
-                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
                   tw.iconButton,
                 )}
+                variant="ghost"
+                size="icon-sm"
               >
                 <Icon name="minus" size={13} />
               </Button>
@@ -442,7 +447,6 @@ export const DetailsPane = memo(function DetailsPane({
             ) : (
               files.map((file) => (
                 <Button
-                  data-slot="button"
                   aria-current={selectedPath === file.path ? "true" : undefined}
                   key={file.path}
                   onClick={() => onSelectFile(file)}
@@ -452,9 +456,11 @@ export const DetailsPane = memo(function DetailsPane({
                   }}
                   type="button"
                   className={cn(
-                    "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+                    "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
                     selectedPath === file.path ? tw.selected : undefined,
                   )}
+                  variant="ghost"
+                  size="default"
                 >
                   <span className={`${tw.statusBadge} ${statusClass(file.status)}`}>
                     {statusLetter(file.status)}
@@ -481,13 +487,12 @@ export const DetailsPane = memo(function DetailsPane({
                 <TooltipTrigger
                   render={
                     <Button
-                      data-slot="button"
                       aria-label="Previous commit"
                       onClick={onPrevious}
                       type="button"
-                      className={cn(
-                        "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                      )}
+                      className={cn("h-7 px-2.5")}
+                      variant="outline"
+                      size="sm"
                     >
                       ↑
                     </Button>
@@ -499,13 +504,12 @@ export const DetailsPane = memo(function DetailsPane({
                 <TooltipTrigger
                   render={
                     <Button
-                      data-slot="button"
                       aria-label="Next commit"
                       onClick={onNext}
                       type="button"
-                      className={cn(
-                        "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                      )}
+                      className={cn("h-7 px-2.5")}
+                      variant="outline"
+                      size="sm"
                     >
                       ↓
                     </Button>
@@ -550,23 +554,21 @@ export const DetailsPane = memo(function DetailsPane({
             )}
             <footer>
               <Button
-                data-slot="button"
                 onClick={onOpenTree}
                 type="button"
-                className={cn(
-                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                )}
+                className={cn("h-7 px-2.5")}
+                variant="outline"
+                size="sm"
               >
                 Browse Repository
               </Button>
               {selectedFile && (
                 <Button
-                  data-slot="button"
                   onClick={() => onInspectFile(selectedFile, "file")}
                   type="button"
-                  className={cn(
-                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                  )}
+                  className={cn("h-7 px-2.5")}
+                  variant="outline"
+                  size="sm"
                 >
                   View File
                 </Button>

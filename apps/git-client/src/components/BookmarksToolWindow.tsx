@@ -1,5 +1,7 @@
-import { Button } from "@base-ui/react/button";
-import { Toggle } from "@base-ui/react/toggle";
+import { Button } from "@jongminchung/ui/components/button";
+import { Toggle } from "@jongminchung/ui/components/toggle";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { useMemo, useState, type KeyboardEvent } from "react";
 import type {
   BookmarkGroup,
@@ -7,12 +9,12 @@ import type {
   LineBookmark,
   ProjectBookmarks,
 } from "../domain/bookmarks";
-import { cn } from "../lib/utils";
 import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
 import { BookmarkGroupCreateDialog } from "./BookmarkGroupCreateDialog";
 import { Icon } from "./Icon";
-import { CheckboxInput, Popover, Tooltip, TooltipContent, TooltipTrigger } from "./ui";
+import { CheckboxInput } from "./ProductFormControls";
+import { Popover } from "./ProductOverlays";
 
 export function BookmarksToolWindow({
   state,
@@ -95,7 +97,6 @@ export function BookmarksToolWindow({
   const renderBookmark = (bookmark: LineBookmark) => (
     <div className={tw.bookmarkRow} key={bookmark.id}>
       <Button
-        data-slot="button"
         aria-selected={selectedBookmarkId === bookmark.id}
         data-bookmark-id={bookmark.id}
         onClick={() => {
@@ -109,8 +110,10 @@ export function BookmarksToolWindow({
         role="treeitem"
         type="button"
         className={cn(
-          "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent aria-expanded:text-foreground",
+          "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
         )}
+        variant="ghost"
+        size="default"
       >
         <span>{bookmark.mnemonic ?? <Icon name="bookmarkFilled" size={11} />}</span>
         <strong>{bookmark.description || bookmark.path.split("/").at(-1)}</strong>
@@ -122,13 +125,12 @@ export function BookmarksToolWindow({
         <TooltipTrigger
           render={
             <Button
-              data-slot="button"
               aria-label="Move Up"
               onClick={() => onMoveBookmark(bookmark.id, -1)}
               type="button"
-              className={cn(
-                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-              )}
+              className={cn("h-7 px-2.5")}
+              variant="outline"
+              size="sm"
             >
               <Icon name="chevron" size={11} />
             </Button>
@@ -140,13 +142,12 @@ export function BookmarksToolWindow({
         <TooltipTrigger
           render={
             <Button
-              data-slot="button"
               aria-label="Move Down"
               onClick={() => onMoveBookmark(bookmark.id, 1)}
               type="button"
-              className={cn(
-                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-              )}
+              className={cn("h-7 px-2.5")}
+              variant="outline"
+              size="sm"
             >
               <Icon name="chevron" size={11} />
             </Button>
@@ -158,13 +159,12 @@ export function BookmarksToolWindow({
         <TooltipTrigger
           render={
             <Button
-              data-slot="button"
               aria-label="Delete Bookmark"
               onClick={() => onDeleteBookmark(bookmark.id)}
               type="button"
-              className={cn(
-                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-              )}
+              className={cn("h-7 px-2.5")}
+              variant="outline"
+              size="sm"
             >
               <Icon name="close" size={11} />
             </Button>
@@ -201,12 +201,13 @@ export function BookmarksToolWindow({
           <TooltipTrigger
             render={
               <Button
-                data-slot="button"
                 aria-label="Bookmarks"
                 type="button"
                 className={cn(
-                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
                 )}
+                variant="ghost"
+                size="xs"
               >
                 <strong>Bookmarks</strong>
               </Button>
@@ -219,13 +220,14 @@ export function BookmarksToolWindow({
           <TooltipTrigger
             render={
               <Button
-                data-slot="button"
                 aria-label="Create Bookmark List"
                 onClick={() => setCreatingGroup(true)}
                 type="button"
                 className={cn(
-                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
                 )}
+                variant="ghost"
+                size="icon-sm"
               >
                 <Icon name="plus" size={14} />
               </Button>
@@ -237,14 +239,15 @@ export function BookmarksToolWindow({
           <TooltipTrigger
             render={
               <Button
-                data-slot="button"
                 aria-label="Edit"
                 disabled={!selectedBookmark}
                 onClick={() => selectedBookmark && void editBookmark(selectedBookmark)}
                 type="button"
                 className={cn(
-                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
                 )}
+                variant="ghost"
+                size="icon-sm"
               >
                 <Icon name="appearance" size={14} />
               </Button>
@@ -256,13 +259,14 @@ export function BookmarksToolWindow({
           <TooltipTrigger
             render={
               <Button
-                data-slot="button"
                 aria-label="Expand All"
                 onClick={() => setCollapsedGroups(new Set())}
                 type="button"
                 className={cn(
-                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
                 )}
+                variant="ghost"
+                size="icon-sm"
               >
                 <Icon name="chevron" size={14} />
               </Button>
@@ -274,13 +278,14 @@ export function BookmarksToolWindow({
           <TooltipTrigger
             render={
               <Button
-                data-slot="button"
                 aria-label="Collapse All"
                 onClick={() => setCollapsedGroups(new Set(state.groups.map((group) => group.id)))}
                 type="button"
                 className={cn(
-                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
                 )}
+                variant="ghost"
+                size="icon-sm"
               >
                 <Icon name="minus" size={14} />
               </Button>
@@ -337,12 +342,13 @@ export function BookmarksToolWindow({
             <TooltipTrigger
               render={
                 <Button
-                  data-slot="button"
                   aria-label="Options"
                   type="button"
                   className={cn(
-                    "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                    "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
                   )}
+                  variant="ghost"
+                  size="icon-sm"
                 >
                   <Icon name="more" size={14} />
                 </Button>
@@ -355,13 +361,14 @@ export function BookmarksToolWindow({
           <TooltipTrigger
             render={
               <Button
-                data-slot="button"
                 aria-label="Close Bookmarks"
                 onClick={onClose}
                 type="button"
                 className={cn(
-                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
                 )}
+                variant="ghost"
+                size="icon-sm"
               >
                 <Icon name="close" size={13} />
               </Button>
@@ -377,7 +384,6 @@ export function BookmarksToolWindow({
             <section key={group.id} role="group">
               <div className={tw.bookmarkGroupRow}>
                 <Button
-                  data-slot="button"
                   aria-expanded={!collapsed}
                   onClick={() =>
                     setCollapsedGroups((current) => {
@@ -388,9 +394,9 @@ export function BookmarksToolWindow({
                     })
                   }
                   type="button"
-                  className={cn(
-                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                  )}
+                  className={cn("h-7 px-2.5")}
+                  variant="outline"
+                  size="sm"
                 >
                   <Icon name="chevron" size={12} />
                   <Icon name="bookmarksList" size={14} />
@@ -407,9 +413,7 @@ export function BookmarksToolWindow({
                         onPressedChange={() => onSetDefaultGroup(group.id)}
                         pressed={group.isDefault}
                         type="button"
-                        className={cn(
-                          "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                        )}
+                        className={cn("h-7 px-2.5")}
                       >
                         <Icon name="check" size={12} />
                       </Toggle>
@@ -423,13 +427,12 @@ export function BookmarksToolWindow({
                   <TooltipTrigger
                     render={
                       <Button
-                        data-slot="button"
                         aria-label={`Rename ${group.name}`}
                         onClick={() => void renameGroup(group)}
                         type="button"
-                        className={cn(
-                          "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                        )}
+                        className={cn("h-7 px-2.5")}
+                        variant="outline"
+                        size="sm"
                       >
                         <Icon name="appearance" size={12} />
                       </Button>
@@ -441,14 +444,13 @@ export function BookmarksToolWindow({
                   <TooltipTrigger
                     render={
                       <Button
-                        data-slot="button"
                         aria-label={`Delete ${group.name}`}
                         disabled={state.groups.length <= 1}
                         onClick={() => onDeleteGroup(group)}
                         type="button"
-                        className={cn(
-                          "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                        )}
+                        className={cn("h-7 px-2.5")}
+                        variant="outline"
+                        size="sm"
                       >
                         <Icon name="trash" size={12} />
                       </Button>

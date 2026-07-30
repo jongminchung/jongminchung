@@ -1,16 +1,16 @@
-import { Button } from "@base-ui/react/button";
-import { Tabs } from "@base-ui/react/tabs";
+import { Button } from "@jongminchung/ui/components/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@jongminchung/ui/components/tabs";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { BlameLine, Commit, TreeEntry } from "../domain/types";
-import { cn } from "../lib/utils";
 import type { FileContent, FilePreview, FileSource } from "../shared/contracts/model";
 import { tw } from "../styles/tailwind";
 import { useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
-import { Dialog, DialogHeader } from "./ui";
-import { EmptyState } from "./ui";
-import { Spinner } from "./ui";
-import { TextInput } from "./ui";
+import { EmptyState } from "./ProductCollections";
+import { Spinner } from "./ProductCollections";
+import { Dialog, DialogHeader } from "./ProductDialog";
+import { TextInput } from "./ProductFormControls";
 
 const CodeMirrorFile = lazy(() => import("./CodeMirrorFile"));
 
@@ -222,7 +222,7 @@ export function RepositoryInspectorDialog({
           title="Repository inspector"
         />
       )}
-      <Tabs.Root
+      <Tabs
         className="contents"
         onValueChange={(value) => {
           if (isInspectorTab(value)) setTab(value);
@@ -230,45 +230,44 @@ export function RepositoryInspectorDialog({
         value={tab}
       >
         <nav className="flex min-w-0 items-center gap-2 border-b border-border bg-muted px-3 py-1.5">
-          <Tabs.List
+          <TabsList
             aria-label="Repository inspector views"
             className="inline-flex h-7 items-center rounded-md bg-muted p-0.5"
           >
-            <Tabs.Tab
+            <TabsTrigger
               className="h-full rounded px-2.5 text-xs text-muted-foreground outline-none hover:text-foreground data-active:bg-background data-active:text-foreground data-active:shadow-xs focus-visible:ring-2 focus-visible:ring-ring/45"
               value="tree"
             >
               Tree
-            </Tabs.Tab>
-            <Tabs.Tab
+            </TabsTrigger>
+            <TabsTrigger
               className="h-full rounded px-2.5 text-xs text-muted-foreground outline-none hover:text-foreground data-active:bg-background data-active:text-foreground data-active:shadow-xs focus-visible:ring-2 focus-visible:ring-ring/45"
               value="file"
             >
               File
-            </Tabs.Tab>
-            <Tabs.Tab
+            </TabsTrigger>
+            <TabsTrigger
               className="h-full rounded px-2.5 text-xs text-muted-foreground outline-none hover:text-foreground data-active:bg-background data-active:text-foreground data-active:shadow-xs focus-visible:ring-2 focus-visible:ring-ring/45"
               value="history"
             >
               File History
-            </Tabs.Tab>
-            <Tabs.Tab
+            </TabsTrigger>
+            <TabsTrigger
               className="h-full rounded px-2.5 text-xs text-muted-foreground outline-none hover:text-foreground data-active:bg-background data-active:text-foreground data-active:shadow-xs focus-visible:ring-2 focus-visible:ring-ring/45"
               value="blame"
             >
               Blame
-            </Tabs.Tab>
-          </Tabs.List>
+            </TabsTrigger>
+          </TabsList>
           {tab === "tree" ? (
             <>
               <Button
-                data-slot="button"
                 onClick={() => setTreePath(treePath.split("/").slice(0, -1).join("/"))}
                 type="button"
                 disabled={!treePath}
-                className={cn(
-                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
-                )}
+                className={cn("h-7 px-2.5")}
+                variant="ghost"
+                size="sm"
               >
                 Up
               </Button>
@@ -291,37 +290,29 @@ export function RepositoryInspectorDialog({
                 value={path}
                 width="100%"
               />
-              <Button
-                data-slot="button"
-                type="submit"
-                className={cn(
-                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
-                )}
-              >
+              <Button type="submit" className={cn("h-7 px-2.5")} variant="outline" size="sm">
                 Load
               </Button>
             </form>
           )}
           {tab === "file" && source.kind === "workingTree" && content?.kind === "text" && (
             <Button
-              data-slot="button"
               onClick={() => void saveEditor(editorValue)}
               type="button"
               disabled={saving || editorValue === content.content}
-              className={cn(
-                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
-              )}
+              className={cn("h-7 px-2.5")}
+              variant="outline"
+              size="sm"
             >
               {saving ? "Saving…" : "Save"}
             </Button>
           )}
         </nav>
-        <Tabs.Panel aria-busy={loading} className={tw.inspectorContent} value="tree">
+        <TabsContent aria-busy={loading} className={tw.inspectorContent} value="tree">
           {inspectorStatus ?? (
             <div className={tw.inspectorTree}>
               {tree.map((entry) => (
                 <Button
-                  data-slot="button"
                   key={`${entry.kind}-${entry.path}`}
                   onDoubleClick={() => {
                     if (entry.kind === "tree") {
@@ -333,8 +324,10 @@ export function RepositoryInspectorDialog({
                   }}
                   type="button"
                   className={cn(
-                    "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+                    "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
                   )}
+                  variant="ghost"
+                  size="default"
                 >
                   <Icon name={entry.kind === "tree" ? "folder" : "file"} size={14} />
                   <span>{entry.path}</span>
@@ -347,8 +340,8 @@ export function RepositoryInspectorDialog({
               ))}
             </div>
           )}
-        </Tabs.Panel>
-        <Tabs.Panel aria-busy={loading} className={tw.inspectorContent} value="file">
+        </TabsContent>
+        <TabsContent aria-busy={loading} className={tw.inspectorContent} value="file">
           {inspectorStatus ??
             (!content ? (
               <div className={tw.emptyState}>Select a file to view its contents.</div>
@@ -378,12 +371,11 @@ export function RepositoryInspectorDialog({
                   </span>
                   {source.kind === "workingTree" && (
                     <Button
-                      data-slot="button"
                       onClick={() => void openWorkingTreeFile(preview.preview.path)}
                       type="button"
-                      className={cn(
-                        "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                      )}
+                      className={cn("h-7 px-2.5")}
+                      variant="outline"
+                      size="sm"
                     >
                       Open in default application
                     </Button>
@@ -407,20 +399,19 @@ export function RepositoryInspectorDialog({
                 )}
                 {source.kind === "workingTree" && content.kind !== "missing" && (
                   <Button
-                    data-slot="button"
                     onClick={() => void openWorkingTreeFile(content.path)}
                     type="button"
-                    className={cn(
-                      "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                    )}
+                    className={cn("h-7 px-2.5")}
+                    variant="outline"
+                    size="sm"
                   >
                     Open in default application
                   </Button>
                 )}
               </div>
             ))}
-        </Tabs.Panel>
-        <Tabs.Panel aria-busy={loading} className={tw.inspectorContent} value="history">
+        </TabsContent>
+        <TabsContent aria-busy={loading} className={tw.inspectorContent} value="history">
           {inspectorStatus ?? (
             <div className={tw.historyList}>
               {history.map((commit) => (
@@ -433,8 +424,8 @@ export function RepositoryInspectorDialog({
               ))}
             </div>
           )}
-        </Tabs.Panel>
-        <Tabs.Panel aria-busy={loading} className={tw.inspectorContent} value="blame">
+        </TabsContent>
+        <TabsContent aria-busy={loading} className={tw.inspectorContent} value="blame">
           {inspectorStatus ?? (
             <div className={tw.blameView}>
               {blame.map((line) => (
@@ -450,8 +441,8 @@ export function RepositoryInspectorDialog({
               ))}
             </div>
           )}
-        </Tabs.Panel>
-      </Tabs.Root>
+        </TabsContent>
+      </Tabs>
     </section>
   );
 

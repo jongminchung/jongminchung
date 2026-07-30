@@ -1,13 +1,13 @@
-import { Button } from "@base-ui/react/button";
+import { Button } from "@jongminchung/ui/components/button";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { useCallback, useEffect, useState } from "react";
-import { cn } from "../lib/utils";
 import type { DiagnosticLeftoverDirectory } from "../shared/contracts/ipc";
 import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
-import { CheckboxInput } from "./ui";
-import { Dialog, DialogHeader } from "./ui";
-import { EmptyState } from "./ui";
-import { List, ListItem } from "./ui";
+import { EmptyState } from "./ProductCollections";
+import { List, ListItem } from "./ProductCollections";
+import { Dialog, DialogHeader } from "./ProductDialog";
+import { CheckboxInput } from "./ProductFormControls";
 
 function sizeLabel(bytes: number): string {
   if (bytes < 1_024) return `${bytes} B`;
@@ -154,23 +154,21 @@ export function LeftoverDirectoriesDialog({
           <footer>
             <span>{selected.size} selected</span>
             <Button
-              data-slot="button"
               onClick={onClose}
               type="button"
-              className={cn(
-                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
-              )}
+              className={cn("h-8 px-3")}
+              variant="outline"
+              size="default"
             >
               Cancel
             </Button>
             <Button
-              data-slot="button"
               onClick={() => void removeSelected()}
               type="button"
               disabled={selected.size === 0 || deleting}
-              className={cn(
-                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-destructive bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/80",
-              )}
+              className={cn("h-8 px-3")}
+              variant="destructive"
+              size="default"
             >
               {deleting ? "Deleting…" : "Delete"}
             </Button>

@@ -158,9 +158,9 @@ test("matches Rebased geometry, density, and interactive states", async ({ page 
   const selected = page.getByRole("radio", { name: "Islands Light", exact: true });
   const other = page.getByRole("radio", { name: "Islands Dark", exact: true });
   await expect(selected).toHaveAttribute("aria-checked", "true");
-  const selectedBackground = await selected
-    .locator("span")
-    .evaluate((element) => getComputedStyle(element).backgroundColor);
+  const selectedBackground = await selected.evaluate(
+    (element) => getComputedStyle(element).backgroundColor,
+  );
   const primary = await page
     .locator("html")
     .evaluate((root) => getComputedStyle(root).getPropertyValue("--primary").trim());

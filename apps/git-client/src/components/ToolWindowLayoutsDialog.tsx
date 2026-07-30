@@ -1,8 +1,8 @@
 import type { NamedToolWindowLayout } from "../domain/toolWindowLayouts";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
-import { Dialog, DialogHeader } from "./ui";
-import { List, ListItem } from "./ui";
+import { List, ListItem } from "./ProductCollections";
+import { Dialog, DialogHeader } from "./ProductDialog";
 
 export function ToolWindowLayoutsDialog({
   layouts,

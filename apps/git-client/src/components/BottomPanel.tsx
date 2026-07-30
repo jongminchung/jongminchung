@@ -1,5 +1,7 @@
-import { Button } from "@base-ui/react/button";
-import { Tabs } from "@base-ui/react/tabs";
+import { Button } from "@jongminchung/ui/components/button";
+import { Tabs, TabsList, TabsTrigger } from "@jongminchung/ui/components/tabs";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
+import { cn } from "@jongminchung/ui/lib/utils";
 import {
   memo,
   type KeyboardEvent as ReactKeyboardEvent,
@@ -19,7 +21,6 @@ import {
   MIN_BOTTOM_PANEL_HEIGHT,
   type WorkspaceBottomPanelTab,
 } from "../domain/workspacePersistence";
-import { cn } from "../lib/utils";
 import type {
   GitLocalHistoryActivitiesPage,
   GitLocalHistoryActivity,
@@ -34,7 +35,6 @@ import { GitConsolePanel } from "./GitConsolePanel";
 import { Icon } from "./Icon";
 import { LocalHistoryPanel } from "./LocalHistoryPanel";
 import { TerminalPanel } from "./TerminalPanel";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui";
 
 export type BottomPanelTab = WorkspaceBottomPanelTab;
 
@@ -359,7 +359,7 @@ export const BottomPanel = memo(function BottomPanel({
         />
       )}
       {(collapsed || active !== "terminal") && (
-        <Tabs.Root
+        <Tabs
           className="contents"
           onValueChange={(value) => {
             if (!isBottomPanelTab(value)) return;
@@ -370,9 +370,9 @@ export const BottomPanel = memo(function BottomPanel({
           value={active}
         >
           <div className={tw.toolTabs}>
-            <Tabs.List activateOnFocus aria-label="Bottom tool windows" className="contents">
+            <TabsList activateOnFocus aria-label="Bottom tool windows" className="contents">
               {tabs.map((tab) => (
-                <Tabs.Tab
+                <TabsTrigger
                   aria-controls="bottom-tool-panel"
                   aria-label={`${tab.label} Tool Window Tab`}
                   data-bottom-tab={tab.id}
@@ -392,23 +392,24 @@ export const BottomPanel = memo(function BottomPanel({
                   <Icon name={tab.icon} size={14} />
                   {tab.label}
                   {tab.id === "stash" && status.stashCount > 0 && <em>{status.stashCount}</em>}
-                </Tabs.Tab>
+                </TabsTrigger>
               ))}
-            </Tabs.List>
+            </TabsList>
             <span />
             {(collapsed || active !== "terminal" || fixture) && (
               <Tooltip>
                 <TooltipTrigger
                   render={
                     <Button
-                      data-slot="button"
                       aria-label={collapsed ? "Show" : "Hide"}
                       onClick={collapsed ? onToggle : hidePanel}
                       type="button"
                       className={cn(
-                        "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 text-muted-foreground aria-selected:bg-accent aria-selected:text-foreground aria-current:bg-accent aria-current:text-foreground",
+                        "gap-1.5 text-xs h-7 px-2.5 text-muted-foreground aria-selected:bg-accent aria-selected:text-foreground aria-current:bg-accent aria-current:text-foreground",
                         tw.iconButton,
                       )}
+                      variant="ghost"
+                      size="sm"
                     >
                       {collapsed ? "⌃" : "⌄"}
                     </Button>
@@ -418,7 +419,7 @@ export const BottomPanel = memo(function BottomPanel({
               </Tooltip>
             )}
           </div>
-        </Tabs.Root>
+        </Tabs>
       )}
       {!collapsed && (
         <div
@@ -439,12 +440,11 @@ export const BottomPanel = memo(function BottomPanel({
                   </p>
                 </div>
                 <Button
-                  data-slot="button"
                   onClick={() => void shelveChanges()}
                   type="button"
-                  className={cn(
-                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                  )}
+                  className={cn("h-7 px-2.5")}
+                  variant="outline"
+                  size="sm"
                 >
                   Shelve Changes…
                 </Button>
@@ -461,27 +461,24 @@ export const BottomPanel = memo(function BottomPanel({
                     </small>
                   </div>
                   <Button
-                    data-slot="button"
                     onClick={() => onApplyShelf(shelf.id, false)}
                     type="button"
-                    className={cn(
-                      "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                    )}
+                    className={cn("h-7 px-2.5")}
+                    variant="outline"
+                    size="sm"
                   >
                     Apply
                   </Button>
                   <Button
-                    data-slot="button"
                     onClick={() => onApplyShelf(shelf.id, true)}
                     type="button"
-                    className={cn(
-                      "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                    )}
+                    className={cn("h-7 px-2.5")}
+                    variant="outline"
+                    size="sm"
                   >
                     Unshelve
                   </Button>
                   <Button
-                    data-slot="button"
                     aria-label={`Delete ${shelf.message}`}
                     onClick={toVoidHandler(async () => {
                       const accepted = await dialog.confirm({
@@ -496,9 +493,11 @@ export const BottomPanel = memo(function BottomPanel({
                     })}
                     type="button"
                     className={cn(
-                      "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                      "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
                       tw.iconButton,
                     )}
+                    variant="ghost"
+                    size="icon-sm"
                   >
                     <Icon name="trash" size={13} />
                   </Button>
@@ -515,17 +514,15 @@ export const BottomPanel = memo(function BottomPanel({
                   <p>Native stash entries from refs/stash.</p>
                 </div>
                 <Button
-                  data-slot="button"
                   onClick={() => void stashChanges()}
                   type="button"
-                  className={cn(
-                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                  )}
+                  className={cn("h-7 px-2.5")}
+                  variant="outline"
+                  size="sm"
                 >
                   Stash Changes…
                 </Button>
                 <Button
-                  data-slot="button"
                   disabled={stashes.length === 0}
                   onClick={toVoidHandler(async () => {
                     const accepted = await dialog.confirm({
@@ -541,9 +538,9 @@ export const BottomPanel = memo(function BottomPanel({
                       });
                   })}
                   type="button"
-                  className={cn(
-                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                  )}
+                  className={cn("h-7 px-2.5")}
+                  variant="outline"
+                  size="sm"
                 >
                   Clear all…
                 </Button>
@@ -565,27 +562,24 @@ export const BottomPanel = memo(function BottomPanel({
                         </small>
                       </div>
                       <Button
-                        data-slot="button"
                         onClick={() => void toggleStashFiles(stash)}
                         type="button"
-                        className={cn(
-                          "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                        )}
+                        className={cn("h-7 px-2.5")}
+                        variant="outline"
+                        size="sm"
                       >
                         {stashFiles[stash.oid] ? "Hide Files" : "Files"}
                       </Button>
                       <Button
-                        data-slot="button"
                         onClick={() => onOpenStashDiff(stash)}
                         type="button"
-                        className={cn(
-                          "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                        )}
+                        className={cn("h-7 px-2.5")}
+                        variant="outline"
+                        size="sm"
                       >
                         Show Diff
                       </Button>
                       <Button
-                        data-slot="button"
                         onClick={() =>
                           void onOperation({
                             kind: "stashApply",
@@ -595,14 +589,13 @@ export const BottomPanel = memo(function BottomPanel({
                           })
                         }
                         type="button"
-                        className={cn(
-                          "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                        )}
+                        className={cn("h-7 px-2.5")}
+                        variant="outline"
+                        size="sm"
                       >
                         Apply
                       </Button>
                       <Button
-                        data-slot="button"
                         onClick={() =>
                           void onOperation({
                             kind: "stashApply",
@@ -612,14 +605,13 @@ export const BottomPanel = memo(function BottomPanel({
                           })
                         }
                         type="button"
-                        className={cn(
-                          "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                        )}
+                        className={cn("h-7 px-2.5")}
+                        variant="outline"
+                        size="sm"
                       >
                         Pop
                       </Button>
                       <Button
-                        data-slot="button"
                         onClick={toVoidHandler(async () => {
                           const branch = await dialog.input({
                             title: `Branch from ${stash.selector}`,
@@ -636,14 +628,13 @@ export const BottomPanel = memo(function BottomPanel({
                             });
                         })}
                         type="button"
-                        className={cn(
-                          "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                        )}
+                        className={cn("h-7 px-2.5")}
+                        variant="outline"
+                        size="sm"
                       >
                         Branch…
                       </Button>
                       <Button
-                        data-slot="button"
                         onClick={toVoidHandler(async () => {
                           const accepted = await dialog.confirm({
                             title: `Drop ${stash.selector}?`,
@@ -660,9 +651,9 @@ export const BottomPanel = memo(function BottomPanel({
                           }
                         })}
                         type="button"
-                        className={cn(
-                          "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                        )}
+                        className={cn("h-7 px-2.5")}
+                        variant="outline"
+                        size="sm"
                       >
                         Drop
                       </Button>
@@ -707,7 +698,6 @@ export const BottomPanel = memo(function BottomPanel({
                       </small>
                     </div>
                     <Button
-                      data-slot="button"
                       disabled={!entry.recoverable}
                       onClick={toVoidHandler(async () => {
                         const refs = entry.refs.map((reference) => reference.name).join("\n");
@@ -723,9 +713,9 @@ export const BottomPanel = memo(function BottomPanel({
                         void onRestoreRecovery(entry.id);
                       })}
                       type="button"
-                      className={cn(
-                        "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                      )}
+                      className={cn("h-7 px-2.5")}
+                      variant="outline"
+                      size="sm"
                     >
                       {entry.recoverable ? "Restore refs" : "Objects expired"}
                     </Button>

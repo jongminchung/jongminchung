@@ -1,8 +1,9 @@
-import { Button } from "@base-ui/react/button";
+import { Button } from "@jongminchung/ui/components/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { useEffect, useMemo, useState } from "react";
 import { createHostingBridge } from "../bridge/createHostingBridge";
 import type { FileChange } from "../domain/types";
-import { cn } from "../lib/utils";
 import type {
   HostingAccount,
   HostingNamespace,
@@ -11,13 +12,12 @@ import type {
 import { tw } from "../styles/tailwind";
 import { loadHostingAccounts } from "./hosting-persistence";
 import { Icon } from "./Icon";
+import { Dialog, DialogHeader } from "./ProductDialog";
+import { CheckboxInput } from "./ProductFormControls";
+import { Selector } from "./ProductFormControls";
+import { TextArea } from "./ProductFormControls";
+import { TextInput } from "./ProductFormControls";
 import { ShareInitialCommitDialog, type InitialCommitSelection } from "./ShareInitialCommitDialog";
-import { CheckboxInput } from "./ui";
-import { Dialog, DialogHeader } from "./ui";
-import { Selector } from "./ui";
-import { TextArea } from "./ui";
-import { TextInput } from "./ui";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui";
 
 interface CreatedRepository {
   readonly project: string;
@@ -378,12 +378,11 @@ export function ShareProjectDialog({
                 width="100%"
               />
               <Button
-                data-slot="button"
                 onClick={onManageAccounts}
                 type="button"
-                className={cn(
-                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
-                )}
+                className={cn("h-8 px-3")}
+                variant="outline"
+                size="default"
               >
                 Add account
               </Button>
@@ -420,14 +419,13 @@ export function ShareProjectDialog({
                 <TooltipTrigger
                   render={
                     <Button
-                      data-slot="button"
                       onClick={() => setNamespaceRefreshToken((value) => value + 1)}
                       type="button"
                       aria-label="Refresh namespaces"
                       disabled={namespaceLoading || busy || created !== null || !accountId}
-                      className={cn(
-                        "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 aspect-square px-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
-                      )}
+                      className={cn("h-8 px-3 aspect-square px-0")}
+                      variant="outline"
+                      size="icon"
                     >
                       <Icon name="refresh" size={14} />
                     </Button>
@@ -511,12 +509,11 @@ export function ShareProjectDialog({
               />
               {accounts.length === 0 && (
                 <Button
-                  data-slot="button"
                   onClick={onManageAccounts}
                   type="button"
-                  className={cn(
-                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
-                  )}
+                  className={cn("h-8 px-3")}
+                  variant="outline"
+                  size="default"
                 >
                   Add account
                 </Button>
@@ -533,17 +530,15 @@ export function ShareProjectDialog({
         </main>
         <footer>
           <Button
-            data-slot="button"
             onClick={onClose}
             type="button"
-            className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
-            )}
+            className={cn("h-8 px-3")}
+            variant="outline"
+            size="default"
           >
             Cancel
           </Button>
           <Button
-            data-slot="button"
             onClick={() => void share()}
             type="button"
             disabled={
@@ -558,9 +553,9 @@ export function ShareProjectDialog({
               repositoryCheckError !== null ||
               remoteRepositoryExists
             }
-            className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-primary bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 active:bg-primary/80",
-            )}
+            className={cn("h-8 px-3")}
+            variant="default"
+            size="default"
           >
             {busy ? "Sharing…" : created ? "Retry Local Setup" : "Share"}
           </Button>

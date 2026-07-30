@@ -108,7 +108,7 @@ export const tw = {
   commitToolWindowHeader:
     "commitToolWindowHeader [align-items:center] [background:var(--secondary)] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:2px] [height:29px] [padding:0_5px_0_8px] [&>_strong]:[font-size:11px] [&>_span]:[flex:1]",
   commitRow:
-    "commitRow [align-items:stretch] [background:transparent] [display:grid] [grid-template-columns:34px_minmax(190px,_1fr)_100px_145px] [height:20px] [left:0] [padding:0_3px] [position:absolute] [right:0] [text-align:left] [top:0] [width:100%] [&:hover]:[background:color-mix(in_oklch,_var(--accent)_42%,_transparent)] [&>_*]:[align-items:center] [&>_*]:[display:flex] [&>_*]:[min-width:0] [&>_*]:[padding:0_4px] [&>_strong]:[font-weight:600] [&>_span:last-child]:[color:var(--muted-foreground)] [&>_span:last-child]:[font-size:11px]",
+    "commitRow [align-items:stretch]! [background:transparent] rounded-none! [display:grid]! [font-weight:400]! [grid-template-columns:34px_minmax(190px,_1fr)_100px_145px] [grid-template-rows:minmax(0,_1fr)] [height:20px]! [justify-content:start]! [left:0] [padding:0_3px]! [position:absolute] [right:0] [text-align:left] [top:0] [width:100%] [&:hover]:[background:color-mix(in_oklch,_var(--accent)_42%,_transparent)] [&>_*]:[align-items:center] [&>_*]:[display:flex] [&>_*]:[min-height:0] [&>_*]:[min-width:0] [&>_*]:[padding:0_4px] [&_strong]:[font-weight:600] [&>_span:last-child]:[color:var(--muted-foreground)] [&>_span:last-child]:[font-size:11px]",
   commitScroller:
     "commitScroller [background:var(--card)] [min-height:0] [overflow:auto] [position:relative]",
   commitSubject:

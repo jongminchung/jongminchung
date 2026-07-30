@@ -1,11 +1,11 @@
-import { Button } from "@base-ui/react/button";
+import { Button } from "@jongminchung/ui/components/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { memo, useMemo, useRef, useState } from "react";
 import type { Ref, RefKind } from "../domain/types";
-import { cn } from "../lib/utils";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui";
 
 type TreeRow =
   | {
@@ -91,13 +91,14 @@ export const BranchTree = memo(function BranchTree({
           <TooltipTrigger
             render={
               <Button
-                data-slot="button"
                 aria-label="Branches"
                 onClick={onActivate}
                 type="button"
                 className={cn(
-                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-[31px] w-[30px] rounded-none p-0 text-muted-foreground hover:text-foreground aria-pressed:text-primary",
+                  "gap-1.5 text-xs h-[31px] w-[30px] rounded-none p-0 text-muted-foreground aria-pressed:text-primary",
                 )}
+                variant="ghost"
+                size="default"
               >
                 <Icon name="chevron" size={10} />
                 <span>Branches</span>
@@ -118,14 +119,15 @@ export const BranchTree = memo(function BranchTree({
           <TooltipTrigger
             render={
               <Button
-                data-slot="button"
                 aria-label="Add repository"
                 onClick={onAdd}
                 type="button"
                 className={cn(
-                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
                   tw.iconButton,
                 )}
+                variant="ghost"
+                size="icon-sm"
               >
                 <Icon name="plus" size={14} />
               </Button>
@@ -168,13 +170,11 @@ export const BranchTree = memo(function BranchTree({
               >
                 {row.type === "group" ? (
                   <Button
-                    data-slot="button"
                     onClick={() => toggle(row.key)}
                     type="button"
-                    className={cn(
-                      "flex min-h-0 shrink-0 whitespace-nowrap rounded-sm border border-transparent bg-transparent text-xs font-medium text-muted-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-                      tw.treeGroup,
-                    )}
+                    className={cn("flex min-h-0 text-xs text-muted-foreground", tw.treeGroup)}
+                    variant="ghost"
+                    size="default"
                   >
                     <Icon
                       className={collapsed.has(row.key) ? undefined : tw.rotated}
@@ -195,13 +195,14 @@ export const BranchTree = memo(function BranchTree({
                     <TooltipTrigger
                       render={
                         <Button
-                          data-slot="button"
                           onClick={() => onSelect(row.ref)}
                           type="button"
                           className={cn(
-                            "flex min-h-0 shrink-0 whitespace-nowrap rounded-sm border border-transparent bg-transparent text-xs font-medium text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                            "flex min-h-0 text-xs",
                             `${tw.refRow} ${selected === row.ref.name ? tw.selected : ""}`,
                           )}
+                          variant="ghost"
+                          size="default"
                         >
                           <span className={tw.refIndent} />
                           {row.ref.favorite ? (

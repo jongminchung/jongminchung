@@ -1,9 +1,13 @@
-import { Menu } from "@base-ui/react/menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuSeparator,
+} from "@jongminchung/ui/components/dropdown-menu";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import type { ActionAvailability } from "../domain/types";
 import { useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
-import { DropdownMenuItem } from "./ui";
+import { DropdownMenuItem } from "./ProductOverlays";
 
 interface MenuItem {
   readonly id: keyof ActionAvailability | "separator";
@@ -113,48 +117,42 @@ export function CommitContextMenu({
   }, []);
 
   return (
-    <Menu.Root
+    <DropdownMenu
       onOpenChange={(open) => {
         if (!open) close();
       }}
       open
     >
-      <Menu.Portal>
-        <Menu.Positioner
-          align="start"
-          anchor={anchor}
-          className="z-[130]"
-          collisionPadding={8}
-          positionMethod="fixed"
-          side="bottom"
-        >
-          <Menu.Popup
-            aria-label="Commit actions"
-            className="grid max-h-[min(520px,calc(100vh-24px))] min-w-[290px] gap-0.5 overflow-auto rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-lg outline-none"
-            finalFocus={false}
-          >
-            {menu.map((item, index) => {
-              if (item.id === "separator") {
-                return (
-                  <Menu.Separator className="my-1 h-px bg-border" key={`separator-${index}`} />
-                );
-              }
-              const action = item.id;
-              return (
-                <DropdownMenuItem
-                  className={item.danger ? "text-destructive" : undefined}
-                  endContent={item.shortcut ? <kbd>{item.shortcut}</kbd> : undefined}
-                  icon={item.icon ? <Icon name={item.icon} size={16} /> : undefined}
-                  isDisabled={!availability[action]}
-                  key={action}
-                  label={item.label}
-                  onClick={() => onAction(action)}
-                />
-              );
-            })}
-          </Menu.Popup>
-        </Menu.Positioner>
-      </Menu.Portal>
-    </Menu.Root>
+      <DropdownMenuContent
+        align="start"
+        anchor={anchor}
+        aria-label="Commit actions"
+        className="z-[130] grid max-h-[min(520px,calc(100vh-24px))] min-w-[290px] gap-0.5 overflow-auto border border-border"
+        collisionPadding={8}
+        finalFocus={false}
+        positionMethod="fixed"
+        side="bottom"
+      >
+        {menu.map((item, index) => {
+          if (item.id === "separator") {
+            return (
+              <DropdownMenuSeparator className="my-1 h-px bg-border" key={`separator-${index}`} />
+            );
+          }
+          const action = item.id;
+          return (
+            <DropdownMenuItem
+              className={item.danger ? "text-destructive" : undefined}
+              endContent={item.shortcut ? <kbd>{item.shortcut}</kbd> : undefined}
+              icon={item.icon ? <Icon name={item.icon} size={16} /> : undefined}
+              isDisabled={!availability[action]}
+              key={action}
+              label={item.label}
+              onClick={() => onAction(action)}
+            />
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

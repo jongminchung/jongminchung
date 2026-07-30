@@ -1,4 +1,5 @@
-import { Button } from "@base-ui/react/button";
+import { Button } from "@jongminchung/ui/components/button";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { GitBranch } from "lucide-react";
 import {
   useDeferredValue,
@@ -10,11 +11,10 @@ import {
 } from "react";
 import { isAppearanceTheme, type AppearancePreference } from "../domain/appearance";
 import type { RecentProject } from "../domain/recentProjects";
-import { cn } from "../lib/utils";
 import { writeClipboardText } from "../platform/electronActions";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
-import { CheckboxInput, Selector } from "./ui/form-controls";
+import { CheckboxInput, Selector } from "./ProductFormControls";
 
 type WelcomeSection = "projects" | "customize";
 
@@ -123,7 +123,6 @@ export function WelcomeWorkspace({
         <div aria-label="Welcome screen categories" className={tw.welcomeNavigation} role="tree">
           {SECTIONS.map((item, index) => (
             <Button
-              data-slot="button"
               aria-current={section === item ? "page" : undefined}
               aria-selected={section === item}
               key={item}
@@ -135,22 +134,25 @@ export function WelcomeWorkspace({
               role="treeitem"
               type="button"
               className={cn(
-                "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 text-muted-foreground aria-selected:bg-accent aria-selected:text-foreground aria-current:bg-accent aria-current:text-foreground",
+                "gap-1.5 text-xs h-7 px-2.5 text-muted-foreground aria-selected:bg-accent aria-selected:text-foreground aria-current:bg-accent aria-current:text-foreground",
               )}
+              variant="ghost"
+              size="sm"
             >
               {sectionLabel(item)}
             </Button>
           ))}
         </div>
         <Button
-          data-slot="button"
           aria-label="Options Menu"
           onClick={onOpenSettings}
           type="button"
           className={cn(
-            "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+            "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
             tw.welcomeSettingsButton,
           )}
+          variant="ghost"
+          size="icon-sm"
         >
           <Icon name="settings" size={16} />
         </Button>
@@ -165,12 +167,11 @@ export function WelcomeWorkspace({
           </header>
           <div aria-label="Project actions" className={tw.welcomeProjectActions}>
             <Button
-              data-slot="button"
               onClick={onNewProject}
               type="button"
-              className={cn(
-                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-              )}
+              className={cn("h-7 px-2.5")}
+              variant="outline"
+              size="sm"
             >
               <span>
                 <Icon name="plus" size={24} />
@@ -178,12 +179,11 @@ export function WelcomeWorkspace({
               New Project
             </Button>
             <Button
-              data-slot="button"
               onClick={onOpenRepository}
               type="button"
-              className={cn(
-                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-              )}
+              className={cn("h-7 px-2.5")}
+              variant="outline"
+              size="sm"
             >
               <span>
                 <Icon name="folder" size={24} />
@@ -191,12 +191,11 @@ export function WelcomeWorkspace({
               Open
             </Button>
             <Button
-              data-slot="button"
               onClick={onCloneRepository}
               type="button"
-              className={cn(
-                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-              )}
+              className={cn("h-7 px-2.5")}
+              variant="outline"
+              size="sm"
             >
               <span>
                 <Icon name="branch" size={24} />
@@ -227,35 +226,38 @@ export function WelcomeWorkspace({
               />
             </label>
             <Button
-              data-slot="button"
               onClick={onNewProject}
               type="button"
               className={cn(
-                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                "h-7 w-[102px] whitespace-nowrap rounded border border-[var(--input)] bg-[var(--card)] px-[13px] text-[12px]",
+                "h-7 px-2.5",
+                "h-7 w-[102px] rounded border-[var(--input)] bg-[var(--card)] px-[13px] text-[12px]",
               )}
+              variant="outline"
+              size="sm"
             >
               New Project
             </Button>
             <Button
-              data-slot="button"
               onClick={onOpenRepository}
               type="button"
               className={cn(
-                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                "h-7 w-[71px] whitespace-nowrap rounded border border-[var(--input)] bg-[var(--card)] px-[14px] text-[12px]",
+                "h-7 px-2.5",
+                "h-7 w-[71px] rounded border-[var(--input)] bg-[var(--card)] px-[14px] text-[12px]",
               )}
+              variant="outline"
+              size="sm"
             >
               Open
             </Button>
             <Button
-              data-slot="button"
               onClick={onCloneRepository}
               type="button"
               className={cn(
-                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                "h-7 w-[133px] whitespace-nowrap rounded border border-[var(--input)] bg-[var(--card)] px-[13px] text-[12px]",
+                "h-7 px-2.5",
+                "h-7 w-[133px] rounded border-[var(--input)] bg-[var(--card)] px-[13px] text-[12px]",
               )}
+              variant="outline"
+              size="sm"
             >
               Clone Repository
             </Button>
@@ -280,7 +282,6 @@ export function WelcomeWorkspace({
           >
             {filteredProjects.map((project, index) => (
               <Button
-                data-slot="button"
                 aria-selected={selectedProject === index}
                 key={project.path}
                 onClick={() => setSelectedProject(index)}
@@ -288,9 +289,11 @@ export function WelcomeWorkspace({
                 role="option"
                 type="button"
                 className={cn(
-                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+                  "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
                   "flex min-h-[58px] w-full items-start gap-[13px] rounded px-[23px] py-[8px] text-left hover:bg-[var(--muted)] focus-visible:bg-[var(--accent)]",
                 )}
+                variant="ghost"
+                size="default"
               >
                 <span className="mt-[1px] flex h-5 w-5 shrink-0 items-center justify-center rounded bg-[var(--project-avatar)] text-[9px] font-bold text-primary-foreground">
                   {projectMonogram(project.name)}

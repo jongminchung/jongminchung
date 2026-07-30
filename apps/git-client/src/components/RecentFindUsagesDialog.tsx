@@ -1,9 +1,9 @@
 import { tw } from "../styles/tailwind";
 import type { FindResultsSession } from "./FindResultsPanel";
 import { Icon } from "./Icon";
-import { Dialog, DialogHeader } from "./ui";
-import { EmptyState } from "./ui";
-import { List, ListItem } from "./ui";
+import { EmptyState } from "./ProductCollections";
+import { List, ListItem } from "./ProductCollections";
+import { Dialog, DialogHeader } from "./ProductDialog";
 
 export function RecentFindUsagesDialog({
   history,

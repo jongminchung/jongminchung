@@ -1,4 +1,5 @@
-import { Button } from "@base-ui/react/button";
+import { Button } from "@jongminchung/ui/components/button";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { useEffect, useMemo, useState } from "react";
 import { sanitizeGitError } from "../domain/gitActivity";
 import {
@@ -6,7 +7,6 @@ import {
   moveHistoryPlanEntry,
   prepareHistoryPlan,
 } from "../domain/historyRewrite";
-import { cn } from "../lib/utils";
 import type {
   GitOperation,
   HistoryRewritePreview,
@@ -15,7 +15,8 @@ import type {
 } from "../shared/contracts/model";
 import { useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
-import { Dialog, DialogFooter, DialogHeader, Notice } from "./ui";
+import { Notice } from "./Notice";
+import { Dialog, DialogFooter, DialogHeader } from "./ProductDialog";
 
 const ACTIONS: readonly RebasePlanAction[] = ["pick", "reword", "edit", "squash", "fixup", "drop"];
 
@@ -194,22 +195,20 @@ export function HistoryRewriteWorkspace({
             )}
             <div className="flex justify-center gap-2">
               <Button
-                data-slot="button"
                 onClick={onClose}
                 type="button"
-                className={cn(
-                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
-                )}
+                className={cn("h-7 px-2.5")}
+                variant="outline"
+                size="sm"
               >
                 Back to history
               </Button>
               <Button
-                data-slot="button"
                 onClick={onOpenPush}
                 type="button"
-                className={cn(
-                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-primary bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 active:bg-primary/80",
-                )}
+                className={cn("h-7 px-2.5")}
+                variant="default"
+                size="sm"
               >
                 Push…
               </Button>
@@ -387,25 +386,23 @@ export function HistoryRewriteWorkspace({
           {error && preview && <small className="text-destructive">{error}</small>}
           <span className="flex-1" />
           <Button
-            data-slot="button"
             onClick={onClose}
             type="button"
             disabled={running}
-            className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
-            )}
+            className={cn("h-7 px-2.5")}
+            variant="ghost"
+            size="sm"
           >
             Cancel
           </Button>
           {!completed && (
             <Button
-              data-slot="button"
               onClick={() => void execute()}
               type="button"
               disabled={!preview || Boolean(validation) || running}
-              className={cn(
-                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-destructive bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/80",
-              )}
+              className={cn("h-7 px-2.5")}
+              variant="destructive"
+              size="sm"
             >
               {running ? "Rewriting…" : "Start Rebase"}
             </Button>

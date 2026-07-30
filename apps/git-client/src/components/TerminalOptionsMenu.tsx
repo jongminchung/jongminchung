@@ -1,4 +1,8 @@
-import { Menu } from "@base-ui/react/menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuSeparator,
+} from "@jongminchung/ui/components/dropdown-menu";
 import { useCallback, useMemo, useRef } from "react";
 import {
   TERMINAL_ACTION_MENU,
@@ -8,7 +12,7 @@ import {
 } from "../domain/terminalActions";
 import { tw } from "../styles/tailwind";
 import { useDismissLayer } from "./CommandProvider";
-import { DropdownMenuItem } from "./ui";
+import { DropdownMenuItem } from "./ProductOverlays";
 
 export function TerminalOptionsMenu({
   x,
@@ -57,42 +61,39 @@ export function TerminalOptionsMenu({
   };
 
   return (
-    <Menu.Root
+    <DropdownMenu
       onOpenChange={(open) => {
         if (!open) handleHide();
       }}
       open
     >
-      <Menu.Portal>
-        <Menu.Positioner
-          align="start"
-          anchor={anchor}
-          className="z-[130]"
-          collisionPadding={8}
-          positionMethod="fixed"
-          side="bottom"
-        >
-          <Menu.Popup
-            aria-label="Terminal Options"
-            className={tw.terminalOptionsMenu}
-            finalFocus={false}
-          >
-            {TERMINAL_ACTION_MENU.map((entry, index) =>
-              entry.kind === "separator" ? (
-                <Menu.Separator className={tw.terminalMenuSeparator} key={`separator-${index}`} />
-              ) : (
-                <DropdownMenuItem
-                  endContent={entry.shortcut === null ? undefined : <kbd>{entry.shortcut}</kbd>}
-                  isDisabled={!isTerminalActionAvailable(entry.id, availability)}
-                  key={entry.id}
-                  label={entry.label}
-                  onClick={() => select(entry.id)}
-                />
-              ),
-            )}
-          </Menu.Popup>
-        </Menu.Positioner>
-      </Menu.Portal>
-    </Menu.Root>
+      <DropdownMenuContent
+        align="start"
+        anchor={anchor}
+        aria-label="Terminal Options"
+        className={tw.terminalOptionsMenu}
+        collisionPadding={8}
+        finalFocus={false}
+        positionMethod="fixed"
+        side="bottom"
+      >
+        {TERMINAL_ACTION_MENU.map((entry, index) =>
+          entry.kind === "separator" ? (
+            <DropdownMenuSeparator
+              className={tw.terminalMenuSeparator}
+              key={`separator-${index}`}
+            />
+          ) : (
+            <DropdownMenuItem
+              endContent={entry.shortcut === null ? undefined : <kbd>{entry.shortcut}</kbd>}
+              isDisabled={!isTerminalActionAvailable(entry.id, availability)}
+              key={entry.id}
+              label={entry.label}
+              onClick={() => select(entry.id)}
+            />
+          ),
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

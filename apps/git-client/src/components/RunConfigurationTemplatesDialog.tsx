@@ -1,15 +1,15 @@
-import { Button } from "@base-ui/react/button";
-import { Tabs } from "@base-ui/react/tabs";
+import { Button } from "@jongminchung/ui/components/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@jongminchung/ui/components/tabs";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { useState } from "react";
 import type {
   RunConfigurationTemplate,
   RunConfigurationTemplateKind,
 } from "../domain/runConfigurationTemplates";
-import { cn } from "../lib/utils";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
-import { Dialog, DialogHeader } from "./ui";
-import { TextInput } from "./ui";
+import { Dialog, DialogHeader } from "./ProductDialog";
+import { TextInput } from "./ProductFormControls";
 
 export function RunConfigurationTemplatesDialog({
   onChange,
@@ -52,7 +52,7 @@ export function RunConfigurationTemplatesDialog({
           onOpenChange={(open) => !open && onClose()}
           title="Run Configuration Templates"
         />
-        <Tabs.Root
+        <Tabs
           className="contents"
           onValueChange={(value) => {
             const kind = templates.find((template) => template.kind === value)?.kind;
@@ -61,10 +61,10 @@ export function RunConfigurationTemplatesDialog({
           orientation="vertical"
           value={activeKind}
         >
-          <Tabs.List aria-label="Run configuration template types" render={<aside />}>
+          <TabsList aria-label="Run configuration template types" render={<aside />}>
             <strong>Templates</strong>
             {templates.map((template) => (
-              <Tabs.Tab
+              <TabsTrigger
                 key={template.kind}
                 value={template.kind}
                 className={cn(
@@ -73,11 +73,11 @@ export function RunConfigurationTemplatesDialog({
               >
                 <Icon name={template.kind === "shell" ? "console" : "file"} size={15} />
                 {template.name}
-              </Tabs.Tab>
+              </TabsTrigger>
             ))}
-          </Tabs.List>
+          </TabsList>
           {templates.map((template) => (
-            <Tabs.Panel key={template.kind} render={<main />} value={template.kind}>
+            <TabsContent key={template.kind} render={<main />} value={template.kind}>
               <h2>{template.name}</h2>
               <p>Default settings used for new {template.name} run configurations.</p>
               <TextInput
@@ -101,17 +101,16 @@ export function RunConfigurationTemplatesDialog({
                 value={template.options}
                 width="100%"
               />
-            </Tabs.Panel>
+            </TabsContent>
           ))}
-        </Tabs.Root>
+        </Tabs>
         <footer>
           <Button
-            data-slot="button"
             onClick={onClose}
             type="button"
-            className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-primary bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 active:bg-primary/80",
-            )}
+            className={cn("h-8 px-3")}
+            variant="default"
+            size="default"
           >
             OK
           </Button>

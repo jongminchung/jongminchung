@@ -1,7 +1,7 @@
-import { Button } from "@base-ui/react/button";
+import { Button } from "@jongminchung/ui/components/button";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { toVoidHandler } from "../domain/toVoidHandler";
 import type { Ref } from "../domain/types";
-import { cn } from "../lib/utils";
 import type {
   BranchComparison,
   GitConfig,
@@ -78,14 +78,15 @@ export function RepositoryToolDialog({
           <strong>{presentation.title}</strong>
           <span />
           <Button
-            data-slot="button"
             aria-label={`Close ${presentation.title}`}
             onClick={onClose}
             type="button"
             className={cn(
-              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+              "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
               tw.iconButton,
             )}
+            variant="ghost"
+            size="icon-sm"
           >
             <Icon name="close" size={15} />
           </Button>
@@ -107,7 +108,6 @@ export function RepositoryToolDialog({
                 <strong>Remotes</strong>
                 <span />
                 <Button
-                  data-slot="button"
                   onClick={toVoidHandler(async () => {
                     const name = await dialog.input({
                       title: "Add remote",
@@ -128,9 +128,9 @@ export function RepositoryToolDialog({
                     });
                   })}
                   type="button"
-                  className={cn(
-                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                  )}
+                  className={cn("h-7 px-2.5")}
+                  variant="outline"
+                  size="sm"
                 >
                   <Icon name="plus" size={13} /> Add remote
                 </Button>
@@ -144,7 +144,6 @@ export function RepositoryToolDialog({
                     <small>Push · {remote.pushUrl}</small>
                   </div>
                   <Button
-                    data-slot="button"
                     onClick={toVoidHandler(async () => {
                       const url = await dialog.input({
                         title: `Edit ${remote.name}`,
@@ -159,14 +158,13 @@ export function RepositoryToolDialog({
                         });
                     })}
                     type="button"
-                    className={cn(
-                      "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                    )}
+                    className={cn("h-7 px-2.5")}
+                    variant="outline"
+                    size="sm"
                   >
                     Edit URL
                   </Button>
                   <Button
-                    data-slot="button"
                     onClick={toVoidHandler(async () => {
                       const accepted = await dialog.confirm({
                         title: `Remove remote “${remote.name}”?`,
@@ -182,9 +180,9 @@ export function RepositoryToolDialog({
                         });
                     })}
                     type="button"
-                    className={cn(
-                      "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                    )}
+                    className={cn("h-7 px-2.5")}
+                    variant="outline"
+                    size="sm"
                   >
                     Remove
                   </Button>
@@ -197,7 +195,6 @@ export function RepositoryToolDialog({
                 <strong>Worktrees</strong>
                 <span />
                 <Button
-                  data-slot="button"
                   onClick={toVoidHandler(async () => {
                     const path = await dialog.input({
                       title: "Add worktree",
@@ -224,9 +221,9 @@ export function RepositoryToolDialog({
                     });
                   })}
                   type="button"
-                  className={cn(
-                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                  )}
+                  className={cn("h-7 px-2.5")}
+                  variant="outline"
+                  size="sm"
                 >
                   <Icon name="plus" size={13} /> Add worktree
                 </Button>
@@ -247,17 +244,15 @@ export function RepositoryToolDialog({
                     </small>
                   </div>
                   <Button
-                    data-slot="button"
                     onClick={() => void onOpenWorktree(worktree.path)}
                     type="button"
-                    className={cn(
-                      "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                    )}
+                    className={cn("h-7 px-2.5")}
+                    variant="outline"
+                    size="sm"
                   >
                     Open
                   </Button>
                   <Button
-                    data-slot="button"
                     disabled={worktree.isMain}
                     onClick={toVoidHandler(async () => {
                       const accepted = await dialog.confirm({
@@ -277,9 +272,9 @@ export function RepositoryToolDialog({
                       }
                     })}
                     type="button"
-                    className={cn(
-                      "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                    )}
+                    className={cn("h-7 px-2.5")}
+                    variant="outline"
+                    size="sm"
                   >
                     Remove
                   </Button>

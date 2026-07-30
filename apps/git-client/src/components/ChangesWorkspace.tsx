@@ -1,5 +1,7 @@
-import { Button } from "@base-ui/react/button";
-import { Toggle } from "@base-ui/react/toggle";
+import { Button } from "@jongminchung/ui/components/button";
+import { Toggle } from "@jongminchung/ui/components/toggle";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   CSSProperties,
@@ -20,7 +22,6 @@ import {
   type CommandDefinition,
 } from "../domain/commands";
 import type { FileChange, StatusModel } from "../domain/types";
-import { cn } from "../lib/utils";
 import type {
   Changelist,
   FileContent,
@@ -34,12 +35,11 @@ import { useAppDialog } from "./AppDialog";
 import { useCommandDefinitions, useDismissLayer } from "./CommandProvider";
 import { DiffViewer } from "./DiffViewer";
 import { Icon } from "./Icon";
-import { CheckboxInput } from "./ui";
-import { Popover } from "./ui";
-import { Selector } from "./ui";
-import { Spinner } from "./ui";
-import { TextArea } from "./ui";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui";
+import { Spinner } from "./ProductCollections";
+import { CheckboxInput } from "./ProductFormControls";
+import { Selector } from "./ProductFormControls";
+import { TextArea } from "./ProductFormControls";
+import { Popover } from "./ProductOverlays";
 import { VerticalResizeHandle } from "./VerticalResizeHandle";
 
 interface ChangesWorkspaceProps {
@@ -541,7 +541,6 @@ export function ChangesWorkspace({
         <small>{group.length}</small>
         <span />
         <Button
-          data-slot="button"
           disabled={group.length === 0}
           onClick={() =>
             void onOperation({
@@ -550,9 +549,9 @@ export function ChangesWorkspace({
             })
           }
           type="button"
-          className={cn(
-            "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-          )}
+          className={cn("h-7 px-2.5")}
+          variant="outline"
+          size="sm"
         >
           {label === "Staged" ? "Unstage all" : "Stage all"}
         </Button>
@@ -627,12 +626,11 @@ export function ChangesWorkspace({
       }
     >
       <Button
-        data-slot="button"
         type="button"
         aria-label={"View Options"}
-        className={cn(
-          "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-[26px] min-w-[26px] px-2 aspect-square px-0 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
-        )}
+        className={cn("h-[26px] min-w-[26px] px-2 aspect-square px-0")}
+        variant="ghost"
+        size="icon-sm"
       >
         <Icon name="more" size={14} />
       </Button>
@@ -658,14 +656,15 @@ export function ChangesWorkspace({
             <TooltipTrigger
               render={
                 <Button
-                  data-slot="button"
                   aria-label="Close Commit"
                   onClick={onCloseToolWindow}
                   type="button"
                   className={cn(
-                    "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                    "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
                     tw.iconButton,
                   )}
+                  variant="ghost"
+                  size="icon-sm"
                 >
                   <Icon name="close" size={13} />
                 </Button>
@@ -716,15 +715,16 @@ export function ChangesWorkspace({
           </Toggle>
           {!toolWindow && viewOptions}
           <Button
-            data-slot="button"
             aria-label="Open commit composer"
             hidden={toolWindow}
             onClick={() => setCommitRailOpen(true)}
             type="button"
             className={cn(
-              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+              "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
               `${tw.iconButton} ${tw.commitRailToggle}`,
             )}
+            variant="ghost"
+            size="icon-sm"
           >
             <Icon name="commit" size={13} />
           </Button>
@@ -745,7 +745,6 @@ export function ChangesWorkspace({
           <footer className={tw.changeNavigatorActions}>
             {effectiveSelectedEntries.some((entry) => entry.selection.layer === "worktree") && (
               <Button
-                data-slot="button"
                 onClick={() =>
                   void onOperation({
                     kind: "stage",
@@ -755,16 +754,15 @@ export function ChangesWorkspace({
                   })
                 }
                 type="button"
-                className={cn(
-                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
-                )}
+                className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
+                variant="ghost"
+                size="default"
               >
                 Stage selected
               </Button>
             )}
             {effectiveSelectedEntries.some((entry) => entry.selection.layer === "index") && (
               <Button
-                data-slot="button"
                 onClick={() =>
                   void onOperation({
                     kind: "unstage",
@@ -774,57 +772,53 @@ export function ChangesWorkspace({
                   })
                 }
                 type="button"
-                className={cn(
-                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
-                )}
+                className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
+                variant="ghost"
+                size="default"
               >
                 Unstage selected
               </Button>
             )}
             <Button
-              data-slot="button"
               onClick={() =>
                 onInspectFile(selectedEntry.file, selectedEntry.selection.layer, "file")
               }
               type="button"
-              className={cn(
-                "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
-              )}
+              className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
+              variant="ghost"
+              size="default"
             >
               View
             </Button>
             <Button
-              data-slot="button"
               onClick={() =>
                 onInspectFile(selectedEntry.file, selectedEntry.selection.layer, "history")
               }
               type="button"
-              className={cn(
-                "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
-              )}
+              className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
+              variant="ghost"
+              size="default"
             >
               History
             </Button>
             <Button
-              data-slot="button"
               onClick={() =>
                 onInspectFile(selectedEntry.file, selectedEntry.selection.layer, "blame")
               }
               type="button"
-              className={cn(
-                "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
-              )}
+              className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
+              variant="ghost"
+              size="default"
             >
               Blame
             </Button>
             {selectedEntry.selection.layer === "worktree" && (
               <Button
-                data-slot="button"
                 onClick={() => void assign(selectedEntry.file)}
                 type="button"
-                className={cn(
-                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
-                )}
+                className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
+                variant="ghost"
+                size="default"
               >
                 Changelist
               </Button>
@@ -870,12 +864,11 @@ export function ChangesWorkspace({
           <Icon name="changes" size={28} />
           <p>Diff preview is hidden.</p>
           <Button
-            data-slot="button"
             onClick={() => setDiffPreviewVisible(true)}
             type="button"
-            className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
-            )}
+            className={cn("h-7 px-2.5")}
+            variant="ghost"
+            size="sm"
           >
             Show Diff Preview
           </Button>
@@ -895,14 +888,12 @@ export function ChangesWorkspace({
           <small>{stagedFiles.length} staged</small>
           {!toolWindow && (
             <Button
-              data-slot="button"
               onClick={() => setCommitRailOpen(false)}
               type="button"
               aria-label={"Close commit composer"}
-              className={cn(
-                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-[26px] min-w-[26px] px-2 aspect-square px-0 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
-                tw.commitRailClose,
-              )}
+              className={cn("h-[26px] min-w-[26px] px-2 aspect-square px-0", tw.commitRailClose)}
+              variant="ghost"
+              size="icon-sm"
             >
               <Icon name="close" size={13} />
             </Button>
@@ -931,14 +922,13 @@ export function ChangesWorkspace({
             width="100%"
           />
           <Button
-            data-slot="button"
             type="button"
             aria-busy={changelistMutation === "create"}
             disabled={changelistMutation !== null}
             onClick={() => void createChangelist()}
-            className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
-            )}
+            className={cn("h-7 px-2.5")}
+            variant="ghost"
+            size="sm"
           >
             {changelistMutation === "create" ? (
               <Spinner label="Creating changelist…" size="sm" />
@@ -949,15 +939,16 @@ export function ChangesWorkspace({
         </div>
         {selectedChangelist && (
           <Button
-            data-slot="button"
             type="button"
             aria-busy={changelistMutation === "delete"}
             disabled={changelistMutation !== null}
             onClick={() => void deleteSelectedChangelist()}
             className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-border bg-secondary text-destructive shadow-xs hover:border-destructive hover:bg-destructive-muted active:bg-destructive-muted/80",
+              "h-7 px-2.5 border-border bg-secondary shadow-xs hover:border-destructive hover:bg-destructive-muted active:bg-destructive-muted/80",
               "w-full",
             )}
+            variant="destructive"
+            size="sm"
           >
             {changelistMutation === "delete" ? (
               <Spinner label="Deleting changelist…" size="sm" />
@@ -1027,13 +1018,7 @@ export function ChangesWorkspace({
               </div>
             }
           >
-            <Button
-              data-slot="button"
-              type="button"
-              className={cn(
-                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
-              )}
-            >
+            <Button type="button" className={cn("h-7 px-2.5")} variant="ghost" size="sm">
               Commit options
               {commitOptionCount > 0 ? <em>{commitOptionCount}</em> : undefined}
             </Button>
@@ -1042,14 +1027,13 @@ export function ChangesWorkspace({
             <TooltipTrigger
               render={
                 <Button
-                  data-slot="button"
                   onClick={() => void commit(false)}
                   type="button"
                   aria-busy={committing}
                   disabled={commitDisabled || committing}
-                  className={cn(
-                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
-                  )}
+                  className={cn("h-7 px-2.5")}
+                  variant="outline"
+                  size="sm"
                 >
                   {committing ? "Checking…" : "Commit"}
                 </Button>
@@ -1061,14 +1045,13 @@ export function ChangesWorkspace({
             <TooltipTrigger
               render={
                 <Button
-                  data-slot="button"
                   onClick={() => void commit(true)}
                   type="button"
                   aria-busy={committing}
                   disabled={commitDisabled || committing}
-                  className={cn(
-                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-primary bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 active:bg-primary/80",
-                  )}
+                  className={cn("h-7 px-2.5")}
+                  variant="default"
+                  size="sm"
                 >
                   {committing ? "Checking…" : "Commit & Push"}
                 </Button>

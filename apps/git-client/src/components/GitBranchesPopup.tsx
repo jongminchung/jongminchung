@@ -1,14 +1,14 @@
-import { Button } from "@base-ui/react/button";
+import { Button } from "@jongminchung/ui/components/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { checkoutTarget, deleteRefOperation } from "../domain/refActions";
 import type { Ref } from "../domain/types";
-import { cn } from "../lib/utils";
 import type { BranchComparison, GitOperation, RemoteInfo } from "../shared/contracts/model";
 import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
 import { useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui";
 
 interface BranchPopupRow {
   readonly ref: Ref;
@@ -325,14 +325,13 @@ export function GitBranchesPopup({
             <TooltipTrigger
               render={
                 <Button
-                  data-slot="button"
                   aria-label="Fetch"
                   disabled={busy}
                   onClick={() => void run({ kind: "fetch", remote: null, prune: false }, false)}
                   type="button"
-                  className={cn(
-                    "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
-                  )}
+                  className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
+                  variant="ghost"
+                  size="default"
                 >
                   <Icon name="fetch" size={14} />
                 </Button>
@@ -344,13 +343,12 @@ export function GitBranchesPopup({
             <TooltipTrigger
               render={
                 <Button
-                  data-slot="button"
                   aria-label="Settings"
                   onClick={onOpenSettings}
                   type="button"
-                  className={cn(
-                    "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
-                  )}
+                  className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
+                  variant="ghost"
+                  size="default"
                 >
                   <Icon name="settings" size={14} />
                 </Button>
@@ -368,7 +366,6 @@ export function GitBranchesPopup({
       >
         {actionMatches("Commit…") && (
           <Button
-            data-slot="button"
             data-branch-action="true"
             disabled={busy}
             onClick={() => {
@@ -378,8 +375,10 @@ export function GitBranchesPopup({
             role="treeitem"
             type="button"
             className={cn(
-              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent aria-expanded:text-foreground",
+              "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
             )}
+            variant="ghost"
+            size="default"
           >
             <Icon name="commit" size={14} />
             <span>Commit…</span>
@@ -389,15 +388,16 @@ export function GitBranchesPopup({
         <div role="separator" />
         {actionMatches("New Branch…") && (
           <Button
-            data-slot="button"
             data-branch-action="true"
             disabled={busy}
             onClick={() => void createBranch()}
             role="treeitem"
             type="button"
             className={cn(
-              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent aria-expanded:text-foreground",
+              "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
             )}
+            variant="ghost"
+            size="default"
           >
             <Icon name="plus" size={14} />
             <span>New Branch…</span>
@@ -406,15 +406,16 @@ export function GitBranchesPopup({
         )}
         {actionMatches("Checkout Tag or Revision…") && (
           <Button
-            data-slot="button"
             data-branch-action="true"
             disabled={busy}
             onClick={() => void checkoutRevision()}
             role="treeitem"
             type="button"
             className={cn(
-              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent aria-expanded:text-foreground",
+              "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
             )}
+            variant="ghost"
+            size="default"
           >
             <Icon name="checkout" size={14} />
             <span>Checkout Tag or Revision…</span>
@@ -439,7 +440,6 @@ export function GitBranchesPopup({
                     <TooltipTrigger
                       render={
                         <Button
-                          data-slot="button"
                           aria-selected={index === activeIndex}
                           id={`branch-${index}`}
                           onClick={() => {
@@ -454,9 +454,11 @@ export function GitBranchesPopup({
                           role="treeitem"
                           type="button"
                           className={cn(
-                            "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent aria-expanded:text-foreground",
+                            "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
                             index === activeIndex ? tw.selected : undefined,
                           )}
+                          variant="ghost"
+                          size="default"
                         >
                           <Icon
                             name={
@@ -501,107 +503,98 @@ export function GitBranchesPopup({
           aria-label={`Actions for ${activeRef.shortName}`}
         >
           <Button
-            data-slot="button"
             disabled={activeRef.current || busy}
             onClick={() => void checkoutActive()}
             type="button"
-            className={cn(
-              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
-            )}
+            className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
+            variant="ghost"
+            size="default"
           >
             Checkout
           </Button>
           <Button
-            data-slot="button"
             disabled={busy}
             onClick={() => void createBranch()}
             type="button"
-            className={cn(
-              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
-            )}
+            className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
+            variant="ghost"
+            size="default"
           >
             New Branch from…
           </Button>
           <Button
-            data-slot="button"
             disabled={!onCompare || !currentBranch || activeRef.current || busy}
             onClick={() => void compareActive()}
             type="button"
-            className={cn(
-              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
-            )}
+            className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
+            variant="ghost"
+            size="default"
           >
             Compare
           </Button>
           {activeRef.kind === "local" && (
             <Button
-              data-slot="button"
               disabled={busy}
               onClick={() => void renameActive()}
               type="button"
-              className={cn(
-                "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
-              )}
+              className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
+              variant="ghost"
+              size="default"
             >
               Rename…
             </Button>
           )}
           {activeRef.kind === "local" && (
             <Button
-              data-slot="button"
               disabled={busy}
               onClick={() => void setUpstream()}
               type="button"
-              className={cn(
-                "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
-              )}
+              className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
+              variant="ghost"
+              size="default"
             >
               Set Upstream…
             </Button>
           )}
           <Button
-            data-slot="button"
             disabled={busy || !onOperation}
             onClick={() => void createTag()}
             type="button"
-            className={cn(
-              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
-            )}
+            className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
+            variant="ghost"
+            size="default"
           >
             New Tag…
           </Button>
           {activeRef.kind === "tag" && (
             <Button
-              data-slot="button"
               disabled={busy || remotes.length === 0}
               onClick={() => void pushActiveTag()}
               type="button"
-              className={cn(
-                "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
-              )}
+              className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
+              variant="ghost"
+              size="default"
             >
               Push Tag
             </Button>
           )}
           <Button
-            data-slot="button"
             disabled={busy || !onOperation}
             onClick={() => void addWorktree()}
             type="button"
-            className={cn(
-              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
-            )}
+            className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
+            variant="ghost"
+            size="default"
           >
             New Worktree…
           </Button>
           <Button
-            data-slot="button"
             disabled={activeRef.current || busy || !onOperation}
             onClick={() => void deleteActive()}
             type="button"
-            className={cn(
-              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
-            )}
+            className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
+            variant="ghost"
+            size="default"
           >
             Delete…
           </Button>

@@ -1,8 +1,8 @@
 import type { CommandId } from "../domain/commands";
 import { tw } from "../styles/tailwind";
 import { Icon, type IconName } from "./Icon";
-import { Dialog, DialogHeader } from "./ui";
-import { List, ListItem } from "./ui";
+import { List, ListItem } from "./ProductCollections";
+import { Dialog, DialogHeader } from "./ProductDialog";
 
 export interface VcsOperationItem {
   readonly commandId: CommandId;

@@ -1,12 +1,14 @@
-import { Button } from "@base-ui/react/button";
+import { Button } from "@jongminchung/ui/components/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { mergeProjectTreeEntries, type ProjectTreeEntry } from "../domain/projectTree";
 import type { ScratchFile } from "../domain/scratchFiles";
 import type { FileChange, TreeEntry } from "../domain/types";
-import { cn } from "../lib/utils";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
-import { CheckboxInput, Popover, Selector, Tooltip, TooltipContent, TooltipTrigger } from "./ui";
+import { CheckboxInput, Selector } from "./ProductFormControls";
+import { Popover } from "./ProductOverlays";
 import { VerticalResizeHandle } from "./VerticalResizeHandle";
 
 interface VisibleProjectRow {
@@ -257,12 +259,13 @@ export function ProjectToolWindow({
           <TooltipTrigger
             render={
               <Button
-                data-slot="button"
                 aria-label="Project"
                 type="button"
                 className={cn(
-                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
                 )}
+                variant="ghost"
+                size="xs"
               >
                 <strong>Project</strong>
               </Button>
@@ -275,13 +278,14 @@ export function ProjectToolWindow({
           <TooltipTrigger
             render={
               <Button
-                data-slot="button"
                 aria-label="New File or Directory…"
                 onClick={onNew}
                 type="button"
                 className={cn(
-                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
                 )}
+                variant="ghost"
+                size="icon-sm"
               >
                 <Icon name="plus" size={14} />
               </Button>
@@ -293,13 +297,14 @@ export function ProjectToolWindow({
           <TooltipTrigger
             render={
               <Button
-                data-slot="button"
                 aria-label="Select Opened File"
                 onClick={() => void revealActiveFile()}
                 type="button"
                 className={cn(
-                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
                 )}
+                variant="ghost"
+                size="icon-sm"
               >
                 <Icon name="checkout" size={14} />
               </Button>
@@ -311,7 +316,6 @@ export function ProjectToolWindow({
           <TooltipTrigger
             render={
               <Button
-                data-slot="button"
                 aria-label="Expand Selected"
                 onClick={() => {
                   if (selectedPath === "") {
@@ -324,8 +328,10 @@ export function ProjectToolWindow({
                 }}
                 type="button"
                 className={cn(
-                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
                 )}
+                variant="ghost"
+                size="icon-sm"
               >
                 <Icon name="chevron" size={14} />
               </Button>
@@ -337,13 +343,14 @@ export function ProjectToolWindow({
           <TooltipTrigger
             render={
               <Button
-                data-slot="button"
                 aria-label="Collapse All"
                 onClick={() => setExpanded(new Set())}
                 type="button"
                 className={cn(
-                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
                 )}
+                variant="ghost"
+                size="icon-sm"
               >
                 <Icon name="minus" size={14} />
               </Button>
@@ -416,12 +423,13 @@ export function ProjectToolWindow({
             <TooltipTrigger
               render={
                 <Button
-                  data-slot="button"
                   aria-label="Options"
                   type="button"
                   className={cn(
-                    "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                    "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
                   )}
+                  variant="ghost"
+                  size="icon-sm"
                 >
                   <Icon name="more" size={14} />
                 </Button>
@@ -434,13 +442,14 @@ export function ProjectToolWindow({
           <TooltipTrigger
             render={
               <Button
-                data-slot="button"
                 aria-label="Hide"
                 onClick={onClose}
                 type="button"
                 className={cn(
-                  "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
                 )}
+                variant="ghost"
+                size="icon-sm"
               >
                 <Icon name="close" size={13} />
               </Button>
@@ -451,7 +460,6 @@ export function ProjectToolWindow({
       </header>
       <div aria-label="Project structure tree" className={tw.projectTree} role="tree">
         <Button
-          data-slot="button"
           aria-expanded={expanded.has("")}
           aria-level={1}
           aria-selected={selectedPath === ""}
@@ -465,9 +473,11 @@ export function ProjectToolWindow({
           style={{ "--tree-depth": 0 } as React.CSSProperties}
           type="button"
           className={cn(
-            "grid min-h-0 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 whitespace-normal text-left aria-selected:bg-accent aria-current:bg-accent aria-expanded:text-foreground",
+            "grid min-h-0 text-xs whitespace-normal text-left aria-selected:bg-accent aria-current:bg-accent",
             tw.projectTreeRow,
           )}
+          variant="ghost"
+          size="default"
         >
           <Icon className={expanded.has("") ? tw.rotated : undefined} name="chevron" size={12} />
           <Icon className={tw.projectFolderIcon} name="folder" size={15} />
@@ -485,7 +495,6 @@ export function ProjectToolWindow({
               <TooltipTrigger
                 render={
                   <Button
-                    data-slot="button"
                     aria-expanded={directory ? expanded.has(entry.path) : undefined}
                     aria-level={depth + 1}
                     aria-selected={selectedPath === entry.path}
@@ -501,9 +510,11 @@ export function ProjectToolWindow({
                     style={{ "--tree-depth": depth } as React.CSSProperties}
                     type="button"
                     className={cn(
-                      "grid min-h-0 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 whitespace-normal text-left aria-selected:bg-accent aria-current:bg-accent aria-expanded:text-foreground",
+                      "grid min-h-0 text-xs whitespace-normal text-left aria-selected:bg-accent aria-current:bg-accent",
                       tw.projectTreeRow,
                     )}
+                    variant="ghost"
+                    size="default"
                   >
                     {directory ? (
                       <Icon
@@ -535,7 +546,6 @@ export function ProjectToolWindow({
             <TooltipTrigger
               render={
                 <Button
-                  data-slot="button"
                   aria-expanded={scratchesExpanded}
                   aria-level={1}
                   aria-selected="false"
@@ -547,9 +557,11 @@ export function ProjectToolWindow({
                   role="treeitem"
                   type="button"
                   className={cn(
-                    "flex min-h-0 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 whitespace-normal text-left aria-selected:bg-accent aria-current:bg-accent aria-expanded:text-foreground",
+                    "flex min-h-0 text-xs whitespace-normal text-left aria-selected:bg-accent aria-current:bg-accent",
                     tw.projectScratches,
                   )}
+                  variant="ghost"
+                  size="default"
                 >
                   <Icon
                     className={scratchesExpanded ? tw.rotated : undefined}
@@ -571,7 +583,6 @@ export function ProjectToolWindow({
               <TooltipTrigger
                 render={
                   <Button
-                    data-slot="button"
                     aria-level={2}
                     onDoubleClick={() => onOpenScratch(scratch)}
                     onKeyDown={(event) => {
@@ -580,9 +591,11 @@ export function ProjectToolWindow({
                     role="treeitem"
                     type="button"
                     className={cn(
-                      "grid min-h-0 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 whitespace-normal text-left aria-selected:bg-accent aria-current:bg-accent aria-expanded:text-foreground",
+                      "grid min-h-0 text-xs whitespace-normal text-left aria-selected:bg-accent aria-current:bg-accent",
                       tw.projectScratchFile,
                     )}
+                    variant="ghost"
+                    size="default"
                   >
                     <span />
                     <Icon name="file" size={14} />

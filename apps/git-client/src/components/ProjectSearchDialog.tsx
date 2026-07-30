@@ -1,5 +1,6 @@
-import { Button } from "@base-ui/react/button";
-import { Toggle } from "@base-ui/react/toggle";
+import { Button } from "@jongminchung/ui/components/button";
+import { Toggle } from "@jongminchung/ui/components/toggle";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import {
   projectSearchResults,
@@ -8,14 +9,13 @@ import {
   type ProjectSearchResult,
   type ProjectTextMatch,
 } from "../domain/projectSearch";
-import { cn } from "../lib/utils";
 import { tw } from "../styles/tailwind";
 import { useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
-import { Dialog, DialogHeader } from "./ui";
-import { List, ListItem } from "./ui";
-import { Spinner } from "./ui";
-import { TextInput } from "./ui";
+import { List, ListItem } from "./ProductCollections";
+import { Spinner } from "./ProductCollections";
+import { Dialog, DialogHeader } from "./ProductDialog";
+import { TextInput } from "./ProductFormControls";
 
 export type ProjectSearchSurface =
   | "find"
@@ -348,16 +348,15 @@ export function ProjectSearchDialog({
           </span>
           {surface === "find" && onOpenInFindWindow && (
             <Button
-              data-slot="button"
               onClick={() => {
                 onOpenInFindWindow(query.trim(), options, results);
                 onClose();
               }}
               type="button"
               disabled={loading || results.length === 0}
-              className={cn(
-                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
-              )}
+              className={cn("h-7 px-2.5")}
+              variant="ghost"
+              size="sm"
             >
               Open in Find Window
             </Button>

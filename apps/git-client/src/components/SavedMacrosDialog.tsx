@@ -1,11 +1,11 @@
-import { Button } from "@base-ui/react/button";
+import { Button } from "@jongminchung/ui/components/button";
+import { cn } from "@jongminchung/ui/lib/utils";
 import type { SavedMacro } from "../domain/macros";
-import { cn } from "../lib/utils";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
-import { Dialog, DialogHeader } from "./ui";
-import { EmptyState } from "./ui";
-import { List, ListItem } from "./ui";
+import { EmptyState } from "./ProductCollections";
+import { List, ListItem } from "./ProductCollections";
+import { Dialog, DialogHeader } from "./ProductDialog";
 
 export function SavedMacrosDialog({
   macros,
@@ -46,15 +46,14 @@ export function SavedMacrosDialog({
                   description={`${macro.commandIds.length} command${macro.commandIds.length === 1 ? "" : "s"}`}
                   endContent={
                     <Button
-                      data-slot="button"
                       onClick={(event) => {
                         event.stopPropagation();
                         onDelete(macro.id);
                       }}
                       type="button"
-                      className={cn(
-                        "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
-                      )}
+                      className={cn("h-7 px-2.5")}
+                      variant="ghost"
+                      size="sm"
                     >
                       <Icon name="trash" size={13} />
                       {`Delete ${macro.name}`}
@@ -71,12 +70,11 @@ export function SavedMacrosDialog({
         </main>
         <footer>
           <Button
-            data-slot="button"
             onClick={onClose}
             type="button"
-            className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-primary bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 active:bg-primary/80",
-            )}
+            className={cn("h-8 px-3")}
+            variant="default"
+            size="default"
           >
             Close
           </Button>

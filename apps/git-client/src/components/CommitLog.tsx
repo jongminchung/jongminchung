@@ -1,18 +1,18 @@
-import { Button } from "@base-ui/react/button";
-import { Toggle } from "@base-ui/react/toggle";
+import { Button } from "@jongminchung/ui/components/button";
+import { Toggle } from "@jongminchung/ui/components/toggle";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import type { Commit, Ref } from "../domain/types";
-import { cn } from "../lib/utils";
 import type { LogFilters, LogOrder } from "../shared/contracts/model";
 import { tw } from "../styles/tailwind";
 import { useDismissLayer } from "./CommandProvider";
 import { CommitGraph } from "./CommitGraph";
 import { Icon } from "./Icon";
-import { CheckboxInput } from "./ui";
-import { Popover } from "./ui";
-import { Selector } from "./ui";
-import { TextInput } from "./ui";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui";
+import { CheckboxInput } from "./ProductFormControls";
+import { Selector } from "./ProductFormControls";
+import { TextInput } from "./ProductFormControls";
+import { Popover } from "./ProductOverlays";
 
 const LOG_ROW_HEIGHT = 20;
 
@@ -293,7 +293,7 @@ export const CommitLog = memo(function CommitLog({
             pressed={regex}
             type="button"
             className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-6 min-w-5 px-1 border-transparent bg-transparent font-mono text-[9px] text-muted-foreground hover:bg-accent hover:text-accent-foreground data-pressed:bg-accent data-pressed:text-foreground",
+              " h-6 min-w-5 px-1 border-transparent bg-transparent font-mono text-[9px] text-muted-foreground hover:bg-accent hover:text-accent-foreground data-pressed:bg-accent data-pressed:text-foreground",
             )}
           >
             .*
@@ -304,7 +304,7 @@ export const CommitLog = memo(function CommitLog({
             pressed={matchCase}
             type="button"
             className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-6 min-w-5 px-1 border-transparent bg-transparent font-mono text-[9px] text-muted-foreground hover:bg-accent hover:text-accent-foreground data-pressed:bg-accent data-pressed:text-foreground",
+              " h-6 min-w-5 px-1 border-transparent bg-transparent font-mono text-[9px] text-muted-foreground hover:bg-accent hover:text-accent-foreground data-pressed:bg-accent data-pressed:text-foreground",
             )}
           >
             Cc
@@ -436,7 +436,6 @@ export const CommitLog = memo(function CommitLog({
                 width="100%"
               />
               <Button
-                data-slot="button"
                 onClick={() => {
                   setQuery("");
                   setBranch("all");
@@ -447,9 +446,9 @@ export const CommitLog = memo(function CommitLog({
                 }}
                 type="button"
                 disabled={activeFilterCount === 0 && order === "topology"}
-                className={cn(
-                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
-                )}
+                className={cn("h-7 px-2.5")}
+                variant="ghost"
+                size="sm"
               >
                 Reset filters
               </Button>
@@ -457,12 +456,11 @@ export const CommitLog = memo(function CommitLog({
           }
         >
           <Button
-            data-slot="button"
             type="button"
             aria-label={"Graph Options"}
-            className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-6 min-w-5 px-1 aspect-square px-0 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
-            )}
+            className={cn("h-6 min-w-5 px-1 aspect-square px-0")}
+            variant="ghost"
+            size="icon-xs"
           >
             <Icon name="filter" size={14} />
           </Button>
@@ -471,13 +469,12 @@ export const CommitLog = memo(function CommitLog({
           <TooltipTrigger
             render={
               <Button
-                data-slot="button"
                 onClick={onOpenNewTab}
                 type="button"
                 aria-label="Open New Git Log Tab"
-                className={cn(
-                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-6 min-w-5 px-1 aspect-square px-0 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
-                )}
+                className={cn("h-6 min-w-5 px-1 aspect-square px-0")}
+                variant="ghost"
+                size="icon-xs"
               >
                 <Icon name="plus" size={14} />
               </Button>
@@ -490,14 +487,13 @@ export const CommitLog = memo(function CommitLog({
             <TooltipTrigger
               render={
                 <Button
-                  data-slot="button"
                   onClick={() => void onEnableIndexing(filters, order)}
                   type="button"
                   aria-label={indexingLabel}
                   disabled={indexing || powerSaveMode}
-                  className={cn(
-                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-6 min-w-5 px-1 aspect-square px-0 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
-                  )}
+                  className={cn("h-6 min-w-5 px-1 aspect-square px-0")}
+                  variant="ghost"
+                  size="icon-xs"
                 >
                   <Icon name="search" size={14} />
                 </Button>
@@ -510,13 +506,12 @@ export const CommitLog = memo(function CommitLog({
           <TooltipTrigger
             render={
               <Button
-                data-slot="button"
                 onClick={onRefresh}
                 type="button"
                 aria-label="Refresh"
-                className={cn(
-                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-6 min-w-5 px-1 aspect-square px-0 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
-                )}
+                className={cn("h-6 min-w-5 px-1 aspect-square px-0")}
+                variant="ghost"
+                size="icon-xs"
               >
                 <Icon name="refresh" size={14} />
               </Button>
@@ -528,14 +523,13 @@ export const CommitLog = memo(function CommitLog({
           <TooltipTrigger
             render={
               <Button
-                data-slot="button"
                 onClick={() => onCherryPick(selectedOids)}
                 type="button"
                 aria-label="Cherry-Pick"
                 disabled={!canCherryPick}
-                className={cn(
-                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-6 min-w-5 px-1 aspect-square px-0 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
-                )}
+                className={cn("h-6 min-w-5 px-1 aspect-square px-0")}
+                variant="ghost"
+                size="icon-xs"
               >
                 <Icon name="cherry" size={14} />
               </Button>
@@ -605,12 +599,11 @@ export const CommitLog = memo(function CommitLog({
             <TooltipTrigger
               render={
                 <Button
-                  data-slot="button"
                   type="button"
                   aria-label="View Options"
-                  className={cn(
-                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-6 min-w-5 px-1 aspect-square px-0 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
-                  )}
+                  className={cn("h-6 min-w-5 px-1 aspect-square px-0")}
+                  variant="ghost"
+                  size="icon-xs"
                 >
                   <Icon name="more" size={14} />
                 </Button>
@@ -623,13 +616,12 @@ export const CommitLog = memo(function CommitLog({
           <TooltipTrigger
             render={
               <Button
-                data-slot="button"
                 onClick={() => searchInput.current?.focus()}
                 type="button"
                 aria-label="Go To Hash/Branch/Tag"
-                className={cn(
-                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-6 min-w-5 px-1 aspect-square px-0 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
-                )}
+                className={cn("h-6 min-w-5 px-1 aspect-square px-0")}
+                variant="ghost"
+                size="icon-xs"
               >
                 <Icon name="search" size={14} />
               </Button>
@@ -638,14 +630,12 @@ export const CommitLog = memo(function CommitLog({
           <TooltipContent>Go To Hash/Branch/Tag</TooltipContent>
         </Tooltip>
         <Button
-          data-slot="button"
           onClick={onImportPatch}
           tabIndex={-1}
           type="button"
-          className={cn(
-            "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-            tw.srOnly,
-          )}
+          className={cn("h-7 px-2.5", tw.srOnly)}
+          variant="outline"
+          size="sm"
         >
           Import Patch
         </Button>
@@ -723,7 +713,6 @@ export const CommitLog = memo(function CommitLog({
               ));
               return (
                 <Button
-                  data-slot="button"
                   aria-label={`${commit.author} ${displayedTime} ${commit.subject} ${commit.oid.slice(0, 7)}`}
                   aria-rowindex={index + 1}
                   aria-selected={selected}
@@ -738,9 +727,11 @@ export const CommitLog = memo(function CommitLog({
                   }}
                   type="button"
                   className={cn(
-                    "grid min-h-0 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 whitespace-normal text-left aria-selected:bg-accent aria-current:bg-accent",
+                    "grid min-h-0 text-xs whitespace-normal text-left aria-selected:bg-accent aria-current:bg-accent",
                     `${tw.commitRow} ${selected ? tw.selectedCommit : ""}`,
                   )}
+                  variant="ghost"
+                  size="default"
                 >
                   <span
                     aria-hidden="true"
@@ -796,12 +787,11 @@ export const CommitLog = memo(function CommitLog({
         <span>{loading ? "Loading…" : `${filtered.length.toLocaleString()} commits`}</span>
         {hasMore ? (
           <Button
-            data-slot="button"
             onClick={() => void loadMore()}
             type="button"
-            className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-            )}
+            className={cn("h-7 px-2.5")}
+            variant="outline"
+            size="sm"
           >
             Load 500 more
           </Button>

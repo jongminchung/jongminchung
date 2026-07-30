@@ -5,10 +5,14 @@ import { describe, expect, test } from "vitest";
 import { tw } from "../styles/tailwind";
 
 const sourceRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
-const workspaceRoot = join(sourceRoot, "..", "..", "..");
+const appRoot = join(sourceRoot, "..");
+const workspaceRoot = join(appRoot, "..", "..");
+const uiRoot = join(workspaceRoot, "packages", "ui");
 const themeContractRoot = join(workspaceRoot, "packages", "theme-contract");
 
 function sourceFiles(directory: string): readonly string[] {
+  if (!existsSync(directory)) return [];
+
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const path = join(directory, entry.name);
     if (entry.isDirectory()) return sourceFiles(path);
@@ -16,125 +20,102 @@ function sourceFiles(directory: string): readonly string[] {
   });
 }
 
-describe("Git Client design system boundary", () => {
-  test("uses Tailwind and shadcn without CSS Modules", () => {
-    const removedStylesheet = join(sourceRoot, "styles", `App${".module"}.css`);
-    expect(existsSync(removedStylesheet)).toBe(false);
+function readJson(path: string): Record<string, unknown> {
+  return JSON.parse(readFileSync(path, "utf8")) as Record<string, unknown>;
+}
 
-    const moduleImport = /from\s+["'][^"']+\.module\.css["']/;
-    for (const file of sourceFiles(sourceRoot)) {
-      expect(readFileSync(file, "utf8"), file).not.toMatch(moduleImport);
+describe("workspace shadcn design system boundary", () => {
+  test("routes every app to the shared primitive package", () => {
+    const apps = ["engineering-docs", "git-client", "readme"] as const;
+
+    for (const app of apps) {
+      const currentAppRoot = join(workspaceRoot, "apps", app);
+      const packageJson = readJson(join(currentAppRoot, "package.json"));
+      const config = readJson(join(currentAppRoot, "components.json"));
+      const aliases = config.aliases as Record<string, string>;
+      const tailwind = config.tailwind as Record<string, string | boolean>;
+
+      expect(config.style, app).toBe("base-nova");
+      expect(config.iconLibrary, app).toBe("lucide");
+      expect(tailwind.baseColor, app).toBe("neutral");
+      expect(aliases.ui, app).toBe("@jongminchung/ui/components");
+      expect(aliases.utils, app).toBe("@jongminchung/ui/lib/utils");
+      expect(aliases.components, app).toBe("@/components");
+      expect(aliases.hooks, app).toBe("@/hooks");
+      expect(aliases.lib, app).toBe("@/lib");
+      expect(config.rsc, app).toBe(app !== "git-client");
+      expect(packageJson.dependencies, app).toMatchObject({
+        "@jongminchung/ui": "workspace:*",
+      });
     }
   });
 
-  test("owns shadcn components and theme values locally", () => {
-    const stylesheet = readFileSync(join(sourceRoot, "styles", "index.css"), "utf8");
-    const packageJson = readFileSync(join(sourceRoot, "..", "package.json"), "utf8");
-    const contractPackageJson = readFileSync(join(themeContractRoot, "package.json"), "utf8");
-    const shadcnConfig = readFileSync(join(sourceRoot, "..", "components.json"), "utf8");
-    const localComponents = join(sourceRoot, "components", "ui");
-    const localTheme = join(sourceRoot, "styles", "theme.css");
-    const removedDesignSystem = ["@astryx", "design"].join("");
-    const removedStyleRuntime = ["@stylexjs", "stylex"].join("/");
-    const removedPrimitive = ["radix", "ui"].join("-");
+  test("publishes component subpaths without a root barrel", () => {
+    const packageJson = readJson(join(uiRoot, "package.json"));
+    const exports = packageJson.exports as Record<string, string>;
 
-    expect(stylesheet).toContain('@import "tailwindcss"');
-    expect(stylesheet).toContain('@import "tw-animate-css"');
-    expect(stylesheet).toContain('@import "@jongminchung/theme-contract/tokens.css"');
-    expect(stylesheet).toContain('@import "./theme.css"');
-    expect(stylesheet).not.toContain(removedDesignSystem);
-    expect(packageJson).not.toContain(removedDesignSystem);
-    expect(packageJson).not.toContain(removedStyleRuntime);
-    expect(packageJson).not.toContain(`"${removedPrimitive}"`);
-    expect(contractPackageJson).not.toContain('"react"');
-    expect(contractPackageJson).not.toContain('"@base-ui/react"');
-    expect(packageJson).toContain('"@base-ui/react"');
-    expect(shadcnConfig).toContain('"style": "base-nova"');
-    expect(shadcnConfig).toContain('"ui": "@/components/ui"');
-    expect(shadcnConfig).toContain('"utils": "@/lib/utils"');
-    expect(existsSync(localComponents)).toBe(true);
-    expect(existsSync(localTheme)).toBe(true);
-    expect(existsSync(join(workspaceRoot, "packages", "ui", "package.json"))).toBe(false);
-    for (const file of sourceFiles(sourceRoot)) {
-      expect(readFileSync(file, "utf8"), file).not.toContain(removedDesignSystem);
-    }
-    expect(stylesheet).not.toMatch(/--(?:violet|mint|coral|surface-raised|surface-sunken):/);
+    expect(packageJson.private).toBe(true);
+    expect(exports).toMatchObject({
+      "./globals.css": "./src/styles/globals.css",
+      "./lib/*": "./src/lib/*.ts",
+      "./components/*": "./src/components/*.tsx",
+    });
+    expect(exports["."]).toBeUndefined();
+    expect(existsSync(join(uiRoot, "src", "index.ts"))).toBe(false);
   });
 
-  test("uses the shared semantic token convention with app-owned values", () => {
-    const theme = readFileSync(join(sourceRoot, "styles", "theme.css"), "utf8");
-    const tokenContract = readFileSync(join(themeContractRoot, "src", "tokens.css"), "utf8");
-    const docsTheme = readFileSync(
+  test("keeps Base UI and primitive copies out of applications", () => {
+    for (const app of ["engineering-docs", "git-client", "readme"] as const) {
+      const currentAppRoot = join(workspaceRoot, "apps", app);
+      const packageJson = readFileSync(join(currentAppRoot, "package.json"), "utf8");
+      const localUiRoot =
+        app === "git-client"
+          ? join(currentAppRoot, "src", "components", "ui")
+          : join(currentAppRoot, "components", "ui");
+      const runtimeRoots =
+        app === "git-client"
+          ? [join(currentAppRoot, "src")]
+          : [
+              join(currentAppRoot, "app"),
+              join(currentAppRoot, "components"),
+              join(currentAppRoot, "lib"),
+            ];
+
+      expect(packageJson, app).not.toContain('"@base-ui/react"');
+      expect(sourceFiles(localUiRoot), app).toEqual([]);
+
+      for (const file of runtimeRoots.flatMap(sourceFiles)) {
+        expect(readFileSync(file, "utf8"), file).not.toMatch(
+          /from\s+["']@base-ui\/react(?:\/[^"']+)?["']/,
+        );
+      }
+    }
+  });
+
+  test("separates shared Tailwind input from app-owned themes", () => {
+    const sharedStyles = readFileSync(join(uiRoot, "src", "styles", "globals.css"), "utf8");
+    const appStyles = [
       join(workspaceRoot, "apps", "engineering-docs", "app", "globals.css"),
-      "utf8",
-    );
-    const requiredPairs = [
-      "card",
-      "popover",
-      "primary",
-      "secondary",
-      "muted",
-      "accent",
-      "destructive",
-      "sidebar",
-      "success",
-      "success-muted",
-      "warning",
-      "warning-muted",
-      "destructive-muted",
-      "feedback",
-      "inverse",
+      join(workspaceRoot, "apps", "git-client", "src", "styles", "index.css"),
+      join(workspaceRoot, "apps", "readme", "app", "globals.css"),
     ] as const;
 
-    expect(theme).toContain("--background:");
-    expect(theme).toContain("--foreground:");
-    for (const token of requiredPairs) {
-      expect(theme).toContain(`--${token}:`);
-      expect(theme).toContain(`--${token}-foreground:`);
-    }
-    expect(theme).toContain("--border:");
-    expect(theme).toContain("--input:");
-    expect(theme).toContain("--ring:");
-    expect(theme).toContain("--radius:");
-    expect(theme).toContain(':root[data-theme="dark"]');
-    expect(theme).toContain("oklch(");
-    expect(theme).not.toMatch(/#[\da-f]{3,8}\b/i);
-    expect(tokenContract).toContain("--color-background: var(--background)");
-    expect(tokenContract).toContain("--color-card-foreground: var(--card-foreground)");
-    expect(tokenContract).not.toContain(":root");
-    expect(docsTheme).toContain("@jongminchung/theme-contract/tokens.css");
+    expect(sharedStyles).toContain('@import "tailwindcss"');
+    expect(sharedStyles).toContain('@import "tw-animate-css"');
+    expect(sharedStyles).toContain('@import "@jongminchung/theme-contract/tokens.css"');
+    expect(sharedStyles).toContain('@source "../**/*.{ts,tsx}"');
+    expect(sharedStyles).not.toContain("apps/");
 
-    const legacyToken =
-      /--(?:color-background-(?:body|surface|card|popover|feedback|muted|inverted)|color-text-|color-icon-|status-|welcome-(?:sidebar|navigation)|color-tab-)/;
-    const removedPrimitiveImport = `from "${["radix", "ui"].join("-")}"`;
-    for (const file of sourceFiles(sourceRoot)) {
-      expect(readFileSync(file, "utf8"), file).not.toMatch(legacyToken);
-      expect(readFileSync(file, "utf8"), file).not.toContain(removedPrimitiveImport);
-    }
-
-    const sharedEntrypoint = "@jongminchung/theme-contract/";
-    for (const file of sourceFiles(join(sourceRoot, "components"))) {
-      expect(readFileSync(file, "utf8"), file).not.toContain(sharedEntrypoint);
+    for (const path of appStyles) {
+      const stylesheet = readFileSync(path, "utf8");
+      expect(stylesheet, path).toContain('@import "@jongminchung/ui/globals.css"');
+      expect(stylesheet, path).toContain('@import "./theme.css"');
+      expect(stylesheet, path).toMatch(/@source\s+"\.\.\/\*\*\/\*\.\{ts,tsx(?:,mdx)?\}"/);
     }
   });
 
-  test("keeps app components out of the theme contract package", () => {
-    const contractFiles = sourceFiles(join(themeContractRoot, "src"));
-    expect(contractFiles.every((file) => !/\.(?:ts|tsx)$/.test(file))).toBe(true);
-
-    for (const app of ["engineering-docs", "git-client", "readme"] as const) {
-      const appRoot = join(workspaceRoot, "apps", app);
-      const packageJson = readFileSync(join(appRoot, "package.json"), "utf8");
-      const shadcnConfig = readFileSync(join(appRoot, "components.json"), "utf8");
-      expect(packageJson).toContain('"@jongminchung/theme-contract"');
-      expect(packageJson).not.toContain('"@jongminchung/ui"');
-      expect(shadcnConfig).toContain('"style": "base-nova"');
-      expect(shadcnConfig).toContain('"ui": "@/components/ui"');
-      expect(shadcnConfig).toContain('"utils": "@/lib/utils"');
-    }
-  });
-
-  test("keeps theme values local and OKLCH-based", () => {
+  test("keeps theme values local and satisfies the semantic token contract", () => {
+    const tokenContract = readFileSync(join(themeContractRoot, "src", "tokens.css"), "utf8");
     const themePaths = [
       join(workspaceRoot, "apps", "engineering-docs", "app", "theme.css"),
       join(workspaceRoot, "apps", "git-client", "src", "styles", "theme.css"),
@@ -153,83 +134,71 @@ describe("Git Client design system boundary", () => {
       "input",
       "ring",
       "radius",
+      "overlay",
     ] as const;
 
-    for (const themePath of themePaths) {
-      const theme = readFileSync(themePath, "utf8");
-      expect(theme, themePath).toContain("oklch(");
-      expect(theme, themePath).not.toMatch(/#[\da-f]{3,8}\b/i);
-      for (const token of requiredTokens) expect(theme, themePath).toContain(`--${token}:`);
+    expect(tokenContract).toContain("--color-background: var(--background)");
+    expect(tokenContract).toContain("--color-overlay: var(--overlay)");
+    expect(tokenContract).not.toContain(":root");
+
+    for (const path of themePaths) {
+      const theme = readFileSync(path, "utf8");
+      expect(theme, path).toContain("oklch(");
+      expect(theme, path).not.toMatch(/#[\da-f]{3,8}\b/i);
+      for (const token of requiredTokens) expect(theme, path).toContain(`--${token}:`);
     }
   });
 
-  test("keeps app UI components on semantic color tokens", () => {
-    const literalColor = /#[\da-f]{3,8}\b/i;
-    const paletteUtility =
-      /\b(?:bg|border|ring|text)-(?:amber|blue|green|purple|red|white|black)(?:-\d+)?(?:\/\d+)?\b/;
+  test("exposes the official Button variants and composes loading explicitly", () => {
+    const button = readFileSync(join(uiRoot, "src", "components", "button.tsx"), "utf8");
+    const spinner = readFileSync(join(uiRoot, "src", "components", "spinner.tsx"), "utf8");
 
-    for (const app of ["engineering-docs", "git-client", "readme"] as const) {
-      const appRoot = join(workspaceRoot, "apps", app);
-      const componentsRoot =
-        app === "git-client"
-          ? join(appRoot, "src", "components", "ui")
-          : join(appRoot, "components", "ui");
-      for (const file of sourceFiles(componentsRoot)) {
-        const contents = readFileSync(file, "utf8");
-        expect(contents, file).not.toMatch(literalColor);
-        expect(contents, file).not.toMatch(paletteUtility);
-      }
+    for (const variant of ["default", "outline", "secondary", "ghost", "destructive", "link"]) {
+      expect(button).toMatch(new RegExp(`\\b${variant}:`));
     }
+    for (const size of [
+      "default",
+      "xs",
+      "sm",
+      "lg",
+      "icon",
+      '"icon-xs"',
+      '"icon-sm"',
+      '"icon-lg"',
+    ]) {
+      expect(button).toMatch(new RegExp(`${size}:`));
+    }
+    expect(button).not.toContain("isLoading");
+    expect(spinner).toContain('role="status"');
   });
 
-  test("uses Base UI state and dismissal contracts", () => {
-    const componentsRoot = join(sourceRoot, "components", "ui");
-    const dialog = readFileSync(join(componentsRoot, "dialog.tsx"), "utf8");
-    const collections = readFileSync(join(componentsRoot, "collections.tsx"), "utf8");
-    const overlays = readFileSync(join(componentsRoot, "overlays.tsx"), "utf8");
-    const tooltip = readFileSync(join(componentsRoot, "tooltip.tsx"), "utf8");
-    const main = readFileSync(join(sourceRoot, "main.tsx"), "utf8");
+  test("keeps product behavior in app-local compositions", () => {
+    const dialog = readFileSync(join(sourceRoot, "components", "ProductDialog.tsx"), "utf8");
+    const form = readFileSync(join(sourceRoot, "components", "ProductFormControls.tsx"), "utf8");
+    const collections = readFileSync(
+      join(sourceRoot, "components", "ProductCollections.tsx"),
+      "utf8",
+    );
+    const overlays = readFileSync(join(sourceRoot, "components", "ProductOverlays.tsx"), "utf8");
     const terminalTabs = readFileSync(
       join(sourceRoot, "components", "TerminalTabStrip.tsx"),
       "utf8",
     );
+    const main = readFileSync(join(sourceRoot, "main.tsx"), "utf8");
 
     expect(dialog).toContain('eventDetails.reason === "escape-key"');
     expect(dialog).toContain("eventDetails.cancel()");
     expect(dialog).toContain('disablePointerDismissal={purpose !== "info"}');
-    expect(collections).toContain('from "@base-ui/react/toggle"');
-    expect(collections).toContain('from "@base-ui/react/toggle-group"');
-    expect(collections).toContain("data-pressed:");
-    expect(terminalTabs).toContain('from "@base-ui/react/tabs"');
-    expect(terminalTabs).toContain("<Tabs.List");
+    expect(form).toContain("aria-describedby");
+    expect(form).toContain("aria-invalid");
+    expect(form).toContain('indeterminate={value === "indeterminate"}');
+    expect(collections).toContain('from "@jongminchung/ui/components/item"');
+    expect(collections).toContain('from "@jongminchung/ui/components/radio-group"');
+    expect(overlays).toContain('from "@jongminchung/ui/components/popover"');
+    expect(overlays).toContain('from "@jongminchung/ui/components/dropdown-menu"');
+    expect(terminalTabs).toContain('from "@jongminchung/ui/components/tabs"');
     expect(terminalTabs).toContain("activateOnFocus");
-    expect(overlays).toContain('from "@base-ui/react/menu"');
-    expect(overlays).toContain("<Menu.Item");
-    expect(overlays).not.toContain("useLayer");
-    expect(overlays).toContain("<PopoverPrimitive.Positioner");
-    expect(overlays).toContain('className="z-[110]"');
-    expect(tooltip).toContain('from "@base-ui/react/tooltip"');
-    expect(tooltip).toContain("<TooltipPrimitive.Trigger");
-    expect(tooltip).toContain("<TooltipPrimitive.Positioner");
-    expect(tooltip).toContain("<TooltipPrimitive.Popup");
     expect(main).toContain("<TooltipProvider>");
-  });
-
-  test("composes supplemental Button help with shadcn Tooltip", () => {
-    const tooltipConsumers = [
-      "AppearanceMenu.tsx",
-      "ChangesWorkspace.tsx",
-      "CommitLog.tsx",
-      "ShareProjectDialog.tsx",
-      "TerminalTabStrip.tsx",
-    ] as const;
-
-    for (const file of tooltipConsumers) {
-      const contents = readFileSync(join(sourceRoot, "components", file), "utf8");
-      expect(contents, file).toContain("<Tooltip");
-      expect(contents, file).toContain("<TooltipTrigger");
-      expect(contents, file).toContain("<TooltipContent");
-    }
   });
 
   test("does not escape quotes inside Tailwind selector variants", () => {

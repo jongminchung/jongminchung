@@ -1,7 +1,7 @@
-import { Button } from "@base-ui/react/button";
-import { Tabs } from "@base-ui/react/tabs";
+import { Button } from "@jongminchung/ui/components/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@jongminchung/ui/components/tabs";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { useEffect, useMemo, useState } from "react";
-import { cn } from "../lib/utils";
 import type {
   GitConfig,
   GitOperation,
@@ -11,7 +11,7 @@ import type {
 import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
 import { Icon } from "./Icon";
-import { Notice } from "./ui";
+import { Notice } from "./Notice";
 
 type RepositorySettingsTab = "ignore" | "submodules" | "config";
 
@@ -139,25 +139,23 @@ export function RepositorySettingsPanel({
         <span />
         {isShallow && (
           <Button
-            data-slot="button"
             disabled={busy}
             onClick={() => void onOperation({ kind: "unshallow" })}
             type="button"
-            className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-            )}
+            className={cn("h-7 px-2.5")}
+            variant="outline"
+            size="sm"
           >
             Unshallow
           </Button>
         )}
         <Button
-          data-slot="button"
           disabled={busy}
           onClick={() => void reload()}
           type="button"
-          className={cn(
-            "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-          )}
+          className={cn("h-7 px-2.5")}
+          variant="outline"
+          size="sm"
         >
           Reload
         </Button>
@@ -172,49 +170,48 @@ export function RepositorySettingsPanel({
           {notice}
         </Notice>
       )}
-      <Tabs.Root
+      <Tabs
         className="contents"
         onValueChange={(value) => {
           if (isRepositorySettingsTab(value)) setTab(value);
         }}
         value={tab}
       >
-        <Tabs.List
+        <TabsList
           aria-label="Repository settings sections"
           className={tw.settingsTabs}
           render={<nav />}
         >
-          <Tabs.Tab
+          <TabsTrigger
             className="inline-flex h-7 items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent px-2.5 text-xs text-muted-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 data-active:bg-accent data-active:text-foreground"
             value="ignore"
           >
             Ignore
-          </Tabs.Tab>
-          <Tabs.Tab
+          </TabsTrigger>
+          <TabsTrigger
             className="inline-flex h-7 items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent px-2.5 text-xs text-muted-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 data-active:bg-accent data-active:text-foreground"
             value="submodules"
           >
             Submodules <em>{submodules.length}</em>
-          </Tabs.Tab>
-          <Tabs.Tab
+          </TabsTrigger>
+          <TabsTrigger
             className="inline-flex h-7 items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent px-2.5 text-xs text-muted-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 data-active:bg-accent data-active:text-foreground"
             value="config"
           >
             Git Config
-          </Tabs.Tab>
-        </Tabs.List>
-        <Tabs.Panel className={tw.settingsSection} render={<section />} value="ignore">
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent className={tw.settingsSection} render={<section />} value="ignore">
           <header>
             <strong>Ignore rules</strong>
             <span />{" "}
             <Button
-              data-slot="button"
               disabled={busy}
               onClick={() => void saveIgnoreRules()}
               type="button"
-              className={cn(
-                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-              )}
+              className={cn("h-7 px-2.5")}
+              variant="outline"
+              size="sm"
             >
               Save rules
             </Button>
@@ -245,13 +242,12 @@ export function RepositorySettingsPanel({
               />
             </label>
           </div>
-        </Tabs.Panel>
-        <Tabs.Panel className={tw.settingsSection} render={<section />} value="submodules">
+        </TabsContent>
+        <TabsContent className={tw.settingsSection} render={<section />} value="submodules">
           <header>
             <strong>Submodules · {submodules.length}</strong>
             <span />
             <Button
-              data-slot="button"
               disabled={busy}
               onClick={() =>
                 void onOperation({
@@ -261,9 +257,9 @@ export function RepositorySettingsPanel({
                 }).then(() => reload())
               }
               type="button"
-              className={cn(
-                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-              )}
+              className={cn("h-7 px-2.5")}
+              variant="outline"
+              size="sm"
             >
               <Icon name="refresh" size={13} /> Update recursively
             </Button>
@@ -284,8 +280,8 @@ export function RepositorySettingsPanel({
               </article>
             ))
           )}
-        </Tabs.Panel>
-        <Tabs.Panel className={tw.settingsSection} render={<section />} value="config">
+        </TabsContent>
+        <TabsContent className={tw.settingsSection} render={<section />} value="config">
           <header>
             <strong>Git config</strong>
             <span />
@@ -320,13 +316,12 @@ export function RepositorySettingsPanel({
               value={value}
             />
             <Button
-              data-slot="button"
               disabled={busy || !key.trim()}
               onClick={() => void saveConfig()}
               type="button"
-              className={cn(
-                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-              )}
+              className={cn("h-7 px-2.5")}
+              variant="outline"
+              size="sm"
             >
               Set local value
             </Button>
@@ -348,12 +343,11 @@ export function RepositorySettingsPanel({
                 <span>
                   {entry.scope === "local" && (
                     <Button
-                      data-slot="button"
                       onClick={() => void removeConfig(entry)}
                       type="button"
-                      className={cn(
-                        "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                      )}
+                      className={cn("h-7 px-2.5")}
+                      variant="outline"
+                      size="sm"
                     >
                       Unset
                     </Button>
@@ -362,8 +356,8 @@ export function RepositorySettingsPanel({
               </div>
             ))}
           </div>
-        </Tabs.Panel>
-      </Tabs.Root>
+        </TabsContent>
+      </Tabs>
       {dialog.node}
     </div>
   );

@@ -1,11 +1,11 @@
-import { Button } from "@base-ui/react/button";
+import { Button } from "@jongminchung/ui/components/button";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { useMemo, useState } from "react";
 import type { ScratchLanguage } from "../domain/scratchFiles";
-import { cn } from "../lib/utils";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
-import { Dialog, DialogHeader } from "./ui";
-import { TextInput } from "./ui";
+import { Dialog, DialogHeader } from "./ProductDialog";
+import { TextInput } from "./ProductFormControls";
 
 export function ScratchFileChooserDialog({
   languages,
@@ -53,7 +53,6 @@ export function ScratchFileChooserDialog({
         <div aria-label="Scratch file types" role="listbox">
           {filtered.map((language, index) => (
             <Button
-              data-slot="button"
               autoFocus={index === 0 && query.length > 0}
               key={language.id}
               onClick={() => onChoose(language)}
@@ -63,8 +62,10 @@ export function ScratchFileChooserDialog({
               role="option"
               type="button"
               className={cn(
-                "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+                "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
               )}
+              variant="ghost"
+              size="default"
             >
               <Icon name="file" size={15} />
               <span>{language.label}</span>

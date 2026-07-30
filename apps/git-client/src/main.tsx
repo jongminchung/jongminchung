@@ -1,7 +1,7 @@
+import { TooltipProvider } from "@jongminchung/ui/components/tooltip";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
-import { TooltipProvider } from "./components/ui";
 import { AppearanceStorage, resolveAppearance } from "./domain/appearance";
 import LocalHistoryWindow from "./LocalHistoryWindow";
 import "./styles/index.css";

@@ -1,8 +1,8 @@
-import { Button } from "@base-ui/react/button";
+import { Button } from "@jongminchung/ui/components/button";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { DiffPreferences } from "../domain/changeReview";
 import { revisionDiffEntries } from "../domain/changeReview";
-import { cn } from "../lib/utils";
 import type { FileContent, FileSource } from "../shared/contracts/model";
 import { tw } from "../styles/tailwind";
 import { DiffViewer } from "./DiffViewer";
@@ -104,15 +104,16 @@ export function RevisionComparison({
           <nav aria-label="Compared files">
             {entries.map((entry) => (
               <Button
-                data-slot="button"
                 aria-current={selected?.file.path === entry.file.path ? "true" : undefined}
                 key={entry.file.path}
                 onClick={() => setSelectedPath(entry.file.path)}
                 type="button"
                 className={cn(
-                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
+                  "h-7 px-2.5",
                   selected?.file.path === entry.file.path ? tw.selected : undefined,
                 )}
+                variant="outline"
+                size="sm"
               >
                 <span className={tw.statusBadge}>{entry.file.status.charAt(0).toUpperCase()}</span>
                 <span className={tw.ellipsis}>{entry.file.path}</span>

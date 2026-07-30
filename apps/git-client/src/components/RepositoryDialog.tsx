@@ -1,4 +1,5 @@
-import { Button } from "@base-ui/react/button";
+import { Button } from "@jongminchung/ui/components/button";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   applyRepositoryCreationEvent,
@@ -10,22 +11,14 @@ import {
   startRepositoryCreation,
   type RepositoryCreationState,
 } from "../domain/repositoryCreation";
-import { cn } from "../lib/utils";
 import { electronApi, isElectronRuntime } from "../platform/electron";
 import type { GitCreationEventListener } from "../shared/contracts/git-utility";
 import type { CloneOptions } from "../shared/contracts/model";
 import { useDismissLayer } from "./CommandProvider";
-import {
-  CheckboxInput,
-  Dialog,
-  DialogBody,
-  DialogFooter,
-  DialogHeader,
-  Notice,
-  SegmentedControl,
-  SegmentedControlItem,
-  TextInput,
-} from "./ui";
+import { Notice } from "./Notice";
+import { SegmentedControl, SegmentedControlItem } from "./ProductCollections";
+import { Dialog, DialogBody, DialogFooter, DialogHeader } from "./ProductDialog";
+import { CheckboxInput, TextInput } from "./ProductFormControls";
 
 export type RepositoryDialogMode = "open" | "clone" | "init";
 
@@ -255,13 +248,12 @@ export function RepositoryDialog({
               status={pathError === null ? undefined : { type: "error", message: pathError }}
             />
             <Button
-              data-slot="button"
               onClick={() => void browse()}
               type="button"
               disabled={fieldsLocked}
-              className={cn(
-                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
-              )}
+              className={cn("h-7 px-2.5")}
+              variant="outline"
+              size="sm"
             >
               Browse…
             </Button>
@@ -348,46 +340,37 @@ export function RepositoryDialog({
         <DialogFooter>
           {creation.kind === "running" ? (
             <Button
-              data-slot="button"
               onClick={() => void cancelCreation()}
               type="button"
               disabled={creation.requestId === null || creation.cancellation === "requested"}
-              className={cn(
-                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
-              )}
+              className={cn("h-7 px-2.5")}
+              variant="ghost"
+              size="sm"
             >
               {creation.cancellation === "requested" ? "Cancelling…" : "Cancel operation"}
             </Button>
           ) : creation.kind === "completed" ? (
             <Button
-              data-slot="button"
               onClick={onClose}
               type="button"
-              className={cn(
-                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-primary bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 active:bg-primary/80",
-              )}
+              className={cn("h-7 px-2.5")}
+              variant="default"
+              size="sm"
             >
               Done
             </Button>
           ) : (
             <>
               <Button
-                data-slot="button"
                 onClick={onClose}
                 type="button"
-                className={cn(
-                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
-                )}
+                className={cn("h-7 px-2.5")}
+                variant="ghost"
+                size="sm"
               >
                 Cancel
               </Button>
-              <Button
-                data-slot="button"
-                type="submit"
-                className={cn(
-                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-primary bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 active:bg-primary/80",
-                )}
-              >
+              <Button type="submit" className={cn("h-7 px-2.5")} variant="default" size="sm">
                 {mode === "open"
                   ? "Open"
                   : creation.kind === "failed" || creation.kind === "cancelled"

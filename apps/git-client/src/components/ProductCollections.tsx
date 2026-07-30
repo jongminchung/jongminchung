@@ -1,10 +1,22 @@
-import { Radio } from "@base-ui/react/radio";
-import { RadioGroup } from "@base-ui/react/radio-group";
-import { Toggle } from "@base-ui/react/toggle";
-import { ToggleGroup } from "@base-ui/react/toggle-group";
-import { LoaderCircle } from "lucide-react";
+import { Button } from "@jongminchung/ui/components/button";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@jongminchung/ui/components/empty";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemGroup,
+  ItemMedia,
+} from "@jongminchung/ui/components/item";
+import { RadioGroup, RadioGroupItem } from "@jongminchung/ui/components/radio-group";
+import { Spinner as SpinnerIcon } from "@jongminchung/ui/components/spinner";
+import { ToggleGroup, ToggleGroupItem } from "@jongminchung/ui/components/toggle-group";
+import { cn } from "@jongminchung/ui/lib/utils";
 import type { HTMLAttributes, ReactNode } from "react";
-import { cn } from "../../lib/utils";
 
 interface ListProps extends HTMLAttributes<HTMLDivElement> {
   readonly density?: "compact" | "default";
@@ -12,8 +24,8 @@ interface ListProps extends HTMLAttributes<HTMLDivElement> {
 
 export function List({ density = "default", className, ...props }: ListProps): ReactNode {
   return (
-    <div
-      className={cn("grid min-w-0 gap-0.5", density === "compact" && "text-xs", className)}
+    <ItemGroup
+      className={cn("gap-0.5", density === "compact" && "text-xs", className)}
       {...props}
     />
   );
@@ -38,42 +50,42 @@ export function ListItem({
   isDisabled = false,
   onClick,
   className,
-  role = "listitem",
+  role,
   ...props
 }: ListItemProps): ReactNode {
   return (
-    <div
+    <Item
       aria-disabled={isDisabled || undefined}
       aria-selected={isSelected || undefined}
       className={cn(
-        "grid min-h-9 min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-md px-2 py-1 outline-none",
-        onClick &&
-          !isDisabled &&
-          "cursor-default hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/45",
+        "min-h-9 gap-2 rounded-md px-2 py-1",
+        onClick && !isDisabled && "cursor-default hover:bg-accent",
         isSelected && "bg-accent text-accent-foreground",
         isDisabled && "opacity-45",
         className,
       )}
       onClick={isDisabled ? undefined : onClick}
-      onKeyDown={(event) => {
-        if (onClick === undefined || isDisabled || (event.key !== "Enter" && event.key !== " "))
-          return;
-        onClick();
-        event.preventDefault();
-      }}
-      role={role}
-      tabIndex={onClick && !isDisabled ? 0 : undefined}
+      render={
+        onClick === undefined ? undefined : (
+          <Button disabled={isDisabled} size="default" type="button" variant="ghost" />
+        )
+      }
+      role={role ?? (onClick === undefined ? "listitem" : undefined)}
       {...props}
     >
-      {startContent ? <span className="text-muted-foreground">{startContent}</span> : <span />}
-      <span className="grid min-w-0 gap-0.5">
+      {startContent ? (
+        <ItemMedia className="text-muted-foreground">{startContent}</ItemMedia>
+      ) : (
+        <span />
+      )}
+      <ItemContent className="gap-0.5">
         <strong className="truncate font-medium">{label}</strong>
         {description ? (
           <small className="truncate text-muted-foreground">{description}</small>
         ) : null}
-      </span>
-      {endContent}
-    </div>
+      </ItemContent>
+      {endContent ? <ItemActions>{endContent}</ItemActions> : null}
+    </Item>
   );
 }
 
@@ -85,12 +97,14 @@ export function EmptyState({
   readonly description?: string;
 }): ReactNode {
   return (
-    <div className="grid place-items-center gap-1 px-6 py-10 text-center">
-      <strong className="text-sm font-medium">{title}</strong>
-      {description ? (
-        <p className="m-0 max-w-sm text-xs text-muted-foreground">{description}</p>
-      ) : null}
-    </div>
+    <Empty className="gap-1 rounded-none px-6 py-10">
+      <EmptyHeader className="gap-1">
+        <EmptyTitle>{title}</EmptyTitle>
+        {description ? (
+          <EmptyDescription className="text-xs">{description}</EmptyDescription>
+        ) : null}
+      </EmptyHeader>
+    </Empty>
   );
 }
 
@@ -103,12 +117,9 @@ export function Spinner({
 }): ReactNode {
   return (
     <span className="inline-flex items-center gap-2 text-xs text-muted-foreground" role="status">
-      <LoaderCircle
+      <SpinnerIcon
         aria-hidden
-        className={cn(
-          "animate-spin",
-          size === "sm" ? "size-3" : size === "lg" ? "size-5" : "size-4",
-        )}
+        className={size === "sm" ? "size-3" : size === "lg" ? "size-5" : "size-4"}
       />
       {label}
     </span>
@@ -138,7 +149,7 @@ export function RadioList({
         {label}
       </legend>
       <RadioGroup
-        className={cn("grid", size === "sm" ? "gap-0.5" : "gap-1")}
+        className={cn(size === "sm" ? "gap-0.5" : "gap-1")}
         onValueChange={onChange}
         value={value}
       >
@@ -166,13 +177,7 @@ export function RadioListItem({
         isDisabled && "opacity-45",
       )}
     >
-      <Radio.Root
-        className="grid size-4 place-items-center rounded-full border border-input bg-background outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
-        disabled={isDisabled}
-        value={value}
-      >
-        <Radio.Indicator className="size-2 rounded-full bg-primary" />
-      </Radio.Root>
+      <RadioGroupItem disabled={isDisabled} value={value} />
       {startContent}
       <span>{label}</span>
     </label>
@@ -201,7 +206,7 @@ export function SegmentedControl({
     <ToggleGroup
       aria-label={label}
       className={cn(
-        "inline-flex rounded-md border border-border bg-muted p-0.5",
+        "rounded-md border border-border bg-muted p-0.5",
         layout === "fill" && "flex w-full",
       )}
       disabled={isDisabled}
@@ -209,6 +214,7 @@ export function SegmentedControl({
         const selected = next[0];
         if (selected !== undefined) onChange(selected);
       }}
+      spacing={0}
       value={[value]}
     >
       {children}
@@ -224,11 +230,11 @@ export function SegmentedControlItem({
   readonly value: string;
 }): ReactNode {
   return (
-    <Toggle
-      className="h-7 flex-1 rounded px-2.5 text-xs outline-none hover:bg-background/60 data-pressed:bg-background data-pressed:shadow-xs focus-visible:ring-2 focus-visible:ring-ring/45"
+    <ToggleGroupItem
+      className="h-7 flex-1 rounded px-2.5 text-xs data-pressed:shadow-xs"
       value={value}
     >
       {label}
-    </Toggle>
+    </ToggleGroupItem>
   );
 }

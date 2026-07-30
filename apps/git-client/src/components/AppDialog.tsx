@@ -1,11 +1,11 @@
-import { Button } from "@base-ui/react/button";
+import { Button } from "@jongminchung/ui/components/button";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
-import { cn } from "../lib/utils";
 import { useDismissLayer } from "./CommandProvider";
-import { Dialog, DialogHeader } from "./ui";
-import { FieldStatus } from "./ui";
-import { TextInput } from "./ui";
+import { Dialog, DialogHeader } from "./ProductDialog";
+import { FieldStatus } from "./ProductFormControls";
+import { TextInput } from "./ProductFormControls";
 
 interface InputOptions {
   readonly title: string;
@@ -169,24 +169,22 @@ export function useAppDialog(): AppDialogController {
         </div>
         <footer className="flex justify-end gap-2 border-t border-border p-3">
           <Button
-            data-slot="button"
             onClick={cancel}
             type="button"
-            className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
-            )}
+            className={cn("h-7 px-2.5")}
+            variant="ghost"
+            size="sm"
           >
             Cancel
           </Button>
           <Button
-            data-slot="button"
             type="submit"
             className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5",
-              request.kind === "confirm" && request.options.dangerous
-                ? "border-destructive bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/80"
-                : "border-primary bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 active:bg-primary/80",
+              "h-7 px-2.5",
+              request.kind === "confirm" && request.options.dangerous ? "" : "",
             )}
+            variant="destructive"
+            size="sm"
           >
             {request.options.confirmLabel ?? (request.kind === "confirm" ? "Continue" : "Apply")}
           </Button>

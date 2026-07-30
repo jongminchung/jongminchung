@@ -2,8 +2,8 @@ import { useEffect, useState, type KeyboardEvent } from "react";
 import type { LineBookmark, ProjectBookmarks } from "../domain/bookmarks";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
-import { Dialog, DialogHeader } from "./ui";
-import { List, ListItem } from "./ui";
+import { List, ListItem } from "./ProductCollections";
+import { Dialog, DialogHeader } from "./ProductDialog";
 
 export type BookmarksPopupMode = "lines" | "mnemonics";
 

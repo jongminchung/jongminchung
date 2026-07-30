@@ -1,4 +1,5 @@
-import { Button } from "@base-ui/react/button";
+import { Button } from "@jongminchung/ui/components/button";
+import { cn } from "@jongminchung/ui/lib/utils";
 import type { AppearancePreference, AppearanceTheme } from "../domain/appearance";
 import {
   isProductKeymapPreset,
@@ -6,10 +7,9 @@ import {
   type ProductSettings,
   type ProductZoom,
 } from "../domain/productSettings";
-import { cn } from "../lib/utils";
 import { tw } from "../styles/tailwind";
-import { Dialog, DialogHeader } from "./ui";
-import { RadioList, RadioListItem } from "./ui";
+import { RadioList, RadioListItem } from "./ProductCollections";
+import { Dialog, DialogHeader } from "./ProductDialog";
 
 const THEMES: readonly {
   readonly value: AppearanceTheme | "system";
@@ -115,12 +115,11 @@ export function QuickSwitchSchemeDialog({
         </div>
         <footer>
           <Button
-            data-slot="button"
             onClick={onClose}
             type="button"
-            className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-primary bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 active:bg-primary/80",
-            )}
+            className={cn("h-8 px-3")}
+            variant="default"
+            size="default"
           >
             Close
           </Button>

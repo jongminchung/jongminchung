@@ -1,4 +1,5 @@
-import { Button } from "@base-ui/react/button";
+import { Button } from "@jongminchung/ui/components/button";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { sanitizeGitError } from "../domain/gitActivity";
 import {
@@ -8,11 +9,11 @@ import {
   requiresPushConfirmation,
   type PushChoice,
 } from "../domain/push";
-import { cn } from "../lib/utils";
 import type { GitOperation, PushPreview, RemoteInfo } from "../shared/contracts/model";
 import { useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
-import { Dialog, DialogBody, DialogFooter, DialogHeader, Notice } from "./ui";
+import { Notice } from "./Notice";
+import { Dialog, DialogBody, DialogFooter, DialogHeader } from "./ProductDialog";
 
 function branchName(remoteRef: string): string {
   return remoteRef.replace(/^refs\/heads\//, "");
@@ -179,13 +180,12 @@ export function PushDialog({
             </label>
             <div className="col-span-2 flex items-center gap-2 max-[600px]:col-span-1">
               <Button
-                data-slot="button"
                 onClick={() => void load(remote, remoteRef)}
                 type="button"
                 disabled={!remote || !remoteRef || loading}
-                className={cn(
-                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
-                )}
+                className={cn("h-7 px-2.5")}
+                variant="outline"
+                size="sm"
               >
                 {loading ? "Checking remote…" : "Review destination"}
               </Button>
@@ -363,25 +363,20 @@ export function PushDialog({
         </DialogBody>
         <DialogFooter>
           <Button
-            data-slot="button"
             onClick={onClose}
             type="button"
-            className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
-            )}
+            className={cn("h-7 px-2.5")}
+            variant="ghost"
+            size="sm"
           >
             Cancel
           </Button>
           <Button
-            data-slot="button"
             type="submit"
             disabled={!canSubmit}
-            className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5",
-              choice === "forceWithLease"
-                ? "border-destructive bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/80"
-                : "border-primary bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 active:bg-primary/80",
-            )}
+            className={cn("h-7 px-2.5", choice === "forceWithLease" ? "" : "")}
+            variant="destructive"
+            size="sm"
           >
             {pushing ? "Pushing…" : choice === "forceWithLease" ? "Force Push with Lease" : "Push"}
           </Button>

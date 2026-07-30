@@ -1,12 +1,12 @@
-import { Button } from "@base-ui/react/button";
+import { Button } from "@jongminchung/ui/components/button";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { useMemo, useState } from "react";
 import { CODE_INSPECTIONS, type CodeInspectionId } from "../domain/codeAnalysis";
-import { cn } from "../lib/utils";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
-import { Dialog, DialogHeader } from "./ui";
-import { List, ListItem } from "./ui";
-import { TextInput } from "./ui";
+import { List, ListItem } from "./ProductCollections";
+import { Dialog, DialogHeader } from "./ProductDialog";
+import { TextInput } from "./ProductFormControls";
 
 export function RunInspectionDialog({
   onChoose,
@@ -66,12 +66,11 @@ export function RunInspectionDialog({
         </List>
         <footer>
           <Button
-            data-slot="button"
             onClick={onClose}
             type="button"
-            className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
-            )}
+            className={cn("h-8 px-3")}
+            variant="outline"
+            size="default"
           >
             Cancel
           </Button>

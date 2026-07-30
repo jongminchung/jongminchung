@@ -1,16 +1,27 @@
-import { Button } from "@base-ui/react/button";
-import { Check, ChevronDown, LoaderCircle, Search, X } from "lucide-react";
+import { Button } from "@jongminchung/ui/components/button";
+import { Checkbox } from "@jongminchung/ui/components/checkbox";
+import { Field, FieldDescription, FieldError, FieldLabel } from "@jongminchung/ui/components/field";
+import { Input } from "@jongminchung/ui/components/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@jongminchung/ui/components/select";
+import { Textarea } from "@jongminchung/ui/components/textarea";
+import { cn } from "@jongminchung/ui/lib/utils";
+import { LoaderCircle, Search, X } from "lucide-react";
 import { useId, useRef } from "react";
 import type {
   ChangeEvent,
+  ComponentProps,
   InputHTMLAttributes,
   KeyboardEvent,
   ReactNode,
   Ref,
-  SelectHTMLAttributes,
   TextareaHTMLAttributes,
 } from "react";
-import { cn } from "../../lib/utils";
 
 interface InputStatus {
   readonly type: "error" | "success" | "warning";
@@ -42,27 +53,50 @@ function FieldShell({
   children,
   className,
 }: FieldShellProps): ReactNode {
+  const descriptionId = description === undefined ? undefined : `${id}-description`;
+  const statusId = status?.message === undefined ? undefined : `${id}-status`;
   return (
-    <label className={cn("grid min-w-0 gap-1 text-xs", className)} htmlFor={id} style={{ width }}>
-      <span className={cn("font-medium", isLabelHidden && "sr-only")}>
+    <Field
+      className={cn("min-w-0 gap-1 text-xs", className)}
+      data-invalid={status?.type === "error" || undefined}
+      style={{ width }}
+    >
+      <FieldLabel className={cn("font-medium", isLabelHidden && "sr-only")} htmlFor={id}>
         {label}
         {isOptional ? (
           <small className="ml-1 font-normal text-muted-foreground">Optional</small>
         ) : null}
-      </span>
-      {description ? <small className="text-muted-foreground">{description}</small> : null}
+      </FieldLabel>
+      {description ? (
+        <FieldDescription className="text-xs" id={descriptionId}>
+          {description}
+        </FieldDescription>
+      ) : null}
       {children}
       {status?.message ? (
-        <small
+        <FieldError
           className={status.type === "error" ? "text-destructive" : "text-muted-foreground"}
-          role={status.type === "error" ? "alert" : undefined}
+          id={statusId}
+          role={status.type === "error" ? "alert" : "status"}
         >
           {status.message}
-        </small>
+        </FieldError>
       ) : null}
       {isRequired ? <span className="sr-only">Required</span> : null}
-    </label>
+    </Field>
   );
+}
+
+function fieldDescriptionIds(
+  id: string,
+  description: string | undefined,
+  status: InputStatus | undefined,
+): string | undefined {
+  const ids = [
+    description === undefined ? undefined : `${id}-description`,
+    status?.message === undefined ? undefined : `${id}-status`,
+  ].filter((value): value is string => value !== undefined);
+  return ids.length === 0 ? undefined : ids.join(" ");
 }
 
 interface TextInputProps extends Omit<
@@ -157,9 +191,11 @@ export function TextInput({
         title={disabledMessage ?? labelTooltip}
       >
         {startIcon ?? <Search aria-hidden className="hidden size-3.5 text-muted-foreground" />}
-        <input
+        <Input
+          aria-describedby={fieldDescriptionIds(inputId, description, status)}
+          aria-invalid={status?.type === "error" || undefined}
           autoFocus={hasAutoFocus}
-          className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
+          className="h-auto min-w-0 flex-1 rounded-none border-0 bg-transparent px-0 py-0 shadow-none focus-visible:ring-0"
           disabled={isDisabled}
           id={inputId}
           name={htmlName}
@@ -179,7 +215,6 @@ export function TextInput({
         {isLoading ? <LoaderCircle aria-hidden className="size-3.5 animate-spin" /> : null}
         {hasClear && value ? (
           <Button
-            data-slot="button"
             aria-label={`Clear ${label}`}
             onClick={() => {
               const input = inputRef.current;
@@ -193,10 +228,9 @@ export function TextInput({
               input.focus();
             }}
             type="button"
-            className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-              "grid size-5 place-items-center rounded-sm hover:bg-accent",
-            )}
+            className="size-5"
+            size="icon-xs"
+            variant="ghost"
           >
             <X aria-hidden className="size-3" />
           </Button>
@@ -274,7 +308,9 @@ export function TextArea({
         {startIcon ? (
           <span className="absolute left-2 top-2 text-muted-foreground">{startIcon}</span>
         ) : null}
-        <textarea
+        <Textarea
+          aria-describedby={fieldDescriptionIds(inputId, description, status)}
+          aria-invalid={status?.type === "error" || undefined}
           autoFocus={hasAutoFocus}
           className={cn(
             "min-h-20 w-full resize-y rounded-md border border-input bg-background px-2.5 py-2 text-xs shadow-xs outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30 disabled:opacity-50",
@@ -306,12 +342,12 @@ export function TextArea({
 }
 
 interface CheckboxInputProps extends Omit<
-  InputHTMLAttributes<HTMLInputElement>,
-  "onChange" | "size" | "value"
+  ComponentProps<typeof Checkbox>,
+  "checked" | "onCheckedChange" | "size" | "value"
 > {
   readonly label: ReactNode;
   readonly value: boolean | "indeterminate";
-  readonly onChange?: (checked: boolean, event: ChangeEvent<HTMLInputElement>) => void;
+  readonly onChange?: (checked: boolean, event: Event) => void;
   readonly isLabelHidden?: boolean;
   readonly description?: string;
   readonly isDisabled?: boolean;
@@ -339,47 +375,54 @@ export function CheckboxInput({
   status,
   htmlName,
   className,
+  id: suppliedId,
+  required,
   ...props
 }: CheckboxInputProps): ReactNode {
+  const generatedId = useId();
+  const id = suppliedId ?? generatedId;
+  const descriptionId = description === undefined ? undefined : `${id}-description`;
+  const statusId = status?.message === undefined ? undefined : `${id}-status`;
   return (
-    <label
+    <Field
       className={cn(
-        "flex items-start gap-2 text-xs",
+        "flex-row items-start gap-2 text-xs",
         size === "sm" ? "min-h-7" : "min-h-8",
         className,
       )}
+      data-invalid={status?.type === "error" || undefined}
       style={{ width }}
       title={disabledMessage}
     >
-      <span className="relative mt-0.5 grid size-4 shrink-0 place-items-center">
-        <input
-          checked={value === true}
-          className="peer size-4 appearance-none rounded border border-input bg-background shadow-xs outline-none checked:border-primary checked:bg-primary focus-visible:ring-2 focus-visible:ring-ring/45 disabled:opacity-50"
-          disabled={isDisabled}
-          name={htmlName}
-          onChange={(event) => {
-            if (!isReadOnly) onChange?.(event.target.checked, event);
-          }}
-          readOnly={isReadOnly}
-          type="checkbox"
-          {...props}
-        />
-        {value === true || value === "indeterminate" ? (
-          <Check
-            aria-hidden
-            className="pointer-events-none absolute size-3 text-primary-foreground"
-          />
-        ) : null}
-      </span>
-      <span className={cn("grid min-w-0 gap-0.5", isLabelHidden && "sr-only")}>
+      <Checkbox
+        {...props}
+        aria-describedby={[descriptionId, statusId].filter(Boolean).join(" ") || undefined}
+        aria-invalid={status?.type === "error" || undefined}
+        checked={value === true}
+        className="mt-0.5"
+        disabled={isDisabled}
+        id={id}
+        indeterminate={value === "indeterminate"}
+        name={htmlName}
+        onCheckedChange={(checked, eventDetails) => {
+          if (!isReadOnly) onChange?.(checked, eventDetails.event);
+        }}
+        readOnly={isReadOnly}
+        required={required}
+      />
+      <FieldLabel className={cn("grid min-w-0 gap-0.5", isLabelHidden && "sr-only")} htmlFor={id}>
         <span className="flex items-center gap-1.5">
           {labelIcon}
           {label}
         </span>
-        {description ? <small className="text-muted-foreground">{description}</small> : null}
-        {status?.message ? <small className="text-destructive">{status.message}</small> : null}
-      </span>
-    </label>
+        {description ? (
+          <FieldDescription className="text-xs" id={descriptionId}>
+            {description}
+          </FieldDescription>
+        ) : null}
+        {status?.message ? <FieldError id={statusId}>{status.message}</FieldError> : null}
+      </FieldLabel>
+    </Field>
   );
 }
 
@@ -389,10 +432,8 @@ interface SelectorOption {
   readonly isDisabled?: boolean;
 }
 
-interface SelectorProps extends Omit<
-  SelectHTMLAttributes<HTMLSelectElement>,
-  "onChange" | "size" | "value"
-> {
+interface SelectorProps {
+  readonly id?: string;
   readonly label: string;
   readonly value: string;
   readonly options: readonly SelectorOption[];
@@ -407,6 +448,10 @@ interface SelectorProps extends Omit<
   readonly labelTooltip?: string;
   readonly status?: InputStatus;
   readonly placeholder?: string;
+  readonly className?: string;
+  readonly name?: string;
+  readonly required?: boolean;
+  readonly "aria-describedby"?: string;
 }
 
 export function Selector({
@@ -426,46 +471,58 @@ export function Selector({
   status,
   placeholder,
   className,
-  ...props
+  name,
+  required,
+  "aria-describedby": ariaDescribedBy,
 }: SelectorProps): ReactNode {
   const generatedId = useId();
   const id = suppliedId ?? generatedId;
+  const selectedLabel = options.find((option) => option.value === value)?.label;
   return (
-    <label className="grid gap-1 text-xs" htmlFor={id} style={{ width }}>
-      <span className={cn("font-medium", isLabelHidden && "sr-only")} title={labelTooltip}>
+    <Field
+      className="gap-1 text-xs"
+      data-invalid={status?.type === "error" || undefined}
+      style={{ width }}
+    >
+      <FieldLabel
+        className={cn("font-medium", isLabelHidden && "sr-only")}
+        htmlFor={id}
+        title={labelTooltip}
+      >
         {label}
-      </span>
-      <span className="relative flex">
-        <select
-          className={cn(
-            "w-full appearance-none rounded-md border border-input bg-background pl-2.5 pr-7 text-xs shadow-xs outline-none focus:border-ring focus:ring-2 focus:ring-ring/30 disabled:opacity-50",
-            size === "sm" ? "h-7" : size === "lg" ? "h-9" : "h-8",
-            className,
-            status?.type === "error" && "border-destructive",
-          )}
-          disabled={isDisabled}
+      </FieldLabel>
+      <Select
+        disabled={isDisabled}
+        name={name}
+        onValueChange={(nextValue) => onChange?.(nextValue ?? "")}
+        required={required}
+        value={value}
+      >
+        <SelectTrigger
+          aria-describedby={ariaDescribedBy}
+          aria-invalid={status?.type === "error" || undefined}
+          className={cn("w-full text-xs", size === "lg" && "h-9", className)}
           id={id}
-          onChange={(event) => onChange?.(event.target.value)}
-          value={value}
-          {...props}
+          size={size === "sm" ? "sm" : "default"}
         >
-          {placeholder && !options.some((option) => option.value === "") ? (
-            <option disabled value="">
-              {placeholder}
-            </option>
-          ) : null}
+          <SelectValue placeholder={placeholder}>
+            {(selectedValue) =>
+              selectedValue === null || selectedValue === ""
+                ? placeholder
+                : (selectedLabel ?? String(selectedValue))
+            }
+          </SelectValue>
+        </SelectTrigger>
+        <SelectContent>
           {options.map((option) => (
-            <option disabled={option.isDisabled} key={option.value} value={option.value}>
+            <SelectItem disabled={option.isDisabled} key={option.value} value={option.value}>
               {option.label}
-            </option>
+            </SelectItem>
           ))}
-        </select>
-        <ChevronDown
-          aria-hidden
-          className="pointer-events-none absolute right-2 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
-        />
-      </span>
-    </label>
+        </SelectContent>
+      </Select>
+      {status?.message ? <FieldError>{status.message}</FieldError> : null}
+    </Field>
   );
 }
 
@@ -477,12 +534,9 @@ export function FieldStatus({
   readonly type: InputStatus["type"];
   readonly variant?: string;
 }): ReactNode {
-  return (
-    <p
-      className={cn("m-0 text-xs", type === "error" ? "text-destructive" : "text-muted-foreground")}
-      role={type === "error" ? "alert" : undefined}
-    >
-      {message}
-    </p>
+  return type === "error" ? (
+    <FieldError className="m-0 text-xs">{message}</FieldError>
+  ) : (
+    <FieldDescription className="m-0 text-xs">{message}</FieldDescription>
   );
 }

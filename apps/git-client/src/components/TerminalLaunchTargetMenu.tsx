@@ -1,4 +1,4 @@
-import { Menu } from "@base-ui/react/menu";
+import { DropdownMenu, DropdownMenuContent } from "@jongminchung/ui/components/dropdown-menu";
 import { useCallback, useMemo, useRef } from "react";
 import type {
   TerminalAgentDescriptor,
@@ -6,7 +6,7 @@ import type {
 } from "../shared/contracts/terminal";
 import { tw } from "../styles/tailwind";
 import { useDismissLayer } from "./CommandProvider";
-import { DropdownMenuItem } from "./ui";
+import { DropdownMenuItem } from "./ProductOverlays";
 
 type TerminalLaunchDescriptor = TerminalShellDescriptor | TerminalAgentDescriptor;
 
@@ -57,32 +57,30 @@ export function TerminalLaunchTargetMenu({
   };
 
   return (
-    <Menu.Root
+    <DropdownMenu
       onOpenChange={(open) => {
         if (!open) handleHide();
       }}
       open
     >
-      <Menu.Portal>
-        <Menu.Positioner
-          align="start"
-          anchor={anchor}
-          className="z-[130]"
-          collisionPadding={8}
-          positionMethod="fixed"
-          side="bottom"
-        >
-          <Menu.Popup aria-label={label} className={tw.terminalOptionsMenu} finalFocus={false}>
-            {items.map((item) => (
-              <DropdownMenuItem
-                key={`${item.kind}:${item.id}`}
-                label={item.displayName}
-                onClick={() => select(item)}
-              />
-            ))}
-          </Menu.Popup>
-        </Menu.Positioner>
-      </Menu.Portal>
-    </Menu.Root>
+      <DropdownMenuContent
+        align="start"
+        anchor={anchor}
+        aria-label={label}
+        className={tw.terminalOptionsMenu}
+        collisionPadding={8}
+        finalFocus={false}
+        positionMethod="fixed"
+        side="bottom"
+      >
+        {items.map((item) => (
+          <DropdownMenuItem
+            key={`${item.kind}:${item.id}`}
+            label={item.displayName}
+            onClick={() => select(item)}
+          />
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

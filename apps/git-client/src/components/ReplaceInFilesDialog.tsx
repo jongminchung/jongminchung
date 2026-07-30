@@ -1,18 +1,18 @@
-import { Button } from "@base-ui/react/button";
-import { Toggle } from "@base-ui/react/toggle";
+import { Button } from "@jongminchung/ui/components/button";
+import { Toggle } from "@jongminchung/ui/components/toggle";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   replacementExpression,
   type ProjectSearchOptions,
   type ProjectTextMatch,
 } from "../domain/projectSearch";
-import { cn } from "../lib/utils";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
-import { Dialog, DialogHeader } from "./ui";
-import { List, ListItem } from "./ui";
-import { Spinner } from "./ui";
-import { TextInput } from "./ui";
+import { List, ListItem } from "./ProductCollections";
+import { Spinner } from "./ProductCollections";
+import { Dialog, DialogHeader } from "./ProductDialog";
+import { TextInput } from "./ProductFormControls";
 
 const DEFAULT_OPTIONS: ProjectSearchOptions = {
   matchCase: false,
@@ -175,14 +175,13 @@ export function ReplaceInFilesDialog({
           </span>
           {files.length > 0 && (
             <Button
-              data-slot="button"
               onClick={() =>
                 setSelectedPaths(new Set(selectedPaths.size === files.length ? [] : files))
               }
               type="button"
-              className={cn(
-                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 border-transparent bg-transparent hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
-              )}
+              className={cn("h-7 px-2.5")}
+              variant="ghost"
+              size="sm"
             >
               {selectedPaths.size === files.length ? "Unselect All" : "Select All"}
             </Button>
@@ -231,23 +230,21 @@ export function ReplaceInFilesDialog({
         </div>
         <footer>
           <Button
-            data-slot="button"
             onClick={onClose}
             type="button"
-            className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
-            )}
+            className={cn("h-8 px-3")}
+            variant="outline"
+            size="default"
           >
             Cancel
           </Button>
           <Button
-            data-slot="button"
             onClick={() => void replace()}
             type="button"
             disabled={loading || replacing || selectedPaths.size === 0 || query === ""}
-            className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-primary bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 active:bg-primary/80",
-            )}
+            className={cn("h-8 px-3")}
+            variant="default"
+            size="default"
           >
             {replacing ? "Replacing…" : "Replace All"}
           </Button>

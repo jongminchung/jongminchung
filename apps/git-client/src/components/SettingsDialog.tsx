@@ -1,5 +1,6 @@
-import { Button } from "@base-ui/react/button";
-import { Tabs } from "@base-ui/react/tabs";
+import { Button } from "@jongminchung/ui/components/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@jongminchung/ui/components/tabs";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { useMemo, useState } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import type { AppearancePreference, AppearanceTheme } from "../domain/appearance";
@@ -12,14 +13,13 @@ import {
 } from "../domain/commands";
 import { isProductKeymapPreset } from "../domain/productSettings";
 import { type ProductSettings, type ProductZoom } from "../domain/productSettings";
-import { cn } from "../lib/utils";
 import { tw } from "../styles/tailwind";
 import { useAppearance } from "./AppearanceProvider";
 import { Icon } from "./Icon";
-import { CheckboxInput } from "./ui";
-import { Dialog, DialogHeader } from "./ui";
-import { RadioList, RadioListItem } from "./ui";
-import { TextInput } from "./ui";
+import { RadioList, RadioListItem } from "./ProductCollections";
+import { Dialog, DialogHeader } from "./ProductDialog";
+import { CheckboxInput } from "./ProductFormControls";
+import { TextInput } from "./ProductFormControls";
 
 type SettingsSection = "appearance" | "keymap" | "versionControl" | "notifications";
 
@@ -144,7 +144,7 @@ export function SettingsDialog({
     >
       <section className={tw.settingsDialog}>
         <DialogHeader hasDivider onOpenChange={(open) => !open && onClose()} title={title} />
-        <Tabs.Root
+        <Tabs
           className="contents"
           onValueChange={(value) => {
             if (isSettingsSection(value)) setSection(value);
@@ -152,41 +152,41 @@ export function SettingsDialog({
           orientation="vertical"
           value={section}
         >
-          <Tabs.List aria-label="Settings categories" render={<aside />}>
-            <Tabs.Tab
+          <TabsList aria-label="Settings categories" render={<aside />}>
+            <TabsTrigger
               value="appearance"
               className={cn(
                 "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 text-muted-foreground data-active:bg-accent data-active:text-foreground",
               )}
             >
               <Icon name="appearance" size={15} /> Appearance & Behavior
-            </Tabs.Tab>
-            <Tabs.Tab
+            </TabsTrigger>
+            <TabsTrigger
               value="keymap"
               className={cn(
                 "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 text-muted-foreground data-active:bg-accent data-active:text-foreground",
               )}
             >
               <Icon name="settings" size={15} /> Keymap
-            </Tabs.Tab>
-            <Tabs.Tab
+            </TabsTrigger>
+            <TabsTrigger
               value="versionControl"
               className={cn(
                 "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 text-muted-foreground data-active:bg-accent data-active:text-foreground",
               )}
             >
               <Icon name="branch" size={15} /> Version Control
-            </Tabs.Tab>
-            <Tabs.Tab
+            </TabsTrigger>
+            <TabsTrigger
               value="notifications"
               className={cn(
                 "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 text-muted-foreground data-active:bg-accent data-active:text-foreground",
               )}
             >
               <Icon name="warning" size={15} /> Notifications
-            </Tabs.Tab>
-          </Tabs.List>
-          <Tabs.Panel render={<main />} value="appearance">
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent render={<main />} value="appearance">
             <div className={tw.settingsPage}>
               <h2>Appearance</h2>
               <RadioList
@@ -287,8 +287,8 @@ export function SettingsDialog({
                 <RadioListItem label="150%" value="150" />
               </RadioList>
             </div>
-          </Tabs.Panel>
-          <Tabs.Panel render={<main />} value="keymap">
+          </TabsContent>
+          <TabsContent render={<main />} value="keymap">
             <div className={tw.settingsPage}>
               <h2>Keymap</h2>
               <label>
@@ -335,16 +335,15 @@ export function SettingsDialog({
                     </span>
                     <span className="contents" role="cell">
                       <Button
-                        data-slot="button"
                         aria-label={`Shortcut for ${command.label}`}
                         onClick={() => setCapturingCommand(command.id)}
                         onKeyDown={(event) =>
                           capturingCommand === command.id && captureShortcut(command.id, event)
                         }
                         type="button"
-                        className={cn(
-                          "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                        )}
+                        className={cn("h-7 px-2.5")}
+                        variant="outline"
+                        size="sm"
                       >
                         {capturingCommand === command.id
                           ? "Press shortcut…"
@@ -356,7 +355,6 @@ export function SettingsDialog({
                     {Object.hasOwn(settings.keymapOverrides, command.id) && (
                       <span className="contents" role="cell">
                         <Button
-                          data-slot="button"
                           aria-label={`Reset shortcut for ${command.label}`}
                           onClick={() => {
                             const keymapOverrides = {
@@ -369,9 +367,9 @@ export function SettingsDialog({
                             });
                           }}
                           type="button"
-                          className={cn(
-                            "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                          )}
+                          className={cn("h-7 px-2.5")}
+                          variant="outline"
+                          size="sm"
                         >
                           Reset
                         </Button>
@@ -381,8 +379,8 @@ export function SettingsDialog({
                 ))}
               </div>
             </div>
-          </Tabs.Panel>
-          <Tabs.Panel render={<main />} value="versionControl">
+          </TabsContent>
+          <TabsContent render={<main />} value="versionControl">
             <div className={tw.settingsPage}>
               <h2>Version Control</h2>
               {showRepositorySettings && onOpenRepositorySettings ? (
@@ -392,12 +390,11 @@ export function SettingsDialog({
                     Git config.
                   </p>
                   <Button
-                    data-slot="button"
                     onClick={onOpenRepositorySettings}
                     type="button"
-                    className={cn(
-                      "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80",
-                    )}
+                    className={cn("h-8 px-3")}
+                    variant="outline"
+                    size="default"
                   >
                     Open Repository Settings
                   </Button>
@@ -409,8 +406,8 @@ export function SettingsDialog({
                 </p>
               )}
             </div>
-          </Tabs.Panel>
-          <Tabs.Panel render={<main />} value="notifications">
+          </TabsContent>
+          <TabsContent render={<main />} value="notifications">
             <div className={tw.settingsPage}>
               <h2>Notifications</h2>
               <CheckboxInput
@@ -438,16 +435,15 @@ export function SettingsDialog({
                 notifications are hidden.
               </p>
             </div>
-          </Tabs.Panel>
-        </Tabs.Root>
+          </TabsContent>
+        </Tabs>
         <footer>
           <Button
-            data-slot="button"
             onClick={onClose}
             type="button"
-            className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-8 px-3 border-primary bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 active:bg-primary/80",
-            )}
+            className={cn("h-8 px-3")}
+            variant="default"
+            size="default"
           >
             Close
           </Button>

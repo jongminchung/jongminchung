@@ -1,4 +1,5 @@
-import { Button } from "@base-ui/react/button";
+import { Button } from "@jongminchung/ui/components/button";
+import { cn } from "@jongminchung/ui/lib/utils";
 import {
   lazy,
   Suspense,
@@ -17,7 +18,6 @@ import {
   type TerminalActionId,
 } from "../domain/terminalActions";
 import { terminalService } from "../domain/TerminalService";
-import { cn } from "../lib/utils";
 import { isElectronRuntime } from "../platform/electron";
 import type { RepositoryId } from "../shared/contracts/model";
 import type {
@@ -361,12 +361,11 @@ export function TerminalPanel({
             </strong>
             {launchError !== null && <p role="alert">{launchError}</p>}
             <Button
-              data-slot="button"
               onClick={() => void create()}
               type="button"
-              className={cn(
-                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-              )}
+              className={cn("h-7 px-2.5")}
+              variant="outline"
+              size="sm"
             >
               New Terminal
             </Button>

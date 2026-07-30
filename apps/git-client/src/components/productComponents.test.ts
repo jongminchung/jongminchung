@@ -1,8 +1,8 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { DialogBody, DialogFooter } from "./dialog";
-import { Notice } from "./notice";
+import { Notice } from "./Notice";
+import { DialogBody, DialogFooter } from "./ProductDialog";
 
 describe("Git Client product component variants", () => {
   it("renders notice tone and live-region roles as public behavior", () => {

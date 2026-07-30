@@ -1,9 +1,9 @@
-import { Button } from "@base-ui/react/button";
+import { Button } from "@jongminchung/ui/components/button";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { useMemo, useState } from "react";
 import { deleteRefOperation } from "../domain/refActions";
 import { toVoidHandler } from "../domain/toVoidHandler";
 import type { Ref } from "../domain/types";
-import { cn } from "../lib/utils";
 import type { BranchComparison, GitOperation, RemoteInfo } from "../shared/contracts/model";
 import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
@@ -107,18 +107,16 @@ export function RefManagementPanel({
         <strong>Branches & tags</strong>
         <span />
         <Button
-          data-slot="button"
           disabled={!currentBranch || busy}
           onClick={onOpenPush}
           type="button"
-          className={cn(
-            "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-          )}
+          className={cn("h-7 px-2.5")}
+          variant="outline"
+          size="sm"
         >
           <Icon name="push" size={13} /> Push…
         </Button>
         <Button
-          data-slot="button"
           disabled={!currentBranch || busy}
           onClick={() =>
             currentBranch &&
@@ -131,9 +129,9 @@ export function RefManagementPanel({
             )
           }
           type="button"
-          className={cn(
-            "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-          )}
+          className={cn("h-7 px-2.5")}
+          variant="outline"
+          size="sm"
         >
           Clean merged branches
         </Button>
@@ -170,7 +168,6 @@ export function RefManagementPanel({
           </select>
         </label>
         <Button
-          data-slot="button"
           disabled={!selected || busy}
           onClick={() =>
             selected &&
@@ -181,37 +178,34 @@ export function RefManagementPanel({
             })
           }
           type="button"
-          className={cn(
-            "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-          )}
+          className={cn("h-7 px-2.5")}
+          variant="outline"
+          size="sm"
         >
           Checkout
         </Button>
         <Button
-          data-slot="button"
           disabled={!selected || !currentBranch || selected.name === currentBranch || busy}
           onClick={() => void compare()}
           type="button"
-          className={cn(
-            "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-          )}
+          className={cn("h-7 px-2.5")}
+          variant="outline"
+          size="sm"
         >
           Compare with current
         </Button>
         <Button
-          data-slot="button"
           disabled={!selected || selected.current || busy}
           onClick={() => void remove()}
           type="button"
-          className={cn(
-            "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-          )}
+          className={cn("h-7 px-2.5")}
+          variant="outline"
+          size="sm"
         >
           Delete…
         </Button>
         {selected?.kind === "tag" && (
           <Button
-            data-slot="button"
             disabled={!remote || busy}
             onClick={() =>
               void run({
@@ -221,9 +215,9 @@ export function RefManagementPanel({
               })
             }
             type="button"
-            className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-            )}
+            className={cn("h-7 px-2.5")}
+            variant="outline"
+            size="sm"
           >
             Push tag
           </Button>
@@ -250,12 +244,11 @@ export function RefManagementPanel({
             value={newName}
           />
           <Button
-            data-slot="button"
             disabled={!newName.trim() || busy}
             type="submit"
-            className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-            )}
+            className={cn("h-7 px-2.5")}
+            variant="outline"
+            size="sm"
           >
             Create & checkout
           </Button>
@@ -279,12 +272,11 @@ export function RefManagementPanel({
             value={renameName}
           />
           <Button
-            data-slot="button"
             disabled={selected?.kind !== "local" || !renameName.trim() || busy}
             type="submit"
-            className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-            )}
+            className={cn("h-7 px-2.5")}
+            variant="outline"
+            size="sm"
           >
             Rename
           </Button>
@@ -308,12 +300,11 @@ export function RefManagementPanel({
             value={upstream}
           />
           <Button
-            data-slot="button"
             disabled={selected?.kind !== "local" || !upstream.trim() || busy}
             type="submit"
-            className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-            )}
+            className={cn("h-7 px-2.5")}
+            variant="outline"
+            size="sm"
           >
             Set upstream
           </Button>
@@ -347,12 +338,11 @@ export function RefManagementPanel({
             value={tagMessage}
           />
           <Button
-            data-slot="button"
             disabled={!tagName.trim() || busy}
             type="submit"
-            className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-            )}
+            className={cn("h-7 px-2.5")}
+            variant="outline"
+            size="sm"
           >
             Create tag
           </Button>
@@ -378,7 +368,6 @@ export function RefManagementPanel({
         </label>
         <span />
         <Button
-          data-slot="button"
           disabled={!selected || busy}
           onClick={() =>
             selected &&
@@ -390,14 +379,13 @@ export function RefManagementPanel({
             })
           }
           type="button"
-          className={cn(
-            "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-          )}
+          className={cn("h-7 px-2.5")}
+          variant="outline"
+          size="sm"
         >
           Merge selected
         </Button>
         <Button
-          data-slot="button"
           disabled={!selected || !currentBranch || busy}
           onClick={toVoidHandler(async () => {
             if (!selected || !currentBranch) return;
@@ -416,9 +404,9 @@ export function RefManagementPanel({
               });
           })}
           type="button"
-          className={cn(
-            "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-          )}
+          className={cn("h-7 px-2.5")}
+          variant="outline"
+          size="sm"
         >
           Rebase current
         </Button>
@@ -449,12 +437,11 @@ export function RefManagementPanel({
             <span key={branch}>
               <code>{branch}</code>
               <Button
-                data-slot="button"
                 onClick={() => void deleteMerged(branch)}
                 type="button"
-                className={cn(
-                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                )}
+                className={cn("h-7 px-2.5")}
+                variant="outline"
+                size="sm"
               >
                 Delete
               </Button>

@@ -1,6 +1,8 @@
-import { Button } from "@base-ui/react/button";
-import { Tabs } from "@base-ui/react/tabs";
-import { Toggle } from "@base-ui/react/toggle";
+import { Button } from "@jongminchung/ui/components/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@jongminchung/ui/components/tabs";
+import { Toggle } from "@jongminchung/ui/components/toggle";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
+import { cn } from "@jongminchung/ui/lib/utils";
 import {
   useCallback,
   useEffect,
@@ -86,7 +88,6 @@ import { ShareProjectDialog, type ShareProjectBinding } from "./components/Share
 import { SpecialFilesDialog } from "./components/SpecialFilesDialog";
 import { StackTraceDialog } from "./components/StackTraceDialog";
 import { ToolWindowLayoutsDialog } from "./components/ToolWindowLayoutsDialog";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./components/ui";
 import { VcsOperationsPopup, type VcsOperationGroup } from "./components/VcsOperationsPopup";
 import { WelcomeWorkspace } from "./components/WelcomeWorkspace";
 import { WhatsNewDialog } from "./components/WhatsNewDialog";
@@ -203,7 +204,6 @@ import {
   migrateRepositoryUiState,
 } from "./domain/workspacePersistence";
 import { useGitSession, type WorkspaceRepositorySession } from "./hooks/useGitSession";
-import { cn } from "./lib/utils";
 import { selectOfflineInspectionFiles } from "./platform/codeAnalysis";
 import { electronApi, isElectronRuntime } from "./platform/electron";
 import {
@@ -509,13 +509,11 @@ function WorkspaceTitlebar({
               <Button
                 aria-expanded={projectSwitcherOpen}
                 aria-label={`Project: ${repository?.snapshot.name ?? "Git Client"}`}
-                className={cn(
-                  "group/button inline-flex h-[26px] shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding text-xs font-medium text-muted-foreground outline-none transition-all select-none hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-                  tw.projectSelector,
-                )}
-                data-slot="button"
+                className={cn("h-[26px] text-xs text-muted-foreground", tw.projectSelector)}
                 onClick={() => onProjectSwitcherOpenChange(!projectSwitcherOpen)}
                 ref={projectButton}
+                variant="ghost"
+                size="default"
               >
                 <span className={tw.projectMark}>
                   {repository?.snapshot.name.trim().charAt(0).toUpperCase() || "G"}
@@ -550,13 +548,11 @@ function WorkspaceTitlebar({
                   <Button
                     aria-expanded={branchesOpen}
                     aria-label={repository?.snapshot.currentBranch ?? "No branch"}
-                    className={cn(
-                      "group/button inline-flex h-[26px] shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding text-xs font-medium text-muted-foreground outline-none transition-all select-none hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-                      tw.mainToolbarAction,
-                    )}
-                    data-slot="button"
+                    className={cn("h-[26px] text-xs text-muted-foreground", tw.mainToolbarAction)}
                     disabled={!repository}
                     onClick={() => setBranchesOpen((value) => !value)}
+                    variant="ghost"
+                    size="default"
                   >
                     <Icon name="branch" size={14} />
                     <span>{repository?.snapshot.currentBranch ?? "No branch"}</span>
@@ -600,11 +596,7 @@ function WorkspaceTitlebar({
               render={
                 <Button
                   aria-label="Update Project..."
-                  className={cn(
-                    "group/button inline-flex h-[26px] w-7 shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding text-xs font-medium text-muted-foreground outline-none transition-all select-none hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-                    tw.mainToolbarIcon,
-                  )}
-                  data-slot="button"
+                  className={cn("h-[26px] w-7 text-xs text-muted-foreground", tw.mainToolbarIcon)}
                   disabled={!repository}
                   onClick={() =>
                     void session.executeOperation({
@@ -612,6 +604,8 @@ function WorkspaceTitlebar({
                       rebase: false,
                     })
                   }
+                  variant="ghost"
+                  size="default"
                 >
                   <Icon name="pull" size={15} />
                 </Button>
@@ -624,13 +618,11 @@ function WorkspaceTitlebar({
               render={
                 <Button
                   aria-label="Push…"
-                  className={cn(
-                    "group/button inline-flex h-[26px] w-7 shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding text-xs font-medium text-muted-foreground outline-none transition-all select-none hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-                    tw.mainToolbarIcon,
-                  )}
-                  data-slot="button"
+                  className={cn("h-[26px] w-7 text-xs text-muted-foreground", tw.mainToolbarIcon)}
                   disabled={!repository}
                   onClick={onOpenPush}
+                  variant="ghost"
+                  size="default"
                 >
                   <Icon name="push" size={15} />
                 </Button>
@@ -646,12 +638,10 @@ function WorkspaceTitlebar({
           render={
             <Button
               aria-label="Search Everywhere"
-              className={cn(
-                "group/button inline-flex h-[26px] w-7 shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding text-xs font-medium text-muted-foreground outline-none transition-all select-none hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-                tw.mainToolbarIcon,
-              )}
-              data-slot="button"
+              className={cn("h-[26px] w-7 text-xs text-muted-foreground", tw.mainToolbarIcon)}
               onClick={openPalette}
+              variant="ghost"
+              size="default"
             >
               <Icon name="search" size={14} />
             </Button>
@@ -665,12 +655,10 @@ function WorkspaceTitlebar({
           render={
             <Button
               aria-label="IDE and Project Settings"
-              className={cn(
-                "group/button inline-flex h-[26px] w-7 shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding text-xs font-medium text-muted-foreground outline-none transition-all select-none hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-                tw.mainToolbarIcon,
-              )}
-              data-slot="button"
+              className={cn("h-[26px] w-7 text-xs text-muted-foreground", tw.mainToolbarIcon)}
               onClick={onOpenSettings}
+              variant="ghost"
+              size="default"
             >
               <Icon name="settings" size={14} />
             </Button>
@@ -778,12 +766,11 @@ function RepositoryToolStripe({
             render={
               <Button
                 aria-label="More"
-                className={cn(
-                  "group/button relative inline-flex h-[31px] w-[30px] shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding text-xs font-medium text-muted-foreground outline-none transition-all select-none hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-                )}
-                data-slot="button"
+                className={cn("relative h-[31px] w-[30px] text-xs text-muted-foreground")}
                 disabled={disabled}
                 onClick={openPalette}
+                variant="ghost"
+                size="default"
               >
                 <Icon name="more" size={17} />
               </Button>
@@ -818,12 +805,11 @@ function RepositoryToolStripe({
               render={
                 <Button
                   aria-label="Git"
-                  className={cn(
-                    "group/button relative inline-flex h-[31px] w-[30px] shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding text-xs font-medium text-muted-foreground outline-none transition-all select-none hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-                  )}
-                  data-slot="button"
+                  className={cn("relative h-[31px] w-[30px] text-xs text-muted-foreground")}
                   disabled={disabled}
                   onClick={onOpenGitConsole}
+                  variant="ghost"
+                  size="default"
                 >
                   <Icon name="branch" size={17} />
                 </Button>
@@ -872,10 +858,11 @@ function RepositoryRightToolStripe({
             <Button
               aria-label="More"
               className={cn(
-                "group/button relative inline-flex h-[31px] w-[30px] shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding text-xs font-medium text-muted-foreground outline-none transition-all select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                "relative h-[31px] w-[30px] text-xs text-muted-foreground disabled:opacity-100",
               )}
-              data-slot="button"
               disabled
+              variant="ghost"
+              size="default"
             >
               <Icon name="more" size={15} />
             </Button>
@@ -4869,10 +4856,9 @@ function RepositoryWorkspace({
               render={
                 <Button
                   aria-label={navigationStatus}
-                  className={cn(
-                    "group/button inline-flex min-w-0 shrink-0 items-center justify-center gap-1 whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding text-[10px] font-medium text-muted-foreground outline-none transition-all select-none hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-                  )}
-                  data-slot="button"
+                  className={cn("min-w-0 gap-1 text-[10px] text-muted-foreground")}
+                  variant="ghost"
+                  size="xs"
                 >
                   <Icon name="folder" size={12} />
                   <span className="min-w-0 truncate">{navigationStatus}</span>
@@ -4883,7 +4869,7 @@ function RepositoryWorkspace({
           </Tooltip>
         </nav>
       )}
-      <Tabs.Root
+      <Tabs
         className="contents"
         onValueChange={(value) => {
           if (value.startsWith("log:")) {
@@ -4907,7 +4893,7 @@ function RepositoryWorkspace({
               } as CSSProperties
             }
           >
-            <Tabs.List
+            <TabsList
               render={
                 <nav aria-label={!inspector ? "Log" : "Editor tabs"} className={tw.editorTabs} />
               }
@@ -4921,7 +4907,7 @@ function RepositoryWorkspace({
                       <Tooltip>
                         <TooltipTrigger
                           render={
-                            <Tabs.Tab
+                            <TabsTrigger
                               aria-controls={editorPanelDomId(editorTabsId, value)}
                               aria-keyshortcuts="Delete"
                               aria-label={label}
@@ -4935,10 +4921,11 @@ function RepositoryWorkspace({
                               render={
                                 <Button
                                   className={cn(
-                                    "group/button inline-flex h-6 max-w-[210px] shrink-0 items-center justify-center gap-1 overflow-hidden whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding py-0 pr-1 pl-2 text-xs font-medium text-ellipsis text-muted-foreground outline-none transition-all select-none hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 data-active:bg-accent data-active:text-foreground disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                                    "h-6 max-w-[210px] gap-1 overflow-hidden py-0 pr-1 pl-2 text-xs text-ellipsis text-muted-foreground data-active:bg-accent data-active:text-foreground",
                                     !inspector && activeLogTabId === tabId && tw.activeButton,
                                   )}
-                                  data-slot="button"
+                                  variant="ghost"
+                                  size="xs"
                                 />
                               }
                               value={value}
@@ -4961,7 +4948,7 @@ function RepositoryWorkspace({
                               >
                                 <Icon name="close" size={10} />
                               </span>
-                            </Tabs.Tab>
+                            </TabsTrigger>
                           }
                         />
                         <TooltipContent>{`${label} · Delete to close`}</TooltipContent>
@@ -4984,7 +4971,7 @@ function RepositoryWorkspace({
                     <Tooltip>
                       <TooltipTrigger
                         render={
-                          <Tabs.Tab
+                          <TabsTrigger
                             aria-controls={editorPanelDomId(editorTabsId, value)}
                             aria-keyshortcuts="Delete"
                             aria-label={`Editor ${tab.path ?? "Repository"}`}
@@ -4998,9 +4985,10 @@ function RepositoryWorkspace({
                             render={
                               <Button
                                 className={cn(
-                                  "group/button inline-flex h-6 max-w-[210px] shrink-0 items-center justify-center gap-1 overflow-hidden whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding py-0 pr-1 pl-2 text-xs font-medium text-ellipsis text-muted-foreground outline-none transition-all select-none hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 data-active:bg-accent data-active:text-foreground disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                                  "h-6 max-w-[210px] gap-1 overflow-hidden py-0 pr-1 pl-2 text-xs text-ellipsis text-muted-foreground data-active:bg-accent data-active:text-foreground",
                                 )}
-                                data-slot="button"
+                                variant="ghost"
+                                size="xs"
                               />
                             }
                             value={value}
@@ -5024,7 +5012,7 @@ function RepositoryWorkspace({
                             >
                               <Icon name="close" size={10} />
                             </span>
-                          </Tabs.Tab>
+                          </TabsTrigger>
                         }
                       />
                       <TooltipContent>{`${tab.path ?? "Repository"} · Delete to close`}</TooltipContent>
@@ -5032,7 +5020,7 @@ function RepositoryWorkspace({
                   </span>
                 );
               })}
-            </Tabs.List>
+            </TabsList>
             <span className={tw.editorToolbarSpacer} />
             {session.stale && <span className={tw.statePill}>Changed</span>}
             {repository.snapshot.isShallow && <span className={tw.statePill}>Shallow</span>}
@@ -5046,10 +5034,7 @@ function RepositoryWorkspace({
             {repository.snapshot.operation && repository.snapshot.operation !== "bisect" && (
               <>
                 <Button
-                  className={cn(
-                    "group/button inline-flex h-6 shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-border bg-secondary bg-clip-padding px-2 text-xs font-medium text-secondary-foreground shadow-xs outline-none transition-all select-none hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-                  )}
-                  data-slot="button"
+                  className={cn("h-6 px-2 text-xs")}
                   onClick={() =>
                     void session.executeOperation({
                       kind: "continue",
@@ -5060,31 +5045,29 @@ function RepositoryWorkspace({
                         | "revert",
                     })
                   }
+                  variant="secondary"
+                  size="xs"
                 >
                   Continue
                 </Button>
                 {(repository.snapshot.operation === "rebase" ||
                   repository.snapshot.operation === "cherryPick") && (
                   <Button
-                    className={cn(
-                      "group/button inline-flex h-6 shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-border bg-secondary bg-clip-padding px-2 text-xs font-medium text-secondary-foreground shadow-xs outline-none transition-all select-none hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-                    )}
-                    data-slot="button"
+                    className={cn("h-6 px-2 text-xs")}
                     onClick={() =>
                       void session.executeOperation({
                         kind: "skip",
                         operation: repository.snapshot.operation as "rebase" | "cherryPick",
                       })
                     }
+                    variant="secondary"
+                    size="xs"
                   >
                     Skip
                   </Button>
                 )}
                 <Button
-                  className={cn(
-                    "group/button inline-flex h-6 shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-destructive bg-destructive bg-clip-padding px-2 text-xs font-medium text-destructive-foreground shadow-xs outline-none transition-all select-none hover:bg-destructive/90 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-                  )}
-                  data-slot="button"
+                  className={cn("h-6 border-destructive px-2 text-xs shadow-xs")}
                   onClick={toVoidHandler(async () => {
                     const accepted = await dialog.confirm({
                       title: `Abort ${repository.snapshot.operation}?`,
@@ -5104,6 +5087,8 @@ function RepositoryWorkspace({
                       });
                     }
                   })}
+                  variant="destructive"
+                  size="xs"
                 >
                   Abort
                 </Button>
@@ -5115,11 +5100,12 @@ function RepositoryWorkspace({
                   <Button
                     aria-label="View Options"
                     className={cn(
-                      "group/button inline-flex h-6 w-[30px] shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-y-0 border-r border-l-0 border-border bg-transparent bg-clip-padding p-0 text-xs font-medium text-muted-foreground outline-none transition-all select-none hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                      "h-6 w-[30px] rounded-none border-y-0 border-r border-l-0 bg-transparent p-0 text-xs text-muted-foreground hover:text-accent-foreground",
                       tw.editorToolbarIcon,
                     )}
-                    data-slot="button"
                     onClick={() => void session.reload()}
+                    variant="outline"
+                    size="xs"
                   >
                     <Icon name="more" size={16} />
                   </Button>
@@ -5303,7 +5289,7 @@ function RepositoryWorkspace({
                       logTabIds.map((tabId) => {
                         const value = `log:${tabId}`;
                         return (
-                          <Tabs.Panel
+                          <TabsContent
                             aria-labelledby={editorTabDomId(editorTabsId, value)}
                             className={tw.editorSurface}
                             id={editorPanelDomId(editorTabsId, value)}
@@ -5482,27 +5468,25 @@ function RepositoryWorkspace({
                                 )}
                               </div>
                             )}
-                          </Tabs.Panel>
+                          </TabsContent>
                         );
                       })}
                     {!inspector && !logOpen && (
                       <div className={tw.editorEmptyWorkspace}>
                         <Button
-                          className={cn(
-                            "group/button inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding p-0 text-[13px] font-medium text-muted-foreground outline-none transition-all select-none hover:text-foreground hover:underline focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-                          )}
+                          className={cn("p-0 text-[13px] text-muted-foreground hover:underline")}
                           data-open-git-log
-                          data-slot="button"
                           onClick={openGitLogTab}
+                          variant="ghost"
+                          size="default"
                         >
                           Open Git Log <kbd>⌥G</kbd>
                         </Button>
                         <Button
-                          className={cn(
-                            "group/button inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding p-0 text-[13px] font-medium text-muted-foreground outline-none transition-all select-none hover:text-foreground hover:underline focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-                          )}
-                          data-slot="button"
+                          className={cn("p-0 text-[13px] text-muted-foreground hover:underline")}
                           onClick={() => setRepositoryViewMode("changes")}
+                          variant="ghost"
+                          size="default"
                         >
                           Commit <kbd>⌘0</kbd>
                         </Button>
@@ -5515,7 +5499,7 @@ function RepositoryWorkspace({
                         ? scratchFiles.find((candidate) => candidate.id === tab.scratchId)
                         : undefined;
                       return (
-                        <Tabs.Panel
+                        <TabsContent
                           aria-labelledby={editorTabDomId(editorTabsId, value)}
                           className={tw.editorSurface}
                           id={editorPanelDomId(editorTabsId, value)}
@@ -5586,7 +5570,7 @@ function RepositoryWorkspace({
                               source={tab.source}
                             />
                           )}
-                        </Tabs.Panel>
+                        </TabsContent>
                       );
                     })}
                   </div>
@@ -5678,7 +5662,7 @@ function RepositoryWorkspace({
             </div>
           )}
         </main>
-      </Tabs.Root>
+      </Tabs>
       {productSettings.statusBarVisible && !productSettings.presentationMode && (
         <footer aria-label="Status Bar" className={tw.statusbar}>
           {productSettings.navigationBar === "status" && (
@@ -5688,10 +5672,9 @@ function RepositoryWorkspace({
                   render={
                     <Button
                       aria-label={navigationStatus}
-                      className={cn(
-                        "group/button inline-flex min-w-0 shrink-0 items-center justify-center gap-1 whitespace-nowrap rounded-md border border-transparent bg-transparent bg-clip-padding p-0 text-[9px] font-medium text-muted-foreground outline-none transition-all select-none hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-                      )}
-                      data-slot="button"
+                      className={cn("min-w-0 gap-1 p-0 text-[9px] text-muted-foreground")}
+                      variant="ghost"
+                      size="xs"
                     >
                       <Icon name="folder" size={12} />
                       <span className="min-w-0 truncate">{navigationStatus}</span>
@@ -5725,22 +5708,20 @@ function RepositoryWorkspace({
                   {session.activity.status === "running" &&
                     session.activity.requestIds.length > 0 && (
                       <Button
-                        className={cn(
-                          "group/button inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding p-0 text-[9px] font-medium text-inherit underline outline-none transition-all select-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-                        )}
-                        data-slot="button"
+                        className={cn("rounded-none p-0 text-[9px] text-inherit underline")}
                         onClick={() => void session.cancelActivity()}
+                        variant="ghost"
+                        size="default"
                       >
                         Cancel
                       </Button>
                     )}
                   {session.activity.status === "failed" && session.activity.canRetry && (
                     <Button
-                      className={cn(
-                        "group/button inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding p-0 text-[9px] font-medium text-inherit underline outline-none transition-all select-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-                      )}
-                      data-slot="button"
+                      className={cn("rounded-none p-0 text-[9px] text-inherit underline")}
                       onClick={() => void session.retryActivity()}
+                      variant="ghost"
+                      size="default"
                     >
                       Retry
                     </Button>
@@ -5753,10 +5734,11 @@ function RepositoryWorkspace({
               <Button
                 aria-label="Refresh repository"
                 className={cn(
-                  "group/button inline-flex h-full min-w-5 shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding px-1 text-[9px] font-medium text-muted-foreground outline-none transition-all select-none hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                  "h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:text-disabled-foreground disabled:opacity-100",
                 )}
-                data-slot="button"
                 onClick={() => void session.reload()}
+                variant="ghost"
+                size="icon"
               >
                 <Icon name="refresh" size={11} />
               </Button>
@@ -5765,10 +5747,11 @@ function RepositoryWorkspace({
               <Button
                 aria-label="Open notifications"
                 className={cn(
-                  "group/button inline-flex h-full min-w-5 shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding px-1 text-[9px] font-medium text-muted-foreground outline-none transition-all select-none hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                  "h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:text-disabled-foreground disabled:opacity-100",
                 )}
-                data-slot="button"
                 onClick={() => setNotificationOpen(true)}
+                variant="ghost"
+                size="icon"
               >
                 <Icon name="warning" size={11} />
               </Button>
@@ -5780,9 +5763,8 @@ function RepositoryWorkspace({
                     <Button
                       aria-label="Go to Line"
                       className={cn(
-                        "group/button inline-flex h-full min-w-5 shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding px-1 text-[9px] font-medium text-muted-foreground outline-none transition-all select-none hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                        "h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:text-disabled-foreground disabled:opacity-100",
                       )}
-                      data-slot="button"
                       onClick={toVoidHandler(async () => {
                         const value = await dialog.input({
                           title: "Go to Line",
@@ -5808,6 +5790,8 @@ function RepositoryWorkspace({
                           }),
                         );
                       })}
+                      variant="ghost"
+                      size="xs"
                     >
                       {editorStatus ? `${editorStatus.line}:${editorStatus.column}` : ""}
                     </Button>
@@ -5823,9 +5807,8 @@ function RepositoryWorkspace({
                     <Button
                       aria-label="Language Services Button"
                       className={cn(
-                        "group/button inline-flex h-full min-w-5 shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding px-1 text-[9px] font-medium text-muted-foreground outline-none transition-all select-none hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                        "h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:text-disabled-foreground disabled:opacity-100",
                       )}
-                      data-slot="button"
                       onClick={() =>
                         setToast(
                           editorStatus
@@ -5833,6 +5816,8 @@ function RepositoryWorkspace({
                             : "No language service is active for the Git Log.",
                         )
                       }
+                      variant="ghost"
+                      size="xs"
                     >
                       {editorStatus?.language ?? ""}
                     </Button>
@@ -5845,9 +5830,10 @@ function RepositoryWorkspace({
               <Button
                 aria-label="Grid position"
                 className={cn(
-                  "group/button inline-flex h-full min-w-5 shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding px-1 text-[9px] font-medium text-muted-foreground outline-none transition-all select-none hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                  "h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:text-disabled-foreground disabled:opacity-100",
                 )}
-                data-slot="button"
+                variant="ghost"
+                size="xs"
               >
                 {editorStatus ? "1 × 1" : ""}
               </Button>
@@ -5856,9 +5842,10 @@ function RepositoryWorkspace({
               <Button
                 aria-label="Line separator"
                 className={cn(
-                  "group/button inline-flex h-full min-w-5 shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding px-1 text-[9px] font-medium text-muted-foreground outline-none transition-all select-none hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                  "h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:text-disabled-foreground disabled:opacity-100",
                 )}
-                data-slot="button"
+                variant="ghost"
+                size="xs"
               >
                 {editorStatus?.lineSeparator ?? ""}
               </Button>
@@ -5867,9 +5854,10 @@ function RepositoryWorkspace({
               <Button
                 aria-label="File encoding"
                 className={cn(
-                  "group/button inline-flex h-full min-w-5 shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding px-1 text-[9px] font-medium text-muted-foreground outline-none transition-all select-none hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                  "h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:text-disabled-foreground disabled:opacity-100",
                 )}
-                data-slot="button"
+                variant="ghost"
+                size="xs"
               >
                 {editorStatus ? "UTF-8" : ""}
               </Button>
@@ -5901,9 +5889,10 @@ function RepositoryWorkspace({
                     <Button
                       aria-label="Power Save Mode"
                       className={cn(
-                        "group/button inline-flex h-full min-w-5 shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding px-1 text-[9px] font-medium text-muted-foreground outline-none transition-all select-none hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                        "h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:text-disabled-foreground disabled:opacity-100",
                       )}
-                      data-slot="button"
+                      variant="ghost"
+                      size="xs"
                     >
                       {productSettings.powerSaveMode ? "Power Save Mode" : ""}
                     </Button>
@@ -5918,9 +5907,10 @@ function RepositoryWorkspace({
               <Button
                 aria-label="Indentation"
                 className={cn(
-                  "group/button inline-flex h-full min-w-5 shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding px-1 text-[9px] font-medium text-muted-foreground outline-none transition-all select-none hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                  "h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:text-disabled-foreground disabled:opacity-100",
                 )}
-                data-slot="button"
+                variant="ghost"
+                size="xs"
               >
                 {editorStatus?.indentation ?? ""}
               </Button>
@@ -5936,9 +5926,8 @@ function RepositoryWorkspace({
                           : "Make file writable"
                       }
                       className={cn(
-                        "group/button inline-flex h-full min-w-5 shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding px-1 text-[9px] font-medium text-muted-foreground outline-none transition-all select-none hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                        "h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:text-disabled-foreground disabled:opacity-100",
                       )}
-                      data-slot="button"
                       onClick={() =>
                         setToast(
                           editorStatus?.readOnly
@@ -5946,6 +5935,8 @@ function RepositoryWorkspace({
                             : "The current surface is already writable.",
                         )
                       }
+                      variant="ghost"
+                      size="xs"
                     >
                       {editorStatus?.readOnly ? "RO" : ""}
                     </Button>
@@ -5965,9 +5956,10 @@ function RepositoryWorkspace({
                     <Button
                       aria-label="Memory Indicator"
                       className={cn(
-                        "group/button inline-flex h-full min-w-5 shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding px-1 text-[9px] font-medium text-muted-foreground outline-none transition-all select-none hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                        "h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:text-disabled-foreground disabled:opacity-100",
                       )}
-                      data-slot="button"
+                      variant="ghost"
+                      size="xs"
                     >
                       Memory
                     </Button>
@@ -5982,10 +5974,11 @@ function RepositoryWorkspace({
                   <Button
                     aria-label="IDE error occurred"
                     className={cn(
-                      "group/button inline-flex h-full min-w-5 shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding px-1 text-[9px] font-medium text-destructive outline-none transition-all select-none hover:bg-destructive-muted focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                      "h-full min-w-5 rounded-none bg-transparent px-1 text-[9px] hover:bg-destructive-muted",
                     )}
-                    data-slot="button"
                     onClick={() => setNotificationOpen(true)}
+                    variant="destructive"
+                    size="icon"
                   >
                     <Icon name="warning" size={11} />
                   </Button>
@@ -6011,11 +6004,10 @@ function RepositoryWorkspace({
             <strong>Comparison</strong>
             <span />
             <Button
-              className={cn(
-                "group/button inline-flex min-h-7 shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-border bg-secondary bg-clip-padding px-2 text-xs font-medium text-secondary-foreground shadow-xs outline-none transition-all select-none hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-              )}
-              data-slot="button"
+              className={cn("min-h-7 px-2 text-xs")}
               onClick={() => setDiffState(undefined)}
+              variant="secondary"
+              size="sm"
             >
               Back to workspace
             </Button>
@@ -7435,25 +7427,23 @@ function AppContent() {
           <span>{session.error}</span>
           {session.activity?.status === "failed" && session.activity.canRetry && (
             <Button
-              className={cn(
-                "group/button inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding p-0 text-xs font-medium text-inherit underline outline-none transition-all select-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-              )}
-              data-slot="button"
+              className={cn("rounded-none p-0 text-xs text-inherit underline")}
               onClick={() => void session.retryActivity()}
+              variant="ghost"
+              size="default"
             >
               Retry
             </Button>
           )}
           <Button
-            className={cn(
-              "group/button inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding p-0 text-xs font-medium text-inherit underline outline-none transition-all select-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-            )}
-            data-slot="button"
+            className={cn("rounded-none p-0 text-xs text-inherit underline")}
             onClick={() => {
               session.dismissError();
               if (session.activity?.status === "failed")
                 session.dismissActivity(session.activity.id);
             }}
+            variant="ghost"
+            size="default"
           >
             Dismiss
           </Button>
@@ -7464,11 +7454,10 @@ function AppContent() {
           <Icon name="history" size={14} />
           <span>{session.notice}</span>
           <Button
-            className={cn(
-              "group/button inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-none border border-transparent bg-transparent bg-clip-padding p-0 text-xs font-medium text-inherit underline outline-none transition-all select-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-            )}
-            data-slot="button"
+            className={cn("rounded-none p-0 text-xs text-inherit underline")}
             onClick={session.dismissNotice}
+            variant="ghost"
+            size="default"
           >
             Dismiss
           </Button>
@@ -7481,11 +7470,10 @@ function AppContent() {
           <code>{activeError.path}</code>
           <p>{activeError.message}</p>
           <Button
-            className={cn(
-              "group/button inline-flex min-h-8 shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-primary bg-primary bg-clip-padding px-3 text-xs font-medium text-primary-foreground shadow-xs outline-none transition-all select-none hover:bg-primary/80 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-            )}
-            data-slot="button"
+            className={cn("min-h-8 px-3 text-xs shadow-xs")}
             onClick={() => void session.activateTab({ kind: "welcome" })}
+            variant="default"
+            size="default"
           >
             Back to Welcome
           </Button>

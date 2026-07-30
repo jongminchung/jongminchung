@@ -1,4 +1,5 @@
-import { Button } from "@base-ui/react/button";
+import { Button } from "@jongminchung/ui/components/button";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import { createHostingBridge } from "../bridge/createHostingBridge";
@@ -7,7 +8,6 @@ import {
   filterHostingChangeRequests,
   type HostingListScope,
 } from "../domain/hostingView";
-import { cn } from "../lib/utils";
 import { isElectronRuntime } from "../platform/electron";
 import type {
   HostingAccount,
@@ -28,7 +28,7 @@ import {
   persistViewedFiles,
 } from "./hosting-persistence";
 import { Icon } from "./Icon";
-import { Notice } from "./ui";
+import { Notice } from "./Notice";
 
 interface RemoteCoordinates {
   readonly project: string;
@@ -414,38 +414,35 @@ export function HostingPanel({
           />
         </label>
         <Button
-          data-slot="button"
           disabled={!accountId || Boolean(busy)}
           onClick={() => void loadList()}
           type="button"
-          className={cn(
-            "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-          )}
+          className={cn("h-7 px-2.5")}
+          variant="outline"
+          size="sm"
         >
           <Icon name="refresh" size={13} /> Load
         </Button>
         <Button
-          data-slot="button"
           aria-controls="hosting-create-request"
           aria-expanded={showCreate}
           disabled={!accountId || !project.trim()}
           onClick={() => setShowCreate((value) => !value)}
           type="button"
-          className={cn(
-            "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-          )}
+          className={cn("h-7 px-2.5")}
+          variant="outline"
+          size="sm"
         >
           <Icon name="plus" size={13} /> New PR / MR
         </Button>
         {selectedAccount?.provider === "gitHub" && currentBranch && (
           <Button
-            data-slot="button"
             disabled={Boolean(busy) || !project.trim()}
             onClick={() => void syncFork()}
             type="button"
-            className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-            )}
+            className={cn("h-7 px-2.5")}
+            variant="outline"
+            size="sm"
           >
             <Icon name="refresh" size={13} /> Sync fork
           </Button>
@@ -483,13 +480,12 @@ export function HostingPanel({
             />
           </label>
           <Button
-            data-slot="button"
             disabled={Boolean(busy)}
             onClick={() => void connect()}
             type="button"
-            className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-            )}
+            className={cn("h-7 px-2.5")}
+            variant="outline"
+            size="sm"
           >
             {busy === "Verifying account" ? "Verifying…" : "Connect and store in Keychain"}
           </Button>
@@ -503,34 +499,31 @@ export function HostingPanel({
               <>
                 <span>Removes metadata and the Keychain credential.</span>
                 <Button
-                  data-slot="button"
                   onClick={() => void removeAccount(selectedAccount.id)}
                   type="button"
-                  className={cn(
-                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                  )}
+                  className={cn("h-7 px-2.5")}
+                  variant="outline"
+                  size="sm"
                 >
                   Confirm remove
                 </Button>
                 <Button
-                  data-slot="button"
                   onClick={() => setRemoveAccountId(undefined)}
                   type="button"
-                  className={cn(
-                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                  )}
+                  className={cn("h-7 px-2.5")}
+                  variant="outline"
+                  size="sm"
                 >
                   Cancel
                 </Button>
               </>
             ) : (
               <Button
-                data-slot="button"
                 onClick={() => setRemoveAccountId(selectedAccount.id)}
                 type="button"
-                className={cn(
-                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                )}
+                className={cn("h-7 px-2.5")}
+                variant="outline"
+                size="sm"
               >
                 Remove account
               </Button>
@@ -588,23 +581,21 @@ export function HostingPanel({
           </div>
           <footer>
             <Button
-              data-slot="button"
               onClick={() => setShowCreate(false)}
               type="button"
-              className={cn(
-                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-              )}
+              className={cn("h-7 px-2.5")}
+              variant="outline"
+              size="sm"
             >
               Cancel
             </Button>
             <Button
-              data-slot="button"
               disabled={!title.trim() || !sourceBranch.trim() || !targetBranch.trim()}
               onClick={() => void create()}
               type="button"
-              className={cn(
-                "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-              )}
+              className={cn("h-7 px-2.5")}
+              variant="outline"
+              size="sm"
             >
               Create
             </Button>
@@ -648,15 +639,16 @@ export function HostingPanel({
           )}
           {visibleItems.map((item) => (
             <Button
-              data-slot="button"
               aria-current={selected?.number === item.number ? "true" : undefined}
               key={item.number}
               onClick={() => void inspect(item)}
               type="button"
               className={cn(
-                "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-current:bg-accent",
+                "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-current:bg-accent",
                 selected?.number === item.number ? tw.hostingSelected : undefined,
               )}
+              variant="ghost"
+              size="default"
             >
               <span>
                 #{item.number} · {item.state}
@@ -670,13 +662,14 @@ export function HostingPanel({
           ))}
           {nextPage && (
             <Button
-              data-slot="button"
               onClick={() => void loadList(nextPage, true)}
               type="button"
               className={cn(
-                "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+                "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
                 tw.hostingMore,
               )}
+              variant="ghost"
+              size="default"
             >
               Load more
             </Button>
@@ -696,12 +689,11 @@ export function HostingPanel({
                   <small>{selected.webUrl}</small>
                 </div>
                 <Button
-                  data-slot="button"
                   onClick={() => void navigator.clipboard.writeText(selected.webUrl)}
                   type="button"
-                  className={cn(
-                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                  )}
+                  className={cn("h-7 px-2.5")}
+                  variant="outline"
+                  size="sm"
                 >
                   <Icon name="copy" size={13} /> Copy link
                 </Button>
@@ -711,19 +703,16 @@ export function HostingPanel({
                     event.preventDefault();
                     void openHostingUrl(selected.webUrl);
                   }}
-                  className={cn(
-                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                  )}
+                  className={cn("h-7 px-2.5")}
                 >
                   <Icon name="external" size={13} /> Open
                 </a>
                 <Button
-                  data-slot="button"
                   onClick={() => void updateBranch()}
                   type="button"
-                  className={cn(
-                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                  )}
+                  className={cn("h-7 px-2.5")}
+                  variant="outline"
+                  size="sm"
                 >
                   Update branch
                 </Button>
@@ -736,33 +725,30 @@ export function HostingPanel({
                   value={reviewBody}
                 />
                 <Button
-                  data-slot="button"
                   onClick={() => void submitReview("comment")}
                   type="button"
-                  className={cn(
-                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                  )}
+                  className={cn("h-7 px-2.5")}
+                  variant="outline"
+                  size="sm"
                 >
                   Comment
                 </Button>
                 <Button
-                  data-slot="button"
                   onClick={() => void submitReview("approve")}
                   type="button"
-                  className={cn(
-                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                  )}
+                  className={cn("h-7 px-2.5")}
+                  variant="outline"
+                  size="sm"
                 >
                   Approve
                 </Button>
                 <Button
-                  data-slot="button"
                   disabled={!reviewBody.trim()}
                   onClick={() => void submitReview("requestChanges")}
                   type="button"
-                  className={cn(
-                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                  )}
+                  className={cn("h-7 px-2.5")}
+                  variant="outline"
+                  size="sm"
                 >
                   Request changes
                 </Button>
@@ -805,13 +791,12 @@ export function HostingPanel({
                   value={discussionBody}
                 />
                 <Button
-                  data-slot="button"
                   disabled={!discussionBody.trim()}
                   onClick={() => void postComment()}
                   type="button"
-                  className={cn(
-                    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 border-border bg-card text-secondary-foreground shadow-xs hover:bg-accent active:bg-accent/80 h-7 px-2.5",
-                  )}
+                  className={cn("h-7 px-2.5")}
+                  variant="outline"
+                  size="sm"
                 >
                   Comment
                 </Button>

@@ -1,12 +1,12 @@
-import { Button } from "@base-ui/react/button";
-import { Tabs } from "@base-ui/react/tabs";
+import { Button } from "@jongminchung/ui/components/button";
+import { Tabs, TabsList, TabsTrigger } from "@jongminchung/ui/components/tabs";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { useRef, type MouseEvent } from "react";
 import { terminalTabAfterClose } from "../domain/terminalActions";
 import type { TerminalSessionSnapshot } from "../domain/TerminalService";
-import { cn } from "../lib/utils";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui";
 
 const TERMINAL_STATUS_CLASS = {
   starting: "bg-primary",
@@ -62,7 +62,7 @@ export function TerminalTabStrip({
   return (
     <div className={tw.terminalTabs}>
       <strong className={tw.terminalToolTitle}>Terminal</strong>
-      <Tabs.Root
+      <Tabs
         className="contents"
         onValueChange={(value) => {
           if (typeof value === "string") onActivate(value);
@@ -70,14 +70,14 @@ export function TerminalTabStrip({
         value={activeKey}
       >
         <div className={cn("relative", tw.terminalTabList)}>
-          <Tabs.List
+          <TabsList
             activateOnFocus
             aria-label="Terminal tabs"
             className="flex min-w-max items-stretch"
           >
             {sessions.map((session) => (
               <div className={tw.terminalTabItem} key={session.key} role="presentation">
-                <Tabs.Tab
+                <TabsTrigger
                   aria-label={session.title}
                   data-terminal-tab-key={session.key}
                   ref={(element) => {
@@ -98,10 +98,10 @@ export function TerminalTabStrip({
                   />
                   <span>{session.title}</span>
                   <span aria-hidden="true" className="-ml-1.5 h-6 w-6 shrink-0" />
-                </Tabs.Tab>
+                </TabsTrigger>
               </div>
             ))}
-          </Tabs.List>
+          </TabsList>
           <div
             aria-label="Terminal tab close actions"
             className="pointer-events-none absolute inset-y-0 left-0 flex min-w-max items-stretch"
@@ -125,13 +125,14 @@ export function TerminalTabStrip({
                   <TooltipTrigger
                     render={
                       <Button
-                        data-slot="button"
                         onClick={() => void close(session.key)}
                         type="button"
                         aria-label={`Close ${session.title}`}
                         className={cn(
-                          "pointer-events-auto inline-flex h-6 min-w-5 shrink-0 aspect-square items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-transparent bg-transparent px-0 text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/55 active:bg-[var(--overlay-pressed)] disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                          "pointer-events-auto h-6 min-w-5 aspect-square gap-1.5 px-0 text-xs hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
                         )}
+                        variant="ghost"
+                        size="icon-xs"
                       >
                         <Icon name="close" size={11} />
                       </Button>
@@ -143,20 +144,21 @@ export function TerminalTabStrip({
             ))}
           </div>
         </div>
-      </Tabs.Root>
+      </Tabs>
       <div aria-label="Action Toolbar" className={tw.terminalToolbar} role="toolbar">
         <Tooltip>
           <TooltipTrigger
             render={
               <Button
-                data-slot="button"
                 onClick={() => void onCreate()}
                 ref={newTab}
                 type="button"
                 aria-label="New Tab"
                 className={cn(
-                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-[29px] min-w-[29px] px-[7px] aspect-square px-0 rounded-none border-l border-y-0 border-r-0 border-border bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+                  "h-[29px] min-w-[29px] px-[7px] aspect-square px-0 rounded-none border-l border-y-0 border-r-0 bg-transparent text-muted-foreground hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
                 )}
+                variant="outline"
+                size="icon"
               >
                 <Icon name="plus" size={13} />
               </Button>
@@ -168,15 +170,16 @@ export function TerminalTabStrip({
           <TooltipTrigger
             render={
               <Button
-                data-slot="button"
                 onClick={onOpenPredefined}
                 ref={predefinedButtonRef}
                 type="button"
                 aria-label="New Predefined Session"
                 disabled={!hasPredefinedSessions}
                 className={cn(
-                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-[29px] min-w-[29px] px-[7px] aspect-square px-0 rounded-none border-l border-y-0 border-r-0 border-border bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+                  "h-[29px] min-w-[29px] px-[7px] aspect-square px-0 rounded-none border-l border-y-0 border-r-0 bg-transparent text-muted-foreground hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
                 )}
+                variant="outline"
+                size="icon"
               >
                 <Icon name="chevron" size={12} />
               </Button>
@@ -188,13 +191,14 @@ export function TerminalTabStrip({
       <div aria-label="Action Toolbar" className={tw.terminalToolbar} role="toolbar">
         {showAgents && (
           <Button
-            data-slot="button"
             onClick={onOpenAgents}
             ref={agentsButtonRef}
             type="button"
             className={cn(
-              "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-[29px] min-w-[29px] px-[7px] rounded-none border-l border-y-0 border-r-0 border-border bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+              "h-[29px] min-w-[29px] px-[7px] rounded-none border-l border-y-0 border-r-0 bg-transparent text-muted-foreground hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
             )}
+            variant="outline"
+            size="sm"
           >
             AI Agents
             <Icon name="chevron" size={10} />
@@ -204,14 +208,15 @@ export function TerminalTabStrip({
           <TooltipTrigger
             render={
               <Button
-                data-slot="button"
                 onClick={onOpenOptions}
                 ref={optionsButtonRef}
                 type="button"
                 aria-label="Options"
                 className={cn(
-                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-[29px] min-w-[29px] px-[7px] aspect-square px-0 rounded-none border-l border-y-0 border-r-0 border-border bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+                  "h-[29px] min-w-[29px] px-[7px] aspect-square px-0 rounded-none border-l border-y-0 border-r-0 bg-transparent text-muted-foreground hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
                 )}
+                variant="outline"
+                size="icon"
               >
                 <Icon name="more" size={13} />
               </Button>
@@ -223,13 +228,14 @@ export function TerminalTabStrip({
           <TooltipTrigger
             render={
               <Button
-                data-slot="button"
                 onClick={onHide}
                 type="button"
                 aria-label="Hide"
                 className={cn(
-                  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-xs font-medium outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-[29px] min-w-[29px] px-[7px] aspect-square px-0 rounded-none border-l border-y-0 border-r-0 border-border bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+                  "h-[29px] min-w-[29px] px-[7px] aspect-square px-0 rounded-none border-l border-y-0 border-r-0 bg-transparent text-muted-foreground hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
                 )}
+                variant="outline"
+                size="icon"
               >
                 <Icon name="chevron" size={12} />
               </Button>
