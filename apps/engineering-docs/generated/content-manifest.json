@@ -658,6 +658,75 @@
     ]
   },
   {
+    "id": "deep-dive/typescript-7-compatibility",
+    "locale": "en",
+    "section": "deep-dive",
+    "title": "TypeScript 7 Compatibility Verification",
+    "displayTitle": "TypeScript 7 Compatibility",
+    "description": "Verify library declarations, Compiler API coupling, builds, and tooling before a compiler major upgrade.",
+    "order": 4,
+    "updatedAt": "2026-07-30",
+    "verifiedAt": "2026-07-30",
+    "tags": [
+      "typescript",
+      "compatibility",
+      "migration",
+      "compiler",
+      "tooling"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/",
+    "packageVersion": "7.0.2",
+    "href": "/en/deep-dive/typescript-7-compatibility",
+    "outline": [
+      {
+        "id": "1-freeze-an-exact-inventory",
+        "label": "1. Freeze an exact inventory",
+        "level": 2
+      },
+      {
+        "id": "2-classify-the-coupling-first",
+        "label": "2. Classify the coupling first",
+        "level": 2
+      },
+      {
+        "id": "3-separate-official-claims-from-local-evidence",
+        "label": "3. Separate official claims from local evidence",
+        "level": 2
+      },
+      {
+        "id": "4-run-typescript-6-and-7-side-by-side",
+        "label": "4. Run TypeScript 6 and 7 side by side",
+        "level": 2
+      },
+      {
+        "id": "5-surface-configuration-changes-first",
+        "label": "5. Surface configuration changes first",
+        "level": 2
+      },
+      {
+        "id": "6-complete-the-verification-ladder",
+        "label": "6. Complete the verification ladder",
+        "level": 2
+      },
+      {
+        "id": "7-record-a-decision-and-a-recheck-trigger",
+        "label": "7. Record a decision and a recheck trigger",
+        "level": 2
+      },
+      {
+        "id": "8-roll-out-in-a-reversible-order",
+        "label": "8. Roll out in a reversible order",
+        "level": 2
+      },
+      {
+        "id": "references",
+        "label": "References",
+        "level": 2
+      }
+    ]
+  },
+  {
     "id": "deep-dive/nextjs-16",
     "locale": "ko",
     "section": "deep-dive",
@@ -1312,6 +1381,75 @@
         "id": "구현-타입을-공개-계약으로-노출",
         "label": "구현 타입을 공개 계약으로 노출",
         "level": 3
+      }
+    ]
+  },
+  {
+    "id": "deep-dive/typescript-7-compatibility",
+    "locale": "ko",
+    "section": "deep-dive",
+    "title": "TypeScript 7 호환성 검증",
+    "displayTitle": "TypeScript 7 호환성",
+    "description": "컴파일러 메이저 업그레이드 전에 라이브러리 선언, Compiler API 결합, 빌드와 도구 체인을 증거로 검증합니다.",
+    "order": 4,
+    "updatedAt": "2026-07-30",
+    "verifiedAt": "2026-07-30",
+    "tags": [
+      "typescript",
+      "compatibility",
+      "migration",
+      "compiler",
+      "tooling"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/",
+    "packageVersion": "7.0.2",
+    "href": "/ko/deep-dive/typescript-7-compatibility",
+    "outline": [
+      {
+        "id": "1-정확한-인벤토리를-고정한다",
+        "label": "1. 정확한 인벤토리를 고정한다",
+        "level": 2
+      },
+      {
+        "id": "2-결합-유형을-먼저-분류한다",
+        "label": "2. 결합 유형을 먼저 분류한다",
+        "level": 2
+      },
+      {
+        "id": "3-공식-근거와-로컬-증거를-분리한다",
+        "label": "3. 공식 근거와 로컬 증거를 분리한다",
+        "level": 2
+      },
+      {
+        "id": "4-typescript-6과-7을-나란히-실행한다",
+        "label": "4. TypeScript 6과 7을 나란히 실행한다",
+        "level": 2
+      },
+      {
+        "id": "5-설정-변경을-먼저-드러낸다",
+        "label": "5. 설정 변경을 먼저 드러낸다",
+        "level": 2
+      },
+      {
+        "id": "6-검증-사다리를-끝까지-오른다",
+        "label": "6. 검증 사다리를 끝까지 오른다",
+        "level": 2
+      },
+      {
+        "id": "7-판정과-재확인-조건을-함께-남긴다",
+        "label": "7. 판정과 재확인 조건을 함께 남긴다",
+        "level": 2
+      },
+      {
+        "id": "8-롤백-가능한-순서로-배포한다",
+        "label": "8. 롤백 가능한 순서로 배포한다",
+        "level": 2
+      },
+      {
+        "id": "참고-자료",
+        "label": "참고 자료",
+        "level": 2
       }
     ]
   }
