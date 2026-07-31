@@ -9,6 +9,7 @@ import {
   createDocumentKey,
   locales,
   parseDocMetadata,
+  sections,
   type ContentManifestEntry,
   type DocMetadata,
   type Locale,
@@ -130,8 +131,18 @@ export async function readDocuments(): Promise<readonly SourceDocument[]> {
   );
 }
 
-function validateDocuments(documents: readonly SourceDocument[]): void {
-  const byPair = new Map<string, Set<Locale>>();
+const localizedMetadataFields = [
+  "section",
+  "order",
+  "status",
+  "tags",
+  "packageName",
+  "packageVersion",
+  "apiSymbols",
+] as const satisfies readonly (keyof DocMetadata)[];
+
+export function validateDocuments(documents: readonly SourceDocument[]): void {
+  const byId = new Map<string, Map<Locale, DocMetadata>>();
   const hrefs = new Set<string>();
   const orders = new Set<string>();
 
@@ -145,15 +156,45 @@ function validateDocuments(documents: readonly SourceDocument[]): void {
     if (orders.has(orderKey)) throw new Error(`Duplicate navigation order: ${orderKey}`);
     orders.add(orderKey);
 
-    const pair = byPair.get(metadata.id) ?? new Set<Locale>();
-    pair.add(metadata.locale);
-    byPair.set(metadata.id, pair);
+    const localized = byId.get(metadata.id) ?? new Map<Locale, DocMetadata>();
+    localized.set(metadata.locale, metadata);
+    byId.set(metadata.id, localized);
   }
 
-  for (const [id, pair] of byPair) {
-    const missing = locales.filter((locale) => !pair.has(locale));
+  for (const [id, localized] of byId) {
+    const missing = locales.filter((locale) => !localized.has(locale));
     if (missing.length > 0)
       throw new Error(`Document ${id} is missing locales: ${missing.join(", ")}`);
+
+    const reference = localized.get(locales[0]);
+    if (reference === undefined) throw new Error(`Document ${id} has no reference locale.`);
+    for (const locale of locales.slice(1)) {
+      const candidate = localized.get(locale);
+      if (candidate === undefined) continue;
+      for (const field of localizedMetadataFields) {
+        if (JSON.stringify(reference[field]) !== JSON.stringify(candidate[field])) {
+          throw new Error(`Document ${id} has inconsistent "${field}" across locales.`);
+        }
+      }
+    }
+  }
+
+  for (const locale of locales) {
+    for (const section of sections) {
+      const sectionDocuments = documents
+        .filter(({ metadata }) => metadata.locale === locale && metadata.section === section)
+        .sort((left, right) => left.metadata.order - right.metadata.order);
+      if (sectionDocuments.length === 0) {
+        throw new Error(`Navigation section ${locale}:${section} must contain a document.`);
+      }
+      for (const [index, document] of sectionDocuments.entries()) {
+        if (document.metadata.order !== index) {
+          throw new Error(
+            `Navigation section ${locale}:${section} must use contiguous order values from 0.`,
+          );
+        }
+      }
+    }
   }
 
   const knownPaths = new Set(

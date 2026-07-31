@@ -50,6 +50,25 @@ export interface SearchDocument {
 }
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const DOCUMENT_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)*$/;
+const metadataFields = {
+  id: true,
+  locale: true,
+  section: true,
+  title: true,
+  displayTitle: true,
+  description: true,
+  order: true,
+  updatedAt: true,
+  verifiedAt: true,
+  tags: true,
+  status: true,
+  sourceUrl: true,
+  packageName: true,
+  packageVersion: true,
+  apiSymbols: true,
+} satisfies Readonly<Record<keyof DocMetadata, true>>;
+const metadataFieldNames = new Set<string>(Object.keys(metadataFields));
 
 function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -60,7 +79,7 @@ function requireString(record: Readonly<Record<string, unknown>>, key: string): 
   if (typeof value !== "string" || value.trim().length === 0) {
     throw new Error(`Metadata field "${key}" must be a non-empty string.`);
   }
-  return value;
+  return value.trim();
 }
 
 function optionalString(
@@ -72,20 +91,40 @@ function optionalString(
   if (typeof value !== "string" || value.trim().length === 0) {
     throw new Error(`Metadata field "${key}" must be a non-empty string.`);
   }
-  return value;
+  return value.trim();
+}
+
+function validateStringArray(value: unknown, key: string): readonly string[] {
+  if (
+    !Array.isArray(value) ||
+    value.length === 0 ||
+    !value.every((item) => typeof item === "string")
+  ) {
+    throw new Error(`Metadata field "${key}" must be an array of strings.`);
+  }
+  const normalized = value.map((item) => item.trim());
+  if (normalized.some((item) => item.length === 0)) {
+    throw new Error(`Metadata field "${key}" must not contain empty strings.`);
+  }
+  if (new Set(normalized).size !== normalized.length) {
+    throw new Error(`Metadata field "${key}" must not contain duplicates.`);
+  }
+  return Object.freeze(normalized);
 }
 
 function requireStringArray(
   record: Readonly<Record<string, unknown>>,
   key: string,
-  optional = false,
+): readonly string[] {
+  return validateStringArray(record[key], key);
+}
+
+function optionalStringArray(
+  record: Readonly<Record<string, unknown>>,
+  key: string,
 ): readonly string[] | undefined {
   const value = record[key];
-  if (value === undefined && optional) return undefined;
-  if (!Array.isArray(value) || !value.every((item) => typeof item === "string")) {
-    throw new Error(`Metadata field "${key}" must be an array of strings.`);
-  }
-  return Object.freeze([...value]);
+  return value === undefined ? undefined : validateStringArray(value, key);
 }
 
 function isOneOf<const TValue extends string>(
@@ -98,6 +137,12 @@ function isOneOf<const TValue extends string>(
 export function parseDocMetadata(value: unknown, source = "document"): DocMetadata {
   if (!isRecord(value)) throw new Error(`${source}: metadata must be an object.`);
 
+  const unknownFields = Object.keys(value).filter((key) => !metadataFieldNames.has(key));
+  if (unknownFields.length > 0) {
+    throw new Error(`${source}: unsupported metadata fields: ${unknownFields.join(", ")}.`);
+  }
+
+  const id = requireString(value, "id");
   const locale = requireString(value, "locale");
   const section = requireString(value, "section");
   const status = requireString(value, "status");
@@ -111,37 +156,48 @@ export function parseDocMetadata(value: unknown, source = "document"): DocMetada
   if (!isOneOf(status, documentStatuses)) {
     throw new Error(`${source}: unsupported status "${status}".`);
   }
+  if (!DOCUMENT_ID_PATTERN.test(id)) {
+    throw new Error(`${source}: metadata field "id" must be a lowercase path.`);
+  }
+  if (
+    (section === "overview" && id !== "overview") ||
+    (section !== "overview" && !id.startsWith(`${section}/`))
+  ) {
+    throw new Error(`${source}: document ID "${id}" does not belong to section "${section}".`);
+  }
   if (typeof order !== "number" || !Number.isInteger(order) || order < 0) {
     throw new Error(`${source}: metadata field "order" must be a non-negative integer.`);
   }
-  if (!ISO_DATE_PATTERN.test(updatedAt) || Number.isNaN(Date.parse(`${updatedAt}T00:00:00Z`))) {
+  if (!isIsoDate(updatedAt)) {
     throw new Error(`${source}: metadata field "updatedAt" must be an ISO date.`);
   }
-  if (
-    verifiedAt !== undefined &&
-    (!ISO_DATE_PATTERN.test(verifiedAt) || Number.isNaN(Date.parse(`${verifiedAt}T00:00:00Z`)))
-  ) {
+  if (verifiedAt !== undefined && !isIsoDate(verifiedAt)) {
     throw new Error(`${source}: metadata field "verifiedAt" must be an ISO date.`);
   }
+  if (verifiedAt !== undefined && verifiedAt < updatedAt) {
+    throw new Error(`${source}: metadata field "verifiedAt" must not precede "updatedAt".`);
+  }
+  let parsedSourceUrl: URL;
   try {
-    new URL(sourceUrl);
+    parsedSourceUrl = new URL(sourceUrl);
   } catch {
     throw new Error(`${source}: metadata field "sourceUrl" must be an absolute URL.`);
   }
-
-  const packageName = value.packageName;
-  const packageVersion = value.packageVersion;
-  if (packageName !== undefined && typeof packageName !== "string") {
-    throw new Error(`${source}: metadata field "packageName" must be a string.`);
-  }
-  if (packageVersion !== undefined && typeof packageVersion !== "string") {
-    throw new Error(`${source}: metadata field "packageVersion" must be a string.`);
+  if (
+    parsedSourceUrl.protocol !== "https:" ||
+    parsedSourceUrl.username !== "" ||
+    parsedSourceUrl.password !== ""
+  ) {
+    throw new Error(`${source}: metadata field "sourceUrl" must be a credential-free HTTPS URL.`);
   }
 
   const displayTitle = optionalString(value, "displayTitle");
+  const packageName = optionalString(value, "packageName");
+  const packageVersion = optionalString(value, "packageVersion");
+  const apiSymbols = optionalStringArray(value, "apiSymbols");
 
   return Object.freeze({
-    id: requireString(value, "id"),
+    id,
     locale,
     section,
     title: requireString(value, "title"),
@@ -150,15 +206,19 @@ export function parseDocMetadata(value: unknown, source = "document"): DocMetada
     order,
     updatedAt,
     ...(verifiedAt === undefined ? {} : { verifiedAt }),
-    tags: requireStringArray(value, "tags") ?? [],
+    tags: requireStringArray(value, "tags"),
     status,
     sourceUrl,
     ...(packageName === undefined ? {} : { packageName }),
     ...(packageVersion === undefined ? {} : { packageVersion }),
-    ...(value.apiSymbols === undefined
-      ? {}
-      : { apiSymbols: requireStringArray(value, "apiSymbols", true) }),
+    ...(apiSymbols === undefined ? {} : { apiSymbols }),
   });
+}
+
+function isIsoDate(value: string): boolean {
+  if (!ISO_DATE_PATTERN.test(value)) return false;
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return !Number.isNaN(date.valueOf()) && date.toISOString().slice(0, 10) === value;
 }
 
 export function displayTitleFor(document: Pick<DocMetadata, "displayTitle" | "title">): string {

@@ -41,12 +41,12 @@ function parseManifest(value: unknown): readonly ContentManifestEntry[] {
   return Object.freeze(
     value.map((item, index) => {
       if (!isRecord(item)) throw new Error(`Manifest item ${index} must be an object.`);
-      const metadata = parseDocMetadata(item, `manifest[${index}]`);
-      const href = item.href;
+      const { href, outline, ...metadataValue } = item;
+      const metadata = parseDocMetadata(metadataValue, `manifest[${index}]`);
       if (typeof href !== "string" || href !== createDocHref(metadata.locale, metadata.id)) {
         throw new Error(`manifest[${index}]: invalid href.`);
       }
-      return Object.freeze({ ...metadata, href, outline: parseOutline(item.outline, href) });
+      return Object.freeze({ ...metadata, href, outline: parseOutline(outline, href) });
     }),
   );
 }

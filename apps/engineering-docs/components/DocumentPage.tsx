@@ -8,13 +8,6 @@ import { Icon } from "./Icon";
 import { TransitionLink } from "./RouteTransition";
 import styles from "./DocumentPage.module.css";
 
-const versionById: Readonly<Record<string, string>> = {
-  "deep-dive/nextjs-16": "16.2.10",
-  "deep-dive/pnpm-11": "11.13.0",
-  "deep-dive/node-26": "26.5.0",
-  "deep-dive/typescript-6": "6.0.3",
-};
-
 const sectionLabels: Readonly<Record<Locale, Readonly<Record<DocSection, string>>>> = {
   ko: {
     overview: "개요",
@@ -29,10 +22,6 @@ const sectionLabels: Readonly<Record<Locale, Readonly<Record<DocSection, string>
     "deep-dive": "Deep Dive",
   },
 };
-
-function versionFor(document: LoadedDocument): string {
-  return document.metadata.packageVersion ?? versionById[document.metadata.id] ?? "v1";
-}
 
 function editHref(locale: Locale, id: string): string {
   return `https://github.com/jongminchung/jongminchung/edit/main/apps/engineering-docs/content/${locale}/${id}.mdx`;
@@ -87,7 +76,7 @@ export function DocumentPage({
               </ol>
             </nav>
             <div className="mt-6 mb-4 flex gap-1.5">
-              <Badge variant="default">{versionFor(document)}</Badge>
+              <Badge variant="default">{metadata.packageVersion ?? "v1"}</Badge>
               <Badge
                 className={
                   metadata.status === "deprecated"

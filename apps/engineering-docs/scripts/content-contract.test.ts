@@ -7,7 +7,7 @@ import { documentLoaders } from "../generated/document-loaders";
 import { createDocumentKey } from "../lib/content-model";
 import englishSearch from "../public/search/en.json";
 import koreanSearch from "../public/search/ko.json";
-import { checkGeneratedFiles, readDocuments } from "./build-content";
+import { checkGeneratedFiles, readDocuments, validateDocuments } from "./build-content";
 
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -68,6 +68,32 @@ describe("documentation content contract", () => {
       },
     );
     expect(output).toContain("localized documents.");
+  });
+
+  it("rejects locale metadata drift and non-contiguous navigation order", async () => {
+    const documents = await readDocuments();
+    expect(() => validateDocuments(documents)).not.toThrow();
+
+    const inconsistentStatus = documents.map((document) =>
+      document.metadata.locale === "ko" && document.metadata.id === "handbook/app-icons"
+        ? {
+            ...document,
+            metadata: { ...document.metadata, status: "experimental" as const },
+          }
+        : document,
+    );
+    expect(() => validateDocuments(inconsistentStatus)).toThrow(
+      'handbook/app-icons has inconsistent "status" across locales',
+    );
+
+    const nonContiguousOrder = documents.map((document) =>
+      document.metadata.section === "handbook" && document.metadata.order === 2
+        ? { ...document, metadata: { ...document.metadata, order: 3 } }
+        : document,
+    );
+    expect(() => validateDocuments(nonContiguousOrder)).toThrow(
+      "Navigation section ko:handbook must use contiguous order values from 0",
+    );
   });
 
   it("rejects stale generated documentation data", async () => {

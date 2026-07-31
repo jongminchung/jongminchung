@@ -444,6 +444,7 @@
     ],
     "status": "stable",
     "sourceUrl": "https://nextjs.org/docs/app",
+    "packageVersion": "16.2.10",
     "href": "/en/deep-dive/nextjs-16",
     "outline": [
       {
@@ -502,6 +503,7 @@
     ],
     "status": "stable",
     "sourceUrl": "https://pnpm.io/",
+    "packageVersion": "11.13.0",
     "href": "/en/deep-dive/pnpm-11",
     "outline": [
       {
@@ -560,6 +562,7 @@
     ],
     "status": "stable",
     "sourceUrl": "https://nodejs.org/docs/latest-v26.x/api/",
+    "packageVersion": "26.5.0",
     "href": "/en/deep-dive/node-26",
     "outline": [
       {
@@ -618,6 +621,7 @@
     ],
     "status": "stable",
     "sourceUrl": "https://www.typescriptlang.org/docs/",
+    "packageVersion": "6.0.3",
     "href": "/en/deep-dive/typescript-6",
     "outline": [
       {
@@ -1171,6 +1175,7 @@
     ],
     "status": "stable",
     "sourceUrl": "https://nextjs.org/docs/app",
+    "packageVersion": "16.2.10",
     "href": "/ko/deep-dive/nextjs-16",
     "outline": [
       {
@@ -1229,6 +1234,7 @@
     ],
     "status": "stable",
     "sourceUrl": "https://pnpm.io/",
+    "packageVersion": "11.13.0",
     "href": "/ko/deep-dive/pnpm-11",
     "outline": [
       {
@@ -1287,6 +1293,7 @@
     ],
     "status": "stable",
     "sourceUrl": "https://nodejs.org/docs/latest-v26.x/api/",
+    "packageVersion": "26.5.0",
     "href": "/ko/deep-dive/node-26",
     "outline": [
       {
@@ -1345,6 +1352,7 @@
     ],
     "status": "stable",
     "sourceUrl": "https://www.typescriptlang.org/docs/",
+    "packageVersion": "6.0.3",
     "href": "/ko/deep-dive/typescript-6",
     "outline": [
       {
