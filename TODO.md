@@ -48,24 +48,19 @@
   - manifest의 모든 URL이 200, 미등록 URL은 404다.
   - content check, Vitest, `next build`가 모두 통과한다.
 
-### [ ] 깨진 workspace gate를 현재 구조와 동기화한다
+### [x] 깨진 workspace gate를 현재 구조와 동기화한다
 
-- 근거
-  - `packages/icon/src/targets.ts:3,38-49`에 삭제된 `immersive-translate`가 남고 `git-client` target은 없다.
-  - tooling/remark package-contract는 `tsdown ^0.22.7`을 기대하지만 manifest는 `^0.22.12`다.
-  - `apps/git-client/scripts/workflow-config.test.ts`는 삭제된 GitHub workflow 두 개를 계속 읽는다.
-- 이번 작업에서 해결
+- 완료
   - UI 디렉터리가 없는 앱을 정상 상태로 처리하고 공유 package export/alias 계약으로 교체했다.
   - 기존 Base UI 직접 사용과 app-local primitive 복제를 검사하던 계약을 공유 shadcn 소유권 기준으로 갱신했다.
-  - root format/lint/typecheck와 이번 전환 관련 계약·행동·E2E 테스트는 통과한다.
-- 변경
-  - 삭제 앱의 icon target을 제거하고 `git-client` target 또는 명시적 exemption을 등록한다.
-  - 삭제 immersive-translate 관련해서 남아 있는 것에 대해서 삭제한다.
-  - 도구의 정확한 patch 문자열보다 호환 범위·실제 build/pack 성공을 검증한다.
-  - workflow 전용 assertion을 제거한다.
-  - 함께 있던 `.node-version`/`engines` 검증은 로컬 runtime 계약 테스트로 분리한다.
-- 완료 조건
-  - `pnpm run icon:check`, root Vitest, 앱별 test/build가 모두 통과한다.
+  - `@jongminchung/icon`은 등록된 README·Docs SVG만 검사하는 opt-in 소유 모델로 바꾸고 별도 Electron icon pipeline에는 exemption을 요구하지 않는다.
+  - 삭제된 `immersive-translate` variant, 산출물 코드, 문서와 README 참조를 제거했다.
+  - 삭제된 GitHub workflow의 assertion, Nx input, dispatch 스크립트와 문서를 제거했다.
+  - tooling/remark package-contract의 정확한 `tsdown` patch 문자열 검사를 제거하고 실제 build와 publish dry-run을 검증했다.
+  - terminal agent 탐색 테스트는 기본 설치 경로를 끌 수 있게 하여 로컬 `codex` 설치와 무관하게 만들었다.
+- 검증
+  - `pnpm run icon:check`, root Vitest 840건, Git Client Vitest 783건이 통과한다.
+  - Engineering Docs, README, Git Client production build와 root `pnpm check`가 통과한다.
 
 ## P1 — React·Next·shadcn 경계 개선
 
@@ -256,22 +251,15 @@
 ## 현재 검증 결과
 
 - 통과
-  - root 및 모든 workspace package typecheck
+  - root `pnpm check` — format, lint, typecheck, Vitest 840건, icon check와 모든 workspace build
   - root format check와 lint — 기존 `no-control-regex` 경고 1개
   - 공유 UI/package-map 10건, theme contract 8건, Engineering Docs Vitest 17건
-  - Engineering Docs와 Git Client production build, README 직접 `next build`
+  - Git Client Vitest 783건과 production build
+  - Engineering Docs와 README production build
   - Engineering Docs Playwright 24건, README 8건, Git Client 42건
+  - tooling/remark 실제 build와 `publish --dry-run --no-git-checks`
   - `shadcn info`와 `shadcn add button --dry-run`
-- 실패
-  - Git Client Vitest: 787 통과, 기존 4건 실패
-    - 삭제된 `.github/workflows/git-client.yml`, `publish-packages.yml` 기대 3건
-    - 현재 환경의 `codex` symlink 해석 차이 1건
-  - root Vitest의 범위 밖 package contract/icon 실패 3건
-    - `tsdown` 기대 버전 불일치 2건
-    - 제거된 앱을 가리키는 icon registry 1건
-  - 표준 README build와 `pnpm run icon:check` — 같은 기존 icon registry에서 차단
 - 참고
-  - root `pnpm run check`는 format/lint/typecheck 통과 후 위 범위 밖 Vitest 7건에서 중단된다.
   - Git Client build는 통과하지만 500KB 초과 chunk 경고가 있다.
 
 ## 완료 확인 명령
