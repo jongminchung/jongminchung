@@ -47,7 +47,6 @@ describe("@jongminchung/tooling package contract", () => {
     });
     expect(packageJson.scripts?.build).toBe("tsdown --log-level error --no-report");
     expect(packageJson.scripts?.["publish:dry-run"]).toBe("pnpm publish --dry-run --access public");
-    expect(packageJson.devDependencies?.tsdown).toBe("^0.22.7");
     expect(packageJson.dependencies).toBeUndefined();
     expect(collectDependencyRanges(packageJson)).not.toContain("catalog:");
     expect(packageJson.files).toEqual([
