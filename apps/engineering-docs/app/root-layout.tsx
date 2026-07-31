@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { DM_Mono, Inter, Inter_Tight } from "next/font/google";
-import type { ReactNode } from "react";
 import "./globals.css";
 
 const inter = Inter({
@@ -20,7 +19,7 @@ const dmMono = DM_Mono({
   display: "swap",
 });
 
-export const metadata: Metadata = {
+export const rootMetadata: Metadata = {
   metadataBase: new URL("https://jongminchung.dev"),
   title: {
     default: "Jongmin Chung Engineering Docs",
@@ -32,19 +31,13 @@ export const metadata: Metadata = {
 const themeScript = `(()=>{try{const m=localStorage.getItem("engineering-docs-theme")||"system";const d=m==="system"?(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):m;document.documentElement.dataset.theme=d;document.documentElement.style.colorScheme=d}catch{}})()`;
 const excalidrawAssetScript = `window.EXCALIDRAW_ASSET_PATH="/excalidraw-assets/"`;
 
-export default function RootLayout({ children }: { readonly children: ReactNode }) {
+export const rootFontClassName = `${inter.variable} ${interTight.variable} ${dmMono.variable}`;
+
+export function InitialDocumentScripts(): React.JSX.Element {
   return (
-    <html
-      className={`${inter.variable} ${interTight.variable} ${dmMono.variable}`}
-      lang="en"
-      data-theme="light"
-      suppressHydrationWarning
-    >
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-        <script dangerouslySetInnerHTML={{ __html: excalidrawAssetScript }} />
-      </head>
-      <body>{children}</body>
-    </html>
+    <>
+      <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      <script dangerouslySetInnerHTML={{ __html: excalidrawAssetScript }} />
+    </>
   );
 }

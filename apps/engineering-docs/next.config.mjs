@@ -1,6 +1,9 @@
 import createMDX from "@next/mdx";
 
 const nextConfig = {
+  experimental: {
+    globalNotFound: true,
+  },
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
   reactStrictMode: true,
   transpilePackages: ["@jongminchung/icon", "@jongminchung/ui"],

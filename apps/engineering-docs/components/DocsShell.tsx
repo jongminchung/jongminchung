@@ -83,10 +83,9 @@ export function DocsShell({
   };
 
   useEffect(() => {
-    document.documentElement.lang = locale;
     const storedMode = localStorage.getItem("engineering-docs-theme");
     if (isThemeMode(storedMode)) setMode(storedMode);
-  }, [locale]);
+  }, []);
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-color-scheme: dark)");

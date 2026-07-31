@@ -407,6 +407,7 @@ test("locale, theme, removed package, and 404 contracts remain visible", async (
   await page.goto("/en/packages/remark-plantuml");
   await page.getByRole("link", { name: "한국어로 읽기" }).click();
   await expect(page).toHaveURL(/\/ko\/packages\/remark-plantuml$/u);
+  await expect(page.locator("html")).toHaveAttribute("lang", "ko");
 
   const themeButton = page.getByRole("button", { name: /테마:/u });
   await themeButton.click();
@@ -421,9 +422,10 @@ test("locale, theme, removed package, and 404 contracts remain visible", async (
   ] as const) {
     const response = await page.goto(path);
     expect(response?.status()).toBe(404);
+    const heading = path.startsWith("/ko/") ? "문서를 찾을 수 없습니다" : "Document not found";
     await expect(
       page.getByRole("heading", {
-        name: "Document not found",
+        name: heading,
       }),
     ).toBeVisible();
   }
