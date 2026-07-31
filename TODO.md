@@ -5,15 +5,15 @@
 - 전체 방향은 시니어 수준에 가깝다.
   - 공유 primitive와 앱별 제품 UI 소유권, Server Component 우선, 의미 토큰, OKLCH, 접근성·비주얼 테스트가 좋다.
   - Electron 앱에 Next.js를 억지로 도입하지 않은 선택도 맞다.
-- 현재 상태를 “운영 가능한 시니어 품질”이라고 보기는 어렵다.
-  - 문서에 노출된 두 경로가 실제 404다.
-  - 표준 build/test gate가 여러 계약 드리프트로 실패한다.
-  - `git-client`의 React 경계와 초기 번들이 이미 단일 파일/훅이 감당할 규모를 넘었다.
+- P0 workspace와 Docs 콘텐츠 gate는 복구됐다.
+  - 생성 파이프라인이 source, manifest, loader, search index를 함께 소유한다.
+  - 정적 문서 URL과 metadata 계약을 build/test/E2E에서 검증한다.
+  - 남은 가장 큰 위험은 `git-client`의 React 경계와 초기 번들 규모다.
 
 | 영역           | 평가               | 핵심 피드백                                                                                                               |
 | -------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------- |
 | React          | 부분 양호          | 타입·외부 값 검증·lazy loading은 좋지만 mega component/hook, Effect 실패 처리, 복합 위젯 접근성을 개선해야 한다.          |
-| Next.js        | 양호하나 결함 있음 | App Router/RSC/Metadata/`next/font` 사용은 좋다. 콘텐츠 registry는 즉시 고치고 서버 HTML의 locale 계약도 보완해야 한다.   |
+| Next.js        | 양호               | App Router/RSC/Metadata/`next/font`와 정적 콘텐츠 registry가 일관된다. 서버 HTML의 locale 계약은 보완해야 한다.           |
 | Tailwind CSS   | 기반 매우 양호     | v4 CSS-first 구성과 의미 토큰은 좋다. 미사용 registry가 CSS 후보를 늘리고 반복 recipe가 source/JS 크기·locality를 해친다. |
 | shadcn/Base UI | 모노레포 전환 완료 | `@jongminchung/ui`가 primitive를 소유하고 앱은 테마와 제품 동작을 소유한다.                                               |
 
@@ -31,22 +31,15 @@
 
 ## P0 — 배포·검증 신뢰성 복구
 
-### [ ] Engineering Docs 콘텐츠의 진실 원천을 하나로 만든다
+### [x] Engineering Docs 콘텐츠의 진실 원천을 하나로 만든다
 
-- 근거
-  - `generated/content-manifest.json`에는 `en/ko/handbook/app-icons`가 있다.
-  - `lib/documents.ts`의 수동 `docLoaders`에는 두 항목이 없다.
-  - 실제 `/en/handbook/app-icons`, `/ko/handbook/app-icons` 응답은 404다.
-- 이번 작업에서 해결
-  - 중복 `content/ko/handbook/ddd copy.mdx`를 삭제했다.
-  - TypeScript 7 호환성 문서는 source, loader, manifest, locale별 검색 index를 함께 등록했다.
-  - content check, Engineering Docs Vitest 17건, production build와 Playwright 24건이 통과한다.
-- 변경
-  - `build-content.ts`가 정적 import를 가진 loader registry까지 생성하게 한다.
-  - 문서 개수 매직 넘버 대신 `source ↔ manifest ↔ loader ↔ search index`의 완전한 일대일 대응을 검사한다.
-- 완료 조건
-  - manifest의 모든 URL이 200, 미등록 URL은 404다.
-  - content check, Vitest, `next build`가 모두 통과한다.
+- 완료
+  - `build-content.ts`가 source에서 manifest, 정적 loader registry, locale별 search index를 함께 생성한다.
+  - 문서 개수 매직 넘버 없이 네 산출물의 `locale/id` key 집합이 정확히 일치하는지 검사한다.
+  - `lib/documents.ts`의 수동 loader 목록을 제거해 `app-icons`를 포함한 모든 문서가 같은 경로로 적재된다.
+  - manifest의 22개 URL이 모두 200이고 미등록 locale/문서/추가 segment는 404인지 E2E로 검증한다.
+- 검증
+  - content check, Engineering Docs Vitest 27건, production build와 Playwright 26건이 통과한다.
 
 ### [x] 깨진 workspace gate를 현재 구조와 동기화한다
 
@@ -212,28 +205,32 @@
   - `components.json`은 공유 primitive 라우팅을 위해 유지한다.
   - fake directory 없이 빈 UI root를 정상으로 처리하는 계약 테스트를 추가했다.
 
-### [ ] 정적 문서 route와 navigation edge case를 결정적으로 만든다
+### [x] 정적 문서 route와 navigation edge case를 결정적으로 만든다
 
-- 근거
-  - 정적 문서 집합인데 catch-all page의 `dynamicParams=true`다.
-  - `RouteTransition.tsx:88-100`은 동일 URL 검사 전에 4초 timeout progress를 시작한다.
-- 변경
-  - locale root redirect와 문서 catch-all을 분리하고 `dynamicParams=false`를 검토한다.
-  - 동일 URL guard를 공통 `navigate` 함수의 첫 단계로 옮긴다.
-- 완료 조건
-  - 알려진 문서는 정적 생성되고 미등록 경로는 결정적 404다.
-  - 현재 문서 선택은 push/progress를 발생시키지 않는다.
+- 해결한 문제
+  - 정적 문서 집합인데 catch-all page가 동적 경로를 허용했다.
+  - 동일 URL 검사 전에 4초 timeout progress를 시작했다.
+- 완료
+  - locale root redirect와 필수 문서 catch-all을 분리하고 두 route에 `dynamicParams=false`를 적용했다.
+  - 생성 manifest의 모든 문서를 `generateStaticParams`로 정적 생성한다.
+  - section 첫 문서 fallback을 생성 metadata 기반 결정적 lookup으로 교체했다.
+  - 동일 URL guard를 공통 `navigate`의 첫 단계로 옮기고 hash navigation은 유지했다.
+  - locale 전환도 공통 client navigation을 사용해 검색 요청 취소와 hydration 경합을 제거했다.
+- 검증
+  - 알려진 문서 22개 200, 미등록 경로 404, locale root redirect가 통과한다.
+  - 현재 문서 선택이 history write나 progress를 발생시키지 않는 E2E가 통과한다.
 
-### [ ] 콘텐츠 metadata의 외부 값 경계를 강화한다
+### [x] 콘텐츠 metadata의 외부 값 경계를 강화한다
 
-- 근거
-  - `content-model.ts:117-130`은 `Date.parse` 정규화와 `new URL()`만 사용한다.
-  - 존재하지 않는 날짜와 `javascript:` 같은 비 HTTP protocol이 통과할 수 있다.
-- 변경
-  - 날짜를 parse 후 원문과 round-trip 검증한다.
-  - `https:` 중심 protocol allowlist를 적용한다.
-- 완료 조건
-  - 잘못된 월말/윤일, 위험 protocol 회귀 테스트가 통과한다.
+- 해결한 문제
+  - 날짜와 URL이 형식 수준으로만 검증돼 존재하지 않는 날짜와 위험 protocol이 통과할 수 있었다.
+- 완료
+  - 허용 frontmatter field를 고정하고 문자열·배열을 정규화한 뒤 빈 값과 중복을 거부한다.
+  - ID와 section 소속, 실제 ISO 날짜 round-trip, 검증일 순서, credential 없는 HTTPS 출처를 검사한다.
+  - locale 쌍의 section/order/status/tags/package/API metadata 일치와 section별 연속 order를 검사한다.
+  - 화면에 하드코딩한 deep-dive 버전을 각 문서의 `packageVersion`으로 이동했다.
+- 검증
+  - 잘못된 월말/윤일, 위험 protocol, unknown field, locale drift, navigation order 회귀 테스트가 통과한다.
 
 ### [ ] 패키지 계약의 소유권과 TypeScript 호환 lane을 명시한다
 
@@ -251,12 +248,12 @@
 ## 현재 검증 결과
 
 - 통과
-  - root `pnpm check` — format, lint, typecheck, Vitest 840건, icon check와 모든 workspace build
+  - root `pnpm check` — format, lint, typecheck, Vitest 850건, icon check와 모든 workspace build
   - root format check와 lint — 기존 `no-control-regex` 경고 1개
-  - 공유 UI/package-map 10건, theme contract 8건, Engineering Docs Vitest 17건
+  - 공유 UI/package-map 10건, theme contract 8건, Engineering Docs Vitest 27건
   - Git Client Vitest 783건과 production build
   - Engineering Docs와 README production build
-  - Engineering Docs Playwright 24건, README 8건, Git Client 42건
+  - Engineering Docs Playwright 26건, README 8건, Git Client 42건
   - tooling/remark 실제 build와 `publish --dry-run --no-git-checks`
   - `shadcn info`와 `shadcn add button --dry-run`
 - 참고
