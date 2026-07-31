@@ -193,11 +193,17 @@ test("search exposes loading, retry, keyboard, focus, and accessibility states",
   page,
 }) => {
   const searchIndex = await readFile(resolve(process.cwd(), "public/search/en.json"), "utf8");
+  let releaseFirstRequest = (): void => {
+    throw new Error("First search request was not initialized.");
+  };
+  const firstRequest = new Promise<void>((resolveRequest) => {
+    releaseFirstRequest = resolveRequest;
+  });
   let attempts = 0;
   await page.route("**/search/en.json", async (route) => {
     attempts += 1;
     if (attempts === 1) {
-      await new Promise((resolveDelay) => setTimeout(resolveDelay, 150));
+      await firstRequest;
       await route.fulfill({ status: 503 });
       return;
     }
@@ -211,6 +217,7 @@ test("search exposes loading, retry, keyboard, focus, and accessibility states",
   const input = dialog.getByRole("combobox");
 
   await expect(dialog.getByRole("status")).toContainText("Loading search index");
+  releaseFirstRequest();
   await expect(dialog.getByRole("alert")).toContainText("Search index failed");
   await dialog.getByRole("button", { name: "Retry" }).click();
   await input.fill("createTsconfigPaths");
