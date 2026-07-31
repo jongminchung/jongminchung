@@ -1,4 +1,4 @@
-import { chmod, mkdtemp, realpath, rm, symlink, writeFile } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, realpath, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -34,6 +34,7 @@ describe("TerminalLaunchTargetResolver", () => {
       defaultShell: "/bin/sh",
       environment: { PATH: bin },
       homeDirectory: bin,
+      includeDefaultAgentDirectories: false,
     });
 
     const targets = resolver.listTargets();
@@ -60,10 +61,30 @@ describe("TerminalLaunchTargetResolver", () => {
       defaultShell: "/bin/sh",
       environment: { PATH: bin },
       homeDirectory: bin,
+      includeDefaultAgentDirectories: false,
     });
 
     expect(resolver.listTargets().agents.some(({ id }) => id === "codex")).toBe(false);
     expect(resolver.resolve({ kind: "agent", id: "codex" })).toBeNull();
+  });
+
+  it("includes conventional agent installation directories by default", async () => {
+    const home = await mkdtemp(join(tmpdir(), "git-client-terminal-target-home-"));
+    temporaryDirectories.push(home);
+    const bin = join(home, ".local/bin");
+    await mkdir(bin, { recursive: true });
+    const codex = await executable(bin, "codex");
+    const resolver = TerminalLaunchTargetResolver.of({
+      defaultShell: "/bin/sh",
+      environment: { PATH: "" },
+      homeDirectory: home,
+    });
+
+    expect(resolver.resolve({ kind: "agent", id: "codex" })).toEqual({
+      executable: await realpath(codex),
+      args: [],
+      title: "Codex",
+    });
   });
 
   it("keeps online INSTALL_AND_RUN outside the local execution policy", () => {

@@ -123,17 +123,20 @@ export interface TerminalLaunchTargetResolverOptions {
   readonly defaultShell: string;
   readonly environment: Readonly<Record<string, string>>;
   readonly homeDirectory?: string;
+  readonly includeDefaultAgentDirectories?: boolean;
 }
 
 export class TerminalLaunchTargetResolver implements TerminalLaunchTargetResolverPort {
   readonly #defaultShell: string;
   readonly #environment: Readonly<Record<string, string>>;
   readonly #homeDirectory: string;
+  readonly #includeDefaultAgentDirectories: boolean;
 
   private constructor(options: TerminalLaunchTargetResolverOptions) {
     this.#defaultShell = options.defaultShell;
     this.#environment = options.environment;
     this.#homeDirectory = options.homeDirectory ?? homedir();
+    this.#includeDefaultAgentDirectories = options.includeDefaultAgentDirectories ?? true;
   }
 
   static of(options: TerminalLaunchTargetResolverOptions): TerminalLaunchTargetResolver {
@@ -208,7 +211,7 @@ export class TerminalLaunchTargetResolver implements TerminalLaunchTargetResolve
     return AGENT_DEFINITIONS.flatMap((definition) => {
       const executable = this.#firstExecutable(definition, [
         ...pathDirectories,
-        ...definition.candidateDirectories,
+        ...(this.#includeDefaultAgentDirectories ? definition.candidateDirectories : []),
       ]);
       if (executable === null) return [];
       return [
