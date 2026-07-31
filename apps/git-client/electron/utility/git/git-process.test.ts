@@ -52,6 +52,67 @@ afterEach(async () => {
 });
 
 describe("GitProcessRunner output policy", () => {
+  it("does not pass inherited Git overrides to the child process", async () => {
+    const root = await mkdtemp(join(tmpdir(), "git-client-process-environment-"));
+    temporaryDirectories.push(root);
+    const fakeGit = join(root, "environment-git");
+    await writeFile(
+      fakeGit,
+      [
+        `#!${process.execPath}`,
+        "const values = Object.fromEntries(",
+        "  Object.entries(process.env)",
+        "    .filter(([key]) => key.toUpperCase().startsWith('GIT_'))",
+        "    .sort(([left], [right]) => left.localeCompare(right)),",
+        ");",
+        "process.stdout.write(`${JSON.stringify(values)}\\n`);",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    await chmod(fakeGit, 0o755);
+    const inherited = {
+      GIT_CONFIG_COUNT: process.env.GIT_CONFIG_COUNT,
+      GIT_CONFIG_KEY_0: process.env.GIT_CONFIG_KEY_0,
+      GIT_CONFIG_VALUE_0: process.env.GIT_CONFIG_VALUE_0,
+      GIT_DIR: process.env.GIT_DIR,
+      GIT_EXTERNAL_DIFF: process.env.GIT_EXTERNAL_DIFF,
+      GIT_INDEX_FILE: process.env.GIT_INDEX_FILE,
+      GIT_WORK_TREE: process.env.GIT_WORK_TREE,
+    };
+    Object.assign(process.env, {
+      GIT_CONFIG_COUNT: "1",
+      GIT_CONFIG_KEY_0: "core.hooksPath",
+      GIT_CONFIG_VALUE_0: "/tmp/hooks",
+      GIT_DIR: "/tmp/other.git",
+      GIT_EXTERNAL_DIFF: "/tmp/diff",
+      GIT_INDEX_FILE: "/tmp/index",
+      GIT_WORK_TREE: "/tmp/worktree",
+    });
+
+    try {
+      const outcome = await new GitProcessRunner(fakeGit).run({
+        cwd: root,
+        args: ["status"],
+        redactStdout: false,
+      });
+
+      expect(outcome.kind).toBe("completed");
+      expect(JSON.parse(stdout(outcome)) as unknown).toEqual({
+        GIT_EDITOR: "true",
+        GIT_MERGE_AUTOEDIT: "no",
+        GIT_OPTIONAL_LOCKS: "0",
+        GIT_PAGER: "cat",
+        GIT_TERMINAL_PROMPT: "0",
+      });
+    } finally {
+      for (const [key, value] of Object.entries(inherited)) {
+        if (value === undefined) delete process.env[key];
+        else process.env[key] = value;
+      }
+    }
+  });
+
   it("preserves chronological order when stdout and stderr alternate", async () => {
     const root = await mkdtemp(join(tmpdir(), "git-client-process-order-"));
     temporaryDirectories.push(root);

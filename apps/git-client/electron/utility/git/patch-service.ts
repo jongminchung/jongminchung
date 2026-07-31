@@ -12,6 +12,7 @@ import type {
   RepositoryRecord,
 } from "../../../src/shared/contracts/git-utility";
 import type { PatchExportResult } from "../../../src/shared/contracts/model";
+import { createGitEnvironment } from "./git-environment";
 import { GitUtilityError } from "./git-error";
 import { redactCredentials, safeErrorMessage } from "./redaction";
 import { validateRevision } from "./validation";
@@ -135,7 +136,7 @@ export class PatchProcessRunner implements PatchProcessRunnerLike {
       try {
         child = spawn(this.#gitBinary, [...spec.args], {
           cwd: spec.cwd,
-          env: { ...process.env, ...PROCESS_ENVIRONMENT },
+          env: createGitEnvironment(process.env, PROCESS_ENVIRONMENT),
           shell: false,
           stdio: ["pipe", "pipe", "pipe"],
           windowsHide: true,

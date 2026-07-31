@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { access, chmod, mkdtemp, mkdir, realpath, rm, writeFile } from "node:fs/promises";
+import { access, chmod, mkdtemp, mkdir, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -584,6 +584,88 @@ describe("Electron Git utility", () => {
     expect(events.map(({ kind }) => kind)).toEqual(["started", "completed"]);
     expect(git(repository, "diff", "--cached", "--name-only")).toContain("new.txt");
   });
+
+  it("arbitrates mutations across operation, repository-service, and direct file surfaces", async () => {
+    const firstPath = await createFixtureRepository();
+    const secondPath = await createFixtureRepository();
+    const hookStarted = join(firstPath, "hook-started.marker");
+    const hookPath = join(firstPath, ".git", "hooks", "pre-commit");
+    await writeFile(
+      hookPath,
+      [
+        `#!${process.execPath}`,
+        `require("node:fs").writeFileSync(${JSON.stringify(hookStarted)}, "started");`,
+        "setInterval(() => undefined, 1_000);",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    await chmod(hookPath, 0o755);
+    await writeFile(join(firstPath, "tracked.txt"), "second\n", "utf8");
+    git(firstPath, "add", "--", "tracked.txt");
+
+    const utility = new GitUtility();
+    const first = await utility.openRepository({ path: firstPath });
+    const second = await utility.openRepository({ path: secondPath });
+    const operation = utility.executeQuery(
+      {
+        kind: "operation",
+        requestId: randomUUID() as GitRequestId,
+        repositoryId: first.id,
+        operation: {
+          kind: "commit",
+          message: "blocking commit",
+          amend: false,
+          signOff: false,
+          gpgSign: false,
+        },
+      },
+      () => undefined,
+    );
+    const hookDeadline = Date.now() + 5_000;
+    while (Date.now() < hookDeadline) {
+      try {
+        await access(hookStarted);
+        break;
+      } catch {
+        await new Promise((resolve) => setTimeout(resolve, 25));
+      }
+    }
+    await expect(access(hookStarted)).resolves.toBeUndefined();
+
+    const queuedRepositoryService = utility.executeRepositoryService({
+      operation: "writeIgnoreRules",
+      repositoryId: first.id,
+      rules: { gitignore: "generated/\n", infoExclude: "private/\n" },
+    });
+    const queuedDirectWrite = utility.writeWorkingTreeFile(first.id, "queued.txt", "queued\n");
+    let repositoryClosed = false;
+    try {
+      await utility.writeWorkingTreeFile(second.id, "parallel.txt", "parallel\n");
+
+      await expect(readFile(join(secondPath, "parallel.txt"), "utf8")).resolves.toBe("parallel\n");
+      await expect(access(join(firstPath, ".gitignore"))).rejects.toMatchObject({ code: "ENOENT" });
+      await expect(access(join(firstPath, "queued.txt"))).rejects.toMatchObject({ code: "ENOENT" });
+
+      repositoryClosed = utility.closeRepository(first.id);
+      expect(repositoryClosed).toBe(true);
+      await expect(queuedRepositoryService).rejects.toMatchObject({
+        name: "RepositoryMutationCancelledError",
+        reason: "repositoryClosed",
+      });
+      await expect(queuedDirectWrite).rejects.toMatchObject({
+        name: "RepositoryMutationCancelledError",
+        reason: "repositoryClosed",
+      });
+      await expect(operation).resolves.toMatchObject({
+        kind: "cancelled",
+        reason: "repositoryClosed",
+      });
+    } finally {
+      if (!repositoryClosed) utility.closeRepository(first.id);
+      await Promise.allSettled([operation, queuedRepositoryService, queuedDirectWrite]);
+    }
+  }, 20_000);
 
   it("reads bounded worktree, index, revision, and image content by repository id", async () => {
     const repository = await createFixtureRepository();

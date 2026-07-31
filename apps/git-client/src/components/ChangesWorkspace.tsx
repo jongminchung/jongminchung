@@ -35,7 +35,7 @@ import { useAppDialog } from "./AppDialog";
 import { useCommandDefinitions, useDismissLayer } from "./CommandProvider";
 import { DiffViewer } from "./DiffViewer";
 import { Icon } from "./Icon";
-import { Spinner } from "./ProductCollections";
+import { EmptyState, Spinner, StatusBadge } from "./ProductCollections";
 import { CheckboxInput } from "./ProductFormControls";
 import { Selector } from "./ProductFormControls";
 import { TextArea } from "./ProductFormControls";
@@ -576,9 +576,9 @@ export function ChangesWorkspace({
                     `${tw.changeNavigatorRow} ${active ? tw.selected : ""} ${multiSelected && !active ? tw.multiSelected : ""}`,
                   )}
                 >
-                  <span className={`${tw.statusBadge} ${statusClass(entry.file)}`}>
+                  <StatusBadge className={statusClass(entry.file)}>
                     {statusLetter(entry.file)}
-                  </span>
+                  </StatusBadge>
                   <Icon name={entry.file.submodule ? "worktree" : "file"} size={13} />
                   <span className={`${tw.ellipsis} grid`}>
                     <strong className="truncate">{treeMode ? filename : entry.file.path}</strong>
@@ -659,10 +659,7 @@ export function ChangesWorkspace({
                   aria-label="Close Commit"
                   onClick={onCloseToolWindow}
                   type="button"
-                  className={cn(
-                    "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
-                    tw.iconButton,
-                  )}
+                  className="text-muted-foreground"
                   variant="ghost"
                   size="icon-sm"
                 >
@@ -706,10 +703,8 @@ export function ChangesWorkspace({
             onPressedChange={setTreeMode}
             pressed={treeMode}
             type="button"
-            className={cn(
-              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
-              tw.iconButton,
-            )}
+            className="size-7 p-0 text-muted-foreground"
+            size="sm"
           >
             <Icon name={treeMode ? "folder" : "changes"} size={13} />
           </Toggle>
@@ -719,10 +714,7 @@ export function ChangesWorkspace({
             hidden={toolWindow}
             onClick={() => setCommitRailOpen(true)}
             type="button"
-            className={cn(
-              "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
-              `${tw.iconButton} ${tw.commitRailToggle}`,
-            )}
+            className="text-muted-foreground [display:none]! max-[1120px]:[display:inline-flex]!"
             variant="ghost"
             size="icon-sm"
           >
@@ -731,9 +723,9 @@ export function ChangesWorkspace({
         </header>
         <div className={tw.changeNavigatorList}>
           {entries.length === 0 ? (
-            <div className={tw.emptyState}>Working tree clean.</div>
+            <EmptyState title="Working tree clean." />
           ) : filteredEntries.length === 0 ? (
-            <div className={tw.emptyState}>No changed files match this filter.</div>
+            <EmptyState title="No changed files match this filter." />
           ) : (
             <>
               {renderGroup("Staged", staged)}
@@ -891,7 +883,7 @@ export function ChangesWorkspace({
               onClick={() => setCommitRailOpen(false)}
               type="button"
               aria-label={"Close commit composer"}
-              className={cn("h-[26px] min-w-[26px] px-2 aspect-square px-0", tw.commitRailClose)}
+              className="aspect-square h-[26px] min-w-[26px] px-0 [display:none]! max-[1120px]:[display:inline-flex]!"
               variant="ghost"
               size="icon-sm"
             >

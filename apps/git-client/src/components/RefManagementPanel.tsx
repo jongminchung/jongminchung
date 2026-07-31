@@ -8,6 +8,7 @@ import type { BranchComparison, GitOperation, RemoteInfo } from "../shared/contr
 import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
 import { Icon } from "./Icon";
+import { Notice } from "./Notice";
 
 export function RefManagementPanel({
   refs,
@@ -137,9 +138,14 @@ export function RefManagementPanel({
         </Button>
       </div>
       {error && (
-        <div className={tw.collectionError} role="alert">
+        <Notice
+          className="rounded-none border-x-0 px-3.5 py-1.5"
+          role="alert"
+          size="sm"
+          tone="destructive"
+        >
           {error}
-        </div>
+        </Notice>
       )}
       <section className={tw.refActionBar}>
         <label>

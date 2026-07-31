@@ -5,6 +5,7 @@ import { access, chmod, lstat, open, readFile, realpath, rename, rm, stat } from
 import { dirname, isAbsolute, join, relative, sep } from "node:path";
 import type { RepositoryId } from "../../../src/shared/contracts/git-utility";
 import type { ConflictContent, ConflictFile } from "../../../src/shared/contracts/model";
+import { createGitEnvironment } from "./git-environment";
 import { GitUtilityError } from "./git-error";
 import { safeErrorMessage } from "./redaction";
 import type { RepositoryRegistry } from "./repository-registry";
@@ -51,7 +52,7 @@ class SpawnConflictGit implements ConflictGit {
       }
       const child = spawn("git", [...args], {
         cwd,
-        env: { ...process.env, ...GIT_ENVIRONMENT },
+        env: createGitEnvironment(process.env, GIT_ENVIRONMENT),
         shell: false,
         stdio: ["ignore", "pipe", "pipe"],
         windowsHide: true,

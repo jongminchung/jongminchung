@@ -1,261 +1,184 @@
-# React / Next.js / Tailwind CSS / shadcn 개선 TODO
+# 모노레포 제품·배포·UI 개선 TODO
 
-## 총평
+## 판단 요약
 
-- 전체 방향은 시니어 수준에 가깝다.
-  - 공유 primitive와 앱별 제품 UI 소유권, Server Component 우선, 의미 토큰, OKLCH, 접근성·비주얼 테스트가 좋다.
-  - Electron 앱에 Next.js를 억지로 도입하지 않은 선택도 맞다.
-- P0 workspace와 Docs 콘텐츠 gate는 복구됐다.
-  - 생성 파이프라인이 source, manifest, loader, search index를 함께 소유한다.
-  - 정적 문서 URL과 metadata 계약을 build/test/E2E에서 검증한다.
-  - 남은 가장 큰 위험은 `git-client`의 React 경계와 초기 번들 규모다.
+- 남은 항목을 장애 위험, 접근성 계약, 측정 가능한 성능, 구조적 취향으로 다시 분류했다.
+- 실제 결함은 renderer persistence 한 가지다. App 전체 재작성, 모든 dialog lazy화, Tailwind registry 전면
+  해체와 test 파일 이동은 독립 프로젝트로 진행하지 않는다.
 
-| 영역           | 평가               | 핵심 피드백                                                                                                               |
-| -------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------- |
-| React          | 부분 양호          | 타입·외부 값 검증·lazy loading은 좋지만 mega component/hook, Effect 실패 처리, 복합 위젯 접근성을 개선해야 한다.          |
-| Next.js        | 양호               | App Router/RSC/Metadata/`next/font`와 정적 콘텐츠 registry가 일관된다. 서버 HTML의 locale 계약은 보완해야 한다.           |
-| Tailwind CSS   | 기반 매우 양호     | v4 CSS-first 구성과 의미 토큰은 좋다. 미사용 registry가 CSS 후보를 늘리고 반복 recipe가 source/JS 크기·locality를 해친다. |
-| shadcn/Base UI | 모노레포 전환 완료 | `@jongminchung/ui`가 primitive를 소유하고 앱은 테마와 제품 동작을 소유한다.                                               |
+| 영역           | 판단                | 핵심 피드백                                                                                                     |
+| -------------- | ------------------- | --------------------------------------------------------------------------------------------------------------- |
+| React/TS       | P0 결함 1건         | read 실패 뒤 기본값을 저장할 수 있다. 기능 경계 분리는 이 결함을 고치는 첫 slice부터 제한적으로 진행한다.       |
+| Next.js        | P2 접근성 보완      | App Router/RSC/Metadata 구성은 충분하다. locale별 root `<html lang>`만 서버 응답에서 바로잡는다.                |
+| 성능           | 측정 후 조건부      | Vite 경고나 gzip 크기만으로 분할하지 않는다. packaged Electron startup 병목이 renderer일 때만 기능 묶음을 뺀다. |
+| Tailwind CSS   | 작은 dead code 정리 | 미사용 40개 recipe는 제거하되, 사용 중인 제품 layout을 다른 스타일 체계로 다시 쓰지 않는다.                     |
+| shadcn/Base UI | 전환 완료           | `@jongminchung/ui`가 primitive를 소유하고 앱은 테마, 제품 조합과 플랫폼 동작을 소유한다.                        |
 
-## 유지할 것
+## 지속 계약
 
-- [x] `packages/ui`는 shadcn primitive, `cn`, 공통 Tailwind 진입점만 소유한다.
+- `packages/ui`는 shadcn primitive, `cn`, 공통 Tailwind 진입점만 소유한다.
   - 앱은 `theme.css`, 제품 컴포넌트, 플랫폼 동작과 시각 언어를 계속 소유한다.
-- [ ] `packages/theme-contract/src/tokens.css`는 값 없는 CSS-only 의미 토큰 계약으로 유지한다.
-- [ ] 앱별 `theme.css`에서 완전한 OKLCH provider 값을 정의한다.
-- [ ] Tailwind를 모든 레이아웃에 강제하지 않고 CSS Module과 역할을 나눈다.
-- [ ] Next 앱은 Server Component를 기본으로 하고 상호작용만 Client Component로 격리한다.
-- [ ] `Excalidraw`, CodeMirror, xterm 등 무거운 기능은 필요 시점에 적재한다.
-- [ ] `unknown` 입력 검증, readonly 모델, Axe·키보드·CLS·비주얼 회귀 검증을 유지한다.
-- [ ] 앱 E2E는 명시적 로컬/릴리스 검증 명령으로 유지한다.
+- `packages/theme-contract/src/tokens.css`는 값 없는 CSS-only 의미 토큰 계약으로 유지한다.
+- 앱별 `theme.css`에서 완전한 OKLCH provider 값을 정의한다.
+- Tailwind를 모든 레이아웃에 강제하지 않고 CSS Module과 역할을 나눈다.
+- Next 앱은 Server Component를 기본으로 하고 상호작용만 Client Component로 격리한다.
+- `Excalidraw`, CodeMirror, xterm 등 무거운 기능은 필요 시점에 적재한다.
+- `unknown` 입력 검증, readonly 모델, Axe·키보드·CLS·비주얼 회귀 검증을 유지한다.
+- 앱 E2E는 명시적 로컬/릴리스 검증 명령으로 유지한다.
+- 모든 workspace는 catalog의 최신 안정 TypeScript 6 한 버전을 사용한다. TS 7 dual lane은 만들지 않는다.
+- contract test는 동작, public API와 import 경계를 검증한다. 파일 위치나 정확한 구현 문자열만 감시하는
+  테스트는 추가하지 않는다.
 
-## P0 — 배포·검증 신뢰성 복구
+## 다음 실행 순서
 
-### [x] Engineering Docs 콘텐츠의 진실 원천을 하나로 만든다
+1. **P0 persistence**: read 실패 뒤 자동 저장을 막고 durable write 오류를 복구 가능하게 만든다.
+2. **P1 첫 feature boundary**: persistence controller와 search/inspection 한 묶음만 App에서 추출한다.
+3. **P2 locale root**: locale별 root layout으로 raw HTML의 기본 언어를 바로잡는다.
+4. **P2 startup 측정**: 병목을 측정하고 renderer가 원인일 때만 1~3개 기능 묶음을 분할한다.
+5. **P2 Tailwind dead code**: 실제 미사용 recipe 40개만 제거하고 전면 스타일 재작성은 하지 않는다.
 
-- 완료
-  - `build-content.ts`가 source에서 manifest, 정적 loader registry, locale별 search index를 함께 생성한다.
-  - 문서 개수 매직 넘버 없이 네 산출물의 `locale/id` key 집합이 정확히 일치하는지 검사한다.
-  - `lib/documents.ts`의 수동 loader 목록을 제거해 `app-icons`를 포함한 모든 문서가 같은 경로로 적재된다.
-  - manifest의 22개 URL이 모두 200이고 미등록 locale/문서/추가 segment는 404인지 E2E로 검증한다.
-- 검증
-  - content check, Engineering Docs Vitest 27건, production build와 Playwright 26건이 통과한다.
+## P0: 데이터 무결성
 
-### [x] 깨진 workspace gate를 현재 구조와 동기화한다
-
-- 완료
-  - UI 디렉터리가 없는 앱을 정상 상태로 처리하고 공유 package export/alias 계약으로 교체했다.
-  - 기존 Base UI 직접 사용과 app-local primitive 복제를 검사하던 계약을 공유 shadcn 소유권 기준으로 갱신했다.
-  - `@jongminchung/icon`은 등록된 README·Docs SVG만 검사하는 opt-in 소유 모델로 바꾸고 별도 Electron icon pipeline에는 exemption을 요구하지 않는다.
-  - 삭제된 `immersive-translate` variant, 산출물 코드, 문서와 README 참조를 제거했다.
-  - 삭제된 GitHub workflow의 assertion, Nx input, dispatch 스크립트와 문서를 제거했다.
-  - tooling/remark package-contract의 정확한 `tsdown` patch 문자열 검사를 제거하고 실제 build와 publish dry-run을 검증했다.
-  - terminal agent 탐색 테스트는 기본 설치 경로를 끌 수 있게 하여 로컬 `codex` 설치와 무관하게 만들었다.
-- 검증
-  - `pnpm run icon:check`, root Vitest 840건, Git Client Vitest 783건이 통과한다.
-  - Engineering Docs, README, Git Client production build와 root `pnpm check`가 통과한다.
-
-## P1 — React·Next·shadcn 경계 개선
-
-### [ ] `git-client`의 App/session 경계를 제품 기능별로 분리한다
+### [ ] Electron renderer persistence의 hydration과 저장 실패를 안전하게 처리한다
 
 - 근거
-  - `src/App.tsx`는 7,628줄이고 `RepositoryWorkspace`만 약 5,254줄이다.
-  - `src/hooks/useGitSession.ts`는 2,292줄이며 90개 안팎의 값·명령을 한 객체로 반환한다.
-  - 넓은 session 객체와 파생 배열은 변경 영향·렌더 범위·테스트 범위를 키운다.
+  - `App.tsx`의 product settings, layouts, macros와 project defaults는 read 실패 뒤에도
+    `loaded=true`가 되어 메모리 기본값을 저장한다.
+  - scratch files, repository UI state와 bookmarks에도 같은 restore-then-write 패턴이 있다.
+  - 여러 write Promise가 실패를 조용히 버리므로 사용자는 durable 설정이 저장되지 않았다는 사실을
+    알 수 없다.
+  - main process의 `SettingsStore`는 이미 atomic write와 write queue를 제공한다. 새 직렬화 계층이
+    아니라 renderer의 hydration 상태 구분이 필요하다.
 - 변경
-  - repository/session I/O, persistence, dialog, search/inspection controller를 독립 hook/service로 추출한다.
-  - 상태 소유권을 나누고 leaf consumer는 equality가 있는 selector 또는 좁은 readonly slice만 받게 한다.
-  - 좁은 TypeScript interface만으로는 re-render가 줄지 않으므로 React Profiler 기준을 함께 둔다.
-  - 반환 타입과 상태 전이를 명시하고 기능별 행동 테스트를 먼저 고정한다.
-  - 한 번에 재작성하지 않고 tracer-bullet 단위로 이동한다.
+  - `loaded: boolean`을 `loading | ready | readError` discriminated union으로 바꾼다.
+  - key 없음인 `null`은 정상 hydration으로, IPC/read rejection은 저장 금지 상태로 구분한다.
+  - read 실패 중에도 기본 UI는 사용할 수 있게 하되 retry 또는 명시적 reset 전에는 자동 저장하지 않는다.
+  - product settings, layouts, macros, project defaults, scratch files, repository UI, bookmarks와 workspace
+    session의 read/write pair를 같은 계약으로 감사한다.
+  - product settings, macros와 bookmarks 같은 durable data의 write 실패는 사용자에게 알리고 재시도를
+    제공한다. 일시적 layout 상태는 진단 로그에 남긴다.
+  - IPC는 `AbortSignal`을 받지 않으므로 가짜 취소 API를 만들지 않는다. cleanup flag 또는 generation으로
+    stale read 결과만 무시한다.
 - 완료 조건
-  - composition root 외의 기능/leaf component가 전체 session facade에 의존하지 않는다.
-  - 기능별 상태 전이와 실패 경로를 독립 테스트할 수 있다.
-  - 대표 작업의 commit 횟수·render 시간이 기준선보다 악화되지 않는다.
+  - read 실패 뒤 어떤 기본값 write도 발생하지 않는다.
+  - missing value, read error, write error, retry, unmount와 repository key 변경 테스트가 통과한다.
+  - persistence 경로에 오류 처리 없는 floating Promise와 조용히 삼키는 catch가 없다.
 
-### [ ] Effect 기반 설정 저장을 실패 안전하게 만든다
+## P1: React/TypeScript 기능 경계
+
+### [ ] Git Client App/session의 첫 두 feature boundary만 분리한다
 
 - 근거
-  - `App.tsx:6388-6518`은 read 오류를 삼킨 뒤 `loaded=true`로 바꾼다.
-  - 이어지는 Effect가 메모리의 기본값을 저장해 기존 설정을 덮어쓸 수 있다.
-  - write Promise 실패도 사용자 상태나 오류 경계에 연결되지 않는다.
+  - `src/App.tsx`는 현재 7,635줄이고 `RepositoryWorkspace`가 약 5,200줄을 차지한다.
+  - `src/hooks/useGitSession.ts`는 2,292줄이고 90개가 넘는 read/command 값을 한 번에 반환한다.
+  - `GitSession = ReturnType<typeof useGitSession>`가 구현 전체를 하위 component 계약으로 노출한다.
+  - 파일 크기는 유지보수 신호지만, interface 분리나 selector 도입만으로 render 성능이 개선되지는 않는다.
 - 변경
-  - 공통 persistence adapter에 `loading | ready | error` 상태를 둔다.
-  - read 성공 후에만 자동 저장한다.
-  - unmount/동시 요청 취소와 read/write 오류 표시·재시도를 정의한다.
+  - 첫 slice로 persistence와 DOM theme 적용을 `useProductSettingsController` 경계로 추출한다.
+  - 두 번째 slice로 `RepositoryWorkspace`의 search/inspection 상태와 명령을 feature controller로 추출한다.
+  - 추출된 component에는 전체 `GitSession` 대신 명시적인 readonly read model과 command port를 전달한다.
+  - `useGitSession` 구현을 한 번에 다시 쓰거나 외부 store를 도입하지 않는다. activity, Git console,
+    terminal 같은 고빈도 경계는 Profiler 근거가 있을 때만 별도 subscription으로 분리한다.
+  - 기존 `useAppDialog`처럼 이미 분리된 controller는 다시 추상화하지 않는다.
 - 완료 조건
-  - read 실패 시 write가 호출되지 않는다.
-  - read/write/재시도/unmount/연속 상태 변경 경쟁 테스트가 통과한다.
+  - `AppContent`가 persistence Effect를 직접 소유하지 않는다.
+  - search/inspection 상태 전이와 persistence 실패를 독립적으로 테스트할 수 있다.
+  - 두 slice의 consumer가 `ReturnType<typeof useGitSession>`에 의존하지 않는다.
+  - 두 slice 이후 이 TODO를 닫고, 나머지 추출은 해당 기능을 변경할 때 수행한다.
 
-### [x] Button 직접사용 예외 정책을 공유 primitive 정책으로 교체한다
+## P2: Next.js 접근성·측정 기반 유지보수
 
-- 근거
-  - `DESIGN_SYSTEM.md:51-56`은 모든 호출부가 Base UI Button과 완전한 class recipe를 직접 소유하도록 강제한다.
-  - 계약 테스트가 직접 import·slot·call-site recipe 정책을 강제한다.
-  - 그 결과 현재 `apps/` 전체에 직접 import 68개 파일, `data-slot="button"` 326곳이 있다.
-  - Git Client에서 동일한 기본 class 조합이 200회 이상 반복된다.
-  - 현재 정책에는 호출부 명시성과 과도한 범용 wrapper 방지라는 장점도 있다.
-- 완료
-  - `@jongminchung/ui/components/button`에 공식 Base UI + CVA Button을 설치했다.
-  - 호출부는 의미 `variant`/`size`와 배치 `className`만 지정한다.
-  - 링크는 `buttonVariants`, loading은 `Spinner` + `disabled` + `aria-busy`를 사용한다.
-  - 결정과 확장 기준을 ADR 및 `DESIGN_SYSTEM.md`에 반영했다.
-
-### [x] 검색 palette를 실제 combobox 계약으로 구현한다
+### [x] Engineering Docs의 기본 문서 언어를 서버 HTML에 고정한다
 
 - 근거
-  - `SearchPalette.tsx:211-259`의 input에는 `aria-controls`/`aria-activedescendant`가 없다.
-  - 결과는 `role="list"` 아래 link로 렌더되어 선택 상태가 보조 기술에 전달되지 않는다.
-  - 열린 검색 dialog는 현재 Axe 시나리오에 포함되지 않는다.
-- 완료
-  - Engineering Docs 검색과 Git Client 명령 팔레트를 공유 `Command`로 전환했다.
-  - 수동 active-index 로직을 제거하고 input 중심의 `aria-activedescendant` 전략으로 통일했다.
-  - 외부 검색 결과는 `shouldFilter={false}`로 전달하고 기존 navigation/command 실행을 유지한다.
-
-### [x] 검색 index 적재를 lazy·취소 가능·실패 명시 상태로 바꾼다
-
-- 근거
-  - `SearchPalette.tsx:157-164`는 모든 문서 mount 때 35~40KB index를 즉시 fetch한다.
-  - `AbortController`와 `catch`가 없어 locale race와 unhandled rejection이 가능하다.
-- 완료
-  - 최초 open 시 locale별 캐시를 적재하고 `AbortController`로 경쟁 요청을 취소한다.
-  - `idle | loading | ready | error` union과 retry UI를 추가했다.
-
-### [x] form/list 복합 위젯의 접근성 primitive를 좁힌다
-
-- 근거
-  - `git-client/src/components/ui/collections.tsx:22-77`의 `ListItem`은 `div` 하나가 static item, button, option 역할을 모두 허용한다.
-  - 일부 listbox는 roving focus와 개별 button focus 전략을 섞는다.
-  - `form-controls.tsx:55-60`의 오류 메시지는 control과 ID로 연결되지 않고 `aria-invalid`도 없다.
-- 완료
-  - `Item`, `CommandItem`, Radio/Checkbox/Select, Button/Link의 역할을 분리했다.
-  - 앱 form wrapper를 공유 `Field` 계열로 재구성하고 description/error ID를 control에 연결했다.
-  - `aria-describedby`, `aria-invalid`, mixed checkbox 상태를 지원한다.
-
-## P2 — 일관성·유지보수성 정리
-
-### [ ] locale을 서버의 `<html lang>`에 반영한다
-
-- 근거
-  - `engineering-docs/app/layout.tsx:38-42`는 항상 `lang="en"`이다.
-  - `[locale]/layout.tsx`가 서버 HTML의 하위 `div`에 올바른 lang을 주지만, 문서 root는 hydration 전까지 `en`이다.
-  - `DocsShell.tsx:87-91`이 hydration 후 root DOM을 보정한다.
+  - `engineering-docs/app/layout.tsx`는 한국어 URL도 `<html lang="en">`으로 렌더링한다.
+  - 하위 `div lang`과 hydration 후 DOM 수정은 raw HTML과 JavaScript 비활성 환경의 기본 언어를
+    바로잡지 못한다.
+  - WCAG 3.1.1은 페이지 기본 언어를 programmatically determinable하게 요구한다.
 - 변경
-  - locale segment가 root layout의 `<html lang>`을 서버 렌더링하도록 route/layout을 재구성한다.
-  - nested `div lang`은 fallback 필요성을 확인한 뒤 hydration 보정과 함께 정리한다.
+  - `[locale]/layout.tsx`를 locale root layout으로 전환해 `<html lang={locale}>`을 직접 렌더링한다.
+  - `/`와 `/diagrams/**`는 고정 영어 `(standalone)` root layout으로 이동한다.
+  - font, metadata, theme/Excalidraw 초기 script 설정은 공유하되 각 root layout이 `<html>/<body>`를
+    명확히 소유한다.
+  - nested `div lang`과 `DocsShell`의 `document.documentElement.lang` Effect를 제거한다.
+  - 여러 root layout 간 이동은 full page load라는 Next.js 제약이 있다. 현재 Docs에서 diagrams로 가는
+    제품 navigation이 없으므로 이 tradeoff를 수용한다.
 - 완료 조건
-  - raw response HTML에서 `/ko/**`는 `<html lang="ko">`, `/en/**`는 `<html lang="en">`이다.
+  - raw response 또는 JavaScript 비활성 환경에서 `/ko/**`는 `<html lang="ko">`, `/en/**`는
+    `<html lang="en">`이다.
+  - `/`, `/diagrams/**`, `/fr/**`, 미등록 문서의 redirect/status/404 계약이 유지된다.
+  - locale 전환, production build와 Axe 테스트가 통과한다.
+- 결과
+  - locale별 root layout과 영어 standalone root layout이 서버 HTML의 `lang`을 직접 소유한다.
+  - raw HTML, locale 전환, JavaScript 비활성, 404, production build와 Axe 검증이 통과했다.
 
-### [ ] Git Client 초기 renderer bundle을 측정하고 기능 단위로 분리한다
+### [ ] Git Client startup과 renderer entry 비용을 측정하고 필요할 때만 분할한다
 
 - 근거
-  - 현재 main JS는 약 1.36MB raw/325KB gzip, CSS는 약 199KB raw/33KB gzip이다.
-  - `App.tsx:14-92`에서 드물게 여는 dialog·tool window를 대량 정적 import한다.
-  - Vite가 500KB 초과 chunk 경고를 출력하지만 실제 cold-start 회귀는 아직 측정하지 않았다.
+  - 현재 main JS는 약 1.33MB raw/361KB gzip, CSS는 약 233KB raw/39KB gzip이다.
+  - CodeMirror와 xterm은 이미 lazy chunk다. 남은 Vite 500KB 경고만으로 사용자 지연을 증명할 수 없다.
+  - Electron은 로컬 packaged asset을 읽으므로 gzip 크기보다 parse/evaluate, first commit과 utility process
+    startup을 구분해 측정해야 한다.
 - 변경
-  - Electron cold-start와 첫 상호작용 기준선을 먼저 측정한다.
-  - 설정·진단·관리 dialog/tool window를 `lazy` + `Suspense`로 분리한다.
-  - 초기 entry JS/CSS 및 cold-start 회귀 예산을 로컬 release check에 둔다.
+  - packaged app에서 app ready, renderer load, first React commit과 interaction ready를 구간별로 측정한다.
+  - entry raw size와 parse/evaluate 시간을 utility process startup과 분리해 기록한다.
+  - renderer가 병목일 때만 무겁고 드물게 여는 기능 1~3개를 의미 있는 chunk로 묶어 `lazy`로 분리한다.
+    모든 dialog를 개별 chunk로 만들지 않는다.
+  - 분리한 기능은 hover/focus 또는 open 직전에 preload하고 lazy rejection은 기존 renderer error boundary로
+    전달한다.
+  - hardware 편차가 큰 로컬 cold-start 절대 시간은 hard gate로 두지 않는다. deterministic entry size는
+    budget으로, timing은 같은 환경의 median/p95 회귀 자료로 사용한다.
 - 완료 조건
-  - warning threshold가 아니라 측정된 entry 크기와 cold-start 예산을 만족한다.
-  - keyboard/focus/smoke 테스트가 유지된다.
+  - 측정 결과와 유지 또는 분할 결정이 기록돼 있다.
+  - 분할하지 않아도 renderer 병목이 아니라는 근거와 deterministic bundle budget이 있으면 완료다.
+  - 분할했다면 동일 환경의 median/p95가 개선되고 keyboard/focus/package smoke가 유지된다.
 
-### [ ] Git Client의 전역 Tailwind 문자열 registry를 점진적으로 해체한다
+### [x] Git Client의 실제 미사용 Tailwind recipe 40개를 제거한다
 
 - 근거
-  - `src/styles/tailwind.ts`는 643줄/약 131KB다.
-  - 정적 참조 기준 미사용 key가 59개이며 문자열 literal은 사용 여부와 무관하게 Tailwind 후보가 된다.
-  - 중복 속성, `!important`, legacy marker와 임의 속성이 한 registry에 섞여 있다.
+  - `src/styles/tailwind.ts`는 현재 544줄/약 112KB다.
+  - 295개 key 중 40개는 정의 외 `tw.<key>` 참조가 없고 `tw[...]` 동적 접근도 없다.
+  - 해당 문자열은 사용되지 않아도 Tailwind source 후보와 renderer JS에 남는다.
 - 변경
-  - 재사용 UI variant는 앱 로컬 shadcn/CVA component로 이동한다.
-  - 제품 레이아웃은 component-local Tailwind 또는 소유권이 명확한 `src/styles` CSS로 이동한다.
-  - CSS Module을 선택한다면 이를 금지하는 앱 계약 테스트부터 명시적으로 변경한다.
-  - 동적 marker만 작은 allowlist로 남기고 미사용 key를 제거한다.
+  - 40개 key를 기능 묶음별로 제거하고 build CSS/JS 변화와 시각 회귀를 확인한다.
+  - 사용 중인 제품 layout, tree, row와 panel recipe는 유지한다.
+  - 이 작업에서 CVA, CSS Module 또는 component-local Tailwind로 전면 이전하지 않는다.
 - 완료 조건
-  - style 변경의 영향 범위가 component 단위다.
-  - 생성 CSS 크기와 unused key 수에 회귀 기준이 있다.
+  - 정의 외 참조가 없는 recipe가 0개다.
+  - Git Client build, theme parity와 주요 workspace Playwright가 통과한다.
+  - 제거 전후 entry JS/CSS 크기를 기록하되, 이를 위한 새 source-string gate는 추가하지 않는다.
+- 결과
+  - recipe는 295개에서 255개로 줄었고 255개 모두 정적 참조된다.
+  - entry JS는 raw/gzip 1,329,838/356,630 bytes에서 1,314,370/354,363 bytes로 줄었다.
+  - entry CSS는 raw/gzip 232,936/38,083 bytes에서 215,079/35,715 bytes로 줄었다.
 
-### [x] Engineering Docs의 생성되지 않는 animation utility를 정리한다
+## 보류하거나 제거한 항목
 
-- 근거
-  - dialog/tooltip이 `animate-in`, `fade-in`, `zoom-in`, `slide-in-*`을 사용한다.
-  - 앱에는 `tw-animate-css` import/dependency가 없어 해당 CSS가 생성되지 않는다.
-- 완료
-  - 공유 Tailwind 진입점이 `tw-animate-css`를 명시적으로 import한다.
-  - Engineering Docs가 공유 진입점을 사용해 shadcn animation utility를 생성한다.
-
-### [x] 불필요한 Client Component 경계를 줄인다
-
-- 근거
-  - `EditPageLink.tsx`는 정적 anchor뿐인데 `"use client"`다.
-  - `DocumentOutline.tsx`는 scroll button 하나 때문에 outline 전체가 client다.
-- 완료
-  - `EditPageLink`와 정적 `DocumentOutline`을 Server Component로 복원했다.
-  - 스크롤 동작은 작은 `BackToTopButton` Client Component로 분리했다.
-  - Tooltip provider를 필요한 interactive docs shell로 내렸다.
-
-### [x] README의 빈 shadcn scaffold와 미사용 의존성을 정리한다
-
-- 근거
-  - `components.json`은 있으나 `components/ui`가 없다.
-  - 정적 앱인데 `@base-ui/react`, `class-variance-authority`가 사용되지 않는다.
-- 완료
-  - 미사용 직접 primitive 의존성을 제거하고 `@jongminchung/ui`만 사용한다.
-  - `components.json`은 공유 primitive 라우팅을 위해 유지한다.
-  - fake directory 없이 빈 UI root를 정상으로 처리하는 계약 테스트를 추가했다.
-
-### [x] 정적 문서 route와 navigation edge case를 결정적으로 만든다
-
-- 해결한 문제
-  - 정적 문서 집합인데 catch-all page가 동적 경로를 허용했다.
-  - 동일 URL 검사 전에 4초 timeout progress를 시작했다.
-- 완료
-  - locale root redirect와 필수 문서 catch-all을 분리하고 두 route에 `dynamicParams=false`를 적용했다.
-  - 생성 manifest의 모든 문서를 `generateStaticParams`로 정적 생성한다.
-  - section 첫 문서 fallback을 생성 metadata 기반 결정적 lookup으로 교체했다.
-  - 동일 URL guard를 공통 `navigate`의 첫 단계로 옮기고 hash navigation은 유지했다.
-  - locale 전환도 공통 client navigation을 사용해 검색 요청 취소와 hydration 경합을 제거했다.
-- 검증
-  - 알려진 문서 22개 200, 미등록 경로 404, locale root redirect가 통과한다.
-  - 현재 문서 선택이 history write나 progress를 발생시키지 않는 E2E가 통과한다.
-
-### [x] 콘텐츠 metadata의 외부 값 경계를 강화한다
-
-- 해결한 문제
-  - 날짜와 URL이 형식 수준으로만 검증돼 존재하지 않는 날짜와 위험 protocol이 통과할 수 있었다.
-- 완료
-  - 허용 frontmatter field를 고정하고 문자열·배열을 정규화한 뒤 빈 값과 중복을 거부한다.
-  - ID와 section 소속, 실제 ISO 날짜 round-trip, 검증일 순서, credential 없는 HTTPS 출처를 검사한다.
-  - locale 쌍의 section/order/status/tags/package/API metadata 일치와 section별 연속 order를 검사한다.
-  - 화면에 하드코딩한 deep-dive 버전을 각 문서의 `packageVersion`으로 이동했다.
-- 검증
-  - 잘못된 월말/윤일, 위험 protocol, unknown field, locale drift, navigation order 회귀 테스트가 통과한다.
-
-### [ ] 패키지 계약의 소유권과 TypeScript 호환 lane을 명시한다
-
-- 근거
-  - `packages/theme-contract/contract.test.ts`는 앱 UI 구현까지 검사하지만 패키지 자체 typecheck 대상이 아니다.
-  - 공용 패키지는 TypeScript 7.0.2, Next 앱은 6.0.3을 사용한다.
-- 변경
-  - theme contract에는 토큰/provider 계약만 남기고 cross-app UI 검사는 루트 integration suite로 이동한다.
-  - TypeScript 버전을 정렬하거나 “공용 source export는 최소 TS6 호환” gate를 추가한다.
-  - private 앱의 공통 React/UI 버전은 catalog로 일원화한다.
-- 완료 조건
-  - 모든 패키지가 필터 단위 test/typecheck를 실행할 수 있다.
-  - 공용 source export가 최소 지원 compiler에서 검증된다.
+- **App/session 전면 재작성**: 제거한다. 줄 수, 모든 leaf의 selector 사용, 외부 store 도입은 완료 기준이
+  아니다. 위 두 feature boundary 뒤에는 실제 기능 변경이나 Profiler 근거가 있을 때만 추가 추출한다.
+- **모든 dialog/tool window lazy화**: 제거한다. 작은 chunk와 첫 open/focus 복잡성이 늘 수 있으므로 startup
+  측정이 renderer 병목을 보여줄 때만 제한적으로 적용한다.
+- **Tailwind registry 전면 해체**: 제거한다. 현재 사용 중인 제품 layout을 CSS Module이나 CVA로 다시 쓰는
+  것은 사용자 가치가 없는 스타일 재작성이다.
+- **theme-contract test 파일 이동과 독립 Nx target**: 제거한다. package는 private CSS-only이고 현재 root
+  Vitest가 계약을 실행한다. affected-only CI 또는 독립 배포 요구가 생길 때 다시 검토한다.
+- **Docs client shell 추가 분리**: 보류한다. MDX 본문은 Server Component `children`으로 유지되고 현재 route
+  JS 비용 문제가 측정되지 않았다.
 
 ## 현재 검증 결과
 
 - 통과
-  - root `pnpm check` — format, lint, typecheck, Vitest 850건, icon check와 모든 workspace build
+  - root `pnpm check` — format, lint, Nx graph, typecheck, Vitest 881건, release
+    Node script 22건, icon check와 모든 workspace build
   - root format check와 lint — 기존 `no-control-regex` 경고 1개
-  - 공유 UI/package-map 10건, theme contract 8건, Engineering Docs Vitest 27건
-  - Git Client Vitest 783건과 production build
+  - 공유 UI/package-map 10건, theme contract 8건, Engineering Docs Vitest 31건
+  - Git Client Vitest 808건과 production build
   - Engineering Docs와 README production build
   - Engineering Docs Playwright 26건, README 8건, Git Client 42건
+  - Electron package와 packaged renderer/preload smoke
+  - production audit — high 이상 0건, moderate 2건, low 1건
   - tooling/remark 실제 build와 `publish --dry-run --no-git-checks`
-  - `shadcn info`와 `shadcn add button --dry-run`
+  - `shadcn info`와 7개 공유 primitive `shadcn add --dry-run`
 - 참고
   - Git Client build는 통과하지만 500KB 초과 chunk 경고가 있다.
 
@@ -265,18 +188,28 @@
 pnpm --filter @jongminchung/ui run typecheck
 pnpm exec vitest run packages/ui packages/tooling/src/package-map.test.ts
 pnpm --dir packages/ui exec shadcn info
-pnpm --dir packages/ui exec shadcn add button --dry-run -y
+pnpm --dir packages/ui exec shadcn add spinner button empty alert badge dropdown-menu dialog --dry-run -y
 pnpm --filter @jongminchung/engineering-docs run build
 pnpm --filter @jongminchung/git-client run build
 pnpm --filter @jongminchung/engineering-docs run test:e2e
 pnpm --filter @jongminchung/readme run test:e2e
 pnpm --filter @jongminchung/git-client run test:e2e
+pnpm --filter @jongminchung/git-client run test:scripts
+pnpm run audit:prod
 pnpm run icon:check
-pnpm check
+pnpm run check
 ```
 
 ## 공식 기준
 
+- [GitHub Actions secure use](https://docs.github.com/en/actions/reference/security/secure-use)
+- [Electron security checklist](https://www.electronjs.org/docs/latest/tutorial/security)
 - [Next.js Server/Client Components](https://nextjs.org/docs/app/getting-started/server-and-client-components)
+- [Next.js Internationalization](https://nextjs.org/docs/app/guides/internationalization)
+- [Next.js Root Layout](https://nextjs.org/docs/app/api-reference/file-conventions/layout)
+- [Next.js Route Groups](https://nextjs.org/docs/app/api-reference/file-conventions/route-groups)
+- [React `lazy`](https://react.dev/reference/react/lazy)
+- [Vite production build](https://vite.dev/guide/build)
+- [WCAG 3.1.1 Language of Page](https://www.w3.org/WAI/WCAG22/Understanding/language-of-page)
 - [Tailwind CSS source detection](https://tailwindcss.com/docs/detecting-classes-in-source-files)
 - [shadcn monorepo 구성](https://ui.shadcn.com/docs/monorepo)

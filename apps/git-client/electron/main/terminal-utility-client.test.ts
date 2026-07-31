@@ -7,6 +7,7 @@ import {
 } from "../../src/shared/contracts/terminal-utility-process";
 import {
   TerminalUtilityClient,
+  type TerminalUtilityClientConnectOptions,
   type TerminalUtilityProcessTransport,
 } from "./terminal-utility-client";
 
@@ -49,18 +50,25 @@ class FakeTerminalUtilityTransport implements TerminalUtilityProcessTransport {
   emitMessage(message: unknown): void {
     for (const listener of this.messageListeners) listener(message);
   }
+
+  emitExit(exitCode: number): void {
+    for (const listener of this.exitListeners) listener(exitCode);
+  }
 }
 
 function lastMessage(transport: FakeTerminalUtilityTransport): MainToTerminalUtilityMessage {
   return MainToTerminalUtilityMessageSchema.parse(transport.posted.at(-1));
 }
 
-async function connectClient(): Promise<{
+async function connectClient(options: TerminalUtilityClientConnectOptions = {}): Promise<{
   readonly client: TerminalUtilityClient;
   readonly transport: FakeTerminalUtilityTransport;
 }> {
   const transport = new FakeTerminalUtilityTransport();
-  const connecting = TerminalUtilityClient.connect(transport, { handshakeTimeoutMs: 1_000 });
+  const connecting = TerminalUtilityClient.connect(transport, {
+    handshakeTimeoutMs: 1_000,
+    ...options,
+  });
   transport.emitMessage({
     kind: "ready",
     protocolVersion: TERMINAL_UTILITY_PROTOCOL_VERSION,
@@ -140,6 +148,25 @@ describe("TerminalUtilityClient", () => {
     await expect(creating).rejects.toMatchObject({ code: "protocolViolation" });
     expect(client.state).toBe("crashed");
     expect(transport.killCount).toBe(1);
+  });
+
+  it("reports a utility crash once and does not replay a pending request", async () => {
+    const crashes: Error[] = [];
+    const { client, transport } = await connectClient({
+      onCrash: (error) => crashes.push(error),
+    });
+    const listing = client.listLaunchTargets();
+    const postedBeforeCrash = transport.posted.length;
+
+    transport.emitExit(9);
+
+    await expect(listing).rejects.toMatchObject({ code: "utilityExited" });
+    expect(client.state).toBe("crashed");
+    expect(transport.posted).toHaveLength(postedBeforeCrash);
+    expect(crashes).toHaveLength(1);
+    expect(crashes[0]).toMatchObject({ code: "utilityExited" });
+    transport.emitExit(10);
+    expect(crashes).toHaveLength(1);
   });
 
   it("validates terminal controls and disposes all sessions with the utility", async () => {

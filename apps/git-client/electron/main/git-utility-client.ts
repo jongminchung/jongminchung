@@ -94,6 +94,7 @@ export interface GitUtilityProcessTransport {
 
 export interface GitUtilityClientConnectOptions {
   readonly handshakeTimeoutMs?: number;
+  readonly onCrash?: (error: Error) => void;
 }
 
 export interface GitUtilityClientForkOptions extends GitUtilityClientConnectOptions {
@@ -167,6 +168,7 @@ export class GitUtilityClient {
   readonly #watchListeners = new Map<RepositoryId, RepositoryChangedListener>();
   readonly #handshakePromise: Promise<void>;
   readonly #unsubscribe: Array<() => void>;
+  readonly #onCrash: ((error: Error) => void) | undefined;
   #resolveHandshake: () => void = () => undefined;
   #rejectHandshake: (error: Error) => void = () => undefined;
   #handshakeTimer: NodeJS.Timeout | null = null;
@@ -180,6 +182,7 @@ export class GitUtilityClient {
     options: GitUtilityClientConnectOptions,
   ) {
     this.#transport = transport;
+    this.#onCrash = options.onCrash;
     this.#handshakePromise = new Promise((resolve, reject) => {
       this.#resolveHandshake = resolve;
       this.#rejectHandshake = reject;
@@ -229,6 +232,7 @@ export class GitUtilityClient {
     );
     return GitUtilityClient.connect(createElectronTransport(child), {
       handshakeTimeoutMs: options.handshakeTimeoutMs,
+      onCrash: options.onCrash,
     });
   }
 
@@ -1262,6 +1266,11 @@ export class GitUtilityClient {
     this.#rejectOutstanding(error);
     this.#cleanUpSubscriptions();
     if (kill) this.#transport.kill();
+    try {
+      this.#onCrash?.(error);
+    } catch (callbackError) {
+      console.error("[git-client] Git utility crash observer failed", callbackError);
+    }
   }
 
   #rejectOutstanding(error: Error): void {

@@ -10,7 +10,6 @@ import {
   type TerminalActionAvailability,
   type TerminalActionId,
 } from "../domain/terminalActions";
-import { tw } from "../styles/tailwind";
 import { useDismissLayer } from "./CommandProvider";
 import { DropdownMenuItem } from "./ProductOverlays";
 
@@ -71,7 +70,7 @@ export function TerminalOptionsMenu({
         align="start"
         anchor={anchor}
         aria-label="Terminal Options"
-        className={tw.terminalOptionsMenu}
+        className="z-[120] w-60 [&_[role=menuitem]]:min-h-7 [&_kbd]:text-[10px] [&_kbd]:text-muted-foreground"
         collisionPadding={8}
         finalFocus={false}
         positionMethod="fixed"
@@ -79,10 +78,7 @@ export function TerminalOptionsMenu({
       >
         {TERMINAL_ACTION_MENU.map((entry, index) =>
           entry.kind === "separator" ? (
-            <DropdownMenuSeparator
-              className={tw.terminalMenuSeparator}
-              key={`separator-${index}`}
-            />
+            <DropdownMenuSeparator key={`separator-${index}`} />
           ) : (
             <DropdownMenuItem
               endContent={entry.shortcut === null ? undefined : <kbd>{entry.shortcut}</kbd>}

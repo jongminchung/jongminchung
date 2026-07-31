@@ -1,10 +1,8 @@
-import { createGitBridge } from "./bridge/createGitBridge";
 import { AppearanceProvider } from "./components/AppearanceProvider";
 import { CommandProvider } from "./components/CommandProvider";
 import { GitClientTheme } from "./components/GitClientTheme";
 import { LocalHistoryPanel } from "./components/LocalHistoryPanel";
-
-const git = createGitBridge();
+import { localHistoryElectronApi } from "./platform/localHistoryElectron";
 
 function requiredParameter(name: string): string {
   const value = new URL(window.location.href).searchParams.get(name);
@@ -13,6 +11,7 @@ function requiredParameter(name: string): string {
 }
 
 export default function LocalHistoryWindow() {
+  const localHistory = localHistoryElectronApi();
   const repositoryId = requiredParameter("repositoryId");
   const repositoryName = requiredParameter("repositoryName");
   const initialPath = new URL(window.location.href).searchParams.get("path") ?? undefined;
@@ -20,14 +19,7 @@ export default function LocalHistoryWindow() {
     ? `Local History: ${initialPath}`
     : `Local History: ${repositoryName}`;
 
-  if (
-    git.listLocalHistoryActivities === undefined ||
-    git.readLocalHistoryActivity === undefined ||
-    git.readLocalHistoryDiff === undefined ||
-    git.revertLocalHistory === undefined ||
-    git.createLocalHistoryPatch === undefined ||
-    git.putLocalHistoryLabel === undefined
-  ) {
+  if (localHistory === null) {
     throw new Error("Local History is unavailable");
   }
 
@@ -44,19 +36,17 @@ export default function LocalHistoryWindow() {
             <LocalHistoryPanel
               initialPath={initialPath}
               loadActivities={(scope, cursor, limit, query, showSystemEvents) =>
-                git.listLocalHistoryActivities!(scope, cursor, limit, query, showSystemEvents)
+                localHistory.listActivities(scope, cursor, limit, query, showSystemEvents)
               }
-              loadActivity={(activityId) => git.readLocalHistoryActivity!(repositoryId, activityId)}
-              loadDiff={(activityId, path) =>
-                git.readLocalHistoryDiff!(repositoryId, activityId, path)
-              }
+              loadActivity={(activityId) => localHistory.readActivity(repositoryId, activityId)}
+              loadDiff={(activityId, path) => localHistory.readDiff(repositoryId, activityId, path)}
               mode="project"
               onCreatePatch={(activityId, paths) =>
-                git.createLocalHistoryPatch!(repositoryId, activityId, paths)
+                localHistory.createPatch(repositoryId, activityId, paths)
               }
-              onPutLabel={(label) => git.putLocalHistoryLabel!(repositoryId, label)}
+              onPutLabel={(label) => localHistory.putLabel(repositoryId, label)}
               onRevert={(activityId, paths, includeLater) =>
-                git.revertLocalHistory!(repositoryId, activityId, paths, includeLater)
+                localHistory.revert(repositoryId, activityId, paths, includeLater)
               }
               repositoryId={repositoryId}
               repositoryName={repositoryName}

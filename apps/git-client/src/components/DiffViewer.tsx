@@ -18,6 +18,7 @@ import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
 import type { SelectableDiffLine } from "./CodeMirrorDiff";
 import { Icon } from "./Icon";
+import { EmptyState, Spinner, StatusBadge } from "./ProductCollections";
 import { Popover } from "./ProductOverlays";
 
 const CodeMirrorDiff = lazy(() => import("./CodeMirrorDiff"));
@@ -406,10 +407,7 @@ export function DiffViewer({
                 disabled={!onPreviousFile}
                 onClick={onPreviousFile}
                 type="button"
-                className={cn(
-                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
-                  tw.iconButton,
-                )}
+                className="text-muted-foreground"
                 variant="ghost"
                 size="icon-sm"
               >
@@ -427,10 +425,7 @@ export function DiffViewer({
                 disabled={!onNextFile}
                 onClick={onNextFile}
                 type="button"
-                className={cn(
-                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
-                  tw.iconButton,
-                )}
+                className="text-muted-foreground"
                 variant="ghost"
                 size="icon-sm"
               >
@@ -442,7 +437,7 @@ export function DiffViewer({
         </Tooltip>
         {file ? (
           <>
-            <span className={tw.statusBadge}>{file.status.charAt(0).toUpperCase()}</span>
+            <StatusBadge>{file.status.charAt(0).toUpperCase()}</StatusBadge>
             <strong className={tw.ellipsis}>{file.path}</strong>
             <small>{sourceLabel}</small>
           </>
@@ -486,10 +481,8 @@ export function DiffViewer({
                   onPressedChange={onToggleFocus}
                   pressed={focused}
                   type="button"
-                  className={cn(
-                    "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
-                    tw.iconButton,
-                  )}
+                  className="size-7 p-0 text-muted-foreground"
+                  size="sm"
                 >
                   <Icon name="external" size={13} />
                 </Toggle>
@@ -730,9 +723,9 @@ export function DiffViewer({
         tabIndex={0}
       >
         {loading ? (
-          <div className={tw.emptyState}>Loading diff…</div>
+          <Spinner className="h-full w-full justify-center" label="Loading diff…" />
         ) : file === null ? (
-          <div className={tw.emptyState}>Select a changed file to review its diff.</div>
+          <EmptyState title="Select a changed file to review its diff." />
         ) : file.binary && hasImagePreview ? (
           <ImageDiff afterPreview={afterPreview} beforePreview={beforePreview} />
         ) : file.submodule && submoduleDiff ? (
@@ -794,7 +787,11 @@ export function DiffViewer({
             )}
           </div>
         ) : beforeText !== null && afterText !== null ? (
-          <Suspense fallback={<div className={tw.emptyState}>Loading diff editor…</div>}>
+          <Suspense
+            fallback={
+              <Spinner className="h-full w-full justify-center" label="Loading diff editor…" />
+            }
+          >
             <CodeMirrorDiff
               after={afterText}
               before={beforeText}

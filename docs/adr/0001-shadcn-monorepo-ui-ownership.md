@@ -2,6 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-07-30
+- Amended: 2026-07-31 (workspace TypeScript baseline)
 
 ## Context
 
@@ -47,6 +48,8 @@ variants and platform behavior remain app-local compositions.
 - Next server boundaries remain visible and reviewable.
 - Vite must deduplicate React, and Next must transpile the source package.
 - Workspace alias tooling and tests must preserve wildcard export captures.
+- The source package follows the single workspace TypeScript 6 baseline; compiler majors move only
+  when every consumer and toolchain boundary can move together.
 
 ## References
 

@@ -6,6 +6,8 @@ import { revisionDiffEntries } from "../domain/changeReview";
 import type { FileContent, FileSource } from "../shared/contracts/model";
 import { tw } from "../styles/tailwind";
 import { DiffViewer } from "./DiffViewer";
+import { Notice } from "./Notice";
+import { EmptyState, Spinner, StatusBadge } from "./ProductCollections";
 import { VerticalResizeHandle } from "./VerticalResizeHandle";
 
 export function RevisionComparison({
@@ -94,13 +96,15 @@ export function RevisionComparison({
         <code>{to.slice(0, 8)}</code>
       </header>
       {loading ? (
-        <div className={tw.emptyState}>Loading revision comparison…</div>
+        <Spinner className="h-full w-full justify-center" label="Loading revision comparison…" />
       ) : error ? (
-        <div className={tw.emptyState}>{error}</div>
+        <Notice className="m-auto w-auto" role="alert" size="sm" tone="destructive">
+          {error}
+        </Notice>
       ) : entries.length === 0 ? (
-        <div className={tw.emptyState}>These revisions have no file differences.</div>
+        <EmptyState title="These revisions have no file differences." />
       ) : (
-        <div>
+        <div data-revision-content>
           <nav aria-label="Compared files">
             {entries.map((entry) => (
               <Button
@@ -115,7 +119,7 @@ export function RevisionComparison({
                 variant="outline"
                 size="sm"
               >
-                <span className={tw.statusBadge}>{entry.file.status.charAt(0).toUpperCase()}</span>
+                <StatusBadge>{entry.file.status.charAt(0).toUpperCase()}</StatusBadge>
                 <span className={tw.ellipsis}>{entry.file.path}</span>
               </Button>
             ))}

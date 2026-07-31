@@ -16,6 +16,7 @@ import type {
 import { useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
 import { Notice } from "./Notice";
+import { Spinner } from "./ProductCollections";
 import { Dialog, DialogFooter, DialogHeader } from "./ProductDialog";
 
 const ACTIONS: readonly RebasePlanAction[] = ["pick", "reword", "edit", "squash", "fixup", "drop"];
@@ -169,13 +170,7 @@ export function HistoryRewriteWorkspace({
           title="History Rewrite"
         />
         {loading ? (
-          <div
-            className="flex items-center justify-center gap-2 text-muted-foreground"
-            role="status"
-          >
-            <span className="activitySpinner" />
-            Inspecting branch history…
-          </div>
+          <Spinner className="w-full justify-center" label="Inspecting branch history…" />
         ) : completed && preview ? (
           <div className="m-auto grid max-w-xl gap-4 rounded-lg border border-border bg-card p-6 text-center">
             <Icon name="check" size={32} />

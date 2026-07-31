@@ -371,12 +371,6 @@
     }
   }
 
-  @keyframes activitySpin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
   .appShell .cm-editor {
     background: var(--muted) !important;
   }
@@ -419,7 +413,7 @@
   }
 
   /* JediTerm 3.72 draws column zero at getInsetX() == 4. */
-  .appShell .terminalSurface > div:not(.terminalEmpty) {
+  .appShell .terminalSurface > div:not([data-slot="empty"]) {
     box-sizing: border-box;
     padding-left: 4px;
   }

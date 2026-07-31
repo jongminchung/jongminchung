@@ -32,7 +32,7 @@ As of 2026-07-20, Git Client is not identical to Rebased 1.1.8. Checked-in repor
 - The Electron Git bridge implements and package-verifies all 43 public methods, but `electron-bridge-support.json` records 0 of 43 as verified against Rebased behavior.
 - Visual, accessibility-tree, focus-order, Git/network side-effect, performance, soak, Developer ID, and notarization gates remain incomplete. `reports/completion.json` therefore remains `complete:false`.
 
-The design-system implementation is intentionally different: Rebased renders JetBrains Islands controls, while Git Client uses Tailwind CSS 4 and locally owned shadcn/ui primitives. This is an allowed framework-rendering difference only when the observable geometry, semantics, focus behavior, and state transitions satisfy the parity thresholds.
+The design-system implementation is intentionally different: Rebased renders JetBrains Islands controls, while Git Client uses Tailwind CSS 4, shared `@jongminchung/ui` shadcn primitives, and app-owned product compositions. This is an allowed framework-rendering difference only when the observable geometry, semantics, focus behavior, and state transitions satisfy the parity thresholds.
 
 ## Verification cadence
 

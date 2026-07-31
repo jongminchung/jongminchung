@@ -41,7 +41,11 @@ describe("Nx Git Client release publisher", () => {
     expect(createReleaseTitle("1.2.3")).toBe("Git Client 1.2.3");
     expect(
       createGhReleaseArguments({
-        artifacts: { checksum: "/tmp/app.dmg.sha256", dmg: "/tmp/app.dmg" },
+        artifacts: {
+          checksum: "/tmp/app.dmg.sha256",
+          dmg: "/tmp/app.dmg",
+          provenance: "/tmp/app.dmg.provenance.json",
+        },
         notesFile: "/tmp/notes.md",
         sha: "abc123",
         version: "1.2.3",
@@ -52,6 +56,7 @@ describe("Nx Git Client release publisher", () => {
       "git-client-1.2.3",
       "/tmp/app.dmg",
       "/tmp/app.dmg.sha256",
+      "/tmp/app.dmg.provenance.json",
       "--repo",
       "jongminchung/jongminchung",
       "--target",
@@ -91,6 +96,7 @@ describe("Nx Git Client release publisher", () => {
         assets: [
           { name: "Git-Client_1.2.3_macos_arm64.dmg" },
           { name: "Git-Client_1.2.3_macos_arm64.dmg.sha256" },
+          { name: "Git-Client_1.2.3_macos_arm64.dmg.provenance.json" },
         ],
         isDraft: true,
         isPrerelease: false,

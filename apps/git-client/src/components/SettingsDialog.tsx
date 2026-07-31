@@ -16,6 +16,7 @@ import { type ProductSettings, type ProductZoom } from "../domain/productSetting
 import { tw } from "../styles/tailwind";
 import { useAppearance } from "./AppearanceProvider";
 import { Icon } from "./Icon";
+import { Notice } from "./Notice";
 import { RadioList, RadioListItem } from "./ProductCollections";
 import { Dialog, DialogHeader } from "./ProductDialog";
 import { CheckboxInput } from "./ProductFormControls";
@@ -322,9 +323,14 @@ export function SettingsDialog({
                 width="100%"
               />
               {keymapError && (
-                <p className={tw.collectionError} role="alert">
+                <Notice
+                  className="rounded-none px-3.5 py-1.5"
+                  role="alert"
+                  size="sm"
+                  tone="destructive"
+                >
                   {keymapError}
-                </p>
+                </Notice>
               )}
               <div className={tw.keymapTable} role="table" aria-label="Keymap actions">
                 {filteredCommands.map((command) => (

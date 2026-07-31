@@ -7,7 +7,7 @@ Appearance supports System Appearance, White, and Black. System mode follows mac
 ## Stack
 
 - Electron 43.1.1, React 19, Vite 8, TypeScript 6, pnpm 11
-- Tailwind CSS 4 and locally owned shadcn/ui primitives on Base UI
+- Tailwind CSS 4, shared `@jongminchung/ui` shadcn primitives on Base UI, and app-owned product UI
 - Sandboxed renderer and a typed preload API; no renderer Node.js access
 - System Git 2.39+ through an allowlisted Electron utility-process bridge
 - TanStack Virtual for refs and 500-row log pages

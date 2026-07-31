@@ -6,6 +6,7 @@ import { basename, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { executeCommand } from "./process.mjs";
 import { createReproducibleDmg } from "./reproducible-dmg.mjs";
+import { smokeElectronPackage } from "./smoke-electron-package.mjs";
 import { verifyElectronPackage } from "./verify-electron-package.mjs";
 
 export const MAX_RELEASE_DMG_BYTES = 160 * 1024 * 1024;
@@ -17,6 +18,7 @@ export const RELEASE_MODES = Object.freeze({
 const expectedElectronVersion = "43.1.1";
 const stableSemverPattern = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/u;
 const developerIdApplicationPattern = /^Developer ID Application: .+ \([A-Z0-9]+\)$/u;
+const sourceShaPattern = /^[0-9a-f]{40}$/u;
 
 export function parseReleaseVersion(value) {
   if (typeof value !== "string" || !stableSemverPattern.test(value)) {
@@ -35,7 +37,57 @@ export function createReleaseArtifactNames(value, mode = RELEASE_MODES.productio
   const validatedMode = parseReleaseMode(mode);
   const suffix = validatedMode === RELEASE_MODES.localAdHoc ? "_adhoc" : "";
   const dmg = `Git-Client_${version}_macos_arm64${suffix}.dmg`;
-  return { checksum: `${dmg}.sha256`, dmg };
+  return { checksum: `${dmg}.sha256`, dmg, provenance: `${dmg}.provenance.json` };
+}
+
+function parseSourceSha(value) {
+  if (typeof value !== "string" || !sourceShaPattern.test(value)) {
+    throw new Error(`Expected a full Git source SHA, received: ${String(value)}`);
+  }
+  return value;
+}
+
+export async function verifyReleaseSource(
+  workspaceRoot,
+  { expectedSha = null, fetch = true, runCommand = executeCommand } = {},
+) {
+  const cwd = resolve(workspaceRoot);
+  const git = async (arguments_) =>
+    runCommand("git", arguments_, {
+      capture: true,
+      cwd,
+    });
+  if (fetch) {
+    await git([
+      "fetch",
+      "--tags",
+      "--prune",
+      "origin",
+      "+refs/heads/main:refs/remotes/origin/main",
+    ]);
+  }
+
+  const status = await git(["status", "--porcelain=v1", "--untracked-files=all"]);
+  if (status.stdout.trim() !== "") {
+    throw new Error("Release source worktree must be clean.");
+  }
+  const branch = (await git(["symbolic-ref", "--quiet", "--short", "HEAD"])).stdout.trim();
+  if (branch !== "main") {
+    throw new Error(`Release source branch must be main, received: ${branch || "detached HEAD"}`);
+  }
+  const sourceSha = parseSourceSha((await git(["rev-parse", "HEAD"])).stdout.trim());
+  const remoteSha = parseSourceSha(
+    (await git(["rev-parse", "refs/remotes/origin/main"])).stdout.trim(),
+  );
+  if (sourceSha !== remoteSha) {
+    throw new Error(`Release source must exactly match origin/main: ${sourceSha} != ${remoteSha}`);
+  }
+  if (expectedSha !== null && sourceSha !== parseSourceSha(expectedSha)) {
+    throw new Error(
+      `Release source changed during validation: ${String(expectedSha)} != ${sourceSha}`,
+    );
+  }
+  return Object.freeze({ sourceSha });
 }
 
 export function requireMacArm64(platform, architecture) {
@@ -156,9 +208,12 @@ export async function stageReleaseArtifact(
   source,
   outputDirectory,
   value,
+  sourceSha,
   mode = RELEASE_MODES.production,
 ) {
   const names = createReleaseArtifactNames(value, mode);
+  const validatedSourceSha = parseSourceSha(sourceSha);
+  const validatedMode = parseReleaseMode(mode);
   const sourceStats = await stat(source);
   if (!sourceStats.isFile()) throw new Error(`Release DMG is not a regular file: ${source}`);
   if (sourceStats.size > MAX_RELEASE_DMG_BYTES) {
@@ -166,11 +221,39 @@ export async function stageReleaseArtifact(
   }
   const dmg = join(outputDirectory, names.dmg);
   const checksum = join(outputDirectory, names.checksum);
+  const provenance = join(outputDirectory, names.provenance);
   await mkdir(outputDirectory, { recursive: true });
   await copyFile(source, dmg);
   const digest = await createSha256(dmg);
   await writeFile(checksum, `${digest}  ${names.dmg}\n`);
-  return Object.freeze({ checksum, dmg, mode: parseReleaseMode(mode) });
+  await writeFile(
+    provenance,
+    `${JSON.stringify(
+      {
+        schemaVersion: 1,
+        repository: "jongminchung/jongminchung",
+        ref: "refs/heads/main",
+        sourceSha: validatedSourceSha,
+        releaseVersion: parseReleaseVersion(value),
+        mode: validatedMode,
+        artifact: {
+          name: names.dmg,
+          sha256: digest,
+          sizeBytes: sourceStats.size,
+        },
+      },
+      null,
+      2,
+    )}\n`,
+    { encoding: "utf8", mode: 0o600 },
+  );
+  return Object.freeze({
+    checksum,
+    dmg,
+    mode: validatedMode,
+    provenance,
+    sourceSha: validatedSourceSha,
+  });
 }
 
 async function visitForgeOutput(directory, found) {
@@ -361,6 +444,11 @@ export async function buildRelease(value, options = {}) {
   const validateApp = options.validateApp ?? validateReleaseApp;
   const validateDmg = options.validateDmg ?? validateReleaseDmg;
   const createDmg = options.createDmg ?? createReproducibleDmg;
+  const smokeApp = options.smokeApp ?? smokeElectronPackage;
+  const verifySource = options.verifySource ?? verifyReleaseSource;
+  const workspaceRoot = options.workspaceRoot ?? resolve(appRoot, "../..");
+
+  const { sourceSha } = await verifySource(workspaceRoot, { runCommand });
 
   if (security.identity !== null) {
     await assertDeveloperIdIdentityAvailable(security.identity, runCommand);
@@ -372,6 +460,11 @@ export async function buildRelease(value, options = {}) {
       env: releaseEnvironment,
     });
   }
+  await verifySource(workspaceRoot, {
+    expectedSha: sourceSha,
+    fetch: false,
+    runCommand,
+  });
 
   await rm(forgeOutputDirectory, { force: true, recursive: true });
   await rm(outputDirectory, { force: true, recursive: true });
@@ -381,6 +474,11 @@ export async function buildRelease(value, options = {}) {
   });
 
   const forgeOutputs = await discoverForgeOutputs(forgeOutputDirectory);
+  await verifySource(workspaceRoot, {
+    expectedSha: sourceSha,
+    fetch: false,
+    runCommand,
+  });
   const reproducibleDirectory = await mkdtemp(join(tmpdir(), "git-client-release-image-"));
   const reproducibleDmg = join(reproducibleDirectory, "Git Client.dmg");
   const validationOptions = {
@@ -391,9 +489,21 @@ export async function buildRelease(value, options = {}) {
   };
   try {
     await validateApp(forgeOutputs.app, version, validationOptions);
+    await smokeApp(forgeOutputs.app);
     await createDmg(forgeOutputs.app, reproducibleDmg, { runCommand });
     await validateDmg(reproducibleDmg, version, validationOptions);
-    const artifacts = await stageReleaseArtifact(reproducibleDmg, outputDirectory, version, mode);
+    await verifySource(workspaceRoot, {
+      expectedSha: sourceSha,
+      fetch: false,
+      runCommand,
+    });
+    const artifacts = await stageReleaseArtifact(
+      reproducibleDmg,
+      outputDirectory,
+      version,
+      sourceSha,
+      mode,
+    );
     return Object.freeze({ ...artifacts, app: forgeOutputs.app });
   } finally {
     await rm(reproducibleDirectory, { force: true, recursive: true });
@@ -407,6 +517,7 @@ async function main() {
   console.log(`Verified app: ${String(artifacts.app)}`);
   console.log(`Release DMG: ${String(artifacts.dmg)}`);
   console.log(`SHA-256 manifest: ${String(artifacts.checksum)}`);
+  console.log(`Source provenance: ${String(artifacts.provenance)}`);
 }
 
 const entryPoint = process.argv[1];

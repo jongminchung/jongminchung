@@ -108,6 +108,7 @@ export const IPC_CHANNELS = {
   gitCloseRepository: "git-client:git:close-repository",
   gitInspectSnapshot: "git-client:git:inspect-snapshot",
   gitRepositoryService: "git-client:git:repository-service",
+  localHistoryRepositoryService: "git-client:local-history:repository-service",
   gitQuery: "git-client:git:query",
   gitQueryEvent: "git-client:git:query-event",
   gitCancelQuery: "git-client:git:cancel-query",

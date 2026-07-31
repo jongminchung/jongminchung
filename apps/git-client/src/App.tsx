@@ -1,4 +1,5 @@
 import { Button } from "@jongminchung/ui/components/button";
+import { Spinner as SpinnerIcon } from "@jongminchung/ui/components/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@jongminchung/ui/components/tabs";
 import { Toggle } from "@jongminchung/ui/components/toggle";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
@@ -54,12 +55,14 @@ import { Icon } from "./components/Icon";
 import { InspectionResultsDialog } from "./components/InspectionResultsDialog";
 import { InvalidateCachesDialog } from "./components/InvalidateCachesDialog";
 import { LeftoverDirectoriesDialog } from "./components/LeftoverDirectoriesDialog";
+import { Notice } from "./components/Notice";
 import {
   NotificationBalloon,
   NotificationToolWindow,
   type ProductNotification,
 } from "./components/NotificationToolWindow";
 import { ProcessesDialog } from "./components/ProcessesDialog";
+import { EmptyState, Spinner, StatePill } from "./components/ProductCollections";
 import { ProductHelpDialog } from "./components/ProductHelpDialog";
 import { ProjectSearchDialog, type ProjectSearchSurface } from "./components/ProjectSearchDialog";
 import { ProjectSwitcherPopup } from "./components/ProjectSwitcherPopup";
@@ -347,11 +350,11 @@ const EMPTY_CONTENT_PAIR: DiffContentPair = {
   loading: false,
 };
 
-const ACTIVITY_STATUS_CLASS = {
-  running: "",
-  succeeded: "text-success",
-  failed: "border-destructive text-destructive",
-  cancelled: "text-disabled-foreground",
+const ACTIVITY_STATUS_TONE = {
+  running: "neutral",
+  succeeded: "success",
+  failed: "destructive",
+  cancelled: "disabled",
 } as const satisfies Readonly<Record<ActivityStatus, string>>;
 
 const STATUS_BAR_WIDGET_COMMANDS = [
@@ -509,7 +512,7 @@ function WorkspaceTitlebar({
               <Button
                 aria-expanded={projectSwitcherOpen}
                 aria-label={`Project: ${repository?.snapshot.name ?? "Git Client"}`}
-                className={cn("h-[26px] text-xs text-muted-foreground", tw.projectSelector)}
+                className="h-[26px] max-w-[210px] gap-[5px] px-1.5 text-xs text-muted-foreground [&>span:nth-child(2)]:overflow-hidden [&>span:nth-child(2)]:text-ellipsis [&>span:nth-child(2)]:whitespace-nowrap"
                 onClick={() => onProjectSwitcherOpenChange(!projectSwitcherOpen)}
                 ref={projectButton}
                 variant="ghost"
@@ -548,7 +551,7 @@ function WorkspaceTitlebar({
                   <Button
                     aria-expanded={branchesOpen}
                     aria-label={repository?.snapshot.currentBranch ?? "No branch"}
-                    className={cn("h-[26px] text-xs text-muted-foreground", tw.mainToolbarAction)}
+                    className="h-[26px] max-w-[180px] gap-[5px] px-1.5 text-xs text-muted-foreground [&>span]:overflow-hidden [&>span]:text-ellipsis [&>span]:whitespace-nowrap"
                     disabled={!repository}
                     onClick={() => setBranchesOpen((value) => !value)}
                     variant="ghost"
@@ -596,7 +599,7 @@ function WorkspaceTitlebar({
               render={
                 <Button
                   aria-label="Update Project..."
-                  className={cn("h-[26px] w-7 text-xs text-muted-foreground", tw.mainToolbarIcon)}
+                  className="h-[26px] w-7 text-xs text-muted-foreground"
                   disabled={!repository}
                   onClick={() =>
                     void session.executeOperation({
@@ -618,7 +621,7 @@ function WorkspaceTitlebar({
               render={
                 <Button
                   aria-label="Push…"
-                  className={cn("h-[26px] w-7 text-xs text-muted-foreground", tw.mainToolbarIcon)}
+                  className="h-[26px] w-7 text-xs text-muted-foreground"
                   disabled={!repository}
                   onClick={onOpenPush}
                   variant="ghost"
@@ -638,7 +641,7 @@ function WorkspaceTitlebar({
           render={
             <Button
               aria-label="Search Everywhere"
-              className={cn("h-[26px] w-7 text-xs text-muted-foreground", tw.mainToolbarIcon)}
+              className="h-[26px] w-7 text-xs text-muted-foreground"
               onClick={openPalette}
               variant="ghost"
               size="default"
@@ -655,7 +658,7 @@ function WorkspaceTitlebar({
           render={
             <Button
               aria-label="IDE and Project Settings"
-              className={cn("h-[26px] w-7 text-xs text-muted-foreground", tw.mainToolbarIcon)}
+              className="h-[26px] w-7 text-xs text-muted-foreground"
               onClick={onOpenSettings}
               variant="ghost"
               size="default"
@@ -894,11 +897,13 @@ function StartupWorkspace({
   if (session.restoring) {
     return (
       <main className={tw.startupWorkspace} aria-busy="true">
-        <section className={tw.restoreWorkspace} role="status">
-          <span className={tw.activitySpinner} />
-          <strong>Restoring workspace…</strong>
-          <p>Reopening repositories and validating saved paths.</p>
-        </section>
+        <EmptyState
+          className="p-0 [grid-row:1_/_-1] [&_[data-slot=empty-title]]:font-medium [&_[data-slot=empty-title]]:text-foreground"
+          description="Reopening repositories and validating saved paths."
+          icon={<SpinnerIcon aria-hidden className="size-3" />}
+          role="status"
+          title="Restoring workspace…"
+        />
       </main>
     );
   }
@@ -940,7 +945,7 @@ function RepositoryLoadingSkeleton(): React.ReactElement {
                 Log
               </span>
             </div>
-            <div className={tw.loadingVcsLog}>Loading VCS Log...</div>
+            <Spinner className="h-full w-full justify-center" label="Loading VCS Log…" />
           </div>
         </div>
       </div>
@@ -4920,10 +4925,7 @@ function RepositoryWorkspace({
                               }}
                               render={
                                 <Button
-                                  className={cn(
-                                    "h-6 max-w-[210px] gap-1 overflow-hidden py-0 pr-1 pl-2 text-xs text-ellipsis text-muted-foreground data-active:bg-accent data-active:text-foreground",
-                                    !inspector && activeLogTabId === tabId && tw.activeButton,
-                                  )}
+                                  className="h-6 max-w-[210px] gap-1 overflow-hidden py-0 pr-1 pl-2 text-xs text-ellipsis text-muted-foreground data-active:bg-accent data-active:text-foreground"
                                   variant="ghost"
                                   size="xs"
                                 />
@@ -5022,14 +5024,14 @@ function RepositoryWorkspace({
               })}
             </TabsList>
             <span className={tw.editorToolbarSpacer} />
-            {session.stale && <span className={tw.statePill}>Changed</span>}
-            {repository.snapshot.isShallow && <span className={tw.statePill}>Shallow</span>}
-            {repository.snapshot.isBare && <span className={tw.statePill}>Bare</span>}
+            {session.stale && <StatePill>Changed</StatePill>}
+            {repository.snapshot.isShallow && <StatePill>Shallow</StatePill>}
+            {repository.snapshot.isBare && <StatePill>Bare</StatePill>}
             {repository.snapshot.operation && (
-              <span className={tw.operationPill}>
+              <StatePill className="gap-1" tone="destructive">
                 <Icon name="warning" size={13} />
                 {repository.snapshot.operation} in progress
-              </span>
+              </StatePill>
             )}
             {repository.snapshot.operation && repository.snapshot.operation !== "bisect" && (
               <>
@@ -5099,10 +5101,7 @@ function RepositoryWorkspace({
                 render={
                   <Button
                     aria-label="View Options"
-                    className={cn(
-                      "h-6 w-[30px] rounded-none border-y-0 border-r border-l-0 bg-transparent p-0 text-xs text-muted-foreground hover:text-accent-foreground",
-                      tw.editorToolbarIcon,
-                    )}
+                    className="h-6 w-[30px] flex-[0_0_30px] rounded-none border-y-0 border-r border-l-0 bg-transparent p-0 text-xs text-muted-foreground hover:text-accent-foreground"
                     onClick={() => void session.reload()}
                     variant="outline"
                     size="xs"
@@ -5472,7 +5471,7 @@ function RepositoryWorkspace({
                         );
                       })}
                     {!inspector && !logOpen && (
-                      <div className={tw.editorEmptyWorkspace}>
+                      <EmptyState className="gap-3 p-0 [&_[data-slot=empty-content]]:gap-3 [&_kbd]:ml-1.5 [&_kbd]:font-sans">
                         <Button
                           className={cn("p-0 text-[13px] text-muted-foreground hover:underline")}
                           data-open-git-log
@@ -5490,7 +5489,7 @@ function RepositoryWorkspace({
                         >
                           Commit <kbd>⌘0</kbd>
                         </Button>
-                      </div>
+                      </EmptyState>
                     )}
                     {inspectorTabs.map((tab) => {
                       const key = inspectorKey(tab);
@@ -5690,13 +5689,14 @@ function RepositoryWorkspace({
             {session.activity &&
               (productSettings.statusBarWidgets.statusText ||
                 productSettings.statusBarWidgets.fileSystemSync) && (
-                <span
-                  className={`${tw.activityPill} ${ACTIVITY_STATUS_CLASS[session.activity.status]}`}
+                <StatePill
+                  className="min-h-[18px] max-w-[420px] gap-1.5 rounded-lg px-1.5 py-px"
                   role="status"
+                  tone={ACTIVITY_STATUS_TONE[session.activity.status]}
                   title={session.activity.error ?? undefined}
                 >
                   {session.activity.status === "running" ? (
-                    <span className={tw.activitySpinner} />
+                    <SpinnerIcon aria-hidden className="size-3" />
                   ) : session.activity.status === "succeeded" ? (
                     <Icon name="check" size={11} />
                   ) : (
@@ -5708,25 +5708,25 @@ function RepositoryWorkspace({
                   {session.activity.status === "running" &&
                     session.activity.requestIds.length > 0 && (
                       <Button
-                        className={cn("rounded-none p-0 text-[9px] text-inherit underline")}
+                        className="h-auto rounded-none p-0 text-[9px] text-inherit"
                         onClick={() => void session.cancelActivity()}
-                        variant="ghost"
-                        size="default"
+                        variant="link"
+                        size="xs"
                       >
                         Cancel
                       </Button>
                     )}
                   {session.activity.status === "failed" && session.activity.canRetry && (
                     <Button
-                      className={cn("rounded-none p-0 text-[9px] text-inherit underline")}
+                      className="h-auto rounded-none p-0 text-[9px] text-inherit"
                       onClick={() => void session.retryActivity()}
-                      variant="ghost"
-                      size="default"
+                      variant="link"
+                      size="xs"
                     >
                       Retry
                     </Button>
                   )}
-                </span>
+                </StatePill>
               )}
           </span>
           <span className={tw.statusbarWidgets}>
@@ -7422,61 +7422,80 @@ function AppContent() {
         />
       )}
       {session.error && (
-        <div className={tw.errorBanner} role="alert">
-          <Icon name="warning" size={14} />
-          <span>{session.error}</span>
-          {session.activity?.status === "failed" && session.activity.canRetry && (
+        <Notice
+          className="absolute top-20 z-[8] w-full items-center rounded-none border-x-0 px-3 py-1.5"
+          icon={<Icon name="warning" size={14} />}
+          role="alert"
+          size="sm"
+          tone="destructive"
+        >
+          <span className="flex w-full items-center gap-2">
+            <span className="min-w-0 flex-1">{session.error}</span>
+            {session.activity?.status === "failed" && session.activity.canRetry && (
+              <Button
+                className="h-auto p-0 text-xs text-inherit"
+                onClick={() => void session.retryActivity()}
+                size="xs"
+                variant="link"
+              >
+                Retry
+              </Button>
+            )}
             <Button
-              className={cn("rounded-none p-0 text-xs text-inherit underline")}
-              onClick={() => void session.retryActivity()}
-              variant="ghost"
-              size="default"
+              className="h-auto p-0 text-xs text-inherit"
+              onClick={() => {
+                session.dismissError();
+                if (session.activity?.status === "failed")
+                  session.dismissActivity(session.activity.id);
+              }}
+              size="xs"
+              variant="link"
             >
-              Retry
+              Dismiss
             </Button>
-          )}
-          <Button
-            className={cn("rounded-none p-0 text-xs text-inherit underline")}
-            onClick={() => {
-              session.dismissError();
-              if (session.activity?.status === "failed")
-                session.dismissActivity(session.activity.id);
-            }}
-            variant="ghost"
-            size="default"
-          >
-            Dismiss
-          </Button>
-        </div>
+          </span>
+        </Notice>
       )}
       {session.notice && (
-        <div className={tw.errorBanner} role="status">
-          <Icon name="history" size={14} />
-          <span>{session.notice}</span>
-          <Button
-            className={cn("rounded-none p-0 text-xs text-inherit underline")}
-            onClick={session.dismissNotice}
-            variant="ghost"
-            size="default"
-          >
-            Dismiss
-          </Button>
-        </div>
+        <Notice
+          className="absolute top-20 z-[8] w-full items-center rounded-none border-x-0 px-3 py-1.5"
+          icon={<Icon name="history" size={14} />}
+          role="status"
+          size="sm"
+        >
+          <span className="flex w-full items-center gap-2">
+            <span className="min-w-0 flex-1">{session.notice}</span>
+            <Button
+              className="h-auto p-0 text-xs text-inherit"
+              onClick={session.dismissNotice}
+              size="xs"
+              variant="link"
+            >
+              Dismiss
+            </Button>
+          </span>
+        </Notice>
       )}
       {activeError?.kind === "error" ? (
-        <main className={tw.repositoryErrorView}>
-          <Icon name="warning" size={28} />
-          <h1>Repository unavailable</h1>
-          <code>{activeError.path}</code>
-          <p>{activeError.message}</p>
-          <Button
-            className={cn("min-h-8 px-3 text-xs shadow-xs")}
-            onClick={() => void session.activateTab({ kind: "welcome" })}
-            variant="default"
-            size="default"
+        <main className="min-h-0 [grid-row:2_/_-1]">
+          <EmptyState
+            className="gap-2 px-10 py-10 [&_[data-slot=empty-title]]:text-foreground"
+            description={<code>{activeError.path}</code>}
+            icon={<Icon name="warning" size={28} />}
+            title={<h1 className="text-base font-semibold">Repository unavailable</h1>}
           >
-            Back to Welcome
-          </Button>
+            <Notice className="w-full" role="alert" size="sm" tone="destructive">
+              {activeError.message}
+            </Notice>
+            <Button
+              className="min-h-8 px-3 text-xs shadow-xs"
+              onClick={() => void session.activateTab({ kind: "welcome" })}
+              variant="default"
+              size="default"
+            >
+              Back to Welcome
+            </Button>
+          </EmptyState>
         </main>
       ) : session.activeTab.kind === "welcome" || !session.repository ? (
         <StartupWorkspace

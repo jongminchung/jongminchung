@@ -7,10 +7,11 @@
   ],
   "type": "module",
   "scripts": {
+    "audit:prod": "pnpm audit --prod --audit-level high",
     "build": "pnpm run icon:check && pnpm -r --if-present run build",
-    "check": "pnpm run fmt:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build",
-    "deps:check": "pnpm dlx npm-check-updates --workspaces --target latest --packageManager pnpm",
-    "deps:update": "pnpm dlx npm-check-updates -u --workspaces --target latest --packageManager pnpm --reject typescript && pnpm install",
+    "check": "pnpm run fmt:check && pnpm run lint && pnpm run workspace:graph:check && pnpm run typecheck && pnpm run test && pnpm run build",
+    "deps:check": "npm-check-updates --workspaces --target latest --packageManager pnpm --reject typescript",
+    "deps:update": "npm-check-updates -u --workspaces --target latest --packageManager pnpm --reject typescript && pnpm install",
     "dev:engineering-docs": "pnpm --filter @jongminchung/engineering-docs run dev",
     "dev:readme": "pnpm --filter @jongminchung/readme run dev",
     "fmt": "oxfmt --config .oxfmtrc.mjs .",
@@ -19,10 +20,11 @@
     "icon:generate": "pnpm --filter @jongminchung/icon run generate",
     "lint": "oxlint .",
     "publish:dry-run": "pnpm --filter @jongminchung/remark-plantuml run publish:dry-run && pnpm --filter @jongminchung/tooling run publish:dry-run",
-    "test": "vitest run",
+    "test": "vitest run && pnpm --filter @jongminchung/git-client run test:scripts",
     "test:engineering-docs": "pnpm --filter @jongminchung/engineering-docs run test",
     "test:readme": "pnpm --filter @jongminchung/readme run test:e2e",
-    "typecheck": "tsc --noEmit && pnpm -r --if-present run typecheck"
+    "typecheck": "tsc --noEmit && pnpm -r --if-present run typecheck",
+    "workspace:graph:check": "nx show projects --json"
   },
   "devDependencies": {
     "@jongminchung/tooling": "workspace:*",
@@ -31,6 +33,7 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "npm-check-updates": "catalog:",
     "nx": "catalog:",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
@@ -46,5 +49,9 @@
     "node": ">=26.5.0",
     "pnpm": ">=11.13.0"
   },
-  "packageManager": "pnpm@11.15.1"
+  "packageManager": "pnpm@11.15.1",
+  "//": [
+    "audit:prod checks production dependency advisories at high severity or above.",
+    "It stays separate from check because the advisory database requires network access; CI runs it on a scheduled security lane."
+  ]
 }

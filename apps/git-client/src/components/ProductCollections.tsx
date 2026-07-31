@@ -1,8 +1,11 @@
+import { Badge } from "@jongminchung/ui/components/badge";
 import { Button } from "@jongminchung/ui/components/button";
 import {
   Empty,
+  EmptyContent,
   EmptyDescription,
   EmptyHeader,
+  EmptyMedia,
   EmptyTitle,
 } from "@jongminchung/ui/components/empty";
 import {
@@ -89,40 +92,108 @@ export function ListItem({
   );
 }
 
+interface EmptyStateProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"> {
+  readonly title?: ReactNode;
+  readonly description?: ReactNode;
+  readonly icon?: ReactNode;
+}
+
 export function EmptyState({
   title,
   description,
-}: {
-  readonly title: string;
-  readonly description?: string;
-}): ReactNode {
+  icon,
+  className,
+  children,
+  ...props
+}: EmptyStateProps): ReactNode {
   return (
-    <Empty className="gap-1 rounded-none px-6 py-10">
-      <EmptyHeader className="gap-1">
-        <EmptyTitle>{title}</EmptyTitle>
-        {description ? (
-          <EmptyDescription className="text-xs">{description}</EmptyDescription>
-        ) : null}
-      </EmptyHeader>
+    <Empty className={cn("h-full min-h-0 gap-1 rounded-none px-6 py-10", className)} {...props}>
+      {icon || title || description ? (
+        <EmptyHeader className="gap-1">
+          {icon ? <EmptyMedia>{icon}</EmptyMedia> : null}
+          {title ? (
+            <EmptyTitle className="text-xs font-normal text-muted-foreground">{title}</EmptyTitle>
+          ) : null}
+          {description ? (
+            <EmptyDescription className="text-xs">{description}</EmptyDescription>
+          ) : null}
+        </EmptyHeader>
+      ) : null}
+      {children ? <EmptyContent>{children}</EmptyContent> : null}
     </Empty>
   );
 }
 
-export function Spinner({
-  label,
-  size = "md",
-}: {
+interface SpinnerProps extends HTMLAttributes<HTMLSpanElement> {
   readonly label: string;
   readonly size?: "sm" | "md" | "lg";
-}): ReactNode {
+}
+
+export function Spinner({ label, size = "md", className, ...props }: SpinnerProps): ReactNode {
   return (
-    <span className="inline-flex items-center gap-2 text-xs text-muted-foreground" role="status">
+    <span
+      className={cn("inline-flex items-center gap-2 text-xs text-muted-foreground", className)}
+      role="status"
+      {...props}
+    >
       <SpinnerIcon
         aria-hidden
         className={size === "sm" ? "size-3" : size === "lg" ? "size-5" : "size-4"}
       />
       {label}
     </span>
+  );
+}
+
+export function StatusBadge({
+  className,
+  children,
+}: {
+  readonly className?: string;
+  readonly children: ReactNode;
+}): ReactNode {
+  return (
+    <Badge
+      className={cn("size-4 flex-none rounded-xs p-0 font-mono text-[9px] font-bold", className)}
+      variant="ghost"
+    >
+      {children}
+    </Badge>
+  );
+}
+
+const statePillToneClasses = {
+  neutral: "border-border text-muted-foreground",
+  success: "border-success/45 bg-success-muted text-success-muted-foreground",
+  destructive: "border-destructive/45 bg-destructive-muted text-destructive-muted-foreground",
+  disabled: "border-border bg-muted text-disabled-foreground",
+  primary: "border-primary",
+} as const;
+
+interface StatePillProps extends HTMLAttributes<HTMLSpanElement> {
+  readonly tone?: keyof typeof statePillToneClasses;
+}
+
+export function StatePill({
+  children,
+  className,
+  tone = "neutral",
+  ...props
+}: StatePillProps): ReactNode {
+  return (
+    <Badge
+      className={cn(
+        "h-auto rounded-xl border px-2 py-0.5 font-normal",
+        statePillToneClasses[tone],
+        className,
+      )}
+      variant={
+        tone === "primary" ? "default" : tone === "destructive" ? "destructive" : "secondary"
+      }
+      {...props}
+    >
+      {children}
+    </Badge>
   );
 }
 

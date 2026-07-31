@@ -1,6 +1,6 @@
 import { Button } from "@jongminchung/ui/components/button";
+import { Spinner as SpinnerIcon } from "@jongminchung/ui/components/spinner";
 import { cn } from "@jongminchung/ui/lib/utils";
-import { LoaderCircle } from "lucide-react";
 import { lazy, Suspense, useMemo, useState } from "react";
 import { COMMAND_ENABLED, commandDefinition, type CommandDefinition } from "../domain/commands";
 import { parseConflictBlocks, resolveConflictBlock } from "../domain/conflicts";
@@ -9,6 +9,7 @@ import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
 import { useCommandDefinitions, useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
+import { Spinner } from "./ProductCollections";
 import { Dialog, DialogHeader } from "./ProductDialog";
 import { Selector } from "./ProductFormControls";
 
@@ -40,7 +41,9 @@ function TextPane({
         )}
       </header>
       <div>
-        <Suspense fallback={<div className={tw.emptyState}>Loading editor…</div>}>
+        <Suspense
+          fallback={<Spinner className="h-full w-full justify-center" label="Loading editor…" />}
+        >
           <CodeMirrorText readOnly value={value ?? "File does not exist on this side."} />
         </Suspense>
       </div>
@@ -156,7 +159,7 @@ export function ConflictEditorDialog({
                   size="sm"
                 >
                   {pendingAction === "continue" ? (
-                    <LoaderCircle aria-hidden className="size-3.5 animate-spin" />
+                    <SpinnerIcon aria-hidden className="size-3.5" />
                   ) : null}
                   {`Continue ${operation}`}
                 </Button>
@@ -173,7 +176,7 @@ export function ConflictEditorDialog({
                   size="sm"
                 >
                   {pendingAction === "abort" ? (
-                    <LoaderCircle aria-hidden className="size-3.5 animate-spin" />
+                    <SpinnerIcon aria-hidden className="size-3.5" />
                   ) : null}
                   Abort
                 </Button>
@@ -209,7 +212,7 @@ export function ConflictEditorDialog({
                   size="default"
                 >
                   {pendingAction === "ours" ? (
-                    <LoaderCircle aria-hidden className="size-3.5 animate-spin" />
+                    <SpinnerIcon aria-hidden className="size-3.5" />
                   ) : null}
                   {`Use ${content.localLabel}`}
                 </Button>
@@ -226,7 +229,7 @@ export function ConflictEditorDialog({
                   size="default"
                 >
                   {pendingAction === "theirs" ? (
-                    <LoaderCircle aria-hidden className="size-3.5 animate-spin" />
+                    <SpinnerIcon aria-hidden className="size-3.5" />
                   ) : null}
                   {`Use ${content.remoteLabel}`}
                 </Button>
@@ -317,13 +320,17 @@ export function ConflictEditorDialog({
                     size="sm"
                   >
                     {pendingAction === "save" ? (
-                      <LoaderCircle aria-hidden className="size-3.5 animate-spin" />
+                      <SpinnerIcon aria-hidden className="size-3.5" />
                     ) : null}
                     Save and stage
                   </Button>
                 </header>
                 <div>
-                  <Suspense fallback={<div className={tw.emptyState}>Loading editor…</div>}>
+                  <Suspense
+                    fallback={
+                      <Spinner className="h-full w-full justify-center" label="Loading editor…" />
+                    }
+                  >
                     <CodeMirrorText onChange={setResult} readOnly={false} value={result} />
                   </Suspense>
                 </div>

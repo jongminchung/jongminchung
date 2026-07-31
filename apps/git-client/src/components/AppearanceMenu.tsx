@@ -1,13 +1,17 @@
 import { Button } from "@jongminchung/ui/components/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@jongminchung/ui/components/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
-import { cn } from "@jongminchung/ui/lib/utils";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import type { AppearancePreference, AppearanceTheme } from "../domain/appearance";
 import { useAppearance } from "./AppearanceProvider";
 import { useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
-import { RadioList, RadioListItem } from "./ProductCollections";
-import { Popover } from "./ProductOverlays";
 
 const APPEARANCE_OPTIONS = [
   { mode: "system", label: "Sync with OS", icon: "appearance" },
@@ -22,7 +26,6 @@ const APPEARANCE_OPTIONS = [
 export function AppearanceMenu(): React.ReactNode {
   const { preference, setPreference } = useAppearance();
   const [isOpen, setOpen] = useState(false);
-  const options = useRef<HTMLDivElement>(null);
   const selection = preference.syncWithOs ? "system" : preference.theme;
   const selected = APPEARANCE_OPTIONS.find((option) => option.mode === selection);
   const close = (): void => setOpen(false);
@@ -50,81 +53,51 @@ export function AppearanceMenu(): React.ReactNode {
     setOpen(false);
   };
 
-  useEffect(() => {
-    if (!isOpen) return;
-    const frame = requestAnimationFrame(() => {
-      options.current?.querySelector<HTMLElement>('[role="radio"][aria-checked="true"]')?.focus();
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [isOpen]);
-
   return (
     <div className="self-center">
       <Tooltip>
-        <Popover
-          alignment="end"
-          hasAutoFocus
-          isOpen={isOpen}
-          label="Appearance"
-          onOpenChange={setOpen}
-          placement="below"
-          width={240}
-          content={
-            <div
-              onKeyDown={(event) => {
-                const radios = options.current?.querySelectorAll<HTMLElement>('[role="radio"]');
-                const radio =
-                  event.target instanceof HTMLElement
-                    ? event.target.closest<HTMLElement>('[role="radio"]')
-                    : null;
-                if (event.key === "Enter" && radio !== null) {
-                  const index = [...(radios ?? [])].indexOf(radio);
-                  const mode = APPEARANCE_OPTIONS[index]?.mode;
-                  if (mode !== undefined) select(mode);
-                  event.preventDefault();
-                  return;
-                }
-                if (event.key !== "Home" && event.key !== "End") return;
-                const target =
-                  event.key === "Home" ? radios?.item(0) : radios?.item((radios?.length ?? 1) - 1);
-                target?.focus();
-                event.preventDefault();
-              }}
-              ref={options}
-            >
-              <RadioList
-                isLabelHidden
-                label="Appearance"
-                onChange={select}
-                size="sm"
-                value={selection}
-              >
-                {APPEARANCE_OPTIONS.map((option) => (
-                  <RadioListItem
-                    key={option.mode}
-                    label={option.label}
-                    startContent={<Icon name={option.icon} size={14} />}
-                    value={option.mode}
-                  />
-                ))}
-              </RadioList>
-            </div>
-          }
+        <DropdownMenu
+          onOpenChange={(open) => {
+            setOpen(open);
+          }}
+          open={isOpen}
         >
           <TooltipTrigger
             render={
-              <Button
-                type="button"
-                aria-label={`Appearance: ${selected?.label ?? "Sync with OS"}`}
-                className={cn("h-7 px-2.5 aspect-square px-0")}
-                variant="ghost"
-                size="icon-sm"
-              >
-                <Icon name={selected?.icon ?? "appearance"} size={14} />
-              </Button>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    aria-label={`Appearance: ${selected?.label ?? "Sync with OS"}`}
+                    className="aspect-square h-7 px-0"
+                    size="icon-sm"
+                    type="button"
+                    variant="ghost"
+                  >
+                    <Icon name={selected?.icon ?? "appearance"} size={14} />
+                  </Button>
+                }
+              />
             }
           />
-        </Popover>
+          <DropdownMenuContent
+            align="end"
+            aria-label="Appearance"
+            className="z-[110] w-60 border border-border"
+          >
+            <DropdownMenuRadioGroup onValueChange={select} value={selection}>
+              {APPEARANCE_OPTIONS.map((option) => (
+                <DropdownMenuRadioItem
+                  className="grid min-h-8 grid-cols-[18px_minmax(0,1fr)] gap-2 px-2 text-xs data-checked:bg-primary data-checked:text-primary-foreground data-highlighted:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
+                  key={option.mode}
+                  value={option.mode}
+                >
+                  <Icon name={option.icon} size={14} />
+                  <span className="truncate">{option.label}</span>
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <TooltipContent>Appearance</TooltipContent>
       </Tooltip>
     </div>

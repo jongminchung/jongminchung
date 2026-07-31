@@ -6,7 +6,7 @@ import { TooltipProvider } from "@jongminchung/ui/components/tooltip";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
-import type { ContentManifestEntry, Locale } from "@/lib/content-model";
+import type { CurrentNavigationEntry, Locale, NavigationEntry } from "@/lib/content-model";
 import { Icon } from "./Icon";
 import { ContextNavigation, GlobalRail, MobileNavigation, MobileTopNavigation } from "./Navigation";
 import { RouteTransitionContent, RouteTransitionProvider } from "./RouteTransition";
@@ -24,8 +24,8 @@ function TabletContextDrawer({
   documents,
 }: {
   readonly locale: Locale;
-  readonly current: ContentManifestEntry;
-  readonly documents: readonly ContentManifestEntry[];
+  readonly current: CurrentNavigationEntry;
+  readonly documents: readonly NavigationEntry[];
 }) {
   const pathname = usePathname();
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -67,8 +67,8 @@ export function DocsShell({
   children,
 }: {
   readonly locale: Locale;
-  readonly current: ContentManifestEntry;
-  readonly documents: readonly ContentManifestEntry[];
+  readonly current: CurrentNavigationEntry;
+  readonly documents: readonly NavigationEntry[];
   readonly children: ReactNode;
 }) {
   const pathname = usePathname();

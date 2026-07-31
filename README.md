@@ -20,10 +20,15 @@ when the current directory is inside an app or package:
 ```bash
 pnpm -w run fmt
 pnpm -w run check
+pnpm -w run audit:prod
 ```
 
 Always include `run` for package scripts. The shorter `pnpm fmt` form can fall through to an
 unrelated system command when the current package does not define `fmt`.
+
+`audit:prod` queries the registry advisory database and fails on high-severity production
+dependency findings. It runs in the scheduled security workflow instead of the offline-reproducible
+`check` chain.
 
 Each workspace owns its build, typecheck, and test commands. Select one with a filter instead of
 adding a package-specific wrapper to the root manifest:
@@ -34,9 +39,9 @@ pnpm --filter @jongminchung/engineering-docs run build
 
 ## Version Policy
 
-`@jongminchung/tooling` and `@jongminchung/remark-plantuml` intentionally stay on `1.0.0`. Reuse
-and republish `1.0.0` when correcting package contents. Do not publish `1.0.1`, `1.0.2`, or other
-replacement versions for these packages.
+Published package versions are immutable. Increment the stable SemVer version before publishing
+changed contents: patch for compatible fixes, minor for compatible features, and major for breaking
+contracts. Never delete and republish an existing version.
 
 ```bash
 pnpm install

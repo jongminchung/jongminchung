@@ -29,6 +29,7 @@ import {
 } from "./hosting-persistence";
 import { Icon } from "./Icon";
 import { Notice } from "./Notice";
+import { EmptyState } from "./ProductCollections";
 
 interface RemoteCoordinates {
   readonly project: string;
@@ -632,10 +633,10 @@ export function HostingPanel({
             </select>
           </div>
           {items.length === 0 && (
-            <p className={tw.emptyState}>Load pull or merge requests for this project.</p>
+            <EmptyState title="Load pull or merge requests for this project." />
           )}
           {items.length > 0 && visibleItems.length === 0 && (
-            <p className={tw.emptyState}>No pull or merge requests match the filter.</p>
+            <EmptyState title="No pull or merge requests match the filter." />
           )}
           {visibleItems.map((item) => (
             <Button
@@ -643,10 +644,7 @@ export function HostingPanel({
               key={item.number}
               onClick={() => void inspect(item)}
               type="button"
-              className={cn(
-                "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-current:bg-accent",
-                selected?.number === item.number ? tw.hostingSelected : undefined,
-              )}
+              className="min-h-[29px] w-full justify-start gap-1.5 whitespace-normal px-2 py-1 text-left text-xs aria-current:bg-accent aria-current:text-foreground"
               variant="ghost"
               size="default"
             >
@@ -664,10 +662,7 @@ export function HostingPanel({
             <Button
               onClick={() => void loadList(nextPage, true)}
               type="button"
-              className={cn(
-                "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
-                tw.hostingMore,
-              )}
+              className="min-h-[29px] w-full items-center justify-start gap-1.5 whitespace-normal px-2 py-1 text-left text-xs text-primary"
               variant="ghost"
               size="default"
             >
@@ -678,7 +673,7 @@ export function HostingPanel({
 
         <section className={tw.hostingDetail} aria-label="Change request detail">
           {!selected ? (
-            <p className={tw.emptyState}>Select a change request to inspect files and timeline.</p>
+            <EmptyState title="Select a change request to inspect files and timeline." />
           ) : (
             <>
               <header>

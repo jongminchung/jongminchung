@@ -9,6 +9,8 @@ import { tw } from "../styles/tailwind";
 import { useDismissLayer } from "./CommandProvider";
 import { CommitGraph } from "./CommitGraph";
 import { Icon } from "./Icon";
+import { Notice } from "./Notice";
+import { EmptyState, Spinner } from "./ProductCollections";
 import { CheckboxInput } from "./ProductFormControls";
 import { Selector } from "./ProductFormControls";
 import { TextInput } from "./ProductFormControls";
@@ -670,15 +672,25 @@ export const CommitLog = memo(function CommitLog({
           <span role="columnheader">Date</span>
         </div>
         {filtered.length === 0 ? (
-          <div className={tw.logEmpty} role="status">
-            {loading
-              ? "Searching commit history…"
-              : error
-                ? error
-                : normalizedQuery || activeFilterCount > 0 || branch !== "all"
+          loading ? (
+            <Spinner
+              className="h-full w-full justify-center px-6"
+              label="Searching commit history…"
+            />
+          ) : error ? (
+            <Notice className="m-auto w-auto max-w-lg" role="alert" size="sm" tone="destructive">
+              {error}
+            </Notice>
+          ) : (
+            <EmptyState
+              role="status"
+              title={
+                normalizedQuery || activeFilterCount > 0 || branch !== "all"
                   ? "No commits match these filters."
-                  : "This repository has no commits yet."}
-          </div>
+                  : "This repository has no commits yet."
+              }
+            />
+          )
         ) : (
           <div
             style={{
@@ -769,17 +781,28 @@ export const CommitLog = memo(function CommitLog({
                 </Button>
               );
             })}
-            {(loading || error) && (
-              <div
-                className={tw.logLoadMore}
-                role={error ? "alert" : "status"}
+            {error ? (
+              <Notice
+                className="absolute top-0 right-0 left-0 h-5 rounded-none border-x-0 px-2 py-0 pl-[42px] text-[10px]"
+                role="alert"
+                size="sm"
                 style={{
                   transform: `translateY(${filtered.length * LOG_ROW_HEIGHT}px)`,
                 }}
+                tone="destructive"
               >
-                {error ?? "Loading commits…"}
-              </div>
-            )}
+                {error}
+              </Notice>
+            ) : loading ? (
+              <Spinner
+                className="absolute top-0 right-0 left-0 h-5 pl-[42px] text-[10px]"
+                label="Loading commits…"
+                size="sm"
+                style={{
+                  transform: `translateY(${filtered.length * LOG_ROW_HEIGHT}px)`,
+                }}
+              />
+            ) : null}
           </div>
         )}
       </div>

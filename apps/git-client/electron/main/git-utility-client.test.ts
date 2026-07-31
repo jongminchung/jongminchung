@@ -31,7 +31,11 @@ import {
   type GitUtilityServerPort,
   type GitUtilityServiceLike,
 } from "../utility/git/utility-server";
-import { GitUtilityClient, type GitUtilityProcessTransport } from "./git-utility-client";
+import {
+  GitUtilityClient,
+  type GitUtilityClientConnectOptions,
+  type GitUtilityProcessTransport,
+} from "./git-utility-client";
 
 const INSTANCE_ID = "fd312e4e-5856-4afe-bfca-b34f35880429";
 const REPOSITORY_ID = "02fc7f7c-3f66-514b-9470-451a776cfcc7" as RepositoryId;
@@ -180,12 +184,16 @@ function lastMainMessage(transport: FakeUtilityProcessTransport): MainToGitUtili
   return MainToGitUtilityMessageSchema.parse(transport.posted.at(-1));
 }
 
-async function connectClient(transport = new FakeUtilityProcessTransport()): Promise<{
+async function connectClient(
+  transport = new FakeUtilityProcessTransport(),
+  options: GitUtilityClientConnectOptions = {},
+): Promise<{
   readonly client: GitUtilityClient;
   readonly transport: FakeUtilityProcessTransport;
 }> {
   const connecting = GitUtilityClient.connect(transport, {
     handshakeTimeoutMs: 1_000,
+    ...options,
   });
   transport.emitMessage({
     kind: "ready",
@@ -920,13 +928,26 @@ describe("GitUtilityClient", () => {
   });
 
   it("rejects every pending operation when the utility crashes", async () => {
-    const { client, transport } = await connectClient();
-    const opening = client.openRepository("/tmp/repository");
+    const crashes: Error[] = [];
+    const { client, transport } = await connectClient(new FakeUtilityProcessTransport(), {
+      onCrash: (error) => crashes.push(error),
+    });
+    const mutation = client.executeRepositoryService({
+      operation: "writeIgnoreRules",
+      repositoryId: REPOSITORY_ID,
+      rules: { gitignore: "dist/\n", infoExclude: "" },
+    });
+    const postedBeforeCrash = transport.posted.length;
 
     transport.emitExit(9);
 
-    await expect(opening).rejects.toMatchObject({ code: "utilityExited" });
+    await expect(mutation).rejects.toMatchObject({ code: "utilityExited" });
     expect(client.state).toBe("crashed");
+    expect(transport.posted).toHaveLength(postedBeforeCrash);
+    expect(crashes).toHaveLength(1);
+    expect(crashes[0]).toMatchObject({ code: "utilityExited" });
+    transport.emitExit(10);
+    expect(crashes).toHaveLength(1);
   });
 
   it("validates incoming messages before routing them", async () => {

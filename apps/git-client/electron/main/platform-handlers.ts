@@ -26,6 +26,7 @@ import type {
   GitCreationEventListener,
   GitCreationTerminalEvent,
   GitTerminalEvent,
+  RepositoryId,
   RepositoryRecord,
 } from "../../src/shared/contracts/git-utility";
 import {
@@ -69,6 +70,10 @@ import type {
   WindowPresentationMode,
 } from "../../src/shared/contracts/ipc";
 import {
+  localHistoryRequestRepositoryId,
+  parseLocalHistoryRepositoryRequest,
+} from "../../src/shared/contracts/local-history-ipc";
+import {
   TerminalCloseRepositoryRequestSchema,
   TerminalCloseRequestSchema,
   TerminalCreateRequestSchema,
@@ -102,6 +107,9 @@ interface PlatformHandlerDependencies {
   readonly hosting: ElectronHostingFoundation;
   readonly diagnostics?: DiagnosticsService;
   readonly runtime: RuntimeInfo;
+  readonly localHistoryRepositoryFor?: (
+    sender: IpcMainInvokeEvent["sender"],
+  ) => RepositoryId | null;
   readonly onWindowPresentationModeChange?: (mode: WindowPresentationMode) => void;
 }
 
@@ -249,6 +257,7 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
     hosting,
     diagnostics: providedDiagnostics,
     runtime,
+    localHistoryRepositoryFor,
     onWindowPresentationModeChange,
   } = dependencies;
   const repositoryPaths = new Map<string, string>();
@@ -695,6 +704,21 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
       await gitUtility.executeRepositoryService(request),
     );
   });
+  ipcMain.handle(IPC_CHANNELS.localHistoryRepositoryService, async (event, raw: unknown) => {
+    const repositoryId = localHistoryRepositoryFor?.(event.sender) ?? null;
+    assertTrustedLocalHistorySender(event, window, repositoryId);
+    const request = parseLocalHistoryRepositoryRequest(raw);
+    if (localHistoryRequestRepositoryId(request) !== repositoryId) {
+      throw new Error("Local History cannot access a different repository.");
+    }
+    const result = GitRepositoryServiceResultSchema.parse(
+      await gitUtility.executeRepositoryService(request),
+    );
+    if (result.operation !== request.operation) {
+      throw new Error("Local History result did not match its request.");
+    }
+    return result;
+  });
   ipcMain.handle(IPC_CHANNELS.gitQuery, async (event, raw: unknown): Promise<GitTerminalEvent> => {
     assertTrustedSender(event, window);
     const request = GitExecutionRequestSchema.parse(raw);
@@ -890,6 +914,7 @@ export function unregisterPlatformHandlers(): void {
     IPC_CHANNELS.gitCloseRepository,
     IPC_CHANNELS.gitInspectSnapshot,
     IPC_CHANNELS.gitRepositoryService,
+    IPC_CHANNELS.localHistoryRepositoryService,
     IPC_CHANNELS.gitQuery,
     IPC_CHANNELS.gitCancelQuery,
     IPC_CHANNELS.gitReadFile,
@@ -925,19 +950,41 @@ function hostingIpcError(error: unknown, secrets: readonly string[] = []): Error
 }
 
 function assertTrustedSender(event: IpcMainInvokeEvent, window: BrowserWindow): void {
-  const senderWindow =
-    event.sender === window.webContents ? window : BrowserWindow.fromWebContents(event.sender);
-  if (
-    senderWindow === null ||
-    (senderWindow !== window && senderWindow.getParentWindow() !== window)
-  ) {
+  if (event.sender !== window.webContents) {
     throw new Error("IPC sender is not the main window.");
   }
-  if (event.senderFrame !== senderWindow.webContents.mainFrame) {
+  if (event.senderFrame !== window.webContents.mainFrame) {
     throw new Error("IPC sender is not the main frame.");
   }
   const frameUrl = event.senderFrame?.url ?? "";
   const isProduction = frameUrl.startsWith("app://git-client/");
   const isDevelopment = /^http:\/\/(127\.0\.0\.1|localhost):\d+\//u.test(frameUrl);
   if (!isProduction && !isDevelopment) throw new Error("IPC sender origin is not trusted.");
+}
+
+function assertTrustedLocalHistorySender(
+  event: IpcMainInvokeEvent,
+  window: BrowserWindow,
+  repositoryId: RepositoryId | null,
+): asserts repositoryId is RepositoryId {
+  const senderWindow = BrowserWindow.fromWebContents(event.sender);
+  if (repositoryId === null || senderWindow === null || senderWindow.getParentWindow() !== window) {
+    throw new Error("IPC sender is not an authorized Local History window.");
+  }
+  if (event.senderFrame !== senderWindow.webContents.mainFrame) {
+    throw new Error("IPC sender is not the Local History main frame.");
+  }
+  try {
+    const frameUrl = new URL(event.senderFrame.url);
+    const isProduction =
+      frameUrl.protocol === "app:" &&
+      frameUrl.host === "git-client" &&
+      frameUrl.pathname === "/local-history";
+    const isDevelopment =
+      frameUrl.pathname === "/local-history" &&
+      /^http:\/\/(127\.0\.0\.1|localhost):\d+$/u.test(frameUrl.origin);
+    if (!isProduction && !isDevelopment) throw new Error("untrusted");
+  } catch {
+    throw new Error("IPC sender origin is not a trusted Local History route.");
+  }
 }

@@ -13,6 +13,7 @@ import type { GitOperation, PushPreview, RemoteInfo } from "../shared/contracts/
 import { useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
 import { Notice } from "./Notice";
+import { Spinner } from "./ProductCollections";
 import { Dialog, DialogBody, DialogFooter, DialogHeader } from "./ProductDialog";
 
 function branchName(remoteRef: string): string {
@@ -198,13 +199,7 @@ export function PushDialog({
           </section>
 
           {loading ? (
-            <div
-              className="flex min-h-24 items-center justify-center gap-2 text-muted-foreground"
-              role="status"
-            >
-              <span className="activitySpinner" />
-              Checking destination…
-            </div>
+            <Spinner className="min-h-24 w-full justify-center" label="Checking destination…" />
           ) : preview ? (
             <>
               <section className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 rounded-lg border border-border bg-muted p-3 text-xs">

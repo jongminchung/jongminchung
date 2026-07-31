@@ -129,7 +129,7 @@ test("renders the dense three-pane Git log fixture", async ({ page }) => {
 test("renders the Codex neutral dark theme", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.getByRole("button", { name: /Appearance:/ }).click();
-  await page.getByRole("radio", { name: "Islands Dark", exact: true }).click();
+  await page.getByRole("menuitemradio", { name: "Islands Dark", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await expect(page).toHaveScreenshot("git-log-workbench-dark.png", {
     fullPage: true,
@@ -140,7 +140,7 @@ test("supports persisted Sync with OS, Islands Light, and Islands Dark modes", a
   const appearance = page.getByRole("button", { name: /Appearance:/ });
 
   await appearance.click();
-  await page.getByRole("radio", { name: "Islands Dark", exact: true }).click();
+  await page.getByRole("menuitemradio", { name: "Islands Dark", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await expect(appearance).toHaveAttribute("aria-label", "Appearance: Islands Dark");
   await page.reload();
@@ -148,12 +148,12 @@ test("supports persisted Sync with OS, Islands Light, and Islands Dark modes", a
   await expect(appearance).toHaveAttribute("aria-label", "Appearance: Islands Dark");
 
   await appearance.click();
-  await page.getByRole("radio", { name: "Islands Light", exact: true }).click();
+  await page.getByRole("menuitemradio", { name: "Islands Light", exact: true }).click();
   await page.emulateMedia({ colorScheme: "dark" });
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 
   await appearance.click();
-  await page.getByRole("radio", { name: "Sync with OS", exact: true }).click();
+  await page.getByRole("menuitemradio", { name: "Sync with OS", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await page.emulateMedia({ colorScheme: "light" });
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
@@ -176,17 +176,19 @@ test("navigates the Appearance menu with the keyboard", async ({ page }) => {
   const appearance = page.getByRole("button", { name: /Appearance:/ });
   await appearance.focus();
   await page.keyboard.press("Enter");
-  await expect(page.getByRole("dialog", { name: "Appearance" })).toBeVisible();
+  await expect(page.getByRole("menu", { name: "Appearance" })).toBeVisible();
   await expect(page).toHaveScreenshot("appearance-menu.png", {
     fullPage: true,
   });
   await page.keyboard.press("End");
-  await expect(page.getByRole("radio", { name: "Islands Dark", exact: true })).toBeFocused();
+  await expect(
+    page.getByRole("menuitemradio", { name: "Islands Dark", exact: true }),
+  ).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(appearance).toHaveAttribute("aria-label", "Appearance: Islands Dark");
   await page.keyboard.press("Enter");
   await page.keyboard.press("Escape");
-  await expect(page.getByRole("dialog", { name: "Appearance" })).toHaveCount(0);
+  await expect(page.getByRole("menu", { name: "Appearance" })).toHaveCount(0);
   await expect(appearance).toBeFocused();
 });
 
@@ -386,7 +388,7 @@ test("keeps the browser fixture terminal shell-free", async ({ page }) => {
   });
   await terminalTab.click();
 
-  const emptyTerminal = page.getByText("Native Terminal", { exact: true }).locator("..");
+  const emptyTerminal = page.locator('[data-slot="empty"]').filter({ hasText: "Native Terminal" });
   await expect(emptyTerminal).toContainText("The deterministic QA fixture does not start a shell.");
   await expect(emptyTerminal).toHaveCSS("display", "flex");
   await expect(emptyTerminal).toHaveCSS("flex-direction", "column");

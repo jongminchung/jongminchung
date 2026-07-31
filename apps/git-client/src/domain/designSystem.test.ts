@@ -194,11 +194,78 @@ describe("workspace shadcn design system boundary", () => {
     expect(form).toContain('indeterminate={value === "indeterminate"}');
     expect(collections).toContain('from "@jongminchung/ui/components/item"');
     expect(collections).toContain('from "@jongminchung/ui/components/radio-group"');
+    expect(collections).toContain('from "@jongminchung/ui/components/badge"');
+    expect(collections).toContain('from "@jongminchung/ui/components/empty"');
+    expect(collections).toContain('from "@jongminchung/ui/components/spinner"');
     expect(overlays).toContain('from "@jongminchung/ui/components/popover"');
     expect(overlays).toContain('from "@jongminchung/ui/components/dropdown-menu"');
     expect(terminalTabs).toContain('from "@jongminchung/ui/components/tabs"');
     expect(terminalTabs).toContain("activateOnFocus");
     expect(main).toContain("<TooltipProvider>");
+  });
+
+  test("does not retain primitive-shaped Tailwind recipes", () => {
+    const stylesheet = readFileSync(join(sourceRoot, "styles", "index.css"), "utf8");
+
+    for (const recipe of [
+      "activeButton",
+      "activityPill",
+      "activitySpinner",
+      "appDialog",
+      "appearanceControl",
+      "appearanceMenu",
+      "bookmarksEmptyState",
+      "closeTab",
+      "collectionError",
+      "commitRailClose",
+      "commitRailToggle",
+      "conflictDialog",
+      "contextMenu",
+      "dangerButton",
+      "dangerMenuItem",
+      "detailsEmpty",
+      "dialogBackdrop",
+      "editorEmptyWorkspace",
+      "emptyState",
+      "errorBanner",
+      "filterButton",
+      "gitBranchesError",
+      "headPill",
+      "hostingMore",
+      "hostingSelected",
+      "iconButton",
+      "inspectorDialog",
+      "loadingBottom",
+      "loadingMainPanes",
+      "loadingVcsLog",
+      "loadingWorkbench",
+      "logEmpty",
+      "logFilterMenu",
+      "logLoadMore",
+      "mainToolbarAction",
+      "mainToolbarIcon",
+      "operationPill",
+      "primaryButton",
+      "projectTreeError",
+      "projectSwitcherRemove",
+      "projectSelector",
+      "repositoryErrorView",
+      "repositoryButton",
+      "repositoryDialog",
+      "repositoryToolDialog",
+      "restoreWorkspace",
+      "statePill",
+      "statusBadge",
+      "terminalEmpty",
+      "terminalOptionsMenu",
+      "editorToolbarIcon",
+      "welcomeHelpButton",
+      "welcomeSettingsButton",
+    ]) {
+      expect(tw).not.toHaveProperty(recipe);
+    }
+    expect(stylesheet).not.toContain("activitySpin");
+    expect(stylesheet).not.toContain(".terminalEmpty");
   });
 
   test("does not escape quotes inside Tailwind selector variants", () => {

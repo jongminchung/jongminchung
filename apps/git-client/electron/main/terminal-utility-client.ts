@@ -52,6 +52,7 @@ export interface TerminalUtilityProcessTransport {
 
 export interface TerminalUtilityClientConnectOptions {
   readonly handshakeTimeoutMs?: number;
+  readonly onCrash?: (error: Error) => void;
 }
 
 type TerminalUtilityClientState = "connecting" | "ready" | "disposing" | "disposed" | "crashed";
@@ -104,6 +105,7 @@ export class TerminalUtilityClient {
   readonly #sessions = new Map<string, TerminalSessionListener>();
   readonly #handshakePromise: Promise<void>;
   readonly #unsubscribe: readonly (() => void)[];
+  readonly #onCrash: ((error: Error) => void) | undefined;
   #resolveHandshake: () => void = () => undefined;
   #rejectHandshake: (error: Error) => void = () => undefined;
   #handshakeTimer: NodeJS.Timeout | null = null;
@@ -117,6 +119,7 @@ export class TerminalUtilityClient {
     options: TerminalUtilityClientConnectOptions,
   ) {
     this.#transport = transport;
+    this.#onCrash = options.onCrash;
     this.#handshakePromise = new Promise((resolve, reject) => {
       this.#resolveHandshake = resolve;
       this.#rejectHandshake = reject;
@@ -545,6 +548,11 @@ export class TerminalUtilityClient {
     this.#rejectOutstanding(error);
     this.#cleanUpSubscriptions();
     if (kill) this.#transport.kill();
+    try {
+      this.#onCrash?.(error);
+    } catch (callbackError) {
+      console.error("[git-client] Terminal utility crash observer failed", callbackError);
+    }
   }
 
   #rejectOutstanding(error: Error): void {

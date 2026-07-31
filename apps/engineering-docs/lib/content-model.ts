@@ -35,6 +35,18 @@ export interface ContentManifestEntry extends DocMetadata {
   readonly outline: readonly OutlineEntry[];
 }
 
+export interface NavigationEntry {
+  readonly id: string;
+  readonly section: DocSection;
+  readonly title: string;
+  readonly displayTitle?: string;
+  readonly href: string;
+}
+
+export interface CurrentNavigationEntry extends NavigationEntry {
+  readonly outline: readonly OutlineEntry[];
+}
+
 export interface SearchDocument {
   readonly id: string;
   readonly locale: Locale;

@@ -7,6 +7,7 @@ import type { ScratchFile } from "../domain/scratchFiles";
 import type { FileChange, TreeEntry } from "../domain/types";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
+import { Notice } from "./Notice";
 import { CheckboxInput, Selector } from "./ProductFormControls";
 import { Popover } from "./ProductOverlays";
 import { VerticalResizeHandle } from "./VerticalResizeHandle";
@@ -507,7 +508,11 @@ export function ProjectToolWindow({
                     onDoubleClick={() => !directory && onOpenFile(entry.path, true)}
                     onKeyDown={(event) => onRowKeyDown(event, entry)}
                     role="treeitem"
-                    style={{ "--tree-depth": depth } as React.CSSProperties}
+                    style={
+                      {
+                        "--tree-depth": depth,
+                      } as React.CSSProperties
+                    }
                     type="button"
                     className={cn(
                       "grid min-h-0 text-xs whitespace-normal text-left aria-selected:bg-accent aria-current:bg-accent",
@@ -540,7 +545,11 @@ export function ProjectToolWindow({
             </Tooltip>
           );
         })}
-        {error && <p className={tw.projectTreeError}>{error}</p>}
+        {error && (
+          <Notice className="m-1.5 mx-2.5 w-auto" role="alert" size="sm" tone="destructive">
+            {error}
+          </Notice>
+        )}
         {showScratches && (
           <Tooltip>
             <TooltipTrigger

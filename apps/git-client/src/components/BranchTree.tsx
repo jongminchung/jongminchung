@@ -6,6 +6,7 @@ import { memo, useMemo, useRef, useState } from "react";
 import type { Ref, RefKind } from "../domain/types";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
+import { StatePill } from "./ProductCollections";
 
 type TreeRow =
   | {
@@ -122,10 +123,7 @@ export const BranchTree = memo(function BranchTree({
                 aria-label="Add repository"
                 onClick={onAdd}
                 type="button"
-                className={cn(
-                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
-                  tw.iconButton,
-                )}
+                className="text-muted-foreground"
                 variant="ghost"
                 size="icon-sm"
               >
@@ -216,7 +214,14 @@ export const BranchTree = memo(function BranchTree({
                               {trackingLabel(row.ref.tracking)}
                             </small>
                           )}
-                          {row.ref.current && <span className={tw.headPill}>HEAD</span>}
+                          {row.ref.current && (
+                            <StatePill
+                              className="ml-auto rounded-lg border-0 px-1.5 py-px text-[8px]"
+                              tone="primary"
+                            >
+                              HEAD
+                            </StatePill>
+                          )}
                         </Button>
                       }
                     />

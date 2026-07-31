@@ -4,7 +4,6 @@ import type {
   TerminalAgentDescriptor,
   TerminalShellDescriptor,
 } from "../shared/contracts/terminal";
-import { tw } from "../styles/tailwind";
 import { useDismissLayer } from "./CommandProvider";
 import { DropdownMenuItem } from "./ProductOverlays";
 
@@ -67,7 +66,7 @@ export function TerminalLaunchTargetMenu({
         align="start"
         anchor={anchor}
         aria-label={label}
-        className={tw.terminalOptionsMenu}
+        className="z-[120] w-60 [&_[role=menuitem]]:min-h-7"
         collisionPadding={8}
         finalFocus={false}
         positionMethod="fixed"

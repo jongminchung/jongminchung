@@ -1,12 +1,16 @@
 import { spawnSync } from "node:child_process";
 import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { build } from "vite";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { VALID_GIT_OPERATIONS } from "../../../src/shared/contracts/git-operation-fixtures";
-import type { GitRequestEvent, GitRequestId } from "../../../src/shared/contracts/git-utility";
+import type {
+  GitRequestEvent,
+  GitRequestId,
+  RepositoryId,
+} from "../../../src/shared/contracts/git-utility";
 import { GitProcessRunner, type GitProcessRunnerLike, type GitProcessSpec } from "./git-process";
 import { GitOperationService } from "./operation-service";
 import type { OperationRecoveryRecorder } from "./operation-service";
@@ -63,6 +67,91 @@ afterEach(async () => {
 });
 
 describe("GitOperationService", () => {
+  it("serializes the same repository while allowing another repository to mutate", async () => {
+    const { root, registry } = await fixture();
+    const secondRoot = join(dirname(root), "repository-2");
+    await mkdir(secondRoot);
+    git(secondRoot, "init", "--initial-branch=main");
+    const firstRepository = await registry.open(root);
+    const secondRepository = await registry.open(secondRoot);
+    const runs: Array<{
+      readonly cwd: string | undefined;
+      readonly resolve: (outcome: Awaited<ReturnType<GitProcessRunnerLike["run"]>>) => void;
+    }> = [];
+    const runner: GitProcessRunnerLike = {
+      run: (spec) =>
+        new Promise((resolve) => {
+          runs.push({ cwd: spec.cwd, resolve });
+        }),
+    };
+    const service = new GitOperationService(registry, runner);
+    const execute = (repositoryId: RepositoryId) =>
+      service.execute(
+        crypto.randomUUID() as GitRequestId,
+        repositoryId,
+        { kind: "stageAll" },
+        () => undefined,
+      );
+    const first = execute(firstRepository.id);
+    await vi.waitFor(() => expect(runs).toHaveLength(1));
+
+    const queued = execute(firstRepository.id);
+    const parallel = execute(secondRepository.id);
+    await vi.waitFor(() => expect(runs).toHaveLength(2));
+    expect(runs.map(({ cwd }) => cwd)).toEqual([firstRepository.path, secondRepository.path]);
+
+    runs[0]?.resolve({ kind: "completed", exitCode: 0, durationMs: 1, output: [] });
+    await vi.waitFor(() => expect(runs).toHaveLength(3));
+    expect(runs[2]?.cwd).toBe(firstRepository.path);
+    runs[1]?.resolve({ kind: "completed", exitCode: 0, durationMs: 1, output: [] });
+    runs[2]?.resolve({ kind: "completed", exitCode: 0, durationMs: 1, output: [] });
+
+    await expect(Promise.all([first, queued, parallel])).resolves.toEqual([
+      expect.objectContaining({ kind: "completed" }),
+      expect.objectContaining({ kind: "completed" }),
+      expect.objectContaining({ kind: "completed" }),
+    ]);
+  });
+
+  it("cancels a mutation while it is queued for repository ownership", async () => {
+    const { root, registry } = await fixture();
+    const repository = await registry.open(root);
+    let resolveFirst: (outcome: Awaited<ReturnType<GitProcessRunnerLike["run"]>>) => void = () => {
+      throw new Error("First mutation did not start");
+    };
+    let runCount = 0;
+    const runner: GitProcessRunnerLike = {
+      run: () =>
+        new Promise((resolve) => {
+          runCount += 1;
+          resolveFirst = resolve;
+        }),
+    };
+    const service = new GitOperationService(registry, runner);
+    const first = service.execute(
+      crypto.randomUUID() as GitRequestId,
+      repository.id,
+      { kind: "stageAll" },
+      () => undefined,
+    );
+    await vi.waitFor(() => expect(runCount).toBe(1));
+
+    const queuedRequestId = crypto.randomUUID() as GitRequestId;
+    const queued = service.execute(
+      queuedRequestId,
+      repository.id,
+      { kind: "stageAll" },
+      () => undefined,
+    );
+    await Promise.resolve();
+    expect(service.cancel(queuedRequestId)).toBe(true);
+    await expect(queued).resolves.toMatchObject({ kind: "cancelled", reason: "requested" });
+    expect(runCount).toBe(1);
+
+    resolveFirst({ kind: "completed", exitCode: 0, durationMs: 1, output: [] });
+    await expect(first).resolves.toMatchObject({ kind: "completed" });
+  });
+
   it("records recovery after validation and before the first mutation side effect", async () => {
     const { root, registry } = await fixture();
     const repository = await registry.open(root);

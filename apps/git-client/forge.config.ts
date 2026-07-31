@@ -141,6 +141,11 @@ const config: ForgeConfig = {
           target: "preload",
         },
         {
+          entry: "electron/local-history-preload.ts",
+          config: "vite.local-history-preload.config.ts",
+          target: "preload",
+        },
+        {
           entry: "electron/utility/git/entry.ts",
           config: "vite.utility.config.ts",
         },

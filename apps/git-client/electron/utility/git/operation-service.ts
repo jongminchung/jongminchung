@@ -21,6 +21,7 @@ import {
 } from "./git-process";
 import { buildOperationCommand } from "./operation-command";
 import { safeErrorMessage } from "./redaction";
+import { RepositoryMutationArbiter } from "./repository-mutation-arbiter";
 import type { RepositoryRegistry } from "./repository-registry";
 import { SequenceEditorSession, type SequenceEditorMode } from "./sequence-editor";
 import {
@@ -91,6 +92,7 @@ export class GitOperationService {
   readonly #runner: GitProcessRunnerLike;
   readonly #sequenceEditorRuntime: SequenceEditorRuntime;
   readonly #recovery: OperationRecoveryRecorder | null;
+  readonly #mutations: RepositoryMutationArbiter;
   readonly #active = new Map<GitRequestId, ActiveOperation>();
 
   constructor(
@@ -98,11 +100,13 @@ export class GitOperationService {
     runner: GitProcessRunnerLike,
     sequenceEditorRuntime: SequenceEditorRuntime = defaultSequenceEditorRuntime(),
     recovery: OperationRecoveryRecorder | null = null,
+    mutations: RepositoryMutationArbiter = new RepositoryMutationArbiter(),
   ) {
     this.#registry = registry;
     this.#runner = runner;
     this.#sequenceEditorRuntime = sequenceEditorRuntime;
     this.#recovery = recovery;
+    this.#mutations = mutations;
   }
 
   async execute(
@@ -117,6 +121,7 @@ export class GitOperationService {
     const startedAt = performance.now();
     let startedDelivered = false;
     let operation: ValidatedGitOperation | null = null;
+    let cancellation: AbortController | null = null;
     try {
       const parsed = GitOperationSchema.safeParse(untrustedOperation);
       if (!parsed.success) {
@@ -125,10 +130,12 @@ export class GitOperationService {
           parsed.error.issues[0]?.message ?? "Invalid Git operation",
         );
       }
-      operation = parsed.data;
-      const command = buildOperationCommand(operation);
-      const cancellation = new AbortController();
-      this.#active.set(requestId, { repositoryId, cancellation });
+      const validatedOperation = parsed.data;
+      operation = validatedOperation;
+      const command = buildOperationCommand(validatedOperation);
+      const operationCancellation = new AbortController();
+      cancellation = operationCancellation;
+      this.#active.set(requestId, { repositoryId, cancellation: operationCancellation });
       this.#emit(listener, {
         kind: "started",
         requestId,
@@ -136,27 +143,36 @@ export class GitOperationService {
         startedAtMs: Date.now(),
       });
       startedDelivered = true;
-      const repository = this.#registry.get(repositoryId);
-      await this.#recovery?.recordBeforeOperation(repositoryId, operation, cancellation.signal);
-      const outcome =
-        command.kind === "sequence"
-          ? await this.#runSequence(
-              repository.path,
-              repository.gitDirectory,
-              operation,
-              command.args,
-              cancellation.signal,
-            )
-          : await this.#runner.run(
-              {
-                cwd: repository.path,
-                args: command.args,
-                stdin: command.stdin,
-                timeoutMs: GIT_QUERY_TIMEOUT_MS,
-                outputLimitBytes: GIT_OUTPUT_LIMIT_BYTES,
-              },
-              cancellation.signal,
-            );
+      const outcome = await this.#mutations.run(
+        [repositoryId],
+        operationCancellation.signal,
+        async (): Promise<GitProcessOutcome> => {
+          const repository = this.#registry.get(repositoryId);
+          await this.#recovery?.recordBeforeOperation(
+            repositoryId,
+            validatedOperation,
+            operationCancellation.signal,
+          );
+          return command.kind === "sequence"
+            ? this.#runSequence(
+                repository.path,
+                repository.gitDirectory,
+                validatedOperation,
+                command.args,
+                operationCancellation.signal,
+              )
+            : this.#runner.run(
+                {
+                  cwd: repository.path,
+                  args: command.args,
+                  stdin: command.stdin,
+                  timeoutMs: GIT_QUERY_TIMEOUT_MS,
+                  outputLimitBytes: GIT_OUTPUT_LIMIT_BYTES,
+                },
+                operationCancellation.signal,
+              );
+        },
+      );
       let sequence = 0;
       for (const output of outcome.output) {
         for (let offset = 0; offset < output.data.length; offset += GIT_EVENT_CHUNK_CHARACTERS) {
@@ -182,20 +198,35 @@ export class GitOperationService {
           startedAtMs: Date.now(),
         });
       }
-      const failure = asGitUtilityError(error);
-      const terminal: GitTerminalEvent = {
-        kind: "failed",
-        requestId,
-        code: failure.code,
-        message: safeErrorMessage(failure.message),
-        exitCode: failure.exitCode,
-        durationMs: duration(startedAt),
-      };
+      const terminal: GitTerminalEvent =
+        cancellation?.signal.aborted === true
+          ? {
+              kind: "cancelled",
+              requestId,
+              reason:
+                cancellation.signal.reason === "repositoryClosed"
+                  ? "repositoryClosed"
+                  : "requested",
+              durationMs: duration(startedAt),
+            }
+          : this.#failure(requestId, startedAt, error);
       this.#emit(listener, terminal);
       return terminal;
     } finally {
       this.#active.delete(requestId);
     }
+  }
+
+  #failure(requestId: GitRequestId, startedAt: number, error: unknown): GitTerminalEvent {
+    const failure = asGitUtilityError(error);
+    return {
+      kind: "failed",
+      requestId,
+      code: failure.code,
+      message: safeErrorMessage(failure.message),
+      exitCode: failure.exitCode,
+      durationMs: duration(startedAt),
+    };
   }
 
   cancel(requestId: GitRequestId): boolean {

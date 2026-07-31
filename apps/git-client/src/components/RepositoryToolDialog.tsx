@@ -16,6 +16,7 @@ import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
 import { HostingPanel } from "./HostingPanel";
 import { Icon } from "./Icon";
+import { Dialog, DialogHeader } from "./ProductDialog";
 import { RefManagementPanel } from "./RefManagementPanel";
 import { RepositorySettingsPanel } from "./RepositorySettingsPanel";
 
@@ -66,31 +67,25 @@ export function RepositoryToolDialog({
   const presentation = TOOL_PRESENTATION[kind];
 
   return (
-    <div className={tw.dialogBackdrop} role="presentation">
-      <section
+    <>
+      <Dialog
         aria-label={presentation.title}
-        aria-modal="true"
-        className={tw.repositoryToolDialog}
-        role="dialog"
+        className="grid h-[min(680px,calc(100vh-70px))] grid-rows-[44px_minmax(0,1fr)] overflow-hidden border-input bg-secondary [&>header]:flex [&>header]:items-center [&>header]:gap-2 [&>header]:border-b [&>header]:border-border [&>header]:px-[9px] [&>main]:min-h-0 [&>main]:overflow-auto"
+        isOpen
+        maxHeight="calc(100vh - 70px)"
+        onOpenChange={(open) => {
+          if (!open) onClose();
+        }}
+        padding={0}
+        purpose="info"
+        width="min(980px, calc(100vw - 70px))"
       >
-        <header>
-          <Icon name={presentation.icon} size={16} />
-          <strong>{presentation.title}</strong>
-          <span />
-          <Button
-            aria-label={`Close ${presentation.title}`}
-            onClick={onClose}
-            type="button"
-            className={cn(
-              "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
-              tw.iconButton,
-            )}
-            variant="ghost"
-            size="icon-sm"
-          >
-            <Icon name="close" size={15} />
-          </Button>
-        </header>
+        <DialogHeader
+          closeLabel={`Close ${presentation.title}`}
+          icon={<Icon name={presentation.icon} size={16} />}
+          onOpenChange={() => onClose()}
+          title={presentation.title}
+        />
         <main>
           {kind === "refs" ? (
             <RefManagementPanel
@@ -297,8 +292,8 @@ export function RepositoryToolDialog({
             />
           )}
         </main>
-      </section>
+      </Dialog>
       {dialog.node}
-    </div>
+    </>
   );
 }

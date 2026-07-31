@@ -12,10 +12,11 @@ Intel Mac, Windows, Linux는 후속 범위다. ad-hoc 서명은 로컬 검증용
 
 ## 다운로드와 checksum 검증
 
-1. [GitHub Releases](https://github.com/jongminchung/jongminchung/releases)에서 같은 버전의 파일 두 개를 내려받는다.
+1. [GitHub Releases](https://github.com/jongminchung/jongminchung/releases)에서 같은 버전의 파일 세 개를 내려받는다.
    - `Git-Client_<version>_macos_arm64.dmg`
    - `Git-Client_<version>_macos_arm64.dmg.sha256`
-2. 두 파일이 있는 디렉터리에서 SHA-256 manifest를 검증한다.
+   - `Git-Client_<version>_macos_arm64.dmg.provenance.json`
+2. 세 파일이 있는 디렉터리에서 provenance의 source SHA를 확인하고 SHA-256 manifest를 검증한다.
 
 ```sh
 shasum -a 256 -c Git-Client_<version>_macos_arm64.dmg.sha256
@@ -35,7 +36,7 @@ shasum -a 256 -c Git-Client_<version>_macos_arm64.dmg.sha256
 | 제목          | `Git Client <version>`                                 |
 | 최초 버전     | `1.0.0`                                                |
 | 게시 상태     | 검증된 draft를 Draft가 아닌 공개 Release로 전환        |
-| 배포 파일     | ARM64 DMG와 SHA-256 checksum                           |
+| 배포 파일     | ARM64 DMG, SHA-256 checksum, source provenance         |
 | 미사용 기능   | npm publish, release commit, Nx Git tag, 자동 업데이트 |
 
 `feat`는 minor, `fix`와 `perf`는 patch, `BREAKING CHANGE`는 major 버전을 만든다. `docs`, `test`, `chore`, `ci`, `refactor`만 있는 변경은 독립적으로 새 버전을 만들지 않는다. 커밋 scope가 아니라 실제 변경 파일과 Nx project graph를 기준으로 판정한다.
@@ -81,13 +82,15 @@ pnpm --filter @jongminchung/git-client release:build -- 1.0.0
 결과는 `apps/git-client/release-artifacts`에 만들어진다. 스크립트는 다음 순서를 강제한다.
 
 1. stable SemVer, macOS ARM64, Developer ID identity와 notarization profile preflight
-2. Vitest, TypeScript/Vite build, Electron package-policy test
-3. 깨끗한 `out`에서 Electron Forge make
-4. 단 하나의 app/DMG를 재귀적으로 발견하고 symlink output 거부
-5. package verifier와 package policy, `codesign --verify --deep --strict`
-6. Developer ID authority, Gatekeeper assessment, stapled notarization ticket
-7. DMG 재마운트 후 같은 검증 반복
-8. 앱 250MiB, DMG 160MiB 제한 및 SHA-256 manifest 생성
+2. `origin/main`을 fetch한 뒤 clean worktree, `main` branch, `HEAD == origin/main` 확인
+3. Vitest, TypeScript/Vite build, Electron package-policy test 후 source SHA 재확인
+4. 깨끗한 `out`에서 Electron Forge make 후 source SHA 재확인
+5. 단 하나의 app/DMG를 재귀적으로 발견하고 symlink output 거부
+6. package verifier와 package policy, `codesign --verify --deep --strict`
+7. Forge가 만든 바로 그 `.app`을 실행해 renderer/preload API handshake smoke 검증
+8. Developer ID authority, Gatekeeper assessment, stapled notarization ticket
+9. DMG 재마운트 후 같은 검증 반복
+10. 앱 250MiB, DMG 160MiB 제한 및 SHA-256 manifest와 source provenance 생성
 
 production에서 identity나 notarization 설정이 없으면 첫 source gate 전에 중단하며, 검증 실패 artifact를 GitHub에 올리지 않는다.
 
@@ -108,7 +111,7 @@ pnpm --filter @jongminchung/git-client release
 
 - 태그가 `git-client-<version>`인지 확인한다.
 - 제목이 `Git Client <version>`인지 확인한다.
-- Release가 Draft가 아니며 DMG와 checksum을 모두 포함하는지 확인한다.
+- Release가 Draft가 아니며 DMG, checksum, source provenance를 모두 포함하는지 확인한다.
 - 공개 Release에서 파일을 다시 내려받아 checksum 검증을 수행한다.
 - 깨끗한 macOS 사용자 환경에서 DMG mount, Applications 복사와 정상 Gatekeeper 실행을 확인한다.
 - 공개 asset 이름에 `_adhoc`가 없고 앱에 자동 업데이트 surface가 없는지 확인한다.

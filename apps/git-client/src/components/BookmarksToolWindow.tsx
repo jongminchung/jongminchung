@@ -13,6 +13,7 @@ import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
 import { BookmarkGroupCreateDialog } from "./BookmarkGroupCreateDialog";
 import { Icon } from "./Icon";
+import { EmptyState } from "./ProductCollections";
 import { CheckboxInput } from "./ProductFormControls";
 import { Popover } from "./ProductOverlays";
 
@@ -464,10 +465,12 @@ export function BookmarksToolWindow({
           );
         })}
         {bookmarks.length === 0 && (
-          <div className={tw.bookmarksEmptyState}>
-            <strong>No bookmarks added.</strong>
-            <span>Add Bookmark (F3) to code lines, symbols, files, and directories.</span>
-          </div>
+          <EmptyState
+            className="min-h-[180px] px-[22px] py-[22px] [&_[data-slot=empty-description]]:max-w-[230px] [&_[data-slot=empty-title]]:font-medium [&_[data-slot=empty-title]]:text-foreground"
+            description="Add Bookmark (F3) to code lines, symbols, files, and directories."
+            role="status"
+            title="No bookmarks added."
+          />
         )}
       </div>
       {creatingGroup && (

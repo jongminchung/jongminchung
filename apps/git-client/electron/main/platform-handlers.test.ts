@@ -25,12 +25,13 @@ type InvokeHandler = (event: unknown, raw: unknown) => unknown;
 const electronMock = vi.hoisted(() => ({
   handlers: new Map<string, InvokeHandler>(),
   clipboardWriteText: vi.fn(),
+  fromWebContents: vi.fn(() => null as unknown),
   openExternal: vi.fn(),
   openPath: vi.fn(),
 }));
 
 vi.mock("electron", () => ({
-  BrowserWindow: { fromWebContents: vi.fn(() => null) },
+  BrowserWindow: { fromWebContents: electronMock.fromWebContents },
   clipboard: { writeText: electronMock.clipboardWriteText },
   dialog: {
     showOpenDialog: vi.fn(),
@@ -153,6 +154,88 @@ describe("platform Git IPC handlers", () => {
     electronMock.handlers.clear();
     electronMock.openExternal.mockReset();
     electronMock.openPath.mockReset();
+    electronMock.fromWebContents.mockReset();
+    electronMock.fromWebContents.mockReturnValue(null);
+  });
+
+  it("denies full IPC to child windows and limits Local History to its repository", async () => {
+    const mainFrame = { url: "app://git-client/" };
+    const mainWebContents = {
+      isDestroyed: () => false,
+      mainFrame,
+      send: vi.fn(),
+    };
+    const window = { isDestroyed: () => false, webContents: mainWebContents };
+    const localHistoryFrame = {
+      url: `app://git-client/local-history?repositoryId=${REPOSITORY_ID}`,
+    };
+    const localHistoryWebContents = {
+      isDestroyed: () => false,
+      mainFrame: localHistoryFrame,
+      send: vi.fn(),
+    };
+    const localHistoryWindow = {
+      webContents: localHistoryWebContents,
+      getParentWindow: () => window,
+    };
+    electronMock.fromWebContents.mockReturnValue(localHistoryWindow);
+    const executeRepositoryService = vi.fn(
+      async (request: GitRepositoryServiceRequest): Promise<GitRepositoryServiceResult> => {
+        if (request.operation !== "readLocalHistoryDiff") {
+          throw new Error(`Unexpected repository service ${request.operation}`);
+        }
+        return { operation: request.operation, value: "diff" };
+      },
+    );
+    registerPlatformHandlers({
+      window,
+      settings: { get: vi.fn(), set: vi.fn(), delete: vi.fn() },
+      menu: { sync: vi.fn() },
+      gitUtility: { executeRepositoryService },
+      terminalUtility: {},
+      localHistoryRepositoryFor: (sender: unknown) =>
+        sender === localHistoryWebContents ? REPOSITORY_ID : null,
+      runtime: {
+        kind: "electron",
+        appVersion: "0.1.0",
+        electronVersion: "43.1.1",
+        platform: "darwin",
+        architecture: "arm64",
+        qaFixture: false,
+      },
+    } as unknown as Parameters<typeof registerPlatformHandlers>[0]);
+    const childEvent = {
+      sender: localHistoryWebContents,
+      senderFrame: localHistoryFrame,
+    };
+
+    await expect(
+      handler(IPC_CHANNELS.shellOpenExternal)(childEvent, "https://example.test"),
+    ).rejects.toThrow("not the main window");
+    await expect(
+      handler(IPC_CHANNELS.localHistoryRepositoryService)(childEvent, {
+        operation: "readLocalHistoryDiff",
+        repositoryId: REPOSITORY_ID,
+        activityId: REQUEST_ID,
+        path: "README.md",
+      }),
+    ).resolves.toEqual({ operation: "readLocalHistoryDiff", value: "diff" });
+    await expect(
+      handler(IPC_CHANNELS.localHistoryRepositoryService)(childEvent, {
+        operation: "readLocalHistoryDiff",
+        repositoryId: "e49f8882-8116-4dd7-9363-5e8c341900af",
+        activityId: REQUEST_ID,
+        path: "README.md",
+      }),
+    ).rejects.toThrow("different repository");
+    await expect(
+      handler(IPC_CHANNELS.localHistoryRepositoryService)(childEvent, {
+        operation: "listConflicts",
+        repositoryId: REPOSITORY_ID,
+      }),
+    ).rejects.toThrow("unavailable to Local History");
+    expect(executeRepositoryService).toHaveBeenCalledTimes(1);
+    unregisterPlatformHandlers();
   });
 
   it("opens only validated HTTP(S) URLs for the trusted renderer", async () => {

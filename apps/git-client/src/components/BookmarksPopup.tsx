@@ -2,7 +2,7 @@ import { useEffect, useState, type KeyboardEvent } from "react";
 import type { LineBookmark, ProjectBookmarks } from "../domain/bookmarks";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
-import { List, ListItem } from "./ProductCollections";
+import { EmptyState, List, ListItem } from "./ProductCollections";
 import { Dialog, DialogHeader } from "./ProductDialog";
 
 export type BookmarksPopupMode = "lines" | "mnemonics";
@@ -55,10 +55,12 @@ export function BookmarksPopup({
       <section className={tw.bookmarksPopup} onKeyDown={onKeyDown}>
         <DialogHeader hasDivider onOpenChange={(open) => !open && onClose()} title={title} />
         {bookmarks.length === 0 ? (
-          <div className={tw.bookmarksEmptyState}>
-            <strong>No bookmarks added.</strong>
-            <span>Add Bookmark (F3) to code lines, symbols, files, and directories.</span>
-          </div>
+          <EmptyState
+            className="min-h-[180px] px-[22px] py-[22px] [&_[data-slot=empty-description]]:max-w-[230px] [&_[data-slot=empty-title]]:font-medium [&_[data-slot=empty-title]]:text-foreground"
+            description="Add Bookmark (F3) to code lines, symbols, files, and directories."
+            role="status"
+            title="No bookmarks added."
+          />
         ) : (
           <List aria-label={title} density="compact" role="listbox">
             {bookmarks.map((bookmark, index) => (

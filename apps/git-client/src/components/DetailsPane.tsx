@@ -17,6 +17,8 @@ import { tw } from "../styles/tailwind";
 import { useDismissLayer } from "./CommandProvider";
 import { DiffViewer } from "./DiffViewer";
 import { Icon } from "./Icon";
+import { Notice } from "./Notice";
+import { EmptyState, Spinner, StatusBadge } from "./ProductCollections";
 import { CheckboxInput } from "./ProductFormControls";
 import { Popover } from "./ProductOverlays";
 import { VerticalResizeHandle } from "./VerticalResizeHandle";
@@ -97,9 +99,7 @@ function ReviewAllRow({
   return (
     <article className={tw.reviewAllRow}>
       <header>
-        <span className={`${tw.statusBadge} ${statusClass(file.status)}`}>
-          {statusLetter(file.status)}
-        </span>
+        <StatusBadge className={statusClass(file.status)}>{statusLetter(file.status)}</StatusBadge>
         <strong>{file.path}</strong>
         <span />
         <small>
@@ -107,9 +107,11 @@ function ReviewAllRow({
         </small>
       </header>
       {loading ? (
-        <div className={tw.emptyState}>Loading diff…</div>
+        <Spinner className="min-h-72 w-full justify-center" label="Loading diff…" />
       ) : error ? (
-        <div className={tw.emptyState}>{error}</div>
+        <Notice className="m-3 w-auto" role="alert" size="sm" tone="destructive">
+          {error}
+        </Notice>
       ) : (
         <DiffViewer
           afterContent={content.after}
@@ -295,10 +297,7 @@ export const DetailsPane = memo(function DetailsPane({
                 disabled={!selectedFile}
                 onClick={() => setFocused(true)}
                 type="button"
-                className={cn(
-                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
-                  tw.iconButton,
-                )}
+                className="text-muted-foreground"
                 variant="ghost"
                 size="icon-sm"
               >
@@ -316,10 +315,7 @@ export const DetailsPane = memo(function DetailsPane({
                 disabled={!selectedFile || !patch || diffLoading}
                 onClick={() => void onRevertSelectedChanges()}
                 type="button"
-                className={cn(
-                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
-                  tw.iconButton,
-                )}
+                className="text-muted-foreground"
                 variant="ghost"
                 size="icon-sm"
               >
@@ -366,11 +362,8 @@ export const DetailsPane = memo(function DetailsPane({
                 <Button
                   aria-label="View Options"
                   type="button"
-                  className={cn(
-                    "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
-                    reviewAll ? tw.activeButton : tw.iconButton,
-                  )}
-                  variant="ghost"
+                  className="text-muted-foreground"
+                  variant={reviewAll ? "secondary" : "ghost"}
                   size="icon-sm"
                 >
                   <Icon name="more" size={14} />
@@ -388,10 +381,7 @@ export const DetailsPane = memo(function DetailsPane({
                 aria-label="Expand All"
                 disabled
                 type="button"
-                className={cn(
-                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
-                  tw.iconButton,
-                )}
+                className="text-muted-foreground"
                 variant="ghost"
                 size="icon-sm"
               >
@@ -408,10 +398,7 @@ export const DetailsPane = memo(function DetailsPane({
                 aria-label="Collapse All"
                 disabled
                 type="button"
-                className={cn(
-                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
-                  tw.iconButton,
-                )}
+                className="text-muted-foreground"
                 variant="ghost"
                 size="icon-sm"
               >
@@ -423,9 +410,12 @@ export const DetailsPane = memo(function DetailsPane({
         </Tooltip>
       </div>
       {!commit ? (
-        <div className={tw.detailsEmpty}>
-          <div>Select commit to view changes</div>
-          <div>Commit details</div>
+        <div className="grid min-h-0 grid-rows-[2fr_1fr] text-center">
+          <EmptyState
+            className="rounded-none border-b border-border p-0"
+            title="Select commit to view changes"
+          />
+          <EmptyState className="rounded-none p-0" title="Commit details" />
         </div>
       ) : reviewAll ? (
         <ReviewAll
@@ -441,9 +431,9 @@ export const DetailsPane = memo(function DetailsPane({
         <div className={tw.revisionSummary}>
           <nav aria-label="Changed files" className={tw.revisionFileList}>
             {loading ? (
-              <div className={tw.emptyState}>Loading files…</div>
+              <Spinner className="h-full w-full justify-center" label="Loading files…" />
             ) : files.length === 0 ? (
-              <div className={tw.emptyState}>This commit has no file changes.</div>
+              <EmptyState title="This commit has no file changes." />
             ) : (
               files.map((file) => (
                 <Button
@@ -462,9 +452,9 @@ export const DetailsPane = memo(function DetailsPane({
                   variant="ghost"
                   size="default"
                 >
-                  <span className={`${tw.statusBadge} ${statusClass(file.status)}`}>
+                  <StatusBadge className={statusClass(file.status)}>
                     {statusLetter(file.status)}
-                  </span>
+                  </StatusBadge>
                   <span className={`${tw.ellipsis} grid`} title={file.path}>
                     <strong className="truncate">{file.path.split("/").at(-1)}</strong>
                     {file.path.includes("/") && (

@@ -34,6 +34,8 @@ import { FindResultsPanel, type FindResultsSession } from "./FindResultsPanel";
 import { GitConsolePanel } from "./GitConsolePanel";
 import { Icon } from "./Icon";
 import { LocalHistoryPanel } from "./LocalHistoryPanel";
+import { Notice } from "./Notice";
+import { EmptyState } from "./ProductCollections";
 import { TerminalPanel } from "./TerminalPanel";
 
 export type BottomPanelTab = WorkspaceBottomPanelTab;
@@ -404,12 +406,9 @@ export const BottomPanel = memo(function BottomPanel({
                       aria-label={collapsed ? "Show" : "Hide"}
                       onClick={collapsed ? onToggle : hidePanel}
                       type="button"
-                      className={cn(
-                        "gap-1.5 text-xs h-7 px-2.5 text-muted-foreground aria-selected:bg-accent aria-selected:text-foreground aria-current:bg-accent aria-current:text-foreground",
-                        tw.iconButton,
-                      )}
+                      className="text-muted-foreground"
                       variant="ghost"
-                      size="sm"
+                      size="icon-sm"
                     >
                       {collapsed ? "⌃" : "⌄"}
                     </Button>
@@ -449,7 +448,16 @@ export const BottomPanel = memo(function BottomPanel({
                   Shelve Changes…
                 </Button>
               </div>
-              {stashLoadError && <div className={tw.collectionError}>{stashLoadError}</div>}
+              {stashLoadError && (
+                <Notice
+                  className="rounded-none border-x-0 px-3.5 py-1.5"
+                  role="alert"
+                  size="sm"
+                  tone="destructive"
+                >
+                  {stashLoadError}
+                </Notice>
+              )}
               {shelves.map((shelf) => (
                 <div className={tw.collectionRow} key={shelf.id}>
                   <Icon name="patch" size={16} />
@@ -492,10 +500,7 @@ export const BottomPanel = memo(function BottomPanel({
                       if (accepted) onDeleteShelf(shelf.id);
                     })}
                     type="button"
-                    className={cn(
-                      "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
-                      tw.iconButton,
-                    )}
+                    className="text-muted-foreground"
                     variant="ghost"
                     size="icon-sm"
                   >
@@ -546,7 +551,7 @@ export const BottomPanel = memo(function BottomPanel({
                 </Button>
               </div>
               {stashes.length === 0 ? (
-                <div className={tw.emptyState}>No entries in refs/stash.</div>
+                <EmptyState title="No entries in refs/stash." />
               ) : (
                 stashes.map((stash) => (
                   <div className={tw.stashEntry} key={stash.oid}>
@@ -684,7 +689,7 @@ export const BottomPanel = memo(function BottomPanel({
                 </div>
               </div>
               {recoveryEntries.length === 0 ? (
-                <div className={tw.emptyState}>No ref-changing operations recorded yet.</div>
+                <EmptyState title="No ref-changing operations recorded yet." />
               ) : (
                 recoveryEntries.map((entry) => (
                   <div className={tw.collectionRow} key={entry.id}>

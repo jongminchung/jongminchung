@@ -2,7 +2,8 @@ import { X509Certificate } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { app, BrowserWindow, dialog, net, safeStorage, session } from "electron";
+import { app, BrowserWindow, dialog, net, safeStorage, session, type WebContents } from "electron";
+import { RepositoryIdSchema, type RepositoryId } from "../../src/shared/contracts/git-utility";
 import { QA_FIXTURE_RENDERER_ARGUMENT } from "../../src/shared/contracts/ipc";
 import type { WindowPresentationMode } from "../../src/shared/contracts/ipc";
 import { ElectronHostingFoundation, FetchHostingHttpClient } from "../hosting";
@@ -13,6 +14,7 @@ import { NativeMenuService } from "./menu-service";
 import { registerPlatformHandlers, unregisterPlatformHandlers } from "./platform-handlers";
 import { registerAppProtocol, registerPrivilegedScheme } from "./protocol";
 import { resolveRuntimeProfile, trustsQaHostingCertificate } from "./runtime-profile";
+import { monitorWindowRuntime } from "./runtime-recovery";
 import { SettingsStore } from "./settings-store";
 import { NATIVE_WINDOW_BACKGROUND } from "./static-color-boundary";
 import { TerminalUtilityClient } from "./terminal-utility-client";
@@ -21,11 +23,20 @@ import {
   shouldRequestProjectClose,
   WELCOME_TRAFFIC_LIGHT_POSITION,
 } from "./window-lifecycle";
+import { installDefaultDenyPermissionPolicy, isTrustedRendererNavigation } from "./window-security";
 
 registerPrivilegedScheme();
 
 const runtimeProfile = resolveRuntimeProfile(process.argv);
 const { qaFixture, qaSmokeTest } = runtimeProfile;
+const runtime = {
+  kind: "electron",
+  appVersion: app.getVersion(),
+  electronVersion: process.versions.electron,
+  platform: process.platform,
+  architecture: process.arch,
+  qaFixture,
+} as const;
 
 app.setName("Git Client");
 app.setPath("userData", join(app.getPath("appData"), runtimeProfile.name));
@@ -57,23 +68,33 @@ const rendererRoot = join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}`);
 let mainWindow: BrowserWindow | null = null;
 let gitUtility: GitUtilityClient | null = null;
 let terminalUtility: TerminalUtilityClient | null = null;
+let diagnosticsService: DiagnosticsService | null = null;
 let finishingQuit = false;
+let utilityCrashPromptOpen = false;
+const localHistoryRepositories = new WeakMap<WebContents, RepositoryId>();
 
-function isLocalHistoryWindowUrl(value: string): boolean {
+function localHistoryRepositoryFromUrl(value: string): RepositoryId | null {
   try {
     const url = new URL(value);
-    if (url.pathname !== "/local-history") return false;
-    if (url.protocol === "app:" && url.host === "git-client") return true;
-    if (MAIN_WINDOW_VITE_DEV_SERVER_URL === undefined) return false;
-    return url.origin === new URL(MAIN_WINDOW_VITE_DEV_SERVER_URL).origin;
+    if (url.pathname !== "/local-history" || url.hash.length > 0) return null;
+    if (!isTrustedRendererNavigation(value, MAIN_WINDOW_VITE_DEV_SERVER_URL)) return null;
+    return RepositoryIdSchema.parse(url.searchParams.get("repositoryId"));
   } catch {
-    return false;
+    return null;
   }
+}
+
+function preventUntrustedNavigation(contents: WebContents): void {
+  contents.on("will-navigate", (event, url) => {
+    if (isTrustedRendererNavigation(url, MAIN_WINDOW_VITE_DEV_SERVER_URL)) return;
+    event.preventDefault();
+  });
 }
 
 async function createMainWindow(
   utility: GitUtilityClient,
   terminal: TerminalUtilityClient,
+  diagnostics: DiagnosticsService,
 ): Promise<BrowserWindow> {
   let presentationMode: WindowPresentationMode = "welcome";
   const window = new BrowserWindow({
@@ -100,7 +121,7 @@ async function createMainWindow(
   window.once("ready-to-show", () => window.show());
 
   window.webContents.setWindowOpenHandler(({ url }) => {
-    if (!isLocalHistoryWindowUrl(url)) return { action: "deny" };
+    if (localHistoryRepositoryFromUrl(url) === null) return { action: "deny" };
     return {
       action: "allow",
       overrideBrowserWindowOptions: {
@@ -114,7 +135,7 @@ async function createMainWindow(
         trafficLightPosition: { x: 12, y: 14 },
         webPreferences: {
           additionalArguments: qaFixture ? [QA_FIXTURE_RENDERER_ARGUMENT] : [],
-          preload: join(__dirname, "preload.cjs"),
+          preload: join(__dirname, "local-history-preload.cjs"),
           contextIsolation: true,
           nodeIntegration: false,
           sandbox: true,
@@ -123,6 +144,25 @@ async function createMainWindow(
         },
       },
     };
+  });
+  window.webContents.on("did-create-window", (childWindow, details) => {
+    const repositoryId = localHistoryRepositoryFromUrl(details.url);
+    if (repositoryId === null) {
+      childWindow.close();
+      return;
+    }
+    const childContents = childWindow.webContents;
+    localHistoryRepositories.set(childContents, repositoryId);
+    preventUntrustedNavigation(childContents);
+    monitorWindowRuntime(childWindow, {
+      diagnostics,
+      showMessageBox: (target, options) => dialog.showMessageBox(target, options),
+      relaunch: () => app.relaunch(),
+      quit: () => app.quit(),
+    });
+    childWindow.once("closed", () => {
+      localHistoryRepositories.delete(childContents);
+    });
   });
   window.webContents.on(
     "did-fail-load",
@@ -140,27 +180,15 @@ async function createMainWindow(
     console.info("[git-client] packaged-smoke-ready");
     setTimeout(() => app.quit(), 1_000);
   });
-  window.webContents.on("will-navigate", (event, url) => {
-    const trustedDevelopmentUrl = MAIN_WINDOW_VITE_DEV_SERVER_URL ?? null;
-    if (
-      url.startsWith("app://git-client/") ||
-      (trustedDevelopmentUrl !== null && url.startsWith(trustedDevelopmentUrl))
-    )
-      return;
-    event.preventDefault();
-  });
+  preventUntrustedNavigation(window.webContents);
 
   const settings = await SettingsStore.of(join(app.getPath("userData"), "settings.json"));
-  const runtime = {
-    kind: "electron",
-    appVersion: app.getVersion(),
-    electronVersion: process.versions.electron,
-    platform: process.platform,
-    architecture: process.arch,
-    qaFixture,
-  } as const;
-  const diagnostics = DiagnosticsService.create(runtime);
-  await diagnostics.initialize();
+  monitorWindowRuntime(window, {
+    diagnostics,
+    showMessageBox: (target, options) => dialog.showMessageBox(target, options),
+    relaunch: () => app.relaunch(),
+    quit: () => app.quit(),
+  });
   const menu = NativeMenuService.create(window);
   const hosting = ElectronHostingFoundation.of(
     FetchHostingHttpClient.of((input, init) =>
@@ -177,6 +205,7 @@ async function createMainWindow(
     hosting,
     diagnostics,
     runtime,
+    localHistoryRepositoryFor: (sender) => localHistoryRepositories.get(sender) ?? null,
     onWindowPresentationModeChange: (mode) => {
       presentationMode = mode;
     },
@@ -203,6 +232,44 @@ async function createMainWindow(
     if (mainWindow === window) mainWindow = null;
   });
   return window;
+}
+
+function reportUtilityCrash(kind: "gitUtilityCrash" | "terminalUtilityCrash", error: Error): void {
+  const diagnostics = diagnosticsService;
+  if (diagnostics !== null) {
+    void diagnostics
+      .recordRuntimeFailure({ kind, message: error.message })
+      .catch((recordError: unknown) => {
+        console.error("[git-client] failed to record utility crash", recordError);
+      });
+  }
+  const window = mainWindow;
+  if (finishingQuit || utilityCrashPromptOpen || window === null || window.isDestroyed()) return;
+  utilityCrashPromptOpen = true;
+  void dialog
+    .showMessageBox(window, {
+      type: "error",
+      title: "Git Client service stopped",
+      message:
+        kind === "gitUtilityCrash"
+          ? "The Git service stopped unexpectedly."
+          : "The terminal service stopped unexpectedly.",
+      detail: "Pending operations were cancelled and will not be retried automatically.",
+      buttons: ["Restart Git Client", "Quit"],
+      defaultId: 0,
+      cancelId: 1,
+      noLink: true,
+    })
+    .then(({ response }) => {
+      if (response === 0) app.relaunch();
+      app.quit();
+    })
+    .catch((dialogError: unknown) => {
+      console.error("[git-client] utility crash dialog failed", dialogError);
+    })
+    .finally(() => {
+      utilityCrashPromptOpen = false;
+    });
 }
 
 async function installQaHostingCertificate(): Promise<void> {
@@ -251,21 +318,29 @@ async function start(): Promise<void> {
   });
 
   await app.whenReady();
+  installDefaultDenyPermissionPolicy(session.defaultSession);
   await installQaHostingCertificate();
   installProductionCsp();
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL === undefined) await registerAppProtocol(rendererRoot);
+  const diagnostics = DiagnosticsService.create(runtime);
+  await diagnostics.initialize();
+  diagnosticsService = diagnostics;
   gitUtility = await GitUtilityClient.fork(join(__dirname, "git-utility.cjs"), {
     storageRoot: app.getPath("userData"),
+    onCrash: (error) => reportUtilityCrash("gitUtilityCrash", error),
   });
-  terminalUtility = await TerminalUtilityClient.fork(join(__dirname, "terminal-utility.cjs"));
-  mainWindow = await createMainWindow(gitUtility, terminalUtility);
+  terminalUtility = await TerminalUtilityClient.fork(join(__dirname, "terminal-utility.cjs"), {
+    onCrash: (error) => reportUtilityCrash("terminalUtilityCrash", error),
+  });
+  mainWindow = await createMainWindow(gitUtility, terminalUtility, diagnostics);
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length !== 0) return;
     const utility = gitUtility;
     const terminal = terminalUtility;
-    if (utility === null || terminal === null) return;
-    void createMainWindow(utility, terminal)
+    const diagnostics = diagnosticsService;
+    if (utility === null || terminal === null || diagnostics === null) return;
+    void createMainWindow(utility, terminal, diagnostics)
       .then((window) => {
         mainWindow = window;
       })

@@ -3,7 +3,7 @@ import { cn } from "@jongminchung/ui/lib/utils";
 import type { ProjectSearchOptions, ProjectSearchResult } from "../domain/projectSearch";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
-import { List, ListItem } from "./ProductCollections";
+import { EmptyState, List, ListItem } from "./ProductCollections";
 
 export interface FindResultsSession {
   readonly query: string;
@@ -42,9 +42,7 @@ export function FindResultsPanel({
         </Button>
       </header>
       {!session || session.results.length === 0 ? (
-        <div className={tw.emptyState}>
-          Run Find in Files and open its results in this tool window.
-        </div>
+        <EmptyState title="Run Find in Files and open its results in this tool window." />
       ) : (
         <List aria-label="Find results" density="compact" role="listbox">
           {session.results.map((result, index) => (

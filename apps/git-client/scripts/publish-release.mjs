@@ -8,7 +8,12 @@ import {
   createDependencyAwareChangelogRenderer,
 } from "./nx-changelog-renderer.mjs";
 import { captureCommand, executeCommand } from "./process.mjs";
-import { buildRelease, createReleaseArtifactNames, parseReleaseVersion } from "./release.mjs";
+import {
+  buildRelease,
+  createReleaseArtifactNames,
+  parseReleaseVersion,
+  verifyReleaseSource,
+} from "./release.mjs";
 
 export const gitClientProject = "@jongminchung/git-client";
 export const gitClientReleaseGroup = "git-client";
@@ -74,6 +79,7 @@ export function createGhReleaseArguments({ artifacts, notesFile, sha, version })
     createReleaseTag(version),
     artifacts.dmg,
     artifacts.checksum,
+    artifacts.provenance,
     "--repo",
     githubRepository,
     "--target",
@@ -125,7 +131,7 @@ export function parseReleaseMetadata(value) {
 
 export function assertReleaseMetadata(metadata, version, expectedDraft) {
   const names = createReleaseArtifactNames(version);
-  const expectedAssets = [names.checksum, names.dmg].sort((left, right) =>
+  const expectedAssets = [names.checksum, names.dmg, names.provenance].sort((left, right) =>
     left.localeCompare(right),
   );
   const actualAssets = [...metadata.assets].sort((left, right) => left.localeCompare(right));
@@ -258,11 +264,11 @@ async function publishRelease(release) {
     throw new Error(`GitHub release already exists: ${tag}`);
   }
 
-  const sha = await captureCommand("git", ["rev-parse", "HEAD"], { cwd: workspaceRoot });
   if ((await readRemoteTagSha(tag, environment)) !== null) {
     throw new Error(`GitHub tag already exists: ${tag}`);
   }
   const artifacts = await buildRelease(release.version);
+  const sha = artifacts.sourceSha;
   const notesFile = join(appRoot, "release-artifacts", "release-notes.md");
   await writeFile(notesFile, release.notes);
 
@@ -316,6 +322,7 @@ export function parsePublishArguments(arguments_) {
 
 async function main() {
   const options = parsePublishArguments(process.argv.slice(2));
+  if (!options.dryRun) await verifyReleaseSource(workspaceRoot);
   const release = await calculateRelease(options.verbose);
   if (!release) {
     console.log("No releasable Git Client changes were detected.");

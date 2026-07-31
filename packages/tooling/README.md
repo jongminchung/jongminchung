@@ -13,8 +13,8 @@ shared settings.
 
 ## Version Policy
 
-This package intentionally stays on `1.0.0`. Consumers should reuse `@jongminchung/tooling@1.0.0`;
-do not publish replacement versions such as `1.0.1` or `1.0.2`.
+Published versions are immutable. Increment the stable SemVer version for every changed release:
+patch for compatible fixes, minor for compatible features, and major for breaking contracts.
 
 ## Package scripts
 

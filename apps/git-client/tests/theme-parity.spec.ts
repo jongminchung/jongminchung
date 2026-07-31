@@ -155,8 +155,8 @@ test("matches Rebased geometry, density, and interactive states", async ({ page 
 
   const appearance = page.getByRole("button", { name: /Appearance:/u });
   await appearance.click();
-  const selected = page.getByRole("radio", { name: "Islands Light", exact: true });
-  const other = page.getByRole("radio", { name: "Islands Dark", exact: true });
+  const selected = page.getByRole("menuitemradio", { name: "Islands Light", exact: true });
+  const other = page.getByRole("menuitemradio", { name: "Islands Dark", exact: true });
   await expect(selected).toHaveAttribute("aria-checked", "true");
   const selectedBackground = await selected.evaluate(
     (element) => getComputedStyle(element).backgroundColor,
@@ -166,13 +166,12 @@ test("matches Rebased geometry, density, and interactive states", async ({ page 
     .evaluate((root) => getComputedStyle(root).getPropertyValue("--primary").trim());
   expect(selectedBackground).toBe(primary);
 
-  const otherRow = other.locator("..");
-  const idleBackground = await otherRow.evaluate(
+  const idleBackground = await other.evaluate(
     (element) => getComputedStyle(element).backgroundColor,
   );
-  await otherRow.hover();
+  await other.hover();
   await expect
-    .poll(() => otherRow.evaluate((element) => getComputedStyle(element).backgroundColor))
+    .poll(() => other.evaluate((element) => getComputedStyle(element).backgroundColor))
     .not.toBe(idleBackground);
   await page.keyboard.press("End");
   await expect(other).toBeFocused();
@@ -220,14 +219,15 @@ test("keeps approved Light and Dark screen states stable", async ({ page }) => {
   await page.setViewportSize({ width: 1184, height: 768 });
   await page.goto("/?fixture=qa");
   await page.getByRole("button", { name: /Appearance:/u }).click();
-  await page.getByRole("radio", { name: "Islands Dark", exact: true }).click();
+  await page.getByRole("menuitemradio", { name: "Islands Dark", exact: true }).click();
   await expect(page).toHaveScreenshot("theme-parity-workbench-dark.png", {
     maxDiffPixelRatio: contract.thresholds.maximumMismatchPercent / 100,
   });
 
   await page.getByRole("button", { name: "Terminal", exact: true }).click();
-  await expect(page.getByText("Native Terminal", { exact: true }).locator("..")).toHaveScreenshot(
-    "theme-parity-terminal-dark.png",
-    { maxDiffPixelRatio: contract.thresholds.maximumMismatchPercent / 100 },
-  );
+  await expect(
+    page.locator('[data-slot="empty"]').filter({ hasText: "Native Terminal" }),
+  ).toHaveScreenshot("theme-parity-terminal-dark.png", {
+    maxDiffPixelRatio: contract.thresholds.maximumMismatchPercent / 100,
+  });
 });

@@ -7,8 +7,7 @@ import type { FileContent, FilePreview, FileSource } from "../shared/contracts/m
 import { tw } from "../styles/tailwind";
 import { useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
-import { EmptyState } from "./ProductCollections";
-import { Spinner } from "./ProductCollections";
+import { EmptyState, Spinner } from "./ProductCollections";
 import { Dialog, DialogHeader } from "./ProductDialog";
 import { TextInput } from "./ProductFormControls";
 
@@ -344,9 +343,13 @@ export function RepositoryInspectorDialog({
         <TabsContent aria-busy={loading} className={tw.inspectorContent} value="file">
           {inspectorStatus ??
             (!content ? (
-              <div className={tw.emptyState}>Select a file to view its contents.</div>
+              <EmptyState title="Select a file to view its contents." />
             ) : content.kind === "text" ? (
-              <Suspense fallback={<div className={tw.emptyState}>Loading viewer…</div>}>
+              <Suspense
+                fallback={
+                  <Spinner className="h-full w-full justify-center" label="Loading viewer…" />
+                }
+              >
                 <CodeMirrorFile
                   bookmarkedLines={bookmarkedLines}
                   editable={source.kind === "workingTree"}
@@ -383,17 +386,18 @@ export function RepositoryInspectorDialog({
                 </figcaption>
               </figure>
             ) : (
-              <div className={tw.emptyState}>
-                <strong>{content.path}</strong>
-                <span>
-                  {content.kind === "binary"
+              <EmptyState
+                description={
+                  content.kind === "binary"
                     ? "Binary file"
                     : content.kind === "invalidUtf8"
                       ? "Not valid UTF-8"
                       : content.kind === "tooLarge"
                         ? "File exceeds the 5 MiB or 50,000 line viewer limit"
-                        : "File does not exist at this source"}
-                </span>
+                        : "File does not exist at this source"
+                }
+                title={content.path}
+              >
                 {"sizeBytes" in content && (
                   <small>{content.sizeBytes.toLocaleString()} bytes</small>
                 )}
@@ -408,7 +412,7 @@ export function RepositoryInspectorDialog({
                     Open in default application
                   </Button>
                 )}
-              </div>
+              </EmptyState>
             ))}
         </TabsContent>
         <TabsContent aria-busy={loading} className={tw.inspectorContent} value="history">

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { GitConsoleEntry } from "../domain/gitConsole";
 import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
+import { EmptyState } from "./ProductCollections";
 
 function statusIcon(status: GitConsoleEntry["status"]): Parameters<typeof Icon>[0]["name"] {
   if (status === "completed") return "check";
@@ -88,7 +89,7 @@ export function GitConsolePanel({
         </Button>
       </header>
       {entries.length === 0 ? (
-        <div className={tw.emptyState}>Git commands will be shown here.</div>
+        <EmptyState title="Git commands will be shown here." />
       ) : (
         <div className={tw.gitConsoleList} role="listbox" aria-label="Git command history">
           {entries.map((entry) => {

@@ -1,13 +1,4 @@
-import {
-  appendFile,
-  lstat,
-  mkdir,
-  readFile,
-  readdir,
-  realpath,
-  rm,
-  writeFile,
-} from "node:fs/promises";
+import { lstat, mkdir, readFile, readdir, realpath, rm, writeFile } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
 import { app, BrowserWindow } from "electron";
 import { strToU8, zipSync } from "fflate";
@@ -20,6 +11,7 @@ import type {
   RuntimeInfo,
 } from "../../src/shared/contracts/ipc";
 import { DiagnosticSnapshotSchema } from "../../src/shared/contracts/ipc";
+import { appendBoundedDiagnosticLog, sanitizeDiagnosticLogField } from "./diagnostics-log";
 import { SHORTCUT_DOCUMENT_COLOR_VARIABLES } from "./static-color-boundary";
 
 const MAX_LOG_ARCHIVE_INPUT_BYTES = 32 * 1_024 * 1_024;
@@ -37,6 +29,17 @@ interface DiagnosticsPaths {
   readonly logs: string;
   readonly sessionData: string;
   readonly userData: string;
+}
+
+export interface RuntimeFailure {
+  readonly kind:
+    | "rendererGone"
+    | "rendererUnresponsive"
+    | "preloadError"
+    | "gitUtilityCrash"
+    | "terminalUtilityCrash";
+  readonly message: string;
+  readonly details?: Readonly<Record<string, string | number | boolean | null>>;
 }
 
 async function directorySize(root: string): Promise<number> {
@@ -144,6 +147,8 @@ function reportSection(report: unknown, key: string): unknown {
 }
 
 export class DiagnosticsService {
+  private logWrite: Promise<void> = Promise.resolve();
+
   private constructor(
     private readonly paths: DiagnosticsPaths,
     private readonly runtime: RuntimeInfo,
@@ -171,6 +176,23 @@ export class DiagnosticsService {
       mkdir(this.paths.logs, { recursive: true, mode: 0o700 }),
     ]);
     await this.appendLog("diagnostics service initialized");
+  }
+
+  async recordRuntimeFailure(failure: RuntimeFailure): Promise<void> {
+    const message = sanitizeDiagnosticLogField(failure.message, 2_048);
+    const details = Object.fromEntries(
+      Object.entries(failure.details ?? {}).map(([key, value]) => [
+        sanitizeDiagnosticLogField(key, 128),
+        typeof value === "string" ? sanitizeDiagnosticLogField(value, 2_048) : value,
+      ]),
+    );
+    await this.appendLog(
+      `runtime failure ${JSON.stringify({
+        kind: failure.kind,
+        message,
+        details,
+      })}`,
+    );
   }
 
   path(kind: DiagnosticPathKind): string {
@@ -411,11 +433,8 @@ export class DiagnosticsService {
   }
 
   private async appendLog(message: string): Promise<void> {
-    await mkdir(this.paths.logs, { recursive: true, mode: 0o700 });
-    await appendFile(
-      join(this.paths.logs, "git-client.log"),
-      `${new Date().toISOString()} ${message}\n`,
-      { encoding: "utf8", mode: 0o600 },
-    );
+    const write = this.logWrite.then(() => appendBoundedDiagnosticLog(this.paths.logs, message));
+    this.logWrite = write.catch(() => undefined);
+    await write;
   }
 }

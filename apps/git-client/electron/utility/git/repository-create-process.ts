@@ -3,6 +3,7 @@ import { spawn } from "node:child_process";
 import type { ChildProcessByStdio } from "node:child_process";
 import type { Readable } from "node:stream";
 import { StringDecoder } from "node:string_decoder";
+import { createGitEnvironment } from "./git-environment";
 import type {
   GitCancellationReason,
   GitProcessOutcome,
@@ -91,7 +92,7 @@ export class RepositoryCreateProcessRunner implements RepositoryCreateProcessRun
       try {
         child = spawn(this.#gitBinary, [...spec.args], {
           cwd: spec.cwd,
-          env: { ...process.env, ...PROCESS_ENVIRONMENT },
+          env: createGitEnvironment(process.env, PROCESS_ENVIRONMENT),
           shell: false,
           stdio: ["ignore", "pipe", "pipe"],
           windowsHide: true,

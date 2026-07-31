@@ -2,6 +2,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { Notice } from "./Notice";
+import { EmptyState, Spinner, StatePill, StatusBadge } from "./ProductCollections";
 import { DialogBody, DialogFooter } from "./ProductDialog";
 
 describe("Git Client product component variants", () => {
@@ -41,5 +42,31 @@ describe("Git Client product component variants", () => {
     expect(markup).toContain("overflow-auto");
     expect(markup).toContain("justify-between");
     expect(markup).toContain("border-t");
+  });
+
+  it("composes product status and state recipes from shared primitives", () => {
+    const markup = renderToStaticMarkup(
+      createElement(
+        "section",
+        null,
+        createElement(Spinner, { label: "Loading changes…" }),
+        createElement(EmptyState, {
+          description: "There are no local changes.",
+          icon: createElement("span", null, "!"),
+          title: "Working tree clean.",
+        }),
+        createElement(StatusBadge, null, "M"),
+        createElement(StatePill, null, "Shallow"),
+        createElement(StatePill, { role: "status", tone: "destructive" }, "Rebase in progress"),
+      ),
+    );
+
+    expect(markup).toContain('data-slot="spinner"');
+    expect(markup).toContain('data-slot="empty"');
+    expect(markup).toContain('data-slot="empty-icon"');
+    expect(markup.match(/data-slot="badge"/g)).toHaveLength(3);
+    expect(markup).toContain("bg-destructive-muted");
+    expect(markup).toContain('role="status"');
+    expect(markup).toContain("Working tree clean.");
   });
 });

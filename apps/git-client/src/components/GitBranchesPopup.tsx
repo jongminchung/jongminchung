@@ -9,6 +9,7 @@ import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
 import { useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
+import { Notice } from "./Notice";
 
 interface BranchPopupRow {
   readonly ref: Ref;
@@ -327,7 +328,16 @@ export function GitBranchesPopup({
                 <Button
                   aria-label="Fetch"
                   disabled={busy}
-                  onClick={() => void run({ kind: "fetch", remote: null, prune: false }, false)}
+                  onClick={() =>
+                    void run(
+                      {
+                        kind: "fetch",
+                        remote: null,
+                        prune: false,
+                      },
+                      false,
+                    )
+                  }
                   type="button"
                   className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
                   variant="ghost"
@@ -493,9 +503,14 @@ export function GitBranchesPopup({
         {rows.length === 0 && <p>No branches found</p>}
       </div>
       {error && (
-        <p className={tw.gitBranchesError} role="alert">
+        <Notice
+          className="w-auto rounded-none border-x-0 p-1.5 px-2 text-[11px]"
+          role="alert"
+          size="sm"
+          tone="destructive"
+        >
           {error}
-        </p>
+        </Notice>
       )}
       {detailsOpen && activeRef && (
         <div

@@ -1,8 +1,20 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { parseExcalidrawSource } from "../lib/excalidraw-scene";
+
+async function loadedJavaScriptUrls(page: Page): Promise<readonly string[]> {
+  return page.evaluate(() => [
+    ...new Set([
+      ...Array.from(document.scripts, (script) => script.src).filter(Boolean),
+      ...performance
+        .getEntriesByType("resource")
+        .map((entry) => entry.name)
+        .filter((url) => new URL(url).pathname.endsWith(".js")),
+    ]),
+  ]);
+}
 
 test("diagram index discovers standalone Excalidraw sources", async ({ page }) => {
   await page.goto("/diagrams");
@@ -143,7 +155,13 @@ test("serves every generated document route including app icon documentation", a
 }) => {
   const manifest = JSON.parse(
     await readFile(resolve(process.cwd(), "generated/content-manifest.json"), "utf8"),
-  ) as readonly { readonly href: string }[];
+  ) as readonly {
+    readonly href: string;
+    readonly outline: readonly {
+      readonly id: string;
+      readonly level: 2 | 3;
+    }[];
+  }[];
   const responses = await Promise.all(
     manifest.map(async (document) => ({
       href: document.href,
@@ -152,6 +170,21 @@ test("serves every generated document route including app icon documentation", a
   );
   for (const { href, response } of responses) {
     expect(response.status(), href).toBe(200);
+  }
+
+  for (const document of manifest) {
+    await page.goto(document.href);
+    const renderedOutline = await page
+      .locator('[data-docs-prose="true"] :is(h2[id], h3[id])')
+      .evaluateAll((headings) =>
+        headings.map((heading) => ({
+          id: heading.id,
+          level: heading.tagName === "H2" ? 2 : 3,
+        })),
+      );
+    expect(renderedOutline, document.href).toEqual(
+      document.outline.map(({ id, level }) => ({ id, level })),
+    );
   }
 
   for (const [href, title] of [
@@ -211,11 +244,20 @@ test("search exposes loading, retry, keyboard, focus, and accessibility states",
   });
 
   await page.goto("/en/overview");
+  await page.waitForLoadState("networkidle");
+  const initialScripts = new Set(await loadedJavaScriptUrls(page));
   const trigger = page.locator("[data-docs-search-trigger]:visible").first();
   await trigger.click();
   const dialog = page.getByRole("dialog", { name: "Search documentation" });
   const input = dialog.getByRole("combobox");
 
+  await expect(dialog).toBeVisible();
+  await expect
+    .poll(async () => {
+      const loadedScripts = await loadedJavaScriptUrls(page);
+      return loadedScripts.filter((url) => !initialScripts.has(url)).length;
+    })
+    .toBeGreaterThan(0);
   await expect(dialog.getByRole("status")).toContainText("Loading search index");
   releaseFirstRequest();
   await expect(dialog.getByRole("alert")).toContainText("Search index failed");

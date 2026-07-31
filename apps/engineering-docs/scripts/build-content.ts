@@ -1,8 +1,13 @@
 import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { dirname, extname, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+import { compile } from "@mdx-js/mdx";
 import matter from "gray-matter";
+import { toString } from "hast-util-to-string";
+import rehypeSlug from "rehype-slug";
+import remarkGfm from "remark-gfm";
 import ts from "typescript";
+import { visit } from "unist-util-visit";
 import {
   compareDocumentMetadata,
   createDocHref,
@@ -38,6 +43,12 @@ interface PackageManifest {
   readonly exports?: unknown;
 }
 
+interface PackageApi {
+  readonly name: string;
+  readonly version: string;
+  readonly symbols: readonly string[];
+}
+
 export interface GeneratedFile {
   readonly filePath: string;
   readonly contents: string;
@@ -45,6 +56,12 @@ export interface GeneratedFile {
 
 type GenerationMode = "check" | "write";
 type ReadTextFile = (filePath: string) => Promise<string | null>;
+type HastNode = Parameters<typeof toString>[0];
+type HeadingElement = HastNode & {
+  readonly type: "element";
+  readonly tagName: "h2" | "h3";
+  readonly properties: Readonly<Record<string, unknown>>;
+};
 
 function toPosixPath(value: string): string {
   return value.split(sep).join("/");
@@ -64,38 +81,45 @@ async function listFiles(directory: string): Promise<readonly string[]> {
     .sort();
 }
 
-function slugify(value: string, used: Map<string, number>): string {
-  const base = value
-    .toLocaleLowerCase()
-    .replace(/<[^>]+>/gu, "")
-    .replace(/[`*_~[\]().,:!?/\\]/gu, "")
-    .trim()
-    .replace(/\s+/gu, "-");
-  const count = used.get(base) ?? 0;
-  used.set(base, count + 1);
-  return count === 0 ? base : `${base}-${count}`;
+function isHeadingElement(node: { readonly type: string }): node is HeadingElement {
+  if (node.type !== "element") return false;
+  const candidate = node as {
+    readonly tagName?: unknown;
+    readonly properties?: unknown;
+  };
+  return (
+    (candidate.tagName === "h2" || candidate.tagName === "h3") &&
+    typeof candidate.properties === "object" &&
+    candidate.properties !== null
+  );
 }
 
-function cleanInlineMarkdown(value: string): string {
-  return value
-    .replace(/<[^>]+>/gu, "")
-    .replace(/!\[([^\]]*)\]\([^)]*\)/gu, "$1")
-    .replace(/\[([^\]]+)\]\([^)]*\)/gu, "$1")
-    .replace(/[`*_~]/gu, "")
-    .trim();
-}
+export async function createOutline(body: string): Promise<readonly OutlineEntry[]> {
+  const outline: OutlineEntry[] = [];
+  const collectOutline =
+    () =>
+    (tree: Parameters<typeof visit>[0]): void => {
+      visit(tree, (node) => {
+        if (!isHeadingElement(node)) return;
+        const id = node.properties.id;
+        if (typeof id !== "string" || id.length === 0) {
+          throw new Error(`Generated heading "${toString(node)}" has no ID.`);
+        }
+        outline.push(
+          Object.freeze({
+            id,
+            label: toString(node),
+            level: node.tagName === "h2" ? 2 : 3,
+          }),
+        );
+      });
+    };
 
-function createOutline(body: string): readonly OutlineEntry[] {
-  const used = new Map<string, number>();
-  return body.split("\n").flatMap((line): readonly OutlineEntry[] => {
-    const match = /^(#{2,3})\s+(.+)$/u.exec(line);
-    if (!match) return [];
-    const hashes = match[1];
-    const heading = match[2];
-    if (hashes === undefined || heading === undefined) return [];
-    const label = cleanInlineMarkdown(heading);
-    return [{ id: slugify(label, used), label, level: hashes.length as 2 | 3 }];
+  await compile(body, {
+    remarkPlugins: [remarkGfm],
+    rehypePlugins: [rehypeSlug, collectOutline],
   });
+  return Object.freeze(outline);
 }
 
 function createSearchBody(body: string): string {
@@ -124,7 +148,7 @@ export async function readDocuments(): Promise<readonly SourceDocument[]> {
         metadata,
         body: parsed.content,
         filePath,
-        outline: createOutline(parsed.content),
+        outline: await createOutline(parsed.content),
         relativePath,
       });
     }),
@@ -235,13 +259,15 @@ function createSpecifier(packageName: string, subpath: string): string {
   return subpath === "." ? packageName : `${packageName}/${subpath.replace(/^\.\//u, "")}`;
 }
 
-async function readPackageApi(packageDirectory: string): Promise<readonly string[]> {
+async function readPackageApi(packageDirectory: string): Promise<PackageApi> {
   const packageRoot = resolve(workspaceRoot, "packages", packageDirectory);
   const manifest = JSON.parse(
     await readFile(resolve(packageRoot, "package.json"), "utf8"),
   ) as PackageManifest;
   if (
     typeof manifest.name !== "string" ||
+    typeof manifest.version !== "string" ||
+    manifest.version.length === 0 ||
     typeof manifest.exports !== "object" ||
     !manifest.exports
   ) {
@@ -273,7 +299,7 @@ async function readPackageApi(packageDirectory: string): Promise<readonly string
   });
   const checker = program.getTypeChecker();
 
-  return entries
+  const symbols = entries
     .flatMap((entry) => {
       const sourceFile = program.getSourceFile(entry.filePath);
       const moduleSymbol =
@@ -286,17 +312,41 @@ async function readPackageApi(packageDirectory: string): Promise<readonly string
         .map((symbol) => `${entry.specifier}#${symbol.name}`);
     })
     .sort();
+  return Object.freeze({
+    name: packageName,
+    version: manifest.version,
+    symbols: Object.freeze(symbols),
+  });
+}
+
+export function validatePackageVersions(
+  documents: readonly SourceDocument[],
+  packageContract: Pick<PackageApi, "name" | "version">,
+): void {
+  for (const document of documents) {
+    if (document.metadata.packageName !== packageContract.name) continue;
+    if (document.metadata.packageVersion !== packageContract.version) {
+      throw new Error(
+        `${document.relativePath}: documented package version ${
+          document.metadata.packageVersion ?? "(missing)"
+        } does not match ${packageContract.name}@${packageContract.version}.`,
+      );
+    }
+  }
 }
 
 async function validatePackageApi(documents: readonly SourceDocument[]): Promise<void> {
   for (const packageDirectory of ["remark-plantuml", "tooling"] as const) {
-    const packageName = `@jongminchung/${packageDirectory}`;
-    const documented = new Set(
-      documents
-        .filter(({ metadata }) => metadata.packageName === packageName)
-        .flatMap(({ metadata }) => metadata.apiSymbols ?? []),
+    const actualPackage = await readPackageApi(packageDirectory);
+    const packageName = actualPackage.name;
+    validatePackageVersions(documents, actualPackage);
+    const packageDocuments = documents.filter(
+      ({ metadata }) => metadata.packageName === packageName,
     );
-    const actual = new Set(await readPackageApi(packageDirectory));
+    const documented = new Set(
+      packageDocuments.flatMap(({ metadata }) => metadata.apiSymbols ?? []),
+    );
+    const actual = new Set(actualPackage.symbols);
     const missing = [...actual].filter((symbol) => !documented.has(symbol));
     const stale = [...documented].filter((symbol) => !actual.has(symbol));
     if (missing.length > 0 || stale.length > 0) {

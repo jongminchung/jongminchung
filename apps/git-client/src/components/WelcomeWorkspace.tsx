@@ -147,10 +147,7 @@ export function WelcomeWorkspace({
           aria-label="Options Menu"
           onClick={onOpenSettings}
           type="button"
-          className={cn(
-            "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
-            tw.welcomeSettingsButton,
-          )}
+          className="absolute bottom-3.5 left-3.5 size-7 p-0 text-muted-foreground"
           variant="ghost"
           size="icon-sm"
         >

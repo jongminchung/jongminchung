@@ -9,9 +9,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@jongminchung/ui/components/select";
+import { Spinner as SpinnerIcon } from "@jongminchung/ui/components/spinner";
 import { Textarea } from "@jongminchung/ui/components/textarea";
 import { cn } from "@jongminchung/ui/lib/utils";
-import { LoaderCircle, Search, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { useId, useRef } from "react";
 import type {
   ChangeEvent,
@@ -181,6 +182,7 @@ export function TextInput({
       width={width}
     >
       <span
+        aria-busy={isLoading || undefined}
         className={cn(
           "flex items-center gap-1.5 rounded-md border bg-background px-2 text-foreground shadow-xs transition-[border-color,box-shadow] focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/30",
           size === "sm" ? "h-7" : size === "lg" ? "h-9" : "h-8",
@@ -212,7 +214,7 @@ export function TextInput({
           value={value}
           {...props}
         />
-        {isLoading ? <LoaderCircle aria-hidden className="size-3.5 animate-spin" /> : null}
+        {isLoading ? <SpinnerIcon aria-hidden className="size-3.5" /> : null}
         {hasClear && value ? (
           <Button
             aria-label={`Clear ${label}`}
@@ -304,7 +306,7 @@ export function TextArea({
       status={status}
       width={width}
     >
-      <span className="relative flex">
+      <span aria-busy={isLoading || undefined} className="relative flex">
         {startIcon ? (
           <span className="absolute left-2 top-2 text-muted-foreground">{startIcon}</span>
         ) : null}
@@ -333,9 +335,7 @@ export function TextArea({
           value={value}
           {...props}
         />
-        {isLoading ? (
-          <LoaderCircle aria-hidden className="absolute right-2 top-2 size-3.5 animate-spin" />
-        ) : null}
+        {isLoading ? <SpinnerIcon aria-hidden className="absolute top-2 right-2 size-3.5" /> : null}
       </span>
     </FieldShell>
   );

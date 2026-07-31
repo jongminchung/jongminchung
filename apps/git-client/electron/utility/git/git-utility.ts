@@ -58,6 +58,7 @@ import {
   type RepositoryCreateTerminalEvent,
 } from "./repository-create-service";
 import { RepositoryInspectionService } from "./repository-inspection-service";
+import { RepositoryMutationArbiter } from "./repository-mutation-arbiter";
 import { RepositoryRegistry } from "./repository-registry";
 import { RepositoryWatcherService } from "./repository-watcher";
 import { ShelfService } from "./shelf-service";
@@ -97,6 +98,56 @@ function repositoryServiceIds(request: GitRepositoryServiceRequest): readonly Re
   return [request.repositoryId];
 }
 
+function repositoryServiceIsMutation(operation: GitRepositoryServiceRequest["operation"]): boolean {
+  switch (operation) {
+    case "writeIgnoreRules":
+    case "importPatch":
+    case "createShelf":
+    case "applyShelf":
+    case "deleteShelf":
+    case "saveChangelist":
+    case "deleteChangelist":
+    case "commitChangelist":
+    case "restoreRecoveryEntry":
+    case "revertLocalHistory":
+    case "putLocalHistoryLabel":
+    case "writeConflictResult":
+    case "resolveBinaryConflict":
+    case "executeSynchronizedBranchOperation":
+    case "applyMultiRootRollback":
+      return true;
+    case "compareBranches":
+    case "preCommitCheck":
+    case "listGitConfig":
+    case "listSubmodules":
+    case "listMergedBranches":
+    case "loadCommitSignature":
+    case "listRemotes":
+    case "listWorktrees":
+    case "readIgnoreRules":
+    case "pushPreview":
+    case "historyRewritePreview":
+    case "exportPatch":
+    case "createPatchText":
+    case "listShelves":
+    case "listChangelists":
+    case "listRecoveryEntries":
+    case "listLocalHistoryActivities":
+    case "readLocalHistoryActivity":
+    case "readLocalHistoryDiff":
+    case "createLocalHistoryPatch":
+    case "listConflicts":
+    case "readConflict":
+    case "loadSubmoduleDiff":
+    case "resolveWorkingTreeFile":
+      return false;
+    default: {
+      const unhandled: never = operation;
+      return unhandled;
+    }
+  }
+}
+
 export class GitUtility {
   readonly #registry: RepositoryRegistry;
   readonly #queries: GitQueryService;
@@ -116,6 +167,7 @@ export class GitUtility {
   readonly #localHistory: LocalHistoryService | null;
   readonly #creations: RepositoryCreatorLike;
   readonly #watchers: RepositoryWatcherLike;
+  readonly #mutations: RepositoryMutationArbiter;
   readonly #activeCreations = new Map<GitRequestId, AbortController>();
   readonly #activeRepositoryServices = new Map<RepositoryId, Set<AbortController>>();
 
@@ -126,11 +178,18 @@ export class GitUtility {
   ) {
     const runner = new GitProcessRunner();
     const patchRunner = new PatchProcessRunner();
+    this.#mutations = new RepositoryMutationArbiter();
     this.#registry = new RepositoryRegistry(runner);
     this.#queries = new GitQueryService(this.#registry, runner);
     this.#recovery =
       storageRoot === null ? null : RecoveryService.of(this.#registry, storageRoot, runner);
-    this.#operations = new GitOperationService(this.#registry, runner, undefined, this.#recovery);
+    this.#operations = new GitOperationService(
+      this.#registry,
+      runner,
+      undefined,
+      this.#recovery,
+      this.#mutations,
+    );
     this.#previews = GitPreviewService.of(this.#registry, runner);
     this.#files = GitFileService.of(this.#registry);
     this.#inspection = new RepositoryInspectionService(this.#registry, runner);
@@ -302,7 +361,11 @@ export class GitUtility {
     const repositoryIds = repositoryServiceIds(request);
     const cancellation = this.#trackRepositoryService(repositoryIds);
     try {
-      const result = await this.#executeRepositoryService(request, cancellation.signal);
+      const execute = (): Promise<GitRepositoryServiceResult> =>
+        this.#executeRepositoryService(request, cancellation.signal);
+      const result = repositoryServiceIsMutation(request.operation)
+        ? await this.#mutations.run(repositoryIds, cancellation.signal, execute)
+        : await execute();
       return GitRepositoryServiceResultSchema.parse(result);
     } finally {
       this.#untrackRepositoryService(repositoryIds, cancellation);
@@ -343,8 +406,15 @@ export class GitUtility {
     content: string,
     activityName?: string,
   ): Promise<void> {
-    await this.#files.writeWorkingTreeFile(repositoryId, path, content);
-    await this.#localHistory?.record(repositoryId, activityName ?? `Editing ${path}`);
+    const cancellation = this.#trackRepositoryService([repositoryId]);
+    try {
+      await this.#mutations.run([repositoryId], cancellation.signal, async () => {
+        await this.#files.writeWorkingTreeFile(repositoryId, path, content);
+        await this.#localHistory?.record(repositoryId, activityName ?? `Editing ${path}`);
+      });
+    } finally {
+      this.#untrackRepositoryService([repositoryId], cancellation);
+    }
   }
 
   watchRepository(

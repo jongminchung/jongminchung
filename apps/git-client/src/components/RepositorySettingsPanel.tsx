@@ -12,6 +12,7 @@ import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
 import { Icon } from "./Icon";
 import { Notice } from "./Notice";
+import { EmptyState } from "./ProductCollections";
 
 type RepositorySettingsTab = "ignore" | "submodules" | "config";
 
@@ -265,7 +266,7 @@ export function RepositorySettingsPanel({
             </Button>
           </header>
           {submodules.length === 0 ? (
-            <p className={tw.emptyState}>No submodules configured.</p>
+            <EmptyState title="No submodules configured." />
           ) : (
             submodules.map((submodule) => (
               <article className={tw.settingRow} key={submodule.path}>

@@ -12,6 +12,7 @@ import type {
   RepositoryId,
 } from "../../../src/shared/contracts/git-utility";
 import type { SubmoduleDiff } from "../../../src/shared/contracts/model";
+import { createGitEnvironment } from "./git-environment";
 import { GitUtilityError } from "./git-error";
 import { GitProcessRunner, type GitProcessRunnerLike } from "./git-process";
 import type { RepositoryRegistry } from "./repository-registry";
@@ -43,7 +44,7 @@ class SpawnBinaryGitReader implements BinaryGitReader {
       try {
         child = spawn("git", [...args], {
           cwd,
-          env: { ...process.env, ...GIT_ENVIRONMENT },
+          env: createGitEnvironment(process.env, GIT_ENVIRONMENT),
           shell: false,
           stdio: ["ignore", "pipe", "pipe"],
           windowsHide: true,

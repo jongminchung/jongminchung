@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { copyFile, mkdir, mkdtemp, readFile, rm, truncate, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -21,8 +22,10 @@ import {
   resolveReleaseSecurity,
   stageReleaseArtifact,
   validateReleaseApp,
+  verifyReleaseSource,
 } from "./release.mjs";
 
+const SOURCE_SHA = "0123456789abcdef0123456789abcdef01234567";
 const productionEnvironment = Object.freeze({
   GIT_CLIENT_CODESIGN_IDENTITY: "Developer ID Application: Example Corp (TEAM123456)",
   GIT_CLIENT_NOTARY_KEYCHAIN_PROFILE: "git-client-release",
@@ -56,11 +59,94 @@ describe("Electron release build contract", () => {
     expect(createReleaseArtifactNames("1.2.3")).toEqual({
       checksum: "Git-Client_1.2.3_macos_arm64.dmg.sha256",
       dmg: "Git-Client_1.2.3_macos_arm64.dmg",
+      provenance: "Git-Client_1.2.3_macos_arm64.dmg.provenance.json",
     });
     expect(createReleaseArtifactNames("1.2.3", RELEASE_MODES.localAdHoc)).toEqual({
       checksum: "Git-Client_1.2.3_macos_arm64_adhoc.dmg.sha256",
       dmg: "Git-Client_1.2.3_macos_arm64_adhoc.dmg",
+      provenance: "Git-Client_1.2.3_macos_arm64_adhoc.dmg.provenance.json",
     });
+  });
+
+  it("requires a clean main branch exactly matching fetched origin/main", async () => {
+    const runCommand = vi.fn(async (_command: string, arguments_: readonly string[]) => {
+      const key = arguments_.join(" ");
+      if (key === "status --porcelain=v1 --untracked-files=all") {
+        return { code: 0, stderr: "", stdout: "" };
+      }
+      if (key === "symbolic-ref --quiet --short HEAD") {
+        return { code: 0, stderr: "", stdout: "main\n" };
+      }
+      if (key === "rev-parse HEAD" || key === "rev-parse refs/remotes/origin/main") {
+        return { code: 0, stderr: "", stdout: `${SOURCE_SHA}\n` };
+      }
+      return { code: 0, stderr: "", stdout: "" };
+    });
+
+    await expect(verifyReleaseSource("/workspace", { runCommand })).resolves.toEqual({
+      sourceSha: SOURCE_SHA,
+    });
+    expect(runCommand).toHaveBeenNthCalledWith(
+      1,
+      "git",
+      ["fetch", "--tags", "--prune", "origin", "+refs/heads/main:refs/remotes/origin/main"],
+      { capture: true, cwd: "/workspace" },
+    );
+
+    runCommand.mockImplementation(async (_command: string, arguments_: readonly string[]) => {
+      const key = arguments_.join(" ");
+      if (key === "status --porcelain=v1 --untracked-files=all") {
+        return { code: 0, stderr: "", stdout: " M apps/git-client/src/main.tsx\n" };
+      }
+      return { code: 0, stderr: "", stdout: "" };
+    });
+    await expect(verifyReleaseSource("/workspace", { runCommand })).rejects.toThrow(
+      "worktree must be clean",
+    );
+  });
+
+  it("updates a stale origin/main tracking ref before comparing release source", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "git-client-release-source-"));
+    const remote = join(directory, "remote.git");
+    const seed = join(directory, "seed");
+    const checkout = join(directory, "checkout");
+    const git = (cwd: string, arguments_: readonly string[]): string =>
+      execFileSync("git", arguments_, {
+        cwd,
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          GIT_AUTHOR_EMAIL: "release-test@example.test",
+          GIT_AUTHOR_NAME: "Release Test",
+          GIT_COMMITTER_EMAIL: "release-test@example.test",
+          GIT_COMMITTER_NAME: "Release Test",
+        },
+      }).trim();
+
+    try {
+      await mkdir(seed);
+      git(directory, ["init", "--bare", remote]);
+      git(seed, ["init", "-b", "main"]);
+      await writeFile(join(seed, "README.md"), "first\n");
+      git(seed, ["add", "README.md"]);
+      git(seed, ["commit", "-m", "first"]);
+      git(seed, ["remote", "add", "origin", remote]);
+      git(seed, ["push", "-u", "origin", "main"]);
+      git(remote, ["symbolic-ref", "HEAD", "refs/heads/main"]);
+      git(directory, ["clone", "--branch", "main", remote, checkout]);
+      const staleTrackingSha = git(checkout, ["rev-parse", "refs/remotes/origin/main"]);
+
+      await writeFile(join(seed, "README.md"), "second\n");
+      git(seed, ["add", "README.md"]);
+      git(seed, ["commit", "-m", "second"]);
+      git(seed, ["push", "origin", "main"]);
+      expect(git(checkout, ["rev-parse", "refs/remotes/origin/main"])).toBe(staleTrackingSha);
+
+      await expect(verifyReleaseSource(checkout)).rejects.toThrow("must exactly match origin/main");
+      expect(git(checkout, ["rev-parse", "refs/remotes/origin/main"])).not.toBe(staleTrackingSha);
+    } finally {
+      await rm(directory, { force: true, recursive: true });
+    }
   });
 
   it("rejects release builds outside macOS ARM64", () => {
@@ -167,17 +253,30 @@ describe("Electron release build contract", () => {
 
     try {
       await writeFile(source, "abc");
-      const artifacts = await stageReleaseArtifact(source, output, "1.2.3");
+      const artifacts = await stageReleaseArtifact(source, output, "1.2.3", SOURCE_SHA);
 
-      expect(artifacts).toEqual({
+      expect(artifacts).toMatchObject({
         checksum: join(output, "Git-Client_1.2.3_macos_arm64.dmg.sha256"),
         dmg: join(output, "Git-Client_1.2.3_macos_arm64.dmg"),
         mode: RELEASE_MODES.production,
+        provenance: join(output, "Git-Client_1.2.3_macos_arm64.dmg.provenance.json"),
+        sourceSha: SOURCE_SHA,
       });
       expect(await readFile(artifacts.dmg, "utf8")).toBe("abc");
       expect(await readFile(artifacts.checksum, "utf8")).toBe(
         "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad  Git-Client_1.2.3_macos_arm64.dmg\n",
       );
+      expect(JSON.parse(await readFile(artifacts.provenance, "utf8"))).toMatchObject({
+        schemaVersion: 1,
+        repository: "jongminchung/jongminchung",
+        ref: "refs/heads/main",
+        sourceSha: SOURCE_SHA,
+        artifact: {
+          name: "Git-Client_1.2.3_macos_arm64.dmg",
+          sha256: "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+          sizeBytes: 3,
+        },
+      });
     } finally {
       await rm(directory, { force: true, recursive: true });
     }
@@ -191,7 +290,7 @@ describe("Electron release build contract", () => {
       await writeFile(source, "");
       await truncate(source, MAX_RELEASE_DMG_BYTES + 1);
       await expect(
-        stageReleaseArtifact(source, join(directory, "artifacts"), "1.2.3"),
+        stageReleaseArtifact(source, join(directory, "artifacts"), "1.2.3", SOURCE_SHA),
       ).rejects.toThrow("160 MiB");
     } finally {
       await rm(directory, { force: true, recursive: true });
@@ -329,6 +428,8 @@ describe("Electron release build contract", () => {
     });
     const validateApp = vi.fn().mockResolvedValue(undefined);
     const validateDmg = vi.fn().mockResolvedValue(undefined);
+    const smokeApp = vi.fn().mockResolvedValue(undefined);
+    const verifySource = vi.fn().mockResolvedValue({ sourceSha: SOURCE_SHA });
 
     try {
       const artifacts = await buildRelease("1.2.3", {
@@ -339,8 +440,10 @@ describe("Electron release build contract", () => {
         platform: "darwin",
         createDmg: (_appPath: string, target: string) => createDmgFixture(appRoot, target),
         runCommand,
+        smokeApp,
         validateApp,
         validateDmg,
+        verifySource,
       });
 
       expect(calls.map(({ command, arguments: arguments_ }) => [command, arguments_])).toEqual([
@@ -353,7 +456,11 @@ describe("Electron release build contract", () => {
         ["pnpm", createElectronMakeArguments()],
       ]);
       expect(validateApp).toHaveBeenCalledOnce();
+      expect(smokeApp).toHaveBeenCalledWith(
+        join(appRoot, "out", "packages", "Git Client-darwin-arm64", "Git Client.app"),
+      );
       expect(validateDmg).toHaveBeenCalledOnce();
+      expect(verifySource).toHaveBeenCalledTimes(4);
       expect(artifacts.dmg).toBe(
         join(appRoot, "release-artifacts", "Git-Client_1.2.3_macos_arm64.dmg"),
       );
@@ -375,6 +482,7 @@ describe("Electron release build contract", () => {
       }
       return { code: 0, stderr: "", stdout: "" };
     });
+    const verifySource = vi.fn().mockResolvedValue({ sourceSha: SOURCE_SHA });
 
     try {
       const artifacts = await buildRelease("1.2.3", {
@@ -385,8 +493,10 @@ describe("Electron release build contract", () => {
         platform: "darwin",
         createDmg: (_appPath: string, target: string) => createDmgFixture(appRoot, target),
         runCommand,
+        smokeApp: vi.fn().mockResolvedValue(undefined),
         validateApp: vi.fn().mockResolvedValue(undefined),
         validateDmg: vi.fn().mockResolvedValue(undefined),
+        verifySource,
       });
       expect(calls).not.toContain("/usr/bin/security");
       expect(artifacts.mode).toBe(RELEASE_MODES.localAdHoc);

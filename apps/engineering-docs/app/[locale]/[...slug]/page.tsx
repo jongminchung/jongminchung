@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { DocsShell } from "@/components/DocsShell";
 import { DocumentPage } from "@/components/DocumentPage";
-import { isLocale } from "@/lib/content-model";
+import {
+  type ContentManifestEntry,
+  type CurrentNavigationEntry,
+  isLocale,
+  type NavigationEntry,
+} from "@/lib/content-model";
 import { documents, findDocument, getLocalizedDocuments, loadDocument } from "@/lib/documents";
 
 interface PageProps {
@@ -14,6 +19,23 @@ interface PageProps {
 
 function idFromSlug(slug: readonly string[]): string {
   return slug.join("/");
+}
+
+function toNavigationEntry(document: ContentManifestEntry): NavigationEntry {
+  return Object.freeze({
+    id: document.id,
+    section: document.section,
+    title: document.title,
+    ...(document.displayTitle === undefined ? {} : { displayTitle: document.displayTitle }),
+    href: document.href,
+  });
+}
+
+function toCurrentNavigationEntry(document: ContentManifestEntry): CurrentNavigationEntry {
+  return Object.freeze({
+    ...toNavigationEntry(document),
+    outline: document.outline,
+  });
 }
 
 export const dynamicParams = false;
@@ -56,11 +78,12 @@ export default async function DocsPage({ params }: PageProps) {
   const id = idFromSlug(slug);
   const document = await loadDocument(locale, id);
   if (document === null) notFound();
+  const navigationEntries = getLocalizedDocuments(locale).map(toNavigationEntry);
   return (
     <DocsShell
       locale={locale}
-      current={document.metadata}
-      documents={getLocalizedDocuments(locale)}
+      current={toCurrentNavigationEntry(document.metadata)}
+      documents={navigationEntries}
     >
       <DocumentPage locale={locale} document={document} />
     </DocsShell>

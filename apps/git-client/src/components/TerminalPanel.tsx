@@ -28,6 +28,8 @@ import type {
 import { tw } from "../styles/tailwind";
 import { useCommands } from "./CommandProvider";
 import { Icon } from "./Icon";
+import { Notice } from "./Notice";
+import { EmptyState, Spinner } from "./ProductCollections";
 import { TerminalLaunchTargetMenu } from "./TerminalLaunchTargetMenu";
 import { TerminalOptionsMenu } from "./TerminalOptionsMenu";
 import { TerminalTabStrip } from "./TerminalTabStrip";
@@ -306,11 +308,12 @@ export function TerminalPanel({
 
   if (fixture || !isElectronRuntime()) {
     return (
-      <div className={tw.terminalEmpty}>
-        <Icon name="console" size={22} />
-        <strong>Native Terminal</strong>
-        <p>The deterministic QA fixture does not start a shell.</p>
-      </div>
+      <EmptyState
+        className="p-0 [&_[data-slot=empty-title]]:font-medium [&_[data-slot=empty-title]]:text-foreground"
+        description="The deterministic QA fixture does not start a shell."
+        icon={<Icon name="console" size={22} />}
+        title="Native Terminal"
+      />
     );
   }
 
@@ -345,7 +348,11 @@ export function TerminalPanel({
       />
       <div className={tw.terminalSurface}>
         {activeKey ? (
-          <Suspense fallback={<div className={tw.emptyState}>Starting terminal…</div>}>
+          <Suspense
+            fallback={
+              <Spinner className="h-full w-full justify-center" label="Starting terminal…" />
+            }
+          >
             <XtermSurface
               onAction={requestAction}
               onContextMenu={openContextMenu}
@@ -354,12 +361,16 @@ export function TerminalPanel({
             />
           </Suspense>
         ) : (
-          <div className={tw.terminalEmpty}>
-            <Icon name="console" size={22} />
-            <strong>
-              {launchError === null ? "No terminal session" : "Terminal failed to start"}
-            </strong>
-            {launchError !== null && <p role="alert">{launchError}</p>}
+          <EmptyState
+            className="p-0 [&_[data-slot=empty-title]]:font-medium [&_[data-slot=empty-title]]:text-foreground"
+            icon={<Icon name="console" size={22} />}
+            title={launchError === null ? "No terminal session" : "Terminal failed to start"}
+          >
+            {launchError !== null && (
+              <Notice className="w-full" role="alert" size="sm" tone="destructive">
+                {launchError}
+              </Notice>
+            )}
             <Button
               onClick={() => void create()}
               type="button"
@@ -369,7 +380,7 @@ export function TerminalPanel({
             >
               New Terminal
             </Button>
-          </div>
+          </EmptyState>
         )}
       </div>
       {menuRequest?.kind === "options" && (

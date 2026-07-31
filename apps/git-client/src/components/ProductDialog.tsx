@@ -103,15 +103,19 @@ export function Dialog({
 interface DialogHeaderProps {
   readonly title: string;
   readonly subtitle?: string;
+  readonly icon?: ReactNode;
   readonly hasDivider?: boolean;
   readonly onOpenChange?: (isOpen: boolean) => unknown;
+  readonly closeLabel?: string;
 }
 
 export function DialogHeader({
   title,
   subtitle,
+  icon,
   hasDivider = false,
   onOpenChange,
+  closeLabel = "Close",
 }: DialogHeaderProps): ReactNode {
   return (
     <header
@@ -120,6 +124,7 @@ export function DialogHeader({
         hasDivider && "border-b border-border",
       )}
     >
+      {icon ? <span aria-hidden>{icon}</span> : null}
       <div className="min-w-0 flex-1">
         <DialogTitle className="m-0 truncate text-sm font-semibold">{title}</DialogTitle>
         {subtitle ? (
@@ -128,7 +133,7 @@ export function DialogHeader({
       </div>
       {onOpenChange ? (
         <Button
-          aria-label="Close"
+          aria-label={closeLabel}
           className="size-7 text-muted-foreground"
           onClick={() => onOpenChange(false)}
           size="icon-sm"

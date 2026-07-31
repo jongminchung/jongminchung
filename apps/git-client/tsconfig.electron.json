@@ -13,6 +13,7 @@
     "forge.config.ts",
     "forge.env.d.ts",
     "vite.main.config.ts",
+    "vite.local-history-preload.config.ts",
     "vite.preload.config.ts",
     "vite.renderer.config.ts",
     "vite.utility.config.ts",

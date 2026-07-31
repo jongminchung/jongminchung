@@ -7,7 +7,13 @@ import { documentLoaders } from "../generated/document-loaders";
 import { createDocumentKey } from "../lib/content-model";
 import englishSearch from "../public/search/en.json";
 import koreanSearch from "../public/search/ko.json";
-import { checkGeneratedFiles, readDocuments, validateDocuments } from "./build-content";
+import {
+  checkGeneratedFiles,
+  createOutline,
+  readDocuments,
+  validateDocuments,
+  validatePackageVersions,
+} from "./build-content";
 
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -40,6 +46,16 @@ describe("documentation content contract", () => {
     const manifestByKey = new Map(
       manifest.map((document) => [createDocumentKey(document.locale, document.id), document]),
     );
+    const sourceByKey = new Map(
+      sources.map((document) => [
+        createDocumentKey(document.metadata.locale, document.metadata.id),
+        document,
+      ]),
+    );
+    for (const manifestDocument of manifest) {
+      const key = createDocumentKey(manifestDocument.locale, manifestDocument.id);
+      expect(manifestDocument.outline, key).toEqual(sourceByKey.get(key)?.outline);
+    }
     for (const searchDocument of searchDocuments) {
       const key = createDocumentKey(searchDocument.locale, searchDocument.id);
       const manifestDocument = manifestByKey.get(key);
@@ -56,6 +72,37 @@ describe("documentation content contract", () => {
         apiSymbols: manifestDocument?.apiSymbols ?? [],
       });
     }
+  });
+
+  it("matches rendered MDX heading IDs and ignores headings inside code fences", async () => {
+    const outline = await createOutline(`
+# Ignored page title
+
+## Issues own the reason; pull requests own the evidence
+
+\`\`\`md
+### Problem and intent
+\`\`\`
+
+## Duplicate?!
+## Duplicate?!
+### \`createProgram()\` details
+`);
+
+    expect(outline).toEqual([
+      {
+        id: "issues-own-the-reason-pull-requests-own-the-evidence",
+        label: "Issues own the reason; pull requests own the evidence",
+        level: 2,
+      },
+      { id: "duplicate", label: "Duplicate?!", level: 2 },
+      { id: "duplicate-1", label: "Duplicate?!", level: 2 },
+      {
+        id: "createprogram-details",
+        label: "createProgram() details",
+        level: 3,
+      },
+    ]);
   });
 
   it("validates schema, URLs, order, links, search output, and package API coverage", () => {
@@ -94,6 +141,16 @@ describe("documentation content contract", () => {
     expect(() => validateDocuments(nonContiguousOrder)).toThrow(
       "Navigation section ko:handbook must use contiguous order values from 0",
     );
+  });
+
+  it("rejects workspace package version drift", async () => {
+    const documents = await readDocuments();
+    expect(() =>
+      validatePackageVersions(documents, {
+        name: "@jongminchung/tooling",
+        version: "2.0.0",
+      }),
+    ).toThrow(/packages\/tooling\.mdx.*does not match @jongminchung\/tooling@2\.0\.0/u);
   });
 
   it("rejects stale generated documentation data", async () => {

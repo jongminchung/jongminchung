@@ -8,6 +8,7 @@ import {
   type GitFailureCode,
   type GitOutputStream,
 } from "../../../src/shared/contracts/git-utility";
+import { createGitEnvironment } from "./git-environment";
 import { redactCredentialChunks, redactCredentials, safeErrorMessage } from "./redaction";
 
 export type GitCancellationReason = "requested" | "repositoryClosed" | "timeout";
@@ -189,8 +190,7 @@ export class GitProcessRunner implements GitProcessRunnerLike {
       try {
         child = spawn(this.#gitBinary, [...spec.args], {
           cwd: spec.cwd,
-          env: {
-            ...process.env,
+          env: createGitEnvironment(process.env, {
             ...PROCESS_ENVIRONMENT,
             ...(spec.editorEnvironment === undefined
               ? {}
@@ -198,7 +198,7 @@ export class GitProcessRunner implements GitProcessRunnerLike {
                   GIT_SEQUENCE_EDITOR: spec.editorEnvironment.sequenceEditor,
                   GIT_EDITOR: spec.editorEnvironment.messageEditor,
                 }),
-          },
+          }),
           shell: false,
           stdio: ["pipe", "pipe", "pipe"],
           windowsHide: true,

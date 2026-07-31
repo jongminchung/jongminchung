@@ -5,11 +5,12 @@ import { Button } from "@jongminchung/ui/components/button";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { type Ref, useState } from "react";
 import {
+  type CurrentNavigationEntry,
   displayTitleFor,
   sections as allSections,
-  type ContentManifestEntry,
   type DocSection,
   type Locale,
+  type NavigationEntry,
 } from "@/lib/content-model";
 import { DeepDiveIcon, HandbookIcon, OverviewIcon, PackageIcon, RepositoryIcon } from "./DocsIcons";
 import { Icon, type IconType } from "./Icon";
@@ -47,7 +48,7 @@ const personalIcon = createIconDataUrl("personal");
 function sectionHref(
   locale: Locale,
   section: DocSection,
-  documents: readonly ContentManifestEntry[],
+  documents: readonly NavigationEntry[],
 ): string {
   const document = documents.find((candidate) => candidate.section === section);
   if (document === undefined) {
@@ -62,8 +63,8 @@ function SectionItems({
   documents,
 }: {
   readonly locale: Locale;
-  readonly current: ContentManifestEntry;
-  readonly documents: readonly ContentManifestEntry[];
+  readonly current: CurrentNavigationEntry;
+  readonly documents: readonly NavigationEntry[];
 }) {
   const sectionDocuments = documents.filter((document) => document.section === current.section);
   const items =
@@ -113,8 +114,8 @@ export function ContextNavigation({
   className,
 }: {
   readonly locale: Locale;
-  readonly current: ContentManifestEntry;
-  readonly documents: readonly ContentManifestEntry[];
+  readonly current: CurrentNavigationEntry;
+  readonly documents: readonly NavigationEntry[];
   readonly className?: string;
 }) {
   return (
@@ -141,8 +142,8 @@ export function GlobalRail({
   onModeChange,
 }: {
   readonly locale: Locale;
-  readonly current: ContentManifestEntry;
-  readonly documents: readonly ContentManifestEntry[];
+  readonly current: CurrentNavigationEntry;
+  readonly documents: readonly NavigationEntry[];
   readonly mode: ThemeMode;
   readonly onModeChange: (mode: ThemeMode) => void;
 }) {
@@ -210,8 +211,8 @@ export function MobileNavigation({
   onModeChange,
 }: {
   readonly locale: Locale;
-  readonly current: ContentManifestEntry;
-  readonly documents: readonly ContentManifestEntry[];
+  readonly current: CurrentNavigationEntry;
+  readonly documents: readonly NavigationEntry[];
   readonly mode: ThemeMode;
   readonly onModeChange: (mode: ThemeMode) => void;
 }) {
