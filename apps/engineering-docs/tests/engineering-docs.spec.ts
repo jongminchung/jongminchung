@@ -137,6 +137,32 @@ test("uses the canonical app icon for navigation and metadata", async ({ page, r
   expect(await favicon.text()).not.toContain("<text");
 });
 
+test("serves every generated document route including app icon documentation", async ({
+  page,
+  request,
+}) => {
+  const manifest = JSON.parse(
+    await readFile(resolve(process.cwd(), "generated/content-manifest.json"), "utf8"),
+  ) as readonly { readonly href: string }[];
+  const responses = await Promise.all(
+    manifest.map(async (document) => ({
+      href: document.href,
+      response: await request.get(document.href),
+    })),
+  );
+  for (const { href, response } of responses) {
+    expect(response.status(), href).toBe(200);
+  }
+
+  for (const [href, title] of [
+    ["/en/handbook/app-icons", "App icon system"],
+    ["/ko/handbook/app-icons", "앱 아이콘 시스템"],
+  ] as const) {
+    await page.goto(href);
+    await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+  }
+});
+
 test("global navigation, breadcrumb, outline, and explained search work by keyboard", async ({
   page,
 }) => {
@@ -277,6 +303,40 @@ test("internal navigation keeps the shell fixed while transitioning document con
   await expect(page.locator("[data-docs-navigation-progress]")).toHaveCount(0);
 });
 
+test("current document selection does not write history or start navigation progress", async ({
+  page,
+}) => {
+  await page.goto("/en/packages/tooling");
+  await page.evaluate(() => {
+    const observedWindow = window as Window & { __docsHistoryWrites: number };
+    observedWindow.__docsHistoryWrites = 0;
+    const pushState = history.pushState.bind(history);
+    const replaceState = history.replaceState.bind(history);
+    history.pushState = (...args: Parameters<History["pushState"]>) => {
+      observedWindow.__docsHistoryWrites += 1;
+      return pushState(...args);
+    };
+    history.replaceState = (...args: Parameters<History["replaceState"]>) => {
+      observedWindow.__docsHistoryWrites += 1;
+      return replaceState(...args);
+    };
+  });
+
+  await page
+    .locator('nav[aria-label="Side navigation"]:visible')
+    .getByRole("link", { name: "tooling", exact: true })
+    .click();
+  await page.waitForTimeout(100);
+
+  await expect(page).toHaveURL(/\/en\/packages\/tooling$/u);
+  expect(
+    await page.evaluate(
+      () => (window as Window & { __docsHistoryWrites: number }).__docsHistoryWrites,
+    ),
+  ).toBe(0);
+  await expect(page.locator("[data-docs-navigation-progress]")).toHaveCount(0);
+});
+
 test("short display titles preserve full SEO titles and consolidate source metadata", async ({
   page,
 }) => {
@@ -332,6 +392,11 @@ test("single-document overview navigation uses page headings without a duplicate
 });
 
 test("locale, theme, removed package, and 404 contracts remain visible", async ({ page }) => {
+  for (const locale of ["en", "ko"] as const) {
+    await page.goto(`/${locale}`);
+    await expect(page).toHaveURL(new RegExp(`/${locale}/overview$`, "u"));
+  }
+
   await page.goto("/en/packages/remark-plantuml");
   await page.getByRole("link", { name: "한국어로 읽기" }).click();
   await expect(page).toHaveURL(/\/ko\/packages\/remark-plantuml$/u);
@@ -340,8 +405,14 @@ test("locale, theme, removed package, and 404 contracts remain visible", async (
   await themeButton.click();
   await expect.poll(() => page.locator("html").getAttribute("data-theme")).toBe("light");
 
-  for (const locale of ["en", "ko"] as const) {
-    const response = await page.goto(`/${locale}/packages/ui`);
+  for (const path of [
+    "/en/packages/ui",
+    "/ko/packages/ui",
+    "/en/not-a-document",
+    "/fr/overview",
+    "/en/overview/extra",
+  ] as const) {
+    const response = await page.goto(path);
     expect(response?.status()).toBe(404);
     await expect(
       page.getByRole("heading", {
@@ -349,9 +420,6 @@ test("locale, theme, removed package, and 404 contracts remain visible", async (
       }),
     ).toBeVisible();
   }
-
-  await page.goto("/en/not-a-document");
-  await expect(page.getByRole("heading", { name: "Document not found" })).toBeVisible();
 });
 
 test("document typography uses the Angular metric contract in both locales", async ({

@@ -87,15 +87,26 @@ export function RouteTransitionProvider({
 
   const navigate = useCallback(
     (href: string, options: NavigationOptions = {}): void => {
+      const target = new URL(href, window.location.href);
+      if (
+        target.origin !== window.location.origin ||
+        (target.pathname === window.location.pathname && target.search === window.location.search)
+      ) {
+        return;
+      }
+      const targetHref = `${target.pathname}${target.search}${target.hash}`;
       const commit = beginNavigation();
       const performNavigation = (): void => {
         startTransition(() => {
-          if (options.replace === true) router.replace(href, { scroll: options.scroll });
-          else router.push(href, { scroll: options.scroll });
+          if (options.replace === true) router.replace(targetHref, { scroll: options.scroll });
+          else router.push(targetHref, { scroll: options.scroll });
         });
       };
 
-      if (typeof document.startViewTransition !== "function" || !shouldAnimateNavigation(href)) {
+      if (
+        typeof document.startViewTransition !== "function" ||
+        !shouldAnimateNavigation(targetHref)
+      ) {
         performNavigation();
         return;
       }
@@ -180,10 +191,12 @@ export const TransitionLink = forwardRef<
         if (isPrevented || typeof href !== "string") return;
 
         const target = new URL(href, window.location.href);
+        if (target.origin !== window.location.origin) return;
         if (
-          target.origin !== window.location.origin ||
-          (target.pathname === window.location.pathname && target.search === window.location.search)
+          target.pathname === window.location.pathname &&
+          target.search === window.location.search
         ) {
+          if (target.hash === window.location.hash) event.preventDefault();
           return;
         }
 

@@ -6,6 +6,7 @@ import { cn } from "@jongminchung/ui/lib/utils";
 import { type Ref, useState } from "react";
 import {
   displayTitleFor,
+  sections as allSections,
   type ContentManifestEntry,
   type DocSection,
   type Locale,
@@ -41,7 +42,6 @@ const sectionIcons: Readonly<Record<DocSection, IconType>> = {
   "deep-dive": DeepDiveIcon,
 };
 
-const allSections = ["overview", "handbook", "packages", "deep-dive"] as const;
 const personalIcon = createIconDataUrl("personal");
 
 function sectionHref(
@@ -49,7 +49,11 @@ function sectionHref(
   section: DocSection,
   documents: readonly ContentManifestEntry[],
 ): string {
-  return documents.find((document) => document.section === section)?.href ?? `/${locale}/overview`;
+  const document = documents.find((candidate) => candidate.section === section);
+  if (document === undefined) {
+    throw new Error(`Missing ${locale}/${section} navigation entry.`);
+  }
+  return document.href;
 }
 
 function SectionItems({

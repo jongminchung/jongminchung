@@ -1,7 +1,7 @@
 import { Badge } from "@jongminchung/ui/components/badge";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { displayTitleFor, type DocSection, type Locale } from "@/lib/content-model";
-import type { LoadedDocument } from "@/lib/documents";
+import { getSectionDocuments, type LoadedDocument } from "@/lib/documents";
 import { DocumentOutline } from "./DocumentOutline";
 import { EditPageLink } from "./EditPageLink";
 import { Icon } from "./Icon";
@@ -30,13 +30,6 @@ const sectionLabels: Readonly<Record<Locale, Readonly<Record<DocSection, string>
   },
 };
 
-const sectionFirstDocument: Readonly<Record<DocSection, string>> = {
-  overview: "overview",
-  handbook: "handbook/collaboration",
-  packages: "packages/remark-plantuml",
-  "deep-dive": "deep-dive/nextjs-16",
-};
-
 function versionFor(document: LoadedDocument): string {
   return document.metadata.packageVersion ?? versionById[document.metadata.id] ?? "v1";
 }
@@ -55,7 +48,11 @@ export function DocumentPage({
   const { metadata, Content, previous, next } = document;
   const isOverview = metadata.id === "overview";
   const title = displayTitleFor(metadata);
-  const sectionHref = `/${locale}/${sectionFirstDocument[metadata.section]}`;
+  const sectionDocument = getSectionDocuments(locale, metadata.section)[0];
+  if (sectionDocument === undefined) {
+    throw new Error(`Missing ${locale}/${metadata.section} navigation entry.`);
+  }
+  const sectionHref = sectionDocument.href;
   return (
     <div className="mx-auto grid w-full max-w-[1160px] grid-cols-[minmax(0,1fr)_224px] gap-8 px-[50px] pt-[50px] pb-24 max-[1400px]:block max-[1400px]:max-w-[860px] max-[1400px]:px-8 min-[769px]:max-[1024px]:pt-7 max-[600px]:px-4 max-[600px]:pt-8 max-[600px]:pb-[72px]">
       <article

@@ -2,6 +2,7 @@
 
 import { cn } from "@jongminchung/ui/lib/utils";
 import type { Locale } from "@/lib/content-model";
+import { TransitionLink } from "./RouteTransition";
 
 export function LocaleSwitcher({
   locale,
@@ -19,7 +20,7 @@ export function LocaleSwitcher({
     document.cookie = `docs-locale=${nextLocale}; Path=/; Max-Age=31536000; SameSite=Lax`;
   };
   return (
-    <a
+    <TransitionLink
       aria-label={label}
       className={cn(
         "inline-flex h-8 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-transparent bg-transparent px-3 text-xs font-medium outline-none transition-colors",
@@ -29,6 +30,6 @@ export function LocaleSwitcher({
       onClick={rememberLocale}
     >
       {compact ? nextLocale.toUpperCase() : label}
-    </a>
+    </TransitionLink>
   );
 }
