@@ -23,9 +23,9 @@ shasum -a 256 -c Git-Client_<version>_macos_arm64.dmg.sha256
 
 출력에 `OK`가 표시된 DMG만 연다. checksum이 일치하지 않으면 파일을 실행하지 말고 다시 내려받는다. production 앱은 일반적인 Finder 설치 흐름에서 Gatekeeper를 통과해야 하며 **그래도 열기** 우회 절차를 배포 지침으로 사용하지 않는다.
 
-## 자동 릴리스 규칙
+## 릴리스 규칙
 
-`main`에 Git Client 또는 Git Client가 사용하는 workspace package 변경이 병합되고 전체 검증이 통과하면 Nx Release가 다음 버전과 릴리스 노트를 계산한다. 실제 GitHub 게시와 asset 업로드는 `gh` CLI가 담당한다.
+로컬 릴리스 명령은 Nx Release로 다음 버전과 릴리스 노트를 계산한다. 실제 GitHub 게시와 asset 업로드는 `gh` CLI가 담당한다.
 
 | 항목          | 규칙                                                   |
 | ------------- | ------------------------------------------------------ |
@@ -51,34 +51,6 @@ perf(git-client): reduce graph rendering work
 Git Client가 의존하는 workspace package의 커밋은 dependency-aware renderer가 릴리스 노트에 포함한다. 다른 앱과 무관한 package의 커밋은 제외한다. root 파일이나 lockfile을 변경한 커밋은 `nx show projects --affected` 결과에서 Git Client가 실제로 영향받은 경우에만 포함한다. 이 과정에서 앱 전용 `git diff-tree`나 경로 파서를 사용하지 않는다.
 
 Nx fixed group은 첫 changelog 기준을 저장소 최초 커밋으로 잡으므로 과거 다른 앱 변경이 섞일 수 있다. 이를 방지하기 위해 `1.0.0` 노트는 `Initial Git Client release.`로 고정하고 `1.0.0` 이후부터 Nx가 태그 사이의 프로젝트별 노트를 생성한다.
-
-## GitHub Actions 흐름
-
-`.github/workflows/git-client.yml`은 다음 순서로 동작한다.
-
-1. 모든 PR과 `main` push에서 Nx affected project를 계산한다.
-2. Git Client가 영향받지 않았으면 나머지 Git Client job을 생략한다.
-3. 영향받았으면 format, lint, typecheck, Vitest와 renderer build를 실행한다.
-4. Playwright, Electron package policy, Electron Forge ARM64 make와 package verifier를 실행한다.
-5. `main` push이거나 명시적인 최초 릴리스 재현 dispatch일 때만 Nx dry-run으로 다음 버전을 계산한다.
-6. release version을 Forge packager에 주입하고 Developer ID 서명 및 Apple notarization을 수행한다.
-7. 앱과 DMG를 다시 검증하고 SHA-256 manifest를 만든다.
-8. 정확한 태그·제목·노트·asset을 가진 draft Release를 만들고 검증한 뒤 공개한다.
-
-verify job은 Electron renderer, preload, main process와 utility process만 검증하며 다른 데스크톱 런타임 산출물을 만들지 않는다.
-
-동시에 들어온 `main` push는 직렬화한다. CI는 내장 `GITHUB_TOKEN`을 현재 step의 `GH_TOKEN`으로 매핑한다. production release job에는 다음 repository secret이 모두 필요하다.
-
-- `GIT_CLIENT_CODESIGN_IDENTITY`: 전체 `Developer ID Application: … (TEAMID)` identity
-- `GIT_CLIENT_CODESIGN_CERTIFICATE_BASE64`: Developer ID `.p12`의 base64
-- `GIT_CLIENT_CODESIGN_CERTIFICATE_PASSWORD`: `.p12` 암호
-- `GIT_CLIENT_APPLE_ID`
-- `GIT_CLIENT_APPLE_APP_SPECIFIC_PASSWORD`
-- `GIT_CLIENT_APPLE_TEAM_ID`
-
-CI는 임시 keychain에 인증서를 넣고 `notarytool` profile을 만든다. identity, 인증서, profile 또는 Apple credential이 하나라도 없으면 production build는 GitHub draft 생성 전에 실패한다. ad-hoc artifact로 자동 fallback하지 않는다.
-
-CI에서 pnpm, Nx, Vite와 Electron Forge를 실행하는 Node.js 버전은 저장소 루트의 `.node-version`으로 고정한다. 현재 값은 `26.5.0`이며 workflow는 설치 직후 실제 버전이 이 값과 같은지 검사한다. GitHub JavaScript Action 자체의 런타임과 애플리케이션 빌드 런타임은 구분한다.
 
 ## 로컬 검증
 
@@ -131,57 +103,6 @@ pnpm --filter @jongminchung/git-client release:dry-run
 test -n "${GH_PAT:-}"
 pnpm --filter @jongminchung/git-client release
 ```
-
-## 최초 1.0.0 멱등 재현
-
-이 검증은 공개 `git-client-1.0.0` Release와 태그를 삭제하고 같은 `origin/main` SHA에서 다시 만든다. `main` branch를 force-push하거나 커밋을 변경하지 않는다. `1.0.0`보다 새로운 Git Client 태그, 실행 중인 workflow, 다른 origin 또는 로컬/원격 SHA 불일치가 있으면 삭제 전에 중단한다.
-
-```sh
-(
-  set -euo pipefail
-
-  test -n "${GH_PAT:-}"
-  gh auth status
-
-  REPO_ROOT="$(git rev-parse --show-toplevel)"
-  VERIFY_DIR="${TMPDIR:-/tmp}/git-client-release-verify"
-
-  git fetch --no-tags origin main
-  test ! -e "$VERIFY_DIR"
-  git worktree add --detach "$VERIFY_DIR" origin/main
-
-  cleanup() {
-    cd "$REPO_ROOT"
-    git worktree remove "$VERIFY_DIR"
-  }
-  trap cleanup EXIT
-
-  cd "$VERIFY_DIR"
-  pnpm install --frozen-lockfile
-
-  for attempt in 1 2; do
-    echo "First-release idempotence verification ${attempt}/2"
-    pnpm --filter @jongminchung/git-client release:verify-first -- \
-      --confirm git-client-1.0.0
-  done
-)
-```
-
-PAT 값은 명령 인자에 직접 적지 않고 실행 전에 현재 shell의 `GH_PAT`으로 주입한다. 별도 detached worktree를 사용하므로 현재 checkout에 다른 커밋이나 변경이 있어도 건드리지 않는다. 한 번의 실행이 삭제·dispatch·재게시·다운로드 검증 전체를 수행하며, 위 반복문은 이를 순차적으로 두 번 실행해 멱등성을 확인한다.
-
-Actions 화면의 `recreate_first_release` 입력은 이 스크립트가 안전 점검과 기존 Release 삭제를 마친 뒤 사용하는 내부 dispatch 진입점이다. 기존 Release가 있는 상태에서 이 입력만 직접 실행하는 것은 완전한 멱등 검증이 아니다.
-
-스크립트는 workflow 완료 후 다음 항목을 확인한다.
-
-- 태그가 정확히 `origin/main` SHA를 가리킴
-- 제목이 `Git Client 1.0.0`이고 공개 상태임
-- DMG와 checksum 외 asset이 없음
-- 재다운로드한 checksum이 일치함
-- DMG가 160MiB 이하이고 앱 버전이 `1.0.0`임
-- 앱 실행 파일 아키텍처가 `arm64` 하나뿐임
-- Developer ID authority, Gatekeeper assessment와 Apple notarization ticket이 유효함
-
-동일 명령을 두 번 연속 실행해 삭제·dispatch·재생성·검증이 반복 가능함을 확인한다.
 
 ## 게시 후 확인
 

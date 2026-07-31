@@ -50,13 +50,6 @@ describe("Nx release configuration", () => {
     });
   });
 
-  it("treats changes to the Git Client workflow as affecting only its release target", () => {
-    expect(packageConfig.nx.targets.release.inputs).toEqual([
-      "{projectRoot}/**/*",
-      "{workspaceRoot}/.github/workflows/git-client.yml",
-    ]);
-  });
-
   it("exposes production and explicit ad-hoc Electron release commands without an updater", () => {
     expect(packageConfig.scripts["release:build"]).toBe("node scripts/release.mjs");
     expect(packageConfig.scripts["release:validate-local"]).toBe(
