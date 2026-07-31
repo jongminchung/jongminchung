@@ -3,7 +3,11 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import manifest from "../generated/content-manifest.json";
-import { checkGeneratedFiles } from "./build-content";
+import { documentLoaders } from "../generated/document-loaders";
+import { createDocumentKey } from "../lib/content-model";
+import englishSearch from "../public/search/en.json";
+import koreanSearch from "../public/search/ko.json";
+import { checkGeneratedFiles, readDocuments } from "./build-content";
 
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -15,8 +19,43 @@ describe("documentation content contract", () => {
       locales.add(document.locale);
       localesById.set(document.id, locales);
     }
-    expect(manifest).toHaveLength(22);
     for (const locales of localesById.values()) expect([...locales].sort()).toEqual(["en", "ko"]);
+  });
+
+  it("keeps source, manifest, loader, and search documents in one-to-one correspondence", async () => {
+    const sources = await readDocuments();
+    const sourceKeys = sources.map(({ metadata }) =>
+      createDocumentKey(metadata.locale, metadata.id),
+    );
+    const manifestKeys = manifest.map(({ locale, id }) => createDocumentKey(locale, id));
+    const loaderKeys = Object.keys(documentLoaders);
+    const searchDocuments = [...englishSearch, ...koreanSearch];
+    const searchKeys = searchDocuments.map(({ locale, id }) => createDocumentKey(locale, id));
+    const sorted = (values: readonly string[]): readonly string[] => [...values].sort();
+
+    expect(sorted(manifestKeys)).toEqual(sorted(sourceKeys));
+    expect(sorted(loaderKeys)).toEqual(sorted(sourceKeys));
+    expect(sorted(searchKeys)).toEqual(sorted(sourceKeys));
+
+    const manifestByKey = new Map(
+      manifest.map((document) => [createDocumentKey(document.locale, document.id), document]),
+    );
+    for (const searchDocument of searchDocuments) {
+      const key = createDocumentKey(searchDocument.locale, searchDocument.id);
+      const manifestDocument = manifestByKey.get(key);
+      expect(manifestDocument, key).toBeDefined();
+      expect(searchDocument).toMatchObject({
+        id: manifestDocument?.id,
+        locale: manifestDocument?.locale,
+        section: manifestDocument?.section,
+        title: manifestDocument?.title,
+        description: manifestDocument?.description,
+        order: manifestDocument?.order,
+        href: manifestDocument?.href,
+        tags: manifestDocument?.tags,
+        apiSymbols: manifestDocument?.apiSymbols ?? [],
+      });
+    }
   });
 
   it("validates schema, URLs, order, links, search output, and package API coverage", () => {
@@ -28,7 +67,7 @@ describe("documentation content contract", () => {
         encoding: "utf8",
       },
     );
-    expect(output).toContain("Validated 22 localized documents.");
+    expect(output).toContain("localized documents.");
   });
 
   it("rejects stale generated documentation data", async () => {
@@ -37,12 +76,12 @@ describe("documentation content contract", () => {
       checkGeneratedFiles(
         [
           {
-            filePath: resolve(appRoot, "generated/content-manifest.json"),
+            filePath: resolve(appRoot, "generated/document-loaders.ts"),
             contents: "current\n",
           },
         ],
         readStaleFile,
       ),
-    ).rejects.toThrow(/content-manifest\.json.*content:build/su);
+    ).rejects.toThrow(/document-loaders\.ts.*content:build/su);
   });
 });

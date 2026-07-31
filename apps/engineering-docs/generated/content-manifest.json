@@ -1,59 +1,36 @@
 [
   {
-    "id": "deep-dive/nextjs-16",
+    "id": "overview",
     "locale": "en",
-    "section": "deep-dive",
-    "title": "Next.js 16 Deep Dive",
-    "displayTitle": "Next.js 16",
-    "description": "Design a Next.js 16 documentation app around App Router and Server Components while avoiding common failures.",
+    "section": "overview",
+    "title": "Jongmin Chung Engineering Docs",
+    "description": "Find the handbook, public packages, and platform knowledge in one documentation hub.",
     "order": 0,
     "updatedAt": "2026-07-14",
-    "verifiedAt": "2026-07-14",
     "tags": [
-      "nextjs",
-      "app-router",
-      "rsc",
-      "mdx",
-      "performance"
+      "overview",
+      "handbook",
+      "packages",
+      "deep-dive"
     ],
     "status": "stable",
-    "sourceUrl": "https://nextjs.org/docs/app",
-    "href": "/en/deep-dive/nextjs-16",
+    "sourceUrl": "https://github.com/jongminchung/jongminchung",
+    "href": "/en/overview",
     "outline": [
       {
-        "id": "choose-rendering-boundaries-first",
-        "label": "Choose rendering boundaries first",
+        "id": "the-shortest-path-to-a-working-change",
+        "label": "The shortest path to a working change",
         "level": 2
       },
       {
-        "id": "mdx-pipeline",
-        "label": "MDX pipeline",
+        "id": "choose-the-depth-you-need",
+        "label": "Choose the depth you need",
         "level": 2
       },
       {
-        "id": "caching-and-parallelism",
-        "label": "Caching and parallelism",
+        "id": "documentation-shaped-together",
+        "label": "Documentation shaped together",
         "level": 2
-      },
-      {
-        "id": "practical-tips",
-        "label": "Practical tips",
-        "level": 2
-      },
-      {
-        "id": "failure-cases",
-        "label": "Failure cases",
-        "level": 2
-      },
-      {
-        "id": "making-the-whole-layout-a-client-component",
-        "label": "Making the whole layout a Client Component",
-        "level": 3
-      },
-      {
-        "id": "runtime-file-system-discovery",
-        "label": "Runtime file-system discovery",
-        "level": 3
       }
     ]
   },
@@ -151,172 +128,6 @@
         "id": "references",
         "label": "References",
         "level": 2
-      }
-    ]
-  },
-  {
-    "id": "overview",
-    "locale": "en",
-    "section": "overview",
-    "title": "Jongmin Chung Engineering Docs",
-    "description": "Find the handbook, public packages, and platform knowledge in one documentation hub.",
-    "order": 0,
-    "updatedAt": "2026-07-14",
-    "tags": [
-      "overview",
-      "handbook",
-      "packages",
-      "deep-dive"
-    ],
-    "status": "stable",
-    "sourceUrl": "https://github.com/jongminchung/jongminchung",
-    "href": "/en/overview",
-    "outline": [
-      {
-        "id": "the-shortest-path-to-a-working-change",
-        "label": "The shortest path to a working change",
-        "level": 2
-      },
-      {
-        "id": "choose-the-depth-you-need",
-        "label": "Choose the depth you need",
-        "level": 2
-      },
-      {
-        "id": "documentation-shaped-together",
-        "label": "Documentation shaped together",
-        "level": 2
-      }
-    ]
-  },
-  {
-    "id": "packages/remark-plantuml",
-    "locale": "en",
-    "section": "packages",
-    "title": "remark-plantuml",
-    "description": "Turn PlantUML code in Markdown and Astro documents into safe SVG diagrams.",
-    "order": 0,
-    "updatedAt": "2026-07-14",
-    "tags": [
-      "remark",
-      "plantuml",
-      "markdown",
-      "astro",
-      "unified"
-    ],
-    "status": "stable",
-    "sourceUrl": "https://github.com/jongminchung/jongminchung/tree/main/packages/remark-plantuml",
-    "packageName": "@jongminchung/remark-plantuml",
-    "packageVersion": "1.0.0",
-    "apiSymbols": [
-      "@jongminchung/remark-plantuml#RemarkPlantUmlOptions",
-      "@jongminchung/remark-plantuml#RemarkPlantUmlTransformer",
-      "@jongminchung/remark-plantuml#default",
-      "@jongminchung/remark-plantuml#createPlantUmlSvgUrl",
-      "@jongminchung/remark-plantuml#encodePlantUmlSource",
-      "@jongminchung/remark-plantuml#publicPlantUmlSvgServerBaseUrl",
-      "@jongminchung/remark-plantuml/astro#AstroRemarkPlantUmlPlugin",
-      "@jongminchung/remark-plantuml/astro#createPlantUmlRemarkPlugin"
-    ],
-    "href": "/en/packages/remark-plantuml",
-    "outline": [
-      {
-        "id": "overview",
-        "label": "Overview",
-        "level": 2
-      },
-      {
-        "id": "installation",
-        "label": "Installation",
-        "level": 2
-      },
-      {
-        "id": "markdown-usage",
-        "label": "Markdown usage",
-        "level": 2
-      },
-      {
-        "id": "astro-usage",
-        "label": "Astro usage",
-        "level": 2
-      },
-      {
-        "id": "styling",
-        "label": "Styling",
-        "level": 2
-      },
-      {
-        "id": "api",
-        "label": "API",
-        "level": 2
-      },
-      {
-        "id": "main-entry",
-        "label": "Main entry",
-        "level": 3
-      },
-      {
-        "id": "astro-entry",
-        "label": "Astro entry",
-        "level": 3
-      }
-    ]
-  },
-  {
-    "id": "deep-dive/pnpm-11",
-    "locale": "en",
-    "section": "deep-dive",
-    "title": "pnpm 11 Deep Dive",
-    "displayTitle": "pnpm 11",
-    "description": "Apply pnpm 11 workspaces, catalogs, and supply-chain policy to a reproducible monorepo.",
-    "order": 1,
-    "updatedAt": "2026-07-14",
-    "verifiedAt": "2026-07-14",
-    "tags": [
-      "pnpm",
-      "workspace",
-      "catalog",
-      "lockfile",
-      "supply-chain"
-    ],
-    "status": "stable",
-    "sourceUrl": "https://pnpm.io/",
-    "href": "/en/deep-dive/pnpm-11",
-    "outline": [
-      {
-        "id": "the-workspace-contract",
-        "label": "The workspace contract",
-        "level": 2
-      },
-      {
-        "id": "lockfiles-and-reproducibility",
-        "label": "Lockfiles and reproducibility",
-        "level": 2
-      },
-      {
-        "id": "build-script-policy",
-        "label": "Build-script policy",
-        "level": 2
-      },
-      {
-        "id": "practical-tips",
-        "label": "Practical tips",
-        "level": 2
-      },
-      {
-        "id": "failure-cases",
-        "label": "Failure cases",
-        "level": 2
-      },
-      {
-        "id": "depending-on-a-global-pnpm",
-        "label": "Depending on a global pnpm",
-        "level": 3
-      },
-      {
-        "id": "allowing-every-install-script",
-        "label": "Allowing every install script",
-        "level": 3
       }
     ]
   },
@@ -432,6 +243,114 @@
     ]
   },
   {
+    "id": "handbook/app-icons",
+    "locale": "en",
+    "section": "handbook",
+    "title": "App icon system",
+    "description": "Generate registered app icons from one Open Weave source without copying paths between apps.",
+    "order": 2,
+    "updatedAt": "2026-07-31",
+    "tags": [
+      "brand",
+      "icon",
+      "accessibility",
+      "generated-assets"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://github.com/jongminchung/jongminchung/blob/main/packages/icon/README.md",
+    "href": "/en/handbook/app-icons",
+    "outline": [
+      {
+        "id": "one-source-multiple-consumers",
+        "label": "One source, multiple consumers",
+        "level": 2
+      },
+      {
+        "id": "working-with-assets",
+        "label": "Working with assets",
+        "level": 2
+      },
+      {
+        "id": "accessibility-and-new-apps",
+        "label": "Accessibility and new apps",
+        "level": 2
+      }
+    ]
+  },
+  {
+    "id": "packages/remark-plantuml",
+    "locale": "en",
+    "section": "packages",
+    "title": "remark-plantuml",
+    "description": "Turn PlantUML code in Markdown and Astro documents into safe SVG diagrams.",
+    "order": 0,
+    "updatedAt": "2026-07-14",
+    "tags": [
+      "remark",
+      "plantuml",
+      "markdown",
+      "astro",
+      "unified"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://github.com/jongminchung/jongminchung/tree/main/packages/remark-plantuml",
+    "packageName": "@jongminchung/remark-plantuml",
+    "packageVersion": "1.0.0",
+    "apiSymbols": [
+      "@jongminchung/remark-plantuml#RemarkPlantUmlOptions",
+      "@jongminchung/remark-plantuml#RemarkPlantUmlTransformer",
+      "@jongminchung/remark-plantuml#default",
+      "@jongminchung/remark-plantuml#createPlantUmlSvgUrl",
+      "@jongminchung/remark-plantuml#encodePlantUmlSource",
+      "@jongminchung/remark-plantuml#publicPlantUmlSvgServerBaseUrl",
+      "@jongminchung/remark-plantuml/astro#AstroRemarkPlantUmlPlugin",
+      "@jongminchung/remark-plantuml/astro#createPlantUmlRemarkPlugin"
+    ],
+    "href": "/en/packages/remark-plantuml",
+    "outline": [
+      {
+        "id": "overview",
+        "label": "Overview",
+        "level": 2
+      },
+      {
+        "id": "installation",
+        "label": "Installation",
+        "level": 2
+      },
+      {
+        "id": "markdown-usage",
+        "label": "Markdown usage",
+        "level": 2
+      },
+      {
+        "id": "astro-usage",
+        "label": "Astro usage",
+        "level": 2
+      },
+      {
+        "id": "styling",
+        "label": "Styling",
+        "level": 2
+      },
+      {
+        "id": "api",
+        "label": "API",
+        "level": 2
+      },
+      {
+        "id": "main-entry",
+        "label": "Main entry",
+        "level": 3
+      },
+      {
+        "id": "astro-entry",
+        "label": "Astro entry",
+        "level": 3
+      }
+    ]
+  },
+  {
     "id": "packages/tooling",
     "locale": "en",
     "section": "packages",
@@ -507,6 +426,122 @@
     ]
   },
   {
+    "id": "deep-dive/nextjs-16",
+    "locale": "en",
+    "section": "deep-dive",
+    "title": "Next.js 16 Deep Dive",
+    "displayTitle": "Next.js 16",
+    "description": "Design a Next.js 16 documentation app around App Router and Server Components while avoiding common failures.",
+    "order": 0,
+    "updatedAt": "2026-07-14",
+    "verifiedAt": "2026-07-14",
+    "tags": [
+      "nextjs",
+      "app-router",
+      "rsc",
+      "mdx",
+      "performance"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://nextjs.org/docs/app",
+    "href": "/en/deep-dive/nextjs-16",
+    "outline": [
+      {
+        "id": "choose-rendering-boundaries-first",
+        "label": "Choose rendering boundaries first",
+        "level": 2
+      },
+      {
+        "id": "mdx-pipeline",
+        "label": "MDX pipeline",
+        "level": 2
+      },
+      {
+        "id": "caching-and-parallelism",
+        "label": "Caching and parallelism",
+        "level": 2
+      },
+      {
+        "id": "practical-tips",
+        "label": "Practical tips",
+        "level": 2
+      },
+      {
+        "id": "failure-cases",
+        "label": "Failure cases",
+        "level": 2
+      },
+      {
+        "id": "making-the-whole-layout-a-client-component",
+        "label": "Making the whole layout a Client Component",
+        "level": 3
+      },
+      {
+        "id": "runtime-file-system-discovery",
+        "label": "Runtime file-system discovery",
+        "level": 3
+      }
+    ]
+  },
+  {
+    "id": "deep-dive/pnpm-11",
+    "locale": "en",
+    "section": "deep-dive",
+    "title": "pnpm 11 Deep Dive",
+    "displayTitle": "pnpm 11",
+    "description": "Apply pnpm 11 workspaces, catalogs, and supply-chain policy to a reproducible monorepo.",
+    "order": 1,
+    "updatedAt": "2026-07-14",
+    "verifiedAt": "2026-07-14",
+    "tags": [
+      "pnpm",
+      "workspace",
+      "catalog",
+      "lockfile",
+      "supply-chain"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://pnpm.io/",
+    "href": "/en/deep-dive/pnpm-11",
+    "outline": [
+      {
+        "id": "the-workspace-contract",
+        "label": "The workspace contract",
+        "level": 2
+      },
+      {
+        "id": "lockfiles-and-reproducibility",
+        "label": "Lockfiles and reproducibility",
+        "level": 2
+      },
+      {
+        "id": "build-script-policy",
+        "label": "Build-script policy",
+        "level": 2
+      },
+      {
+        "id": "practical-tips",
+        "label": "Practical tips",
+        "level": 2
+      },
+      {
+        "id": "failure-cases",
+        "label": "Failure cases",
+        "level": 2
+      },
+      {
+        "id": "depending-on-a-global-pnpm",
+        "label": "Depending on a global pnpm",
+        "level": 3
+      },
+      {
+        "id": "allowing-every-install-script",
+        "label": "Allowing every install script",
+        "level": 3
+      }
+    ]
+  },
+  {
     "id": "deep-dive/node-26",
     "locale": "en",
     "section": "deep-dive",
@@ -561,41 +596,6 @@
         "id": "replacing-type-checking-with-type-stripping",
         "label": "Replacing type checking with type stripping",
         "level": 3
-      }
-    ]
-  },
-  {
-    "id": "handbook/app-icons",
-    "locale": "en",
-    "section": "handbook",
-    "title": "App icon system",
-    "description": "Generate registered app icons from one Open Weave source without copying paths between apps.",
-    "order": 2,
-    "updatedAt": "2026-07-31",
-    "tags": [
-      "brand",
-      "icon",
-      "accessibility",
-      "generated-assets"
-    ],
-    "status": "stable",
-    "sourceUrl": "https://github.com/jongminchung/jongminchung/blob/main/packages/icon/README.md",
-    "href": "/en/handbook/app-icons",
-    "outline": [
-      {
-        "id": "one-source-multiple-consumers",
-        "label": "One source, multiple consumers",
-        "level": 2
-      },
-      {
-        "id": "working-with-assets",
-        "label": "Working with assets",
-        "level": 2
-      },
-      {
-        "id": "accessibility-and-new-apps",
-        "label": "Accessibility and new apps",
-        "level": 2
       }
     ]
   },
@@ -727,60 +727,37 @@
     ]
   },
   {
-    "id": "deep-dive/nextjs-16",
+    "id": "overview",
     "locale": "ko",
-    "section": "deep-dive",
-    "title": "Next.js 16 Deep Dive",
-    "displayTitle": "Next.js 16",
-    "description": "App Router와 Server Components 중심으로 Next.js 16 문서 앱을 설계하고 실패를 피합니다.",
+    "section": "overview",
+    "title": "Jongmin Chung Engineering Docs",
+    "description": "핸드북, 공개 패키지, 기반 기술 문서를 한곳에서 찾을 수 있습니다.",
     "order": 0,
     "updatedAt": "2026-07-14",
-    "verifiedAt": "2026-07-14",
     "tags": [
-      "nextjs",
-      "app-router",
-      "rsc",
-      "mdx",
-      "performance"
+      "overview",
+      "handbook",
+      "packages",
+      "deep-dive"
     ],
     "status": "stable",
-    "sourceUrl": "https://nextjs.org/docs/app",
-    "href": "/ko/deep-dive/nextjs-16",
+    "sourceUrl": "https://github.com/jongminchung/jongminchung",
+    "href": "/ko/overview",
     "outline": [
       {
-        "id": "렌더링-경계를-먼저-정하기",
-        "label": "렌더링 경계를 먼저 정하기",
+        "id": "가장-짧은-시작-경로",
+        "label": "가장 짧은 시작 경로",
         "level": 2
       },
       {
-        "id": "mdx-파이프라인",
-        "label": "MDX 파이프라인",
+        "id": "필요한-깊이부터-선택하세요",
+        "label": "필요한 깊이부터 선택하세요",
         "level": 2
       },
       {
-        "id": "캐시와-병렬성",
-        "label": "캐시와 병렬성",
+        "id": "함께-다듬는-문서",
+        "label": "함께 다듬는 문서",
         "level": 2
-      },
-      {
-        "id": "실전-팁",
-        "label": "실전 팁",
-        "level": 2
-      },
-      {
-        "id": "실패-사례",
-        "label": "실패 사례",
-        "level": 2
-      },
-      {
-        "id": "전체-레이아웃을-client-component로-만들기",
-        "label": "전체 레이아웃을 Client Component로 만들기",
-        "level": 3
-      },
-      {
-        "id": "런타임-파일-시스템-의존",
-        "label": "런타임 파일 시스템 의존",
-        "level": 3
       }
     ]
   },
@@ -878,172 +855,6 @@
         "id": "참고",
         "label": "참고",
         "level": 2
-      }
-    ]
-  },
-  {
-    "id": "overview",
-    "locale": "ko",
-    "section": "overview",
-    "title": "Jongmin Chung Engineering Docs",
-    "description": "핸드북, 공개 패키지, 기반 기술 문서를 한곳에서 찾을 수 있습니다.",
-    "order": 0,
-    "updatedAt": "2026-07-14",
-    "tags": [
-      "overview",
-      "handbook",
-      "packages",
-      "deep-dive"
-    ],
-    "status": "stable",
-    "sourceUrl": "https://github.com/jongminchung/jongminchung",
-    "href": "/ko/overview",
-    "outline": [
-      {
-        "id": "가장-짧은-시작-경로",
-        "label": "가장 짧은 시작 경로",
-        "level": 2
-      },
-      {
-        "id": "필요한-깊이부터-선택하세요",
-        "label": "필요한 깊이부터 선택하세요",
-        "level": 2
-      },
-      {
-        "id": "함께-다듬는-문서",
-        "label": "함께 다듬는 문서",
-        "level": 2
-      }
-    ]
-  },
-  {
-    "id": "packages/remark-plantuml",
-    "locale": "ko",
-    "section": "packages",
-    "title": "remark-plantuml",
-    "description": "Markdown과 Astro 문서의 PlantUML 코드를 안전한 SVG 다이어그램으로 변환합니다.",
-    "order": 0,
-    "updatedAt": "2026-07-14",
-    "tags": [
-      "remark",
-      "plantuml",
-      "markdown",
-      "astro",
-      "unified"
-    ],
-    "status": "stable",
-    "sourceUrl": "https://github.com/jongminchung/jongminchung/tree/main/packages/remark-plantuml",
-    "packageName": "@jongminchung/remark-plantuml",
-    "packageVersion": "1.0.0",
-    "apiSymbols": [
-      "@jongminchung/remark-plantuml#RemarkPlantUmlOptions",
-      "@jongminchung/remark-plantuml#RemarkPlantUmlTransformer",
-      "@jongminchung/remark-plantuml#default",
-      "@jongminchung/remark-plantuml#createPlantUmlSvgUrl",
-      "@jongminchung/remark-plantuml#encodePlantUmlSource",
-      "@jongminchung/remark-plantuml#publicPlantUmlSvgServerBaseUrl",
-      "@jongminchung/remark-plantuml/astro#AstroRemarkPlantUmlPlugin",
-      "@jongminchung/remark-plantuml/astro#createPlantUmlRemarkPlugin"
-    ],
-    "href": "/ko/packages/remark-plantuml",
-    "outline": [
-      {
-        "id": "개요",
-        "label": "개요",
-        "level": 2
-      },
-      {
-        "id": "설치",
-        "label": "설치",
-        "level": 2
-      },
-      {
-        "id": "markdown-사용법",
-        "label": "Markdown 사용법",
-        "level": 2
-      },
-      {
-        "id": "astro-사용법",
-        "label": "Astro 사용법",
-        "level": 2
-      },
-      {
-        "id": "스타일",
-        "label": "스타일",
-        "level": 2
-      },
-      {
-        "id": "api",
-        "label": "API",
-        "level": 2
-      },
-      {
-        "id": "기본-엔트리",
-        "label": "기본 엔트리",
-        "level": 3
-      },
-      {
-        "id": "astro-엔트리",
-        "label": "Astro 엔트리",
-        "level": 3
-      }
-    ]
-  },
-  {
-    "id": "deep-dive/pnpm-11",
-    "locale": "ko",
-    "section": "deep-dive",
-    "title": "pnpm 11 Deep Dive",
-    "displayTitle": "pnpm 11",
-    "description": "pnpm 11 워크스페이스, catalog, 공급망 정책을 재현 가능한 모노레포 운영에 적용합니다.",
-    "order": 1,
-    "updatedAt": "2026-07-14",
-    "verifiedAt": "2026-07-14",
-    "tags": [
-      "pnpm",
-      "workspace",
-      "catalog",
-      "lockfile",
-      "supply-chain"
-    ],
-    "status": "stable",
-    "sourceUrl": "https://pnpm.io/",
-    "href": "/ko/deep-dive/pnpm-11",
-    "outline": [
-      {
-        "id": "워크스페이스-계약",
-        "label": "워크스페이스 계약",
-        "level": 2
-      },
-      {
-        "id": "잠금-파일과-재현성",
-        "label": "잠금 파일과 재현성",
-        "level": 2
-      },
-      {
-        "id": "빌드-스크립트-정책",
-        "label": "빌드 스크립트 정책",
-        "level": 2
-      },
-      {
-        "id": "실전-팁",
-        "label": "실전 팁",
-        "level": 2
-      },
-      {
-        "id": "실패-사례",
-        "label": "실패 사례",
-        "level": 2
-      },
-      {
-        "id": "전역-pnpm에-의존",
-        "label": "전역 pnpm에 의존",
-        "level": 3
-      },
-      {
-        "id": "모든-install-script-허용",
-        "label": "모든 install script 허용",
-        "level": 3
       }
     ]
   },
@@ -1159,6 +970,114 @@
     ]
   },
   {
+    "id": "handbook/app-icons",
+    "locale": "ko",
+    "section": "handbook",
+    "title": "앱 아이콘 시스템",
+    "description": "앱 사이에 경로를 복사하지 않고 하나의 오픈 위브 원본에서 등록된 앱 아이콘을 생성합니다.",
+    "order": 2,
+    "updatedAt": "2026-07-31",
+    "tags": [
+      "brand",
+      "icon",
+      "accessibility",
+      "generated-assets"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://github.com/jongminchung/jongminchung/blob/main/packages/icon/README.md",
+    "href": "/ko/handbook/app-icons",
+    "outline": [
+      {
+        "id": "하나의-원본과-여러-소비자",
+        "label": "하나의 원본과 여러 소비자",
+        "level": 2
+      },
+      {
+        "id": "산출물-작업",
+        "label": "산출물 작업",
+        "level": 2
+      },
+      {
+        "id": "접근성과-새-앱",
+        "label": "접근성과 새 앱",
+        "level": 2
+      }
+    ]
+  },
+  {
+    "id": "packages/remark-plantuml",
+    "locale": "ko",
+    "section": "packages",
+    "title": "remark-plantuml",
+    "description": "Markdown과 Astro 문서의 PlantUML 코드를 안전한 SVG 다이어그램으로 변환합니다.",
+    "order": 0,
+    "updatedAt": "2026-07-14",
+    "tags": [
+      "remark",
+      "plantuml",
+      "markdown",
+      "astro",
+      "unified"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://github.com/jongminchung/jongminchung/tree/main/packages/remark-plantuml",
+    "packageName": "@jongminchung/remark-plantuml",
+    "packageVersion": "1.0.0",
+    "apiSymbols": [
+      "@jongminchung/remark-plantuml#RemarkPlantUmlOptions",
+      "@jongminchung/remark-plantuml#RemarkPlantUmlTransformer",
+      "@jongminchung/remark-plantuml#default",
+      "@jongminchung/remark-plantuml#createPlantUmlSvgUrl",
+      "@jongminchung/remark-plantuml#encodePlantUmlSource",
+      "@jongminchung/remark-plantuml#publicPlantUmlSvgServerBaseUrl",
+      "@jongminchung/remark-plantuml/astro#AstroRemarkPlantUmlPlugin",
+      "@jongminchung/remark-plantuml/astro#createPlantUmlRemarkPlugin"
+    ],
+    "href": "/ko/packages/remark-plantuml",
+    "outline": [
+      {
+        "id": "개요",
+        "label": "개요",
+        "level": 2
+      },
+      {
+        "id": "설치",
+        "label": "설치",
+        "level": 2
+      },
+      {
+        "id": "markdown-사용법",
+        "label": "Markdown 사용법",
+        "level": 2
+      },
+      {
+        "id": "astro-사용법",
+        "label": "Astro 사용법",
+        "level": 2
+      },
+      {
+        "id": "스타일",
+        "label": "스타일",
+        "level": 2
+      },
+      {
+        "id": "api",
+        "label": "API",
+        "level": 2
+      },
+      {
+        "id": "기본-엔트리",
+        "label": "기본 엔트리",
+        "level": 3
+      },
+      {
+        "id": "astro-엔트리",
+        "label": "Astro 엔트리",
+        "level": 3
+      }
+    ]
+  },
+  {
     "id": "packages/tooling",
     "locale": "ko",
     "section": "packages",
@@ -1234,6 +1153,122 @@
     ]
   },
   {
+    "id": "deep-dive/nextjs-16",
+    "locale": "ko",
+    "section": "deep-dive",
+    "title": "Next.js 16 Deep Dive",
+    "displayTitle": "Next.js 16",
+    "description": "App Router와 Server Components 중심으로 Next.js 16 문서 앱을 설계하고 실패를 피합니다.",
+    "order": 0,
+    "updatedAt": "2026-07-14",
+    "verifiedAt": "2026-07-14",
+    "tags": [
+      "nextjs",
+      "app-router",
+      "rsc",
+      "mdx",
+      "performance"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://nextjs.org/docs/app",
+    "href": "/ko/deep-dive/nextjs-16",
+    "outline": [
+      {
+        "id": "렌더링-경계를-먼저-정하기",
+        "label": "렌더링 경계를 먼저 정하기",
+        "level": 2
+      },
+      {
+        "id": "mdx-파이프라인",
+        "label": "MDX 파이프라인",
+        "level": 2
+      },
+      {
+        "id": "캐시와-병렬성",
+        "label": "캐시와 병렬성",
+        "level": 2
+      },
+      {
+        "id": "실전-팁",
+        "label": "실전 팁",
+        "level": 2
+      },
+      {
+        "id": "실패-사례",
+        "label": "실패 사례",
+        "level": 2
+      },
+      {
+        "id": "전체-레이아웃을-client-component로-만들기",
+        "label": "전체 레이아웃을 Client Component로 만들기",
+        "level": 3
+      },
+      {
+        "id": "런타임-파일-시스템-의존",
+        "label": "런타임 파일 시스템 의존",
+        "level": 3
+      }
+    ]
+  },
+  {
+    "id": "deep-dive/pnpm-11",
+    "locale": "ko",
+    "section": "deep-dive",
+    "title": "pnpm 11 Deep Dive",
+    "displayTitle": "pnpm 11",
+    "description": "pnpm 11 워크스페이스, catalog, 공급망 정책을 재현 가능한 모노레포 운영에 적용합니다.",
+    "order": 1,
+    "updatedAt": "2026-07-14",
+    "verifiedAt": "2026-07-14",
+    "tags": [
+      "pnpm",
+      "workspace",
+      "catalog",
+      "lockfile",
+      "supply-chain"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://pnpm.io/",
+    "href": "/ko/deep-dive/pnpm-11",
+    "outline": [
+      {
+        "id": "워크스페이스-계약",
+        "label": "워크스페이스 계약",
+        "level": 2
+      },
+      {
+        "id": "잠금-파일과-재현성",
+        "label": "잠금 파일과 재현성",
+        "level": 2
+      },
+      {
+        "id": "빌드-스크립트-정책",
+        "label": "빌드 스크립트 정책",
+        "level": 2
+      },
+      {
+        "id": "실전-팁",
+        "label": "실전 팁",
+        "level": 2
+      },
+      {
+        "id": "실패-사례",
+        "label": "실패 사례",
+        "level": 2
+      },
+      {
+        "id": "전역-pnpm에-의존",
+        "label": "전역 pnpm에 의존",
+        "level": 3
+      },
+      {
+        "id": "모든-install-script-허용",
+        "label": "모든 install script 허용",
+        "level": 3
+      }
+    ]
+  },
+  {
     "id": "deep-dive/node-26",
     "locale": "ko",
     "section": "deep-dive",
@@ -1288,41 +1323,6 @@
         "id": "타입-검사를-런타임-실행으로-대체",
         "label": "타입 검사를 런타임 실행으로 대체",
         "level": 3
-      }
-    ]
-  },
-  {
-    "id": "handbook/app-icons",
-    "locale": "ko",
-    "section": "handbook",
-    "title": "앱 아이콘 시스템",
-    "description": "앱 사이에 경로를 복사하지 않고 하나의 오픈 위브 원본에서 등록된 앱 아이콘을 생성합니다.",
-    "order": 2,
-    "updatedAt": "2026-07-31",
-    "tags": [
-      "brand",
-      "icon",
-      "accessibility",
-      "generated-assets"
-    ],
-    "status": "stable",
-    "sourceUrl": "https://github.com/jongminchung/jongminchung/blob/main/packages/icon/README.md",
-    "href": "/ko/handbook/app-icons",
-    "outline": [
-      {
-        "id": "하나의-원본과-여러-소비자",
-        "label": "하나의 원본과 여러 소비자",
-        "level": 2
-      },
-      {
-        "id": "산출물-작업",
-        "label": "산출물 작업",
-        "level": 2
-      },
-      {
-        "id": "접근성과-새-앱",
-        "label": "접근성과 새 앱",
-        "level": 2
       }
     ]
   },

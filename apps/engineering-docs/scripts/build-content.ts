@@ -4,7 +4,9 @@ import { fileURLToPath } from "node:url";
 import matter from "gray-matter";
 import ts from "typescript";
 import {
+  compareDocumentMetadata,
   createDocHref,
+  createDocumentKey,
   locales,
   parseDocMetadata,
   type ContentManifestEntry,
@@ -18,13 +20,15 @@ const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const workspaceRoot = resolve(appRoot, "../..");
 const contentRoot = resolve(appRoot, "content");
 const manifestPath = resolve(appRoot, "generated/content-manifest.json");
+const loaderRegistryPath = resolve(appRoot, "generated/document-loaders.ts");
 const searchRoot = resolve(appRoot, "public/search");
 
-interface SourceDocument {
+export interface SourceDocument {
   readonly metadata: DocMetadata;
   readonly body: string;
   readonly filePath: string;
   readonly outline: readonly OutlineEntry[];
+  readonly relativePath: string;
 }
 
 interface PackageManifest {
@@ -103,7 +107,7 @@ function createSearchBody(body: string): string {
     .trim();
 }
 
-async function readDocuments(): Promise<readonly SourceDocument[]> {
+export async function readDocuments(): Promise<readonly SourceDocument[]> {
   const files = await listFiles(contentRoot);
   return Promise.all(
     files.map(async (filePath): Promise<SourceDocument> => {
@@ -120,6 +124,7 @@ async function readDocuments(): Promise<readonly SourceDocument[]> {
         body: parsed.content,
         filePath,
         outline: createOutline(parsed.content),
+        relativePath,
       });
     }),
   );
@@ -274,11 +279,12 @@ function createGeneratedFiles(documents: readonly SourceDocument[]): readonly Ge
       href: createDocHref(metadata.locale, metadata.id),
       outline,
     }))
-    .sort((left, right) => left.locale.localeCompare(right.locale) || left.order - right.order);
+    .sort(compareDocumentMetadata);
 
   const searchFiles = locales.map((locale): GeneratedFile => {
     const searchDocuments: readonly SearchDocument[] = documents
       .filter(({ metadata }) => metadata.locale === locale)
+      .sort((left, right) => compareDocumentMetadata(left.metadata, right.metadata))
       .map(({ metadata, body, outline }) => ({
         id: metadata.id,
         locale: metadata.locale,
@@ -298,8 +304,30 @@ function createGeneratedFiles(documents: readonly SourceDocument[]): readonly Ge
     };
   });
 
+  const loaderEntries = [...documents]
+    .sort((left, right) => compareDocumentMetadata(left.metadata, right.metadata))
+    .map(({ metadata, relativePath }) => {
+      const key = createDocumentKey(metadata.locale, metadata.id);
+      return `  ${JSON.stringify(key)}: () => import(${JSON.stringify(`../content/${relativePath}`)}),`;
+    });
+  const loaderRegistry = [
+    'import type { ComponentType } from "react";',
+    "",
+    "interface MdxModule {",
+    "  readonly default: ComponentType;",
+    "}",
+    "",
+    "export const documentLoaders = {",
+    ...loaderEntries,
+    "} as const satisfies Readonly<Record<string, () => Promise<MdxModule>>>;",
+    "",
+    "export type DocumentLoaderKey = keyof typeof documentLoaders;",
+    "",
+  ].join("\n");
+
   return [
     { filePath: manifestPath, contents: `${JSON.stringify(manifest, null, 2)}\n` },
+    { filePath: loaderRegistryPath, contents: loaderRegistry },
     ...searchFiles,
   ];
 }

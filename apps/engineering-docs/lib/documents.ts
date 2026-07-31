@@ -1,7 +1,10 @@
 import type { ComponentType } from "react";
 import manifestData from "@/generated/content-manifest.json";
+import { documentLoaders, type DocumentLoaderKey } from "@/generated/document-loaders";
 import {
+  compareDocumentMetadata,
   createDocHref,
+  createDocumentKey,
   isLocale,
   parseDocMetadata,
   type ContentManifestEntry,
@@ -10,43 +13,12 @@ import {
   type OutlineEntry,
 } from "./content-model";
 
-interface MdxModule {
-  readonly default: ComponentType;
-}
-
 export interface LoadedDocument {
   readonly metadata: ContentManifestEntry;
   readonly Content: ComponentType;
   readonly previous: ContentManifestEntry | null;
   readonly next: ContentManifestEntry | null;
 }
-
-const sectionOrder = ["overview", "handbook", "packages", "deep-dive"] as const;
-
-const docLoaders = {
-  "ko/overview": () => import("@/content/ko/overview.mdx"),
-  "ko/handbook/collaboration": () => import("@/content/ko/handbook/collaboration.mdx"),
-  "ko/handbook/ddd": () => import("@/content/ko/handbook/ddd.mdx"),
-  "ko/packages/remark-plantuml": () => import("@/content/ko/packages/remark-plantuml.mdx"),
-  "ko/packages/tooling": () => import("@/content/ko/packages/tooling.mdx"),
-  "ko/deep-dive/nextjs-16": () => import("@/content/ko/deep-dive/nextjs-16.mdx"),
-  "ko/deep-dive/pnpm-11": () => import("@/content/ko/deep-dive/pnpm-11.mdx"),
-  "ko/deep-dive/node-26": () => import("@/content/ko/deep-dive/node-26.mdx"),
-  "ko/deep-dive/typescript-6": () => import("@/content/ko/deep-dive/typescript-6.mdx"),
-  "ko/deep-dive/typescript-7-compatibility": () =>
-    import("@/content/ko/deep-dive/typescript-7-compatibility.mdx"),
-  "en/overview": () => import("@/content/en/overview.mdx"),
-  "en/handbook/collaboration": () => import("@/content/en/handbook/collaboration.mdx"),
-  "en/handbook/ddd": () => import("@/content/en/handbook/ddd.mdx"),
-  "en/packages/remark-plantuml": () => import("@/content/en/packages/remark-plantuml.mdx"),
-  "en/packages/tooling": () => import("@/content/en/packages/tooling.mdx"),
-  "en/deep-dive/nextjs-16": () => import("@/content/en/deep-dive/nextjs-16.mdx"),
-  "en/deep-dive/pnpm-11": () => import("@/content/en/deep-dive/pnpm-11.mdx"),
-  "en/deep-dive/node-26": () => import("@/content/en/deep-dive/node-26.mdx"),
-  "en/deep-dive/typescript-6": () => import("@/content/en/deep-dive/typescript-6.mdx"),
-  "en/deep-dive/typescript-7-compatibility": () =>
-    import("@/content/en/deep-dive/typescript-7-compatibility.mdx"),
-} satisfies Readonly<Record<string, () => Promise<MdxModule>>>;
 
 function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -81,14 +53,8 @@ function parseManifest(value: unknown): readonly ContentManifestEntry[] {
 
 export const documents = parseManifest(manifestData);
 
-function compareDocuments(left: ContentManifestEntry, right: ContentManifestEntry): number {
-  const leftSection = sectionOrder.indexOf(left.section);
-  const rightSection = sectionOrder.indexOf(right.section);
-  return leftSection - rightSection || left.order - right.order;
-}
-
 export function getLocalizedDocuments(locale: Locale): readonly ContentManifestEntry[] {
-  return documents.filter((document) => document.locale === locale).sort(compareDocuments);
+  return documents.filter((document) => document.locale === locale).sort(compareDocumentMetadata);
 }
 
 export function getSectionDocuments(
@@ -105,7 +71,8 @@ export function findDocument(locale: string, id: string): ContentManifestEntry |
 
 export async function loadDocument(locale: Locale, id: string): Promise<LoadedDocument | null> {
   const metadata = findDocument(locale, id);
-  const loader = docLoaders[`${locale}/${id}` as keyof typeof docLoaders];
+  const key = createDocumentKey(locale, id) as DocumentLoaderKey;
+  const loader = documentLoaders[key];
   if (metadata === null || loader === undefined) return null;
 
   const localized = getLocalizedDocuments(locale);

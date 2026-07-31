@@ -169,6 +169,22 @@ export function createDocHref(locale: Locale, id: string): string {
   return `/${locale}/${id}`;
 }
 
+export function createDocumentKey(locale: string, id: string): string {
+  return `${locale}/${id}`;
+}
+
+export function compareDocumentMetadata(
+  left: Pick<DocMetadata, "id" | "locale" | "order" | "section">,
+  right: Pick<DocMetadata, "id" | "locale" | "order" | "section">,
+): number {
+  return (
+    left.locale.localeCompare(right.locale) ||
+    sections.indexOf(left.section) - sections.indexOf(right.section) ||
+    left.order - right.order ||
+    left.id.localeCompare(right.id)
+  );
+}
+
 export function isLocale(value: string): value is Locale {
   return isOneOf(value, locales);
 }
