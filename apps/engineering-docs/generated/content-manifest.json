@@ -70,21 +70,6 @@
         "level": 2
       },
       {
-        "id": "goal",
-        "label": "Goal",
-        "level": 3
-      },
-      {
-        "id": "blocker",
-        "label": "Blocker",
-        "level": 3
-      },
-      {
-        "id": "environment",
-        "label": "Environment",
-        "level": 3
-      },
-      {
         "id": "describe-a-bug-as-a-reproducible-difference",
         "label": "Describe a bug as a reproducible difference",
         "level": 2
@@ -95,29 +80,9 @@
         "level": 2
       },
       {
-        "id": "issues-own-the-reason;-pull-requests-own-the-evidence",
+        "id": "issues-own-the-reason-pull-requests-own-the-evidence",
         "label": "Issues own the reason; pull requests own the evidence",
         "level": 2
-      },
-      {
-        "id": "problem-and-intent",
-        "label": "Problem and intent",
-        "level": 3
-      },
-      {
-        "id": "change-and-non-goals",
-        "label": "Change and non-goals",
-        "level": 3
-      },
-      {
-        "id": "validation",
-        "label": "Validation",
-        "level": 3
-      },
-      {
-        "id": "impact-and-follow-up",
-        "label": "Impact and follow-up",
-        "level": 3
       },
       {
         "id": "experience-connected-through-documentation",
@@ -669,8 +634,8 @@
     "displayTitle": "TypeScript 7 Compatibility",
     "description": "Verify library declarations, Compiler API coupling, builds, and tooling before a compiler major upgrade.",
     "order": 4,
-    "updatedAt": "2026-07-30",
-    "verifiedAt": "2026-07-30",
+    "updatedAt": "2026-07-31",
+    "verifiedAt": "2026-07-31",
     "tags": [
       "typescript",
       "compatibility",
@@ -699,28 +664,33 @@
         "level": 2
       },
       {
-        "id": "4-run-typescript-6-and-7-side-by-side",
-        "label": "4. Run TypeScript 6 and 7 side by side",
+        "id": "4-map-ecosystem-specific-migration-routes",
+        "label": "4. Map ecosystem-specific migration routes",
         "level": 2
       },
       {
-        "id": "5-surface-configuration-changes-first",
-        "label": "5. Surface configuration changes first",
+        "id": "5-keep-one-production-compiler",
+        "label": "5. Keep one production compiler",
         "level": 2
       },
       {
-        "id": "6-complete-the-verification-ladder",
-        "label": "6. Complete the verification ladder",
+        "id": "6-surface-configuration-changes-first",
+        "label": "6. Surface configuration changes first",
         "level": 2
       },
       {
-        "id": "7-record-a-decision-and-a-recheck-trigger",
-        "label": "7. Record a decision and a recheck trigger",
+        "id": "7-complete-the-verification-ladder",
+        "label": "7. Complete the verification ladder",
         "level": 2
       },
       {
-        "id": "8-roll-out-in-a-reversible-order",
-        "label": "8. Roll out in a reversible order",
+        "id": "8-record-a-decision-and-a-recheck-trigger",
+        "label": "8. Record a decision and a recheck trigger",
+        "level": 2
+      },
+      {
+        "id": "9-move-the-workspace-as-one-boundary",
+        "label": "9. Move the workspace as one boundary",
         "level": 2
       },
       {
@@ -801,21 +771,6 @@
         "level": 2
       },
       {
-        "id": "하려는-일",
-        "label": "하려는 일",
-        "level": 3
-      },
-      {
-        "id": "막힌-지점",
-        "label": "막힌 지점",
-        "level": 3
-      },
-      {
-        "id": "환경",
-        "label": "환경",
-        "level": 3
-      },
-      {
         "id": "버그는-재현-가능한-차이로-설명한다",
         "label": "버그는 재현 가능한 차이로 설명한다",
         "level": 2
@@ -829,26 +784,6 @@
         "id": "이슈는-이유를-풀-리퀘스트는-증거를-소유한다",
         "label": "이슈는 이유를, 풀 리퀘스트는 증거를 소유한다",
         "level": 2
-      },
-      {
-        "id": "문제와-의도",
-        "label": "문제와 의도",
-        "level": 3
-      },
-      {
-        "id": "변경과-비범위",
-        "label": "변경과 비범위",
-        "level": 3
-      },
-      {
-        "id": "검증",
-        "label": "검증",
-        "level": 3
-      },
-      {
-        "id": "영향과-후속-작업",
-        "label": "영향과 후속 작업",
-        "level": 3
       },
       {
         "id": "문서로-연결된-경험",
@@ -1400,8 +1335,8 @@
     "displayTitle": "TypeScript 7 호환성",
     "description": "컴파일러 메이저 업그레이드 전에 라이브러리 선언, Compiler API 결합, 빌드와 도구 체인을 증거로 검증합니다.",
     "order": 4,
-    "updatedAt": "2026-07-30",
-    "verifiedAt": "2026-07-30",
+    "updatedAt": "2026-07-31",
+    "verifiedAt": "2026-07-31",
     "tags": [
       "typescript",
       "compatibility",
@@ -1430,28 +1365,33 @@
         "level": 2
       },
       {
-        "id": "4-typescript-6과-7을-나란히-실행한다",
-        "label": "4. TypeScript 6과 7을 나란히 실행한다",
+        "id": "4-생태계별-전환-경로를-만든다",
+        "label": "4. 생태계별 전환 경로를 만든다",
         "level": 2
       },
       {
-        "id": "5-설정-변경을-먼저-드러낸다",
-        "label": "5. 설정 변경을 먼저 드러낸다",
+        "id": "5-production-compiler를-하나로-유지한다",
+        "label": "5. production compiler를 하나로 유지한다",
         "level": 2
       },
       {
-        "id": "6-검증-사다리를-끝까지-오른다",
-        "label": "6. 검증 사다리를 끝까지 오른다",
+        "id": "6-설정-변경을-먼저-드러낸다",
+        "label": "6. 설정 변경을 먼저 드러낸다",
         "level": 2
       },
       {
-        "id": "7-판정과-재확인-조건을-함께-남긴다",
-        "label": "7. 판정과 재확인 조건을 함께 남긴다",
+        "id": "7-검증-사다리를-끝까지-오른다",
+        "label": "7. 검증 사다리를 끝까지 오른다",
         "level": 2
       },
       {
-        "id": "8-롤백-가능한-순서로-배포한다",
-        "label": "8. 롤백 가능한 순서로 배포한다",
+        "id": "8-판정과-재확인-조건을-함께-남긴다",
+        "label": "8. 판정과 재확인 조건을 함께 남긴다",
+        "level": 2
+      },
+      {
+        "id": "9-workspace를-하나의-경계로-이동한다",
+        "label": "9. workspace를 하나의 경계로 이동한다",
         "level": 2
       },
       {
