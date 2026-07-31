@@ -27,15 +27,6 @@ const projects = [
   },
   {
     index: "02",
-    category: "Local-first product",
-    title: "Immersive Translate",
-    description:
-      "A Chrome extension that translates DOCX and EPUB documents locally while keeping both languages in view.",
-    tags: ["React", "WXT", "MLX"],
-    href: "https://github.com/jongminchung/jongminchung/tree/main/apps/immersive-translate",
-  },
-  {
-    index: "03",
     category: "Open package",
     title: "remark-plantuml",
     description:
@@ -44,7 +35,7 @@ const projects = [
     href: "https://github.com/jongminchung/jongminchung/tree/main/packages/remark-plantuml",
   },
   {
-    index: "04",
+    index: "03",
     category: "Developer tooling",
     title: "@jongminchung/tooling",
     description:

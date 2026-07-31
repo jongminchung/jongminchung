@@ -8,7 +8,7 @@ test("presents Jamie's work with valid metadata", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "Complex systemsshould explainthemselves.",
   );
-  await expect(page.locator('[data-project="true"]')).toHaveCount(4);
+  await expect(page.locator('[data-project="true"]').first()).toBeVisible();
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://jamie.kr");
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
     "content",

@@ -569,9 +569,9 @@
     "locale": "en",
     "section": "handbook",
     "title": "App icon system",
-    "description": "Generate every app icon from one Open Weave source without copying paths between apps.",
+    "description": "Generate registered app icons from one Open Weave source without copying paths between apps.",
     "order": 2,
-    "updatedAt": "2026-07-14",
+    "updatedAt": "2026-07-31",
     "tags": [
       "brand",
       "icon",
@@ -1296,9 +1296,9 @@
     "locale": "ko",
     "section": "handbook",
     "title": "앱 아이콘 시스템",
-    "description": "앱 사이에 경로를 복사하지 않고 하나의 오픈 위브 원본에서 모든 앱 아이콘을 생성합니다.",
+    "description": "앱 사이에 경로를 복사하지 않고 하나의 오픈 위브 원본에서 등록된 앱 아이콘을 생성합니다.",
     "order": 2,
-    "updatedAt": "2026-07-14",
+    "updatedAt": "2026-07-31",
     "tags": [
       "brand",
       "icon",

@@ -1,13 +1,12 @@
 export const iconPalette = Object.freeze({
   deepInk: "#121826",
-  cloud: "#F4F6FB",
   cobalt: "#3157D5",
   iris: "#6B5BC7",
   mineralCyan: "#2E98A6",
   humanCoral: "#D96C7B",
 });
 
-export const iconVariants = ["personal", "immersive-translate"] as const;
+export const iconVariants = ["personal"] as const;
 export const iconPreviewSizes = [16, 32, 48, 64, 96, 128, 256] as const;
 
 export type IconVariant = (typeof iconVariants)[number];
@@ -77,50 +76,6 @@ const iconDefinitions = Object.freeze({
         width: 10,
         height: 10,
         rx: 2,
-        fill: iconPalette.mineralCyan,
-      },
-    ],
-  },
-  "immersive-translate": {
-    viewBoxSize: 128,
-    elements: [
-      {
-        kind: "rect",
-        x: 4,
-        y: 4,
-        width: 120,
-        height: 120,
-        rx: 27,
-        fill: iconPalette.deepInk,
-      },
-      {
-        kind: "path",
-        d: "M26 36h42c13 0 24 11 24 24",
-        stroke: iconPalette.cobalt,
-        strokeWidth: 20,
-      },
-      {
-        kind: "path",
-        d: "M102 92H60c-13 0-24-11-24-24",
-        stroke: iconPalette.iris,
-        strokeWidth: 20,
-      },
-      {
-        kind: "rect",
-        x: 26,
-        y: 26,
-        width: 20,
-        height: 20,
-        rx: 4,
-        fill: iconPalette.cloud,
-      },
-      {
-        kind: "rect",
-        x: 82,
-        y: 82,
-        width: 20,
-        height: 20,
-        rx: 4,
         fill: iconPalette.mineralCyan,
       },
     ],

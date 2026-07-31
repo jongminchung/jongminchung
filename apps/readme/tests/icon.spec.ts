@@ -3,7 +3,6 @@ import { expect, test } from "@playwright/test";
 
 test("visual: app icon family at production sizes", async ({ page }) => {
   const personalIcon = createIconDataUrl("personal");
-  const productIcon = createIconDataUrl("immersive-translate");
   const cells = iconPreviewSizes
     .map(
       (size) => `
@@ -13,17 +12,7 @@ test("visual: app icon family at production sizes", async ({ page }) => {
         </div>`,
     )
     .join("");
-  const productCells = iconPreviewSizes
-    .map(
-      (size) => `
-        <div class="cell">
-          <div class="stage"><img src="${productIcon}" width="${size}" height="${size}" /></div>
-          <span>${size}px</span>
-        </div>`,
-    )
-    .join("");
-
-  await page.setViewportSize({ width: 1280, height: 1040 });
+  await page.setViewportSize({ width: 1280, height: 760 });
   await page.setContent(`
     <!doctype html>
     <html>
@@ -51,13 +40,12 @@ test("visual: app icon family at production sizes", async ({ page }) => {
       <body>
         <header><h1>Jamie · Open Weave</h1><span>LIGHT / 16—256</span></header>
         <section><h2>Personal mark</h2><div class="row">${cells}</div></section>
-        <section><h2>Immersive Translate · exchange lanes</h2><div class="row">${productCells}</div></section>
         <section>
           <h2>Contrast modes · 64px</h2>
           <div class="contrast">
-            <div class="mode light"><img src="${personalIcon}" width="64" height="64" /><img src="${productIcon}" width="64" height="64" /></div>
-            <div class="mode dark"><img src="${personalIcon}" width="64" height="64" /><img src="${productIcon}" width="64" height="64" /></div>
-            <div class="mode mono"><img src="${personalIcon}" width="64" height="64" /><img src="${productIcon}" width="64" height="64" /></div>
+            <div class="mode light"><img src="${personalIcon}" width="64" height="64" /></div>
+            <div class="mode dark"><img src="${personalIcon}" width="64" height="64" /></div>
+            <div class="mode mono"><img src="${personalIcon}" width="64" height="64" /></div>
           </div>
         </section>
       </body>

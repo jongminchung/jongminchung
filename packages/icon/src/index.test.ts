@@ -7,7 +7,7 @@ import {
   iconVariants,
   renderIconSvg,
 } from "./index.ts";
-import { iconApplicationIds, iconAssetTargets } from "./targets.ts";
+import { iconAssetTargets } from "./targets.ts";
 
 const forbiddenSvgContent =
   /<(?:text|image|foreignObject|linearGradient|radialGradient|filter)\b|(?:font-family|href=|url\()/iu;
@@ -24,23 +24,16 @@ async function readCenterPixel(svg: string, size: number): Promise<readonly numb
 }
 
 describe("app icon source", () => {
-  it("defines unique variants, preview sizes, and output paths", () => {
+  it("defines unique variants, preview sizes, and owned output paths", () => {
     expect(new Set(iconVariants).size).toBe(iconVariants.length);
     expect(new Set(iconPreviewSizes).size).toBe(iconPreviewSizes.length);
     expect(new Set(iconAssetTargets.map((target) => target.path)).size).toBe(
       iconAssetTargets.length,
     );
-    expect(new Set(iconAssetTargets.map((target) => target.app))).toEqual(
-      new Set(iconApplicationIds),
-    );
     expect(iconAssetTargets.every((target) => target.path.startsWith(`apps/${target.app}/`))).toBe(
       true,
     );
-    const productPngSizes = iconAssetTargets.flatMap((target) =>
-      target.kind === "png" ? [target.size] : [],
-    );
-    expect(productPngSizes).toEqual([16, 32, 48, 96, 128]);
-    expect(new Set(productPngSizes).size).toBe(productPngSizes.length);
+    expect(iconAssetTargets.every((target) => target.kind === "svg")).toBe(true);
   });
 
   it.each(iconVariants)("renders safe standalone SVG for %s", (variant) => {

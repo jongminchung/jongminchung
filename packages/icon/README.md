@@ -1,27 +1,26 @@
 # @jongminchung/icon
 
-Canonical code-based vector definitions for the Jamie app icon family.
+Canonical code-based vector definition for the Jamie app icon.
 
 ## Source and generated assets
 
-`src/index.ts` is the only source for palette, geometry, variants, and preview sizes. The tracked SVG
-and PNG files under `apps/` are generated compatibility assets for Next.js metadata and the Chrome
-extension. Do not edit those files directly.
+`src/index.ts` is the only source for the palette, geometry, approved variant, and preview sizes.
+The tracked SVG files under registered apps are generated compatibility assets for Next.js
+metadata. Do not edit those files directly.
 
-| App                        | Variant               | Generated assets                          |
-| -------------------------- | --------------------- | ----------------------------------------- |
-| `apps/readme`              | `personal`            | `app/icon.svg`                            |
-| `apps/engineering-docs`    | `personal`            | `app/icon.svg`                            |
-| `apps/immersive-translate` | `immersive-translate` | master SVG and 16, 32, 48, 96, 128px PNGs |
+| App                     | Variant    | Generated asset |
+| ----------------------- | ---------- | --------------- |
+| `apps/readme`           | `personal` | `app/icon.svg`  |
+| `apps/engineering-docs` | `personal` | `app/icon.svg`  |
 
 ```sh
 pnpm icon:generate
 pnpm icon:check
 ```
 
-`icon:generate` updates tracked app assets. `icon:check` compares them with the canonical source
-and is safe to run in builds and CI. The check discovers every `apps/*/package.json` and fails when
-an app has no registered icon target.
+`icon:generate` updates registered app assets. `icon:check` compares those outputs with the
+canonical source and is safe to run in builds and CI. Apps that own a separate icon pipeline do not
+need a registry entry or an exemption.
 
 ## Consuming the icon
 
@@ -36,7 +35,7 @@ import { createIconDataUrl } from "@jongminchung/icon";
 Keep an existing text label such as `JAMIE`, `Docs`, or the product name. Decorative icon instances
 use an empty alternative text.
 
-When adding an app, choose an existing approved variant, register every required static output in
-`src/targets.ts`, declare the workspace dependency if application code imports the package, then run
-the generator and the drift check. The Playwright size-sheet snapshot is a visual approval record,
-not an asset source.
+An app opts into generated assets by registering each required static output in `src/targets.ts`.
+Declare the workspace dependency if application code imports the package, then run the generator
+and drift check. The Playwright size-sheet snapshot is a visual approval record, not an asset
+source.
