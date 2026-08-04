@@ -57,10 +57,10 @@ pnpm run publish:dry-run
 **I'm a Night 🦉** 
 
 ```text
-🌞 Morning                795 commits         ██░░░░░░░░░░░░░░░░░░░░░░░   09.35 % 
-🌆 Daytime                1762 commits        █████░░░░░░░░░░░░░░░░░░░░   20.73 % 
-🌃 Evening                3461 commits        ██████████░░░░░░░░░░░░░░░   40.72 % 
-🌙 Night                  2482 commits        ███████░░░░░░░░░░░░░░░░░░   29.20 % 
+🌞 Morning                791 commits         ██░░░░░░░░░░░░░░░░░░░░░░░   09.47 % 
+🌆 Daytime                1710 commits        █████░░░░░░░░░░░░░░░░░░░░   20.48 % 
+🌃 Evening                3393 commits        ██████████░░░░░░░░░░░░░░░   40.64 % 
+🌙 Night                  2455 commits        ███████░░░░░░░░░░░░░░░░░░   29.40 % 
 ```
 
 
@@ -68,36 +68,36 @@ pnpm run publish:dry-run
 
 ```text
 💬 Programming Languages: 
-Bash                     5 hrs 46 mins       ██████░░░░░░░░░░░░░░░░░░░   25.96 % 
-TypeScript               5 hrs 26 mins       ██████░░░░░░░░░░░░░░░░░░░   24.48 % 
-Markdown                 3 hrs 11 mins       ████░░░░░░░░░░░░░░░░░░░░░   14.37 % 
-YAML                     2 hrs 17 mins       ███░░░░░░░░░░░░░░░░░░░░░░   10.30 % 
-Other                    1 hr 27 mins        ██░░░░░░░░░░░░░░░░░░░░░░░   06.52 % 
+Bash                     4 hrs 7 mins        ███████░░░░░░░░░░░░░░░░░░   26.22 % 
+TypeScript               3 hrs 27 mins       █████░░░░░░░░░░░░░░░░░░░░   21.92 % 
+YAML                     2 hrs 20 mins       ████░░░░░░░░░░░░░░░░░░░░░   14.84 % 
+Markdown                 1 hr 46 mins        ███░░░░░░░░░░░░░░░░░░░░░░   11.22 % 
+Java                     1 hr 6 mins         ██░░░░░░░░░░░░░░░░░░░░░░░   07.00 % 
 ```
 
 🤖 **AI Coding This Week** 
 
 ```text
-⏱ AI Coding Time: 21 hrs 55 mins (98.49%)
+⏱ AI Coding Time: 15 hrs 27 mins (98.19%)
 
-✍️ 25,085 lines written by AI, 20 lines written by hand (99.92% AI-written)
+✍️ 20,864 lines written by AI, 19 lines written by hand (99.91% AI-written)
 
-🔤 2,499,142,728 Input Tokens, 10,161,520 Output Tokens
+🔤 1,812,356,241 Input Tokens, 7,372,034 Output Tokens
 
-💵 $3861.22 Estimated AI Cost This Week
+💵 $2507.59 Estimated AI Cost This Week
 
-🧠 102 AI Sessions, 327 AI Prompts
+🧠 76 AI Sessions, 231 AI Prompts
 
-GPT                      27,815 lines        █████████████████████████   100.00 % 
+GPT                      22,357 lines        █████████████████████████   100.00 % 
 Vscode-Wakatime          0 lines             ░░░░░░░░░░░░░░░░░░░░░░░░░   00.00 % 
 Codex-Cli                0 lines             ░░░░░░░░░░░░░░░░░░░░░░░░░   00.00 % 
 Opencode-Cli             0 lines             ░░░░░░░░░░░░░░░░░░░░░░░░░   00.00 % 
 
 🔎 AI Coding Insights:
-🤖 AI-Driven — 99.92% of written lines came from AI
-📄 Detailed Prompter — average 1,184 characters per prompt
+🤖 AI-Driven — 99.91% of written lines came from AI
+📄 Detailed Prompter — average 1,182 characters per prompt
 🔁 Iterative Prompter — average 3 prompts per session
-🚀 High AI Trust — 0.16% of changed lines were hand-edited
+🚀 High AI Trust — 0.08% of changed lines were hand-edited
 ```
 
 
