@@ -23,6 +23,20 @@ const cases = [
     theme: "dark",
   },
   {
+    name: "deep-dive-landing-wide-light",
+    path: "/ko/deep-dive",
+    width: 1440,
+    height: 1000,
+    theme: "light",
+  },
+  {
+    name: "packages-landing-mobile-dark",
+    path: "/en/packages",
+    width: 390,
+    height: 844,
+    theme: "dark",
+  },
+  {
     name: "ddd-wide-light",
     path: "/ko/handbook/ddd",
     width: 1440,

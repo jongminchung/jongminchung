@@ -1,10 +1,16 @@
 import { Badge } from "@jongminchung/ui/components/badge";
 import { cn } from "@jongminchung/ui/lib/utils";
-import { displayTitleFor, type DocSection, type Locale } from "@/lib/content-model";
-import { getSectionDocuments, type LoadedDocument } from "@/lib/documents";
+import {
+  createSectionHref,
+  displayTitleFor,
+  type DocSection,
+  type Locale,
+} from "@/lib/content-model";
+import type { LoadedDocument } from "@/lib/documents";
 import { DocumentOutline } from "./DocumentOutline";
 import { EditPageLink } from "./EditPageLink";
 import { Icon } from "./Icon";
+import { RelatedDocuments } from "./RelatedDocuments";
 import { TransitionLink } from "./RouteTransition";
 import styles from "./DocumentPage.module.css";
 
@@ -37,11 +43,7 @@ export function DocumentPage({
   const { metadata, Content, previous, next } = document;
   const isOverview = metadata.id === "overview";
   const title = displayTitleFor(metadata);
-  const sectionDocument = getSectionDocuments(locale, metadata.section)[0];
-  if (sectionDocument === undefined) {
-    throw new Error(`Missing ${locale}/${metadata.section} navigation entry.`);
-  }
-  const sectionHref = sectionDocument.href;
+  const sectionHref = createSectionHref(locale, metadata.section);
   return (
     <div className="mx-auto grid w-full max-w-[1160px] grid-cols-[minmax(0,1fr)_224px] gap-8 px-[50px] pt-[50px] pb-24 max-[1400px]:block max-[1400px]:max-w-[860px] max-[1400px]:px-8 min-[769px]:max-[1024px]:pt-7 max-[600px]:px-4 max-[600px]:pt-8 max-[600px]:pb-[72px]">
       <article
@@ -128,6 +130,7 @@ export function DocumentPage({
         <div className={`${styles.prose} ${isOverview ? "" : "pt-[18px]"}`} data-docs-prose="true">
           <Content />
         </div>
+        {isOverview ? null : <RelatedDocuments documents={document.related} locale={locale} />}
         <nav
           className="mt-[72px] grid grid-cols-2 gap-3 border-t border-border pt-6 max-[600px]:grid-cols-1 [&>*]:min-h-[68px]"
           aria-label={locale === "ko" ? "이전 및 다음 문서" : "Previous and next documents"}

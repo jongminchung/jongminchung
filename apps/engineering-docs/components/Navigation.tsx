@@ -6,6 +6,8 @@ import { cn } from "@jongminchung/ui/lib/utils";
 import { type Ref, useState } from "react";
 import {
   type CurrentNavigationEntry,
+  createDocHref,
+  createSectionHref,
   displayTitleFor,
   sections as allSections,
   type DocSection,
@@ -45,16 +47,10 @@ const sectionIcons: Readonly<Record<DocSection, IconType>> = {
 
 const personalIcon = createIconDataUrl("personal");
 
-function sectionHref(
-  locale: Locale,
-  section: DocSection,
-  documents: readonly NavigationEntry[],
-): string {
-  const document = documents.find((candidate) => candidate.section === section);
-  if (document === undefined) {
-    throw new Error(`Missing ${locale}/${section} navigation entry.`);
-  }
-  return document.href;
+function localizedCurrentHref(locale: Locale, current: CurrentNavigationEntry): string {
+  return current.kind === "section"
+    ? createSectionHref(locale, current.section)
+    : createDocHref(locale, current.id);
 }
 
 function SectionItems({
@@ -68,7 +64,7 @@ function SectionItems({
 }) {
   const sectionDocuments = documents.filter((document) => document.section === current.section);
   const items =
-    sectionDocuments.length === 1
+    current.kind === "document" && sectionDocuments.length === 1
       ? current.outline
           .filter((item) => item.level === 2)
           .map((item) => ({
@@ -125,7 +121,7 @@ export function ContextNavigation({
         <SideNavHeading
           heading={sectionLabels[locale][current.section]}
           superheading="Jongmin Chung Engineering Docs"
-          headingHref={sectionHref(locale, current.section, documents)}
+          headingHref={createSectionHref(locale, current.section)}
         />
       }
     >
@@ -137,13 +133,11 @@ export function ContextNavigation({
 export function GlobalRail({
   locale,
   current,
-  documents,
   mode,
   onModeChange,
 }: {
   readonly locale: Locale;
   readonly current: CurrentNavigationEntry;
-  readonly documents: readonly NavigationEntry[];
   readonly mode: ThemeMode;
   readonly onModeChange: (mode: ThemeMode) => void;
 }) {
@@ -175,7 +169,7 @@ export function GlobalRail({
         {allSections.map((section) => (
           <TransitionLink
             key={section}
-            href={sectionHref(locale, section, documents)}
+            href={createSectionHref(locale, section)}
             className={current.section === section ? styles.sectionLinkActive : styles.sectionLink}
             aria-current={current.section === section ? "page" : undefined}
           >
@@ -196,7 +190,11 @@ export function GlobalRail({
         </a>
         <ThemeControl locale={locale} mode={mode} onModeChange={onModeChange} />
         <span className={styles.localeSwitch}>
-          <LocaleSwitcher locale={locale} href={`/${otherLocale}/${current.id}`} compact />
+          <LocaleSwitcher
+            locale={locale}
+            href={localizedCurrentHref(otherLocale, current)}
+            compact
+          />
         </span>
       </div>
     </nav>
@@ -282,7 +280,7 @@ export function MobileNavigation({
       <div className={styles.mobileUtilities}>
         <SearchTrigger />
         <ThemeControl locale={locale} mode={mode} onModeChange={onModeChange} />
-        <LocaleSwitcher locale={locale} href={`/${otherLocale}/${current.id}`} compact />
+        <LocaleSwitcher locale={locale} href={localizedCurrentHref(otherLocale, current)} compact />
       </div>
     </div>
   );

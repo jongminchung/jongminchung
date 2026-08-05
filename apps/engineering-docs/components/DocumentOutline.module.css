@@ -43,6 +43,12 @@
   color: var(--foreground);
 }
 
+.list li[data-active="true"] a {
+  background: var(--accent);
+  color: var(--primary);
+  box-shadow: inset 2px 0 var(--primary);
+}
+
 @media (max-width: 1399px) {
   .container {
     display: none;

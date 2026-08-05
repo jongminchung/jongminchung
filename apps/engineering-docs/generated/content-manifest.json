@@ -701,6 +701,142 @@
     ]
   },
   {
+    "id": "deep-dive/server-monitoring-analysis-guide",
+    "locale": "en",
+    "section": "deep-dive",
+    "title": "서버 모니터링 분석 가이드",
+    "description": "핵심 서버 지표의 패턴을 읽고 증상에서 원인으로 좁혀 가는 모니터링 분석 방법을 설명합니다.",
+    "order": 5,
+    "updatedAt": "2026-07-20",
+    "verifiedAt": "2026-08-05",
+    "tags": [
+      "backend",
+      "monitoring",
+      "devops",
+      "software-engineering"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://kciter.so/posts/server-monitoring-analysis-guide/",
+    "href": "/en/deep-dive/server-monitoring-analysis-guide",
+    "outline": [
+      {
+        "id": "무엇이-중요한가",
+        "label": "무엇이 중요한가?",
+        "level": 2
+      },
+      {
+        "id": "사용자의-문제를-읽는-법",
+        "label": "사용자의 문제를 읽는 법",
+        "level": 2
+      },
+      {
+        "id": "트래픽-얼마나-들어오고-있는가",
+        "label": "트래픽, 얼마나 들어오고 있는가",
+        "level": 3
+      },
+      {
+        "id": "지연-시간-얼마나-걸리는가",
+        "label": "지연 시간, 얼마나 걸리는가",
+        "level": 3
+      },
+      {
+        "id": "에러-얼마나-실패하는가",
+        "label": "에러, 얼마나 실패하는가",
+        "level": 3
+      },
+      {
+        "id": "범인을-좁히는-법",
+        "label": "범인을 좁히는 법",
+        "level": 2
+      },
+      {
+        "id": "cpu-사용률이라는-말의-함정",
+        "label": "CPU 사용률이라는 말의 함정",
+        "level": 3
+      },
+      {
+        "id": "메모리-누수와-스파이크",
+        "label": "메모리 누수와 스파이크",
+        "level": 3
+      },
+      {
+        "id": "비둘기집의-원리",
+        "label": "비둘기집의 원리",
+        "level": 3
+      },
+      {
+        "id": "이벤트-루프-서버라면",
+        "label": "이벤트 루프 서버라면",
+        "level": 3
+      },
+      {
+        "id": "지표-하나로는-보이지-않는-것들",
+        "label": "지표 하나로는 보이지 않는 것들",
+        "level": 2
+      },
+      {
+        "id": "대기가-쌓이는-곳",
+        "label": "대기가 쌓이는 곳",
+        "level": 3
+      },
+      {
+        "id": "큐는-공짜가-아니다",
+        "label": "큐는 공짜가 아니다",
+        "level": 3
+      },
+      {
+        "id": "캐시-히트율이-무너지는-순간",
+        "label": "캐시 히트율이 무너지는 순간",
+        "level": 3
+      },
+      {
+        "id": "두-대시보드가-서로-다른-말을-할-때",
+        "label": "두 대시보드가 서로 다른 말을 할 때",
+        "level": 3
+      },
+      {
+        "id": "세-가지-시간",
+        "label": "세 가지 시간",
+        "level": 2
+      },
+      {
+        "id": "미리-문제를-찾는-시간",
+        "label": "미리 문제를 찾는 시간",
+        "level": 3
+      },
+      {
+        "id": "천천히-나빠지는-것들",
+        "label": "천천히 나빠지는 것들",
+        "level": 3
+      },
+      {
+        "id": "가장-위험한-30분",
+        "label": "가장 위험한 30분",
+        "level": 3
+      },
+      {
+        "id": "응급-처치의-시간",
+        "label": "응급 처치의 시간",
+        "level": 3
+      },
+      {
+        "id": "포스트모템",
+        "label": "포스트모템",
+        "level": 3
+      },
+      {
+        "id": "마치며",
+        "label": "마치며",
+        "level": 2
+      },
+      {
+        "id": "footnote-label",
+        "label": "Footnotes",
+        "level": 2
+      }
+    ]
+  },
+  {
     "id": "overview",
     "locale": "ko",
     "section": "overview",
@@ -1397,6 +1533,142 @@
       {
         "id": "참고-자료",
         "label": "참고 자료",
+        "level": 2
+      }
+    ]
+  },
+  {
+    "id": "deep-dive/server-monitoring-analysis-guide",
+    "locale": "ko",
+    "section": "deep-dive",
+    "title": "서버 모니터링 분석 가이드",
+    "description": "핵심 서버 지표의 패턴을 읽고 증상에서 원인으로 좁혀 가는 모니터링 분석 방법을 설명합니다.",
+    "order": 5,
+    "updatedAt": "2026-07-20",
+    "verifiedAt": "2026-08-05",
+    "tags": [
+      "backend",
+      "monitoring",
+      "devops",
+      "software-engineering"
+    ],
+    "status": "stable",
+    "sourceUrl": "https://kciter.so/posts/server-monitoring-analysis-guide/",
+    "href": "/ko/deep-dive/server-monitoring-analysis-guide",
+    "outline": [
+      {
+        "id": "무엇이-중요한가",
+        "label": "무엇이 중요한가?",
+        "level": 2
+      },
+      {
+        "id": "사용자의-문제를-읽는-법",
+        "label": "사용자의 문제를 읽는 법",
+        "level": 2
+      },
+      {
+        "id": "트래픽-얼마나-들어오고-있는가",
+        "label": "트래픽, 얼마나 들어오고 있는가",
+        "level": 3
+      },
+      {
+        "id": "지연-시간-얼마나-걸리는가",
+        "label": "지연 시간, 얼마나 걸리는가",
+        "level": 3
+      },
+      {
+        "id": "에러-얼마나-실패하는가",
+        "label": "에러, 얼마나 실패하는가",
+        "level": 3
+      },
+      {
+        "id": "범인을-좁히는-법",
+        "label": "범인을 좁히는 법",
+        "level": 2
+      },
+      {
+        "id": "cpu-사용률이라는-말의-함정",
+        "label": "CPU 사용률이라는 말의 함정",
+        "level": 3
+      },
+      {
+        "id": "메모리-누수와-스파이크",
+        "label": "메모리 누수와 스파이크",
+        "level": 3
+      },
+      {
+        "id": "비둘기집의-원리",
+        "label": "비둘기집의 원리",
+        "level": 3
+      },
+      {
+        "id": "이벤트-루프-서버라면",
+        "label": "이벤트 루프 서버라면",
+        "level": 3
+      },
+      {
+        "id": "지표-하나로는-보이지-않는-것들",
+        "label": "지표 하나로는 보이지 않는 것들",
+        "level": 2
+      },
+      {
+        "id": "대기가-쌓이는-곳",
+        "label": "대기가 쌓이는 곳",
+        "level": 3
+      },
+      {
+        "id": "큐는-공짜가-아니다",
+        "label": "큐는 공짜가 아니다",
+        "level": 3
+      },
+      {
+        "id": "캐시-히트율이-무너지는-순간",
+        "label": "캐시 히트율이 무너지는 순간",
+        "level": 3
+      },
+      {
+        "id": "두-대시보드가-서로-다른-말을-할-때",
+        "label": "두 대시보드가 서로 다른 말을 할 때",
+        "level": 3
+      },
+      {
+        "id": "세-가지-시간",
+        "label": "세 가지 시간",
+        "level": 2
+      },
+      {
+        "id": "미리-문제를-찾는-시간",
+        "label": "미리 문제를 찾는 시간",
+        "level": 3
+      },
+      {
+        "id": "천천히-나빠지는-것들",
+        "label": "천천히 나빠지는 것들",
+        "level": 3
+      },
+      {
+        "id": "가장-위험한-30분",
+        "label": "가장 위험한 30분",
+        "level": 3
+      },
+      {
+        "id": "응급-처치의-시간",
+        "label": "응급 처치의 시간",
+        "level": 3
+      },
+      {
+        "id": "포스트모템",
+        "label": "포스트모템",
+        "level": 3
+      },
+      {
+        "id": "마치며",
+        "label": "마치며",
+        "level": 2
+      },
+      {
+        "id": "footnote-label",
+        "label": "Footnotes",
         "level": 2
       }
     ]

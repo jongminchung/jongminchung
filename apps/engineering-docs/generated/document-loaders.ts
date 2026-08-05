@@ -16,6 +16,7 @@ export const documentLoaders = {
   "en/deep-dive/node-26": () => import("../content/en/deep-dive/node-26.mdx"),
   "en/deep-dive/typescript-6": () => import("../content/en/deep-dive/typescript-6.mdx"),
   "en/deep-dive/typescript-7-compatibility": () => import("../content/en/deep-dive/typescript-7-compatibility.mdx"),
+  "en/deep-dive/server-monitoring-analysis-guide": () => import("../content/en/deep-dive/server-monitoring-analysis-guide.mdx"),
   "ko/overview": () => import("../content/ko/overview.mdx"),
   "ko/handbook/collaboration": () => import("../content/ko/handbook/collaboration.mdx"),
   "ko/handbook/ddd": () => import("../content/ko/handbook/ddd.mdx"),
@@ -27,6 +28,7 @@ export const documentLoaders = {
   "ko/deep-dive/node-26": () => import("../content/ko/deep-dive/node-26.mdx"),
   "ko/deep-dive/typescript-6": () => import("../content/ko/deep-dive/typescript-6.mdx"),
   "ko/deep-dive/typescript-7-compatibility": () => import("../content/ko/deep-dive/typescript-7-compatibility.mdx"),
+  "ko/deep-dive/server-monitoring-analysis-guide": () => import("../content/ko/deep-dive/server-monitoring-analysis-guide.mdx"),
 } as const satisfies Readonly<Record<string, () => Promise<MdxModule>>>;
 
 export type DocumentLoaderKey = keyof typeof documentLoaders;

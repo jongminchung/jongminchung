@@ -108,13 +108,7 @@ export function DocsShell({
 
   const navigation = (
     <div className={styles.navigationFrame}>
-      <GlobalRail
-        locale={locale}
-        current={current}
-        documents={documents}
-        mode={mode}
-        onModeChange={changeMode}
-      />
+      <GlobalRail locale={locale} current={current} mode={mode} onModeChange={changeMode} />
       <ContextNavigation
         locale={locale}
         current={current}

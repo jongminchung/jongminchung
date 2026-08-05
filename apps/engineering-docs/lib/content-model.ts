@@ -1,9 +1,11 @@
 export const locales = ["ko", "en"] as const;
 export const sections = ["overview", "handbook", "packages", "deep-dive"] as const;
+export const sectionLandingSections = ["handbook", "packages", "deep-dive"] as const;
 export const documentStatuses = ["stable", "deprecated", "experimental"] as const;
 
 export type Locale = (typeof locales)[number];
 export type DocSection = (typeof sections)[number];
+export type SectionLanding = (typeof sectionLandingSections)[number];
 export type DocumentStatus = (typeof documentStatuses)[number];
 
 export interface DocMetadata {
@@ -43,9 +45,17 @@ export interface NavigationEntry {
   readonly href: string;
 }
 
-export interface CurrentNavigationEntry extends NavigationEntry {
+export interface CurrentDocumentNavigationEntry extends NavigationEntry {
+  readonly kind: "document";
   readonly outline: readonly OutlineEntry[];
 }
+
+export interface CurrentSectionNavigationEntry extends NavigationEntry {
+  readonly kind: "section";
+  readonly section: SectionLanding;
+}
+
+export type CurrentNavigationEntry = CurrentDocumentNavigationEntry | CurrentSectionNavigationEntry;
 
 export interface SearchDocument {
   readonly id: string;
@@ -241,6 +251,14 @@ export function createDocHref(locale: Locale, id: string): string {
   return `/${locale}/${id}`;
 }
 
+export function createSectionHref(locale: Locale, section: DocSection): string {
+  return section === "overview" ? createDocHref(locale, "overview") : `/${locale}/${section}`;
+}
+
+export function createOgImageHref(locale: Locale, id: string): string {
+  return `/og/${locale}/${id}`;
+}
+
 export function createDocumentKey(locale: string, id: string): string {
   return `${locale}/${id}`;
 }
@@ -259,4 +277,8 @@ export function compareDocumentMetadata(
 
 export function isLocale(value: string): value is Locale {
   return isOneOf(value, locales);
+}
+
+export function isSectionLanding(value: string): value is SectionLanding {
+  return isOneOf(value, sectionLandingSections);
 }

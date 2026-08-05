@@ -1,0 +1,89 @@
+.page {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 54px 32px 96px;
+}
+
+.header {
+  display: grid;
+  justify-items: center;
+  margin-bottom: 34px;
+  text-align: center;
+}
+
+.rule {
+  display: flex;
+  width: min(100%, 460px);
+  align-items: center;
+  gap: 12px;
+  color: var(--muted-foreground);
+  font-family: var(--font-family-code);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.rule::before,
+.rule::after {
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(to right, transparent, var(--border));
+  content: "";
+}
+
+.rule::after {
+  background: linear-gradient(to left, transparent, var(--border));
+}
+
+.title {
+  margin: 22px 0 12px;
+  color: var(--primary);
+  font-family: var(--font-family-heading);
+  font-size: 44px;
+  font-weight: 550;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+}
+
+.description {
+  max-width: 620px;
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.sectionLabel {
+  margin: 0 0 14px;
+  color: var(--muted-foreground);
+  font-family: var(--font-family-code);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.allDocuments {
+  margin-top: 40px;
+}
+
+.list {
+  display: grid;
+  gap: 16px;
+}
+
+@media (max-width: 680px) {
+  .page {
+    padding: 38px 16px 72px;
+  }
+
+  .header {
+    margin-bottom: 28px;
+  }
+
+  .title {
+    font-size: 36px;
+  }
+}
