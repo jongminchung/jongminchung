@@ -85,6 +85,21 @@ for (const visualCase of cases) {
     );
     await page.goto(visualCase.path);
     await page.evaluate(() => document.fonts.ready);
+    await page.evaluate(async () => {
+      const images = [...document.images];
+      for (const image of images) image.loading = "eager";
+      await Promise.all(
+        images.map(async (image) => {
+          if (!image.complete) {
+            await new Promise<void>((resolve) => {
+              image.addEventListener("load", () => resolve(), { once: true });
+              image.addEventListener("error", () => resolve(), { once: true });
+            });
+          }
+          await image.decode().catch(() => undefined);
+        }),
+      );
+    });
     await expect(page).toHaveScreenshot(`${visualCase.name}.png`, {
       animations: "disabled",
       fullPage: true,

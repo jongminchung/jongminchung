@@ -1,0 +1,1114 @@
+---
+id: deep-dive/building-llm
+locale: ko
+section: deep-dive
+title: "나만의 작은 언어 모델 만들어보기"
+description: "임베딩, 어텐션, Transformer와 샘플링을 연결해 작은 언어 모델을 이해합니다."
+order: 25
+updatedAt: "2026-07-05"
+verifiedAt: "2026-08-06"
+tags: [ai, llm, transformer, machine-learning]
+status: experimental
+sourceUrl: https://github.com/kciter/kciter.github.io/blob/develop/src/drafts/2026/2026-07-05-building-llm.mdx
+---
+
+ChatGPT나 Claude 같은 서비스를 이용하다 보면 대체 이 안에서 무슨 일이 벌어지고 있는 건지 궁금해질 때가 있다. 필자는 직접 만들어봐야 직성이 풀리는 성격이라 이번에는 LLM의 기반이 되는 언어 모델을 처음부터 만들어 보기로 했다. 어떻게 시작할지 막막했지만 다행히 관련된 자료가 많아 학습하며 만들어볼 수 있었다.
+
+이 글에서 만들 모델의 이름은 **HamsterLM**으로 햄스터처럼 말하는 작은 한국어 언어 모델이다. HamsterLM은 약 90M 파라미터 규모로 GPT-2 Small과 비슷한 크기다. 언어 모델을 만들기 위한 배경 지식을 먼저 살펴본 뒤, 사전학습(Pretrain)부터 미세조정(SFT), ONNX 변환, 브라우저 배포까지 전 과정을 직접 구현해볼 것이다.
+
+결과물을 미리 보고 싶다면 아래 버튼을 눌러 데모를 확인할 수 있다. 다만, 로컬에 모델을 다운로드해서 돌리는 방식이기 때문에 디바이스 성능에 따라 로딩과 응답 속도가 느릴 수 있다. 모델 용량이 작지 않기 때문에 가급적 와이파이 환경에서 이용하는 것을 추천한다.
+
+<MaterialDemo id="building-llm/HamsterLMDemo" />
+
+## 언어 모델은 어떻게 작동할까?
+
+우리가 사용하는 LLM은 기본적으로 언어 모델의 한 종류다. 언어 모델이라 표현하면 마치 "언어의 규칙을 이해하는 똑똑한 프로그램" 같은 느낌이 들지만 실제로는 "다음 글자를 예측하는 프로그램"에 가깝다. 먼저 언어 모델은 어떻게 작동하는지, 그리고 어떻게 다음 글자를 잘 맞힐 수 있는지부터 알아보자.
+
+### 언어 모델의 기본 아이디어
+
+스마트폰 키보드의 자동완성 기능을 떠올려보자. "오늘 날씨가"를 입력하면 "좋다", "흐리다", "덥다" 같은 후보가 나타난다. 이것이 바로 언어 모델의 기본 원리다. 조금 더 수학적으로 표현하면 이전 글자들이 주어졌을 때 다음 글자가 나올 확률을 계산하는 것이다.
+
+예를 들어 "나는 오늘"이라는 텍스트가 주어졌을 때 다음 글자로 " "(공백) 혹은 "도", "은" 등이 올 수 있다.
+
+<MaterialDemo id="building-llm/NextTokenDiagram" />
+
+이렇게 한 글자씩 예측하고 예측한 글자를 다시 입력에 붙여서 또 다음 글자를 예측하는 과정을 반복하면 문장이 만들어진다. 이처럼 예측한 글자를 하나씩 이어붙이며 생성하는 방식을 <strong>자기회귀적 생성(Autoregressive Generation)</strong>이라 부른다. ChatGPT가 답변을 쓸 때 글자가 하나씩 나타나는 것도 이 때문이다.
+
+### 규칙을 스스로 배우는 프로그램
+
+주어진 문장을 완성시키기 위해선 **다음 글자를 예측하는 프로그램**을 만들어야 한다. 그런데 어떻게 만들 수 있을까? `if-else`로 "나는" 다음에는 "오늘"이 온다는 규칙을 하나씩 짤 수는 없다. 언어는 너무 복잡하고 예외도 끝이 없어서 사람이 규칙을 직접 정의하는 것은 사실상 불가능하다. 대량의 데이터는 이 문제를 해결하는 열쇠다. 규칙을 직접 짜는 대신 대량의 텍스트 데이터를 보고 그 안에서 **패턴과 확률을 스스로 찾아내는** 프로그램을 만드는 것이다. 이것을 <strong>신경망(Neural Network)</strong>이라 부른다.
+
+신경망은 어떻게 동작할까? 신경망은 인간의 뇌 구조에서 영감을 받았다. 뇌의 뉴런이 전기 신호를 받아 다른 뉴런에 전달하듯 인공 신경망의 **뉴런**도 숫자를 입력받아 계산하고 다음 뉴런에 전달한다. 뉴런 하나가 하는 일은 굉장히 단순하다.
+
+1. 여러 숫자를 입력받는다
+2. 각 입력에 가중치를 곱한다
+3. 모두 더하고 편향을 추가한다
+4. 활성화 함수를 통과시켜 결과를 내보낸다
+
+수식으로 쓰면 `y = f(w₁x₁ + w₂x₂ + ... + wₙxₙ + b)`로 표현할 수 있다.
+
+갑자기 수식이 나와서 당황스러울 수 있지만 뜯어보면 단순히 **곱하고 더하는 것이 전부**다. 위 수식에서 `w`는 가중치, `b`는 편향, `f`는 활성화 함수다. 활성화 함수는 곱하고 더한 결과를 한 번 "구부려주는" 비선형 함수다. 이게 없으면 곱하고 더하기(선형 계산)를 아무리 겹쳐도 수학적으로 커다란 곱하고 더하기 하나로 뭉개져 버려서 층 사이에 비선형을 끼워 넣어야 층을 쌓는 의미가 생긴다. 이렇게 단순한 뉴런을 여러 개 모아 <strong>층(Layer)</strong>을 만들고 층을 여러 개 쌓으면 신경망이 된다.
+
+<MaterialDemo id="building-llm/NeuralNetworkDiagram" />
+
+뉴런 하나는 단순하지만 이것을 수천 개 연결하면 꽤 복잡한 패턴도 표현할 수 있게 된다. 여기서 핵심은 가중치와 편향 값인데, 이 값들을 잘 정하면 "나는 오늘" 다음에 나올 글자 중 가장 적절한 것을 예측할 수 있다. 그런데 이 값들은 어떻게 정할까?
+
+### 가중치와 편향은 어떻게 정할까?
+
+처음에는 무작위로 설정한다. 그러면 당연히 결과가 엉망으로 나올 것이다. "나는" 다음 글자를 예측하라고 하면 "퀡"을 내뱉는 수준이다. 하지만 걱정할 필요는 없다. 모델이 스스로 가중치와 편향을 조정하는 방법이 있기 때문이다. 이 과정을 **학습**이라 부른다. 학습은 예측, 평가, 조정의 세 단계로 이루어진다.
+
+1. **예측**: 현재 가중치로 다음 글자를 예측한다
+2. **평가**: 학습 데이터의 실제 다음 글자와 비교하여 얼마나 틀렸는지 측정한다. 이 차이를 **손실**이라 부른다
+3. **조정**: 손실이 줄어드는 방향으로 가중치를 조금씩 바꾼다
+
+여기서 "정답"이란 학습 데이터에서 실제로 다음에 나온 글자를 말한다. 물론 "나는" 다음에 올 수 있는 글자는 여러 개다. 하지만 학습 데이터에 "나는 오늘"이라는 문장이 있다면 그 시점의 정답은 " "(공백)이 된다. 다른 문장에서 "나는"이 나오면 또 다른 글자가 정답이 될 수 있다. 이렇게 수많은 문장을 반복해서 학습하면 모델은 자연스럽게 **각 글자가 나올 확률 분포**를 익히게 된다.
+
+이 과정을 수천, 수만 번 반복하면 가중치가 점점 좋아지면서 모델이 올바른 답에 가까워진다. 사람이 규칙을 알려주는 것이 아니라 데이터와 비교하며 **스스로 패턴을 찾아가는 과정**이다.
+
+가중치를 "손실이 줄어드는 방향"으로 바꾸는 방법을 **경사하강법**이라 부른다. 비유하자면, 눈을 가린 채 산에서 내려가는 것과 같다. 발밑의 경사를 느끼고, 가장 가파르게 내려가는 방향으로 한 발씩 내딛는다. 충분히 반복하면 골짜기(최솟값)에 도달할 수 있다.
+
+이 비유에는 앞으로 계속 만날 용어들이 숨어 있다. "발밑의 경사", 즉 각 가중치를 어느 쪽으로 움직여야 손실이 줄어드는지 알려주는 값이 <strong>기울기(Gradient)</strong>다. 이 기울기를 신경망의 출력 쪽에서 입력 쪽으로 거꾸로 전달하며 계산하는 알고리즘이 <strong>역전파(Backpropagation)</strong>다. 그리고 "한 발의 보폭"이 <strong>학습률(Learning Rate)</strong>이다. 보폭이 너무 크면 골짜기를 지나쳐 버리고, 너무 작으면 내려가는 데 하염없이 오래 걸린다. 뒤에서 학습 코드를 작성할 때 이 용어들이 다시 등장한다.
+
+여기까지가 신경망의 기본 원리다. 그런데 한 가지 현실적인 문제가 있다.
+
+### 뉴런이 수억 개면?
+
+신경망의 뉴런은 "숫자를 곱하고 더하는 것"이 전부였다. 그런데 실제 신경망에는 가중치와 편향이 수억\~수천억 개에 달한다. 이 글에서 만들 HamsterLM도 약 9천만 개다. 이걸 하나씩 for 루프로 돌리면 너무 느리다. 대량의 연산을 한 번에 처리하는 방법이 필요한데 **행렬 연산**을 이용할 수 있다.
+
+예를 들어, 입력 3개를 받는 뉴런 2개가 있다고 하자. 각 뉴런의 "곱하고 더하기"를 따로 계산하는 대신 행렬로 묶으면 한 번의 연산으로 끝난다.
+
+<MaterialDemo id="building-llm/MatrixMultiplyDiagram" />
+
+뉴런이 2개든 2000개든 행렬 곱셈 한 번이면 끝난다. 그리고 이 행렬 곱셈은 GPU가 아주 잘하는 일이다. GPU는 원래 화면의 수백만 픽셀을 동시에 계산하기 위해 만들어진 장치라서 단순한 연산을 **대량으로 병렬 처리**하는 데 특화되어 있다. 행렬 곱셈이 딱 그런 종류의 연산이기 때문에 신경망 학습에 GPU가 쓰이는 것이다.
+
+이제 신경망이 무엇인지, 어떻게 학습하는지, 어떻게 빠르게 계산하는지를 알았다. 그런데 우리가 다루고 싶은 건 **글자**인데 신경망은 **숫자**만 다룬다. 이 문제는 어떻게 해결할 수 있을까?
+
+### 컴퓨터에게 글자를 알려주려면
+
+"안녕하세요"를 신경망에 넣으려면 먼저 숫자로 바꿔야 한다. 정확히는 숫자 하나가 아니라 **숫자들의 묶음**, 즉 <strong>벡터(Vector)</strong>로 바꿔야 한다. 왜 숫자 하나로는 안 될까? "가"를 1, "나"를 2, "다"를 3이라고 두면 "가"와 "다"의 차이가 "가"와 "나"의 차이보다 2배 크다는 꼴이 되는데, 이게 무슨 의미인지 아무도 모른다. 글자 간의 "비슷함"이나 "관계"를 단일 숫자로는 표현할 방법이 없다.
+
+반면 여러 숫자를 묶어 벡터로 표현하면 이야기가 달라진다. 벡터는 공간의 한 점이라고 볼 수 있어서, 두 점 사이의 **거리**와 **방향**을 수학적으로 계산할 수 있다. 비슷한 글자는 가까이, 다른 글자는 멀리 두면 "유사성"이라는 추상적인 개념이 공간적 거리로 표현된다. 실제로 신경망 안에서 오가는 모든 값은 벡터다. 입력, 뉴런의 출력, 다음 층으로 넘겨지는 중간값, 최종 예측까지 전부. 신경망이 하는 일을 한 문장으로 요약하면 **벡터를 변환하고 비교하는 것**이다.
+
+그래서 언어 모델을 만드는 첫 단계는 "글자를 좋은 벡터로 바꾸는 것"이다. 가장 단순한 방법은 <strong>원-핫 인코딩(One-hot Encoding)</strong>이다. 사전에 "가", "나", "다" 세 글자만 있다고 하면 다음과 같이 표현할 수 있다.
+
+```
+"가" → [1, 0, 0]
+"나" → [0, 1, 0]
+"다" → [0, 0, 1]
+```
+
+직관적이고 이해하기 쉽지만 두 가지 큰 문제가 있다.
+
+1. **낭비가 심하다**: 사전에 글자가 1만 개라면 글자 하나를 표현하는 데 1만 차원의 벡터가 필요하다.
+2. **관계를 표현하지 못한다**: "가"와 "나"의 거리, "가"와 "다"의 거리가 모두 동일하다. 실제로 비슷하게 쓰이는 글자도 완전히 다른 존재처럼 취급된다.
+
+이 문제를 해결하는 것이 <strong>임베딩(Embedding)</strong>이다. 임베딩은 각 글자를 **짧고 의미 있는 숫자 벡터**로 변환한다.
+
+원-핫 인코딩과 비교해보자. 원-핫에서 "가"는 `[1, 0, 0]`이고 "나"는 `[0, 1, 0]`이다. 두 벡터 사이의 거리는 항상 같다. 반면 임베딩에서는 "가"가 `[0.2, -0.5, 0.8, 0.1]`, "나"가 `[0.3, -0.4, 0.7, 0.2]`처럼 표현될 수 있다. 숫자가 비슷하면 벡터 공간에서 가까이 위치하는데, 이는 **두 글자가 비슷한 맥락에서 쓰인다**는 뜻이다.
+
+중요한 점은 이 숫자들을 사람이 정하지 않는다는 것이다. 임베딩 벡터의 각 값도 앞서 본 가중치처럼 학습 과정에서 모델이 스스로 찾아낸다. 처음에는 무작위지만, 학습이 진행되면서 비슷한 역할을 하는 글자들의 벡터가 자연스럽게 가까워진다.
+
+<MaterialDemo id="building-llm/EmbeddingDiagram" />
+
+임베딩 덕분에 글자를 의미 있는 벡터로 바꿀 수 있게 됐다. 하지만 임베딩 벡터는 글자 하나의 의미만 담고 있을 뿐 **주변에 어떤 글자가 있는지**는 모른다.
+
+### 어떤 글자에 집중할까?
+
+임베딩이 주변을 모른다는 문제를 좀 더 구체적으로 살펴보자. 이전 한 글자만 보고 다음 글자를 예측한다면 "나" 다음에는 "는"이 올 확률이 높다는 것 정도는 알 수 있다. 하지만 긴 문맥이 되면 이야기가 달라진다. **이전의 모든 글자를 함께 고려**해야 하고, 그중 어떤 부분이 예측에 중요한지도 판단해야 한다. 다음 문장을 살펴보자.
+
+> "영희가 철수에게 선물을 줬다. **그는** 고마워했다."
+
+"그는" 다음에 올 단어를 예측하려면 "그는"이 누구를 가리키는지 알아야 한다. 한국어 사용자라면 "그는"이 선물을 받은 "철수"를 가리킨다는 것을 문맥에서 자연스럽게 알 수 있다. 하지만 "그는"의 임베딩 벡터에는 "나는 철수를 가리키고 있다"는 정보가 없다. 임베딩은 글자 하나만 알 뿐이다.
+
+이 문제를 풀기 위해 2017년 구글이 "Attention Is All You Need"[^1] 논문에서 <strong>트랜스포머(Transformer)</strong>라는 새로운 아키텍처를 제안했다. 핵심 아이디어는 단순하다. 각 글자가 문장 속 다른 글자들을 살펴보고 지금 자기에게 중요한 글자에 더 많이 <strong>집중(Attention)</strong>하는 것이다.
+
+스터디 그룹에 비유하면 이해하기 쉽다. 세 명의 학생 A, B, C가 함께 시험 공부를 하고 있다고 하자. A는 영어를 잘하지만 미적분에 약하고, B는 미적분을 잘하고, C는 통계를 잘한다. 그리고 각자 자기만의 비법 노트를 갖고 있다. A가 "미적분을 어떻게 풀지?"라고 궁금해한다. 그러면 A는 B와 C를 살펴본다. B는 미적분 전문가니까 관련성이 높고 C는 통계 전문이라 관련성이 낮다. A는 B의 노트를 80%, C의 노트를 20% 비율로 참고해서 자기 지식을 보강한다.
+
+<MaterialDemo id="building-llm/StudyGroupDiagram" />
+
+같은 일이 B와 C에게도 동시에 일어날 수 있다. B도 자기가 궁금한 것에 대해 A와 C를 살펴보고 C도 마찬가지다. **모든 학생이 동시에 질문자이면서 답변자**인 것이다. Attention도 정확히 이 구조다. 각 글자가 자기 임베딩 벡터로부터 세 가지 벡터를 만든다.
+
+- **Query**: 스터디 비유에서 "미적분 어떻게 풀지?"에 해당한다. 이 글자가 지금 **찾고 있는 정보**다.
+- **Key**: "나는 미적분 잘해"에 해당한다. 이 글자가 다른 글자에게 **제공할 수 있는 정보**다.
+- **Value**: 실제 노트에 해당한다. 이 글자가 가진 **실제 정보**다.
+
+같은 임베딩에서 출발하지만 서로 다른 가중치 행렬을 곱하기 때문에 각각 다른 역할을 맡게 된다. 앞서 본 "영희가 철수에게 선물을 줬다. 그는 고마워했다."에서 "그는"이 누구를 가리키는지 알아내는 과정을 예로 들어 살펴보자. Attention의 과정을 정리하면 세 단계다.
+
+1. **관련성 점수 매기기**: "그는"의 Q(질문)와 각 단어의 K(전문 분야)를 비교한다. "철수"의 K와는 점수가 높고, "영희"의 K와는 상대적으로 낮을 것이다.
+2. **점수를 비율로 바꾸기**: 점수를 합이 100%가 되는 비율로 변환한다. 예를 들어 "철수" 60%, "영희" 25%, "그는" 15% 같은 식이다. 이 변환을 **softmax**라 부른다.
+3. **비율에 따라 정보 섞기**: 각 단어의 V(노트)를 위 비율로 섞는다. "철수"의 정보가 60%나 들어오니, "그는"의 벡터는 이제 "철수를 가리키는 대명사"라는 문맥을 갖게 된다.
+
+<MaterialDemo id="building-llm/AttentionProcessDiagram" />
+
+이 과정이 모든 단어에 대해 동시에 일어난다. 핵심은 어떤 단어의 Q, K, V를 어떻게 만들지를 사람이 정하는 것이 아니라 **데이터를 보며 모델이 스스로 찾아낸다**는 점이다. 임베딩에서 Q, K, V를 뽑아내는 가중치 행렬이 학습 대상이고, 이 값이 좋아질수록 관련성 점수도 정확해진다.
+
+여기서 한 걸음 더 들어가 보자. 스터디 그룹에서 한 명의 학생이 한 가지 전문 분야만 갖고 있으면, "누가 이걸 잘 아는가?"라는 한 가지 기준으로만 관련성을 매길 수 있다. 하지만 "나는 서울에서 김치를 먹었다"에서 "먹었다"를 이해하려면 누가 먹었는지("나는"), 무엇을("김치를"), 어디서("서울에서")를 동시에 파악해야 한다. 그래서 Q, K, V를 **여러 세트** 둔다. 주어-동사 관계를 보는 그룹, 목적어 관계를 보는 그룹, 장소 관계를 보는 그룹처럼 **서로 다른 관점의 스터디 그룹을 동시에 운영하는 것**과 같다. 각 세트를 "헤드"라 부르고 이것을 **Multi-Head Attention**이라 한다. 각 헤드가 따로 계산한 결과는 마지막에 하나로 이어 붙인 뒤 한 번 더 가중치를 곱해 종합한다. 여러 스터디 그룹에서 얻은 결론을 모아 최종 답안을 정리하는 셈이다.
+
+마지막으로 제약이 하나 더 필요하다. 지금까지의 Attention에서는 모든 글자가 모든 글자를 참조할 수 있었다. 하지만 우리는 "다음 글자 예측"을 하고 있다. "나는 오늘"에서 "오" 다음 글자를 맞히는데 "늘"을 미리 볼 수 있으면 답을 보고 시험 치는 것과 같다. 그래서 각 글자는 **자기 자신과 이전 글자만 참조**할 수 있도록 미래 글자의 관련성 점수를 강제로 -∞로 만든다. 점수가 -∞이면 비율로 변환(softmax)했을 때 0%가 되어 해당 글자의 정보가 전혀 섞이지 않는다. 이것을 **Causal Mask**라 부른다.
+
+### 글자의 순서를 알려주려면
+
+Attention 과정을 다시 생각해보자. Q와 K를 비교해서 관련성 점수를 매기는 과정 어디에도 "철수"가 첫 번째 단어이고 "그는"이 마지막 단어라는 정보가 없었다. 단어의 순서를 뒤섞어도 결과가 같다. 하지만 "나는 너를 좋아한다"와 "너는 나를 좋아한다"는 전혀 다른 의미다. 순서를 알려줘야 한다.
+
+가장 단순한 방법은 <strong>위치 임베딩(Positional Embedding)</strong>이다.[^3] 각 위치에 고유한 벡터를 부여하고 임베딩에 더한다. 1번째 위치의 글자에는 "1번 벡터"를, 2번째 위치의 글자에는 "2번 벡터"를 더하는 식이다. 같은 글자 "나"라도 1번째에 있을 때와 3번째에 있을 때 서로 다른 위치 벡터가 더해지므로 최종 벡터가 달라진다. 위치 임베딩 값도 가중치와 마찬가지로 모델이 학습하면서 스스로 찾아낸다.
+
+하지만 이 방식에는 한계가 있다. 학습할 때 1\~128번째 위치까지만 배웠다면 129번째 위치가 등장했을 때 어떻게 해야 할지 모른다. 그리고 "3번째 글자와 5번째 글자의 간격이 2"라는 **상대적인 거리** 정보를 직접 표현하지 못한다.
+
+이 문제를 해결하기 위해 최근 LLM들은 <strong>RoPE(Rotary Position Embedding)</strong>라는 방식을 쓴다. 위치 임베딩이 "각 위치에 고유 벡터를 더하는 것"이었다면, RoPE는 위치에 따라 벡터를 **회전**시키는 것이다. 시계 바늘을 생각하면 된다. 1번째 위치의 벡터는 10도, 2번째는 20도, 3번째는 30도씩 회전시킨다. 핵심은 **두 글자 사이의 간격이 같으면 회전 각도의 차이도 같다**는 점이다. 1번째와 3번째의 각도 차이가 20도인데, 2번째와 4번째의 각도 차이도 20도다. "두 칸 떨어져 있다"는 관계가 절대 위치와 상관없이 일정하게 표현되는 것이다. 이 성질이 Attention과 만나면 딱 맞아떨어진다. Attention은 Q와 K를 비교해서 관련성 점수를 매기는데, 회전된 두 벡터를 비교하면 각자의 절대 각도는 상쇄되고 **각도 차이만 점수에 남는다**. 결국 "몇 번째 위치인가"는 지워지고 "서로 몇 칸 떨어져 있는가"만 반영된다.
+
+이게 왜 좋을까? 언어에서 중요한 건 대부분 **상대적인 관계**다. "나는 너를 좋아한다"에서 "나는"과 "너를"의 관계는 문장이 어디서 시작되든 똑같이 "주어 다음 목적어"다. RoPE는 이런 상대적 관계를 자연스럽게 담아낸다. 덧붙여 학습해야 할 파라미터도 없고, 위치별 벡터 테이블이 없으니 긴 문맥으로 확장하기에도 위치 임베딩보다 유리하다. 다만 만능은 아니다. 학습 범위를 크게 벗어난 길이에서는 성능이 떨어지기 때문에 실제 LLM들은 별도의 컨텍스트 확장 기법을 함께 쓴다.
+
+<MaterialDemo id="building-llm/PositionEmbeddingDiagram" />
+
+### 중간 정리
+
+지금까지의 흐름을 되짚어보자.
+
+1. 다음 글자를 예측하는 프로그램을 만들고 싶다
+2. 규칙을 직접 짤 수 없으니 데이터에서 스스로 패턴을 찾아내는 **신경망**을 쓴다
+3. 신경망의 대량 연산은 **행렬 곱셈**으로 묶어서 GPU로 빠르게 처리한다
+4. 글자를 신경망에 넣으려면 숫자로 바꿔야 한다 → **임베딩**
+5. 임베딩만으로는 문맥을 모른다 → **Attention**으로 주변 글자의 정보를 가져온다
+6. Attention에 순서 정보가 없다 → <strong>위치 임베딩(RoPE)</strong>으로 보충한다
+7. Attention이 가져온 정보를 각 글자가 정리하도록 **MLP**(층을 쌓은 작은 신경망)를 뒤에 붙인다. 이 "Attention + MLP" 한 묶음이 **Transformer Block**이고, 블록을 여러 번 쌓은 것이 곧 모델이다
+
+이것들이 HamsterLM을 구성하는 핵심 부품이다. 이 외에도 학습을 안정시키기 위한 몇 가지 보조 장치가 있는데, 코드를 작성하면서 필요할 때 설명하겠다. 전체 구조는 다음 다이어그램과 같다.
+
+<MaterialDemo id="building-llm/TransformerBlockDiagram" />
+
+## 모델 만들기
+
+이제부터 실제로 HamsterLM을 만들어보자. 접근 방식은 **가장 단순한 구조에서 출발해 하나씩 개선해 나가는** 것이다. 각 단계마다 "왜 이렇게 선택했는가?", "뭐가 부족해서 개선이 필요한가?"를 따져가면서 만든다. 실제 LLM을 만드는 엔지니어가 겪을 법한 사고 과정을 그대로 따라가보는 것이 목표다.
+
+전체 프로젝트는 `hamsterlm/` 패키지에 역할별로 파일을 나눠뒀고 코드는 [저장소](https://github.com/kciter/HamsterLM)에서 볼 수 있다. 글에서는 핵심 부분만 짚고 넘어간다.
+
+### 어떤 크기로 만들까?
+
+가장 먼저 결정할 것은 **모델 크기**다. 크면 클수록 좋다고 하지만 현실적인 제약이 있다. 수십억\~수천억 파라미터를 가진 대형 모델은 학습에 수십\~수천 개의 GPU가 필요하다. 우리가 가진 자원은 Colab의 A100 한 대가 전부다. 그렇다고 너무 작으면 언어 자체를 제대로 익히지 못한다.
+
+적당한 타협점은 **100M(1억) 파라미터** 언저리다. 2019년에 나온 GPT-2 Small과 비슷한 크기로, Colab A100 한 대에서 한 시간 안에 학습을 끝낼 수 있는 규모다. 학습이 끝나면 한국어로 어느 정도 말이 통하는 수준이 된다.
+
+그럼 100M짜리 모델을 만들려면 구체적으로 무엇을 결정해야 할까? 모델의 크기와 학습 방식을 정하는 여러 설정값이 필요한데, 이렇게 사람이 직접 정하는 값들을 **하이퍼파라미터**라 부른다. 모델이 학습을 통해 스스로 찾아내는 가중치나 편향 같은 값은 그냥 파라미터고, 그 상위에서 사람이 정하는 값이라 "하이퍼"가 붙었다. 그중에서도 파라미터 수를 결정하는 하이퍼파라미터는 크게 세 가지다.
+
+- **임베딩 차원**(`n_embd`): 벡터의 크기. 클수록 풍부한 정보를 담을 수 있다
+- **헤드 수**(`n_head`): 동시에 볼 수 있는 관점의 개수. `n_embd`를 `n_head`로 나눈 값이 각 헤드가 다루는 차원(`head_dim`)이다
+- **블록 수**(`n_layer`): 배경 지식 마지막에 정리한 "Attention + MLP" 묶음, 즉 Transformer Block을 몇 번 쌓을지. 깊을수록 복잡한 패턴을 학습할 수 있다
+
+GPT-2 Small이 쓴 값을 그대로 가져오면 `n_embd=768, n_head=12, n_layer=12`다. 우리가 새로 발명할 이유는 없다.
+
+왜 이 조합이 100M 언저리인지 감을 잡아보자. 파라미터는 주로 두 곳에 모인다. **Attention의 Q, K, V 행렬**과 **MLP의 행렬**이다. 이 행렬들의 크기는 대략 `n_embd × n_embd` 꼴이라서, 임베딩 차원이 늘어나면 파라미터는 **제곱으로 불어난다**. 여기에 같은 구조의 블록을 `n_layer`번 쌓으니 그만큼 다시 곱해진다. `n_embd`를 2배로 늘리면 파라미터는 약 4배가 되고, 블록 수까지 2배 늘리면 다시 8배가 되는 식이다.
+
+정확한 공식을 외울 필요는 없다. **임베딩 차원을 키우면 파라미터가 제곱으로 늘고, 블록을 쌓으면 블록 수에 비례해 늘어난다**는 감각만 잡으면 충분하다.
+
+<MaterialDemo id="building-llm/ParameterScaleDiagram" />
+
+나머지 값들은 학습 환경에 맞게 정한다. 아래 설정에 등장하는 BPE, 특수 토큰, 패딩 같은 용어는 바로 다음 섹션들에서 하나씩 설명하니 지금은 넘어가도 좋다.
+
+```python title="hamsterlm/config.py"
+# ── 모델 하이퍼파라미터 ──
+BATCH_SIZE = 32        # 한 step에 병렬 처리할 학습 샘플 수
+MAX_SEQ_LEN = 128      # 햄스터 대화는 대부분 60~80 토큰이라 128이면 충분
+N_EMBD = 768           # 임베딩 차원 (GPT-2 small과 동일)
+N_HEAD = 12            # Attention 헤드 수 (head_dim = 768/12 = 64)
+N_LAYER = 12           # Transformer Block 반복 횟수
+DROPOUT = 0.2          # 드롭아웃 (SFT 데이터가 작으므로 0.2로 높게 설정)
+VOCAB_SIZE = 4096      # BPE 어휘 크기
+
+# ── 특수 토큰 (ChatML) ──
+PAD_ID = 0             # 패딩 (배치 내 길이 맞춤)
+BOS_ID = 1             # <|im_start|> (턴 시작)
+EOS_ID = 2             # <|im_end|>   (턴 종료, 생성 중단 신호)
+```
+
+- `MAX_SEQ_LEN = 128`: 한 번에 볼 수 있는 토큰 수. 햄스터 대화는 대부분 60\~80 토큰이라 128이면 충분하다. 이보다 더 크게 잡으면 Attention 계산량이 제곱으로 늘어나 느려진다
+- `BATCH_SIZE = 32`: **배치**는 학습 샘플 여러 개를 묶어 GPU에서 한 번에 병렬 처리하는 단위다. 클수록 학습이 빨라지지만 그만큼 메모리를 더 쓴다. 이 규모(100M 언저리, seq 128)에서 32는 A100 40GB에 여유 있게 들어가는 보수적인 값이다
+- `VOCAB_SIZE = 4096`: 너무 크면 임베딩 테이블이 파라미터 대부분을 차지하고, 너무 작으면 시퀀스가 길어진다. 한국어 소규모 모델에 적당한 값
+- `DROPOUT = 0.2`: 학습 중 뉴런 출력의 20%를 무작위로 꺼버리는 장치. 모델이 학습 데이터를 통째로 외워버리는 <strong>과적합(Overfitting)</strong>을 막는다. 데이터가 적을수록 외우기 쉬우므로, SFT 데이터가 작은 HamsterLM은 다소 높은 값을 쓴다
+
+### 텍스트를 어떻게 숫자로 바꿀까?
+
+모델이 처리할 수 있는 건 숫자뿐이다. 그래서 문장을 **토큰**이라는 단위로 쪼개고 각 토큰에 고유한 번호를 매겨야 한다. 이 과정을 담당하는 것이 <strong>토크나이저(Tokenizer)</strong>다.
+
+여기서 짚고 갈 것이 있다. 지금까지는 설명을 쉽게 하기 위해 "다음 **글자** 예측"이라 표현했지만, 정확히는 "다음 **토큰** 예측"이다. 글자는 토큰을 정하는 여러 방법 중 하나일 뿐이고, 모델은 토크나이저가 정한 토큰 단위로 세상을 본다. 그렇다면 토큰을 **어떤 단위**로 정하는 게 좋을까? 두 가지 극단부터 생각해보자.
+
+**단순한 선택 1: 글자 단위**
+
+한 글자를 하나의 토큰으로 만든다. 직관적이지만 두 가지 약점이 있다. 첫째, 문장을 표현하는 데 필요한 토큰 수, 즉 시퀀스 길이가 늘어난다. 앞서 봤듯 Attention 계산량은 시퀀스 길이의 제곱으로 늘어나므로 그만큼 느려지고, 같은 컨텍스트 길이 안에 담을 수 있는 내용도 줄어든다. 둘째, 글자 하나에는 의미가 거의 없다. "사"라는 글자는 "사과", "사람", "회사" 어디에나 등장하기 때문에 모델이 글자 조합에서 의미를 처음부터 쌓아 올려야 해서 학습 부담이 크다.
+
+**단순한 선택 2: 단어 단위**
+
+공백으로 나눈다. 영어처럼 단어 간 경계가 명확한 언어는 그럭저럭 괜찮지만 한국어는 조사가 붙어서 형태가 다양해진다. "사과", "사과가", "사과를", "사과는"이 모두 다른 토큰이 되어 어휘가 또 폭발한다. 게다가 학습 때 본 적 없는 단어가 들어오면 처리 자체가 불가능하다(OOV 문제).
+
+**타협점: BPE(Byte Pair Encoding)**
+
+양극단 사이의 타협점이 **BPE**[^6]다. 실제 LLM들이 쓰는 방식이기도 하다. 원리는 단순하다. 학습 데이터를 보면서 **자주 함께 등장하는 문자 조합을 반복적으로 합쳐서** 하나의 토큰으로 만든다. "해바라기씨"가 자주 나오면 통째로 하나의 토큰이 되고, 반대로 드문 단어는 작은 조각(서브워드)으로 쪼개진다. **자주 쓰는 건 짧게, 드문 건 조각내되 뭐든 처리 가능**한 균형이 만들어진다.
+
+ChatGPT나 Claude도 같은 원리의 토크나이저를 쓴다. 다만 그쪽은 영어 데이터가 훨씬 많아 영어 토큰이 효율적으로 압축되어 있다. HamsterLM은 학습 데이터가 전부 한국어이므로 한국어에 최적화된 토크나이저가 만들어진다.
+
+HuggingFace의 `tokenizers` 라이브러리로 BPE를 손쉽게 학습시킬 수 있다.
+
+```python title="hamsterlm/tokenizer_utils.py"
+from tokenizers import Tokenizer, models, trainers, pre_tokenizers, decoders
+
+def train_tokenizer(texts, save_path="data/tokenizer.json"):
+    tokenizer = Tokenizer(models.BPE())
+    tokenizer.pre_tokenizer = pre_tokenizers.ByteLevel(add_prefix_space=False)
+    tokenizer.decoder = decoders.ByteLevel()
+
+    trainer = trainers.BpeTrainer(
+        vocab_size=4096,
+        special_tokens=["<pad>", "<|im_start|>", "<|im_end|>"],  # [!code highlight]
+        min_frequency=2,
+    )
+    tokenizer.train_from_iterator(texts, trainer)
+    tokenizer.save(save_path)
+```
+
+### 대화의 경계는 어떻게 알려줄까?
+
+하이라이트한 `special_tokens`는 일반 텍스트에서는 절대 등장하지 않는 특수 토큰이다. 왜 필요할까? HamsterLM은 대화하는 모델이라 학습 데이터도 대화 형태다. 모델이 "어디까지가 사용자의 말이고 어디부터가 햄스터의 대답인지" 구분할 수 있어야 한다. 즉 **턴의 경계**를 알려줄 신호가 필요하다.
+
+이를 위해 OpenAI가 만든 **ChatML** 형식을 빌려왔다. 특수 토큰으로 각 턴을 감싸는 방식이다.
+
+```
+<|im_start|>user
+안녕<|im_end|>
+<|im_start|>assistant
+반가워. 볼주머니에 해바라기씨 하나 있는데 줄까?<|im_end|>
+```
+
+`<|im_start|>`는 "여기서부터 누군가의 말이 시작된다", `<|im_end|>`는 "여기서 말이 끝난다"를 뜻한다. 이 경계 덕분에 모델은 학습 중 자연스럽게 "한 턴의 끝"을 배우게 되고, 추론 시에도 `<|im_end|>`를 만나면 생성을 멈출 수 있다.
+
+학습 데이터는 JSONL 형식으로 저장한다. 각 줄이 하나의 대화다.
+
+```json
+{ "text": "<|im_start|>user\n안녕<|im_end|>\n<|im_start|>assistant\n반가워.<|im_end|>" }
+```
+
+### 학습용 데이터셋 만들기
+
+토크나이저와 데이터 포맷이 준비됐으니 PyTorch Dataset으로 감싼다. 아래 `HamsterDataset`은 햄스터 대화(SFT) 데이터용이고, 성격이 다른 사전학습용 데이터셋은 뒤의 학습 단계에서 따로 만든다. 여기서 중요한 건 **입력과 정답을 어떻게 만드느냐**다. 언어 모델은 "다음 토큰 예측"을 학습하므로, 입력을 한 칸씩 밀어서 정답으로 삼는다. 이것을 **한 칸 시프트**라 부른다.
+
+예를 들어 토큰 시퀀스 `[A, B, C, D]`가 있다면, 입력은 `[A, B, C]`, 정답은 `[B, C, D]`다. 각 위치에서 "바로 다음 토큰"이 정답이 되는 구조다.
+
+```python title="hamsterlm/dataset.py"
+class HamsterDataset(Dataset):
+    def __init__(self, path, tokenizer_path, max_len=128):
+        self.tokenizer = Tokenizer.from_file(tokenizer_path)
+        self.samples = []
+        with open(path, encoding="utf-8") as f:
+            for line in f:
+                ids = self.tokenizer.encode(json.loads(line)["text"]).ids
+                if len(ids) > max_len: ids = ids[:max_len]
+                if len(ids) >= 2: self.samples.append(ids)
+
+    def __getitem__(self, idx):
+        ids = self.samples[idx]
+        x = ids[:-1]   # 입력: 마지막 토큰 제외
+        y = ids[1:]    # 정답: 첫 토큰 제외 (한 칸 시프트)
+        return torch.tensor(x, dtype=torch.long), torch.tensor(y, dtype=torch.long)
+```
+
+여기서 Dataset은 시퀀스 하나만 돌려주고, 배치 내 길이가 서로 다른 문제는 DataLoader 쪽의 `collate_fn`에서 padding으로 해결한다. 앞서 `PAD_ID = 0`을 정해둔 이유가 여기서 드러난다.
+
+단순화한 부분도 있다. 이 방식은 user의 질문까지 포함한 대화 전체를 학습 대상으로 삼는다. 실무 SFT에서는 보통 assistant 응답 부분에만 손실을 계산해서 모델이 질문하는 법까지 배우지 않도록 하는데, HamsterLM은 구현을 단순하게 유지하기 위해 전체를 학습한다.
+
+데이터를 모델에 넣는 형식은 여기까지다. 실제로 어떤 데이터를 채울지는 모델을 완성한 뒤 정한다. 이제 모델 내부를 하나씩 만들어볼 차례다. Transformer Block 안에 들어갈 부품들을 순서대로 살펴보자.
+
+### 위치 정보를 어떻게 넣을까?
+
+Attention은 그대로 두면 단어의 순서를 모른다. 가장 단순한 방법은 GPT-2가 쓴 **학습된 위치 임베딩**이다. 구현은 간단하지만, 앞서 짚었듯 학습 범위 밖의 위치에 대응하지 못하고 상대적인 거리도 직접 표현하지 못한다. 그래서 최근 LLM들이 쓰는 <strong>RoPE(Rotary Position Embedding)</strong>를 선택한다. 배경 지식에서 시계 바늘 비유로 살펴봤던 바로 그 방법이다. 위치마다 Q와 K 벡터를 일정 각도로 회전시켜서 "거리가 같으면 각도 차이도 같다"는 성질을 만들어낸다.
+
+이제 코드로 옮겨보자. 원리를 간단히 다시 정리하면, 벡터의 짝수/홀수 인덱스를 쌍으로 묶어 2차원 평면의 점으로 본다. 그리고 위치 `t`에 대해 정해진 각도(`tθ`)만큼 회전한다. 이때 아래 코드의 `freqs`가 차원 쌍마다 **서로 다른 회전 속도**를 부여한다. 어떤 쌍은 시침처럼 천천히, 어떤 쌍은 초침처럼 빠르게 돌게 해서, 가까운 거리부터 먼 거리까지 다양한 스케일의 위치 관계를 표현하는 것이다. 회전 각도는 학습 중에 바뀌지 않으니, **cos/sin 값을 미리 계산**해서 재사용하면 된다.
+
+```python title="hamsterlm/model.py"
+def precompute_rope(dim, max_seq_len, theta=10000.0):
+    """RoPE에 사용할 cos/sin 테이블을 미리 계산한다.
+
+    Args:
+        dim: head_dim (= n_embd // n_head). 각 헤드 내에서 회전을 적용할 차원.
+        max_seq_len: 미리 계산할 최대 위치 수.
+        theta: 주파수 기저. 10000은 원논문(RoFormer) 기본값.
+    """
+    freqs = 1.0 / (theta ** (torch.arange(0, dim, 2).float() / dim))
+    t = torch.arange(max_seq_len)
+    angles = torch.outer(t, freqs)  # (max_seq_len, dim/2)
+    return angles.cos(), angles.sin()
+```
+
+그리고 실제로 벡터를 회전시키는 함수가 `apply_rope`다. `x1 * cos - x2 * sin`과 `x1 * sin + x2 * cos`는 고등학교에서 본 **2차원 회전 행렬**의 전개식이다.
+
+```python title="hamsterlm/model.py"
+def apply_rope(x, cos, sin):
+    """RoPE를 Q 또는 K에 적용한다.
+
+    짝수/홀수 인덱스를 쌍으로 묶어 2D 회전을 적용하는 원리.
+    x: (B, n_head, T, head_dim)
+    """
+    T = x.shape[2]
+    cos = cos[:T].unsqueeze(0).unsqueeze(0)
+    sin = sin[:T].unsqueeze(0).unsqueeze(0)
+    x1 = x[..., ::2]   # 짝수 인덱스
+    x2 = x[..., 1::2]  # 홀수 인덱스
+    rotated = torch.stack([x1 * cos - x2 * sin, x1 * sin + x2 * cos], dim=-1)
+    return rotated.flatten(-2)
+```
+
+구현상의 선택도 하나 있었다. **원래 RoPE 논문과 LLaMA 공식 구현 등 일부 구현은 복소수(complex) 자료형으로 회전을 표현한다.** 수학적으로는 실수 cos/sin 구현과 같지만 코드가 훨씬 간결해진다. 하지만 `torch.complex64` 같은 복소수 텐서는 ONNX(모델 교환 포맷) 변환 시 지원이 불완전하다. HamsterLM의 목표 중 하나가 브라우저 배포이므로 이건 양보할 수 없는 문제다. 그래서 코드는 다소 길어지지만 어디서나 돌아가는 **실수 cos/sin 구현**을 택했다.
+
+### Attention을 어떻게 코드로 옮길까?
+
+배경 지식에서 Attention의 3단계(점수 → 비율 → 섞기)를 살펴봤다. 이제 이걸 코드로 옮기면 된다. 직접 구현한다면 아래처럼 쓸 수 있다.
+
+```python
+# Attention 수동 구현 (참고용)
+scores = q @ k.transpose(-2, -1) / math.sqrt(head_dim)  # 1. 점수
+scores = scores.masked_fill(mask == 0, float('-inf'))    # Causal Mask
+probs = F.softmax(scores, dim=-1)                         # 2. 비율
+out = probs @ v                                           # 3. 섞기
+```
+
+`@`는 Python의 행렬 곱셈 연산자이고, `masked_fill`이 미래 위치의 점수를 -∞로 바꾸는 Causal Mask다. 점수를 `√head_dim`으로 나누는 부분만 처음 보는데, 내적 값이 지나치게 커져 학습이 어려워지는 것을 막는 스케일링이다.[^2] 원리는 정확하다. 하지만 실제로 이렇게 돌리면 문제가 있다. 시퀀스 길이가 길어지면 중간 행렬(`q @ k.T`)의 크기가 **길이의 제곱**으로 커져서 메모리와 속도 모두 부담이 된다. 긴 시퀀스일수록 Attention이 병목이 되는 이유다.
+
+다행히 PyTorch 2.0부터 `F.scaled_dot_product_attention`이라는 내장 함수가 제공된다. 내부에서 **Flash Attention** 같은 최적화가 자동 적용되어 훨씬 빠르고 메모리도 덜 쓴다. 원리는 동일하니 이걸 쓰면 된다.
+
+고민할 점도 하나 더 있다. 아래 코드에 등장하는 `nn.Linear`는 배경 지식에서 본 "가중치를 곱하고 더하는 층"의 PyTorch 구현체로, 임베딩에서 Q, K, V를 뽑아내는 것도 결국 이 Linear 층이 하는 일이다. 그렇다면 **Q, K, V를 각각 만드는 Linear 층을 세 개 두는 것**과 **하나의 큰 Linear로 한 번에 계산한 뒤 쪼개는 것** 중 어느 쪽이 나을까? 연산은 같지만 후자가 GPU에서 더 효율적이다. 세 번의 행렬 곱셈보다 한 번의 큰 행렬 곱셈이 병렬화가 잘 되기 때문이다. 그래서 `3 * n_embd` 크기의 Linear 하나로 묶는다.
+
+여기에 앞서 만든 RoPE를 Q와 K에 적용하는 단계만 추가하면 된다. 코드를 읽기 전에 약자 하나만 짚고 가자. 딥러닝 코드에서 관용적으로 쓰는 `B, T, C`는 각각 **배치 크기**(한 번에 처리하는 시퀀스 수), **시퀀스 길이**(토큰 수), **임베딩 차원**을 뜻한다.
+
+```python title="hamsterlm/model.py"
+class CausalSelfAttention(nn.Module):
+    def __init__(self, n_embd, n_head, max_seq_len, dropout):
+        super().__init__()
+        assert n_embd % n_head == 0
+        self.n_head = n_head
+        self.head_dim = n_embd // n_head
+        self.dropout = dropout
+
+        # Q, K, V를 한 번에 계산 (효율을 위해 하나의 행렬로 합침)
+        self.c_attn = nn.Linear(n_embd, 3 * n_embd, bias=False)
+        self.c_proj = nn.Linear(n_embd, n_embd, bias=False)
+        self.resid_dropout = nn.Dropout(dropout)
+
+        # RoPE cos/sin 테이블을 버퍼로 등록 (학습 파라미터 아님)
+        cos, sin = precompute_rope(self.head_dim, max_seq_len)
+        self.register_buffer("rope_cos", cos)
+        self.register_buffer("rope_sin", sin)
+
+    def forward(self, x):
+        B, T, C = x.size()
+        q, k, v = self.c_attn(x).split(C, dim=2)
+        q = q.view(B, T, self.n_head, self.head_dim).transpose(1, 2)
+        k = k.view(B, T, self.n_head, self.head_dim).transpose(1, 2)
+        v = v.view(B, T, self.n_head, self.head_dim).transpose(1, 2)
+
+        # RoPE는 Q와 K에만 적용한다 [!code highlight]
+        q = apply_rope(q, self.rope_cos, self.rope_sin)  # [!code highlight]
+        k = apply_rope(k, self.rope_cos, self.rope_sin)  # [!code highlight]
+
+        # 최적화된 Attention 커널 자동 선택, is_causal=True로 미래 마스킹까지 한 번에
+        y = F.scaled_dot_product_attention(
+            q, k, v,
+            is_causal=True,
+            dropout_p=self.dropout if self.training else 0.0,
+        )
+
+        y = y.transpose(1, 2).contiguous().view(B, T, C)
+        y = self.resid_dropout(self.c_proj(y))
+        return y
+```
+
+하이라이트된 줄에서 RoPE를 **Q와 K에만** 적용한다는 점이 중요하다. Value는 "섞여서 최종 벡터가 될 정보 자체"인데 여기에 회전을 가하면 정보가 왜곡된다. 위치 정보는 어디까지나 "누가 누구와 관련 있는지 계산하는 단계"에만 필요하고, Q와 K가 그 역할을 맡는다.
+
+`forward`의 마지막 두 줄은 헤드들을 다시 종합하는 부분이다. `view(B, T, C)`가 12개 헤드의 결과를 하나로 이어 붙이고, `c_proj`가 한 번 더 변환해 마무리한다. 배경 지식에서 말한 "여러 스터디 그룹의 결론을 종합하는" 단계다.
+
+또한 Causal Mask도 `is_causal=True` 플래그 한 줄로 끝난다. 직접 `tril` 행렬을 만들어 마스킹할 필요가 없다.
+
+아래 데모에서 토큰을 클릭하면 각 토큰이 어디에 얼마나 집중하는지, 그리고 Causal Mask가 미래 토큰을 어떻게 차단하는지 직접 확인할 수 있다.
+
+<MaterialDemo id="building-llm/AttentionVisualizerDemo" />
+
+### 가져온 정보를 어떻게 가공할까?
+
+Attention이 "다른 토큰에서 정보를 가져오는 과정"이라면, 그다음 단계는 **가져온 정보를 각 토큰이 혼자서 정리하는 과정**이다. 이 역할은 **MLP**(Multi-Layer Perceptron, 다층 퍼셉트론)가 맡는다. 이름이 낯설 수 있지만 새로운 부품이 아니다. 배경 지식 첫머리에서 본 "뉴런을 층으로 쌓은 기본 신경망"이 바로 MLP다. 가장 단순한 MLP는 `Linear → 활성화 함수 → Linear` 형태다. 2017년 원조 Transformer 논문은 활성화 함수로 `ReLU`를 썼고, GPT 계열은 이를 `GELU`[^5]로 바꿨다. 이 정도 구조만으로도 충분히 작동한다.
+
+하지만 최근 LLM들은 거의 예외 없이 게이트 구조의 MLP로 갈아탔다. LLaMA와 Mistral은 **SwiGLU**를 쓰고, Gemma는 사촌 격인 GeGLU를 쓴다. 왜일까? 핵심은 **게이트 메커니즘**이다. 입력을 두 갈래로 보내서 한쪽은 "얼마나 통과시킬지 결정하는 문지기"(게이트), 다른 쪽은 "실제 정보"로 쓰고, 둘을 곱한다. 게이트 값이 0에 가까우면 해당 뉴런이 "꺼지고", 1에 가까우면 "켜진다". 불필요한 뉴런이 스스로 억제되어 같은 파라미터 수에서 더 나은 성능을 낸다.
+
+```python title="hamsterlm/model.py"
+class SwiGLU(nn.Module):
+    def __init__(self, n_embd, dropout):
+        super().__init__()
+        # 기존 GELU MLP의 hidden = 4 * n_embd (= 3072)에서
+        # Linear가 2→3개로 늘어나므로, 파라미터 수를 맞추기 위해
+        # hidden = 4 * n_embd * 2/3 (= 2048)로 줄인다.
+        hidden = ((int(4 * n_embd * 2 / 3) + 7) // 8) * 8
+        self.w1 = nn.Linear(n_embd, hidden, bias=False)  # gate projection
+        self.w2 = nn.Linear(hidden, n_embd, bias=False)   # down projection
+        self.w3 = nn.Linear(n_embd, hidden, bias=False)   # up projection
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, x):
+        # SiLU(= Swish) 활성화를 gate로 사용하여 up projection을 제어
+        return self.dropout(self.w2(F.silu(self.w1(x)) * self.w3(x)))
+```
+
+`F.silu(self.w1(x)) * self.w3(x)` 부분이 핵심이다. `w1`로 만든 벡터에 SiLU를 적용한 게이트 값과 `w3`로 만든 정보 벡터를 **원소별로 곱한다**. 그 결과를 `w2`로 원래 크기로 되돌린다.
+
+Linear가 2개에서 3개로 늘어나면 파라미터가 1.5배가 될 것 같지만, 그만큼 중간 차원(`hidden`)을 2/3로 줄여서 총 파라미터는 GELU 방식과 비슷하게 맞춘다. `hidden`을 8의 배수로 반올림하는 건 GPU 텐서 연산이 8의 배수 차원에서 가장 효율적이기 때문이다.
+
+### 값의 스케일은 어떻게 유지할까?
+
+신경망 학습에서는 층을 거치면서 값이 지나치게 커지거나 작아지는 일이 흔하다. 이게 계속 쌓이면 학습이 불안정해지거나 아예 멈춘다. 그래서 중간중간 <strong>정규화(Normalization)</strong>를 걸어 값의 스케일을 일정하게 유지한다.
+
+가장 대중적인 선택은 **LayerNorm**이다. 평균을 빼고(중앙 정렬), 분산으로 나눈다(스케일 정렬). 그런데 LLaMA 계열은 **RMSNorm**으로 바꾸었다. RMSNorm은 **평균을 빼는 중앙 정렬을 아예 생략**하고 RMS(제곱평균제곱근)로만 나눈다. 연산이 단순해지는 만큼 빨라지고, 의외로 학습 안정성도 비슷하거나 더 낫다고 보고되어 있다. 단순한 게 결국 이겼다는 얘기다.
+
+```python title="hamsterlm/model.py"
+class RMSNorm(nn.Module):
+    def __init__(self, dim, eps=1e-6):
+        super().__init__()
+        self.eps = eps
+        self.weight = nn.Parameter(torch.ones(dim))  # 학습되는 스케일 값 (buffer와 달리 학습 대상)
+
+    def forward(self, x):
+        # LayerNorm: (x - mean) / sqrt(var + eps) * weight + bias
+        # RMSNorm:   x / sqrt(mean(x²) + eps) * weight   (평균 빼기 없음, bias 없음)
+        norm = torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + self.eps)
+        return x * norm * self.weight
+```
+
+`torch.rsqrt`는 `1/√x`를 한 번에 계산하는 함수다. `sqrt`로 제곱근을 먼저 구하고 나눗셈을 하는 대신, GPU의 전용 인스트럭션으로 한 번에 계산해 더 빠르다.
+
+### 부품을 한 블록으로 묶기
+
+이제 Attention과 MLP를 하나의 블록으로 합친다. 가장 단순하게는 이렇게 쓸 수 있다.
+
+```python
+# 가장 단순한 블록 (참고용)
+def forward(self, x):
+    x = self.attn(x)
+    x = self.mlp(x)
+    return x
+```
+
+그런데 이렇게 블록을 12개 쌓으면 문제가 생긴다. 층이 깊어질수록 **학습 신호(gradient)가 뒤로 전달되면서 점점 희미해진다**. 깊은 신경망의 고질적인 문제다.
+
+해결책은 간단하다. **입력을 그대로 출력에 더하는** 경로를 만들어주면 된다. 이걸 <strong>Residual Connection(잔차 연결)</strong>이라 부른다. 변환된 결과에 원본을 얹는 것뿐이지만, 이 "건너뛰는 경로" 덕에 학습 신호가 아무리 깊은 층이라도 변환 없이 바로 전달될 수 있다.
+
+또 하나, 정규화를 **Attention/MLP의 앞에 두는지 뒤에 두는지**도 선택이다. 원래 Transformer 논문은 뒤에 두는 Post-Norm이었지만, 깊은 모델에서는 앞에 두는 Pre-Norm이 훨씬 안정적이라는 게 정설이 되었다.[^4] HamsterLM도 Pre-Norm으로 간다.
+
+```python title="hamsterlm/model.py"
+class Block(nn.Module):
+    def __init__(self, n_embd, n_head, max_seq_len, dropout):
+        super().__init__()
+        self.ln_1 = RMSNorm(n_embd)
+        self.attn = CausalSelfAttention(n_embd, n_head, max_seq_len, dropout)
+        self.ln_2 = RMSNorm(n_embd)
+        self.mlp = SwiGLU(n_embd, dropout)
+
+    def forward(self, x):
+        x = x + self.attn(self.ln_1(x))   # [!code highlight]
+        x = x + self.mlp(self.ln_2(x))    # [!code highlight]
+        return x
+```
+
+하이라이트된 `x + ...` 부분이 바로 잔차 연결이다. `Attention`과 `MLP` 둘 다 앞쪽에 `RMSNorm`(`ln_1`, `ln_2`)이 붙어있으므로 Pre-Norm 구조다.
+
+### 전체 모델 조립하기
+
+이제 부품이 다 모였다. 전체 파이프라인을 그려보면 다음과 같다.
+
+1. 토큰 id 입력 → **임베딩**으로 벡터화
+2. **Transformer Block**을 12번 통과 (각 블록에서 Attention + MLP)
+3. 마지막에 한 번 더 **정규화**
+4. **출력 헤드**로 각 토큰 자리에서 "다음 토큰 확률"을 계산
+
+```python title="hamsterlm/model.py"
+class HamsterLM(nn.Module):
+    def __init__(self, vocab_size, n_embd, n_head, n_layer, max_seq_len, dropout, pad_id):
+        super().__init__()
+        self.pad_id = pad_id
+        self.max_seq_len = max_seq_len
+        self.transformer = nn.ModuleDict(dict(
+            wte = nn.Embedding(vocab_size, n_embd, padding_idx=pad_id),
+            # RoPE를 쓰므로 위치 임베딩(wpe) 없음 [!code highlight]
+            drop = nn.Dropout(dropout),
+            h = nn.ModuleList([Block(n_embd, n_head, max_seq_len, dropout) for _ in range(n_layer)]),
+            ln_f = RMSNorm(n_embd),
+        ))
+        self.lm_head = nn.Linear(n_embd, vocab_size, bias=False)
+
+        # Weight Tying: 토큰 임베딩과 출력 헤드가 같은 가중치를 공유
+        self.transformer.wte.weight = self.lm_head.weight
+
+        self.apply(self._init_weights)
+        n_params = sum(p.numel() for p in self.parameters())
+        print(f"HamsterLM 파라미터 수: {n_params/1e6:.2f}M")
+
+    def _init_weights(self, module):
+        if isinstance(module, nn.Linear):
+            torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
+            if module.bias is not None:
+                torch.nn.init.zeros_(module.bias)
+        elif isinstance(module, nn.Embedding):
+            torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
+        elif isinstance(module, RMSNorm):
+            torch.nn.init.ones_(module.weight)
+```
+
+하이라이트한 주석처럼 **위치 임베딩이 없다**. 많은 튜토리얼에서는 여기에 `wpe = nn.Embedding(max_seq_len, n_embd)`가 들어가지만, RoPE가 Attention 내부에서 위치 정보를 직접 주입하므로 별도 파라미터가 필요 없다. 이 차이 하나로 약 10만 개(`128 × 768`)의 파라미터가 줄어든다.
+
+**Weight Tying**은 모델 크기를 더 줄이는 기법이다. 토큰 임베딩(`wte`: 토큰 id → 벡터)과 출력 헤드(`lm_head`: 벡터 → 토큰 점수)가 **같은 가중치 행렬을 공유**한다. 입력과 출력에서 "토큰과 벡터의 대응 관계"는 같아야 하니 이론적으로도 합리적이고, HamsterLM 기준 3M 파라미터를 아끼는 효과도 있다.[^7] 참고로 이렇게 조립을 마치면 생성자의 `print`가 실제 파라미터 수를 알려주는데, 약 88M으로 목표했던 100M 언저리에 안착한다.
+
+가중치 초기화도 세심하게 처리한다. Linear는 평균 0, 표준편차 0.02의 정규분포로, RMSNorm은 모두 1로 초기화한다. 작은 표준편차가 학습 초기의 불안정성을 줄여준다.
+
+`forward`는 위에서 그린 파이프라인을 그대로 코드로 옮긴 것이다.
+
+```python title="hamsterlm/model.py"
+    def forward(self, idx, targets=None):
+        B, T = idx.size()
+
+        # 1. 토큰 임베딩 (위치 임베딩은 RoPE가 블록 내부에서 처리)
+        x = self.transformer.drop(self.transformer.wte(idx))
+
+        # 2. Transformer Block 12번 통과
+        for block in self.transformer.h:
+            x = block(x)
+
+        # 3. 최종 정규화 → 출력 헤드
+        x = self.transformer.ln_f(x)
+        logits = self.lm_head(x)
+
+        loss = None
+        if targets is not None:
+            loss = F.cross_entropy(
+                logits.view(-1, logits.size(-1)),
+                targets.view(-1),
+                ignore_index=self.pad_id,  # PAD 토큰은 loss 계산에서 제외
+            )
+        return logits, loss
+```
+
+`logits`는 **어휘에 포함된 모든 토큰에 대한 점수**다. 이 점수에 softmax를 씌우면 "다음 토큰 확률 분포"가 된다. 학습할 때는 실제 정답 토큰과 이 점수를 `cross_entropy`로 비교해 손실을 구한다. `ignore_index=pad_id`로 패딩 토큰은 손실에서 제외해 배치 내 길이 차이가 손실 계산에 영향을 주지 않게 한다.
+
+### 학습된 모델로 어떻게 생성할까?
+
+학습이 끝난 모델로 실제로 텍스트를 만들려면 **자기회귀적 생성**을 구현해야 한다. 앞서 본 것처럼 "한 토큰 예측 → 입력에 붙이기 → 다시 예측"을 반복하는 과정이다.
+
+가장 단순한 방법은 매번 **가장 확률이 높은 토큰**을 고르는 것(greedy decoding)이다. 하지만 그러면 문제가 있다. 같은 입력에 항상 같은 답이 나오고, 길어지면 반복적이고 지루한 문장이 된다. "오늘 날씨가 좋다. 오늘 날씨가 좋다. 오늘 날씨가 좋다..." 같은 식이다.
+
+그래서 **확률 분포에서 토큰을 샘플링**하는 방식을 쓴다. 확률이 높으면 더 자주, 낮으면 가끔 선택되도록. 여기에 두 가지 조절 장치를 붙인다.
+
+```python title="hamsterlm/model.py"
+    @torch.no_grad()  # 생성은 학습이 아니므로 기울기 계산을 꺼서 메모리와 속도를 아낀다
+    def generate(self, idx, max_new_tokens, temperature=1.0, top_k=None, eos_id=EOS_ID):
+        for _ in range(max_new_tokens):
+            idx_cond = idx[:, -self.max_seq_len:]
+            logits, _ = self(idx_cond)
+            logits = logits[:, -1, :] / temperature   # [!code highlight]
+
+            if top_k is not None:                       # [!code highlight]
+                v, _ = torch.topk(logits, min(top_k, logits.size(-1)))
+                logits[logits < v[:, [-1]]] = -float('Inf')  # 상위 k개 밖의 점수는 모두 제거
+
+            probs = F.softmax(logits, dim=-1)
+            idx_next = torch.multinomial(probs, num_samples=1)  # 확률에 비례해 하나 뽑기(샘플링)
+            idx = torch.cat((idx, idx_next), dim=1)
+            if idx_next.item() == eos_id:  # <|im_end|>를 만나면 중단
+                break
+        return idx
+```
+
+하이라이트된 두 부분이 생성 품질을 조절하는 장치다.
+
+**Temperature**는 확률 분포의 "뾰족함"을 조절한다. 로짓을 temperature로 나누는 것이 전부인데, 이 값 하나로 분포 모양이 완전히 달라진다. softmax는 점수 간의 **차이**를 지수적으로 증폭해서 비율을 만들기 때문에, 나눗셈으로 점수 차이를 벌리거나 좁히기만 해도 최종 분포가 크게 달라지는 것이다.
+
+- 1.0보다 작으면: 분포가 뾰족해져서 확률 높은 토큰이 거의 확정적으로 선택된다. 안전하지만 반복적이다
+- 1.0보다 크면: 분포가 평평해져서 다양한 토큰이 선택된다. 창의적이지만 난잡해질 수 있다
+
+**Top-k**는 확률 상위 `k`개 후보만 남기고 나머지를 모두 버리는 방식이다. 확률이 아주 낮은 엉뚱한 토큰이 운 나쁘게 뽑히는 걸 방지한다. Temperature만으로는 여전히 "이상한 토큰이 0.01% 확률로 선택되는" 사고가 가능한데 Top-k가 그 꼬리를 잘라낸다.
+
+<MaterialDemo id="building-llm/TemperatureSamplingDemo" />
+
+마지막으로 `EOS_ID`(`<|im_end|>`)를 만나면 생성을 중단하는 로직도 잊지 말아야 한다. ChatML 형식으로 학습했기 때문에 모델은 "한 턴이 끝났다"는 신호를 자연스럽게 배웠고, 추론 시 이 토큰을 뱉는 순간 우리도 멈춘다. 이게 없으면 모델이 `max_new_tokens` 끝까지 계속 생성해서 햄스터가 혼자 자문자답하는 이상한 출력이 나오게 된다.
+
+참고로 이 구현은 토큰을 하나 생성할 때마다 시퀀스 전체를 처음부터 다시 계산한다. 실제 LLM 서빙에서는 앞서 계산한 K와 V를 저장해두고 재사용하는 **KV 캐시**로 이 중복 계산을 없애는데, HamsterLM은 시퀀스가 최대 128토큰이라 매번 다시 계산해도 충분히 빠르기 때문에 단순한 구현을 유지했다.
+
+## 학습 데이터 만들기
+
+모델 코드는 완성됐다. 이제 학습 데이터를 준비할 차례다.
+
+HamsterLM은 2단계로 학습한다. 실제 LLM이 쓰는 방식과 같다.
+
+1. **사전학습(Pretrain)**: 한국어 자체를 배운다. 위키피디아 같은 대량의 일반 텍스트로 "언어 패턴"을 익힌다.
+2. **미세조정(SFT)**: 햄스터 성격을 입힌다. 사전학습된 모델을 햄스터 대화 데이터로 추가 학습한다.
+
+왜 두 단계로 나눌까? 햄스터 대화 데이터만으로 처음부터 학습하면, 모델이 "한국어 문법"과 "햄스터 페르소나"를 동시에 배워야 한다. 100M 정도의 모델에게는 부담이 크다. 일반 텍스트로 기초 체력을 쌓고(사전학습), 그 위에 특정 스타일을 얹는(미세조정) 방식이 훨씬 효율적이다. ChatGPT, Claude 같은 실제 LLM도 이 2단계 학습 구조를 따른다.
+
+### 사전학습 데이터 — 위키피디아
+
+사전학습에는 한국어 위키피디아를 쓴다. HuggingFace Datasets에서 쉽게 받을 수 있다.
+
+```python title="generate_pretrain_data.py"
+from datasets import load_dataset
+
+dataset = load_dataset("wikimedia/wikipedia", "20231101.ko", split="train")
+
+# 각 문서를 정리하고 적절한 길이로 쪼개서 JSONL로 저장
+for article in dataset:
+    text = clean_text(article["text"])              # 위키 마크업 제거
+    sentences = split_sentences(text)               # 문장 분리
+    chunks = make_chunks(sentences, max_chars=300)  # 적당한 청크로 묶음
+    for chunk in chunks:
+        f.write(json.dumps({"text": chunk}) + "\n")
+```
+
+위키피디아 원문은 위키 마크업이 섞여 있으므로 정리가 필요하다. 또 한 문서가 너무 길면 한 번에 학습하기 어렵기 때문에, 300자(약 60\~100 토큰) 정도로 쪼갠다. 약 200만 개의 청크를 만든다.
+
+### SFT 데이터 — 햄스터 대화
+
+HamsterLM을 햄스터처럼 말하게 하려면 햄스터 성격의 대화 데이터가 필요하다. 이 데이터를 어떻게 만들지가 품질을 좌우한다.
+
+#### 방법 1: 스크립트로 템플릿 조합
+
+처음에는 [GuppyLM](https://github.com/arman-bd/guppylm)이 쓴 방식, 즉 **템플릿 기반 합성 데이터**를 시도했다. 카테고리별로 질문과 답변 템플릿을 만들고 소재를 무작위로 채워 넣는 방식이다.
+
+```python
+CATEGORIES = {
+    "음식": {
+        "inputs": ["좋아하는 음식이 뭐야", "뭐 먹고 싶어", "배고파?"],
+        "outputs": ["{food}가 제일 좋아.", "{food} 주면 더 고마워."],
+    },
+    # ... 24개 카테고리
+}
+
+# 카테고리 하나 뽑고, 질문과 답변 템플릿을 각각 뽑고, 소재를 채움
+cat = random.choice(list(CATEGORIES.keys()))
+inp = random.choice(CATEGORIES[cat]["inputs"])
+out = random.choice(CATEGORIES[cat]["outputs"]).format(food=random.choice(FOODS))
+```
+
+이 방식으로 6만 개의 데이터를 만들어 학습시켰더니, 문제가 발생했다. 모델이 생성하는 답변이 **템플릿의 구조를 그대로 재현**하는 느낌이 들었다. "\{food\}가 제일 좋아. 바삭바삭해서."라는 패턴이 반복되고, 같은 질문에 대해 항상 비슷한 문장 구조로 답했다. 규칙 기반 챗봇에 가까운 느낌이었다.
+
+원인은 명확했다. 템플릿 조합은 단어만 다를 뿐 **문장 구조는 한정된 수만 있다**. 아무리 6만 개를 만들어도 실제 고유한 문장 패턴은 몇백 개 수준이다. 모델이 이걸 학습하면, 본 적 없는 질문이 들어왔을 때 템플릿 중 하나를 골라 답하려고 한다.
+
+#### 방법 2: LLM API로 다양한 대화 생성
+
+해결책은 **실제 LLM에게 데이터를 만들게 하는 것**이었다. Claude API를 써서 햄스터 성격 프롬프트를 주고 수만 개의 대화를 생성했다. 장점은 매번 **완전히 다른 문장 구조**가 나온다는 점이다.
+
+```python title="generate_sft_api.py"
+SYSTEM_PROMPT = """너는 '햄스터'라는 캐릭터야. 아래 설정을 따라서, user의 말에 햄스터로서 자연스럽게 대답해.
+
+## 캐릭터 설정
+- 작고 귀여운 햄스터. 케이지에 살고 있음
+- 볼주머니에 음식을 넣어 다님
+- 해바라기씨, 호박씨, 당근 등을 좋아함
+- 쳇바퀴 달리기가 취미. 야행성
+- 고양이, 큰 소리, 목욕을 무서워함
+
+## 말투 규칙
+- 반말 사용
+- 1~3문장으로 답변
+- 매번 다른 문장 구조 사용
+- 역질문 금지 ("너는?" 같은 것 금지)
+"""
+
+# API로 여러 질문에 대한 답변을 배치로 받음
+response = client.messages.create(
+    model="claude-haiku-4-5",
+    system=SYSTEM_PROMPT,
+    messages=[{"role": "user", "content": batch_of_questions}],
+)
+```
+
+질문은 50%를 고정 풀(카테고리별로 준비한 질문 목록)에서 뽑고, 나머지 50%는 AI가 생성하게 했다. 그러면 질문 자체도 다양해진다.
+
+비용은 Haiku 기준 1만 개에 약 $1\~2 수준이다. 크지 않다.
+
+#### 템플릿 vs API 품질 비교
+
+같은 질문("오늘 기분 어때?")에 대한 답변을 비교하면 차이가 명확하다.
+
+**템플릿 방식:**
+
+```
+기분 좋아. 해바라기씨 먹었거든.
+기분 좋아. 쳇바퀴 달리기 하고 나서 그래.
+기분 좋아. 호박씨 먹었거든.
+```
+
+단어만 바뀌고 "기분 좋아. X 했거든."이라는 구조가 반복된다.
+
+**API 방식:**
+
+```
+음... 나쁘지 않아. 볼주머니가 좀 허전하긴 한데.
+완전 신나! 아까 톱밥 속에서 엄청 큰 해바라기씨 발견했거든.
+그냥 그래. 낮잠 자고 일어났는데 아직 비몽사몽이야.
+```
+
+문장 구조, 말투, 길이가 매번 다르다. 모델이 이런 다양성을 학습하면 새로운 질문에도 유연하게 답할 수 있다.
+
+실제 HamsterLM은 이 방식으로 생성한 1만 개의 대화로 SFT를 수행한다. 데이터 크기는 템플릿 방식의 1/6이지만 품질이 훨씬 좋다. **데이터의 양보다 질이 중요하다**는 교훈이다.
+
+## 학습시키기
+
+데이터가 준비되면 2단계 학습을 진행한다.
+
+### 학습 루프
+
+학습 루프는 사전학습과 SFT 모두 공통으로 사용한다. 배경 지식에서 설명한 "예측 → 손실 → 가중치 조정"을 반복할 뿐이지만, 실무에서는 여기에 몇 가지 안정화 장치가 들어간다. 가중치를 조정하는 옵티마이저로는 대부분의 LLM 학습에서 표준으로 쓰이는 **AdamW**[^8]를 사용한다. 용어도 두 개만 짚고 가자. 배치 하나를 처리해 가중치를 한 번 조정하는 것이 **step**(iteration이라고도 하며, 코드의 `global_step`)이고, 전체 학습 데이터를 한 바퀴 도는 것이 **epoch**이다. 또한 준비한 데이터의 일부는 학습에 쓰지 않고 검증용으로 따로 떼어두는데(코드의 `eval_loader`), 왜 필요한지는 아래에서 설명한다.
+
+```python title="hamsterlm/train.py"
+def _train_loop(model, train_loader, eval_loader, max_lr, max_iters, warmup_iters, ...):
+    optimizer = torch.optim.AdamW(model.parameters(), lr=max_lr)
+    min_lr = max_lr * 0.1
+    best_val_loss = float("inf")
+    global_step = 0
+
+    for epoch in range(1000):
+        for xb, yb in train_loader:
+            if global_step >= max_iters: break
+
+            # 1. Warmup + Cosine Decay LR 스케줄 [!code highlight]
+            lr = get_lr(global_step, warmup_iters, max_iters, max_lr, min_lr)
+            for param_group in optimizer.param_groups:
+                param_group["lr"] = lr
+
+            # 2. Forward + Backward
+            xb, yb = xb.to(DEVICE), yb.to(DEVICE)
+            _, loss = model(xb, yb)
+            optimizer.zero_grad(set_to_none=True)
+            loss.backward()
+
+            # 3. Gradient Clipping [!code highlight]
+            torch.nn.utils.clip_grad_norm_(model.parameters(), GRAD_CLIP_MAX_NORM)
+
+            optimizer.step()
+
+            # 4. 평가 및 best checkpoint 저장 [!code highlight]
+            if global_step % eval_interval == 0:
+                val_loss = _evaluate(model, eval_loader)
+                if val_loss < best_val_loss:
+                    best_val_loss = val_loss
+                    _save_checkpoint(model, checkpoint_path, ...)
+
+            global_step += 1
+
+        if global_step >= max_iters: break  # 바깥 epoch 루프도 함께 종료
+```
+
+하이라이트된 세 곳이 기본 루프에 추가된 안정화 장치다.
+
+**Warmup + Cosine Decay LR 스케줄** — 경사하강법에서 "한 발의 보폭"이라 했던 학습률(LR)을 고정하지 않고 시간에 따라 변화시킨다.
+
+```python title="hamsterlm/train.py"
+def get_lr(step, warmup_iters, max_iters, max_lr, min_lr):
+    if step < warmup_iters:
+        return max_lr * (step + 1) / warmup_iters     # 초반 선형 증가
+    progress = (step - warmup_iters) / (max_iters - warmup_iters)
+    return min_lr + 0.5 * (max_lr - min_lr) * (1 + math.cos(math.pi * progress))
+```
+
+학습 초반에는 학습률을 천천히 올린다(warmup). 가중치가 무작위 초기값인 상태에서 갑자기 큰 학습률을 쓰면 손실이 폭발할 수 있다. 후반에는 코사인 곡선으로 부드럽게 낮춘다(cosine decay). 학습률이 일정하면 수렴 지점 근처에서 진동하는데, 낮춰주면 더 안정적으로 수렴한다. GPT-3, LLaMA 등 대부분의 LLM이 쓰는 표준 스케줄이다.
+
+**Gradient Clipping** — 역전파로 계산한 기울기(gradient)의 크기가 임계값을 넘으면 스케일링한다. 학습 초반이나 이상한 데이터를 만났을 때 기울기가 폭발적으로 커지는 경우가 있는데, 이걸 막아주는 안전장치다. `max_norm=1.0`이 사실상 표준값이다.
+
+**Best Checkpoint 저장** — 앞서 떼어둔 **검증 데이터**가 여기서 쓰인다. 학습에 쓴 적 없는 데이터에 대한 손실, 즉 **검증 손실**이 낮아야 모델이 데이터를 외운 게 아니라 일반화되는 패턴을 배웠다고 말할 수 있기 때문이다. 일정 간격으로 검증 손실을 평가하고, 최저치를 갱신할 때마다 모델을 저장한다. 학습이 끝난 시점의 모델이 아니라 **검증 손실이 가장 낮았던 시점의 모델**을 가져온다. 과적합이 시작되면 자동으로 이전 체크포인트를 유지하는 효과가 있다.
+
+### Stage 1: 사전학습
+
+사전학습의 목표는 "햄스터"가 아니라 "한국어"를 배우는 것이다.
+
+```python title="hamsterlm/config.py"
+# Pretrain 설정
+PRETRAIN_LR = 1e-3              # 처음부터 학습하므로 LR을 크게
+PRETRAIN_MAX_ITERS = 20000      # 20K iter × batch 32 × seq 128 ≈ 8천만 토큰
+PRETRAIN_WARMUP_ITERS = 1000    # 전체의 5%를 warmup
+```
+
+```python title="hamsterlm/pretrain_dataset.py"
+class PretrainDataset(Dataset):
+    """
+    모든 위키피디아 텍스트를 토큰화하여 하나의 긴 시퀀스로 이어 붙이고,
+    고정 길이(max_len + 1)의 청크로 나눈다. 패딩 낭비가 없다.
+    """
+    def __init__(self, path, tokenizer_path, max_len=128):
+        tokenizer = Tokenizer.from_file(tokenizer_path)
+        all_ids = []
+        with open(path, encoding="utf-8") as f:
+            for line in f:
+                ids = tokenizer.encode(json.loads(line)["text"]).ids
+                all_ids.extend(ids)
+        # max_len+1 크기 청크로 분할
+        chunk_size = max_len + 1
+        self.chunks = [all_ids[i:i+chunk_size] for i in range(0, len(all_ids) - chunk_size, chunk_size)]
+```
+
+SFT 데이터셋과 다른 점은 각 샘플을 독립적으로 토큰화하지 않고, **모든 토큰을 이어 붙여서 고정 길이로 자른다**는 것이다. 위키피디아는 대화가 아니라 연속된 긴 텍스트라서, 패딩 없이 꽉꽉 채우는 이 방식이 효율적이다.
+
+Colab A100 GPU에서 약 40\~50분 걸린다. 기준점을 먼저 잡자면, 아무것도 배우지 못한 모델이 4096개 어휘에서 무작위로 찍을 때의 손실이 ln(4096) ≈ 8.3이다. 손실은 이 근처에서 시작해 3.5\~4 수준까지 내려간다. 손실 3.5는 모델이 매 순간 다음 토큰 후보를 평균 33개(= e<sup>3.5</sup>) 수준으로 좁혔다는 뜻이다. 이 시점의 모델은 **한국어 문법과 어휘를 어느 정도 익힌 상태**이지만, 아직 햄스터가 아니다. 위키피디아로 학습했으니 "조선 시대에는..." 같은 말을 생성한다.
+
+### Stage 2: SFT
+
+SFT는 사전학습된 체크포인트에서 시작해서 햄스터 대화 데이터로 미세조정한다.
+
+```python title="hamsterlm/config.py"
+# SFT 설정
+SFT_LR = 3e-4                   # 사전학습 LR의 약 1/3 (기존 지식 보존)
+SFT_MAX_ITERS = 5000            # 1만개 데이터 기준 적당
+SFT_WARMUP_ITERS = 200          # 이미 좋은 가중치에서 시작하므로 warmup 짧게
+```
+
+SFT의 LR을 사전학습의 약 1/3로 낮춘 이유가 있다. 사전학습에서 어렵게 배운 한국어 지식을 너무 큰 LR로 덮어쓰면 **catastrophic forgetting**(기존 지식을 잊어버리는 현상)이 일어난다. 햄스터 스타일만 살짝 입히는 정도로 천천히 학습해야 한다.
+
+```python title="hamsterlm/train.py"
+def sft():
+    model = HamsterLM(vocab_size=...).to(DEVICE)
+
+    # 사전학습 체크포인트 로드 (모델 가중치만, optimizer는 새로 초기화) [!code highlight]
+    if os.path.exists(PRETRAIN_CHECKPOINT_PATH):
+        ckpt = torch.load(PRETRAIN_CHECKPOINT_PATH, ...)
+        model.load_state_dict(ckpt["model_state_dict"])
+
+    _train_loop(model, ..., max_lr=SFT_LR, max_iters=SFT_MAX_ITERS, ...)
+```
+
+`optimizer`는 새로 초기화한다. 사전학습과 SFT는 다른 데이터, 다른 LR로 학습하므로 optimizer의 내부 상태(momentum 등)를 이어 쓰면 오히려 혼란스럽다.
+
+SFT는 Colab A100에서 10\~15분이면 끝난다. 체크포인트는 `checkpoints/hamsterlm.pt`에 저장된다.
+
+### 실행하기
+
+학습은 다음 단계로 진행한다.
+
+```bash
+# 1. 사전학습 데이터 준비 (위키피디아 다운로드 + 전처리)
+python generate_pretrain_data.py
+
+# 2. SFT 데이터 생성 (Claude API 필요)
+export ANTHROPIC_API_KEY="sk-ant-..."
+python generate_sft_api.py --count 10000
+
+# 3. BPE 토크나이저 학습 (사전학습 + SFT 데이터 모두 사용)
+python -m hamsterlm --prepare
+
+# 4. 사전학습 → SFT 순차 실행
+python -m hamsterlm --train
+
+# 5. CLI 대화 모드로 테스트
+python -m hamsterlm --chat
+```
+
+대화 예시:
+
+```
+You> 안녕
+HamsterLM> 안녕! 톱밥 속에서 뒹굴뒹굴하고 있었어.
+
+You> 좋아하는 음식이 뭐야
+HamsterLM> 해바라기씨! 볼주머니에 잔뜩 넣으면 얼굴이 빵빵해져서 엄청 행복해.
+
+You> 오늘 기분 어때
+HamsterLM> 음... 나쁘지 않아. 아까 쳇바퀴 좀 뛰고 낮잠 자서 몸이 개운해.
+```
+
+전체 학습은 Colab A100 기준 사전학습 40\~50분 + SFT 10\~15분으로 약 1시간이 걸린다. T4 GPU에서는 배치 크기를 16\~24로 줄이면 돌릴 수 있지만 시간이 2\~3배 걸린다.
+
+앞서 기준으로 삼은 [Google Colab](https://colab.research.google.com/) 환경이라면 저장소의 `HamsterLM_Colab.ipynb` 노트북 하나로 데이터 생성부터 학습, ONNX 변환까지 한 번에 처리할 수 있다.
+
+## 브라우저에서 실행하기
+
+학습된 모델이 있다면 이제 남은 건 배포다. HamsterLM은 **브라우저 안에서 직접 실행**되도록 만들었다. 서버 없이 WebAssembly로 동작한다.
+
+왜 브라우저에서 실행할까? 서버 배포는 비용이 들고 관리가 필요하다. 100M 정도의 작은 모델이라면 브라우저에서 충분히 돌릴 수 있고, 사용자 입장에서도 서버 통신 없이 즉시 대화할 수 있다. 개인정보가 외부로 나가지 않는 것도 장점이다.
+
+### ONNX 변환 + int8 양자화
+
+PyTorch 모델을 브라우저에서 바로 쓸 수는 없다. 중간 단계로 **ONNX**(Open Neural Network Exchange) 형식으로 변환한다. ONNX는 여러 프레임워크 간 모델을 교환하기 위한 표준 포맷으로, 브라우저에서는 **ONNX Runtime Web**이 WebAssembly로 ONNX 모델을 실행해준다.
+
+```python title="hamsterlm/export.py"
+def export_onnx(output_path="checkpoints/hamsterlm.onnx", quantize=True):
+    ckpt = torch.load(CHECKPOINT_PATH, ...)
+    model = HamsterLM(vocab_size=vocab_size).to(DEVICE)
+    model.load_state_dict(ckpt["model_state_dict"])
+    model.eval()
+
+    dummy_input = torch.randint(0, vocab_size, (1, MAX_SEQ_LEN), device=DEVICE)
+    torch.onnx.export(
+        model, (dummy_input,), output_path,
+        input_names=["input_ids"], output_names=["logits"],
+        dynamic_axes={
+            "input_ids": {0: "batch", 1: "seq_len"},
+            "logits": {0: "batch", 1: "seq_len"},
+        },
+        opset_version=17,
+        dynamo=False,  # 중요! [!code highlight]
+    )
+
+    # int8 양자화 적용 (fp32 원본을 옮겨두고 최종 파일을 양자화본으로 교체)
+    if quantize:
+        from onnxruntime.quantization import quantize_dynamic, QuantType
+        fp32_path = output_path.replace(".onnx", ".fp32.onnx")
+        os.rename(output_path, fp32_path)
+        quantize_dynamic(fp32_path, output_path, weight_type=QuantType.QUInt8)
+```
+
+하이라이트된 `dynamo=False`가 중요하다. PyTorch 2.9부터 기본값이 `dynamo=True`인데, 새 exporter는 가중치를 외부 데이터 파일로 분리 저장하는 등 결과물 구성이 달라서 `.onnx` 파일 하나만 배포하는 우리 방식과 맞지 않았다. 파일 하나로 떨어지는 레거시 TorchScript exporter(`dynamo=False`)를 써야 브라우저에서 바로 쓸 수 있는 ONNX 파일이 나온다.
+
+**int8 양자화**는 FP32(32비트 실수)로 저장된 가중치를 int8(8비트 정수)로 압축하는 기법이다. 파일 크기가 **약 1/4로 줄어든다**. HamsterLM의 ONNX 파일이 370MB → 90MB 정도가 된다. 브라우저 배포에는 이 크기 차이가 결정적이다. 성능 저하도 거의 없다.
+
+### 토크나이저를 JavaScript로 구현하기
+
+모델은 ONNX로 변환했지만, 토크나이저는 어떻게 할까? Python의 `tokenizers` 라이브러리를 브라우저에서 쓸 수는 없다. 다행히 `tokenizers.save()`로 저장된 JSON 파일은 vocab과 merges 정보가 들어있어서, 이걸 JavaScript로 읽어서 **BPE 알고리즘을 직접 구현**할 수 있다.
+
+```javascript title="web/app.js"
+function buildTokenizer(json) {
+  const vocab = json.model.vocab;
+  const merges = json.model.merges;
+
+  // merge 순위 룩업 (순위가 낮을수록 우선순위 높음)
+  const mergeRank = {};
+  for (let i = 0; i < merges.length; i++) {
+    mergeRank[merges[i].join(" ")] = i;
+  }
+
+  function bpe(word) {
+    let pieces = word.slice();
+    while (pieces.length > 1) {
+      // 가장 낮은 순위의 merge를 찾아 적용
+      let bestRank = Infinity,
+        bestIdx = -1;
+      for (let i = 0; i < pieces.length - 1; i++) {
+        const rank = mergeRank[pieces[i] + " " + pieces[i + 1]];
+        if (rank !== undefined && rank < bestRank) {
+          bestRank = rank;
+          bestIdx = i;
+        }
+      }
+      if (bestIdx === -1) break;
+      pieces = [
+        ...pieces.slice(0, bestIdx),
+        pieces[bestIdx] + pieces[bestIdx + 1],
+        ...pieces.slice(bestIdx + 2),
+      ];
+    }
+    return pieces;
+  }
+  // ... encode, decode 함수
+  return { encode, decode };
+}
+```
+
+BPE 알고리즘 자체는 단순하다. "가장 우선순위 높은 쌍부터 합친다"를 반복하는 것. HuggingFace `tokenizers`가 ByteLevel BPE를 쓰므로, byte-to-unicode 매핑도 같은 규칙으로 구현하면 된다.
+
+### 모델 다운로드와 Cache API
+
+ONNX 파일은 90MB다. GitHub Pages에 올리자니 파일당 100MB 제한(LFS 미사용 시)에 거의 닿아 여유가 없고, 매번 방문할 때마다 90MB를 다시 다운로드하게 하는 것도 낭비다.
+
+**해결책: HuggingFace Hub에 모델을 올리고, 브라우저는 Cache API로 로컬 캐시한다.**
+
+```javascript title="web/app.js"
+async function loadModel() {
+  const MODEL_URL = "https://huggingface.co/kciter/HamsterLM/resolve/main/hamsterlm.onnx";
+  const cache = await caches.open("hamsterlm-v1");
+
+  // 캐시에 있으면 바로 사용
+  let response = await cache.match(MODEL_URL);
+  if (!response) {
+    // 없으면 다운로드 + 캐시
+    response = await fetch(MODEL_URL);
+    await cache.put(MODEL_URL, response.clone());
+  }
+
+  const buffer = await response.arrayBuffer();
+  return await ort.InferenceSession.create(buffer);
+}
+```
+
+첫 방문 시에만 90MB를 다운로드하고, 이후에는 브라우저 캐시에서 즉시 로드된다. 재방문 시 로딩 시간이 사실상 0이다.
+
+### 토큰 스트리밍
+
+ChatGPT처럼 답변이 한 글자씩 흘러나오게 하려면 **토큰 스트리밍**을 구현해야 한다. 단순히 `generate()`로 전체를 생성한 뒤 한 번에 표시하면 답답하고, 생성 중에 UI가 멈춰서 브라우저가 "응답 없음" 상태가 되기도 한다.
+
+스트리밍은 두 가지 문제를 동시에 해결한다. 첫째, 생성된 토큰을 즉시 화면에 표시해서 체감 속도를 높인다. 둘째, 매 토큰마다 이벤트 루프에 제어권을 돌려줘서 WASM이 UI를 블로킹하지 않게 한다.
+
+```javascript title="web/app.js"
+async function* generateStream(inputIds) {
+  let ids = inputIds.slice();
+  for (let i = 0; i < maxTokens; i++) {
+    const logits = await runInference(ids);
+    const nextToken = sampleTopK(logits, topK, temperature);
+    if (nextToken === EOS_ID) break;
+    ids.push(nextToken);
+    yield nextToken; // 토큰 하나가 생성될 때마다 yield  [!code highlight]
+    await yieldToMain(); // 브라우저 이벤트 루프에 제어권 양보 [!code highlight]
+  }
+}
+
+// 사용 측 — 토큰을 하나씩 따로 디코드하면 한글(UTF-8 멀티바이트)이
+// 토큰 경계에서 갈라질 때 깨진 문자(�)가 보일 수 있어,
+// 매번 누적된 토큰 전체를 다시 디코드해서 표시한다
+const outputIds = [];
+for await (const tokenId of generateStream(inputIds)) {
+  outputIds.push(tokenId);
+  responseDiv.textContent = tokenizer.decode(outputIds);
+}
+```
+
+`yield` 키워드로 비동기 제너레이터를 만든다. 매 토큰이 생성될 때마다 값을 내보내고, `yieldToMain()`으로 메인 스레드에 제어권을 넘겨 UI가 업데이트될 수 있게 한다.
+
+## 이것은 LLM인가?
+
+솔직히 말하면 HamsterLM을 "LLM"이라 부르기엔 애매하다. "Large" Language Model의 "Large"는 보통 수십억 파라미터 이상을 가리키는데, HamsterLM은 88M(약 0.9억)이다. 학습 데이터도 위키피디아 200만 청크 + SFT 1만 개 정도로, GPT-4 같은 모델과 비교하면 극히 적다.
+
+하지만 **아키텍처는 같다**. RMSNorm, SwiGLU, RoPE, Multi-Head Causal Self-Attention, Residual Connection — 이 구성 요소들이 LLaMA, Mistral, Gemma 같은 최신 LLM에 그대로 들어간다. 숫자만 바뀔 뿐이다.
+
+규모를 비교해보자.
+
+|                | HamsterLM | GPT-2 Small | LLaMA 2 7B | GPT-4 (추정) |
+| -------------- | --------- | ----------- | ---------- | ------------ |
+| 파라미터       | 88M       | 124M        | 7B         | 1조+         |
+| HamsterLM 대비 | 1x        | 1.4x        | **80x**    | **11,000x+** |
+| n_embd         | 768       | 768         | 4,096      | -            |
+| n_layer        | 12        | 12          | 32         | -            |
+| n_head         | 12        | 12          | 32         | -            |
+
+HamsterLM은 GPT-2 Small과 거의 같은 크기이고, 아키텍처는 LLaMA 계열이다. 더 큰 모델로 확장하는 건 숫자를 키우고 학습 데이터를 늘리는 문제일 뿐, 구조 자체는 크게 달라지지 않는다.
+
+진짜 LLM이 되기 위해 더 필요한 것들:
+
+- **더 큰 모델과 데이터**: 수십억\~수천억 파라미터, 수 TB의 사전학습 데이터
+- **분산 학습**: 수천 개 GPU를 활용한 데이터/모델 병렬화
+- **RLHF**: 사람의 피드백을 반영한 강화 학습
+- **안전성 학습**: 유해 콘텐츠 필터링
+- **더 긴 컨텍스트**: 지금의 128이 아니라 수십만\~수백만 토큰
+
+그래도 HamsterLM을 만들면서 배운 것이 많았다. LLM이 "마법"이 아니라 **구체적인 부품들의 조합**이라는 감각, **데이터의 양보다 질이 중요**하다는 교훈(템플릿 6만 개보다 API로 만든 1만 개가 더 나았다), 2단계 학습(사전학습 + SFT)이 왜 필수인지, 브라우저에서 돌리려면 어떤 엔지니어링이 필요한지. 이런 것들은 직접 손으로 구현해보지 않으면 알기 어렵다.
+
+## 마치며
+
+직접 만들어보지 않으면 이해했다고 말하기 어렵다. HamsterLM은 ChatGPT처럼 똑똑하지는 않지만, 햄스터 세계 안에서는 나름대로 대화를 이어간다. 그 안에서 RMSNorm이 값을 정규화하고, RoPE가 위치를 회전시키고, SwiGLU가 게이트를 열고 닫고, Attention이 주변 토큰을 참조하고 있다. 이 구조가 그대로 수천억 파라미터로 확장되면 ChatGPT가 된다.
+
+- **코드**: [github.com/kciter/HamsterLM](https://github.com/kciter/HamsterLM)
+- **데모**: [kciter.so/HamsterLM](https://kciter.so/HamsterLM/)
+- **모델**: [huggingface.co/kciter/HamsterLM](https://huggingface.co/kciter/HamsterLM)
+- **데이터셋**: [huggingface.co/datasets/kciter/HamsterLM-SFT](https://huggingface.co/datasets/kciter/HamsterLM-SFT)
+
+하이퍼파라미터를 바꿔보거나 다른 페르소나로 SFT 데이터를 만들어 실험해보면 재미있을 것이다. 핵심은, 이런 작업이 더 이상 거대 기업만의 영역이 아니라는 점이다.
+
+[^1]: Vaswani, A., et al. "Attention Is All You Need." Advances in Neural Information Processing Systems, 2017. Transformer 아키텍처를 최초로 제안한 논문이다.
+
+[^2]: dₖ가 커지면 내적 값도 커지는데, 이렇게 되면 softmax의 기울기가 매우 작아져 학습이 잘 되지 않는다. √dₖ로 나누면 값의 분산이 1로 유지된다.
+
+[^3]: 원래 "Attention Is All You Need" 논문에서는 사인/코사인 함수를 이용한 고정 위치 인코딩을 사용했지만, GPT-2에서는 학습 가능한 위치 임베딩을 사용한다. 최신 모델들은 RoPE(Rotary Position Embedding) 같은 더 발전된 방식을 사용하기도 한다.
+
+[^4]: Xiong, R., et al. "On Layer Normalization in the Transformer Architecture." ICML, 2020. Pre-Norm이 Post-Norm보다 학습이 안정적이라는 것을 보인 논문이다.
+
+[^5]: GELU(Gaussian Error Linear Unit)는 x · Φ(x) (Φ는 표준 정규 분포의 CDF)로 정의된다. ReLU처럼 비선형성을 추가하지만, 0 근처에서 부드럽게 전환되어 학습에 유리하다.
+
+[^6]: BPE(Byte Pair Encoding)는 가장 빈번하게 등장하는 문자 쌍을 반복적으로 합치는 방식이다. 예를 들어 "low"와 "lower"가 많이 나오면 "low"를 하나의 토큰으로 만든다. 이렇게 하면 어휘 크기를 효율적으로 관리하면서도 단어의 의미를 보존할 수 있다.
+
+[^7]: Press, O., & Wolf, L. "Using the Output Embedding to Improve Language Models." EACL, 2017. 토큰 임베딩과 출력 헤드의 가중치를 공유하면 파라미터 수가 줄어들면서도 성능이 향상된다.
+
+[^8]: Loshchilov, I., & Hutter, F. "Decoupled Weight Decay Regularization." ICLR, 2019. AdamW는 Adam에서 가중치 감쇠를 올바르게 분리한 변형이다.

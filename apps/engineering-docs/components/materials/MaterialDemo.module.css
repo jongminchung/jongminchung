@@ -1,0 +1,73 @@
+@import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
+
+.frame {
+  --material-surface: #ffffff;
+  --material-foreground: #212529;
+  --material-muted: #868e96;
+  --material-border: #dee2e6;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 1.75rem 0;
+  overflow: clip;
+  color: var(--material-foreground);
+  color-scheme: light;
+  font-family:
+    "Pretendard Variable",
+    Pretendard,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  isolation: isolate;
+}
+
+.frame *,
+.frame *::before,
+.frame *::after {
+  box-sizing: border-box;
+}
+
+.stage {
+  width: 100%;
+  min-width: 0;
+}
+
+.stage > :first-child {
+  margin-top: 0;
+}
+
+.stage > :last-child {
+  margin-bottom: 0;
+}
+
+.placeholder {
+  display: grid;
+  min-height: inherit;
+  place-items: center;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  background: #f8f9fa;
+  color: #868e96;
+  font-size: 13px;
+}
+
+.caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frame *,
+  .frame *::before,
+  .frame *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

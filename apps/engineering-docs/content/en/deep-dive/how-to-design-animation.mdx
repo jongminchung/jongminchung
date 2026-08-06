@@ -1,0 +1,397 @@
+---
+id: deep-dive/how-to-design-animation
+locale: en
+section: deep-dive
+title: "How to Design an Animation"
+description: "Design animation with graphs, easing, springs, pipelines, and deterministic randomness."
+order: 9
+updatedAt: "2026-02-18"
+verifiedAt: "2026-08-06"
+tags: [frontend, animation, design, math]
+status: stable
+sourceUrl: https://kciter.so/posts/how-to-design-animation/
+---
+
+Every so often a website or app shows you an animation that just catches your eye. Animation isn't only decoration. It helps people understand what's happening, confirms the result of an interaction, and expresses a brand's personality.
+
+Things are different when you're the one who has to build it. You've probably watched a prototype video from a designer and wondered how on earth you were supposed to implement it. Or had a motion pictured clearly in your head with no idea where to start turning it into code.
+
+The premise of this article is that animation can be **designed**. Motion that looks complicated is, once you break it down, a combination of simple state changes, and each of those changes can be written down mathematically. What follows is a way to do that decomposition systematically.
+
+## Animation Is a Graph
+
+Designing anything requires two things: you need to be able to **reproduce** it, and you need to be able to **combine** it. If a motion exists only as a feeling in your head, you can't reliably recreate it, and you can't weave it together with other motions either. So we need an engineering representation of motion, and a **graph** does the job. Every animation can be drawn as a graph. Once you start seeing motion this way, even complicated movement becomes something you can take apart and build deliberately.
+
+Take a fade-in, where an element's opacity goes from 0 to 1. As a graph, the horizontal axis is time and the vertical axis is opacity. Starting at 0 seconds and ending at 2, the value climbs from 0 to 1.
+
+<MaterialDemo id="how-to-design-animation/FadeInGraphDemo" />
+
+Movement works the same way. An element sliding from left to right is a time-position graph, and a grow animation is a time-scale graph. The horizontal axis doesn't even have to be time. In a parallax effect, where elements appear as the page scrolls, the scroll offset is the axis. Every animation boils down to **a value changing in response to some input**, and that change can be drawn.
+
+The important part is that the **shape** of the graph is the **feel** of the motion. Same start point, same end point, but a different curve gives a completely different impression. Producing the curve you want is the heart of animation design, and the tool for that is math.
+
+## Math, the Toolkit for Animation
+
+So how do you produce a curve of a particular shape? With math. This section goes through the mathematical tools that show up constantly in animation and how each one shapes the graph. If math isn't your thing, don't worry. The goal is not to master the theory but to know what each tool does to the feel of the motion.
+
+### Easing and Bézier Curves
+
+The simplest animation is linear: constant speed from start to finish. Real-world motion is never like that. A thrown ball starts fast and slows down; a car pulls away slowly and builds speed. **Easing** functions are how we express that kind of natural acceleration and deceleration.
+
+An easing function takes a progress value between 0 and 1 and returns an adjusted progress value. `ease-in` starts slow and finishes fast; `ease-out` does the opposite. The most common way to define one mathematically is the **cubic Bézier curve**.
+
+A cubic Bézier curve is defined by four control points. For easing, the start (0, 0) and end (1, 1) are fixed, which leaves two control points to play with: (x1, y1) and (x2, y2). A control point is not a point the curve passes through. It **pulls** on the curve like a magnet, bending its path.
+
+So how does a curve come out of control points? Through **linear interpolation, applied recursively**. Interpolating between two points is simple: at progress `t = 0` you're at the first point, at 1 the second, at 0.5 exactly halfway.
+
+```js
+function lerp(a, b, t) {
+  return a + (b - a) * t;
+}
+```
+
+A Bézier curve runs this interpolation in layers. Say we have four control points P0, P1, P2, and P3.
+
+1. Interpolate between P0–P1, P1–P2, and P2–P3 at `t`, giving three intermediate points
+2. Interpolate between those three at `t`, giving two points
+3. Interpolate between those two at `t`, and you have a point on the curve
+
+Two control points turn out to be enough for an enormous range of motion. Here are some combinations you'll see everywhere.
+
+<MaterialDemo id="how-to-design-animation/EasingVisualizer" />
+
+How do you pick an easing in practice? Say a toast notification slides up from the bottom of the screen.
+
+With `ease-out`, the toast appears fast, grabbing attention, then decelerates and settles into place. With `ease-in` it starts slow and speeds up, which makes for a more low-key entrance. `linear` rises at constant speed and stops dead, which reads as mechanical.
+
+Same element, same movement, completely different impression depending on the easing. None of them is the "correct" one. The question is **what the motion is for**. If it needs to pull the user's eye, use a curve that's fast early on. If something should slip away quietly, use one that's fast toward the end. Try the different easings on the toast below and compare.
+
+<MaterialDemo id="how-to-design-animation/EasingPracticeDemo" />
+
+Once you understand how the curve works, you don't need a tool to hand you a preset. Want something that pops out fast and settles gently? Push the first control point's y value up high and put the second one near (1, 1). Draw the shape of the graph first, then find the control points that produce it.
+
+### Exponential Approach
+
+An easing curve has a fixed start and end. What happens when the target moves? For an element trailing the cursor, the target changes every frame, and a predefined curve can't keep up. The pattern that can is the **exponential approach**.
+
+```js
+value += (target - value) * factor; // factor: 0~1
+```
+
+That's the whole formula. Run it every frame and the value moves by an amount **proportional to the remaining distance** — fast when far away, slower as it closes in. The natural-looking deceleration falls out on its own.
+
+<MaterialDemo id="how-to-design-animation/ExpApproachGraphDemo" />
+
+A small `factor` closes in slowly, a large one quickly. Mathematically this is **exponential decay**: the gap shrinks by a ratio of `(1 - factor)` each frame, so the remaining distance decreases exponentially.
+
+<MaterialDemo id="how-to-design-animation/ExponentialApproachDemo" />
+
+It isn't limited to position. A dashboard counter that races toward its target number and slows to a stop as it arrives is the same trick.
+
+<MaterialDemo id="how-to-design-animation/CounterDemo" />
+
+So is a progress bar. Real progress lurches forward in chunks as the network allows, but if the displayed bar chases the real value with an exponential approach, the user sees smooth motion.
+
+<MaterialDemo id="how-to-design-animation/ProgressBarDemo" />
+
+Best of all, **it stays natural when the target changes**. If the cursor suddenly jumps to the other side of the screen, the element simply curves off toward the new target from wherever it happens to be.
+
+### Spring Animation
+
+Easing and exponential approach both converge on the target monotonically — they never overshoot. Real objects have inertia. They overshoot a little and come back, and that elasticity is a big part of what makes motion feel alive. For a button with a bouncy press, or a dragged element snapping back into place, use a **spring animation**.
+
+Springs are based on **damped harmonic oscillation**, straight out of physics class. Picture a weight hanging on a spring: pull it and let go, and it oscillates around its resting point, losing energy to friction until it stops.
+
+Two forces drive the whole thing.
+
+- **Restoring force**: pulls toward the target, harder the farther away. `F = -k × (current - target)`, where `k` is the **stiffness**.
+- **Damping force**: resists motion in proportion to velocity. `F = -c × velocity`, where `c` is the **damping** coefficient.
+
+Each frame, sum the two forces to get acceleration, update velocity with acceleration, and update position with velocity.
+
+```js
+const force = -stiffness * (current - target) - damping * velocity;
+velocity += force * dt;
+current += velocity * dt;
+```
+
+<MaterialDemo id="how-to-design-animation/SpringPlayground" />
+
+The character of a spring comes down to `stiffness` and `damping`. High stiffness feels taut and quick; low damping keeps it wobbling longer. Just these two knobs cover everything from a snappy button to a card that eases gently into place.
+
+Take a like button. The moment you press the heart, its scale dips, then springs back up toward its original size. Thanks to the overshoot — passing the target slightly and coming back — the press feels tactile.
+
+<MaterialDemo id="how-to-design-animation/SpringLikeDemo" />
+
+Springs differ from easing in one fundamental way: **there is no duration**. Easing runs "for 0.3 seconds"; a spring is a physics simulation that runs until it settles. There's another difference too: if the target changes midway, a spring carries its current velocity into the new motion, so the handoff is seamless.
+
+### Physics Simulation
+
+A spring is one value oscillating toward one target. You can take the physics further. Combine gravity, collisions, friction, and inertia, and you get complex motion that would be miserable to choreograph by hand.
+
+The structure of a physics simulation is simple. Every frame, three steps:
+
+1. **Compute forces**: sum everything acting on each object (gravity, springs, friction, user input, and so on)
+2. **Integrate**: force gives acceleration, acceleration updates velocity, velocity updates position
+3. **Apply constraints**: collision detection, boundary limits, joints and connections
+
+```js
+for (const obj of objects) {
+  // Compute forces
+  const gravity = { x: 0, y: 9.8 * obj.mass };
+  const friction = { x: -obj.vx * drag, y: -obj.vy * drag };
+  const fx = gravity.x + friction.x;
+  const fy = gravity.y + friction.y;
+
+  // Integrate
+  obj.vx += (fx / obj.mass) * dt;
+  obj.vy += (fy / obj.mass) * dt;
+  obj.x += obj.vx * dt;
+  obj.y += obj.vy * dt;
+
+  // Apply constraints (floor collision)
+  if (obj.y > floorY) {
+    obj.y = floorY;
+    obj.vy *= -restitution; // bounce scaled by restitution
+  }
+}
+```
+
+What makes this structure powerful is that **you define the rules and the motion emerges**. Take confetti. Hand-designing a trajectory for every piece with easing functions would be absurd. Set up gravity, air resistance, and spin, and dozens of pieces each fall along their own path. You never touch an individual trajectory.
+
+<MaterialDemo id="how-to-design-animation/ConfettiDemo" />
+
+This is why physics simulation fits situations where **many objects interact**, or where **user input changes the outcome**.
+
+The trade-off is predictability. With easing you know exactly where everything will be at any moment; a simulation's outcome depends on its initial conditions. So physics tends to suit ambient effects and interactive elements better than a UI's core transitions.
+
+### Natural Direction Changes
+
+Everything so far has been about **how much** a value changes. This one is about **which direction**. Suppose an element follows the cursor around the screen. Tracking the position is easy enough. But what if the element should also **rotate** to face the direction it's moving?
+
+That's what `atan2` is for. `atan2(dy, dx)` returns the angle between two points in radians. Pass in the difference `(dx, dy)` between the current and target positions, and out comes the direction the element should face.
+
+```js
+const dx = targetX - currentX;
+const dy = targetY - currentY;
+const angle = Math.atan2(dy, dx);
+element.style.transform = `rotate(${angle}rad)`;
+```
+
+It's a one-liner, but it makes a surprising difference to how natural the motion feels. An arrow that points where it's going, a character that turns its head toward its destination, particles that stretch along their direction of travel — `atan2` is behind all of them.
+
+<MaterialDemo id="how-to-design-animation/Atan2Demo" />
+
+Here's a practical use: the 3D tilt effect, where a card leans toward the cursor as the mouse moves over it. `atan2` gives the **direction** of the tilt, and the distance from the center gives its **strength**.
+
+<MaterialDemo id="how-to-design-animation/CardTiltDemo" />
+
+Once you can compute the direction between two points, a whole category of animation opens up.
+
+### Periodic Motion with Trigonometry
+
+The trig functions we learned in school turn out to be everywhere in animation. What makes them useful is **periodicity**. Their values cycle between -1 and 1 forever, which makes them the natural tool for anything that repeats.
+
+A single `sin` function plus phase offsets can coordinate dozens of elements. Loading indicators, equalizer bars, ripple effects — most animation that's periodic and looks choreographed is built on this.
+
+```js
+const y = amplitude * Math.sin(time * frequency);
+```
+
+Three parameters shape the repetition.
+
+- **Amplitude**: the size of the motion. Bigger means wider swings
+- **Frequency**: the speed. Higher means faster repetition
+- **Phase**: the starting offset. Different phases across elements create a wave
+
+The phase is where it gets interesting. Give each item in a list a phase proportional to its index, and they ripple in sequence like a wave.
+
+```js
+items.forEach((item, i) => {
+  const y = amplitude * Math.sin(time * frequency + i * phaseOffset);
+  item.style.transform = `translateY(${y}px)`;
+});
+```
+
+<MaterialDemo id="how-to-design-animation/TrigWaveDemo" />
+
+The typing indicator in messaging apps is the classic example. Three dots bouncing in turn: identical `sin`, different phase.
+
+<MaterialDemo id="how-to-design-animation/LoadingIndicatorDemo" />
+
+The floating elements you see on landing pages are the same thing. Give each one a different amplitude, frequency, and phase, and one `sin` function produces a natural, ambient background.
+
+<MaterialDemo id="how-to-design-animation/FloatingHeroDemo" />
+
+### Sawtooth Waves
+
+`sin` is for motion that swings **back and forth**. Not everything repeats that way. The pulse ring on a notification badge goes from 0 to 1 in **one direction**, then snaps back to the start and goes again. That's a **sawtooth wave**.
+
+```js
+const p = (t % period) / period; // always 0~1, resets every period
+```
+
+Take `t` modulo the period and normalize, and the value ramps linearly from 0 to 1, then drops straight back to 0. Map this `p` onto scale and opacity and you get a repeating "expand and fade" effect.
+
+```js
+const scale = 1 + p * 0.8; // grows from 1 → 1.8
+const opacity = 1 - p; // fades from 1 → 0
+```
+
+<MaterialDemo id="how-to-design-animation/PulseBadgeDemo" />
+
+Start, end, instant reset — that simple structure is why sawtooths show up everywhere: pulses, pings, looping progress indicators. Between `sin`'s smooth back-and-forth and the sawtooth's one-way reset, you can cover most periodic animation.
+
+## Designing an Animation
+
+That covers the tools: easing, springs, trig, and the rest. Sometimes one tool is all you need, but real animations are usually messier. Say a notification appears: the background dims, a card slides up, and the content fades in. How do you build that?
+
+Before designing anything complex, there are two things to understand: how to split a graph apart, and what an animation's state depends on.
+
+### Split the Graph
+
+Complex motion resists being captured in one formula. The way out is to **split the graph into segments**.
+
+Consider a map pin that bounces in place a couple of times and settles. A physics simulation could get you close, but natural motion isn't always good animation. Maybe the second bounce should be deliberately smaller, or the final landing softer. Splitting into segments gives you that control. Each segment is a simple piece of a graph, and joined end to end they make the full animation.
+
+<MaterialDemo id="how-to-design-animation/BounceGraphDemo" />
+
+In math this is called a piecewise function, and the idea carries over directly: **break complex motion into simple pieces, design each piece on its own, and join them back up**.
+
+### What Does the Value Depend On?
+
+The horizontal axis of the graph doesn't have to be time, and this deserves a closer look, because identifying **what an animation's value depends on** is where design starts. There are three broad types.
+
+**Time-based** animation is the most common. The value changes as time passes from some starting moment. Each frame applies the elapsed time to the previous state — `f(state, Δt) → nextState` — and repeating that drives the animation forward.
+
+**Value-based** animation takes something other than time as its input. Scroll-driven parallax is the obvious example: an element's position and opacity change with how far the user has scrolled, so the scroll offset is the horizontal axis. Mouse position, sensor data — plenty of things can play that role.
+
+**Event-based** animation switches values on a trigger. A hover, a click, data finishing loading — the event kicks off a transition from the current value to the next. These are usually hybrids: the event **triggers** the animation, and the transition itself is driven by time.
+
+The first question to ask about any animation is: what does its value depend on? The answer fixes the graph's horizontal axis, and the implementation follows from there.
+
+Once you can split graphs and identify dependencies, what's left is **assembling** the pieces. There are three patterns.
+
+### Pipelining
+
+The most intuitive way to assemble pieces is to **lay them out in order**. This is **pipelining**. The notification animation from earlier splits into three pieces:
+
+1. Background dims — opacity 0 → 0.5, 200ms
+2. Card slides up — from below to its position, 300ms, ease-out
+3. Content fades in — opacity 0 → 1, 200ms
+
+Each piece is its own graph, but placed in order on the time axis they form a pipeline.
+
+<MaterialDemo id="how-to-design-animation/PipelineTimelineDemo" />
+
+They don't have to run strictly one after another. There are several placement strategies.
+
+- **Sequential**: B starts when A ends
+- **Overlapping**: B starts at A's 80% mark, smoothing the seam between pieces
+- **Simultaneous**: A and B start together but animate different properties
+- **Staggered**: the same animation across multiple elements, offset in time. List items appearing one by one is the classic case
+
+Pipelining keeps **each piece independently editable**. If the card rises too fast, you tweak that one piece and leave the rest alone — no need to redesign the whole animation.
+
+<MaterialDemo id="how-to-design-animation/PipelineDemo" />
+
+### Designing with State Transitions
+
+Pipelining lays pieces out along an axis. **With state transitions, the animation instead moves to the next stage when a condition is met** — a better fit when one element goes through stages that differ completely in character.
+
+Let's design a firework. A single particle passes through these states.
+
+| State   | What changes      | Graph                  | Transition condition   |
+| ------- | ----------------- | ---------------------- | ---------------------- |
+| Launch  | height ↑          | acceleration (ease-in) | velocity = 0 → explode |
+| Explode | particles split   | instant switch         | immediately → spread   |
+| Spread  | radius ↑, speed ↓ | deceleration + gravity | time elapsed → fade    |
+| Fade    | opacity ↓         | linear decrease        | opacity = 0 → remove   |
+
+Each state has its own graph. Launch is time-height, spread is time-radius, fade is time-opacity. One formula for all of it would be a nightmare; cut at the state boundaries and every piece is simple.
+
+The key is to **pin down the transition conditions**. "Explode when velocity hits 0." "Remove when opacity hits 0." With explicit triggers, even a complex animation can be managed like a state machine, and drawn as a diagram:
+
+<MaterialDemo id="how-to-design-animation/FireworkStateDiagram" />
+
+The difference from pipelining is that the driver is <strong>a condition, not the clock</strong>. Since transitions depend on state values rather than time, this approach fits naturally where you can't predict the timeline in advance — physics simulations, user interaction.
+
+<MaterialDemo id="how-to-design-animation/FireworkDemo" />
+
+### Property Splitting
+
+Sometimes several properties need to change at once. In that case, **split them into independent tracks**.
+
+Picture a pricing-plan card you click to select. The border should turn blue to show it's selected. The card should grow slightly for emphasis. And the details the user cares about should expand into view. Three changes at the same moment, and each one wants motion of a different character.
+
+One formula tying them together can't serve all three. Separate tracks can. Have a look at the example below.
+
+<MaterialDemo id="how-to-design-animation/PropertySplitDemo" />
+
+The point of splitting is that **no track needs to know about the others**. Changing the border track doesn't touch the size or the details. That independence is what makes it easy to fine-tune one property or bolt on a new one.
+
+### Randomness
+
+Back to the firework from the state transitions section. What if every particle flew out at exactly the same speed, at perfectly even angles? Geometrically correct, but not natural. Real fireworks are slightly irregular, and the irregularity is what makes them look real.
+
+Adding **randomness** is how an animation escapes feeling mechanical. Give particle speeds a ±20% variance, add a little jitter to the angles, nudge the start times slightly apart.
+
+There's an important rule, though. **Random shouldn't be truly random.** Full randomness is unpredictable and produces results you didn't intend — the particles might all drift to one side, or sizes might come out at wild extremes.
+
+<MaterialDemo id="how-to-design-animation/RandomComparisonDemo" />
+
+It helps to divide an animation into **the intended** and **the unintended**. Particles flying upward is intended motion; the small speed differences between them are the "accidents" you engineer on purpose. The designer's job is to draw the line: control up to here, randomness from there. Draw it well and you get order and naturalness at the same time.
+
+### Bidirectionality
+
+Almost everything so far ran in **one direction**: start to end, 0 to 1. But some animations let **the user reverse them mid-flight** — scroll effects, drag interactions. Scroll down and the element appears; scroll back up and it disappears. These need to be designed with reverse playback in mind.
+
+The example below shows a scroll parallax designed to be bidirectional. The element enters and exits with the scroll, and the motion stays smooth when the scroll direction flips.
+
+<MaterialDemo id="how-to-design-animation/BidirectionalDemo" />
+
+Value-based animations like parallax get bidirectionality almost for free. The horizontal axis is the scroll offset, so reversing just means walking the same graph backward. Event-based animations — showing and hiding on a button click, say — take more care. Ignore bidirectionality and two problems show up:
+
+- **Jumps**: hit "hide" while the element is still appearing, and the exit animation starts from the beginning, ignoring where the element currently is. It teleports, and the motion breaks
+- **Same graph both ways**: reusing the same easing curve for entering and exiting feels off. If it appeared with ease-in, it should leave with ease-out
+
+Handle it properly and the moment the direction flips, the animation reverses, **continuing from its current state**. Try toggling quickly mid-animation in the example below to feel the difference.
+
+<MaterialDemo id="how-to-design-animation/BidirectionalCompareDemo" />
+
+## What About Really Complex Animations?
+
+The techniques above cover a lot of ground, but they have limits. A character walking and running, hand-drawn-style morphing, an intro where dozens of layers interlock with precision — building these in code alone isn't realistic.
+
+That's what **dedicated tools** are for. Build the animation in After Effects and export it with [Lottie](https://airbnb.io/lottie/), or use something like [Rive](https://rive.app/), which specializes in interactive animation. Sometimes producing a plain **video** and playing it back is the right answer. Picking the appropriate tool beats forcing everything into code.
+
+<MaterialImage
+  src="/materials/images/2026-02-18-how-to-design-animation/lottie.gif"
+  caption="A complex animation built with Lottie"
+/>
+
+What code has that those tools don't is **real-time interaction**. Motion that responds instantly to input and changes dynamically with state can't come from a pre-rendered video. That's exactly where the techniques in this article apply.
+
+## Closing
+
+If you've ever stared at an animation with no idea where to begin, I hope this article gave you a place to start. In the end, animation design comes down to **decomposition**. Any motion becomes simple once you break it apart, and simple pieces can be drawn as graphs. Practice the process deliberately, and the gap between the motion in your head and the code in your editor keeps shrinking.
+
+## 추가 인터랙티브 자료
+
+### OrbitDemo
+
+원문 주제에 포함된 보조 시각 자료다.
+
+<MaterialDemo id="how-to-design-animation/OrbitDemo" />
+
+### ProgressMappingDemo
+
+원문 주제에 포함된 보조 시각 자료다.
+
+<MaterialDemo id="how-to-design-animation/ProgressMappingDemo" />
+
+### PropertySplitTimelineDemo
+
+원문 주제에 포함된 보조 시각 자료다.
+
+<MaterialDemo id="how-to-design-animation/PropertySplitTimelineDemo" />

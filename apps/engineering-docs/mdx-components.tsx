@@ -3,6 +3,8 @@ import Link from "next/link";
 import { isValidElement, type ComponentProps, type ReactNode } from "react";
 import { DocsCodeBlock } from "./components/DocsCodeBlock";
 import { ExcalidrawDiagram } from "./components/ExcalidrawDiagram";
+import { MaterialDemo } from "./components/materials/MaterialDemo";
+import { MaterialImage, MaterialVideo } from "./components/materials/MaterialMedia";
 import { OverviewCards, OverviewCta, OverviewHero, QuickStart } from "./components/OverviewBlocks";
 import { classifyMdxCodeBlock } from "./lib/mdx-code";
 
@@ -37,6 +39,9 @@ const components = {
   a: MdxLink,
   pre: MdxPre,
   ExcalidrawDiagram,
+  MaterialDemo,
+  MaterialImage,
+  MaterialVideo,
   OverviewCards,
   OverviewCta,
   OverviewHero,

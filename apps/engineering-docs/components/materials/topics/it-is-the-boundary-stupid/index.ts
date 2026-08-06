@@ -1,0 +1,20 @@
+// @ts-nocheck -- Upstream visual source; runtime contracts are checked at the registry boundary.
+
+export { BoundaryDualityDiagram } from "./BoundaryDualityDiagram";
+export { CallerCalleeBoundaryDiagram } from "./CallerCalleeBoundaryDiagram";
+export { DependencyBoundaryDiagram } from "./DependencyBoundaryDiagram";
+export { DataTransformFlowDiagram } from "./DataTransformFlowDiagram";
+export { TrustBoundaryDiagram } from "./TrustBoundaryDiagram";
+export { DesignErosionDiagram } from "./DesignErosionDiagram";
+export { AsyncOrderDiagram } from "./AsyncOrderDiagram";
+export { ScaleBoundaryDiagram } from "./ScaleBoundaryDiagram";
+export { AtomicityBreakDiagram } from "./AtomicityBreakDiagram";
+export { ConwaysLawDiagram } from "./ConwaysLawDiagram";
+export { TelephoneGameDiagram } from "./TelephoneGameDiagram";
+export { TradeoffScaleDiagram } from "./TradeoffScaleDiagram";
+export { HeroSloganDiagram } from "./HeroSloganDiagram";
+export { AbstractionLeakDiagram } from "./AbstractionLeakDiagram";
+export { FocusLineEffect } from "./FocusLineEffect";
+export { HiddenBoundaryDiagram } from "./HiddenBoundaryDiagram";
+export { BoundaryEvolutionDiagram } from "./BoundaryEvolutionDiagram";
+export { UserDevBoundaryDiagram } from "./UserDevBoundaryDiagram";

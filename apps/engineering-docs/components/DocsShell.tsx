@@ -8,6 +8,7 @@ import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import type { CurrentNavigationEntry, Locale, NavigationEntry } from "@/lib/content-model";
 import { Icon } from "./Icon";
+import { MaterialLocaleProvider } from "./materials/MaterialLocaleContext";
 import { ContextNavigation, GlobalRail, MobileNavigation, MobileTopNavigation } from "./Navigation";
 import { RouteTransitionContent, RouteTransitionProvider } from "./RouteTransition";
 import { SearchProvider } from "./SearchPalette";
@@ -146,7 +147,9 @@ export function DocsShell({
                 </SheetContent>
               </Sheet>
               <TabletContextDrawer locale={locale} current={current} documents={documents} />
-              <RouteTransitionContent>{children}</RouteTransitionContent>
+              <RouteTransitionContent>
+                <MaterialLocaleProvider locale={locale}>{children}</MaterialLocaleProvider>
+              </RouteTransitionContent>
             </main>
           </div>
         </TooltipProvider>
