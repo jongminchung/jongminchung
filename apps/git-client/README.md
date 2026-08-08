@@ -62,6 +62,8 @@ Pinned Rebased evidence and generated contracts live under `parity/rebased/1.1.8
 
 The product targets complete UI, UX, behavior, and side-effect parity with checksum-verified Rebased 1.1.8. The contract in [`docs/rebased-parity.md`](docs/rebased-parity.md) is the production release gate: all source and runtime obligations, including editor and Local History, must be evidence-backed; native Git and hosting operations stay allowlisted, and deterministic fixtures remain development-only.
 
+The fresh, Git-focused audit against the installed Rebased 1.1.11 is recorded in [`docs/rebased-1.1.11-independent-audit.md`](docs/rebased-1.1.11-independent-audit.md). It deliberately excludes existing parity records from its evidence and currently grades the product as **partially implemented** because UI/UX is not identical.
+
 ## Releases
 
 Git Client is distributed as a Developer ID-signed and Apple-notarized macOS 26+ ARM64 DMG on [GitHub Releases](https://github.com/jongminchung/jongminchung/releases). Nx Release derives project-scoped versions and notes from Conventional Commits, using `git-client-<version>` tags and `Git Client <version>` release titles. Each release includes the DMG and its SHA-256 manifest; the app does not include an in-app updater. Production release fails closed when signing identity or notarization configuration is unavailable. A separate `release:validate-local` command creates visibly named `_adhoc` artifacts that must never be published.
