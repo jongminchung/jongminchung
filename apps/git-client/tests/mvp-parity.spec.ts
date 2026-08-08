@@ -56,7 +56,7 @@ test("[parity:shell.welcome] exposes the canonical Welcome and Open flow", async
   await expect(page).toHaveTitle("Welcome to Git Client");
   await expect(page.getByRole("button", { name: "Open", exact: true })).toBeVisible();
   await expect(page.getByTestId("welcome-sidebar")).toHaveCSS("width", "224px");
-  await expect(page.getByTestId("welcome-titlebar")).toHaveCSS("height", "27px");
+  await expect(page.getByTestId("welcome-titlebar")).toHaveCSS("height", "30px");
   await verifyAppearanceMatrix(page, page.getByRole("region", { name: "Projects" }));
   await page.getByRole("treeitem", { name: "Projects" }).focus();
   await page.keyboard.press("ArrowDown");
@@ -70,7 +70,7 @@ test("[parity:shell.project-log] selects a commit and opens its review surface",
   await page.setViewportSize({ width: 1184, height: 768 });
   await page.goto("/?fixture=qa");
 
-  await expect(page.getByRole("banner", { name: "Main Toolbar" })).toHaveCSS("height", "30px");
+  await expect(page.getByRole("banner", { name: "Main Toolbar" })).toHaveCSS("height", "35px");
   await expect(page.getByRole("region", { name: "Commit log" })).toBeVisible();
   await verifyAppearanceMatrix(page, page.getByRole("region", { name: "Commit log" }));
   await page
@@ -103,7 +103,10 @@ test("[parity:platform.terminal] keeps the browser fixture shell-free and focusa
 }) => {
   await page.setViewportSize({ width: 1184, height: 768 });
   await page.goto("/?fixture=qa");
-  const terminal = page.getByRole("button", { name: "Terminal", exact: true });
+  const terminal = page.getByRole("button", {
+    name: "Terminal",
+    exact: true,
+  });
   await terminal.click();
 
   const surface = page.getByText("Native Terminal", { exact: true }).locator("..");

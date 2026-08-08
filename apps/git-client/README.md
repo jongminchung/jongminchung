@@ -39,9 +39,9 @@ Keyboard commands are defined once in `src/command-manifest.json` and shared by 
 
 `pnpm parity:theme` is the independent Islands Light/Dark design-system gate. It validates the Rebased-to-semantic-token mapping, rejects literal UI colors, checks 30/29/22/20px geometry and interactive states, and writes deterministic sRGB comparison reports to `test-results/theme-parity/`. It uses checked-in evidence only and consumes no AI tokens.
 
-`pnpm parity:mvp` verifies the frozen Rebased 1.1.8 MVP contract. It runs deterministic fixture and real Git integration tests, four parallel renderer lanes, one production Electron package, and the serial native Git/PTY checks. Results and bounded command logs are written below `test-results/parity/1.1.8/`; the command does not launch Rebased, access external services, update goldens, or call an AI service. Run one lane with `pnpm parity:test --scenario <id>`.
+`pnpm parity:mvp` preserves the historical Rebased 1.1.8 regression contract. It is not the current product-completion verdict. It runs deterministic fixture and real Git integration tests, four parallel renderer lanes, one production Electron package, and the serial native Git/PTY checks. Results and bounded command logs are written below `test-results/parity/1.1.8/`; the command does not launch Rebased, access external services, update goldens, or call an AI service. Run one lane with `pnpm parity:test --scenario <id>`.
 
-Pinned Rebased evidence and generated contracts live under `parity/rebased/1.1.8/`; candidate-only observers live under `tests/parity/observers/`. The gate derives every count from individual current-build results and never trusts a stored `complete` flag. The project and branch popup contracts remain explicitly unverified until raw Rebased evidence is attached, so their candidate regression tests cannot inflate parity completion. Computer Use is reserved for previously uncaptured native states or conflicting evidence.
+Historical 1.1.8 evidence and generated contracts live under `parity/rebased/1.1.8/`; they are retained only for regression coverage and are excluded from the independent 1.1.11 verdict. Candidate-only observers live under `tests/parity/observers/`. The gate derives every count from individual current-build results and never trusts a stored `complete` flag.
 
 ## Safety model
 
@@ -60,9 +60,9 @@ Pinned Rebased evidence and generated contracts live under `parity/rebased/1.1.8
 
 ## Scope
 
-The product targets complete UI, UX, behavior, and side-effect parity with checksum-verified Rebased 1.1.8. The contract in [`docs/rebased-parity.md`](docs/rebased-parity.md) is the production release gate: all source and runtime obligations, including editor and Local History, must be evidence-backed; native Git and hosting operations stay allowlisted, and deterministic fixtures remain development-only.
+The current Git-focused target is the installed Rebased 1.1.11 on macOS ARM64. The older [`docs/rebased-parity.md`](docs/rebased-parity.md) and `parity/rebased/1.1.8/` tree are historical regression material, not evidence for the current verdict.
 
-The fresh, Git-focused audit against the installed Rebased 1.1.11 is recorded in [`docs/rebased-1.1.11-independent-audit.md`](docs/rebased-1.1.11-independent-audit.md). It deliberately excludes existing parity records from its evidence and currently grades the product as **partially implemented** because UI/UX is not identical.
+The fresh, Git-focused audit is recorded in [`docs/rebased-1.1.11-independent-audit.md`](docs/rebased-1.1.11-independent-audit.md). It deliberately excludes existing parity records and currently grades the product as **partially implemented**: the confirmed workbench regressions are fixed, while uncaptured advanced Rebased interactions and true safe-mode preview remain open.
 
 ## Releases
 

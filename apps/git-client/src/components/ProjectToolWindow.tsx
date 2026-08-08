@@ -476,7 +476,7 @@ export function ProjectToolWindow({
           style={{ "--tree-depth": 0 } as React.CSSProperties}
           type="button"
           className={cn(
-            "grid min-h-0 text-xs whitespace-normal text-left aria-selected:bg-accent aria-current:bg-accent",
+            "grid min-h-0 text-xs whitespace-normal text-left aria-selected:bg-muted! aria-current:bg-muted!",
             tw.projectTreeRow,
           )}
           variant="ghost"

@@ -424,12 +424,12 @@
   }
 
   .appShell[data-window-mode="welcome"] {
-    grid-template-rows: 27px 29px minmax(0, 1fr) 20px !important;
+    grid-template-rows: 30px 29px minmax(0, 1fr) 20px !important;
   }
 
   html[data-status-bar-visible="false"] .appShell[data-window-mode="welcome"],
   html[data-presentation-mode="true"] .appShell[data-window-mode="welcome"] {
-    grid-template-rows: 27px 29px minmax(0, 1fr) 0 !important;
+    grid-template-rows: 30px 29px minmax(0, 1fr) 0 !important;
   }
 
   html[data-toolbar-visible="false"] .titlebar > :not(.trafficSpace):not(.mainToolbarDragRegion),

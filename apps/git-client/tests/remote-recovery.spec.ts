@@ -28,7 +28,7 @@ test("keeps Push keyboard-safe through exact lease confirmation and Escape", asy
 test("focuses the first history rewrite action and dismisses with Escape", async ({ page }) => {
   await page
     .getByRole("row", {
-      name: /Jamie 2h ago refactor: isolate credential redaction/,
+      name: /Jamie 2 hours ago refactor: isolate credential redaction/,
     })
     .click({ button: "right" });
   await page.getByRole("menuitem", { name: "Interactive Rebase from Here…" }).click();

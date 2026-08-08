@@ -419,7 +419,7 @@ export const BottomPanel = memo(function BottomPanel({
           tabIndex={0}
         />
       )}
-      {(collapsed || active !== "terminal") && (
+      {!collapsed && active !== "terminal" && (
         <Tabs
           className="contents"
           onValueChange={(value) => {
@@ -440,7 +440,7 @@ export const BottomPanel = memo(function BottomPanel({
                   id={`bottom-tool-tab-${tab.id}`}
                   key={tab.id}
                   onClick={() => {
-                    if (tab.id !== active) return;
+                    if (tab.id !== active) onActiveChange(tab.id);
                     setExplicitlyOpened(true);
                     if (collapsed) onToggle();
                   }}
@@ -457,25 +457,23 @@ export const BottomPanel = memo(function BottomPanel({
               ))}
             </TabsList>
             <span />
-            {(collapsed || active !== "terminal" || fixture) && (
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <Button
-                      aria-label={collapsed ? "Show" : "Hide"}
-                      onClick={collapsed ? onToggle : hidePanel}
-                      type="button"
-                      className="text-muted-foreground"
-                      variant="ghost"
-                      size="icon-sm"
-                    >
-                      {collapsed ? "⌃" : "⌄"}
-                    </Button>
-                  }
-                />
-                <TooltipContent>{collapsed ? "Show" : "Hide"}</TooltipContent>
-              </Tooltip>
-            )}
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    aria-label="Hide"
+                    onClick={hidePanel}
+                    type="button"
+                    className="text-muted-foreground"
+                    variant="ghost"
+                    size="icon-sm"
+                  >
+                    ⌄
+                  </Button>
+                }
+              />
+              <TooltipContent>Hide</TooltipContent>
+            </Tooltip>
           </div>
         </Tabs>
       )}
@@ -601,7 +599,9 @@ export const BottomPanel = memo(function BottomPanel({
                         dangerous: true,
                       });
                       if (!accepted) return;
-                      await onOperation({ kind: "stashClear" });
+                      await onOperation({
+                        kind: "stashClear",
+                      });
                     });
                   })}
                   type="button"

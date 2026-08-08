@@ -49,6 +49,7 @@ export function useAppDialog(): AppDialogController {
   const [value, setValue] = useState("");
   const [validation, setValidation] = useState<string>();
   const requestRef = useRef<DialogRequest | undefined>(undefined);
+  const originFocus = useRef<HTMLElement | null>(null);
   const dialogId = useId();
   requestRef.current = request;
 
@@ -63,6 +64,8 @@ export function useAppDialog(): AppDialogController {
 
   const input = useCallback((options: InputOptions): Promise<string | null> => {
     return new Promise((resolve) => {
+      originFocus.current =
+        document.activeElement instanceof HTMLElement ? document.activeElement : null;
       setValue(options.initialValue ?? "");
       setValidation(undefined);
       setRequest({ kind: "input", options, resolve });
@@ -71,6 +74,8 @@ export function useAppDialog(): AppDialogController {
 
   const confirm = useCallback((options: ConfirmOptions): Promise<boolean> => {
     return new Promise((resolve) => {
+      originFocus.current =
+        document.activeElement instanceof HTMLElement ? document.activeElement : null;
       setValidation(undefined);
       setRequest({ kind: "confirm", options, resolve });
     });
@@ -80,6 +85,9 @@ export function useAppDialog(): AppDialogController {
     if (request?.kind === "input") request.resolve(null);
     if (request?.kind === "confirm") request.resolve(false);
     setRequest(undefined);
+    window.requestAnimationFrame(() => {
+      if (originFocus.current?.isConnected) originFocus.current.focus();
+    });
   };
 
   const submit = (): void => {
@@ -100,6 +108,9 @@ export function useAppDialog(): AppDialogController {
       request.resolve(true);
     }
     setRequest(undefined);
+    window.requestAnimationFrame(() => {
+      if (originFocus.current?.isConnected) originFocus.current.focus();
+    });
   };
 
   useDismissLayer(
@@ -169,6 +180,7 @@ export function useAppDialog(): AppDialogController {
         </div>
         <footer className="flex justify-end gap-2 border-t border-border p-3">
           <Button
+            autoFocus={request.kind === "confirm" && request.options.dangerous === true}
             onClick={cancel}
             type="button"
             className={cn("h-7 px-2.5")}
@@ -178,12 +190,15 @@ export function useAppDialog(): AppDialogController {
             Cancel
           </Button>
           <Button
+            autoFocus={request.kind === "confirm" && request.options.dangerous !== true}
             type="submit"
             className={cn(
               "h-7 px-2.5",
               request.kind === "confirm" && request.options.dangerous ? "" : "",
             )}
-            variant="destructive"
+            variant={
+              request.kind === "confirm" && request.options.dangerous ? "destructive" : "default"
+            }
             size="sm"
           >
             {request.options.confirmLabel ?? (request.kind === "confirm" ? "Continue" : "Apply")}

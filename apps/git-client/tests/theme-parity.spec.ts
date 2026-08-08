@@ -143,8 +143,8 @@ test("matches Rebased geometry, density, and interactive states", async ({ page 
   const toolbar = page.getByRole("banner", { name: "Main Toolbar" });
   const logTabs = page.locator(".commandbar");
   const statusBar = page.getByRole("contentinfo", { name: "Status Bar" });
-  await expect(toolbar).toHaveCSS("height", `${contract.geometry.mainToolbar}px`);
-  await expect(logTabs).toHaveCSS("height", "27px");
+  await expect(toolbar).toHaveCSS("height", "35px");
+  await expect(logTabs).toHaveCSS("height", "32px");
   await expect(statusBar).toHaveCSS("height", `${contract.geometry.statusBar}px`);
 
   await page.locator("html").evaluate((root) => {
@@ -153,43 +153,17 @@ test("matches Rebased geometry, density, and interactive states", async ({ page 
   const commitRow = page.getByRole("row").nth(1);
   await expect(commitRow).toHaveCSS("height", `${contract.geometry.compactRow}px`);
 
-  const appearance = page.getByRole("button", { name: /Appearance:/u });
-  await appearance.click();
-  const selected = page.getByRole("menuitemradio", { name: "Islands Light", exact: true });
-  const other = page.getByRole("menuitemradio", { name: "Islands Dark", exact: true });
-  await expect(selected).toHaveAttribute("aria-checked", "true");
-  const selectedBackground = await selected.evaluate(
-    (element) => getComputedStyle(element).backgroundColor,
-  );
-  const primary = await page
-    .locator("html")
-    .evaluate((root) => getComputedStyle(root).getPropertyValue("--primary").trim());
-  expect(selectedBackground).toBe(primary);
-
-  const idleBackground = await other.evaluate(
-    (element) => getComputedStyle(element).backgroundColor,
-  );
-  await other.hover();
-  await expect
-    .poll(() => other.evaluate((element) => getComputedStyle(element).backgroundColor))
-    .not.toBe(idleBackground);
-  await page.keyboard.press("End");
-  await expect(other).toBeFocused();
-  expect(
-    await other.evaluate((element) => {
-      const style = getComputedStyle(element);
-      return style.outlineStyle !== "none" || style.boxShadow !== "none";
-    }),
-  ).toBe(true);
-
-  await page.keyboard.press("Escape");
+  await expect(page.getByRole("button", { name: /Appearance:/u })).toHaveCount(0);
+  const settings = page.getByRole("button", {
+    name: "IDE and Project Settings",
+  });
   await page.mouse.move(0, 200);
-  const idleActionBackground = await appearance.evaluate(
+  const idleActionBackground = await settings.evaluate(
     (element) => getComputedStyle(element).backgroundColor,
   );
-  await appearance.hover();
+  await settings.hover();
   await page.mouse.down();
-  const activeActionBackground = await appearance.evaluate(
+  const activeActionBackground = await settings.evaluate(
     (element) => getComputedStyle(element).backgroundColor,
   );
   await page.mouse.up();
@@ -206,7 +180,10 @@ test("matches Rebased geometry, density, and interactive states", async ({ page 
   const expectedDisabledColor = await page
     .locator("html")
     .evaluate((root) => getComputedStyle(root).getPropertyValue("--disabled-foreground").trim());
-  expect(disabledColor).toEqual({ color: expectedDisabledColor, opacity: "0.45" });
+  expect(disabledColor).toEqual({
+    color: expectedDisabledColor,
+    opacity: "0.45",
+  });
 });
 
 test("keeps approved Light and Dark screen states stable", async ({ page }) => {
@@ -218,8 +195,7 @@ test("keeps approved Light and Dark screen states stable", async ({ page }) => {
 
   await page.setViewportSize({ width: 1184, height: 768 });
   await page.goto("/?fixture=qa");
-  await page.getByRole("button", { name: /Appearance:/u }).click();
-  await page.getByRole("menuitemradio", { name: "Islands Dark", exact: true }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await expect(page).toHaveScreenshot("theme-parity-workbench-dark.png", {
     maxDiffPixelRatio: contract.thresholds.maximumMismatchPercent / 100,
   });

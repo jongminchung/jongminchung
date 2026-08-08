@@ -298,6 +298,7 @@ export function GitBranchesPopup({
 
   return (
     <div
+      aria-busy={busy || undefined}
       aria-label="Git Branches"
       className={tw.gitBranchesPopup}
       onKeyDown={(event) => {

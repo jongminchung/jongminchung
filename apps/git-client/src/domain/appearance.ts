@@ -9,7 +9,7 @@ export interface AppearancePreference {
 }
 
 export const DEFAULT_APPEARANCE_PREFERENCE: AppearancePreference = {
-  theme: "light",
+  theme: "dark",
   syncWithOs: false,
 };
 

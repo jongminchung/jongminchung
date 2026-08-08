@@ -10,7 +10,7 @@ const COLOR_TOKENS = [
   "--graph-5",
   "--graph-6",
 ] as const;
-const ROW_HEIGHT = 19;
+const ROW_HEIGHT = 25;
 const LANE_WIDTH = 12;
 
 export const CommitGraph = memo(function CommitGraph({

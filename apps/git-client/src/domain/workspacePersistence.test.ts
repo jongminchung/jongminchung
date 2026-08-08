@@ -166,7 +166,7 @@ describe("workspace persistence", () => {
       commitDraft: { message: "WIP", runHooks: false },
       changesNavigatorWidth: 420,
     });
-    expect(migrateRepositoryUiState({ historyReviewWidth: 760 }).historyReviewWidth).toBe(194);
+    expect(migrateRepositoryUiState({ historyReviewWidth: 760 }).historyReviewWidth).toBe(253);
   });
 
   it("preserves repository and failed-path tab order", () => {

@@ -416,8 +416,8 @@ export function PushDialog({
           <Button
             type="submit"
             disabled={!canSubmit}
-            className={cn("h-7 px-2.5", choice === "forceWithLease" ? "" : "")}
-            variant="destructive"
+            className={cn("h-7 px-2.5")}
+            variant={choice === "forceWithLease" ? "destructive" : "default"}
             size="sm"
           >
             {pushing ? "Pushing…" : choice === "forceWithLease" ? "Force Push with Lease" : "Push"}

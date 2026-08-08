@@ -12,11 +12,11 @@ import {
 
 export const WORKSPACE_SCHEMA_VERSION = 10;
 export const DEFAULT_BOTTOM_PANEL_HEIGHT = 248;
-export const DEFAULT_HISTORY_REVIEW_WIDTH = 194;
+export const DEFAULT_HISTORY_REVIEW_WIDTH = 253;
 export const MIN_BOTTOM_PANEL_HEIGHT = 160;
 export const MAX_BOTTOM_PANEL_HEIGHT = 420;
-export const DEFAULT_SIDE_TOOL_WINDOW_WIDTH = 352;
-export const MIN_SIDE_TOOL_WINDOW_WIDTH = 260;
+export const DEFAULT_SIDE_TOOL_WINDOW_WIDTH = 458;
+export const MIN_SIDE_TOOL_WINDOW_WIDTH = 302;
 export const MAX_SIDE_TOOL_WINDOW_WIDTH = 520;
 
 export type WorkspaceBottomPanelTab =

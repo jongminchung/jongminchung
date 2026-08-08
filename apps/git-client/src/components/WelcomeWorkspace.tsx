@@ -203,9 +203,8 @@ export function WelcomeWorkspace({
             <Button
               onClick={onNewProject}
               type="button"
-              className={cn("h-7 px-2.5")}
-              variant="outline"
-              size="sm"
+              className="h-auto! min-h-0 border-0 p-0! hover:bg-transparent"
+              variant="ghost"
             >
               <span>
                 <Icon name="plus" size={24} />
@@ -215,9 +214,8 @@ export function WelcomeWorkspace({
             <Button
               onClick={onOpenRepository}
               type="button"
-              className={cn("h-7 px-2.5")}
-              variant="outline"
-              size="sm"
+              className="h-auto! min-h-0 border-0 p-0! hover:bg-transparent"
+              variant="ghost"
             >
               <span>
                 <Icon name="folder" size={24} />
@@ -227,9 +225,8 @@ export function WelcomeWorkspace({
             <Button
               onClick={onCloneRepository}
               type="button"
-              className={cn("h-7 px-2.5")}
-              variant="outline"
-              size="sm"
+              className="h-auto! min-h-0 border-0 p-0! hover:bg-transparent"
+              variant="ghost"
             >
               <span>
                 <Icon name="branch" size={24} />
@@ -237,6 +234,15 @@ export function WelcomeWorkspace({
               Clone Repository
             </Button>
           </div>
+          <Button
+            className="mx-auto mt-5 h-7 px-3 text-xs text-muted-foreground"
+            onClick={onOpenSettings}
+            type="button"
+            variant="ghost"
+            size="sm"
+          >
+            More Actions
+          </Button>
         </section>
       )}
 
@@ -303,44 +309,55 @@ export function WelcomeWorkspace({
             role="listbox"
           >
             {filteredProjects.map((project, index) => (
-              <Button
-                aria-selected={selectedProject === index}
-                key={project.path}
-                onClick={() => setSelectedProject(index)}
-                onDoubleClick={() => onOpenRecent(project.path)}
-                onFocus={() => setSelectedProject(index)}
-                ref={(node) => {
-                  projectRefs.current[index] = node;
-                }}
-                role="option"
-                aria-keyshortcuts="Enter"
-                tabIndex={selectedProject === index ? 0 : -1}
-                type="button"
-                className={cn(
-                  "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
-                  "flex min-h-[58px] w-full items-start gap-[13px] rounded px-[23px] py-[8px] text-left hover:bg-[var(--muted)] focus-visible:bg-[var(--accent)]",
-                )}
-                variant="ghost"
-                size="default"
-              >
-                <span className="mt-[1px] flex h-5 w-5 shrink-0 items-center justify-center rounded bg-[var(--project-avatar)] text-[9px] font-bold text-primary-foreground">
-                  {projectMonogram(project.name)}
-                </span>
-                <span className="min-w-0">
-                  <strong className="block text-[13px] font-medium leading-[18px]">
-                    {project.name}
-                  </strong>
-                  <small className="block truncate text-[12px] leading-[17px] text-[var(--muted-foreground)]">
-                    {displayPath(project.path)}
-                  </small>
-                  {project.branch !== null && (
-                    <small className="flex items-center gap-1 text-[12px] leading-[17px] text-[var(--muted-foreground)]">
-                      <GitBranch aria-hidden size={12} strokeWidth={1.5} />
-                      {project.branch}
-                    </small>
+              <div className="group relative" key={project.path}>
+                <Button
+                  aria-selected={selectedProject === index}
+                  onClick={() => setSelectedProject(index)}
+                  onDoubleClick={() => onOpenRecent(project.path)}
+                  onFocus={() => setSelectedProject(index)}
+                  ref={(node) => {
+                    projectRefs.current[index] = node;
+                  }}
+                  role="option"
+                  aria-keyshortcuts="Enter"
+                  tabIndex={selectedProject === index ? 0 : -1}
+                  type="button"
+                  className={cn(
+                    "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+                    "flex min-h-[58px] w-full items-start gap-[13px] rounded px-[23px] py-[8px] pr-12 text-left hover:bg-[var(--muted)] focus-visible:bg-[var(--accent)]",
                   )}
-                </span>
-              </Button>
+                  variant="ghost"
+                  size="default"
+                >
+                  <span className="mt-[1px] flex h-5 w-5 shrink-0 items-center justify-center rounded bg-[var(--project-avatar)] text-[9px] font-bold text-primary-foreground">
+                    {projectMonogram(project.name)}
+                  </span>
+                  <span className="min-w-0">
+                    <strong className="block text-[13px] font-medium leading-[18px]">
+                      {project.name}
+                    </strong>
+                    <small className="block truncate text-[12px] leading-[17px] text-[var(--muted-foreground)]">
+                      {displayPath(project.path)}
+                    </small>
+                    {project.branch !== null && (
+                      <small className="flex items-center gap-1 text-[12px] leading-[17px] text-[var(--muted-foreground)]">
+                        <GitBranch aria-hidden size={12} strokeWidth={1.5} />
+                        {project.branch}
+                      </small>
+                    )}
+                  </span>
+                </Button>
+                <Button
+                  aria-label={`More actions for ${project.name}`}
+                  className="absolute top-[15px] right-3 size-7 p-0 text-muted-foreground opacity-0 group-hover:opacity-100 focus:opacity-100"
+                  onClick={() => onOpenSettings()}
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                >
+                  <Icon name="more" size={15} />
+                </Button>
+              </div>
             ))}
             {filteredProjects.length === 0 && (
               <p className="px-5 py-3 text-[var(--muted-foreground)]">No projects found.</p>

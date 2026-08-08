@@ -411,7 +411,7 @@ export const DetailsPane = memo(function DetailsPane({
         </Tooltip>
       </div>
       {!commit ? (
-        <div className="grid min-h-0 grid-rows-[2fr_1fr] text-center" data-empty-revision-review>
+        <div className="grid min-h-0 grid-rows-[7fr_3fr] text-center" data-empty-revision-review>
           <EmptyState
             className="rounded-none border-b border-border p-0"
             title="Select commit to view changes"

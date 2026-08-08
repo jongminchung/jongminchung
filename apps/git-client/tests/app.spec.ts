@@ -14,9 +14,9 @@ test("matches the 800 by 650 Rebased recent-project geometry", async ({ page }) 
     "feat/opensearch",
   );
   await expect(page.getByRole("button", { name: "New Project" })).toBeVisible();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await expect(page.getByTestId("welcome-sidebar")).toHaveCSS("width", "224px");
-  await expect(page.getByTestId("welcome-titlebar")).toHaveCSS("height", "27px");
+  await expect(page.getByTestId("welcome-titlebar")).toHaveCSS("height", "30px");
   await expect(page.getByTestId("welcome-project-toolbar")).toHaveCSS("height", "68px");
   await expect(page).toHaveScreenshot("welcome-projects-light-recent-800x650.png");
 
@@ -34,6 +34,10 @@ test("keeps the Rebased empty-project state at 800 by 650", async ({ page }) => 
   await page.setViewportSize({ width: 800, height: 650 });
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Welcome to Git Client" })).toBeVisible();
+  const moreActions = page.getByRole("button", { name: "More Actions" });
+  await expect(moreActions).toBeVisible();
+  const moreActionsBounds = await moreActions.boundingBox();
+  expect((moreActionsBounds?.y ?? 650) + (moreActionsBounds?.height ?? 0)).toBeLessThan(650);
   await expect(page).toHaveScreenshot("welcome-projects-light-empty-800x650.png");
 });
 
@@ -45,7 +49,7 @@ test("matches the focused Rebased Customize geometry", async ({ page }) => {
   await expect(page.getByRole("treeitem", { name: "Customize" })).toBeFocused();
   await page.evaluate(() => window.scrollTo(0, 0));
   await expect(page.getByRole("heading", { name: "Appearance" })).toBeVisible();
-  await expect(page.getByLabel("Theme:")).toContainText("Islands Light");
+  await expect(page.getByLabel("Theme:")).toContainText("Islands Dark");
   await expect(page.getByText("Plugins", { exact: true })).toHaveCount(0);
   await expect(page.getByText("Editor color scheme", { exact: true })).toHaveCount(0);
   await expect(page.getByText("Language and Region", { exact: true })).toHaveCount(0);
@@ -102,8 +106,8 @@ test("applies and restores Welcome appearance preferences", async ({ page }) => 
   await expect(root).toHaveAttribute("data-theme", "light");
 });
 
-test("keeps the workspace titlebar at 30px", async ({ page }) => {
-  await expect(page.getByRole("banner", { name: "Main Toolbar" })).toHaveCSS("height", "30px");
+test("keeps the workspace titlebar at 35px", async ({ page }) => {
+  await expect(page.getByRole("banner", { name: "Main Toolbar" })).toHaveCSS("height", "35px");
 });
 
 test("renders the dense three-pane Git log fixture", async ({ page }) => {
@@ -119,7 +123,7 @@ test("renders the dense three-pane Git log fixture", async ({ page }) => {
     .click();
   await expect(page.getByRole("navigation", { name: "Changed files" })).toBeVisible();
   await expect(page.getByText("Commit details", { exact: true })).toBeVisible();
-  await expect(page.getByTitle("Local-only commit to push")).toBeVisible();
+  await expect(page.getByTitle("Local-only commit to push")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Check for updates" })).toHaveCount(0);
   await expect(page).toHaveScreenshot("git-log-workbench.png", {
     fullPage: true,
@@ -128,8 +132,6 @@ test("renders the dense three-pane Git log fixture", async ({ page }) => {
 
 test("renders the Codex neutral dark theme", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.getByRole("button", { name: /Appearance:/ }).click();
-  await page.getByRole("menuitemradio", { name: "Islands Dark", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await expect(page).toHaveScreenshot("git-log-workbench-dark.png", {
     fullPage: true,
@@ -137,59 +139,66 @@ test("renders the Codex neutral dark theme", async ({ page }) => {
 });
 
 test("supports persisted Sync with OS, Islands Light, and Islands Dark modes", async ({ page }) => {
-  const appearance = page.getByRole("button", { name: /Appearance:/ });
+  const settings = page.getByRole("button", {
+    name: "IDE and Project Settings",
+  });
 
-  await appearance.click();
-  await page.getByRole("menuitemradio", { name: "Islands Dark", exact: true }).click();
+  await settings.click();
+  let dialog = page.getByRole("dialog", { name: "Settings" });
+  await dialog.getByRole("radio", { name: "Islands Dark", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await expect(appearance).toHaveAttribute("aria-label", "Appearance: Islands Dark");
   await page.reload();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await expect(appearance).toHaveAttribute("aria-label", "Appearance: Islands Dark");
 
-  await appearance.click();
-  await page.getByRole("menuitemradio", { name: "Islands Light", exact: true }).click();
+  await settings.click();
+  dialog = page.getByRole("dialog", { name: "Settings" });
+  await dialog.getByRole("radio", { name: "Islands Light", exact: true }).click();
   await page.emulateMedia({ colorScheme: "dark" });
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 
-  await appearance.click();
-  await page.getByRole("menuitemradio", { name: "Sync with OS", exact: true }).click();
+  await dialog.getByRole("radio", { name: "Sync with OS", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await page.emulateMedia({ colorScheme: "light" });
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 });
 
 test("shows accessible supplemental help for icon actions", async ({ page }) => {
-  const appearance = page.getByRole("button", { name: /Appearance:/ });
+  const settings = page.getByRole("button", {
+    name: "IDE and Project Settings",
+  });
 
-  await appearance.hover();
-  await expect(page.locator('[data-slot="tooltip-content"]')).toHaveText("Appearance");
+  await settings.hover();
+  await expect(page.locator('[data-slot="tooltip-content"]')).toHaveText(
+    "IDE and Project Settings",
+  );
   await page.keyboard.press("Escape");
   await expect(page.locator('[data-slot="tooltip-content"]')).toHaveCount(0);
 
   await page.mouse.move(0, 0);
-  await appearance.focus();
-  await expect(page.locator('[data-slot="tooltip-content"]')).toHaveText("Appearance");
+  await settings.focus();
+  await expect(page.locator('[data-slot="tooltip-content"]')).toHaveText(
+    "IDE and Project Settings",
+  );
 });
 
-test("navigates the Appearance menu with the keyboard", async ({ page }) => {
-  const appearance = page.getByRole("button", { name: /Appearance:/ });
-  await appearance.focus();
-  await page.keyboard.press("Enter");
-  await expect(page.getByRole("menu", { name: "Appearance" })).toBeVisible();
-  await expect(page).toHaveScreenshot("appearance-menu.png", {
-    fullPage: true,
+test("navigates appearance settings with the keyboard", async ({ page }) => {
+  const settings = page.getByRole("button", {
+    name: "IDE and Project Settings",
   });
-  await page.keyboard.press("End");
-  await expect(
-    page.getByRole("menuitemradio", { name: "Islands Dark", exact: true }),
-  ).toBeFocused();
+  await settings.focus();
   await page.keyboard.press("Enter");
-  await expect(appearance).toHaveAttribute("aria-label", "Appearance: Islands Dark");
-  await page.keyboard.press("Enter");
+  const dialog = page.getByRole("dialog", { name: "Settings" });
+  await expect(dialog).toBeVisible();
+  const light = dialog.getByRole("radio", {
+    name: "Islands Light",
+    exact: true,
+  });
+  await light.focus();
+  await page.keyboard.press("Space");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   await page.keyboard.press("Escape");
-  await expect(page.getByRole("menu", { name: "Appearance" })).toHaveCount(0);
-  await expect(appearance).toBeFocused();
+  await expect(dialog).toHaveCount(0);
+  await expect(settings).toBeFocused();
 });
 
 test("keeps core panes usable at the minimum window size", async ({ page }) => {
@@ -264,7 +273,9 @@ test("opens Changes with the first layer selected and restores selection after s
   page,
 }) => {
   await page.getByRole("button", { name: "Commit", exact: true }).click();
-  const changedFiles = page.getByRole("complementary", { name: "Changed files" });
+  const changedFiles = page.getByRole("complementary", {
+    name: "Changed files",
+  });
   await expect(
     changedFiles.getByRole("button", {
       name: /M actionAvailability\.ts src\/domain \+34 −4/,
@@ -330,7 +341,7 @@ test("opens one reviewed Push dialog and requires exact lease confirmation", asy
 
 test("opens published commits in the visual interactive rebase workspace", async ({ page }) => {
   const commit = page.getByRole("row", {
-    name: /Jamie 2h ago refactor: isolate credential redaction/,
+    name: /Jamie 2 hours ago refactor: isolate credential redaction/,
   });
   await commit.click({ button: "right" });
   await page.getByRole("menuitem", { name: "Interactive Rebase from Here…" }).click();
@@ -466,13 +477,17 @@ test("resizes the bottom panel with accessible keyboard controls", async ({ page
 });
 
 test("resizes and exposes v4 review panes with accessible separators", async ({ page }) => {
+  await page
+    .getByRole("navigation", { name: "Left Toolbar" })
+    .getByRole("button", { name: "Project", exact: true })
+    .click();
   const review = page.getByRole("separator", {
     name: "Resize revision review",
   });
-  await expect(review).toHaveAttribute("aria-valuenow", "194");
+  await expect(review).toHaveAttribute("aria-valuenow", "253");
   await review.focus();
   await page.keyboard.press("ArrowLeft");
-  await expect(review).toHaveAttribute("aria-valuenow", "206");
+  await expect(review).toHaveAttribute("aria-valuenow", "265");
 
   await page.getByRole("button", { name: "Commit", exact: true }).click();
   await expect(page.getByRole("complementary", { name: "Changed files" })).toBeVisible();
@@ -481,6 +496,8 @@ test("resizes and exposes v4 review panes with accessible separators", async ({ 
       name: "Resize change navigator",
     }),
   ).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Commit log" })).toBeVisible();
+  await expect(page.getByRole("complementary", { name: "Revision review" })).toBeVisible();
 });
 
 test("routes branch operations to a focused repository tool", async ({ page }) => {
@@ -551,7 +568,9 @@ test("uses the command registry for palette, views, search, drawer, and settings
   await expect(page.getByLabel("Filter changed files")).toBeFocused();
 
   await page.keyboard.press("Meta+p");
-  const executablePalette = page.getByRole("dialog", { name: "Search Everywhere" });
+  const executablePalette = page.getByRole("dialog", {
+    name: "Search Everywhere",
+  });
   await executablePalette.getByRole("combobox").fill("Settings");
   await expect(executablePalette.getByRole("option", { name: /Settings/u }).first()).toBeVisible();
   await page.keyboard.press("Enter");
@@ -590,7 +609,10 @@ test("dismisses context, popover, and multi-selection one layer at a time", asyn
   await expect(page.getByRole("menu")).toHaveCount(0);
   await expect(head).toBeFocused();
 
-  const filters = page.getByRole("button", { name: "Graph Options", exact: true });
+  const filters = page.getByRole("button", {
+    name: "Graph Options",
+    exact: true,
+  });
   await filters.click();
   await expect(page.getByRole("combobox", { name: "Author" })).toBeVisible();
   await page.keyboard.press("Escape");
@@ -635,6 +657,10 @@ test("links and closes dynamic Log and editor tabs with keyboard focus", async (
     await expect(panel).toBeVisible();
   };
 
+  await page
+    .getByRole("navigation", { name: "Left Toolbar" })
+    .getByRole("button", { name: "Project", exact: true })
+    .click();
   const firstLogTab = page.getByRole("tab", { name: "Log", exact: true });
   await expect(firstLogTab).toHaveAttribute("aria-selected", "true");
   await expectLinkedPanel(firstLogTab);

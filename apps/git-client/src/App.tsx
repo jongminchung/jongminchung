@@ -16,7 +16,6 @@ import {
 import type { CSSProperties } from "react";
 import { ActivityMonitorDialog } from "./components/ActivityMonitorDialog";
 import { useAppDialog } from "./components/AppDialog";
-import { AppearanceMenu } from "./components/AppearanceMenu";
 import { AppearanceProvider } from "./components/AppearanceProvider";
 import { useAppearance } from "./components/AppearanceProvider";
 import { BookmarkGroupSelectDialog } from "./components/BookmarkGroupSelectDialog";
@@ -91,6 +90,7 @@ import { ShareProjectDialog, type ShareProjectBinding } from "./components/Share
 import { SpecialFilesDialog } from "./components/SpecialFilesDialog";
 import { StackTraceDialog } from "./components/StackTraceDialog";
 import { ToolWindowLayoutsDialog } from "./components/ToolWindowLayoutsDialog";
+import { TrustProjectDialog } from "./components/TrustProjectDialog";
 import { VcsOperationsPopup, type VcsOperationGroup } from "./components/VcsOperationsPopup";
 import { WelcomeWorkspace } from "./components/WelcomeWorkspace";
 import { WhatsNewDialog } from "./components/WhatsNewDialog";
@@ -545,6 +545,45 @@ function WorkspaceTitlebar({
       </div>
       {showRepositoryActions && (
         <>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  aria-label="Update Project..."
+                  className="h-[26px] w-7 text-xs text-muted-foreground"
+                  disabled={!repository}
+                  onClick={() =>
+                    void session.executeOperation({
+                      kind: "pull",
+                      rebase: false,
+                    })
+                  }
+                  variant="ghost"
+                  size="default"
+                >
+                  <Icon name="pull" size={15} />
+                </Button>
+              }
+            />
+            <TooltipContent>Update Project...</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  aria-label="Push…"
+                  className="h-[26px] w-7 text-xs text-muted-foreground"
+                  disabled={!repository}
+                  onClick={onOpenPush}
+                  variant="ghost"
+                  size="default"
+                >
+                  <Icon name="push" size={15} />
+                </Button>
+              }
+            />
+            <TooltipContent>Push…</TooltipContent>
+          </Tooltip>
           <div className={tw.mainToolbarPopupAnchor}>
             <Tooltip>
               <TooltipTrigger
@@ -595,45 +634,6 @@ function WorkspaceTitlebar({
               />
             )}
           </div>
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  aria-label="Update Project..."
-                  className="h-[26px] w-7 text-xs text-muted-foreground"
-                  disabled={!repository}
-                  onClick={() =>
-                    void session.executeOperation({
-                      kind: "pull",
-                      rebase: false,
-                    })
-                  }
-                  variant="ghost"
-                  size="default"
-                >
-                  <Icon name="pull" size={15} />
-                </Button>
-              }
-            />
-            <TooltipContent>Update Project...</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  aria-label="Push…"
-                  className="h-[26px] w-7 text-xs text-muted-foreground"
-                  disabled={!repository}
-                  onClick={onOpenPush}
-                  variant="ghost"
-                  size="default"
-                >
-                  <Icon name="push" size={15} />
-                </Button>
-              }
-            />
-            <TooltipContent>Push…</TooltipContent>
-          </Tooltip>
         </>
       )}
       <span className={tw.mainToolbarDragRegion} />
@@ -653,7 +653,6 @@ function WorkspaceTitlebar({
         />
         <TooltipContent>Search Everywhere</TooltipContent>
       </Tooltip>
-      <AppearanceMenu />
       <Tooltip>
         <TooltipTrigger
           render={
@@ -2138,12 +2137,12 @@ function RepositoryWorkspace({
   );
 
   useEffect(() => {
-    if (selectedOids.length === 0) return;
+    if (session.loading || selectedOids.length === 0) return;
     const validOids = selectedOids.filter((oid) =>
       repository.commits.some((commit) => commit.oid === oid),
     );
     if (validOids.length !== selectedOids.length) setSelectedOids(validOids);
-  }, [repository.commits, selectedOids]);
+  }, [repository.commits, selectedOids, session.loading]);
 
   useEffect(() => {
     setChangeSelection((current) => reconcileChangeSelection(current, workingEntries));
@@ -3955,7 +3954,6 @@ function RepositoryWorkspace({
       commandDefinition(
         "repository.shelveChanges",
         () => {
-          setBottomCollapsed(false);
           window.dispatchEvent(new CustomEvent("git-client:shelve-changes"));
         },
         () =>
@@ -3964,7 +3962,6 @@ function RepositoryWorkspace({
             : commandDisabled("There are no changes to shelve."),
       ),
       commandDefinition("repository.showShelf", () => {
-        setBottomCollapsed(false);
         window.dispatchEvent(
           new CustomEvent("git-client:open-bottom-panel", {
             detail: { tab: "shelf" },
@@ -3974,7 +3971,7 @@ function RepositoryWorkspace({
       commandDefinition(
         "repository.stashChanges",
         () => {
-          setBottomCollapsed(false);
+          setBottomPanelTab("stash");
           window.dispatchEvent(new CustomEvent("git-client:stash-changes"));
         },
         () =>
@@ -3985,7 +3982,7 @@ function RepositoryWorkspace({
       commandDefinition(
         "repository.showStash",
         () => {
-          setBottomCollapsed(false);
+          setBottomPanelTab("stash");
           window.dispatchEvent(
             new CustomEvent("git-client:open-bottom-panel", {
               detail: { tab: "stash" },
@@ -4553,9 +4550,14 @@ function RepositoryWorkspace({
     ),
   );
 
+  const abortInProgressOperation = async (): Promise<void> => {
+    const operation = repository.snapshot.operation;
+    if (!operation || operation === "bisect") return;
+    await session.abortOperation(operation);
+  };
+
   const commitToolWindow = (
     <ChangesWorkspace
-      toolWindow
       afterContent={changeContent.after}
       afterPreview={changePreview.after}
       beforeContent={changeContent.before}
@@ -4578,14 +4580,15 @@ function RepositoryWorkspace({
       }}
       onDeleteChangelist={session.deleteChangelist}
       onDraftChange={setCommitDraft}
-      onInspectFile={(file, layer, tab) =>
+      onInspectFile={(file, layer, tab) => {
+        setRepositoryViewMode("history");
         openInspector({
           revision: repository.snapshot.headOid ?? "HEAD",
           source: layer === "index" ? { kind: "index" } : { kind: "workingTree" },
           path: file.path,
           tab,
-        })
-      }
+        });
+      }}
       onOpenConflict={openConflict}
       onOpenPush={() => onOpenPush()}
       onCommitRailWidthChange={(width) =>
@@ -4605,6 +4608,7 @@ function RepositoryWorkspace({
       preferences={diffPreferences}
       selection={changeSelection}
       status={repository.status}
+      toolWindow
     />
   );
   const leftToolWindowOpen = repositoryViewMode === "changes" || projectOpen || bookmarksOpen;
@@ -4897,8 +4901,8 @@ function RepositoryWorkspace({
               {
                 "--editor-left":
                   leftToolWindowOpen && !session.loading
-                    ? `${sideToolWindowWidth + 30}px`
-                    : "27px",
+                    ? `${(repositoryViewMode === "changes" ? 302 : sideToolWindowWidth) + 42}px`
+                    : "39px",
               } as CSSProperties
             }
           >
@@ -4929,7 +4933,7 @@ function RepositoryWorkspace({
                               }}
                               render={
                                 <Button
-                                  className="h-[27px] max-w-[210px] gap-1 overflow-hidden px-2 py-0 text-xs text-ellipsis text-muted-foreground data-active:bg-accent data-active:text-foreground"
+                                  className="h-[32px]! max-w-[210px] gap-1! overflow-hidden px-2! py-0! text-xs! text-ellipsis text-muted-foreground data-active:bg-accent data-active:text-foreground"
                                   variant="ghost"
                                   size="xs"
                                 />
@@ -4991,7 +4995,7 @@ function RepositoryWorkspace({
                             render={
                               <Button
                                 className={cn(
-                                  "h-[27px] max-w-[210px] gap-1 overflow-hidden px-2 py-0 text-xs text-ellipsis text-muted-foreground data-active:bg-accent data-active:text-foreground",
+                                  "h-[32px]! max-w-[210px] gap-1! overflow-hidden px-2! py-0! text-xs! text-ellipsis text-muted-foreground data-active:bg-accent data-active:text-foreground",
                                 )}
                                 variant="ghost"
                                 size="xs"
@@ -5087,10 +5091,7 @@ function RepositoryWorkspace({
                       repository.snapshot.operation &&
                       repository.snapshot.operation !== "bisect"
                     ) {
-                      void session.executeOperation({
-                        kind: "abort",
-                        operation: repository.snapshot.operation,
-                      });
+                      void abortInProgressOperation();
                     }
                   })}
                   variant="destructive"
@@ -5170,7 +5171,7 @@ function RepositoryWorkspace({
                   className={`${tw.workbenchContent} ${leftToolWindowOpen ? tw.projectToolOpen : ""} ${maximizedToolWindow === "project" || maximizedToolWindow === "bookmarks" ? tw.maximizedSideTool : ""}`}
                   style={
                     {
-                      "--side-tool-window-width": `${sideToolWindowWidth}px`,
+                      "--side-tool-window-width": `${repositoryViewMode === "changes" ? 302 : sideToolWindowWidth}px`,
                       "--details-pane-width": `${historyReviewWidth}px`,
                     } as CSSProperties
                   }
@@ -6031,12 +6032,7 @@ function RepositoryWorkspace({
         <ConflictEditorDialog
           content={conflictContent}
           onAbort={async () => {
-            const operation = repository.snapshot.operation;
-            if (!operation || operation === "bisect") return;
-            await session.executeOperation({
-              kind: "abort",
-              operation,
-            });
+            await abortInProgressOperation();
             setConflictContent(undefined);
           }}
           onClose={() => setConflictContent(undefined)}
@@ -6222,6 +6218,7 @@ function AppContent() {
     systemTheme,
   } = useAppearance();
   const [showRepositoryDialog, setShowRepositoryDialog] = useState(false);
+  const [pendingTrustPath, setPendingTrustPath] = useState<string | null>(null);
   const [repositoryDialogMode, setRepositoryDialogMode] = useState<RepositoryDialogMode>("open");
   const [projectSwitcherOpen, setProjectSwitcherOpen] = useState(false);
   const [repositoryTool, setRepositoryTool] = useState<RepositoryToolKind | null>(null);
@@ -6327,8 +6324,8 @@ function AppContent() {
       defaultPath: null,
       filters: [],
     });
-    if (typeof selected === "string") await session.openRepository(selected);
-  }, [confirmDiscardEditors, session.openRepository]);
+    if (typeof selected === "string") setPendingTrustPath(selected);
+  }, [confirmDiscardEditors]);
   const importSettingsArchive = useCallback(async (): Promise<void> => {
     if (!(await importElectronSettings())) return;
     setProductSettings(parseProductSettings(await readElectronSetting(PRODUCT_SETTINGS_KEY)));
@@ -7402,6 +7399,23 @@ function AppContent() {
                 ? "Save Changes in Layout"
                 : "Rename Layout"
           }
+        />
+      )}
+      {pendingTrustPath && (
+        <TrustProjectDialog
+          onCancel={() => setPendingTrustPath(null)}
+          onPreview={() => {
+            const path = pendingTrustPath;
+            setPendingTrustPath(null);
+            void session.openRepository(path);
+          }}
+          onTrust={() => {
+            const path = pendingTrustPath;
+            setPendingTrustPath(null);
+            void session.openRepository(path);
+          }}
+          parentName={pendingTrustPath.split("/").filter(Boolean).at(-2) ?? "project"}
+          projectName={pendingTrustPath.split("/").filter(Boolean).at(-1) ?? "project"}
         />
       )}
       {welcomeVisible ? (

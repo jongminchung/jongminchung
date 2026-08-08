@@ -60,7 +60,7 @@ describe("ProjectToolWindow", () => {
         repositoryName: "dirty",
         repositoryPath: "/private/tmp/dirty",
         scratches: [],
-        width: 352,
+        width: 458,
         onWidthChange: vi.fn(),
       }),
     );

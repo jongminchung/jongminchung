@@ -62,6 +62,7 @@ import type {
   GitLocalHistoryScope,
 } from "../shared/contracts/git-utility";
 import type {
+  AbortableOperation,
   Changelist,
   BranchComparison,
   ChangelistCommitResult,
@@ -1208,18 +1209,35 @@ export function useGitSession() {
         } catch {
           // Preserve the original mutation failure; the next watcher refresh retries state hydration.
         }
+        let recoveryEntries: readonly RecoveryEntry[] | null = null;
+        if (recordsRecovery(operation) && !fixture) {
+          try {
+            recoveryEntries = await gitBridge.listRecoveryEntries(snapshot.id);
+          } catch {
+            // Preserve the original mutation failure when recovery metadata cannot be refreshed.
+          }
+        }
         const message = sanitizeGitError(error);
         setState((current) =>
           updateRepositorySession(current, snapshot.id, (session) => ({
             ...session,
             error: message,
+            recoveryEntries: recoveryEntries ?? session.recoveryEntries,
           })),
         );
         finishActivity(activityId, "failed", message);
         if (throwOnError) throw new Error(message);
       }
     },
-    [activeSnapshot, beginActivity, finishActivity, fixture, refreshCoordinator, runRequest],
+    [
+      activeSnapshot,
+      beginActivity,
+      finishActivity,
+      fixture,
+      gitBridge,
+      refreshCoordinator,
+      runRequest,
+    ],
   );
 
   const loadPushPreview = useCallback(
@@ -2072,6 +2090,22 @@ export function useGitSession() {
     [activeSnapshot, refreshCoordinator],
   );
 
+  const abortOperation = useCallback(
+    async (operation: AbortableOperation): Promise<void> => {
+      const snapshot = activeSnapshot();
+      const recoveryOperation = operation === "cherryPick" ? "cherry-pick" : operation;
+      const recoveryEntries = fixture
+        ? EMPTY_ARRAY
+        : await gitBridge.listRecoveryEntries(snapshot.id);
+      const recoveryEntry = recoveryEntries.find(
+        (entry) => entry.recoverable && entry.operation === recoveryOperation,
+      );
+      await executeOperation({ kind: "abort", operation }, true);
+      if (recoveryEntry) await restoreRecoveryEntry(recoveryEntry.id);
+    },
+    [activeSnapshot, executeOperation, fixture, gitBridge, restoreRecoveryEntry],
+  );
+
   const readConflict = useCallback(
     async (path: string): Promise<ConflictContent> =>
       gitBridge.readConflict(activeSnapshot().id, path),
@@ -2260,6 +2294,7 @@ export function useGitSession() {
     loadStashFiles,
     loadStashPatch,
     executeOperation,
+    abortOperation,
     loadPushPreview,
     loadHistoryRewritePreview,
     createShelf,

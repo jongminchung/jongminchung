@@ -98,7 +98,7 @@ function renderEmptyReview(): string {
         onInspectFile: vi.fn(),
         onPrevious: vi.fn(),
         onNext: vi.fn(),
-        reviewWidth: 194,
+        reviewWidth: 253,
         onReviewWidthChange: vi.fn(),
         onRevertSelectedChanges: vi.fn(async () => undefined),
       }),
@@ -107,25 +107,25 @@ function renderEmptyReview(): string {
 }
 
 describe("Rebased 1.1.11 history surfaces", () => {
-  it("uses the independently measured filter and commit row heights", () => {
+  it("uses the independently normalized filter and commit row heights", () => {
     const markup = renderHistory();
 
-    expect(markup).toContain('data-filter-row-height="22"');
-    expect(markup).toContain('data-log-row-height="19"');
-    expect(markup).toContain("grid-template-rows:22px minmax(0, 1fr) 0");
-    expect(markup).toContain("height:38px;position:relative");
-    expect(markup).toContain("height:19px;transform:translateY(0px)");
-    expect(markup).toContain("height:19px;transform:translateY(19px)");
-    expect(markup).toContain("[height:19px]!");
-    expect(markup).not.toContain("[height:20px]!");
+    expect(markup).toContain('data-filter-row-height="35"');
+    expect(markup).toContain('data-log-row-height="25"');
+    expect(markup).toContain("grid-template-rows:35px minmax(0, 1fr) 0");
+    expect(markup).toContain("height:50px;position:relative");
+    expect(markup).toContain("height:25px;transform:translateY(0px)");
+    expect(markup).toContain("height:25px;transform:translateY(25px)");
+    expect(markup).toContain("[height:25px]!");
+    expect(markup).not.toContain("[height:19px]!");
   });
 
-  it("keeps graph geometry on the same 19 pixel row cadence", () => {
+  it("keeps graph geometry on the same 25 pixel row cadence", () => {
     const markup = renderToStaticMarkup(createElement(CommitGraph, { commits, width: 34 }));
 
-    expect(markup).toContain('data-row-height="19"');
-    expect(markup).toContain('height="38"');
-    expect(markup).toContain("height:38px");
+    expect(markup).toContain('data-row-height="25"');
+    expect(markup).toContain('height="50"');
+    expect(markup).toContain("height:50px");
   });
 
   it("renders the measured empty review when no commit is selected", () => {

@@ -2,7 +2,7 @@
   "name": "@jongminchung/git-client",
   "version": "0.1.0",
   "private": true,
-  "description": "An Electron Git and forge client for macOS with Rebased 1.1.8 parity",
+  "description": "An independently audited, Rebased-inspired Electron Git client for macOS",
   "type": "module",
   "main": ".vite/build/main.cjs",
   "scripts": {

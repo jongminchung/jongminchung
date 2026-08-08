@@ -16,17 +16,26 @@ import { Selector } from "./ProductFormControls";
 import { TextInput } from "./ProductFormControls";
 import { Popover } from "./ProductOverlays";
 
-const LOG_FILTER_ROW_HEIGHT = 22;
-const LOG_ROW_HEIGHT = 19;
-const HISTORY_COMMIT_ROW_CLASS = tw.commitRow.replace("[height:20px]!", "[height:19px]!");
+const LOG_FILTER_ROW_HEIGHT = 35;
+const LOG_ROW_HEIGHT = 25;
+const HISTORY_COMMIT_ROW_CLASS = `${tw.commitRow} [height:25px]!`;
 
 function commitTime(timestamp: number, relativeTimeBaseSeconds?: number): string {
   const nowSeconds = relativeTimeBaseSeconds ?? Date.now() / 1000;
   const elapsedSeconds = Math.max(0, Math.floor(nowSeconds - timestamp));
   if (elapsedSeconds < 60) return "now";
-  if (elapsedSeconds < 3_600) return `${Math.floor(elapsedSeconds / 60)}m ago`;
-  if (elapsedSeconds < 86_400) return `${Math.floor(elapsedSeconds / 3_600)}h ago`;
-  if (elapsedSeconds < 604_800) return `${Math.floor(elapsedSeconds / 86_400)}d ago`;
+  if (elapsedSeconds < 3_600) {
+    const minutes = Math.floor(elapsedSeconds / 60);
+    return `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
+  }
+  if (elapsedSeconds < 86_400) {
+    const hours = Math.floor(elapsedSeconds / 3_600);
+    return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
+  }
+  if (elapsedSeconds < 604_800) {
+    const days = Math.floor(elapsedSeconds / 86_400);
+    return `${days} ${days === 1 ? "day" : "days"} ago`;
+  }
   return new Intl.DateTimeFormat(undefined, {
     year: "numeric",
     month: "numeric",
@@ -168,7 +177,7 @@ export const CommitLog = memo(function CommitLog({
     Number(author !== "all") +
     Number(since !== "all") +
     Number(Boolean(path.trim()));
-  const rowColumns = `34px minmax(190px, 1fr) ${showAuthor ? "100px" : "0px"} ${showDate ? "145px" : "0px"}`;
+  const rowColumns = `34px minmax(190px, 1fr) ${showAuthor ? "100px" : "0px"} ${showDate ? "90px" : "0px"}`;
 
   const loadMore = async (): Promise<void> => {
     if (!hasMore || loading || loadingMore.current) return;
@@ -288,7 +297,7 @@ export const CommitLog = memo(function CommitLog({
       <div className={tw.logFilters} style={{ height: LOG_FILTER_ROW_HEIGHT }}>
         <div className={tw.logSearchControls} style={{ height: LOG_FILTER_ROW_HEIGHT }}>
           <TextInput
-            className="min-w-0"
+            className="h-7! min-w-0 rounded-sm px-1.5"
             data-command-search="history"
             isLabelHidden
             label="Search"
@@ -306,7 +315,7 @@ export const CommitLog = memo(function CommitLog({
             pressed={regex}
             type="button"
             className={cn(
-              " h-6 min-w-5 px-1 border-transparent bg-transparent font-mono text-[9px] text-muted-foreground hover:bg-accent hover:text-accent-foreground data-pressed:bg-accent data-pressed:text-foreground",
+              "h-5 min-w-5 border-transparent bg-transparent px-1 font-mono text-[9px] text-muted-foreground hover:bg-accent hover:text-accent-foreground data-pressed:bg-accent data-pressed:text-foreground",
             )}
           >
             .*
@@ -317,7 +326,7 @@ export const CommitLog = memo(function CommitLog({
             pressed={matchCase}
             type="button"
             className={cn(
-              " h-6 min-w-5 px-1 border-transparent bg-transparent font-mono text-[9px] text-muted-foreground hover:bg-accent hover:text-accent-foreground data-pressed:bg-accent data-pressed:text-foreground",
+              "h-5 min-w-5 border-transparent bg-transparent px-1 font-mono text-[9px] text-muted-foreground hover:bg-accent hover:text-accent-foreground data-pressed:bg-accent data-pressed:text-foreground",
             )}
           >
             Cc
@@ -335,9 +344,10 @@ export const CommitLog = memo(function CommitLog({
             })),
           ]}
           placement="below"
+          className="h-7! rounded-sm px-1.5!"
           size="sm"
           value={branch}
-          width={62}
+          width={74}
         />
         <Selector
           isLabelHidden
@@ -351,9 +361,10 @@ export const CommitLog = memo(function CommitLog({
             })),
           ]}
           placement="below"
+          className="h-7! rounded-sm px-1.5!"
           size="sm"
           value={author}
-          width={55}
+          width={64}
         />
         <Selector
           isLabelHidden
@@ -366,11 +377,13 @@ export const CommitLog = memo(function CommitLog({
             { value: "1 month ago", label: "Last month" },
           ]}
           placement="below"
+          className="h-7! rounded-sm px-1.5!"
           size="sm"
           value={since}
-          width={55}
+          width={64}
         />
         <TextInput
+          className="h-7! rounded-sm px-1.5"
           isLabelHidden
           label="Paths"
           onChange={setPath}
@@ -471,7 +484,7 @@ export const CommitLog = memo(function CommitLog({
           <Button
             type="button"
             aria-label={"Graph Options"}
-            className={cn("h-6 min-w-5 px-1 aspect-square px-0")}
+            className={cn("h-5 min-w-5 px-0 aspect-square")}
             variant="ghost"
             size="icon-xs"
           >
@@ -485,7 +498,7 @@ export const CommitLog = memo(function CommitLog({
                 onClick={onOpenNewTab}
                 type="button"
                 aria-label="Open New Git Log Tab"
-                className={cn("h-6 min-w-5 px-1 aspect-square px-0")}
+                className={cn("h-5 min-w-5 px-0 aspect-square")}
                 variant="ghost"
                 size="icon-xs"
               >
@@ -504,7 +517,7 @@ export const CommitLog = memo(function CommitLog({
                   type="button"
                   aria-label={indexingLabel}
                   disabled={indexing || powerSaveMode}
-                  className={cn("h-6 min-w-5 px-1 aspect-square px-0")}
+                  className={cn("h-5 min-w-5 px-0 aspect-square")}
                   variant="ghost"
                   size="icon-xs"
                 >
@@ -522,7 +535,7 @@ export const CommitLog = memo(function CommitLog({
                 onClick={onRefresh}
                 type="button"
                 aria-label="Refresh"
-                className={cn("h-6 min-w-5 px-1 aspect-square px-0")}
+                className={cn("h-5 min-w-5 px-0 aspect-square")}
                 variant="ghost"
                 size="icon-xs"
               >
@@ -540,7 +553,7 @@ export const CommitLog = memo(function CommitLog({
                 type="button"
                 aria-label="Cherry-Pick"
                 disabled={!canCherryPick}
-                className={cn("h-6 min-w-5 px-1 aspect-square px-0")}
+                className={cn("h-5 min-w-5 px-0 aspect-square")}
                 variant="ghost"
                 size="icon-xs"
               >
@@ -614,7 +627,7 @@ export const CommitLog = memo(function CommitLog({
                 <Button
                   type="button"
                   aria-label="View Options"
-                  className={cn("h-6 min-w-5 px-1 aspect-square px-0")}
+                  className={cn("h-5 min-w-5 px-0 aspect-square")}
                   variant="ghost"
                   size="icon-xs"
                 >
@@ -632,7 +645,7 @@ export const CommitLog = memo(function CommitLog({
                 onClick={() => searchInput.current?.focus()}
                 type="button"
                 aria-label="Go To Hash/Branch/Tag"
-                className={cn("h-6 min-w-5 px-1 aspect-square px-0")}
+                className={cn("h-5 min-w-5 px-0 aspect-square")}
                 variant="ghost"
                 size="icon-xs"
               >
@@ -739,6 +752,7 @@ export const CommitLog = memo(function CommitLog({
                   aria-label={`${commit.author} ${displayedTime} ${commit.subject} ${commit.oid.slice(0, 7)}`}
                   aria-rowindex={index + 1}
                   aria-selected={selected}
+                  data-sync-state={toPush ? "push" : toPull ? "pull" : undefined}
                   data-oid={commit.oid}
                   key={commit.oid}
                   onClick={(event) => select(event, commit)}
@@ -757,37 +771,17 @@ export const CommitLog = memo(function CommitLog({
                   variant="ghost"
                   size="default"
                 >
-                  <span
-                    aria-hidden="true"
-                    className="relative z-[3] justify-end gap-0.5 pr-1 text-[9px] font-semibold"
-                  >
-                    {toPush && (
-                      <em
-                        className="rounded bg-success/15 px-1 text-success"
-                        title="Local-only commit to push"
-                      >
-                        ↑ push
-                      </em>
-                    )}
-                    {toPull && (
-                      <em
-                        className="rounded bg-accent/15 px-1 text-primary"
-                        title="Remote-only history to pull"
-                      >
-                        ↓ pull
-                      </em>
-                    )}
-                  </span>
+                  <span aria-hidden="true" />
                   <span aria-label={commit.subject} className={tw.commitSubject} role="cell">
                     {referencesOnLeft && referenceBadges}
                     <span className={tw.ellipsis}>{commit.subject}</span>
                     {!referencesOnLeft && referenceBadges}
                     {showHash && <code>{commit.oid.slice(0, 7)}</code>}
                   </span>
-                  <strong className={tw.ellipsis} hidden={!showAuthor} role="cell">
+                  <span className={tw.ellipsis} hidden={!showAuthor} role="cell">
                     {commit.author}
-                  </strong>
-                  <span hidden={!showDate} role="cell">
+                  </span>
+                  <span className={tw.ellipsis} hidden={!showDate} role="cell">
                     {displayedTime}
                   </span>
                 </Button>
