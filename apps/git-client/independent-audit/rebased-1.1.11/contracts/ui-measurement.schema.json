@@ -1,0 +1,185 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://git-client.local/schemas/rebased-1.1.11-ui-measurement.json",
+  "title": "Rebased 1.1.11 independent UI measurement contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contractVersion", "baseline", "coordinateSystem", "surfaces"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "contractVersion": { "const": 1 },
+    "baseline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["product", "version", "platform", "architecture", "authority"],
+      "properties": {
+        "product": { "const": "Rebased" },
+        "version": { "const": "1.1.11" },
+        "platform": { "const": "macOS" },
+        "architecture": { "const": "arm64" },
+        "authority": { "const": "installed-app-first" }
+      }
+    },
+    "coordinateSystem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["origin", "unit", "colorSpace"],
+      "properties": {
+        "origin": { "const": "screen-top-left" },
+        "unit": { "const": "physical-pixel" },
+        "colorSpace": { "const": "srgb-8bit" }
+      }
+    },
+    "surfaces": {
+      "type": "array",
+      "minItems": 10,
+      "items": { "$ref": "#/$defs/surface" }
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "product", "version", "evidenceIds"],
+      "properties": {
+        "status": { "enum": ["pending", "observed"] },
+        "product": { "const": "Rebased" },
+        "version": { "const": "1.1.11" },
+        "capturedAt": { "type": ["string", "null"], "format": "date-time" },
+        "evidenceIds": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "notes": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "rectRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "selectorHint", "required", "value"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "selectorHint": { "type": "string", "minLength": 1 },
+        "required": { "type": "boolean" },
+        "value": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["x", "y", "width", "height"],
+              "properties": {
+                "x": { "type": "number" },
+                "y": { "type": "number" },
+                "width": { "type": "number", "minimum": 0 },
+                "height": { "type": "number", "minimum": 0 }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "textRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "role", "required", "value"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "role": { "type": "string", "minLength": 1 },
+        "required": { "type": "boolean" },
+        "value": { "type": ["string", "null"] }
+      }
+    },
+    "interaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["initialFocus", "tabSequence", "shiftTabSequence", "escapeStack", "confirmations"],
+      "properties": {
+        "initialFocus": { "type": ["string", "null"] },
+        "tabSequence": { "type": "array", "items": { "type": "string" } },
+        "shiftTabSequence": { "type": "array", "items": { "type": "string" } },
+        "escapeStack": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["layer", "restoredFocus"],
+            "properties": {
+              "layer": { "type": "string" },
+              "restoredFocus": { "type": ["string", "null"] }
+            }
+          }
+        },
+        "confirmations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["trigger", "title", "confirmLabel", "cancelLabel", "typedValue"],
+            "properties": {
+              "trigger": { "type": "string" },
+              "title": { "type": ["string", "null"] },
+              "confirmLabel": { "type": ["string", "null"] },
+              "cancelLabel": { "type": ["string", "null"] },
+              "typedValue": { "type": ["string", "null"] }
+            }
+          }
+        }
+      }
+    },
+    "implementation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entrypoints", "components", "stateOwners", "styleAnchors", "tests"],
+      "properties": {
+        "entrypoints": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "components": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "stateOwners": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "styleAnchors": { "type": "array", "items": { "type": "string" } },
+        "tests": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "surface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "fixture", "viewport", "openAction", "measurements", "interaction", "source", "implementation"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]+$" },
+        "title": { "type": "string", "minLength": 1 },
+        "fixture": { "type": "string", "minLength": 1 },
+        "viewport": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["width", "height"],
+          "properties": {
+            "width": { "type": "integer", "minimum": 1 },
+            "height": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "openAction": { "type": "string", "minLength": 1 },
+        "measurements": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["rectangles", "texts", "colors"],
+          "properties": {
+            "rectangles": { "type": "array", "items": { "$ref": "#/$defs/rectRequest" }, "minItems": 1 },
+            "texts": { "type": "array", "items": { "$ref": "#/$defs/textRequest" }, "minItems": 1 },
+            "colors": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["id", "sampleHint", "value"],
+                "properties": {
+                  "id": { "type": "string" },
+                  "sampleHint": { "type": "string" },
+                  "value": { "type": ["string", "null"], "pattern": "^#[0-9a-fA-F]{8}$" }
+                }
+              }
+            }
+          }
+        },
+        "interaction": { "$ref": "#/$defs/interaction" },
+        "source": { "$ref": "#/$defs/source" },
+        "implementation": { "$ref": "#/$defs/implementation" }
+      }
+    }
+  }
+}

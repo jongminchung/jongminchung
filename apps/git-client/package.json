@@ -35,7 +35,7 @@
     "test:e2e:update": "playwright test --update-snapshots",
     "test:electron": "playwright test --config playwright.electron.config.ts",
     "test:electron-package-policy": "node --test scripts/electron-package-policy.node-test.mjs",
-    "test:scripts": "node --test scripts/*.node-test.mjs scripts/parity/*.node-test.mjs",
+    "test:scripts": "node --test scripts/*.node-test.mjs scripts/independent-audit/*.node-test.mjs scripts/parity/*.node-test.mjs",
     "test:verbose": "vitest run --root ../.. apps/git-client --reporter=verbose",
     "typecheck": "tsc --noEmit"
   },
