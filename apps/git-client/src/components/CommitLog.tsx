@@ -16,7 +16,9 @@ import { Selector } from "./ProductFormControls";
 import { TextInput } from "./ProductFormControls";
 import { Popover } from "./ProductOverlays";
 
-const LOG_ROW_HEIGHT = 20;
+const LOG_FILTER_ROW_HEIGHT = 22;
+const LOG_ROW_HEIGHT = 19;
+const HISTORY_COMMIT_ROW_CLASS = tw.commitRow.replace("[height:20px]!", "[height:19px]!");
 
 function commitTime(timestamp: number, relativeTimeBaseSeconds?: number): string {
   const nowSeconds = relativeTimeBaseSeconds ?? Date.now() / 1000;
@@ -273,9 +275,18 @@ export const CommitLog = memo(function CommitLog({
   );
 
   return (
-    <section className={tw.logPane} aria-busy={loading} aria-label="Commit log">
-      <div className={tw.logFilters}>
-        <div className={tw.logSearchControls}>
+    <section
+      className={tw.logPane}
+      aria-busy={loading}
+      aria-label="Commit log"
+      data-filter-row-height={LOG_FILTER_ROW_HEIGHT}
+      data-log-row-height={LOG_ROW_HEIGHT}
+      style={{
+        gridTemplateRows: `${LOG_FILTER_ROW_HEIGHT}px minmax(0, 1fr) 0`,
+      }}
+    >
+      <div className={tw.logFilters} style={{ height: LOG_FILTER_ROW_HEIGHT }}>
+        <div className={tw.logSearchControls} style={{ height: LOG_FILTER_ROW_HEIGHT }}>
           <TextInput
             className="min-w-0"
             data-command-search="history"
@@ -735,12 +746,13 @@ export const CommitLog = memo(function CommitLog({
                   role="row"
                   style={{
                     gridTemplateColumns: rowColumns,
+                    height: LOG_ROW_HEIGHT,
                     transform: `translateY(${index * LOG_ROW_HEIGHT}px)`,
                   }}
                   type="button"
                   className={cn(
                     "grid min-h-0 text-xs whitespace-normal text-left aria-selected:bg-accent aria-current:bg-accent",
-                    `${tw.commitRow} ${selected ? tw.selectedCommit : ""}`,
+                    `${HISTORY_COMMIT_ROW_CLASS} ${selected ? tw.selectedCommit : ""}`,
                   )}
                   variant="ghost"
                   size="default"

@@ -12,9 +12,10 @@ import {
 
 export const WORKSPACE_SCHEMA_VERSION = 10;
 export const DEFAULT_BOTTOM_PANEL_HEIGHT = 248;
+export const DEFAULT_HISTORY_REVIEW_WIDTH = 194;
 export const MIN_BOTTOM_PANEL_HEIGHT = 160;
 export const MAX_BOTTOM_PANEL_HEIGHT = 420;
-export const DEFAULT_SIDE_TOOL_WINDOW_WIDTH = 386;
+export const DEFAULT_SIDE_TOOL_WINDOW_WIDTH = 352;
 export const MIN_SIDE_TOOL_WINDOW_WIDTH = 260;
 export const MAX_SIDE_TOOL_WINDOW_WIDTH = 520;
 
@@ -140,7 +141,7 @@ export function migrateRepositoryUiState(value: unknown): RepositoryUiState {
       diffPreferences: parseDiffPreferences(null),
       commitDraft: EMPTY_COMMIT_DRAFT,
       changesNavigatorWidth: 250,
-      historyReviewWidth: 210,
+      historyReviewWidth: DEFAULT_HISTORY_REVIEW_WIDTH,
       commitRailWidth: 315,
       sideToolWindowWidth: DEFAULT_SIDE_TOOL_WINDOW_WIDTH,
       projectOpen: true,
@@ -167,8 +168,8 @@ export function migrateRepositoryUiState(value: unknown): RepositoryUiState {
     changesNavigatorWidth: clampPaneWidth(value.changesNavigatorWidth, 250, 190, 420),
     historyReviewWidth:
       typeof value.historyReviewWidth === "number" && value.historyReviewWidth >= 640
-        ? 210
-        : clampPaneWidth(value.historyReviewWidth, 210, 180, 480),
+        ? DEFAULT_HISTORY_REVIEW_WIDTH
+        : clampPaneWidth(value.historyReviewWidth, DEFAULT_HISTORY_REVIEW_WIDTH, 180, 480),
     commitRailWidth: clampPaneWidth(value.commitRailWidth, 315, 280, 480),
     sideToolWindowWidth: clampPaneWidth(
       value.sideToolWindowWidth,

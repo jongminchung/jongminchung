@@ -6,6 +6,20 @@ describe("product settings", () => {
     expect(parseProductSettings(null)).toEqual(DEFAULT_PRODUCT_SETTINGS);
   });
 
+  it("does not show a shortcut-conflict balloon for a fresh profile", () => {
+    expect(parseProductSettings(null).showShortcutConflictWarning).toBe(false);
+    expect(parseProductSettings({}).showShortcutConflictWarning).toBe(false);
+  });
+
+  it("preserves an explicitly persisted shortcut-conflict preference", () => {
+    expect(parseProductSettings({ showShortcutConflictWarning: true })).toMatchObject({
+      showShortcutConflictWarning: true,
+    });
+    expect(parseProductSettings({ showShortcutConflictWarning: false })).toMatchObject({
+      showShortcutConflictWarning: false,
+    });
+  });
+
   it("accepts only supported compact, zoom, and notification values", () => {
     expect(
       parseProductSettings({ compactMode: true, zoom: 125, showNotifications: false }),

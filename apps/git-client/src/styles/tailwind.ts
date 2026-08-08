@@ -4,7 +4,7 @@ export const tw = {
     "activeToolTab [box-shadow:inset_0_-2px_var(--primary)] [color:var(--foreground)] [font-weight:600] [background:var(--accent)]! [color:var(--foreground)]!",
   activitySlot: "activitySlot [min-width:0]",
   appShell:
-    "appShell [background:var(--background)] [display:grid] [grid-template-rows:30px_29px_minmax(0,_1fr)_20px] [height:100%] [min-width:800px] [overflow:hidden] [position:relative] [&_button]:rounded-sm [&_input]:rounded-sm [&_textarea]:rounded-sm [&_select]:rounded-sm [&_button:not(:disabled):hover]:[background-color:color-mix(in_oklch,_var(--foreground)_7%,_transparent)]",
+    "appShell [background:var(--background)] [display:grid] [grid-template-rows:30px_27px_minmax(0,_1fr)_20px] [height:100%] [min-width:800px] [overflow:hidden] [position:relative] [&_button]:rounded-sm [&_input]:rounded-sm [&_textarea]:rounded-sm [&_select]:rounded-sm [&_button:not(:disabled):hover]:[background-color:color-mix(in_oklch,_var(--foreground)_7%,_transparent)]",
   binaryConflict:
     "binaryConflict [align-items:center] [display:flex] [flex-direction:column] [justify-content:center] [padding:40px] [text-align:center] [&_p]:[color:var(--muted-foreground)] [&_p]:[max-width:480px] [&>_div]:[display:flex] [&>_div]:[gap:8px]",
   binaryMetadata:
@@ -66,7 +66,7 @@ export const tw = {
   replaceInFilesResults:
     "replaceInFilesResults [min-height:0] [overflow:auto] [padding:5px_7px] [&>_p]:[color:var(--muted-foreground)] [&>_p]:[margin:24px] [&>_p[role=alert]]:[color:var(--destructive)] [&_li]:rounded-sm [&_li_code]:[color:var(--disabled-foreground)] [&_li_code]:[font-size:9px]",
   commandbar:
-    "commandbar [align-items:center] [background:var(--card)] [border-bottom:1px_solid_var(--border)] rounded-t-lg rounded-b-none [display:flex] [gap:3px] [height:29px] [left:var(--editor-left,_30px)] [padding:0_5px_0_0] [position:absolute] [right:30px] [top:30px] [z-index:8] [&>_button]:[align-items:center] [&>_button]:[background:transparent] [&>_button]:[display:flex] [&>_button]:[gap:6px] [&>_button]:[height:25px] [&>_button]:[padding:0_7px] [&>_button:hover]:[background:var(--muted)] [&>_button_>_em]:[align-items:center] [&>_button_>_em]:[background:var(--primary)] [&>_button_>_em]:rounded-lg [&>_button_>_em]:[color:var(--primary-foreground)] [&>_button_>_em]:[display:inline-flex] [&>_button_>_em]:[font-size:9px] [&>_button_>_em]:[font-style:normal] [&>_button_>_em]:[height:15px] [&>_button_>_em]:[justify-content:center] [&>_button_>_em]:[min-width:15px] [&>_button_>_em]:[padding:0_4px]",
+    "commandbar [align-items:center] [background:var(--card)] [border-bottom:1px_solid_var(--border)] rounded-t-lg rounded-b-none [display:flex] [gap:3px] [height:27px] [left:var(--editor-left,_27px)] [padding:0_5px_0_0] [position:absolute] [right:25px] [top:30px] [z-index:8] [&>_button]:[align-items:center] [&>_button]:[background:transparent] [&>_button]:[display:flex] [&>_button]:[gap:6px] [&>_button]:[height:25px] [&>_button]:[padding:0_7px] [&>_button:hover]:[background:var(--muted)] [&>_button_>_em]:[align-items:center] [&>_button_>_em]:[background:var(--primary)] [&>_button_>_em]:rounded-lg [&>_button_>_em]:[color:var(--primary-foreground)] [&>_button_>_em]:[display:inline-flex] [&>_button_>_em]:[font-size:9px] [&>_button_>_em]:[font-style:normal] [&>_button_>_em]:[height:15px] [&>_button_>_em]:[justify-content:center] [&>_button_>_em]:[min-width:15px] [&>_button_>_em]:[padding:0_4px]",
   commitRail:
     "commitRail [border-left:1px_solid_var(--border)] [display:grid] [gap:7px] [grid-template-rows:34px_auto_auto_minmax(110px,_1fr)_auto] [min-height:0] [min-width:0] [padding:7px] [position:relative] [&>_.verticalResizeHandle]:[left:-4px] [&>_.verticalResizeHandle]:[right:auto] [&>_header]:[align-items:center] [&>_header]:[display:flex] [&>_header]:[gap:6px] [&>_header_small]:[color:var(--disabled-foreground)] [&>_header_small]:[margin-left:auto] [&_textarea]:[background:var(--secondary)] [&_textarea]:[border:1px_solid_var(--border)] [&_textarea]:[min-height:110px] [&_textarea]:[padding:9px] [&_textarea]:[resize:none] [&>_footer]:[align-items:center] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:grid] [&>_footer]:[gap:5px] [&>_footer]:[grid-template-columns:minmax(0,_1fr)_auto_auto] [&>_footer]:[padding-top:7px] [&>_footer_>_button]:[background:var(--secondary)] [&>_footer_>_button]:[border:1px_solid_var(--border)] [&>_footer_>_button]:[min-height:29px] [&>_footer_>_button]:[padding:0_9px] max-[1120px]:[bottom:0] max-[1120px]:[box-shadow:var(--shadow-lg)] max-[1120px]:[position:absolute] max-[1120px]:[right:0] max-[1120px]:[top:0] max-[1120px]:[transform:translateX(102%)] max-[1120px]:[transition:transform_120ms_ease-out] max-[1120px]:[width:min(var(--commit-rail-width,_340px),_calc(100%_-_220px))] max-[1120px]:[z-index:15] max-[1120px]:[&>_.verticalResizeHandle]:[display:none]",
   commitRailOpen: "commitRailOpen",
@@ -183,7 +183,7 @@ export const tw = {
   inspectorTree:
     "inspectorTree [&>_button]:[align-items:center] [&>_button]:[background:transparent] [&>_button]:[display:grid] [&>_button]:[gap:8px] [&>_button]:[grid-template-columns:18px_minmax(180px,_1fr)_70px_90px_70px] [&>_button]:[height:29px] [&>_button]:[padding:0_12px] [&>_button]:[text-align:left] [&>_button]:[width:100%] [&>_button:hover]:[background:var(--muted)] [&_small]:[color:var(--disabled-foreground)] [&_code]:[color:var(--disabled-foreground)]",
   loadingEditorTabs:
-    "loadingEditorTabs [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [height:29px] [left:0] [padding:0_5px] [position:absolute] [right:0] [top:0] [&>_span]:[align-items:center] [&>_span]:[background:var(--accent)] [&>_span]:rounded-sm [&>_span]:[color:var(--foreground)] [&>_span]:[display:flex] [&>_span]:[gap:5px] [&>_span]:[height:24px] [&>_span]:[padding:0_8px]",
+    "loadingEditorTabs [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [height:27px] [left:0] [padding:0_5px] [position:absolute] [right:0] [top:0] [&>_span]:[align-items:center] [&>_span]:[background:var(--accent)] [&>_span]:rounded-sm [&>_span]:[color:var(--foreground)] [&>_span]:[display:flex] [&>_span]:[gap:5px] [&>_span]:[height:24px] [&>_span]:[padding:0_8px]",
   logViewOptions:
     "logViewOptions [display:grid] [gap:3px] [padding:5px] [&>_strong]:[border-top:1px_solid_var(--border)] [&>_strong]:[color:var(--muted-foreground)] [&>_strong]:[font-size:10px] [&>_strong]:[margin:4px_5px_1px] [&>_strong]:[padding-top:6px]",
   logFilters:
@@ -194,12 +194,12 @@ export const tw = {
   logSearchControls:
     "logSearchControls [flex:0_1_148px] [height:28px] [max-width:148px] [min-width:118px] [position:relative] [&_input]:[padding-right:43px]! [&>_button]:[position:absolute] [&>_button]:[top:2px] [&>_button:nth-of-type(1)]:[right:21px] [&>_button:nth-of-type(2)]:[right:1px]",
   mainPanes:
-    "mainPanes [display:grid] [grid-template-columns:29px_minmax(0,_1fr)_var(--details-pane-width,_300px)] [height:100%] [min-height:0] [min-width:0] max-[900px]:[grid-template-columns:29px_minmax(0,_1fr)] max-[900px]:[&>_*:last-child]:[display:none]",
+    "mainPanes [display:grid] [grid-template-columns:27px_minmax(0,_1fr)_var(--details-pane-width,_194px)] [height:100%] [min-height:0] [min-width:0] max-[900px]:[grid-template-columns:27px_minmax(0,_1fr)] max-[900px]:[&>_*:last-child]:[display:none]",
   activeWorkspace:
-    "activeWorkspace [background:var(--card)] rounded-lg [display:grid] [min-height:0] [min-width:0] [overflow:hidden] [padding-top:26px] [position:relative]",
+    "activeWorkspace [background:var(--card)] rounded-lg [display:grid] [min-height:0] [min-width:0] [overflow:hidden] [padding-top:27px] [position:relative]",
   activeWorkspaceNoTabs: "activeWorkspaceNoTabs [padding-top:0]",
   projectToolOpen:
-    "projectToolOpen [grid-template-columns:minmax(260px,_var(--side-tool-window-width,_386px))_minmax(0,_1fr)]",
+    "projectToolOpen [grid-template-columns:minmax(260px,_var(--side-tool-window-width,_352px))_minmax(0,_1fr)]",
   projectToolWindow:
     "projectToolWindow [background:var(--card)] rounded-lg [display:grid] [grid-template-rows:26px_minmax(0,_1fr)] [min-height:0] [min-width:0] [overflow:hidden] [position:relative] [&>_.verticalResizeHandle]:[right:0]",
   bookmarksToolWindow:
@@ -440,11 +440,11 @@ export const tw = {
   virtualTree: "virtualTree [min-height:0] [overflow:auto]",
   workspace: "workspace [grid-row:2_/_4] [min-height:0] [position:relative]",
   workbench:
-    "workbench [display:grid] [grid-template-columns:30px_minmax(0,_1fr)_30px] [height:100%] [min-height:0] [min-width:0]",
+    "workbench [display:grid] [grid-template-columns:27px_minmax(0,_1fr)_25px] [height:100%] [min-height:0] [min-width:0]",
   workbenchSurface:
     "workbenchSurface [background:var(--background)] [display:grid] [grid-template-rows:minmax(0,_1fr)_auto] [min-height:0] [min-width:0]",
   workbenchContent:
-    "workbenchContent [display:grid] [gap:6px] [grid-template-columns:minmax(0,_1fr)] [min-height:0] [min-width:0]",
+    "workbenchContent [display:grid] [gap:3px] [grid-template-columns:minmax(0,_1fr)] [min-height:0] [min-width:0]",
   maximizedSideTool:
     "maximizedSideTool [grid-template-columns:minmax(0,_1fr)] [&>_[data-workspace-main]]:[display:none]",
   maximizedBottomTool:

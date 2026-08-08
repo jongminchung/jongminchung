@@ -26,7 +26,7 @@ describe("ProjectToolWindow", () => {
 
     const actions = [
       "New File or Directory…",
-      "Select Opened File",
+      "Select Opened File (⌥F1, 1)",
       "Expand Selected",
       "Collapse All",
       "Options",
@@ -38,5 +38,36 @@ describe("ProjectToolWindow", () => {
       expect(index).toBeGreaterThan(previous);
       previous = index;
     }
+
+    expect(markup).toContain('aria-label="reference  /private/tmp/reference" aria-expanded="true"');
+    const [selectOpenedFile] =
+      markup.match(/<button[^>]*aria-label="Select Opened File \(⌥F1, 1\)"[^>]*>/) ?? [];
+    expect(selectOpenedFile).toBeDefined();
+    expect(selectOpenedFile).not.toContain('disabled=""');
+  });
+
+  it("disables selecting an opened file when the project has no active editor", () => {
+    const markup = renderToStaticMarkup(
+      createElement(ProjectToolWindow, {
+        changes: [],
+        hasCommits: true,
+        loadTree: vi.fn().mockResolvedValue([]),
+        onClose: vi.fn(),
+        onNew: vi.fn(),
+        onNewScratch: vi.fn(),
+        onOpenFile: vi.fn(),
+        onOpenScratch: vi.fn(),
+        repositoryName: "dirty",
+        repositoryPath: "/private/tmp/dirty",
+        scratches: [],
+        width: 352,
+        onWidthChange: vi.fn(),
+      }),
+    );
+
+    const [selectOpenedFile] =
+      markup.match(/<button[^>]*aria-label="Select Opened File \(⌥F1, 1\)"[^>]*>/) ?? [];
+    expect(selectOpenedFile).toBeDefined();
+    expect(selectOpenedFile).toContain('disabled=""');
   });
 });

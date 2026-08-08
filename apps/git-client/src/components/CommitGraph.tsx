@@ -10,7 +10,7 @@ const COLOR_TOKENS = [
   "--graph-5",
   "--graph-6",
 ] as const;
-const ROW_HEIGHT = 20;
+const ROW_HEIGHT = 19;
 const LANE_WIDTH = 12;
 
 export const CommitGraph = memo(function CommitGraph({
@@ -78,5 +78,18 @@ export const CommitGraph = memo(function CommitGraph({
       context.fill();
     });
   }, [commits.length, rows, showLongEdges, visibleOids, width]);
-  return <canvas ref={canvasRef} style={{ display: "block", pointerEvents: "none" }} />;
+  return (
+    <canvas
+      data-row-height={ROW_HEIGHT}
+      height={commits.length * ROW_HEIGHT}
+      ref={canvasRef}
+      style={{
+        display: "block",
+        height: commits.length * ROW_HEIGHT,
+        pointerEvents: "none",
+        width,
+      }}
+      width={width}
+    />
+  );
 });

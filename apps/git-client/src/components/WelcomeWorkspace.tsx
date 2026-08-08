@@ -19,6 +19,9 @@ import { CheckboxInput, Selector } from "./ProductFormControls";
 type WelcomeSection = "projects" | "customize";
 
 const SECTIONS: readonly WelcomeSection[] = ["projects", "customize"];
+const WELCOME_SIDEBAR_WIDTH = 224;
+const WELCOME_NAV_ITEM_WIDTH = 200;
+const WELCOME_NAV_ITEM_HEIGHT = 32;
 
 function sectionLabel(section: WelcomeSection): string {
   if (section === "projects") return "Projects";
@@ -97,11 +100,12 @@ export function WelcomeWorkspace({
       className={tw.welcomeWorkspace}
       onDragOver={(event) => event.preventDefault()}
       onDrop={openDroppedDirectory}
+      style={{ gridTemplateColumns: `${WELCOME_SIDEBAR_WIDTH}px minmax(0, 1fr)` }}
     >
       <aside
-        aria-label="Welcome screen categories"
         className={tw.welcomeSidebar}
         data-testid="welcome-sidebar"
+        style={{ width: WELCOME_SIDEBAR_WIDTH }}
       >
         <div className={tw.welcomeBrand}>
           <a
@@ -132,6 +136,7 @@ export function WelcomeWorkspace({
                 navRefs.current[index] = node;
               }}
               role="treeitem"
+              style={{ width: WELCOME_NAV_ITEM_WIDTH, height: WELCOME_NAV_ITEM_HEIGHT }}
               type="button"
               className={cn(
                 "gap-1.5 text-xs h-7 px-2.5 text-muted-foreground aria-selected:bg-accent aria-selected:text-foreground aria-current:bg-accent aria-current:text-foreground",
@@ -160,7 +165,7 @@ export function WelcomeWorkspace({
           <header>
             <h1 id="welcome-title">Welcome to Git Client</h1>
             <p>Create a new project to start from scratch.</p>
-            <p>Open an existing project from disk or version control.</p>
+            <p>Open existing project from disk or version control.</p>
           </header>
           <div aria-label="Project actions" className={tw.welcomeProjectActions}>
             <Button

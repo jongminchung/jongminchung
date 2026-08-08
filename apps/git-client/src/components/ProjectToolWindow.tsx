@@ -298,7 +298,8 @@ export function ProjectToolWindow({
           <TooltipTrigger
             render={
               <Button
-                aria-label="Select Opened File"
+                aria-label="Select Opened File (⌥F1, 1)"
+                disabled={!activePath}
                 onClick={() => void revealActiveFile()}
                 type="button"
                 className={cn(
@@ -461,6 +462,7 @@ export function ProjectToolWindow({
       </header>
       <div aria-label="Project structure tree" className={tw.projectTree} role="tree">
         <Button
+          aria-label={`${repositoryName}  ${repositoryPath}`}
           aria-expanded={expanded.has("")}
           aria-level={1}
           aria-selected={selectedPath === ""}
@@ -537,7 +539,11 @@ export function ProjectToolWindow({
                     />
                     <span>{entry.name}</span>
                     {loading.has(entry.path) && <small>Loading…</small>}
-                    {label && <em data-status={entry.status}>{label}</em>}
+                    {label && (
+                      <em aria-hidden data-status={entry.status}>
+                        {label}
+                      </em>
+                    )}
                   </Button>
                 }
               />

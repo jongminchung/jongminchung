@@ -55,7 +55,7 @@ test("[parity:shell.welcome] exposes the canonical Welcome and Open flow", async
 
   await expect(page).toHaveTitle("Welcome to Git Client");
   await expect(page.getByRole("button", { name: "Open", exact: true })).toBeVisible();
-  await expect(page.getByTestId("welcome-sidebar")).toHaveCSS("width", "225px");
+  await expect(page.getByTestId("welcome-sidebar")).toHaveCSS("width", "224px");
   await expect(page.getByTestId("welcome-titlebar")).toHaveCSS("height", "27px");
   await verifyAppearanceMatrix(page, page.getByRole("region", { name: "Projects" }));
   await page.getByRole("treeitem", { name: "Projects" }).focus();

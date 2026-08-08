@@ -199,6 +199,7 @@ import type {
 } from "./domain/types";
 import {
   DEFAULT_BOTTOM_PANEL_HEIGHT,
+  DEFAULT_HISTORY_REVIEW_WIDTH,
   DEFAULT_SIDE_TOOL_WINDOW_WIDTH,
   MAX_BOTTOM_PANEL_HEIGHT,
   MAX_SIDE_TOOL_WINDOW_WIDTH,
@@ -1229,7 +1230,7 @@ function RepositoryWorkspace({
   const [sideToolWindowWidth, setSideToolWindowWidth] = useState(DEFAULT_SIDE_TOOL_WINDOW_WIDTH);
   const [bottomPanelTab, setBottomPanelTab] = useState<BottomPanelTab>("shelf");
   const [changesNavigatorWidth, setChangesNavigatorWidth] = useState(250);
-  const [historyReviewWidth, setHistoryReviewWidth] = useState(210);
+  const [historyReviewWidth, setHistoryReviewWidth] = useState(DEFAULT_HISTORY_REVIEW_WIDTH);
   const [commitRailWidth, setCommitRailWidth] = useState(315);
   const [toast, setToast] = useState<string>();
   const [notificationOpen, setNotificationOpen] = useState(false);
@@ -4894,7 +4895,10 @@ function RepositoryWorkspace({
             className={tw.commandbar}
             style={
               {
-                "--editor-left": leftToolWindowOpen && !session.loading ? "422px" : "30px",
+                "--editor-left":
+                  leftToolWindowOpen && !session.loading
+                    ? `${sideToolWindowWidth + 30}px`
+                    : "27px",
               } as CSSProperties
             }
           >
@@ -4925,7 +4929,7 @@ function RepositoryWorkspace({
                               }}
                               render={
                                 <Button
-                                  className="h-6 max-w-[210px] gap-1 overflow-hidden py-0 pr-1 pl-2 text-xs text-ellipsis text-muted-foreground data-active:bg-accent data-active:text-foreground"
+                                  className="h-[27px] max-w-[210px] gap-1 overflow-hidden px-2 py-0 text-xs text-ellipsis text-muted-foreground data-active:bg-accent data-active:text-foreground"
                                   variant="ghost"
                                   size="xs"
                                 />
@@ -4987,7 +4991,7 @@ function RepositoryWorkspace({
                             render={
                               <Button
                                 className={cn(
-                                  "h-6 max-w-[210px] gap-1 overflow-hidden py-0 pr-1 pl-2 text-xs text-ellipsis text-muted-foreground data-active:bg-accent data-active:text-foreground",
+                                  "h-[27px] max-w-[210px] gap-1 overflow-hidden px-2 py-0 text-xs text-ellipsis text-muted-foreground data-active:bg-accent data-active:text-foreground",
                                 )}
                                 variant="ghost"
                                 size="xs"

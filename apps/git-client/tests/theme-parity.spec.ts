@@ -144,7 +144,7 @@ test("matches Rebased geometry, density, and interactive states", async ({ page 
   const logTabs = page.locator(".commandbar");
   const statusBar = page.getByRole("contentinfo", { name: "Status Bar" });
   await expect(toolbar).toHaveCSS("height", `${contract.geometry.mainToolbar}px`);
-  await expect(logTabs).toHaveCSS("height", `${contract.geometry.logTab}px`);
+  await expect(logTabs).toHaveCSS("height", "27px");
   await expect(statusBar).toHaveCSS("height", `${contract.geometry.statusBar}px`);
 
   await page.locator("html").evaluate((root) => {

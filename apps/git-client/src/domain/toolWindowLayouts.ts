@@ -1,5 +1,6 @@
 import {
   DEFAULT_BOTTOM_PANEL_HEIGHT,
+  DEFAULT_HISTORY_REVIEW_WIDTH,
   DEFAULT_SIDE_TOOL_WINDOW_WIDTH,
   MAX_SIDE_TOOL_WINDOW_WIDTH,
   MIN_SIDE_TOOL_WINDOW_WIDTH,
@@ -34,7 +35,7 @@ export const DEFAULT_TOOL_WINDOW_LAYOUT: ToolWindowLayout = {
   bottomPanelTab: "shelf",
   changesNavigatorWidth: 250,
   commitRailWidth: 315,
-  historyReviewWidth: 210,
+  historyReviewWidth: DEFAULT_HISTORY_REVIEW_WIDTH,
   sideToolWindowWidth: DEFAULT_SIDE_TOOL_WINDOW_WIDTH,
   logOpen: true,
   projectOpen: true,
@@ -83,8 +84,8 @@ export function parseToolWindowLayout(value: unknown): ToolWindowLayout {
     commitRailWidth: boundedNumber(value.commitRailWidth, 315, 280, 480),
     historyReviewWidth:
       typeof value.historyReviewWidth === "number" && value.historyReviewWidth >= 640
-        ? 210
-        : boundedNumber(value.historyReviewWidth, 210, 180, 480),
+        ? DEFAULT_HISTORY_REVIEW_WIDTH
+        : boundedNumber(value.historyReviewWidth, DEFAULT_HISTORY_REVIEW_WIDTH, 180, 480),
     sideToolWindowWidth: boundedNumber(
       value.sideToolWindowWidth,
       DEFAULT_SIDE_TOOL_WINDOW_WIDTH,

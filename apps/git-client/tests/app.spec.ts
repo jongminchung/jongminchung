@@ -15,7 +15,7 @@ test("matches the 800 by 650 Rebased recent-project geometry", async ({ page }) 
   );
   await expect(page.getByRole("button", { name: "New Project" })).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  await expect(page.getByTestId("welcome-sidebar")).toHaveCSS("width", "225px");
+  await expect(page.getByTestId("welcome-sidebar")).toHaveCSS("width", "224px");
   await expect(page.getByTestId("welcome-titlebar")).toHaveCSS("height", "27px");
   await expect(page.getByTestId("welcome-project-toolbar")).toHaveCSS("height", "68px");
   await expect(page).toHaveScreenshot("welcome-projects-light-recent-800x650.png");
@@ -464,10 +464,10 @@ test("resizes and exposes v4 review panes with accessible separators", async ({ 
   const review = page.getByRole("separator", {
     name: "Resize revision review",
   });
-  await expect(review).toHaveAttribute("aria-valuenow", "210");
+  await expect(review).toHaveAttribute("aria-valuenow", "194");
   await review.focus();
   await page.keyboard.press("ArrowLeft");
-  await expect(review).toHaveAttribute("aria-valuenow", "222");
+  await expect(review).toHaveAttribute("aria-valuenow", "206");
 
   await page.getByRole("button", { name: "Commit", exact: true }).click();
   await expect(page.getByRole("complementary", { name: "Changed files" })).toBeVisible();

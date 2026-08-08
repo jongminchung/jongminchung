@@ -22,6 +22,37 @@ const sessions = [
 ];
 
 describe("workspace persistence", () => {
+  it("opens a fresh repository in Project history without selecting a commit", () => {
+    expect(migrateRepositoryUiState(null)).toMatchObject({
+      activeView: "history",
+      selectedOids: [],
+      selectedRef: null,
+      projectOpen: true,
+      bookmarksOpen: false,
+      logOpen: true,
+    });
+  });
+
+  it("preserves an explicitly persisted repository shell state", () => {
+    expect(
+      migrateRepositoryUiState({
+        activeView: "changes",
+        selectedOids: ["abc123"],
+        selectedRef: "refs/heads/topic",
+        projectOpen: false,
+        bookmarksOpen: true,
+        logOpen: false,
+      }),
+    ).toMatchObject({
+      activeView: "changes",
+      selectedOids: ["abc123"],
+      selectedRef: "refs/heads/topic",
+      projectOpen: false,
+      bookmarksOpen: true,
+      logOpen: false,
+    });
+  });
+
   it("migrates missing preferences without trusting stored values", () => {
     expect(migrateWorkspacePreferences(null)).toEqual(DEFAULT_WORKSPACE_PREFERENCES);
     expect(
@@ -135,7 +166,7 @@ describe("workspace persistence", () => {
       commitDraft: { message: "WIP", runHooks: false },
       changesNavigatorWidth: 420,
     });
-    expect(migrateRepositoryUiState({ historyReviewWidth: 760 }).historyReviewWidth).toBe(210);
+    expect(migrateRepositoryUiState({ historyReviewWidth: 760 }).historyReviewWidth).toBe(194);
   });
 
   it("preserves repository and failed-path tab order", () => {

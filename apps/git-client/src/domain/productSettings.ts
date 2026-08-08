@@ -91,7 +91,7 @@ export const DEFAULT_PRODUCT_SETTINGS: ProductSettings = {
   statusBarWidgets: DEFAULT_STATUS_BAR_WIDGETS,
   adjustRedGreenVision: false,
   showNotifications: true,
-  showShortcutConflictWarning: true,
+  showShortcutConflictWarning: false,
   keymapPreset: "macOS",
   keymapOverrides: {},
   bidiTextDirection: "content",
@@ -193,7 +193,7 @@ export function parseProductSettings(value: unknown): ProductSettings {
     showShortcutConflictWarning:
       typeof value.showShortcutConflictWarning === "boolean"
         ? value.showShortcutConflictWarning
-        : true,
+        : false,
     keymapPreset: isProductKeymapPreset(value.keymapPreset) ? value.keymapPreset : "macOS",
     keymapOverrides,
     bidiTextDirection:
