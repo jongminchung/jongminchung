@@ -350,6 +350,11 @@ test("opens published commits in the visual interactive rebase workspace", async
     .selectOption("reword");
   await expect(dialog.getByLabel(/New message for/).first()).toBeVisible();
   await dialog.getByRole("button", { name: "Start Rebase" }).click();
+  const confirmation = page.getByRole("dialog", {
+    name: "Rewrite protected branch main?",
+  });
+  await expect(confirmation).toBeVisible();
+  await confirmation.getByRole("button", { name: "Start rebase" }).click();
   await expect(dialog.getByText("History rewrite completed", { exact: true })).toBeVisible();
   await dialog.getByRole("button", { name: "Push…" }).click();
   const push = page.getByRole("dialog", { name: "Push" });

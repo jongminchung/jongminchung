@@ -1,19 +1,24 @@
 import { Button } from "@jongminchung/ui/components/button";
 import { Spinner as SpinnerIcon } from "@jongminchung/ui/components/spinner";
 import { cn } from "@jongminchung/ui/lib/utils";
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useCallback, useMemo, useState } from "react";
 import { COMMAND_ENABLED, commandDefinition, type CommandDefinition } from "../domain/commands";
 import { parseConflictBlocks, resolveConflictBlock } from "../domain/conflicts";
+import { sanitizeGitError } from "../domain/gitActivity";
+import { abortOperationConfirmation, operationDisplayName } from "../domain/recoveryFlow";
 import type { ConflictContent, InProgressOperation } from "../shared/contracts/model";
 import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
 import { useCommandDefinitions, useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
+import { Notice } from "./Notice";
 import { Spinner } from "./ProductCollections";
 import { Dialog, DialogHeader } from "./ProductDialog";
 import { Selector } from "./ProductFormControls";
 
 const CodeMirrorText = lazy(() => import("./CodeMirrorText"));
+
+type PendingAction = "continue" | "abort" | "ours" | "theirs" | "save";
 
 function TextPane({
   label,
@@ -70,20 +75,35 @@ export function ConflictEditorDialog({
 }) {
   const [result, setResult] = useState(content.result ?? "");
   const [blockIndex, setBlockIndex] = useState(0);
-  const [pendingAction, setPendingAction] = useState<
-    "continue" | "abort" | "ours" | "theirs" | "save" | null
-  >(null);
-  const dialog = useAppDialog();
+  const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const { confirm, node: confirmationNode } = useAppDialog();
   const blocks = useMemo(() => parseConflictBlocks(result), [result]);
   const selectedBlock = blocks[Math.min(blockIndex, Math.max(0, blocks.length - 1))];
-  const resolveBlock = (choice: "local" | "remote" | "both") => {
+  const resolveBlock = (choice: "local" | "remote" | "both"): void => {
     if (!selectedBlock) return;
     setResult(resolveConflictBlock(result, selectedBlock, choice));
     setBlockIndex(Math.min(blockIndex, Math.max(0, blocks.length - 2)));
   };
-  const requestClose = async (): Promise<void> => {
+  const runAction = useCallback(
+    async (action: PendingAction, operationAction: () => Promise<void>): Promise<void> => {
+      if (pendingAction !== null) return;
+      setPendingAction(action);
+      setActionError(null);
+      try {
+        await operationAction();
+      } catch (reason) {
+        setActionError(sanitizeGitError(reason));
+      } finally {
+        setPendingAction(null);
+      }
+    },
+    [pendingAction],
+  );
+  const requestClose = useCallback(async (): Promise<void> => {
+    if (pendingAction !== null) return;
     if (result !== (content.result ?? "")) {
-      const accepted = await dialog.confirm({
+      const accepted = await confirm({
         title: "Discard conflict result edits?",
         description:
           "The repository is unchanged, but edits made in the conflict result pane will be lost.",
@@ -93,7 +113,14 @@ export function ConflictEditorDialog({
       if (!accepted) return;
     }
     onClose();
-  };
+  }, [confirm, content.result, onClose, pendingAction, result]);
+  const requestAbort = useCallback(async (): Promise<void> => {
+    if (!operation || operation === "bisect" || pendingAction !== null) return;
+    const accepted = await confirm(
+      abortOperationConfirmation(operation, result !== (content.result ?? "")),
+    );
+    if (accepted) await runAction("abort", onAbort);
+  }, [confirm, content.result, onAbort, operation, pendingAction, result, runAction]);
   useDismissLayer(
     useMemo(
       () => ({
@@ -110,7 +137,7 @@ export function ConflictEditorDialog({
       {
         ...commandDefinition(
           "changes.save",
-          () => onSave(result),
+          () => runAction("save", () => onSave(result)),
           () => COMMAND_ENABLED,
         ),
         allowInEditor: true,
@@ -119,7 +146,7 @@ export function ConflictEditorDialog({
         priority: 100,
       },
     ],
-    [onSave, result],
+    [onSave, result, runAction],
   );
   useCommandDefinitions(commands);
   return (
@@ -135,7 +162,7 @@ export function ConflictEditorDialog({
         purpose="form"
         width="min(1440px, calc(100vw - 50px))"
       >
-        <section className="grid h-[min(760px,calc(100vh-50px))] min-h-0 grid-rows-[auto_minmax(0,1fr)] overflow-hidden">
+        <section className="relative grid h-[min(760px,calc(100vh-50px))] min-h-0 grid-rows-[auto_minmax(0,1fr)] overflow-hidden">
           <div className="flex min-w-0 items-center gap-2 border-b border-border pr-3">
             <div className="min-w-0 flex-1">
               <DialogHeader
@@ -148,11 +175,11 @@ export function ConflictEditorDialog({
               <>
                 <Button
                   aria-busy={pendingAction === "continue"}
+                  autoFocus
                   disabled={pendingAction !== null}
                   type="button"
                   onClick={() => {
-                    setPendingAction("continue");
-                    void onContinue().finally(() => setPendingAction(null));
+                    void runAction("continue", onContinue);
                   }}
                   className={cn("h-7 px-2.5")}
                   variant="outline"
@@ -161,15 +188,14 @@ export function ConflictEditorDialog({
                   {pendingAction === "continue" ? (
                     <SpinnerIcon aria-hidden className="size-3.5" />
                   ) : null}
-                  {`Continue ${operation}`}
+                  {`Continue ${operationDisplayName(operation)}`}
                 </Button>
                 <Button
                   aria-busy={pendingAction === "abort"}
                   disabled={pendingAction !== null}
                   type="button"
                   onClick={() => {
-                    setPendingAction("abort");
-                    void onAbort().finally(() => setPendingAction(null));
+                    void requestAbort();
                   }}
                   className={cn("h-7 px-2.5")}
                   variant="destructive"
@@ -186,6 +212,8 @@ export function ConflictEditorDialog({
               onClick={() => void requestClose()}
               type="button"
               aria-label={"Close conflict editor"}
+              aria-keyshortcuts="Escape"
+              disabled={pendingAction !== null}
               className={cn("h-7 px-2.5 aspect-square px-0")}
               variant="ghost"
               size="icon-sm"
@@ -193,6 +221,15 @@ export function ConflictEditorDialog({
               <Icon name="close" size={15} />
             </Button>
           </div>
+          {actionError && (
+            <Notice
+              className="absolute top-12 right-2 left-2 z-20 shadow-lg"
+              role="alert"
+              tone="destructive"
+            >
+              {actionError}
+            </Notice>
+          )}
           {content.binary ? (
             <div className={tw.binaryConflict}>
               <Icon name="warning" size={32} />
@@ -204,8 +241,7 @@ export function ConflictEditorDialog({
                   disabled={pendingAction !== null}
                   type="button"
                   onClick={() => {
-                    setPendingAction("ours");
-                    void onResolveBinary("ours").finally(() => setPendingAction(null));
+                    void runAction("ours", () => onResolveBinary("ours"));
                   }}
                   className={cn("h-8 px-3")}
                   variant="outline"
@@ -221,8 +257,7 @@ export function ConflictEditorDialog({
                   disabled={pendingAction !== null}
                   type="button"
                   onClick={() => {
-                    setPendingAction("theirs");
-                    void onResolveBinary("theirs").finally(() => setPendingAction(null));
+                    void runAction("theirs", () => onResolveBinary("theirs"));
                   }}
                   className={cn("h-8 px-3")}
                   variant="outline"
@@ -312,8 +347,7 @@ export function ConflictEditorDialog({
                     disabled={pendingAction !== null}
                     type="button"
                     onClick={() => {
-                      setPendingAction("save");
-                      void onSave(result).finally(() => setPendingAction(null));
+                      void runAction("save", () => onSave(result));
                     }}
                     className={cn("h-7 px-2.5")}
                     variant="default"
@@ -339,7 +373,7 @@ export function ConflictEditorDialog({
           )}
         </section>
       </Dialog>
-      {dialog.node}
+      {confirmationNode}
     </>
   );
 }

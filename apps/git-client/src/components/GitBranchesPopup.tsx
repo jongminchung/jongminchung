@@ -2,7 +2,7 @@ import { Button } from "@jongminchung/ui/components/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { checkoutTarget, deleteRefOperation } from "../domain/refActions";
+import { checkoutTarget, deleteRefOperation, mergeRefOperation } from "../domain/refActions";
 import type { Ref } from "../domain/types";
 import type { BranchComparison, GitOperation, RemoteInfo } from "../shared/contracts/model";
 import { tw } from "../styles/tailwind";
@@ -37,7 +37,9 @@ export function GitBranchesPopup({
   readonly onOpenSettings: () => void;
   readonly onClose: () => void;
 }) {
+  const popup = useRef<HTMLDivElement>(null);
   const search = useRef<HTMLInputElement>(null);
+  const selectedActions = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const [comparison, setComparison] = useState<BranchComparison | null>(null);
@@ -270,6 +272,30 @@ export function GitBranchesPopup({
     }
   };
 
+  const mergeActive = async (): Promise<void> => {
+    if (!activeRef || activeRef.current || !currentBranch) return;
+    const accepted = await dialog.confirm({
+      title: `Merge ${activeRef.shortName} into ${currentBranch}?`,
+      description: "Integrates the selected reference into the current branch.",
+      impact: activeRef.subject,
+      confirmLabel: "Merge",
+      dangerous: true,
+    });
+    if (!accepted) return;
+    await run(mergeRefOperation(activeRef));
+  };
+
+  const moveFocusWithinPopup = (backward: boolean): void => {
+    const elements = popup.current?.querySelectorAll<HTMLElement>(
+      'input:not(:disabled), button:not(:disabled), [tabindex]:not([tabindex="-1"])',
+    );
+    if (!elements || elements.length === 0) return;
+    const current = Array.from(elements).findIndex((element) => element === document.activeElement);
+    const next =
+      current < 0 ? 0 : (current + (backward ? -1 : 1) + elements.length) % elements.length;
+    elements[next]?.focus();
+  };
+
   return (
     <div
       aria-label="Git Branches"
@@ -278,6 +304,15 @@ export function GitBranchesPopup({
         if (event.key === "Escape") {
           event.preventDefault();
           onClose();
+        } else if (event.key === "Tab") {
+          event.preventDefault();
+          moveFocusWithinPopup(event.shiftKey);
+        } else if (event.key === "ArrowLeft" && detailsOpen) {
+          event.preventDefault();
+          setDetailsOpen(false);
+          search.current?.focus();
+        } else if (event.target instanceof HTMLElement && event.target.closest("button") !== null) {
+          return;
         } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
           event.preventDefault();
           setActiveIndex((current) => {
@@ -296,11 +331,14 @@ export function GitBranchesPopup({
         } else if (event.key === "ArrowRight" && activeRef) {
           event.preventDefault();
           setDetailsOpen(true);
-        } else if (event.key === "ArrowLeft" && detailsOpen) {
-          event.preventDefault();
-          setDetailsOpen(false);
+          window.requestAnimationFrame(() =>
+            selectedActions.current
+              ?.querySelector<HTMLButtonElement>("button:not(:disabled)")
+              ?.focus(),
+          );
         }
       }}
+      ref={popup}
       role="dialog"
     >
       <div className={tw.gitBranchesSearch}>
@@ -310,6 +348,7 @@ export function GitBranchesPopup({
             aria-activedescendant={rows[activeIndex] ? `branch-${activeIndex}` : undefined}
             aria-controls="git-branches-list"
             aria-label="Search"
+            autoFocus
             onChange={(event) => {
               setQuery(event.target.value);
               setActiveIndex(0);
@@ -516,6 +555,7 @@ export function GitBranchesPopup({
         <div
           className={tw.gitBranchSelectedActions}
           aria-label={`Actions for ${activeRef.shortName}`}
+          ref={selectedActions}
         >
           <Button
             disabled={activeRef.current || busy}
@@ -546,6 +586,16 @@ export function GitBranchesPopup({
             size="default"
           >
             Compare
+          </Button>
+          <Button
+            disabled={!currentBranch || activeRef.current || busy || !onOperation}
+            onClick={() => void mergeActive()}
+            type="button"
+            className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
+            variant="ghost"
+            size="default"
+          >
+            Merge into {currentBranch ?? "current branch"}…
           </Button>
           {activeRef.kind === "local" && (
             <Button

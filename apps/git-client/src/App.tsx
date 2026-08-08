@@ -6314,6 +6314,21 @@ function AppContent() {
     },
     [confirmDiscardEditors, session.openRepository],
   );
+  const openRepositoryFromPicker = useCallback(async (): Promise<void> => {
+    if (!(await confirmDiscardEditors())) return;
+    const api = electronApi();
+    if (api === null) {
+      setRepositoryDialogMode("open");
+      setShowRepositoryDialog(true);
+      return;
+    }
+    const selected = await api.dialog.openDirectory({
+      title: "Open File or Project",
+      defaultPath: null,
+      filters: [],
+    });
+    if (typeof selected === "string") await session.openRepository(selected);
+  }, [confirmDiscardEditors, session.openRepository]);
   const importSettingsArchive = useCallback(async (): Promise<void> => {
     if (!(await importElectronSettings())) return;
     setProductSettings(parseProductSettings(await readElectronSetting(PRODUCT_SETTINGS_KEY)));
@@ -6609,16 +6624,10 @@ function AppContent() {
         setRepositoryDialogMode("init");
         setShowRepositoryDialog(true);
       }),
-      commandDefinition("workspace.open", () => {
-        setRepositoryDialogMode("open");
-        setShowRepositoryDialog(true);
-      }),
+      commandDefinition("workspace.open", () => void openRepositoryFromPicker()),
       commandDefinition("workspace.manageProjects", () => {
         if (session.repository) setProjectSwitcherOpen(true);
-        else {
-          setRepositoryDialogMode("open");
-          setShowRepositoryDialog(true);
-        }
+        else void openRepositoryFromPicker();
       }),
       commandDefinition("workspace.clone", () => {
         setRepositoryDialogMode("clone");
@@ -7238,6 +7247,7 @@ function AppContent() {
       renameToolWindowLayout,
       lastMacro,
       macroRecording,
+      openRepositoryFromPicker,
       recordedCommandIds,
       savedMacros,
       saveToolWindowLayout,
@@ -7403,10 +7413,7 @@ function AppContent() {
             setRepositoryDialogMode("clone");
             setShowRepositoryDialog(true);
           }}
-          onOpenProject={() => {
-            setRepositoryDialogMode("open");
-            setShowRepositoryDialog(true);
-          }}
+          onOpenProject={() => void openRepositoryFromPicker()}
           onOpenRecentProject={openRecentProjectSafely}
           onOpenPush={() =>
             setPushRequest({
@@ -7513,20 +7520,14 @@ function AppContent() {
             setRepositoryDialogMode("init");
             setShowRepositoryDialog(true);
           }}
-          onOpenRepository={() => {
-            setRepositoryDialogMode("open");
-            setShowRepositoryDialog(true);
-          }}
+          onOpenRepository={() => void openRepositoryFromPicker()}
           onOpenSettings={() => setSettingsOpen(true)}
           session={session}
         />
       ) : (
         <RepositoryWorkspace
           key={session.repository.snapshot.id}
-          onAddRepository={() => {
-            setRepositoryDialogMode("open");
-            setShowRepositoryDialog(true);
-          }}
+          onAddRepository={() => void openRepositoryFromPicker()}
           onDirtyEditorCountChange={setDirtyEditorCount}
           onChromeModeChange={setRepositoryChromeMode}
           onDismissShortcutConflictWarning={() =>

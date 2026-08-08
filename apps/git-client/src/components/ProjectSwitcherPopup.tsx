@@ -97,6 +97,10 @@ export function ProjectSwitcherPopup({
     itemRefs.current[next]?.focus();
   };
 
+  const moveFocusWithTab = (backward: boolean): void => {
+    focusItem(activeIndex + (backward ? -1 : 1));
+  };
+
   const activateItem = (index: number): void => {
     if (index === 0) {
       onClose();
@@ -120,6 +124,9 @@ export function ProjectSwitcherPopup({
         if (event.key === "Escape") {
           event.preventDefault();
           onClose();
+        } else if (event.key === "Tab") {
+          event.preventDefault();
+          moveFocusWithTab(event.shiftKey);
         } else if (event.key === "ArrowDown") {
           event.preventDefault();
           focusItem(activeIndex + 1);
@@ -149,6 +156,7 @@ export function ProjectSwitcherPopup({
         <div className={tw.projectSwitcherActions} role="presentation">
           <Button
             aria-selected={activeIndex === 0}
+            autoFocus
             onClick={() => {
               onClose();
               onOpen();
@@ -229,6 +237,7 @@ export function ProjectSwitcherPopup({
           return (
             <Button
               aria-description="Press Delete to remove from Recent Projects"
+              aria-keyshortcuts="Enter Delete Backspace"
               aria-selected={activeIndex === index}
               disabled={busy}
               key={project.path}

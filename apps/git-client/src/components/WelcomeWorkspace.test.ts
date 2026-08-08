@@ -62,6 +62,8 @@ describe("WelcomeWorkspace", () => {
     );
 
     expect(markup).toContain('aria-label="Recent Projects"');
+    expect(markup).toContain('aria-keyshortcuts="Enter"');
+    expect(markup).toMatch(/tabindex="0"[^>]*role="option"/);
     expect(markup).toContain("/tmp/example");
     expect(markup).toContain("main");
   });

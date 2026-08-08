@@ -3,6 +3,7 @@ import { cn } from "@jongminchung/ui/lib/utils";
 import { GitBranch } from "lucide-react";
 import {
   useDeferredValue,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -65,6 +66,7 @@ export function WelcomeWorkspace({
   const [selectedProject, setSelectedProject] = useState(0);
   const deferredQuery = useDeferredValue(query.trim().toLocaleLowerCase());
   const navRefs = useRef<Array<HTMLElement | null>>([]);
+  const projectRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   const filteredProjects = useMemo(() => {
     if (deferredQuery.length === 0) return recentProjects;
@@ -74,6 +76,31 @@ export function WelcomeWorkspace({
       ),
     );
   }, [deferredQuery, recentProjects]);
+
+  useEffect(() => {
+    setSelectedProject((current) => Math.min(current, Math.max(0, filteredProjects.length - 1)));
+  }, [filteredProjects.length]);
+
+  const selectProjectFromKeyboard = (event: KeyboardEvent<HTMLElement>): void => {
+    if (filteredProjects.length === 0) return;
+    if (event.key === "Enter") {
+      event.preventDefault();
+      const project = filteredProjects[selectedProject];
+      if (project) onOpenRecent(project.path);
+      return;
+    }
+    if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
+    event.preventDefault();
+    const next =
+      event.key === "Home"
+        ? 0
+        : event.key === "End"
+          ? filteredProjects.length - 1
+          : (selectedProject + (event.key === "ArrowDown" ? 1 : -1) + filteredProjects.length) %
+            filteredProjects.length;
+    setSelectedProject(next);
+    window.requestAnimationFrame(() => projectRefs.current[next]?.focus());
+  };
 
   const selectSectionFromKeyboard = (
     event: KeyboardEvent<HTMLButtonElement>,
@@ -100,7 +127,9 @@ export function WelcomeWorkspace({
       className={tw.welcomeWorkspace}
       onDragOver={(event) => event.preventDefault()}
       onDrop={openDroppedDirectory}
-      style={{ gridTemplateColumns: `${WELCOME_SIDEBAR_WIDTH}px minmax(0, 1fr)` }}
+      style={{
+        gridTemplateColumns: `${WELCOME_SIDEBAR_WIDTH}px minmax(0, 1fr)`,
+      }}
     >
       <aside
         className={tw.welcomeSidebar}
@@ -136,7 +165,10 @@ export function WelcomeWorkspace({
                 navRefs.current[index] = node;
               }}
               role="treeitem"
-              style={{ width: WELCOME_NAV_ITEM_WIDTH, height: WELCOME_NAV_ITEM_HEIGHT }}
+              style={{
+                width: WELCOME_NAV_ITEM_WIDTH,
+                height: WELCOME_NAV_ITEM_HEIGHT,
+              }}
               type="button"
               className={cn(
                 "gap-1.5 text-xs h-7 px-2.5 text-muted-foreground aria-selected:bg-accent aria-selected:text-foreground aria-current:bg-accent aria-current:text-foreground",
@@ -267,20 +299,8 @@ export function WelcomeWorkspace({
           <div
             aria-label="Recent Projects"
             className="pt-[16px] outline-none"
-            onKeyDown={(event) => {
-              if (filteredProjects.length === 0) return;
-              if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-                event.preventDefault();
-                const delta = event.key === "ArrowDown" ? 1 : -1;
-                setSelectedProject(
-                  (selectedProject + delta + filteredProjects.length) % filteredProjects.length,
-                );
-              }
-              if (event.key === "Enter")
-                onOpenRecent(filteredProjects[selectedProject]?.path ?? "");
-            }}
+            onKeyDown={selectProjectFromKeyboard}
             role="listbox"
-            tabIndex={0}
           >
             {filteredProjects.map((project, index) => (
               <Button
@@ -288,7 +308,13 @@ export function WelcomeWorkspace({
                 key={project.path}
                 onClick={() => setSelectedProject(index)}
                 onDoubleClick={() => onOpenRecent(project.path)}
+                onFocus={() => setSelectedProject(index)}
+                ref={(node) => {
+                  projectRefs.current[index] = node;
+                }}
                 role="option"
+                aria-keyshortcuts="Enter"
+                tabIndex={selectedProject === index ? 0 : -1}
                 type="button"
                 className={cn(
                   "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",

@@ -13,6 +13,8 @@ import { CommandProvider } from "./CommandProvider";
 describe("ChangesWorkspace", () => {
   it("renders the Rebased vertical Commit tool-window structure", () => {
     const entries = changeEntries(sampleStatus);
+    const worktreeSelection =
+      entries.find((entry) => entry.selection.layer === "worktree")?.selection ?? null;
     const markup = renderToStaticMarkup(
       createElement(
         CommandProvider,
@@ -21,7 +23,7 @@ describe("ChangesWorkspace", () => {
           toolWindow: true,
           status: sampleStatus,
           entries,
-          selection: entries[0]?.selection ?? null,
+          selection: worktreeSelection,
           patch: "",
           diffLoading: false,
           beforePreview: null,
@@ -32,7 +34,7 @@ describe("ChangesWorkspace", () => {
           navigatorWidth: 250,
           commitRailWidth: 315,
           preferences: DEFAULT_DIFF_PREFERENCES,
-          draft: EMPTY_COMMIT_DRAFT,
+          draft: { ...EMPTY_COMMIT_DRAFT, message: "Preserved draft", amend: true },
           changelists: [],
           onSelectionChange: vi.fn(),
           onPreferencesChange: vi.fn(),
@@ -75,5 +77,11 @@ describe("ChangesWorkspace", () => {
     expect(markup).toContain("Working Tree");
     expect(markup).toContain("Commit Message");
     expect(markup).toContain("Commit &amp; Push");
+    expect(markup).toContain("Stage hunk");
+    expect(markup).toContain("Stage lines");
+    expect(markup).toContain("Discard…");
+    expect(markup).toContain("data-commit-message");
+    expect(markup).toContain("Preserved draft");
+    expect(markup).toContain("Commit options<em>1</em>");
   });
 });

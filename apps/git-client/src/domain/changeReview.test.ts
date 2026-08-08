@@ -2,12 +2,14 @@ import { describe, expect, it } from "vitest";
 import {
   DEFAULT_DIFF_PREFERENCES,
   changeEntries,
+  normalizePartialPatchTarget,
   parseChangeSelection,
   parseCommitDraft,
   parseDiffPreferences,
   parseRepositoryViewMode,
   reconcileChangeSelection,
   revisionDiffEntries,
+  uniqueChangePaths,
 } from "./changeReview";
 import type { FileChange, StatusModel } from "./types";
 
@@ -42,6 +44,41 @@ describe("change review state", () => {
       path: "src/app.ts",
       layer: "index",
     });
+  });
+
+  it("keeps partial staging on the cached index and rejects ambiguous patch targets", () => {
+    expect(
+      normalizePartialPatchTarget(
+        { path: "src/app.ts", layer: "worktree" },
+        { cached: true, reverse: false },
+      ),
+    ).toEqual({ cached: true, reverse: false });
+    expect(
+      normalizePartialPatchTarget(
+        { path: "src/app.ts", layer: "index" },
+        { cached: true, reverse: true },
+      ),
+    ).toEqual({ cached: true, reverse: true });
+    expect(
+      normalizePartialPatchTarget(
+        { path: "src/app.ts", layer: "worktree" },
+        { cached: false, reverse: true },
+      ),
+    ).toEqual({ cached: false, reverse: true });
+    expect(
+      normalizePartialPatchTarget(
+        { path: "src/app.ts", layer: "index" },
+        { cached: false, reverse: true },
+      ),
+    ).toBeNull();
+  });
+
+  it("deduplicates selected paths within the requested change layer", () => {
+    const partiallyStaged = changeEntries(status([file({ staged: true })]));
+    expect(uniqueChangePaths([...partiallyStaged, ...partiallyStaged], "index")).toEqual([
+      "src/app.ts",
+    ]);
+    expect(uniqueChangePaths(partiallyStaged, "worktree")).toEqual(["src/app.ts"]);
   });
 
   it("selects the first entry initially and clears an empty repository", () => {

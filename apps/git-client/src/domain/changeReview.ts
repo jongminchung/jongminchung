@@ -16,6 +16,11 @@ export interface ChangeEntry {
   readonly file: FileChange;
 }
 
+export interface PartialPatchTarget {
+  readonly cached: boolean;
+  readonly reverse: boolean;
+}
+
 export interface RevisionDiffEntry {
   readonly file: FileChange;
   readonly patch: string;
@@ -74,6 +79,29 @@ export function changeEntries(status: StatusModel): readonly ChangeEntry[] {
 
 export function hasSameChangeSelection(left: ChangeSelection, right: ChangeSelection): boolean {
   return left.path === right.path && left.layer === right.layer;
+}
+
+export function uniqueChangePaths(
+  entries: readonly ChangeEntry[],
+  layer: ChangeLayer,
+): readonly string[] {
+  return [
+    ...new Set(
+      entries.filter((entry) => entry.selection.layer === layer).map((entry) => entry.file.path),
+    ),
+  ];
+}
+
+export function normalizePartialPatchTarget(
+  selection: ChangeSelection,
+  requested: PartialPatchTarget,
+): PartialPatchTarget | null {
+  if (selection.layer === "index") {
+    return requested.cached && requested.reverse ? requested : null;
+  }
+  if (requested.cached && !requested.reverse) return requested;
+  if (!requested.cached && requested.reverse) return requested;
+  return null;
 }
 
 export function reconcileChangeSelection(

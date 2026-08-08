@@ -39,6 +39,7 @@ describe("GitBranchesPopup", () => {
     );
 
     expect(markup).toContain('aria-label="Search"');
+    expect(markup).toContain('autofocus=""');
     expect(markup).toContain('placeholder="Search for branches and actions"');
     expect(markup).toContain('aria-label="Branches Tree"');
     expect(markup).toContain('role="tree"');

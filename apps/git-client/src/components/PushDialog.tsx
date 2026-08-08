@@ -1,6 +1,6 @@
 import { Button } from "@jongminchung/ui/components/button";
 import { cn } from "@jongminchung/ui/lib/utils";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { sanitizeGitError } from "../domain/gitActivity";
 import {
   canForceWithLease,
@@ -51,13 +51,29 @@ export function PushDialog({
   const [confirmation, setConfirmation] = useState("");
   const [loading, setLoading] = useState(true);
   const [pushing, setPushing] = useState(false);
+  const [reviewExpired, setReviewExpired] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const generation = useRef(0);
+  const confirmationRef = useRef<HTMLInputElement>(null);
+  const returnFocus = useRef<HTMLElement | null>(
+    typeof document !== "undefined" && document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null,
+  );
+  const close = useCallback((): void => {
+    const target = returnFocus.current;
+    onClose();
+    window.requestAnimationFrame(() => {
+      if (target?.isConnected) target.focus();
+    });
+  }, [onClose]);
 
   const load = async (selectedRemote: string | null, selectedRef: string | null): Promise<void> => {
     const current = generation.current + 1;
     generation.current = current;
     setLoading(true);
+    setPreview(null);
+    setReviewExpired(false);
     setError(null);
     setChoice("normal");
     setConfirmation("");
@@ -88,9 +104,11 @@ export function PushDialog({
         id: "push-dialog",
         priority: 135,
         active: true,
-        dismiss: onClose,
+        dismiss: () => {
+          if (!pushing) close();
+        },
       }),
-      [onClose],
+      [close, pushing],
     ),
   );
 
@@ -107,9 +125,16 @@ export function PushDialog({
     !pushing &&
     remote === preview.remote &&
     remoteRef === preview.remoteRef &&
+    !reviewExpired &&
     confirmationValid &&
     (choice === "normal" ? normalAvailable : forceAvailable),
   );
+
+  useEffect(() => {
+    if (choice === "forceWithLease" && requiresTypedConfirmation) {
+      confirmationRef.current?.focus();
+    }
+  }, [choice, requiresTypedConfirmation]);
 
   const submit = async (): Promise<void> => {
     if (!preview || !canSubmit) return;
@@ -117,9 +142,13 @@ export function PushDialog({
     setError(null);
     try {
       await onPush(createPushOperation(preview, choice, setUpstream));
-      onClose();
+      close();
     } catch (reason) {
-      setError(sanitizeGitError(reason));
+      setReviewExpired(true);
+      setConfirmation("");
+      setError(
+        `${sanitizeGitError(reason)} The reviewed remote state is no longer reusable. Review the destination again before retrying.`,
+      );
     } finally {
       setPushing(false);
     }
@@ -131,7 +160,7 @@ export function PushDialog({
       isOpen
       maxHeight="calc(100vh - 48px)"
       onOpenChange={(isOpen) => {
-        if (!isOpen) onClose();
+        if (!isOpen && !pushing) close();
       }}
       padding={0}
       purpose="form"
@@ -147,7 +176,7 @@ export function PushDialog({
         <DialogHeader
           hasDivider
           onOpenChange={(isOpen) => {
-            if (!isOpen) onClose();
+            if (!isOpen && !pushing) close();
           }}
           subtitle="Review the exact source, destination, and remote state before pushing."
           title="Push"
@@ -157,6 +186,8 @@ export function PushDialog({
             <label className="grid gap-1 text-xs text-muted-foreground">
               Remote
               <select
+                aria-label="Remote"
+                autoFocus
                 className="min-h-8 rounded-md border border-border bg-card px-2 text-foreground"
                 onChange={(event) => setRemote(event.target.value)}
                 value={remote}
@@ -192,7 +223,8 @@ export function PushDialog({
               </Button>
               {preview && (
                 <small className="text-muted-foreground">
-                  Checked {new Date(preview.checkedAtMs).toLocaleTimeString()}
+                  Checked {new Date(preview.checkedAtMs).toLocaleTimeString()} against an exact
+                  remote snapshot
                 </small>
               )}
             </div>
@@ -225,7 +257,18 @@ export function PushDialog({
                 <strong>
                   {preview.ahead} ahead · {preview.behind} behind
                 </strong>
+                <span className="text-muted-foreground">Expected lease</span>
+                <strong className="font-mono">{shortOid(preview.expectedLeaseOid)}</strong>
               </section>
+
+              {reviewExpired && (
+                <Notice icon={<Icon name="warning" size={16} />} role="alert" tone="warning">
+                  <span>
+                    Destination review expired. Review the destination again to fetch a new exact
+                    lease before retrying.
+                  </span>
+                </Notice>
+              )}
 
               {preview.remoteStateError && (
                 <Notice icon={<Icon name="warning" size={16} />} role="status" tone="warning">
@@ -313,6 +356,9 @@ export function PushDialog({
                       <label className="grid gap-1 text-xs">
                         Type <strong>{destinationBranch}</strong> to confirm
                         <input
+                          ref={confirmationRef}
+                          aria-label={`Type ${destinationBranch} to confirm force push with lease`}
+                          autoComplete="off"
                           className="min-h-8 rounded-md border border-destructive bg-card px-2 font-mono"
                           onChange={(event) => setConfirmation(event.target.value)}
                           value={confirmation}
@@ -358,8 +404,9 @@ export function PushDialog({
         </DialogBody>
         <DialogFooter>
           <Button
-            onClick={onClose}
+            onClick={close}
             type="button"
+            disabled={pushing}
             className={cn("h-7 px-2.5")}
             variant="ghost"
             size="sm"

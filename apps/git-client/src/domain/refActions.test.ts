@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { checkoutTarget, deleteRefOperation } from "./refActions";
+import { checkoutTarget, deleteRefOperation, mergeRefOperation } from "./refActions";
 import { sampleRefs } from "./sampleData";
 
 describe("reference actions", () => {
@@ -31,5 +31,16 @@ describe("reference actions", () => {
   it("never offers deletion for the current branch", () => {
     const current = sampleRefs.find((ref) => ref.current);
     expect(current && deleteRefOperation(current)).toBeNull();
+  });
+
+  it("merges the selected full reference without enabling rewrite options", () => {
+    const branch = sampleRefs.find((ref) => ref.kind === "local" && !ref.current);
+
+    expect(branch && mergeRefOperation(branch)).toEqual({
+      kind: "merge",
+      revision: branch?.name,
+      noFf: false,
+      squash: false,
+    });
   });
 });

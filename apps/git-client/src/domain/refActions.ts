@@ -21,3 +21,12 @@ export function deleteRefOperation(ref: Ref): GitOperation | null {
     branch: branchParts.join("/"),
   };
 }
+
+export function mergeRefOperation(ref: Ref): GitOperation {
+  return {
+    kind: "merge",
+    revision: ref.name,
+    noFf: false,
+    squash: false,
+  };
+}

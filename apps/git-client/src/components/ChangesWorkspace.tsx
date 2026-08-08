@@ -2,7 +2,7 @@ import { Button } from "@jongminchung/ui/components/button";
 import { Toggle } from "@jongminchung/ui/components/toggle";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
 import { cn } from "@jongminchung/ui/lib/utils";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   CSSProperties,
   KeyboardEvent as ReactKeyboardEvent,
@@ -14,7 +14,11 @@ import type {
   CommitDraft,
   DiffPreferences,
 } from "../domain/changeReview";
-import { hasSameChangeSelection } from "../domain/changeReview";
+import {
+  hasSameChangeSelection,
+  normalizePartialPatchTarget,
+  uniqueChangePaths,
+} from "../domain/changeReview";
 import {
   COMMAND_ENABLED,
   commandDefinition,
@@ -158,7 +162,9 @@ export function ChangesWorkspace({
   const [commitRailOpen, setCommitRailOpen] = useState(false);
   const [commitOptionsOpen, setCommitOptionsOpen] = useState(false);
   const searchInput = useRef<HTMLInputElement>(null);
+  const workspace = useRef<HTMLDivElement>(null);
   const navigator = useRef<HTMLElement>(null);
+  const commitComposerOrigin = useRef<HTMLElement | null>(null);
   const changelistMutationRef = useRef<ChangelistMutation | null>(null);
   const dialog = useAppDialog();
   const normalizedQuery = query.trim().toLocaleLowerCase();
@@ -201,6 +207,29 @@ export function ChangesWorkspace({
     (selectedChangelist
       ? selectedChangelist.paths.length === 0
       : stagedFiles.length === 0 && !hasCommitAllChanges);
+
+  const focusCommitMessage = useCallback((): void => {
+    window.requestAnimationFrame(() => {
+      workspace.current?.querySelector<HTMLTextAreaElement>("[data-commit-message]")?.focus();
+    });
+  }, []);
+
+  const openCommitComposer = useCallback((): void => {
+    commitComposerOrigin.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setCommitRailOpen(true);
+    focusCommitMessage();
+  }, [focusCommitMessage]);
+
+  const closeCommitComposer = useCallback((): void => {
+    setCommitOptionsOpen(false);
+    if (!toolWindow) setCommitRailOpen(false);
+    const origin = commitComposerOrigin.current;
+    window.requestAnimationFrame(() => {
+      if (origin?.isConnected) origin.focus();
+      else navigator.current?.focus();
+    });
+  }, [toolWindow]);
 
   const moveSelection = (offset: number): void => {
     if (filteredEntries.length === 0) return;
@@ -317,6 +346,24 @@ export function ChangesWorkspace({
       kind: selectedEntry.selection.layer === "index" ? "unstage" : "stage",
       paths: [selectedEntry.file.path],
     });
+  };
+
+  const discardSelectedChanges = async (): Promise<void> => {
+    const discardable = effectiveSelectedEntries.filter(
+      (entry) => entry.selection.layer === "worktree" && entry.file.status !== "conflicted",
+    );
+    const paths = uniqueChangePaths(discardable, "worktree");
+    if (paths.length === 0) return;
+    const accepted = await dialog.confirm({
+      title:
+        paths.length === 1 ? `Discard changes in ${paths[0]}?` : `Discard ${paths.length} files?`,
+      description: "Restore each selected working-tree path to its indexed version.",
+      impact: "Uncommitted working-tree edits will be lost.",
+      confirmLabel: "Discard changes",
+      dangerous: true,
+    });
+    if (!accepted) return;
+    await onOperation({ kind: "discard", paths: [...paths] });
   };
 
   useEffect(() => {
@@ -506,9 +553,9 @@ export function ChangesWorkspace({
         id: "commit-drawer",
         priority: 60,
         active: commitRailOpen,
-        dismiss: () => setCommitRailOpen(false),
+        dismiss: closeCommitComposer,
       }),
-      [commitRailOpen],
+      [closeCommitComposer, commitRailOpen],
     ),
   );
   useDismissLayer(
@@ -640,6 +687,7 @@ export function ChangesWorkspace({
   return (
     <div
       className={`${tw.changesWorkspace} ${toolWindow ? tw.changesToolWindow : ""} ${focused && !toolWindow ? tw.changesWorkspaceFocused : ""} ${commitRailOpen ? tw.commitRailOpen : ""}`}
+      ref={workspace}
       style={
         {
           "--changes-navigator-width": `${navigatorWidth}px`,
@@ -712,7 +760,7 @@ export function ChangesWorkspace({
           <Button
             aria-label="Open commit composer"
             hidden={toolWindow}
-            onClick={() => setCommitRailOpen(true)}
+            onClick={openCommitComposer}
             type="button"
             className="text-muted-foreground [display:none]! max-[1120px]:[display:inline-flex]!"
             variant="ghost"
@@ -751,6 +799,19 @@ export function ChangesWorkspace({
                 size="default"
               >
                 Stage selected
+              </Button>
+            )}
+            {effectiveSelectedEntries.some(
+              (entry) => entry.selection.layer === "worktree" && entry.file.status !== "conflicted",
+            ) && (
+              <Button
+                onClick={() => void discardSelectedChanges()}
+                type="button"
+                className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
+                variant="ghost"
+                size="default"
+              >
+                Discard…
               </Button>
             )}
             {effectiveSelectedEntries.some((entry) => entry.selection.layer === "index") && (
@@ -830,11 +891,14 @@ export function ChangesWorkspace({
           loading={diffLoading}
           mode={selection?.layer === "index" ? "unstage" : "stage"}
           onApplyPatch={async (partialPatch, cached, reverse) => {
+            if (selection === null) return;
+            const target = normalizePartialPatchTarget(selection, { cached, reverse });
+            if (target === null) return;
             await onOperation({
               kind: "partialPatch",
               patch: partialPatch,
-              cached,
-              reverse,
+              cached: target.cached,
+              reverse: target.reverse,
             });
           }}
           onFileAction={selectedEntry ? runFileAction : undefined}
@@ -880,7 +944,7 @@ export function ChangesWorkspace({
           <small>{stagedFiles.length} staged</small>
           {!toolWindow && (
             <Button
-              onClick={() => setCommitRailOpen(false)}
+              onClick={closeCommitComposer}
               type="button"
               aria-label={"Close commit composer"}
               className="aspect-square h-[26px] min-w-[26px] px-0 [display:none]! max-[1120px]:[display:inline-flex]!"
@@ -950,9 +1014,16 @@ export function ChangesWorkspace({
           </Button>
         )}
         <TextArea
+          data-commit-message
           isLabelHidden
           label="Commit message"
           onChange={(message) => onDraftChange({ ...draft, message })}
+          onKeyDown={(event) => {
+            if (event.key !== "Escape") return;
+            event.preventDefault();
+            event.stopPropagation();
+            closeCommitComposer();
+          }}
           placeholder="Commit message"
           rows={7}
           size="sm"
@@ -972,7 +1043,10 @@ export function ChangesWorkspace({
               <div className="grid gap-1 p-1">
                 <CheckboxInput
                   label="Amend"
-                  onChange={(amend) => onDraftChange({ ...draft, amend })}
+                  onChange={(amend) => {
+                    onDraftChange({ ...draft, amend });
+                    focusCommitMessage();
+                  }}
                   size="sm"
                   value={draft.amend}
                 />

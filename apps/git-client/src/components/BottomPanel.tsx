@@ -58,6 +58,8 @@ function isBottomPanelTab(value: unknown): value is BottomPanelTab {
   return tabs.some((tab) => tab.id === value);
 }
 
+type StashMutation = "create" | "apply" | "pop" | "branch" | "drop" | "clear";
+
 export const BottomPanel = memo(function BottomPanel({
   status,
   shelves,
@@ -142,9 +144,11 @@ export const BottomPanel = memo(function BottomPanel({
   const [localHistoryPath, setLocalHistoryPath] = useState<string>();
   const [stashFiles, setStashFiles] = useState<Readonly<Record<string, readonly FileChange[]>>>({});
   const [stashLoadError, setStashLoadError] = useState<string>();
+  const [stashMutation, setStashMutation] = useState<StashMutation | null>(null);
   const dialog = useAppDialog();
   const panel = useRef<HTMLElement>(null);
   const originFocus = useRef<HTMLElement | null>(null);
+  const stashMutationRef = useRef<StashMutation | null>(null);
 
   useEffect(() => {
     const rememberExternalFocus = (event: FocusEvent): void => {
@@ -284,23 +288,78 @@ export const BottomPanel = memo(function BottomPanel({
       setStashLoadError(error instanceof Error ? error.message : String(error));
     }
   };
+  const runStashMutation = useCallback(
+    async (mutation: StashMutation, action: () => Promise<void>): Promise<void> => {
+      if (stashMutationRef.current !== null) return;
+      stashMutationRef.current = mutation;
+      setStashMutation(mutation);
+      try {
+        await action();
+      } finally {
+        stashMutationRef.current = null;
+        setStashMutation(null);
+      }
+    },
+    [],
+  );
   const stashChanges = useCallback(async (): Promise<void> => {
-    const stashMessage = await dialog.input({
-      title: "Stash changes",
-      label: "Message (optional)",
-      initialValue: "WIP",
-      allowEmpty: true,
-      description: "Includes untracked files and keeps the current index state in the stash.",
-      confirmLabel: "Stash",
+    await runStashMutation("create", async () => {
+      const stashMessage = await dialog.input({
+        title: "Stash changes",
+        label: "Message (optional)",
+        initialValue: "WIP",
+        allowEmpty: true,
+        description: "Includes untracked files and stores the current index state in the stash.",
+        confirmLabel: "Stash",
+      });
+      if (stashMessage === null) return;
+      await onOperation({
+        kind: "stashPush",
+        message: stashMessage || null,
+        includeUntracked: true,
+        keepIndex: false,
+      });
     });
-    if (stashMessage === null) return;
-    await onOperation({
-      kind: "stashPush",
-      message: stashMessage || null,
-      includeUntracked: true,
-      keepIndex: false,
-    });
-  }, [dialog.input, onOperation]);
+  }, [dialog.input, onOperation, runStashMutation]);
+  const applyStash = useCallback(
+    async (stash: StashEntry, pop: boolean): Promise<void> => {
+      await runStashMutation(pop ? "pop" : "apply", async () => {
+        const accepted = await dialog.confirm({
+          title: `${pop ? "Pop" : "Apply"} ${stash.selector}?`,
+          description: pop
+            ? "Apply the saved changes and drop the stash only after Git succeeds."
+            : "Apply the saved changes while retaining the stash entry.",
+          impact: stash.subject,
+          confirmLabel: pop ? "Pop stash" : "Apply stash",
+          dangerous: pop,
+        });
+        if (!accepted) return;
+        await onOperation({
+          kind: "stashApply",
+          stash: stash.selector,
+          pop,
+          reinstateIndex: true,
+        });
+      });
+    },
+    [dialog.confirm, onOperation, runStashMutation],
+  );
+  const dropStash = useCallback(
+    async (stash: StashEntry): Promise<void> => {
+      await runStashMutation("drop", async () => {
+        const accepted = await dialog.confirm({
+          title: `Drop ${stash.selector}?`,
+          description: "This removes the stash entry from refs/stash.",
+          impact: stash.subject,
+          confirmLabel: "Drop stash",
+          dangerous: true,
+        });
+        if (!accepted) return;
+        await onOperation({ kind: "stashDrop", stash: stash.selector });
+      });
+    },
+    [dialog.confirm, onOperation, runStashMutation],
+  );
   const shelveChanges = useCallback(async (): Promise<void> => {
     const message = await dialog.input({
       title: "Shelve changes",
@@ -519,6 +578,8 @@ export const BottomPanel = memo(function BottomPanel({
                   <p>Native stash entries from refs/stash.</p>
                 </div>
                 <Button
+                  aria-busy={stashMutation === "create"}
+                  disabled={stashMutation !== null}
                   onClick={() => void stashChanges()}
                   type="button"
                   className={cn("h-7 px-2.5")}
@@ -528,19 +589,20 @@ export const BottomPanel = memo(function BottomPanel({
                   Stash Changes…
                 </Button>
                 <Button
-                  disabled={stashes.length === 0}
+                  aria-busy={stashMutation === "clear"}
+                  disabled={stashes.length === 0 || stashMutation !== null}
                   onClick={toVoidHandler(async () => {
-                    const accepted = await dialog.confirm({
-                      title: "Clear every stash entry?",
-                      description: "This removes refs/stash and all entries in its reflog.",
-                      impact: `${stashes.length} stash entries`,
-                      confirmLabel: "Clear stashes",
-                      dangerous: true,
-                    });
-                    if (accepted)
-                      void onOperation({
-                        kind: "stashClear",
+                    await runStashMutation("clear", async () => {
+                      const accepted = await dialog.confirm({
+                        title: "Clear every stash entry?",
+                        description: "This removes refs/stash and all entries in its reflog.",
+                        impact: `${stashes.length} stash entries`,
+                        confirmLabel: "Clear stashes",
+                        dangerous: true,
                       });
+                      if (!accepted) return;
+                      await onOperation({ kind: "stashClear" });
+                    });
                   })}
                   type="button"
                   className={cn("h-7 px-2.5")}
@@ -585,14 +647,9 @@ export const BottomPanel = memo(function BottomPanel({
                         Show Diff
                       </Button>
                       <Button
-                        onClick={() =>
-                          void onOperation({
-                            kind: "stashApply",
-                            stash: stash.selector,
-                            pop: false,
-                            reinstateIndex: true,
-                          })
-                        }
+                        aria-busy={stashMutation === "apply"}
+                        disabled={stashMutation !== null}
+                        onClick={() => void applyStash(stash, false)}
                         type="button"
                         className={cn("h-7 px-2.5")}
                         variant="outline"
@@ -601,14 +658,9 @@ export const BottomPanel = memo(function BottomPanel({
                         Apply
                       </Button>
                       <Button
-                        onClick={() =>
-                          void onOperation({
-                            kind: "stashApply",
-                            stash: stash.selector,
-                            pop: true,
-                            reinstateIndex: true,
-                          })
-                        }
+                        aria-busy={stashMutation === "pop"}
+                        disabled={stashMutation !== null}
+                        onClick={() => void applyStash(stash, true)}
                         type="button"
                         className={cn("h-7 px-2.5")}
                         variant="outline"
@@ -617,20 +669,24 @@ export const BottomPanel = memo(function BottomPanel({
                         Pop
                       </Button>
                       <Button
+                        aria-busy={stashMutation === "branch"}
+                        disabled={stashMutation !== null}
                         onClick={toVoidHandler(async () => {
-                          const branch = await dialog.input({
-                            title: `Branch from ${stash.selector}`,
-                            label: "New branch name",
-                            initialValue: "stash/",
-                            description:
-                              "Creates the branch at the stash base, applies the stash, then drops it on success.",
-                          });
-                          if (branch)
-                            void onOperation({
+                          await runStashMutation("branch", async () => {
+                            const branch = await dialog.input({
+                              title: `Branch from ${stash.selector}`,
+                              label: "New branch name",
+                              initialValue: "stash/",
+                              description:
+                                "Creates the branch at the stash base, applies the stash, then drops it on success.",
+                            });
+                            if (!branch) return;
+                            await onOperation({
                               kind: "stashBranch",
                               stash: stash.selector,
                               branch,
                             });
+                          });
                         })}
                         type="button"
                         className={cn("h-7 px-2.5")}
@@ -640,21 +696,9 @@ export const BottomPanel = memo(function BottomPanel({
                         Branch…
                       </Button>
                       <Button
-                        onClick={toVoidHandler(async () => {
-                          const accepted = await dialog.confirm({
-                            title: `Drop ${stash.selector}?`,
-                            description: "This removes the stash entry from refs/stash.",
-                            impact: stash.subject,
-                            confirmLabel: "Drop stash",
-                            dangerous: true,
-                          });
-                          if (accepted) {
-                            void onOperation({
-                              kind: "stashDrop",
-                              stash: stash.selector,
-                            });
-                          }
-                        })}
+                        aria-busy={stashMutation === "drop"}
+                        disabled={stashMutation !== null}
+                        onClick={() => void dropStash(stash)}
                         type="button"
                         className={cn("h-7 px-2.5")}
                         variant="outline"
