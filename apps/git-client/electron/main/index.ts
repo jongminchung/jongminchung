@@ -13,6 +13,7 @@ import { SafeStorageHostingCredentialStore } from "./hosting-credential-store";
 import { NativeMenuService } from "./menu-service";
 import { registerPlatformHandlers, unregisterPlatformHandlers } from "./platform-handlers";
 import { registerAppProtocol, registerPrivilegedScheme } from "./protocol";
+import { QaHostingSafeStorage } from "./qa-hosting-safe-storage";
 import { resolveRuntimeProfile, trustsQaHostingCertificate } from "./runtime-profile";
 import { monitorWindowRuntime } from "./runtime-recovery";
 import { SettingsStore } from "./settings-store";
@@ -190,11 +191,15 @@ async function createMainWindow(
     quit: () => app.quit(),
   });
   const menu = NativeMenuService.create(window);
+  const hostingSafeStorage =
+    runtimeProfile.hostingCertificatePath === null
+      ? safeStorage
+      : QaHostingSafeStorage.fromSeed(readFileSync(runtimeProfile.hostingCertificatePath));
   const hosting = ElectronHostingFoundation.of(
     FetchHostingHttpClient.of((input, init) =>
       net.fetch(input instanceof URL ? input.toString() : input, init),
     ),
-    new SafeStorageHostingCredentialStore(safeStorage, settings),
+    new SafeStorageHostingCredentialStore(hostingSafeStorage, settings),
   );
   registerPlatformHandlers({
     window,

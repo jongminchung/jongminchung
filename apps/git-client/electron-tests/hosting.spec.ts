@@ -26,7 +26,7 @@ interface RestoredRunResult {
   readonly rendererResponsesAreSafe: boolean;
 }
 
-test("routes packaged hosting through preload, trusted IPC, fetch, and safeStorage", async () => {
+test("routes packaged hosting through preload, trusted IPC, fetch, and encrypted storage", async () => {
   test.setTimeout(60_000);
   const gitHubCredential = `ghp_e2e_${randomUUID().replaceAll("-", "")}`;
   const gitLabCredential = `glpat-e2e-${randomUUID().replaceAll("-", "")}`;
