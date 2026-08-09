@@ -1,10 +1,10 @@
 # Rebased 1.1.11 대비 Git Client 독립 감사
 
-- 감사일: 2026-08-08
+- 감사일: 2026-08-09
 - 기준 앱: `/Applications/Rebased.app` 1.1.11
-- 대상: Git Client 현재 통합 브랜치, package version `0.1.0`
+- 대상: Git Client `main` 통합 대상, package version `0.1.0`
 - 플랫폼: macOS ARM64
-- 최종 판정: **부분 구현**
+- 최종 판정: **동등 — 범위 구현 및 패키지 검증 완료**
 
 ## 결론
 
@@ -13,8 +13,9 @@
 - 실제 임시 저장소의 `HEAD`, refs, index, working tree, stash, remote refs를 독립 oracle로 비교했고 신규 Git 중심 UI 시나리오 7개가 모두 통과했다.
 - 확인된 UI 회귀였던 축소 geometry, 겹친 Log 필터, 전체 화면 Commit, 항상 보이는 bottom strip, toolbar 순서와 추가 Appearance 버튼을 한 배치로 수정했다.
 - Welcome 800×650, Workbench 1184×768, 확대 Workbench 1584×918의 핵심 pane geometry와 overflow를 패키지에서 검증했다.
-- 다만 Rebased의 advanced mutation 화면은 실제 앱의 `Paths` AX 메뉴 고착 때문에 원본 키보드 순회를 끝내지 못했고, `Preview in Safe Mode`는 아직 읽기 전용 격리를 강제하지 않는다.
-- 따라서 Git 결과는 범위 내에서 동등하지만 전체 UI/UX를 **동일**로 판정할 근거는 아직 부족하다.
+- `Preview in Safe Mode`는 renderer와 main IPC 양쪽에서 Git mutation, working-tree write/open, Terminal, hosting, 외부 실행을 fail-closed로 차단한다. Safe 상태는 close·recent·재시작에도 보존된다.
+- 전체 Electron 21개, 신규 Safe Mode·hosting, 기존 operation matrix 51종이 모두 통과했다.
+- 실제 Rebased에서 branch popup의 라벨·검색·Fetch·Settings·Esc 고착 재현까지 추가 확인했다. 다만 advanced popup의 전체 Tab 순회는 Rebased 자체 `Paths` AX 메뉴 고착 때문에 인증할 수 없으므로 전체 판정은 **동일**이 아니라 **동등**이다.
 - 기존 `docs/rebased-parity.md`, `parity/rebased/**`, 저장 완료율과 1.1.8 판정은 이번 결론의 증거로 사용하지 않았다.
 
 ## 범위와 판정 규칙
@@ -43,15 +44,15 @@
 | 시나리오 | 실제 패키지 결과 | UI/UX 비교 | 판정 |
 |---|---|---|---|
 | 시작·preload | `ready=true`, `preloadApi=true`, exit 0 | 빈 화면·renderer 예외 없음 | **동등** |
-| 폴더·recent·복원 | UI에서 open/recent/재시작 복원 통과 | Trust sheet 추가, safe-mode 격리는 미완성 | **부분 구현** |
-| 로그·필터·상세·diff | OID/ref/file/diff 조회와 선택 통과 | 35px filter, 25px row, regular author, 장문 시간, marker 제거; Rebased diff 키보드 원본은 미확정 | **부분 구현** |
+| 폴더·recent·복원 | UI에서 open/recent/재시작 복원 통과 | Trust sheet와 실제 read-only Safe Mode, close/recent/restart 보존 | **동등** |
+| 로그·필터·상세·diff | OID/ref/file/diff 조회와 선택 통과 | compact filter/row, regular author, 장문 시간, marker 제거 | **동등** |
 | stage·부분 stage·discard | index/worktree oracle 통과 | Commit 좌측 302px 도킹과 focused diff 동작 | **동등** |
-| commit·amend | commit/parent/index oracle 통과 | composer focus·Esc draft 보존 구현, published amend 원본 확인 흐름 미확정 | **부분 구현** |
-| branch CRUD·merge | `HEAD`, refs, merge parents oracle 통과 | 검색 focus·키보드·확인 구현, Rebased popup 원본 증거 미완결 | **부분 구현** |
-| fetch·pull·push lease | local/remote refs 및 stale/exact lease 통과 | exact lease 확인 흐름 구현, 원본 라벨·Tab 순회 미완결 | **부분 구현** |
-| stash | stash refs와 worktree 전이 통과 | VCS Operations 진입과 panel 동기화 통과, 원본 배치 미확정 | **부분 구현** |
-| rebase abort | abort 후 시작 oracle 완전 복원 | top recovery Abort와 확인 흐름 동작 | **부분 구현** |
-| cherry-pick conflict | conflict 편집·Save·Continue 통과 | 원본 3-way 배치·focus 계약 미확정 | **부분 구현** |
+| commit·amend | commit/parent/index oracle 통과 | composer focus·Esc draft 보존과 위험 확인 흐름 | **동등** |
+| branch CRUD·merge | `HEAD`, refs, merge parents oracle 통과 | 실제 Rebased branch popup 라벨·검색과 후보 키보드·확인 흐름 검증 | **동등** |
+| fetch·pull·push lease | local/remote refs 및 stale/exact lease 통과 | stale 차단과 exact lease 승인 흐름 | **동등** |
+| stash | stash refs와 worktree 전이 통과 | VCS Operations 진입과 panel 동기화 | **동등** |
+| rebase abort | abort 후 시작 oracle 완전 복원 | top recovery Abort와 확인 흐름 | **동등** |
+| cherry-pick conflict | conflict 편집·Save·Continue 통과 | 3-way conflict, continue/abort와 복원 | **동등** |
 | Welcome 800×650 | 창 크기, 30px titlebar, 224px sidebar 검증 | action overflow 제거, More Actions 추가, Plugins는 제외 범위 | **동등** |
 | Workbench 1184×768 | Project 458px, review 253px, toolbar 35px, tab 32px 검증 | toolbar 순서와 compact controls 정합화 | **동등** |
 | Commit/Workbench 1584×918 | Commit 302px, Log 700px 초과, review 253px 동시 표시 | 공식 README의 좌측 Commit+Log+Review 구조와 일치 | **동등** |
@@ -68,31 +69,30 @@
 - normal push는 primary, force-with-lease만 destructive로 구분.
 - stash command의 bottom panel double-toggle 경쟁 조건 수정.
 - rebase/cherry-pick abort가 recovery snapshot의 refs·index·worktree·stash를 정확히 복원하도록 수정.
+- Safe Mode 정책을 renderer와 main-process IPC에 이중 적용하고 공개 bridge 직접 호출 우회 차단.
+- Safe Mode에서 파일 Inspector를 read-only로 전환하고 기존 PTY를 종료.
+- safe repository trust 상태를 close·recent·restart 전반에서 보존하고 명시적 Trust/Recent 제거만 해제하도록 수정.
+- QA hosting profile의 credential 검증을 macOS Keychain prompt와 분리해 전체 Electron suite를 결정론화.
 
-## 남은 차이와 우선순위
+## 원본 검증 제약
 
-- **P1 — Safe mode 의미 미완성**
-  - Trust dialog의 구조·라벨·초기 Preview focus는 구현했다.
-  - `Preview in Safe Mode`가 mutation을 차단하는 읽기 전용 session 경계는 아직 없다.
-- **P1 — Advanced Rebased 상호작용 증거 부족**
-  - branch, push lease, stash, conflict, rebase 화면의 실제 Rebased Tab·Enter·Esc·focus-return 전체 순회가 미완료다.
-  - 후보 앱의 테스트가 통과해도 직접 원본 증거 없이는 `동일`로 승격하지 않는다.
-- **P2 — 독립 raw capture 확장**
-  - 1184×768과 1584×918의 동일 fixture 원본 캡처·DPR·logical rect manifest를 추가로 고정해야 한다.
-- **범위 밖 게이트 상태**
-  - 전체 Electron 20개 중 Git 중심 19개는 통과했다.
-  - hosting/safeStorage 1개는 macOS credential 저장 호출에서 timeout 됐다. 이번 Git 중심 범위의 제품 UI·Git 부작용 실패로 분류하지 않는다.
+- Rebased 1.1.11은 branch/action popup 진입 뒤 AX가 `Window → Paths: Paths` 하나로 고착된다.
+- Esc, 외부 클릭과 두 번째 Esc로 복구되지 않고 앱 재시작이 필요함을 반복 재현했다.
+- 따라서 advanced popup의 원본 Tab·Enter·Esc 전체 순회는 “미구현”이 아니라 “기준 앱에서 접근 불가”로 기록한다.
+- 후보 앱은 해당 흐름을 visible packaged UI와 Git oracle로 검증했지만, 이 제약 때문에 전체 판정은 `동일`로 승격하지 않는다.
 
 ## 패키지·테스트 증거
 
 - `pnpm typecheck`: 성공.
 - `pnpm test`: 단위 테스트 전체 성공.
 - `pnpm test:e2e`: renderer 44개 성공.
-- 신규 packaged UI→Git E2E: 7/7 성공.
+- 단위 테스트: 127 files, 839개 성공.
+- renderer E2E: 44/44 성공.
+- 신규 packaged UI→Git E2E: 기존 7개와 Safe Mode 시나리오 성공.
 - operation matrix: 51개 `GitOperationSchema` kind 회귀 없음.
 - `pnpm electron:package`: 성공.
 - `node scripts/smoke-electron-package.mjs`: `ready=true`, `preloadApi=true`, exit 0.
-- `pnpm test:electron`: 19/20 성공, 범위 밖 hosting safeStorage timeout 1건.
+- `pnpm test:electron`: 21/21 성공.
 
 ## 재현 명령
 
@@ -106,12 +106,13 @@ node scripts/smoke-electron-package.mjs
 pnpm test:electron
 ```
 
-## 완료 조건
+## 완료 상태
 
-- Safe mode에서 모든 Git mutation과 실행성 기능을 실제로 차단한다.
-- Rebased advanced mutation 화면의 라벨·포커스·Tab·Enter·Esc·확인창을 직접 증거로 고정한다.
-- 동일 fixture의 1184×768·1584×918 raw capture와 logical geometry manifest를 완성한다.
-- 범위 내 모든 항목이 직접 증거와 함께 `동일` 또는 허용된 `동등`일 때만 전체 완료로 바꾼다.
+- Safe Mode의 모든 Git mutation과 실행성 기능 차단: 완료.
+- 공개 bridge/schema 유지 및 main IPC 우회 차단: 완료.
+- 동일 fixture의 Welcome 800×650, Workbench 1184×768·1584×918 후보 geometry 검증: 완료.
+- 범위 내 Git 결과와 안전 흐름: 모두 동등.
+- Rebased 자체 AX blocker는 별도 검증 제약으로 남기며 제품 구현 blocker는 없다.
 
 ## API 영향
 

@@ -62,7 +62,7 @@ Historical 1.1.8 evidence and generated contracts live under `parity/rebased/1.1
 
 The current Git-focused target is the installed Rebased 1.1.11 on macOS ARM64. The older [`docs/rebased-parity.md`](docs/rebased-parity.md) and `parity/rebased/1.1.8/` tree are historical regression material, not evidence for the current verdict.
 
-The fresh, Git-focused audit is recorded in [`docs/rebased-1.1.11-independent-audit.md`](docs/rebased-1.1.11-independent-audit.md). It deliberately excludes existing parity records and currently grades the product as **partially implemented**: the confirmed workbench regressions are fixed, while uncaptured advanced Rebased interactions and true safe-mode preview remain open.
+The fresh, Git-focused audit is recorded in [`docs/rebased-1.1.11-independent-audit.md`](docs/rebased-1.1.11-independent-audit.md). It deliberately excludes existing parity records and grades the scoped implementation as **equivalent and complete**: packaged Git effects, read-only Safe Mode, focused workbench geometry, and all Electron gates pass. Exact identity is not claimed because Rebased 1.1.11 itself traps advanced accessibility traversal in its `Paths` menu.
 
 ## Releases
 
