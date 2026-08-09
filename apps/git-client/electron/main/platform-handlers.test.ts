@@ -158,6 +158,208 @@ describe("platform Git IPC handlers", () => {
     electronMock.fromWebContents.mockReturnValue(null);
   });
 
+  it("rejects direct Git operation IPC for a repository opened in Safe Mode", async () => {
+    const mainFrame = { url: "app://git-client/" };
+    const webContents = {
+      isDestroyed: () => false,
+      mainFrame,
+      send: vi.fn(),
+    };
+    const executeQuery = vi.fn(async () => ({
+      kind: "completed" as const,
+      requestId: REQUEST_ID,
+      exitCode: 0,
+      durationMs: 1,
+    }));
+    const settings = new Map<string, unknown>([
+      ["safeRepositoryPaths", [REPOSITORY.path]],
+      ["activeRepositoryPath", REPOSITORY.path],
+    ]);
+    registerPlatformHandlers({
+      window: { isDestroyed: () => false, webContents },
+      settings: { get: (key: string) => settings.get(key) ?? null },
+      menu: { sync: vi.fn() },
+      gitUtility: {
+        openRepository: vi.fn(async () => REPOSITORY),
+        executeQuery,
+      },
+      terminalUtility: { closeRepository: vi.fn(async () => 0) },
+      hosting: {},
+      runtime: {
+        kind: "electron",
+        appVersion: "0.1.0",
+        electronVersion: "43.1.1",
+        platform: "darwin",
+        architecture: "arm64",
+        qaFixture: false,
+      },
+    } as unknown as Parameters<typeof registerPlatformHandlers>[0]);
+    const event = { sender: webContents, senderFrame: mainFrame };
+
+    await handler(IPC_CHANNELS.gitOpenRepository)(event, { path: REPOSITORY.path });
+    await expect(
+      handler(IPC_CHANNELS.gitQuery)(event, {
+        kind: "status",
+        requestId: REQUEST_ID,
+        repositoryId: REPOSITORY_ID,
+      }),
+    ).resolves.toMatchObject({ kind: "completed", requestId: REQUEST_ID });
+    await expect(
+      handler(IPC_CHANNELS.gitQuery)(event, {
+        kind: "operation",
+        requestId: REQUEST_ID,
+        repositoryId: REPOSITORY_ID,
+        operation: { kind: "stageAll" },
+      }),
+    ).rejects.toThrow("Git changes is unavailable in Safe Mode");
+    expect(executeQuery).toHaveBeenCalledOnce();
+    unregisterPlatformHandlers();
+  });
+
+  it("rejects direct repository-service and working-tree mutations in Safe Mode", async () => {
+    const mainFrame = { url: "app://git-client/" };
+    const webContents = {
+      isDestroyed: () => false,
+      mainFrame,
+      send: vi.fn(),
+    };
+    const executeRepositoryService = vi.fn();
+    const writeWorkingTreeFile = vi.fn();
+    const resolveWorkingTreeFile = vi.fn();
+    const settings = new Map<string, unknown>([
+      ["safeRepositoryPaths", [REPOSITORY.path]],
+      ["activeRepositoryPath", REPOSITORY.path],
+    ]);
+    registerPlatformHandlers({
+      window: { isDestroyed: () => false, webContents },
+      settings: { get: (key: string) => settings.get(key) ?? null },
+      menu: { sync: vi.fn() },
+      gitUtility: {
+        openRepository: vi.fn(async () => REPOSITORY),
+        executeRepositoryService,
+        writeWorkingTreeFile,
+        resolveWorkingTreeFile,
+      },
+      terminalUtility: { closeRepository: vi.fn(async () => 0) },
+      hosting: {},
+      runtime: {
+        kind: "electron",
+        appVersion: "0.1.0",
+        electronVersion: "43.1.1",
+        platform: "darwin",
+        architecture: "arm64",
+        qaFixture: false,
+      },
+    } as unknown as Parameters<typeof registerPlatformHandlers>[0]);
+    const event = { sender: webContents, senderFrame: mainFrame };
+    await handler(IPC_CHANNELS.gitOpenRepository)(event, { path: REPOSITORY.path });
+
+    await expect(
+      handler(IPC_CHANNELS.gitRepositoryService)(event, {
+        operation: "writeIgnoreRules",
+        repositoryId: REPOSITORY_ID,
+        rules: { gitignore: "dist/\n", infoExclude: "" },
+      }),
+    ).rejects.toThrow("Git changes is unavailable in Safe Mode");
+    await expect(
+      handler(IPC_CHANNELS.gitRepositoryService)(event, {
+        operation: "preCommitCheck",
+        repositoryId: REPOSITORY_ID,
+      }),
+    ).rejects.toThrow("Git changes is unavailable in Safe Mode");
+    await expect(
+      handler(IPC_CHANNELS.gitWriteWorkingTreeFile)(event, {
+        repositoryId: REPOSITORY_ID,
+        path: "tracked.txt",
+        content: "changed\n",
+        activityName: null,
+      }),
+    ).rejects.toThrow("Git changes is unavailable in Safe Mode");
+    await expect(
+      handler(IPC_CHANNELS.gitOpenWorkingTreeFile)(event, {
+        repositoryId: REPOSITORY_ID,
+        path: "tracked.txt",
+      }),
+    ).rejects.toThrow("External execution is unavailable in Safe Mode");
+    expect(executeRepositoryService).not.toHaveBeenCalled();
+    expect(writeWorkingTreeFile).not.toHaveBeenCalled();
+    expect(resolveWorkingTreeFile).not.toHaveBeenCalled();
+    unregisterPlatformHandlers();
+  });
+
+  it("closes existing PTYs and rejects terminal and hosting IPC on trusted-to-safe reopen", async () => {
+    const mainFrame = { url: "app://git-client/" };
+    const webContents = {
+      isDestroyed: () => false,
+      mainFrame,
+      send: vi.fn(),
+    };
+    const settings = new Map<string, unknown>([
+      ["safeRepositoryPaths", []],
+      ["activeRepositoryPath", REPOSITORY.path],
+    ]);
+    const terminalUtility = {
+      create: vi.fn(async () => ({
+        requestId: REQUEST_ID,
+        terminalId: "f6478d5c-5aa0-4d4a-b646-cb950b0ca555",
+      })),
+      listLaunchTargets: vi.fn(async () => ({ shells: [], agents: [] })),
+      closeRepository: vi.fn(async () => 1),
+    };
+    const hosting = {
+      deleteAccount: vi.fn(async () => undefined),
+    };
+    registerPlatformHandlers({
+      window: { isDestroyed: () => false, webContents },
+      settings: { get: (key: string) => settings.get(key) ?? null },
+      menu: { sync: vi.fn() },
+      gitUtility: { openRepository: vi.fn(async () => REPOSITORY) },
+      terminalUtility,
+      hosting,
+      runtime: {
+        kind: "electron",
+        appVersion: "0.1.0",
+        electronVersion: "43.1.1",
+        platform: "darwin",
+        architecture: "arm64",
+        qaFixture: false,
+      },
+    } as unknown as Parameters<typeof registerPlatformHandlers>[0]);
+    const event = { sender: webContents, senderFrame: mainFrame };
+    const createRequest = {
+      requestId: REQUEST_ID,
+      repositoryId: REPOSITORY_ID,
+      cols: 100,
+      rows: 28,
+    };
+
+    await handler(IPC_CHANNELS.gitOpenRepository)(event, { path: REPOSITORY.path });
+    await expect(handler(IPC_CHANNELS.terminalCreate)(event, createRequest)).resolves.toMatchObject(
+      {
+        requestId: REQUEST_ID,
+      },
+    );
+    settings.set("safeRepositoryPaths", [REPOSITORY.path]);
+    await handler(IPC_CHANNELS.gitOpenRepository)(event, { path: REPOSITORY.path });
+
+    expect(terminalUtility.closeRepository).toHaveBeenCalledWith({
+      repositoryId: REPOSITORY_ID,
+    });
+    await expect(handler(IPC_CHANNELS.terminalCreate)(event, createRequest)).rejects.toThrow(
+      "Terminal access is unavailable in Safe Mode",
+    );
+    await expect(handler(IPC_CHANNELS.terminalListLaunchTargets)(event, {})).rejects.toThrow(
+      "Terminal access is unavailable in Safe Mode",
+    );
+    await expect(
+      handler(IPC_CHANNELS.hostingDeleteAccount)(event, { accountId: "account-1" }),
+    ).rejects.toThrow("Hosting access is unavailable in Safe Mode");
+    expect(terminalUtility.create).toHaveBeenCalledOnce();
+    expect(terminalUtility.listLaunchTargets).not.toHaveBeenCalled();
+    expect(hosting.deleteAccount).not.toHaveBeenCalled();
+    unregisterPlatformHandlers();
+  });
+
   it("denies full IPC to child windows and limits Local History to its repository", async () => {
     const mainFrame = { url: "app://git-client/" };
     const mainWebContents = {
@@ -508,7 +710,7 @@ describe("platform Git IPC handlers", () => {
       window: { isDestroyed: () => false, webContents },
       settings: { get: vi.fn(), set: vi.fn(), delete: vi.fn() },
       menu: { sync: vi.fn() },
-      gitUtility: { executeQuery },
+      gitUtility: { openRepository: vi.fn(async () => REPOSITORY), executeQuery },
       terminalUtility: {},
       runtime: {
         kind: "electron",
@@ -519,13 +721,13 @@ describe("platform Git IPC handlers", () => {
         qaFixture: false,
       },
     } as unknown as Parameters<typeof registerPlatformHandlers>[0]);
+    const event = { sender: webContents, senderFrame: mainFrame };
 
-    await expect(
-      handler(IPC_CHANNELS.gitQuery)(
-        { sender: webContents, senderFrame: mainFrame },
-        operationRequest,
-      ),
-    ).resolves.toEqual(terminal);
+    await handler(IPC_CHANNELS.gitOpenRepository)(event, { path: REPOSITORY.path });
+
+    await expect(handler(IPC_CHANNELS.gitQuery)(event, operationRequest)).resolves.toEqual(
+      terminal,
+    );
     expect(send.mock.calls).toEqual([
       [IPC_CHANNELS.gitQueryEvent, started],
       [IPC_CHANNELS.gitQueryEvent, terminal],
@@ -643,7 +845,10 @@ describe("platform Git IPC handlers", () => {
       window: { isDestroyed: () => false, webContents },
       settings: { get: vi.fn(), set: vi.fn(), delete: vi.fn() },
       menu: { sync: vi.fn() },
-      gitUtility: { executeRepositoryService },
+      gitUtility: {
+        openRepository: vi.fn(async () => REPOSITORY),
+        executeRepositoryService,
+      },
       terminalUtility: {},
       runtime: {
         kind: "electron",
@@ -655,6 +860,8 @@ describe("platform Git IPC handlers", () => {
       },
     } as unknown as Parameters<typeof registerPlatformHandlers>[0]);
     const event = { sender: webContents, senderFrame: mainFrame };
+
+    await handler(IPC_CHANNELS.gitOpenRepository)(event, { path: REPOSITORY.path });
 
     await expect(
       handler(IPC_CHANNELS.gitRepositoryService)(event, {
@@ -850,7 +1057,10 @@ describe("platform Git IPC handlers", () => {
       window: { isDestroyed: () => false, webContents },
       settings: { get: vi.fn(), set: vi.fn(), delete: vi.fn() },
       menu: { sync: vi.fn() },
-      gitUtility: { resolveWorkingTreeFile },
+      gitUtility: {
+        openRepository: vi.fn(async () => REPOSITORY),
+        resolveWorkingTreeFile,
+      },
       terminalUtility: {},
       runtime: {
         kind: "electron",
@@ -862,6 +1072,8 @@ describe("platform Git IPC handlers", () => {
       },
     } as unknown as Parameters<typeof registerPlatformHandlers>[0]);
     const event = { sender: webContents, senderFrame: mainFrame };
+
+    await handler(IPC_CHANNELS.gitOpenRepository)(event, { path: REPOSITORY.path });
 
     electronMock.openPath.mockResolvedValueOnce("");
     await expect(

@@ -38,6 +38,7 @@ export function RepositoryInspectorDialog({
   initialColumn,
   bookmarkedLines,
   onToggleBookmark,
+  readOnly = false,
 }: {
   readonly revision: string;
   readonly initialPath?: string;
@@ -57,6 +58,7 @@ export function RepositoryInspectorDialog({
   readonly initialColumn?: number;
   readonly bookmarkedLines?: readonly number[];
   readonly onToggleBookmark?: (path: string, line: number, column: number) => void;
+  readonly readOnly?: boolean;
 }) {
   const [tab, setTab] = useState<InspectorTab>(initialTab);
   const [path, setPath] = useState(initialPath ?? "");
@@ -74,7 +76,10 @@ export function RepositoryInspectorDialog({
   const onDirtyChangeRef = useRef(onDirtyChange);
   onDirtyChangeRef.current = onDirtyChange;
   const editorDirty =
-    source.kind === "workingTree" && content?.kind === "text" && editorValue !== content.content;
+    !readOnly &&
+    source.kind === "workingTree" &&
+    content?.kind === "text" &&
+    editorValue !== content.content;
   useDismissLayer(
     useMemo(
       () => ({
@@ -145,7 +150,7 @@ export function RepositoryInspectorDialog({
 
   const saveEditor = useCallback(
     async (value: string): Promise<void> => {
-      if (source.kind !== "workingTree" || content?.kind !== "text" || saving) return;
+      if (readOnly || source.kind !== "workingTree" || content?.kind !== "text" || saving) return;
       setSaving(true);
       setError(undefined);
       try {
@@ -168,7 +173,7 @@ export function RepositoryInspectorDialog({
         setSaving(false);
       }
     },
-    [content, path, saving, source.kind, writeWorkingTreeFile],
+    [content, path, readOnly, saving, source.kind, writeWorkingTreeFile],
   );
 
   useEffect(() => {
@@ -298,7 +303,7 @@ export function RepositoryInspectorDialog({
             <Button
               onClick={() => void saveEditor(editorValue)}
               type="button"
-              disabled={saving || editorValue === content.content}
+              disabled={readOnly || saving || editorValue === content.content}
               className={cn("h-7 px-2.5")}
               variant="outline"
               size="sm"
@@ -352,7 +357,7 @@ export function RepositoryInspectorDialog({
               >
                 <CodeMirrorFile
                   bookmarkedLines={bookmarkedLines}
-                  editable={source.kind === "workingTree"}
+                  editable={source.kind === "workingTree" && !readOnly}
                   initialColumn={initialColumn}
                   initialLine={initialLine}
                   onChange={setEditorValue}
@@ -374,6 +379,7 @@ export function RepositoryInspectorDialog({
                   </span>
                   {source.kind === "workingTree" && (
                     <Button
+                      disabled={readOnly}
                       onClick={() => void openWorkingTreeFile(preview.preview.path)}
                       type="button"
                       className={cn("h-7 px-2.5")}

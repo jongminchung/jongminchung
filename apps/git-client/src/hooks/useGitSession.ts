@@ -32,6 +32,12 @@ import {
 import { updateRecentProjects } from "../domain/recentProjects";
 import type { RecentProject } from "../domain/recentProjects";
 import { RefreshCoordinator } from "../domain/RefreshCoordinator";
+import {
+  assertGitRequestAllowed,
+  repositoryAccessPolicy,
+  restoreRepositoryAccess,
+  type RepositoryAccessMode,
+} from "../domain/repositoryAccess";
 import { updateRepositoryView } from "../domain/repositoryView";
 import { terminalService } from "../domain/TerminalService";
 import type {
@@ -446,12 +452,19 @@ export function useGitSession() {
     return session?.kind === "error" ? session : null;
   }, [state.activeTab, state.sessions]);
   const openRepositoryPathsJson = JSON.stringify(workspacePaths(state.sessions));
+  const safeRepositoryPathsJson = JSON.stringify(
+    repositoryAccessPolicy.safePaths([
+      ...workspacePaths(state.sessions),
+      ...state.recentProjects.map((project) => project.path),
+    ]),
+  );
   const recentProjectsJson = JSON.stringify(state.recentProjects);
   const activeRepositoryPath =
     activeSession?.repository.snapshot.path ?? activeErrorSession?.path ?? null;
 
   useEffect(() => {
     activeRepositoryId.current = activeSession?.repository.snapshot.id ?? null;
+    repositoryAccessPolicy.activate(activeRepositoryId.current);
     activeSnapshotRef.current =
       activeSession?.repository.snapshot ?? managementSession?.repository.snapshot ?? null;
     if (activeSession) {
@@ -556,6 +569,7 @@ export function useGitSession() {
         const { samplePatch } = await requireFixtureData();
         return request.kind === "diff" ? samplePatch : "";
       }
+      assertGitRequestAllowed(repositoryAccessPolicy, request);
       return new Promise((resolve, reject) => {
         const eventBuffer = new GitRequestEventBuffer();
         let settled = false;
@@ -871,6 +885,7 @@ export function useGitSession() {
 
   const addSnapshot = useCallback(
     async (snapshot: RepositorySnapshot, activate: boolean): Promise<void> => {
+      if (activate) repositoryAccessPolicy.activate(snapshot.id);
       setState((current) => ({
         ...current,
         sessions: [
@@ -907,6 +922,7 @@ export function useGitSession() {
         const snapshots = results.flatMap((result) =>
           result.status === "fulfilled" ? [result.value] : [],
         );
+        restoreRepositoryAccess(repositoryAccessPolicy, snapshots, startup.safeRepositoryPaths);
         const sessions = snapshots.map(loadingSession);
         const failures = results.flatMap((result, index) =>
           result.status === "rejected"
@@ -920,9 +936,13 @@ export function useGitSession() {
             ? [startup.openRepositoryPaths[index]]
             : [],
         );
+        const activeTab = restoredWorkspaceTab(sessions, startup.activeRepositoryPath);
+        repositoryAccessPolicy.activate(
+          activeTab.kind === "repository" ? activeTab.repositoryId : null,
+        );
         setState({
           sessions,
-          activeTab: restoredWorkspaceTab(sessions, startup.activeRepositoryPath),
+          activeTab,
           recentProjects: recentProjectsWithRestoreFailures(startup.recentProjects, failedPaths),
           restoring: false,
           error:
@@ -953,6 +973,7 @@ export function useGitSession() {
       await writeElectronSettings({
         schemaVersion: WORKSPACE_SCHEMA_VERSION,
         openRepositoryPaths: JSON.parse(openRepositoryPathsJson),
+        safeRepositoryPaths: JSON.parse(safeRepositoryPathsJson),
         activeRepositoryPath,
         recentProjects: JSON.parse(recentProjectsJson),
       });
@@ -962,6 +983,7 @@ export function useGitSession() {
     activeRepositoryPath,
     fixture,
     openRepositoryPathsJson,
+    safeRepositoryPathsJson,
     recentProjectsJson,
     state.restoring,
     welcomeRecentFixture,
@@ -978,10 +1000,27 @@ export function useGitSession() {
   );
 
   const openRepository = useCallback(
-    async (path: string): Promise<void> => {
+    async (
+      path: string,
+      mode: RepositoryAccessMode = repositoryAccessPolicy.modeForPath(path),
+    ): Promise<void> => {
       try {
         assertLiveRepositoryActionAllowed(fixture);
-        await addSnapshot(await gitBridge.openRepository(path), true);
+        repositoryAccessPolicy.remember(path, mode);
+        const intendedSafeRepositoryPaths = repositoryAccessPolicy
+          .safePaths([
+            ...workspacePaths(state.sessions),
+            ...state.recentProjects.map((project) => project.path),
+            path,
+          ])
+          .filter((safePath) => mode === "safe" || safePath !== path);
+        await writeElectronSettings({
+          safeRepositoryPaths: intendedSafeRepositoryPaths,
+          activeRepositoryPath: path,
+        });
+        const snapshot = await gitBridge.openRepository(path);
+        repositoryAccessPolicy.open(snapshot.id, snapshot.path, mode);
+        await addSnapshot(snapshot, true);
       } catch (error) {
         setState((current) => ({
           ...current,
@@ -989,13 +1028,14 @@ export function useGitSession() {
         }));
       }
     },
-    [addSnapshot, fixture],
+    [addSnapshot, fixture, state.recentProjects, state.sessions],
   );
 
   const initializeRepository = useCallback(
     async (path: string, bare: boolean, onEvent?: GitCreationEventListener): Promise<void> => {
       try {
         assertLiveRepositoryActionAllowed(fixture);
+        repositoryAccessPolicy.assertActive("gitMutation");
         await addSnapshot(await gitBridge.initializeRepository(path, bare, onEvent), true);
       } catch (error) {
         const message = sanitizeGitError(error);
@@ -1018,6 +1058,7 @@ export function useGitSession() {
     ): Promise<void> => {
       try {
         assertLiveRepositoryActionAllowed(fixture);
+        repositoryAccessPolicy.assertActive("gitMutation");
         await addSnapshot(await gitBridge.cloneRepository(url, path, options, onEvent), true);
       } catch (error) {
         const message = sanitizeGitError(error);
@@ -1037,7 +1078,22 @@ export function useGitSession() {
 
   const activateTab = useCallback(
     async (tab: WorkspaceTab): Promise<void> => {
+      const nextActiveSession = state.sessions.find((candidate) =>
+        tab.kind === "repository"
+          ? candidate.kind === "repository" && candidate.repository.snapshot.id === tab.repositoryId
+          : tab.kind === "error"
+            ? candidate.kind === "error" && candidate.id === tab.sessionId
+            : false,
+      );
+      const nextActivePath =
+        nextActiveSession === undefined
+          ? null
+          : nextActiveSession.kind === "repository"
+            ? nextActiveSession.repository.snapshot.path
+            : nextActiveSession.path;
+      await writeElectronSettings({ activeRepositoryPath: nextActivePath });
       activeRepositoryId.current = tab.kind === "repository" ? tab.repositoryId : null;
+      repositoryAccessPolicy.activate(activeRepositoryId.current);
       setState((current) => ({ ...current, activeTab: tab }));
       if (tab.kind !== "repository") return;
       const session = state.sessions.find(
@@ -1086,6 +1142,7 @@ export function useGitSession() {
         logCommitCounts.current.delete(sessionId);
         logGenerations.current.delete(sessionId);
         activeLogRequests.current.delete(sessionId);
+        repositoryAccessPolicy.forget(sessionId);
       }
       setState((current) => ({
         ...current,
@@ -1117,9 +1174,11 @@ export function useGitSession() {
         logCommitCounts.current.delete(repositoryId);
         logGenerations.current.delete(repositoryId);
         activeLogRequests.current.delete(repositoryId);
+        repositoryAccessPolicy.forget(repositoryId);
       },
     });
     activeRepositoryId.current = null;
+    repositoryAccessPolicy.activate(null);
     activeSnapshotRef.current = null;
     setState((current) => ({
       ...current,
@@ -1138,6 +1197,7 @@ export function useGitSession() {
     async (operation: GitOperation, throwOnError = false): Promise<void> => {
       if (fixture) return;
       const snapshot = activeSnapshot();
+      repositoryAccessPolicy.assert(snapshot.id, "gitMutation");
       const activityId = beginActivity(
         snapshot.id,
         operationActivityLabel(operation),
@@ -1659,6 +1719,7 @@ export function useGitSession() {
       if (gitBridge.revertLocalHistory === undefined)
         throw new Error("Local History is unavailable");
       const snapshot = activeSnapshot();
+      repositoryAccessPolicy.assert(snapshot.id, "gitMutation");
       await gitBridge.revertLocalHistory(snapshot.id, activityId, paths, includeLater);
       await refreshAll(snapshot.id);
     },
@@ -1680,7 +1741,9 @@ export function useGitSession() {
       if (fixture) throw new Error("Local History requires the native app");
       if (gitBridge.putLocalHistoryLabel === undefined)
         throw new Error("Local History is unavailable");
-      return gitBridge.putLocalHistoryLabel(activeSnapshot().id, label);
+      const snapshot = activeSnapshot();
+      repositoryAccessPolicy.assert(snapshot.id, "gitMutation");
+      return gitBridge.putLocalHistoryLabel(snapshot.id, label);
     },
     [activeSnapshot, fixture],
   );
@@ -1688,7 +1751,9 @@ export function useGitSession() {
   const exportPatch = useCallback(
     async (revisions: readonly string[], targetPath: string): Promise<PatchExportResult> => {
       if (fixture) throw new Error("Patch export requires the native app");
-      return gitBridge.exportPatch(activeSnapshot().id, revisions, targetPath);
+      const snapshot = activeSnapshot();
+      repositoryAccessPolicy.assert(snapshot.id, "externalExecution");
+      return gitBridge.exportPatch(snapshot.id, revisions, targetPath);
     },
     [activeSnapshot, fixture],
   );
@@ -1703,6 +1768,7 @@ export function useGitSession() {
   const importPatch = useCallback(
     async (path: string): Promise<void> => {
       const snapshot = activeSnapshot();
+      repositoryAccessPolicy.assert(snapshot.id, "gitMutation");
       await gitBridge.importPatch(snapshot.id, path);
       refreshCoordinator.invalidate(snapshot.id, ["status", "history"]);
       await refreshCoordinator.flush(snapshot.id);
@@ -1840,6 +1906,7 @@ export function useGitSession() {
       if (gitBridge.writeWorkingTreeFile === undefined)
         throw new Error("File editing is unavailable");
       const snapshot = activeSnapshot();
+      repositoryAccessPolicy.assert(snapshot.id, "gitMutation");
       await gitBridge.writeWorkingTreeFile(snapshot.id, path, content, activityName);
       refreshCoordinator.invalidate(snapshot.id, ["status"]);
       await refreshCoordinator.flush(snapshot.id);
@@ -1868,7 +1935,9 @@ export function useGitSession() {
   const openWorkingTreeFile = useCallback(
     async (path: string): Promise<void> => {
       if (fixture) return;
-      await gitBridge.openWorkingTreeFile(activeSnapshot().id, path);
+      const snapshot = activeSnapshot();
+      repositoryAccessPolicy.assert(snapshot.id, "externalExecution");
+      await gitBridge.openWorkingTreeFile(snapshot.id, path);
     },
     [activeSnapshot, fixture],
   );
@@ -1909,6 +1978,7 @@ export function useGitSession() {
       invalidations: readonly RepositoryInvalidation[],
     ): Promise<void> => {
       const snapshot = activeSnapshot();
+      repositoryAccessPolicy.assert(snapshot.id, "gitMutation");
       await mutation(snapshot.id);
       refreshCoordinator.invalidate(snapshot.id, invalidations);
       await refreshCoordinator.flush(snapshot.id);
@@ -1920,6 +1990,7 @@ export function useGitSession() {
     async (message: string, paths: readonly string[]): Promise<void> => {
       if (fixture) return;
       const snapshot = activeSnapshot();
+      repositoryAccessPolicy.assert(snapshot.id, "gitMutation");
       const shelf = await gitBridge.createShelf(snapshot.id, message, paths);
       setState((current) =>
         updateRepositorySession(current, snapshot.id, (session) => ({
@@ -1937,6 +2008,7 @@ export function useGitSession() {
     async (shelfId: string, dropAfterApply: boolean): Promise<void> => {
       if (fixture) return;
       const snapshot = activeSnapshot();
+      repositoryAccessPolicy.assert(snapshot.id, "gitMutation");
       await gitBridge.applyShelf(snapshot.id, shelfId, dropAfterApply);
       if (dropAfterApply) {
         setState((current) =>
@@ -1955,6 +2027,7 @@ export function useGitSession() {
   const deleteShelf = useCallback(
     async (shelfId: string): Promise<void> => {
       const snapshot = activeSnapshot();
+      repositoryAccessPolicy.assert(snapshot.id, "gitMutation");
       await gitBridge.deleteShelf(snapshot.id, shelfId);
       setState((current) =>
         updateRepositorySession(current, snapshot.id, (session) => ({
@@ -1969,6 +2042,7 @@ export function useGitSession() {
   const saveChangelist = useCallback(
     async (id: string | null, name: string, paths: readonly string[]): Promise<Changelist> => {
       const snapshot = activeSnapshot();
+      repositoryAccessPolicy.assert(snapshot.id, "gitMutation");
       const saved = await gitBridge.saveChangelist(snapshot.id, id, name, paths);
       setState((current) =>
         updateRepositorySession(current, snapshot.id, (session) => ({
@@ -1987,6 +2061,7 @@ export function useGitSession() {
   const deleteChangelist = useCallback(
     async (changelistId: string): Promise<void> => {
       const snapshot = activeSnapshot();
+      repositoryAccessPolicy.assert(snapshot.id, "gitMutation");
       await gitBridge.deleteChangelist(snapshot.id, changelistId);
       setState((current) =>
         updateRepositorySession(current, snapshot.id, (session) => ({
@@ -2007,6 +2082,7 @@ export function useGitSession() {
       gpgSign: boolean,
     ): Promise<ChangelistCommitResult> => {
       const snapshot = activeSnapshot();
+      repositoryAccessPolicy.assert(snapshot.id, "gitMutation");
       const result = await gitBridge.commitChangelist(
         snapshot.id,
         changelistId,
@@ -2049,6 +2125,7 @@ export function useGitSession() {
   const writeIgnoreRules = useCallback(
     async (rules: IgnoreRules): Promise<void> => {
       const snapshot = activeSnapshot();
+      repositoryAccessPolicy.assert(snapshot.id, "gitMutation");
       await gitBridge.writeIgnoreRules(snapshot.id, rules);
       refreshCoordinator.invalidate(snapshot.id, ["status"]);
       await refreshCoordinator.flush(snapshot.id);
@@ -2073,6 +2150,7 @@ export function useGitSession() {
   const restoreRecoveryEntry = useCallback(
     async (entryId: string): Promise<void> => {
       const snapshot = activeSnapshot();
+      repositoryAccessPolicy.assert(snapshot.id, "gitMutation");
       await gitBridge.restoreRecoveryEntry(snapshot.id, entryId);
       refreshCoordinator.invalidate(snapshot.id, ["status", "history"]);
       const [recoveryEntries] = await Promise.all([
@@ -2134,6 +2212,9 @@ export function useGitSession() {
 
   const executeSynchronizedBranchOperation = useCallback(
     async (repositoryIds: readonly string[], operation: GitOperation): Promise<MultiRootResult> => {
+      for (const repositoryId of repositoryIds) {
+        repositoryAccessPolicy.assert(repositoryId, "gitMutation");
+      }
       const result = await gitBridge.executeSynchronizedBranchOperation(repositoryIds, operation);
       if (activeSession) {
         const repositoryId = activeSession.repository.snapshot.id;
@@ -2147,6 +2228,9 @@ export function useGitSession() {
 
   const applyMultiRootRollback = useCallback(
     async (steps: readonly MultiRootRollbackStep[]): Promise<readonly MultiRootOutcome[]> => {
+      for (const step of steps) {
+        repositoryAccessPolicy.assert(step.repositoryId, "gitMutation");
+      }
       const outcomes = await gitBridge.applyMultiRootRollback(steps);
       if (activeSession) {
         const repositoryId = activeSession.repository.snapshot.id;
@@ -2217,16 +2301,30 @@ export function useGitSession() {
     setState((current) => ({ ...current, notice: null }));
   }, []);
 
-  const removeRecentProject = useCallback((path: string): void => {
-    setState((current) => ({
-      ...current,
-      recentProjects: current.recentProjects.filter((project) => project.path !== path),
-    }));
-  }, []);
+  const removeRecentProject = useCallback(
+    (path: string): void => {
+      const openInSafeMode = state.sessions.some(
+        (session) =>
+          session.kind === "repository" &&
+          session.repository.snapshot.path === path &&
+          repositoryAccessPolicy.mode(session.repository.snapshot.id) === "safe",
+      );
+      if (!openInSafeMode) repositoryAccessPolicy.forgetPath(path);
+      setState((current) => ({
+        ...current,
+        recentProjects: current.recentProjects.filter((project) => project.path !== path),
+      }));
+    },
+    [state.sessions],
+  );
 
   const openRepositories = state.sessions.flatMap((session) =>
     session.kind === "repository" ? [session.repository.snapshot] : [],
   );
+  const accessMode: RepositoryAccessMode =
+    activeSession === null
+      ? "trusted"
+      : repositoryAccessPolicy.mode(activeSession.repository.snapshot.id);
 
   return {
     sessions: state.sessions,
@@ -2236,6 +2334,7 @@ export function useGitSession() {
     error: state.error ?? activeSession?.error ?? null,
     notice: state.notice ?? null,
     fixture,
+    accessMode,
     repository: activeSession?.repository ?? null,
     repositoryError: activeErrorSession,
     loading: activeSession?.status === "loading",

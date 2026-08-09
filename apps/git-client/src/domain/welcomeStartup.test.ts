@@ -6,6 +6,7 @@ describe("workspace startup", () => {
     const settings = new Map<string, unknown>([
       ["openRepositoryPaths", ["/work/one", "/work/two", "/work/one", 3]],
       ["activeRepositoryPath", "/work/two"],
+      ["safeRepositoryPaths", ["/work/one"]],
       ["recentRepositories", ["/work/recent"]],
     ]);
     const readSetting = vi.fn(async (key: string): Promise<unknown> => settings.get(key));
@@ -13,6 +14,7 @@ describe("workspace startup", () => {
     await expect(loadWorkspaceStartupState(readSetting)).resolves.toEqual({
       activeRepositoryPath: "/work/two",
       openRepositoryPaths: ["/work/one", "/work/two"],
+      safeRepositoryPaths: ["/work/one"],
       recentProjects: [
         {
           path: "/work/recent",
@@ -25,6 +27,7 @@ describe("workspace startup", () => {
     expect(readSetting.mock.calls.map(([key]) => key)).toEqual([
       "openRepositoryPaths",
       "activeRepositoryPath",
+      "safeRepositoryPaths",
       "recentProjects",
       "recentRepositories",
     ]);
@@ -50,6 +53,7 @@ describe("workspace startup", () => {
 
     expect(startup.activeRepositoryPath).toBeNull();
     expect(startup.openRepositoryPaths).toEqual([]);
+    expect(startup.safeRepositoryPaths).toEqual([]);
     expect(startup.recentProjects).toEqual([
       {
         path: "/work/current",
@@ -70,8 +74,19 @@ describe("workspace startup", () => {
     expect(startup).toEqual({
       activeRepositoryPath: null,
       openRepositoryPaths: ["/work/valid"],
+      safeRepositoryPaths: [],
       recentProjects: [],
     });
+  });
+
+  it("restores only validated safe-mode repository paths", async () => {
+    const startup = await loadWorkspaceStartupState(async (key) => {
+      if (key === "openRepositoryPaths") return ["/work/safe", "/work/trusted"];
+      if (key === "safeRepositoryPaths") return ["/work/safe", "", 42, "/work/safe"];
+      return null;
+    });
+
+    expect(startup.safeRepositoryPaths).toEqual(["/work/safe"]);
   });
 
   it("keeps failed restore paths available for retry or removal", () => {

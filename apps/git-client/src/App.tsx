@@ -480,6 +480,7 @@ function WorkspaceTitlebar({
   onProjectSwitcherOpenChange,
   onRemoveRecentProject,
   projectSwitcherOpen,
+  readOnly,
   showRepositoryActions,
 }: {
   readonly session: GitSession;
@@ -493,6 +494,7 @@ function WorkspaceTitlebar({
   readonly onProjectSwitcherOpenChange: (open: boolean) => void;
   readonly onRemoveRecentProject: (path: string) => void;
   readonly projectSwitcherOpen: boolean;
+  readonly readOnly: boolean;
   readonly showRepositoryActions: boolean;
 }) {
   const { openPalette } = useCommands();
@@ -551,7 +553,7 @@ function WorkspaceTitlebar({
                 <Button
                   aria-label="Update Project..."
                   className="h-[26px] w-7 text-xs text-muted-foreground"
-                  disabled={!repository}
+                  disabled={!repository || readOnly}
                   onClick={() =>
                     void session.executeOperation({
                       kind: "pull",
@@ -573,7 +575,7 @@ function WorkspaceTitlebar({
                 <Button
                   aria-label="Push…"
                   className="h-[26px] w-7 text-xs text-muted-foreground"
-                  disabled={!repository}
+                  disabled={!repository || readOnly}
                   onClick={onOpenPush}
                   variant="ghost"
                   size="default"
@@ -592,7 +594,7 @@ function WorkspaceTitlebar({
                     aria-expanded={branchesOpen}
                     aria-label={repository?.snapshot.currentBranch ?? "No branch"}
                     className="h-[26px] max-w-[180px] gap-[5px] px-1.5 text-xs text-muted-foreground [&>span]:overflow-hidden [&>span]:text-ellipsis [&>span]:whitespace-nowrap"
-                    disabled={!repository}
+                    disabled={!repository || readOnly}
                     onClick={() => setBranchesOpen((value) => !value)}
                     variant="ghost"
                     size="default"
@@ -635,6 +637,15 @@ function WorkspaceTitlebar({
             )}
           </div>
         </>
+      )}
+      {readOnly && (
+        <span
+          aria-label="Safe Mode"
+          className="rounded border border-border bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground"
+          role="status"
+        >
+          Safe Mode
+        </span>
       )}
       <span className={tw.mainToolbarDragRegion} />
       <Tooltip>
@@ -692,6 +703,7 @@ function RepositoryToolStripe({
   onOpenBookmarks,
   terminalFocused,
   disabled = false,
+  readOnly = false,
 }: {
   readonly changes: number;
   readonly mode: RepositoryViewMode;
@@ -703,6 +715,7 @@ function RepositoryToolStripe({
   readonly onOpenBookmarks: () => void;
   readonly terminalFocused: boolean;
   readonly disabled?: boolean;
+  readonly readOnly?: boolean;
 }) {
   const { openPalette } = useCommands();
   return (
@@ -752,7 +765,7 @@ function RepositoryToolStripe({
                   aria-label="Commit"
                   className="group/toggle relative inline-flex h-[31px] w-[30px] shrink-0 items-center justify-center rounded-md bg-transparent text-muted-foreground outline-none transition-all hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 data-pressed:text-primary [&_svg]:pointer-events-none [&_svg]:shrink-0"
                   data-slot="toggle"
-                  disabled={disabled}
+                  disabled={disabled || readOnly}
                   onPressedChange={() => onModeChange("changes")}
                   pressed={mode === "changes"}
                 >
@@ -790,7 +803,7 @@ function RepositoryToolStripe({
                 aria-label="Terminal"
                 className="group/toggle relative inline-flex h-[31px] w-[30px] shrink-0 items-center justify-center rounded-md bg-transparent text-muted-foreground outline-none transition-all hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 data-pressed:text-primary [&_svg]:pointer-events-none [&_svg]:shrink-0"
                 data-slot="toggle"
-                disabled={disabled}
+                disabled={disabled || readOnly}
                 onPressedChange={() =>
                   window.dispatchEvent(new CustomEvent("git-client:open-terminal"))
                 }
@@ -982,6 +995,7 @@ function RepositoryWorkspace({
   readonly onChromeModeChange: (mode: "editor" | "terminal") => void;
 }) {
   const { execute: executeCommand, openPaletteFor } = useCommands();
+  const safeMode = session.accessMode === "safe";
   const editorTabsId = useId();
   const [selectedOids, setSelectedOids] = useState<readonly string[]>([]);
   const [selectedRef, setSelectedRef] = useState<string | undefined>(
@@ -990,14 +1004,14 @@ function RepositoryWorkspace({
   const [repositoryViewMode, setRepositoryViewMode] = useState<RepositoryViewMode>("history");
   useEffect(() => {
     const openRequestedView = (event: Event): void => {
-      if (event instanceof CustomEvent && event.detail === "changes") {
+      if (!safeMode && event instanceof CustomEvent && event.detail === "changes") {
         setRepositoryViewMode("changes");
       }
     };
     window.addEventListener("git-client:repository-view-request", openRequestedView);
     return () =>
       window.removeEventListener("git-client:repository-view-request", openRequestedView);
-  }, []);
+  }, [safeMode]);
   const [changeSelection, setChangeSelection] = useState<ChangeSelection | null>(null);
   const [historySelectedPath, setHistorySelectedPath] = useState<string | null>(null);
   const [historyParentRevision, setHistoryParentRevision] = useState<string | null>(null);
@@ -3012,9 +3026,11 @@ function RepositoryWorkspace({
 
   const repositoryBusy = session.loading || session.activity?.status === "running";
   const repositoryAvailability = (): ReturnType<CommandDefinition["availability"]> =>
-    repositoryBusy
-      ? commandDisabled(session.activity?.label ?? "Repository data is loading.")
-      : COMMAND_ENABLED;
+    safeMode
+      ? commandDisabled("Git changes and executable tools are unavailable in Safe Mode.")
+      : repositoryBusy
+        ? commandDisabled(session.activity?.label ?? "Repository data is loading.")
+        : COMMAND_ENABLED;
   const inspectorTabKeys = useMemo(
     () => inspectorTabs.map((tab) => inspectorKey(tab)),
     [inspectorTabs],
@@ -3807,12 +3823,16 @@ function RepositoryWorkspace({
         },
         repositoryAvailability,
       ),
-      commandDefinition("view.terminal", () => {
-        setBottomCollapsed(false);
-        window.requestAnimationFrame(() =>
-          window.dispatchEvent(new CustomEvent("git-client:open-terminal")),
-        );
-      }),
+      commandDefinition(
+        "view.terminal",
+        () => {
+          setBottomCollapsed(false);
+          window.requestAnimationFrame(() =>
+            window.dispatchEvent(new CustomEvent("git-client:open-terminal")),
+          );
+        },
+        repositoryAvailability,
+      ),
       commandDefinition("window.jumpLastToolWindow", jumpToLastToolWindow, repositoryAvailability),
       {
         ...commandDefinition(
@@ -3994,8 +4014,16 @@ function RepositoryWorkspace({
             ? repositoryAvailability()
             : commandDisabled("There are no stash entries."),
       ),
-      commandDefinition("repository.manageRemotes", () => requestOpenRepositoryTool("remotes")),
-      commandDefinition("repository.manageAccounts", () => requestOpenRepositoryTool("hosting")),
+      commandDefinition(
+        "repository.manageRemotes",
+        () => requestOpenRepositoryTool("remotes"),
+        repositoryAvailability,
+      ),
+      commandDefinition(
+        "repository.manageAccounts",
+        () => requestOpenRepositoryTool("hosting"),
+        repositoryAvailability,
+      ),
       commandDefinition(
         "repository.shareGitHub",
         () => requestShareProject("gitHub"),
@@ -4655,6 +4683,15 @@ function RepositoryWorkspace({
     ],
   );
   const terminalFocused = !hasEditorTabs && !bottomCollapsed && bottomPanelTab === "terminal";
+  useEffect(() => {
+    if (!safeMode) return;
+    setBottomCollapsed(true);
+    setRepositoryViewMode("history");
+    setHistoryRewrite(null);
+    setShareExistingRemotes(undefined);
+    setShareProjectProvider(undefined);
+    onChromeModeChange("editor");
+  }, [onChromeModeChange, safeMode]);
   const baseNavigationStatus =
     session.loading || terminalFocused
       ? `Project(name=${repository.snapshot.name}, containerState=COMPONENT_CREATED, componentStore=${repository.snapshot.path})`
@@ -5162,6 +5199,7 @@ function RepositoryWorkspace({
                   setProjectOpen((value) => !value);
                 }}
                 projectOpen={projectOpen && repositoryViewMode === "history"}
+                readOnly={safeMode}
                 terminalFocused={terminalFocused}
               />
               <div
@@ -5569,6 +5607,7 @@ function RepositoryWorkspace({
                               openWorkingTreeFile={session.openWorkingTreeFile}
                               readFile={session.readFile}
                               readFilePreview={session.readFilePreview}
+                              readOnly={safeMode}
                               writeWorkingTreeFile={session.writeWorkingTreeFile}
                               revision={tab.revision}
                               source={tab.source}
@@ -7407,12 +7446,12 @@ function AppContent() {
           onPreview={() => {
             const path = pendingTrustPath;
             setPendingTrustPath(null);
-            void session.openRepository(path);
+            void session.openRepository(path, "safe");
           }}
           onTrust={() => {
             const path = pendingTrustPath;
             setPendingTrustPath(null);
-            void session.openRepository(path);
+            void session.openRepository(path, "trusted");
           }}
           parentName={pendingTrustPath.split("/").filter(Boolean).at(-2) ?? "project"}
           projectName={pendingTrustPath.split("/").filter(Boolean).at(-1) ?? "project"}
@@ -7440,6 +7479,7 @@ function AppContent() {
           onProjectSwitcherOpenChange={setProjectSwitcherOpen}
           onRemoveRecentProject={session.removeRecentProject}
           projectSwitcherOpen={projectSwitcherOpen}
+          readOnly={session.accessMode === "safe"}
           session={session}
           showRepositoryActions={
             session.activeTab.kind === "repository" && repositoryChromeMode === "editor"

@@ -2,12 +2,21 @@ import { describe, expect, it, vi } from "vitest";
 import type { TerminalBridge } from "../bridge/TerminalBridge";
 import type { RepositoryId, TerminalEvent, TerminalId } from "../shared/contracts/model";
 import type { TerminalLaunchTarget, TerminalLaunchTargets } from "../shared/contracts/terminal";
+import { RepositoryAccessPolicy, SafeModeViolationError } from "./repositoryAccess";
 import { TerminalService } from "./TerminalService";
 
 class FakeTerminalBridge implements TerminalBridge {
-  readonly createCalls: Array<{ repositoryId: string; cols: number; rows: number }> = [];
+  readonly createCalls: Array<{
+    repositoryId: string;
+    cols: number;
+    rows: number;
+  }> = [];
   readonly writes: Array<{ terminalId: string; data: string }> = [];
-  readonly resizes: Array<{ terminalId: string; cols: number; rows: number }> = [];
+  readonly resizes: Array<{
+    terminalId: string;
+    cols: number;
+    rows: number;
+  }> = [];
   readonly closes: string[] = [];
   readonly repositoryCloses: string[] = [];
   onEvent?: (event: TerminalEvent) => void;
@@ -46,11 +55,26 @@ class FakeTerminalBridge implements TerminalBridge {
 }
 
 describe("TerminalService", () => {
+  it("does not create or restore PTY sessions for a safe-mode repository", async () => {
+    const bridge = new FakeTerminalBridge();
+    const access = RepositoryAccessPolicy.create();
+    access.open("repository-a", "/tmp/project-a", "safe");
+    access.activate("repository-a");
+    const service = TerminalService.of(bridge, access);
+
+    await expect(service.create("repository-a")).rejects.toBeInstanceOf(SafeModeViolationError);
+    expect(() => service.restore("repository-a")).toThrow(SafeModeViolationError);
+    expect(() => service.listLaunchTargets()).toThrow(SafeModeViolationError);
+    expect(bridge.createCalls).toEqual([]);
+  });
+
   it("keeps PTY sessions per repository and forwards their lifecycle", async () => {
     vi.stubGlobal("crypto", { randomUUID: () => "ui-session-1" });
     const bridge = new FakeTerminalBridge();
     const service = TerminalService.of(bridge);
-    const key = await service.create("repository-a", { title: "Feature shell" });
+    const key = await service.create("repository-a", {
+      title: "Feature shell",
+    });
 
     expect(key).toBe("ui-session-1");
     expect(bridge.createCalls).toEqual([{ repositoryId: "repository-a", cols: 100, rows: 28 }]);
@@ -63,7 +87,11 @@ describe("TerminalService", () => {
 
     const received: TerminalEvent[] = [];
     service.subscribeEvents(key, (event) => received.push(event));
-    bridge.onEvent?.({ kind: "output", sequence: 3, data: [112, 119, 100] });
+    bridge.onEvent?.({
+      kind: "output",
+      sequence: 3,
+      data: [112, 119, 100],
+    });
     bridge.onEvent?.({ kind: "exited", exitCode: 130, signal: "SIGINT" });
     expect(received.map((event) => event.kind)).toEqual(["output", "exited"]);
     expect(service.events(key)).toEqual(received);
@@ -155,7 +183,10 @@ describe("TerminalService", () => {
       error: "Unable to start terminal shell: EACCES",
     });
     expect(service.events(key)).toEqual([
-      { kind: "failed", message: "Unable to start terminal shell: EACCES" },
+      {
+        kind: "failed",
+        message: "Unable to start terminal shell: EACCES",
+      },
     ]);
     vi.unstubAllGlobals();
   });

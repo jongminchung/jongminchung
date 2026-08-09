@@ -3,6 +3,7 @@ import { basename, dirname, extname, join, relative, resolve } from "node:path";
 import { app, BrowserWindow, clipboard, dialog, ipcMain, shell } from "electron";
 import type { IpcMainInvokeEvent } from "electron";
 import { strFromU8, strToU8, unzipSync, zipSync } from "fflate";
+import { SafeModeViolationError } from "../../src/domain/repositoryAccess";
 import {
   GitCloneRepositoryRequestSchema,
   GitCreationEventSchema,
@@ -25,6 +26,7 @@ import {
 import type {
   GitCreationEventListener,
   GitCreationTerminalEvent,
+  GitRepositoryServiceRequest,
   GitTerminalEvent,
   RepositoryId,
   RepositoryRecord,
@@ -116,6 +118,69 @@ interface PlatformHandlerDependencies {
 const SETTINGS_ARCHIVE_MAX_BYTES = 1_048_576;
 const SETTINGS_ARCHIVE_MAX_EXPANDED_BYTES = 4_194_304;
 const SETTINGS_CREDENTIAL_PREFIX = "hostingCredential:";
+const SAFE_REPOSITORY_PATHS_SETTING = "safeRepositoryPaths";
+const ACTIVE_REPOSITORY_PATH_SETTING = "activeRepositoryPath";
+
+type ExecutableCapability = "gitMutation" | "terminal" | "hosting" | "externalExecution";
+
+function safeRepositoryPaths(settings: SettingsStore): ReadonlySet<string> {
+  const value = settings.get(SAFE_REPOSITORY_PATHS_SETTING);
+  if (value === null || value === undefined) return new Set();
+  if (!Array.isArray(value)) {
+    throw new Error("Safe Mode repository access state is invalid.");
+  }
+  const paths = value.filter((path): path is string => typeof path === "string" && path.length > 0);
+  if (paths.length !== value.length) {
+    throw new Error("Safe Mode repository access state is invalid.");
+  }
+  return new Set(paths);
+}
+
+function activeRepositoryPath(settings: SettingsStore): string | null {
+  const value = settings.get(ACTIVE_REPOSITORY_PATH_SETTING);
+  if (value === null || value === undefined) return null;
+  if (typeof value !== "string" || value.length === 0) {
+    throw new Error("Safe Mode active repository state is invalid.");
+  }
+  return value;
+}
+
+function repositoryServiceExecutableIds(
+  request: GitRepositoryServiceRequest,
+): readonly RepositoryId[] {
+  switch (request.operation) {
+    case "compareBranches":
+    case "listGitConfig":
+    case "listSubmodules":
+    case "listMergedBranches":
+    case "loadCommitSignature":
+    case "listRemotes":
+    case "listWorktrees":
+    case "readIgnoreRules":
+    case "pushPreview":
+    case "historyRewritePreview":
+    case "createPatchText":
+    case "listShelves":
+    case "listChangelists":
+    case "listRecoveryEntries":
+    case "listLocalHistoryActivities":
+    case "readLocalHistoryActivity":
+    case "readLocalHistoryDiff":
+    case "createLocalHistoryPatch":
+    case "listConflicts":
+    case "readConflict":
+    case "loadSubmoduleDiff":
+    case "resolveWorkingTreeFile":
+      return [];
+    case "executeSynchronizedBranchOperation":
+      return request.repositoryIds;
+    case "applyMultiRootRollback":
+      return request.steps.map((step) => step.repositoryId);
+    default:
+      if ("repositoryId" in request) return [request.repositoryId];
+      throw new Error("Repository service is unavailable in Safe Mode.");
+  }
+}
 
 function escapeHtml(value: string): string {
   return value
@@ -261,6 +326,32 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
     onWindowPresentationModeChange,
   } = dependencies;
   const repositoryPaths = new Map<string, string>();
+  const repositoryAccessModes = new Map<string, "trusted" | "safe">();
+  const assertRepositoryCapability = (
+    repositoryId: string,
+    capability: ExecutableCapability,
+  ): void => {
+    const path = repositoryPaths.get(repositoryId);
+    if (path === undefined) {
+      throw new Error(
+        capability === "terminal"
+          ? "Repository is not open for terminal access"
+          : "Repository is not open for executable access.",
+      );
+    }
+    if (
+      repositoryAccessModes.get(repositoryId) === "safe" ||
+      safeRepositoryPaths(settings).has(path)
+    ) {
+      throw new SafeModeViolationError(capability);
+    }
+  };
+  const assertActiveCapability = (capability: ExecutableCapability): void => {
+    const path = activeRepositoryPath(settings);
+    if (path !== null && safeRepositoryPaths(settings).has(path)) {
+      throw new SafeModeViolationError(capability);
+    }
+  };
   const creationListener: GitCreationEventListener = (creationEvent) => {
     if (window.isDestroyed() || window.webContents.isDestroyed()) return;
     window.webContents.send(
@@ -658,7 +749,21 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
       assertTrustedSender(event, window);
       const request = OpenRepositoryRequestSchema.parse(raw);
       const repository = await gitUtility.openRepository(request.path);
+      const safePaths = safeRepositoryPaths(settings);
+      const nextMode =
+        safePaths.has(request.path) || safePaths.has(repository.path) ? "safe" : "trusted";
+      if (nextMode === "safe") {
+        const repositoriesToClose = [...repositoryPaths.entries()].flatMap(([id, path]) =>
+          path === repository.path && repositoryAccessModes.get(id) === "trusted" ? [id] : [],
+        );
+        await Promise.all(
+          repositoriesToClose.map(async (repositoryId) =>
+            terminalUtility.closeRepository({ repositoryId }),
+          ),
+        );
+      }
       repositoryPaths.set(repository.id, repository.path);
+      repositoryAccessModes.set(repository.id, nextMode);
       return RepositoryRecordSchema.parse(repository);
     },
   );
@@ -666,10 +771,12 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
     IPC_CHANNELS.gitInitializeRepository,
     async (event, raw: unknown): Promise<RepositoryRecord> => {
       assertTrustedSender(event, window);
+      assertActiveCapability("gitMutation");
       const request = GitInitializeRepositoryRequestSchema.parse(raw);
       const terminal = await gitUtility.initializeRepository(request, creationListener);
       const repository = RepositoryRecordSchema.parse(createdRepository(terminal));
       repositoryPaths.set(repository.id, repository.path);
+      repositoryAccessModes.set(repository.id, "trusted");
       return repository;
     },
   );
@@ -677,10 +784,12 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
     IPC_CHANNELS.gitCloneRepository,
     async (event, raw: unknown): Promise<RepositoryRecord> => {
       assertTrustedSender(event, window);
+      assertActiveCapability("gitMutation");
       const request = GitCloneRepositoryRequestSchema.parse(raw);
       const terminal = await gitUtility.cloneRepository(request, creationListener);
       const repository = RepositoryRecordSchema.parse(createdRepository(terminal));
       repositoryPaths.set(repository.id, repository.path);
+      repositoryAccessModes.set(repository.id, "trusted");
       return repository;
     },
   );
@@ -690,6 +799,7 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
     await terminalUtility.closeRepository(request);
     const closed = await gitUtility.closeRepository(request.repositoryId);
     repositoryPaths.delete(request.repositoryId);
+    repositoryAccessModes.delete(request.repositoryId);
     return closed;
   });
   ipcMain.handle(IPC_CHANNELS.gitInspectSnapshot, async (event, raw: unknown) => {
@@ -700,6 +810,9 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
   ipcMain.handle(IPC_CHANNELS.gitRepositoryService, async (event, raw: unknown) => {
     assertTrustedSender(event, window);
     const request = GitRepositoryServiceRequestSchema.parse(raw);
+    for (const repositoryId of repositoryServiceExecutableIds(request)) {
+      assertRepositoryCapability(repositoryId, "gitMutation");
+    }
     return GitRepositoryServiceResultSchema.parse(
       await gitUtility.executeRepositoryService(request),
     );
@@ -710,6 +823,9 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
     const request = parseLocalHistoryRepositoryRequest(raw);
     if (localHistoryRequestRepositoryId(request) !== repositoryId) {
       throw new Error("Local History cannot access a different repository.");
+    }
+    for (const executableRepositoryId of repositoryServiceExecutableIds(request)) {
+      assertRepositoryCapability(executableRepositoryId, "gitMutation");
     }
     const result = GitRepositoryServiceResultSchema.parse(
       await gitUtility.executeRepositoryService(request),
@@ -722,6 +838,9 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
   ipcMain.handle(IPC_CHANNELS.gitQuery, async (event, raw: unknown): Promise<GitTerminalEvent> => {
     assertTrustedSender(event, window);
     const request = GitExecutionRequestSchema.parse(raw);
+    if (request.kind === "operation") {
+      assertRepositoryCapability(request.repositoryId, "gitMutation");
+    }
     const terminal = await gitUtility.executeQuery(request, (gitEvent) => {
       if (window.isDestroyed() || window.webContents.isDestroyed()) return;
       window.webContents.send(IPC_CHANNELS.gitQueryEvent, GitRequestEventSchema.parse(gitEvent));
@@ -752,6 +871,7 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
     async (event, raw: unknown): Promise<void> => {
       assertTrustedSender(event, window);
       const request = GitWriteWorkingTreeFileRequestSchema.parse(raw);
+      assertRepositoryCapability(request.repositoryId, "gitMutation");
       await gitUtility.writeWorkingTreeFile(
         request.repositoryId,
         request.path,
@@ -765,6 +885,7 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
     async (event, raw: unknown): Promise<void> => {
       assertTrustedSender(event, window);
       const request = GitWorkingTreeFileRequestSchema.parse(raw);
+      assertRepositoryCapability(request.repositoryId, "externalExecution");
       const canonicalPath = await gitUtility.resolveWorkingTreeFile(
         request.repositoryId,
         request.path,
@@ -794,6 +915,7 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
   ipcMain.handle(IPC_CHANNELS.terminalCreate, async (event, raw: unknown) => {
     assertTrustedSender(event, window);
     const request = TerminalCreateRequestSchema.parse(raw);
+    assertRepositoryCapability(request.repositoryId, "terminal");
     const cwd = repositoryPaths.get(request.repositoryId);
     if (cwd === undefined) throw new Error("Repository is not open for terminal access");
     const result = await terminalUtility.create({ ...request, cwd }, (terminalEvent) => {
@@ -808,6 +930,7 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
   ipcMain.handle(IPC_CHANNELS.terminalListLaunchTargets, async (event, raw: unknown) => {
     assertTrustedSender(event, window);
     TerminalListLaunchTargetsRequestSchema.parse(raw);
+    assertActiveCapability("terminal");
     return TerminalLaunchTargetsSchema.parse(await terminalUtility.listLaunchTargets());
   });
   ipcMain.handle(IPC_CHANNELS.terminalWrite, async (event, raw: unknown): Promise<void> => {
@@ -831,6 +954,7 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
   );
   ipcMain.handle(IPC_CHANNELS.hostingSaveAccount, async (event, raw: unknown) => {
     assertTrustedSender(event, window);
+    assertActiveCapability("hosting");
     const token = hostingToken(raw);
     try {
       const request = HostingSaveAccountRequestSchema.parse(raw);
@@ -843,6 +967,7 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
   });
   ipcMain.handle(IPC_CHANNELS.hostingRestoreAccounts, (event, raw: unknown): void => {
     assertTrustedSender(event, window);
+    assertActiveCapability("hosting");
     try {
       const request = HostingRestoreAccountsRequestSchema.parse(raw);
       hosting.restoreAccounts(request.accounts);
@@ -852,6 +977,7 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
   });
   ipcMain.handle(IPC_CHANNELS.hostingDeleteAccount, async (event, raw: unknown): Promise<void> => {
     assertTrustedSender(event, window);
+    assertActiveCapability("hosting");
     try {
       const request = HostingDeleteAccountRequestSchema.parse(raw);
       await hosting.deleteAccount(request.accountId);
@@ -861,6 +987,7 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
   });
   ipcMain.handle(IPC_CHANNELS.hostingExecute, async (event, raw: unknown) => {
     assertTrustedSender(event, window);
+    assertActiveCapability("hosting");
     try {
       const request = HostingExecuteRequestSchema.parse(raw);
       const response = HostingResponseSchema.parse(

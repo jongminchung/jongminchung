@@ -9,6 +9,7 @@ import {
   type TerminalLaunchTarget,
   type TerminalLaunchTargets,
 } from "../shared/contracts/terminal";
+import { repositoryAccessPolicy, type RepositoryAccessPolicy } from "./repositoryAccess";
 
 const MAX_BACKLOG_BYTES = 2 * 1024 * 1024;
 
@@ -54,18 +55,23 @@ const PersistedTerminalSessionSchema = z
 
 export class TerminalService {
   readonly #bridge: TerminalBridge;
+  readonly #access: RepositoryAccessPolicy;
   readonly #sessions = new Map<string, TerminalSessionRecord>();
   readonly #listeners = new Set<Listener>();
   readonly #eventListeners = new Map<string, Set<EventListener>>();
   readonly #repositoryRestorations = new Map<string, Promise<void>>();
   #version = 0;
 
-  private constructor(bridge: TerminalBridge) {
+  private constructor(bridge: TerminalBridge, access: RepositoryAccessPolicy) {
     this.#bridge = bridge;
+    this.#access = access;
   }
 
-  static of(bridge: TerminalBridge): TerminalService {
-    return new TerminalService(bridge);
+  static of(
+    bridge: TerminalBridge,
+    access: RepositoryAccessPolicy = repositoryAccessPolicy,
+  ): TerminalService {
+    return new TerminalService(bridge, access);
   }
 
   subscribe = (listener: Listener): (() => void) => {
@@ -96,6 +102,7 @@ export class TerminalService {
   }
 
   listLaunchTargets(): Promise<TerminalLaunchTargets> {
+    this.#access.assertActive("terminal");
     return this.#bridge.listLaunchTargets();
   }
 
@@ -103,6 +110,7 @@ export class TerminalService {
     repositoryId: RepositoryId,
     options: TerminalSessionCreateOptions = {},
   ): Promise<string> {
+    this.#access.assert(repositoryId, "terminal");
     const key = crypto.randomUUID();
     const target = TerminalLaunchTargetSchema.parse(
       options.target ?? DEFAULT_TERMINAL_LAUNCH_TARGET,
@@ -149,12 +157,16 @@ export class TerminalService {
   }
 
   async write(key: string, data: string): Promise<void> {
-    const terminalId = this.#sessions.get(key)?.terminalId;
+    const session = this.#sessions.get(key);
+    if (session) this.#access.assert(session.repositoryId, "terminal");
+    const terminalId = session?.terminalId;
     if (terminalId) await this.#bridge.write(terminalId, data);
   }
 
   async resize(key: string, cols: number, rows: number): Promise<void> {
-    const terminalId = this.#sessions.get(key)?.terminalId;
+    const session = this.#sessions.get(key);
+    if (session) this.#access.assert(session.repositoryId, "terminal");
+    const terminalId = session?.terminalId;
     if (terminalId) await this.#bridge.resize(terminalId, cols, rows);
   }
 
@@ -182,6 +194,7 @@ export class TerminalService {
   }
 
   restore(repositoryId: RepositoryId): Promise<void> {
+    this.#access.assert(repositoryId, "terminal");
     const active = this.#repositoryRestorations.get(repositoryId);
     if (active !== undefined) return active;
     const restoration = this.#restore(repositoryId);

@@ -3,12 +3,14 @@ import { parseRecentProjects, updateRecentProjects, type RecentProject } from ".
 type WorkspaceSettingKey =
   | "activeRepositoryPath"
   | "openRepositoryPaths"
+  | "safeRepositoryPaths"
   | "recentProjects"
   | "recentRepositories";
 
 export interface WorkspaceStartupState {
   readonly activeRepositoryPath: string | null;
   readonly openRepositoryPaths: readonly string[];
+  readonly safeRepositoryPaths: readonly string[];
   readonly recentProjects: readonly RecentProject[];
 }
 
@@ -44,18 +46,21 @@ function parseStoredPaths(value: unknown): readonly string[] {
 export async function loadWorkspaceStartupState(
   readSetting: (key: WorkspaceSettingKey) => Promise<unknown>,
 ): Promise<WorkspaceStartupState> {
-  const [storedPaths, storedActivePath, storedProjects, legacyRepositories] = await Promise.all([
-    readSetting("openRepositoryPaths"),
-    readSetting("activeRepositoryPath"),
-    readSetting("recentProjects"),
-    readSetting("recentRepositories"),
-  ]);
+  const [storedPaths, storedActivePath, storedSafePaths, storedProjects, legacyRepositories] =
+    await Promise.all([
+      readSetting("openRepositoryPaths"),
+      readSetting("activeRepositoryPath"),
+      readSetting("safeRepositoryPaths"),
+      readSetting("recentProjects"),
+      readSetting("recentRepositories"),
+    ]);
   const recentProjects = parseRecentProjects(storedProjects);
 
   return {
     activeRepositoryPath:
       typeof storedActivePath === "string" && storedActivePath.length > 0 ? storedActivePath : null,
     openRepositoryPaths: parseStoredPaths(storedPaths),
+    safeRepositoryPaths: parseStoredPaths(storedSafePaths),
     recentProjects:
       recentProjects.length > 0 ? recentProjects : parseRecentProjects(legacyRepositories),
   };

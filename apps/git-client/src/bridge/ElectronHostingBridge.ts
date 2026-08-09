@@ -8,6 +8,7 @@ import {
   SaveHostingAccountSchema,
 } from "../../electron/hosting/hosting-contract";
 import { safeHostingErrorMessage } from "../../electron/hosting/hosting-redaction";
+import { repositoryAccessPolicy, type RepositoryAccessPolicy } from "../domain/repositoryAccess";
 import type {
   HostingAccount,
   HostingProviderKind,
@@ -73,17 +74,29 @@ function responseFromBoundary(requestKind: HostingRequest["kind"], raw: unknown)
   }
   switch (result.data.kind) {
     case "changeRequests":
-      return { ...result.data, items: result.data.items.map((item) => ({ ...item })) };
+      return {
+        ...result.data,
+        items: result.data.items.map((item) => ({ ...item })),
+      };
     case "changeRequest":
       return { ...result.data, item: { ...result.data.item } };
     case "files":
-      return { ...result.data, items: result.data.items.map((item) => ({ ...item })) };
+      return {
+        ...result.data,
+        items: result.data.items.map((item) => ({ ...item })),
+      };
     case "timeline":
-      return { ...result.data, items: result.data.items.map((item) => ({ ...item })) };
+      return {
+        ...result.data,
+        items: result.data.items.map((item) => ({ ...item })),
+      };
     case "viewedFiles":
       return { ...result.data, paths: [...result.data.paths] };
     case "namespaces":
-      return { ...result.data, items: result.data.items.map((item) => ({ ...item })) };
+      return {
+        ...result.data,
+        items: result.data.items.map((item) => ({ ...item })),
+      };
     case "shareRepositories":
       return { ...result.data, names: [...result.data.names] };
     case "completed":
@@ -95,13 +108,18 @@ function responseFromBoundary(requestKind: HostingRequest["kind"], raw: unknown)
 
 export class ElectronHostingBridge implements HostingBridge {
   readonly #api: ElectronHostingApi;
+  readonly #access: RepositoryAccessPolicy;
 
-  private constructor(api: ElectronHostingApi) {
+  private constructor(api: ElectronHostingApi, access: RepositoryAccessPolicy) {
     this.#api = api;
+    this.#access = access;
   }
 
-  static of(api: ElectronHostingApi): ElectronHostingBridge {
-    return new ElectronHostingBridge(api);
+  static of(
+    api: ElectronHostingApi,
+    access: RepositoryAccessPolicy = repositoryAccessPolicy,
+  ): ElectronHostingBridge {
+    return new ElectronHostingBridge(api, access);
   }
 
   async saveAccount(
@@ -109,6 +127,7 @@ export class ElectronHostingBridge implements HostingBridge {
     baseUrl: string,
     token: string,
   ): Promise<HostingAccount> {
+    this.#access.assertActive("hosting");
     const secrets = typeof token === "string" && token.length <= 16_384 ? [token] : [];
     try {
       const input = SaveHostingAccountSchema.parse({
@@ -128,6 +147,7 @@ export class ElectronHostingBridge implements HostingBridge {
   }
 
   async restoreAccounts(accounts: readonly HostingAccount[]): Promise<void> {
+    this.#access.assertActive("hosting");
     try {
       const validated = HostingAccountsSchema.parse(accounts).map((account) => ({ ...account }));
       await this.#api.restoreAccounts(validated);
@@ -137,6 +157,7 @@ export class ElectronHostingBridge implements HostingBridge {
   }
 
   async deleteAccount(accountId: string): Promise<void> {
+    this.#access.assertActive("hosting");
     try {
       const validatedAccountId = HostingAccountIdSchema.parse(accountId);
       await this.#api.deleteAccount(validatedAccountId);
@@ -146,6 +167,7 @@ export class ElectronHostingBridge implements HostingBridge {
   }
 
   async execute(accountId: string, request: HostingRequest): Promise<HostingResponse> {
+    this.#access.assertActive("hosting");
     try {
       const validatedAccountId = HostingAccountIdSchema.parse(accountId);
       const validatedRequest = HostingRequestSchema.parse(request);
