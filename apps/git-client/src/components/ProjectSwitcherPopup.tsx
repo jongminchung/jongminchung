@@ -3,7 +3,6 @@ import { cn } from "@jongminchung/ui/lib/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { RecentProject } from "../domain/recentProjects";
 import type { RepositorySnapshot } from "../shared/contracts/model";
-import { tw } from "../styles/tailwind";
 import { useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
 
@@ -119,7 +118,7 @@ export function ProjectSwitcherPopup({
   return (
     <section
       aria-label="Projects"
-      className={tw.projectSwitcherPopup}
+      className={`projectSwitcherPopup [background:var(--popover)] [border:1px_solid_var(--input)] rounded-lg [box-shadow:var(--shadow-lg)] [left:0] [max-height:min(540px,_calc(100vh_-_62px))] [min-width:368px] [overflow:auto] [padding:0_0_5px] [position:absolute] [top:calc(100%_+_2px)] [z-index:80] [&_[data-project-section]]:[border-top:1px_solid_var(--border)] [&_[data-project-section]]:[color:var(--muted-foreground)] [&_[data-project-section]]:[display:block] [&_[data-project-section]]:[font-size:10px] [&_[data-project-section]]:[font-weight:600] [&_[data-project-section]]:[padding:8px_11px_4px] [&>_p]:[color:var(--destructive)] [&>_p]:[font-size:10px] [&>_p]:[margin:5px_9px] projectSwitcherPopup rounded-lg`}
       onKeyDown={(event) => {
         if (event.key === "Escape") {
           event.preventDefault();
@@ -153,7 +152,10 @@ export function ProjectSwitcherPopup({
       role="dialog"
     >
       <div aria-label="Projects" role="listbox">
-        <div className={tw.projectSwitcherActions} role="presentation">
+        <div
+          className={`projectSwitcherActions [border-bottom:1px_solid_var(--border)] [display:grid] [padding:5px] [&_button]:[align-items:center] [&_button]:[background:transparent] [&_button]:rounded-sm [&_button]:[display:flex] [&_button]:[gap:8px] [&_button]:[height:30px] [&_button]:[padding:0_8px] [&_button:hover]:[background:var(--muted)] [&_button[aria-selected=true]]:[background:var(--accent)] projectSwitcherActions [&_button]:rounded-sm`}
+          role="presentation"
+        >
           <Button
             aria-selected={activeIndex === 0}
             autoFocus
@@ -206,6 +208,7 @@ export function ProjectSwitcherPopup({
             aria-selected={activeIndex === index + 2}
             disabled={busy}
             key={repository.id}
+            data-project-switcher-row
             onClick={() => void runItem({ kind: "open", repository })}
             onFocus={() => setActiveIndex(index + 2)}
             ref={(node) => {
@@ -215,12 +218,16 @@ export function ProjectSwitcherPopup({
             type="button"
             className={cn(
               "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
-              tw.projectSwitcherRow,
+              `projectSwitcherRow [align-items:center] [background:transparent] [display:grid] [gap:8px] [grid-template-columns:24px_minmax(0,_1fr)_16px] [min-height:45px] [padding:5px_8px] [text-align:left] [width:100%] [&:hover]:[background:var(--muted)] [&[aria-selected=true]]:[background:var(--accent)] [&>_span:nth-child(2)]:[display:flex] [&>_span:nth-child(2)]:[flex-direction:column] [&>_span:nth-child(2)]:[min-width:0] [&_b]:[font-weight:600] [&_b]:[overflow:hidden] [&_b]:[text-overflow:ellipsis] [&_b]:[white-space:nowrap] [&_small]:[color:var(--disabled-foreground)] [&_small]:[font-size:10px] [&_small]:[overflow:hidden] [&_small]:[text-overflow:ellipsis] [&_small]:[white-space:nowrap] projectSwitcherRow`,
             )}
             variant="ghost"
             size="default"
           >
-            <span className={tw.projectMark}>{repository.name.charAt(0).toUpperCase()}</span>
+            <span
+              className={`projectMark [align-items:center] [background:var(--primary)] rounded-xs [color:var(--primary-foreground)] [display:inline-flex] [font-size:9px] [font-weight:700] [height:16px] [justify-content:center] [width:16px] projectMark rounded-xs`}
+            >
+              {repository.name.charAt(0).toUpperCase()}
+            </span>
             <span>
               <b>{repository.name}</b>
               <small>{displayPath(repository.path)}</small>
@@ -248,14 +255,19 @@ export function ProjectSwitcherPopup({
               }}
               role="option"
               type="button"
+              data-project-switcher-row
               className={cn(
                 "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
-                tw.projectSwitcherRow,
+                `projectSwitcherRow [align-items:center] [background:transparent] [display:grid] [gap:8px] [grid-template-columns:24px_minmax(0,_1fr)_16px] [min-height:45px] [padding:5px_8px] [text-align:left] [width:100%] [&:hover]:[background:var(--muted)] [&[aria-selected=true]]:[background:var(--accent)] [&>_span:nth-child(2)]:[display:flex] [&>_span:nth-child(2)]:[flex-direction:column] [&>_span:nth-child(2)]:[min-width:0] [&_b]:[font-weight:600] [&_b]:[overflow:hidden] [&_b]:[text-overflow:ellipsis] [&_b]:[white-space:nowrap] [&_small]:[color:var(--disabled-foreground)] [&_small]:[font-size:10px] [&_small]:[overflow:hidden] [&_small]:[text-overflow:ellipsis] [&_small]:[white-space:nowrap] projectSwitcherRow`,
               )}
               variant="ghost"
               size="default"
             >
-              <span className={tw.projectMark}>{project.name.charAt(0).toUpperCase()}</span>
+              <span
+                className={`projectMark [align-items:center] [background:var(--primary)] rounded-xs [color:var(--primary-foreground)] [display:inline-flex] [font-size:9px] [font-weight:700] [height:16px] [justify-content:center] [width:16px] projectMark rounded-xs`}
+              >
+                {project.name.charAt(0).toUpperCase()}
+              </span>
               <span>
                 <b>{project.name}</b>
                 <small>{displayPath(project.path)}</small>

@@ -7,7 +7,7 @@ import { build } from "vite";
 import { afterEach, describe, expect, it } from "vitest";
 import type { GitOperation, RebasePlanEntry } from "../../../src/shared/contracts/model";
 import { SequenceEditorSession } from "./sequence-editor";
-import { createSequenceEditorCommand } from "./sequence-editor-cli";
+import { createApplicationSequenceEditorCommand } from "./sequence-editor-cli";
 
 const temporaryDirectories: string[] = [];
 
@@ -103,7 +103,7 @@ describe("sequence editor Git integration", () => {
     const session = await SequenceEditorSession.create(join(repository, ".git"), operation);
     try {
       const helperDirectory = join(root, "helper'; touch COMMAND_INJECTION; echo '");
-      const entryPath = join(helperDirectory, "sequence-editor.cjs");
+      const applicationEntryPath = join(helperDirectory, "main.cjs");
       await build({
         configFile: false,
         logLevel: "silent",
@@ -111,9 +111,9 @@ describe("sequence editor Git integration", () => {
           emptyOutDir: true,
           outDir: helperDirectory,
           rollupOptions: {
-            input: fileURLToPath(new URL("./sequence-editor-entry.ts", import.meta.url)),
+            input: fileURLToPath(new URL("../../main.ts", import.meta.url)),
             output: {
-              entryFileNames: "sequence-editor.cjs",
+              entryFileNames: "main.cjs",
               format: "cjs",
             },
           },
@@ -124,15 +124,15 @@ describe("sequence editor Git integration", () => {
       });
 
       runGit(repository, ["rebase", "-i", "--root"], {
-        GIT_SEQUENCE_EDITOR: createSequenceEditorCommand({
+        GIT_SEQUENCE_EDITOR: createApplicationSequenceEditorCommand({
           executablePath: process.execPath,
-          entryPath,
+          applicationEntryPath,
           mode: "sequence",
           session,
         }),
-        GIT_EDITOR: createSequenceEditorCommand({
+        GIT_EDITOR: createApplicationSequenceEditorCommand({
           executablePath: process.execPath,
-          entryPath,
+          applicationEntryPath,
           mode: "message",
           session,
         }),

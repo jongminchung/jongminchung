@@ -51,16 +51,6 @@
     --radius: 0.5rem;
   }
 
-  html[data-compact="true"] .toolStripe button,
-  html[data-compact="true"] .rightToolStripe button {
-    min-height: 24px;
-  }
-
-  html[data-compact="true"] .projectTreeRow,
-  html[data-compact="true"] .commitRow {
-    height: 22px !important;
-  }
-
   body {
     background: var(--background);
     color: var(--foreground);
@@ -110,385 +100,43 @@
   }
 }
 
-@layer components {
-  .local-history-activity {
-    background: var(--card);
-    display: grid;
-    grid-template-columns: minmax(280px, 38%) minmax(360px, 1fr);
-    height: 100%;
-    min-height: 0;
-    min-width: 0;
-    overflow: hidden;
-  }
-
-  .local-history-native-window {
-    background: var(--card);
-    display: grid;
-    grid-template-rows: 30px minmax(0, 1fr);
-    height: 100%;
-    min-height: 0;
-    min-width: 0;
-    overflow: hidden;
-  }
-
-  .local-history-native-titlebar {
-    -webkit-app-region: drag;
-    align-items: center;
-    background: var(--secondary);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    padding: 0 12px 0 76px;
-  }
-
-  .local-history-native-titlebar strong {
-    font-size: 12px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .local-history-left {
-    display: grid;
-    grid-template-rows: 35px minmax(90px, 3fr) 31px 31px minmax(90px, 2fr);
-    min-height: 0;
-    min-width: 0;
-  }
-
-  .local-history-splitter {
-    background: var(--border);
-    cursor: ew-resize;
-    min-height: 0;
-    outline: 0;
-    position: relative;
-  }
-
-  .local-history-splitter:hover,
-  .local-history-splitter:focus-visible {
-    background: var(--primary);
-  }
-
-  .local-history-searchbar,
-  .local-history-changes-toolbar,
-  .local-history-activity-actions,
-  .local-history-diff > header {
-    align-items: center;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    gap: 5px;
-    min-width: 0;
-    padding: 0 7px;
-  }
-
-  .local-history-searchbar input {
-    background: transparent;
-    border: 0;
-    flex: 1;
-    height: 27px;
-    min-width: 0;
-    outline: 0;
-  }
-
-  .local-history-searchbar:focus-within {
-    box-shadow: inset 0 -2px var(--primary);
-  }
-
-  .local-history-searchbar button,
-  .local-history-changes-toolbar button,
-  .local-history-diff > header button {
-    background: transparent;
-    border: 0;
-    color: var(--muted-foreground);
-    min-height: 24px;
-    padding: 0 6px;
-  }
-
-  .local-history-activities,
-  .local-history-changes {
-    min-height: 0;
-    overflow: auto;
-  }
-
-  .local-history-activities > button,
-  .local-history-changes > button {
-    align-items: center;
-    background: transparent;
-    border: 0;
-    border-radius: initial;
-    display: grid;
-    gap: 6px;
-    min-height: 30px;
-    padding: 4px 8px;
-    text-align: left;
-    width: 100%;
-  }
-
-  .local-history-activities > button {
-    grid-template-columns: 17px minmax(0, 1fr);
-  }
-
-  .local-history-activities > button[aria-selected="true"],
-  .local-history-changes > button[aria-selected="true"] {
-    background: var(--accent);
-  }
-
-  .local-history-activities > .local-history-load-more {
-    color: var(--primary);
-    display: block;
-    min-height: 30px;
-    text-align: center;
-  }
-
-  .local-history-activities span,
-  .local-history-changes span {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .local-history-activities strong,
-  .local-history-activities small {
-    display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .local-history-activities small,
-  .local-history-changes small {
-    color: var(--disabled-foreground);
-    font-size: var(--font-size-xs);
-    font-weight: 400;
-  }
-
-  .local-history-activity-actions {
-    border-top: 1px solid var(--border);
-    justify-content: flex-end;
-  }
-
-  .local-history-activity-actions button {
-    background: transparent;
-    border: 0;
-    color: var(--muted-foreground);
-    font-size: var(--font-size-xs);
-    min-height: 24px;
-  }
-
-  .local-history-changes-toolbar strong,
-  .local-history-diff > header strong {
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .local-history-changes > button {
-    grid-template-columns: 17px minmax(0, 1fr) auto;
-  }
-
-  .local-history-diff {
-    display: grid;
-    grid-template-rows: 35px minmax(0, 1fr);
-    min-height: 0;
-    min-width: 0;
-  }
-
-  .local-history-diff pre {
-    background: var(--card);
-    font-size: 11px;
-    line-height: 1.45;
-    margin: 0;
-    overflow: auto;
-    padding: 10px 12px;
-    tab-size: 4;
-  }
-
-  .local-history-empty,
-  .local-history-error {
-    align-items: center;
-    color: var(--disabled-foreground);
-    display: flex;
-    height: 100%;
-    justify-content: center;
-    min-height: 58px;
-    padding: 12px;
-    text-align: center;
-  }
-
-  .local-history-error {
-    color: var(--destructive);
-  }
+.cm-editor {
+  background: var(--muted) !important;
 }
 
-@layer components {
-  /* Rebased uses the layer-1 main-window color around layer-0 islands. */
-  .titlebar,
-  .toolStripe,
-  .rightToolStripe,
-  .statusbar {
-    background: var(--background);
-    border-color: transparent;
-  }
+.cm-gutters {
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+  color: var(--disabled-foreground) !important;
+}
 
-  .notificationBalloon {
-    background: var(--feedback);
-  }
+.cm-lineActionGutter {
+  min-width: 22px;
+}
 
-  .commandbar {
-    background: var(--card);
-  }
+.cm-lineActionMarker {
+  align-items: center;
+  color: var(--primary);
+  cursor: pointer;
+  display: flex;
+  font-size: 10px;
+  height: 100%;
+  justify-content: center;
+  width: 20px;
+}
 
-  .editorTabs button[aria-current="page"] {
-    background: var(--muted) !important;
-    border-radius: var(--radius-sm);
-    box-shadow: inset 0 0 0 1px var(--input) !important;
-    color: var(--foreground) !important;
-  }
+.cm-mergeView,
+.cm-mergeViewEditors,
+.cm-mergeViewEditor {
+  height: 100%;
+  min-height: 0;
+}
 
-  .editorTabs button:hover:not([aria-current="page"]) {
-    background: var(--overlay-hover);
-    border-radius: var(--radius-sm);
-  }
+.cm-mergeViewEditors {
+  overflow: hidden;
+}
 
-  [data-preview="true"] > button:first-child {
-    font-style: italic;
-  }
-
-  [data-pinned="true"] > button:first-child::after {
-    content: "";
-    width: 4px;
-    height: 4px;
-    border-radius: var(--radius-full);
-    background: currentColor;
-    opacity: 0.55;
-  }
-  @keyframes skeletonPulse {
-    from {
-      opacity: 0.48;
-    }
-    to {
-      opacity: 0.9;
-    }
-  }
-
-  .appShell .cm-editor {
-    background: var(--muted) !important;
-  }
-
-  .appShell .cm-gutters {
-    background: var(--card) !important;
-    border-color: var(--border) !important;
-    color: var(--disabled-foreground) !important;
-  }
-
-  .appShell .cm-lineActionGutter {
-    min-width: 22px;
-  }
-
-  .appShell .cm-lineActionMarker {
-    align-items: center;
-    color: var(--primary);
-    cursor: pointer;
-    display: flex;
-    font-size: 10px;
-    height: 100%;
-    justify-content: center;
-    width: 20px;
-  }
-
-  .appShell .cm-mergeView,
-  .appShell .cm-mergeViewEditors,
-  .appShell .cm-mergeViewEditor {
-    height: 100%;
-    min-height: 0;
-  }
-
-  .appShell .cm-mergeViewEditors {
-    overflow: hidden;
-  }
-
-  .appShell .xterm-viewport,
-  .appShell .xterm-screen {
-    background: var(--card) !important;
-  }
-
-  /* JediTerm 3.72 draws column zero at getInsetX() == 4. */
-  .appShell .terminalSurface > div:not([data-slot="empty"]) {
-    box-sizing: border-box;
-    padding-left: 4px;
-  }
-
-  html[data-status-bar-visible="false"] .appShell,
-  html[data-presentation-mode="true"] .appShell {
-    grid-template-rows: 30px 29px minmax(0, 1fr) 0 !important;
-  }
-
-  .appShell[data-window-mode="welcome"] {
-    grid-template-rows: 30px 29px minmax(0, 1fr) 20px !important;
-  }
-
-  html[data-status-bar-visible="false"] .appShell[data-window-mode="welcome"],
-  html[data-presentation-mode="true"] .appShell[data-window-mode="welcome"] {
-    grid-template-rows: 30px 29px minmax(0, 1fr) 0 !important;
-  }
-
-  html[data-toolbar-visible="false"] .titlebar > :not(.trafficSpace):not(.mainToolbarDragRegion),
-  html[data-distraction-free-mode="true"]
-    .titlebar
-    > :not(.trafficSpace):not(.mainToolbarDragRegion),
-  html[data-presentation-mode="true"] .titlebar > :not(.trafficSpace):not(.mainToolbarDragRegion) {
-    display: none !important;
-  }
-
-  html[data-tool-window-bars-visible="false"] .toolStripe,
-  html[data-tool-window-bars-visible="false"] .rightToolStripe,
-  html[data-distraction-free-mode="true"] .toolStripe,
-  html[data-distraction-free-mode="true"] .rightToolStripe,
-  html[data-presentation-mode="true"] .toolStripe,
-  html[data-presentation-mode="true"] .rightToolStripe {
-    display: none !important;
-  }
-
-  html[data-tool-window-bars-visible="false"] .workbench,
-  html[data-distraction-free-mode="true"] .workbench,
-  html[data-presentation-mode="true"] .workbench {
-    grid-template-columns: 0 minmax(0, 1fr) 0 !important;
-  }
-
-  html[data-tool-window-bars-visible="false"] .commandbar,
-  html[data-distraction-free-mode="true"] .commandbar,
-  html[data-presentation-mode="true"] .commandbar {
-    left: 0 !important;
-    right: 0 !important;
-  }
-
-  html[data-distraction-free-mode="true"] .projectToolWindow,
-  html[data-presentation-mode="true"] .projectToolWindow,
-  html[data-distraction-free-mode="true"] .mainPanes > :first-child,
-  html[data-distraction-free-mode="true"] .mainPanes > :last-child,
-  html[data-presentation-mode="true"] .mainPanes > :first-child,
-  html[data-presentation-mode="true"] .mainPanes > :last-child {
-    display: none !important;
-  }
-
-  html[data-distraction-free-mode="true"] .workbenchContent,
-  html[data-presentation-mode="true"] .workbenchContent,
-  html[data-distraction-free-mode="true"] .mainPanes,
-  html[data-presentation-mode="true"] .mainPanes {
-    grid-template-columns: minmax(0, 1fr) !important;
-  }
-
-  html[data-distraction-free-mode="true"] .commandbar,
-  html[data-presentation-mode="true"] .commandbar,
-  html[data-presentation-mode="true"] .topNavigationBar {
-    display: none !important;
-  }
-
-  html[data-navigation-bar="top"] .workspace {
-    padding-top: 29px !important;
-  }
-
-  html[data-navigation-bar="top"] .commandbar {
-    top: 59px !important;
-  }
+.xterm-viewport,
+.xterm-screen {
+  background: var(--card) !important;
 }

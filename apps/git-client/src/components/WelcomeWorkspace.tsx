@@ -1,4 +1,5 @@
 import { Button } from "@jongminchung/ui/components/button";
+import { Input } from "@jongminchung/ui/components/input";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { GitBranch } from "lucide-react";
 import {
@@ -13,7 +14,6 @@ import {
 import { isAppearanceTheme, type AppearancePreference } from "../domain/appearance";
 import type { RecentProject } from "../domain/recentProjects";
 import { writeClipboardText } from "../platform/electronActions";
-import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
 import { CheckboxInput, Selector } from "./ProductFormControls";
 
@@ -124,7 +124,9 @@ export function WelcomeWorkspace({
 
   return (
     <main
-      className={tw.welcomeWorkspace}
+      className={
+        "welcomeWorkspace [background:var(--card)] [display:grid] [grid-column:1] [grid-row:2_/_-1] [grid-template-columns:224px_minmax(0,_1fr)] [height:100%] [min-height:0] [overflow:hidden]"
+      }
       onDragOver={(event) => event.preventDefault()}
       onDrop={openDroppedDirectory}
       style={{
@@ -132,14 +134,22 @@ export function WelcomeWorkspace({
       }}
     >
       <aside
-        className={tw.welcomeSidebar}
+        className={
+          "welcomeSidebar [background:var(--sidebar)] [border-right:1px_solid_var(--border)] [min-height:0] [position:relative]"
+        }
         data-testid="welcome-sidebar"
         style={{ width: WELCOME_SIDEBAR_WIDTH }}
       >
-        <div className={tw.welcomeBrand}>
+        <div
+          className={
+            "welcomeBrand [align-items:center] [display:flex] [gap:10px] [height:64px] [padding:12px_16px_8px] [&>_span:last-child]:[display:flex] [&>_span:last-child]:[flex-direction:column] [&_strong]:[font-size:13px] [&_strong]:[font-weight:500] [&_small]:[color:var(--muted-foreground)] [&_small]:[font-size:10px]"
+          }
+        >
           <a
             aria-label="Copy About"
-            className={tw.welcomeBrandMark}
+            className={
+              "welcomeBrandMark [align-items:center] [background:var(--primary)] rounded-sm [color:var(--primary-foreground)] [display:flex] [height:31px] [justify-content:center] [width:31px]"
+            }
             href="#copy-about"
             onClick={(event) => {
               event.preventDefault();
@@ -153,7 +163,13 @@ export function WelcomeWorkspace({
             <small>0.1.0</small>
           </span>
         </div>
-        <div aria-label="Welcome screen categories" className={tw.welcomeNavigation} role="tree">
+        <div
+          aria-label="Welcome screen categories"
+          className={
+            "welcomeNavigation [display:flex] [flex-direction:column] [gap:1px] [padding:20px_12px] [&>_button]:[background:transparent] [&>_button]:[height:32px] [&>_button]:[justify-content:flex-start] [&>_button]:[padding:0_23px] [&>_button]:[text-align:left] [&>_button:hover]:[background:color-mix(in_oklch,_var(--foreground)_5%,_transparent)] [&>_button[aria-current=page]]:[background:var(--sidebar-accent)] [&>_button:focus-visible]:[outline:2px_solid_var(--primary)] [&>_button:focus-visible]:[outline-offset:-2px]"
+          }
+          role="tree"
+        >
           {SECTIONS.map((item, index) => (
             <Button
               aria-current={section === item ? "page" : undefined}
@@ -193,13 +209,23 @@ export function WelcomeWorkspace({
       </aside>
 
       {section === "projects" && recentProjects.length === 0 && (
-        <section aria-labelledby="welcome-title" className={tw.welcomeProjects}>
+        <section
+          aria-labelledby="welcome-title"
+          className={
+            "welcomeProjects [display:grid] [grid-template-rows:auto_auto_minmax(0,_1fr)] [min-height:0] [padding:104px_30px_34px] [position:relative] [&>_header]:[text-align:center] [&>_header_h1]:[font-size:27px] [&>_header_h1]:[line-height:1.2] [&>_header_h1]:[margin:0_0_20px] [&>_header_p]:[color:var(--muted-foreground)] [&>_header_p]:[font-size:13px] [&>_header_p]:[margin:0_0_7px] [&>_.welcomeProjectActions]:[margin-top:42px]"
+          }
+        >
           <header>
             <h1 id="welcome-title">Welcome to Git Client</h1>
             <p>Create a new project to start from scratch.</p>
             <p>Open existing project from disk or version control.</p>
           </header>
-          <div aria-label="Project actions" className={tw.welcomeProjectActions}>
+          <div
+            aria-label="Project actions"
+            className={
+              "welcomeProjectActions [display:flex] [gap:56px] [justify-content:center] [&>_button]:[align-items:center] [&>_button]:[background:transparent] [&>_button]:[display:flex] [&>_button]:[flex-direction:column] [&>_button]:[font-size:13px] [&>_button]:[gap:12px] [&>_button]:[min-width:64px] [&>_button]:[padding:0] [&>_button>_span]:[align-items:center] [&>_button>_span]:[background:var(--muted)] [&>_button>_span]:rounded-sm [&>_button>_span]:[color:var(--primary)] [&>_button>_span]:[display:flex] [&>_button>_span]:[height:54px] [&>_button>_span]:[justify-content:center] [&>_button>_span]:[width:54px] [&>_button:hover>_span]:[background:var(--accent)]"
+            }
+          >
             <Button
               onClick={onNewProject}
               type="button"
@@ -254,8 +280,8 @@ export function WelcomeWorkspace({
           >
             <label className="flex min-w-0 flex-1 items-center gap-[9px] px-[9px] text-[var(--muted-foreground)]">
               <Icon name="search" size={15} />
-              <span className={tw.srOnly}>Search projects</span>
-              <input
+              <span className="sr-only">Search projects</span>
+              <Input
                 className="h-8 min-w-0 flex-1 border-0 bg-transparent text-[13px] outline-none"
                 onChange={(event) => {
                   setQuery(event.currentTarget.value);
@@ -367,7 +393,12 @@ export function WelcomeWorkspace({
       )}
 
       {section === "customize" && (
-        <section aria-label="Customize" className={tw.welcomeCustomize}>
+        <section
+          aria-label="Customize"
+          className={
+            "welcomeCustomize [background:var(--card)] [min-height:0] [overflow:auto] [padding:30px_30px_18px]"
+          }
+        >
           <section>
             <h1 className="m-0 mb-[18px] text-[16px] font-semibold leading-[20px]">Appearance</h1>
             <div className="grid grid-cols-[59px_280px_minmax(0,1fr)] items-center gap-x-[10px] gap-y-[10px]">

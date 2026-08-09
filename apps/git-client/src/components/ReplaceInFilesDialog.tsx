@@ -7,7 +7,6 @@ import {
   type ProjectSearchOptions,
   type ProjectTextMatch,
 } from "../domain/projectSearch";
-import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
 import { List, ListItem } from "./ProductCollections";
 import { Spinner } from "./ProductCollections";
@@ -114,13 +113,17 @@ export function ReplaceInFilesDialog({
       purpose="form"
       width="min(820px, calc(100vw - 70px))"
     >
-      <section className={tw.replaceInFilesDialog}>
+      <section
+        className={`replaceInFilesDialog [display:grid] [grid-template-rows:auto_auto_auto_minmax(0,_1fr)_auto] [height:min(680px,_calc(100vh_-_70px))] [min-height:0] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:flex] [&>_footer]:[gap:8px] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:9px_12px] replaceInFilesDialog`}
+      >
         <DialogHeader
           hasDivider
           onOpenChange={(open) => !open && onClose()}
           title="Replace in Files"
         />
-        <div className={tw.replaceInFilesQuery}>
+        <div
+          className={`replaceInFilesQuery [border-bottom:1px_solid_var(--border)] [display:grid] [gap:8px] [grid-template-columns:minmax(0,_1fr)_minmax(0,_1fr)_auto] [padding:10px_12px] [&>_div:last-child]:[align-items:flex-end] [&>_div:last-child]:[display:flex] [&>_div:last-child]:[gap:4px] replaceInFilesQuery`}
+        >
           <TextInput
             hasAutoFocus
             label="Text to find"
@@ -169,7 +172,9 @@ export function ReplaceInFilesDialog({
             </Toggle>
           </div>
         </div>
-        <div className={tw.replaceInFilesStatus}>
+        <div
+          className={`replaceInFilesStatus [align-items:center] [background:var(--muted)] [border-bottom:1px_solid_var(--border)] [color:var(--muted-foreground)] [display:flex] [min-height:30px] [padding:4px_12px] [&>_span]:[flex:1] [&>_button]:[background:transparent] [&>_button]:[color:var(--primary)] replaceInFilesStatus`}
+        >
           <span>
             {loading ? "Searching…" : `${matches.length} matches in ${files.length} files`}
           </span>
@@ -187,7 +192,9 @@ export function ReplaceInFilesDialog({
             </Button>
           )}
         </div>
-        <div className={tw.replaceInFilesResults}>
+        <div
+          className={`replaceInFilesResults [min-height:0] [overflow:auto] [padding:5px_7px] [&>_p]:[color:var(--muted-foreground)] [&>_p]:[margin:24px] [&>_p[role=alert]]:[color:var(--destructive)] [&_li]:rounded-sm [&_li_code]:[color:var(--disabled-foreground)] [&_li_code]:[font-size:9px] replaceInFilesResults [&_li]:rounded-sm`}
+        >
           {loading ? (
             <Spinner label="Searching project…" size="lg" />
           ) : error ? (

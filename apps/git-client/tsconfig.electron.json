@@ -4,6 +4,8 @@
     "lib": ["ESNext"],
     "module": "Preserve",
     "moduleResolution": "bundler",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "rootDir": ".",
     "types": ["node"]
   },

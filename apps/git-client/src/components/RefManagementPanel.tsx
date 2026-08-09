@@ -1,14 +1,16 @@
 import { Button } from "@jongminchung/ui/components/button";
+import { Checkbox } from "@jongminchung/ui/components/checkbox";
+import { Input } from "@jongminchung/ui/components/input";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { useMemo, useState } from "react";
 import { deleteRefOperation } from "../domain/refActions";
 import { toVoidHandler } from "../domain/toVoidHandler";
 import type { Ref } from "../domain/types";
 import type { BranchComparison, GitOperation, RemoteInfo } from "../shared/contracts/model";
-import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
 import { Icon } from "./Icon";
 import { Notice } from "./Notice";
+import { Selector } from "./ProductFormControls";
 
 export function RefManagementPanel({
   refs,
@@ -103,8 +105,13 @@ export function RefManagementPanel({
   };
 
   return (
-    <div className={tw.refManagement} aria-busy={busy}>
-      <div className={tw.managementToolbar}>
+    <div
+      className={`refManagement [height:100%] [overflow:auto] [&_input]:[background:var(--secondary)] [&_input]:[border:1px_solid_var(--border)] [&_input]:[min-height:29px] [&_input]:[padding:0_9px] [&_select]:[background:var(--secondary)] [&_select]:[border:1px_solid_var(--border)] [&_select]:[min-height:29px] [&_select]:[padding:0_9px] [&_button]:[background:var(--secondary)] [&_button]:[border:1px_solid_var(--border)] [&_button]:[min-height:29px] [&_button]:[padding:0_9px] refManagement`}
+      aria-busy={busy}
+    >
+      <div
+        className={`managementToolbar [&>_span]:[flex:1] [align-items:center] [background:var(--muted)] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:5px] [height:38px] [padding:0_11px] [&>_button]:[align-items:center] [&>_button]:[background:var(--card)] [&>_button]:[border:1px_solid_var(--border)] [&>_button]:rounded-sm [&>_button]:[display:flex] [&>_button]:[gap:5px] [&>_button]:[min-height:27px] [&>_button]:[padding:0_8px] [background:var(--card)] managementToolbar [&>_button]:rounded-sm`}
+      >
         <strong>Branches & tags</strong>
         <span />
         <Button
@@ -147,32 +154,29 @@ export function RefManagementPanel({
           {error}
         </Notice>
       )}
-      <section className={tw.refActionBar}>
-        <label>
-          Reference
-          <select
-            value={selectedName}
-            onChange={(event) => {
-              setSelectedName(event.target.value);
-              setComparison(undefined);
-            }}
-          >
-            {refs.map((ref) => (
-              <option key={ref.name} value={ref.name}>
-                {ref.kind} · {ref.shortName}
-                {ref.current ? " · HEAD" : ""}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Remote
-          <select value={remote} onChange={(event) => setRemote(event.target.value)}>
-            {remotes.map((item) => (
-              <option key={item.name}>{item.name}</option>
-            ))}
-          </select>
-        </label>
+      <section
+        className={`refActionBar [align-items:end] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:8px] [padding:9px_11px] [&>_label]:[color:var(--muted-foreground)] [&>_label]:[display:flex] [&>_label]:[flex:1] [&>_label]:[flex-direction:column] [&>_label]:[font-size:11px] [&>_label]:[gap:4px] [&>_label:nth-child(2)]:[flex:0_0_130px] max-[1120px]:[align-items:stretch] max-[1120px]:[flex-wrap:wrap] refActionBar`}
+      >
+        <Selector
+          className="bg-secondary"
+          label="Reference"
+          onChange={(value) => {
+            setSelectedName(value);
+            setComparison(undefined);
+          }}
+          options={refs.map((ref) => ({
+            label: `${ref.kind} · ${ref.shortName}${ref.current ? " · HEAD" : ""}`,
+            value: ref.name,
+          }))}
+          value={selectedName}
+        />
+        <Selector
+          className="bg-secondary"
+          label="Remote"
+          onChange={setRemote}
+          options={remotes.map((item) => ({ label: item.name, value: item.name }))}
+          value={remote}
+        />
         <Button
           disabled={!selected || busy}
           onClick={() =>
@@ -229,7 +233,9 @@ export function RefManagementPanel({
           </Button>
         )}
       </section>
-      <section className={tw.refForms}>
+      <section
+        className={`refForms [&_form]:[align-items:end] [&_form]:[border-bottom:1px_solid_var(--border)] [&_form]:[display:flex] [&_form]:[gap:8px] [&_form]:[padding:9px_11px] [display:grid] [gap:10px] [grid-template-columns:repeat(2,_minmax(260px,_1fr))] [padding:11px] [&_form]:[align-items:stretch] [&_form]:[background:var(--secondary)] [&_form]:[border:1px_solid_var(--border)] [&_form]:rounded-lg [&_form]:[flex-direction:column] [&_form]:[padding:11px] [&_form_strong]:[min-height:29px] max-[1120px]:[grid-template-columns:1fr] refForms [&_form]:rounded-lg`}
+      >
         <form
           onSubmit={(event) => {
             event.preventDefault();
@@ -243,7 +249,7 @@ export function RefManagementPanel({
           }}
         >
           <strong>Create branch</strong>
-          <input
+          <Input
             aria-label="New branch name"
             onChange={(event) => setNewName(event.target.value)}
             placeholder="feat/name"
@@ -271,7 +277,7 @@ export function RefManagementPanel({
           }}
         >
           <strong>Rename selected local branch</strong>
-          <input
+          <Input
             aria-label="Renamed branch name"
             onChange={(event) => setRenameName(event.target.value)}
             placeholder="new/name"
@@ -299,7 +305,7 @@ export function RefManagementPanel({
           }}
         >
           <strong>Tracking branch</strong>
-          <input
+          <Input
             aria-label="Upstream branch"
             onChange={(event) => setUpstream(event.target.value)}
             placeholder="origin/main"
@@ -331,13 +337,13 @@ export function RefManagementPanel({
           }}
         >
           <strong>Create tag at selected reference</strong>
-          <input
+          <Input
             aria-label="New tag name"
             onChange={(event) => setTagName(event.target.value)}
             placeholder="v1.0.0"
             value={tagName}
           />
-          <input
+          <Input
             aria-label="Tag message"
             onChange={(event) => setTagMessage(event.target.value)}
             placeholder="Message (optional)"
@@ -354,23 +360,16 @@ export function RefManagementPanel({
           </Button>
         </form>
       </section>
-      <section className={tw.mergeOptions}>
+      <section
+        className={`mergeOptions [align-items:center] [border-top:1px_solid_var(--border)] [display:flex] [gap:10px] [padding:10px_11px] [&_label]:[align-items:center] [&_label]:[color:var(--muted-foreground)] [&_label]:[display:inline-flex] [&_label]:[gap:4px] [&>_span]:[flex:1] mergeOptions`}
+      >
         <strong>Integrate selected reference</strong>
         <label>
-          <input
-            checked={noFf}
-            onChange={(event) => setNoFf(event.target.checked)}
-            type="checkbox"
-          />{" "}
-          Create merge commit (--no-ff)
+          <Checkbox checked={noFf} onCheckedChange={setNoFf} /> Create merge commit (--no-ff)
         </label>
         <label>
-          <input
-            checked={squashMerge}
-            onChange={(event) => setSquashMerge(event.target.checked)}
-            type="checkbox"
-          />{" "}
-          Squash changes without committing
+          <Checkbox checked={squashMerge} onCheckedChange={setSquashMerge} /> Squash changes without
+          committing
         </label>
         <span />
         <Button
@@ -418,7 +417,9 @@ export function RefManagementPanel({
         </Button>
       </section>
       {comparison && (
-        <section className={tw.branchComparison}>
+        <section
+          className={`branchComparison [display:flex] [flex-direction:column] [gap:6px] [padding:12px] [&>_span]:[color:var(--muted-foreground)] [&_pre]:[background:var(--muted)] [&_pre]:[border:1px_solid_var(--border)] [&_pre]:rounded-lg [&_pre]:[max-height:220px] [&_pre]:[overflow:auto] [&_pre]:[padding:8px] branchComparison [&_pre]:rounded-lg`}
+        >
           <strong>
             {currentBranch} ↔ {selected?.shortName}
           </strong>
@@ -437,7 +438,9 @@ export function RefManagementPanel({
         </section>
       )}
       {mergedBranches.length > 0 && (
-        <section className={tw.mergedBranches}>
+        <section
+          className={`mergedBranches [border-top:1px_solid_var(--border)] [display:flex] [flex-direction:column] [gap:6px] [padding:11px] [&>_span]:[align-items:center] [&>_span]:[display:flex] [&>_span]:[gap:8px] [&_code]:[flex:1] mergedBranches`}
+        >
           <strong>Merged into {currentBranch}</strong>
           {mergedBranches.map((branch) => (
             <span key={branch}>

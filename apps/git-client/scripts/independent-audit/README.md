@@ -36,3 +36,7 @@ Run focused tests from `apps/git-client`:
 ```sh
 node --test scripts/independent-audit/*.node-test.mjs
 ```
+
+This also validates the checked-in Rebased 1.1.11 screenshot and accessibility evidence. The
+validation fails closed for a missing, changed, unmanifested, or unsafe-path file and for incorrect
+application/version/platform metadata.

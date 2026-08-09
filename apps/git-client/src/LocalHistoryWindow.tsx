@@ -27,8 +27,8 @@ export default function LocalHistoryWindow() {
     <AppearanceProvider>
       <GitClientTheme>
         <CommandProvider>
-          <main className="local-history-native-window">
-            <header className="local-history-native-titlebar">
+          <main className="grid h-full min-h-0 min-w-0 grid-rows-[30px_minmax(0,1fr)] overflow-hidden bg-card">
+            <header className="flex items-center border-b border-border bg-secondary pr-3 pl-[76px] [-webkit-app-region:drag] [&_strong]:truncate [&_strong]:text-xs">
               <strong>
                 {initialPath ? `Local History: ${initialPath}` : `Local History: ${repositoryName}`}
               </strong>

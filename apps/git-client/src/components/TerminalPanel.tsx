@@ -25,7 +25,6 @@ import type {
   TerminalLaunchTargets,
   TerminalShellDescriptor,
 } from "../shared/contracts/terminal";
-import { tw } from "../styles/tailwind";
 import { useCommands } from "./CommandProvider";
 import { Icon } from "./Icon";
 import { Notice } from "./Notice";
@@ -320,7 +319,7 @@ export function TerminalPanel({
   return (
     <div
       aria-label="Local Tool Window"
-      className={tw.terminalTool}
+      className={`terminalTool [display:grid] [grid-template-rows:30px_minmax(0,_1fr)] [height:100%] [min-height:0] terminalTool`}
       onKeyDownCapture={(event: KeyboardEvent<HTMLDivElement>) => {
         if (terminalActionForKeyboard(event.nativeEvent) !== "newTab") return;
         event.preventDefault();
@@ -346,7 +345,9 @@ export function TerminalPanel({
         sessions={sessions}
         showAgents
       />
-      <div className={tw.terminalSurface}>
+      <div
+        className={`terminalSurface [background:var(--terminal-background)] [min-height:0] [overflow:hidden] [&>_div:not([data-slot=empty])]:[height:100%] [&>div:not([data-slot=empty])]:box-border [&>div:not([data-slot=empty])]:pl-1 terminalSurface`}
+      >
         {activeKey ? (
           <Suspense
             fallback={

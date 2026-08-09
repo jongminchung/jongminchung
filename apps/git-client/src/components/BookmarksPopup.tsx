@@ -1,6 +1,5 @@
 import { useEffect, useState, type KeyboardEvent } from "react";
 import type { LineBookmark, ProjectBookmarks } from "../domain/bookmarks";
-import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
 import { EmptyState, List, ListItem } from "./ProductCollections";
 import { Dialog, DialogHeader } from "./ProductDialog";
@@ -52,7 +51,10 @@ export function BookmarksPopup({
       purpose="info"
       width={mode === "lines" ? "min(760px, calc(100vw - 72px))" : "min(640px, calc(100vw - 72px))"}
     >
-      <section className={tw.bookmarksPopup} onKeyDown={onKeyDown}>
+      <section
+        className={`bookmarksPopup [display:grid] [grid-template-rows:auto_minmax(180px,_1fr)] [max-height:min(640px,_calc(100vh_-_82px))] [min-height:330px] [&>_[role=listbox]]:[min-height:0] [&>_[role=listbox]]:[overflow:auto] bookmarksPopup`}
+        onKeyDown={onKeyDown}
+      >
         <DialogHeader hasDivider onOpenChange={(open) => !open && onClose()} title={title} />
         {bookmarks.length === 0 ? (
           <EmptyState

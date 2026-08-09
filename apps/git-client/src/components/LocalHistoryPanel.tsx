@@ -1,4 +1,5 @@
 import { Button } from "@jongminchung/ui/components/button";
+import { Input } from "@jongminchung/ui/components/input";
 import { Toggle } from "@jongminchung/ui/components/toggle";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
 import { cn } from "@jongminchung/ui/lib/utils";
@@ -242,17 +243,18 @@ export function LocalHistoryPanel({
 
   return (
     <section
-      className="local-history-activity"
+      className="grid h-full min-h-0 min-w-0 overflow-hidden bg-card [grid-template-columns:minmax(280px,38%)_minmax(360px,1fr)]"
+      data-local-history-activity
       aria-busy={loading}
       aria-label="Local History"
       style={{
         gridTemplateColumns: `${leftWidth}px 4px minmax(360px, 1fr)`,
       }}
     >
-      <div className="local-history-left">
-        <header className="local-history-searchbar">
+      <div className="grid min-h-0 min-w-0 grid-rows-[35px_minmax(90px,3fr)_31px_31px_minmax(90px,2fr)]">
+        <header className="flex min-w-0 items-center gap-[5px] border-b border-border px-[7px] focus-within:shadow-[inset_0_-2px_var(--primary)] [&_button]:min-h-6 [&_button]:border-0 [&_button]:bg-transparent [&_button]:px-1.5 [&_button]:text-muted-foreground [&_input]:h-[27px] [&_input]:min-w-0 [&_input]:flex-1 [&_input]:border-0 [&_input]:bg-transparent [&_input]:outline-0">
           <Icon name="search" size={13} />
-          <input
+          <Input
             aria-label="Search by file name"
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search by file name"
@@ -297,7 +299,11 @@ export function LocalHistoryPanel({
             <TooltipContent>Show System Events</TooltipContent>
           </Tooltip>
         </header>
-        <div className="local-history-activities" role="listbox" aria-label="Activity History">
+        <div
+          className="min-h-0 overflow-auto [&>button]:grid [&>button]:min-h-[30px] [&>button]:w-full [&>button]:grid-cols-[17px_minmax(0,1fr)] [&>button]:gap-1.5 [&>button]:rounded-none [&>button]:px-2 [&>button]:py-1 [&>button]:text-left [&>button[aria-selected=true]]:bg-accent [&_small]:block [&_small]:truncate [&_small]:text-[length:var(--font-size-xs)] [&_small]:font-normal [&_small]:text-disabled-foreground [&_span]:min-w-0 [&_span]:truncate [&_strong]:block [&_strong]:truncate"
+          role="listbox"
+          aria-label="Activity History"
+        >
           {activities.map((activity) => (
             <Button
               aria-selected={activity.id === selectedId}
@@ -322,7 +328,9 @@ export function LocalHistoryPanel({
             </Button>
           ))}
           {!loading && activities.length === 0 && (
-            <div className="local-history-empty">No activity in {repositoryName} detected</div>
+            <div className="flex h-full min-h-[58px] items-center justify-center p-3 text-center text-disabled-foreground">
+              No activity in {repositoryName} detected
+            </div>
           )}
           {nextCursor !== null && (
             <Button
@@ -330,7 +338,7 @@ export function LocalHistoryPanel({
               type="button"
               className={cn(
                 "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
-                "local-history-load-more",
+                "block min-h-[30px] text-center text-primary",
               )}
               variant="ghost"
               size="default"
@@ -339,7 +347,7 @@ export function LocalHistoryPanel({
             </Button>
           )}
         </div>
-        <div className="local-history-activity-actions">
+        <div className="flex min-w-0 items-center justify-end gap-[5px] border-y border-border px-[7px] [&_button]:min-h-6 [&_button]:border-0 [&_button]:bg-transparent [&_button]:text-[length:var(--font-size-xs)] [&_button]:text-muted-foreground">
           <Button
             disabled={selectedId === null}
             onClick={() => void revert(true)}
@@ -361,7 +369,7 @@ export function LocalHistoryPanel({
             Create Patch…
           </Button>
         </div>
-        <header className="local-history-changes-toolbar">
+        <header className="flex min-w-0 items-center gap-[5px] border-b border-border px-[7px] [&>strong]:min-w-0 [&>strong]:flex-1 [&>strong]:truncate [&_button]:min-h-6 [&_button]:border-0 [&_button]:bg-transparent [&_button]:px-1.5 [&_button]:text-muted-foreground">
           <strong>Changes</strong>
           <Tooltip>
             <TooltipTrigger
@@ -391,7 +399,11 @@ export function LocalHistoryPanel({
             Show Diff
           </Toggle>
         </header>
-        <div className="local-history-changes" role="tree" aria-label="Changes">
+        <div
+          className="min-h-0 overflow-auto [&>button]:grid [&>button]:min-h-[30px] [&>button]:w-full [&>button]:grid-cols-[17px_minmax(0,1fr)_auto] [&>button]:gap-1.5 [&>button]:rounded-none [&>button]:px-2 [&>button]:py-1 [&>button]:text-left [&>button[aria-selected=true]]:bg-accent [&_small]:truncate [&_small]:text-[length:var(--font-size-xs)] [&_small]:font-normal [&_small]:text-disabled-foreground [&_span]:min-w-0 [&_span]:truncate"
+          role="tree"
+          aria-label="Changes"
+        >
           {detail?.changes.map((change) => (
             <Button
               aria-selected={change.path === selectedPath}
@@ -418,23 +430,27 @@ export function LocalHistoryPanel({
             </Button>
           ))}
           {detail !== null && detail.changes.length === 0 && (
-            <div className="local-history-empty">Label has no file changes</div>
+            <div className="flex h-full min-h-[58px] items-center justify-center p-3 text-center text-disabled-foreground">
+              Label has no file changes
+            </div>
           )}
           {detail === null && (
-            <div className="local-history-empty">Select activity to view changes</div>
+            <div className="flex h-full min-h-[58px] items-center justify-center p-3 text-center text-disabled-foreground">
+              Select activity to view changes
+            </div>
           )}
         </div>
       </div>
       <div
         aria-label="Resize Local History panels"
         aria-orientation="vertical"
-        className="local-history-splitter"
+        className="relative min-h-0 cursor-ew-resize bg-border outline-0 hover:bg-primary focus-visible:bg-primary"
         onPointerDown={resizePanels}
         role="separator"
         tabIndex={0}
       />
-      <main className="local-history-diff">
-        <header>
+      <main className="grid min-h-0 min-w-0 grid-rows-[35px_minmax(0,1fr)] [&>pre]:m-0 [&>pre]:overflow-auto [&>pre]:bg-card [&>pre]:px-3 [&>pre]:py-2.5 [&>pre]:text-[11px] [&>pre]:leading-[1.45] [&>pre]:[tab-size:4]">
+        <header className="flex min-w-0 items-center gap-[5px] border-b border-border px-[7px] [&>strong]:min-w-0 [&>strong]:flex-1 [&>strong]:truncate [&_button]:min-h-6 [&_button]:border-0 [&_button]:bg-transparent [&_button]:px-1.5 [&_button]:text-muted-foreground">
           <Tooltip>
             <TooltipTrigger
               render={
@@ -486,17 +502,26 @@ export function LocalHistoryPanel({
           </Button>
         </header>
         {!showDiff ? (
-          <div className="local-history-empty">Nothing to show</div>
+          <div className="flex h-full min-h-[58px] items-center justify-center p-3 text-center text-disabled-foreground">
+            Nothing to show
+          </div>
         ) : error !== null ? (
-          <div className="local-history-error" role="alert">
+          <div
+            className="flex h-full min-h-[58px] items-center justify-center p-3 text-center text-destructive"
+            role="alert"
+          >
             {error}
           </div>
         ) : selectedChange?.contentAvailability === "unavailable" ? (
-          <div className="local-history-empty">Content unavailable</div>
+          <div className="flex h-full min-h-[58px] items-center justify-center p-3 text-center text-disabled-foreground">
+            Content unavailable
+          </div>
         ) : patch.length > 0 ? (
           <pre>{patch}</pre>
         ) : (
-          <div className="local-history-empty">Nothing to show</div>
+          <div className="flex h-full min-h-[58px] items-center justify-center p-3 text-center text-disabled-foreground">
+            Nothing to show
+          </div>
         )}
       </main>
       {dialog.node}

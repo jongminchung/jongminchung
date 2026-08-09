@@ -2,7 +2,6 @@ import { Button } from "@jongminchung/ui/components/button";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { useEffect, useState } from "react";
 import type { DiagnosticSnapshot } from "../shared/contracts/ipc";
-import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
 import { EmptyState } from "./ProductCollections";
 import { List, ListItem } from "./ProductCollections";
@@ -54,7 +53,9 @@ export function ActivityMonitorDialog({
       purpose="info"
       width="min(680px, calc(100vw - 70px))"
     >
-      <section className={tw.activityMonitorDialog}>
+      <section
+        className={`activityMonitorDialog [display:grid] [grid-template-rows:auto_30px_minmax(300px,_1fr)_auto] [height:min(620px,_calc(100vh_-_80px))] [&>_header]:[align-items:center] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[color:var(--muted-foreground)] [&>_header]:[display:grid] [&>_header]:[grid-template-columns:minmax(0,_1fr)_90px_100px] [&>_header]:[padding:0_12px] [&>_header]:[font-size:11px] [&>_main]:[min-height:0] [&>_main]:[overflow:auto] [&>_main>_div[role=list]]:[padding:5px] [&>_footer]:[align-items:center] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[color:var(--muted-foreground)] [&>_footer]:[display:flex] [&>_footer]:[justify-content:space-between] [&>_footer]:[padding:8px_10px] activityMonitorDialog`}
+      >
         <DialogHeader
           hasDivider
           onOpenChange={(open) => !open && onClose()}
@@ -76,7 +77,9 @@ export function ActivityMonitorDialog({
                 <ListItem
                   description={`PID ${process.pid}`}
                   endContent={
-                    <span className={tw.activityMonitorMetrics}>
+                    <span
+                      className={`activityMonitorMetrics [display:grid] [font-variant-numeric:tabular-nums] [grid-template-columns:90px_100px] [text-align:right] activityMonitorMetrics`}
+                    >
                       <span>{process.cpuPercent.toFixed(1)}%</span>
                       <span>{bytesLabel(process.memoryBytes)}</span>
                     </span>

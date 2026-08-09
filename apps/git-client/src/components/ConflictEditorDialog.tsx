@@ -7,7 +7,6 @@ import { parseConflictBlocks, resolveConflictBlock } from "../domain/conflicts";
 import { sanitizeGitError } from "../domain/gitActivity";
 import { abortOperationConfirmation, operationDisplayName } from "../domain/recoveryFlow";
 import type { ConflictContent, InProgressOperation } from "../shared/contracts/model";
-import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
 import { useCommandDefinitions, useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
@@ -30,7 +29,9 @@ function TextPane({
   readonly onAccept?: () => void;
 }) {
   return (
-    <section className={tw.conflictPane}>
+    <section
+      className={`conflictPane [&_select]:[background:var(--muted)] [&_select]:[border:1px_solid_var(--border)] [&_select]:rounded-sm [&_select]:[min-height:26px] [&_select]:[padding:0_8px] [display:grid] [grid-template-rows:32px_minmax(0,_1fr)] [min-height:0] [min-width:0] [&:nth-child(odd)]:[border-right:1px_solid_var(--border)] [&:nth-child(-n_+_2)]:[border-bottom:1px_solid_var(--border)] [&>_header]:[align-items:center] [&>_header]:[background:var(--muted)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[gap:4px] [&>_header]:[padding:2px_7px] [&>_header_strong]:[flex:1] [&>_div]:[min-height:0] [&>_div]:[overflow:hidden] conflictPane [&_select]:rounded-sm`}
+    >
       <header>
         <strong>{label}</strong>
         {onAccept && (
@@ -231,7 +232,9 @@ export function ConflictEditorDialog({
             </Notice>
           )}
           {content.binary ? (
-            <div className={tw.binaryConflict}>
+            <div
+              className={`binaryConflict [align-items:center] [display:flex] [flex-direction:column] [justify-content:center] [padding:40px] [text-align:center] [&_p]:[color:var(--muted-foreground)] [&_p]:[max-width:480px] [&>_div]:[display:flex] [&>_div]:[gap:8px] binaryConflict`}
+            >
               <Icon name="warning" size={32} />
               <strong>Binary or oversized conflict</strong>
               <p>The file cannot be safely represented as UTF-8 text. Choose one complete side.</p>
@@ -271,7 +274,9 @@ export function ConflictEditorDialog({
               </div>
             </div>
           ) : (
-            <div className={tw.conflictGrid}>
+            <div
+              className={`conflictGrid [display:grid] [grid-template-columns:repeat(2,_minmax(0,_1fr))] [grid-template-rows:repeat(2,_minmax(0,_1fr))] [min-height:0] conflictGrid`}
+            >
               <TextPane
                 label="Base"
                 value={content.base}
@@ -287,7 +292,9 @@ export function ConflictEditorDialog({
                 value={content.remote}
                 onAccept={() => setResult(content.remote ?? "")}
               />
-              <section className={tw.conflictPane}>
+              <section
+                className={`conflictPane [&_select]:[background:var(--muted)] [&_select]:[border:1px_solid_var(--border)] [&_select]:rounded-sm [&_select]:[min-height:26px] [&_select]:[padding:0_8px] [display:grid] [grid-template-rows:32px_minmax(0,_1fr)] [min-height:0] [min-width:0] [&:nth-child(odd)]:[border-right:1px_solid_var(--border)] [&:nth-child(-n_+_2)]:[border-bottom:1px_solid_var(--border)] [&>_header]:[align-items:center] [&>_header]:[background:var(--muted)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[gap:4px] [&>_header]:[padding:2px_7px] [&>_header_strong]:[flex:1] [&>_div]:[min-height:0] [&>_div]:[overflow:hidden] conflictPane [&_select]:rounded-sm`}
+              >
                 <header>
                   <strong>Result</strong>
                   {blocks.length > 0 && (

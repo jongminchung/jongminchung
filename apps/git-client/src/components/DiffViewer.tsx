@@ -1,4 +1,14 @@
 import { Button } from "@jongminchung/ui/components/button";
+import { ButtonGroup } from "@jongminchung/ui/components/button-group";
+import { Checkbox } from "@jongminchung/ui/components/checkbox";
+import { Input } from "@jongminchung/ui/components/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@jongminchung/ui/components/select";
 import { Toggle } from "@jongminchung/ui/components/toggle";
 import { ToggleGroup, ToggleGroupItem } from "@jongminchung/ui/components/toggle-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
@@ -14,7 +24,6 @@ import type {
   ImagePreview,
   SubmoduleDiff,
 } from "../shared/contracts/model";
-import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
 import type { SelectableDiffLine } from "./CodeMirrorDiff";
 import { Icon } from "./Icon";
@@ -74,8 +83,12 @@ function ImageDiff({
   const after = imageFrom(afterPreview);
 
   return (
-    <div className={tw.imageDiff}>
-      <div className={tw.imageDiffToolbar}>
+    <div
+      className={`imageDiff [display:grid] [grid-template-rows:auto_minmax(0,_1fr)] [height:100%] [min-height:0] [background:var(--card)] [&_figcaption]:[position:relative] [&_figcaption]:[z-index:2] [&_figcaption]:[padding:7px_10px] [&_figcaption]:[color:var(--muted-foreground)] [&_figcaption]:[background:var(--muted)] [&_figcaption]:[border-bottom:1px_solid_var(--border)] [&_figcaption]:[font-size:11px] imageDiff`}
+    >
+      <div
+        className={`imageDiffToolbar [display:flex] [min-height:36px] [align-items:center] [justify-content:space-between] [gap:12px] [padding:5px_10px] [border-bottom:1px_solid_var(--border)] [background:var(--muted)] [&>_div]:[display:flex] [&>_div]:[align-items:center] [&>_div]:[gap:6px] [&>_label]:[display:flex] [&>_label]:[align-items:center] [&>_label]:[gap:6px] [&_input[type=range]]:[width:120px] imageDiffToolbar`}
+      >
         <ToggleGroup
           aria-label="Image comparison mode"
           onValueChange={(value) => {
@@ -117,7 +130,7 @@ function ImageDiff({
         {mode !== "sideBySide" && before && after && (
           <label>
             {mode === "swipe" ? "Reveal" : "After opacity"}
-            <input
+            <Input
               aria-label={mode === "swipe" ? "Image reveal" : "After image opacity"}
               min="0"
               max="100"
@@ -130,7 +143,9 @@ function ImageDiff({
         )}
       </div>
       {mode === "sideBySide" || !before || !after ? (
-        <div className={tw.imageDiffPair}>
+        <div
+          className={`imageDiffPair [display:grid] [grid-template-columns:repeat(2,_minmax(0,_1fr))] [min-height:0] [&_figure]:[display:grid] [&_figure]:[grid-template-rows:auto_minmax(0,_1fr)] [&_figure]:[min-width:0] [&_figure]:[min-height:0] [&_figure]:[margin:0] [&_figure]:[background-color:var(--card)] [&_figure]:[background-image:linear-gradient(45deg,_var(--muted)_25%,_transparent_25%),_linear-gradient(-45deg,_var(--muted)_25%,_transparent_25%),_linear-gradient(45deg,_transparent_75%,_var(--muted)_75%),_linear-gradient(-45deg,_transparent_75%,_var(--muted)_75%)] [&_figure]:[background-size:18px_18px] [&_figure]:[background-position:0_0,_0_9px,_9px_-9px,_-9px_0] [&_figure_+_figure]:[border-left:1px_solid_var(--border)] [&_figure_>_img]:[width:100%] [&_figure_>_img]:[height:100%] [&_figure_>_img]:[min-height:180px] [&_figure_>_img]:[object-fit:contain] [&_figure_>_img]:[padding:16px] [&_figure_>_div]:[width:100%] [&_figure_>_div]:[height:100%] [&_figure_>_div]:[min-height:180px] [&_figure_>_div]:[object-fit:contain] [&_figure_>_div]:[padding:16px] [&_figure_>_div]:[display:grid] [&_figure_>_div]:[place-items:center] [&_figure_>_div]:[color:var(--muted-foreground)] max-[960px]:[grid-template-columns:1fr] max-[960px]:[overflow:auto] max-[960px]:[&_figure_+_figure]:[border-left:0] max-[960px]:[&_figure_+_figure]:[border-top:1px_solid_var(--border)] imageDiffPair`}
+        >
           <figure>
             <figcaption>Before · {previewDescription(beforePreview)}</figcaption>
             {before ? <img alt="Before revision" src={before.dataUrl} /> : <div>Not available</div>}
@@ -141,7 +156,9 @@ function ImageDiff({
           </figure>
         </div>
       ) : (
-        <figure className={tw.imageDiffOverlay}>
+        <figure
+          className={`imageDiffOverlay [display:grid] [grid-template-rows:auto_minmax(0,_1fr)] [min-width:0] [min-height:0] [margin:0] [background-color:var(--card)] [background-image:linear-gradient(45deg,_var(--muted)_25%,_transparent_25%),_linear-gradient(-45deg,_var(--muted)_25%,_transparent_25%),_linear-gradient(45deg,_transparent_75%,_var(--muted)_75%),_linear-gradient(-45deg,_transparent_75%,_var(--muted)_75%)] [background-size:18px_18px] [background-position:0_0,_0_9px,_9px_-9px,_-9px_0] [&>_div]:[position:relative] [&>_div]:[min-height:0] [&_img]:[position:absolute] [&_img]:[inset:0] [&_img]:[width:100%] [&_img]:[height:100%] [&_img]:[object-fit:contain] [&_img]:[padding:16px] imageDiffOverlay`}
+        >
           <figcaption>Before / After</figcaption>
           <div>
             <img alt="Before revision" src={before.dataUrl} />
@@ -392,13 +409,15 @@ export function DiffViewer({
   return (
     <section
       aria-label={file ? `Diff for ${file.path}` : "Diff preview"}
-      className={`${tw.diffViewer} ${focused ? tw.focusedDiffViewer : ""}`}
+      className={`${`diffViewer [background:var(--card)] [display:grid] [grid-template-rows:36px_auto_minmax(0,_1fr)] [min-height:0] [min-width:0] [outline:0] [position:relative] [&:focus-visible]:[box-shadow:inset_0_0_0_2px_color-mix(in_oklch,_var(--primary)_55%,_transparent)] diffViewer`} ${focused ? `focusedDiffViewer [background:var(--card)] rounded-lg [inset:56px_30px_18px_31px] [position:fixed] [z-index:45] focusedDiffViewer rounded-lg` : ""}`}
       data-diff-viewer
       onKeyDown={handleKeyboard}
       ref={root}
       tabIndex={0}
     >
-      <header className={tw.diffViewerHeader}>
+      <header
+        className={`diffViewerHeader [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:6px] [min-width:0] [padding:4px_7px] [&>_span:last-of-type]:[flex:1] [&_strong]:[min-width:40px] [&_small]:[color:var(--disabled-foreground)] [&_small]:[flex:none] diffViewerHeader`}
+      >
         <Tooltip>
           <TooltipTrigger
             render={
@@ -438,16 +457,22 @@ export function DiffViewer({
         {file ? (
           <>
             <StatusBadge>{file.status.charAt(0).toUpperCase()}</StatusBadge>
-            <strong className={tw.ellipsis}>{file.path}</strong>
+            <strong
+              className={`ellipsis [min-width:0] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap] ellipsis`}
+            >
+              {file.path}
+            </strong>
             <small>{sourceLabel}</small>
           </>
         ) : (
           <strong>Select a changed file</strong>
         )}
         <span />
-        <label className={tw.diffSearch}>
+        <label
+          className={`diffSearch [align-items:center] [background:var(--secondary)] [border:1px_solid_var(--border)] rounded-lg [display:flex] [height:26px] [padding:0_6px] [width:128px] [&:focus-within]:[border-color:var(--primary)] [&:focus-within]:[box-shadow:0_0_0_2px_color-mix(in_oklch,_var(--primary)_22%,_transparent)] [&_input]:[background:transparent] [&_input]:[border:0] [&_input]:[min-width:0] [&_input]:[outline:0] [&_input]:[width:100%] [&_small]:[color:var(--disabled-foreground)] diffSearch rounded-lg`}
+        >
           <Icon name="search" size={13} />
-          <input
+          <Input
             aria-label="Search diff"
             data-command-search="diff"
             onChange={(event) => {
@@ -492,63 +517,66 @@ export function DiffViewer({
           </Tooltip>
         )}
       </header>
-      <div className={tw.diffViewerToolbar}>
+      <div
+        className={`diffViewerToolbar [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:6px] [min-width:0] [padding:4px_7px] [&>_span]:[flex:1] [background:var(--secondary)] [flex-wrap:wrap] [min-height:34px] [&_label]:[align-items:center] [&_label]:[color:var(--muted-foreground)] [&_label]:[display:inline-flex] [&_label]:[font-size:10px] [&_label]:[gap:5px] [&_label]:[white-space:nowrap] [&_button]:[background:var(--card)] [&_button]:[border:1px_solid_var(--border)] [&_button]:[min-height:25px] [&_button]:[padding:0_7px] [&_select]:[background:var(--card)] [&_select]:[border:1px_solid_var(--border)] [&_select]:[min-height:25px] [&_select]:[padding:0_7px] diffViewerToolbar`}
+      >
         <label>
           View
-          <select
-            aria-label="Diff view mode"
-            onChange={(event) =>
+          <Select
+            onValueChange={(value) =>
               onPreferencesChange({
                 ...preferences,
-                viewMode:
-                  event.target.value === "split" || event.target.value === "unified"
-                    ? event.target.value
-                    : "auto",
+                viewMode: value === "split" || value === "unified" ? value : "auto",
               })
             }
             value={preferences.viewMode}
           >
-            <option value="auto">Auto</option>
-            <option value="split">Split</option>
-            <option value="unified">Unified</option>
-          </select>
+            <SelectTrigger aria-label="Diff view mode" className="bg-card" size="sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent align="start">
+              <SelectItem value="auto">Auto</SelectItem>
+              <SelectItem value="split">Split</SelectItem>
+              <SelectItem value="unified">Unified</SelectItem>
+            </SelectContent>
+          </Select>
         </label>
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <Button
-                aria-label="Previous difference"
-                disabled={statistics.differences === 0}
-                onClick={() => moveHunk(-1)}
-                type="button"
-                className={cn("h-7 px-2.5")}
-                variant="outline"
-                size="sm"
-              >
-                ↑ Difference
-              </Button>
-            }
-          />
-          <TooltipContent>Previous difference · ⌥↑</TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <Button
-                aria-label="Next difference"
-                disabled={statistics.differences === 0}
-                onClick={() => moveHunk(1)}
-                type="button"
-                className={cn("h-7 px-2.5")}
-                variant="outline"
-                size="sm"
-              >
-                ↓ Difference
-              </Button>
-            }
-          />
-          <TooltipContent>Next difference · ⌥↓</TooltipContent>
-        </Tooltip>
+        <ButtonGroup>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  aria-label="Previous difference"
+                  disabled={statistics.differences === 0}
+                  onClick={() => moveHunk(-1)}
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                >
+                  ↑ Difference
+                </Button>
+              }
+            />
+            <TooltipContent>Previous difference · ⌥↑</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  aria-label="Next difference"
+                  disabled={statistics.differences === 0}
+                  onClick={() => moveHunk(1)}
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                >
+                  ↓ Difference
+                </Button>
+              }
+            />
+            <TooltipContent>Next difference · ⌥↓</TooltipContent>
+          </Tooltip>
+        </ButtonGroup>
         <small>{statistics.differences} differences</small>
         <Popover
           alignment="end"
@@ -562,10 +590,8 @@ export function DiffViewer({
             <div className="grid gap-2 p-1">
               <label>
                 Context
-                <select
-                  aria-label="Diff context lines"
-                  onChange={(event) => {
-                    const value = event.target.value;
+                <Select
+                  onValueChange={(value) => {
                     onPreferencesChange({
                       ...preferences,
                       contextLines:
@@ -574,62 +600,63 @@ export function DiffViewer({
                   }}
                   value={String(preferences.contextLines)}
                 >
-                  <option value="3">3 lines</option>
-                  <option value="5">5 lines</option>
-                  <option value="10">10 lines</option>
-                  <option value="full">Entire file</option>
-                </select>
+                  <SelectTrigger aria-label="Diff context lines" className="w-full" size="sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent align="start">
+                    <SelectItem value="3">3 lines</SelectItem>
+                    <SelectItem value="5">5 lines</SelectItem>
+                    <SelectItem value="10">10 lines</SelectItem>
+                    <SelectItem value="full">Entire file</SelectItem>
+                  </SelectContent>
+                </Select>
               </label>
               <label>
-                <input
+                <Checkbox
                   checked={preferences.whitespace === "ignoreAll"}
-                  onChange={(event) =>
+                  onCheckedChange={(checked) =>
                     onPreferencesChange({
                       ...preferences,
-                      whitespace: event.target.checked ? "ignoreAll" : "show",
+                      whitespace: checked ? "ignoreAll" : "show",
                     })
                   }
-                  type="checkbox"
                 />
                 Ignore whitespace
               </label>
               <label>
-                <input
+                <Checkbox
                   checked={preferences.wordWrap}
-                  onChange={(event) =>
+                  onCheckedChange={(checked) =>
                     onPreferencesChange({
                       ...preferences,
-                      wordWrap: event.target.checked,
+                      wordWrap: checked,
                     })
                   }
-                  type="checkbox"
                 />
                 Wrap
               </label>
               <label>
-                <input
+                <Checkbox
                   checked={preferences.collapseUnchanged}
-                  onChange={(event) =>
+                  onCheckedChange={(checked) =>
                     onPreferencesChange({
                       ...preferences,
-                      collapseUnchanged: event.target.checked,
+                      collapseUnchanged: checked,
                     })
                   }
-                  type="checkbox"
                 />
                 Fold unchanged
               </label>
               {split && (
                 <label>
-                  <input
+                  <Checkbox
                     checked={preferences.synchronizedScroll}
-                    onChange={(event) =>
+                    onCheckedChange={(checked) =>
                       onPreferencesChange({
                         ...preferences,
-                        synchronizedScroll: event.target.checked,
+                        synchronizedScroll: checked,
                       })
                     }
-                    type="checkbox"
                   />
                   Sync scroll
                 </label>
@@ -644,18 +671,22 @@ export function DiffViewer({
         <span />
         {mode !== "readOnly" && (
           <>
-            <select
-              aria-label="Selected hunk"
+            <Select
               disabled={document.hunks.length === 0}
-              onChange={(event) => setHunkIndex(Number(event.target.value))}
-              value={Math.min(hunkIndex, Math.max(0, document.hunks.length - 1))}
+              onValueChange={(value) => value !== null && setHunkIndex(Number(value))}
+              value={String(Math.min(hunkIndex, Math.max(0, document.hunks.length - 1)))}
             >
-              {document.hunks.map((item, index) => (
-                <option key={`${item.header}-${index}`} value={index}>
-                  Hunk {index + 1}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger aria-label="Selected hunk" className="bg-card" size="sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent align="end">
+                {document.hunks.map((item, index) => (
+                  <SelectItem key={`${item.header}-${index}`} value={String(index)}>
+                    Hunk {index + 1}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {hunk && (
               <code
                 className="max-w-56 truncate text-[10px] text-muted-foreground"
@@ -718,7 +749,7 @@ export function DiffViewer({
       </div>
       <div
         aria-label={file ? `Diff content for ${file.path}` : "Diff content"}
-        className={tw.diffViewerContent}
+        className={`diffViewerContent [min-height:0] [overflow:auto] [&>_pre]:[font-family:var(--font-family-code)] [&>_pre]:[font-size:11px] [&>_pre]:[line-height:1.55] [&>_pre]:[margin:0] [&>_pre]:[min-height:100%] [&>_pre]:[padding:12px] [&>_pre]:[white-space:pre] [&>_pre.wrappedDiff]:[white-space:pre-wrap] [&>_pre.wrappedDiff]:[word-break:break-word] [&>_pre_>_span]:[display:inline] diffViewerContent`}
         role="region"
         tabIndex={0}
       >
@@ -729,7 +760,9 @@ export function DiffViewer({
         ) : file.binary && hasImagePreview ? (
           <ImageDiff afterPreview={afterPreview} beforePreview={beforePreview} />
         ) : file.submodule && submoduleDiff ? (
-          <div className={tw.submoduleDiff}>
+          <div
+            className={`submoduleDiff [display:grid] [align-content:center] [justify-items:center] [gap:10px] [min-height:100%] [padding:28px] [color:var(--muted-foreground)] [text-align:center] [&>_strong]:[color:var(--foreground)] [&>_div]:[display:grid] [&>_div]:[grid-template-columns:minmax(0,_1fr)_auto_minmax(0,_1fr)] [&>_div]:[align-items:center] [&>_div]:[gap:12px] [&>_div]:[width:min(680px,_100%)] [&_section]:[display:grid] [&_section]:[gap:6px] [&_section]:[min-width:0] [&_section]:[padding:12px] [&_section]:[border:1px_solid_var(--border)] [&_section]:rounded-lg [&_section]:[background:var(--secondary)] [&_section]:[text-align:left] [&_code]:[overflow:hidden] [&_code]:[color:var(--foreground)] [&_code]:[font-size:11px] [&_code]:[text-overflow:ellipsis] submoduleDiff [&_section]:rounded-lg`}
+          >
             <Icon name="worktree" size={24} />
             <strong>Submodule pointer change</strong>
             <div>
@@ -757,7 +790,9 @@ export function DiffViewer({
             )}
           </div>
         ) : unsupportedReason ? (
-          <div className={tw.unsupportedDiff}>
+          <div
+            className={`unsupportedDiff [align-items:center] [color:var(--muted-foreground)] [display:flex] [flex-direction:column] [height:100%] [justify-content:center] [text-align:center] [&_strong]:[color:var(--foreground)] [&_strong]:[margin-top:9px] [&_p]:[max-width:380px] [&_button]:[align-items:center] [&_button]:[background:var(--muted)] [&_button]:[border:1px_solid_var(--border)] [&_button]:rounded-sm [&_button]:[display:inline-flex] [&_button]:[gap:6px] [&_button]:[height:29px] [&_button]:[padding:0_10px] unsupportedDiff [&_button]:rounded-sm`}
+          >
             <Icon name={file.submodule ? "worktree" : "warning"} size={24} />
             <strong>{unsupportedReason}</strong>
             <p>
@@ -766,7 +801,9 @@ export function DiffViewer({
                 : "This file is shown as metadata only to keep the renderer responsive and safe."}
             </p>
             {file.binary && (
-              <div className={tw.binaryMetadata}>
+              <div
+                className={`binaryMetadata [display:grid] [gap:4px] [color:var(--muted-foreground)] [font-family:var(--font-family-code)] [font-size:11px] binaryMetadata`}
+              >
                 <span>Before: {previewDescription(beforePreview)}</span>
                 <span>After: {previewDescription(afterPreview)}</span>
               </div>
@@ -812,7 +849,9 @@ export function DiffViewer({
             />
           </Suspense>
         ) : (
-          <div className={tw.unsupportedDiff}>
+          <div
+            className={`unsupportedDiff [align-items:center] [color:var(--muted-foreground)] [display:flex] [flex-direction:column] [height:100%] [justify-content:center] [text-align:center] [&_strong]:[color:var(--foreground)] [&_strong]:[margin-top:9px] [&_p]:[max-width:380px] [&_button]:[align-items:center] [&_button]:[background:var(--muted)] [&_button]:[border:1px_solid_var(--border)] [&_button]:rounded-sm [&_button]:[display:inline-flex] [&_button]:[gap:6px] [&_button]:[height:29px] [&_button]:[padding:0_10px] unsupportedDiff [&_button]:rounded-sm`}
+          >
             <Icon name="warning" size={24} />
             <strong>Semantic preview unavailable</strong>
             <p>{contentUnavailable ?? "The before/after file content could not be loaded."}</p>

@@ -268,6 +268,7 @@ interface TextAreaProps extends Omit<
   readonly htmlName?: string;
   readonly isLoading?: boolean;
   readonly size?: "sm" | "md" | "lg";
+  readonly fieldClassName?: string;
 }
 
 export function TextArea({
@@ -290,6 +291,7 @@ export function TextArea({
   hasAutoFocus = false,
   htmlName,
   isLoading = false,
+  fieldClassName,
   className,
   ...props
 }: TextAreaProps): ReactNode {
@@ -297,6 +299,7 @@ export function TextArea({
   const inputId = id ?? generatedId;
   return (
     <FieldShell
+      className={fieldClassName}
       description={description}
       id={inputId}
       isLabelHidden={isLabelHidden}
@@ -442,7 +445,7 @@ interface SelectorProps {
   readonly isDisabled?: boolean;
   readonly width?: number | string;
   readonly size?: "sm" | "md" | "lg";
-  readonly placement?: string;
+  readonly placement?: "above" | "below";
   readonly hasSearch?: boolean;
   readonly isLoading?: boolean;
   readonly labelTooltip?: string;
@@ -451,6 +454,7 @@ interface SelectorProps {
   readonly className?: string;
   readonly name?: string;
   readonly required?: boolean;
+  readonly hasAutoFocus?: boolean;
   readonly "aria-describedby"?: string;
 }
 
@@ -464,7 +468,7 @@ export function Selector({
   isDisabled = false,
   width,
   size = "md",
-  placement: _placement,
+  placement = "below",
   hasSearch: _hasSearch,
   isLoading: _isLoading,
   labelTooltip,
@@ -473,6 +477,7 @@ export function Selector({
   className,
   name,
   required,
+  hasAutoFocus = false,
   "aria-describedby": ariaDescribedBy,
 }: SelectorProps): ReactNode {
   const generatedId = useId();
@@ -502,6 +507,7 @@ export function Selector({
           aria-describedby={ariaDescribedBy}
           aria-invalid={status?.type === "error" || undefined}
           className={cn("w-full text-xs", size === "lg" && "h-9", className)}
+          autoFocus={hasAutoFocus}
           id={id}
           size={size === "sm" ? "sm" : "default"}
         >
@@ -513,7 +519,7 @@ export function Selector({
             }
           </SelectValue>
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent side={placement === "above" ? "top" : "bottom"}>
           {options.map((option) => (
             <SelectItem disabled={option.isDisabled} key={option.value} value={option.value}>
               {option.label}

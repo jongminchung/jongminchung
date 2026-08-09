@@ -2,7 +2,6 @@ import { Button } from "@jongminchung/ui/components/button";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { useState, type KeyboardEvent } from "react";
 import { isBookmarkMnemonic, type BookmarkMnemonic } from "../domain/bookmarks";
-import { tw } from "../styles/tailwind";
 import { Dialog, DialogHeader } from "./ProductDialog";
 import { TextInput } from "./ProductFormControls";
 
@@ -55,9 +54,16 @@ export function BookmarkMnemonicDialog({
       purpose="info"
       width={430}
     >
-      <section className={tw.bookmarkMnemonicDialog} onKeyDown={onKeyDown}>
+      <section
+        className={`bookmarkMnemonicDialog [display:grid] [gap:12px] [padding-bottom:12px] [&>_*:not(:first-child)]:[margin-left:12px] [&>_*:not(:first-child)]:[margin-right:12px] [&>_p]:[color:var(--muted-foreground)] [&>_p]:[font-size:10px] [&>_p]:[margin-bottom:0] [&>_p]:[margin-top:-3px] [&>_footer]:[display:flex] [&>_footer]:[gap:7px] [&>_footer]:[justify-content:flex-end] bookmarkMnemonicDialog`}
+        onKeyDown={onKeyDown}
+      >
         <DialogHeader hasDivider onOpenChange={(open) => !open && onClose()} title={title} />
-        <div className={tw.bookmarkMnemonicGrid} role="listbox" aria-label="Bookmark mnemonics">
+        <div
+          className={`bookmarkMnemonicGrid [display:grid] [gap:4px] [grid-template-columns:repeat(10,_1fr)] [&>_button]:[background:var(--muted)] [&>_button]:[border:1px_solid_transparent] [&>_button]:rounded-sm [&>_button]:[color:var(--foreground)] [&>_button]:[font-family:var(--font-family-code)] [&>_button]:[font-size:11px] [&>_button]:[height:28px] [&>_button:hover]:[background:var(--overlay-hover)] [&>_button[aria-selected=true]]:[background:var(--accent)] [&>_button[aria-selected=true]]:[border-color:var(--primary)] [&>_button[data-assigned=true]]:[color:var(--disabled-foreground)] [&>_button[data-assigned=true]]:[text-decoration:underline] bookmarkMnemonicGrid [&>_button]:rounded-sm`}
+          role="listbox"
+          aria-label="Bookmark mnemonics"
+        >
           {MNEMONICS.map((mnemonic) => (
             <Button
               aria-label={`Mnemonic ${mnemonic}${assigned.has(mnemonic) && mnemonic !== current ? ", already used" : ""}`}

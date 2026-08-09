@@ -1,5 +1,22 @@
 import { Button } from "@jongminchung/ui/components/button";
+import { Input } from "@jongminchung/ui/components/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@jongminchung/ui/components/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@jongminchung/ui/components/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@jongminchung/ui/components/tabs";
+import { Textarea } from "@jongminchung/ui/components/textarea";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { useEffect, useMemo, useState } from "react";
 import type {
@@ -8,7 +25,6 @@ import type {
   IgnoreRules,
   SubmoduleInfo,
 } from "../shared/contracts/model";
-import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
 import { Icon } from "./Icon";
 import { Notice } from "./Notice";
@@ -134,8 +150,13 @@ export function RepositorySettingsPanel({
   };
 
   return (
-    <div className={tw.repositorySettings} aria-busy={busy}>
-      <div className={tw.managementToolbar}>
+    <div
+      className={`repositorySettings [height:100%] [overflow:auto] repositorySettings`}
+      aria-busy={busy}
+    >
+      <div
+        className={`managementToolbar [&>_span]:[flex:1] [align-items:center] [background:var(--muted)] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:5px] [height:38px] [padding:0_11px] [&>_button]:[align-items:center] [&>_button]:[background:var(--card)] [&>_button]:[border:1px_solid_var(--border)] [&>_button]:rounded-sm [&>_button]:[display:flex] [&>_button]:[gap:5px] [&>_button]:[min-height:27px] [&>_button]:[padding:0_8px] [background:var(--card)] managementToolbar [&>_button]:rounded-sm`}
+      >
         <strong>Repository settings</strong>
         <span />
         {isShallow && (
@@ -180,7 +201,7 @@ export function RepositorySettingsPanel({
       >
         <TabsList
           aria-label="Repository settings sections"
-          className={tw.settingsTabs}
+          className={`settingsTabs [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:4px] [padding:8px_11px] [&>_button]:[background:transparent] [&>_button]:[min-height:29px] [&>_button]:[padding:0_10px] [&_em]:[color:var(--disabled-foreground)] [&_em]:[font-size:10px] [&_em]:[font-style:normal] [&_em]:[margin-left:4px] settingsTabs`}
           render={<nav />}
         >
           <TabsTrigger
@@ -202,7 +223,11 @@ export function RepositorySettingsPanel({
             Git Config
           </TabsTrigger>
         </TabsList>
-        <TabsContent className={tw.settingsSection} render={<section />} value="ignore">
+        <TabsContent
+          className={`settingsSection [border-bottom:1px_solid_var(--border)] [&>_header]:[align-items:center] [&>_header]:[background:var(--muted)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[gap:8px] [&>_header]:[min-height:37px] [&>_header]:[padding:6px_11px] [&>_header_>_span]:[flex:1] [&_button]:[background:var(--secondary)] [&_button]:[border:1px_solid_var(--border)] [&_button]:[min-height:28px] [&_button]:[padding:0_8px] [&_input]:[background:var(--secondary)] [&_input]:[border:1px_solid_var(--border)] [&_input]:[min-height:28px] [&_input]:[padding:0_8px] [&_select]:[background:var(--secondary)] [&_select]:[border:1px_solid_var(--border)] [&_select]:[min-height:28px] [&_select]:[padding:0_8px] settingsSection`}
+          render={<section />}
+          value="ignore"
+        >
           <header>
             <strong>Ignore rules</strong>
             <span />{" "}
@@ -217,10 +242,12 @@ export function RepositorySettingsPanel({
               Save rules
             </Button>
           </header>
-          <div className={tw.ignoreEditors}>
+          <div
+            className={`ignoreEditors [display:grid] [gap:10px] [grid-template-columns:1fr_1fr] [padding:10px_11px] [&_label]:[color:var(--muted-foreground)] [&_label]:[display:flex] [&_label]:[flex-direction:column] [&_label]:[font-size:11px] [&_label]:[gap:5px] [&_textarea]:[background:var(--muted)] [&_textarea]:[border:1px_solid_var(--border)] [&_textarea]:rounded-lg [&_textarea]:[color:var(--foreground)] [&_textarea]:[font-family:var(--font-family-code)] [&_textarea]:[font-size:12px] [&_textarea]:[min-height:150px] [&_textarea]:[padding:8px] [&_textarea]:[resize:vertical] max-[1120px]:[grid-template-columns:1fr] ignoreEditors [&_textarea]:rounded-lg`}
+          >
             <label>
               .gitignore
-              <textarea
+              <Textarea
                 value={rules.gitignore}
                 onChange={(event) =>
                   setRules((current) => ({
@@ -232,7 +259,7 @@ export function RepositorySettingsPanel({
             </label>
             <label>
               .git/info/exclude
-              <textarea
+              <Textarea
                 value={rules.infoExclude}
                 onChange={(event) =>
                   setRules((current) => ({
@@ -244,7 +271,11 @@ export function RepositorySettingsPanel({
             </label>
           </div>
         </TabsContent>
-        <TabsContent className={tw.settingsSection} render={<section />} value="submodules">
+        <TabsContent
+          className={`settingsSection [border-bottom:1px_solid_var(--border)] [&>_header]:[align-items:center] [&>_header]:[background:var(--muted)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[gap:8px] [&>_header]:[min-height:37px] [&>_header]:[padding:6px_11px] [&>_header_>_span]:[flex:1] [&_button]:[background:var(--secondary)] [&_button]:[border:1px_solid_var(--border)] [&_button]:[min-height:28px] [&_button]:[padding:0_8px] [&_input]:[background:var(--secondary)] [&_input]:[border:1px_solid_var(--border)] [&_input]:[min-height:28px] [&_input]:[padding:0_8px] [&_select]:[background:var(--secondary)] [&_select]:[border:1px_solid_var(--border)] [&_select]:[min-height:28px] [&_select]:[padding:0_8px] settingsSection`}
+          render={<section />}
+          value="submodules"
+        >
           <header>
             <strong>Submodules · {submodules.length}</strong>
             <span />
@@ -269,7 +300,10 @@ export function RepositorySettingsPanel({
             <EmptyState title="No submodules configured." />
           ) : (
             submodules.map((submodule) => (
-              <article className={tw.settingRow} key={submodule.path}>
+              <article
+                className={`settingRow [align-items:center] [border-top:1px_solid_var(--border)] [display:flex] [gap:8px] [min-height:48px] [padding:7px_11px] [&>_div]:[display:flex] [&>_div]:[flex:1] [&>_div]:[flex-direction:column] [&>_div]:[min-width:0] [&_small]:[color:var(--disabled-foreground)] [&_small]:[overflow:hidden] [&_small]:[text-overflow:ellipsis] [&_small]:[white-space:nowrap] settingRow`}
+                key={submodule.path}
+              >
                 <Icon name="worktree" size={15} />
                 <div>
                   <strong>{submodule.path}</strong>
@@ -282,35 +316,49 @@ export function RepositorySettingsPanel({
             ))
           )}
         </TabsContent>
-        <TabsContent className={tw.settingsSection} render={<section />} value="config">
+        <TabsContent
+          className={`settingsSection [border-bottom:1px_solid_var(--border)] [&>_header]:[align-items:center] [&>_header]:[background:var(--muted)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[gap:8px] [&>_header]:[min-height:37px] [&>_header]:[padding:6px_11px] [&>_header_>_span]:[flex:1] [&_button]:[background:var(--secondary)] [&_button]:[border:1px_solid_var(--border)] [&_button]:[min-height:28px] [&_button]:[padding:0_8px] [&_input]:[background:var(--secondary)] [&_input]:[border:1px_solid_var(--border)] [&_input]:[min-height:28px] [&_input]:[padding:0_8px] [&_select]:[background:var(--secondary)] [&_select]:[border:1px_solid_var(--border)] [&_select]:[min-height:28px] [&_select]:[padding:0_8px] settingsSection`}
+          render={<section />}
+          value="config"
+        >
           <header>
             <strong>Git config</strong>
             <span />
-            <select
-              aria-label="Filter Git config scope"
-              onChange={(event) => setScopeFilter(event.target.value as typeof scopeFilter)}
+            <Select
+              onValueChange={(value) => value && setScopeFilter(value as typeof scopeFilter)}
               value={scopeFilter}
             >
-              <option value="all">All scopes</option>
-              <option value="local">Local</option>
-              <option value="global">Global</option>
-              <option value="system">System</option>
-            </select>
-            <input
+              <SelectTrigger
+                aria-label="Filter Git config scope"
+                className="bg-secondary"
+                size="sm"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent align="end">
+                <SelectItem value="all">All scopes</SelectItem>
+                <SelectItem value="local">Local</SelectItem>
+                <SelectItem value="global">Global</SelectItem>
+                <SelectItem value="system">System</SelectItem>
+              </SelectContent>
+            </Select>
+            <Input
               aria-label="Filter Git config"
               onChange={(event) => setFilter(event.target.value)}
               placeholder="Filter keys or values"
               value={filter}
             />
           </header>
-          <div className={tw.configComposer}>
-            <input
+          <div
+            className={`configComposer [display:grid] [gap:8px] [grid-template-columns:minmax(180px,_1fr)_minmax(220px,_2fr)_auto] [padding:9px_11px] configComposer`}
+          >
+            <Input
               aria-label="Config key"
               onChange={(event) => setKey(event.target.value)}
               placeholder="user.email"
               value={key}
             />
-            <input
+            <Input
               aria-label="Config value"
               onChange={(event) => setValue(event.target.value)}
               placeholder="value"
@@ -327,36 +375,40 @@ export function RepositorySettingsPanel({
               Set local value
             </Button>
           </div>
-          <div className={tw.configTable} role="table" aria-label="Git config values">
-            <div role="row">
-              <strong role="columnheader">Key</strong>
-              <strong role="columnheader">Value</strong>
-              <strong role="columnheader">Scope</strong>
-              <strong role="columnheader">Origin</strong>
-              <span />
-            </div>
-            {filteredConfig.map((entry) => (
-              <div role="row" key={`${entry.scope}-${entry.origin}-${entry.key}`}>
-                <code role="cell">{entry.key}</code>
-                <span role="cell">{entry.value}</span>
-                <span role="cell">{entry.scope ?? "unknown"}</span>
-                <small role="cell">{entry.origin}</small>
-                <span>
-                  {entry.scope === "local" && (
-                    <Button
-                      onClick={() => void removeConfig(entry)}
-                      type="button"
-                      className={cn("h-7 px-2.5")}
-                      variant="outline"
-                      size="sm"
-                    >
-                      Unset
-                    </Button>
-                  )}
-                </span>
-              </div>
-            ))}
-          </div>
+          <Table aria-label="Git config values" className="min-w-[660px] table-fixed text-xs">
+            <TableHeader className="sticky top-0 z-10 bg-muted text-muted-foreground">
+              <TableRow>
+                <TableHead className="w-[24%]">Key</TableHead>
+                <TableHead className="w-[28%]">Value</TableHead>
+                <TableHead className="w-[75px]">Scope</TableHead>
+                <TableHead>Origin</TableHead>
+                <TableHead className="w-[68px]" />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredConfig.map((entry) => (
+                <TableRow key={`${entry.scope}-${entry.origin}-${entry.key}`}>
+                  <TableCell className="truncate font-mono">{entry.key}</TableCell>
+                  <TableCell className="truncate">{entry.value}</TableCell>
+                  <TableCell className="truncate">{entry.scope ?? "unknown"}</TableCell>
+                  <TableCell className="truncate text-muted-foreground">{entry.origin}</TableCell>
+                  <TableCell>
+                    {entry.scope === "local" && (
+                      <Button
+                        onClick={() => void removeConfig(entry)}
+                        type="button"
+                        className={cn("h-7 px-2.5")}
+                        variant="outline"
+                        size="sm"
+                      >
+                        Unset
+                      </Button>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </TabsContent>
       </Tabs>
       {dialog.node}

@@ -291,7 +291,8 @@ test("aborts a conflicting rebase from visible recovery controls and restores th
       const branchesDialog = page.getByRole("dialog", {
         name: "Branches & Tags",
       });
-      await branchesDialog.getByLabel("Reference").selectOption({ label: "local · target" });
+      await branchesDialog.getByLabel("Reference").click();
+      await page.getByRole("option", { name: "local · target", exact: true }).click();
       await branchesDialog.getByRole("button", { name: "Rebase current", exact: true }).click();
       const confirmation = page.getByRole("dialog", {
         name: "Rebase topic onto target?",

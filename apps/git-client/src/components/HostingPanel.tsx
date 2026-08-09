@@ -1,4 +1,14 @@
 import { Button } from "@jongminchung/ui/components/button";
+import { Checkbox } from "@jongminchung/ui/components/checkbox";
+import { Input } from "@jongminchung/ui/components/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@jongminchung/ui/components/select";
+import { Textarea } from "@jongminchung/ui/components/textarea";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
@@ -19,7 +29,6 @@ import type {
   HostingReviewEvent,
   HostingTimelineEntry,
 } from "../shared/contracts/model";
-import { tw } from "../styles/tailwind";
 import {
   loadHostingAccounts,
   loadViewedFiles,
@@ -30,6 +39,7 @@ import {
 import { Icon } from "./Icon";
 import { Notice } from "./Notice";
 import { EmptyState } from "./ProductCollections";
+import { Selector } from "./ProductFormControls";
 
 interface RemoteCoordinates {
   readonly project: string;
@@ -381,7 +391,9 @@ export function HostingPanel({
 
   if (!isElectronRuntime()) {
     return (
-      <section className={tw.collectionIntro}>
+      <section
+        className={`collectionIntro [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:10px] [min-height:48px] [padding:8px_14px] [background:var(--muted)] [&_div]:[flex:1] [&_p]:[color:var(--muted-foreground)] [&_p]:[margin:2px_0_0] collectionIntro`}
+      >
         <Icon name="globe" size={18} />
         <div>
           <strong>GitHub and GitLab require the native app</strong>
@@ -392,22 +404,30 @@ export function HostingPanel({
   }
 
   return (
-    <div className={tw.hostingPanel} aria-busy={Boolean(busy)}>
-      <section className={tw.hostingAccountBar}>
-        <label>
-          Account
-          <select value={accountId} onChange={(event) => setAccountId(event.target.value)}>
-            <option value="">No account</option>
-            {accounts.map((account) => (
-              <option key={account.id} value={account.id}>
-                {account.login} · {account.provider === "gitHub" ? "GitHub" : "GitLab"}
-              </option>
-            ))}
-          </select>
-        </label>
+    <div
+      className={`hostingPanel [display:flex] [flex-direction:column] [height:100%] [min-height:0] [&_input]:[background:var(--secondary)] [&_input]:[border:1px_solid_var(--border)] [&_input]:[min-height:29px] [&_input]:[padding:4px_8px] [&_select]:[background:var(--secondary)] [&_select]:[border:1px_solid_var(--border)] [&_select]:[min-height:29px] [&_select]:[padding:4px_8px] [&_textarea]:[background:var(--secondary)] [&_textarea]:[border:1px_solid_var(--border)] [&_textarea]:[min-height:29px] [&_textarea]:[padding:4px_8px] [&_button]:[align-items:center] [&_button]:[background:var(--secondary)] [&_button]:[border:1px_solid_var(--border)] [&_button]:[display:inline-flex] [&_button]:[gap:5px] [&_button]:[min-height:29px] [&_button]:[padding:0_9px] hostingPanel`}
+      aria-busy={Boolean(busy)}
+    >
+      <section
+        className={`hostingAccountBar [align-items:center] [display:flex] [gap:8px] [background:var(--muted)] [border-bottom:1px_solid_var(--border)] [min-height:52px] [padding:7px_11px] [&_label]:[color:var(--muted-foreground)] [&_label]:[display:flex] [&_label]:[flex-direction:column] [&_label]:[font-size:11px] [&_label]:[gap:3px] [&_label:nth-child(2)]:[flex:1] hostingAccountBar`}
+      >
+        <Selector
+          className="bg-secondary"
+          label="Account"
+          onChange={setAccountId}
+          options={[
+            { label: "No account", value: "" },
+            ...accounts.map((account) => ({
+              label: `${account.login} · ${account.provider === "gitHub" ? "GitHub" : "GitLab"}`,
+              value: account.id,
+            })),
+          ]}
+          placeholder="No account"
+          value={accountId}
+        />
         <label>
           Project
-          <input
+          <Input
             aria-label="Hosting project"
             onChange={(event) => setProject(event.target.value)}
             placeholder="owner/repository"
@@ -450,30 +470,35 @@ export function HostingPanel({
         )}
       </section>
 
-      <details className={tw.hostingConnect} open={accounts.length === 0}>
+      <details
+        className={`hostingConnect [border-bottom:1px_solid_var(--border)] [padding:8px_11px] [&_summary]:[color:var(--muted-foreground)] [&_summary]:[cursor:default] [&_summary]:[font-weight:600] hostingConnect`}
+        open={accounts.length === 0}
+      >
         <summary>Connect a GitHub or GitLab account</summary>
-        <div className={tw.hostingFormGrid}>
-          <label>
-            Provider
-            <select
-              value={provider}
-              onChange={(event) => {
-                const next = event.target.value as HostingProviderKind;
-                setProvider(next);
-                setBaseUrl(next === "gitHub" ? "https://github.com" : "https://gitlab.com");
-              }}
-            >
-              <option value="gitHub">GitHub</option>
-              <option value="gitLab">GitLab</option>
-            </select>
-          </label>
+        <div
+          className={`hostingFormGrid [&_label]:[color:var(--muted-foreground)] [&_label]:[display:flex] [&_label]:[flex-direction:column] [&_label]:[font-size:11px] [&_label]:[gap:3px] [align-items:end] [display:grid] [gap:8px] [grid-template-columns:110px_minmax(190px,_1fr)_minmax(190px,_1fr)_auto] [padding-top:9px] hostingFormGrid`}
+        >
+          <Selector
+            className="bg-secondary"
+            label="Provider"
+            value={provider}
+            onChange={(value) => {
+              const next = value as HostingProviderKind;
+              setProvider(next);
+              setBaseUrl(next === "gitHub" ? "https://github.com" : "https://gitlab.com");
+            }}
+            options={[
+              { label: "GitHub", value: "gitHub" },
+              { label: "GitLab", value: "gitLab" },
+            ]}
+          />
           <label>
             Server URL
-            <input onChange={(event) => setBaseUrl(event.target.value)} value={baseUrl} />
+            <Input onChange={(event) => setBaseUrl(event.target.value)} value={baseUrl} />
           </label>
           <label>
             Personal access token
-            <input
+            <Input
               autoComplete="off"
               onChange={(event) => setToken(event.target.value)}
               type="password"
@@ -492,7 +517,9 @@ export function HostingPanel({
           </Button>
         </div>
         {selectedAccount && (
-          <div className={tw.hostingAccountMeta}>
+          <div
+            className={`hostingAccountMeta [align-items:center] [display:flex] [gap:8px] [border-top:1px_solid_var(--border)] [color:var(--muted-foreground)] [margin-top:9px] [padding-top:8px] [&>_span:first-child]:[flex:1] hostingAccountMeta`}
+          >
             <span>
               {selectedAccount.login} · {selectedAccount.baseUrl}
             </span>
@@ -543,41 +570,47 @@ export function HostingPanel({
           {notice}
         </Notice>
       )}
-      {busy && <div className={tw.hostingProgress}>{busy}…</div>}
+      {busy && (
+        <div
+          className={`hostingProgress [border-bottom:1px_solid_var(--border)] [padding:7px_12px] [color:var(--primary)] hostingProgress`}
+        >
+          {busy}…
+        </div>
+      )}
 
       {showCreate && (
-        <section className={tw.hostingComposer} id="hosting-create-request">
+        <section
+          className={`hostingComposer [&>_footer]:[align-items:center] [&>_footer]:[display:flex] [&>_footer]:[gap:8px] [&_label]:[color:var(--muted-foreground)] [&_label]:[display:flex] [&_label]:[flex-direction:column] [&_label]:[font-size:11px] [&_label]:[gap:3px] [background:var(--secondary)] [border-bottom:1px_solid_var(--border)] [display:flex] [flex-direction:column] [gap:8px] [padding:11px] [&_textarea]:[min-height:64px] [&_textarea]:[resize:vertical] [&>_div]:[align-items:end] [&>_div]:[display:grid] [&>_div]:[gap:8px] [&>_div]:[grid-template-columns:1fr_1fr_auto] [&>_footer]:[justify-content:flex-end] hostingComposer`}
+          id="hosting-create-request"
+        >
           <strong>Create change request</strong>
           <label>
             Title
-            <input onChange={(event) => setTitle(event.target.value)} value={title} />
+            <Input onChange={(event) => setTitle(event.target.value)} value={title} />
           </label>
           <label>
             Description
-            <textarea onChange={(event) => setBody(event.target.value)} value={body} />
+            <Textarea onChange={(event) => setBody(event.target.value)} value={body} />
           </label>
           <div>
             <label>
               Source
-              <input
+              <Input
                 onChange={(event) => setSourceBranch(event.target.value)}
                 value={sourceBranch}
               />
             </label>
             <label>
               Target
-              <input
+              <Input
                 onChange={(event) => setTargetBranch(event.target.value)}
                 value={targetBranch}
               />
             </label>
-            <label className={tw.inlineCheck}>
-              <input
-                checked={draft}
-                onChange={(event) => setDraft(event.target.checked)}
-                type="checkbox"
-              />{" "}
-              Draft
+            <label
+              className={`inlineCheck [align-items:center] [flex-direction:row]! [min-height:29px] [&_input]:[min-height:auto] inlineCheck`}
+            >
+              <Checkbox checked={draft} onCheckedChange={setDraft} /> Draft
             </label>
           </div>
           <footer>
@@ -604,33 +637,45 @@ export function HostingPanel({
         </section>
       )}
 
-      <div className={tw.hostingColumns}>
+      <div
+        className={`hostingColumns [display:grid] [flex:1] [grid-template-columns:minmax(230px,_34%)_minmax(0,_1fr)] [min-height:0] hostingColumns`}
+      >
         <section
-          className={tw.hostingList}
+          className={`hostingList [min-height:0] [overflow:auto] [border-right:1px_solid_var(--border)] [&>_button]:[align-items:stretch] [&>_button]:[background:transparent] [&>_button]:[border:0] [&>_button]:[border-bottom:1px_solid_var(--border)] [&>_button]:rounded-none [&>_button]:[display:flex] [&>_button]:[flex-direction:column] [&>_button]:[gap:4px] [&>_button]:[padding:10px_11px] [&>_button]:[text-align:left] [&>_button]:[width:100%] [&_small]:[color:var(--disabled-foreground)] hostingList [&>_button]:rounded-none`}
           aria-label="Pull and merge requests"
           onKeyDown={navigateList}
           tabIndex={0}
         >
-          <div className={tw.hostingListToolbar}>
+          <div
+            className={`hostingListToolbar [align-items:center] [background:var(--muted)] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:5px] [padding:5px] [position:sticky] [top:0] [z-index:2] [&>_label]:[align-items:center] [&>_label]:[background:var(--secondary)] [&>_label]:[border:1px_solid_var(--border)] [&>_label]:rounded-sm [&>_label]:[display:flex] [&>_label]:[flex:1] [&>_label]:[gap:5px] [&>_label]:[padding:0_6px] [&>_label_input]:[background:transparent] [&>_label_input]:[border:0] [&>_label_input]:[min-width:0] [&>_label_input]:[outline:0] [&>_label_input]:[padding:0] [&>_label_input]:[width:100%] [&>_select]:[width:78px] hostingListToolbar [&>_label]:rounded-sm`}
+          >
             <label>
               <Icon name="search" size={13} />
-              <input
+              <Input
                 aria-label="Filter pull and merge requests"
                 onChange={(event) => setListQuery(event.target.value)}
                 placeholder="Search"
                 value={listQuery}
               />
             </label>
-            <select
-              aria-label="Pull and merge request state"
-              onChange={(event) => setListScope(event.target.value as HostingListScope)}
+            <Select
+              onValueChange={(value) => value && setListScope(value as HostingListScope)}
               value={listScope}
             >
-              <option value="open">Open</option>
-              <option value="draft">Draft</option>
-              <option value="closed">Closed</option>
-              <option value="all">All</option>
-            </select>
+              <SelectTrigger
+                aria-label="Pull and merge request state"
+                className="w-[78px] bg-secondary"
+                size="sm"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent align="end">
+                <SelectItem value="open">Open</SelectItem>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="closed">Closed</SelectItem>
+                <SelectItem value="all">All</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           {items.length === 0 && (
             <EmptyState title="Load pull or merge requests for this project." />
@@ -671,7 +716,10 @@ export function HostingPanel({
           )}
         </section>
 
-        <section className={tw.hostingDetail} aria-label="Change request detail">
+        <section
+          className={`hostingDetail [&>_header]:[align-items:center] [&>_header]:[display:flex] [&>_header]:[gap:8px] [min-height:0] [overflow:auto] [&_small]:[color:var(--disabled-foreground)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[padding:9px_11px] [&>_header_>_div]:[display:flex] [&>_header_>_div]:[flex:1] [&>_header_>_div]:[flex-direction:column] [&>_header_>_div]:[min-width:0] [&>_header_small]:[overflow:hidden] [&>_header_small]:[text-overflow:ellipsis] [&>_header_small]:[white-space:nowrap] [&_h3]:[color:var(--muted-foreground)] [&_h3]:[font-size:12px] [&_h3]:[margin:0] [&_h3]:[padding:10px_11px_6px] hostingDetail`}
+          aria-label="Change request detail"
+        >
           {!selected ? (
             <EmptyState title="Select a change request to inspect files and timeline." />
           ) : (
@@ -712,8 +760,10 @@ export function HostingPanel({
                   Update branch
                 </Button>
               </header>
-              <div className={tw.hostingReviewBar}>
-                <textarea
+              <div
+                className={`hostingReviewBar [align-items:center] [display:flex] [gap:8px] [border-bottom:1px_solid_var(--border)] [padding:8px_11px] [&_textarea]:[flex:1] [&_textarea]:[min-height:52px] [&_textarea]:[resize:vertical] hostingReviewBar`}
+              >
+                <Textarea
                   aria-label="Review body"
                   onChange={(event) => setReviewBody(event.target.value)}
                   placeholder="Review or comment"
@@ -750,12 +800,14 @@ export function HostingPanel({
               </div>
               <h3>Changed files · {files.length}</h3>
               {files.map((file) => (
-                <article className={tw.hostingFile} key={file.path}>
+                <article
+                  className={`hostingFile [border-top:1px_solid_var(--border)] [padding:8px_11px] [&>_label]:[float:right] [&>_strong]:[display:block] [&>_small]:[display:block] [&_pre]:[background:var(--muted)] [&_pre]:[border:1px_solid_var(--border)] [&_pre]:rounded-lg [&_pre]:[font-size:12px] [&_pre]:[max-height:280px] [&_pre]:[overflow:auto] [&_pre]:[padding:9px] hostingFile [&_pre]:rounded-lg`}
+                  key={file.path}
+                >
                   <label>
-                    <input
+                    <Checkbox
                       checked={viewed.has(file.path)}
-                      onChange={() => void toggleViewed(file.path)}
-                      type="checkbox"
+                      onCheckedChange={() => void toggleViewed(file.path)}
                     />{" "}
                     Viewed
                   </label>
@@ -772,14 +824,19 @@ export function HostingPanel({
               ))}
               <h3>Timeline · {timeline.length}</h3>
               {timeline.map((entry) => (
-                <article className={tw.hostingTimeline} key={entry.id}>
+                <article
+                  className={`hostingTimeline [border-top:1px_solid_var(--border)] [padding:8px_11px] [&_p]:[line-height:1.45] [&_p]:[margin:5px_0_0] [&_p]:[white-space:pre-wrap] [&_small]:[float:right] hostingTimeline`}
+                  key={entry.id}
+                >
                   <strong>{entry.author || entry.kind}</strong>
                   <small>{entry.createdAt}</small>
                   <p>{entry.body}</p>
                 </article>
               ))}
-              <div className={tw.hostingDiscussionComposer}>
-                <textarea
+              <div
+                className={`hostingDiscussionComposer [align-items:flex-end] [border-top:1px_solid_var(--border)] [display:flex] [gap:8px] [padding:8px_11px] [&_textarea]:[flex:1] [&_textarea]:[min-height:54px] [&_textarea]:[resize:vertical] hostingDiscussionComposer`}
+              >
+                <Textarea
                   aria-label="Add timeline comment"
                   onChange={(event) => setDiscussionBody(event.target.value)}
                   placeholder="Add a comment"

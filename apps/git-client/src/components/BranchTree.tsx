@@ -1,10 +1,10 @@
 import { Button } from "@jongminchung/ui/components/button";
+import { Input } from "@jongminchung/ui/components/input";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { memo, useMemo, useRef, useState } from "react";
 import type { Ref, RefKind } from "../domain/types";
-import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
 import { StatePill } from "./ProductCollections";
 
@@ -87,7 +87,10 @@ export const BranchTree = memo(function BranchTree({
 
   if (compact) {
     return (
-      <aside className={tw.branchRail} aria-label="Branches and tags">
+      <aside
+        className={`branchRail [background:var(--card)] [border-right:1px_solid_var(--border)] [min-height:0] [overflow:hidden] [&_button]:[align-items:center] [&_button]:[background:transparent] [&_button]:[color:var(--muted-foreground)] [&_button]:[display:flex] [&_button]:[flex-direction:column] [&_button]:[gap:5px] [&_button]:[height:100%] [&_button]:[justify-content:flex-start] [&_button]:[padding:7px_0] [&_button]:[width:100%] [&_button_span]:[font-size:10px] [&_button_span]:[writing-mode:vertical-rl] [&_button_span]:[transform:rotate(180deg)] branchRail`}
+        aria-label="Branches and tags"
+      >
         <Tooltip>
           <TooltipTrigger
             render={
@@ -113,8 +116,13 @@ export const BranchTree = memo(function BranchTree({
   }
 
   return (
-    <aside className={tw.branchPane} aria-label="Branches and tags">
-      <div className={tw.paneTitle}>
+    <aside
+      className={`branchPane [background:var(--card)] [min-height:0] [min-width:0] [border-right:1px_solid_var(--border)] [display:grid] [grid-template-rows:31px_38px_29px_minmax(0,_1fr)] max-[1050px]:[display:none] branchPane`}
+      aria-label="Branches and tags"
+    >
+      <div
+        className={`paneTitle [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [font-weight:650] [padding:0_6px_0_10px] [&_span]:[flex:1] paneTitle`}
+      >
         <span>Repositories</span>
         <Tooltip>
           <TooltipTrigger
@@ -134,21 +142,27 @@ export const BranchTree = memo(function BranchTree({
           <TooltipContent>Add repository</TooltipContent>
         </Tooltip>
       </div>
-      <div className={tw.treeSearch}>
+      <div
+        className={`treeSearch [align-items:center] [background:var(--secondary)] [border:1px_solid_var(--border)] rounded-sm [display:flex] [gap:5px] [margin:6px_7px] [padding:0_7px] [&:focus-within]:[border-color:var(--primary)] [&:focus-within]:[box-shadow:0_0_0_1px_color-mix(in_oklch,_var(--primary)_20%,_transparent)] [&_input]:[background:transparent] [&_input]:[border:0] [&_input]:[height:24px] [&_input]:[min-width:0] [&_input]:[outline:0] [&_input]:[width:100%] treeSearch rounded-sm`}
+      >
         <Icon name="search" size={14} />
-        <input
+        <Input
           aria-label="Filter branches"
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Branch or tag"
           value={query}
         />
       </div>
-      <div className={tw.headRow}>
+      <div
+        className={`headRow [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:6px] [padding:0_10px] [&.muted]:[color:var(--disabled-foreground)] [&.muted]:[font-size:10px] headRow`}
+      >
         <Icon name="commit" size={14} />
         <strong>HEAD</strong>
-        <span className={tw.muted}>(Current Branch)</span>
+        <span className={`muted [color:var(--disabled-foreground)] [font-size:10px] muted`}>
+          (Current Branch)
+        </span>
       </div>
-      <div className={tw.virtualTree} ref={parentRef}>
+      <div className={`virtualTree [min-height:0] [overflow:auto] virtualTree`} ref={parentRef}>
         <div
           style={{
             height: virtualizer.getTotalSize(),
@@ -160,7 +174,7 @@ export const BranchTree = memo(function BranchTree({
             if (!row) return null;
             return (
               <div
-                className={tw.treeVirtualRow}
+                className={`treeVirtualRow [height:27px] [left:0] [position:absolute] [right:0] [top:0] treeVirtualRow`}
                 key={row.type === "group" ? row.key : row.ref.name}
                 style={{
                   transform: `translateY(${item.start}px)`,
@@ -170,12 +184,19 @@ export const BranchTree = memo(function BranchTree({
                   <Button
                     onClick={() => toggle(row.key)}
                     type="button"
-                    className={cn("flex min-h-0 text-xs text-muted-foreground", tw.treeGroup)}
+                    className={cn(
+                      "flex min-h-0 text-xs text-muted-foreground",
+                      `treeGroup [align-items:center] [background:transparent] [display:flex] [gap:5px] [height:27px] [padding:0_8px] [text-align:left] [width:100%] [color:var(--muted-foreground)] [font-size:11px] [font-weight:650] [text-transform:uppercase] [&_small]:[color:var(--disabled-foreground)] [&_small]:[font-weight:400] [&_small]:[margin-left:auto] [&_svg:first-child]:[transform:rotate(0deg)] [&_svg:first-child]:[transition:transform_0.12s] [&.rotated]:[transform:rotate(90deg)] [&:hover]:[background:var(--muted)] treeGroup`,
+                    )}
                     variant="ghost"
                     size="default"
                   >
                     <Icon
-                      className={collapsed.has(row.key) ? undefined : tw.rotated}
+                      className={
+                        collapsed.has(row.key)
+                          ? undefined
+                          : `rotated [transform:rotate(90deg)] rotated`
+                      }
                       name="chevron"
                       size={13}
                     />
@@ -197,18 +218,26 @@ export const BranchTree = memo(function BranchTree({
                           type="button"
                           className={cn(
                             "flex min-h-0 text-xs",
-                            `${tw.refRow} ${selected === row.ref.name ? tw.selected : ""}`,
+                            `${`refRow [align-items:center] [background:transparent] [display:flex] [gap:5px] [height:27px] [padding:0_8px] [text-align:left] [width:100%] [&:hover]:[background:var(--muted)] [&.selected]:[background:var(--accent)] [&.selected]:[color:var(--foreground)] refRow`} ${selected === row.ref.name ? `selected [background:var(--accent)] [color:var(--foreground)] selected` : ""}`,
                           )}
                           variant="ghost"
                           size="default"
                         >
-                          <span className={tw.refIndent} />
+                          <span className={`refIndent [width:15px] refIndent`} />
                           {row.ref.favorite ? (
-                            <Icon className={tw.favorite} name="star" size={13} />
+                            <Icon
+                              className={`favorite [color:var(--bookmark)] [fill:var(--bookmark)] favorite`}
+                              name="star"
+                              size={13}
+                            />
                           ) : (
                             <Icon name="branch" size={13} />
                           )}
-                          <span className={tw.ellipsis}>{row.ref.shortName}</span>
+                          <span
+                            className={`ellipsis [min-width:0] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap] ellipsis`}
+                          >
+                            {row.ref.shortName}
+                          </span>
                           {trackingLabel(row.ref.tracking) && (
                             <small className="text-[10px] text-muted-foreground">
                               {trackingLabel(row.ref.tracking)}

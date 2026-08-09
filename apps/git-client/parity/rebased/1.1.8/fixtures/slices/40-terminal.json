@@ -1,7 +1,0 @@
-{
-  "id": "platform.terminal",
-  "lane": "terminal",
-  "repositoryState": "clean",
-  "themes": ["light", "dark"],
-  "densities": ["regular", "compact"]
-}

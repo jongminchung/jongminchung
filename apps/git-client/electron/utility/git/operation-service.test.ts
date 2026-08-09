@@ -294,7 +294,7 @@ describe("GitOperationService", () => {
     expect(git(root, "diff", "HEAD", "--", "tracked.txt")).toContain("+changed");
   });
 
-  it("runs an interactive rewrite through a utility-created sequence session", async () => {
+  it("runs an interactive rewrite through the application sequence-editor entry", async () => {
     const { root, registry } = await fixture();
     const helperDirectory = join(root, "sequence-helper");
     await build({
@@ -304,9 +304,9 @@ describe("GitOperationService", () => {
         emptyOutDir: true,
         outDir: helperDirectory,
         rollupOptions: {
-          input: fileURLToPath(new URL("./sequence-editor-entry.ts", import.meta.url)),
+          input: fileURLToPath(new URL("../../main.ts", import.meta.url)),
           output: {
-            entryFileNames: "sequence-editor.cjs",
+            entryFileNames: "main.cjs",
             format: "cjs",
           },
         },
@@ -317,9 +317,8 @@ describe("GitOperationService", () => {
     });
     const runner = new GitProcessRunner();
     const service = new GitOperationService(registry, runner, {
-      kind: "standalone",
       executablePath: process.execPath,
-      entryPath: join(helperDirectory, "sequence-editor.cjs"),
+      applicationEntryPath: join(helperDirectory, "main.cjs"),
     });
     const repository = await registry.open(root);
     const events: GitRequestEvent[] = [];

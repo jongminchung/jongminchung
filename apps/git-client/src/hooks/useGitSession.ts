@@ -1161,6 +1161,10 @@ export function useGitSession() {
     const repositoryIds = state.sessions.flatMap((session) =>
       session.kind === "repository" ? [session.repository.snapshot.id] : [],
     );
+    await writeElectronSettings({
+      activeRepositoryPath: null,
+      openRepositoryPaths: [],
+    });
     await closeProjectResources(repositoryIds, {
       unwatchRepository: (repositoryId) =>
         fixture ? Promise.resolve() : gitBridge.unwatchRepository(repositoryId),

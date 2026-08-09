@@ -165,19 +165,18 @@ describe("Electron release build contract", () => {
     );
   });
 
-  it("runs source test/build/package-policy gates before an ARM64 Electron Forge make", () => {
+  it("runs the complete source gates before an ARM64 Electron Forge make", () => {
     expect(createReleaseSourceGateCommands()).toEqual([
       { command: "pnpm", arguments: ["test"] },
+      { command: "pnpm", arguments: ["test:e2e"] },
       { command: "pnpm", arguments: ["build"] },
-      { command: "pnpm", arguments: ["parity:theme"] },
-      { command: "pnpm", arguments: ["test:electron-package-policy"] },
-      { command: "pnpm", arguments: ["parity:check"] },
+      { command: "pnpm", arguments: ["test:scripts"] },
     ]);
     expect(createReleaseSourceGateCommands(RELEASE_MODES.localAdHoc)).toEqual([
       { command: "pnpm", arguments: ["test"] },
+      { command: "pnpm", arguments: ["test:e2e"] },
       { command: "pnpm", arguments: ["build"] },
-      { command: "pnpm", arguments: ["parity:theme"] },
-      { command: "pnpm", arguments: ["test:electron-package-policy"] },
+      { command: "pnpm", arguments: ["test:scripts"] },
     ]);
     expect(createElectronMakeArguments()).toEqual([
       "electron:make",
@@ -449,10 +448,9 @@ describe("Electron release build contract", () => {
       expect(calls.map(({ command, arguments: arguments_ }) => [command, arguments_])).toEqual([
         ["/usr/bin/security", ["find-identity", "-v", "-p", "codesigning"]],
         ["pnpm", ["test"]],
+        ["pnpm", ["test:e2e"]],
         ["pnpm", ["build"]],
-        ["pnpm", ["parity:theme"]],
-        ["pnpm", ["test:electron-package-policy"]],
-        ["pnpm", ["parity:check"]],
+        ["pnpm", ["test:scripts"]],
         ["pnpm", createElectronMakeArguments()],
       ]);
       expect(validateApp).toHaveBeenCalledOnce();

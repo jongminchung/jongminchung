@@ -117,21 +117,13 @@ export function createElectronMakeArguments() {
 }
 
 export function createReleaseSourceGateCommands(mode = RELEASE_MODES.production) {
-  const validatedMode = parseReleaseMode(mode);
+  parseReleaseMode(mode);
   const commonGates = [
     Object.freeze({ command: "pnpm", arguments: Object.freeze(["test"]) }),
+    Object.freeze({ command: "pnpm", arguments: Object.freeze(["test:e2e"]) }),
     Object.freeze({ command: "pnpm", arguments: Object.freeze(["build"]) }),
-    Object.freeze({ command: "pnpm", arguments: Object.freeze(["parity:theme"]) }),
-    Object.freeze({
-      command: "pnpm",
-      arguments: Object.freeze(["test:electron-package-policy"]),
-    }),
+    Object.freeze({ command: "pnpm", arguments: Object.freeze(["test:scripts"]) }),
   ];
-  if (validatedMode === RELEASE_MODES.production) {
-    commonGates.push(
-      Object.freeze({ command: "pnpm", arguments: Object.freeze(["parity:check"]) }),
-    );
-  }
   return Object.freeze(commonGates);
 }
 

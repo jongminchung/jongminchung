@@ -2,7 +2,6 @@ import { Button } from "@jongminchung/ui/components/button";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { useMemo, useState } from "react";
 import type { FileChange } from "../domain/types";
-import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
 import { List, ListItem } from "./ProductCollections";
 import { Dialog, DialogHeader } from "./ProductDialog";
@@ -54,7 +53,9 @@ export function ShareInitialCommitDialog({
       purpose="form"
       width="min(660px, calc(100vw - 70px))"
     >
-      <section className={tw.shareInitialCommitDialog}>
+      <section
+        className={`shareInitialCommitDialog [display:grid] [grid-template-rows:auto_32px_minmax(220px,_1fr)_auto_auto] [height:min(640px,_calc(100vh_-_70px))] [&>_header]:[align-items:center] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[color:var(--muted-foreground)] [&>_header]:[display:flex] [&>_header]:[justify-content:space-between] [&>_header]:[padding:0_10px_0_13px] [&>_main]:[min-height:0] [&>_main]:[overflow:auto] [&>_main>_p]:[color:var(--muted-foreground)] [&>_main>_p]:[margin:18px] [&>_main>_div[role=list]]:[padding:5px_7px] [&>_[data-slot=text-area]]:[border-top:1px_solid_var(--border)] [&>_[data-slot=text-area]]:[padding:10px_12px] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:flex] [&>_footer]:[gap:8px] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:8px_10px] shareInitialCommitDialog`}
+      >
         <DialogHeader
           hasDivider
           onOpenChange={(open) => !open && onCancel()}

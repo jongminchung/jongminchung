@@ -9,7 +9,6 @@ import type {
   HostingNamespace,
   HostingProviderKind,
 } from "../shared/contracts/model";
-import { tw } from "../styles/tailwind";
 import { loadHostingAccounts } from "./hosting-persistence";
 import { Icon } from "./Icon";
 import { Dialog, DialogHeader } from "./ProductDialog";
@@ -360,11 +359,15 @@ export function ShareProjectDialog({
       purpose="form"
       width={530}
     >
-      <section className={tw.shareProjectDialog}>
+      <section
+        className={`shareProjectDialog [display:grid] [grid-template-rows:auto_minmax(0,_1fr)_auto] [max-height:min(720px,_calc(100vh_-_70px))] [&>_main]:[display:grid] [&>_main]:[gap:12px] [&>_main]:[min-height:0] [&>_main]:[overflow:auto] [&>_main]:[padding:14px] [&>_main>_p]:[color:var(--muted-foreground)] [&>_main>_p]:[margin:0] [&>_main>_p[role=alert]]:[color:var(--destructive)] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:flex] [&>_footer]:[gap:8px] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:8px_10px] shareProjectDialog`}
+      >
         <DialogHeader hasDivider onOpenChange={(open) => !open && onClose()} title={title} />
         <main>
           {provider === "gitLab" && (
-            <div className={tw.shareProjectAccount}>
+            <div
+              className={`shareProjectAccount [align-items:end] [display:grid] [gap:8px] [grid-template-columns:minmax(0,_1fr)_auto] shareProjectAccount`}
+            >
               <Selector
                 isDisabled={loading || busy || created !== null}
                 label="Account"
@@ -389,7 +392,9 @@ export function ShareProjectDialog({
             </div>
           )}
           {provider === "gitLab" && (
-            <div className={tw.shareProjectAccount}>
+            <div
+              className={`shareProjectAccount [align-items:end] [display:grid] [gap:8px] [grid-template-columns:minmax(0,_1fr)_auto] shareProjectAccount`}
+            >
               <Selector
                 hasSearch
                 isDisabled={busy || created !== null || !accountId}
@@ -435,7 +440,9 @@ export function ShareProjectDialog({
               </Tooltip>
             </div>
           )}
-          <div className={tw.shareProjectCoordinates}>
+          <div
+            className={`shareProjectCoordinates [align-items:end] [display:grid] [gap:12px] [grid-template-columns:minmax(0,_1fr)_auto] shareProjectCoordinates`}
+          >
             <TextInput
               hasAutoFocus
               isDisabled={busy || created !== null}
@@ -494,7 +501,9 @@ export function ShareProjectDialog({
             />
           )}
           {provider === "gitHub" && !loading && accounts.length !== 1 && (
-            <div className={tw.shareProjectAccount}>
+            <div
+              className={`shareProjectAccount [align-items:end] [display:grid] [gap:8px] [grid-template-columns:minmax(0,_1fr)_auto] shareProjectAccount`}
+            >
               <Selector
                 isDisabled={busy || created !== null}
                 label="Share by"

@@ -2,7 +2,6 @@ import { Button } from "@jongminchung/ui/components/button";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { useCallback, useEffect, useState } from "react";
 import type { DiagnosticLeftoverDirectory } from "../shared/contracts/ipc";
-import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
 import { EmptyState } from "./ProductCollections";
 import { List, ListItem } from "./ProductCollections";
@@ -94,7 +93,9 @@ export function LeftoverDirectoriesDialog({
         purpose="form"
         width="min(720px, calc(100vw - 70px))"
       >
-        <section className={tw.leftoverDirectoriesDialog}>
+        <section
+          className={`leftoverDirectoriesDialog [display:grid] [grid-template-rows:auto_auto_30px_minmax(260px,_1fr)_auto] [height:min(620px,_calc(100vh_-_80px))] [&>_p]:[color:var(--muted-foreground)] [&>_p]:[margin:0] [&>_p]:[padding:11px_13px] [&>_header]:[align-items:center] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[color:var(--muted-foreground)] [&>_header]:[display:grid] [&>_header]:[font-size:11px] [&>_header]:[grid-template-columns:minmax(0,_1fr)_130px_90px] [&>_header]:[padding:0_12px_0_46px] [&>_main]:[min-height:0] [&>_main]:[overflow:auto] [&>_main>_div[role=list]]:[padding:5px] [&>_footer]:[align-items:center] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:flex] [&>_footer]:[gap:8px] [&>_footer]:[padding:8px_10px] [&>_footer>_span]:[color:var(--muted-foreground)] [&>_footer>_span]:[flex:1] leftoverDirectoriesDialog`}
+        >
           <DialogHeader
             hasDivider
             onOpenChange={(open) => !open && onClose()}
@@ -122,7 +123,9 @@ export function LeftoverDirectoriesDialog({
                   <ListItem
                     description="Obsolete Git Client Electron profile"
                     endContent={
-                      <span className={tw.leftoverDirectoryMetrics}>
+                      <span
+                        className={`leftoverDirectoryMetrics [align-items:center] [color:var(--muted-foreground)] [display:grid] [font-variant-numeric:tabular-nums] [grid-template-columns:130px_90px] [&>_span]:[text-align:right] leftoverDirectoryMetrics`}
+                      >
                         <time dateTime={new Date(directory.lastModifiedMs).toISOString()}>
                           {new Date(directory.lastModifiedMs).toLocaleDateString()}
                         </time>

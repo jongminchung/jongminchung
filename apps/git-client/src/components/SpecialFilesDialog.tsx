@@ -1,7 +1,6 @@
 import { Button } from "@jongminchung/ui/components/button";
 import { cn } from "@jongminchung/ui/lib/utils";
 import type { DiagnosticPathKind } from "../shared/contracts/ipc";
-import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
 import { List, ListItem } from "./ProductCollections";
 import { Dialog, DialogHeader } from "./ProductDialog";
@@ -59,7 +58,9 @@ export function SpecialFilesDialog({
       purpose="info"
       width={560}
     >
-      <section className={tw.specialFilesDialog}>
+      <section
+        className={`specialFilesDialog [display:grid] [grid-template-rows:auto_minmax(260px,_1fr)_auto] [&>_div[role=list]]:[padding:6px] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:flex] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:8px_10px] specialFilesDialog`}
+      >
         <DialogHeader
           hasDivider
           onOpenChange={(open) => !open && onClose()}

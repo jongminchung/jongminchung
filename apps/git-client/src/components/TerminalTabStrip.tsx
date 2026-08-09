@@ -5,7 +5,6 @@ import { cn } from "@jongminchung/ui/lib/utils";
 import { useRef, type MouseEvent } from "react";
 import { terminalTabAfterClose } from "../domain/terminalActions";
 import type { TerminalSessionSnapshot } from "../domain/TerminalService";
-import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
 
 const TERMINAL_STATUS_CLASS = {
@@ -60,8 +59,14 @@ export function TerminalTabStrip({
   };
 
   return (
-    <div className={tw.terminalTabs}>
-      <strong className={tw.terminalToolTitle}>Terminal</strong>
+    <div
+      className={`terminalTabs [align-items:stretch] [background:var(--card)] [border-bottom:1px_solid_var(--border)] [display:flex] [min-width:0] [&_.activeTerminalTab]:[background:var(--accent)] [&_.activeTerminalTab]:[color:var(--foreground)] [&>_.terminalToolbar:last-child]:[margin-left:auto] terminalTabs`}
+    >
+      <strong
+        className={`terminalToolTitle [align-items:center] [display:flex] [font-size:12px] [padding:0_9px] terminalToolTitle`}
+      >
+        Terminal
+      </strong>
       <Tabs
         className="contents"
         onValueChange={(value) => {
@@ -69,14 +74,23 @@ export function TerminalTabStrip({
         }}
         value={activeKey}
       >
-        <div className={cn("relative", tw.terminalTabList)}>
+        <div
+          className={cn(
+            "relative",
+            `terminalTabList [align-items:stretch] [display:flex] [flex:none] [min-width:0] [overflow-x:auto] terminalTabList`,
+          )}
+        >
           <TabsList
             activateOnFocus
             aria-label="Terminal tabs"
             className="flex min-w-max items-stretch"
           >
             {sessions.map((session) => (
-              <div className={tw.terminalTabItem} key={session.key} role="presentation">
+              <div
+                className={`terminalTabItem [align-items:center] [background:var(--accent)] rounded-sm [display:flex] [margin:3px_0] [min-width:0] terminalTabItem rounded-sm`}
+                key={session.key}
+                role="presentation"
+              >
                 <TabsTrigger
                   aria-label={session.title}
                   data-terminal-tab-key={session.key}
@@ -88,12 +102,12 @@ export function TerminalTabStrip({
                   value={session.key}
                   className={cn(
                     "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 text-muted-foreground data-active:bg-accent data-active:text-foreground",
-                    `${tw.terminalTab}${activeKey === session.key ? ` ${tw.activeTerminalTab}` : ""}`,
+                    `${`terminalTab [align-items:center] [background:transparent] [color:var(--muted-foreground)] [display:flex] [gap:6px] [min-width:0] [padding:0_4px_0_9px] [&>_span:last-child]:[overflow:hidden] [&>_span:last-child]:[text-overflow:ellipsis] [&>_span:last-child]:[white-space:nowrap] terminalTab`}${activeKey === session.key ? ` ${`activeTerminalTab [background:var(--card)] [color:var(--foreground)] activeTerminalTab`}` : ""}`,
                   )}
                 >
                   <span
                     aria-hidden="true"
-                    className={`${tw.terminalStatus} ${TERMINAL_STATUS_CLASS[session.status]}`}
+                    className={`${`terminalStatus [display:none] terminalStatus`} ${TERMINAL_STATUS_CLASS[session.status]}`}
                     title={session.error ?? session.status}
                   />
                   <span>{session.title}</span>
@@ -113,11 +127,11 @@ export function TerminalTabStrip({
                   aria-hidden="true"
                   className={cn(
                     "invisible inline-flex h-7 items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent px-2.5 text-xs text-muted-foreground [&_svg]:shrink-0",
-                    `${tw.terminalTab}${activeKey === session.key ? ` ${tw.activeTerminalTab}` : ""}`,
+                    `${`terminalTab [align-items:center] [background:transparent] [color:var(--muted-foreground)] [display:flex] [gap:6px] [min-width:0] [padding:0_4px_0_9px] [&>_span:last-child]:[overflow:hidden] [&>_span:last-child]:[text-overflow:ellipsis] [&>_span:last-child]:[white-space:nowrap] terminalTab`}${activeKey === session.key ? ` ${`activeTerminalTab [background:var(--card)] [color:var(--foreground)] activeTerminalTab`}` : ""}`,
                   )}
                 >
                   <span
-                    className={`${tw.terminalStatus} ${TERMINAL_STATUS_CLASS[session.status]}`}
+                    className={`${`terminalStatus [display:none] terminalStatus`} ${TERMINAL_STATUS_CLASS[session.status]}`}
                   />
                   <span>{session.title}</span>
                 </span>
@@ -145,7 +159,11 @@ export function TerminalTabStrip({
           </div>
         </div>
       </Tabs>
-      <div aria-label="Action Toolbar" className={tw.terminalToolbar} role="toolbar">
+      <div
+        aria-label="Action Toolbar"
+        className={`terminalToolbar [align-items:stretch] [display:flex] terminalToolbar`}
+        role="toolbar"
+      >
         <Tooltip>
           <TooltipTrigger
             render={
@@ -188,7 +206,11 @@ export function TerminalTabStrip({
           <TooltipContent>New Predefined Session</TooltipContent>
         </Tooltip>
       </div>
-      <div aria-label="Action Toolbar" className={tw.terminalToolbar} role="toolbar">
+      <div
+        aria-label="Action Toolbar"
+        className={`terminalToolbar [align-items:stretch] [display:flex] terminalToolbar`}
+        role="toolbar"
+      >
         {showAgents && (
           <Button
             onClick={onOpenAgents}

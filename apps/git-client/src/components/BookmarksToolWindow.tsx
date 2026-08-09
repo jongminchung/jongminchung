@@ -9,7 +9,6 @@ import type {
   LineBookmark,
   ProjectBookmarks,
 } from "../domain/bookmarks";
-import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
 import { BookmarkGroupCreateDialog } from "./BookmarkGroupCreateDialog";
 import { Icon } from "./Icon";
@@ -96,7 +95,10 @@ export function BookmarksToolWindow({
   };
 
   const renderBookmark = (bookmark: LineBookmark) => (
-    <div className={tw.bookmarkRow} key={bookmark.id}>
+    <div
+      className={`bookmarkRow [align-items:center] [display:grid] [grid-template-columns:minmax(0,_1fr)_20px_20px_20px] [height:31px] [min-width:0] [&>_button]:[align-items:center] [&>_button]:[background:transparent] [&>_button]:[border:0] [&>_button]:[color:var(--muted-foreground)] [&>_button]:[display:flex] [&>_button]:[height:28px] [&>_button]:[justify-content:center] [&>_button]:[padding:0] [&>_button:hover]:[background:var(--overlay-hover)] [&>_button:first-child]:[display:grid] [&>_button:first-child]:[gap:0_5px] [&>_button:first-child]:[grid-template-columns:17px_minmax(0,_1fr)] [&>_button:first-child]:[grid-template-rows:15px_12px] [&>_button:first-child]:[justify-content:stretch] [&>_button:first-child]:[padding:1px_5px_1px_16px] [&>_button:first-child]:[text-align:left] [&>_button:first-child]:[width:100%] [&>_button:first-child[aria-selected=true]]:[background:var(--accent)] [&>_button:first-child>_span]:[align-items:center] [&>_button:first-child>_span]:[color:var(--primary)] [&>_button:first-child>_span]:[display:flex] [&>_button:first-child>_span]:[font-size:10px] [&>_button:first-child>_span]:[font-weight:700] [&>_button:first-child>_span]:[grid-row:1_/_3] [&_strong]:[color:var(--foreground)] [&_strong]:[font-size:11px] [&_strong]:[font-weight:500] [&_strong]:[overflow:hidden] [&_strong]:[text-overflow:ellipsis] [&_strong]:[white-space:nowrap] [&_small]:[color:var(--disabled-foreground)] [&_small]:[font-size:9px] [&_small]:[overflow:hidden] [&_small]:[text-overflow:ellipsis] [&_small]:[white-space:nowrap] [&>_button:nth-child(3)>_svg]:[transform:rotate(180deg)] bookmarkRow`}
+      key={bookmark.id}
+    >
       <Button
         aria-selected={selectedBookmarkId === bookmark.id}
         data-bookmark-id={bookmark.id}
@@ -184,7 +186,11 @@ export function BookmarksToolWindow({
       byFile.set(bookmark.path, [...current, bookmark]);
     }
     return [...byFile].map(([path, entries]) => (
-      <section className={tw.bookmarkFileGroup} key={path} role="group">
+      <section
+        className={`bookmarkFileGroup [&>_div:first-child]:[align-items:center] [&>_div:first-child]:[color:var(--muted-foreground)] [&>_div:first-child]:[display:grid] [&>_div:first-child]:[gap:5px] [&>_div:first-child]:[grid-template-columns:14px_minmax(0,_1fr)_auto] [&>_div:first-child]:[height:22px] [&>_div:first-child]:[padding:0_7px_0_18px] [&>_div:first-child>_strong]:[font-size:10px] [&>_div:first-child>_strong]:[font-weight:500] [&>_div:first-child>_strong]:[overflow:hidden] [&>_div:first-child>_strong]:[text-overflow:ellipsis] [&>_div:first-child>_strong]:[white-space:nowrap] [&>_div:first-child>_small]:[font-size:9px] bookmarkFileGroup`}
+        key={path}
+        role="group"
+      >
         <div>
           <Icon name="file" size={13} />
           <strong>{path}</strong>
@@ -196,8 +202,13 @@ export function BookmarksToolWindow({
   };
 
   return (
-    <section aria-label="Bookmarks Tool Window" className={tw.bookmarksToolWindow}>
-      <header className={tw.projectToolHeader}>
+    <section
+      aria-label="Bookmarks Tool Window"
+      className={`bookmarksToolWindow [background:var(--card)] rounded-xl [display:grid] [grid-template-rows:30px_minmax(0,_1fr)] [min-height:0] [min-width:0] [overflow:hidden] bookmarksToolWindow rounded-xl`}
+    >
+      <header
+        className={`projectToolHeader [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [padding:0_3px_0_6px] [&>_span]:[flex:1] [&>_button]:[align-items:center] [&>_button]:[background:transparent] [&>_button]:rounded-sm [&>_button]:[color:var(--muted-foreground)] [&>_button]:[display:flex] [&>_button]:[height:24px] [&>_button]:[justify-content:center] [&>_button]:[width:24px] [&>_button:first-child]:[color:var(--foreground)] [&>_button:first-child]:[font-size:12px] [&>_button:first-child]:[padding:0_4px] [&>_button:first-child]:[width:auto] [&>_button:hover]:[background:var(--muted)] [&>_button:hover]:[color:var(--foreground)] projectToolHeader [&>_button]:rounded-sm`}
+      >
         <Tooltip>
           <TooltipTrigger
             render={
@@ -303,7 +314,9 @@ export function BookmarksToolWindow({
             placement="below"
             width={260}
             content={
-              <div className={tw.bookmarkOptions}>
+              <div
+                className={`bookmarkOptions [display:grid] [gap:2px] [padding:5px] bookmarkOptions`}
+              >
                 <CheckboxInput
                   label="Group Line Bookmarks by File"
                   onChange={(groupLineBookmarks) =>
@@ -378,12 +391,17 @@ export function BookmarksToolWindow({
           <TooltipContent>Close</TooltipContent>
         </Tooltip>
       </header>
-      <div className={tw.bookmarksTree} role="tree">
+      <div
+        className={`bookmarksTree [min-height:0] [overflow:auto] [padding:3px_0] bookmarksTree`}
+        role="tree"
+      >
         {state.groups.map((group) => {
           const collapsed = collapsedGroups.has(group.id);
           return (
             <section key={group.id} role="group">
-              <div className={tw.bookmarkGroupRow}>
+              <div
+                className={`bookmarkGroupRow [align-items:center] [display:grid] [grid-template-columns:minmax(0,_1fr)_22px_22px_22px] [min-width:0] [&>_button]:[align-items:center] [&>_button]:[background:transparent] [&>_button]:[border:0] [&>_button]:[color:var(--muted-foreground)] [&>_button]:[display:flex] [&>_button]:[height:24px] [&>_button]:[justify-content:center] [&>_button]:[min-width:0] [&>_button]:[padding:0] [&>_button:hover]:[background:var(--overlay-hover)] [&>_button:first-child]:[gap:4px] [&>_button:first-child]:[justify-content:flex-start] [&>_button:first-child]:[padding:0_5px] [&>_button:first-child>_svg:first-child]:[transition:transform_100ms] [&>_button:first-child[aria-expanded=true]>_svg:first-child]:[transform:rotate(90deg)] [&_strong]:[color:var(--foreground)] [&_strong]:[font-size:11px] [&_strong]:[overflow:hidden] [&_strong]:[text-overflow:ellipsis] [&_strong]:[white-space:nowrap] [&_small]:[background:var(--muted)] [&_small]:rounded-xs [&_small]:[font-size:9px] [&_small]:[margin-left:3px] [&_small]:[padding:1px_4px] bookmarkGroupRow [&_small]:rounded-xs`}
+              >
                 <Button
                   aria-expanded={!collapsed}
                   onClick={() =>

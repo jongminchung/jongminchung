@@ -24,22 +24,12 @@ import { safeErrorMessage } from "./redaction";
 import { RepositoryMutationArbiter } from "./repository-mutation-arbiter";
 import type { RepositoryRegistry } from "./repository-registry";
 import { SequenceEditorSession, type SequenceEditorMode } from "./sequence-editor";
-import {
-  createApplicationSequenceEditorCommand,
-  createSequenceEditorCommand,
-} from "./sequence-editor-cli";
+import { createApplicationSequenceEditorCommand } from "./sequence-editor-cli";
 
-export type SequenceEditorRuntime =
-  | Readonly<{
-      kind: "application";
-      executablePath: string;
-      applicationEntryPath: string | null;
-    }>
-  | Readonly<{
-      kind: "standalone";
-      executablePath: string;
-      entryPath: string;
-    }>;
+export type SequenceEditorRuntime = Readonly<{
+  executablePath: string;
+  applicationEntryPath: string | null;
+}>;
 
 interface ActiveOperation {
   readonly repositoryId: RepositoryId;
@@ -60,7 +50,6 @@ function duration(startedAt: number): number {
 
 function defaultSequenceEditorRuntime(): SequenceEditorRuntime {
   return {
-    kind: "application",
     executablePath: process.execPath,
     applicationEntryPath: process.defaultApp === true ? join(__dirname, "main.cjs") : null,
   };
@@ -71,14 +60,6 @@ function sequenceEditorCommand(
   mode: SequenceEditorMode,
   session: SequenceEditorSession,
 ): string {
-  if (runtime.kind === "standalone") {
-    return createSequenceEditorCommand({
-      executablePath: runtime.executablePath,
-      entryPath: runtime.entryPath,
-      mode,
-      session,
-    });
-  }
   return createApplicationSequenceEditorCommand({
     executablePath: runtime.executablePath,
     applicationEntryPath: runtime.applicationEntryPath,

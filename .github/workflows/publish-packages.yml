@@ -1,0 +1,51 @@
+name: Publish Packages
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - name: Verify configured Node.js
+        run: test "v$(cat .node-version)" = "$(node --version)"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run check
+      - name: Configure GitHub Packages auth
+        run: npm config set //npm.pkg.github.com/:_authToken "$NODE_AUTH_TOKEN"
+      - name: Guard fixed package versions
+        run: |
+          node <<'NODE'
+          const { readFileSync } = require("node:fs");
+
+          for (const filePath of [
+            "packages/remark-plantuml/package.json",
+            "packages/tooling/package.json",
+          ]) {
+            const packageJson = JSON.parse(readFileSync(filePath, "utf8"));
+
+            if (packageJson.version !== "1.0.0") {
+              throw new Error(`${packageJson.name} must reuse version 1.0.0`);
+            }
+          }
+          NODE
+      - run: pnpm publish --dry-run --access public
+        working-directory: packages/remark-plantuml
+      - run: pnpm publish --dry-run --access public
+        working-directory: packages/tooling
+      - run: pnpm publish --access public
+        working-directory: packages/remark-plantuml
+      - run: pnpm publish --access public
+        working-directory: packages/tooling

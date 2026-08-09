@@ -32,6 +32,13 @@ function gitVoid(repository: string, ...args: readonly string[]): void {
   });
 }
 
+function stashList(repository: string): string {
+  if (git(repository, "for-each-ref", "--format=%(refname)", "refs/stash").trim() === "") {
+    return "";
+  }
+  return git(repository, "stash", "list", "--format=%H%x00%gs");
+}
+
 function evidence(repository: string): GitEvidence {
   const head = git(repository, "rev-parse", "HEAD").trim();
   const revision = git(repository, "rev-list", "--parents", "-n", "1", "HEAD").trim().split(/\s+/);
@@ -40,7 +47,7 @@ function evidence(repository: string): GitEvidence {
     index: git(repository, "diff", "--cached", "--binary"),
     parents: revision.slice(1),
     refs: git(repository, "for-each-ref", "--sort=refname", "--format=%(refname)%00%(objectname)"),
-    stash: git(repository, "stash", "list", "--format=%H%x00%gs"),
+    stash: stashList(repository),
     status: git(repository, "status", "--porcelain=v2", "--untracked-files=all"),
     worktree: git(repository, "diff", "--binary"),
   };
@@ -177,6 +184,7 @@ test("mutates partial index, worktree, commit, and amend state only through visi
       expect(partiallyStaged.worktree).toContain("line 100 changed for discarded hunk");
       expect(partiallyStaged.stash).toBe("");
 
+      await page.getByRole("button", { name: "Exit focused diff" }).click();
       await worktreeGroup.getByRole("button", { name: /partial\.txt/ }).click();
       await changedFiles(page).getByRole("button", { name: "Discard…", exact: true }).click();
       const discardDialog = page.getByRole("dialog", {

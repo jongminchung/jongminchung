@@ -1,4 +1,3 @@
-import mvpFixtureContract from "../../parity/rebased/1.1.8/fixtures/mvp-contract.json";
 import type { FileSource, RepositorySnapshot, ShelfEntry } from "../shared/contracts/model";
 import type { Commit, FileChange, Ref, RepositoryView, StashEntry, StatusModel } from "./types";
 
@@ -15,7 +14,8 @@ const SUBJECTS = [
   "feat: resolve GitLab forge URLs",
 ] as const;
 const AUTHORS = ["Jongmin Chung", "Suh Junmin", "Jamie", "renovate-ci"] as const;
-const now = Math.floor(Date.parse(mvpFixtureContract.clock.iso) / 1000);
+const QA_REFERENCE_EPOCH_SECONDS = Math.floor(Date.parse("2025-01-15T12:00:00.000Z") / 1000);
+const now = QA_REFERENCE_EPOCH_SECONDS;
 
 function oid(index: number): string {
   return `${(index + 1).toString(16).padStart(8, "0")}b1a7e4c9d2f6a8305e77c4f91a12d0aa`;

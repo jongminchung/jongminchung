@@ -9,7 +9,6 @@ import {
   type ProjectSearchResult,
   type ProjectTextMatch,
 } from "../domain/projectSearch";
-import { tw } from "../styles/tailwind";
 import { useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
 import { List, ListItem } from "./ProductCollections";
@@ -264,9 +263,13 @@ export function ProjectSearchDialog({
       purpose="info"
       width="min(760px, calc(100vw - 72px))"
     >
-      <section className={tw.projectSearchDialog}>
+      <section
+        className={`projectSearchDialog [display:grid] [grid-template-rows:auto_auto_27px_minmax(210px,_1fr)] [height:min(610px,_calc(100vh_-_82px))] [min-height:0] [overflow:hidden] projectSearchDialog`}
+      >
         <DialogHeader hasDivider onOpenChange={(open) => !open && onClose()} title={copy.title} />
-        <div className={tw.projectSearchQuery}>
+        <div
+          className={`projectSearchQuery [align-items:end] [border-bottom:1px_solid_var(--border)] [display:grid] [gap:5px] [grid-template-columns:minmax(0,_1fr)_auto_auto_auto_auto] [padding:8px_9px] [&>_button]:[min-width:28px] projectSearchQuery`}
+        >
           <TextInput
             hasAutoFocus
             hasClear
@@ -336,7 +339,10 @@ export function ProjectSearchDialog({
             </>
           )}
         </div>
-        <div className={tw.projectSearchStatus} aria-live="polite">
+        <div
+          className={`projectSearchStatus [align-items:center] [background:var(--muted)] [border-bottom:1px_solid_var(--border)] [color:var(--muted-foreground)] [display:flex] [font-size:10px] [padding:0_6px_0_10px] [&>_span]:[flex:1] [&>_button]:[height:23px] [&>_button]:[font-size:10px] projectSearchStatus`}
+          aria-live="polite"
+        >
           <span>
             {loading
               ? "Searching…"
@@ -362,7 +368,9 @@ export function ProjectSearchDialog({
             </Button>
           )}
         </div>
-        <div className={tw.projectSearchResults}>
+        <div
+          className={`projectSearchResults [min-height:0] [overflow:auto] [padding:4px] [&>_[role=status]]:[margin:36px_auto] [&>_p]:[color:var(--muted-foreground)] [&>_p]:[padding:36px_12px] [&>_p]:[text-align:center] [&_li]:[min-height:39px] [&_li_[data-slot=item-description]]:[font-family:var(--font-family-code)] [&_li_[data-slot=item-description]]:[font-size:10px] [&_li_code]:[color:var(--disabled-foreground)] [&_li_code]:[font-size:9px] [&_li_code]:[max-width:310px] [&_li_code]:[overflow:hidden] [&_li_code]:[text-overflow:ellipsis] [&_li_code]:[white-space:nowrap] projectSearchResults`}
+        >
           {loading && results.length === 0 ? (
             <Spinner label="Searching project…" size="lg" />
           ) : error ? (

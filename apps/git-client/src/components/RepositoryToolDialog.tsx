@@ -12,7 +12,6 @@ import type {
   SubmoduleInfo,
   WorktreeInfo,
 } from "../shared/contracts/model";
-import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
 import { HostingPanel } from "./HostingPanel";
 import { Icon } from "./Icon";
@@ -99,7 +98,9 @@ export function RepositoryToolDialog({
             />
           ) : kind === "remotes" ? (
             <>
-              <div className={tw.managementToolbar}>
+              <div
+                className={`managementToolbar [&>_span]:[flex:1] [align-items:center] [background:var(--muted)] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:5px] [height:38px] [padding:0_11px] [&>_button]:[align-items:center] [&>_button]:[background:var(--card)] [&>_button]:[border:1px_solid_var(--border)] [&>_button]:rounded-sm [&>_button]:[display:flex] [&>_button]:[gap:5px] [&>_button]:[min-height:27px] [&>_button]:[padding:0_8px] [background:var(--card)] managementToolbar [&>_button]:rounded-sm`}
+              >
                 <strong>Remotes</strong>
                 <span />
                 <Button
@@ -131,7 +132,10 @@ export function RepositoryToolDialog({
                 </Button>
               </div>
               {remotes.map((remote) => (
-                <article className={tw.managementRow} key={remote.name}>
+                <article
+                  className={`managementRow [&>_button]:[align-items:center] [&>_button]:[background:var(--card)] [&>_button]:[border:1px_solid_var(--border)] [&>_button]:rounded-sm [&>_button]:[display:flex] [&>_button]:[gap:5px] [&>_button]:[min-height:27px] [&>_button]:[padding:0_8px] [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:9px] [min-height:66px] [padding:8px_11px] [&>_div]:[flex:1] [&>_div]:[min-width:0] [&_small]:[color:var(--disabled-foreground)] [&_small]:[display:block] [&_small]:[margin-top:2px] [&_small]:[overflow:hidden] [&_small]:[text-overflow:ellipsis] [&_small]:[white-space:nowrap] managementRow [&>_button]:rounded-sm`}
+                  key={remote.name}
+                >
                   <Icon name="remote" size={18} />
                   <div>
                     <strong>{remote.name}</strong>
@@ -186,7 +190,9 @@ export function RepositoryToolDialog({
             </>
           ) : kind === "worktrees" ? (
             <>
-              <div className={tw.managementToolbar}>
+              <div
+                className={`managementToolbar [&>_span]:[flex:1] [align-items:center] [background:var(--muted)] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:5px] [height:38px] [padding:0_11px] [&>_button]:[align-items:center] [&>_button]:[background:var(--card)] [&>_button]:[border:1px_solid_var(--border)] [&>_button]:rounded-sm [&>_button]:[display:flex] [&>_button]:[gap:5px] [&>_button]:[min-height:27px] [&>_button]:[padding:0_8px] [background:var(--card)] managementToolbar [&>_button]:rounded-sm`}
+              >
                 <strong>Worktrees</strong>
                 <span />
                 <Button
@@ -224,7 +230,10 @@ export function RepositoryToolDialog({
                 </Button>
               </div>
               {worktrees.map((worktree) => (
-                <article className={tw.managementRow} key={worktree.path}>
+                <article
+                  className={`managementRow [&>_button]:[align-items:center] [&>_button]:[background:var(--card)] [&>_button]:[border:1px_solid_var(--border)] [&>_button]:rounded-sm [&>_button]:[display:flex] [&>_button]:[gap:5px] [&>_button]:[min-height:27px] [&>_button]:[padding:0_8px] [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:9px] [min-height:66px] [padding:8px_11px] [&>_div]:[flex:1] [&>_div]:[min-width:0] [&_small]:[color:var(--disabled-foreground)] [&_small]:[display:block] [&_small]:[margin-top:2px] [&_small]:[overflow:hidden] [&_small]:[text-overflow:ellipsis] [&_small]:[white-space:nowrap] managementRow [&>_button]:rounded-sm`}
+                  key={worktree.path}
+                >
                   <Icon name="worktree" size={18} />
                   <div>
                     <strong>

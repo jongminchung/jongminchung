@@ -1,6 +1,5 @@
 import { Button } from "@jongminchung/ui/components/button";
 import { cn } from "@jongminchung/ui/lib/utils";
-import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
 import { List, ListItem } from "./ProductCollections";
 import { Dialog, DialogHeader } from "./ProductDialog";
@@ -47,7 +46,9 @@ export function WhatsNewDialog({ onClose }: { readonly onClose: () => void }) {
       purpose="info"
       width={620}
     >
-      <section className={tw.whatsNewDialog}>
+      <section
+        className={`whatsNewDialog [display:grid] [grid-template-rows:auto_minmax(300px,_1fr)_auto] [&>_main]:[min-height:0] [&>_main]:[overflow:auto] [&>_main>_p]:[color:var(--muted-foreground)] [&>_main>_p]:[margin:14px_16px_8px] [&>_main>_div[role=list]]:[padding:5px_9px_12px] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:flex] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:8px_10px] whatsNewDialog`}
+      >
         <DialogHeader
           hasDivider
           onOpenChange={(open) => !open && onClose()}

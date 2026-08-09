@@ -1,4 +1,7 @@
 import { Button } from "@jongminchung/ui/components/button";
+import { Checkbox } from "@jongminchung/ui/components/checkbox";
+import { Input } from "@jongminchung/ui/components/input";
+import { RadioGroup, RadioGroupItem } from "@jongminchung/ui/components/radio-group";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { sanitizeGitError } from "../domain/gitActivity";
@@ -15,6 +18,7 @@ import { Icon } from "./Icon";
 import { Notice } from "./Notice";
 import { Spinner } from "./ProductCollections";
 import { Dialog, DialogBody, DialogFooter, DialogHeader } from "./ProductDialog";
+import { Selector } from "./ProductFormControls";
 
 function branchName(remoteRef: string): string {
   return remoteRef.replace(/^refs\/heads\//, "");
@@ -183,28 +187,22 @@ export function PushDialog({
         />
         <DialogBody className="grid gap-4 p-4">
           <section className="grid grid-cols-2 gap-3 max-[600px]:grid-cols-1">
-            <label className="grid gap-1 text-xs text-muted-foreground">
-              Remote
-              <select
-                aria-label="Remote"
-                autoFocus
-                className="min-h-8 rounded-md border border-border bg-card px-2 text-foreground"
-                onChange={(event) => setRemote(event.target.value)}
-                value={remote}
-              >
-                {remotes.map((item) => (
-                  <option key={item.name} value={item.name}>
-                    {item.name}
-                  </option>
-                ))}
-                {remote && !remotes.some((item) => item.name === remote) && (
-                  <option value={remote}>{remote}</option>
-                )}
-              </select>
-            </label>
+            <Selector
+              className="bg-card text-foreground"
+              hasAutoFocus
+              label="Remote"
+              onChange={setRemote}
+              options={[
+                ...remotes.map((item) => ({ label: item.name, value: item.name })),
+                ...(remote && !remotes.some((item) => item.name === remote)
+                  ? [{ label: remote, value: remote }]
+                  : []),
+              ]}
+              value={remote}
+            />
             <label className="grid gap-1 text-xs text-muted-foreground">
               Destination branch
-              <input
+              <Input
                 className="min-h-8 rounded-md border border-border bg-card px-2 font-mono text-foreground"
                 onChange={(event) => setRemoteRef(event.target.value)}
                 value={remoteRef}
@@ -298,41 +296,36 @@ export function PushDialog({
 
               <fieldset className="grid gap-2 rounded-lg border border-border p-3">
                 <legend className="px-1 text-xs font-semibold">Push mode</legend>
-                <label className="flex items-start gap-2">
-                  <input
-                    checked={choice === "normal"}
-                    disabled={!normalAvailable}
-                    name="push-mode"
-                    onChange={() => {
-                      setChoice("normal");
-                      setConfirmation("");
-                    }}
-                    type="radio"
-                  />
-                  <span>
-                    <strong>Normal push</strong>
-                    <small className="block text-muted-foreground">
-                      Updates only when the destination is a fast-forward.
-                    </small>
-                  </span>
-                </label>
-                {!preview.newBranch && (
+                <RadioGroup
+                  name="push-mode"
+                  onValueChange={(value) => {
+                    if (value !== "normal" && value !== "forceWithLease") return;
+                    setChoice(value);
+                    if (value === "normal") setConfirmation("");
+                  }}
+                  value={choice}
+                >
                   <label className="flex items-start gap-2">
-                    <input
-                      checked={choice === "forceWithLease"}
-                      disabled={!forceAvailable}
-                      name="push-mode"
-                      onChange={() => setChoice("forceWithLease")}
-                      type="radio"
-                    />
+                    <RadioGroupItem disabled={!normalAvailable} value="normal" />
                     <span>
-                      <strong>Force push with lease</strong>
+                      <strong>Normal push</strong>
                       <small className="block text-muted-foreground">
-                        Uses the exact reviewed remote OID. It is rejected if the remote changes.
+                        Updates only when the destination is a fast-forward.
                       </small>
                     </span>
                   </label>
-                )}
+                  {!preview.newBranch && (
+                    <label className="flex items-start gap-2">
+                      <RadioGroupItem disabled={!forceAvailable} value="forceWithLease" />
+                      <span>
+                        <strong>Force push with lease</strong>
+                        <small className="block text-muted-foreground">
+                          Uses the exact reviewed remote OID. It is rejected if the remote changes.
+                        </small>
+                      </span>
+                    </label>
+                  )}
+                </RadioGroup>
               </fieldset>
 
               {choice === "forceWithLease" && (
@@ -355,7 +348,7 @@ export function PushDialog({
                     {requiresTypedConfirmation && (
                       <label className="grid gap-1 text-xs">
                         Type <strong>{destinationBranch}</strong> to confirm
-                        <input
+                        <Input
                           ref={confirmationRef}
                           aria-label={`Type ${destinationBranch} to confirm force push with lease`}
                           autoComplete="off"
@@ -374,12 +367,8 @@ export function PushDialog({
                   <strong>{preview.commits.length} commit(s) to push</strong>
                   <span className="flex-1" />
                   <label className="text-xs">
-                    <input
-                      checked={setUpstream}
-                      onChange={(event) => setSetUpstream(event.target.checked)}
-                      type="checkbox"
-                    />{" "}
-                    Set upstream after push
+                    <Checkbox checked={setUpstream} onCheckedChange={setSetUpstream} /> Set upstream
+                    after push
                   </label>
                 </div>
                 <div className="grid max-h-36 gap-1 overflow-auto rounded-lg border border-border bg-muted p-2 font-mono text-xs">

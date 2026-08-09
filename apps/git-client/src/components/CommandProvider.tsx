@@ -34,7 +34,6 @@ import {
 import { parseProductSettings, PRODUCT_SETTINGS_KEY } from "../domain/productSettings";
 import { electronApi, isElectronRuntime } from "../platform/electron";
 import { readElectronSetting } from "../platform/electronSettings";
-import { tw } from "../styles/tailwind";
 import { CommandPalette } from "./CommandPalette";
 
 interface RegisteredDismissLayer extends DismissLayer {
@@ -478,11 +477,19 @@ export function CommandProvider({ children }: { readonly children: ReactNode }) 
         />
       )}
       {assistantMessage && (
-        <div className={tw.presentationAssistant} role="status">
+        <div
+          className={`presentationAssistant [background:var(--popover)] [border:1px_solid_var(--input)] rounded-lg [bottom:42px] [box-shadow:var(--shadow-lg)] [color:var(--foreground)] [font-size:14px] [font-weight:600] [left:50%] [padding:10px_16px] [position:fixed] [transform:translateX(-50%)] [z-index:180] presentationAssistant rounded-lg`}
+          role="status"
+        >
           {assistantMessage}
         </div>
       )}
-      <span aria-live="polite" className={tw.srOnly} data-command-status role="status">
+      <span
+        aria-live="polite"
+        className={`srOnly [clip:rect(0_0_0_0)] [clip-path:inset(50%)] [height:1px] [overflow:hidden] [position:absolute] [left:0] [top:0] [white-space:nowrap] [width:1px] srOnly`}
+        data-command-status
+        role="status"
+      >
         {liveMessage}
       </span>
     </CommandContext.Provider>

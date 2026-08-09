@@ -1,5 +1,4 @@
 import type { CommandId } from "../domain/commands";
-import { tw } from "../styles/tailwind";
 import { Icon, type IconName } from "./Icon";
 import { List, ListItem } from "./ProductCollections";
 import { Dialog, DialogHeader } from "./ProductDialog";
@@ -42,7 +41,9 @@ export function VcsOperationsPopup({
       purpose="info"
       width={440}
     >
-      <section className={tw.vcsOperationsPopup}>
+      <section
+        className={`vcsOperationsPopup [display:grid] [grid-template-rows:auto_minmax(0,_1fr)] [max-height:min(720px,_calc(100vh_-_82px))] [&>_main]:[min-height:0] [&>_main]:[overflow:auto] [&>_main]:[padding:5px] [&>_main>_section]:[padding:2px_0] [&>_main>_section+section]:[border-top:1px_solid_var(--border)] [&>_main_h3]:[color:var(--muted-foreground)] [&>_main_h3]:[font-size:10px] [&>_main_h3]:[font-weight:600] [&>_main_h3]:[margin:4px_8px_2px] [&>_main_kbd]:[color:var(--disabled-foreground)] [&>_main_kbd]:[font-family:var(--font-family-code)] [&>_main_[aria-disabled=true]]:[opacity:.48] vcsOperationsPopup`}
+      >
         <DialogHeader
           hasDivider
           onOpenChange={(open) => !open && onClose()}

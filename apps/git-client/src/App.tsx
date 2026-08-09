@@ -248,7 +248,6 @@ import type {
   FileSource,
   SubmoduleDiff,
 } from "./shared/contracts/model";
-import { tw } from "./styles/tailwind";
 
 interface ContextPosition {
   readonly x: number;
@@ -506,9 +505,14 @@ function WorkspaceTitlebar({
     window.requestAnimationFrame(() => projectButton.current?.focus());
   }, [onProjectSwitcherOpenChange]);
   return (
-    <header className={tw.titlebar} aria-label="Main Toolbar">
-      <div className={tw.trafficSpace} />
-      <div className={tw.mainToolbarPopupAnchor}>
+    <header
+      className={`titlebar [align-items:center] [background:var(--card)] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:2px] [padding-right:5px] [user-select:none] [&>_button]:[align-items:center] [&>_button]:[background:transparent] [&>_button]:[color:var(--muted-foreground)] [&>_button]:[display:flex] [&>_button]:[height:26px] [&>_button]:[justify-content:center] [&>_button:hover]:[background:var(--muted)] [&>_button:hover]:[color:var(--foreground)] bg-background! border-transparent! [html[data-toolbar-visible=false]_&>*:not(.trafficSpace):not(.mainToolbarDragRegion)]:hidden! [html[data-distraction-free-mode=true]_&>*:not(.trafficSpace):not(.mainToolbarDragRegion)]:hidden! [html[data-presentation-mode=true]_&>*:not(.trafficSpace):not(.mainToolbarDragRegion)]:hidden! titlebar`}
+      aria-label="Main Toolbar"
+    >
+      <div className={`trafficSpace [flex:0_0_74px] max-[1050px]:[flex-basis:64px] trafficSpace`} />
+      <div
+        className={`mainToolbarPopupAnchor [align-self:stretch] [display:flex] [position:relative] mainToolbarPopupAnchor`}
+      >
         <Tooltip>
           <TooltipTrigger
             render={
@@ -521,7 +525,9 @@ function WorkspaceTitlebar({
                 variant="ghost"
                 size="default"
               >
-                <span className={tw.projectMark}>
+                <span
+                  className={`projectMark [align-items:center] [background:var(--primary)] rounded-xs [color:var(--primary-foreground)] [display:inline-flex] [font-size:9px] [font-weight:700] [height:16px] [justify-content:center] [width:16px] projectMark rounded-xs`}
+                >
                   {repository?.snapshot.name.trim().charAt(0).toUpperCase() || "G"}
                 </span>
                 <span>{repository?.snapshot.name ?? "Git Client"}</span>
@@ -586,7 +592,9 @@ function WorkspaceTitlebar({
             />
             <TooltipContent>Push…</TooltipContent>
           </Tooltip>
-          <div className={tw.mainToolbarPopupAnchor}>
+          <div
+            className={`mainToolbarPopupAnchor [align-self:stretch] [display:flex] [position:relative] mainToolbarPopupAnchor`}
+          >
             <Tooltip>
               <TooltipTrigger
                 render={
@@ -647,7 +655,7 @@ function WorkspaceTitlebar({
           Safe Mode
         </span>
       )}
-      <span className={tw.mainToolbarDragRegion} />
+      <span className={`mainToolbarDragRegion [flex:1] [height:100%] mainToolbarDragRegion`} />
       <Tooltip>
         <TooltipTrigger
           render={
@@ -686,7 +694,12 @@ function WorkspaceTitlebar({
 
 function WelcomeTitlebar() {
   return (
-    <header className={tw.welcomeTitlebar} data-testid="welcome-titlebar">
+    <header
+      className={
+        "welcomeTitlebar [align-items:center] [background:var(--card)] [border-bottom:1px_solid_var(--border)] [display:flex] [font-weight:600] [grid-row:1] [height:30px] [padding-left:84px] [user-select:none]"
+      }
+      data-testid="welcome-titlebar"
+    >
       Welcome to Git Client
     </header>
   );
@@ -719,7 +732,10 @@ function RepositoryToolStripe({
 }) {
   const { openPalette } = useCommands();
   return (
-    <nav aria-label="Left Toolbar" className={tw.toolStripe}>
+    <nav
+      aria-label="Left Toolbar"
+      className={`toolStripe bg-background! border-transparent! [html[data-compact=true]_&_button]:min-h-6 [html[data-tool-window-bars-visible=false]_&]:hidden! [html[data-distraction-free-mode=true]_&]:hidden! [html[data-presentation-mode=true]_&]:hidden! [background:var(--card)] [border-right:1px_solid_var(--border)] [display:flex] [flex-direction:column] [justify-content:space-between] [min-height:0] [padding:3px_0] [&>_div]:[display:flex] [&>_div]:[flex-direction:column] [&_button_em]:[align-items:center] [&_button_em]:[background:var(--primary)] [&_button_em]:rounded-lg [&_button_em]:[color:var(--primary-foreground)] [&_button_em]:[display:flex] [&_button_em]:[font-size:8px] [&_button_em]:[font-style:normal] [&_button_em]:[height:13px] [&_button_em]:[justify-content:center] [&_button_em]:[min-width:13px] [&_button_em]:[position:absolute] [&_button_em]:[right:1px] [&_button_em]:[top:1px] toolStripe [&_button_em]:rounded-lg`}
+    >
       <div>
         <Tooltip>
           <TooltipTrigger
@@ -849,7 +865,10 @@ function RepositoryRightToolStripe({
   readonly onToggleNotifications?: () => void;
 } = {}) {
   return (
-    <nav aria-label="Right Toolbar" className={tw.rightToolStripe}>
+    <nav
+      aria-label="Right Toolbar"
+      className={`rightToolStripe bg-background! border-transparent! [html[data-compact=true]_&_button]:min-h-6 [html[data-tool-window-bars-visible=false]_&]:hidden! [html[data-distraction-free-mode=true]_&]:hidden! [html[data-presentation-mode=true]_&]:hidden! [background:var(--card)] [border-left:1px_solid_var(--border)] [min-height:0] [padding:3px_0] [&_button_em]:[background:var(--primary)] [&_button_em]:rounded-full [&_button_em]:[display:block] [&_button_em]:[height:7px] [&_button_em]:[position:absolute] [&_button_em]:[right:3px] [&_button_em]:[top:2px] [&_button_em]:[width:7px] rightToolStripe [&_button_em]:rounded-full`}
+    >
       <Tooltip>
         <TooltipTrigger
           render={
@@ -909,7 +928,10 @@ function StartupWorkspace({
 }) {
   if (session.restoring) {
     return (
-      <main className={tw.startupWorkspace} aria-busy="true">
+      <main
+        className={`startupWorkspace [grid-row:2_/_-1] [min-height:0] [background:var(--card)] [display:grid] [grid-template-rows:auto_minmax(0,_1fr)] [overflow:hidden] startupWorkspace`}
+        aria-busy="true"
+      >
         <EmptyState
           className="p-0 [grid-row:1_/_-1] [&_[data-slot=empty-title]]:font-medium [&_[data-slot=empty-title]]:text-foreground"
           description="Reopening repositories and validating saved paths."
@@ -936,7 +958,10 @@ function StartupWorkspace({
 
 function RepositoryLoadingSkeleton(): React.ReactElement {
   return (
-    <div className={tw.workbench} role="status">
+    <div
+      className={`workbench [display:grid] [grid-template-columns:39px_minmax(0,_1fr)_35px] [height:100%] [min-height:0] [min-width:0] [html[data-tool-window-bars-visible=false]_&]:grid-cols-[0_minmax(0,1fr)_0]! [html[data-distraction-free-mode=true]_&]:grid-cols-[0_minmax(0,1fr)_0]! [html[data-presentation-mode=true]_&]:grid-cols-[0_minmax(0,1fr)_0]! workbench`}
+      role="status"
+    >
       <RepositoryToolStripe
         bookmarksOpen={false}
         changes={0}
@@ -949,10 +974,20 @@ function RepositoryLoadingSkeleton(): React.ReactElement {
         terminalFocused={false}
         disabled
       />
-      <div className={tw.workbenchSurface}>
-        <div className={tw.workbenchContent}>
-          <div className={tw.activeWorkspace}>
-            <div aria-label="Log" className={tw.loadingEditorTabs} role="tablist">
+      <div
+        className={`workbenchSurface [background:var(--background)] [display:grid] [grid-template-rows:minmax(0,_1fr)_auto] [min-height:0] [min-width:0] workbenchSurface`}
+      >
+        <div
+          className={`workbenchContent [display:grid] [gap:3px] [grid-template-columns:minmax(0,_1fr)] [min-height:0] [min-width:0] [html[data-distraction-free-mode=true]_&]:grid-cols-[minmax(0,1fr)]! [html[data-presentation-mode=true]_&]:grid-cols-[minmax(0,1fr)]! workbenchContent`}
+        >
+          <div
+            className={`activeWorkspace [background:var(--card)] rounded-lg [display:grid] [min-height:0] [min-width:0] [overflow:hidden] [padding-top:32px] [position:relative] activeWorkspace rounded-lg`}
+          >
+            <div
+              aria-label="Log"
+              className={`loadingEditorTabs [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [height:32px] [left:0] [padding:0_5px] [position:absolute] [right:0] [top:0] [&>_span]:[align-items:center] [&>_span]:[background:var(--accent)] [&>_span]:rounded-sm [&>_span]:[color:var(--foreground)] [&>_span]:[display:flex] [&>_span]:[gap:5px] [&>_span]:[height:29px] [&>_span]:[padding:0_8px] loadingEditorTabs [&>_span]:rounded-sm`}
+              role="tablist"
+            >
               <span aria-hidden="true">
                 <Icon name="branch" size={14} />
                 Log
@@ -4897,7 +4932,10 @@ function RepositoryWorkspace({
         />
       )}
       {productSettings.navigationBar === "top" && !productSettings.presentationMode && (
-        <nav aria-label="Navigation Bar" className={tw.topNavigationBar}>
+        <nav
+          aria-label="Navigation Bar"
+          className={`topNavigationBar [align-items:center] [background:var(--card)] [border-bottom:1px_solid_var(--border)] [display:flex] [height:26px] [left:31px] [padding:0_8px] [position:absolute] [right:30px] [top:30px] [z-index:9] [html[data-presentation-mode=true]_&]:hidden! topNavigationBar`}
+        >
           <Tooltip>
             <TooltipTrigger
               render={
@@ -4933,7 +4971,7 @@ function RepositoryWorkspace({
       >
         {hasEditorTabs && (
           <div
-            className={tw.commandbar}
+            className={`commandbar [html[data-tool-window-bars-visible=false]_&]:left-0! [html[data-tool-window-bars-visible=false]_&]:right-0! [html[data-distraction-free-mode=true]_&]:hidden! [html[data-presentation-mode=true]_&]:hidden! [html[data-navigation-bar=top]_&]:top-[59px]! [align-items:center] [background:var(--card)] [border-bottom:1px_solid_var(--border)] rounded-t-lg rounded-b-none [display:flex] [gap:3px] [height:32px] [left:var(--editor-left,_39px)] [padding:0_5px_0_0] [position:absolute] [right:35px] [top:35px] [z-index:8] [&>_button]:[align-items:center] [&>_button]:[background:transparent] [&>_button]:[display:flex] [&>_button]:[gap:6px] [&>_button]:[height:30px] [&>_button]:[padding:0_7px] [&>_button:hover]:[background:var(--muted)] [&>_button_>_em]:[align-items:center] [&>_button_>_em]:[background:var(--primary)] [&>_button_>_em]:rounded-lg [&>_button_>_em]:[color:var(--primary-foreground)] [&>_button_>_em]:[display:inline-flex] [&>_button_>_em]:[font-size:9px] [&>_button_>_em]:[font-style:normal] [&>_button_>_em]:[height:15px] [&>_button_>_em]:[justify-content:center] [&>_button_>_em]:[min-width:15px] [&>_button_>_em]:[padding:0_4px] commandbar rounded-t-lg rounded-b-none [&>_button_>_em]:rounded-lg`}
             style={
               {
                 "--editor-left":
@@ -4945,7 +4983,10 @@ function RepositoryWorkspace({
           >
             <TabsList
               render={
-                <nav aria-label={!inspector ? "Log" : "Editor tabs"} className={tw.editorTabs} />
+                <nav
+                  aria-label={!inspector ? "Log" : "Editor tabs"}
+                  className={`editorTabs [align-items:center] [align-self:stretch] [display:flex] [&_button[aria-current=page]]:rounded-sm [&_button[aria-current=page]]:bg-muted! [&_button[aria-current=page]]:text-foreground! [&_button[aria-current=page]]:shadow-[inset_0_0_0_1px_var(--input)]! [&_button:hover:not([aria-current=page])]:rounded-sm [&_button:hover:not([aria-current=page])]:bg-overlay-hover editorTabs`}
+                />
               }
             >
               {logOpen &&
@@ -4953,7 +4994,14 @@ function RepositoryWorkspace({
                   const label = index === 0 ? "Log" : `Log ${index + 1}`;
                   const value = `log:${tabId}`;
                   return (
-                    <span className={cn("group", tw.workspaceTab)} key={tabId} role="presentation">
+                    <span
+                      className={cn(
+                        "group",
+                        `workspaceTab [display:inline-flex] [flex:0_0_auto] [&_em]:[color:var(--destructive)] [&_em]:[font-size:15px] [&_em]:[font-style:normal] [&_em]:[line-height:1] data-[preview=true]:[&>button:first-child]:italic data-[pinned=true]:[&>button:first-child]:after:size-1 data-[pinned=true]:[&>button:first-child]:after:rounded-full data-[pinned=true]:[&>button:first-child]:after:bg-current data-[pinned=true]:[&>button:first-child]:after:opacity-55 data-[pinned=true]:[&>button:first-child]:after:content-[""] workspaceTab`,
+                      )}
+                      key={tabId}
+                      role="presentation"
+                    >
                       <Tooltip>
                         <TooltipTrigger
                           render={
@@ -5009,7 +5057,10 @@ function RepositoryWorkspace({
                 const value = `inspector:${key}`;
                 return (
                   <span
-                    className={cn("group", tw.workspaceTab)}
+                    className={cn(
+                      "group",
+                      `workspaceTab [display:inline-flex] [flex:0_0_auto] [&_em]:[color:var(--destructive)] [&_em]:[font-size:15px] [&_em]:[font-style:normal] [&_em]:[line-height:1] data-[preview=true]:[&>button:first-child]:italic data-[pinned=true]:[&>button:first-child]:after:size-1 data-[pinned=true]:[&>button:first-child]:after:rounded-full data-[pinned=true]:[&>button:first-child]:after:bg-current data-[pinned=true]:[&>button:first-child]:after:opacity-55 data-[pinned=true]:[&>button:first-child]:after:content-[""] workspaceTab`,
+                    )}
                     data-pinned={pinnedInspectorKeys.has(key)}
                     data-preview={previewInspectorKey === key}
                     key={key}
@@ -5068,7 +5119,7 @@ function RepositoryWorkspace({
                 );
               })}
             </TabsList>
-            <span className={tw.editorToolbarSpacer} />
+            <span className={`editorToolbarSpacer [flex:1] editorToolbarSpacer`} />
             {session.stale && <StatePill>Changed</StatePill>}
             {repository.snapshot.isShallow && <StatePill>Shallow</StatePill>}
             {repository.snapshot.isBare && <StatePill>Bare</StatePill>}
@@ -5128,7 +5179,7 @@ function RepositoryWorkspace({
                       repository.snapshot.operation &&
                       repository.snapshot.operation !== "bisect"
                     ) {
-                      void abortInProgressOperation();
+                      await abortInProgressOperation();
                     }
                   })}
                   variant="destructive"
@@ -5156,11 +5207,16 @@ function RepositoryWorkspace({
             </Tooltip>
           </div>
         )}
-        <main className={tw.workspace} aria-busy={session.loading}>
+        <main
+          className={`workspace [grid-row:2_/_4] [min-height:0] [position:relative] [html[data-navigation-bar=top]_&]:pt-[29px]! workspace`}
+          aria-busy={session.loading}
+        >
           {session.loading ? (
             <RepositoryLoadingSkeleton />
           ) : (
-            <div className={tw.workbench}>
+            <div
+              className={`workbench [display:grid] [grid-template-columns:39px_minmax(0,_1fr)_35px] [height:100%] [min-height:0] [min-width:0] [html[data-tool-window-bars-visible=false]_&]:grid-cols-[0_minmax(0,1fr)_0]! [html[data-distraction-free-mode=true]_&]:grid-cols-[0_minmax(0,1fr)_0]! [html[data-presentation-mode=true]_&]:grid-cols-[0_minmax(0,1fr)_0]! workbench`}
+            >
               <RepositoryToolStripe
                 bookmarksOpen={bookmarksOpen}
                 changes={repository.status.changes.length}
@@ -5203,10 +5259,10 @@ function RepositoryWorkspace({
                 terminalFocused={terminalFocused}
               />
               <div
-                className={`${tw.workbenchSurface} ${maximizedToolWindow === "bottom" ? tw.maximizedBottomTool : ""}`}
+                className={`${`workbenchSurface [background:var(--background)] [display:grid] [grid-template-rows:minmax(0,_1fr)_auto] [min-height:0] [min-width:0] workbenchSurface`} ${maximizedToolWindow === "bottom" ? `maximizedBottomTool [grid-template-rows:minmax(0,_1fr)] [&>_.workbenchContent]:[display:none] [&>_[data-tool-window-position=bottom]]:[height:100%!important] maximizedBottomTool` : ""}`}
               >
                 <div
-                  className={`${tw.workbenchContent} ${leftToolWindowOpen ? tw.projectToolOpen : ""} ${maximizedToolWindow === "project" || maximizedToolWindow === "bookmarks" ? tw.maximizedSideTool : ""}`}
+                  className={`${`workbenchContent [display:grid] [gap:3px] [grid-template-columns:minmax(0,_1fr)] [min-height:0] [min-width:0] [html[data-distraction-free-mode=true]_&]:grid-cols-[minmax(0,1fr)]! [html[data-presentation-mode=true]_&]:grid-cols-[minmax(0,1fr)]! workbenchContent`} ${leftToolWindowOpen ? `projectToolOpen [grid-template-columns:minmax(302px,_var(--side-tool-window-width,_clamp(352px,_32.7vw,_458px)))_minmax(0,_1fr)] projectToolOpen` : ""} ${maximizedToolWindow === "project" || maximizedToolWindow === "bookmarks" ? `maximizedSideTool [grid-template-columns:minmax(0,_1fr)] [&>_[data-workspace-main]]:[display:none] maximizedSideTool` : ""}`}
                   style={
                     {
                       "--side-tool-window-width": `${repositoryViewMode === "changes" ? 302 : sideToolWindowWidth}px`,
@@ -5324,7 +5380,7 @@ function RepositoryWorkspace({
                   )}
                   {repositoryViewMode === "changes" && commitToolWindow}
                   <div
-                    className={`${tw.activeWorkspace} ${!hasEditorTabs ? tw.activeWorkspaceNoTabs : ""}`}
+                    className={`${`activeWorkspace [background:var(--card)] rounded-lg [display:grid] [min-height:0] [min-width:0] [overflow:hidden] [padding-top:32px] [position:relative] activeWorkspace rounded-lg`} ${!hasEditorTabs ? `activeWorkspaceNoTabs [padding-top:0] activeWorkspaceNoTabs` : ""}`}
                     data-workspace-main
                   >
                     {logOpen &&
@@ -5333,7 +5389,7 @@ function RepositoryWorkspace({
                         return (
                           <TabsContent
                             aria-labelledby={editorTabDomId(editorTabsId, value)}
-                            className={tw.editorSurface}
+                            className={`editorSurface [height:100%] [min-height:0] [min-width:0] [&[hidden]]:[display:none] editorSurface`}
                             id={editorPanelDomId(editorTabsId, value)}
                             keepMounted
                             key={tabId}
@@ -5341,7 +5397,7 @@ function RepositoryWorkspace({
                           >
                             {tabId === activeLogTabId && (
                               <div
-                                className={tw.mainPanes}
+                                className={`mainPanes [display:grid] [grid-template-columns:30px_minmax(0,_1fr)_var(--details-pane-width,_253px)] [height:100%] [min-height:0] [min-width:0] max-[900px]:[grid-template-columns:30px_minmax(0,_1fr)] max-[900px]:[&>_*:last-child]:[display:none] [html[data-distraction-free-mode=true]_&>*:first-child]:hidden! [html[data-distraction-free-mode=true]_&>*:last-child]:hidden! [html[data-presentation-mode=true]_&>*:first-child]:hidden! [html[data-presentation-mode=true]_&>*:last-child]:hidden! mainPanes`}
                                 style={
                                   {
                                     "--history-review-width": `${historyReviewWidth}px`,
@@ -5543,7 +5599,7 @@ function RepositoryWorkspace({
                       return (
                         <TabsContent
                           aria-labelledby={editorTabDomId(editorTabsId, value)}
-                          className={tw.editorSurface}
+                          className={`editorSurface [height:100%] [min-height:0] [min-width:0] [&[hidden]]:[display:none] editorSurface`}
                           id={editorPanelDomId(editorTabsId, value)}
                           keepMounted
                           key={key}
@@ -5707,7 +5763,10 @@ function RepositoryWorkspace({
         </main>
       </Tabs>
       {productSettings.statusBarVisible && !productSettings.presentationMode && (
-        <footer aria-label="Status Bar" className={tw.statusbar}>
+        <footer
+          aria-label="Status Bar"
+          className={`statusbar [align-items:center] [background:var(--card)] [border-top:1px_solid_var(--border)] [color:var(--muted-foreground)] [display:flex] [font-size:9px] [gap:5px] [padding:0_5px_0_8px] [&>_nav]:[flex:1] [&>_nav]:[min-width:0] [&>_span]:[align-items:center] [&>_span]:[display:flex] [&>_span]:[gap:4px] bg-background! border-transparent! statusbar`}
+        >
           {productSettings.navigationBar === "status" && (
             <nav aria-label="Navigation Bar">
               <Tooltip>
@@ -5728,8 +5787,10 @@ function RepositoryWorkspace({
               </Tooltip>
             </nav>
           )}
-          {productSettings.navigationBar !== "status" && <span className={tw.statusbarSpacer} />}
-          <span className={tw.activitySlot}>
+          {productSettings.navigationBar !== "status" && (
+            <span className={`statusbarSpacer [flex:1] [min-width:0] statusbarSpacer`} />
+          )}
+          <span className={`activitySlot [min-width:0] activitySlot`}>
             {session.activity &&
               (productSettings.statusBarWidgets.statusText ||
                 productSettings.statusBarWidgets.fileSystemSync) && (
@@ -5773,7 +5834,9 @@ function RepositoryWorkspace({
                 </StatePill>
               )}
           </span>
-          <span className={tw.statusbarWidgets}>
+          <span
+            className={`statusbarWidgets [align-self:stretch] [display:flex] [gap:0]! statusbarWidgets`}
+          >
             {productSettings.statusBarWidgets.fileSystemSync && (
               <Button
                 aria-label="Refresh repository"
@@ -6012,24 +6075,26 @@ function RepositoryWorkspace({
                 <TooltipContent>Memory Indicator</TooltipContent>
               </Tooltip>
             )}
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  <Button
-                    aria-label="IDE error occurred"
-                    className={cn(
-                      "h-full min-w-5 rounded-none bg-transparent px-1 text-[9px] hover:bg-destructive-muted",
-                    )}
-                    onClick={() => setNotificationOpen(true)}
-                    variant="destructive"
-                    size="icon"
-                  >
-                    <Icon name="warning" size={11} />
-                  </Button>
-                }
-              />
-              <TooltipContent>See details</TooltipContent>
-            </Tooltip>
+            {notifications.some((notification) => notification.kind === "error") && (
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      aria-label="IDE error occurred"
+                      className={cn(
+                        "h-full min-w-5 rounded-none bg-transparent px-1 text-[9px] hover:bg-destructive-muted",
+                      )}
+                      onClick={() => setNotificationOpen(true)}
+                      variant="destructive"
+                      size="icon"
+                    >
+                      <Icon name="warning" size={11} />
+                    </Button>
+                  }
+                />
+                <TooltipContent>See details</TooltipContent>
+              </Tooltip>
+            )}
           </span>
         </footer>
       )}
@@ -6043,7 +6108,10 @@ function RepositoryWorkspace({
         />
       )}
       {diffState && (
-        <section className={tw.standaloneDiff} aria-label="Standalone diff review">
+        <section
+          className={`standaloneDiff [background:var(--card)] [display:grid] [grid-template-rows:38px_minmax(0,_1fr)] [inset:70px_0_23px] [position:fixed] [z-index:44] [&>_header]:[align-items:center] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[padding:0_9px] [&>_header_span]:[flex:1] standaloneDiff`}
+          aria-label="Standalone diff review"
+        >
           <header>
             <strong>Comparison</strong>
             <span />
@@ -6239,7 +6307,9 @@ function RepositoryWorkspace({
       )}
       {dialog.node}
       {toast && (
-        <div className={tw.toast}>
+        <div
+          className={`toast [align-items:center] [background:var(--inverse)] rounded-lg [bottom:36px] [box-shadow:var(--shadow-lg)] [color:var(--inverse-foreground)] [display:flex] [gap:7px] [left:50%] [padding:9px_13px] [position:fixed] [transform:translateX(-50%)] [z-index:80] toast rounded-lg`}
+        >
           <Icon name="check" size={15} />
           {toast}
         </div>
@@ -7326,7 +7396,10 @@ function AppContent() {
   usePaletteItems(repositoryPaletteItems);
 
   return (
-    <div className={tw.appShell} data-window-mode={welcomeVisible ? "welcome" : "workspace"}>
+    <div
+      className={`appShell [background:var(--background)] [display:grid] [grid-template-rows:35px_32px_minmax(0,_1fr)_20px] [height:100%] [min-width:800px] [overflow:hidden] [position:relative] [&_button]:rounded-sm [&_input]:rounded-sm [&_textarea]:rounded-sm [&_select]:rounded-sm [&_button:not(:disabled):hover]:[background-color:color-mix(in_oklch,_var(--foreground)_7%,_transparent)] data-[window-mode=welcome]:grid-rows-[30px_29px_minmax(0,1fr)_20px]! [html[data-status-bar-visible=false]_&]:grid-rows-[30px_29px_minmax(0,1fr)_0]! [html[data-presentation-mode=true]_&]:grid-rows-[30px_29px_minmax(0,1fr)_0]! [html[data-status-bar-visible=false]_&[data-window-mode=welcome]]:grid-rows-[30px_29px_minmax(0,1fr)_0]! [html[data-presentation-mode=true]_&[data-window-mode=welcome]]:grid-rows-[30px_29px_minmax(0,1fr)_0]! appShell`}
+      data-window-mode={welcomeVisible ? "welcome" : "workspace"}
+    >
       {helpOpen && <ProductHelpDialog onClose={() => setHelpOpen(false)} />}
       {whatsNewOpen && <WhatsNewDialog onClose={() => setWhatsNewOpen(false)} />}
       {activityMonitorOpen && (

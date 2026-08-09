@@ -1,4 +1,11 @@
 import { Button } from "@jongminchung/ui/components/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@jongminchung/ui/components/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -13,7 +20,6 @@ import type {
   FileSource,
   SubmoduleDiff,
 } from "../shared/contracts/model";
-import { tw } from "../styles/tailwind";
 import { useDismissLayer } from "./CommandProvider";
 import { DiffViewer } from "./DiffViewer";
 import { Icon } from "./Icon";
@@ -36,12 +42,17 @@ function statusLetter(status: FileChange["status"]): string {
 }
 
 function statusClass(status: FileChange["status"]): string {
-  if (status === "added") return tw.statusAdded;
-  if (status === "deleted") return tw.statusDeleted;
-  if (status === "renamed" || status === "copied") return tw.statusRenamed;
-  if (status === "conflicted") return tw.statusConflict;
-  if (status === "untracked") return tw.statusUnknown;
-  return tw.statusModified;
+  if (status === "added")
+    return `statusAdded [background:color-mix(in_oklch,_var(--success)_16%,_transparent)] [color:var(--success)] statusAdded`;
+  if (status === "deleted")
+    return `statusDeleted [background:color-mix(in_oklch,_var(--destructive)_16%,_transparent)] [color:var(--destructive)] statusDeleted`;
+  if (status === "renamed" || status === "copied")
+    return `statusRenamed [background:color-mix(in_oklch,_var(--primary)_16%,_transparent)] [color:var(--primary)] statusRenamed`;
+  if (status === "conflicted")
+    return `statusConflict [background:color-mix(in_oklch,_var(--destructive)_16%,_transparent)] [color:var(--destructive)] statusConflict`;
+  if (status === "untracked")
+    return `statusUnknown [background:var(--muted)] [color:var(--muted-foreground)] statusUnknown`;
+  return `statusModified [background:color-mix(in_oklch,_var(--primary)_16%,_transparent)] [color:var(--primary)] statusModified`;
 }
 
 function ReviewAllRow({
@@ -97,7 +108,9 @@ function ReviewAllRow({
   }, [commit, file, loadDiff, parentRevision, readFile]);
 
   return (
-    <article className={tw.reviewAllRow}>
+    <article
+      className={`reviewAllRow [border-bottom:1px_solid_var(--border)] [min-height:340px] [&>_header]:[align-items:center] [&>_header]:[background:var(--secondary)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[gap:7px] [&>_header]:[height:32px] [&>_header]:[padding:0_9px] [&>_header]:[position:sticky] [&>_header]:[top:0] [&>_header_>_span:nth-last-child(2)]:[flex:1] [&>_header_small]:[color:var(--disabled-foreground)] [&_pre]:[font-family:var(--font-family-code)] [&_pre]:[font-size:11px] [&_pre]:[line-height:1.5] [&_pre]:[margin:0] [&_pre]:[max-height:480px] [&_pre]:[overflow:auto] [&_pre]:[padding:10px] reviewAllRow`}
+    >
       <header>
         <StatusBadge className={statusClass(file.status)}>{statusLetter(file.status)}</StatusBadge>
         <strong>{file.path}</strong>
@@ -154,7 +167,7 @@ function ReviewAll({
     overscan: 1,
   });
   return (
-    <div className={tw.reviewAll} ref={parent}>
+    <div className={`reviewAll [min-height:0] [overflow:auto] reviewAll`} ref={parent}>
       <div
         style={{
           height: virtualizer.getTotalSize(),
@@ -274,7 +287,7 @@ export const DetailsPane = memo(function DetailsPane({
 
   return (
     <aside
-      className={tw.detailsPane}
+      className={`detailsPane [background:var(--card)] [min-height:0] [min-width:0] [border-left:1px_solid_var(--border)] [display:grid] [grid-template-rows:26px_minmax(0,_1fr)] [position:relative] [&>_.verticalResizeHandle]:[left:-4px] [&>_.verticalResizeHandle]:[right:auto] detailsPane`}
       aria-label="Revision review"
       data-commit-selection={commit ? "selected" : "empty"}
       style={
@@ -289,7 +302,9 @@ export const DetailsPane = memo(function DetailsPane({
         onChange={onReviewWidthChange}
         value={reviewWidth}
       />
-      <div className={tw.detailsToolbar}>
+      <div
+        className={`detailsToolbar [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:1px] [padding:2px_5px] [&>_select]:[background:var(--secondary)] [&>_select]:[border:1px_solid_var(--border)] [&>_select]:[height:25px] [&>_select]:[max-width:170px] [&>_select]:[padding:0_6px] detailsToolbar`}
+      >
         <Tooltip>
           <TooltipTrigger
             render={
@@ -336,7 +351,9 @@ export const DetailsPane = memo(function DetailsPane({
             placement="below"
             width={250}
             content={
-              <div className={tw.detailsViewOptions}>
+              <div
+                className={`detailsViewOptions [display:grid] [gap:3px] [padding:5px] detailsViewOptions`}
+              >
                 <CheckboxInput
                   isDisabled={!commit || files.length === 0}
                   label="Show All Changes"
@@ -374,7 +391,7 @@ export const DetailsPane = memo(function DetailsPane({
           </Popover>
           <TooltipContent>View Options</TooltipContent>
         </Tooltip>
-        <span className={tw.filterSpacer} />
+        <span className={`filterSpacer [flex:1] filterSpacer`} />
         <Tooltip>
           <TooltipTrigger
             render={
@@ -429,8 +446,13 @@ export const DetailsPane = memo(function DetailsPane({
           readFile={onReadFile}
         />
       ) : (
-        <div className={tw.revisionSummary}>
-          <nav aria-label="Changed files" className={tw.revisionFileList}>
+        <div
+          className={`revisionSummary [display:grid] [grid-template-rows:minmax(0,_2fr)_minmax(150px,_1fr)] [min-height:0] [min-width:0] [position:relative] revisionSummary`}
+        >
+          <nav
+            aria-label="Changed files"
+            className={`revisionFileList [border-bottom:1px_solid_var(--border)] [min-height:0] [overflow:auto] [padding:4px] [&>_button]:[align-items:center] [&>_button]:[background:transparent] [&>_button]:[display:flex] [&>_button]:[gap:5px] [&>_button]:[min-height:28px] [&>_button]:[padding:3px_6px] [&>_button]:[text-align:left] [&>_button]:[width:100%] [&>_button.selected]:[background:var(--accent)] [&>_button[aria-current=true]]:[background:var(--accent)] [&>_button_small]:[color:var(--disabled-foreground)] [&>_button_small]:[flex:none] [&>_button_small]:[font-size:9px] revisionFileList`}
+          >
             {loading ? (
               <Spinner className="h-full w-full justify-center" label="Loading files…" />
             ) : files.length === 0 ? (
@@ -448,7 +470,9 @@ export const DetailsPane = memo(function DetailsPane({
                   type="button"
                   className={cn(
                     "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
-                    selectedPath === file.path ? tw.selected : undefined,
+                    selectedPath === file.path
+                      ? `selected [background:var(--accent)] [color:var(--foreground)] selected`
+                      : undefined,
                   )}
                   variant="ghost"
                   size="default"
@@ -456,7 +480,10 @@ export const DetailsPane = memo(function DetailsPane({
                   <StatusBadge className={statusClass(file.status)}>
                     {statusLetter(file.status)}
                   </StatusBadge>
-                  <span className={`${tw.ellipsis} grid`} title={file.path}>
+                  <span
+                    className={`${`ellipsis [min-width:0] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap] ellipsis`} grid`}
+                    title={file.path}
+                  >
                     <strong className="truncate">{file.path.split("/").at(-1)}</strong>
                     {file.path.includes("/") && (
                       <small className="truncate">
@@ -471,7 +498,9 @@ export const DetailsPane = memo(function DetailsPane({
               ))
             )}
           </nav>
-          <section className={tw.revisionCommitDetails}>
+          <section
+            className={`revisionCommitDetails [border-top:1px_solid_var(--border)] [display:flex] [flex-direction:column] [gap:5px] [min-height:0] [overflow:auto] [padding:7px_8px] [&>_header]:[align-items:center] [&>_header]:[display:flex] [&>_header]:[gap:2px] [&>_header_strong]:[flex:1] [&>_header_button]:[background:transparent] [&>_header_button]:[height:22px] [&>_header_button]:[width:22px] [&>_strong]:[overflow-wrap:anywhere] [&>_span]:[color:var(--muted-foreground)] [&>_small]:[color:var(--disabled-foreground)] [&>_code]:[color:var(--disabled-foreground)] [&>_code]:[font-size:10px] [&>_code]:[overflow-wrap:anywhere] [&>_select]:[background:var(--secondary)] [&>_select]:[border:1px_solid_var(--border)] [&>_select]:[height:25px] [&>_select]:[width:100%] [&>_footer]:[display:flex] [&>_footer]:[flex-wrap:wrap] [&>_footer]:[gap:4px] [&>_footer_button]:[background:var(--secondary)] [&>_footer_button]:[border:1px_solid_var(--border)] [&>_footer_button]:[height:25px] [&>_footer_button]:[padding:0_6px] revisionCommitDetails`}
+          >
             <header>
               <strong>Commit details</strong>
               <Tooltip>
@@ -514,26 +543,30 @@ export const DetailsPane = memo(function DetailsPane({
             <small>{commit.email}</small>
             <code>{commit.oid}</code>
             {commit.parents.length > 0 && (
-              <select
-                aria-label="Compare commit parent"
-                onChange={(event) => onParentRevisionChange(event.target.value)}
+              <Select
+                onValueChange={(value) => value && onParentRevisionChange(value)}
                 value={parentRevision ?? commit.parents[0]}
               >
-                {commit.parents.map((parent, index) => (
-                  <option key={parent} value={parent}>
-                    Parent {index + 1} · {parent.slice(0, 8)}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger aria-label="Compare commit parent" className="w-full" size="sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent align="start">
+                  {commit.parents.map((parent, index) => (
+                    <SelectItem key={parent} value={parent}>
+                      Parent {index + 1} · {parent.slice(0, 8)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             )}
             {signature && (
               <span
                 className={
                   signature.status === "G"
-                    ? tw.signatureGood
+                    ? `signatureGood [color:var(--success)] signatureGood`
                     : signature.status === "N"
-                      ? tw.muted
-                      : tw.signatureBad
+                      ? `muted [color:var(--disabled-foreground)] [font-size:10px] muted`
+                      : `signatureBad [color:var(--destructive)] signatureBad`
                 }
               >
                 {signature.status === "G"

@@ -5,7 +5,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { mergeProjectTreeEntries, type ProjectTreeEntry } from "../domain/projectTree";
 import type { ScratchFile } from "../domain/scratchFiles";
 import type { FileChange, TreeEntry } from "../domain/types";
-import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
 import { Notice } from "./Notice";
 import { CheckboxInput, Selector } from "./ProductFormControls";
@@ -248,14 +247,19 @@ export function ProjectToolWindow({
   };
 
   return (
-    <section aria-label="Project Tool Window" className={tw.projectToolWindow}>
+    <section
+      aria-label="Project Tool Window"
+      className={`projectToolWindow [html[data-distraction-free-mode=true]_&]:hidden! [html[data-presentation-mode=true]_&]:hidden! [background:var(--card)] rounded-lg [display:grid] [grid-template-rows:34px_minmax(0,_1fr)] [min-height:0] [min-width:0] [overflow:hidden] [position:relative] [&>_.verticalResizeHandle]:[right:0] projectToolWindow rounded-lg`}
+    >
       <VerticalResizeHandle
         direction={1}
         label="Resize Project tool window"
         onChange={onWidthChange}
         value={width}
       />
-      <header className={tw.projectToolHeader}>
+      <header
+        className={`projectToolHeader [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [padding:0_3px_0_6px] [&>_span]:[flex:1] [&>_button]:[align-items:center] [&>_button]:[background:transparent] [&>_button]:rounded-sm [&>_button]:[color:var(--muted-foreground)] [&>_button]:[display:flex] [&>_button]:[height:24px] [&>_button]:[justify-content:center] [&>_button]:[width:24px] [&>_button:first-child]:[color:var(--foreground)] [&>_button:first-child]:[font-size:12px] [&>_button:first-child]:[padding:0_4px] [&>_button:first-child]:[width:auto] [&>_button:hover]:[background:var(--muted)] [&>_button:hover]:[color:var(--foreground)] projectToolHeader [&>_button]:rounded-sm`}
+      >
         <Tooltip>
           <TooltipTrigger
             render={
@@ -370,7 +374,9 @@ export function ProjectToolWindow({
             placement="below"
             width={286}
             content={
-              <div className={tw.projectViewOptions}>
+              <div
+                className={`projectViewOptions [display:grid] [gap:3px] [padding:5px] [&>_strong]:[color:var(--muted-foreground)] [&>_strong]:[font-size:10px] [&>_strong]:[font-weight:600] [&>_strong]:[margin:5px_6px_2px] [&>_strong:not(:first-child)]:[border-top:1px_solid_var(--border)] [&>_strong:not(:first-child)]:[padding-top:7px] projectViewOptions`}
+              >
                 <strong>Behavior</strong>
                 <CheckboxInput
                   label="Open Files with Single Click"
@@ -460,7 +466,11 @@ export function ProjectToolWindow({
           <TooltipContent>Hide</TooltipContent>
         </Tooltip>
       </header>
-      <div aria-label="Project structure tree" className={tw.projectTree} role="tree">
+      <div
+        aria-label="Project structure tree"
+        className={`projectTree [min-height:0] [overflow:auto] [padding:3px_0] projectTree`}
+        role="tree"
+      >
         <Button
           aria-label={`${repositoryName}  ${repositoryPath}`}
           aria-expanded={expanded.has("")}
@@ -477,14 +487,24 @@ export function ProjectToolWindow({
           type="button"
           className={cn(
             "grid min-h-0 text-xs whitespace-normal text-left aria-selected:bg-muted! aria-current:bg-muted!",
-            tw.projectTreeRow,
+            `projectTreeRow [align-items:center] [background:transparent] [border:0] [color:var(--foreground)] [display:grid] [font-size:12px] [gap:4px] [grid-template-columns:14px_16px_minmax(0,_1fr)_auto] [height:20px] [padding:0_7px_0_calc(7px_+_var(--tree-depth)_*_14px)] [text-align:left] [width:100%] [&:hover]:[background:var(--overlay-hover)] [&[aria-selected=true]]:[background:var(--accent)] [&>_span:nth-child(3)]:[overflow:hidden] [&>_span:nth-child(3)]:[text-overflow:ellipsis] [&>_span:nth-child(3)]:[white-space:nowrap] [&_small]:[color:var(--disabled-foreground)] [&_small]:[font-size:9px] [&_em]:[color:var(--primary)] [&_em]:[font-size:10px] [&_em]:[font-style:normal] [&_em[data-status=untracked]]:[color:var(--success)] [&_em[data-status=deleted]]:[color:var(--destructive)] [&_em[data-status=conflicted]]:[color:var(--destructive)] [html[data-compact=true]_&]:h-[22px]! projectTreeRow`,
           )}
           variant="ghost"
           size="default"
         >
-          <Icon className={expanded.has("") ? tw.rotated : undefined} name="chevron" size={12} />
-          <Icon className={tw.projectFolderIcon} name="folder" size={15} />
-          <span className={tw.projectRootLabel}>
+          <Icon
+            className={expanded.has("") ? `rotated [transform:rotate(90deg)] rotated` : undefined}
+            name="chevron"
+            size={12}
+          />
+          <Icon
+            className={`projectFolderIcon [color:var(--project-folder)] projectFolderIcon`}
+            name="folder"
+            size={15}
+          />
+          <span
+            className={`projectRootLabel [align-items:center] [display:flex]! [gap:5px] [&_strong]:[font-weight:600] [&_small]:[color:var(--disabled-foreground)] [&_small]:[font-size:10px] [&_small]:[overflow:hidden] [&_small]:[text-overflow:ellipsis] [&_small]:[white-space:nowrap] projectRootLabel`}
+          >
             <strong>{repositoryName}</strong>
             <small>{repositoryPath}</small>
           </span>
@@ -518,22 +538,32 @@ export function ProjectToolWindow({
                     type="button"
                     className={cn(
                       "grid min-h-0 text-xs whitespace-normal text-left aria-selected:bg-accent aria-current:bg-accent",
-                      tw.projectTreeRow,
+                      `projectTreeRow [align-items:center] [background:transparent] [border:0] [color:var(--foreground)] [display:grid] [font-size:12px] [gap:4px] [grid-template-columns:14px_16px_minmax(0,_1fr)_auto] [height:20px] [padding:0_7px_0_calc(7px_+_var(--tree-depth)_*_14px)] [text-align:left] [width:100%] [&:hover]:[background:var(--overlay-hover)] [&[aria-selected=true]]:[background:var(--accent)] [&>_span:nth-child(3)]:[overflow:hidden] [&>_span:nth-child(3)]:[text-overflow:ellipsis] [&>_span:nth-child(3)]:[white-space:nowrap] [&_small]:[color:var(--disabled-foreground)] [&_small]:[font-size:9px] [&_em]:[color:var(--primary)] [&_em]:[font-size:10px] [&_em]:[font-style:normal] [&_em[data-status=untracked]]:[color:var(--success)] [&_em[data-status=deleted]]:[color:var(--destructive)] [&_em[data-status=conflicted]]:[color:var(--destructive)] [html[data-compact=true]_&]:h-[22px]! projectTreeRow`,
                     )}
                     variant="ghost"
                     size="default"
                   >
                     {directory ? (
                       <Icon
-                        className={expanded.has(entry.path) ? tw.rotated : undefined}
+                        className={
+                          expanded.has(entry.path)
+                            ? `rotated [transform:rotate(90deg)] rotated`
+                            : undefined
+                        }
                         name="chevron"
                         size={12}
                       />
                     ) : (
-                      <span className={tw.projectTreeIndent} />
+                      <span
+                        className={`projectTreeIndent [display:block] [height:12px] [width:12px] projectTreeIndent`}
+                      />
                     )}
                     <Icon
-                      className={directory ? tw.projectFolderIcon : tw.projectFileIcon}
+                      className={
+                        directory
+                          ? `projectFolderIcon [color:var(--project-folder)] projectFolderIcon`
+                          : `projectFileIcon [color:var(--muted-foreground)] projectFileIcon`
+                      }
                       name={directory ? "folder" : "file"}
                       size={15}
                     />
@@ -573,13 +603,15 @@ export function ProjectToolWindow({
                   type="button"
                   className={cn(
                     "flex min-h-0 text-xs whitespace-normal text-left aria-selected:bg-accent aria-current:bg-accent",
-                    tw.projectScratches,
+                    `projectScratches [align-items:center] [background:transparent] [color:var(--muted-foreground)] [display:flex] [gap:4px] [height:22px] [padding:0_8px] [text-align:left] projectScratches`,
                   )}
                   variant="ghost"
                   size="default"
                 >
                   <Icon
-                    className={scratchesExpanded ? tw.rotated : undefined}
+                    className={
+                      scratchesExpanded ? `rotated [transform:rotate(90deg)] rotated` : undefined
+                    }
                     name="chevron"
                     size={12}
                   />
@@ -607,7 +639,7 @@ export function ProjectToolWindow({
                     type="button"
                     className={cn(
                       "grid min-h-0 text-xs whitespace-normal text-left aria-selected:bg-accent aria-current:bg-accent",
-                      tw.projectScratchFile,
+                      `projectScratchFile [align-items:center] [background:transparent] [display:grid] [gap:4px] [grid-template-columns:12px_16px_minmax(0,_1fr)] [height:22px] [padding:0_8px] [text-align:left] [width:100%] [&:hover]:[background:var(--muted)] [&:focus]:[background:var(--accent)] [&>_span:last-child]:[overflow:hidden] [&>_span:last-child]:[text-overflow:ellipsis] [&>_span:last-child]:[white-space:nowrap] projectScratchFile`,
                     )}
                     variant="ghost"
                     size="default"

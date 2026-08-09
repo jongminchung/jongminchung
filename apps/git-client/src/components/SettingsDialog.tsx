@@ -1,4 +1,6 @@
 import { Button } from "@jongminchung/ui/components/button";
+import { ScrollArea } from "@jongminchung/ui/components/scroll-area";
+import { Table, TableBody, TableCell, TableRow } from "@jongminchung/ui/components/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@jongminchung/ui/components/tabs";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { useMemo, useState } from "react";
@@ -13,14 +15,12 @@ import {
 } from "../domain/commands";
 import { isProductKeymapPreset } from "../domain/productSettings";
 import { type ProductSettings, type ProductZoom } from "../domain/productSettings";
-import { tw } from "../styles/tailwind";
 import { useAppearance } from "./AppearanceProvider";
 import { Icon } from "./Icon";
 import { Notice } from "./Notice";
 import { RadioList, RadioListItem } from "./ProductCollections";
 import { Dialog, DialogHeader } from "./ProductDialog";
-import { CheckboxInput } from "./ProductFormControls";
-import { TextInput } from "./ProductFormControls";
+import { CheckboxInput, Selector, TextInput } from "./ProductFormControls";
 
 type SettingsSection = "appearance" | "keymap" | "versionControl" | "notifications";
 
@@ -143,7 +143,9 @@ export function SettingsDialog({
       purpose="form"
       width="min(920px, calc(100vw - 70px))"
     >
-      <section className={tw.settingsDialog}>
+      <section
+        className={`settingsDialog [display:grid] [grid-template-columns:230px_minmax(0,_1fr)] [grid-template-rows:auto_minmax(0,_1fr)_auto] [height:min(680px,_calc(100vh_-_70px))] [min-height:0] [&>_[data-slot=dialog-header]]:[grid-column:1/-1] [&>_aside]:[background:var(--muted)] [&>_aside]:[border-right:1px_solid_var(--border)] [&>_aside]:[display:flex] [&>_aside]:[flex-direction:column] [&>_aside]:[gap:2px] [&>_aside]:[padding:7px] [&>_aside_button]:[align-items:center] [&>_aside_button]:[background:transparent] [&>_aside_button]:[display:flex] [&>_aside_button]:[gap:8px] [&>_aside_button]:[height:31px] [&>_aside_button]:[padding:0_8px] [&>_aside_button]:[text-align:left] [&>_main]:[min-height:0] [&>_main]:[overflow:auto] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:flex] [&>_footer]:[grid-column:1/-1] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:8px_12px] settingsDialog`}
+      >
         <DialogHeader hasDivider onOpenChange={(open) => !open && onClose()} title={title} />
         <Tabs
           className="contents"
@@ -188,7 +190,9 @@ export function SettingsDialog({
             </TabsTrigger>
           </TabsList>
           <TabsContent render={<main />} value="appearance">
-            <div className={tw.settingsPage}>
+            <div
+              className={`settingsPage [display:flex] [flex-direction:column] [gap:14px] [padding:18px_20px] [&>_h2]:[font-size:16px] [&>_h2]:[margin:0] [&>_p]:[color:var(--muted-foreground)] [&>_p]:[line-height:1.5] [&>_p]:[margin:0] settingsPage`}
+            >
               <h2>Appearance</h2>
               <RadioList
                 label="Theme"
@@ -233,46 +237,32 @@ export function SettingsDialog({
                 }
                 value={settings.adjustRedGreenVision}
               />
-              <label>
-                IDE font
-                <select
-                  onChange={(event) =>
-                    onSettingsChange({
-                      ...settings,
-                      ideFontSize: Number(event.currentTarget.value),
-                    })
-                  }
-                  value={settings.ideFontSize}
-                >
-                  {[8, 9, 10, 11, 12, 13, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72].map(
-                    (size) => (
-                      <option key={size} value={size}>
-                        {size.toFixed(1)}
-                      </option>
-                    ),
-                  )}
-                </select>
-              </label>
-              <label>
-                Editor font
-                <select
-                  onChange={(event) =>
-                    onSettingsChange({
-                      ...settings,
-                      editorFontSize: Number(event.currentTarget.value),
-                    })
-                  }
-                  value={settings.editorFontSize}
-                >
-                  {[8, 9, 10, 11, 12, 13, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72].map(
-                    (size) => (
-                      <option key={size} value={size}>
-                        {size.toFixed(1)}
-                      </option>
-                    ),
-                  )}
-                </select>
-              </label>
+              <Selector
+                label="IDE font"
+                onChange={(value) =>
+                  onSettingsChange({
+                    ...settings,
+                    ideFontSize: Number(value),
+                  })
+                }
+                options={[8, 9, 10, 11, 12, 13, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72].map(
+                  (size) => ({ label: size.toFixed(1), value: String(size) }),
+                )}
+                value={String(settings.ideFontSize)}
+              />
+              <Selector
+                label="Editor font"
+                onChange={(value) =>
+                  onSettingsChange({
+                    ...settings,
+                    editorFontSize: Number(value),
+                  })
+                }
+                options={[8, 9, 10, 11, 12, 13, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72].map(
+                  (size) => ({ label: size.toFixed(1), value: String(size) }),
+                )}
+                value={String(settings.editorFontSize)}
+              />
               <RadioList
                 label="IDE zoom"
                 onChange={(value) =>
@@ -290,30 +280,30 @@ export function SettingsDialog({
             </div>
           </TabsContent>
           <TabsContent render={<main />} value="keymap">
-            <div className={tw.settingsPage}>
+            <div
+              className={`settingsPage [display:flex] [flex-direction:column] [gap:14px] [padding:18px_20px] [&>_h2]:[font-size:16px] [&>_h2]:[margin:0] [&>_p]:[color:var(--muted-foreground)] [&>_p]:[line-height:1.5] [&>_p]:[margin:0] settingsPage`}
+            >
               <h2>Keymap</h2>
-              <label>
-                Keymap
-                <select
-                  onChange={(event) => {
-                    const value = event.currentTarget.value;
-                    if (isProductKeymapPreset(value)) {
-                      onSettingsChange({
-                        ...settings,
-                        keymapPreset: value,
-                      });
-                    }
-                  }}
-                  value={settings.keymapPreset}
-                >
-                  <option>macOS</option>
-                  <option>Emacs</option>
-                  <option>IntelliJ IDEA Classic</option>
-                  <option>macOS System Shortcuts</option>
-                  <option>Sublime Text</option>
-                  <option>Sublime Text (macOS)</option>
-                </select>
-              </label>
+              <Selector
+                label="Keymap"
+                onChange={(value) => {
+                  if (isProductKeymapPreset(value)) {
+                    onSettingsChange({
+                      ...settings,
+                      keymapPreset: value,
+                    });
+                  }
+                }}
+                options={[
+                  "macOS",
+                  "Emacs",
+                  "IntelliJ IDEA Classic",
+                  "macOS System Shortcuts",
+                  "Sublime Text",
+                  "Sublime Text (macOS)",
+                ].map((value) => ({ label: value, value }))}
+                value={settings.keymapPreset}
+              />
               <TextInput
                 isLabelHidden
                 label="Search keymap"
@@ -332,62 +322,72 @@ export function SettingsDialog({
                   {keymapError}
                 </Notice>
               )}
-              <div className={tw.keymapTable} role="table" aria-label="Keymap actions">
-                {filteredCommands.map((command) => (
-                  <div key={command.id} role="row">
-                    <span role="cell">
-                      <strong>{command.label}</strong>
-                      <small>{command.id}</small>
-                    </span>
-                    <span className="contents" role="cell">
-                      <Button
-                        aria-label={`Shortcut for ${command.label}`}
-                        onClick={() => setCapturingCommand(command.id)}
-                        onKeyDown={(event) =>
-                          capturingCommand === command.id && captureShortcut(command.id, event)
-                        }
-                        type="button"
-                        className={cn("h-7 px-2.5")}
-                        variant="outline"
-                        size="sm"
-                      >
-                        {capturingCommand === command.id
-                          ? "Press shortcut…"
-                          : displayAccelerator(
-                              resolvedAccelerator(command, settings.keymapOverrides),
-                            ) || "—"}
-                      </Button>
-                    </span>
-                    {Object.hasOwn(settings.keymapOverrides, command.id) && (
-                      <span className="contents" role="cell">
-                        <Button
-                          aria-label={`Reset shortcut for ${command.label}`}
-                          onClick={() => {
-                            const keymapOverrides = {
-                              ...settings.keymapOverrides,
-                            };
-                            delete keymapOverrides[command.id];
-                            onSettingsChange({
-                              ...settings,
-                              keymapOverrides,
-                            });
-                          }}
-                          type="button"
-                          className={cn("h-7 px-2.5")}
-                          variant="outline"
-                          size="sm"
-                        >
-                          Reset
-                        </Button>
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
+              <ScrollArea className="min-h-0 flex-1 rounded-lg border border-border">
+                <Table aria-label="Keymap actions" className="table-fixed text-xs">
+                  <TableBody>
+                    {filteredCommands.map((command) => (
+                      <TableRow className="h-[39px]" key={command.id}>
+                        <TableCell className="w-auto min-w-0 py-1">
+                          <span className="grid min-w-0">
+                            <strong>{command.label}</strong>
+                            <small className="truncate text-[9px] text-muted-foreground">
+                              {command.id}
+                            </small>
+                          </span>
+                        </TableCell>
+                        <TableCell className="w-[130px] py-1">
+                          <Button
+                            aria-label={`Shortcut for ${command.label}`}
+                            onClick={() => setCapturingCommand(command.id)}
+                            onKeyDown={(event) =>
+                              capturingCommand === command.id && captureShortcut(command.id, event)
+                            }
+                            type="button"
+                            className="h-[26px] w-full justify-start font-mono"
+                            variant="outline"
+                            size="sm"
+                          >
+                            {capturingCommand === command.id
+                              ? "Press shortcut…"
+                              : displayAccelerator(
+                                  resolvedAccelerator(command, settings.keymapOverrides),
+                                ) || "—"}
+                          </Button>
+                        </TableCell>
+                        <TableCell className="w-[58px] py-1">
+                          {Object.hasOwn(settings.keymapOverrides, command.id) ? (
+                            <Button
+                              aria-label={`Reset shortcut for ${command.label}`}
+                              onClick={() => {
+                                const keymapOverrides = {
+                                  ...settings.keymapOverrides,
+                                };
+                                delete keymapOverrides[command.id];
+                                onSettingsChange({
+                                  ...settings,
+                                  keymapOverrides,
+                                });
+                              }}
+                              type="button"
+                              className="h-[26px] px-2"
+                              variant="outline"
+                              size="sm"
+                            >
+                              Reset
+                            </Button>
+                          ) : null}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
             </div>
           </TabsContent>
           <TabsContent render={<main />} value="versionControl">
-            <div className={tw.settingsPage}>
+            <div
+              className={`settingsPage [display:flex] [flex-direction:column] [gap:14px] [padding:18px_20px] [&>_h2]:[font-size:16px] [&>_h2]:[margin:0] [&>_p]:[color:var(--muted-foreground)] [&>_p]:[line-height:1.5] [&>_p]:[margin:0] settingsPage`}
+            >
               <h2>Version Control</h2>
               {showRepositorySettings && onOpenRepositorySettings ? (
                 <>
@@ -414,7 +414,9 @@ export function SettingsDialog({
             </div>
           </TabsContent>
           <TabsContent render={<main />} value="notifications">
-            <div className={tw.settingsPage}>
+            <div
+              className={`settingsPage [display:flex] [flex-direction:column] [gap:14px] [padding:18px_20px] [&>_h2]:[font-size:16px] [&>_h2]:[margin:0] [&>_p]:[color:var(--muted-foreground)] [&>_p]:[line-height:1.5] [&>_p]:[margin:0] settingsPage`}
+            >
               <h2>Notifications</h2>
               <CheckboxInput
                 label="Show operation notifications"

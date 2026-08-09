@@ -7,9 +7,9 @@ import {
   type ProductSettings,
   type ProductZoom,
 } from "../domain/productSettings";
-import { tw } from "../styles/tailwind";
 import { RadioList, RadioListItem } from "./ProductCollections";
 import { Dialog, DialogHeader } from "./ProductDialog";
+import { Selector } from "./ProductFormControls";
 
 const THEMES: readonly {
   readonly value: AppearanceTheme | "system";
@@ -51,7 +51,9 @@ export function QuickSwitchSchemeDialog({
       purpose="info"
       width={520}
     >
-      <section className={tw.quickSwitchSchemeDialog}>
+      <section
+        className={`quickSwitchSchemeDialog [display:grid] [gap:10px] [grid-template-columns:1fr_1fr] [padding-bottom:12px] [&>_*:not(:first-child)]:[margin-left:12px] [&>_*:not(:first-child)]:[margin-right:12px] [&>_header]:[grid-column:1_/_3] [&>_div:first-of-type]:[grid-column:1_/_3] [&_h3]:[font-size:11px] [&_h3]:[margin:0_0_5px] [&_select]:[background:var(--secondary)] [&_select]:[border:1px_solid_var(--border)] [&_select]:rounded-sm [&_select]:[color:var(--foreground)] [&_select]:[height:28px] [&_select]:[width:100%] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:flex] [&>_footer]:[grid-column:1_/_3] [&>_footer]:[justify-content:flex-end] [&>_footer]:[margin-left:0]! [&>_footer]:[margin-right:0]! [&>_footer]:[padding:10px_12px_0] quickSwitchSchemeDialog [&_select]:rounded-sm`}
+      >
         <DialogHeader hasDivider onOpenChange={(open) => !open && onClose()} title="Switch" />
         <div>
           <h3>Theme and Color Scheme</h3>
@@ -78,10 +80,10 @@ export function QuickSwitchSchemeDialog({
         </div>
         <div>
           <h3>Keymap</h3>
-          <select
-            aria-label="Keymap"
-            onChange={(event) => {
-              const value = event.currentTarget.value;
+          <Selector
+            isLabelHidden
+            label="Keymap"
+            onChange={(value) => {
               if (isProductKeymapPreset(value)) {
                 onSettingsChange({
                   ...settings,
@@ -89,12 +91,9 @@ export function QuickSwitchSchemeDialog({
                 });
               }
             }}
+            options={KEYMAPS.map((keymap) => ({ label: keymap, value: keymap }))}
             value={settings.keymapPreset}
-          >
-            {KEYMAPS.map((keymap) => (
-              <option key={keymap}>{keymap}</option>
-            ))}
-          </select>
+          />
         </div>
         <div>
           <h3>IDE Scale</h3>

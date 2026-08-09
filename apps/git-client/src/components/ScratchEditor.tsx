@@ -1,6 +1,5 @@
 import { lazy, Suspense } from "react";
 import type { ScratchFile } from "../domain/scratchFiles";
-import { tw } from "../styles/tailwind";
 import { Spinner } from "./ProductCollections";
 
 const CodeMirrorFile = lazy(() => import("./CodeMirrorFile"));
@@ -21,7 +20,10 @@ export function ScratchEditor({
   readonly onToggleBookmark?: (line: number, column: number) => void;
 }) {
   return (
-    <section aria-label={`Scratch file: ${file.name}`} className={tw.scratchEditor}>
+    <section
+      aria-label={`Scratch file: ${file.name}`}
+      className={`scratchEditor [background:var(--card)] [height:100%] [min-height:0] [min-width:0] [overflow:hidden] scratchEditor`}
+    >
       <Suspense
         fallback={<Spinner className="h-full w-full justify-center" label="Loading editor…" />}
       >

@@ -523,22 +523,22 @@ describe("ElectronGitBridge real utility fixture", () => {
 
     const result = await bridge.executeSynchronizedBranchOperation([second.id, first.id], {
       kind: "createBranch",
-      name: "feature/parity",
+      name: "feature/synchronized-flow",
       startPoint: "HEAD",
       checkout: true,
     });
     expect(result.outcomes).toHaveLength(2);
     expect(result.outcomes.every((outcome) => outcome.succeeded)).toBe(true);
     expect(result.rollbackPlan).toHaveLength(2);
-    expect(git(firstPath, "branch", "--show-current").trim()).toBe("feature/parity");
-    expect(git(secondPath, "branch", "--show-current").trim()).toBe("feature/parity");
+    expect(git(firstPath, "branch", "--show-current").trim()).toBe("feature/synchronized-flow");
+    expect(git(secondPath, "branch", "--show-current").trim()).toBe("feature/synchronized-flow");
 
     const rollback = await bridge.applyMultiRootRollback(result.rollbackPlan);
     expect(rollback).toHaveLength(2);
     expect(rollback.every((outcome) => outcome.succeeded)).toBe(true);
     for (const path of [firstPath, secondPath]) {
       expect(git(path, "branch", "--show-current").trim()).toBe("main");
-      expect(git(path, "branch", "--list", "feature/parity").trim()).toBe("");
+      expect(git(path, "branch", "--list", "feature/synchronized-flow").trim()).toBe("");
     }
 
     await Promise.all([bridge.unwatchRepository(first.id), bridge.unwatchRepository(second.id)]);

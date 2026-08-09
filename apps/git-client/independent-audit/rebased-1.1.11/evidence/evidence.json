@@ -57,7 +57,14 @@
     "defaultLeftToolWindow": "Project",
     "defaultCommitSelection": null,
     "emptyReviewLabels": ["Select commit to view changes", "Commit details"],
-    "toolbarLabels": ["Project: dirty", "Update Project...", "Push…", "main", "Search Everywhere", "IDE and Project Settings"],
+    "toolbarLabels": [
+      "Project: dirty",
+      "Update Project...",
+      "Push…",
+      "main",
+      "Search Everywhere",
+      "IDE and Project Settings"
+    ],
     "logFilterLabels": ["Branch", "User", "Date", "Paths"],
     "leftToolLabels": ["Project", "Commit", "More", "Terminal", "Git"]
   },

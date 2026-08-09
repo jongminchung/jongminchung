@@ -28,7 +28,6 @@ import type {
   GitLocalHistoryScope,
 } from "../shared/contracts/git-utility";
 import type { GitOperation, RecoveryEntry, ShelfEntry } from "../shared/contracts/model";
-import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
 import { FindResultsPanel, type FindResultsSession } from "./FindResultsPanel";
 import { GitConsolePanel } from "./GitConsolePanel";
@@ -399,7 +398,7 @@ export const BottomPanel = memo(function BottomPanel({
   return (
     <section
       aria-label={`${active} Tool Window`}
-      className={`${tw.bottomPanel} ${collapsed ? tw.bottomCollapsed : ""} ${active === "terminal" ? tw.bottomTerminalPanel : ""}`}
+      className={`${`bottomPanel [background:var(--card)] rounded-t-xl rounded-b-none [display:grid] [grid-template-rows:4px_31px_minmax(0,_1fr)] [min-height:0] [overflow:hidden] bottomPanel rounded-t-xl rounded-b-none`} ${collapsed ? `bottomCollapsed [border-top:0] [height:0] [grid-template-rows:0] [overflow:hidden] bottomCollapsed` : ""} ${active === "terminal" ? `bottomTerminalPanel [grid-template-rows:4px_minmax(0,_1fr)] bottomTerminalPanel` : ""}`}
       data-tool-window-position="bottom"
       ref={panel}
       style={collapsed ? undefined : { height }}
@@ -411,7 +410,7 @@ export const BottomPanel = memo(function BottomPanel({
           aria-valuemax={MAX_BOTTOM_PANEL_HEIGHT}
           aria-valuemin={MIN_BOTTOM_PANEL_HEIGHT}
           aria-valuenow={height}
-          className={tw.bottomResizer}
+          className={`bottomResizer [background:transparent] [cursor:ns-resize] [position:relative] [z-index:3] [&::after]:[background:var(--input)] [&::after]:[content:\"\"] [&::after]:[height:1px] [&::after]:[left:0] [&::after]:[position:absolute] [&::after]:[right:0] [&::after]:[top:1px] [&:hover::after]:[background:var(--primary)] [&:hover::after]:[height:2px] [&:focus-visible::after]:[background:var(--primary)] [&:focus-visible::after]:[height:2px] bottomResizer`}
           onDoubleClick={() => onHeightChange(DEFAULT_BOTTOM_PANEL_HEIGHT)}
           onKeyDown={resizePanelWithKeyboard}
           onPointerDown={resizePanel}
@@ -430,7 +429,9 @@ export const BottomPanel = memo(function BottomPanel({
           }}
           value={active}
         >
-          <div className={tw.toolTabs}>
+          <div
+            className={`toolTabs [align-items:stretch] [background:var(--secondary)] [display:flex] [&_button]:[align-items:center] [&_button]:[background:transparent] [&_button]:[border-right:1px_solid_var(--border)] [&_button]:[color:var(--muted-foreground)] [&_button]:[display:flex] [&_button]:[gap:6px] [&_button]:[padding:0_12px] [&_button:hover]:[background:var(--muted)] [&_button:hover]:[color:var(--foreground)] [&_.activeToolTab]:[box-shadow:inset_0_-2px_var(--primary)] [&_.activeToolTab]:[color:var(--foreground)] [&_.activeToolTab]:[font-weight:600] [&_button_em]:[align-items:center] [&_button_em]:[background:var(--muted)] [&_button_em]:rounded-lg [&_button_em]:[display:flex] [&_button_em]:[font-size:9px] [&_button_em]:[font-style:normal] [&_button_em]:[height:14px] [&_button_em]:[justify-content:center] [&_button_em]:[min-width:14px] [&>_span]:[flex:1] [background:var(--card)] toolTabs [&_button_em]:rounded-lg`}
+          >
             <TabsList activateOnFocus aria-label="Bottom tool windows" className="contents">
               {tabs.map((tab) => (
                 <TabsTrigger
@@ -447,7 +448,9 @@ export const BottomPanel = memo(function BottomPanel({
                   value={tab.id}
                   className={cn(
                     "inline-flex h-7 items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent px-2.5 text-xs text-muted-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 data-active:bg-accent data-active:text-foreground disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-                    active === tab.id ? tw.activeToolTab : undefined,
+                    active === tab.id
+                      ? `activeToolTab [box-shadow:inset_0_-2px_var(--primary)] [color:var(--foreground)] [font-weight:600] [background:var(--accent)]! [color:var(--foreground)]! activeToolTab`
+                      : undefined,
                   )}
                 >
                   <Icon name={tab.icon} size={14} />
@@ -480,13 +483,17 @@ export const BottomPanel = memo(function BottomPanel({
       {!collapsed && (
         <div
           aria-labelledby={`bottom-tool-tab-${active}`}
-          className={tw.toolContent}
+          className={`toolContent [min-height:0] [overflow:hidden] toolContent`}
           id="bottom-tool-panel"
           role="tabpanel"
         >
           {active === "shelf" && (
-            <div className={tw.collectionTool}>
-              <div className={tw.collectionIntro}>
+            <div
+              className={`collectionTool [&_button]:[background:var(--muted)] [&_button]:[border:1px_solid_var(--border)] [&_button]:rounded-sm [&_button]:[height:27px] [&_button]:[padding:0_9px] [&_button]:[white-space:nowrap] [height:100%] [overflow:auto] collectionTool [&_button]:rounded-sm`}
+            >
+              <div
+                className={`collectionIntro [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:10px] [min-height:48px] [padding:8px_14px] [background:var(--muted)] [&_div]:[flex:1] [&_p]:[color:var(--muted-foreground)] [&_p]:[margin:2px_0_0] collectionIntro`}
+              >
                 <Icon name="shelf" size={24} />
                 <div>
                   <strong>Shelf</strong>
@@ -516,7 +523,10 @@ export const BottomPanel = memo(function BottomPanel({
                 </Notice>
               )}
               {shelves.map((shelf) => (
-                <div className={tw.collectionRow} key={shelf.id}>
+                <div
+                  className={`collectionRow [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:10px] [min-height:48px] [padding:8px_14px] [&_div]:[flex:1] [&_small]:[color:var(--disabled-foreground)] [&_small]:[display:block] [&_small]:[margin-top:3px] [border-bottom:0] collectionRow`}
+                  key={shelf.id}
+                >
                   <Icon name="patch" size={16} />
                   <div>
                     <strong>{shelf.message}</strong>
@@ -568,8 +578,12 @@ export const BottomPanel = memo(function BottomPanel({
             </div>
           )}
           {active === "stash" && (
-            <div className={tw.collectionTool}>
-              <div className={tw.collectionIntro}>
+            <div
+              className={`collectionTool [&_button]:[background:var(--muted)] [&_button]:[border:1px_solid_var(--border)] [&_button]:rounded-sm [&_button]:[height:27px] [&_button]:[padding:0_9px] [&_button]:[white-space:nowrap] [height:100%] [overflow:auto] collectionTool [&_button]:rounded-sm`}
+            >
+              <div
+                className={`collectionIntro [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:10px] [min-height:48px] [padding:8px_14px] [background:var(--muted)] [&_div]:[flex:1] [&_p]:[color:var(--muted-foreground)] [&_p]:[margin:2px_0_0] collectionIntro`}
+              >
                 <Icon name="stash" size={24} />
                 <div>
                   <strong>Git Stash</strong>
@@ -616,8 +630,13 @@ export const BottomPanel = memo(function BottomPanel({
                 <EmptyState title="No entries in refs/stash." />
               ) : (
                 stashes.map((stash) => (
-                  <div className={tw.stashEntry} key={stash.oid}>
-                    <div className={tw.collectionRow}>
+                  <div
+                    className={`stashEntry [border-bottom:1px_solid_var(--border)] [&.collectionRow]:[border-bottom:0] stashEntry`}
+                    key={stash.oid}
+                  >
+                    <div
+                      className={`collectionRow [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:10px] [min-height:48px] [padding:8px_14px] [&_div]:[flex:1] [&_small]:[color:var(--disabled-foreground)] [&_small]:[display:block] [&_small]:[margin-top:3px] [border-bottom:0] collectionRow`}
+                    >
                       <Icon name="commit" size={16} />
                       <div>
                         <strong>
@@ -708,7 +727,9 @@ export const BottomPanel = memo(function BottomPanel({
                       </Button>
                     </div>
                     {stashFiles[stash.oid] && (
-                      <div className={tw.stashFiles}>
+                      <div
+                        className={`stashFiles [background:var(--muted)] [display:grid] [gap:3px] [padding:6px_14px_8px_48px] [&_span]:[color:var(--muted-foreground)] [&_span]:[font-family:var(--font-family-code)] [&_strong]:[color:var(--primary)] [&_strong]:[display:inline-block] [&_strong]:[margin-right:8px] [&_strong]:[width:12px] stashFiles`}
+                      >
                         {(stashFiles[stash.oid] ?? []).map((file) => (
                           <span key={`${stash.oid}-${file.path}`}>
                             <strong>{file.status.charAt(0).toUpperCase()}</strong>
@@ -724,8 +745,12 @@ export const BottomPanel = memo(function BottomPanel({
             </div>
           )}
           {active === "recovery" && (
-            <div className={tw.collectionTool}>
-              <div className={tw.collectionIntro}>
+            <div
+              className={`collectionTool [&_button]:[background:var(--muted)] [&_button]:[border:1px_solid_var(--border)] [&_button]:rounded-sm [&_button]:[height:27px] [&_button]:[padding:0_9px] [&_button]:[white-space:nowrap] [height:100%] [overflow:auto] collectionTool [&_button]:rounded-sm`}
+            >
+              <div
+                className={`collectionIntro [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:10px] [min-height:48px] [padding:8px_14px] [background:var(--muted)] [&_div]:[flex:1] [&_p]:[color:var(--muted-foreground)] [&_p]:[margin:2px_0_0] collectionIntro`}
+              >
                 <Icon name="history" size={24} />
                 <div>
                   <strong>Ref Recovery Ledger</strong>
@@ -736,7 +761,10 @@ export const BottomPanel = memo(function BottomPanel({
                 <EmptyState title="No ref-changing operations recorded yet." />
               ) : (
                 recoveryEntries.map((entry) => (
-                  <div className={tw.collectionRow} key={entry.id}>
+                  <div
+                    className={`collectionRow [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:10px] [min-height:48px] [padding:8px_14px] [&_div]:[flex:1] [&_small]:[color:var(--disabled-foreground)] [&_small]:[display:block] [&_small]:[margin-top:3px] [border-bottom:0] collectionRow`}
+                    key={entry.id}
+                  >
                     <Icon name="history" size={16} />
                     <div>
                       <strong>{entry.operation}</strong>

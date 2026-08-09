@@ -2,7 +2,6 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, test } from "vitest";
-import { tw } from "../styles/tailwind";
 
 const sourceRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 const appRoot = join(sourceRoot, "..");
@@ -172,6 +171,15 @@ describe("workspace shadcn design system boundary", () => {
     expect(spinner).toContain('role="status"');
   });
 
+  test("publishes the shadcn primitives used by dense Git Client surfaces", () => {
+    for (const component of ["table", "scroll-area", "button-group"] as const) {
+      expect(existsSync(join(uiRoot, "src", "components", `${component}.tsx`)), component).toBe(
+        true,
+      );
+    }
+    expect(existsSync(join(uiRoot, "src", "components", "native-select.tsx"))).toBe(false);
+  });
+
   test("keeps product behavior in app-local compositions", () => {
     const dialog = readFileSync(join(sourceRoot, "components", "ProductDialog.tsx"), "utf8");
     const form = readFileSync(join(sourceRoot, "components", "ProductFormControls.tsx"), "utf8");
@@ -204,88 +212,30 @@ describe("workspace shadcn design system boundary", () => {
     expect(main).toContain("<TooltipProvider>");
   });
 
-  test("does not retain primitive-shaped Tailwind recipes", () => {
-    const stylesheet = readFileSync(join(sourceRoot, "styles", "index.css"), "utf8");
+  test("keeps component styling out of a central Tailwind registry", () => {
+    expect(existsSync(join(sourceRoot, "styles", "tailwind.ts"))).toBe(false);
 
-    for (const recipe of [
-      "activeButton",
-      "activityPill",
-      "activitySpinner",
-      "appDialog",
-      "appearanceControl",
-      "appearanceMenu",
-      "bookmarksEmptyState",
-      "closeTab",
-      "collectionError",
-      "commitRailClose",
-      "commitRailToggle",
-      "conflictDialog",
-      "contextMenu",
-      "dangerButton",
-      "dangerMenuItem",
-      "detailsEmpty",
-      "dialogBackdrop",
-      "editorEmptyWorkspace",
-      "emptyState",
-      "errorBanner",
-      "filterButton",
-      "gitBranchesError",
-      "headPill",
-      "hostingMore",
-      "hostingSelected",
-      "iconButton",
-      "inspectorDialog",
-      "loadingBottom",
-      "loadingMainPanes",
-      "loadingVcsLog",
-      "loadingWorkbench",
-      "logEmpty",
-      "logFilterMenu",
-      "logLoadMore",
-      "mainToolbarAction",
-      "mainToolbarIcon",
-      "operationPill",
-      "primaryButton",
-      "projectTreeError",
-      "projectSwitcherRemove",
-      "projectSelector",
-      "repositoryErrorView",
-      "repositoryButton",
-      "repositoryDialog",
-      "repositoryToolDialog",
-      "restoreWorkspace",
-      "statePill",
-      "statusBadge",
-      "terminalEmpty",
-      "terminalOptionsMenu",
-      "editorToolbarIcon",
-      "welcomeHelpButton",
-      "welcomeSettingsButton",
-    ]) {
-      expect(tw).not.toHaveProperty(recipe);
-    }
-    expect(stylesheet).not.toContain("activitySpin");
-    expect(stylesheet).not.toContain(".terminalEmpty");
-  });
-
-  test("does not escape quotes inside Tailwind selector variants", () => {
-    const malformed = Object.entries(tw)
-      .filter(([, classes]) => /(?:aria-[a-z-]+|role|type)=\\"/.test(classes))
-      .map(([name]) => name);
-
-    expect(malformed).toEqual([]);
-  });
-
-  test("uses explicit combinators for every HTML descendant variant", () => {
-    const htmlElement =
-      "(?:a|article|b|button|code|div|em|figcaption|figure|form|h1|h3|hr|i|img|input|kbd|label|p|path|pre|section|select|small|span|strong|summary|svg|textarea|time)";
-    const missingDescendantCombinator = new RegExp(
-      `(?:^|\\s)(?:max-\\[[^\\]]+\\]:)?\\[&${htmlElement}(?=\\]|[_.:\\[])`,
+    const applicationSources = sourceFiles(sourceRoot).filter(
+      (path) => !path.endsWith("designSystem.test.ts"),
     );
-    const malformed = Object.entries(tw)
-      .filter(([, classes]) => missingDescendantCombinator.test(classes))
-      .map(([name]) => name);
+    expect(applicationSources.filter((path) => path.endsWith(".module.css"))).toEqual([]);
 
-    expect(malformed).toEqual([]);
+    for (const path of applicationSources.filter((path) => /\.tsx?$/.test(path))) {
+      const source = readFileSync(path, "utf8");
+      expect(source, path).not.toMatch(/from\s+["'][^"']*styles\/tailwind["']/);
+      expect(source, path).not.toMatch(/from\s+["'][^"']*\.module\.css["']/);
+      expect(source, path).not.toMatch(/\btw\.[A-Za-z0-9_]+/);
+      expect(source, path).not.toMatch(/Native(?:)Select/);
+      expect(source, path).not.toMatch(/<(?:select|option)\b/);
+      if (!/\.test\.tsx?$/.test(path)) {
+        expect(source, path).not.toMatch(/<(?:button|input|select|textarea)\b/);
+      }
+    }
+
+    const indexCss = readFileSync(join(sourceRoot, "styles", "index.css"), "utf8");
+    expect(indexCss).not.toContain("@layer components");
+    expect(indexCss).not.toMatch(/\.(?:appShell|titlebar|toolStripe|workbench|local-history-)/);
+    expect(indexCss).not.toContain("@apply");
+    expect(indexCss).not.toMatch(/#[\da-f]{3,8}\b/i);
   });
 });

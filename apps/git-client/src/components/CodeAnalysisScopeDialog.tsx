@@ -2,7 +2,6 @@ import { Button } from "@jongminchung/ui/components/button";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { useState } from "react";
 import type { CodeInspectionId } from "../domain/codeAnalysis";
-import { tw } from "../styles/tailwind";
 import { RadioList, RadioListItem } from "./ProductCollections";
 import { Dialog, DialogHeader } from "./ProductDialog";
 import { Selector } from "./ProductFormControls";
@@ -51,7 +50,9 @@ export function CodeAnalysisScopeDialog({
       purpose="form"
       width={560}
     >
-      <section className={tw.codeAnalysisScopeDialog}>
+      <section
+        className={`codeAnalysisScopeDialog [display:grid] [grid-template-rows:auto_minmax(0,_1fr)_auto] [&>_main]:[display:grid] [&>_main]:[gap:16px] [&>_main]:[padding:18px_20px] [&>_main_p]:[color:var(--destructive)] [&>_main_p]:[margin:0] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:flex] [&>_footer]:[gap:8px] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:9px_11px] codeAnalysisScopeDialog`}
+      >
         <DialogHeader hasDivider onOpenChange={(open) => !open && onClose()} title={title} />
         <main>
           <RadioList

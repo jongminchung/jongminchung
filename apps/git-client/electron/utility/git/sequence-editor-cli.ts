@@ -12,13 +12,6 @@ export interface SequenceEditorCliOptions {
   readonly writeError?: (text: string) => void;
 }
 
-export interface SequenceEditorCommandRequest {
-  readonly executablePath: string;
-  readonly entryPath: string;
-  readonly mode: SequenceEditorMode;
-  readonly session: SequenceEditorSession;
-}
-
 export interface ApplicationSequenceEditorCommandRequest {
   readonly executablePath: string;
   readonly applicationEntryPath: string | null;
@@ -43,35 +36,6 @@ function normalizedAbsolutePath(value: string, field: string): string {
 
 function quotePosixArgument(value: string): string {
   return `'${value.replaceAll("'", `'"'"'`)}'`;
-}
-
-export function createSequenceEditorCommand(request: SequenceEditorCommandRequest): string {
-  if (
-    !(request.session instanceof SequenceEditorSession) ||
-    !/^[0-9a-f]{64}$/u.test(request.session.nonce)
-  ) {
-    throw new SequenceEditorError("authenticationFailed", "Sequence editor authentication failed");
-  }
-  const mode =
-    request.mode === "sequence"
-      ? "--sequence-editor"
-      : request.mode === "message"
-        ? "--message-editor"
-        : null;
-  if (mode === null) {
-    throw new SequenceEditorError("invalidInput", "Invalid sequence editor mode");
-  }
-  return [
-    normalizedAbsolutePath(request.executablePath, "Executable path"),
-    normalizedAbsolutePath(request.entryPath, "Entry path"),
-    mode,
-    "--payload",
-    normalizedAbsolutePath(request.session.payloadPath, "Payload path"),
-    "--nonce",
-    request.session.nonce,
-  ]
-    .map(quotePosixArgument)
-    .join(" ");
 }
 
 export function createApplicationSequenceEditorCommand(

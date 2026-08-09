@@ -5,7 +5,6 @@ import { cn } from "@jongminchung/ui/lib/utils";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import type { Commit, Ref } from "../domain/types";
 import type { LogFilters, LogOrder } from "../shared/contracts/model";
-import { tw } from "../styles/tailwind";
 import { useDismissLayer } from "./CommandProvider";
 import { CommitGraph } from "./CommitGraph";
 import { Icon } from "./Icon";
@@ -18,7 +17,7 @@ import { Popover } from "./ProductOverlays";
 
 const LOG_FILTER_ROW_HEIGHT = 35;
 const LOG_ROW_HEIGHT = 25;
-const HISTORY_COMMIT_ROW_CLASS = `${tw.commitRow} [height:25px]!`;
+const HISTORY_COMMIT_ROW_CLASS = `${`commitRow [html[data-compact=true]_&]:h-[22px]! [align-items:stretch]! [background:transparent] rounded-none! [display:grid]! [font-weight:400]! [grid-template-columns:34px_minmax(190px,_1fr)_100px_145px] [grid-template-rows:minmax(0,_1fr)] [height:20px]! [justify-content:start]! [left:0] [padding:0_3px]! [position:absolute] [right:0] [text-align:left] [top:0] [width:100%] [&:hover]:[background:color-mix(in_oklch,_var(--accent)_42%,_transparent)] [&>_*]:[align-items:center] [&>_*]:[display:flex] [&>_*]:[min-height:0] [&>_*]:[min-width:0] [&>_*]:[padding:0_4px] [&_strong]:[font-weight:600] [&>_span:last-child]:[color:var(--muted-foreground)] [&>_span:last-child]:[font-size:11px] commitRow rounded-none!`} [height:25px]!`;
 
 function commitTime(timestamp: number, relativeTimeBaseSeconds?: number): string {
   const nowSeconds = relativeTimeBaseSeconds ?? Date.now() / 1000;
@@ -285,7 +284,7 @@ export const CommitLog = memo(function CommitLog({
 
   return (
     <section
-      className={tw.logPane}
+      className={`logPane [background:var(--card)] [min-height:0] [min-width:0] [display:grid] [grid-template-rows:35px_minmax(0,_1fr)_0] logPane`}
       aria-busy={loading}
       aria-label="Commit log"
       data-filter-row-height={LOG_FILTER_ROW_HEIGHT}
@@ -294,8 +293,14 @@ export const CommitLog = memo(function CommitLog({
         gridTemplateRows: `${LOG_FILTER_ROW_HEIGHT}px minmax(0, 1fr) 0`,
       }}
     >
-      <div className={tw.logFilters} style={{ height: LOG_FILTER_ROW_HEIGHT }}>
-        <div className={tw.logSearchControls} style={{ height: LOG_FILTER_ROW_HEIGHT }}>
+      <div
+        className={`logFilters [align-items:center] [background:var(--secondary)] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:1px] [overflow:hidden] [padding:0_3px] [&>_label]:[flex:none] logFilters`}
+        style={{ height: LOG_FILTER_ROW_HEIGHT }}
+      >
+        <div
+          className={`logSearchControls [flex:0_1_145px] [height:22px] [max-width:145px] [min-width:125px] [position:relative] [&_input]:[padding-right:39px]! [&>_button]:[position:absolute] [&>_button]:[top:1px] [&>_button:nth-of-type(1)]:[right:19px] [&>_button:nth-of-type(2)]:[right:0] logSearchControls`}
+          style={{ height: LOG_FILTER_ROW_HEIGHT }}
+        >
           <TextInput
             className="h-7! min-w-0 rounded-sm px-1.5"
             data-command-search="history"
@@ -392,7 +397,7 @@ export const CommitLog = memo(function CommitLog({
           value={path}
           width={65}
         />
-        <span className={tw.filterSpacer} />
+        <span className={`filterSpacer [flex:1] filterSpacer`} />
         <Popover
           alignment="end"
           hasAutoFocus
@@ -573,7 +578,9 @@ export const CommitLog = memo(function CommitLog({
             placement="below"
             width={264}
             content={
-              <div className={tw.logViewOptions}>
+              <div
+                className={`logViewOptions [display:grid] [gap:3px] [padding:5px] [&>_strong]:[border-top:1px_solid_var(--border)] [&>_strong]:[color:var(--muted-foreground)] [&>_strong]:[font-size:10px] [&>_strong]:[margin:4px_5px_1px] [&>_strong]:[padding-top:6px] logViewOptions`}
+              >
                 <CheckboxInput isDisabled label="Root Names" size="sm" value={false} />
                 <CheckboxInput
                   label="Compact References View"
@@ -659,7 +666,10 @@ export const CommitLog = memo(function CommitLog({
           onClick={onImportPatch}
           tabIndex={-1}
           type="button"
-          className={cn("h-7 px-2.5", tw.srOnly)}
+          className={cn(
+            "h-7 px-2.5",
+            `srOnly [clip:rect(0_0_0_0)] [clip-path:inset(50%)] [height:1px] [overflow:hidden] [position:absolute] [left:0] [top:0] [white-space:nowrap] [width:1px] srOnly`,
+          )}
           variant="outline"
           size="sm"
         >
@@ -670,7 +680,7 @@ export const CommitLog = memo(function CommitLog({
         aria-colcount={4}
         aria-label="Git log"
         aria-rowcount={filtered.length}
-        className={tw.commitScroller}
+        className={`commitScroller [background:var(--card)] [min-height:0] [overflow:auto] [position:relative] commitScroller`}
         onScroll={(event) => {
           const target = event.currentTarget;
           if (target.scrollHeight - target.scrollTop - target.clientHeight < 220) {
@@ -689,7 +699,10 @@ export const CommitLog = memo(function CommitLog({
         role="table"
         tabIndex={0}
       >
-        <div className={tw.srOnly} role="row">
+        <div
+          className={`srOnly [clip:rect(0_0_0_0)] [clip-path:inset(50%)] [height:1px] [overflow:hidden] [position:absolute] [left:0] [top:0] [white-space:nowrap] [width:1px] srOnly`}
+          role="row"
+        >
           <span role="columnheader">Graph</span>
           <span role="columnheader">Commit</span>
           <span role="columnheader">Author</span>
@@ -722,7 +735,9 @@ export const CommitLog = memo(function CommitLog({
               position: "relative",
             }}
           >
-            <div className={tw.graphCanvas}>
+            <div
+              className={`graphCanvas [left:2px] [pointer-events:none] [position:absolute] [top:0] [width:34px] [z-index:2] graphCanvas`}
+            >
               <CommitGraph commits={filtered} width={34} showLongEdges={showLongEdges} />
             </div>
             {filtered.map((commit, index) => {
@@ -766,22 +781,38 @@ export const CommitLog = memo(function CommitLog({
                   type="button"
                   className={cn(
                     "grid min-h-0 text-xs whitespace-normal text-left aria-selected:bg-accent aria-current:bg-accent",
-                    `${HISTORY_COMMIT_ROW_CLASS} ${selected ? tw.selectedCommit : ""}`,
+                    `${HISTORY_COMMIT_ROW_CLASS} ${selected ? `selectedCommit [background:var(--accent)]! selectedCommit` : ""}`,
                   )}
                   variant="ghost"
                   size="default"
                 >
                   <span aria-hidden="true" />
-                  <span aria-label={commit.subject} className={tw.commitSubject} role="cell">
+                  <span
+                    aria-label={commit.subject}
+                    className={`commitSubject [gap:6px] [&_em]:[background:color-mix(in_oklch,_var(--primary)_16%,_var(--card))] [&_em]:[border:1px_solid_color-mix(in_oklch,_var(--primary)_35%,_var(--border))] [&_em]:rounded-xs [&_em]:[color:var(--primary)] [&_em]:[flex:none] [&_em]:[font-size:9px] [&_em]:[font-style:normal] [&_em]:[padding:1px_4px] [&_code]:[color:var(--disabled-foreground)] [&_code]:[font-size:9px] [&_code]:[margin-left:auto] commitSubject [&_em]:rounded-xs`}
+                    role="cell"
+                  >
                     {referencesOnLeft && referenceBadges}
-                    <span className={tw.ellipsis}>{commit.subject}</span>
+                    <span
+                      className={`ellipsis [min-width:0] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap] ellipsis`}
+                    >
+                      {commit.subject}
+                    </span>
                     {!referencesOnLeft && referenceBadges}
                     {showHash && <code>{commit.oid.slice(0, 7)}</code>}
                   </span>
-                  <span className={tw.ellipsis} hidden={!showAuthor} role="cell">
+                  <span
+                    className={`ellipsis [min-width:0] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap] ellipsis`}
+                    hidden={!showAuthor}
+                    role="cell"
+                  >
                     {commit.author}
                   </span>
-                  <span className={tw.ellipsis} hidden={!showDate} role="cell">
+                  <span
+                    className={`ellipsis [min-width:0] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap] ellipsis`}
+                    hidden={!showDate}
+                    role="cell"
+                  >
                     {displayedTime}
                   </span>
                 </Button>
@@ -812,7 +843,7 @@ export const CommitLog = memo(function CommitLog({
           </div>
         )}
       </div>
-      <div className={tw.logFooter}>
+      <div className={`logFooter [display:none] logFooter`}>
         <span>{loading ? "Loading…" : `${filtered.length.toLocaleString()} commits`}</span>
         {hasMore ? (
           <Button

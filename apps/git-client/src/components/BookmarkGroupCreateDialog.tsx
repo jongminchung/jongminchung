@@ -1,7 +1,6 @@
 import { Button } from "@jongminchung/ui/components/button";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { useState } from "react";
-import { tw } from "../styles/tailwind";
 import { Dialog, DialogHeader } from "./ProductDialog";
 import { CheckboxInput } from "./ProductFormControls";
 import { TextInput } from "./ProductFormControls";
@@ -38,7 +37,7 @@ export function BookmarkGroupCreateDialog({
       width={410}
     >
       <form
-        className={tw.bookmarkGroupCreateDialog}
+        className={`bookmarkGroupCreateDialog [display:grid] [gap:10px] [padding-bottom:12px] [&>_*:not(:first-child)]:[margin-left:12px] [&>_*:not(:first-child)]:[margin-right:12px] [&>_p]:[color:var(--muted-foreground)] [&>_p]:[font-size:10px] [&>_p]:[margin-bottom:0] [&>_p]:[margin-top:-5px] [&>_footer]:[display:flex] [&>_footer]:[gap:7px] [&>_footer]:[justify-content:flex-end] bookmarkGroupCreateDialog`}
         onSubmit={(event) => {
           event.preventDefault();
           submit();

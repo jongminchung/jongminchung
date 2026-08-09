@@ -16,7 +16,7 @@
 - `Preview in Safe Mode`는 renderer와 main IPC 양쪽에서 Git mutation, working-tree write/open, Terminal, hosting, 외부 실행을 fail-closed로 차단한다. Safe 상태는 close·recent·재시작에도 보존된다.
 - 전체 Electron 21개, 신규 Safe Mode·hosting, 기존 operation matrix 51종이 모두 통과했다.
 - 실제 Rebased에서 branch popup의 라벨·검색·Fetch·Settings·Esc 고착 재현까지 추가 확인했다. 다만 advanced popup의 전체 Tab 순회는 Rebased 자체 `Paths` AX 메뉴 고착 때문에 인증할 수 없으므로 전체 판정은 **동일**이 아니라 **동등**이다.
-- 기존 `docs/rebased-parity.md`, `parity/rebased/**`, 저장 완료율과 1.1.8 판정은 이번 결론의 증거로 사용하지 않았다.
+- 결론은 이 문서에 기록한 1.1.11 원본 증거와 현재 패키지 검증만을 근거로 한다.
 
 ## 범위와 판정 규칙
 
@@ -30,7 +30,7 @@
 
 ## 독립 검증 방법
 
-- Rebased 1.1.11과 공식 `/Users/jongminchung/workspace/rebased/README.md`, `screenshot.png`를 직접 확인했다.
+- Rebased 1.1.11과 공식 README 화면을 직접 확인했다.
 - 체크인된 원본 화면·AX·측정·SHA-256 manifest는 `independent-audit/rebased-1.1.11/evidence/`에 저장했다.
 - 격리 profile, disposable repository, local bare remote를 사용했다.
 - API 존재와 패키지 동작을 분리했다.
@@ -41,21 +41,21 @@
 
 ## 시나리오 결과
 
-| 시나리오 | 실제 패키지 결과 | UI/UX 비교 | 판정 |
-|---|---|---|---|
-| 시작·preload | `ready=true`, `preloadApi=true`, exit 0 | 빈 화면·renderer 예외 없음 | **동등** |
-| 폴더·recent·복원 | UI에서 open/recent/재시작 복원 통과 | Trust sheet와 실제 read-only Safe Mode, close/recent/restart 보존 | **동등** |
-| 로그·필터·상세·diff | OID/ref/file/diff 조회와 선택 통과 | compact filter/row, regular author, 장문 시간, marker 제거 | **동등** |
-| stage·부분 stage·discard | index/worktree oracle 통과 | Commit 좌측 302px 도킹과 focused diff 동작 | **동등** |
-| commit·amend | commit/parent/index oracle 통과 | composer focus·Esc draft 보존과 위험 확인 흐름 | **동등** |
-| branch CRUD·merge | `HEAD`, refs, merge parents oracle 통과 | 실제 Rebased branch popup 라벨·검색과 후보 키보드·확인 흐름 검증 | **동등** |
-| fetch·pull·push lease | local/remote refs 및 stale/exact lease 통과 | stale 차단과 exact lease 승인 흐름 | **동등** |
-| stash | stash refs와 worktree 전이 통과 | VCS Operations 진입과 panel 동기화 | **동등** |
-| rebase abort | abort 후 시작 oracle 완전 복원 | top recovery Abort와 확인 흐름 | **동등** |
-| cherry-pick conflict | conflict 편집·Save·Continue 통과 | 3-way conflict, continue/abort와 복원 | **동등** |
-| Welcome 800×650 | 창 크기, 30px titlebar, 224px sidebar 검증 | action overflow 제거, More Actions 추가, Plugins는 제외 범위 | **동등** |
-| Workbench 1184×768 | Project 458px, review 253px, toolbar 35px, tab 32px 검증 | toolbar 순서와 compact controls 정합화 | **동등** |
-| Commit/Workbench 1584×918 | Commit 302px, Log 700px 초과, review 253px 동시 표시 | 공식 README의 좌측 Commit+Log+Review 구조와 일치 | **동등** |
+| 시나리오                  | 실제 패키지 결과                                         | UI/UX 비교                                                        | 판정     |
+| ------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------- | -------- |
+| 시작·preload              | `ready=true`, `preloadApi=true`, exit 0                  | 빈 화면·renderer 예외 없음                                        | **동등** |
+| 폴더·recent·복원          | UI에서 open/recent/재시작 복원 통과                      | Trust sheet와 실제 read-only Safe Mode, close/recent/restart 보존 | **동등** |
+| 로그·필터·상세·diff       | OID/ref/file/diff 조회와 선택 통과                       | compact filter/row, regular author, 장문 시간, marker 제거        | **동등** |
+| stage·부분 stage·discard  | index/worktree oracle 통과                               | Commit 좌측 302px 도킹과 focused diff 동작                        | **동등** |
+| commit·amend              | commit/parent/index oracle 통과                          | composer focus·Esc draft 보존과 위험 확인 흐름                    | **동등** |
+| branch CRUD·merge         | `HEAD`, refs, merge parents oracle 통과                  | 실제 Rebased branch popup 라벨·검색과 후보 키보드·확인 흐름 검증  | **동등** |
+| fetch·pull·push lease     | local/remote refs 및 stale/exact lease 통과              | stale 차단과 exact lease 승인 흐름                                | **동등** |
+| stash                     | stash refs와 worktree 전이 통과                          | VCS Operations 진입과 panel 동기화                                | **동등** |
+| rebase abort              | abort 후 시작 oracle 완전 복원                           | top recovery Abort와 확인 흐름                                    | **동등** |
+| cherry-pick conflict      | conflict 편집·Save·Continue 통과                         | 3-way conflict, continue/abort와 복원                             | **동등** |
+| Welcome 800×650           | 창 크기, 30px titlebar, 224px sidebar 검증               | action overflow 제거, More Actions 추가, Plugins는 제외 범위      | **동등** |
+| Workbench 1184×768        | Project 458px, review 253px, toolbar 35px, tab 32px 검증 | toolbar 순서와 compact controls 정합화                            | **동등** |
+| Commit/Workbench 1584×918 | Commit 302px, Log 700px 초과, review 253px 동시 표시     | 공식 README의 좌측 Commit+Log+Review 구조와 일치                  | **동등** |
 
 ## 이번 배치에서 해소한 차이
 
@@ -85,9 +85,9 @@
 
 - `pnpm typecheck`: 성공.
 - `pnpm test`: 단위 테스트 전체 성공.
-- `pnpm test:e2e`: renderer 44개 성공.
-- 단위 테스트: 127 files, 839개 성공.
-- renderer E2E: 44/44 성공.
+- `pnpm test:e2e`: renderer 33개 성공.
+- 단위 테스트: 111 files, 785개 성공.
+- renderer E2E: 33/33 성공.
 - 신규 packaged UI→Git E2E: 기존 7개와 Safe Mode 시나리오 성공.
 - operation matrix: 51개 `GitOperationSchema` kind 회귀 없음.
 - `pnpm electron:package`: 성공.
@@ -96,14 +96,17 @@
 
 ## 재현 명령
 
+모노레포 루트에서 실행한다.
+
 ```sh
-cd /Users/jongminchung/workspace/jongminchung/apps/git-client
-pnpm typecheck
-pnpm test
-pnpm test:e2e
-pnpm electron:package
-node scripts/smoke-electron-package.mjs
-pnpm test:electron
+pnpm --filter @jongminchung/git-client typecheck
+pnpm --filter @jongminchung/git-client test
+pnpm --filter @jongminchung/git-client test:e2e
+pnpm --filter @jongminchung/git-client test:scripts
+pnpm --filter @jongminchung/git-client electron:package
+pnpm --filter @jongminchung/git-client electron:verify-package
+pnpm --filter @jongminchung/git-client electron:smoke-package
+pnpm --filter @jongminchung/git-client test:electron
 ```
 
 ## 완료 상태

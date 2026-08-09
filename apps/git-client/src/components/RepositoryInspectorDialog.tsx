@@ -4,7 +4,6 @@ import { cn } from "@jongminchung/ui/lib/utils";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { BlameLine, Commit, TreeEntry } from "../domain/types";
 import type { FileContent, FilePreview, FileSource } from "../shared/contracts/model";
-import { tw } from "../styles/tailwind";
 import { useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
 import { EmptyState, Spinner } from "./ProductCollections";
@@ -208,7 +207,7 @@ export function RepositoryInspectorDialog({
       aria-label={embedded ? `Editor: ${path || "Repository"}` : undefined}
       className={
         embedded
-          ? tw.inspectorEmbedded
+          ? `inspectorEmbedded [display:grid] [grid-template-rows:38px_minmax(0,_1fr)] [height:100%] [min-height:0] [overflow:hidden] [&>_nav]:[align-items:center] [&>_nav]:[border-bottom:1px_solid_var(--border)] inspectorEmbedded`
           : "grid h-[min(720px,calc(100vh-70px))] min-h-0 grid-rows-[auto_auto_minmax(0,1fr)] overflow-hidden"
       }
     >
@@ -312,9 +311,15 @@ export function RepositoryInspectorDialog({
             </Button>
           )}
         </nav>
-        <TabsContent aria-busy={loading} className={tw.inspectorContent} value="tree">
+        <TabsContent
+          aria-busy={loading}
+          className={`inspectorContent [min-height:0] [overflow:auto] inspectorContent`}
+          value="tree"
+        >
           {inspectorStatus ?? (
-            <div className={tw.inspectorTree}>
+            <div
+              className={`inspectorTree [&>_button]:[align-items:center] [&>_button]:[background:transparent] [&>_button]:[display:grid] [&>_button]:[gap:8px] [&>_button]:[grid-template-columns:18px_minmax(180px,_1fr)_70px_90px_70px] [&>_button]:[height:29px] [&>_button]:[padding:0_12px] [&>_button]:[text-align:left] [&>_button]:[width:100%] [&>_button:hover]:[background:var(--muted)] [&_small]:[color:var(--disabled-foreground)] [&_code]:[color:var(--disabled-foreground)] inspectorTree`}
+            >
               {tree.map((entry) => (
                 <Button
                   key={`${entry.kind}-${entry.path}`}
@@ -345,7 +350,11 @@ export function RepositoryInspectorDialog({
             </div>
           )}
         </TabsContent>
-        <TabsContent aria-busy={loading} className={tw.inspectorContent} value="file">
+        <TabsContent
+          aria-busy={loading}
+          className={`inspectorContent [min-height:0] [overflow:auto] inspectorContent`}
+          value="file"
+        >
           {inspectorStatus ??
             (!content ? (
               <EmptyState title="Select a file to view its contents." />
@@ -370,7 +379,9 @@ export function RepositoryInspectorDialog({
                 />
               </Suspense>
             ) : preview?.kind === "image" ? (
-              <figure className={tw.imageViewer}>
+              <figure
+                className={`imageViewer [align-items:center] [display:flex] [flex-direction:column] [gap:12px] [height:100%] [justify-content:center] [margin:0] [overflow:auto] [padding:20px] [&_img]:[background:var(--muted)] [&_img]:[box-shadow:var(--shadow-xs)] [&_img]:[max-height:calc(100%_-_54px)] [&_img]:[max-width:100%] [&_img]:[object-fit:contain] [&_figcaption]:[align-items:center] [&_figcaption]:[color:var(--muted-foreground)] [&_figcaption]:[display:flex] [&_figcaption]:[gap:9px] [&_figcaption_strong]:[color:var(--foreground)] [&_button]:[background:var(--muted)] [&_button]:[border:1px_solid_var(--border)] [&_button]:rounded-sm [&_button]:[height:28px] [&_button]:[padding:0_9px] imageViewer [&_button]:rounded-sm`}
+              >
                 <img alt={preview.preview.path} src={preview.preview.dataUrl} />
                 <figcaption>
                   <strong>{preview.preview.path}</strong>
@@ -421,9 +432,15 @@ export function RepositoryInspectorDialog({
               </EmptyState>
             ))}
         </TabsContent>
-        <TabsContent aria-busy={loading} className={tw.inspectorContent} value="history">
+        <TabsContent
+          aria-busy={loading}
+          className={`inspectorContent [min-height:0] [overflow:auto] inspectorContent`}
+          value="history"
+        >
           {inspectorStatus ?? (
-            <div className={tw.historyList}>
+            <div
+              className={`historyList [&_article:hover]:[background:var(--muted)] [&_span]:[color:var(--disabled-foreground)] [&_time]:[color:var(--disabled-foreground)] [&_article]:[align-items:center] [&_article]:[border-bottom:1px_solid_var(--border)] [&_article]:[display:grid] [&_article]:[gap:10px] [&_article]:[grid-template-columns:75px_minmax(200px,_1fr)_130px_170px] [&_article]:[min-height:38px] [&_article]:[padding:0_12px] historyList`}
+            >
               {history.map((commit) => (
                 <article key={commit.oid}>
                   <code>{commit.oid.slice(0, 8)}</code>
@@ -435,9 +452,15 @@ export function RepositoryInspectorDialog({
             </div>
           )}
         </TabsContent>
-        <TabsContent aria-busy={loading} className={tw.inspectorContent} value="blame">
+        <TabsContent
+          aria-busy={loading}
+          className={`inspectorContent [min-height:0] [overflow:auto] inspectorContent`}
+          value="blame"
+        >
           {inspectorStatus ?? (
-            <div className={tw.blameView}>
+            <div
+              className={`blameView [&>_div:hover]:[background:var(--muted)] [&>_div]:[display:grid] [&>_div]:[font-size:10px] [&>_div]:[grid-template-columns:50px_70px_120px_minmax(200px,_1fr)] [&>_div]:[min-height:22px] [&>_div_>_*]:[align-items:center] [&>_div_>_*]:[border-right:1px_solid_var(--border)] [&>_div_>_*]:[display:flex] [&>_div_>_*]:[margin:0] [&>_div_>_*]:[padding:2px_7px] [&_pre]:[font-family:var(--font-family-code)] [&_pre]:[overflow-x:auto] [&_pre]:[white-space:pre] blameView`}
+            >
               {blame.map((line) => (
                 <div
                   key={`${line.finalLine}-${line.oid}`}

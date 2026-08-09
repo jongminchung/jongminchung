@@ -18,7 +18,7 @@
 - After project load, a `Paths:` menu intermittently became the only AX root. Two Esc presses, an outside click, a title-bar click, and keyboard menu selection did not restore the Workbench AX tree.
 - A process restart restored the Workbench long enough to capture the reliable dirty default state. This is an automation/accessibility obstruction, not proof that the product UI itself is broken.
 
-## Unreachable in this capture session
+## Original-app capture limits
 
 - Commit selection and file diff after the `Paths:` AX menu obstruction.
 - Branch create/rename/delete/merge dialogs.
@@ -26,7 +26,7 @@
 - Stash create/apply/delete.
 - Conflict, rebase, cherry-pick, continue, abort, Tab order, and dialog Esc behavior.
 
-These states remain **pending evidence**. They must not be inferred from source code, prior parity material, or README screenshots.
+These states were not reachable in this original-app capture session. Git Client coverage for them is recorded separately by packaged UI-to-Git tests and the state oracle; this bundle does not infer Rebased behavior for those states.
 
 ## Fixture state
 

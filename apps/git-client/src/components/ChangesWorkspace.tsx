@@ -1,4 +1,5 @@
 import { Button } from "@jongminchung/ui/components/button";
+import { Input } from "@jongminchung/ui/components/input";
 import { Toggle } from "@jongminchung/ui/components/toggle";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
 import { cn } from "@jongminchung/ui/lib/utils";
@@ -34,7 +35,6 @@ import type {
   PreCommitCheck,
   SubmoduleDiff,
 } from "../shared/contracts/model";
-import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
 import { useCommandDefinitions, useDismissLayer } from "./CommandProvider";
 import { DiffViewer } from "./DiffViewer";
@@ -106,12 +106,17 @@ function statusLetter(file: FileChange): string {
 }
 
 function statusClass(file: FileChange): string {
-  if (file.status === "added") return tw.statusAdded;
-  if (file.status === "deleted") return tw.statusDeleted;
-  if (file.status === "renamed" || file.status === "copied") return tw.statusRenamed;
-  if (file.status === "conflicted") return tw.statusConflict;
-  if (file.status === "untracked") return tw.statusUnknown;
-  return tw.statusModified;
+  if (file.status === "added")
+    return `statusAdded [background:color-mix(in_oklch,_var(--success)_16%,_transparent)] [color:var(--success)] statusAdded`;
+  if (file.status === "deleted")
+    return `statusDeleted [background:color-mix(in_oklch,_var(--destructive)_16%,_transparent)] [color:var(--destructive)] statusDeleted`;
+  if (file.status === "renamed" || file.status === "copied")
+    return `statusRenamed [background:color-mix(in_oklch,_var(--primary)_16%,_transparent)] [color:var(--primary)] statusRenamed`;
+  if (file.status === "conflicted")
+    return `statusConflict [background:color-mix(in_oklch,_var(--destructive)_16%,_transparent)] [color:var(--destructive)] statusConflict`;
+  if (file.status === "untracked")
+    return `statusUnknown [background:var(--muted)] [color:var(--muted-foreground)] statusUnknown`;
+  return `statusModified [background:color-mix(in_oklch,_var(--primary)_16%,_transparent)] [color:var(--primary)] statusModified`;
 }
 
 type ChangelistMutation = "create" | "delete";
@@ -582,7 +587,9 @@ export function ChangesWorkspace({
   );
 
   const renderGroup = (label: string, group: readonly ChangeEntry[]) => (
-    <section className={tw.changeNavigatorGroup}>
+    <section
+      className={`changeNavigatorGroup [&>_header]:[align-items:center] [&>_header]:[background:var(--secondary)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[border-top:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[gap:6px] [&>_header]:[height:29px] [&>_header]:[padding:0_7px] [&>_header]:[position:sticky] [&>_header]:[top:0] [&>_header]:[z-index:2] [&:first-child_>_header]:[border-top:0] [&>_header_small]:[color:var(--disabled-foreground)] [&>_header_span]:[flex:1] [&>_header_button]:[background:transparent] [&>_header_button]:[color:var(--primary)] [&>_header_button]:[padding:0_5px] changeNavigatorGroup`}
+    >
       <header>
         <strong>{label}</strong>
         <small>{group.length}</small>
@@ -620,20 +627,24 @@ export function ChangesWorkspace({
                   type="button"
                   className={cn(
                     "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
-                    `${tw.changeNavigatorRow} ${active ? tw.selected : ""} ${multiSelected && !active ? tw.multiSelected : ""}`,
+                    `${`changeNavigatorRow [align-items:center] [background:transparent] rounded-none! [display:flex] [gap:5px] [min-height:29px] [padding:3px_7px] [text-align:left] [width:100%] [&.selected]:[background:var(--accent)] [&[aria-current=true]]:[background:var(--accent)] [&.multiSelected]:[background:color-mix(in_oklch,_var(--accent)_62%,_transparent)] [&_small]:[color:var(--disabled-foreground)] changeNavigatorRow rounded-none!`} ${active ? `selected [background:var(--accent)] [color:var(--foreground)] selected` : ""} ${multiSelected && !active ? `multiSelected [background:color-mix(in_oklch,_var(--accent)_62%,_transparent)] multiSelected` : ""}`,
                   )}
                 >
                   <StatusBadge className={statusClass(entry.file)}>
                     {statusLetter(entry.file)}
                   </StatusBadge>
                   <Icon name={entry.file.submodule ? "worktree" : "file"} size={13} />
-                  <span className={`${tw.ellipsis} grid`}>
+                  <span
+                    className={`${`ellipsis [min-width:0] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap] ellipsis`} grid`}
+                  >
                     <strong className="truncate">{treeMode ? filename : entry.file.path}</strong>
                     {treeMode && folders.length > 0 && (
                       <small className="truncate">{folders.join("/")}</small>
                     )}
                   </span>
-                  <span className={tw.diffStat}>
+                  <span
+                    className={`diffStat [display:flex] [font-size:9px] [gap:4px] [margin-left:auto] [&_i]:[color:var(--success)] [&_i]:[font-style:normal] [&_b]:[color:var(--destructive)] [&_b]:[font-weight:400] diffStat`}
+                  >
                     <i>+{entry.file.additions ?? 0}</i>
                     <b>−{entry.file.deletions ?? 0}</b>
                   </span>
@@ -657,7 +668,9 @@ export function ChangesWorkspace({
       placement="below"
       width={250}
       content={
-        <div className={tw.changesViewOptions}>
+        <div
+          className={`changesViewOptions [display:grid] [gap:3px] [padding:5px] [&>_strong]:[color:var(--muted-foreground)] [&>_strong]:[font-size:10px] [&>_strong]:[font-weight:600] [&>_strong]:[margin:5px_6px_2px] [&>_strong:not(:first-child)]:[border-top:1px_solid_var(--border)] [&>_strong:not(:first-child)]:[padding-top:7px] changesViewOptions`}
+        >
           <strong>Group By</strong>
           <CheckboxInput label="Directory" onChange={setTreeMode} size="sm" value={treeMode} />
           <CheckboxInput isDisabled label="Repository" size="sm" value={false} />
@@ -686,7 +699,7 @@ export function ChangesWorkspace({
 
   return (
     <div
-      className={`${tw.changesWorkspace} ${toolWindow ? tw.changesToolWindow : ""} ${focused && !toolWindow ? tw.changesWorkspaceFocused : ""} ${commitRailOpen ? tw.commitRailOpen : ""}`}
+      className={`${`changesWorkspace [background:var(--card)] [display:grid] [grid-template-columns:minmax(190px,_var(--changes-navigator-width,_250px))_minmax(420px,_1fr)_minmax(280px,_var(--commit-rail-width,_315px))] [min-height:0] [min-width:0] max-[1120px]:[grid-template-columns:minmax(210px,_245px)_minmax(0,_1fr)] max-[1120px]:[position:relative] max-[1120px]:[&>_.commitRail]:[bottom:0] max-[1120px]:[&>_.commitRail]:[box-shadow:var(--shadow-lg)] max-[1120px]:[&>_.commitRail]:[position:absolute] max-[1120px]:[&>_.commitRail]:[right:0] max-[1120px]:[&>_.commitRail]:[top:0] max-[1120px]:[&>_.commitRail]:[transform:translateX(102%)] max-[1120px]:[&>_.commitRail]:[transition:transform_120ms_ease-out] max-[1120px]:[&>_.commitRail]:[width:min(var(--commit-rail-width,_340px),_calc(100%_-_220px))] max-[1120px]:[&>_.commitRail]:[z-index:15] max-[1120px]:[&.commitRailOpen_>_.commitRail]:[transform:translateX(0)] changesWorkspace`} ${toolWindow ? `changesToolWindow rounded-xl [grid-template-columns:minmax(0,_1fr)]! [grid-template-rows:29px_minmax(150px,_3fr)_minmax(120px,_2fr)] [overflow:hidden] max-[1120px]:[grid-template-columns:minmax(0,_1fr)]! max-[1120px]:[position:relative] [&>_.changeNavigator]:[border-bottom:1px_solid_var(--border)] [&>_.changeNavigator]:[border-right:0] [&>_.diffViewer]:[display:none] [&>_.focusedDiffViewer]:[display:grid] [&>_.commitRail]:[border-left:0] [&>_.commitRail]:[border-top:1px_solid_var(--border)] [&>_.commitRail]:[padding:6px] max-[1120px]:[&>_.commitRail]:[box-shadow:none] max-[1120px]:[&>_.commitRail]:[position:relative] max-[1120px]:[&>_.commitRail]:[transform:none] max-[1120px]:[&>_.commitRail]:[width:auto] changesToolWindow rounded-lg` : ""} ${focused && !toolWindow ? `changesWorkspaceFocused [grid-template-columns:0_minmax(0,_1fr)_0] [&>_.changeNavigator]:[overflow:hidden] [&>_.changeNavigator]:[visibility:hidden] [&>_.commitRail]:[overflow:hidden] [&>_.commitRail]:[visibility:hidden] changesWorkspaceFocused` : ""} ${commitRailOpen ? "commitRailOpen" : ""}`}
       ref={workspace}
       style={
         {
@@ -696,7 +709,9 @@ export function ChangesWorkspace({
       }
     >
       {toolWindow && (
-        <header className={tw.commitToolWindowHeader}>
+        <header
+          className={`commitToolWindowHeader [align-items:center] [background:var(--secondary)] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:2px] [height:29px] [padding:0_5px_0_8px] [&>_strong]:[font-size:11px] [&>_span]:[flex:1] commitToolWindowHeader`}
+        >
           <strong>Commit</strong>
           <span />
           {viewOptions}
@@ -721,7 +736,7 @@ export function ChangesWorkspace({
       )}
       <aside
         aria-label="Changed files"
-        className={tw.changeNavigator}
+        className={`changeNavigator [border-right:1px_solid_var(--border)] [display:grid] [grid-template-rows:38px_minmax(0,_1fr)_auto] [min-height:0] [min-width:0] [outline:0] [position:relative] changeNavigator`}
         onKeyDown={handleNavigatorKeyboard}
         ref={navigator}
         tabIndex={0}
@@ -734,10 +749,12 @@ export function ChangesWorkspace({
             value={navigatorWidth}
           />
         )}
-        <header className={tw.changeNavigatorToolbar}>
+        <header
+          className={`changeNavigatorToolbar [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:4px] [padding:5px_6px] [&>_label]:[align-items:center] [&>_label]:[background:var(--secondary)] [&>_label]:[border:1px_solid_var(--border)] [&>_label]:rounded-lg [&>_label]:[display:flex] [&>_label]:[flex:1] [&>_label]:[gap:5px] [&>_label]:[height:27px] [&>_label]:[padding:0_7px] [&>_label:focus-within]:[border-color:var(--primary)] [&>_label:focus-within]:[box-shadow:0_0_0_2px_color-mix(in_oklch,_var(--primary)_22%,_transparent)] [&_input]:[background:transparent] [&_input]:[border:0] [&_input]:[min-width:0] [&_input]:[outline:0] [&_input]:[width:100%] changeNavigatorToolbar [&>_label]:rounded-lg`}
+        >
           <label>
             <Icon name="search" size={13} />
-            <input
+            <Input
               aria-label="Filter changed files"
               data-command-search="changes"
               onChange={(event) => setQuery(event.target.value)}
@@ -769,7 +786,7 @@ export function ChangesWorkspace({
             <Icon name="commit" size={13} />
           </Button>
         </header>
-        <div className={tw.changeNavigatorList}>
+        <div className={`changeNavigatorList [min-height:0] [overflow:auto] changeNavigatorList`}>
           {entries.length === 0 ? (
             <EmptyState title="Working tree clean." />
           ) : filteredEntries.length === 0 ? (
@@ -782,7 +799,9 @@ export function ChangesWorkspace({
           )}
         </div>
         {selectedEntry && (
-          <footer className={tw.changeNavigatorActions}>
+          <footer
+            className={`changeNavigatorActions [border-top:1px_solid_var(--border)] [display:flex] [flex-wrap:wrap] [gap:4px] [padding:5px] [&_button]:[background:transparent] [&_button]:[color:var(--muted-foreground)] [&_button]:[min-height:25px] [&_button]:[padding:0_6px] changeNavigatorActions`}
+          >
             {effectiveSelectedEntries.some((entry) => entry.selection.layer === "worktree") && (
               <Button
                 onClick={() =>
@@ -892,7 +911,10 @@ export function ChangesWorkspace({
           mode={selection?.layer === "index" ? "unstage" : "stage"}
           onApplyPatch={async (partialPatch, cached, reverse) => {
             if (selection === null) return;
-            const target = normalizePartialPatchTarget(selection, { cached, reverse });
+            const target = normalizePartialPatchTarget(selection, {
+              cached,
+              reverse,
+            });
             if (target === null) return;
             await onOperation({
               kind: "partialPatch",
@@ -916,7 +938,10 @@ export function ChangesWorkspace({
           sourceLabel={selection?.layer === "index" ? "HEAD → Index" : "Index → Worktree"}
         />
       ) : (
-        <section className={tw.diffPreviewHidden} aria-label="Diff preview hidden">
+        <section
+          className={`diffPreviewHidden [align-items:center] [background:var(--card)] [color:var(--muted-foreground)] [display:flex] [flex-direction:column] [gap:7px] [justify-content:center] [min-height:0] [&>_p]:[margin:0] diffPreviewHidden`}
+          aria-label="Diff preview hidden"
+        >
           <Icon name="changes" size={28} />
           <p>Diff preview is hidden.</p>
           <Button
@@ -930,7 +955,9 @@ export function ChangesWorkspace({
           </Button>
         </section>
       )}
-      <aside className={tw.commitRail}>
+      <aside
+        className={`commitRail [border-left:1px_solid_var(--border)] [display:grid] [gap:7px] [grid-template-rows:34px_auto_auto_minmax(110px,_1fr)_auto] [min-height:0] [min-width:0] [padding:7px] [position:relative] [&>_.verticalResizeHandle]:[left:-4px] [&>_.verticalResizeHandle]:[right:auto] [&>_header]:[align-items:center] [&>_header]:[display:flex] [&>_header]:[gap:6px] [&>_header_small]:[color:var(--disabled-foreground)] [&>_header_small]:[margin-left:auto] [&_textarea]:[background:var(--secondary)] [&_textarea]:[border:1px_solid_var(--border)] [&_textarea]:[min-height:110px] [&_textarea]:[padding:9px] [&_textarea]:[resize:none] [&>_footer]:[align-items:center] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:grid] [&>_footer]:[gap:5px] [&>_footer]:[grid-template-columns:minmax(0,_1fr)_auto_auto] [&>_footer]:[padding-top:7px] [&>_footer_>_button]:[background:var(--secondary)] [&>_footer_>_button]:[border:1px_solid_var(--border)] [&>_footer_>_button]:[min-height:29px] [&>_footer_>_button]:[padding:0_9px] max-[1120px]:[bottom:0] max-[1120px]:[box-shadow:var(--shadow-lg)] max-[1120px]:[position:absolute] max-[1120px]:[right:0] max-[1120px]:[top:0] max-[1120px]:[transform:translateX(102%)] max-[1120px]:[transition:transform_120ms_ease-out] max-[1120px]:[width:min(var(--commit-rail-width,_340px),_calc(100%_-_220px))] max-[1120px]:[z-index:15] max-[1120px]:[&>_.verticalResizeHandle]:[display:none] commitRail`}
+      >
         {!toolWindow && (
           <VerticalResizeHandle
             direction={-1}
@@ -955,7 +982,9 @@ export function ChangesWorkspace({
             </Button>
           )}
         </header>
-        <div className={tw.changelistBar}>
+        <div
+          className={`changelistBar [display:flex] [gap:5px] [min-width:0] [padding-bottom:5px] [&_select]:[background:var(--secondary)] [&_select]:[border:1px_solid_var(--border)] [&_select]:rounded-sm [&_select]:[flex:1] [&_select]:[min-width:0] [&_select]:[padding:0_6px] [&_button]:[height:24px] changelistBar [&_select]:rounded-sm`}
+        >
           <Selector
             isLabelHidden
             label="Commit changelist"
@@ -1002,6 +1031,7 @@ export function ChangesWorkspace({
             className={cn(
               "h-7 px-2.5 border-border bg-secondary shadow-xs hover:border-destructive hover:bg-destructive-muted active:bg-destructive-muted/80",
               "w-full",
+              "deleteChangelistButton [grid-row:3]",
             )}
             variant="destructive"
             size="sm"
@@ -1014,6 +1044,9 @@ export function ChangesWorkspace({
           </Button>
         )}
         <TextArea
+          fieldClassName={
+            "commitMessageField [grid-row:4] h-full min-h-0 [&>span]:h-full [&>span]:min-h-0 [&_textarea]:h-full [&_textarea]:min-h-0"
+          }
           data-commit-message
           isLabelHidden
           label="Commit message"

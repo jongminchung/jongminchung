@@ -4,7 +4,7 @@ export default defineConfig({
   build: {
     sourcemap: true,
     rollupOptions: {
-      external: ["electron", "node-pty", "@vscode/ripgrep"],
+      external: ["electron", "node-pty"],
       output: {
         entryFileNames: "main.cjs",
         format: "cjs",

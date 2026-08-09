@@ -1,7 +1,6 @@
 import { Button } from "@jongminchung/ui/components/button";
 import { cn } from "@jongminchung/ui/lib/utils";
 import type { ProjectSearchOptions, ProjectSearchResult } from "../domain/projectSearch";
-import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
 import { EmptyState, List, ListItem } from "./ProductCollections";
 
@@ -22,7 +21,10 @@ export function FindResultsPanel({
 }) {
   const fileCount = new Set(session?.results.map((result) => result.path) ?? []).size;
   return (
-    <section aria-label="Find" className={tw.findResultsPanel}>
+    <section
+      aria-label="Find"
+      className={`findResultsPanel [display:grid] [grid-template-rows:32px_minmax(0,_1fr)] [height:100%] [min-height:0] [&>_header]:[align-items:center] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[gap:7px] [&>_header]:[padding:0_7px] [&>_header_strong]:[font-size:11px] [&>_header_span]:[color:var(--muted-foreground)] [&>_header_span]:[flex:1] [&>_header_button]:[background:var(--secondary)] [&>_header_button]:[border:1px_solid_var(--border)] [&>_header_button]:[height:25px] [&>_header_button]:[padding:0_7px] [&>_ul]:[min-height:0] [&>_ul]:[overflow:auto] [&>_ul]:[padding:4px] [&_li]:[min-height:37px] [&_li_code]:[color:var(--disabled-foreground)] [&_li_code]:[font-size:9px] findResultsPanel`}
+    >
       <header>
         <Icon name="search" size={14} />
         <strong>{session ? `“${session.query}”` : "Find in Files"}</strong>

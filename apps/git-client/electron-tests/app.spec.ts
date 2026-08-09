@@ -8,10 +8,10 @@ import { basename, join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { expect, test } from "@playwright/test";
 import type { Locator, Page } from "@playwright/test";
-import { captureGitState } from "../scripts/parity/git-state-oracle.mjs";
 import type { GitExecutionRequest } from "../src/shared/contracts/git-utility";
 import type { DesktopApi } from "../src/shared/contracts/ipc";
 import type { GitOperation } from "../src/shared/contracts/model";
+import { captureGitState } from "./helpers/git-state-oracle.mjs";
 import { launchPackaged, resetQaProfile, runtimeProfileName } from "./packaged-app-harness";
 
 function git(cwd: string, ...args: readonly string[]): void {
@@ -266,7 +266,7 @@ test("uses the packaged Electron Welcome geometry", async () => {
       }));
       expect(overflow.scrollHeight).toBeLessThanOrEqual(overflow.clientHeight);
     }
-    await expect(app.page.locator(".appShell")).toHaveAttribute("data-window-mode", "welcome");
+    await expect(app.page.locator('[data-window-mode="welcome"]')).toBeVisible();
     const bounds = await app.page.evaluate(() => ({
       height: window.outerHeight,
       width: window.outerWidth,
@@ -277,7 +277,7 @@ test("uses the packaged Electron Welcome geometry", async () => {
   }
 });
 
-test("[parity:mvp] opens a real packaged Electron PTY in the repository directory", async () => {
+test("opens a real packaged Electron PTY in the repository directory", async () => {
   const profileName = runtimeProfileName;
   await resetQaProfile(profileName);
   const repositoryPath = await mkdtemp(join(tmpdir(), "git-client-electron-terminal-"));
@@ -451,7 +451,7 @@ test("shows real packaged Git history and commit details", async () => {
       await projectButton.click();
       const projectRows = page
         .getByRole("dialog", { name: "Projects" })
-        .locator(".projectSwitcherRow");
+        .locator("[data-project-switcher-row]");
       await expect(projectRows).toHaveCount(2);
       await expect(projectRows.nth(0)).toContainText(watchedName);
       await expect(projectRows.nth(1)).toContainText(basename(canonicalReplacement));
@@ -482,7 +482,7 @@ test("shows real packaged Git history and commit details", async () => {
       await projectButton.click();
       const projectRows = reopenedApp.page
         .getByRole("dialog", { name: "Projects" })
-        .locator(".projectSwitcherRow");
+        .locator("[data-project-switcher-row]");
       await expect(projectRows).toHaveCount(2);
       await expect(projectRows.nth(0)).toContainText(watchedName);
       await expect(projectRows.nth(1)).toContainText(basename(canonicalReplacement));
@@ -494,7 +494,7 @@ test("shows real packaged Git history and commit details", async () => {
   }
 });
 
-test("[parity:mvp] executes packaged index, commit, ref, stash, config, remote, and worktree mutations", async () => {
+test("executes packaged index, commit, ref, stash, config, remote, and worktree mutations", async () => {
   test.setTimeout(60_000);
   await resetQaProfile(runtimeProfileName);
   const parent = await mkdtemp(join(tmpdir(), "git-client-electron-mutation-e2e-"));
@@ -1185,7 +1185,7 @@ test("executes and rolls back a packaged synchronized multi-root branch operatio
         opened.map(({ id }) => id),
         {
           kind: "createBranch",
-          name: "feature/packaged-parity",
+          name: "feature/packaged-flow",
           startPoint: "HEAD",
           checkout: true,
         },
@@ -1195,9 +1195,7 @@ test("executes and rolls back a packaged synchronized multi-root branch operatio
     expect(operation.result.outcomes).toHaveLength(2);
     expect(operation.result.outcomes.every(({ succeeded }) => succeeded)).toBe(true);
     for (const repository of repositories) {
-      expect(gitText(repository, "branch", "--show-current").trim()).toBe(
-        "feature/packaged-parity",
-      );
+      expect(gitText(repository, "branch", "--show-current").trim()).toBe("feature/packaged-flow");
     }
 
     const rollback = await app.page.evaluate(async (steps) => {
@@ -1212,7 +1210,7 @@ test("executes and rolls back a packaged synchronized multi-root branch operatio
     expect(rollback.every(({ succeeded }) => succeeded)).toBe(true);
     for (const repository of repositories) {
       expect(gitText(repository, "branch", "--show-current").trim()).toBe("main");
-      expect(gitText(repository, "branch", "--list", "feature/packaged-parity").trim()).toBe("");
+      expect(gitText(repository, "branch", "--list", "feature/packaged-flow").trim()).toBe("");
     }
   } finally {
     await app.close();

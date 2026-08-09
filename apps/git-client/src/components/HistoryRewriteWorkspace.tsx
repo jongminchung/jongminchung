@@ -1,4 +1,22 @@
 import { Button } from "@jongminchung/ui/components/button";
+import { Checkbox } from "@jongminchung/ui/components/checkbox";
+import { Input } from "@jongminchung/ui/components/input";
+import { ScrollArea } from "@jongminchung/ui/components/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@jongminchung/ui/components/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@jongminchung/ui/components/table";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { useEffect, useMemo, useState } from "react";
 import { sanitizeGitError } from "../domain/gitActivity";
@@ -225,20 +243,19 @@ export function HistoryRewriteWorkspace({
             </div>
           ) : preview ? (
             <div className="grid min-h-0 grid-cols-[minmax(0,1fr)_320px] max-[900px]:grid-cols-1 max-[900px]:grid-rows-[minmax(0,1fr)_auto]">
-              <div className="min-h-0 overflow-auto border-r border-border max-[900px]:border-b max-[900px]:border-r-0">
-                <table className="w-full border-collapse text-left text-xs">
-                  <thead className="sticky top-0 z-10 bg-card text-muted-foreground">
-                    <tr>
-                      <th className="w-8 p-2" />
-                      <th className="w-28 p-2">Action</th>
-                      <th className="p-2">Commit</th>
-                      <th className="w-52 p-2">Impact</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+              <ScrollArea className="min-h-0 border-r border-border max-[900px]:border-b max-[900px]:border-r-0">
+                <Table className="border-collapse text-left text-xs">
+                  <TableHeader className="sticky top-0 z-10 bg-card text-muted-foreground">
+                    <TableRow>
+                      <TableHead className="h-8 w-8 p-2" />
+                      <TableHead className="h-8 w-28 p-2">Action</TableHead>
+                      <TableHead className="h-8 p-2">Commit</TableHead>
+                      <TableHead className="h-8 w-52 p-2">Impact</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {entries.map((entry, index) => (
-                      <tr
-                        className="border-t border-border hover:bg-muted"
+                      <TableRow
                         data-rebase-oid={entry.oid}
                         draggable={!preview.hasMerges && !entry.mergeCommit}
                         key={entry.oid}
@@ -248,34 +265,41 @@ export function HistoryRewriteWorkspace({
                         onDragStart={() => setDraggedOid(entry.oid)}
                         onDrop={() => dropOn(entry.oid)}
                       >
-                        <td className="cursor-grab p-2 text-muted-foreground">
+                        <TableCell className="cursor-grab p-2 text-muted-foreground">
                           <Icon name="more" size={14} />
-                        </td>
-                        <td className="p-2">
-                          <select
-                            aria-label={`Action for ${entry.subject}`}
-                            autoFocus={index === 0}
-                            className="min-h-7 rounded-md border border-border bg-card px-2"
+                        </TableCell>
+                        <TableCell className="p-2">
+                          <Select
                             disabled={entry.mergeCommit}
-                            onChange={(event) =>
-                              changeAction(entry.oid, event.target.value as RebasePlanAction)
+                            onValueChange={(value) =>
+                              value && changeAction(entry.oid, value as RebasePlanAction)
                             }
                             value={entry.action}
                           >
-                            {ACTIONS.map((action) => (
-                              <option key={action} value={action}>
-                                {action}
-                              </option>
-                            ))}
-                          </select>
-                        </td>
-                        <td className="min-w-0 p-2">
+                            <SelectTrigger
+                              aria-label={`Action for ${entry.subject}`}
+                              autoFocus={index === 0}
+                              className="w-full bg-card"
+                              size="sm"
+                            >
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent align="start">
+                              {ACTIONS.map((action) => (
+                                <SelectItem key={action} value={action}>
+                                  {action}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell className="min-w-0 p-2 whitespace-normal">
                           <div className="flex min-w-0 items-center gap-2">
                             <code>{entry.oid.slice(0, 8)}</code>
                             <strong className="truncate">{entry.subject}</strong>
                           </div>
                           {entry.action === "reword" && (
-                            <input
+                            <Input
                               aria-label={`New message for ${entry.subject}`}
                               className="mt-2 min-h-8 w-full rounded-md border border-border bg-card px-2"
                               onChange={(event) =>
@@ -293,8 +317,8 @@ export function HistoryRewriteWorkspace({
                               value={entry.message ?? ""}
                             />
                           )}
-                        </td>
-                        <td className="p-2">
+                        </TableCell>
+                        <TableCell className="p-2">
                           <div className="flex flex-wrap gap-1">
                             {entry.published && (
                               <span className="rounded bg-warning/15 px-1.5 py-0.5 text-warning">
@@ -312,12 +336,12 @@ export function HistoryRewriteWorkspace({
                               </span>
                             )}
                           </div>
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
-              </div>
+                  </TableBody>
+                </Table>
+              </ScrollArea>
               <aside className="grid content-start gap-4 overflow-auto bg-card p-4">
                 <section className="grid gap-2">
                   <strong>Preview</strong>
@@ -346,25 +370,17 @@ export function HistoryRewriteWorkspace({
                 <section className="grid gap-2">
                   <strong>Options</strong>
                   <label>
-                    <input
-                      checked={autostash}
-                      onChange={(event) => setAutostash(event.target.checked)}
-                      type="checkbox"
-                    />{" "}
-                    Autostash local changes
+                    <Checkbox checked={autostash} onCheckedChange={setAutostash} /> Autostash local
+                    changes
                   </label>
                   {preview.dependentRefs.length > 0 && (
                     <label>
-                      <input
-                        checked={updateRefs}
-                        onChange={(event) => setUpdateRefs(event.target.checked)}
-                        type="checkbox"
-                      />{" "}
-                      Update dependent refs
+                      <Checkbox checked={updateRefs} onCheckedChange={setUpdateRefs} /> Update
+                      dependent refs
                     </label>
                   )}
                   <label>
-                    <input checked disabled type="checkbox" /> Preserve merge topology
+                    <Checkbox checked disabled /> Preserve merge topology
                   </label>
                 </section>
                 {preview.dependentRefs.length > 0 && (

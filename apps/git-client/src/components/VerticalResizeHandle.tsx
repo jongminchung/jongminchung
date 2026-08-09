@@ -1,6 +1,5 @@
 import { useRef } from "react";
 import type { KeyboardEvent, PointerEvent } from "react";
-import { tw } from "../styles/tailwind";
 
 export function VerticalResizeHandle({
   label,
@@ -32,7 +31,7 @@ export function VerticalResizeHandle({
       aria-label={label}
       aria-orientation="vertical"
       aria-valuenow={Math.round(value)}
-      className={tw.verticalResizeHandle}
+      className={`verticalResizeHandle [bottom:0] [cursor:col-resize] [position:absolute] [right:-4px] [top:0] [width:7px] [z-index:12] [&::after]:[background:transparent] [&::after]:[content:\"\"] [&::after]:[inset:0_3px] [&::after]:[position:absolute] [&::after]:[transition:background_100ms_ease-out] [&:hover::after]:[background:var(--primary)] [&:focus-visible::after]:[background:var(--primary)] max-[1120px]:[display:none] verticalResizeHandle`}
       onKeyDown={handleKeyboard}
       onPointerCancel={(event) => {
         drag.current = null;

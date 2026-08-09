@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { decodeCursor, encodeCursor } from "./cursor";
 import { branchUrl, commitUrl, resolveForge } from "./forge";
 import {
   assembleHunkPatch,
@@ -207,7 +206,7 @@ describe("repository inspection parsers", () => {
   });
 });
 
-describe("forge URLs and cursors", () => {
+describe("forge URLs", () => {
   it("normalizes SSH and HTTPS remotes", () => {
     expect(resolveForge("git@github.com:acme/repo.git")).toEqual({
       forge: "github",
@@ -219,11 +218,5 @@ describe("forge URLs and cursors", () => {
     expect(branchUrl("git@github.com:acme/repo.git", "feat/a")).toBe(
       "https://github.com/acme/repo/tree/feat%2Fa",
     );
-  });
-
-  it("round-trips filter cursors and rejects junk", () => {
-    const cursor = { skip: 500, query: "한글", branch: "main", order: "topology" as const };
-    expect(decodeCursor(encodeCursor(cursor))).toEqual(cursor);
-    expect(decodeCursor("not-json")).toBeUndefined();
   });
 });

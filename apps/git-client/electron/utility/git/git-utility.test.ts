@@ -537,7 +537,7 @@ describe("Electron Git utility", () => {
     expect(new Set([...firstPage, ...secondPage].map((commit) => commit.oid))).toHaveLength(502);
   }, 30_000);
 
-  it("runs a bounded read-only working-tree diff with the native parity options", async () => {
+  it("runs a bounded read-only working-tree diff with the native Git options", async () => {
     const repository = await createFixtureRepository();
     await writeFile(join(repository, "tracked.txt"), "second\n", "utf8");
     const utility = new GitUtility();

@@ -1116,7 +1116,7 @@ describe("platform Git IPC handlers", () => {
       data: [36, 32],
     };
     const terminalUtility = {
-      create: vi.fn(async (request: unknown, listener: (event: TerminalEventEnvelope) => void) => {
+      create: vi.fn(async (_request: unknown, listener: (event: TerminalEventEnvelope) => void) => {
         listener(terminalEvent);
         return {
           requestId: REQUEST_ID,

@@ -2,7 +2,6 @@ import { Button } from "@jongminchung/ui/components/button";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { useMemo, useState } from "react";
 import { CODE_INSPECTIONS, type CodeInspectionId } from "../domain/codeAnalysis";
-import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
 import { List, ListItem } from "./ProductCollections";
 import { Dialog, DialogHeader } from "./ProductDialog";
@@ -34,7 +33,9 @@ export function RunInspectionDialog({
       purpose="info"
       width={600}
     >
-      <section className={tw.runInspectionDialog}>
+      <section
+        className={`runInspectionDialog [display:grid] [grid-template-rows:auto_auto_minmax(260px,_1fr)_auto] [height:min(580px,_calc(100vh_-_80px))] [&>_[data-slot=text-input]]:[margin:10px_12px_5px] [&>_div[role=listbox]]:[min-height:0] [&>_div[role=listbox]]:[overflow:auto] [&>_div[role=listbox]]:[padding:5px_7px] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:flex] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:8px_10px] runInspectionDialog`}
+      >
         <DialogHeader
           hasDivider
           onOpenChange={(open) => !open && onClose()}

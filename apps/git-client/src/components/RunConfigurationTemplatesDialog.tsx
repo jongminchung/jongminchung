@@ -6,7 +6,6 @@ import type {
   RunConfigurationTemplate,
   RunConfigurationTemplateKind,
 } from "../domain/runConfigurationTemplates";
-import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
 import { Dialog, DialogHeader } from "./ProductDialog";
 import { TextInput } from "./ProductFormControls";
@@ -46,7 +45,9 @@ export function RunConfigurationTemplatesDialog({
       purpose="form"
       width="min(860px, calc(100vw - 70px))"
     >
-      <section className={tw.runConfigurationTemplatesDialog}>
+      <section
+        className={`runConfigurationTemplatesDialog [display:grid] [grid-template-columns:220px_minmax(0,_1fr)] [grid-template-rows:auto_minmax(0,_1fr)_auto] [height:min(590px,_calc(100vh_-_70px))] [min-height:0] [&>_[data-slot=dialog-header]]:[grid-column:1/-1] [&>_aside]:[background:var(--muted)] [&>_aside]:[border-right:1px_solid_var(--border)] [&>_aside]:[display:flex] [&>_aside]:[flex-direction:column] [&>_aside]:[gap:2px] [&>_aside]:[padding:10px_7px] [&>_aside_>_strong]:[color:var(--muted-foreground)] [&>_aside_>_strong]:[font-size:10px] [&>_aside_>_strong]:[padding:2px_8px_7px] [&>_aside_button]:[align-items:center] [&>_aside_button]:[background:transparent] [&>_aside_button]:[display:flex] [&>_aside_button]:[gap:8px] [&>_aside_button]:[height:31px] [&>_aside_button]:[padding:0_8px] [&>_aside_button]:[text-align:left] [&>_main]:[display:flex] [&>_main]:[flex-direction:column] [&>_main]:[gap:15px] [&>_main]:[min-height:0] [&>_main]:[overflow:auto] [&>_main]:[padding:18px_20px] [&>_main_h2]:[font-size:16px] [&>_main_h2]:[margin:0] [&>_main_p]:[color:var(--muted-foreground)] [&>_main_p]:[margin:0] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:flex] [&>_footer]:[grid-column:1/-1] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:8px_12px] runConfigurationTemplatesDialog`}
+      >
         <DialogHeader
           hasDivider
           onOpenChange={(open) => !open && onClose()}

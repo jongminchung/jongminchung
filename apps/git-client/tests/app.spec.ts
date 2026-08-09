@@ -5,6 +5,22 @@ test.beforeEach(async ({ page }) => {
   await page.goto("/?fixture=qa");
 });
 
+test("keeps welcome categories left aligned with and without recent projects", async ({ page }) => {
+  await page.setViewportSize({ width: 800, height: 650 });
+
+  for (const path of ["/", "/?fixture=welcome-recent"]) {
+    await page.goto(path);
+    await expect(page.getByRole("treeitem", { name: "Projects" })).toHaveCSS(
+      "justify-content",
+      "flex-start",
+    );
+    await expect(page.getByRole("treeitem", { name: "Customize" })).toHaveCSS(
+      "justify-content",
+      "flex-start",
+    );
+  }
+});
+
 test("matches the 800 by 650 Rebased recent-project geometry", async ({ page }) => {
   await page.setViewportSize({ width: 800, height: 650 });
   await page.goto("/?fixture=welcome-recent");
@@ -201,6 +217,28 @@ test("navigates appearance settings with the keyboard", async ({ page }) => {
   await expect(settings).toBeFocused();
 });
 
+test("operates shadcn Select with Space, arrows, Escape, and focus restoration", async ({
+  page,
+}) => {
+  await page.getByRole("button", { name: "IDE and Project Settings" }).click();
+  const dialog = page.getByRole("dialog", { name: "Settings" });
+  const ideFont = dialog.getByLabel("IDE font");
+  const initialValue = await ideFont.textContent();
+
+  await ideFont.focus();
+  await page.keyboard.press("Space");
+  await expect(page.getByRole("option", { name: "72.0", exact: true })).toBeVisible();
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("Enter");
+  await expect.poll(() => ideFont.textContent()).not.toBe(initialValue);
+  await expect(ideFont).toBeFocused();
+
+  await page.keyboard.press("Space");
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("listbox")).toHaveCount(0);
+  await expect(ideFont).toBeFocused();
+});
+
 test("keeps core panes usable at the minimum window size", async ({ page }) => {
   await page.setViewportSize({ width: 960, height: 640 });
   await expect(page.getByRole("complementary", { name: "Branches and tags" })).toBeVisible();
@@ -355,10 +393,9 @@ test("opens published commits in the visual interactive rebase workspace", async
   const firstOid = await rows.first().getAttribute("data-rebase-oid");
   await rows.first().dragTo(rows.nth(2));
   await expect(rows.first()).not.toHaveAttribute("data-rebase-oid", firstOid ?? "");
-  await dialog
-    .getByLabel(/Action for/)
-    .first()
-    .selectOption("reword");
+  const action = dialog.getByLabel(/Action for/).first();
+  await action.click();
+  await page.getByRole("option", { name: "reword", exact: true }).click();
   await expect(dialog.getByLabel(/New message for/).first()).toBeVisible();
   await dialog.getByRole("button", { name: "Start Rebase" }).click();
   const confirmation = page.getByRole("dialog", {

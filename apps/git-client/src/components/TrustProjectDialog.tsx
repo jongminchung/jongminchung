@@ -1,8 +1,8 @@
 import { Button } from "@jongminchung/ui/components/button";
 import { useState } from "react";
+import { Icon } from "./Icon";
 import { Dialog } from "./ProductDialog";
 import { CheckboxInput } from "./ProductFormControls";
-import { Icon } from "./Icon";
 
 export function TrustProjectDialog({
   parentName,

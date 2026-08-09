@@ -1,4 +1,3 @@
-import { tw } from "../styles/tailwind";
 import type { FindResultsSession } from "./FindResultsPanel";
 import { Icon } from "./Icon";
 import { EmptyState } from "./ProductCollections";
@@ -23,7 +22,9 @@ export function RecentFindUsagesDialog({
       purpose="info"
       width={480}
     >
-      <section className={tw.recentFindUsagesDialog}>
+      <section
+        className={`recentFindUsagesDialog [display:grid] [grid-template-rows:auto_minmax(190px,_1fr)] [max-height:min(480px,_calc(100vh_-_90px))] [&>_[data-slot=empty-state]]:[min-height:190px] [&>_div[role=listbox]]:[min-height:0] [&>_div[role=listbox]]:[overflow:auto] [&>_div[role=listbox]]:[padding:6px] recentFindUsagesDialog`}
+      >
         <DialogHeader
           hasDivider
           onOpenChange={(open) => !open && onClose()}

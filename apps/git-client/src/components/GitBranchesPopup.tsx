@@ -1,11 +1,11 @@
 import { Button } from "@jongminchung/ui/components/button";
+import { Input } from "@jongminchung/ui/components/input";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { checkoutTarget, deleteRefOperation, mergeRefOperation } from "../domain/refActions";
 import type { Ref } from "../domain/types";
 import type { BranchComparison, GitOperation, RemoteInfo } from "../shared/contracts/model";
-import { tw } from "../styles/tailwind";
 import { useAppDialog } from "./AppDialog";
 import { useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
@@ -300,7 +300,7 @@ export function GitBranchesPopup({
     <div
       aria-busy={busy || undefined}
       aria-label="Git Branches"
-      className={tw.gitBranchesPopup}
+      className={`gitBranchesPopup [background:var(--popover)] [border:1px_solid_var(--input)] rounded-lg [box-shadow:var(--shadow-lg)] [display:grid] [grid-template-rows:36px_minmax(120px,_auto)] [left:0] [max-height:min(520px,_calc(100vh_-_70px))] [min-width:368px] [overflow:hidden] [position:absolute] [top:31px] [z-index:100] gitBranchesPopup rounded-lg`}
       onKeyDown={(event) => {
         if (event.key === "Escape") {
           event.preventDefault();
@@ -342,10 +342,12 @@ export function GitBranchesPopup({
       ref={popup}
       role="dialog"
     >
-      <div className={tw.gitBranchesSearch}>
+      <div
+        className={`gitBranchesSearch [align-items:center] [border-bottom:1px_solid_var(--border)] [display:grid] [gap:5px] [grid-template-columns:minmax(0,_1fr)_auto] [padding:4px_5px] [&>_label]:[align-items:center] [&>_label]:[background:var(--secondary)] [&>_label]:[border:1px_solid_var(--border)] [&>_label]:rounded-sm [&>_label]:[display:flex] [&>_label]:[gap:5px] [&>_label]:[padding:0_6px] [&>_label:focus-within]:[border-color:var(--primary)] [&_input]:[background:transparent] [&_input]:[border:0] [&_input]:[height:25px] [&_input]:[min-width:0] [&_input]:[outline:0] [&_input]:[width:100%] [&_[role=toolbar]]:[display:flex] [&_[role=toolbar]_button]:[align-items:center] [&_[role=toolbar]_button]:[background:transparent] [&_[role=toolbar]_button]:[display:flex] [&_[role=toolbar]_button]:[height:26px] [&_[role=toolbar]_button]:[justify-content:center] [&_[role=toolbar]_button]:[width:26px] gitBranchesSearch [&>_label]:rounded-sm`}
+      >
         <label>
           <Icon name="search" size={14} />
-          <input
+          <Input
             aria-activedescendant={rows[activeIndex] ? `branch-${activeIndex}` : undefined}
             aria-controls="git-branches-list"
             aria-label="Search"
@@ -410,7 +412,7 @@ export function GitBranchesPopup({
       </div>
       <div
         aria-label="Branches Tree"
-        className={tw.gitBranchesList}
+        className={`gitBranchesList [min-height:0] [overflow:auto] [padding:4px] [&_[role=separator]]:[border-top:1px_solid_var(--border)] [&_[role=separator]]:[height:5px] [&_[role=separator]]:[margin-top:4px] [&_[role=treeitem]]:[align-items:center] [&_[role=treeitem]]:[background:transparent] [&_[role=treeitem]]:rounded-sm [&_[role=treeitem]]:[display:grid] [&_[role=treeitem]]:[gap:6px] [&_[role=treeitem]]:[grid-template-columns:17px_minmax(0,_1fr)_auto_auto] [&_[role=treeitem]]:[height:27px] [&_[role=treeitem]]:[padding:0_7px] [&_[role=treeitem]]:[text-align:left] [&_[role=treeitem]]:[width:100%] [&_[role=treeitem]:hover]:[background:var(--muted)] [&_[role=treeitem][aria-selected=true]]:[background:var(--accent)] [&_[role=group]_[role=treeitem]]:[padding-left:25px] [&_[data-branch-group=true]]:[font-weight:600] [&_kbd]:[color:var(--disabled-foreground)] [&_kbd]:[font:inherit] [&_small]:[color:var(--disabled-foreground)] [&_small]:[font-size:10px] [&>_p]:[color:var(--muted-foreground)] [&>_p]:[padding:20px] [&>_p]:[text-align:center] gitBranchesList [&_[role=treeitem]]:rounded-sm`}
         id="git-branches-list"
         role="tree"
       >
@@ -481,7 +483,11 @@ export function GitBranchesPopup({
           return (
             <div key={kind} role="none">
               <div aria-expanded="true" data-branch-group="true" role="treeitem">
-                <Icon className={tw.rotated} name="chevron" size={11} />
+                <Icon
+                  className={`rotated [transform:rotate(90deg)] rotated`}
+                  name="chevron"
+                  size={11}
+                />
                 <span>{label}</span>
               </div>
               <div role="group">
@@ -505,7 +511,9 @@ export function GitBranchesPopup({
                           type="button"
                           className={cn(
                             "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
-                            index === activeIndex ? tw.selected : undefined,
+                            index === activeIndex
+                              ? `selected [background:var(--accent)] [color:var(--foreground)] selected`
+                              : undefined,
                           )}
                           variant="ghost"
                           size="default"
@@ -522,7 +530,11 @@ export function GitBranchesPopup({
                           />
                           <span>{row.label}</span>
                           {row.ref.favorite && (
-                            <Icon className={tw.favorite} name="star" size={12} />
+                            <Icon
+                              className={`favorite [color:var(--bookmark)] [fill:var(--bookmark)] favorite`}
+                              name="star"
+                              size={12}
+                            />
                           )}
                           {(row.ref.current || row.ref.shortName === currentBranch) && (
                             <small>
@@ -554,7 +566,7 @@ export function GitBranchesPopup({
       )}
       {detailsOpen && activeRef && (
         <div
-          className={tw.gitBranchSelectedActions}
+          className={`gitBranchSelectedActions [border-top:1px_solid_var(--border)] [display:flex] [flex-wrap:wrap] [gap:3px] [padding:4px_5px] [&_button]:[background:transparent] [&_button]:[font-size:10px] [&_button]:[height:25px] [&_button]:[padding:0_6px] gitBranchSelectedActions`}
           aria-label={`Actions for ${activeRef.shortName}`}
           ref={selectedActions}
         >
@@ -667,7 +679,10 @@ export function GitBranchesPopup({
         </div>
       )}
       {comparison && activeRef && (
-        <div className={tw.gitBranchComparison} role="status">
+        <div
+          className={`gitBranchComparison [align-items:center] [background:var(--muted)] [border-top:1px_solid_var(--border)] [display:flex] [font-size:10px] [gap:8px] [padding:5px_8px] [&_span]:[color:var(--muted-foreground)] gitBranchComparison`}
+          role="status"
+        >
           <strong>
             {currentBranch} ↔ {activeRef.shortName}
           </strong>

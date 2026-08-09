@@ -1,7 +1,6 @@
 import { Button } from "@jongminchung/ui/components/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
 import { cn } from "@jongminchung/ui/lib/utils";
-import { tw } from "../styles/tailwind";
 import { Icon } from "./Icon";
 
 export interface ProductNotification {
@@ -30,7 +29,11 @@ export function NotificationBalloon({
     openUrl: "Open Repository",
   } as const;
   return (
-    <aside aria-label={notification.title} className={tw.notificationBalloon} role="status">
+    <aside
+      aria-label={notification.title}
+      className={`notificationBalloon bg-feedback! [align-items:start] [background:var(--popover)] [border:1px_solid_var(--input)] rounded-lg [bottom:32px] [box-shadow:var(--shadow-lg)] [display:grid] [gap:8px] [grid-template-columns:17px_minmax(0,_1fr)_18px] [padding:10px_10px_9px] [position:fixed] [right:31px] [width:320px] [z-index:75] [&>_svg]:[color:var(--warning)] [&>_div]:[min-width:0] [&_strong]:[display:block] [&_p]:[color:var(--muted-foreground)] [&_p]:[line-height:1.35] [&_p]:[margin:3px_0_0] [&_p]:[max-height:34px] [&_p]:[overflow:hidden] [&_footer]:[display:flex] [&_footer]:[gap:12px] [&_footer]:[margin-top:7px] [&_footer_button]:[background:transparent] [&_footer_button]:[color:var(--primary)] [&_footer_button]:[font-size:11px] [&_footer_button]:[padding:0] [&>_button]:[align-items:center] [&>_button]:[background:transparent] [&>_button]:[color:var(--disabled-foreground)] [&>_button]:[display:flex] [&>_button]:[height:18px] [&>_button]:[justify-content:center] [&>_button]:[padding:0] [&>_button]:[width:18px] notificationBalloon rounded-lg`}
+      role="status"
+    >
       <Icon
         name={
           notification.kind === "error"
@@ -103,7 +106,10 @@ export function NotificationToolWindow({
   readonly onClose: () => void;
 }) {
   return (
-    <aside className={tw.notificationToolWindow} aria-label="Notifications">
+    <aside
+      className={`notificationToolWindow [background:var(--card)] [border:1px_solid_var(--border)] rounded-lg [bottom:18px] [box-shadow:var(--shadow-lg)] [display:grid] [grid-template-rows:30px_minmax(0,_1fr)] [position:fixed] [right:30px] [top:56px] [width:340px] [z-index:35] [&>_header]:[align-items:center] [&>_header]:[background:var(--secondary)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[gap:5px] [&>_header]:[padding:0_5px_0_8px] [&>_header>_strong]:[flex:1] [&>_header>_span]:[color:var(--disabled-foreground)] [&>_header>_button]:[align-items:center] [&>_header>_button]:[background:transparent] [&>_header>_button]:[display:flex] [&>_header>_button]:[height:24px] [&>_header>_button]:[justify-content:center] [&>_header>_button]:[width:24px] [&>_div]:[min-height:0] [&>_div]:[overflow:auto] [&>_div>_p]:[color:var(--muted-foreground)] [&>_div>_p]:[padding:24px] [&>_div>_p]:[text-align:center] [&_article]:[align-items:start] [&_article]:[border-bottom:1px_solid_var(--border)] [&_article]:[display:grid] [&_article]:[gap:7px] [&_article]:[grid-template-columns:18px_minmax(0,_1fr)_auto] [&_article]:[padding:8px] [&_article>_span]:[display:grid] [&_article_strong]:[font-size:11px] [&_article_small]:[color:var(--muted-foreground)] [&_article_small]:[line-height:1.35] [&_article_time]:[color:var(--disabled-foreground)] [&_article_time]:[font-size:9px] notificationToolWindow rounded-lg`}
+      aria-label="Notifications"
+    >
       <header>
         <strong>Notifications</strong>
         <span>{notifications.length || ""}</span>

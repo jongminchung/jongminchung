@@ -20,12 +20,12 @@ Appearance supports System Appearance, White, and Black. System mode follows mac
 ```sh
 pnpm install
 pnpm --filter @jongminchung/git-client dev
-pnpm --filter @jongminchung/git-client dev:web
+pnpm --filter @jongminchung/git-client exec vite --host 127.0.0.1
 pnpm --filter @jongminchung/git-client test
 pnpm --filter @jongminchung/git-client build
 ```
 
-`pnpm dev` launches Electron Forge. `pnpm dev:web` starts only the browser development server; its normal URL starts on the Welcome screen because a browser has no native Git bridge. A deterministic fixture is available only at `http://localhost:1420/?fixture=qa` for visual and Playwright testing. In Electron, **Open Repository** uses the native directory picker and all requests cross the context-isolated preload as validated discriminated unions. The renderer never receives an arbitrary Git command, path, URL, or IPC channel API.
+`pnpm dev` launches Electron Forge. The direct Vite command starts only the browser development server; its normal URL starts on the Welcome screen because a browser has no native Git bridge. A deterministic fixture is available only at `http://127.0.0.1:1420/?fixture=qa` for visual and Playwright testing. In Electron, **Open Repository** uses the native directory picker and all requests cross the context-isolated preload as validated discriminated unions. The renderer never receives an arbitrary Git command, path, URL, or IPC channel API. See the [local development and testing guide](docs/contributing.md) for focused and packaged test workflows.
 
 Open repositories, their order, the active project, recent paths, and repository UI state are restored from the Electron settings store. The project selector mirrors Rebased with Open, Clone Repository, Open Projects, and Recent Projects entries; branch, remote, worktree, hosting, and repository settings remain available through focused tools. The resizable bottom tool window contains Shelf, Stash, Recovery, and a real repository-scoped PTY Terminal. Git operations expose only temporary redacted progress, failure, and cancellation state; command output is not retained by the renderer.
 
@@ -34,14 +34,6 @@ Keyboard commands are defined once in `src/command-manifest.json` and shared by 
 ## Token-efficient QA
 
 `pnpm qa:compact` runs type checks, unit tests, and renderer Playwright tests. Playwright uses a compact reporter by default: stdout contains only aggregate counts and one line per failed contract, while bounded error details and trace, screenshot, and diff paths are written to `test-results/qa/renderer.json`. Packaged Electron tests use the same format in `test-results/qa/electron.json` through `pnpm qa:compact:electron`. Set `GIT_CLIENT_VERBOSE_TESTS=1` or run `pnpm qa:verbose` only when an individual failure needs the full live reporter.
-
-`pnpm parity:compact` emits one gate line and writes the compact, current-build gate record to `test-results/qa/parity.json`. `pnpm parity:next --limit 5` lists only the next five divergent or unverified obligations, while `pnpm parity:explain <id>` opens one structured result. Full AX, Git, trace, and screenshot evidence remains under `test-results/parity/<build-hash>/`.
-
-`pnpm parity:theme` is the independent Islands Light/Dark design-system gate. It validates the Rebased-to-semantic-token mapping, rejects literal UI colors, checks 30/29/22/20px geometry and interactive states, and writes deterministic sRGB comparison reports to `test-results/theme-parity/`. It uses checked-in evidence only and consumes no AI tokens.
-
-`pnpm parity:mvp` preserves the historical Rebased 1.1.8 regression contract. It is not the current product-completion verdict. It runs deterministic fixture and real Git integration tests, four parallel renderer lanes, one production Electron package, and the serial native Git/PTY checks. Results and bounded command logs are written below `test-results/parity/1.1.8/`; the command does not launch Rebased, access external services, update goldens, or call an AI service. Run one lane with `pnpm parity:test --scenario <id>`.
-
-Historical 1.1.8 evidence and generated contracts live under `parity/rebased/1.1.8/`; they are retained only for regression coverage and are excluded from the independent 1.1.11 verdict. Candidate-only observers live under `tests/parity/observers/`. The gate derives every count from individual current-build results and never trusts a stored `complete` flag.
 
 ## Safety model
 
@@ -60,9 +52,7 @@ Historical 1.1.8 evidence and generated contracts live under `parity/rebased/1.1
 
 ## Scope
 
-The current Git-focused target is the installed Rebased 1.1.11 on macOS ARM64. The older [`docs/rebased-parity.md`](docs/rebased-parity.md) and `parity/rebased/1.1.8/` tree are historical regression material, not evidence for the current verdict.
-
-The fresh, Git-focused audit is recorded in [`docs/rebased-1.1.11-independent-audit.md`](docs/rebased-1.1.11-independent-audit.md). It deliberately excludes existing parity records and grades the scoped implementation as **equivalent and complete**: packaged Git effects, read-only Safe Mode, focused workbench geometry, and all Electron gates pass. Exact identity is not claimed because Rebased 1.1.11 itself traps advanced accessibility traversal in its `Paths` menu.
+The current Git-focused target is the installed Rebased 1.1.11 on macOS ARM64. The independent audit is recorded in [`docs/rebased-1.1.11-independent-audit.md`](docs/rebased-1.1.11-independent-audit.md). It grades the scoped implementation as **equivalent and complete**: packaged Git effects, read-only Safe Mode, focused workbench geometry, and all Electron gates pass. Exact identity is not claimed because Rebased 1.1.11 itself traps advanced accessibility traversal in its `Paths` menu.
 
 ## Releases
 
