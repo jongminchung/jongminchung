@@ -705,6 +705,8 @@ test("executes packaged repository inspection, ignore, preview, and patch bounda
               until: null,
               paths: [],
               noMerges: false,
+              regex: false,
+              matchCase: false,
             },
           }),
           withIdentity({

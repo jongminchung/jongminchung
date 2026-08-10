@@ -188,7 +188,7 @@ describe("platform Git IPC handlers", () => {
       runtime: {
         kind: "electron",
         appVersion: "0.1.0",
-        electronVersion: "43.1.1",
+        electronVersion: "43.3.0",
         platform: "darwin",
         architecture: "arm64",
         qaFixture: false,
@@ -245,7 +245,7 @@ describe("platform Git IPC handlers", () => {
       runtime: {
         kind: "electron",
         appVersion: "0.1.0",
-        electronVersion: "43.1.1",
+        electronVersion: "43.3.0",
         platform: "darwin",
         architecture: "arm64",
         qaFixture: false,
@@ -319,7 +319,7 @@ describe("platform Git IPC handlers", () => {
       runtime: {
         kind: "electron",
         appVersion: "0.1.0",
-        electronVersion: "43.1.1",
+        electronVersion: "43.3.0",
         platform: "darwin",
         architecture: "arm64",
         qaFixture: false,
@@ -400,7 +400,7 @@ describe("platform Git IPC handlers", () => {
       runtime: {
         kind: "electron",
         appVersion: "0.1.0",
-        electronVersion: "43.1.1",
+        electronVersion: "43.3.0",
         platform: "darwin",
         architecture: "arm64",
         qaFixture: false,
@@ -456,7 +456,7 @@ describe("platform Git IPC handlers", () => {
       runtime: {
         kind: "electron",
         appVersion: "0.1.0",
-        electronVersion: "43.1.1",
+        electronVersion: "43.3.0",
         platform: "darwin",
         architecture: "arm64",
         qaFixture: false,
@@ -507,7 +507,7 @@ describe("platform Git IPC handlers", () => {
       runtime: {
         kind: "electron",
         appVersion: "0.1.0",
-        electronVersion: "43.1.1",
+        electronVersion: "43.3.0",
         platform: "darwin",
         architecture: "arm64",
         qaFixture: false,
@@ -615,7 +615,7 @@ describe("platform Git IPC handlers", () => {
       runtime: {
         kind: "electron",
         appVersion: "0.1.0",
-        electronVersion: "43.1.1",
+        electronVersion: "43.3.0",
         platform: "darwin",
         architecture: "arm64",
         qaFixture: false,
@@ -715,7 +715,7 @@ describe("platform Git IPC handlers", () => {
       runtime: {
         kind: "electron",
         appVersion: "0.1.0",
-        electronVersion: "43.1.1",
+        electronVersion: "43.3.0",
         platform: "darwin",
         architecture: "arm64",
         qaFixture: false,
@@ -759,7 +759,7 @@ describe("platform Git IPC handlers", () => {
       runtime: {
         kind: "electron",
         appVersion: "0.1.0",
-        electronVersion: "43.1.1",
+        electronVersion: "43.3.0",
         platform: "darwin",
         architecture: "arm64",
         qaFixture: false,
@@ -796,7 +796,7 @@ describe("platform Git IPC handlers", () => {
       runtime: {
         kind: "electron",
         appVersion: "0.1.0",
-        electronVersion: "43.1.1",
+        electronVersion: "43.3.0",
         platform: "darwin",
         architecture: "arm64",
         qaFixture: false,
@@ -853,7 +853,7 @@ describe("platform Git IPC handlers", () => {
       runtime: {
         kind: "electron",
         appVersion: "0.1.0",
-        electronVersion: "43.1.1",
+        electronVersion: "43.3.0",
         platform: "darwin",
         architecture: "arm64",
         qaFixture: false,
@@ -933,7 +933,7 @@ describe("platform Git IPC handlers", () => {
       runtime: {
         kind: "electron",
         appVersion: "0.1.0",
-        electronVersion: "43.1.1",
+        electronVersion: "43.3.0",
         platform: "darwin",
         architecture: "arm64",
         qaFixture: false,
@@ -1001,7 +1001,7 @@ describe("platform Git IPC handlers", () => {
       runtime: {
         kind: "electron",
         appVersion: "0.1.0",
-        electronVersion: "43.1.1",
+        electronVersion: "43.3.0",
         platform: "darwin",
         architecture: "arm64",
         qaFixture: false,
@@ -1065,7 +1065,7 @@ describe("platform Git IPC handlers", () => {
       runtime: {
         kind: "electron",
         appVersion: "0.1.0",
-        electronVersion: "43.1.1",
+        electronVersion: "43.3.0",
         platform: "darwin",
         architecture: "arm64",
         qaFixture: false,
@@ -1143,7 +1143,7 @@ describe("platform Git IPC handlers", () => {
       runtime: {
         kind: "electron",
         appVersion: "0.1.0",
-        electronVersion: "43.1.1",
+        electronVersion: "43.3.0",
         platform: "darwin",
         architecture: "arm64",
         qaFixture: false,
@@ -1238,7 +1238,7 @@ describe("platform hosting IPC handlers", () => {
       runtime: {
         kind: "electron",
         appVersion: "0.1.0",
-        electronVersion: "43.1.1",
+        electronVersion: "43.3.0",
         platform: "darwin",
         architecture: "arm64",
         qaFixture: false,

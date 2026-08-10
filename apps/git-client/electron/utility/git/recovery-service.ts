@@ -1,14 +1,10 @@
-import { Buffer, isUtf8 } from "node:buffer";
-import { createHash, randomUUID } from "node:crypto";
+import { Buffer } from "node:buffer";
+import { randomUUID } from "node:crypto";
 import { constants } from "node:fs";
 import type { Stats } from "node:fs";
 import { lstat, mkdir, open, realpath, rename, rm } from "node:fs/promises";
 import { dirname, isAbsolute, join } from "node:path";
 import { z } from "zod";
-import {
-  GitOperationSchema,
-  type ValidatedGitOperation,
-} from "../../../src/shared/contracts/git-operation";
 import {
   RepositoryIdSchema,
   type RepositoryId,
@@ -20,130 +16,39 @@ import type {
   RecoveryRestoreResult,
 } from "../../../src/shared/contracts/model";
 import { GitUtilityError } from "./git-error";
+import { GitProcessRunner, type GitProcessRunnerLike } from "./git-process";
 import {
-  GitProcessRunner,
-  type GitProcessCompleted,
-  type GitProcessOutcome,
-  type GitProcessRunnerLike,
-} from "./git-process";
+  MAX_RECOVERY_ENTRIES,
+  MAX_RECOVERY_MANIFEST_BYTES,
+  copyRecoveryEntry as copyEntry,
+  copyStoredRecoveryEntry as copyStoredEntry,
+  decodeRecoveryManifest,
+  encodeRecoveryManifest as encodeManifest,
+  type StoredRecoveryEntry,
+} from "./recovery-manifest";
+import {
+  MAX_RECOVERY_DIAGNOSTIC_BYTES,
+  RecoveryObjectIdSchema,
+  affectedRecoveryRefs,
+  assertRecoveryNotAborted,
+  captureOptionalRecoveryGit,
+  createRecoveryRefTransaction,
+  hasSafeRecoveryRefStructure,
+  recoveryProcessFailure,
+  recoveryRefsEqual,
+  runRecoveryGit,
+  validateRecoveryOperation,
+} from "./recovery-ref-transaction";
 import {
   captureRepositorySnapshot,
-  copyRepositorySnapshot,
   repositorySnapshotsEqual,
-  RepositorySnapshotSchema,
   restoreRepositorySnapshot,
-  type RepositorySnapshot,
 } from "./recovery-snapshot";
 import { safeErrorMessage } from "./redaction";
 
-export const MAX_RECOVERY_ENTRIES = 200;
-export const MAX_RECOVERY_MANIFEST_BYTES = 96 * 1024 * 1024;
+export { MAX_RECOVERY_ENTRIES, MAX_RECOVERY_MANIFEST_BYTES } from "./recovery-manifest";
 
-const MAX_RECOVERY_REFS = 32;
-const MAX_RECOVERY_TEXT_CHARACTERS = 16_384;
-const MAX_RECOVERY_DIAGNOSTIC_BYTES = 1024 * 1024;
 const RECOVERY_DIRECTORY = "recovery";
-const LEGACY_MANIFEST_VERSION = 1;
-const MANIFEST_VERSION = 2;
-
-const ObjectIdSchema = z.string().regex(/^(?:[0-9a-f]{40}|[0-9a-f]{64})$/u);
-const ChecksumSchema = z.string().regex(/^[0-9a-f]{64}$/u);
-
-function hasSafeRefStructure(value: string): boolean {
-  if (
-    value.length === 0 ||
-    value.length > 16_384 ||
-    value.includes("\0") ||
-    value.includes("..") ||
-    value.includes("@{") ||
-    value.includes("//") ||
-    value.endsWith(".") ||
-    value.endsWith("/") ||
-    value.endsWith(".lock") ||
-    value.startsWith(".") ||
-    value.startsWith("/")
-  ) {
-    return false;
-  }
-  for (const character of value) {
-    const codePoint = character.codePointAt(0) ?? 0;
-    if (codePoint <= 0x20 || codePoint === 0x7f || "~^:?*[\\".includes(character)) {
-      return false;
-    }
-  }
-  return true;
-}
-
-const RecoveryRefSchema = z
-  .object({
-    name: z.string().max(MAX_RECOVERY_TEXT_CHARACTERS).refine(hasSafeRefStructure),
-    oid: ObjectIdSchema.nullable(),
-  })
-  .strict();
-const RecoveryEntrySchema = z
-  .object({
-    id: z.uuid(),
-    repositoryId: RepositoryIdSchema,
-    operation: z
-      .string()
-      .min(1)
-      .max(MAX_RECOVERY_TEXT_CHARACTERS)
-      .refine((value) => !value.includes("\0")),
-    createdAtMs: z.number().int().nonnegative().safe(),
-    branch: z
-      .string()
-      .max(MAX_RECOVERY_TEXT_CHARACTERS)
-      .refine((value) => !value.includes("\0"))
-      .nullable(),
-    headOid: ObjectIdSchema.nullable(),
-    refs: z.array(RecoveryRefSchema).max(MAX_RECOVERY_REFS),
-    recoverable: z.boolean(),
-  })
-  .strict()
-  .superRefine((entry, context) => {
-    const names = new Set<string>();
-    for (const [index, reference] of entry.refs.entries()) {
-      if (names.has(reference.name)) {
-        context.addIssue({
-          code: "custom",
-          message: "Recovery entry contains duplicate refs",
-          path: ["refs", index, "name"],
-        });
-      }
-      names.add(reference.name);
-    }
-  });
-const StoredRecoveryEntrySchema = RecoveryEntrySchema.safeExtend({
-  snapshot: RepositorySnapshotSchema.nullable(),
-});
-const LegacyRecoveryManifestSchema = z
-  .object({
-    version: z.literal(LEGACY_MANIFEST_VERSION),
-    entries: z.array(RecoveryEntrySchema).max(MAX_RECOVERY_ENTRIES),
-    sha256: ChecksumSchema,
-  })
-  .strict();
-const RecoveryManifestSchema = z
-  .object({
-    version: z.literal(MANIFEST_VERSION),
-    entries: z.array(StoredRecoveryEntrySchema).max(MAX_RECOVERY_ENTRIES),
-    sha256: ChecksumSchema,
-  })
-  .strict();
-
-interface StoredRecoveryEntry extends RecoveryEntry {
-  readonly snapshot: RepositorySnapshot | null;
-}
-
-interface RecoveryManifestPayload {
-  readonly version: typeof MANIFEST_VERSION;
-  readonly entries: readonly StoredRecoveryEntry[];
-}
-
-interface LegacyRecoveryManifestPayload {
-  readonly version: typeof LEGACY_MANIFEST_VERSION;
-  readonly entries: readonly RecoveryEntry[];
-}
 
 interface PinnedDirectory {
   readonly path: string;
@@ -155,11 +60,6 @@ interface FileIdentity {
   readonly device: number;
   readonly inode: number;
   readonly size: number;
-}
-
-interface AffectedRefs {
-  readonly operation: string;
-  readonly names: readonly string[];
 }
 
 export interface RecoveryRepositoryRegistryLike {
@@ -202,30 +102,6 @@ function fileFrom(metadata: Stats): FileIdentity {
   return { device: metadata.dev, inode: metadata.ino, size: metadata.size };
 }
 
-function checksum(bytes: Buffer): string {
-  return createHash("sha256").update(bytes).digest("hex");
-}
-
-function manifestPayload(entries: readonly StoredRecoveryEntry[]): RecoveryManifestPayload {
-  return { version: MANIFEST_VERSION, entries };
-}
-
-function legacyManifestPayload(entries: readonly RecoveryEntry[]): LegacyRecoveryManifestPayload {
-  return { version: LEGACY_MANIFEST_VERSION, entries };
-}
-
-function payloadBytes(payload: RecoveryManifestPayload | LegacyRecoveryManifestPayload): Buffer {
-  return Buffer.from(JSON.stringify(payload), "utf8");
-}
-
-function encodeManifest(entries: readonly StoredRecoveryEntry[]): Buffer {
-  const payload = manifestPayload(entries);
-  return Buffer.from(
-    `${JSON.stringify({ ...payload, sha256: checksum(payloadBytes(payload)) }, null, 2)}\n`,
-    "utf8",
-  );
-}
-
 function validateRepositoryId(untrustedRepositoryId: unknown): RepositoryId {
   const result = RepositoryIdSchema.safeParse(untrustedRepositoryId);
   if (!result.success) throw invalid("Repository id must be a UUID");
@@ -236,94 +112,6 @@ function validateEntryId(untrustedEntryId: unknown): string {
   const result = z.uuid().safeParse(untrustedEntryId);
   if (!result.success) throw invalid("Recovery entry id must be a UUID");
   return result.data;
-}
-
-function validateOperation(untrustedOperation: unknown): ValidatedGitOperation {
-  const result = GitOperationSchema.safeParse(untrustedOperation);
-  if (!result.success) throw invalid("Recovery operation is invalid");
-  return result.data;
-}
-
-function assertNotAborted(signal: AbortSignal | undefined): void {
-  if (signal?.aborted !== true) return;
-  const suffix = signal.reason === "repositoryClosed" ? " because the repository closed" : "";
-  throw new GitUtilityError("commandFailed", `Recovery operation was cancelled${suffix}`);
-}
-
-function outcomeText(outcome: GitProcessOutcome, stream: "stdout" | "stderr"): string {
-  return outcome.output
-    .filter((entry) => entry.stream === stream)
-    .map((entry) => entry.data)
-    .join("");
-}
-
-function processFailure(outcome: Exclude<GitProcessOutcome, GitProcessCompleted>): GitUtilityError {
-  if (outcome.kind === "cancelled") {
-    const suffix =
-      outcome.reason === "timeout"
-        ? " timed out"
-        : outcome.reason === "repositoryClosed"
-          ? " was cancelled because the repository closed"
-          : " was cancelled";
-    return new GitUtilityError("commandFailed", `Recovery Git command${suffix}`);
-  }
-  const detail = outcomeText(outcome, "stderr") || outcome.message;
-  return new GitUtilityError(outcome.code, safeErrorMessage(detail), outcome.exitCode);
-}
-
-async function runGit(
-  runner: GitProcessRunnerLike,
-  repository: string,
-  args: readonly string[],
-  signal: AbortSignal | undefined,
-  stdin?: string,
-): Promise<GitProcessCompleted> {
-  assertNotAborted(signal);
-  const outcome = await runner.run(
-    {
-      cwd: repository,
-      args,
-      ...(stdin === undefined ? {} : { stdin }),
-      redactStdout: false,
-      outputLimitBytes: MAX_RECOVERY_DIAGNOSTIC_BYTES,
-    },
-    signal,
-  );
-  if (outcome.kind !== "completed") throw processFailure(outcome);
-  return outcome;
-}
-
-async function captureOptional(
-  runner: GitProcessRunnerLike,
-  repository: string,
-  args: readonly string[],
-  missingExitCodes: readonly number[],
-  signal: AbortSignal | undefined,
-): Promise<string | null> {
-  assertNotAborted(signal);
-  const outcome = await runner.run(
-    {
-      cwd: repository,
-      args,
-      redactStdout: false,
-      outputLimitBytes: MAX_RECOVERY_DIAGNOSTIC_BYTES,
-    },
-    signal,
-  );
-  if (outcome.kind === "completed") {
-    const value = outcomeText(outcome, "stdout").trim();
-    if (value.includes("\ufffd")) throw invalid("Non-UTF-8 Git ref names are unsupported");
-    return value;
-  }
-  if (
-    outcome.kind === "failed" &&
-    outcome.code === "commandFailed" &&
-    outcome.exitCode !== null &&
-    missingExitCodes.includes(outcome.exitCode)
-  ) {
-    return null;
-  }
-  throw processFailure(outcome);
 }
 
 async function pinDirectory(path: string, label: string): Promise<PinnedDirectory> {
@@ -485,36 +273,7 @@ async function readManifestFile(
     throw invalid("Recovery manifest changed while it was being read");
   }
   await assertPinnedDirectory(directory, "Recovery storage directory");
-  if (!isUtf8(bytes)) throw invalid("Recovery manifest must contain valid UTF-8");
-  let decoded: unknown;
-  try {
-    decoded = JSON.parse(bytes.toString("utf8")) as unknown;
-  } catch {
-    throw invalid("Recovery manifest is not valid JSON");
-  }
-  const parsed = RecoveryManifestSchema.safeParse(decoded);
-  let entries: readonly StoredRecoveryEntry[];
-  let expectedChecksum: string;
-  let storedChecksum: string;
-  if (parsed.success) {
-    entries = parsed.data.entries.map(copyStoredEntry);
-    expectedChecksum = checksum(payloadBytes(manifestPayload(entries)));
-    storedChecksum = parsed.data.sha256;
-  } else {
-    const legacy = LegacyRecoveryManifestSchema.safeParse(decoded);
-    if (!legacy.success) throw invalid("Recovery manifest is invalid");
-    const legacyEntries = legacy.data.entries.map(copyEntry);
-    entries = legacyEntries.map((entry) => ({ ...entry, snapshot: null }));
-    expectedChecksum = checksum(payloadBytes(legacyManifestPayload(legacyEntries)));
-    storedChecksum = legacy.data.sha256;
-  }
-  if (expectedChecksum !== storedChecksum) throw invalid("Recovery manifest checksum mismatch");
-  for (const entry of entries) {
-    if (entry.repositoryId !== repositoryId) {
-      throw invalid("Recovery manifest contains an entry for another repository");
-    }
-  }
-  return entries.map(copyStoredEntry);
+  return decodeRecoveryManifest(bytes, repositoryId);
 }
 
 async function writeManifestFile(
@@ -583,135 +342,6 @@ async function writeManifestFile(
   }
 }
 
-function copyEntry(entry: RecoveryEntry): RecoveryEntry {
-  return {
-    id: entry.id,
-    repositoryId: entry.repositoryId,
-    operation: entry.operation,
-    createdAtMs: entry.createdAtMs,
-    branch: entry.branch,
-    headOid: entry.headOid,
-    refs: entry.refs.map((reference) => ({ ...reference })),
-    recoverable: entry.recoverable,
-  };
-}
-
-function copyStoredEntry(entry: StoredRecoveryEntry): StoredRecoveryEntry {
-  return {
-    ...copyEntry(entry),
-    snapshot: entry.snapshot === null ? null : copyRepositorySnapshot(entry.snapshot),
-  };
-}
-
-function affectedRefs(
-  operation: ValidatedGitOperation,
-  currentBranch: string | null,
-): AffectedRefs | null {
-  const current = (label: string): AffectedRefs | null =>
-    currentBranch === null ? null : { operation: label, names: [`refs/heads/${currentBranch}`] };
-  switch (operation.kind) {
-    case "commit":
-    case "commitAdvanced":
-      return current("commit");
-    case "reset":
-      return current("reset");
-    case "revert":
-      return current("revert");
-    case "cherryPick":
-      return current("cherry-pick");
-    case "merge":
-      return current("merge");
-    case "rebase":
-      return current("rebase");
-    case "interactiveRebase":
-      return current("interactive rebase");
-    case "dropCommits":
-      return current("drop commits");
-    case "squashCommits":
-      return current("squash commits");
-    case "rewordCommit":
-      return current("reword commit");
-    case "undoCommit":
-      return current("undo commit");
-    case "createFixupCommit":
-      return current("fixup commit");
-    case "createSquashCommit":
-      return current("squash commit");
-    case "continue":
-      return current("continue operation");
-    case "skip":
-      return current("skip operation");
-    case "abort":
-      return current("abort operation");
-    case "createBranch":
-      return {
-        operation: "create branch",
-        names: [`refs/heads/${operation.name}`],
-      };
-    case "renameBranch":
-      return {
-        operation: "rename branch",
-        names: [`refs/heads/${operation.oldName}`, `refs/heads/${operation.newName}`],
-      };
-    case "deleteBranch":
-      return {
-        operation: "delete branch",
-        names: [`refs/heads/${operation.name}`],
-      };
-    case "createTag":
-      return {
-        operation: "create tag",
-        names: [`refs/tags/${operation.name}`],
-      };
-    case "deleteTag":
-      return {
-        operation: "delete tag",
-        names: [`refs/tags/${operation.name}`],
-      };
-    case "stashPush":
-    case "stashApply":
-    case "stashDrop":
-    case "stashClear":
-    case "stashBranch":
-      return { operation: "stash", names: ["refs/stash"] };
-    default:
-      return null;
-  }
-}
-
-function updateTransaction(
-  targets: readonly RecoveryRef[],
-  current: ReadonlyMap<string, string | null>,
-): { readonly stdin: string; readonly restoredRefs: readonly string[] } | null {
-  const commands: string[] = ["start"];
-  const restoredRefs: string[] = [];
-  for (const target of targets) {
-    const oldOid = current.get(target.name) ?? null;
-    if (target.oid === oldOid) continue;
-    if (target.oid === null && oldOid !== null) {
-      commands.push(`delete ${target.name} ${oldOid}`);
-    } else if (target.oid !== null && oldOid === null) {
-      commands.push(`create ${target.name} ${target.oid}`);
-    } else if (target.oid !== null && oldOid !== null) {
-      commands.push(`update ${target.name} ${target.oid} ${oldOid}`);
-    }
-    restoredRefs.push(target.name);
-  }
-  if (restoredRefs.length === 0) return null;
-  commands.push("prepare", "commit");
-  return { stdin: `${commands.join("\n")}\n`, restoredRefs };
-}
-
-function sameRefs(left: readonly RecoveryRef[], right: readonly RecoveryRef[]): boolean {
-  return (
-    left.length === right.length &&
-    left.every(
-      (reference, index) =>
-        reference.name === right[index]?.name && reference.oid === right[index]?.oid,
-    )
-  );
-}
-
 class RepositoryMutex {
   readonly #tails = new Map<RepositoryId, Promise<void>>();
 
@@ -772,12 +402,12 @@ export class RecoveryService {
     signal?: AbortSignal,
   ): Promise<RecoveryEntry | null> {
     const validatedRepositoryId = validateRepositoryId(repositoryId);
-    const operation = validateOperation(untrustedOperation);
+    const operation = validateRecoveryOperation(untrustedOperation);
     return this.#mutex.run(validatedRepositoryId, async () => {
-      assertNotAborted(signal);
+      assertRecoveryNotAborted(signal);
       const repository = await this.#repository(validatedRepositoryId);
       const branch = await this.#currentBranch(repository.path, signal);
-      const affected = affectedRefs(operation, branch);
+      const affected = affectedRecoveryRefs(operation, branch);
       if (affected === null) return null;
       const refs = await this.#captureRefs(repository.path, affected.names, signal);
       const headOid = await this.#head(repository.path, signal);
@@ -787,7 +417,11 @@ export class RecoveryService {
         this.#head(repository.path, signal),
         this.#captureRefs(repository.path, affected.names, signal),
       ]);
-      if (branch !== finalBranch || headOid !== finalHeadOid || !sameRefs(refs, finalRefs)) {
+      if (
+        branch !== finalBranch ||
+        headOid !== finalHeadOid ||
+        !recoveryRefsEqual(refs, finalRefs)
+      ) {
         throw invalid("Repository refs changed while the recovery snapshot was being captured");
       }
       const entry: StoredRecoveryEntry = {
@@ -809,12 +443,12 @@ export class RecoveryService {
   async list(repositoryId: RepositoryId, signal?: AbortSignal): Promise<readonly RecoveryEntry[]> {
     const validatedRepositoryId = validateRepositoryId(repositoryId);
     return this.#mutex.run(validatedRepositoryId, async () => {
-      assertNotAborted(signal);
+      assertRecoveryNotAborted(signal);
       const repository = await this.#repository(validatedRepositoryId);
       const entries = await this.#read(validatedRepositoryId);
       const resolved: RecoveryEntry[] = [];
       for (const entry of entries) {
-        assertNotAborted(signal);
+        assertRecoveryNotAborted(signal);
         resolved.push({
           ...copyEntry(entry),
           recoverable: await this.#refsAreRecoverable(repository.path, entry.refs, signal),
@@ -832,7 +466,7 @@ export class RecoveryService {
     const validatedRepositoryId = validateRepositoryId(repositoryId);
     const entryId = validateEntryId(untrustedEntryId);
     return this.#mutex.run(validatedRepositoryId, async () => {
-      assertNotAborted(signal);
+      assertRecoveryNotAborted(signal);
       const repository = await this.#repository(validatedRepositoryId);
       const entries = await this.#read(validatedRepositoryId);
       const entry = entries.find((candidate) => candidate.id === entryId);
@@ -860,7 +494,7 @@ export class RecoveryService {
       if (
         currentBranch !== finalBranch ||
         currentHeadOid !== finalHeadOid ||
-        !sameRefs(currentRefs, finalRefs)
+        !recoveryRefsEqual(currentRefs, finalRefs)
       ) {
         throw invalid("Repository changed while the inverse recovery snapshot was being captured");
       }
@@ -876,12 +510,12 @@ export class RecoveryService {
         snapshot: currentSnapshot,
       };
       await this.#append(validatedRepositoryId, inverse, signal);
-      assertNotAborted(signal);
+      assertRecoveryNotAborted(signal);
       const current = new Map(currentRefs.map((reference) => [reference.name, reference.oid]));
-      const transaction = updateTransaction(entry.refs, current);
+      const transaction = createRecoveryRefTransaction(entry.refs, current);
       if (entry.snapshot === null) {
         if (transaction === null) return { entryId, restoredRefs: [] };
-        await runGit(
+        await runRecoveryGit(
           this.#runner,
           repository.path,
           ["update-ref", "--stdin"],
@@ -901,9 +535,9 @@ export class RecoveryService {
           signal,
           false,
         );
-        assertNotAborted(signal);
+        assertRecoveryNotAborted(signal);
         if (transaction !== null) {
-          await runGit(
+          await runRecoveryGit(
             this.#runner,
             repository.path,
             ["update-ref", "--stdin"],
@@ -937,15 +571,15 @@ export class RecoveryService {
               entry.refs.map((reference) => reference.name),
               undefined,
             );
-            if (!sameRefs(rollbackCurrentRefs, entry.refs)) {
+            if (!recoveryRefsEqual(rollbackCurrentRefs, entry.refs)) {
               throw invalid("Repository refs changed before recovery could be rolled back");
             }
             const rollbackCurrent = new Map(
               rollbackCurrentRefs.map((reference) => [reference.name, reference.oid]),
             );
-            const rollbackTransaction = updateTransaction(currentRefs, rollbackCurrent);
+            const rollbackTransaction = createRecoveryRefTransaction(currentRefs, rollbackCurrent);
             if (rollbackTransaction !== null) {
-              await runGit(
+              await runRecoveryGit(
                 this.#runner,
                 repository.path,
                 ["update-ref", "--stdin"],
@@ -987,28 +621,28 @@ export class RecoveryService {
     repository: string,
     signal: AbortSignal | undefined,
   ): Promise<string | null> {
-    const branch = await captureOptional(
+    const branch = await captureOptionalRecoveryGit(
       this.#runner,
       repository,
       ["symbolic-ref", "--quiet", "--short", "HEAD"],
       [1],
       signal,
     );
-    if (branch !== null && !hasSafeRefStructure(branch)) {
+    if (branch !== null && !hasSafeRecoveryRefStructure(branch)) {
       throw invalid("Git returned an invalid current branch name");
     }
     return branch;
   }
 
   async #head(repository: string, signal: AbortSignal | undefined): Promise<string | null> {
-    const oid = await captureOptional(
+    const oid = await captureOptionalRecoveryGit(
       this.#runner,
       repository,
       ["rev-parse", "--verify", "--end-of-options", "HEAD"],
       [128],
       signal,
     );
-    if (oid !== null && !ObjectIdSchema.safeParse(oid).success) {
+    if (oid !== null && !RecoveryObjectIdSchema.safeParse(oid).success) {
       throw invalid("Git returned an invalid HEAD object id");
     }
     return oid;
@@ -1022,14 +656,14 @@ export class RecoveryService {
     const refs: RecoveryRef[] = [];
     for (const name of names) {
       await this.#validateRef(repository, name, signal);
-      const oid = await captureOptional(
+      const oid = await captureOptionalRecoveryGit(
         this.#runner,
         repository,
         ["rev-parse", "--verify", "--end-of-options", name],
         [128],
         signal,
       );
-      if (oid !== null && !ObjectIdSchema.safeParse(oid).success) {
+      if (oid !== null && !RecoveryObjectIdSchema.safeParse(oid).success) {
         throw invalid(`Git returned an invalid object id for ${name}`);
       }
       refs.push({ name, oid });
@@ -1042,7 +676,7 @@ export class RecoveryService {
     name: string,
     signal: AbortSignal | undefined,
   ): Promise<void> {
-    if (!hasSafeRefStructure(name)) throw invalid("Recovery ref name is invalid");
+    if (!hasSafeRecoveryRefStructure(name)) throw invalid("Recovery ref name is invalid");
     const outcome = await this.#runner.run(
       {
         cwd: repository,
@@ -1055,7 +689,7 @@ export class RecoveryService {
     if (outcome.kind === "failed" && outcome.code === "commandFailed") {
       throw invalid(`Recovery ref name is invalid (${name})`);
     }
-    throw processFailure(outcome);
+    throw recoveryProcessFailure(outcome);
   }
 
   async #refsAreRecoverable(
@@ -1064,7 +698,7 @@ export class RecoveryService {
     signal: AbortSignal | undefined,
   ): Promise<boolean> {
     for (const reference of refs) {
-      assertNotAborted(signal);
+      assertRecoveryNotAborted(signal);
       if (reference.oid === null) continue;
       const outcome = await this.#runner.run(
         {
@@ -1076,7 +710,7 @@ export class RecoveryService {
       );
       if (outcome.kind === "completed") continue;
       if (outcome.kind === "failed" && outcome.code === "commandFailed") return false;
-      throw processFailure(outcome);
+      throw recoveryProcessFailure(outcome);
     }
     return true;
   }
@@ -1097,7 +731,7 @@ export class RecoveryService {
     entry: StoredRecoveryEntry,
     signal: AbortSignal | undefined,
   ): Promise<void> {
-    assertNotAborted(signal);
+    assertRecoveryNotAborted(signal);
     const root = await pinDirectory(this.#storageRoot, "Recovery storage root");
     const directory = await ensureChildDirectory(
       root,
@@ -1118,7 +752,7 @@ export class RecoveryService {
         `Recovery manifest exceeds ${MAX_RECOVERY_MANIFEST_BYTES} bytes`,
       );
     }
-    assertNotAborted(signal);
+    assertRecoveryNotAborted(signal);
     await writeManifestFile(directory, repositoryId, next);
   }
 }

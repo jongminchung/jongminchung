@@ -60,6 +60,11 @@ import {
 import { RepositoryInspectionService } from "./repository-inspection-service";
 import { RepositoryMutationArbiter } from "./repository-mutation-arbiter";
 import { RepositoryRegistry } from "./repository-registry";
+import {
+  dispatchRepositoryService,
+  repositoryServiceIds,
+  repositoryServiceIsMutation,
+} from "./repository-service-dispatcher";
 import { RepositoryWatcherService } from "./repository-watcher";
 import { ShelfService } from "./shelf-service";
 import { SubmoduleDiffService } from "./submodule-diff-service";
@@ -84,69 +89,6 @@ interface RepositoryWatcherLike {
 }
 
 type RepositoryWatcherFactory = (registry: RepositoryRegistry) => RepositoryWatcherLike;
-
-function repositoryServiceIds(request: GitRepositoryServiceRequest): readonly RepositoryId[] {
-  if (request.operation === "executeSynchronizedBranchOperation") {
-    return [...new Set(request.repositoryIds)];
-  }
-  if (request.operation === "applyMultiRootRollback") {
-    return [...new Set(request.steps.map((step) => step.repositoryId))];
-  }
-  if (request.operation === "listLocalHistoryActivities") {
-    return [request.scope.repositoryId];
-  }
-  return [request.repositoryId];
-}
-
-function repositoryServiceIsMutation(operation: GitRepositoryServiceRequest["operation"]): boolean {
-  switch (operation) {
-    case "writeIgnoreRules":
-    case "importPatch":
-    case "createShelf":
-    case "applyShelf":
-    case "deleteShelf":
-    case "saveChangelist":
-    case "deleteChangelist":
-    case "commitChangelist":
-    case "restoreRecoveryEntry":
-    case "revertLocalHistory":
-    case "putLocalHistoryLabel":
-    case "writeConflictResult":
-    case "resolveBinaryConflict":
-    case "executeSynchronizedBranchOperation":
-    case "applyMultiRootRollback":
-      return true;
-    case "compareBranches":
-    case "preCommitCheck":
-    case "listGitConfig":
-    case "listSubmodules":
-    case "listMergedBranches":
-    case "loadCommitSignature":
-    case "listRemotes":
-    case "listWorktrees":
-    case "readIgnoreRules":
-    case "pushPreview":
-    case "historyRewritePreview":
-    case "exportPatch":
-    case "createPatchText":
-    case "listShelves":
-    case "listChangelists":
-    case "listRecoveryEntries":
-    case "listLocalHistoryActivities":
-    case "readLocalHistoryActivity":
-    case "readLocalHistoryDiff":
-    case "createLocalHistoryPatch":
-    case "listConflicts":
-    case "readConflict":
-    case "loadSubmoduleDiff":
-    case "resolveWorkingTreeFile":
-      return false;
-    default: {
-      const unhandled: never = operation;
-      return unhandled;
-    }
-  }
-}
 
 export class GitUtility {
   readonly #registry: RepositoryRegistry;
@@ -433,301 +375,24 @@ export class GitUtility {
     return this.#watchers.unwatch(repositoryId);
   }
 
-  async #executeRepositoryService(
+  #executeRepositoryService(
     request: GitRepositoryServiceRequest,
     signal: AbortSignal,
   ): Promise<GitRepositoryServiceResult> {
-    switch (request.operation) {
-      case "compareBranches":
-        return {
-          operation: request.operation,
-          value: await this.compareBranches(request.repositoryId, request.left, request.right),
-        };
-      case "preCommitCheck":
-        return {
-          operation: request.operation,
-          value: await this.preCommitCheck(request.repositoryId),
-        };
-      case "listGitConfig":
-        return {
-          operation: request.operation,
-          value: await this.listGitConfig(request.repositoryId),
-        };
-      case "listSubmodules":
-        return {
-          operation: request.operation,
-          value: await this.listSubmodules(request.repositoryId),
-        };
-      case "listMergedBranches":
-        return {
-          operation: request.operation,
-          value: await this.listMergedBranches(request.repositoryId, request.target),
-        };
-      case "loadCommitSignature":
-        return {
-          operation: request.operation,
-          value: await this.loadCommitSignature(request.repositoryId, request.revision),
-        };
-      case "listRemotes":
-        return {
-          operation: request.operation,
-          value: await this.listRemotes(request.repositoryId),
-        };
-      case "listWorktrees":
-        return {
-          operation: request.operation,
-          value: await this.listWorktrees(request.repositoryId),
-        };
-      case "readIgnoreRules":
-        return {
-          operation: request.operation,
-          value: await this.readIgnoreRules(request.repositoryId),
-        };
-      case "writeIgnoreRules":
-        await this.writeIgnoreRules(request.repositoryId, request.rules);
-        return { operation: request.operation };
-      case "pushPreview":
-        return {
-          operation: request.operation,
-          value: await this.loadPushPreview(
-            request.repositoryId,
-            request.remote,
-            request.remoteRef,
-            request.localRevision,
-          ),
-        };
-      case "historyRewritePreview":
-        return {
-          operation: request.operation,
-          value: await this.loadHistoryRewritePreview(request.repositoryId, request.fromRevision),
-        };
-      case "exportPatch":
-        return {
-          operation: request.operation,
-          value: await this.#patches.exportPatch(
-            request.repositoryId,
-            request.revisions,
-            request.targetPath,
-            signal,
-          ),
-        };
-      case "createPatchText":
-        return {
-          operation: request.operation,
-          value: await this.#patches.createPatchText(
-            request.repositoryId,
-            request.revisions,
-            signal,
-          ),
-        };
-      case "importPatch":
-        await this.#patches.importPatch(request.repositoryId, request.path, signal);
-        return { operation: request.operation };
-      case "createShelf":
-        return {
-          operation: request.operation,
-          value: await this.#stored(this.#shelves).create(
-            request.repositoryId,
-            request.message,
-            request.paths,
-            signal,
-          ),
-        };
-      case "listShelves":
-        return {
-          operation: request.operation,
-          value: await this.#stored(this.#shelves).list(request.repositoryId),
-        };
-      case "applyShelf":
-        await this.#stored(this.#shelves).apply(
-          request.repositoryId,
-          request.shelfId,
-          request.dropAfterApply,
-          signal,
-        );
-        return { operation: request.operation };
-      case "deleteShelf":
-        await this.#stored(this.#shelves).delete(request.repositoryId, request.shelfId);
-        return { operation: request.operation };
-      case "listChangelists":
-        return {
-          operation: request.operation,
-          value: await this.#stored(this.#changelists).list(request.repositoryId, signal),
-        };
-      case "saveChangelist":
-        return {
-          operation: request.operation,
-          value: await this.#stored(this.#changelists).save(
-            request.repositoryId,
-            request.id,
-            request.name,
-            request.paths,
-            signal,
-          ),
-        };
-      case "deleteChangelist":
-        await this.#stored(this.#changelists).delete(
-          request.repositoryId,
-          request.changelistId,
-          signal,
-        );
-        return { operation: request.operation };
-      case "commitChangelist":
-        await this.#stored(this.#recovery).recordBeforeOperation(
-          request.repositoryId,
-          {
-            kind: "commit",
-            message: request.message,
-            amend: request.amend,
-            signOff: request.signOff,
-            gpgSign: request.gpgSign,
-          },
-          signal,
-        );
-        return {
-          operation: request.operation,
-          value: await this.#stored(this.#changelists).commit(
-            request.repositoryId,
-            request.changelistId,
-            {
-              message: request.message,
-              amend: request.amend,
-              signOff: request.signOff,
-              gpgSign: request.gpgSign,
-            },
-            signal,
-          ),
-        };
-      case "listRecoveryEntries":
-        return {
-          operation: request.operation,
-          value: await this.#stored(this.#recovery).list(request.repositoryId, signal),
-        };
-      case "restoreRecoveryEntry":
-        return {
-          operation: request.operation,
-          value: await this.#stored(this.#recovery).restore(
-            request.repositoryId,
-            request.entryId,
-            signal,
-          ),
-        };
-      case "listLocalHistoryActivities":
-        return {
-          operation: request.operation,
-          value: await this.#stored(this.#localHistory).list(
-            request.scope,
-            request.cursor,
-            request.limit,
-            request.query,
-            request.showSystemEvents,
-          ),
-        };
-      case "readLocalHistoryActivity":
-        return {
-          operation: request.operation,
-          value: await this.#stored(this.#localHistory).detail(
-            request.repositoryId,
-            request.activityId,
-          ),
-        };
-      case "readLocalHistoryDiff":
-        return {
-          operation: request.operation,
-          value: await this.#stored(this.#localHistory).diff(
-            request.repositoryId,
-            request.activityId,
-            request.path,
-            signal,
-          ),
-        };
-      case "revertLocalHistory":
-        await this.#stored(this.#localHistory).revert(
-          request.repositoryId,
-          request.activityId,
-          request.paths,
-          request.includeLater,
-          signal,
-        );
-        return { operation: request.operation };
-      case "createLocalHistoryPatch":
-        return {
-          operation: request.operation,
-          value: await this.#stored(this.#localHistory).createPatch(
-            request.repositoryId,
-            request.activityId,
-            request.paths,
-            signal,
-          ),
-        };
-      case "putLocalHistoryLabel":
-        return {
-          operation: request.operation,
-          value: await this.#stored(this.#localHistory).putLabel(
-            request.repositoryId,
-            request.label,
-          ),
-        };
-      case "listConflicts":
-        return {
-          operation: request.operation,
-          value: await this.#conflicts.list(request.repositoryId, signal),
-        };
-      case "readConflict":
-        return {
-          operation: request.operation,
-          value: await this.#conflicts.read(request.repositoryId, request.path, signal),
-        };
-      case "writeConflictResult":
-        await this.#conflicts.write(
-          request.repositoryId,
-          request.path,
-          request.result,
-          request.stage,
-          signal,
-        );
-        return { operation: request.operation };
-      case "resolveBinaryConflict":
-        await this.#conflicts.resolveBinary(
-          request.repositoryId,
-          request.path,
-          request.side,
-          signal,
-        );
-        return { operation: request.operation };
-      case "loadSubmoduleDiff":
-        return {
-          operation: request.operation,
-          value: (
-            await this.#submoduleDiff.loadSubmoduleDiff(
-              request.repositoryId,
-              request.before,
-              request.after,
-              request.path,
-              signal,
-            )
-          ).diff,
-        };
-      case "resolveWorkingTreeFile":
-        return {
-          operation: request.operation,
-          value: await this.#workingTreeFiles.resolve(request.repositoryId, request.path),
-        };
-      case "executeSynchronizedBranchOperation":
-        return {
-          operation: request.operation,
-          value: await this.#stored(this.#multiRoot).executeSynchronizedBranchOperation(
-            request.repositoryIds,
-            request.gitOperation,
-            signal,
-          ),
-        };
-      case "applyMultiRootRollback":
-        return {
-          operation: request.operation,
-          value: await this.#stored(this.#multiRoot).applyMultiRootRollback(request.steps, signal),
-        };
-    }
+    return dispatchRepositoryService(request, signal, {
+      inspection: this.#inspection,
+      ignoreRules: this.#ignoreRules,
+      previews: this.#previews,
+      patches: this.#patches,
+      shelves: this.#shelves,
+      changelists: this.#changelists,
+      recovery: this.#recovery,
+      localHistory: this.#localHistory,
+      conflicts: this.#conflicts,
+      submoduleDiff: this.#submoduleDiff,
+      workingTreeFiles: this.#workingTreeFiles,
+      multiRoot: this.#multiRoot,
+    });
   }
 
   #trackRepositoryService(repositoryIds: readonly RepositoryId[]): AbortController {
@@ -741,11 +406,6 @@ export class GitUtility {
       }
     }
     return cancellation;
-  }
-
-  #stored<T>(service: T | null): T {
-    if (service !== null) return service;
-    throw new GitUtilityError("invalidInput", "Persistent Git service storage is not configured");
   }
 
   #untrackRepositoryService(

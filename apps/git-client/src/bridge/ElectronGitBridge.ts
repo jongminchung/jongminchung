@@ -1,34 +1,15 @@
 import {
-  GitExecutionRequestSchema,
-  type GitExecutionRequest,
-} from "../shared/contracts/git-request";
-import type {
-  GitEventListener,
-  GitCreationEventListener,
-  GitRequestEvent,
-  GitRequestId,
-  GitTerminalEvent,
-  GitPatchExportResult as ElectronPatchExportResult,
-  GitShelfEntry as ElectronShelfEntry,
-  GitChangelist as ElectronChangelist,
-  GitChangelistCommitResult as ElectronChangelistCommitResult,
-  GitRecoveryEntry as ElectronRecoveryEntry,
-  GitRecoveryRestoreResult as ElectronRecoveryRestoreResult,
-  GitLocalHistoryScope as ElectronLocalHistoryScope,
-  GitLocalHistoryActivitiesPage as ElectronLocalHistoryActivitiesPage,
-  GitLocalHistoryActivityDetail as ElectronLocalHistoryActivityDetail,
-  GitLocalHistoryActivity as ElectronLocalHistoryActivity,
-  GitConflictFile as ElectronConflictFile,
-  GitConflictContent as ElectronConflictContent,
-  GitSubmoduleDiff as ElectronSubmoduleDiff,
-  GitMultiRootOutcome as ElectronMultiRootOutcome,
-  GitMultiRootResult as ElectronMultiRootResult,
-  RepositoryRecord,
-} from "../shared/contracts/git-utility";
-import {
   GitLocalHistoryActivitiesPageSchema,
   GitLocalHistoryActivityDetailSchema,
   GitLocalHistoryActivitySchema,
+  type GitCreationEventListener,
+  type GitRequestEvent,
+  type GitRequestId,
+  type GitLocalHistoryActivitiesPage as ElectronLocalHistoryActivitiesPage,
+  type GitLocalHistoryActivity as ElectronLocalHistoryActivity,
+  type GitLocalHistoryActivityDetail as ElectronLocalHistoryActivityDetail,
+  type GitLocalHistoryScope as ElectronLocalHistoryScope,
+  type RepositoryRecord,
 } from "../shared/contracts/git-utility";
 import type {
   BranchComparison,
@@ -64,235 +45,26 @@ import type {
   SubmoduleInfo,
   WorktreeInfo,
 } from "../shared/contracts/model";
+import type { ElectronGitApi } from "./electronGitApi";
+import { translateGitRequest } from "./electronGitRequest";
+import {
+  asChangelist,
+  asChangelistCommitResult,
+  asConflictContent,
+  asConflictFile,
+  asGeneratedEvent,
+  asMultiRootOutcome,
+  asMultiRootResult,
+  asPatchExportResult,
+  asRecoveryEntry,
+  asRecoveryRestoreResult,
+  asShelfEntry,
+  asSubmoduleDiff,
+} from "./electronGitResultMappers";
 import type { GitBridge } from "./GitBridge";
 
-export interface ElectronGitApi {
-  openRepository(path: string): Promise<RepositoryRecord>;
-  initializeRepository(
-    path: string,
-    bare: boolean,
-    listener?: GitCreationEventListener,
-  ): Promise<RepositoryRecord>;
-  cloneRepository(
-    url: string,
-    path: string,
-    options: CloneOptions,
-    listener?: GitCreationEventListener,
-  ): Promise<RepositoryRecord>;
-  inspectSnapshot(repositoryId: string): Promise<RepositorySnapshot>;
-  compareBranches(repositoryId: string, left: string, right: string): Promise<BranchComparison>;
-  preCommitCheck(repositoryId: string): Promise<PreCommitCheck>;
-  listGitConfig(repositoryId: string): Promise<readonly GitConfig[]>;
-  listSubmodules(repositoryId: string): Promise<readonly SubmoduleInfo[]>;
-  listMergedBranches(repositoryId: string, target: string): Promise<readonly string[]>;
-  loadCommitSignature(repositoryId: string, revision: string): Promise<CommitSignature>;
-  listRemotes(repositoryId: string): Promise<readonly RemoteInfo[]>;
-  listWorktrees(repositoryId: string): Promise<readonly WorktreeInfo[]>;
-  readIgnoreRules(repositoryId: string): Promise<IgnoreRules>;
-  writeIgnoreRules(repositoryId: string, rules: IgnoreRules): Promise<void>;
-  loadPushPreview(
-    repositoryId: string,
-    remote: string | null,
-    remoteRef: string | null,
-    localRevision: string,
-  ): Promise<PushPreview>;
-  loadHistoryRewritePreview(
-    repositoryId: string,
-    fromRevision: string,
-  ): Promise<HistoryRewritePreview>;
-  exportPatch(
-    repositoryId: string,
-    revisions: readonly string[],
-    targetPath: string,
-  ): Promise<ElectronPatchExportResult>;
-  createPatchText(repositoryId: string, revisions: readonly string[]): Promise<string>;
-  importPatch(repositoryId: string, path: string): Promise<void>;
-  createShelf(
-    repositoryId: string,
-    message: string,
-    paths: readonly string[],
-  ): Promise<ElectronShelfEntry>;
-  listShelves(repositoryId: string): Promise<readonly ElectronShelfEntry[]>;
-  applyShelf(repositoryId: string, shelfId: string, dropAfterApply: boolean): Promise<void>;
-  deleteShelf(repositoryId: string, shelfId: string): Promise<void>;
-  listChangelists(repositoryId: string): Promise<readonly ElectronChangelist[]>;
-  saveChangelist(
-    repositoryId: string,
-    id: string | null,
-    name: string,
-    paths: readonly string[],
-  ): Promise<ElectronChangelist>;
-  deleteChangelist(repositoryId: string, changelistId: string): Promise<void>;
-  commitChangelist(
-    repositoryId: string,
-    changelistId: string,
-    message: string,
-    amend: boolean,
-    signOff: boolean,
-    gpgSign: boolean,
-  ): Promise<ElectronChangelistCommitResult>;
-  listRecoveryEntries(repositoryId: string): Promise<readonly ElectronRecoveryEntry[]>;
-  restoreRecoveryEntry(
-    repositoryId: string,
-    entryId: string,
-  ): Promise<ElectronRecoveryRestoreResult>;
-  listLocalHistoryActivities?(
-    scope: ElectronLocalHistoryScope,
-    cursor: string | null,
-    limit: number,
-    query: string,
-    showSystemEvents: boolean,
-  ): Promise<ElectronLocalHistoryActivitiesPage>;
-  readLocalHistoryActivity?(
-    repositoryId: string,
-    activityId: string,
-  ): Promise<ElectronLocalHistoryActivityDetail>;
-  readLocalHistoryDiff?(repositoryId: string, activityId: string, path: string): Promise<string>;
-  revertLocalHistory?(
-    repositoryId: string,
-    activityId: string,
-    paths: readonly string[],
-    includeLater: boolean,
-  ): Promise<void>;
-  createLocalHistoryPatch?(
-    repositoryId: string,
-    activityId: string,
-    paths: readonly string[],
-  ): Promise<string>;
-  putLocalHistoryLabel?(repositoryId: string, label: string): Promise<ElectronLocalHistoryActivity>;
-  listConflicts(repositoryId: string): Promise<readonly ElectronConflictFile[]>;
-  readConflict(repositoryId: string, path: string): Promise<ElectronConflictContent>;
-  writeConflictResult(
-    repositoryId: string,
-    path: string,
-    result: string,
-    stage: boolean,
-  ): Promise<void>;
-  resolveBinaryConflict(repositoryId: string, path: string, side: "ours" | "theirs"): Promise<void>;
-  readFile(repositoryId: string, source: FileSource, path: string): Promise<FileContent>;
-  readFilePreview(repositoryId: string, source: FileSource, path: string): Promise<FilePreview>;
-  writeWorkingTreeFile?(
-    repositoryId: string,
-    path: string,
-    content: string,
-    activityName?: string,
-  ): Promise<void>;
-  loadSubmoduleDiff(
-    repositoryId: string,
-    before: FileSource,
-    after: FileSource,
-    path: string,
-  ): Promise<ElectronSubmoduleDiff>;
-  openWorkingTreeFile(repositoryId: string, path: string): Promise<void>;
-  executeSynchronizedBranchOperation(
-    repositoryIds: readonly string[],
-    gitOperation: GitOperation,
-  ): Promise<ElectronMultiRootResult>;
-  applyMultiRootRollback(
-    steps: readonly MultiRootRollbackStep[],
-  ): Promise<readonly ElectronMultiRootOutcome[]>;
-  watchRepository(
-    repositoryId: string,
-    listener: (event: RepositoryChangedEvent) => void,
-  ): Promise<void>;
-  unwatchRepository(repositoryId: string): Promise<void>;
-  closeRepository(repositoryId: string): Promise<boolean>;
-  executeQuery(request: GitExecutionRequest, listener: GitEventListener): Promise<GitTerminalEvent>;
-  cancelQuery(requestId: GitRequestId): Promise<boolean>;
-}
-
-export function translateGitRequest(
-  request: GitRequest,
-  requestId: GitRequestId,
-): GitExecutionRequest {
-  return GitExecutionRequestSchema.parse({ ...request, requestId });
-}
-
-function asGeneratedEvent(event: GitRequestEvent): GitEvent {
-  switch (event.kind) {
-    case "started":
-    case "output":
-    case "completed":
-      return event;
-    case "failed":
-      return {
-        kind: "failed",
-        requestId: event.requestId,
-        message: event.message,
-        exitCode: event.exitCode,
-        durationMs: event.durationMs,
-      };
-    case "cancelled":
-      return {
-        kind: "cancelled",
-        requestId: event.requestId,
-        durationMs: event.durationMs,
-      };
-  }
-}
-
-function asPatchExportResult(result: ElectronPatchExportResult): PatchExportResult {
-  return { ...result };
-}
-
-function asShelfEntry(entry: ElectronShelfEntry): ShelfEntry {
-  return {
-    ...entry,
-    files: entry.files.map((file) => ({ ...file })),
-  };
-}
-
-function asChangelist(changelist: ElectronChangelist): Changelist {
-  return { ...changelist, paths: [...changelist.paths] };
-}
-
-function asChangelistCommitResult(result: ElectronChangelistCommitResult): ChangelistCommitResult {
-  return { ...result };
-}
-
-function asRecoveryEntry(entry: ElectronRecoveryEntry): RecoveryEntry {
-  return {
-    ...entry,
-    refs: entry.refs.map((reference) => ({ ...reference })),
-  };
-}
-
-function asRecoveryRestoreResult(result: ElectronRecoveryRestoreResult): RecoveryRestoreResult {
-  return { ...result, restoredRefs: [...result.restoredRefs] };
-}
-
-function asConflictFile(file: ElectronConflictFile): ConflictFile {
-  return { ...file };
-}
-
-function asConflictContent(content: ElectronConflictContent): ConflictContent {
-  return { ...content };
-}
-
-function asSubmoduleDiff(diff: ElectronSubmoduleDiff): SubmoduleDiff {
-  return { ...diff };
-}
-
-function asMultiRootOutcome(outcome: ElectronMultiRootOutcome): MultiRootOutcome {
-  return { ...outcome };
-}
-
-function asRollbackOperation(
-  operation: ElectronMultiRootResult["rollbackPlan"][number]["operations"][number],
-): GitOperation {
-  if (operation.kind === "checkout") return { ...operation };
-  return { ...operation };
-}
-
-function asMultiRootResult(result: ElectronMultiRootResult): MultiRootResult {
-  return {
-    outcomes: result.outcomes.map(asMultiRootOutcome),
-    rollbackPlan: result.rollbackPlan.map((step) => ({
-      ...step,
-      operations: step.operations.map(asRollbackOperation),
-    })),
-  };
-}
+export type { ElectronGitApi } from "./electronGitApi";
+export { translateGitRequest } from "./electronGitRequest";
 
 export class ElectronGitBridge implements GitBridge {
   readonly #api: ElectronGitApi;

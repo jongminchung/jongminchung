@@ -1,36 +1,9 @@
-import { lstat, mkdir, readFile, readdir, realpath, writeFile } from "node:fs/promises";
-import { basename, dirname, extname, join, relative, resolve } from "node:path";
+import { lstat, readFile, readdir, realpath, writeFile } from "node:fs/promises";
+import { basename, dirname, extname, join, resolve } from "node:path";
 import { app, BrowserWindow, clipboard, dialog, ipcMain, shell } from "electron";
 import type { IpcMainInvokeEvent } from "electron";
-import { strFromU8, strToU8, unzipSync, zipSync } from "fflate";
-import { SafeModeViolationError } from "../../src/domain/repositoryAccess";
-import {
-  GitCloneRepositoryRequestSchema,
-  GitCreationEventSchema,
-  GitInitializeRepositoryRequestSchema,
-  FileContentSchema,
-  FilePreviewSchema,
-  GitReadFileRequestSchema,
-  GitRepositoryServiceRequestSchema,
-  GitRepositoryServiceResultSchema,
-  GitExecutionRequestSchema,
-  GitRequestEventSchema,
-  OpenRepositoryRequestSchema,
-  GitWatchRepositoryRequestSchema,
-  GitWorkingTreeFileRequestSchema,
-  GitWriteWorkingTreeFileRequestSchema,
-  RepositoryChangedEventSchema,
-  RepositoryRecordSchema,
-  RepositorySnapshotSchema,
-} from "../../src/shared/contracts/git-utility";
-import type {
-  GitCreationEventListener,
-  GitCreationTerminalEvent,
-  GitRepositoryServiceRequest,
-  GitTerminalEvent,
-  RepositoryId,
-  RepositoryRecord,
-} from "../../src/shared/contracts/git-utility";
+import { strToU8, zipSync } from "fflate";
+import type { RepositoryId } from "../../src/shared/contracts/git-utility";
 import {
   ClipboardWriteRequestSchema,
   ClipboardTextSchema,
@@ -45,15 +18,7 @@ import {
   DiagnosticPathKindSchema,
   DiagnosticSnapshotSchema,
   ExternalUrlSchema,
-  GitCancelQueryRequestSchema,
-  GitCloseRepositoryRequestSchema,
-  GitRepositoryRequestSchema,
-  GitTerminalResultSchema,
   HtmlExportRequestSchema,
-  HostingDeleteAccountRequestSchema,
-  HostingExecuteRequestSchema,
-  HostingRestoreAccountsRequestSchema,
-  HostingSaveAccountRequestSchema,
   IPC_CHANNELS,
   JsonValueSchema,
   MaintenanceRelaunchRequestSchema,
@@ -66,38 +31,25 @@ import {
   SettingsSetRequestSchema,
   WindowPresentationModeSchema,
 } from "../../src/shared/contracts/ipc";
-import type {
-  JsonValue,
-  RuntimeInfo,
-  WindowPresentationMode,
-} from "../../src/shared/contracts/ipc";
-import {
-  localHistoryRequestRepositoryId,
-  parseLocalHistoryRepositoryRequest,
-} from "../../src/shared/contracts/local-history-ipc";
-import {
-  TerminalCloseRepositoryRequestSchema,
-  TerminalCloseRequestSchema,
-  TerminalCreateRequestSchema,
-  TerminalCreateResultSchema,
-  TerminalEventEnvelopeSchema,
-  TerminalLaunchTargetsSchema,
-  TerminalListLaunchTargetsRequestSchema,
-  TerminalResizeRequestSchema,
-  TerminalWriteRequestSchema,
-} from "../../src/shared/contracts/terminal";
-import {
-  HostingAccountSchema,
-  HostingResponseKindByRequest,
-  HostingResponseSchema,
-  type ElectronHostingFoundation,
-} from "../hosting";
-import { safeHostingErrorMessage } from "../hosting/hosting-redaction";
+import type { RuntimeInfo, WindowPresentationMode } from "../../src/shared/contracts/ipc";
+import type { ElectronHostingFoundation } from "../hosting";
 import type { DiagnosticsService } from "./diagnostics-service";
+import { registerGitHandlers } from "./git-handlers";
 import type { GitUtilityClient } from "./git-utility-client";
+import { registerHostingHandlers } from "./hosting-handlers";
+import { assertTrustedSender } from "./ipc-security";
 import type { NativeMenuService } from "./menu-service";
+import {
+  ensureExportDirectory,
+  escapeHtml,
+  exportedHtml,
+  exportedPath,
+  htmlLink,
+} from "./platform-export";
+import { createRepositoryCapabilityAssertions } from "./repository-capabilities";
+import { parseImportedSettings, SETTINGS_CREDENTIAL_PREFIX } from "./settings-archive";
 import type { SettingsStore } from "./settings-store";
-import { EXPORTED_DOCUMENT_COLOR_VARIABLES } from "./static-color-boundary";
+import { registerTerminalHandlers } from "./terminal-handlers";
 import type { TerminalUtilityClient } from "./terminal-utility-client";
 
 interface PlatformHandlerDependencies {
@@ -115,203 +67,6 @@ interface PlatformHandlerDependencies {
   readonly onWindowPresentationModeChange?: (mode: WindowPresentationMode) => void;
 }
 
-const SETTINGS_ARCHIVE_MAX_BYTES = 1_048_576;
-const SETTINGS_ARCHIVE_MAX_EXPANDED_BYTES = 4_194_304;
-const SETTINGS_CREDENTIAL_PREFIX = "hostingCredential:";
-const SAFE_REPOSITORY_PATHS_SETTING = "safeRepositoryPaths";
-const ACTIVE_REPOSITORY_PATH_SETTING = "activeRepositoryPath";
-
-type ExecutableCapability = "gitMutation" | "terminal" | "hosting" | "externalExecution";
-
-function safeRepositoryPaths(settings: SettingsStore): ReadonlySet<string> {
-  const value = settings.get(SAFE_REPOSITORY_PATHS_SETTING);
-  if (value === null || value === undefined) return new Set();
-  if (!Array.isArray(value)) {
-    throw new Error("Safe Mode repository access state is invalid.");
-  }
-  const paths = value.filter((path): path is string => typeof path === "string" && path.length > 0);
-  if (paths.length !== value.length) {
-    throw new Error("Safe Mode repository access state is invalid.");
-  }
-  return new Set(paths);
-}
-
-function activeRepositoryPath(settings: SettingsStore): string | null {
-  const value = settings.get(ACTIVE_REPOSITORY_PATH_SETTING);
-  if (value === null || value === undefined) return null;
-  if (typeof value !== "string" || value.length === 0) {
-    throw new Error("Safe Mode active repository state is invalid.");
-  }
-  return value;
-}
-
-function repositoryServiceExecutableIds(
-  request: GitRepositoryServiceRequest,
-): readonly RepositoryId[] {
-  switch (request.operation) {
-    case "compareBranches":
-    case "listGitConfig":
-    case "listSubmodules":
-    case "listMergedBranches":
-    case "loadCommitSignature":
-    case "listRemotes":
-    case "listWorktrees":
-    case "readIgnoreRules":
-    case "pushPreview":
-    case "historyRewritePreview":
-    case "createPatchText":
-    case "listShelves":
-    case "listChangelists":
-    case "listRecoveryEntries":
-    case "listLocalHistoryActivities":
-    case "readLocalHistoryActivity":
-    case "readLocalHistoryDiff":
-    case "createLocalHistoryPatch":
-    case "listConflicts":
-    case "readConflict":
-    case "loadSubmoduleDiff":
-    case "resolveWorkingTreeFile":
-      return [];
-    case "executeSynchronizedBranchOperation":
-      return request.repositoryIds;
-    case "applyMultiRootRollback":
-      return request.steps.map((step) => step.repositoryId);
-    default:
-      if ("repositoryId" in request) return [request.repositoryId];
-      throw new Error("Repository service is unavailable in Safe Mode.");
-  }
-}
-
-function escapeHtml(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
-}
-
-function exportedHtml(path: string, content: string, lineNumbers: boolean): string {
-  const lines = content.split("\n");
-  const body = lineNumbers
-    ? lines
-        .map(
-          (line, index) =>
-            `<span class="line"><span class="number">${index + 1}</span><span class="source">${escapeHtml(line)}</span></span>`,
-        )
-        .join("\n")
-    : escapeHtml(content);
-  return `<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${escapeHtml(path)}</title><style>
-:root{color-scheme:light dark;${EXPORTED_DOCUMENT_COLOR_VARIABLES}}body{margin:0;background:var(--document-background-dark);color:var(--document-foreground-dark);font:13px/1.55 "JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace}header{position:sticky;top:0;padding:9px 14px;background:var(--document-header-dark);border-bottom:1px solid var(--document-border-dark);color:var(--document-header-foreground-dark)}pre{margin:0;padding:12px 0;tab-size:4}.line{display:grid;grid-template-columns:52px minmax(0,1fr);min-height:20px}.number{box-sizing:border-box;padding-right:12px;color:var(--document-line-number-dark);text-align:right;user-select:none}.source{padding-right:16px;white-space:pre-wrap}@media(prefers-color-scheme:light){body{background:var(--document-background-light);color:var(--document-foreground-light)}header{background:var(--document-header-light);border-color:var(--document-border-light)}.number{color:var(--document-line-number-light)}}</style></head>
-<body><header>${escapeHtml(path)}</header><pre>${body}</pre></body></html>`;
-}
-
-function exportedPath(path: string): string {
-  return `${path}.html`;
-}
-
-async function ensureExportDirectory(
-  canonicalRoot: string,
-  relativeDirectory: string,
-): Promise<string> {
-  let current = canonicalRoot;
-  for (const segment of relativeDirectory.split("/").filter(Boolean)) {
-    current = resolve(current, segment);
-    const relation = relative(canonicalRoot, current);
-    if (relation.startsWith("..") || relation === "") {
-      throw new Error("HTML export path escaped the selected directory.");
-    }
-    try {
-      const metadata = await lstat(current);
-      if (metadata.isSymbolicLink() || !metadata.isDirectory()) {
-        throw new Error("HTML export refuses symbolic-link and non-directory parents.");
-      }
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
-      await mkdir(current, { mode: 0o700 });
-    }
-  }
-  return current;
-}
-
-function htmlLink(path: string): string {
-  return path.split("/").map(encodeURIComponent).join("/");
-}
-
-function validateSettingsArchiveEnvelope(bytes: Uint8Array): void {
-  if (bytes.byteLength > SETTINGS_ARCHIVE_MAX_BYTES) {
-    throw new Error("Settings archive is larger than 1 MiB.");
-  }
-  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  const searchStart = Math.max(0, bytes.byteLength - 65_557);
-  let end = -1;
-  for (let offset = bytes.byteLength - 22; offset >= searchStart; offset -= 1) {
-    if (view.getUint32(offset, true) === 0x06054b50) {
-      end = offset;
-      break;
-    }
-  }
-  if (end < 0) throw new Error("Settings archive is not a valid ZIP file.");
-  const entryCount = view.getUint16(end + 10, true);
-  const directorySize = view.getUint32(end + 12, true);
-  let offset = view.getUint32(end + 16, true);
-  const directoryEnd = offset + directorySize;
-  if (entryCount !== 1 || directoryEnd > end) {
-    throw new Error("Settings archive must contain exactly settings.json.");
-  }
-  let expandedBytes = 0;
-  for (let index = 0; index < entryCount; index += 1) {
-    if (offset + 46 > directoryEnd || view.getUint32(offset, true) !== 0x02014b50) {
-      throw new Error("Settings archive directory is invalid.");
-    }
-    expandedBytes += view.getUint32(offset + 24, true);
-    const nameLength = view.getUint16(offset + 28, true);
-    const extraLength = view.getUint16(offset + 30, true);
-    const commentLength = view.getUint16(offset + 32, true);
-    const nameStart = offset + 46;
-    const nameEnd = nameStart + nameLength;
-    if (nameEnd > directoryEnd) {
-      throw new Error("Settings archive entry name is invalid.");
-    }
-    if (strFromU8(bytes.subarray(nameStart, nameEnd)) !== "settings.json") {
-      throw new Error("Settings archive contains an unexpected entry.");
-    }
-    offset = nameEnd + extraLength + commentLength;
-  }
-  if (expandedBytes > SETTINGS_ARCHIVE_MAX_EXPANDED_BYTES || offset !== directoryEnd) {
-    throw new Error("Settings archive expands beyond the allowed size.");
-  }
-}
-
-function parseImportedSettings(bytes: Uint8Array): Readonly<Record<string, JsonValue>> {
-  validateSettingsArchiveEnvelope(bytes);
-  const entry = unzipSync(bytes)["settings.json"];
-  if (entry === undefined) throw new Error("settings.json is missing from the archive.");
-  const raw = JSON.parse(strFromU8(entry)) as unknown;
-  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
-    throw new Error("Imported settings are invalid.");
-  }
-  if (
-    Reflect.get(raw, "format") !== "git-client-settings" ||
-    Reflect.get(raw, "schemaVersion") !== 1
-  ) {
-    throw new Error("Imported settings use an unsupported format.");
-  }
-  const rawValues = Reflect.get(raw, "values");
-  if (typeof rawValues !== "object" || rawValues === null || Array.isArray(rawValues)) {
-    throw new Error("Imported settings values are invalid.");
-  }
-  return Object.fromEntries(
-    Object.entries(rawValues).flatMap(([key, value]) =>
-      key.startsWith(SETTINGS_CREDENTIAL_PREFIX)
-        ? []
-        : [[key, JsonValueSchema.parse(value)] as const],
-    ),
-  );
-}
-
 export function registerPlatformHandlers(dependencies: PlatformHandlerDependencies): void {
   const {
     window,
@@ -327,43 +82,12 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
   } = dependencies;
   const repositoryPaths = new Map<string, string>();
   const repositoryAccessModes = new Map<string, "trusted" | "safe">();
-  const assertRepositoryCapability = (
-    repositoryId: string,
-    capability: ExecutableCapability,
-  ): void => {
-    const path = repositoryPaths.get(repositoryId);
-    if (path === undefined) {
-      throw new Error(
-        capability === "terminal"
-          ? "Repository is not open for terminal access"
-          : "Repository is not open for executable access.",
-      );
-    }
-    if (
-      repositoryAccessModes.get(repositoryId) === "safe" ||
-      safeRepositoryPaths(settings).has(path)
-    ) {
-      throw new SafeModeViolationError(capability);
-    }
-  };
-  const assertActiveCapability = (capability: ExecutableCapability): void => {
-    const path = activeRepositoryPath(settings);
-    if (path !== null && safeRepositoryPaths(settings).has(path)) {
-      throw new SafeModeViolationError(capability);
-    }
-  };
-  const creationListener: GitCreationEventListener = (creationEvent) => {
-    if (window.isDestroyed() || window.webContents.isDestroyed()) return;
-    window.webContents.send(
-      IPC_CHANNELS.gitCreationEvent,
-      GitCreationEventSchema.parse(creationEvent),
-    );
-  };
-  const createdRepository = (terminal: GitCreationTerminalEvent): RepositoryRecord => {
-    if (terminal.kind === "completed") return terminal.repository;
-    if (terminal.kind === "failed") throw new Error(terminal.message);
-    throw new Error("Repository creation was cancelled");
-  };
+  const { assertRepositoryCapability, assertActiveCapability } =
+    createRepositoryCapabilityAssertions({
+      settings,
+      repositoryPaths,
+      repositoryAccessModes,
+    });
 
   ipcMain.handle(IPC_CHANNELS.runtimeInfo, (event) => {
     assertTrustedSender(event, window);
@@ -743,264 +467,25 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
     assertTrustedSender(event, window);
     menu.sync(NativeCommandStatesSchema.parse(raw));
   });
-  ipcMain.handle(
-    IPC_CHANNELS.gitOpenRepository,
-    async (event, raw: unknown): Promise<RepositoryRecord> => {
-      assertTrustedSender(event, window);
-      const request = OpenRepositoryRequestSchema.parse(raw);
-      const repository = await gitUtility.openRepository(request.path);
-      const safePaths = safeRepositoryPaths(settings);
-      const nextMode =
-        safePaths.has(request.path) || safePaths.has(repository.path) ? "safe" : "trusted";
-      if (nextMode === "safe") {
-        const repositoriesToClose = [...repositoryPaths.entries()].flatMap(([id, path]) =>
-          path === repository.path && repositoryAccessModes.get(id) === "trusted" ? [id] : [],
-        );
-        await Promise.all(
-          repositoriesToClose.map(async (repositoryId) =>
-            terminalUtility.closeRepository({ repositoryId }),
-          ),
-        );
-      }
-      repositoryPaths.set(repository.id, repository.path);
-      repositoryAccessModes.set(repository.id, nextMode);
-      return RepositoryRecordSchema.parse(repository);
-    },
-  );
-  ipcMain.handle(
-    IPC_CHANNELS.gitInitializeRepository,
-    async (event, raw: unknown): Promise<RepositoryRecord> => {
-      assertTrustedSender(event, window);
-      assertActiveCapability("gitMutation");
-      const request = GitInitializeRepositoryRequestSchema.parse(raw);
-      const terminal = await gitUtility.initializeRepository(request, creationListener);
-      const repository = RepositoryRecordSchema.parse(createdRepository(terminal));
-      repositoryPaths.set(repository.id, repository.path);
-      repositoryAccessModes.set(repository.id, "trusted");
-      return repository;
-    },
-  );
-  ipcMain.handle(
-    IPC_CHANNELS.gitCloneRepository,
-    async (event, raw: unknown): Promise<RepositoryRecord> => {
-      assertTrustedSender(event, window);
-      assertActiveCapability("gitMutation");
-      const request = GitCloneRepositoryRequestSchema.parse(raw);
-      const terminal = await gitUtility.cloneRepository(request, creationListener);
-      const repository = RepositoryRecordSchema.parse(createdRepository(terminal));
-      repositoryPaths.set(repository.id, repository.path);
-      repositoryAccessModes.set(repository.id, "trusted");
-      return repository;
-    },
-  );
-  ipcMain.handle(IPC_CHANNELS.gitCloseRepository, async (event, raw: unknown): Promise<boolean> => {
-    assertTrustedSender(event, window);
-    const request = GitCloseRepositoryRequestSchema.parse(raw);
-    await terminalUtility.closeRepository(request);
-    const closed = await gitUtility.closeRepository(request.repositoryId);
-    repositoryPaths.delete(request.repositoryId);
-    repositoryAccessModes.delete(request.repositoryId);
-    return closed;
+  registerGitHandlers({
+    window,
+    settings,
+    gitUtility,
+    terminalUtility,
+    repositoryPaths,
+    repositoryAccessModes,
+    assertRepositoryCapability,
+    assertActiveCapability,
+    localHistoryRepositoryFor,
   });
-  ipcMain.handle(IPC_CHANNELS.gitInspectSnapshot, async (event, raw: unknown) => {
-    assertTrustedSender(event, window);
-    const request = GitRepositoryRequestSchema.parse(raw);
-    return RepositorySnapshotSchema.parse(await gitUtility.inspectSnapshot(request.repositoryId));
+  registerTerminalHandlers({
+    window,
+    terminalUtility,
+    repositoryPaths,
+    assertRepositoryCapability,
+    assertActiveCapability,
   });
-  ipcMain.handle(IPC_CHANNELS.gitRepositoryService, async (event, raw: unknown) => {
-    assertTrustedSender(event, window);
-    const request = GitRepositoryServiceRequestSchema.parse(raw);
-    for (const repositoryId of repositoryServiceExecutableIds(request)) {
-      assertRepositoryCapability(repositoryId, "gitMutation");
-    }
-    return GitRepositoryServiceResultSchema.parse(
-      await gitUtility.executeRepositoryService(request),
-    );
-  });
-  ipcMain.handle(IPC_CHANNELS.localHistoryRepositoryService, async (event, raw: unknown) => {
-    const repositoryId = localHistoryRepositoryFor?.(event.sender) ?? null;
-    assertTrustedLocalHistorySender(event, window, repositoryId);
-    const request = parseLocalHistoryRepositoryRequest(raw);
-    if (localHistoryRequestRepositoryId(request) !== repositoryId) {
-      throw new Error("Local History cannot access a different repository.");
-    }
-    for (const executableRepositoryId of repositoryServiceExecutableIds(request)) {
-      assertRepositoryCapability(executableRepositoryId, "gitMutation");
-    }
-    const result = GitRepositoryServiceResultSchema.parse(
-      await gitUtility.executeRepositoryService(request),
-    );
-    if (result.operation !== request.operation) {
-      throw new Error("Local History result did not match its request.");
-    }
-    return result;
-  });
-  ipcMain.handle(IPC_CHANNELS.gitQuery, async (event, raw: unknown): Promise<GitTerminalEvent> => {
-    assertTrustedSender(event, window);
-    const request = GitExecutionRequestSchema.parse(raw);
-    if (request.kind === "operation") {
-      assertRepositoryCapability(request.repositoryId, "gitMutation");
-    }
-    const terminal = await gitUtility.executeQuery(request, (gitEvent) => {
-      if (window.isDestroyed() || window.webContents.isDestroyed()) return;
-      window.webContents.send(IPC_CHANNELS.gitQueryEvent, GitRequestEventSchema.parse(gitEvent));
-    });
-    return GitTerminalResultSchema.parse(terminal);
-  });
-  ipcMain.handle(IPC_CHANNELS.gitCancelQuery, async (event, raw: unknown): Promise<boolean> => {
-    assertTrustedSender(event, window);
-    const request = GitCancelQueryRequestSchema.parse(raw);
-    return gitUtility.cancelQuery(request.requestId);
-  });
-  ipcMain.handle(IPC_CHANNELS.gitReadFile, async (event, raw: unknown) => {
-    assertTrustedSender(event, window);
-    const request = GitReadFileRequestSchema.parse(raw);
-    return FileContentSchema.parse(
-      await gitUtility.readFile(request.repositoryId, request.source, request.path),
-    );
-  });
-  ipcMain.handle(IPC_CHANNELS.gitReadFilePreview, async (event, raw: unknown) => {
-    assertTrustedSender(event, window);
-    const request = GitReadFileRequestSchema.parse(raw);
-    return FilePreviewSchema.parse(
-      await gitUtility.readFilePreview(request.repositoryId, request.source, request.path),
-    );
-  });
-  ipcMain.handle(
-    IPC_CHANNELS.gitWriteWorkingTreeFile,
-    async (event, raw: unknown): Promise<void> => {
-      assertTrustedSender(event, window);
-      const request = GitWriteWorkingTreeFileRequestSchema.parse(raw);
-      assertRepositoryCapability(request.repositoryId, "gitMutation");
-      await gitUtility.writeWorkingTreeFile(
-        request.repositoryId,
-        request.path,
-        request.content,
-        request.activityName ?? undefined,
-      );
-    },
-  );
-  ipcMain.handle(
-    IPC_CHANNELS.gitOpenWorkingTreeFile,
-    async (event, raw: unknown): Promise<void> => {
-      assertTrustedSender(event, window);
-      const request = GitWorkingTreeFileRequestSchema.parse(raw);
-      assertRepositoryCapability(request.repositoryId, "externalExecution");
-      const canonicalPath = await gitUtility.resolveWorkingTreeFile(
-        request.repositoryId,
-        request.path,
-      );
-      const error = await shell.openPath(canonicalPath);
-      if (error.length > 0) {
-        throw new Error(`Could not open working-tree file: ${error}`);
-      }
-    },
-  );
-  ipcMain.handle(IPC_CHANNELS.gitWatchRepository, async (event, raw: unknown): Promise<void> => {
-    assertTrustedSender(event, window);
-    const request = GitWatchRepositoryRequestSchema.parse(raw);
-    await gitUtility.watchRepository(request.repositoryId, (repositoryEvent) => {
-      if (window.isDestroyed() || window.webContents.isDestroyed()) return;
-      window.webContents.send(
-        IPC_CHANNELS.gitRepositoryChanged,
-        RepositoryChangedEventSchema.parse(repositoryEvent),
-      );
-    });
-  });
-  ipcMain.handle(IPC_CHANNELS.gitUnwatchRepository, async (event, raw: unknown): Promise<void> => {
-    assertTrustedSender(event, window);
-    const request = GitWatchRepositoryRequestSchema.parse(raw);
-    await gitUtility.unwatchRepository(request.repositoryId);
-  });
-  ipcMain.handle(IPC_CHANNELS.terminalCreate, async (event, raw: unknown) => {
-    assertTrustedSender(event, window);
-    const request = TerminalCreateRequestSchema.parse(raw);
-    assertRepositoryCapability(request.repositoryId, "terminal");
-    const cwd = repositoryPaths.get(request.repositoryId);
-    if (cwd === undefined) throw new Error("Repository is not open for terminal access");
-    const result = await terminalUtility.create({ ...request, cwd }, (terminalEvent) => {
-      if (window.isDestroyed() || window.webContents.isDestroyed()) return;
-      window.webContents.send(
-        IPC_CHANNELS.terminalEvent,
-        TerminalEventEnvelopeSchema.parse(terminalEvent),
-      );
-    });
-    return TerminalCreateResultSchema.parse(result);
-  });
-  ipcMain.handle(IPC_CHANNELS.terminalListLaunchTargets, async (event, raw: unknown) => {
-    assertTrustedSender(event, window);
-    TerminalListLaunchTargetsRequestSchema.parse(raw);
-    assertActiveCapability("terminal");
-    return TerminalLaunchTargetsSchema.parse(await terminalUtility.listLaunchTargets());
-  });
-  ipcMain.handle(IPC_CHANNELS.terminalWrite, async (event, raw: unknown): Promise<void> => {
-    assertTrustedSender(event, window);
-    await terminalUtility.write(TerminalWriteRequestSchema.parse(raw));
-  });
-  ipcMain.handle(IPC_CHANNELS.terminalResize, async (event, raw: unknown): Promise<void> => {
-    assertTrustedSender(event, window);
-    await terminalUtility.resize(TerminalResizeRequestSchema.parse(raw));
-  });
-  ipcMain.handle(IPC_CHANNELS.terminalClose, async (event, raw: unknown): Promise<void> => {
-    assertTrustedSender(event, window);
-    await terminalUtility.close(TerminalCloseRequestSchema.parse(raw));
-  });
-  ipcMain.handle(
-    IPC_CHANNELS.terminalCloseRepository,
-    async (event, raw: unknown): Promise<void> => {
-      assertTrustedSender(event, window);
-      await terminalUtility.closeRepository(TerminalCloseRepositoryRequestSchema.parse(raw));
-    },
-  );
-  ipcMain.handle(IPC_CHANNELS.hostingSaveAccount, async (event, raw: unknown) => {
-    assertTrustedSender(event, window);
-    assertActiveCapability("hosting");
-    const token = hostingToken(raw);
-    try {
-      const request = HostingSaveAccountRequestSchema.parse(raw);
-      return HostingAccountSchema.parse(
-        await hosting.saveAccount(request.provider, request.baseUrl, request.token),
-      );
-    } catch (error) {
-      throw hostingIpcError(error, token === null ? [] : [token]);
-    }
-  });
-  ipcMain.handle(IPC_CHANNELS.hostingRestoreAccounts, (event, raw: unknown): void => {
-    assertTrustedSender(event, window);
-    assertActiveCapability("hosting");
-    try {
-      const request = HostingRestoreAccountsRequestSchema.parse(raw);
-      hosting.restoreAccounts(request.accounts);
-    } catch (error) {
-      throw hostingIpcError(error);
-    }
-  });
-  ipcMain.handle(IPC_CHANNELS.hostingDeleteAccount, async (event, raw: unknown): Promise<void> => {
-    assertTrustedSender(event, window);
-    assertActiveCapability("hosting");
-    try {
-      const request = HostingDeleteAccountRequestSchema.parse(raw);
-      await hosting.deleteAccount(request.accountId);
-    } catch (error) {
-      throw hostingIpcError(error);
-    }
-  });
-  ipcMain.handle(IPC_CHANNELS.hostingExecute, async (event, raw: unknown) => {
-    assertTrustedSender(event, window);
-    assertActiveCapability("hosting");
-    try {
-      const request = HostingExecuteRequestSchema.parse(raw);
-      const response = HostingResponseSchema.parse(
-        await hosting.execute(request.accountId, request.request),
-      );
-      if (response.kind !== HostingResponseKindByRequest[request.request.kind]) {
-        throw new Error("Hosting response did not match its request");
-      }
-      return response;
-    } catch (error) {
-      throw hostingIpcError(error);
-    }
-  });
+  registerHostingHandlers({ window, hosting, assertActiveCapability });
 }
 
 export function unregisterPlatformHandlers(): void {
@@ -1062,56 +547,5 @@ export function unregisterPlatformHandlers(): void {
     IPC_CHANNELS.hostingExecute,
   ]) {
     ipcMain.removeHandler(channel);
-  }
-}
-
-function hostingToken(raw: unknown): string | null {
-  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) return null;
-  const token = Reflect.get(raw, "token");
-  return typeof token === "string" && token.length <= 16_384 ? token : null;
-}
-
-function hostingIpcError(error: unknown, secrets: readonly string[] = []): Error {
-  const message = error instanceof Error ? error.message : String(error);
-  return new Error(safeHostingErrorMessage(message, secrets));
-}
-
-function assertTrustedSender(event: IpcMainInvokeEvent, window: BrowserWindow): void {
-  if (event.sender !== window.webContents) {
-    throw new Error("IPC sender is not the main window.");
-  }
-  if (event.senderFrame !== window.webContents.mainFrame) {
-    throw new Error("IPC sender is not the main frame.");
-  }
-  const frameUrl = event.senderFrame?.url ?? "";
-  const isProduction = frameUrl.startsWith("app://git-client/");
-  const isDevelopment = /^http:\/\/(127\.0\.0\.1|localhost):\d+\//u.test(frameUrl);
-  if (!isProduction && !isDevelopment) throw new Error("IPC sender origin is not trusted.");
-}
-
-function assertTrustedLocalHistorySender(
-  event: IpcMainInvokeEvent,
-  window: BrowserWindow,
-  repositoryId: RepositoryId | null,
-): asserts repositoryId is RepositoryId {
-  const senderWindow = BrowserWindow.fromWebContents(event.sender);
-  if (repositoryId === null || senderWindow === null || senderWindow.getParentWindow() !== window) {
-    throw new Error("IPC sender is not an authorized Local History window.");
-  }
-  if (event.senderFrame !== senderWindow.webContents.mainFrame) {
-    throw new Error("IPC sender is not the Local History main frame.");
-  }
-  try {
-    const frameUrl = new URL(event.senderFrame.url);
-    const isProduction =
-      frameUrl.protocol === "app:" &&
-      frameUrl.host === "git-client" &&
-      frameUrl.pathname === "/local-history";
-    const isDevelopment =
-      frameUrl.pathname === "/local-history" &&
-      /^http:\/\/(127\.0\.0\.1|localhost):\d+$/u.test(frameUrl.origin);
-    if (!isProduction && !isDevelopment) throw new Error("untrusted");
-  } catch {
-    throw new Error("IPC sender origin is not a trusted Local History route.");
   }
 }
