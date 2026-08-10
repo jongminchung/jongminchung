@@ -36,7 +36,14 @@ function stashList(repository: string): string {
   if (git(repository, "for-each-ref", "--format=%(refname)", "refs/stash").trim() === "") {
     return "";
   }
-  return git(repository, "stash", "list", "--format=%H%x00%gs");
+  try {
+    return git(repository, "stash", "list", "--format=%H%x00%gs");
+  } catch (error) {
+    const refStillExists =
+      git(repository, "for-each-ref", "--format=%(refname)", "refs/stash").trim() !== "";
+    if (refStillExists) throw error;
+    return "";
+  }
 }
 
 function evidence(repository: string): GitEvidence {
