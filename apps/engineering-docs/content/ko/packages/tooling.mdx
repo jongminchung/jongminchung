@@ -5,7 +5,7 @@ section: packages
 title: tooling
 description: oxlint, oxfmt, 워크스페이스 패키지 맵을 위한 공유 설정 패키지입니다.
 order: 1
-updatedAt: "2026-07-14"
+updatedAt: "2026-08-10"
 tags: [tooling, oxlint, oxfmt, workspace, package-map]
 status: stable
 sourceUrl: https://github.com/jongminchung/jongminchung/tree/main/packages/tooling
@@ -15,12 +15,10 @@ apiSymbols:
   - "@jongminchung/tooling/oxfmt#OxfmtConfig"
   - "@jongminchung/tooling/oxfmt#OxfmtOverride"
   - "@jongminchung/tooling/oxfmt#ResolvedOxfmtConfig"
-  - "@jongminchung/tooling/oxfmt#default"
   - "@jongminchung/tooling/oxfmt#defaultOxfmtConfig"
   - "@jongminchung/tooling/oxfmt#defineOxfmtConfig"
   - "@jongminchung/tooling/oxlint#OxlintConfig"
   - "@jongminchung/tooling/oxlint#ResolvedOxlintConfig"
-  - "@jongminchung/tooling/oxlint#default"
   - "@jongminchung/tooling/oxlint#defaultOxlintConfig"
   - "@jongminchung/tooling/oxlint#defineOxlintConfig"
   - "@jongminchung/tooling/package-map#LocalSourceAlias"
@@ -42,6 +40,7 @@ apiSymbols:
 ## 개요
 
 `@jongminchung/tooling`은 저장소마다 반복되는 formatter·linter 기본값과 패키지 export 기반 별칭 생성을 한곳에서 관리합니다. 설정을 복사하지 않고 작은 override만 선언하는 것이 목표입니다.
+Node.js 24.15 이상에서 사용할 수 있으며 모든 공개 런타임 API는 named export입니다.
 
 ## oxlint
 
@@ -79,6 +78,14 @@ export default {
 ```
 
 루트 `workspaces`와 각 패키지의 `exports`를 읽어 TypeScript paths 또는 Vite alias를 만듭니다. `source`, `default`, `import`, `types` 조건을 순서대로 해석하며 CSS·JSON subpath도 보존합니다.
+
+## CommonJS 사용법
+
+별도 CommonJS 빌드 없이 동일한 ESM named export를 `require()`로 불러옵니다.
+
+```js
+const { defineOxlintConfig } = require("@jongminchung/tooling/oxlint");
+```
 
 ## API
 

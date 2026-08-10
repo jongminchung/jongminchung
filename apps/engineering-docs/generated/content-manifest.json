@@ -249,7 +249,7 @@
     "title": "remark-plantuml",
     "description": "Turn PlantUML code in Markdown and Astro documents into safe SVG diagrams.",
     "order": 0,
-    "updatedAt": "2026-07-14",
+    "updatedAt": "2026-08-10",
     "tags": [
       "remark",
       "plantuml",
@@ -264,10 +264,10 @@
     "apiSymbols": [
       "@jongminchung/remark-plantuml#RemarkPlantUmlOptions",
       "@jongminchung/remark-plantuml#RemarkPlantUmlTransformer",
-      "@jongminchung/remark-plantuml#default",
       "@jongminchung/remark-plantuml#createPlantUmlSvgUrl",
       "@jongminchung/remark-plantuml#encodePlantUmlSource",
       "@jongminchung/remark-plantuml#publicPlantUmlSvgServerBaseUrl",
+      "@jongminchung/remark-plantuml#remarkPlantUml",
       "@jongminchung/remark-plantuml/astro#AstroRemarkPlantUmlPlugin",
       "@jongminchung/remark-plantuml/astro#createPlantUmlRemarkPlugin"
     ],
@@ -299,6 +299,11 @@
         "level": 2
       },
       {
+        "id": "commonjs-usage",
+        "label": "CommonJS usage",
+        "level": 2
+      },
+      {
         "id": "api",
         "label": "API",
         "level": 2
@@ -322,7 +327,7 @@
     "title": "tooling",
     "description": "Shared configuration for oxlint, oxfmt, and workspace package maps.",
     "order": 1,
-    "updatedAt": "2026-07-14",
+    "updatedAt": "2026-08-10",
     "tags": [
       "tooling",
       "oxlint",
@@ -338,12 +343,10 @@
       "@jongminchung/tooling/oxfmt#OxfmtConfig",
       "@jongminchung/tooling/oxfmt#OxfmtOverride",
       "@jongminchung/tooling/oxfmt#ResolvedOxfmtConfig",
-      "@jongminchung/tooling/oxfmt#default",
       "@jongminchung/tooling/oxfmt#defaultOxfmtConfig",
       "@jongminchung/tooling/oxfmt#defineOxfmtConfig",
       "@jongminchung/tooling/oxlint#OxlintConfig",
       "@jongminchung/tooling/oxlint#ResolvedOxlintConfig",
-      "@jongminchung/tooling/oxlint#default",
       "@jongminchung/tooling/oxlint#defaultOxlintConfig",
       "@jongminchung/tooling/oxlint#defineOxlintConfig",
       "@jongminchung/tooling/package-map#LocalSourceAlias",
@@ -381,6 +384,11 @@
       {
         "id": "package-map",
         "label": "package-map",
+        "level": 2
+      },
+      {
+        "id": "commonjs-usage",
+        "label": "CommonJS usage",
         "level": 2
       },
       {
@@ -2654,7 +2662,7 @@
     "title": "remark-plantuml",
     "description": "Markdown과 Astro 문서의 PlantUML 코드를 안전한 SVG 다이어그램으로 변환합니다.",
     "order": 0,
-    "updatedAt": "2026-07-14",
+    "updatedAt": "2026-08-10",
     "tags": [
       "remark",
       "plantuml",
@@ -2669,10 +2677,10 @@
     "apiSymbols": [
       "@jongminchung/remark-plantuml#RemarkPlantUmlOptions",
       "@jongminchung/remark-plantuml#RemarkPlantUmlTransformer",
-      "@jongminchung/remark-plantuml#default",
       "@jongminchung/remark-plantuml#createPlantUmlSvgUrl",
       "@jongminchung/remark-plantuml#encodePlantUmlSource",
       "@jongminchung/remark-plantuml#publicPlantUmlSvgServerBaseUrl",
+      "@jongminchung/remark-plantuml#remarkPlantUml",
       "@jongminchung/remark-plantuml/astro#AstroRemarkPlantUmlPlugin",
       "@jongminchung/remark-plantuml/astro#createPlantUmlRemarkPlugin"
     ],
@@ -2704,6 +2712,11 @@
         "level": 2
       },
       {
+        "id": "commonjs-사용법",
+        "label": "CommonJS 사용법",
+        "level": 2
+      },
+      {
         "id": "api",
         "label": "API",
         "level": 2
@@ -2727,7 +2740,7 @@
     "title": "tooling",
     "description": "oxlint, oxfmt, 워크스페이스 패키지 맵을 위한 공유 설정 패키지입니다.",
     "order": 1,
-    "updatedAt": "2026-07-14",
+    "updatedAt": "2026-08-10",
     "tags": [
       "tooling",
       "oxlint",
@@ -2743,12 +2756,10 @@
       "@jongminchung/tooling/oxfmt#OxfmtConfig",
       "@jongminchung/tooling/oxfmt#OxfmtOverride",
       "@jongminchung/tooling/oxfmt#ResolvedOxfmtConfig",
-      "@jongminchung/tooling/oxfmt#default",
       "@jongminchung/tooling/oxfmt#defaultOxfmtConfig",
       "@jongminchung/tooling/oxfmt#defineOxfmtConfig",
       "@jongminchung/tooling/oxlint#OxlintConfig",
       "@jongminchung/tooling/oxlint#ResolvedOxlintConfig",
-      "@jongminchung/tooling/oxlint#default",
       "@jongminchung/tooling/oxlint#defaultOxlintConfig",
       "@jongminchung/tooling/oxlint#defineOxlintConfig",
       "@jongminchung/tooling/package-map#LocalSourceAlias",
@@ -2786,6 +2797,11 @@
       {
         "id": "package-map",
         "label": "package-map",
+        "level": 2
+      },
+      {
+        "id": "commonjs-사용법",
+        "label": "CommonJS 사용법",
         "level": 2
       },
       {

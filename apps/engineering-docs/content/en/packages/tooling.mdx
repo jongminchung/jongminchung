@@ -5,7 +5,7 @@ section: packages
 title: tooling
 description: Shared configuration for oxlint, oxfmt, and workspace package maps.
 order: 1
-updatedAt: "2026-07-14"
+updatedAt: "2026-08-10"
 tags: [tooling, oxlint, oxfmt, workspace, package-map]
 status: stable
 sourceUrl: https://github.com/jongminchung/jongminchung/tree/main/packages/tooling
@@ -15,12 +15,10 @@ apiSymbols:
   - "@jongminchung/tooling/oxfmt#OxfmtConfig"
   - "@jongminchung/tooling/oxfmt#OxfmtOverride"
   - "@jongminchung/tooling/oxfmt#ResolvedOxfmtConfig"
-  - "@jongminchung/tooling/oxfmt#default"
   - "@jongminchung/tooling/oxfmt#defaultOxfmtConfig"
   - "@jongminchung/tooling/oxfmt#defineOxfmtConfig"
   - "@jongminchung/tooling/oxlint#OxlintConfig"
   - "@jongminchung/tooling/oxlint#ResolvedOxlintConfig"
-  - "@jongminchung/tooling/oxlint#default"
   - "@jongminchung/tooling/oxlint#defaultOxlintConfig"
   - "@jongminchung/tooling/oxlint#defineOxlintConfig"
   - "@jongminchung/tooling/package-map#LocalSourceAlias"
@@ -42,6 +40,7 @@ apiSymbols:
 ## Overview
 
 `@jongminchung/tooling` centralizes formatter and linter defaults plus aliases derived from package exports. Consumers declare small overrides instead of copying configuration.
+Node.js 24.15 or newer is required, and every public runtime API is a named export.
 
 ## oxlint
 
@@ -79,6 +78,14 @@ export default {
 ```
 
 The package reads root workspaces and package `exports` to generate TypeScript paths or Vite aliases. It resolves `source`, `default`, `import`, and `types` conditions in order while preserving CSS and JSON subpaths.
+
+## CommonJS usage
+
+CommonJS loads the same ESM named exports without a separate CommonJS build.
+
+```js
+const { defineOxlintConfig } = require("@jongminchung/tooling/oxlint");
+```
 
 ## API
 

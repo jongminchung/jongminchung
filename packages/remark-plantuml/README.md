@@ -9,6 +9,8 @@ patch for compatible fixes, minor for compatible features, and major for breakin
 
 ## Install
 
+Node.js 24.15 or newer is required.
+
 ```bash
 npm install --save-dev @jongminchung/remark-plantuml
 ```
@@ -17,7 +19,7 @@ npm install --save-dev @jongminchung/remark-plantuml
 
 ```ts
 import { unified } from "@astrojs/markdown-remark";
-import remarkPlantUml from "@jongminchung/remark-plantuml";
+import { remarkPlantUml } from "@jongminchung/remark-plantuml";
 
 export default {
   markdown: {
@@ -34,6 +36,12 @@ export default {
     }),
   },
 };
+```
+
+CommonJS consumers receive the same named exports from the ESM package:
+
+```js
+const { remarkPlantUml } = require("@jongminchung/remark-plantuml");
 ```
 
 Astro configs can use the helper export:

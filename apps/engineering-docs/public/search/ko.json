@@ -123,6 +123,7 @@
       "Markdown 사용법",
       "Astro 사용법",
       "스타일",
+      "CommonJS 사용법",
       "API",
       "기본 엔트리",
       "Astro 엔트리"
@@ -137,14 +138,14 @@
     "apiSymbols": [
       "@jongminchung/remark-plantuml#RemarkPlantUmlOptions",
       "@jongminchung/remark-plantuml#RemarkPlantUmlTransformer",
-      "@jongminchung/remark-plantuml#default",
       "@jongminchung/remark-plantuml#createPlantUmlSvgUrl",
       "@jongminchung/remark-plantuml#encodePlantUmlSource",
       "@jongminchung/remark-plantuml#publicPlantUmlSvgServerBaseUrl",
+      "@jongminchung/remark-plantuml#remarkPlantUml",
       "@jongminchung/remark-plantuml/astro#AstroRemarkPlantUmlPlugin",
       "@jongminchung/remark-plantuml/astro#createPlantUmlRemarkPlugin"
     ],
-    "body": "개요 @jongminchung/remark-plantuml 은 fenced code 또는 로컬 .puml 링크를 PlantUML 서버의 SVG URL로 변환하는 비동기 remark 플러그인입니다. 원문을 deflate하고 PlantUML 6-bit 형식으로 인코딩하며, 캡션과 대체 텍스트를 HTML 이스케이프합니다. 설치 GitHub Packages를 사용하므로 프로젝트의 .npmrc 에 @jongminchung 레지스트리 매핑이 필요합니다. Markdown 사용법 plantuml 과 puml fenced code가 기본 대상입니다. 로컬 .puml 파일을 링크하면 현재 Markdown 파일을 기준으로 읽습니다. contentRoot 밖으로 벗어나는 경로는 허용하지 마세요. Astro 사용법 스타일 기본 figure 클래스는 plantuml-diagram 입니다. @jongminchung/remark-plantuml/styles.css 또는 Starlight용 starlight.css 를 가져오거나 className 으로 자체 스타일을 연결할 수 있습니다. API 기본 엔트리 - remarkPlantUml options : unified transformer를 반환하는 기본 export - createPlantUmlSvgUrl source, serverBaseUrl : 지정한 서버의 SVG URL 생성 - encodePlantUmlSource source : PlantUML 서버 경로용 문자열 생성 - publicPlantUmlSvgServerBaseUrl : 공개 SVG 서버 기본 URL - RemarkPlantUmlOptions : 서버 URL, 루트, 확장자, 언어, 클래스 설정 Astro 엔트리 - createPlantUmlRemarkPlugin options : Astro remark tuple 생성 - AstroRemarkPlantUmlPlugin : tuple 타입",
+    "body": "개요 @jongminchung/remark-plantuml 은 fenced code 또는 로컬 .puml 링크를 PlantUML 서버의 SVG URL로 변환하는 비동기 remark 플러그인입니다. 원문을 deflate하고 PlantUML 6-bit 형식으로 인코딩하며, 캡션과 대체 텍스트를 HTML 이스케이프합니다. 설치 GitHub Packages를 사용하므로 프로젝트의 .npmrc 에 @jongminchung 레지스트리 매핑이 필요합니다. Node.js 24.15 이상에서 사용할 수 있습니다. Markdown 사용법 plantuml 과 puml fenced code가 기본 대상입니다. 로컬 .puml 파일을 링크하면 현재 Markdown 파일을 기준으로 읽습니다. contentRoot 밖으로 벗어나는 경로는 허용하지 마세요. Astro 사용법 스타일 기본 figure 클래스는 plantuml-diagram 입니다. @jongminchung/remark-plantuml/styles.css 또는 Starlight용 starlight.css 를 가져오거나 className 으로 자체 스타일을 연결할 수 있습니다. CommonJS 사용법 별도 CommonJS 빌드 없이 동일한 ESM named export를 require 로 불러옵니다. API 기본 엔트리 - remarkPlantUml options : unified transformer를 반환하는 named export - createPlantUmlSvgUrl source, serverBaseUrl : 지정한 서버의 SVG URL 생성 - encodePlantUmlSource source : PlantUML 서버 경로용 문자열 생성 - publicPlantUmlSvgServerBaseUrl : 공개 SVG 서버 기본 URL - RemarkPlantUmlOptions : 서버 URL, 루트, 확장자, 언어, 클래스 설정 Astro 엔트리 - createPlantUmlRemarkPlugin options : Astro remark tuple 생성 - AstroRemarkPlantUmlPlugin : tuple 타입",
     "order": 0
   },
   {
@@ -159,6 +160,7 @@
       "oxlint",
       "oxfmt",
       "package-map",
+      "CommonJS 사용법",
       "API"
     ],
     "tags": [
@@ -172,12 +174,10 @@
       "@jongminchung/tooling/oxfmt#OxfmtConfig",
       "@jongminchung/tooling/oxfmt#OxfmtOverride",
       "@jongminchung/tooling/oxfmt#ResolvedOxfmtConfig",
-      "@jongminchung/tooling/oxfmt#default",
       "@jongminchung/tooling/oxfmt#defaultOxfmtConfig",
       "@jongminchung/tooling/oxfmt#defineOxfmtConfig",
       "@jongminchung/tooling/oxlint#OxlintConfig",
       "@jongminchung/tooling/oxlint#ResolvedOxlintConfig",
-      "@jongminchung/tooling/oxlint#default",
       "@jongminchung/tooling/oxlint#defaultOxlintConfig",
       "@jongminchung/tooling/oxlint#defineOxlintConfig",
       "@jongminchung/tooling/package-map#LocalSourceAlias",
@@ -195,7 +195,7 @@
       "@jongminchung/tooling/package-map#loadWorkspacePackageMap",
       "@jongminchung/tooling/package-map#writeTsconfigAliasConfig"
     ],
-    "body": "개요 @jongminchung/tooling 은 저장소마다 반복되는 formatter·linter 기본값과 패키지 export 기반 별칭 생성을 한곳에서 관리합니다. 설정을 복사하지 않고 작은 override만 선언하는 것이 목표입니다. oxlint 기본 설정은 type-aware 분석, 미사용 변수, floating promise와 잘못 사용한 promise 검사를 활성화합니다. 복구 가능한 예외가 필요한 규칙만 호출자 설정에서 덮어씁니다. oxfmt 기본 ignore와 override는 유지되고 호출자의 배열이 뒤에 합쳐집니다. JSON은 2칸 들여쓰기를 사용하며 package script와 import 정렬을 활성화합니다. package-map 루트 workspaces 와 각 패키지의 exports 를 읽어 TypeScript paths 또는 Vite alias를 만듭니다. source , default , import , types 조건을 순서대로 해석하며 CSS·JSON subpath도 보존합니다. API - defineOxlintConfig , defineOxfmtConfig : 기본값과 override 병합 - loadWorkspacePackageMap : 워크스페이스 패키지와 manifest 조회 - createPackageExportAliases : 공개 subpath와 실제 target 연결 - createTsconfigPaths , createTsconfigAliasConfig : TypeScript paths 생성 - createViteResolveAliases : 정규식 기반 Vite alias 생성 - formatTsconfigAliasConfig , writeTsconfigAliasConfig : 별칭 파일 직렬화와 기록",
+    "body": "개요 @jongminchung/tooling 은 저장소마다 반복되는 formatter·linter 기본값과 패키지 export 기반 별칭 생성을 한곳에서 관리합니다. 설정을 복사하지 않고 작은 override만 선언하는 것이 목표입니다. Node.js 24.15 이상에서 사용할 수 있으며 모든 공개 런타임 API는 named export입니다. oxlint 기본 설정은 type-aware 분석, 미사용 변수, floating promise와 잘못 사용한 promise 검사를 활성화합니다. 복구 가능한 예외가 필요한 규칙만 호출자 설정에서 덮어씁니다. oxfmt 기본 ignore와 override는 유지되고 호출자의 배열이 뒤에 합쳐집니다. JSON은 2칸 들여쓰기를 사용하며 package script와 import 정렬을 활성화합니다. package-map 루트 workspaces 와 각 패키지의 exports 를 읽어 TypeScript paths 또는 Vite alias를 만듭니다. source , default , import , types 조건을 순서대로 해석하며 CSS·JSON subpath도 보존합니다. CommonJS 사용법 별도 CommonJS 빌드 없이 동일한 ESM named export를 require 로 불러옵니다. API - defineOxlintConfig , defineOxfmtConfig : 기본값과 override 병합 - loadWorkspacePackageMap : 워크스페이스 패키지와 manifest 조회 - createPackageExportAliases : 공개 subpath와 실제 target 연결 - createTsconfigPaths , createTsconfigAliasConfig : TypeScript paths 생성 - createViteResolveAliases : 정규식 기반 Vite alias 생성 - formatTsconfigAliasConfig , writeTsconfigAliasConfig : 별칭 파일 직렬화와 기록",
     "order": 1
   },
   {

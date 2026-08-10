@@ -123,6 +123,7 @@
       "Markdown usage",
       "Astro usage",
       "Styling",
+      "CommonJS usage",
       "API",
       "Main entry",
       "Astro entry"
@@ -137,14 +138,14 @@
     "apiSymbols": [
       "@jongminchung/remark-plantuml#RemarkPlantUmlOptions",
       "@jongminchung/remark-plantuml#RemarkPlantUmlTransformer",
-      "@jongminchung/remark-plantuml#default",
       "@jongminchung/remark-plantuml#createPlantUmlSvgUrl",
       "@jongminchung/remark-plantuml#encodePlantUmlSource",
       "@jongminchung/remark-plantuml#publicPlantUmlSvgServerBaseUrl",
+      "@jongminchung/remark-plantuml#remarkPlantUml",
       "@jongminchung/remark-plantuml/astro#AstroRemarkPlantUmlPlugin",
       "@jongminchung/remark-plantuml/astro#createPlantUmlRemarkPlugin"
     ],
-    "body": "Overview @jongminchung/remark-plantuml is an asynchronous remark plugin that converts fenced code or local .puml links into PlantUML server SVG URLs. It deflates and PlantUML-encodes source while HTML-escaping captions and alternative text. Installation The package is distributed through GitHub Packages, so map the @jongminchung scope in the consuming project's .npmrc . Markdown usage The default fenced languages are plantuml and puml . Local .puml links resolve from the current Markdown file. Keep resolved files within contentRoot . Astro usage Styling The default figure class is plantuml-diagram . Import styles.css , the Starlight-specific starlight.css , or provide a custom className . API Main entry - remarkPlantUml options : default export that creates a unified transformer - createPlantUmlSvgUrl source, serverBaseUrl : creates an SVG URL for a selected server - encodePlantUmlSource source : creates the encoded PlantUML path segment - publicPlantUmlSvgServerBaseUrl : public SVG server base URL - RemarkPlantUmlOptions : server, root, extension, language, and class options Astro entry - createPlantUmlRemarkPlugin options : creates an Astro remark tuple - AstroRemarkPlantUmlPlugin : tuple type",
+    "body": "Overview @jongminchung/remark-plantuml is an asynchronous remark plugin that converts fenced code or local .puml links into PlantUML server SVG URLs. It deflates and PlantUML-encodes source while HTML-escaping captions and alternative text. Installation The package is distributed through GitHub Packages, so map the @jongminchung scope in the consuming project's .npmrc . Node.js 24.15 or newer is required. Markdown usage The default fenced languages are plantuml and puml . Local .puml links resolve from the current Markdown file. Keep resolved files within contentRoot . Astro usage Styling The default figure class is plantuml-diagram . Import styles.css , the Starlight-specific starlight.css , or provide a custom className . CommonJS usage CommonJS loads the same ESM named exports without a separate CommonJS build. API Main entry - remarkPlantUml options : named export that creates a unified transformer - createPlantUmlSvgUrl source, serverBaseUrl : creates an SVG URL for a selected server - encodePlantUmlSource source : creates the encoded PlantUML path segment - publicPlantUmlSvgServerBaseUrl : public SVG server base URL - RemarkPlantUmlOptions : server, root, extension, language, and class options Astro entry - createPlantUmlRemarkPlugin options : creates an Astro remark tuple - AstroRemarkPlantUmlPlugin : tuple type",
     "order": 0
   },
   {
@@ -159,6 +160,7 @@
       "oxlint",
       "oxfmt",
       "package-map",
+      "CommonJS usage",
       "API"
     ],
     "tags": [
@@ -172,12 +174,10 @@
       "@jongminchung/tooling/oxfmt#OxfmtConfig",
       "@jongminchung/tooling/oxfmt#OxfmtOverride",
       "@jongminchung/tooling/oxfmt#ResolvedOxfmtConfig",
-      "@jongminchung/tooling/oxfmt#default",
       "@jongminchung/tooling/oxfmt#defaultOxfmtConfig",
       "@jongminchung/tooling/oxfmt#defineOxfmtConfig",
       "@jongminchung/tooling/oxlint#OxlintConfig",
       "@jongminchung/tooling/oxlint#ResolvedOxlintConfig",
-      "@jongminchung/tooling/oxlint#default",
       "@jongminchung/tooling/oxlint#defaultOxlintConfig",
       "@jongminchung/tooling/oxlint#defineOxlintConfig",
       "@jongminchung/tooling/package-map#LocalSourceAlias",
@@ -195,7 +195,7 @@
       "@jongminchung/tooling/package-map#loadWorkspacePackageMap",
       "@jongminchung/tooling/package-map#writeTsconfigAliasConfig"
     ],
-    "body": "Overview @jongminchung/tooling centralizes formatter and linter defaults plus aliases derived from package exports. Consumers declare small overrides instead of copying configuration. oxlint The default enables type-aware analysis and checks unused values, floating promises, and misused promises. Override only rules for which the caller has an intentional exception. oxfmt Base ignore patterns and overrides remain in place, with caller arrays appended. JSON uses two spaces, and package scripts and imports are sorted. package-map The package reads root workspaces and package exports to generate TypeScript paths or Vite aliases. It resolves source , default , import , and types conditions in order while preserving CSS and JSON subpaths. API - defineOxlintConfig , defineOxfmtConfig : merge defaults and overrides - loadWorkspacePackageMap : read workspace packages and manifests - createPackageExportAliases : connect public subpaths to real targets - createTsconfigPaths , createTsconfigAliasConfig : generate TypeScript paths - createViteResolveAliases : generate regular-expression Vite aliases - formatTsconfigAliasConfig , writeTsconfigAliasConfig : serialize and write alias files",
+    "body": "Overview @jongminchung/tooling centralizes formatter and linter defaults plus aliases derived from package exports. Consumers declare small overrides instead of copying configuration. Node.js 24.15 or newer is required, and every public runtime API is a named export. oxlint The default enables type-aware analysis and checks unused values, floating promises, and misused promises. Override only rules for which the caller has an intentional exception. oxfmt Base ignore patterns and overrides remain in place, with caller arrays appended. JSON uses two spaces, and package scripts and imports are sorted. package-map The package reads root workspaces and package exports to generate TypeScript paths or Vite aliases. It resolves source , default , import , and types conditions in order while preserving CSS and JSON subpaths. CommonJS usage CommonJS loads the same ESM named exports without a separate CommonJS build. API - defineOxlintConfig , defineOxfmtConfig : merge defaults and overrides - loadWorkspacePackageMap : read workspace packages and manifests - createPackageExportAliases : connect public subpaths to real targets - createTsconfigPaths , createTsconfigAliasConfig : generate TypeScript paths - createViteResolveAliases : generate regular-expression Vite aliases - formatTsconfigAliasConfig , writeTsconfigAliasConfig : serialize and write alias files",
     "order": 1
   },
   {

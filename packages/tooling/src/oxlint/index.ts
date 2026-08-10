@@ -35,5 +35,3 @@ export function defineOxlintConfig(overrides: OxlintConfig = {}): ResolvedOxlint
     },
   };
 }
-
-export default defaultOxlintConfig;

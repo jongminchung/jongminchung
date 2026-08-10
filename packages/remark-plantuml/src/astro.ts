@@ -1,5 +1,5 @@
 import type { RemarkPlantUmlOptions } from "./index.js";
-import remarkPlantUml from "./index.js";
+import { remarkPlantUml } from "./index.js";
 
 export type AstroRemarkPlantUmlPlugin = [typeof remarkPlantUml, RemarkPlantUmlOptions];
 

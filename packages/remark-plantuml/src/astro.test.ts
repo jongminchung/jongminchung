@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createPlantUmlRemarkPlugin } from "./astro.js";
-import remarkPlantUml from "./index.js";
+import { remarkPlantUml } from "./index.js";
 
 describe("createPlantUmlRemarkPlugin", () => {
   it("creates an Astro-compatible remark plugin tuple", () => {

@@ -26,15 +26,13 @@
   ],
   "exports": {
     ".": {
-      "source": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
+      "source": "./src/index.ts",
       "default": "./dist/index.js"
     },
     "./astro": {
-      "source": "./src/astro.ts",
       "types": "./dist/astro.d.ts",
-      "import": "./dist/astro.js",
+      "source": "./src/astro.ts",
       "default": "./dist/astro.js"
     },
     "./styles.css": {
@@ -66,6 +64,9 @@
     "typescript": "catalog:",
     "unified": "catalog:",
     "vitest": "catalog:"
+  },
+  "engines": {
+    "node": ">=24.15.0"
   },
   "nx": {
     "tags": [

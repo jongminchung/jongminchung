@@ -5,7 +5,7 @@ import remarkParse from "remark-parse";
 import remarkStringify from "remark-stringify";
 import { unified } from "unified";
 import { afterEach, describe, expect, it } from "vitest";
-import remarkPlantUml, { createPlantUmlSvgUrl, encodePlantUmlSource } from "./index.js";
+import { createPlantUmlSvgUrl, encodePlantUmlSource, remarkPlantUml } from "./index.js";
 
 const tempRoots: string[] = [];
 

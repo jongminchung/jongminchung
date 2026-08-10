@@ -86,5 +86,3 @@ export function defineOxfmtConfig(overrides: OxfmtConfig = {}): ResolvedOxfmtCon
     overrides: [...baseOverrides, ...(overrides.overrides ?? [])],
   };
 }
-
-export default defaultOxfmtConfig;

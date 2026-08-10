@@ -20,21 +20,18 @@
   "type": "module",
   "exports": {
     "./oxlint": {
-      "source": "./src/oxlint/index.ts",
       "types": "./dist/oxlint/index.d.ts",
-      "import": "./dist/oxlint/index.js",
+      "source": "./src/oxlint/index.ts",
       "default": "./dist/oxlint/index.js"
     },
     "./oxfmt": {
-      "source": "./src/oxfmt/index.ts",
       "types": "./dist/oxfmt/index.d.ts",
-      "import": "./dist/oxfmt/index.js",
+      "source": "./src/oxfmt/index.ts",
       "default": "./dist/oxfmt/index.js"
     },
     "./package-map": {
-      "source": "./src/package-map.ts",
       "types": "./dist/package-map.d.ts",
-      "import": "./dist/package-map.js",
+      "source": "./src/package-map.ts",
       "default": "./dist/package-map.js"
     },
     "./oxlint.json": {
@@ -59,6 +56,9 @@
     "tsdown": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
+  },
+  "engines": {
+    "node": ">=24.15.0"
   },
   "nx": {
     "tags": [

@@ -42,7 +42,7 @@ interface HtmlNode {
 
 export type RemarkPlantUmlTransformer = (tree: unknown, file: MarkdownFile) => Promise<void>;
 
-export default function remarkPlantUml(options: RemarkPlantUmlOptions): RemarkPlantUmlTransformer {
+export function remarkPlantUml(options: RemarkPlantUmlOptions): RemarkPlantUmlTransformer {
   const contentRoot = resolve(options.contentRoot ?? process.cwd());
   const serverBaseUrl = createServerBaseUrl(options.serverBaseUrl);
   const className = options.className ?? "plantuml-diagram";

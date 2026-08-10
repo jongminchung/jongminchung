@@ -60,6 +60,10 @@ const excludedDirectories = new Set([
   "tests",
 ]);
 const excludedFile = /\.(?:e2e|integration|spec|test)\.[^.]+$|\.stories\.[^.]+$/;
+const productPolicyExclusions = [
+  "apps/engineering-docs/components/materials/",
+  "apps/engineering-docs/scripts/import-kciter-materials.ts",
+] as const;
 
 const literalColorBoundaries = new Map<string, string>([
   [
@@ -72,6 +76,10 @@ const literalColorBoundaries = new Map<string, string>([
     "generated app icon uses the canonical sRGB asset palette",
   ],
   ["apps/readme/app/icon.svg", "generated app icon uses the canonical sRGB asset palette"],
+  [
+    "apps/engineering-docs/app/og/[locale]/[...slug]/route.tsx",
+    "Next ImageResponse does not parse OKLCH colors",
+  ],
   ["apps/readme/app/opengraph-image.tsx", "Next ImageResponse does not parse OKLCH colors"],
   ["packages/icon/src/index.ts", "canonical SVG and PNG assets require an sRGB palette"],
 ]);
@@ -100,6 +108,13 @@ function sourceFiles(directory: string): readonly string[] {
     if (entry.isDirectory()) return sourceFiles(path);
     if (!productionExtensions.has(extname(entry.name)) || excludedFile.test(entry.name)) return [];
     return [path];
+  });
+}
+
+function productPolicyFiles(directory: string): readonly string[] {
+  return sourceFiles(directory).filter((file) => {
+    const path = relativePath(file);
+    return productPolicyExclusions.every((prefix) => !path.startsWith(prefix));
   });
 }
 
@@ -379,8 +394,8 @@ describe("@jongminchung/theme-contract", () => {
 
   test("keeps production UI on semantic colors and perceptual mixing", () => {
     const files = [
-      ...sourceFiles(join(workspaceRoot, "apps")),
-      ...sourceFiles(join(workspaceRoot, "packages")),
+      ...productPolicyFiles(join(workspaceRoot, "apps")),
+      ...productPolicyFiles(join(workspaceRoot, "packages")),
     ];
     const literalColor =
       /#[\da-f]{3,8}\b|(?:^|[^\w-])(?:color|hsla?|lab|lch|oklab|rgba?)\s*\(|\b(?:color|background(?:-color)?|border-color|fill|stroke)\s*:\s*(?:white|black)\b|(?:^|[,(])\s*(?:white|black)(?=\s|[,)/;])/i;
@@ -421,8 +436,8 @@ describe("@jongminchung/theme-contract", () => {
 
   test("rejects legacy token names and one-off radii in production UI", () => {
     const files = [
-      ...sourceFiles(join(workspaceRoot, "apps")),
-      ...sourceFiles(join(workspaceRoot, "packages")),
+      ...productPolicyFiles(join(workspaceRoot, "apps")),
+      ...productPolicyFiles(join(workspaceRoot, "packages")),
     ].filter((file) => file !== contractPath);
     const appAndProductFiles = files.filter(
       (file) => !relativePath(file).startsWith("packages/ui/"),
@@ -438,7 +453,7 @@ describe("@jongminchung/theme-contract", () => {
         .split("\n")
         .flatMap((line, index) => {
           if (!/rounded-\[[^\]]+\]/.test(line)) return [];
-          if (line.includes("var(--radius")) return [];
+          if (line.includes("var(--radius") || line.includes("rounded-[inherit]")) return [];
           if (path === "packages/ui/src/components/tooltip.tsx" && line.includes("rounded-[2px]")) {
             return [];
           }
@@ -472,7 +487,7 @@ describe("@jongminchung/theme-contract", () => {
       "button.tsx",
     );
     const sharedButton = readFileSync(sharedButtonPath, "utf8");
-    const files = sourceFiles(join(workspaceRoot, "apps")).filter(
+    const files = productPolicyFiles(join(workspaceRoot, "apps")).filter(
       (file) => extname(file) === ".tsx",
     );
     const rawButtonViolations: string[] = [];

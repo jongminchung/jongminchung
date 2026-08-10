@@ -5,7 +5,7 @@ section: packages
 title: remark-plantuml
 description: Markdown과 Astro 문서의 PlantUML 코드를 안전한 SVG 다이어그램으로 변환합니다.
 order: 0
-updatedAt: "2026-07-14"
+updatedAt: "2026-08-10"
 tags: [remark, plantuml, markdown, astro, unified]
 status: stable
 sourceUrl: https://github.com/jongminchung/jongminchung/tree/main/packages/remark-plantuml
@@ -14,10 +14,10 @@ packageVersion: 1.0.0
 apiSymbols:
   - "@jongminchung/remark-plantuml#RemarkPlantUmlOptions"
   - "@jongminchung/remark-plantuml#RemarkPlantUmlTransformer"
-  - "@jongminchung/remark-plantuml#default"
   - "@jongminchung/remark-plantuml#createPlantUmlSvgUrl"
   - "@jongminchung/remark-plantuml#encodePlantUmlSource"
   - "@jongminchung/remark-plantuml#publicPlantUmlSvgServerBaseUrl"
+  - "@jongminchung/remark-plantuml#remarkPlantUml"
   - "@jongminchung/remark-plantuml/astro#AstroRemarkPlantUmlPlugin"
   - "@jongminchung/remark-plantuml/astro#createPlantUmlRemarkPlugin"
 ---
@@ -33,13 +33,14 @@ pnpm add @jongminchung/remark-plantuml
 ```
 
 GitHub Packages를 사용하므로 프로젝트의 `.npmrc`에 `@jongminchung` 레지스트리 매핑이 필요합니다.
+Node.js 24.15 이상에서 사용할 수 있습니다.
 
 ## Markdown 사용법
 
 ```ts
 import remarkParse from "remark-parse";
 import { unified } from "unified";
-import remarkPlantUml, { publicPlantUmlSvgServerBaseUrl } from "@jongminchung/remark-plantuml";
+import { publicPlantUmlSvgServerBaseUrl, remarkPlantUml } from "@jongminchung/remark-plantuml";
 
 const processor = unified().use(remarkParse).use(remarkPlantUml, {
   serverBaseUrl: publicPlantUmlSvgServerBaseUrl,
@@ -69,11 +70,19 @@ export default defineConfig({
 
 기본 figure 클래스는 `plantuml-diagram`입니다. `@jongminchung/remark-plantuml/styles.css` 또는 Starlight용 `starlight.css`를 가져오거나 `className`으로 자체 스타일을 연결할 수 있습니다.
 
+## CommonJS 사용법
+
+별도 CommonJS 빌드 없이 동일한 ESM named export를 `require()`로 불러옵니다.
+
+```js
+const { remarkPlantUml } = require("@jongminchung/remark-plantuml");
+```
+
 ## API
 
 ### 기본 엔트리
 
-- `remarkPlantUml(options)`: unified transformer를 반환하는 기본 export
+- `remarkPlantUml(options)`: unified transformer를 반환하는 named export
 - `createPlantUmlSvgUrl(source, serverBaseUrl)`: 지정한 서버의 SVG URL 생성
 - `encodePlantUmlSource(source)`: PlantUML 서버 경로용 문자열 생성
 - `publicPlantUmlSvgServerBaseUrl`: 공개 SVG 서버 기본 URL

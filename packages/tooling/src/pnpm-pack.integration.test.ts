@@ -20,6 +20,7 @@ interface PackResult {
 interface PackedManifest {
   readonly dependencies?: Readonly<Record<string, string>>;
   readonly devDependencies?: Readonly<Record<string, string>>;
+  readonly engines?: Readonly<Record<string, string>>;
   readonly optionalDependencies?: Readonly<Record<string, string>>;
   readonly peerDependencies?: Readonly<Record<string, string>>;
 }
@@ -76,13 +77,13 @@ function isUnknownRecord(value: unknown): value is Readonly<Record<string, unkno
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function parsePackedDependencyGroup(
+function parsePackedStringRecord(
   value: unknown,
-  group: keyof PackedManifest,
+  field: keyof PackedManifest,
 ): Readonly<Record<string, string>> | undefined {
   if (value === undefined) return undefined;
   if (!isStringRecord(value)) {
-    throw new Error(`expected packed ${group} to contain string ranges`);
+    throw new Error(`expected packed ${field} to contain string values`);
   }
   return value;
 }
@@ -91,13 +92,14 @@ function parsePackedManifest(value: unknown): PackedManifest {
   if (!isUnknownRecord(value)) throw new Error("expected packed package.json object");
 
   return Object.freeze({
-    dependencies: parsePackedDependencyGroup(value.dependencies, "dependencies"),
-    devDependencies: parsePackedDependencyGroup(value.devDependencies, "devDependencies"),
-    optionalDependencies: parsePackedDependencyGroup(
+    dependencies: parsePackedStringRecord(value.dependencies, "dependencies"),
+    devDependencies: parsePackedStringRecord(value.devDependencies, "devDependencies"),
+    engines: parsePackedStringRecord(value.engines, "engines"),
+    optionalDependencies: parsePackedStringRecord(
       value.optionalDependencies,
       "optionalDependencies",
     ),
-    peerDependencies: parsePackedDependencyGroup(value.peerDependencies, "peerDependencies"),
+    peerDependencies: parsePackedStringRecord(value.peerDependencies, "peerDependencies"),
   });
 }
 
@@ -149,18 +151,27 @@ async function packWorkspace(workspace: string): Promise<PackedWorkspace> {
   }
 }
 
-async function importKeysFromConsumer(
+async function moduleKeysFromConsumer(
   consumerRoot: string,
   specifier: string,
+  loader: "import" | "require",
 ): Promise<readonly string[]> {
+  const expression =
+    loader === "import"
+      ? `await import(${JSON.stringify(specifier)})`
+      : `require(${JSON.stringify(specifier)})`;
   const script = `
-    const module = await import(${JSON.stringify(specifier)});
-    console.log(JSON.stringify(Object.keys(module).sort()));
+    const loaded = ${expression};
+    console.log(JSON.stringify(Object.keys(loaded).sort()));
   `;
-  const { stdout } = await execFileAsync("node", ["--input-type=module", "--eval", script], {
-    cwd: consumerRoot,
-    timeout: 30_000,
-  });
+  const { stdout } = await execFileAsync(
+    "node",
+    [loader === "import" ? "--input-type=module" : "--input-type=commonjs", "--eval", script],
+    {
+      cwd: consumerRoot,
+      timeout: 30_000,
+    },
+  );
 
   const parsed: unknown = JSON.parse(stdout);
   if (!Array.isArray(parsed) || !parsed.every((value) => typeof value === "string")) {
@@ -232,31 +243,39 @@ describe("pnpm package tarball contracts", () => {
     try {
       expect(packed.files).toEqual(
         expect.arrayContaining([
-          "LICENSE",
-          "README.md",
           "dist/astro.d.ts",
-          "dist/astro.js",
           "dist/index.d.ts",
-          "dist/index.js",
           "dist/starlight.css",
           "dist/styles.css",
-          "package.json",
         ]),
       );
+      expect(packed.manifest.engines).toEqual({ node: ">=24.15.0" });
       expectPackedProtocolsResolved(packed.manifest);
-      expect(
-        await importKeysFromConsumer(packed.consumerRoot, "@jongminchung/remark-plantuml"),
-      ).toEqual(
-        expect.arrayContaining([
-          "createPlantUmlSvgUrl",
-          "default",
-          "encodePlantUmlSource",
-          "publicPlantUmlSvgServerBaseUrl",
-        ]),
-      );
-      expect(
-        await importKeysFromConsumer(packed.consumerRoot, "@jongminchung/remark-plantuml/astro"),
-      ).toEqual(expect.arrayContaining(["createPlantUmlRemarkPlugin"]));
+      expect(packed.files.some((file) => file.endsWith(".cjs"))).toBe(false);
+
+      const rootExports = [
+        "createPlantUmlSvgUrl",
+        "encodePlantUmlSource",
+        "publicPlantUmlSvgServerBaseUrl",
+        "remarkPlantUml",
+      ];
+      const astroExports = ["createPlantUmlRemarkPlugin"];
+      for (const loader of ["import", "require"] as const) {
+        expect(
+          await moduleKeysFromConsumer(
+            packed.consumerRoot,
+            "@jongminchung/remark-plantuml",
+            loader,
+          ),
+        ).toEqual(rootExports);
+        expect(
+          await moduleKeysFromConsumer(
+            packed.consumerRoot,
+            "@jongminchung/remark-plantuml/astro",
+            loader,
+          ),
+        ).toEqual(astroExports);
+      }
     } finally {
       await rm(packed.tempDir, { force: true, recursive: true });
     }
@@ -267,41 +286,42 @@ describe("pnpm package tarball contracts", () => {
     try {
       expect(packed.files).toEqual(
         expect.arrayContaining([
-          "LICENSE",
-          "README.md",
           "dist/oxfmt/index.d.ts",
-          "dist/oxfmt/index.js",
           "dist/oxlint/base.json",
           "dist/oxlint/index.d.ts",
-          "dist/oxlint/index.js",
           "dist/package-map.d.ts",
-          "dist/package-map.js",
-          "package.json",
-          "src/oxfmt/index.ts",
-          "src/oxlint/base.json",
-          "src/oxlint/index.ts",
-          "src/package-map.ts",
         ]),
       );
-      expect(packed.files.some((file) => file.startsWith("dist/bin/"))).toBe(false);
-      expect(packed.files.some((file) => file.startsWith("dist/eslint/"))).toBe(false);
-      expect(packed.files.some((file) => file.endsWith(".mjs"))).toBe(false);
-      expect(packed.files.some((file) => file.endsWith(".test.ts"))).toBe(false);
+      expect(packed.manifest.engines).toEqual({ node: ">=24.15.0" });
       expectPackedProtocolsResolved(packed.manifest);
+      expect(packed.files.some((file) => file.endsWith(".cjs"))).toBe(false);
 
-      expect(
-        await importKeysFromConsumer(packed.consumerRoot, "@jongminchung/tooling/oxfmt"),
-      ).toEqual(expect.arrayContaining(["defaultOxfmtConfig", "defineOxfmtConfig"]));
-      expect(
-        await importKeysFromConsumer(packed.consumerRoot, "@jongminchung/tooling/oxlint"),
-      ).toEqual(expect.arrayContaining(["defaultOxlintConfig", "defineOxlintConfig"]));
-      expect(
-        await importKeysFromConsumer(packed.consumerRoot, "@jongminchung/tooling/package-map"),
-      ).toEqual(expect.arrayContaining(["createTsconfigAliasConfig"]));
+      for (const [specifier, expectedExports] of [
+        ["@jongminchung/tooling/oxfmt", ["defaultOxfmtConfig", "defineOxfmtConfig"]],
+        ["@jongminchung/tooling/oxlint", ["defaultOxlintConfig", "defineOxlintConfig"]],
+        [
+          "@jongminchung/tooling/package-map",
+          [
+            "createPackageExportAliases",
+            "createTsconfigAliasConfig",
+            "createTsconfigPaths",
+            "createViteResolveAliases",
+            "formatTsconfigAliasConfig",
+            "loadWorkspacePackageMap",
+            "writeTsconfigAliasConfig",
+          ],
+        ],
+      ] as const) {
+        for (const loader of ["import", "require"] as const) {
+          expect(await moduleKeysFromConsumer(packed.consumerRoot, specifier, loader)).toEqual(
+            expectedExports,
+          );
+        }
+      }
 
       const consumerRoot = await installToolingTarballInWorkspaceConsumer(packed);
       expect(
-        await importKeysFromConsumer(consumerRoot, "@jongminchung/tooling/package-map"),
+        await moduleKeysFromConsumer(consumerRoot, "@jongminchung/tooling/package-map", "import"),
       ).toEqual(expect.arrayContaining(["createTsconfigAliasConfig"]));
       const { stdout: aliasStdout } = await execFileAsync(
         "node",

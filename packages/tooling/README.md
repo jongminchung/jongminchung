@@ -4,12 +4,21 @@ Shared lint, format, and package-map configuration for TypeScript workspaces.
 
 ## Install
 
+Node.js 24.15 or newer is required.
+
 ```bash
 npm install --save-dev @jongminchung/tooling
 ```
 
 Install the actual formatter and linter in each consuming project. This package only centralizes the
 shared settings.
+
+The package ships ESM only. CommonJS consumers on supported Node.js versions receive the same
+named exports:
+
+```js
+const { defineOxlintConfig } = require("@jongminchung/tooling/oxlint");
+```
 
 ## Version Policy
 
@@ -100,7 +109,7 @@ export default {
 ```
 
 If a package export has a `source` condition, local aliases prefer that source file. Published npm
-consumers use the standard `types`, `import`, and `default` conditions.
+consumers use the standard `types` and `default` conditions.
 
 ## Build and pack
 
@@ -113,4 +122,4 @@ npm pack --dry-run
 source module structure while still shipping JavaScript runtime files.
 
 The npm package includes compiled ESM JavaScript, generated declarations, source config files,
-`LICENSE`, `README.md`, and `package.json`.
+`LICENSE`, `README.md`, and `package.json`. It does not include a separate CommonJS build.
