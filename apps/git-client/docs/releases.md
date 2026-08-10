@@ -63,7 +63,7 @@ pnpm --filter @jongminchung/git-client electron:verify-package
 pnpm --filter @jongminchung/git-client test:electron-package-policy
 ```
 
-Developer ID가 없는 Apple Silicon Mac에서는 explicit local mode로 전체 source gate와 Forge make를 재현한다.
+Developer ID가 없는 Apple Silicon Mac에서는 explicit local mode로 전체 source gate와 Forge package를 재현한다.
 
 ```sh
 pnpm --filter @jongminchung/git-client release:validate-local -- 1.0.0
@@ -83,13 +83,13 @@ pnpm --filter @jongminchung/git-client release:build -- 1.0.0
 
 1. stable SemVer, macOS ARM64, Developer ID identity와 notarization profile preflight
 2. `origin/main`을 fetch한 뒤 clean worktree, `main` branch, `HEAD == origin/main` 확인
-3. Vitest, TypeScript/Vite build, Electron package-policy test 후 source SHA 재확인
-4. 깨끗한 `out`에서 Electron Forge make 후 source SHA 재확인
-5. 단 하나의 app/DMG를 재귀적으로 발견하고 symlink output 거부
+3. 공용 tooling을 bootstrap한 뒤 Vitest, TypeScript/Vite build, Electron package-policy test 후 source SHA 재확인
+4. 깨끗한 `out`에서 Electron Forge package 후 source SHA 재확인
+5. 단 하나의 app을 재귀적으로 발견하고 symlink 및 중간 DMG output 거부
 6. package verifier와 package policy, `codesign --verify --deep --strict`
 7. Forge가 만든 바로 그 `.app`을 실행해 renderer/preload API handshake smoke 검증
 8. Developer ID authority, Gatekeeper assessment, stapled notarization ticket
-9. DMG 재마운트 후 같은 검증 반복
+9. 검증된 `.app`으로 재현 가능한 DMG를 생성하고 재마운트 후 같은 검증 반복
 10. 앱 250MiB, DMG 160MiB 제한 및 SHA-256 manifest와 source provenance 생성
 
 production에서 identity나 notarization 설정이 없으면 첫 source gate 전에 중단하며, 검증 실패 artifact를 GitHub에 올리지 않는다.

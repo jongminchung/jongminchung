@@ -55,8 +55,13 @@ describe("Nx release configuration", () => {
     expect(packageConfig.scripts["release:validate-local"]).toBe(
       "node scripts/release.mjs --local-ad-hoc",
     );
-    expect(packageConfig.scripts["electron:make"]).toBe("electron-forge make");
-    expect(packageConfig.devDependencies["fs-xattr"]).toBe("catalog:");
+    expect(packageConfig.scripts["electron:package"]).toBe("electron-forge package");
+    expect(packageConfig.scripts).not.toHaveProperty("electron:make");
+    expect(packageConfig.devDependencies).not.toHaveProperty("@electron-forge/maker-dmg");
+    expect(packageConfig.devDependencies).not.toHaveProperty(
+      "@electron-forge/plugin-auto-unpack-natives",
+    );
+    expect(packageConfig.devDependencies).not.toHaveProperty("fs-xattr");
     expect(packageConfig.devDependencies["macos-alias"]).toBe("catalog:");
     expect(packageConfig.devDependencies["node-gyp"]).toBe("catalog:");
     expect(packageConfig.dependencies).not.toHaveProperty("electron-updater");

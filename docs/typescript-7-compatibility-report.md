@@ -5,7 +5,7 @@
 > 현재 정책은 모든 workspace가 하나의 최신 안정 TypeScript 6 버전을 사용하는 것이다.
 > 아래의 TS 7 단일·듀얼 구성 결과는 채택되지 않은 격리 실험이며 현재 구성이나 권고가 아니다.
 >
-> 2026-07-31 생태계 업데이트는 역사적 실패와 현재 공급자 지원 범위를 분리해 기록한다.
+> 2026-08-10 생태계 업데이트는 역사적 실패와 현재 공급자 지원 범위를 분리해 기록한다.
 
 ## 현재 결정
 
@@ -18,9 +18,9 @@ Nx와 Next.js는 이후 TS 6/7 병행 또는 TS 7 CLI 경로를 공식화했지�
 저장소 선택이다. 따라서 최신 안정 TypeScript 6을 모든 workspace의 단일 compiler/API 기준선으로
 사용하고, TS 7은 격리된 호환성 감사에서만 평가한다.
 
-## 2026-07-31 현행 생태계 업데이트
+## 2026-08-10 현행 생태계 업데이트
 
-현재 manifest와 catalog를 다시 집계한 결과 직접 외부 의존성은 84개이며 TypeScript는 전 workspace에서
+현재 manifest와 catalog를 다시 집계한 결과 직접 외부 의존성은 80개이며 TypeScript는 전 workspace에서
 `6.0.3`을 사용한다. 역사적 감사 이후 `@mdx-js/mdx`, `cmdk`, `hast-util-to-string`,
 `npm-check-updates`, `shadcn`, `unist-util-visit`이 직접 의존성에 추가됐고 Next.js 계열은
 `16.2.12`로 갱신됐다.
@@ -46,29 +46,29 @@ Nx와 Next.js는 이후 TS 6/7 병행 또는 TS 7 CLI 경로를 공식화했지�
   하지 않는다. [Vitest typecheck](https://vitest.dev/guide/testing-types.html)는 `tsc` 또는
   `vue-tsc`를 실행하므로 선택된 compiler를 별도로 확인해야 한다.
 - Electron Forge는 [TypeScript 설정](https://www.electronforge.io/config/typescript-configuration)을
-  `jiti`로 읽으며 Vite 플러그인은 experimental이다. TS 7 전용 선언보다 package, make, native
-  rebuild와 smoke test가 승인 근거가 된다.
+  `jiti`로 읽으며 Vite 플러그인은 experimental이다. TS 7 전용 선언보다 package, release DMG
+  검증, native rebuild와 smoke test가 승인 근거가 된다.
 
-### 직접 의존성 84개 전환 도메인
+### 직접 의존성 80개 전환 도메인
 
-아래 목록은 현재 직접 의존성 84개를 빠짐없이 전환 경계로 묶은 것이다. “전용 가이드 없음”은 지원
+아래 목록은 현재 직접 의존성 80개를 빠짐없이 전환 경계로 묶은 것이다. “전용 가이드 없음”은 지원
 확인이 아니라 Compiler API 결합이 발견되지 않아 로컬 사용 경계로 판단해야 한다는 뜻이다.
 
-| 영역            |  수 | 직접 의존성                                                                                                                                                                                                                                                                                                                                    | TS 7 전환 시 필요한 근거                             |
-| --------------- | --: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| compiler·Nx     |   4 | `typescript`, `nx`, `@nx/devkit`, `@nx/js`                                                                                                                                                                                                                                                                                                     | TypeScript와 Nx 공식 병행 절차, Nx graph             |
-| Next.js·MDX     |   7 | `next`, `@next/mdx`, `@mdx-js/loader`, `@mdx-js/mdx`, `@mdx-js/react`, `@types/mdx`, `remark-mdx-frontmatter`                                                                                                                                                                                                                                  | Next CLI checker, MDX 공식 지원, 콘텐츠 Compiler API |
-| build·lint·test |   9 | `tsdown`, `vite`, `@vitejs/plugin-react`, `vitest`, `oxlint`, `oxlint-tsgolint`, `oxfmt`, `@playwright/test`, `@axe-core/playwright`                                                                                                                                                                                                           | d.ts emit, Vite build, type-aware lint, unit·E2E     |
-| Electron·native |  16 | `@electron-forge/cli`, `@electron-forge/maker-dmg`, `@electron-forge/plugin-auto-unpack-natives`, `@electron-forge/plugin-fuses`, `@electron-forge/plugin-vite`, `@electron-forge/shared-types`, `@electron/fuses`, `@electron/rebuild`, `electron`, `@vscode/ripgrep`, `ds-store`, `fs-xattr`, `macos-alias`, `node-gyp`, `node-pty`, `sharp` | Forge package·make, ABI rebuild, packaged app smoke  |
-| CSS             |   5 | `tailwindcss`, `@tailwindcss/postcss`, `@tailwindcss/vite`, `postcss`, `tw-animate-css`                                                                                                                                                                                                                                                        | Vite·Next production CSS build                       |
-| React·UI        |  13 | `react`, `react-dom`, `scheduler`, `@types/react`, `@types/react-dom`, `@base-ui/react`, `@tanstack/react-virtual`, `lucide-react`, `class-variance-authority`, `clsx`, `cmdk`, `tailwind-merge`, `zod`                                                                                                                                        | JSX 선언 검사와 실제 앱 build                        |
-| editor          |  14 | `@codemirror/commands`, `@codemirror/lang-css`, `@codemirror/lang-html`, `@codemirror/lang-java`, `@codemirror/lang-javascript`, `@codemirror/lang-json`, `@codemirror/lang-python`, `@codemirror/language`, `@codemirror/merge`, `@codemirror/search`, `@codemirror/state`, `@codemirror/view`, `@xterm/addon-fit`, `@xterm/xterm`            | Git Client typecheck·Vite build·runtime smoke        |
-| content AST     |   9 | `gray-matter`, `rehype-slug`, `remark-frontmatter`, `remark-gfm`, `remark-parse`, `remark-stringify`, `unified`, `unist-util-visit`, `hast-util-to-string`                                                                                                                                                                                     | 콘텐츠 생성, manifest·검색 계약                      |
-| runtime utility |   3 | `chokidar`, `fflate`, `uuid`                                                                                                                                                                                                                                                                                                                   | 선언 검사와 runtime smoke                            |
-| 개발 CLI        |   2 | `shadcn`, `npm-check-updates`                                                                                                                                                                                                                                                                                                                  | CLI smoke; TypeScript는 자동 갱신 제외 후 수동 전환  |
-| 기타 선언       |   2 | `@excalidraw/excalidraw`, `@types/node`                                                                                                                                                                                                                                                                                                        | `skipLibCheck: false` 비교와 앱 build                |
+| 영역            |  수 | 직접 의존성                                                                                                                                                                                                                                                                                                                         | TS 7 전환 시 필요한 근거                                       |
+| --------------- | --: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| compiler·Nx     |   4 | `typescript`, `nx`, `@nx/devkit`, `@nx/js`                                                                                                                                                                                                                                                                                          | TypeScript와 Nx 공식 병행 절차, Nx graph                       |
+| Next.js·MDX     |   7 | `next`, `@next/mdx`, `@mdx-js/loader`, `@mdx-js/mdx`, `@mdx-js/react`, `@types/mdx`, `remark-mdx-frontmatter`                                                                                                                                                                                                                       | Next CLI checker, MDX 공식 지원, 콘텐츠 Compiler API           |
+| build·lint·test |   9 | `tsdown`, `vite`, `@vitejs/plugin-react`, `vitest`, `oxlint`, `oxlint-tsgolint`, `oxfmt`, `@playwright/test`, `@axe-core/playwright`                                                                                                                                                                                                | d.ts emit, Vite build, type-aware lint, unit·E2E               |
+| Electron·native |  11 | `@electron-forge/cli`, `@electron-forge/plugin-fuses`, `@electron-forge/plugin-vite`, `@electron-forge/shared-types`, `@electron/fuses`, `electron`, `ds-store`, `macos-alias`, `node-gyp`, `node-pty`, `sharp`                                                                                                                     | Forge package·release DMG 검증, native ABI, packaged app smoke |
+| CSS             |   5 | `tailwindcss`, `@tailwindcss/postcss`, `@tailwindcss/vite`, `postcss`, `tw-animate-css`                                                                                                                                                                                                                                             | Vite·Next production CSS build                                 |
+| React·UI        |  14 | `react`, `react-dom`, `@types/react`, `@types/react-dom`, `@base-ui/react`, `@tanstack/react-virtual`, `lucide-react`, `class-variance-authority`, `clsx`, `cmdk`, `motion`, `pretendard`, `tailwind-merge`, `zod`                                                                                                                  | JSX 선언 검사와 실제 앱 build                                  |
+| editor          |  14 | `@codemirror/commands`, `@codemirror/lang-css`, `@codemirror/lang-html`, `@codemirror/lang-java`, `@codemirror/lang-javascript`, `@codemirror/lang-json`, `@codemirror/lang-python`, `@codemirror/language`, `@codemirror/merge`, `@codemirror/search`, `@codemirror/state`, `@codemirror/view`, `@xterm/addon-fit`, `@xterm/xterm` | Git Client typecheck·Vite build·runtime smoke                  |
+| content AST     |   9 | `gray-matter`, `rehype-slug`, `remark-frontmatter`, `remark-gfm`, `remark-parse`, `remark-stringify`, `unified`, `unist-util-visit`, `hast-util-to-string`                                                                                                                                                                          | 콘텐츠 생성, manifest·검색 계약                                |
+| runtime utility |   3 | `zustand`, `fflate`, `uuid`                                                                                                                                                                                                                                                                                                         | 선언 검사와 runtime smoke                                      |
+| 개발 CLI        |   2 | `shadcn`, `npm-check-updates`                                                                                                                                                                                                                                                                                                       | CLI smoke; TypeScript는 자동 갱신 제외 후 수동 전환            |
+| 기타 선언       |   2 | `@excalidraw/excalidraw`, `@types/node`                                                                                                                                                                                                                                                                                             | `skipLibCheck: false` 비교와 앱 build                          |
 
-합계는 84개다. 전이 경계에서는 `rolldown-plugin-dts`, `@nx/workspace`, `ts-morph`와 저장소 자체
+합계는 80개다. 전이 경계에서는 `rolldown-plugin-dts`, `@nx/workspace`, `ts-morph`와 저장소 자체
 `engineering-docs/scripts/build-content.ts`를 추가로 추적한다.
 
 ### 현행 적용 결정

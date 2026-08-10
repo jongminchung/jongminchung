@@ -6,7 +6,6 @@ import { basename, dirname, join } from "node:path";
 import { executeCommand } from "./process.mjs";
 
 const require = createRequire(import.meta.url);
-const DSStore = require("ds-store");
 
 const HFS_SIGNATURE = 0x482b;
 const HFS_HEADER_OFFSET = 1_024;
@@ -202,6 +201,7 @@ export async function normalizeUdifImage(filePath) {
 }
 
 function writeFinderLayout(path) {
+  const DSStore = require("ds-store");
   return new Promise((resolve, reject) => {
     const store = new DSStore();
     store.vSrn(1);

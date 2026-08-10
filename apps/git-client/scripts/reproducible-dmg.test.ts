@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 import { normalizeHfsImageBuffer, normalizeUdifTrailerBuffer } from "./reproducible-dmg.mjs";
 
@@ -5,6 +6,23 @@ const IMAGE_BYTES = 16_384;
 const NODE_SIZE = 512;
 const CATALOG_OFFSET = 4_096;
 const FIXED_HFS_TIMESTAMP = 3_660_681_600;
+
+describe("reproducible DMG module loading", () => {
+  it("defers ds-store loading until Finder layout generation", () => {
+    const moduleUrl = new URL("./reproducible-dmg.mjs", import.meta.url).href;
+    const script = `
+      const Module = require("node:module");
+      const originalLoad = Module._load;
+      Module._load = function (request, parent, isMain) {
+        if (request === "ds-store") throw new Error("ds-store loaded during import");
+        return originalLoad.call(this, request, parent, isMain);
+      };
+      import(${JSON.stringify(moduleUrl)});
+    `;
+
+    expect(() => execFileSync(process.execPath, ["--eval", script])).not.toThrow();
+  });
+});
 
 function writeHeader(image: Buffer, offset: number): void {
   image.writeUInt16BE(0x482b, offset);

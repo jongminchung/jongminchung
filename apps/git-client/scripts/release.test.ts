@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { copyFile, mkdir, mkdtemp, readFile, rm, truncate, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, truncate, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
@@ -10,7 +10,7 @@ import {
   assertDeveloperIdSignatureOutput,
   assertReleaseBundleMetadata,
   buildRelease,
-  createElectronMakeArguments,
+  createElectronPackageArguments,
   createReleaseArtifactNames,
   createReleaseBuildEnvironment,
   createReleaseSourceGateCommands,
@@ -36,12 +36,10 @@ async function createForgeFixture(appRoot: string): Promise<void> {
   await mkdir(join(appRoot, "out", "packages", "Git Client-darwin-arm64", "Git Client.app"), {
     recursive: true,
   });
-  await mkdir(join(appRoot, "out", "make", "dmg", "arm64"), { recursive: true });
-  await writeFile(join(appRoot, "out", "make", "dmg", "arm64", "Git Client.dmg"), "dmg");
 }
 
-async function createDmgFixture(appRoot: string, target: string): Promise<void> {
-  await copyFile(join(appRoot, "out", "make", "dmg", "arm64", "Git Client.dmg"), target);
+async function createDmgFixture(target: string): Promise<void> {
+  await writeFile(target, "dmg");
 }
 
 describe("Electron release build contract", () => {
@@ -165,21 +163,23 @@ describe("Electron release build contract", () => {
     );
   });
 
-  it("runs the complete source gates before an ARM64 Electron Forge make", () => {
+  it("runs the complete source gates before an ARM64 Electron Forge package", () => {
     expect(createReleaseSourceGateCommands()).toEqual([
+      { command: "pnpm", arguments: ["--filter", "@jongminchung/tooling", "build"] },
       { command: "pnpm", arguments: ["test"] },
       { command: "pnpm", arguments: ["test:e2e"] },
       { command: "pnpm", arguments: ["build"] },
       { command: "pnpm", arguments: ["test:scripts"] },
     ]);
     expect(createReleaseSourceGateCommands(RELEASE_MODES.localAdHoc)).toEqual([
+      { command: "pnpm", arguments: ["--filter", "@jongminchung/tooling", "build"] },
       { command: "pnpm", arguments: ["test"] },
       { command: "pnpm", arguments: ["test:e2e"] },
       { command: "pnpm", arguments: ["build"] },
       { command: "pnpm", arguments: ["test:scripts"] },
     ]);
-    expect(createElectronMakeArguments()).toEqual([
-      "electron:make",
+    expect(createElectronPackageArguments()).toEqual([
+      "electron:package",
       "--platform=darwin",
       "--arch=arm64",
     ]);
@@ -296,7 +296,7 @@ describe("Electron release build contract", () => {
     }
   });
 
-  it("discovers exactly one nested Forge app and DMG while ignoring apps inside the bundle", async () => {
+  it("discovers exactly one nested Forge app and rejects intermediate DMGs", async () => {
     const appRoot = await mkdtemp(join(tmpdir(), "git-client-forge-output-"));
     try {
       await createForgeFixture(appRoot);
@@ -315,11 +315,15 @@ describe("Electron release build contract", () => {
       );
       await expect(discoverForgeOutputs(join(appRoot, "out"))).resolves.toEqual({
         app: join(appRoot, "out", "packages", "Git Client-darwin-arm64", "Git Client.app"),
-        dmg: join(appRoot, "out", "make", "dmg", "arm64", "Git Client.dmg"),
       });
-      await writeFile(join(appRoot, "out", "make", "dmg", "arm64", "duplicate.dmg"), "dmg");
+      await writeFile(join(appRoot, "out", "intermediate.dmg"), "dmg");
       await expect(discoverForgeOutputs(join(appRoot, "out"))).rejects.toThrow(
-        "one Electron app and one DMG",
+        "one Electron app and no DMG",
+      );
+      await rm(join(appRoot, "out", "intermediate.dmg"));
+      await mkdir(join(appRoot, "out", "packages", "Duplicate.app"));
+      await expect(discoverForgeOutputs(join(appRoot, "out"))).rejects.toThrow(
+        "one Electron app and no DMG",
       );
     } finally {
       await rm(appRoot, { force: true, recursive: true });
@@ -420,7 +424,7 @@ describe("Electron release build contract", () => {
           stdout: `1) ABC "${productionEnvironment.GIT_CLIENT_CODESIGN_IDENTITY}"`,
         };
       }
-      if (command === "pnpm" && arguments_[0] === "electron:make") {
+      if (command === "pnpm" && arguments_[0] === "electron:package") {
         await createForgeFixture(appRoot);
       }
       return { code: 0, stderr: "", stdout: "" };
@@ -437,7 +441,7 @@ describe("Electron release build contract", () => {
         environment: productionEnvironment,
         mode: RELEASE_MODES.production,
         platform: "darwin",
-        createDmg: (_appPath: string, target: string) => createDmgFixture(appRoot, target),
+        createDmg: (_appPath: string, target: string) => createDmgFixture(target),
         runCommand,
         smokeApp,
         validateApp,
@@ -447,11 +451,12 @@ describe("Electron release build contract", () => {
 
       expect(calls.map(({ command, arguments: arguments_ }) => [command, arguments_])).toEqual([
         ["/usr/bin/security", ["find-identity", "-v", "-p", "codesigning"]],
+        ["pnpm", ["--filter", "@jongminchung/tooling", "build"]],
         ["pnpm", ["test"]],
         ["pnpm", ["test:e2e"]],
         ["pnpm", ["build"]],
         ["pnpm", ["test:scripts"]],
-        ["pnpm", createElectronMakeArguments()],
+        ["pnpm", createElectronPackageArguments()],
       ]);
       expect(validateApp).toHaveBeenCalledOnce();
       expect(smokeApp).toHaveBeenCalledWith(
@@ -475,7 +480,7 @@ describe("Electron release build contract", () => {
     const calls: string[] = [];
     const runCommand = vi.fn(async (command: string, arguments_: readonly string[]) => {
       calls.push(command);
-      if (command === "pnpm" && arguments_[0] === "electron:make") {
+      if (command === "pnpm" && arguments_[0] === "electron:package") {
         await createForgeFixture(appRoot);
       }
       return { code: 0, stderr: "", stdout: "" };
@@ -489,7 +494,7 @@ describe("Electron release build contract", () => {
         environment: productionEnvironment,
         mode: RELEASE_MODES.localAdHoc,
         platform: "darwin",
-        createDmg: (_appPath: string, target: string) => createDmgFixture(appRoot, target),
+        createDmg: (_appPath: string, target: string) => createDmgFixture(target),
         runCommand,
         smokeApp: vi.fn().mockResolvedValue(undefined),
         validateApp: vi.fn().mockResolvedValue(undefined),

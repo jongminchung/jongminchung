@@ -3,9 +3,9 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
-  ensureDmgMakerNativeBinding,
+  ensureDmgNativeDependencies,
   resolveNativeModuleRoot,
-} from "./ensure-dmg-maker-native.mjs";
+} from "./ensure-dmg-native-dependencies.mjs";
 
 const temporaryDirectories: string[] = [];
 
@@ -17,8 +17,8 @@ async function fixture(): Promise<{ binding: string; root: string }> {
   return { binding, root };
 }
 
-function nativeModule(root: string, bindingName = "volume.node") {
-  return [{ bindingName, moduleName: "fixture-native", moduleRoot: root }];
+function nativeModule(root: string, moduleName = "fixture-native") {
+  return [{ bindingName: "volume.node", moduleName, moduleRoot: root }];
 }
 
 afterEach(async () => {
@@ -27,13 +27,12 @@ afterEach(async () => {
   );
 });
 
-describe("DMG maker native binding preflight", () => {
-  it("resolves native package roots without importing private package.json subpaths", () => {
+describe("DMG native dependency preflight", () => {
+  it("resolves the native package root without importing private package.json subpaths", () => {
     expect(resolveNativeModuleRoot("macos-alias")).toMatch(/macos-alias$/u);
-    expect(resolveNativeModuleRoot("fs-xattr")).toMatch(/fs-xattr$/u);
   });
 
-  it("builds a missing binding before Forge loads the maker", async () => {
+  it("builds a missing binding before the reproducible DMG generator loads it", async () => {
     const { binding, root } = await fixture();
     const build = vi.fn(async (_nodeGypScript: string, moduleRoot: string) => {
       expect(moduleRoot).toBe(root);
@@ -41,7 +40,7 @@ describe("DMG maker native binding preflight", () => {
     });
 
     await expect(
-      ensureDmgMakerNativeBinding({
+      ensureDmgNativeDependencies({
         architecture: "arm64",
         architectures: async () => ["arm64"],
         build,
@@ -63,7 +62,7 @@ describe("DMG maker native binding preflight", () => {
     const build = vi.fn();
 
     await expect(
-      ensureDmgMakerNativeBinding({
+      ensureDmgNativeDependencies({
         architecture: "arm64",
         architectures: async () => ["arm64"],
         build,
@@ -81,7 +80,7 @@ describe("DMG maker native binding preflight", () => {
     await writeFile(target, "target");
     await symlink(target, symlinkFixture.binding);
     await expect(
-      ensureDmgMakerNativeBinding({
+      ensureDmgNativeDependencies({
         architecture: "arm64",
         modules: nativeModule(symlinkFixture.root),
         nodeGypScript: "/node-gyp.js",
@@ -92,7 +91,7 @@ describe("DMG maker native binding preflight", () => {
     const architectureFixture = await fixture();
     await writeFile(architectureFixture.binding, "x64 fixture");
     await expect(
-      ensureDmgMakerNativeBinding({
+      ensureDmgNativeDependencies({
         architecture: "arm64",
         architectures: async () => ["x86_64"],
         modules: nativeModule(architectureFixture.root),
@@ -102,35 +101,23 @@ describe("DMG maker native binding preflight", () => {
     ).rejects.toThrow("fixture-native native binding must contain only arm64");
   });
 
-  it("builds every missing Forge DMG native dependency", async () => {
+  it("builds the missing macos-alias dependency", async () => {
     const alias = await fixture();
-    const xattr = await fixture();
-    const xattrBinding = join(xattr.root, "build", "Release", "xattr.node");
     const build = vi.fn(async (_nodeGypScript: string, moduleRoot: string) => {
-      await writeFile(moduleRoot === alias.root ? alias.binding : xattrBinding, "arm64 fixture");
+      expect(moduleRoot).toBe(alias.root);
+      await writeFile(alias.binding, "arm64 fixture");
     });
 
     await expect(
-      ensureDmgMakerNativeBinding({
+      ensureDmgNativeDependencies({
         architecture: "arm64",
         architectures: async () => ["arm64"],
         build,
-        modules: [
-          {
-            bindingName: "volume.node",
-            moduleName: "macos-alias",
-            moduleRoot: alias.root,
-          },
-          {
-            bindingName: "xattr.node",
-            moduleName: "fs-xattr",
-            moduleRoot: xattr.root,
-          },
-        ],
+        modules: nativeModule(alias.root, "macos-alias"),
         nodeGypScript: "/node-gyp.js",
         platform: "darwin",
       }),
-    ).resolves.toMatchObject({ rebuilt: ["macos-alias", "fs-xattr"] });
-    expect(build).toHaveBeenCalledTimes(2);
+    ).resolves.toMatchObject({ rebuilt: ["macos-alias"] });
+    expect(build).toHaveBeenCalledOnce();
   });
 });

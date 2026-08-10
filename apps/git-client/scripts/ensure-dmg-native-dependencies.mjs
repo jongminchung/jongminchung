@@ -44,12 +44,12 @@ async function defaultBuild(nodeGypScript, moduleRoot) {
   });
 }
 
-export async function ensureDmgMakerNativeBinding(options = {}) {
+export async function ensureDmgNativeDependencies(options = {}) {
   const platform = options.platform ?? process.platform;
   const architecture = options.architecture ?? process.arch;
   if (platform !== "darwin") return Object.freeze({ skipped: true });
   if (architecture !== "arm64") {
-    throw new Error(`DMG maker native binding requires arm64, received ${architecture}`);
+    throw new Error(`DMG native dependencies require arm64, received ${architecture}`);
   }
 
   const nodeGypScript = options.nodeGypScript ?? require.resolve("node-gyp/bin/node-gyp.js");
@@ -58,11 +58,6 @@ export async function ensureDmgMakerNativeBinding(options = {}) {
       bindingName: "volume.node",
       moduleName: "macos-alias",
       moduleRoot: resolveNativeModuleRoot("macos-alias"),
-    },
-    {
-      bindingName: "xattr.node",
-      moduleName: "fs-xattr",
-      moduleRoot: resolveNativeModuleRoot("fs-xattr"),
     },
   ];
   const bindings = [];

@@ -5,13 +5,12 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
-import { AutoUnpackNativesPlugin } from "@electron-forge/plugin-auto-unpack-natives";
 import { FusesPlugin } from "@electron-forge/plugin-fuses";
 import { VitePlugin } from "@electron-forge/plugin-vite";
 import type { ForgeConfig } from "@electron-forge/shared-types";
 import { FuseV1Options, FuseVersion } from "@electron/fuses";
 import { pruneElectronLocales } from "./scripts/electron-package-policy.mjs";
-import { ensureDmgMakerNativeBinding } from "./scripts/ensure-dmg-maker-native.mjs";
+import { ensureDmgNativeDependencies } from "./scripts/ensure-dmg-native-dependencies.mjs";
 import { verifyElectronPackage } from "./scripts/verify-electron-package.mjs";
 
 const execFileAsync = promisify(execFile);
@@ -84,7 +83,7 @@ const config: ForgeConfig = {
   },
   hooks: {
     async generateAssets() {
-      await ensureDmgMakerNativeBinding();
+      await ensureDmgNativeDependencies();
       await rm(nodePtyResource, { recursive: true, force: true });
       await mkdir(join(nodePtyResource, "prebuilds"), {
         recursive: true,
@@ -118,19 +117,7 @@ const config: ForgeConfig = {
     },
   },
   rebuildConfig: {},
-  makers: [
-    {
-      name: "@electron-forge/maker-dmg",
-      platforms: ["darwin"],
-      config: {
-        format: "ULFO",
-        name: "Git Client",
-        icon: "resources/icons/icon.icns",
-      },
-    },
-  ],
   plugins: [
-    new AutoUnpackNativesPlugin({}),
     new VitePlugin({
       concurrent: true,
       build: [

@@ -634,8 +634,8 @@
     "displayTitle": "TypeScript 7 Compatibility",
     "description": "Verify library declarations, Compiler API coupling, builds, and tooling before a compiler major upgrade.",
     "order": 4,
-    "updatedAt": "2026-07-31",
-    "verifiedAt": "2026-07-31",
+    "updatedAt": "2026-08-10",
+    "verifiedAt": "2026-08-10",
     "tags": [
       "typescript",
       "compatibility",
@@ -3039,8 +3039,8 @@
     "displayTitle": "TypeScript 7 호환성",
     "description": "컴파일러 메이저 업그레이드 전에 라이브러리 선언, Compiler API 결합, 빌드와 도구 체인을 증거로 검증합니다.",
     "order": 4,
-    "updatedAt": "2026-07-31",
-    "verifiedAt": "2026-07-31",
+    "updatedAt": "2026-08-10",
+    "verifiedAt": "2026-08-10",
     "tags": [
       "typescript",
       "compatibility",

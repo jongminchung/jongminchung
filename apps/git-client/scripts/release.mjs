@@ -112,13 +112,17 @@ export function assertReleaseBundleMetadata(actualVersion, actualArchitectures, 
   }
 }
 
-export function createElectronMakeArguments() {
-  return ["electron:make", "--platform=darwin", "--arch=arm64"];
+export function createElectronPackageArguments() {
+  return ["electron:package", "--platform=darwin", "--arch=arm64"];
 }
 
 export function createReleaseSourceGateCommands(mode = RELEASE_MODES.production) {
   parseReleaseMode(mode);
   const commonGates = [
+    Object.freeze({
+      command: "pnpm",
+      arguments: Object.freeze(["--filter", "@jongminchung/tooling", "build"]),
+    }),
     Object.freeze({ command: "pnpm", arguments: Object.freeze(["test"]) }),
     Object.freeze({ command: "pnpm", arguments: Object.freeze(["test:e2e"]) }),
     Object.freeze({ command: "pnpm", arguments: Object.freeze(["build"]) }),
@@ -272,15 +276,15 @@ export async function discoverForgeOutputs(outputDirectory) {
   await visitForgeOutput(outputDirectory, found);
   found.apps.sort((left, right) => left.localeCompare(right));
   found.dmgs.sort((left, right) => left.localeCompare(right));
-  if (found.apps.length !== 1 || found.dmgs.length !== 1) {
+  if (found.apps.length !== 1 || found.dmgs.length !== 0) {
     throw new Error(
-      `Expected exactly one Electron app and one DMG in ${outputDirectory}, found ${found.apps.length} app(s) and ${found.dmgs.length} DMG(s)`,
+      `Expected exactly one Electron app and no DMG in ${outputDirectory}, found ${found.apps.length} app(s) and ${found.dmgs.length} DMG(s)`,
     );
   }
   if (basename(found.apps[0]) !== "Git Client.app") {
     throw new Error(`Unexpected Electron app name: ${basename(found.apps[0])}`);
   }
-  return Object.freeze({ app: found.apps[0], dmg: found.dmgs[0] });
+  return Object.freeze({ app: found.apps[0] });
 }
 
 function commandOutput(result) {
@@ -460,7 +464,7 @@ export async function buildRelease(value, options = {}) {
 
   await rm(forgeOutputDirectory, { force: true, recursive: true });
   await rm(outputDirectory, { force: true, recursive: true });
-  await runCommand("pnpm", createElectronMakeArguments(), {
+  await runCommand("pnpm", createElectronPackageArguments(), {
     cwd: appRoot,
     env: releaseEnvironment,
   });
