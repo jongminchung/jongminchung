@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { usePaletteItems } from "../components/CommandProvider";
-import { type VcsOperationGroup } from "../components/VcsOperationsPopup";
+import type { VcsOperationGroup } from "../components/VcsOperationsPopup";
 import { COMMAND_ENABLED, commandDisabled, type PaletteItem } from "../domain/commands";
 interface RepositoryPaletteContext {
   readonly hasTrackedWorkingChanges: boolean;

@@ -7,7 +7,7 @@ import { GitBranchesPopup } from "../components/GitBranchesPopup";
 import { Icon } from "../components/Icon";
 import { EmptyState } from "../components/ProductCollections";
 import { ProjectSwitcherPopup } from "../components/ProjectSwitcherPopup";
-import { type RepositoryToolKind } from "../components/RepositoryToolDialog";
+import type { RepositoryToolKind } from "../components/RepositoryToolDialog";
 import { WelcomeWorkspace } from "../components/WelcomeWorkspace";
 import { type AppearancePreference } from "../domain/appearance";
 import type { GitSessionController } from "../git-session/useGitSessionController";

@@ -1,4 +1,3 @@
-// @ts-nocheck -- Upstream visual source; runtime contracts are checked at the registry boundary.
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
@@ -85,11 +84,17 @@ const DATA: PresetData[] = PRESETS.map((p) => {
   };
 });
 
+function dataAt(index: number): PresetData {
+  const data = DATA[index];
+  if (data === undefined) throw new Error(`Missing reply parser preset ${index}.`);
+  return data;
+}
+
 const OFFSETS = DATA.reduce<number[]>(
-  (acc, d, i) => [...acc, (acc[i - 1] ?? 0) + (i === 0 ? 0 : DATA[i - 1].total)],
+  (acc, d, i) => [...acc, (acc[i - 1] ?? 0) + (i === 0 ? 0 : dataAt(i - 1).total)],
   [],
 );
-const CYCLE = OFFSETS[DATA.length - 1] + DATA[DATA.length - 1].total;
+const CYCLE = (OFFSETS.at(-1) ?? 0) + dataAt(DATA.length - 1).total;
 
 const LINE_H = 19.2; // 12px * 1.6
 const MAX_LINES = Math.max(...DATA.map((d) => d.lines.length));
@@ -145,13 +150,13 @@ export const ReplyParserDemo = () => {
       const e = (now - start) % CYCLE;
       let preset = 0;
       for (let i = DATA.length - 1; i >= 0; i--) {
-        if (e >= OFFSETS[i]) {
+        if (e >= (OFFSETS[i] ?? 0)) {
           preset = i;
           break;
         }
       }
-      const d = DATA[preset];
-      const t = Math.max(0, e - OFFSETS[preset]);
+      const d = dataAt(preset);
+      const t = Math.max(0, e - (OFFSETS[preset] ?? 0));
       const n = d.lines.length;
 
       let phase: number;
@@ -185,7 +190,7 @@ export const ReplyParserDemo = () => {
     return () => cancelMaterialFrame(raf);
   }, []);
 
-  const d = DATA[view.preset];
+  const d = dataAt(view.preset);
   const n = d.lines.length;
   const { phase, prog } = view;
 
@@ -278,7 +283,7 @@ export const ReplyParserDemo = () => {
           ))}
       </div>
 
-      <div className="rpd-caption">{CAPTIONS[phase]}</div>
+      <div className="rpd-caption">{CAPTIONS[phase] ?? ""}</div>
     </div>
   );
 };

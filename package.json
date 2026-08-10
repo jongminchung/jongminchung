@@ -9,7 +9,10 @@
   "scripts": {
     "audit:prod": "pnpm audit --prod --audit-level high",
     "build": "pnpm run icon:check && pnpm -r --if-present run build",
-    "check": "pnpm run fmt:check && pnpm run lint && pnpm run workspace:graph:check && pnpm run typecheck && pnpm run test && pnpm run build",
+    "check": "pnpm run fmt:check && pnpm run lint && pnpm run workspace:graph:check && pnpm run typecheck && pnpm run test",
+    "check:full": "pnpm run check && pnpm run typecheck:e2e && pnpm run build && pnpm run test:e2e",
+    "check:full:electron": "pnpm run check:full && pnpm --filter @jongminchung/git-client run test:electron",
+    "check:full:materials": "pnpm run check:full && pnpm --filter @jongminchung/engineering-docs run test:e2e:materials",
     "deps:check": "npm-check-updates --workspaces --target latest --packageManager pnpm --reject typescript",
     "deps:update": "npm-check-updates -u --workspaces --target latest --packageManager pnpm --reject typescript && pnpm install",
     "dev:engineering-docs": "pnpm --filter @jongminchung/engineering-docs run dev",
@@ -20,10 +23,13 @@
     "icon:generate": "pnpm --filter @jongminchung/icon run generate",
     "lint": "oxlint .",
     "publish:dry-run": "pnpm --filter @jongminchung/remark-plantuml run publish:dry-run && pnpm --filter @jongminchung/tooling run publish:dry-run",
-    "test": "vitest run && pnpm --filter @jongminchung/git-client run test:scripts",
+    "test": "vitest run --maxWorkers=2 && pnpm --filter @jongminchung/git-client run test:scripts",
+    "test:e2e": "pnpm --filter @jongminchung/engineering-docs run test:e2e:core && pnpm --filter @jongminchung/readme run test:e2e:core && pnpm --filter @jongminchung/git-client run test:e2e",
+    "test:e2e:visual": "pnpm --filter @jongminchung/engineering-docs run test:e2e:visual && pnpm --filter @jongminchung/readme run test:e2e:visual",
     "test:engineering-docs": "pnpm --filter @jongminchung/engineering-docs run test",
     "test:readme": "pnpm --filter @jongminchung/readme run test:e2e",
     "typecheck": "tsc --noEmit && pnpm -r --if-present run typecheck",
+    "typecheck:e2e": "pnpm --filter @jongminchung/engineering-docs run typecheck:e2e && pnpm --filter @jongminchung/readme run typecheck:e2e",
     "workspace:graph:check": "nx show projects --json"
   },
   "devDependencies": {

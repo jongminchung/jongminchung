@@ -1,4 +1,3 @@
-// @ts-nocheck -- Upstream visual source; runtime contracts are checked at the registry boundary.
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
@@ -27,6 +26,12 @@ const EVENTS = [
   { label: "신상품 등록", tag: "products" },
   { label: "장바구니 담기", tag: "cart" },
 ];
+
+function eventAt(index: number): (typeof EVENTS)[number] {
+  const event = EVENTS[index];
+  if (event === undefined) throw new Error(`Missing cache invalidation event ${index}.`);
+  return event;
+}
 
 // 이벤트 하나의 타임라인 (ms)
 const FLASH_MS = 900; // 이벤트 행·태그 칩 강조 시간
@@ -82,9 +87,11 @@ export const TagInvalidationDemo = () => {
       setCards((prev) => {
         const next = { ...prev };
         CARDS.filter((c) => c.tags.includes(tag)).forEach((c) => {
+          const previous = prev[c.id];
+          if (previous === undefined) throw new Error(`Missing cache card state ${c.id}.`);
           next[c.id] = {
             status,
-            version: prev[c.id].version + (bump ? 1 : 0),
+            version: previous.version + (bump ? 1 : 0),
           };
         });
         return next;
@@ -92,7 +99,7 @@ export const TagInvalidationDemo = () => {
     };
 
     const fireEvent = (index: number) => {
-      const ev = EVENTS[index];
+      const ev = eventAt(index);
 
       // 이벤트 발생: 이벤트 행과 해당 태그 칩을 강조
       setActiveEvent(index);
@@ -145,6 +152,7 @@ export const TagInvalidationDemo = () => {
       >
         {CARDS.map((card) => {
           const state = cards[card.id];
+          if (state === undefined) throw new Error(`Missing cache card state ${card.id}.`);
           const meta = STATUS_META[state.status];
           return (
             <div

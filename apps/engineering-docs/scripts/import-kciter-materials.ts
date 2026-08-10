@@ -1,6 +1,7 @@
 import { copyFile, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { extname, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+import { appOwnedMaterialFileSet, upstreamMaterialNotice } from "./material-ownership.ts";
 
 const appRoot = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const destinationRoot = resolve(appRoot, "components/materials/topics");
@@ -12,16 +13,6 @@ if (sourceArgument === undefined) {
 
 const sourceRoot = resolve(sourceArgument.slice("--source=".length));
 const sourceRepositoryRoot = resolve(sourceRoot, "../..");
-
-const motionOwnedFiles = new Set([
-  "building-email-relay-system/ReplyParserDemo.tsx",
-  "building-email-relay-system/TokenAnatomyDemo.tsx",
-  "frontend-caching-strategies/StaleTimeSessionDemo.tsx",
-  "frontend-caching-strategies/TagInvalidationDemo.tsx",
-  "react-component-based-thinking/StateMachineDemo.tsx",
-  "the-expensive-main-thread/LongTaskBlockingDemo.tsx",
-  "the-expensive-main-thread/TransformVsLayoutDemo.tsx",
-]);
 
 function toPosixPath(value: string): string {
   return value.split(sep).join("/");
@@ -49,7 +40,7 @@ function usesNativeCanvas(relativePath: string): boolean {
 function prependImports(source: string, imports: readonly string[]): string {
   const directive = '"use client";\n\n';
   const body = source.startsWith(directive) ? source.slice(directive.length) : source;
-  return `// @ts-nocheck -- Upstream visual source; runtime contracts are checked at the registry boundary.\n${directive}${imports.join("\n")}\n${body}`;
+  return `${upstreamMaterialNotice}\n${directive}${imports.join("\n")}\n${body}`;
 }
 
 function transformSource(source: string, relativePath: string): string {
@@ -136,7 +127,7 @@ function transformSource(source: string, relativePath: string): string {
 
   return isComponent
     ? prependImports(transformed, imports)
-    : `// @ts-nocheck -- Upstream visual source; runtime contracts are checked at the registry boundary.\n${imports.join("\n")}\n${transformed}`;
+    : `${upstreamMaterialNotice}\n${imports.join("\n")}\n${transformed}`;
 }
 
 const files = await listFiles(sourceRoot);
@@ -144,7 +135,7 @@ for (const sourcePath of files) {
   const relativePath = toPosixPath(relative(sourceRoot, sourcePath));
   const destinationPath = resolve(destinationRoot, relativePath);
   await mkdir(resolve(destinationPath, ".."), { recursive: true });
-  if (motionOwnedFiles.has(relativePath)) {
+  if (appOwnedMaterialFileSet.has(relativePath)) {
     const existingOverride = await readFile(destinationPath, "utf8").catch(() => null);
     if (existingOverride !== null) continue;
   }

@@ -79,7 +79,8 @@ test("standalone Excalidraw files render from one source without document chrome
   await expect(diagram.locator(".disable-zen-mode:visible")).toHaveCount(0);
 
   const hasRenderedInk = await diagram.locator("canvas").evaluateAll((canvases) =>
-    canvases.some((canvas) => {
+    canvases.some((element) => {
+      const canvas = element as HTMLCanvasElement;
       const context = canvas.getContext("2d");
       if (context === null || canvas.width === 0 || canvas.height === 0) return false;
       const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;

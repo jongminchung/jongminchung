@@ -1,4 +1,3 @@
-// @ts-nocheck -- Upstream visual source; runtime contracts are checked at the registry boundary.
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
@@ -44,6 +43,12 @@ const STEP_INFO = SCRIPT.map((screen, i) => {
   };
 });
 
+function stepInfoAt(index: number): (typeof STEP_INFO)[number] {
+  const info = STEP_INFO[index];
+  if (info === undefined) throw new Error(`Missing stale-time step ${index}.`);
+  return info;
+}
+
 // 스텝 시작 시점에 카운터가 오른 뒤의 값
 function countersAt(step: number) {
   const firstVisits = STEP_INFO.slice(0, step + 1).filter((s) => s.firstVisit).length;
@@ -59,7 +64,7 @@ const FINAL = countersAt(SCRIPT.length - 1); // 요청 7 vs 3, 스피너 3
 type Variant = "zero" | "five";
 
 function ageText(step: number, sub: number, variant: Variant): string {
-  const info = STEP_INFO[step];
+  const info = stepInfoAt(step);
   if (info.firstVisit) return "방금 받은 데이터";
   if (variant === "zero") {
     if (sub === 1) return "방금 갱신된 데이터";
@@ -104,7 +109,7 @@ export const StaleTimeSessionDemo = () => {
   const { step, sub } = frame;
   const isResult = step >= SCRIPT.length;
   const navStep = isResult ? SCRIPT.length - 1 : step;
-  const info = STEP_INFO[navStep];
+  const info = stepInfoAt(navStep);
   const counters = isResult ? FINAL : countersAt(step);
   const cached = new Set(SCRIPT.slice(0, navStep + 1)); // 방문한 화면 = 캐시된 화면 (양쪽 동일)
 

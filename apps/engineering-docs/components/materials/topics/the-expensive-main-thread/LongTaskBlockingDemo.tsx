@@ -1,4 +1,3 @@
-// @ts-nocheck -- Upstream visual source; runtime contracts are checked at the registry boundary.
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
@@ -47,11 +46,9 @@ const boxStyle: React.CSSProperties = {
 export const LongTaskBlockingDemo = ({ locale: lang = "ko" }: { locale?: Lang }) => {
   const t = STRINGS[lang];
   const jsBoxRef = useRef<HTMLDivElement>(null);
-  const fpsRef = useRef<HTMLSpanElement>(null);
   const rafRef = useRef<number>(0);
   const angleRef = useRef(0);
   const lastRef = useRef(0);
-  const framesRef = useRef<number[]>([]);
   const [blocking, setBlocking] = useState(false);
   const reducedMotion = useReducedMotion();
   const { ref: rootRef, visible } = useVisible<HTMLDivElement>();
@@ -59,11 +56,6 @@ export const LongTaskBlockingDemo = ({ locale: lang = "ko" }: { locale?: Lang })
   useEffect(() => {
     if (!visible) return; // 화면 밖에서는 루프를 돌리지 않는다
     const animate = (t: number) => {
-      const frames = framesRef.current;
-      frames.push(t);
-      while (frames.length && t - frames[0] > 1000) frames.shift();
-      if (fpsRef.current) fpsRef.current.textContent = String(frames.length);
-
       if (lastRef.current) {
         const dt = t - lastRef.current;
         angleRef.current = (angleRef.current + dt * 0.24) % 360;
@@ -86,7 +78,6 @@ export const LongTaskBlockingDemo = ({ locale: lang = "ko" }: { locale?: Lang })
         /* 아무것도 안 하고 메인 스레드를 붙잡는 busy loop */
       }
       lastRef.current = 0; // 각도가 튀지 않도록 리셋
-      framesRef.current = [];
       setBlocking(false);
     }, 0);
   };
@@ -99,7 +90,6 @@ export const LongTaskBlockingDemo = ({ locale: lang = "ko" }: { locale?: Lang })
     boxRef: React.Ref<HTMLDivElement> | undefined,
     boxColor: string,
     animated: boolean,
-    fps: boolean,
   ) => (
     <div
       style={{
@@ -154,8 +144,8 @@ export const LongTaskBlockingDemo = ({ locale: lang = "ko" }: { locale?: Lang })
       }}
     >
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-        {panel(t.jsTitle, t.jsTag, "#1971c2", "#e7f5ff", jsBoxRef, "#228be6", false, true)}
-        {panel(t.cssTitle, t.cssTag, "#2f9e44", "#ebfbee", undefined, "#40c057", true, false)}
+        {panel(t.jsTitle, t.jsTag, "#1971c2", "#e7f5ff", jsBoxRef, "#228be6", false)}
+        {panel(t.cssTitle, t.cssTag, "#2f9e44", "#ebfbee", undefined, "#40c057", true)}
       </div>
 
       <input

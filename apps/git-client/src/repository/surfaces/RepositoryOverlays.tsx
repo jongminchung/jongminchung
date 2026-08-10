@@ -1,22 +1,6 @@
-import { type ComponentProps } from "react";
+import { lazy, Suspense, type ComponentProps } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { BookmarkGroupSelectDialog } from "../../components/BookmarkGroupSelectDialog";
-import { BookmarkMnemonicDialog } from "../../components/BookmarkMnemonicDialog";
-import { BookmarksPopup } from "../../components/BookmarksPopup";
-import {
-  CodeAnalysisScopeDialog,
-  type CodeAnalysisScope,
-} from "../../components/CodeAnalysisScopeDialog";
-import { ExportToHtmlDialog } from "../../components/ExportToHtmlDialog";
-import { InspectionResultsDialog } from "../../components/InspectionResultsDialog";
-import { ProcessesDialog } from "../../components/ProcessesDialog";
-import { ProjectSearchDialog } from "../../components/ProjectSearchDialog";
-import { RecentFindUsagesDialog } from "../../components/RecentFindUsagesDialog";
-import { ReplaceInFilesDialog } from "../../components/ReplaceInFilesDialog";
-import { RunInspectionDialog } from "../../components/RunInspectionDialog";
-import { ScratchFileChooserDialog } from "../../components/ScratchFileChooserDialog";
-import { StackTraceDialog } from "../../components/StackTraceDialog";
-import { VcsOperationsPopup } from "../../components/VcsOperationsPopup";
+import type { CodeAnalysisScope } from "../../components/CodeAnalysisScopeDialog";
 import {
   addLineBookmarkToGroup,
   allLineBookmarks,
@@ -32,6 +16,77 @@ import type { RepositoryView } from "../../domain/types";
 import type { GitSessionController } from "../../git-session/useGitSessionController";
 import { useRepositoryWorkspaceStore } from "../state/RepositoryWorkspaceStoreProvider";
 import type { BookmarkMnemonicTarget, InspectorState } from "../state/workspaceTypes";
+
+const BookmarkGroupSelectDialog = lazy(() =>
+  import("../../components/BookmarkGroupSelectDialog").then(({ BookmarkGroupSelectDialog }) => ({
+    default: BookmarkGroupSelectDialog,
+  })),
+);
+const BookmarkMnemonicDialog = lazy(() =>
+  import("../../components/BookmarkMnemonicDialog").then(({ BookmarkMnemonicDialog }) => ({
+    default: BookmarkMnemonicDialog,
+  })),
+);
+const BookmarksPopup = lazy(() =>
+  import("../../components/BookmarksPopup").then(({ BookmarksPopup }) => ({
+    default: BookmarksPopup,
+  })),
+);
+const CodeAnalysisScopeDialog = lazy(() =>
+  import("../../components/CodeAnalysisScopeDialog").then(({ CodeAnalysisScopeDialog }) => ({
+    default: CodeAnalysisScopeDialog,
+  })),
+);
+const ExportToHtmlDialog = lazy(() =>
+  import("../../components/ExportToHtmlDialog").then(({ ExportToHtmlDialog }) => ({
+    default: ExportToHtmlDialog,
+  })),
+);
+const InspectionResultsDialog = lazy(() =>
+  import("../../components/InspectionResultsDialog").then(({ InspectionResultsDialog }) => ({
+    default: InspectionResultsDialog,
+  })),
+);
+const ProcessesDialog = lazy(() =>
+  import("../../components/ProcessesDialog").then(({ ProcessesDialog }) => ({
+    default: ProcessesDialog,
+  })),
+);
+const ProjectSearchDialog = lazy(() =>
+  import("../../components/ProjectSearchDialog").then(({ ProjectSearchDialog }) => ({
+    default: ProjectSearchDialog,
+  })),
+);
+const RecentFindUsagesDialog = lazy(() =>
+  import("../../components/RecentFindUsagesDialog").then(({ RecentFindUsagesDialog }) => ({
+    default: RecentFindUsagesDialog,
+  })),
+);
+const ReplaceInFilesDialog = lazy(() =>
+  import("../../components/ReplaceInFilesDialog").then(({ ReplaceInFilesDialog }) => ({
+    default: ReplaceInFilesDialog,
+  })),
+);
+const RunInspectionDialog = lazy(() =>
+  import("../../components/RunInspectionDialog").then(({ RunInspectionDialog }) => ({
+    default: RunInspectionDialog,
+  })),
+);
+const ScratchFileChooserDialog = lazy(() =>
+  import("../../components/ScratchFileChooserDialog").then(({ ScratchFileChooserDialog }) => ({
+    default: ScratchFileChooserDialog,
+  })),
+);
+const StackTraceDialog = lazy(() =>
+  import("../../components/StackTraceDialog").then(({ StackTraceDialog }) => ({
+    default: StackTraceDialog,
+  })),
+);
+const VcsOperationsPopup = lazy(() =>
+  import("../../components/VcsOperationsPopup").then(({ VcsOperationsPopup }) => ({
+    default: VcsOperationsPopup,
+  })),
+);
 
 interface RepositoryOverlaysProps {
   readonly activity: ComponentProps<typeof ProcessesDialog>["activity"];
@@ -161,7 +216,7 @@ export function RepositoryOverlays({
   );
 
   return (
-    <>
+    <Suspense fallback={null}>
       {scratchFileChooserOpen && (
         <ScratchFileChooserDialog
           languages={SCRATCH_LANGUAGES}
@@ -351,6 +406,6 @@ export function RepositoryOverlays({
           onClose={() => setProcessesOpen(false)}
         />
       )}
-    </>
+    </Suspense>
   );
 }

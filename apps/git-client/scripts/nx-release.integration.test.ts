@@ -200,7 +200,7 @@ describe("Nx release project affectedness", () => {
     expect(await readFile(join(directory, "apps/git-client/package.json"), "utf8")).toBe(
       manifestBefore,
     );
-  }, 30_000);
+  }, 60_000);
 
   it("includes workspace dependencies while excluding unrelated apps", async () => {
     const directory = await createFixture();

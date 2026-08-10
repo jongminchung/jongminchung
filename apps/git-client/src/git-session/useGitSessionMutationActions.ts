@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import type { GitBridge } from "../bridge/GitBridge";
+import { operationPolicyFor } from "../domain/gitOperationPolicy";
 import { repositoryAccessPolicy } from "../domain/repositoryAccess";
 import type {
   AbortableOperation,
@@ -43,41 +44,6 @@ function updateRepositorySession(
 
 function sameValue(left: unknown, right: unknown): boolean {
   return JSON.stringify(left) === JSON.stringify(right);
-}
-
-function invalidationsForOperation(operation: GitOperation): readonly RepositoryInvalidation[] {
-  if (
-    operation.kind === "stage" ||
-    operation.kind === "stageAll" ||
-    operation.kind === "stageTracked" ||
-    operation.kind === "addIntent" ||
-    operation.kind === "unstage" ||
-    operation.kind === "removeCached" ||
-    operation.kind === "discard" ||
-    operation.kind === "applyPatch" ||
-    operation.kind === "partialPatch"
-  ) {
-    return ["status"];
-  }
-  if (
-    operation.kind === "stashPush" ||
-    operation.kind === "stashApply" ||
-    operation.kind === "stashDrop" ||
-    operation.kind === "stashClear" ||
-    operation.kind === "stashBranch"
-  ) {
-    return ["status", "history", "stash"];
-  }
-  if (
-    operation.kind === "worktreeAdd" ||
-    operation.kind === "worktreeRemove" ||
-    operation.kind === "remoteAdd" ||
-    operation.kind === "remoteRemove" ||
-    operation.kind === "remoteSetUrl"
-  ) {
-    return ["status", "history", "management"];
-  }
-  return operation.kind === "push" ? ["status", "history"] : ["status", "history", "operation"];
 }
 
 interface GitSessionMutationDependencies {
@@ -345,7 +311,7 @@ export function useGitSessionMutationActions({
       const result = await gitBridge.executeSynchronizedBranchOperation(repositoryIds, operation);
       if (activeSession) {
         const repositoryId = activeSession.repository.snapshot.id;
-        refreshCoordinator.invalidate(repositoryId, invalidationsForOperation(operation));
+        refreshCoordinator.invalidate(repositoryId, operationPolicyFor(operation).invalidations);
         await refreshCoordinator.flush(repositoryId);
       }
       return result;

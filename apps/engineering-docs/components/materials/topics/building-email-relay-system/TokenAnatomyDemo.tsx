@@ -1,4 +1,3 @@
-// @ts-nocheck -- Upstream visual source; runtime contracts are checked at the registry boundary.
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
@@ -69,6 +68,12 @@ const SCENARIOS: ScenarioDef[] = [
   },
 ];
 
+function scenarioAt(index: number): ScenarioDef {
+  const scenario = SCENARIOS[index];
+  if (scenario === undefined) throw new Error(`Missing token scenario ${index}.`);
+  return scenario;
+}
+
 async function hmacHex16(payload: string): Promise<string> {
   const enc = new TextEncoder();
   const key = await crypto.subtle.importKey(
@@ -129,7 +134,7 @@ export const TokenAnatomyDemo = () => {
     let cancelled = false;
     let raf = 0;
 
-    Promise.all([
+    void Promise.all([
       hmacHex16(PAYLOAD_VALID),
       hmacHex16(PAYLOAD_FORGED),
       hmacHex16(PAYLOAD_EXPIRED),
@@ -168,7 +173,7 @@ export const TokenAnatomyDemo = () => {
   }, []);
 
   const { scen, mutated, rows } = step;
-  const def = SCENARIOS[scen];
+  const def = scenarioAt(scen);
 
   // 화면에 보이는 주소 — 조작 전에는 정상 주소, 조작 후에는 해당 시나리오의 값
   const shownTicket = mutated ? def.ticketId : TICKET_VALID;

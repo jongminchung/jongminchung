@@ -1,4 +1,5 @@
 import type { GitOperation } from "../shared/contracts/model";
+import { operationPolicyFor } from "./gitOperationPolicy";
 
 export type ActivityStatus = "running" | "succeeded" | "failed" | "cancelled";
 
@@ -79,7 +80,7 @@ export function operationActivityLabel(operation: GitOperation): string {
 }
 
 export function isRetryableOperation(operation: GitOperation): boolean {
-  return operation.kind === "fetch";
+  return operationPolicyFor(operation).retryable;
 }
 
 export function isGitRequestCancelled(error: unknown): boolean {

@@ -6,6 +6,7 @@ import {
   operationActivityLabel,
   sanitizeGitError,
 } from "../domain/gitActivity";
+import { operationPolicyFor } from "../domain/gitOperationPolicy";
 import { parseLog, parseRefs, parseStashList, parseStatusV2 } from "../domain/parsers";
 import { closeProjectResources } from "../domain/projectClose";
 import { updateRecentProjects } from "../domain/recentProjects";
@@ -178,76 +179,6 @@ function createLogRequest(
 
 function sameValue(left: unknown, right: unknown): boolean {
   return JSON.stringify(left) === JSON.stringify(right);
-}
-
-function invalidationsForOperation(operation: GitOperation): readonly RepositoryInvalidation[] {
-  if (
-    operation.kind === "stage" ||
-    operation.kind === "stageAll" ||
-    operation.kind === "stageTracked" ||
-    operation.kind === "addIntent" ||
-    operation.kind === "unstage" ||
-    operation.kind === "removeCached" ||
-    operation.kind === "discard" ||
-    operation.kind === "applyPatch" ||
-    operation.kind === "partialPatch"
-  ) {
-    return ["status"];
-  }
-  if (
-    operation.kind === "stashPush" ||
-    operation.kind === "stashApply" ||
-    operation.kind === "stashDrop" ||
-    operation.kind === "stashClear" ||
-    operation.kind === "stashBranch"
-  ) {
-    return ["status", "history", "stash"];
-  }
-  if (
-    operation.kind === "worktreeAdd" ||
-    operation.kind === "worktreeRemove" ||
-    operation.kind === "remoteAdd" ||
-    operation.kind === "remoteRemove" ||
-    operation.kind === "remoteSetUrl"
-  ) {
-    return ["status", "history", "management"];
-  }
-  if (operation.kind === "push") {
-    return ["status", "history"];
-  }
-  return ["status", "history", "operation"];
-}
-
-function recordsRecovery(operation: GitOperation): boolean {
-  return (
-    operation.kind === "commit" ||
-    operation.kind === "commitAdvanced" ||
-    operation.kind === "reset" ||
-    operation.kind === "revert" ||
-    operation.kind === "cherryPick" ||
-    operation.kind === "merge" ||
-    operation.kind === "rebase" ||
-    operation.kind === "interactiveRebase" ||
-    operation.kind === "dropCommits" ||
-    operation.kind === "squashCommits" ||
-    operation.kind === "rewordCommit" ||
-    operation.kind === "undoCommit" ||
-    operation.kind === "createFixupCommit" ||
-    operation.kind === "createSquashCommit" ||
-    operation.kind === "continue" ||
-    operation.kind === "skip" ||
-    operation.kind === "abort" ||
-    operation.kind === "createBranch" ||
-    operation.kind === "renameBranch" ||
-    operation.kind === "deleteBranch" ||
-    operation.kind === "createTag" ||
-    operation.kind === "deleteTag" ||
-    operation.kind === "stashPush" ||
-    operation.kind === "stashApply" ||
-    operation.kind === "stashDrop" ||
-    operation.kind === "stashClear" ||
-    operation.kind === "stashBranch"
-  );
 }
 
 async function cancelRequests(
@@ -926,6 +857,7 @@ export function useGitSessionController() {
     async (operation: GitOperation, throwOnError = false): Promise<void> => {
       if (fixture) return;
       const snapshot = activeSnapshot();
+      const policy = operationPolicyFor(operation);
       repositoryAccessPolicy.assert(snapshot.id, "gitMutation");
       const activityId = beginActivity(
         snapshot.id,
@@ -947,8 +879,8 @@ export function useGitSessionController() {
           },
           { activityId },
         );
-        refreshCoordinator.invalidate(snapshot.id, invalidationsForOperation(operation));
-        const recoveryEntries = recordsRecovery(operation)
+        refreshCoordinator.invalidate(snapshot.id, policy.invalidations);
+        const recoveryEntries = policy.recordsRecovery
           ? fixture
             ? null
             : await gitBridge.listRecoveryEntries(snapshot.id)
@@ -999,7 +931,7 @@ export function useGitSessionController() {
           // Preserve the original mutation failure; the next watcher refresh retries state hydration.
         }
         let recoveryEntries: readonly RecoveryEntry[] | null = null;
-        if (recordsRecovery(operation) && !fixture) {
+        if (policy.recordsRecovery && !fixture) {
           try {
             recoveryEntries = await gitBridge.listRecoveryEntries(snapshot.id);
           } catch {
@@ -1478,8 +1410,119 @@ export function useGitSessionController() {
     activeSession === null
       ? "trusted"
       : repositoryAccessPolicy.mode(activeSession.repository.snapshot.id);
+  const activeActivity =
+    activity?.repositoryId === activeSession?.repository.snapshot.id ? activity : null;
+  const activeGitConsoleEntries = gitConsoleEntries.filter(
+    (entry) => entry.repositoryId === activeSession?.repository.snapshot.id,
+  );
+  const capabilities = {
+    workspace: {
+      sessions: state.sessions,
+      activeTab: state.activeTab,
+      recentProjects: state.recentProjects,
+      restoring: state.restoring,
+      error: state.error ?? activeSession?.error ?? null,
+      notice: state.notice ?? null,
+      openRepositories,
+      openRepository,
+      initializeRepository,
+      cloneRepository,
+      cancelRepositoryCreation,
+      activateTab,
+      closeRepository,
+      closeProject,
+      switchRepository,
+      removeRecentProject,
+      dismissError,
+      dismissNotice,
+    },
+    repository: {
+      fixture,
+      accessMode,
+      repository: activeSession?.repository ?? null,
+      repositoryError: activeErrorSession,
+      loading: activeSession?.status === "loading",
+      stale: activeSession?.stale ?? false,
+      hasMoreCommits: activeSession?.hasMoreCommits ?? false,
+      logLoading: activeSession?.logLoading ?? false,
+      logError: activeSession?.logError ?? null,
+      shelves: activeSession?.shelves ?? EMPTY_ARRAY,
+      stashes: activeSession?.stashes ?? EMPTY_ARRAY,
+      changelists: activeSession?.changelists ?? EMPTY_ARRAY,
+      recoveryEntries: activeSession?.recoveryEntries ?? EMPTY_ARRAY,
+      conflicts: activeSession?.conflicts ?? EMPTY_ARRAY,
+      remotes: (activeSession ?? managementSession)?.remotes ?? EMPTY_ARRAY,
+      worktrees: (activeSession ?? managementSession)?.worktrees ?? EMPTY_ARRAY,
+    },
+    queries: {
+      reload,
+      loadLog,
+      indexLog,
+      loadCommitFiles,
+      loadCommitDiff,
+      loadWorkingDiff,
+      loadLocalChangesPatch,
+      loadRevisionDiff,
+      listLocalHistoryActivities,
+      readLocalHistoryActivity,
+      loadLocalHistoryDiff,
+      createLocalHistoryPatch,
+      exportPatch,
+      createPatchText,
+      loadFiles,
+      searchProjectText,
+      loadTree,
+      loadFileHistory,
+      loadBlame,
+      readFile,
+      readFilePreview,
+      loadSubmoduleDiff,
+      openWorkingTreeFile,
+      loadStashFiles,
+      loadStashPatch,
+      loadPushPreview,
+      loadHistoryRewritePreview,
+      preCommitCheck,
+      loadGitConfig,
+      loadSubmodules,
+      loadMergedBranches,
+      readIgnoreRules,
+      compareBranches,
+      loadCommitSignature,
+      readConflict,
+    },
+    mutations: {
+      revertLocalHistory,
+      putLocalHistoryLabel,
+      importPatch,
+      writeWorkingTreeFile,
+      executeOperation,
+      abortOperation,
+      createShelf,
+      applyShelf,
+      deleteShelf,
+      saveChangelist,
+      deleteChangelist,
+      commitChangelist,
+      writeIgnoreRules,
+      restoreRecoveryEntry,
+      saveConflictResult,
+      resolveBinaryConflict,
+      executeSynchronizedBranchOperation,
+      applyMultiRootRollback,
+    },
+    activity: {
+      current: activeActivity,
+      gitConsoleEntries: activeGitConsoleEntries,
+      cancel: cancelActivity,
+      retry: retryActivity,
+      dismiss: dismissActivity,
+      clearConsole: clearGitConsole,
+    },
+  };
 
   return {
+    capabilities,
     sessions: state.sessions,
     activeTab: state.activeTab,
     recentProjects: state.recentProjects,
@@ -1495,10 +1538,8 @@ export function useGitSessionController() {
     hasMoreCommits: activeSession?.hasMoreCommits ?? false,
     logLoading: activeSession?.logLoading ?? false,
     logError: activeSession?.logError ?? null,
-    activity: activity?.repositoryId === activeSession?.repository.snapshot.id ? activity : null,
-    gitConsoleEntries: gitConsoleEntries.filter(
-      (entry) => entry.repositoryId === activeSession?.repository.snapshot.id,
-    ),
+    activity: activeActivity,
+    gitConsoleEntries: activeGitConsoleEntries,
     shelves: activeSession?.shelves ?? EMPTY_ARRAY,
     stashes: activeSession?.stashes ?? EMPTY_ARRAY,
     changelists: activeSession?.changelists ?? EMPTY_ARRAY,
@@ -1579,3 +1620,4 @@ export function useGitSessionController() {
 }
 
 export type GitSessionController = ReturnType<typeof useGitSessionController>;
+export type GitSessionCapabilities = GitSessionController["capabilities"];

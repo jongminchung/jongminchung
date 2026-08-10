@@ -2,7 +2,7 @@ import { Button } from "@jongminchung/ui/components/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@jongminchung/ui/components/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
 import { cn } from "@jongminchung/ui/lib/utils";
-import { useCallback, useEffect, useId, useMemo, useRef, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 import type { CSSProperties } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useAppDialog } from "../components/AppDialog";
@@ -17,7 +17,6 @@ import { ConflictEditorDialog } from "../components/ConflictEditorDialog";
 import { DetailsPane } from "../components/DetailsPane";
 import { DiffViewer } from "../components/DiffViewer";
 import { HistoryRewriteWorkspace } from "../components/HistoryRewriteWorkspace";
-import { loadHostingAccounts } from "../components/hosting-persistence";
 import { Icon } from "../components/Icon";
 import {
   NotificationBalloon,
@@ -27,7 +26,7 @@ import {
 import { EmptyState, StatePill } from "../components/ProductCollections";
 import { ProjectToolWindow } from "../components/ProjectToolWindow";
 import { RepositoryInspectorDialog } from "../components/RepositoryInspectorDialog";
-import { type RepositoryToolKind } from "../components/RepositoryToolDialog";
+import type { RepositoryToolKind } from "../components/RepositoryToolDialog";
 import { RevisionComparison } from "../components/RevisionComparison";
 import { ScratchEditor } from "../components/ScratchEditor";
 import { ShareExistingRemotesDialog } from "../components/ShareExistingRemotesDialog";
@@ -73,8 +72,14 @@ import { useRepositoryBookmarkController } from "./hooks/useRepositoryBookmarkCo
 import { useRepositoryContentLoader } from "./hooks/useRepositoryContentLoader";
 import { useRepositoryEditorController } from "./hooks/useRepositoryEditorController";
 import { useRepositoryEditorFeatures } from "./hooks/useRepositoryEditorFeatures";
+import { useRepositoryHostingCoordinator } from "./hooks/useRepositoryHostingCoordinator";
 import { useRepositoryNotifications } from "./hooks/useRepositoryNotifications";
 import { useRepositoryPersistence } from "./hooks/useRepositoryPersistence";
+import {
+  editorPanelDomId,
+  editorTabDomId,
+  useRepositoryTabCoordinator,
+} from "./hooks/useRepositoryTabCoordinator";
 import { useRepositoryToolWindowController } from "./hooks/useRepositoryToolWindowController";
 import { useRepositoryVcsController } from "./hooks/useRepositoryVcsController";
 import { useRepositoryWorkspaceLifecycle } from "./hooks/useRepositoryWorkspaceLifecycle";
@@ -93,15 +98,6 @@ import { RepositoryNavigationSurface } from "./surfaces/RepositoryNavigationSurf
 import { RepositoryOverlays } from "./surfaces/RepositoryOverlays";
 import { useRepositoryCommands } from "./useRepositoryCommands";
 import { useRepositoryPalette } from "./useRepositoryPalette";
-
-function remoteHostname(remote: string): string | null {
-  try {
-    return new URL(remote).hostname.toLowerCase();
-  } catch {
-    const match = /^(?:[^@\s]+@)?([^:/\s]+):[^\s]+$/u.exec(remote);
-    return match?.[1]?.toLowerCase() ?? null;
-  }
-}
 
 function remoteBrowserUrl(remote: string): string | null {
   try {
@@ -141,14 +137,6 @@ function isEditorStatus(value: unknown): value is EditorStatus {
     (candidate.symbol === undefined || typeof candidate.symbol === "string") &&
     (candidate.selectedText === undefined || typeof candidate.selectedText === "string")
   );
-}
-
-function editorTabDomId(scope: string, value: string): string {
-  return `${scope}-tab-${encodeURIComponent(value)}`;
-}
-
-function editorPanelDomId(scope: string, value: string): string {
-  return `${scope}-panel-${encodeURIComponent(value)}`;
 }
 
 type GitSession = GitSessionController;
@@ -220,26 +208,39 @@ function RepositoryWorkspaceContent({
   onChromeModeChange,
 }: RepositoryWorkspaceProps) {
   const {
+    activity: sessionActivityCapability,
+    mutations: sessionMutations,
+    queries: sessionQueries,
+    repository: sessionRepositoryCapability,
+    workspace: sessionWorkspace,
+  } = session.capabilities;
+  const {
+    cancel: sessionCancelActivity,
+    clearConsole: sessionClearGitConsole,
+    current: sessionActivity,
+    gitConsoleEntries: sessionGitConsoleEntries,
+  } = sessionActivityCapability;
+  const {
     abortOperation: sessionAbortOperation,
-    accessMode: sessionAccessMode,
-    activity: sessionActivity,
     applyShelf: sessionApplyShelf,
-    cancelActivity: sessionCancelActivity,
-    changelists: sessionChangelists,
-    clearGitConsole: sessionClearGitConsole,
     commitChangelist: sessionCommitChangelist,
-    createLocalHistoryPatch: sessionCreateLocalHistoryPatch,
-    createPatchText: sessionCreatePatchText,
     createShelf: sessionCreateShelf,
     deleteChangelist: sessionDeleteChangelist,
     deleteShelf: sessionDeleteShelf,
-    error: sessionError,
     executeOperation: sessionExecuteOperation,
-    exportPatch: sessionExportPatch,
-    fixture: sessionFixture,
-    gitConsoleEntries: sessionGitConsoleEntries,
-    hasMoreCommits: sessionHasMoreCommits,
     importPatch: sessionImportPatch,
+    putLocalHistoryLabel: sessionPutLocalHistoryLabel,
+    resolveBinaryConflict: sessionResolveBinaryConflict,
+    restoreRecoveryEntry: sessionRestoreRecoveryEntry,
+    revertLocalHistory: sessionRevertLocalHistory,
+    saveChangelist: sessionSaveChangelist,
+    saveConflictResult: sessionSaveConflictResult,
+    writeWorkingTreeFile: sessionWriteWorkingTreeFile,
+  } = sessionMutations;
+  const {
+    createLocalHistoryPatch: sessionCreateLocalHistoryPatch,
+    createPatchText: sessionCreatePatchText,
+    exportPatch: sessionExportPatch,
     indexLog: sessionIndexLog,
     listLocalHistoryActivities: sessionListLocalHistoryActivities,
     loadBlame: sessionLoadBlame,
@@ -258,33 +259,32 @@ function RepositoryWorkspaceContent({
     loadSubmoduleDiff: sessionLoadSubmoduleDiff,
     loadTree: sessionLoadTree,
     loadWorkingDiff: sessionLoadWorkingDiff,
-    loading: sessionLoading,
-    logError: sessionLogError,
-    logLoading: sessionLogLoading,
     openWorkingTreeFile: sessionOpenWorkingTreeFile,
     preCommitCheck: sessionPreCommitCheck,
-    putLocalHistoryLabel: sessionPutLocalHistoryLabel,
     readConflict: sessionReadConflict,
     readFile: sessionReadFile,
     readFilePreview: sessionReadFilePreview,
     readLocalHistoryActivity: sessionReadLocalHistoryActivity,
-    recoveryEntries: sessionRecoveryEntries,
     reload: sessionReload,
-    remotes: sessionRemotes,
-    resolveBinaryConflict: sessionResolveBinaryConflict,
-    restoreRecoveryEntry: sessionRestoreRecoveryEntry,
-    revertLocalHistory: sessionRevertLocalHistory,
-    saveChangelist: sessionSaveChangelist,
-    saveConflictResult: sessionSaveConflictResult,
     searchProjectText: sessionSearchProjectText,
+  } = sessionQueries;
+  const {
+    accessMode: sessionAccessMode,
+    changelists: sessionChangelists,
+    fixture: sessionFixture,
+    hasMoreCommits: sessionHasMoreCommits,
+    loading: sessionLoading,
+    logError: sessionLogError,
+    logLoading: sessionLogLoading,
+    recoveryEntries: sessionRecoveryEntries,
+    remotes: sessionRemotes,
     shelves: sessionShelves,
     stale: sessionStale,
     stashes: sessionStashes,
-    writeWorkingTreeFile: sessionWriteWorkingTreeFile,
-  } = session;
+  } = sessionRepositoryCapability;
+  const { error: sessionError } = sessionWorkspace;
   const { execute: executeCommand, openPaletteFor } = useCommands();
   const safeMode = sessionAccessMode === "safe";
-  const editorTabsId = useId();
   const review = useRepositoryWorkspaceStore(
     useShallow((state) => ({
       selectedOids: state.selectedOids,
@@ -530,7 +530,6 @@ function RepositoryWorkspaceContent({
     setBalloonId,
     setEditorStatus,
   } = layout;
-  const nextLogTabNumber = useRef(2);
   useSyncExternalStore(
     terminalService.subscribe,
     terminalService.snapshot,
@@ -610,141 +609,34 @@ function RepositoryWorkspaceContent({
     requestToggleBookmark,
     toggleCurrentBookmark,
   } = useRepositoryBookmarkController({ openInspector, repository });
-  const setInspectorDirty = useCallback(
-    (key: string, dirty: boolean): void => {
-      if (dirty) {
-        setPreviewInspectorKey((current) => (current === key ? undefined : current));
-      }
-      setDirtyInspectorKeys((current) => {
-        if (current.has(key) === dirty) return current;
-        const next = new Set(current);
-        if (dirty) next.add(key);
-        else next.delete(key);
-        return next;
-      });
-    },
-    [setDirtyInspectorKeys, setPreviewInspectorKey],
-  );
-  const requestCloseInspectors = useCallback(
-    async (keys: readonly string[]): Promise<void> => {
-      const uniqueKeys = [...new Set(keys)];
-      const dirtyCount = uniqueKeys.filter((key) => dirtyInspectorKeys.has(key)).length;
-      if (dirtyCount > 0) {
-        const accepted = await dialog.confirm({
-          title:
-            dirtyCount === 1
-              ? "Discard unsaved editor changes?"
-              : `Discard changes in ${dirtyCount} editor tabs?`,
-          description: `${dirtyCount} file${dirtyCount === 1 ? " has" : "s have"} changes that have not been written to the working tree.`,
-          impact: "Unsaved editor content will be lost.",
-          confirmLabel: uniqueKeys.length === 1 ? "Discard and close" : "Discard and close tabs",
-          dangerous: true,
-        });
-        if (!accepted) return;
-      }
-      closeInspectors(uniqueKeys);
-    },
-    [closeInspectors, dirtyInspectorKeys, dialog],
-  );
-  const requestCloseInspector = useCallback(
-    (key: string): Promise<void> => requestCloseInspectors([key]),
-    [requestCloseInspectors],
-  );
-  const openNewLogTab = useCallback((): void => {
-    const tabId = `log-${nextLogTabNumber.current}`;
-    nextLogTabNumber.current += 1;
-    setLogTabIds((current) => [...current, tabId]);
-    setActiveLogTabId(tabId);
-    setActiveInspectorKey(undefined);
-    setRepositoryViewMode("history");
-    setLogOpen(true);
-  }, [setActiveInspectorKey, setActiveLogTabId, setLogOpen, setLogTabIds, setRepositoryViewMode]);
-  const openGitLogTab = useCallback((): void => {
-    if (logOpen) {
-      openNewLogTab();
-      return;
-    }
-    if (logTabIds.length === 0) setLogTabIds(["log-1"]);
-    setActiveLogTabId(logTabIds[0] ?? "log-1");
-    setActiveInspectorKey(undefined);
-    setRepositoryViewMode("history");
-    setLogOpen(true);
-  }, [
+  const {
+    closeLogTab,
+    editorTabsId,
+    nextLogTabNumber,
+    openGitLogTab,
+    openNewLogTab,
+    requestCloseInspector,
+    requestCloseInspectors,
+    requestOpenRepositoryTool,
+    setInspectorDirty,
+  } = useRepositoryTabCoordinator({
+    activeInspectorKey,
+    activeLogTabId,
+    closeInspectors,
+    dialog,
+    dirtyInspectorKeys,
+    inspectorTabs,
     logOpen,
     logTabIds,
-    openNewLogTab,
-    setActiveLogTabId,
+    onOpenRepositoryTool,
     setActiveInspectorKey,
-    setRepositoryViewMode,
-    setLogTabIds,
+    setActiveLogTabId,
+    setDirtyInspectorKeys,
     setLogOpen,
-  ]);
-  const focusEditorTab = useCallback(
-    (value: string | undefined): void => {
-      window.requestAnimationFrame(() => {
-        if (value) {
-          document.getElementById(editorTabDomId(editorTabsId, value))?.focus();
-          return;
-        }
-        document.querySelector<HTMLElement>("[data-open-git-log]")?.focus();
-      });
-    },
-    [editorTabsId],
-  );
-  const closeLogTab = useCallback(
-    (tabId: string): void => {
-      const index = logTabIds.indexOf(tabId);
-      const next = logTabIds.filter((candidate) => candidate !== tabId);
-      const wasActive = activeInspectorKey === undefined && activeLogTabId === tabId;
-      if (next.length === 0) {
-        const fallbackInspector = inspectorTabs[0];
-        setLogTabIds(["log-1"]);
-        setActiveLogTabId("log-1");
-        setLogOpen(false);
-        if (fallbackInspector) {
-          const fallbackKey = inspectorKey(fallbackInspector);
-          setActiveInspectorKey(fallbackKey);
-          if (wasActive) focusEditorTab(`inspector:${fallbackKey}`);
-        } else if (wasActive) {
-          focusEditorTab(undefined);
-        }
-        return;
-      }
-      setLogTabIds(next);
-      if (activeLogTabId === tabId) {
-        const fallbackId = next[Math.min(Math.max(index, 0), next.length - 1)] ?? next[0]!;
-        setActiveLogTabId(fallbackId);
-        if (wasActive) focusEditorTab(`log:${fallbackId}`);
-      }
-    },
-    [
-      activeInspectorKey,
-      activeLogTabId,
-      focusEditorTab,
-      inspectorTabs,
-      logTabIds,
-      setLogTabIds,
-      setActiveLogTabId,
-      setActiveInspectorKey,
-      setLogOpen,
-    ],
-  );
-  const requestOpenRepositoryTool = useCallback(
-    async (kind: RepositoryToolKind): Promise<void> => {
-      if (dirtyInspectorKeys.size > 0) {
-        const accepted = await dialog.confirm({
-          title: "Leave editors with unsaved changes?",
-          description: `${dirtyInspectorKeys.size} editor tab(s) contain unsaved changes.`,
-          impact: "Unsaved editor content will be lost.",
-          confirmLabel: "Discard and continue",
-          dangerous: true,
-        });
-        if (!accepted) return;
-      }
-      onOpenRepositoryTool(kind);
-    },
-    [dirtyInspectorKeys.size, onOpenRepositoryTool, dialog],
-  );
+    setLogTabIds,
+    setPreviewInspectorKey,
+    setRepositoryViewMode,
+  });
   const {
     applyPatchFromClipboard,
     applyPatchFromFile,
@@ -1468,33 +1360,11 @@ function RepositoryWorkspaceContent({
     search?.focus();
     search?.select();
   }, [dispatchEditorSearch, repositoryViewMode]);
-  const requestShareProject = useCallback(
-    async (provider: "gitHub" | "gitLab"): Promise<void> => {
-      const accounts = await loadHostingAccounts().catch(() => []);
-      const knownHosts = new Set([
-        provider === "gitHub" ? "github.com" : "gitlab.com",
-        ...accounts
-          .filter((account) => account.provider === provider)
-          .map((account) => new URL(account.baseUrl).hostname.toLowerCase()),
-      ]);
-      const matchingRemotes = [
-        ...new Set(
-          sessionRemotes
-            .flatMap((remote) => [remote.fetchUrl, remote.pushUrl])
-            .filter((remote) => {
-              const hostname = remoteHostname(remote);
-              return hostname !== null && knownHosts.has(hostname);
-            }),
-        ),
-      ];
-      if (matchingRemotes.length > 0) {
-        setShareExistingRemotes({ provider, remotes: matchingRemotes });
-        return;
-      }
-      setShareProjectProvider(provider);
-    },
-    [sessionRemotes, setShareExistingRemotes, setShareProjectProvider],
-  );
+  const { requestShareProject } = useRepositoryHostingCoordinator({
+    remotes: sessionRemotes,
+    setShareExistingRemotes,
+    setShareProjectProvider,
+  });
   useRepositoryCommands({
     setScratchFileChooserOpen,
     setExportToHtmlOpen,

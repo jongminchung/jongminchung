@@ -1,11 +1,28 @@
+import { lazy, Suspense } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useAppearance } from "../components/AppearanceProvider";
-import { PushDialog } from "../components/PushDialog";
-import { RepositoryDialog } from "../components/RepositoryDialog";
-import { RepositoryToolDialog, type RepositoryToolKind } from "../components/RepositoryToolDialog";
-import { SettingsDialog } from "../components/SettingsDialog";
+import type { RepositoryToolKind } from "../components/RepositoryToolDialog";
 import type { GitSessionController } from "../git-session/useGitSessionController";
 import { useAppStore } from "./state/AppStoreProvider";
+
+const PushDialog = lazy(() =>
+  import("../components/PushDialog").then(({ PushDialog }) => ({ default: PushDialog })),
+);
+const RepositoryDialog = lazy(() =>
+  import("../components/RepositoryDialog").then(({ RepositoryDialog }) => ({
+    default: RepositoryDialog,
+  })),
+);
+const RepositoryToolDialog = lazy(() =>
+  import("../components/RepositoryToolDialog").then(({ RepositoryToolDialog }) => ({
+    default: RepositoryToolDialog,
+  })),
+);
+const SettingsDialog = lazy(() =>
+  import("../components/SettingsDialog").then(({ SettingsDialog }) => ({
+    default: SettingsDialog,
+  })),
+);
 
 export function AppOverlays({
   openRepositoryToolSafely,
@@ -74,7 +91,7 @@ export function AppOverlays({
   const sessionWriteIgnoreRules = session.writeIgnoreRules;
 
   return (
-    <>
+    <Suspense fallback={null}>
       {showRepositoryDialog && (
         <RepositoryDialog
           initialMode={repositoryDialogMode}
@@ -129,26 +146,30 @@ export function AppOverlays({
           remotes={sessionRemotes}
         />
       )}
-      <SettingsDialog
-        isOpen={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
-        onSettingsChange={handleProductSettingsChange}
-        settings={productSettings}
-        onOpenRepositorySettings={() => {
-          setSettingsOpen(false);
-          void openRepositoryToolSafely("settings");
-        }}
-      />
-      <SettingsDialog
-        appearancePreference={newProjectAppearancePreference}
-        isOpen={newProjectSettingsOpen}
-        onAppearancePreferenceChange={setNewProjectAppearancePreference}
-        onClose={() => setNewProjectSettingsOpen(false)}
-        onSettingsChange={setNewProjectSettings}
-        settings={newProjectSettings}
-        showRepositorySettings={false}
-        title="Settings for New Projects"
-      />
-    </>
+      {settingsOpen && (
+        <SettingsDialog
+          isOpen
+          onClose={() => setSettingsOpen(false)}
+          onSettingsChange={handleProductSettingsChange}
+          settings={productSettings}
+          onOpenRepositorySettings={() => {
+            setSettingsOpen(false);
+            void openRepositoryToolSafely("settings");
+          }}
+        />
+      )}
+      {newProjectSettingsOpen && (
+        <SettingsDialog
+          appearancePreference={newProjectAppearancePreference}
+          isOpen
+          onAppearancePreferenceChange={setNewProjectAppearancePreference}
+          onClose={() => setNewProjectSettingsOpen(false)}
+          onSettingsChange={setNewProjectSettings}
+          settings={newProjectSettings}
+          showRepositorySettings={false}
+          title="Settings for New Projects"
+        />
+      )}
+    </Suspense>
   );
 }

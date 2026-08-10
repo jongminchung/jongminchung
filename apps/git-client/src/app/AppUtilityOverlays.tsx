@@ -1,19 +1,7 @@
+import { lazy, Suspense } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { ActivityMonitorDialog } from "../components/ActivityMonitorDialog";
 import { useAppearance } from "../components/AppearanceProvider";
-import { CommandLineLauncherDialog } from "../components/CommandLineLauncherDialog";
 import { useCommands } from "../components/CommandProvider";
-import { ConfigurationFileDialog } from "../components/ConfigurationFileDialog";
-import { InvalidateCachesDialog } from "../components/InvalidateCachesDialog";
-import { LeftoverDirectoriesDialog } from "../components/LeftoverDirectoriesDialog";
-import { ProductHelpDialog } from "../components/ProductHelpDialog";
-import { QuickSwitchSchemeDialog } from "../components/QuickSwitchSchemeDialog";
-import { RepairIdeDialog } from "../components/RepairIdeDialog";
-import { RunConfigurationTemplatesDialog } from "../components/RunConfigurationTemplatesDialog";
-import { SavedMacrosDialog } from "../components/SavedMacrosDialog";
-import { SpecialFilesDialog } from "../components/SpecialFilesDialog";
-import { ToolWindowLayoutsDialog } from "../components/ToolWindowLayoutsDialog";
-import { WhatsNewDialog } from "../components/WhatsNewDialog";
 import type { CommandId } from "../domain/commands";
 import type { ProductSettings } from "../domain/productSettings";
 import type { NamedToolWindowLayout, ToolWindowLayout } from "../domain/toolWindowLayouts";
@@ -29,6 +17,72 @@ import {
 } from "../platform/electronActions";
 import { clearCommitFilesCache } from "../repository/RepositoryWorkspace";
 import { useAppStore } from "./state/AppStoreProvider";
+
+const ActivityMonitorDialog = lazy(() =>
+  import("../components/ActivityMonitorDialog").then(({ ActivityMonitorDialog }) => ({
+    default: ActivityMonitorDialog,
+  })),
+);
+const CommandLineLauncherDialog = lazy(() =>
+  import("../components/CommandLineLauncherDialog").then(({ CommandLineLauncherDialog }) => ({
+    default: CommandLineLauncherDialog,
+  })),
+);
+const ConfigurationFileDialog = lazy(() =>
+  import("../components/ConfigurationFileDialog").then(({ ConfigurationFileDialog }) => ({
+    default: ConfigurationFileDialog,
+  })),
+);
+const InvalidateCachesDialog = lazy(() =>
+  import("../components/InvalidateCachesDialog").then(({ InvalidateCachesDialog }) => ({
+    default: InvalidateCachesDialog,
+  })),
+);
+const LeftoverDirectoriesDialog = lazy(() =>
+  import("../components/LeftoverDirectoriesDialog").then(({ LeftoverDirectoriesDialog }) => ({
+    default: LeftoverDirectoriesDialog,
+  })),
+);
+const ProductHelpDialog = lazy(() =>
+  import("../components/ProductHelpDialog").then(({ ProductHelpDialog }) => ({
+    default: ProductHelpDialog,
+  })),
+);
+const QuickSwitchSchemeDialog = lazy(() =>
+  import("../components/QuickSwitchSchemeDialog").then(({ QuickSwitchSchemeDialog }) => ({
+    default: QuickSwitchSchemeDialog,
+  })),
+);
+const RepairIdeDialog = lazy(() =>
+  import("../components/RepairIdeDialog").then(({ RepairIdeDialog }) => ({
+    default: RepairIdeDialog,
+  })),
+);
+const RunConfigurationTemplatesDialog = lazy(() =>
+  import("../components/RunConfigurationTemplatesDialog").then(
+    ({ RunConfigurationTemplatesDialog }) => ({ default: RunConfigurationTemplatesDialog }),
+  ),
+);
+const SavedMacrosDialog = lazy(() =>
+  import("../components/SavedMacrosDialog").then(({ SavedMacrosDialog }) => ({
+    default: SavedMacrosDialog,
+  })),
+);
+const SpecialFilesDialog = lazy(() =>
+  import("../components/SpecialFilesDialog").then(({ SpecialFilesDialog }) => ({
+    default: SpecialFilesDialog,
+  })),
+);
+const ToolWindowLayoutsDialog = lazy(() =>
+  import("../components/ToolWindowLayoutsDialog").then(({ ToolWindowLayoutsDialog }) => ({
+    default: ToolWindowLayoutsDialog,
+  })),
+);
+const WhatsNewDialog = lazy(() =>
+  import("../components/WhatsNewDialog").then(({ WhatsNewDialog }) => ({
+    default: WhatsNewDialog,
+  })),
+);
 
 export function AppUtilityOverlays({
   applyToolWindowLayout,
@@ -122,7 +176,7 @@ export function AppUtilityOverlays({
   const sessionReload = reloadRepository;
 
   return (
-    <>
+    <Suspense fallback={null}>
       {helpOpen && <ProductHelpDialog onClose={() => setHelpOpen(false)} />}
       {whatsNewOpen && <WhatsNewDialog onClose={() => setWhatsNewOpen(false)} />}
       {activityMonitorOpen && (
@@ -236,6 +290,6 @@ export function AppUtilityOverlays({
           }
         />
       )}
-    </>
+    </Suspense>
   );
 }
