@@ -56,6 +56,7 @@ export function StackTraceDialog({
                 onClick={frame.path && frame.line ? () => onOpenFrame(frame) : undefined}
                 role="option"
                 startContent={<Icon name="file" size={14} />}
+                tabIndex={-1}
               />
             ))}
           </List>

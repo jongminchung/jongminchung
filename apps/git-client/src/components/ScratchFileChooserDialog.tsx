@@ -67,6 +67,7 @@ export function ScratchFileChooserDialog({
               )}
               variant="ghost"
               size="default"
+              tabIndex={-1}
             >
               <Icon name="file" size={15} />
               <span>{language.label}</span>

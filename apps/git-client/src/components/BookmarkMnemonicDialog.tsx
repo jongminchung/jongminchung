@@ -79,6 +79,7 @@ export function BookmarkMnemonicDialog({
               )}
               variant="ghost"
               size="default"
+              tabIndex={-1}
             >
               {mnemonic}
             </Button>

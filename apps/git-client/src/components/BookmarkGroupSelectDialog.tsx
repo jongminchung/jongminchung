@@ -48,6 +48,7 @@ export function BookmarkGroupSelectDialog({
               onClick={() => setSelectedId(group.id)}
               role="option"
               startContent={<Icon name="bookmarksList" size={13} />}
+              tabIndex={-1}
             />
           ))}
         </List>

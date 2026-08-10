@@ -35,6 +35,7 @@ export function ToolWindowLayoutsDialog({
               onClick={() => onChoose(layout)}
               role="option"
               startContent={<Icon name="split" size={14} />}
+              tabIndex={-1}
             />
           ))}
         </List>

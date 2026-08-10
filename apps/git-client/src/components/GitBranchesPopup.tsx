@@ -517,6 +517,7 @@ export function GitBranchesPopup({
                           )}
                           variant="ghost"
                           size="default"
+                          tabIndex={-1}
                         >
                           <Icon
                             name={

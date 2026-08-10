@@ -77,7 +77,7 @@ function resultFields(value: string): readonly [number, number, string] | null {
       return [line, column, nulFields.slice(2).join("\0")];
     }
   }
-  const separatedFields = value.match(/^:?(\d+)(?:\0|:)(\d+)(?:\0|:)(.*)$/u);
+  const separatedFields = value.replaceAll("\0", ":").match(/^:?(\d+):(\d+):(.*)$/u);
   if (!separatedFields) return null;
   return [Number(separatedFields[1]), Number(separatedFields[2]), separatedFields[3] ?? ""];
 }

@@ -117,6 +117,7 @@ export function BookmarksToolWindow({
         )}
         variant="ghost"
         size="default"
+        tabIndex={-1}
       >
         <span>{bookmark.mnemonic ?? <Icon name="bookmarkFilled" size={11} />}</span>
         <strong>{bookmark.description || bookmark.path.split("/").at(-1)}</strong>

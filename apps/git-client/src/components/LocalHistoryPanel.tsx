@@ -316,6 +316,7 @@ export function LocalHistoryPanel({
               )}
               variant="ghost"
               size="default"
+              tabIndex={-1}
             >
               <Icon name={activity.label === null ? "history" : "bookmark"} size={14} />
               <span>
@@ -416,6 +417,7 @@ export function LocalHistoryPanel({
               )}
               variant="ghost"
               size="default"
+              tabIndex={-1}
             >
               <Icon
                 name={change.contentAvailability === "unavailable" ? "warning" : "file"}

@@ -60,6 +60,7 @@ export function FindResultsPanel({
               onClick={() => onOpenResult(result)}
               role="option"
               startContent={<Icon name="file" size={13} />}
+              tabIndex={-1}
             />
           ))}
         </List>

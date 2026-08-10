@@ -1,51 +1,39 @@
 import { Button } from "@jongminchung/ui/components/button";
-import { Toggle } from "@jongminchung/ui/components/toggle";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
 import { cn } from "@jongminchung/ui/lib/utils";
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { memo } from "react";
+import type { MouseEvent } from "react";
 import type { Commit, Ref } from "../domain/types";
 import type { LogFilters, LogOrder } from "../shared/contracts/model";
-import { useDismissLayer } from "./CommandProvider";
-import { CommitGraph } from "./CommitGraph";
-import { Icon } from "./Icon";
-import { Notice } from "./Notice";
-import { EmptyState, Spinner } from "./ProductCollections";
-import { CheckboxInput } from "./ProductFormControls";
-import { Selector } from "./ProductFormControls";
-import { TextInput } from "./ProductFormControls";
-import { Popover } from "./ProductOverlays";
+import { CommitLogTable, LOG_ROW_HEIGHT } from "./commit-log/CommitLogTable";
+import { CommitLogToolbar } from "./commit-log/CommitLogToolbar";
+import { useCommitLogNavigation } from "./commit-log/useCommitLogNavigation";
+import { useCommitLogState } from "./commit-log/useCommitLogState";
 
 const LOG_FILTER_ROW_HEIGHT = 35;
-const LOG_ROW_HEIGHT = 25;
-const HISTORY_COMMIT_ROW_CLASS = `${`commitRow [html[data-compact=true]_&]:h-[22px]! [align-items:stretch]! [background:transparent] rounded-none! [display:grid]! [font-weight:400]! [grid-template-columns:34px_minmax(190px,_1fr)_100px_145px] [grid-template-rows:minmax(0,_1fr)] [height:20px]! [justify-content:start]! [left:0] [padding:0_3px]! [position:absolute] [right:0] [text-align:left] [top:0] [width:100%] [&:hover]:[background:color-mix(in_oklch,_var(--accent)_42%,_transparent)] [&>_*]:[align-items:center] [&>_*]:[display:flex] [&>_*]:[min-height:0] [&>_*]:[min-width:0] [&>_*]:[padding:0_4px] [&_strong]:[font-weight:600] [&>_span:last-child]:[color:var(--muted-foreground)] [&>_span:last-child]:[font-size:11px] commitRow rounded-none!`} [height:25px]!`;
 
-function commitTime(timestamp: number, relativeTimeBaseSeconds?: number): string {
-  const nowSeconds = relativeTimeBaseSeconds ?? Date.now() / 1000;
-  const elapsedSeconds = Math.max(0, Math.floor(nowSeconds - timestamp));
-  if (elapsedSeconds < 60) return "now";
-  if (elapsedSeconds < 3_600) {
-    const minutes = Math.floor(elapsedSeconds / 60);
-    return `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
-  }
-  if (elapsedSeconds < 86_400) {
-    const hours = Math.floor(elapsedSeconds / 3_600);
-    return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
-  }
-  if (elapsedSeconds < 604_800) {
-    const days = Math.floor(elapsedSeconds / 86_400);
-    return `${days} ${days === 1 ? "day" : "days"} ago`;
-  }
-  return new Intl.DateTimeFormat(undefined, {
-    year: "numeric",
-    month: "numeric",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(new Date(timestamp * 1000));
-}
-
-function isLogOrder(value: string): value is LogOrder {
-  return value === "topology" || value === "date" || value === "firstParent";
+export interface CommitLogProps {
+  readonly commits: readonly Commit[];
+  readonly selectedOids: readonly string[];
+  readonly onSelectionChange: (oids: readonly string[]) => void;
+  readonly onContextMenu: (event: MouseEvent, commit: Commit) => void;
+  readonly refs: readonly Ref[];
+  readonly hasMore: boolean;
+  readonly onLoad: (filters: LogFilters, order: LogOrder, append: boolean) => Promise<void>;
+  readonly onImportPatch: () => void;
+  readonly onRefresh: () => void;
+  readonly onOpenNewTab: () => void;
+  readonly onEnableIndexing: (filters: LogFilters, order: LogOrder) => Promise<void>;
+  readonly indexingEnabled: boolean;
+  readonly indexing: boolean;
+  readonly onCherryPick: (oids: readonly string[]) => void;
+  readonly canCherryPick: boolean;
+  readonly loading: boolean;
+  readonly error: string | null;
+  readonly ahead: number;
+  readonly behind: number;
+  readonly upstream?: string;
+  readonly powerSaveMode: boolean;
+  readonly relativeTimeBaseSeconds?: number;
 }
 
 export const CommitLog = memo(function CommitLog({
@@ -71,216 +59,22 @@ export const CommitLog = memo(function CommitLog({
   upstream,
   powerSaveMode,
   relativeTimeBaseSeconds,
-}: {
-  readonly commits: readonly Commit[];
-  readonly selectedOids: readonly string[];
-  readonly onSelectionChange: (oids: readonly string[]) => void;
-  readonly onContextMenu: (event: React.MouseEvent, commit: Commit) => void;
-  readonly refs: readonly Ref[];
-  readonly hasMore: boolean;
-  readonly onLoad: (filters: LogFilters, order: LogOrder, append: boolean) => Promise<void>;
-  readonly onImportPatch: () => void;
-  readonly onRefresh: () => void;
-  readonly onOpenNewTab: () => void;
-  readonly onEnableIndexing: (filters: LogFilters, order: LogOrder) => Promise<void>;
-  readonly indexingEnabled: boolean;
-  readonly indexing: boolean;
-  readonly onCherryPick: (oids: readonly string[]) => void;
-  readonly canCherryPick: boolean;
-  readonly loading: boolean;
-  readonly error: string | null;
-  readonly ahead: number;
-  readonly behind: number;
-  readonly upstream?: string;
-  readonly powerSaveMode: boolean;
-  readonly relativeTimeBaseSeconds?: number;
-}) {
-  const parentRef = useRef<HTMLDivElement>(null);
-  const searchInput = useRef<HTMLInputElement>(null);
-  const [query, setQuery] = useState("");
-  const [regex, setRegex] = useState(false);
-  const [matchCase, setMatchCase] = useState(false);
-  const [author, setAuthor] = useState("all");
-  const [branch, setBranch] = useState("all");
-  const [since, setSince] = useState("all");
-  const [path, setPath] = useState("");
-  const [order, setOrder] = useState<LogOrder>("topology");
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const [viewOptionsOpen, setViewOptionsOpen] = useState(false);
-  const [showAuthor, setShowAuthor] = useState(true);
-  const [showDate, setShowDate] = useState(true);
-  const [showHash, setShowHash] = useState(false);
-  const [showTagNames, setShowTagNames] = useState(true);
-  const [compactReferences, setCompactReferences] = useState(false);
-  const [showLongEdges, setShowLongEdges] = useState(true);
-  const [referencesOnLeft, setReferencesOnLeft] = useState(false);
-  const [preferCommitDate, setPreferCommitDate] = useState(false);
-  const firstLoad = useRef(true);
-  const loadingMore = useRef(false);
-  const normalizedQuery = query.trim();
-  const queryPattern = useMemo<RegExp | null>(() => {
-    if (!regex || normalizedQuery.length === 0) return null;
-    try {
-      return new RegExp(normalizedQuery, matchCase ? "" : "i");
-    } catch {
-      return null;
-    }
-  }, [matchCase, normalizedQuery, regex]);
-  const authors = useMemo(() => [...new Set(commits.map((commit) => commit.author))], [commits]);
-  const filtered = useMemo(
-    () =>
-      commits.filter(
-        (commit) =>
-          (normalizedQuery.length === 0 ||
-            (regex
-              ? queryPattern?.test(`${commit.subject}\n${commit.oid}`) === true
-              : (matchCase ? commit.subject : commit.subject.toLowerCase()).includes(
-                  matchCase ? normalizedQuery : normalizedQuery.toLowerCase(),
-                ) ||
-                (matchCase ? commit.oid : commit.oid.toLowerCase()).startsWith(
-                  matchCase ? normalizedQuery : normalizedQuery.toLowerCase(),
-                ))) &&
-          (author === "all" || commit.author === author),
-      ),
-    [author, commits, matchCase, normalizedQuery, queryPattern, regex],
-  );
-  const toPushOids = useMemo(
-    () => new Set(commits.slice(0, Math.max(0, ahead)).map((commit) => commit.oid)),
-    [ahead, commits],
-  );
-  const upstreamRef = upstream ? `refs/remotes/${upstream}` : null;
-  const indexingLabel = powerSaveMode
-    ? "Git Log Indexing is unavailable in Power Save Mode"
-    : indexing
-      ? "Indexing Git Log"
-      : "Enable Git Log Indexing";
-
-  const filters = useMemo<LogFilters>(
-    () => ({
-      query: normalizedQuery || null,
-      branch: branch === "all" ? null : branch,
-      author: author === "all" ? null : author,
-      since: since === "all" ? null : since,
-      until: null,
-      paths: path.trim() ? [path.trim()] : [],
-      noMerges: false,
-      regex,
-      matchCase,
-    }),
-    [author, branch, matchCase, normalizedQuery, path, regex, since],
-  );
-
-  const activeFilterCount =
-    Number(Boolean(normalizedQuery)) +
-    Number(branch !== "all") +
-    Number(author !== "all") +
-    Number(since !== "all") +
-    Number(Boolean(path.trim()));
-  const rowColumns = `34px minmax(190px, 1fr) ${showAuthor ? "100px" : "0px"} ${showDate ? "90px" : "0px"}`;
-
-  const loadMore = async (): Promise<void> => {
-    if (!hasMore || loading || loadingMore.current) return;
-    loadingMore.current = true;
-    try {
-      await onLoad(filters, order, true);
-    } finally {
-      loadingMore.current = false;
-    }
-  };
-
-  useEffect(() => {
-    if (firstLoad.current) {
-      firstLoad.current = false;
-      return;
-    }
-    const timeout = window.setTimeout(() => {
-      void onLoad(filters, order, false);
-    }, 250);
-    return () => window.clearTimeout(timeout);
-  }, [filters, onLoad, order]);
-
-  useEffect(() => {
-    const find = (event: Event): void => {
-      if (!(event instanceof CustomEvent) || !normalizedQuery || filtered.length === 0) return;
-      const ownsSearch =
-        searchInput.current === document.activeElement ||
-        parentRef.current?.contains(document.activeElement);
-      if (!ownsSearch) return;
-      const direction = event.detail?.direction === -1 ? -1 : 1;
-      const current = filtered.findIndex((commit) => commit.oid === selectedOids[0]);
-      const index = ((current < 0 ? 0 : current) + direction + filtered.length) % filtered.length;
-      const commit = filtered[index];
-      if (commit) onSelectionChange([commit.oid]);
-    };
-    window.addEventListener("git-client:find", find);
-    return () => window.removeEventListener("git-client:find", find);
-  }, [filtered, normalizedQuery, onSelectionChange, selectedOids]);
-
-  const select = (event: React.MouseEvent, commit: Commit) => {
-    if (event.metaKey || event.ctrlKey) {
-      onSelectionChange(
-        selectedOids.includes(commit.oid)
-          ? selectedOids.filter((oid) => oid !== commit.oid)
-          : [...selectedOids, commit.oid],
-      );
-    } else if (event.shiftKey && selectedOids[0]) {
-      const from = filtered.findIndex((item) => item.oid === selectedOids[0]);
-      const to = filtered.findIndex((item) => item.oid === commit.oid);
-      onSelectionChange(
-        filtered.slice(Math.min(from, to), Math.max(from, to) + 1).map((item) => item.oid),
-      );
-    } else onSelectionChange([commit.oid]);
-  };
-
-  const navigateCommit = (direction: "parent" | "child"): void => {
-    const selected = commits.find((commit) => commit.oid === selectedOids[0]);
-    if (!selected) return;
-    const oid =
-      direction === "parent"
-        ? selected.parents[0]
-        : commits.find((commit) => commit.parents.includes(selected.oid))?.oid;
-    if (oid) onSelectionChange([oid]);
-  };
-
-  const navigateRow = (offset: number): void => {
-    if (filtered.length === 0) return;
-    const current = filtered.findIndex((commit) => commit.oid === selectedOids[0]);
-    const nextIndex = Math.max(
-      0,
-      Math.min(filtered.length - 1, (current < 0 ? 0 : current) + offset),
-    );
-    const next = filtered[nextIndex];
-    if (!next) return;
-    onSelectionChange([next.oid]);
-    window.requestAnimationFrame(() => {
-      parentRef.current
-        ?.querySelector<HTMLElement>(`[data-oid="${next.oid}"]`)
-        ?.scrollIntoView({ block: "nearest" });
-    });
-  };
-
-  useDismissLayer(
-    useMemo(
-      () => ({
-        id: "log-filters",
-        priority: 110,
-        active: filtersOpen,
-        dismiss: () => setFiltersOpen(false),
-      }),
-      [filtersOpen],
-    ),
-  );
-  useDismissLayer(
-    useMemo(
-      () => ({
-        id: "log-view-options",
-        priority: 110,
-        active: viewOptionsOpen,
-        dismiss: () => setViewOptionsOpen(false),
-      }),
-      [viewOptionsOpen],
-    ),
-  );
+}: CommitLogProps) {
+  const state = useCommitLogState({
+    ahead,
+    commits,
+    hasMore,
+    loading,
+    onLoad,
+    upstream,
+  });
+  const navigation = useCommitLogNavigation({
+    commits,
+    filtered: state.filtered,
+    normalizedQuery: state.normalizedQuery,
+    onSelectionChange,
+    selectedOids,
+  });
 
   return (
     <section
@@ -293,561 +87,52 @@ export const CommitLog = memo(function CommitLog({
         gridTemplateRows: `${LOG_FILTER_ROW_HEIGHT}px minmax(0, 1fr) 0`,
       }}
     >
-      <div
-        className={`logFilters [align-items:center] [background:var(--secondary)] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:1px] [overflow:hidden] [padding:0_3px] [&>_label]:[flex:none] logFilters`}
-        style={{ height: LOG_FILTER_ROW_HEIGHT }}
-      >
-        <div
-          className={`logSearchControls [flex:0_1_145px] [height:22px] [max-width:145px] [min-width:125px] [position:relative] [&_input]:[padding-right:39px]! [&>_button]:[position:absolute] [&>_button]:[top:1px] [&>_button:nth-of-type(1)]:[right:19px] [&>_button:nth-of-type(2)]:[right:0] logSearchControls`}
-          style={{ height: LOG_FILTER_ROW_HEIGHT }}
-        >
-          <TextInput
-            className="h-7! min-w-0 rounded-sm px-1.5"
-            data-command-search="history"
-            isLabelHidden
-            label="Search"
-            onChange={setQuery}
-            placeholder="Text or hash"
-            ref={searchInput}
-            size="sm"
-            startIcon={<Icon name="search" size={14} />}
-            value={query}
-            width="100%"
-          />
-          <Toggle
-            aria-label="Use regular expression"
-            onPressedChange={setRegex}
-            pressed={regex}
-            type="button"
-            className={cn(
-              "h-5 min-w-5 border-transparent bg-transparent px-1 font-mono text-[9px] text-muted-foreground hover:bg-accent hover:text-accent-foreground data-pressed:bg-accent data-pressed:text-foreground",
-            )}
-          >
-            .*
-          </Toggle>
-          <Toggle
-            aria-label="Match case"
-            onPressedChange={setMatchCase}
-            pressed={matchCase}
-            type="button"
-            className={cn(
-              "h-5 min-w-5 border-transparent bg-transparent px-1 font-mono text-[9px] text-muted-foreground hover:bg-accent hover:text-accent-foreground data-pressed:bg-accent data-pressed:text-foreground",
-            )}
-          >
-            Cc
-          </Toggle>
-        </div>
-        <Selector
-          isLabelHidden
-          label="Branch"
-          onChange={setBranch}
-          options={[
-            { value: "all", label: "Branch" },
-            ...refs.map((ref) => ({
-              value: ref.name,
-              label: ref.shortName,
-            })),
-          ]}
-          placement="below"
-          className="h-7! rounded-sm px-1.5!"
-          size="sm"
-          value={branch}
-          width={74}
-        />
-        <Selector
-          isLabelHidden
-          label="User"
-          onChange={setAuthor}
-          options={[
-            { value: "all", label: "User" },
-            ...authors.map((name) => ({
-              value: name,
-              label: name,
-            })),
-          ]}
-          placement="below"
-          className="h-7! rounded-sm px-1.5!"
-          size="sm"
-          value={author}
-          width={64}
-        />
-        <Selector
-          isLabelHidden
-          label="Date"
-          onChange={setSince}
-          options={[
-            { value: "all", label: "Date" },
-            { value: "1 day ago", label: "Last day" },
-            { value: "1 week ago", label: "Last week" },
-            { value: "1 month ago", label: "Last month" },
-          ]}
-          placement="below"
-          className="h-7! rounded-sm px-1.5!"
-          size="sm"
-          value={since}
-          width={64}
-        />
-        <TextInput
-          className="h-7! rounded-sm px-1.5"
-          isLabelHidden
-          label="Paths"
-          onChange={setPath}
-          placeholder="Paths"
-          size="sm"
-          value={path}
-          width={65}
-        />
-        <span className={`filterSpacer [flex:1] filterSpacer`} />
-        <Popover
-          alignment="end"
-          hasAutoFocus
-          isOpen={filtersOpen}
-          label="Graph Options"
-          onOpenChange={setFiltersOpen}
-          placement="below"
-          width={300}
-          content={
-            <div className="grid gap-3 p-1">
-              <Selector
-                label="Author"
-                onChange={setAuthor}
-                options={[
-                  { value: "all", label: "All authors" },
-                  ...authors.map((name) => ({
-                    value: name,
-                    label: name,
-                  })),
-                ]}
-                placement="below"
-                size="sm"
-                value={author}
-                width="100%"
-              />
-              <Selector
-                label="Date"
-                onChange={setSince}
-                options={[
-                  { value: "all", label: "All dates" },
-                  { value: "1 day ago", label: "Last day" },
-                  { value: "1 week ago", label: "Last week" },
-                  {
-                    value: "1 month ago",
-                    label: "Last month",
-                  },
-                ]}
-                placement="below"
-                size="sm"
-                value={since}
-                width="100%"
-              />
-              <TextInput
-                label="Path"
-                onChange={setPath}
-                placeholder="src/components"
-                size="sm"
-                value={path}
-                width="100%"
-              />
-              <Selector
-                label="Order"
-                onChange={(value) => {
-                  if (isLogOrder(value)) setOrder(value);
-                }}
-                options={[
-                  { value: "topology", label: "Topology" },
-                  { value: "date", label: "Date" },
-                  {
-                    value: "firstParent",
-                    label: "First parent",
-                  },
-                ]}
-                placement="below"
-                size="sm"
-                value={order}
-                width="100%"
-              />
-              <Button
-                onClick={() => {
-                  setQuery("");
-                  setBranch("all");
-                  setAuthor("all");
-                  setSince("all");
-                  setPath("");
-                  setOrder("topology");
-                }}
-                type="button"
-                disabled={activeFilterCount === 0 && order === "topology"}
-                className={cn("h-7 px-2.5")}
-                variant="ghost"
-                size="sm"
-              >
-                Reset filters
-              </Button>
-            </div>
-          }
-        >
-          <Button
-            type="button"
-            aria-label={"Graph Options"}
-            className={cn("h-5 min-w-5 px-0 aspect-square")}
-            variant="ghost"
-            size="icon-xs"
-          >
-            <Icon name="filter" size={14} />
-          </Button>
-        </Popover>
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <Button
-                onClick={onOpenNewTab}
-                type="button"
-                aria-label="Open New Git Log Tab"
-                className={cn("h-5 min-w-5 px-0 aspect-square")}
-                variant="ghost"
-                size="icon-xs"
-              >
-                <Icon name="plus" size={14} />
-              </Button>
-            }
-          />
-          <TooltipContent>Open New Git Log Tab</TooltipContent>
-        </Tooltip>
-        {!indexingEnabled && (
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  onClick={() => void onEnableIndexing(filters, order)}
-                  type="button"
-                  aria-label={indexingLabel}
-                  disabled={indexing || powerSaveMode}
-                  className={cn("h-5 min-w-5 px-0 aspect-square")}
-                  variant="ghost"
-                  size="icon-xs"
-                >
-                  <Icon name="search" size={14} />
-                </Button>
-              }
-            />
-            <TooltipContent>{indexingLabel}</TooltipContent>
-          </Tooltip>
-        )}
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <Button
-                onClick={onRefresh}
-                type="button"
-                aria-label="Refresh"
-                className={cn("h-5 min-w-5 px-0 aspect-square")}
-                variant="ghost"
-                size="icon-xs"
-              >
-                <Icon name="refresh" size={14} />
-              </Button>
-            }
-          />
-          <TooltipContent>Refresh</TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <Button
-                onClick={() => onCherryPick(selectedOids)}
-                type="button"
-                aria-label="Cherry-Pick"
-                disabled={!canCherryPick}
-                className={cn("h-5 min-w-5 px-0 aspect-square")}
-                variant="ghost"
-                size="icon-xs"
-              >
-                <Icon name="cherry" size={14} />
-              </Button>
-            }
-          />
-          <TooltipContent>Cherry-Pick</TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <Popover
-            alignment="end"
-            hasAutoFocus
-            isOpen={viewOptionsOpen}
-            label="View Options"
-            onOpenChange={setViewOptionsOpen}
-            placement="below"
-            width={264}
-            content={
-              <div
-                className={`logViewOptions [display:grid] [gap:3px] [padding:5px] [&>_strong]:[border-top:1px_solid_var(--border)] [&>_strong]:[color:var(--muted-foreground)] [&>_strong]:[font-size:10px] [&>_strong]:[margin:4px_5px_1px] [&>_strong]:[padding-top:6px] logViewOptions`}
-              >
-                <CheckboxInput isDisabled label="Root Names" size="sm" value={false} />
-                <CheckboxInput
-                  label="Compact References View"
-                  onChange={setCompactReferences}
-                  size="sm"
-                  value={compactReferences}
-                />
-                <CheckboxInput
-                  label="Tag Names"
-                  onChange={setShowTagNames}
-                  size="sm"
-                  value={showTagNames}
-                />
-                <CheckboxInput
-                  label="Long Edges"
-                  onChange={setShowLongEdges}
-                  size="sm"
-                  value={showLongEdges}
-                />
-                <CheckboxInput
-                  label="Commit Timestamp"
-                  onChange={setPreferCommitDate}
-                  size="sm"
-                  value={preferCommitDate}
-                />
-                <CheckboxInput
-                  label="References on the Left"
-                  onChange={setReferencesOnLeft}
-                  size="sm"
-                  value={referencesOnLeft}
-                />
-                <strong>Columns</strong>
-                <CheckboxInput
-                  label="Author"
-                  onChange={setShowAuthor}
-                  size="sm"
-                  value={showAuthor}
-                />
-                <CheckboxInput label="Date" onChange={setShowDate} size="sm" value={showDate} />
-                <CheckboxInput
-                  label="Commit Hash"
-                  onChange={setShowHash}
-                  size="sm"
-                  value={showHash}
-                />
-              </div>
-            }
-          >
-            <TooltipTrigger
-              render={
-                <Button
-                  type="button"
-                  aria-label="View Options"
-                  className={cn("h-5 min-w-5 px-0 aspect-square")}
-                  variant="ghost"
-                  size="icon-xs"
-                >
-                  <Icon name="more" size={14} />
-                </Button>
-              }
-            />
-          </Popover>
-          <TooltipContent>View Options</TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <Button
-                onClick={() => searchInput.current?.focus()}
-                type="button"
-                aria-label="Go To Hash/Branch/Tag"
-                className={cn("h-5 min-w-5 px-0 aspect-square")}
-                variant="ghost"
-                size="icon-xs"
-              >
-                <Icon name="search" size={14} />
-              </Button>
-            }
-          />
-          <TooltipContent>Go To Hash/Branch/Tag</TooltipContent>
-        </Tooltip>
-        <Button
-          onClick={onImportPatch}
-          tabIndex={-1}
-          type="button"
-          className={cn(
-            "h-7 px-2.5",
-            `srOnly [clip:rect(0_0_0_0)] [clip-path:inset(50%)] [height:1px] [overflow:hidden] [position:absolute] [left:0] [top:0] [white-space:nowrap] [width:1px] srOnly`,
-          )}
-          variant="outline"
-          size="sm"
-        >
-          Import Patch
-        </Button>
-      </div>
-      <div
-        aria-colcount={4}
-        aria-label="Git log"
-        aria-rowcount={filtered.length}
-        className={`commitScroller [background:var(--card)] [min-height:0] [overflow:auto] [position:relative] commitScroller`}
-        onScroll={(event) => {
-          const target = event.currentTarget;
-          if (target.scrollHeight - target.scrollTop - target.clientHeight < 220) {
-            void loadMore();
-          }
-        }}
-        onKeyDown={(event) => {
-          if (event.key === "ArrowDown") navigateRow(1);
-          else if (event.key === "ArrowUp") navigateRow(-1);
-          else if (event.key === "ArrowRight") navigateCommit("parent");
-          else if (event.key === "ArrowLeft") navigateCommit("child");
-          else return;
-          event.preventDefault();
-        }}
-        ref={parentRef}
-        role="table"
-        tabIndex={0}
-      >
-        <div
-          className={`srOnly [clip:rect(0_0_0_0)] [clip-path:inset(50%)] [height:1px] [overflow:hidden] [position:absolute] [left:0] [top:0] [white-space:nowrap] [width:1px] srOnly`}
-          role="row"
-        >
-          <span role="columnheader">Graph</span>
-          <span role="columnheader">Commit</span>
-          <span role="columnheader">Author</span>
-          <span role="columnheader">Date</span>
-        </div>
-        {filtered.length === 0 ? (
-          loading ? (
-            <Spinner
-              className="h-full w-full justify-center px-6"
-              label="Searching commit history…"
-            />
-          ) : error ? (
-            <Notice className="m-auto w-auto max-w-lg" role="alert" size="sm" tone="destructive">
-              {error}
-            </Notice>
-          ) : (
-            <EmptyState
-              role="status"
-              title={
-                normalizedQuery || activeFilterCount > 0 || branch !== "all"
-                  ? "No commits match these filters."
-                  : "This repository has no commits yet."
-              }
-            />
-          )
-        ) : (
-          <div
-            style={{
-              height: filtered.length * LOG_ROW_HEIGHT + (loading || error ? LOG_ROW_HEIGHT : 0),
-              position: "relative",
-            }}
-          >
-            <div
-              className={`graphCanvas [left:2px] [pointer-events:none] [position:absolute] [top:0] [width:34px] [z-index:2] graphCanvas`}
-            >
-              <CommitGraph commits={filtered} width={34} showLongEdges={showLongEdges} />
-            </div>
-            {filtered.map((commit, index) => {
-              const selected = selectedOids.includes(commit.oid);
-              const toPush = toPushOids.has(commit.oid);
-              const toPull =
-                behind > 0 && upstreamRef !== null && commit.refs.includes(upstreamRef);
-              const references = commit.refs.filter(
-                (ref) => showTagNames || !ref.startsWith("tag: refs/tags/"),
-              );
-              const visibleReferences = compactReferences ? references.slice(0, 1) : references;
-              const displayedTime = commitTime(
-                preferCommitDate ? commit.committedAt : commit.authoredAt,
-                relativeTimeBaseSeconds,
-              );
-              const referenceBadges = visibleReferences.map((ref) => (
-                <em key={ref}>
-                  {ref
-                    .replace("HEAD -> refs/heads/", "")
-                    .replace("refs/remotes/", "")
-                    .replace("refs/heads/", "")
-                    .replace("tag: refs/tags/", "")}
-                </em>
-              ));
-              return (
-                <Button
-                  aria-label={`${commit.author} ${displayedTime} ${commit.subject} ${commit.oid.slice(0, 7)}`}
-                  aria-rowindex={index + 1}
-                  aria-selected={selected}
-                  data-sync-state={toPush ? "push" : toPull ? "pull" : undefined}
-                  data-oid={commit.oid}
-                  key={commit.oid}
-                  onClick={(event) => select(event, commit)}
-                  onContextMenu={(event) => onContextMenu(event, commit)}
-                  role="row"
-                  style={{
-                    gridTemplateColumns: rowColumns,
-                    height: LOG_ROW_HEIGHT,
-                    transform: `translateY(${index * LOG_ROW_HEIGHT}px)`,
-                  }}
-                  type="button"
-                  className={cn(
-                    "grid min-h-0 text-xs whitespace-normal text-left aria-selected:bg-accent aria-current:bg-accent",
-                    `${HISTORY_COMMIT_ROW_CLASS} ${selected ? `selectedCommit [background:var(--accent)]! selectedCommit` : ""}`,
-                  )}
-                  variant="ghost"
-                  size="default"
-                >
-                  <span aria-hidden="true" />
-                  <span
-                    aria-label={commit.subject}
-                    className={`commitSubject [gap:6px] [&_em]:[background:color-mix(in_oklch,_var(--primary)_16%,_var(--card))] [&_em]:[border:1px_solid_color-mix(in_oklch,_var(--primary)_35%,_var(--border))] [&_em]:rounded-xs [&_em]:[color:var(--primary)] [&_em]:[flex:none] [&_em]:[font-size:9px] [&_em]:[font-style:normal] [&_em]:[padding:1px_4px] [&_code]:[color:var(--disabled-foreground)] [&_code]:[font-size:9px] [&_code]:[margin-left:auto] commitSubject [&_em]:rounded-xs`}
-                    role="cell"
-                  >
-                    {referencesOnLeft && referenceBadges}
-                    <span
-                      className={`ellipsis [min-width:0] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap] ellipsis`}
-                    >
-                      {commit.subject}
-                    </span>
-                    {!referencesOnLeft && referenceBadges}
-                    {showHash && <code>{commit.oid.slice(0, 7)}</code>}
-                  </span>
-                  <span
-                    className={`ellipsis [min-width:0] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap] ellipsis`}
-                    hidden={!showAuthor}
-                    role="cell"
-                  >
-                    {commit.author}
-                  </span>
-                  <span
-                    className={`ellipsis [min-width:0] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap] ellipsis`}
-                    hidden={!showDate}
-                    role="cell"
-                  >
-                    {displayedTime}
-                  </span>
-                </Button>
-              );
-            })}
-            {error ? (
-              <Notice
-                className="absolute top-0 right-0 left-0 h-5 rounded-none border-x-0 px-2 py-0 pl-[42px] text-[10px]"
-                role="alert"
-                size="sm"
-                style={{
-                  transform: `translateY(${filtered.length * LOG_ROW_HEIGHT}px)`,
-                }}
-                tone="destructive"
-              >
-                {error}
-              </Notice>
-            ) : loading ? (
-              <Spinner
-                className="absolute top-0 right-0 left-0 h-5 pl-[42px] text-[10px]"
-                label="Loading commits…"
-                size="sm"
-                style={{
-                  transform: `translateY(${filtered.length * LOG_ROW_HEIGHT}px)`,
-                }}
-              />
-            ) : null}
-          </div>
-        )}
-      </div>
+      <CommitLogToolbar
+        activeFilterCount={state.activeFilterCount}
+        authors={state.authors}
+        canCherryPick={canCherryPick}
+        filterState={state.filterState}
+        filters={state.filters}
+        indexing={indexing}
+        indexingEnabled={indexingEnabled}
+        onCherryPick={onCherryPick}
+        onEnableIndexing={onEnableIndexing}
+        onFilterChange={state.setFilter}
+        onImportPatch={onImportPatch}
+        onOpenNewTab={onOpenNewTab}
+        onRefresh={onRefresh}
+        onResetFilters={state.resetFilters}
+        onViewOptionChange={state.setViewOption}
+        powerSaveMode={powerSaveMode}
+        refs={refs}
+        searchInputRef={navigation.searchInputRef}
+        selectedOids={selectedOids}
+        viewOptions={state.viewOptions}
+      />
+      <CommitLogTable
+        activeFilterCount={state.activeFilterCount}
+        behind={behind}
+        branch={state.filterState.branch}
+        error={error}
+        filtered={state.filtered}
+        loadMore={state.loadMore}
+        loading={loading}
+        normalizedQuery={state.normalizedQuery}
+        onContextMenu={onContextMenu}
+        onKeyDown={navigation.onKeyDown}
+        onSelect={navigation.select}
+        relativeTimeBaseSeconds={relativeTimeBaseSeconds}
+        selectedOids={selectedOids}
+        tableRef={navigation.tableRef}
+        toPushOids={state.toPushOids}
+        upstreamRef={state.upstreamRef}
+        viewOptions={state.viewOptions}
+      />
       <div className={`logFooter [display:none] logFooter`}>
-        <span>{loading ? "Loading…" : `${filtered.length.toLocaleString()} commits`}</span>
+        <span>{loading ? "Loading…" : `${state.filtered.length.toLocaleString()} commits`}</span>
         {hasMore ? (
           <Button
-            onClick={() => void loadMore()}
+            onClick={() => void state.loadMore()}
             type="button"
             className={cn("h-7 px-2.5")}
             variant="outline"
@@ -856,7 +141,10 @@ export const CommitLog = memo(function CommitLog({
             Load 500 more
           </Button>
         ) : (
-          <span>{order === "firstParent" ? "First parent" : order} order</span>
+          <span>
+            {state.filterState.order === "firstParent" ? "First parent" : state.filterState.order}{" "}
+            order
+          </span>
         )}
       </div>
     </section>

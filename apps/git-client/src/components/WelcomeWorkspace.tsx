@@ -191,6 +191,7 @@ export function WelcomeWorkspace({
               )}
               variant="ghost"
               size="sm"
+              tabIndex={-1}
             >
               {sectionLabel(item)}
             </Button>
@@ -230,6 +231,7 @@ export function WelcomeWorkspace({
               onClick={onNewProject}
               type="button"
               className="h-auto! min-h-0 border-0 p-0! hover:bg-transparent"
+              size="default"
               variant="ghost"
             >
               <span>
@@ -241,6 +243,7 @@ export function WelcomeWorkspace({
               onClick={onOpenRepository}
               type="button"
               className="h-auto! min-h-0 border-0 p-0! hover:bg-transparent"
+              size="default"
               variant="ghost"
             >
               <span>
@@ -252,6 +255,7 @@ export function WelcomeWorkspace({
               onClick={onCloneRepository}
               type="button"
               className="h-auto! min-h-0 border-0 p-0! hover:bg-transparent"
+              size="default"
               variant="ghost"
             >
               <span>
@@ -333,6 +337,7 @@ export function WelcomeWorkspace({
             className="pt-[16px] outline-none"
             onKeyDown={selectProjectFromKeyboard}
             role="listbox"
+            tabIndex={-1}
           >
             {filteredProjects.map((project, index) => (
               <div className="group relative" key={project.path}>

@@ -72,35 +72,38 @@ export function PushDialog({
     });
   }, [onClose]);
 
-  const load = async (selectedRemote: string | null, selectedRef: string | null): Promise<void> => {
-    const current = generation.current + 1;
-    generation.current = current;
-    setLoading(true);
-    setPreview(null);
-    setReviewExpired(false);
-    setError(null);
-    setChoice("normal");
-    setConfirmation("");
-    try {
-      const next = await onLoadPreview(selectedRemote, selectedRef, localRevision);
-      if (generation.current !== current) return;
-      setPreview(next);
-      setRemote(next.remote);
-      setRemoteRef(next.remoteRef);
-      setSetUpstream(next.setUpstreamDefault);
-    } catch (reason) {
-      if (generation.current === current) setError(sanitizeGitError(reason));
-    } finally {
-      if (generation.current === current) setLoading(false);
-    }
-  };
+  const load = useCallback(
+    async (selectedRemote: string | null, selectedRef: string | null): Promise<void> => {
+      const current = generation.current + 1;
+      generation.current = current;
+      setLoading(true);
+      setPreview(null);
+      setReviewExpired(false);
+      setError(null);
+      setChoice("normal");
+      setConfirmation("");
+      try {
+        const next = await onLoadPreview(selectedRemote, selectedRef, localRevision);
+        if (generation.current !== current) return;
+        setPreview(next);
+        setRemote(next.remote);
+        setRemoteRef(next.remoteRef);
+        setSetUpstream(next.setUpstreamDefault);
+      } catch (reason) {
+        if (generation.current === current) setError(sanitizeGitError(reason));
+      } finally {
+        if (generation.current === current) setLoading(false);
+      }
+    },
+    [localRevision, onLoadPreview],
+  );
 
   useEffect(() => {
     void load(null, null);
     return () => {
       generation.current += 1;
     };
-  }, [localRevision]);
+  }, [localRevision, load]);
 
   useDismissLayer(
     useMemo(
@@ -193,7 +196,10 @@ export function PushDialog({
               label="Remote"
               onChange={setRemote}
               options={[
-                ...remotes.map((item) => ({ label: item.name, value: item.name })),
+                ...remotes.map((item) => ({
+                  label: item.name,
+                  value: item.name,
+                })),
                 ...(remote && !remotes.some((item) => item.name === remote)
                   ? [{ label: remote, value: remote }]
                   : []),
@@ -305,7 +311,7 @@ export function PushDialog({
                   }}
                   value={choice}
                 >
-                  <label className="flex items-start gap-2">
+                  <label aria-label="Normal push" className="flex items-start gap-2">
                     <RadioGroupItem disabled={!normalAvailable} value="normal" />
                     <span>
                       <strong>Normal push</strong>
@@ -315,7 +321,7 @@ export function PushDialog({
                     </span>
                   </label>
                   {!preview.newBranch && (
-                    <label className="flex items-start gap-2">
+                    <label aria-label="Force push with lease" className="flex items-start gap-2">
                       <RadioGroupItem disabled={!forceAvailable} value="forceWithLease" />
                       <span>
                         <strong>Force push with lease</strong>

@@ -174,6 +174,7 @@ export function ProjectSwitcherPopup({
             )}
             variant="ghost"
             size="default"
+            tabIndex={-1}
           >
             <Icon name="folder" size={16} />
             <span>Open…</span>
@@ -195,6 +196,7 @@ export function ProjectSwitcherPopup({
             )}
             variant="ghost"
             size="default"
+            tabIndex={-1}
           >
             <Icon name="branch" size={16} />
             <span>Clone Repository…</span>

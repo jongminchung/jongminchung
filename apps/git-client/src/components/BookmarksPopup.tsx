@@ -77,6 +77,7 @@ export function BookmarksPopup({
                 onMouseEnter={() => setActiveIndex(index)}
                 role="option"
                 startContent={<Icon name="bookmarkFilled" size={13} />}
+                tabIndex={-1}
               />
             ))}
           </List>

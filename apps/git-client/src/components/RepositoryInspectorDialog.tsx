@@ -145,6 +145,7 @@ export function RepositoryInspectorDialog({
     source,
     tab,
     treePath,
+    path,
   ]);
 
   const saveEditor = useCallback(

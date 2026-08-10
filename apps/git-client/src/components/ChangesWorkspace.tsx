@@ -36,13 +36,12 @@ import type {
   SubmoduleDiff,
 } from "../shared/contracts/model";
 import { useAppDialog } from "./AppDialog";
+import { CommitComposer } from "./changes/CommitComposer";
 import { useCommandDefinitions, useDismissLayer } from "./CommandProvider";
 import { DiffViewer } from "./DiffViewer";
 import { Icon } from "./Icon";
-import { EmptyState, Spinner, StatusBadge } from "./ProductCollections";
+import { EmptyState, StatusBadge } from "./ProductCollections";
 import { CheckboxInput } from "./ProductFormControls";
-import { Selector } from "./ProductFormControls";
-import { TextArea } from "./ProductFormControls";
 import { Popover } from "./ProductOverlays";
 import { VerticalResizeHandle } from "./VerticalResizeHandle";
 
@@ -165,7 +164,6 @@ export function ChangesWorkspace({
   const [changelistMutation, setChangelistMutation] = useState<ChangelistMutation | null>(null);
   const [focused, setFocused] = useState(false);
   const [commitRailOpen, setCommitRailOpen] = useState(false);
-  const [commitOptionsOpen, setCommitOptionsOpen] = useState(false);
   const searchInput = useRef<HTMLInputElement>(null);
   const workspace = useRef<HTMLDivElement>(null);
   const navigator = useRef<HTMLElement>(null);
@@ -227,7 +225,6 @@ export function ChangesWorkspace({
   }, [focusCommitMessage]);
 
   const closeCommitComposer = useCallback((): void => {
-    setCommitOptionsOpen(false);
     if (!toolWindow) setCommitRailOpen(false);
     const origin = commitComposerOrigin.current;
     window.requestAnimationFrame(() => {
@@ -380,7 +377,7 @@ export function ChangesWorkspace({
     const key = selectionKey(selection);
     setSelectedKeys((current) => (current.size > 1 ? current : new Set([key])));
     setSelectionAnchor((current) => current ?? key);
-  }, [selection?.layer, selection?.path]);
+  }, [selection?.layer, selection?.path, selection]);
 
   const assign = async (file: FileChange): Promise<void> => {
     const choice = await dialog.input({
@@ -509,36 +506,33 @@ export function ChangesWorkspace({
       ? selectedChangelist.paths.length > 0
       : stagedFiles.length > 0 || hasCommitAllChanges),
   );
-  const changeCommands = useMemo<readonly CommandDefinition[]>(
-    () => [
-      commandDefinition("changes.save", runFileAction, () =>
-        selectedEntry
-          ? COMMAND_ENABLED
-          : commandDisabled("Select a changed file to stage or unstage."),
-      ),
-      commandDefinition(
-        "changes.commit",
-        () => commit(false),
-        () =>
-          committing
-            ? commandDisabled("A commit is already in progress.")
-            : canCommit
-              ? COMMAND_ENABLED
-              : commandDisabled("Enter a commit message and stage at least one file."),
-      ),
-      commandDefinition(
-        "changes.commitPush",
-        () => commit(true),
-        () =>
-          committing
-            ? commandDisabled("A commit is already in progress.")
-            : canCommit
-              ? COMMAND_ENABLED
-              : commandDisabled("Enter a commit message and stage at least one file."),
-      ),
-    ],
-    [canCommit, commit, committing, runFileAction, selectedEntry],
-  );
+  const changeCommands: readonly CommandDefinition[] = [
+    commandDefinition("changes.save", runFileAction, () =>
+      selectedEntry
+        ? COMMAND_ENABLED
+        : commandDisabled("Select a changed file to stage or unstage."),
+    ),
+    commandDefinition(
+      "changes.commit",
+      () => commit(false),
+      () =>
+        committing
+          ? commandDisabled("A commit is already in progress.")
+          : canCommit
+            ? COMMAND_ENABLED
+            : commandDisabled("Enter a commit message and stage at least one file."),
+    ),
+    commandDefinition(
+      "changes.commitPush",
+      () => commit(true),
+      () =>
+        committing
+          ? commandDisabled("A commit is already in progress.")
+          : canCommit
+            ? COMMAND_ENABLED
+            : commandDisabled("Enter a commit message and stage at least one file."),
+    ),
+  ];
   useCommandDefinitions(changeCommands);
 
   useDismissLayer(
@@ -574,18 +568,6 @@ export function ChangesWorkspace({
       [selectedKeys.size, selection],
     ),
   );
-  useDismissLayer(
-    useMemo(
-      () => ({
-        id: "commit-options",
-        priority: 110,
-        active: commitOptionsOpen,
-        dismiss: () => setCommitOptionsOpen(false),
-      }),
-      [commitOptionsOpen],
-    ),
-  );
-
   const renderGroup = (label: string, group: readonly ChangeEntry[]) => (
     <section
       className={`changeNavigatorGroup [&>_header]:[align-items:center] [&>_header]:[background:var(--secondary)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[border-top:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[gap:6px] [&>_header]:[height:29px] [&>_header]:[padding:0_7px] [&>_header]:[position:sticky] [&>_header]:[top:0] [&>_header]:[z-index:2] [&:first-child_>_header]:[border-top:0] [&>_header_small]:[color:var(--disabled-foreground)] [&>_header_span]:[flex:1] [&>_header_button]:[background:transparent] [&>_header_button]:[color:var(--primary)] [&>_header_button]:[padding:0_5px] changeNavigatorGroup`}
@@ -739,6 +721,7 @@ export function ChangesWorkspace({
         className={`changeNavigator [border-right:1px_solid_var(--border)] [display:grid] [grid-template-rows:38px_minmax(0,_1fr)_auto] [min-height:0] [min-width:0] [outline:0] [position:relative] changeNavigator`}
         onKeyDown={handleNavigatorKeyboard}
         ref={navigator}
+        // oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- The changed-files navigator owns keyboard selection.
         tabIndex={0}
       >
         {!toolWindow && (
@@ -955,211 +938,25 @@ export function ChangesWorkspace({
           </Button>
         </section>
       )}
-      <aside
-        className={`commitRail [border-left:1px_solid_var(--border)] [display:grid] [gap:7px] [grid-template-rows:34px_auto_auto_minmax(110px,_1fr)_auto] [min-height:0] [min-width:0] [padding:7px] [position:relative] [&>_.verticalResizeHandle]:[left:-4px] [&>_.verticalResizeHandle]:[right:auto] [&>_header]:[align-items:center] [&>_header]:[display:flex] [&>_header]:[gap:6px] [&>_header_small]:[color:var(--disabled-foreground)] [&>_header_small]:[margin-left:auto] [&_textarea]:[background:var(--secondary)] [&_textarea]:[border:1px_solid_var(--border)] [&_textarea]:[min-height:110px] [&_textarea]:[padding:9px] [&_textarea]:[resize:none] [&>_footer]:[align-items:center] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:grid] [&>_footer]:[gap:5px] [&>_footer]:[grid-template-columns:minmax(0,_1fr)_auto_auto] [&>_footer]:[padding-top:7px] [&>_footer_>_button]:[background:var(--secondary)] [&>_footer_>_button]:[border:1px_solid_var(--border)] [&>_footer_>_button]:[min-height:29px] [&>_footer_>_button]:[padding:0_9px] max-[1120px]:[bottom:0] max-[1120px]:[box-shadow:var(--shadow-lg)] max-[1120px]:[position:absolute] max-[1120px]:[right:0] max-[1120px]:[top:0] max-[1120px]:[transform:translateX(102%)] max-[1120px]:[transition:transform_120ms_ease-out] max-[1120px]:[width:min(var(--commit-rail-width,_340px),_calc(100%_-_220px))] max-[1120px]:[z-index:15] max-[1120px]:[&>_.verticalResizeHandle]:[display:none] commitRail`}
-      >
-        {!toolWindow && (
-          <VerticalResizeHandle
-            direction={-1}
-            label="Resize commit composer"
-            onChange={onCommitRailWidthChange}
-            value={commitRailWidth}
-          />
-        )}
-        <header>
-          <strong>{toolWindow ? "Commit Message" : "Commit"}</strong>
-          <small>{stagedFiles.length} staged</small>
-          {!toolWindow && (
-            <Button
-              onClick={closeCommitComposer}
-              type="button"
-              aria-label={"Close commit composer"}
-              className="aspect-square h-[26px] min-w-[26px] px-0 [display:none]! max-[1120px]:[display:inline-flex]!"
-              variant="ghost"
-              size="icon-sm"
-            >
-              <Icon name="close" size={13} />
-            </Button>
-          )}
-        </header>
-        <div
-          className={`changelistBar [display:flex] [gap:5px] [min-width:0] [padding-bottom:5px] [&_select]:[background:var(--secondary)] [&_select]:[border:1px_solid_var(--border)] [&_select]:rounded-sm [&_select]:[flex:1] [&_select]:[min-width:0] [&_select]:[padding:0_6px] [&_button]:[height:24px] changelistBar [&_select]:rounded-sm`}
-        >
-          <Selector
-            isLabelHidden
-            label="Commit changelist"
-            onChange={(value) =>
-              onDraftChange({
-                ...draft,
-                changelistId: value || null,
-              })
-            }
-            options={[
-              { value: "", label: "Default · staged index" },
-              ...changelists.map((changelist) => ({
-                value: changelist.id,
-                label: `${changelist.name} · ${changelist.paths.length} files`,
-              })),
-            ]}
-            placement="above"
-            size="sm"
-            value={draft.changelistId ?? ""}
-            width="100%"
-          />
-          <Button
-            type="button"
-            aria-busy={changelistMutation === "create"}
-            disabled={changelistMutation !== null}
-            onClick={() => void createChangelist()}
-            className={cn("h-7 px-2.5")}
-            variant="ghost"
-            size="sm"
-          >
-            {changelistMutation === "create" ? (
-              <Spinner label="Creating changelist…" size="sm" />
-            ) : (
-              "New"
-            )}
-          </Button>
-        </div>
-        {selectedChangelist && (
-          <Button
-            type="button"
-            aria-busy={changelistMutation === "delete"}
-            disabled={changelistMutation !== null}
-            onClick={() => void deleteSelectedChangelist()}
-            className={cn(
-              "h-7 px-2.5 border-border bg-secondary shadow-xs hover:border-destructive hover:bg-destructive-muted active:bg-destructive-muted/80",
-              "w-full",
-              "deleteChangelistButton [grid-row:3]",
-            )}
-            variant="destructive"
-            size="sm"
-          >
-            {changelistMutation === "delete" ? (
-              <Spinner label="Deleting changelist…" size="sm" />
-            ) : (
-              "Delete selected changelist"
-            )}
-          </Button>
-        )}
-        <TextArea
-          fieldClassName={
-            "commitMessageField [grid-row:4] h-full min-h-0 [&>span]:h-full [&>span]:min-h-0 [&_textarea]:h-full [&_textarea]:min-h-0"
-          }
-          data-commit-message
-          isLabelHidden
-          label="Commit message"
-          onChange={(message) => onDraftChange({ ...draft, message })}
-          onKeyDown={(event) => {
-            if (event.key !== "Escape") return;
-            event.preventDefault();
-            event.stopPropagation();
-            closeCommitComposer();
-          }}
-          placeholder="Commit message"
-          rows={7}
-          size="sm"
-          value={draft.message}
-          width="100%"
-        />
-        <footer className="flex items-center justify-end gap-2 border-t border-border p-2">
-          <Popover
-            alignment="end"
-            hasAutoFocus
-            isOpen={commitOptionsOpen}
-            label="Commit options"
-            onOpenChange={setCommitOptionsOpen}
-            placement="above"
-            width={260}
-            content={
-              <div className="grid gap-1 p-1">
-                <CheckboxInput
-                  label="Amend"
-                  onChange={(amend) => {
-                    onDraftChange({ ...draft, amend });
-                    focusCommitMessage();
-                  }}
-                  size="sm"
-                  value={draft.amend}
-                />
-                <CheckboxInput
-                  label="Sign-off"
-                  onChange={(signOff) => onDraftChange({ ...draft, signOff })}
-                  size="sm"
-                  value={draft.signOff}
-                />
-                <CheckboxInput
-                  label="GPG sign"
-                  onChange={(gpgSign) => onDraftChange({ ...draft, gpgSign })}
-                  size="sm"
-                  value={draft.gpgSign}
-                />
-                <CheckboxInput
-                  label="Run hooks"
-                  onChange={(runHooks) => onDraftChange({ ...draft, runHooks })}
-                  size="sm"
-                  value={draft.runHooks}
-                />
-                {!selectedChangelist && (
-                  <CheckboxInput
-                    label="Commit tracked"
-                    onChange={(commitAll) =>
-                      onDraftChange({
-                        ...draft,
-                        commitAll,
-                      })
-                    }
-                    size="sm"
-                    value={draft.commitAll}
-                  />
-                )}
-              </div>
-            }
-          >
-            <Button type="button" className={cn("h-7 px-2.5")} variant="ghost" size="sm">
-              Commit options
-              {commitOptionCount > 0 ? <em>{commitOptionCount}</em> : undefined}
-            </Button>
-          </Popover>
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  onClick={() => void commit(false)}
-                  type="button"
-                  aria-busy={committing}
-                  disabled={commitDisabled || committing}
-                  className={cn("h-7 px-2.5")}
-                  variant="outline"
-                  size="sm"
-                >
-                  {committing ? "Checking…" : "Commit"}
-                </Button>
-              }
-            />
-            <TooltipContent>Commit · ⌘↩</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  onClick={() => void commit(true)}
-                  type="button"
-                  aria-busy={committing}
-                  disabled={commitDisabled || committing}
-                  className={cn("h-7 px-2.5")}
-                  variant="default"
-                  size="sm"
-                >
-                  {committing ? "Checking…" : "Commit & Push"}
-                </Button>
-              }
-            />
-            <TooltipContent>Commit &amp; Push · ⇧⌘↩</TooltipContent>
-          </Tooltip>
-        </footer>
-      </aside>
+      <CommitComposer
+        changelistMutation={changelistMutation}
+        changelists={changelists}
+        closeCommitComposer={closeCommitComposer}
+        commit={commit}
+        commitDisabled={commitDisabled}
+        commitOptionCount={commitOptionCount}
+        commitRailWidth={commitRailWidth}
+        committing={committing}
+        createChangelist={createChangelist}
+        deleteSelectedChangelist={deleteSelectedChangelist}
+        draft={draft}
+        focusCommitMessage={focusCommitMessage}
+        onCommitRailWidthChange={onCommitRailWidthChange}
+        onDraftChange={onDraftChange}
+        selectedChangelist={selectedChangelist}
+        stagedFiles={stagedFiles}
+        toolWindow={toolWindow}
+      />
       {dialog.node}
     </div>
   );

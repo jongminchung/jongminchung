@@ -63,7 +63,10 @@ describe("native Electron actions", () => {
   });
 
   it("keeps Electron commit signatures and patch actions on native boundaries", async () => {
-    const appSource = await readFile(fileURLToPath(new URL("../App.tsx", import.meta.url)), "utf8");
+    const appSource = await readFile(
+      fileURLToPath(new URL("../repository/RepositoryWorkspace.tsx", import.meta.url)),
+      "utf8",
+    );
 
     expect(appSource).toContain("if (!primaryCommitOid || !isElectronRuntime())");
     expect(appSource).toContain("selectPatchExportPath(");

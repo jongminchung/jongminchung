@@ -60,6 +60,7 @@ export function InspectionResultsDialog({
                 startContent={
                   <Icon name={issue.severity === "error" ? "warning" : "search"} size={14} />
                 }
+                tabIndex={-1}
               />
             ))}
           </List>

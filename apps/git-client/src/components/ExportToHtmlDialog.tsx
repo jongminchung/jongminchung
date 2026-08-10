@@ -79,10 +79,10 @@ export function ExportToHtmlDialog({
             />
             <RadioListItem label={`All files in directory ${directoryName}`} value="directory" />
           </RadioList>
-          <label>
+          <div>
             Output directory
             <span>The native directory picker opens after you choose Export.</span>
-          </label>
+          </div>
           <fieldset>
             <legend>Options</legend>
             <CheckboxInput

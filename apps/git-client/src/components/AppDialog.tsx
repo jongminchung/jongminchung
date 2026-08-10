@@ -81,14 +81,14 @@ export function useAppDialog(): AppDialogController {
     });
   }, []);
 
-  const cancel = (): void => {
+  const cancel = useCallback((): void => {
     if (request?.kind === "input") request.resolve(null);
     if (request?.kind === "confirm") request.resolve(false);
     setRequest(undefined);
     window.requestAnimationFrame(() => {
       if (originFocus.current?.isConnected) originFocus.current.focus();
     });
-  };
+  }, [request]);
 
   const submit = (): void => {
     if (!request) return;
@@ -121,7 +121,7 @@ export function useAppDialog(): AppDialogController {
         active: request !== undefined,
         dismiss: cancel,
       }),
-      [dialogId, request],
+      [dialogId, request, cancel],
     ),
   );
 

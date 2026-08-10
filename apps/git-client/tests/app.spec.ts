@@ -763,3 +763,29 @@ test("has no serious automated accessibility violations", async ({ page }) => {
     ),
   ).toEqual([]);
 });
+
+test("keeps welcome, repository, and settings surfaces accessible", async ({ page }) => {
+  const expectNoSeriousViolations = async (include?: string): Promise<void> => {
+    let audit = new AxeBuilder({ page }).disableRules(["color-contrast"]);
+    if (include) audit = audit.include(include);
+    const results = await audit.analyze();
+    expect(
+      results.violations.filter((violation) =>
+        ["serious", "critical"].includes(violation.impact ?? ""),
+      ),
+    ).toEqual([]);
+  };
+
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "Welcome to Git Client" })).toBeVisible();
+  await expectNoSeriousViolations();
+
+  await page.goto("/?fixture=qa");
+  await expect(page.getByRole("region", { name: "Commit log" })).toBeVisible();
+  await expectNoSeriousViolations();
+
+  await page.getByRole("button", { name: "IDE and Project Settings" }).click();
+  const settings = page.getByRole("dialog", { name: "Settings" });
+  await expect(settings).toBeVisible();
+  await expectNoSeriousViolations('[role="dialog"][aria-label="Settings"]');
+});

@@ -18,7 +18,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@jongminchung/ui/components/tabs";
 import { Textarea } from "@jongminchung/ui/components/textarea";
 import { cn } from "@jongminchung/ui/lib/utils";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type {
   GitConfig,
   GitOperation,
@@ -71,7 +71,7 @@ export function RepositorySettingsPanel({
   const [notice, setNotice] = useState<string>();
   const dialog = useAppDialog();
 
-  const reload = async (): Promise<void> => {
+  const reload = useCallback(async (): Promise<void> => {
     setBusy(true);
     setError(undefined);
     try {
@@ -88,11 +88,11 @@ export function RepositorySettingsPanel({
     } finally {
       setBusy(false);
     }
-  };
+  }, [onLoadConfig, onLoadSubmodules, onReadIgnoreRules]);
 
   useEffect(() => {
     void reload();
-  }, []);
+  }, [reload]);
 
   const filteredConfig = useMemo(() => {
     const query = filter.trim().toLowerCase();

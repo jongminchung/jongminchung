@@ -185,7 +185,7 @@ export function ProjectToolWindow({
     if (opening) void loadDirectory(path);
   };
 
-  const revealActiveFile = async (): Promise<void> => {
+  const revealActiveFile = useCallback(async (): Promise<void> => {
     if (!activePath) {
       setExpanded((current) => new Set(current).add(""));
       setSelectedPath("");
@@ -204,12 +204,12 @@ export function ProjectToolWindow({
         .querySelector<HTMLElement>(`[data-project-path="${CSS.escape(activePath)}"]`)
         ?.focus(),
     );
-  };
+  }, [activePath, loadDirectory]);
 
   useEffect(() => {
     if (!alwaysSelectOpenedFile || !activePath || selectedPath === activePath) return;
     void revealActiveFile();
-  }, [activePath, alwaysSelectOpenedFile, selectedPath]);
+  }, [activePath, alwaysSelectOpenedFile, selectedPath, revealActiveFile]);
 
   const focusRelative = (path: string, offset: number): void => {
     const paths = ["", ...rows.map((row) => row.entry.path)];
@@ -491,6 +491,7 @@ export function ProjectToolWindow({
           )}
           variant="ghost"
           size="default"
+          tabIndex={-1}
         >
           <Icon
             className={expanded.has("") ? `rotated [transform:rotate(90deg)] rotated` : undefined}
@@ -542,6 +543,7 @@ export function ProjectToolWindow({
                     )}
                     variant="ghost"
                     size="default"
+                    tabIndex={-1}
                   >
                     {directory ? (
                       <Icon
@@ -607,6 +609,7 @@ export function ProjectToolWindow({
                   )}
                   variant="ghost"
                   size="default"
+                  tabIndex={-1}
                 >
                   <Icon
                     className={
@@ -643,6 +646,7 @@ export function ProjectToolWindow({
                     )}
                     variant="ghost"
                     size="default"
+                    tabIndex={-1}
                   >
                     <span />
                     <Icon name="file" size={14} />

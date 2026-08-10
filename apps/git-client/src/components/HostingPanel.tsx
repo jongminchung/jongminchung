@@ -1,23 +1,8 @@
 import { Button } from "@jongminchung/ui/components/button";
-import { Checkbox } from "@jongminchung/ui/components/checkbox";
 import { Input } from "@jongminchung/ui/components/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@jongminchung/ui/components/select";
-import { Textarea } from "@jongminchung/ui/components/textarea";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { KeyboardEvent } from "react";
 import { createHostingBridge } from "../bridge/createHostingBridge";
-import {
-  adjacentHostingChangeRequest,
-  filterHostingChangeRequests,
-  type HostingListScope,
-} from "../domain/hostingView";
 import { isElectronRuntime } from "../platform/electron";
 import type {
   HostingAccount,
@@ -30,15 +15,20 @@ import type {
   HostingTimelineEntry,
 } from "../shared/contracts/model";
 import {
+  HostingAccountConnection,
+  HostingRequestComposer,
+  HostingRequestDetails,
+  HostingRequestList,
+  type HostingRequestDraft,
+} from "./hosting";
+import {
   loadHostingAccounts,
   loadViewedFiles,
-  openHostingUrl,
   persistHostingAccounts,
   persistViewedFiles,
 } from "./hosting-persistence";
 import { Icon } from "./Icon";
 import { Notice } from "./Notice";
-import { EmptyState } from "./ProductCollections";
 import { Selector } from "./ProductFormControls";
 
 interface RemoteCoordinates {
@@ -87,37 +77,20 @@ export function HostingPanel({
   const coordinates = useMemo(() => inferRemoteCoordinates(remoteUrl), [remoteUrl]);
   const [accounts, setAccounts] = useState<readonly HostingAccount[]>([]);
   const [accountId, setAccountId] = useState("");
-  const [provider, setProvider] = useState<HostingProviderKind>(coordinates?.provider ?? "gitHub");
-  const [baseUrl, setBaseUrl] = useState(coordinates?.baseUrl ?? "https://github.com");
-  const [token, setToken] = useState("");
   const [project, setProject] = useState(coordinates?.project ?? "");
   const [items, setItems] = useState<readonly HostingChangeRequest[]>([]);
   const [nextPage, setNextPage] = useState<number | null>(null);
   const [selected, setSelected] = useState<HostingChangeRequest>();
-  const [listQuery, setListQuery] = useState("");
-  const [listScope, setListScope] = useState<HostingListScope>("open");
   const [files, setFiles] = useState<readonly HostingChangedFile[]>([]);
   const [timeline, setTimeline] = useState<readonly HostingTimelineEntry[]>([]);
   const [viewed, setViewed] = useState<ReadonlySet<string>>(new Set());
   const [showCreate, setShowCreate] = useState(false);
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
-  const [sourceBranch, setSourceBranch] = useState(currentBranch ?? "");
-  const [targetBranch, setTargetBranch] = useState("main");
-  const [draft, setDraft] = useState(false);
-  const [reviewBody, setReviewBody] = useState("");
-  const [discussionBody, setDiscussionBody] = useState("");
-  const [removeAccountId, setRemoveAccountId] = useState<string>();
   const [busy, setBusy] = useState<string>();
   const [error, setError] = useState<string>();
   const [notice, setNotice] = useState<string>();
   const inspectionSequence = useRef(0);
 
   const selectedAccount = accounts.find((account) => account.id === accountId);
-  const visibleItems = useMemo(
-    () => filterHostingChangeRequests(items, listQuery, listScope),
-    [items, listQuery, listScope],
-  );
 
   useEffect(() => {
     if (!isElectronRuntime()) return;
@@ -265,29 +238,34 @@ export function HostingPanel({
     }
   };
 
-  const connect = async (): Promise<void> => {
-    if (!token.trim()) {
+  const connect = async (
+    provider: HostingProviderKind,
+    baseUrl: string,
+    token: string,
+  ): Promise<boolean> => {
+    if (!token) {
       setError("Enter a personal access token. It will be stored in macOS Keychain.");
-      return;
+      return false;
     }
     setBusy("Verifying account");
     setError(undefined);
     try {
-      const account = await hostingBridge.saveAccount(provider, baseUrl.trim(), token.trim());
+      const account = await hostingBridge.saveAccount(provider, baseUrl, token);
       const next = [...accounts.filter((item) => item.id !== account.id), account];
-      setToken("");
       setAccounts(next);
       setAccountId(account.id);
       await persistHostingAccounts(next);
       setNotice(`Connected ${account.login}. The token is stored in macOS Keychain.`);
+      return true;
     } catch (connectError) {
       setError(errorMessage(connectError));
+      return false;
     } finally {
       setBusy(undefined);
     }
   };
 
-  const removeAccount = async (id: string): Promise<void> => {
+  const removeAccount = async (id: string): Promise<boolean> => {
     setBusy("Removing account");
     setError(undefined);
     try {
@@ -295,61 +273,58 @@ export function HostingPanel({
       const next = accounts.filter((account) => account.id !== id);
       setAccounts(next);
       setAccountId(next[0]?.id ?? "");
-      setRemoveAccountId(undefined);
       await persistHostingAccounts(next);
+      return true;
     } catch (removeError) {
       setError(errorMessage(removeError));
+      return false;
     } finally {
       setBusy(undefined);
     }
   };
 
-  const create = async (): Promise<void> => {
+  const create = async (draft: HostingRequestDraft): Promise<boolean> => {
     const response = await execute("Creating change request", {
       kind: "create",
       project: project.trim(),
-      title: title.trim(),
-      body,
-      sourceBranch: sourceBranch.trim(),
-      targetBranch: targetBranch.trim(),
-      draft,
+      ...draft,
     });
-    if (response?.kind !== "changeRequest") return;
+    if (response?.kind !== "changeRequest") return false;
     setItems((current) => [response.item, ...current]);
     setShowCreate(false);
-    setTitle("");
-    setBody("");
     setNotice(`Created #${response.item.number}.`);
+    return true;
   };
 
-  const submitReview = async (event: HostingReviewEvent): Promise<void> => {
-    if (!selected) return;
+  const submitReview = async (event: HostingReviewEvent, body: string): Promise<boolean> => {
+    if (!selected) return false;
     const response = await execute("Submitting review", {
       kind: "review",
       project: project.trim(),
       number: selected.number,
       event,
-      body: reviewBody,
+      body,
     });
     if (response?.kind === "completed") {
-      setReviewBody("");
       setNotice(response.message);
       await inspect(selected);
+      return true;
     }
+    return false;
   };
 
-  const postComment = async (): Promise<void> => {
-    if (!selected || !discussionBody.trim()) return;
+  const postComment = async (body: string): Promise<boolean> => {
+    if (!selected || !body) return false;
     const response = await execute("Posting comment", {
       kind: "comment",
       project: project.trim(),
       number: selected.number,
-      body: discussionBody.trim(),
+      body,
     });
-    if (response?.kind !== "completed") return;
-    setDiscussionBody("");
+    if (response?.kind !== "completed") return false;
     setNotice(response.message);
     await inspect(selected);
+    return true;
   };
 
   const updateBranch = async (): Promise<void> => {
@@ -370,23 +345,6 @@ export function HostingPanel({
       branch: currentBranch,
     });
     if (response?.kind === "completed") setNotice(response.message);
-  };
-
-  const navigateList = (event: KeyboardEvent<HTMLElement>): void => {
-    const direction =
-      event.key === "ArrowDown"
-        ? "next"
-        : event.key === "ArrowUp"
-          ? "previous"
-          : event.key === "Home"
-            ? "first"
-            : event.key === "End"
-              ? "last"
-              : null;
-    if (direction === null) return;
-    event.preventDefault();
-    const next = adjacentHostingChangeRequest(visibleItems, selected?.number ?? null, direction);
-    if (next) void inspect(next);
   };
 
   if (!isElectronRuntime()) {
@@ -470,95 +428,15 @@ export function HostingPanel({
         )}
       </section>
 
-      <details
-        className={`hostingConnect [border-bottom:1px_solid_var(--border)] [padding:8px_11px] [&_summary]:[color:var(--muted-foreground)] [&_summary]:[cursor:default] [&_summary]:[font-weight:600] hostingConnect`}
-        open={accounts.length === 0}
-      >
-        <summary>Connect a GitHub or GitLab account</summary>
-        <div
-          className={`hostingFormGrid [&_label]:[color:var(--muted-foreground)] [&_label]:[display:flex] [&_label]:[flex-direction:column] [&_label]:[font-size:11px] [&_label]:[gap:3px] [align-items:end] [display:grid] [gap:8px] [grid-template-columns:110px_minmax(190px,_1fr)_minmax(190px,_1fr)_auto] [padding-top:9px] hostingFormGrid`}
-        >
-          <Selector
-            className="bg-secondary"
-            label="Provider"
-            value={provider}
-            onChange={(value) => {
-              const next = value as HostingProviderKind;
-              setProvider(next);
-              setBaseUrl(next === "gitHub" ? "https://github.com" : "https://gitlab.com");
-            }}
-            options={[
-              { label: "GitHub", value: "gitHub" },
-              { label: "GitLab", value: "gitLab" },
-            ]}
-          />
-          <label>
-            Server URL
-            <Input onChange={(event) => setBaseUrl(event.target.value)} value={baseUrl} />
-          </label>
-          <label>
-            Personal access token
-            <Input
-              autoComplete="off"
-              onChange={(event) => setToken(event.target.value)}
-              type="password"
-              value={token}
-            />
-          </label>
-          <Button
-            disabled={Boolean(busy)}
-            onClick={() => void connect()}
-            type="button"
-            className={cn("h-7 px-2.5")}
-            variant="outline"
-            size="sm"
-          >
-            {busy === "Verifying account" ? "Verifying…" : "Connect and store in Keychain"}
-          </Button>
-        </div>
-        {selectedAccount && (
-          <div
-            className={`hostingAccountMeta [align-items:center] [display:flex] [gap:8px] [border-top:1px_solid_var(--border)] [color:var(--muted-foreground)] [margin-top:9px] [padding-top:8px] [&>_span:first-child]:[flex:1] hostingAccountMeta`}
-          >
-            <span>
-              {selectedAccount.login} · {selectedAccount.baseUrl}
-            </span>
-            {removeAccountId === selectedAccount.id ? (
-              <>
-                <span>Removes metadata and the Keychain credential.</span>
-                <Button
-                  onClick={() => void removeAccount(selectedAccount.id)}
-                  type="button"
-                  className={cn("h-7 px-2.5")}
-                  variant="outline"
-                  size="sm"
-                >
-                  Confirm remove
-                </Button>
-                <Button
-                  onClick={() => setRemoveAccountId(undefined)}
-                  type="button"
-                  className={cn("h-7 px-2.5")}
-                  variant="outline"
-                  size="sm"
-                >
-                  Cancel
-                </Button>
-              </>
-            ) : (
-              <Button
-                onClick={() => setRemoveAccountId(selectedAccount.id)}
-                type="button"
-                className={cn("h-7 px-2.5")}
-                variant="outline"
-                size="sm"
-              >
-                Remove account
-              </Button>
-            )}
-          </div>
-        )}
-      </details>
+      <HostingAccountConnection
+        accountId={accountId}
+        accounts={accounts}
+        busy={busy}
+        initialBaseUrl={coordinates?.baseUrl ?? "https://github.com"}
+        initialProvider={coordinates?.provider ?? "gitHub"}
+        onConnect={connect}
+        onRemove={removeAccount}
+      />
 
       {error && (
         <Notice role="alert" size="sm" tone="destructive">
@@ -579,283 +457,33 @@ export function HostingPanel({
       )}
 
       {showCreate && (
-        <section
-          className={`hostingComposer [&>_footer]:[align-items:center] [&>_footer]:[display:flex] [&>_footer]:[gap:8px] [&_label]:[color:var(--muted-foreground)] [&_label]:[display:flex] [&_label]:[flex-direction:column] [&_label]:[font-size:11px] [&_label]:[gap:3px] [background:var(--secondary)] [border-bottom:1px_solid_var(--border)] [display:flex] [flex-direction:column] [gap:8px] [padding:11px] [&_textarea]:[min-height:64px] [&_textarea]:[resize:vertical] [&>_div]:[align-items:end] [&>_div]:[display:grid] [&>_div]:[gap:8px] [&>_div]:[grid-template-columns:1fr_1fr_auto] [&>_footer]:[justify-content:flex-end] hostingComposer`}
-          id="hosting-create-request"
-        >
-          <strong>Create change request</strong>
-          <label>
-            Title
-            <Input onChange={(event) => setTitle(event.target.value)} value={title} />
-          </label>
-          <label>
-            Description
-            <Textarea onChange={(event) => setBody(event.target.value)} value={body} />
-          </label>
-          <div>
-            <label>
-              Source
-              <Input
-                onChange={(event) => setSourceBranch(event.target.value)}
-                value={sourceBranch}
-              />
-            </label>
-            <label>
-              Target
-              <Input
-                onChange={(event) => setTargetBranch(event.target.value)}
-                value={targetBranch}
-              />
-            </label>
-            <label
-              className={`inlineCheck [align-items:center] [flex-direction:row]! [min-height:29px] [&_input]:[min-height:auto] inlineCheck`}
-            >
-              <Checkbox checked={draft} onCheckedChange={setDraft} /> Draft
-            </label>
-          </div>
-          <footer>
-            <Button
-              onClick={() => setShowCreate(false)}
-              type="button"
-              className={cn("h-7 px-2.5")}
-              variant="outline"
-              size="sm"
-            >
-              Cancel
-            </Button>
-            <Button
-              disabled={!title.trim() || !sourceBranch.trim() || !targetBranch.trim()}
-              onClick={() => void create()}
-              type="button"
-              className={cn("h-7 px-2.5")}
-              variant="outline"
-              size="sm"
-            >
-              Create
-            </Button>
-          </footer>
-        </section>
+        <HostingRequestComposer
+          currentBranch={currentBranch}
+          onCancel={() => setShowCreate(false)}
+          onCreate={create}
+        />
       )}
 
       <div
         className={`hostingColumns [display:grid] [flex:1] [grid-template-columns:minmax(230px,_34%)_minmax(0,_1fr)] [min-height:0] hostingColumns`}
       >
-        <section
-          className={`hostingList [min-height:0] [overflow:auto] [border-right:1px_solid_var(--border)] [&>_button]:[align-items:stretch] [&>_button]:[background:transparent] [&>_button]:[border:0] [&>_button]:[border-bottom:1px_solid_var(--border)] [&>_button]:rounded-none [&>_button]:[display:flex] [&>_button]:[flex-direction:column] [&>_button]:[gap:4px] [&>_button]:[padding:10px_11px] [&>_button]:[text-align:left] [&>_button]:[width:100%] [&_small]:[color:var(--disabled-foreground)] hostingList [&>_button]:rounded-none`}
-          aria-label="Pull and merge requests"
-          onKeyDown={navigateList}
-          tabIndex={0}
-        >
-          <div
-            className={`hostingListToolbar [align-items:center] [background:var(--muted)] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:5px] [padding:5px] [position:sticky] [top:0] [z-index:2] [&>_label]:[align-items:center] [&>_label]:[background:var(--secondary)] [&>_label]:[border:1px_solid_var(--border)] [&>_label]:rounded-sm [&>_label]:[display:flex] [&>_label]:[flex:1] [&>_label]:[gap:5px] [&>_label]:[padding:0_6px] [&>_label_input]:[background:transparent] [&>_label_input]:[border:0] [&>_label_input]:[min-width:0] [&>_label_input]:[outline:0] [&>_label_input]:[padding:0] [&>_label_input]:[width:100%] [&>_select]:[width:78px] hostingListToolbar [&>_label]:rounded-sm`}
-          >
-            <label>
-              <Icon name="search" size={13} />
-              <Input
-                aria-label="Filter pull and merge requests"
-                onChange={(event) => setListQuery(event.target.value)}
-                placeholder="Search"
-                value={listQuery}
-              />
-            </label>
-            <Select
-              onValueChange={(value) => value && setListScope(value as HostingListScope)}
-              value={listScope}
-            >
-              <SelectTrigger
-                aria-label="Pull and merge request state"
-                className="w-[78px] bg-secondary"
-                size="sm"
-              >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent align="end">
-                <SelectItem value="open">Open</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="closed">Closed</SelectItem>
-                <SelectItem value="all">All</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          {items.length === 0 && (
-            <EmptyState title="Load pull or merge requests for this project." />
-          )}
-          {items.length > 0 && visibleItems.length === 0 && (
-            <EmptyState title="No pull or merge requests match the filter." />
-          )}
-          {visibleItems.map((item) => (
-            <Button
-              aria-current={selected?.number === item.number ? "true" : undefined}
-              key={item.number}
-              onClick={() => void inspect(item)}
-              type="button"
-              className="min-h-[29px] w-full justify-start gap-1.5 whitespace-normal px-2 py-1 text-left text-xs aria-current:bg-accent aria-current:text-foreground"
-              variant="ghost"
-              size="default"
-            >
-              <span>
-                #{item.number} · {item.state}
-                {item.draft ? " · draft" : ""}
-              </span>
-              <strong>{item.title}</strong>
-              <small>
-                {item.author} · {item.sourceBranch} → {item.targetBranch}
-              </small>
-            </Button>
-          ))}
-          {nextPage && (
-            <Button
-              onClick={() => void loadList(nextPage, true)}
-              type="button"
-              className="min-h-[29px] w-full items-center justify-start gap-1.5 whitespace-normal px-2 py-1 text-left text-xs text-primary"
-              variant="ghost"
-              size="default"
-            >
-              Load more
-            </Button>
-          )}
-        </section>
-
-        <section
-          className={`hostingDetail [&>_header]:[align-items:center] [&>_header]:[display:flex] [&>_header]:[gap:8px] [min-height:0] [overflow:auto] [&_small]:[color:var(--disabled-foreground)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[padding:9px_11px] [&>_header_>_div]:[display:flex] [&>_header_>_div]:[flex:1] [&>_header_>_div]:[flex-direction:column] [&>_header_>_div]:[min-width:0] [&>_header_small]:[overflow:hidden] [&>_header_small]:[text-overflow:ellipsis] [&>_header_small]:[white-space:nowrap] [&_h3]:[color:var(--muted-foreground)] [&_h3]:[font-size:12px] [&_h3]:[margin:0] [&_h3]:[padding:10px_11px_6px] hostingDetail`}
-          aria-label="Change request detail"
-        >
-          {!selected ? (
-            <EmptyState title="Select a change request to inspect files and timeline." />
-          ) : (
-            <>
-              <header>
-                <div>
-                  <strong>
-                    #{selected.number} {selected.title}
-                  </strong>
-                  <small>{selected.webUrl}</small>
-                </div>
-                <Button
-                  onClick={() => void navigator.clipboard.writeText(selected.webUrl)}
-                  type="button"
-                  className={cn("h-7 px-2.5")}
-                  variant="outline"
-                  size="sm"
-                >
-                  <Icon name="copy" size={13} /> Copy link
-                </Button>
-                <a
-                  href={selected.webUrl}
-                  onClick={(event) => {
-                    event.preventDefault();
-                    void openHostingUrl(selected.webUrl);
-                  }}
-                  className={cn("h-7 px-2.5")}
-                >
-                  <Icon name="external" size={13} /> Open
-                </a>
-                <Button
-                  onClick={() => void updateBranch()}
-                  type="button"
-                  className={cn("h-7 px-2.5")}
-                  variant="outline"
-                  size="sm"
-                >
-                  Update branch
-                </Button>
-              </header>
-              <div
-                className={`hostingReviewBar [align-items:center] [display:flex] [gap:8px] [border-bottom:1px_solid_var(--border)] [padding:8px_11px] [&_textarea]:[flex:1] [&_textarea]:[min-height:52px] [&_textarea]:[resize:vertical] hostingReviewBar`}
-              >
-                <Textarea
-                  aria-label="Review body"
-                  onChange={(event) => setReviewBody(event.target.value)}
-                  placeholder="Review or comment"
-                  value={reviewBody}
-                />
-                <Button
-                  onClick={() => void submitReview("comment")}
-                  type="button"
-                  className={cn("h-7 px-2.5")}
-                  variant="outline"
-                  size="sm"
-                >
-                  Comment
-                </Button>
-                <Button
-                  onClick={() => void submitReview("approve")}
-                  type="button"
-                  className={cn("h-7 px-2.5")}
-                  variant="outline"
-                  size="sm"
-                >
-                  Approve
-                </Button>
-                <Button
-                  disabled={!reviewBody.trim()}
-                  onClick={() => void submitReview("requestChanges")}
-                  type="button"
-                  className={cn("h-7 px-2.5")}
-                  variant="outline"
-                  size="sm"
-                >
-                  Request changes
-                </Button>
-              </div>
-              <h3>Changed files · {files.length}</h3>
-              {files.map((file) => (
-                <article
-                  className={`hostingFile [border-top:1px_solid_var(--border)] [padding:8px_11px] [&>_label]:[float:right] [&>_strong]:[display:block] [&>_small]:[display:block] [&_pre]:[background:var(--muted)] [&_pre]:[border:1px_solid_var(--border)] [&_pre]:rounded-lg [&_pre]:[font-size:12px] [&_pre]:[max-height:280px] [&_pre]:[overflow:auto] [&_pre]:[padding:9px] hostingFile [&_pre]:rounded-lg`}
-                  key={file.path}
-                >
-                  <label>
-                    <Checkbox
-                      checked={viewed.has(file.path)}
-                      onCheckedChange={() => void toggleViewed(file.path)}
-                    />{" "}
-                    Viewed
-                  </label>
-                  <strong>{file.path}</strong>
-                  <small>
-                    +{file.additions} −{file.deletions} · {file.status}
-                  </small>
-                  {file.patch && (
-                    <pre aria-label={`Diff for ${file.path}`} tabIndex={0}>
-                      <code>{file.patch}</code>
-                    </pre>
-                  )}
-                </article>
-              ))}
-              <h3>Timeline · {timeline.length}</h3>
-              {timeline.map((entry) => (
-                <article
-                  className={`hostingTimeline [border-top:1px_solid_var(--border)] [padding:8px_11px] [&_p]:[line-height:1.45] [&_p]:[margin:5px_0_0] [&_p]:[white-space:pre-wrap] [&_small]:[float:right] hostingTimeline`}
-                  key={entry.id}
-                >
-                  <strong>{entry.author || entry.kind}</strong>
-                  <small>{entry.createdAt}</small>
-                  <p>{entry.body}</p>
-                </article>
-              ))}
-              <div
-                className={`hostingDiscussionComposer [align-items:flex-end] [border-top:1px_solid_var(--border)] [display:flex] [gap:8px] [padding:8px_11px] [&_textarea]:[flex:1] [&_textarea]:[min-height:54px] [&_textarea]:[resize:vertical] hostingDiscussionComposer`}
-              >
-                <Textarea
-                  aria-label="Add timeline comment"
-                  onChange={(event) => setDiscussionBody(event.target.value)}
-                  placeholder="Add a comment"
-                  value={discussionBody}
-                />
-                <Button
-                  disabled={!discussionBody.trim()}
-                  onClick={() => void postComment()}
-                  type="button"
-                  className={cn("h-7 px-2.5")}
-                  variant="outline"
-                  size="sm"
-                >
-                  Comment
-                </Button>
-              </div>
-            </>
-          )}
-        </section>
+        <HostingRequestList
+          items={items}
+          nextPage={nextPage}
+          onInspect={(item) => void inspect(item)}
+          onLoadMore={(page) => void loadList(page, true)}
+          selectedNumber={selected?.number ?? null}
+        />
+        <HostingRequestDetails
+          files={files}
+          onPostComment={postComment}
+          onSubmitReview={submitReview}
+          onToggleViewed={(path) => void toggleViewed(path)}
+          onUpdateBranch={() => void updateBranch()}
+          selected={selected}
+          timeline={timeline}
+          viewed={viewed}
+        />
       </div>
     </div>
   );

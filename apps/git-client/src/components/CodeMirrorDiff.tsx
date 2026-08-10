@@ -350,6 +350,7 @@ export default function CodeMirrorDiff({
     synchronizedScroll,
     viewMode,
     wordWrap,
+    searchQuery,
   ]);
 
   useEffect(() => {

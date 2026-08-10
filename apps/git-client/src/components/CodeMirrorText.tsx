@@ -65,7 +65,7 @@ export default function CodeMirrorText({
       view.current = null;
       editor.destroy();
     };
-  }, [readOnly]);
+  }, [readOnly, value]);
 
   useEffect(() => {
     const editor = view.current;

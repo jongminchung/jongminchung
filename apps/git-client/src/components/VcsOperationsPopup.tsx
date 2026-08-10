@@ -64,6 +64,7 @@ export function VcsOperationsPopup({
                     onClick={item.disabledReason ? undefined : () => void activate(item)}
                     role="option"
                     startContent={<Icon name={item.icon} size={14} />}
+                    tabIndex={-1}
                   />
                 ))}
               </List>

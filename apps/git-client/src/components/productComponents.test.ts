@@ -8,19 +8,25 @@ import { DialogBody, DialogFooter } from "./ProductDialog";
 describe("Git Client product component variants", () => {
   it("renders notice tone and live-region roles as public behavior", () => {
     const alert = renderToStaticMarkup(
-      createElement(Notice, {
-        children: "Remote commits may be replaced.",
-        role: "alert",
-        tone: "destructive",
-      }),
+      createElement(
+        Notice,
+        {
+          role: "alert",
+          tone: "destructive",
+        },
+        "Remote commits may be replaced.",
+      ),
     );
     const status = renderToStaticMarkup(
-      createElement(Notice, {
-        children: "Repository created.",
-        role: "status",
-        size: "sm",
-        tone: "success",
-      }),
+      createElement(
+        Notice,
+        {
+          role: "status",
+          size: "sm",
+          tone: "success",
+        },
+        "Repository created.",
+      ),
     );
 
     expect(alert).toContain('role="alert"');

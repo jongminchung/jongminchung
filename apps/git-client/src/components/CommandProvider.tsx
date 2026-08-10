@@ -391,30 +391,23 @@ export function CommandProvider({ children }: { readonly children: ReactNode }) 
     if (isElectronRuntime()) void sync();
   }, [contextualAvailability, focusTarget, keymapOverrides, registry, revision]);
 
-  const commandItems = useMemo<readonly PaletteItem[]>(
-    () =>
-      COMMAND_MANIFEST.commands.map((entry) => {
-        const definition = registry.find(entry.id);
-        return {
-          id: entry.id,
-          kind: "command",
-          label: definition?.label ?? entry.label,
-          detail: definition?.category ?? entry.category,
-          category: definition?.category ?? entry.category,
-          keywords: definition?.keywords ?? [],
-          availability: definition
-            ? contextualAvailability(definition, focusTarget)
-            : commandDisabled("This command is not available in the current view."),
-          execute: () => execute(entry.id),
-          shortcut: displayAccelerator(resolvedAccelerator(entry, keymapOverrides)) || undefined,
-        };
-      }),
-    [contextualAvailability, execute, focusTarget, keymapOverrides, registry, revision],
-  );
-  const allPaletteItems = useMemo(
-    () => [...commandItems, ...[...paletteItems.current.values()].flat()],
-    [commandItems, revision],
-  );
+  const commandItems: readonly PaletteItem[] = COMMAND_MANIFEST.commands.map((entry) => {
+    const definition = registry.find(entry.id);
+    return {
+      id: entry.id,
+      kind: "command",
+      label: definition?.label ?? entry.label,
+      detail: definition?.category ?? entry.category,
+      category: definition?.category ?? entry.category,
+      keywords: definition?.keywords ?? [],
+      availability: definition
+        ? contextualAvailability(definition, focusTarget)
+        : commandDisabled("This command is not available in the current view."),
+      execute: () => execute(entry.id),
+      shortcut: displayAccelerator(resolvedAccelerator(entry, keymapOverrides)) || undefined,
+    };
+  });
+  const allPaletteItems = [...commandItems, ...[...paletteItems.current.values()].flat()];
 
   useEffect(() => {
     const owner = "command-palette";

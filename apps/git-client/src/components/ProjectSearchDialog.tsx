@@ -398,6 +398,7 @@ export function ProjectSearchDialog({
                   startContent={
                     <Icon name={result.kind === "class" ? "file" : "search"} size={14} />
                   }
+                  tabIndex={-1}
                 />
               ))}
             </List>

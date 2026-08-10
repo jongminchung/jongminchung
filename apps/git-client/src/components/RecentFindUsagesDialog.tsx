@@ -42,6 +42,7 @@ export function RecentFindUsagesDialog({
                 onClick={() => onChoose(session)}
                 role="option"
                 startContent={<Icon name="search" size={14} />}
+                tabIndex={-1}
               />
             ))}
           </List>
