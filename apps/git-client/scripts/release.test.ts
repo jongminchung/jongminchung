@@ -369,7 +369,7 @@ describe("Electron release build contract", () => {
       }
       return { code: 0, stderr: "", stdout: "" };
     });
-    const verifyPackage = vi.fn().mockResolvedValue({ electronVersion: "43.1.1" });
+    const verifyPackage = vi.fn().mockResolvedValue({ electronVersion: "43.3.0" });
 
     try {
       await mkdir(join(appPath, "Contents", "MacOS"), { recursive: true });

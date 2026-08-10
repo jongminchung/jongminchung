@@ -6,7 +6,7 @@ const SUBJECTS = [
   "fix(graph): preserve lanes across page boundaries",
   "refactor: isolate credential redaction",
   "test: cover rebase conflict recovery",
-  "chore(deps): update electron to 43.1.1",
+  "chore(deps): update electron to 43.3.0",
   "feat(diff): support line-level staging",
   "fix: debounce duplicate status refreshes",
   "docs: record destructive operation safeguards",

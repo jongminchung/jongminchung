@@ -15,7 +15,7 @@ export const RELEASE_MODES = Object.freeze({
   production: "production",
 });
 
-const expectedElectronVersion = "43.1.1";
+const expectedElectronVersion = "43.3.0";
 const stableSemverPattern = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/u;
 const developerIdApplicationPattern = /^Developer ID Application: .+ \([A-Z0-9]+\)$/u;
 const sourceShaPattern = /^[0-9a-f]{40}$/u;

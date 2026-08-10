@@ -1,6 +1,6 @@
 # GitHub Release 배포 가이드
 
-Git Client는 Electron 43.1.1로 만든 macOS ARM64 DMG를 GitHub Releases에서 직접 배포한다. 공개 artifact는 Developer ID Application으로 서명하고 Apple 공증 티켓을 포함한다. 인앱 자동 업데이트, updater feed, updater 서명 키, `latest.json`은 사용하지 않는다.
+Git Client는 Electron 43.3.0으로 만든 macOS ARM64 DMG를 GitHub Releases에서 직접 배포한다. 공개 artifact는 Developer ID Application으로 서명하고 Apple 공증 티켓을 포함한다. 인앱 자동 업데이트, updater feed, updater 서명 키, `latest.json`은 사용하지 않는다.
 
 ## 지원 범위
 
@@ -69,7 +69,7 @@ Developer ID가 없는 Apple Silicon Mac에서는 explicit local mode로 전체 
 pnpm --filter @jongminchung/git-client release:validate-local -- 1.0.0
 ```
 
-결과 이름에는 `_adhoc`가 들어간다. 예: `Git-Client_1.0.0_macos_arm64_adhoc.dmg`. 이 파일은 strict `codesign --verify --deep --strict`, Electron 43.1.1, ARM64, fuse, ASAR integrity, locale, node-pty와 크기 정책을 검증하지만 Apple notarization artifact가 아니므로 게시할 수 없다.
+결과 이름에는 `_adhoc`가 들어간다. 예: `Git-Client_1.0.0_macos_arm64_adhoc.dmg`. 이 파일은 strict `codesign --verify --deep --strict`, Electron 43.3.0, ARM64, fuse, ASAR integrity, locale, node-pty와 크기 정책을 검증하지만 Apple notarization artifact가 아니므로 게시할 수 없다.
 
 production 릴리스 staging은 signing identity와 `notarytool` keychain profile을 명시한다.
 

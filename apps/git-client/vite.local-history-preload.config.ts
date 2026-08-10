@@ -1,5 +1,5 @@
 import { defineConfig } from "vite";
-import { rejectNodeBuiltinsInSandboxedPreload } from "./vite.preload.config";
+import { rejectNodeBuiltinsInSandboxedPreload } from "./vite.preload.config.ts";
 
 export default defineConfig({
   plugins: [rejectNodeBuiltinsInSandboxedPreload()],

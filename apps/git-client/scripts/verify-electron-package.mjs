@@ -13,7 +13,7 @@ import {
 
 const execFileAsync = promisify(execFile);
 const EXPECTED_BUNDLE_ID = "io.github.jongminchung.gitclient";
-const EXPECTED_ELECTRON_VERSION = "43.1.1";
+const EXPECTED_ELECTRON_VERSION = "43.3.0";
 const EXPECTED_ARCHITECTURES = "arm64";
 const MAX_APP_SIZE_KIB = 250 * 1024;
 

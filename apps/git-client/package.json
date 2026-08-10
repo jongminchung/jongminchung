@@ -7,7 +7,7 @@
   "main": ".vite/build/main.cjs",
   "scripts": {
     "benchmark": "node scripts/benchmark.mjs",
-    "build": "tsc --noEmit && tsc --noEmit -p tsconfig.electron.json && vite build",
+    "build": "pnpm typecheck && vite build",
     "dev": "electron-forge start",
     "electron:make": "electron-forge make",
     "electron:package": "electron-forge package",
@@ -28,7 +28,7 @@
     "test:electron-package-policy": "node --test scripts/electron-package-policy.node-test.mjs",
     "test:scripts": "node --test scripts/*.node-test.mjs scripts/independent-audit/*.node-test.mjs",
     "test:verbose": "vitest run --root ../.. apps/git-client --maxWorkers=2 --reporter=verbose",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.test.json && tsc --noEmit -p tsconfig.electron.json"
   },
   "dependencies": {
     "@codemirror/commands": "catalog:",
@@ -53,7 +53,8 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "uuid": "catalog:",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "zustand": "catalog:"
   },
   "devDependencies": {
     "@axe-core/playwright": "catalog:",
