@@ -7,6 +7,12 @@ hoistPattern:
 
 catalogMode: strict
 
+catalogs:
+  ui-peer:
+    react: "^19.2.0"
+    react-dom: "^19.2.0"
+    tailwindcss: "^4.3.0"
+
 overrides:
   "@electron/rebuild": "4.2.0"
   "extract-zip": "npm:@electron-internal/extract-zip@1.0.4"

@@ -4,13 +4,15 @@ This repository owns the shared `@jongminchung` packages used by downstream proj
 
 - `@jongminchung/tooling`: shared `oxfmt`, `oxlint`, and package-map configuration.
 - `@jongminchung/remark-plantuml`: shared PlantUML rendering for Markdown and Astro docs.
-- `@jongminchung/ui`: private shadcn primitives, shared Tailwind entrypoint, and value-free semantic tokens.
+- `@jongminchung/ui`: published shadcn primitives, a default neutral theme, shared Tailwind styles,
+  and semantic tokens.
 
 Public packages are published to GitHub Packages. Consumers need the `@jongminchung` scope mapped
 to `https://npm.pkg.github.com`.
 
-The apps own their theme values and components. See [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) for the
-token contract, component ownership rules, and runtime exception policy.
+The UI package provides safe default theme values. Apps may override semantic tokens and continue
+to own product components and behavior. See [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) for the token
+contract, component ownership rules, and runtime exception policy.
 
 ## Documentation
 

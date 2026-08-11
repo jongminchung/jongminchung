@@ -5,7 +5,7 @@
 
 ## 배경
 
-- 공개 패키지: `@jongminchung/remark-plantuml`, `@jongminchung/tooling`
+- 공개 Node 패키지: `@jongminchung/remark-plantuml`, `@jongminchung/tooling`
 - 지원 runtime: Node.js 24 이상
 - JavaScript 계약: ESM 전용, named export 전용
 - 기존 빌드: `tsdown`의 `unbundle` 모드

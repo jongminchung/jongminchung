@@ -1,13 +1,14 @@
 import { resolve } from "node:path";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { defaultClientConditions, defineConfig } from "vite";
 
 export default defineConfig({
   clearScreen: false,
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: [{ find: "@", replacement: resolve(import.meta.dirname, "src") }],
+    conditions: ["source", ...defaultClientConditions],
     dedupe: ["react", "react-dom"],
     preserveSymlinks: false,
   },

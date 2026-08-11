@@ -44,7 +44,7 @@
   "scripts": {
     "build": "node ../../scripts/clean-package-dist.mjs && tsc -p tsconfig.build.json",
     "prepack": "pnpm run build",
-    "publish:dry-run": "pnpm publish --dry-run --access public",
+    "publish:dry-run": "pnpm publish --dry-run --access public --no-git-checks",
     "test": "vitest run --root ../.. packages/remark-plantuml",
     "typecheck": "tsc --noEmit"
   },

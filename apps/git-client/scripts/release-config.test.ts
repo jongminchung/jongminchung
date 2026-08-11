@@ -36,6 +36,7 @@ describe("fixed Git Client release configuration", () => {
     expect(packageWorkflow).toContain('select(.name == "1.0.0")');
     expect(packageWorkflow).toContain("Publish remark-plantuml 1.0.0");
     expect(packageWorkflow).toContain("Publish tooling 1.0.0");
+    expect(packageWorkflow).toContain("Publish ui 1.0.0");
     expect(packageWorkflow).toContain("GH_PAT: ${{ secrets.GH_PAT }}");
     expect(packageWorkflow).toContain("Remove GitHub Packages auth");
     expect(packageWorkflow).not.toContain("secrets.GITHUB_TOKEN");

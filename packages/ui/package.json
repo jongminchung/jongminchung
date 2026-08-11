@@ -1,8 +1,26 @@
 {
   "name": "@jongminchung/ui",
-  "version": "0.0.0",
-  "private": true,
+  "version": "1.0.0",
+  "description": "Shared shadcn primitives, semantic theme tokens, and Tailwind styles",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jongminchung/jongminchung.git",
+    "directory": "packages/ui"
+  },
+  "files": [
+    "dist",
+    "src/components/*.tsx",
+    "src/hooks/*.ts",
+    "src/lib/*.ts",
+    "src/styles/*.css",
+    "LICENSE",
+    "README.md"
+  ],
   "type": "module",
+  "sideEffects": [
+    "./src/styles/*.css"
+  ],
   "imports": {
     "#components/*": "./src/components/*.tsx",
     "#hooks/*": "./src/hooks/*.ts",
@@ -10,13 +28,33 @@
   },
   "exports": {
     "./globals.css": "./src/styles/globals.css",
+    "./theme.css": "./src/styles/theme.css",
     "./tokens.css": "./src/styles/tokens.css",
-    "./hooks/*": "./src/hooks/*.ts",
-    "./lib/*": "./src/lib/*.ts",
-    "./components/*": "./src/components/*.tsx",
+    "./hooks/*": {
+      "types": "./dist/hooks/*.d.ts",
+      "source": "./src/hooks/*.ts",
+      "import": "./dist/hooks/*.js"
+    },
+    "./lib/*": {
+      "types": "./dist/lib/*.d.ts",
+      "source": "./src/lib/*.ts",
+      "import": "./dist/lib/*.js"
+    },
+    "./components/*": {
+      "types": "./dist/components/*.d.ts",
+      "source": "./src/components/*.tsx",
+      "import": "./dist/components/*.js"
+    },
     "./package.json": "./package.json"
   },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.pkg.github.com"
+  },
   "scripts": {
+    "build": "node ../../scripts/clean-package-dist.mjs && tsc -p tsconfig.build.json",
+    "prepack": "pnpm run build",
+    "publish:dry-run": "pnpm publish --dry-run --access public --no-git-checks",
     "test": "vitest run --root ../.. packages/ui",
     "typecheck": "tsc --noEmit"
   },
@@ -26,8 +64,6 @@
     "clsx": "catalog:",
     "cmdk": "catalog:",
     "lucide-react": "catalog:",
-    "react": "catalog:",
-    "react-dom": "catalog:",
     "shadcn": "catalog:",
     "tailwind-merge": "catalog:",
     "tw-animate-css": "catalog:"
@@ -36,8 +72,23 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "catalog:ui-peer",
+    "react-dom": "catalog:ui-peer",
+    "tailwindcss": "catalog:ui-peer"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "nx": {
+    "tags": [
+      "pkg:ui"
+    ]
   }
 }

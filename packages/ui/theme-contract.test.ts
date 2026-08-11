@@ -6,6 +6,7 @@ import { describe, expect, test } from "vitest";
 const packageRoot = dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = join(packageRoot, "..", "..");
 const contractPath = join(packageRoot, "src", "styles", "tokens.css");
+const defaultThemePath = join(packageRoot, "src", "styles", "theme.css");
 const packageManifestPath = join(packageRoot, "package.json");
 
 const coreColorTokens = [
@@ -53,6 +54,7 @@ const appThemes = [
 const oklchLiteralBoundaries = new Set<string>([
   ...appThemes,
   "packages/remark-plantuml/src/styles.css",
+  "packages/ui/src/styles/theme.css",
 ]);
 
 const productionExtensions = new Set([".css", ".html", ".svg", ".ts", ".tsx"]);
@@ -174,7 +176,9 @@ function localThemeProviders(contents: string): ReadonlySet<string> {
 
 function themeScopes(contents: string): readonly ThemeScope[] {
   return Array.from(
-    contents.matchAll(/(:root(?:\[data-theme=["'][^"']+["']\])?)\s*\{([^}]*)\}/g),
+    contents.matchAll(
+      /(:where\(:root(?:\[data-theme=["'][^"']+["']\])?\)|:root(?:\[data-theme=["'][^"']+["']\])?)\s*\{([^}]*)\}/g,
+    ),
     (match) => ({ selector: capture(match, 1), body: capture(match, 2) }),
   );
 }
@@ -298,41 +302,55 @@ describe("@jongminchung/ui theme contract", () => {
     expect(contract).not.toContain("--shadow-med:");
     expect(contract).not.toContain(":root");
     expect(packageManifest).toMatchObject({
-      private: true,
+      version: "1.0.0",
       exports: {
+        "./theme.css": "./src/styles/theme.css",
         "./tokens.css": "./src/styles/tokens.css",
       },
     });
+    expect(packageManifest.private).toBeUndefined();
   });
 
-  test("requires complete core providers in every app-owned theme scope", () => {
+  test("provides complete low-specificity defaults and allows app-owned overrides", () => {
+    const defaultTheme = readFileSync(defaultThemePath, "utf8");
+    const defaultScopes = themeScopes(defaultTheme);
+    const defaultRoot = defaultScopes.find(({ selector }) => selector === ":where(:root)");
+    const defaultDark = defaultScopes.find(
+      ({ selector }) => selector === ':where(:root[data-theme="dark"])',
+    );
+
+    expect(defaultRoot).toBeDefined();
+    expect(defaultDark).toBeDefined();
+    expect(defaultTheme).not.toContain("!important");
+    expect(defaultTheme).not.toMatch(/#[\da-f]{3,8}\b/i);
+
+    for (const scope of [defaultRoot, defaultDark]) {
+      const definedTokens = declarations(scope?.body ?? "");
+      const missingTokens = coreColorTokens.filter((token) => !definedTokens.has(token));
+      expect(missingTokens, `default theme ${scope?.selector}`).toEqual([]);
+    }
+
+    const defaultRootTokens = declarations(defaultRoot?.body ?? "");
+    expect(
+      [
+        "radius",
+        "font-family-body",
+        "font-family-code",
+        "elevation-low",
+        "elevation-medium",
+        "elevation-high",
+      ].filter((token) => !defaultRootTokens.has(token)),
+      "default theme infrastructure",
+    ).toEqual([]);
+
     for (const themePath of appThemes) {
       const contents = readFileSync(join(workspaceRoot, themePath), "utf8");
       const scopes = themeScopes(contents);
       const rootScope = scopes.find(({ selector }) => selector === ":root");
 
-      expect(rootScope, `${themePath} must declare a :root theme`).toBeDefined();
+      expect(rootScope, `${themePath} must declare app overrides at :root`).toBeDefined();
       expect(contents, themePath).toContain("oklch(");
       expect(contents, themePath).not.toMatch(/#[\da-f]{3,8}\b/i);
-
-      for (const scope of scopes) {
-        const definedTokens = declarations(scope.body);
-        const missingTokens = coreColorTokens.filter((token) => !definedTokens.has(token));
-        expect(missingTokens, `${themePath} ${scope.selector}`).toEqual([]);
-      }
-
-      const rootTokens = declarations(rootScope?.body ?? "");
-      expect(
-        [
-          "radius",
-          "font-family-body",
-          "font-family-code",
-          "elevation-low",
-          "elevation-medium",
-          "elevation-high",
-        ].filter((token) => !rootTokens.has(token)),
-        `${themePath} root infrastructure`,
-      ).toEqual([]);
     }
   });
 
@@ -378,7 +396,10 @@ describe("@jongminchung/ui theme contract", () => {
   });
 
   test("requires every production CSS variable use to have a provider", () => {
-    const sharedProviders = declarations(readFileSync(contractPath, "utf8"));
+    const sharedProviders = new Set([
+      ...declarations(readFileSync(contractPath, "utf8")),
+      ...declarations(readFileSync(defaultThemePath, "utf8")),
+    ]);
 
     for (const app of ["engineering-docs", "git-client", "readme"] as const) {
       const files = sourceFiles(join(workspaceRoot, "apps", app));

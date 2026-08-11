@@ -90,9 +90,10 @@ describe("workspace shadcn design system boundary", () => {
   test("publishes named component subpaths without a root barrel", () => {
     const packageJson = readJson(join(uiRoot, "package.json"));
     const packageImports = packageJson.imports as Record<string, string>;
-    const exports = packageJson.exports as Record<string, string>;
+    const exports = packageJson.exports as Record<string, unknown>;
 
-    expect(packageJson.private).toBe(true);
+    expect(packageJson.version).toBe("1.0.0");
+    expect(packageJson.private).toBeUndefined();
     expect(packageImports).toEqual({
       "#components/*": "./src/components/*.tsx",
       "#hooks/*": "./src/hooks/*.ts",
@@ -100,10 +101,23 @@ describe("workspace shadcn design system boundary", () => {
     });
     expect(exports).toMatchObject({
       "./globals.css": "./src/styles/globals.css",
+      "./theme.css": "./src/styles/theme.css",
       "./tokens.css": "./src/styles/tokens.css",
-      "./hooks/*": "./src/hooks/*.ts",
-      "./lib/*": "./src/lib/*.ts",
-      "./components/*": "./src/components/*.tsx",
+      "./hooks/*": {
+        types: "./dist/hooks/*.d.ts",
+        source: "./src/hooks/*.ts",
+        import: "./dist/hooks/*.js",
+      },
+      "./lib/*": {
+        types: "./dist/lib/*.d.ts",
+        source: "./src/lib/*.ts",
+        import: "./dist/lib/*.js",
+      },
+      "./components/*": {
+        types: "./dist/components/*.d.ts",
+        source: "./src/components/*.tsx",
+        import: "./dist/components/*.js",
+      },
     });
     expect(exports["."]).toBeUndefined();
     expect(existsSync(join(uiRoot, "src", "index.ts"))).toBe(false);
@@ -143,6 +157,7 @@ describe("workspace shadcn design system boundary", () => {
 
   test("separates shared Tailwind input from app-owned themes", () => {
     const sharedStyles = readFileSync(join(uiRoot, "src", "styles", "globals.css"), "utf8");
+    const defaultTheme = readFileSync(join(uiRoot, "src", "styles", "theme.css"), "utf8");
     const appStyles = [
       join(workspaceRoot, "apps", "engineering-docs", "app", "globals.css"),
       join(workspaceRoot, "apps", "git-client", "src", "styles", "index.css"),
@@ -152,11 +167,18 @@ describe("workspace shadcn design system boundary", () => {
     expect(sharedStyles).toContain('@import "tailwindcss"');
     expect(sharedStyles).toContain('@import "shadcn/tailwind.css"');
     expect(sharedStyles).toContain('@import "tw-animate-css"');
+    expect(sharedStyles).toContain('@import "./theme.css"');
     expect(sharedStyles).toContain('@import "./tokens.css"');
+    expect(sharedStyles.indexOf('@import "./theme.css"')).toBeLessThan(
+      sharedStyles.indexOf('@import "./tokens.css"'),
+    );
     expect(sharedStyles).toContain('@source "../**/*.{ts,tsx}"');
     expect(sharedStyles).toContain("@apply border-border outline-ring/50");
     expect(sharedStyles).toContain("@apply bg-background text-foreground");
     expect(sharedStyles).not.toContain("apps/");
+    expect(defaultTheme).toContain(":where(:root)");
+    expect(defaultTheme).toContain(':where(:root[data-theme="dark"])');
+    expect(defaultTheme).not.toContain("!important");
 
     for (const path of appStyles) {
       const stylesheet = readFileSync(path, "utf8");
@@ -166,8 +188,9 @@ describe("workspace shadcn design system boundary", () => {
     }
   });
 
-  test("keeps theme values local and satisfies the semantic token contract", () => {
+  test("keeps product theme overrides local and satisfies the semantic token contract", () => {
     const tokenContract = readFileSync(join(uiRoot, "src", "styles", "tokens.css"), "utf8");
+    const defaultTheme = readFileSync(join(uiRoot, "src", "styles", "theme.css"), "utf8");
     const themePaths = [
       join(workspaceRoot, "apps", "engineering-docs", "app", "theme.css"),
       join(workspaceRoot, "apps", "git-client", "src", "styles", "theme.css"),
@@ -206,11 +229,12 @@ describe("workspace shadcn design system boundary", () => {
     expect(tokenContract).toContain("--color-overlay: var(--overlay)");
     expect(tokenContract).not.toContain(":root");
 
+    for (const token of requiredTokens) expect(defaultTheme).toContain(`--${token}:`);
+
     for (const path of themePaths) {
       const theme = readFileSync(path, "utf8");
       expect(theme, path).toContain("oklch(");
       expect(theme, path).not.toMatch(/#[\da-f]{3,8}\b/i);
-      for (const token of requiredTokens) expect(theme, path).toContain(`--${token}:`);
     }
   });
 

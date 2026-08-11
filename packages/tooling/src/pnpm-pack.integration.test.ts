@@ -25,6 +25,7 @@ interface PackedManifest {
   readonly optionalDependencies?: Readonly<Record<string, string>>;
   readonly peerDependencies?: Readonly<Record<string, string>>;
   readonly type?: string;
+  readonly version?: string;
 }
 
 interface PackedWorkspace {
@@ -104,6 +105,7 @@ function parsePackedManifest(value: unknown): PackedManifest {
     ),
     peerDependencies: parsePackedStringRecord(value.peerDependencies, "peerDependencies"),
     type: typeof value.type === "string" ? value.type : undefined,
+    version: typeof value.version === "string" ? value.version : undefined,
   });
 }
 
@@ -402,6 +404,57 @@ describe("pnpm package tarball contracts", () => {
       expect(JSON.parse(aliasStdout)).toMatchObject({
         "@consumer/app": ["./packages/app/src/index.ts"],
       });
+    } finally {
+      await rm(packed.tempDir, { force: true, recursive: true });
+    }
+  }, 240_000);
+
+  it("packs @jongminchung/ui with ESM components, declarations, and theme assets", async () => {
+    const packed = await packWorkspace("@jongminchung/ui");
+    try {
+      expect(packed.files).toEqual(
+        expect.arrayContaining([
+          "LICENSE",
+          "README.md",
+          "dist/components/button.d.ts",
+          "dist/components/button.js",
+          "dist/lib/utils.d.ts",
+          "dist/lib/utils.js",
+          "src/components/button.tsx",
+          "src/styles/globals.css",
+          "src/styles/theme.css",
+          "src/styles/tokens.css",
+        ]),
+      );
+      expect(packed.files.some((file) => file.endsWith(".test.ts"))).toBe(false);
+      expect(packed.files.some((file) => file.endsWith(".test.tsx"))).toBe(false);
+      expect(packed.manifest.version).toBe("1.0.0");
+      expect(packed.manifest.type).toBe("module");
+      expect(packed.manifest.dependencies).not.toHaveProperty("react");
+      expect(packed.manifest.dependencies).not.toHaveProperty("react-dom");
+      expect(packed.manifest.peerDependencies).toMatchObject({
+        react: "^19.2.0",
+        "react-dom": "^19.2.0",
+        tailwindcss: "^4.3.0",
+      });
+      expect(JSON.stringify(packed.manifest.exports)).toContain('"source"');
+      expect(JSON.stringify(packed.manifest.exports)).toContain('"types"');
+      expect(JSON.stringify(packed.manifest.exports)).toContain('"import"');
+      expect(JSON.stringify(packed.manifest.exports)).not.toContain('"require"');
+      expectPackedProtocolsResolved(packed.manifest);
+      expect(packed.files.some((file) => file.endsWith(".cjs"))).toBe(false);
+      expect(
+        await commonJsErrorCodeFromConsumer(packed.consumerRoot, "@jongminchung/ui/lib/utils"),
+      ).toBe("ERR_PACKAGE_PATH_NOT_EXPORTED");
+
+      for (const stylesheet of ["globals", "theme", "tokens"] as const) {
+        expect(
+          await packageFileContentsFromConsumer(
+            packed.consumerRoot,
+            `@jongminchung/ui/${stylesheet}.css`,
+          ),
+        ).toBe(await readFile(join(rootDir, `packages/ui/src/styles/${stylesheet}.css`), "utf8"));
+      }
     } finally {
       await rm(packed.tempDir, { force: true, recursive: true });
     }

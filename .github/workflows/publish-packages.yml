@@ -35,6 +35,7 @@ jobs:
           for (const filePath of [
             "packages/remark-plantuml/package.json",
             "packages/tooling/package.json",
+            "packages/ui/package.json",
           ]) {
             const packageJson = JSON.parse(readFileSync(filePath, "utf8"));
 
@@ -47,6 +48,8 @@ jobs:
         working-directory: packages/remark-plantuml
       - run: pnpm publish --dry-run --access public
         working-directory: packages/tooling
+      - run: pnpm publish --dry-run --access public
+        working-directory: packages/ui
       - name: Remove existing remark-plantuml 1.0.0
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
@@ -79,6 +82,33 @@ jobs:
       - name: Publish tooling 1.0.0
         run: pnpm publish --access public
         working-directory: packages/tooling
+      - name: Remove existing ui 1.0.0
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          set +e
+          version_ids="$(
+            GH_TOKEN="$GH_PAT" gh api --paginate \
+              "/users/${GITHUB_REPOSITORY_OWNER}/packages/npm/ui/versions" \
+              --jq '.[] | select(.name == "1.0.0") | .id' 2>&1
+          )"
+          status=$?
+          set -e
+          if test "$status" -ne 0; then
+            if grep -q "HTTP 404" <<< "$version_ids"; then
+              version_ids=""
+            else
+              printf '%s\n' "$version_ids" >&2
+              exit "$status"
+            fi
+          fi
+          while IFS= read -r version_id; do
+            test -z "$version_id" || GH_TOKEN="$GH_PAT" gh api --method DELETE \
+              "/users/${GITHUB_REPOSITORY_OWNER}/packages/npm/ui/versions/${version_id}"
+          done <<< "$version_ids"
+      - name: Publish ui 1.0.0
+        run: pnpm publish --access public
+        working-directory: packages/ui
       - name: Remove GitHub Packages auth
         if: always()
         run: npm config delete //npm.pkg.github.com/:_authToken

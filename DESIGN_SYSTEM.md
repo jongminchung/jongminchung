@@ -2,7 +2,7 @@
 
 - 공용 primitive는 `@jongminchung/ui`에서 소스 코드로 직접 소유·수정
 - 제품 UI의 조합과 동작은 각 앱에서 소유
-- `@jongminchung/ui`는 별도로 배포하는 디자인 시스템이 아닌 내부 shadcn 소스 패키지
+- `@jongminchung/ui`는 workspace에서 source-first로 개발하고 GitHub Packages에 `1.0.0`으로 배포하는 디자인 시스템
 
 ## 소유권
 
@@ -10,13 +10,13 @@
   - shadcn primitive와 `cn`
   - 공용 Tailwind 진입점
   - 값이 없는 semantic token 계약
+  - neutral light·dark 기본 theme 값
   - Tailwind 색상·radius 매핑
 - 각 앱
-  - `theme.css`의 실제 값
+  - `theme.css`의 선택적 override와 제품 token
   - 제품 component와 layout
   - 상태와 플랫폼별 동작
 - 공용 primitive는 파일 단위 named export만 제공
-- default export 사용 금지
 - 공용 primitive import는 명시적인 subpath 사용
 
 ```tsx
@@ -65,6 +65,8 @@ pnpm exec shadcn add <component-or-block>
   - `@jongminchung/ui/lib/*`
 - registry hook은 `packages/ui`에서 소유
 - 공용 primitive가 특정 앱의 private alias에 의존하는 구성 금지
+- 공개 package consumer는 ESM JavaScript와 declaration을 사용
+- workspace tooling은 package export의 `source` 조건을 우선 사용
 - `tsconfig.base.json` 필수 설정
   - `moduleResolution: "bundler"`
   - `resolvePackageJsonImports: true`
@@ -94,16 +96,36 @@ pnpm exec shadcn add <component-or-block>
 - 기준: [shadcn theming contract](https://ui.shadcn.com/docs/theming)
 - `@jongminchung/ui/globals.css` 소유 범위
   - Tailwind, `shadcn/tailwind.css`, `tw-animate-css` import
+  - `theme.css`의 neutral light·dark 기본값 import
   - 값이 없는 `tokens.css` 계약 import
   - 공용 UI source tree 등록
   - 기본 border, focus outline, body background·foreground layer
 - 각 앱의 책임
   - `@jongminchung/ui/globals.css` import
-  - 앱의 `theme.css` import
+  - 공용 기본값을 바꿀 때 그 뒤에서 앱의 `theme.css` import
   - 앱 source tree를 `@source`로 등록
+- 소비자는 앱의 전역 CSS에서 공용 진입점을 한 번만 import하고, 해당 CSS를 framework entry에서 기존 Tailwind 방식대로 로드
+
+```css
+@import "@jongminchung/ui/globals.css";
+@import "./theme.css";
+
+@source "../**/*.{ts,tsx}";
+```
+
+```tsx
+import "./globals.css";
+```
+
+- `globals.css`가 Tailwind, shadcn, animation, 기본 theme, token mapping과 공용 UI source scanning을 제공
+- 소비자는 `tailwindcss`, `shadcn/tailwind.css`, `tw-animate-css` 또는 공용 UI source를 중복 import·등록하지 않음
+- 앱 `theme.css` import는 공용 기본 token을 덮어쓸 때만 추가
+- 공용 기본값은 `@jongminchung/ui/theme.css`로도 export
+- 공용 기본 selector는 `:where(:root)`와 `:where(:root[data-theme="dark"])`로 specificity를 낮춤
+- 소비자 override는 `globals.css` 뒤에서 `:root` 또는 `:root[data-theme="dark"]`에 필요한 token만 선언
 - token 계약은 `@jongminchung/ui/tokens.css`로도 export
 - 동일한 계약을 위한 별도 theme package 추가 금지
-- 모든 앱의 각 theme scope에서 다음 provider 값을 완전하게 정의
+- 공용 기본 theme의 light·dark scope에서 다음 provider 값을 완전하게 정의
   - background·foreground
   - surface와 action
   - border·input·ring
@@ -127,8 +149,9 @@ pnpm exec shadcn add <component-or-block>
 - `"use client"`가 있는 공용 component는 실제 server output에서 import될 때만 client boundary 생성
 - 정적 shell, link, document content는 server rendering 유지
 - provider는 필요한 가장 작은 interactive subtree에 배치
-- `apps/engineering-docs`와 `apps/readme`는 `@jongminchung/ui`를 transpile
-- Vite 기반 Git Client는 같은 소스 패키지를 사용하고 `react`, `react-dom`을 dedupe
+- `apps/engineering-docs`와 `apps/readme`는 workspace의 `@jongminchung/ui` source를 transpile
+- Vite 기반 Git Client는 `source` export condition으로 같은 소스를 사용하고 `react`, `react-dom`을 dedupe
+- 외부 consumer는 공개 subpath의 ESM JavaScript와 declaration을 사용
 - 모든 workspace는 동일한 최신 안정 TypeScript 6 compiler 사용
 - compiler major 전환 조건
   - Compiler API 검증
@@ -144,8 +167,8 @@ pnpm exec shadcn add <component-or-block>
 
 - 계약 테스트 대상
   - `components.json` 라우팅
-  - package export
-  - token·radius·variant 계약
+  - package export와 tarball
+  - 기본 theme·override cascade·token·radius·variant 계약
   - 앱 내부 primitive 복사 방지
   - 앱의 Base UI 직접 import 방지
 - 동작 테스트 대상
