@@ -44,14 +44,17 @@ export function AppWorkspaceRouter({
     setSettingsOpen,
     setShowRepositoryDialog,
   } = state;
-  const sessionActiveTab = session.activeTab;
-  const sessionRepository = session.repository;
-  const sessionActivateTab = session.activateTab;
+  const {
+    activateTab: sessionActivateTab,
+    activeTab: sessionActiveTab,
+    sessions,
+  } = session.workspace;
+  const { repository: sessionRepository } = session.repository;
   const activeError = useMemo(() => {
     if (sessionActiveTab.kind !== "error") return null;
     const sessionId = sessionActiveTab.sessionId;
-    return session.sessions.find((item) => item.kind === "error" && item.id === sessionId) ?? null;
-  }, [session.sessions, sessionActiveTab]);
+    return sessions.find((item) => item.kind === "error" && item.id === sessionId) ?? null;
+  }, [sessions, sessionActiveTab]);
   const showNotifications = productSettings.showNotifications;
 
   return (

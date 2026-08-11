@@ -175,7 +175,7 @@ export function useAppDialog(): AppDialogController {
             </pre>
           ) : null}
           {validation && request.kind !== "input" && (
-            <FieldStatus message={validation} type="error" variant="detached" />
+            <FieldStatus message={validation} type="error" />
           )}
         </div>
         <footer className="flex justify-end gap-2 border-t border-border p-3">

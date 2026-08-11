@@ -213,7 +213,7 @@ function RepositoryWorkspaceContent({
     queries: sessionQueries,
     repository: sessionRepositoryCapability,
     workspace: sessionWorkspace,
-  } = session.capabilities;
+  } = session;
   const {
     cancel: sessionCancelActivity,
     clearConsole: sessionClearGitConsole,

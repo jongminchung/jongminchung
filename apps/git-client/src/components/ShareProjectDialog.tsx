@@ -396,7 +396,6 @@ export function ShareProjectDialog({
               className={`shareProjectAccount [align-items:end] [display:grid] [gap:8px] [grid-template-columns:minmax(0,_1fr)_auto] shareProjectAccount`}
             >
               <Selector
-                hasSearch
                 isDisabled={busy || created !== null || !accountId}
                 isLoading={namespaceLoading}
                 label="Namespace / Group"

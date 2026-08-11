@@ -56,7 +56,7 @@ The current Git-focused target is the installed Rebased 1.1.11 on macOS ARM64. T
 
 ## Releases
 
-Git Client is distributed as a Developer ID-signed and Apple-notarized macOS 26+ ARM64 DMG on [GitHub Releases](https://github.com/jongminchung/jongminchung/releases). Nx Release derives project-scoped versions and notes from Conventional Commits, using `git-client-<version>` tags and `Git Client <version>` release titles. Each release includes the DMG and its SHA-256 manifest; the app does not include an in-app updater. Production release fails closed when signing identity or notarization configuration is unavailable. A separate `release:validate-local` command creates visibly named `_adhoc` artifacts that must never be published.
+Git Client is distributed as a Developer ID-signed and Apple-notarized macOS 26+ ARM64 DMG on [GitHub Releases](https://github.com/jongminchung/jongminchung/releases). Releases are started manually and always replace the `git-client-1.0.0` tag and `Git Client 1.0.0` release. Each release includes the DMG and its SHA-256 manifest; the app does not include an in-app updater. Production release fails closed when signing identity or notarization configuration is unavailable. A separate `release:validate-local` command creates visibly named `_adhoc` artifacts that must never be published.
 
 See [`docs/releases.md`](docs/releases.md) for checksum verification, signing/notarization gates, release conventions, and local build commands.
 

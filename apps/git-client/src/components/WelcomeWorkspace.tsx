@@ -11,6 +11,7 @@ import {
   type DragEvent,
   type KeyboardEvent,
 } from "react";
+import packageConfig from "../../package.json";
 import { isAppearanceTheme, type AppearancePreference } from "../domain/appearance";
 import type { RecentProject } from "../domain/recentProjects";
 import { writeClipboardText } from "../platform/electronActions";
@@ -23,6 +24,7 @@ const SECTIONS: readonly WelcomeSection[] = ["projects", "customize"];
 const WELCOME_SIDEBAR_WIDTH = 224;
 const WELCOME_NAV_ITEM_WIDTH = 200;
 const WELCOME_NAV_ITEM_HEIGHT = 32;
+const PRODUCT_VERSION = packageConfig.version;
 
 function sectionLabel(section: WelcomeSection): string {
   if (section === "projects") return "Projects";
@@ -153,14 +155,14 @@ export function WelcomeWorkspace({
             href="#copy-about"
             onClick={(event) => {
               event.preventDefault();
-              void writeClipboardText("Git Client 0.1.0");
+              void writeClipboardText(`Git Client ${PRODUCT_VERSION}`);
             }}
           >
             <Icon name="branch" size={19} />
           </a>
           <span>
             <strong>Git Client</strong>
-            <small>0.1.0</small>
+            <small>{PRODUCT_VERSION}</small>
           </span>
         </div>
         <div

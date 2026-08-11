@@ -8,7 +8,7 @@ import { inspectorKey, type InspectorState } from "../state/workspaceTypes";
 
 interface RepositoryEditorControllerOptions {
   readonly repository: RepositoryView;
-  readonly loadFiles: GitSessionController["loadFiles"];
+  readonly loadFiles: GitSessionController["queries"]["loadFiles"];
   readonly onDirtyEditorCountChange: (count: number) => void;
 }
 

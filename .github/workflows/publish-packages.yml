@@ -10,8 +10,6 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -24,7 +22,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run check
       - name: Configure GitHub Packages auth
-        run: npm config set //npm.pkg.github.com/:_authToken "$NODE_AUTH_TOKEN"
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          test -n "$GH_PAT"
+          npm config set //npm.pkg.github.com/:_authToken "$GH_PAT"
       - name: Guard fixed package versions
         run: |
           node <<'NODE'
@@ -45,7 +47,38 @@ jobs:
         working-directory: packages/remark-plantuml
       - run: pnpm publish --dry-run --access public
         working-directory: packages/tooling
-      - run: pnpm publish --access public
+      - name: Remove existing remark-plantuml 1.0.0
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          version_ids="$(
+            GH_TOKEN="$GH_PAT" gh api --paginate \
+              "/users/${GITHUB_REPOSITORY_OWNER}/packages/npm/remark-plantuml/versions" \
+              --jq '.[] | select(.name == "1.0.0") | .id'
+          )"
+          while IFS= read -r version_id; do
+            test -z "$version_id" || GH_TOKEN="$GH_PAT" gh api --method DELETE \
+              "/users/${GITHUB_REPOSITORY_OWNER}/packages/npm/remark-plantuml/versions/${version_id}"
+          done <<< "$version_ids"
+      - name: Publish remark-plantuml 1.0.0
+        run: pnpm publish --access public
         working-directory: packages/remark-plantuml
-      - run: pnpm publish --access public
+      - name: Remove existing tooling 1.0.0
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          version_ids="$(
+            GH_TOKEN="$GH_PAT" gh api --paginate \
+              "/users/${GITHUB_REPOSITORY_OWNER}/packages/npm/tooling/versions" \
+              --jq '.[] | select(.name == "1.0.0") | .id'
+          )"
+          while IFS= read -r version_id; do
+            test -z "$version_id" || GH_TOKEN="$GH_PAT" gh api --method DELETE \
+              "/users/${GITHUB_REPOSITORY_OWNER}/packages/npm/tooling/versions/${version_id}"
+          done <<< "$version_ids"
+      - name: Publish tooling 1.0.0
+        run: pnpm publish --access public
         working-directory: packages/tooling
+      - name: Remove GitHub Packages auth
+        if: always()
+        run: npm config delete //npm.pkg.github.com/:_authToken

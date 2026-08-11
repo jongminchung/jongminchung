@@ -56,7 +56,7 @@ export function createProjectCommands(
     }),
     commandDefinition("workspace.open", () => void openRepositoryFromPicker()),
     commandDefinition("workspace.manageProjects", () => {
-      if (session.repository) setProjectSwitcherOpen(true);
+      if (session.repository.repository) setProjectSwitcherOpen(true);
       else void openRepositoryFromPicker();
     }),
     commandDefinition("workspace.clone", () => {
@@ -89,7 +89,7 @@ export function createProjectCommands(
       "workspace.repairIde",
       () => setRepairIdeOpen(true),
       () =>
-        session.activeTab.kind === "repository"
+        session.workspace.activeTab.kind === "repository"
           ? COMMAND_ENABLED
           : commandDisabled("Open a project to repair its indexes."),
     ),
@@ -101,7 +101,9 @@ export function createProjectCommands(
     commandDefinition(
       "workspace.close",
       async () => {
-        const repositorySessions = session.sessions.filter((item) => item.kind === "repository");
+        const repositorySessions = session.workspace.sessions.filter(
+          (item) => item.kind === "repository",
+        );
         if (repositorySessions.length === 0) return;
         const terminalCount = repositorySessions.reduce(
           (count, item) => count + terminalService.count(item.repository.snapshot.id),
@@ -122,10 +124,10 @@ export function createProjectCommands(
           });
           if (!accepted) return;
         }
-        await session.closeProject();
+        await session.workspace.closeProject();
       },
       () =>
-        session.openRepositories.length > 0
+        session.workspace.openRepositories.length > 0
           ? COMMAND_ENABLED
           : commandDisabled("There is no project to close."),
     ),

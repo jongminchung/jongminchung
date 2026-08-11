@@ -45,5 +45,9 @@ export function createRepositoryCommands(
 }
 
 export function useRepositoryCommands(context: RepositoryCommandContext): void {
-  useCommandDefinitions(createRepositoryCommands(context));
+  useCommandDefinitions(createProjectCommands(context));
+  useCommandDefinitions(createEditorNavigationCommands(context));
+  useCommandDefinitions(createVcsCommands(context));
+  useCommandDefinitions(createSearchAnalysisCommands(context));
+  useCommandDefinitions(createAppearanceLayoutCommands(context));
 }

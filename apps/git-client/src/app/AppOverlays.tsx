@@ -74,21 +74,27 @@ export function AppOverlays({
   } = state;
   const handleProductSettingsChange = (settings: typeof productSettings): void =>
     setProductSettings(settings);
-  const sessionCancelRepositoryCreation = session.cancelRepositoryCreation;
-  const sessionCloneRepository = session.cloneRepository;
-  const sessionCompareBranches = session.compareBranches;
-  const sessionExecuteOperation = session.executeOperation;
-  const sessionInitializeRepository = session.initializeRepository;
-  const sessionLoadGitConfig = session.loadGitConfig;
-  const sessionLoadMergedBranches = session.loadMergedBranches;
-  const sessionLoadPushPreview = session.loadPushPreview;
-  const sessionLoadSubmodules = session.loadSubmodules;
-  const sessionOpenRepository = session.openRepository;
-  const sessionReadIgnoreRules = session.readIgnoreRules;
-  const sessionRemotes = session.remotes;
-  const sessionRepository = session.repository;
-  const sessionWorktrees = session.worktrees;
-  const sessionWriteIgnoreRules = session.writeIgnoreRules;
+  const {
+    compareBranches: sessionCompareBranches,
+    loadGitConfig: sessionLoadGitConfig,
+    loadMergedBranches: sessionLoadMergedBranches,
+    loadPushPreview: sessionLoadPushPreview,
+    loadSubmodules: sessionLoadSubmodules,
+    readIgnoreRules: sessionReadIgnoreRules,
+  } = session.queries;
+  const { executeOperation: sessionExecuteOperation, writeIgnoreRules: sessionWriteIgnoreRules } =
+    session.mutations;
+  const {
+    remotes: sessionRemotes,
+    repository: sessionRepository,
+    worktrees: sessionWorktrees,
+  } = session.repository;
+  const {
+    cancelRepositoryCreation: sessionCancelRepositoryCreation,
+    cloneRepository: sessionCloneRepository,
+    initializeRepository: sessionInitializeRepository,
+    openRepository: sessionOpenRepository,
+  } = session.workspace;
 
   return (
     <Suspense fallback={null}>

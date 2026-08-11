@@ -22,8 +22,8 @@ const EMPTY_CONTENT_PAIR: DiffContentPair = {
 const EMPTY_TREE_OID = "4b825dc642cb6eb9a060e54bf8d69288fbee4904";
 
 interface RepositoryContentLoaderOptions {
-  readonly loadFile: GitSessionController["readFile"];
-  readonly loadFilePreview: GitSessionController["readFilePreview"];
+  readonly loadFile: GitSessionController["queries"]["readFile"];
+  readonly loadFilePreview: GitSessionController["queries"]["readFilePreview"];
   readonly primaryCommit: Commit | undefined;
   readonly repository: RepositoryView;
   readonly workingEntries: readonly ChangeEntry[];

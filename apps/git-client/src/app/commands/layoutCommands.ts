@@ -39,7 +39,7 @@ export function createLayoutCommands(
       "window.layoutDefault",
       () => applyToolWindowLayout(DEFAULT_TOOL_WINDOW_LAYOUT),
       () =>
-        session.activeTab.kind === "repository"
+        session.workspace.activeTab.kind === "repository"
           ? COMMAND_ENABLED
           : commandDisabled("Open a project to restore its layout."),
     ),
@@ -48,7 +48,7 @@ export function createLayoutCommands(
         "window.activateCurrentProject",
         () => window.focus(),
         () =>
-          session.activeTab.kind === "repository"
+          session.workspace.activeTab.kind === "repository"
             ? COMMAND_ENABLED
             : commandDisabled("Open a project window."),
       ),
@@ -66,7 +66,7 @@ export function createLayoutCommands(
         }
       },
       () =>
-        session.activeTab.kind === "repository"
+        session.workspace.activeTab.kind === "repository"
           ? COMMAND_ENABLED
           : commandDisabled("Open a project to restore a layout."),
     ),
@@ -82,7 +82,7 @@ export function createLayoutCommands(
         }
       },
       () =>
-        session.activeTab.kind === "repository"
+        session.workspace.activeTab.kind === "repository"
           ? COMMAND_ENABLED
           : commandDisabled("Open a project to save its layout."),
     ),
@@ -134,7 +134,7 @@ export function createLayoutCommands(
         ]);
       },
       () =>
-        session.activeTab.kind === "repository"
+        session.workspace.activeTab.kind === "repository"
           ? COMMAND_ENABLED
           : commandDisabled("Open a project to save its layout."),
     ),

@@ -153,7 +153,7 @@ export function createAppearanceCommands(
           editorFontSize: DEFAULT_PRODUCT_SETTINGS.editorFontSize,
         })),
       () =>
-        session.activeTab.kind === "repository"
+        session.workspace.activeTab.kind === "repository"
           ? COMMAND_ENABLED
           : commandDisabled("Open a project to reset editor fonts."),
     ),
@@ -166,7 +166,7 @@ export function createAppearanceCommands(
             bidiTextDirection: "content",
           })),
         () =>
-          session.activeTab.kind === "repository"
+          session.workspace.activeTab.kind === "repository"
             ? COMMAND_ENABLED
             : commandDisabled("Open a project to set text direction."),
       ),
@@ -181,7 +181,7 @@ export function createAppearanceCommands(
             bidiTextDirection: "ltr",
           })),
         () =>
-          session.activeTab.kind === "repository"
+          session.workspace.activeTab.kind === "repository"
             ? COMMAND_ENABLED
             : commandDisabled("Open a project to set text direction."),
       ),
@@ -196,7 +196,7 @@ export function createAppearanceCommands(
             bidiTextDirection: "rtl",
           })),
         () =>
-          session.activeTab.kind === "repository"
+          session.workspace.activeTab.kind === "repository"
             ? COMMAND_ENABLED
             : commandDisabled("Open a project to set text direction."),
       ),

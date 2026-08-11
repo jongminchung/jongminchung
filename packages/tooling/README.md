@@ -22,8 +22,7 @@ const { defineOxlintConfig } = require("@jongminchung/tooling/oxlint");
 
 ## Version Policy
 
-Published versions are immutable. Increment the stable SemVer version for every changed release:
-patch for compatible fixes, minor for compatible features, and major for breaking contracts.
+The manual package workflow always replaces the personal `1.0.0` package version.
 
 ## Package scripts
 

@@ -18,7 +18,6 @@ import type {
   ChangeEvent,
   ComponentProps,
   InputHTMLAttributes,
-  KeyboardEvent,
   ReactNode,
   Ref,
   TextareaHTMLAttributes,
@@ -107,10 +106,6 @@ interface TextInputProps extends Omit<
   readonly label: string;
   readonly value: string;
   readonly onChange?: (value: string, event: ChangeEvent<HTMLInputElement>) => void;
-  readonly changeAction?: (
-    value: string,
-    event: ChangeEvent<HTMLInputElement>,
-  ) => void | Promise<void>;
   readonly isLabelHidden?: boolean;
   readonly description?: string;
   readonly isOptional?: boolean;
@@ -126,8 +121,6 @@ interface TextInputProps extends Omit<
   readonly labelTooltip?: string;
   readonly hasClear?: boolean;
   readonly hasAutoFocus?: boolean;
-  readonly htmlName?: string;
-  readonly onEnter?: () => void;
   readonly ref?: Ref<HTMLInputElement>;
 }
 
@@ -136,7 +129,6 @@ export function TextInput({
   label,
   value,
   onChange,
-  changeAction,
   isLabelHidden,
   description,
   isOptional,
@@ -152,8 +144,6 @@ export function TextInput({
   labelTooltip,
   hasClear = false,
   hasAutoFocus = false,
-  htmlName,
-  onEnter,
   ref,
   className,
   onKeyDown,
@@ -162,14 +152,6 @@ export function TextInput({
   const generatedId = useId();
   const inputId = id ?? generatedId;
   const inputRef = useRef<HTMLInputElement>(null);
-  const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    onChange?.(event.target.value, event);
-    if (!event.defaultPrevented && changeAction) void changeAction(event.target.value, event);
-  };
-  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>): void => {
-    onKeyDown?.(event);
-    if (!event.defaultPrevented && event.key === "Enter") onEnter?.();
-  };
   return (
     <FieldShell
       description={description}
@@ -200,9 +182,8 @@ export function TextInput({
           className="h-auto min-w-0 flex-1 rounded-none border-0 bg-transparent px-0 py-0 shadow-none focus-visible:ring-0"
           disabled={isDisabled}
           id={inputId}
-          name={htmlName}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
+          onChange={(event) => onChange?.(event.target.value, event)}
+          onKeyDown={onKeyDown}
           placeholder={placeholder}
           readOnly={isDisabled && disabledMessage !== undefined}
           ref={(node) => {
@@ -249,10 +230,6 @@ interface TextAreaProps extends Omit<
   readonly label: string;
   readonly value: string;
   readonly onChange?: (value: string, event: ChangeEvent<HTMLTextAreaElement>) => void;
-  readonly changeAction?: (
-    value: string,
-    event: ChangeEvent<HTMLTextAreaElement>,
-  ) => void | Promise<void>;
   readonly isLabelHidden?: boolean;
   readonly description?: string;
   readonly isOptional?: boolean;
@@ -265,7 +242,6 @@ interface TextAreaProps extends Omit<
   readonly startIcon?: ReactNode;
   readonly hasSpellCheck?: boolean;
   readonly hasAutoFocus?: boolean;
-  readonly htmlName?: string;
   readonly isLoading?: boolean;
   readonly size?: "sm" | "md" | "lg";
   readonly fieldClassName?: string;
@@ -276,7 +252,6 @@ export function TextArea({
   label,
   value,
   onChange,
-  changeAction,
   isLabelHidden,
   description,
   isOptional,
@@ -289,7 +264,6 @@ export function TextArea({
   startIcon,
   hasSpellCheck = true,
   hasAutoFocus = false,
-  htmlName,
   isLoading = false,
   fieldClassName,
   className,
@@ -325,12 +299,7 @@ export function TextArea({
           )}
           disabled={isDisabled}
           id={inputId}
-          name={htmlName}
-          onChange={(event) => {
-            onChange?.(event.target.value, event);
-            if (!event.defaultPrevented && changeAction)
-              void changeAction(event.target.value, event);
-          }}
+          onChange={(event) => onChange?.(event.target.value, event)}
           readOnly={isDisabled && disabledMessage !== undefined}
           required={isRequired}
           spellCheck={hasSpellCheck}
@@ -360,7 +329,6 @@ interface CheckboxInputProps extends Omit<
   readonly width?: number | string;
   readonly labelIcon?: ReactNode;
   readonly status?: InputStatus;
-  readonly htmlName?: string;
 }
 
 export function CheckboxInput({
@@ -376,7 +344,6 @@ export function CheckboxInput({
   width,
   labelIcon,
   status,
-  htmlName,
   className,
   id: suppliedId,
   required,
@@ -406,7 +373,6 @@ export function CheckboxInput({
         disabled={isDisabled}
         id={id}
         indeterminate={value === "indeterminate"}
-        name={htmlName}
         onCheckedChange={(checked, eventDetails) => {
           if (!isReadOnly) onChange?.(checked, eventDetails.event);
         }}
@@ -446,7 +412,6 @@ interface SelectorProps {
   readonly width?: number | string;
   readonly size?: "sm" | "md" | "lg";
   readonly placement?: "above" | "below";
-  readonly hasSearch?: boolean;
   readonly isLoading?: boolean;
   readonly labelTooltip?: string;
   readonly status?: InputStatus;
@@ -469,8 +434,7 @@ export function Selector({
   width,
   size = "md",
   placement = "below",
-  hasSearch: _hasSearch,
-  isLoading: _isLoading,
+  isLoading = false,
   labelTooltip,
   status,
   placeholder,
@@ -483,8 +447,10 @@ export function Selector({
   const generatedId = useId();
   const id = suppliedId ?? generatedId;
   const selectedLabel = options.find((option) => option.value === value)?.label;
+  const statusId = status?.message === undefined ? undefined : `${id}-status`;
   return (
     <Field
+      aria-busy={isLoading || undefined}
       className="gap-1 text-xs"
       data-invalid={status?.type === "error" || undefined}
       style={{ width }}
@@ -497,14 +463,14 @@ export function Selector({
         {label}
       </FieldLabel>
       <Select
-        disabled={isDisabled}
+        disabled={isDisabled || isLoading}
         name={name}
         onValueChange={(nextValue) => onChange?.(nextValue ?? "")}
         required={required}
         value={value}
       >
         <SelectTrigger
-          aria-describedby={ariaDescribedBy}
+          aria-describedby={[ariaDescribedBy, statusId].filter(Boolean).join(" ") || undefined}
           aria-invalid={status?.type === "error" || undefined}
           className={cn("w-full text-xs", size === "lg" && "h-9", className)}
           autoFocus={hasAutoFocus}
@@ -518,6 +484,7 @@ export function Selector({
                 : (selectedLabel ?? String(selectedValue))
             }
           </SelectValue>
+          {isLoading ? <SpinnerIcon aria-hidden className="size-3.5" /> : null}
         </SelectTrigger>
         <SelectContent side={placement === "above" ? "top" : "bottom"}>
           {options.map((option) => (
@@ -527,7 +494,7 @@ export function Selector({
           ))}
         </SelectContent>
       </Select>
-      {status?.message ? <FieldError>{status.message}</FieldError> : null}
+      {status?.message ? <FieldError id={statusId}>{status.message}</FieldError> : null}
     </Field>
   );
 }
@@ -538,7 +505,6 @@ export function FieldStatus({
 }: {
   readonly message: string;
   readonly type: InputStatus["type"];
-  readonly variant?: string;
 }): ReactNode {
   return type === "error" ? (
     <FieldError className="m-0 text-xs">{message}</FieldError>

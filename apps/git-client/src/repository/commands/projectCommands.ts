@@ -53,7 +53,7 @@ export function createProjectCommands(context: ProjectCommandPort): readonly Com
           if (!accepted) return;
         }
         window.dispatchEvent(new CustomEvent("git-client:reload-editors"));
-        await session.reload();
+        await session.queries.reload();
       },
       repositoryAvailability,
     ),

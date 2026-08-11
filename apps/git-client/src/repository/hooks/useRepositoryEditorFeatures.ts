@@ -23,11 +23,11 @@ import type { InspectorState } from "../state/workspaceTypes";
 
 interface RepositoryEditorFeatureOptions {
   readonly inspector: InspectorState | undefined;
-  readonly loadFile: GitSessionController["readFile"];
+  readonly loadFile: GitSessionController["queries"]["readFile"];
   readonly openInspector: (next: InspectorState, keepOpen?: boolean) => void;
-  readonly reload: GitSessionController["reload"];
+  readonly reload: GitSessionController["queries"]["reload"];
   readonly repository: RepositoryView;
-  readonly writeWorkingTreeFile: GitSessionController["writeWorkingTreeFile"];
+  readonly writeWorkingTreeFile: GitSessionController["mutations"]["writeWorkingTreeFile"];
 }
 
 export function useRepositoryEditorFeatures({

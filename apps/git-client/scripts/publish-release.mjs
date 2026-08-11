@@ -1,13 +1,7 @@
 import { writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createProjectGraphAsync } from "@nx/devkit";
-import { ReleaseClient } from "nx/release";
-import {
-  collectTransitiveWorkspaceDependencies,
-  createDependencyAwareChangelogRenderer,
-} from "./nx-changelog-renderer.mjs";
-import { captureCommand, executeCommand } from "./process.mjs";
+import { executeCommand } from "./process.mjs";
 import {
   buildRelease,
   createReleaseArtifactNames,
@@ -15,55 +9,30 @@ import {
   verifyReleaseSource,
 } from "./release.mjs";
 
-export const gitClientProject = "@jongminchung/git-client";
-export const gitClientReleaseGroup = "git-client";
 export const githubRepository = "jongminchung/jongminchung";
-export const initialReleaseVersion = "1.0.0";
+export const fixedReleaseVersion = "1.0.0";
 
-const stableReleaseTagPattern = /^git-client-(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
 const appRoot = fileURLToPath(new URL("../", import.meta.url));
 const workspaceRoot = fileURLToPath(new URL("../../../", import.meta.url));
 
 export function createReleaseTag(value) {
-  return `git-client-${parseReleaseVersion(value)}`;
+  return `git-client-${assertFixedReleaseVersion(value)}`;
 }
 
 export function createReleaseTitle(value) {
-  return `Git Client ${parseReleaseVersion(value)}`;
+  return `Git Client ${assertFixedReleaseVersion(value)}`;
 }
 
-export function createInitialReleaseNotes() {
-  return `# ${initialReleaseVersion}\n\nInitial Git Client release.\n`;
+export function assertFixedReleaseVersion(value) {
+  const version = parseReleaseVersion(value);
+  if (version !== fixedReleaseVersion) {
+    throw new Error(`Git Client releases must reuse version ${fixedReleaseVersion}`);
+  }
+  return version;
 }
 
-export function hasStableReleaseTag(tags) {
-  return tags.some((tag) => stableReleaseTagPattern.test(tag));
-}
-
-export function findLatestStableReleaseTag(tags) {
-  return tags
-    .filter((tag) => stableReleaseTagPattern.test(tag))
-    .sort((left, right) => {
-      const leftVersion = left.replace("git-client-", "").split(".").map(Number);
-      const rightVersion = right.replace("git-client-", "").split(".").map(Number);
-      for (let index = 0; index < leftVersion.length; index += 1) {
-        if (leftVersion[index] !== rightVersion[index]) {
-          return rightVersion[index] - leftVersion[index];
-        }
-      }
-      return 0;
-    })[0];
-}
-
-export function createVersionOptions(tags, verbose = false) {
-  const firstRelease = !hasStableReleaseTag(tags);
-  return {
-    dryRun: true,
-    firstRelease,
-    groups: [gitClientReleaseGroup],
-    specifier: firstRelease ? initialReleaseVersion : undefined,
-    verbose,
-  };
+export function createReleaseNotes() {
+  return `# ${fixedReleaseVersion}\n\nManual Git Client release.\n`;
 }
 
 export function createGitHubEnvironment(environment) {
@@ -149,63 +118,6 @@ export function assertReleaseMetadata(metadata, version, expectedDraft) {
   }
 }
 
-async function listReleaseTags() {
-  const output = await captureCommand("git", ["tag", "--list", "git-client-*"], {
-    cwd: workspaceRoot,
-  });
-  return output === "" ? [] : output.split("\n");
-}
-
-async function calculateRelease(verbose) {
-  const tags = await listReleaseTags();
-  const versionOptions = createVersionOptions(tags, verbose);
-  const projectGraph = await createProjectGraphAsync();
-  const includedProjects = collectTransitiveWorkspaceDependencies(projectGraph, gitClientProject);
-  const renderer = createDependencyAwareChangelogRenderer({
-    includedProjects,
-    projectName: gitClientProject,
-    workspaceRoot,
-  });
-  const releaseClient = new ReleaseClient({
-    groups: {
-      [gitClientReleaseGroup]: {
-        changelog: {
-          file: "{projectRoot}/release-artifacts/release-notes.md",
-          renderer,
-        },
-        projects: [gitClientProject],
-      },
-    },
-  });
-  const { projectsVersionData, releaseGraph } = await releaseClient.releaseVersion(versionOptions);
-  const versionData = projectsVersionData[gitClientProject];
-  if (!versionData) throw new Error(`Nx did not return version data for ${gitClientProject}`);
-  if (versionData.newVersion === null) return null;
-  if (versionOptions.firstRelease) {
-    return {
-      notes: createInitialReleaseNotes(),
-      version: initialReleaseVersion,
-    };
-  }
-
-  const changelogResult = await releaseClient.releaseChangelog({
-    dryRun: true,
-    firstRelease: false,
-    from: findLatestStableReleaseTag(tags),
-    groups: [gitClientReleaseGroup],
-    releaseGraph,
-    verbose,
-    versionData: projectsVersionData,
-  });
-  const changelog = changelogResult.projectChangelogs?.[gitClientProject];
-  if (!changelog) throw new Error(`Nx did not return a changelog for ${gitClientProject}`);
-
-  return {
-    notes: changelog.contents,
-    version: parseReleaseVersion(versionData.newVersion),
-  };
-}
-
 async function readReleaseMetadata(tag, environment, allowFailure = false) {
   const result = await executeCommand(
     "gh",
@@ -224,9 +136,9 @@ async function readReleaseMetadata(tag, environment, allowFailure = false) {
   return parseReleaseMetadata(result.stdout);
 }
 
-async function removeDraftRelease(tag, environment) {
+async function removeExistingRelease(tag, environment) {
   const metadata = await readReleaseMetadata(tag, environment, true);
-  if (metadata?.isDraft !== true) return;
+  if (metadata === null) return;
   await executeCommand(
     "gh",
     ["release", "delete", tag, "--repo", githubRepository, "--cleanup-tag", "--yes"],
@@ -260,17 +172,18 @@ async function removeTagCreatedByCurrentRun(tag, sha, environment) {
 async function publishRelease(release) {
   const environment = createGitHubEnvironment(process.env);
   const tag = createReleaseTag(release.version);
-  if ((await readReleaseMetadata(tag, environment, true)) !== null) {
-    throw new Error(`GitHub release already exists: ${tag}`);
-  }
-
-  if ((await readRemoteTagSha(tag, environment)) !== null) {
-    throw new Error(`GitHub tag already exists: ${tag}`);
-  }
   const artifacts = await buildRelease(release.version);
   const sha = artifacts.sourceSha;
   const notesFile = join(appRoot, "release-artifacts", "release-notes.md");
   await writeFile(notesFile, release.notes);
+
+  await removeExistingRelease(tag, environment);
+  if ((await readRemoteTagSha(tag, environment)) !== null) {
+    await executeCommand("gh", createGhDeleteTagArguments(tag), {
+      cwd: workspaceRoot,
+      env: environment,
+    });
+  }
 
   let mayHaveCreatedDraft = false;
   try {
@@ -296,7 +209,7 @@ async function publishRelease(release) {
   } catch (error) {
     if (mayHaveCreatedDraft) {
       try {
-        await removeDraftRelease(tag, environment);
+        await removeExistingRelease(tag, environment);
         await removeTagCreatedByCurrentRun(tag, sha, environment);
       } catch (cleanupError) {
         throw new AggregateError(
@@ -310,25 +223,21 @@ async function publishRelease(release) {
 }
 
 export function parsePublishArguments(arguments_) {
-  const unknown = arguments_.filter(
-    (argument) => argument !== "--dry-run" && argument !== "--verbose",
-  );
+  const unknown = arguments_.filter((argument) => argument !== "--dry-run");
   if (unknown.length > 0) throw new Error(`Unknown release argument: ${unknown[0]}`);
   return {
     dryRun: arguments_.includes("--dry-run"),
-    verbose: arguments_.includes("--verbose"),
   };
 }
 
 async function main() {
   const options = parsePublishArguments(process.argv.slice(2));
   if (!options.dryRun) await verifyReleaseSource(workspaceRoot);
-  const release = await calculateRelease(options.verbose);
-  if (!release) {
-    console.log("No releasable Git Client changes were detected.");
-    return;
-  }
-  console.log(`Next Git Client release: ${release.version}`);
+  const release = {
+    notes: createReleaseNotes(),
+    version: fixedReleaseVersion,
+  };
+  console.log(`Git Client release: ${release.version}`);
   if (options.dryRun) {
     console.log(release.notes);
     return;

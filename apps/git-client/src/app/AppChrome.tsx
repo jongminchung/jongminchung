@@ -44,7 +44,10 @@ export function WorkspaceTitlebar({
   readonly showRepositoryActions: boolean;
 }) {
   const { openPalette } = useCommands();
-  const repository = session.repository;
+  const { repository, remotes } = session.repository;
+  const { compareBranches } = session.queries;
+  const { executeOperation } = session.mutations;
+  const { openRepositories, recentProjects } = session.workspace;
   const projectButton = useRef<HTMLButtonElement>(null);
   const [branchesOpen, setBranchesOpen] = useState(false);
   const closeProjectSwitcher = useCallback((): void => {
@@ -93,8 +96,8 @@ export function WorkspaceTitlebar({
             onOpen={onOpenProject}
             onOpenRecent={onOpenRecentProject}
             onRemoveRecent={onRemoveRecentProject}
-            openRepositories={session.openRepositories}
-            recentProjects={session.recentProjects}
+            openRepositories={openRepositories}
+            recentProjects={recentProjects}
           />
         )}
       </div>
@@ -108,7 +111,7 @@ export function WorkspaceTitlebar({
                   className="h-[26px] w-7 text-xs text-muted-foreground"
                   disabled={!repository || readOnly}
                   onClick={() =>
-                    void session.executeOperation({
+                    void executeOperation({
                       kind: "pull",
                       rebase: false,
                     })
@@ -166,13 +169,13 @@ export function WorkspaceTitlebar({
               <GitBranchesPopup
                 currentBranch={repository.snapshot.currentBranch}
                 onCheckout={(target) =>
-                  session.executeOperation({
+                  executeOperation({
                     kind: "checkout",
                     target,
                     force: false,
                   })
                 }
-                onCompare={session.compareBranches}
+                onCompare={compareBranches}
                 onCommit={() =>
                   window.dispatchEvent(
                     new CustomEvent("git-client:repository-view-request", {
@@ -180,14 +183,14 @@ export function WorkspaceTitlebar({
                     }),
                   )
                 }
-                onOperation={session.executeOperation}
+                onOperation={executeOperation}
                 onClose={() => setBranchesOpen(false)}
                 onOpenSettings={() => {
                   setBranchesOpen(false);
                   onOpenRepositoryTool("refs");
                 }}
                 refs={repository.refs}
-                remotes={session.remotes}
+                remotes={remotes}
               />
             )}
           </div>
@@ -269,7 +272,8 @@ export function StartupWorkspace({
   readonly appearancePreference: AppearancePreference;
   readonly onAppearancePreferenceChange: (preference: AppearancePreference) => void;
 }) {
-  if (session.restoring) {
+  const { openRepository, recentProjects, restoring } = session.workspace;
+  if (restoring) {
     return (
       <main
         className={`startupWorkspace [grid-row:2_/_-1] [min-height:0] [background:var(--card)] [display:grid] [grid-template-rows:auto_minmax(0,_1fr)] [overflow:hidden] startupWorkspace`}
@@ -291,10 +295,10 @@ export function StartupWorkspace({
       onAppearancePreferenceChange={onAppearancePreferenceChange}
       onCloneRepository={onCloneRepository}
       onNewProject={onNewProject}
-      onOpenRecent={(path) => void session.openRepository(path)}
+      onOpenRecent={(path) => void openRepository(path)}
       onOpenRepository={onOpenRepository}
       onOpenSettings={onOpenSettings}
-      recentProjects={session.recentProjects}
+      recentProjects={recentProjects}
     />
   );
 }

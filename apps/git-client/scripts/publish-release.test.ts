@@ -1,44 +1,30 @@
 import { describe, expect, it } from "vitest";
 import {
+  assertFixedReleaseVersion,
   assertReleaseMetadata,
   createGhDeleteTagArguments,
   createGhReleaseArguments,
   createGhTagReferenceArguments,
   createGitHubEnvironment,
-  createInitialReleaseNotes,
+  createReleaseNotes,
   createReleaseTag,
   createReleaseTitle,
-  createVersionOptions,
-  findLatestStableReleaseTag,
+  fixedReleaseVersion,
   parsePublishArguments,
   parseReleaseMetadata,
 } from "./publish-release.mjs";
 
-describe("Nx Git Client release publisher", () => {
-  it("forces the first release to 1.0.0 and later releases to conventional commits", () => {
-    expect(createVersionOptions([])).toEqual({
-      dryRun: true,
-      firstRelease: true,
-      groups: ["git-client"],
-      specifier: "1.0.0",
-      verbose: false,
-    });
-    expect(createVersionOptions(["git-client-1.0.0"], true)).toEqual({
-      dryRun: true,
-      firstRelease: false,
-      groups: ["git-client"],
-      specifier: undefined,
-      verbose: true,
-    });
-    expect(createInitialReleaseNotes()).toBe("# 1.0.0\n\nInitial Git Client release.\n");
-    expect(
-      findLatestStableReleaseTag(["git-client-1.2.0", "git-client-2.0.0", "git-client-1.10.0"]),
-    ).toBe("git-client-2.0.0");
+describe("fixed Git Client release publisher", () => {
+  it("always uses the manual 1.0.0 release identity", () => {
+    expect(fixedReleaseVersion).toBe("1.0.0");
+    expect(assertFixedReleaseVersion("1.0.0")).toBe("1.0.0");
+    expect(() => assertFixedReleaseVersion("1.0.1")).toThrow("must reuse version 1.0.0");
+    expect(createReleaseNotes()).toBe("# 1.0.0\n\nManual Git Client release.\n");
   });
 
   it("uses the agreed tag, title, and draft creation arguments", () => {
-    expect(createReleaseTag("1.2.3")).toBe("git-client-1.2.3");
-    expect(createReleaseTitle("1.2.3")).toBe("Git Client 1.2.3");
+    expect(createReleaseTag("1.0.0")).toBe("git-client-1.0.0");
+    expect(createReleaseTitle("1.0.0")).toBe("Git Client 1.0.0");
     expect(
       createGhReleaseArguments({
         artifacts: {
@@ -48,12 +34,12 @@ describe("Nx Git Client release publisher", () => {
         },
         notesFile: "/tmp/notes.md",
         sha: "abc123",
-        version: "1.2.3",
+        version: "1.0.0",
       }),
     ).toEqual([
       "release",
       "create",
-      "git-client-1.2.3",
+      "git-client-1.0.0",
       "/tmp/app.dmg",
       "/tmp/app.dmg.sha256",
       "/tmp/app.dmg.provenance.json",
@@ -62,22 +48,22 @@ describe("Nx Git Client release publisher", () => {
       "--target",
       "abc123",
       "--title",
-      "Git Client 1.2.3",
+      "Git Client 1.0.0",
       "--notes-file",
       "/tmp/notes.md",
       "--draft",
     ]);
-    expect(createGhTagReferenceArguments("git-client-1.2.3")).toEqual([
+    expect(createGhTagReferenceArguments("git-client-1.0.0")).toEqual([
       "api",
-      "repos/jongminchung/jongminchung/git/ref/tags/git-client-1.2.3",
+      "repos/jongminchung/jongminchung/git/ref/tags/git-client-1.0.0",
       "--jq",
       ".object.sha",
     ]);
-    expect(createGhDeleteTagArguments("git-client-1.2.3")).toEqual([
+    expect(createGhDeleteTagArguments("git-client-1.0.0")).toEqual([
       "api",
       "--method",
       "DELETE",
-      "repos/jongminchung/jongminchung/git/refs/tags/git-client-1.2.3",
+      "repos/jongminchung/jongminchung/git/refs/tags/git-client-1.0.0",
     ]);
   });
 
@@ -94,27 +80,27 @@ describe("Nx Git Client release publisher", () => {
     const metadata = parseReleaseMetadata(
       JSON.stringify({
         assets: [
-          { name: "Git-Client_1.2.3_macos_arm64.dmg" },
-          { name: "Git-Client_1.2.3_macos_arm64.dmg.sha256" },
-          { name: "Git-Client_1.2.3_macos_arm64.dmg.provenance.json" },
+          { name: "Git-Client_1.0.0_macos_arm64.dmg" },
+          { name: "Git-Client_1.0.0_macos_arm64.dmg.sha256" },
+          { name: "Git-Client_1.0.0_macos_arm64.dmg.provenance.json" },
         ],
         isDraft: true,
         isPrerelease: false,
-        name: "Git Client 1.2.3",
-        tagName: "git-client-1.2.3",
+        name: "Git Client 1.0.0",
+        tagName: "git-client-1.0.0",
       }),
     );
 
-    expect(() => assertReleaseMetadata(metadata, "1.2.3", true)).not.toThrow();
-    expect(() => assertReleaseMetadata(metadata, "1.2.3", false)).toThrow("publication state");
+    expect(() => assertReleaseMetadata(metadata, "1.0.0", true)).not.toThrow();
+    expect(() => assertReleaseMetadata(metadata, "1.0.0", false)).toThrow("publication state");
     expect(() => parseReleaseMetadata("[]")).toThrow("object");
   });
 
-  it("accepts only dry-run and verbose publisher flags", () => {
-    expect(parsePublishArguments(["--dry-run", "--verbose"])).toEqual({
+  it("accepts only the dry-run publisher flag", () => {
+    expect(parsePublishArguments(["--dry-run"])).toEqual({
       dryRun: true,
-      verbose: true,
     });
+    expect(() => parsePublishArguments(["--verbose"])).toThrow("Unknown release argument");
     expect(() => parsePublishArguments(["1.2.3"])).toThrow("Unknown release argument");
   });
 });

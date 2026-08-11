@@ -2,7 +2,7 @@
 
 - 감사일: 2026-08-09
 - 기준 앱: `/Applications/Rebased.app` 1.1.11
-- 대상: Git Client `main` 통합 대상, package version `0.1.0`
+- 대상: Git Client `main` 통합 대상, package version `1.0.0`
 - 플랫폼: macOS ARM64
 - 최종 판정: **동등 — 범위 구현 및 패키지 검증 완료**
 

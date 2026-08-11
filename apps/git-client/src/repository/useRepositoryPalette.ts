@@ -155,7 +155,8 @@ export function useRepositoryPalette(
           },
           {
             commandId: "repository.showStash",
-            disabledReason: session.stashes.length > 0 ? undefined : "There are no stash entries.",
+            disabledReason:
+              session.repository.stashes.length > 0 ? undefined : "There are no stash entries.",
             icon: "stash",
             label: "Unstash Changes…",
           },
@@ -210,7 +211,7 @@ export function useRepositoryPalette(
       repository.snapshot.currentBranch,
       repository.snapshot.hasCommits,
       repository.snapshot.isShallow,
-      session.stashes.length,
+      session.repository.stashes.length,
       untrackedPaths.length,
       vcsFileChange,
       vcsFileEntry,

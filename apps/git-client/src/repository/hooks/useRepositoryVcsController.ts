@@ -14,11 +14,11 @@ import { useRepositoryWorkspaceStore } from "../state/RepositoryWorkspaceStorePr
 import type { InspectorState } from "../state/workspaceTypes";
 
 interface RepositoryVcsControllerOptions {
-  readonly executeOperation: GitSessionController["executeOperation"];
-  readonly importPatch: GitSessionController["importPatch"];
+  readonly executeOperation: GitSessionController["mutations"]["executeOperation"];
+  readonly importPatch: GitSessionController["mutations"]["importPatch"];
   readonly inspector: InspectorState | undefined;
-  readonly loadLocalChangesPatch: GitSessionController["loadLocalChangesPatch"];
-  readonly loadRevisionDiff: GitSessionController["loadRevisionDiff"];
+  readonly loadLocalChangesPatch: GitSessionController["queries"]["loadLocalChangesPatch"];
+  readonly loadRevisionDiff: GitSessionController["queries"]["loadRevisionDiff"];
   readonly openInspector: (next: InspectorState, keepOpen?: boolean) => void;
   readonly repository: RepositoryView;
 }

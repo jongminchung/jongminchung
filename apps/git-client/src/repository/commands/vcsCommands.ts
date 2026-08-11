@@ -115,14 +115,14 @@ export function createVcsCommands(context: VcsCommandPort): readonly CommandDefi
         confirmLabel: "OK",
       });
       if (label !== null && label.trim().length > 0) {
-        await session.putLocalHistoryLabel(label.trim());
+        await session.mutations.putLocalHistoryLabel(label.trim());
       }
     }),
-    commandDefinition("repository.refresh", session.reload, repositoryAvailability),
+    commandDefinition("repository.refresh", session.queries.reload, repositoryAvailability),
     commandDefinition(
       "repository.fetch",
       () =>
-        session.executeOperation({
+        session.mutations.executeOperation({
           kind: "fetch",
           remote: null,
           prune: false,
@@ -131,13 +131,13 @@ export function createVcsCommands(context: VcsCommandPort): readonly CommandDefi
     ),
     commandDefinition(
       "repository.pull",
-      () => session.executeOperation({ kind: "pull", rebase: false }),
+      () => session.mutations.executeOperation({ kind: "pull", rebase: false }),
       repositoryAvailability,
     ),
     commandDefinition("repository.push", () => onOpenPush(), repositoryAvailability),
     commandDefinition(
       "repository.update",
-      () => session.executeOperation({ kind: "pull", rebase: false }),
+      () => session.mutations.executeOperation({ kind: "pull", rebase: false }),
       repositoryAvailability,
     ),
     commandDefinition("repository.merge", () => requestOpenRepositoryTool("refs")),
@@ -153,7 +153,7 @@ export function createVcsCommands(context: VcsCommandPort): readonly CommandDefi
           description: `Creates a lightweight tag at ${primaryCommit?.oid.slice(0, 12) ?? "HEAD"}.`,
         });
         if (!name) return;
-        await session.executeOperation({
+        await session.mutations.executeOperation({
           kind: "createTag",
           name,
           revision: primaryCommit?.oid ?? "HEAD",
@@ -196,7 +196,7 @@ export function createVcsCommands(context: VcsCommandPort): readonly CommandDefi
           dangerous: true,
         });
         if (!accepted) return;
-        await session.executeOperation({
+        await session.mutations.executeOperation({
           kind: "reset",
           revision,
           mode: mode as "soft" | "mixed" | "hard" | "keep",
@@ -248,7 +248,7 @@ export function createVcsCommands(context: VcsCommandPort): readonly CommandDefi
         );
       },
       () =>
-        session.stashes.length > 0
+        session.repository.stashes.length > 0
           ? repositoryAvailability()
           : commandDisabled("There are no stash entries."),
     ),
@@ -297,7 +297,7 @@ export function createVcsCommands(context: VcsCommandPort): readonly CommandDefi
     commandDefinition(
       "repository.stageUnversioned",
       () =>
-        session.executeOperation({
+        session.mutations.executeOperation({
           kind: "stage",
           paths: untrackedPaths,
         }),
@@ -308,7 +308,7 @@ export function createVcsCommands(context: VcsCommandPort): readonly CommandDefi
     ),
     commandDefinition(
       "repository.stageTracked",
-      () => session.executeOperation({ kind: "stageTracked" }),
+      () => session.mutations.executeOperation({ kind: "stageTracked" }),
       () =>
         hasTrackedWorkingChanges
           ? repositoryAvailability()
@@ -328,7 +328,7 @@ export function createVcsCommands(context: VcsCommandPort): readonly CommandDefi
       "repository.addCurrentFile",
       () =>
         vcsFilePath
-          ? session.executeOperation({
+          ? session.mutations.executeOperation({
               kind: "stage",
               paths: [vcsFilePath],
             })
@@ -401,7 +401,7 @@ export function createVcsCommands(context: VcsCommandPort): readonly CommandDefi
     ),
     commandDefinition(
       "repository.unshallow",
-      () => session.executeOperation({ kind: "unshallow" }),
+      () => session.mutations.executeOperation({ kind: "unshallow" }),
       () =>
         repository.snapshot.isShallow
           ? repositoryAvailability()

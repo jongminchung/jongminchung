@@ -109,7 +109,7 @@ interface RepositoryOverlaysProps {
   readonly repository: RepositoryView;
   readonly runCodeCleanup: (scope: CodeAnalysisScope) => Promise<void>;
   readonly runCodeInspection: (scope: CodeAnalysisScope, id?: CodeInspectionId) => Promise<void>;
-  readonly searchProjectText: GitSessionController["searchProjectText"];
+  readonly searchProjectText: GitSessionController["queries"]["searchProjectText"];
   readonly vcsOperationGroups: ComponentProps<typeof VcsOperationsPopup>["groups"];
 }
 

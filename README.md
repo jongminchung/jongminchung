@@ -39,9 +39,9 @@ pnpm --filter @jongminchung/engineering-docs run build
 
 ## Version Policy
 
-Published package versions are immutable. Increment the stable SemVer version before publishing
-changed contents: patch for compatible fixes, minor for compatible features, and major for breaking
-contracts. Never delete and republish an existing version.
+The manually triggered package workflow always republishes the personal packages as `1.0.0`.
+It removes an existing `1.0.0` package version immediately before uploading the replacement.
+GitHub authentication is supplied only through the `GH_PAT` Actions secret.
 
 ```bash
 pnpm install

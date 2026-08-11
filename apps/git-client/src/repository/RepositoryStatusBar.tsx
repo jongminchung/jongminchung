@@ -33,6 +33,8 @@ export function RepositoryStatusBar({
   readonly session: GitSession;
   readonly terminalFocused: boolean;
 }) {
+  const { current: activity, cancel: cancelActivity, retry: retryActivity } = session.activity;
+  const { reload } = session.queries;
   const { editorStatus, notifications, setNotificationOpen, setToast } =
     useRepositoryWorkspaceStore(
       useShallow((state) => ({
@@ -73,37 +75,37 @@ export function RepositoryStatusBar({
         <span className={`statusbarSpacer [flex:1] [min-width:0] statusbarSpacer`} />
       )}
       <span className={`activitySlot [min-width:0] activitySlot`}>
-        {session.activity &&
+        {activity &&
           (productSettings.statusBarWidgets.statusText ||
             productSettings.statusBarWidgets.fileSystemSync) && (
             <StatePill
               className="min-h-[18px] max-w-[420px] gap-1.5 rounded-lg px-1.5 py-px"
               role="status"
-              tone={ACTIVITY_STATUS_TONE[session.activity.status]}
-              title={session.activity.error ?? undefined}
+              tone={ACTIVITY_STATUS_TONE[activity.status]}
+              title={activity.error ?? undefined}
             >
-              {session.activity.status === "running" ? (
+              {activity.status === "running" ? (
                 <SpinnerIcon aria-hidden className="size-3" />
-              ) : session.activity.status === "succeeded" ? (
+              ) : activity.status === "succeeded" ? (
                 <Icon name="check" size={11} />
               ) : (
                 <Icon name="warning" size={11} />
               )}
-              {productSettings.statusBarWidgets.statusText && <span>{session.activity.label}</span>}
-              {session.activity.status === "running" && session.activity.requestIds.length > 0 && (
+              {productSettings.statusBarWidgets.statusText && <span>{activity.label}</span>}
+              {activity.status === "running" && activity.requestIds.length > 0 && (
                 <Button
                   className="h-auto rounded-none p-0 text-[9px] text-inherit"
-                  onClick={() => void session.cancelActivity()}
+                  onClick={() => void cancelActivity()}
                   variant="link"
                   size="xs"
                 >
                   Cancel
                 </Button>
               )}
-              {session.activity.status === "failed" && session.activity.canRetry && (
+              {activity.status === "failed" && activity.canRetry && (
                 <Button
                   className="h-auto rounded-none p-0 text-[9px] text-inherit"
-                  onClick={() => void session.retryActivity()}
+                  onClick={() => void retryActivity()}
                   variant="link"
                   size="xs"
                 >
@@ -122,7 +124,7 @@ export function RepositoryStatusBar({
             className={cn(
               "h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:text-disabled-foreground disabled:opacity-100",
             )}
-            onClick={() => void session.reload()}
+            onClick={() => void reload()}
             variant="ghost"
             size="icon"
           >

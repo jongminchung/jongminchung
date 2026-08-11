@@ -3,7 +3,7 @@ import { useCallback, useMemo, useRef } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useAppDialog } from "../components/AppDialog";
 import { useAppearance } from "../components/AppearanceProvider";
-import { useCommandDefinitions, useCommands, usePaletteItems } from "../components/CommandProvider";
+import { useCommands, usePaletteItems } from "../components/CommandProvider";
 import { Icon } from "../components/Icon";
 import { Notice } from "../components/Notice";
 import { TrustProjectDialog } from "../components/TrustProjectDialog";
@@ -20,12 +20,12 @@ import { WelcomeTitlebar, WorkspaceTitlebar } from "./AppChrome";
 import { AppOverlays } from "./AppOverlays";
 import { AppUtilityOverlays } from "./AppUtilityOverlays";
 import { AppWorkspaceRouter } from "./AppWorkspaceRouter";
-import { createWorkspaceCommands } from "./commands/workspaceCommands";
 import { useAppHydration } from "./hooks/useAppHydration";
 import { useAppWindowLifecycle } from "./hooks/useAppWindowLifecycle";
 import { useProjectNavigation } from "./hooks/useProjectNavigation";
 import { hydrateProductSettings } from "./state/appPersistence";
 import { useAppStore } from "./state/AppStoreProvider";
+import { useWorkspaceCommands } from "./useWorkspaceCommands";
 
 interface ToolWindowLayoutCaptureDetail {
   readonly accept: (layout: ToolWindowLayout) => void;
@@ -34,23 +34,26 @@ interface ToolWindowLayoutCaptureDetail {
 export function AppShell() {
   const session = useGitSessionController();
   const {
-    accessMode: sessionAccessMode,
-    activateTab: sessionActivateTab,
-    activeTab: sessionActiveTab,
-    activity: sessionActivity,
-    dismissActivity: sessionDismissActivity,
-    dismissError: sessionDismissError,
-    dismissNotice: sessionDismissNotice,
-    error: sessionError,
-    notice: sessionNotice,
-    openRepositories: sessionOpenRepositories,
-    openRepository: sessionOpenRepository,
-    reload: sessionReload,
-    removeRecentProject: sessionRemoveRecentProject,
-    repository: sessionRepository,
-    restoring: sessionRestoring,
-    retryActivity: sessionRetryActivity,
-    sessions: sessionSessions,
+    activity: {
+      current: sessionActivity,
+      dismiss: sessionDismissActivity,
+      retry: sessionRetryActivity,
+    },
+    queries: { reload: sessionReload },
+    repository: { accessMode: sessionAccessMode, repository: sessionRepository },
+    workspace: {
+      activateTab: sessionActivateTab,
+      activeTab: sessionActiveTab,
+      dismissError: sessionDismissError,
+      dismissNotice: sessionDismissNotice,
+      error: sessionError,
+      notice: sessionNotice,
+      openRepositories: sessionOpenRepositories,
+      openRepository: sessionOpenRepository,
+      removeRecentProject: sessionRemoveRecentProject,
+      restoring: sessionRestoring,
+      sessions: sessionSessions,
+    },
   } = session;
   const commands = useCommands();
   const { setPreference: setAppearancePreference } = useAppearance();
@@ -255,54 +258,52 @@ export function AppShell() {
     );
     return active?.kind === "repository" ? active.repository.snapshot.name : "Git Client";
   }, [sessionActiveTab, sessionSessions]);
-  useCommandDefinitions(
-    createWorkspaceCommands({
-      activeProjectName,
-      applyToolWindowLayout,
-      captureToolWindowLayout,
-      commands,
-      dialog,
-      dirtyEditorCount,
-      importSettingsArchive,
-      lastMacro,
-      macroRecording,
-      openRepositoryFromPicker,
-      presentationPreviousFullScreen,
-      productSettings,
-      recordedCommandIds,
-      renameToolWindowLayout,
-      saveToolWindowLayout,
-      savedMacros,
-      session,
-      setActivityMonitorOpen,
-      setAppearancePreference,
-      setCommandLineLauncherOpen,
-      setDiagnosticConfiguration,
-      setHelpOpen,
-      setInvalidateCachesOpen,
-      setLastMacro,
-      setLayoutChooserMode,
-      setLeftoverDirectoriesOpen,
-      setMacroRecording,
-      setNewProjectSettingsOpen,
-      setProductSettings,
-      setProjectSwitcherOpen,
-      setQuickSwitchSchemeOpen,
-      setRecordedCommandIds,
-      setRepairIdeOpen,
-      setRepositoryDialogMode,
-      setRunConfigurationTemplatesOpen,
-      setSavedMacros,
-      setSavedMacrosOpen,
-      setSettingsOpen,
-      setShowRepositoryDialog,
-      setSpecialFilesOpen,
-      setToolWindowLayouts,
-      setWhatsNewOpen,
-      toolWindowLayouts,
-      zenPreviousFullScreen,
-    }),
-  );
+  useWorkspaceCommands({
+    activeProjectName,
+    applyToolWindowLayout,
+    captureToolWindowLayout,
+    commands,
+    dialog,
+    dirtyEditorCount,
+    importSettingsArchive,
+    lastMacro,
+    macroRecording,
+    openRepositoryFromPicker,
+    presentationPreviousFullScreen,
+    productSettings,
+    recordedCommandIds,
+    renameToolWindowLayout,
+    saveToolWindowLayout,
+    savedMacros,
+    session,
+    setActivityMonitorOpen,
+    setAppearancePreference,
+    setCommandLineLauncherOpen,
+    setDiagnosticConfiguration,
+    setHelpOpen,
+    setInvalidateCachesOpen,
+    setLastMacro,
+    setLayoutChooserMode,
+    setLeftoverDirectoriesOpen,
+    setMacroRecording,
+    setNewProjectSettingsOpen,
+    setProductSettings,
+    setProjectSwitcherOpen,
+    setQuickSwitchSchemeOpen,
+    setRecordedCommandIds,
+    setRepairIdeOpen,
+    setRepositoryDialogMode,
+    setRunConfigurationTemplatesOpen,
+    setSavedMacros,
+    setSavedMacrosOpen,
+    setSettingsOpen,
+    setShowRepositoryDialog,
+    setSpecialFilesOpen,
+    setToolWindowLayouts,
+    setWhatsNewOpen,
+    toolWindowLayouts,
+    zenPreviousFullScreen,
+  });
 
   const repositoryPaletteItems = useMemo<readonly PaletteItem[]>(
     () =>

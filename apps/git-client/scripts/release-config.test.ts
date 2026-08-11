@@ -1,53 +1,44 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-const nxConfig = JSON.parse(readFileSync(new URL("../../../nx.json", import.meta.url), "utf8"));
 const packageConfig = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+const gitClientWorkflow = readFileSync(
+  new URL("../../../.github/workflows/git-client.yml", import.meta.url),
+  "utf8",
+);
+const packageWorkflow = readFileSync(
+  new URL("../../../.github/workflows/publish-packages.yml", import.meta.url),
+  "utf8",
+);
 
-describe("Nx release configuration", () => {
-  it("isolates Git Client in a fixed release group", () => {
-    const group = nxConfig.release.groups["git-client"];
+function expectManualWorkflow(workflow: string): void {
+  const triggerBlock = /^on:\n(?<triggers>(?: {2}.+\n)+)/mu.exec(workflow)?.groups?.triggers;
+  expect(triggerBlock?.trim()).toBe("workflow_dispatch:");
+}
 
-    expect(group.projects).toEqual(["@jongminchung/git-client"]);
-    expect(group.projectsRelationship).toBe("fixed");
-    expect(group.releaseTag).toEqual({
-      pattern: "git-client-{version}",
-      requireSemver: true,
-    });
+describe("fixed Git Client release configuration", () => {
+  it("uses one manually replaced release version", () => {
+    expect(packageConfig.version).toBe("1.0.0");
+    expect(packageConfig.scripts.release).toBe("node scripts/publish-release.mjs");
+    expect(packageConfig.scripts["release:dry-run"]).toBe(
+      "node scripts/publish-release.mjs --dry-run",
+    );
+    expectManualWorkflow(gitClientWorkflow);
+    expect(gitClientWorkflow).toContain('test "$GITHUB_REF" = "refs/heads/main"');
+    expect(gitClientWorkflow).toContain("release:validate-local -- 1.0.0");
+    expect(gitClientWorkflow).toContain("Publish fixed Git Client 1.0.0 release");
+    expect(gitClientWorkflow).toContain("GH_PAT: ${{ secrets.GH_PAT }}");
+    expect(gitClientWorkflow).not.toContain("secrets.GITHUB_TOKEN");
   });
 
-  it("uses file affectedness and the agreed conventional commit bumps", () => {
-    expect(nxConfig.release.conventionalCommits).toMatchObject({
-      useCommitScope: false,
-      types: {
-        feat: { semverBump: "minor" },
-        fix: { semverBump: "patch" },
-        perf: { semverBump: "patch" },
-      },
-    });
-    expect(nxConfig.release.groups["git-client"].version).toMatchObject({
-      adjustSemverBumpsForZeroMajorVersion: false,
-      currentVersionResolver: "git-tag",
-      fallbackCurrentVersionResolver: "disk",
-      specifierSource: "conventional-commits",
-      versionActionsOptions: { skipLockFileUpdate: true },
-    });
-  });
-
-  it("avoids broad lockfile invalidation and Nx git mutations", () => {
-    expect(nxConfig.pluginsConfig["@nx/js"].projectsAffectedByDependencyUpdates).toBe("auto");
-    const disabledGitMutations = {
-      commit: false,
-      push: false,
-      stageChanges: false,
-      tag: false,
-    };
-    expect(nxConfig.release.version.git).toEqual(disabledGitMutations);
-    expect(nxConfig.release.changelog.git).toEqual(disabledGitMutations);
-    expect(nxConfig.release.groups["git-client"].changelog).toMatchObject({
-      createRelease: false,
-      file: false,
-    });
+  it("manually replaces both public package versions with 1.0.0", () => {
+    expectManualWorkflow(packageWorkflow);
+    expect(packageWorkflow).toContain('select(.name == "1.0.0")');
+    expect(packageWorkflow).toContain("Publish remark-plantuml 1.0.0");
+    expect(packageWorkflow).toContain("Publish tooling 1.0.0");
+    expect(packageWorkflow).toContain("GH_PAT: ${{ secrets.GH_PAT }}");
+    expect(packageWorkflow).toContain("Remove GitHub Packages auth");
+    expect(packageWorkflow).not.toContain("secrets.GITHUB_TOKEN");
   });
 
   it("exposes production and explicit ad-hoc Electron release commands without an updater", () => {
