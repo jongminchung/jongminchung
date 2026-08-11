@@ -1,7 +1,6 @@
-// @ts-nocheck -- Upstream visual source; runtime contracts are checked at the registry boundary.
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { type FC, type Key, type KeyboardEvent, useEffect, useState } from "react";
 
 // 타입 정의
 export interface ColumnDefinition {
@@ -18,6 +17,7 @@ export interface TableCell<T> {
 }
 
 export interface TableRow<T> {
+  id?: Key;
   cells: TableCell<T>[];
 }
 
@@ -43,7 +43,7 @@ export interface FilterInfo {
     | "NOT_LIKE"
     | "GREATER_THAN"
     | "LESS_THAN";
-  value: any;
+  value: unknown;
 }
 
 export interface TableState {
@@ -64,7 +64,7 @@ export interface TableRequestParams {
   pageSize?: number;
   sortBy?: string;
   sortDirection?: "ASC" | "DESC";
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
 }
 
 export interface TableRendererProps<T> {
@@ -77,7 +77,7 @@ export interface TableRendererProps<T> {
 }
 
 // 유틸리티 함수
-export const formatCellValue = (value: any, type: string): string => {
+export const formatCellValue = (value: unknown, type: ColumnDefinition["type"]): string => {
   if (value === null || value === undefined) return "";
 
   switch (type) {
@@ -110,49 +110,76 @@ interface SortIconProps {
   sorting?: SortInfo[] | null;
 }
 
-const SortIcon: React.FC<SortIconProps> = ({ columnId, sortable, sorting }) => {
+const SortIcon: FC<SortIconProps> = ({ columnId, sortable, sorting }) => {
   if (!sortable) return null;
 
-  if (sorting && sorting.length > 0) {
-    const currentSort = sorting[0];
-    if (currentSort.columnId === columnId) {
-      return currentSort.direction === "ASC" ? (
-        <span className="sort-icon">↑</span>
-      ) : (
-        <span className="sort-icon">↓</span>
-      );
-    }
+  const currentSort = sorting?.[0];
+  if (currentSort?.columnId === columnId) {
+    return currentSort.direction === "ASC" ? (
+      <span aria-hidden="true" className="sort-icon">
+        ↑
+      </span>
+    ) : (
+      <span aria-hidden="true" className="sort-icon">
+        ↓
+      </span>
+    );
   }
 
-  return <span className="sort-icon sort-icon-none">↕</span>;
+  return (
+    <span aria-hidden="true" className="sort-icon sort-icon-none">
+      ↕
+    </span>
+  );
 };
 
 // 테이블 헤더 컴포넌트
-interface TableHeaderProps<T> {
+interface TableHeaderProps {
   columns: ColumnDefinition[];
   sortable: boolean;
   sorting?: SortInfo[] | null;
   onSort: (columnId: string) => void;
 }
 
-const TableHeader = <T,>({ columns, sortable, sorting, onSort }: TableHeaderProps<T>) => {
+const TableHeader = ({ columns, sortable, sorting, onSort }: TableHeaderProps) => {
   return (
     <thead>
       <tr>
-        {columns.map((column) => (
-          <th
-            key={column.id}
-            className={`column-${column.align.toLowerCase()} ${column.sortable ? "sortable" : ""}`}
-            onClick={() => (column.sortable ? onSort(column.id) : null)}
-          >
-            <div className="th-content">
-              <span>{column.label}</span>
-              {column.sortable && (
-                <SortIcon columnId={column.id} sortable={sortable} sorting={sorting} />
+        {columns.map((column) => {
+          const isSortable = sortable && column.sortable;
+          const direction = sorting?.find((item) => item.columnId === column.id)?.direction;
+          return (
+            <th
+              key={column.id}
+              aria-sort={
+                isSortable
+                  ? direction === "ASC"
+                    ? "ascending"
+                    : direction === "DESC"
+                      ? "descending"
+                      : "none"
+                  : undefined
+              }
+              className={`column-${column.align.toLowerCase()} ${isSortable ? "sortable" : ""}`}
+            >
+              {isSortable ? (
+                <button
+                  aria-label={`${column.label} 정렬`}
+                  className="th-content"
+                  type="button"
+                  onClick={() => onSort(column.id)}
+                >
+                  <span>{column.label}</span>
+                  <SortIcon columnId={column.id} sortable sorting={sorting} />
+                </button>
+              ) : (
+                <div className="th-content">
+                  <span>{column.label}</span>
+                </div>
               )}
-            </div>
-          </th>
-        ))}
+            </th>
+          );
+        })}
       </tr>
     </thead>
   );
@@ -163,10 +190,10 @@ interface LoadingRowProps {
   colSpan: number;
 }
 
-const LoadingRow: React.FC<LoadingRowProps> = ({ colSpan }) => (
+const LoadingRow: FC<LoadingRowProps> = ({ colSpan }) => (
   <tr>
     <td colSpan={colSpan} className="loading-cell">
-      <div className="loading-spinner"></div>
+      <div aria-label="데이터 불러오는 중" className="loading-spinner" role="status" />
     </td>
   </tr>
 );
@@ -177,7 +204,7 @@ interface EmptyRowProps {
   message?: string;
 }
 
-const EmptyRow: React.FC<EmptyRowProps> = ({ colSpan, message = "데이터가 없습니다." }) => (
+const EmptyRow: FC<EmptyRowProps> = ({ colSpan, message = "데이터가 없습니다." }) => (
   <tr>
     <td colSpan={colSpan} className="empty-table">
       {message}
@@ -188,12 +215,12 @@ const EmptyRow: React.FC<EmptyRowProps> = ({ colSpan, message = "데이터가 �
 // 테이블 셀 컴포넌트
 interface TableCellProps {
   columnId: string;
-  columnType: string;
-  align: string;
-  value: any;
+  columnType: ColumnDefinition["type"];
+  align: ColumnDefinition["align"];
+  value: unknown;
 }
 
-const TableCellComponent: React.FC<TableCellProps> = ({ columnId, columnType, align, value }) => (
+const TableCellComponent: FC<TableCellProps> = ({ columnId, columnType, align, value }) => (
   <td key={columnId} className={`column-${align.toLowerCase()}`}>
     {formatCellValue(value, columnType)}
   </td>
@@ -206,24 +233,38 @@ interface TableRowProps<T> {
   onClick?: (row: TableRow<T>) => void;
 }
 
-const TableRowComponent = <T,>({ row, columns, onClick }: TableRowProps<T>) => (
-  <tr className={onClick ? "clickable-row" : ""} onClick={() => (onClick ? onClick(row) : null)}>
-    {columns.map((column) => {
-      const cell = findCellByColumnId(row, column.id);
-      const value = cell ? cell.value : null;
+const TableRowComponent = <T,>({ row, columns, onClick }: TableRowProps<T>) => {
+  const activate = (): void => onClick?.(row);
+  const handleKeyDown = (event: KeyboardEvent<HTMLTableRowElement>): void => {
+    if (!onClick || (event.key !== "Enter" && event.key !== " ")) return;
+    event.preventDefault();
+    activate();
+  };
 
-      return (
-        <TableCellComponent
-          key={column.id}
-          columnId={column.id}
-          columnType={column.type}
-          align={column.align}
-          value={value}
-        />
-      );
-    })}
-  </tr>
-);
+  return (
+    <tr
+      className={onClick ? "clickable-row" : ""}
+      tabIndex={onClick ? 0 : undefined}
+      onClick={onClick ? activate : undefined}
+      onKeyDown={onClick ? handleKeyDown : undefined}
+    >
+      {columns.map((column) => {
+        const cell = findCellByColumnId(row, column.id);
+        const value = cell ? cell.value : null;
+
+        return (
+          <TableCellComponent
+            key={column.id}
+            columnId={column.id}
+            columnType={column.type}
+            align={column.align}
+            value={value}
+          />
+        );
+      })}
+    </tr>
+  );
+};
 
 // 테이블 본문 컴포넌트
 interface TableBodyProps<T> {
@@ -253,7 +294,7 @@ const TableBody = <T,>({ columns, rows, loading, onRowClick }: TableBodyProps<T>
   return (
     <tbody>
       {rows.map((row, index) => (
-        <TableRowComponent key={index} row={row} columns={columns} onClick={onRowClick} />
+        <TableRowComponent key={row.id ?? index} row={row} columns={columns} onClick={onRowClick} />
       ))}
     </tbody>
   );
@@ -265,17 +306,25 @@ interface PaginationComponentProps {
   onPageChange: (page: number) => void;
 }
 
-const PaginationComponent: React.FC<PaginationComponentProps> = ({ pagination, onPageChange }) => {
+const PaginationComponent: FC<PaginationComponentProps> = ({ pagination, onPageChange }) => {
   const { page, totalPage, pageSize } = pagination;
 
   return (
     <div className="table-pagination">
-      <button className="pagination-button" disabled={page <= 1} onClick={() => onPageChange(1)}>
+      <button
+        aria-label="첫 페이지"
+        className="pagination-button"
+        disabled={page <= 1}
+        type="button"
+        onClick={() => onPageChange(1)}
+      >
         {"<<"}
       </button>
       <button
+        aria-label="이전 페이지"
         className="pagination-button"
         disabled={page <= 1}
+        type="button"
         onClick={() => onPageChange(page - 1)}
       >
         {"<"}
@@ -286,15 +335,19 @@ const PaginationComponent: React.FC<PaginationComponentProps> = ({ pagination, o
       </span>
 
       <button
+        aria-label="다음 페이지"
         className="pagination-button"
         disabled={page >= totalPage}
+        type="button"
         onClick={() => onPageChange(page + 1)}
       >
         {">"}
       </button>
       <button
+        aria-label="마지막 페이지"
         className="pagination-button"
         disabled={page >= totalPage}
+        type="button"
         onClick={() => onPageChange(totalPage)}
       >
         {">>"}
@@ -330,11 +383,9 @@ const TableRenderer = <T,>({
     if (!column || !column.sortable) return;
 
     let newDirection: "ASC" | "DESC" = "ASC";
-    if (state.sorting && state.sorting.length > 0) {
-      const currentSort = state.sorting[0];
-      if (currentSort.columnId === columnId) {
-        newDirection = currentSort.direction === "ASC" ? "DESC" : "ASC";
-      }
+    const currentSort = state.sorting?.[0];
+    if (currentSort?.columnId === columnId) {
+      newDirection = currentSort.direction === "ASC" ? "DESC" : "ASC";
     }
 
     const newSortInfo: SortInfo = {

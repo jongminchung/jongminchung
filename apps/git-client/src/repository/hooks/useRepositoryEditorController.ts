@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { runInBackground } from "../../domain/toVoidHandler";
 import type { RepositoryView } from "../../domain/types";
 import type { GitSessionController } from "../../git-session/useGitSessionController";
 import { hydrateScratchFiles, persistScratchFiles } from "../state/repositoryWorkspacePersistence";
@@ -160,7 +161,7 @@ export function useRepositoryEditorController({
 
   useEffect(() => {
     if (!scratchFilesRestored) return;
-    void persistScratchFiles(scratchFiles);
+    runInBackground(persistScratchFiles(scratchFiles), "Scratch file persistence");
   }, [scratchFiles, scratchFilesRestored]);
 
   useEffect(() => {

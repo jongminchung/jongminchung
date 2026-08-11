@@ -31,18 +31,18 @@
     "./theme.css": "./src/styles/theme.css",
     "./tokens.css": "./src/styles/tokens.css",
     "./hooks/*": {
-      "types": "./dist/hooks/*.d.ts",
       "source": "./src/hooks/*.ts",
+      "types": "./dist/hooks/*.d.ts",
       "import": "./dist/hooks/*.js"
     },
     "./lib/*": {
-      "types": "./dist/lib/*.d.ts",
       "source": "./src/lib/*.ts",
+      "types": "./dist/lib/*.d.ts",
       "import": "./dist/lib/*.js"
     },
     "./components/*": {
-      "types": "./dist/components/*.d.ts",
       "source": "./src/components/*.tsx",
+      "types": "./dist/components/*.d.ts",
       "import": "./dist/components/*.js"
     },
     "./package.json": "./package.json"

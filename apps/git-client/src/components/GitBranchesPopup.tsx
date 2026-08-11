@@ -3,11 +3,11 @@ import { Input } from "@jongminchung/ui/components/input";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { checkoutTarget, deleteRefOperation, mergeRefOperation } from "../domain/refActions";
 import type { Ref } from "../domain/types";
 import type { BranchComparison, GitOperation, RemoteInfo } from "../shared/contracts/model";
-import { useAppDialog } from "./AppDialog";
 import { useDismissLayer } from "./CommandProvider";
+import { GitBranchSelectionPanel } from "./git-branches/GitBranchSelectionPanel";
+import { useGitBranchActions } from "./git-branches/useGitBranchActions";
 import { Icon } from "./Icon";
 import { Notice } from "./Notice";
 
@@ -42,11 +42,7 @@ export function GitBranchesPopup({
   const selectedActions = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
-  const [comparison, setComparison] = useState<BranchComparison | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const dialog = useAppDialog();
   const normalizedQuery = query.trim().toLowerCase();
   const rows = useMemo<readonly BranchPopupRow[]>(
     () =>
@@ -87,203 +83,36 @@ export function GitBranchesPopup({
     setActiveIndex((current) => Math.min(current, Math.max(0, rows.length - 1)));
   }, [rows.length]);
 
-  const checkoutActive = async (): Promise<void> => {
-    const row = rows[activeIndex];
-    if (!row || row.ref.current) return;
-    setBusy(true);
-    setError(null);
-    try {
-      await onCheckout(checkoutTarget(row.ref));
-      onClose();
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : String(reason));
-    } finally {
-      setBusy(false);
-    }
-  };
-
   const activeRef = rows[activeIndex]?.ref ?? null;
   const actionMatches = (label: string): boolean =>
     !normalizedQuery || label.toLowerCase().includes(normalizedQuery);
-
-  const run = async (operation: GitOperation, close = true): Promise<void> => {
-    if (!onOperation) {
-      onClose();
-      onOpenSettings();
-      return;
-    }
-    setBusy(true);
-    setError(null);
-    try {
-      await onOperation(operation);
-      if (close) onClose();
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : String(reason));
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const createBranch = async (): Promise<void> => {
-    const name = await dialog.input({
-      title: "New Branch",
-      label: "Branch name",
-      description: `Start point: ${activeRef?.shortName ?? "HEAD"}`,
-      placeholder: "feature/name",
-      confirmLabel: "Create",
-    });
-    if (!name) return;
-    await run({
-      kind: "createBranch",
-      name,
-      startPoint: activeRef?.name ?? "HEAD",
-      checkout: true,
-    });
-  };
-
-  const checkoutRevision = async (): Promise<void> => {
-    const target = await dialog.input({
-      title: "Checkout Tag or Revision",
-      label: "Tag or revision",
-      initialValue: activeRef?.shortName ?? "",
-      confirmLabel: "Checkout",
-    });
-    if (!target) return;
-    await onCheckout(target);
-    onClose();
-  };
-
-  const renameActive = async (): Promise<void> => {
-    if (activeRef?.kind !== "local") return;
-    const name = await dialog.input({
-      title: `Rename ${activeRef.shortName}`,
-      label: "New branch name",
-      initialValue: activeRef.shortName,
-      confirmLabel: "Rename",
-    });
-    if (!name || name === activeRef.shortName) return;
-    await run({
-      kind: "renameBranch",
-      oldName: activeRef.shortName,
-      newName: name,
-    });
-  };
-
-  const createTag = async (): Promise<void> => {
-    const name = await dialog.input({
-      title: "New Tag",
-      label: "Tag name",
-      description: `Revision: ${activeRef?.shortName ?? "HEAD"}`,
-      placeholder: "v1.0.0",
-      confirmLabel: "Create",
-    });
-    if (!name) return;
-    const message = await dialog.input({
-      title: `Tag ${name}`,
-      label: "Annotation (optional)",
-      allowEmpty: true,
-      confirmLabel: "Create Tag",
-    });
-    if (message === null) return;
-    await run({
-      kind: "createTag",
-      name,
-      revision: activeRef?.name ?? "HEAD",
-      message: message || null,
-    });
-  };
-
-  const setUpstream = async (): Promise<void> => {
-    if (activeRef?.kind !== "local") return;
-    const upstream = await dialog.input({
-      title: `Set Upstream for ${activeRef.shortName}`,
-      label: "Upstream branch",
-      initialValue: activeRef.upstream?.replace(/^refs\/remotes\//, "") ?? "origin/",
-      placeholder: "origin/main",
-      confirmLabel: "Set Upstream",
-    });
-    if (!upstream) return;
-    await run({
-      kind: "setUpstream",
-      branch: activeRef.shortName,
-      upstream,
-    });
-  };
-
-  const addWorktree = async (): Promise<void> => {
-    const path = await dialog.input({
-      title: "New Worktree",
-      label: "Absolute worktree path",
-      confirmLabel: "Next",
-    });
-    if (!path) return;
-    const branch = await dialog.input({
-      title: "New Worktree",
-      label: "New branch (optional)",
-      allowEmpty: true,
-      description: "Leave empty to check out the selected reference in detached mode.",
-      confirmLabel: "Add Worktree",
-    });
-    if (branch === null) return;
-    await run({
-      kind: "worktreeAdd",
-      path,
-      branch: branch || null,
-      startPoint: activeRef?.name ?? "HEAD",
-    });
-  };
-
-  const pushActiveTag = async (): Promise<void> => {
-    if (activeRef?.kind !== "tag" || !remotes[0]) return;
-    await run({
-      kind: "pushTag",
-      remote: remotes[0].name,
-      name: activeRef.shortName,
-    });
-  };
-
-  const deleteActive = async (): Promise<void> => {
-    if (!activeRef || activeRef.current) return;
-    const accepted = await dialog.confirm({
-      title: `Delete ${activeRef.shortName}?`,
-      description:
-        activeRef.kind === "remote"
-          ? "Deletes the branch from its remote."
-          : `Deletes the selected ${activeRef.kind}.`,
-      impact: activeRef.subject,
-      confirmLabel: "Delete",
-      dangerous: true,
-    });
-    if (!accepted) return;
-    const operation = deleteRefOperation(activeRef);
-    if (operation) await run(operation);
-  };
-
-  const compareActive = async (): Promise<void> => {
-    if (!onCompare || !currentBranch || !activeRef) return;
-    setBusy(true);
-    setError(null);
-    try {
-      setComparison(await onCompare(currentBranch, activeRef.name));
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : String(reason));
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const mergeActive = async (): Promise<void> => {
-    if (!activeRef || activeRef.current || !currentBranch) return;
-    const accepted = await dialog.confirm({
-      title: `Merge ${activeRef.shortName} into ${currentBranch}?`,
-      description: "Integrates the selected reference into the current branch.",
-      impact: activeRef.subject,
-      confirmLabel: "Merge",
-      dangerous: true,
-    });
-    if (!accepted) return;
-    await run(mergeRefOperation(activeRef));
-  };
+  const {
+    addWorktree,
+    busy,
+    checkoutActive,
+    checkoutRevision,
+    compareActive,
+    comparison,
+    createBranch,
+    createTag,
+    deleteActive,
+    dialogNode,
+    error,
+    mergeActive,
+    pushActiveTag,
+    renameActive,
+    run,
+    setUpstream,
+  } = useGitBranchActions({
+    activeRef,
+    currentBranch,
+    onCheckout,
+    onClose,
+    onCompare,
+    onOpenSettings,
+    onOperation,
+    remotes,
+  });
 
   const moveFocusWithinPopup = (backward: boolean): void => {
     const elements = popup.current?.querySelectorAll<HTMLElement>(
@@ -565,134 +394,28 @@ export function GitBranchesPopup({
           {error}
         </Notice>
       )}
-      {detailsOpen && activeRef && (
-        <div
-          className={`gitBranchSelectedActions [border-top:1px_solid_var(--border)] [display:flex] [flex-wrap:wrap] [gap:3px] [padding:4px_5px] [&_button]:[background:transparent] [&_button]:[font-size:10px] [&_button]:[height:25px] [&_button]:[padding:0_6px] gitBranchSelectedActions`}
-          aria-label={`Actions for ${activeRef.shortName}`}
-          ref={selectedActions}
-        >
-          <Button
-            disabled={activeRef.current || busy}
-            onClick={() => void checkoutActive()}
-            type="button"
-            className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
-            variant="ghost"
-            size="default"
-          >
-            Checkout
-          </Button>
-          <Button
-            disabled={busy}
-            onClick={() => void createBranch()}
-            type="button"
-            className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
-            variant="ghost"
-            size="default"
-          >
-            New Branch from…
-          </Button>
-          <Button
-            disabled={!onCompare || !currentBranch || activeRef.current || busy}
-            onClick={() => void compareActive()}
-            type="button"
-            className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
-            variant="ghost"
-            size="default"
-          >
-            Compare
-          </Button>
-          <Button
-            disabled={!currentBranch || activeRef.current || busy || !onOperation}
-            onClick={() => void mergeActive()}
-            type="button"
-            className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
-            variant="ghost"
-            size="default"
-          >
-            Merge into {currentBranch ?? "current branch"}…
-          </Button>
-          {activeRef.kind === "local" && (
-            <Button
-              disabled={busy}
-              onClick={() => void renameActive()}
-              type="button"
-              className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
-              variant="ghost"
-              size="default"
-            >
-              Rename…
-            </Button>
-          )}
-          {activeRef.kind === "local" && (
-            <Button
-              disabled={busy}
-              onClick={() => void setUpstream()}
-              type="button"
-              className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
-              variant="ghost"
-              size="default"
-            >
-              Set Upstream…
-            </Button>
-          )}
-          <Button
-            disabled={busy || !onOperation}
-            onClick={() => void createTag()}
-            type="button"
-            className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
-            variant="ghost"
-            size="default"
-          >
-            New Tag…
-          </Button>
-          {activeRef.kind === "tag" && (
-            <Button
-              disabled={busy || remotes.length === 0}
-              onClick={() => void pushActiveTag()}
-              type="button"
-              className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
-              variant="ghost"
-              size="default"
-            >
-              Push Tag
-            </Button>
-          )}
-          <Button
-            disabled={busy || !onOperation}
-            onClick={() => void addWorktree()}
-            type="button"
-            className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
-            variant="ghost"
-            size="default"
-          >
-            New Worktree…
-          </Button>
-          <Button
-            disabled={activeRef.current || busy || !onOperation}
-            onClick={() => void deleteActive()}
-            type="button"
-            className={cn("gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground")}
-            variant="ghost"
-            size="default"
-          >
-            Delete…
-          </Button>
-        </div>
-      )}
-      {comparison && activeRef && (
-        <div
-          className={`gitBranchComparison [align-items:center] [background:var(--muted)] [border-top:1px_solid_var(--border)] [display:flex] [font-size:10px] [gap:8px] [padding:5px_8px] [&_span]:[color:var(--muted-foreground)] gitBranchComparison`}
-          role="status"
-        >
-          <strong>
-            {currentBranch} ↔ {activeRef.shortName}
-          </strong>
-          <span>
-            {comparison.ahead} ahead · {comparison.behind} behind
-          </span>
-        </div>
-      )}
-      {dialog.node}
+      <GitBranchSelectionPanel
+        activeRef={activeRef}
+        actionsRef={selectedActions}
+        busy={busy}
+        canCompare={onCompare !== undefined}
+        canOperate={onOperation !== undefined}
+        comparison={comparison}
+        currentBranch={currentBranch}
+        detailsOpen={detailsOpen}
+        onAddWorktree={addWorktree}
+        onCheckout={checkoutActive}
+        onCompare={compareActive}
+        onCreateBranch={createBranch}
+        onCreateTag={createTag}
+        onDelete={deleteActive}
+        onMerge={mergeActive}
+        onPushTag={pushActiveTag}
+        onRename={renameActive}
+        onSetUpstream={setUpstream}
+        remoteCount={remotes.length}
+      />
+      {dialogNode}
     </div>
   );
 }

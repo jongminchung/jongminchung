@@ -20,6 +20,7 @@ html:has([data-slot="sheet-content"][data-open]) {
 
 body {
   min-height: 100vh;
+  min-height: 100dvh;
   margin: 0;
   font-family: var(--font-family-body);
   text-rendering: optimizeLegibility;
@@ -36,6 +37,7 @@ body {
 .not-found {
   display: grid;
   min-height: 100vh;
+  min-height: 100dvh;
   place-content: center;
   justify-items: start;
   padding: 32px;
@@ -89,14 +91,6 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
   [data-docs-transition-content] {
     view-transition-name: none;
   }

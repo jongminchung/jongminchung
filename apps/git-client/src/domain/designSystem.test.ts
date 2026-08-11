@@ -80,6 +80,7 @@ describe("workspace shadcn design system boundary", () => {
       });
       expect(packageImports["#hooks/*"], app).toBeUndefined();
       expect(compilerOptions.paths ?? {}, app).toEqual({});
+      if (app === "git-client") expect(compilerOptions.customConditions).toEqual(["source"]);
       expect(config.rsc, app).toBe(app !== "git-client");
       expect(packageJson.dependencies, app).toMatchObject({
         "@jongminchung/ui": "workspace:*",
@@ -91,6 +92,7 @@ describe("workspace shadcn design system boundary", () => {
     const packageJson = readJson(join(uiRoot, "package.json"));
     const packageImports = packageJson.imports as Record<string, string>;
     const exports = packageJson.exports as Record<string, unknown>;
+    const componentExport = exports["./components/*"] as Record<string, string>;
 
     expect(packageJson.version).toBe("1.0.0");
     expect(packageJson.private).toBeUndefined();
@@ -120,6 +122,7 @@ describe("workspace shadcn design system boundary", () => {
       },
     });
     expect(exports["."]).toBeUndefined();
+    expect(Object.keys(componentExport)).toEqual(["source", "types", "import"]);
     expect(existsSync(join(uiRoot, "src", "index.ts"))).toBe(false);
 
     for (const file of sourceFiles(join(uiRoot, "src"))) {
@@ -175,6 +178,7 @@ describe("workspace shadcn design system boundary", () => {
     expect(sharedStyles).toContain('@source "../**/*.{ts,tsx}"');
     expect(sharedStyles).toContain("@apply border-border outline-ring/50");
     expect(sharedStyles).toContain("@apply bg-background text-foreground");
+    expect(sharedStyles).toContain("@media (prefers-reduced-motion: reduce)");
     expect(sharedStyles).not.toContain("apps/");
     expect(defaultTheme).toContain(":where(:root)");
     expect(defaultTheme).toContain(':where(:root[data-theme="dark"])');

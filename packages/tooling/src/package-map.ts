@@ -1,6 +1,5 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, relative, resolve, sep } from "node:path";
-import { fileURLToPath } from "node:url";
 
 const defaultLocalSourceAliases = Object.freeze([]) satisfies readonly LocalSourceAlias[];
 
@@ -305,12 +304,4 @@ export function writeTsconfigAliasConfig({
     formatTsconfigAliasConfig({ rootDir, localSourceAliases }),
     "utf8",
   );
-}
-
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  if (process.argv.includes("--write")) {
-    writeTsconfigAliasConfig();
-  } else {
-    process.stdout.write(formatTsconfigAliasConfig());
-  }
 }

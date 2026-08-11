@@ -6,6 +6,7 @@ export const appOwnedMaterialFiles = [
   "building-email-relay-system/TokenAnatomyDemo.tsx",
   "frontend-caching-strategies/StaleTimeSessionDemo.tsx",
   "frontend-caching-strategies/TagInvalidationDemo.tsx",
+  "modeling-series-view-model/TableRenderer.tsx",
   "react-component-based-thinking/StateMachineDemo.tsx",
   "the-expensive-main-thread/LongTaskBlockingDemo.tsx",
   "the-expensive-main-thread/TransformVsLayoutDemo.tsx",

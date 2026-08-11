@@ -1,6 +1,9 @@
 import { readFile } from "node:fs/promises";
-import { dirname, extname, isAbsolute, relative, resolve } from "node:path";
-import { deflateRawSync } from "node:zlib";
+import { resolve } from "node:path";
+import { encodePlantUmlSource, normalizePlantUmlServerBaseUrl } from "./encoding.js";
+import { isLocalPlantUmlUrl, resolvePlantUmlSourcePath } from "./path.js";
+
+export { createPlantUmlSvgUrl, encodePlantUmlSource } from "./encoding.js";
 
 export const publicPlantUmlSvgServerBaseUrl = "https://www.plantuml.com/plantuml/svg";
 
@@ -44,7 +47,7 @@ export type RemarkPlantUmlTransformer = (tree: unknown, file: MarkdownFile) => P
 
 export function remarkPlantUml(options: RemarkPlantUmlOptions): RemarkPlantUmlTransformer {
   const contentRoot = resolve(options.contentRoot ?? process.cwd());
-  const serverBaseUrl = createServerBaseUrl(options.serverBaseUrl);
+  const serverBaseUrl = normalizePlantUmlServerBaseUrl(options.serverBaseUrl);
   const className = options.className ?? "plantuml-diagram";
   const languages = createNormalizedSet(options.languages ?? ["plantuml", "puml"]);
   const extensions = createExtensionSet(options.extensions ?? [".puml", ".plantuml"]);
@@ -73,7 +76,7 @@ async function transformNode(node: unknown, context: TransformContext): Promise<
   }
 
   if ((node.type === "link" || node.type === "image") && isLocalPlantUmlUrl(node.url, context)) {
-    const sourcePath = resolvePlantUmlPath(node.url, context);
+    const sourcePath = resolvePlantUmlSourcePath(node.url, context);
     const source = await readFile(sourcePath, "utf8");
     return createHtmlNode(
       createPlantUmlSvgUrlFromContext(source, context),
@@ -107,94 +110,8 @@ function isPlantUmlLanguage(language: string | undefined, languages: ReadonlySet
   return typeof language === "string" && languages.has(language.toLowerCase());
 }
 
-function isLocalPlantUmlUrl(url: string | undefined, context: TransformContext): url is string {
-  if (typeof url !== "string" || url.length === 0) return false;
-  if (url.startsWith("#") || url.startsWith("//")) return false;
-  if (/^[a-z][a-z0-9+.-]*:/i.test(url)) return false;
-
-  return isPlantUmlPath(decodeUrlPath(url), context.extensions);
-}
-
-function isPlantUmlPath(path: string, extensions: ReadonlySet<string>): boolean {
-  return extensions.has(extname(path.toLowerCase()));
-}
-
-function decodeUrlPath(url: string): string {
-  const path = url.split(/[?#]/, 1)[0] ?? "";
-  try {
-    return decodeURIComponent(path);
-  } catch {
-    return path;
-  }
-}
-
-function resolvePlantUmlPath(url: string, context: TransformContext): string {
-  const urlPath = decodeUrlPath(url);
-  const basePath = context.markdownPath ? dirname(context.markdownPath) : context.contentRoot;
-  const resolvedPath = urlPath.startsWith("/")
-    ? resolve(context.contentRoot, `.${urlPath}`)
-    : resolve(basePath, urlPath);
-
-  if (!isInsideRoot(resolvedPath, context.contentRoot)) {
-    throw new Error(`PlantUML link must stay inside docs content root: ${url}`);
-  }
-
-  return resolvedPath;
-}
-
-function isInsideRoot(path: string, root: string): boolean {
-  const rootRelativePath = relative(root, path);
-  return (
-    rootRelativePath === "" || (!rootRelativePath.startsWith("..") && !isAbsolute(rootRelativePath))
-  );
-}
-
-export function createPlantUmlSvgUrl(source: string, serverBaseUrl: string): string {
-  return `${createServerBaseUrl(serverBaseUrl)}/${encodePlantUmlSource(source)}`;
-}
-
 function createPlantUmlSvgUrlFromContext(source: string, context: TransformContext): string {
   return `${context.serverBaseUrl}/${encodePlantUmlSource(source)}`;
-}
-
-export function encodePlantUmlSource(source: string): string {
-  return encodePlantUmlBytes(deflateRawSync(Buffer.from(source, "utf8")));
-}
-
-function encodePlantUmlBytes(bytes: Buffer): string {
-  let encoded = "";
-  for (let index = 0; index < bytes.length; index += 3) {
-    const first = bytes[index] ?? 0;
-    const second = bytes[index + 1] ?? 0;
-    const third = bytes[index + 2] ?? 0;
-    const chunk = append3Bytes(first, second, third);
-
-    if (index + 1 >= bytes.length) {
-      encoded += chunk.slice(0, 2);
-    } else if (index + 2 >= bytes.length) {
-      encoded += chunk.slice(0, 3);
-    } else {
-      encoded += chunk;
-    }
-  }
-  return encoded;
-}
-
-function append3Bytes(first: number, second: number, third: number): string {
-  const c1 = first >> 2;
-  const c2 = ((first & 0x3) << 4) | (second >> 4);
-  const c3 = ((second & 0xf) << 2) | (third >> 6);
-  const c4 = third & 0x3f;
-  return `${encode6Bit(c1)}${encode6Bit(c2)}${encode6Bit(c3)}${encode6Bit(c4)}`;
-}
-
-function encode6Bit(value: number): string {
-  if (value < 10) return String.fromCharCode(48 + value);
-  if (value < 36) return String.fromCharCode(65 + value - 10);
-  if (value < 62) return String.fromCharCode(97 + value - 36);
-  if (value === 62) return "-";
-  if (value === 63) return "_";
-  throw new Error(`Invalid PlantUML 6-bit value: ${value}`);
 }
 
 function createHtmlNode(src: string, caption: string | null, className: string): HtmlNode {
@@ -224,14 +141,6 @@ function extractText(node: unknown): string {
   return node.children.map((child) => extractText(child)).join("");
 }
 
-function createServerBaseUrl(value: string): string {
-  const trimmed = value.trim();
-  if (trimmed.length === 0) {
-    throw new Error("PlantUML serverBaseUrl is required");
-  }
-  return trimTrailingSlash(trimmed);
-}
-
 function createNormalizedSet(values: readonly string[]): ReadonlySet<string> {
   return new Set(values.map((value) => value.toLowerCase()));
 }
@@ -243,10 +152,6 @@ function createExtensionSet(values: readonly string[]): ReadonlySet<string> {
       return extension.toLowerCase();
     }),
   );
-}
-
-function trimTrailingSlash(value: string): string {
-  return value.replace(/\/+$/, "");
 }
 
 function escapeHtml(value: string): string {

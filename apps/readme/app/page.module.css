@@ -100,6 +100,7 @@
 .hero {
   display: grid;
   min-height: calc(100vh - 74px);
+  min-height: calc(100dvh - 74px);
   grid-template-columns: minmax(0, 2.2fr) minmax(270px, 0.8fr);
   gap: clamp(28px, 5vw, 78px);
   padding: clamp(64px, 9vw, 138px) clamp(20px, 4vw, 64px) clamp(48px, 6vw, 88px);

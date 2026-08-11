@@ -18,6 +18,7 @@ html {
 
 body {
   min-height: 100vh;
+  min-height: 100dvh;
   margin: 0;
   font-family: var(--font-family-body);
   text-rendering: optimizeLegibility;
@@ -35,15 +36,4 @@ a {
 :where(a, button):focus-visible {
   outline: 3px solid var(--ring);
   outline-offset: 4px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
 }

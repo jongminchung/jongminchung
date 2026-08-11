@@ -24,6 +24,7 @@ export function ActivityMonitorDialog({
 
   useEffect(() => {
     let active = true;
+    let timer: number | undefined;
     const refresh = async (): Promise<void> => {
       try {
         const next = await loadSnapshot();
@@ -35,11 +36,14 @@ export function ActivityMonitorDialog({
         setError(reason instanceof Error ? reason.message : String(reason));
       }
     };
-    void refresh();
-    const timer = window.setInterval(() => void refresh(), 1_000);
+    const poll = async (): Promise<void> => {
+      await refresh();
+      if (active) timer = window.setTimeout(() => void poll(), 1_000);
+    };
+    void poll();
     return () => {
       active = false;
-      window.clearInterval(timer);
+      if (timer !== undefined) window.clearTimeout(timer);
     };
   }, [loadSnapshot]);
 

@@ -38,6 +38,7 @@
 .list {
   display: grid;
   max-height: min(460px, 60vh);
+  max-height: min(460px, 60dvh);
   gap: 2px;
   padding: 6px;
   overflow-y: auto;

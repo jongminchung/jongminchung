@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useAppearance } from "../../components/AppearanceProvider";
 import { synchronizeAppearancePreference } from "../../domain/appearance";
+import { runInBackground } from "../../domain/toVoidHandler";
 import {
   hydrateProductSettings,
   hydrateProjectDefaults,
@@ -99,7 +100,7 @@ export function useAppHydration(): void {
 
   useEffect(() => {
     if (!toolWindowLayoutsLoaded) return;
-    void persistToolWindowLayouts(toolWindowLayouts);
+    runInBackground(persistToolWindowLayouts(toolWindowLayouts), "Tool-window layout persistence");
   }, [toolWindowLayouts, toolWindowLayoutsLoaded]);
 
   useEffect(() => {
@@ -119,7 +120,7 @@ export function useAppHydration(): void {
 
   useEffect(() => {
     if (!savedMacrosLoaded) return;
-    void persistSavedMacros(savedMacros);
+    runInBackground(persistSavedMacros(savedMacros), "Saved macro persistence");
   }, [savedMacros, savedMacrosLoaded]);
 
   useEffect(() => {
@@ -185,11 +186,14 @@ export function useAppHydration(): void {
 
   useEffect(() => {
     if (!projectDefaultsLoaded) return;
-    void persistProjectDefaults({
-      settings: newProjectSettings,
-      appearance: newProjectAppearancePreference,
-      templates: runConfigurationTemplates,
-    });
+    runInBackground(
+      persistProjectDefaults({
+        settings: newProjectSettings,
+        appearance: newProjectAppearancePreference,
+        templates: runConfigurationTemplates,
+      }),
+      "Project default persistence",
+    );
   }, [
     newProjectAppearancePreference,
     newProjectSettings,
@@ -232,7 +236,7 @@ export function useAppHydration(): void {
         detail: productSettings,
       }),
     );
-    void persistProductSettings(productSettings);
+    runInBackground(persistProductSettings(productSettings), "Product settings persistence");
   }, [productSettings, productSettingsLoaded]);
 
   useEffect(() => {

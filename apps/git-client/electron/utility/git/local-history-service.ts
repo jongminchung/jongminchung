@@ -1,21 +1,4 @@
-import { Buffer, isUtf8 } from "node:buffer";
-import { createHash, randomUUID } from "node:crypto";
-import {
-  chmod,
-  lstat,
-  mkdir,
-  open,
-  readdir,
-  readFile,
-  readlink,
-  rename,
-  rm,
-  symlink,
-  writeFile,
-} from "node:fs/promises";
-import { isAbsolute, join, relative, sep } from "node:path";
-import { promisify } from "node:util";
-import { gunzip, gzip } from "node:zlib";
+import { isAbsolute } from "node:path";
 import { z } from "zod";
 import {
   GitLocalHistoryActivitiesPageSchema,
@@ -29,129 +12,21 @@ import {
   type GitLocalHistoryScope,
   type RepositoryId,
 } from "../../../src/shared/contracts/git-utility";
-import { GitUtilityError } from "./git-error";
-import type { GitProcessOutcome, GitProcessRunnerLike } from "./git-process";
+import type { GitProcessRunnerLike } from "./git-process";
+import { LocalHistoryCapture } from "./local-history-capture";
 import {
-  CurrentStateSchema,
   DEFAULT_LOCAL_HISTORY_PAGE_SIZE,
-  LegacyEntrySchema,
-  LegacyManifestSchema,
-  LegacySnapshotSchema,
-  LOCAL_HISTORY_ACTIVITY_GROUP_WINDOW_MS,
-  LOCAL_HISTORY_RETENTION_MS,
-  LOCAL_HISTORY_STORAGE_VERSION,
-  ManifestSchema,
-  StoredActivitySchema,
   createLocalHistoryChanges,
-  isLocalHistoryTextPath,
   publicLocalHistoryActivity,
   publicLocalHistoryChange,
-  type ContentReference,
-  type FileState,
-  type LocalHistoryManifest,
-  type OptionalFileState,
-  type StoredActivity,
-  type StoredChange,
 } from "./local-history-model";
+import { LocalHistoryStorage } from "./local-history-storage";
+import { invalid, isErrno } from "./local-history-support";
 import type { RepositoryRegistry } from "./repository-registry";
 
-const gzipAsync = promisify(gzip);
-const gunzipAsync = promisify(gunzip);
-
-function invalid(message: string): GitUtilityError {
-  return new GitUtilityError("invalidInput", message);
-}
-
-function commandFailure(outcome: GitProcessOutcome): GitUtilityError {
-  if (outcome.kind === "failed")
-    return new GitUtilityError(outcome.code, outcome.message, outcome.exitCode);
-  if (outcome.kind === "cancelled") {
-    return new GitUtilityError(
-      "commandFailed",
-      `Local History command was cancelled (${outcome.reason})`,
-    );
-  }
-  return new GitUtilityError(
-    "commandFailed",
-    "Local History command did not complete successfully",
-  );
-}
-
-function processOutput(outcome: GitProcessOutcome, stream: "stdout" | "stderr"): string {
-  return outcome.output
-    .filter((item) => item.stream === stream)
-    .map((item) => item.data)
-    .join("");
-}
-
-function isErrno(error: unknown, code: string): boolean {
-  return (
-    error instanceof Error && "code" in error && (error as NodeJS.ErrnoException).code === code
-  );
-}
-
-async function looksLikeText(path: string): Promise<boolean> {
-  const handle = await open(path, "r");
-  try {
-    const sample = Buffer.alloc(8 * 1024);
-    const { bytesRead } = await handle.read(sample, 0, sample.length, 0);
-    const bytes = sample.subarray(0, bytesRead);
-    return !bytes.includes(0) && isUtf8(bytes);
-  } finally {
-    await handle.close();
-  }
-}
-
-function contained(root: string, candidate: string): boolean {
-  const path = relative(root, candidate);
-  return path === "" || (!isAbsolute(path) && path !== ".." && !path.startsWith(`..${sep}`));
-}
-
-function parseNul(value: string): readonly string[] {
-  if (value.length === 0) return [];
-  if (!value.endsWith("\0")) throw invalid("Git returned an invalid path list");
-  return value
-    .slice(0, -1)
-    .split("\0")
-    .map((path) => GitRelativePathSchema.parse(path));
-}
-
-function parseIndex(value: string): ReadonlyMap<string, string> {
-  const result = new Map<string, string>();
-  if (value.length > 0 && !value.endsWith("\0")) throw invalid("Git returned an invalid index");
-  for (const record of value.length === 0 ? [] : value.slice(0, -1).split("\0")) {
-    const tab = record.indexOf("\t");
-    const header = record.slice(0, tab).split(" ");
-    const path = record.slice(tab + 1);
-    if (tab < 0 || header.length !== 3 || header[2] !== "0") continue;
-    const oid = header[1];
-    if (oid !== undefined) result.set(GitRelativePathSchema.parse(path), oid);
-  }
-  return result;
-}
-
-function parseDirty(value: string): ReadonlySet<string> {
-  const records = value.length === 0 ? [] : value.slice(0, -1).split("\0");
-  const paths = new Set<string>();
-  for (let index = 0; index < records.length; index += 1) {
-    const record = records[index];
-    if (record === undefined || record.length < 4) continue;
-    const path = GitRelativePathSchema.parse(record.slice(3));
-    paths.add(path);
-    if (record[0] === "R" || record[0] === "C" || record[1] === "R" || record[1] === "C") {
-      const previous = records[index + 1];
-      if (previous !== undefined) paths.add(GitRelativePathSchema.parse(previous));
-      index += 1;
-    }
-  }
-  return paths;
-}
-
 export class LocalHistoryService {
-  readonly #registry: RepositoryRegistry;
-  readonly #storageRoot: string;
-  readonly #runner: GitProcessRunnerLike;
-  readonly #now: () => number;
+  readonly #storage: LocalHistoryStorage;
+  readonly #capture: LocalHistoryCapture;
   readonly #mutations = new Map<RepositoryId, Promise<void>>();
 
   private constructor(
@@ -161,10 +36,8 @@ export class LocalHistoryService {
     now: () => number,
   ) {
     if (!isAbsolute(storageRoot)) throw invalid("Local History storage root must be absolute");
-    this.#registry = registry;
-    this.#storageRoot = storageRoot;
-    this.#runner = runner;
-    this.#now = now;
+    this.#storage = new LocalHistoryStorage(storageRoot, now);
+    this.#capture = new LocalHistoryCapture(registry, runner, this.#storage);
   }
 
   static of(
@@ -179,11 +52,12 @@ export class LocalHistoryService {
   async initialize(repositoryId: RepositoryId, signal?: AbortSignal): Promise<void> {
     const id = RepositoryIdSchema.parse(repositoryId);
     await this.#serialize(id, async () => {
-      await this.#archiveLegacy(id);
+      await this.#storage.archiveLegacy(id);
       try {
-        const current = await this.#readCurrent(id);
-        if (current.size === 0) await this.#writeCurrent(id, await this.#captureState(id, signal));
-        await this.#purge(id);
+        const current = await this.#storage.readCurrent(id);
+        if (current.size === 0)
+          await this.#storage.writeCurrent(id, await this.#capture.captureState(id, signal));
+        await this.#storage.purge(id);
       } catch (error) {
         if (
           !(error instanceof z.ZodError) &&
@@ -192,8 +66,8 @@ export class LocalHistoryService {
         ) {
           throw error;
         }
-        await this.#quarantineCorruptRepository(id);
-        await this.#writeCurrent(id, await this.#captureState(id, signal));
+        await this.#storage.quarantineCorruptRepository(id);
+        await this.#storage.writeCurrent(id, await this.#capture.captureState(id, signal));
       }
     });
   }
@@ -206,16 +80,16 @@ export class LocalHistoryService {
   ): Promise<GitLocalHistoryActivity | null> {
     const id = RepositoryIdSchema.parse(repositoryId);
     return this.#serialize(id, async () => {
-      const previous = await this.#readCurrent(id);
-      const current = await this.#captureState(id, signal);
+      const previous = await this.#storage.readCurrent(id);
+      const current = await this.#capture.captureState(id, signal);
       if (previous.size === 0) {
-        await this.#writeCurrent(id, current);
+        await this.#storage.writeCurrent(id, current);
         return null;
       }
       const changes = createLocalHistoryChanges(previous, current);
-      await this.#writeCurrent(id, current);
+      await this.#storage.writeCurrent(id, current);
       if (changes.length === 0) return null;
-      return this.#append(id, name, null, system, changes);
+      return this.#storage.append(id, name, null, system, changes);
     });
   }
 
@@ -223,7 +97,7 @@ export class LocalHistoryService {
     const id = RepositoryIdSchema.parse(repositoryId);
     const value = label.trim();
     if (value.length === 0) throw invalid("Local History label must not be empty");
-    return this.#serialize(id, () => this.#append(id, value, value, false, []));
+    return this.#serialize(id, () => this.#storage.append(id, value, value, false, []));
   }
 
   async list(
@@ -234,9 +108,9 @@ export class LocalHistoryService {
     showSystemEvents = true,
   ): Promise<GitLocalHistoryActivitiesPage> {
     const parsed = GitLocalHistoryScopeSchema.parse(scope);
-    const manifest = await this.#readManifest(parsed.repositoryId);
+    const manifest = await this.#storage.readManifest(parsed.repositoryId);
     const activities = await Promise.all(
-      manifest.activityIds.map((id) => this.#readActivity(parsed.repositoryId, id)),
+      manifest.activityIds.map((id) => this.#storage.readActivity(parsed.repositoryId, id)),
     );
     const needle = query.trim().toLocaleLowerCase();
     const filtered = activities.filter((activity) => {
@@ -262,7 +136,10 @@ export class LocalHistoryService {
     repositoryId: RepositoryId,
     activityId: string,
   ): Promise<GitLocalHistoryActivityDetail> {
-    const activity = await this.#readActivity(RepositoryIdSchema.parse(repositoryId), activityId);
+    const activity = await this.#storage.readActivity(
+      RepositoryIdSchema.parse(repositoryId),
+      activityId,
+    );
     return GitLocalHistoryActivityDetailSchema.parse({
       activity: publicLocalHistoryActivity(activity),
       changes: activity.changes.map(publicLocalHistoryChange),
@@ -277,14 +154,14 @@ export class LocalHistoryService {
   ): Promise<string> {
     const id = RepositoryIdSchema.parse(repositoryId);
     const safePath = GitRelativePathSchema.parse(path);
-    const activity = await this.#readActivity(id, activityId);
+    const activity = await this.#storage.readActivity(id, activityId);
     const change = activity.changes.find(
       (candidate) => candidate.path === safePath || candidate.previousPath === safePath,
     );
     if (change === undefined) return "";
     const [before, after] = await Promise.all([
-      this.#readContent(id, change.before, signal),
-      this.#readContent(id, change.after, signal),
+      this.#capture.readContent(id, change.before, signal),
+      this.#capture.readContent(id, change.after, signal),
     ]);
     if (before === null || after === null)
       return `Binary or unavailable content changed: ${safePath}`;
@@ -326,14 +203,14 @@ export class LocalHistoryService {
   ): Promise<void> {
     const id = RepositoryIdSchema.parse(repositoryId);
     await this.#serialize(id, async () => {
-      const beforeRevert = await this.#captureState(id, signal);
-      const manifest = await this.#readManifest(id);
+      const beforeRevert = await this.#capture.captureState(id, signal);
+      const manifest = await this.#storage.readManifest(id);
       const index = manifest.activityIds.indexOf(activityId);
       if (index < 0) throw invalid("Local History activity does not exist");
       const activities = await Promise.all(
         manifest.activityIds
           .slice(0, includeLater ? index + 1 : 1)
-          .map((value) => this.#readActivity(id, includeLater ? value : activityId)),
+          .map((value) => this.#storage.readActivity(id, includeLater ? value : activityId)),
       );
       const selected = new Set(paths.map((path) => GitRelativePathSchema.parse(path)));
       for (const activity of activities) {
@@ -344,480 +221,24 @@ export class LocalHistoryService {
             (change.previousPath === null || !selected.has(change.previousPath))
           )
             continue;
-          await this.#restoreState(id, change.previousPath ?? change.path, change.before, signal);
+          await this.#capture.restoreState(
+            id,
+            change.previousPath ?? change.path,
+            change.before,
+            signal,
+          );
           if (change.previousPath !== null && change.previousPath !== change.path) {
-            await this.#restoreState(id, change.path, null, signal);
+            await this.#capture.restoreState(id, change.path, null, signal);
           }
         }
       }
-      const afterRevert = await this.#captureState(id, signal);
-      await this.#writeCurrent(id, afterRevert);
+      const afterRevert = await this.#capture.captureState(id, signal);
+      await this.#storage.writeCurrent(id, afterRevert);
       const changes = createLocalHistoryChanges(beforeRevert, afterRevert);
       if (changes.length > 0) {
-        await this.#append(id, "Revert Local History", null, true, changes);
+        await this.#storage.append(id, "Revert Local History", null, true, changes);
       }
     });
-  }
-
-  async #append(
-    repositoryId: RepositoryId,
-    name: string,
-    label: string | null,
-    system: boolean,
-    changes: readonly StoredChange[],
-  ): Promise<GitLocalHistoryActivity> {
-    const manifest = await this.#readManifest(repositoryId);
-    const latestId = manifest.activityIds[0];
-    if (latestId !== undefined && label === null && changes.length > 0) {
-      const latest = await this.#readActivity(repositoryId, latestId);
-      if (
-        latest.label === null &&
-        latest.name === name &&
-        latest.system === system &&
-        this.#now() - latest.createdAtMs <= LOCAL_HISTORY_ACTIVITY_GROUP_WINDOW_MS
-      ) {
-        const grouped = StoredActivitySchema.parse({
-          ...latest,
-          changes: [...latest.changes, ...changes],
-        });
-        await this.#atomicJson(
-          join(this.#repositoryDirectory(repositoryId), "activities", `${latest.id}.json`),
-          grouped,
-        );
-        await this.#purge(repositoryId);
-        return publicLocalHistoryActivity(grouped);
-      }
-    }
-    const activity = StoredActivitySchema.parse({
-      version: LOCAL_HISTORY_STORAGE_VERSION,
-      id: randomUUID(),
-      repositoryId,
-      createdAtMs: this.#now(),
-      name,
-      label,
-      system,
-      changes,
-    });
-    const directory = this.#repositoryDirectory(repositoryId);
-    await mkdir(join(directory, "activities"), {
-      recursive: true,
-      mode: 0o700,
-    });
-    await this.#atomicJson(join(directory, "activities", `${activity.id}.json`), activity);
-    await this.#writeManifest(repositoryId, [activity.id, ...manifest.activityIds]);
-    await this.#purge(repositoryId);
-    return publicLocalHistoryActivity(activity);
-  }
-
-  async #captureState(
-    repositoryId: RepositoryId,
-    signal?: AbortSignal,
-  ): Promise<ReadonlyMap<string, FileState>> {
-    const repository = this.#registry.get(repositoryId);
-    const [indexText, untrackedText, statusText] = await Promise.all([
-      this.#git(repository.path, ["ls-files", "--stage", "-z", "--"], signal),
-      this.#git(
-        repository.path,
-        ["ls-files", "--others", "--exclude-standard", "-z", "--"],
-        signal,
-      ),
-      this.#git(
-        repository.path,
-        ["status", "--porcelain=v1", "-z", "--untracked-files=all", "--"],
-        signal,
-      ),
-    ]);
-    const indexed = parseIndex(indexText);
-    const untracked = parseNul(untrackedText);
-    const dirty = parseDirty(statusText);
-    const paths = [...new Set([...indexed.keys(), ...untracked])].sort();
-    const state = new Map<string, FileState>();
-    for (const path of paths) {
-      if (signal?.aborted === true)
-        throw new GitUtilityError("commandFailed", "Local History was cancelled");
-      const absolute = join(repository.path, ...path.split("/"));
-      if (!contained(repository.path, absolute))
-        throw invalid("Local History path escaped the project");
-      let metadata;
-      try {
-        metadata = await lstat(absolute);
-      } catch (error) {
-        if (isErrno(error, "ENOENT")) continue;
-        throw error;
-      }
-      if (!metadata.isFile() && !metadata.isSymbolicLink()) continue;
-      const mode = metadata.mode & 0o777;
-      let contentType: FileState["contentType"] = "binary";
-      try {
-        contentType =
-          metadata.isSymbolicLink() ||
-          isLocalHistoryTextPath(path) ||
-          (await looksLikeText(absolute))
-            ? "text"
-            : "binary";
-      } catch {
-        contentType = "binary";
-      }
-      if (!dirty.has(path) && indexed.has(path)) {
-        state.set(path, {
-          kind: metadata.isSymbolicLink() ? "symlink" : "file",
-          mode,
-          contentType,
-          content: { kind: "git", oid: indexed.get(path) ?? "" },
-        });
-        continue;
-      }
-      try {
-        if (contentType === "binary") {
-          state.set(path, {
-            kind: "file",
-            mode,
-            contentType,
-            content: { kind: "unavailable" },
-          });
-          continue;
-        }
-        const bytes = metadata.isSymbolicLink()
-          ? Buffer.from(await readlink(absolute))
-          : await readFile(absolute);
-        const sha256 = await this.#writeBlob(bytes);
-        state.set(path, {
-          kind: metadata.isSymbolicLink() ? "symlink" : "file",
-          mode,
-          contentType,
-          content: { kind: "blob", sha256 },
-        });
-      } catch {
-        state.set(path, {
-          kind: metadata.isSymbolicLink() ? "symlink" : "file",
-          mode,
-          contentType,
-          content: { kind: "unavailable" },
-        });
-      }
-    }
-    return state;
-  }
-
-  async #git(cwd: string, args: readonly string[], signal?: AbortSignal): Promise<string> {
-    const outcome = await this.#runner.run(
-      {
-        cwd,
-        args,
-        redactStdout: false,
-        outputLimitBytes: 32 * 1024 * 1024,
-      },
-      signal,
-    );
-    if (outcome.kind !== "completed") throw commandFailure(outcome);
-    return processOutput(outcome, "stdout");
-  }
-
-  async #readContent(
-    repositoryId: RepositoryId,
-    state: OptionalFileState,
-    signal?: AbortSignal,
-  ): Promise<Buffer | null> {
-    if (state === null) return Buffer.alloc(0);
-    if (state.contentType === "binary") return null;
-    if (state.content.kind === "unavailable") return null;
-    if (state.content.kind === "blob") {
-      return gunzipAsync(await readFile(this.#blobPath(state.content.sha256)));
-    }
-    const repository = this.#registry.get(repositoryId);
-    const outcome = await this.#runner.run(
-      {
-        cwd: repository.path,
-        args: ["cat-file", "blob", state.content.oid],
-        redactStdout: false,
-        outputLimitBytes: 256 * 1024 * 1024,
-      },
-      signal,
-    );
-    if (outcome.kind !== "completed") return null;
-    return Buffer.from(processOutput(outcome, "stdout"), "utf8");
-  }
-
-  async #restoreState(
-    repositoryId: RepositoryId,
-    path: string,
-    state: OptionalFileState,
-    signal?: AbortSignal,
-  ): Promise<void> {
-    const repository = this.#registry.get(repositoryId);
-    const safePath = GitRelativePathSchema.parse(path);
-    const absolute = join(repository.path, ...safePath.split("/"));
-    if (!contained(repository.path, absolute))
-      throw invalid("Local History restore escaped the project");
-    if (state === null) {
-      await rm(absolute, { force: true });
-      return;
-    }
-    const bytes = await this.#readContent(repositoryId, state, signal);
-    if (bytes === null) throw invalid(`Content for ${safePath} was not stored in Local History`);
-    await mkdir(join(absolute, ".."), { recursive: true });
-    const temporary = `${absolute}.local-history-${randomUUID()}`;
-    if (state.kind === "symlink") {
-      await symlink(bytes.toString("utf8"), temporary);
-    } else {
-      await writeFile(temporary, bytes, { mode: state.mode });
-      await chmod(temporary, state.mode);
-    }
-    await rename(temporary, absolute);
-  }
-
-  async #readCurrent(repositoryId: RepositoryId): Promise<ReadonlyMap<string, FileState>> {
-    try {
-      const raw: unknown = JSON.parse(
-        await readFile(join(this.#repositoryDirectory(repositoryId), "current.json"), "utf8"),
-      );
-      const parsed = CurrentStateSchema.parse(raw);
-      return new Map<string, FileState>(
-        parsed.files.map(([path, state]) => [path, state] as const),
-      );
-    } catch (error) {
-      if (isErrno(error, "ENOENT")) return new Map();
-      throw error;
-    }
-  }
-
-  async #writeCurrent(
-    repositoryId: RepositoryId,
-    state: ReadonlyMap<string, FileState>,
-  ): Promise<void> {
-    await mkdir(this.#repositoryDirectory(repositoryId), {
-      recursive: true,
-      mode: 0o700,
-    });
-    await this.#atomicJson(join(this.#repositoryDirectory(repositoryId), "current.json"), {
-      version: LOCAL_HISTORY_STORAGE_VERSION,
-      files: [...state.entries()],
-    });
-  }
-
-  async #readManifest(repositoryId: RepositoryId): Promise<LocalHistoryManifest> {
-    try {
-      const raw: unknown = JSON.parse(
-        await readFile(join(this.#repositoryDirectory(repositoryId), "manifest.json"), "utf8"),
-      );
-      return ManifestSchema.parse(raw);
-    } catch (error) {
-      if (isErrno(error, "ENOENT"))
-        return {
-          version: LOCAL_HISTORY_STORAGE_VERSION,
-          activityIds: [],
-        };
-      throw error;
-    }
-  }
-
-  async #writeManifest(repositoryId: RepositoryId, activityIds: readonly string[]): Promise<void> {
-    await this.#atomicJson(join(this.#repositoryDirectory(repositoryId), "manifest.json"), {
-      version: LOCAL_HISTORY_STORAGE_VERSION,
-      activityIds,
-    });
-  }
-
-  async #readActivity(repositoryId: RepositoryId, activityId: string): Promise<StoredActivity> {
-    const raw: unknown = JSON.parse(
-      await readFile(
-        join(this.#repositoryDirectory(repositoryId), "activities", `${activityId}.json`),
-        "utf8",
-      ),
-    );
-    return StoredActivitySchema.parse(raw);
-  }
-
-  async #writeBlob(bytes: Buffer): Promise<string> {
-    const sha256 = createHash("sha256").update(bytes).digest("hex");
-    const target = this.#blobPath(sha256);
-    await mkdir(join(this.#storageDirectory(), "objects"), {
-      recursive: true,
-      mode: 0o700,
-    });
-    try {
-      await writeFile(target, await gzipAsync(bytes), {
-        mode: 0o600,
-        flag: "wx",
-      });
-    } catch (error) {
-      if (!isErrno(error, "EEXIST")) throw error;
-    }
-    return sha256;
-  }
-
-  async #purge(repositoryId: RepositoryId): Promise<void> {
-    const manifest = await this.#readManifest(repositoryId);
-    const cutoff = this.#now() - LOCAL_HISTORY_RETENTION_MS;
-    const retained: string[] = [];
-    for (const id of manifest.activityIds) {
-      const activity = await this.#readActivity(repositoryId, id);
-      if (activity.createdAtMs >= cutoff) retained.push(id);
-      else
-        await rm(join(this.#repositoryDirectory(repositoryId), "activities", `${id}.json`), {
-          force: true,
-        });
-    }
-    if (retained.length !== manifest.activityIds.length) {
-      await this.#writeManifest(repositoryId, retained);
-      await this.#collectUnreferencedBlobs();
-    }
-  }
-
-  async #collectUnreferencedBlobs(): Promise<void> {
-    const repositoriesDirectory = join(this.#storageDirectory(), "repositories");
-    const referenced = new Set<string>();
-    try {
-      const repositories = await readdir(repositoriesDirectory, {
-        withFileTypes: true,
-      });
-      for (const repository of repositories) {
-        if (!repository.isDirectory()) continue;
-        const repositoryId = RepositoryIdSchema.safeParse(repository.name);
-        if (!repositoryId.success) continue;
-        const current = await this.#readCurrent(repositoryId.data);
-        for (const state of current.values()) {
-          if (state.content.kind === "blob") referenced.add(state.content.sha256);
-        }
-        const manifest = await this.#readManifest(repositoryId.data);
-        for (const activityId of manifest.activityIds) {
-          const activity = await this.#readActivity(repositoryId.data, activityId);
-          for (const change of activity.changes) {
-            for (const state of [change.before, change.after]) {
-              if (state?.content.kind === "blob") referenced.add(state.content.sha256);
-            }
-          }
-        }
-      }
-      const objectsDirectory = join(this.#storageDirectory(), "objects");
-      const objects = await readdir(objectsDirectory, {
-        withFileTypes: true,
-      });
-      await Promise.all(
-        objects
-          .filter((object) => object.isFile() && object.name.endsWith(".gz"))
-          .filter((object) => !referenced.has(object.name.slice(0, -3)))
-          .map((object) =>
-            rm(join(objectsDirectory, object.name), {
-              force: true,
-            }),
-          ),
-      );
-    } catch (error) {
-      if (!isErrno(error, "ENOENT")) throw error;
-    }
-  }
-
-  async #archiveLegacy(repositoryId: RepositoryId): Promise<void> {
-    const legacy = join(this.#storageRoot, "local-history", repositoryId);
-    try {
-      const raw: unknown = JSON.parse(await readFile(join(legacy, "manifest.json"), "utf8"));
-      const manifest = LegacyManifestSchema.parse(raw);
-      const snapshots: Array<{
-        readonly entry: z.infer<typeof LegacyEntrySchema>;
-        readonly state: ReadonlyMap<string, FileState>;
-      }> = [];
-      for (const entry of [...manifest.entries].reverse()) {
-        const snapshotRaw: unknown = JSON.parse(
-          await readFile(join(legacy, `${entry.snapshotFile}.json`), "utf8"),
-        );
-        const snapshot = LegacySnapshotSchema.parse(snapshotRaw);
-        const files = new Map<string, FileState>();
-        for (const file of snapshot.files) {
-          const bytes = Buffer.from(file.bytesBase64, "base64");
-          const content: ContentReference =
-            file.kind === "symlink" || (isLocalHistoryTextPath(file.path) && isUtf8(bytes))
-              ? {
-                  kind: "blob",
-                  sha256: await this.#writeBlob(bytes),
-                }
-              : { kind: "unavailable" };
-          files.set(file.path, {
-            kind: file.kind,
-            mode: file.mode,
-            contentType: content.kind === "unavailable" ? "binary" : "text",
-            content,
-          });
-        }
-        snapshots.push({ entry, state: files });
-      }
-      const migrated: StoredActivity[] = [];
-      const initial = snapshots[0];
-      if (initial?.entry.label) {
-        migrated.push(
-          StoredActivitySchema.parse({
-            version: LOCAL_HISTORY_STORAGE_VERSION,
-            id: initial.entry.id,
-            repositoryId,
-            createdAtMs: initial.entry.createdAtMs,
-            name: initial.entry.label,
-            label: initial.entry.label,
-            system: false,
-            changes: [],
-          }),
-        );
-      }
-      for (let index = 1; index < snapshots.length; index += 1) {
-        const previous = snapshots[index - 1];
-        const current = snapshots[index];
-        if (previous === undefined || current === undefined) continue;
-        const changes = createLocalHistoryChanges(previous.state, current.state);
-        if (changes.length === 0 && current.entry.label === null) continue;
-        migrated.push(
-          StoredActivitySchema.parse({
-            version: LOCAL_HISTORY_STORAGE_VERSION,
-            id: current.entry.id,
-            repositoryId,
-            createdAtMs: current.entry.createdAtMs,
-            name: current.entry.label ?? "Migrated Local History",
-            label: current.entry.label,
-            system: false,
-            changes,
-          }),
-        );
-      }
-      if (migrated.length > 0) {
-        const activityDirectory = join(this.#repositoryDirectory(repositoryId), "activities");
-        await mkdir(activityDirectory, {
-          recursive: true,
-          mode: 0o700,
-        });
-        for (const activity of migrated) {
-          await this.#atomicJson(join(activityDirectory, `${activity.id}.json`), activity);
-        }
-        await this.#writeManifest(repositoryId, migrated.map((activity) => activity.id).reverse());
-      }
-      const archive = join(this.#storageRoot, "local-history-v1-archive");
-      await mkdir(archive, { recursive: true, mode: 0o700 });
-      await rename(legacy, join(archive, repositoryId)).catch((error: unknown) => {
-        if (!isErrno(error, "EEXIST")) throw error;
-      });
-    } catch (error) {
-      if (error instanceof z.ZodError || error instanceof SyntaxError) return;
-      if (!isErrno(error, "ENOENT")) throw error;
-    }
-  }
-
-  async #quarantineCorruptRepository(repositoryId: RepositoryId): Promise<void> {
-    const source = this.#repositoryDirectory(repositoryId);
-    const archive = join(this.#storageRoot, "local-history-v2-corrupt");
-    await mkdir(archive, { recursive: true, mode: 0o700 });
-    await rename(source, join(archive, `${repositoryId}-${randomUUID()}`)).catch(
-      (error: unknown) => {
-        if (!isErrno(error, "ENOENT")) throw error;
-      },
-    );
-  }
-
-  async #atomicJson(target: string, value: unknown): Promise<void> {
-    await mkdir(join(target, ".."), { recursive: true, mode: 0o700 });
-    const temporary = `${target}.${randomUUID()}.tmp`;
-    await writeFile(temporary, JSON.stringify(value), {
-      encoding: "utf8",
-      mode: 0o600,
-      flag: "wx",
-    });
-    await rename(temporary, target);
   }
 
   async #serialize<T>(repositoryId: RepositoryId, operation: () => Promise<T>): Promise<T> {
@@ -833,17 +254,5 @@ export class LocalHistoryService {
     } finally {
       if (this.#mutations.get(repositoryId) === settled) this.#mutations.delete(repositoryId);
     }
-  }
-
-  #storageDirectory(): string {
-    return join(this.#storageRoot, "local-history-v2");
-  }
-
-  #repositoryDirectory(repositoryId: RepositoryId): string {
-    return join(this.#storageDirectory(), "repositories", RepositoryIdSchema.parse(repositoryId));
-  }
-
-  #blobPath(sha256: string): string {
-    return join(this.#storageDirectory(), "objects", `${sha256}.gz`);
   }
 }

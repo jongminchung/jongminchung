@@ -1,7 +1,7 @@
 import { Button } from "@jongminchung/ui/components/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
 import { cn } from "@jongminchung/ui/lib/utils";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { mergeProjectTreeEntries, type ProjectTreeEntry } from "../domain/projectTree";
 import type { ScratchFile } from "../domain/scratchFiles";
 import type { FileChange, TreeEntry } from "../domain/types";
@@ -102,24 +102,30 @@ export function ProjectToolWindow({
   const [compactDirectories, setCompactDirectories] = useState(true);
   const [foldersAlwaysOnTop, setFoldersAlwaysOnTop] = useState(true);
   const [sortKey, setSortKey] = useState<ProjectSortKey>("name");
+  const loadGenerationRef = useRef(0);
 
   const loadDirectory = useCallback(
     async (path: string): Promise<void> => {
       if (children.has(path) || loading.has(path)) return;
+      const generation = loadGenerationRef.current;
       setLoading((current) => new Set(current).add(path));
       setError(undefined);
       try {
         const tracked = hasCommits ? await loadTree("HEAD", path || undefined) : [];
+        if (generation !== loadGenerationRef.current) return;
         const entries = mergeProjectTreeEntries(path, tracked, changes);
         setChildren((current) => new Map(current).set(path, entries));
       } catch (reason) {
+        if (generation !== loadGenerationRef.current) return;
         setError(reason instanceof Error ? reason.message : String(reason));
       } finally {
-        setLoading((current) => {
-          const next = new Set(current);
-          next.delete(path);
-          return next;
-        });
+        if (generation === loadGenerationRef.current) {
+          setLoading((current) => {
+            const next = new Set(current);
+            next.delete(path);
+            return next;
+          });
+        }
       }
     },
     [changes, children, hasCommits, loadTree, loading],
@@ -134,7 +140,9 @@ export function ProjectToolWindow({
   );
 
   useEffect(() => {
+    loadGenerationRef.current += 1;
     setChildren(new Map());
+    setLoading(new Set());
   }, [changeFingerprint, hasCommits]);
 
   useEffect(() => {

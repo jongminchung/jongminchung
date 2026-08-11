@@ -141,6 +141,7 @@ const fetchTableData = async (params: any) => {
 
   // 테이블 행 형식으로 변환
   const rows = paginatedData.map((item) => ({
+    id: item.id,
     cells: [
       { columnId: "id", value: item.id },
       { columnId: "name", value: item.name },

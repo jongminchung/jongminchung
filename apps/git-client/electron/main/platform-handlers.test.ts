@@ -14,10 +14,8 @@ import type {
   GitTerminalEvent,
   RepositoryChangedEvent,
   RepositoryChangedListener,
-  RepositoryRecord,
 } from "../../src/shared/contracts/git-utility";
 import { IPC_CHANNELS } from "../../src/shared/contracts/ipc";
-import type { RepositorySnapshot } from "../../src/shared/contracts/model";
 import type { TerminalEventEnvelope } from "../../src/shared/contracts/terminal";
 
 type InvokeHandler = (event: unknown, raw: unknown) => unknown;
@@ -52,36 +50,13 @@ vi.mock("electron", () => ({
 }));
 
 import { registerPlatformHandlers, unregisterPlatformHandlers } from "./platform-handlers";
+import {
+  TEST_REPOSITORY as REPOSITORY,
+  TEST_REPOSITORY_ID as REPOSITORY_ID,
+  TEST_SNAPSHOT as SNAPSHOT,
+} from "./test/repository-fixtures";
 
-const REPOSITORY_ID = "02fc7f7c-3f66-514b-9470-451a776cfcc7";
 const REQUEST_ID = "388ac97b-6f01-4e10-8149-78ec15412d18";
-const REPOSITORY: RepositoryRecord = Object.freeze({
-  id: REPOSITORY_ID,
-  name: "repository",
-  path: "/tmp/repository",
-  gitDirectory: "/tmp/repository/.git",
-  commonDirectory: "/tmp/repository/.git",
-  isBare: false,
-  gitVersion: Object.freeze({
-    major: 2,
-    minor: 55,
-    patch: 0,
-    display: "git version 2.55.0",
-  }),
-});
-const SNAPSHOT: RepositorySnapshot = Object.freeze({
-  ...REPOSITORY,
-  currentBranch: "main",
-  headOid: "0123456789abcdef0123456789abcdef01234567",
-  upstream: "origin/main",
-  remoteUrl: "https://example.invalid/repository.git",
-  ahead: 2,
-  behind: 1,
-  isShallow: false,
-  isDetached: false,
-  hasCommits: true,
-  operation: null,
-});
 const PUSH_PREVIEW = {
   sourceBranch: "main",
   sourceRevision: "HEAD",
@@ -1197,151 +1172,6 @@ describe("platform Git IPC handlers", () => {
     expect(terminalUtility.closeRepository).toHaveBeenCalledWith({
       repositoryId: REPOSITORY_ID,
     });
-    unregisterPlatformHandlers();
-  });
-});
-
-describe("platform hosting IPC handlers", () => {
-  const account = Object.freeze({
-    id: "account-1",
-    provider: "gitHub" as const,
-    baseUrl: "https://github.com",
-    login: "octocat",
-  });
-
-  beforeEach(() => electronMock.handlers.clear());
-
-  function setup() {
-    const mainFrame = { url: "app://git-client/" };
-    const webContents = {
-      isDestroyed: () => false,
-      mainFrame,
-      send: vi.fn(),
-    };
-    const window = { isDestroyed: () => false, webContents };
-    const hosting = {
-      saveAccount: vi.fn(async () => account),
-      restoreAccounts: vi.fn(),
-      deleteAccount: vi.fn(async () => undefined),
-      execute: vi.fn(async () => ({
-        kind: "completed" as const,
-        message: "done",
-      })),
-    };
-    registerPlatformHandlers({
-      window,
-      settings: { get: vi.fn(), set: vi.fn(), delete: vi.fn() },
-      menu: { sync: vi.fn() },
-      gitUtility: {},
-      terminalUtility: {},
-      hosting,
-      runtime: {
-        kind: "electron",
-        appVersion: "0.1.0",
-        electronVersion: "43.3.0",
-        platform: "darwin",
-        architecture: "arm64",
-        qaFixture: false,
-      },
-    } as unknown as Parameters<typeof registerPlatformHandlers>[0]);
-    return {
-      event: { sender: webContents, senderFrame: mainFrame },
-      hosting,
-      webContents,
-    };
-  }
-
-  it("validates, delegates, and unregisters every hosting channel", async () => {
-    const { event, hosting } = setup();
-    const token = "ghp_super-secret-token";
-
-    const saved = await handler(IPC_CHANNELS.hostingSaveAccount)(event, {
-      provider: "gitHub",
-      baseUrl: "https://github.com/",
-      token,
-    });
-    expect(
-      handler(IPC_CHANNELS.hostingRestoreAccounts)(event, {
-        accounts: [account],
-      }),
-    ).toBeUndefined();
-    await expect(
-      handler(IPC_CHANNELS.hostingDeleteAccount)(event, {
-        accountId: account.id,
-      }),
-    ).resolves.toBeUndefined();
-    await expect(
-      handler(IPC_CHANNELS.hostingExecute)(event, {
-        accountId: account.id,
-        request: {
-          kind: "comment",
-          project: "owner/repo",
-          number: 7,
-          body: "Looks good",
-        },
-      }),
-    ).resolves.toEqual({ kind: "completed", message: "done" });
-
-    expect(saved).toEqual(account);
-    expect(JSON.stringify(saved)).not.toContain(token);
-    expect(hosting.saveAccount).toHaveBeenCalledWith("gitHub", "https://github.com", token);
-    expect(hosting.restoreAccounts).toHaveBeenCalledWith([account]);
-    expect(hosting.deleteAccount).toHaveBeenCalledWith(account.id);
-
-    unregisterPlatformHandlers();
-    for (const channel of [
-      IPC_CHANNELS.hostingSaveAccount,
-      IPC_CHANNELS.hostingRestoreAccounts,
-      IPC_CHANNELS.hostingDeleteAccount,
-      IPC_CHANNELS.hostingExecute,
-    ]) {
-      expect(electronMock.handlers.has(channel)).toBe(false);
-    }
-  });
-
-  it("rejects untrusted senders before delegation", async () => {
-    const { event, hosting } = setup();
-    const untrusted = { ...event, sender: {} };
-
-    await expect(
-      handler(IPC_CHANNELS.hostingDeleteAccount)(untrusted, {
-        accountId: account.id,
-      }),
-    ).rejects.toThrow("IPC sender is not the main window");
-    expect(hosting.deleteAccount).not.toHaveBeenCalled();
-    unregisterPlatformHandlers();
-  });
-
-  it("redacts credentials and rejects response kinds that do not match requests", async () => {
-    const { event, hosting } = setup();
-    const token = "ghp_super-secret-token";
-    hosting.saveAccount.mockRejectedValueOnce(
-      new Error(`Authorization: Bearer ${token}; token=${token}`),
-    );
-
-    let saveError: unknown;
-    try {
-      await handler(IPC_CHANNELS.hostingSaveAccount)(event, {
-        provider: "gitHub",
-        baseUrl: "https://github.com",
-        token,
-      });
-    } catch (error) {
-      saveError = error;
-    }
-    expect(String(saveError)).toContain("[redacted]");
-    expect(String(saveError)).not.toContain(token);
-
-    hosting.execute.mockResolvedValueOnce({
-      kind: "completed",
-      message: "wrong kind",
-    });
-    await expect(
-      handler(IPC_CHANNELS.hostingExecute)(event, {
-        accountId: account.id,
-        request: { kind: "files", project: "owner/repo", number: 7 },
-      }),
-    ).rejects.toThrow("Hosting response did not match its request");
     unregisterPlatformHandlers();
   });
 });

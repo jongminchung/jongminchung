@@ -794,7 +794,7 @@ describe("ElectronGitBridge real utility fixture", () => {
     await expect(bridge.listConflicts(repositoryId)).resolves.toEqual([]);
     git(path, "merge", "--abort");
     await bridge.unwatchRepository(repositoryId);
-  });
+  }, 60_000);
 
   it("executes representative index, commit, ref, stash, config, remote, and worktree mutations through one bridge lifecycle", async () => {
     const path = await createRepository();

@@ -1,6 +1,5 @@
 import { Button } from "@jongminchung/ui/components/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@jongminchung/ui/components/tabs";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
+import { Tabs, TabsContent } from "@jongminchung/ui/components/tabs";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 import type { CSSProperties } from "react";
@@ -18,19 +17,15 @@ import { DetailsPane } from "../components/DetailsPane";
 import { DiffViewer } from "../components/DiffViewer";
 import { HistoryRewriteWorkspace } from "../components/HistoryRewriteWorkspace";
 import { Icon } from "../components/Icon";
-import {
-  NotificationBalloon,
-  NotificationToolWindow,
-  type ProductNotification,
-} from "../components/NotificationToolWindow";
-import { EmptyState, StatePill } from "../components/ProductCollections";
+import { NotificationBalloon, NotificationToolWindow } from "../components/NotificationToolWindow";
+import { EmptyState } from "../components/ProductCollections";
 import { ProjectToolWindow } from "../components/ProjectToolWindow";
 import { RepositoryInspectorDialog } from "../components/RepositoryInspectorDialog";
 import type { RepositoryToolKind } from "../components/RepositoryToolDialog";
 import { RevisionComparison } from "../components/RevisionComparison";
 import { ScratchEditor } from "../components/ScratchEditor";
 import { ShareExistingRemotesDialog } from "../components/ShareExistingRemotesDialog";
-import { ShareProjectDialog, type ShareProjectBinding } from "../components/ShareProjectDialog";
+import { ShareProjectDialog } from "../components/ShareProjectDialog";
 import { deriveActionAvailability } from "../domain/actionAvailability";
 import {
   allLineBookmarks,
@@ -83,44 +78,20 @@ import {
 import { useRepositoryToolWindowController } from "./hooks/useRepositoryToolWindowController";
 import { useRepositoryVcsController } from "./hooks/useRepositoryVcsController";
 import { useRepositoryWorkspaceLifecycle } from "./hooks/useRepositoryWorkspaceLifecycle";
-import {
-  RepositoryLoadingSkeleton,
-  RepositoryRightToolStripe,
-  RepositoryToolStripe,
-} from "./RepositoryChrome";
+import { RepositoryRightToolStripe, RepositoryToolStripe } from "./RepositoryChrome";
 import { RepositoryStatusBar } from "./RepositoryStatusBar";
 import {
   RepositoryWorkspaceStoreProvider,
   useRepositoryWorkspaceStore,
 } from "./state/RepositoryWorkspaceStoreProvider";
 import { inspectorKey, type EditorStatus } from "./state/workspaceTypes";
+import { RepositoryEditorSurface } from "./surfaces/RepositoryEditorSurface";
+import { RepositoryEditorTabs } from "./surfaces/RepositoryEditorTabs";
 import { RepositoryNavigationSurface } from "./surfaces/RepositoryNavigationSurface";
 import { RepositoryOverlays } from "./surfaces/RepositoryOverlays";
+import { RepositoryToolWindows } from "./surfaces/RepositoryToolWindows";
 import { useRepositoryCommands } from "./useRepositoryCommands";
 import { useRepositoryPalette } from "./useRepositoryPalette";
-
-function remoteBrowserUrl(remote: string): string | null {
-  try {
-    const url = new URL(remote);
-    if (url.protocol === "https:" || url.protocol === "http:") {
-      url.username = "";
-      url.password = "";
-      url.pathname = url.pathname.replace(/\.git$/u, "");
-      url.search = "";
-      url.hash = "";
-      return url.toString();
-    }
-    if (url.protocol === "ssh:") {
-      return `https://${url.hostname}${url.pathname.replace(/\.git$/u, "")}`;
-    }
-  } catch {
-    const match = /^(?:[^@\s]+@)?([^:/\s]+):(.+)$/u.exec(remote);
-    if (match?.[1] && match[2]) {
-      return `https://${match[1]}/${match[2].replace(/\.git$/u, "")}`;
-    }
-  }
-  return null;
-}
 
 function isEditorStatus(value: unknown): value is EditorStatus {
   if (typeof value !== "object" || value === null) return false;
@@ -1360,11 +1331,18 @@ function RepositoryWorkspaceContent({
     search?.focus();
     search?.select();
   }, [dispatchEditorSearch, repositoryViewMode]);
-  const { requestShareProject } = useRepositoryHostingCoordinator({
-    remotes: sessionRemotes,
-    setShareExistingRemotes,
-    setShareProjectProvider,
-  });
+  const { bindSharedProject, openExistingRemote, requestShareProject } =
+    useRepositoryHostingCoordinator({
+      executeOperation: sessionExecuteOperation,
+      onNotification: (notification) => setNotifications((current) => [notification, ...current]),
+      onToast: setToast,
+      remotes: sessionRemotes,
+      repository,
+      shareProjectProvider,
+      setBalloonId,
+      setShareExistingRemotes,
+      setShareProjectProvider,
+    });
   useRepositoryCommands({
     setScratchFileChooserOpen,
     setExportToHtmlOpen,
@@ -1694,797 +1672,566 @@ function RepositoryWorkspaceContent({
         value={hasEditorTabs ? activeEditorTabValue : null}
       >
         {hasEditorTabs && (
-          <div
-            className={`commandbar [html[data-tool-window-bars-visible=false]_&]:left-0! [html[data-tool-window-bars-visible=false]_&]:right-0! [html[data-distraction-free-mode=true]_&]:hidden! [html[data-presentation-mode=true]_&]:hidden! [html[data-navigation-bar=top]_&]:top-[59px]! [align-items:center] [background:var(--card)] [border-bottom:1px_solid_var(--border)] rounded-t-lg rounded-b-none [display:flex] [gap:3px] [height:32px] [left:var(--editor-left,_39px)] [padding:0_5px_0_0] [position:absolute] [right:35px] [top:35px] [z-index:8] [&>_button]:[align-items:center] [&>_button]:[background:transparent] [&>_button]:[display:flex] [&>_button]:[gap:6px] [&>_button]:[height:30px] [&>_button]:[padding:0_7px] [&>_button:hover]:[background:var(--muted)] [&>_button_>_em]:[align-items:center] [&>_button_>_em]:[background:var(--primary)] [&>_button_>_em]:rounded-lg [&>_button_>_em]:[color:var(--primary-foreground)] [&>_button_>_em]:[display:inline-flex] [&>_button_>_em]:[font-size:9px] [&>_button_>_em]:[font-style:normal] [&>_button_>_em]:[height:15px] [&>_button_>_em]:[justify-content:center] [&>_button_>_em]:[min-width:15px] [&>_button_>_em]:[padding:0_4px] commandbar rounded-t-lg rounded-b-none [&>_button_>_em]:rounded-lg`}
-            style={
-              {
-                "--editor-left":
-                  leftToolWindowOpen && !sessionLoading
-                    ? `${(repositoryViewMode === "changes" ? 302 : sideToolWindowWidth) + 42}px`
-                    : "39px",
-              } as CSSProperties
+          <RepositoryEditorTabs
+            abortInProgressOperation={abortInProgressOperation}
+            closeInspectorEditorTab={closeInspectorEditorTab}
+            closeLogTab={closeLogTab}
+            dialog={dialog}
+            dirtyInspectorKeys={dirtyInspectorKeys}
+            editorTabsId={editorTabsId}
+            hasInspector={inspector !== undefined}
+            inspectorTabs={inspectorTabs}
+            leftToolWindowOpen={leftToolWindowOpen}
+            logOpen={logOpen}
+            logTabIds={logTabIds}
+            pinnedInspectorKeys={pinnedInspectorKeys}
+            previewInspectorKey={previewInspectorKey}
+            repository={repository}
+            repositoryViewMode={repositoryViewMode}
+            sessionExecuteOperation={sessionExecuteOperation}
+            sessionLoading={sessionLoading}
+            sessionReload={sessionReload}
+            sessionStale={sessionStale}
+            sideToolWindowWidth={sideToolWindowWidth}
+          />
+        )}
+        <RepositoryToolWindows loading={sessionLoading}>
+          <RepositoryToolStripe
+            bookmarksOpen={bookmarksOpen}
+            changes={repository.status.changes.length}
+            mode={repositoryViewMode}
+            onModeChange={(mode) => {
+              if (mode === "changes") {
+                setProjectOpen(false);
+                setBookmarksOpen(false);
+                setRepositoryViewMode((current) => (current === "changes" ? "history" : "changes"));
+                return;
+              }
+              setRepositoryViewMode("history");
+            }}
+            onOpenGitConsole={() =>
+              window.dispatchEvent(new CustomEvent("git-client:open-git-console"))
             }
-          >
-            <TabsList
-              render={
-                <nav
-                  aria-label={!inspector ? "Log" : "Editor tabs"}
-                  className={`editorTabs [align-items:center] [align-self:stretch] [display:flex] [&_button[aria-current=page]]:rounded-sm [&_button[aria-current=page]]:bg-muted! [&_button[aria-current=page]]:text-foreground! [&_button[aria-current=page]]:shadow-[inset_0_0_0_1px_var(--input)]! [&_button:hover:not([aria-current=page])]:rounded-sm [&_button:hover:not([aria-current=page])]:bg-overlay-hover editorTabs`}
-                />
+            onOpenBookmarks={() => {
+              setRepositoryViewMode("history");
+              setProjectOpen(false);
+              setBookmarksOpen((value) => !value);
+            }}
+            onOpenProject={() => {
+              if (repositoryViewMode === "changes") {
+                setRepositoryViewMode("history");
+                setProjectOpen(true);
+                setBookmarksOpen(false);
+                return;
+              }
+              if (bookmarksOpen) {
+                setBookmarksOpen(false);
+                setProjectOpen(true);
+                return;
+              }
+              setProjectOpen((value) => !value);
+            }}
+            projectOpen={projectOpen && repositoryViewMode === "history"}
+            readOnly={safeMode}
+            terminalFocused={terminalFocused}
+          />
+          <RepositoryEditorSurface maximizedToolWindow={maximizedToolWindow}>
+            <div
+              className={`${`workbenchContent [display:grid] [gap:3px] [grid-template-columns:minmax(0,_1fr)] [min-height:0] [min-width:0] [html[data-distraction-free-mode=true]_&]:grid-cols-[minmax(0,1fr)]! [html[data-presentation-mode=true]_&]:grid-cols-[minmax(0,1fr)]! workbenchContent`} ${leftToolWindowOpen ? `projectToolOpen [grid-template-columns:minmax(302px,_var(--side-tool-window-width,_clamp(352px,_32.7vw,_458px)))_minmax(0,_1fr)] projectToolOpen` : ""} ${maximizedToolWindow === "project" || maximizedToolWindow === "bookmarks" ? `maximizedSideTool [grid-template-columns:minmax(0,_1fr)] [&>_[data-workspace-main]]:[display:none] maximizedSideTool` : ""}`}
+              style={
+                {
+                  "--side-tool-window-width": `${repositoryViewMode === "changes" ? 302 : sideToolWindowWidth}px`,
+                  "--details-pane-width": `${historyReviewWidth}px`,
+                } as CSSProperties
               }
             >
-              {logOpen &&
-                logTabIds.map((tabId, index) => {
-                  const label = index === 0 ? "Log" : `Log ${index + 1}`;
-                  const value = `log:${tabId}`;
-                  return (
-                    <span
-                      className={cn(
-                        "group",
-                        `workspaceTab [display:inline-flex] [flex:0_0_auto] [&_em]:[color:var(--destructive)] [&_em]:[font-size:15px] [&_em]:[font-style:normal] [&_em]:[line-height:1] data-[preview=true]:[&>button:first-child]:italic data-[pinned=true]:[&>button:first-child]:after:size-1 data-[pinned=true]:[&>button:first-child]:after:rounded-full data-[pinned=true]:[&>button:first-child]:after:bg-current data-[pinned=true]:[&>button:first-child]:after:opacity-55 data-[pinned=true]:[&>button:first-child]:after:content-[""] workspaceTab`,
-                      )}
-                      key={tabId}
-                      role="presentation"
-                    >
-                      <Tooltip>
-                        <TooltipTrigger
-                          render={
-                            <TabsTrigger
-                              aria-controls={editorPanelDomId(editorTabsId, value)}
-                              aria-keyshortcuts="Delete"
-                              aria-label={label}
-                              id={editorTabDomId(editorTabsId, value)}
-                              onKeyDown={(event) => {
-                                if (event.key !== "Delete" && event.key !== "Backspace") return;
-                                event.preventDefault();
-                                event.stopPropagation();
-                                closeLogTab(tabId);
-                              }}
-                              render={
-                                <Button
-                                  className="h-[32px]! max-w-[210px] gap-1! overflow-hidden px-2! py-0! text-xs! text-ellipsis text-muted-foreground data-active:bg-accent data-active:text-foreground"
-                                  variant="ghost"
-                                  size="xs"
-                                />
-                              }
-                              value={value}
-                            >
-                              <Icon name="branch" size={14} />
-                              <span className="truncate">{label}</span>
-                              <span
-                                aria-hidden="true"
-                                className="inline-flex h-6 shrink-0 items-center justify-center rounded-md px-1 text-muted-foreground opacity-0 transition-all hover:bg-muted hover:text-foreground group-hover:opacity-100 group-focus-within:opacity-100"
-                                data-close-tab={value}
-                                onClick={(event) => {
-                                  event.preventDefault();
-                                  event.stopPropagation();
-                                  closeLogTab(tabId);
-                                }}
-                                onPointerDown={(event) => {
-                                  event.preventDefault();
-                                  event.stopPropagation();
-                                }}
-                              >
-                                <Icon name="close" size={10} />
-                              </span>
-                            </TabsTrigger>
-                          }
-                        />
-                        <TooltipContent>{`${label} · Delete to close`}</TooltipContent>
-                      </Tooltip>
-                    </span>
-                  );
-                })}
-              {inspectorTabs.map((tab) => {
-                const key = inspectorKey(tab);
-                const label = tab.path?.split("/").at(-1) ?? "Repository";
-                const value = `inspector:${key}`;
-                return (
-                  <span
-                    className={cn(
-                      "group",
-                      `workspaceTab [display:inline-flex] [flex:0_0_auto] [&_em]:[color:var(--destructive)] [&_em]:[font-size:15px] [&_em]:[font-style:normal] [&_em]:[line-height:1] data-[preview=true]:[&>button:first-child]:italic data-[pinned=true]:[&>button:first-child]:after:size-1 data-[pinned=true]:[&>button:first-child]:after:rounded-full data-[pinned=true]:[&>button:first-child]:after:bg-current data-[pinned=true]:[&>button:first-child]:after:opacity-55 data-[pinned=true]:[&>button:first-child]:after:content-[""] workspaceTab`,
-                    )}
-                    data-pinned={pinnedInspectorKeys.has(key)}
-                    data-preview={previewInspectorKey === key}
-                    key={key}
-                    role="presentation"
-                  >
-                    <Tooltip>
-                      <TooltipTrigger
-                        render={
-                          <TabsTrigger
-                            aria-controls={editorPanelDomId(editorTabsId, value)}
-                            aria-keyshortcuts="Delete"
-                            aria-label={`Editor ${tab.path ?? "Repository"}`}
-                            id={editorTabDomId(editorTabsId, value)}
-                            onKeyDown={(event) => {
-                              if (event.key !== "Delete" && event.key !== "Backspace") return;
-                              event.preventDefault();
-                              event.stopPropagation();
-                              void closeInspectorEditorTab(key);
-                            }}
-                            render={
-                              <Button
-                                className={cn(
-                                  "h-[32px]! max-w-[210px] gap-1! overflow-hidden px-2! py-0! text-xs! text-ellipsis text-muted-foreground data-active:bg-accent data-active:text-foreground",
-                                )}
-                                variant="ghost"
-                                size="xs"
-                              />
-                            }
-                            value={value}
-                          >
-                            <Icon name={tab.tab === "tree" ? "folder" : "file"} size={14} />
-                            <span className="truncate">{label}</span>
-                            {dirtyInspectorKeys.has(key) && <span aria-label="Modified">*</span>}
-                            <span
-                              aria-hidden="true"
-                              className="inline-flex h-6 shrink-0 items-center justify-center rounded-md px-1 text-muted-foreground opacity-0 transition-all hover:bg-muted hover:text-foreground group-hover:opacity-100 group-focus-within:opacity-100"
-                              data-close-tab={value}
-                              onClick={(event) => {
-                                event.preventDefault();
-                                event.stopPropagation();
-                                void closeInspectorEditorTab(key);
-                              }}
-                              onPointerDown={(event) => {
-                                event.preventDefault();
-                                event.stopPropagation();
-                              }}
-                            >
-                              <Icon name="close" size={10} />
-                            </span>
-                          </TabsTrigger>
-                        }
-                      />
-                      <TooltipContent>{`${tab.path ?? "Repository"} · Delete to close`}</TooltipContent>
-                    </Tooltip>
-                  </span>
-                );
-              })}
-            </TabsList>
-            <span className={`editorToolbarSpacer [flex:1] editorToolbarSpacer`} />
-            {sessionStale && <StatePill>Changed</StatePill>}
-            {repository.snapshot.isShallow && <StatePill>Shallow</StatePill>}
-            {repository.snapshot.isBare && <StatePill>Bare</StatePill>}
-            {repository.snapshot.operation && (
-              <StatePill className="gap-1" tone="destructive">
-                <Icon name="warning" size={13} />
-                {repository.snapshot.operation} in progress
-              </StatePill>
-            )}
-            {repository.snapshot.operation && repository.snapshot.operation !== "bisect" && (
-              <>
-                <Button
-                  className={cn("h-6 px-2 text-xs")}
-                  onClick={() =>
-                    void sessionExecuteOperation({
-                      kind: "continue",
-                      operation: repository.snapshot.operation as
-                        | "merge"
-                        | "rebase"
-                        | "cherryPick"
-                        | "revert",
-                    })
+              {bookmarksOpen && repositoryViewMode === "history" && (
+                <BookmarksToolWindow
+                  onClose={() => setBookmarksOpen(false)}
+                  onCreateGroup={(name, isDefault) =>
+                    setBookmarks((current) =>
+                      createBookmarkGroup(current, crypto.randomUUID(), name, isDefault),
+                    )
                   }
-                  variant="secondary"
-                  size="xs"
-                >
-                  Continue
-                </Button>
-                {(repository.snapshot.operation === "rebase" ||
-                  repository.snapshot.operation === "cherryPick") && (
-                  <Button
-                    className={cn("h-6 px-2 text-xs")}
-                    onClick={() =>
-                      void sessionExecuteOperation({
-                        kind: "skip",
-                        operation: repository.snapshot.operation as "rebase" | "cherryPick",
+                  onDeleteBookmark={(bookmarkId) =>
+                    setBookmarks((current) => removeBookmark(current, bookmarkId))
+                  }
+                  onDeleteGroup={(group) => {
+                    void dialog
+                      .confirm({
+                        title: "Delete Bookmark List",
+                        description: `Are you sure you want to delete ‘${group.name}’ bookmark list? This action can't be undone.`,
+                        impact: `${group.bookmarks.length} bookmark${group.bookmarks.length === 1 ? "" : "s"} will be deleted.`,
+                        confirmLabel: "Delete",
+                        dangerous: true,
                       })
-                    }
-                    variant="secondary"
-                    size="xs"
-                  >
-                    Skip
-                  </Button>
-                )}
-                <Button
-                  className={cn("h-6 border-destructive px-2 text-xs shadow-xs")}
-                  onClick={toVoidHandler(async () => {
-                    const accepted = await dialog.confirm({
-                      title: `Abort ${repository.snapshot.operation}?`,
-                      description:
-                        "Restores the state recorded before the in-progress Git operation.",
-                      confirmLabel: "Abort operation",
-                      dangerous: true,
-                    });
-                    if (
-                      accepted &&
-                      repository.snapshot.operation &&
-                      repository.snapshot.operation !== "bisect"
-                    ) {
-                      await abortInProgressOperation();
-                    }
-                  })}
-                  variant="destructive"
-                  size="xs"
-                >
-                  Abort
-                </Button>
-              </>
-            )}
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  <Button
-                    aria-label="View Options"
-                    className="h-6 w-[30px] flex-[0_0_30px] rounded-none border-y-0 border-r border-l-0 bg-transparent p-0 text-xs text-muted-foreground hover:text-accent-foreground"
-                    onClick={() => void sessionReload()}
-                    variant="outline"
-                    size="xs"
-                  >
-                    <Icon name="more" size={16} />
-                  </Button>
-                }
-              />
-              <TooltipContent>View Options</TooltipContent>
-            </Tooltip>
-          </div>
-        )}
-        <main
-          className={`workspace [grid-row:2_/_4] [min-height:0] [position:relative] [html[data-navigation-bar=top]_&]:pt-[29px]! workspace`}
-          aria-busy={sessionLoading}
-        >
-          {sessionLoading ? (
-            <RepositoryLoadingSkeleton />
-          ) : (
-            <div
-              className={`workbench [display:grid] [grid-template-columns:39px_minmax(0,_1fr)_35px] [height:100%] [min-height:0] [min-width:0] [html[data-tool-window-bars-visible=false]_&]:grid-cols-[0_minmax(0,1fr)_0]! [html[data-distraction-free-mode=true]_&]:grid-cols-[0_minmax(0,1fr)_0]! [html[data-presentation-mode=true]_&]:grid-cols-[0_minmax(0,1fr)_0]! workbench`}
-            >
-              <RepositoryToolStripe
-                bookmarksOpen={bookmarksOpen}
-                changes={repository.status.changes.length}
-                mode={repositoryViewMode}
-                onModeChange={(mode) => {
-                  if (mode === "changes") {
-                    setProjectOpen(false);
-                    setBookmarksOpen(false);
-                    setRepositoryViewMode((current) =>
-                      current === "changes" ? "history" : "changes",
-                    );
-                    return;
-                  }
-                  setRepositoryViewMode("history");
-                }}
-                onOpenGitConsole={() =>
-                  window.dispatchEvent(new CustomEvent("git-client:open-git-console"))
-                }
-                onOpenBookmarks={() => {
-                  setRepositoryViewMode("history");
-                  setProjectOpen(false);
-                  setBookmarksOpen((value) => !value);
-                }}
-                onOpenProject={() => {
-                  if (repositoryViewMode === "changes") {
-                    setRepositoryViewMode("history");
-                    setProjectOpen(true);
-                    setBookmarksOpen(false);
-                    return;
-                  }
-                  if (bookmarksOpen) {
-                    setBookmarksOpen(false);
-                    setProjectOpen(true);
-                    return;
-                  }
-                  setProjectOpen((value) => !value);
-                }}
-                projectOpen={projectOpen && repositoryViewMode === "history"}
-                readOnly={safeMode}
-                terminalFocused={terminalFocused}
-              />
-              <div
-                className={`${`workbenchSurface [background:var(--background)] [display:grid] [grid-template-rows:minmax(0,_1fr)_auto] [min-height:0] [min-width:0] workbenchSurface`} ${maximizedToolWindow === "bottom" ? `maximizedBottomTool [grid-template-rows:minmax(0,_1fr)] [&>_.workbenchContent]:[display:none] [&>_[data-tool-window-position=bottom]]:[height:100%!important] maximizedBottomTool` : ""}`}
-              >
-                <div
-                  className={`${`workbenchContent [display:grid] [gap:3px] [grid-template-columns:minmax(0,_1fr)] [min-height:0] [min-width:0] [html[data-distraction-free-mode=true]_&]:grid-cols-[minmax(0,1fr)]! [html[data-presentation-mode=true]_&]:grid-cols-[minmax(0,1fr)]! workbenchContent`} ${leftToolWindowOpen ? `projectToolOpen [grid-template-columns:minmax(302px,_var(--side-tool-window-width,_clamp(352px,_32.7vw,_458px)))_minmax(0,_1fr)] projectToolOpen` : ""} ${maximizedToolWindow === "project" || maximizedToolWindow === "bookmarks" ? `maximizedSideTool [grid-template-columns:minmax(0,_1fr)] [&>_[data-workspace-main]]:[display:none] maximizedSideTool` : ""}`}
-                  style={
-                    {
-                      "--side-tool-window-width": `${repositoryViewMode === "changes" ? 302 : sideToolWindowWidth}px`,
-                      "--details-pane-width": `${historyReviewWidth}px`,
-                    } as CSSProperties
-                  }
-                >
-                  {bookmarksOpen && repositoryViewMode === "history" && (
-                    <BookmarksToolWindow
-                      onClose={() => setBookmarksOpen(false)}
-                      onCreateGroup={(name, isDefault) =>
-                        setBookmarks((current) =>
-                          createBookmarkGroup(current, crypto.randomUUID(), name, isDefault),
-                        )
-                      }
-                      onDeleteBookmark={(bookmarkId) =>
-                        setBookmarks((current) => removeBookmark(current, bookmarkId))
-                      }
-                      onDeleteGroup={(group) => {
-                        void dialog
-                          .confirm({
-                            title: "Delete Bookmark List",
-                            description: `Are you sure you want to delete ‘${group.name}’ bookmark list? This action can't be undone.`,
-                            impact: `${group.bookmarks.length} bookmark${group.bookmarks.length === 1 ? "" : "s"} will be deleted.`,
-                            confirmLabel: "Delete",
-                            dangerous: true,
-                          })
-                          .then((accepted) => {
-                            if (accepted) {
-                              setBookmarks((current) => deleteBookmarkGroup(current, group.id));
-                            }
-                          });
-                      }}
-                      onDescribeBookmark={(bookmarkId, description) =>
-                        setBookmarks((current) =>
-                          describeBookmark(current, bookmarkId, description),
-                        )
-                      }
-                      onMoveBookmark={(bookmarkId, offset) =>
-                        setBookmarks((current) => moveBookmark(current, bookmarkId, offset))
-                      }
-                      onOpenBookmark={openLineBookmark}
-                      onRenameGroup={(groupId, name) =>
-                        setBookmarks((current) => renameBookmarkGroup(current, groupId, name))
-                      }
-                      onSetDefaultGroup={(groupId) =>
-                        setBookmarks((current) => setDefaultBookmarkGroup(current, groupId))
-                      }
-                      onViewOptionsChange={(view) =>
-                        setBookmarks((current) => ({
-                          ...current,
-                          view,
-                        }))
-                      }
-                      state={bookmarks}
-                    />
-                  )}
-                  {projectOpen && repositoryViewMode === "history" && (
-                    <ProjectToolWindow
-                      activePath={inspector?.path}
-                      changes={repository.status.changes}
-                      hasCommits={repository.snapshot.hasCommits}
-                      loadTree={sessionLoadTree}
-                      onClose={() => setProjectOpen(false)}
-                      onNew={toVoidHandler(async () => {
-                        const path = await dialog.input({
-                          title: "New File",
-                          label: "Path relative to the project",
-                          placeholder: "src/new-file.ts",
-                          confirmLabel: "Create",
-                        });
-                        if (!path) return;
-                        try {
-                          await sessionWriteWorkingTreeFile(path, "");
-                          openInspector({
-                            revision: repository.snapshot.headOid ?? "HEAD",
-                            source: {
-                              kind: "workingTree",
-                            },
-                            path,
-                            tab: "file",
-                          });
-                        } catch (error) {
-                          setToast(error instanceof Error ? error.message : String(error));
+                      .then((accepted) => {
+                        if (accepted) {
+                          setBookmarks((current) => deleteBookmarkGroup(current, group.id));
                         }
-                      })}
-                      onNewScratch={() => setScratchFileChooserOpen(true)}
-                      onOpenFile={(path, keepOpen = true) =>
-                        openInspector(
-                          {
-                            revision: repository.snapshot.headOid ?? "HEAD",
-                            source: {
-                              kind: "workingTree",
-                            },
-                            path,
-                            tab: "file",
-                          },
-                          keepOpen,
-                        )
-                      }
-                      onOpenScratch={openScratchFile}
-                      repositoryName={repository.snapshot.name}
-                      repositoryPath={repository.snapshot.path}
-                      scratches={scratchFiles}
-                      width={sideToolWindowWidth}
-                      onWidthChange={(width) =>
-                        setSideToolWindowWidth(
-                          Math.min(
-                            MAX_SIDE_TOOL_WINDOW_WIDTH,
-                            Math.max(MIN_SIDE_TOOL_WINDOW_WIDTH, Math.round(width)),
-                          ),
-                        )
-                      }
-                    />
-                  )}
-                  {repositoryViewMode === "changes" && commitToolWindow}
-                  <div
-                    className={`${`activeWorkspace [background:var(--card)] rounded-lg [display:grid] [min-height:0] [min-width:0] [overflow:hidden] [padding-top:32px] [position:relative] activeWorkspace rounded-lg`} ${!hasEditorTabs ? `activeWorkspaceNoTabs [padding-top:0] activeWorkspaceNoTabs` : ""}`}
-                    data-workspace-main
-                  >
-                    {logOpen &&
-                      logTabIds.map((tabId) => {
-                        const value = `log:${tabId}`;
-                        return (
-                          <TabsContent
-                            aria-labelledby={editorTabDomId(editorTabsId, value)}
-                            className={`editorSurface [height:100%] [min-height:0] [min-width:0] [&[hidden]]:[display:none] editorSurface`}
-                            id={editorPanelDomId(editorTabsId, value)}
-                            keepMounted
-                            key={tabId}
-                            value={value}
-                          >
-                            {tabId === activeLogTabId && (
-                              <div
-                                className={`mainPanes [display:grid] [grid-template-columns:30px_minmax(0,_1fr)_var(--details-pane-width,_253px)] [height:100%] [min-height:0] [min-width:0] max-[900px]:[grid-template-columns:30px_minmax(0,_1fr)] max-[900px]:[&>_*:last-child]:[display:none] [html[data-distraction-free-mode=true]_&>*:first-child]:hidden! [html[data-distraction-free-mode=true]_&>*:last-child]:hidden! [html[data-presentation-mode=true]_&>*:first-child]:hidden! [html[data-presentation-mode=true]_&>*:last-child]:hidden! mainPanes`}
-                                style={
-                                  {
-                                    "--history-review-width": `${historyReviewWidth}px`,
-                                  } as CSSProperties
-                                }
-                              >
-                                <BranchTree
-                                  compact
-                                  onAdd={onAddRepository}
-                                  onActivate={() => void requestOpenRepositoryTool("refs")}
-                                  onSelect={selectRef}
-                                  refs={repository.refs}
-                                  selected={selectedRef}
-                                />
-                                <CommitLog
-                                  ahead={repository.status.ahead}
-                                  behind={repository.status.behind}
-                                  canCherryPick={availability.cherryPick}
-                                  commits={repository.commits}
-                                  hasMore={sessionHasMoreCommits}
-                                  loading={sessionLogLoading}
-                                  error={sessionLogError}
-                                  refs={repository.refs}
-                                  onLoad={sessionLoadLog}
-                                  onOpenNewTab={openNewLogTab}
-                                  indexing={logIndexing}
-                                  indexingEnabled={logIndexingEnabled}
-                                  powerSaveMode={productSettings.powerSaveMode}
-                                  relativeTimeBaseSeconds={
-                                    sessionFixture ? repository.commits[0]?.authoredAt : undefined
-                                  }
-                                  onEnableIndexing={async (filters, order) => {
-                                    setLogIndexing(true);
-                                    try {
-                                      await sessionIndexLog(filters, order);
-                                      setLogIndexingEnabled(true);
-                                    } finally {
-                                      setLogIndexing(false);
-                                    }
-                                  }}
-                                  onCherryPick={() => void runAction("cherryPick")}
-                                  onImportPatch={toVoidHandler(async () => {
-                                    const selectedPath = await selectPatchImportPath();
-                                    if (selectedPath === null) return;
-                                    await sessionImportPatch(selectedPath);
-                                    setToast("Patch applied to the index and working tree.");
-                                  })}
-                                  onRefresh={() => void sessionReload()}
-                                  onContextMenu={(event, commit) => {
-                                    event.preventDefault();
-                                    event.stopPropagation();
-                                    if (!selectedOids.includes(commit.oid))
-                                      setSelectedOids([commit.oid]);
-                                    setContextPosition({
-                                      x: event.clientX,
-                                      y: event.clientY,
-                                    });
-                                  }}
-                                  onSelectionChange={setSelectedOids}
-                                  selectedOids={selectedOids}
-                                  upstream={repository.status.upstream}
-                                />
-                                {revisionComparison ? (
-                                  <RevisionComparison
-                                    from={revisionComparison.from}
-                                    loading={revisionComparison.loading}
-                                    onPreferencesChange={setDiffPreferences}
-                                    onReviewWidthChange={(width) =>
-                                      setHistoryReviewWidth(
-                                        Math.min(480, Math.max(180, Math.round(width))),
-                                      )
-                                    }
-                                    patch={revisionComparison.patch}
-                                    preferences={diffPreferences}
-                                    reviewWidth={historyReviewWidth}
-                                    readFile={sessionReadFile}
-                                    to={revisionComparison.to}
-                                  />
-                                ) : (
-                                  <DetailsPane
-                                    afterContent={historyContent.after}
-                                    afterPreview={historyPreview.after}
-                                    beforeContent={historyContent.before}
-                                    beforePreview={historyPreview.before}
-                                    submoduleDiff={historySubmodule.value}
-                                    commit={primaryCommit}
-                                    diffLoading={
-                                      historyDiff.loading ||
-                                      historyContent.loading ||
-                                      historyPreview.loading ||
-                                      historySubmodule.loading
-                                    }
-                                    files={commitFiles}
-                                    loading={commitFilesLoading}
-                                    onLoadDiff={(commit, file) =>
-                                      sessionLoadCommitDiff(
-                                        commit,
-                                        file.path,
-                                        nativeDiffOptions(diffPreferences),
-                                        historyParentRevision ?? undefined,
-                                      )
-                                    }
-                                    onReadFile={sessionReadFile}
-                                    onRevertSelectedChanges={async () => {
-                                      if (!historyDiff.patch || !historySelectedPath) {
-                                        return;
-                                      }
-                                      const accepted = await dialog.confirm({
-                                        title: "Revert selected changes?",
-                                        description:
-                                          "Applies the inverse of this file change to the working tree.",
-                                        impact: historySelectedPath,
-                                        confirmLabel: "Revert selected changes",
-                                        dangerous: true,
-                                      });
-                                      if (!accepted) return;
-                                      await sessionExecuteOperation({
-                                        kind: "applyPatch",
-                                        patch: historyDiff.patch,
-                                        cached: false,
-                                        reverse: true,
-                                      });
-                                    }}
-                                    signature={commitSignature}
-                                    parentRevision={historyParentRevision}
-                                    patch={historyDiff.patch}
-                                    preferences={diffPreferences}
-                                    reviewWidth={historyReviewWidth}
-                                    selectedPath={historySelectedPath}
-                                    onNext={() => selectRelative("child")}
-                                    onPrevious={() => selectRelative("parent")}
-                                    onReviewWidthChange={(width) =>
-                                      setHistoryReviewWidth(
-                                        Math.min(480, Math.max(180, Math.round(width))),
-                                      )
-                                    }
-                                    onParentRevisionChange={setHistoryParentRevision}
-                                    onPreferencesChange={setDiffPreferences}
-                                    onSelectFile={(file) => setHistorySelectedPath(file.path)}
-                                    onInspectFile={(file, tab) => {
-                                      if (primaryCommit) {
-                                        openInspector({
-                                          revision: primaryCommit.oid,
-                                          source: {
-                                            kind: "revision",
-                                            revision: primaryCommit.oid,
-                                          },
-                                          path: file.path,
-                                          tab,
-                                        });
-                                      }
-                                    }}
-                                    onOpenTree={() => {
-                                      if (primaryCommit) {
-                                        openInspector({
-                                          revision: primaryCommit.oid,
-                                          source: {
-                                            kind: "revision",
-                                            revision: primaryCommit.oid,
-                                          },
-                                          tab: "tree",
-                                        });
-                                      }
-                                    }}
-                                  />
-                                )}
-                              </div>
-                            )}
-                          </TabsContent>
-                        );
-                      })}
-                    {!inspector && !logOpen && (
-                      <EmptyState className="gap-3 p-0 [&_[data-slot=empty-content]]:gap-3 [&_kbd]:ml-1.5 [&_kbd]:font-sans">
-                        <Button
-                          className={cn("p-0 text-[13px] text-muted-foreground hover:underline")}
-                          data-open-git-log
-                          onClick={openGitLogTab}
-                          variant="ghost"
-                          size="default"
-                        >
-                          Open Git Log <kbd>⌥G</kbd>
-                        </Button>
-                        <Button
-                          className={cn("p-0 text-[13px] text-muted-foreground hover:underline")}
-                          onClick={() => setRepositoryViewMode("changes")}
-                          variant="ghost"
-                          size="default"
-                        >
-                          Commit <kbd>⌘0</kbd>
-                        </Button>
-                      </EmptyState>
-                    )}
-                    {inspectorTabs.map((tab) => {
-                      const key = inspectorKey(tab);
-                      const value = `inspector:${key}`;
-                      const scratch = tab.scratchId
-                        ? scratchFiles.find((candidate) => candidate.id === tab.scratchId)
-                        : undefined;
-                      return (
-                        <TabsContent
-                          aria-labelledby={editorTabDomId(editorTabsId, value)}
-                          className={`editorSurface [height:100%] [min-height:0] [min-width:0] [&[hidden]]:[display:none] editorSurface`}
-                          id={editorPanelDomId(editorTabsId, value)}
-                          keepMounted
-                          key={key}
-                          value={value}
-                        >
-                          {scratch ? (
-                            <ScratchEditor
-                              bookmarkedLines={allLineBookmarks(bookmarks)
-                                .filter((bookmark) => bookmark.path === `Scratches/${scratch.name}`)
-                                .map((bookmark) => bookmark.line)}
-                              file={scratch}
-                              initialColumn={tab.column}
-                              initialLine={tab.line}
-                              onChange={(content) =>
-                                setScratchFiles((current) =>
-                                  current.map((candidate) =>
-                                    candidate.id === scratch.id
-                                      ? {
-                                          ...candidate,
-                                          content,
-                                          updatedAtMs: Date.now(),
-                                        }
-                                      : candidate,
-                                  ),
-                                )
-                              }
-                              onToggleBookmark={(line, column) =>
-                                requestToggleBookmark({
-                                  path: `Scratches/${scratch.name}`,
-                                  line,
-                                  column,
-                                })
-                              }
-                            />
-                          ) : (
-                            <RepositoryInspectorDialog
-                              bookmarkedLines={
-                                tab.path
-                                  ? allLineBookmarks(bookmarks)
-                                      .filter((bookmark) => bookmark.path === tab.path)
-                                      .map((bookmark) => bookmark.line)
-                                  : []
-                              }
-                              embedded
-                              initialPath={tab.path}
-                              initialColumn={tab.column}
-                              initialLine={tab.line}
-                              initialTab={tab.tab}
-                              loadBlame={sessionLoadBlame}
-                              loadFileHistory={sessionLoadFileHistory}
-                              loadTree={sessionLoadTree}
-                              onClose={() => void requestCloseInspector(key)}
-                              onDirtyChange={(dirty) => setInspectorDirty(key, dirty)}
-                              onToggleBookmark={(path, line, column) =>
-                                requestToggleBookmark({
-                                  path,
-                                  line,
-                                  column,
-                                })
-                              }
-                              openWorkingTreeFile={sessionOpenWorkingTreeFile}
-                              readFile={sessionReadFile}
-                              readFilePreview={sessionReadFilePreview}
-                              readOnly={safeMode}
-                              writeWorkingTreeFile={sessionWriteWorkingTreeFile}
-                              revision={tab.revision}
-                              source={tab.source}
-                            />
-                          )}
-                        </TabsContent>
-                      );
-                    })}
-                  </div>
-                </div>
-                <BottomPanel
-                  collapsed={bottomCollapsed}
-                  height={bottomPanelHeight}
-                  active={bottomPanelTab}
-                  fixture={sessionFixture}
-                  onApplyShelf={(shelfId, drop) => void sessionApplyShelf(shelfId, drop)}
-                  onCreateShelf={(message, paths) => void sessionCreateShelf(message, paths)}
-                  onDeleteShelf={(shelfId) => void sessionDeleteShelf(shelfId)}
-                  onLoadStashFiles={(stash) => sessionLoadStashFiles(stash.selector)}
-                  onOpenStashDiff={openStashDiff}
-                  onOperation={sessionExecuteOperation}
-                  onRestoreRecovery={sessionRestoreRecoveryEntry}
-                  onToggle={() => setBottomCollapsed((value) => !value)}
-                  onHeightChange={setBottomPanelHeight}
-                  onActiveChange={setBottomPanelTab}
-                  recoveryEntries={sessionRecoveryEntries}
-                  gitConsoleEntries={sessionGitConsoleEntries}
-                  onClearGitConsole={sessionClearGitConsole}
-                  onLoadLocalHistoryActivities={sessionListLocalHistoryActivities}
-                  onLoadLocalHistoryActivity={sessionReadLocalHistoryActivity}
-                  onLoadLocalHistoryDiff={sessionLoadLocalHistoryDiff}
-                  onCreateLocalHistoryPatch={sessionCreateLocalHistoryPatch}
-                  onPutLocalHistoryLabel={sessionPutLocalHistoryLabel}
-                  findResults={findResults}
-                  onOpenFindResult={(result) => {
-                    setRepositoryViewMode("history");
-                    openInspector({
-                      revision: repository.snapshot.headOid ?? "HEAD",
-                      source: { kind: "workingTree" },
-                      path: result.path,
-                      tab: "file",
-                      line: result.line,
-                      column: result.column,
-                    });
+                      });
                   }}
-                  onSearchAgain={() => {
-                    setProjectSearchInitialQuery("");
-                    setProjectSearchSurface("find");
-                  }}
-                  onRevertLocalHistory={sessionRevertLocalHistory}
-                  repositoryId={repository.snapshot.id}
-                  repositoryName={repository.snapshot.name}
-                  shelves={sessionShelves}
-                  stashes={sessionStashes}
-                  status={repository.status}
-                />
-              </div>
-              {notificationOpen && (
-                <NotificationToolWindow
-                  notifications={notifications}
-                  onClear={() => setNotifications([])}
-                  onClose={() => setNotificationOpen(false)}
+                  onDescribeBookmark={(bookmarkId, description) =>
+                    setBookmarks((current) => describeBookmark(current, bookmarkId, description))
+                  }
+                  onMoveBookmark={(bookmarkId, offset) =>
+                    setBookmarks((current) => moveBookmark(current, bookmarkId, offset))
+                  }
+                  onOpenBookmark={openLineBookmark}
+                  onRenameGroup={(groupId, name) =>
+                    setBookmarks((current) => renameBookmarkGroup(current, groupId, name))
+                  }
+                  onSetDefaultGroup={(groupId) =>
+                    setBookmarks((current) => setDefaultBookmarkGroup(current, groupId))
+                  }
+                  onViewOptionsChange={(view) =>
+                    setBookmarks((current) => ({
+                      ...current,
+                      view,
+                    }))
+                  }
+                  state={bookmarks}
                 />
               )}
-              {balloonId &&
-                (() => {
-                  const notification = notifications.find((item) => item.id === balloonId);
-                  return notification ? (
-                    <NotificationBalloon
-                      notification={notification}
-                      onAction={(action) => {
-                        if (action === "modifyShortcuts") {
-                          onOpenSettings();
-                        } else if (action === "openUrl" && notification.url) {
-                          void openExternalUrl(notification.url);
-                        } else if (action === "dismiss") {
-                          onDismissShortcutConflictWarning();
-                          setNotifications((current) =>
-                            current.filter((item) => item.id !== notification.id),
-                          );
-                        } else {
-                          setNotificationOpen(true);
-                        }
-                        setBalloonId(undefined);
-                      }}
-                      onDismiss={() => setBalloonId(undefined)}
-                    />
-                  ) : null;
-                })()}
-              <RepositoryRightToolStripe
-                notificationCount={notifications.length}
-                notificationsOpen={notificationOpen}
-                onToggleNotifications={() => setNotificationOpen((current) => !current)}
-              />
+              {projectOpen && repositoryViewMode === "history" && (
+                <ProjectToolWindow
+                  activePath={inspector?.path}
+                  changes={repository.status.changes}
+                  hasCommits={repository.snapshot.hasCommits}
+                  loadTree={sessionLoadTree}
+                  onClose={() => setProjectOpen(false)}
+                  onNew={toVoidHandler(async () => {
+                    const path = await dialog.input({
+                      title: "New File",
+                      label: "Path relative to the project",
+                      placeholder: "src/new-file.ts",
+                      confirmLabel: "Create",
+                    });
+                    if (!path) return;
+                    try {
+                      await sessionWriteWorkingTreeFile(path, "");
+                      openInspector({
+                        revision: repository.snapshot.headOid ?? "HEAD",
+                        source: {
+                          kind: "workingTree",
+                        },
+                        path,
+                        tab: "file",
+                      });
+                    } catch (error) {
+                      setToast(error instanceof Error ? error.message : String(error));
+                    }
+                  })}
+                  onNewScratch={() => setScratchFileChooserOpen(true)}
+                  onOpenFile={(path, keepOpen = true) =>
+                    openInspector(
+                      {
+                        revision: repository.snapshot.headOid ?? "HEAD",
+                        source: {
+                          kind: "workingTree",
+                        },
+                        path,
+                        tab: "file",
+                      },
+                      keepOpen,
+                    )
+                  }
+                  onOpenScratch={openScratchFile}
+                  repositoryName={repository.snapshot.name}
+                  repositoryPath={repository.snapshot.path}
+                  scratches={scratchFiles}
+                  width={sideToolWindowWidth}
+                  onWidthChange={(width) =>
+                    setSideToolWindowWidth(
+                      Math.min(
+                        MAX_SIDE_TOOL_WINDOW_WIDTH,
+                        Math.max(MIN_SIDE_TOOL_WINDOW_WIDTH, Math.round(width)),
+                      ),
+                    )
+                  }
+                />
+              )}
+              {repositoryViewMode === "changes" && commitToolWindow}
+              <div
+                className={`${`activeWorkspace [background:var(--card)] rounded-lg [display:grid] [min-height:0] [min-width:0] [overflow:hidden] [padding-top:32px] [position:relative] activeWorkspace rounded-lg`} ${!hasEditorTabs ? `activeWorkspaceNoTabs [padding-top:0] activeWorkspaceNoTabs` : ""}`}
+                data-workspace-main
+              >
+                {logOpen &&
+                  logTabIds.map((tabId) => {
+                    const value = `log:${tabId}`;
+                    return (
+                      <TabsContent
+                        aria-labelledby={editorTabDomId(editorTabsId, value)}
+                        className={`editorSurface [height:100%] [min-height:0] [min-width:0] [&[hidden]]:[display:none] editorSurface`}
+                        id={editorPanelDomId(editorTabsId, value)}
+                        keepMounted
+                        key={tabId}
+                        value={value}
+                      >
+                        {tabId === activeLogTabId && (
+                          <div
+                            className={`mainPanes [display:grid] [grid-template-columns:30px_minmax(0,_1fr)_var(--details-pane-width,_253px)] [height:100%] [min-height:0] [min-width:0] max-[900px]:[grid-template-columns:30px_minmax(0,_1fr)] max-[900px]:[&>_*:last-child]:[display:none] [html[data-distraction-free-mode=true]_&>*:first-child]:hidden! [html[data-distraction-free-mode=true]_&>*:last-child]:hidden! [html[data-presentation-mode=true]_&>*:first-child]:hidden! [html[data-presentation-mode=true]_&>*:last-child]:hidden! mainPanes`}
+                            style={
+                              {
+                                "--history-review-width": `${historyReviewWidth}px`,
+                              } as CSSProperties
+                            }
+                          >
+                            <BranchTree
+                              compact
+                              onAdd={onAddRepository}
+                              onActivate={() => void requestOpenRepositoryTool("refs")}
+                              onSelect={selectRef}
+                              refs={repository.refs}
+                              selected={selectedRef}
+                            />
+                            <CommitLog
+                              ahead={repository.status.ahead}
+                              behind={repository.status.behind}
+                              canCherryPick={availability.cherryPick}
+                              commits={repository.commits}
+                              hasMore={sessionHasMoreCommits}
+                              loading={sessionLogLoading}
+                              error={sessionLogError}
+                              refs={repository.refs}
+                              onLoad={sessionLoadLog}
+                              onOpenNewTab={openNewLogTab}
+                              indexing={logIndexing}
+                              indexingEnabled={logIndexingEnabled}
+                              powerSaveMode={productSettings.powerSaveMode}
+                              relativeTimeBaseSeconds={
+                                sessionFixture ? repository.commits[0]?.authoredAt : undefined
+                              }
+                              onEnableIndexing={async (filters, order) => {
+                                setLogIndexing(true);
+                                try {
+                                  await sessionIndexLog(filters, order);
+                                  setLogIndexingEnabled(true);
+                                } finally {
+                                  setLogIndexing(false);
+                                }
+                              }}
+                              onCherryPick={() => void runAction("cherryPick")}
+                              onImportPatch={toVoidHandler(async () => {
+                                const selectedPath = await selectPatchImportPath();
+                                if (selectedPath === null) return;
+                                await sessionImportPatch(selectedPath);
+                                setToast("Patch applied to the index and working tree.");
+                              })}
+                              onRefresh={() => void sessionReload()}
+                              onContextMenu={(event, commit) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                if (!selectedOids.includes(commit.oid))
+                                  setSelectedOids([commit.oid]);
+                                setContextPosition({
+                                  x: event.clientX,
+                                  y: event.clientY,
+                                });
+                              }}
+                              onSelectionChange={setSelectedOids}
+                              selectedOids={selectedOids}
+                              upstream={repository.status.upstream}
+                            />
+                            {revisionComparison ? (
+                              <RevisionComparison
+                                from={revisionComparison.from}
+                                loading={revisionComparison.loading}
+                                onPreferencesChange={setDiffPreferences}
+                                onReviewWidthChange={(width) =>
+                                  setHistoryReviewWidth(
+                                    Math.min(480, Math.max(180, Math.round(width))),
+                                  )
+                                }
+                                patch={revisionComparison.patch}
+                                preferences={diffPreferences}
+                                reviewWidth={historyReviewWidth}
+                                readFile={sessionReadFile}
+                                to={revisionComparison.to}
+                              />
+                            ) : (
+                              <DetailsPane
+                                afterContent={historyContent.after}
+                                afterPreview={historyPreview.after}
+                                beforeContent={historyContent.before}
+                                beforePreview={historyPreview.before}
+                                submoduleDiff={historySubmodule.value}
+                                commit={primaryCommit}
+                                diffLoading={
+                                  historyDiff.loading ||
+                                  historyContent.loading ||
+                                  historyPreview.loading ||
+                                  historySubmodule.loading
+                                }
+                                files={commitFiles}
+                                loading={commitFilesLoading}
+                                onLoadDiff={(commit, file) =>
+                                  sessionLoadCommitDiff(
+                                    commit,
+                                    file.path,
+                                    nativeDiffOptions(diffPreferences),
+                                    historyParentRevision ?? undefined,
+                                  )
+                                }
+                                onReadFile={sessionReadFile}
+                                onRevertSelectedChanges={async () => {
+                                  if (!historyDiff.patch || !historySelectedPath) {
+                                    return;
+                                  }
+                                  const accepted = await dialog.confirm({
+                                    title: "Revert selected changes?",
+                                    description:
+                                      "Applies the inverse of this file change to the working tree.",
+                                    impact: historySelectedPath,
+                                    confirmLabel: "Revert selected changes",
+                                    dangerous: true,
+                                  });
+                                  if (!accepted) return;
+                                  await sessionExecuteOperation({
+                                    kind: "applyPatch",
+                                    patch: historyDiff.patch,
+                                    cached: false,
+                                    reverse: true,
+                                  });
+                                }}
+                                signature={commitSignature}
+                                parentRevision={historyParentRevision}
+                                patch={historyDiff.patch}
+                                preferences={diffPreferences}
+                                reviewWidth={historyReviewWidth}
+                                selectedPath={historySelectedPath}
+                                onNext={() => selectRelative("child")}
+                                onPrevious={() => selectRelative("parent")}
+                                onReviewWidthChange={(width) =>
+                                  setHistoryReviewWidth(
+                                    Math.min(480, Math.max(180, Math.round(width))),
+                                  )
+                                }
+                                onParentRevisionChange={setHistoryParentRevision}
+                                onPreferencesChange={setDiffPreferences}
+                                onSelectFile={(file) => setHistorySelectedPath(file.path)}
+                                onInspectFile={(file, tab) => {
+                                  if (primaryCommit) {
+                                    openInspector({
+                                      revision: primaryCommit.oid,
+                                      source: {
+                                        kind: "revision",
+                                        revision: primaryCommit.oid,
+                                      },
+                                      path: file.path,
+                                      tab,
+                                    });
+                                  }
+                                }}
+                                onOpenTree={() => {
+                                  if (primaryCommit) {
+                                    openInspector({
+                                      revision: primaryCommit.oid,
+                                      source: {
+                                        kind: "revision",
+                                        revision: primaryCommit.oid,
+                                      },
+                                      tab: "tree",
+                                    });
+                                  }
+                                }}
+                              />
+                            )}
+                          </div>
+                        )}
+                      </TabsContent>
+                    );
+                  })}
+                {!inspector && !logOpen && (
+                  <EmptyState className="gap-3 p-0 [&_[data-slot=empty-content]]:gap-3 [&_kbd]:ml-1.5 [&_kbd]:font-sans">
+                    <Button
+                      className={cn("p-0 text-[13px] text-muted-foreground hover:underline")}
+                      data-open-git-log
+                      onClick={openGitLogTab}
+                      variant="ghost"
+                      size="default"
+                    >
+                      Open Git Log <kbd>⌥G</kbd>
+                    </Button>
+                    <Button
+                      className={cn("p-0 text-[13px] text-muted-foreground hover:underline")}
+                      onClick={() => setRepositoryViewMode("changes")}
+                      variant="ghost"
+                      size="default"
+                    >
+                      Commit <kbd>⌘0</kbd>
+                    </Button>
+                  </EmptyState>
+                )}
+                {inspectorTabs.map((tab) => {
+                  const key = inspectorKey(tab);
+                  const value = `inspector:${key}`;
+                  const scratch = tab.scratchId
+                    ? scratchFiles.find((candidate) => candidate.id === tab.scratchId)
+                    : undefined;
+                  return (
+                    <TabsContent
+                      aria-labelledby={editorTabDomId(editorTabsId, value)}
+                      className={`editorSurface [height:100%] [min-height:0] [min-width:0] [&[hidden]]:[display:none] editorSurface`}
+                      id={editorPanelDomId(editorTabsId, value)}
+                      keepMounted
+                      key={key}
+                      value={value}
+                    >
+                      {scratch ? (
+                        <ScratchEditor
+                          bookmarkedLines={allLineBookmarks(bookmarks)
+                            .filter((bookmark) => bookmark.path === `Scratches/${scratch.name}`)
+                            .map((bookmark) => bookmark.line)}
+                          file={scratch}
+                          initialColumn={tab.column}
+                          initialLine={tab.line}
+                          onChange={(content) =>
+                            setScratchFiles((current) =>
+                              current.map((candidate) =>
+                                candidate.id === scratch.id
+                                  ? {
+                                      ...candidate,
+                                      content,
+                                      updatedAtMs: Date.now(),
+                                    }
+                                  : candidate,
+                              ),
+                            )
+                          }
+                          onToggleBookmark={(line, column) =>
+                            requestToggleBookmark({
+                              path: `Scratches/${scratch.name}`,
+                              line,
+                              column,
+                            })
+                          }
+                        />
+                      ) : (
+                        <RepositoryInspectorDialog
+                          bookmarkedLines={
+                            tab.path
+                              ? allLineBookmarks(bookmarks)
+                                  .filter((bookmark) => bookmark.path === tab.path)
+                                  .map((bookmark) => bookmark.line)
+                              : []
+                          }
+                          embedded
+                          initialPath={tab.path}
+                          initialColumn={tab.column}
+                          initialLine={tab.line}
+                          initialTab={tab.tab}
+                          loadBlame={sessionLoadBlame}
+                          loadFileHistory={sessionLoadFileHistory}
+                          loadTree={sessionLoadTree}
+                          onClose={() => void requestCloseInspector(key)}
+                          onDirtyChange={(dirty) => setInspectorDirty(key, dirty)}
+                          onToggleBookmark={(path, line, column) =>
+                            requestToggleBookmark({
+                              path,
+                              line,
+                              column,
+                            })
+                          }
+                          openWorkingTreeFile={sessionOpenWorkingTreeFile}
+                          readFile={sessionReadFile}
+                          readFilePreview={sessionReadFilePreview}
+                          readOnly={safeMode}
+                          writeWorkingTreeFile={sessionWriteWorkingTreeFile}
+                          revision={tab.revision}
+                          source={tab.source}
+                        />
+                      )}
+                    </TabsContent>
+                  );
+                })}
+              </div>
             </div>
+            <BottomPanel
+              collapsed={bottomCollapsed}
+              height={bottomPanelHeight}
+              active={bottomPanelTab}
+              fixture={sessionFixture}
+              onApplyShelf={(shelfId, drop) => void sessionApplyShelf(shelfId, drop)}
+              onCreateShelf={(message, paths) => void sessionCreateShelf(message, paths)}
+              onDeleteShelf={(shelfId) => void sessionDeleteShelf(shelfId)}
+              onLoadStashFiles={(stash) => sessionLoadStashFiles(stash.selector)}
+              onOpenStashDiff={openStashDiff}
+              onOperation={sessionExecuteOperation}
+              onRestoreRecovery={sessionRestoreRecoveryEntry}
+              onToggle={() => setBottomCollapsed((value) => !value)}
+              onHeightChange={setBottomPanelHeight}
+              onActiveChange={setBottomPanelTab}
+              recoveryEntries={sessionRecoveryEntries}
+              gitConsoleEntries={sessionGitConsoleEntries}
+              onClearGitConsole={sessionClearGitConsole}
+              onLoadLocalHistoryActivities={sessionListLocalHistoryActivities}
+              onLoadLocalHistoryActivity={sessionReadLocalHistoryActivity}
+              onLoadLocalHistoryDiff={sessionLoadLocalHistoryDiff}
+              onCreateLocalHistoryPatch={sessionCreateLocalHistoryPatch}
+              onPutLocalHistoryLabel={sessionPutLocalHistoryLabel}
+              findResults={findResults}
+              onOpenFindResult={(result) => {
+                setRepositoryViewMode("history");
+                openInspector({
+                  revision: repository.snapshot.headOid ?? "HEAD",
+                  source: { kind: "workingTree" },
+                  path: result.path,
+                  tab: "file",
+                  line: result.line,
+                  column: result.column,
+                });
+              }}
+              onSearchAgain={() => {
+                setProjectSearchInitialQuery("");
+                setProjectSearchSurface("find");
+              }}
+              onRevertLocalHistory={sessionRevertLocalHistory}
+              repositoryId={repository.snapshot.id}
+              repositoryName={repository.snapshot.name}
+              shelves={sessionShelves}
+              stashes={sessionStashes}
+              status={repository.status}
+            />
+          </RepositoryEditorSurface>
+          {notificationOpen && (
+            <NotificationToolWindow
+              notifications={notifications}
+              onClear={() => setNotifications([])}
+              onClose={() => setNotificationOpen(false)}
+            />
           )}
-        </main>
+          {balloonId &&
+            (() => {
+              const notification = notifications.find((item) => item.id === balloonId);
+              return notification ? (
+                <NotificationBalloon
+                  notification={notification}
+                  onAction={(action) => {
+                    if (action === "modifyShortcuts") {
+                      onOpenSettings();
+                    } else if (action === "openUrl" && notification.url) {
+                      void openExternalUrl(notification.url);
+                    } else if (action === "dismiss") {
+                      onDismissShortcutConflictWarning();
+                      setNotifications((current) =>
+                        current.filter((item) => item.id !== notification.id),
+                      );
+                    } else {
+                      setNotificationOpen(true);
+                    }
+                    setBalloonId(undefined);
+                  }}
+                  onDismiss={() => setBalloonId(undefined)}
+                />
+              ) : null;
+            })()}
+          <RepositoryRightToolStripe
+            notificationCount={notifications.length}
+            notificationsOpen={notificationOpen}
+            onToggleNotifications={() => setNotificationOpen((current) => !current)}
+          />
+        </RepositoryToolWindows>
       </Tabs>
       <RepositoryStatusBar
         navigationStatus={navigationStatus}
@@ -2575,14 +2322,7 @@ function RepositoryWorkspaceContent({
       {shareExistingRemotes && (
         <ShareExistingRemotesDialog
           onCancel={() => setShareExistingRemotes(undefined)}
-          onOpenRemote={(remote) => {
-            const url = remoteBrowserUrl(remote);
-            if (url === null) {
-              setToast("This remote URL cannot be opened in a browser.");
-              return;
-            }
-            void openExternalUrl(url);
-          }}
+          onOpenRemote={openExistingRemote}
           onShareAnyway={() => {
             setShareProjectProvider(shareExistingRemotes.provider);
             setShareExistingRemotes(undefined);
@@ -2596,102 +2336,7 @@ function RepositoryWorkspaceContent({
           currentBranch={repository.snapshot.currentBranch}
           changes={repository.status.changes}
           hasCommits={repository.snapshot.hasCommits}
-          onBind={async (binding: ShareProjectBinding) => {
-            const existingRemote = sessionRemotes.find(
-              (remote) => remote.name === binding.remoteName,
-            );
-            if (!existingRemote) {
-              await sessionExecuteOperation(
-                {
-                  kind: "remoteAdd",
-                  name: binding.remoteName,
-                  url: binding.remoteUrl,
-                },
-                true,
-              );
-            } else if (
-              existingRemote.fetchUrl !== binding.remoteUrl &&
-              existingRemote.pushUrl !== binding.remoteUrl
-            ) {
-              throw new Error(
-                `Remote '${binding.remoteName}' now points to a different repository.`,
-              );
-            }
-            if (binding.initialCommit && !repository.snapshot.hasCommits) {
-              const selectedPaths = new Set(binding.initialCommit.paths);
-              const excludedStagedPaths = repository.status.changes
-                .filter((change) => change.staged && !selectedPaths.has(change.path))
-                .map((change) => change.path);
-              if (excludedStagedPaths.length > 0) {
-                await sessionExecuteOperation(
-                  {
-                    kind: "removeCached",
-                    paths: excludedStagedPaths,
-                  },
-                  true,
-                );
-              }
-              await sessionExecuteOperation(
-                {
-                  kind: "stage",
-                  paths: [...binding.initialCommit.paths],
-                },
-                true,
-              );
-              await sessionExecuteOperation(
-                {
-                  kind: "commitAdvanced",
-                  message: binding.initialCommit.message,
-                  amend: false,
-                  signOff: false,
-                  gpgSign: false,
-                  skipHooks: false,
-                  commitAll: false,
-                },
-                true,
-              );
-            }
-            if (repository.snapshot.hasCommits || binding.initialCommit !== null) {
-              const branch = repository.snapshot.currentBranch;
-              if (!branch) {
-                throw new Error("Check out a local branch before pushing the shared project.");
-              }
-              await sessionExecuteOperation(
-                {
-                  kind: "push",
-                  destination: {
-                    remote: binding.remoteName,
-                    remoteRef: `refs/heads/${branch}`,
-                    localRevision: branch,
-                    setUpstream: true,
-                  },
-                  mode: { kind: "normal" },
-                },
-                true,
-              );
-            }
-            const service = shareProjectProvider === "gitHub" ? "GitHub" : "GitLab";
-            const createdEmptyRepository =
-              !repository.snapshot.hasCommits && binding.initialCommit === null;
-            setToast(
-              createdEmptyRepository
-                ? `Successfully created empty repository on ${service}`
-                : `Project shared on ${service}`,
-            );
-            const notification: ProductNotification = {
-              id: crypto.randomUUID(),
-              title: createdEmptyRepository
-                ? `Successfully created empty repository on ${service}`
-                : `Successfully shared on ${service}`,
-              message: binding.webUrl,
-              kind: "success",
-              createdAt: Date.now(),
-              actions: ["openUrl"],
-              url: binding.webUrl,
-            };
-            setNotifications((current) => [notification, ...current]);
-            setBalloonId(notification.id);
-          }}
+          onBind={bindSharedProject}
           onClose={() => setShareProjectProvider(undefined)}
           onManageAccounts={() => void requestOpenRepositoryTool("hosting")}
           projectName={repository.snapshot.name}
