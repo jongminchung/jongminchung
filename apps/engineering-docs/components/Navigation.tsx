@@ -13,7 +13,7 @@ import {
   type DocSection,
   type Locale,
   type NavigationEntry,
-} from "@/lib/content-model";
+} from "#lib/content-model";
 import { DeepDiveIcon, HandbookIcon, OverviewIcon, PackageIcon, RepositoryIcon } from "./DocsIcons";
 import { Icon, type IconType } from "./Icon";
 import { LocaleSwitcher } from "./LocaleSwitcher";

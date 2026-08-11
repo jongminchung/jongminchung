@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useRef, useEffect, useState } from "react";
-import { seededMaterialRandom } from "@/components/materials/runtime/random";
+import { seededMaterialRandom } from "#components/materials/runtime/random";
 import { useVisible } from "./useVisible";
 
 // 같은 순위 변동 애니메이션을 두 방식으로 동시에 돌린다.

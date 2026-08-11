@@ -5,7 +5,7 @@ section: packages
 title: remark-plantuml
 description: Turn PlantUML code in Markdown and Astro documents into safe SVG diagrams.
 order: 0
-updatedAt: "2026-08-10"
+updatedAt: "2026-08-11"
 tags: [remark, plantuml, markdown, astro, unified]
 status: stable
 sourceUrl: https://github.com/jongminchung/jongminchung/tree/main/packages/remark-plantuml
@@ -33,7 +33,7 @@ pnpm add @jongminchung/remark-plantuml
 ```
 
 The package is distributed through GitHub Packages, so map the `@jongminchung` scope in the consuming project's `.npmrc`.
-Node.js 24.15 or newer is required.
+Node.js 24 or newer is required. The package exposes ESM named exports only.
 
 ## Markdown usage
 
@@ -70,13 +70,9 @@ export default defineConfig({
 
 The default figure class is `plantuml-diagram`. Import `styles.css`, the Starlight-specific `starlight.css`, or provide a custom `className`.
 
-## CommonJS usage
+## Module contract
 
-CommonJS loads the same ESM named exports without a separate CommonJS build.
-
-```js
-const { remarkPlantUml } = require("@jongminchung/remark-plantuml");
-```
+Use ESM `import` for every JavaScript entry point. CommonJS `require()` is not part of the supported package contract.
 
 ## API
 

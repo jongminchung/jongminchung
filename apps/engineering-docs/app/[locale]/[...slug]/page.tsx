@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { DocsShell } from "@/components/DocsShell";
-import { DocumentPage } from "@/components/DocumentPage";
-import { SectionLandingPage } from "@/components/SectionLanding";
+import { DocsShell } from "#components/DocsShell";
+import { DocumentPage } from "#components/DocumentPage";
+import { SectionLandingPage } from "#components/SectionLanding";
 import {
   type ContentManifestEntry,
   createDocHref,
@@ -14,9 +14,9 @@ import {
   type Locale,
   type NavigationEntry,
   sectionLandingSections,
-} from "@/lib/content-model";
-import { documents, findDocument, getLocalizedDocuments, loadDocument } from "@/lib/documents";
-import { findSectionPage, type SectionPage } from "@/lib/section-pages";
+} from "#lib/content-model";
+import { documents, findDocument, getLocalizedDocuments, loadDocument } from "#lib/documents";
+import { findSectionPage, type SectionPage } from "#lib/section-pages";
 
 interface PageProps {
   readonly params: Promise<{

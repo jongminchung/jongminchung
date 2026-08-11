@@ -1,0 +1,25 @@
+# 저장소 문서
+
+이 디렉터리는 pnpm 모노레포의 기술 선택, 유지보수 절차와 의사결정 기록을 관리한다.
+별도 안내가 없으면 명령은 저장소 루트에서 실행한다. `plugins/go-lsp` 문서는 이 인덱스의
+범위에 포함하지 않는다.
+
+## 유지보수
+
+- [기술 스택과 공식 문서](technology-stack.md): 기반 도구와 외부 직접 의존성 75개의 현재 버전·용도·공식 문서
+- [유지보수 가이드](maintenance.md): 의존성, 보안, 생성물, workflow와 릴리스 운영 절차
+- [루트 기여 가이드](../CONTRIBUTING.md): 개발 환경, workspace별 명령과 제출 기준
+- [디자인 시스템](../DESIGN_SYSTEM.md): UI primitive·Tailwind 진입점·semantic token의 통합 소유권
+
+## 기술 기록
+
+- [ADR 0002: 공개 TypeScript 패키지 빌드를 `tsc`로 단순화](adr/0002-node-library-tsc-build.md)
+- [TypeScript 7 호환성 보고서](typescript-7-compatibility-report.md): 현재 TypeScript 6 정책과 재검증 기준
+
+## 프로젝트 문서
+
+- [Git Client 문서](../apps/git-client/docs/README.md): 로컬 개발·테스트, 독립 감사와 GitHub Release
+- [Git Client 기여 가이드](../apps/git-client/CONTRIBUTING.md)
+- [Engineering Docs material 소유권](../apps/engineering-docs/components/materials/README.md)
+- [`@jongminchung/icon`](../packages/icon/README.md): 아이콘 원본과 생성 자산
+- [`@jongminchung/tooling`](../packages/tooling/README.md): Oxc 설정과 package map

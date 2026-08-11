@@ -5,7 +5,7 @@ section: packages
 title: remark-plantuml
 description: Markdown과 Astro 문서의 PlantUML 코드를 안전한 SVG 다이어그램으로 변환합니다.
 order: 0
-updatedAt: "2026-08-10"
+updatedAt: "2026-08-11"
 tags: [remark, plantuml, markdown, astro, unified]
 status: stable
 sourceUrl: https://github.com/jongminchung/jongminchung/tree/main/packages/remark-plantuml
@@ -33,7 +33,7 @@ pnpm add @jongminchung/remark-plantuml
 ```
 
 GitHub Packages를 사용하므로 프로젝트의 `.npmrc`에 `@jongminchung` 레지스트리 매핑이 필요합니다.
-Node.js 24.15 이상에서 사용할 수 있습니다.
+Node.js 24 이상에서 사용할 수 있으며 모든 공개 런타임 API는 ESM named export입니다.
 
 ## Markdown 사용법
 
@@ -70,13 +70,9 @@ export default defineConfig({
 
 기본 figure 클래스는 `plantuml-diagram`입니다. `@jongminchung/remark-plantuml/styles.css` 또는 Starlight용 `starlight.css`를 가져오거나 `className`으로 자체 스타일을 연결할 수 있습니다.
 
-## CommonJS 사용법
+## 모듈 계약
 
-별도 CommonJS 빌드 없이 동일한 ESM named export를 `require()`로 불러옵니다.
-
-```js
-const { remarkPlantUml } = require("@jongminchung/remark-plantuml");
-```
+모든 JavaScript entry point는 ESM `import`로 사용합니다. CommonJS `require()`는 지원하는 패키지 계약에 포함하지 않습니다.
 
 ## API
 

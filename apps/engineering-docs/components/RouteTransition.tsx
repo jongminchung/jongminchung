@@ -14,7 +14,7 @@ import {
   useRef,
   useState,
 } from "react";
-import type { Locale } from "@/lib/content-model";
+import type { Locale } from "#lib/content-model";
 import styles from "./RouteTransition.module.css";
 
 const PROGRESS_DELAY_MS = 30;

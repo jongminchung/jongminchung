@@ -9,14 +9,15 @@
         "./packages/remark-plantuml/src/starlight.css"
       ],
       "@jongminchung/remark-plantuml/styles.css": ["./packages/remark-plantuml/src/styles.css"],
-      "@jongminchung/theme-contract/tokens.css": ["./packages/theme-contract/src/tokens.css"],
       "@jongminchung/tooling/oxfmt": ["./packages/tooling/src/oxfmt/index.ts"],
       "@jongminchung/tooling/oxlint": ["./packages/tooling/src/oxlint/index.ts"],
       "@jongminchung/tooling/oxlint.json": ["./packages/tooling/src/oxlint/base.json"],
       "@jongminchung/tooling/package-map": ["./packages/tooling/src/package-map.ts"],
       "@jongminchung/ui/components/*": ["./packages/ui/src/components/*.tsx"],
       "@jongminchung/ui/globals.css": ["./packages/ui/src/styles/globals.css"],
-      "@jongminchung/ui/lib/*": ["./packages/ui/src/lib/*.ts"]
+      "@jongminchung/ui/hooks/*": ["./packages/ui/src/hooks/*.ts"],
+      "@jongminchung/ui/lib/*": ["./packages/ui/src/lib/*.ts"],
+      "@jongminchung/ui/tokens.css": ["./packages/ui/src/styles/tokens.css"]
     }
   }
 }

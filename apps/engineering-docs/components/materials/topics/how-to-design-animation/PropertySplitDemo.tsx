@@ -5,7 +5,7 @@ import React, { useRef, useCallback, useState } from "react";
 import {
   cancelMaterialFrame,
   scheduleMaterialFrame,
-} from "@/components/materials/runtime/scheduler";
+} from "#components/materials/runtime/scheduler";
 
 const easeOut = (t: number) => 1 - (1 - t) * (1 - t);
 

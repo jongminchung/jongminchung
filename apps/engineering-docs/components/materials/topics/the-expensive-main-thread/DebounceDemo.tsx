@@ -5,7 +5,7 @@ import React, { useRef, useEffect, useState } from "react";
 import {
   cancelMaterialFrame,
   scheduleMaterialFrame,
-} from "@/components/materials/runtime/scheduler";
+} from "#components/materials/runtime/scheduler";
 import { useVisible } from "./useVisible";
 
 // 마크다운 에디터의 실시간 미리보기 — 키 입력마다 문서 전체를 파싱해 미리보기를 다시 만든다.

@@ -5,13 +5,13 @@ import React, { useRef, useEffect } from "react";
 import {
   cancelMaterialFrame,
   scheduleMaterialFrame,
-} from "@/components/materials/runtime/scheduler";
+} from "#components/materials/runtime/scheduler";
 import {
   SvgCanvas,
   type SvgCanvasHandle,
   type SvgDrawingContext,
   type SvgGradient,
-} from "@/components/materials/runtime/svg-canvas";
+} from "#components/materials/runtime/svg-canvas";
 
 const RING_PERIOD = 1.5;
 const GRAPH_W = 200;

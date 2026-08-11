@@ -5,7 +5,7 @@ import React, { useRef, useCallback, useState } from "react";
 import {
   cancelMaterialFrame,
   scheduleMaterialFrame,
-} from "@/components/materials/runtime/scheduler";
+} from "#components/materials/runtime/scheduler";
 
 const STIFFNESS = 300;
 const DAMPING = 12;

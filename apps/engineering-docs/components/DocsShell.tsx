@@ -6,7 +6,7 @@ import { TooltipProvider } from "@jongminchung/ui/components/tooltip";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
-import type { CurrentNavigationEntry, Locale, NavigationEntry } from "@/lib/content-model";
+import type { CurrentNavigationEntry, Locale, NavigationEntry } from "#lib/content-model";
 import { Icon } from "./Icon";
 import { MaterialLocaleProvider } from "./materials/MaterialLocaleContext";
 import { ContextNavigation, GlobalRail, MobileNavigation, MobileTopNavigation } from "./Navigation";

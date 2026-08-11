@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ExcalidrawDiagram } from "@/components/ExcalidrawDiagram";
+import { ExcalidrawDiagram } from "#components/ExcalidrawDiagram";
 import {
   findStandaloneExcalidrawAsset,
   listStandaloneExcalidrawAssets,
-} from "@/lib/excalidraw-files";
+} from "#lib/excalidraw-files";
 import styles from "./page.module.css";
 
 interface PageProps {

@@ -5,13 +5,13 @@ import React, { useRef, useEffect } from "react";
 import {
   cancelMaterialFrame,
   scheduleMaterialFrame,
-} from "@/components/materials/runtime/scheduler";
+} from "#components/materials/runtime/scheduler";
 import {
   SvgCanvas,
   type SvgCanvasHandle,
   type SvgDrawingContext,
   type SvgGradient,
-} from "@/components/materials/runtime/svg-canvas";
+} from "#components/materials/runtime/svg-canvas";
 import { useVisible } from "./useVisible";
 
 const FONT = "'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, sans-serif";

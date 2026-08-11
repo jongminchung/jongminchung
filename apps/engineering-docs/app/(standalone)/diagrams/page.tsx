@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { listStandaloneExcalidrawAssets } from "@/lib/excalidraw-files";
+import { listStandaloneExcalidrawAssets } from "#lib/excalidraw-files";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {

@@ -7,7 +7,7 @@ import {
   type SvgCanvasHandle,
   type SvgDrawingContext,
   type SvgGradient,
-} from "@/components/materials/runtime/svg-canvas";
+} from "#components/materials/runtime/svg-canvas";
 
 // 16:10 썸네일 (3200×2000 PNG로 다운로드). 발행 전 임시 컴포넌트.
 const W = 1600;

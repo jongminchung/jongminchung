@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import type { Locale } from "@/lib/content-model";
+import type { Locale } from "#lib/content-model";
 import { NotFoundContent, notFoundCopy } from "./not-found";
 import { InitialDocumentScripts, rootFontClassName } from "./root-layout";
 

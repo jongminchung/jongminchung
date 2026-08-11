@@ -5,7 +5,7 @@ import React, { useRef, useEffect } from "react";
 import {
   cancelMaterialFrame,
   scheduleMaterialFrame,
-} from "@/components/materials/runtime/scheduler";
+} from "#components/materials/runtime/scheduler";
 
 const DOT_COUNT = 3;
 const AMPLITUDE = 4;

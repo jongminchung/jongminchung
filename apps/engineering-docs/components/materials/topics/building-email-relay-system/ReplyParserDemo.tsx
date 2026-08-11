@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   cancelMaterialFrame,
   scheduleMaterialFrame,
-} from "@/components/materials/runtime/scheduler";
+} from "#components/materials/runtime/scheduler";
 import { classifyLines, extractReply, type ClassifiedLine, type LineKind } from "./replyParser";
 
 const FONT = "'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, sans-serif";

@@ -1,7 +1,18 @@
 @import "tailwindcss";
+@import "shadcn/tailwind.css";
 @import "tw-animate-css";
-@import "@jongminchung/theme-contract/tokens.css";
+@import "./tokens.css";
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @source "../**/*.{ts,tsx}";
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}

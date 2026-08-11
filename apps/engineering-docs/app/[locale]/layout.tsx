@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
-import { isLocale } from "@/lib/content-model";
+import { isLocale } from "#lib/content-model";
 import { InitialDocumentScripts, rootFontClassName, rootMetadata } from "../root-layout";
 
 export const metadata: Metadata = rootMetadata;

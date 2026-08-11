@@ -5,8 +5,8 @@ import {
   displayTitleFor,
   type DocSection,
   type Locale,
-} from "@/lib/content-model";
-import type { LoadedDocument } from "@/lib/documents";
+} from "#lib/content-model";
+import type { LoadedDocument } from "#lib/documents";
 import { DocumentOutline } from "./DocumentOutline";
 import { EditPageLink } from "./EditPageLink";
 import { Icon } from "./Icon";

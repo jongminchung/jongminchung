@@ -5,13 +5,13 @@ import React, { useRef, useEffect } from "react";
 import {
   cancelMaterialFrame,
   scheduleMaterialFrame,
-} from "@/components/materials/runtime/scheduler";
+} from "#components/materials/runtime/scheduler";
 import {
   SvgCanvas,
   type SvgCanvasHandle,
   type SvgDrawingContext,
   type SvgGradient,
-} from "@/components/materials/runtime/svg-canvas";
+} from "#components/materials/runtime/svg-canvas";
 
 const CANVAS_W = 400;
 const CANVAS_H = 110;

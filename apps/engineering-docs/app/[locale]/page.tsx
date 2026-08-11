@@ -1,5 +1,5 @@
 import { notFound, redirect } from "next/navigation";
-import { isLocale, locales } from "@/lib/content-model";
+import { isLocale, locales } from "#lib/content-model";
 
 interface PageProps {
   readonly params: Promise<{ readonly locale: string }>;

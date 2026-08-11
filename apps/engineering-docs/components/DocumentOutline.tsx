@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { Locale, OutlineEntry } from "@/lib/content-model";
+import type { Locale, OutlineEntry } from "#lib/content-model";
 import { BackToTopButton } from "./BackToTopButton";
 import styles from "./DocumentOutline.module.css";
 

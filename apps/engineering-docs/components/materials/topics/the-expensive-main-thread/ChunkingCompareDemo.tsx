@@ -2,11 +2,11 @@
 "use client";
 
 import React, { useRef, useEffect, useState } from "react";
-import { seededMaterialRandom } from "@/components/materials/runtime/random";
+import { seededMaterialRandom } from "#components/materials/runtime/random";
 import {
   cancelMaterialFrame,
   scheduleMaterialFrame,
-} from "@/components/materials/runtime/scheduler";
+} from "#components/materials/runtime/scheduler";
 import { useVisible } from "./useVisible";
 
 type Lang = "ko" | "en";

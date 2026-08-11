@@ -5,7 +5,7 @@ import React, { useRef, useEffect } from "react";
 import {
   cancelMaterialFrame,
   scheduleMaterialFrame,
-} from "@/components/materials/runtime/scheduler";
+} from "#components/materials/runtime/scheduler";
 
 const MAX_TILT = 15;
 const LERP_FACTOR = 0.1;

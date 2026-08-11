@@ -5,7 +5,7 @@ import React, { useRef, useEffect } from "react";
 import {
   cancelMaterialFrame,
   scheduleMaterialFrame,
-} from "@/components/materials/runtime/scheduler";
+} from "#components/materials/runtime/scheduler";
 
 function cubicBezier(p1x: number, p1y: number, p2x: number, p2y: number) {
   return (t: number): number => {

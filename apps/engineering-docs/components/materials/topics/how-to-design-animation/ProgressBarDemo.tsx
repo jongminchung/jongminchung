@@ -5,7 +5,7 @@ import React, { useRef, useEffect } from "react";
 import {
   cancelMaterialFrame,
   scheduleMaterialFrame,
-} from "@/components/materials/runtime/scheduler";
+} from "#components/materials/runtime/scheduler";
 
 const FACTOR = 0.05;
 const PAUSE_AT_END = 2000;

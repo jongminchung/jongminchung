@@ -11,9 +11,9 @@
   },
   "iconLibrary": "lucide",
   "aliases": {
-    "components": "@/components",
-    "hooks": "@/hooks",
-    "lib": "@/lib",
+    "components": "#components",
+    "hooks": "@jongminchung/ui/hooks",
+    "lib": "#lib",
     "utils": "@jongminchung/ui/lib/utils",
     "ui": "@jongminchung/ui/components"
   },

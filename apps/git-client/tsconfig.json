@@ -5,9 +5,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noUncheckedSideEffectImports": true,
-    "paths": {
-      "@/*": ["./src/*"]
-    },
+    "paths": {},
     "rootDir": ".",
     "types": ["vite/client", "react", "react-dom"]
   },

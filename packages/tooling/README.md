@@ -4,7 +4,7 @@ Shared lint, format, and package-map configuration for TypeScript workspaces.
 
 ## Install
 
-Node.js 24.15 or newer is required.
+Node.js 24 or newer is required.
 
 ```bash
 npm install --save-dev @jongminchung/tooling
@@ -13,12 +13,8 @@ npm install --save-dev @jongminchung/tooling
 Install the actual formatter and linter in each consuming project. This package only centralizes the
 shared settings.
 
-The package ships ESM only. CommonJS consumers on supported Node.js versions receive the same
-named exports:
-
-```js
-const { defineOxlintConfig } = require("@jongminchung/tooling/oxlint");
-```
+The package ships ESM only and exposes every runtime API as a named export. Use ESM `import` for
+every JavaScript entry point; CommonJS `require()` is not part of the supported package contract.
 
 ## Version Policy
 
@@ -117,8 +113,10 @@ pnpm run build
 npm pack --dry-run
 ```
 
-`pnpm run build` uses `tsdown` in unbundle mode so the published `dist` tree mirrors the TypeScript
-source module structure while still shipping JavaScript runtime files.
+`pnpm run build` uses TypeScript `tsc` with the shared Node library configuration. It emits only the
+explicit public entry points as ESM JavaScript and declarations while preserving their source module
+structure.
 
-The npm package includes compiled ESM JavaScript, generated declarations, source config files,
-`LICENSE`, `README.md`, and `package.json`. It does not include a separate CommonJS build.
+The npm package includes compiled ESM JavaScript, generated declarations, source config files, the
+directly exported Oxlint JSON asset, `LICENSE`, `README.md`, and `package.json`. It does not include a
+bundle or a separate CommonJS build.

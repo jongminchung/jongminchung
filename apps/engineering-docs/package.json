@@ -3,6 +3,15 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "imports": {
+    "#components/materials/runtime/random": "./components/materials/runtime/random.ts",
+    "#components/materials/runtime/scheduler": "./components/materials/runtime/scheduler.ts",
+    "#components/materials/runtime/svg-canvas": "./components/materials/runtime/svg-canvas.tsx",
+    "#components/materials/types": "./components/materials/types.ts",
+    "#components/*": "./components/*.tsx",
+    "#generated/materials-registry": "./generated/materials-registry.tsx",
+    "#lib/*": "./lib/*.ts"
+  },
   "scripts": {
     "build": "node scripts/prepare-excalidraw-assets.ts && node scripts/check-excalidraw.ts && pnpm run materials:check && pnpm run content:check && next build",
     "content:build": "node scripts/build-content.ts --write",
@@ -25,7 +34,6 @@
   "dependencies": {
     "@excalidraw/excalidraw": "catalog:",
     "@jongminchung/icon": "workspace:*",
-    "@jongminchung/theme-contract": "workspace:*",
     "@jongminchung/ui": "workspace:*",
     "@mdx-js/loader": "catalog:",
     "@mdx-js/react": "catalog:",

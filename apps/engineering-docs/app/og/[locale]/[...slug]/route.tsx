@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
-import { type DocSection, isLocale, locales, sectionLandingSections } from "@/lib/content-model";
-import { documents, findDocument } from "@/lib/documents";
-import { findSectionPage } from "@/lib/section-pages";
+import { type DocSection, isLocale, locales, sectionLandingSections } from "#lib/content-model";
+import { documents, findDocument } from "#lib/documents";
+import { findSectionPage } from "#lib/section-pages";
 
 interface RouteContext {
   readonly params: Promise<{

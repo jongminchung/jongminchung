@@ -2,7 +2,7 @@
 import {
   cancelMaterialFrame,
   scheduleMaterialFrame,
-} from "@/components/materials/runtime/scheduler";
+} from "#components/materials/runtime/scheduler";
 // @ts-nocheck
 var A = Object.defineProperty;
 var b = (y, t, h) =>

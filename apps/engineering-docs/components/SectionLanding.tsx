@@ -1,4 +1,4 @@
-import type { SectionPage } from "@/lib/section-pages";
+import type { SectionPage } from "#lib/section-pages";
 import { DocumentCard } from "./DocumentCard";
 import styles from "./SectionLanding.module.css";
 

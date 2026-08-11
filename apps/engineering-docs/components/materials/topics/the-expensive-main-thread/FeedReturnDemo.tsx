@@ -5,7 +5,7 @@ import React, { useRef, useEffect, useState } from "react";
 import {
   cancelMaterialFrame,
   scheduleMaterialFrame,
-} from "@/components/materials/runtime/scheduler";
+} from "#components/materials/runtime/scheduler";
 import { useVisible } from "./useVisible";
 
 // SNS 피드 탭 복귀 — 게시물이 잔뜩 쌓인 피드를 keep-alive(display 토글)로 숨겼다가 다시 보일 때,

@@ -4,7 +4,7 @@ import {
   type SvgCanvasHandle,
   type SvgDrawingContext,
   type SvgGradient,
-} from "@/components/materials/runtime/svg-canvas";
+} from "#components/materials/runtime/svg-canvas";
 // 데모 공용 그리기 도우미 — 모든 데모가 같은 시각 언어를 쓰도록 묶어둔다.
 // 게임 로직은 전부 engine.ts에 있고, 여기는 캔버스에 픽셀을 찍는 코드만 있다.
 import { orthoProject, vec3, type Vec3 } from "./engine";

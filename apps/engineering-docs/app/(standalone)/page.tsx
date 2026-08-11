@@ -1,6 +1,6 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { isLocale, type Locale } from "@/lib/content-model";
+import { isLocale, type Locale } from "#lib/content-model";
 
 function selectLocale(savedLocale: string | undefined, acceptLanguage: string | null): Locale {
   if (savedLocale !== undefined && isLocale(savedLocale)) return savedLocale;

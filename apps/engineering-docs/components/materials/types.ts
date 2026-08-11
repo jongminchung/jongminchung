@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import type { Locale } from "@/lib/content-model";
+import type { Locale } from "#lib/content-model";
 
 export type MaterialRenderer = "svg-motion" | "dom-motion" | "canvas" | "wasm";
 export type MaterialTopic =

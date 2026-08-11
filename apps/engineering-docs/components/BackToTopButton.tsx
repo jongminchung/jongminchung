@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@jongminchung/ui/components/button";
-import type { Locale } from "@/lib/content-model";
+import type { Locale } from "#lib/content-model";
 import { Icon } from "./Icon";
 
 export function BackToTopButton({ locale }: { readonly locale: Locale }) {

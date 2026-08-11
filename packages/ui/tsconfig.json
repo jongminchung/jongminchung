@@ -1,15 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "paths": {
-      "@jongminchung/ui/components": ["./src/components"],
-      "@jongminchung/ui/components/*": ["./src/components/*"],
-      "@jongminchung/ui/hooks": ["./src/hooks"],
-      "@jongminchung/ui/hooks/*": ["./src/hooks/*"],
-      "@jongminchung/ui/lib": ["./src/lib"],
-      "@jongminchung/ui/lib/*": ["./src/lib/*"]
-    },
-    "types": ["react", "react-dom"]
+    "types": ["node", "react", "react-dom"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "*.ts"],
   "exclude": ["node_modules"]

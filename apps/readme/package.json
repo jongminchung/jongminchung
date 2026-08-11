@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "imports": {
+    "#components/*": "./components/*.tsx",
+    "#lib/*": "./lib/*.ts"
+  },
   "scripts": {
     "build": "pnpm run icon:check && tsc --noEmit && next build",
     "dev": "pnpm run icon:check && next dev --port 3200",
@@ -17,7 +21,6 @@
   },
   "dependencies": {
     "@jongminchung/icon": "workspace:*",
-    "@jongminchung/theme-contract": "workspace:*",
     "@jongminchung/ui": "workspace:*",
     "next": "catalog:",
     "react": "catalog:",

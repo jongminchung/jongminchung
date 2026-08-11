@@ -2,11 +2,11 @@
 "use client";
 
 import React, { useRef, useEffect, useState } from "react";
-import { seededMaterialRandom } from "@/components/materials/runtime/random";
+import { seededMaterialRandom } from "#components/materials/runtime/random";
 import {
   cancelMaterialFrame,
   scheduleMaterialFrame,
-} from "@/components/materials/runtime/scheduler";
+} from "#components/materials/runtime/scheduler";
 import { useVisible } from "./useVisible";
 
 // 웹소켓 시세 틱이 프레임 주기와 무관하게 쏟아질 때, 그리기를 프레임당 한 번으로 모으는 효과를 본다.

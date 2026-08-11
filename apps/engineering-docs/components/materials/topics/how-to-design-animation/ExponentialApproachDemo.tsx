@@ -5,7 +5,7 @@ import React, { useRef, useEffect, useState } from "react";
 import {
   cancelMaterialFrame,
   scheduleMaterialFrame,
-} from "@/components/materials/runtime/scheduler";
+} from "#components/materials/runtime/scheduler";
 
 type Lang = "ko" | "en";
 

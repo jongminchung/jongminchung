@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import type { ComponentType } from "react";
-import type { MaterialComponentProps, MaterialId, MaterialManifestEntry } from "@/components/materials/types";
+import type { MaterialComponentProps, MaterialId, MaterialManifestEntry } from "#components/materials/types";
 
 export const materialRegistry: Readonly<Record<string, MaterialManifestEntry>> = {
   "ascii-3d-renderer/ASCII3DRenderer": {

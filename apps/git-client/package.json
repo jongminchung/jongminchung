@@ -5,6 +5,10 @@
   "description": "An independently audited, Rebased-inspired Electron Git client for macOS",
   "type": "module",
   "main": ".vite/build/main.cjs",
+  "imports": {
+    "#components/*": "./src/components/*.tsx",
+    "#lib/*": "./src/lib/*.ts"
+  },
   "scripts": {
     "benchmark": "node scripts/benchmark.mjs",
     "build": "pnpm typecheck && vite build",

@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   cancelMaterialFrame,
   scheduleMaterialFrame,
-} from "@/components/materials/runtime/scheduler";
+} from "#components/materials/runtime/scheduler";
 import { chaseRom } from "./chaseRom";
 import { NesAudio } from "./nesAudio";
 import { NesConsole } from "./pkg/nes_core";

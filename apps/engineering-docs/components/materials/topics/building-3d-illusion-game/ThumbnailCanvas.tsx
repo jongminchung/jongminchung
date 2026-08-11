@@ -7,7 +7,7 @@ import {
   type SvgCanvasHandle,
   type SvgDrawingContext,
   type SvgGradient,
-} from "@/components/materials/runtime/svg-canvas";
+} from "#components/materials/runtime/svg-canvas";
 import { drawCube, makeOrthoCam, CUBE_FACES, FONT } from "./draw";
 import { penroseCubes, paintersOrder, ISO_YAW, ISO_PITCH, vec3, type Vec3 } from "./engine";
 

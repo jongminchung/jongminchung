@@ -4,7 +4,7 @@ import {
   type SvgCanvasHandle,
   type SvgDrawingContext,
   type SvgGradient,
-} from "@/components/materials/runtime/svg-canvas";
+} from "#components/materials/runtime/svg-canvas";
 // 데모 공용 트랙 렌더링 헬퍼
 import { WORLD_W, WORLD_H, HALF_W, type Track } from "./engine";
 

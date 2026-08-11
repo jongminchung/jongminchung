@@ -7,7 +7,6 @@ const sourceRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 const appRoot = join(sourceRoot, "..");
 const workspaceRoot = join(appRoot, "..", "..");
 const uiRoot = join(workspaceRoot, "packages", "ui");
-const themeContractRoot = join(workspaceRoot, "packages", "theme-contract");
 
 function sourceFiles(directory: string): readonly string[] {
   if (!existsSync(directory)) return [];
@@ -26,22 +25,61 @@ function readJson(path: string): Record<string, unknown> {
 describe("workspace shadcn design system boundary", () => {
   test("routes every app to the shared primitive package", () => {
     const apps = ["engineering-docs", "git-client", "readme"] as const;
+    const baseTsconfig = readJson(join(workspaceRoot, "tsconfig.base.json"));
+    const baseCompilerOptions = baseTsconfig.compilerOptions as Record<string, unknown>;
+    const sharedConfig = readJson(join(uiRoot, "components.json"));
+    const sharedAliases = sharedConfig.aliases as Record<string, string>;
+    const sharedTailwind = sharedConfig.tailwind as Record<string, string | boolean>;
+
+    expect(baseCompilerOptions.moduleResolution).toBe("bundler");
+    expect(baseCompilerOptions.resolvePackageJsonImports).toBe(true);
+    expect(sharedConfig.style).toBe("base-nova");
+    expect(sharedConfig.iconLibrary).toBe("lucide");
+    expect(sharedConfig.rsc).toBe(true);
+    expect(sharedTailwind).toMatchObject({
+      config: "",
+      css: "src/styles/globals.css",
+      baseColor: "neutral",
+      cssVariables: true,
+    });
+    expect(sharedAliases).toMatchObject({
+      components: "#components",
+      hooks: "#hooks",
+      lib: "#lib",
+      utils: "#lib/utils",
+      ui: "#components",
+    });
 
     for (const app of apps) {
       const currentAppRoot = join(workspaceRoot, "apps", app);
       const packageJson = readJson(join(currentAppRoot, "package.json"));
+      const packageImports = packageJson.imports as Record<string, string>;
       const config = readJson(join(currentAppRoot, "components.json"));
+      const tsconfig = readJson(join(currentAppRoot, "tsconfig.json"));
+      const compilerOptions = tsconfig.compilerOptions as Record<string, unknown>;
       const aliases = config.aliases as Record<string, string>;
       const tailwind = config.tailwind as Record<string, string | boolean>;
+      const sourcePrefix = app === "git-client" ? "./src/" : "./";
 
       expect(config.style, app).toBe("base-nova");
       expect(config.iconLibrary, app).toBe("lucide");
-      expect(tailwind.baseColor, app).toBe("neutral");
+      expect(tailwind, app).toMatchObject({
+        config: "",
+        css: "../../packages/ui/src/styles/globals.css",
+        baseColor: "neutral",
+        cssVariables: true,
+      });
       expect(aliases.ui, app).toBe("@jongminchung/ui/components");
       expect(aliases.utils, app).toBe("@jongminchung/ui/lib/utils");
-      expect(aliases.components, app).toBe("@/components");
-      expect(aliases.hooks, app).toBe("@/hooks");
-      expect(aliases.lib, app).toBe("@/lib");
+      expect(aliases.components, app).toBe("#components");
+      expect(aliases.hooks, app).toBe("@jongminchung/ui/hooks");
+      expect(aliases.lib, app).toBe("#lib");
+      expect(packageImports, app).toMatchObject({
+        "#components/*": `${sourcePrefix}components/*.tsx`,
+        "#lib/*": `${sourcePrefix}lib/*.ts`,
+      });
+      expect(packageImports["#hooks/*"], app).toBeUndefined();
+      expect(compilerOptions.paths ?? {}, app).toEqual({});
       expect(config.rsc, app).toBe(app !== "git-client");
       expect(packageJson.dependencies, app).toMatchObject({
         "@jongminchung/ui": "workspace:*",
@@ -49,18 +87,30 @@ describe("workspace shadcn design system boundary", () => {
     }
   });
 
-  test("publishes component subpaths without a root barrel", () => {
+  test("publishes named component subpaths without a root barrel", () => {
     const packageJson = readJson(join(uiRoot, "package.json"));
+    const packageImports = packageJson.imports as Record<string, string>;
     const exports = packageJson.exports as Record<string, string>;
 
     expect(packageJson.private).toBe(true);
+    expect(packageImports).toEqual({
+      "#components/*": "./src/components/*.tsx",
+      "#hooks/*": "./src/hooks/*.ts",
+      "#lib/*": "./src/lib/*.ts",
+    });
     expect(exports).toMatchObject({
       "./globals.css": "./src/styles/globals.css",
+      "./tokens.css": "./src/styles/tokens.css",
+      "./hooks/*": "./src/hooks/*.ts",
       "./lib/*": "./src/lib/*.ts",
       "./components/*": "./src/components/*.tsx",
     });
     expect(exports["."]).toBeUndefined();
     expect(existsSync(join(uiRoot, "src", "index.ts"))).toBe(false);
+
+    for (const file of sourceFiles(join(uiRoot, "src"))) {
+      expect(readFileSync(file, "utf8"), file).not.toMatch(/\bexport\s+default\b/);
+    }
   });
 
   test("keeps Base UI and primitive copies out of applications", () => {
@@ -100,9 +150,12 @@ describe("workspace shadcn design system boundary", () => {
     ] as const;
 
     expect(sharedStyles).toContain('@import "tailwindcss"');
+    expect(sharedStyles).toContain('@import "shadcn/tailwind.css"');
     expect(sharedStyles).toContain('@import "tw-animate-css"');
-    expect(sharedStyles).toContain('@import "@jongminchung/theme-contract/tokens.css"');
+    expect(sharedStyles).toContain('@import "./tokens.css"');
     expect(sharedStyles).toContain('@source "../**/*.{ts,tsx}"');
+    expect(sharedStyles).toContain("@apply border-border outline-ring/50");
+    expect(sharedStyles).toContain("@apply bg-background text-foreground");
     expect(sharedStyles).not.toContain("apps/");
 
     for (const path of appStyles) {
@@ -114,7 +167,7 @@ describe("workspace shadcn design system boundary", () => {
   });
 
   test("keeps theme values local and satisfies the semantic token contract", () => {
-    const tokenContract = readFileSync(join(themeContractRoot, "src", "tokens.css"), "utf8");
+    const tokenContract = readFileSync(join(uiRoot, "src", "styles", "tokens.css"), "utf8");
     const themePaths = [
       join(workspaceRoot, "apps", "engineering-docs", "app", "theme.css"),
       join(workspaceRoot, "apps", "git-client", "src", "styles", "theme.css"),
@@ -132,6 +185,19 @@ describe("workspace shadcn design system boundary", () => {
       "border",
       "input",
       "ring",
+      "chart-1",
+      "chart-2",
+      "chart-3",
+      "chart-4",
+      "chart-5",
+      "sidebar",
+      "sidebar-foreground",
+      "sidebar-primary",
+      "sidebar-primary-foreground",
+      "sidebar-accent",
+      "sidebar-accent-foreground",
+      "sidebar-border",
+      "sidebar-ring",
       "radius",
       "overlay",
     ] as const;

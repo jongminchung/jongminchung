@@ -5,7 +5,7 @@ import { describe, expect, test } from "vitest";
 
 const packageRoot = dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = join(packageRoot, "..", "..");
-const contractPath = join(packageRoot, "src", "tokens.css");
+const contractPath = join(packageRoot, "src", "styles", "tokens.css");
 const packageManifestPath = join(packageRoot, "package.json");
 
 const coreColorTokens = [
@@ -28,6 +28,19 @@ const coreColorTokens = [
   "border",
   "input",
   "ring",
+  "chart-1",
+  "chart-2",
+  "chart-3",
+  "chart-4",
+  "chart-5",
+  "sidebar",
+  "sidebar-foreground",
+  "sidebar-primary",
+  "sidebar-primary-foreground",
+  "sidebar-accent",
+  "sidebar-accent-foreground",
+  "sidebar-border",
+  "sidebar-ring",
   "overlay",
 ] as const;
 const coreColorTokenSet = new Set<string>(coreColorTokens);
@@ -94,6 +107,12 @@ interface JsxOpeningTag {
   readonly text: string;
 }
 
+function capture(match: RegExpMatchArray, index: number): string {
+  const value = match[index];
+  if (value === undefined) throw new Error(`Missing regular expression capture ${index}`);
+  return value;
+}
+
 function relativePath(path: string): string {
   return relative(workspaceRoot, path).split(sep).join("/");
 }
@@ -119,7 +138,7 @@ function productPolicyFiles(directory: string): readonly string[] {
 }
 
 function declarations(contents: string): ReadonlySet<string> {
-  return new Set(Array.from(contents.matchAll(/--([\w-]+)\s*:/g), ([, token]) => token));
+  return new Set(Array.from(contents.matchAll(/--([\w-]+)\s*:/g), (match) => capture(match, 1)));
 }
 
 function assignedVariables(contents: string): ReadonlySet<string> {
@@ -130,24 +149,24 @@ function assignedVariables(contents: string): ReadonlySet<string> {
     /\bvariable\s*:\s*["']--([\w-]+)["']/g,
   ];
   return new Set(
-    patterns.flatMap((pattern) => Array.from(contents.matchAll(pattern), ([, token]) => token)),
+    patterns.flatMap((pattern) =>
+      Array.from(contents.matchAll(pattern), (match) => capture(match, 1)),
+    ),
   );
 }
 
 function usedVariables(contents: string): ReadonlySet<string> {
-  return new Set(Array.from(contents.matchAll(/var\(--([\w-]+)/g), ([, token]) => token));
+  return new Set(Array.from(contents.matchAll(/var\(--([\w-]+)/g), (match) => capture(match, 1)));
 }
 
 function localThemeProviders(contents: string): ReadonlySet<string> {
-  const themeBlocks = Array.from(
-    contents.matchAll(/@theme\s+inline\s*\{([^}]*)\}/g),
-    ([, body]) => body,
+  const themeBlocks = Array.from(contents.matchAll(/@theme\s+inline\s*\{([^}]*)\}/g), (match) =>
+    capture(match, 1),
   );
   return new Set(
     themeBlocks.flatMap((body) =>
-      Array.from(
-        body.matchAll(/--color-[\w-]+\s*:\s*var\(--([\w-]+)\)/g),
-        ([, provider]) => provider,
+      Array.from(body.matchAll(/--color-[\w-]+\s*:\s*var\(--([\w-]+)\)/g), (match) =>
+        capture(match, 1),
       ),
     ),
   );
@@ -156,7 +175,7 @@ function localThemeProviders(contents: string): ReadonlySet<string> {
 function themeScopes(contents: string): readonly ThemeScope[] {
   return Array.from(
     contents.matchAll(/(:root(?:\[data-theme=["'][^"']+["']\])?)\s*\{([^}]*)\}/g),
-    ([, selector, body]) => ({ selector, body }),
+    (match) => ({ selector: capture(match, 1), body: capture(match, 2) }),
   );
 }
 
@@ -249,20 +268,20 @@ function namedColorViolations(files: readonly string[]): readonly string[] {
         const patterns = [propertyValue, svgValue];
         if (oklchLiteralBoundaries.has(path)) patterns.push(themeValue);
         const values = patterns.flatMap((pattern) =>
-          Array.from(line.matchAll(pattern), ([, value]) => value.toLowerCase()),
+          Array.from(line.matchAll(pattern), (match) => capture(match, 1).toLowerCase()),
         );
         return values.some((value) => !allowedValues.has(value)) ? [`${path}:${index + 1}`] : [];
       });
   });
 }
 
-describe("@jongminchung/theme-contract", () => {
+describe("@jongminchung/ui theme contract", () => {
   test("is a CSS-only Tailwind adapter for the core semantic vocabulary", () => {
     const contract = readFileSync(contractPath, "utf8");
     const packageManifest = JSON.parse(readFileSync(packageManifestPath, "utf8"));
     const colorMappings = Array.from(
       contract.matchAll(/--color-([\w-]+):\s*var\(--([\w-]+)\)/g),
-      ([, utility, provider]) => [utility, provider],
+      (match) => [capture(match, 1), capture(match, 2)],
     );
 
     expect(colorMappings).toEqual(coreColorTokens.map((token) => [token, token]));
@@ -281,14 +300,9 @@ describe("@jongminchung/theme-contract", () => {
     expect(packageManifest).toMatchObject({
       private: true,
       exports: {
-        "./tokens.css": "./src/tokens.css",
+        "./tokens.css": "./src/styles/tokens.css",
       },
     });
-
-    const sourceEntries = readdirSync(join(packageRoot, "src"), { withFileTypes: true });
-    expect(sourceEntries.every((entry) => entry.isFile() && extname(entry.name) === ".css")).toBe(
-      true,
-    );
   });
 
   test("requires complete core providers in every app-owned theme scope", () => {

@@ -19,8 +19,6 @@
   ],
   "type": "module",
   "sideEffects": [
-    "./dist/styles.css",
-    "./dist/starlight.css",
     "./src/styles.css",
     "./src/starlight.css"
   ],
@@ -28,21 +26,15 @@
     ".": {
       "types": "./dist/index.d.ts",
       "source": "./src/index.ts",
-      "default": "./dist/index.js"
+      "import": "./dist/index.js"
     },
     "./astro": {
       "types": "./dist/astro.d.ts",
       "source": "./src/astro.ts",
-      "default": "./dist/astro.js"
+      "import": "./dist/astro.js"
     },
-    "./styles.css": {
-      "source": "./src/styles.css",
-      "default": "./dist/styles.css"
-    },
-    "./starlight.css": {
-      "source": "./src/starlight.css",
-      "default": "./dist/starlight.css"
-    },
+    "./styles.css": "./src/styles.css",
+    "./starlight.css": "./src/starlight.css",
     "./package.json": "./package.json"
   },
   "publishConfig": {
@@ -50,7 +42,7 @@
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "build": "tsdown --log-level error --no-report",
+    "build": "node ../../scripts/clean-package-dist.mjs && tsc -p tsconfig.build.json",
     "prepack": "pnpm run build",
     "publish:dry-run": "pnpm publish --dry-run --access public",
     "test": "vitest run --root ../.. packages/remark-plantuml",
@@ -60,13 +52,12 @@
     "@types/node": "catalog:",
     "remark-parse": "catalog:",
     "remark-stringify": "catalog:",
-    "tsdown": "catalog:",
     "typescript": "catalog:",
     "unified": "catalog:",
     "vitest": "catalog:"
   },
   "engines": {
-    "node": ">=24.15.0"
+    "node": ">=24.0.0"
   },
   "nx": {
     "tags": [

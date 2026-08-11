@@ -5,7 +5,8 @@
 > 현재 정책은 모든 workspace가 하나의 최신 안정 TypeScript 6 버전을 사용하는 것이다.
 > 아래의 TS 7 단일·듀얼 구성 결과는 채택되지 않은 격리 실험이며 현재 구성이나 권고가 아니다.
 >
-> 2026-08-10 생태계 업데이트는 역사적 실패와 현재 공급자 지원 범위를 분리해 기록한다.
+> 2026-08-11 생태계 업데이트는 역사적 실패와 현재 공급자 지원 범위를 분리해 기록한다.
+> `tsdown` 제거 전 실행 결과와 전이 의존성은 역사적 감사 증거로 유지한다.
 
 ## 현재 결정
 
@@ -18,12 +19,13 @@ Nx와 Next.js는 이후 TS 6/7 병행 또는 TS 7 CLI 경로를 공식화했지�
 저장소 선택이다. 따라서 최신 안정 TypeScript 6을 모든 workspace의 단일 compiler/API 기준선으로
 사용하고, TS 7은 격리된 호환성 감사에서만 평가한다.
 
-## 2026-08-10 현행 생태계 업데이트
+## 2026-08-11 현행 생태계 업데이트
 
-현재 manifest와 catalog를 다시 집계한 결과 직접 외부 의존성은 80개이며 TypeScript는 전 workspace에서
-`6.0.3`을 사용한다. 역사적 감사 이후 `@mdx-js/mdx`, `cmdk`, `hast-util-to-string`,
-`npm-check-updates`, `shadcn`, `unist-util-visit`이 직접 의존성에 추가됐고 Next.js 계열은
-`16.2.12`로 갱신됐다.
+현재 manifest와 catalog를 다시 집계한 결과 직접 외부 의존성은 79개이며 TypeScript는 전
+workspace에서 `6.0.3`을 사용한다. 공개 패키지는 `tsdown`을 제거하고 동일한 TypeScript
+compiler로 ESM JavaScript와 declaration을 생성한다. 역사적 감사 이후 `@mdx-js/mdx`, `cmdk`,
+`hast-util-to-string`, `npm-check-updates`, `shadcn`, `unist-util-visit`이 직접 의존성에 추가됐고
+Next.js 계열은 `16.2.12`로 갱신됐다.
 
 ### 공식 전환 경로의 변화
 
@@ -38,9 +40,8 @@ Nx와 Next.js는 이후 TS 6/7 병행 또는 TS 7 CLI 경로를 공식화했지�
   프로젝트의 TS 7 `tsc`를 실행한다. 따라서 Next.js 자체는 더 이상 절대 차단으로 분류하지 않는다.
 - [Oxlint type-aware linting](https://oxc.rs/docs/guide/usage/linter/type-aware.html)은 TypeScript 7
   이상을 요구하며, TypeScript 7.0.2를 추적하는 `oxlint-tsgolint@7` 전환 절차를 제공한다.
-- [tsdown 선언 생성](https://tsdown.dev/options/dts)은 `isolatedDeclarations`가 없으면 기존
-  TypeScript compiler로 되돌아간다. peer 범위에 7이 있어도 실제 d.ts 생성 경로를 별도로 검증해야
-  한다.
+- [TypeScript declaration 생성](https://www.typescriptlang.org/tsconfig/declaration.html)은
+  공개 패키지의 JavaScript emit과 같은 compiler 경계에서 실행한다.
 - [Vite](https://vite.dev/guide/features.html)와
   [Playwright](https://playwright.dev/docs/test-typescript)는 TypeScript를 변환하지만 타입 검사는
   하지 않는다. [Vitest typecheck](https://vitest.dev/guide/testing-types.html)는 `tsc` 또는
@@ -49,16 +50,16 @@ Nx와 Next.js는 이후 TS 6/7 병행 또는 TS 7 CLI 경로를 공식화했지�
   `jiti`로 읽으며 Vite 플러그인은 experimental이다. TS 7 전용 선언보다 package, release DMG
   검증, native rebuild와 smoke test가 승인 근거가 된다.
 
-### 직접 의존성 80개 전환 도메인
+### 직접 의존성 79개 전환 도메인
 
-아래 목록은 현재 직접 의존성 80개를 빠짐없이 전환 경계로 묶은 것이다. “전용 가이드 없음”은 지원
+아래 목록은 현재 직접 의존성 79개를 빠짐없이 전환 경계로 묶은 것이다. “전용 가이드 없음”은 지원
 확인이 아니라 Compiler API 결합이 발견되지 않아 로컬 사용 경계로 판단해야 한다는 뜻이다.
 
 | 영역            |  수 | 직접 의존성                                                                                                                                                                                                                                                                                                                         | TS 7 전환 시 필요한 근거                                       |
 | --------------- | --: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
 | compiler·Nx     |   4 | `typescript`, `nx`, `@nx/devkit`, `@nx/js`                                                                                                                                                                                                                                                                                          | TypeScript와 Nx 공식 병행 절차, Nx graph                       |
 | Next.js·MDX     |   7 | `next`, `@next/mdx`, `@mdx-js/loader`, `@mdx-js/mdx`, `@mdx-js/react`, `@types/mdx`, `remark-mdx-frontmatter`                                                                                                                                                                                                                       | Next CLI checker, MDX 공식 지원, 콘텐츠 Compiler API           |
-| build·lint·test |   9 | `tsdown`, `vite`, `@vitejs/plugin-react`, `vitest`, `oxlint`, `oxlint-tsgolint`, `oxfmt`, `@playwright/test`, `@axe-core/playwright`                                                                                                                                                                                                | d.ts emit, Vite build, type-aware lint, unit·E2E               |
+| build·lint·test |   8 | `vite`, `@vitejs/plugin-react`, `vitest`, `oxlint`, `oxlint-tsgolint`, `oxfmt`, `@playwright/test`, `@axe-core/playwright`                                                                                                                                                                                                          | `tsc` d.ts emit, Vite build, type-aware lint, unit·E2E         |
 | Electron·native |  11 | `@electron-forge/cli`, `@electron-forge/plugin-fuses`, `@electron-forge/plugin-vite`, `@electron-forge/shared-types`, `@electron/fuses`, `electron`, `ds-store`, `macos-alias`, `node-gyp`, `node-pty`, `sharp`                                                                                                                     | Forge package·release DMG 검증, native ABI, packaged app smoke |
 | CSS             |   5 | `tailwindcss`, `@tailwindcss/postcss`, `@tailwindcss/vite`, `postcss`, `tw-animate-css`                                                                                                                                                                                                                                             | Vite·Next production CSS build                                 |
 | React·UI        |  14 | `react`, `react-dom`, `@types/react`, `@types/react-dom`, `@base-ui/react`, `@tanstack/react-virtual`, `lucide-react`, `class-variance-authority`, `clsx`, `cmdk`, `motion`, `pretendard`, `tailwind-merge`, `zod`                                                                                                                  | JSX 선언 검사와 실제 앱 build                                  |
@@ -68,8 +69,9 @@ Nx와 Next.js는 이후 TS 6/7 병행 또는 TS 7 CLI 경로를 공식화했지�
 | 개발 CLI        |   2 | `shadcn`, `npm-check-updates`                                                                                                                                                                                                                                                                                                       | CLI smoke; TypeScript는 자동 갱신 제외 후 수동 전환            |
 | 기타 선언       |   2 | `@excalidraw/excalidraw`, `@types/node`                                                                                                                                                                                                                                                                                             | `skipLibCheck: false` 비교와 앱 build                          |
 
-합계는 80개다. 전이 경계에서는 `rolldown-plugin-dts`, `@nx/workspace`, `ts-morph`와 저장소 자체
-`engineering-docs/scripts/build-content.ts`를 추가로 추적한다.
+합계는 79개다. 전이 경계에서는 `@nx/workspace`, `ts-morph`와 저장소 자체
+`engineering-docs/scripts/build-content.ts`를 추가로 추적한다. 제거된
+`rolldown-plugin-dts`는 아래 역사적 감사 표에만 남긴다.
 
 ### 현행 적용 결정
 
@@ -80,8 +82,8 @@ Nx와 Next.js는 이후 TS 6/7 병행 또는 TS 7 CLI 경로를 공식화했지�
 2. TypeScript 공식 문서는 MDX workflow에 아직 TypeScript 6을 권장한다.
 3. Nx의 듀얼 compiler와 Next.js의 CLI checker는 지원되는 선택지지만 이 저장소가 채택한 단일
    compiler 정책과 다르다.
-4. `oxlint-tsgolint@7`, Next CLI checker, tsdown d.ts emit, editor/LSP와 Electron package를 함께
-   검증한 새 격리 감사가 아직 없다.
+4. `oxlint-tsgolint@7`, Next CLI checker, 공개 패키지 `tsc` declaration emit, editor/LSP와
+   Electron package를 함께 검증한 새 격리 감사가 아직 없다.
 
 재감사에서는 TS 6 production 구성을 수정하지 않은 복사본에서 공식 병행 구성과 workspace별 TS 7
 구성을 비교한다. 모든 경계가 통과해도 production 적용은 별도 변경과 리뷰로 결정한다.
@@ -331,8 +333,8 @@ topology는 채택하지 않았다.
 
 1. 모든 workspace는 하나의 최신 안정 TypeScript 6 버전을 사용한다.
 2. TypeScript 7 CLI alias나 듀얼 compiler/API topology를 production 구성으로 두지 않는다.
-3. compiler 변경 검증에서는 `nx show projects`, 모든 tsconfig typecheck, tsdown build,
-   Vite/Electron package, Next.js build를 각각 실제 사용 경계로 실행한다.
+3. compiler 변경 검증에서는 `nx show projects`, 모든 tsconfig typecheck, 공개 패키지 `tsc`
+   build, Vite/Electron package, Next.js build를 각각 실제 사용 경계로 실행한다.
 4. Next.js의 CLI checker와 Nx의 병행 구성은 확인된 공식 경로로 기록하되 현재 production에는
    적용하지 않는다.
 5. MDX와 저장소 콘텐츠 Compiler API 경계가 TS 7을 지원하고, type-aware lint와 모든 delivery

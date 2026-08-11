@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   cancelMaterialFrame,
   scheduleMaterialFrame,
-} from "@/components/materials/runtime/scheduler";
+} from "#components/materials/runtime/scheduler";
 import { SnakeConsole } from "./pkg/nes_core";
 import { ensureWasm } from "./wasmInit";
 

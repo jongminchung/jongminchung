@@ -12,9 +12,9 @@ import {
 import { Dialog, DialogContent, DialogTitle } from "@jongminchung/ui/components/dialog";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { DocSection, Locale, SearchDocument } from "@/lib/content-model";
-import { isLocale, sections } from "@/lib/content-model";
-import { searchDocuments, type SearchHit, type SearchMatchField } from "@/lib/search";
+import type { DocSection, Locale, SearchDocument } from "#lib/content-model";
+import { isLocale, sections } from "#lib/content-model";
+import { searchDocuments, type SearchHit, type SearchMatchField } from "#lib/search";
 import { useDocsNavigation } from "./RouteTransition";
 import styles from "./SearchPalette.module.css";
 

@@ -5,7 +5,7 @@ import React, { useRef, useEffect, useState } from "react";
 import {
   cancelMaterialFrame,
   scheduleMaterialFrame,
-} from "@/components/materials/runtime/scheduler";
+} from "#components/materials/runtime/scheduler";
 
 const TARGETS = [1247, 8392, 3156, 5720, 9481];
 const FACTOR = 0.06;

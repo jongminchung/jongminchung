@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Locale } from "@/lib/content-model";
+import type { Locale } from "#lib/content-model";
 
 export const notFoundCopy = {
   en: {

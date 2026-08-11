@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { materialRegistry } from "@/generated/materials-registry";
+import { materialRegistry } from "#generated/materials-registry";
 import { useMaterialLocale } from "./MaterialLocaleContext";
 import { resetMaterialSeed } from "./runtime/random";
 import type { MaterialDemoProps } from "./types";

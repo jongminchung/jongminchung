@@ -1,7 +1,7 @@
 import { buttonVariants } from "@jongminchung/ui/components/button";
 import { Card } from "@jongminchung/ui/components/card";
 import { cn } from "@jongminchung/ui/lib/utils";
-import type { Locale } from "@/lib/content-model";
+import type { Locale } from "#lib/content-model";
 import { Icon } from "./Icon";
 import { TransitionLink } from "./RouteTransition";
 

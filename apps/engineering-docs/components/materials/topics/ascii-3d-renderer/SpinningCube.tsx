@@ -5,7 +5,7 @@ import React, { useRef } from "react";
 import {
   cancelMaterialFrame,
   scheduleMaterialFrame,
-} from "@/components/materials/runtime/scheduler";
+} from "#components/materials/runtime/scheduler";
 
 const width = 60;
 const height = 22;

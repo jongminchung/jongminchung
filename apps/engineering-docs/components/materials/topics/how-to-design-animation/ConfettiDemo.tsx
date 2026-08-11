@@ -2,17 +2,17 @@
 "use client";
 
 import React, { useRef, useEffect, useState } from "react";
-import { seededMaterialRandom } from "@/components/materials/runtime/random";
+import { seededMaterialRandom } from "#components/materials/runtime/random";
 import {
   cancelMaterialFrame,
   scheduleMaterialFrame,
-} from "@/components/materials/runtime/scheduler";
+} from "#components/materials/runtime/scheduler";
 import {
   SvgCanvas,
   type SvgCanvasHandle,
   type SvgDrawingContext,
   type SvgGradient,
-} from "@/components/materials/runtime/svg-canvas";
+} from "#components/materials/runtime/svg-canvas";
 
 const GRAVITY = 0.15;
 const DRAG = 0.02;

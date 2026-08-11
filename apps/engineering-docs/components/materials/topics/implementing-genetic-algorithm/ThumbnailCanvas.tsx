@@ -7,7 +7,7 @@ import {
   type SvgCanvasHandle,
   type SvgDrawingContext,
   type SvgGradient,
-} from "@/components/materials/runtime/svg-canvas";
+} from "#components/materials/runtime/svg-canvas";
 import { CHAMPION } from "./champion";
 import {
   buildTrack,

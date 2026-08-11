@@ -22,22 +22,19 @@
     "./oxlint": {
       "types": "./dist/oxlint/index.d.ts",
       "source": "./src/oxlint/index.ts",
-      "default": "./dist/oxlint/index.js"
+      "import": "./dist/oxlint/index.js"
     },
     "./oxfmt": {
       "types": "./dist/oxfmt/index.d.ts",
       "source": "./src/oxfmt/index.ts",
-      "default": "./dist/oxfmt/index.js"
+      "import": "./dist/oxfmt/index.js"
     },
     "./package-map": {
       "types": "./dist/package-map.d.ts",
       "source": "./src/package-map.ts",
-      "default": "./dist/package-map.js"
+      "import": "./dist/package-map.js"
     },
-    "./oxlint.json": {
-      "source": "./src/oxlint/base.json",
-      "default": "./dist/oxlint/base.json"
-    },
+    "./oxlint.json": "./src/oxlint/base.json",
     "./package.json": "./package.json"
   },
   "publishConfig": {
@@ -45,7 +42,7 @@
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "build": "tsdown --log-level error --no-report",
+    "build": "node ../../scripts/clean-package-dist.mjs && tsc -p tsconfig.build.json",
     "prepack": "pnpm run build",
     "publish:dry-run": "pnpm publish --dry-run --access public",
     "test": "vitest run --root ../.. packages/tooling",
@@ -53,12 +50,11 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "tsdown": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },
   "engines": {
-    "node": ">=24.15.0"
+    "node": ">=24.0.0"
   },
   "nx": {
     "tags": [

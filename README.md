@@ -4,13 +4,20 @@ This repository owns the shared `@jongminchung` packages used by downstream proj
 
 - `@jongminchung/tooling`: shared `oxfmt`, `oxlint`, and package-map configuration.
 - `@jongminchung/remark-plantuml`: shared PlantUML rendering for Markdown and Astro docs.
-- `@jongminchung/theme-contract`: private CSS-only adapter for the apps' shared semantic vocabulary.
+- `@jongminchung/ui`: private shadcn primitives, shared Tailwind entrypoint, and value-free semantic tokens.
 
 Public packages are published to GitHub Packages. Consumers need the `@jongminchung` scope mapped
 to `https://npm.pkg.github.com`.
 
 The apps own their theme values and components. See [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) for the
 token contract, component ownership rules, and runtime exception policy.
+
+## Documentation
+
+- [Repository documentation](./docs/README.md)
+- [Technology stack and official references](./docs/technology-stack.md)
+- [Maintenance guide](./docs/maintenance.md)
+- [Contributing guide](./CONTRIBUTING.md)
 
 ## Workspace scripts
 
@@ -27,8 +34,8 @@ Always include `run` for package scripts. The shorter `pnpm fmt` form can fall t
 unrelated system command when the current package does not define `fmt`.
 
 `audit:prod` queries the registry advisory database and fails on high-severity production
-dependency findings. It runs in the scheduled security workflow instead of the offline-reproducible
-`check` chain.
+dependency findings. It requires network access and is run manually during maintenance and before
+releases instead of being part of the offline-reproducible `check` chain.
 
 Each workspace owns its build, typecheck, and test commands. Select one with a filter instead of
 adding a package-specific wrapper to the root manifest:

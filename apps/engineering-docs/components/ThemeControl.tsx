@@ -2,7 +2,7 @@
 
 import { Button } from "@jongminchung/ui/components/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
-import type { Locale } from "@/lib/content-model";
+import type { Locale } from "#lib/content-model";
 import { DarkThemeIcon, LightThemeIcon, SystemThemeIcon } from "./DocsIcons";
 import { Icon, type IconType } from "./Icon";
 

@@ -1,4 +1,4 @@
-import type { ContentManifestEntry, Locale } from "@/lib/content-model";
+import type { ContentManifestEntry, Locale } from "#lib/content-model";
 import { DocumentCard } from "./DocumentCard";
 import styles from "./RelatedDocuments.module.css";
 

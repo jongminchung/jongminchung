@@ -21,8 +21,10 @@ interface PackedManifest {
   readonly dependencies?: Readonly<Record<string, string>>;
   readonly devDependencies?: Readonly<Record<string, string>>;
   readonly engines?: Readonly<Record<string, string>>;
+  readonly exports?: unknown;
   readonly optionalDependencies?: Readonly<Record<string, string>>;
   readonly peerDependencies?: Readonly<Record<string, string>>;
+  readonly type?: string;
 }
 
 interface PackedWorkspace {
@@ -95,11 +97,13 @@ function parsePackedManifest(value: unknown): PackedManifest {
     dependencies: parsePackedStringRecord(value.dependencies, "dependencies"),
     devDependencies: parsePackedStringRecord(value.devDependencies, "devDependencies"),
     engines: parsePackedStringRecord(value.engines, "engines"),
+    exports: value.exports,
     optionalDependencies: parsePackedStringRecord(
       value.optionalDependencies,
       "optionalDependencies",
     ),
     peerDependencies: parsePackedStringRecord(value.peerDependencies, "peerDependencies"),
+    type: typeof value.type === "string" ? value.type : undefined,
   });
 }
 
@@ -154,30 +158,61 @@ async function packWorkspace(workspace: string): Promise<PackedWorkspace> {
 async function moduleKeysFromConsumer(
   consumerRoot: string,
   specifier: string,
-  loader: "import" | "require",
 ): Promise<readonly string[]> {
-  const expression =
-    loader === "import"
-      ? `await import(${JSON.stringify(specifier)})`
-      : `require(${JSON.stringify(specifier)})`;
   const script = `
-    const loaded = ${expression};
+    const loaded = await import(${JSON.stringify(specifier)});
     console.log(JSON.stringify(Object.keys(loaded).sort()));
   `;
-  const { stdout } = await execFileAsync(
-    "node",
-    [loader === "import" ? "--input-type=module" : "--input-type=commonjs", "--eval", script],
-    {
-      cwd: consumerRoot,
-      timeout: 30_000,
-    },
-  );
+  const { stdout } = await execFileAsync("node", ["--input-type=module", "--eval", script], {
+    cwd: consumerRoot,
+    timeout: 30_000,
+  });
 
   const parsed: unknown = JSON.parse(stdout);
   if (!Array.isArray(parsed) || !parsed.every((value) => typeof value === "string")) {
     throw new Error(`expected ${specifier} to expose string export names`);
   }
   return parsed;
+}
+
+async function packageFileContentsFromConsumer(
+  consumerRoot: string,
+  specifier: string,
+): Promise<string> {
+  const script = `
+    const { readFile } = await import("node:fs/promises");
+    const contents = await readFile(new URL(import.meta.resolve(${JSON.stringify(specifier)})), "utf8");
+    console.log(JSON.stringify(contents));
+  `;
+  const { stdout } = await execFileAsync("node", ["--input-type=module", "--eval", script], {
+    cwd: consumerRoot,
+    timeout: 30_000,
+  });
+
+  const parsed: unknown = JSON.parse(stdout);
+  if (typeof parsed !== "string") {
+    throw new Error(`expected ${specifier} to resolve to a text file`);
+  }
+  return parsed;
+}
+
+async function commonJsErrorCodeFromConsumer(
+  consumerRoot: string,
+  specifier: string,
+): Promise<string> {
+  const script = `
+    try {
+      require(${JSON.stringify(specifier)});
+      console.log("loaded");
+    } catch (error) {
+      console.log(error?.code ?? "unknown");
+    }
+  `;
+  const { stdout } = await execFileAsync("node", ["--input-type=commonjs", "--eval", script], {
+    cwd: consumerRoot,
+    timeout: 30_000,
+  });
+  return stdout.trim();
 }
 
 function collectPackedDependencyRanges(manifest: PackedManifest): readonly string[] {
@@ -244,12 +279,19 @@ describe("pnpm package tarball contracts", () => {
       expect(packed.files).toEqual(
         expect.arrayContaining([
           "dist/astro.d.ts",
+          "dist/astro.js",
           "dist/index.d.ts",
-          "dist/starlight.css",
-          "dist/styles.css",
+          "dist/index.js",
+          "src/starlight.css",
+          "src/styles.css",
         ]),
       );
-      expect(packed.manifest.engines).toEqual({ node: ">=24.15.0" });
+      expect(packed.files).not.toContain("dist/starlight.css");
+      expect(packed.files).not.toContain("dist/styles.css");
+      expect(packed.manifest.engines).toEqual({ node: ">=24.0.0" });
+      expect(packed.manifest.type).toBe("module");
+      expect(JSON.stringify(packed.manifest.exports)).toContain('"import"');
+      expect(JSON.stringify(packed.manifest.exports)).not.toContain('"require"');
       expectPackedProtocolsResolved(packed.manifest);
       expect(packed.files.some((file) => file.endsWith(".cjs"))).toBe(false);
 
@@ -260,22 +302,27 @@ describe("pnpm package tarball contracts", () => {
         "remarkPlantUml",
       ];
       const astroExports = ["createPlantUmlRemarkPlugin"];
-      for (const loader of ["import", "require"] as const) {
-        expect(
-          await moduleKeysFromConsumer(
-            packed.consumerRoot,
-            "@jongminchung/remark-plantuml",
-            loader,
-          ),
-        ).toEqual(rootExports);
-        expect(
-          await moduleKeysFromConsumer(
-            packed.consumerRoot,
-            "@jongminchung/remark-plantuml/astro",
-            loader,
-          ),
-        ).toEqual(astroExports);
-      }
+      expect(
+        await moduleKeysFromConsumer(packed.consumerRoot, "@jongminchung/remark-plantuml"),
+      ).toEqual(rootExports);
+      expect(
+        await moduleKeysFromConsumer(packed.consumerRoot, "@jongminchung/remark-plantuml/astro"),
+      ).toEqual(astroExports);
+      expect(
+        await commonJsErrorCodeFromConsumer(packed.consumerRoot, "@jongminchung/remark-plantuml"),
+      ).toBe("ERR_PACKAGE_PATH_NOT_EXPORTED");
+      expect(
+        await packageFileContentsFromConsumer(
+          packed.consumerRoot,
+          "@jongminchung/remark-plantuml/styles.css",
+        ),
+      ).toBe(await readFile(join(rootDir, "packages/remark-plantuml/src/styles.css"), "utf8"));
+      expect(
+        await packageFileContentsFromConsumer(
+          packed.consumerRoot,
+          "@jongminchung/remark-plantuml/starlight.css",
+        ),
+      ).toBe(await readFile(join(rootDir, "packages/remark-plantuml/src/starlight.css"), "utf8"));
     } finally {
       await rm(packed.tempDir, { force: true, recursive: true });
     }
@@ -287,12 +334,19 @@ describe("pnpm package tarball contracts", () => {
       expect(packed.files).toEqual(
         expect.arrayContaining([
           "dist/oxfmt/index.d.ts",
-          "dist/oxlint/base.json",
+          "dist/oxfmt/index.js",
           "dist/oxlint/index.d.ts",
+          "dist/oxlint/index.js",
           "dist/package-map.d.ts",
+          "dist/package-map.js",
+          "src/oxlint/base.json",
         ]),
       );
-      expect(packed.manifest.engines).toEqual({ node: ">=24.15.0" });
+      expect(packed.files).not.toContain("dist/oxlint/base.json");
+      expect(packed.manifest.engines).toEqual({ node: ">=24.0.0" });
+      expect(packed.manifest.type).toBe("module");
+      expect(JSON.stringify(packed.manifest.exports)).toContain('"import"');
+      expect(JSON.stringify(packed.manifest.exports)).not.toContain('"require"');
       expectPackedProtocolsResolved(packed.manifest);
       expect(packed.files.some((file) => file.endsWith(".cjs"))).toBe(false);
 
@@ -312,16 +366,23 @@ describe("pnpm package tarball contracts", () => {
           ],
         ],
       ] as const) {
-        for (const loader of ["import", "require"] as const) {
-          expect(await moduleKeysFromConsumer(packed.consumerRoot, specifier, loader)).toEqual(
-            expectedExports,
-          );
-        }
+        expect(await moduleKeysFromConsumer(packed.consumerRoot, specifier)).toEqual(
+          expectedExports,
+        );
       }
+      expect(
+        await commonJsErrorCodeFromConsumer(packed.consumerRoot, "@jongminchung/tooling/oxlint"),
+      ).toBe("ERR_PACKAGE_PATH_NOT_EXPORTED");
+      expect(
+        await packageFileContentsFromConsumer(
+          packed.consumerRoot,
+          "@jongminchung/tooling/oxlint.json",
+        ),
+      ).toBe(await readFile(join(rootDir, "packages/tooling/src/oxlint/base.json"), "utf8"));
 
       const consumerRoot = await installToolingTarballInWorkspaceConsumer(packed);
       expect(
-        await moduleKeysFromConsumer(consumerRoot, "@jongminchung/tooling/package-map", "import"),
+        await moduleKeysFromConsumer(consumerRoot, "@jongminchung/tooling/package-map"),
       ).toEqual(expect.arrayContaining(["createTsconfigAliasConfig"]));
       const { stdout: aliasStdout } = await execFileAsync(
         "node",

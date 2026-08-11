@@ -13,7 +13,7 @@ import {
   type SvgCanvasHandle,
   type SvgDrawingContext,
   type SvgGradient,
-} from "@/components/materials/runtime/svg-canvas";
+} from "#components/materials/runtime/svg-canvas";
 import { FONT, PALETTE } from "./draw";
 
 const EYE_Y = 1.5; // 눈높이

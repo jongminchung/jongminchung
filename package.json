@@ -47,7 +47,6 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "shadcn": "catalog:",
-    "tsdown": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },

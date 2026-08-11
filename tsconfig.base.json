@@ -18,6 +18,7 @@
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
+    "resolvePackageJsonImports": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,

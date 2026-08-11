@@ -16,9 +16,9 @@
 
 ## 지속 계약
 
-- `packages/ui`는 shadcn primitive, `cn`, 공통 Tailwind 진입점만 소유한다.
+- `packages/ui`는 shadcn primitive, `cn`, 공통 Tailwind 진입점과 값 없는 theme contract를 소유한다.
   - 앱은 `theme.css`, 제품 컴포넌트, 플랫폼 동작과 시각 언어를 계속 소유한다.
-- `packages/theme-contract/src/tokens.css`는 값 없는 CSS-only 의미 토큰 계약으로 유지한다.
+- `packages/ui/src/styles/tokens.css`는 값 없는 CSS-only 의미 토큰 계약으로 유지한다.
 - 앱별 `theme.css`에서 완전한 OKLCH provider 값을 정의한다.
 - Tailwind를 모든 레이아웃에 강제하지 않고 CSS Module과 역할을 나눈다.
 - Next 앱은 Server Component를 기본으로 하고 상호작용만 Client Component로 격리한다.
@@ -160,8 +160,8 @@
   측정이 renderer 병목을 보여줄 때만 제한적으로 적용한다.
 - **Tailwind registry 전면 해체**: 제거한다. 현재 사용 중인 제품 layout을 CSS Module이나 CVA로 다시 쓰는
   것은 사용자 가치가 없는 스타일 재작성이다.
-- **theme-contract test 파일 이동과 독립 Nx target**: 제거한다. package는 private CSS-only이고 현재 root
-  Vitest가 계약을 실행한다. affected-only CI 또는 독립 배포 요구가 생길 때 다시 검토한다.
+- **theme contract 독립 패키지와 Nx target**: 제거한다. 계약 파일과 테스트는 `packages/ui`에서 함께
+  관리한다. 독립 소비자나 배포 요구가 생길 때 패키지 분리를 다시 검토한다.
 - **Docs client shell 추가 분리**: 보류한다. MDX 본문은 Server Component `children`으로 유지되고 현재 route
   JS 비용 문제가 측정되지 않았다.
 

@@ -5,13 +5,13 @@ import React, { useEffect, useRef } from "react";
 import {
   cancelMaterialFrame,
   scheduleMaterialFrame,
-} from "@/components/materials/runtime/scheduler";
+} from "#components/materials/runtime/scheduler";
 import {
   SvgCanvas,
   type SvgCanvasHandle,
   type SvgDrawingContext,
   type SvgGradient,
-} from "@/components/materials/runtime/svg-canvas";
+} from "#components/materials/runtime/svg-canvas";
 import { CHAMPION } from "./champion";
 import { buildTrack, spawnCar, stepCar, type Car } from "./engine";
 import { FONT, makeView, trackHeightFor, drawTrack, drawCar } from "./trackDraw";

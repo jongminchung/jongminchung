@@ -8,7 +8,6 @@
 - Node.js 26.5.0 (`.node-version`)
 - pnpm 11.15.1 (`package.json#packageManager`)
 - 시스템 Git 2.39 이상
-- Electron 패키지·PTY·DMG 검증에는 Xcode Command Line Tools 필요
 
 버전과 의존성을 확인한다.
 

@@ -113,16 +113,16 @@ function transformSource(source: string, relativePath: string): string {
   const imports: string[] = [];
   if (hadCanvas) {
     imports.push(
-      'import { SvgCanvas, type SvgCanvasHandle, type SvgDrawingContext, type SvgGradient } from "@/components/materials/runtime/svg-canvas";',
+      'import { SvgCanvas, type SvgCanvasHandle, type SvgDrawingContext, type SvgGradient } from "#components/materials/runtime/svg-canvas";',
     );
   }
   if (hadFrameScheduling) {
     imports.push(
-      'import { cancelMaterialFrame, scheduleMaterialFrame } from "@/components/materials/runtime/scheduler";',
+      'import { cancelMaterialFrame, scheduleMaterialFrame } from "#components/materials/runtime/scheduler";',
     );
   }
   if (hadRandom) {
-    imports.push('import { seededMaterialRandom } from "@/components/materials/runtime/random";');
+    imports.push('import { seededMaterialRandom } from "#components/materials/runtime/random";');
   }
 
   return isComponent

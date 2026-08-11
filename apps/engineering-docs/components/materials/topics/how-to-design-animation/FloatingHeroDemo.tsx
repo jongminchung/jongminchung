@@ -5,7 +5,7 @@ import React, { useRef, useEffect } from "react";
 import {
   cancelMaterialFrame,
   scheduleMaterialFrame,
-} from "@/components/materials/runtime/scheduler";
+} from "#components/materials/runtime/scheduler";
 
 const ITEMS = [
   { emoji: "\uD83D\uDE80", x: "15%", y: "20%", amp: 8, freq: 0.8, phase: 0 },

@@ -7,7 +7,7 @@ import {
   type SvgCanvasHandle,
   type SvgDrawingContext,
   type SvgGradient,
-} from "@/components/materials/runtime/svg-canvas";
+} from "#components/materials/runtime/svg-canvas";
 import { FONT, PALETTE, CUBE_FACES, drawCube, makeOrthoCam, type ProjectFn } from "./draw";
 import {
   perspectiveProject,

@@ -8,7 +8,7 @@ The manual package workflow always replaces the personal `1.0.0` package version
 
 ## Install
 
-Node.js 24.15 or newer is required.
+Node.js 24 or newer is required. The package exposes ESM named exports only.
 
 ```bash
 npm install --save-dev @jongminchung/remark-plantuml
@@ -37,11 +37,8 @@ export default {
 };
 ```
 
-CommonJS consumers receive the same named exports from the ESM package:
-
-```js
-const { remarkPlantUml } = require("@jongminchung/remark-plantuml");
-```
+Use ESM `import` for every JavaScript entry point. CommonJS `require()` is not part of the
+supported package contract.
 
 Astro configs can use the helper export:
 
@@ -70,3 +67,14 @@ Starlight-oriented caption color:
 ```css
 @import "@jongminchung/remark-plantuml/starlight.css";
 ```
+
+## Build and pack
+
+```bash
+pnpm run build
+npm pack --dry-run
+```
+
+`pnpm run build` uses TypeScript `tsc` to emit the explicit public entry points as ESM JavaScript and
+declarations. The CSS subpaths resolve directly to the source assets included in the package. The
+package does not include a bundle or a separate CommonJS build.

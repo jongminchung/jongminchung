@@ -1,5 +1,5 @@
-import type { ContentManifestEntry, Locale } from "@/lib/content-model";
-import { createOgImageHref, displayTitleFor } from "@/lib/content-model";
+import type { ContentManifestEntry, Locale } from "#lib/content-model";
+import { createOgImageHref, displayTitleFor } from "#lib/content-model";
 import { TransitionLink } from "./RouteTransition";
 import styles from "./DocumentCard.module.css";
 
