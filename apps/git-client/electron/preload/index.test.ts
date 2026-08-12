@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { DesktopApi } from "../../src/shared/contracts/desktop-api";
+import { RPC_PROCEDURES } from "../../src/shared/contracts/desktop-rpc";
 import type {
   FileContent,
   FilePreview,
@@ -7,15 +9,73 @@ import type {
   RepositoryChangedEvent,
   RepositoryRecord,
 } from "../../src/shared/contracts/git-utility";
-import type { DesktopApi } from "../../src/shared/contracts/ipc";
-import { IPC_CHANNELS } from "../../src/shared/contracts/ipc";
 import type { RepositorySnapshot, TerminalEvent } from "../../src/shared/contracts/model";
+
+interface TestMessagePort {
+  onmessage: ((event: { data: unknown }) => void) | null;
+  peer: TestMessagePort | null;
+  postMessage(data: unknown): void;
+  start(): void;
+  close(): void;
+}
+
+class SynchronousMessagePort implements TestMessagePort {
+  onmessage: ((event: { data: unknown }) => void) | null = null;
+  peer: TestMessagePort | null = null;
+
+  postMessage(data: unknown): void {
+    this.peer?.onmessage?.({ data });
+  }
+
+  start(): void {}
+
+  close(): void {}
+}
+
+class SynchronousMessageChannel {
+  readonly port1 = new SynchronousMessagePort();
+  readonly port2 = new SynchronousMessagePort();
+
+  constructor() {
+    this.port1.peer = this.port2;
+    this.port2.peer = this.port1;
+  }
+}
+
+vi.stubGlobal("MessageChannel", SynchronousMessageChannel);
 
 const electronMock = vi.hoisted(() => ({
   exposedApi: null as unknown,
   invoke: vi.fn(),
-  on: vi.fn(),
-  removeListener: vi.fn(),
+  streamPort: null as TestMessagePort | null,
+  postMessage: vi.fn((_channel: string, _request: unknown, ports: TestMessagePort[]) => {
+    const [port] = ports;
+    if (port === undefined) throw new Error("Missing desktop stream port");
+    electronMock.streamPort = port;
+    port.postMessage({ kind: "ready", version: 1 });
+  }),
+  transportInvoke: vi.fn(async (_channel: string, request: unknown) => {
+    const envelope = request as { procedure: string; payload?: unknown };
+    const result =
+      envelope.payload === undefined
+        ? await electronMock.invoke(envelope.procedure)
+        : await electronMock.invoke(envelope.procedure, envelope.payload);
+    if (
+      envelope.procedure === "git.query" ||
+      envelope.procedure === "git.initializeRepository" ||
+      envelope.procedure === "git.cloneRepository"
+    ) {
+      const payload = envelope.payload as { requestId: string };
+      setTimeout(() => {
+        electronMock.streamPort?.postMessage({
+          kind: "git.barrier",
+          operation: envelope.procedure === "git.query" ? "query" : "creation",
+          requestId: payload.requestId,
+        });
+      }, 0);
+    }
+    return result;
+  }),
 }));
 
 vi.mock("electron", () => ({
@@ -25,9 +85,8 @@ vi.mock("electron", () => ({
     },
   },
   ipcRenderer: {
-    invoke: electronMock.invoke,
-    on: electronMock.on,
-    removeListener: electronMock.removeListener,
+    invoke: electronMock.transportInvoke,
+    postMessage: electronMock.postMessage,
   },
 }));
 
@@ -132,35 +191,43 @@ function api(): DesktopApi {
 }
 
 function gitEventHandler(): IpcEventHandler {
-  const registration = electronMock.on.mock.calls.find(
-    ([channel]) => channel === IPC_CHANNELS.gitQueryEvent,
-  );
-  if (registration === undefined) throw new Error("Git query event handler was not registered");
-  return registration[1] as IpcEventHandler;
+  return (_event, raw) => {
+    const gitEvent = raw as GitRequestEvent;
+    if (
+      gitEvent.kind === "completed" ||
+      gitEvent.kind === "failed" ||
+      gitEvent.kind === "cancelled"
+    ) {
+      return;
+    }
+    electronMock.streamPort?.postMessage({ kind: "git.query.event", event: raw });
+  };
 }
 
 function gitCreationEventHandler(): IpcEventHandler {
-  const registration = electronMock.on.mock.calls.find(
-    ([channel]) => channel === IPC_CHANNELS.gitCreationEvent,
-  );
-  if (registration === undefined) throw new Error("Git creation event handler was not registered");
-  return registration[1] as IpcEventHandler;
+  return (_event, raw) => {
+    const creationEvent = raw as GitCreationEvent;
+    if (
+      creationEvent.kind === "completed" ||
+      creationEvent.kind === "failed" ||
+      creationEvent.kind === "cancelled"
+    ) {
+      return;
+    }
+    electronMock.streamPort?.postMessage({ kind: "git.creation.event", event: raw });
+  };
 }
 
 function repositoryChangedEventHandler(): IpcEventHandler {
-  const registration = electronMock.on.mock.calls.find(
-    ([channel]) => channel === IPC_CHANNELS.gitRepositoryChanged,
-  );
-  if (registration === undefined) throw new Error("Repository event handler was not registered");
-  return registration[1] as IpcEventHandler;
+  return (_event, raw) => {
+    electronMock.streamPort?.postMessage({ kind: "repository.changed", event: raw });
+  };
 }
 
 function terminalEventHandler(): IpcEventHandler {
-  const registration = electronMock.on.mock.calls.find(
-    ([channel]) => channel === IPC_CHANNELS.terminalEvent,
-  );
-  if (registration === undefined) throw new Error("Terminal event handler was not registered");
-  return registration[1] as IpcEventHandler;
+  return (_event, raw) => {
+    electronMock.streamPort?.postMessage({ kind: "terminal.event", event: raw });
+  };
 }
 
 describe("Electron preload Git API", () => {
@@ -179,7 +246,7 @@ describe("Electron preload Git API", () => {
       api().shell.openExternal("http://gitlab.example.test/group/project"),
     ).resolves.toBeUndefined();
     expect(electronMock.invoke).toHaveBeenCalledWith(
-      IPC_CHANNELS.shellOpenExternal,
+      RPC_PROCEDURES.shellOpenExternal,
       "http://gitlab.example.test/group/project",
     );
 
@@ -192,9 +259,9 @@ describe("Electron preload Git API", () => {
 
   it("validates repository lifecycle results", async () => {
     electronMock.invoke.mockImplementation(async (channel: string): Promise<unknown> => {
-      if (channel === IPC_CHANNELS.gitOpenRepository) return REPOSITORY;
-      if (channel === IPC_CHANNELS.gitCloseRepository) return true;
-      if (channel === IPC_CHANNELS.gitCancelQuery) return false;
+      if (channel === RPC_PROCEDURES.gitOpenRepository) return REPOSITORY;
+      if (channel === RPC_PROCEDURES.gitCloseRepository) return true;
+      if (channel === RPC_PROCEDURES.gitCancelQuery) return false;
       throw new Error(`Unexpected channel ${channel}`);
     });
 
@@ -207,7 +274,7 @@ describe("Electron preload Git API", () => {
     electronMock.invoke.mockResolvedValue(SNAPSHOT);
 
     await expect(api().git.inspectSnapshot(REPOSITORY_ID)).resolves.toEqual(SNAPSHOT);
-    expect(electronMock.invoke).toHaveBeenCalledWith(IPC_CHANNELS.gitInspectSnapshot, {
+    expect(electronMock.invoke).toHaveBeenCalledWith(RPC_PROCEDURES.gitInspectSnapshot, {
       repositoryId: REPOSITORY_ID,
     });
   });
@@ -215,7 +282,7 @@ describe("Electron preload Git API", () => {
   it("validates every repository inspection and ignore-rules response", async () => {
     electronMock.invoke.mockImplementation(
       async (channel: string, request: Readonly<Record<string, unknown>>): Promise<unknown> => {
-        if (channel !== IPC_CHANNELS.gitRepositoryService) {
+        if (channel !== RPC_PROCEDURES.gitRepositoryService) {
           throw new Error(`Unexpected channel ${channel}`);
         }
         switch (request.operation) {
@@ -310,7 +377,7 @@ describe("Electron preload Git API", () => {
         infoExclude: ".work/\n",
       }),
     ).resolves.toBeUndefined();
-    expect(electronMock.invoke).toHaveBeenLastCalledWith(IPC_CHANNELS.gitRepositoryService, {
+    expect(electronMock.invoke).toHaveBeenLastCalledWith(RPC_PROCEDURES.gitRepositoryService, {
       operation: "writeIgnoreRules",
       repositoryId: REPOSITORY_ID,
       rules: { gitignore: "coverage/\n", infoExclude: ".work/\n" },
@@ -320,7 +387,7 @@ describe("Electron preload Git API", () => {
   it("validates direct push and history rewrite preview results", async () => {
     electronMock.invoke.mockImplementation(
       async (channel: string, request: Readonly<Record<string, unknown>>): Promise<unknown> => {
-        expect(channel).toBe(IPC_CHANNELS.gitRepositoryService);
+        expect(channel).toBe(RPC_PROCEDURES.gitRepositoryService);
         if (request.operation === "pushPreview") {
           return {
             operation: request.operation,
@@ -343,7 +410,7 @@ describe("Electron preload Git API", () => {
     await expect(api().git.loadHistoryRewritePreview(REPOSITORY_ID, "HEAD~1")).resolves.toEqual(
       HISTORY_REWRITE_PREVIEW,
     );
-    expect(electronMock.invoke).toHaveBeenNthCalledWith(1, IPC_CHANNELS.gitRepositoryService, {
+    expect(electronMock.invoke).toHaveBeenNthCalledWith(1, RPC_PROCEDURES.gitRepositoryService, {
       operation: "pushPreview",
       repositoryId: REPOSITORY_ID,
       remote: "origin",
@@ -403,7 +470,7 @@ describe("Electron preload Git API", () => {
     };
     electronMock.invoke.mockImplementation(
       async (channel: string, request: Readonly<Record<string, unknown>>): Promise<unknown> => {
-        expect(channel).toBe(IPC_CHANNELS.gitRepositoryService);
+        expect(channel).toBe(RPC_PROCEDURES.gitRepositoryService);
         switch (request.operation) {
           case "exportPatch":
             return {
@@ -559,8 +626,8 @@ describe("Electron preload Git API", () => {
     };
     electronMock.invoke.mockImplementation(
       async (channel: string, request: Readonly<Record<string, unknown>>): Promise<unknown> => {
-        if (channel === IPC_CHANNELS.gitOpenWorkingTreeFile) return undefined;
-        if (channel !== IPC_CHANNELS.gitRepositoryService)
+        if (channel === RPC_PROCEDURES.gitOpenWorkingTreeFile) return undefined;
+        if (channel !== RPC_PROCEDURES.gitRepositoryService)
           throw new Error(`Unexpected channel ${channel}`);
         if (request.operation === "loadSubmoduleDiff") {
           return {
@@ -623,7 +690,7 @@ describe("Electron preload Git API", () => {
 
     expect(electronMock.invoke.mock.calls).toEqual([
       [
-        IPC_CHANNELS.gitRepositoryService,
+        RPC_PROCEDURES.gitRepositoryService,
         {
           operation: "loadSubmoduleDiff",
           repositoryId: REPOSITORY_ID,
@@ -632,9 +699,9 @@ describe("Electron preload Git API", () => {
           path: "modules/client",
         },
       ],
-      [IPC_CHANNELS.gitOpenWorkingTreeFile, { repositoryId: REPOSITORY_ID, path: "tracked.txt" }],
+      [RPC_PROCEDURES.gitOpenWorkingTreeFile, { repositoryId: REPOSITORY_ID, path: "tracked.txt" }],
       [
-        IPC_CHANNELS.gitRepositoryService,
+        RPC_PROCEDURES.gitRepositoryService,
         {
           operation: "executeSynchronizedBranchOperation",
           repositoryIds: [REPOSITORY_ID, SECOND_REPOSITORY_ID],
@@ -646,7 +713,7 @@ describe("Electron preload Git API", () => {
         },
       ],
       [
-        IPC_CHANNELS.gitRepositoryService,
+        RPC_PROCEDURES.gitRepositoryService,
         {
           operation: "applyMultiRootRollback",
           steps: [rollbackStep],
@@ -671,12 +738,13 @@ describe("Electron preload Git API", () => {
     electronMock.invoke.mockImplementation(
       async (channel: string, request: Readonly<Record<string, unknown>>): Promise<unknown> => {
         if (
-          channel !== IPC_CHANNELS.gitInitializeRepository &&
-          channel !== IPC_CHANNELS.gitCloneRepository
+          channel !== RPC_PROCEDURES.gitInitializeRepository &&
+          channel !== RPC_PROCEDURES.gitCloneRepository
         ) {
           throw new Error(`Unexpected channel ${channel}`);
         }
-        const operation = channel === IPC_CHANNELS.gitInitializeRepository ? "initialize" : "clone";
+        const operation =
+          channel === RPC_PROCEDURES.gitInitializeRepository ? "initialize" : "clone";
         const emit = gitCreationEventHandler();
         emit(
           {},
@@ -688,18 +756,16 @@ describe("Electron preload Git API", () => {
             startedAtMs: 1,
           },
         );
-        emit(
-          {},
-          {
-            kind: "completed",
-            requestId: request.requestId,
-            operation,
-            repository: REPOSITORY,
-            exitCode: 0,
-            durationMs: 2,
-          },
-        );
-        return REPOSITORY;
+        const terminal = {
+          kind: "completed" as const,
+          requestId: request.requestId,
+          operation,
+          repository: REPOSITORY,
+          exitCode: 0,
+          durationMs: 2,
+        };
+        emit({}, terminal);
+        return terminal;
       },
     );
 
@@ -743,7 +809,7 @@ describe("Electron preload Git API", () => {
       durationMs: 4,
     };
     electronMock.invoke.mockImplementation(async (channel: string): Promise<unknown> => {
-      if (channel !== IPC_CHANNELS.gitQuery) throw new Error(`Unexpected channel ${channel}`);
+      if (channel !== RPC_PROCEDURES.gitQuery) throw new Error(`Unexpected channel ${channel}`);
       const emit = gitEventHandler();
       emit(
         {},
@@ -790,7 +856,7 @@ describe("Electron preload Git API", () => {
       durationMs: 4,
     };
     electronMock.invoke.mockImplementation(async (channel: string): Promise<unknown> => {
-      if (channel !== IPC_CHANNELS.gitQuery) throw new Error(`Unexpected channel ${channel}`);
+      if (channel !== RPC_PROCEDURES.gitQuery) throw new Error(`Unexpected channel ${channel}`);
       setTimeout(() => {
         const emit = gitEventHandler();
         emit(
@@ -861,7 +927,7 @@ describe("Electron preload Git API", () => {
     };
     electronMock.invoke.mockImplementation(
       async (channel: string, raw: unknown): Promise<unknown> => {
-        if (channel !== IPC_CHANNELS.gitQuery) throw new Error(`Unexpected channel ${channel}`);
+        if (channel !== RPC_PROCEDURES.gitQuery) throw new Error(`Unexpected channel ${channel}`);
         expect(raw).toEqual(request);
         const emit = gitEventHandler();
         emit(
@@ -887,13 +953,13 @@ describe("Electron preload Git API", () => {
   it("validates bounded file results and owns repository watcher cleanup", async () => {
     const received: RepositoryChangedEvent[] = [];
     electronMock.invoke.mockImplementation(async (channel: string): Promise<unknown> => {
-      if (channel === IPC_CHANNELS.gitReadFile) return FILE_CONTENT;
-      if (channel === IPC_CHANNELS.gitReadFilePreview) return FILE_PREVIEW;
-      if (channel === IPC_CHANNELS.gitWatchRepository) {
+      if (channel === RPC_PROCEDURES.gitReadFile) return FILE_CONTENT;
+      if (channel === RPC_PROCEDURES.gitReadFilePreview) return FILE_PREVIEW;
+      if (channel === RPC_PROCEDURES.gitWatchRepository) {
         repositoryChangedEventHandler()({}, REPOSITORY_CHANGED);
         return undefined;
       }
-      if (channel === IPC_CHANNELS.gitUnwatchRepository) return undefined;
+      if (channel === RPC_PROCEDURES.gitUnwatchRepository) return undefined;
       throw new Error(`Unexpected channel ${channel}`);
     });
 
@@ -907,7 +973,7 @@ describe("Electron preload Git API", () => {
       api().git.watchRepository(REPOSITORY_ID, (event) => received.push(event)),
     ).resolves.toBeUndefined();
     expect(received).toEqual([REPOSITORY_CHANGED]);
-    expect(electronMock.invoke).toHaveBeenNthCalledWith(1, IPC_CHANNELS.gitReadFile, {
+    expect(electronMock.invoke).toHaveBeenNthCalledWith(1, RPC_PROCEDURES.gitReadFile, {
       repositoryId: REPOSITORY_ID,
       source: { kind: "workingTree" },
       path: "tracked.txt",
@@ -942,7 +1008,7 @@ describe("Electron preload Git API", () => {
     const received: TerminalEvent[] = [];
     electronMock.invoke.mockImplementation(
       async (channel: string, request: Readonly<Record<string, unknown>>): Promise<unknown> => {
-        if (channel === IPC_CHANNELS.terminalCreate) {
+        if (channel === RPC_PROCEDURES.terminalCreate) {
           terminalEventHandler()(
             {},
             {
@@ -958,17 +1024,17 @@ describe("Electron preload Git API", () => {
             terminalId: TERMINAL_ID,
           };
         }
-        if (channel === IPC_CHANNELS.terminalListLaunchTargets) {
+        if (channel === RPC_PROCEDURES.terminalListLaunchTargets) {
           return {
             shells: [{ kind: "shell", id: "zsh", displayName: "Zsh" }],
             agents: [],
           };
         }
         if (
-          channel === IPC_CHANNELS.terminalWrite ||
-          channel === IPC_CHANNELS.terminalResize ||
-          channel === IPC_CHANNELS.terminalClose ||
-          channel === IPC_CHANNELS.terminalCloseRepository
+          channel === RPC_PROCEDURES.terminalWrite ||
+          channel === RPC_PROCEDURES.terminalResize ||
+          channel === RPC_PROCEDURES.terminalClose ||
+          channel === RPC_PROCEDURES.terminalCloseRepository
         ) {
           return undefined;
         }
@@ -1045,18 +1111,18 @@ describe("Electron preload hosting API", () => {
       kind: "changeRequest",
       item: changeRequest,
     });
-    expect(electronMock.invoke).toHaveBeenNthCalledWith(1, IPC_CHANNELS.hostingSaveAccount, {
+    expect(electronMock.invoke).toHaveBeenNthCalledWith(1, RPC_PROCEDURES.hostingSaveAccount, {
       provider: "gitHub",
       baseUrl: "https://github.com",
       token: "ghp_super-secret",
     });
-    expect(electronMock.invoke).toHaveBeenNthCalledWith(2, IPC_CHANNELS.hostingRestoreAccounts, {
+    expect(electronMock.invoke).toHaveBeenNthCalledWith(2, RPC_PROCEDURES.hostingRestoreAccounts, {
       accounts: [account],
     });
-    expect(electronMock.invoke).toHaveBeenNthCalledWith(3, IPC_CHANNELS.hostingDeleteAccount, {
+    expect(electronMock.invoke).toHaveBeenNthCalledWith(3, RPC_PROCEDURES.hostingDeleteAccount, {
       accountId: "account-1",
     });
-    expect(electronMock.invoke).toHaveBeenNthCalledWith(4, IPC_CHANNELS.hostingExecute, {
+    expect(electronMock.invoke).toHaveBeenNthCalledWith(4, RPC_PROCEDURES.hostingExecute, {
       accountId: "account-1",
       request: { kind: "get", project: "owner/repo", number: 7 },
     });

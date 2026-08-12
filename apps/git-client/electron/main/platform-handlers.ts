@@ -1,8 +1,8 @@
 import { lstat, readFile, readdir, realpath, writeFile } from "node:fs/promises";
 import { basename, dirname, extname, join, resolve } from "node:path";
-import { app, BrowserWindow, clipboard, dialog, ipcMain, shell } from "electron";
-import type { IpcMainInvokeEvent } from "electron";
+import { app, BrowserWindow, clipboard, dialog, shell } from "electron";
 import { strToU8, zipSync } from "fflate";
+import { RPC_PROCEDURES } from "../../src/shared/contracts/desktop-rpc";
 import type { RepositoryId } from "../../src/shared/contracts/git-utility";
 import {
   ClipboardWriteRequestSchema,
@@ -19,7 +19,6 @@ import {
   DiagnosticSnapshotSchema,
   ExternalUrlSchema,
   HtmlExportRequestSchema,
-  IPC_CHANNELS,
   JsonValueSchema,
   MaintenanceRelaunchRequestSchema,
   NativeCommandStatesSchema,
@@ -33,8 +32,10 @@ import {
 } from "../../src/shared/contracts/ipc";
 import type { RuntimeInfo, WindowPresentationMode } from "../../src/shared/contracts/ipc";
 import type { ElectronHostingFoundation } from "../hosting";
+import { DesktopRpcRouter } from "./desktop-rpc-router";
+import type { DesktopStreamPublisher } from "./desktop-stream-hub";
 import type { DiagnosticsService } from "./diagnostics-service";
-import { registerGitHandlers } from "./git-handlers";
+import { registerGitHandlers, registerLocalHistoryGitHandler } from "./git-handlers";
 import type { GitUtilityClient } from "./git-utility-client";
 import { registerHostingHandlers } from "./hosting-handlers";
 import { assertTrustedSender } from "./ipc-security";
@@ -61,13 +62,20 @@ interface PlatformHandlerDependencies {
   readonly hosting: ElectronHostingFoundation;
   readonly diagnostics?: DiagnosticsService;
   readonly runtime: RuntimeInfo;
-  readonly localHistoryRepositoryFor?: (
-    sender: IpcMainInvokeEvent["sender"],
-  ) => RepositoryId | null;
+  readonly stream?: DesktopStreamPublisher;
   readonly onWindowPresentationModeChange?: (mode: WindowPresentationMode) => void;
 }
 
-export function registerPlatformHandlers(dependencies: PlatformHandlerDependencies): void {
+export interface PlatformHandlerRegistration {
+  registerLocalHistoryWindow(window: BrowserWindow, repositoryId: RepositoryId): () => void;
+  dispose(): void;
+}
+
+let currentRegistration: PlatformHandlerRegistration | null = null;
+
+export function registerPlatformHandlers(
+  dependencies: PlatformHandlerDependencies,
+): PlatformHandlerRegistration {
   const {
     window,
     settings,
@@ -77,9 +85,12 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
     hosting,
     diagnostics: providedDiagnostics,
     runtime,
-    localHistoryRepositoryFor,
+    stream: providedStream,
     onWindowPresentationModeChange,
   } = dependencies;
+  const stream = providedStream ?? { publish: (): void => undefined };
+  currentRegistration?.dispose();
+  const router = new DesktopRpcRouter(window.webContents);
   const repositoryPaths = new Map<string, string>();
   const repositoryAccessModes = new Map<string, "trusted" | "safe">();
   const { assertRepositoryCapability, assertActiveCapability } =
@@ -89,27 +100,27 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
       repositoryAccessModes,
     });
 
-  ipcMain.handle(IPC_CHANNELS.runtimeInfo, (event) => {
+  router.handle(RPC_PROCEDURES.runtimeInfo, (event) => {
     assertTrustedSender(event, window);
     return RuntimeInfoSchema.parse(runtime);
   });
-  ipcMain.handle(IPC_CHANNELS.runtimeLauncherInfo, (event) => {
+  router.handle(RPC_PROCEDURES.runtimeLauncherInfo, (event) => {
     assertTrustedSender(event, window);
     return CommandLineLauncherInfoSchema.parse({
       directory: dirname(process.execPath),
       command: basename(process.execPath),
     });
   });
-  ipcMain.handle(IPC_CHANNELS.windowGetFullScreen, (event): boolean => {
+  router.handle(RPC_PROCEDURES.windowGetFullScreen, (event): boolean => {
     assertTrustedSender(event, window);
     return window.isFullScreen();
   });
-  ipcMain.handle(IPC_CHANNELS.windowSetFullScreen, (event, raw: unknown): void => {
+  router.handle(RPC_PROCEDURES.windowSetFullScreen, (event, raw: unknown): void => {
     assertTrustedSender(event, window);
     if (typeof raw !== "boolean") throw new Error("Full-screen state must be a boolean.");
     window.setFullScreen(raw);
   });
-  ipcMain.handle(IPC_CHANNELS.windowSetPresentationMode, (event, raw: unknown): void => {
+  router.handle(RPC_PROCEDURES.windowSetPresentationMode, (event, raw: unknown): void => {
     assertTrustedSender(event, window);
     const mode = WindowPresentationModeSchema.parse(raw);
     onWindowPresentationModeChange?.(mode);
@@ -129,7 +140,7 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
       window.center();
     }
   });
-  ipcMain.handle(IPC_CHANNELS.maintenanceRelaunch, async (event, raw: unknown): Promise<void> => {
+  router.handle(RPC_PROCEDURES.maintenanceRelaunch, async (event, raw: unknown): Promise<void> => {
     assertTrustedSender(event, window);
     const request = MaintenanceRelaunchRequestSchema.parse(raw);
     if (request.invalidateCaches) {
@@ -140,11 +151,11 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
   });
   if (providedDiagnostics !== undefined) {
     const diagnostics = providedDiagnostics;
-    ipcMain.handle(IPC_CHANNELS.diagnosticsSnapshot, async (event) => {
+    router.handle(RPC_PROCEDURES.diagnosticsSnapshot, async (event) => {
       assertTrustedSender(event, window);
       return DiagnosticSnapshotSchema.parse(await diagnostics.snapshot());
     });
-    ipcMain.handle(IPC_CHANNELS.diagnosticsReveal, async (event, raw: unknown): Promise<void> => {
+    router.handle(RPC_PROCEDURES.diagnosticsReveal, async (event, raw: unknown): Promise<void> => {
       assertTrustedSender(event, window);
       const kind = DiagnosticPathKindSchema.parse(raw);
       const path = await diagnostics.preparePath(kind);
@@ -162,7 +173,7 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
       const error = await shell.openPath(path);
       if (error) throw new Error(error);
     });
-    ipcMain.handle(IPC_CHANNELS.diagnosticsCollectLogs, async (event): Promise<boolean> => {
+    router.handle(RPC_PROCEDURES.diagnosticsCollectLogs, async (event): Promise<boolean> => {
       assertTrustedSender(event, window);
       const selection = await dialog.showSaveDialog(window, {
         title: "Collect Logs and Diagnostic Data",
@@ -189,39 +200,39 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
       });
       return true;
     });
-    ipcMain.handle(IPC_CHANNELS.diagnosticsDumpThreads, async (event): Promise<string> => {
+    router.handle(RPC_PROCEDURES.diagnosticsDumpThreads, async (event): Promise<string> => {
       assertTrustedSender(event, window);
       const path = await diagnostics.dumpThreads();
       shell.showItemInFolder(path);
       return path;
     });
-    ipcMain.handle(
-      IPC_CHANNELS.diagnosticsReadConfiguration,
+    router.handle(
+      RPC_PROCEDURES.diagnosticsReadConfiguration,
       async (event, raw: unknown): Promise<string> => {
         assertTrustedSender(event, window);
         return diagnostics.readConfiguration(DiagnosticConfigurationKindSchema.parse(raw));
       },
     );
-    ipcMain.handle(
-      IPC_CHANNELS.diagnosticsWriteConfiguration,
+    router.handle(
+      RPC_PROCEDURES.diagnosticsWriteConfiguration,
       async (event, raw: unknown): Promise<void> => {
         assertTrustedSender(event, window);
         const request = DiagnosticConfigurationWriteRequestSchema.parse(raw);
         await diagnostics.writeConfiguration(request.kind, request.content);
       },
     );
-    ipcMain.handle(IPC_CHANNELS.diagnosticsKeyboardShortcutsPdf, async (event): Promise<void> => {
+    router.handle(RPC_PROCEDURES.diagnosticsKeyboardShortcutsPdf, async (event): Promise<void> => {
       assertTrustedSender(event, window);
       const path = await diagnostics.createKeyboardShortcutsPdf();
       const error = await shell.openPath(path);
       if (error) throw new Error(error);
     });
-    ipcMain.handle(IPC_CHANNELS.diagnosticsListLeftoverDirectories, async (event) => {
+    router.handle(RPC_PROCEDURES.diagnosticsListLeftoverDirectories, async (event) => {
       assertTrustedSender(event, window);
       return DiagnosticLeftoverDirectoriesSchema.parse(await diagnostics.listLeftoverDirectories());
     });
-    ipcMain.handle(
-      IPC_CHANNELS.diagnosticsDeleteLeftoverDirectories,
+    router.handle(
+      RPC_PROCEDURES.diagnosticsDeleteLeftoverDirectories,
       async (event, raw: unknown) => {
         assertTrustedSender(event, window);
         const request = DiagnosticDeleteLeftoverDirectoriesRequestSchema.parse(raw);
@@ -231,7 +242,7 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
       },
     );
   }
-  ipcMain.handle(IPC_CHANNELS.exportHtml, async (event, raw: unknown): Promise<boolean> => {
+  router.handle(RPC_PROCEDURES.exportHtml, async (event, raw: unknown): Promise<boolean> => {
     assertTrustedSender(event, window);
     const request = HtmlExportRequestSchema.parse(raw);
     const selection = await dialog.showOpenDialog(window, {
@@ -284,7 +295,7 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
     }
     return true;
   });
-  ipcMain.handle(IPC_CHANNELS.analysisOpenOfflineInspection, async (event) => {
+  router.handle(RPC_PROCEDURES.analysisOpenOfflineInspection, async (event) => {
     assertTrustedSender(event, window);
     const selection = await dialog.showOpenDialog(window, {
       title: "Select Path",
@@ -336,7 +347,7 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
     }
     return OfflineInspectionFilesSchema.parse(files);
   });
-  ipcMain.handle(IPC_CHANNELS.exportPatchText, async (event, raw: unknown): Promise<boolean> => {
+  router.handle(RPC_PROCEDURES.exportPatchText, async (event, raw: unknown): Promise<boolean> => {
     assertTrustedSender(event, window);
     const request = PatchTextExportRequestSchema.parse(raw);
     const selection = await dialog.showSaveDialog(window, {
@@ -361,22 +372,22 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
     });
     return true;
   });
-  ipcMain.handle(IPC_CHANNELS.settingsGet, (event, raw: unknown) => {
+  router.handle(RPC_PROCEDURES.settingsGet, (event, raw: unknown) => {
     assertTrustedSender(event, window);
     const request = SettingsGetRequestSchema.parse(raw);
     return settings.get(request.key);
   });
-  ipcMain.handle(IPC_CHANNELS.settingsSet, async (event, raw: unknown): Promise<void> => {
+  router.handle(RPC_PROCEDURES.settingsSet, async (event, raw: unknown): Promise<void> => {
     assertTrustedSender(event, window);
     const request = SettingsSetRequestSchema.parse(raw);
     await settings.set(request.key, JsonValueSchema.parse(request.value));
   });
-  ipcMain.handle(IPC_CHANNELS.settingsDelete, async (event, raw: unknown): Promise<void> => {
+  router.handle(RPC_PROCEDURES.settingsDelete, async (event, raw: unknown): Promise<void> => {
     assertTrustedSender(event, window);
     const request = SettingsDeleteRequestSchema.parse(raw);
     await settings.delete(request.key);
   });
-  ipcMain.handle(IPC_CHANNELS.settingsExport, async (event): Promise<boolean> => {
+  router.handle(RPC_PROCEDURES.settingsExport, async (event): Promise<boolean> => {
     assertTrustedSender(event, window);
     const selection = await dialog.showSaveDialog(window, {
       title: "Export Settings",
@@ -401,7 +412,7 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
     await writeFile(selection.filePath, archive, { mode: 0o600 });
     return true;
   });
-  ipcMain.handle(IPC_CHANNELS.settingsImport, async (event): Promise<boolean> => {
+  router.handle(RPC_PROCEDURES.settingsImport, async (event): Promise<boolean> => {
     assertTrustedSender(event, window);
     const selection = await dialog.showOpenDialog(window, {
       title: "Import Settings",
@@ -418,7 +429,7 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
     await settings.replace({ ...imported, ...credentials });
     return true;
   });
-  ipcMain.handle(IPC_CHANNELS.dialogOpenDirectory, async (event, raw: unknown) => {
+  router.handle(RPC_PROCEDURES.dialogOpenDirectory, async (event, raw: unknown) => {
     assertTrustedSender(event, window);
     const request = DialogRequestSchema.parse(raw);
     const result = await dialog.showOpenDialog(window, {
@@ -428,7 +439,7 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
     });
     return DialogSelectionSchema.parse(result.canceled ? null : (result.filePaths[0] ?? null));
   });
-  ipcMain.handle(IPC_CHANNELS.dialogOpenFile, async (event, raw: unknown) => {
+  router.handle(RPC_PROCEDURES.dialogOpenFile, async (event, raw: unknown) => {
     assertTrustedSender(event, window);
     const request = DialogRequestSchema.parse(raw);
     const result = await dialog.showOpenDialog(window, {
@@ -439,7 +450,7 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
     });
     return DialogSelectionSchema.parse(result.canceled ? null : (result.filePaths[0] ?? null));
   });
-  ipcMain.handle(IPC_CHANNELS.dialogSaveFile, async (event, raw: unknown) => {
+  router.handle(RPC_PROCEDURES.dialogSaveFile, async (event, raw: unknown) => {
     assertTrustedSender(event, window);
     const request = DialogRequestSchema.parse(raw);
     const result = await dialog.showSaveDialog(window, {
@@ -449,25 +460,27 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
     });
     return DialogSelectionSchema.parse(result.canceled ? null : (result.filePath ?? null));
   });
-  ipcMain.handle(IPC_CHANNELS.shellOpenExternal, async (event, raw: unknown): Promise<void> => {
+  router.handle(RPC_PROCEDURES.shellOpenExternal, async (event, raw: unknown): Promise<void> => {
     assertTrustedSender(event, window);
     const url = ExternalUrlSchema.parse(raw);
     await shell.openExternal(url, { activate: true });
   });
-  ipcMain.handle(IPC_CHANNELS.clipboardWriteText, (event, raw: unknown): void => {
+  router.handle(RPC_PROCEDURES.clipboardWriteText, (event, raw: unknown): void => {
     assertTrustedSender(event, window);
     const request = ClipboardWriteRequestSchema.parse(raw);
     clipboard.writeText(request.text);
   });
-  ipcMain.handle(IPC_CHANNELS.clipboardReadText, (event): string => {
+  router.handle(RPC_PROCEDURES.clipboardReadText, (event): string => {
     assertTrustedSender(event, window);
     return ClipboardTextSchema.parse(clipboard.readText());
   });
-  ipcMain.handle(IPC_CHANNELS.menuSyncState, (event, raw: unknown): void => {
+  router.handle(RPC_PROCEDURES.menuSyncState, (event, raw: unknown): void => {
     assertTrustedSender(event, window);
     menu.sync(NativeCommandStatesSchema.parse(raw));
   });
-  registerGitHandlers({
+  const disposeGitHandlers = registerGitHandlers({
+    router,
+    stream,
     window,
     settings,
     gitUtility,
@@ -476,76 +489,50 @@ export function registerPlatformHandlers(dependencies: PlatformHandlerDependenci
     repositoryAccessModes,
     assertRepositoryCapability,
     assertActiveCapability,
-    localHistoryRepositoryFor,
   });
-  registerTerminalHandlers({
+  const disposeTerminalHandlers = registerTerminalHandlers({
+    router,
+    stream,
     window,
     terminalUtility,
     repositoryPaths,
     assertRepositoryCapability,
     assertActiveCapability,
   });
-  registerHostingHandlers({ window, hosting, assertActiveCapability });
+  registerHostingHandlers({ router, window, hosting, assertActiveCapability });
+
+  const localHistoryRouters = new Set<DesktopRpcRouter>();
+  const registration: PlatformHandlerRegistration = {
+    registerLocalHistoryWindow(localHistoryWindow, repositoryId) {
+      const localHistoryRouter = new DesktopRpcRouter(localHistoryWindow.webContents);
+      localHistoryRouters.add(localHistoryRouter);
+      registerLocalHistoryGitHandler({
+        router: localHistoryRouter,
+        window,
+        repositoryId,
+        gitUtility,
+        assertRepositoryCapability,
+      });
+      const dispose = (): void => {
+        localHistoryRouter.dispose();
+        localHistoryRouters.delete(localHistoryRouter);
+      };
+      localHistoryWindow.once("closed", dispose);
+      return dispose;
+    },
+    dispose() {
+      disposeGitHandlers();
+      disposeTerminalHandlers();
+      router.dispose();
+      for (const localHistoryRouter of localHistoryRouters) localHistoryRouter.dispose();
+      localHistoryRouters.clear();
+      if (currentRegistration === registration) currentRegistration = null;
+    },
+  };
+  currentRegistration = registration;
+  return registration;
 }
 
 export function unregisterPlatformHandlers(): void {
-  for (const channel of [
-    IPC_CHANNELS.runtimeInfo,
-    IPC_CHANNELS.runtimeLauncherInfo,
-    IPC_CHANNELS.windowGetFullScreen,
-    IPC_CHANNELS.windowSetFullScreen,
-    IPC_CHANNELS.windowSetPresentationMode,
-    IPC_CHANNELS.maintenanceRelaunch,
-    IPC_CHANNELS.diagnosticsSnapshot,
-    IPC_CHANNELS.diagnosticsReveal,
-    IPC_CHANNELS.diagnosticsCollectLogs,
-    IPC_CHANNELS.diagnosticsDumpThreads,
-    IPC_CHANNELS.diagnosticsReadConfiguration,
-    IPC_CHANNELS.diagnosticsWriteConfiguration,
-    IPC_CHANNELS.diagnosticsKeyboardShortcutsPdf,
-    IPC_CHANNELS.diagnosticsListLeftoverDirectories,
-    IPC_CHANNELS.diagnosticsDeleteLeftoverDirectories,
-    IPC_CHANNELS.exportHtml,
-    IPC_CHANNELS.exportPatchText,
-    IPC_CHANNELS.analysisOpenOfflineInspection,
-    IPC_CHANNELS.settingsGet,
-    IPC_CHANNELS.settingsSet,
-    IPC_CHANNELS.settingsDelete,
-    IPC_CHANNELS.settingsExport,
-    IPC_CHANNELS.settingsImport,
-    IPC_CHANNELS.dialogOpenDirectory,
-    IPC_CHANNELS.dialogOpenFile,
-    IPC_CHANNELS.dialogSaveFile,
-    IPC_CHANNELS.shellOpenExternal,
-    IPC_CHANNELS.clipboardWriteText,
-    IPC_CHANNELS.clipboardReadText,
-    IPC_CHANNELS.menuSyncState,
-    IPC_CHANNELS.gitOpenRepository,
-    IPC_CHANNELS.gitInitializeRepository,
-    IPC_CHANNELS.gitCloneRepository,
-    IPC_CHANNELS.gitCloseRepository,
-    IPC_CHANNELS.gitInspectSnapshot,
-    IPC_CHANNELS.gitRepositoryService,
-    IPC_CHANNELS.localHistoryRepositoryService,
-    IPC_CHANNELS.gitQuery,
-    IPC_CHANNELS.gitCancelQuery,
-    IPC_CHANNELS.gitReadFile,
-    IPC_CHANNELS.gitReadFilePreview,
-    IPC_CHANNELS.gitWriteWorkingTreeFile,
-    IPC_CHANNELS.gitOpenWorkingTreeFile,
-    IPC_CHANNELS.gitWatchRepository,
-    IPC_CHANNELS.gitUnwatchRepository,
-    IPC_CHANNELS.terminalCreate,
-    IPC_CHANNELS.terminalListLaunchTargets,
-    IPC_CHANNELS.terminalWrite,
-    IPC_CHANNELS.terminalResize,
-    IPC_CHANNELS.terminalClose,
-    IPC_CHANNELS.terminalCloseRepository,
-    IPC_CHANNELS.hostingSaveAccount,
-    IPC_CHANNELS.hostingRestoreAccounts,
-    IPC_CHANNELS.hostingDeleteAccount,
-    IPC_CHANNELS.hostingExecute,
-  ]) {
-    ipcMain.removeHandler(channel);
-  }
+  currentRegistration?.dispose();
 }

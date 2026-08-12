@@ -1,4 +1,4 @@
-import type { DesktopApi } from "../shared/contracts/ipc";
+import type { DesktopApi } from "../shared/contracts/desktop-api";
 
 export function electronApi(): DesktopApi | null {
   if (typeof window === "undefined") return null;

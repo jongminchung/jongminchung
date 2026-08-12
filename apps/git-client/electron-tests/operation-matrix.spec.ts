@@ -5,8 +5,8 @@ import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
+import type { DesktopApi } from "../src/shared/contracts/desktop-api";
 import { VALID_GIT_OPERATIONS } from "../src/shared/contracts/git-operation-fixtures";
-import type { DesktopApi } from "../src/shared/contracts/ipc";
 import type { GitOperation, RebasePlanEntry } from "../src/shared/contracts/model";
 import { launchPackaged, resetQaProfile, runtimeProfileName } from "./packaged-app-harness";
 

@@ -1,19 +1,20 @@
-import { contextBridge, ipcRenderer } from "electron";
+import { contextBridge } from "electron";
+import { RPC_PROCEDURES } from "../src/shared/contracts/desktop-rpc";
 import {
   GitRepositoryServiceResultSchema,
   type GitRepositoryServiceResult,
 } from "../src/shared/contracts/git-utility";
-import { IPC_CHANNELS } from "../src/shared/contracts/ipc";
 import type { LocalHistoryApi } from "../src/shared/contracts/local-history-ipc";
 import {
   parseLocalHistoryRepositoryRequest,
   type LocalHistoryRepositoryRequest,
 } from "../src/shared/contracts/local-history-ipc";
+import { invokeDesktopRpc } from "./preload/rpc-client";
 
 async function invoke(request: LocalHistoryRepositoryRequest): Promise<GitRepositoryServiceResult> {
   const validatedRequest = parseLocalHistoryRepositoryRequest(request);
-  const raw: unknown = await ipcRenderer.invoke(
-    IPC_CHANNELS.localHistoryRepositoryService,
+  const raw: unknown = await invokeDesktopRpc(
+    RPC_PROCEDURES.localHistoryRepositoryService,
     validatedRequest,
   );
   const result = GitRepositoryServiceResultSchema.parse(raw);

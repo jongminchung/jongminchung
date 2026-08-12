@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RepositoryAccessPolicy, SafeModeViolationError } from "../domain/repositoryAccess";
-import type { DesktopApi } from "../shared/contracts/ipc";
+import type { DesktopApi } from "../shared/contracts/desktop-api";
 import { ElectronHostingBridge } from "./ElectronHostingBridge";
 
 const platformMock = vi.hoisted(() => ({ electronApi: vi.fn() }));

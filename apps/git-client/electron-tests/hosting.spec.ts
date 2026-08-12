@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import type { HostingAccount } from "../electron/hosting/hosting-contract";
-import type { DesktopApi } from "../src/shared/contracts/ipc";
+import type { DesktopApi } from "../src/shared/contracts/desktop-api";
 import {
   inspectHostingProfile,
   launchPackagedHosting,

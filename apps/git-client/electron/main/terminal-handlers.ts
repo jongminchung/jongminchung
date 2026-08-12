@@ -1,6 +1,5 @@
-import { ipcMain } from "electron";
 import type { BrowserWindow } from "electron";
-import { IPC_CHANNELS } from "../../src/shared/contracts/ipc";
+import { RPC_PROCEDURES } from "../../src/shared/contracts/desktop-rpc";
 import {
   TerminalCloseRepositoryRequestSchema,
   TerminalCloseRequestSchema,
@@ -12,10 +11,14 @@ import {
   TerminalResizeRequestSchema,
   TerminalWriteRequestSchema,
 } from "../../src/shared/contracts/terminal";
+import type { DesktopRpcRouter } from "./desktop-rpc-router";
+import type { DesktopStreamPublisher } from "./desktop-stream-hub";
 import { assertTrustedSender } from "./ipc-security";
 import type { TerminalUtilityClient } from "./terminal-utility-client";
 
 interface TerminalHandlerDependencies {
+  readonly router: DesktopRpcRouter;
+  readonly stream: DesktopStreamPublisher;
   readonly window: BrowserWindow;
   readonly terminalUtility: TerminalUtilityClient;
   readonly repositoryPaths: ReadonlyMap<string, string>;
@@ -24,13 +27,23 @@ interface TerminalHandlerDependencies {
 }
 
 export function registerTerminalHandlers({
+  router,
+  stream,
   window,
   terminalUtility,
   repositoryPaths,
   assertRepositoryCapability,
   assertActiveCapability,
-}: TerminalHandlerDependencies): void {
-  ipcMain.handle(IPC_CHANNELS.terminalCreate, async (event, raw: unknown) => {
+}: TerminalHandlerDependencies): () => void {
+  const terminalRepositories = new Map<string, string>();
+  const unsubscribeDisconnect =
+    stream.onDisconnect?.(() => {
+      for (const terminalId of terminalRepositories.keys()) {
+        void terminalUtility.close({ terminalId }).catch(() => undefined);
+      }
+      terminalRepositories.clear();
+    }) ?? (() => undefined);
+  router.handle(RPC_PROCEDURES.terminalCreate, async (event, raw: unknown) => {
     assertTrustedSender(event, window);
     const request = TerminalCreateRequestSchema.parse(raw);
     assertRepositoryCapability(request.repositoryId, "terminal");
@@ -38,36 +51,51 @@ export function registerTerminalHandlers({
     if (cwd === undefined) throw new Error("Repository is not open for terminal access");
     const result = await terminalUtility.create({ ...request, cwd }, (terminalEvent) => {
       if (window.isDestroyed() || window.webContents.isDestroyed()) return;
-      window.webContents.send(
-        IPC_CHANNELS.terminalEvent,
-        TerminalEventEnvelopeSchema.parse(terminalEvent),
-      );
+      stream.publish({
+        kind: "terminal.event",
+        event: TerminalEventEnvelopeSchema.parse(terminalEvent),
+      });
     });
-    return TerminalCreateResultSchema.parse(result);
+    const parsed = TerminalCreateResultSchema.parse(result);
+    terminalRepositories.set(parsed.terminalId, request.repositoryId);
+    return parsed;
   });
-  ipcMain.handle(IPC_CHANNELS.terminalListLaunchTargets, async (event, raw: unknown) => {
+  router.handle(RPC_PROCEDURES.terminalListLaunchTargets, async (event, raw: unknown) => {
     assertTrustedSender(event, window);
     TerminalListLaunchTargetsRequestSchema.parse(raw);
     assertActiveCapability("terminal");
     return TerminalLaunchTargetsSchema.parse(await terminalUtility.listLaunchTargets());
   });
-  ipcMain.handle(IPC_CHANNELS.terminalWrite, async (event, raw: unknown): Promise<void> => {
+  router.handle(RPC_PROCEDURES.terminalWrite, async (event, raw: unknown): Promise<void> => {
     assertTrustedSender(event, window);
     await terminalUtility.write(TerminalWriteRequestSchema.parse(raw));
   });
-  ipcMain.handle(IPC_CHANNELS.terminalResize, async (event, raw: unknown): Promise<void> => {
+  router.handle(RPC_PROCEDURES.terminalResize, async (event, raw: unknown): Promise<void> => {
     assertTrustedSender(event, window);
     await terminalUtility.resize(TerminalResizeRequestSchema.parse(raw));
   });
-  ipcMain.handle(IPC_CHANNELS.terminalClose, async (event, raw: unknown): Promise<void> => {
+  router.handle(RPC_PROCEDURES.terminalClose, async (event, raw: unknown): Promise<void> => {
     assertTrustedSender(event, window);
-    await terminalUtility.close(TerminalCloseRequestSchema.parse(raw));
+    const request = TerminalCloseRequestSchema.parse(raw);
+    try {
+      await terminalUtility.close(request);
+    } finally {
+      terminalRepositories.delete(request.terminalId);
+    }
   });
-  ipcMain.handle(
-    IPC_CHANNELS.terminalCloseRepository,
+  router.handle(
+    RPC_PROCEDURES.terminalCloseRepository,
     async (event, raw: unknown): Promise<void> => {
       assertTrustedSender(event, window);
-      await terminalUtility.closeRepository(TerminalCloseRepositoryRequestSchema.parse(raw));
+      const request = TerminalCloseRepositoryRequestSchema.parse(raw);
+      try {
+        await terminalUtility.closeRepository(request);
+      } finally {
+        for (const [terminalId, repositoryId] of terminalRepositories) {
+          if (repositoryId === request.repositoryId) terminalRepositories.delete(terminalId);
+        }
+      }
     },
   );
+  return unsubscribeDisconnect;
 }

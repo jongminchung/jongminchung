@@ -1,5 +1,5 @@
 import { electronApi } from "../platform/electron";
-import type { DesktopApi } from "../shared/contracts/ipc";
+import type { DesktopApi } from "../shared/contracts/desktop-api";
 import { ElectronGitBridge, type ElectronGitApi } from "./ElectronGitBridge";
 import type { GitBridge } from "./GitBridge";
 

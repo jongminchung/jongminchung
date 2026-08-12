@@ -1,12 +1,15 @@
-import { ipcRenderer } from "electron";
 import { z } from "zod";
+import type { DesktopApi } from "../../src/shared/contracts/desktop-api";
+import { RPC_PROCEDURES } from "../../src/shared/contracts/desktop-rpc";
 import {
   FileContentSchema,
   FilePreviewSchema,
   type GitCloneOptions,
   type GitCloneRepositoryRequest,
   GitCloneRepositoryRequestSchema,
+  GitCreationEventSchema,
   type GitCreationEventListener,
+  type GitCreationTerminalEvent,
   type GitEventListener,
   type GitExecutionRequest,
   GitExecutionRequestSchema,
@@ -29,37 +32,46 @@ import {
   GitCloseRepositoryRequestSchema,
   GitRepositoryRequestSchema,
   GitTerminalResultSchema,
-  IPC_CHANNELS,
 } from "../../src/shared/contracts/ipc";
-import type { DesktopApi } from "../../src/shared/contracts/ipc";
-import { gitListenerRegistry } from "./git-listener-registry";
+import { desktopStream } from "./desktop-stream-client";
 import {
   createGitRepositoryServiceApi,
   invokeRepositoryService,
 } from "./git-repository-service-api";
+import { gitStreamEvents } from "./git-stream-events";
+import { invokeDesktopRpc } from "./rpc-client";
 
 const BooleanResultSchema = z.boolean();
 
 async function invokeRepositoryCreation(
-  channel: typeof IPC_CHANNELS.gitInitializeRepository | typeof IPC_CHANNELS.gitCloneRepository,
+  channel: typeof RPC_PROCEDURES.gitInitializeRepository | typeof RPC_PROCEDURES.gitCloneRepository,
   request: GitInitializeRepositoryRequest | GitCloneRepositoryRequest,
   listener: GitCreationEventListener | undefined,
 ): Promise<RepositoryRecord> {
+  await desktopStream.ready();
   if (listener !== undefined) {
-    if (gitListenerRegistry.creationListeners.has(request.requestId)) {
+    if (gitStreamEvents.creationListeners.has(request.requestId)) {
       throw new Error(`Git request ${request.requestId} is already running in this renderer`);
     }
-    gitListenerRegistry.creationListeners.set(request.requestId, listener);
+    gitStreamEvents.creationListeners.set(request.requestId, listener);
   }
   try {
-    const raw: unknown = await ipcRenderer.invoke(channel, request);
-    return RepositoryRecordSchema.parse(raw);
+    const raw: unknown = await invokeDesktopRpc(channel, request);
+    const terminal = GitCreationEventSchema.parse(raw) as GitCreationTerminalEvent;
+    if (terminal.requestId !== request.requestId) {
+      throw new Error("Git creation result did not match its request");
+    }
+    await gitStreamEvents.waitForBarrier("creation", request.requestId);
+    if (listener !== undefined) gitStreamEvents.deliverCreationEvent(listener, terminal);
+    if (terminal.kind === "completed") return RepositoryRecordSchema.parse(terminal.repository);
+    if (terminal.kind === "failed") throw new Error(terminal.message);
+    throw new Error("Repository creation was cancelled");
   } finally {
     if (
       listener !== undefined &&
-      gitListenerRegistry.creationListeners.get(request.requestId) === listener
+      gitStreamEvents.creationListeners.get(request.requestId) === listener
     ) {
-      gitListenerRegistry.creationListeners.delete(request.requestId);
+      gitStreamEvents.creationListeners.delete(request.requestId);
     }
   }
 }
@@ -68,7 +80,7 @@ export function createGitApi(): DesktopApi["git"] {
   return {
     async openRepository(path: string): Promise<RepositoryRecord> {
       const request = OpenRepositoryRequestSchema.parse({ path });
-      const raw: unknown = await ipcRenderer.invoke(IPC_CHANNELS.gitOpenRepository, request);
+      const raw: unknown = await invokeDesktopRpc(RPC_PROCEDURES.gitOpenRepository, request);
       return RepositoryRecordSchema.parse(raw);
     },
     async initializeRepository(
@@ -81,7 +93,7 @@ export function createGitApi(): DesktopApi["git"] {
         path,
         bare,
       });
-      return invokeRepositoryCreation(IPC_CHANNELS.gitInitializeRepository, request, listener);
+      return invokeRepositoryCreation(RPC_PROCEDURES.gitInitializeRepository, request, listener);
     },
     async cloneRepository(
       url: string,
@@ -95,22 +107,22 @@ export function createGitApi(): DesktopApi["git"] {
         path,
         options,
       });
-      return invokeRepositoryCreation(IPC_CHANNELS.gitCloneRepository, request, listener);
+      return invokeRepositoryCreation(RPC_PROCEDURES.gitCloneRepository, request, listener);
     },
     async closeRepository(repositoryId: RepositoryId): Promise<boolean> {
       const request = GitCloseRepositoryRequestSchema.parse({
         repositoryId,
       });
       try {
-        const raw: unknown = await ipcRenderer.invoke(IPC_CHANNELS.gitCloseRepository, request);
+        const raw: unknown = await invokeDesktopRpc(RPC_PROCEDURES.gitCloseRepository, request);
         return BooleanResultSchema.parse(raw);
       } finally {
-        gitListenerRegistry.repositoryListeners.delete(request.repositoryId);
+        gitStreamEvents.repositoryListeners.delete(request.repositoryId);
       }
     },
     async inspectSnapshot(repositoryId) {
       const request = GitRepositoryRequestSchema.parse({ repositoryId });
-      const raw: unknown = await ipcRenderer.invoke(IPC_CHANNELS.gitInspectSnapshot, request);
+      const raw: unknown = await invokeDesktopRpc(RPC_PROCEDURES.gitInspectSnapshot, request);
       return RepositorySnapshotSchema.parse(raw);
     },
     ...createGitRepositoryServiceApi(),
@@ -119,36 +131,31 @@ export function createGitApi(): DesktopApi["git"] {
       listener: GitEventListener,
     ): Promise<GitTerminalEvent> {
       const request = GitExecutionRequestSchema.parse(untrustedRequest);
-      if (gitListenerRegistry.queryListeners.has(request.requestId)) {
+      await desktopStream.ready();
+      if (gitStreamEvents.queryListeners.has(request.requestId)) {
         throw new Error(`Git request ${request.requestId} is already running in this renderer`);
       }
-      let resolveTerminalEvent = (): void => undefined;
-      const terminalEvent = new Promise<void>((resolve) => {
-        resolveTerminalEvent = resolve;
-      });
-      gitListenerRegistry.queryListeners.set(request.requestId, listener);
-      gitListenerRegistry.queryTerminalWaiters.set(request.requestId, resolveTerminalEvent);
+      gitStreamEvents.queryListeners.set(request.requestId, listener);
       try {
-        const raw: unknown = await ipcRenderer.invoke(IPC_CHANNELS.gitQuery, request);
+        const raw: unknown = await invokeDesktopRpc(RPC_PROCEDURES.gitQuery, request);
         const terminal = GitTerminalResultSchema.parse(raw);
         if (terminal.requestId !== request.requestId) {
           throw new Error("Git query result did not match its request");
         }
-        await gitListenerRegistry.waitForGitTerminalEvent(terminalEvent);
-        if (gitListenerRegistry.queryListeners.get(request.requestId) === listener) {
-          gitListenerRegistry.deliverGitEvent(listener, terminal);
+        await gitStreamEvents.waitForBarrier("query", request.requestId);
+        if (gitStreamEvents.queryListeners.get(request.requestId) === listener) {
+          gitStreamEvents.deliverQueryEvent(listener, terminal);
         }
         return terminal;
       } finally {
-        gitListenerRegistry.queryTerminalWaiters.delete(request.requestId);
-        if (gitListenerRegistry.queryListeners.get(request.requestId) === listener) {
-          gitListenerRegistry.queryListeners.delete(request.requestId);
+        if (gitStreamEvents.queryListeners.get(request.requestId) === listener) {
+          gitStreamEvents.queryListeners.delete(request.requestId);
         }
       }
     },
     async cancelQuery(requestId: GitRequestId): Promise<boolean> {
       const request = GitCancelQueryRequestSchema.parse({ requestId });
-      const raw: unknown = await ipcRenderer.invoke(IPC_CHANNELS.gitCancelQuery, request);
+      const raw: unknown = await invokeDesktopRpc(RPC_PROCEDURES.gitCancelQuery, request);
       return BooleanResultSchema.parse(raw);
     },
     async readFile(repositoryId, source, path) {
@@ -157,7 +164,7 @@ export function createGitApi(): DesktopApi["git"] {
         source,
         path,
       });
-      const raw: unknown = await ipcRenderer.invoke(IPC_CHANNELS.gitReadFile, request);
+      const raw: unknown = await invokeDesktopRpc(RPC_PROCEDURES.gitReadFile, request);
       return FileContentSchema.parse(raw);
     },
     async readFilePreview(repositoryId, source, path) {
@@ -166,7 +173,7 @@ export function createGitApi(): DesktopApi["git"] {
         source,
         path,
       });
-      const raw: unknown = await ipcRenderer.invoke(IPC_CHANNELS.gitReadFilePreview, request);
+      const raw: unknown = await invokeDesktopRpc(RPC_PROCEDURES.gitReadFilePreview, request);
       return FilePreviewSchema.parse(raw);
     },
     async writeWorkingTreeFile(repositoryId, path, content, activityName): Promise<void> {
@@ -176,7 +183,7 @@ export function createGitApi(): DesktopApi["git"] {
         content,
         activityName: activityName ?? null,
       });
-      await ipcRenderer.invoke(IPC_CHANNELS.gitWriteWorkingTreeFile, request);
+      await invokeDesktopRpc(RPC_PROCEDURES.gitWriteWorkingTreeFile, request);
     },
     async loadSubmoduleDiff(repositoryId, before, after, path) {
       const result = await invokeRepositoryService({
@@ -194,7 +201,7 @@ export function createGitApi(): DesktopApi["git"] {
         repositoryId,
         path,
       });
-      await ipcRenderer.invoke(IPC_CHANNELS.gitOpenWorkingTreeFile, request);
+      await invokeDesktopRpc(RPC_PROCEDURES.gitOpenWorkingTreeFile, request);
     },
     async executeSynchronizedBranchOperation(repositoryIds, gitOperation) {
       const result = await invokeRepositoryService({
@@ -219,16 +226,17 @@ export function createGitApi(): DesktopApi["git"] {
       const request = GitWatchRepositoryRequestSchema.parse({
         repositoryId,
       });
-      if (gitListenerRegistry.repositoryListeners.has(request.repositoryId)) {
-        gitListenerRegistry.repositoryListeners.set(request.repositoryId, listener);
+      await desktopStream.ready();
+      if (gitStreamEvents.repositoryListeners.has(request.repositoryId)) {
+        gitStreamEvents.repositoryListeners.set(request.repositoryId, listener);
         return;
       }
-      gitListenerRegistry.repositoryListeners.set(request.repositoryId, listener);
+      gitStreamEvents.repositoryListeners.set(request.repositoryId, listener);
       try {
-        await ipcRenderer.invoke(IPC_CHANNELS.gitWatchRepository, request);
+        await invokeDesktopRpc(RPC_PROCEDURES.gitWatchRepository, request);
       } catch (error) {
-        if (gitListenerRegistry.repositoryListeners.get(request.repositoryId) === listener) {
-          gitListenerRegistry.repositoryListeners.delete(request.repositoryId);
+        if (gitStreamEvents.repositoryListeners.get(request.repositoryId) === listener) {
+          gitStreamEvents.repositoryListeners.delete(request.repositoryId);
         }
         throw error;
       }
@@ -238,9 +246,9 @@ export function createGitApi(): DesktopApi["git"] {
         repositoryId,
       });
       try {
-        await ipcRenderer.invoke(IPC_CHANNELS.gitUnwatchRepository, request);
+        await invokeDesktopRpc(RPC_PROCEDURES.gitUnwatchRepository, request);
       } finally {
-        gitListenerRegistry.repositoryListeners.delete(request.repositoryId);
+        gitStreamEvents.repositoryListeners.delete(request.repositoryId);
       }
     },
   };

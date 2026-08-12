@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { IPC_CHANNELS } from "../../src/shared/contracts/ipc";
+import {
+  desktopRpcChannel,
+  RPC_PROCEDURES,
+  type DesktopRpcProcedure,
+} from "../../src/shared/contracts/desktop-rpc";
 
 type InvokeHandler = (event: unknown, raw: unknown) => unknown;
 
@@ -18,14 +22,6 @@ vi.mock("electron", () => ({
     showOpenDialog: vi.fn(),
     showSaveDialog: vi.fn(),
   },
-  ipcMain: {
-    handle: (channel: string, handler: InvokeHandler): void => {
-      electronMock.handlers.set(channel, handler);
-    },
-    removeHandler: (channel: string): void => {
-      electronMock.handlers.delete(channel);
-    },
-  },
   shell: {
     openExternal: electronMock.openExternal,
     openPath: electronMock.openPath,
@@ -34,10 +30,20 @@ vi.mock("electron", () => ({
 
 import { registerPlatformHandlers, unregisterPlatformHandlers } from "./platform-handlers";
 
-function handler(channel: string): InvokeHandler {
+const webContentsIpc = {
+  handle(channel: string, handler: InvokeHandler): void {
+    electronMock.handlers.set(channel, handler);
+  },
+  removeHandler(channel: string): void {
+    electronMock.handlers.delete(channel);
+  },
+};
+
+function handler(procedure: DesktopRpcProcedure): InvokeHandler {
+  const channel = desktopRpcChannel(procedure);
   const registered = electronMock.handlers.get(channel);
   if (registered === undefined) throw new Error(`No handler registered for ${channel}`);
-  return registered;
+  return (event, payload) => registered(event, { procedure, payload });
 }
 
 describe("platform hosting IPC handlers", () => {
@@ -55,6 +61,7 @@ describe("platform hosting IPC handlers", () => {
     const webContents = {
       isDestroyed: () => false,
       mainFrame,
+      ipc: webContentsIpc,
       send: vi.fn(),
     };
     const window = { isDestroyed: () => false, webContents };
@@ -94,23 +101,23 @@ describe("platform hosting IPC handlers", () => {
     const { event, hosting } = setup();
     const token = "ghp_super-secret-token";
 
-    const saved = await handler(IPC_CHANNELS.hostingSaveAccount)(event, {
+    const saved = await handler(RPC_PROCEDURES.hostingSaveAccount)(event, {
       provider: "gitHub",
       baseUrl: "https://github.com/",
       token,
     });
     expect(
-      handler(IPC_CHANNELS.hostingRestoreAccounts)(event, {
+      handler(RPC_PROCEDURES.hostingRestoreAccounts)(event, {
         accounts: [account],
       }),
     ).toBeUndefined();
     await expect(
-      handler(IPC_CHANNELS.hostingDeleteAccount)(event, {
+      handler(RPC_PROCEDURES.hostingDeleteAccount)(event, {
         accountId: account.id,
       }),
     ).resolves.toBeUndefined();
     await expect(
-      handler(IPC_CHANNELS.hostingExecute)(event, {
+      handler(RPC_PROCEDURES.hostingExecute)(event, {
         accountId: account.id,
         request: {
           kind: "comment",
@@ -129,12 +136,12 @@ describe("platform hosting IPC handlers", () => {
 
     unregisterPlatformHandlers();
     for (const channel of [
-      IPC_CHANNELS.hostingSaveAccount,
-      IPC_CHANNELS.hostingRestoreAccounts,
-      IPC_CHANNELS.hostingDeleteAccount,
-      IPC_CHANNELS.hostingExecute,
+      RPC_PROCEDURES.hostingSaveAccount,
+      RPC_PROCEDURES.hostingRestoreAccounts,
+      RPC_PROCEDURES.hostingDeleteAccount,
+      RPC_PROCEDURES.hostingExecute,
     ]) {
-      expect(electronMock.handlers.has(channel)).toBe(false);
+      expect(electronMock.handlers.has(desktopRpcChannel(channel))).toBe(false);
     }
   });
 
@@ -143,7 +150,7 @@ describe("platform hosting IPC handlers", () => {
     const untrusted = { ...event, sender: {} };
 
     await expect(
-      handler(IPC_CHANNELS.hostingDeleteAccount)(untrusted, {
+      handler(RPC_PROCEDURES.hostingDeleteAccount)(untrusted, {
         accountId: account.id,
       }),
     ).rejects.toThrow("IPC sender is not the main window");
@@ -160,7 +167,7 @@ describe("platform hosting IPC handlers", () => {
 
     let saveError: unknown;
     try {
-      await handler(IPC_CHANNELS.hostingSaveAccount)(event, {
+      await handler(RPC_PROCEDURES.hostingSaveAccount)(event, {
         provider: "gitHub",
         baseUrl: "https://github.com",
         token,
@@ -176,7 +183,7 @@ describe("platform hosting IPC handlers", () => {
       message: "wrong kind",
     });
     await expect(
-      handler(IPC_CHANNELS.hostingExecute)(event, {
+      handler(RPC_PROCEDURES.hostingExecute)(event, {
         accountId: account.id,
         request: { kind: "files", project: "owner/repo", number: 7 },
       }),

@@ -1,11 +1,10 @@
-import { ipcMain } from "electron";
 import type { BrowserWindow } from "electron";
+import { RPC_PROCEDURES } from "../../src/shared/contracts/desktop-rpc";
 import {
   HostingDeleteAccountRequestSchema,
   HostingExecuteRequestSchema,
   HostingRestoreAccountsRequestSchema,
   HostingSaveAccountRequestSchema,
-  IPC_CHANNELS,
 } from "../../src/shared/contracts/ipc";
 import {
   HostingAccountSchema,
@@ -14,9 +13,11 @@ import {
   type ElectronHostingFoundation,
 } from "../hosting";
 import { safeHostingErrorMessage } from "../hosting/hosting-redaction";
+import type { DesktopRpcRouter } from "./desktop-rpc-router";
 import { assertTrustedSender } from "./ipc-security";
 
 interface HostingHandlerDependencies {
+  readonly router: DesktopRpcRouter;
   readonly window: BrowserWindow;
   readonly hosting: ElectronHostingFoundation;
   readonly assertActiveCapability: (capability: "hosting") => void;
@@ -34,11 +35,12 @@ function hostingIpcError(error: unknown, secrets: readonly string[] = []): Error
 }
 
 export function registerHostingHandlers({
+  router,
   window,
   hosting,
   assertActiveCapability,
 }: HostingHandlerDependencies): void {
-  ipcMain.handle(IPC_CHANNELS.hostingSaveAccount, async (event, raw: unknown) => {
+  router.handle(RPC_PROCEDURES.hostingSaveAccount, async (event, raw: unknown) => {
     assertTrustedSender(event, window);
     assertActiveCapability("hosting");
     const token = hostingToken(raw);
@@ -51,7 +53,7 @@ export function registerHostingHandlers({
       throw hostingIpcError(error, token === null ? [] : [token]);
     }
   });
-  ipcMain.handle(IPC_CHANNELS.hostingRestoreAccounts, (event, raw: unknown): void => {
+  router.handle(RPC_PROCEDURES.hostingRestoreAccounts, (event, raw: unknown): void => {
     assertTrustedSender(event, window);
     assertActiveCapability("hosting");
     try {
@@ -61,7 +63,7 @@ export function registerHostingHandlers({
       throw hostingIpcError(error);
     }
   });
-  ipcMain.handle(IPC_CHANNELS.hostingDeleteAccount, async (event, raw: unknown): Promise<void> => {
+  router.handle(RPC_PROCEDURES.hostingDeleteAccount, async (event, raw: unknown): Promise<void> => {
     assertTrustedSender(event, window);
     assertActiveCapability("hosting");
     try {
@@ -71,7 +73,7 @@ export function registerHostingHandlers({
       throw hostingIpcError(error);
     }
   });
-  ipcMain.handle(IPC_CHANNELS.hostingExecute, async (event, raw: unknown) => {
+  router.handle(RPC_PROCEDURES.hostingExecute, async (event, raw: unknown) => {
     assertTrustedSender(event, window);
     assertActiveCapability("hosting");
     try {

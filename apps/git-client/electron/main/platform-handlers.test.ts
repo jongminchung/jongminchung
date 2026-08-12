@@ -1,4 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  desktopRpcChannel,
+  RPC_PROCEDURES,
+  type DesktopRpcProcedure,
+} from "../../src/shared/contracts/desktop-rpc";
 import type {
   FileContent,
   FilePreview,
@@ -15,7 +20,6 @@ import type {
   RepositoryChangedEvent,
   RepositoryChangedListener,
 } from "../../src/shared/contracts/git-utility";
-import { IPC_CHANNELS } from "../../src/shared/contracts/ipc";
 import type { TerminalEventEnvelope } from "../../src/shared/contracts/terminal";
 
 type InvokeHandler = (event: unknown, raw: unknown) => unknown;
@@ -34,14 +38,6 @@ vi.mock("electron", () => ({
   dialog: {
     showOpenDialog: vi.fn(),
     showSaveDialog: vi.fn(),
-  },
-  ipcMain: {
-    handle: (channel: string, handler: InvokeHandler): void => {
-      electronMock.handlers.set(channel, handler);
-    },
-    removeHandler: (channel: string): void => {
-      electronMock.handlers.delete(channel);
-    },
   },
   shell: {
     openExternal: electronMock.openExternal,
@@ -118,10 +114,20 @@ const REPOSITORY_CHANGED: RepositoryChangedEvent = {
   invalidations: ["status", "management"],
 };
 
-function handler(channel: string): InvokeHandler {
+const webContentsIpc = {
+  handle(channel: string, handler: InvokeHandler): void {
+    electronMock.handlers.set(channel, handler);
+  },
+  removeHandler(channel: string): void {
+    electronMock.handlers.delete(channel);
+  },
+};
+
+function handler(procedure: DesktopRpcProcedure): InvokeHandler {
+  const channel = desktopRpcChannel(procedure);
   const registered = electronMock.handlers.get(channel);
   if (registered === undefined) throw new Error(`No handler registered for ${channel}`);
-  return registered;
+  return (event, payload) => registered(event, { procedure, payload });
 }
 
 describe("platform Git IPC handlers", () => {
@@ -138,6 +144,7 @@ describe("platform Git IPC handlers", () => {
     const webContents = {
       isDestroyed: () => false,
       mainFrame,
+      ipc: webContentsIpc,
       send: vi.fn(),
     };
     const executeQuery = vi.fn(async () => ({
@@ -171,16 +178,16 @@ describe("platform Git IPC handlers", () => {
     } as unknown as Parameters<typeof registerPlatformHandlers>[0]);
     const event = { sender: webContents, senderFrame: mainFrame };
 
-    await handler(IPC_CHANNELS.gitOpenRepository)(event, { path: REPOSITORY.path });
+    await handler(RPC_PROCEDURES.gitOpenRepository)(event, { path: REPOSITORY.path });
     await expect(
-      handler(IPC_CHANNELS.gitQuery)(event, {
+      handler(RPC_PROCEDURES.gitQuery)(event, {
         kind: "status",
         requestId: REQUEST_ID,
         repositoryId: REPOSITORY_ID,
       }),
     ).resolves.toMatchObject({ kind: "completed", requestId: REQUEST_ID });
     await expect(
-      handler(IPC_CHANNELS.gitQuery)(event, {
+      handler(RPC_PROCEDURES.gitQuery)(event, {
         kind: "operation",
         requestId: REQUEST_ID,
         repositoryId: REPOSITORY_ID,
@@ -196,6 +203,7 @@ describe("platform Git IPC handlers", () => {
     const webContents = {
       isDestroyed: () => false,
       mainFrame,
+      ipc: webContentsIpc,
       send: vi.fn(),
     };
     const executeRepositoryService = vi.fn();
@@ -227,23 +235,23 @@ describe("platform Git IPC handlers", () => {
       },
     } as unknown as Parameters<typeof registerPlatformHandlers>[0]);
     const event = { sender: webContents, senderFrame: mainFrame };
-    await handler(IPC_CHANNELS.gitOpenRepository)(event, { path: REPOSITORY.path });
+    await handler(RPC_PROCEDURES.gitOpenRepository)(event, { path: REPOSITORY.path });
 
     await expect(
-      handler(IPC_CHANNELS.gitRepositoryService)(event, {
+      handler(RPC_PROCEDURES.gitRepositoryService)(event, {
         operation: "writeIgnoreRules",
         repositoryId: REPOSITORY_ID,
         rules: { gitignore: "dist/\n", infoExclude: "" },
       }),
     ).rejects.toThrow("Git changes is unavailable in Safe Mode");
     await expect(
-      handler(IPC_CHANNELS.gitRepositoryService)(event, {
+      handler(RPC_PROCEDURES.gitRepositoryService)(event, {
         operation: "preCommitCheck",
         repositoryId: REPOSITORY_ID,
       }),
     ).rejects.toThrow("Git changes is unavailable in Safe Mode");
     await expect(
-      handler(IPC_CHANNELS.gitWriteWorkingTreeFile)(event, {
+      handler(RPC_PROCEDURES.gitWriteWorkingTreeFile)(event, {
         repositoryId: REPOSITORY_ID,
         path: "tracked.txt",
         content: "changed\n",
@@ -251,7 +259,7 @@ describe("platform Git IPC handlers", () => {
       }),
     ).rejects.toThrow("Git changes is unavailable in Safe Mode");
     await expect(
-      handler(IPC_CHANNELS.gitOpenWorkingTreeFile)(event, {
+      handler(RPC_PROCEDURES.gitOpenWorkingTreeFile)(event, {
         repositoryId: REPOSITORY_ID,
         path: "tracked.txt",
       }),
@@ -267,6 +275,7 @@ describe("platform Git IPC handlers", () => {
     const webContents = {
       isDestroyed: () => false,
       mainFrame,
+      ipc: webContentsIpc,
       send: vi.fn(),
     };
     const settings = new Map<string, unknown>([
@@ -308,26 +317,26 @@ describe("platform Git IPC handlers", () => {
       rows: 28,
     };
 
-    await handler(IPC_CHANNELS.gitOpenRepository)(event, { path: REPOSITORY.path });
-    await expect(handler(IPC_CHANNELS.terminalCreate)(event, createRequest)).resolves.toMatchObject(
-      {
-        requestId: REQUEST_ID,
-      },
-    );
+    await handler(RPC_PROCEDURES.gitOpenRepository)(event, { path: REPOSITORY.path });
+    await expect(
+      handler(RPC_PROCEDURES.terminalCreate)(event, createRequest),
+    ).resolves.toMatchObject({
+      requestId: REQUEST_ID,
+    });
     settings.set("safeRepositoryPaths", [REPOSITORY.path]);
-    await handler(IPC_CHANNELS.gitOpenRepository)(event, { path: REPOSITORY.path });
+    await handler(RPC_PROCEDURES.gitOpenRepository)(event, { path: REPOSITORY.path });
 
     expect(terminalUtility.closeRepository).toHaveBeenCalledWith({
       repositoryId: REPOSITORY_ID,
     });
-    await expect(handler(IPC_CHANNELS.terminalCreate)(event, createRequest)).rejects.toThrow(
+    await expect(handler(RPC_PROCEDURES.terminalCreate)(event, createRequest)).rejects.toThrow(
       "Terminal access is unavailable in Safe Mode",
     );
-    await expect(handler(IPC_CHANNELS.terminalListLaunchTargets)(event, {})).rejects.toThrow(
+    await expect(handler(RPC_PROCEDURES.terminalListLaunchTargets)(event, {})).rejects.toThrow(
       "Terminal access is unavailable in Safe Mode",
     );
     await expect(
-      handler(IPC_CHANNELS.hostingDeleteAccount)(event, { accountId: "account-1" }),
+      handler(RPC_PROCEDURES.hostingDeleteAccount)(event, { accountId: "account-1" }),
     ).rejects.toThrow("Hosting access is unavailable in Safe Mode");
     expect(terminalUtility.create).toHaveBeenCalledOnce();
     expect(terminalUtility.listLaunchTargets).not.toHaveBeenCalled();
@@ -340,6 +349,7 @@ describe("platform Git IPC handlers", () => {
     const mainWebContents = {
       isDestroyed: () => false,
       mainFrame,
+      ipc: webContentsIpc,
       send: vi.fn(),
     };
     const window = { isDestroyed: () => false, webContents: mainWebContents };
@@ -349,11 +359,13 @@ describe("platform Git IPC handlers", () => {
     const localHistoryWebContents = {
       isDestroyed: () => false,
       mainFrame: localHistoryFrame,
+      ipc: webContentsIpc,
       send: vi.fn(),
     };
     const localHistoryWindow = {
       webContents: localHistoryWebContents,
       getParentWindow: () => window,
+      once: vi.fn(),
     };
     electronMock.fromWebContents.mockReturnValue(localHistoryWindow);
     const executeRepositoryService = vi.fn(
@@ -364,14 +376,12 @@ describe("platform Git IPC handlers", () => {
         return { operation: request.operation, value: "diff" };
       },
     );
-    registerPlatformHandlers({
+    const registration = registerPlatformHandlers({
       window,
       settings: { get: vi.fn(), set: vi.fn(), delete: vi.fn() },
       menu: { sync: vi.fn() },
       gitUtility: { executeRepositoryService },
       terminalUtility: {},
-      localHistoryRepositoryFor: (sender: unknown) =>
-        sender === localHistoryWebContents ? REPOSITORY_ID : null,
       runtime: {
         kind: "electron",
         appVersion: "0.1.0",
@@ -381,16 +391,22 @@ describe("platform Git IPC handlers", () => {
         qaFixture: false,
       },
     } as unknown as Parameters<typeof registerPlatformHandlers>[0]);
+    registration.registerLocalHistoryWindow(
+      localHistoryWindow as unknown as Parameters<
+        typeof registration.registerLocalHistoryWindow
+      >[0],
+      REPOSITORY_ID,
+    );
     const childEvent = {
       sender: localHistoryWebContents,
       senderFrame: localHistoryFrame,
     };
 
     await expect(
-      handler(IPC_CHANNELS.shellOpenExternal)(childEvent, "https://example.test"),
+      handler(RPC_PROCEDURES.shellOpenExternal)(childEvent, "https://example.test"),
     ).rejects.toThrow("not the main window");
     await expect(
-      handler(IPC_CHANNELS.localHistoryRepositoryService)(childEvent, {
+      handler(RPC_PROCEDURES.localHistoryRepositoryService)(childEvent, {
         operation: "readLocalHistoryDiff",
         repositoryId: REPOSITORY_ID,
         activityId: REQUEST_ID,
@@ -398,7 +414,7 @@ describe("platform Git IPC handlers", () => {
       }),
     ).resolves.toEqual({ operation: "readLocalHistoryDiff", value: "diff" });
     await expect(
-      handler(IPC_CHANNELS.localHistoryRepositoryService)(childEvent, {
+      handler(RPC_PROCEDURES.localHistoryRepositoryService)(childEvent, {
         operation: "readLocalHistoryDiff",
         repositoryId: "e49f8882-8116-4dd7-9363-5e8c341900af",
         activityId: REQUEST_ID,
@@ -406,7 +422,7 @@ describe("platform Git IPC handlers", () => {
       }),
     ).rejects.toThrow("different repository");
     await expect(
-      handler(IPC_CHANNELS.localHistoryRepositoryService)(childEvent, {
+      handler(RPC_PROCEDURES.localHistoryRepositoryService)(childEvent, {
         operation: "listConflicts",
         repositoryId: REPOSITORY_ID,
       }),
@@ -420,6 +436,7 @@ describe("platform Git IPC handlers", () => {
     const webContents = {
       isDestroyed: () => false,
       mainFrame,
+      ipc: webContentsIpc,
       send: vi.fn(),
     };
     registerPlatformHandlers({
@@ -440,7 +457,7 @@ describe("platform Git IPC handlers", () => {
     const event = { sender: webContents, senderFrame: mainFrame };
 
     await expect(
-      handler(IPC_CHANNELS.shellOpenExternal)(event, "http://gitlab.example.test/group/project"),
+      handler(RPC_PROCEDURES.shellOpenExternal)(event, "http://gitlab.example.test/group/project"),
     ).resolves.toBeUndefined();
     expect(electronMock.openExternal).toHaveBeenCalledWith(
       "http://gitlab.example.test/group/project",
@@ -448,7 +465,7 @@ describe("platform Git IPC handlers", () => {
     );
 
     await expect(
-      handler(IPC_CHANNELS.shellOpenExternal)(event, "https://token@example.test/private"),
+      handler(RPC_PROCEDURES.shellOpenExternal)(event, "https://token@example.test/private"),
     ).rejects.toThrow("credential-free HTTP or HTTPS");
     expect(electronMock.openExternal).toHaveBeenCalledTimes(1);
     unregisterPlatformHandlers();
@@ -459,6 +476,7 @@ describe("platform Git IPC handlers", () => {
     const webContents = {
       isDestroyed: () => false,
       mainFrame,
+      ipc: webContentsIpc,
       send: vi.fn(),
     };
     const setMinimumSize = vi.fn();
@@ -491,13 +509,13 @@ describe("platform Git IPC handlers", () => {
     } as unknown as Parameters<typeof registerPlatformHandlers>[0]);
     const event = { sender: webContents, senderFrame: mainFrame };
 
-    await handler(IPC_CHANNELS.windowSetPresentationMode)(event, "welcome");
+    await handler(RPC_PROCEDURES.windowSetPresentationMode)(event, "welcome");
     expect(setMinimumSize).toHaveBeenLastCalledWith(800, 650);
     expect(setSize).toHaveBeenLastCalledWith(800, 650, true);
     expect(center).toHaveBeenCalledOnce();
     expect(onWindowPresentationModeChange).toHaveBeenLastCalledWith("welcome");
 
-    await handler(IPC_CHANNELS.windowSetPresentationMode)(event, "workspace");
+    await handler(RPC_PROCEDURES.windowSetPresentationMode)(event, "workspace");
     expect(setMinimumSize).toHaveBeenLastCalledWith(960, 640);
     expect(onWindowPresentationModeChange).toHaveBeenLastCalledWith("workspace");
     unregisterPlatformHandlers();
@@ -506,7 +524,7 @@ describe("platform Git IPC handlers", () => {
   it("validates, delegates, and streams Git query events to the trusted window", async () => {
     const send = vi.fn();
     const mainFrame = { url: "app://git-client/" };
-    const webContents = { isDestroyed: () => false, mainFrame, send };
+    const webContents = { isDestroyed: () => false, mainFrame, ipc: webContentsIpc, send };
     const window = { isDestroyed: () => false, webContents };
     const started: GitRequestEvent = {
       kind: "started",
@@ -587,6 +605,7 @@ describe("platform Git IPC handlers", () => {
       terminalUtility: {
         closeRepository: vi.fn(async () => 0),
       },
+      stream: { publish: send },
       runtime: {
         kind: "electron",
         appVersion: "0.1.0",
@@ -599,19 +618,19 @@ describe("platform Git IPC handlers", () => {
     const event = { sender: webContents, senderFrame: mainFrame };
 
     await expect(
-      handler(IPC_CHANNELS.gitOpenRepository)(event, {
+      handler(RPC_PROCEDURES.gitOpenRepository)(event, {
         path: "/tmp/repository",
       }),
     ).resolves.toEqual(REPOSITORY);
     await expect(
-      handler(IPC_CHANNELS.gitInitializeRepository)(event, {
+      handler(RPC_PROCEDURES.gitInitializeRepository)(event, {
         requestId: REQUEST_ID,
         path: "/tmp/repository",
         bare: false,
       }),
-    ).resolves.toEqual(REPOSITORY);
+    ).resolves.toEqual(creationTerminal);
     await expect(
-      handler(IPC_CHANNELS.gitCloneRepository)(event, {
+      handler(RPC_PROCEDURES.gitCloneRepository)(event, {
         requestId: REQUEST_ID,
         url: "https://example.invalid/repository.git",
         path: "/tmp/repository",
@@ -621,37 +640,39 @@ describe("platform Git IPC handlers", () => {
           recurseSubmodules: false,
         },
       }),
-    ).resolves.toEqual(REPOSITORY);
+    ).resolves.toEqual(cloneTerminal);
     await expect(
-      handler(IPC_CHANNELS.gitQuery)(event, {
+      handler(RPC_PROCEDURES.gitQuery)(event, {
         kind: "status",
         requestId: REQUEST_ID,
         repositoryId: REPOSITORY_ID,
       }),
     ).resolves.toEqual(terminal);
     await expect(
-      handler(IPC_CHANNELS.gitCloseRepository)(event, {
+      handler(RPC_PROCEDURES.gitCloseRepository)(event, {
         repositoryId: REPOSITORY_ID,
       }),
     ).resolves.toBe(true);
     await expect(
-      handler(IPC_CHANNELS.gitCancelQuery)(event, {
+      handler(RPC_PROCEDURES.gitCancelQuery)(event, {
         requestId: REQUEST_ID,
       }),
     ).resolves.toBe(true);
-    expect(send).toHaveBeenNthCalledWith(1, IPC_CHANNELS.gitCreationEvent, creationStarted);
-    expect(send).toHaveBeenNthCalledWith(2, IPC_CHANNELS.gitCreationEvent, creationTerminal);
-    expect(send).toHaveBeenNthCalledWith(3, IPC_CHANNELS.gitCreationEvent, cloneStarted);
-    expect(send).toHaveBeenNthCalledWith(4, IPC_CHANNELS.gitCreationEvent, cloneTerminal);
-    expect(send).toHaveBeenNthCalledWith(5, IPC_CHANNELS.gitQueryEvent, started);
-    expect(send).toHaveBeenNthCalledWith(6, IPC_CHANNELS.gitQueryEvent, terminal);
+    expect(send.mock.calls).toEqual([
+      [{ kind: "git.creation.event", event: creationStarted }],
+      [{ kind: "git.barrier", operation: "creation", requestId: REQUEST_ID }],
+      [{ kind: "git.creation.event", event: cloneStarted }],
+      [{ kind: "git.barrier", operation: "creation", requestId: REQUEST_ID }],
+      [{ kind: "git.query.event", event: started }],
+      [{ kind: "git.barrier", operation: "query", requestId: REQUEST_ID }],
+    ]);
     unregisterPlatformHandlers();
   });
 
   it("validates and streams an operation through the same Git IPC lifecycle", async () => {
     const send = vi.fn();
     const mainFrame = { url: "app://git-client/" };
-    const webContents = { isDestroyed: () => false, mainFrame, send };
+    const webContents = { isDestroyed: () => false, mainFrame, ipc: webContentsIpc, send };
     const operationRequest: GitExecutionRequest = {
       kind: "operation",
       requestId: REQUEST_ID,
@@ -687,6 +708,7 @@ describe("platform Git IPC handlers", () => {
       menu: { sync: vi.fn() },
       gitUtility: { openRepository: vi.fn(async () => REPOSITORY), executeQuery },
       terminalUtility: {},
+      stream: { publish: send },
       runtime: {
         kind: "electron",
         appVersion: "0.1.0",
@@ -698,14 +720,14 @@ describe("platform Git IPC handlers", () => {
     } as unknown as Parameters<typeof registerPlatformHandlers>[0]);
     const event = { sender: webContents, senderFrame: mainFrame };
 
-    await handler(IPC_CHANNELS.gitOpenRepository)(event, { path: REPOSITORY.path });
+    await handler(RPC_PROCEDURES.gitOpenRepository)(event, { path: REPOSITORY.path });
 
-    await expect(handler(IPC_CHANNELS.gitQuery)(event, operationRequest)).resolves.toEqual(
+    await expect(handler(RPC_PROCEDURES.gitQuery)(event, operationRequest)).resolves.toEqual(
       terminal,
     );
     expect(send.mock.calls).toEqual([
-      [IPC_CHANNELS.gitQueryEvent, started],
-      [IPC_CHANNELS.gitQueryEvent, terminal],
+      [{ kind: "git.query.event", event: started }],
+      [{ kind: "git.barrier", operation: "query", requestId: REQUEST_ID }],
     ]);
     unregisterPlatformHandlers();
   });
@@ -716,6 +738,7 @@ describe("platform Git IPC handlers", () => {
     const webContents = {
       isDestroyed: () => false,
       mainFrame,
+      ipc: webContentsIpc,
       send: vi.fn(),
     };
     registerPlatformHandlers({
@@ -742,7 +765,7 @@ describe("platform Git IPC handlers", () => {
     } as unknown as Parameters<typeof registerPlatformHandlers>[0]);
 
     await expect(
-      handler(IPC_CHANNELS.gitOpenRepository)(
+      handler(RPC_PROCEDURES.gitOpenRepository)(
         {
           sender: {},
           senderFrame: { url: "https://attacker.invalid/" },
@@ -759,6 +782,7 @@ describe("platform Git IPC handlers", () => {
     const webContents = {
       isDestroyed: () => false,
       mainFrame,
+      ipc: webContentsIpc,
       send: vi.fn(),
     };
     const inspectSnapshot = vi.fn(async () => SNAPSHOT);
@@ -780,7 +804,7 @@ describe("platform Git IPC handlers", () => {
     const event = { sender: webContents, senderFrame: mainFrame };
 
     await expect(
-      handler(IPC_CHANNELS.gitInspectSnapshot)(event, {
+      handler(RPC_PROCEDURES.gitInspectSnapshot)(event, {
         repositoryId: REPOSITORY_ID,
       }),
     ).resolves.toEqual(SNAPSHOT);
@@ -793,6 +817,7 @@ describe("platform Git IPC handlers", () => {
     const webContents = {
       isDestroyed: () => false,
       mainFrame,
+      ipc: webContentsIpc,
       send: vi.fn(),
     };
     const headOid = SNAPSHOT.headOid;
@@ -836,10 +861,10 @@ describe("platform Git IPC handlers", () => {
     } as unknown as Parameters<typeof registerPlatformHandlers>[0]);
     const event = { sender: webContents, senderFrame: mainFrame };
 
-    await handler(IPC_CHANNELS.gitOpenRepository)(event, { path: REPOSITORY.path });
+    await handler(RPC_PROCEDURES.gitOpenRepository)(event, { path: REPOSITORY.path });
 
     await expect(
-      handler(IPC_CHANNELS.gitRepositoryService)(event, {
+      handler(RPC_PROCEDURES.gitRepositoryService)(event, {
         operation: "compareBranches",
         repositoryId: REPOSITORY_ID,
         left: "feature",
@@ -855,7 +880,7 @@ describe("platform Git IPC handlers", () => {
       },
     });
     await expect(
-      handler(IPC_CHANNELS.gitRepositoryService)(event, {
+      handler(RPC_PROCEDURES.gitRepositoryService)(event, {
         operation: "writeIgnoreRules",
         repositoryId: REPOSITORY_ID,
         rules: { gitignore: "dist/\n", infoExclude: ".cache/\n" },
@@ -880,6 +905,7 @@ describe("platform Git IPC handlers", () => {
     const webContents = {
       isDestroyed: () => false,
       mainFrame,
+      ipc: webContentsIpc,
       send: vi.fn(),
     };
     const executeRepositoryService = vi.fn(
@@ -917,7 +943,7 @@ describe("platform Git IPC handlers", () => {
     const event = { sender: webContents, senderFrame: mainFrame };
 
     await expect(
-      handler(IPC_CHANNELS.gitRepositoryService)(event, {
+      handler(RPC_PROCEDURES.gitRepositoryService)(event, {
         operation: "pushPreview",
         repositoryId: REPOSITORY_ID,
         remote: "origin",
@@ -926,7 +952,7 @@ describe("platform Git IPC handlers", () => {
       }),
     ).resolves.toEqual({ operation: "pushPreview", value: PUSH_PREVIEW });
     await expect(
-      handler(IPC_CHANNELS.gitRepositoryService)(event, {
+      handler(RPC_PROCEDURES.gitRepositoryService)(event, {
         operation: "historyRewritePreview",
         repositoryId: REPOSITORY_ID,
         fromRevision: "HEAD",
@@ -953,7 +979,7 @@ describe("platform Git IPC handlers", () => {
   it("validates file reads and forwards watched repository invalidations", async () => {
     const send = vi.fn();
     const mainFrame = { url: "app://git-client/" };
-    const webContents = { isDestroyed: () => false, mainFrame, send };
+    const webContents = { isDestroyed: () => false, mainFrame, ipc: webContentsIpc, send };
     const readFile = vi.fn(async () => FILE_CONTENT);
     const readFilePreview = vi.fn(async () => FILE_PREVIEW);
     const watchRepository = vi.fn(
@@ -973,6 +999,7 @@ describe("platform Git IPC handlers", () => {
         unwatchRepository,
       },
       terminalUtility: {},
+      stream: { publish: send },
       runtime: {
         kind: "electron",
         appVersion: "0.1.0",
@@ -985,27 +1012,30 @@ describe("platform Git IPC handlers", () => {
     const event = { sender: webContents, senderFrame: mainFrame };
 
     await expect(
-      handler(IPC_CHANNELS.gitReadFile)(event, {
+      handler(RPC_PROCEDURES.gitReadFile)(event, {
         repositoryId: REPOSITORY_ID,
         source: { kind: "workingTree" },
         path: "tracked.txt",
       }),
     ).resolves.toEqual(FILE_CONTENT);
     await expect(
-      handler(IPC_CHANNELS.gitReadFilePreview)(event, {
+      handler(RPC_PROCEDURES.gitReadFilePreview)(event, {
         repositoryId: REPOSITORY_ID,
         source: { kind: "revision", revision: "HEAD" },
         path: "tracked.bin",
       }),
     ).resolves.toEqual(FILE_PREVIEW);
     await expect(
-      handler(IPC_CHANNELS.gitWatchRepository)(event, {
+      handler(RPC_PROCEDURES.gitWatchRepository)(event, {
         repositoryId: REPOSITORY_ID,
       }),
     ).resolves.toBeUndefined();
-    expect(send).toHaveBeenCalledWith(IPC_CHANNELS.gitRepositoryChanged, REPOSITORY_CHANGED);
+    expect(send).toHaveBeenCalledWith({
+      kind: "repository.changed",
+      event: REPOSITORY_CHANGED,
+    });
     await expect(
-      handler(IPC_CHANNELS.gitUnwatchRepository)(event, {
+      handler(RPC_PROCEDURES.gitUnwatchRepository)(event, {
         repositoryId: REPOSITORY_ID,
       }),
     ).resolves.toBeUndefined();
@@ -1024,6 +1054,7 @@ describe("platform Git IPC handlers", () => {
     const webContents = {
       isDestroyed: () => false,
       mainFrame,
+      ipc: webContentsIpc,
       send: vi.fn(),
     };
     const canonicalPath = "/tmp/repository/tracked.txt";
@@ -1048,11 +1079,11 @@ describe("platform Git IPC handlers", () => {
     } as unknown as Parameters<typeof registerPlatformHandlers>[0]);
     const event = { sender: webContents, senderFrame: mainFrame };
 
-    await handler(IPC_CHANNELS.gitOpenRepository)(event, { path: REPOSITORY.path });
+    await handler(RPC_PROCEDURES.gitOpenRepository)(event, { path: REPOSITORY.path });
 
     electronMock.openPath.mockResolvedValueOnce("");
     await expect(
-      handler(IPC_CHANNELS.gitOpenWorkingTreeFile)(event, {
+      handler(RPC_PROCEDURES.gitOpenWorkingTreeFile)(event, {
         repositoryId: REPOSITORY_ID,
         path: "tracked.txt",
       }),
@@ -1061,7 +1092,7 @@ describe("platform Git IPC handlers", () => {
     expect(electronMock.openPath).toHaveBeenCalledWith(canonicalPath);
 
     await expect(
-      handler(IPC_CHANNELS.gitOpenWorkingTreeFile)(event, {
+      handler(RPC_PROCEDURES.gitOpenWorkingTreeFile)(event, {
         repositoryId: REPOSITORY_ID,
         path: "../outside.txt",
       }),
@@ -1070,7 +1101,7 @@ describe("platform Git IPC handlers", () => {
 
     electronMock.openPath.mockResolvedValueOnce("No application available");
     await expect(
-      handler(IPC_CHANNELS.gitOpenWorkingTreeFile)(event, {
+      handler(RPC_PROCEDURES.gitOpenWorkingTreeFile)(event, {
         repositoryId: REPOSITORY_ID,
         path: "tracked.txt",
       }),
@@ -1081,7 +1112,7 @@ describe("platform Git IPC handlers", () => {
   it("resolves terminal cwd only from an opened repository and forwards validated PTY events", async () => {
     const send = vi.fn();
     const mainFrame = { url: "app://git-client/" };
-    const webContents = { isDestroyed: () => false, mainFrame, send };
+    const webContents = { isDestroyed: () => false, mainFrame, ipc: webContentsIpc, send };
     const window = { isDestroyed: () => false, webContents };
     const terminalEvent: TerminalEventEnvelope = {
       kind: "output",
@@ -1115,6 +1146,7 @@ describe("platform Git IPC handlers", () => {
       menu: { sync: vi.fn() },
       gitUtility,
       terminalUtility,
+      stream: { publish: send },
       runtime: {
         kind: "electron",
         appVersion: "0.1.0",
@@ -1133,21 +1165,21 @@ describe("platform Git IPC handlers", () => {
     };
 
     await expect(
-      handler(IPC_CHANNELS.terminalCreate)(event, {
+      handler(RPC_PROCEDURES.terminalCreate)(event, {
         ...createRequest,
         cwd: "/tmp/attacker-controlled",
       }),
     ).rejects.toThrow(/unrecognized_keys/u);
 
-    await expect(handler(IPC_CHANNELS.terminalCreate)(event, createRequest)).rejects.toThrow(
+    await expect(handler(RPC_PROCEDURES.terminalCreate)(event, createRequest)).rejects.toThrow(
       "Repository is not open for terminal access",
     );
     await expect(
-      handler(IPC_CHANNELS.gitOpenRepository)(event, {
+      handler(RPC_PROCEDURES.gitOpenRepository)(event, {
         path: "/tmp/repository",
       }),
     ).resolves.toEqual(REPOSITORY);
-    await expect(handler(IPC_CHANNELS.terminalCreate)(event, createRequest)).resolves.toEqual({
+    await expect(handler(RPC_PROCEDURES.terminalCreate)(event, createRequest)).resolves.toEqual({
       requestId: REQUEST_ID,
       terminalId: "f6478d5c-5aa0-4d4a-b646-cb950b0ca555",
     });
@@ -1162,16 +1194,109 @@ describe("platform Git IPC handlers", () => {
       },
       expect.any(Function),
     );
-    expect(send).toHaveBeenCalledWith(IPC_CHANNELS.terminalEvent, terminalEvent);
+    expect(send).toHaveBeenCalledWith({ kind: "terminal.event", event: terminalEvent });
 
     await expect(
-      handler(IPC_CHANNELS.gitCloseRepository)(event, {
+      handler(RPC_PROCEDURES.gitCloseRepository)(event, {
         repositoryId: REPOSITORY_ID,
       }),
     ).resolves.toBe(true);
     expect(terminalUtility.closeRepository).toHaveBeenCalledWith({
       repositoryId: REPOSITORY_ID,
     });
+    unregisterPlatformHandlers();
+  });
+
+  it("cancels stream-owned Git work, watchers, and terminals on disconnect", async () => {
+    const mainFrame = { url: "app://git-client/" };
+    const webContents = {
+      isDestroyed: () => false,
+      mainFrame,
+      ipc: webContentsIpc,
+      send: vi.fn(),
+    };
+    const disconnectListeners = new Set<() => void>();
+    const stream = {
+      publish: vi.fn(),
+      onDisconnect(listener: () => void): () => void {
+        disconnectListeners.add(listener);
+        return () => disconnectListeners.delete(listener);
+      },
+    };
+    let completeQuery: ((terminal: GitTerminalEvent) => void) | undefined;
+    const executeQuery = vi.fn(
+      () =>
+        new Promise<GitTerminalEvent>((resolve) => {
+          completeQuery = resolve;
+        }),
+    );
+    const cancelQuery = vi.fn(async () => true);
+    const watchRepository = vi.fn(async () => undefined);
+    const unwatchRepository = vi.fn(async () => undefined);
+    const closeTerminal = vi.fn(async () => undefined);
+    const terminalId = "f6478d5c-5aa0-4d4a-b646-cb950b0ca555";
+
+    registerPlatformHandlers({
+      window: { isDestroyed: () => false, webContents },
+      settings: { get: vi.fn(), set: vi.fn(), delete: vi.fn() },
+      menu: { sync: vi.fn() },
+      gitUtility: {
+        openRepository: vi.fn(async () => REPOSITORY),
+        executeQuery,
+        cancelQuery,
+        watchRepository,
+        unwatchRepository,
+      },
+      terminalUtility: {
+        create: vi.fn(async (request: { requestId: string }) => ({
+          requestId: request.requestId,
+          terminalId,
+        })),
+        close: closeTerminal,
+      },
+      stream,
+      runtime: {
+        kind: "electron",
+        appVersion: "0.1.0",
+        electronVersion: "43.3.0",
+        platform: "darwin",
+        architecture: "arm64",
+        qaFixture: false,
+      },
+    } as unknown as Parameters<typeof registerPlatformHandlers>[0]);
+    const event = { sender: webContents, senderFrame: mainFrame };
+    await handler(RPC_PROCEDURES.gitOpenRepository)(event, { path: REPOSITORY.path });
+    await handler(RPC_PROCEDURES.gitWatchRepository)(event, { repositoryId: REPOSITORY_ID });
+    await handler(RPC_PROCEDURES.terminalCreate)(event, {
+      requestId: REQUEST_ID,
+      repositoryId: REPOSITORY_ID,
+      cols: 100,
+      rows: 28,
+    });
+    const query = Promise.resolve(
+      handler(RPC_PROCEDURES.gitQuery)(event, {
+        kind: "status",
+        requestId: REQUEST_ID,
+        repositoryId: REPOSITORY_ID,
+      }),
+    );
+    await vi.waitFor(() => expect(executeQuery).toHaveBeenCalledOnce());
+
+    for (const disconnect of disconnectListeners) disconnect();
+    await vi.waitFor(() => expect(cancelQuery).toHaveBeenCalledWith(REQUEST_ID));
+    expect(unwatchRepository).toHaveBeenCalledWith(REPOSITORY_ID);
+    expect(closeTerminal).toHaveBeenCalledWith({ terminalId });
+
+    completeQuery?.({
+      kind: "cancelled",
+      requestId: REQUEST_ID,
+      reason: "requested",
+      durationMs: 1,
+    });
+    await expect(query).resolves.toMatchObject({ kind: "cancelled" });
+    expect(stream.publish).not.toHaveBeenCalledWith(
+      expect.objectContaining({ kind: "git.barrier" }),
+    );
     unregisterPlatformHandlers();
   });
 });

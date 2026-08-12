@@ -1,8 +1,11 @@
 import { BrowserWindow } from "electron";
-import type { IpcMainInvokeEvent } from "electron";
+import type { IpcMainEvent, IpcMainInvokeEvent } from "electron";
 import type { RepositoryId } from "../../src/shared/contracts/git-utility";
 
-export function assertTrustedSender(event: IpcMainInvokeEvent, window: BrowserWindow): void {
+export function assertTrustedSender(
+  event: IpcMainEvent | IpcMainInvokeEvent,
+  window: BrowserWindow,
+): void {
   if (event.sender !== window.webContents) {
     throw new Error("IPC sender is not the main window.");
   }

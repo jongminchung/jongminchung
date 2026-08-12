@@ -1,10 +1,11 @@
-import { ipcRenderer } from "electron";
+import type { DesktopApi } from "../../src/shared/contracts/desktop-api";
+import { RPC_PROCEDURES } from "../../src/shared/contracts/desktop-rpc";
 import {
   GitRepositoryServiceRequestSchema,
   GitRepositoryServiceResultSchema,
   type GitRepositoryServiceResult,
 } from "../../src/shared/contracts/git-utility";
-import { IPC_CHANNELS, type DesktopApi } from "../../src/shared/contracts/ipc";
+import { invokeDesktopRpc } from "./rpc-client";
 
 type RepositoryServiceMethod =
   | "compareBranches"
@@ -47,7 +48,7 @@ export async function invokeRepositoryService(
   untrustedRequest: unknown,
 ): Promise<GitRepositoryServiceResult> {
   const request = GitRepositoryServiceRequestSchema.parse(untrustedRequest);
-  const raw: unknown = await ipcRenderer.invoke(IPC_CHANNELS.gitRepositoryService, request);
+  const raw: unknown = await invokeDesktopRpc(RPC_PROCEDURES.gitRepositoryService, request);
   const result = GitRepositoryServiceResultSchema.parse(raw);
   if (result.operation !== request.operation) {
     throw new Error("Repository service result did not match its request");

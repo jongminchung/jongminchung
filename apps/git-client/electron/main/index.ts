@@ -7,11 +7,13 @@ import { RepositoryIdSchema, type RepositoryId } from "../../src/shared/contract
 import { QA_FIXTURE_RENDERER_ARGUMENT } from "../../src/shared/contracts/ipc";
 import type { WindowPresentationMode } from "../../src/shared/contracts/ipc";
 import { ElectronHostingFoundation, FetchHostingHttpClient } from "../hosting";
+import { DesktopStreamHub } from "./desktop-stream-hub";
 import { DiagnosticsService } from "./diagnostics-service";
 import { GitUtilityClient } from "./git-utility-client";
 import { SafeStorageHostingCredentialStore } from "./hosting-credential-store";
 import { NativeMenuService } from "./menu-service";
 import { registerPlatformHandlers, unregisterPlatformHandlers } from "./platform-handlers";
+import type { PlatformHandlerRegistration } from "./platform-handlers";
 import { registerAppProtocol, registerPrivilegedScheme } from "./protocol";
 import { QaHostingSafeStorage } from "./qa-hosting-safe-storage";
 import { resolveRuntimeProfile, trustsQaHostingCertificate } from "./runtime-profile";
@@ -72,7 +74,6 @@ let terminalUtility: TerminalUtilityClient | null = null;
 let diagnosticsService: DiagnosticsService | null = null;
 let finishingQuit = false;
 let utilityCrashPromptOpen = false;
-const localHistoryRepositories = new WeakMap<WebContents, RepositoryId>();
 
 function localHistoryRepositoryFromUrl(value: string): RepositoryId | null {
   try {
@@ -98,6 +99,7 @@ async function createMainWindow(
   diagnostics: DiagnosticsService,
 ): Promise<BrowserWindow> {
   let presentationMode: WindowPresentationMode = "welcome";
+  let platformHandlers: PlatformHandlerRegistration | null = null;
   const window = new BrowserWindow({
     width: 800,
     height: 650,
@@ -153,16 +155,13 @@ async function createMainWindow(
       return;
     }
     const childContents = childWindow.webContents;
-    localHistoryRepositories.set(childContents, repositoryId);
     preventUntrustedNavigation(childContents);
+    platformHandlers?.registerLocalHistoryWindow(childWindow, repositoryId);
     monitorWindowRuntime(childWindow, {
       diagnostics,
       showMessageBox: (target, options) => dialog.showMessageBox(target, options),
       relaunch: () => app.relaunch(),
       quit: () => app.quit(),
-    });
-    childWindow.once("closed", () => {
-      localHistoryRepositories.delete(childContents);
     });
   });
   window.webContents.on(
@@ -190,7 +189,10 @@ async function createMainWindow(
     relaunch: () => app.relaunch(),
     quit: () => app.quit(),
   });
-  const menu = NativeMenuService.create(window);
+  const stream = new DesktopStreamHub(window);
+  const menu = NativeMenuService.create(window, (command) => {
+    stream.publish({ kind: "menu.command", command });
+  });
   const hostingSafeStorage =
     runtimeProfile.hostingCertificatePath === null
       ? safeStorage
@@ -201,7 +203,7 @@ async function createMainWindow(
     ),
     new SafeStorageHostingCredentialStore(hostingSafeStorage, settings),
   );
-  registerPlatformHandlers({
+  platformHandlers = registerPlatformHandlers({
     window,
     settings,
     menu,
@@ -210,7 +212,7 @@ async function createMainWindow(
     hosting,
     diagnostics,
     runtime,
-    localHistoryRepositoryFor: (sender) => localHistoryRepositories.get(sender) ?? null,
+    stream,
     onWindowPresentationModeChange: (mode) => {
       presentationMode = mode;
     },
@@ -233,6 +235,7 @@ async function createMainWindow(
   if (!window.isVisible()) window.show();
 
   window.on("closed", () => {
+    stream.dispose();
     unregisterPlatformHandlers();
     if (mainWindow === window) mainWindow = null;
   });

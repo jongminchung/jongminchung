@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { DesktopApi } from "../shared/contracts/ipc";
+import type { DesktopApi } from "../shared/contracts/desktop-api";
 
 const platformMock = vi.hoisted(() => ({
   electronApi: vi.fn(),

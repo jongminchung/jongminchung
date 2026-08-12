@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { DesktopApi } from "../shared/contracts/ipc";
+import type { DesktopApi } from "../shared/contracts/desktop-api";
 import { openExternalUrl, selectPatchExportPath, selectPatchImportPath } from "./electronActions";
 
 function installElectronApi(api: Partial<DesktopApi>): void {

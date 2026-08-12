@@ -1,6 +1,5 @@
-import { ipcRenderer } from "electron";
-import { IPC_CHANNELS } from "../../src/shared/contracts/ipc";
-import type { DesktopApi } from "../../src/shared/contracts/ipc";
+import type { DesktopApi } from "../../src/shared/contracts/desktop-api";
+import { RPC_PROCEDURES } from "../../src/shared/contracts/desktop-rpc";
 import {
   type TerminalClientEvent,
   TerminalCloseRepositoryRequestSchema,
@@ -15,6 +14,8 @@ import {
   TerminalResizeRequestSchema,
   TerminalWriteRequestSchema,
 } from "../../src/shared/contracts/terminal";
+import { desktopStream } from "./desktop-stream-client";
+import { invokeDesktopRpc } from "./rpc-client";
 
 const terminalListeners = new Map<TerminalRequestId, TerminalEventListener>();
 
@@ -41,8 +42,9 @@ function terminalClientEvent(
   }
 }
 
-ipcRenderer.on(IPC_CHANNELS.terminalEvent, (_event, raw: unknown): void => {
-  const event = TerminalEventEnvelopeSchema.parse(raw);
+desktopStream.subscribe((envelope): void => {
+  if (envelope.kind !== "terminal.event") return;
+  const event = TerminalEventEnvelopeSchema.parse(envelope.event);
   const listener = terminalListeners.get(event.requestId);
   if (listener === undefined) return;
   try {
@@ -60,13 +62,14 @@ export function createTerminalApi(): DesktopApi["terminal"] {
   return {
     async listLaunchTargets() {
       const request = TerminalListLaunchTargetsRequestSchema.parse({});
-      const raw: unknown = await ipcRenderer.invoke(
-        IPC_CHANNELS.terminalListLaunchTargets,
+      const raw: unknown = await invokeDesktopRpc(
+        RPC_PROCEDURES.terminalListLaunchTargets,
         request,
       );
       return TerminalLaunchTargetsSchema.parse(raw);
     },
     async create(repositoryId, cols, rows, target, listener) {
+      await desktopStream.ready();
       const request = TerminalCreateRequestSchema.parse({
         requestId: globalThis.crypto.randomUUID(),
         repositoryId,
@@ -76,7 +79,7 @@ export function createTerminalApi(): DesktopApi["terminal"] {
       });
       terminalListeners.set(request.requestId, listener);
       try {
-        const raw: unknown = await ipcRenderer.invoke(IPC_CHANNELS.terminalCreate, request);
+        const raw: unknown = await invokeDesktopRpc(RPC_PROCEDURES.terminalCreate, request);
         const result = TerminalCreateResultSchema.parse(raw);
         if (result.requestId !== request.requestId) {
           throw new Error("Terminal create result did not match its request");
@@ -95,7 +98,7 @@ export function createTerminalApi(): DesktopApi["terminal"] {
         terminalId,
         data,
       });
-      await ipcRenderer.invoke(IPC_CHANNELS.terminalWrite, request);
+      await invokeDesktopRpc(RPC_PROCEDURES.terminalWrite, request);
     },
     async resize(terminalId, cols, rows): Promise<void> {
       const request = TerminalResizeRequestSchema.parse({
@@ -103,12 +106,12 @@ export function createTerminalApi(): DesktopApi["terminal"] {
         cols,
         rows,
       });
-      await ipcRenderer.invoke(IPC_CHANNELS.terminalResize, request);
+      await invokeDesktopRpc(RPC_PROCEDURES.terminalResize, request);
     },
     async close(terminalId): Promise<void> {
       const request = TerminalCloseRequestSchema.parse({ terminalId });
       try {
-        await ipcRenderer.invoke(IPC_CHANNELS.terminalClose, request);
+        await invokeDesktopRpc(RPC_PROCEDURES.terminalClose, request);
       } finally {
         const requestId = terminalRequests.get(request.terminalId);
         terminalRequests.delete(request.terminalId);
@@ -119,7 +122,7 @@ export function createTerminalApi(): DesktopApi["terminal"] {
       const request = TerminalCloseRepositoryRequestSchema.parse({
         repositoryId,
       });
-      await ipcRenderer.invoke(IPC_CHANNELS.terminalCloseRepository, request);
+      await invokeDesktopRpc(RPC_PROCEDURES.terminalCloseRepository, request);
     },
   };
 }

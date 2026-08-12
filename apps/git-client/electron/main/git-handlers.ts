@@ -1,5 +1,6 @@
-import { ipcMain, shell } from "electron";
-import type { BrowserWindow, IpcMainInvokeEvent } from "electron";
+import { shell } from "electron";
+import type { BrowserWindow } from "electron";
+import { RPC_PROCEDURES } from "../../src/shared/contracts/desktop-rpc";
 import {
   FileContentSchema,
   FilePreviewSchema,
@@ -30,12 +31,13 @@ import {
   GitCloseRepositoryRequestSchema,
   GitRepositoryRequestSchema,
   GitTerminalResultSchema,
-  IPC_CHANNELS,
 } from "../../src/shared/contracts/ipc";
 import {
   localHistoryRequestRepositoryId,
   parseLocalHistoryRepositoryRequest,
 } from "../../src/shared/contracts/local-history-ipc";
+import type { DesktopRpcRouter } from "./desktop-rpc-router";
+import type { DesktopStreamPublisher } from "./desktop-stream-hub";
 import type { GitUtilityClient } from "./git-utility-client";
 import { assertTrustedLocalHistorySender, assertTrustedSender } from "./ipc-security";
 import { safeRepositoryPaths } from "./repository-capabilities";
@@ -81,6 +83,8 @@ function repositoryServiceExecutableIds(
 }
 
 interface GitHandlerDependencies {
+  readonly router: DesktopRpcRouter;
+  readonly stream: DesktopStreamPublisher;
   readonly window: BrowserWindow;
   readonly settings: SettingsStore;
   readonly gitUtility: GitUtilityClient;
@@ -92,13 +96,12 @@ interface GitHandlerDependencies {
     capability: ExecutableCapability,
   ) => void;
   readonly assertActiveCapability: (capability: ExecutableCapability) => void;
-  readonly localHistoryRepositoryFor?: (
-    sender: IpcMainInvokeEvent["sender"],
-  ) => RepositoryId | null;
 }
 
-export function registerGitHandlers(dependencies: GitHandlerDependencies): void {
+export function registerGitHandlers(dependencies: GitHandlerDependencies): () => void {
   const {
+    router,
+    stream,
     window,
     settings,
     gitUtility,
@@ -107,22 +110,36 @@ export function registerGitHandlers(dependencies: GitHandlerDependencies): void 
     repositoryAccessModes,
     assertRepositoryCapability,
     assertActiveCapability,
-    localHistoryRepositoryFor,
   } = dependencies;
   const creationListener: GitCreationEventListener = (creationEvent) => {
     if (window.isDestroyed() || window.webContents.isDestroyed()) return;
-    window.webContents.send(
-      IPC_CHANNELS.gitCreationEvent,
-      GitCreationEventSchema.parse(creationEvent),
-    );
+    if (
+      creationEvent.kind === "completed" ||
+      creationEvent.kind === "failed" ||
+      creationEvent.kind === "cancelled"
+    ) {
+      return;
+    }
+    stream.publish({
+      kind: "git.creation.event",
+      event: GitCreationEventSchema.parse(creationEvent),
+    });
   };
-  const createdRepository = (terminal: GitCreationTerminalEvent): RepositoryRecord => {
-    if (terminal.kind === "completed") return terminal.repository;
-    if (terminal.kind === "failed") throw new Error(terminal.message);
-    throw new Error("Repository creation was cancelled");
-  };
-  ipcMain.handle(
-    IPC_CHANNELS.gitOpenRepository,
+  const activeRequestIds = new Set<string>();
+  const watchedRepositoryIds = new Set<RepositoryId>();
+  const unsubscribeDisconnect =
+    stream.onDisconnect?.(() => {
+      for (const requestId of activeRequestIds) {
+        void gitUtility.cancelQuery(requestId).catch(() => undefined);
+      }
+      activeRequestIds.clear();
+      for (const repositoryId of watchedRepositoryIds) {
+        void gitUtility.unwatchRepository(repositoryId).catch(() => undefined);
+      }
+      watchedRepositoryIds.clear();
+    }) ?? (() => undefined);
+  router.handle(
+    RPC_PROCEDURES.gitOpenRepository,
     async (event, raw: unknown): Promise<RepositoryRecord> => {
       assertTrustedSender(event, window);
       const request = OpenRepositoryRequestSchema.parse(raw);
@@ -145,47 +162,80 @@ export function registerGitHandlers(dependencies: GitHandlerDependencies): void 
       return RepositoryRecordSchema.parse(repository);
     },
   );
-  ipcMain.handle(
-    IPC_CHANNELS.gitInitializeRepository,
-    async (event, raw: unknown): Promise<RepositoryRecord> => {
+  router.handle(
+    RPC_PROCEDURES.gitInitializeRepository,
+    async (event, raw: unknown): Promise<GitCreationTerminalEvent> => {
       assertTrustedSender(event, window);
       assertActiveCapability("gitMutation");
       const request = GitInitializeRepositoryRequestSchema.parse(raw);
-      const terminal = await gitUtility.initializeRepository(request, creationListener);
-      const repository = RepositoryRecordSchema.parse(createdRepository(terminal));
-      repositoryPaths.set(repository.id, repository.path);
-      repositoryAccessModes.set(repository.id, "trusted");
-      return repository;
+      activeRequestIds.add(request.requestId);
+      try {
+        const terminal = GitCreationEventSchema.parse(
+          await gitUtility.initializeRepository(request, creationListener),
+        ) as GitCreationTerminalEvent;
+        if (terminal.kind === "completed") {
+          repositoryPaths.set(terminal.repository.id, terminal.repository.path);
+          repositoryAccessModes.set(terminal.repository.id, "trusted");
+        }
+        if (activeRequestIds.has(request.requestId)) {
+          stream.publish({
+            kind: "git.barrier",
+            operation: "creation",
+            requestId: request.requestId,
+          });
+        }
+        return terminal;
+      } finally {
+        activeRequestIds.delete(request.requestId);
+      }
     },
   );
-  ipcMain.handle(
-    IPC_CHANNELS.gitCloneRepository,
-    async (event, raw: unknown): Promise<RepositoryRecord> => {
+  router.handle(
+    RPC_PROCEDURES.gitCloneRepository,
+    async (event, raw: unknown): Promise<GitCreationTerminalEvent> => {
       assertTrustedSender(event, window);
       assertActiveCapability("gitMutation");
       const request = GitCloneRepositoryRequestSchema.parse(raw);
-      const terminal = await gitUtility.cloneRepository(request, creationListener);
-      const repository = RepositoryRecordSchema.parse(createdRepository(terminal));
-      repositoryPaths.set(repository.id, repository.path);
-      repositoryAccessModes.set(repository.id, "trusted");
-      return repository;
+      activeRequestIds.add(request.requestId);
+      try {
+        const terminal = GitCreationEventSchema.parse(
+          await gitUtility.cloneRepository(request, creationListener),
+        ) as GitCreationTerminalEvent;
+        if (terminal.kind === "completed") {
+          repositoryPaths.set(terminal.repository.id, terminal.repository.path);
+          repositoryAccessModes.set(terminal.repository.id, "trusted");
+        }
+        if (activeRequestIds.has(request.requestId)) {
+          stream.publish({
+            kind: "git.barrier",
+            operation: "creation",
+            requestId: request.requestId,
+          });
+        }
+        return terminal;
+      } finally {
+        activeRequestIds.delete(request.requestId);
+      }
     },
   );
-  ipcMain.handle(IPC_CHANNELS.gitCloseRepository, async (event, raw: unknown): Promise<boolean> => {
-    assertTrustedSender(event, window);
-    const request = GitCloseRepositoryRequestSchema.parse(raw);
-    await terminalUtility.closeRepository(request);
-    const closed = await gitUtility.closeRepository(request.repositoryId);
-    repositoryPaths.delete(request.repositoryId);
-    repositoryAccessModes.delete(request.repositoryId);
-    return closed;
-  });
-  ipcMain.handle(IPC_CHANNELS.gitInspectSnapshot, async (event, raw: unknown) => {
+  router.handle(
+    RPC_PROCEDURES.gitCloseRepository,
+    async (event, raw: unknown): Promise<boolean> => {
+      assertTrustedSender(event, window);
+      const request = GitCloseRepositoryRequestSchema.parse(raw);
+      await terminalUtility.closeRepository(request);
+      const closed = await gitUtility.closeRepository(request.repositoryId);
+      repositoryPaths.delete(request.repositoryId);
+      repositoryAccessModes.delete(request.repositoryId);
+      return closed;
+    },
+  );
+  router.handle(RPC_PROCEDURES.gitInspectSnapshot, async (event, raw: unknown) => {
     assertTrustedSender(event, window);
     const request = GitRepositoryRequestSchema.parse(raw);
     return RepositorySnapshotSchema.parse(await gitUtility.inspectSnapshot(request.repositoryId));
   });
-  ipcMain.handle(IPC_CHANNELS.gitRepositoryService, async (event, raw: unknown) => {
+  router.handle(RPC_PROCEDURES.gitRepositoryService, async (event, raw: unknown) => {
     assertTrustedSender(event, window);
     const request = GitRepositoryServiceRequestSchema.parse(raw);
     for (const repositoryId of repositoryServiceExecutableIds(request)) {
@@ -195,8 +245,128 @@ export function registerGitHandlers(dependencies: GitHandlerDependencies): void 
       await gitUtility.executeRepositoryService(request),
     );
   });
-  ipcMain.handle(IPC_CHANNELS.localHistoryRepositoryService, async (event, raw: unknown) => {
-    const repositoryId = localHistoryRepositoryFor?.(event.sender) ?? null;
+  router.handle(RPC_PROCEDURES.gitQuery, async (event, raw: unknown): Promise<GitTerminalEvent> => {
+    assertTrustedSender(event, window);
+    const request = GitExecutionRequestSchema.parse(raw);
+    if (request.kind === "operation") {
+      assertRepositoryCapability(request.repositoryId, "gitMutation");
+    }
+    activeRequestIds.add(request.requestId);
+    try {
+      const terminal = await gitUtility.executeQuery(request, (gitEvent) => {
+        if (window.isDestroyed() || window.webContents.isDestroyed()) return;
+        if (
+          gitEvent.kind === "completed" ||
+          gitEvent.kind === "failed" ||
+          gitEvent.kind === "cancelled"
+        ) {
+          return;
+        }
+        stream.publish({
+          kind: "git.query.event",
+          event: GitRequestEventSchema.parse(gitEvent),
+        });
+      });
+      if (activeRequestIds.has(request.requestId)) {
+        stream.publish({ kind: "git.barrier", operation: "query", requestId: request.requestId });
+      }
+      return GitTerminalResultSchema.parse(terminal);
+    } finally {
+      activeRequestIds.delete(request.requestId);
+    }
+  });
+  router.handle(RPC_PROCEDURES.gitCancelQuery, async (event, raw: unknown): Promise<boolean> => {
+    assertTrustedSender(event, window);
+    const request = GitCancelQueryRequestSchema.parse(raw);
+    return gitUtility.cancelQuery(request.requestId);
+  });
+  router.handle(RPC_PROCEDURES.gitReadFile, async (event, raw: unknown) => {
+    assertTrustedSender(event, window);
+    const request = GitReadFileRequestSchema.parse(raw);
+    return FileContentSchema.parse(
+      await gitUtility.readFile(request.repositoryId, request.source, request.path),
+    );
+  });
+  router.handle(RPC_PROCEDURES.gitReadFilePreview, async (event, raw: unknown) => {
+    assertTrustedSender(event, window);
+    const request = GitReadFileRequestSchema.parse(raw);
+    return FilePreviewSchema.parse(
+      await gitUtility.readFilePreview(request.repositoryId, request.source, request.path),
+    );
+  });
+  router.handle(
+    RPC_PROCEDURES.gitWriteWorkingTreeFile,
+    async (event, raw: unknown): Promise<void> => {
+      assertTrustedSender(event, window);
+      const request = GitWriteWorkingTreeFileRequestSchema.parse(raw);
+      assertRepositoryCapability(request.repositoryId, "gitMutation");
+      await gitUtility.writeWorkingTreeFile(
+        request.repositoryId,
+        request.path,
+        request.content,
+        request.activityName ?? undefined,
+      );
+    },
+  );
+  router.handle(
+    RPC_PROCEDURES.gitOpenWorkingTreeFile,
+    async (event, raw: unknown): Promise<void> => {
+      assertTrustedSender(event, window);
+      const request = GitWorkingTreeFileRequestSchema.parse(raw);
+      assertRepositoryCapability(request.repositoryId, "externalExecution");
+      const canonicalPath = await gitUtility.resolveWorkingTreeFile(
+        request.repositoryId,
+        request.path,
+      );
+      const error = await shell.openPath(canonicalPath);
+      if (error.length > 0) {
+        throw new Error(`Could not open working-tree file: ${error}`);
+      }
+    },
+  );
+  router.handle(RPC_PROCEDURES.gitWatchRepository, async (event, raw: unknown): Promise<void> => {
+    assertTrustedSender(event, window);
+    const request = GitWatchRepositoryRequestSchema.parse(raw);
+    await gitUtility.watchRepository(request.repositoryId, (repositoryEvent) => {
+      if (window.isDestroyed() || window.webContents.isDestroyed()) return;
+      stream.publish({
+        kind: "repository.changed",
+        event: RepositoryChangedEventSchema.parse(repositoryEvent),
+      });
+    });
+    watchedRepositoryIds.add(request.repositoryId);
+  });
+  router.handle(RPC_PROCEDURES.gitUnwatchRepository, async (event, raw: unknown): Promise<void> => {
+    assertTrustedSender(event, window);
+    const request = GitWatchRepositoryRequestSchema.parse(raw);
+    try {
+      await gitUtility.unwatchRepository(request.repositoryId);
+    } finally {
+      watchedRepositoryIds.delete(request.repositoryId);
+    }
+  });
+  return unsubscribeDisconnect;
+}
+
+interface LocalHistoryGitHandlerDependencies {
+  readonly router: DesktopRpcRouter;
+  readonly window: BrowserWindow;
+  readonly repositoryId: RepositoryId;
+  readonly gitUtility: GitUtilityClient;
+  readonly assertRepositoryCapability: (
+    repositoryId: string,
+    capability: ExecutableCapability,
+  ) => void;
+}
+
+export function registerLocalHistoryGitHandler({
+  router,
+  window,
+  repositoryId,
+  gitUtility,
+  assertRepositoryCapability,
+}: LocalHistoryGitHandlerDependencies): void {
+  router.handle(RPC_PROCEDURES.localHistoryRepositoryService, async (event, raw: unknown) => {
     assertTrustedLocalHistorySender(event, window, repositoryId);
     const request = parseLocalHistoryRepositoryRequest(raw);
     if (localHistoryRequestRepositoryId(request) !== repositoryId) {
@@ -212,82 +382,5 @@ export function registerGitHandlers(dependencies: GitHandlerDependencies): void 
       throw new Error("Local History result did not match its request.");
     }
     return result;
-  });
-  ipcMain.handle(IPC_CHANNELS.gitQuery, async (event, raw: unknown): Promise<GitTerminalEvent> => {
-    assertTrustedSender(event, window);
-    const request = GitExecutionRequestSchema.parse(raw);
-    if (request.kind === "operation") {
-      assertRepositoryCapability(request.repositoryId, "gitMutation");
-    }
-    const terminal = await gitUtility.executeQuery(request, (gitEvent) => {
-      if (window.isDestroyed() || window.webContents.isDestroyed()) return;
-      window.webContents.send(IPC_CHANNELS.gitQueryEvent, GitRequestEventSchema.parse(gitEvent));
-    });
-    return GitTerminalResultSchema.parse(terminal);
-  });
-  ipcMain.handle(IPC_CHANNELS.gitCancelQuery, async (event, raw: unknown): Promise<boolean> => {
-    assertTrustedSender(event, window);
-    const request = GitCancelQueryRequestSchema.parse(raw);
-    return gitUtility.cancelQuery(request.requestId);
-  });
-  ipcMain.handle(IPC_CHANNELS.gitReadFile, async (event, raw: unknown) => {
-    assertTrustedSender(event, window);
-    const request = GitReadFileRequestSchema.parse(raw);
-    return FileContentSchema.parse(
-      await gitUtility.readFile(request.repositoryId, request.source, request.path),
-    );
-  });
-  ipcMain.handle(IPC_CHANNELS.gitReadFilePreview, async (event, raw: unknown) => {
-    assertTrustedSender(event, window);
-    const request = GitReadFileRequestSchema.parse(raw);
-    return FilePreviewSchema.parse(
-      await gitUtility.readFilePreview(request.repositoryId, request.source, request.path),
-    );
-  });
-  ipcMain.handle(
-    IPC_CHANNELS.gitWriteWorkingTreeFile,
-    async (event, raw: unknown): Promise<void> => {
-      assertTrustedSender(event, window);
-      const request = GitWriteWorkingTreeFileRequestSchema.parse(raw);
-      assertRepositoryCapability(request.repositoryId, "gitMutation");
-      await gitUtility.writeWorkingTreeFile(
-        request.repositoryId,
-        request.path,
-        request.content,
-        request.activityName ?? undefined,
-      );
-    },
-  );
-  ipcMain.handle(
-    IPC_CHANNELS.gitOpenWorkingTreeFile,
-    async (event, raw: unknown): Promise<void> => {
-      assertTrustedSender(event, window);
-      const request = GitWorkingTreeFileRequestSchema.parse(raw);
-      assertRepositoryCapability(request.repositoryId, "externalExecution");
-      const canonicalPath = await gitUtility.resolveWorkingTreeFile(
-        request.repositoryId,
-        request.path,
-      );
-      const error = await shell.openPath(canonicalPath);
-      if (error.length > 0) {
-        throw new Error(`Could not open working-tree file: ${error}`);
-      }
-    },
-  );
-  ipcMain.handle(IPC_CHANNELS.gitWatchRepository, async (event, raw: unknown): Promise<void> => {
-    assertTrustedSender(event, window);
-    const request = GitWatchRepositoryRequestSchema.parse(raw);
-    await gitUtility.watchRepository(request.repositoryId, (repositoryEvent) => {
-      if (window.isDestroyed() || window.webContents.isDestroyed()) return;
-      window.webContents.send(
-        IPC_CHANNELS.gitRepositoryChanged,
-        RepositoryChangedEventSchema.parse(repositoryEvent),
-      );
-    });
-  });
-  ipcMain.handle(IPC_CHANNELS.gitUnwatchRepository, async (event, raw: unknown): Promise<void> => {
-    assertTrustedSender(event, window);
-    const request = GitWatchRepositoryRequestSchema.parse(raw);
-    await gitUtility.unwatchRepository(request.repositoryId);
   });
 }

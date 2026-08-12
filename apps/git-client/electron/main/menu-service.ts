@@ -1,7 +1,6 @@
 import { app, Menu } from "electron";
 import type { BrowserWindow, MenuItem, MenuItemConstructorOptions } from "electron";
 import type { NativeCommand, NativeCommandState } from "../../src/shared/contracts/ipc";
-import { IPC_CHANNELS } from "../../src/shared/contracts/ipc";
 
 type MenuTemplateItem = MenuItemConstructorOptions;
 
@@ -31,10 +30,16 @@ export class NativeMenuService {
   #accelerators = new Map<string, string | null>();
   #acceleratorSignature = "";
 
-  private constructor(private readonly window: BrowserWindow) {}
+  private constructor(
+    private readonly window: BrowserWindow,
+    private readonly commandSink: (command: NativeCommand) => void,
+  ) {}
 
-  static create(window: BrowserWindow): NativeMenuService {
-    const service = new NativeMenuService(window);
+  static create(
+    window: BrowserWindow,
+    commandSink: (command: NativeCommand) => void = (): void => undefined,
+  ): NativeMenuService {
+    const service = new NativeMenuService(window, commandSink);
     service.install();
     return service;
   }
@@ -641,6 +646,6 @@ export class NativeMenuService {
 
   private send(command: NativeCommand): void {
     if (this.window.isDestroyed()) return;
-    this.window.webContents.send(IPC_CHANNELS.menuCommand, command);
+    this.commandSink(command);
   }
 }
