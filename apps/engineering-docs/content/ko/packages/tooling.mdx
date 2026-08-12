@@ -12,10 +12,10 @@ sourceUrl: https://github.com/jongminchung/jongminchung/tree/main/packages/tooli
 packageName: "@jongminchung/tooling"
 packageVersion: 1.0.0
 apiSymbols:
-  - "@jongminchung/tooling/oxfmt#OxfmtConfig"
-  - "@jongminchung/tooling/oxfmt#OxfmtOverride"
-  - "@jongminchung/tooling/oxfmt#ResolvedOxfmtConfig"
-  - "@jongminchung/tooling/oxfmt#defineOxfmtConfig"
+    - "@jongminchung/tooling/oxfmt#OxfmtConfig"
+    - "@jongminchung/tooling/oxfmt#OxfmtOverride"
+    - "@jongminchung/tooling/oxfmt#ResolvedOxfmtConfig"
+    - "@jongminchung/tooling/oxfmt#defineOxfmtConfig"
 ---
 
 ## 개요
@@ -44,8 +44,8 @@ pnpm add --save-dev @jongminchung/tooling oxfmt oxlint
 import { defineOxfmtConfig } from "@jongminchung/tooling/oxfmt";
 
 export default defineOxfmtConfig({
-  printWidth: 100,
-  ignorePatterns: ["generated/"],
+    printWidth: 100,
+    ignorePatterns: ["generated/"],
 });
 ```
 

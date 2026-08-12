@@ -830,8 +830,8 @@ if self.sample_acc >= CYCLES_PER_SAMPLE {
 CPU에는 nestest라는 정답지가 있었고 PPU는 스크린샷을 눈으로 봤다. 소리는? 파형을 WAV 파일로 덤프해서 귀로 듣고, 스펙트로그램(시간-주파수 그림)으로 눈으로도 본다. 아래는 우리 APU가 만들어낸 「Chase」의 소리, Start를 누른 직후 5초의 스펙트로그램이다.
 
 <MaterialImage
-  src="/materials/images/2026-07-07-building-nes-emulator/chase-spectrogram.png"
-  caption="Chase에서 Start를 누른 직후 5초의 스펙트로그램. 수평 사다리가 펄스·삼각파의 배음, 세로로 뻗은 광대역 기둥이 노이즈 채널의 퍼커션이다."
+    src="/materials/images/2026-07-07-building-nes-emulator/chase-spectrogram.png"
+    caption="Chase에서 Start를 누른 직후 5초의 스펙트로그램. 수평 사다리가 펄스·삼각파의 배음, 세로로 뻗은 광대역 기둥이 노이즈 채널의 퍼커션이다."
 />
 
 멜로디가 있는 소리는 이렇게 기본음 위로 배음이 수평 사다리를 그리고, 드럼은 전 대역을 덮는 세로 기둥으로 나타난다. 잡음 벽지처럼 보이면 믹서나 LFSR 버그, 텅 비어 있으면 프레임 카운터나 채널 enable 버그를 의심하면 된다.
@@ -952,11 +952,11 @@ impl NesConsole {
 
 ```js
 const loop = () => {
-  console.run_frame(); // 1/60초어치 에뮬레이션
-  const buf = new Uint8ClampedArray(console.frame());
-  ctx.putImageData(new ImageData(buf, 256, 240), 0, 0);
-  audioNode.port.postMessage(console.audio()); // APU 샘플을 스피커로
-  requestAnimationFrame(loop);
+    console.run_frame(); // 1/60초어치 에뮬레이션
+    const buf = new Uint8ClampedArray(console.frame());
+    ctx.putImageData(new ImageData(buf, 256, 240), 0, 0);
+    audioNode.port.postMessage(console.audio()); // APU 샘플을 스피커로
+    requestAnimationFrame(loop);
 };
 ```
 

@@ -46,7 +46,7 @@ sourceUrl: https://kciter.so/posts/how-to-design-animation/
 
 ```js
 function lerp(a, b, t) {
-  return a + (b - a) * t;
+    return a + (b - a) * t;
 }
 ```
 
@@ -137,23 +137,23 @@ current += velocity * dt;
 
 ```js
 for (const obj of objects) {
-  // 힘 계산
-  const gravity = { x: 0, y: 9.8 * obj.mass };
-  const friction = { x: -obj.vx * drag, y: -obj.vy * drag };
-  const fx = gravity.x + friction.x;
-  const fy = gravity.y + friction.y;
+    // 힘 계산
+    const gravity = { x: 0, y: 9.8 * obj.mass };
+    const friction = { x: -obj.vx * drag, y: -obj.vy * drag };
+    const fx = gravity.x + friction.x;
+    const fy = gravity.y + friction.y;
 
-  // 적분
-  obj.vx += (fx / obj.mass) * dt;
-  obj.vy += (fy / obj.mass) * dt;
-  obj.x += obj.vx * dt;
-  obj.y += obj.vy * dt;
+    // 적분
+    obj.vx += (fx / obj.mass) * dt;
+    obj.vy += (fy / obj.mass) * dt;
+    obj.x += obj.vx * dt;
+    obj.y += obj.vy * dt;
 
-  // 제약 처리 (바닥 충돌)
-  if (obj.y > floorY) {
-    obj.y = floorY;
-    obj.vy *= -restitution; // 반발 계수만큼 튕김
-  }
+    // 제약 처리 (바닥 충돌)
+    if (obj.y > floorY) {
+        obj.y = floorY;
+        obj.vy *= -restitution; // 반발 계수만큼 튕김
+    }
 }
 ```
 
@@ -208,8 +208,8 @@ const y = amplitude * Math.sin(time * frequency);
 
 ```js
 items.forEach((item, i) => {
-  const y = amplitude * Math.sin(time * frequency + i * phaseOffset);
-  item.style.transform = `translateY(${y}px)`;
+    const y = amplitude * Math.sin(time * frequency + i * phaseOffset);
+    item.style.transform = `translateY(${y}px)`;
 });
 ```
 
@@ -366,8 +366,8 @@ const opacity = 1 - p; // 1 → 0으로 사라짐
 이런 경우에는 **전문 도구**를 사용하는 것이 맞다. After Effects로 만든 애니메이션을 [Lottie](https://airbnb.io/lottie/)로 내보내거나, [Rive](https://rive.app/)처럼 인터랙티브 애니메이션에 특화된 도구를 쓰는 방식이다. 혹은 아예 **영상**으로 제작해서 재생하는 것도 방법이다. 코드로 모든 것을 해결하려는 것보다 적절한 도구를 선택하는 것이 더 나은 결과를 만든다.
 
 <MaterialImage
-  src="/materials/images/2026-02-18-how-to-design-animation/lottie.gif"
-  caption="Lottie를 사용한 복잡한 애니메이션"
+    src="/materials/images/2026-02-18-how-to-design-animation/lottie.gif"
+    caption="Lottie를 사용한 복잡한 애니메이션"
 />
 
 반대로 말하면 코드로 작성하는 애니메이션의 강점은 **실시간 인터랙션**에 있다. 사용자의 입력에 즉각 반응하고 상태에 따라 동적으로 변하는 움직임은 미리 만들어 둔 영상으로는 구현하기 어렵다. 이 글에서 다룬 기법들이 빛을 발하는 지점이 바로 여기다.

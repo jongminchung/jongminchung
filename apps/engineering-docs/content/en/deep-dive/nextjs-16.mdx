@@ -20,9 +20,9 @@ Server Components are the App Router default. Build document content, navigation
 
 ```tsx
 export default async function Page({ params }: PageProps) {
-  const { locale, slug } = await params;
-  const document = await getDocument(locale, slug);
-  return <DocumentPage document={document} />;
+    const { locale, slug } = await params;
+    const document = await getDocument(locale, slug);
+    return <DocumentPage document={document} />;
 }
 ```
 

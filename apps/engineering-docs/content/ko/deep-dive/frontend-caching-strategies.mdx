@@ -229,12 +229,12 @@ Cache-Control: public, s-maxage=300, max-age=0
 let inflight: Promise<string> | null = null;
 
 async function getProducts() {
-  if (cache && cache.expiresAt > Date.now()) return cache.body;
-  // 이미 원본에 다녀오는 중이면 그 결과를 같이 기다린다
-  inflight ??= fetchOrigin().finally(() => {
-    inflight = null;
-  });
-  return inflight;
+    if (cache && cache.expiresAt > Date.now()) return cache.body;
+    // 이미 원본에 다녀오는 중이면 그 결과를 같이 기다린다
+    inflight ??= fetchOrigin().finally(() => {
+        inflight = null;
+    });
+    return inflight;
 }
 ```
 
@@ -268,12 +268,12 @@ async function getProducts() {
 
 ```tsx
 function ProductList() {
-  const [products, setProducts] = useState<Product[]>([]);
+    const [products, setProducts] = useState<Product[]>([]);
 
-  useEffect(() => {
-    fetchProducts().then(setProducts);
-  }, []);
-  // ...
+    useEffect(() => {
+        fetchProducts().then(setProducts);
+    }, []);
+    // ...
 }
 ```
 
@@ -283,12 +283,12 @@ function ProductList() {
 
 ```tsx
 function ProductList({ category, sort }: Props) {
-  const { data } = useQuery({
-    queryKey: ["products", { category, sort }],
-    queryFn: () => fetchProducts(category, sort),
-    staleTime: 60_000,
-  });
-  // ...
+    const { data } = useQuery({
+        queryKey: ["products", { category, sort }],
+        queryFn: () => fetchProducts(category, sort),
+        staleTime: 60_000,
+    });
+    // ...
 }
 ```
 
@@ -323,13 +323,13 @@ function ProductList({ category, sort }: Props) {
 
 ```tsx
 [
-  "products",
+    "products",
 ] // 상품 도메인 전체
 [
-  ("products", "list")
+    ("products", "list")
 ] // 모든 상품 목록
 [
-  ("products", "list", { category, sort })
+    ("products", "list", { category, sort })
 ] // 특정 조건의 목록
 [("products", "detail", productId)]; // 특정 상품 상세
 ```
@@ -407,13 +407,13 @@ CDN의 기본 캐시 키는 URL이다. 그런데 URL은 우리 생각보다 훨�
 
 ```tsx
 <ProductCard
-  onMouseEnter={() =>
-    queryClient.prefetchQuery({
-      queryKey: ["products", "detail", product.id],
-      queryFn: () => fetchProduct(product.id),
-      staleTime: 60_000,
-    })
-  }
+    onMouseEnter={() =>
+        queryClient.prefetchQuery({
+            queryKey: ["products", "detail", product.id],
+            queryFn: () => fetchProduct(product.id),
+            staleTime: 60_000,
+        })
+    }
 />
 ```
 
@@ -441,10 +441,10 @@ TTL의 미덕은 신호가 필요 없다는 점이다. 데이터가 어디서 �
 
 ```tsx
 const addToCart = useMutation({
-  mutationFn: (item: CartItem) => api.addToCart(item),
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ["cart"] });
-  },
+    mutationFn: (item: CartItem) => api.addToCart(item),
+    onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["cart"] });
+    },
 });
 ```
 
@@ -459,7 +459,7 @@ const addToCart = useMutation({
 ```typescript
 // 데이터를 가져올 때 태그를 달아둔다
 fetch(`https://api.example.com/products/${id}`, {
-  next: { tags: [`product:${id}`, "products"] },
+    next: { tags: [`product:${id}`, "products"] },
 });
 ```
 
@@ -469,9 +469,9 @@ fetch(`https://api.example.com/products/${id}`, {
 import { revalidateTag } from "next/cache";
 
 export async function updatePrice(id: string, price: number) {
-  await api.updatePrice(id, price);
-  revalidateTag(`product:${id}`); // 이 상품의 상세와
-  revalidateTag("products"); // 이 상품이 포함된 목록들까지
+    await api.updatePrice(id, price);
+    revalidateTag(`product:${id}`); // 이 상품의 상세와
+    revalidateTag("products"); // 이 상품이 포함된 목록들까지
 }
 ```
 
@@ -487,30 +487,37 @@ CDN에도 서로게이트 키(surrogate key), 캐시 태그라는 이름으로 �
 
 ```tsx
 const toggleLike = useMutation({
-  mutationFn: (postId: string) => api.toggleLike(postId),
-  onMutate: async (postId) => {
-    await queryClient.cancelQueries({ queryKey: ["posts", "detail", postId] });
-    const previous = queryClient.getQueryData(["posts", "detail", postId]);
-    // 서버 응답 전에 캐시를 미리 고친다 (캐시가 비어 있으면 건드리지 않는다)
-    queryClient.setQueryData(
-      ["posts", "detail", postId],
-      (old: Post | undefined) =>
-        old && {
-          ...old,
-          liked: !old.liked,
-          likeCount: old.likeCount + (old.liked ? -1 : 1),
-        },
-    );
-    return { previous };
-  },
-  onError: (_err, postId, context) => {
-    // 실패하면 원래 값으로 되돌린다
-    queryClient.setQueryData(["posts", "detail", postId], context?.previous);
-  },
-  onSettled: (_data, _err, postId) => {
-    // 성공이든 실패든 마지막엔 서버 값으로 맞춘다
-    queryClient.invalidateQueries({ queryKey: ["posts", "detail", postId] });
-  },
+    mutationFn: (postId: string) => api.toggleLike(postId),
+    onMutate: async (postId) => {
+        await queryClient.cancelQueries({
+            queryKey: ["posts", "detail", postId],
+        });
+        const previous = queryClient.getQueryData(["posts", "detail", postId]);
+        // 서버 응답 전에 캐시를 미리 고친다 (캐시가 비어 있으면 건드리지 않는다)
+        queryClient.setQueryData(
+            ["posts", "detail", postId],
+            (old: Post | undefined) =>
+                old && {
+                    ...old,
+                    liked: !old.liked,
+                    likeCount: old.likeCount + (old.liked ? -1 : 1),
+                },
+        );
+        return { previous };
+    },
+    onError: (_err, postId, context) => {
+        // 실패하면 원래 값으로 되돌린다
+        queryClient.setQueryData(
+            ["posts", "detail", postId],
+            context?.previous,
+        );
+    },
+    onSettled: (_data, _err, postId) => {
+        // 성공이든 실패든 마지막엔 서버 값으로 맞춘다
+        queryClient.invalidateQueries({
+            queryKey: ["posts", "detail", postId],
+        });
+    },
 });
 ```
 
@@ -532,9 +539,9 @@ channel.postMessage({ type: "invalidate", queryKey: ["cart"] });
 
 // 다른 탭들은 받아서 자기 캐시를 무효화한다
 channel.onmessage = (e) => {
-  if (e.data.type === "invalidate") {
-    queryClient.invalidateQueries({ queryKey: e.data.queryKey });
-  }
+    if (e.data.type === "invalidate") {
+        queryClient.invalidateQueries({ queryKey: e.data.queryKey });
+    }
 };
 ```
 
@@ -557,10 +564,10 @@ import { persistQueryClient } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 
 persistQueryClient({
-  queryClient,
-  persister: createSyncStoragePersister({ storage: window.localStorage }),
-  maxAge: 24 * 60 * 60 * 1000, // 이보다 오래된 캐시는 복원하지 않는다
-  buster: BUILD_ID, // 배포 버전 — 값이 바뀌면 이전 캐시를 통째로 버린다
+    queryClient,
+    persister: createSyncStoragePersister({ storage: window.localStorage }),
+    maxAge: 24 * 60 * 60 * 1000, // 이보다 오래된 캐시는 복원하지 않는다
+    buster: BUILD_ID, // 배포 버전 — 값이 바뀌면 이전 캐시를 통째로 버린다
 });
 ```
 
@@ -585,10 +592,10 @@ persistQueryClient({
 window.addEventListener("pagehide", flushAnalytics);
 
 window.addEventListener("pageshow", (e) => {
-  if (e.persisted) {
-    // bfcache에서 복원된 화면 — 데이터가 낡았을 수 있으니 재검증만 건다
-    queryClient.invalidateQueries();
-  }
+    if (e.persisted) {
+        // bfcache에서 복원된 화면 — 데이터가 낡았을 수 있으니 재검증만 건다
+        queryClient.invalidateQueries();
+    }
 });
 ```
 

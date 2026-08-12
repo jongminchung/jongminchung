@@ -1,10 +1,9 @@
-// @ts-nocheck -- Upstream visual source; runtime contracts are checked at the registry boundary.
 "use client";
 
-import React from "react";
 import { useSwitch } from "./useSwitch";
 
-const FONT = "'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, sans-serif";
+const FONT =
+    "'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, sans-serif";
 const MONO = "ui-monospace, SFMono-Regular, Menlo, monospace";
 
 const STYLE = `
@@ -33,72 +32,92 @@ const STYLE = `
 `;
 
 const AttrReadout = ({ checked }: { checked: boolean }) => (
-  <div className="hswd-attrs">
-    aria-checked=<b>"{String(checked)}"</b>
-    <br />
-    data-state=<b>"{checked ? "checked" : "unchecked"}"</b>
-  </div>
+    <div className="hswd-attrs">
+        aria-checked=<b>"{String(checked)}"</b>
+        <br />
+        data-state=<b>"{checked ? "checked" : "unchecked"}"</b>
+    </div>
 );
 
 const IosSwitch = () => {
-  const { checked, getSwitchProps } = useSwitch();
-  return (
-    <div className="hswd-item">
-      <button {...getSwitchProps({ className: "hswd-ios" })} aria-label="iOS 스타일 스위치" />
-      <AttrReadout checked={checked} />
-      <div className="hswd-label">iOS 스타일 · button</div>
-    </div>
-  );
+    const { checked, getSwitchProps } = useSwitch();
+    return (
+        <div className="hswd-item">
+            <button
+                {...getSwitchProps({ className: "hswd-ios" })}
+                aria-label="iOS 스타일 스위치"
+            />
+            <AttrReadout checked={checked} />
+            <div className="hswd-label">iOS 스타일 · button</div>
+        </div>
+    );
 };
 
 const CheckboxSwitch = () => {
-  const { checked, getSwitchProps } = useSwitch({ defaultChecked: true });
-  return (
-    <div className="hswd-item">
-      <button {...getSwitchProps({ className: "hswd-check" })}>
-        <span className="hswd-box" aria-hidden>
-          ✓
-        </span>
-        알림 받기
-      </button>
-      <AttrReadout checked={checked} />
-      <div className="hswd-label">체크박스 스타일 · button</div>
-    </div>
-  );
+    const { checked, getSwitchProps } = useSwitch({ defaultChecked: true });
+    return (
+        <div className="hswd-item">
+            <button {...getSwitchProps({ className: "hswd-check" })}>
+                <span className="hswd-box" aria-hidden>
+                    ✓
+                </span>
+                알림 받기
+            </button>
+            <AttrReadout checked={checked} />
+            <div className="hswd-label">체크박스 스타일 · button</div>
+        </div>
+    );
 };
 
 const TerminalSwitch = () => {
-  const { checked, getSwitchProps } = useSwitch();
-  return (
-    <div className="hswd-item">
-      <div {...getSwitchProps({ className: "hswd-term" })}>{checked ? "[ ON  ]" : "[ OFF ]"}</div>
-      <AttrReadout checked={checked} />
-      <div className="hswd-label">터미널 스타일 · div</div>
-    </div>
-  );
+    const { checked, getSwitchProps } = useSwitch();
+    return (
+        <div className="hswd-item">
+            <div {...getSwitchProps({ className: "hswd-term" })}>
+                {checked ? "[ ON  ]" : "[ OFF ]"}
+            </div>
+            <AttrReadout checked={checked} />
+            <div className="hswd-label">터미널 스타일 · div</div>
+        </div>
+    );
 };
 
 export const SwitchSkinDemo = () => {
-  return (
-    <div
-      style={{
-        border: "1px solid #dee2e6",
-        borderRadius: 8,
-        padding: 20,
-        margin: "24px 0",
-        background: "#fff",
-        fontFamily: FONT,
-      }}
-    >
-      <style dangerouslySetInnerHTML={{ __html: STYLE }} />
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 16, justifyContent: "center" }}>
-        <IosSwitch />
-        <CheckboxSwitch />
-        <TerminalSwitch />
-      </div>
-      <div style={{ fontSize: 11, color: "#adb5bd", textAlign: "center", marginTop: 16 }}>
-        셋 다 같은 useSwitch를 사용한다 — 클릭하거나 Tab으로 포커스한 뒤 Space, Enter로 조작해보자
-      </div>
-    </div>
-  );
+    return (
+        <div
+            style={{
+                border: "1px solid #dee2e6",
+                borderRadius: 8,
+                padding: 20,
+                margin: "24px 0",
+                background: "#fff",
+                fontFamily: FONT,
+            }}
+        >
+            <style dangerouslySetInnerHTML={{ __html: STYLE }} />
+            <div
+                style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 16,
+                    justifyContent: "center",
+                }}
+            >
+                <IosSwitch />
+                <CheckboxSwitch />
+                <TerminalSwitch />
+            </div>
+            <div
+                style={{
+                    fontSize: 11,
+                    color: "#adb5bd",
+                    textAlign: "center",
+                    marginTop: 16,
+                }}
+            >
+                셋 다 같은 useSwitch를 사용한다 — 클릭하거나 Tab으로 포커스한 뒤
+                Space, Enter로 조작해보자
+            </div>
+        </div>
+    );
 };

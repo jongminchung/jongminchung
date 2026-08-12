@@ -1,21 +1,19 @@
-// @ts-nocheck -- Upstream visual source; runtime contracts are checked at the registry boundary.
-
-export { TrafficPatternDemo } from "./TrafficPatternDemo";
-export { PercentileDemo } from "./PercentileDemo";
-export { SurvivorshipDemo } from "./SurvivorshipDemo";
+export { BackpressureDemo } from "./BackpressureDemo";
+export { BottleneckDemo } from "./BottleneckDemo";
+export { CacheStampedeDemo } from "./CacheStampedeDemo";
+export { CascadeDemo } from "./CascadeDemo";
 export { CpuPatternDemo } from "./CpuPatternDemo";
-export { ThrottlingDemo } from "./ThrottlingDemo";
+export { DeployDemo } from "./DeployDemo";
+export { EventLoopDemo } from "./EventLoopDemo";
+export { GcPauseDemo } from "./GcPauseDemo";
 export { MemoryLeakDemo } from "./MemoryLeakDemo";
 export { MemorySpikeDemo } from "./MemorySpikeDemo";
-export { GcPauseDemo } from "./GcPauseDemo";
-export { ThreadPoolDemo } from "./ThreadPoolDemo";
-export { CascadeDemo } from "./CascadeDemo";
-export { EventLoopDemo } from "./EventLoopDemo";
-export { BottleneckDemo } from "./BottleneckDemo";
-export { UtilizationCurveDemo } from "./UtilizationCurveDemo";
-export { BackpressureDemo } from "./BackpressureDemo";
-export { CacheStampedeDemo } from "./CacheStampedeDemo";
-export { TimeoutMismatchDemo } from "./TimeoutMismatchDemo";
-export { DeployDemo } from "./DeployDemo";
-export { SlowBurnDemo } from "./SlowBurnDemo";
+export { PercentileDemo } from "./PercentileDemo";
 export { PostmortemDemo } from "./PostmortemDemo";
+export { SlowBurnDemo } from "./SlowBurnDemo";
+export { SurvivorshipDemo } from "./SurvivorshipDemo";
+export { ThreadPoolDemo } from "./ThreadPoolDemo";
+export { ThrottlingDemo } from "./ThrottlingDemo";
+export { TimeoutMismatchDemo } from "./TimeoutMismatchDemo";
+export { TrafficPatternDemo } from "./TrafficPatternDemo";
+export { UtilizationCurveDemo } from "./UtilizationCurveDemo";

@@ -1,11 +1,24 @@
 {
-  "extends": "../../tsconfig.library.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "allowImportingTsExtensions": false,
+    "declaration": true,
+    "declarationMap": false,
     "lib": ["ES2024", "DOM", "DOM.Iterable"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "noEmit": false,
+    "noEmitOnError": true,
     "outDir": "dist",
     "rootDir": "src",
+    "sourceMap": false,
+    "target": "ES2024",
     "types": ["node", "react", "react-dom"]
   },
-  "include": ["src/components/**/*.tsx", "src/hooks/**/*.ts", "src/lib/**/*.ts"],
+  "include": [
+    "src/components/**/*.tsx",
+    "src/hooks/**/*.ts",
+    "src/lib/**/*.ts"
+  ],
   "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"]
 }

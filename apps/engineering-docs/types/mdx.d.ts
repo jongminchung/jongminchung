@@ -1,7 +1,7 @@
 declare module "*.mdx" {
-  import type { ComponentType } from "react";
+    import type { ComponentType } from "react";
 
-  const MdxContent: ComponentType;
-  export const metadata: unknown;
-  export default MdxContent;
+    const MdxContent: ComponentType;
+    export const metadata: unknown;
+    export default MdxContent;
 }

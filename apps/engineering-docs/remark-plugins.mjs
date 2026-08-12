@@ -5,31 +5,35 @@ import { remarkKroki } from "remark-kroki";
 import remarkMdxFrontmatter from "remark-mdx-frontmatter";
 
 const publicKrokiServer = "https://kroki.io";
-const remarkKrokiAdapter = fileURLToPath(new URL("./remark-kroki-next.mjs", import.meta.url));
+const remarkKrokiAdapter = fileURLToPath(
+    new URL("./remark-kroki-next.mjs", import.meta.url),
+);
 
 function krokiOptions(server) {
-  return {
-    alias: ["plantuml"],
-    output: "img-base64",
-    server,
-    target: "mdx3",
-  };
+    return {
+        alias: ["plantuml"],
+        output: "img-base64",
+        server,
+        target: "mdx3",
+    };
 }
 
 export function createRemarkPlugins() {
-  return [
-    "remark-gfm",
-    "remark-frontmatter",
-    ["remark-mdx-frontmatter", { name: "metadata" }],
-    [remarkKrokiAdapter, krokiOptions(publicKrokiServer)],
-  ];
+    return [
+        "remark-gfm",
+        "remark-frontmatter",
+        ["remark-mdx-frontmatter", { name: "metadata" }],
+        [remarkKrokiAdapter, krokiOptions(publicKrokiServer)],
+    ];
 }
 
-export function createRemarkPluginImplementations({ krokiServer = publicKrokiServer } = {}) {
-  return [
-    remarkGfm,
-    remarkFrontmatter,
-    [remarkMdxFrontmatter, { name: "metadata" }],
-    [remarkKroki, krokiOptions(krokiServer)],
-  ];
+export function createRemarkPluginImplementations({
+    krokiServer = publicKrokiServer,
+} = {}) {
+    return [
+        remarkGfm,
+        remarkFrontmatter,
+        [remarkMdxFrontmatter, { name: "metadata" }],
+        [remarkKroki, krokiOptions(krokiServer)],
+    ];
 }

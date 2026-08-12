@@ -2,15 +2,15 @@ import { defineConfig } from "vite";
 import { rejectNodeBuiltinsInSandboxedPreload } from "./vite.preload.config.ts";
 
 export default defineConfig({
-  plugins: [rejectNodeBuiltinsInSandboxedPreload()],
-  build: {
-    sourcemap: true,
-    rollupOptions: {
-      external: ["electron"],
-      output: {
-        entryFileNames: "local-history-preload.cjs",
-        format: "cjs",
-      },
+    plugins: [rejectNodeBuiltinsInSandboxedPreload()],
+    build: {
+        sourcemap: true,
+        rollupOptions: {
+            external: ["electron"],
+            output: {
+                entryFileNames: "local-history-preload.cjs",
+                format: "cjs",
+            },
+        },
     },
-  },
 });

@@ -46,7 +46,7 @@ So how does a curve come out of control points? Through **linear interpolation, 
 
 ```js
 function lerp(a, b, t) {
-  return a + (b - a) * t;
+    return a + (b - a) * t;
 }
 ```
 
@@ -137,23 +137,23 @@ The structure of a physics simulation is simple. Every frame, three steps:
 
 ```js
 for (const obj of objects) {
-  // Compute forces
-  const gravity = { x: 0, y: 9.8 * obj.mass };
-  const friction = { x: -obj.vx * drag, y: -obj.vy * drag };
-  const fx = gravity.x + friction.x;
-  const fy = gravity.y + friction.y;
+    // Compute forces
+    const gravity = { x: 0, y: 9.8 * obj.mass };
+    const friction = { x: -obj.vx * drag, y: -obj.vy * drag };
+    const fx = gravity.x + friction.x;
+    const fy = gravity.y + friction.y;
 
-  // Integrate
-  obj.vx += (fx / obj.mass) * dt;
-  obj.vy += (fy / obj.mass) * dt;
-  obj.x += obj.vx * dt;
-  obj.y += obj.vy * dt;
+    // Integrate
+    obj.vx += (fx / obj.mass) * dt;
+    obj.vy += (fy / obj.mass) * dt;
+    obj.x += obj.vx * dt;
+    obj.y += obj.vy * dt;
 
-  // Apply constraints (floor collision)
-  if (obj.y > floorY) {
-    obj.y = floorY;
-    obj.vy *= -restitution; // bounce scaled by restitution
-  }
+    // Apply constraints (floor collision)
+    if (obj.y > floorY) {
+        obj.y = floorY;
+        obj.vy *= -restitution; // bounce scaled by restitution
+    }
 }
 ```
 
@@ -208,8 +208,8 @@ The phase is where it gets interesting. Give each item in a list a phase proport
 
 ```js
 items.forEach((item, i) => {
-  const y = amplitude * Math.sin(time * frequency + i * phaseOffset);
-  item.style.transform = `translateY(${y}px)`;
+    const y = amplitude * Math.sin(time * frequency + i * phaseOffset);
+    item.style.transform = `translateY(${y}px)`;
 });
 ```
 
@@ -366,8 +366,8 @@ The techniques above cover a lot of ground, but they have limits. A character wa
 That's what **dedicated tools** are for. Build the animation in After Effects and export it with [Lottie](https://airbnb.io/lottie/), or use something like [Rive](https://rive.app/), which specializes in interactive animation. Sometimes producing a plain **video** and playing it back is the right answer. Picking the appropriate tool beats forcing everything into code.
 
 <MaterialImage
-  src="/materials/images/2026-02-18-how-to-design-animation/lottie.gif"
-  caption="A complex animation built with Lottie"
+    src="/materials/images/2026-02-18-how-to-design-animation/lottie.gif"
+    caption="A complex animation built with Lottie"
 />
 
 What code has that those tools don't is **real-time interaction**. Motion that responds instantly to input and changes dynamically with state can't come from a pre-rendered video. That's exactly where the techniques in this article apply.

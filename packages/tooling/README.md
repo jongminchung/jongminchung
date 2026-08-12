@@ -38,24 +38,52 @@ pnpm update --force @jongminchung/tooling@1.0.0
 
 ```json
 {
-  "scripts": {
-    "lint": "oxlint",
-    "fmt": "oxfmt --config .oxfmtrc.mjs",
-    "fmt:check": "oxfmt --config .oxfmtrc.mjs --check"
-  }
+	"scripts": {
+		"lint": "oxlint",
+		"fmt": "oxfmt --config .oxfmtrc.mjs",
+		"fmt:check": "oxfmt --config .oxfmtrc.mjs --check"
+	}
 }
 ```
 
 ## oxlint
 
-Oxlint configs can extend the shared JSON file:
+Oxlint configs extend the shared JSON file without adding workspace-local rule sets:
 
 ```json
 {
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "extends": ["./node_modules/@jongminchung/tooling/oxlint.json"]
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"extends": ["./node_modules/@jongminchung/tooling/oxlint.json"]
 }
 ```
+
+The shared config enables Oxlint's official `correctness` category at error level and activates the
+TypeScript, Unicorn, Oxc, React, and JSX accessibility plugins. Recommended rules supplied by that
+category and those plugins—including Hooks, ARIA, Promise handling, and unused-code checks—are not
+listed a second time.
+
+Only repository policy outside the recommended set is explicit. Every explicit rule and exception
+has a reason plus an executable bad/good example immediately above it:
+
+```jsonc
+{
+	"rules": {
+		// any removes checking from every later property access, so narrow an external boundary instead
+		// Bad: (window as any).desktopApi
+		// Good: extend Window and access window.desktopApi through the declared contract
+		"typescript/no-explicit-any": "error",
+
+		// role=group does not always mean fieldset, which could change non-form UI semantics
+		// Allowed: <div role="group" aria-label="Editor tools">...</div>
+		// Rejected elsewhere: <div role="button">...</div> remains covered by recommended a11y rules
+		"jsx-a11y/prefer-tag-over-role": "off",
+	},
+}
+```
+
+The other explicit policies are `prefer-const`, type-aware `no-misused-promises`, shared control
+names for `label-has-associated-control`, and named scroll regions for
+`no-noninteractive-tabindex`.
 
 ## oxfmt
 
@@ -63,14 +91,21 @@ Oxlint configs can extend the shared JSON file:
 import { defineOxfmtConfig } from "@jongminchung/tooling/oxfmt";
 
 export default defineOxfmtConfig({
-  ignorePatterns: ["dist/", "coverage/", "generated/"],
-  sortImports: { order: "asc" },
+	// Source: content/topic files; generated counterpart: tracked manifests and search indexes.
+	ignorePatterns: ["generated/", "public/search/"],
 });
 ```
 
-The public config and override types are aliases of Oxfmt's official types. Ignore and override
-arrays append to the shared defaults. Object forms of `sortImports` and `sortPackageJson` merge with
-the shared nested defaults, while booleans such as `false` replace them.
+Formatting style stays on Oxfmt's zero-config defaults: width, quotes, semicolons, trailing commas,
+and indentation are not copied into this package. The shared implementation adds only two
+repository decisions: imports use Oxfmt's default group ordering without blank lines between groups,
+and `package.json` scripts sort alphabetically.
+
+For example, mixed local/external imports become one ordered block, and `{ "scripts": { "test":
+"vitest", "build": "tsc" } }` becomes `{ "scripts": { "build": "tsc", "test": "vitest" } }`.
+Ignore and override arrays append to shared output exclusions. Object forms of `sortImports` and
+`sortPackageJson` merge with the two repository decisions, while booleans such as `false` replace
+them.
 
 ## Build and pack
 

@@ -1,1 +1,6 @@
-export type ImagePreview = { path: string; mimeType: string; dataUrl: string; sizeBytes: number };
+export type ImagePreview = {
+    path: string;
+    mimeType: string;
+    dataUrl: string;
+    sizeBytes: number;
+};

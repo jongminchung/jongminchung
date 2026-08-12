@@ -7,11 +7,15 @@ import { build } from "vite";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { VALID_GIT_OPERATIONS } from "../../../src/shared/contracts/git-operation-fixtures";
 import type {
-  GitRequestEvent,
-  GitRequestId,
-  RepositoryId,
+    GitRequestEvent,
+    GitRequestId,
+    RepositoryId,
 } from "../../../src/shared/contracts/git-utility";
-import { GitProcessRunner, type GitProcessRunnerLike, type GitProcessSpec } from "./git-process";
+import {
+    GitProcessRunner,
+    type GitProcessRunnerLike,
+    type GitProcessSpec,
+} from "./git-process";
 import { GitOperationService } from "./operation-service";
 import type { OperationRecoveryRecorder } from "./operation-service";
 import { RepositoryRegistry } from "./repository-registry";
@@ -19,419 +23,488 @@ import { RepositoryRegistry } from "./repository-registry";
 const temporaryDirectories: string[] = [];
 
 function git(cwd: string, ...args: readonly string[]): string {
-  const result = spawnSync("git", args, {
-    cwd,
-    env: {
-      ...process.env,
-      GIT_TERMINAL_PROMPT: "0",
-      GIT_OPTIONAL_LOCKS: "0",
-      LC_ALL: "C",
-    },
-    encoding: "utf8",
-    shell: false,
-  });
-  if (result.status !== 0) throw new Error(result.stderr || `git ${args.join(" ")} failed`);
-  return result.stdout;
+    const result = spawnSync("git", args, {
+        cwd,
+        env: {
+            ...process.env,
+            GIT_TERMINAL_PROMPT: "0",
+            GIT_OPTIONAL_LOCKS: "0",
+            LC_ALL: "C",
+        },
+        encoding: "utf8",
+        shell: false,
+    });
+    if (result.status !== 0)
+        throw new Error(result.stderr || `git ${args.join(" ")} failed`);
+    return result.stdout;
 }
 
 async function fixture(): Promise<{
-  readonly root: string;
-  readonly registry: RepositoryRegistry;
-  readonly service: GitOperationService;
+    readonly root: string;
+    readonly registry: RepositoryRegistry;
+    readonly service: GitOperationService;
 }> {
-  const temporaryDirectory = await mkdtemp(join(tmpdir(), "git-client-operation-"));
-  temporaryDirectories.push(temporaryDirectory);
-  const root = join(temporaryDirectory, "repository");
-  await mkdir(root);
-  git(root, "init", "--initial-branch=main");
-  git(root, "config", "user.name", "Git Client Test");
-  git(root, "config", "user.email", "git-client@example.invalid");
-  await writeFile(join(root, "tracked.txt"), "initial\n", "utf8");
-  git(root, "add", "--", "tracked.txt");
-  git(root, "commit", "-m", "initial");
-  const runner = new GitProcessRunner();
-  const registry = new RepositoryRegistry(runner);
-  return {
-    root,
-    registry,
-    service: new GitOperationService(registry, runner),
-  };
+    const temporaryDirectory = await mkdtemp(
+        join(tmpdir(), "git-client-operation-"),
+    );
+    temporaryDirectories.push(temporaryDirectory);
+    const root = join(temporaryDirectory, "repository");
+    await mkdir(root);
+    git(root, "init", "--initial-branch=main");
+    git(root, "config", "user.name", "Git Client Test");
+    git(root, "config", "user.email", "git-client@example.invalid");
+    await writeFile(join(root, "tracked.txt"), "initial\n", "utf8");
+    git(root, "add", "--", "tracked.txt");
+    git(root, "commit", "-m", "initial");
+    const runner = new GitProcessRunner();
+    const registry = new RepositoryRegistry(runner);
+    return {
+        root,
+        registry,
+        service: new GitOperationService(registry, runner),
+    };
 }
 
 afterEach(async () => {
-  await Promise.all(
-    temporaryDirectories
-      .splice(0)
-      .map((directory) => rm(directory, { recursive: true, force: true })),
-  );
+    await Promise.all(
+        temporaryDirectories
+            .splice(0)
+            .map((directory) =>
+                rm(directory, { recursive: true, force: true }),
+            ),
+    );
 });
 
 describe("GitOperationService", () => {
-  it("serializes the same repository while allowing another repository to mutate", async () => {
-    const { root, registry } = await fixture();
-    const secondRoot = join(dirname(root), "repository-2");
-    await mkdir(secondRoot);
-    git(secondRoot, "init", "--initial-branch=main");
-    const firstRepository = await registry.open(root);
-    const secondRepository = await registry.open(secondRoot);
-    const runs: Array<{
-      readonly cwd: string | undefined;
-      readonly resolve: (outcome: Awaited<ReturnType<GitProcessRunnerLike["run"]>>) => void;
-    }> = [];
-    const runner: GitProcessRunnerLike = {
-      run: (spec) =>
-        new Promise((resolve) => {
-          runs.push({ cwd: spec.cwd, resolve });
-        }),
-    };
-    const service = new GitOperationService(registry, runner);
-    const execute = (repositoryId: RepositoryId) =>
-      service.execute(
-        crypto.randomUUID() as GitRequestId,
-        repositoryId,
-        { kind: "stageAll" },
-        () => undefined,
-      );
-    const first = execute(firstRepository.id);
-    await vi.waitFor(() => expect(runs).toHaveLength(1));
+    it("serializes the same repository while allowing another repository to mutate", async () => {
+        const { root, registry } = await fixture();
+        const secondRoot = join(dirname(root), "repository-2");
+        await mkdir(secondRoot);
+        git(secondRoot, "init", "--initial-branch=main");
+        const firstRepository = await registry.open(root);
+        const secondRepository = await registry.open(secondRoot);
+        const runs: Array<{
+            readonly cwd: string | undefined;
+            readonly resolve: (
+                outcome: Awaited<ReturnType<GitProcessRunnerLike["run"]>>,
+            ) => void;
+        }> = [];
+        const runner: GitProcessRunnerLike = {
+            run: (spec) =>
+                new Promise((resolve) => {
+                    runs.push({ cwd: spec.cwd, resolve });
+                }),
+        };
+        const service = new GitOperationService(registry, runner);
+        const execute = (repositoryId: RepositoryId) =>
+            service.execute(
+                crypto.randomUUID() as GitRequestId,
+                repositoryId,
+                { kind: "stageAll" },
+                () => undefined,
+            );
+        const first = execute(firstRepository.id);
+        await vi.waitFor(() => expect(runs).toHaveLength(1));
 
-    const queued = execute(firstRepository.id);
-    const parallel = execute(secondRepository.id);
-    await vi.waitFor(() => expect(runs).toHaveLength(2));
-    expect(runs.map(({ cwd }) => cwd)).toEqual([firstRepository.path, secondRepository.path]);
+        const queued = execute(firstRepository.id);
+        const parallel = execute(secondRepository.id);
+        await vi.waitFor(() => expect(runs).toHaveLength(2));
+        expect(runs.map(({ cwd }) => cwd)).toEqual([
+            firstRepository.path,
+            secondRepository.path,
+        ]);
 
-    runs[0]?.resolve({ kind: "completed", exitCode: 0, durationMs: 1, output: [] });
-    await vi.waitFor(() => expect(runs).toHaveLength(3));
-    expect(runs[2]?.cwd).toBe(firstRepository.path);
-    runs[1]?.resolve({ kind: "completed", exitCode: 0, durationMs: 1, output: [] });
-    runs[2]?.resolve({ kind: "completed", exitCode: 0, durationMs: 1, output: [] });
-
-    await expect(Promise.all([first, queued, parallel])).resolves.toEqual([
-      expect.objectContaining({ kind: "completed" }),
-      expect.objectContaining({ kind: "completed" }),
-      expect.objectContaining({ kind: "completed" }),
-    ]);
-  });
-
-  it("cancels a mutation while it is queued for repository ownership", async () => {
-    const { root, registry } = await fixture();
-    const repository = await registry.open(root);
-    let resolveFirst: (outcome: Awaited<ReturnType<GitProcessRunnerLike["run"]>>) => void = () => {
-      throw new Error("First mutation did not start");
-    };
-    let runCount = 0;
-    const runner: GitProcessRunnerLike = {
-      run: () =>
-        new Promise((resolve) => {
-          runCount += 1;
-          resolveFirst = resolve;
-        }),
-    };
-    const service = new GitOperationService(registry, runner);
-    const first = service.execute(
-      crypto.randomUUID() as GitRequestId,
-      repository.id,
-      { kind: "stageAll" },
-      () => undefined,
-    );
-    await vi.waitFor(() => expect(runCount).toBe(1));
-
-    const queuedRequestId = crypto.randomUUID() as GitRequestId;
-    const queued = service.execute(
-      queuedRequestId,
-      repository.id,
-      { kind: "stageAll" },
-      () => undefined,
-    );
-    await Promise.resolve();
-    expect(service.cancel(queuedRequestId)).toBe(true);
-    await expect(queued).resolves.toMatchObject({ kind: "cancelled", reason: "requested" });
-    expect(runCount).toBe(1);
-
-    resolveFirst({ kind: "completed", exitCode: 0, durationMs: 1, output: [] });
-    await expect(first).resolves.toMatchObject({ kind: "completed" });
-  });
-
-  it("records recovery after validation and before the first mutation side effect", async () => {
-    const { root, registry } = await fixture();
-    const repository = await registry.open(root);
-    const order: string[] = [];
-    const recovery: OperationRecoveryRecorder = {
-      async recordBeforeOperation(receivedRepositoryId, operation): Promise<void> {
-        expect(receivedRepositoryId).toBe(repository.id);
-        expect(operation.kind).toBe("commit");
-        order.push("recovery");
-      },
-    };
-    const runner: GitProcessRunnerLike = {
-      run: () => {
-        order.push("mutation");
-        return Promise.resolve({
-          kind: "completed",
-          exitCode: 0,
-          durationMs: 1,
-          output: [],
+        runs[0]?.resolve({
+            kind: "completed",
+            exitCode: 0,
+            durationMs: 1,
+            output: [],
         });
-      },
-    };
-    const service = new GitOperationService(registry, runner, undefined, recovery);
-
-    await expect(
-      service.execute(
-        crypto.randomUUID() as GitRequestId,
-        repository.id,
-        {
-          kind: "commit",
-          message: "recorded",
-          amend: false,
-          signOff: false,
-          gpgSign: false,
-        },
-        () => undefined,
-      ),
-    ).resolves.toMatchObject({ kind: "completed" });
-    expect(order).toEqual(["recovery", "mutation"]);
-  });
-
-  it("does not launch a mutation when recovery recording fails", async () => {
-    const { root, registry } = await fixture();
-    const repository = await registry.open(root);
-    const runner: GitProcessRunnerLike = {
-      run: () => {
-        throw new Error("mutation must not start");
-      },
-    };
-    const recovery: OperationRecoveryRecorder = {
-      recordBeforeOperation: () => Promise.reject(new Error("recovery storage unavailable")),
-    };
-    const service = new GitOperationService(registry, runner, undefined, recovery);
-
-    await expect(
-      service.execute(
-        crypto.randomUUID() as GitRequestId,
-        repository.id,
-        {
-          kind: "reset",
-          revision: "HEAD",
-          mode: "hard",
-        },
-        () => undefined,
-      ),
-    ).resolves.toMatchObject({
-      kind: "failed",
-      message: "recovery storage unavailable",
-    });
-  });
-
-  it("dispatches every one of the 51 validated operation variants", async () => {
-    const { root, registry } = await fixture();
-    const repository = await registry.open(root);
-    const specs: GitProcessSpec[] = [];
-    const runner: GitProcessRunnerLike = {
-      run: (spec) => {
-        specs.push(spec);
-        return Promise.resolve({
-          kind: "completed",
-          exitCode: 0,
-          durationMs: 1,
-          output: [],
+        await vi.waitFor(() => expect(runs).toHaveLength(3));
+        expect(runs[2]?.cwd).toBe(firstRepository.path);
+        runs[1]?.resolve({
+            kind: "completed",
+            exitCode: 0,
+            durationMs: 1,
+            output: [],
         });
-      },
-    };
-    const service = new GitOperationService(registry, runner);
+        runs[2]?.resolve({
+            kind: "completed",
+            exitCode: 0,
+            durationMs: 1,
+            output: [],
+        });
 
-    expect(VALID_GIT_OPERATIONS).toHaveLength(51);
-    expect(new Set(VALID_GIT_OPERATIONS.map(({ kind }) => kind)).size).toBe(51);
-    for (const operation of VALID_GIT_OPERATIONS) {
-      const terminal = await service.execute(
-        crypto.randomUUID() as GitRequestId,
-        repository.id,
-        operation,
-        () => undefined,
-      );
-      expect(terminal.kind, operation.kind).toBe("completed");
-    }
-    expect(specs).toHaveLength(51);
-    expect(specs.filter((spec) => spec.editorEnvironment !== undefined)).toHaveLength(4);
-  });
-
-  it("stages selected paths and emits one ordered terminal lifecycle", async () => {
-    const { root, registry, service } = await fixture();
-    await writeFile(join(root, "new.txt"), "new\n", "utf8");
-    const repository = await registry.open(root);
-    const events: GitRequestEvent[] = [];
-    const terminal = await service.execute(
-      crypto.randomUUID() as GitRequestId,
-      repository.id,
-      { kind: "stage", paths: ["new.txt"] },
-      (event) => events.push(event),
-    );
-
-    expect(terminal.kind).toBe("completed");
-    expect(git(root, "diff", "--cached", "--name-only")).toContain("new.txt");
-    expect(events[0]?.kind).toBe("started");
-    expect(events.at(-1)?.kind).toBe("completed");
-    expect(
-      events.filter((event) => ["completed", "failed", "cancelled"].includes(event.kind)),
-    ).toHaveLength(1);
-  });
-
-  it("pipes patch content over stdin instead of argv", async () => {
-    const { root, registry, service } = await fixture();
-    await writeFile(join(root, "tracked.txt"), "changed\n", "utf8");
-    const patch = git(root, "diff", "--", "tracked.txt");
-    git(root, "restore", "--", "tracked.txt");
-    const repository = await registry.open(root);
-
-    const terminal = await service.execute(
-      crypto.randomUUID() as GitRequestId,
-      repository.id,
-      { kind: "applyPatch", patch, cached: false, reverse: false },
-      () => undefined,
-    );
-
-    expect(terminal.kind).toBe("completed");
-    expect(git(root, "diff", "HEAD", "--", "tracked.txt")).toContain("+changed");
-  });
-
-  it("runs an interactive rewrite through the application sequence-editor entry", async () => {
-    const { root, registry } = await fixture();
-    const helperDirectory = join(root, "sequence-helper");
-    await build({
-      configFile: false,
-      logLevel: "silent",
-      build: {
-        emptyOutDir: true,
-        outDir: helperDirectory,
-        rollupOptions: {
-          input: fileURLToPath(new URL("../../main.ts", import.meta.url)),
-          output: {
-            entryFileNames: "main.cjs",
-            format: "cjs",
-          },
-        },
-        ssr: true,
-        target: "node22",
-      },
-      ssr: { noExternal: true },
+        await expect(Promise.all([first, queued, parallel])).resolves.toEqual([
+            expect.objectContaining({ kind: "completed" }),
+            expect.objectContaining({ kind: "completed" }),
+            expect.objectContaining({ kind: "completed" }),
+        ]);
     });
-    const runner = new GitProcessRunner();
-    const service = new GitOperationService(registry, runner, {
-      executablePath: process.execPath,
-      applicationEntryPath: join(helperDirectory, "main.cjs"),
+
+    it("cancels a mutation while it is queued for repository ownership", async () => {
+        const { root, registry } = await fixture();
+        const repository = await registry.open(root);
+        let resolveFirst: (
+            outcome: Awaited<ReturnType<GitProcessRunnerLike["run"]>>,
+        ) => void = () => {
+            throw new Error("First mutation did not start");
+        };
+        let runCount = 0;
+        const runner: GitProcessRunnerLike = {
+            run: () =>
+                new Promise((resolve) => {
+                    runCount += 1;
+                    resolveFirst = resolve;
+                }),
+        };
+        const service = new GitOperationService(registry, runner);
+        const first = service.execute(
+            crypto.randomUUID() as GitRequestId,
+            repository.id,
+            { kind: "stageAll" },
+            () => undefined,
+        );
+        await vi.waitFor(() => expect(runCount).toBe(1));
+
+        const queuedRequestId = crypto.randomUUID() as GitRequestId;
+        const queued = service.execute(
+            queuedRequestId,
+            repository.id,
+            { kind: "stageAll" },
+            () => undefined,
+        );
+        await Promise.resolve();
+        expect(service.cancel(queuedRequestId)).toBe(true);
+        await expect(queued).resolves.toMatchObject({
+            kind: "cancelled",
+            reason: "requested",
+        });
+        expect(runCount).toBe(1);
+
+        resolveFirst({
+            kind: "completed",
+            exitCode: 0,
+            durationMs: 1,
+            output: [],
+        });
+        await expect(first).resolves.toMatchObject({ kind: "completed" });
     });
-    const repository = await registry.open(root);
-    const events: GitRequestEvent[] = [];
-    const terminal = await service.execute(
-      crypto.randomUUID() as GitRequestId,
-      repository.id,
-      {
-        kind: "interactiveRebase",
-        base: null,
-        entries: [
-          {
-            oid: git(root, "rev-parse", "HEAD").trim(),
-            subject: "initial",
-            parents: [],
-            action: "pick",
-            message: null,
-            published: false,
-            mergeCommit: false,
-          },
-        ],
-        options: {
-          autostash: false,
-          updateRefs: false,
-          preserveMerges: false,
-        },
-      },
-      (event) => events.push(event),
-    );
-    expect(terminal).toMatchObject({ kind: "completed", exitCode: 0 });
-    expect(events[0]?.kind).toBe("started");
-    expect(events.slice(1, -1).every((event) => event.kind === "output")).toBe(true);
-    expect(events.at(-1)?.kind).toBe("completed");
-  });
 
-  it("cancels active mutations by request and repository", async () => {
-    let resolveRun: ((value: Awaited<ReturnType<GitProcessRunnerLike["run"]>>) => void) | null =
-      null;
-    const runner: GitProcessRunnerLike = {
-      run: (_spec, signal) =>
-        new Promise((resolve) => {
-          resolveRun = resolve;
-          signal?.addEventListener(
-            "abort",
-            () =>
-              resolve({
-                kind: "cancelled",
-                reason: signal.reason === "repositoryClosed" ? "repositoryClosed" : "requested",
-                durationMs: 1,
-                output: [],
-              }),
-            { once: true },
-          );
-        }),
-    };
-    const registry = new RepositoryRegistry(new GitProcessRunner());
-    const service = new GitOperationService(registry, runner);
-    const { root } = await fixture();
-    const repository = await registry.open(root);
-    const requestId = crypto.randomUUID() as GitRequestId;
-    const pending = service.execute(
-      requestId,
-      repository.id,
-      { kind: "stageAll" },
-      () => undefined,
-    );
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(service.cancel(requestId)).toBe(true);
-    await expect(pending).resolves.toMatchObject({
-      kind: "cancelled",
-      reason: "requested",
+    it("records recovery after validation and before the first mutation side effect", async () => {
+        const { root, registry } = await fixture();
+        const repository = await registry.open(root);
+        const order: string[] = [];
+        const recovery: OperationRecoveryRecorder = {
+            async recordBeforeOperation(
+                receivedRepositoryId,
+                operation,
+            ): Promise<void> {
+                expect(receivedRepositoryId).toBe(repository.id);
+                expect(operation.kind).toBe("commit");
+                order.push("recovery");
+            },
+        };
+        const runner: GitProcessRunnerLike = {
+            run: () => {
+                order.push("mutation");
+                return Promise.resolve({
+                    kind: "completed",
+                    exitCode: 0,
+                    durationMs: 1,
+                    output: [],
+                });
+            },
+        };
+        const service = new GitOperationService(
+            registry,
+            runner,
+            undefined,
+            recovery,
+        );
+
+        await expect(
+            service.execute(
+                crypto.randomUUID() as GitRequestId,
+                repository.id,
+                {
+                    kind: "commit",
+                    message: "recorded",
+                    amend: false,
+                    signOff: false,
+                    gpgSign: false,
+                },
+                () => undefined,
+            ),
+        ).resolves.toMatchObject({ kind: "completed" });
+        expect(order).toEqual(["recovery", "mutation"]);
     });
-    expect(resolveRun).not.toBeNull();
-  });
 
-  it("can cancel synchronously from the started event without launching an uncancellable process", async () => {
-    const runner: GitProcessRunnerLike = {
-      run: (_spec, signal) =>
-        Promise.resolve(
-          signal?.aborted === true
-            ? {
-                kind: "cancelled",
-                reason: "requested",
-                durationMs: 0,
-                output: [],
-              }
-            : {
-                kind: "completed",
-                exitCode: 0,
-                durationMs: 0,
-                output: [],
-              },
-        ),
-    };
-    const registry = new RepositoryRegistry(new GitProcessRunner());
-    const service = new GitOperationService(registry, runner);
-    const { root } = await fixture();
-    const repository = await registry.open(root);
-    const requestId = crypto.randomUUID() as GitRequestId;
+    it("does not launch a mutation when recovery recording fails", async () => {
+        const { root, registry } = await fixture();
+        const repository = await registry.open(root);
+        const runner: GitProcessRunnerLike = {
+            run: () => {
+                throw new Error("mutation must not start");
+            },
+        };
+        const recovery: OperationRecoveryRecorder = {
+            recordBeforeOperation: () =>
+                Promise.reject(new Error("recovery storage unavailable")),
+        };
+        const service = new GitOperationService(
+            registry,
+            runner,
+            undefined,
+            recovery,
+        );
 
-    const terminal = await service.execute(
-      requestId,
-      repository.id,
-      { kind: "stageAll" },
-      (event) => {
-        if (event.kind === "started") {
-          expect(service.cancel(requestId)).toBe(true);
+        await expect(
+            service.execute(
+                crypto.randomUUID() as GitRequestId,
+                repository.id,
+                {
+                    kind: "reset",
+                    revision: "HEAD",
+                    mode: "hard",
+                },
+                () => undefined,
+            ),
+        ).resolves.toMatchObject({
+            kind: "failed",
+            message: "recovery storage unavailable",
+        });
+    });
+
+    it("dispatches every one of the 51 validated operation variants", async () => {
+        const { root, registry } = await fixture();
+        const repository = await registry.open(root);
+        const specs: GitProcessSpec[] = [];
+        const runner: GitProcessRunnerLike = {
+            run: (spec) => {
+                specs.push(spec);
+                return Promise.resolve({
+                    kind: "completed",
+                    exitCode: 0,
+                    durationMs: 1,
+                    output: [],
+                });
+            },
+        };
+        const service = new GitOperationService(registry, runner);
+
+        expect(VALID_GIT_OPERATIONS).toHaveLength(51);
+        expect(new Set(VALID_GIT_OPERATIONS.map(({ kind }) => kind)).size).toBe(
+            51,
+        );
+        for (const operation of VALID_GIT_OPERATIONS) {
+            const terminal = await service.execute(
+                crypto.randomUUID() as GitRequestId,
+                repository.id,
+                operation,
+                () => undefined,
+            );
+            expect(terminal.kind, operation.kind).toBe("completed");
         }
-      },
-    );
-
-    expect(terminal).toMatchObject({
-      kind: "cancelled",
-      reason: "requested",
+        expect(specs).toHaveLength(51);
+        expect(
+            specs.filter((spec) => spec.editorEnvironment !== undefined),
+        ).toHaveLength(4);
     });
-  });
+
+    it("stages selected paths and emits one ordered terminal lifecycle", async () => {
+        const { root, registry, service } = await fixture();
+        await writeFile(join(root, "new.txt"), "new\n", "utf8");
+        const repository = await registry.open(root);
+        const events: GitRequestEvent[] = [];
+        const terminal = await service.execute(
+            crypto.randomUUID() as GitRequestId,
+            repository.id,
+            { kind: "stage", paths: ["new.txt"] },
+            (event) => events.push(event),
+        );
+
+        expect(terminal.kind).toBe("completed");
+        expect(git(root, "diff", "--cached", "--name-only")).toContain(
+            "new.txt",
+        );
+        expect(events[0]?.kind).toBe("started");
+        expect(events.at(-1)?.kind).toBe("completed");
+        expect(
+            events.filter((event) =>
+                ["completed", "failed", "cancelled"].includes(event.kind),
+            ),
+        ).toHaveLength(1);
+    });
+
+    it("pipes patch content over stdin instead of argv", async () => {
+        const { root, registry, service } = await fixture();
+        await writeFile(join(root, "tracked.txt"), "changed\n", "utf8");
+        const patch = git(root, "diff", "--", "tracked.txt");
+        git(root, "restore", "--", "tracked.txt");
+        const repository = await registry.open(root);
+
+        const terminal = await service.execute(
+            crypto.randomUUID() as GitRequestId,
+            repository.id,
+            { kind: "applyPatch", patch, cached: false, reverse: false },
+            () => undefined,
+        );
+
+        expect(terminal.kind).toBe("completed");
+        expect(git(root, "diff", "HEAD", "--", "tracked.txt")).toContain(
+            "+changed",
+        );
+    });
+
+    it("runs an interactive rewrite through the application sequence-editor entry", async () => {
+        const { root, registry } = await fixture();
+        const helperDirectory = join(root, "sequence-helper");
+        await build({
+            configFile: false,
+            logLevel: "silent",
+            build: {
+                emptyOutDir: true,
+                outDir: helperDirectory,
+                rollupOptions: {
+                    input: fileURLToPath(
+                        new URL("../../main.ts", import.meta.url),
+                    ),
+                    output: {
+                        entryFileNames: "main.cjs",
+                        format: "cjs",
+                    },
+                },
+                ssr: true,
+                target: "node22",
+            },
+            ssr: { noExternal: true },
+        });
+        const runner = new GitProcessRunner();
+        const service = new GitOperationService(registry, runner, {
+            executablePath: process.execPath,
+            applicationEntryPath: join(helperDirectory, "main.cjs"),
+        });
+        const repository = await registry.open(root);
+        const events: GitRequestEvent[] = [];
+        const terminal = await service.execute(
+            crypto.randomUUID() as GitRequestId,
+            repository.id,
+            {
+                kind: "interactiveRebase",
+                base: null,
+                entries: [
+                    {
+                        oid: git(root, "rev-parse", "HEAD").trim(),
+                        subject: "initial",
+                        parents: [],
+                        action: "pick",
+                        message: null,
+                        published: false,
+                        mergeCommit: false,
+                    },
+                ],
+                options: {
+                    autostash: false,
+                    updateRefs: false,
+                    preserveMerges: false,
+                },
+            },
+            (event) => events.push(event),
+        );
+        expect(terminal).toMatchObject({ kind: "completed", exitCode: 0 });
+        expect(events[0]?.kind).toBe("started");
+        expect(
+            events.slice(1, -1).every((event) => event.kind === "output"),
+        ).toBe(true);
+        expect(events.at(-1)?.kind).toBe("completed");
+    });
+
+    it("cancels active mutations by request and repository", async () => {
+        let resolveRun:
+            | ((
+                  value: Awaited<ReturnType<GitProcessRunnerLike["run"]>>,
+              ) => void)
+            | null = null;
+        const runner: GitProcessRunnerLike = {
+            run: (_spec, signal) =>
+                new Promise((resolve) => {
+                    resolveRun = resolve;
+                    signal?.addEventListener(
+                        "abort",
+                        () =>
+                            resolve({
+                                kind: "cancelled",
+                                reason:
+                                    signal.reason === "repositoryClosed"
+                                        ? "repositoryClosed"
+                                        : "requested",
+                                durationMs: 1,
+                                output: [],
+                            }),
+                        { once: true },
+                    );
+                }),
+        };
+        const registry = new RepositoryRegistry(new GitProcessRunner());
+        const service = new GitOperationService(registry, runner);
+        const { root } = await fixture();
+        const repository = await registry.open(root);
+        const requestId = crypto.randomUUID() as GitRequestId;
+        const pending = service.execute(
+            requestId,
+            repository.id,
+            { kind: "stageAll" },
+            () => undefined,
+        );
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        expect(service.cancel(requestId)).toBe(true);
+        await expect(pending).resolves.toMatchObject({
+            kind: "cancelled",
+            reason: "requested",
+        });
+        expect(resolveRun).not.toBeNull();
+    });
+
+    it("can cancel synchronously from the started event without launching an uncancellable process", async () => {
+        const runner: GitProcessRunnerLike = {
+            run: (_spec, signal) =>
+                Promise.resolve(
+                    signal?.aborted === true
+                        ? {
+                              kind: "cancelled",
+                              reason: "requested",
+                              durationMs: 0,
+                              output: [],
+                          }
+                        : {
+                              kind: "completed",
+                              exitCode: 0,
+                              durationMs: 0,
+                              output: [],
+                          },
+                ),
+        };
+        const registry = new RepositoryRegistry(new GitProcessRunner());
+        const service = new GitOperationService(registry, runner);
+        const { root } = await fixture();
+        const repository = await registry.open(root);
+        const requestId = crypto.randomUUID() as GitRequestId;
+
+        const terminal = await service.execute(
+            requestId,
+            repository.id,
+            { kind: "stageAll" },
+            (event) => {
+                if (event.kind === "started") {
+                    expect(service.cancel(requestId)).toBe(true);
+                }
+            },
+        );
+
+        expect(terminal).toMatchObject({
+            kind: "cancelled",
+            reason: "requested",
+        });
+    });
 });

@@ -1,53 +1,56 @@
 import { useCommandDefinitions } from "../components/CommandProvider";
 import type { CommandDefinition } from "../domain/commands";
 import {
-  createAppearanceLayoutCommands,
-  type AppearanceLayoutCommandPort,
+    createAppearanceLayoutCommands,
+    type AppearanceLayoutCommandPort,
 } from "./commands/appearanceLayoutCommands";
 import {
-  createEditorNavigationCommands,
-  type EditorNavigationCommandPort,
+    createEditorNavigationCommands,
+    type EditorNavigationCommandPort,
 } from "./commands/editorNavigationCommands";
-import { createProjectCommands, type ProjectCommandPort } from "./commands/projectCommands";
+import {
+    createProjectCommands,
+    type ProjectCommandPort,
+} from "./commands/projectCommands";
 import type { RepositoryCommandContext } from "./commands/repositoryCommandTypes";
 import {
-  createSearchAnalysisCommands,
-  type SearchAnalysisCommandPort,
+    createSearchAnalysisCommands,
+    type SearchAnalysisCommandPort,
 } from "./commands/searchAnalysisCommands";
 import { createVcsCommands, type VcsCommandPort } from "./commands/vcsCommands";
 
 export {
-  createAppearanceLayoutCommands,
-  createEditorNavigationCommands,
-  createProjectCommands,
-  createSearchAnalysisCommands,
-  createVcsCommands,
+    createAppearanceLayoutCommands,
+    createEditorNavigationCommands,
+    createProjectCommands,
+    createSearchAnalysisCommands,
+    createVcsCommands,
 };
 export type {
-  AppearanceLayoutCommandPort,
-  EditorNavigationCommandPort,
-  ProjectCommandPort,
-  RepositoryCommandContext,
-  SearchAnalysisCommandPort,
-  VcsCommandPort,
+    AppearanceLayoutCommandPort,
+    EditorNavigationCommandPort,
+    ProjectCommandPort,
+    RepositoryCommandContext,
+    SearchAnalysisCommandPort,
+    VcsCommandPort,
 };
 
 export function createRepositoryCommands(
-  context: RepositoryCommandContext,
+    context: RepositoryCommandContext,
 ): readonly CommandDefinition[] {
-  return [
-    ...createProjectCommands(context),
-    ...createEditorNavigationCommands(context),
-    ...createVcsCommands(context),
-    ...createSearchAnalysisCommands(context),
-    ...createAppearanceLayoutCommands(context),
-  ];
+    return [
+        ...createProjectCommands(context),
+        ...createEditorNavigationCommands(context),
+        ...createVcsCommands(context),
+        ...createSearchAnalysisCommands(context),
+        ...createAppearanceLayoutCommands(context),
+    ];
 }
 
 export function useRepositoryCommands(context: RepositoryCommandContext): void {
-  useCommandDefinitions(createProjectCommands(context));
-  useCommandDefinitions(createEditorNavigationCommands(context));
-  useCommandDefinitions(createVcsCommands(context));
-  useCommandDefinitions(createSearchAnalysisCommands(context));
-  useCommandDefinitions(createAppearanceLayoutCommands(context));
+    useCommandDefinitions(createProjectCommands(context));
+    useCommandDefinitions(createEditorNavigationCommands(context));
+    useCommandDefinitions(createVcsCommands(context));
+    useCommandDefinitions(createSearchAnalysisCommands(context));
+    useCommandDefinitions(createAppearanceLayoutCommands(context));
 }

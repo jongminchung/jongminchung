@@ -4,50 +4,63 @@ import { isValidElement, type ComponentProps, type ReactNode } from "react";
 import { DocsCodeBlock } from "./components/DocsCodeBlock";
 import { ExcalidrawDiagram } from "./components/ExcalidrawDiagram";
 import { MaterialDemo } from "./components/materials/MaterialDemo";
-import { MaterialImage, MaterialVideo } from "./components/materials/MaterialMedia";
-import { OverviewCards, OverviewCta, OverviewHero, QuickStart } from "./components/OverviewBlocks";
+import {
+    MaterialImage,
+    MaterialVideo,
+} from "./components/materials/MaterialMedia";
+import {
+    OverviewCards,
+    OverviewCta,
+    OverviewHero,
+    QuickStart,
+} from "./components/OverviewBlocks";
 import { classifyMdxCodeBlock } from "./lib/mdx-code";
 
 interface CodeElementProps {
-  readonly children?: ReactNode;
-  readonly className?: string;
+    readonly children?: ReactNode;
+    readonly className?: string;
 }
 
 export function MdxPre({ children }: ComponentProps<"pre">) {
-  if (!isValidElement<CodeElementProps>(children)) return <pre>{children}</pre>;
-  const block = classifyMdxCodeBlock(children.props.className, children.props.children);
-  if (block.kind === "excalidraw") {
-    return <ExcalidrawDiagram source={block.source} />;
-  }
-  return <DocsCodeBlock code={block.source} language={block.language} />;
+    if (!isValidElement<CodeElementProps>(children))
+        return <pre>{children}</pre>;
+    const block = classifyMdxCodeBlock(
+        children.props.className,
+        children.props.children,
+    );
+    if (block.kind === "excalidraw") {
+        return <ExcalidrawDiagram source={block.source} />;
+    }
+    return <DocsCodeBlock code={block.source} language={block.language} />;
 }
 
 function MdxLink({ href = "", children }: ComponentProps<"a">) {
-  const isExternal = href.startsWith("http://") || href.startsWith("https://");
-  return (
-    <Link
-      href={href}
-      target={isExternal ? "_blank" : undefined}
-      rel={isExternal ? "noreferrer" : undefined}
-    >
-      {children}
-    </Link>
-  );
+    const isExternal =
+        href.startsWith("http://") || href.startsWith("https://");
+    return (
+        <Link
+            href={href}
+            target={isExternal ? "_blank" : undefined}
+            rel={isExternal ? "noreferrer" : undefined}
+        >
+            {children}
+        </Link>
+    );
 }
 
 const components = {
-  a: MdxLink,
-  pre: MdxPre,
-  ExcalidrawDiagram,
-  MaterialDemo,
-  MaterialImage,
-  MaterialVideo,
-  OverviewCards,
-  OverviewCta,
-  OverviewHero,
-  QuickStart,
+    a: MdxLink,
+    pre: MdxPre,
+    ExcalidrawDiagram,
+    MaterialDemo,
+    MaterialImage,
+    MaterialVideo,
+    OverviewCards,
+    OverviewCta,
+    OverviewHero,
+    QuickStart,
 } satisfies MDXComponents;
 
 export function useMDXComponents(): MDXComponents {
-  return components;
+    return components;
 }

@@ -21,13 +21,13 @@
 
 ## 결정
 
-- 공통 `tsconfig.library.json` 사용
+- 공통 `tsconfig.base.json`의 strict 검사 사용
+- 패키지별 `tsconfig.build.json`에 emit 전용 옵션 명시
   - `module`: `NodeNext`
   - `moduleResolution`: `NodeNext`
   - `target`: `ES2024`
   - `declaration`: `true`
   - `noEmitOnError`: `true`
-- 패키지별 `tsconfig.build.json` 사용
   - 공개 entry point만 `files`에 명시
   - `rootDir`: `src`
   - `outDir`: `dist`

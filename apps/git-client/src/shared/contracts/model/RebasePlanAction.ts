@@ -1,1 +1,7 @@
-export type RebasePlanAction = "pick" | "reword" | "edit" | "squash" | "fixup" | "drop";
+export type RebasePlanAction =
+    | "pick"
+    | "reword"
+    | "edit"
+    | "squash"
+    | "fixup"
+    | "drop";

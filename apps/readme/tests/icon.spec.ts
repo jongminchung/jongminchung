@@ -2,18 +2,18 @@ import { createIconDataUrl, iconPreviewSizes } from "@jongminchung/icon";
 import { expect, test } from "@playwright/test";
 
 test("visual: app icon family at production sizes", async ({ page }) => {
-  const personalIcon = createIconDataUrl("personal");
-  const cells = iconPreviewSizes
-    .map(
-      (size) => `
+    const personalIcon = createIconDataUrl("personal");
+    const cells = iconPreviewSizes
+        .map(
+            (size) => `
         <div class="cell">
           <div class="stage"><img src="${personalIcon}" width="${size}" height="${size}" /></div>
           <span>${size}px</span>
         </div>`,
-    )
-    .join("");
-  await page.setViewportSize({ width: 1280, height: 760 });
-  await page.setContent(`
+        )
+        .join("");
+    await page.setViewportSize({ width: 1280, height: 760 });
+    await page.setContent(`
     <!doctype html>
     <html>
       <head>
@@ -52,8 +52,8 @@ test("visual: app icon family at production sizes", async ({ page }) => {
     </html>
   `);
 
-  await expect(page).toHaveScreenshot("app-icon-size-sheet.png", {
-    animations: "disabled",
-    fullPage: true,
-  });
+    await expect(page).toHaveScreenshot("app-icon-size-sheet.png", {
+        animations: "disabled",
+        fullPage: true,
+    });
 });

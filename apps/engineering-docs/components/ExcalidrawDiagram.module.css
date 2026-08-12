@@ -1,111 +1,111 @@
 .figure {
-  --excalidraw-canvas-height: clamp(320px, 52vw, 520px);
-  display: flex;
-  min-width: 0;
-  min-height: var(--excalidraw-canvas-height);
-  flex-direction: column;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--card);
+    --excalidraw-canvas-height: clamp(320px, 52vw, 520px);
+    display: flex;
+    min-width: 0;
+    min-height: var(--excalidraw-canvas-height);
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--card);
 }
 
 .standalone {
-  width: 100%;
-  min-height: 0;
-  flex: 1;
-  border-radius: 0;
+    width: 100%;
+    min-height: 0;
+    flex: 1;
+    border-radius: 0;
 }
 
 .toolbar {
-  display: flex;
-  min-height: 44px;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 6px 10px;
-  border-bottom: 1px solid var(--border);
-  background: var(--card);
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border);
+    background: var(--card);
 }
 
 .canvas {
-  position: relative;
-  min-height: 0;
-  flex: 1;
-  background: var(--excalidraw-canvas);
+    position: relative;
+    min-height: 0;
+    flex: 1;
+    background: var(--excalidraw-canvas);
 }
 
 .canvas :global(.main-menu-trigger),
 .canvas :global(.help-icon),
 .canvas :global(.disable-zen-mode) {
-  display: none !important;
+    display: none !important;
 }
 
 .loading,
 .error {
-  display: grid;
-  min-height: calc(var(--excalidraw-canvas-height) - 45px);
-  place-content: center;
-  justify-items: center;
-  gap: 10px;
-  padding: 24px;
-  color: var(--muted-foreground);
-  text-align: center;
+    display: grid;
+    min-height: calc(var(--excalidraw-canvas-height) - 45px);
+    place-content: center;
+    justify-items: center;
+    gap: 10px;
+    padding: 24px;
+    color: var(--muted-foreground);
+    text-align: center;
 }
 
 .standalone .loading,
 .standalone .error {
-  min-height: 100%;
+    min-height: 100%;
 }
 
 .error p {
-  max-width: 560px;
-  margin: 0;
+    max-width: 560px;
+    margin: 0;
 }
 
 .caption {
-  margin: 0;
-  padding: 10px 12px;
-  border-top: 1px solid var(--border);
-  color: var(--muted-foreground);
-  font-size: 12px;
-  line-height: 1.4;
+    margin: 0;
+    padding: 10px 12px;
+    border-top: 1px solid var(--border);
+    color: var(--muted-foreground);
+    font-size: 12px;
+    line-height: 1.4;
 }
 
 .screenReaderOnly {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 .interactionError {
-  margin-right: auto;
-  color: var(--muted-foreground);
-  font-size: 12px;
+    margin-right: auto;
+    color: var(--muted-foreground);
+    font-size: 12px;
 }
 
 .figure:fullscreen {
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh;
-  max-width: none;
-  max-height: none;
-  border: 0;
-  border-radius: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    max-width: none;
+    max-height: none;
+    border: 0;
+    border-radius: 0;
 }
 
 @media (max-width: 600px) {
-  .figure {
-    --excalidraw-canvas-height: 360px;
-  }
+    .figure {
+        --excalidraw-canvas-height: 360px;
+    }
 
-  .toolbar {
-    flex-wrap: wrap;
-  }
+    .toolbar {
+        flex-wrap: wrap;
+    }
 }

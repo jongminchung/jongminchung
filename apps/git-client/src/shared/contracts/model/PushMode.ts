@@ -1,1 +1,3 @@
-export type PushMode = { kind: "normal" } | { kind: "forceWithLease"; expectedRemoteOid: string };
+export type PushMode =
+    | { kind: "normal" }
+    | { kind: "forceWithLease"; expectedRemoteOid: string };

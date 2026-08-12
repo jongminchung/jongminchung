@@ -20,9 +20,9 @@ App Router의 기본은 Server Component입니다. 문서 본문, 내비게이�
 
 ```tsx
 export default async function Page({ params }: PageProps) {
-  const { locale, slug } = await params;
-  const document = await getDocument(locale, slug);
-  return <DocumentPage document={document} />;
+    const { locale, slug } = await params;
+    const document = await getDocument(locale, slug);
+    return <DocumentPage document={document} />;
 }
 ```
 

@@ -412,7 +412,12 @@ ZRANGE feed:sess:8f3a 40 59 REV                                      # "3페이�
 다른 하나는 재개 토큰 방식이다. 커서에 비교값이 아니라 **랭킹을 재현하는 데 필요한 상태**를 담는다.
 
 ```json
-{ "reqId": "rank-8f3a", "served": [1024, 887, 1201], "candidateOffset": 120, "v": 2 }
+{
+    "reqId": "rank-8f3a",
+    "served": [1024, 887, 1201],
+    "candidateOffset": 120,
+    "v": 2
+}
 ```
 
 랭킹 요청 ID, 이미 반환한 글 ID 목록(또는 그것을 아주 작은 공간으로 요약해 포함 여부만 검사하는 블룸 필터), 후보 생성기의 진행 위치 같은 것들이다. 다음 요청에서 랭킹을 다시 돌리되 이미 보낸 글을 제외하고 상위 N건을 반환한다. 신선함을 유지하면서 중복만 막는 접근으로, 커서라기보다 "이어하기 토큰"에 가깝다. 대형 추천 피드의 커서를 디코딩해보면 대개 이런 상태 덩어리가 들어 있다.
@@ -511,19 +516,19 @@ GraphQL 진영에는 Relay Connection 스펙이 사실상의 표준이다.
 
 ```graphql
 {
-  orders(first: 20, after: "b3JkZXI6MTg2MDQ0OA==") {
-    edges {
-      cursor
-      node {
-        id
-        totalAmount
-      }
+    orders(first: 20, after: "b3JkZXI6MTg2MDQ0OA==") {
+        edges {
+            cursor
+            node {
+                id
+                totalAmount
+            }
+        }
+        pageInfo {
+            hasNextPage
+            endCursor
+        }
     }
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
-  }
 }
 ```
 
@@ -567,10 +572,10 @@ URL과의 관계도 여기서 갈린다. `?page=3`은 새로고침해도, 북마
 
 ```typescript
 const { data, fetchNextPage, hasNextPage } = useInfiniteQuery({
-  queryKey: ["orders", filters], // 필터가 바뀌면 캐시도 분리된다
-  queryFn: ({ pageParam }) => fetchOrders({ cursor: pageParam, ...filters }),
-  initialPageParam: undefined,
-  getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    queryKey: ["orders", filters], // 필터가 바뀌면 캐시도 분리된다
+    queryFn: ({ pageParam }) => fetchOrders({ cursor: pageParam, ...filters }),
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
 });
 ```
 

@@ -9,25 +9,26 @@ import "./styles/index.css";
 
 const initialPreference = AppearanceStorage.of(window.localStorage).load();
 const initialColorScheme = resolveAppearance(
-  initialPreference,
-  window.matchMedia("(prefers-color-scheme: dark)").matches,
+    initialPreference,
+    window.matchMedia("(prefers-color-scheme: dark)").matches,
 );
 document.documentElement.dataset.appearanceMode = initialPreference.syncWithOs
-  ? "system"
-  : initialPreference.theme;
+    ? "system"
+    : initialPreference.theme;
 document.documentElement.dataset.theme = initialColorScheme;
 document.documentElement.style.colorScheme = initialColorScheme;
 
-const Root = window.location.pathname === "/local-history" ? LocalHistoryWindow : App;
+const Root =
+    window.location.pathname === "/local-history" ? LocalHistoryWindow : App;
 const rootElement = document.getElementById("root");
 if (rootElement === null) throw new Error("Git Client root element is missing");
 
 createRoot(rootElement).render(
-  <StrictMode>
-    <RendererErrorBoundary>
-      <TooltipProvider>
-        <Root />
-      </TooltipProvider>
-    </RendererErrorBoundary>
-  </StrictMode>,
+    <StrictMode>
+        <RendererErrorBoundary>
+            <TooltipProvider>
+                <Root />
+            </TooltipProvider>
+        </RendererErrorBoundary>
+    </StrictMode>,
 );

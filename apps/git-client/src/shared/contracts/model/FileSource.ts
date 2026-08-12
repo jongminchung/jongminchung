@@ -1,4 +1,4 @@
 export type FileSource =
-  | { kind: "workingTree" }
-  | { kind: "index" }
-  | { kind: "revision"; revision: string };
+    | { kind: "workingTree" }
+    | { kind: "index" }
+    | { kind: "revision"; revision: string };

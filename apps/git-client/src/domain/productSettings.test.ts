@@ -1,76 +1,99 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_PRODUCT_SETTINGS, parseProductSettings } from "./productSettings";
+import {
+    DEFAULT_PRODUCT_SETTINGS,
+    parseProductSettings,
+} from "./productSettings";
 
 describe("product settings", () => {
-  it("uses Rebased regular density and 100% zoom by default", () => {
-    expect(parseProductSettings(null)).toEqual(DEFAULT_PRODUCT_SETTINGS);
-  });
-
-  it("does not show a shortcut-conflict balloon for a fresh profile", () => {
-    expect(parseProductSettings(null).showShortcutConflictWarning).toBe(false);
-    expect(parseProductSettings({}).showShortcutConflictWarning).toBe(false);
-  });
-
-  it("preserves an explicitly persisted shortcut-conflict preference", () => {
-    expect(parseProductSettings({ showShortcutConflictWarning: true })).toMatchObject({
-      showShortcutConflictWarning: true,
+    it("uses Rebased regular density and 100% zoom by default", () => {
+        expect(parseProductSettings(null)).toEqual(DEFAULT_PRODUCT_SETTINGS);
     });
-    expect(parseProductSettings({ showShortcutConflictWarning: false })).toMatchObject({
-      showShortcutConflictWarning: false,
+
+    it("does not show a shortcut-conflict balloon for a fresh profile", () => {
+        expect(parseProductSettings(null).showShortcutConflictWarning).toBe(
+            false,
+        );
+        expect(parseProductSettings({}).showShortcutConflictWarning).toBe(
+            false,
+        );
     });
-  });
 
-  it("accepts only supported compact, zoom, and notification values", () => {
-    expect(
-      parseProductSettings({ compactMode: true, zoom: 125, showNotifications: false }),
-    ).toEqual({
-      ...DEFAULT_PRODUCT_SETTINGS,
-      compactMode: true,
-      zoom: 125,
-      showNotifications: false,
+    it("preserves an explicitly persisted shortcut-conflict preference", () => {
+        expect(
+            parseProductSettings({ showShortcutConflictWarning: true }),
+        ).toMatchObject({
+            showShortcutConflictWarning: true,
+        });
+        expect(
+            parseProductSettings({ showShortcutConflictWarning: false }),
+        ).toMatchObject({
+            showShortcutConflictWarning: false,
+        });
     });
-    expect(parseProductSettings({ compactMode: "yes", zoom: 110, showNotifications: 1 })).toEqual(
-      DEFAULT_PRODUCT_SETTINGS,
-    );
-  });
 
-  it("restores welcome appearance, language, and region values", () => {
-    expect(
-      parseProductSettings({
-        editorColorScheme: "dark",
-        language: "English",
-        region: "asiaExceptChinaMainland",
-      }),
-    ).toMatchObject({
-      editorColorScheme: "dark",
-      language: "English",
-      region: "asiaExceptChinaMainland",
+    it("accepts only supported compact, zoom, and notification values", () => {
+        expect(
+            parseProductSettings({
+                compactMode: true,
+                zoom: 125,
+                showNotifications: false,
+            }),
+        ).toEqual({
+            ...DEFAULT_PRODUCT_SETTINGS,
+            compactMode: true,
+            zoom: 125,
+            showNotifications: false,
+        });
+        expect(
+            parseProductSettings({
+                compactMode: "yes",
+                zoom: 110,
+                showNotifications: 1,
+            }),
+        ).toEqual(DEFAULT_PRODUCT_SETTINGS);
     });
-  });
 
-  it("defaults new settings to Asia while preserving an explicitly saved region", () => {
-    expect(parseProductSettings({}).region).toBe("asiaExceptChinaMainland");
-    expect(parseProductSettings({ region: "notSpecified" }).region).toBe("notSpecified");
-  });
-
-  it("accepts only bounded IDE font sizes", () => {
-    expect(parseProductSettings({ ideFontSize: 16 }).ideFontSize).toBe(16);
-    expect(parseProductSettings({ ideFontSize: 4 }).ideFontSize).toBe(13);
-    expect(parseProductSettings({ ideFontSize: Number.NaN }).ideFontSize).toBe(13);
-  });
-
-  it("keeps only bounded shortcut overrides", () => {
-    expect(
-      parseProductSettings({
-        keymapOverrides: {
-          "view.project": "CmdOrCtrl+1",
-          "view.notifications": null,
-          tooLong: "x".repeat(129),
-        },
-      }).keymapOverrides,
-    ).toEqual({
-      "view.project": "CmdOrCtrl+1",
-      "view.notifications": null,
+    it("restores welcome appearance, language, and region values", () => {
+        expect(
+            parseProductSettings({
+                editorColorScheme: "dark",
+                language: "English",
+                region: "asiaExceptChinaMainland",
+            }),
+        ).toMatchObject({
+            editorColorScheme: "dark",
+            language: "English",
+            region: "asiaExceptChinaMainland",
+        });
     });
-  });
+
+    it("defaults new settings to Asia while preserving an explicitly saved region", () => {
+        expect(parseProductSettings({}).region).toBe("asiaExceptChinaMainland");
+        expect(parseProductSettings({ region: "notSpecified" }).region).toBe(
+            "notSpecified",
+        );
+    });
+
+    it("accepts only bounded IDE font sizes", () => {
+        expect(parseProductSettings({ ideFontSize: 16 }).ideFontSize).toBe(16);
+        expect(parseProductSettings({ ideFontSize: 4 }).ideFontSize).toBe(13);
+        expect(
+            parseProductSettings({ ideFontSize: Number.NaN }).ideFontSize,
+        ).toBe(13);
+    });
+
+    it("keeps only bounded shortcut overrides", () => {
+        expect(
+            parseProductSettings({
+                keymapOverrides: {
+                    "view.project": "CmdOrCtrl+1",
+                    "view.notifications": null,
+                    tooLong: "x".repeat(129),
+                },
+            }).keymapOverrides,
+        ).toEqual({
+            "view.project": "CmdOrCtrl+1",
+            "view.notifications": null,
+        });
+    });
 });

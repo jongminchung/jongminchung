@@ -1,7 +1,5 @@
-// @ts-nocheck -- Upstream visual source; runtime contracts are checked at the registry boundary.
-
+export { AblationChart } from "./AblationChart";
 export { AgentLoopDiagram } from "./AgentLoopDiagram";
-export { ToolCallDiagram } from "./ToolCallDiagram";
 export { ContextGrowthDiagram } from "./ContextGrowthDiagram";
 export { ToolAnatomyDiagram } from "./ToolAnatomyDiagram";
-export { AblationChart } from "./AblationChart";
+export { ToolCallDiagram } from "./ToolCallDiagram";

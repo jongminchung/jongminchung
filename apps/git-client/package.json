@@ -46,6 +46,8 @@
     "@codemirror/view": "catalog:",
     "@jongminchung/ui": "workspace:*",
     "@tanstack/react-virtual": "catalog:",
+    "@trpc/client": "catalog:",
+    "@trpc/server": "catalog:",
     "@xterm/addon-fit": "catalog:",
     "@xterm/xterm": "catalog:",
     "fflate": "catalog:",

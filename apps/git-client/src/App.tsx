@@ -6,17 +6,17 @@ import { GitClientTheme } from "./components/GitClientTheme";
 import { GitSessionStoreProvider } from "./git-session/GitSessionStoreProvider";
 
 export default function App() {
-  return (
-    <AppearanceProvider>
-      <GitClientTheme>
-        <CommandProvider>
-          <GitSessionStoreProvider>
-            <AppStoreProvider>
-              <AppShell />
-            </AppStoreProvider>
-          </GitSessionStoreProvider>
-        </CommandProvider>
-      </GitClientTheme>
-    </AppearanceProvider>
-  );
+    return (
+        <AppearanceProvider>
+            <GitClientTheme>
+                <CommandProvider>
+                    <GitSessionStoreProvider>
+                        <AppStoreProvider>
+                            <AppShell />
+                        </AppStoreProvider>
+                    </GitSessionStoreProvider>
+                </CommandProvider>
+            </GitClientTheme>
+        </AppearanceProvider>
+    );
 }

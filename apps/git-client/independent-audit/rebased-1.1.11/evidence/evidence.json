@@ -19,7 +19,12 @@
     "pixelBounds": { "width": 800, "height": 650 },
     "titleBarHeightPx": 30,
     "sidebarWidthPx": 224,
-    "selectedCategoryBoundsPx": { "x": 12, "y": 114, "width": 200, "height": 32 },
+    "selectedCategoryBoundsPx": {
+      "x": 12,
+      "y": 114,
+      "width": 200,
+      "height": 32
+    },
     "labels": [
       "Projects",
       "Customize",
@@ -34,13 +39,22 @@
   "trustProject": {
     "screenshot": "screenshots/02-trust-project.png",
     "pixelBounds": { "width": 637, "height": 192 },
-    "buttonsInVisualOrder": ["Don't Open", "Preview in Safe Mode", "Trust Project"],
+    "buttonsInVisualOrder": [
+      "Don't Open",
+      "Preview in Safe Mode",
+      "Trust Project"
+    ],
     "initialFocus": "Preview in Safe Mode"
   },
   "dirtyWorkbench": {
     "screenshot": "screenshots/04-dirty-workbench-default.png",
     "pixelBounds": { "width": 1076, "height": 768 },
-    "persistedLogicalFrame": { "x": 260, "y": 55, "width": 1400, "height": 1000 },
+    "persistedLogicalFrame": {
+      "x": 260,
+      "y": 55,
+      "width": 1400,
+      "height": 1000
+    },
     "measuredPixelGeometry": {
       "topToolbarHeight": 30,
       "leftToolStripeWidth": 27,

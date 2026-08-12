@@ -1,14 +1,14 @@
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  build: {
-    sourcemap: true,
-    rollupOptions: {
-      external: ["electron"],
-      output: {
-        entryFileNames: "git-utility.cjs",
-        format: "cjs",
-      },
+    build: {
+        sourcemap: true,
+        rollupOptions: {
+            external: ["electron"],
+            output: {
+                entryFileNames: "git-utility.cjs",
+                format: "cjs",
+            },
+        },
     },
-  },
 });

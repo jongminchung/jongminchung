@@ -67,16 +67,17 @@ advisory가 발견되면 다음 순서로 처리한다.
 
 ## 생성물 관리
 
-| 대상                                  | 원본                                | 갱신                                                             | 검증                         |
-| ------------------------------------- | ----------------------------------- | ---------------------------------------------------------------- | ---------------------------- |
-| 앱 아이콘 SVG                         | `packages/icon/src/index.ts`        | `pnpm run icon:generate`                                         | `pnpm run icon:check`        |
-| Engineering Docs 콘텐츠 manifest·검색 | `apps/engineering-docs/content`     | `pnpm --filter @jongminchung/engineering-docs run content:build` | `content:check`              |
-| Engineering Docs material registry    | sibling `kciter.github.io` snapshot | importer 후 `materials:build`                                    | `materials:check`            |
-| Excalidraw 정적 자산                  | Excalidraw source asset             | `excalidraw:assets`                                              | `excalidraw:check`           |
-| Playwright snapshot                   | 렌더링 결과                         | 각 workspace의 `test:e2e:update`                                 | visual test와 diff 직접 검토 |
+| 대상                                  | 원본                            | 갱신                                                             | 검증                         |
+| ------------------------------------- | ------------------------------- | ---------------------------------------------------------------- | ---------------------------- |
+| 앱 아이콘 SVG                         | `packages/icon/src/index.ts`    | `pnpm run icon:generate`                                         | `pnpm run icon:check`        |
+| Engineering Docs 콘텐츠 manifest·검색 | `apps/engineering-docs/content` | `pnpm --filter @jongminchung/engineering-docs run content:build` | `content:check`              |
+| Engineering Docs material registry    | `components/materials/topics`   | `materials:build`                                                | `materials:check`            |
+| Excalidraw 정적 자산                  | Excalidraw source asset         | `excalidraw:assets`                                              | `excalidraw:check`           |
+| Playwright snapshot                   | 렌더링 결과                     | 각 workspace의 `test:e2e:update`                                 | visual test와 diff 직접 검토 |
 
-`apps/engineering-docs/components/materials/topics`와 앱의 생성 아이콘은 직접 편집하지 않는다.
-생성 명령 후에는 생성물만 보지 말고 원본 변경과 함께 diff를 검토한다.
+`apps/engineering-docs/components/materials/topics`는 직접 편집하는 원본이며 registry와 manifest는
+생성물이다. 앱의 생성 아이콘과 material 생성물은 직접 편집하지 않고 원본 변경과 함께 diff를
+검토한다.
 
 ## GitHub Actions
 
@@ -112,10 +113,11 @@ export만 제공한다. `package.json`에는 `type: "module"`, `engines.node: ">
 JavaScript entry point별 `import` 조건을 유지하고 CommonJS 산출물과 `require` 조건을 추가하지
 않는다.
 
-두 패키지의 `build`는 공통 `tsconfig.library.json`과 패키지별 `tsconfig.build.json`을 사용해
-`tsc`로 ESM JavaScript와 declaration을 생성한다. CSS·JSON subpath는 tarball에 포함된 원본
-자산을 직접 가리킨다. 번들링·축소·복수 모듈 형식이나 빌드 플러그인은 기본 배포 경계가 아니며,
-[ADR 0002](adr/0002-node-library-tsc-build.md)의 재도입 조건을 충족할 때만 다시 검토한다.
+두 패키지의 `build`는 공통 `tsconfig.base.json`의 strict 검사를 상속하고 패키지별
+`tsconfig.build.json`에 선언·출력 옵션만 명시해 `tsc`로 ESM JavaScript와 declaration을
+생성한다. CSS·JSON subpath는 tarball에 포함된 원본 자산을 직접 가리킨다. 번들링·축소·복수
+모듈 형식이나 빌드 플러그인은 기본 배포 경계가 아니며, [ADR 0002](adr/0002-node-library-tsc-build.md)의
+재도입 조건을 충족할 때만 다시 검토한다.
 
 ```sh
 pnpm run check

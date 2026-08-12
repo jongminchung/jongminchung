@@ -49,28 +49,30 @@ Anthropic이 이 글에서 반복하는 조언이 하나 있다. **가능하면 
 
 ```typescript
 async function runAgent(task: string) {
-  const messages = [{ role: "user", content: [{ type: "text", text: task }] }];
+    const messages = [
+        { role: "user", content: [{ type: "text", text: task }] },
+    ];
 
-  while (true) {
-    // 1. 지금까지의 대화 + 도구 목록을 모델에게 보낸다
-    const response = await callModel(messages, tools);
-    messages.push({ role: "assistant", content: response.content });
+    while (true) {
+        // 1. 지금까지의 대화 + 도구 목록을 모델에게 보낸다
+        const response = await callModel(messages, tools);
+        messages.push({ role: "assistant", content: response.content });
 
-    // 2. 모델이 도구를 호출했는가?
-    const toolUses = response.content.filter((b) => b.type === "tool_use");
-    if (toolUses.length === 0) {
-      return response; // 도구를 안 썼으니 최종 답변이다
+        // 2. 모델이 도구를 호출했는가?
+        const toolUses = response.content.filter((b) => b.type === "tool_use");
+        if (toolUses.length === 0) {
+            return response; // 도구를 안 썼으니 최종 답변이다
+        }
+
+        // 3. 도구를 실행하고 결과를 다음 메시지로 붙인다
+        const results = toolUses.map((t) => ({
+            type: "tool_result",
+            tool_use_id: t.id,
+            content: runTool(t.name, t.input),
+        }));
+        messages.push({ role: "user", content: results });
+        // 4. 루프의 처음으로 돌아간다
     }
-
-    // 3. 도구를 실행하고 결과를 다음 메시지로 붙인다
-    const results = toolUses.map((t) => ({
-      type: "tool_result",
-      tool_use_id: t.id,
-      content: runTool(t.name, t.input),
-    }));
-    messages.push({ role: "user", content: results });
-    // 4. 루프의 처음으로 돌아간다
-  }
 }
 ```
 
@@ -88,18 +90,18 @@ API에 요청을 보낼 때, 우리는 대화 메시지와 함께 **도구 목�
 
 ```typescript
 const tools = [
-  {
-    name: "read_file",
-    description: "파일 내용을 읽는다. 줄 번호가 붙은 텍스트를 돌려준다.",
-    input_schema: {
-      type: "object",
-      properties: {
-        path: { type: "string", description: "읽을 파일의 상대 경로" },
-      },
-      required: ["path"],
+    {
+        name: "read_file",
+        description: "파일 내용을 읽는다. 줄 번호가 붙은 텍스트를 돌려준다.",
+        input_schema: {
+            type: "object",
+            properties: {
+                path: { type: "string", description: "읽을 파일의 상대 경로" },
+            },
+            required: ["path"],
+        },
     },
-  },
-  // ... 다른 도구들
+    // ... 다른 도구들
 ];
 ```
 
@@ -109,17 +111,17 @@ const tools = [
 
 ```json
 {
-  "role": "assistant",
-  "stop_reason": "tool_use",
-  "content": [
-    { "type": "text", "text": "먼저 파일을 읽어볼게." },
-    {
-      "type": "tool_use",
-      "id": "toolu_01A09q90qw90lq917835lq9",
-      "name": "read_file",
-      "input": { "path": "src/cart.js" }
-    }
-  ]
+    "role": "assistant",
+    "stop_reason": "tool_use",
+    "content": [
+        { "type": "text", "text": "먼저 파일을 읽어볼게." },
+        {
+            "type": "tool_use",
+            "id": "toolu_01A09q90qw90lq917835lq9",
+            "name": "read_file",
+            "input": { "path": "src/cart.js" }
+        }
+    ]
 }
 ```
 
@@ -127,14 +129,14 @@ const tools = [
 
 ```json
 {
-  "role": "user",
-  "content": [
-    {
-      "type": "tool_result",
-      "tool_use_id": "toolu_01A09q90qw90lq917835lq9",
-      "content": "   1| function calculateTotal(items) { ..."
-    }
-  ]
+    "role": "user",
+    "content": [
+        {
+            "type": "tool_result",
+            "tool_use_id": "toolu_01A09q90qw90lq917835lq9",
+            "content": "   1| function calculateTotal(items) { ..."
+        }
+    ]
 }
 ```
 
@@ -146,10 +148,10 @@ const tools = [
 
 ```json
 {
-  "type": "tool_result",
-  "tool_use_id": "toolu_01A09q90qw90lq917835lq9",
-  "content": "오류: 그런 파일이 없다",
-  "is_error": true
+    "type": "tool_result",
+    "tool_use_id": "toolu_01A09q90qw90lq917835lq9",
+    "content": "오류: 그런 파일이 없다",
+    "is_error": true
 }
 ```
 
@@ -225,10 +227,10 @@ case "edit_file": {
 ```typescript
 const agentsPath = path.join(workdir, "AGENTS.md");
 if (fs.existsSync(agentsPath)) {
-  agentsMd = `\n다음은 이 프로젝트의 AGENTS.md 내용이다. 반드시 따를 것:\n${fs.readFileSync(
-    agentsPath,
-    "utf-8",
-  )}\n`;
+    agentsMd = `\n다음은 이 프로젝트의 AGENTS.md 내용이다. 반드시 따를 것:\n${fs.readFileSync(
+        agentsPath,
+        "utf-8",
+    )}\n`;
 }
 ```
 
@@ -258,11 +260,11 @@ if (fs.existsSync(agentsPath)) {
 
 ```javascript
 function calculateTotal(items) {
-  let total = 0;
-  for (const item of items) {
-    total = item.price * item.quantity; // 버그: += 여야 하는데 =
-  }
-  return total;
+    let total = 0;
+    for (const item of items) {
+        total = item.price * item.quantity; // 버그: += 여야 하는데 =
+    }
+    return total;
 }
 ```
 
@@ -418,12 +420,12 @@ execSync(command, { cwd: workdir, timeout: 30_000 });
 ```typescript
 // 컨텍스트가 한계의 80%를 넘으면 오래된 메시지를 요약으로 압축한다
 if (estimateTokens(messages) > limit * 0.8) {
-  const old = messages.slice(0, -6); // 최근 6개는 남기고
-  const summary = await callModel(
-    [...old, { role: "user", content: "지금까지의 작업을 요약하라." }],
-    [],
-  );
-  messages = [{ role: "user", content: summary }, ...messages.slice(-6)];
+    const old = messages.slice(0, -6); // 최근 6개는 남기고
+    const summary = await callModel(
+        [...old, { role: "user", content: "지금까지의 작업을 요약하라." }],
+        [],
+    );
+    messages = [{ role: "user", content: summary }, ...messages.slice(-6)];
 }
 ```
 
@@ -440,11 +442,11 @@ if (estimateTokens(messages) > limit * 0.8) {
 ```typescript
 // 작업 디렉터리 밖으로 나가는 경로를 막는다
 function resolveSafe(workdir: string, p: string): string {
-  const abs = path.resolve(workdir, p);
-  if (!abs.startsWith(path.resolve(workdir))) {
-    throw new Error(`작업 디렉터리 밖의 경로는 접근할 수 없다: ${p}`);
-  }
-  return abs;
+    const abs = path.resolve(workdir, p);
+    if (!abs.startsWith(path.resolve(workdir))) {
+        throw new Error(`작업 디렉터리 밖의 경로는 접근할 수 없다: ${p}`);
+    }
+    return abs;
 }
 ```
 

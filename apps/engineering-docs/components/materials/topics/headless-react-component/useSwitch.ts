@@ -1,5 +1,3 @@
-// @ts-nocheck -- Upstream visual source; runtime contracts are checked at the registry boundary.
-
 import React, { useCallback } from "react";
 import { useControllableState } from "./useControllableState";
 
@@ -10,53 +8,61 @@ import { useControllableState } from "./useControllableState";
 
 type Handler<E> = (event: E) => void;
 
-function composeHandlers<E>(theirs?: Handler<E>, ours?: Handler<E>): Handler<E> {
-  return (event) => {
-    theirs?.(event);
-    ours?.(event);
-  };
+function composeHandlers<E>(
+    theirs?: Handler<E>,
+    ours?: Handler<E>,
+): Handler<E> {
+    return (event) => {
+        theirs?.(event);
+        ours?.(event);
+    };
 }
 
 export interface UseSwitchOptions {
-  checked?: boolean;
-  defaultChecked?: boolean;
-  disabled?: boolean;
-  onCheckedChange?: (checked: boolean) => void;
+    checked?: boolean;
+    defaultChecked?: boolean;
+    disabled?: boolean;
+    onCheckedChange?: (checked: boolean) => void;
 }
 
 export function useSwitch({
-  checked: controlledChecked,
-  defaultChecked = false,
-  disabled = false,
-  onCheckedChange,
+    checked: controlledChecked,
+    defaultChecked = false,
+    disabled = false,
+    onCheckedChange,
 }: UseSwitchOptions = {}) {
-  const [checked, setChecked] = useControllableState({
-    value: controlledChecked,
-    defaultValue: defaultChecked,
-    onChange: onCheckedChange,
-  });
+    const [checked, setChecked] = useControllableState({
+        value: controlledChecked,
+        defaultValue: defaultChecked,
+        onChange: onCheckedChange,
+    });
 
-  const toggle = useCallback(() => {
-    if (disabled) return;
-    setChecked(!checked);
-  }, [checked, disabled, setChecked]);
+    const toggle = useCallback(() => {
+        if (disabled) return;
+        setChecked(!checked);
+    }, [checked, disabled, setChecked]);
 
-  const getSwitchProps = (userProps: React.HTMLAttributes<HTMLElement> = {}) => ({
-    role: "switch" as const,
-    "aria-checked": checked,
-    "aria-disabled": disabled || undefined,
-    tabIndex: disabled ? -1 : 0,
-    "data-state": checked ? "checked" : "unchecked",
-    "data-disabled": disabled ? "" : undefined,
-    ...userProps,
-    onClick: composeHandlers(userProps.onClick, toggle),
-    onKeyDown: composeHandlers<React.KeyboardEvent<HTMLElement>>(userProps.onKeyDown, (event) => {
-      if (event.key === " " || event.key === "Enter") {
-        event.preventDefault();
-        toggle();
-      }
-    }),
-  });
+    const getSwitchProps = (
+        userProps: React.HTMLAttributes<HTMLElement> = {},
+    ) => ({
+        role: "switch" as const,
+        "aria-checked": checked,
+        "aria-disabled": disabled || undefined,
+        tabIndex: disabled ? -1 : 0,
+        "data-state": checked ? "checked" : "unchecked",
+        "data-disabled": disabled ? "" : undefined,
+        ...userProps,
+        onClick: composeHandlers(userProps.onClick, toggle),
+        onKeyDown: composeHandlers<React.KeyboardEvent<HTMLElement>>(
+            userProps.onKeyDown,
+            (event) => {
+                if (event.key === " " || event.key === "Enter") {
+                    event.preventDefault();
+                    toggle();
+                }
+            },
+        ),
+    });
 
-  return { checked, toggle, getSwitchProps };
+    return { checked, toggle, getSwitchProps };
 }

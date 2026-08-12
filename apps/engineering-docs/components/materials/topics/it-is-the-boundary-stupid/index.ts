@@ -1,20 +1,18 @@
-// @ts-nocheck -- Upstream visual source; runtime contracts are checked at the registry boundary.
-
-export { BoundaryDualityDiagram } from "./BoundaryDualityDiagram";
-export { CallerCalleeBoundaryDiagram } from "./CallerCalleeBoundaryDiagram";
-export { DependencyBoundaryDiagram } from "./DependencyBoundaryDiagram";
-export { DataTransformFlowDiagram } from "./DataTransformFlowDiagram";
-export { TrustBoundaryDiagram } from "./TrustBoundaryDiagram";
-export { DesignErosionDiagram } from "./DesignErosionDiagram";
+export { AbstractionLeakDiagram } from "./AbstractionLeakDiagram";
 export { AsyncOrderDiagram } from "./AsyncOrderDiagram";
-export { ScaleBoundaryDiagram } from "./ScaleBoundaryDiagram";
 export { AtomicityBreakDiagram } from "./AtomicityBreakDiagram";
+export { BoundaryDualityDiagram } from "./BoundaryDualityDiagram";
+export { BoundaryEvolutionDiagram } from "./BoundaryEvolutionDiagram";
+export { CallerCalleeBoundaryDiagram } from "./CallerCalleeBoundaryDiagram";
 export { ConwaysLawDiagram } from "./ConwaysLawDiagram";
+export { DataTransformFlowDiagram } from "./DataTransformFlowDiagram";
+export { DependencyBoundaryDiagram } from "./DependencyBoundaryDiagram";
+export { DesignErosionDiagram } from "./DesignErosionDiagram";
+export { FocusLineEffect } from "./FocusLineEffect";
+export { HeroSloganDiagram } from "./HeroSloganDiagram";
+export { HiddenBoundaryDiagram } from "./HiddenBoundaryDiagram";
+export { ScaleBoundaryDiagram } from "./ScaleBoundaryDiagram";
 export { TelephoneGameDiagram } from "./TelephoneGameDiagram";
 export { TradeoffScaleDiagram } from "./TradeoffScaleDiagram";
-export { HeroSloganDiagram } from "./HeroSloganDiagram";
-export { AbstractionLeakDiagram } from "./AbstractionLeakDiagram";
-export { FocusLineEffect } from "./FocusLineEffect";
-export { HiddenBoundaryDiagram } from "./HiddenBoundaryDiagram";
-export { BoundaryEvolutionDiagram } from "./BoundaryEvolutionDiagram";
+export { TrustBoundaryDiagram } from "./TrustBoundaryDiagram";
 export { UserDevBoundaryDiagram } from "./UserDevBoundaryDiagram";

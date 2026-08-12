@@ -34,11 +34,16 @@ sourceUrl: https://github.com/kciter/kciter.github.io/blob/develop/src/drafts/20
 
 ```ts
 // 원근 투영: 깊이로 나눈다. 멀수록 작게 보인다.
-function perspectiveProject(v: Vec3, yaw: number, pitch: number, camDist: number) {
-  const t = viewTransform(v, yaw, pitch); // 카메라 방향으로 세계를 돌려 눕히고
-  const d = camDist - t.z; // 카메라에서 이 점까지의 깊이를 구해
-  const scale = camDist / d; // 깊이에 반비례하는 배율을 곱한다
-  return { x: t.x * scale, y: -t.y * scale };
+function perspectiveProject(
+    v: Vec3,
+    yaw: number,
+    pitch: number,
+    camDist: number,
+) {
+    const t = viewTransform(v, yaw, pitch); // 카메라 방향으로 세계를 돌려 눕히고
+    const d = camDist - t.z; // 카메라에서 이 점까지의 깊이를 구해
+    const scale = camDist / d; // 깊이에 반비례하는 배율을 곱한다
+    return { x: t.x * scale, y: -t.y * scale };
 }
 ```
 
@@ -47,8 +52,8 @@ function perspectiveProject(v: Vec3, yaw: number, pitch: number, camDist: number
 ```ts
 // 평행 투영(직교 투영): 깊이를 화면 위치에 쓰지 않는다. 멀어도 작아지지 않는다.
 function orthoProject(v: Vec3, yaw: number, pitch: number) {
-  const t = viewTransform(v, yaw, pitch);
-  return { x: t.x, y: -t.y, depth: -t.z }; // 깊이는 나중을 위해 챙겨만 둔다
+    const t = viewTransform(v, yaw, pitch);
+    return { x: t.x, y: -t.y, depth: -t.z }; // 깊이는 나중을 위해 챙겨만 둔다
 }
 ```
 
@@ -89,11 +94,11 @@ function orthoProject(v: Vec3, yaw: number, pitch: number) {
 ```ts
 // 큐브를 x축으로 n개, y축으로 n개, z축으로 n개 이어 붙인 ㄷ자 구조물.
 function penroseCubes(n: number): Vec3[] {
-  const cubes: Vec3[] = [];
-  for (let i = 0; i <= n; i++) cubes.push(vec3(i, 0, 0)); // 바닥 팔: +x
-  for (let i = 1; i <= n; i++) cubes.push(vec3(n, i, 0)); // 기둥 팔: +y
-  for (let i = 1; i <= n; i++) cubes.push(vec3(n, n, i)); // 안쪽 팔: +z
-  return cubes;
+    const cubes: Vec3[] = [];
+    for (let i = 0; i <= n; i++) cubes.push(vec3(i, 0, 0)); // 바닥 팔: +x
+    for (let i = 1; i <= n; i++) cubes.push(vec3(n, i, 0)); // 기둥 팔: +y
+    for (let i = 1; i <= n; i++) cubes.push(vec3(n, n, i)); // 안쪽 팔: +z
+    return cubes;
 }
 ```
 
@@ -136,18 +141,18 @@ function penroseCubes(n: number): Vec3[] {
 ```ts
 // 비교용: 화면을 보지 않고 3D 좌표로만 잇는 "정직한" 그래프
 function buildWorldGraph(nodes: WalkNode[]): Map<string, string[]> {
-  const byKey = new Map(nodes.map((n) => [n.id, n])); // 좌표 → 노드 색인
-  const graph = new Map<string, string[]>();
-  for (const n of nodes) {
-    const edges: string[] = [];
-    for (const d of DIRS) {
-      // 동서남북 네 방향
-      const neighbor = keyOf(add(n.pos, d)); // 3D 좌표로 옆 칸에
-      if (byKey.has(neighbor)) edges.push(neighbor); // 노드가 실제로 있으면 잇는다
+    const byKey = new Map(nodes.map((n) => [n.id, n])); // 좌표 → 노드 색인
+    const graph = new Map<string, string[]>();
+    for (const n of nodes) {
+        const edges: string[] = [];
+        for (const d of DIRS) {
+            // 동서남북 네 방향
+            const neighbor = keyOf(add(n.pos, d)); // 3D 좌표로 옆 칸에
+            if (byKey.has(neighbor)) edges.push(neighbor); // 노드가 실제로 있으면 잇는다
+        }
+        graph.set(n.id, edges);
     }
-    graph.set(n.id, edges);
-  }
-  return graph;
+    return graph;
 }
 ```
 
@@ -160,29 +165,38 @@ function buildWorldGraph(nodes: WalkNode[]): Map<string, string[]> {
 ```ts
 // 두 노드를 잇는 규칙은 단 하나다.
 // "A의 이웃 칸이 있어야 할 화면 위치에, 어떤 노드 B가 보이면 연결한다."
-function buildScreenGraph(nodes: WalkNode[], yaw: number, pitch: number, epsilon = 0.05) {
-  const graph = new Map<string, string[]>();
-  const projected = nodes.map((n) => orthoProject(n.pos, yaw, pitch)); // 전부 화면 좌표로
+function buildScreenGraph(
+    nodes: WalkNode[],
+    yaw: number,
+    pitch: number,
+    epsilon = 0.05,
+) {
+    const graph = new Map<string, string[]>();
+    const projected = nodes.map((n) => orthoProject(n.pos, yaw, pitch)); // 전부 화면 좌표로
 
-  for (let i = 0; i < nodes.length; i++) {
-    const edges: string[] = [];
-    for (const d of DIRS) {
-      // A의 이웃 칸이 화면 어디에 보여야 하는지 계산하고,
-      const target = orthoProject(add(nodes[i].pos, d), yaw, pitch);
-      // 그 자리에 보이는 노드를 찾는다. 3D 거리는 따지지 않는다.
-      let found = -1;
-      for (let j = 0; j < nodes.length; j++) {
-        if (j === i) continue;
-        if (dist2d(projected[j], target) < epsilon) {
-          // 같은 자리에 여러 노드가 겹쳐 보이면 카메라에 가까운 쪽이 이긴다
-          if (found < 0 || projected[j].depth < projected[found].depth) found = j;
+    for (let i = 0; i < nodes.length; i++) {
+        const edges: string[] = [];
+        for (const d of DIRS) {
+            // A의 이웃 칸이 화면 어디에 보여야 하는지 계산하고,
+            const target = orthoProject(add(nodes[i].pos, d), yaw, pitch);
+            // 그 자리에 보이는 노드를 찾는다. 3D 거리는 따지지 않는다.
+            let found = -1;
+            for (let j = 0; j < nodes.length; j++) {
+                if (j === i) continue;
+                if (dist2d(projected[j], target) < epsilon) {
+                    // 같은 자리에 여러 노드가 겹쳐 보이면 카메라에 가까운 쪽이 이긴다
+                    if (
+                        found < 0 ||
+                        projected[j].depth < projected[found].depth
+                    )
+                        found = j;
+                }
+            }
+            if (found >= 0) edges.push(nodes[found].id);
         }
-      }
-      if (found >= 0) edges.push(nodes[found].id);
+        graph.set(nodes[i].id, edges);
     }
-    graph.set(nodes[i].id, edges);
-  }
-  return graph;
+    return graph;
 }
 ```
 
@@ -210,18 +224,18 @@ function buildScreenGraph(nodes: WalkNode[], yaw: number, pitch: number, epsilon
 
 ```ts
 function findPath(graph: Map<string, string[]>, from: string, to: string) {
-  const cameFrom = new Map([[from, from]]); // 각 노드에 "어디서 왔는지" 기록
-  const queue = [from];
-  while (queue.length > 0) {
-    const cur = queue.shift()!;
-    for (const next of graph.get(cur) ?? []) {
-      if (cameFrom.has(next)) continue; // 이미 방문했으면 통과
-      cameFrom.set(next, cur);
-      if (next === to) return reconstruct(cameFrom, from, to); // 도착: 경로 복원
-      queue.push(next);
+    const cameFrom = new Map([[from, from]]); // 각 노드에 "어디서 왔는지" 기록
+    const queue = [from];
+    while (queue.length > 0) {
+        const cur = queue.shift()!;
+        for (const next of graph.get(cur) ?? []) {
+            if (cameFrom.has(next)) continue; // 이미 방문했으면 통과
+            cameFrom.set(next, cur);
+            if (next === to) return reconstruct(cameFrom, from, to); // 도착: 경로 복원
+            queue.push(next);
+        }
     }
-  }
-  return null; // 길이 없다
+    return null; // 길이 없다
 }
 ```
 
@@ -245,10 +259,10 @@ function findPath(graph: Map<string, string[]>, from: string, to: string) {
 ```ts
 // 그룹 회전을 반영한 블록의 실제 월드 좌표
 function blockWorldPos(b: Block, groups, rotations): Vec3 {
-  if (!b.group) return vec3(b.x, b.y, b.z); // 회전과 무관한 블록
-  const g = groups[b.group];
-  const rel = sub(b, g.pivot); // 피벗 기준 상대 좌표로
-  return add(rotateY(rel, rotations[b.group]), g.pivot); // 돌려서 다시 제자리에
+    if (!b.group) return vec3(b.x, b.y, b.z); // 회전과 무관한 블록
+    const g = groups[b.group];
+    const rel = sub(b, g.pivot); // 피벗 기준 상대 좌표로
+    return add(rotateY(rel, rotations[b.group]), g.pivot); // 돌려서 다시 제자리에
 }
 ```
 
@@ -276,9 +290,15 @@ function blockWorldPos(b: Block, groups, rotations): Vec3 {
 
 ```ts
 // 깊이가 큰(먼) 블록부터 그리면 가까운 블록이 자연스럽게 그 위를 덮는다
-function paintersOrder(positions: Vec3[], yaw: number, pitch: number): number[] {
-  const depths = positions.map((p) => orthoProject(centerOf(p), yaw, pitch).depth);
-  return positions.map((_, i) => i).sort((a, b) => depths[b] - depths[a]);
+function paintersOrder(
+    positions: Vec3[],
+    yaw: number,
+    pitch: number,
+): number[] {
+    const depths = positions.map(
+        (p) => orthoProject(centerOf(p), yaw, pitch).depth,
+    );
+    return positions.map((_, i) => i).sort((a, b) => depths[b] - depths[a]);
 }
 ```
 
@@ -293,19 +313,19 @@ function paintersOrder(positions: Vec3[], yaw: number, pitch: number): number[] 
 ```ts
 const GROUPS = { crank: { pivot: vec3(6, 2, 4) } }; // 크랭크로 도는 그룹
 const BLOCKS: Block[] = [
-  // 바닥 복도: (0,0,0) ~ (4,0,0)
-  { x: 0, y: 0, z: 0 },
-  { x: 1, y: 0, z: 0 },
-  { x: 2, y: 0, z: 0 },
-  { x: 3, y: 0, z: 0 },
-  { x: 4, y: 0, z: 0 },
-  // 공중 다리: 크랭크로 회전한다
-  { x: 6, y: 2, z: 3, group: "crank" },
-  { x: 6, y: 2, z: 4, group: "crank" },
-  { x: 6, y: 2, z: 5, group: "crank" },
-  // 도착 발판
-  { x: 6, y: 2, z: 6 },
-  { x: 6, y: 2, z: 7 },
+    // 바닥 복도: (0,0,0) ~ (4,0,0)
+    { x: 0, y: 0, z: 0 },
+    { x: 1, y: 0, z: 0 },
+    { x: 2, y: 0, z: 0 },
+    { x: 3, y: 0, z: 0 },
+    { x: 4, y: 0, z: 0 },
+    // 공중 다리: 크랭크로 회전한다
+    { x: 6, y: 2, z: 3, group: "crank" },
+    { x: 6, y: 2, z: 4, group: "crank" },
+    { x: 6, y: 2, z: 5, group: "crank" },
+    // 도착 발판
+    { x: 6, y: 2, z: 6 },
+    { x: 6, y: 2, z: 7 },
 ];
 const START = vec3(0, 1, 0);
 const GOAL = vec3(6, 3, 7);
@@ -335,12 +355,19 @@ const GOAL = vec3(6, 3, 7);
 
 ```ts
 // 이 블록이 화면에서 이 점을 가리는가. 조건은 둘이다.
-function blockCovers(block: Vec3, point: Vec3, yaw: number, pitch: number): boolean {
-  const p = orthoProject(point, yaw, pitch);
-  const center = orthoProject(centerOf(block), yaw, pitch);
-  if (center.depth >= p.depth - 0.05) return false; // ① 점 뒤의 블록은 가릴 수 없다
-  // ② 블록 여섯 면의 투영 다각형 중 하나라도 점을 품으면 가려진 것
-  return UNIT_FACES.some((face) => pointInPolygon(p, projectFace(block, face, yaw, pitch)));
+function blockCovers(
+    block: Vec3,
+    point: Vec3,
+    yaw: number,
+    pitch: number,
+): boolean {
+    const p = orthoProject(point, yaw, pitch);
+    const center = orthoProject(centerOf(block), yaw, pitch);
+    if (center.depth >= p.depth - 0.05) return false; // ① 점 뒤의 블록은 가릴 수 없다
+    // ② 블록 여섯 면의 투영 다각형 중 하나라도 점을 품으면 가려진 것
+    return UNIT_FACES.some((face) =>
+        pointInPolygon(p, projectFace(block, face, yaw, pitch)),
+    );
 }
 
 // 부재의 법칙: 구멍은 가려지면 없는 셈이 된다

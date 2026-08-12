@@ -1,81 +1,81 @@
 .shell {
-  display: flex;
-  min-height: 100vh;
-  min-height: 100dvh;
-  background: var(--background);
+    display: flex;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--background);
 }
 
 .main {
-  min-width: 0;
-  flex: 1;
+    min-width: 0;
+    flex: 1;
 }
 
 .mobileTitle {
-  padding: 18px 20px;
-  border-bottom: 1px solid var(--border);
-  font-size: 14px;
-  font-weight: 600;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    font-weight: 600;
 }
 
 .navigationFrame {
-  display: flex;
-  width: 372px;
-  min-width: 372px;
-  align-items: stretch;
+    display: flex;
+    width: 372px;
+    min-width: 372px;
+    align-items: stretch;
 }
 
 .contextInline {
-  position: sticky;
-  top: 0;
-  width: 260px;
-  min-width: 260px;
-  height: 100vh;
-  height: 100dvh;
-  border-right: 1px solid var(--border);
-  background: var(--card);
+    position: sticky;
+    top: 0;
+    width: 260px;
+    min-width: 260px;
+    height: 100vh;
+    height: 100dvh;
+    border-right: 1px solid var(--border);
+    background: var(--card);
 }
 
 .tabletContext {
-  display: none;
-  max-width: 860px;
-  margin: 0 auto;
-  padding: 16px 32px 0;
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background: color-mix(in oklch, var(--background) 90%, transparent);
-  backdrop-filter: blur(12px);
+    display: none;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 16px 32px 0;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: color-mix(in oklch, var(--background) 90%, transparent);
+    backdrop-filter: blur(12px);
 }
 
 @media (min-width: 769px) and (max-width: 1023px) {
-  .navigationFrame {
-    width: 112px;
-    min-width: 112px;
-  }
+    .navigationFrame {
+        width: 112px;
+        min-width: 112px;
+    }
 
-  .contextInline {
-    display: none;
-  }
+    .contextInline {
+        display: none;
+    }
 
-  .tabletContext {
-    display: block;
-  }
+    .tabletContext {
+        display: block;
+    }
 }
 
 @media (max-width: 768px) {
-  .navigationFrame {
-    display: none;
-    width: 0;
-    min-width: 0;
-  }
+    .navigationFrame {
+        display: none;
+        width: 0;
+        min-width: 0;
+    }
 
-  .tabletContext {
-    display: none;
-  }
+    .tabletContext {
+        display: none;
+    }
 }
 
 @media (max-width: 480px) {
-  .tabletContext {
-    padding-inline: 18px;
-  }
+    .tabletContext {
+        padding-inline: 18px;
+    }
 }

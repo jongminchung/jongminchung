@@ -1,18 +1,18 @@
-// @ts-nocheck -- Upstream visual source; runtime contracts are checked at the registry boundary.
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { Select } from "./Select";
 
-const FONT = "'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, sans-serif";
+const FONT =
+    "'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, sans-serif";
 const MONO = "ui-monospace, SFMono-Regular, Menlo, monospace";
 
 type SkinId = "saas" | "commerce" | "terminal";
 
 const SKINS: Array<{ id: SkinId; label: string }> = [
-  { id: "saas", label: "SaaS 대시보드" },
-  { id: "commerce", label: "커머스" },
-  { id: "terminal", label: "어드민 콘솔" },
+    { id: "saas", label: "SaaS 대시보드" },
+    { id: "commerce", label: "커머스" },
+    { id: "terminal", label: "어드민 콘솔" },
 ];
 
 const STYLE = `
@@ -58,91 +58,110 @@ const STYLE = `
 `;
 
 const OPTIONS = [
-  { value: "latest", label: "최신순" },
-  { value: "popular", label: "인기순" },
-  { value: "price-asc", label: "낮은 가격순" },
-  { value: "price-desc", label: "높은 가격순" },
+    { value: "latest", label: "최신순" },
+    { value: "popular", label: "인기순" },
+    { value: "price-asc", label: "낮은 가격순" },
+    { value: "price-desc", label: "높은 가격순" },
 ];
 
 export const SkinSwapDemo = () => {
-  const [skin, setSkin] = useState<SkinId>("saas");
-  const [value, setValue] = useState<string | null>(null);
-  const [open, setOpen] = useState(false);
+    const [skin, setSkin] = useState<SkinId>("saas");
+    const [value, setValue] = useState<string | null>(null);
+    const [open, setOpen] = useState(false);
 
-  return (
-    <div
-      style={{
-        border: "1px solid #dee2e6",
-        borderRadius: 8,
-        padding: 20,
-        margin: "24px 0",
-        background: "#fff",
-        fontFamily: FONT,
-      }}
-    >
-      <style dangerouslySetInnerHTML={{ __html: STYLE }} />
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
-        {SKINS.map((s) => (
-          <button
-            key={s.id}
-            onClick={() => setSkin(s.id)}
+    return (
+        <div
             style={{
-              fontFamily: FONT,
-              fontSize: 12,
-              padding: "6px 12px",
-              borderRadius: 6,
-              border: `1px solid ${skin === s.id ? "#228be6" : "#dee2e6"}`,
-              background: skin === s.id ? "#e7f5ff" : "#fff",
-              color: skin === s.id ? "#1971c2" : "#868e96",
-              fontWeight: skin === s.id ? 600 : 400,
-              cursor: "pointer",
+                border: "1px solid #dee2e6",
+                borderRadius: 8,
+                padding: 20,
+                margin: "24px 0",
+                background: "#fff",
+                fontFamily: FONT,
             }}
-          >
-            {s.label}
-          </button>
-        ))}
-      </div>
-
-      <div className={`hsd-stage hsd-${skin}`}>
-        <Select.Root
-          key={skin} // 스킨 전환 시 실제로 리마운트시킨다 — 값은 제어 모드라 데모 쪽에 남는다
-          value={value}
-          onValueChange={setValue}
-          open={open}
-          onOpenChange={setOpen}
-          className="hsd-root"
         >
-          <Select.Trigger className="hsd-trigger">
-            <Select.Value placeholder="정렬 기준 선택" />
-            <span className="hsd-chevron" aria-hidden>
-              ▾
-            </span>
-          </Select.Trigger>
-          <Select.Listbox className="hsd-listbox">
-            {OPTIONS.map((option) => (
-              <Select.Option key={option.value} className="hsd-option" value={option.value}>
-                {option.label}
-              </Select.Option>
-            ))}
-          </Select.Listbox>
-        </Select.Root>
-      </div>
+            <style dangerouslySetInnerHTML={{ __html: STYLE }} />
+            <div
+                style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 6,
+                    marginBottom: 14,
+                }}
+            >
+                {SKINS.map((s) => (
+                    <button
+                        key={s.id}
+                        onClick={() => setSkin(s.id)}
+                        style={{
+                            fontFamily: FONT,
+                            fontSize: 12,
+                            padding: "6px 12px",
+                            borderRadius: 6,
+                            border: `1px solid ${skin === s.id ? "#228be6" : "#dee2e6"}`,
+                            background: skin === s.id ? "#e7f5ff" : "#fff",
+                            color: skin === s.id ? "#1971c2" : "#868e96",
+                            fontWeight: skin === s.id ? 600 : 400,
+                            cursor: "pointer",
+                        }}
+                    >
+                        {s.label}
+                    </button>
+                ))}
+            </div>
 
-      <div
-        style={{
-          fontFamily: MONO,
-          fontSize: 11,
-          color: "#868e96",
-          marginTop: 12,
-          textAlign: "center",
-        }}
-      >
-        value: {value === null ? "null" : `"${value}"`} · open: {String(open)}
-      </div>
-      <div style={{ fontSize: 11, color: "#adb5bd", textAlign: "center", marginTop: 6 }}>
-        세 스킨 모두 같은 Select 코어가 렌더링한다 — 스킨을 바꿔도 선택한 값이 유지되고, ↑ ↓ Enter
-        Esc 키보드로도 조작할 수 있다
-      </div>
-    </div>
-  );
+            <div className={`hsd-stage hsd-${skin}`}>
+                <Select.Root
+                    key={skin} // 스킨 전환 시 실제로 리마운트시킨다 — 값은 제어 모드라 데모 쪽에 남는다
+                    value={value}
+                    onValueChange={setValue}
+                    open={open}
+                    onOpenChange={setOpen}
+                    className="hsd-root"
+                >
+                    <Select.Trigger className="hsd-trigger">
+                        <Select.Value placeholder="정렬 기준 선택" />
+                        <span className="hsd-chevron" aria-hidden>
+                            ▾
+                        </span>
+                    </Select.Trigger>
+                    <Select.Listbox className="hsd-listbox">
+                        {OPTIONS.map((option) => (
+                            <Select.Option
+                                key={option.value}
+                                className="hsd-option"
+                                value={option.value}
+                            >
+                                {option.label}
+                            </Select.Option>
+                        ))}
+                    </Select.Listbox>
+                </Select.Root>
+            </div>
+
+            <div
+                style={{
+                    fontFamily: MONO,
+                    fontSize: 11,
+                    color: "#868e96",
+                    marginTop: 12,
+                    textAlign: "center",
+                }}
+            >
+                value: {value === null ? "null" : `"${value}"`} · open:{" "}
+                {String(open)}
+            </div>
+            <div
+                style={{
+                    fontSize: 11,
+                    color: "#adb5bd",
+                    textAlign: "center",
+                    marginTop: 6,
+                }}
+            >
+                세 스킨 모두 같은 Select 코어가 렌더링한다 — 스킨을 바꿔도
+                선택한 값이 유지되고, ↑ ↓ Enter Esc 키보드로도 조작할 수 있다
+            </div>
+        </div>
+    );
 };

@@ -100,10 +100,10 @@ pnpm --filter @jongminchung/engineering-docs run content:build
 pnpm --filter @jongminchung/engineering-docs run content:check
 ```
 
-`apps/engineering-docs/components/materials/topics`는 sibling `kciter.github.io`의 vendor
-snapshot이다. 파일을 직접 고치지 말고
-[material 소유권 문서](apps/engineering-docs/components/materials/README.md)의 importer를
-사용한 뒤 다음 검사를 실행한다.
+`apps/engineering-docs/components/materials/topics`는 이 저장소가 직접 관리하는 canonical
+source이다. topic 파일과 export를 직접 수정하고
+[material 소유권 문서](apps/engineering-docs/components/materials/README.md)의 계약에 따라
+추적 registry를 갱신한 뒤 다음 검사를 실행한다.
 
 ```sh
 pnpm --filter @jongminchung/engineering-docs run materials:build
@@ -161,8 +161,8 @@ pnpm install
 - 공개 Node.js 패키지는 `engines.node: ">=24.0.0"`과 `type: "module"`을 유지한다.
 - JavaScript entry point는 `exports`의 `import` 조건으로만 공개한다.
 - CommonJS build, `require` 조건, JavaScript `default` fallback을 추가하지 않는다.
-- 공개 패키지는 공통 `tsconfig.library.json`과 패키지별 `tsconfig.build.json`으로 ESM
-  JavaScript와 declaration을 직접 생성한다.
+- 공개 패키지는 공통 `tsconfig.base.json`의 strict 검사를 상속하고 패키지별
+  `tsconfig.build.json`에 emit 옵션만 명시해 ESM JavaScript와 declaration을 직접 생성한다.
 - 번들러 재도입 조건은 [ADR 0002](docs/adr/0002-node-library-tsc-build.md)를 따른다.
 - `packages/icon`은 private source package이므로 registry에 게시하지 않는다.
 

@@ -5,22 +5,25 @@ import { cn } from "@jongminchung/ui/lib/utils";
 import type { ComponentProps, ReactNode } from "react";
 
 export {
-  Select,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectScrollDownButton,
-  SelectScrollUpButton,
-  SelectSeparator,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectScrollDownButton,
+    SelectScrollUpButton,
+    SelectSeparator,
+    SelectTrigger,
+    SelectValue,
 } from "@jongminchung/ui/components/select";
 
 export function SelectContent({
-  positionerClassName,
-  ...props
+    positionerClassName,
+    ...props
 }: ComponentProps<typeof SharedSelectContent>): ReactNode {
-  return (
-    <SharedSelectContent positionerClassName={cn("z-[150]", positionerClassName)} {...props} />
-  );
+    return (
+        <SharedSelectContent
+            positionerClassName={cn("z-[150]", positionerClassName)}
+            {...props}
+        />
+    );
 }

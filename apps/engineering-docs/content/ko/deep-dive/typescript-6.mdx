@@ -24,7 +24,7 @@ frontmatter, JSON, HTTP 응답은 타입 단언으로 신뢰하지 않습니다.
 
 ```ts
 function isLocale(value: string): value is "ko" | "en" {
-  return value === "ko" || value === "en";
+    return value === "ko" || value === "en";
 }
 ```
 

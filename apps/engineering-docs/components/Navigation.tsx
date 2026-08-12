@@ -5,324 +5,388 @@ import { Button } from "@jongminchung/ui/components/button";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { type Ref, useState } from "react";
 import {
-  type CurrentNavigationEntry,
-  createDocHref,
-  createSectionHref,
-  displayTitleFor,
-  sections as allSections,
-  type DocSection,
-  type Locale,
-  type NavigationEntry,
+    type CurrentNavigationEntry,
+    createDocHref,
+    createSectionHref,
+    displayTitleFor,
+    sections as allSections,
+    type DocSection,
+    type Locale,
+    type NavigationEntry,
 } from "#lib/content-model";
-import { DeepDiveIcon, HandbookIcon, OverviewIcon, PackageIcon, RepositoryIcon } from "./DocsIcons";
+import {
+    DeepDiveIcon,
+    HandbookIcon,
+    OverviewIcon,
+    PackageIcon,
+    RepositoryIcon,
+} from "./DocsIcons";
 import { Icon, type IconType } from "./Icon";
 import { LocaleSwitcher } from "./LocaleSwitcher";
-import { SideNav, SideNavHeading, SideNavItem, SideNavSection } from "./NavigationPrimitives";
+import {
+    SideNav,
+    SideNavHeading,
+    SideNavItem,
+    SideNavSection,
+} from "./NavigationPrimitives";
 import { TransitionLink } from "./RouteTransition";
 import { SearchTrigger } from "./SearchPalette";
 import { ThemeControl, type ThemeMode } from "./ThemeControl";
 import styles from "./Navigation.module.css";
 
-const sectionLabels: Readonly<Record<Locale, Readonly<Record<DocSection, string>>>> = {
-  ko: {
-    overview: "개요",
-    handbook: "핸드북",
-    packages: "패키지",
-    "deep-dive": "Deep Dive",
-  },
-  en: {
-    overview: "Overview",
-    handbook: "Handbook",
-    packages: "Packages",
-    "deep-dive": "Deep Dive",
-  },
+const sectionLabels: Readonly<
+    Record<Locale, Readonly<Record<DocSection, string>>>
+> = {
+    ko: {
+        overview: "개요",
+        handbook: "핸드북",
+        packages: "패키지",
+        "deep-dive": "Deep Dive",
+    },
+    en: {
+        overview: "Overview",
+        handbook: "Handbook",
+        packages: "Packages",
+        "deep-dive": "Deep Dive",
+    },
 };
 
 const sectionIcons: Readonly<Record<DocSection, IconType>> = {
-  overview: OverviewIcon,
-  handbook: HandbookIcon,
-  packages: PackageIcon,
-  "deep-dive": DeepDiveIcon,
+    overview: OverviewIcon,
+    handbook: HandbookIcon,
+    packages: PackageIcon,
+    "deep-dive": DeepDiveIcon,
 };
 
 const personalIcon = createIconDataUrl("personal");
 
-function localizedCurrentHref(locale: Locale, current: CurrentNavigationEntry): string {
-  return current.kind === "section"
-    ? createSectionHref(locale, current.section)
-    : createDocHref(locale, current.id);
+function localizedCurrentHref(
+    locale: Locale,
+    current: CurrentNavigationEntry,
+): string {
+    return current.kind === "section"
+        ? createSectionHref(locale, current.section)
+        : createDocHref(locale, current.id);
 }
 
 function SectionItems({
-  locale,
-  current,
-  documents,
+    locale,
+    current,
+    documents,
 }: {
-  readonly locale: Locale;
-  readonly current: CurrentNavigationEntry;
-  readonly documents: readonly NavigationEntry[];
+    readonly locale: Locale;
+    readonly current: CurrentNavigationEntry;
+    readonly documents: readonly NavigationEntry[];
 }) {
-  const sectionDocuments = documents.filter((document) => document.section === current.section);
-  const items =
-    current.kind === "document" && sectionDocuments.length === 1
-      ? current.outline
-          .filter((item) => item.level === 2)
-          .map((item) => ({
-            id: item.id,
-            href: `#${item.id}`,
-            label: item.label,
-            selected: false,
-          }))
-      : sectionDocuments.map((document) => ({
-          id: document.id,
-          href: document.href,
-          label: displayTitleFor(document),
-          selected: document.id === current.id,
-        }));
-  const title =
-    sectionDocuments.length === 1
-      ? locale === "ko"
-        ? "이 페이지에서"
-        : "On this page"
-      : locale === "ko"
-        ? "이 섹션에서"
-        : "In this section";
+    const sectionDocuments = documents.filter(
+        (document) => document.section === current.section,
+    );
+    const items =
+        current.kind === "document" && sectionDocuments.length === 1
+            ? current.outline
+                  .filter((item) => item.level === 2)
+                  .map((item) => ({
+                      id: item.id,
+                      href: `#${item.id}`,
+                      label: item.label,
+                      selected: false,
+                  }))
+            : sectionDocuments.map((document) => ({
+                  id: document.id,
+                  href: document.href,
+                  label: displayTitleFor(document),
+                  selected: document.id === current.id,
+              }));
+    const title =
+        sectionDocuments.length === 1
+            ? locale === "ko"
+                ? "이 페이지에서"
+                : "On this page"
+            : locale === "ko"
+              ? "이 섹션에서"
+              : "In this section";
 
-  return (
-    <SideNavSection title={title} isHeaderHidden>
-      {items.map((item) => (
-        <SideNavItem
-          key={item.id}
-          label={item.label}
-          href={item.href}
-          isSelected={item.selected}
-          size="md"
-        />
-      ))}
-    </SideNavSection>
-  );
+    return (
+        <SideNavSection title={title} isHeaderHidden>
+            {items.map((item) => (
+                <SideNavItem
+                    key={item.id}
+                    label={item.label}
+                    href={item.href}
+                    isSelected={item.selected}
+                    size="md"
+                />
+            ))}
+        </SideNavSection>
+    );
 }
 
 export function ContextNavigation({
-  locale,
-  current,
-  documents,
-  className,
+    locale,
+    current,
+    documents,
+    className,
 }: {
-  readonly locale: Locale;
-  readonly current: CurrentNavigationEntry;
-  readonly documents: readonly NavigationEntry[];
-  readonly className?: string;
+    readonly locale: Locale;
+    readonly current: CurrentNavigationEntry;
+    readonly documents: readonly NavigationEntry[];
+    readonly className?: string;
 }) {
-  return (
-    <SideNav
-      className={`${styles.contextNavigation}${className === undefined ? "" : ` ${className}`}`}
-      header={
-        <SideNavHeading
-          heading={sectionLabels[locale][current.section]}
-          superheading="Jongmin Chung Engineering Docs"
-          headingHref={createSectionHref(locale, current.section)}
-        />
-      }
-    >
-      <SectionItems locale={locale} current={current} documents={documents} />
-    </SideNav>
-  );
+    return (
+        <SideNav
+            className={`${styles.contextNavigation}${className === undefined ? "" : ` ${className}`}`}
+            header={
+                <SideNavHeading
+                    heading={sectionLabels[locale][current.section]}
+                    superheading="Jongmin Chung Engineering Docs"
+                    headingHref={createSectionHref(locale, current.section)}
+                />
+            }
+        >
+            <SectionItems
+                locale={locale}
+                current={current}
+                documents={documents}
+            />
+        </SideNav>
+    );
 }
 
 export function GlobalRail({
-  locale,
-  current,
-  mode,
-  onModeChange,
+    locale,
+    current,
+    mode,
+    onModeChange,
 }: {
-  readonly locale: Locale;
-  readonly current: CurrentNavigationEntry;
-  readonly mode: ThemeMode;
-  readonly onModeChange: (mode: ThemeMode) => void;
+    readonly locale: Locale;
+    readonly current: CurrentNavigationEntry;
+    readonly mode: ThemeMode;
+    readonly onModeChange: (mode: ThemeMode) => void;
 }) {
-  const otherLocale = locale === "ko" ? "en" : "ko";
-  return (
-    <nav
-      className={styles.globalRail}
-      aria-label={locale === "ko" ? "전체 문서" : "All documentation"}
-    >
-      <TransitionLink
-        href={`/${locale}/overview`}
-        className={styles.brand}
-        aria-label="Jongmin Chung Engineering Docs"
-      >
-        <img
-          alt=""
-          aria-hidden="true"
-          className={styles.brandIcon}
-          height="38"
-          src={personalIcon}
-          width="38"
-        />
-      </TransitionLink>
-      <span className={styles.version}>v1</span>
-      <div className={styles.railSearch}>
-        <SearchTrigger compact />
-      </div>
-      <div className={styles.sectionLinks}>
-        {allSections.map((section) => (
-          <TransitionLink
-            key={section}
-            href={createSectionHref(locale, section)}
-            className={current.section === section ? styles.sectionLinkActive : styles.sectionLink}
-            aria-current={current.section === section ? "page" : undefined}
-          >
-            <Icon icon={sectionIcons[section]} />
-            <span>{sectionLabels[locale][section]}</span>
-          </TransitionLink>
-        ))}
-      </div>
-      <div className={styles.railFooter}>
-        <a
-          href="https://github.com/jongminchung/jongminchung"
-          className={styles.utilityLink}
-          target="_blank"
-          rel="noreferrer"
-          aria-label="GitHub"
+    const otherLocale = locale === "ko" ? "en" : "ko";
+    return (
+        <nav
+            className={styles.globalRail}
+            aria-label={locale === "ko" ? "전체 문서" : "All documentation"}
         >
-          <Icon icon={RepositoryIcon} />
-        </a>
-        <ThemeControl locale={locale} mode={mode} onModeChange={onModeChange} />
-        <span className={styles.localeSwitch}>
-          <LocaleSwitcher
-            locale={locale}
-            href={localizedCurrentHref(otherLocale, current)}
-            compact
-          />
-        </span>
-      </div>
-    </nav>
-  );
+            <TransitionLink
+                href={`/${locale}/overview`}
+                className={styles.brand}
+                aria-label="Jongmin Chung Engineering Docs"
+            >
+                <img
+                    alt=""
+                    aria-hidden="true"
+                    className={styles.brandIcon}
+                    height="38"
+                    src={personalIcon}
+                    width="38"
+                />
+            </TransitionLink>
+            <span className={styles.version}>v1</span>
+            <div className={styles.railSearch}>
+                <SearchTrigger compact />
+            </div>
+            <div className={styles.sectionLinks}>
+                {allSections.map((section) => (
+                    <TransitionLink
+                        key={section}
+                        href={createSectionHref(locale, section)}
+                        className={
+                            current.section === section
+                                ? styles.sectionLinkActive
+                                : styles.sectionLink
+                        }
+                        aria-current={
+                            current.section === section ? "page" : undefined
+                        }
+                    >
+                        <Icon icon={sectionIcons[section]} />
+                        <span>{sectionLabels[locale][section]}</span>
+                    </TransitionLink>
+                ))}
+            </div>
+            <div className={styles.railFooter}>
+                <a
+                    href="https://github.com/jongminchung/jongminchung"
+                    className={styles.utilityLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="GitHub"
+                >
+                    <Icon icon={RepositoryIcon} />
+                </a>
+                <ThemeControl
+                    locale={locale}
+                    mode={mode}
+                    onModeChange={onModeChange}
+                />
+                <span className={styles.localeSwitch}>
+                    <LocaleSwitcher
+                        locale={locale}
+                        href={localizedCurrentHref(otherLocale, current)}
+                        compact
+                    />
+                </span>
+            </div>
+        </nav>
+    );
 }
 
 export function MobileNavigation({
-  locale,
-  current,
-  documents,
-  mode,
-  onModeChange,
+    locale,
+    current,
+    documents,
+    mode,
+    onModeChange,
 }: {
-  readonly locale: Locale;
-  readonly current: CurrentNavigationEntry;
-  readonly documents: readonly NavigationEntry[];
-  readonly mode: ThemeMode;
-  readonly onModeChange: (mode: ThemeMode) => void;
+    readonly locale: Locale;
+    readonly current: CurrentNavigationEntry;
+    readonly documents: readonly NavigationEntry[];
+    readonly mode: ThemeMode;
+    readonly onModeChange: (mode: ThemeMode) => void;
 }) {
-  const otherLocale = locale === "ko" ? "en" : "ko";
-  const [section, setSection] = useState<DocSection | null>(current.section);
+    const otherLocale = locale === "ko" ? "en" : "ko";
+    const [section, setSection] = useState<DocSection | null>(current.section);
 
-  return (
-    <div className={styles.mobileNavigation}>
-      <div className={styles.mobileNavigationBody}>
-        {section === null ? (
-          <nav aria-label={locale === "ko" ? "문서 섹션" : "Documentation sections"}>
-            <p className={styles.mobileTreeTitle}>{locale === "ko" ? "문서" : "Documentation"}</p>
-            <div className={styles.mobileSectionTree}>
-              {allSections.map((item) => (
-                <Button
-                  key={item}
-                  className={cn(
-                    "min-h-[52px] w-full justify-start gap-2 px-5 text-sm",
-                    "[&>:last-child]:ml-auto",
-                  )}
-                  onClick={() => setSection(item)}
-                  variant="ghost"
-                  size="default"
-                >
-                  <Icon icon={sectionIcons[item]} />
-                  {sectionLabels[locale][item]}
-                  <Icon icon="chevronRight" />
-                </Button>
-              ))}
+    return (
+        <div className={styles.mobileNavigation}>
+            <div className={styles.mobileNavigationBody}>
+                {section === null ? (
+                    <nav
+                        aria-label={
+                            locale === "ko"
+                                ? "문서 섹션"
+                                : "Documentation sections"
+                        }
+                    >
+                        <p className={styles.mobileTreeTitle}>
+                            {locale === "ko" ? "문서" : "Documentation"}
+                        </p>
+                        <div className={styles.mobileSectionTree}>
+                            {allSections.map((item) => (
+                                <Button
+                                    key={item}
+                                    className={cn(
+                                        "min-h-[52px] w-full justify-start gap-2 px-5 text-sm",
+                                        "[&>:last-child]:ml-auto",
+                                    )}
+                                    onClick={() => setSection(item)}
+                                    variant="ghost"
+                                    size="default"
+                                >
+                                    <Icon icon={sectionIcons[item]} />
+                                    {sectionLabels[locale][item]}
+                                    <Icon icon="chevronRight" />
+                                </Button>
+                            ))}
+                        </div>
+                    </nav>
+                ) : (
+                    <div className={styles.mobileSectionView}>
+                        <Button
+                            aria-label={
+                                locale === "ko"
+                                    ? "전체 문서로 돌아가기"
+                                    : "Back to all documentation"
+                            }
+                            className={
+                                "sticky top-0 z-[1] min-h-[52px] w-full justify-start gap-2 rounded-none border-b-border px-5 text-[17px]"
+                            }
+                            onClick={() => setSection(null)}
+                            variant="outline"
+                            size="default"
+                        >
+                            <Icon icon="chevronLeft" />
+                            {sectionLabels[locale][section]}
+                        </Button>
+                        <SideNav className={styles.mobileContextNavigation}>
+                            {section === current.section ? (
+                                <SectionItems
+                                    locale={locale}
+                                    current={current}
+                                    documents={documents}
+                                />
+                            ) : (
+                                <SideNavSection
+                                    title={sectionLabels[locale][section]}
+                                    isHeaderHidden
+                                >
+                                    {documents
+                                        .filter(
+                                            (document) =>
+                                                document.section === section,
+                                        )
+                                        .map((document) => (
+                                            <SideNavItem
+                                                key={document.id}
+                                                label={displayTitleFor(
+                                                    document,
+                                                )}
+                                                href={document.href}
+                                                size="md"
+                                            />
+                                        ))}
+                                </SideNavSection>
+                            )}
+                        </SideNav>
+                    </div>
+                )}
             </div>
-          </nav>
-        ) : (
-          <div className={styles.mobileSectionView}>
-            <Button
-              aria-label={locale === "ko" ? "전체 문서로 돌아가기" : "Back to all documentation"}
-              className={
-                "sticky top-0 z-[1] min-h-[52px] w-full justify-start gap-2 rounded-none border-b-border px-5 text-[17px]"
-              }
-              onClick={() => setSection(null)}
-              variant="outline"
-              size="default"
-            >
-              <Icon icon="chevronLeft" />
-              {sectionLabels[locale][section]}
-            </Button>
-            <SideNav className={styles.mobileContextNavigation}>
-              {section === current.section ? (
-                <SectionItems locale={locale} current={current} documents={documents} />
-              ) : (
-                <SideNavSection title={sectionLabels[locale][section]} isHeaderHidden>
-                  {documents
-                    .filter((document) => document.section === section)
-                    .map((document) => (
-                      <SideNavItem
-                        key={document.id}
-                        label={displayTitleFor(document)}
-                        href={document.href}
-                        size="md"
-                      />
-                    ))}
-                </SideNavSection>
-              )}
-            </SideNav>
-          </div>
-        )}
-      </div>
-      <div className={styles.mobileUtilities}>
-        <SearchTrigger />
-        <ThemeControl locale={locale} mode={mode} onModeChange={onModeChange} />
-        <LocaleSwitcher locale={locale} href={localizedCurrentHref(otherLocale, current)} compact />
-      </div>
-    </div>
-  );
+            <div className={styles.mobileUtilities}>
+                <SearchTrigger />
+                <ThemeControl
+                    locale={locale}
+                    mode={mode}
+                    onModeChange={onModeChange}
+                />
+                <LocaleSwitcher
+                    locale={locale}
+                    href={localizedCurrentHref(otherLocale, current)}
+                    compact
+                />
+            </div>
+        </div>
+    );
 }
 
 export function MobileTopNavigation({
-  locale,
-  onMenuClick,
-  triggerRef,
+    locale,
+    onMenuClick,
+    triggerRef,
 }: {
-  readonly locale: Locale;
-  readonly onMenuClick: () => void;
-  readonly triggerRef: Ref<HTMLButtonElement>;
+    readonly locale: Locale;
+    readonly onMenuClick: () => void;
+    readonly triggerRef: Ref<HTMLButtonElement>;
 }) {
-  return (
-    <header className={styles.mobileTopNav}>
-      <Button
-        ref={triggerRef}
-        aria-label={locale === "ko" ? "탐색 열기" : "Open navigation"}
-        className={"size-9 gap-2 p-0 text-sm"}
-        onClick={onMenuClick}
-        variant="ghost"
-        size="icon"
-      >
-        <Icon icon="menu" />
-      </Button>
-      <TransitionLink
-        href={`/${locale}/overview`}
-        className={styles.mobileHeading}
-        aria-label="Jongmin Chung Engineering Docs"
-      >
-        <img
-          alt=""
-          aria-hidden="true"
-          className={styles.mobileBrand}
-          height="30"
-          src={personalIcon}
-          width="30"
-        />
-        <span>Engineering Docs</span>
-      </TransitionLink>
-      <SearchTrigger compact showShortcut={false} />
-    </header>
-  );
+    return (
+        <header className={styles.mobileTopNav}>
+            <Button
+                ref={triggerRef}
+                aria-label={locale === "ko" ? "탐색 열기" : "Open navigation"}
+                className={"size-9 gap-2 p-0 text-sm"}
+                onClick={onMenuClick}
+                variant="ghost"
+                size="icon"
+            >
+                <Icon icon="menu" />
+            </Button>
+            <TransitionLink
+                href={`/${locale}/overview`}
+                className={styles.mobileHeading}
+                aria-label="Jongmin Chung Engineering Docs"
+            >
+                <img
+                    alt=""
+                    aria-hidden="true"
+                    className={styles.mobileBrand}
+                    height="30"
+                    src={personalIcon}
+                    width="30"
+                />
+                <span>Engineering Docs</span>
+            </TransitionLink>
+            <SearchTrigger compact showShortcut={false} />
+        </header>
+    );
 }

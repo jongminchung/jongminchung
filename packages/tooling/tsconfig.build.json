@@ -1,8 +1,18 @@
 {
-  "extends": "../../tsconfig.library.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "allowImportingTsExtensions": false,
+    "declaration": true,
+    "declarationMap": false,
+    "lib": ["ES2024"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "noEmit": false,
+    "noEmitOnError": true,
     "outDir": "dist",
-    "rootDir": "src"
+    "rootDir": "src",
+    "sourceMap": false,
+    "target": "ES2024"
   },
   "files": ["src/oxfmt/index.ts"]
 }

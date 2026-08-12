@@ -7,9 +7,9 @@ import { createProjectCommands } from "./commands/projectCommands";
 import type { WorkspaceCommandContext } from "./commands/workspaceCommandTypes";
 
 export function useWorkspaceCommands(context: WorkspaceCommandContext): void {
-  useCommandDefinitions(createProjectCommands(context));
-  useCommandDefinitions(createLayoutCommands(context));
-  useCommandDefinitions(createHelpCommands(context));
-  useCommandDefinitions(createMacroCommands(context));
-  useCommandDefinitions(createAppearanceCommands(context));
+    useCommandDefinitions(createProjectCommands(context));
+    useCommandDefinitions(createLayoutCommands(context));
+    useCommandDefinitions(createHelpCommands(context));
+    useCommandDefinitions(createMacroCommands(context));
+    useCommandDefinitions(createAppearanceCommands(context));
 }

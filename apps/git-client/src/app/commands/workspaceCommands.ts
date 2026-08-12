@@ -14,13 +14,13 @@ export { createProjectCommands } from "./projectCommands";
 export type { WorkspaceCommandContext } from "./workspaceCommandTypes";
 
 export function createWorkspaceCommands(
-  context: WorkspaceCommandContext,
+    context: WorkspaceCommandContext,
 ): readonly CommandDefinition[] {
-  return [
-    ...createProjectCommands(context),
-    ...createLayoutCommands(context),
-    ...createHelpCommands(context),
-    ...createMacroCommands(context),
-    ...createAppearanceCommands(context),
-  ];
+    return [
+        ...createProjectCommands(context),
+        ...createLayoutCommands(context),
+        ...createHelpCommands(context),
+        ...createMacroCommands(context),
+        ...createAppearanceCommands(context),
+    ];
 }

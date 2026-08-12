@@ -1,41 +1,41 @@
-// @ts-nocheck -- Upstream visual source; runtime contracts are checked at the registry boundary.
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ASCII3DRenderer as Renderer } from "./renderer";
 
 export const ASCII3DRenderer = () => {
-  const ref = useRef<HTMLDivElement>(null);
+    const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const renderer = new Renderer(ref.current, 80, 40);
-    renderer.loadFromString(mesh);
-    renderer.run();
-  }, [ref.current]);
+    useEffect(() => {
+        const renderer = new Renderer(ref.current, 80, 40);
+        renderer.loadFromString(mesh);
+        renderer.run();
+        return () => renderer.stop();
+    }, []);
 
-  const [width, setWidth] = useState<number>(0);
+    const [width, setWidth] = useState<number>(0);
 
-  const handleResize = () => {
-    setWidth(ref.current?.clientWidth || 0);
-  };
+    const handleResize = () => {
+        setWidth(ref.current?.clientWidth || 0);
+    };
 
-  useEffect(() => {
-    window.addEventListener("resize", handleResize);
-    handleResize();
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+    useEffect(() => {
+        window.addEventListener("resize", handleResize);
+        handleResize();
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
 
-  return (
-    <div
-      ref={ref}
-      style={{
-        fontSize: (width / 700) * 14,
-        lineHeight: 1,
-        width: "100%",
-        fontFamily: "monospace",
-      }}
-    />
-  );
+    return (
+        <div
+            ref={ref}
+            style={{
+                fontSize: (width / 700) * 14,
+                lineHeight: 1,
+                width: "100%",
+                fontFamily: "monospace",
+            }}
+        />
+    );
 };
 
 const mesh = `

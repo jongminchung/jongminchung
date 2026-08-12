@@ -1,1 +1,6 @@
-export type RepositoryInvalidation = "status" | "history" | "stash" | "operation" | "management";
+export type RepositoryInvalidation =
+    | "status"
+    | "history"
+    | "stash"
+    | "operation"
+    | "management";

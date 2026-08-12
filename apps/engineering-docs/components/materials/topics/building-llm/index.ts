@@ -1,14 +1,12 @@
-// @ts-nocheck -- Upstream visual source; runtime contracts are checked at the registry boundary.
-
+export { AttentionProcessDiagram } from "./AttentionProcessDiagram";
 export { AttentionVisualizerDemo } from "./AttentionVisualizerDemo";
-export { TransformerBlockDiagram } from "./TransformerBlockDiagram";
-export { TemperatureSamplingDemo } from "./TemperatureSamplingDemo";
-export { NeuralNetworkDiagram } from "./NeuralNetworkDiagram";
 export { EmbeddingDiagram } from "./EmbeddingDiagram";
 export { HamsterLMDemo } from "./HamsterLMDemo";
-export { NextTokenDiagram } from "./NextTokenDiagram";
 export { MatrixMultiplyDiagram } from "./MatrixMultiplyDiagram";
-export { AttentionProcessDiagram } from "./AttentionProcessDiagram";
-export { StudyGroupDiagram } from "./StudyGroupDiagram";
-export { PositionEmbeddingDiagram } from "./PositionEmbeddingDiagram";
+export { NeuralNetworkDiagram } from "./NeuralNetworkDiagram";
+export { NextTokenDiagram } from "./NextTokenDiagram";
 export { ParameterScaleDiagram } from "./ParameterScaleDiagram";
+export { PositionEmbeddingDiagram } from "./PositionEmbeddingDiagram";
+export { StudyGroupDiagram } from "./StudyGroupDiagram";
+export { TemperatureSamplingDemo } from "./TemperatureSamplingDemo";
+export { TransformerBlockDiagram } from "./TransformerBlockDiagram";
