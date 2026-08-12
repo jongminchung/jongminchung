@@ -30,7 +30,7 @@ const projects = [
     category: "Developer tooling",
     title: "@jongminchung/tooling",
     description:
-      "Shared lint, format, and package-map contracts that keep a workspace consistent without copying configuration.",
+      "Shared lint and format contracts that keep a workspace consistent without copying configuration.",
     tags: ["oxlint", "oxfmt", "pnpm"],
     href: "https://github.com/jongminchung/jongminchung/tree/main/packages/tooling",
   },

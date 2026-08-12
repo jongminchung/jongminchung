@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "extends": ["./node_modules/@jongminchung/tooling/src/oxlint/base.json"],
+  "extends": ["./node_modules/@jongminchung/tooling/oxlint.json"],
   "ignorePatterns": [
     "**/node_modules",
     "**/.next",

@@ -177,6 +177,79 @@ async function moduleKeysFromConsumer(
   return parsed;
 }
 
+async function installPackedConsumer(packed: PackedWorkspace): Promise<string> {
+  const consumerRoot = join(packed.tempDir, "installed-consumer");
+  await mkdir(consumerRoot, { recursive: true });
+  await writeFile(
+    join(consumerRoot, "package.json"),
+    `${JSON.stringify(
+      {
+        name: "packed-package-consumer",
+        private: true,
+        type: "module",
+        dependencies: {
+          "@jongminchung/ui": `file:${packed.tarballPath}`,
+          "@tailwindcss/postcss": "4.3.3",
+          "@types/react": "19.2.18",
+          "@types/react-dom": "19.2.4",
+          postcss: "8.5.20",
+          react: "19.2.8",
+          "react-dom": "19.2.8",
+          tailwindcss: "4.3.3",
+          typescript: "6.0.3",
+        },
+      },
+      null,
+      2,
+    )}\n`,
+    "utf8",
+  );
+  await execFileAsync(
+    "pnpm",
+    [
+      "install",
+      "--prefer-offline",
+      "--ignore-scripts",
+      "--ignore-workspace",
+      "--frozen-lockfile=false",
+    ],
+    {
+      cwd: consumerRoot,
+      maxBuffer: 4 * 1024 * 1024,
+      timeout: 120_000,
+    },
+  );
+  await writeFile(
+    join(consumerRoot, "index.tsx"),
+    'import { Button } from "@jongminchung/ui/components/button";\n\nexport const button = <Button className="bg-primary data-open:block no-scrollbar">Consumer</Button>;\n',
+    "utf8",
+  );
+  await writeFile(
+    join(consumerRoot, "tsconfig.json"),
+    `${JSON.stringify(
+      {
+        compilerOptions: {
+          jsx: "react-jsx",
+          module: "NodeNext",
+          moduleResolution: "NodeNext",
+          noEmit: true,
+          strict: true,
+        },
+        files: ["index.tsx"],
+      },
+      null,
+      2,
+    )}\n`,
+    "utf8",
+  );
+  await writeFile(
+    join(consumerRoot, "input.css"),
+    '@import "@jongminchung/ui/globals.css";\n@source "./index.tsx";\n',
+    "utf8",
+  );
+  return consumerRoot;
+}
+
 async function packageFileContentsFromConsumer(
   consumerRoot: string,
   specifier: string,
@@ -232,123 +305,34 @@ function expectPackedProtocolsResolved(manifest: PackedManifest): void {
   }
 }
 
-async function installToolingTarballInWorkspaceConsumer(packed: PackedWorkspace): Promise<string> {
-  const consumerRoot = join(packed.tempDir, "tooling-npm-consumer");
-  await mkdir(join(consumerRoot, "packages", "app", "src"), { recursive: true });
-  await writeFile(
-    join(consumerRoot, "package.json"),
-    `${JSON.stringify({ private: true, type: "module", workspaces: ["packages/*"] }, null, 2)}\n`,
-    "utf8",
-  );
-  await writeFile(
-    join(consumerRoot, "packages", "app", "package.json"),
-    `${JSON.stringify(
-      {
-        name: "@consumer/app",
-        exports: {
-          ".": {
-            source: "./src/index.ts",
-            default: "./dist/index.js",
-          },
-        },
-      },
-      null,
-      2,
-    )}\n`,
-    "utf8",
-  );
-  await writeFile(
-    join(consumerRoot, "packages", "app", "src", "index.ts"),
-    "export const app = 1;\n",
-  );
-  await execFileAsync(
-    "npm",
-    ["install", "--ignore-scripts", "--package-lock=false", packed.tarballPath],
-    {
-      cwd: consumerRoot,
-      maxBuffer: 8 * 1024 * 1024,
-      timeout: 180_000,
-    },
-  );
-
-  return consumerRoot;
-}
-
 describe("pnpm package tarball contracts", () => {
   it("packs @jongminchung/tooling with config modules and declarations", async () => {
     const packed = await packWorkspace("@jongminchung/tooling");
     try {
       expect(packed.files).toEqual(
-        expect.arrayContaining([
-          "dist/oxfmt/index.d.ts",
-          "dist/oxfmt/index.js",
-          "dist/oxlint/index.d.ts",
-          "dist/oxlint/index.js",
-          "dist/package-map.d.ts",
-          "dist/package-map.js",
-          "src/oxlint/base.json",
-        ]),
+        expect.arrayContaining(["dist/oxfmt/index.d.ts", "dist/oxfmt/index.js", "oxlint.json"]),
       );
-      expect(packed.files).not.toContain("dist/oxlint/base.json");
+      expect(packed.files).not.toContain("dist/oxlint.json");
       expect(packed.manifest.engines).toEqual({ node: ">=24.0.0" });
       expect(packed.manifest.type).toBe("module");
+      expect(packed.manifest.peerDependencies).toEqual({ oxfmt: "^0.59.0" });
       expect(JSON.stringify(packed.manifest.exports)).toContain('"import"');
       expect(JSON.stringify(packed.manifest.exports)).not.toContain('"require"');
       expectPackedProtocolsResolved(packed.manifest);
       expect(packed.files.some((file) => file.endsWith(".cjs"))).toBe(false);
 
-      for (const [specifier, expectedExports] of [
-        ["@jongminchung/tooling/oxfmt", ["defaultOxfmtConfig", "defineOxfmtConfig"]],
-        ["@jongminchung/tooling/oxlint", ["defaultOxlintConfig", "defineOxlintConfig"]],
-        [
-          "@jongminchung/tooling/package-map",
-          [
-            "createPackageExportAliases",
-            "createTsconfigAliasConfig",
-            "createTsconfigPaths",
-            "createViteResolveAliases",
-            "formatTsconfigAliasConfig",
-            "loadWorkspacePackageMap",
-            "writeTsconfigAliasConfig",
-          ],
-        ],
-      ] as const) {
-        expect(await moduleKeysFromConsumer(packed.consumerRoot, specifier)).toEqual(
-          expectedExports,
-        );
-      }
       expect(
-        await commonJsErrorCodeFromConsumer(packed.consumerRoot, "@jongminchung/tooling/oxlint"),
+        await moduleKeysFromConsumer(packed.consumerRoot, "@jongminchung/tooling/oxfmt"),
+      ).toEqual(["defineOxfmtConfig"]);
+      expect(
+        await commonJsErrorCodeFromConsumer(packed.consumerRoot, "@jongminchung/tooling/oxfmt"),
       ).toBe("ERR_PACKAGE_PATH_NOT_EXPORTED");
       expect(
         await packageFileContentsFromConsumer(
           packed.consumerRoot,
           "@jongminchung/tooling/oxlint.json",
         ),
-      ).toBe(await readFile(join(rootDir, "packages/tooling/src/oxlint/base.json"), "utf8"));
-
-      const consumerRoot = await installToolingTarballInWorkspaceConsumer(packed);
-      expect(
-        await moduleKeysFromConsumer(consumerRoot, "@jongminchung/tooling/package-map"),
-      ).toEqual(expect.arrayContaining(["createTsconfigAliasConfig"]));
-      const { stdout: aliasStdout } = await execFileAsync(
-        "node",
-        [
-          "--input-type=module",
-          "--eval",
-          `
-              const { createTsconfigAliasConfig } = await import("@jongminchung/tooling/package-map");
-              console.log(JSON.stringify(createTsconfigAliasConfig().compilerOptions.paths));
-            `,
-        ],
-        {
-          cwd: consumerRoot,
-          timeout: 30_000,
-        },
-      );
-      expect(JSON.parse(aliasStdout)).toMatchObject({
-        "@consumer/app": ["./packages/app/src/index.ts"],
-      });
+      ).toBe(await readFile(join(rootDir, "packages/tooling/oxlint.json"), "utf8"));
     } finally {
       await rm(packed.tempDir, { force: true, recursive: true });
     }
@@ -388,9 +372,72 @@ describe("pnpm package tarball contracts", () => {
       expect(JSON.stringify(packed.manifest.exports)).not.toContain('"require"');
       expectPackedProtocolsResolved(packed.manifest);
       expect(packed.files.some((file) => file.endsWith(".cjs"))).toBe(false);
+
+      for (const [sourceDirectory, sourceExtension, outputDirectory] of [
+        ["src/components/", ".tsx", "dist/components/"],
+        ["src/hooks/", ".ts", "dist/hooks/"],
+        ["src/lib/", ".ts", "dist/lib/"],
+      ] as const) {
+        const sourceFiles = packed.files.filter(
+          (file) => file.startsWith(sourceDirectory) && file.endsWith(sourceExtension),
+        );
+        expect(sourceFiles.length).toBeGreaterThan(0);
+        for (const sourceFile of sourceFiles) {
+          const outputBase = `${outputDirectory}${sourceFile.slice(sourceDirectory.length, -sourceExtension.length)}`;
+          expect(packed.files).toContain(`${outputBase}.js`);
+          expect(packed.files).toContain(`${outputBase}.d.ts`);
+        }
+      }
+
       expect(
         await commonJsErrorCodeFromConsumer(packed.consumerRoot, "@jongminchung/ui/lib/utils"),
       ).toBe("ERR_PACKAGE_PATH_NOT_EXPORTED");
+
+      const installedConsumer = await installPackedConsumer(packed);
+      expect(
+        await moduleKeysFromConsumer(installedConsumer, "@jongminchung/ui/components/button"),
+      ).toEqual(["Button", "buttonVariants"]);
+      const { stdout: typecheckFiles } = await execFileAsync(
+        "pnpm",
+        ["exec", "tsc", "--project", "tsconfig.json", "--listFiles"],
+        {
+          cwd: installedConsumer,
+          maxBuffer: 4 * 1024 * 1024,
+          timeout: 60_000,
+        },
+      );
+      expect(typecheckFiles).toContain(
+        join("node_modules", "@jongminchung", "ui", "dist", "components", "button.d.ts"),
+      );
+      await execFileAsync(
+        "node",
+        [
+          "--input-type=module",
+          "--eval",
+          `
+            import { readFile } from "node:fs/promises";
+            import { resolve } from "node:path";
+            import tailwindcss from "@tailwindcss/postcss";
+            import postcss from "postcss";
+
+            const from = resolve("input.css");
+            const result = await postcss([tailwindcss()]).process(await readFile(from, "utf8"), { from });
+            if (
+              !result.css.includes("background-color: var(--primary)") ||
+              !result.css.includes(".bg-primary") ||
+              !result.css.includes(".data-open\\\\:block") ||
+              !result.css.includes(".no-scrollbar")
+            ) {
+              throw new Error("expected compiled UI token, variant, and utility classes");
+            }
+          `,
+        ],
+        {
+          cwd: installedConsumer,
+          maxBuffer: 4 * 1024 * 1024,
+          timeout: 60_000,
+        },
+      );
 
       for (const stylesheet of ["globals", "theme", "tokens"] as const) {
         expect(

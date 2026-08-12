@@ -2,13 +2,6 @@ import { Button } from "@jongminchung/ui/components/button";
 import { Checkbox } from "@jongminchung/ui/components/checkbox";
 import { Field, FieldDescription, FieldError, FieldLabel } from "@jongminchung/ui/components/field";
 import { Input } from "@jongminchung/ui/components/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@jongminchung/ui/components/select";
 import { Spinner as SpinnerIcon } from "@jongminchung/ui/components/spinner";
 import { Textarea } from "@jongminchung/ui/components/textarea";
 import { cn } from "@jongminchung/ui/lib/utils";
@@ -22,6 +15,7 @@ import type {
   Ref,
   TextareaHTMLAttributes,
 } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ProductSelect";
 
 interface InputStatus {
   readonly type: "error" | "success" | "warning";

@@ -35,7 +35,6 @@
     "@excalidraw/excalidraw": "catalog:",
     "@jongminchung/icon": "workspace:*",
     "@jongminchung/ui": "workspace:*",
-    "@mdx-js/loader": "catalog:",
     "@mdx-js/react": "catalog:",
     "@next/mdx": "catalog:",
     "lucide-react": "catalog:",

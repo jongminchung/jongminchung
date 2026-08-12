@@ -1,11 +1,30 @@
 # @jongminchung/ui
 
-Shared shadcn primitives, semantic theme tokens, and Tailwind CSS styles.
+Internal shared UI primitives, semantic token contracts, and global Tailwind CSS infrastructure for
+the applications in this repository.
+
+## Scope
+
+This package owns product-agnostic primitives, `cn`, the semantic token schema, neutral fallback
+theme values, and the global CSS contract. Applications own their theme overrides, product tokens,
+composition, state, and behavior.
+
+Ownership follows the abstraction layer rather than the number of consumers. A generic primitive
+remains here even when only one application uses it, while similar product compositions remain in
+their applications when their meaning or behavior differs.
 
 ## Install
 
-Node.js 24 or newer is required. Configure the `@jongminchung` scope for GitHub Packages, then
-install the package with its peers:
+Node.js 24 or newer is required. GitHub Packages requires a classic personal access token with
+`read:packages`, including for public package downloads.
+
+```ini
+@jongminchung:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GITHUB_PACKAGES_TOKEN}
+```
+
+Keep the token in the environment rather than committing it to `.npmrc`, then install the package
+with its peers:
 
 ```bash
 npm install @jongminchung/ui react react-dom tailwindcss
@@ -64,4 +83,12 @@ does not expose a root barrel or CommonJS build.
 
 ## Version policy
 
-The manual package workflow always replaces the personal `1.0.0` package version.
+Workspace consumers use the package source-first, and compatibility is evaluated against consumers
+inside this repository. The manual package workflow always replaces the fixed personal `1.0.0`
+package version. This is a mutable snapshot channel, so the same version can have different API,
+contents, and integrity. Force a new resolution and commit the updated downstream lockfile after a
+replacement is published:
+
+```bash
+pnpm update --force @jongminchung/ui@1.0.0
+```

@@ -115,49 +115,27 @@
     "locale": "ko",
     "section": "packages",
     "title": "tooling",
-    "description": "oxlint, oxfmt, 워크스페이스 패키지 맵을 위한 공유 설정 패키지입니다.",
+    "description": "oxlint와 oxfmt를 위한 공유 설정 패키지입니다.",
     "href": "/ko/packages/tooling",
     "headings": [
       "개요",
       "oxlint",
       "oxfmt",
-      "package-map",
       "모듈 계약",
       "API"
     ],
     "tags": [
       "tooling",
       "oxlint",
-      "oxfmt",
-      "workspace",
-      "package-map"
+      "oxfmt"
     ],
     "apiSymbols": [
       "@jongminchung/tooling/oxfmt#OxfmtConfig",
       "@jongminchung/tooling/oxfmt#OxfmtOverride",
       "@jongminchung/tooling/oxfmt#ResolvedOxfmtConfig",
-      "@jongminchung/tooling/oxfmt#defaultOxfmtConfig",
-      "@jongminchung/tooling/oxfmt#defineOxfmtConfig",
-      "@jongminchung/tooling/oxlint#OxlintConfig",
-      "@jongminchung/tooling/oxlint#ResolvedOxlintConfig",
-      "@jongminchung/tooling/oxlint#defaultOxlintConfig",
-      "@jongminchung/tooling/oxlint#defineOxlintConfig",
-      "@jongminchung/tooling/package-map#LocalSourceAlias",
-      "@jongminchung/tooling/package-map#PackageExportAlias",
-      "@jongminchung/tooling/package-map#TsconfigAliasConfig",
-      "@jongminchung/tooling/package-map#TsconfigPaths",
-      "@jongminchung/tooling/package-map#ViteResolveAlias",
-      "@jongminchung/tooling/package-map#WorkspacePackage",
-      "@jongminchung/tooling/package-map#WorkspacePackageMap",
-      "@jongminchung/tooling/package-map#createPackageExportAliases",
-      "@jongminchung/tooling/package-map#createTsconfigAliasConfig",
-      "@jongminchung/tooling/package-map#createTsconfigPaths",
-      "@jongminchung/tooling/package-map#createViteResolveAliases",
-      "@jongminchung/tooling/package-map#formatTsconfigAliasConfig",
-      "@jongminchung/tooling/package-map#loadWorkspacePackageMap",
-      "@jongminchung/tooling/package-map#writeTsconfigAliasConfig"
+      "@jongminchung/tooling/oxfmt#defineOxfmtConfig"
     ],
-    "body": "개요 @jongminchung/tooling 은 저장소마다 반복되는 formatter·linter 기본값과 패키지 export 기반 별칭 생성을 한곳에서 관리합니다. 설정을 복사하지 않고 작은 override만 선언하는 것이 목표입니다. Node.js 24 이상에서 사용할 수 있으며 모든 공개 런타임 API는 ESM named export입니다. oxlint 기본 설정은 type-aware 분석, 미사용 변수, floating promise와 잘못 사용한 promise 검사를 활성화합니다. 복구 가능한 예외가 필요한 규칙만 호출자 설정에서 덮어씁니다. oxfmt 기본 ignore와 override는 유지되고 호출자의 배열이 뒤에 합쳐집니다. JSON은 2칸 들여쓰기를 사용하며 package script와 import 정렬을 활성화합니다. package-map 루트 workspaces 와 각 패키지의 exports 를 읽어 TypeScript paths 또는 Vite alias를 만듭니다. source , default , import , types 조건을 순서대로 해석하며 CSS·JSON subpath도 보존합니다. 모듈 계약 모든 JavaScript entry point는 ESM import 로 사용합니다. CommonJS require 는 지원하는 패키지 계약에 포함하지 않습니다. API - defineOxlintConfig , defineOxfmtConfig : 기본값과 override 병합 - loadWorkspacePackageMap : 워크스페이스 패키지와 manifest 조회 - createPackageExportAliases : 공개 subpath와 실제 target 연결 - createTsconfigPaths , createTsconfigAliasConfig : TypeScript paths 생성 - createViteResolveAliases : 정규식 기반 Vite alias 생성 - formatTsconfigAliasConfig , writeTsconfigAliasConfig : 별칭 파일 직렬화와 기록",
+    "body": "개요 @jongminchung/tooling 은 formatter 기본값과 공유 linter 설정을 한곳에서 관리합니다. 설정을 복사하지 않고 작은 override만 선언하는 것이 목표입니다. Node.js 24 이상에서 사용할 수 있으며 ESM JavaScript 함수 하나와 JSON asset 하나를 공개합니다. read:packages 권한이 있는 classic PAT로 GitHub Packages를 설정하고 package와 Oxfmt peer를 함께 설치합니다. oxlint 사용하는 Oxlint 설정에서 ./node modules/@jongminchung/tooling/oxlint.json 을 확장합니다. package root의 안정적인 asset은 @jongminchung/tooling/oxlint.json subpath로도 게시되며 type-aware 분석, 미사용 변수, floating promise와 잘못 사용한 promise 검사를 활성화합니다. oxfmt 공개 config와 override 이름은 Oxfmt 공식 타입의 alias입니다. 기본 ignore와 override는 유지되고 호출자의 배열이 뒤에 합쳐집니다. object 형태의 sortImports 와 sortPackageJson 은 중첩 기본값과 병합하고 boolean 값은 기본값을 대체합니다. 모듈 계약 모든 JavaScript entry point는 ESM import 로 사용합니다. CommonJS require 는 지원하는 패키지 계약에 포함하지 않습니다. 고정 1.0.0 은 재현 가능한 SemVer release가 아니라 mutable personal snapshot입니다. 교체 게시 후 pnpm update --force @jongminchung/tooling@1.0.0 을 실행하고 갱신된 lockfile integrity를 반영합니다. API - defineOxfmtConfig : formatter 기본값과 override 병합 - oxlint.json : 저장소의 기본 linter 설정 공유",
     "order": 0
   },
   {

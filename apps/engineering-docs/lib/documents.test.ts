@@ -50,7 +50,6 @@ describe("documentation discovery", () => {
     const current = requireDocument("en", "packages/tooling");
     expect(rankRelatedDocuments(current, documents).map(({ id }) => id)).toEqual([
       "deep-dive/typescript-7-compatibility",
-      "deep-dive/pnpm-11",
     ]);
   });
 

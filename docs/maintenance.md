@@ -82,11 +82,11 @@ advisory가 발견되면 다음 순서로 처리한다.
 
 현재 저장소에는 세 workflow가 있다.
 
-| Workflow           | Trigger                     | 역할                                              | 주요 secret                      |
-| ------------------ | --------------------------- | ------------------------------------------------- | -------------------------------- |
-| `Publish Packages` | `workflow_dispatch`         | 검사 후 `tooling`의 GitHub Packages `1.0.0` 교체  | `GH_PAT`                         |
-| `Git Client`       | `workflow_dispatch`         | `main` 검증, macOS ARM64 서명·공증·GitHub Release | `GH_PAT`, Apple 서명·공증 secret |
-| `Waka Readme`      | 매일 `15:00 UTC`, 수동 실행 | README Waka 통계 구간 갱신                        | `WAKATIME_API_KEY`, `GH_TOKEN`   |
+| Workflow           | Trigger                     | 역할                                                   | 주요 secret                      |
+| ------------------ | --------------------------- | ------------------------------------------------------ | -------------------------------- |
+| `Publish Packages` | `workflow_dispatch`         | 검사 후 `tooling`, `ui`의 GitHub Packages `1.0.0` 교체 | `GH_PAT`                         |
+| `Git Client`       | `workflow_dispatch`         | `main` 검증, macOS ARM64 서명·공증·GitHub Release      | `GH_PAT`, Apple 서명·공증 secret |
+| `Waka Readme`      | 매일 `15:00 UTC`, 수동 실행 | README Waka 통계 구간 갱신                             | `WAKATIME_API_KEY`, `GH_TOKEN`   |
 
 Git Client workflow가 사용하는 Apple secret 이름은 다음과 같다.
 
@@ -103,13 +103,16 @@ GitHub repository의 등록 상태를 확인하고 다음 production release의 
 
 ## 패키지 게시
 
-`@jongminchung/tooling`은 고정 `1.0.0` 정책을 사용한다.
-이 패키지는 Node.js 24 이상에서 동작하는 ESM 전용 패키지이며 공개 runtime API는 named
+`@jongminchung/tooling`, `@jongminchung/ui`는 고정 `1.0.0` 정책을 사용한다.
+이는 동일 version의 API·내용·integrity가 달라질 수 있는 mutable personal snapshot 채널이며
+SemVer 호환성과 lockfile 재현성을 지원하지 않는다. 소비자는 교체된 snapshot을 적용할 때
+`pnpm update --force <package>@1.0.0`으로 다시 해석하고 변경된 lockfile을 함께 반영한다.
+두 패키지는 Node.js 24 이상에서 동작하는 ESM 전용 패키지이며 공개 runtime API는 named
 export만 제공한다. `package.json`에는 `type: "module"`, `engines.node: ">=24.0.0"`,
 JavaScript entry point별 `import` 조건을 유지하고 CommonJS 산출물과 `require` 조건을 추가하지
 않는다.
 
-이 패키지의 `build`는 공통 `tsconfig.library.json`과 패키지별 `tsconfig.build.json`을 사용해
+두 패키지의 `build`는 공통 `tsconfig.library.json`과 패키지별 `tsconfig.build.json`을 사용해
 `tsc`로 ESM JavaScript와 declaration을 생성한다. CSS·JSON subpath는 tarball에 포함된 원본
 자산을 직접 가리킨다. 번들링·축소·복수 모듈 형식이나 빌드 플러그인은 기본 배포 경계가 아니며,
 [ADR 0002](adr/0002-node-library-tsc-build.md)의 재도입 조건을 충족할 때만 다시 검토한다.
@@ -120,9 +123,10 @@ pnpm run publish:dry-run
 ```
 
 dry-run의 포함 파일, ESM JavaScript·declaration, named export와 package export를 검토한 뒤
-`main`에서 `Publish Packages` workflow를 수동 실행한다. workflow는 기존 `1.0.0`을 삭제한
-다음 새 package를 게시하므로, 실행 중 실패하면 GitHub Packages의 실제 버전 존재 여부를
-확인하고 재실행한다.
+`main`에서 `Publish Packages` workflow를 수동 실행한다. workflow는 삭제 전에 세 tarball과
+integrity를 모두 확정하고, package별 기존 `1.0.0` 삭제와 게시를 순서대로 수행한다. 모든
+package에 404 처리와 게시 재시도를 동일하게 적용하고, 게시된 integrity와 새 소비자 설치를
+검증한다. workflow summary의 commit SHA와 준비·게시 integrity가 일치해야 완료된 배포로 본다.
 
 ## Git Client 릴리스
 

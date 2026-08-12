@@ -119,10 +119,6 @@ export function createElectronPackageArguments() {
 export function createReleaseSourceGateCommands(mode = RELEASE_MODES.production) {
   parseReleaseMode(mode);
   const commonGates = [
-    Object.freeze({
-      command: "pnpm",
-      arguments: Object.freeze(["--filter", "@jongminchung/tooling", "build"]),
-    }),
     Object.freeze({ command: "pnpm", arguments: Object.freeze(["test"]) }),
     Object.freeze({ command: "pnpm", arguments: Object.freeze(["test:e2e"]) }),
     Object.freeze({ command: "pnpm", arguments: Object.freeze(["build"]) }),

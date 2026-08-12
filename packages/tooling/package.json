@@ -1,7 +1,7 @@
 {
   "name": "@jongminchung/tooling",
   "version": "1.0.0",
-  "description": "Shared format, lint, and package-map configuration for TypeScript workspaces",
+  "description": "Shared format and lint configuration for TypeScript workspaces",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -11,30 +11,18 @@
   "files": [
     "dist",
     "src/oxfmt/index.ts",
-    "src/**/*.json",
-    "src/oxlint/index.ts",
-    "src/package-map.ts",
+    "oxlint.json",
     "LICENSE",
     "README.md"
   ],
   "type": "module",
   "exports": {
-    "./oxlint": {
-      "types": "./dist/oxlint/index.d.ts",
-      "source": "./src/oxlint/index.ts",
-      "import": "./dist/oxlint/index.js"
-    },
     "./oxfmt": {
       "types": "./dist/oxfmt/index.d.ts",
       "source": "./src/oxfmt/index.ts",
       "import": "./dist/oxfmt/index.js"
     },
-    "./package-map": {
-      "types": "./dist/package-map.d.ts",
-      "source": "./src/package-map.ts",
-      "import": "./dist/package-map.js"
-    },
-    "./oxlint.json": "./src/oxlint/base.json",
+    "./oxlint.json": "./oxlint.json",
     "./package.json": "./package.json"
   },
   "publishConfig": {
@@ -50,15 +38,14 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "oxfmt": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },
+  "peerDependencies": {
+    "oxfmt": "catalog:tooling-peer"
+  },
   "engines": {
     "node": ">=24.0.0"
-  },
-  "nx": {
-    "tags": [
-      "pkg:tooling"
-    ]
   }
 }

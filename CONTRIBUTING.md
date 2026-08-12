@@ -33,7 +33,7 @@ pnpm install --frozen-lockfile
 | `apps/git-client`       | macOS Electron Git 클라이언트               | `pnpm --filter @jongminchung/git-client run dev`       |
 | `packages/ui`           | 공개 UI primitive·기본 theme·semantic token | `pnpm --filter @jongminchung/ui run build`             |
 | `packages/icon`         | 아이콘 원본과 앱별 생성 자산                | `pnpm run icon:check`                                  |
-| `packages/tooling`      | Oxc 설정과 workspace package map            | `pnpm --filter @jongminchung/tooling run test`         |
+| `packages/tooling`      | Oxc 공용 설정                               | `pnpm --filter @jongminchung/tooling run test`         |
 
 공용 UI의 소유권, token과 component 추가 규칙은 [디자인 시스템](DESIGN_SYSTEM.md)을
 따른다. 앱별 product component를 `packages/ui`로 옮기거나 앱에서 공용 primitive를 복제하지
@@ -53,16 +53,16 @@ pnpm --filter @jongminchung/ui run test
 
 루트 검증 명령의 범위는 다음과 같다.
 
-| 명령                            | 검증 범위                                             |
-| ------------------------------- | ----------------------------------------------------- |
-| `pnpm run fmt:check`            | Oxfmt 형식 검사                                       |
-| `pnpm run lint`                 | Oxlint 정적 분석                                      |
-| `pnpm run typecheck`            | 루트와 모든 workspace TypeScript 검사                 |
-| `pnpm run test`                 | Vitest와 Git Client script 테스트                     |
-| `pnpm run check`                | format, lint, Nx graph, typecheck, unit·script 테스트 |
-| `pnpm run check:full`           | `check`, E2E typecheck, build, core E2E               |
-| `pnpm run check:full:electron`  | `check:full`과 패키지 Electron E2E                    |
-| `pnpm run check:full:materials` | `check:full`과 모든 material E2E                      |
+| 명령                            | 검증 범위                                   |
+| ------------------------------- | ------------------------------------------- |
+| `pnpm run fmt:check`            | Oxfmt 형식 검사                             |
+| `pnpm run lint`                 | Oxlint 정적 분석                            |
+| `pnpm run typecheck`            | 루트와 모든 workspace TypeScript 검사       |
+| `pnpm run test`                 | Vitest와 Git Client script 테스트           |
+| `pnpm run check`                | format, lint, typecheck, unit·script 테스트 |
+| `pnpm run check:full`           | `check`, E2E typecheck, build, core E2E     |
+| `pnpm run check:full:electron`  | `check:full`과 패키지 Electron E2E          |
+| `pnpm run check:full:materials` | `check:full`과 모든 material E2E            |
 
 변경 유형별 최소 검증은 다음을 기준으로 한다.
 
@@ -164,15 +164,18 @@ pnpm install
 - 공개 패키지는 공통 `tsconfig.library.json`과 패키지별 `tsconfig.build.json`으로 ESM
   JavaScript와 declaration을 직접 생성한다.
 - 번들러 재도입 조건은 [ADR 0002](docs/adr/0002-node-library-tsc-build.md)를 따른다.
-- `packages/icon`, `packages/ui`는 private source package이므로 registry에 게시하지 않는다.
+- `packages/icon`은 private source package이므로 registry에 게시하지 않는다.
 
 ```sh
 pnpm run check
 pnpm run publish:dry-run
 ```
 
-`@jongminchung/tooling`은 GitHub Actions의 수동
-`Publish Packages` workflow가 GitHub Packages의 고정 `1.0.0`을 교체한다. Git Client는
+`@jongminchung/tooling`, `@jongminchung/ui`는 GitHub Actions의 수동
+`Publish Packages` workflow가 GitHub Packages의 고정 `1.0.0` snapshot을 교체한다. 동일
+version의 API·내용·integrity가 바뀔 수 있으므로 SemVer 호환성과 lockfile 재현성을 보장하지
+않는다. workflow는 삭제 전에 두 tarball을 모두 검증하고 게시 후 registry integrity와 새 소비자
+설치를 확인한다. Git Client는
 [GitHub Release 배포 가이드](apps/git-client/docs/releases.md)를 따른다.
 
 ## 제출 체크리스트

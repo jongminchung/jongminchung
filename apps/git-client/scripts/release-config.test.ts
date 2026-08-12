@@ -31,14 +31,17 @@ describe("fixed Git Client release configuration", () => {
     expect(gitClientWorkflow).not.toContain("secrets.GITHUB_TOKEN");
   });
 
-  it("manually replaces the remaining public package versions with 1.0.0", () => {
+  it("manually replaces all public package snapshots with 1.0.0", () => {
     expectManualWorkflow(packageWorkflow);
     expect(packageWorkflow).toContain('select(.name == "1.0.0")');
-    expect(packageWorkflow).not.toContain("remark-plantuml");
     expect(packageWorkflow).toContain("Publish tooling 1.0.0");
     expect(packageWorkflow).toContain("Publish ui 1.0.0");
+    expect(packageWorkflow).toContain("package-integrities.tsv");
+    expect(packageWorkflow).toContain("Verify published integrity and consumer installation");
+    expect(packageWorkflow).toContain('grep -q "HTTP 404"');
     expect(packageWorkflow).toContain("GH_PAT: ${{ secrets.GH_PAT }}");
     expect(packageWorkflow).toContain("Remove GitHub Packages auth");
+    expect(packageWorkflow).not.toContain("remark-plantuml");
     expect(packageWorkflow).not.toContain("secrets.GITHUB_TOKEN");
   });
 

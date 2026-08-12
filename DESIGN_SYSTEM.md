@@ -1,21 +1,28 @@
 # 디자인 시스템
 
-- 공용 primitive는 `@jongminchung/ui`에서 소스 코드로 직접 소유·수정
+- `@jongminchung/ui`는 저장소 내부 앱을 위한 공용 primitive 기반으로 소스 코드에서 직접 소유·수정
 - 제품 UI의 조합과 동작은 각 앱에서 소유
-- `@jongminchung/ui`는 workspace에서 source-first로 개발하고 GitHub Packages에 `1.0.0`으로 배포하는 디자인 시스템
+- `@jongminchung/ui`는 workspace에서 source-first로 개발하고 GitHub Packages에 고정 `1.0.0`으로 배포
 
 ## 소유권
 
 - `@jongminchung/ui`
-  - shadcn primitive와 `cn`
-  - 공용 Tailwind 진입점
+  - 저장소가 소유하는 UI primitive와 `cn`
+  - 공용 Tailwind 진입점과 전역 CSS 계약
   - 값이 없는 semantic token 계약
-  - neutral light·dark 기본 theme 값
+  - 앱 override가 없는 경우의 neutral light·dark 기본 theme 값
   - Tailwind 색상·radius 매핑
 - 각 앱
-  - `theme.css`의 선택적 override와 제품 token
+  - 앱 theme 값과 제품 token
   - 제품 component와 layout
   - 상태와 플랫폼별 동작
+- 소유권은 사용 앱 수가 아니라 추상화 계층으로 결정
+  - 한 앱만 사용하는 범용 primitive도 `@jongminchung/ui`에서 소유
+  - 여러 앱에서 형태가 비슷한 제품 composition도 제품 의미와 동작이 다르면 각 앱에서 소유
+- 앱별 제품 소유 범위
+  - Git Client: Repository, Commit, Diff, Terminal UI와 제품 token
+  - Engineering Docs: Navigation, SearchPalette, 문서 card와 문서 theme
+  - README: landing page composition, 브랜드 표현과 marketing theme
 - 공용 primitive는 파일 단위 named export만 제공
 - 공용 primitive import는 명시적인 subpath 사용
 
@@ -33,6 +40,15 @@ import { cn } from "@jongminchung/ui/lib/utils";
 ## 컴포넌트 추가
 
 - 기준: [shadcn monorepo workflow](https://ui.shadcn.com/docs/monorepo)
+- [Open Code와 Composition](https://ui.shadcn.com/docs)의 공식 원칙
+  - registry는 복사할 수 있는 공식 구현과 문서의 기준이며 런타임 UI 라이브러리가 아님
+  - 생성된 source는 저장소가 소유하고 제품 요구에 맞게 직접 수정
+  - upstream 갱신은 로컬 수정을 덮어쓰지 않고 diff를 검토해 필요한 변경만 병합
+- UI 계층 기준
+  - primitive: 접근성, 상태와 범용 API를 캡슐화하고 `packages/ui`에서 소유
+  - variant: 제품과 무관한 semantic intent를 표현할 때 primitive API로 제공
+  - composition: 공식 composition 구조를 지키면서 primitive를 조합하고 사용하는 앱에서 소유
+  - 앱 overlay: 앱 theme 값, 제품 token, layout, 상태와 동작을 앱의 style과 component에서 적용
 - 실행 위치: component나 block을 사용할 앱 workspace
 
 ```bash
@@ -44,6 +60,7 @@ pnpm exec shadcn add <component-or-block>
   - 공용 primitive와 registry hook: `packages/ui`
   - 앱 block과 제품 composition: 해당 앱
 - 생성 파일은 commit 전 검토
+- shadcn은 루트 개발 CLI로만 사용하고 공용 UI의 배포 의존성으로 추가하지 않음
 - `packages/ui/components.json`의 `base-nova`, Base UI, Lucide, neutral, RSC 설정 유지
 - 새 primitive와 hook은 기존 `./components/*`, `./hooks/*` wildcard export 사용
 - 여러 모듈을 묶는 root `index.ts`와 root package export 추가 금지
@@ -51,6 +68,14 @@ pnpm exec shadcn add <component-or-block>
 - 공용 component 설치·갱신은 사용하는 앱 workspace에서 shadcn CLI로만 수행
 - CLI 실행 후 primitive가 `packages/ui`에 생성되고 앱 composition이 해당 앱에 남는지 확인
 - 앱별 제품 component는 앱의 component 디렉터리에서 공용 primitive를 조합해 구현
+- 기존 primitive 갱신 절차
+  - 사용하는 앱 workspace에서 `pnpm exec shadcn add <component> --diff` 실행
+  - 공식 registry와 저장소 source 차이를 검토하고 접근성·API·style 변경 중 필요한 항목만 수동 병합
+  - 로컬 variant와 앱 overlay를 확인하며 `--overwrite`로 일괄 교체하지 않음
+  - 영향받는 UI package와 앱 검증 후 변경을 commit
+- 임시 upstream 접근성 보정
+  - `cmdk@1.1.1`의 초기 선택 `aria-activedescendant` 누락은 [upstream PR #411](https://github.com/dip/cmdk/pull/411)이 배포될 때까지 `CommandInput`에서만 보정
+  - item ID와 키보드 선택은 `cmdk`에 맡기고 별도 ID 생성이나 keydown 동기화는 추가하지 않음
 
 ## Package Imports
 
@@ -79,7 +104,7 @@ pnpm exec shadcn add <component-or-block>
 
 - class 추가 전 공용 primitive가 제공하는 variant 우선 사용
 - 공용 variant 추가 조건
-  - 둘 이상의 앱에서 같은 semantic intent로 재사용
+  - 사용 앱 수와 무관하게 제품에 종속되지 않은 semantic intent를 표현
   - 제품 layout이나 제품 동작을 포함하지 않음
 - 배치, 너비, 일회성 layout은 호출 위치에서 소유
 - `Button`의 shadcn Base UI API
@@ -95,7 +120,8 @@ pnpm exec shadcn add <component-or-block>
 
 - 기준: [shadcn theming contract](https://ui.shadcn.com/docs/theming)
 - `@jongminchung/ui/globals.css` 소유 범위
-  - Tailwind, `shadcn/tailwind.css`, `tw-animate-css` import
+  - Tailwind와 `tw-animate-css` import
+  - 실제 사용하는 data-state variant와 `no-scrollbar` 정의
   - `theme.css`의 neutral light·dark 기본값 import
   - 값이 없는 `tokens.css` 계약 import
   - 공용 UI source tree 등록
@@ -117,8 +143,8 @@ pnpm exec shadcn add <component-or-block>
 import "./globals.css";
 ```
 
-- `globals.css`가 Tailwind, shadcn, animation, 기본 theme, token mapping과 공용 UI source scanning을 제공
-- 소비자는 `tailwindcss`, `shadcn/tailwind.css`, `tw-animate-css` 또는 공용 UI source를 중복 import·등록하지 않음
+- `globals.css`가 Tailwind, animation, 상태 variant, 기본 theme, token mapping과 공용 UI source scanning을 제공
+- 소비자는 `tailwindcss`, `tw-animate-css` 또는 공용 UI source를 중복 import·등록하지 않음
 - 앱 `theme.css` import는 공용 기본 token을 덮어쓸 때만 추가
 - 공용 기본값은 `@jongminchung/ui/theme.css`로도 export
 - 공용 기본 selector는 `:where(:root)`와 `:where(:root[data-theme="dark"])`로 specificity를 낮춤
@@ -152,6 +178,8 @@ import "./globals.css";
 - `apps/engineering-docs`와 `apps/readme`는 workspace의 `@jongminchung/ui` source를 transpile
 - Vite 기반 Git Client는 `source` export condition으로 같은 소스를 사용하고 `react`, `react-dom`을 dedupe
 - 외부 consumer는 공개 subpath의 ESM JavaScript와 declaration을 사용
+- 호환성 판단은 저장소 내부의 실제 import와 consumer를 기준으로 수행
+- GitHub Packages 배포는 고정 `1.0.0`을 대체하는 source-first 내부 배포 정책을 유지
 - 모든 workspace는 동일한 최신 안정 TypeScript 6 compiler 사용
 - compiler major 전환 조건
   - Compiler API 검증

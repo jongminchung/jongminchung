@@ -247,15 +247,13 @@
     "locale": "en",
     "section": "packages",
     "title": "tooling",
-    "description": "Shared configuration for oxlint, oxfmt, and workspace package maps.",
+    "description": "Shared configuration for oxlint and oxfmt.",
     "order": 0,
-    "updatedAt": "2026-08-11",
+    "updatedAt": "2026-08-12",
     "tags": [
       "tooling",
       "oxlint",
-      "oxfmt",
-      "workspace",
-      "package-map"
+      "oxfmt"
     ],
     "status": "stable",
     "sourceUrl": "https://github.com/jongminchung/jongminchung/tree/main/packages/tooling",
@@ -265,26 +263,7 @@
       "@jongminchung/tooling/oxfmt#OxfmtConfig",
       "@jongminchung/tooling/oxfmt#OxfmtOverride",
       "@jongminchung/tooling/oxfmt#ResolvedOxfmtConfig",
-      "@jongminchung/tooling/oxfmt#defaultOxfmtConfig",
-      "@jongminchung/tooling/oxfmt#defineOxfmtConfig",
-      "@jongminchung/tooling/oxlint#OxlintConfig",
-      "@jongminchung/tooling/oxlint#ResolvedOxlintConfig",
-      "@jongminchung/tooling/oxlint#defaultOxlintConfig",
-      "@jongminchung/tooling/oxlint#defineOxlintConfig",
-      "@jongminchung/tooling/package-map#LocalSourceAlias",
-      "@jongminchung/tooling/package-map#PackageExportAlias",
-      "@jongminchung/tooling/package-map#TsconfigAliasConfig",
-      "@jongminchung/tooling/package-map#TsconfigPaths",
-      "@jongminchung/tooling/package-map#ViteResolveAlias",
-      "@jongminchung/tooling/package-map#WorkspacePackage",
-      "@jongminchung/tooling/package-map#WorkspacePackageMap",
-      "@jongminchung/tooling/package-map#createPackageExportAliases",
-      "@jongminchung/tooling/package-map#createTsconfigAliasConfig",
-      "@jongminchung/tooling/package-map#createTsconfigPaths",
-      "@jongminchung/tooling/package-map#createViteResolveAliases",
-      "@jongminchung/tooling/package-map#formatTsconfigAliasConfig",
-      "@jongminchung/tooling/package-map#loadWorkspacePackageMap",
-      "@jongminchung/tooling/package-map#writeTsconfigAliasConfig"
+      "@jongminchung/tooling/oxfmt#defineOxfmtConfig"
     ],
     "href": "/en/packages/tooling",
     "outline": [
@@ -301,11 +280,6 @@
       {
         "id": "oxfmt",
         "label": "oxfmt",
-        "level": 2
-      },
-      {
-        "id": "package-map",
-        "label": "package-map",
         "level": 2
       },
       {
@@ -2582,15 +2556,13 @@
     "locale": "ko",
     "section": "packages",
     "title": "tooling",
-    "description": "oxlint, oxfmt, 워크스페이스 패키지 맵을 위한 공유 설정 패키지입니다.",
+    "description": "oxlint와 oxfmt를 위한 공유 설정 패키지입니다.",
     "order": 0,
-    "updatedAt": "2026-08-11",
+    "updatedAt": "2026-08-12",
     "tags": [
       "tooling",
       "oxlint",
-      "oxfmt",
-      "workspace",
-      "package-map"
+      "oxfmt"
     ],
     "status": "stable",
     "sourceUrl": "https://github.com/jongminchung/jongminchung/tree/main/packages/tooling",
@@ -2600,26 +2572,7 @@
       "@jongminchung/tooling/oxfmt#OxfmtConfig",
       "@jongminchung/tooling/oxfmt#OxfmtOverride",
       "@jongminchung/tooling/oxfmt#ResolvedOxfmtConfig",
-      "@jongminchung/tooling/oxfmt#defaultOxfmtConfig",
-      "@jongminchung/tooling/oxfmt#defineOxfmtConfig",
-      "@jongminchung/tooling/oxlint#OxlintConfig",
-      "@jongminchung/tooling/oxlint#ResolvedOxlintConfig",
-      "@jongminchung/tooling/oxlint#defaultOxlintConfig",
-      "@jongminchung/tooling/oxlint#defineOxlintConfig",
-      "@jongminchung/tooling/package-map#LocalSourceAlias",
-      "@jongminchung/tooling/package-map#PackageExportAlias",
-      "@jongminchung/tooling/package-map#TsconfigAliasConfig",
-      "@jongminchung/tooling/package-map#TsconfigPaths",
-      "@jongminchung/tooling/package-map#ViteResolveAlias",
-      "@jongminchung/tooling/package-map#WorkspacePackage",
-      "@jongminchung/tooling/package-map#WorkspacePackageMap",
-      "@jongminchung/tooling/package-map#createPackageExportAliases",
-      "@jongminchung/tooling/package-map#createTsconfigAliasConfig",
-      "@jongminchung/tooling/package-map#createTsconfigPaths",
-      "@jongminchung/tooling/package-map#createViteResolveAliases",
-      "@jongminchung/tooling/package-map#formatTsconfigAliasConfig",
-      "@jongminchung/tooling/package-map#loadWorkspacePackageMap",
-      "@jongminchung/tooling/package-map#writeTsconfigAliasConfig"
+      "@jongminchung/tooling/oxfmt#defineOxfmtConfig"
     ],
     "href": "/ko/packages/tooling",
     "outline": [
@@ -2636,11 +2589,6 @@
       {
         "id": "oxfmt",
         "label": "oxfmt",
-        "level": 2
-      },
-      {
-        "id": "package-map",
-        "label": "package-map",
         "level": 2
       },
       {

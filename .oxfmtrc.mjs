@@ -1,4 +1,4 @@
-import { defineOxfmtConfig } from "@jongminchung/tooling/oxfmt";
+import { defineOxfmtConfig } from "./packages/tooling/src/oxfmt/index.ts";
 
 export default defineOxfmtConfig({
   ignorePatterns: [

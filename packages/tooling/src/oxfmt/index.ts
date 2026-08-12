@@ -1,47 +1,42 @@
-export interface OxfmtOverride {
-  readonly files?: readonly string[];
-  readonly options?: Record<string, unknown>;
-}
+import type {
+  OxfmtConfig as NativeOxfmtConfig,
+  OxfmtOverrideConfig,
+  SortImportsUserConfig,
+  SortPackageJsonUserConfig,
+} from "oxfmt";
 
-export interface OxfmtConfig {
-  readonly arrowParens?: string;
-  readonly bracketSameLine?: boolean;
-  readonly bracketSpacing?: boolean;
-  readonly endOfLine?: string;
-  readonly ignorePatterns?: readonly string[];
-  readonly jsxSingleQuote?: boolean;
-  readonly overrides?: readonly OxfmtOverride[];
-  readonly printWidth?: number;
-  readonly proseWrap?: string;
-  readonly quoteProps?: string;
-  readonly semi?: boolean;
-  readonly singleQuote?: boolean;
-  readonly sortImports?: Record<string, unknown>;
-  readonly sortPackageJson?: Record<string, unknown>;
-  readonly tabWidth?: number;
-  readonly trailingComma?: string;
-  readonly useTabs?: boolean;
-}
+export type OxfmtConfig = NativeOxfmtConfig;
+export type OxfmtOverride = OxfmtOverrideConfig;
 
-export interface ResolvedOxfmtConfig {
-  readonly arrowParens: string;
-  readonly bracketSameLine: boolean;
-  readonly bracketSpacing: boolean;
-  readonly endOfLine: string;
-  readonly ignorePatterns: readonly string[];
-  readonly jsxSingleQuote: boolean;
-  readonly overrides: readonly OxfmtOverride[];
-  readonly printWidth: number;
-  readonly proseWrap: string;
-  readonly quoteProps: string;
-  readonly semi: boolean;
-  readonly singleQuote: boolean;
-  readonly sortImports: Record<string, unknown>;
-  readonly sortPackageJson: Record<string, unknown>;
-  readonly tabWidth: number;
-  readonly trailingComma: string;
-  readonly useTabs: boolean;
-}
+type SharedOxfmtDefaults = Required<
+  Pick<
+    OxfmtConfig,
+    | "arrowParens"
+    | "bracketSameLine"
+    | "bracketSpacing"
+    | "endOfLine"
+    | "jsxSingleQuote"
+    | "printWidth"
+    | "proseWrap"
+    | "quoteProps"
+    | "semi"
+    | "singleQuote"
+    | "tabWidth"
+    | "trailingComma"
+    | "useTabs"
+  >
+>;
+
+export type ResolvedOxfmtConfig = OxfmtConfig &
+  SharedOxfmtDefaults & {
+    ignorePatterns: string[];
+    overrides: OxfmtOverride[];
+    sortImports: SortImportsUserConfig;
+    sortPackageJson: SortPackageJsonUserConfig;
+  };
+
+type SortImportsOptions = Exclude<SortImportsUserConfig, boolean>;
+type SortPackageJsonOptions = Exclude<SortPackageJsonUserConfig, boolean>;
 
 const baseOverrides = [
   {
@@ -50,11 +45,13 @@ const baseOverrides = [
       tabWidth: 2,
     },
   },
-];
+] satisfies OxfmtOverride[];
 
 const baseIgnorePatterns = [".git/", ".husky/_/", "coverage/", "dist/", "build/", "node_modules/"];
+const baseSortImports = { newlinesBetween: false } satisfies SortImportsOptions;
+const baseSortPackageJson = { sortScripts: true } satisfies SortPackageJsonOptions;
 
-export const defaultOxfmtConfig = Object.freeze({
+const defaultOxfmtConfig = Object.freeze({
   printWidth: 100,
   tabWidth: 2,
   useTabs: false,
@@ -68,15 +65,11 @@ export const defaultOxfmtConfig = Object.freeze({
   bracketSameLine: false,
   arrowParens: "always",
   proseWrap: "preserve",
-  sortImports: {
-    newlinesBetween: false,
-  },
-  sortPackageJson: {
-    sortScripts: true,
-  },
+  sortImports: baseSortImports,
+  sortPackageJson: baseSortPackageJson,
   ignorePatterns: baseIgnorePatterns,
   overrides: baseOverrides,
-}) satisfies Readonly<ResolvedOxfmtConfig>;
+}) satisfies ResolvedOxfmtConfig;
 
 export function defineOxfmtConfig(overrides: OxfmtConfig = {}): ResolvedOxfmtConfig {
   return {
@@ -84,5 +77,19 @@ export function defineOxfmtConfig(overrides: OxfmtConfig = {}): ResolvedOxfmtCon
     ...overrides,
     ignorePatterns: [...baseIgnorePatterns, ...(overrides.ignorePatterns ?? [])],
     overrides: [...baseOverrides, ...(overrides.overrides ?? [])],
+    sortImports: mergeSortImports(overrides.sortImports),
+    sortPackageJson: mergeSortPackageJson(overrides.sortPackageJson),
   };
+}
+
+function mergeSortImports(overrides: SortImportsUserConfig | undefined): SortImportsUserConfig {
+  if (typeof overrides === "object") return { ...baseSortImports, ...overrides };
+  return overrides ?? baseSortImports;
+}
+
+function mergeSortPackageJson(
+  overrides: SortPackageJsonUserConfig | undefined,
+): SortPackageJsonUserConfig {
+  if (typeof overrides === "object") return { ...baseSortPackageJson, ...overrides };
+  return overrides ?? baseSortPackageJson;
 }

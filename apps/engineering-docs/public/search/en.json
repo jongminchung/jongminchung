@@ -115,49 +115,27 @@
     "locale": "en",
     "section": "packages",
     "title": "tooling",
-    "description": "Shared configuration for oxlint, oxfmt, and workspace package maps.",
+    "description": "Shared configuration for oxlint and oxfmt.",
     "href": "/en/packages/tooling",
     "headings": [
       "Overview",
       "oxlint",
       "oxfmt",
-      "package-map",
       "Module contract",
       "API"
     ],
     "tags": [
       "tooling",
       "oxlint",
-      "oxfmt",
-      "workspace",
-      "package-map"
+      "oxfmt"
     ],
     "apiSymbols": [
       "@jongminchung/tooling/oxfmt#OxfmtConfig",
       "@jongminchung/tooling/oxfmt#OxfmtOverride",
       "@jongminchung/tooling/oxfmt#ResolvedOxfmtConfig",
-      "@jongminchung/tooling/oxfmt#defaultOxfmtConfig",
-      "@jongminchung/tooling/oxfmt#defineOxfmtConfig",
-      "@jongminchung/tooling/oxlint#OxlintConfig",
-      "@jongminchung/tooling/oxlint#ResolvedOxlintConfig",
-      "@jongminchung/tooling/oxlint#defaultOxlintConfig",
-      "@jongminchung/tooling/oxlint#defineOxlintConfig",
-      "@jongminchung/tooling/package-map#LocalSourceAlias",
-      "@jongminchung/tooling/package-map#PackageExportAlias",
-      "@jongminchung/tooling/package-map#TsconfigAliasConfig",
-      "@jongminchung/tooling/package-map#TsconfigPaths",
-      "@jongminchung/tooling/package-map#ViteResolveAlias",
-      "@jongminchung/tooling/package-map#WorkspacePackage",
-      "@jongminchung/tooling/package-map#WorkspacePackageMap",
-      "@jongminchung/tooling/package-map#createPackageExportAliases",
-      "@jongminchung/tooling/package-map#createTsconfigAliasConfig",
-      "@jongminchung/tooling/package-map#createTsconfigPaths",
-      "@jongminchung/tooling/package-map#createViteResolveAliases",
-      "@jongminchung/tooling/package-map#formatTsconfigAliasConfig",
-      "@jongminchung/tooling/package-map#loadWorkspacePackageMap",
-      "@jongminchung/tooling/package-map#writeTsconfigAliasConfig"
+      "@jongminchung/tooling/oxfmt#defineOxfmtConfig"
     ],
-    "body": "Overview @jongminchung/tooling centralizes formatter and linter defaults plus aliases derived from package exports. Consumers declare small overrides instead of copying configuration. Node.js 24 or newer is required. The package exposes ESM named exports only. oxlint The default enables type-aware analysis and checks unused values, floating promises, and misused promises. Override only rules for which the caller has an intentional exception. oxfmt Base ignore patterns and overrides remain in place, with caller arrays appended. JSON uses two spaces, and package scripts and imports are sorted. package-map The package reads root workspaces and package exports to generate TypeScript paths or Vite aliases. It resolves source , default , import , and types conditions in order while preserving CSS and JSON subpaths. Module contract Use ESM import for every JavaScript entry point. CommonJS require is not part of the supported package contract. API - defineOxlintConfig , defineOxfmtConfig : merge defaults and overrides - loadWorkspacePackageMap : read workspace packages and manifests - createPackageExportAliases : connect public subpaths to real targets - createTsconfigPaths , createTsconfigAliasConfig : generate TypeScript paths - createViteResolveAliases : generate regular-expression Vite aliases - formatTsconfigAliasConfig , writeTsconfigAliasConfig : serialize and write alias files",
+    "body": "Overview @jongminchung/tooling centralizes formatter defaults and the shared linter config. Consumers declare small overrides instead of copying configuration. Node.js 24 or newer is required. The package exposes one ESM JavaScript function and one JSON asset. Configure GitHub Packages with a classic PAT that has read:packages , then install the package and its Oxfmt peer: oxlint Extend ./node modules/@jongminchung/tooling/oxlint.json from the consuming Oxlint config. The stable root asset is also published through the @jongminchung/tooling/oxlint.json package subpath and enables type-aware analysis and checks unused values, floating promises, and misused promises. oxfmt The public config and override names alias Oxfmt's official types. Base ignore patterns and overrides remain in place, with caller arrays appended. Object sortImports and sortPackageJson values merge with their shared nested defaults; boolean values replace them. Module contract Use ESM import for every JavaScript entry point. CommonJS require is not part of the supported package contract. The fixed 1.0.0 is a mutable personal snapshot rather than a reproducible SemVer release. After a replacement is published, run pnpm update --force @jongminchung/tooling@1.0.0 and commit the refreshed lockfile integrity. API - defineOxfmtConfig : merge formatter defaults and overrides - oxlint.json : share the repository's base linter configuration",
     "order": 0
   },
   {

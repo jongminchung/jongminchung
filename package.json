@@ -9,7 +9,7 @@
   "scripts": {
     "audit:prod": "pnpm audit --prod --audit-level high",
     "build": "pnpm run icon:check && pnpm -r --if-present run build",
-    "check": "pnpm run fmt:check && pnpm run lint && pnpm run workspace:graph:check && pnpm run typecheck && pnpm run test",
+    "check": "pnpm run fmt:check && pnpm run lint && pnpm run typecheck && pnpm run test",
     "check:full": "pnpm run check && pnpm run typecheck:e2e && pnpm run build && pnpm run test:e2e",
     "check:full:electron": "pnpm run check:full && pnpm --filter @jongminchung/git-client run test:electron",
     "check:full:materials": "pnpm run check:full && pnpm --filter @jongminchung/engineering-docs run test:e2e:materials",
@@ -24,18 +24,14 @@
     "test": "vitest run --maxWorkers=2 && pnpm --filter @jongminchung/git-client run test:scripts",
     "test:e2e": "pnpm --filter @jongminchung/engineering-docs run test:e2e:core && pnpm --filter @jongminchung/readme run test:e2e:core && pnpm --filter @jongminchung/git-client run test:e2e",
     "typecheck": "tsc --noEmit && pnpm -r --if-present run typecheck",
-    "typecheck:e2e": "pnpm --filter @jongminchung/engineering-docs run typecheck:e2e && pnpm --filter @jongminchung/readme run typecheck:e2e",
-    "workspace:graph:check": "nx show projects --json"
+    "typecheck:e2e": "pnpm --filter @jongminchung/engineering-docs run typecheck:e2e && pnpm --filter @jongminchung/readme run typecheck:e2e"
   },
   "devDependencies": {
     "@jongminchung/tooling": "workspace:*",
-    "@nx/devkit": "catalog:",
-    "@nx/js": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "npm-check-updates": "catalog:",
-    "nx": "catalog:",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
     "oxlint-tsgolint": "catalog:",
@@ -52,6 +48,6 @@
   "packageManager": "pnpm@11.15.1",
   "//": [
     "audit:prod checks production dependency advisories at high severity or above.",
-    "It stays separate from check because the advisory database requires network access; CI runs it on a scheduled security lane."
+    "It stays separate from check because the advisory database requires network access; release workflows run it before publishing."
   ]
 }

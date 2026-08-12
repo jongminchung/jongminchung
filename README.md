@@ -2,12 +2,18 @@
 
 This repository owns the shared `@jongminchung` packages used by downstream projects.
 
-- `@jongminchung/tooling`: shared `oxfmt`, `oxlint`, and package-map configuration.
-- `@jongminchung/ui`: published shadcn primitives, a default neutral theme, shared Tailwind styles,
+- `@jongminchung/tooling`: shared `oxfmt` and `oxlint` configuration.
+- `@jongminchung/ui`: published UI primitives, a default neutral theme, shared Tailwind styles,
   and semantic tokens.
 
 Public packages are published to GitHub Packages. Consumers need the `@jongminchung` scope mapped
-to `https://npm.pkg.github.com`.
+to `https://npm.pkg.github.com` and a classic PAT with `read:packages`, including for public package
+downloads. Keep the token in the environment rather than committing it to `.npmrc`.
+
+```ini
+@jongminchung:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GITHUB_PACKAGES_TOKEN}
+```
 
 The UI package provides safe default theme values. Apps may override semantic tokens and continue
 to own product components and behavior. See [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) for the token
@@ -48,8 +54,15 @@ pnpm --filter @jongminchung/engineering-docs run build
 ## Version Policy
 
 The manually triggered package workflow always republishes the personal packages as `1.0.0`.
-It removes an existing `1.0.0` package version immediately before uploading the replacement.
-GitHub authentication is supplied only through the `GH_PAT` Actions secret.
+This is a mutable snapshot channel: the same version can have different API, contents, and
+integrity, so SemVer compatibility and lockfile reproducibility are not guaranteed. Consumers must
+force a new resolution, such as `pnpm update --force <package>@1.0.0`, and commit the resulting
+lockfile whenever they adopt a replacement.
+
+The workflow validates and records all tarball integrities before deletion, then replaces each
+snapshot with uniform 404 handling and publish retries. It verifies registry integrity and a clean
+consumer installation afterward. GitHub authentication is supplied only through the `GH_PAT`
+Actions secret.
 
 ```bash
 pnpm install

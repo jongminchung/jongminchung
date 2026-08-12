@@ -215,7 +215,7 @@ export function SearchDialog({
         <DialogTitle className="sr-only">
           {locale === "ko" ? "문서 검색" : "Search documentation"}
         </DialogTitle>
-        <Command key={locale} shouldFilter={false} className="rounded-lg">
+        <Command key={locale} className="rounded-lg" shouldFilter={false}>
           <div className={styles.inputRow}>
             <CommandInput
               autoFocus

@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { Button, buttonVariants } from "./components/button";
 import { Checkbox } from "./components/checkbox";
+import { Command, CommandInput, CommandItem, CommandList } from "./components/command";
 import { Field, FieldDescription, FieldError, FieldLabel } from "./components/field";
 import { Item, ItemContent, ItemTitle } from "./components/item";
 import { Spinner } from "./components/spinner";
@@ -57,11 +58,50 @@ describe("shared UI behavior", () => {
     expect(markup).toContain('role="alert"');
   });
 
+  it("deduplicates form error messages while preserving distinct failures", () => {
+    const markup = renderToStaticMarkup(
+      createElement(FieldError, {
+        errors: [
+          { message: "Branch is required." },
+          { message: "Branch is required." },
+          { message: "Branch already exists." },
+        ],
+      }),
+    );
+
+    expect(markup.match(/Branch is required\./gu)).toHaveLength(1);
+    expect(markup.match(/Branch already exists\./gu)).toHaveLength(1);
+    expect(markup).toContain("<ul");
+    expect(markup).toContain('role="alert"');
+  });
+
+  it("keeps the default cmdk input and item markup", () => {
+    const markup = renderToStaticMarkup(
+      createElement(
+        Command,
+        { label: "Repository commands" },
+        createElement(CommandInput, { "aria-label": "Search commands" }),
+        createElement(CommandList, null, createElement(CommandItem, null, "Open repository")),
+      ),
+    );
+
+    expect(markup).toContain('data-slot="command"');
+    expect(markup).toContain('data-slot="command-input"');
+    expect(markup).toContain('aria-label="Search commands"');
+    expect(markup).toContain('data-slot="command-item"');
+  });
+
   it("renders mixed checkboxes and preserves static versus actionable item roles", () => {
     const mixed = renderToStaticMarkup(
       createElement(Checkbox, {
         "aria-label": "Select all files",
         indeterminate: true,
+      }),
+    );
+    const checked = renderToStaticMarkup(
+      createElement(Checkbox, {
+        "aria-label": "Select file",
+        checked: true,
       }),
     );
     const staticItem = renderToStaticMarkup(
@@ -80,6 +120,10 @@ describe("shared UI behavior", () => {
     );
 
     expect(mixed).toContain('aria-checked="mixed"');
+    expect(mixed).toContain("lucide-minus");
+    expect(mixed).not.toContain("lucide-check");
+    expect(checked).toContain("lucide-check");
+    expect(checked).not.toContain("lucide-minus");
     expect(staticItem).toContain('role="listitem"');
     expect(staticItem).toContain("<div");
     expect(actionItem).toContain("<button");

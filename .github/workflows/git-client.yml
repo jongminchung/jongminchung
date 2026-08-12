@@ -27,10 +27,10 @@ jobs:
       - name: Verify configured Node.js
         run: test "v$(cat .node-version)" = "$(node --version)"
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @jongminchung/tooling build
+      - run: pnpm run audit:prod
       - name: Guard fixed Git Client version
         run: test "$(node -p "require('./apps/git-client/package.json').version")" = "1.0.0"
-      - run: pnpm exec oxfmt --config .oxfmtrc.mjs --check apps/git-client nx.json
+      - run: pnpm exec oxfmt --config .oxfmtrc.mjs --check apps/git-client
       - run: pnpm exec oxlint apps/git-client/src apps/git-client/tests apps/git-client/scripts
       - run: pnpm --filter @jongminchung/git-client typecheck
       - run: pnpm --filter @jongminchung/git-client test

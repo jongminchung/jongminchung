@@ -1,13 +1,6 @@
 import { Button } from "@jongminchung/ui/components/button";
 import { Input } from "@jongminchung/ui/components/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@jongminchung/ui/components/select";
-import {
   Table,
   TableBody,
   TableCell,
@@ -29,6 +22,7 @@ import { useAppDialog } from "./AppDialog";
 import { Icon } from "./Icon";
 import { Notice } from "./Notice";
 import { EmptyState } from "./ProductCollections";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ProductSelect";
 
 type RepositorySettingsTab = "ignore" | "submodules" | "config";
 

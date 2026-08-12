@@ -67,10 +67,16 @@ describe("native Electron actions", () => {
       fileURLToPath(new URL("../repository/RepositoryWorkspace.tsx", import.meta.url)),
       "utf8",
     );
+    const reviewSource = await readFile(
+      fileURLToPath(
+        new URL("../repository/hooks/useRepositoryReviewController.ts", import.meta.url),
+      ),
+      "utf8",
+    );
 
-    expect(appSource).toContain("if (!primaryCommitOid || !isElectronRuntime())");
-    expect(appSource).toContain("selectPatchExportPath(");
+    expect(reviewSource).toContain("if (!primaryCommitOid || !isElectronRuntime())");
+    expect(reviewSource).toContain("selectPatchExportPath(");
     expect(appSource).toContain("selectPatchImportPath()");
-    expect(appSource).toContain("openExternalUrl(url)");
+    expect(reviewSource).toContain("openExternalUrl(url)");
   });
 });

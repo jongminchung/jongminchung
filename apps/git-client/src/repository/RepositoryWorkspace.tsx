@@ -26,7 +26,6 @@ import { RevisionComparison } from "../components/RevisionComparison";
 import { ScratchEditor } from "../components/ScratchEditor";
 import { ShareExistingRemotesDialog } from "../components/ShareExistingRemotesDialog";
 import { ShareProjectDialog } from "../components/ShareProjectDialog";
-import { deriveActionAvailability } from "../domain/actionAvailability";
 import {
   allLineBookmarks,
   createBookmarkGroup,
@@ -37,39 +36,27 @@ import {
   renameBookmarkGroup,
   setDefaultBookmarkGroup,
 } from "../domain/bookmarks";
-import { reconcileChangeSelection, type DiffPreferences } from "../domain/changeReview";
+import type { DiffPreferences } from "../domain/changeReview";
 import { COMMAND_ENABLED, commandDisabled, type CommandDefinition } from "../domain/commands";
-import { commitUrl } from "../domain/forge";
 import { type ProductSettings } from "../domain/productSettings";
 import { terminalService } from "../domain/TerminalService";
 import { toVoidHandler } from "../domain/toVoidHandler";
-import type {
-  ActionAvailability,
-  Commit,
-  FileChange,
-  Ref,
-  RepositoryView,
-  StashEntry,
-} from "../domain/types";
+import type { FileChange, Ref, RepositoryView, StashEntry } from "../domain/types";
 import {
   MAX_SIDE_TOOL_WINDOW_WIDTH,
   MIN_SIDE_TOOL_WINDOW_WIDTH,
 } from "../domain/workspacePersistence";
 import type { GitSessionController } from "../git-session/useGitSessionController";
 import { isElectronRuntime } from "../platform/electron";
-import {
-  openExternalUrl,
-  selectPatchExportPath,
-  selectPatchImportPath,
-} from "../platform/electronActions";
-import type { DiffOptions, FileSource } from "../shared/contracts/model";
+import { openExternalUrl, selectPatchImportPath } from "../platform/electronActions";
+import type { DiffOptions } from "../shared/contracts/model";
 import { useRepositoryBookmarkController } from "./hooks/useRepositoryBookmarkController";
-import { useRepositoryContentLoader } from "./hooks/useRepositoryContentLoader";
 import { useRepositoryEditorController } from "./hooks/useRepositoryEditorController";
 import { useRepositoryEditorFeatures } from "./hooks/useRepositoryEditorFeatures";
 import { useRepositoryHostingCoordinator } from "./hooks/useRepositoryHostingCoordinator";
 import { useRepositoryNotifications } from "./hooks/useRepositoryNotifications";
 import { useRepositoryPersistence } from "./hooks/useRepositoryPersistence";
+import { useRepositoryReviewController } from "./hooks/useRepositoryReviewController";
 import {
   editorPanelDomId,
   editorTabDomId,
@@ -111,9 +98,6 @@ function isEditorStatus(value: unknown): value is EditorStatus {
 }
 
 type GitSession = GitSessionController;
-const commitFilesCache = new Map<string, readonly FileChange[]>();
-const COMMIT_FILES_CACHE_LIMIT = 200;
-const EMPTY_TREE_OID = "4b825dc642cb6eb9a060e54bf8d69288fbee4904";
 
 function nativeDiffOptions(preferences: DiffPreferences): DiffOptions {
   return {
@@ -122,18 +106,7 @@ function nativeDiffOptions(preferences: DiffPreferences): DiffOptions {
   };
 }
 
-function cacheCommitFiles(key: string, files: readonly FileChange[]): void {
-  commitFilesCache.delete(key);
-  commitFilesCache.set(key, files);
-  const oldest = commitFilesCache.keys().next().value;
-  if (commitFilesCache.size > COMMIT_FILES_CACHE_LIMIT && typeof oldest === "string") {
-    commitFilesCache.delete(oldest);
-  }
-}
-
-export function clearCommitFilesCache(): void {
-  commitFilesCache.clear();
-}
+export { clearCommitFilesCache } from "./hooks/useRepositoryReviewController";
 
 interface RepositoryWorkspaceProps {
   readonly repository: RepositoryView;
@@ -210,14 +183,10 @@ function RepositoryWorkspaceContent({
   } = sessionMutations;
   const {
     createLocalHistoryPatch: sessionCreateLocalHistoryPatch,
-    createPatchText: sessionCreatePatchText,
-    exportPatch: sessionExportPatch,
     indexLog: sessionIndexLog,
     listLocalHistoryActivities: sessionListLocalHistoryActivities,
     loadBlame: sessionLoadBlame,
     loadCommitDiff: sessionLoadCommitDiff,
-    loadCommitFiles: sessionLoadCommitFiles,
-    loadCommitSignature: sessionLoadCommitSignature,
     loadFileHistory: sessionLoadFileHistory,
     loadFiles: sessionLoadFiles,
     loadHistoryRewritePreview: sessionLoadHistoryRewritePreview,
@@ -227,9 +196,7 @@ function RepositoryWorkspaceContent({
     loadRevisionDiff: sessionLoadRevisionDiff,
     loadStashFiles: sessionLoadStashFiles,
     loadStashPatch: sessionLoadStashPatch,
-    loadSubmoduleDiff: sessionLoadSubmoduleDiff,
     loadTree: sessionLoadTree,
-    loadWorkingDiff: sessionLoadWorkingDiff,
     openWorkingTreeFile: sessionOpenWorkingTreeFile,
     preCommitCheck: sessionPreCommitCheck,
     readConflict: sessionReadConflict,
@@ -290,17 +257,9 @@ function RepositoryWorkspaceContent({
       setHistoryParentRevision: state.setHistoryParentRevision,
       setDiffPreferences: state.setDiffPreferences,
       setCommitDraft: state.setCommitDraft,
-      setHistoryDiff: state.setHistoryDiff,
-      setChangeDiff: state.setChangeDiff,
-      setHistorySubmodule: state.setHistorySubmodule,
-      setChangeSubmodule: state.setChangeSubmodule,
       setContextPosition: state.setContextPosition,
       setDiffState: state.setDiffState,
-      setRevisionComparison: state.setRevisionComparison,
       setConflictContent: state.setConflictContent,
-      setCommitFiles: state.setCommitFiles,
-      setCommitFilesLoading: state.setCommitFilesLoading,
-      setCommitSignature: state.setCommitSignature,
       setHistoryRewrite: state.setHistoryRewrite,
     })),
   );
@@ -337,17 +296,9 @@ function RepositoryWorkspaceContent({
     setHistoryParentRevision,
     setDiffPreferences,
     setCommitDraft,
-    setHistoryDiff,
-    setChangeDiff,
-    setHistorySubmodule,
-    setChangeSubmodule,
     setContextPosition,
     setDiffState,
-    setRevisionComparison,
     setConflictContent,
-    setCommitFiles,
-    setCommitFilesLoading,
-    setCommitSignature,
     setHistoryRewrite,
   } = review;
   useEffect(() => {
@@ -633,75 +584,16 @@ function RepositoryWorkspaceContent({
     openInspector,
     repository,
   });
-  const commitsByOid = useMemo(
-    () => new Map(repository.commits.map((commit) => [commit.oid, commit])),
-    [repository.commits],
-  );
-  const selectedCommits = useMemo(
-    () =>
-      selectedOids
-        .map((oid) => commitsByOid.get(oid))
-        .filter((commit): commit is Commit => Boolean(commit)),
-    [commitsByOid, selectedOids],
-  );
-  const primaryCommit = selectedCommits[0];
-  const primaryCommitOid = primaryCommit?.oid;
-  const primaryIndex = primaryCommit
-    ? repository.commits.findIndex((commit) => commit.oid === primaryCommit.oid)
-    : -1;
-  const selectedInHistoryOrder = repository.commits.filter((commit) =>
-    selectedOids.includes(commit.oid),
-  );
-  const selectedAreContiguousFirstParent =
-    selectedInHistoryOrder.length === selectedOids.length &&
-    selectedInHistoryOrder.every((commit, index) => {
-      const older = selectedInHistoryOrder[index + 1];
-      return !older || commit.parents[0] === older.oid;
+  const { availability, commitsByOid, primaryCommit, runAction, selectRelative } =
+    useRepositoryReviewController({
+      dialog,
+      onOpenPush,
+      openInspector,
+      repository,
+      session,
+      workingEntries,
     });
-  const availability = useMemo(
-    () =>
-      deriveActionAvailability({
-        selectedCommits,
-        currentBranch: repository.snapshot.currentBranch ?? undefined,
-        headOid: repository.snapshot.headOid ?? undefined,
-        upstream: repository.snapshot.upstream ?? undefined,
-        selectedIsAncestorOfHead: primaryIndex >= 0,
-        selectedIsAheadOfUpstream: primaryIndex >= 0 && primaryIndex < repository.status.ahead,
-        selectedAreContiguousFirstParent,
-        selectedIncludesMerge: selectedCommits.some((commit) => commit.parents.length > 1),
-        hasChild: Boolean(
-          primaryCommit &&
-          repository.commits.some((commit) => commit.parents.includes(primaryCommit.oid)),
-        ),
-        repositoryHasCommits: repository.snapshot.hasCommits,
-        operationInProgress: repository.snapshot.operation !== null,
-      }),
-    [
-      primaryCommit,
-      primaryIndex,
-      repository.commits,
-      repository.snapshot,
-      repository.status.ahead,
-      selectedCommits,
-      selectedAreContiguousFirstParent,
-    ],
-  );
-
-  useEffect(() => {
-    if (sessionLoading || selectedOids.length === 0) return;
-    const validOids = selectedOids.filter((oid) =>
-      repository.commits.some((commit) => commit.oid === oid),
-    );
-    if (validOids.length !== selectedOids.length) setSelectedOids(validOids);
-  }, [repository.commits, selectedOids, sessionLoading, setSelectedOids]);
-
-  useEffect(() => {
-    setChangeSelection((current) => reconcileChangeSelection(current, workingEntries));
-  }, [workingEntries, setChangeSelection]);
-
-  useEffect(() => {
-    setHistoryParentRevision(primaryCommit?.parents[0] ?? (primaryCommit ? EMPTY_TREE_OID : null));
-  }, [primaryCommit?.oid, primaryCommit, setHistoryParentRevision]);
+  const primaryCommitOid = primaryCommit?.oid;
 
   useRepositoryPersistence({
     nextLogTabNumber,
@@ -714,262 +606,6 @@ function RepositoryWorkspaceContent({
     showNotifications,
     showShortcutConflictWarning,
   });
-  useEffect(() => {
-    if (!primaryCommitOid) {
-      setCommitFiles([]);
-      setCommitFilesLoading(false);
-      return;
-    }
-    const cacheKey = `${repository.snapshot.id}:${primaryCommitOid}`;
-    const cached = commitFilesCache.get(cacheKey);
-    if (cached) {
-      setCommitFiles(cached);
-      setCommitFilesLoading(false);
-      return;
-    }
-    let active = true;
-    const load = async (): Promise<void> => {
-      setCommitFilesLoading(true);
-      try {
-        const files = await sessionLoadCommitFiles(primaryCommitOid);
-        if (active) {
-          cacheCommitFiles(cacheKey, files);
-          setCommitFiles(files);
-        }
-      } catch (error) {
-        console.warn("Could not load commit files", error);
-        if (active) setCommitFiles([]);
-      } finally {
-        if (active) setCommitFilesLoading(false);
-      }
-    };
-    void load();
-    return () => {
-      active = false;
-    };
-  }, [
-    primaryCommitOid,
-    repository.snapshot.id,
-    sessionLoadCommitFiles,
-    setCommitFiles,
-    setCommitFilesLoading,
-  ]);
-
-  useEffect(() => {
-    setHistorySelectedPath((current) => {
-      if (current && commitFiles.some((file) => file.path === current)) {
-        return current;
-      }
-      return commitFiles[0]?.path ?? null;
-    });
-  }, [commitFiles, setHistorySelectedPath]);
-
-  useEffect(() => {
-    const file = commitFiles.find((candidate) => candidate.path === historySelectedPath);
-    if (!primaryCommit || !file || !historyParentRevision) {
-      setHistoryDiff({ patch: "", loading: false });
-      return;
-    }
-    if (file.binary || file.submodule) {
-      setHistoryDiff({ patch: "", loading: false });
-      return;
-    }
-    let active = true;
-    const load = async (): Promise<void> => {
-      setHistoryDiff((current) => ({ ...current, loading: true }));
-      try {
-        const patch = await sessionLoadCommitDiff(
-          primaryCommit,
-          file.path,
-          nativeDiffOptions(diffPreferences),
-          historyParentRevision,
-        );
-        if (active) setHistoryDiff({ patch, loading: false });
-      } catch (error) {
-        if (active) {
-          setHistoryDiff({
-            patch: `Unable to load diff: ${String(error)}`,
-            loading: false,
-          });
-        }
-      }
-    };
-    void load();
-    return () => {
-      active = false;
-    };
-  }, [
-    commitFiles,
-    historyParentRevision,
-    historySelectedPath,
-    primaryCommit,
-    sessionLoadCommitDiff,
-    diffPreferences,
-    setHistoryDiff,
-  ]);
-
-  useEffect(() => {
-    const entry = workingEntries.find(
-      (candidate) =>
-        changeSelection?.path === candidate.selection.path &&
-        changeSelection.layer === candidate.selection.layer,
-    );
-    if (!entry || entry.file.status === "conflicted" || entry.file.binary || entry.file.submodule) {
-      setChangeDiff({ patch: "", loading: false });
-      return;
-    }
-    let active = true;
-    const load = async (): Promise<void> => {
-      setChangeDiff((current) => ({ ...current, loading: true }));
-      try {
-        const patch = await sessionLoadWorkingDiff(
-          entry.file.path,
-          entry.selection.layer === "index",
-          nativeDiffOptions(diffPreferences),
-        );
-        if (active) setChangeDiff({ patch, loading: false });
-      } catch (error) {
-        if (active) {
-          setChangeDiff({
-            patch: `Unable to load diff: ${String(error)}`,
-            loading: false,
-          });
-        }
-      }
-    };
-    void load();
-    return () => {
-      active = false;
-    };
-  }, [changeSelection, sessionLoadWorkingDiff, workingEntries, setChangeDiff, diffPreferences]);
-
-  useEffect(() => {
-    const file = commitFiles.find((candidate) => candidate.path === historySelectedPath);
-    if (!primaryCommit || !file?.submodule || !historyParentRevision) {
-      setHistorySubmodule({ value: null, loading: false });
-      return;
-    }
-    let active = true;
-    setHistorySubmodule((current) => ({ ...current, loading: true }));
-    void sessionLoadSubmoduleDiff(
-      { kind: "revision", revision: historyParentRevision },
-      { kind: "revision", revision: primaryCommit.oid },
-      file.path,
-    ).then(
-      (value) => {
-        if (active) setHistorySubmodule({ value, loading: false });
-      },
-      () => {
-        if (active) setHistorySubmodule({ value: null, loading: false });
-      },
-    );
-    return () => {
-      active = false;
-    };
-  }, [
-    commitFiles,
-    historyParentRevision,
-    historySelectedPath,
-    primaryCommit,
-    sessionLoadSubmoduleDiff,
-    setHistorySubmodule,
-  ]);
-
-  useEffect(() => {
-    const entry = workingEntries.find(
-      (candidate) =>
-        changeSelection?.path === candidate.selection.path &&
-        changeSelection.layer === candidate.selection.layer,
-    );
-    if (!entry?.file.submodule) {
-      setChangeSubmodule({ value: null, loading: false });
-      return;
-    }
-    const before: FileSource =
-      entry.selection.layer === "index"
-        ? {
-            kind: "revision",
-            revision: repository.snapshot.headOid ?? EMPTY_TREE_OID,
-          }
-        : { kind: "index" };
-    const after: FileSource =
-      entry.selection.layer === "index" ? { kind: "index" } : { kind: "workingTree" };
-    let active = true;
-    setChangeSubmodule((current) => ({ ...current, loading: true }));
-    void sessionLoadSubmoduleDiff(before, after, entry.file.path).then(
-      (value) => {
-        if (active) setChangeSubmodule({ value, loading: false });
-      },
-      () => {
-        if (active) setChangeSubmodule({ value: null, loading: false });
-      },
-    );
-    return () => {
-      active = false;
-    };
-  }, [
-    changeSelection,
-    repository.snapshot.headOid,
-    sessionLoadSubmoduleDiff,
-    workingEntries,
-    setChangeSubmodule,
-  ]);
-
-  useEffect(() => {
-    if (!primaryCommitOid || !isElectronRuntime()) {
-      setCommitSignature(undefined);
-      return;
-    }
-    let active = true;
-    void sessionLoadCommitSignature(primaryCommitOid).then(
-      (signature) => active && setCommitSignature(signature),
-      () => active && setCommitSignature(undefined),
-    );
-    return () => {
-      active = false;
-    };
-  }, [primaryCommitOid, sessionLoadCommitSignature, setCommitSignature]);
-
-  useEffect(() => {
-    if (selectedCommits.length !== 2) {
-      setRevisionComparison(undefined);
-      return;
-    }
-    const [to, from] = selectedCommits;
-    if (!from || !to) return;
-    let active = true;
-    setRevisionComparison({
-      from: from.oid,
-      to: to.oid,
-      patch: "",
-      loading: true,
-    });
-    void sessionLoadRevisionDiff(from.oid, to.oid, nativeDiffOptions(diffPreferences)).then(
-      (patch) => {
-        if (active) {
-          setRevisionComparison({
-            from: from.oid,
-            to: to.oid,
-            patch,
-            loading: false,
-          });
-        }
-      },
-      (error) => {
-        if (active) {
-          setRevisionComparison({
-            from: from.oid,
-            to: to.oid,
-            patch: `Unable to compare revisions: ${String(error)}`,
-            loading: false,
-          });
-        }
-      },
-    );
-    return () => {
-      active = false;
-    };
-  }, [selectedCommits, sessionLoadRevisionDiff, setRevisionComparison, diffPreferences]);
 
   const openStashDiff = useCallback(
     (stash: StashEntry): void => {
@@ -1002,218 +638,6 @@ function RepositoryWorkspaceContent({
     [sessionLoadStashPatch, setDiffState],
   );
 
-  const selectRelative = useCallback(
-    (direction: "parent" | "child"): void => {
-      if (!primaryCommit) return;
-      const oid =
-        direction === "parent"
-          ? primaryCommit.parents[0]
-          : repository.commits.find((commit) => commit.parents.includes(primaryCommit.oid))?.oid;
-      if (oid && commitsByOid.has(oid)) setSelectedOids([oid]);
-    },
-    [commitsByOid, primaryCommit, repository.commits, setSelectedOids],
-  );
-
-  const runAction = useCallback(
-    async (action: keyof ActionAvailability): Promise<void> => {
-      setContextPosition(undefined);
-      if (!primaryCommit || !availability[action]) return;
-      if (action === "copyRevision") {
-        await navigator.clipboard.writeText(primaryCommit.oid);
-        setToast(`Copied ${primaryCommit.oid.slice(0, 8)}`);
-      } else if (action === "goToParent") selectRelative("parent");
-      else if (action === "goToChild") selectRelative("child");
-      else if (action === "cherryPick") {
-        await sessionExecuteOperation({
-          kind: "cherryPick",
-          revisions: selectedCommits.map((commit) => commit.oid),
-          noCommit: false,
-        });
-      } else if (action === "revert") {
-        await sessionExecuteOperation({
-          kind: "revert",
-          revisions: selectedCommits.map((commit) => commit.oid),
-          noCommit: false,
-        });
-      } else if (action === "reset") {
-        const accepted = await dialog.confirm({
-          title: `Reset ${repository.snapshot.currentBranch ?? "HEAD"}?`,
-          description:
-            "A mixed reset moves the branch and resets the index while keeping working-tree changes.",
-          impact: `Target: ${primaryCommit.oid.slice(0, 12)}`,
-          confirmLabel: "Reset branch",
-          dangerous: true,
-        });
-        if (accepted) {
-          const mode = await dialog.input({
-            title: "Choose reset mode",
-            label: "Mode: soft, mixed, hard, or keep",
-            initialValue: "mixed",
-            description:
-              "Hard discards index and working-tree changes; keep refuses to overwrite local changes.",
-          });
-          if (!mode || !["soft", "mixed", "hard", "keep"].includes(mode)) {
-            if (mode) setToast("Reset mode must be soft, mixed, hard, or keep.");
-            return;
-          }
-          await sessionExecuteOperation({
-            kind: "reset",
-            revision: primaryCommit.oid,
-            mode: mode as "soft" | "mixed" | "hard" | "keep",
-          });
-        }
-      } else if (action === "undoCommit") {
-        const accepted = await dialog.confirm({
-          title: "Undo the last commit?",
-          description:
-            "Moves HEAD to its parent with a soft reset, keeping all committed changes staged.",
-          impact: `${primaryCommit.oid.slice(0, 8)} ${primaryCommit.subject}`,
-          confirmLabel: "Undo commit",
-          dangerous: true,
-        });
-        if (accepted) await sessionExecuteOperation({ kind: "undoCommit" });
-      } else if (action === "reword") {
-        const message = await dialog.input({
-          title: "Reword commit",
-          label: "New commit message",
-          initialValue: primaryCommit.subject,
-          description: "Interactive rebase rewrites this commit and all descendants.",
-        });
-        if (message)
-          await sessionExecuteOperation({
-            kind: "rewordCommit",
-            revision: primaryCommit.oid,
-            message,
-          });
-      } else if (action === "fixup") {
-        await sessionExecuteOperation({
-          kind: "createFixupCommit",
-          revision: primaryCommit.oid,
-        });
-      } else if (action === "squashInto") {
-        await sessionExecuteOperation({
-          kind: "createSquashCommit",
-          revision: primaryCommit.oid,
-        });
-      } else if (action === "newBranch") {
-        const name = await dialog.input({
-          title: "Create branch",
-          label: "Branch name",
-          initialValue: "feat/",
-          description: `Starts at ${primaryCommit.oid.slice(0, 12)} without checking it out.`,
-        });
-        if (name) {
-          await sessionExecuteOperation({
-            kind: "createBranch",
-            name,
-            startPoint: primaryCommit.oid,
-            checkout: false,
-          });
-        }
-      } else if (action === "newTag") {
-        const name = await dialog.input({
-          title: "Create tag",
-          label: "Tag name",
-          initialValue: "v0.1.0",
-          description: `Creates a lightweight tag at ${primaryCommit.oid.slice(0, 12)}.`,
-        });
-        if (name) {
-          await sessionExecuteOperation({
-            kind: "createTag",
-            name,
-            revision: primaryCommit.oid,
-            message: null,
-          });
-        }
-      } else if (action === "pushUpTo") {
-        onOpenPush(primaryCommit.oid);
-      } else if (action === "interactiveRebase") {
-        setHistoryRewrite({
-          fromRevision: primaryCommit.oid,
-          squashOids: [],
-        });
-      } else if (action === "viewInBrowser") {
-        const url = repository.snapshot.remoteUrl
-          ? commitUrl(repository.snapshot.remoteUrl, primaryCommit.oid)
-          : undefined;
-        if (!url) setToast("The origin remote is not a supported GitHub or GitLab URL.");
-        else await openExternalUrl(url);
-      } else if (action === "createPatch") {
-        const targetPath = await selectPatchExportPath(`${primaryCommit.oid.slice(0, 8)}.patch`);
-        if (!targetPath) return;
-        const result = await sessionExportPatch(
-          selectedCommits.map((commit) => commit.oid),
-          targetPath,
-        );
-        setToast(
-          `Exported ${result.commitCount} commit(s) · ${result.sizeBytes.toLocaleString()} bytes`,
-        );
-      } else if (action === "copyPatch") {
-        const patch = await sessionCreatePatchText(selectedCommits.map((commit) => commit.oid));
-        await navigator.clipboard.writeText(patch);
-        setToast(`Copied patch · ${patch.length.toLocaleString()} characters`);
-      } else if (action === "showRepositoryAtRevision") {
-        openInspector({
-          revision: primaryCommit.oid,
-          source: { kind: "revision", revision: primaryCommit.oid },
-          tab: "tree",
-        });
-      } else if (action === "compareVersions") {
-        setRepositoryViewMode("history");
-      } else if (action === "drop") {
-        const accepted = await dialog.confirm({
-          title: `Drop ${selectedCommits.length} commit(s)?`,
-          description: "Interactive rebase rewrites this branch and all descendant commit IDs.",
-          impact: selectedCommits
-            .map((commit) => `${commit.oid.slice(0, 8)} ${commit.subject}`)
-            .join("\n"),
-          confirmLabel: "Rewrite and drop",
-          dangerous: true,
-        });
-        if (accepted) {
-          await sessionExecuteOperation({
-            kind: "dropCommits",
-            revisions: selectedCommits.map((commit) => commit.oid),
-          });
-        }
-      } else if (action === "squash") {
-        const selected = new Set(selectedCommits.map((commit) => commit.oid));
-        const oldest = repository.commits.findLast((commit) => selected.has(commit.oid));
-        if (oldest) {
-          setHistoryRewrite({
-            fromRevision: oldest.oid,
-            squashOids: selectedCommits.map((commit) => commit.oid),
-          });
-        }
-      }
-    },
-    [
-      availability,
-      openInspector,
-      primaryCommit,
-      repository.snapshot,
-      selectRelative,
-      selectedCommits,
-      onOpenPush,
-      dialog,
-      repository.commits,
-      setRepositoryViewMode,
-      setContextPosition,
-      setToast,
-      setHistoryRewrite,
-      sessionExportPatch,
-      sessionCreatePatchText,
-      sessionExecuteOperation,
-    ],
-  );
-
-  useRepositoryContentLoader({
-    loadFile: sessionReadFile,
-    loadFilePreview: sessionReadFilePreview,
-    primaryCommit,
-    repository,
-    workingEntries,
-  });
   const selectRef = (ref: Ref): void => {
     setSelectedRef(ref.name);
     if (commitsByOid.has(ref.oid)) setSelectedOids([ref.oid]);

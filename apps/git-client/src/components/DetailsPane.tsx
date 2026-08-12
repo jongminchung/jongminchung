@@ -1,11 +1,4 @@
 import { Button } from "@jongminchung/ui/components/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@jongminchung/ui/components/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -27,6 +20,7 @@ import { Notice } from "./Notice";
 import { EmptyState, Spinner, StatusBadge } from "./ProductCollections";
 import { CheckboxInput } from "./ProductFormControls";
 import { Popover } from "./ProductOverlays";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ProductSelect";
 import { VerticalResizeHandle } from "./VerticalResizeHandle";
 
 function statusLetter(status: FileChange["status"]): string {

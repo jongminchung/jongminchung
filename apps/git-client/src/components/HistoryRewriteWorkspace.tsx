@@ -3,13 +3,6 @@ import { Checkbox } from "@jongminchung/ui/components/checkbox";
 import { Input } from "@jongminchung/ui/components/input";
 import { ScrollArea } from "@jongminchung/ui/components/scroll-area";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@jongminchung/ui/components/select";
-import {
   Table,
   TableBody,
   TableCell,
@@ -38,6 +31,7 @@ import { Icon } from "./Icon";
 import { Notice } from "./Notice";
 import { Spinner } from "./ProductCollections";
 import { Dialog, DialogFooter, DialogHeader } from "./ProductDialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ProductSelect";
 
 const ACTIONS: readonly RebasePlanAction[] = ["pick", "reword", "edit", "squash", "fixup", "drop"];
 

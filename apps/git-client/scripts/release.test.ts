@@ -165,14 +165,12 @@ describe("Electron release build contract", () => {
 
   it("runs the complete source gates before an ARM64 Electron Forge package", () => {
     expect(createReleaseSourceGateCommands()).toEqual([
-      { command: "pnpm", arguments: ["--filter", "@jongminchung/tooling", "build"] },
       { command: "pnpm", arguments: ["test"] },
       { command: "pnpm", arguments: ["test:e2e"] },
       { command: "pnpm", arguments: ["build"] },
       { command: "pnpm", arguments: ["test:scripts"] },
     ]);
     expect(createReleaseSourceGateCommands(RELEASE_MODES.localAdHoc)).toEqual([
-      { command: "pnpm", arguments: ["--filter", "@jongminchung/tooling", "build"] },
       { command: "pnpm", arguments: ["test"] },
       { command: "pnpm", arguments: ["test:e2e"] },
       { command: "pnpm", arguments: ["build"] },
@@ -451,7 +449,6 @@ describe("Electron release build contract", () => {
 
       expect(calls.map(({ command, arguments: arguments_ }) => [command, arguments_])).toEqual([
         ["/usr/bin/security", ["find-identity", "-v", "-p", "codesigning"]],
-        ["pnpm", ["--filter", "@jongminchung/tooling", "build"]],
         ["pnpm", ["test"]],
         ["pnpm", ["test:e2e"]],
         ["pnpm", ["build"]],

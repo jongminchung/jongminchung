@@ -1,7 +1,7 @@
 {
   "name": "@jongminchung/ui",
   "version": "1.0.0",
-  "description": "Shared shadcn primitives, semantic theme tokens, and Tailwind styles",
+  "description": "Shared UI primitives, semantic theme tokens, and Tailwind styles",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -64,7 +64,6 @@
     "clsx": "catalog:",
     "cmdk": "catalog:",
     "lucide-react": "catalog:",
-    "shadcn": "catalog:",
     "tailwind-merge": "catalog:",
     "tw-animate-css": "catalog:"
   },
@@ -85,10 +84,5 @@
   },
   "engines": {
     "node": ">=24.0.0"
-  },
-  "nx": {
-    "tags": [
-      "pkg:ui"
-    ]
   }
 }

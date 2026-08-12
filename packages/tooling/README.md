@@ -1,24 +1,38 @@
 # @jongminchung/tooling
 
-Shared lint, format, and package-map configuration for TypeScript workspaces.
+Shared lint and format configuration for TypeScript workspaces.
 
 ## Install
 
-Node.js 24 or newer is required.
+Node.js 24 or newer is required. Configure GitHub Packages with a classic personal access token
+that has `read:packages`; public package downloads still require authentication.
+
+```ini
+@jongminchung:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GITHUB_PACKAGES_TOKEN}
+```
+
+Keep the token in the environment rather than committing it to `.npmrc`.
 
 ```bash
-npm install --save-dev @jongminchung/tooling
+npm install --save-dev @jongminchung/tooling oxfmt oxlint
 ```
 
 Install the actual formatter and linter in each consuming project. This package only centralizes the
 shared settings.
 
-The package ships ESM only and exposes every runtime API as a named export. Use ESM `import` for
-every JavaScript entry point; CommonJS `require()` is not part of the supported package contract.
+The package ships ESM only. `defineOxfmtConfig` is its only JavaScript API, and CommonJS
+`require()` is not part of the supported package contract.
 
 ## Version Policy
 
-The manual package workflow always replaces the personal `1.0.0` package version.
+The manual package workflow always replaces the personal `1.0.0` package version. It is a mutable
+snapshot channel rather than a reproducible SemVer release. Refresh the downstream resolution and
+commit the changed lockfile whenever a replacement is published:
+
+```bash
+pnpm update --force @jongminchung/tooling@1.0.0
+```
 
 ## Package scripts
 
@@ -34,22 +48,12 @@ The manual package workflow always replaces the personal `1.0.0` package version
 
 ## oxlint
 
-```js
-import { defineOxlintConfig } from "@jongminchung/tooling/oxlint";
-
-export default defineOxlintConfig({
-  rules: {
-    "typescript/no-explicit-any": "error",
-  },
-});
-```
-
-JSON configs can extend the default file:
+Oxlint configs can extend the shared JSON file:
 
 ```json
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "extends": ["./node_modules/@jongminchung/tooling/src/oxlint/base.json"]
+  "extends": ["./node_modules/@jongminchung/tooling/oxlint.json"]
 }
 ```
 
@@ -60,51 +64,13 @@ import { defineOxfmtConfig } from "@jongminchung/tooling/oxfmt";
 
 export default defineOxfmtConfig({
   ignorePatterns: ["dist/", "coverage/", "generated/"],
+  sortImports: { order: "asc" },
 });
 ```
 
-## Package map aliases
-
-Monorepos can derive TypeScript and Vite aliases from workspace package manifests:
-
-```js
-import {
-  createTsconfigAliasConfig,
-  createViteResolveAliases,
-} from "@jongminchung/tooling/package-map";
-
-export default {
-  resolve: {
-    alias: createViteResolveAliases(),
-  },
-};
-```
-
-By default, package-map reads the consuming repo at `process.cwd()` and only derives aliases from
-workspace package `exports`. Repo-local aliases are opt-in:
-
-```js
-import { createViteResolveAliases } from "@jongminchung/tooling/package-map";
-
-export default {
-  resolve: {
-    alias: createViteResolveAliases({
-      rootDir: import.meta.dirname,
-      localSourceAliases: [
-        {
-          find: /^@\//,
-          replacementPath: "src",
-          tsconfigKey: "@/*",
-          tsconfigTarget: "./src/*",
-        },
-      ],
-    }),
-  },
-};
-```
-
-If a package export has a `source` condition, local aliases prefer that source file. Published npm
-consumers use the standard `types` and `default` conditions.
+The public config and override types are aliases of Oxfmt's official types. Ignore and override
+arrays append to the shared defaults. Object forms of `sortImports` and `sortPackageJson` merge with
+the shared nested defaults, while booleans such as `false` replace them.
 
 ## Build and pack
 
@@ -117,6 +83,6 @@ npm pack --dry-run
 explicit public entry points as ESM JavaScript and declarations while preserving their source module
 structure.
 
-The npm package includes compiled ESM JavaScript, generated declarations, source config files, the
-directly exported Oxlint JSON asset, `LICENSE`, `README.md`, and `package.json`. It does not include a
-bundle or a separate CommonJS build.
+The npm package includes the compiled Oxfmt module, declarations, the directly exported Oxlint JSON
+asset, `LICENSE`, `README.md`, and `package.json`. It does not include a bundle or a separate CommonJS
+build.

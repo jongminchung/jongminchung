@@ -2,13 +2,6 @@ import { Button } from "@jongminchung/ui/components/button";
 import { ButtonGroup } from "@jongminchung/ui/components/button-group";
 import { Checkbox } from "@jongminchung/ui/components/checkbox";
 import { Input } from "@jongminchung/ui/components/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@jongminchung/ui/components/select";
 import { Toggle } from "@jongminchung/ui/components/toggle";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@jongminchung/ui/components/tooltip";
 import { cn } from "@jongminchung/ui/lib/utils";
@@ -24,6 +17,7 @@ import { useDiffSelection } from "./diff/useDiffSelection";
 import { Icon } from "./Icon";
 import { EmptyState, Spinner, StatusBadge } from "./ProductCollections";
 import { Popover } from "./ProductOverlays";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ProductSelect";
 
 const CodeMirrorDiff = lazy(() => import("./CodeMirrorDiff"));
 

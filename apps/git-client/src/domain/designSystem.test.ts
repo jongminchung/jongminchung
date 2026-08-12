@@ -1,12 +1,14 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, test } from "vitest";
 
 const sourceRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 const appRoot = join(sourceRoot, "..");
 const workspaceRoot = join(appRoot, "..", "..");
+const appsRoot = join(workspaceRoot, "apps");
 const uiRoot = join(workspaceRoot, "packages", "ui");
+const apps = ["engineering-docs", "git-client", "readme"] as const;
 
 function sourceFiles(directory: string): readonly string[] {
   if (!existsSync(directory)) return [];
@@ -22,9 +24,35 @@ function readJson(path: string): Record<string, unknown> {
   return JSON.parse(readFileSync(path, "utf8")) as Record<string, unknown>;
 }
 
+function dependencyNames(manifest: Record<string, unknown>): readonly string[] {
+  return ["dependencies", "devDependencies", "optionalDependencies", "peerDependencies"].flatMap(
+    (section) => Object.keys((manifest[section] ?? {}) as Record<string, unknown>),
+  );
+}
+
+function importSpecifiers(contents: string): readonly string[] {
+  return Array.from(
+    contents.matchAll(/(?:\bfrom\s+|\bimport\s*(?:\(\s*)?|@import\s+)["']([^"']+)["']/g),
+    (match) => match[1] ?? "",
+  );
+}
+
+function isAppRuntimePackage(packageName: string): boolean {
+  const appRuntimes = ["electron", "next", "react-router", "react-router-dom"];
+  const isUiPackage =
+    packageName === "@jongminchung/ui" || packageName.startsWith("@jongminchung/ui/");
+
+  return (
+    (packageName.startsWith("@jongminchung/") && !isUiPackage) ||
+    packageName.startsWith("@electron/") ||
+    packageName.startsWith("@electron-forge/") ||
+    packageName.startsWith("@tanstack/react-router") ||
+    appRuntimes.some((runtime) => packageName === runtime || packageName.startsWith(`${runtime}/`))
+  );
+}
+
 describe("workspace shadcn design system boundary", () => {
   test("routes every app to the shared primitive package", () => {
-    const apps = ["engineering-docs", "git-client", "readme"] as const;
     const baseTsconfig = readJson(join(workspaceRoot, "tsconfig.base.json"));
     const baseCompilerOptions = baseTsconfig.compilerOptions as Record<string, unknown>;
     const sharedConfig = readJson(join(uiRoot, "components.json"));
@@ -88,52 +116,12 @@ describe("workspace shadcn design system boundary", () => {
     }
   });
 
-  test("publishes named component subpaths without a root barrel", () => {
-    const packageJson = readJson(join(uiRoot, "package.json"));
-    const packageImports = packageJson.imports as Record<string, string>;
-    const exports = packageJson.exports as Record<string, unknown>;
-    const componentExport = exports["./components/*"] as Record<string, string>;
+  test("keeps primitive implementations and root UI imports out of applications", () => {
+    const primitivePackages = ["@base-ui/react", "cmdk"] as const;
 
-    expect(packageJson.version).toBe("1.0.0");
-    expect(packageJson.private).toBeUndefined();
-    expect(packageImports).toEqual({
-      "#components/*": "./src/components/*.tsx",
-      "#hooks/*": "./src/hooks/*.ts",
-      "#lib/*": "./src/lib/*.ts",
-    });
-    expect(exports).toMatchObject({
-      "./globals.css": "./src/styles/globals.css",
-      "./theme.css": "./src/styles/theme.css",
-      "./tokens.css": "./src/styles/tokens.css",
-      "./hooks/*": {
-        types: "./dist/hooks/*.d.ts",
-        source: "./src/hooks/*.ts",
-        import: "./dist/hooks/*.js",
-      },
-      "./lib/*": {
-        types: "./dist/lib/*.d.ts",
-        source: "./src/lib/*.ts",
-        import: "./dist/lib/*.js",
-      },
-      "./components/*": {
-        types: "./dist/components/*.d.ts",
-        source: "./src/components/*.tsx",
-        import: "./dist/components/*.js",
-      },
-    });
-    expect(exports["."]).toBeUndefined();
-    expect(Object.keys(componentExport)).toEqual(["source", "types", "import"]);
-    expect(existsSync(join(uiRoot, "src", "index.ts"))).toBe(false);
-
-    for (const file of sourceFiles(join(uiRoot, "src"))) {
-      expect(readFileSync(file, "utf8"), file).not.toMatch(/\bexport\s+default\b/);
-    }
-  });
-
-  test("keeps Base UI and primitive copies out of applications", () => {
-    for (const app of ["engineering-docs", "git-client", "readme"] as const) {
+    for (const app of apps) {
       const currentAppRoot = join(workspaceRoot, "apps", app);
-      const packageJson = readFileSync(join(currentAppRoot, "package.json"), "utf8");
+      const packageJson = readJson(join(currentAppRoot, "package.json"));
       const localUiRoot =
         app === "git-client"
           ? join(currentAppRoot, "src", "components", "ui")
@@ -147,13 +135,41 @@ describe("workspace shadcn design system boundary", () => {
               join(currentAppRoot, "lib"),
             ];
 
-      expect(packageJson, app).not.toContain('"@base-ui/react"');
+      const dependencies = dependencyNames(packageJson);
+      for (const primitivePackage of primitivePackages) {
+        expect(dependencies, app).not.toContain(primitivePackage);
+      }
       expect(sourceFiles(localUiRoot), app).toEqual([]);
 
       for (const file of runtimeRoots.flatMap(sourceFiles)) {
-        expect(readFileSync(file, "utf8"), file).not.toMatch(
-          /from\s+["']@base-ui\/react(?:\/[^"']+)?["']/,
-        );
+        const specifiers = importSpecifiers(readFileSync(file, "utf8"));
+        for (const specifier of specifiers) {
+          expect(
+            primitivePackages.some(
+              (packageName) => specifier === packageName || specifier.startsWith(`${packageName}/`),
+            ),
+            file,
+          ).toBe(false);
+          expect(specifier, file).not.toBe("@jongminchung/ui");
+        }
+      }
+    }
+  });
+
+  test("keeps the shared UI package independent from applications and app runtimes", () => {
+    const uiManifest = readJson(join(uiRoot, "package.json"));
+
+    for (const dependency of dependencyNames(uiManifest)) {
+      expect(isAppRuntimePackage(dependency), dependency).toBe(false);
+    }
+
+    for (const file of sourceFiles(join(uiRoot, "src"))) {
+      for (const specifier of importSpecifiers(readFileSync(file, "utf8"))) {
+        expect(isAppRuntimePackage(specifier), file).toBe(false);
+        if (specifier.startsWith(".")) {
+          const target = resolve(dirname(file), specifier);
+          expect(target.startsWith(`${appsRoot}${sep}`), file).toBe(false);
+        }
       }
     }
   });
@@ -168,10 +184,23 @@ describe("workspace shadcn design system boundary", () => {
     ] as const;
 
     expect(sharedStyles).toContain('@import "tailwindcss"');
-    expect(sharedStyles).toContain('@import "shadcn/tailwind.css"');
     expect(sharedStyles).toContain('@import "tw-animate-css"');
     expect(sharedStyles).toContain('@import "./theme.css"');
     expect(sharedStyles).toContain('@import "./tokens.css"');
+    expect(sharedStyles).not.toContain('@import "shadcn/tailwind.css"');
+    for (const variant of [
+      "data-open",
+      "data-closed",
+      "data-checked",
+      "data-selected",
+      "data-disabled",
+      "data-active",
+      "data-horizontal",
+      "data-vertical",
+    ]) {
+      expect(sharedStyles).toContain(`@custom-variant ${variant}`);
+    }
+    expect(sharedStyles).toContain("@utility no-scrollbar");
     expect(sharedStyles.indexOf('@import "./theme.css"')).toBeLessThan(
       sharedStyles.indexOf('@import "./tokens.css"'),
     );
@@ -277,6 +306,7 @@ describe("workspace shadcn design system boundary", () => {
   test("keeps product behavior in app-local compositions", () => {
     const dialog = readFileSync(join(sourceRoot, "components", "ProductDialog.tsx"), "utf8");
     const form = readFileSync(join(sourceRoot, "components", "ProductFormControls.tsx"), "utf8");
+    const select = readFileSync(join(sourceRoot, "components", "ProductSelect.tsx"), "utf8");
     const collections = readFileSync(
       join(sourceRoot, "components", "ProductCollections.tsx"),
       "utf8",
@@ -294,6 +324,12 @@ describe("workspace shadcn design system boundary", () => {
     expect(form).toContain("aria-describedby");
     expect(form).toContain("aria-invalid");
     expect(form).toContain('indeterminate={value === "indeterminate"}');
+    expect(select).toContain('positionerClassName={cn("z-[150]", positionerClassName)}');
+    expect(
+      sourceFiles(sourceRoot).filter((file) =>
+        importSpecifiers(readFileSync(file, "utf8")).includes("@jongminchung/ui/components/select"),
+      ),
+    ).toEqual([join(sourceRoot, "components", "ProductSelect.tsx")]);
     expect(collections).toContain('from "@jongminchung/ui/components/item"');
     expect(collections).toContain('from "@jongminchung/ui/components/radio-group"');
     expect(collections).toContain('from "@jongminchung/ui/components/badge"');

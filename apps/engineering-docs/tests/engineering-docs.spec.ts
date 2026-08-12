@@ -211,13 +211,13 @@ test("global navigation, breadcrumb, outline, and explained search work by keybo
   await page.keyboard.press("ControlOrMeta+K");
   const search = page.getByPlaceholder("Search titles, APIs, and topics");
   await expect(search).toBeFocused();
-  await search.fill("createTsconfigPaths");
+  await search.fill("defineOxfmtConfig");
   const searchDialog = page.getByRole("dialog", {
     name: "Search documentation",
   });
   await expect(searchDialog.getByText("tooling", { exact: true })).toBeVisible();
   await expect(searchDialog.getByText("API symbol", { exact: true })).toBeVisible();
-  await expect(searchDialog.getByText(/createTsconfigPaths/u)).toBeVisible();
+  await expect(searchDialog.getByText(/defineOxfmtConfig/u)).toBeVisible();
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/\/en\/packages\/tooling$/u);
@@ -263,8 +263,8 @@ test("search exposes loading, retry, keyboard, focus, and accessibility states",
   releaseFirstRequest();
   await expect(dialog.getByRole("alert")).toContainText("Search index failed");
   await dialog.getByRole("button", { name: "Retry" }).click();
-  await input.fill("createTsconfigPaths");
-  const option = dialog.getByRole("option", { name: /createTsconfigPaths/u });
+  await input.fill("defineOxfmtConfig");
+  const option = dialog.getByRole("option", { name: /defineOxfmtConfig/u });
   await expect(option).toBeVisible();
   await page.keyboard.press("ArrowDown");
   await expect(input).toHaveAttribute("aria-activedescendant", /.+/u);
@@ -301,7 +301,7 @@ test("search cancels a stale locale request before accepting the next locale", a
 
   await page.locator("[data-docs-search-trigger]:visible").first().click();
   const dialog = page.getByRole("dialog", { name: "문서 검색" });
-  await dialog.getByRole("combobox").fill("createTsconfigPaths");
+  await dialog.getByRole("combobox").fill("defineOxfmtConfig");
   await expect(dialog.getByText("API 심볼", { exact: true })).toBeVisible();
   await page.waitForTimeout(550);
   await expect(dialog.getByText("API 심볼", { exact: true })).toBeVisible();

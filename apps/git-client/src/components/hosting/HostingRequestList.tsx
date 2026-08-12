@@ -1,12 +1,5 @@
 import { Button } from "@jongminchung/ui/components/button";
 import { Input } from "@jongminchung/ui/components/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@jongminchung/ui/components/select";
 import { useMemo, useState } from "react";
 import type { KeyboardEvent } from "react";
 import {
@@ -17,6 +10,7 @@ import {
 import type { HostingChangeRequest } from "../../shared/contracts/model";
 import { Icon } from "../Icon";
 import { EmptyState } from "../ProductCollections";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ProductSelect";
 
 interface HostingRequestListProps {
   readonly items: readonly HostingChangeRequest[];

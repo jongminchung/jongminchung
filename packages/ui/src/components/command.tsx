@@ -58,26 +58,23 @@ function CommandDialog({
 
 function CommandInput({
   className,
-  onKeyDown,
   ref,
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Input>) {
   const inputRef = React.useRef<HTMLInputElement | null>(null);
 
-  const syncActiveDescendant = React.useCallback(() => {
-    const input = inputRef.current;
-    if (input === null) return;
-    const command = inputRef.current?.closest<HTMLElement>('[data-slot="command"]');
-    const selected = command?.querySelector<HTMLElement>(
-      '[data-slot="command-item"][aria-selected="true"]',
-    );
-    if (selected?.id) input.setAttribute("aria-activedescendant", selected.id);
-    else input.removeAttribute("aria-activedescendant");
-  }, []);
-
   React.useEffect(() => {
-    const command = inputRef.current?.closest<HTMLElement>('[data-slot="command"]');
-    if (command === undefined || command === null) return;
+    const input = inputRef.current;
+    const command = input?.closest<HTMLElement>('[data-slot="command"]');
+    if (input === null || command === undefined || command === null) return;
+
+    const syncActiveDescendant = (): void => {
+      const selected = command.querySelector<HTMLElement>(
+        '[data-slot="command-item"][aria-selected="true"]',
+      );
+      if (selected?.id) input.setAttribute("aria-activedescendant", selected.id);
+      else input.removeAttribute("aria-activedescendant");
+    };
 
     syncActiveDescendant();
     const observer = new MutationObserver(syncActiveDescendant);
@@ -88,7 +85,7 @@ function CommandInput({
       subtree: true,
     });
     return () => observer.disconnect();
-  }, [syncActiveDescendant]);
+  }, []);
 
   return (
     <div data-slot="command-input-wrapper" className="p-1 pb-0">
@@ -104,10 +101,6 @@ function CommandInput({
             "w-full text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
             className,
           )}
-          onKeyDown={(event) => {
-            onKeyDown?.(event);
-            requestAnimationFrame(syncActiveDescendant);
-          }}
           {...props}
         />
         <InputGroupAddon>
@@ -176,13 +169,10 @@ function CommandSeparator({
 function CommandItem({
   className,
   children,
-  id,
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Item>) {
-  const generatedId = React.useId();
   return (
     <CommandPrimitive.Item
-      id={id ?? generatedId}
       data-slot="command-item"
       className={cn(
         "group/command-item relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none in-data-[slot=dialog-content]:rounded-lg! data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 data-selected:bg-muted data-selected:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 data-selected:*:[svg]:text-foreground",

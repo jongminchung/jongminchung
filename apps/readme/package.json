@@ -8,9 +8,8 @@
     "#lib/*": "./lib/*.ts"
   },
   "scripts": {
-    "build": "pnpm run icon:check && tsc --noEmit && next build",
-    "dev": "pnpm run icon:check && next dev --port 3200",
-    "icon:check": "pnpm --dir ../.. run icon:check",
+    "build": "pnpm --filter @jongminchung/icon run check && tsc --noEmit && next build",
+    "dev": "pnpm --filter @jongminchung/icon run check && next dev --port 3200",
     "start": "next start",
     "test:e2e": "playwright test",
     "test:e2e:core": "playwright test --config playwright.core.config.ts",

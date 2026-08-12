@@ -228,6 +228,11 @@ test("operates shadcn Select with Space, arrows, Escape, and focus restoration",
   await ideFont.focus();
   await page.keyboard.press("Space");
   await expect(page.getByRole("option", { name: "72.0", exact: true })).toBeVisible();
+  const selectLayer = await page
+    .getByRole("listbox")
+    .evaluate((listbox) => Number(getComputedStyle(listbox.parentElement!.parentElement!).zIndex));
+  const dialogLayer = await dialog.evaluate((element) => Number(getComputedStyle(element).zIndex));
+  expect(selectLayer).toBeGreaterThan(dialogLayer);
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("Enter");
   await expect.poll(() => ideFont.textContent()).not.toBe(initialValue);

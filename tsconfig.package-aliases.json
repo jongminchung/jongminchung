@@ -4,9 +4,7 @@
     "paths": {
       "@jongminchung/icon": ["./packages/icon/src/index.ts"],
       "@jongminchung/tooling/oxfmt": ["./packages/tooling/src/oxfmt/index.ts"],
-      "@jongminchung/tooling/oxlint": ["./packages/tooling/src/oxlint/index.ts"],
-      "@jongminchung/tooling/oxlint.json": ["./packages/tooling/src/oxlint/base.json"],
-      "@jongminchung/tooling/package-map": ["./packages/tooling/src/package-map.ts"],
+      "@jongminchung/tooling/oxlint.json": ["./packages/tooling/oxlint.json"],
       "@jongminchung/ui/components/*": ["./packages/ui/src/components/*.tsx"],
       "@jongminchung/ui/globals.css": ["./packages/ui/src/styles/globals.css"],
       "@jongminchung/ui/hooks/*": ["./packages/ui/src/hooks/*.ts"],
