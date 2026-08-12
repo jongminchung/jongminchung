@@ -4,6 +4,7 @@ import {
     type PointerEvent as ReactPointerEvent,
     useCallback,
 } from "react";
+import type { TerminalAvailability } from "../application/terminal/ports/TerminalAvailability";
 import type { GitConsoleEntry } from "../domain/gitConsole";
 import type { ProjectSearchResult } from "../domain/projectSearch";
 import type { FileChange, StashEntry, StatusModel } from "../domain/types";
@@ -22,7 +23,7 @@ import type {
     GitOperation,
     RecoveryEntry,
     ShelfEntry,
-} from "../shared/contracts/model";
+} from "../shared/contracts/model/index";
 import { useAppDialog } from "./AppDialog";
 import { BottomPanelTabs } from "./bottom-panel/BottomPanelTabs";
 import type { BottomPanelTab } from "./bottom-panel/bottomPanelTypes";
@@ -63,7 +64,7 @@ export const BottomPanel = memo(function BottomPanel({
     onLoadStashFiles,
     repositoryId,
     repositoryName,
-    fixture,
+    terminalAvailability,
     collapsed,
     onToggle,
     height,
@@ -117,7 +118,7 @@ export const BottomPanel = memo(function BottomPanel({
     ) => Promise<readonly FileChange[]>;
     readonly repositoryId: string;
     readonly repositoryName: string;
-    readonly fixture: boolean;
+    readonly terminalAvailability: TerminalAvailability;
     readonly collapsed: boolean;
     readonly onToggle: () => void;
     readonly height: number;
@@ -275,9 +276,9 @@ export const BottomPanel = memo(function BottomPanel({
                     )}
                     {active === "terminal" && (
                         <TerminalPanel
-                            fixture={fixture}
                             onHide={lifecycle.hidePanel}
                             repositoryId={repositoryId}
+                            availability={terminalAvailability}
                         />
                     )}
                     {active === "gitConsole" && (

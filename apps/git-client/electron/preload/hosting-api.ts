@@ -1,15 +1,15 @@
 import type { DesktopApi } from "../../src/shared/contracts/desktop-api";
 import {
+    HostingAccountSchema,
+    HostingResponseKindByRequest,
+    HostingResponseSchema,
+} from "../../src/shared/contracts/hosting";
+import {
     HostingDeleteAccountRequestSchema,
     HostingExecuteRequestSchema,
     HostingRestoreAccountsRequestSchema,
     HostingSaveAccountRequestSchema,
 } from "../../src/shared/contracts/ipc";
-import {
-    HostingAccountSchema,
-    HostingResponseKindByRequest,
-    HostingResponseSchema,
-} from "../hosting/hosting-contract";
 import { desktopTrpc } from "./main-trpc-client";
 
 export function createHostingApi(): DesktopApi["hosting"] {

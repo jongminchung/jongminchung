@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { HostingChangeRequest } from "../shared/contracts/model";
+import type { HostingChangeRequest } from "../shared/contracts/model/index";
 import {
     adjacentHostingChangeRequest,
     filterHostingChangeRequests,

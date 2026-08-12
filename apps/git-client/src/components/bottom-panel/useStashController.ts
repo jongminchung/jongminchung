@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import type { FileChange, StashEntry } from "../../domain/types";
-import type { GitOperation } from "../../shared/contracts/model";
+import type { GitOperation } from "../../shared/contracts/model/index";
 import type { AppDialogController } from "../AppDialog";
 import type { StashMutation } from "./StashSurface";
 

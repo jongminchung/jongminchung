@@ -8,7 +8,7 @@ import {
 import { cn } from "@jongminchung/ui/lib/utils";
 import type { RefObject } from "react";
 import type { Ref } from "../../domain/types";
-import type { LogFilters } from "../../shared/contracts/model";
+import type { LogFilters } from "../../shared/contracts/model/index";
 import { Icon } from "../Icon";
 import { Selector, TextInput } from "../ProductFormControls";
 import type {

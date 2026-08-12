@@ -1,5 +1,9 @@
 import { useEffect } from "react";
 import { useShallow } from "zustand/react/shallow";
+import {
+    dispatchWorkbenchEvent,
+    listenWorkbenchEvent,
+} from "../../application/workbench-events/WorkbenchEventPort";
 import { useAppearance } from "../../components/AppearanceProvider";
 import { synchronizeAppearancePreference } from "../../domain/appearance";
 import { runInBackground } from "../../domain/toVoidHandler";
@@ -133,9 +137,8 @@ export function useAppHydration(): void {
 
     useEffect(() => {
         if (!macroRecording) return;
-        const recordCommand = (event: Event): void => {
-            if (!(event instanceof CustomEvent)) return;
-            const commandId = event.detail?.id;
+        return listenWorkbenchEvent("git-client:command-executed", ({ id }) => {
+            const commandId = id;
             if (
                 typeof commandId !== "string" ||
                 commandId === "edit.startMacroRecording" ||
@@ -146,13 +149,7 @@ export function useAppHydration(): void {
             setRecordedCommandIds((current) =>
                 current.length >= 1_000 ? current : [...current, commandId],
             );
-        };
-        window.addEventListener("git-client:command-executed", recordCommand);
-        return () =>
-            window.removeEventListener(
-                "git-client:command-executed",
-                recordCommand,
-            );
+        });
     }, [macroRecording, setRecordedCommandIds]);
 
     useEffect(() => {
@@ -254,15 +251,13 @@ export function useAppHydration(): void {
             "--editor-font-size",
             `${productSettings.editorFontSize}px`,
         );
-        window.dispatchEvent(
-            new CustomEvent("git-client:keymap-changed", {
-                detail: productSettings.keymapOverrides,
-            }),
+        dispatchWorkbenchEvent(
+            "git-client:keymap-changed",
+            productSettings.keymapOverrides,
         );
-        window.dispatchEvent(
-            new CustomEvent("git-client:product-settings-changed", {
-                detail: productSettings,
-            }),
+        dispatchWorkbenchEvent(
+            "git-client:product-settings-changed",
+            productSettings,
         );
         runInBackground(
             persistProductSettings(productSettings),
@@ -271,25 +266,15 @@ export function useAppHydration(): void {
     }, [productSettings, productSettingsLoaded]);
 
     useEffect(() => {
-        const handleRequest = (event: Event): void => {
-            if (
-                event instanceof CustomEvent &&
-                event.detail?.kind === "toggleCompact"
-            ) {
+        return listenWorkbenchEvent(
+            "git-client:product-settings-request",
+            ({ kind }) => {
+                if (kind !== "toggleCompact") return;
                 setProductSettings((current) => ({
                     ...current,
                     compactMode: !current.compactMode,
                 }));
-            }
-        };
-        window.addEventListener(
-            "git-client:product-settings-request",
-            handleRequest,
+            },
         );
-        return () =>
-            window.removeEventListener(
-                "git-client:product-settings-request",
-                handleRequest,
-            );
     }, [setProductSettings]);
 }

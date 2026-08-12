@@ -26,7 +26,7 @@ import type {
     RecoveryRestoreResult,
     ShelfEntry,
     SubmoduleDiff,
-} from "../shared/contracts/model";
+} from "../shared/contracts/model/index";
 
 export function asGeneratedEvent(event: GitRequestEvent): GitEvent {
     switch (event.kind) {

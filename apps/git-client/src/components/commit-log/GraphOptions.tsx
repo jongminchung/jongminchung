@@ -6,7 +6,7 @@ import {
 } from "@jongminchung/ui/components/tooltip";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { useMemo, useState } from "react";
-import type { LogOrder } from "../../shared/contracts/model";
+import type { LogOrder } from "../../shared/contracts/model/index";
 import { useDismissLayer } from "../CommandProvider";
 import { Icon } from "../Icon";
 import { CheckboxInput, Selector, TextInput } from "../ProductFormControls";

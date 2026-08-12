@@ -5,10 +5,12 @@ import { Button, buttonVariants } from "./components/button";
 import { Checkbox } from "./components/checkbox";
 import {
     Command,
+    CommandDialog,
     CommandInput,
     CommandItem,
     CommandList,
 } from "./components/command";
+import { DialogContent } from "./components/dialog";
 import {
     Field,
     FieldDescription,
@@ -16,9 +18,30 @@ import {
     FieldLabel,
 } from "./components/field";
 import { Item, ItemContent, ItemTitle } from "./components/item";
+import { SheetContent } from "./components/sheet";
 import { Spinner } from "./components/spinner";
+import { Tabs, TabsList, TabsTrigger } from "./components/tabs";
 
 describe("shared UI behavior", () => {
+    it("limits the overflowing tab indicator to line tabs", () => {
+        const markup = renderToStaticMarkup(
+            createElement(
+                Tabs,
+                { defaultValue: "log" },
+                createElement(
+                    TabsList,
+                    null,
+                    createElement(TabsTrigger, { value: "log" }, "Log"),
+                ),
+            ),
+        );
+
+        expect(markup).not.toContain(" after:absolute ");
+        expect(markup).toContain(
+            "group-data-[variant=line]/tabs-list:after:absolute",
+        );
+    });
+
     it("keeps buttons native and styles links without rendering a Base UI button", () => {
         const button = renderToStaticMarkup(
             createElement(
@@ -103,6 +126,33 @@ describe("shared UI behavior", () => {
         expect(markup).toContain('role="alert"');
     });
 
+    it("filters empty form errors before selecting single-message markup", () => {
+        const markup = renderToStaticMarkup(
+            createElement(FieldError, {
+                errors: [undefined, {}, { message: "Branch is required." }],
+            }),
+        );
+
+        expect(markup).toContain("Branch is required.");
+        expect(markup).not.toContain("<ul");
+    });
+
+    it("requires spinners to be explicitly labelled or decorative", () => {
+        const labelled = renderToStaticMarkup(
+            createElement(Spinner, { label: "Loading repository" }),
+        );
+        const decorative = renderToStaticMarkup(
+            createElement(Spinner, { "aria-hidden": true }),
+        );
+
+        expect(labelled).toContain('role="status"');
+        expect(labelled).toContain('aria-label="Loading repository"');
+        expect(labelled).not.toContain("aria-hidden");
+        expect(decorative).toContain('aria-hidden="true"');
+        expect(decorative).not.toContain('role="status"');
+        expect(decorative).not.toContain("aria-label");
+    });
+
     it("keeps the default cmdk input and item markup", () => {
         const markup = renderToStaticMarkup(
             createElement(
@@ -170,5 +220,20 @@ describe("shared UI behavior", () => {
         expect(staticItem).toContain("<div");
         expect(actionItem).toContain("<button");
         expect(actionItem).not.toContain('role="listitem"');
+    });
+
+    it("enforces accessible labels for status and dismiss controls at compile time", () => {
+        const compileTimeOnly = () => {
+            // @ts-expect-error A visible spinner requires an explicit accessible label.
+            createElement(Spinner, {});
+            // @ts-expect-error The default dialog close button requires its label.
+            createElement(DialogContent, {});
+            // @ts-expect-error The default sheet close button requires its label.
+            createElement(SheetContent, {});
+            // @ts-expect-error Command dialog metadata must come from its caller.
+            createElement(CommandDialog, {}, null);
+        };
+
+        expect(compileTimeOnly).toBeTypeOf("function");
     });
 });

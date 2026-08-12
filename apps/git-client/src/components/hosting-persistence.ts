@@ -1,10 +1,10 @@
+import { electronApi } from "../platform/electron";
 import {
     HostingAccountSchema,
     HostingAccountsSchema,
-} from "../../electron/hosting/hosting-contract";
-import { electronApi } from "../platform/electron";
+} from "../shared/contracts/hosting";
 import type { JsonValue } from "../shared/contracts/ipc";
-import type { HostingAccount } from "../shared/contracts/model";
+import type { HostingAccount } from "../shared/contracts/model/index";
 
 const HOSTING_ACCOUNTS_KEY = "hostingAccounts";
 

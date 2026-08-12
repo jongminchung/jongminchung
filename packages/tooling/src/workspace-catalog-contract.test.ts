@@ -4,7 +4,12 @@ import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
-const dependencyGroups = ["dependencies", "devDependencies"] as const;
+const dependencyGroups = [
+    "dependencies",
+    "devDependencies",
+    "optionalDependencies",
+    "peerDependencies",
+] as const;
 const rootDir = fileURLToPath(new URL("../../..", import.meta.url));
 const workspaceDirectories = ["apps", "packages"] as const;
 
@@ -66,6 +71,16 @@ async function readPackageManifest(filePath: string): Promise<PackageManifest> {
                 parsed.devDependencies,
                 filePath,
                 "devDependencies",
+            ),
+            optionalDependencies: parseDependencyRanges(
+                parsed.optionalDependencies,
+                filePath,
+                "optionalDependencies",
+            ),
+            peerDependencies: parseDependencyRanges(
+                parsed.peerDependencies,
+                filePath,
+                "peerDependencies",
             ),
         }),
         filePath,
@@ -154,13 +169,16 @@ describe("workspace catalog contract", () => {
                 for (const [dependencyName, range] of Object.entries(
                     manifest.dependencyRanges[group],
                 )) {
-                    const expectedRange = workspacePackageNames.has(
-                        dependencyName,
-                    )
-                        ? "workspace:*"
-                        : "catalog:";
                     const dependencyPath = `${relative(rootDir, manifest.filePath)} ${group}.${dependencyName}`;
-                    expect(range, dependencyPath).toBe(expectedRange);
+                    if (workspacePackageNames.has(dependencyName)) {
+                        expect(range, dependencyPath).toBe("workspace:*");
+                    } else if (group === "peerDependencies") {
+                        expect(range, dependencyPath).toMatch(
+                            /^catalog:[a-z][a-z0-9-]*$/u,
+                        );
+                    } else {
+                        expect(range, dependencyPath).toBe("catalog:");
+                    }
                 }
             }
         }

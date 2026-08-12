@@ -19,7 +19,7 @@ import {
     type ChangeSelection,
 } from "../../domain/changeReview";
 import type { FileChange } from "../../domain/types";
-import type { GitOperation } from "../../shared/contracts/model";
+import type { GitOperation } from "../../shared/contracts/model/index";
 import { Icon } from "../Icon";
 import { EmptyState, StatusBadge } from "../ProductCollections";
 import { VerticalResizeHandle } from "../VerticalResizeHandle";
@@ -202,14 +202,15 @@ export function ChangeNavigator({
     );
 
     return (
-        <div
+        // oxlint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- The focusable landmark owns file-navigation keyboard shortcuts.
+        <aside
             aria-label="Changed files"
             className="changeNavigator [border-right:1px_solid_var(--border)] [display:grid] [grid-template-rows:38px_minmax(0,_1fr)_auto] [min-height:0] [min-width:0] [outline:0] [position:relative] changeNavigator"
             onKeyDown={onKeyDown}
             ref={(node) => {
                 navigator.current = node;
             }}
-            role="tree"
+            // oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- The landmark owns file-navigation keyboard shortcuts.
             tabIndex={0}
         >
             {!toolWindow && (
@@ -365,6 +366,6 @@ export function ChangeNavigator({
                     )}
                 </footer>
             )}
-        </div>
+        </aside>
     );
 }

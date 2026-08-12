@@ -18,6 +18,7 @@ import {
     useState,
 } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
+import { listenWorkbenchEvent } from "../application/workbench-events/WorkbenchEventPort";
 import type { DiffPreferences } from "../domain/changeReview";
 import {
     assembleHunkPatch,
@@ -28,7 +29,7 @@ import type {
     FileContent,
     FilePreview,
     SubmoduleDiff,
-} from "../shared/contracts/model";
+} from "../shared/contracts/model/index";
 import { useAppDialog } from "./AppDialog";
 import { ImageDiff, imageFrom, previewDescription } from "./diff/ImageDiff";
 import { useDiffSelection } from "./diff/useDiffSelection";
@@ -185,18 +186,12 @@ export function DiffViewer({
     }, [file?.path, mode, patch]);
 
     useEffect(() => {
-        const find = (event: Event): void => {
-            if (
-                !(event instanceof CustomEvent) ||
-                !searchQuery ||
-                matchCount === 0
-            )
-                return;
+        return listenWorkbenchEvent("git-client:find", ({ direction }) => {
+            if (!searchQuery || matchCount === 0) return;
             const ownsSearch =
                 searchInput.current === window.document.activeElement ||
                 root.current?.contains(window.document.activeElement);
             if (!ownsSearch) return;
-            const direction = event.detail?.direction === -1 ? -1 : 1;
             setSearchMatchIndex(
                 (current) => (current + direction + matchCount) % matchCount,
             );
@@ -204,9 +199,7 @@ export function DiffViewer({
                 sequence: current.sequence + 1,
                 direction,
             }));
-        };
-        window.addEventListener("git-client:find", find);
-        return () => window.removeEventListener("git-client:find", find);
+        });
     }, [matchCount, searchQuery]);
 
     useEffect(() => {
@@ -289,13 +282,15 @@ export function DiffViewer({
     };
 
     return (
+        // oxlint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- The focusable region owns file and hunk navigation shortcuts.
         <div
             aria-label={file ? `Diff for ${file.path}` : "Diff preview"}
             className={`${`diffViewer [background:var(--card)] [display:grid] [grid-template-rows:36px_auto_minmax(0,_1fr)] [min-height:0] [min-width:0] [outline:0] [position:relative] [&:focus-visible]:[box-shadow:inset_0_0_0_2px_color-mix(in_oklch,_var(--primary)_55%,_transparent)] diffViewer`} ${focused ? `focusedDiffViewer [background:var(--card)] rounded-lg [inset:56px_30px_18px_31px] [position:fixed] [z-index:45] focusedDiffViewer rounded-lg` : ""}`}
             data-diff-viewer
             onKeyDown={handleKeyboard}
             ref={root}
-            role="grid"
+            role="region"
+            // oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Focus enables file and hunk navigation shortcuts for the diff region.
             tabIndex={0}
         >
             <header

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Commit } from "../../domain/types";
-import type { LogFilters, LogOrder } from "../../shared/contracts/model";
+import type { LogFilters, LogOrder } from "../../shared/contracts/model/index";
 import type {
     CommitLogFilterState,
     CommitLogViewOptions,

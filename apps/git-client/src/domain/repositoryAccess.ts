@@ -1,4 +1,4 @@
-import type { GitRequest } from "../shared/contracts/model";
+import type { GitRequest } from "../shared/contracts/model/index";
 
 export type RepositoryAccessMode = "trusted" | "safe";
 

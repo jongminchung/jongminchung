@@ -1,7 +1,7 @@
+import type { GitBridge } from "../application/git-session/ports/GitBridge";
 import { electronApi } from "../platform/electron";
 import type { DesktopApi } from "../shared/contracts/desktop-api";
 import { ElectronGitBridge, type ElectronGitApi } from "./ElectronGitBridge";
-import type { GitBridge } from "./GitBridge";
 
 function hasGitApi(
     api: DesktopApi,

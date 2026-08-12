@@ -19,7 +19,7 @@ import type {
     GitOperation,
     PushPreview,
     RemoteInfo,
-} from "../shared/contracts/model";
+} from "../shared/contracts/model/index";
 import { useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
 import { Notice } from "./Notice";

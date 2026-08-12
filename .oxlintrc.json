@@ -8,8 +8,6 @@
     "**/coverage",
     // content/*.mdx와 material source에서 재생성되므로 생성기와 typecheck로 검증함
     "apps/engineering-docs/generated/**",
-    "apps/engineering-docs/public/search/**",
-    // core/*.rs에서 생성된 wasm-bindgen JS·선언은 Rust 산출물로 추적만 유지함
-    "apps/engineering-docs/components/materials/topics/building-nes-emulator/pkg/**"
+    "apps/engineering-docs/public/search/**"
   ]
 }

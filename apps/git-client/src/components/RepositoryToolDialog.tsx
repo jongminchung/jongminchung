@@ -11,7 +11,7 @@ import type {
     RepositorySnapshot,
     SubmoduleInfo,
     WorktreeInfo,
-} from "../shared/contracts/model";
+} from "../shared/contracts/model/index";
 import { useAppDialog } from "./AppDialog";
 import { HostingPanel } from "./HostingPanel";
 import { Icon } from "./Icon";

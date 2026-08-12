@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { GitEvent, RequestId } from "../shared/contracts/model";
+import type { GitEvent, RequestId } from "../shared/contracts/model/index";
 import { GitRequestEventBuffer } from "./gitRequestEvents";
 
 const requestId = "request-1" as RequestId;

@@ -13,7 +13,7 @@ import {
 } from "../domain/repositoryCreation";
 import { electronApi, isElectronRuntime } from "../platform/electron";
 import type { GitCreationEventListener } from "../shared/contracts/git-utility";
-import type { CloneOptions } from "../shared/contracts/model";
+import type { CloneOptions } from "../shared/contracts/model/index";
 import { useDismissLayer } from "./CommandProvider";
 import { Notice } from "./Notice";
 import { SegmentedControl, SegmentedControlItem } from "./ProductCollections";

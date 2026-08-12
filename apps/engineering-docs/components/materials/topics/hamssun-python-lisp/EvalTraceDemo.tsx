@@ -149,9 +149,9 @@ const renderExpr = (
         return (
             <span
                 style={{
-                    color: "#2f9e44",
+                    color: "#237032",
                     background: "#ebfbee",
-                    border: justNow ? "1px solid #2f9e44" : "1px solid #b2f2bb",
+                    border: justNow ? "1px solid #237032" : "1px solid #b2f2bb",
                     borderRadius: 4,
                     padding: "1px 6px",
                     fontWeight: 700,
@@ -165,7 +165,7 @@ const renderExpr = (
     // 건너뛴 갈래는 서브트리 통째로 회색 취소선
     if (view.skipped.has(path)) {
         return (
-            <span style={{ color: "#adb5bd", textDecoration: "line-through" }}>
+            <span style={{ color: "#5c636a", textDecoration: "line-through" }}>
                 {exprToStr(expr)}
             </span>
         );
@@ -221,7 +221,7 @@ const btnStyle = (disabled: boolean): React.CSSProperties => ({
     padding: "5px 12px",
     fontSize: 12,
     fontFamily: FONT,
-    color: disabled ? "#ced4da" : "#495057",
+    color: disabled ? "#5f666d" : "#495057",
     background: disabled ? "#f8f9fa" : "#fff",
     border: "1px solid #dee2e6",
     borderRadius: 6,
@@ -277,7 +277,7 @@ export const EvalTraceDemo = () => {
                             padding: "3px 10px",
                             fontSize: 12,
                             fontFamily: MONO,
-                            color: presetIndex === i ? "#228be6" : "#868e96",
+                            color: presetIndex === i ? "#1864ab" : "#495057",
                             background:
                                 presetIndex === i ? "#e7f5ff" : "#f8f9fa",
                             border:
@@ -356,7 +356,7 @@ export const EvalTraceDemo = () => {
                         marginLeft: "auto",
                         fontSize: 12,
                         fontFamily: MONO,
-                        color: "#868e96",
+                        color: "#495057",
                     }}
                 >
                     스텝 {stepIndex}/{total}
@@ -380,7 +380,7 @@ export const EvalTraceDemo = () => {
                         style={{
                             fontFamily: MONO,
                             fontSize: 12,
-                            color: "#adb5bd",
+                            color: "#5c636a",
                         }}
                     >
                         [다음 ▶]을 눌러 평가를 시작하자
@@ -397,13 +397,13 @@ export const EvalTraceDemo = () => {
                                 color:
                                     i === applied.length - 1
                                         ? step.kind === "skip"
-                                            ? "#868e96"
+                                            ? "#495057"
                                             : step.kind === "resolve"
-                                              ? "#2f9e44"
-                                              : "#228be6"
+                                              ? "#237032"
+                                              : "#1864ab"
                                         : step.kind === "skip"
-                                          ? "#adb5bd"
-                                          : "#868e96",
+                                          ? "#5c636a"
+                                          : "#495057",
                                 fontWeight:
                                     i === applied.length - 1 ? 700 : 400,
                             }}
@@ -418,7 +418,7 @@ export const EvalTraceDemo = () => {
                 style={{
                     marginTop: 14,
                     fontSize: 11,
-                    color: "#adb5bd",
+                    color: "#5c636a",
                     textAlign: "center",
                 }}
             >

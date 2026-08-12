@@ -190,7 +190,7 @@ test("opens a recent project through the packaged UI and restores its history re
             );
             await page.keyboard.press("Escape");
 
-            const logTable = page.getByRole("table", { name: "Git log" });
+            const logTable = page.getByRole("grid", { name: "Git log" });
             await expect(logTable.locator("[data-oid]")).toHaveCount(3);
             const historySearch = page.getByPlaceholder("Text or hash");
             await historySearch.fill("add audit guide");
@@ -268,7 +268,7 @@ test("opens a recent project through the packaged UI and restores its history re
                 }),
             ).toBeVisible();
             const restoredCommit = page
-                .getByRole("table", { name: "Git log" })
+                .getByRole("grid", { name: "Git log" })
                 .locator(`[data-oid="${auditOid}"]`);
             await expect(restoredCommit).toHaveAttribute(
                 "aria-selected",

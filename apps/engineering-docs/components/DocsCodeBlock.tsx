@@ -20,7 +20,12 @@ export function DocsCodeBlock({
     };
     return (
         <div className="docs-code-block group" data-language={language}>
-            <pre role="region" tabIndex={0} aria-label={`${language} code`}>
+            <pre
+                role="group"
+                // oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Focus enables keyboard scrolling without creating duplicate region landmarks.
+                tabIndex={0}
+                aria-label={`${language} code`}
+            >
                 <code>{code}</code>
             </pre>
             <Button

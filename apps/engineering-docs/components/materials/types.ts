@@ -1,34 +1,16 @@
 import type { ComponentType, ReactNode } from "react";
 import type { Locale } from "#lib/content-model";
+import type {
+    MaterialId,
+    MaterialTopic,
+} from "../../generated/materials-types";
 
-export type MaterialRenderer = "svg-motion" | "dom-motion" | "canvas" | "wasm";
-export type MaterialTopic =
-    | "ascii-3d-renderer"
-    | "beyond-beautiful-code"
-    | "building-3d-illusion-game"
-    | "building-calculator-engine"
-    | "building-coding-agent"
-    | "building-email-relay-system"
-    | "building-llm"
-    | "building-nes-emulator"
-    | "do-we-really-know-pagination"
-    | "encrypted-share-vault-system"
-    | "feeling-claude-blue"
-    | "frontend-caching-strategies"
-    | "hamssun-python-lisp"
-    | "headless-react-component"
-    | "how-to-design-animation"
-    | "how-to-whittle-a-skill"
-    | "implementing-genetic-algorithm"
-    | "it-is-the-boundary-stupid"
-    | "modeling-series-view-model"
-    | "react-component-based-thinking"
-    | "server-monitoring-analysis-guide"
-    | "the-expensive-main-thread"
-    | "the-weight-of-trivial-code"
-    | "throughput-and-latency";
+export type {
+    MaterialId,
+    MaterialTopic,
+} from "../../generated/materials-types";
 
-export type MaterialId = `${MaterialTopic}/${string}`;
+export type MaterialRenderer = "svg-motion" | "dom-motion" | "canvas";
 
 export interface MaterialDemoProps {
     readonly id: MaterialId;

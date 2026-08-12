@@ -38,6 +38,12 @@ import { Button } from "@jongminchung/ui/components/button";
 import { cn } from "@jongminchung/ui/lib/utils";
 ```
 
+Accessible text stays with the consuming product and locale. Pass `label` to a standalone `Spinner`,
+or mark a spinner nested inside an already labelled control with `aria-hidden`. `DialogContent` and
+`SheetContent` require `closeLabel` whenever their default close button is visible. `CommandDialog`
+requires callers to provide both `title` and `description`; shared primitives do not supply English
+fallback copy.
+
 ## Styles and themes
 
 Import the shared Tailwind entry point from the application's global stylesheet:

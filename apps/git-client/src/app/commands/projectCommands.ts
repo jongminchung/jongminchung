@@ -1,3 +1,10 @@
+import type {
+    WorkspaceRepositorySession,
+    WorkspaceTab,
+} from "../../application/git-session/state/GitSessionState";
+import { terminalService } from "../../application/terminal/activeTerminalService";
+import type { AppDialogController } from "../../components/AppDialog";
+import type { AppearancePreference } from "../../domain/appearance";
 import {
     COMMAND_ENABLED,
     commandDefinition,
@@ -5,31 +12,44 @@ import {
     type CommandDefinition,
 } from "../../domain/commands";
 import { DEFAULT_PRODUCT_SETTINGS } from "../../domain/productSettings";
-import { terminalService } from "../../domain/TerminalService";
 import { DEFAULT_NAMED_TOOL_WINDOW_LAYOUT } from "../../domain/toolWindowLayouts";
+import type { RepositoryView } from "../../domain/types";
 import { exportElectronSettings } from "../../platform/electronSettings";
-import type { WorkspaceCommandContext } from "./workspaceCommandTypes";
+import type { AppStore } from "../state/appStore";
+
+export type ProjectCommandPort = Pick<
+    AppStore,
+    | "dirtyEditorCount"
+    | "setInvalidateCachesOpen"
+    | "setNewProjectSettingsOpen"
+    | "setProductSettings"
+    | "setProjectSwitcherOpen"
+    | "setRepairIdeOpen"
+    | "setRepositoryDialogMode"
+    | "setRunConfigurationTemplatesOpen"
+    | "setSettingsOpen"
+    | "setShowRepositoryDialog"
+    | "setToolWindowLayouts"
+> & {
+    readonly dialog: AppDialogController;
+    readonly importSettingsArchive: () => Promise<void>;
+    readonly openRepositoryFromPicker: () => Promise<void>;
+    readonly session: {
+        readonly repository: { readonly repository: RepositoryView | null };
+        readonly workspace: {
+            readonly activeTab: WorkspaceTab;
+            readonly sessions: readonly WorkspaceRepositorySession[];
+            readonly openRepositories: readonly unknown[];
+            readonly closeProject: () => Promise<void>;
+        };
+    };
+    readonly setAppearancePreference: (
+        preference: AppearancePreference,
+    ) => void;
+};
 
 export function createProjectCommands(
-    context: Pick<
-        WorkspaceCommandContext,
-        | "dialog"
-        | "dirtyEditorCount"
-        | "importSettingsArchive"
-        | "openRepositoryFromPicker"
-        | "session"
-        | "setAppearancePreference"
-        | "setInvalidateCachesOpen"
-        | "setNewProjectSettingsOpen"
-        | "setProductSettings"
-        | "setProjectSwitcherOpen"
-        | "setRepairIdeOpen"
-        | "setRepositoryDialogMode"
-        | "setRunConfigurationTemplatesOpen"
-        | "setSettingsOpen"
-        | "setShowRepositoryDialog"
-        | "setToolWindowLayouts"
-    >,
+    context: ProjectCommandPort,
 ): readonly CommandDefinition[] {
     const {
         dialog,

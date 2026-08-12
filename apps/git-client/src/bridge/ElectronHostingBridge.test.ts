@@ -5,7 +5,7 @@ import type {
     HostingProviderKind,
     HostingRequest,
     HostingResponse,
-} from "../shared/contracts/model";
+} from "../shared/contracts/model/index";
 import {
     ElectronHostingBridge,
     ElectronHostingBridgeError,

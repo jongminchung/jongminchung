@@ -68,7 +68,15 @@ function TabletContextDrawer({
                 {locale === "ko" ? "현재 섹션" : "Current section"}
             </Button>
             <Sheet open={isOpen} onOpenChange={setOpen}>
-                <SheetContent className="w-80" side="left">
+                <SheetContent
+                    className="w-80"
+                    closeLabel={
+                        locale === "ko"
+                            ? "현재 섹션 메뉴 닫기"
+                            : "Close current section menu"
+                    }
+                    side="left"
+                >
                     <SheetTitle className="sr-only">
                         {locale === "ko" ? "현재 섹션" : "Current section"}
                     </SheetTitle>
@@ -163,7 +171,14 @@ export function DocsShell({
                                 open={isMobileOpen}
                                 onOpenChange={changeMobileOpen}
                             >
-                                <SheetContent side="left">
+                                <SheetContent
+                                    closeLabel={
+                                        locale === "ko"
+                                            ? "모바일 문서 탐색 닫기"
+                                            : "Close mobile documentation navigation"
+                                    }
+                                    side="left"
+                                >
                                     <SheetTitle className={styles.mobileTitle}>
                                         {locale === "ko"
                                             ? "모바일 문서 탐색"

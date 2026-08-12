@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type {
     HistoryRewritePreview,
     RebasePlanEntry,
-} from "../shared/contracts/model";
+} from "../shared/contracts/model/index";
 import {
     historyPlanError,
     moveHistoryPlanEntry,

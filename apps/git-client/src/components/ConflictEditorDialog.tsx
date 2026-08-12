@@ -24,7 +24,7 @@ import {
 import type {
     ConflictContent,
     InProgressOperation,
-} from "../shared/contracts/model";
+} from "../shared/contracts/model/index";
 import { useAppDialog } from "./AppDialog";
 import { useCommandDefinitions, useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";

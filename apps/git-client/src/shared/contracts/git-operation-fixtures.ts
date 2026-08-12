@@ -1,7 +1,4 @@
-import type {
-    GitOperation,
-    RebasePlanEntry,
-} from "../../shared/contracts/model";
+import type { GitOperation, RebasePlanEntry } from "./model/index";
 
 export const FIXTURE_OID = "1".repeat(40);
 export const OTHER_FIXTURE_OID = "2".repeat(40);

@@ -1,7 +1,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import type { TerminalSessionSnapshot } from "../domain/TerminalService";
+import type { TerminalSessionSnapshot } from "../application/terminal/TerminalService";
 import { TerminalTabStrip } from "./TerminalTabStrip";
 
 const session: TerminalSessionSnapshot = {

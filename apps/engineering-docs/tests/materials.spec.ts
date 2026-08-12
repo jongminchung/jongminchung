@@ -1,60 +1,44 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-test("plain documents do not download the Motion-powered material renderer", async ({
+test("plain documents omit material frames while material routes load independent demos", async ({
     page,
 }) => {
-    let materialRendererLoaded = false;
-    page.on("response", async (response) => {
-        if (response.request().resourceType() !== "script") return;
-        const source = await response.text().catch(() => "");
-        if (source.includes("material-gradient-"))
-            materialRendererLoaded = true;
-    });
-
     await page.goto("/en/overview");
-    await page.waitForLoadState("networkidle");
-    expect(materialRendererLoaded).toBe(false);
+    await expect(page.locator("[data-material-demo]")).toHaveCount(0);
 
-    await page.goto("/en/deep-dive/server-monitoring-analysis-guide");
+    await page.goto("/en/deep-dive/the-expensive-main-thread");
     const demo = page.locator(
-        '[data-material-demo="server-monitoring-analysis-guide/TrafficPatternDemo"]',
+        '[data-material-demo="the-expensive-main-thread/DynamicPriorityDemo"]',
     );
     await demo.scrollIntoViewIfNeeded();
-    await expect(demo.locator("svg")).toBeVisible();
-    await expect.poll(() => materialRendererLoaded).toBe(true);
+    await expect(
+        demo.getByRole("button", { name: "Attach 60 photos" }),
+    ).toBeVisible();
 });
 
-test("material demos preload near the viewport, animate as SVG, and pause offscreen", async ({
+test("material demos preload near the viewport and unmount offscreen", async ({
     page,
 }) => {
-    await page.goto("/ko/deep-dive/server-monitoring-analysis-guide");
+    await page.goto("/ko/deep-dive/throughput-and-latency");
 
     await expect(
         page.getByRole("heading", {
             level: 1,
-            name: "서버 모니터링 분석 가이드",
+            name: "처리량과 지연 시간",
         }),
     ).toBeVisible();
     const demos = page.locator("[data-material-demo]");
-    await expect(demos).toHaveCount(19);
-    await expect(demos.last().locator("svg, canvas")).toHaveCount(0);
+    await expect(demos).toHaveCount(8);
 
     const firstDemo = page.locator(
-        '[data-material-demo="server-monitoring-analysis-guide/TrafficPatternDemo"]',
+        '[data-material-demo="throughput-and-latency/ConcurrencyVsParallelismDiagram"]',
     );
     await firstDemo.scrollIntoViewIfNeeded();
-    const svg = firstDemo.locator("svg");
-    await expect(svg).toBeVisible();
-    await expect
-        .poll(() => svg.locator(":scope > *").count())
-        .toBeGreaterThan(5);
-
-    const firstFrame = await svg.innerHTML();
-    await expect.poll(() => svg.innerHTML()).not.toBe(firstFrame);
+    await expect(firstDemo.locator("figure")).toBeVisible();
 
     await demos.last().scrollIntoViewIfNeeded();
-    await expect(firstDemo.locator("svg")).toHaveCount(0);
+    await expect(firstDemo).toHaveAttribute("data-material-active", "false");
 
     await page.setViewportSize({ width: 390, height: 844 });
     await expect
@@ -62,23 +46,20 @@ test("material demos preload near the viewport, animate as SVG, and pause offscr
         .toBe(390);
 });
 
-test("reduced motion renders a stable representative SVG frame", async ({
+test("reduced motion renders a stable representative Motion frame", async ({
     page,
 }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("/en/deep-dive/server-monitoring-analysis-guide");
+    await page.goto("/en/deep-dive/the-expensive-main-thread");
     const demo = page.locator(
-        '[data-material-demo="server-monitoring-analysis-guide/TrafficPatternDemo"]',
+        '[data-material-demo="the-expensive-main-thread/TransformVsLayoutDemo"]',
     );
     await demo.scrollIntoViewIfNeeded();
-    const svg = demo.locator("svg");
-    await expect(svg).toBeVisible();
-    await expect
-        .poll(() => svg.locator(":scope > *").count())
-        .toBeGreaterThan(5);
-    const frame = await svg.innerHTML();
+    const animated = demo.locator("[style*='will-change']").first();
+    await expect(animated).toBeVisible();
+    const frame = await animated.getAttribute("style");
     await page.waitForTimeout(250);
-    expect(await svg.innerHTML()).toBe(frame);
+    expect(await animated.getAttribute("style")).toBe(frame);
 });
 
 test("pixel-processing exceptions remain native Canvas and material frames are accessible", async ({

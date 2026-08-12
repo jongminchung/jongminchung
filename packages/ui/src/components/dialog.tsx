@@ -6,6 +6,18 @@ import { cn } from "@jongminchung/ui/lib/utils";
 import { XIcon } from "lucide-react";
 import * as React from "react";
 
+type DialogContentProps = DialogPrimitive.Popup.Props &
+    (
+        | { closeLabel: string; showCloseButton?: true }
+        | { closeLabel?: never; showCloseButton: false }
+    );
+
+type DialogFooterProps = React.ComponentProps<"div"> &
+    (
+        | { closeLabel: string; showCloseButton: true }
+        | { closeLabel?: never; showCloseButton?: false }
+    );
+
 function Dialog({ ...props }: DialogPrimitive.Root.Props) {
     return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
@@ -41,11 +53,10 @@ function DialogOverlay({
 function DialogContent({
     className,
     children,
+    closeLabel,
     showCloseButton = true,
     ...props
-}: DialogPrimitive.Popup.Props & {
-    showCloseButton?: boolean;
-}) {
+}: DialogContentProps) {
     return (
         <DialogPortal>
             <DialogOverlay />
@@ -70,7 +81,7 @@ function DialogContent({
                         }
                     >
                         <XIcon />
-                        <span className="sr-only">Close</span>
+                        <span className="sr-only">{closeLabel}</span>
                     </DialogPrimitive.Close>
                 )}
             </DialogPrimitive.Popup>
@@ -90,12 +101,11 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
 
 function DialogFooter({
     className,
+    closeLabel,
     showCloseButton = false,
     children,
     ...props
-}: React.ComponentProps<"div"> & {
-    showCloseButton?: boolean;
-}) {
+}: DialogFooterProps) {
     return (
         <div
             data-slot="dialog-footer"
@@ -108,7 +118,7 @@ function DialogFooter({
             {children}
             {showCloseButton && (
                 <DialogPrimitive.Close render={<Button variant="outline" />}>
-                    Close
+                    {closeLabel}
                 </DialogPrimitive.Close>
             )}
         </div>

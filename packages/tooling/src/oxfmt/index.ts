@@ -70,7 +70,7 @@ function mergeSortImports(
 ): SortImportsUserConfig {
     if (typeof overrides === "object")
         return { ...baseSortImports, ...overrides };
-    return overrides ?? baseSortImports;
+    return overrides ?? { ...baseSortImports };
 }
 
 function mergeSortPackageJson(
@@ -78,5 +78,5 @@ function mergeSortPackageJson(
 ): SortPackageJsonUserConfig {
     if (typeof overrides === "object")
         return { ...baseSortPackageJson, ...overrides };
-    return overrides ?? baseSortPackageJson;
+    return overrides ?? { ...baseSortPackageJson };
 }

@@ -5,7 +5,7 @@ import {
     normalizeHostingBaseUrl,
     type HostingProviderKind,
     type HostingRequest,
-} from "./hosting-contract";
+} from "../../src/shared/contracts/hosting";
 import {
     FetchHostingHttpClient,
     type HostingHttpRequest,

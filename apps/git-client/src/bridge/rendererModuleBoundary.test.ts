@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { builtinModules } from "node:module";
-import { join, relative, resolve } from "node:path";
+import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
@@ -52,15 +52,44 @@ describe("production renderer module boundary", () => {
         expect(violations).toEqual([]);
     });
 
+    it("does not depend on Electron implementation folders", () => {
+        const electronRoot = resolve(SOURCE_ROOT, "../electron");
+        const violations = productionSources(SOURCE_ROOT).flatMap((path) =>
+            moduleSpecifiers(readFileSync(path, "utf8")).flatMap(
+                (specifier) => {
+                    if (!specifier.startsWith(".")) return [];
+                    const resolved = resolve(dirname(path), specifier);
+                    return resolved === electronRoot ||
+                        resolved.startsWith(`${electronRoot}/`)
+                        ? [`${relative(SOURCE_ROOT, path)} -> ${specifier}`]
+                        : [];
+                },
+            ),
+        );
+
+        expect(violations).toEqual([]);
+    });
+
+    it("centralizes workbench custom events in the typed adapter", () => {
+        const violations = productionSources(SOURCE_ROOT).flatMap((path) => {
+            const sourcePath = relative(SOURCE_ROOT, path);
+            if (sourcePath === "adapters/workbench-events/workbenchEvents.ts")
+                return [];
+            return readFileSync(path, "utf8").includes("new CustomEvent")
+                ? [sourcePath]
+                : [];
+        });
+
+        expect(violations).toEqual([]);
+    });
+
     it("keeps Zustand slice internals behind their store composer", () => {
         const violations = productionSources(SOURCE_ROOT).flatMap((path) => {
             const sourcePath = relative(SOURCE_ROOT, path);
             return moduleSpecifiers(readFileSync(path, "utf8")).flatMap(
                 (specifier) => {
                     if (!specifier.includes("/state/slices/")) return [];
-                    const ownsStoreComposition =
-                        sourcePath.includes("/state/") ||
-                        sourcePath.endsWith("gitSessionStore.ts");
+                    const ownsStoreComposition = sourcePath.includes("/state/");
                     return ownsStoreComposition
                         ? []
                         : [`${sourcePath} -> ${specifier}`];

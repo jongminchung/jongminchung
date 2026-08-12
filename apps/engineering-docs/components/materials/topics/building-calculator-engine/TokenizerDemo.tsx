@@ -120,13 +120,13 @@ const TOKEN_STYLE: Record<
     TokenType,
     { color: string; bg: string; border: string }
 > = {
-    number: { color: "#228be6", bg: "#e7f5ff", border: "#a5d8ff" },
-    ident: { color: "#845ef7", bg: "#f3f0ff", border: "#d0bfff" },
-    op: { color: "#fa5252", bg: "#fff5f5", border: "#ffc9c9" },
-    lparen: { color: "#f08c00", bg: "#fff9db", border: "#ffe066" },
-    rparen: { color: "#f08c00", bg: "#fff9db", border: "#ffe066" },
-    comma: { color: "#868e96", bg: "#f8f9fa", border: "#dee2e6" },
-    eof: { color: "#868e96", bg: "#fff", border: "#adb5bd" },
+    number: { color: "#1864ab", bg: "#e7f5ff", border: "#a5d8ff" },
+    ident: { color: "#6741d9", bg: "#f3f0ff", border: "#d0bfff" },
+    op: { color: "#c92a2a", bg: "#fff5f5", border: "#ffc9c9" },
+    lparen: { color: "#a65300", bg: "#fff9db", border: "#ffe066" },
+    rparen: { color: "#a65300", bg: "#fff9db", border: "#ffe066" },
+    comma: { color: "#495057", bg: "#f8f9fa", border: "#dee2e6" },
+    eof: { color: "#495057", bg: "#fff", border: "#5c636a" },
 };
 
 const PRESETS = ["1 + 2 * 3", "sqrt(16) + pi", "3.5.2 + @"];
@@ -164,13 +164,13 @@ const TokenChip = ({ token }: { token: Token }) => {
                 style={{
                     fontFamily: MONO,
                     fontSize: 13,
-                    color: token.type === "eof" ? "#adb5bd" : "#343a40",
+                    color: token.type === "eof" ? "#5c636a" : "#343a40",
                     whiteSpace: "pre",
                 }}
             >
                 {token.type === "eof" ? "∅" : token.value}
             </span>
-            <span style={{ fontSize: 9, color: "#adb5bd" }}>
+            <span style={{ fontSize: 9, color: "#5c636a" }}>
                 pos {token.pos}
             </span>
         </div>
@@ -210,7 +210,7 @@ export const TokenizerDemo = () => {
                     fontFamily: MONO,
                     color: "#343a40",
                     background: "#fff",
-                    border: focused ? "1px solid #228be6" : "1px solid #ced4da",
+                    border: focused ? "1px solid #1864ab" : "1px solid #5f666d",
                     boxShadow: focused
                         ? "0 0 0 2px rgba(34, 139, 230, 0.15)"
                         : "none",
@@ -237,7 +237,7 @@ export const TokenizerDemo = () => {
                             padding: "3px 10px",
                             fontSize: 12,
                             fontFamily: MONO,
-                            color: input === preset ? "#228be6" : "#868e96",
+                            color: input === preset ? "#1864ab" : "#495057",
                             background:
                                 input === preset ? "#e7f5ff" : "#f8f9fa",
                             border:
@@ -282,7 +282,7 @@ export const TokenizerDemo = () => {
                         style={{
                             fontSize: 13,
                             fontWeight: 600,
-                            color: "#fa5252",
+                            color: "#c92a2a",
                         }}
                     >
                         {result.error.message}
@@ -303,7 +303,7 @@ export const TokenizerDemo = () => {
                                 style={
                                     i === result.error!.pos
                                         ? {
-                                              background: "#fa5252",
+                                              background: "#c92a2a",
                                               color: "#fff",
                                               borderRadius: 2,
                                               padding: "1px 2px",
@@ -323,7 +323,7 @@ export const TokenizerDemo = () => {
                 style={{
                     marginTop: 14,
                     fontSize: 11,
-                    color: "#adb5bd",
+                    color: "#5c636a",
                     textAlign: "center",
                 }}
             >

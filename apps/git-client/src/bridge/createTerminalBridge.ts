@@ -1,17 +1,17 @@
+import type { TerminalPort } from "../application/terminal/ports/TerminalPort";
 import { electronApi } from "../platform/electron";
 import type {
     RepositoryId,
     TerminalEvent,
     TerminalId,
-} from "../shared/contracts/model";
+} from "../shared/contracts/model/index";
 import type {
     TerminalLaunchTarget,
     TerminalLaunchTargets,
 } from "../shared/contracts/terminal";
 import { ElectronTerminalBridge } from "./ElectronTerminalBridge";
-import type { TerminalBridge } from "./TerminalBridge";
 
-class UnavailableTerminalBridge implements TerminalBridge {
+class UnavailableTerminalBridge implements TerminalPort {
     listLaunchTargets(): Promise<TerminalLaunchTargets> {
         return Promise.resolve({ shells: [], agents: [] });
     }
@@ -53,7 +53,7 @@ class UnavailableTerminalBridge implements TerminalBridge {
     }
 }
 
-export function createTerminalBridge(): TerminalBridge {
+export function createTerminalBridge(): TerminalPort {
     const api = electronApi();
     if (api !== null) return ElectronTerminalBridge.of(api.terminal);
     return new UnavailableTerminalBridge();

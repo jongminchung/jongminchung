@@ -1,13 +1,13 @@
+import type { TerminalPort } from "../application/terminal/ports/TerminalPort";
 import type {
     RepositoryId,
     TerminalEvent,
     TerminalId,
-} from "../shared/contracts/model";
+} from "../shared/contracts/model/index";
 import type {
     TerminalLaunchTarget,
     TerminalLaunchTargets,
 } from "../shared/contracts/terminal";
-import type { TerminalBridge } from "./TerminalBridge";
 
 export interface ElectronTerminalApi {
     listLaunchTargets(): Promise<TerminalLaunchTargets>;
@@ -24,7 +24,7 @@ export interface ElectronTerminalApi {
     closeRepository(repositoryId: RepositoryId): Promise<void>;
 }
 
-export class ElectronTerminalBridge implements TerminalBridge {
+export class ElectronTerminalBridge implements TerminalPort {
     readonly #api: ElectronTerminalApi;
 
     private constructor(api: ElectronTerminalApi) {

@@ -1,7 +1,7 @@
 import type {
     GitOperation,
     RepositoryInvalidation,
-} from "../shared/contracts/model";
+} from "../shared/contracts/model/index";
 
 export interface GitOperationPolicy {
     readonly invalidations: readonly RepositoryInvalidation[];

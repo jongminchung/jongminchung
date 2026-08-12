@@ -8,7 +8,7 @@ import type {
     HostingChangedFile,
     HostingReviewEvent,
     HostingTimelineEntry,
-} from "../../shared/contracts/model";
+} from "../../shared/contracts/model/index";
 import { openHostingUrl } from "../hosting-persistence";
 import { Icon } from "../Icon";
 import { EmptyState } from "../ProductCollections";

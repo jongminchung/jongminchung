@@ -11,15 +11,16 @@ import {
     type KeyboardEvent,
     type MouseEvent,
 } from "react";
+import { terminalService } from "../application/terminal/activeTerminalService";
+import type { TerminalAvailability } from "../application/terminal/ports/TerminalAvailability";
+import { listenWorkbenchEvent } from "../application/workbench-events/WorkbenchEventPort";
 import {
     terminalActionForKeyboard,
     terminalTabAfterClose,
     type TerminalActionAvailability,
     type TerminalActionId,
 } from "../domain/terminalActions";
-import { terminalService } from "../domain/TerminalService";
-import { isElectronRuntime } from "../platform/electron";
-import type { RepositoryId } from "../shared/contracts/model";
+import type { RepositoryId } from "../shared/contracts/model/index";
 import type {
     TerminalAgentDescriptor,
     TerminalLaunchTargets,
@@ -58,12 +59,32 @@ type TerminalMenuRequest =
       }>;
 
 export function TerminalPanel({
+    availability,
     repositoryId,
-    fixture,
+    onHide,
+}: {
+    readonly availability: TerminalAvailability;
+    readonly repositoryId: RepositoryId;
+    readonly onHide: () => void;
+}) {
+    if (availability.kind === "unavailable") {
+        return (
+            <EmptyState
+                className="p-0 [&_[data-slot=empty-title]]:font-medium [&_[data-slot=empty-title]]:text-foreground"
+                description="The deterministic QA fixture does not start a shell."
+                icon={<Icon name="console" size={22} />}
+                title="Native Terminal"
+            />
+        );
+    }
+    return <NativeTerminalPanel onHide={onHide} repositoryId={repositoryId} />;
+}
+
+function NativeTerminalPanel({
+    repositoryId,
     onHide,
 }: {
     readonly repositoryId: RepositoryId;
-    readonly fixture: boolean;
     readonly onHide: () => void;
 }) {
     useSyncExternalStore(
@@ -90,7 +111,6 @@ export function TerminalPanel({
     const predefinedButton = useRef<HTMLButtonElement>(null);
     const xterm = useRef<XtermSurfaceHandle>(null);
     useEffect(() => {
-        if (fixture || !isElectronRuntime()) return;
         let cancelled = false;
         const openInitialTerminal = async (): Promise<void> => {
             try {
@@ -117,10 +137,9 @@ export function TerminalPanel({
         return () => {
             cancelled = true;
         };
-    }, [announce, fixture, repositoryId]);
+    }, [announce, repositoryId]);
 
     useEffect(() => {
-        if (fixture || !isElectronRuntime()) return;
         let cancelled = false;
         const load = async (): Promise<void> => {
             try {
@@ -137,7 +156,7 @@ export function TerminalPanel({
         return () => {
             cancelled = true;
         };
-    }, [announce, fixture]);
+    }, [announce]);
 
     useEffect(() => {
         if (!sessions.some((session) => session.key === activeKey)) {
@@ -146,7 +165,6 @@ export function TerminalPanel({
     }, [activeKey, sessions]);
 
     const create = useCallback(async (): Promise<void> => {
-        if (fixture || !isElectronRuntime()) return;
         try {
             const key = await terminalService.create(repositoryId);
             setLaunchError(null);
@@ -157,13 +175,12 @@ export function TerminalPanel({
             setLaunchError(message);
             announce(message);
         }
-    }, [announce, fixture, repositoryId]);
+    }, [announce, repositoryId]);
 
     const createLaunchTarget = useCallback(
         async (
             target: TerminalShellDescriptor | TerminalAgentDescriptor,
         ): Promise<void> => {
-            if (fixture || !isElectronRuntime()) return;
             const launchTarget =
                 target.kind === "shell"
                     ? ({ kind: "shell", id: target.id } as const)
@@ -182,7 +199,7 @@ export function TerminalPanel({
                 announce(message);
             }
         },
-        [announce, fixture, repositoryId],
+        [announce, repositoryId],
     );
 
     const close = useCallback(
@@ -213,45 +230,34 @@ export function TerminalPanel({
     closeTabRef.current = close;
 
     useEffect(() => {
-        const navigateTab = (event: Event): void => {
-            if (!(event instanceof CustomEvent)) return;
-            const offset = event.detail?.offset;
-            if (offset !== -1 && offset !== 1) return;
-            const keys = terminalService
-                .sessions(repositoryId)
-                .map((session) => session.key);
-            if (keys.length < 2) return;
-            const currentIndex = Math.max(
-                0,
-                keys.indexOf(activeKeyRef.current ?? ""),
-            );
-            const target =
-                keys[(currentIndex + offset + keys.length) % keys.length];
-            if (!target) return;
-            setActiveKey(target);
-            window.requestAnimationFrame(() => xterm.current?.focus());
-        };
-        const closeActiveTab = (): void => {
-            const key = activeKeyRef.current;
-            if (key !== null) void closeTabRef.current(key);
-        };
-        window.addEventListener(
+        const removeNavigationListener = listenWorkbenchEvent(
             "git-client:terminal-tab-navigate",
-            navigateTab,
+            ({ offset }) => {
+                const keys = terminalService
+                    .sessions(repositoryId)
+                    .map((session) => session.key);
+                if (keys.length < 2) return;
+                const currentIndex = Math.max(
+                    0,
+                    keys.indexOf(activeKeyRef.current ?? ""),
+                );
+                const target =
+                    keys[(currentIndex + offset + keys.length) % keys.length];
+                if (!target) return;
+                setActiveKey(target);
+                window.requestAnimationFrame(() => xterm.current?.focus());
+            },
         );
-        window.addEventListener(
+        const removeCloseListener = listenWorkbenchEvent(
             "git-client:terminal-tab-close",
-            closeActiveTab,
+            () => {
+                const key = activeKeyRef.current;
+                if (key !== null) void closeTabRef.current(key);
+            },
         );
         return () => {
-            window.removeEventListener(
-                "git-client:terminal-tab-navigate",
-                navigateTab,
-            );
-            window.removeEventListener(
-                "git-client:terminal-tab-close",
-                closeActiveTab,
-            );
+            removeNavigationListener();
+            removeCloseListener();
         };
     }, [repositoryId]);
 
@@ -343,17 +349,6 @@ export function TerminalPanel({
             optionsButton.current?.focus();
         else xterm.current?.focus();
     }, [menuRequest]);
-
-    if (fixture || !isElectronRuntime()) {
-        return (
-            <EmptyState
-                className="p-0 [&_[data-slot=empty-title]]:font-medium [&_[data-slot=empty-title]]:text-foreground"
-                description="The deterministic QA fixture does not start a shell."
-                icon={<Icon name="console" size={22} />}
-                title="Native Terminal"
-            />
-        );
-    }
 
     return (
         <div

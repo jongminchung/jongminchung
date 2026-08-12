@@ -5,7 +5,7 @@ import { useState } from "react";
 import type {
     HostingAccount,
     HostingProviderKind,
-} from "../../shared/contracts/model";
+} from "../../shared/contracts/model/index";
 import { Selector } from "../ProductFormControls";
 
 interface HostingAccountConnectionProps {

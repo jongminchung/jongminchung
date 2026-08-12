@@ -1,9 +1,9 @@
 import { useCallback } from "react";
 import { useShallow } from "zustand/react/shallow";
+import type { WorkspaceTab } from "../../application/git-session/state/GitSessionState";
 import type { AppDialogController } from "../../components/AppDialog";
 import type { RepositoryToolKind } from "../../components/RepositoryToolDialog";
 import type { RepositoryAccessMode } from "../../domain/repositoryAccess";
-import type { WorkspaceTab } from "../../git-session/sessionTypes";
 import { electronApi } from "../../platform/electron";
 import { useAppStore } from "../state/AppStoreProvider";
 

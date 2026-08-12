@@ -13,6 +13,7 @@
     "start": "next start",
     "test:e2e": "playwright test",
     "test:e2e:core": "playwright test --config playwright.core.config.ts",
+    "test:e2e:prebuilt": "playwright test --config playwright.prebuilt.config.ts",
     "test:e2e:update": "playwright test --update-snapshots",
     "test:e2e:visual": "playwright test visual.spec.ts",
     "typecheck": "tsc --noEmit",

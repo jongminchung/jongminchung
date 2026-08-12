@@ -2,7 +2,7 @@ import { Button } from "@jongminchung/ui/components/button";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { RecentProject } from "../domain/recentProjects";
-import type { RepositorySnapshot } from "../shared/contracts/model";
+import type { RepositorySnapshot } from "../shared/contracts/model/index";
 import { useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
 

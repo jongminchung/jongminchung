@@ -6,13 +6,12 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { createServer as createHttpsServer } from "node:https";
 import { createServer as createTcpServer } from "node:net";
 import { homedir, tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { join } from "node:path";
 import { chromium } from "@playwright/test";
 import type { Browser, Page } from "@playwright/test";
+import { resolvePackagedExecutablePath } from "../scripts/packaged-app-path.mjs";
 
-const EXECUTABLE_PATH = resolve(
-    "out/Git Client-darwin-arm64/Git Client.app/Contents/MacOS/Git Client",
-);
+const EXECUTABLE_PATH = resolvePackagedExecutablePath();
 
 export const HOSTING_PROFILE_NAME = "Git Client Electron QA Hosting";
 

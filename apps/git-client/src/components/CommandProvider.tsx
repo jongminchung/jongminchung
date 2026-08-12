@@ -10,6 +10,10 @@ import {
     type ReactNode,
 } from "react";
 import {
+    dispatchWorkbenchEvent,
+    listenWorkbenchEvent,
+} from "../application/workbench-events/WorkbenchEventPort";
+import {
     COMMAND_MANIFEST,
     CommandRegistry,
     canHandleShortcut,
@@ -351,11 +355,9 @@ export function CommandProvider({
             }
             try {
                 await definition.execute();
-                window.dispatchEvent(
-                    new CustomEvent("git-client:command-executed", {
-                        detail: { id: definition.id },
-                    }),
-                );
+                dispatchWorkbenchEvent("git-client:command-executed", {
+                    id: definition.id,
+                });
             } catch (error) {
                 announce(
                     error instanceof Error ? error.message : String(error),
@@ -389,31 +391,27 @@ export function CommandProvider({
             }
         };
         void restore();
-        const update = (event: Event): void => {
-            if (!(event instanceof CustomEvent)) return;
-            setKeymapOverrides(
-                parseProductSettings({ keymapOverrides: event.detail })
-                    .keymapOverrides,
-            );
-        };
-        const updateProductSettings = (event: Event): void => {
-            if (!(event instanceof CustomEvent)) return;
-            const settings = parseProductSettings(event.detail);
-            setKeymapOverrides(settings.keymapOverrides);
-            setPresentationAssistant(settings.presentationAssistant);
-        };
-        window.addEventListener("git-client:keymap-changed", update);
-        window.addEventListener(
+        const removeKeymapListener = listenWorkbenchEvent(
+            "git-client:keymap-changed",
+            (detail) => {
+                setKeymapOverrides(
+                    parseProductSettings({ keymapOverrides: detail })
+                        .keymapOverrides,
+                );
+            },
+        );
+        const removeSettingsListener = listenWorkbenchEvent(
             "git-client:product-settings-changed",
-            updateProductSettings,
+            (detail) => {
+                const settings = parseProductSettings(detail);
+                setKeymapOverrides(settings.keymapOverrides);
+                setPresentationAssistant(settings.presentationAssistant);
+            },
         );
         return () => {
             active = false;
-            window.removeEventListener("git-client:keymap-changed", update);
-            window.removeEventListener(
-                "git-client:product-settings-changed",
-                updateProductSettings,
-            );
+            removeKeymapListener();
+            removeSettingsListener();
         };
     }, []);
 

@@ -16,6 +16,19 @@ import { Command as CommandPrimitive } from "cmdk";
 import { SearchIcon, CheckIcon } from "lucide-react";
 import * as React from "react";
 
+type CommandDialogProps = Omit<
+    React.ComponentProps<typeof Dialog>,
+    "children"
+> & {
+    children: React.ReactNode;
+    className?: string;
+    description: string;
+    title: string;
+} & (
+        | { closeLabel: string; showCloseButton: true }
+        | { closeLabel?: never; showCloseButton?: false }
+    );
+
 function Command({
     className,
     ...props
@@ -33,19 +46,21 @@ function Command({
 }
 
 function CommandDialog({
-    title = "Command Palette",
-    description = "Search for a command to run...",
+    title,
+    description,
     children,
     className,
+    closeLabel,
     showCloseButton = false,
     ...props
-}: Omit<React.ComponentProps<typeof Dialog>, "children"> & {
-    title?: string;
-    description?: string;
-    className?: string;
-    showCloseButton?: boolean;
-    children: React.ReactNode;
-}) {
+}: CommandDialogProps) {
+    const closeButtonProps = showCloseButton
+        ? ({
+              closeLabel: requireCloseLabel(closeLabel),
+              showCloseButton: true,
+          } as const)
+        : ({ showCloseButton: false } as const);
+
     return (
         <Dialog {...props}>
             <DialogHeader className="sr-only">
@@ -57,12 +72,18 @@ function CommandDialog({
                     "top-1/3 translate-y-0 overflow-hidden rounded-xl! p-0",
                     className,
                 )}
-                showCloseButton={showCloseButton}
+                {...closeButtonProps}
             >
                 {children}
             </DialogContent>
         </Dialog>
     );
+}
+
+function requireCloseLabel(label: string | undefined): string {
+    if (label === undefined)
+        throw new Error("CommandDialog closeLabel is required");
+    return label;
 }
 
 function CommandInput({

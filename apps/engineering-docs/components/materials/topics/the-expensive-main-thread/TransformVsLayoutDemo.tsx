@@ -86,12 +86,12 @@ export const TransformVsLayoutDemo = ({
                     style={{
                         fontSize: 12,
                         fontWeight: 600,
-                        color: "#2f9e44",
+                        color: "#237032",
                         marginBottom: 6,
                     }}
                 >
                     transform: translateX{" "}
-                    <span style={{ fontWeight: 400, color: "#868e96" }}>
+                    <span style={{ fontWeight: 400, color: "#495057" }}>
                         · {t.compositor}
                     </span>
                 </div>
@@ -110,7 +110,7 @@ export const TransformVsLayoutDemo = ({
                             repeatType: "mirror",
                         }}
                         style={{
-                            ...dot("#40c057"),
+                            ...dot("#237032"),
                             willChange: "transform",
                         }}
                     />
@@ -120,12 +120,12 @@ export const TransformVsLayoutDemo = ({
                     style={{
                         fontSize: 12,
                         fontWeight: 600,
-                        color: "#e8590c",
+                        color: "#c2410c",
                         margin: "16px 0 6px",
                     }}
                 >
                     left{" "}
-                    <span style={{ fontWeight: 400, color: "#868e96" }}>
+                    <span style={{ fontWeight: 400, color: "#495057" }}>
                         · {t.mainThread}
                     </span>
                 </div>
@@ -144,7 +144,7 @@ export const TransformVsLayoutDemo = ({
                             repeatType: "mirror",
                         }}
                         style={{
-                            ...dot("#fd7e14"),
+                            ...dot("#c2410c"),
                             left: 0,
                         }}
                     />
@@ -164,7 +164,7 @@ export const TransformVsLayoutDemo = ({
                         padding: "8px 18px",
                         border: "none",
                         borderRadius: 6,
-                        background: load ? "#fa5252" : "#228be6",
+                        background: load ? "#c92a2a" : "#1864ab",
                         color: "#fff",
                         cursor: "pointer",
                         fontSize: 13,

@@ -1,7 +1,7 @@
 import { Button } from "@jongminchung/ui/components/button";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { toVoidHandler } from "../../domain/toVoidHandler";
-import type { ShelfEntry } from "../../shared/contracts/model";
+import type { ShelfEntry } from "../../shared/contracts/model/index";
 import type { AppDialogController } from "../AppDialog";
 import { Icon } from "../Icon";
 import { Notice } from "../Notice";

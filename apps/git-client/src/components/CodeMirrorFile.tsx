@@ -8,6 +8,10 @@ import {
     rectangularSelection,
 } from "@codemirror/view";
 import { useEffect, useRef } from "react";
+import {
+    dispatchWorkbenchEvent,
+    listenWorkbenchEvent,
+} from "../application/workbench-events/WorkbenchEventPort";
 import { languageExtensionForPath } from "./codeMirrorLanguage";
 import {
     codeMirrorSearchExtensions,
@@ -118,75 +122,69 @@ export default function CodeMirrorFile({
             const line = editor.state.doc.lineAt(head);
             const word = editor.state.wordAt(head);
             const selection = editor.state.selection.main;
-            window.dispatchEvent(
-                new CustomEvent("git-client:editor-status", {
-                    detail: {
-                        path,
-                        line: line.number,
-                        column: head - line.from + 1,
-                        readOnly: !editable,
-                        language: languageName(path),
-                        lineSeparator: editor.state.doc
-                            .toString()
-                            .includes("\r\n")
-                            ? "CRLF"
-                            : "LF",
-                        indentation: indentationLabel(
-                            editor.state.doc.toString(),
-                        ),
-                        columnSelection: columnSelectionRef.current,
-                        symbol: word
-                            ? editor.state.doc.sliceString(word.from, word.to)
-                            : undefined,
-                        selectedText: selection.empty
-                            ? undefined
-                            : editor.state.doc.sliceString(
-                                  selection.from,
-                                  selection.to,
-                              ),
-                    },
-                }),
-            );
-        };
-        const goToLine = (event: Event): void => {
-            if (!active || !(event instanceof CustomEvent) || view === null)
-                return;
-            const requestedLine = Number(event.detail?.line);
-            const requestedColumn = Number(event.detail?.column ?? 1);
-            if (
-                !Number.isInteger(requestedLine) ||
-                !Number.isInteger(requestedColumn)
-            )
-                return;
-            const line = view.state.doc.line(
-                Math.min(view.state.doc.lines, Math.max(1, requestedLine)),
-            );
-            const position = Math.min(
-                line.to,
-                line.from + Math.max(0, requestedColumn - 1),
-            );
-            view.dispatch({
-                selection: { anchor: position },
-                effects: EditorView.scrollIntoView(position, { y: "center" }),
+            dispatchWorkbenchEvent("git-client:editor-status", {
+                path,
+                line: line.number,
+                column: head - line.from + 1,
+                readOnly: !editable,
+                language: languageName(path),
+                lineSeparator: editor.state.doc.toString().includes("\r\n")
+                    ? "CRLF"
+                    : "LF",
+                indentation: indentationLabel(editor.state.doc.toString()),
+                columnSelection: columnSelectionRef.current,
+                symbol: word
+                    ? editor.state.doc.sliceString(word.from, word.to)
+                    : undefined,
+                selectedText: selection.empty
+                    ? undefined
+                    : editor.state.doc.sliceString(
+                          selection.from,
+                          selection.to,
+                      ),
             });
-            view.focus();
-            publishStatus(view);
         };
+        const removeGoToLineListener = listenWorkbenchEvent(
+            "git-client:go-to-line",
+            ({ line: requestedLine, column: requestedColumn }) => {
+                if (!active || view === null) return;
+                if (
+                    !Number.isInteger(requestedLine) ||
+                    !Number.isInteger(requestedColumn)
+                )
+                    return;
+                const line = view.state.doc.line(
+                    Math.min(view.state.doc.lines, Math.max(1, requestedLine)),
+                );
+                const position = Math.min(
+                    line.to,
+                    line.from + Math.max(0, requestedColumn - 1),
+                );
+                view.dispatch({
+                    selection: { anchor: position },
+                    effects: EditorView.scrollIntoView(position, {
+                        y: "center",
+                    }),
+                });
+                view.focus();
+                publishStatus(view);
+            },
+        );
         const toggleColumnSelection = (): void => {
             if (!active || view === null) return;
             columnSelectionRef.current = !columnSelectionRef.current;
             publishStatus(view);
         };
-        const editorActivated = (event: Event): void => {
-            if (!(event instanceof CustomEvent)) return;
-            if (event.detail !== editorIdRef.current) active = false;
-        };
-        window.addEventListener("git-client:go-to-line", goToLine);
-        window.addEventListener(
+        const removeColumnSelectionListener = listenWorkbenchEvent(
             "git-client:toggle-column-selection",
             toggleColumnSelection,
         );
-        window.addEventListener("git-client:editor-activated", editorActivated);
+        const removeEditorActivatedListener = listenWorkbenchEvent(
+            "git-client:editor-activated",
+            (editorId) => {
+                if (editorId !== editorIdRef.current) active = false;
+            },
+        );
         const removeSearchBridge = installCodeMirrorSearchBridge(() => view);
         const removeActionBridge = installCodeMirrorActionBridge(() => view);
         const render = async (): Promise<void> => {
@@ -272,13 +270,9 @@ export default function CodeMirrorFile({
                         EditorView.domEventHandlers({
                             focus: (_event, editor) => {
                                 active = true;
-                                window.dispatchEvent(
-                                    new CustomEvent(
-                                        "git-client:editor-activated",
-                                        {
-                                            detail: editorIdRef.current,
-                                        },
-                                    ),
+                                dispatchWorkbenchEvent(
+                                    "git-client:editor-activated",
+                                    editorIdRef.current,
                                 );
                                 publishStatus(editor);
                             },
@@ -333,23 +327,13 @@ export default function CodeMirrorFile({
         void render();
         return () => {
             disposed = true;
-            window.removeEventListener("git-client:go-to-line", goToLine);
-            window.removeEventListener(
-                "git-client:toggle-column-selection",
-                toggleColumnSelection,
-            );
-            window.removeEventListener(
-                "git-client:editor-activated",
-                editorActivated,
-            );
+            removeGoToLineListener();
+            removeColumnSelectionListener();
+            removeEditorActivatedListener();
             removeSearchBridge();
             removeActionBridge();
             if (active) {
-                window.dispatchEvent(
-                    new CustomEvent("git-client:editor-status", {
-                        detail: null,
-                    }),
-                );
+                dispatchWorkbenchEvent("git-client:editor-status", null);
             }
             view?.destroy();
             if (viewRef.current === view) viewRef.current = null;

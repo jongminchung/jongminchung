@@ -1,3 +1,6 @@
+import type { WorkspaceTab } from "../../application/git-session/state/GitSessionState";
+import { dispatchWorkbenchEvent } from "../../application/workbench-events/WorkbenchEventPort";
+import type { AppDialogController } from "../../components/AppDialog";
 import {
     COMMAND_ENABLED,
     commandDefinition,
@@ -9,7 +12,7 @@ import {
     getElectronFullScreen,
     setElectronFullScreen,
 } from "../../platform/electronActions";
-import type { WorkspaceCommandContext } from "./workspaceCommandTypes";
+import type { AppStore } from "../state/appStore";
 
 const STATUS_BAR_WIDGET_COMMANDS = [
     ["view.statusWidgetStatusText", "statusText"],
@@ -30,17 +33,20 @@ const STATUS_BAR_WIDGET_COMMANDS = [
     import("../../domain/productSettings").StatusBarWidget,
 ])[];
 
+export type AppearanceCommandPort = Pick<
+    AppStore,
+    "productSettings" | "setProductSettings" | "setQuickSwitchSchemeOpen"
+> & {
+    readonly dialog: AppDialogController;
+    readonly presentationPreviousFullScreen: { current: boolean };
+    readonly session: {
+        readonly workspace: { readonly activeTab: WorkspaceTab };
+    };
+    readonly zenPreviousFullScreen: { current: boolean };
+};
+
 export function createAppearanceCommands(
-    context: Pick<
-        WorkspaceCommandContext,
-        | "dialog"
-        | "presentationPreviousFullScreen"
-        | "productSettings"
-        | "session"
-        | "setProductSettings"
-        | "setQuickSwitchSchemeOpen"
-        | "zenPreviousFullScreen"
-    >,
+    context: AppearanceCommandPort,
 ): readonly CommandDefinition[] {
     const {
         dialog,
@@ -72,11 +78,9 @@ export function createAppearanceCommands(
         },
         {
             ...commandDefinition("view.compactMode", () => {
-                window.dispatchEvent(
-                    new CustomEvent("git-client:product-settings-request", {
-                        detail: { kind: "toggleCompact" },
-                    }),
-                );
+                dispatchWorkbenchEvent("git-client:product-settings-request", {
+                    kind: "toggleCompact",
+                });
             }),
             checked: () => productSettings.compactMode,
         },

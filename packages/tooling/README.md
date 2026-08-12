@@ -15,11 +15,12 @@ that has `read:packages`; public package downloads still require authentication.
 Keep the token in the environment rather than committing it to `.npmrc`.
 
 ```bash
-npm install --save-dev @jongminchung/tooling oxfmt oxlint
+npm install --save-dev @jongminchung/tooling oxfmt oxlint oxlint-tsgolint
 ```
 
 Install the actual formatter and linter in each consuming project. This package only centralizes the
-shared settings.
+shared settings. `oxlint-tsgolint` is required because the shared Oxlint config enables type-aware
+rules.
 
 The package ships ESM only. `defineOxfmtConfig` is its only JavaScript API, and CommonJS
 `require()` is not part of the supported package contract.

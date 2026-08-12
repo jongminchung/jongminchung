@@ -42,49 +42,13 @@ import {
     type Extension,
 } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
+import { listenWorkbenchEvent } from "../application/workbench-events/WorkbenchEventPort";
+import type { EditorAction } from "../domain/editorContracts";
 
-export type EditorSearchAction =
-    | "find"
-    | "replace"
-    | "next"
-    | "previous"
-    | "nextWord"
-    | "previousWord"
-    | "selectionScope";
-export type EditorAction =
-    | "selectAllOccurrences"
-    | "selectNextOccurrence"
-    | "unselectOccurrence"
-    | "addCaretsToLineEnds"
-    | "extendSelection"
-    | "shrinkSelection"
-    | "toggleCase"
-    | "joinLines"
-    | "duplicate"
-    | "fillParagraph"
-    | "sortLines"
-    | "reverseLines"
-    | "transpose"
-    | "indent"
-    | "unindent"
-    | "convertIndentsToSpaces"
-    | "convertIndentsToTabs"
-    | "expandFold"
-    | "expandAllFolds"
-    | "collapseFold"
-    | "collapseAllFolds"
-    | "toggleFold"
-    | "lineComment"
-    | "blockComment"
-    | "moveStatementDown"
-    | "moveStatementUp"
-    | "moveLineDown"
-    | "moveLineUp"
-    | "nextMethod"
-    | "previousMethod"
-    | "matchingBrace"
-    | "undo"
-    | "redo";
+export type {
+    EditorAction,
+    EditorSearchAction,
+} from "../domain/editorContracts";
 
 export const codeMirrorSearchExtensions = [
     search({ top: true }),
@@ -108,67 +72,64 @@ function isFocusedEditor(view: EditorView): boolean {
 export function installCodeMirrorSearchBridge(
     getView: () => EditorView | null,
 ): () => void {
-    const searchEditor = (event: Event): void => {
-        if (!(event instanceof CustomEvent)) return;
-        const view = getView();
-        if (view === null || !isFocusedEditor(view)) return;
-        const action = event.detail?.action as EditorSearchAction | undefined;
-        if (!action) return;
-        event.preventDefault();
-        if (action === "next") {
-            findNext(view);
-            return;
-        }
-        if (action === "previous") {
-            findPrevious(view);
-            return;
-        }
-        if (action === "nextWord" || action === "previousWord") {
-            const selection = view.state.selection.main;
-            const word = selection.empty
-                ? view.state.wordAt(selection.head)
-                : selection;
-            if (!word) return;
-            const query = new SearchQuery({
-                search: view.state.sliceDoc(word.from, word.to),
-                literal: true,
-            });
-            view.dispatch({ effects: setSearchQuery.of(query) });
-            (action === "nextWord" ? findNext : findPrevious)(view);
-            return;
-        }
-        if (action === "selectionScope") {
-            const selection = view.state.selection.main;
-            if (selection.empty) return;
-            const current = getSearchQuery(view.state);
-            const query = new SearchQuery({
-                search:
-                    current.search ||
-                    view.state.sliceDoc(selection.from, selection.to),
-                caseSensitive: current.caseSensitive,
-                literal: current.literal,
-                regexp: current.regexp,
-                replace: current.replace,
-                wholeWord: current.wholeWord,
-                test: (_match, _state, from, to) =>
-                    from >= selection.from && to <= selection.to,
-            });
-            view.dispatch({ effects: setSearchQuery.of(query) });
+    return listenWorkbenchEvent(
+        "git-client:editor-search",
+        ({ action }, control) => {
+            const view = getView();
+            if (view === null || !isFocusedEditor(view)) return;
+            control.preventDefault();
+            if (action === "next") {
+                findNext(view);
+                return;
+            }
+            if (action === "previous") {
+                findPrevious(view);
+                return;
+            }
+            if (action === "nextWord" || action === "previousWord") {
+                const selection = view.state.selection.main;
+                const word = selection.empty
+                    ? view.state.wordAt(selection.head)
+                    : selection;
+                if (!word) return;
+                const query = new SearchQuery({
+                    search: view.state.sliceDoc(word.from, word.to),
+                    literal: true,
+                });
+                view.dispatch({ effects: setSearchQuery.of(query) });
+                (action === "nextWord" ? findNext : findPrevious)(view);
+                return;
+            }
+            if (action === "selectionScope") {
+                const selection = view.state.selection.main;
+                if (selection.empty) return;
+                const current = getSearchQuery(view.state);
+                const query = new SearchQuery({
+                    search:
+                        current.search ||
+                        view.state.sliceDoc(selection.from, selection.to),
+                    caseSensitive: current.caseSensitive,
+                    literal: current.literal,
+                    regexp: current.regexp,
+                    replace: current.replace,
+                    wholeWord: current.wholeWord,
+                    test: (_match, _state, from, to) =>
+                        from >= selection.from && to <= selection.to,
+                });
+                view.dispatch({ effects: setSearchQuery.of(query) });
+                openSearchPanel(view);
+                return;
+            }
             openSearchPanel(view);
-            return;
-        }
-        openSearchPanel(view);
-        if (action === "replace") {
-            window.requestAnimationFrame(() => {
-                view.dom
-                    .querySelector<HTMLInputElement>('[name="replace"]')
-                    ?.focus();
-            });
-        }
-    };
-    window.addEventListener("git-client:editor-search", searchEditor);
-    return () =>
-        window.removeEventListener("git-client:editor-search", searchEditor);
+            if (action === "replace") {
+                window.requestAnimationFrame(() => {
+                    view.dom
+                        .querySelector<HTMLInputElement>('[name="replace"]')
+                        ?.focus();
+                });
+            }
+        },
+    );
 }
 
 function selectedLineRange(view: EditorView): {
@@ -383,16 +344,14 @@ function runEditorAction(view: EditorView, action: EditorAction): boolean {
 export function installCodeMirrorActionBridge(
     getView: () => EditorView | null,
 ): () => void {
-    const run = (event: Event): void => {
-        if (!(event instanceof CustomEvent)) return;
-        const view = getView();
-        if (view === null || !isFocusedEditor(view)) return;
-        const action = event.detail?.action as EditorAction | undefined;
-        if (!action) return;
-        event.preventDefault();
-        runEditorAction(view, action);
-        view.focus();
-    };
-    window.addEventListener("git-client:editor-action", run);
-    return () => window.removeEventListener("git-client:editor-action", run);
+    return listenWorkbenchEvent(
+        "git-client:editor-action",
+        ({ action }, control) => {
+            const view = getView();
+            if (view === null || !isFocusedEditor(view)) return;
+            control.preventDefault();
+            runEditorAction(view, action);
+            view.focus();
+        },
+    );
 }

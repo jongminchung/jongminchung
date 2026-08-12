@@ -76,6 +76,7 @@ export const TemperatureSamplingDemo = ({ caption }: { caption?: string }) => {
                         }}
                     >
                         <label
+                            htmlFor="temperature-sampling-temperature"
                             style={{
                                 fontSize: 14,
                                 color: "#495057",
@@ -86,6 +87,7 @@ export const TemperatureSamplingDemo = ({ caption }: { caption?: string }) => {
                             Temperature: {temperature.toFixed(1)}
                         </label>
                         <input
+                            id="temperature-sampling-temperature"
                             type="range"
                             min={0.1}
                             max={2.0}
@@ -105,6 +107,7 @@ export const TemperatureSamplingDemo = ({ caption }: { caption?: string }) => {
                         }}
                     >
                         <label
+                            htmlFor="temperature-sampling-top-k"
                             style={{
                                 fontSize: 14,
                                 color: "#495057",
@@ -115,6 +118,7 @@ export const TemperatureSamplingDemo = ({ caption }: { caption?: string }) => {
                             Top-k: {topK}
                         </label>
                         <input
+                            id="temperature-sampling-top-k"
                             type="range"
                             min={1}
                             max={10}
@@ -146,8 +150,7 @@ export const TemperatureSamplingDemo = ({ caption }: { caption?: string }) => {
                                     display: "flex",
                                     alignItems: "center",
                                     marginBottom: 6,
-                                    opacity: active ? 1 : 0.3,
-                                    transition: "opacity 0.2s ease",
+                                    opacity: 1,
                                 }}
                             >
                                 <span
@@ -155,7 +158,7 @@ export const TemperatureSamplingDemo = ({ caption }: { caption?: string }) => {
                                         width: 28,
                                         fontSize: 15,
                                         fontWeight: 600,
-                                        color: active ? "#495057" : "#868e96",
+                                        color: active ? "#495057" : "#495057",
                                         textAlign: "center",
                                         flexShrink: 0,
                                     }}
@@ -178,8 +181,8 @@ export const TemperatureSamplingDemo = ({ caption }: { caption?: string }) => {
                                             width: `${barWidth}%`,
                                             height: "100%",
                                             background: active
-                                                ? "#228be6"
-                                                : "#adb5bd",
+                                                ? "#1864ab"
+                                                : "#5c636a",
                                             borderRadius: 4,
                                             transition:
                                                 "width 0.2s ease, background 0.2s ease",
@@ -190,7 +193,7 @@ export const TemperatureSamplingDemo = ({ caption }: { caption?: string }) => {
                                     style={{
                                         width: 48,
                                         fontSize: 13,
-                                        color: active ? "#495057" : "#868e96",
+                                        color: active ? "#495057" : "#495057",
                                         textAlign: "right",
                                         flexShrink: 0,
                                     }}
@@ -206,7 +209,7 @@ export const TemperatureSamplingDemo = ({ caption }: { caption?: string }) => {
                     style={{
                         marginTop: 12,
                         fontSize: 12,
-                        color: "#868e96",
+                        color: "#495057",
                         lineHeight: 1.5,
                     }}
                 >

@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { dispatchWorkbenchEvent } from "../application/workbench-events/WorkbenchEventPort";
 import { useAppearance } from "../components/AppearanceProvider";
 import { useCommands } from "../components/CommandProvider";
 import type { CommandId } from "../domain/commands";
@@ -8,6 +9,7 @@ import type {
     NamedToolWindowLayout,
     ToolWindowLayout,
 } from "../domain/toolWindowLayouts";
+import { clearCommitFilesCache } from "../features/repository/review/useRepositoryReviewController";
 import {
     deleteLeftoverDirectories,
     loadDiagnosticSnapshot,
@@ -18,7 +20,6 @@ import {
     revealDiagnosticPath,
     writeDiagnosticConfiguration,
 } from "../platform/electronActions";
-import { clearCommitFilesCache } from "../repository/RepositoryWorkspace";
 import { useAppStore } from "./state/AppStoreProvider";
 
 const ActivityMonitorDialog = lazy(() =>
@@ -270,8 +271,9 @@ export function AppUtilityOverlays({
                     }}
                     onRepair={async () => {
                         clearCommitFilesCache();
-                        window.dispatchEvent(
-                            new CustomEvent("git-client:repair-indexes"),
+                        dispatchWorkbenchEvent(
+                            "git-client:repair-indexes",
+                            undefined,
                         );
                         await sessionReload();
                     }}

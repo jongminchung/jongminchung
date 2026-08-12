@@ -24,8 +24,6 @@ Designing anything requires two things: you need to be able to **reproduce** it,
 
 Take a fade-in, where an element's opacity goes from 0 to 1. As a graph, the horizontal axis is time and the vertical axis is opacity. Starting at 0 seconds and ending at 2, the value climbs from 0 to 1.
 
-<MaterialDemo id="how-to-design-animation/FadeInGraphDemo" />
-
 Movement works the same way. An element sliding from left to right is a time-position graph, and a grow animation is a time-scale graph. The horizontal axis doesn't even have to be time. In a parallax effect, where elements appear as the page scrolls, the scroll offset is the axis. Every animation boils down to **a value changing in response to some input**, and that change can be drawn.
 
 The important part is that the **shape** of the graph is the **feel** of the motion. Same start point, same end point, but a different curve gives a completely different impression. Producing the curve you want is the heart of animation design, and the tool for that is math.
@@ -58,15 +56,11 @@ A Bézier curve runs this interpolation in layers. Say we have four control poin
 
 Two control points turn out to be enough for an enormous range of motion. Here are some combinations you'll see everywhere.
 
-<MaterialDemo id="how-to-design-animation/EasingVisualizer" />
-
 How do you pick an easing in practice? Say a toast notification slides up from the bottom of the screen.
 
 With `ease-out`, the toast appears fast, grabbing attention, then decelerates and settles into place. With `ease-in` it starts slow and speeds up, which makes for a more low-key entrance. `linear` rises at constant speed and stops dead, which reads as mechanical.
 
 Same element, same movement, completely different impression depending on the easing. None of them is the "correct" one. The question is **what the motion is for**. If it needs to pull the user's eye, use a curve that's fast early on. If something should slip away quietly, use one that's fast toward the end. Try the different easings on the toast below and compare.
-
-<MaterialDemo id="how-to-design-animation/EasingPracticeDemo" />
 
 Once you understand how the curve works, you don't need a tool to hand you a preset. Want something that pops out fast and settles gently? Push the first control point's y value up high and put the second one near (1, 1). Draw the shape of the graph first, then find the control points that produce it.
 
@@ -80,19 +74,11 @@ value += (target - value) * factor; // factor: 0~1
 
 That's the whole formula. Run it every frame and the value moves by an amount **proportional to the remaining distance** — fast when far away, slower as it closes in. The natural-looking deceleration falls out on its own.
 
-<MaterialDemo id="how-to-design-animation/ExpApproachGraphDemo" />
-
 A small `factor` closes in slowly, a large one quickly. Mathematically this is **exponential decay**: the gap shrinks by a ratio of `(1 - factor)` each frame, so the remaining distance decreases exponentially.
-
-<MaterialDemo id="how-to-design-animation/ExponentialApproachDemo" />
 
 It isn't limited to position. A dashboard counter that races toward its target number and slows to a stop as it arrives is the same trick.
 
-<MaterialDemo id="how-to-design-animation/CounterDemo" />
-
 So is a progress bar. Real progress lurches forward in chunks as the network allows, but if the displayed bar chases the real value with an exponential approach, the user sees smooth motion.
-
-<MaterialDemo id="how-to-design-animation/ProgressBarDemo" />
 
 Best of all, **it stays natural when the target changes**. If the cursor suddenly jumps to the other side of the screen, the element simply curves off toward the new target from wherever it happens to be.
 
@@ -115,13 +101,9 @@ velocity += force * dt;
 current += velocity * dt;
 ```
 
-<MaterialDemo id="how-to-design-animation/SpringPlayground" />
-
 The character of a spring comes down to `stiffness` and `damping`. High stiffness feels taut and quick; low damping keeps it wobbling longer. Just these two knobs cover everything from a snappy button to a card that eases gently into place.
 
 Take a like button. The moment you press the heart, its scale dips, then springs back up toward its original size. Thanks to the overshoot — passing the target slightly and coming back — the press feels tactile.
-
-<MaterialDemo id="how-to-design-animation/SpringLikeDemo" />
 
 Springs differ from easing in one fundamental way: **there is no duration**. Easing runs "for 0.3 seconds"; a spring is a physics simulation that runs until it settles. There's another difference too: if the target changes midway, a spring carries its current velocity into the new motion, so the handoff is seamless.
 
@@ -159,8 +141,6 @@ for (const obj of objects) {
 
 What makes this structure powerful is that **you define the rules and the motion emerges**. Take confetti. Hand-designing a trajectory for every piece with easing functions would be absurd. Set up gravity, air resistance, and spin, and dozens of pieces each fall along their own path. You never touch an individual trajectory.
 
-<MaterialDemo id="how-to-design-animation/ConfettiDemo" />
-
 This is why physics simulation fits situations where **many objects interact**, or where **user input changes the outcome**.
 
 The trade-off is predictability. With easing you know exactly where everything will be at any moment; a simulation's outcome depends on its initial conditions. So physics tends to suit ambient effects and interactive elements better than a UI's core transitions.
@@ -180,11 +160,7 @@ element.style.transform = `rotate(${angle}rad)`;
 
 It's a one-liner, but it makes a surprising difference to how natural the motion feels. An arrow that points where it's going, a character that turns its head toward its destination, particles that stretch along their direction of travel — `atan2` is behind all of them.
 
-<MaterialDemo id="how-to-design-animation/Atan2Demo" />
-
 Here's a practical use: the 3D tilt effect, where a card leans toward the cursor as the mouse moves over it. `atan2` gives the **direction** of the tilt, and the distance from the center gives its **strength**.
-
-<MaterialDemo id="how-to-design-animation/CardTiltDemo" />
 
 Once you can compute the direction between two points, a whole category of animation opens up.
 
@@ -213,15 +189,9 @@ items.forEach((item, i) => {
 });
 ```
 
-<MaterialDemo id="how-to-design-animation/TrigWaveDemo" />
-
 The typing indicator in messaging apps is the classic example. Three dots bouncing in turn: identical `sin`, different phase.
 
-<MaterialDemo id="how-to-design-animation/LoadingIndicatorDemo" />
-
 The floating elements you see on landing pages are the same thing. Give each one a different amplitude, frequency, and phase, and one `sin` function produces a natural, ambient background.
-
-<MaterialDemo id="how-to-design-animation/FloatingHeroDemo" />
 
 ### Sawtooth Waves
 
@@ -238,8 +208,6 @@ const scale = 1 + p * 0.8; // grows from 1 → 1.8
 const opacity = 1 - p; // fades from 1 → 0
 ```
 
-<MaterialDemo id="how-to-design-animation/PulseBadgeDemo" />
-
 Start, end, instant reset — that simple structure is why sawtooths show up everywhere: pulses, pings, looping progress indicators. Between `sin`'s smooth back-and-forth and the sawtooth's one-way reset, you can cover most periodic animation.
 
 ## Designing an Animation
@@ -253,8 +221,6 @@ Before designing anything complex, there are two things to understand: how to sp
 Complex motion resists being captured in one formula. The way out is to **split the graph into segments**.
 
 Consider a map pin that bounces in place a couple of times and settles. A physics simulation could get you close, but natural motion isn't always good animation. Maybe the second bounce should be deliberately smaller, or the final landing softer. Splitting into segments gives you that control. Each segment is a simple piece of a graph, and joined end to end they make the full animation.
-
-<MaterialDemo id="how-to-design-animation/BounceGraphDemo" />
 
 In math this is called a piecewise function, and the idea carries over directly: **break complex motion into simple pieces, design each piece on its own, and join them back up**.
 
@@ -282,8 +248,6 @@ The most intuitive way to assemble pieces is to **lay them out in order**. This 
 
 Each piece is its own graph, but placed in order on the time axis they form a pipeline.
 
-<MaterialDemo id="how-to-design-animation/PipelineTimelineDemo" />
-
 They don't have to run strictly one after another. There are several placement strategies.
 
 - **Sequential**: B starts when A ends
@@ -292,8 +256,6 @@ They don't have to run strictly one after another. There are several placement s
 - **Staggered**: the same animation across multiple elements, offset in time. List items appearing one by one is the classic case
 
 Pipelining keeps **each piece independently editable**. If the card rises too fast, you tweak that one piece and leave the rest alone — no need to redesign the whole animation.
-
-<MaterialDemo id="how-to-design-animation/PipelineDemo" />
 
 ### Designing with State Transitions
 
@@ -312,11 +274,7 @@ Each state has its own graph. Launch is time-height, spread is time-radius, fade
 
 The key is to **pin down the transition conditions**. "Explode when velocity hits 0." "Remove when opacity hits 0." With explicit triggers, even a complex animation can be managed like a state machine, and drawn as a diagram:
 
-<MaterialDemo id="how-to-design-animation/FireworkStateDiagram" />
-
 The difference from pipelining is that the driver is <strong>a condition, not the clock</strong>. Since transitions depend on state values rather than time, this approach fits naturally where you can't predict the timeline in advance — physics simulations, user interaction.
-
-<MaterialDemo id="how-to-design-animation/FireworkDemo" />
 
 ### Property Splitting
 
@@ -325,8 +283,6 @@ Sometimes several properties need to change at once. In that case, **split them 
 Picture a pricing-plan card you click to select. The border should turn blue to show it's selected. The card should grow slightly for emphasis. And the details the user cares about should expand into view. Three changes at the same moment, and each one wants motion of a different character.
 
 One formula tying them together can't serve all three. Separate tracks can. Have a look at the example below.
-
-<MaterialDemo id="how-to-design-animation/PropertySplitDemo" />
 
 The point of splitting is that **no track needs to know about the others**. Changing the border track doesn't touch the size or the details. That independence is what makes it easy to fine-tune one property or bolt on a new one.
 
@@ -337,8 +293,6 @@ Back to the firework from the state transitions section. What if every particle 
 Adding **randomness** is how an animation escapes feeling mechanical. Give particle speeds a ±20% variance, add a little jitter to the angles, nudge the start times slightly apart.
 
 There's an important rule, though. **Random shouldn't be truly random.** Full randomness is unpredictable and produces results you didn't intend — the particles might all drift to one side, or sizes might come out at wild extremes.
-
-<MaterialDemo id="how-to-design-animation/RandomComparisonDemo" />
 
 It helps to divide an animation into **the intended** and **the unintended**. Particles flying upward is intended motion; the small speed differences between them are the "accidents" you engineer on purpose. The designer's job is to draw the line: control up to here, randomness from there. Draw it well and you get order and naturalness at the same time.
 
@@ -356,8 +310,6 @@ Value-based animations like parallax get bidirectionality almost for free. The h
 - **Same graph both ways**: reusing the same easing curve for entering and exiting feels off. If it appeared with ease-in, it should leave with ease-out
 
 Handle it properly and the moment the direction flips, the animation reverses, **continuing from its current state**. Try toggling quickly mid-animation in the example below to feel the difference.
-
-<MaterialDemo id="how-to-design-animation/BidirectionalCompareDemo" />
 
 ## What About Really Complex Animations?
 
@@ -378,20 +330,8 @@ If you've ever stared at an animation with no idea where to begin, I hope this a
 
 ## 추가 인터랙티브 자료
 
-### OrbitDemo
-
-원문 주제에 포함된 보조 시각 자료다.
-
-<MaterialDemo id="how-to-design-animation/OrbitDemo" />
-
 ### ProgressMappingDemo
 
 원문 주제에 포함된 보조 시각 자료다.
 
 <MaterialDemo id="how-to-design-animation/ProgressMappingDemo" />
-
-### PropertySplitTimelineDemo
-
-원문 주제에 포함된 보조 시각 자료다.
-
-<MaterialDemo id="how-to-design-animation/PropertySplitTimelineDemo" />

@@ -26,30 +26,30 @@ const STYLE = `
 /* 스킨 1: SaaS 대시보드 — 밝고 절제된 톤 */
 .hsd-saas.hsd-stage { background: #f8f9fa; }
 .hsd-saas .hsd-trigger { display: inline-flex; align-items: center; justify-content: space-between; min-width: 180px; font-family: ${FONT}; font-size: 14px; color: #495057; background: #fff; border: 1px solid #dee2e6; border-radius: 8px; padding: 9px 14px; cursor: pointer; }
-.hsd-saas .hsd-trigger:focus-visible { outline: none; border-color: #228be6; box-shadow: 0 0 0 3px rgba(34, 139, 230, 0.2); }
-.hsd-saas .hsd-trigger [data-placeholder] { color: #adb5bd; }
+.hsd-saas .hsd-trigger:focus-visible { outline: none; border-color: #1864ab; box-shadow: 0 0 0 3px rgba(34, 139, 230, 0.2); }
+.hsd-saas .hsd-trigger [data-placeholder] { color: #5c636a; }
 .hsd-saas .hsd-listbox { background: #fff; border: 1px solid #dee2e6; border-radius: 8px; padding: 4px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08); }
 .hsd-saas .hsd-option { font-family: ${FONT}; font-size: 14px; color: #495057; padding: 8px 12px; border-radius: 6px; }
 .hsd-saas .hsd-option[data-highlighted] { background: #e7f5ff; color: #1971c2; }
 .hsd-saas .hsd-option[data-state='checked'] { font-weight: 600; }
-.hsd-saas .hsd-option[data-state='checked']::after { content: ' ✓'; color: #228be6; }
+.hsd-saas .hsd-option[data-state='checked']::after { content: ' ✓'; color: #1864ab; }
 
 /* 스킨 2: 커머스 — 둥글고 따뜻한 톤 */
 .hsd-commerce.hsd-stage { background: #fff4e6; }
-.hsd-commerce .hsd-trigger { display: inline-flex; align-items: center; justify-content: space-between; min-width: 180px; font-family: ${FONT}; font-size: 14px; font-weight: 700; color: #d9480f; background: #fff; border: 2px solid #ffa94d; border-radius: 999px; padding: 10px 18px; cursor: pointer; box-shadow: 0 2px 8px rgba(217, 72, 15, 0.12); }
+.hsd-commerce .hsd-trigger { display: inline-flex; align-items: center; justify-content: space-between; min-width: 180px; font-family: ${FONT}; font-size: 14px; font-weight: 700; color: #c2410c; background: #fff; border: 2px solid #c2410c; border-radius: 999px; padding: 10px 18px; cursor: pointer; box-shadow: 0 2px 8px rgba(217, 72, 15, 0.12); }
 .hsd-commerce .hsd-trigger:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(255, 146, 43, 0.35); }
-.hsd-commerce .hsd-trigger [data-placeholder] { color: #ffa94d; }
+.hsd-commerce .hsd-trigger [data-placeholder] { color: #c2410c; }
 .hsd-commerce .hsd-listbox { background: #fff; border-radius: 20px; padding: 8px; box-shadow: 0 8px 24px rgba(217, 72, 15, 0.18); }
 .hsd-commerce .hsd-option { font-family: ${FONT}; font-size: 14px; color: #495057; padding: 9px 16px; border-radius: 999px; }
-.hsd-commerce .hsd-option[data-highlighted] { background: #ffe8cc; color: #d9480f; }
-.hsd-commerce .hsd-option[data-state='checked'] { background: #fd7e14; color: #fff; font-weight: 700; }
+.hsd-commerce .hsd-option[data-highlighted] { background: #ffe8cc; color: #c2410c; }
+.hsd-commerce .hsd-option[data-state='checked'] { background: #c2410c; color: #fff; font-weight: 700; }
 
 /* 스킨 3: 어드민 콘솔 — 어둡고 기계적인 톤 */
 .hsd-terminal.hsd-stage { background: #1a1b26; }
 .hsd-terminal .hsd-trigger { display: inline-flex; align-items: center; justify-content: space-between; min-width: 200px; font-family: ${MONO}; font-size: 13px; color: #9ece6a; background: #16161e; border: 1px solid #3b4261; border-radius: 2px; padding: 9px 12px; cursor: pointer; }
-.hsd-terminal .hsd-trigger::before { content: '$ '; color: #565f89; }
+.hsd-terminal .hsd-trigger::before { content: '$ '; color: #a9b1d6; }
 .hsd-terminal .hsd-trigger:focus-visible { outline: 1px solid #9ece6a; outline-offset: 2px; }
-.hsd-terminal .hsd-trigger [data-placeholder] { color: #565f89; }
+.hsd-terminal .hsd-trigger [data-placeholder] { color: #a9b1d6; }
 .hsd-terminal .hsd-listbox { background: #16161e; border: 1px solid #3b4261; border-radius: 2px; padding: 2px; }
 .hsd-terminal .hsd-option { font-family: ${MONO}; font-size: 13px; color: #a9b1d6; padding: 7px 12px; }
 .hsd-terminal .hsd-option[data-highlighted] { background: #9ece6a; color: #16161e; }
@@ -98,9 +98,9 @@ export const SkinSwapDemo = () => {
                             fontSize: 12,
                             padding: "6px 12px",
                             borderRadius: 6,
-                            border: `1px solid ${skin === s.id ? "#228be6" : "#dee2e6"}`,
+                            border: `1px solid ${skin === s.id ? "#1864ab" : "#dee2e6"}`,
                             background: skin === s.id ? "#e7f5ff" : "#fff",
-                            color: skin === s.id ? "#1971c2" : "#868e96",
+                            color: skin === s.id ? "#1971c2" : "#495057",
                             fontWeight: skin === s.id ? 600 : 400,
                             cursor: "pointer",
                         }}
@@ -119,7 +119,10 @@ export const SkinSwapDemo = () => {
                     onOpenChange={setOpen}
                     className="hsd-root"
                 >
-                    <Select.Trigger className="hsd-trigger">
+                    <Select.Trigger
+                        aria-label="정렬 기준"
+                        className="hsd-trigger"
+                    >
                         <Select.Value placeholder="정렬 기준 선택" />
                         <span className="hsd-chevron" aria-hidden>
                             ▾
@@ -143,7 +146,7 @@ export const SkinSwapDemo = () => {
                 style={{
                     fontFamily: MONO,
                     fontSize: 11,
-                    color: "#868e96",
+                    color: "#495057",
                     marginTop: 12,
                     textAlign: "center",
                 }}
@@ -154,7 +157,7 @@ export const SkinSwapDemo = () => {
             <div
                 style={{
                     fontSize: 11,
-                    color: "#adb5bd",
+                    color: "#5c636a",
                     textAlign: "center",
                     marginTop: 6,
                 }}

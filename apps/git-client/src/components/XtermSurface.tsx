@@ -8,6 +8,7 @@ import {
     useRef,
     type MouseEventHandler,
 } from "react";
+import { terminalService } from "../application/terminal/activeTerminalService";
 import {
     TerminalActionExecutor,
     terminalActionForKeyboard,
@@ -16,10 +17,9 @@ import {
     type TerminalClipboardPort,
     type TerminalSurfaceActionId,
 } from "../domain/terminalActions";
-import { terminalService } from "../domain/TerminalService";
-import { terminalThemeFor } from "../domain/terminalTheme";
-import type { TerminalEvent } from "../shared/contracts/model";
+import type { TerminalEvent } from "../shared/contracts/model/index";
 import { useAppearance } from "./AppearanceProvider";
+import { browserTerminalTheme } from "./terminal/browserTerminalTheme";
 
 export interface XtermSurfaceCapabilities {
     readonly hasSelection: boolean;
@@ -94,7 +94,7 @@ const XtermSurface = forwardRef<XtermSurfaceHandle, XtermSurfaceProps>(
                 fontSize: 13,
                 lineHeight: 1,
                 scrollback: 10_000,
-                theme: terminalThemeFor(),
+                theme: browserTerminalTheme(),
             });
             terminalRef.current = terminal;
             terminal.attachCustomKeyEventHandler((event) => {
@@ -156,7 +156,7 @@ const XtermSurface = forwardRef<XtermSurfaceHandle, XtermSurfaceProps>(
             const terminal = terminalRef.current;
             if (!terminal) return;
             const frame = requestAnimationFrame(() => {
-                terminal.options.theme = terminalThemeFor();
+                terminal.options.theme = browserTerminalTheme();
             });
             return () => cancelAnimationFrame(frame);
         }, [colorScheme]);

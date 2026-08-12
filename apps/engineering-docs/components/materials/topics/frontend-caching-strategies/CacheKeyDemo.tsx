@@ -138,7 +138,7 @@ const badgeStyle = (hit: boolean): React.CSSProperties => ({
     fontFamily: FONT,
     padding: "2px 10px",
     borderRadius: 10,
-    color: hit ? "#2f9e44" : "#fa5252",
+    color: hit ? "#237032" : "#c92a2a",
     background: hit ? "#d3f9d8" : "#ffe3e3",
 });
 
@@ -168,14 +168,14 @@ const Panel = ({
     const shown = entries.slice(0, maxChips);
     const overflow = entries.length - shown.length;
     const rateColor = goodRate
-        ? "#2f9e44"
+        ? "#237032"
         : entries.length > 6
-          ? "#fa5252"
+          ? "#c92a2a"
           : "#495057";
     return (
         <div
             style={{
-                border: final ? "1px solid #adb5bd" : "1px solid #dee2e6",
+                border: final ? "1px solid #5c636a" : "1px solid #dee2e6",
                 borderRadius: 8,
                 padding: narrow ? "10px 10px" : "12px 14px",
                 background: "#fff",
@@ -235,7 +235,7 @@ const Panel = ({
                 <span
                     style={{
                         fontSize: final ? 15 : 12,
-                        color: "#adb5bd",
+                        color: "#5c636a",
                         margin: "0 6px",
                     }}
                 >
@@ -245,7 +245,7 @@ const Panel = ({
                     style={{
                         fontSize: final ? (narrow ? 20 : 24) : narrow ? 14 : 15,
                         fontWeight: 700,
-                        color: entries.length > 6 ? "#fa5252" : "#495057",
+                        color: entries.length > 6 ? "#c92a2a" : "#495057",
                         fontVariantNumeric: "tabular-nums",
                         transition: "font-size 0.3s",
                     }}
@@ -266,7 +266,7 @@ const Panel = ({
                 }}
             >
                 {entries.length === 0 ? (
-                    <span style={{ fontSize: 11, color: "#adb5bd" }}>
+                    <span style={{ fontSize: 11, color: "#5c636a" }}>
                         아직 캐시된 항목이 없다
                     </span>
                 ) : (
@@ -280,7 +280,7 @@ const Panel = ({
                                     padding: "3px 6px",
                                     borderRadius: 4,
                                     whiteSpace: "nowrap",
-                                    color: e.tracked ? "#adb5bd" : "#1971c2",
+                                    color: e.tracked ? "#5c636a" : "#1971c2",
                                     background: e.tracked
                                         ? "#f8f9fa"
                                         : "#e7f5ff",
@@ -300,7 +300,7 @@ const Panel = ({
                                     fontWeight: 700,
                                     padding: "3px 6px",
                                     borderRadius: 4,
-                                    color: "#fa5252",
+                                    color: "#c92a2a",
                                     background: "#fff5f5",
                                     border: "1px solid #ffc9c9",
                                 }}
@@ -383,13 +383,13 @@ export const CacheKeyDemo = () => {
                         marginBottom: 6,
                     }}
                 >
-                    <span style={{ fontSize: 11, color: "#868e96" }}>
+                    <span style={{ fontSize: 11, color: "#495057" }}>
                         들어오는 요청
                     </span>
                     <span
                         style={{
                             fontSize: 11,
-                            color: "#adb5bd",
+                            color: "#5c636a",
                             fontVariantNumeric: "tabular-nums",
                         }}
                     >
@@ -401,7 +401,7 @@ export const CacheKeyDemo = () => {
                         <div
                             style={{
                                 fontSize: narrow ? 13 : 15,
-                                color: "#adb5bd",
+                                color: "#5c636a",
                                 whiteSpace: "nowrap",
                                 lineHeight: 1.6,
                             }}
@@ -423,7 +423,7 @@ export const CacheKeyDemo = () => {
                             {frame!.params!.map((p, i) => (
                                 <React.Fragment key={p.key}>
                                     {i > 0 && (
-                                        <span style={{ color: "#adb5bd" }}>
+                                        <span style={{ color: "#5c636a" }}>
                                             &amp;
                                         </span>
                                     )}
@@ -495,7 +495,7 @@ export const CacheKeyDemo = () => {
                                         {i > 0 && (
                                             <span
                                                 style={{
-                                                    color: "#adb5bd",
+                                                    color: "#5c636a",
                                                     textDecoration: p.tracking
                                                         ? "line-through"
                                                         : "none",
@@ -514,7 +514,7 @@ export const CacheKeyDemo = () => {
                                                     : "none",
                                                 opacity: p.tracking ? 0.35 : 1,
                                                 color: p.tracking
-                                                    ? "#868e96"
+                                                    ? "#495057"
                                                     : "#1971c2",
                                             }}
                                         >
@@ -529,7 +529,7 @@ export const CacheKeyDemo = () => {
             </div>
 
             <div
-                style={{ fontSize: 11, color: "#adb5bd", textAlign: "center" }}
+                style={{ fontSize: 11, color: "#5c636a", textAlign: "center" }}
             >
                 실제로 서로 다른 페이지는 6개뿐이다 — 왼쪽의 나머지 항목은 전부
                 파편이다

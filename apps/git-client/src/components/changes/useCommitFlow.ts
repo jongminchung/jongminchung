@@ -6,7 +6,7 @@ import type {
     Changelist,
     GitOperation,
     PreCommitCheck,
-} from "../../shared/contracts/model";
+} from "../../shared/contracts/model/index";
 import type { useAppDialog } from "../AppDialog";
 
 export type ChangelistMutation = "create" | "delete";

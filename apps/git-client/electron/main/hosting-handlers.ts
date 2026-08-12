@@ -1,4 +1,5 @@
 import type { MainDesktopTrpcRouter } from "../../src/shared/contracts/desktop-trpc";
+import { safeHostingErrorMessage } from "../../src/shared/contracts/hosting-redaction";
 import {
     HostingDeleteAccountRequestSchema,
     HostingExecuteRequestSchema,
@@ -11,7 +12,6 @@ import {
     HostingResponseSchema,
     type ElectronHostingFoundation,
 } from "../hosting";
-import { safeHostingErrorMessage } from "../hosting/hosting-redaction";
 import type { DesktopTrpcHost } from "./desktop-trpc-host";
 
 interface HostingHandlerDependencies {

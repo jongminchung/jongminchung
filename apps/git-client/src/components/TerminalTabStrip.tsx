@@ -7,8 +7,8 @@ import {
 } from "@jongminchung/ui/components/tooltip";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { useRef, type MouseEvent } from "react";
+import type { TerminalSessionSnapshot } from "../application/terminal/TerminalService";
 import { terminalTabAfterClose } from "../domain/terminalActions";
-import type { TerminalSessionSnapshot } from "../domain/TerminalService";
 import { Icon } from "./Icon";
 
 const TERMINAL_STATUS_CLASS = {

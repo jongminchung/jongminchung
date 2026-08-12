@@ -1,14 +1,14 @@
 import { readFile, readdir, stat, writeFile } from "node:fs/promises";
-import { dirname, relative, resolve, sep } from "node:path";
+import { basename, dirname, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+import ts from "typescript";
 
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const topicsRoot = resolve(appRoot, "components/materials/topics");
 const registryPath = resolve(appRoot, "generated/materials-registry.tsx");
 const manifestPath = resolve(appRoot, "generated/materials-manifest.json");
+const typesPath = resolve(appRoot, "generated/materials-types.ts");
 const mode = process.argv.includes("--write") ? "write" : "check";
-const expectedTopicCount = 24;
-const expectedDemoCount = 179;
 
 interface MaterialExport {
     readonly exportName: string;
@@ -17,8 +17,13 @@ interface MaterialExport {
     readonly minHeight: number;
     readonly moduleExport: string;
     readonly modulePath: string;
-    readonly renderer: "svg-motion" | "dom-motion" | "canvas" | "wasm";
+    readonly renderer: "svg-motion" | "dom-motion" | "canvas";
     readonly topic: string;
+}
+
+interface ExportedName {
+    readonly exportName: string;
+    readonly localName: string;
 }
 
 function toPosixPath(value: string): string {
@@ -47,14 +52,73 @@ async function resolveModuleFile(
     );
 }
 
-function namedExports(source: string): readonly string[] {
-    const names = new Set<string>();
-    const declarationPattern =
-        /export\s+(?:default\s+)?(?:const|let|var|function|class)\s+([A-Za-z_$][\w$]*)/gu;
-    for (const match of source.matchAll(declarationPattern)) {
-        if (match[1] !== undefined) names.add(match[1]);
+function parseSource(filePath: string, source: string): ts.SourceFile {
+    return ts.createSourceFile(
+        filePath,
+        source,
+        ts.ScriptTarget.Latest,
+        true,
+        filePath.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+    );
+}
+
+function hasExportModifier(node: ts.Node): boolean {
+    return ts.canHaveModifiers(node)
+        ? (ts
+              .getModifiers(node)
+              ?.some(
+                  (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword,
+              ) ?? false)
+        : false;
+}
+
+function exportedValueNames(
+    sourceFile: ts.SourceFile,
+): readonly ExportedName[] {
+    const names: ExportedName[] = [];
+    for (const statement of sourceFile.statements) {
+        if (!hasExportModifier(statement)) continue;
+        if (
+            (ts.isFunctionDeclaration(statement) ||
+                ts.isClassDeclaration(statement)) &&
+            statement.name !== undefined
+        ) {
+            names.push({
+                exportName: statement.name.text,
+                localName: statement.name.text,
+            });
+            continue;
+        }
+        if (ts.isVariableStatement(statement)) {
+            for (const declaration of statement.declarationList.declarations) {
+                if (!ts.isIdentifier(declaration.name)) continue;
+                names.push({
+                    exportName: declaration.name.text,
+                    localName: declaration.name.text,
+                });
+            }
+        }
     }
-    return [...names];
+    return names;
+}
+
+function exportedNames(
+    sourceFile: ts.SourceFile,
+    declaration: ts.ExportDeclaration,
+    moduleSourceFile: ts.SourceFile,
+): readonly ExportedName[] {
+    if (declaration.exportClause === undefined) {
+        return exportedValueNames(moduleSourceFile);
+    }
+    if (!ts.isNamedExports(declaration.exportClause)) {
+        throw new Error(
+            `${sourceFile.fileName}: namespace material exports are unsupported.`,
+        );
+    }
+    return declaration.exportClause.elements.map((element) => ({
+        exportName: element.name.text,
+        localName: element.propertyName?.text ?? element.name.text,
+    }));
 }
 
 function rendererFor(
@@ -62,15 +126,13 @@ function rendererFor(
     fileName: string,
     source: string,
 ): MaterialExport["renderer"] {
-    if (topic === "building-nes-emulator") return "wasm";
     if (
         topic === "the-expensive-main-thread" &&
-        (fileName === "DynamicPriorityDemo" || fileName === "SeamCarvingDemo")
+        fileName === "DynamicPriorityDemo"
     ) {
         return "canvas";
     }
-    if (source.includes("<SvgCanvas") || source.includes("<svg"))
-        return "svg-motion";
+    if (source.includes("<svg")) return "svg-motion";
     return "dom-motion";
 }
 
@@ -78,57 +140,34 @@ function minHeightFor(
     topic: string,
     renderer: MaterialExport["renderer"],
 ): number {
-    if (topic === "building-nes-emulator") return 520;
-    if (topic === "building-llm" || topic === "it-is-the-boundary-stupid")
-        return 400;
-    if (renderer === "dom-motion") return 240;
-    return 320;
+    if (topic === "building-llm") return 400;
+    return renderer === "dom-motion" ? 240 : 320;
 }
 
 async function readTopicExports(
     topic: string,
 ): Promise<readonly MaterialExport[]> {
     const topicRoot = resolve(topicsRoot, topic);
-    const indexSource = await readFile(resolve(topicRoot, "index.ts"), "utf8");
+    const indexPath = resolve(topicRoot, "index.ts");
+    const indexSource = await readFile(indexPath, "utf8");
+    const indexFile = parseSource(indexPath, indexSource);
     const exports: MaterialExport[] = [];
-    const declarationPattern =
-        /export\s+(\*|\{[^}]+\})\s+from\s+['"]([^'"]+)['"]/gu;
 
-    for (const declaration of indexSource.matchAll(declarationPattern)) {
-        const clause = declaration[1];
-        const specifier = declaration[2];
-        if (clause === undefined || specifier === undefined) continue;
+    for (const declaration of indexFile.statements) {
+        if (
+            !ts.isExportDeclaration(declaration) ||
+            declaration.moduleSpecifier === undefined ||
+            !ts.isStringLiteral(declaration.moduleSpecifier)
+        ) {
+            continue;
+        }
+        const specifier = declaration.moduleSpecifier.text;
         const filePath = await resolveModuleFile(topicRoot, specifier);
         const fileSource = await readFile(filePath, "utf8");
-        const fileName = specifier.split("/").at(-1);
-        if (fileName === undefined)
-            throw new Error(`Invalid material specifier: ${specifier}`);
+        const fileName = basename(filePath).replace(/\.tsx?$/u, "");
+        const moduleFile = parseSource(filePath, fileSource);
 
-        const items =
-            clause === "*"
-                ? namedExports(fileSource).map((name) => ({
-                      exportName: name,
-                      localName: name,
-                  }))
-                : clause
-                      .slice(1, -1)
-                      .split(",")
-                      .map((item) => item.trim())
-                      .filter(Boolean)
-                      .map((item) => {
-                          const alias =
-                              /^(default|[A-Za-z_$][\w$]*)\s+as\s+([A-Za-z_$][\w$]*)$/u.exec(
-                                  item,
-                              );
-                          return alias === null
-                              ? { exportName: item, localName: item }
-                              : {
-                                    exportName: alias[2] ?? item,
-                                    localName: alias[1] ?? item,
-                                };
-                      });
-
-        for (const item of items) {
+        for (const item of exportedNames(indexFile, declaration, moduleFile)) {
             const renderer = rendererFor(topic, fileName, fileSource);
             exports.push({
                 exportName: item.exportName,
@@ -143,6 +182,11 @@ async function readTopicExports(
         }
     }
 
+    if (exports.length === 0) {
+        throw new Error(
+            `${toPosixPath(relative(appRoot, indexPath))} exports no demos.`,
+        );
+    }
     return exports;
 }
 
@@ -170,14 +214,6 @@ async function listSourceFiles(directory: string): Promise<readonly string[]> {
         .sort();
 }
 
-function isCanvasException(relativePath: string): boolean {
-    return (
-        relativePath.startsWith("building-nes-emulator/") ||
-        relativePath === "the-expensive-main-thread/DynamicPriorityDemo.tsx" ||
-        relativePath === "the-expensive-main-thread/SeamCarvingDemo.tsx"
-    );
-}
-
 async function validateRenderingPolicy(): Promise<void> {
     const violations: string[] = [];
     for (const filePath of await listSourceFiles(topicsRoot)) {
@@ -188,7 +224,10 @@ async function validateRenderingPolicy(): Promise<void> {
             source.includes("CanvasRenderingContext2D") ||
             source.includes("HTMLCanvasElement") ||
             /createElement\(\s*['"]canvas['"]\s*\)/u.test(source);
-        if (hasCanvas && !isCanvasException(relativePath)) {
+        if (
+            hasCanvas &&
+            relativePath !== "the-expensive-main-thread/DynamicPriorityDemo.tsx"
+        ) {
             violations.push(
                 `${relativePath}: native Canvas is outside the allowlist`,
             );
@@ -220,11 +259,12 @@ async function validateRenderingPolicy(): Promise<void> {
 
 function createRegistry(exports: readonly MaterialExport[]): string {
     const entries = exports
-        .map((entry) => {
-            return `  ${JSON.stringify(entry.id)}: {\n    id: ${JSON.stringify(entry.id)},\n    topic: ${JSON.stringify(entry.topic)},\n    name: ${JSON.stringify(entry.exportName)},\n    renderer: ${JSON.stringify(entry.renderer)},\n    minHeight: ${entry.minHeight},\n    component: dynamic<MaterialComponentProps>(\n      () => import(${JSON.stringify(entry.modulePath)}).then((module) => module.${entry.moduleExport}),\n      { ssr: false },\n    ),\n    preload: () => import(${JSON.stringify(entry.modulePath)}),\n  } satisfies MaterialManifestEntry,`;
-        })
+        .map(
+            (entry) =>
+                `  ${JSON.stringify(entry.id)}: {\n    id: ${JSON.stringify(entry.id)},\n    topic: ${JSON.stringify(entry.topic)},\n    name: ${JSON.stringify(entry.exportName)},\n    renderer: ${JSON.stringify(entry.renderer)},\n    minHeight: ${entry.minHeight},\n    component: dynamic<MaterialComponentProps>(\n      () => import(${JSON.stringify(entry.modulePath)}).then((module) => module.${entry.moduleExport}),\n      { ssr: false },\n    ),\n    preload: () => import(${JSON.stringify(entry.modulePath)}),\n  } satisfies MaterialManifestEntry,`,
+        )
         .join("\n");
-    return `/* This file is generated by scripts/build-materials.ts. */\n\nimport dynamic from "next/dynamic";\nimport type { MaterialComponentProps, MaterialId, MaterialManifestEntry } from "#components/materials/types";\n\nexport const materialRegistry: Readonly<Record<string, MaterialManifestEntry>> = {\n${entries}\n};\n\nexport const materialIds = Object.freeze(Object.keys(materialRegistry) as MaterialId[]);\n`;
+    return `/* This file is generated by scripts/build-materials.ts. */\n\nimport dynamic from "next/dynamic";\nimport type { MaterialComponentProps, MaterialId, MaterialManifestEntry } from "#components/materials/types";\n\nexport const materialRegistry: Readonly<Record<MaterialId, MaterialManifestEntry>> = {\n${entries}\n};\n\nexport const materialIds = Object.freeze(Object.keys(materialRegistry) as MaterialId[]);\n`;
 }
 
 function createManifest(exports: readonly MaterialExport[]): string {
@@ -241,6 +281,57 @@ function createManifest(exports: readonly MaterialExport[]): string {
     return `${JSON.stringify(manifest, null, 2)}\n`;
 }
 
+function createTypes(exports: readonly MaterialExport[]): string {
+    const ids = exports
+        .map((entry) => `    | ${JSON.stringify(entry.id)}`)
+        .join("\n");
+    const topics = [...new Set(exports.map((entry) => entry.topic))]
+        .map((topic) => `    | ${JSON.stringify(topic)}`)
+        .join("\n");
+    return `/* This file is generated by scripts/build-materials.ts. */\n\nexport type MaterialId =\n${ids};\n\nexport type MaterialTopic =\n${topics};\n`;
+}
+
+async function readLocaleIds(locale: "ko" | "en"): Promise<readonly string[]> {
+    const directory = resolve(appRoot, `content/${locale}/deep-dive`);
+    const files = (await readdir(directory))
+        .filter((fileName) => fileName.endsWith(".mdx"))
+        .sort();
+    const ids: string[] = [];
+    for (const fileName of files) {
+        const source = await readFile(resolve(directory, fileName), "utf8");
+        ids.push(
+            ...[...source.matchAll(/<MaterialDemo\s+id="([^"]+)"\s*\/>/gu)].map(
+                (match) => match[1] ?? "",
+            ),
+        );
+    }
+    return ids;
+}
+
+async function validateLocalizedReferences(
+    exports: readonly MaterialExport[],
+): Promise<void> {
+    const expected = exports.map((entry) => entry.id).sort();
+    for (const locale of ["ko", "en"] as const) {
+        const ids = [...(await readLocaleIds(locale))].sort();
+        const duplicates = ids.filter((id, index) => id === ids[index - 1]);
+        if (duplicates.length > 0) {
+            throw new Error(
+                `${locale} material IDs must be unique: ${[...new Set(duplicates)].join(", ")}`,
+            );
+        }
+        if (JSON.stringify(ids) !== JSON.stringify(expected)) {
+            const actual = new Set(ids);
+            const expectedSet = new Set(expected);
+            const missing = expected.filter((id) => !actual.has(id));
+            const unknown = ids.filter((id) => !expectedSet.has(id));
+            throw new Error(
+                `${locale} material references differ from the registry. Missing: ${missing.join(", ") || "none"}. Unknown: ${unknown.join(", ") || "none"}.`,
+            );
+        }
+    }
+}
+
 async function checkOrWrite(filePath: string, contents: string): Promise<void> {
     const existing = await readFile(filePath, "utf8").catch(() => null);
     if (mode === "write") {
@@ -255,27 +346,18 @@ async function checkOrWrite(filePath: string, contents: string): Promise<void> {
 }
 
 const topics = await listTopicDirectories();
-if (topics.length !== expectedTopicCount) {
-    throw new Error(
-        `Expected ${expectedTopicCount} material topics, found ${topics.length}.`,
-    );
-}
-
 const exports = (await Promise.all(topics.map(readTopicExports)))
     .flat()
     .sort((left, right) => left.id.localeCompare(right.id));
-if (exports.length !== expectedDemoCount) {
-    throw new Error(
-        `Expected ${expectedDemoCount} public material demos, found ${exports.length}.`,
-    );
-}
 if (new Set(exports.map((entry) => entry.id)).size !== exports.length) {
     throw new Error("Material IDs must be unique.");
 }
 
 await validateRenderingPolicy();
+await validateLocalizedReferences(exports);
 await checkOrWrite(registryPath, createRegistry(exports));
 await checkOrWrite(manifestPath, createManifest(exports));
+await checkOrWrite(typesPath, createTypes(exports));
 console.log(
     `Validated ${topics.length} material topics and ${exports.length} public demos.`,
 );

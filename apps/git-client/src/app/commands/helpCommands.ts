@@ -1,3 +1,4 @@
+import type { AppDialogController } from "../../components/AppDialog";
 import {
     COMMAND_ENABLED,
     commandDefinition,
@@ -12,20 +13,21 @@ import {
     revealDiagnosticPath,
     writeDiagnosticConfiguration,
 } from "../../platform/electronActions";
-import type { WorkspaceCommandContext } from "./workspaceCommandTypes";
+import type { AppStore } from "../state/appStore";
+
+export type HelpCommandPort = Pick<
+    AppStore,
+    | "setActivityMonitorOpen"
+    | "setCommandLineLauncherOpen"
+    | "setDiagnosticConfiguration"
+    | "setHelpOpen"
+    | "setLeftoverDirectoriesOpen"
+    | "setSpecialFilesOpen"
+    | "setWhatsNewOpen"
+> & { readonly dialog: AppDialogController };
 
 export function createHelpCommands(
-    context: Pick<
-        WorkspaceCommandContext,
-        | "dialog"
-        | "setActivityMonitorOpen"
-        | "setCommandLineLauncherOpen"
-        | "setDiagnosticConfiguration"
-        | "setHelpOpen"
-        | "setLeftoverDirectoriesOpen"
-        | "setSpecialFilesOpen"
-        | "setWhatsNewOpen"
-    >,
+    context: HelpCommandPort,
 ): readonly CommandDefinition[] {
     const {
         dialog,

@@ -7,7 +7,7 @@ const MONO = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
 // 에이전트 루프의 한 왕복을 보여주는 정적 시퀀스 다이어그램.
 // tool_use 요청과 tool_result 응답이 같은 id로 짝지어진다는 걸 강조한다.
 
-const ID_COLOR = "#845ef7"; // 같은 id를 잇는 보라색
+const ID_COLOR = "#6741d9"; // 같은 id를 잇는 보라색
 
 const STYLE = `
 .bca-call-card {
@@ -65,7 +65,7 @@ export const ToolCallDiagram = ({ caption }: { caption?: string }) => {
                         height={26}
                         rx={5}
                         fill="#fff5f5"
-                        stroke="#fa5252"
+                        stroke="#c92a2a"
                         strokeWidth={1.2}
                     />
                     <text
@@ -75,7 +75,7 @@ export const ToolCallDiagram = ({ caption }: { caption?: string }) => {
                         fontFamily={FONT}
                         fontSize={12}
                         fontWeight={700}
-                        fill="#e03131"
+                        fill="#c92a2a"
                     >
                         모델
                     </text>
@@ -87,7 +87,7 @@ export const ToolCallDiagram = ({ caption }: { caption?: string }) => {
                         height={26}
                         rx={5}
                         fill="#ebfbee"
-                        stroke="#40c057"
+                        stroke="#237032"
                         strokeWidth={1.2}
                     />
                     <text
@@ -97,7 +97,7 @@ export const ToolCallDiagram = ({ caption }: { caption?: string }) => {
                         fontFamily={FONT}
                         fontSize={12}
                         fontWeight={700}
-                        fill="#2f9e44"
+                        fill="#237032"
                     >
                         우리 코드 · 실행기
                     </text>
@@ -151,7 +151,7 @@ export const ToolCallDiagram = ({ caption }: { caption?: string }) => {
                         textAnchor="middle"
                         fontFamily={MONO}
                         fontSize={10}
-                        fill="#868e96"
+                        fill="#495057"
                     >
                         name: read_file
                     </text>
@@ -190,7 +190,7 @@ export const ToolCallDiagram = ({ caption }: { caption?: string }) => {
                         height={22}
                         rx={4}
                         fill="#f8f9fa"
-                        stroke="#ced4da"
+                        stroke="#5f666d"
                         strokeWidth={1}
                     />
                     <text
@@ -199,7 +199,7 @@ export const ToolCallDiagram = ({ caption }: { caption?: string }) => {
                         textAnchor="middle"
                         fontFamily={FONT}
                         fontSize={10}
-                        fill="#868e96"
+                        fill="#495057"
                     >
                         파일을 읽음
                     </text>
@@ -233,7 +233,7 @@ export const ToolCallDiagram = ({ caption }: { caption?: string }) => {
                         textAnchor="middle"
                         fontFamily={MONO}
                         fontSize={10}
-                        fill="#868e96"
+                        fill="#495057"
                     >
                         content: 파일 내용…
                     </text>

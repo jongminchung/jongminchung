@@ -14,7 +14,7 @@ export const DiagramPlaceholder = ({ name, caption }: Props) => (
                 justifyContent: "center",
                 background:
                     "repeating-linear-gradient(45deg, #f8f9fa, #f8f9fa 8px, #f1f3f5 8px, #f1f3f5 16px)",
-                border: "2px dashed #adb5bd",
+                border: "2px dashed #5c636a",
                 borderRadius: "8px",
                 padding: "64px 20px",
                 textAlign: "center",
@@ -34,7 +34,7 @@ export const DiagramPlaceholder = ({ name, caption }: Props) => (
                 <div
                     style={{
                         fontSize: "11px",
-                        color: "#868e96",
+                        color: "#495057",
                         marginTop: "4px",
                     }}
                 >

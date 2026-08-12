@@ -103,7 +103,7 @@ test("keeps a packaged safe-mode project read-only across restart", async () => 
             ).toBeVisible();
             await expect(
                 page
-                    .getByRole("table", { name: "Git log" })
+                    .getByRole("grid", { name: "Git log" })
                     .locator("[data-oid]"),
             ).toHaveCount(1);
 

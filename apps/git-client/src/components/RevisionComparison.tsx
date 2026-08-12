@@ -3,7 +3,7 @@ import { cn } from "@jongminchung/ui/lib/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { DiffPreferences } from "../domain/changeReview";
 import { revisionDiffEntries } from "../domain/changeReview";
-import type { FileContent, FileSource } from "../shared/contracts/model";
+import type { FileContent, FileSource } from "../shared/contracts/model/index";
 import { DiffViewer } from "./DiffViewer";
 import { Notice } from "./Notice";
 import { EmptyState, Spinner, StatusBadge } from "./ProductCollections";

@@ -102,20 +102,20 @@ interface GroupStyle {
 const GROUPS: GroupStyle[] = [
     {
         label: "부호(1)",
-        labelColor: "#fa5252",
-        onBg: "#fa5252",
+        labelColor: "#c92a2a",
+        onBg: "#c92a2a",
         offBg: "#fff5f5",
     },
     {
         label: "지수(11)",
-        labelColor: "#f08c00",
-        onBg: "#f08c00",
+        labelColor: "#a65300",
+        onBg: "#a65300",
         offBg: "#fff9db",
     },
     {
         label: "가수(52)",
-        labelColor: "#228be6",
-        onBg: "#228be6",
+        labelColor: "#1864ab",
+        onBg: "#1864ab",
         offBg: "#e7f5ff",
     },
 ];
@@ -155,7 +155,7 @@ export const FloatBitsDemo = () => {
                 justifyContent: "center",
                 borderRadius: 3,
                 background: bit === "1" ? g.onBg : g.offBg,
-                color: bit === "1" ? "#fff" : "#adb5bd",
+                color: bit === "1" ? "#fff" : "#5c636a",
                 fontFamily: MONO,
                 fontSize: cellFs,
                 fontWeight: bit === "1" ? 700 : 400,
@@ -224,7 +224,7 @@ export const FloatBitsDemo = () => {
                                     padding: "4px 10px",
                                     borderRadius: 12,
                                     border: active
-                                        ? "1px solid #228be6"
+                                        ? "1px solid #1864ab"
                                         : "1px solid #dee2e6",
                                     background: active ? "#e7f5ff" : "#f8f9fa",
                                     color: active ? "#1971c2" : "#495057",
@@ -245,7 +245,7 @@ export const FloatBitsDemo = () => {
                         padding: "14px 12px",
                         borderRadius: 6,
                         background: "#f8f9fa",
-                        color: "#868e96",
+                        color: "#495057",
                         fontSize: 13,
                         textAlign: "center",
                     }}
@@ -340,7 +340,7 @@ export const FloatBitsDemo = () => {
                             <span
                                 style={{
                                     fontSize: 12,
-                                    color: "#868e96",
+                                    color: "#495057",
                                     flexShrink: 0,
                                     width: 90,
                                 }}
@@ -352,7 +352,7 @@ export const FloatBitsDemo = () => {
                                     fontFamily: MONO,
                                     fontSize: 13,
                                     fontWeight: 700,
-                                    color: "#228be6",
+                                    color: "#1864ab",
                                     wordBreak: "break-all",
                                 }}
                             >
@@ -369,7 +369,7 @@ export const FloatBitsDemo = () => {
                             <span
                                 style={{
                                     fontSize: 12,
-                                    color: "#868e96",
+                                    color: "#495057",
                                     flexShrink: 0,
                                     width: 90,
                                 }}
@@ -381,7 +381,7 @@ export const FloatBitsDemo = () => {
                                     fontFamily: MONO,
                                     fontSize: 13,
                                     fontWeight: 700,
-                                    color: isExact ? "#2f9e44" : "#e03131",
+                                    color: isExact ? "#237032" : "#c92a2a",
                                     wordBreak: "break-all",
                                 }}
                             >
@@ -393,9 +393,9 @@ export const FloatBitsDemo = () => {
                                             marginLeft: 8,
                                             padding: "2px 8px",
                                             borderRadius: 10,
-                                            border: "1px solid #40c057",
+                                            border: "1px solid #237032",
                                             background: "#d3f9d8",
-                                            color: "#2f9e44",
+                                            color: "#237032",
                                             fontFamily: FONT,
                                             fontSize: 11,
                                             fontWeight: 700,
@@ -415,7 +415,7 @@ export const FloatBitsDemo = () => {
                 style={{
                     marginTop: 12,
                     fontSize: 11,
-                    color: "#adb5bd",
+                    color: "#5c636a",
                     textAlign: "center",
                 }}
             >

@@ -16,7 +16,7 @@ import type {
     FilePreview,
     FileSource,
     SubmoduleDiff,
-} from "../shared/contracts/model";
+} from "../shared/contracts/model/index";
 import { useDismissLayer } from "./CommandProvider";
 import { DiffViewer } from "./DiffViewer";
 import { Icon } from "./Icon";

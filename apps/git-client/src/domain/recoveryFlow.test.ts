@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { HistoryRewritePreview } from "../shared/contracts/model";
+import type { HistoryRewritePreview } from "../shared/contracts/model/index";
 import {
     abortOperationConfirmation,
     operationDisplayName,

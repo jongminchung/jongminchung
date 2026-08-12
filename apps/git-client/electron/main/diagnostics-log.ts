@@ -1,6 +1,6 @@
 import { appendFile, lstat, mkdir, rename, rm } from "node:fs/promises";
 import { join } from "node:path";
-import { redactHostingCredentials } from "../hosting/hosting-redaction";
+import { redactHostingCredentials } from "../../src/shared/contracts/hosting-redaction";
 
 export const MAX_DIAGNOSTIC_LOG_BYTES = 4 * 1_024 * 1_024;
 const MAX_DIAGNOSTIC_LOG_LINE_CHARACTERS = 16_384;

@@ -15,6 +15,7 @@ import {
     packagedElectronFrameworkResourcesPath,
     verifyElectronLocales,
 } from "./electron-package-policy.mjs";
+import { resolvePackagedAppPath } from "./packaged-app-path.mjs";
 
 const execFileAsync = promisify(execFile);
 const EXPECTED_BUNDLE_ID = "io.github.jongminchung.gitclient";
@@ -261,13 +262,9 @@ const isEntryPoint =
     process.argv[1] !== undefined && resolve(process.argv[1]) === scriptPath;
 
 if (isEntryPoint) {
-    const defaultAppPath = resolve(
-        dirname(scriptPath),
-        "..",
-        "out",
-        "Git Client-darwin-arm64",
-        "Git Client.app",
-    );
+    const defaultAppPath = resolvePackagedAppPath({
+        cwd: resolve(dirname(scriptPath), ".."),
+    });
     const requestedPath =
         process.argv[2] === undefined
             ? defaultAppPath

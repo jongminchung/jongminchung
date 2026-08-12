@@ -16,7 +16,7 @@ const STYLE = `
   width: 13px;
   height: 13px;
   border: 2px solid rgba(134, 142, 150, 0.35);
-  border-top-color: #868e96;
+  border-top-color: #495057;
   border-radius: 50%;
 }
 `;
@@ -25,9 +25,9 @@ const CHIP_COLORS: Record<
     Status,
     { bg: string; text: string; border: string }
 > = {
-    idle: { bg: "#e7f5ff", text: "#228be6", border: "#a5d8ff" },
-    loading: { bg: "#fff9db", text: "#b08900", border: "#ffe066" },
-    added: { bg: "#ebfbee", text: "#40c057", border: "#b2f2bb" },
+    idle: { bg: "#e7f5ff", text: "#1864ab", border: "#a5d8ff" },
+    loading: { bg: "#fff9db", text: "#8f6900", border: "#ffe066" },
+    added: { bg: "#ebfbee", text: "#237032", border: "#b2f2bb" },
 };
 
 // ---- 상태 그래프 (SVG) ----
@@ -57,8 +57,8 @@ const GraphNode = ({ spec, current }: { spec: NodeSpec; current: boolean }) => {
                 width={spec.w}
                 height={NODE_H}
                 rx={17}
-                fill={current ? "#228be6" : "#fff"}
-                stroke={current ? "#228be6" : "#adb5bd"}
+                fill={current ? "#1864ab" : "#fff"}
+                stroke={current ? "#1864ab" : "#5c636a"}
                 strokeWidth={current ? 2 : 1.5}
                 strokeDasharray={dashed ? "5 4" : undefined}
                 animate={{
@@ -133,7 +133,7 @@ const EDGES: EdgeSpec[] = [
 ];
 
 const GraphEdge = ({ spec, active }: { spec: EdgeSpec; active: boolean }) => {
-    const color = active ? "#fab005" : "#adb5bd";
+    const color = active ? "#8f6900" : "#5c636a";
     return (
         <g>
             <line
@@ -160,7 +160,7 @@ const GraphEdge = ({ spec, active }: { spec: EdgeSpec; active: boolean }) => {
                 fontFamily={MONO}
                 fontSize={10.5}
                 fontWeight={active ? 700 : 500}
-                fill={active ? "#b08900" : "#868e96"}
+                fill={active ? "#8f6900" : "#495057"}
                 style={{ transition: "fill 0.25s ease" }}
             >
                 {spec.label}
@@ -197,7 +197,7 @@ const StateGraph = ({
                 markerHeight={7}
                 orient="auto-start-reverse"
             >
-                <path d="M 0 0 L 10 5 L 0 10 z" fill="#adb5bd" />
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#5c636a" />
             </marker>
             <marker
                 id="rcbt-smd-arrow-active"
@@ -208,7 +208,7 @@ const StateGraph = ({
                 markerHeight={7}
                 orient="auto-start-reverse"
             >
-                <path d="M 0 0 L 10 5 L 0 10 z" fill="#fab005" />
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#8f6900" />
             </marker>
         </defs>
         {EDGES.map((e) => (
@@ -304,12 +304,12 @@ export const StateMachineDemo = () => {
         transform: pressed ? "scale(0.94)" : "scale(1)",
         transition:
             "background 0.2s ease, color 0.2s ease, transform 0.15s ease",
-        ...(status === "idle" && { background: "#228be6", color: "#fff" }),
+        ...(status === "idle" && { background: "#1864ab", color: "#fff" }),
         ...(status === "loading" && {
             background: "#dee2e6",
-            color: "#868e96",
+            color: "#495057",
         }),
-        ...(status === "added" && { background: "#40c057", color: "#fff" }),
+        ...(status === "added" && { background: "#237032", color: "#fff" }),
     };
 
     const chip = CHIP_COLORS[status];
@@ -379,7 +379,7 @@ export const StateMachineDemo = () => {
                             style={{
                                 fontFamily: FONT,
                                 fontSize: 12,
-                                color: "#adb5bd",
+                                color: "#5c636a",
                             }}
                         >
                             {status === "idle" && "클릭 대기 중..."}
@@ -417,7 +417,7 @@ export const StateMachineDemo = () => {
             <div
                 style={{
                     fontSize: 11,
-                    color: "#adb5bd",
+                    color: "#5c636a",
                     textAlign: "center",
                     marginTop: 16,
                 }}

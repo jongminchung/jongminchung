@@ -11,7 +11,8 @@ import {
     type HostingProviderKind,
     type HostingRequest,
     type HostingResponse,
-} from "./hosting-contract";
+} from "../../src/shared/contracts/hosting";
+import { safeHostingErrorMessage } from "../../src/shared/contracts/hosting-redaction";
 import { HostingFoundationError } from "./hosting-error";
 import type {
     HostingHttpClient,
@@ -23,7 +24,6 @@ import {
     parseHostingResponse,
     prepareHostingRequest,
 } from "./hosting-provider";
-import { safeHostingErrorMessage } from "./hosting-redaction";
 
 export const HOSTING_REQUEST_TIMEOUT_MS = 120_000;
 export const HOSTING_RESPONSE_LIMIT_BYTES = 8 * 1_024 * 1_024;

@@ -40,7 +40,7 @@ import type {
     SubmoduleInfo,
     SubmoduleDiff,
     WorktreeInfo,
-} from "../shared/contracts/model";
+} from "../shared/contracts/model/index";
 import {
     ElectronGitBridge,
     translateGitRequest,

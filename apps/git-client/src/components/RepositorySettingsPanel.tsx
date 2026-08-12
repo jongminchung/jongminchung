@@ -22,7 +22,7 @@ import type {
     GitOperation,
     IgnoreRules,
     SubmoduleInfo,
-} from "../shared/contracts/model";
+} from "../shared/contracts/model/index";
 import { useAppDialog } from "./AppDialog";
 import { Icon } from "./Icon";
 import { Notice } from "./Notice";

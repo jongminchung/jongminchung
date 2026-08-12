@@ -1,4 +1,4 @@
-import type { GitOperation } from "../shared/contracts/model";
+import type { GitOperation } from "../shared/contracts/model/index";
 import type { Ref } from "./types";
 
 export function checkoutTarget(ref: Ref): string {

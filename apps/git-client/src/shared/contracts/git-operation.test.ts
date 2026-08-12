@@ -1,13 +1,10 @@
 import { describe, expect, it } from "vitest";
-import type {
-    GitOperation,
-    RebasePlanEntry,
-} from "../../shared/contracts/model";
 import {
     GitOperationSchema,
     MAX_GIT_OPERATION_PATCH_BYTES,
     type ValidatedGitOperation,
 } from "./git-operation";
+import type { GitOperation, RebasePlanEntry } from "./model/index";
 
 type IsAssignable<From, To> = [From] extends [To] ? true : false;
 

@@ -12,7 +12,7 @@ import type {
     HostingAccount,
     HostingNamespace,
     HostingProviderKind,
-} from "../shared/contracts/model";
+} from "../shared/contracts/model/index";
 import { loadHostingAccounts } from "./hosting-persistence";
 import { Icon } from "./Icon";
 import { Dialog, DialogHeader } from "./ProductDialog";

@@ -40,7 +40,7 @@ import type {
     RepositorySnapshot,
     SubmoduleInfo,
     WorktreeInfo,
-} from "../shared/contracts/model";
+} from "../shared/contracts/model/index";
 
 export interface ElectronGitApi {
     openRepository(path: string): Promise<RepositoryRecord>;

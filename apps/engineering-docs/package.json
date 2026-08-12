@@ -4,9 +4,6 @@
   "private": true,
   "type": "module",
   "imports": {
-    "#components/materials/runtime/random": "./components/materials/runtime/random.ts",
-    "#components/materials/runtime/scheduler": "./components/materials/runtime/scheduler.ts",
-    "#components/materials/runtime/svg-canvas": "./components/materials/runtime/svg-canvas.tsx",
     "#components/materials/types": "./components/materials/types.ts",
     "#components/*": "./components/*.tsx",
     "#generated/materials-registry": "./generated/materials-registry.tsx",
@@ -26,6 +23,8 @@
     "test:e2e": "playwright test",
     "test:e2e:core": "playwright test --config playwright.core.config.ts",
     "test:e2e:materials": "playwright test materials-all.spec.ts",
+    "test:e2e:materials:prebuilt": "playwright test --config playwright.materials-prebuilt.config.ts",
+    "test:e2e:prebuilt": "playwright test --config playwright.prebuilt.config.ts",
     "test:e2e:update": "playwright test --update-snapshots",
     "test:e2e:visual": "playwright test visual.spec.ts",
     "typecheck": "tsc --noEmit",

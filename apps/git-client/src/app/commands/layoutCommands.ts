@@ -1,3 +1,5 @@
+import type { WorkspaceTab } from "../../application/git-session/state/GitSessionState";
+import type { AppDialogController } from "../../components/AppDialog";
 import {
     COMMAND_ENABLED,
     commandDefinition,
@@ -5,22 +7,31 @@ import {
     type CommandDefinition,
 } from "../../domain/commands";
 import { DEFAULT_TOOL_WINDOW_LAYOUT } from "../../domain/toolWindowLayouts";
-import type { WorkspaceCommandContext } from "./workspaceCommandTypes";
+import type {
+    NamedToolWindowLayout,
+    ToolWindowLayout,
+} from "../../domain/toolWindowLayouts";
+import type { AppStore } from "../state/appStore";
+
+export type LayoutCommandPort = Pick<
+    AppStore,
+    "setLayoutChooserMode" | "setToolWindowLayouts" | "toolWindowLayouts"
+> & {
+    readonly activeProjectName: string;
+    readonly applyToolWindowLayout: (layout: ToolWindowLayout) => void;
+    readonly captureToolWindowLayout: () => ToolWindowLayout | null;
+    readonly dialog: AppDialogController;
+    readonly renameToolWindowLayout: (
+        layout: NamedToolWindowLayout,
+    ) => Promise<void>;
+    readonly saveToolWindowLayout: (layout: NamedToolWindowLayout) => void;
+    readonly session: {
+        readonly workspace: { readonly activeTab: WorkspaceTab };
+    };
+};
 
 export function createLayoutCommands(
-    context: Pick<
-        WorkspaceCommandContext,
-        | "activeProjectName"
-        | "applyToolWindowLayout"
-        | "captureToolWindowLayout"
-        | "dialog"
-        | "renameToolWindowLayout"
-        | "saveToolWindowLayout"
-        | "session"
-        | "setLayoutChooserMode"
-        | "setToolWindowLayouts"
-        | "toolWindowLayouts"
-    >,
+    context: LayoutCommandPort,
 ): readonly CommandDefinition[] {
     const {
         activeProjectName,

@@ -13,20 +13,20 @@ import type {
     HostingResponse,
     HostingReviewEvent,
     HostingTimelineEntry,
-} from "../shared/contracts/model";
-import {
-    HostingAccountConnection,
-    HostingRequestComposer,
-    HostingRequestDetails,
-    HostingRequestList,
-    type HostingRequestDraft,
-} from "./hosting";
+} from "../shared/contracts/model/index";
 import {
     loadHostingAccounts,
     loadViewedFiles,
     persistHostingAccounts,
     persistViewedFiles,
 } from "./hosting-persistence";
+import {
+    HostingAccountConnection,
+    HostingRequestComposer,
+    HostingRequestDetails,
+    HostingRequestList,
+    type HostingRequestDraft,
+} from "./hosting/index";
 import { Icon } from "./Icon";
 import { Notice } from "./Notice";
 import { Selector } from "./ProductFormControls";

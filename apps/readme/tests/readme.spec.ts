@@ -83,3 +83,35 @@ test("keeps the mobile layout within the viewport", async ({ page }) => {
         page.getByRole("navigation", { name: "Primary navigation" }),
     ).toBeVisible();
 });
+
+test("disables route motion and smooth scrolling for reduced motion", async ({
+    page,
+}) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+
+    const route = page
+        .locator(
+            '[aria-label="Language becomes a model, code, and proof"] path',
+        )
+        .nth(1);
+    await expect(route).toBeVisible();
+    const routeStyle = await route.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+            animationName: style.animationName,
+            strokeDashoffset: style.strokeDashoffset,
+            transitionDuration: style.transitionDuration,
+        };
+    });
+    expect(routeStyle).toEqual({
+        animationName: "none",
+        strokeDashoffset: "0px",
+        transitionDuration: "0s",
+    });
+    expect(
+        await page.evaluate(
+            () => getComputedStyle(document.documentElement).scrollBehavior,
+        ),
+    ).toBe("auto");
+});

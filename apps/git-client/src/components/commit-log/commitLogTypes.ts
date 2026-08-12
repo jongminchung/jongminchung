@@ -1,4 +1,4 @@
-import type { LogOrder } from "../../shared/contracts/model";
+import type { LogOrder } from "../../shared/contracts/model/index";
 
 export interface CommitLogFilterState {
     readonly query: string;

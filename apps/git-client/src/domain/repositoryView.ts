@@ -1,4 +1,4 @@
-import type { RepositorySnapshot } from "../shared/contracts/model";
+import type { RepositorySnapshot } from "../shared/contracts/model/index";
 import type { Commit, Ref, RepositoryView, StatusModel } from "./types";
 
 export interface RepositoryViewUpdate {

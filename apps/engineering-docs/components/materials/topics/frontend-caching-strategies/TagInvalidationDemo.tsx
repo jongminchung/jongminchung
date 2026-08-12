@@ -53,19 +53,19 @@ const STATUS_META: Record<
 > = {
     fresh: {
         label: "신선",
-        border: "#40c057",
+        border: "#237032",
         badgeBg: "#d3f9d8",
-        badgeColor: "#2f9e44",
+        badgeColor: "#237032",
     },
     stale: {
         label: "낡음",
-        border: "#fab005",
+        border: "#8f6900",
         badgeBg: "#fff9db",
-        badgeColor: "#e67700",
+        badgeColor: "#9c4b00",
     },
     revalidating: {
         label: "재검증 중",
-        border: "#228be6",
+        border: "#1864ab",
         badgeBg: "#e7f5ff",
         badgeColor: "#1971c2",
     },
@@ -163,7 +163,7 @@ export const TagInvalidationDemo = () => {
                 style={{
                     fontSize: 11,
                     fontWeight: 700,
-                    color: "#868e96",
+                    color: "#495057",
                     marginBottom: 10,
                 }}
             >
@@ -216,7 +216,7 @@ export const TagInvalidationDemo = () => {
                                             fontFamily: MONO,
                                             fontSize: 11,
                                             fontWeight: 400,
-                                            color: "#868e96",
+                                            color: "#495057",
                                         }}
                                     >
                                         v{state.version}
@@ -265,13 +265,13 @@ export const TagInvalidationDemo = () => {
                                                 fontSize: 11,
                                                 padding: "2px 7px",
                                                 borderRadius: 4,
-                                                border: `1px solid ${flashed ? "#fab005" : "#dee2e6"}`,
+                                                border: `1px solid ${flashed ? "#8f6900" : "#dee2e6"}`,
                                                 background: flashed
                                                     ? "#fff9db"
                                                     : "#f8f9fa",
                                                 color: flashed
-                                                    ? "#e67700"
-                                                    : "#868e96",
+                                                    ? "#9c4b00"
+                                                    : "#495057",
                                                 transition:
                                                     "background 0.25s, border-color 0.25s, color 0.25s",
                                             }}
@@ -290,7 +290,7 @@ export const TagInvalidationDemo = () => {
                 style={{
                     fontSize: 11,
                     fontWeight: 700,
-                    color: "#868e96",
+                    color: "#495057",
                     margin: "16px 0 10px",
                 }}
             >
@@ -309,7 +309,7 @@ export const TagInvalidationDemo = () => {
                                 flexWrap: "wrap",
                                 alignItems: "center",
                                 gap: "4px 10px",
-                                border: `1px solid ${active ? "#228be6" : "#dee2e6"}`,
+                                border: `1px solid ${active ? "#1864ab" : "#dee2e6"}`,
                                 borderRadius: 6,
                                 padding: "7px 12px",
                                 background: flashing
@@ -325,7 +325,7 @@ export const TagInvalidationDemo = () => {
                                 style={{
                                     fontSize: 12,
                                     fontWeight: 600,
-                                    color: active ? "#495057" : "#adb5bd",
+                                    color: active ? "#495057" : "#5c636a",
                                     transition: "color 0.3s",
                                 }}
                             >
@@ -336,14 +336,14 @@ export const TagInvalidationDemo = () => {
                                     fontFamily: MONO,
                                     fontSize: 12,
                                     whiteSpace: "nowrap",
-                                    color: active ? "#495057" : "#adb5bd",
+                                    color: active ? "#495057" : "#5c636a",
                                     transition: "color 0.3s",
                                 }}
                             >
                                 revalidateTag(
                                 <span
                                     style={{
-                                        color: active ? "#228be6" : "#adb5bd",
+                                        color: active ? "#1864ab" : "#5c636a",
                                     }}
                                 >
                                     &apos;{ev.tag}&apos;
@@ -359,7 +359,7 @@ export const TagInvalidationDemo = () => {
                 style={{
                     marginTop: 14,
                     fontSize: 11,
-                    color: "#adb5bd",
+                    color: "#5c636a",
                     textAlign: "center",
                 }}
             >

@@ -1,10 +1,6 @@
 import { initTRPC } from "@trpc/server";
 import { z } from "zod";
 import {
-    HostingAccountSchema,
-    HostingResponseSchema,
-} from "../../../electron/hosting/hosting-contract";
-import {
     type DesktopTrpcAuthorization,
     type DesktopTrpcCapability,
     type DesktopTrpcDomain,
@@ -29,6 +25,7 @@ import {
     RepositoryRecordSchema,
     RepositorySnapshotSchema,
 } from "./git-utility";
+import { HostingAccountSchema, HostingResponseSchema } from "./hosting";
 import {
     ClipboardTextSchema,
     ClipboardWriteRequestSchema,

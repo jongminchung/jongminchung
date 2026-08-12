@@ -1,10 +1,4 @@
 import type {
-    HostingAccount,
-    HostingProviderKind,
-    HostingRequest,
-    HostingResponse,
-} from "../../../electron/hosting/hosting-contract";
-import type {
     FileContent,
     FilePreview,
     FileSource,
@@ -46,6 +40,12 @@ import type {
     RepositorySnapshot,
 } from "./git-utility";
 import type {
+    HostingAccount,
+    HostingProviderKind,
+    HostingRequest,
+    HostingResponse,
+} from "./hosting";
+import type {
     CommandLineLauncherInfo,
     DiagnosticConfigurationKind,
     DiagnosticLeftoverDirectory,
@@ -62,7 +62,7 @@ import type {
     RuntimeInfo,
     WindowPresentationMode,
 } from "./ipc";
-import type { GitOperation } from "./model";
+import type { GitOperation } from "./model/index";
 import type {
     TerminalEventListener,
     TerminalId,

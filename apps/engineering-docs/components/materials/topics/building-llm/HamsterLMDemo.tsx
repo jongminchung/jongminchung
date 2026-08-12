@@ -28,7 +28,7 @@ export const HamsterLMDemo = () => {
                     fontSize: "1rem",
                     fontWeight: 600,
                     color: "#fff",
-                    backgroundColor: "#f59e0b",
+                    backgroundColor: "#92400e",
                     border: "none",
                     borderRadius: "8px",
                     cursor: "pointer",

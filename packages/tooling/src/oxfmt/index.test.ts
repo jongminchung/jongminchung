@@ -52,6 +52,26 @@ describe("oxfmt config", () => {
         expect(config.sortPackageJson).toBe(false);
     });
 
+    it("isolates nested defaults between config instances", () => {
+        const first = defineOxfmtConfig();
+        const second = defineOxfmtConfig();
+
+        expect(first.sortImports).not.toBe(second.sortImports);
+        expect(first.sortPackageJson).not.toBe(second.sortPackageJson);
+
+        if (
+            typeof first.sortImports !== "object" ||
+            typeof first.sortPackageJson !== "object"
+        ) {
+            throw new Error("expected default sort options to be objects");
+        }
+        Object.assign(first.sortImports, { newlinesBetween: true });
+        Object.assign(first.sortPackageJson, { sortScripts: false });
+
+        expect(second.sortImports).toEqual({ newlinesBetween: false });
+        expect(second.sortPackageJson).toEqual({ sortScripts: true });
+    });
+
     it("uses the official Oxfmt type constraints", () => {
         const compileTimeOnly = () => {
             // @ts-expect-error Oxfmt only accepts its documented arrowParens values.

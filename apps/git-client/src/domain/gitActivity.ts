@@ -1,4 +1,4 @@
-import type { GitOperation } from "../shared/contracts/model";
+import type { GitOperation } from "../shared/contracts/model/index";
 import { operationPolicyFor } from "./gitOperationPolicy";
 
 export type ActivityStatus = "running" | "succeeded" | "failed" | "cancelled";

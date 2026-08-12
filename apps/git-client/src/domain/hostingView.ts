@@ -1,4 +1,4 @@
-import type { HostingChangeRequest } from "../shared/contracts/model";
+import type { HostingChangeRequest } from "../shared/contracts/model/index";
 
 export type HostingListScope = "all" | "open" | "closed" | "draft";
 

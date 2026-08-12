@@ -1,9 +1,14 @@
 import assert from "node:assert/strict";
+import { spawn } from "node:child_process";
+import { once } from "node:events";
 import { describe, it } from "node:test";
 import {
     HANDSHAKE_SENTINEL,
     READY_SENTINEL,
+    createSmokeTimeoutFailure,
     detectSmokeLogFailure,
+    isSmokeStartupReady,
+    terminateSmokeChild,
     validateSmokeOutcome,
 } from "./smoke-electron-package.mjs";
 
@@ -131,4 +136,74 @@ void describe("packaged Electron smoke outcome", () => {
             /Packaged app logged module-not-found/iu,
         );
     });
+
+    void it("accepts a controlled cleanup only after readiness and handshake", () => {
+        assert.equal(isSmokeStartupReady(HEALTHY_OUTPUT, true), true);
+        assert.equal(isSmokeStartupReady(HANDSHAKE_SENTINEL, true), false);
+        assert.equal(isSmokeStartupReady(HEALTHY_OUTPUT, false), false);
+        assert.deepEqual(
+            validateSmokeOutcome({
+                code: null,
+                signal: "SIGKILL",
+                output: HEALTHY_OUTPUT,
+                handshakeComplete: true,
+                controlledCleanup: true,
+            }),
+            { ready: true, preloadApi: true, exitCode: 0 },
+        );
+        assert.throws(
+            () =>
+                validateSmokeOutcome({
+                    code: null,
+                    signal: "SIGKILL",
+                    output: HANDSHAKE_SENTINEL,
+                    handshakeComplete: true,
+                    controlledCleanup: true,
+                }),
+            /before its renderer loaded/iu,
+        );
+    });
+
+    void it("retains captured startup output in timeout failures", () => {
+        const failure = createSmokeTimeoutFailure(
+            "startup diagnostic\n",
+            "SIGKILL",
+        );
+        assert.match(failure.message, /cleanup=SIGKILL/iu);
+        assert.match(failure.message, /startup diagnostic/iu);
+    });
+
+    void it(
+        "force-stops a packaged process that ignores graceful termination",
+        { skip: process.platform === "win32" },
+        async () => {
+            const child = spawn(
+                process.execPath,
+                [
+                    "-e",
+                    "process.on('SIGTERM', () => undefined); process.stdout.write('ready\\n'); setInterval(() => undefined, 1000);",
+                ],
+                { stdio: ["ignore", "pipe", "ignore"] },
+            );
+            await once(child.stdout, "data");
+
+            const cleanup = await terminateSmokeChild(child, {
+                terminationGraceMs: 50,
+                forceTerminationGraceMs: 1_000,
+            });
+
+            assert.equal(cleanup, "SIGKILL");
+            assert.equal(child.signalCode, "SIGKILL");
+            assert.deepEqual(
+                validateSmokeOutcome({
+                    code: child.exitCode,
+                    signal: child.signalCode,
+                    output: HEALTHY_OUTPUT,
+                    handshakeComplete: true,
+                    controlledCleanup: cleanup !== "already-exited",
+                }),
+                { ready: true, preloadApi: true, exitCode: 0 },
+            );
+        },
+    );
 });

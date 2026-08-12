@@ -2,7 +2,7 @@ import type {
     GitEvent,
     GitRequest,
     RequestId,
-} from "../shared/contracts/model";
+} from "../shared/contracts/model/index";
 import { operationActivityLabel } from "./gitActivity";
 
 export type GitConsoleStatus = "running" | "completed" | "failed" | "cancelled";

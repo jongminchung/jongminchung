@@ -6,6 +6,7 @@ import {
     TooltipTrigger,
 } from "@jongminchung/ui/components/tooltip";
 import { useCallback, useRef, useState } from "react";
+import { dispatchWorkbenchEvent } from "../application/workbench-events/WorkbenchEventPort";
 import { useCommands } from "../components/CommandProvider";
 import { GitBranchesPopup } from "../components/GitBranchesPopup";
 import { Icon } from "../components/Icon";
@@ -14,7 +15,7 @@ import { ProjectSwitcherPopup } from "../components/ProjectSwitcherPopup";
 import type { RepositoryToolKind } from "../components/RepositoryToolDialog";
 import { WelcomeWorkspace } from "../components/WelcomeWorkspace";
 import { type AppearancePreference } from "../domain/appearance";
-import type { GitSessionController } from "../git-session/useGitSessionController";
+import type { GitSessionController } from "../features/repository/session/useGitSessionController";
 
 type GitSession = GitSessionController;
 
@@ -204,13 +205,9 @@ export function WorkspaceTitlebar({
                                 }
                                 onCompare={compareBranches}
                                 onCommit={() =>
-                                    window.dispatchEvent(
-                                        new CustomEvent(
-                                            "git-client:repository-view-request",
-                                            {
-                                                detail: "changes",
-                                            },
-                                        ),
+                                    dispatchWorkbenchEvent(
+                                        "git-client:repository-view-request",
+                                        "changes",
                                     )
                                 }
                                 onOperation={executeOperation}

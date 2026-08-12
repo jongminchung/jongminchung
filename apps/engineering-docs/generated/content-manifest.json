@@ -629,106 +629,6 @@
         "level": 2
       },
       {
-        "id": "interactive-materials",
-        "label": "Interactive materials",
-        "level": 2
-      },
-      {
-        "id": "backpressuredemo",
-        "label": "BackpressureDemo",
-        "level": 3
-      },
-      {
-        "id": "bottleneckdemo",
-        "label": "BottleneckDemo",
-        "level": 3
-      },
-      {
-        "id": "cachestampededemo",
-        "label": "CacheStampedeDemo",
-        "level": 3
-      },
-      {
-        "id": "cascadedemo",
-        "label": "CascadeDemo",
-        "level": 3
-      },
-      {
-        "id": "cpupatterndemo",
-        "label": "CpuPatternDemo",
-        "level": 3
-      },
-      {
-        "id": "deploydemo",
-        "label": "DeployDemo",
-        "level": 3
-      },
-      {
-        "id": "eventloopdemo",
-        "label": "EventLoopDemo",
-        "level": 3
-      },
-      {
-        "id": "gcpausedemo",
-        "label": "GcPauseDemo",
-        "level": 3
-      },
-      {
-        "id": "memoryleakdemo",
-        "label": "MemoryLeakDemo",
-        "level": 3
-      },
-      {
-        "id": "memoryspikedemo",
-        "label": "MemorySpikeDemo",
-        "level": 3
-      },
-      {
-        "id": "percentiledemo",
-        "label": "PercentileDemo",
-        "level": 3
-      },
-      {
-        "id": "postmortemdemo",
-        "label": "PostmortemDemo",
-        "level": 3
-      },
-      {
-        "id": "slowburndemo",
-        "label": "SlowBurnDemo",
-        "level": 3
-      },
-      {
-        "id": "survivorshipdemo",
-        "label": "SurvivorshipDemo",
-        "level": 3
-      },
-      {
-        "id": "threadpooldemo",
-        "label": "ThreadPoolDemo",
-        "level": 3
-      },
-      {
-        "id": "throttlingdemo",
-        "label": "ThrottlingDemo",
-        "level": 3
-      },
-      {
-        "id": "timeoutmismatchdemo",
-        "label": "TimeoutMismatchDemo",
-        "level": 3
-      },
-      {
-        "id": "trafficpatterndemo",
-        "label": "TrafficPatternDemo",
-        "level": 3
-      },
-      {
-        "id": "utilizationcurvedemo",
-        "label": "UtilizationCurveDemo",
-        "level": 3
-      },
-      {
         "id": "source-and-scope",
         "label": "Source and scope",
         "level": 2
@@ -810,16 +710,6 @@
         "level": 2
       },
       {
-        "id": "추가-인터랙티브-자료",
-        "label": "추가 인터랙티브 자료",
-        "level": 2
-      },
-      {
-        "id": "browserthreadmapdiagram",
-        "label": "BrowserThreadMapDiagram",
-        "level": 3
-      },
-      {
         "id": "footnote-label",
         "label": "Footnotes",
         "level": 2
@@ -851,51 +741,6 @@
         "level": 2
       },
       {
-        "id": "interactive-materials",
-        "label": "Interactive materials",
-        "level": 2
-      },
-      {
-        "id": "contextwindowdiagram",
-        "label": "ContextWindowDiagram",
-        "level": 3
-      },
-      {
-        "id": "harnessdiagram",
-        "label": "HarnessDiagram",
-        "level": 3
-      },
-      {
-        "id": "llmapidiagram",
-        "label": "LlmApiDiagram",
-        "level": 3
-      },
-      {
-        "id": "promptdistributiondiagram",
-        "label": "PromptDistributionDiagram",
-        "level": 3
-      },
-      {
-        "id": "prompttechniquesdiagram",
-        "label": "PromptTechniquesDiagram",
-        "level": 3
-      },
-      {
-        "id": "ralphloopdiagram",
-        "label": "RalphLoopDiagram",
-        "level": 3
-      },
-      {
-        "id": "skillselectiondiagram",
-        "label": "SkillSelectionDiagram",
-        "level": 3
-      },
-      {
-        "id": "toolusediagram",
-        "label": "ToolUseDiagram",
-        "level": 3
-      },
-      {
         "id": "source-and-scope",
         "label": "Source and scope",
         "level": 2
@@ -925,101 +770,6 @@
         "id": "overview",
         "label": "Overview",
         "level": 2
-      },
-      {
-        "id": "interactive-materials",
-        "label": "Interactive materials",
-        "level": 2
-      },
-      {
-        "id": "abstractionleakdiagram",
-        "label": "AbstractionLeakDiagram",
-        "level": 3
-      },
-      {
-        "id": "asyncorderdiagram",
-        "label": "AsyncOrderDiagram",
-        "level": 3
-      },
-      {
-        "id": "atomicitybreakdiagram",
-        "label": "AtomicityBreakDiagram",
-        "level": 3
-      },
-      {
-        "id": "boundarydualitydiagram",
-        "label": "BoundaryDualityDiagram",
-        "level": 3
-      },
-      {
-        "id": "boundaryevolutiondiagram",
-        "label": "BoundaryEvolutionDiagram",
-        "level": 3
-      },
-      {
-        "id": "callercalleeboundarydiagram",
-        "label": "CallerCalleeBoundaryDiagram",
-        "level": 3
-      },
-      {
-        "id": "conwayslawdiagram",
-        "label": "ConwaysLawDiagram",
-        "level": 3
-      },
-      {
-        "id": "datatransformflowdiagram",
-        "label": "DataTransformFlowDiagram",
-        "level": 3
-      },
-      {
-        "id": "dependencyboundarydiagram",
-        "label": "DependencyBoundaryDiagram",
-        "level": 3
-      },
-      {
-        "id": "designerosiondiagram",
-        "label": "DesignErosionDiagram",
-        "level": 3
-      },
-      {
-        "id": "focuslineeffect",
-        "label": "FocusLineEffect",
-        "level": 3
-      },
-      {
-        "id": "heroslogandiagram",
-        "label": "HeroSloganDiagram",
-        "level": 3
-      },
-      {
-        "id": "hiddenboundarydiagram",
-        "label": "HiddenBoundaryDiagram",
-        "level": 3
-      },
-      {
-        "id": "scaleboundarydiagram",
-        "label": "ScaleBoundaryDiagram",
-        "level": 3
-      },
-      {
-        "id": "telephonegamediagram",
-        "label": "TelephoneGameDiagram",
-        "level": 3
-      },
-      {
-        "id": "tradeoffscalediagram",
-        "label": "TradeoffScaleDiagram",
-        "level": 3
-      },
-      {
-        "id": "trustboundarydiagram",
-        "label": "TrustBoundaryDiagram",
-        "level": 3
-      },
-      {
-        "id": "userdevboundarydiagram",
-        "label": "UserDevBoundaryDiagram",
-        "level": 3
       },
       {
         "id": "source-and-scope",
@@ -1148,18 +898,8 @@
         "level": 2
       },
       {
-        "id": "orbitdemo",
-        "label": "OrbitDemo",
-        "level": 3
-      },
-      {
         "id": "progressmappingdemo",
         "label": "ProgressMappingDemo",
-        "level": 3
-      },
-      {
-        "id": "propertysplittimelinedemo",
-        "label": "PropertySplitTimelineDemo",
         "level": 3
       }
     ]
@@ -1230,21 +970,6 @@
         "level": 2
       },
       {
-        "id": "interactive-materials",
-        "label": "Interactive materials",
-        "level": 2
-      },
-      {
-        "id": "ascii3drenderer",
-        "label": "ASCII3DRenderer",
-        "level": 3
-      },
-      {
-        "id": "spinningcube",
-        "label": "SpinningCube",
-        "level": 3
-      },
-      {
         "id": "source-and-scope",
         "label": "Source and scope",
         "level": 2
@@ -1274,46 +999,6 @@
         "id": "overview",
         "label": "Overview",
         "level": 2
-      },
-      {
-        "id": "interactive-materials",
-        "label": "Interactive materials",
-        "level": 2
-      },
-      {
-        "id": "adjacencydemo",
-        "label": "AdjacencyDemo",
-        "level": 3
-      },
-      {
-        "id": "echochromedemo",
-        "label": "EchochromeDemo",
-        "level": 3
-      },
-      {
-        "id": "forcedperspectivedemo",
-        "label": "ForcedPerspectiveDemo",
-        "level": 3
-      },
-      {
-        "id": "illusiongamedemo",
-        "label": "IllusionGameDemo",
-        "level": 3
-      },
-      {
-        "id": "penrosedemo",
-        "label": "PenroseDemo",
-        "level": 3
-      },
-      {
-        "id": "projectiondemo",
-        "label": "ProjectionDemo",
-        "level": 3
-      },
-      {
-        "id": "thumbnailcanvas",
-        "label": "ThumbnailCanvas",
-        "level": 3
       },
       {
         "id": "source-and-scope",
@@ -1408,31 +1093,6 @@
         "level": 2
       },
       {
-        "id": "interactive-materials",
-        "label": "Interactive materials",
-        "level": 2
-      },
-      {
-        "id": "relayflowdiagram",
-        "label": "RelayFlowDiagram",
-        "level": 3
-      },
-      {
-        "id": "replyparserdemo",
-        "label": "ReplyParserDemo",
-        "level": 3
-      },
-      {
-        "id": "smtpsessiondemo",
-        "label": "SmtpSessionDemo",
-        "level": 3
-      },
-      {
-        "id": "tokenanatomydemo",
-        "label": "TokenAnatomyDemo",
-        "level": 3
-      },
-      {
         "id": "source-and-scope",
         "label": "Source and scope",
         "level": 2
@@ -1474,33 +1134,8 @@
         "level": 3
       },
       {
-        "id": "cachelayersdiagram",
-        "label": "CacheLayersDiagram",
-        "level": 3
-      },
-      {
-        "id": "freshnesslifetimedemo",
-        "label": "FreshnessLifetimeDemo",
-        "level": 3
-      },
-      {
-        "id": "staletimesessiondemo",
-        "label": "StaleTimeSessionDemo",
-        "level": 3
-      },
-      {
-        "id": "stampededemo",
-        "label": "StampedeDemo",
-        "level": 3
-      },
-      {
         "id": "taginvalidationdemo",
         "label": "TagInvalidationDemo",
-        "level": 3
-      },
-      {
-        "id": "thumbnailcanvas",
-        "label": "ThumbnailCanvas",
         "level": 3
       },
       {
@@ -1591,16 +1226,6 @@
         "level": 2
       },
       {
-        "id": "archetypediagram",
-        "label": "ArchetypeDiagram",
-        "level": 3
-      },
-      {
-        "id": "headlessanatomydiagram",
-        "label": "HeadlessAnatomyDiagram",
-        "level": 3
-      },
-      {
         "id": "skinswapdemo",
         "label": "SkinSwapDemo",
         "level": 3
@@ -1608,11 +1233,6 @@
       {
         "id": "switchskindemo",
         "label": "SwitchSkinDemo",
-        "level": 3
-      },
-      {
-        "id": "thumbnailcanvas",
-        "label": "ThumbnailCanvas",
         "level": 3
       },
       {
@@ -1652,28 +1272,8 @@
         "level": 2
       },
       {
-        "id": "componentanatomydiagram",
-        "label": "ComponentAnatomyDiagram",
-        "level": 3
-      },
-      {
-        "id": "dataflowdiagram",
-        "label": "DataFlowDiagram",
-        "level": 3
-      },
-      {
         "id": "statemachinedemo",
         "label": "StateMachineDemo",
-        "level": 3
-      },
-      {
-        "id": "tensiondiagram",
-        "label": "TensionDiagram",
-        "level": 3
-      },
-      {
-        "id": "thumbnailcanvas",
-        "label": "ThumbnailCanvas",
         "level": 3
       },
       {
@@ -1706,26 +1306,6 @@
         "id": "overview",
         "label": "Overview",
         "level": 2
-      },
-      {
-        "id": "interactive-materials",
-        "label": "Interactive materials",
-        "level": 2
-      },
-      {
-        "id": "aestheticsmigrationdiagram",
-        "label": "AestheticsMigrationDiagram",
-        "level": 3
-      },
-      {
-        "id": "aestheticssurfacediagram",
-        "label": "AestheticsSurfaceDiagram",
-        "level": 3
-      },
-      {
-        "id": "threeperspectivesdiagram",
-        "label": "ThreePerspectivesDiagram",
-        "level": 3
       },
       {
         "id": "source-and-scope",
@@ -1764,23 +1344,8 @@
         "level": 2
       },
       {
-        "id": "astdemo",
-        "label": "AstDemo",
-        "level": 3
-      },
-      {
         "id": "floatbitsdemo",
         "label": "FloatBitsDemo",
-        "level": 3
-      },
-      {
-        "id": "naturalcalcdemo",
-        "label": "NaturalCalcDemo",
-        "level": 3
-      },
-      {
-        "id": "thumbnailcanvas",
-        "label": "ThumbnailCanvas",
         "level": 3
       },
       {
@@ -1820,31 +1385,6 @@
         "level": 2
       },
       {
-        "id": "interactive-materials",
-        "label": "Interactive materials",
-        "level": 2
-      },
-      {
-        "id": "cpustepdemo",
-        "label": "CpuStepDemo",
-        "level": 3
-      },
-      {
-        "id": "nesdemo",
-        "label": "NesDemo",
-        "level": 3
-      },
-      {
-        "id": "snakedemo",
-        "label": "SnakeDemo",
-        "level": 3
-      },
-      {
-        "id": "tiledemo",
-        "label": "TileDemo",
-        "level": 3
-      },
-      {
         "id": "source-and-scope",
         "label": "Source and scope",
         "level": 2
@@ -1874,26 +1414,6 @@
         "id": "overview",
         "label": "Overview",
         "level": 2
-      },
-      {
-        "id": "interactive-materials",
-        "label": "Interactive materials",
-        "level": 2
-      },
-      {
-        "id": "keyhierarchydiagram",
-        "label": "KeyHierarchyDiagram",
-        "level": 3
-      },
-      {
-        "id": "vaultshareflowdiagram",
-        "label": "VaultShareFlowDiagram",
-        "level": 3
-      },
-      {
-        "id": "zeroknowledgediagram",
-        "label": "ZeroKnowledgeDiagram",
-        "level": 3
       },
       {
         "id": "source-and-scope",
@@ -1927,26 +1447,6 @@
         "level": 2
       },
       {
-        "id": "interactive-materials",
-        "label": "Interactive materials",
-        "level": 2
-      },
-      {
-        "id": "ladderdiagram",
-        "label": "LadderDiagram",
-        "level": 3
-      },
-      {
-        "id": "progressivedisclosurediagram",
-        "label": "ProgressiveDisclosureDiagram",
-        "level": 3
-      },
-      {
-        "id": "threearmchart",
-        "label": "ThreeArmChart",
-        "level": 3
-      },
-      {
         "id": "source-and-scope",
         "label": "Source and scope",
         "level": 2
@@ -1976,41 +1476,6 @@
         "id": "overview",
         "label": "Overview",
         "level": 2
-      },
-      {
-        "id": "interactive-materials",
-        "label": "Interactive materials",
-        "level": 2
-      },
-      {
-        "id": "championdemo",
-        "label": "ChampionDemo",
-        "level": 3
-      },
-      {
-        "id": "crossovermutationdemo",
-        "label": "CrossoverMutationDemo",
-        "level": 3
-      },
-      {
-        "id": "evolvedemo",
-        "label": "EvolveDemo",
-        "level": 3
-      },
-      {
-        "id": "genomedemo",
-        "label": "GenomeDemo",
-        "level": 3
-      },
-      {
-        "id": "selectiondemo",
-        "label": "SelectionDemo",
-        "level": 3
-      },
-      {
-        "id": "thumbnailcanvas",
-        "label": "ThumbnailCanvas",
-        "level": 3
       },
       {
         "id": "source-and-scope",
@@ -2049,18 +1514,8 @@
         "level": 2
       },
       {
-        "id": "attentionprocessdiagram",
-        "label": "AttentionProcessDiagram",
-        "level": 3
-      },
-      {
         "id": "attentionvisualizerdemo",
         "label": "AttentionVisualizerDemo",
-        "level": 3
-      },
-      {
-        "id": "embeddingdiagram",
-        "label": "EmbeddingDiagram",
         "level": 3
       },
       {
@@ -2069,43 +1524,8 @@
         "level": 3
       },
       {
-        "id": "matrixmultiplydiagram",
-        "label": "MatrixMultiplyDiagram",
-        "level": 3
-      },
-      {
-        "id": "neuralnetworkdiagram",
-        "label": "NeuralNetworkDiagram",
-        "level": 3
-      },
-      {
-        "id": "nexttokendiagram",
-        "label": "NextTokenDiagram",
-        "level": 3
-      },
-      {
-        "id": "parameterscalediagram",
-        "label": "ParameterScaleDiagram",
-        "level": 3
-      },
-      {
-        "id": "positionembeddingdiagram",
-        "label": "PositionEmbeddingDiagram",
-        "level": 3
-      },
-      {
-        "id": "studygroupdiagram",
-        "label": "StudyGroupDiagram",
-        "level": 3
-      },
-      {
         "id": "temperaturesamplingdemo",
         "label": "TemperatureSamplingDemo",
-        "level": 3
-      },
-      {
-        "id": "transformerblockdiagram",
-        "label": "TransformerBlockDiagram",
         "level": 3
       },
       {
@@ -2140,41 +1560,6 @@
         "level": 2
       },
       {
-        "id": "interactive-materials",
-        "label": "Interactive materials",
-        "level": 2
-      },
-      {
-        "id": "fanoutdemo",
-        "label": "FanoutDemo",
-        "level": 3
-      },
-      {
-        "id": "offsetvscursordemo",
-        "label": "OffsetVsCursorDemo",
-        "level": 3
-      },
-      {
-        "id": "pageshiftdemo",
-        "label": "PageShiftDemo",
-        "level": 3
-      },
-      {
-        "id": "scattergatherdemo",
-        "label": "ScatterGatherDemo",
-        "level": 3
-      },
-      {
-        "id": "thumbnailcanvas",
-        "label": "ThumbnailCanvas",
-        "level": 3
-      },
-      {
-        "id": "tombstonescandemo",
-        "label": "TombstoneScanDemo",
-        "level": 3
-      },
-      {
         "id": "source-and-scope",
         "label": "Source and scope",
         "level": 2
@@ -2204,26 +1589,6 @@
         "id": "overview",
         "label": "Overview",
         "level": 2
-      },
-      {
-        "id": "interactive-materials",
-        "label": "Interactive materials",
-        "level": 2
-      },
-      {
-        "id": "awaitlessreturndiagram",
-        "label": "AwaitlessReturnDiagram",
-        "level": 3
-      },
-      {
-        "id": "mutabledefaultargdiagram",
-        "label": "MutableDefaultArgDiagram",
-        "level": 3
-      },
-      {
-        "id": "threevaluedlogicdiagram",
-        "label": "ThreeValuedLogicDiagram",
-        "level": 3
       },
       {
         "id": "source-and-scope",
@@ -3033,16 +2398,6 @@
         "level": 2
       },
       {
-        "id": "추가-인터랙티브-자료",
-        "label": "추가 인터랙티브 자료",
-        "level": 2
-      },
-      {
-        "id": "gcpausedemo",
-        "label": "GcPauseDemo",
-        "level": 3
-      },
-      {
         "id": "footnote-label",
         "label": "Footnotes",
         "level": 2
@@ -3122,16 +2477,6 @@
         "id": "마치며",
         "label": "마치며",
         "level": 2
-      },
-      {
-        "id": "추가-인터랙티브-자료",
-        "label": "추가 인터랙티브 자료",
-        "level": 2
-      },
-      {
-        "id": "browserthreadmapdiagram",
-        "label": "BrowserThreadMapDiagram",
-        "level": 3
       },
       {
         "id": "footnote-label",
@@ -3218,16 +2563,6 @@
         "id": "마치며",
         "label": "마치며",
         "level": 2
-      },
-      {
-        "id": "추가-인터랙티브-자료",
-        "label": "추가 인터랙티브 자료",
-        "level": 2
-      },
-      {
-        "id": "promptdistributiondiagram",
-        "label": "PromptDistributionDiagram",
-        "level": 3
       },
       {
         "id": "footnote-label",
@@ -3376,16 +2711,6 @@
         "level": 2
       },
       {
-        "id": "추가-인터랙티브-자료",
-        "label": "추가 인터랙티브 자료",
-        "level": 2
-      },
-      {
-        "id": "heroslogandiagram",
-        "label": "HeroSloganDiagram",
-        "level": 3
-      },
-      {
         "id": "footnote-label",
         "label": "Footnotes",
         "level": 2
@@ -3512,18 +2837,8 @@
         "level": 2
       },
       {
-        "id": "orbitdemo",
-        "label": "OrbitDemo",
-        "level": 3
-      },
-      {
         "id": "progressmappingdemo",
         "label": "ProgressMappingDemo",
-        "level": 3
-      },
-      {
-        "id": "propertysplittimelinedemo",
-        "label": "PropertySplitTimelineDemo",
         "level": 3
       }
     ]
@@ -4744,8 +4059,8 @@
         "level": 3
       },
       {
-        "id": "눈으로-확인하기",
-        "label": "눈으로 확인하기",
+        "id": "cpu-단계-검증",
+        "label": "CPU 단계 검증",
         "level": 3
       },
       {
@@ -4759,8 +4074,8 @@
         "level": 3
       },
       {
-        "id": "돌려보자",
-        "label": "돌려보자",
+        "id": "실행-속도와-타이밍",
+        "label": "실행 속도와 타이밍",
         "level": 3
       },
       {
@@ -4899,8 +4214,8 @@
         "level": 3
       },
       {
-        "id": "완성-게임을-꽂아보자",
-        "label": "완성: 게임을 꽂아보자",
+        "id": "게임을-연결할-때",
+        "label": "게임을 연결할 때",
         "level": 3
       },
       {
@@ -5603,26 +4918,6 @@
         "id": "개요",
         "label": "개요",
         "level": 2
-      },
-      {
-        "id": "인터랙티브-자료",
-        "label": "인터랙티브 자료",
-        "level": 2
-      },
-      {
-        "id": "awaitlessreturndiagram",
-        "label": "AwaitlessReturnDiagram",
-        "level": 3
-      },
-      {
-        "id": "mutabledefaultargdiagram",
-        "label": "MutableDefaultArgDiagram",
-        "level": 3
-      },
-      {
-        "id": "threevaluedlogicdiagram",
-        "label": "ThreeValuedLogicDiagram",
-        "level": 3
       },
       {
         "id": "출처와-범위",

@@ -4,12 +4,13 @@ import type {
     MouseEvent as ReactMouseEvent,
     RefObject,
 } from "react";
+import { listenWorkbenchEvent } from "../../application/workbench-events/WorkbenchEventPort";
 import type { ChangeEntry, ChangeSelection } from "../../domain/changeReview";
 import {
     hasSameChangeSelection,
     uniqueChangePaths,
 } from "../../domain/changeReview";
-import type { GitOperation } from "../../shared/contracts/model";
+import type { GitOperation } from "../../shared/contracts/model/index";
 import type { useAppDialog } from "../AppDialog";
 
 export function selectionKey(selection: ChangeSelection): string {
@@ -217,13 +218,11 @@ export function useChangeSelection({
     };
 
     useEffect(() => {
-        const find = (event: Event): void => {
-            if (!(event instanceof CustomEvent)) return;
+        return listenWorkbenchEvent("git-client:find", ({ direction }) => {
             const ownsSearch =
                 searchInput.current === document.activeElement ||
                 navigator.current?.contains(document.activeElement);
             if (!ownsSearch || !query || filteredEntries.length === 0) return;
-            const direction = event.detail?.direction === -1 ? -1 : 1;
             const nextIndex =
                 (Math.max(0, selectedIndex) +
                     direction +
@@ -231,9 +230,7 @@ export function useChangeSelection({
                 filteredEntries.length;
             const next = filteredEntries[nextIndex];
             if (next) onSelectionChange(next.selection);
-        };
-        window.addEventListener("git-client:find", find);
-        return () => window.removeEventListener("git-client:find", find);
+        });
     }, [
         filteredEntries,
         navigator,

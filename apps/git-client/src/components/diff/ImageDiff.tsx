@@ -5,7 +5,10 @@ import {
 } from "@jongminchung/ui/components/toggle-group";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { useState } from "react";
-import type { FilePreview, ImagePreview } from "../../shared/contracts/model";
+import type {
+    FilePreview,
+    ImagePreview,
+} from "../../shared/contracts/model/index";
 
 type ImageDiffMode = "sideBySide" | "swipe" | "onion";
 

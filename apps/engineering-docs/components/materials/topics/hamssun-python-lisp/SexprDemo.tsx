@@ -13,9 +13,9 @@ const CHIP_STYLE: Record<
     ChipKind,
     { color: string; bg: string; border: string }
 > = {
-    paren: { color: "#f08c00", bg: "#fff9db", border: "#ffe066" },
-    number: { color: "#228be6", bg: "#e7f5ff", border: "#a5d8ff" },
-    symbol: { color: "#845ef7", bg: "#f3f0ff", border: "#d0bfff" },
+    paren: { color: "#a65300", bg: "#fff9db", border: "#ffe066" },
+    number: { color: "#1864ab", bg: "#e7f5ff", border: "#a5d8ff" },
+    symbol: { color: "#6741d9", bg: "#f3f0ff", border: "#d0bfff" },
 };
 
 // atom 판별: #t/#f 또는 Number()로 변환 가능하면 숫자/불리언, 아니면 심볼
@@ -94,13 +94,13 @@ const TreeNode = ({ expr, depth }: { expr: Expr; depth: number }) => {
                 gap: 6,
                 padding: "6px 10px",
                 borderRadius: 10,
-                border: "1px solid #ced4da",
+                border: "1px solid #5f666d",
                 background: depth % 2 === 0 ? "#fff" : "#f8f9fa",
             }}
         >
             {expr.length === 0 ? (
                 <span
-                    style={{ fontFamily: MONO, fontSize: 12, color: "#adb5bd" }}
+                    style={{ fontFamily: MONO, fontSize: 12, color: "#5c636a" }}
                 >
                     ()
                 </span>
@@ -176,7 +176,7 @@ export const SexprDemo = () => {
                     fontFamily: MONO,
                     color: "#343a40",
                     background: "#fff",
-                    border: focused ? "1px solid #228be6" : "1px solid #ced4da",
+                    border: focused ? "1px solid #1864ab" : "1px solid #5f666d",
                     boxShadow: focused
                         ? "0 0 0 2px rgba(34, 139, 230, 0.15)"
                         : "none",
@@ -203,7 +203,7 @@ export const SexprDemo = () => {
                             padding: "3px 10px",
                             fontSize: 12,
                             fontFamily: MONO,
-                            color: input === preset ? "#228be6" : "#868e96",
+                            color: input === preset ? "#1864ab" : "#495057",
                             background:
                                 input === preset ? "#e7f5ff" : "#f8f9fa",
                             border:
@@ -232,7 +232,7 @@ export const SexprDemo = () => {
                     }}
                 >
                     {tokens.length === 0 ? (
-                        <span style={{ fontSize: 12, color: "#adb5bd" }}>
+                        <span style={{ fontSize: 12, color: "#5c636a" }}>
                             토큰이 없다
                         </span>
                     ) : (
@@ -255,7 +255,7 @@ export const SexprDemo = () => {
                             borderRadius: 6,
                             fontSize: 13,
                             fontWeight: 600,
-                            color: "#fa5252",
+                            color: "#c92a2a",
                         }}
                     >
                         SyntaxError: {parsed.error}
@@ -295,7 +295,7 @@ export const SexprDemo = () => {
                 style={{
                     marginTop: 14,
                     fontSize: 11,
-                    color: "#adb5bd",
+                    color: "#5c636a",
                     textAlign: "center",
                 }}
             >

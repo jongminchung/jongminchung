@@ -1,7 +1,7 @@
 import type {
     HistoryRewritePreview,
     InProgressOperation,
-} from "../shared/contracts/model";
+} from "../shared/contracts/model/index";
 
 export interface RecoveryConfirmation {
     readonly title: string;

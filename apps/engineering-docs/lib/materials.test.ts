@@ -7,7 +7,7 @@ import type { MaterialComponentProps } from "#components/materials/types";
 interface ManifestEntry {
     readonly id: string;
     readonly name: string;
-    readonly renderer: "svg-motion" | "dom-motion" | "canvas" | "wasm";
+    readonly renderer: "svg-motion" | "dom-motion" | "canvas";
     readonly topic: string;
 }
 
@@ -31,33 +31,41 @@ async function readManifest(): Promise<readonly ManifestEntry[]> {
     ) as readonly ManifestEntry[];
 }
 
+async function readLocalizedMaterialIds(
+    locale: "ko" | "en",
+): Promise<readonly string[]> {
+    const directory = resolve(appRoot, `content/${locale}/deep-dive`);
+    const fileNames = (await readdir(directory))
+        .filter((fileName) => fileName.endsWith(".mdx"))
+        .sort();
+    const sources = await Promise.all(
+        fileNames.map((fileName) =>
+            readFile(resolve(directory, fileName), "utf8"),
+        ),
+    );
+    return sources.flatMap((source) =>
+        [...source.matchAll(/<MaterialDemo\s+id="([^"]+)"\s*\/>/gu)].map(
+            (match) => match[1] ?? "",
+        ),
+    );
+}
+
 describe("material registry", () => {
-    it("contains 24 topics and 179 unique public demos", async () => {
+    it("contains 11 topics and 31 unique independent demos", async () => {
         const manifest = await readManifest();
-        expect(manifest).toHaveLength(179);
-        expect(new Set(manifest.map((entry) => entry.id)).size).toBe(179);
-        expect(new Set(manifest.map((entry) => entry.topic)).size).toBe(24);
+        expect(manifest).toHaveLength(31);
+        expect(new Set(manifest.map((entry) => entry.id)).size).toBe(31);
+        expect(new Set(manifest.map((entry) => entry.topic)).size).toBe(11);
     });
 
-    it("limits native rendering to the measured pixel and WASM exceptions", async () => {
+    it("limits native rendering to the measured pixel exception", async () => {
         const manifest = await readManifest();
         expect(
             manifest
-                .filter(
-                    (entry) =>
-                        entry.renderer === "canvas" ||
-                        entry.renderer === "wasm",
-                )
+                .filter((entry) => entry.renderer === "canvas")
                 .map((entry) => entry.id)
                 .sort(),
-        ).toEqual([
-            "building-nes-emulator/CpuStepDemo",
-            "building-nes-emulator/NesDemo",
-            "building-nes-emulator/SnakeDemo",
-            "building-nes-emulator/TileDemo",
-            "the-expensive-main-thread/DynamicPriorityDemo",
-            "the-expensive-main-thread/SeamCarvingDemo",
-        ]);
+        ).toEqual(["the-expensive-main-thread/DynamicPriorityDemo"]);
     });
 
     it("keeps every generated entry on the static manifest type contract", async () => {
@@ -68,40 +76,28 @@ describe("material registry", () => {
 
         expect(
             registry.match(/satisfies MaterialManifestEntry/gu),
-        ).toHaveLength(179);
+        ).toHaveLength(31);
         expect(registry).not.toContain("as unknown as");
-        expect(registry).not.toMatch(/\.then\(\(module\) => module\[/u);
+        expect(registry).not.toMatch(
+            /\.then\(\s*\(module\)\s*=>\s*module\s*\[/u,
+        );
         expect(
             registry.match(
-                /\.then\(\(module\) => module\.[A-Za-z_$][A-Za-z0-9_$]*\)/gu,
+                /\.then\(\s*\(module\)\s*=>\s*module\.[A-Za-z_$][A-Za-z0-9_$]*\s*\)/gu,
             ),
-        ).toHaveLength(179);
+        ).toHaveLength(31);
         expect(rejectsUnexpectedRequiredProps).toBe(false);
     });
 
-    it("references every demo from both localized topic documents", async () => {
+    it("keeps both locale ID sets unique and exactly equal to the registry", async () => {
         const manifest = await readManifest();
-        const topics = await readdir(resolve(appRoot, "content/ko/deep-dive"));
-        expect(topics).toEqual(
-            expect.arrayContaining(
-                manifest.map((entry) => `${entry.topic}.mdx`),
-            ),
-        );
+        const expected = manifest.map((entry) => entry.id).sort();
 
-        for (const entry of manifest) {
-            const [korean, english] = await Promise.all(
-                (["ko", "en"] as const).map((locale) =>
-                    readFile(
-                        resolve(
-                            appRoot,
-                            `content/${locale}/deep-dive/${entry.topic}.mdx`,
-                        ),
-                        "utf8",
-                    ),
-                ),
-            );
-            expect(korean).toContain(`<MaterialDemo id="${entry.id}" />`);
-            expect(english).toContain(`<MaterialDemo id="${entry.id}" />`);
+        for (const locale of ["ko", "en"] as const) {
+            const ids = [...(await readLocalizedMaterialIds(locale))].sort();
+            expect(ids).toHaveLength(31);
+            expect(new Set(ids).size).toBe(ids.length);
+            expect(ids).toEqual(expected);
         }
     });
 });

@@ -57,22 +57,7 @@ sourceUrl: https://kciter.so/posts/ascii-3d-renderer/
 
 <MaterialImage src="/materials/images/2024-03-03-ascii-3d-renderer/shade.png" />
 
-참고로 간격이 일정해야 하므로 반드시 고정폭 글꼴을 사용해야 한다. 앞서 소개했던 유튜브 영상에서 나오는 큐브처럼 명암을 표현하면 다음과 같다.
-
-<div
-    style={{
-        boxShadow: "1px 1px 2px 2px rgba(0, 0, 0, 0.1)",
-        borderRadius: 4,
-        padding: 16,
-        width: "80%",
-        margin: "0 auto 8px auto",
-    }}
->
-    <MaterialDemo id="ascii-3d-renderer/SpinningCube" />
-</div>
-<figcaption>마치 상자가 회전하는 것처럼 보인다</figcaption>
-
-위 예제는 필자가 유튜브 영상에 나온 프로그램을 직접 웹에서 실행 가능하도록 구현한 것이다. 빛에 기반한 명암 처리는 아니지만 각 면의 명암이 다르기에 **입체감**을 느낄 수 있다. 이제 이를 구현하기 위해 필요한 지식을 알아보자.
+참고로 간격이 일정해야 하므로 반드시 고정폭 글꼴을 사용해야 한다. 빛에 기반한 명암 처리가 아니더라도 각 면의 문자를 다르게 선택하면 **입체감**을 만들 수 있다. 이제 이를 구현하기 위해 필요한 지식을 알아보자.
 
 ## 3D 좌표를 2D 좌표로
 
@@ -1190,20 +1175,7 @@ private Shade = '·┼╬░▒▓█';
 
 ## 마치며
 
-JavaScript(TypeScript를 빌드)로 구현했기 때문에 웹에서 실행이 가능하다. 결과적으로 다음과 같이 결과물을 웹에서 볼 수 있다.
-
-<div
-    style={{
-        boxShadow: "1px 1px 2px 2px rgba(0, 0, 0, 0.1)",
-        borderRadius: 4,
-        padding: 16,
-        width: "80%",
-        margin: "0 auto 8px auto",
-    }}
->
-    <MaterialDemo id="ascii-3d-renderer/ASCII3DRenderer" />
-</div>
-<figcaption>명암도 잘 구분된다</figcaption>
+JavaScript(TypeScript를 빌드)로 구현했기 때문에 동일한 렌더링 과정을 브라우저에서도 실행할 수 있다.
 
 별도로 배포한 [Chromatic](https://6637eb83d047d2bb1b3cfe67-bdnazvfsel.chromatic.com)에서 보면 더 다양한 예제를 볼 수 있다.
 

@@ -54,7 +54,7 @@ function rendererGraph(
 }
 
 describe("hosting renderer and preload boundaries", () => {
-    it("does not reach Electron's main-only hosting barrel or node built-ins", () => {
+    it("shares transport contracts without reaching Electron's main-only hosting barrel", () => {
         const sources = rendererGraph([
             join(APP_ROOT, "electron/preload/index.ts"),
             join(APP_ROOT, "src/bridge/createHostingBridge.ts"),
@@ -63,6 +63,9 @@ describe("hosting renderer and preload boundaries", () => {
 
         expect([...sources.keys()]).not.toContain(
             join(APP_ROOT, "electron/hosting/index.ts"),
+        );
+        expect([...sources.keys()]).toContain(
+            join(APP_ROOT, "src/shared/contracts/hosting.ts"),
         );
     });
 });

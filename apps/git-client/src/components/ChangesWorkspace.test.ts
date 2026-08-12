@@ -77,6 +77,8 @@ describe("ChangesWorkspace", () => {
         );
 
         expect(markup).toContain("changesToolWindow");
+        expect(markup).toContain('<aside aria-label="Changed files"');
+        expect(markup).toContain('role="region"');
         expect(markup).toContain('aria-label="Close Commit"');
         expect(markup).toContain("Staged");
         expect(markup).toContain("Working Tree");

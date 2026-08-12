@@ -7,7 +7,7 @@ import {
     filterHostingChangeRequests,
     type HostingListScope,
 } from "../../domain/hostingView";
-import type { HostingChangeRequest } from "../../shared/contracts/model";
+import type { HostingChangeRequest } from "../../shared/contracts/model/index";
 import { Icon } from "../Icon";
 import { EmptyState } from "../ProductCollections";
 import {

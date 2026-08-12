@@ -3,7 +3,7 @@ import type {
     RepositoryId,
     TerminalEvent,
     TerminalId,
-} from "../shared/contracts/model";
+} from "../shared/contracts/model/index";
 import {
     DEFAULT_TERMINAL_LAUNCH_TARGET,
     type TerminalLaunchTarget,

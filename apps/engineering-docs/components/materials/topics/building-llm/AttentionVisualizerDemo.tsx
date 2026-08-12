@@ -51,14 +51,14 @@ export const AttentionVisualizerDemo = () => {
             <div
                 style={{
                     fontSize: 12,
-                    color: "#868e96",
+                    color: "#495057",
                     marginBottom: 16,
                     fontWeight: 500,
                     lineHeight: 1.6,
                 }}
             >
                 토큰을 클릭하면 해당 토큰이 각 토큰에 얼마나{" "}
-                <strong style={{ color: "#228be6" }}>어텐션(attention)</strong>
+                <strong style={{ color: "#1864ab" }}>어텐션(attention)</strong>
                 을 주는지 확인할 수 있습니다. Causal Mask(인과적 마스킹)로 인해
                 자기 자신과 이전 토큰에만 어텐션을 줄 수 있습니다.
             </div>
@@ -101,7 +101,7 @@ export const AttentionVisualizerDemo = () => {
                                 cursor: "pointer",
                                 transition: "all 0.2s ease",
                                 border: isSelected
-                                    ? "2px solid #228be6"
+                                    ? "2px solid #1864ab"
                                     : isAttended
                                       ? `2px solid ${weightToBorderColor(weight)}`
                                       : "2px solid #dee2e6",
@@ -113,9 +113,9 @@ export const AttentionVisualizerDemo = () => {
                                         ? "#f1f3f5"
                                         : "#f8f9fa",
                                 color: isMasked
-                                    ? "#ced4da"
+                                    ? "#5f666d"
                                     : isSelected
-                                      ? "#228be6"
+                                      ? "#1864ab"
                                       : "#495057",
                                 userSelect: "none",
                                 textDecoration: isMasked
@@ -134,7 +134,7 @@ export const AttentionVisualizerDemo = () => {
                                         fontSize: 11,
                                         fontWeight: 700,
                                         color: "#fff",
-                                        background: "#228be6",
+                                        background: "#1864ab",
                                         borderRadius: 10,
                                         padding: "1px 6px",
                                         minWidth: 18,
@@ -154,7 +154,7 @@ export const AttentionVisualizerDemo = () => {
                                         fontSize: 11,
                                         fontWeight: 700,
                                         color: "#fff",
-                                        background: "#228be6",
+                                        background: "#1864ab",
                                         borderRadius: 10,
                                         padding: "1px 6px",
                                         minWidth: 18,
@@ -183,12 +183,12 @@ export const AttentionVisualizerDemo = () => {
                     <div
                         style={{
                             fontSize: 12,
-                            color: "#868e96",
+                            color: "#495057",
                             marginBottom: 12,
                             fontWeight: 500,
                         }}
                     >
-                        <strong style={{ color: "#228be6" }}>
+                        <strong style={{ color: "#1864ab" }}>
                             {TOKENS[selectedToken]}
                         </strong>
                         의 어텐션 분포
@@ -221,7 +221,7 @@ export const AttentionVisualizerDemo = () => {
                                             fontWeight: 500,
                                             color: isAccessible
                                                 ? "#495057"
-                                                : "#ced4da",
+                                                : "#5f666d",
                                             flexShrink: 0,
                                         }}
                                     >
@@ -242,7 +242,7 @@ export const AttentionVisualizerDemo = () => {
                                                     height: "100%",
                                                     width: `${weight! * 100}%`,
                                                     background:
-                                                        "linear-gradient(90deg, #228be6, #4dabf7)",
+                                                        "linear-gradient(90deg, #1864ab, #4dabf7)",
                                                     borderRadius: 3,
                                                     transition:
                                                         "width 0.3s ease",
@@ -254,8 +254,8 @@ export const AttentionVisualizerDemo = () => {
                                         style={{
                                             fontSize: 12,
                                             color: isAccessible
-                                                ? "#868e96"
-                                                : "#ced4da",
+                                                ? "#495057"
+                                                : "#5f666d",
                                             width: 42,
                                             textAlign: "right",
                                             flexShrink: 0,
@@ -278,7 +278,7 @@ export const AttentionVisualizerDemo = () => {
                 <div
                     style={{
                         fontSize: 12,
-                        color: "#868e96",
+                        color: "#495057",
                         textAlign: "center",
                         lineHeight: 1.5,
                     }}
@@ -291,7 +291,7 @@ export const AttentionVisualizerDemo = () => {
                 <div
                     style={{
                         fontSize: 13,
-                        color: "#868e96",
+                        color: "#495057",
                         textAlign: "center",
                         padding: "8px 0",
                     }}

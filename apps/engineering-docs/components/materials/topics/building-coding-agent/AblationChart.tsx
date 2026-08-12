@@ -30,8 +30,8 @@ const DATA = [
     },
 ];
 
-const EASY_COLOR = "#adb5bd"; // 쉬운 세트
-const HARD_COLOR = "#228be6"; // 어려운 세트(효과가 드러나는 쪽)
+const EASY_COLOR = "#5c636a"; // 쉬운 세트
+const HARD_COLOR = "#1864ab"; // 어려운 세트(효과가 드러나는 쪽)
 
 const STYLE = `
 .bca-abl-card {
@@ -92,7 +92,7 @@ export const AblationChart = ({ caption }: { caption?: string }) => {
                             y={13}
                             fontFamily={FONT}
                             fontSize={11}
-                            fill="#868e96"
+                            fill="#495057"
                         >
                             {l.t}
                         </text>
@@ -122,7 +122,7 @@ export const AblationChart = ({ caption }: { caption?: string }) => {
                     y={top - 4}
                     fontFamily={FONT}
                     fontSize={9}
-                    fill="#ced4da"
+                    fill="#5f666d"
                 >
                     100%
                 </text>
@@ -153,7 +153,7 @@ export const AblationChart = ({ caption }: { caption?: string }) => {
                                 textAnchor="end"
                                 fontFamily={FONT}
                                 fontSize={9}
-                                fill="#adb5bd"
+                                fill="#5c636a"
                             >
                                 {d.sub}
                             </text>

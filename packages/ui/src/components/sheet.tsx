@@ -6,6 +6,12 @@ import { cn } from "@jongminchung/ui/lib/utils";
 import { XIcon } from "lucide-react";
 import * as React from "react";
 
+type SheetContentProps = SheetPrimitive.Popup.Props &
+    (
+        | { closeLabel: string; showCloseButton?: true }
+        | { closeLabel?: never; showCloseButton: false }
+    );
+
 function Sheet({ ...props }: SheetPrimitive.Root.Props) {
     return <SheetPrimitive.Root data-slot="sheet" {...props} />;
 }
@@ -38,12 +44,12 @@ function SheetOverlay({ className, ...props }: SheetPrimitive.Backdrop.Props) {
 function SheetContent({
     className,
     children,
+    closeLabel,
     side = "right",
     showCloseButton = true,
     ...props
-}: SheetPrimitive.Popup.Props & {
+}: SheetContentProps & {
     side?: "top" | "right" | "bottom" | "left";
-    showCloseButton?: boolean;
 }) {
     return (
         <SheetPortal>
@@ -70,7 +76,7 @@ function SheetContent({
                         }
                     >
                         <XIcon />
-                        <span className="sr-only">Close</span>
+                        <span className="sr-only">{closeLabel}</span>
                     </SheetPrimitive.Close>
                 )}
             </SheetPrimitive.Popup>

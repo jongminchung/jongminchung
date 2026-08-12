@@ -12,6 +12,7 @@
   "scripts": {
     "build": "pnpm typecheck && vite build",
     "dev": "electron-forge start",
+    "electron:clean-package": "node scripts/clean-electron-package.mjs",
     "electron:package": "electron-forge package",
     "electron:smoke-package": "node scripts/smoke-electron-package.mjs",
     "electron:verify-package": "node scripts/verify-electron-package.mjs",
@@ -24,10 +25,12 @@
     "release:validate-local": "node scripts/release.mjs --local-ad-hoc",
     "test": "vitest run --root ../.. apps/git-client --maxWorkers=2 --reporter=agent --silent=passed-only",
     "test:e2e": "playwright test",
+    "test:e2e:prebuilt": "playwright test --config playwright.prebuilt.config.ts",
     "test:e2e:update": "playwright test --update-snapshots",
-    "test:electron": "playwright test --config playwright.electron.config.ts",
+    "test:electron": "pnpm run electron:clean-package && pnpm run electron:package && pnpm run electron:verify-package && pnpm run electron:smoke-package && pnpm run test:electron:prebuilt",
     "test:electron-package-policy": "node --test scripts/electron-package-policy.node-test.mjs",
-    "test:scripts": "node --test scripts/*.node-test.mjs scripts/independent-audit/*.node-test.mjs",
+    "test:electron:prebuilt": "playwright test --config playwright.electron.config.ts",
+    "test:scripts": "node --test --test-concurrency=1 --test-timeout=60000 scripts/*.node-test.mjs scripts/independent-audit/*.node-test.mjs",
     "test:verbose": "vitest run --root ../.. apps/git-client --maxWorkers=2 --reporter=verbose",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.test.json && tsc --noEmit -p tsconfig.electron.json"
   },

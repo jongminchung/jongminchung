@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { GitRequest, RequestId } from "../shared/contracts/model";
+import type { GitRequest, RequestId } from "../shared/contracts/model/index";
 import { describeGitRequest, recordGitConsoleEvent } from "./gitConsole";
 
 const request: GitRequest = { kind: "status", repositoryId: "repository-1" };

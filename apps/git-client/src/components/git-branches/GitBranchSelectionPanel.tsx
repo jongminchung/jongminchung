@@ -2,7 +2,7 @@ import { Button } from "@jongminchung/ui/components/button";
 import { cn } from "@jongminchung/ui/lib/utils";
 import type { ReactNode, RefObject } from "react";
 import type { Ref } from "../../domain/types";
-import type { BranchComparison } from "../../shared/contracts/model";
+import type { BranchComparison } from "../../shared/contracts/model/index";
 
 interface GitBranchSelectionPanelProps {
     readonly activeRef: Ref | null;

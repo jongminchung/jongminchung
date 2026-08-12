@@ -9,7 +9,7 @@ const MONO = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
 // Beaver의 다섯 도구를 카드로 나열한다. 각 카드는 심플한 SVG 글리프 +
 // 도구명(MONO) + 한 줄 설명. 반응형 그리드.
 
-const ACCENT = "#228be6";
+const ACCENT = "#1864ab";
 
 // 24x24 뷰박스 안의 간단한 라인 글리프
 const glyphs: Record<string, React.ReactNode> = {
@@ -251,14 +251,14 @@ const STYLE = `
 .bca-tool-ko {
   font-family: ${FONT};
   font-size: 10px;
-  color: #adb5bd;
+  color: #5c636a;
   margin-top: 1px;
 }
 .bca-tool-desc {
   font-family: ${FONT};
   font-size: 10.5px;
   line-height: 1.45;
-  color: #868e96;
+  color: #495057;
   margin-top: 6px;
 }
 .bca-tools-caption {

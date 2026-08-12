@@ -1,26 +1,37 @@
 import type { CommandDefinition } from "../../domain/commands";
-import { createAppearanceCommands } from "./appearanceCommands";
-import { createHelpCommands } from "./helpCommands";
-import { createLayoutCommands } from "./layoutCommands";
-import { createMacroCommands } from "./macroCommands";
-import { createProjectCommands } from "./projectCommands";
-import type { WorkspaceCommandContext } from "./workspaceCommandTypes";
+import {
+    createAppearanceCommands,
+    type AppearanceCommandPort,
+} from "./appearanceCommands";
+import { createHelpCommands, type HelpCommandPort } from "./helpCommands";
+import { createLayoutCommands, type LayoutCommandPort } from "./layoutCommands";
+import { createMacroCommands, type MacroCommandPort } from "./macroCommands";
+import {
+    createProjectCommands,
+    type ProjectCommandPort,
+} from "./projectCommands";
 
 export { createAppearanceCommands } from "./appearanceCommands";
 export { createHelpCommands } from "./helpCommands";
 export { createLayoutCommands } from "./layoutCommands";
 export { createMacroCommands } from "./macroCommands";
 export { createProjectCommands } from "./projectCommands";
-export type { WorkspaceCommandContext } from "./workspaceCommandTypes";
+export interface WorkspaceCommandPorts {
+    readonly appearance: AppearanceCommandPort;
+    readonly help: HelpCommandPort;
+    readonly layout: LayoutCommandPort;
+    readonly macro: MacroCommandPort;
+    readonly project: ProjectCommandPort;
+}
 
 export function createWorkspaceCommands(
-    context: WorkspaceCommandContext,
+    ports: WorkspaceCommandPorts,
 ): readonly CommandDefinition[] {
     return [
-        ...createProjectCommands(context),
-        ...createLayoutCommands(context),
-        ...createHelpCommands(context),
-        ...createMacroCommands(context),
-        ...createAppearanceCommands(context),
+        ...createProjectCommands(ports.project),
+        ...createLayoutCommands(ports.layout),
+        ...createHelpCommands(ports.help),
+        ...createMacroCommands(ports.macro),
+        ...createAppearanceCommands(ports.appearance),
     ];
 }

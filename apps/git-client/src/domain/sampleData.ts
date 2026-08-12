@@ -2,7 +2,7 @@ import type {
     FileSource,
     RepositorySnapshot,
     ShelfEntry,
-} from "../shared/contracts/model";
+} from "../shared/contracts/model/index";
 import type {
     Commit,
     FileChange,

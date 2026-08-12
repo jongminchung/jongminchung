@@ -3,7 +3,7 @@ import { cn } from "@jongminchung/ui/lib/utils";
 import { memo } from "react";
 import type { MouseEvent } from "react";
 import type { Commit, Ref } from "../domain/types";
-import type { LogFilters, LogOrder } from "../shared/contracts/model";
+import type { LogFilters, LogOrder } from "../shared/contracts/model/index";
 import { CommitLogTable, LOG_ROW_HEIGHT } from "./commit-log/CommitLogTable";
 import { CommitLogToolbar } from "./commit-log/CommitLogToolbar";
 import { useCommitLogNavigation } from "./commit-log/useCommitLogNavigation";

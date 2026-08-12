@@ -1,7 +1,7 @@
 import type {
     HistoryRewritePreview,
     RebasePlanEntry,
-} from "../shared/contracts/model";
+} from "../shared/contracts/model/index";
 
 export function prepareHistoryPlan(
     preview: HistoryRewritePreview,

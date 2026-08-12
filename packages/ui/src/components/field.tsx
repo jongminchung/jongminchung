@@ -1,10 +1,23 @@
-"use client";
-
 import { Label } from "@jongminchung/ui/components/label";
 import { Separator } from "@jongminchung/ui/components/separator";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
-import { useMemo } from "react";
+
+interface FieldErrorEntry {
+    readonly message?: string;
+}
+
+function uniqueErrorMessages(
+    errors: readonly (FieldErrorEntry | undefined)[] | undefined,
+): readonly string[] {
+    return [
+        ...new Set(
+            errors?.flatMap((error) =>
+                error?.message ? [error.message] : [],
+            ) ?? [],
+        ),
+    ];
+}
 
 function FieldSet({ className, ...props }: React.ComponentProps<"fieldset">) {
     return (
@@ -178,34 +191,20 @@ function FieldError({
     errors,
     ...props
 }: React.ComponentProps<"div"> & {
-    errors?: Array<{ message?: string } | undefined>;
+    errors?: readonly (FieldErrorEntry | undefined)[];
 }) {
-    const content = useMemo(() => {
-        if (children) {
-            return children;
-        }
-
-        if (!errors?.length) {
-            return null;
-        }
-
-        const uniqueErrors = [
-            ...new Map(errors.map((error) => [error?.message, error])).values(),
-        ];
-
-        if (uniqueErrors?.length == 1) {
-            return uniqueErrors[0]?.message;
-        }
-
-        return (
+    const messages = uniqueErrorMessages(errors);
+    const content =
+        children ??
+        (messages.length === 1 ? (
+            messages[0]
+        ) : messages.length > 1 ? (
             <ul className="ml-4 flex list-disc flex-col gap-1">
-                {uniqueErrors.map(
-                    (error, index) =>
-                        error?.message && <li key={index}>{error.message}</li>,
-                )}
+                {messages.map((message) => (
+                    <li key={message}>{message}</li>
+                ))}
             </ul>
-        );
-    }, [children, errors]);
+        ) : null);
 
     if (!content) {
         return null;

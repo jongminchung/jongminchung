@@ -10,9 +10,9 @@ const MONO = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
 // 각 층의 상대 크기(임의 단위). 도구 결과가 게걸스럽게 먹는다.
 type Layer = { key: string; label: string; color: string };
 const LAYERS: Record<string, Layer> = {
-    system: { key: "system", label: "시스템 프롬프트", color: "#adb5bd" },
-    user: { key: "user", label: "사용자 요청", color: "#228be6" },
-    tool: { key: "tool", label: "도구 결과 (파일 내용 등)", color: "#f76707" },
+    system: { key: "system", label: "시스템 프롬프트", color: "#5c636a" },
+    user: { key: "user", label: "사용자 요청", color: "#1864ab" },
+    tool: { key: "tool", label: "도구 결과 (파일 내용 등)", color: "#c2410c" },
 };
 
 // 턴별 층 구성. 도구 결과가 턴마다 누적되며 커진다.
@@ -139,7 +139,7 @@ export const ContextGrowthDiagram = ({ caption }: { caption?: string }) => {
                                 y={y + rowH / 2 + 4}
                                 fontFamily={MONO}
                                 fontSize={10}
-                                fill="#868e96"
+                                fill="#495057"
                             >
                                 ×
                                 {(
@@ -176,7 +176,7 @@ export const ContextGrowthDiagram = ({ caption }: { caption?: string }) => {
                                 y={cy + 9.5}
                                 fontFamily={FONT}
                                 fontSize={10.5}
-                                fill="#868e96"
+                                fill="#495057"
                             >
                                 {l.label}
                             </text>

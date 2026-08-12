@@ -214,7 +214,6 @@ async function createMainWindow(
     window.webContents.once("did-finish-load", () => {
         if (!qaSmokeTest) return;
         console.info("[git-client] packaged-smoke-ready");
-        setTimeout(() => app.quit(), 1_000);
     });
     preventUntrustedNavigation(window.webContents);
 

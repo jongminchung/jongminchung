@@ -1,12 +1,3 @@
-export { AttentionProcessDiagram } from "./AttentionProcessDiagram";
 export { AttentionVisualizerDemo } from "./AttentionVisualizerDemo";
-export { EmbeddingDiagram } from "./EmbeddingDiagram";
 export { HamsterLMDemo } from "./HamsterLMDemo";
-export { MatrixMultiplyDiagram } from "./MatrixMultiplyDiagram";
-export { NeuralNetworkDiagram } from "./NeuralNetworkDiagram";
-export { NextTokenDiagram } from "./NextTokenDiagram";
-export { ParameterScaleDiagram } from "./ParameterScaleDiagram";
-export { PositionEmbeddingDiagram } from "./PositionEmbeddingDiagram";
-export { StudyGroupDiagram } from "./StudyGroupDiagram";
 export { TemperatureSamplingDemo } from "./TemperatureSamplingDemo";
-export { TransformerBlockDiagram } from "./TransformerBlockDiagram";

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import type { KeyboardEvent, MouseEvent } from "react";
+import { listenWorkbenchEvent } from "../../application/workbench-events/WorkbenchEventPort";
 import type { Commit } from "../../domain/types";
 
 export function useCommitLogNavigation({
@@ -19,18 +20,12 @@ export function useCommitLogNavigation({
     const searchInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        const find = (event: Event): void => {
-            if (
-                !(event instanceof CustomEvent) ||
-                !normalizedQuery ||
-                filtered.length === 0
-            )
-                return;
+        return listenWorkbenchEvent("git-client:find", ({ direction }) => {
+            if (!normalizedQuery || filtered.length === 0) return;
             const ownsSearch =
                 searchInputRef.current === document.activeElement ||
                 tableRef.current?.contains(document.activeElement);
             if (!ownsSearch) return;
-            const direction = event.detail?.direction === -1 ? -1 : 1;
             const current = filtered.findIndex(
                 (commit) => commit.oid === selectedOids[0],
             );
@@ -39,9 +34,7 @@ export function useCommitLogNavigation({
                 filtered.length;
             const commit = filtered[index];
             if (commit) onSelectionChange([commit.oid]);
-        };
-        window.addEventListener("git-client:find", find);
-        return () => window.removeEventListener("git-client:find", find);
+        });
     }, [filtered, normalizedQuery, onSelectionChange, selectedOids]);
 
     const select = useCallback(

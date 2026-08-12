@@ -37,15 +37,11 @@ The second is **drawing the screen**. When the DOM or styles change and the scre
 
 If nothing changed, these steps are skipped entirely, so they don't necessarily run every frame. Only the final compositing step — taking the produced output and assembling it on screen — moves off to the compositor thread[^1]. In other words, most of the front half of the pipeline that draws your screen belongs to the main thread.
 
-<MaterialDemo id="the-expensive-main-thread/RenderingPipelineDiagram" />
-
 For the screen to look smooth, frames have to be produced at the display's refresh rate. On the most common 60Hz display that's 60 frames per second — **about 16.6 milliseconds** per frame. And you don't even get all of it. After subtracting the browser's own overhead, the practical budget is usually taken to be around 10 milliseconds[^2], and on a 120Hz device the budget itself is cut in half.
 
 The problem is that the two kinds of work above **stand in a single line on the same thread**. JavaScript was designed around a **single-threaded event loop**. The main thread processes one task at a time, and **while that task runs, nothing else can happen.** If one JavaScript function runs for 200 milliseconds, then for 200 milliseconds the browser cannot repaint the screen or accept a click. Against a frame budget of barely 10 milliseconds, that's an eternity. A task that holds the main thread this long is called a long task, and anything over 50 milliseconds is generally considered a problem.
 
 Words only go so far, so let's feel it. In the demo below, pressing the button makes JavaScript grab the main thread for a moment.
-
-<MaterialDemo id="the-expensive-main-thread/LongTaskBlockingDemo" />
 
 The instant you press the button, the JS animation stops and typing into the input field does nothing. The CSS animation, meanwhile, keeps running. We'll get to where that difference comes from later. What to remember for now: **holding the main thread for a long time is the same as freezing the screen.**
 
@@ -71,8 +67,6 @@ Picture the chat pane of a live stream. On a popular stream, chat can burst to h
 The fix is exactly what we said above: cut the clump into small pieces, and between pieces, hand control of the main thread back for a moment. In those gaps the browser catches up on the screen updates and input handling it had queued.
 
 The demo below simulates a streaming chat pane. Press "Flood the chat" and messages start pouring in. Try typing in the input field while watching the smoothness gauge and fps up top, and compare the "Immediate render" and "Yielding render" modes.
-
-<MaterialDemo id="the-expensive-main-thread/ChunkingCompareDemo" />
 
 In "Immediate render" mode, the DOM is touched the moment each message arrives, so while chat is flooding in, fps craters, the gauge stutters, and the input field lags. Look closely and the chat messages themselves start appearing noticeably more slowly: the callback that receives and processes them is itself a task waiting in the main thread's line, so it gets delayed along with everything else. Now switch to "Yielding render". Messages are still drawn one at a time, exactly as before, yet input comes back to life and the screen moves again. The only change: after every 20 messages, the main thread is released for a moment.
 
@@ -105,8 +99,6 @@ Now no matter how hard chat floods in, the DOM work never occupies the main thre
 
 The star of this code is `setTimeout`. It schedules the resumption of the remaining work as a new task, which ends the current task right there — and in that gap, the backlogged input and rendering run. `await` pauses the function until that scheduled task comes back around, then picks up where it left off.
 
-<MaterialDemo id="the-expensive-main-thread/YieldTimelineDiagram" />
-
 The example above split the incoming work by **count**. But if an animation is already running, or the user is mid-scroll, splitting by **time** is safer. An animation is spending a slice of the main thread every frame, so a heavy job has to keep checking the clock to avoid swallowing what's left of the frame's budget.
 
 ```js
@@ -131,8 +123,6 @@ Note that rAF passes its callback the frame's start timestamp, and the code abov
 
 With this in place, even while heavy work grinds on, there's room to draw the screen every frame — the work and the animation run smoothly side by side. Try the demo below. Moving the mouse scatters 4,000 particles away from the cursor, and nearby particles also push each other apart, so deciding one particle's direction means checking its distance to every other particle. That's roughly 16 million distance calculations per pass — recomputing everything every frame blows the budget on its own. Compare the "Compute all at once" and "5ms per frame" modes.
 
-<MaterialDemo id="the-expensive-main-thread/FrameBudgetChunkingDemo" />
-
 Splitting is the most fundamental way to stretch the main thread's time, and it buys the perceived performance that matters to users: fast responses and a smooth screen.
 
 A few caveats to close the topic. First, **splitting too finely backfires.** Yielding and coming back has a cost of its own, so if the pieces are too small, that overhead can outweigh the work you're actually trying to do.
@@ -155,8 +145,6 @@ The best batching targets are events. Scroll, resize, and input events can fire 
 
 Next up is a markdown editor with a long CHANGELOG open. Building the preview means parsing the entire document (about 2,000 lines) and rebuilding its DOM wholesale — far too expensive to run on every keystroke. Type quickly into the left editor with "No debounce": the preview rebuilds once per character and your input lags behind. Switch to "Debounce 300ms" and the render happens exactly once, after you stop typing — and the typing turns smooth.
 
-<MaterialDemo id="the-expensive-main-thread/DebounceDemo" />
-
 For visual updates there's `requestAnimationFrame`. The screen only gets drawn once per frame anyway, so no matter how many update requests pile up, actually drawing once per frame is enough.
 
 ```js
@@ -174,8 +162,6 @@ socket.on("tick", (tick) => {
 ```
 
 Below, a board of 60 tickers is fed over 1,000 messages per second. "Render every tick" mode redraws the whole board on every message — calling a chart library's `update()` per message is a common mistake, and this is exactly what it looks like. Flip it to "Once per frame" and every arriving data point is still reflected, but the fps comes back.
-
-<MaterialDemo id="the-expensive-main-thread/TickerCoalesceDemo" />
 
 DOM writes can be batched too. Appending a hundred nodes in one operation instead of one by one, or toggling a single class instead of poking style properties individually, collapses many changes into one. The old trick of assembling an HTML string and assigning it to `innerHTML` in one shot has the same essence: gather the writes so the rendering pipeline's fixed cost is paid once.
 
@@ -261,8 +247,6 @@ feed.querySelectorAll(".feed-item").forEach((el) => io.observe(el));
 
 Here's a feed with 1,500 posts piled up[^5]. It starts with "Render only when visible" on. Visit the notifications tab and come back — the return is instant, regardless of how much has accumulated. Now switch to "Render everything" and make the round trip again. Every return freezes for hundreds of milliseconds while all 1,500 posts are laid out again. Apart from unfilled slots flashing briefly during fast scrolling, the two modes look identical.
 
-<MaterialDemo id="the-expensive-main-thread/FeedReturnDemo" />
-
 Rendering isn't the only thing this defers. Off-screen posts never get their DOM built at all, so the cost of creating and maintaining it is deferred along with everything else. If a widget carries heavy initialization, that too can wait until it nears the screen. There's also a CSS property that aims for a similar effect in one line: `content-visibility: auto`. As of this writing, though, engine implementations vary — Safari has a performance bug that makes returns slower, not faster — so for now `IntersectionObserver` behaves predictably everywhere.
 
 **Continuously running work** — carousels, animated promo banners, live charts — is pure waste while off screen. You're spending main-thread time redrawing a picture nobody can see, every frame. Run it while visible, stop it when it leaves. In fact, that's the secret to how the dozen-plus demos in this article coexist on a single page: each one stops the moment it scrolls out of view.
@@ -322,8 +306,6 @@ To the user's eye the element glides from its old spot to its new one, but in re
 
 See the difference at a glance below. Press "Play rank shuffle" and both ranking lists reshuffle identically. The left list animates `top` with a transition; the right list moves only `transform`, via FLIP. With no load, both look silky. Now turn on "Load the main thread" and play again. The left one staggers its way to the finish; the right one stays smooth no matter what.
 
-<MaterialDemo id="the-expensive-main-thread/FlipDemo" />
-
 Two things worth knowing before handing work to the compositor. One is `will-change: transform`. It hints to the browser that "this element is about to change, prepare it as its own layer in advance," which smooths the start of an animation. Overuse it, though, and layers proliferate and waste memory.
 
 The other is reading layout values, which you just saw in the FLIP code. Get the ordering of layout reads (`getBoundingClientRect`, `offsetWidth`) and style writes wrong, and you get a problem called layout thrashing.
@@ -367,8 +349,6 @@ Enough theory — let's bring in genuinely heavy image work. Seam carving is an 
 
 Press "Run on main thread" in the demo below. For the one or two seconds the computation runs, the entire page freezes, and the result pops in all at once at the end — with no task boundaries for paint to slip into, you couldn't show intermediate progress even if you wanted to. Now try "Run in worker". The same computation runs, and you get to watch the image narrow in real time.
 
-<MaterialDemo id="the-expensive-main-thread/SeamCarvingDemo" />
-
 The smooth intermediate frames have one more secret. If the worker copied a multi-megabyte pixel buffer every time it sent a frame, that cost would sting too. So `postMessage` offers an alternative to copying: **transferring ownership outright.** Transferable objects like `ArrayBuffer` move by reference, so the cost is near zero regardless of size. The sender loses access to the buffer — that's the trade for making the copy cost vanish.
 
 ```js
@@ -382,8 +362,6 @@ worker.postMessage({ buf: pixels.buffer, width, height }, [pixels.buffer]);
 So far we've asked, "does this really need to run on the main thread?" Now let's ask a sharper question: **does this work need to happen at all?** The best thing for performance is work that never runs.
 
 Backpressure came up earlier: however well you batch, once inflow exceeds maximum throughput, the backlog grows without bound. And unfortunately the browser has no good way to tell the server "slow down." At some point you have to abandon the idea of doing everything you're given. Eliminating work usually takes one of three shapes.
-
-<MaterialDemo id="the-expensive-main-thread/WorkEliminationDiagram" />
 
 The first is **dropping**. For data that just flows past — live logs, say — once processing falls behind, you can quietly discard the oldest entries and users won't notice. Keeping up with the present matters more than showing everything.
 
@@ -416,11 +394,3 @@ Dig deep enough and nothing is easy. So much of development is trade-offs, and c
 [^6]: https://aerotwist.com/blog/flip-your-animations/
 
 [^7]: https://en.wikipedia.org/wiki/Seam_carving
-
-## 추가 인터랙티브 자료
-
-### BrowserThreadMapDiagram
-
-원문 주제에 포함된 보조 시각 자료다.
-
-<MaterialDemo id="the-expensive-main-thread/BrowserThreadMapDiagram" />

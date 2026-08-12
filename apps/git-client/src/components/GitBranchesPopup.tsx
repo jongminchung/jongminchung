@@ -12,7 +12,7 @@ import type {
     BranchComparison,
     GitOperation,
     RemoteInfo,
-} from "../shared/contracts/model";
+} from "../shared/contracts/model/index";
 import { useDismissLayer } from "./CommandProvider";
 import { GitBranchSelectionPanel } from "./git-branches/GitBranchSelectionPanel";
 import { useGitBranchActions } from "./git-branches/useGitBranchActions";

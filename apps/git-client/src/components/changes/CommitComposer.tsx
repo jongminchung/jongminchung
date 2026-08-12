@@ -7,7 +7,7 @@ import {
 import { cn } from "@jongminchung/ui/lib/utils";
 import { useMemo, useState } from "react";
 import type { ChangeEntry, CommitDraft } from "../../domain/changeReview";
-import type { Changelist } from "../../shared/contracts/model";
+import type { Changelist } from "../../shared/contracts/model/index";
 import { useDismissLayer } from "../CommandProvider";
 import { Icon } from "../Icon";
 import { Spinner } from "../ProductCollections";

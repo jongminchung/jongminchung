@@ -10,7 +10,7 @@ export {
     HostingReviewEventSchema,
     SaveHostingAccountSchema,
     normalizeHostingBaseUrl,
-} from "./hosting-contract";
+} from "../../src/shared/contracts/hosting";
 export type {
     HostingAccount,
     HostingChangeRequest,
@@ -20,7 +20,7 @@ export type {
     HostingResponse,
     HostingReviewEvent,
     HostingTimelineEntry,
-} from "./hosting-contract";
+} from "../../src/shared/contracts/hosting";
 export { HostingFoundationError } from "./hosting-error";
 export type { HostingFoundationErrorCode } from "./hosting-error";
 export { FetchHostingHttpClient } from "./hosting-http";

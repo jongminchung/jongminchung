@@ -49,7 +49,7 @@ function makeThumbnail(img: HTMLImageElement | null): string {
     } else {
         // 사진을 못 받아온 경우의 대체 이미지
         const g = sctx.createLinearGradient(0, 0, FETCH, FETCH);
-        g.addColorStop(0, "#adb5bd");
+        g.addColorStop(0, "#5c636a");
         g.addColorStop(1, "#dee2e6");
         sctx.fillStyle = g;
         sctx.fillRect(0, 0, FETCH, FETCH);
@@ -187,7 +187,7 @@ export const DynamicPriorityDemo = ({
             style={{
                 flex: 1,
                 padding: "7px 10px",
-                border: mode === m ? "2px solid #228be6" : "1px solid #dee2e6",
+                border: mode === m ? "2px solid #1864ab" : "1px solid #dee2e6",
                 borderRadius: 6,
                 background: mode === m ? "#e7f5ff" : "#fff",
                 color: mode === m ? "#1971c2" : "#495057",
@@ -225,7 +225,7 @@ export const DynamicPriorityDemo = ({
                             aspectRatio: "1",
                             border:
                                 tracked === i
-                                    ? "2px solid #228be6"
+                                    ? "2px solid #1864ab"
                                     : "1px solid #dee2e6",
                             borderRadius: 4,
                             background: previews[i]
@@ -260,7 +260,7 @@ export const DynamicPriorityDemo = ({
                         padding: "8px 20px",
                         border: "none",
                         borderRadius: 6,
-                        background: running || loading ? "#ced4da" : "#1971c2",
+                        background: running || loading ? "#5f666d" : "#1971c2",
                         color: "#fff",
                         cursor: running || loading ? "default" : "pointer",
                         fontSize: 13,

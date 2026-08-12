@@ -1,4 +1,4 @@
-import type { RepositoryInvalidation } from "../shared/contracts/model";
+import type { RepositoryInvalidation } from "../shared/contracts/model/index";
 
 type Refresh = (
     repositoryId: string,

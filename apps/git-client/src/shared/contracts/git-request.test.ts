@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import type { GitRequest, RepositoryId } from "../../shared/contracts/model";
 import { VALID_GIT_OPERATIONS } from "./git-operation-fixtures";
 import {
     GitDomainRequestSchema,
@@ -10,6 +9,7 @@ import {
     type GitDomainQueryRequest,
 } from "./git-request";
 import { MainToGitUtilityMessageSchema } from "./git-utility-process";
+import type { GitRequest, RepositoryId } from "./model/index";
 
 const repositoryId = "00000000-0000-4000-8000-000000000001" as RepositoryId;
 const requestId = "00000000-0000-4000-8000-000000000002";

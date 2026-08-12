@@ -34,7 +34,7 @@ const STYLE = `
   font-family: ${FONT};
   font-size: 11px;
   line-height: 1.5;
-  color: #868e96;
+  color: #495057;
   text-align: center;
   margin-top: 8px;
 }
@@ -66,7 +66,7 @@ const WorkflowSVG = () => (
                         height={24}
                         rx={5}
                         fill="#f1f3f5"
-                        stroke="#adb5bd"
+                        stroke="#5c636a"
                         strokeWidth={1.2}
                     />
                     <text
@@ -80,7 +80,7 @@ const WorkflowSVG = () => (
                         {label}
                     </text>
                     {i < 3 && (
-                        <g stroke="#868e96" strokeWidth={1.2} fill="#868e96">
+                        <g stroke="#495057" strokeWidth={1.2} fill="#495057">
                             <line x1={100} y1={y + 24} x2={100} y2={y + 32} />
                             <path
                                 d={`M100 ${y + 34} l-3.5 -5 h7 z`}
@@ -121,7 +121,7 @@ const AgentSVG = () => {
                     refY="3"
                     orient="auto"
                 >
-                    <path d="M0 0 L6 3 L0 6 z" fill="#228be6" />
+                    <path d="M0 0 L6 3 L0 6 z" fill="#1864ab" />
                 </marker>
             </defs>
             {tools.map((t) => {
@@ -147,7 +147,7 @@ const AgentSVG = () => {
                             y1={sy + py * off}
                             x2={ex + px * off}
                             y2={ey + py * off}
-                            stroke="#228be6"
+                            stroke="#1864ab"
                             strokeWidth={1.2}
                             markerEnd="url(#bca-loop-arrow)"
                             opacity={0.85}
@@ -157,7 +157,7 @@ const AgentSVG = () => {
                             y1={ey - py * off}
                             x2={sx - px * off}
                             y2={sy - py * off}
-                            stroke="#adb5bd"
+                            stroke="#5c636a"
                             strokeWidth={1.2}
                             strokeDasharray="2.5 2.5"
                             markerEnd="url(#bca-loop-arrow)"
@@ -170,7 +170,7 @@ const AgentSVG = () => {
                             height={18}
                             rx={4}
                             fill="#e7f5ff"
-                            stroke="#228be6"
+                            stroke="#1864ab"
                             strokeWidth={1}
                         />
                         <text
@@ -191,7 +191,7 @@ const AgentSVG = () => {
                 cy={cy}
                 r={24}
                 fill="#fff5f5"
-                stroke="#fa5252"
+                stroke="#c92a2a"
                 strokeWidth={1.4}
             />
             <text
@@ -201,7 +201,7 @@ const AgentSVG = () => {
                 fontFamily={FONT}
                 fontSize={12}
                 fontWeight={700}
-                fill="#e03131"
+                fill="#c92a2a"
             >
                 LLM
             </text>
@@ -216,7 +216,7 @@ export const AgentLoopDiagram = ({ caption }: { caption?: string }) => (
             <div>
                 <div
                     className="bca-loop-panel-title"
-                    style={{ color: "#868e96" }}
+                    style={{ color: "#495057" }}
                 >
                     워크플로
                 </div>
@@ -230,7 +230,7 @@ export const AgentLoopDiagram = ({ caption }: { caption?: string }) => (
             <div>
                 <div
                     className="bca-loop-panel-title"
-                    style={{ color: "#228be6" }}
+                    style={{ color: "#1864ab" }}
                 >
                     에이전트
                 </div>

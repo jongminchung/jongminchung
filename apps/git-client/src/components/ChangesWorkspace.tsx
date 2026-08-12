@@ -28,7 +28,7 @@ import type {
     GitOperation,
     PreCommitCheck,
     SubmoduleDiff,
-} from "../shared/contracts/model";
+} from "../shared/contracts/model/index";
 import { useAppDialog } from "./AppDialog";
 import { ChangeNavigator } from "./changes/ChangeNavigator";
 import { CommitComposer } from "./changes/CommitComposer";

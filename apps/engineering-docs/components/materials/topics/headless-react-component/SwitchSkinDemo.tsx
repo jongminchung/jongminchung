@@ -8,25 +8,25 @@ const MONO = "ui-monospace, SFMono-Regular, Menlo, monospace";
 
 const STYLE = `
 .hswd-item { display: flex; flex-direction: column; align-items: center; gap: 10px; flex: 1 1 140px; min-width: 140px; }
-.hswd-label { font-size: 12px; color: #868e96; }
-.hswd-attrs { font-family: ${MONO}; font-size: 10px; color: #adb5bd; text-align: center; line-height: 1.6; }
+.hswd-label { font-size: 12px; color: #495057; }
+.hswd-attrs { font-family: ${MONO}; font-size: 10px; color: #5c636a; text-align: center; line-height: 1.6; }
 .hswd-attrs b { color: #495057; font-weight: 600; }
 
 /* 스킨 1: iOS 스타일 */
 .hswd-ios { border: none; padding: 3px; width: 52px; height: 30px; border-radius: 15px; background: #dee2e6; cursor: pointer; transition: background 0.15s ease; display: inline-flex; }
-.hswd-ios[data-state='checked'] { background: #40c057; }
+.hswd-ios[data-state='checked'] { background: #237032; }
 .hswd-ios::before { content: ''; width: 24px; height: 24px; border-radius: 12px; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25); transition: transform 0.15s ease; }
 .hswd-ios[data-state='checked']::before { transform: translateX(22px); }
-.hswd-ios:focus-visible { outline: 2px solid #228be6; outline-offset: 2px; }
+.hswd-ios:focus-visible { outline: 2px solid #1864ab; outline-offset: 2px; }
 
 /* 스킨 2: 체크박스 스타일 */
 .hswd-check { border: none; background: none; padding: 6px 10px; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-family: ${FONT}; font-size: 14px; color: #495057; border-radius: 6px; }
-.hswd-check .hswd-box { width: 20px; height: 20px; border-radius: 5px; border: 2px solid #adb5bd; display: inline-flex; align-items: center; justify-content: center; color: transparent; font-size: 13px; font-weight: 700; transition: all 0.12s ease; }
-.hswd-check[data-state='checked'] .hswd-box { background: #228be6; border-color: #228be6; color: #fff; }
-.hswd-check:focus-visible { outline: 2px solid #228be6; outline-offset: 2px; }
+.hswd-check .hswd-box { width: 20px; height: 20px; border-radius: 5px; border: 2px solid #5c636a; display: inline-flex; align-items: center; justify-content: center; color: transparent; font-size: 13px; font-weight: 700; transition: all 0.12s ease; }
+.hswd-check[data-state='checked'] .hswd-box { background: #1864ab; border-color: #1864ab; color: #fff; }
+.hswd-check:focus-visible { outline: 2px solid #1864ab; outline-offset: 2px; }
 
 /* 스킨 3: 터미널 스타일 (div로 렌더링) */
-.hswd-term { font-family: ${MONO}; font-size: 14px; padding: 8px 14px; background: #1a1b26; color: #565f89; border-radius: 4px; cursor: pointer; user-select: none; letter-spacing: 1px; }
+.hswd-term { font-family: ${MONO}; font-size: 14px; padding: 8px 14px; background: #1a1b26; color: #a9b1d6; border-radius: 4px; cursor: pointer; user-select: none; letter-spacing: 1px; }
 .hswd-term[data-state='checked'] { color: #9ece6a; text-shadow: 0 0 8px rgba(158, 206, 106, 0.5); }
 .hswd-term:focus-visible { outline: 2px solid #9ece6a; outline-offset: 2px; }
 `;
@@ -110,7 +110,7 @@ export const SwitchSkinDemo = () => {
             <div
                 style={{
                     fontSize: 11,
-                    color: "#adb5bd",
+                    color: "#5c636a",
                     textAlign: "center",
                     marginTop: 16,
                 }}

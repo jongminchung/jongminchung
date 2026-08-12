@@ -24,7 +24,7 @@ import type {
     HistoryRewritePreview,
     RebasePlanAction,
     RebasePlanEntry,
-} from "../shared/contracts/model";
+} from "../shared/contracts/model/index";
 import { useAppDialog } from "./AppDialog";
 import { useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";

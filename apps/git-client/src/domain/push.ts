@@ -1,4 +1,7 @@
-import type { GitOperation, PushPreview } from "../shared/contracts/model";
+import type {
+    GitOperation,
+    PushPreview,
+} from "../shared/contracts/model/index";
 
 export type PushChoice = "normal" | "forceWithLease";
 

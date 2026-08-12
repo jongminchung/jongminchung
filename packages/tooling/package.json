@@ -39,11 +39,15 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "oxlint-tsgolint": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },
   "peerDependencies": {
-    "oxfmt": "catalog:tooling-peer"
+    "oxfmt": "catalog:tooling-peer",
+    "oxlint": "catalog:tooling-peer",
+    "oxlint-tsgolint": "catalog:tooling-peer"
   },
   "engines": {
     "node": ">=24.0.0"

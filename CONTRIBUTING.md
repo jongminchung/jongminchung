@@ -53,16 +53,27 @@ pnpm --filter @jongminchung/ui run test
 
 루트 검증 명령의 범위는 다음과 같다.
 
-| 명령                            | 검증 범위                                   |
-| ------------------------------- | ------------------------------------------- |
-| `pnpm run fmt:check`            | Oxfmt 형식 검사                             |
-| `pnpm run lint`                 | Oxlint 정적 분석                            |
-| `pnpm run typecheck`            | 루트와 모든 workspace TypeScript 검사       |
-| `pnpm run test`                 | Vitest와 Git Client script 테스트           |
-| `pnpm run check`                | format, lint, typecheck, unit·script 테스트 |
-| `pnpm run check:full`           | `check`, E2E typecheck, build, core E2E     |
-| `pnpm run check:full:electron`  | `check:full`과 패키지 Electron E2E          |
-| `pnpm run check:full:materials` | `check:full`과 모든 material E2E            |
+| 명령                            | 검증 범위                                    |
+| ------------------------------- | -------------------------------------------- |
+| `pnpm run fmt:check`            | Oxfmt 형식 검사                              |
+| `pnpm run lint`                 | Oxlint 정적 분석                             |
+| `pnpm run typecheck`            | 루트와 모든 workspace TypeScript 검사        |
+| `pnpm run test`                 | Unit·architecture·integration·script 테스트  |
+| `pnpm run check`                | format, lint, typecheck와 전체 로컬 테스트   |
+| `pnpm run check:full`           | `check`, E2E typecheck, 단일 build, core E2E |
+| `pnpm run check:full:electron`  | `check:full`과 clean package Electron E2E    |
+| `pnpm run check:full:materials` | `check:full`과 생성된 전체 material E2E      |
+
+Vitest는 빠른 Unit, 실제 Git·filesystem·PTY·tarball Integration, 의존 방향과 디자인 시스템
+Architecture project로 분리한다. Unit coverage 기준선을 의도적으로 갱신할 때만 다음 명령을
+실행하고 생성된 `coverage-baseline.json`의 변화를 검토한다.
+
+```sh
+pnpm run test:unit
+pnpm run test:architecture
+pnpm run test:integration
+pnpm run test:coverage:update
+```
 
 변경 유형별 최소 검증은 다음을 기준으로 한다.
 

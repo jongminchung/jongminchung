@@ -199,8 +199,8 @@ export const ReplDemo = () => {
                         color: "#343a40",
                         background: "#fff",
                         border: focused
-                            ? "1px solid #228be6"
-                            : "1px solid #ced4da",
+                            ? "1px solid #1864ab"
+                            : "1px solid #5f666d",
                         boxShadow: focused
                             ? "0 0 0 2px rgba(34, 139, 230, 0.15)"
                             : "none",
@@ -217,7 +217,7 @@ export const ReplDemo = () => {
                         fontWeight: 600,
                         fontFamily: FONT,
                         color: "#fff",
-                        background: "#228be6",
+                        background: "#1864ab",
                         border: "none",
                         borderRadius: 6,
                         cursor: "pointer",
@@ -233,7 +233,7 @@ export const ReplDemo = () => {
                         padding: "10px 14px",
                         fontSize: 13,
                         fontFamily: FONT,
-                        color: "#868e96",
+                        color: "#495057",
                         background: "#f8f9fa",
                         border: "1px solid #dee2e6",
                         borderRadius: 6,
@@ -265,7 +265,7 @@ export const ReplDemo = () => {
                             padding: "3px 10px",
                             fontSize: 12,
                             fontFamily: MONO,
-                            color: "#868e96",
+                            color: "#495057",
                             background: "#f8f9fa",
                             border: "1px solid #dee2e6",
                             borderRadius: 100,
@@ -281,7 +281,7 @@ export const ReplDemo = () => {
                 style={{
                     marginTop: 14,
                     fontSize: 11,
-                    color: "#adb5bd",
+                    color: "#5c636a",
                     textAlign: "center",
                 }}
             >

@@ -1,3 +1,5 @@
+import type { AppDialogController } from "../../components/AppDialog";
+import type { useCommands } from "../../components/CommandProvider";
 import {
     COMMAND_ENABLED,
     commandDefinition,
@@ -6,23 +8,26 @@ import {
     type CommandId,
 } from "../../domain/commands";
 import type { SavedMacro } from "../../domain/macros";
-import type { WorkspaceCommandContext } from "./workspaceCommandTypes";
+import type { AppStore } from "../state/appStore";
+
+export type MacroCommandPort = Pick<
+    AppStore,
+    | "lastMacro"
+    | "macroRecording"
+    | "recordedCommandIds"
+    | "savedMacros"
+    | "setLastMacro"
+    | "setMacroRecording"
+    | "setRecordedCommandIds"
+    | "setSavedMacros"
+    | "setSavedMacrosOpen"
+> & {
+    readonly commands: ReturnType<typeof useCommands>;
+    readonly dialog: AppDialogController;
+};
 
 export function createMacroCommands(
-    context: Pick<
-        WorkspaceCommandContext,
-        | "commands"
-        | "dialog"
-        | "lastMacro"
-        | "macroRecording"
-        | "recordedCommandIds"
-        | "savedMacros"
-        | "setLastMacro"
-        | "setMacroRecording"
-        | "setRecordedCommandIds"
-        | "setSavedMacros"
-        | "setSavedMacrosOpen"
-    >,
+    context: MacroCommandPort,
 ): readonly CommandDefinition[] {
     const {
         commands,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { PushPreview } from "../shared/contracts/model";
+import type { PushPreview } from "../shared/contracts/model/index";
 import {
     canForceWithLease,
     canNormalPush,

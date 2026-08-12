@@ -73,10 +73,10 @@ describe("native Electron actions", () => {
     });
 
     it("keeps Electron commit signatures and patch actions on native boundaries", async () => {
-        const appSource = await readFile(
+        const vcsSource = await readFile(
             fileURLToPath(
                 new URL(
-                    "../repository/RepositoryWorkspace.tsx",
+                    "../features/repository/vcs/useRepositoryVcsController.ts",
                     import.meta.url,
                 ),
             ),
@@ -85,7 +85,7 @@ describe("native Electron actions", () => {
         const reviewSource = await readFile(
             fileURLToPath(
                 new URL(
-                    "../repository/hooks/useRepositoryReviewController.ts",
+                    "../features/repository/review/useRepositoryReviewController.ts",
                     import.meta.url,
                 ),
             ),
@@ -96,7 +96,7 @@ describe("native Electron actions", () => {
             "if (!primaryCommitOid || !isElectronRuntime())",
         );
         expect(reviewSource).toContain("selectPatchExportPath(");
-        expect(appSource).toContain("selectPatchImportPath()");
+        expect(vcsSource).toContain("selectPatchImportPath()");
         expect(reviewSource).toContain("openExternalUrl(url)");
     });
 });

@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { materialRegistry } from "#generated/materials-registry";
 import { useMaterialLocale } from "./MaterialLocaleContext";
-import { resetMaterialSeed } from "./runtime/random";
 import type { MaterialDemoProps } from "./types";
 import styles from "./MaterialDemo.module.css";
 
@@ -76,7 +75,6 @@ export function MaterialDemo({ id }: MaterialDemoProps) {
     }
 
     const Demo = entry.component;
-    if (active) resetMaterialSeed(id);
     const label = id.split("/").at(-1) ?? id;
 
     return (

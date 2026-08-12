@@ -94,6 +94,9 @@ export const BidirectionalDemo = ({
         >
             <div
                 ref={scrollRef}
+                aria-label={t.caption}
+                role="region"
+                tabIndex={0}
                 style={{
                     height: 300,
                     overflowY: "auto",
@@ -123,7 +126,7 @@ export const BidirectionalDemo = ({
                     <div
                         style={{
                             fontSize: 12,
-                            color: "#adb5bd",
+                            color: "#5c636a",
                             textAlign: "center",
                             paddingTop: 24,
                         }}
@@ -154,7 +157,7 @@ export const BidirectionalDemo = ({
                                 height: 36,
                                 borderRadius: 8,
                                 background:
-                                    "linear-gradient(135deg, #228be6, #845ef7)",
+                                    "linear-gradient(135deg, #1864ab, #6741d9)",
                                 marginBottom: 12,
                             }}
                         />
@@ -171,7 +174,7 @@ export const BidirectionalDemo = ({
                         <div
                             style={{
                                 fontSize: 12,
-                                color: "#868e96",
+                                color: "#495057",
                                 lineHeight: 1.5,
                             }}
                         >
@@ -184,7 +187,7 @@ export const BidirectionalDemo = ({
                     <div
                         style={{
                             fontSize: 12,
-                            color: "#adb5bd",
+                            color: "#5c636a",
                             textAlign: "center",
                         }}
                     >
@@ -215,7 +218,7 @@ export const BidirectionalDemo = ({
                         ref={barRef}
                         style={{
                             height: "100%",
-                            background: "#228be6",
+                            background: "#1864ab",
                             borderRadius: 2,
                             width: "0%",
                             willChange: "width",
@@ -226,7 +229,7 @@ export const BidirectionalDemo = ({
                     ref={labelRef}
                     style={{
                         fontSize: 11,
-                        color: "#868e96",
+                        color: "#495057",
                         width: 32,
                         textAlign: "right",
                         fontVariantNumeric: "tabular-nums",
@@ -239,7 +242,7 @@ export const BidirectionalDemo = ({
             <div
                 style={{
                     fontSize: 11,
-                    color: "#adb5bd",
+                    color: "#5c636a",
                     textAlign: "center",
                     marginTop: 8,
                 }}

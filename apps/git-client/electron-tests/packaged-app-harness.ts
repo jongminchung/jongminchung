@@ -4,13 +4,12 @@ import { once } from "node:events";
 import { rm } from "node:fs/promises";
 import { createServer } from "node:net";
 import { homedir } from "node:os";
-import { join, resolve } from "node:path";
+import { join } from "node:path";
 import { chromium } from "@playwright/test";
 import type { Browser, Page } from "@playwright/test";
+import { resolvePackagedExecutablePath } from "../scripts/packaged-app-path.mjs";
 
-const executablePath = resolve(
-    "out/Git Client-darwin-arm64/Git Client.app/Contents/MacOS/Git Client",
-);
+const executablePath = resolvePackagedExecutablePath();
 
 export const runtimeProfileName = "Git Client Electron QA Runtime";
 

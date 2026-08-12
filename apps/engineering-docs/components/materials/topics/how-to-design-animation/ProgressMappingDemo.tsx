@@ -7,9 +7,9 @@ const easeOut = (t: number) => 1 - (1 - t) * (1 - t);
 const stepped = (t: number) => Math.round(t * 4) / 4;
 
 const TRACKS = [
-    { label: "선형", fn: linear, color: "#228be6" },
-    { label: "ease-out", fn: easeOut, color: "#40c057" },
-    { label: "4단계", fn: stepped, color: "#fab005" },
+    { label: "선형", fn: linear, color: "#1864ab" },
+    { label: "ease-out", fn: easeOut, color: "#237032" },
+    { label: "4단계", fn: stepped, color: "#8f6900" },
 ] as const;
 
 export const ProgressMappingDemo = () => {
@@ -85,6 +85,9 @@ export const ProgressMappingDemo = () => {
         >
             <div
                 ref={areaRef}
+                aria-label="입력 위치에 따른 선형, ease-out, 단계별 진행도 비교"
+                role="region"
+                tabIndex={0}
                 style={{
                     position: "relative",
                     padding: "16px 0",
@@ -117,7 +120,7 @@ export const ProgressMappingDemo = () => {
                             position: "absolute",
                             left: 0,
                             fontSize: 9,
-                            color: "#adb5bd",
+                            color: "#5c636a",
                             top: -2,
                         }}
                     >
@@ -128,7 +131,7 @@ export const ProgressMappingDemo = () => {
                             position: "absolute",
                             right: 0,
                             fontSize: 9,
-                            color: "#adb5bd",
+                            color: "#5c636a",
                             top: -2,
                         }}
                     >
@@ -152,7 +155,7 @@ export const ProgressMappingDemo = () => {
                     <div
                         style={{
                             fontSize: 10,
-                            color: "#868e96",
+                            color: "#495057",
                             textAlign: "center",
                             position: "absolute",
                             width: "100%",
@@ -177,7 +180,7 @@ export const ProgressMappingDemo = () => {
                         <span
                             style={{
                                 fontSize: 11,
-                                color: "#868e96",
+                                color: "#495057",
                                 width: 52,
                                 textAlign: "right",
                                 flexShrink: 0,
@@ -218,7 +221,7 @@ export const ProgressMappingDemo = () => {
             <div
                 style={{
                     fontSize: 11,
-                    color: "#adb5bd",
+                    color: "#5c636a",
                     textAlign: "center",
                     marginTop: 8,
                 }}

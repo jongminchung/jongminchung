@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { GitOperation } from "../shared/contracts/model";
+import type { GitOperation } from "../shared/contracts/model/index";
 import { gitOperationPolicies } from "./gitOperationPolicy";
 
 const operationKinds = [

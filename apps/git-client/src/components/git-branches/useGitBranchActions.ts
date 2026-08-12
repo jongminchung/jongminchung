@@ -9,7 +9,7 @@ import type {
     BranchComparison,
     GitOperation,
     RemoteInfo,
-} from "../../shared/contracts/model";
+} from "../../shared/contracts/model/index";
 import { useAppDialog } from "../AppDialog";
 
 interface GitBranchActionsOptions {

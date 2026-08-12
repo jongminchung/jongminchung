@@ -6,7 +6,7 @@ import type {
     HostingRequest,
     HostingResponse,
     HostingTimelineEntry,
-} from "./hosting-contract";
+} from "../../src/shared/contracts/hosting";
 import { HostingFoundationError } from "./hosting-error";
 import type { HostingHttpMethod } from "./hosting-http";
 

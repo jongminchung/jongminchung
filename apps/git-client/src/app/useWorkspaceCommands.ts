@@ -4,12 +4,12 @@ import { createHelpCommands } from "./commands/helpCommands";
 import { createLayoutCommands } from "./commands/layoutCommands";
 import { createMacroCommands } from "./commands/macroCommands";
 import { createProjectCommands } from "./commands/projectCommands";
-import type { WorkspaceCommandContext } from "./commands/workspaceCommandTypes";
+import type { WorkspaceCommandPorts } from "./commands/workspaceCommands";
 
-export function useWorkspaceCommands(context: WorkspaceCommandContext): void {
-    useCommandDefinitions(createProjectCommands(context));
-    useCommandDefinitions(createLayoutCommands(context));
-    useCommandDefinitions(createHelpCommands(context));
-    useCommandDefinitions(createMacroCommands(context));
-    useCommandDefinitions(createAppearanceCommands(context));
+export function useWorkspaceCommands(ports: WorkspaceCommandPorts): void {
+    useCommandDefinitions(createProjectCommands(ports.project));
+    useCommandDefinitions(createLayoutCommands(ports.layout));
+    useCommandDefinitions(createHelpCommands(ports.help));
+    useCommandDefinitions(createMacroCommands(ports.macro));
+    useCommandDefinitions(createAppearanceCommands(ports.appearance));
 }

@@ -2,6 +2,7 @@ import { createElement } from "react";
 import type { ComponentProps } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
+import { UNAVAILABLE_TERMINAL } from "../application/terminal/ports/TerminalAvailability";
 import { sampleStatus } from "../domain/sampleData";
 import type { StashEntry } from "../domain/types";
 import { BottomPanel } from "./BottomPanel";
@@ -49,7 +50,7 @@ const props = {
     onLoadStashFiles: vi.fn(async () => []),
     repositoryId: "repository-1",
     repositoryName: "fixture",
-    fixture: true,
+    terminalAvailability: UNAVAILABLE_TERMINAL,
     collapsed: false,
     onToggle: vi.fn(),
     height: 260,

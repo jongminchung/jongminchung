@@ -1,4 +1,8 @@
 import {
+    repositoryAccessPolicy,
+    type RepositoryAccessPolicy,
+} from "../domain/repositoryAccess";
+import {
     HostingAccountIdSchema,
     HostingAccountSchema,
     HostingAccountsSchema,
@@ -6,18 +10,14 @@ import {
     HostingResponseKindByRequest,
     HostingResponseSchema,
     SaveHostingAccountSchema,
-} from "../../electron/hosting/hosting-contract";
-import { safeHostingErrorMessage } from "../../electron/hosting/hosting-redaction";
-import {
-    repositoryAccessPolicy,
-    type RepositoryAccessPolicy,
-} from "../domain/repositoryAccess";
+} from "../shared/contracts/hosting";
+import { safeHostingErrorMessage } from "../shared/contracts/hosting-redaction";
 import type {
     HostingAccount,
     HostingProviderKind,
     HostingRequest,
     HostingResponse,
-} from "../shared/contracts/model";
+} from "../shared/contracts/model/index";
 import type { HostingBridge } from "./HostingBridge";
 
 export interface ElectronHostingApi {

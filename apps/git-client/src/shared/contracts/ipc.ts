@@ -2,18 +2,18 @@ import { z } from "zod";
 
 export const QA_FIXTURE_RENDERER_ARGUMENT = "--git-client-qa-fixture";
 import {
-    HostingAccountIdSchema,
-    HostingAccountsSchema,
-    HostingRequestSchema,
-    SaveHostingAccountSchema,
-} from "../../../electron/hosting/hosting-contract";
-import {
     GitCancelledEventSchema,
     GitCompletedEventSchema,
     GitFailedEventSchema,
     GitRequestIdSchema,
     RepositoryIdSchema,
 } from "./git-utility";
+import {
+    HostingAccountIdSchema,
+    HostingAccountsSchema,
+    HostingRequestSchema,
+    SaveHostingAccountSchema,
+} from "./hosting";
 
 export const WindowPresentationModeSchema = z.enum(["welcome", "workspace"]);
 export type WindowPresentationMode = z.infer<

@@ -1,6 +1,7 @@
 import { Button } from "@jongminchung/ui/components/button";
 import { useCallback, useMemo, useRef } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { dispatchWorkbenchEvent } from "../application/workbench-events/WorkbenchEventPort";
 import { useAppDialog } from "../components/AppDialog";
 import { useAppearance } from "../components/AppearanceProvider";
 import { useCommands, usePaletteItems } from "../components/CommandProvider";
@@ -14,7 +15,7 @@ import {
     type NamedToolWindowLayout,
     type ToolWindowLayout,
 } from "../domain/toolWindowLayouts";
-import { useGitSessionController } from "../git-session/useGitSessionController";
+import { useGitSessionController } from "../features/repository/session/useGitSessionController";
 import { importElectronSettings } from "../platform/electronSettings";
 import { WelcomeTitlebar, WorkspaceTitlebar } from "./AppChrome";
 import { AppOverlays } from "./AppOverlays";
@@ -175,24 +176,18 @@ export function AppShell() {
 
     const captureToolWindowLayout = useCallback((): ToolWindowLayout | null => {
         let captured: ToolWindowLayout | null = null;
-        window.dispatchEvent(
-            new CustomEvent("git-client:capture-tool-window-layout", {
-                detail: {
-                    accept: (layout: ToolWindowLayout) => {
-                        captured = parseToolWindowLayout(layout);
-                    },
-                } satisfies ToolWindowLayoutCaptureDetail,
-            }),
-        );
+        dispatchWorkbenchEvent("git-client:capture-tool-window-layout", {
+            accept: (layout: ToolWindowLayout) => {
+                captured = parseToolWindowLayout(layout);
+            },
+        } satisfies ToolWindowLayoutCaptureDetail);
         return captured;
     }, []);
     const applyToolWindowLayout = useCallback(
         (layout: ToolWindowLayout): void => {
-            window.dispatchEvent(
-                new CustomEvent("git-client:apply-tool-window-layout", {
-                    detail: { layout: parseToolWindowLayout(layout) },
-                }),
-            );
+            dispatchWorkbenchEvent("git-client:apply-tool-window-layout", {
+                layout: parseToolWindowLayout(layout),
+            });
         },
         [],
     );
@@ -276,50 +271,68 @@ export function AppShell() {
             : "Git Client";
     }, [sessionActiveTab, sessionSessions]);
     useWorkspaceCommands({
-        activeProjectName,
-        applyToolWindowLayout,
-        captureToolWindowLayout,
-        commands,
-        dialog,
-        dirtyEditorCount,
-        importSettingsArchive,
-        lastMacro,
-        macroRecording,
-        openRepositoryFromPicker,
-        presentationPreviousFullScreen,
-        productSettings,
-        recordedCommandIds,
-        renameToolWindowLayout,
-        saveToolWindowLayout,
-        savedMacros,
-        session,
-        setActivityMonitorOpen,
-        setAppearancePreference,
-        setCommandLineLauncherOpen,
-        setDiagnosticConfiguration,
-        setHelpOpen,
-        setInvalidateCachesOpen,
-        setLastMacro,
-        setLayoutChooserMode,
-        setLeftoverDirectoriesOpen,
-        setMacroRecording,
-        setNewProjectSettingsOpen,
-        setProductSettings,
-        setProjectSwitcherOpen,
-        setQuickSwitchSchemeOpen,
-        setRecordedCommandIds,
-        setRepairIdeOpen,
-        setRepositoryDialogMode,
-        setRunConfigurationTemplatesOpen,
-        setSavedMacros,
-        setSavedMacrosOpen,
-        setSettingsOpen,
-        setShowRepositoryDialog,
-        setSpecialFilesOpen,
-        setToolWindowLayouts,
-        setWhatsNewOpen,
-        toolWindowLayouts,
-        zenPreviousFullScreen,
+        appearance: {
+            dialog,
+            presentationPreviousFullScreen,
+            productSettings,
+            session,
+            setProductSettings,
+            setQuickSwitchSchemeOpen,
+            zenPreviousFullScreen,
+        },
+        help: {
+            dialog,
+            setActivityMonitorOpen,
+            setCommandLineLauncherOpen,
+            setDiagnosticConfiguration,
+            setHelpOpen,
+            setLeftoverDirectoriesOpen,
+            setSpecialFilesOpen,
+            setWhatsNewOpen,
+        },
+        layout: {
+            activeProjectName,
+            applyToolWindowLayout,
+            captureToolWindowLayout,
+            dialog,
+            renameToolWindowLayout,
+            saveToolWindowLayout,
+            session,
+            setLayoutChooserMode,
+            setToolWindowLayouts,
+            toolWindowLayouts,
+        },
+        macro: {
+            commands,
+            dialog,
+            lastMacro,
+            macroRecording,
+            recordedCommandIds,
+            savedMacros,
+            setLastMacro,
+            setMacroRecording,
+            setRecordedCommandIds,
+            setSavedMacros,
+            setSavedMacrosOpen,
+        },
+        project: {
+            dialog,
+            dirtyEditorCount,
+            importSettingsArchive,
+            openRepositoryFromPicker,
+            session,
+            setAppearancePreference,
+            setInvalidateCachesOpen,
+            setNewProjectSettingsOpen,
+            setProductSettings,
+            setProjectSwitcherOpen,
+            setRepairIdeOpen,
+            setRepositoryDialogMode,
+            setRunConfigurationTemplatesOpen,
+            setSettingsOpen,
+            setShowRepositoryDialog,
+            setToolWindowLayouts,
+        },
     });
 
     const repositoryPaletteItems = useMemo<readonly PaletteItem[]>(

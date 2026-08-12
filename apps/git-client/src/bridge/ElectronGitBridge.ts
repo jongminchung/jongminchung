@@ -1,3 +1,4 @@
+import type { GitBridge } from "../application/git-session/ports/GitBridge";
 import {
     GitLocalHistoryActivitiesPageSchema,
     GitLocalHistoryActivityDetailSchema,
@@ -44,7 +45,7 @@ import type {
     SubmoduleDiff,
     SubmoduleInfo,
     WorktreeInfo,
-} from "../shared/contracts/model";
+} from "../shared/contracts/model/index";
 import type { ElectronGitApi } from "./electronGitApi";
 import { translateGitRequest } from "./electronGitRequest";
 import {
@@ -61,7 +62,6 @@ import {
     asShelfEntry,
     asSubmoduleDiff,
 } from "./electronGitResultMappers";
-import type { GitBridge } from "./GitBridge";
 
 export type { ElectronGitApi } from "./electronGitApi";
 export { translateGitRequest } from "./electronGitRequest";

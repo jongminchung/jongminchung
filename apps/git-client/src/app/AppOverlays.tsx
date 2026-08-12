@@ -2,7 +2,7 @@ import { lazy, Suspense } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useAppearance } from "../components/AppearanceProvider";
 import type { RepositoryToolKind } from "../components/RepositoryToolDialog";
-import type { GitSessionController } from "../git-session/useGitSessionController";
+import type { GitSessionController } from "../features/repository/session/useGitSessionController";
 import { useAppStore } from "./state/AppStoreProvider";
 
 const PushDialog = lazy(() =>

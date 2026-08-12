@@ -6,6 +6,7 @@ import { lstat, realpath } from "node:fs/promises";
 import { createServer } from "node:net";
 import { basename, dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { resolvePackagedAppPath } from "./packaged-app-path.mjs";
 
 export const READY_SENTINEL = "[git-client] packaged-smoke-ready";
 export const HANDSHAKE_SENTINEL = "[git-client] smoke-preload-api-handshake";
@@ -37,6 +38,8 @@ const FAILURE_PATTERNS = Object.freeze([
 ]);
 const MAX_LOG_CHARACTERS = 1_000_000;
 const TIMEOUT_MS = 20_000;
+const TERMINATION_GRACE_MS = 1_000;
+const FORCE_TERMINATION_GRACE_MS = 1_000;
 const HANDSHAKE_EXPRESSION = String.raw`(async () => {
   const api = globalThis.gitClient;
   if (typeof api !== "object" || api === null) return false;
@@ -63,6 +66,60 @@ function appendLog(current, chunk) {
         : next.slice(-MAX_LOG_CHARACTERS);
 }
 
+function childExited(child) {
+    return child.exitCode !== null || child.signalCode !== null;
+}
+
+function waitForChildClose(child, timeoutMs) {
+    if (childExited(child)) return Promise.resolve(true);
+    return new Promise((resolveWait) => {
+        const onClose = () => {
+            clearTimeout(timeout);
+            resolveWait(true);
+        };
+        const timeout = setTimeout(() => {
+            child.off("close", onClose);
+            resolveWait(false);
+        }, timeoutMs);
+        child.once("close", onClose);
+    });
+}
+
+export async function terminateSmokeChild(
+    child,
+    {
+        terminationGraceMs = TERMINATION_GRACE_MS,
+        forceTerminationGraceMs = FORCE_TERMINATION_GRACE_MS,
+    } = {},
+) {
+    if (childExited(child)) return "already-exited";
+    child.kill("SIGTERM");
+    if (await waitForChildClose(child, terminationGraceMs)) return "SIGTERM";
+    child.kill("SIGKILL");
+    if (await waitForChildClose(child, forceTerminationGraceMs))
+        return "SIGKILL";
+
+    child.stdout?.destroy();
+    child.stderr?.destroy();
+    child.unref();
+    throw new Error("Packaged app remained alive after SIGKILL");
+}
+
+export function createSmokeTimeoutFailure(output, cleanup) {
+    const captured = output.length === 0 ? "<no output captured>" : output;
+    return new Error(
+        `Packaged app did not finish its startup smoke test within ${TIMEOUT_MS}ms (cleanup=${cleanup})\nCaptured output:\n${captured}`,
+    );
+}
+
+export function isSmokeStartupReady(output, handshakeComplete) {
+    return (
+        handshakeComplete &&
+        output.includes(READY_SENTINEL) &&
+        output.includes(HANDSHAKE_SENTINEL)
+    );
+}
+
 export function detectSmokeLogFailure(output) {
     if (typeof output !== "string")
         throw new TypeError("Smoke output must be a string");
@@ -78,12 +135,13 @@ export function validateSmokeOutcome({
     output,
     handshakeComplete,
     observedFailure = null,
+    controlledCleanup = false,
 }) {
     const failure = observedFailure ?? detectSmokeLogFailure(output);
     if (failure !== null) {
         throw new Error(`Packaged app logged ${failure}\n${output}`);
     }
-    if (code !== 0 || signal !== null) {
+    if (!controlledCleanup && (code !== 0 || signal !== null)) {
         throw new Error(
             `Packaged app smoke test exited unexpectedly (code=${String(code)}, signal=${String(signal)})\n${output}`,
         );
@@ -98,7 +156,11 @@ export function validateSmokeOutcome({
             `Packaged app renderer became ready without a renderer/preload API handshake\n${output}`,
         );
     }
-    return Object.freeze({ ready: true, preloadApi: true, exitCode: code });
+    return Object.freeze({
+        ready: true,
+        preloadApi: true,
+        exitCode: controlledCleanup ? 0 : code,
+    });
 }
 
 async function freePort() {
@@ -325,8 +387,50 @@ export async function smokeElectronPackage(inputPath) {
         let output = "";
         let observedFailure = null;
         let settled = false;
+        let stopping = false;
         let handshakeComplete = false;
         const handshakeController = new AbortController();
+        let timeout = null;
+        const finish = (error, result) => {
+            if (settled) return;
+            settled = true;
+            if (timeout !== null) clearTimeout(timeout);
+            if (error === null) resolveResult(result);
+            else rejectResult(error);
+        };
+        const stopAndValidate = (controlledCleanup) => {
+            if (settled || stopping) return;
+            stopping = true;
+            handshakeController.abort();
+            void terminateSmokeChild(child).then(
+                (cleanup) => {
+                    try {
+                        const result = validateSmokeOutcome({
+                            code: child.exitCode,
+                            signal: child.signalCode,
+                            output,
+                            handshakeComplete,
+                            observedFailure,
+                            controlledCleanup:
+                                controlledCleanup &&
+                                cleanup !== "already-exited",
+                        });
+                        finish(null, Object.freeze({ appPath, ...result }));
+                    } catch (error) {
+                        finish(error);
+                    }
+                },
+                (error) => finish(error),
+            );
+        };
+        const maybeStop = () => {
+            if (observedFailure !== null) {
+                stopAndValidate(false);
+                return;
+            }
+            if (isSmokeStartupReady(output, handshakeComplete))
+                stopAndValidate(true);
+        };
         const handshake = probeRendererPreloadApi(
             remoteDebuggingPort,
             handshakeController.signal,
@@ -334,22 +438,22 @@ export async function smokeElectronPackage(inputPath) {
             .then(() => {
                 handshakeComplete = true;
                 output = appendLog(output, `${HANDSHAKE_SENTINEL}\n`);
+                maybeStop();
             })
             .catch(() => undefined);
-        const finish = (error, result) => {
-            if (settled) return;
-            settled = true;
-            clearTimeout(timeout);
-            if (error === null) resolveResult(result);
-            else rejectResult(error);
-        };
-        const timeout = setTimeout(() => {
+        timeout = setTimeout(() => {
+            if (settled || stopping) return;
+            stopping = true;
             handshakeController.abort();
-            child.kill("SIGTERM");
-            finish(
-                new Error(
-                    `Packaged app did not finish its startup smoke test within ${TIMEOUT_MS}ms`,
-                ),
+            void terminateSmokeChild(child).then(
+                (cleanup) => finish(createSmokeTimeoutFailure(output, cleanup)),
+                (error) =>
+                    finish(
+                        createSmokeTimeoutFailure(
+                            output,
+                            `failed: ${error instanceof Error ? error.message : String(error)}`,
+                        ),
+                    ),
             );
         }, TIMEOUT_MS);
 
@@ -359,14 +463,31 @@ export async function smokeElectronPackage(inputPath) {
                 `${output.slice(-4_096)}${text}`,
             );
             output = appendLog(output, text);
+            maybeStop();
         };
         child.stdout.on("data", capture);
         child.stderr.on("data", capture);
         child.once("error", (error) => {
             handshakeController.abort();
-            finish(error);
+            if (stopping) return;
+            stopping = true;
+            if (child.pid === undefined) {
+                finish(error);
+                return;
+            }
+            void terminateSmokeChild(child).then(
+                () => finish(error),
+                (cleanupError) =>
+                    finish(
+                        new AggregateError(
+                            [error, cleanupError],
+                            "Packaged app failed and could not be stopped",
+                        ),
+                    ),
+            );
         });
         child.once("close", (code, signal) => {
+            if (stopping) return;
             handshakeController.abort();
             void handshake.then(() => {
                 try {
@@ -388,13 +509,9 @@ export async function smokeElectronPackage(inputPath) {
 
 const scriptPath = fileURLToPath(import.meta.url);
 if (process.argv[1] !== undefined && resolve(process.argv[1]) === scriptPath) {
-    const defaultAppPath = resolve(
-        dirname(scriptPath),
-        "..",
-        "out",
-        "Git Client-darwin-arm64",
-        "Git Client.app",
-    );
+    const defaultAppPath = resolvePackagedAppPath({
+        cwd: resolve(dirname(scriptPath), ".."),
+    });
     const requestedPath =
         process.argv[2] === undefined
             ? defaultAppPath

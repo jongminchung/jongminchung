@@ -15,12 +15,13 @@ import {
     useRef,
     useState,
 } from "react";
+import { listenWorkbenchEvent } from "../application/workbench-events/WorkbenchEventPort";
 import type { BlameLine, Commit, TreeEntry } from "../domain/types";
 import type {
     FileContent,
     FilePreview,
     FileSource,
-} from "../shared/contracts/model";
+} from "../shared/contracts/model/index";
 import { useDismissLayer } from "./CommandProvider";
 import { Icon } from "./Icon";
 import { EmptyState, Spinner } from "./ProductCollections";
@@ -242,24 +243,25 @@ export function RepositoryInspectorDialog({
     );
 
     useEffect(() => {
-        const saveAll = (event: Event): void => {
-            if (!editorDirty) return;
-            const task = saveEditor(editorValue);
-            if (
-                event instanceof CustomEvent &&
-                Array.isArray(event.detail?.tasks)
-            ) {
-                event.detail.tasks.push(task);
-            } else {
-                void task;
-            }
-        };
-        const reload = (): void => setReloadToken((value) => value + 1);
-        window.addEventListener("git-client:save-all", saveAll);
-        window.addEventListener("git-client:reload-editors", reload);
+        const removeSaveListener = listenWorkbenchEvent(
+            "git-client:save-all",
+            (detail) => {
+                if (!editorDirty) return;
+                const task = saveEditor(editorValue);
+                if (detail && Array.isArray(detail.tasks)) {
+                    detail.tasks.push(task);
+                } else {
+                    void task;
+                }
+            },
+        );
+        const removeReloadListener = listenWorkbenchEvent(
+            "git-client:reload-editors",
+            () => setReloadToken((value) => value + 1),
+        );
         return () => {
-            window.removeEventListener("git-client:save-all", saveAll);
-            window.removeEventListener("git-client:reload-editors", reload);
+            removeSaveListener();
+            removeReloadListener();
         };
     }, [editorDirty, editorValue, saveEditor]);
 
