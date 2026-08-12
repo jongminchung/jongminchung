@@ -61,6 +61,7 @@
     "rehype-slug": "catalog:",
     "remark-frontmatter": "catalog:",
     "remark-gfm": "catalog:",
+    "remark-kroki": "catalog:",
     "remark-mdx-frontmatter": "catalog:",
     "typescript": "catalog:",
     "unist-util-visit": "catalog:",

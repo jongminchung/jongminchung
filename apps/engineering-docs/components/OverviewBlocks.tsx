@@ -27,8 +27,8 @@ const copy = {
       [
         "Packages",
         "실제로 배포되는 API",
-        "두 패키지의 설치, 예제, 공개 symbol을 확인합니다.",
-        "/ko/packages/remark-plantuml",
+        "패키지의 설치, 예제, 공개 symbol을 확인합니다.",
+        "/ko/packages/tooling",
       ],
       [
         "Deep Dive",
@@ -69,8 +69,8 @@ const copy = {
       [
         "Packages",
         "APIs that actually ship",
-        "Inspect installation, examples, and public symbols for two packages.",
-        "/en/packages/remark-plantuml",
+        "Inspect installation, examples, and public symbols for the package.",
+        "/en/packages/tooling",
       ],
       [
         "Deep Dive",
@@ -126,7 +126,7 @@ export function OverviewHero({ locale }: { readonly locale: Locale }) {
           </TransitionLink>
           <TransitionLink
             className={cn(buttonVariants({ variant: "outline", size: "lg" }), "h-11 px-5")}
-            href={`/${locale}/packages/remark-plantuml`}
+            href={`/${locale}/packages/tooling`}
           >
             {text.packages}
           </TransitionLink>

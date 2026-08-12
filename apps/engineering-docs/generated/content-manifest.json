@@ -243,90 +243,12 @@
     ]
   },
   {
-    "id": "packages/remark-plantuml",
-    "locale": "en",
-    "section": "packages",
-    "title": "remark-plantuml",
-    "description": "Turn PlantUML code in Markdown and Astro documents into safe SVG diagrams.",
-    "order": 0,
-    "updatedAt": "2026-08-11",
-    "tags": [
-      "remark",
-      "plantuml",
-      "markdown",
-      "astro",
-      "unified"
-    ],
-    "status": "stable",
-    "sourceUrl": "https://github.com/jongminchung/jongminchung/tree/main/packages/remark-plantuml",
-    "packageName": "@jongminchung/remark-plantuml",
-    "packageVersion": "1.0.0",
-    "apiSymbols": [
-      "@jongminchung/remark-plantuml#RemarkPlantUmlOptions",
-      "@jongminchung/remark-plantuml#RemarkPlantUmlTransformer",
-      "@jongminchung/remark-plantuml#createPlantUmlSvgUrl",
-      "@jongminchung/remark-plantuml#encodePlantUmlSource",
-      "@jongminchung/remark-plantuml#publicPlantUmlSvgServerBaseUrl",
-      "@jongminchung/remark-plantuml#remarkPlantUml",
-      "@jongminchung/remark-plantuml/astro#AstroRemarkPlantUmlPlugin",
-      "@jongminchung/remark-plantuml/astro#createPlantUmlRemarkPlugin"
-    ],
-    "href": "/en/packages/remark-plantuml",
-    "outline": [
-      {
-        "id": "overview",
-        "label": "Overview",
-        "level": 2
-      },
-      {
-        "id": "installation",
-        "label": "Installation",
-        "level": 2
-      },
-      {
-        "id": "markdown-usage",
-        "label": "Markdown usage",
-        "level": 2
-      },
-      {
-        "id": "astro-usage",
-        "label": "Astro usage",
-        "level": 2
-      },
-      {
-        "id": "styling",
-        "label": "Styling",
-        "level": 2
-      },
-      {
-        "id": "module-contract",
-        "label": "Module contract",
-        "level": 2
-      },
-      {
-        "id": "api",
-        "label": "API",
-        "level": 2
-      },
-      {
-        "id": "main-entry",
-        "label": "Main entry",
-        "level": 3
-      },
-      {
-        "id": "astro-entry",
-        "label": "Astro entry",
-        "level": 3
-      }
-    ]
-  },
-  {
     "id": "packages/tooling",
     "locale": "en",
     "section": "packages",
     "title": "tooling",
     "description": "Shared configuration for oxlint, oxfmt, and workspace package maps.",
-    "order": 1,
+    "order": 0,
     "updatedAt": "2026-08-11",
     "tags": [
       "tooling",
@@ -2656,90 +2578,12 @@
     ]
   },
   {
-    "id": "packages/remark-plantuml",
-    "locale": "ko",
-    "section": "packages",
-    "title": "remark-plantuml",
-    "description": "Markdown과 Astro 문서의 PlantUML 코드를 안전한 SVG 다이어그램으로 변환합니다.",
-    "order": 0,
-    "updatedAt": "2026-08-11",
-    "tags": [
-      "remark",
-      "plantuml",
-      "markdown",
-      "astro",
-      "unified"
-    ],
-    "status": "stable",
-    "sourceUrl": "https://github.com/jongminchung/jongminchung/tree/main/packages/remark-plantuml",
-    "packageName": "@jongminchung/remark-plantuml",
-    "packageVersion": "1.0.0",
-    "apiSymbols": [
-      "@jongminchung/remark-plantuml#RemarkPlantUmlOptions",
-      "@jongminchung/remark-plantuml#RemarkPlantUmlTransformer",
-      "@jongminchung/remark-plantuml#createPlantUmlSvgUrl",
-      "@jongminchung/remark-plantuml#encodePlantUmlSource",
-      "@jongminchung/remark-plantuml#publicPlantUmlSvgServerBaseUrl",
-      "@jongminchung/remark-plantuml#remarkPlantUml",
-      "@jongminchung/remark-plantuml/astro#AstroRemarkPlantUmlPlugin",
-      "@jongminchung/remark-plantuml/astro#createPlantUmlRemarkPlugin"
-    ],
-    "href": "/ko/packages/remark-plantuml",
-    "outline": [
-      {
-        "id": "개요",
-        "label": "개요",
-        "level": 2
-      },
-      {
-        "id": "설치",
-        "label": "설치",
-        "level": 2
-      },
-      {
-        "id": "markdown-사용법",
-        "label": "Markdown 사용법",
-        "level": 2
-      },
-      {
-        "id": "astro-사용법",
-        "label": "Astro 사용법",
-        "level": 2
-      },
-      {
-        "id": "스타일",
-        "label": "스타일",
-        "level": 2
-      },
-      {
-        "id": "모듈-계약",
-        "label": "모듈 계약",
-        "level": 2
-      },
-      {
-        "id": "api",
-        "label": "API",
-        "level": 2
-      },
-      {
-        "id": "기본-엔트리",
-        "label": "기본 엔트리",
-        "level": 3
-      },
-      {
-        "id": "astro-엔트리",
-        "label": "Astro 엔트리",
-        "level": 3
-      }
-    ]
-  },
-  {
     "id": "packages/tooling",
     "locale": "ko",
     "section": "packages",
     "title": "tooling",
     "description": "oxlint, oxfmt, 워크스페이스 패키지 맵을 위한 공유 설정 패키지입니다.",
-    "order": 1,
+    "order": 0,
     "updatedAt": "2026-08-11",
     "tags": [
       "tooling",

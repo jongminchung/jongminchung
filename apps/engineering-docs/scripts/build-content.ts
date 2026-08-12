@@ -336,7 +336,7 @@ export function validatePackageVersions(
 }
 
 async function validatePackageApi(documents: readonly SourceDocument[]): Promise<void> {
-  for (const packageDirectory of ["remark-plantuml", "tooling"] as const) {
+  for (const packageDirectory of ["tooling"] as const) {
     const actualPackage = await readPackageApi(packageDirectory);
     const packageName = actualPackage.name;
     validatePackageVersions(documents, actualPackage);

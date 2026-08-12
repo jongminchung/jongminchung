@@ -3,6 +3,9 @@
 - 상태: 승인
 - 결정일: 2026-08-11
 
+> 후속 상태: `@jongminchung/remark-plantuml` workspace는 2026-08-12에 제거되었으며 이 결정은
+> 현재 `@jongminchung/tooling`에 적용된다
+
 ## 배경
 
 - 공개 Node 패키지: `@jongminchung/remark-plantuml`, `@jongminchung/tooling`

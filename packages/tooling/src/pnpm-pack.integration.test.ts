@@ -275,61 +275,6 @@ async function installToolingTarballInWorkspaceConsumer(packed: PackedWorkspace)
 }
 
 describe("pnpm package tarball contracts", () => {
-  it("packs @jongminchung/remark-plantuml with ESM modules and declarations", async () => {
-    const packed = await packWorkspace("@jongminchung/remark-plantuml");
-    try {
-      expect(packed.files).toEqual(
-        expect.arrayContaining([
-          "dist/astro.d.ts",
-          "dist/astro.js",
-          "dist/index.d.ts",
-          "dist/index.js",
-          "src/starlight.css",
-          "src/styles.css",
-        ]),
-      );
-      expect(packed.files).not.toContain("dist/starlight.css");
-      expect(packed.files).not.toContain("dist/styles.css");
-      expect(packed.manifest.engines).toEqual({ node: ">=24.0.0" });
-      expect(packed.manifest.type).toBe("module");
-      expect(JSON.stringify(packed.manifest.exports)).toContain('"import"');
-      expect(JSON.stringify(packed.manifest.exports)).not.toContain('"require"');
-      expectPackedProtocolsResolved(packed.manifest);
-      expect(packed.files.some((file) => file.endsWith(".cjs"))).toBe(false);
-
-      const rootExports = [
-        "createPlantUmlSvgUrl",
-        "encodePlantUmlSource",
-        "publicPlantUmlSvgServerBaseUrl",
-        "remarkPlantUml",
-      ];
-      const astroExports = ["createPlantUmlRemarkPlugin"];
-      expect(
-        await moduleKeysFromConsumer(packed.consumerRoot, "@jongminchung/remark-plantuml"),
-      ).toEqual(rootExports);
-      expect(
-        await moduleKeysFromConsumer(packed.consumerRoot, "@jongminchung/remark-plantuml/astro"),
-      ).toEqual(astroExports);
-      expect(
-        await commonJsErrorCodeFromConsumer(packed.consumerRoot, "@jongminchung/remark-plantuml"),
-      ).toBe("ERR_PACKAGE_PATH_NOT_EXPORTED");
-      expect(
-        await packageFileContentsFromConsumer(
-          packed.consumerRoot,
-          "@jongminchung/remark-plantuml/styles.css",
-        ),
-      ).toBe(await readFile(join(rootDir, "packages/remark-plantuml/src/styles.css"), "utf8"));
-      expect(
-        await packageFileContentsFromConsumer(
-          packed.consumerRoot,
-          "@jongminchung/remark-plantuml/starlight.css",
-        ),
-      ).toBe(await readFile(join(rootDir, "packages/remark-plantuml/src/starlight.css"), "utf8"));
-    } finally {
-      await rm(packed.tempDir, { force: true, recursive: true });
-    }
-  }, 240_000);
-
   it("packs @jongminchung/tooling with config modules and declarations", async () => {
     const packed = await packWorkspace("@jongminchung/tooling");
     try {

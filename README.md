@@ -3,7 +3,6 @@
 This repository owns the shared `@jongminchung` packages used by downstream projects.
 
 - `@jongminchung/tooling`: shared `oxfmt`, `oxlint`, and package-map configuration.
-- `@jongminchung/remark-plantuml`: shared PlantUML rendering for Markdown and Astro docs.
 - `@jongminchung/ui`: published shadcn primitives, a default neutral theme, shared Tailwind styles,
   and semantic tokens.
 

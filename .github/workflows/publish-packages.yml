@@ -33,7 +33,6 @@ jobs:
           const { readFileSync } = require("node:fs");
 
           for (const filePath of [
-            "packages/remark-plantuml/package.json",
             "packages/tooling/package.json",
             "packages/ui/package.json",
           ]) {
@@ -45,27 +44,9 @@ jobs:
           }
           NODE
       - run: pnpm publish --dry-run --access public
-        working-directory: packages/remark-plantuml
-      - run: pnpm publish --dry-run --access public
         working-directory: packages/tooling
       - run: pnpm publish --dry-run --access public
         working-directory: packages/ui
-      - name: Remove existing remark-plantuml 1.0.0
-        env:
-          GH_PAT: ${{ secrets.GH_PAT }}
-        run: |
-          version_ids="$(
-            GH_TOKEN="$GH_PAT" gh api --paginate \
-              "/users/${GITHUB_REPOSITORY_OWNER}/packages/npm/remark-plantuml/versions" \
-              --jq '.[] | select(.name == "1.0.0") | .id'
-          )"
-          while IFS= read -r version_id; do
-            test -z "$version_id" || GH_TOKEN="$GH_PAT" gh api --method DELETE \
-              "/users/${GITHUB_REPOSITORY_OWNER}/packages/npm/remark-plantuml/versions/${version_id}"
-          done <<< "$version_ids"
-      - name: Publish remark-plantuml 1.0.0
-        run: pnpm publish --access public
-        working-directory: packages/remark-plantuml
       - name: Remove existing tooling 1.0.0
         env:
           GH_PAT: ${{ secrets.GH_PAT }}

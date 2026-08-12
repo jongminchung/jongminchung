@@ -1,4 +1,5 @@
 import createMDX from "@next/mdx";
+import { createRemarkPlugins } from "./remark-plugins.mjs";
 
 const nextConfig = {
   experimental: {
@@ -12,11 +13,7 @@ const nextConfig = {
 const withMDX = createMDX({
   extension: /\.mdx?$/,
   options: {
-    remarkPlugins: [
-      "remark-gfm",
-      "remark-frontmatter",
-      ["remark-mdx-frontmatter", { name: "metadata" }],
-    ],
+    remarkPlugins: createRemarkPlugins(),
     rehypePlugins: ["rehype-slug"],
   },
 });

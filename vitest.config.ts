@@ -42,7 +42,7 @@ export default defineConfig({
       {
         extends: true,
         test: {
-          include: ["apps/**/*.test.ts"],
+          include: ["apps/**/*.test.{mjs,ts}"],
           name: "apps",
         },
       },

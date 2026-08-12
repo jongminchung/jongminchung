@@ -31,10 +31,10 @@ describe("fixed Git Client release configuration", () => {
     expect(gitClientWorkflow).not.toContain("secrets.GITHUB_TOKEN");
   });
 
-  it("manually replaces both public package versions with 1.0.0", () => {
+  it("manually replaces the remaining public package versions with 1.0.0", () => {
     expectManualWorkflow(packageWorkflow);
     expect(packageWorkflow).toContain('select(.name == "1.0.0")');
-    expect(packageWorkflow).toContain("Publish remark-plantuml 1.0.0");
+    expect(packageWorkflow).not.toContain("remark-plantuml");
     expect(packageWorkflow).toContain("Publish tooling 1.0.0");
     expect(packageWorkflow).toContain("Publish ui 1.0.0");
     expect(packageWorkflow).toContain("GH_PAT: ${{ secrets.GH_PAT }}");

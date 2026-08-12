@@ -45,7 +45,7 @@ const cases = [
   },
   {
     name: "package-dark",
-    path: "/en/packages/remark-plantuml",
+    path: "/en/packages/tooling",
     width: 1440,
     height: 1000,
     theme: "dark",

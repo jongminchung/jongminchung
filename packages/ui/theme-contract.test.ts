@@ -51,11 +51,7 @@ const appThemes = [
   "apps/git-client/src/styles/theme.css",
   "apps/readme/app/theme.css",
 ] as const;
-const oklchLiteralBoundaries = new Set<string>([
-  ...appThemes,
-  "packages/remark-plantuml/src/styles.css",
-  "packages/ui/src/styles/theme.css",
-]);
+const oklchLiteralBoundaries = new Set<string>([...appThemes, "packages/ui/src/styles/theme.css"]);
 
 const productionExtensions = new Set([".css", ".html", ".svg", ".ts", ".tsx"]);
 const excludedDirectories = new Set([
@@ -411,20 +407,6 @@ describe("@jongminchung/ui theme contract", () => {
 
       expect(missingProviders, `apps/${app} CSS variable providers`).toEqual([]);
     }
-  });
-
-  test("keeps the public PlantUML stylesheet consumer-themeable", () => {
-    const styles = readFileSync(
-      join(workspaceRoot, "packages", "remark-plantuml", "src", "styles.css"),
-      "utf8",
-    );
-    const starlightStyles = readFileSync(
-      join(workspaceRoot, "packages", "remark-plantuml", "src", "starlight.css"),
-      "utf8",
-    );
-
-    expect(styles).toContain("var(--plantuml-caption-foreground, var(--muted-foreground, oklch(");
-    expect(starlightStyles).toContain("--plantuml-caption-foreground: var(--sl-color-gray-3)");
   });
 
   test("keeps production UI on semantic colors and perceptual mixing", () => {

@@ -27,15 +27,6 @@ const projects = [
   },
   {
     index: "02",
-    category: "Open package",
-    title: "remark-plantuml",
-    description:
-      "A safe Markdown and Astro pipeline that turns PlantUML source into diagrams without losing document context.",
-    tags: ["TypeScript", "Unified", "PlantUML"],
-    href: "https://github.com/jongminchung/jongminchung/tree/main/packages/remark-plantuml",
-  },
-  {
-    index: "03",
     category: "Developer tooling",
     title: "@jongminchung/tooling",
     description:

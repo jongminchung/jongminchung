@@ -356,7 +356,7 @@ test("internal navigation keeps the shell fixed while transitioning document con
 test("current document selection does not write history or start navigation progress", async ({
   page,
 }) => {
-  await page.goto("/en/packages/tooling");
+  await page.goto("/en/deep-dive/nextjs-16");
   await page.evaluate(() => {
     const observedWindow = window as Window & { __docsHistoryWrites: number };
     observedWindow.__docsHistoryWrites = 0;
@@ -374,11 +374,11 @@ test("current document selection does not write history or start navigation prog
 
   await page
     .locator('nav[aria-label="Side navigation"]:visible')
-    .getByRole("link", { name: "tooling", exact: true })
+    .getByRole("link", { name: "Next.js 16", exact: true })
     .click();
   await page.waitForTimeout(100);
 
-  await expect(page).toHaveURL(/\/en\/packages\/tooling$/u);
+  await expect(page).toHaveURL(/\/en\/deep-dive\/nextjs-16$/u);
   expect(
     await page.evaluate(
       () => (window as Window & { __docsHistoryWrites: number }).__docsHistoryWrites,
@@ -447,9 +447,9 @@ test("locale, theme, removed package, and 404 contracts remain visible", async (
     await expect(page).toHaveURL(new RegExp(`/${locale}/overview$`, "u"));
   }
 
-  await page.goto("/en/packages/remark-plantuml");
+  await page.goto("/en/packages/tooling");
   await page.getByRole("link", { name: "한국어로 읽기" }).click();
-  await expect(page).toHaveURL(/\/ko\/packages\/remark-plantuml$/u);
+  await expect(page).toHaveURL(/\/ko\/packages\/tooling$/u);
   await expect(page.locator("html")).toHaveAttribute("lang", "ko");
 
   const themeButton = page.getByRole("button", { name: /테마:/u });
@@ -459,6 +459,8 @@ test("locale, theme, removed package, and 404 contracts remain visible", async (
   for (const path of [
     "/en/packages/ui",
     "/ko/packages/ui",
+    "/en/packages/remark-plantuml",
+    "/ko/packages/remark-plantuml",
     "/en/not-a-document",
     "/fr/overview",
     "/en/overview/extra",
@@ -486,7 +488,7 @@ test("document typography uses the Angular metric contract in both locales", asy
   for (const { locale, width } of cases) {
     const context = await browser.newContext({ viewport: { width, height: 900 } });
     const page = await context.newPage();
-    await page.goto(`/${locale}/packages/remark-plantuml`);
+    await page.goto(`/${locale}/packages/tooling`);
     const metrics = await page.evaluate(() => {
       const article = document.querySelector("article");
       const prose = document.querySelector('[data-docs-prose="true"]');
@@ -701,7 +703,7 @@ test("representative pages have no Axe violations or console warnings", async ({
     "/diagrams",
     "/diagrams/operating-system",
     "/en/handbook/ddd",
-    "/en/packages/remark-plantuml",
+    "/en/packages/tooling",
     "/en/deep-dive/pnpm-11",
   ]) {
     await page.goto(path, { waitUntil: "networkidle" });

@@ -20,7 +20,7 @@
     "icon:check": "pnpm --filter @jongminchung/icon run check",
     "icon:generate": "pnpm --filter @jongminchung/icon run generate",
     "lint": "oxlint .",
-    "publish:dry-run": "pnpm --filter @jongminchung/remark-plantuml run publish:dry-run && pnpm --filter @jongminchung/tooling run publish:dry-run && pnpm --filter @jongminchung/ui run publish:dry-run",
+    "publish:dry-run": "pnpm --filter @jongminchung/tooling run publish:dry-run && pnpm --filter @jongminchung/ui run publish:dry-run",
     "test": "vitest run --maxWorkers=2 && pnpm --filter @jongminchung/git-client run test:scripts",
     "test:e2e": "pnpm --filter @jongminchung/engineering-docs run test:e2e:core && pnpm --filter @jongminchung/readme run test:e2e:core && pnpm --filter @jongminchung/git-client run test:e2e",
     "typecheck": "tsc --noEmit && pnpm -r --if-present run typecheck",

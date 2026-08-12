@@ -82,11 +82,11 @@ advisory가 발견되면 다음 순서로 처리한다.
 
 현재 저장소에는 세 workflow가 있다.
 
-| Workflow           | Trigger                     | 역할                                                                | 주요 secret                      |
-| ------------------ | --------------------------- | ------------------------------------------------------------------- | -------------------------------- |
-| `Publish Packages` | `workflow_dispatch`         | 검사 후 `remark-plantuml`, `tooling`의 GitHub Packages `1.0.0` 교체 | `GH_PAT`                         |
-| `Git Client`       | `workflow_dispatch`         | `main` 검증, macOS ARM64 서명·공증·GitHub Release                   | `GH_PAT`, Apple 서명·공증 secret |
-| `Waka Readme`      | 매일 `15:00 UTC`, 수동 실행 | README Waka 통계 구간 갱신                                          | `WAKATIME_API_KEY`, `GH_TOKEN`   |
+| Workflow           | Trigger                     | 역할                                              | 주요 secret                      |
+| ------------------ | --------------------------- | ------------------------------------------------- | -------------------------------- |
+| `Publish Packages` | `workflow_dispatch`         | 검사 후 `tooling`의 GitHub Packages `1.0.0` 교체  | `GH_PAT`                         |
+| `Git Client`       | `workflow_dispatch`         | `main` 검증, macOS ARM64 서명·공증·GitHub Release | `GH_PAT`, Apple 서명·공증 secret |
+| `Waka Readme`      | 매일 `15:00 UTC`, 수동 실행 | README Waka 통계 구간 갱신                        | `WAKATIME_API_KEY`, `GH_TOKEN`   |
 
 Git Client workflow가 사용하는 Apple secret 이름은 다음과 같다.
 
@@ -103,13 +103,13 @@ GitHub repository의 등록 상태를 확인하고 다음 production release의 
 
 ## 패키지 게시
 
-`@jongminchung/remark-plantuml`과 `@jongminchung/tooling`은 고정 `1.0.0` 정책을 사용한다.
-두 패키지는 Node.js 24 이상에서 동작하는 ESM 전용 패키지이며 공개 runtime API는 named
+`@jongminchung/tooling`은 고정 `1.0.0` 정책을 사용한다.
+이 패키지는 Node.js 24 이상에서 동작하는 ESM 전용 패키지이며 공개 runtime API는 named
 export만 제공한다. `package.json`에는 `type: "module"`, `engines.node: ">=24.0.0"`,
 JavaScript entry point별 `import` 조건을 유지하고 CommonJS 산출물과 `require` 조건을 추가하지
 않는다.
 
-두 패키지의 `build`는 공통 `tsconfig.library.json`과 패키지별 `tsconfig.build.json`을 사용해
+이 패키지의 `build`는 공통 `tsconfig.library.json`과 패키지별 `tsconfig.build.json`을 사용해
 `tsc`로 ESM JavaScript와 declaration을 생성한다. CSS·JSON subpath는 tarball에 포함된 원본
 자산을 직접 가리킨다. 번들링·축소·복수 모듈 형식이나 빌드 플러그인은 기본 배포 경계가 아니며,
 [ADR 0002](adr/0002-node-library-tsc-build.md)의 재도입 조건을 충족할 때만 다시 검토한다.

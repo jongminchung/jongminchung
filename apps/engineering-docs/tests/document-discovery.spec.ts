@@ -44,16 +44,12 @@ test("related documentation is deterministic and excludes the current document",
   await page.goto("/en/packages/tooling");
   const related = page.getByRole("region", { name: "Related documentation" });
   await expect(related).toBeVisible();
-  await expect(related.locator("a")).toHaveCount(3);
+  await expect(related.locator("a")).toHaveCount(2);
   expect(
     await related
       .locator("a")
       .evaluateAll((links) => links.map((link) => link.getAttribute("href"))),
-  ).toEqual([
-    "/en/deep-dive/typescript-7-compatibility",
-    "/en/deep-dive/pnpm-11",
-    "/en/packages/remark-plantuml",
-  ]);
+  ).toEqual(["/en/deep-dive/typescript-7-compatibility", "/en/deep-dive/pnpm-11"]);
   await expect(related.locator('a[href="/en/packages/tooling"]')).toHaveCount(0);
 });
 

@@ -26,15 +26,14 @@ pnpm install --frozen-lockfile
 
 ## Workspace 구조
 
-| Workspace                  | 역할                                        | 주요 개발 명령                                         |
-| -------------------------- | ------------------------------------------- | ------------------------------------------------------ |
-| `apps/engineering-docs`    | Next.js·MDX 기술 문서 앱                    | `pnpm --filter @jongminchung/engineering-docs run dev` |
-| `apps/readme`              | 개인 README Next.js 앱                      | `pnpm --filter @jongminchung/readme run dev`           |
-| `apps/git-client`          | macOS Electron Git 클라이언트               | `pnpm --filter @jongminchung/git-client run dev`       |
-| `packages/ui`              | 공개 UI primitive·기본 theme·semantic token | `pnpm --filter @jongminchung/ui run build`             |
-| `packages/icon`            | 아이콘 원본과 앱별 생성 자산                | `pnpm run icon:check`                                  |
-| `packages/remark-plantuml` | Markdown PlantUML 변환 패키지               | `pnpm --filter @jongminchung/remark-plantuml run test` |
-| `packages/tooling`         | Oxc 설정과 workspace package map            | `pnpm --filter @jongminchung/tooling run test`         |
+| Workspace               | 역할                                        | 주요 개발 명령                                         |
+| ----------------------- | ------------------------------------------- | ------------------------------------------------------ |
+| `apps/engineering-docs` | Next.js·MDX 기술 문서 앱                    | `pnpm --filter @jongminchung/engineering-docs run dev` |
+| `apps/readme`           | 개인 README Next.js 앱                      | `pnpm --filter @jongminchung/readme run dev`           |
+| `apps/git-client`       | macOS Electron Git 클라이언트               | `pnpm --filter @jongminchung/git-client run dev`       |
+| `packages/ui`           | 공개 UI primitive·기본 theme·semantic token | `pnpm --filter @jongminchung/ui run build`             |
+| `packages/icon`         | 아이콘 원본과 앱별 생성 자산                | `pnpm run icon:check`                                  |
+| `packages/tooling`      | Oxc 설정과 workspace package map            | `pnpm --filter @jongminchung/tooling run test`         |
 
 공용 UI의 소유권, token과 component 추가 규칙은 [디자인 시스템](DESIGN_SYSTEM.md)을
 따른다. 앱별 product component를 `packages/ui`로 옮기거나 앱에서 공용 primitive를 복제하지
@@ -172,7 +171,7 @@ pnpm run check
 pnpm run publish:dry-run
 ```
 
-`@jongminchung/remark-plantuml`과 `@jongminchung/tooling`은 GitHub Actions의 수동
+`@jongminchung/tooling`은 GitHub Actions의 수동
 `Publish Packages` workflow가 GitHub Packages의 고정 `1.0.0`을 교체한다. Git Client는
 [GitHub Release 배포 가이드](apps/git-client/docs/releases.md)를 따른다.
 

@@ -51,7 +51,6 @@ describe("documentation discovery", () => {
     expect(rankRelatedDocuments(current, documents).map(({ id }) => id)).toEqual([
       "deep-dive/typescript-7-compatibility",
       "deep-dive/pnpm-11",
-      "packages/remark-plantuml",
     ]);
   });
 

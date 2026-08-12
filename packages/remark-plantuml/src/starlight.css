@@ -1,5 +1,0 @@
-@import "./styles.css";
-
-.plantuml-diagram {
-  --plantuml-caption-foreground: var(--sl-color-gray-3);
-}
