@@ -22,15 +22,14 @@ git --version
 pnpm install --frozen-lockfile
 ```
 
-의존성은 workspace별로 따로 설치하지 않는다. 모든 명령은 별도 안내가 없으면 저장소
-루트에서 실행하고, package script에는 항상 `run`을 명시한다.
+의존성은 workspace별로 따로 설치하지 않는다.
 
 ## Workspace 구조
 
 | Workspace                  | 역할                                        | 주요 개발 명령                                         |
 | -------------------------- | ------------------------------------------- | ------------------------------------------------------ |
-| `apps/engineering-docs`    | Next.js·MDX 기술 문서 앱                    | `pnpm run dev:engineering-docs`                        |
-| `apps/readme`              | 개인 README Next.js 앱                      | `pnpm run dev:readme`                                  |
+| `apps/engineering-docs`    | Next.js·MDX 기술 문서 앱                    | `pnpm --filter @jongminchung/engineering-docs run dev` |
+| `apps/readme`              | 개인 README Next.js 앱                      | `pnpm --filter @jongminchung/readme run dev`           |
 | `apps/git-client`          | macOS Electron Git 클라이언트               | `pnpm --filter @jongminchung/git-client run dev`       |
 | `packages/ui`              | 공개 UI primitive·기본 theme·semantic token | `pnpm --filter @jongminchung/ui run build`             |
 | `packages/icon`            | 아이콘 원본과 앱별 생성 자산                | `pnpm run icon:check`                                  |

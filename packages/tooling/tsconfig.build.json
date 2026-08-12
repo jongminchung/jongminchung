@@ -4,10 +4,5 @@
     "outDir": "dist",
     "rootDir": "src"
   },
-  "files": [
-    "src/oxfmt/index.ts",
-    "src/oxlint/index.ts",
-    "src/package-map.ts",
-    "src/package-map-cli.ts"
-  ]
+  "files": ["src/oxfmt/index.ts", "src/oxlint/index.ts", "src/package-map.ts"]
 }

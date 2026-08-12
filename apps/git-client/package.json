@@ -10,12 +10,10 @@
     "#lib/*": "./src/lib/*.ts"
   },
   "scripts": {
-    "benchmark": "node scripts/benchmark.mjs",
     "build": "pnpm typecheck && vite build",
     "dev": "electron-forge start",
     "electron:package": "electron-forge package",
     "electron:smoke-package": "node scripts/smoke-electron-package.mjs",
-    "electron:start": "electron-forge start",
     "electron:verify-package": "node scripts/verify-electron-package.mjs",
     "qa:compact": "pnpm typecheck && pnpm test && pnpm test:e2e",
     "qa:compact:electron": "pnpm test:electron",
