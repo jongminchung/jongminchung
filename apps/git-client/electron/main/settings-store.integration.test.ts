@@ -1,4 +1,11 @@
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import {
+    mkdir,
+    mkdtemp,
+    readFile,
+    readdir,
+    rm,
+    writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -36,7 +43,7 @@ describe("SettingsStore", () => {
         });
         expect(reopened.get("theme")).toBe("Islands Dark");
         expect(JSON.parse(await readFile(filePath, "utf8"))).toEqual({
-            schemaVersion: 1,
+            schemaVersion: 2,
             values: {
                 layout: { compact: true, widths: [240, 680] },
                 theme: "Islands Dark",
@@ -69,7 +76,7 @@ describe("SettingsStore", () => {
         ]);
 
         expect(JSON.parse(await readFile(filePath, "utf8"))).toEqual({
-            schemaVersion: 1,
+            schemaVersion: 2,
             values: {
                 schemaVersion: 1,
                 openRepositoryPaths: ["/tmp/one", "/tmp/two"],
@@ -80,10 +87,33 @@ describe("SettingsStore", () => {
         });
     });
 
-    it("rejects corrupt or unsupported documents", async () => {
+    it("backs up and resets the previous settings schema", async () => {
         const filePath = await createSettingsPath();
         await mkdir(dirname(filePath), { recursive: true });
-        await writeFile(filePath, '{"schemaVersion":2,"values":{}}', "utf8");
+        const legacyDocument = '{"schemaVersion":1,"values":{"theme":"Dark"}}';
+        await writeFile(filePath, legacyDocument, "utf8");
+
+        const store = await SettingsStore.of(filePath);
+
+        expect(store.createSnapshot()).toEqual({});
+        expect(JSON.parse(await readFile(filePath, "utf8"))).toEqual({
+            schemaVersion: 2,
+            values: {},
+        });
+        const files = await readdir(dirname(filePath));
+        const backup = files.find((file) =>
+            /^settings\.json\.v1\..+\.backup$/u.test(file),
+        );
+        expect(backup).toBeDefined();
+        expect(await readFile(join(dirname(filePath), backup!), "utf8")).toBe(
+            legacyDocument,
+        );
+    });
+
+    it("rejects unsupported documents", async () => {
+        const filePath = await createSettingsPath();
+        await mkdir(dirname(filePath), { recursive: true });
+        await writeFile(filePath, '{"schemaVersion":3,"values":{}}', "utf8");
 
         await expect(SettingsStore.of(filePath)).rejects.toMatchObject({
             code: "settings.version",

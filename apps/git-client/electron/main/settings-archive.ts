@@ -7,6 +7,7 @@ import {
 const SETTINGS_ARCHIVE_MAX_BYTES = 1_048_576;
 const SETTINGS_ARCHIVE_MAX_EXPANDED_BYTES = 4_194_304;
 export const SETTINGS_CREDENTIAL_PREFIX = "hostingCredential:";
+export const SETTINGS_ARCHIVE_SCHEMA_VERSION = 2;
 
 function validateSettingsArchiveEnvelope(bytes: Uint8Array): void {
     if (bytes.byteLength > SETTINGS_ARCHIVE_MAX_BYTES) {
@@ -76,7 +77,7 @@ export function parseImportedSettings(
     }
     if (
         Reflect.get(raw, "format") !== "git-client-settings" ||
-        Reflect.get(raw, "schemaVersion") !== 1
+        Reflect.get(raw, "schemaVersion") !== SETTINGS_ARCHIVE_SCHEMA_VERSION
     ) {
         throw new Error("Imported settings use an unsupported format.");
     }

@@ -76,6 +76,7 @@ import { createRepositoryCapabilityAssertions } from "./repository-capabilities"
 import {
     parseImportedSettings,
     SETTINGS_CREDENTIAL_PREFIX,
+    SETTINGS_ARCHIVE_SCHEMA_VERSION,
 } from "./settings-archive";
 import type { SettingsStore } from "./settings-store";
 import { registerTerminalHandlers } from "./terminal-handlers";
@@ -560,7 +561,7 @@ export function registerPlatformHandlers(
             const payload = strToU8(
                 JSON.stringify({
                     format: "git-client-settings",
-                    schemaVersion: 1,
+                    schemaVersion: SETTINGS_ARCHIVE_SCHEMA_VERSION,
                     exportedAt: new Date().toISOString(),
                     values,
                 }),

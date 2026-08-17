@@ -1,15 +1,21 @@
-import { mkdir, open, readFile, rename } from "node:fs/promises";
+import { copyFile, mkdir, open, readFile, rename } from "node:fs/promises";
 import { dirname } from "node:path";
 import type { JsonValue } from "../../src/shared/contracts/ipc";
 import { JsonValueSchema } from "../../src/shared/contracts/ipc";
 import { NativeError } from "../shared/native-error";
 
 interface SettingsDocument {
-    readonly schemaVersion: 1;
+    readonly schemaVersion: 2;
     readonly values: Readonly<Record<string, JsonValue>>;
 }
 
-const EMPTY_SETTINGS: SettingsDocument = { schemaVersion: 1, values: {} };
+const SETTINGS_SCHEMA_VERSION = 2;
+const LEGACY_SETTINGS_SCHEMA_VERSION = 1;
+
+function legacyBackupPath(filePath: string, now: Date): string {
+    const timestamp = now.toISOString().replaceAll(/[:.]/gu, "-");
+    return `${filePath}.v${LEGACY_SETTINGS_SCHEMA_VERSION}.${timestamp}.backup`;
+}
 
 function parseSettings(raw: unknown): SettingsDocument {
     if (typeof raw !== "object" || raw === null) {
@@ -18,7 +24,10 @@ function parseSettings(raw: unknown): SettingsDocument {
             "Settings must be a JSON object.",
         );
     }
-    if (!("schemaVersion" in raw) || raw.schemaVersion !== 1) {
+    if (
+        !("schemaVersion" in raw) ||
+        raw.schemaVersion !== SETTINGS_SCHEMA_VERSION
+    ) {
         throw NativeError.create(
             "settings.version",
             "Unsupported settings version.",
@@ -39,7 +48,7 @@ function parseSettings(raw: unknown): SettingsDocument {
     for (const [key, value] of Object.entries(raw.values)) {
         values[key] = JsonValueSchema.parse(value);
     }
-    return { schemaVersion: 1, values };
+    return { schemaVersion: SETTINGS_SCHEMA_VERSION, values };
 }
 
 export class SettingsStore {
@@ -51,10 +60,25 @@ export class SettingsStore {
     ) {}
 
     static async of(filePath: string): Promise<SettingsStore> {
-        let document = EMPTY_SETTINGS;
         try {
             const rawText = await readFile(filePath, "utf8");
-            document = parseSettings(JSON.parse(rawText) as unknown);
+            const raw = JSON.parse(rawText) as unknown;
+            if (
+                typeof raw === "object" &&
+                raw !== null &&
+                "schemaVersion" in raw &&
+                raw.schemaVersion === LEGACY_SETTINGS_SCHEMA_VERSION
+            ) {
+                await copyFile(
+                    filePath,
+                    legacyBackupPath(filePath, new Date()),
+                );
+                const store = new SettingsStore(filePath, {});
+                await store.flush({});
+                return store;
+            }
+            const document = parseSettings(raw);
+            return new SettingsStore(filePath, { ...document.values });
         } catch (error) {
             if (
                 error instanceof Error &&
@@ -65,7 +89,6 @@ export class SettingsStore {
             }
             throw NativeError.from(error, "settings.read");
         }
-        return new SettingsStore(filePath, { ...document.values });
     }
 
     get(key: string): JsonValue | null {
@@ -115,7 +138,7 @@ export class SettingsStore {
         await mkdir(dirname(this.filePath), { recursive: true, mode: 0o700 });
         const temporaryPath = `${this.filePath}.tmp`;
         const document: SettingsDocument = {
-            schemaVersion: 1,
+            schemaVersion: SETTINGS_SCHEMA_VERSION,
             values,
         };
         const handle = await open(temporaryPath, "w", 0o600);
