@@ -20,11 +20,11 @@
     "lint": "oxlint --config oxlint.config.ts .",
     "publish:dry-run": "pnpm --filter @jongminchung/tooling run publish:dry-run && pnpm --filter @jongminchung/ui run publish:dry-run",
     "test": "pnpm run test:unit && pnpm run test:integration",
-    "test:coverage:update": "vitest run --project unit --coverage && node scripts/check-coverage-baseline.ts --write",
+    "test:coverage:update": "vitest run --project unit --coverage --coverage.thresholds.autoUpdate",
     "test:e2e": "pnpm run typecheck:e2e && pnpm run build && pnpm run test:e2e:prebuilt",
     "test:e2e:prebuilt": "pnpm --filter @jongminchung/web run test:e2e:prebuilt && pnpm --filter @jongminchung/git-client run test:e2e:prebuilt",
     "test:integration": "vitest run --project integration && pnpm --filter @jongminchung/git-client run test:integration:native",
-    "test:unit": "vitest run --project unit --coverage && node scripts/check-coverage-baseline.ts",
+    "test:unit": "vitest run --project unit --coverage",
     "typecheck": "tsc --noEmit && pnpm -r --if-present run typecheck",
     "typecheck:e2e": "pnpm --filter @jongminchung/web run typecheck:e2e"
   },

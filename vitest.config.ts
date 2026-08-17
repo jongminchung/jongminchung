@@ -35,6 +35,38 @@ export default defineConfig({
             provider: "v8",
             reporter: ["text-summary", "json-summary"],
             reportsDirectory: "coverage",
+            thresholds: {
+                "apps/web/lib/**": {
+                    branches: 70.04,
+                    functions: 75,
+                    lines: 75.48,
+                    statements: 73.39,
+                },
+                "apps/git-client/src/application/**": {
+                    branches: 69.56,
+                    functions: 61.9,
+                    lines: 76.79,
+                    statements: 75.15,
+                },
+                "apps/git-client/src/domain/**": {
+                    branches: 63.92,
+                    functions: 70.5,
+                    lines: 74.07,
+                    statements: 70.83,
+                },
+                "packages/tooling/src/**": {
+                    branches: 100,
+                    functions: 100,
+                    lines: 100,
+                    statements: 100,
+                },
+                "packages/ui/src/**": {
+                    branches: 19.26,
+                    functions: 14.28,
+                    lines: 18.13,
+                    statements: 17.78,
+                },
+            },
         },
         environment: "node",
         exclude: vitestExclude,
