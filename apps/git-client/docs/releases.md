@@ -54,7 +54,7 @@ pnpm --filter @jongminchung/git-client run test:integration:native
 Developer ID가 없는 Apple Silicon Mac에서는 explicit local mode로 전체 source gate와 Forge package를 재현한다.
 
 ```sh
-pnpm --filter @jongminchung/git-client release:validate-local -- 1.0.0
+pnpm --filter @jongminchung/git-client run release:validate-local -- 1.0.0
 ```
 
 결과 이름에는 `_adhoc`가 들어간다. 예: `Git-Client_1.0.0_macos_arm64_adhoc.dmg`. 이 파일은 strict `codesign --verify --deep --strict`, Electron 43.3.0, ARM64, fuse, ASAR integrity, locale, node-pty와 크기 정책을 검증하지만 Apple notarization artifact가 아니므로 게시할 수 없다.
@@ -64,7 +64,7 @@ production 릴리스 staging은 signing identity와 `notarytool` keychain profil
 ```sh
 export GIT_CLIENT_CODESIGN_IDENTITY='Developer ID Application: Example Corp (TEAMID)'
 export GIT_CLIENT_NOTARY_KEYCHAIN_PROFILE='git-client-release'
-pnpm --filter @jongminchung/git-client release:build -- 1.0.0
+pnpm --filter @jongminchung/git-client run release:build -- 1.0.0
 ```
 
 결과는 `apps/git-client/release-artifacts`에 만들어진다. 스크립트는 다음 순서를 강제한다.
@@ -85,14 +85,14 @@ production에서 identity나 notarization 설정이 없으면 첫 source gate �
 고정 버전과 릴리스 노트만 확인할 때는 토큰이 필요 없다.
 
 ```sh
-pnpm --filter @jongminchung/git-client release:dry-run
+pnpm --filter @jongminchung/git-client run release:dry-run
 ```
 
 로컬에서 실제 게시 스크립트를 실행해야 한다면 repository contents 쓰기 권한이 있는 PAT를 현재 shell의 `GH_PAT`에 secret manager로 주입한다. 스크립트는 자식 `gh` 프로세스에만 `GH_TOKEN`으로 전달한다.
 
 ```sh
 test -n "${GH_PAT:-}"
-pnpm --filter @jongminchung/git-client release
+pnpm --filter @jongminchung/git-client run release
 ```
 
 ## 게시 후 확인

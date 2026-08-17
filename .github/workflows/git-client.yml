@@ -30,15 +30,15 @@ jobs:
       - run: pnpm run audit:prod
       - name: Guard fixed Git Client version
         run: test "$(node -p "require('./apps/git-client/package.json').version")" = "1.0.0"
-      - run: pnpm exec oxfmt --config .oxfmtrc.mjs --check apps/git-client
-      - run: pnpm exec oxlint apps/git-client/src apps/git-client/tests apps/git-client/scripts
-      - run: pnpm --filter @jongminchung/git-client typecheck
-      - run: pnpm --filter @jongminchung/git-client test
-      - run: pnpm --filter @jongminchung/git-client build
+      - run: pnpm exec oxfmt --config oxfmt.config.ts --check apps/git-client
+      - run: pnpm exec oxlint --config oxlint.config.ts apps/git-client
+      - run: pnpm --filter @jongminchung/git-client run typecheck
+      - run: pnpm --filter @jongminchung/git-client run test
+      - run: pnpm --filter @jongminchung/git-client run build
       - run: pnpm --filter @jongminchung/git-client exec playwright install chromium
-      - run: pnpm --filter @jongminchung/git-client test:e2e
+      - run: pnpm --filter @jongminchung/git-client run test:e2e
       - name: Build and validate local ad-hoc Electron ARM64 artifacts
-        run: pnpm --filter @jongminchung/git-client release:validate-local -- 1.0.0
+        run: pnpm --filter @jongminchung/git-client run release:validate-local -- 1.0.0
       - name: Upload compact QA evidence
         if: always()
         uses: actions/upload-artifact@v7
@@ -119,7 +119,7 @@ jobs:
           GIT_CLIENT_CODESIGN_IDENTITY: ${{ secrets.GIT_CLIENT_CODESIGN_IDENTITY }}
           GIT_CLIENT_NOTARY_KEYCHAIN: ${{ runner.temp }}/git-client-signing.keychain-db
           GIT_CLIENT_NOTARY_KEYCHAIN_PROFILE: git-client-ci
-        run: pnpm --filter @jongminchung/git-client release
+        run: pnpm --filter @jongminchung/git-client run release
       - name: Remove ephemeral signing keychain
         if: always()
         run: security delete-keychain "${RUNNER_TEMP}/git-client-signing.keychain-db" || true

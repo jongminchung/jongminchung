@@ -38,7 +38,7 @@ Renderer가 임의 Git 명령이나 Node.js API를 직접 받지 않도록 한�
 실제 폴더 선택기, Git bridge, 설정 복원과 PTY를 확인하려면 Electron Forge 개발 모드를 실행한다.
 
 ```sh
-pnpm --filter @jongminchung/git-client dev
+pnpm --filter @jongminchung/git-client run dev
 ```
 
 - React·CSS 변경은 renderer HMR로 반영된다.
@@ -107,19 +107,19 @@ pnpm --filter @jongminchung/git-client qa:compact
 
 개별 명령은 다음과 같다.
 
-| 명령                                                             | 검증 범위                                             |
-| ---------------------------------------------------------------- | ----------------------------------------------------- |
-| `pnpm --filter @jongminchung/git-client typecheck`               | renderer TypeScript                                   |
-| `pnpm --filter @jongminchung/git-client test`                    | Vitest 단위·통합 테스트                               |
-| `pnpm --filter @jongminchung/git-client test:e2e`                | Vite QA fixture 기반 renderer Playwright              |
-| `pnpm --filter @jongminchung/git-client build`                   | renderer와 Electron TypeScript, Vite production build |
-| `pnpm --filter @jongminchung/git-client test:integration:native` | Integration의 독립 audit·package policy Node 검사     |
+| 명령                                                                 | 검증 범위                                             |
+| -------------------------------------------------------------------- | ----------------------------------------------------- |
+| `pnpm --filter @jongminchung/git-client run typecheck`               | renderer TypeScript                                   |
+| `pnpm --filter @jongminchung/git-client run test`                    | Vitest 단위·통합 테스트                               |
+| `pnpm --filter @jongminchung/git-client run test:e2e`                | Vite QA fixture 기반 renderer Playwright              |
+| `pnpm --filter @jongminchung/git-client run build`                   | renderer와 Electron TypeScript, Vite production build |
+| `pnpm --filter @jongminchung/git-client run test:integration:native` | Integration의 독립 audit·package policy Node 검사     |
 
 실패 상세가 필요할 때만 verbose reporter를 사용한다.
 
 ```sh
-pnpm --filter @jongminchung/git-client test:verbose
-GIT_CLIENT_VERBOSE_TESTS=1 pnpm --filter @jongminchung/git-client test:e2e
+pnpm --filter @jongminchung/git-client run test:verbose
+GIT_CLIENT_VERBOSE_TESTS=1 pnpm --filter @jongminchung/git-client run test:e2e
 ```
 
 결과와 trace는 다음 경로에 기록된다.
@@ -145,7 +145,7 @@ pnpm --filter @jongminchung/git-client exec playwright test \
 의도적인 시각 변경만 snapshot을 갱신하고 생성된 diff를 직접 검토한다.
 
 ```sh
-pnpm --filter @jongminchung/git-client test:e2e:update
+pnpm --filter @jongminchung/git-client run test:e2e:update
 ```
 
 ## 패키지 Electron 검증
@@ -156,7 +156,7 @@ main, preload, utility, native menu, Git 부작용, Terminal 또는 Safe Mode를
 pnpm --filter @jongminchung/git-client electron:package
 pnpm --filter @jongminchung/git-client electron:verify-package
 pnpm --filter @jongminchung/git-client electron:smoke-package
-pnpm --filter @jongminchung/git-client test:electron
+pnpm --filter @jongminchung/git-client run test:electron
 ```
 
 - 패키지 위치: `apps/git-client/out/Git Client-darwin-arm64/Git Client.app`
@@ -191,14 +191,14 @@ pnpm --filter @jongminchung/git-client exec playwright test \
 ## 전체 제출 전 게이트
 
 ```sh
-pnpm --filter @jongminchung/git-client typecheck
-pnpm --filter @jongminchung/git-client test
-pnpm --filter @jongminchung/git-client test:e2e
-pnpm --filter @jongminchung/git-client test:integration:native
+pnpm --filter @jongminchung/git-client run typecheck
+pnpm --filter @jongminchung/git-client run test
+pnpm --filter @jongminchung/git-client run test:e2e
+pnpm --filter @jongminchung/git-client run test:integration:native
 pnpm --filter @jongminchung/git-client electron:package
 pnpm --filter @jongminchung/git-client electron:verify-package
 pnpm --filter @jongminchung/git-client electron:smoke-package
-pnpm --filter @jongminchung/git-client test:electron
+pnpm --filter @jongminchung/git-client run test:electron
 git diff --check
 ```
 

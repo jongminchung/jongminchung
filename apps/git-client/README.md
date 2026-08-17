@@ -19,10 +19,10 @@ Appearance supports System Appearance, White, and Black. System mode follows mac
 
 ```sh
 pnpm install
-pnpm --filter @jongminchung/git-client dev
+pnpm --filter @jongminchung/git-client run dev
 pnpm --filter @jongminchung/git-client exec vite --host 127.0.0.1
-pnpm --filter @jongminchung/git-client test
-pnpm --filter @jongminchung/git-client build
+pnpm --filter @jongminchung/git-client run test
+pnpm --filter @jongminchung/git-client run build
 ```
 
 `pnpm dev` launches Electron Forge. The direct Vite command starts only the browser development server; its normal URL starts on the Welcome screen because a browser has no native Git bridge. A deterministic fixture is available only at `http://127.0.0.1:1420/?fixture=qa` for visual and Playwright testing. In Electron, **Open Repository** uses the native directory picker and all requests cross the context-isolated preload as validated discriminated unions. The renderer never receives an arbitrary Git command, path, URL, or IPC channel API. See the [local development and testing guide](docs/contributing.md) for focused and packaged test workflows.
