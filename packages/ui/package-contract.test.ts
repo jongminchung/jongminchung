@@ -25,18 +25,12 @@ describe("@jongminchung/ui package contract", () => {
         expect(manifest.private).toBeUndefined();
         expect(manifest.imports).toEqual({
             "#components/*": "./src/components/*.tsx",
-            "#hooks/*": "./src/hooks/*.ts",
             "#lib/*": "./src/lib/*.ts",
         });
         expect(manifest.exports).toEqual({
             "./globals.css": "./src/styles/globals.css",
             "./theme.css": "./src/styles/theme.css",
             "./tokens.css": "./src/styles/tokens.css",
-            "./hooks/*": {
-                source: "./src/hooks/*.ts",
-                types: "./dist/hooks/*.d.ts",
-                import: "./dist/hooks/*.js",
-            },
             "./lib/*": {
                 source: "./src/lib/*.ts",
                 types: "./dist/lib/*.d.ts",

@@ -11,7 +11,6 @@
   "files": [
     "dist",
     "src/components/*.tsx",
-    "src/hooks/*.ts",
     "src/lib/*.ts",
     "src/styles/*.css",
     "LICENSE",
@@ -23,18 +22,12 @@
   ],
   "imports": {
     "#components/*": "./src/components/*.tsx",
-    "#hooks/*": "./src/hooks/*.ts",
     "#lib/*": "./src/lib/*.ts"
   },
   "exports": {
     "./globals.css": "./src/styles/globals.css",
     "./theme.css": "./src/styles/theme.css",
     "./tokens.css": "./src/styles/tokens.css",
-    "./hooks/*": {
-      "source": "./src/hooks/*.ts",
-      "types": "./dist/hooks/*.d.ts",
-      "import": "./dist/hooks/*.js"
-    },
     "./lib/*": {
       "source": "./src/lib/*.ts",
       "types": "./dist/lib/*.d.ts",
@@ -52,7 +45,7 @@
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "build": "node ../../scripts/clean-package-dist.mjs && tsc -p tsconfig.build.json",
+    "build": "node ../../scripts/clean-package-dist.ts && tsc -p tsconfig.build.json",
     "prepack": "pnpm run build",
     "publish:dry-run": "pnpm publish --dry-run --access public --no-git-checks",
     "test": "vitest run --root ../.. packages/ui",

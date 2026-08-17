@@ -91,43 +91,11 @@ function CommandInput({
     ref,
     ...props
 }: React.ComponentProps<typeof CommandPrimitive.Input>) {
-    const inputRef = React.useRef<HTMLInputElement | null>(null);
-
-    React.useEffect(() => {
-        const input = inputRef.current;
-        const command = input?.closest<HTMLElement>('[data-slot="command"]');
-        if (input === null || command === undefined || command === null) return;
-
-        const syncActiveDescendant = (): void => {
-            const selected = command.querySelector<HTMLElement>(
-                '[data-slot="command-item"][aria-selected="true"]',
-            );
-            if (selected?.id)
-                input.setAttribute("aria-activedescendant", selected.id);
-            else input.removeAttribute("aria-activedescendant");
-        };
-
-        syncActiveDescendant();
-        const observer = new MutationObserver(syncActiveDescendant);
-        observer.observe(command, {
-            attributeFilter: ["aria-selected"],
-            attributes: true,
-            childList: true,
-            subtree: true,
-        });
-        return () => observer.disconnect();
-    }, []);
-
     return (
         <div data-slot="command-input-wrapper" className="p-1 pb-0">
             <InputGroup className="h-8! rounded-lg! border-input/30 bg-input/30 shadow-none! *:data-[slot=input-group-addon]:pl-2!">
                 <CommandPrimitive.Input
-                    ref={(node) => {
-                        inputRef.current = node;
-                        if (typeof ref === "function") ref(node);
-                        else if (ref !== null && ref !== undefined)
-                            ref.current = node;
-                    }}
+                    ref={ref}
                     data-slot="command-input"
                     className={cn(
                         "w-full text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
