@@ -1,5 +1,8 @@
-import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import {
+    expectNoAccessibilityViolations,
+    expectNoHorizontalOverflow,
+} from "./assertions";
 
 test("plain documents omit material frames while material routes load independent demos", async ({
     page,
@@ -41,9 +44,7 @@ test("material demos preload near the viewport and unmount offscreen", async ({
     await expect(firstDemo).toHaveAttribute("data-material-active", "false");
 
     await page.setViewportSize({ width: 390, height: 844 });
-    await expect
-        .poll(() => page.evaluate(() => document.documentElement.scrollWidth))
-        .toBe(390);
+    await expectNoHorizontalOverflow(page);
 });
 
 test("pixel-processing exceptions remain native Canvas and material frames are accessible", async ({
@@ -59,12 +60,8 @@ test("pixel-processing exceptions remain native Canvas and material frames are a
         demo.getByRole("button", { name: "Attach 60 photos" }),
     ).toBeVisible();
 
-    const accessibility = await new AxeBuilder({ page })
-        .include("[data-material-demo]")
-        .analyze();
-    expect(
-        accessibility.violations.filter((violation) =>
-            ["serious", "critical"].includes(violation.impact ?? ""),
-        ),
-    ).toEqual([]);
+    await expectNoAccessibilityViolations(page, "[data-material-demo]", [
+        "serious",
+        "critical",
+    ]);
 });

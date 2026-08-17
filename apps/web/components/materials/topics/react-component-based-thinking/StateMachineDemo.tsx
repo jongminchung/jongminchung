@@ -2,13 +2,19 @@
 
 import { motion, useReducedMotion } from "motion/react";
 import React, { useEffect, useRef, useState } from "react";
+import {
+    stateMachineChipColors,
+    stateMachineTransitions,
+    type StateMachineEdge,
+    type StateMachineStatus,
+} from "./StateMachineModel";
 
 const FONT =
     "'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, sans-serif";
 const MONO = "ui-monospace, SFMono-Regular, Menlo, monospace";
 
-type Status = "idle" | "loading" | "added";
-type EdgeId = "CLICK" | "SUCCESS" | "RESET";
+type Status = StateMachineStatus;
+type EdgeId = StateMachineEdge;
 
 const STYLE = `
 .rcbt-smd-spinner {
@@ -20,15 +26,6 @@ const STYLE = `
   border-radius: 50%;
 }
 `;
-
-const CHIP_COLORS: Record<
-    Status,
-    { bg: string; text: string; border: string }
-> = {
-    idle: { bg: "#e7f5ff", text: "#1864ab", border: "#a5d8ff" },
-    loading: { bg: "#fff9db", text: "#8f6900", border: "#ffe066" },
-    added: { bg: "#ebfbee", text: "#237032", border: "#b2f2bb" },
-};
 
 // ---- 상태 그래프 (SVG) ----
 
@@ -259,29 +256,23 @@ export const StateMachineDemo = () => {
     useEffect(() => {
         const timers: ReturnType<typeof setTimeout>[] = [];
 
-        if (status === "idle") {
+        const transition = stateMachineTransitions[status];
+        if (transition.edge === "CLICK") {
             // 잠시 뒤 가상의 클릭이 들어온다
             timers.push(
                 setTimeout(() => {
                     setPressed(true);
                     timers.push(setTimeout(() => setPressed(false), 200));
-                    flashEdge("CLICK");
-                    setStatus("loading");
-                }, 1700),
-            );
-        } else if (status === "loading") {
-            timers.push(
-                setTimeout(() => {
-                    setStatus("added");
-                    flashEdge("SUCCESS");
-                }, 1300),
+                    flashEdge(transition.edge);
+                    setStatus(transition.next);
+                }, transition.delay),
             );
         } else {
             timers.push(
                 setTimeout(() => {
-                    setStatus("idle");
-                    flashEdge("RESET");
-                }, 1900),
+                    setStatus(transition.next);
+                    flashEdge(transition.edge);
+                }, transition.delay),
             );
         }
 
@@ -312,7 +303,7 @@ export const StateMachineDemo = () => {
         ...(status === "added" && { background: "#237032", color: "#fff" }),
     };
 
-    const chip = CHIP_COLORS[status];
+    const chip = stateMachineChipColors[status];
 
     return (
         <div

@@ -1,7 +1,8 @@
 import { readFile, readdir, stat, writeFile } from "node:fs/promises";
-import { basename, dirname, relative, resolve, sep } from "node:path";
+import { basename, dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
+import { toPosixPath } from "./generation-utils.ts";
 
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const topicsRoot = resolve(appRoot, "components/materials/topics");
@@ -24,10 +25,6 @@ interface MaterialExport {
 interface ExportedName {
     readonly exportName: string;
     readonly localName: string;
-}
-
-function toPosixPath(value: string): string {
-    return value.split(sep).join("/");
 }
 
 async function exists(filePath: string): Promise<boolean> {

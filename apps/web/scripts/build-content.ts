@@ -1,5 +1,5 @@
-import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
-import { dirname, extname, relative, resolve, sep } from "node:path";
+import { readFile } from "node:fs/promises";
+import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { compile } from "@mdx-js/mdx";
 import matter from "gray-matter";
@@ -21,6 +21,15 @@ import {
     type OutlineEntry,
     type SearchDocument,
 } from "../lib/content-model.ts";
+import {
+    listFiles,
+    relativeGeneratedPaths,
+    staleGeneratedFiles,
+    toPosixPath,
+    type GeneratedFile,
+    type ReadTextFile,
+    writeGeneratedFiles,
+} from "./generation-utils.ts";
 
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const workspaceRoot = resolve(appRoot, "../..");
@@ -49,37 +58,13 @@ interface PackageApi {
     readonly symbols: readonly string[];
 }
 
-export interface GeneratedFile {
-    readonly filePath: string;
-    readonly contents: string;
-}
-
 type GenerationMode = "check" | "write";
-type ReadTextFile = (filePath: string) => Promise<string | null>;
 type HastNode = Parameters<typeof toString>[0];
 type HeadingElement = HastNode & {
     readonly type: "element";
     readonly tagName: "h2" | "h3";
     readonly properties: Readonly<Record<string, unknown>>;
 };
-
-function toPosixPath(value: string): string {
-    return value.split(sep).join("/");
-}
-
-async function listFiles(directory: string): Promise<readonly string[]> {
-    const entries = await readdir(directory, { withFileTypes: true });
-    const files = await Promise.all(
-        entries.map(async (entry): Promise<readonly string[]> => {
-            const entryPath = resolve(directory, entry.name);
-            return entry.isDirectory() ? listFiles(entryPath) : [entryPath];
-        }),
-    );
-    return files
-        .flat()
-        .filter((filePath) => extname(filePath) === ".mdx")
-        .sort();
-}
 
 function isHeadingElement(node: {
     readonly type: string;
@@ -139,7 +124,7 @@ function createSearchBody(body: string): string {
 }
 
 export async function readDocuments(): Promise<readonly SourceDocument[]> {
-    const files = await listFiles(contentRoot);
+    const files = await listFiles(contentRoot, ".mdx");
     return Promise.all(
         files.map(async (filePath): Promise<SourceDocument> => {
             const source = await readFile(filePath, "utf8");
@@ -487,48 +472,14 @@ function createGeneratedFiles(
     ];
 }
 
-async function writeGeneratedFiles(
-    files: readonly GeneratedFile[],
-): Promise<void> {
-    await Promise.all(
-        files.map(async ({ filePath, contents }) => {
-            await mkdir(dirname(filePath), { recursive: true });
-            await writeFile(filePath, contents, "utf8");
-        }),
-    );
-}
-
-function hasErrorCode(error: unknown, code: string): boolean {
-    return (
-        typeof error === "object" &&
-        error !== null &&
-        "code" in error &&
-        error.code === code
-    );
-}
-
-async function readGeneratedFile(filePath: string): Promise<string | null> {
-    try {
-        return await readFile(filePath, "utf8");
-    } catch (error: unknown) {
-        if (hasErrorCode(error, "ENOENT")) return null;
-        throw error;
-    }
-}
-
 export async function checkGeneratedFiles(
     files: readonly GeneratedFile[],
-    readTextFile: ReadTextFile = readGeneratedFile,
+    readTextFile?: ReadTextFile,
 ): Promise<void> {
-    const comparisons = await Promise.all(
-        files.map(async (file) => ({
-            file,
-            current: await readTextFile(file.filePath),
-        })),
+    const staleFiles = relativeGeneratedPaths(
+        workspaceRoot,
+        await staleGeneratedFiles(files, readTextFile),
     );
-    const staleFiles = comparisons
-        .filter(({ file, current }) => current !== file.contents)
-        .map(({ file }) => relative(workspaceRoot, file.filePath));
     if (staleFiles.length === 0) return;
     throw new Error(
         [

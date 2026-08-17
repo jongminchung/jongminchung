@@ -7,9 +7,7 @@ import {
     SheetTitle,
 } from "@jongminchung/ui/components/sheet";
 import { TooltipProvider } from "@jongminchung/ui/components/tooltip";
-import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { useEffect, useRef, useState } from "react";
 import type {
     CurrentNavigationEntry,
     Locale,
@@ -24,7 +22,9 @@ import {
     MobileTopNavigation,
 } from "./Navigation";
 import { SearchProvider } from "./SearchPalette";
+import { techNavigationCopy } from "./tech-navigation";
 import { TechUiProvider } from "./TechUiProvider";
+import { useRouteSheet } from "./useRouteSheet";
 import styles from "./DocsShell.module.css";
 
 function TabletContextDrawer({
@@ -36,41 +36,29 @@ function TabletContextDrawer({
     readonly current: CurrentNavigationEntry;
     readonly documents: readonly NavigationEntry[];
 }) {
-    const pathname = usePathname();
-    const triggerRef = useRef<HTMLButtonElement>(null);
-    const [isOpen, setIsOpen] = useState(false);
-    useEffect(() => setIsOpen(false), [pathname]);
-    const setOpen = (nextOpen: boolean): void => {
-        setIsOpen(nextOpen);
-        if (!nextOpen) requestAnimationFrame(() => triggerRef.current?.focus());
-    };
+    const { isOpen, setOpen, triggerRef } = useRouteSheet();
+    const copy = techNavigationCopy[locale];
     return (
         <div className={styles.tabletContext}>
             <Button
                 ref={triggerRef}
-                aria-label={
-                    locale === "ko" ? "현재 섹션 메뉴" : "Current section menu"
-                }
+                aria-label={copy.tabletMenu}
                 className={"h-8 gap-2 px-3 text-xs"}
                 onClick={() => setOpen(true)}
                 variant="outline"
                 size="default"
             >
                 <Icon icon="menu" />
-                {locale === "ko" ? "현재 섹션" : "Current section"}
+                {copy.tabletSection}
             </Button>
             <Sheet open={isOpen} onOpenChange={setOpen}>
                 <SheetContent
                     className="w-80"
-                    closeLabel={
-                        locale === "ko"
-                            ? "현재 섹션 메뉴 닫기"
-                            : "Close current section menu"
-                    }
+                    closeLabel={copy.closeTabletMenu}
                     side="left"
                 >
                     <SheetTitle className="sr-only">
-                        {locale === "ko" ? "현재 섹션" : "Current section"}
+                        {copy.tabletSection}
                     </SheetTitle>
                     <ContextNavigation
                         locale={locale}
@@ -94,16 +82,12 @@ export function DocsShell({
     readonly documents: readonly NavigationEntry[];
     readonly children: ReactNode;
 }) {
-    const pathname = usePathname();
-    const [isMobileOpen, setIsMobileOpen] = useState(false);
-    const mobileTriggerRef = useRef<HTMLButtonElement>(null);
-    useEffect(() => setIsMobileOpen(false), [pathname]);
-
-    const changeMobileOpen = (nextOpen: boolean): void => {
-        setIsMobileOpen(nextOpen);
-        if (!nextOpen)
-            requestAnimationFrame(() => mobileTriggerRef.current?.focus());
-    };
+    const {
+        isOpen: isMobileOpen,
+        setOpen: changeMobileOpen,
+        triggerRef: mobileTriggerRef,
+    } = useRouteSheet();
+    const copy = techNavigationCopy[locale];
 
     const navigation = (
         <div className={styles.navigationFrame}>
@@ -134,17 +118,11 @@ export function DocsShell({
                                 onOpenChange={changeMobileOpen}
                             >
                                 <SheetContent
-                                    closeLabel={
-                                        locale === "ko"
-                                            ? "모바일 문서 탐색 닫기"
-                                            : "Close mobile documentation navigation"
-                                    }
+                                    closeLabel={copy.closeMobileNavigation}
                                     side="left"
                                 >
                                     <SheetTitle className={styles.mobileTitle}>
-                                        {locale === "ko"
-                                            ? "모바일 문서 탐색"
-                                            : "Mobile documentation navigation"}
+                                        {copy.mobileNavigation}
                                     </SheetTitle>
                                     <MobileNavigation
                                         key={`${locale}:${current.section}`}

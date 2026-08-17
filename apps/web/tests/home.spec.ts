@@ -1,5 +1,8 @@
-import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import {
+    expectNoAccessibilityViolations,
+    expectNoHorizontalOverflow,
+} from "./assertions";
 
 test("presents Jamie's work with valid metadata", async ({ page }) => {
     await page.goto("/");
@@ -69,21 +72,14 @@ test("has no automatically detectable accessibility violations", async ({
     page,
 }) => {
     await page.goto("/");
-    const results = await new AxeBuilder({ page }).analyze();
-
-    expect(results.violations).toEqual([]);
+    await expectNoAccessibilityViolations(page);
 });
 
 test("keeps the mobile layout within the viewport", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");
 
-    const viewport = await page.evaluate(() => ({
-        clientWidth: document.documentElement.clientWidth,
-        scrollWidth: document.documentElement.scrollWidth,
-    }));
-
-    expect(viewport.scrollWidth).toBe(viewport.clientWidth);
+    await expectNoHorizontalOverflow(page);
     await expect(
         page.getByRole("navigation", { name: "Primary navigation" }),
     ).toBeVisible();

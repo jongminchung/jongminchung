@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { expectNoHorizontalOverflow } from "./assertions";
 
 interface ManifestEntry {
     readonly id: string;
@@ -68,15 +69,7 @@ test.describe("all material demos", () => {
 
             expect(runtimeErrors).toEqual([]);
             expect(accessibilityViolations).toEqual([]);
-            await expect
-                .poll(() =>
-                    page.evaluate(
-                        () =>
-                            document.documentElement.scrollWidth <=
-                            window.innerWidth,
-                    ),
-                )
-                .toBe(true);
+            await expectNoHorizontalOverflow(page);
         });
     }
 });

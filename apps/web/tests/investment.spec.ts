@@ -1,5 +1,8 @@
-import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import {
+    expectNoAccessibilityViolations,
+    expectNoHorizontalOverflow,
+} from "./assertions";
 
 test("renders the bilingual empty research journal without horizontal overflow", async ({
     page,
@@ -15,14 +18,8 @@ test("renders the bilingual empty research journal without horizontal overflow",
     await expect(
         page.getByText("The first research note is in preparation"),
     ).toBeVisible();
-    expect(
-        await page.evaluate(
-            () =>
-                document.documentElement.scrollWidth <=
-                document.documentElement.clientWidth,
-        ),
-    ).toBe(true);
-    expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+    await expectNoHorizontalOverflow(page);
+    await expectNoAccessibilityViolations(page);
 });
 
 test("publishes independent investment discovery files", async ({

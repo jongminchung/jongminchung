@@ -6,9 +6,7 @@ import Link from "next/link";
 import { type Ref, useState } from "react";
 import {
     type CurrentNavigationEntry,
-    createDocHref,
     createSectionHref,
-    displayTitleFor,
     sections as allSections,
     type DocSection,
     type Locale,
@@ -31,6 +29,13 @@ import {
     SideNavSection,
 } from "./NavigationPrimitives";
 import { SearchTrigger } from "./SearchPalette";
+import {
+    documentsForSection,
+    localizedNavigationHref,
+    otherLocale,
+    sectionNavigationItems,
+    techNavigationCopy,
+} from "./tech-navigation";
 import { ThemeControl } from "./ThemeControl";
 import styles from "./Navigation.module.css";
 
@@ -39,15 +44,6 @@ const sectionIcons: Readonly<Record<DocSection, IconType>> = {
     handbook: HandbookIcon,
     "deep-dive": DeepDiveIcon,
 };
-
-function localizedCurrentHref(
-    locale: Locale,
-    current: CurrentNavigationEntry,
-): string {
-    return current.kind === "section"
-        ? createSectionHref(locale, current.section)
-        : createDocHref(locale, current.id);
-}
 
 function SectionItems({
     locale,
@@ -58,33 +54,11 @@ function SectionItems({
     readonly current: CurrentNavigationEntry;
     readonly documents: readonly NavigationEntry[];
 }) {
-    const sectionDocuments = documents.filter(
-        (document) => document.section === current.section,
-    );
-    const items =
-        current.kind === "document" && sectionDocuments.length === 1
-            ? current.outline
-                  .filter((item) => item.level === 2)
-                  .map((item) => ({
-                      id: item.id,
-                      href: `#${item.id}`,
-                      label: item.label,
-                      selected: false,
-                  }))
-            : sectionDocuments.map((document) => ({
-                  id: document.id,
-                  href: document.href,
-                  label: displayTitleFor(document),
-                  selected: document.id === current.id,
-              }));
+    const items = sectionNavigationItems(current, documents);
+    const sectionDocuments = documentsForSection(documents, current.section);
+    const copy = techNavigationCopy[locale];
     const title =
-        sectionDocuments.length === 1
-            ? locale === "ko"
-                ? "이 페이지에서"
-                : "On this page"
-            : locale === "ko"
-              ? "이 섹션에서"
-              : "In this section";
+        sectionDocuments.length === 1 ? copy.onThisPage : copy.inSection;
 
     return (
         <SideNavSection title={title} isHeaderHidden>
@@ -139,11 +113,11 @@ export function GlobalRail({
     readonly locale: Locale;
     readonly current: CurrentNavigationEntry;
 }) {
-    const otherLocale = locale === "ko" ? "en" : "ko";
+    const alternateLocale = otherLocale(locale);
     return (
         <nav
             className={styles.globalRail}
-            aria-label={locale === "ko" ? "전체 문서" : "All documentation"}
+            aria-label={techNavigationCopy[locale].allDocumentation}
         >
             <Link
                 href={`/${locale}`}
@@ -189,7 +163,7 @@ export function GlobalRail({
                 <span className={styles.localeSwitch}>
                     <LocaleSwitcher
                         locale={locale}
-                        href={localizedCurrentHref(otherLocale, current)}
+                        href={localizedNavigationHref(alternateLocale, current)}
                         compact
                     />
                 </span>
@@ -207,22 +181,17 @@ export function MobileNavigation({
     readonly current: CurrentNavigationEntry;
     readonly documents: readonly NavigationEntry[];
 }) {
-    const otherLocale = locale === "ko" ? "en" : "ko";
+    const alternateLocale = otherLocale(locale);
+    const copy = techNavigationCopy[locale];
     const [section, setSection] = useState<DocSection | null>(current.section);
 
     return (
         <div className={styles.mobileNavigation}>
             <div className={styles.mobileNavigationBody}>
                 {section === null ? (
-                    <nav
-                        aria-label={
-                            locale === "ko"
-                                ? "문서 섹션"
-                                : "Documentation sections"
-                        }
-                    >
+                    <nav aria-label={copy.documentationSections}>
                         <p className={styles.mobileTreeTitle}>
-                            {locale === "ko" ? "문서" : "Documentation"}
+                            {copy.documentation}
                         </p>
                         <div className={styles.mobileSectionTree}>
                             {allSections.map((item) => (
@@ -246,11 +215,7 @@ export function MobileNavigation({
                 ) : (
                     <div className={styles.mobileSectionView}>
                         <Button
-                            aria-label={
-                                locale === "ko"
-                                    ? "전체 문서로 돌아가기"
-                                    : "Back to all documentation"
-                            }
+                            aria-label={copy.backToAll}
                             className={
                                 "sticky top-0 z-[1] min-h-[52px] w-full justify-start gap-2 rounded-none border-b-border px-5 text-[17px]"
                             }
@@ -273,21 +238,17 @@ export function MobileNavigation({
                                     title={techSectionLabels[locale][section]}
                                     isHeaderHidden
                                 >
-                                    {documents
-                                        .filter(
-                                            (document) =>
-                                                document.section === section,
-                                        )
-                                        .map((document) => (
-                                            <SideNavItem
-                                                key={document.id}
-                                                label={displayTitleFor(
-                                                    document,
-                                                )}
-                                                href={document.href}
-                                                size="md"
-                                            />
-                                        ))}
+                                    {documentsForSection(
+                                        documents,
+                                        section,
+                                    ).map((document) => (
+                                        <SideNavItem
+                                            key={document.id}
+                                            label={document.label}
+                                            href={document.href}
+                                            size="md"
+                                        />
+                                    ))}
                                 </SideNavSection>
                             )}
                         </SideNav>
@@ -299,7 +260,7 @@ export function MobileNavigation({
                 <ThemeControl locale={locale} />
                 <LocaleSwitcher
                     locale={locale}
-                    href={localizedCurrentHref(otherLocale, current)}
+                    href={localizedNavigationHref(alternateLocale, current)}
                     compact
                 />
             </div>
@@ -320,7 +281,7 @@ export function MobileTopNavigation({
         <header className={styles.mobileTopNav}>
             <Button
                 ref={triggerRef}
-                aria-label={locale === "ko" ? "탐색 열기" : "Open navigation"}
+                aria-label={techNavigationCopy[locale].openNavigation}
                 className={"size-9 gap-2 p-0 text-sm"}
                 onClick={onMenuClick}
                 variant="ghost"

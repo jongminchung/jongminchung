@@ -1,5 +1,8 @@
-import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import {
+    expectNoAccessibilityViolations,
+    expectNoHorizontalOverflow,
+} from "./assertions";
 
 test("renders Engineering Notes with isolated site tokens and no overflow", async ({
     page,
@@ -12,14 +15,8 @@ test("renders Engineering Notes with isolated site tokens and no overflow", asyn
     await expect(
         page.getByRole("link", { name: "jongminchung tech" }).first(),
     ).toContainText("jongminchungtech");
-    expect(
-        await page.evaluate(
-            () =>
-                document.documentElement.scrollWidth <=
-                document.documentElement.clientWidth,
-        ),
-    ).toBe(true);
-    expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+    await expectNoHorizontalOverflow(page);
+    await expectNoAccessibilityViolations(page);
 });
 
 test("searches generated article data and preserves the article across locales", async ({

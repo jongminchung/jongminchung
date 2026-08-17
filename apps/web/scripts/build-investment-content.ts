@@ -1,5 +1,5 @@
-import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
-import { dirname, relative, resolve, sep } from "node:path";
+import { readFile } from "node:fs/promises";
+import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import matter from "gray-matter";
 import {
@@ -10,6 +10,14 @@ import {
     type InvestmentNoteMetadata,
 } from "../lib/investment-content.ts";
 import { locales, type Locale } from "../lib/site-routing.ts";
+import {
+    listFiles,
+    relativeGeneratedPaths,
+    staleGeneratedFiles,
+    toPosixPath,
+    type GeneratedFile,
+    writeGeneratedFiles,
+} from "./generation-utils.ts";
 
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const workspaceRoot = resolve(appRoot, "../..");
@@ -22,39 +30,8 @@ interface SourceNote {
     readonly relativePath: string;
 }
 
-interface GeneratedFile {
-    readonly filePath: string;
-    readonly contents: string;
-}
-
-async function listMdxFiles(directory: string): Promise<readonly string[]> {
-    try {
-        const entries = await readdir(directory, { withFileTypes: true });
-        const nested = await Promise.all(
-            entries.map(async (entry) => {
-                const path = resolve(directory, entry.name);
-                return entry.isDirectory()
-                    ? listMdxFiles(path)
-                    : entry.name.endsWith(".mdx")
-                      ? [path]
-                      : [];
-            }),
-        );
-        return nested.flat().sort();
-    } catch (error: unknown) {
-        if (
-            typeof error === "object" &&
-            error !== null &&
-            "code" in error &&
-            error.code === "ENOENT"
-        )
-            return [];
-        throw error;
-    }
-}
-
 export async function readInvestmentNotes(): Promise<readonly SourceNote[]> {
-    const files = await listMdxFiles(contentRoot);
+    const files = await listFiles(contentRoot, ".mdx", true);
     return Promise.all(
         files.map(async (filePath) => {
             const parsed = matter(await readFile(filePath, "utf8"));
@@ -66,9 +43,7 @@ export async function readInvestmentNotes(): Promise<readonly SourceNote[]> {
                 parsed.content,
                 relative(workspaceRoot, filePath),
             );
-            const relativePath = relative(contentRoot, filePath)
-                .split(sep)
-                .join("/");
+            const relativePath = toPosixPath(relative(contentRoot, filePath));
             const expectedPath = `${metadata.locale}/notes/${metadata.id}.mdx`;
             if (relativePath !== expectedPath)
                 throw new Error(`${relativePath}: expected ${expectedPath}.`);
@@ -157,39 +132,13 @@ function createGeneratedFiles(
     ];
 }
 
-async function writeGeneratedFiles(
-    files: readonly GeneratedFile[],
-): Promise<void> {
-    await Promise.all(
-        files.map(async ({ filePath, contents }) => {
-            await mkdir(dirname(filePath), { recursive: true });
-            await writeFile(filePath, contents, "utf8");
-        }),
-    );
-}
-
 async function checkGeneratedFiles(
     files: readonly GeneratedFile[],
 ): Promise<void> {
-    const stale: string[] = [];
-    for (const file of files) {
-        let current: string | null = null;
-        try {
-            current = await readFile(file.filePath, "utf8");
-        } catch (error: unknown) {
-            if (
-                !(
-                    typeof error === "object" &&
-                    error !== null &&
-                    "code" in error &&
-                    error.code === "ENOENT"
-                )
-            )
-                throw error;
-        }
-        if (current !== file.contents)
-            stale.push(relative(workspaceRoot, file.filePath));
-    }
+    const stale = relativeGeneratedPaths(
+        workspaceRoot,
+        await staleGeneratedFiles(files),
+    );
     if (stale.length > 0)
         throw new Error(
             `Generated investment data is stale:\n${stale.join("\n")}\nRun \`pnpm --filter @jongminchung/web run investment:build\`.`,

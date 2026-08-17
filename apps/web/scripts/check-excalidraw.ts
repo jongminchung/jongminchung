@@ -1,8 +1,9 @@
-import { readFile, readdir } from "node:fs/promises";
-import { dirname, extname, resolve } from "node:path";
+import { readFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { listStandaloneExcalidrawAssets } from "../lib/excalidraw-files.ts";
 import { parseExcalidrawSource } from "../lib/excalidraw-scene.ts";
+import { listFiles } from "./generation-utils.ts";
 
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const contentRoot = resolve(appRoot, "content");
@@ -10,20 +11,6 @@ const contentRoot = resolve(appRoot, "content");
 export interface ExcalidrawFence {
     readonly index: number;
     readonly source: string;
-}
-
-async function listMdxFiles(directory: string): Promise<readonly string[]> {
-    const entries = await readdir(directory, { withFileTypes: true });
-    const files = await Promise.all(
-        entries.map(async (entry): Promise<readonly string[]> => {
-            const entryPath = resolve(directory, entry.name);
-            return entry.isDirectory() ? listMdxFiles(entryPath) : [entryPath];
-        }),
-    );
-    return files
-        .flat()
-        .filter((filePath) => extname(filePath) === ".mdx")
-        .sort();
 }
 
 export function findExcalidrawFences(
@@ -51,7 +38,7 @@ export async function checkExcalidrawContent(): Promise<{
         }),
     );
 
-    const mdxFiles = await listMdxFiles(contentRoot);
+    const mdxFiles = await listFiles(contentRoot, ".mdx");
     const inlineCounts = await Promise.all(
         mdxFiles.map(async (filePath): Promise<number> => {
             const markdown = await readFile(filePath, "utf8");

@@ -18,6 +18,7 @@
 
 ## 프로젝트 문서
 
+- [Web 테스트 전략](web-testing-strategy.md): Next.js 공식 Vitest·Playwright 가이드에 따른 Web 테스트 분류와 실행 기준
 - [Git Client 문서](../apps/git-client/docs/README.md): 로컬 개발·테스트, 독립 감사와 GitHub Release
 - [Git Client 기여 가이드](../apps/git-client/CONTRIBUTING.md)
 - [Web material 소유권](../apps/web/components/materials/README.md)
