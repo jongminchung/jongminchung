@@ -59,22 +59,22 @@
 ## 유지할 Playwright 테스트
 
 - **Host·locale·보안 라우팅의 실제 HTTP 경계 테스트는 유지함**
-  - 대상: `apps/web/tests/host-routing.spec.ts`
+  - 대상: `apps/web/proxy.e2e.test.ts`
   - 근거: unit test는 routing function을 검증하지만 실제 Host header, redirect, rewritten route, not-found response의 조합은 production server에서만 검증됨
   - 사례: unknown host와 private path 거부, `X-Forwarded-Host` 무시, cookie 우선 locale redirect, host와 무관한 health response가 해당함
 
 - **기술 문서의 핵심 독자 흐름은 유지함**
-  - 대상: `apps/web/tests/tech.spec.ts`
+  - 대상: `apps/web/app/(tech)/tech.e2e.test.ts`
   - 근거: search fetch, retry UI, history·hash link, diagram loading/failure, locale·theme persistence는 hydration·network·browser storage를 함께 사용함
   - 사례: 검색 결과에서 문서를 열고 locale을 바꿔도 같은 문서를 유지하는 흐름과, search index·remote diagram failure를 사용자에게 보이는 상태로 검증하는 일이 해당함
 
 - **투자 사이트의 locale과 크롤러 공개 파일 테스트는 유지함**
-  - 대상: `apps/web/tests/investment.spec.ts`
+  - 대상: `apps/web/app/(invest)/investment.e2e.test.ts`
   - 근거: 별도 domain의 locale cookie와 `robots.txt`·`sitemap`은 배포된 HTTP representation의 계약임
   - 사례: locale 선택 후 새 page에서도 유지되는지와 discovery 파일을 독립적으로 제공하는지 검증이 해당함
 
 - **문서 탐색성과 외부 공개 자산의 실제 응답 테스트는 유지함**
-  - 대상: `apps/web/tests/document-discovery.spec.ts`, `apps/web/tests/document-language.spec.ts`
+  - 대상: `apps/web/app/(tech)/document-discovery.e2e.test.ts`, `apps/web/app/(tech)/document-language.e2e.test.ts`
   - 근거: outline active state와 server HTML language, OG image, `llms.txt`는 client·server·crawler가 서로 다르게 소비하는 경계임
   - 사례: scroll에 따른 `aria-current="location"`, locale-prefixed 404의 `lang`, PNG signature와 content type 검증이 해당함
 
@@ -85,7 +85,7 @@
   - 예외: `data-material-active`·renderer type 자체가 사용자에게 보이지 않는다면, visible control·rendered figure·runtime error assertion을 보조하는 최소 contract로만 사용함
 
 - **대표 페이지의 자동 접근성·모션·모바일 overflow 검사는 유지함**
-  - 대상: `apps/web/tests/home.spec.ts`와 materials의 axe 검사
+  - 대상: `apps/web/app/(home)/home.e2e.test.ts`와 materials의 axe 검사
   - 근거: Playwright의 axe 연동은 label, contrast, duplicate ID 등 자동 탐지 가능한 회귀를 찾을 수 있음
   - 예외: axe는 모든 접근성 문제를 찾을 수 없으므로 navigation, dialog, search 등 키보드 상호작용 변경 시에는 수동 keyboard 검토가 필요함
   - 참고: [Playwright Accessibility Testing](https://playwright.dev/docs/accessibility-testing)
@@ -93,19 +93,19 @@
 ## 축소하거나 성격을 바꿀 테스트
 
 - **full-page visual snapshot은 layout boundary별 대표 화면만 유지함**
-  - 대상: `apps/web/tests/visual.spec.ts`, `apps/web/tests/home-visual.spec.ts`
+  - 대상: `apps/web/app/(tech)/visual.e2e.test.ts`, `apps/web/app/(home)/home-visual.e2e.test.ts`
   - 근거: 모든 문서·viewport·theme의 full-page screenshot은 문서 내용, 이미지, font rendering 변화로 인해 높은 변경 비용을 만듦
   - 유지 사례: home desktop/mobile, 문서 desktop/mobile, dark theme처럼 서로 다른 layout branch를 대표하는 3~5개 screenshot이 적절함
   - 운영 사례: 나머지 시각 회귀 검사는 PR 차단 대신 수동 확인 또는 별도 정기 실행으로 분리할 수 있음
 
 - **문서별 정확한 featured·related 목록 assertion은 알고리즘 계약으로 일반화함**
-  - 대상: `apps/web/tests/document-discovery.spec.ts`
+  - 대상: `apps/web/app/(tech)/document-discovery.e2e.test.ts`
   - 근거: 특정 문서 ID와 순서를 E2E에 고정하면 정상 콘텐츠 추가·편집도 실패 원인이 됨
   - 유지 사례: 현재 문서 제외, 유효한 locale URL, 최대 표시 개수, 관련 문서 존재 여부를 E2E에서 검증함
   - 이전 사례: ranking, tag 우선순위, fallback 순서는 `apps/web/lib/documents.test.ts`에서 fixture 기반으로 검증함
 
 - **페이지의 정적 문구 존재 여부는 역할·목적을 검증하는 assertion으로 바꿈**
-  - 대상: `apps/web/tests/home.spec.ts`, `apps/web/tests/document-discovery.spec.ts`의 정적 문서명 assertion 일부
+  - 대상: `apps/web/app/(home)/home.e2e.test.ts`, `apps/web/app/(tech)/document-discovery.e2e.test.ts`의 정적 문서명 assertion 일부
   - 근거: 문구 편집은 사용자 흐름의 결함이 아니며, product copy 변경마다 test 변경을 요구함
   - 유지 사례: heading level, navigation landmark, link destination, language 전환과 같이 의미론·동작을 나타내는 assertion이 적절함
 

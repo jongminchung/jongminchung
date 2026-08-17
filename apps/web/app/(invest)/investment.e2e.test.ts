@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import {
     expectNoAccessibilityViolations,
     expectNoHorizontalOverflow,
-} from "./assertions";
+} from "../../e2e-assertions";
 
 test("[실패] 수평 바닥 바닥 없이 더블 언어 빈 연구 보고서를 제출함", async ({
     page,

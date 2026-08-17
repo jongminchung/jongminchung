@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import {
     expectNoAccessibilityViolations,
     expectNoHorizontalOverflow,
-} from "./assertions";
+} from "../../e2e-assertions";
 
 test("[성공] 캔팅된 사이트를 사용하고 외부 플로어 주차장을 주차함", async ({
     page,

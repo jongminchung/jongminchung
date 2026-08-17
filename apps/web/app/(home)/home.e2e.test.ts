@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import {
     expectNoAccessibilityViolations,
     expectNoHorizontalOverflow,
-} from "./assertions";
+} from "../../e2e-assertions";
 
 test("[성공] 현재 상황 데이터로 Jamie의 작업을 제시함", async ({ page }) => {
     await page.goto("/");

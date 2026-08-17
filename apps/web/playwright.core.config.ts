@@ -15,7 +15,7 @@ export default defineConfig({
         testIgnore: [
             ...toPatterns(project.testIgnore),
             /materials-all\.spec\.ts/u,
-            /(?:home-)?visual\.spec\.ts/u,
+            /(?:home-)?visual\.e2e\.test\.ts/u,
         ],
     })),
 });

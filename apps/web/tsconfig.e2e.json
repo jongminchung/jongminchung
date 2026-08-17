@@ -4,6 +4,11 @@
     "incremental": false,
     "plugins": []
   },
-  "include": ["playwright*.config.ts", "tests/**/*.ts"],
+  "include": [
+    "playwright*.config.ts",
+    "e2e-assertions.ts",
+    "e2e-window.d.ts",
+    "**/*.e2e.test.ts"
+  ],
   "exclude": ["node_modules"]
 }
