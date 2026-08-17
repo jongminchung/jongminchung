@@ -9,7 +9,7 @@ function event(value: GitEvent): GitEvent {
 }
 
 describe("GitRequestEventBuffer", () => {
-    it("collects ordered parser input and clears it on completion", () => {
+    it("[성공] 궁금하신 사항을 입력하세요", () => {
         const buffer = new GitRequestEventBuffer();
         expect(
             buffer.consume(
@@ -61,7 +61,7 @@ describe("GitRequestEventBuffer", () => {
             durationMs: 4,
         }),
         event({ kind: "cancelled", requestId, durationMs: 5 }),
-    ])("clears parser input for $kind", (terminalEvent) => {
+    ])("[성공] $kind에 대한 파서를 입력하세요", (terminalEvent) => {
         const buffer = new GitRequestEventBuffer();
         buffer.consume(
             event({

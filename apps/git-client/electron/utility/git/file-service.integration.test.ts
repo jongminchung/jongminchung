@@ -71,8 +71,8 @@ afterEach(async () => {
     );
 });
 
-describe("GitFileService", () => {
-    it("reads distinct working-tree, index, and revision content for Unicode paths", async () => {
+describe("Git파일서비스", () => {
+    it("[성공] 외국 코드에 대한 개별 작업 트리, 믿을 수 있는 내용을 읽었습니다", async () => {
         const { root, registry, service } = await createRepository();
         const record = await registry.open(root);
         await writeFile(join(root, "한글 file.txt"), "working tree\n", "utf8");
@@ -109,7 +109,7 @@ describe("GitFileService", () => {
         });
     });
 
-    it("does not follow a working-tree symlink outside the repository", async () => {
+    it("[실패] 외부의 게임 트리밍 링크에 추가 기능", async () => {
         const { root, registry, service } = await createRepository();
         const record = await registry.open(root);
         const outside = join(root, "..", "secret.txt");
@@ -132,7 +132,7 @@ describe("GitFileService", () => {
         });
     });
 
-    it("atomically saves existing text files without changing the Git index", async () => {
+    it("[실패] Git을 변경하지 않고 기존 텍스트 파일을 자동으로 저장함", async () => {
         const { root, registry, service } = await createRepository();
         const record = await registry.open(root);
         await writeFile(join(root, "한글 file.txt"), "staged\n", "utf8");
@@ -150,7 +150,7 @@ describe("GitFileService", () => {
         expect(git(root, "show", ":한글 file.txt")).toBe("staged\n");
     });
 
-    it("creates a new regular file without staging it", async () => {
+    it("[실패] 스테이징하지 않고 새로운 일반 파일을 생성함", async () => {
         const { root, registry, service } = await createRepository();
         const record = await registry.open(root);
 
@@ -168,7 +168,7 @@ describe("GitFileService", () => {
         ).toContain('?? "new file.txt"');
     });
 
-    it("does not create files through a missing or outside parent", async () => {
+    it("[실패] 외부로 파일을 생성하지 마십시오", async () => {
         const { root, registry, service } = await createRepository();
         const record = await registry.open(root);
 
@@ -180,7 +180,7 @@ describe("GitFileService", () => {
         ).rejects.toMatchObject({ code: "invalidInput" });
     });
 
-    it("rejects editor writes through paths that resolve outside the repository", async () => {
+    it("[실패] 외부에서 확인되는 관측되는 위치를 유지함", async () => {
         const { root, registry, service } = await createRepository();
         const record = await registry.open(root);
         const outside = join(root, "..", "outside-edit.txt");
@@ -197,7 +197,7 @@ describe("GitFileService", () => {
         await expect(readFile(outside, "utf8")).resolves.toBe("keep\n");
     });
 
-    it("does not expose Git metadata as working-tree files for a bare repository", async () => {
+    it("[실패] Git 데이터를 주간의 작업 트리 파일로 연결하지 않음", async () => {
         const temporaryDirectory = await mkdtemp(
             join(tmpdir(), "git-client-bare-files-"),
         );
@@ -214,7 +214,7 @@ describe("GitFileService", () => {
         ).rejects.toMatchObject({ code: "invalidInput" });
     });
 
-    it("loads index, revision, and working-tree submodule metadata without following outside links", async () => {
+    it("[실패] 외부 링크를 제외하고 유일하게, 하위 트리 하위 모듈 데이터를 로드함", async () => {
         const temporaryDirectory = await mkdtemp(
             join(tmpdir(), "git-client-submodule-diff-"),
         );
@@ -295,8 +295,8 @@ describe("GitFileService", () => {
     });
 });
 
-describe("file classification", () => {
-    it("classifies text, binary, invalid UTF-8, line-heavy, and byte-heavy content", () => {
+describe("파일 종류", () => {
+    it("[실패] 텍스트, 바이너리, 유효하지 않은 UTF-8, 문자열이 의미하는 포인트가 많은 콘텐츠를 지정함", () => {
         expect(
             classifyFileContent("text.txt", Buffer.from("first\nsecond\n")),
         ).toMatchObject({
@@ -330,7 +330,7 @@ describe("file classification", () => {
         });
     });
 
-    it("creates data URLs only for allowlisted raster image formats", () => {
+    it("[성공] 허용 목록에 있는 새스터 이미지 형식에 대해서만 데이터 URL을 생성함", () => {
         const png = classifyFilePreview(
             "image.png",
             Buffer.from([

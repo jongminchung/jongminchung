@@ -515,8 +515,8 @@ afterEach(async () => {
     );
 });
 
-describe("ElectronGitBridge real utility fixture", () => {
-    it("opens, inspects, compares, manages ignore rules, and lists repository metadata", async () => {
+describe("ElectronGitBridge 실제 유틸리티 구성", () => {
+    it("[성공] 무시하고, 검사하고, 관리하고, 관리하고 데이터를 관리하세요", async () => {
         const path = await createRepository();
         const bridge = new ElectronGitBridge(bridgeApi(new GitUtility()));
         const snapshot = await bridge.openRepository(path);
@@ -577,7 +577,7 @@ describe("ElectronGitBridge real utility fixture", () => {
         await bridge.unwatchRepository(snapshot.id);
     });
 
-    it("loads a real submodule gitlink diff and rejects unsafe worktree-file opens", async () => {
+    it("[실패] 실제 하위 모듈 gitlink diff를 로드하고 안전하지 않은 작업 트리 파일을 반환하고 있음", async () => {
         const fixture = await createSubmoduleRepository();
         const bridge = new ElectronGitBridge(bridgeApi(new GitUtility()));
         const snapshot = await bridge.openRepository(fixture.root);
@@ -607,7 +607,7 @@ describe("ElectronGitBridge real utility fixture", () => {
         await bridge.unwatchRepository(snapshot.id);
     });
 
-    it("creates and rolls back one branch across two real repositories", async () => {
+    it("[성공] 두 개의 실제 서버에 하나의 분기를 생성하고 롤백함", async () => {
         const [firstPath, secondPath] = await Promise.all([
             createRepository(),
             createRepository(),
@@ -666,7 +666,7 @@ describe("ElectronGitBridge real utility fixture", () => {
         ]);
     });
 
-    it("executes all 17 generated non-operation requests through the renderer bridge", async () => {
+    it("[성공] 렌더러 다리를 통해 생성된 17개의 작업 비 요청을 모두 실행함", async () => {
         const path = await createQueryRepository();
         const bridge = new ElectronGitBridge(bridgeApi(new GitUtility()));
         const { id: repositoryId } = await bridge.openRepository(path);
@@ -813,7 +813,7 @@ describe("ElectronGitBridge real utility fixture", () => {
         await bridge.unwatchRepository(repositoryId);
     });
 
-    it("transports patch, shelf, changelist, recovery, and conflict services against one disposable repository", async () => {
+    it("[성공] 하나의 비상용 부품에 대해 패치, 선반, 변경 목록, 복구 및 충돌 서비스를 전송함", async () => {
         const path = await createRepository();
         const storageRoot = join(dirname(path), "electron profile");
         await mkdir(storageRoot);
@@ -967,7 +967,7 @@ describe("ElectronGitBridge real utility fixture", () => {
         await bridge.unwatchRepository(repositoryId);
     }, 60_000);
 
-    it("executes representative index, commit, ref, stash, config, remote, and worktree mutations through one bridge lifecycle", async () => {
+    it("[성공] 하나의 다리 생활주기를 통해 대표 색상, 커밋, 참조, 숨김, 구성, 원격 및 작업 트리 변형을 실행함", async () => {
         const path = await createRepository();
         const bridge = new ElectronGitBridge(bridgeApi(new GitUtility()));
         const { id: repositoryId } = await bridge.openRepository(path);
@@ -1084,7 +1084,7 @@ describe("ElectronGitBridge real utility fixture", () => {
         await bridge.unwatchRepository(repositoryId);
     });
 
-    it("preserves started/output/failed ordering for a real Git error", async () => {
+    it("[성공] 실제 Git 오류에 대해 시작/출력/실패한 시간을 유지함", async () => {
         const path = await createQueryRepository();
         const bridge = new ElectronGitBridge(bridgeApi(new GitUtility()));
         const { id: repositoryId } = await bridge.openRepository(path);
@@ -1103,7 +1103,7 @@ describe("ElectronGitBridge real utility fixture", () => {
         await bridge.unwatchRepository(repositoryId);
     });
 
-    it("preserves alternating stdout and stderr chronology from the process runner to the bridge", async () => {
+    it("[성공] 프로세스 실행기에서 다리까지 교대로 stdout 및 stderr 연대를 유지함", async () => {
         const path = await createQueryRepository();
         const fakeGit = join(path, "alternating-git");
         await writeFile(

@@ -264,16 +264,16 @@ function terminalEventHandler(): IpcEventHandler {
     };
 }
 
-describe("Electron preload Git API", () => {
+describe("전자 사전 로드 Git API", () => {
     beforeEach(() => {
         electronMock.invoke.mockReset();
     });
 
-    it("exposes the fixture flag from the Electron process arguments", () => {
+    it("[성공] Electron 프로세스 인수에서 고정 명칭을 따르기", () => {
         expect(api().runtime.qaFixture).toBe(false);
     });
 
-    it("validates HTTP(S) external URLs before crossing IPC", async () => {
+    it("[성공] IPC를 통과하기 전에 HTTP(S) 외부 URL의 승리를 확인함", async () => {
         electronMock.invoke.mockResolvedValue(undefined);
 
         await expect(
@@ -293,7 +293,7 @@ describe("Electron preload Git API", () => {
         expect(electronMock.invoke).not.toHaveBeenCalled();
     });
 
-    it("validates repository lifecycle results", async () => {
+    it("[성공] 리포지토리 수명주기 결과를 인증함", async () => {
         electronMock.invoke.mockImplementation(
             async (channel: string): Promise<unknown> => {
                 if (channel === TEST_TRPC_PATHS.gitOpenRepository)
@@ -313,7 +313,7 @@ describe("Electron preload Git API", () => {
         await expect(api().git.cancelQuery(REQUEST_ID)).resolves.toBe(false);
     });
 
-    it("validates a complete inspected repository snapshot", async () => {
+    it("[성공] 총체적으로 스냅샷을 조사함", async () => {
         electronMock.invoke.mockResolvedValue(SNAPSHOT);
 
         await expect(api().git.inspectSnapshot(REPOSITORY_ID)).resolves.toEqual(
@@ -327,7 +327,7 @@ describe("Electron preload Git API", () => {
         );
     });
 
-    it("validates every repository inspection and ignore-rules response", async () => {
+    it("[성공] 모든 조사관 및 무시 무시함을 확인함", async () => {
         electronMock.invoke.mockImplementation(
             async (
                 channel: string,
@@ -454,7 +454,7 @@ describe("Electron preload Git API", () => {
         );
     });
 
-    it("validates direct push and history rewrite preview results", async () => {
+    it("[성공] 직접 업로드 및 기록 다시 쓰기 보기 결과를 확인함", async () => {
         electronMock.invoke.mockImplementation(
             async (
                 channel: string,
@@ -503,7 +503,7 @@ describe("Electron preload Git API", () => {
         );
     });
 
-    it("validates all patch, shelf, changelist, recovery, and conflict calls", async () => {
+    it("[성공] 모든 패치, 쉘프, 변경 목록, 복구 및 호출을 인증함", async () => {
         const shelfId = "896b19c6-dd8f-4f7b-a591-cf701e86457c";
         const changelistId = "723094e7-bf3b-4d3e-8f74-6cebe9571840";
         const recoveryId = "53f66fe0-6b52-4a69-9b9f-b07c724f9095";
@@ -722,7 +722,7 @@ describe("Electron preload Git API", () => {
         ]);
     });
 
-    it("rejects unsafe special-service input before invoking main", async () => {
+    it("[실패] 메인을 호출하기 전에는 아무런 서비스도 받지 못했습니다", async () => {
         await expect(
             api().git.readConflict(REPOSITORY_ID, "../secret.txt"),
         ).rejects.toThrow();
@@ -737,7 +737,7 @@ describe("Electron preload Git API", () => {
         expect(electronMock.invoke).not.toHaveBeenCalled();
     });
 
-    it("validates submodule, file-open, and multi-root requests in the sandboxed preload", async () => {
+    it("[성공] 샌드박스 사전 로드에서 하위 모듈, 파일 전송 및 소수에게 요청을 검증함", async () => {
         const submoduleDiff = {
             path: "modules/client",
             beforeOid: SNAPSHOT.headOid,
@@ -877,7 +877,7 @@ describe("Electron preload Git API", () => {
         expect(electronMock.invoke).not.toHaveBeenCalled();
     });
 
-    it("validates and streams repository initialize and clone operations", async () => {
+    it("[성공] 리포지토리 및 복제 작업을 인증하고 스트리밍함", async () => {
         const received: GitCreationEvent[] = [];
         electronMock.invoke.mockImplementation(
             async (
@@ -956,7 +956,7 @@ describe("Electron preload Git API", () => {
         });
     });
 
-    it("subscribes before invoking and delivers one ordered query lifecycle", async () => {
+    it("[성공] 호출하기 전에 구독하고 시간을 지정하고 하나의 서비스 수명을 전달함", async () => {
         const received: GitRequestEvent[] = [];
         const terminal = {
             kind: "completed" as const,
@@ -1010,7 +1010,7 @@ describe("Electron preload Git API", () => {
         ]);
     });
 
-    it("retains output events when the invoke response arrives before the event channel", async () => {
+    it("[성공] 호출 응답 이벤트 채널보다 먼저 도착하면 출력 이벤트를 유지함", async () => {
         const received: GitRequestEvent[] = [];
         const terminal = {
             kind: "completed" as const,
@@ -1081,7 +1081,7 @@ describe("Electron preload Git API", () => {
         expect(received[1]).toMatchObject({ data: "commit output\0" });
     });
 
-    it("delivers an operation through the same validated preload lifecycle", async () => {
+    it("[성공] 신뢰하는 사전 임대 기간을 통해 작업을", async () => {
         const received: GitRequestEvent[] = [];
         const request = {
             kind: "operation" as const,
@@ -1124,7 +1124,7 @@ describe("Electron preload Git API", () => {
         ]);
     });
 
-    it("validates bounded file results and owns repository watcher cleanup", async () => {
+    it("[성공] 권한 파일 결과를 검증하고 시계자 정리를 소유함", async () => {
         const received: RepositoryChangedEvent[] = [];
         electronMock.invoke.mockImplementation(
             async (channel: string): Promise<unknown> => {
@@ -1179,7 +1179,7 @@ describe("Electron preload Git API", () => {
         expect(received).toEqual([REPOSITORY_CHANGED]);
     });
 
-    it("rejects a terminal response correlated to another request", async () => {
+    it("[실패] 다른 요청과 관련 서버에 응답을 했습니다", async () => {
         electronMock.invoke.mockResolvedValue({
             kind: "completed",
             requestId: "cb2587dc-3b92-454d-86fb-94486b336c6b",
@@ -1199,7 +1199,7 @@ describe("Electron preload Git API", () => {
         ).rejects.toThrow("Git query result did not match its request");
     });
 
-    it("subscribes before creating a terminal and validates every terminal operation", async () => {
+    it("[성공] 터미널을 생성하기 전에 구독하고 모든 터미널 작동을 검증함", async () => {
         const received: TerminalEvent[] = [];
         electronMock.invoke.mockImplementation(
             async (
@@ -1274,7 +1274,7 @@ describe("Electron preload Git API", () => {
     });
 });
 
-describe("Electron preload hosting API", () => {
+describe("전자 사전 로드 거부 API", () => {
     const account = Object.freeze({
         id: "account-1",
         provider: "gitHub" as const,
@@ -1296,7 +1296,7 @@ describe("Electron preload hosting API", () => {
 
     beforeEach(() => electronMock.invoke.mockReset());
 
-    it("validates all hosting calls and does not expose the credential", async () => {
+    it("[실패] 모든 예외 챔피언십을 심사하고 자격을 증명하지 않음", async () => {
         electronMock.invoke
             .mockResolvedValueOnce(account)
             .mockResolvedValueOnce(undefined)
@@ -1358,7 +1358,7 @@ describe("Electron preload hosting API", () => {
         );
     });
 
-    it("rejects malformed input before IPC and mismatched responses after IPC", async () => {
+    it("[실패] IPC 이전에는 입력을 하지 않았는데 IPC 이후에는 일치하지 않는 응답이 있었습니다", async () => {
         await expect(
             api().hosting.restoreAccounts([
                 { ...account, token: "must-not-cross" },
@@ -1379,7 +1379,7 @@ describe("Electron preload hosting API", () => {
         ).rejects.toThrow("Hosting response did not match its request");
     });
 
-    it("rejects an account identity that does not match the save request", async () => {
+    it("[실패] 저장 요청과 일치하지 않는 계정 ID가 있음", async () => {
         electronMock.invoke.mockResolvedValue({
             ...account,
             provider: "gitLab",
@@ -1394,7 +1394,7 @@ describe("Electron preload hosting API", () => {
         ).rejects.toThrow("Hosting account response did not match its request");
     });
 
-    it("rejects any credential field returned across the main boundary", async () => {
+    it("[실패] 기본 경계를 보장받을 수 있는 모든 자격을 증명하는 현장을 유지하고 있음", async () => {
         electronMock.invoke.mockResolvedValue({
             ...account,
             token: "ghp_must-never-reach-the-renderer",

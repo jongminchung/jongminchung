@@ -29,8 +29,8 @@ afterEach(async () => {
     );
 });
 
-describe("SettingsStore", () => {
-    it("persists typed JSON values and reopens the same snapshot", async () => {
+describe("설정 저장", () => {
+    it("[성공] 입력된 JSON 값을 유지하고 적합한 스냅샷을 다시 작성함", async () => {
         const filePath = await createSettingsPath();
         const store = await SettingsStore.of(filePath);
         await store.set("layout", { compact: true, widths: [240, 680] });
@@ -51,7 +51,7 @@ describe("SettingsStore", () => {
         });
     });
 
-    it("deletes a key without mutating the previous snapshot", async () => {
+    it("[실패] 이전 스냅샷을 변경하지 않고 키를 삭제함", async () => {
         const filePath = await createSettingsPath();
         const store = await SettingsStore.of(filePath);
         await store.set("one", 1);
@@ -63,7 +63,7 @@ describe("SettingsStore", () => {
         expect(store.createSnapshot()).toEqual({ two: 2 });
     });
 
-    it("serializes concurrent updates without racing the atomic temporary file", async () => {
+    it("[실패] 오토바이 임시 파일을 경주하지 않고 직접 업데이트를 직렬화함", async () => {
         const filePath = await createSettingsPath();
         const store = await SettingsStore.of(filePath);
 
@@ -87,7 +87,7 @@ describe("SettingsStore", () => {
         });
     });
 
-    it("backs up and resets the previous settings schema", async () => {
+    it("[성공] 이전 설정을 백업하고 멤버함", async () => {
         const filePath = await createSettingsPath();
         await mkdir(dirname(filePath), { recursive: true });
         const legacyDocument = '{"schemaVersion":1,"values":{"theme":"Dark"}}';
@@ -110,7 +110,7 @@ describe("SettingsStore", () => {
         );
     });
 
-    it("rejects unsupported documents", async () => {
+    it("[실패] 지원되지 않는 문서가 있음", async () => {
         const filePath = await createSettingsPath();
         await mkdir(dirname(filePath), { recursive: true });
         await writeFile(filePath, '{"schemaVersion":3,"values":{}}', "utf8");

@@ -1,8 +1,24 @@
 import { describe, expect, it } from "vitest";
 import { defineOxfmtConfig } from "./index.js";
 
-describe("oxfmt config", () => {
-    it("adds local ignore patterns after shared defaults", () => {
+describe("oxfmt 구성", () => {
+    it("[성공] 소비자용 문서화된 공유 기본값 포함", () => {
+        expect(defineOxfmtConfig()).toEqual({
+            ignorePatterns: [
+                ".git/",
+                ".husky/_/",
+                "coverage/",
+                "dist/",
+                "build/",
+                "node_modules/",
+            ],
+            overrides: [],
+            sortImports: { newlinesBetween: false },
+            sortPackageJson: { sortScripts: true },
+        });
+    });
+
+    it("[성공] 뒤에는 반대하는 태도를 추가함", () => {
         const config = defineOxfmtConfig({
             ignorePatterns: ["fixtures/generated/"],
         });
@@ -11,7 +27,17 @@ describe("oxfmt config", () => {
         expect(config.ignorePatterns.at(-1)).toBe("fixtures/generated/");
     });
 
-    it("leaves formatting style on Oxfmt zero-config defaults", () => {
+    it("[성공] 호출자 배열 공유 없이 로컬 override 추가", () => {
+        const overrides = [
+            { files: ["generated/**"], options: { tabWidth: 4 } },
+        ];
+        const config = defineOxfmtConfig({ overrides });
+
+        expect(config.overrides).toEqual(overrides);
+        expect(config.overrides).not.toBe(overrides);
+    });
+
+    it("[성공] Oxfmt zero-config는 일체형이 아닙니다", () => {
         const config = defineOxfmtConfig();
 
         expect(config).not.toHaveProperty("printWidth");
@@ -23,7 +49,7 @@ describe("oxfmt config", () => {
         expect(config.sortPackageJson).toEqual({ sortScripts: true });
     });
 
-    it("accepts current Oxfmt options and merges nested sort configuration", () => {
+    it("[성공] 현재 Oxfmt 옵션을 존중하고 존중하는 구성을 선언함", () => {
         const config = defineOxfmtConfig({
             insertFinalNewline: false,
             objectWrap: "collapse",
@@ -42,7 +68,7 @@ describe("oxfmt config", () => {
         expect(config.sortTailwindcss).toBe(true);
     });
 
-    it("allows sort configuration to be disabled without merging object defaults", () => {
+    it("[실패] 존재하는 것을 받아들이지 않고 반환되는 구성을 찾을 수 있음", () => {
         const config = defineOxfmtConfig({
             sortImports: false,
             sortPackageJson: false,
@@ -52,7 +78,7 @@ describe("oxfmt config", () => {
         expect(config.sortPackageJson).toBe(false);
     });
 
-    it("isolates nested defaults between config instances", () => {
+    it("[성공] 구성하면 상관없을 것 같습니다", () => {
         const first = defineOxfmtConfig();
         const second = defineOxfmtConfig();
 
@@ -72,7 +98,7 @@ describe("oxfmt config", () => {
         expect(second.sortPackageJson).toEqual({ sortScripts: true });
     });
 
-    it("uses the official Oxfmt type constraints", () => {
+    it("[성공] 공식 Oxfmt에 대한 응답을 사용함", () => {
         const compileTimeOnly = () => {
             // @ts-expect-error Oxfmt only accepts its documented arrowParens values.
             defineOxfmtConfig({ arrowParens: "sometimes" });

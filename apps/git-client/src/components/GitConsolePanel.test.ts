@@ -14,8 +14,8 @@ const entry: GitConsoleEntry = {
     output: "# branch.head main\n",
 };
 
-describe("GitConsolePanel", () => {
-    it("renders command lifecycle controls and the recorded command", () => {
+describe("Git콘솔 패널", () => {
+    it("[성공] 전투기의 기록 보관함", () => {
         const markup = renderToStaticMarkup(
             createElement(GitConsolePanel, {
                 entries: [entry],

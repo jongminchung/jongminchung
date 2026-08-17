@@ -3,7 +3,7 @@ import { updateRepositoryView } from "./repositoryView";
 import type { RepositoryView, StatusModel } from "./types";
 
 describe("updateRepositoryView", () => {
-    it("preserves history references during a status-only refresh", () => {
+    it("[성공]상태만 새로 고치는 동안 기록을 참조하여 유지함", () => {
         const repository = {
             snapshot: { id: "repo" },
             refs: [{ name: "refs/heads/main" }],

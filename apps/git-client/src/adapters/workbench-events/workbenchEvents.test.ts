@@ -5,7 +5,7 @@ import {
 } from "../../application/workbench-events/WorkbenchEventPort";
 import { installBrowserWorkbenchEventPort } from "./workbenchEvents";
 
-describe("workbench event adapter", () => {
+describe("워크벤치 이벤트 어댑터", () => {
     vi.stubGlobal("window", new EventTarget());
     let uninstall: () => void;
 
@@ -18,7 +18,7 @@ describe("workbench event adapter", () => {
         vi.restoreAllMocks();
     });
 
-    it("delivers typed details and removes subscriptions", () => {
+    it("[성공] 입력 세부정보를 전달하고 구독을 제거함", () => {
         const listener = vi.fn();
         const remove = listenWorkbenchEvent(
             "git-client:terminal-tab-navigate",
@@ -40,7 +40,7 @@ describe("workbench event adapter", () => {
         );
     });
 
-    it("preserves cancellation as the dispatch result", () => {
+    it("[성공] 취소를 취소 결과로 유지함", () => {
         const prevent = (event: Event): void => event.preventDefault();
         window.addEventListener("git-client:editor-action", prevent);
 

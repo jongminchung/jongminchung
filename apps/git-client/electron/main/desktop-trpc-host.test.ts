@@ -45,8 +45,8 @@ async function dispatch(
     );
 }
 
-describe("DesktopTrpcHost", () => {
-    it("dispatches a typed procedure through its window-scoped domain channel", async () => {
+describe("데스크탑Trpc호스트", () => {
+    it("[성공] 창 영역 포트 채널을 통해 입력된 프로시저를 디스플레이함", async () => {
         const { authorize, handlers, host } = fixture();
         const procedure = vi.fn(() => ({
             kind: "electron" as const,
@@ -83,7 +83,7 @@ describe("DesktopTrpcHost", () => {
         expect(procedure).toHaveBeenCalledOnce();
     });
 
-    it("rejects wrong channels, operation types, versions, and unavailable handlers", async () => {
+    it("[실패] 잘못된 채널, 작업 유형, 버전 및 사용할 수 없는 핸들러를 갖고 있음", async () => {
         const { handlers, host } = fixture();
         host.handle("platform", "runtimeInfo", () => ({
             kind: "electron" as const,
@@ -136,7 +136,7 @@ describe("DesktopTrpcHost", () => {
         expect(handlers.size).toBe(0);
     });
 
-    it("validates output and returns sanitized errors", async () => {
+    it("[성공] 반환을 인정하고 삭제된 것을 거부함", async () => {
         const { handlers, host } = fixture();
         host.handle(
             "platform",

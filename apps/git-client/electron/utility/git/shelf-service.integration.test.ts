@@ -172,8 +172,8 @@ afterEach(async () => {
     );
 });
 
-describe("ShelfService", () => {
-    it("round-trips staged, worktree, and byte-exact untracked layers through a reusable shelf", async () => {
+describe("리더 서비스", () => {
+    it("[성공] 공간을 통해 에너지원을 갖춘, 작업 공간 및 포인트 단위의 추적이 아닌 레이어링", async () => {
         const repository = await createRepository();
         const record = repositoryRecord(repository);
         const storageRoot = join(await temporaryDirectory(), "profile");
@@ -265,7 +265,7 @@ describe("ShelfService", () => {
         await expect(service.list(record.id)).resolves.toEqual([]);
     });
 
-    it("uses only fixed Git argv, canonical cwd, bounded output, and the caller's abort signal", async () => {
+    it("[실패] 고정 Git argv, 마이애미 cwd, 권한 승인 및 호출자의 중단 신호만 사용함", async () => {
         const repository = await createRepository();
         const record = repositoryRecord(repository);
         const storageRoot = join(await temporaryDirectory(), "profile");
@@ -351,7 +351,7 @@ describe("ShelfService", () => {
         ).toEqual(indexPatch);
     });
 
-    it("rejects invalid messages and pathspecs before Git or filesystem side effects", async () => {
+    it("[실패] Git 또는 파일 시스템 균열이 발생하기 전에 먼저 잘못된 메시지 및 해석을 수행함", async () => {
         const repository = await createRepository();
         const record = repositoryRecord(repository);
         const storageRoot = join(await temporaryDirectory(), "profile");
@@ -383,7 +383,7 @@ describe("ShelfService", () => {
         ).rejects.toMatchObject({ code: "ENOENT" });
     });
 
-    it("rejects storage and repository symlinks without following or deleting their targets", async () => {
+    it("[실패] 대상을 제외하거나 삭제하지 않고 손잡이 및 손잡이 링크를 포함함", async () => {
         const repository = await createRepository();
         const record = repositoryRecord(repository);
         const root = await temporaryDirectory();
@@ -435,7 +435,7 @@ describe("ShelfService", () => {
         expect(await readdir(outsideStorage)).toEqual([]);
     });
 
-    it("preflights untracked restore destinations and blocks parent-symlink escapes", async () => {
+    it("[실패] 추적하지 않은 응답을 프리플라이트하고 하위 링크 링크 함 이스케이프를 사랑했습니다", async () => {
         const repository = await createRepository();
         const record = repositoryRecord(repository);
         const root = await temporaryDirectory();
@@ -470,7 +470,7 @@ describe("ShelfService", () => {
         await expect(service.list(record.id)).resolves.toEqual([entry]);
     });
 
-    it("detects tampering before apply or delete and never removes an unverified shelf", async () => {
+    it("[성공] 적용 또는 삭제하기 전에 감지하고 확인하지 않은 선반은 절대 제거되지 않음", async () => {
         const repository = await createRepository();
         const record = repositoryRecord(repository);
         const storageRoot = join(await temporaryDirectory(), "profile");
@@ -504,7 +504,7 @@ describe("ShelfService", () => {
         await expect(access(directory)).resolves.toBeUndefined();
     });
 
-    it("cleans temporary shelves and propagates cancellation, output limits, and redacted diagnostics", async () => {
+    it("[성공] 임시 선반을 정리하고 취소, 종료 및 수정된 치료를 수행함", async () => {
         const repository = await createRepository();
         const record = repositoryRecord(repository);
         const root = await temporaryDirectory();

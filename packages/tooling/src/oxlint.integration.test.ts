@@ -20,8 +20,8 @@ function readResolvedConfig(): PrintedOxlintConfig {
     return JSON.parse(output) as PrintedOxlintConfig;
 }
 
-describe("resolved Oxlint config", () => {
-    it("combines the recommended baseline with repository-specific rules", () => {
+describe("해결된 Oxlint 구성", () => {
+    it("[성공] 기준점과 기준점 규칙을", () => {
         const config = readResolvedConfig();
 
         expect(config.categories.correctness).toBe("deny");

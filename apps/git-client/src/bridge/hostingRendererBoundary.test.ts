@@ -53,8 +53,8 @@ function rendererGraph(
     return sources;
 }
 
-describe("hosting renderer and preload boundaries", () => {
-    it("shares transport contracts without reaching Electron's main-only hosting barrel", () => {
+describe("테이프더 렌러 및 사전 로드 경계", () => {
+    it("[실패] Electron의 주요 소유권을 달성하지 않고 운송 계약을 공유함", () => {
         const sources = rendererGraph([
             join(APP_ROOT, "electron/preload/index.ts"),
             join(APP_ROOT, "src/bridge/createHostingBridge.ts"),

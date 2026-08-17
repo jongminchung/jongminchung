@@ -72,8 +72,8 @@ async function flushServer(): Promise<void> {
     await new Promise<void>((resolve) => setImmediate(resolve));
 }
 
-describe("TerminalUtilityProtocolServer", () => {
-    it("requires a handshake and validates every command and emitted event", async () => {
+describe("터미널유틸리티프로토콜버", () => {
+    it("[성공] 핸드 셰이크가 필요하고 모든 것을 통합하고 생성된 이벤트의 이벤트를 조사함", async () => {
         const port = new FakeServerPort();
         const utility = new FakeTerminalUtility();
         let disposed = false;

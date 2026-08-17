@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { stateMachineTransitions } from "./StateMachineModel";
 
-describe("stateMachineTransitions", () => {
-    it("models one complete add-to-cart cycle", () => {
+describe("상태머신전환", () => {
+    it("[성공] 하나의 완전한 캐리어 추가 장식함", () => {
         expect(stateMachineTransitions.idle).toMatchObject({
             edge: "CLICK",
             next: "loading",

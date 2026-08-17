@@ -1,6 +1,5 @@
 import { readdir } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 import {
     parseExcalidrawFilename,
     type ExcalidrawAsset,
@@ -10,7 +9,7 @@ export interface StandaloneExcalidrawAsset extends ExcalidrawAsset {
     readonly filePath: string;
 }
 
-const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const appRoot = resolve(import.meta.dirname, "..");
 export const standaloneExcalidrawRoot = resolve(appRoot, "public/diagrams");
 
 function hasErrorCode(error: unknown, code: string): boolean {

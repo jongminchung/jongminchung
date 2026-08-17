@@ -10,8 +10,8 @@ import { sampleStatus } from "../domain/sampleData";
 import { ChangesWorkspace } from "./ChangesWorkspace";
 import { CommandProvider } from "./CommandProvider";
 
-describe("ChangesWorkspace", () => {
-    it("renders the Rebased vertical Commit tool-window structure", () => {
+describe("변경사항 작업공간", () => {
+    it("[성공] 리베이스된 수직 커밋 도구 창 구조를 임시함", () => {
         const entries = changeEntries(sampleStatus);
         const worktreeSelection =
             entries.find((entry) => entry.selection.layer === "worktree")

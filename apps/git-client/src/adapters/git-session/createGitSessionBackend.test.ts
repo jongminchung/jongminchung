@@ -35,8 +35,8 @@ const livePreview = {
 describe.each([
     ["live", false],
     ["fixture", true],
-] as const)("%s Git session backend contract", (kind, fixtureMode) => {
-    it("implements the repository port", async () => {
+] as const)("[성공] %s Git 세션 백엔드계약", (kind, fixtureMode) => {
+    it("[성공] 별자리를 구현함", async () => {
         const backend = createGitSessionBackend(fixtureMode);
         const workspace = await backend.repository.initialWorkspace();
         const refresh = vi.fn(async () => undefined);
@@ -54,7 +54,7 @@ describe.each([
         );
     });
 
-    it("implements the query port", async () => {
+    it("[성공] 쿼리 포트 구현", async () => {
         const backend = createGitSessionBackend(fixtureMode);
         const live = vi.fn(async () => "live");
         const fixture = vi.fn(async () => "fixture");
@@ -66,7 +66,7 @@ describe.each([
         expect(fixture).toHaveBeenCalledTimes(fixtureMode ? 1 : 0);
     });
 
-    it("implements the mutation port", async () => {
+    it("[성공] 돌연변이 포트를 구현함", async () => {
         const backend = createGitSessionBackend(fixtureMode);
         const operation = vi.fn(async () => undefined);
 
@@ -76,7 +76,7 @@ describe.each([
         expect(operation).toHaveBeenCalledTimes(fixtureMode ? 0 : 1);
     });
 
-    it("implements the history port", async () => {
+    it("[성공] 히스토리 포트를 구현함", async () => {
         const backend = createGitSessionBackend(fixtureMode);
         const live = vi.fn(async () => livePreview);
 
@@ -86,7 +86,7 @@ describe.each([
         expect(live).toHaveBeenCalledTimes(fixtureMode ? 0 : 1);
     });
 
-    it("publishes terminal availability from the selected adapter", () => {
+    it("[성공] 어댑터의 서버 가용성을 게시함", () => {
         const backend = createGitSessionBackend(fixtureMode, {
             electronRuntime: true,
         });
@@ -96,7 +96,7 @@ describe.each([
         );
     });
 
-    it("executes requests through the selected query adapter", async () => {
+    it("[성공] 예외 쿼리 어댑터를 통해 요청을 실행함", async () => {
         const backend = createGitSessionBackend(fixtureMode);
         const live = vi.fn(async () => "live output");
 
@@ -107,8 +107,8 @@ describe.each([
     });
 });
 
-describe("Git session workspace persistence capability", () => {
-    it("keeps browser rendering independent from native restore and persist", async () => {
+describe("Git 세션 작업을 수행하는 기능이 있음", () => {
+    it("[성공] 기본 복원과 파티션 브라우저를 유지하고 유지함", async () => {
         const backend = createGitSessionBackend(false, {
             workspacePersistence: false,
         });
@@ -122,7 +122,7 @@ describe("Git session workspace persistence capability", () => {
         expect(persist).not.toHaveBeenCalled();
     });
 
-    it("keeps the native terminal unavailable in a browser runtime", () => {
+    it("[성공] 예외에서 기본 터미널을 사용할 수 있도록 유지함", () => {
         const backend = createGitSessionBackend(false, {
             electronRuntime: false,
         });

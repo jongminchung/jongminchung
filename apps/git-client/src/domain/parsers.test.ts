@@ -17,8 +17,8 @@ import {
     placeGraphLanes,
 } from "./parsers";
 
-describe("porcelain parsers", () => {
-    it("parses NUL-delimited status including paths with spaces and renames", () => {
+describe("도자기 파서", () => {
+    it("[성공] 공백이 있는 외곽과 이름 변경을 포함하여 NUL로 구분된 상태를 해석함", () => {
         const status = parseStatusV2(
             "# branch.oid abc123\n# branch.head main\n# branch.upstream origin/main\n# branch.ab +2 -1\n# stash 3\n1 M. N... 100644 100644 100644 a b src/a file.ts\0" +
                 "2 R. N... 100644 100644 100644 a b R100 src/new name.ts\0src/old name.ts\0? 한글 파일.md\0",
@@ -48,7 +48,7 @@ describe("porcelain parsers", () => {
         ]);
     });
 
-    it("parses refs and record-delimited logs", () => {
+    it("[성공] 참조 및 기록으로 구분된 로그를 해석함", () => {
         const refs = parseRefs(
             "refs/heads/main\0abc\0commit\0*\0refs/remotes/origin/main\0>\0subject\0Jamie\0" +
                 "1700000000\0\n",
@@ -70,7 +70,7 @@ describe("porcelain parsers", () => {
         });
     });
 
-    it("parses commit numstat records including binary files and renames", () => {
+    it("[성공] 바이너리 파일을 포함하는 커밋 numstat 기록을 해석하고 이름을 바꿉니다", () => {
         const header = [
             "oid",
             "parent",
@@ -108,7 +108,7 @@ describe("porcelain parsers", () => {
         ]);
     });
 
-    it("parses native stash metadata and NUL-delimited changed files", () => {
+    it("[성공] 기본 숨김 메타데이터 및 NUL로 구분된 변경 파일을 분석하여 변환함", () => {
         const stashes = parseStashList(
             `\x1e${["stash@{0}", "abc123", "On main: work in progress", "Jamie", "j@example.com", "1700000000", ""].join("\0")}` +
                 `\x1e${["stash@{1}", "def456", "On feat: 한글 메시지", "Min", "m@example.com", "1700000100", ""].join("\0")}`,
@@ -141,8 +141,8 @@ describe("porcelain parsers", () => {
     });
 });
 
-describe("graph and patch helpers", () => {
-    it("allocates a second lane for a merge parent", () => {
+describe("그래프 및 패치표", () => {
+    it("[성공] 상위 항목에 두 번째 차선을 표시함", () => {
         const commits = [
             {
                 oid: "c",
@@ -184,7 +184,7 @@ describe("graph and patch helpers", () => {
         });
     });
 
-    it("assembles selected hunks without dropping line prefixes", () => {
+    it("[실패] 라인 폴더두사를 삭제하지 말고 선택 사항을 선택하세요", () => {
         const hunks = parseDiffHunks(
             "@@ -1 +1 @@\n-old\n+new\n@@ -8 +8 @@\n-a\n+b",
         );
@@ -195,7 +195,7 @@ describe("graph and patch helpers", () => {
         ).toContain("@@ -8 +8 @@\n-a\n+b");
     });
 
-    it("assembles zero-context line hunks with recalculated ranges", () => {
+    it("[성공] 다시 철거된 군함을 사용하여 컨텍스트가 없는 라인을 조립함", () => {
         const patch = [
             "diff --git a/a.txt b/a.txt",
             "--- a/a.txt",
@@ -219,8 +219,8 @@ describe("graph and patch helpers", () => {
     });
 });
 
-describe("repository inspection parsers", () => {
-    it("parses tree, file history, and line porcelain blame", () => {
+describe("전자검사 파서", () => {
+    it("[성공] 트리, 파일 히스토리, 라인 포세린 분류을 분석함", () => {
         expect(parseTree("100644 blob abc 12\tsrc/a file.ts\0")).toEqual([
             {
                 mode: "100644",
@@ -254,8 +254,8 @@ describe("repository inspection parsers", () => {
     });
 });
 
-describe("forge URLs", () => {
-    it("normalizes SSH and HTTPS remotes", () => {
+describe("위조 URL", () => {
+    it("[성공] SSH 및 HTTPS 원격을 사용함", () => {
         expect(resolveForge("git@github.com:acme/repo.git")).toEqual({
             forge: "github",
             webBaseUrl: "https://github.com/acme/repo",

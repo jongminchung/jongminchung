@@ -4,8 +4,8 @@ import {
     recentProjectsWithRestoreFailures,
 } from "./welcomeStartup";
 
-describe("workspace startup", () => {
-    it("loads ordered open repositories and the active path", async () => {
+describe("작업공간 시작", () => {
+    it("[성공] 휴일이 열리는 날과 활동적인 노선을 로드함", async () => {
         const settings = new Map<string, unknown>([
             ["openRepositoryPaths", ["/work/one", "/work/two", "/work/one", 3]],
             ["activeRepositoryPath", "/work/two"],
@@ -38,7 +38,7 @@ describe("workspace startup", () => {
         ]);
     });
 
-    it("prefers metadata-rich recent projects over the legacy list", async () => {
+    it("[성공] 레거시 목록보다 메타데이터가 풍부한 최신 프로젝트를 선호함", async () => {
         const readSetting = async (key: string): Promise<unknown> => {
             if (key === "recentProjects") {
                 return [
@@ -69,7 +69,7 @@ describe("workspace startup", () => {
         ]);
     });
 
-    it("rejects malformed persisted paths at the storage boundary", async () => {
+    it("[실패] 스토리지 경계에서 유효하지 않은 위치에 있음", async () => {
         const startup = await loadWorkspaceStartupState(async (key) => {
             if (key === "openRepositoryPaths") return ["", null, "/work/valid"];
             if (key === "activeRepositoryPath") return 42;
@@ -84,7 +84,7 @@ describe("workspace startup", () => {
         });
     });
 
-    it("restores only validated safe-mode repository paths", async () => {
+    it("[성공] 유죄화된 처벌 모드", async () => {
         const startup = await loadWorkspaceStartupState(async (key) => {
             if (key === "openRepositoryPaths")
                 return ["/work/safe", "/work/trusted"];
@@ -96,7 +96,7 @@ describe("workspace startup", () => {
         expect(startup.safeRepositoryPaths).toEqual(["/work/safe"]);
     });
 
-    it("keeps failed restore paths available for retry or removal", () => {
+    it("[성공] 재시도 또는 제거를 위해 오류 복구를 유지함", () => {
         expect(
             recentProjectsWithRestoreFailures(
                 [

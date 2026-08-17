@@ -20,8 +20,8 @@ class TestPort {
     }
 }
 
-describe("DesktopStreamHub", () => {
-    it("validates the sender, replaces duplicate ports, and publishes typed envelopes", () => {
+describe("데스크탑 스트림허브", () => {
+    it("[실패] 파견자를 확인하고, 플러그인을 교체하고, 입력한 스테이크를 게시함", () => {
         const listeners = new Map<
             string,
             (event: unknown, raw: unknown) => void
@@ -80,7 +80,7 @@ describe("DesktopStreamHub", () => {
         expect(listeners.has(DESKTOP_STREAM_CHANNEL)).toBe(false);
     });
 
-    it("rejects version skew and untrusted frames", () => {
+    it("[실패] 버전을 수정하고 수정할 수 없는 프레임이 있었습니다", () => {
         let connect: ((event: unknown, raw: unknown) => void) | undefined;
         const mainFrame = { url: "app://git-client/" };
         const webContents = {

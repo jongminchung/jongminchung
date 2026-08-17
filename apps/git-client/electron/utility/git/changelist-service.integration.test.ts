@@ -189,8 +189,8 @@ afterEach(async () => {
     );
 });
 
-describe("ChangelistService metadata", () => {
-    it("implements the existing list/save/delete contract without inventing a persisted default", async () => {
+describe("ChangelistService에서 데이터", () => {
+    it("[실패] 존재하는 것과 원래의 목록/저장/삭제 계약의 의미", async () => {
         const fixture = await createFixture();
 
         await expect(
@@ -232,7 +232,7 @@ describe("ChangelistService metadata", () => {
         ).resolves.toEqual([]);
     });
 
-    it("uses whole-path replacement for add/remove/move semantics and preserves duplicate assignment behavior", async () => {
+    it("[실패] 추가/제거/이동 의미에 전체적으로 대체하여 사용할 수 있는 기능을 유지함", async () => {
         const fixture = await createFixture();
         const left = await fixture.service.save(
             fixture.repositoryId,
@@ -270,7 +270,7 @@ describe("ChangelistService metadata", () => {
         ]);
     });
 
-    it("serializes concurrent same-repository saves without losing entries", async () => {
+    it("[실패] 항목은 제외되지 않고 동일한 이름으로 저장을 직렬화함", async () => {
         const fixture = await createFixture();
         const saved = await Promise.all(
             Array.from({ length: 40 }, (_, index) =>
@@ -296,7 +296,7 @@ describe("ChangelistService metadata", () => {
         ["parent", "../outside.txt"],
         ["non-normalized", "directory/../file.txt"],
         ["empty component", "directory//file.txt"],
-    ])("rejects %s paths before persistence", async (_label, path) => {
+    ])("[실패] 실제 존재하기 전에 %s가 있었습니다", async (_label, path) => {
         const fixture = await createFixture();
         await expect(
             fixture.service.save(fixture.repositoryId, null, "Unsafe", [path]),
@@ -306,7 +306,7 @@ describe("ChangelistService metadata", () => {
         ).resolves.toEqual([]);
     });
 
-    it("fails closed for checksum damage and valid-checksum invariant damage", async () => {
+    it("[실패] 체크섬 부상 및 유효 체크섬 불변 부상으로 인해 처리하기 어렵습니다", async () => {
         const fixture = await createFixture();
         await fixture.service.save(fixture.repositoryId, null, "Original", [
             "a.txt",
@@ -342,7 +342,7 @@ describe("ChangelistService metadata", () => {
         ).rejects.toThrow(/sorted and unique/u);
     });
 
-    it("rejects oversized and symlinked manifests and symlink-traversing storage roots", async () => {
+    it("[실패] 크기가 너무 크고 릭 링크된 매니페스트와 릭 링크를 전달하는 스토리지를 포함하고 있음", async () => {
         const fixture = await createFixture();
         await fixture.service.save(fixture.repositoryId, null, "Original", []);
         const path = manifestPath(fixture);
@@ -388,7 +388,7 @@ describe("ChangelistService metadata", () => {
         );
     });
 
-    it("honors an already-aborted signal without creating metadata", async () => {
+    it("[실패]데이터를 생성하지 않고 이미 중단된 신호를 보내도록", async () => {
         const fixture = await createFixture();
         const cancellation = new AbortController();
         cancellation.abort("requested");
@@ -405,8 +405,8 @@ describe("ChangelistService metadata", () => {
     });
 });
 
-describe("ChangelistService selected commits", () => {
-    it("commits selected worktree and untracked bytes while preserving unrelated staged entries", async () => {
+describe("ChangelistService가 더 이상 사용되지 않음", () => {
+    it("[성공] 관련되지 않은 단계적 항목을 유지하면서 제외 작업 트리와 추적하지 않은 바이트를 커밋함", async () => {
         const fixture = await createFixture();
         await writeBase(fixture.root);
         await writeFile(
@@ -499,7 +499,7 @@ describe("ChangelistService selected commits", () => {
         ).resolves.toEqual([]);
     });
 
-    it("rolls back intent-to-add and retains metadata when a hook rejects the commit", async () => {
+    it("[실패] 후크가 커밋을 수행하면 추가 요구를 트리거백하고 데이터를 유지함", async () => {
         const fixture = await createFixture();
         await writeBase(fixture.root);
         await writeFile(join(fixture.root, "staged.txt"), "staged\n", "utf8");
@@ -536,7 +536,7 @@ describe("ChangelistService selected commits", () => {
     });
 
     it.each(["cancelled", "outputLimit"] as const)(
-        "restores the exact index and manifest after a %s Git terminal outcome",
+        "[성공] %s Git 터미널 결과 이후 오직 그들과 매니페스트를 패배시켰습니다",
         async (terminal) => {
             const fixture = await createFixture(
                 new CommitTerminalRunner(terminal),
@@ -577,7 +577,7 @@ describe("ChangelistService selected commits", () => {
         },
     );
 
-    it("rejects a symlinked Git index and a repository root replaced by a symlink", async () => {
+    it("[실패] 릭 링크된 Git 키보드와 색칠한 링크로 대체된 크리스마스를 제외함", async () => {
         const fixture = await createFixture();
         await writeBase(fixture.root);
         await writeFile(
@@ -619,7 +619,7 @@ describe("ChangelistService selected commits", () => {
         ).rejects.toThrow(/symbolic link/u);
     });
 
-    it("leaves HEAD, index, and metadata untouched for a clean selected path", async () => {
+    it("[성공] 깔끔하게 선택한 것을 위해 HEAD, 유일하게 데이터를 그대로 유지함", async () => {
         const fixture = await createFixture();
         await writeBase(fixture.root);
         const changelist = await fixture.service.save(
@@ -647,7 +647,7 @@ describe("ChangelistService selected commits", () => {
         );
     });
 
-    it("validates ids, messages, options, and empty changelists before Git mutation", async () => {
+    it("[성공] Git 변형 이전에 ID, 메시지, 옵션 및 빈 변경 목록을 검증함", async () => {
         const fixture = await createFixture();
         const empty = await fixture.service.save(
             fixture.repositoryId,

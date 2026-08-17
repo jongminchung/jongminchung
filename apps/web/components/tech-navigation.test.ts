@@ -20,8 +20,8 @@ const documents: readonly NavigationEntry[] = [
     },
 ] as const;
 
-describe("sectionNavigationItems", () => {
-    it("uses an outline for a section with one current document", () => {
+describe("섹션NavigationItems", () => {
+    it("[성공] 하나의 현재 문서가 있는 섹션에 대한 개요를 사용함", () => {
         const current: CurrentNavigationEntry = {
             kind: "document",
             id: "ddd",
@@ -43,7 +43,7 @@ describe("sectionNavigationItems", () => {
         ]);
     });
 
-    it("keeps section landing items unselected and alternate sections unselected", () => {
+    it("[성공] 섹션 연결을 선택 취소하고 대체 섹션을 선택하지 않은 상태로 유지함 항목", () => {
         const current: CurrentNavigationEntry = {
             kind: "section",
             id: "handbook",

@@ -90,8 +90,8 @@ async function connectClient(
     return { client: await connecting, transport };
 }
 
-describe("TerminalUtilityClient", () => {
-    it("handshakes, creates a session, and forwards ordered output even before create resolves", async () => {
+describe("터미널유틸리티클라이언트", () => {
+    it("[성공] 생성이 이루어지기 전에도 핸드셰이크, 세션 생성, 일정대로 출력 전달", async () => {
         const { client, transport } = await connectClient();
         const events: TerminalEventEnvelope[] = [];
         const creating = client.create(
@@ -129,7 +129,7 @@ describe("TerminalUtilityClient", () => {
         expect(client.state).toBe("ready");
     });
 
-    it("rejects an out-of-order PTY event and tears down the compromised utility", async () => {
+    it("[실패] 타이머가 없는 PTY 이벤트를 처리하고 유틸리티를 보관함", async () => {
         const { client, transport } = await connectClient();
         const creating = client.create(
             {
@@ -162,7 +162,7 @@ describe("TerminalUtilityClient", () => {
         expect(transport.killCount).toBe(1);
     });
 
-    it("reports a utility crash once and does not replay a pending request", async () => {
+    it("[실패] 클러스터 충돌을 한 번 보고 있고 사이에 요청을 보내지 않음", async () => {
         const crashes: Error[] = [];
         const { client, transport } = await connectClient({
             onCrash: (error) => crashes.push(error),
@@ -181,7 +181,7 @@ describe("TerminalUtilityClient", () => {
         expect(crashes).toHaveLength(1);
     });
 
-    it("validates terminal controls and disposes all sessions with the utility", async () => {
+    it("[성공] 터미널 제어를 검증하고 유틸리티를 사용하여 모든 세션을 삭제함", async () => {
         const { client, transport } = await connectClient();
 
         const listing = client.listLaunchTargets();

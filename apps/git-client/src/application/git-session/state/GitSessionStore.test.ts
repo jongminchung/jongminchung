@@ -23,7 +23,7 @@ function fakeCoordinator(): GitSessionRefreshCoordinator {
 }
 
 describe("GitSessionStore", () => {
-    it("injects bridge/coordinator dependencies and resets transient slices", () => {
+    it("[성공] 다리/코디네이터 활력성을 완화하고 임시 보호를 위해", () => {
         const bridge = {} as GitBridge;
         const refreshCoordinator = fakeCoordinator();
         const store = createGitSessionStore({
@@ -57,7 +57,7 @@ describe("GitSessionStore", () => {
         expect(store.getState().consoleEntries).toEqual([]);
     });
 
-    it("always closes mutation state on explicit success, failure, or cancellation paths", () => {
+    it("[성공] 벽돌같은 성공, 실패하거나 취소된 상태에서 변형된 상태를 유지함", () => {
         const store = createGitSessionStore({
             bridge: {} as GitBridge,
             initialWorkspace: INITIAL_WORKSPACE,

@@ -3,8 +3,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { Notice } from "./Notice";
 
-describe("Git Client product component variants", () => {
-    it("renders notice tone and live-region roles as public behavior", () => {
+describe("Git 클라이언트 제품 구성 요소 변형", () => {
+    it("[성공] 경고음 및 라이브 역할을 경고로 표시함", () => {
         const alert = renderToStaticMarkup(
             createElement(
                 Notice,

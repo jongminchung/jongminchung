@@ -67,13 +67,11 @@ advisory가 발견되면 다음 순서로 처리한다.
 
 ## 생성물 관리
 
-| 대상                               | 원본                          | 갱신                                                   | 검증                         |
-| ---------------------------------- | ----------------------------- | ------------------------------------------------------ | ---------------------------- |
-| Web 기술 콘텐츠 manifest·검색      | `apps/web/content/tech`       | `pnpm --filter @jongminchung/web run content:build`    | `content:check`              |
-| Web 투자 콘텐츠 manifest           | `apps/web/content/invest`     | `pnpm --filter @jongminchung/web run investment:build` | `investment:check`           |
-| Engineering Docs material registry | `components/materials/topics` | `materials:build`                                      | `materials:check`            |
-| Excalidraw 정적 자산               | Excalidraw source asset       | `excalidraw:assets`                                    | `excalidraw:check`           |
-| Playwright snapshot                | 렌더링 결과                   | 각 workspace의 `test:e2e:update`                       | visual test와 diff 직접 검토 |
+| 대상                   | 원본                                                            | 갱신                                           | 검증                                 |
+| ---------------------- | --------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------ |
+| Web 추적 콘텐츠 생성물 | `content/tech`, `content/invest`, `components/materials/topics` | `pnpm --filter @jongminchung/web run generate` | `build`의 콘텐츠·투자·material check |
+| Excalidraw 정적 자산   | Excalidraw source asset                                         | `excalidraw:assets`                            | `excalidraw:check`                   |
+| Playwright snapshot    | 렌더링 결과                                                     | 각 workspace의 `test:e2e:update`               | visual test와 diff 직접 검토         |
 
 `apps/web/components/materials/topics`는 직접 편집하는 원본이며 registry와 manifest는
 생성물이다. material 생성물은 직접 편집하지 않고 원본 변경과 함께 diff를 검토한다.

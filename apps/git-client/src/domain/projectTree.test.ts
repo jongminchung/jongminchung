@@ -18,8 +18,8 @@ const changes: readonly FileChange[] = [
     { path: "src/App.tsx", status: "modified", staged: false, worktree: true },
 ];
 
-describe("project tree", () => {
-    it("merges tracked and working-tree-only root entries", () => {
+describe("프로젝트 트리", () => {
+    it("[성공] 추적된 버전 항목과 작업 트리의 정의 항목을 강조함", () => {
         expect(mergeProjectTreeEntries("", tracked, changes)).toEqual([
             {
                 path: "notes",
@@ -45,7 +45,7 @@ describe("project tree", () => {
         ]);
     });
 
-    it("exposes untracked descendants inside synthetic directories", () => {
+    it("[성공] 내부적으로 추적되지 않은 하위 항목을 분류함", () => {
         expect(mergeProjectTreeEntries("notes", [], changes)).toEqual([
             {
                 path: "notes/한글 경로.md",

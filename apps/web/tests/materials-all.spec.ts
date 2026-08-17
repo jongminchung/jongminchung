@@ -17,7 +17,7 @@ const manifest = JSON.parse(
 ) as readonly ManifestEntry[];
 const topics = [...new Set(manifest.map((entry) => entry.topic))];
 
-test.describe("all material demos", () => {
+test.describe("[성공] 모든 자료 데모", () => {
     test.describe.configure({ mode: "serial" });
 
     for (const topic of topics) {

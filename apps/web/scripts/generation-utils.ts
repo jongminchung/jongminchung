@@ -1,5 +1,5 @@
-import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
-import { dirname, extname, relative, resolve, sep } from "node:path";
+import { access, glob, mkdir, readFile, writeFile } from "node:fs/promises";
+import { dirname, relative, resolve, sep } from "node:path";
 
 export interface GeneratedFile {
     readonly filePath: string;
@@ -18,18 +18,14 @@ export async function listFiles(
     allowMissing = false,
 ): Promise<readonly string[]> {
     try {
-        const entries = await readdir(directory, { withFileTypes: true });
-        const files = await Promise.all(
-            entries.map(async (entry): Promise<readonly string[]> => {
-                const entryPath = resolve(directory, entry.name);
-                return entry.isDirectory()
-                    ? listFiles(entryPath, extension)
-                    : extname(entry.name) === extension
-                      ? [entryPath]
-                      : [];
-            }),
-        );
-        return files.flat().sort();
+        await access(directory);
+        const files: string[] = [];
+        for await (const filePath of glob(`**/*${extension}`, {
+            cwd: directory,
+        })) {
+            files.push(resolve(directory, filePath));
+        }
+        return files.toSorted();
     } catch (error: unknown) {
         if (
             allowMissing &&

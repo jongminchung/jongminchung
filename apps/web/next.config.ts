@@ -1,10 +1,9 @@
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 import createMDX from "@next/mdx";
 import type { NextConfig } from "next";
 import { createRemarkPlugins } from "./remark-plugins.ts";
 
-const appRoot = dirname(fileURLToPath(import.meta.url));
+const appRoot = import.meta.dirname;
 
 const nextConfig = {
     experimental: {

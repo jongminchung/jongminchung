@@ -10,8 +10,8 @@ const NODE_SIZE = 512;
 const CATALOG_OFFSET = 4_096;
 const FIXED_HFS_TIMESTAMP = 3_660_681_600;
 
-describe("reproducible DMG module loading", () => {
-    it("defers ds-store loading until Finder layout generation", () => {
+describe("DMG 모듈 로드 기능 포함", () => {
+    it("[성공] Finder가 생성될 때까지 ds-store 로드를 수행함", () => {
         const moduleUrl = new URL("./reproducible-dmg.ts", import.meta.url)
             .href;
         const script = `
@@ -78,8 +78,8 @@ function fixture(): Buffer {
     return image;
 }
 
-describe("reproducible HFS+ image normalization", () => {
-    it("fixes both volume headers and every file/folder catalog record", () => {
+describe("HFS+ 이미지 교육을 보유하고 있음", () => {
+    it("[성공] 볼륨 헤더와 모든 파일/폴더 기록을 모두 수정함", () => {
         const image = fixture();
         const report = normalizeHfsImageBuffer(image);
 
@@ -110,7 +110,7 @@ describe("reproducible HFS+ image normalization", () => {
         }
     });
 
-    it("fails closed for malformed HFS geometry", () => {
+    it("[실패] 잘못된 HFS 형상으로 인해 실패 처리됨", () => {
         const image = fixture();
         image.writeUInt32BE(123, 1_024 + 40);
         expect(() => normalizeHfsImageBuffer(image)).toThrow(
@@ -119,8 +119,8 @@ describe("reproducible HFS+ image normalization", () => {
     });
 });
 
-describe("reproducible UDIF normalization", () => {
-    it("fixes the container UUID without changing the payload metadata", () => {
+describe("UDIF 교육을 보유하고 있음", () => {
+    it("[실패] 페이로드 메타 데이터를 변경하지 않고 컨테이너 UUID를 수정함", () => {
         const trailer = Buffer.alloc(512, 0xa5);
         trailer.write("koly", 0, "ascii");
         const prefix = Buffer.from(trailer.subarray(0, 64));
@@ -134,7 +134,7 @@ describe("reproducible UDIF normalization", () => {
         );
     });
 
-    it("rejects a container without the UDIF trailer signature", () => {
+    it("[실패] UDIF 서명이 없는 컨테이너에 있음", () => {
         expect(() => normalizeUdifTrailerBuffer(Buffer.alloc(512))).toThrow(
             /koly/u,
         );

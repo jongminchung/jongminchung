@@ -1,6 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { dirname, relative, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { relative, resolve } from "node:path";
 import matter from "gray-matter";
 import {
     createInvestmentNoteHref,
@@ -19,7 +18,7 @@ import {
     writeGeneratedFiles,
 } from "./generation-utils.ts";
 
-const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const appRoot = resolve(import.meta.dirname, "..");
 const workspaceRoot = resolve(appRoot, "../..");
 const contentRoot = resolve(appRoot, "content/invest");
 const manifestPath = resolve(appRoot, "generated/investment-manifest.json");
@@ -57,15 +56,15 @@ export function validateInvestmentTranslations(
 ): void {
     const byId = new Map<string, Map<Locale, InvestmentNoteMetadata>>();
     for (const note of notes) {
-        const localized =
-            byId.get(note.metadata.id) ??
-            new Map<Locale, InvestmentNoteMetadata>();
+        const localized = byId.getOrInsertComputed(
+            note.metadata.id,
+            () => new Map<Locale, InvestmentNoteMetadata>(),
+        );
         if (localized.has(note.metadata.locale))
             throw new Error(
                 `Duplicate investment note ${note.metadata.locale}/${note.metadata.id}.`,
             );
         localized.set(note.metadata.locale, note.metadata);
-        byId.set(note.metadata.id, localized);
     }
     for (const [id, localized] of byId) {
         const missing = locales.filter((locale) => !localized.has(locale));
@@ -162,8 +161,5 @@ async function main(args: readonly string[]): Promise<void> {
 }
 
 const entryPath = process.argv[1];
-if (
-    entryPath !== undefined &&
-    resolve(entryPath) === fileURLToPath(import.meta.url)
-)
+if (entryPath !== undefined && resolve(entryPath) === import.meta.filename)
     await main(process.argv.slice(2));

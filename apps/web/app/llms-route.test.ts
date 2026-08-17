@@ -8,7 +8,7 @@ import {
 import { GET } from "./(tech)/sites/tech/llms.txt/route";
 
 describe("llms.txt", () => {
-    it("publishes every localized document and section landing in the proposed format", async () => {
+    it("[성공] 모든 내부 문서와 섹션 소개를 제안된 형식으로 게시함", async () => {
         const response = GET();
         const body = await response.text();
 

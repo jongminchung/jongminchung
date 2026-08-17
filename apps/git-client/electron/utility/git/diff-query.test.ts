@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { buildDiffArguments } from "./diff-query";
 
-describe("buildDiffArguments", () => {
-    it("matches the existing native diff options and protects paths with an option terminator", () => {
+describe("빌드Diff인수", () => {
+    it("[성공] 기본 기본 diff 옵션과 일치하고 옵션 구문 분석을 보호함", () => {
         expect(
             buildDiffArguments({
                 from: "HEAD~1",
@@ -27,7 +27,7 @@ describe("buildDiffArguments", () => {
         ]);
     });
 
-    it("supports staged full-context diffs", () => {
+    it("[성공] 단계적 전체 컨텍스트 해석을 지원함", () => {
         expect(
             buildDiffArguments({
                 from: null,
@@ -79,7 +79,7 @@ describe("buildDiffArguments", () => {
                 options: { whitespace: "show" as const, contextLines: 3 },
             },
         },
-    ])("rejects $label", ({ query }) => {
+    ])("[실패] $label 있는데", ({ query }) => {
         expect(() => buildDiffArguments(query)).toThrow();
     });
 });

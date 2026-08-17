@@ -17,7 +17,7 @@ import { createHostingBridge } from "./createHostingBridge";
 describe("createHostingBridge", () => {
     beforeEach(() => platformMock.electronApi.mockReset());
 
-    it("selects the Electron bridge when the preload API is present", () => {
+    it("[성공] 사전 로드 API가 있는 경우 전자 다리를 선택함", () => {
         const hosting = {
             saveAccount: vi.fn(),
             restoreAccounts: vi.fn(),
@@ -31,7 +31,7 @@ describe("createHostingBridge", () => {
         expect(createHostingBridge()).toBeInstanceOf(ElectronHostingBridge);
     });
 
-    it("fails closed outside Electron", () => {
+    it("[실패] Electron 외부에서 실패하면 반사되는 모습", () => {
         platformMock.electronApi.mockReturnValue(null);
 
         expect(() => createHostingBridge()).toThrow(
@@ -39,7 +39,7 @@ describe("createHostingBridge", () => {
         );
     });
 
-    it("does not invoke any hosting preload method while the active project is in safe mode", async () => {
+    it("[실패] 활성 프로젝트가 권한 모드에 있는 동안만 사전 로드 방법을 호출하지 마십시오", async () => {
         const hosting = {
             saveAccount: vi.fn(),
             restoreAccounts: vi.fn(),

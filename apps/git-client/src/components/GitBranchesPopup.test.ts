@@ -5,8 +5,8 @@ import { sampleRefs } from "../domain/sampleData";
 import { CommandProvider } from "./CommandProvider";
 import { GitBranchesPopup } from "./GitBranchesPopup";
 
-describe("GitBranchesPopup", () => {
-    it("renders the Rebased search, action toolbar, and branches tree", () => {
+describe("GitBranches팝업", () => {
+    it("[성공] Rebased 검색, 작업 도구 모음 및 분기 트리를 연결함", () => {
         const markup = renderToStaticMarkup(
             createElement(
                 CommandProvider,

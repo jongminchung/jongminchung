@@ -78,7 +78,7 @@ async function seedSafeProfile(repository: string): Promise<void> {
     );
 }
 
-test("keeps a packaged safe-mode project read-only across restart", async () => {
+test("[성공] 다시 부팅도 패키지화된 보안 모드 프로젝트를 선두로 유지함", async () => {
     test.setTimeout(60_000);
     await resetQaProfile(runtimeProfileName);
     const parent = await mkdtemp(join(tmpdir(), "git-client-safe-mode-ui-"));

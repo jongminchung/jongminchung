@@ -14,8 +14,8 @@ import {
     parseReleaseMetadata,
 } from "./publish-release.ts";
 
-describe("fixed Git Client release publisher", () => {
-    it("always uses the manual 1.0.0 release identity", () => {
+describe("고정 Git 클라이언트 릴리스 게시자", () => {
+    it("[성공] 항상 매뉴얼 1.0.0 릴리스 ID를 사용함", () => {
         expect(fixedReleaseVersion).toBe("1.0.0");
         expect(assertFixedReleaseVersion("1.0.0")).toBe("1.0.0");
         expect(() => assertFixedReleaseVersion("1.0.1")).toThrow(
@@ -26,7 +26,7 @@ describe("fixed Git Client release publisher", () => {
         );
     });
 
-    it("uses the agreed tag, title, and draft creation arguments", () => {
+    it("[성공] 소속된 태그, 및 초안 작성을 사용함", () => {
         expect(createReleaseTag("1.0.0")).toBe("git-client-1.0.0");
         expect(createReleaseTitle("1.0.0")).toBe("Git Client 1.0.0");
         expect(
@@ -71,7 +71,7 @@ describe("fixed Git Client release publisher", () => {
         ]);
     });
 
-    it("maps a local GH_PAT to the GH_TOKEN used by child processes", () => {
+    it("[성공] 방향 GH_PAT를 하위 변형에서 사용하는 GH_TOKEN에 매핑함", () => {
         expect(
             createGitHubEnvironment({ GH_PAT: "local-token" }),
         ).toMatchObject({
@@ -85,7 +85,7 @@ describe("fixed Git Client release publisher", () => {
         expect(() => createGitHubEnvironment({})).toThrow("GH_TOKEN");
     });
 
-    it("validates GitHub release metadata before publication", () => {
+    it("[성공] 게시하기 전에 GitHub를 통해 데이터를 감시함", () => {
         const metadata = parseReleaseMetadata(
             JSON.stringify({
                 assets: [
@@ -111,7 +111,7 @@ describe("fixed Git Client release publisher", () => {
         expect(() => parseReleaseMetadata("[]")).toThrow("object");
     });
 
-    it("accepts only the dry-run publisher flag", () => {
+    it("[성공] 테스트 실행 게시자 지명만 인정함", () => {
         expect(parsePublishArguments(["--dry-run"])).toEqual({
             dryRun: true,
         });

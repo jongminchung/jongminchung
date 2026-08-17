@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { RepositoryWatchSession } from "./RepositoryWatchSession";
 
-describe("RepositoryWatchSession", () => {
-    it("retries after an initial subscription failure", async () => {
+describe("현재 WatchSession", () => {
+    it("[성공] 처음 구독 실패 후 재시도", async () => {
         const session = new RepositoryWatchSession();
         const subscribe = vi
             .fn<() => Promise<void>>()
@@ -21,7 +21,7 @@ describe("RepositoryWatchSession", () => {
         expect(session.isWatched("repository-1")).toBe(true);
     });
 
-    it("deduplicates concurrent subscriptions and forgets pending attempts", async () => {
+    it("[성공] 여러분이 구독자를 분리하고 움직이려고 노력할 것임", async () => {
         const session = new RepositoryWatchSession();
         let resolveSubscription: (() => void) | undefined;
         const subscribe = vi.fn(

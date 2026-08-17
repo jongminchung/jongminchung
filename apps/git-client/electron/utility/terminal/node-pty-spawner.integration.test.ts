@@ -24,7 +24,7 @@ afterEach(async () => {
 describe.runIf(process.platform !== "win32")(
     "NodePtySpawner integration",
     () => {
-        it("starts an allowlisted predefined shell in the disposable repository cwd", async () => {
+        it("[성공] 외부 사용자 cwd에서 목록에 있는 사전 정의된 셸을 시작함", async () => {
             const repository = await mkdtemp(
                 join(tmpdir(), "git-client-terminal-pty-"),
             );

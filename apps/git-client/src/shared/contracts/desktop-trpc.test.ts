@@ -8,8 +8,8 @@ import {
     type DesktopTrpcDomain,
 } from "./desktop-trpc";
 
-describe("desktop tRPC contract", () => {
-    it("defines 55 unique procedures with input and output parsers", () => {
+describe("tRPC 계약 종료", () => {
+    it("[성공] 입력 및 출력 분석기를 사용하여 55개의 고유한 프로시저를 정의함", () => {
         const records = {
             ...MAIN_DESKTOP_TRPC_PROCEDURE_KEYS,
             ...LOCAL_HISTORY_TRPC_PROCEDURE_KEYS,
@@ -40,7 +40,7 @@ describe("desktop tRPC contract", () => {
         );
     });
 
-    it("rejects unknown protocol versions and extra envelope fields", () => {
+    it("[실패] 알 수 없는 변형 버전 및 추가 캠프 필드를 유지함", () => {
         expect(() =>
             DesktopTrpcRequestSchema.parse({
                 version: 2,

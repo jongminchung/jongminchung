@@ -7,8 +7,8 @@ import {
 
 const REQUEST_ID = "f77bceee-5296-4076-a8f1-c91e2020b294";
 
-describe("repository creation state", () => {
-    it("tracks started, progress, and completed clone events without exposing the command", () => {
+describe("생성상태", () => {
+    it("[실패] 콤보를 반대하지 않고 시작, 진행 및 완료 복제 이벤트를 추적함", () => {
         let state = startRepositoryCreation("clone");
         state = applyRepositoryCreationEvent(state, {
             kind: "started",
@@ -68,7 +68,7 @@ describe("repository creation state", () => {
         });
     });
 
-    it("ignores uncorrelated events and preserves cancellation until the terminal event", () => {
+    it("[성공] 성공하지 않은 이벤트를 무시하고 최종 이벤트가 발생한 경우까지 취소를 유지함", () => {
         let state = startRepositoryCreation("initialize");
         state = applyRepositoryCreationEvent(state, {
             kind: "started",

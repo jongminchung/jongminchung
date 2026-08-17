@@ -4,7 +4,7 @@ import {
     expectNoHorizontalOverflow,
 } from "./assertions";
 
-test("plain documents omit material frames while material routes load independent demos", async ({
+test("[성공] 일반 문서 데이터 프레임이 있고 데이터 경로는 관련인 템플릿을 로드함", async ({
     page,
 }) => {
     await page.goto("/en");
@@ -20,7 +20,7 @@ test("plain documents omit material frames while material routes load independen
     ).toBeVisible();
 });
 
-test("material demos preload near the viewport and unmount offscreen", async ({
+test("[성공] 머티리얼 데모는 데비포트 배경화면에 미리 로드하고 화면을 움직이며 휴가함", async ({
     page,
 }) => {
     await page.goto("/ko/articles/throughput-and-latency");
@@ -47,7 +47,7 @@ test("material demos preload near the viewport and unmount offscreen", async ({
     await expectNoHorizontalOverflow(page);
 });
 
-test("pixel-processing exceptions remain native Canvas and material frames are accessible", async ({
+test("[성공] 광대 처리 이벤트는 기본 캔버스로 유지 관리 프레임에 액세스할 수 있음", async ({
     page,
 }) => {
     await page.goto("/en/articles/the-expensive-main-thread");

@@ -34,8 +34,8 @@ const context = (
     ...overrides,
 });
 
-describe("deriveActionAvailability", () => {
-    it("enables the single local ancestor actions", () => {
+describe("가동 가동 가능", () => {
+    it("[성공] 단일 상위 작업을 활성화함", () => {
         expect(deriveActionAvailability(context())).toMatchObject({
             copyRevision: true,
             cherryPick: true,
@@ -46,7 +46,7 @@ describe("deriveActionAvailability", () => {
         });
     });
 
-    it("disables branch mutations for detached HEAD and active operations", () => {
+    it("[성공] 분리된 HEAD 및 활동 작업에 대한 분기 변경을 진행함", () => {
         for (const overrides of [
             { currentBranch: undefined },
             { operationInProgress: true },
@@ -60,7 +60,7 @@ describe("deriveActionAvailability", () => {
         }
     });
 
-    it("requires two commits for compare and squash", () => {
+    it("[성공]검사 및 스쿼시를 위해 두 번의 커밋이 필요함", () => {
         const availability = deriveActionAvailability(
             context({ selectedCommits: [commit("a"), commit("b")] }),
         );
@@ -72,7 +72,7 @@ describe("deriveActionAvailability", () => {
         });
     });
 
-    it("rejects quick squash across a merge or non-contiguous first-parent range", () => {
+    it("[실패] 자물쇠 또는 연결되지 않은 첫 번째 상위 범위에서 빠른 스쿼시를 처리함", () => {
         expect(
             deriveActionAvailability(
                 context({
@@ -91,7 +91,7 @@ describe("deriveActionAvailability", () => {
         ).toBe(false);
     });
 
-    it("does not drop or cherry-pick HEAD and checks upstream ancestry before partial push", () => {
+    it("[실패] HEAD를 삭제하거나 하위 부분을 푸시하기 전에 상위 스트림 항목을 확인함", () => {
         expect(
             deriveActionAvailability(
                 context({ selectedCommits: [commit("head")], headOid: "head" }),
@@ -114,7 +114,7 @@ describe("deriveActionAvailability", () => {
         });
     });
 
-    it("handles initial repositories and root commits", () => {
+    it("[성공] 전방 및 커밋을 처리함", () => {
         expect(
             deriveActionAvailability(
                 context({ selectedCommits: [], repositoryHasCommits: false }),

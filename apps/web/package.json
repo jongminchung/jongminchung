@@ -17,6 +17,7 @@
     "dev": "node scripts/prepare-excalidraw-assets.ts && next dev",
     "excalidraw:assets": "node scripts/prepare-excalidraw-assets.ts",
     "excalidraw:check": "node scripts/check-excalidraw.ts",
+    "generate": "pnpm run content:build && pnpm run investment:build && pnpm run materials:build",
     "investment:build": "node scripts/build-investment-content.ts --write",
     "investment:check": "node scripts/build-investment-content.ts --check",
     "materials:build": "node scripts/build-materials.ts --write",

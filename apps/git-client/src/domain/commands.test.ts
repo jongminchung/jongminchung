@@ -30,8 +30,8 @@ const keyboardEvent = (
     ...overrides,
 });
 
-describe("command manifest", () => {
-    it("has unique IDs and accelerators and renders macOS shortcuts", () => {
+describe("키보드 매니페스트", () => {
+    it("[성공] 고유한 ID를 가속 장치에 연결하기", () => {
         expect(COMMAND_MANIFEST.commands.length).toBeGreaterThan(15);
         expect(
             new Set(COMMAND_MANIFEST.commands.map((command) => command.id))
@@ -46,7 +46,7 @@ describe("command manifest", () => {
         ).toBe(false);
     });
 
-    it("rejects malformed external values", () => {
+    it("[실패] 잘못된 형식의 외부 값을 있음", () => {
         expect(() =>
             parseCommandManifest({ schemaVersion: 2, commands: [] }),
         ).toThrow(/schema version/);
@@ -59,8 +59,8 @@ describe("command manifest", () => {
     });
 });
 
-describe("shortcut matching", () => {
-    it("normalizes command, shift, option and enter", () => {
+describe("바로가기 매칭", () => {
+    it("[성공]문자, Shift, 옵션 및 Enter를 사용하는 정규화함", () => {
         expect(matchesKeyboardShortcut(keyboardEvent(), "CmdOrCtrl+P")).toBe(
             true,
         );
@@ -78,7 +78,7 @@ describe("shortcut matching", () => {
         ).toBe(true);
     });
 
-    it("captures and resolves user keymap overrides", () => {
+    it("[성공] 사용자 키 맵 금융을 감시하고 해결함", () => {
         expect(
             acceleratorFromKeyboardEvent({
                 key: "k",
@@ -112,7 +112,7 @@ describe("shortcut matching", () => {
         ).toBe("CmdOrCtrl+Shift+K");
     });
 
-    it("protects IME and repeated mutations", () => {
+    it("[성공] IME 및 반복되는 돌연변이를 보호함", () => {
         const mutation = COMMAND_MANIFEST.commands.find(
             (command) => command.id === "repository.push",
         );
@@ -131,8 +131,8 @@ describe("shortcut matching", () => {
     });
 });
 
-describe("CommandRegistry", () => {
-    it("uses the newest contextual handler and reports disabled reasons", async () => {
+describe("다루기", () => {
+    it("[성공] 최신 상황별 처리 방법을 사용하고 모집된 이유를 보고함", async () => {
         const registry = CommandRegistry.create();
         const first = vi.fn();
         const second = vi.fn();
@@ -160,7 +160,7 @@ describe("CommandRegistry", () => {
     });
 });
 
-describe("palette ranking", () => {
+describe("순위", () => {
     const item = (id: string, label: string, enabled = true): PaletteItem => ({
         id,
         kind: "command",
@@ -174,7 +174,7 @@ describe("palette ranking", () => {
         execute: vi.fn(),
     });
 
-    it("ranks exact and prefix matches while keeping disabled results", () => {
+    it("[성공] 채용된 결과를 유지하면서 일치 및 공개된 결과를 선거함", () => {
         const sorted = sortPaletteItems(
             [
                 item("fetch", "Fetch", false),
@@ -190,8 +190,8 @@ describe("palette ranking", () => {
     });
 });
 
-describe("Escape dismiss order", () => {
-    it("closes one highest layer and leaves input-owned Escape alone below overlays", () => {
+describe("탈출기각", () => {
+    it("[성공] 가장 높은 레이어를 하나를 닫고 아래로 입력하여 탈출만 남겨두세요", () => {
         const dismiss = vi.fn();
         const layers = [
             { id: "selection", priority: 20, active: true, dismiss },

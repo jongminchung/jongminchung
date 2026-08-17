@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { findExcalidrawFences } from "./check-excalidraw";
 
-describe("findExcalidrawFences", () => {
-    it("finds Excalidraw JSON fences without consuming other code blocks", () => {
+describe("findExcalidraw울타리", () => {
+    it("[실패] 다른 코드 블록을 사용하지 않고 Excalidraw JSON을 찾고 있음", () => {
         const markdown = [
             "```typescript",
             "const value = true;",

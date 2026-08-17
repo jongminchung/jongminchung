@@ -14,13 +14,13 @@ vi.mock("../../../application/desktop/DesktopPort", () => ({
     writeDesktopSettings: electronSettings.write,
 }));
 
-describe("repository persistence adapter", () => {
+describe("용도를 변경하여 사용하세요", () => {
     beforeEach(() => {
         electronSettings.read.mockReset();
         electronSettings.write.mockReset();
     });
 
-    it("migrates repository UI state under the existing scoped key", async () => {
+    it("[성공] 기존 위치에 보관되어 있는 UI 상태를 마이그레이션함", async () => {
         electronSettings.read.mockResolvedValue({ bottomPanelHeight: 10_000 });
 
         await expect(
@@ -34,7 +34,7 @@ describe("repository persistence adapter", () => {
         );
     });
 
-    it("hydrates bookmarks with the existing parser and key", async () => {
+    it("[성공] 기존 파서 및 키로 북마크를 수화함", async () => {
         electronSettings.read.mockResolvedValue(undefined);
 
         const bookmarks = await hydrateRepositoryBookmarks(

@@ -76,8 +76,8 @@ afterEach(async () => {
     );
 });
 
-describe("RepositoryInspectionService", () => {
-    it("returns redacted config, remotes, merged branches, signatures, and worktrees", async () => {
+describe("교체검사서비스", () => {
+    it("[성공] 수정된 구성, 원격, 밀봉된 분기, 서명 및 작업 트리를 유지함", async () => {
         const { root, registry, service } = await createRepository();
         git(root, "config", "credential.helper", "secret-helper");
         git(
@@ -136,7 +136,7 @@ describe("RepositoryInspectionService", () => {
         );
     });
 
-    it("inspects complete clean, detached, remote, shallow, and operation snapshot fields", async () => {
+    it("[성공] 완전한 Clean, Detached, Remote, Shallow 및 Operation 스냅샷 필드를 검사함", async () => {
         const { root, registry, service } = await createRepository();
         git(
             root,
@@ -173,7 +173,7 @@ describe("RepositoryInspectionService", () => {
         );
     });
 
-    it("rejects unsafe revisions before spawning Git", async () => {
+    it("[실패] Git을 생성하기 전에 안전하지 않았음을 의미함", async () => {
         const { root, registry, service } = await createRepository();
         const record = await registry.open(root);
         await expect(
@@ -188,7 +188,7 @@ describe("RepositoryInspectionService", () => {
         });
     });
 
-    it("compares branches and inspects staged commit risks and hooks", async () => {
+    it("[성공] 브랜치를 칭찬하고 단계적 커밋 위험과 후크를 검사함", async () => {
         const { root, registry, service } = await createRepository();
         git(root, "checkout", "-b", "feature");
         await writeFile(join(root, "feature.txt"), "feature\n", "utf8");
@@ -227,8 +227,8 @@ describe("RepositoryInspectionService", () => {
     });
 });
 
-describe("repository inspection parsers", () => {
-    it("uses the same operation precedence as the Git state model", async () => {
+describe("전자검사 파서", () => {
+    it("[성공] Git 상태 모델과 동급 최고의 순위를 사용함", async () => {
         const temporaryDirectory = await mkdtemp(
             join(tmpdir(), "git-client-operation-state-"),
         );
@@ -245,7 +245,7 @@ describe("repository inspection parsers", () => {
         ).resolves.toBe("rebase");
     });
 
-    it("parses config triples and redacts secrets and embedded credentials", () => {
+    it("[성공] 구성 트리플을 삽입 분석하고 비밀 및 내장된 자격 증명을 수정함", () => {
         expect(
             parseGitConfig(
                 "local\0file:.git/config\0credential.helper\nsecret\0" +
@@ -267,7 +267,7 @@ describe("repository inspection parsers", () => {
         ]);
     });
 
-    it("parses every submodule state marker", () => {
+    it("[성공] 모든 하위 모듈 상태 표시기를 분석함", () => {
         expect(
             parseSubmoduleStatus(
                 "-1111111111111111111111111111111111111111 one (heads/main)\n" +
@@ -299,7 +299,7 @@ describe("repository inspection parsers", () => {
         ]);
     });
 
-    it("parses main, detached, locked, and prunable worktrees", async () => {
+    it("[성공] 기본, 분리, 운동 및 정리 가능한 작업 트리 삽입을 분석함", async () => {
         const temporaryDirectory = await mkdtemp(
             join(tmpdir(), "git-client-worktree-parser-"),
         );

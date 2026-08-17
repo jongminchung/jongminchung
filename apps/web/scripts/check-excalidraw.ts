@@ -1,11 +1,10 @@
 import { readFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 import { listStandaloneExcalidrawAssets } from "../lib/excalidraw-files.ts";
 import { parseExcalidrawSource } from "../lib/excalidraw-scene.ts";
 import { listFiles } from "./generation-utils.ts";
 
-const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const appRoot = resolve(import.meta.dirname, "..");
 const contentRoot = resolve(appRoot, "content");
 
 export interface ExcalidrawFence {
@@ -62,8 +61,7 @@ export async function checkExcalidrawContent(): Promise<{
 function isMainModule(): boolean {
     const entryPath = process.argv[1];
     return (
-        entryPath !== undefined &&
-        resolve(entryPath) === fileURLToPath(import.meta.url)
+        entryPath !== undefined && resolve(entryPath) === import.meta.filename
     );
 }
 

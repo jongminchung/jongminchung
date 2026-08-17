@@ -122,17 +122,20 @@ const operations: readonly GitOperation[] = [
     },
 ];
 
-describe("buildOperationCommand", () => {
-    it.each(operations)("builds the fixed command for $kind", (operation) => {
-        const command = buildOperationCommand(operation);
-        expect(command.args.length).toBeGreaterThan(0);
-        expect(command.args).not.toContain("");
-        expect(command.kind === "sequence" || command.args[0] !== "git").toBe(
-            true,
-        );
-    });
+describe("buildOperation 명령", () => {
+    it.each(operations)(
+        "[성공] $kind에 대한 고정형 구조물 제작함",
+        (operation) => {
+            const command = buildOperationCommand(operation);
+            expect(command.args.length).toBeGreaterThan(0);
+            expect(command.args).not.toContain("");
+            expect(
+                command.kind === "sequence" || command.args[0] !== "git",
+            ).toBe(true);
+        },
+    );
 
-    it("preserves stdin without placing patch content in argv", () => {
+    it("[실패] argv에 패치 내용을 배치하지 않고 stdin을 유지함", () => {
         const command = buildOperationCommand({
             kind: "applyPatch",
             patch: "secret patch content",
@@ -146,7 +149,7 @@ describe("buildOperationCommand", () => {
         expect(command.args).not.toContain("secret patch content");
     });
 
-    it("builds explicit sequence-helper commands without renderer-supplied environment", () => {
+    it("[실패] 렌더러 제공 환경 없이 홀더형 배열함을 제작함", () => {
         expect(
             buildOperationCommand({
                 kind: "interactiveRebase",
@@ -166,7 +169,7 @@ describe("buildOperationCommand", () => {
         });
     });
 
-    it("rejects traversal, empty selections/messages, unsafe refs and URLs, bad leases, and invalid plans", () => {
+    it("[실패] 순회, 빈 선택/메시지, 안전하지 않은 선택 및 URL, 잘못된 임대 및 유효하지 않은 계획을 가지고 있음", () => {
         const invalid: readonly GitOperation[] = [
             { kind: "stage", paths: [] },
             { kind: "discard", paths: ["../secret"] },

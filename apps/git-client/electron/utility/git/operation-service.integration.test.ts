@@ -76,7 +76,7 @@ afterEach(async () => {
 });
 
 describe("GitOperationService", () => {
-    it("serializes the same repository while allowing another repository to mutate", async () => {
+    it("[성공] 다른 곳의 변경을 허용하는 동안 같은 장소를 직렬화함", async () => {
         const { root, registry } = await fixture();
         const secondRoot = join(dirname(root), "repository-2");
         await mkdir(secondRoot);
@@ -142,7 +142,7 @@ describe("GitOperationService", () => {
         ]);
     });
 
-    it("cancels a mutation while it is queued for repository ownership", async () => {
+    it("[실패] 클래스 소유권을 위해 생존하는 동안 변형을 취소함", async () => {
         const { root, registry } = await fixture();
         const repository = await registry.open(root);
         let resolveFirst: (
@@ -191,7 +191,7 @@ describe("GitOperationService", () => {
         await expect(first).resolves.toMatchObject({ kind: "completed" });
     });
 
-    it("records recovery after validation and before the first mutation side effect", async () => {
+    it("[성공] 검증 후 첫 번째 돌연변이 이전의 복구를 기록함", async () => {
         const { root, registry } = await fixture();
         const repository = await registry.open(root);
         const order: string[] = [];
@@ -240,7 +240,7 @@ describe("GitOperationService", () => {
         expect(order).toEqual(["recovery", "mutation"]);
     });
 
-    it("does not launch a mutation when recovery recording fails", async () => {
+    it("[실패]복구 기록이 실패하면 돌연변이가 시작되지 않음", async () => {
         const { root, registry } = await fixture();
         const repository = await registry.open(root);
         const runner: GitProcessRunnerLike = {
@@ -276,7 +276,7 @@ describe("GitOperationService", () => {
         });
     });
 
-    it("dispatches every one of the 51 validated operation variants", async () => {
+    it("[성공] 51개의 변형된 작업을 모두 변형함", async () => {
         const { root, registry } = await fixture();
         const repository = await registry.open(root);
         const specs: GitProcessSpec[] = [];
@@ -312,7 +312,7 @@ describe("GitOperationService", () => {
         ).toHaveLength(4);
     });
 
-    it("stages selected paths and emits one ordered terminal lifecycle", async () => {
+    it("[성공] 콘솔을 선택하고 하나의 선택으로 인해 터미널 생활을 유지하지 않고 내보냅니다", async () => {
         const { root, registry, service } = await fixture();
         await writeFile(join(root, "new.txt"), "new\n", "utf8");
         const repository = await registry.open(root);
@@ -337,7 +337,7 @@ describe("GitOperationService", () => {
         ).toHaveLength(1);
     });
 
-    it("pipes patch content over stdin instead of argv", async () => {
+    it("[성공] argv 대신 stdin을 통해 패치 콘텐츠를 파이프함", async () => {
         const { root, registry, service } = await fixture();
         await writeFile(join(root, "tracked.txt"), "changed\n", "utf8");
         const patch = git(root, "diff", "--", "tracked.txt");
@@ -357,7 +357,7 @@ describe("GitOperationService", () => {
         );
     });
 
-    it("runs an interactive rewrite through the application sequence-editor entry", async () => {
+    it("[성공] 특수 목적 편집기 항목을 통해 대화형 재작성을 실행함", async () => {
         const { root, registry } = await fixture();
         const helperDirectory = join(root, "sequence-helper");
         await build({
@@ -420,7 +420,7 @@ describe("GitOperationService", () => {
         expect(events.at(-1)?.kind).toBe("completed");
     });
 
-    it("cancels active mutations by request and repository", async () => {
+    it("[실패] 적용 및 활동 활성화를 취소함", async () => {
         let resolveRun:
             | ((
                   value: Awaited<ReturnType<GitProcessRunnerLike["run"]>>,
@@ -466,7 +466,7 @@ describe("GitOperationService", () => {
         expect(resolveRun).not.toBeNull();
     });
 
-    it("can cancel synchronously from the started event without launching an uncancellable process", async () => {
+    it("[실패] 취소할 수 없는 프레임을 시작하지 않고 의도적으로 취소할 수 있음", async () => {
         const runner: GitProcessRunnerLike = {
             run: (_spec, signal) =>
                 Promise.resolve(

@@ -10,8 +10,8 @@ function createStore(repositoryId: string) {
     });
 }
 
-describe("RepositoryWorkspaceStore", () => {
-    it("isolates state and generations between repositories", () => {
+describe("작업공간스토어", () => {
+    it("[성공] 리포지토리 간 상태와 독립을 분리함", () => {
         const first = createStore("repository-1");
         const second = createStore("repository-2");
 
@@ -26,7 +26,7 @@ describe("RepositoryWorkspaceStore", () => {
         );
     });
 
-    it("rejects stale async tokens after the repository scope is invalidated", () => {
+    it("[실패] 배낭이 소형화된 후에는 쓸모없게 되었습니다", () => {
         const store = createStore("repository-1");
         const token = store.getState().createRequestToken();
 
@@ -38,7 +38,7 @@ describe("RepositoryWorkspaceStore", () => {
         expect(other.getState().isRequestCurrent(token)).toBe(false);
     });
 
-    it("commits repository tasks only while the scope is current", async () => {
+    it("[성공] 범위가 현재인 동안에만 파티를 커밋함", async () => {
         const store = createStore("repository-1");
         let resolveTask: ((value: string) => void) | undefined;
         const task = new Promise<string>((resolve) => {
@@ -57,7 +57,7 @@ describe("RepositoryWorkspaceStore", () => {
         expect(committed).toEqual([]);
     });
 
-    it("settles current task failures without committing stale errors", async () => {
+    it("[실패] 오래된 오류를 범하지 않고 계속해서 실패를 해결함", async () => {
         const current = createStore("repository-1");
         const failures: string[] = [];
 

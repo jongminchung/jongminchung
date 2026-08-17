@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { RefreshCoordinator } from "./RefreshCoordinator";
 
-describe("RefreshCoordinator", () => {
-    it("merges queued invalidations and serializes a follow-up refresh", async () => {
+describe("새로고침코디네이터", () => {
+    it("[성공] 임시 휴화를 방탄하고 새로고침을 직렬화함", async () => {
         let finishFirst: (() => void) | undefined;
         const refresh = vi.fn(
             (
@@ -36,7 +36,7 @@ describe("RefreshCoordinator", () => {
         expect(refresh).toHaveBeenNthCalledWith(2, "repo", ["stash"]);
     });
 
-    it("defers inactive repository work until it is resumed", async () => {
+    it("[성공] 비활성 작업자 작업이 재개될 때까지 행동함", async () => {
         const refresh = vi.fn(async (): Promise<void> => undefined);
         const coordinator = RefreshCoordinator.of(refresh);
 

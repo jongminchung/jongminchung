@@ -203,7 +203,7 @@ async function checkoutBranch(
     await popup.getByRole("treeitem").filter({ hasText: target }).dblclick();
 }
 
-test("mutates partial index, worktree, commit, and amend state only through visible controls", async () => {
+test("[성공] 보이는 것을 바꿀 수 있는 부분, 작업 트리, 커밋 및 수정 상태를 변경함", async () => {
     test.setTimeout(60_000);
     await resetQaProfile(runtimeProfileName);
     const parent = await mkdtemp(join(tmpdir(), "git-client-ui-changes-"));
@@ -351,7 +351,7 @@ test("mutates partial index, worktree, commit, and amend state only through visi
     }
 });
 
-test("creates, checks out, renames, merges, and deletes branches through the branch popup", async () => {
+test("[성공] 브랜치 팝업을 통해 브랜치 생성, 출력, 이름 변경, 알림, 삭제", async () => {
     test.setTimeout(60_000);
     await resetQaProfile(runtimeProfileName);
     const parent = await mkdtemp(join(tmpdir(), "git-client-ui-refs-"));
@@ -485,7 +485,7 @@ test("creates, checks out, renames, merges, and deletes branches through the bra
     }
 });
 
-test("creates, applies, and drops a stash through visible VCS operations", async () => {
+test("[성공] 보이는 VCS 작업을 통해 숨김을 생성, 적용 및 삭제함", async () => {
     test.setTimeout(60_000);
     await resetQaProfile(runtimeProfileName);
     const parent = await mkdtemp(join(tmpdir(), "git-client-ui-stash-"));

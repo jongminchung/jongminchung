@@ -134,8 +134,8 @@ afterEach(async () => {
     );
 });
 
-describe("SubmoduleDiffService", () => {
-    it("loads gitlink OIDs, subjects, dirty worktree state, and recursive submodule metadata", async () => {
+describe("하위 모듈 DiffService", () => {
+    it("[성공] gitlink OID, 주제, 더티 작업 트리 상태 및 재귀 하위 모듈 메타데이터를 로드함", async () => {
         const fixture = await createNestedSubmoduleFixture();
         const record = await fixture.registry.open(fixture.root);
         const service = new SubmoduleDiffService(fixture.registry);
@@ -189,7 +189,7 @@ describe("SubmoduleDiffService", () => {
         });
     });
 
-    it("rejects submodule symlink escapes and invalid FileSource revisions", async () => {
+    it("[실패] 모듈 하위 포인터 링크 링크 이스케이프 및 잘못된 FileSource가 있었을 것임", async () => {
         const fixture = await createNestedSubmoduleFixture();
         const record = await fixture.registry.open(fixture.root);
         const service = new SubmoduleDiffService(fixture.registry);
@@ -217,8 +217,8 @@ describe("SubmoduleDiffService", () => {
     });
 });
 
-describe("parseNestedSubmoduleStatus", () => {
-    it("preserves paths with spaces and rejects malformed metadata", () => {
+describe("해석NestedSubmoduleStatus", () => {
+    it("[실패] 공백이 있는 곳에는 존재하지 않고 잘못된 형식의 데이터를 가지고 있음", () => {
         const oid = "a".repeat(40);
         expect(
             parseNestedSubmoduleStatus(

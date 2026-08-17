@@ -113,7 +113,7 @@ function workspaceCommandDefinitions(): readonly CommandDefinition[] {
     ];
 }
 
-describe("workspace command feature ports", () => {
+describe("작업 공간이 가능함", () => {
     let uninstallWorkbenchEvents: () => void;
 
     beforeEach(() => {
@@ -145,7 +145,7 @@ describe("workspace command feature ports", () => {
         vi.unstubAllGlobals();
     });
 
-    it("resolves every command from the canonical manifest", () => {
+    it("[성공] 매칭 매니페스트의 모든 퍼즐을 해결함", () => {
         const definitions = workspaceCommandDefinitions();
         const manifestIds = new Set(
             COMMAND_MANIFEST.commands.map((entry) => entry.id),
@@ -157,7 +157,7 @@ describe("workspace command feature ports", () => {
         );
     });
 
-    it("evaluates availability and checked state for every command", () => {
+    it("[성공] 모든 압축기에 대한 가용성 및 확인된 상태를 평가함", () => {
         for (const definition of workspaceCommandDefinitions()) {
             expect(
                 ["enabled", "disabled"],
@@ -172,7 +172,7 @@ describe("workspace command feature ports", () => {
         }
     });
 
-    it("executes every command against its narrow fake port", async () => {
+    it("[성공] 좁은 쉬크 포트에 대해 모든 범위를 실행함", async () => {
         for (const definition of workspaceCommandDefinitions()) {
             try {
                 await definition.execute();

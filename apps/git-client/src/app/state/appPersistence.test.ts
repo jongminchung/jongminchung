@@ -15,13 +15,13 @@ vi.mock("../../platform/electronSettings", () => ({
     writeElectronSettings: electronSettings.write,
 }));
 
-describe("app persistence adapter", () => {
+describe("앱을 활용해 주셔서 감사함", () => {
     beforeEach(() => {
         electronSettings.read.mockReset();
         electronSettings.write.mockReset();
     });
 
-    it("hydrates product settings through the existing parser", async () => {
+    it("[성공] 기존의 기록 보관소 설정을 수화함", async () => {
         electronSettings.read.mockResolvedValue({
             compactMode: true,
             zoom: 150,
@@ -33,7 +33,7 @@ describe("app persistence adapter", () => {
         });
     });
 
-    it("migrates missing project defaults without changing their setting keys", async () => {
+    it("[실패] 설정 키를 변경하지 않고 반대하는 프로젝트를 마이그레이션함", async () => {
         electronSettings.read.mockResolvedValue(undefined);
 
         await expect(hydrateProjectDefaults()).resolves.toMatchObject({

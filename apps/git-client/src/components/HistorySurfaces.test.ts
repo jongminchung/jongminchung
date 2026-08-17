@@ -46,8 +46,8 @@ function renderEmptyReview(): string {
     );
 }
 
-describe("Rebased 1.1.11 history surfaces", () => {
-    it("renders the measured empty review when no commit is selected", () => {
+describe("1.1.11 기록 표면을 많이 추가했습니다", () => {
+    it("[성공] 커밋이 선택되지 않은 경우에 대해 확인하고 보내드립니다", () => {
         const markup = renderEmptyReview();
         const changesLabel = markup.indexOf("Select commit to view changes");
         const detailsLabel = markup.indexOf("Commit details");

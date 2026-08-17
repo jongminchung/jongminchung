@@ -151,7 +151,7 @@ function handler(path: TestDesktopTrpcPath): InvokeHandler {
     };
 }
 
-describe("platform Git IPC handlers", () => {
+describe("플랫폼 Git IPC 핸들러", () => {
     beforeEach(() => {
         electronMock.handlers.clear();
         electronMock.openExternal.mockReset();
@@ -160,7 +160,7 @@ describe("platform Git IPC handlers", () => {
         electronMock.fromWebContents.mockReturnValue(null);
     });
 
-    it("rejects direct Git operation IPC for a repository opened in Safe Mode", async () => {
+    it("[실패] 전원 모드에서 열려 있는 휴가용 Git 작업 IPC에 포함되어 있음", async () => {
         const mainFrame = { url: "app://git-client/" };
         const webContents = {
             isDestroyed: () => false,
@@ -221,7 +221,7 @@ describe("platform Git IPC handlers", () => {
         unregisterPlatformHandlers();
     });
 
-    it("rejects direct repository-service and working-tree mutations in Safe Mode", async () => {
+    it("[실패] 그립 모드에서 손잡이 서비스 및 작업 트리를 변형할 수 있음", async () => {
         const mainFrame = { url: "app://git-client/" };
         const webContents = {
             isDestroyed: () => false,
@@ -295,7 +295,7 @@ describe("platform Git IPC handlers", () => {
         unregisterPlatformHandlers();
     });
 
-    it("closes existing PTYs and rejects terminal and hosting IPC on trusted-to-safe reopen", async () => {
+    it("[실패] 서부 PTY를 늦게 고칠 수 있는 후방 복구방 시 터미널 및 IPC를 포함하고 있음", async () => {
         const mainFrame = { url: "app://git-client/" };
         const webContents = {
             isDestroyed: () => false,
@@ -375,7 +375,7 @@ describe("platform Git IPC handlers", () => {
         unregisterPlatformHandlers();
     });
 
-    it("denies full IPC to child windows and limits Local History to its repository", async () => {
+    it("[실패] 하위 창에 대한 전체 IPC를 배치하고 기록을 표시하도록 제한함", async () => {
         const mainFrame = { url: "app://git-client/" };
         const mainWebContents = {
             isDestroyed: () => false,
@@ -475,7 +475,7 @@ describe("platform Git IPC handlers", () => {
         unregisterPlatformHandlers();
     });
 
-    it("opens only validated HTTP(S) URLs for the trusted renderer", async () => {
+    it("[성공] 믿을 수 있는 렌더러에 대해 검증된 HTTP(S) URL만 조사함", async () => {
         const mainFrame = { url: "app://git-client/" };
         const webContents = {
             isDestroyed: () => false,
@@ -521,7 +521,7 @@ describe("platform Git IPC handlers", () => {
         unregisterPlatformHandlers();
     });
 
-    it("switches between welcome and workspace window bounds", async () => {
+    it("[성공] 시작과 작업 공간 창 경계 사이를 전환함", async () => {
         const mainFrame = { url: "app://git-client/" };
         const webContents = {
             isDestroyed: () => false,
@@ -581,7 +581,7 @@ describe("platform Git IPC handlers", () => {
         unregisterPlatformHandlers();
     });
 
-    it("validates, delegates, and streams Git query events to the trusted window", async () => {
+    it("[성공] Git 쿼리 이벤트를 발생시킬 수 있는 창으로 검증, 입력 및 스트리밍함", async () => {
         const send = vi.fn();
         const mainFrame = { url: "app://git-client/" };
         const webContents = {
@@ -755,7 +755,7 @@ describe("platform Git IPC handlers", () => {
         unregisterPlatformHandlers();
     });
 
-    it("validates and streams an operation through the same Git IPC lifecycle", async () => {
+    it("[성공] Git IPC 수명주기를 통해 파티를 검증하고 스트리밍함", async () => {
         const send = vi.fn();
         const mainFrame = { url: "app://git-client/" };
         const webContents = {
@@ -834,7 +834,7 @@ describe("platform Git IPC handlers", () => {
         unregisterPlatformHandlers();
     });
 
-    it("rejects Git calls from an untrusted sender before delegation", async () => {
+    it("[실패]하기 전에는 전투할 수 없는 발신자의 Git 명령을 받았을 것임", async () => {
         const openRepository = vi.fn(async () => REPOSITORY);
         const mainFrame = { url: "app://git-client/" };
         const webContents = {
@@ -879,7 +879,7 @@ describe("platform Git IPC handlers", () => {
         unregisterPlatformHandlers();
     });
 
-    it("validates and delegates complete snapshot inspection", async () => {
+    it("[성공] 전체 스냅인 스캔들을 검증하고 당황함", async () => {
         const mainFrame = { url: "app://git-client/" };
         const webContents = {
             isDestroyed: () => false,
@@ -914,7 +914,7 @@ describe("platform Git IPC handlers", () => {
         unregisterPlatformHandlers();
     });
 
-    it("validates and dispatches repository inspection and ignore-rule operations", async () => {
+    it("[성공] 감시자 및 규칙을 무시하고 감시하고 감시함", async () => {
         const mainFrame = { url: "app://git-client/" };
         const webContents = {
             isDestroyed: () => false,
@@ -1008,7 +1008,7 @@ describe("platform Git IPC handlers", () => {
         unregisterPlatformHandlers();
     });
 
-    it("validates and dispatches push and history rewrite previews as direct results", async () => {
+    it("[성공] 푸시 및 기록 재작성 미리 보기를 거부하고 결과를 전달함", async () => {
         const mainFrame = { url: "app://git-client/" };
         const webContents = {
             isDestroyed: () => false,
@@ -1088,7 +1088,7 @@ describe("platform Git IPC handlers", () => {
         unregisterPlatformHandlers();
     });
 
-    it("validates file reads and forwards watched repository invalidations", async () => {
+    it("[성공] 파일 읽기를 확인하고 대문자화를 전달함", async () => {
         const send = vi.fn();
         const mainFrame = { url: "app://git-client/" };
         const webContents = {
@@ -1173,7 +1173,7 @@ describe("platform Git IPC handlers", () => {
         unregisterPlatformHandlers();
     });
 
-    it("opens only utility-resolved canonical worktree files and surfaces shell failures", async () => {
+    it("[성공] 전투기로 전투 중인 전투 작업 트리 파일만 남아 있는 헬리콥터를 표시함", async () => {
         const mainFrame = { url: "app://git-client/" };
         const webContents = {
             isDestroyed: () => false,
@@ -1240,7 +1240,7 @@ describe("platform Git IPC handlers", () => {
         unregisterPlatformHandlers();
     });
 
-    it("resolves terminal cwd only from an opened repository and forwards validated PTY events", async () => {
+    it("[성공] 참가자들만 터미널 cwd를 확인하고 검증된 PTY 이벤트를 전달했습니다", async () => {
         const send = vi.fn();
         const mainFrame = { url: "app://git-client/" };
         const webContents = {
@@ -1353,7 +1353,7 @@ describe("platform Git IPC handlers", () => {
         unregisterPlatformHandlers();
     });
 
-    it("cancels stream-owned Git work, watchers, and terminals on disconnect", async () => {
+    it("[실패] 연결 해제 시 스트림 소유 Git 작업, 감시자 및 터미널을 취소함", async () => {
         const mainFrame = { url: "app://git-client/" };
         const webContents = {
             isDestroyed: () => false,

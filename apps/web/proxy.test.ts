@@ -17,8 +17,8 @@ function createRequest(
     });
 }
 
-describe("multi-domain proxy", () => {
-    it("redirects the site root by cookie and Accept-Language", () => {
+describe("제조원", () => {
+    it("[성공] 쿠키 및 Accept-Language를 통해 사이트를 종료함", () => {
         const saved = proxy(
             createRequest("/", {
                 headers: {
@@ -53,7 +53,7 @@ describe("multi-domain proxy", () => {
         expect(production.headers.get("location")).toBe("http://jamie.kr/ko");
     });
 
-    it("rewrites localized routes and declares the representation language", () => {
+    it("[성공] 지역적으로 다시 작성하고 표현적인 언어를 선언함", () => {
         const response = proxy(createRequest("/ko/articles/ddd"));
         expect(response.status).toBe(200);
         expect(response.headers.get("content-language")).toBe("ko");
@@ -65,7 +65,7 @@ describe("multi-domain proxy", () => {
         ).toBeNull();
     });
 
-    it("rejects spoofed internal routing headers and private paths", () => {
+    it("[실패] 스푸핑된 내부 헤더 및 개인 위치를 유지함", () => {
         const headers = {
             "x-jamie-internal-rewrite": "1",
             "x-jamie-locale": "ko",
@@ -84,7 +84,7 @@ describe("multi-domain proxy", () => {
         ).toBe(404);
     });
 
-    it("uses Host without trusting X-Forwarded-Host", () => {
+    it("[실패] X-Forwarded-Host를 신뢰하지 않고 호스트를 사용함", () => {
         expect(
             proxy(
                 createRequest("/en", {

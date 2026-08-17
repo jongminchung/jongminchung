@@ -135,8 +135,8 @@ afterEach(async () => {
     );
 });
 
-describe("RepositoryQueryService", () => {
-    it("executes a validated status request in its registered repository", async () => {
+describe("쿼리서비스", () => {
+    it("[성공] 등록된 참가자에서 검증된 상태 요청을 실행함", async () => {
         const { repositoryId, service } = await fixture();
         const request: GitDomainQueryRequest = { kind: "status", repositoryId };
 
@@ -149,7 +149,7 @@ describe("RepositoryQueryService", () => {
         });
     });
 
-    it("executes and decodes all 17 read-only Git request kinds", async () => {
+    it("[성공] 17가지 읽기에 Git이 요청하는 종류를 모두 실행하고 있음을 확인함", async () => {
         const { repositoryId, root, service } = await fixture();
         const requests = [
             { kind: "status", repositoryId },
@@ -256,7 +256,7 @@ describe("RepositoryQueryService", () => {
         await expect(pathExists(join(root, "injected"))).resolves.toBe(false);
     });
 
-    it("returns bounded failures for invalid input, unknown repositories, and Git errors", async () => {
+    it("[실패] 자리를 입력하지 않고, 알 수 없는 외부 및 Git 오류에 대한 실패를 거부함", async () => {
         const { repositoryId, service } = await fixture();
         const invalid = await service.execute({
             kind: "log",
@@ -301,7 +301,7 @@ describe("RepositoryQueryService", () => {
         });
     });
 
-    it("runs from the registry's canonical cwd and maps active cancellation", async () => {
+    it("[성공] 선호의 표준 cwd에서 실행하고 활성 취소를 매핑함", async () => {
         const { registry, repositoryId, root } = await fixture();
         let observedSpec: GitProcessSpec | null = null;
         const runner: GitProcessRunnerLike = {
@@ -356,7 +356,7 @@ describe("RepositoryQueryService", () => {
         });
     });
 
-    it("decodes streams before redacting credentials that cross process output chunks", async () => {
+    it("[성공] 청크를 인증하는 시험 처리 자격 증명을 수정하기 전에 스트림을 감사함", async () => {
         const { registry, repositoryId } = await fixture();
         const runner: GitProcessRunnerLike = {
             run: () =>
@@ -400,7 +400,7 @@ describe("RepositoryQueryService", () => {
         ]);
     });
 
-    it("redacts a NUL-delimited config secret without consuming the next entry", async () => {
+    it("[실패] 다음 항목을 사용하지 않고 NUL로 구분된 구성 비밀을 수정함", async () => {
         const { registry, repositoryId } = await fixture();
         const configOutput = [
             "file:.git/config",
@@ -434,7 +434,7 @@ describe("RepositoryQueryService", () => {
         expect(outcome.stdout).not.toContain(secretToken);
     });
 
-    it("preserves repository stdout on output-limit failures while redacting the error message", async () => {
+    it("[성공] 오류 메시지를 수정하는 동안 전송 제한은 실패합니다. stdout을 유지함", async () => {
         const { registry, repositoryId } = await fixture();
         const runner: GitProcessRunnerLike = {
             run: () =>

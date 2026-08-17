@@ -70,8 +70,8 @@ function keyboard(
     };
 }
 
-describe("terminal action manifest", () => {
-    it("keeps the evidence-backed action order, labels, separators, and macOS shortcuts", () => {
+describe("터미널 작업 매니페스트", () => {
+    it("[성공] 증거 기반 작업 목록, 레이블, 구분 기호 및 macOS 표시를 유지함", () => {
         expect(TERMINAL_ACTION_MENU).toEqual([
             { kind: "action", id: "newTab", label: "New Tab", shortcut: "⌘T" },
             {
@@ -99,7 +99,7 @@ describe("terminal action manifest", () => {
         ]);
     });
 
-    it("maps exact macOS shortcuts and ignores modified, repeated, and composing events", () => {
+    it("[성공] macOS를 매핑하고 수정하고, 반복 및 구성 이벤트를 무시함", () => {
         expect(terminalActionForKeyboard(keyboard("t"))).toBe("newTab");
         expect(terminalActionForKeyboard(keyboard("w"))).toBe("closeTab");
         expect(terminalActionForKeyboard(keyboard("c"))).toBe("copy");
@@ -117,7 +117,7 @@ describe("terminal action manifest", () => {
         ).toBeNull();
     });
 
-    it("derives enabled states from actual terminal and clipboard capabilities", () => {
+    it("[성공] 실제 터미널 및 클립보드에서 활성화된 상태를 유지하는 기능", () => {
         const ready = {
             hasSession: true,
             hasSelection: true,
@@ -152,8 +152,8 @@ describe("terminal action manifest", () => {
     });
 });
 
-describe("terminal keyboard navigation", () => {
-    it("wraps menus and tabs while supporting Home and End", () => {
+describe("터미널 키보드 탐색", () => {
+    it("[성공] Home과 End를 지원하면서 메뉴와 탭을 저장함", () => {
         expect(nextTerminalMenuIndex(4, 3, "ArrowDown")).toBe(0);
         expect(nextTerminalMenuIndex(4, 0, "ArrowUp")).toBe(3);
         expect(nextTerminalMenuIndex(4, -1, "ArrowDown")).toBe(0);
@@ -174,7 +174,7 @@ describe("terminal keyboard navigation", () => {
         );
     });
 
-    it("chooses the following tab, then the preceding tab, after close", () => {
+    it("[성공] 다음 탭을 선택하고 다음 선택은 후 이전 탭을 선택함", () => {
         expect(terminalTabAfterClose(["one", "two", "three"], "two")).toBe(
             "three",
         );
@@ -185,8 +185,8 @@ describe("terminal keyboard navigation", () => {
     });
 });
 
-describe("TerminalActionExecutor", () => {
-    it("uses only xterm-supported surface methods and restores terminal focus", async () => {
+describe("터미널 액션 실행자", () => {
+    it("[성공] xterm이 지원하는 표면 방법만 사용하고 터미널 초점을 복원함", async () => {
         const terminal = new FakeTerminal();
         const clipboard = new FakeClipboard();
         const executor = TerminalActionExecutor.of(terminal, clipboard);
@@ -211,7 +211,7 @@ describe("TerminalActionExecutor", () => {
         expect(terminal.focusCount).toBe(4);
     });
 
-    it("returns recoverable unavailable results and still restores focus", async () => {
+    it("[성공]복구 가능하고 사용할 수 없는 결과를 반환하고 유지하는 것에 대한 복원", async () => {
         const terminal = new FakeTerminal();
         terminal.selection = "";
         const executor = TerminalActionExecutor.of(terminal, null);

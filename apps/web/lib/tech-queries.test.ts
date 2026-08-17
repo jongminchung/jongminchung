@@ -48,8 +48,8 @@ function createClient(): QueryClient {
 
 afterEach(() => vi.unstubAllGlobals());
 
-describe("searchIndexQueryOptions", () => {
-    it("separates locale keys and parses the response contract", async () => {
+describe("검색인 인덱스 설정", () => {
+    it("[성공] 로케일 키를 분리하고 응답 계약을 삽입 분석함", async () => {
         vi.stubGlobal(
             "fetch",
             vi.fn(async () => Response.json([searchDocument])),
@@ -71,7 +71,7 @@ describe("searchIndexQueryOptions", () => {
         ).resolves.toEqual([searchDocument]);
     });
 
-    it("rejects HTTP and Zod contract failures", async () => {
+    it("[실패] HTTP 및 Zod 계약이 실패했습니다", async () => {
         const client = createClient();
         const fetchMock = vi
             .fn<typeof fetch>()
@@ -90,8 +90,8 @@ describe("searchIndexQueryOptions", () => {
     });
 });
 
-describe("excalidrawSceneQueryOptions", () => {
-    it("forwards the query signal and caches a scene by source", async () => {
+describe("excalidrawSceneQuery 옵션", () => {
+    it("[성공] 쿼리 신호를 전달하고 소스를 캐시함", async () => {
         let receivedSignal: AbortSignal | undefined;
         const fetchMock = vi.fn(
             async (_input: RequestInfo | URL, init?: RequestInit) => {

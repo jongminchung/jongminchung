@@ -11,8 +11,8 @@ const changelistId = "723094e7-bf3b-4d3e-8f74-6cebe9571840";
 const recoveryId = "53f66fe0-6b52-4a69-9b9f-b07c724f9095";
 const secondRepositoryId = "50dce2ce-cd90-4f4a-8af7-dbb005bf7262";
 
-describe("Git repository service contracts", () => {
-    it("accepts correlated bounded inspection and ignore-rule values", () => {
+describe("Git 기반 서비스 계약", () => {
+    it("[성공] 성공된 검토 및 무시 규칙의 가치를 인정함", () => {
         expect(
             GitRepositoryServiceRequestSchema.parse({
                 operation: "compareBranches",
@@ -43,7 +43,7 @@ describe("Git repository service contracts", () => {
         ).toMatchObject({ operation: "writeIgnoreRules" });
     });
 
-    it("rejects unknown fields, unsafe revisions, null bytes, and invalid result objects", () => {
+    it("[실패] 알 수 없는 필드, 안전하지 않은 경우, null 포인트 및 유효하지 않은 결과를 가질 수 있음", () => {
         const invalidRequests: readonly unknown[] = [
             { operation: "listRemotes", repositoryId, unexpected: true },
             {
@@ -87,7 +87,7 @@ describe("Git repository service contracts", () => {
         ).toBe(false);
     });
 
-    it("defines all 17 bounded special service request and result variants", () => {
+    it("[성공] 17개의 특별 서비스 요청 및 결과 변형을 모두 정의함", () => {
         const requests: readonly unknown[] = [
             {
                 operation: "exportPatch",
@@ -252,7 +252,7 @@ describe("Git repository service contracts", () => {
         }
     });
 
-    it("rejects traversal, option injection, oversized text, and malformed special DTOs", () => {
+    it("[실패] 순회, 옵션 설명, 너무 큰 텍스트 및 공백 형식의 숫자 DTO를 포함함", () => {
         const invalidRequests: readonly unknown[] = [
             {
                 operation: "exportPatch",
@@ -318,7 +318,7 @@ describe("Git repository service contracts", () => {
         ).toBe(false);
     });
 
-    it("strictly correlates submodule, file-open, and multi-root service values", () => {
+    it("[성공] 모듈 하위, 파일 전송 및 다중 서비스 값을 활용하게 연관시키다", () => {
         const requests: readonly unknown[] = [
             {
                 operation: "loadSubmoduleDiff",

@@ -21,8 +21,8 @@ const sessions = [
     },
 ];
 
-describe("workspace persistence", () => {
-    it("opens a fresh repository in Project history without selecting a commit", () => {
+describe("작업과정을 거치는 과정", () => {
+    it("[실패] 커밋을 선택하지 않고 프로젝트 기록에서 새로운 내용을 다루다", () => {
         expect(migrateRepositoryUiState(null)).toMatchObject({
             activeView: "history",
             selectedOids: [],
@@ -33,7 +33,7 @@ describe("workspace persistence", () => {
         });
     });
 
-    it("preserves an explicitly persisted repository shell state", () => {
+    it("[성공] 유일하게 수용되는 셸 상태를 유지함", () => {
         expect(
             migrateRepositoryUiState({
                 activeView: "changes",
@@ -53,7 +53,7 @@ describe("workspace persistence", () => {
         });
     });
 
-    it("migrates missing preferences without trusting stored values", () => {
+    it("[실패] 값을 신뢰하지 않고 반환된 기본 설정을 마이그레이션함", () => {
         expect(migrateWorkspacePreferences(null)).toEqual(
             DEFAULT_WORKSPACE_PREFERENCES,
         );
@@ -75,7 +75,7 @@ describe("workspace persistence", () => {
         ).toBe(false);
     });
 
-    it("preserves validated hosting metadata without storing secrets", () => {
+    it("[실패] 비밀을 저장하지 않고 인증된 타이머 데이터를 저장하지 않음", () => {
         expect(
             migrateWorkspacePreferences({
                 hostingAccounts: [
@@ -98,7 +98,7 @@ describe("workspace persistence", () => {
         ]);
     });
 
-    it("migrates schema v2 state to the current schema without losing workspace preferences", () => {
+    it("[실패] 작업 공간 기본 설정을 실행하고 v2상태를 현재로서는 마이그레이션함", () => {
         expect(
             migrateWorkspacePreferences({
                 schemaVersion: 2,
@@ -119,7 +119,7 @@ describe("workspace persistence", () => {
         ).toBe(false);
     });
 
-    it("migrates repository panel state with safe height defaults and bounds", () => {
+    it("[성공] 대피 장소와 경계를 사용하여 선반 패널 상태를 마이그레이션함", () => {
         expect(
             migrateRepositoryUiState({
                 selectedOids: ["abc", 1],
@@ -146,7 +146,7 @@ describe("workspace persistence", () => {
         ).toBe(MAX_BOTTOM_PANEL_HEIGHT);
     });
 
-    it("migrates schema v3 review state and validates drafts and pane widths", () => {
+    it("[성공] v3 검토 상태를 마이그레이션하고 초안 및 창의 경량화를 확인함", () => {
         expect(
             migrateRepositoryUiState({
                 activeView: "changes",
@@ -178,7 +178,7 @@ describe("workspace persistence", () => {
         ).toBe(253);
     });
 
-    it("preserves repository and failed-path tab order", () => {
+    it("[성공] 중단 및 중단 시간을 유지함", () => {
         expect(workspacePaths(sessions)).toEqual([
             "/work/a",
             "/missing",
@@ -186,7 +186,7 @@ describe("workspace persistence", () => {
         ]);
     });
 
-    it("restores the active repository and falls back to the first valid repository", () => {
+    it("[성공] 활동적인 바깥쪽을 복구하고 첫 번째 손잡이로 교체함", () => {
         expect(restoredWorkspaceTab(sessions, "/work/b")).toEqual({
             kind: "repository",
             repositoryId: "repo-b",
@@ -204,7 +204,7 @@ describe("workspace persistence", () => {
         });
     });
 
-    it("selects the adjacent session when the active repository closes", () => {
+    it("[성공] 활력있는 에너지를 받을 때 세션을 선택함", () => {
         expect(
             workspaceTabAfterClose(
                 sessions,

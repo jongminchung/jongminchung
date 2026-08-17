@@ -152,7 +152,7 @@ function repositoryCommandDefinitions(): readonly CommandDefinition[] {
     ];
 }
 
-describe("repository command feature ports", () => {
+describe("사용자는 다음과 같은 기능을 가지고 있음", () => {
     let uninstallWorkbenchEvents: () => void;
 
     beforeEach(() => {
@@ -202,7 +202,7 @@ describe("repository command feature ports", () => {
         vi.unstubAllGlobals();
     });
 
-    it("resolves every factory command from the canonical manifest", () => {
+    it("[성공] 기아 매니페스트의 모든 패키지토리 수수께끼를 해결함", () => {
         const definitions = repositoryCommandDefinitions();
         const manifestIds = new Set(
             COMMAND_MANIFEST.commands.map((entry) => entry.id),
@@ -214,7 +214,7 @@ describe("repository command feature ports", () => {
         );
     });
 
-    it("evaluates availability and checked state for every command", () => {
+    it("[성공] 모든 압축기에 대한 가용성 및 확인된 상태를 평가함", () => {
         for (const definition of repositoryCommandDefinitions()) {
             expect(
                 ["enabled", "disabled"],
@@ -229,7 +229,7 @@ describe("repository command feature ports", () => {
         }
     });
 
-    it("executes every command against its narrow fake port", async () => {
+    it("[성공] 좁은 쉬크 포트에 대해 모든 범위를 실행함", async () => {
         for (const definition of repositoryCommandDefinitions()) {
             try {
                 await definition.execute();
@@ -241,7 +241,7 @@ describe("repository command feature ports", () => {
         }
     });
 
-    it("routes representative actions only through their feature port", async () => {
+    it("[성공] 해당 기능을 사용할 수 있는 업체를 대표함", async () => {
         const openScratch = vi.fn();
         const focusSearch = vi.fn();
         const collapseBottom = vi.fn();

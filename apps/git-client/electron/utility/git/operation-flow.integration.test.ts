@@ -30,8 +30,8 @@ afterEach(async () => {
     );
 });
 
-describe("packaged Git operation flow", () => {
-    it("stages, commits, amends, creates a branch, and pushes to the local remote", async () => {
+describe("패키지화된 Git 작업", () => {
+    it("[성공] 준비, 커밋, 분기, 분기 생성 및 원격으로 푸시", async () => {
         const fixtureRoot = await mkdtemp(
             join(tmpdir(), "git-client-operation-flow-"),
         );

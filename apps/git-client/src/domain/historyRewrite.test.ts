@@ -37,8 +37,8 @@ const preview = (entries: RebasePlanEntry[]): HistoryRewritePreview => ({
     warnings: [],
 });
 
-describe("history rewrite plan", () => {
-    it("prepares quick squash oldest-first with an editable final message", () => {
+describe("역사 다시 쓰기 계획", () => {
+    it("[성공] 최종 메시지를 사용하여 가장 오래된 것부터 빠른 스쿼시를 준비함", () => {
         const plan = prepareHistoryPlan(
             preview([entry("a"), entry("b"), entry("c")]),
             new Set(["a", "b"]),
@@ -53,7 +53,7 @@ describe("history rewrite plan", () => {
         expect(historyPlanError(plan)).toBeNull();
     });
 
-    it("validates action targets and keeps reordering immutable", () => {
+    it("[성공] 아이들 목표를 검증하고 수호할 수 있도록 재단함", () => {
         expect(historyPlanError([entry("a", { action: "fixup" })])).toMatch(
             /earlier picked/,
         );

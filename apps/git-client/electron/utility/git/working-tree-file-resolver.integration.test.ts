@@ -107,7 +107,7 @@ afterEach(async () => {
 });
 
 describe("WorkingTreeFileResolver", () => {
-    it("returns canonical absolute paths only for regular files inside the repository", async () => {
+    it("[성공] 내부의 일반 파일에 대해서만 표준을 유지해야 함", async () => {
         const { root, registry } = await createRepository();
         const record = await registry.open(root);
         const resolver = new WorkingTreeFileResolver(registry);
@@ -122,7 +122,7 @@ describe("WorkingTreeFileResolver", () => {
         ).resolves.toBe(await realpath(join(root, "tracked.txt")));
     });
 
-    it("rejects escape links, directories, missing paths, traversal, null bytes, and option-like paths", async () => {
+    it("[실패] 이스케이프 링크, 일체형, 힌지된 기하학, 순회, 나선형 바이트 및 인사과 응용 프로그램을 적용함", async () => {
         const { root, registry } = await createRepository();
         const record = await registry.open(root);
         const resolver = new WorkingTreeFileResolver(registry);
@@ -148,7 +148,7 @@ describe("WorkingTreeFileResolver", () => {
         }
     });
 
-    it("rejects a file replaced between canonicalization and identity verification", async () => {
+    it("[실패] 정규화와 신원 확인 사이에 대체된 파일을 포함함", async () => {
         const { root, registry } = await createRepository();
         const record = await registry.open(root);
         const target = await realpath(join(root, "tracked.txt"));

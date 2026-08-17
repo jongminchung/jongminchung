@@ -170,31 +170,31 @@ function interactiveRebase(entries: readonly unknown[]): unknown {
     };
 }
 
-describe("GitOperationSchema", () => {
-    it("is compile-time compatible with the generated GitOperation in both directions", () => {
+describe("Git작업스키마", () => {
+    it("[성공] 생성된 GitOperation과 양방향으로 서로 호환 가능", () => {
         expect(generatedFitsContract).toBe(true);
         expect(contractFitsGenerated).toBe(true);
     });
 
-    it("contains one valid fixture for each of the 51 generated operation kinds", () => {
+    it("[성공] 생성된 51개의 작업 종류 각각에 대해 하나의 찾기 쉬운 물을 포함함", () => {
         expect(validOperations).toHaveLength(51);
         expect(new Set(validOperations.map(({ kind }) => kind)).size).toBe(51);
     });
 
     it.each(validOperations)(
-        "accepts the operation-command fixture for $kind",
+        "[성공] $kind에 대한 로봇 고정 장치를 허용함",
         (operation) => {
             expect(GitOperationSchema.parse(operation)).toEqual(operation);
         },
     );
 
-    it("rejects every abuse case already rejected by operation command construction", () => {
+    it("[실패] 작전 명령 구성에 이미 존재하고 있는 모든 남용 참가자가 있음", () => {
         for (const operation of commandBuilderInvalidOperations) {
             expect(GitOperationSchema.safeParse(operation).success).toBe(false);
         }
     });
 
-    it("rejects unknown, non-strict, missing, oversized, and unsafe operation fields", () => {
+    it("[실패] 알 수 없음, 추가되지 않음, 로그됨, 크기가 더 크고 안전하지 않은 게임 필드를 가지고 있음", () => {
         const invalid: readonly unknown[] = [
             { kind: "unknown" },
             { kind: "stageAll", unexpected: true },
@@ -252,7 +252,7 @@ describe("GitOperationSchema", () => {
         }
     });
 
-    it("bounds patch content by UTF-8 bytes", () => {
+    it("[성공] 패치 내용을 UTF-8바이트로 제한", () => {
         const maximumPatch = "x".repeat(MAX_GIT_OPERATION_PATCH_BYTES);
         expect(
             GitOperationSchema.safeParse({
@@ -280,7 +280,7 @@ describe("GitOperationSchema", () => {
         ).toBe(false);
     });
 
-    it("enforces rebase plan bounds, identifiers, and action/message relationships", () => {
+    it("[성공] 리베이스 계획 범위, 제외 및 작업/메시지 관계를 적용함", () => {
         const tooManyEntries = Array.from({ length: 501 }, (_, index) => ({
             ...entry,
             oid: index.toString(16).padStart(40, "0"),

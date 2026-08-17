@@ -19,8 +19,8 @@ function expectManualWorkflow(workflow: string): void {
     expect(triggerBlock?.trim()).toBe("workflow_dispatch:");
 }
 
-describe("fixed Git Client release configuration", () => {
-    it("uses one manually replaced release version", () => {
+describe("Git 클라이언트 릴리스 구성 변경", () => {
+    it("[성공] 매뉴얼로 교체된 릴리스 버전 하나를 사용함", () => {
         expect(packageConfig.version).toBe("1.0.0");
         expect(packageConfig.scripts.release).toBe(
             "node scripts/publish-release.ts",
@@ -40,7 +40,7 @@ describe("fixed Git Client release configuration", () => {
         expect(gitClientWorkflow).not.toContain("secrets.GITHUB_TOKEN");
     });
 
-    it("manually replaces all public package snapshots with 1.0.0", () => {
+    it("[성공] 모든 스파이스샷을 1.0.0으로 수동으로 바뀐다", () => {
         expectManualWorkflow(packageWorkflow);
         expect(packageWorkflow).toContain('select(.name == "1.0.0")');
         expect(packageWorkflow).toContain("Publish tooling 1.0.0");
@@ -56,7 +56,7 @@ describe("fixed Git Client release configuration", () => {
         expect(packageWorkflow).not.toContain("secrets.GITHUB_TOKEN");
     });
 
-    it("exposes production and explicit ad-hoc Electron release commands without an updater", () => {
+    it("[실패]업데이트 데이터 제외 및 외계인 같은 임시 전자 방출 장치를 일치함", () => {
         expect(packageConfig.scripts["release:build"]).toBe(
             "node scripts/release.ts",
         );

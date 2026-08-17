@@ -8,8 +8,8 @@ import {
     sanitizeDiagnosticLogMessage,
 } from "./diagnostics-log";
 
-describe("diagnostic log storage", () => {
-    it("redacts URL credentials and common token assignments", () => {
+describe("로그 로그 저장", () => {
+    it("[성공] URL 자격 증명 및 처음으로 권한을 수정함", () => {
         const message = sanitizeDiagnosticLogMessage(
             "https://user:secret@example.test token=plain Authorization: Bearer arbitrary-secret",
         );
@@ -19,7 +19,7 @@ describe("diagnostic log storage", () => {
         expect(message).not.toContain("arbitrary-secret");
     });
 
-    it("redacts a long credential before applying the field length limit", () => {
+    it("[성공] 필드 길이 제한을 적용하기 전에 긴 자격 증명을 수정함", () => {
         const secret = "s".repeat(3_000);
         const message = sanitizeDiagnosticLogField(
             `https://user:${secret}@example.test/repository`,
@@ -29,7 +29,7 @@ describe("diagnostic log storage", () => {
         expect(message).not.toContain(secret.slice(0, 128));
     });
 
-    it("rotates to one bounded backup before appending", async () => {
+    it("[성공] 추가하기 전에 하나의 거대한 백업으로 회전함", async () => {
         const directory = await mkdtemp(
             join(tmpdir(), "git-client-diagnostics-log-"),
         );

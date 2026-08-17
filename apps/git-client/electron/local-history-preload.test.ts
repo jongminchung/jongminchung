@@ -22,8 +22,8 @@ vi.mock("electron", () => ({
 
 await import("./local-history-preload");
 
-describe("Local History preload", () => {
-    it("exposes only the six Local History operations through its dedicated channel", async () => {
+describe("의상 사전 로드", () => {
+    it("[성공] 승리 채널을 통해 6개의 위치에 있는 파티에만 참여함", async () => {
         const api = electronMock.exposed.get(
             "gitClientLocalHistory",
         ) as LocalHistoryApi;

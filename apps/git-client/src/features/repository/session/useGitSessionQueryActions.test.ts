@@ -8,8 +8,8 @@ import type {
 } from "../../../shared/contracts/model/index";
 import { runProjectTextSearch } from "./useGitSessionQueryActions";
 
-describe("project text search session", () => {
-    it("cancels without starting a live query when clear or unmount sends an empty query", async () => {
+describe("프로젝트 관련 검색 세션", () => {
+    it("[실패] 지우거나 사냥할 때 라이브 쿼리를 시작하지 않고 취소합니다. 빈 쿼리를 보내", async () => {
         const runtime = createGitSessionRuntime("repository-1");
         runtime.activeSearchRequest = "request-1";
         const cancel = vi.fn(async () => undefined);

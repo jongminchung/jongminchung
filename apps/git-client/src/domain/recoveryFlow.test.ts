@@ -6,8 +6,8 @@ import {
     protectedRewriteConfirmation,
 } from "./recoveryFlow";
 
-describe("recovery flow presentation", () => {
-    it("names cherry-pick consistently and describes abort restoration", () => {
+describe("치료방법", () => {
+    it("[실패] 일관되게 Cherry-Pick의 이름을 대표하고 중단된 복원을 설명함", () => {
         expect(operationDisplayName("cherryPick")).toBe("cherry-pick");
         expect(abortOperationConfirmation("rebase", true)).toMatchObject({
             title: "Abort rebase?",
@@ -17,7 +17,7 @@ describe("recovery flow presentation", () => {
         });
     });
 
-    it("summarizes protected history rewrite impact before execution", () => {
+    it("[성공] 실행 전 보호 기록에 다시 영향을 요약함", () => {
         const preview = {
             branch: "main",
             descendantCount: 3,

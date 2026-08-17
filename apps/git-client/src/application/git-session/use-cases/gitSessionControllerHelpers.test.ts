@@ -24,8 +24,8 @@ function workspace(): WorkspaceState {
     };
 }
 
-describe("Git session controller helpers", () => {
-    it("creates empty and loading repository state", () => {
+describe("Git 세션 컨트롤러 패널", () => {
+    it("[성공] 비어 있고 로드하는 동안 상태를 생성함", () => {
         expect(emptyRepository(snapshot)).toMatchObject({
             snapshot,
             refs: [],
@@ -45,7 +45,7 @@ describe("Git session controller helpers", () => {
         });
     });
 
-    it("updates only the selected repository session", () => {
+    it("[성공] 제외 다른 세션만 업데이트함", () => {
         const current = workspace();
         const updated = updateRepositorySession(
             current,
@@ -66,7 +66,7 @@ describe("Git session controller helpers", () => {
         ).toBe(current);
     });
 
-    it("builds log requests and compares serialized values", () => {
+    it("[성공] 로그인 요청을 작성하고 직렬화된 값을 비교함", () => {
         expect(createLogRequest(snapshot.id)).toEqual({
             kind: "log",
             repositoryId: snapshot.id,
@@ -86,7 +86,7 @@ describe("Git session controller helpers", () => {
         expect(sameValue({ value: 1 }, { value: 2 })).toBe(false);
     });
 
-    it("settles every cancellation independently", async () => {
+    it("[성공] 모든 취소를 응답으로 처리", async () => {
         const cancel = vi
             .fn<GitBridge["cancel"]>()
             .mockResolvedValueOnce()

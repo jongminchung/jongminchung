@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { closeLogTabState } from "./useRepositoryTabCoordinator";
 
-describe("repository tab coordinator transitions", () => {
-    it("returns to the first inspector after closing the only active log tab", () => {
+describe("대신에 전환하세요", () => {
+    it("[성공] 장점 활성 탭을 마지막으로 첫 번째 검사로 돌아갑니다", () => {
         expect(
             closeLogTabState({
                 activeInspectorKey: undefined,
@@ -20,7 +20,7 @@ describe("repository tab coordinator transitions", () => {
         });
     });
 
-    it("keeps the fallback log contract when no inspector exists", () => {
+    it("[성공] 검사하는 동안 교체 계약을 유지함", () => {
         expect(
             closeLogTabState({
                 activeInspectorKey: undefined,
@@ -36,7 +36,7 @@ describe("repository tab coordinator transitions", () => {
         });
     });
 
-    it("selects the adjacent tab when the active log tab closes", () => {
+    it("[성공] 활성 탭이 될 때 힐을 받을 때 탭을 선택함", () => {
         expect(
             closeLogTabState({
                 activeInspectorKey: undefined,

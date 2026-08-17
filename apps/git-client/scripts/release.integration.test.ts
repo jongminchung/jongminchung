@@ -59,12 +59,12 @@ async function createDmgFixture(target: string): Promise<void> {
     await writeFile(target, "dmg");
 }
 
-describe("Electron release build contract", () => {
-    it("accepts a stable semantic release version", () => {
+describe("전자 릴리스 빌드 계약", () => {
+    it("[성공]의 의미는 릴리스 버전을 허용함", () => {
         expect(parseReleaseVersion("1.2.3")).toBe("1.2.3");
     });
 
-    it("rejects malformed or prerelease versions", () => {
+    it("[실패] 잘못된 해석 또는 테스트판 버전을 제출했습니다", () => {
         for (const version of [
             "1.2",
             "01.2.3",
@@ -78,7 +78,7 @@ describe("Electron release build contract", () => {
         }
     });
 
-    it("uses deterministic production and visibly ad-hoc ARM64 artifact names", () => {
+    it("[성공]결정론적 생산 및 가시적인 임시 ARM64 아티팩트 이름을 사용함", () => {
         expect(createReleaseArtifactNames("1.2.3")).toEqual({
             checksum: "Git-Client_1.2.3_macos_arm64.dmg.sha256",
             dmg: "Git-Client_1.2.3_macos_arm64.dmg",
@@ -94,7 +94,7 @@ describe("Electron release build contract", () => {
         });
     });
 
-    it("requires a clean main branch exactly matching fetched origin/main", async () => {
+    it("[성공] 가져온 원본/메인과 정확히 일치하는 기본 기본 지점이 필요함", async () => {
         const runCommand = vi.fn(
             async (_command: string, arguments_: readonly string[]) => {
                 const key = arguments_.join(" ");
@@ -150,7 +150,7 @@ describe("Electron release build contract", () => {
         ).rejects.toThrow("worktree must be clean");
     });
 
-    it("updates a stale origin/main tracking ref before comparing release source", async () => {
+    it("[성공] 릴리스를 비교하기 전에 오래된 원본/기본 추적 참조를 업데이트함", async () => {
         const directory = await mkdtemp(
             join(tmpdir(), "git-client-release-source-"),
         );
@@ -205,13 +205,13 @@ describe("Electron release build contract", () => {
         }
     });
 
-    it("rejects release builds outside macOS ARM64", () => {
+    it("[실패] macOS ARM64 외부의 릴리스를 제공함", () => {
         expect(requireMacArm64("darwin", "arm64")).toBe("arm64");
         expect(() => requireMacArm64("darwin", "x64")).toThrow("macOS ARM64");
         expect(() => requireMacArm64("linux", "arm64")).toThrow("macOS ARM64");
     });
 
-    it("accepts only the requested app version and a single arm64 executable", () => {
+    it("[성공] 요청된 앱 버전과 단일 arm64 실행 파일에만 허용됨", () => {
         expect(() =>
             assertReleaseBundleMetadata("1.2.3", "arm64", "1.2.3"),
         ).not.toThrow();
@@ -223,7 +223,7 @@ describe("Electron release build contract", () => {
         ).toThrow("only arm64");
     });
 
-    it("runs the complete source gates before an ARM64 Electron Forge package", () => {
+    it("[성공] ARM64 Electron Forge 패키지 이전에 전체 소스 모듈을 실행함", () => {
         expect(createReleaseSourceGateCommands()).toEqual([
             { command: "pnpm", arguments: ["test"] },
             { command: "pnpm", arguments: ["test:e2e"] },
@@ -245,7 +245,7 @@ describe("Electron release build contract", () => {
         ]);
     });
 
-    it("requires Developer ID and notarization configuration for production", () => {
+    it("[성공] 제작을 위한 개발자 ID 및 공증 구성이 필요함", () => {
         expect(
             resolveReleaseSecurity(
                 RELEASE_MODES.production,
@@ -274,7 +274,7 @@ describe("Electron release build contract", () => {
         ).toThrow("Developer ID Application");
     });
 
-    it("creates an explicit release environment without leaking production signing into ad-hoc mode", () => {
+    it("[실패] 징후를 임시 모드로 유지하지 않고 호환되는 릴리스 환경을 생성함", () => {
         expect(
             createReleaseBuildEnvironment(
                 productionEnvironment,
@@ -305,7 +305,7 @@ describe("Electron release build contract", () => {
         });
     });
 
-    it("parses production by default and requires an explicit local ad-hoc flag", () => {
+    it("[성공] 기본적으로 메모를 해석하고 독창적인 자리에 표기해야 함", () => {
         expect(findReleaseArguments(["--", "1.2.3"])).toEqual({
             mode: RELEASE_MODES.production,
             version: "1.2.3",
@@ -324,7 +324,7 @@ describe("Electron release build contract", () => {
         ).toThrow("Duplicate");
     });
 
-    it("stages a DMG with a streaming SHA-256 manifest", async () => {
+    it("[성공] 스트리밍 SHA-256 매니페스트를 사용하여 DMG를 준비함", async () => {
         const directory = await mkdtemp(join(tmpdir(), "git-client-release-"));
         const source = join(directory, "source.dmg");
         const output = join(directory, "artifacts");
@@ -373,7 +373,7 @@ describe("Electron release build contract", () => {
         }
     });
 
-    it("rejects a DMG larger than the 160 MiB release budget", async () => {
+    it("[실패] 160MiB 릴리스보다 큰 DMG를 보유함", async () => {
         const directory = await mkdtemp(join(tmpdir(), "git-client-release-"));
         const source = join(directory, "oversized.dmg");
 
@@ -393,7 +393,7 @@ describe("Electron release build contract", () => {
         }
     });
 
-    it("discovers exactly one nested Forge app and rejects intermediate DMGs", async () => {
+    it("[실패] 사실 하나의 맞지 않은 Forge 앱을 발견하고 포함된 DMG를 포함함", async () => {
         const appRoot = await mkdtemp(
             join(tmpdir(), "git-client-forge-output-"),
         );
@@ -437,7 +437,7 @@ describe("Electron release build contract", () => {
         }
     });
 
-    it("verifies the configured Developer ID identity from mocked keychain output", async () => {
+    it("[성공] 모의 키체인 출력에서 ​​​​구성된 개발자 ID ID를 확인함", async () => {
         const identity = productionEnvironment.GIT_CLIENT_CODESIGN_IDENTITY;
         const runCommand = vi.fn().mockResolvedValue({
             code: 0,
@@ -463,7 +463,7 @@ describe("Electron release build contract", () => {
         ).rejects.toThrow("not available");
     });
 
-    it("rejects ad-hoc signature details for a production artifact", () => {
+    it("[실패] 함대 아티팩트에 대한 임시 서명 정보를 있음함", () => {
         const identity = productionEnvironment.GIT_CLIENT_CODESIGN_IDENTITY;
         expect(() =>
             assertDeveloperIdSignatureOutput(`Authority=${identity}`, identity),
@@ -476,7 +476,7 @@ describe("Electron release build contract", () => {
         ).toThrow("not signed");
     });
 
-    it("runs package, strict codesign, Gatekeeper, and notarization-ticket validation", async () => {
+    it("[성공]패키지, 협공 설계, 메달키퍼 및 공증 입증 검증 실행함", async () => {
         const directory = await mkdtemp(
             join(tmpdir(), "git-client-release-app-"),
         );
@@ -535,7 +535,7 @@ describe("Electron release build contract", () => {
         }
     });
 
-    it("fails closed before source gates when production signing configuration is missing", async () => {
+    it("[실패] 호스트 서명 구성이 존재하는 소스 카드 이전에 실패하여 닫기 힘", async () => {
         const appRoot = await mkdtemp(
             join(tmpdir(), "git-client-release-build-"),
         );
@@ -556,7 +556,7 @@ describe("Electron release build contract", () => {
         }
     });
 
-    it("executes the production Electron pipeline in order with mocked subprocesses", async () => {
+    it("[성공] 모의 하위 프로세스와 함께 표시되는 전자 파이프라인을 순서대로 실행함", async () => {
         const appRoot = await mkdtemp(
             join(tmpdir(), "git-client-release-build-"),
         );
@@ -649,7 +649,7 @@ describe("Electron release build contract", () => {
         }
     });
 
-    it("uses an explicit, visibly marked local ad-hoc validation pipeline", async () => {
+    it("[성공] 연관성 있는 증거로 암시하는 암시 파이프라인을 사용함", async () => {
         const appRoot = await mkdtemp(
             join(tmpdir(), "git-client-release-build-"),
         );

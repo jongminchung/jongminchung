@@ -69,8 +69,8 @@ class FakeTerminalPort implements TerminalPort {
     }
 }
 
-describe("TerminalService", () => {
-    it("does not create or restore PTY sessions for a safe-mode repository", async () => {
+describe("터미널서비스", () => {
+    it("[실패] 안전 모드에 대한 PTY 세션을 생성하거나 복원하지 마십시오", async () => {
         const bridge = new FakeTerminalPort();
         const access = RepositoryAccessPolicy.create();
         access.open("repository-a", "/tmp/project-a", "safe");
@@ -89,7 +89,7 @@ describe("TerminalService", () => {
         expect(bridge.createCalls).toEqual([]);
     });
 
-    it("keeps PTY sessions per repository and forwards their lifecycle", async () => {
+    it("[성공] 리포지토리 나비 PTY 세션을 유지하고 생활주기를 전달함", async () => {
         vi.stubGlobal("crypto", { randomUUID: () => "ui-session-1" });
         const bridge = new FakeTerminalPort();
         const service = TerminalService.of(bridge);
@@ -141,7 +141,7 @@ describe("TerminalService", () => {
         vi.unstubAllGlobals();
     });
 
-    it("does not overwrite an exit delivered before Electron create resolves", async () => {
+    it("[실패] Electron create가 처리되기 전에 전달이 중단되는 현상", async () => {
         vi.stubGlobal("crypto", { randomUUID: () => "ui-session-2" });
         const bridge = new FakeTerminalPort();
         bridge.create = async (
@@ -168,7 +168,7 @@ describe("TerminalService", () => {
         vi.unstubAllGlobals();
     });
 
-    it("makes concurrent restore callers wait for the same restored terminal state", async () => {
+    it("[성공] 복원된 복원자가 동일하게 복원된 터미널 상태를 기다리게 함", async () => {
         vi.stubGlobal("crypto", { randomUUID: () => "ui-session-restored" });
         let finishRead: (value: unknown) => void = () => undefined;
         const read = new Promise<unknown>((resolve) => {
@@ -199,7 +199,7 @@ describe("TerminalService", () => {
         expect(service.sessions("repository-a")).toHaveLength(1);
     });
 
-    it("retains a create failure as a terminal event for the xterm surface", async () => {
+    it("[성공] xterm 표면에 대한 터미널 이벤트를 생성하지 못함을 유지함", async () => {
         vi.stubGlobal("crypto", { randomUUID: () => "ui-session-failed" });
         const bridge = new FakeTerminalPort();
         bridge.create = async (): Promise<TerminalId> => {

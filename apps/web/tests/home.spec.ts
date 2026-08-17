@@ -4,7 +4,7 @@ import {
     expectNoHorizontalOverflow,
 } from "./assertions";
 
-test("presents Jamie's work with valid metadata", async ({ page }) => {
+test("[성공] 현재 상황 데이터로 Jamie의 작업을 제시함", async ({ page }) => {
     await page.goto("/");
 
     await expect(page).toHaveTitle("Jamie — Jongmin Chung");
@@ -25,9 +25,7 @@ test("presents Jamie's work with valid metadata", async ({ page }) => {
     ).toContainText("jongminchung");
 });
 
-test("renders editorial actions with working destinations", async ({
-    page,
-}) => {
+test("[성공] 작업 대상으로 편집 작업을 전송함", async ({ page }) => {
     await page.goto("/");
 
     const workAction = page.getByRole("link", { name: "Read the work" });
@@ -45,7 +43,7 @@ test("renders editorial actions with working destinations", async ({
     await expect(page).toHaveURL(/#work$/u);
 });
 
-test("publishes domain discovery files", async ({ page, request }) => {
+test("[성공] 검색 파일 게시", async ({ page, request }) => {
     await page.goto("/en");
     const socialImageUrl = await page
         .locator('meta[property="og:image"]')
@@ -68,14 +66,12 @@ test("publishes domain discovery files", async ({ page, request }) => {
     expect(socialImage.headers()["content-type"]).toContain("image/png");
 });
 
-test("has no automatically detectable accessibility violations", async ({
-    page,
-}) => {
+test("[성공] 자동으로 소유할 수 있는 회원은 없습니다", async ({ page }) => {
     await page.goto("/");
     await expectNoAccessibilityViolations(page);
 });
 
-test("keeps the mobile layout within the viewport", async ({ page }) => {
+test("[성공]뷰포트 내에서 모바일 노드를 유지함", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");
 
@@ -85,7 +81,7 @@ test("keeps the mobile layout within the viewport", async ({ page }) => {
     ).toBeVisible();
 });
 
-test("disables route motion and smooth scrolling for reduced motion", async ({
+test("[성공] 모션 개념을 위한 이동 모션 및 부드러운 스크롤을 위한 문의", async ({
     page,
 }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });

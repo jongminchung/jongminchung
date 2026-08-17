@@ -182,8 +182,8 @@ afterEach(async () => {
     );
 });
 
-describe("RepositoryWatcherService", () => {
-    it("cleans up an initial subscription failure so a later watch can succeed", async () => {
+describe("마주감시자서비스", () => {
+    it("[성공] 이후의 거부가 성공할 수 있도록 처음부터 구독하지 못하게 정리함", async () => {
         const { root, repositoryId, service, source } = await createFixture();
         const events: RepositoryChangedEvent[] = [];
         source.failNextSubscriptions();
@@ -202,7 +202,7 @@ describe("RepositoryWatcherService", () => {
         });
     });
 
-    it("reconnects after a runtime error and retries a failed reconnect with bounded backoff", async () => {
+    it("[성공] 본능적으로 다시 연결하고 백오프를 사용하여 다시 연결을 다시 시도함", async () => {
         const { root, repositoryId, service, source } = await createFixture();
         const events: RepositoryChangedEvent[] = [];
         await service.watch(repositoryId, (event) => events.push(event));
@@ -232,7 +232,7 @@ describe("RepositoryWatcherService", () => {
         });
     });
 
-    it("emits a status invalidation when the opened worktree changes", async () => {
+    it("[성공] 작업이 변경되면 상태를 내보냅니다", async () => {
         const { root, repositoryId, service, source } = await createFixture();
         const events: RepositoryChangedEvent[] = [];
         await service.watch(repositoryId, (event) => events.push(event));
@@ -246,7 +246,7 @@ describe("RepositoryWatcherService", () => {
         });
     });
 
-    it("invalidates status and history when HEAD changes", async () => {
+    it("[성공] HEAD가 변경되면서 상태 및 기록이 초기화되었습니다", async () => {
         const { gitDirectory, repositoryId, service, source } =
             await createFixture();
         const events: RepositoryChangedEvent[] = [];
@@ -261,7 +261,7 @@ describe("RepositoryWatcherService", () => {
         });
     });
 
-    it("invalidates status when the Git index changes", async () => {
+    it("[성공] Git이 바뀌었다가 다시 화됨", async () => {
         const { gitDirectory, repositoryId, service, source } =
             await createFixture();
         const events: RepositoryChangedEvent[] = [];
@@ -275,7 +275,7 @@ describe("RepositoryWatcherService", () => {
         });
     });
 
-    it("invalidates history when a ref changes", async () => {
+    it("[성공] 기록을 바꾸다", async () => {
         const { gitDirectory, repositoryId, service, source } =
             await createFixture();
         const events: RepositoryChangedEvent[] = [];
@@ -289,7 +289,7 @@ describe("RepositoryWatcherService", () => {
         });
     });
 
-    it("invalidates status, history, and stash state when refs/stash changes", async () => {
+    it("[성공] 참조/스태시가 변경된 상태, 기록 및 스태시상태를 초기화함", async () => {
         const { gitDirectory, repositoryId, service, source } =
             await createFixture();
         const events: RepositoryChangedEvent[] = [];
@@ -303,7 +303,7 @@ describe("RepositoryWatcherService", () => {
         });
     });
 
-    it("invalidates repository management when Git config changes", async () => {
+    it("[성공] Git 구성이 변경되면 다시 관리됨", async () => {
         const { gitDirectory, repositoryId, service, source } =
             await createFixture();
         const events: RepositoryChangedEvent[] = [];
@@ -317,7 +317,7 @@ describe("RepositoryWatcherService", () => {
         });
     });
 
-    it("invalidates status and operation state when merge metadata changes", async () => {
+    it("[성공] 임시 임시 데이터가 변경되면 상태 및 작업 상태를 초기화함", async () => {
         const { gitDirectory, repositoryId, service, source } =
             await createFixture();
         const events: RepositoryChangedEvent[] = [];
@@ -331,7 +331,7 @@ describe("RepositoryWatcherService", () => {
         });
     });
 
-    it("debounces a burst into one canonically ordered invalidation event", async () => {
+    it("[성공] 버스트를 대신하여 하나의 복귀화 이벤트로 디바운싱함", async () => {
         const { root, gitDirectory, repositoryId, service, source } =
             await createFixture();
         const events: RepositoryChangedEvent[] = [];
@@ -349,7 +349,7 @@ describe("RepositoryWatcherService", () => {
         expect(events).toEqual([]);
     });
 
-    it("ignores object, log, lock, and unrelated Git metadata noise", async () => {
+    it("[성공]을 받고, 로그인하고, 잠금 및 관련 없는 Git을 통해 데이터를 무시하고", async () => {
         const { gitDirectory, repositoryId, service, source } =
             await createFixture();
         const events: RepositoryChangedEvent[] = [];
@@ -365,7 +365,7 @@ describe("RepositoryWatcherService", () => {
         expect(events).toEqual([]);
     });
 
-    it("unwatch cancels a pending debounce and detaches future events", async () => {
+    it("[실패] unwatch는 보는 이들 사이에서 휴가를 보내고 싶어하는 이벤트를 분리함", async () => {
         const { root, repositoryId, service, source } = await createFixture();
         const events: RepositoryChangedEvent[] = [];
         await service.watch(repositoryId, (event) => events.push(event));
@@ -378,7 +378,7 @@ describe("RepositoryWatcherService", () => {
         expect(events).toEqual([]);
     });
 
-    it("dispose detaches repository events and is idempotent", async () => {
+    it("[성공] dispose는 현재 이벤트를 분리하고 멱등성을 갖고 있음", async () => {
         const { root, repositoryId, service, source } = await createFixture();
         const events: RepositoryChangedEvent[] = [];
         await service.watch(repositoryId, (event) => events.push(event));
@@ -391,7 +391,7 @@ describe("RepositoryWatcherService", () => {
         expect(events).toEqual([]);
     });
 
-    it("watches only canonical repository roots and rejects symlink or traversal escapes", async () => {
+    it("[실패] 표준 시계에만 표시되어 있으며 테두리 링크 또는 순회 이스케이프를 가지고 있음", async () => {
         const { root, repositoryId, service, source } = await createFixture();
         const events: RepositoryChangedEvent[] = [];
         const outside = join(root, "..", "outside.txt");
@@ -407,7 +407,7 @@ describe("RepositoryWatcherService", () => {
         expect(events).toEqual([]);
     });
 
-    it("watches canonical linked-worktree and common metadata roots without duplication", async () => {
+    it("[실패] 연결되지 않은 연결 트리 및 스위치에 데이터 표시를 표시함", async () => {
         const { root, registry, service, source } = await createFixture();
         const linkedPath = join(root, "..", "linked-worktree");
         git(root, "worktree", "add", "-b", "feature", linkedPath);
@@ -424,7 +424,7 @@ describe("RepositoryWatcherService", () => {
         });
     });
 
-    it("invalidates management for another linked worktree metadata change", async () => {
+    it("[성공] 연결된 다른 작업 트리밍 데이터를 변경하여 관리를 초기화함", async () => {
         const { root, registry, service, source } = await createFixture();
         const linkedPath = join(root, "..", "linked-worktree");
         git(root, "worktree", "add", "-b", "feature", linkedPath);

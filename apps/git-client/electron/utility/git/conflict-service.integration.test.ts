@@ -189,8 +189,8 @@ afterEach(async () => {
     );
 });
 
-describe("GitConflictService", () => {
-    it("lists, reads, writes, and optionally stages all three text conflict stages", async () => {
+describe("힘내 충돌 서비스", () => {
+    it("[성공] 세 가지의 충돌 단계를 모두 설명하고, 알아보고, 설명하고, 선택적으로 준비함", async () => {
         const { repositoryId, root, service } = await createMergeConflict();
 
         await expect(service.list(repositoryId)).resolves.toEqual([
@@ -227,7 +227,7 @@ describe("GitConflictService", () => {
         expect(git(root, "show", ":conflict.txt")).toBe("resolved\n");
     });
 
-    it("resolves either binary side byte-for-byte without evaluating the path in a shell", async () => {
+    it("[실패] 일체형에서 경로를 평가하지 않고 기본적으로 바이너리 플레이어를 해결함", async () => {
         const path = "binary;touch injected.bin";
         const { repositoryId, root, service } = await createMergeConflict(
             path,
@@ -271,7 +271,7 @@ describe("GitConflictService", () => {
         );
     });
 
-    it("enforces the 5 MiB, 50,000-line, and NUL text boundaries before replacing a file", async () => {
+    it("[성공] 파일을 교체하기 전에 5MiB, 50,000줄 및 NUL 텍스트 경계를 적용함", async () => {
         const { repositoryId, root, service } = await createMergeConflict();
         const destination = join(root, "conflict.txt");
         const maximumBytes = "x".repeat(MAX_CONFLICT_TEXT_BYTES);
@@ -310,7 +310,7 @@ describe("GitConflictService", () => {
         await expect(readFile(destination, "utf8")).resolves.toBe(maximumLines);
     });
 
-    it("classifies conflict stages beyond the byte or line boundary as binary", async () => {
+    it("[성공] 바이트 또는 라인 경계를 넘어서는 충돌 그룹을 경계로 구분함", async () => {
         const oversizedShared = `${"x".repeat(105)}\n`.repeat(
             MAX_CONFLICT_TEXT_LINES - 1,
         );
@@ -361,7 +361,7 @@ describe("GitConflictService", () => {
         });
     });
 
-    it("rejects traversal, direct symlinks, and symlinked parent escapes without changing outside files", async () => {
+    it("[실패] 외부 파일을 변경하지 않고 순회하고, 키보드 링크 및 키보드 링크가 상위 링크가 되었습니다", async () => {
         const path = "nested/conflict.txt";
         const { repositoryId, root, service } = await createMergeConflict(path);
         const temporaryDirectory = dirname(root);
@@ -438,19 +438,16 @@ describe("GitConflictService", () => {
             localLabel: "Current branch (ours)",
             remoteLabel: "Reverted commit (theirs)",
         },
-    ])(
-        "uses operation-aware labels during $operation conflicts",
-        async (scenario) => {
-            const { repositoryId, service } = await createOperationConflict(
-                scenario.operation,
-            );
+    ])("[성공] $ 장식용 레이블을 사용함", async (scenario) => {
+        const { repositoryId, service } = await createOperationConflict(
+            scenario.operation,
+        );
 
-            await expect(
-                service.read(repositoryId, "conflict.txt"),
-            ).resolves.toMatchObject({
-                localLabel: scenario.localLabel,
-                remoteLabel: scenario.remoteLabel,
-            });
-        },
-    );
+        await expect(
+            service.read(repositoryId, "conflict.txt"),
+        ).resolves.toMatchObject({
+            localLabel: scenario.localLabel,
+            remoteLabel: scenario.remoteLabel,
+        });
+    });
 });

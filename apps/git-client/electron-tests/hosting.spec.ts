@@ -29,7 +29,7 @@ interface RestoredRunResult {
     readonly rendererResponsesAreSafe: boolean;
 }
 
-test("routes packaged hosting through preload, trusted IPC, fetch, and encrypted storage", async () => {
+test("[성공] 사전 로드, 가져올 수 있는 IPC, 가져오기 및 보관된 공유기를 통해 배터리를 사용할 수 있음", async () => {
     test.setTimeout(60_000);
     const gitHubCredential = `ghp_e2e_${randomUUID().replaceAll("-", "")}`;
     const gitLabCredential = `glpat-e2e-${randomUUID().replaceAll("-", "")}`;

@@ -6,14 +6,14 @@ import {
 } from "./refActions";
 import { sampleRefs } from "./sampleData";
 
-describe("reference actions", () => {
-    it("checks out user-facing local, remote, and tag names instead of full refs", () => {
+describe("참조 작업", () => {
+    it("[성공] 전체 참조 대신 사용자 측 위치, 원격 및 태그 이름을 확인함", () => {
         expect(sampleRefs.map(checkoutTarget)).toEqual(
             sampleRefs.map((ref) => ref.shortName),
         );
     });
 
-    it("maps each deletable reference kind to the matching Git side effect", () => {
+    it("[성공] 삭제 기능을 참조하여 일치하는 Git 플레이어에 매핑함", () => {
         const local = sampleRefs.find(
             (ref) => ref.kind === "local" && !ref.current,
         );
@@ -36,12 +36,12 @@ describe("reference actions", () => {
         });
     });
 
-    it("never offers deletion for the current branch", () => {
+    it("[성공] 현재 분기에 대한 삭제를 제공하지 않음", () => {
         const current = sampleRefs.find((ref) => ref.current);
         expect(current && deleteRefOperation(current)).toBeNull();
     });
 
-    it("merges the selected full reference without enabling rewrite options", () => {
+    it("[실패] 다시 쓰기 옵션을 활성화하지 않고 전체 도움말을 도움말로 사용함", () => {
         const branch = sampleRefs.find(
             (ref) => ref.kind === "local" && !ref.current,
         );

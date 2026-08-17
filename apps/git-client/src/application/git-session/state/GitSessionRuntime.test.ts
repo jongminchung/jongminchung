@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { createGitSessionRuntime } from "./GitSessionRuntime";
 
-describe("GitSessionRuntime", () => {
-    it("isolates request state between runtime instances", () => {
+describe("GitSession런타임", () => {
+    it("[성공] 임시로 요청한 상태를 불확실함", () => {
         const first = createGitSessionRuntime("repository-1");
         const second = createGitSessionRuntime("repository-2");
 
@@ -18,7 +18,7 @@ describe("GitSessionRuntime", () => {
         expect(second.rawRepositoryData.size).toBe(0);
     });
 
-    it("forgets every repository-scoped request cache", () => {
+    it("[성공] 모든 장소가 인식을 인식함", () => {
         const runtime = createGitSessionRuntime("repository-1");
         runtime.activeSnapshot = {
             id: "repository-1",

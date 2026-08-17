@@ -170,8 +170,8 @@ afterEach(async () => {
     );
 });
 
-describe("PatchService contracts", () => {
-    it("validates 1..500 revisions and uses canonical repository cwd with fixed argv", async () => {
+describe("패치서비스 계약", () => {
+    it("[성공] 1..500개의 독립판을 검증하고 고정 argv와 함께 표준 사용자 cwd를 사용함", async () => {
         const path = await createRepository();
         const record = repositoryRecord(path);
         const runner = new RecordingPatchRunner([
@@ -218,7 +218,7 @@ describe("PatchService contracts", () => {
         expect(runner.specs).toHaveLength(2);
     });
 
-    it("preserves credential-like stdout bytes and redacts only failure diagnostics", async () => {
+    it("[성공] 자격이 있다는 것을 증명하고 stdout 바이트를 계속해서 증상을 변경함", async () => {
         const path = await createRepository();
         const record = repositoryRecord(path);
         const payload = Buffer.from(
@@ -256,7 +256,7 @@ describe("PatchService contracts", () => {
         expect(String((error as Error).message)).not.toContain("secret-value");
     });
 
-    it("enforces clipboard/export/import byte limits and propagates cancel/timeout/output-limit", async () => {
+    it("[실패] 클립보드/내보내기/가져오기 바이트 제한을 적용하고 취소/시간 초과/출력 제한을 함", async () => {
         const path = await createRepository();
         const record = repositoryRecord(path);
         const oversizedClipboard = new RecordingPatchRunner([
@@ -360,7 +360,7 @@ describe("PatchService contracts", () => {
         ).rejects.toMatchObject({ code: "commandFailed" });
     });
 
-    it("atomically exports without following target symlinks or a replaced parent", async () => {
+    it("[실패]대상 밑에 있는 링크나 대체된 상위 항목을 폐기하고 원자로 내보냅니다", async () => {
         const repositoryPath = await createRepository();
         const record = repositoryRecord(repositoryPath);
         const root = await temporaryDirectory();
@@ -454,7 +454,7 @@ describe("PatchService contracts", () => {
         });
     });
 
-    it("imports only a selected regular file and sends its raw bytes through fixed apply argv", async () => {
+    it("[성공] 덤프 파일만 가져오고 고정 적용 argv를 통해 원시 바이트를 보냅니다", async () => {
         const path = await createRepository();
         const record = repositoryRecord(path);
         const root = await temporaryDirectory();
@@ -492,7 +492,7 @@ describe("PatchService contracts", () => {
 });
 
 describe("PatchProcessRunner", () => {
-    it("preserves stdout bytes and enforces cancellation, timeout, and separate output limits", async () => {
+    it("[실패] stdout 바이트를 반감하고 취소, 시간 초과 및 부분의 출력 제한을 적용함", async () => {
         const root = await temporaryDirectory();
         const executable = join(root, "fake git runner.js");
         await writeFile(
@@ -572,8 +572,8 @@ describe("PatchProcessRunner", () => {
     });
 });
 
-describe("PatchService real Git round trip", () => {
-    it("preserves Unicode, shell-meta paths, binary data, and secret-like patch payloads", async () => {
+describe("PatchService 실제 Git 상담", () => {
+    it("[성공] 유니코드, 공유하다, 바이너리 데이터 및 공유과 패치", async () => {
         const source = await createRepository("원본 repository");
         const shellMetaName = "shell;$meta-[한글].txt";
         const secretText = [

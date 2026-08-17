@@ -105,7 +105,7 @@ async function waitForChangesCount(
     await expect(changesTab(page).locator("em")).toHaveText(String(count));
 }
 
-test("opens a real packaged Electron PTY in the repository directory", async () => {
+test("[성공] 부스에 실제 패키지화된 Electron PTY를 요청다", async () => {
     const profileName = runtimeProfileName;
     await resetQaProfile(profileName);
     const repositoryPath = await mkdtemp(
@@ -186,7 +186,7 @@ test("opens a real packaged Electron PTY in the repository directory", async () 
     }
 });
 
-test("initializes and clones repositories through the packaged Electron utility", async () => {
+test("[성공]패키지화된 전자 조종사를 통해 리포지토리를 방수하고 복제함", async () => {
     const profileName = runtimeProfileName;
     await resetQaProfile(profileName);
     const parent = await mkdtemp(
@@ -258,7 +258,7 @@ test("initializes and clones repositories through the packaged Electron utility"
     }
 });
 
-test("shows real packaged Git history and commit details", async () => {
+test("[성공] 실제로 인증된 Git 기록 및 커밋 세부 정보를 표시함", async () => {
     await resetQaProfile(runtimeProfileName);
     const parent = await mkdtemp(
         join(tmpdir(), "git-client-electron-diff-watcher-"),
@@ -390,7 +390,7 @@ test("shows real packaged Git history and commit details", async () => {
     }
 });
 
-test("executes packaged index, commit, ref, stash, config, remote, and worktree mutations", async () => {
+test("[성공]패시브 형태, 커밋, 참조, 숨김, 구성, 원격 및 작업 트리 변형을 실행함", async () => {
     test.setTimeout(60_000);
     await resetQaProfile(runtimeProfileName);
     const parent = await mkdtemp(
@@ -548,7 +548,7 @@ test("executes packaged index, commit, ref, stash, config, remote, and worktree 
     }
 });
 
-test("executes packaged repository inspection, ignore, preview, and patch boundaries", async () => {
+test("[성공] 클러스터 경계선 감지기, 무시, 미리보기 및 패치 경계를 실행함", async () => {
     test.setTimeout(60_000);
     await resetQaProfile(runtimeProfileName);
     const parent = await mkdtemp(
@@ -876,7 +876,7 @@ test("executes packaged repository inspection, ignore, preview, and patch bounda
     }
 });
 
-test("executes packaged shelf, changelist, recovery, and conflict boundaries", async () => {
+test("[성공]패키지인 베어링, 변경 목록, 복구 및 충돌 경계를 실행함", async () => {
     test.setTimeout(90_000);
     await resetQaProfile(runtimeProfileName);
     const parent = await mkdtemp(
@@ -1091,7 +1091,7 @@ test("executes packaged shelf, changelist, recovery, and conflict boundaries", a
     }
 });
 
-test("executes packaged submodule inspection and rejects unsafe file opens", async () => {
+test("[성공] [실패패]패키지 모듈 하위 검사를 실행하고 안전하지 않은 파일을 가지고 있음", async () => {
     test.setTimeout(60_000);
     await resetQaProfile(runtimeProfileName);
     const parent = await mkdtemp(
@@ -1186,7 +1186,7 @@ test("executes packaged submodule inspection and rejects unsafe file opens", asy
     }
 });
 
-test("executes and rolls back a packaged synchronized multi-root branch operation", async () => {
+test("[성공] 세트가 되는 2개의 분기 작업을 실행하고 롤백함", async () => {
     test.setTimeout(60_000);
     await resetQaProfile(runtimeProfileName);
     const parent = await mkdtemp(
@@ -1266,7 +1266,7 @@ test("executes and rolls back a packaged synchronized multi-root branch operatio
     }
 });
 
-test("cancels a packaged in-flight Git query with terminal event ordering", async () => {
+test("[실패] 터미널 이벤트 시간을 사용하여 패키지화된 내 Git 쿼리 취소함", async () => {
     test.setTimeout(60_000);
     await resetQaProfile(runtimeProfileName);
     const parent = await mkdtemp(

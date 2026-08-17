@@ -1,8 +1,7 @@
 import { access, cp, mkdir, rm } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
-const appRoot = dirname(dirname(fileURLToPath(import.meta.url)));
+const appRoot = dirname(import.meta.dirname);
 const standaloneRoot = join(appRoot, ".next", "standalone", "apps", "web");
 const standaloneStaticRoot = join(standaloneRoot, ".next", "static");
 const standaloneServer = join(standaloneRoot, "server.js");

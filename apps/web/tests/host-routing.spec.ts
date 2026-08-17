@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("rejects private paths, unknown hosts, and spoofed routing headers", async ({
+test("[실패] 개인 위치, 알 수 없는 호스트 및 스푸핑된 헤더를 갖고 있음", async ({
     request,
     playwright,
 }) => {
@@ -19,7 +19,9 @@ test("rejects private paths, unknown hosts, and spoofed routing headers", async 
     await unknown.dispose();
 });
 
-test("uses Host and ignores X-Forwarded-Host", async ({ playwright }) => {
+test("[성공] 호스트를 사용하고 X-Forwarded-Host를 무시함", async ({
+    playwright,
+}) => {
     const spoofed = await playwright.request.newContext({
         baseURL: "http://127.0.0.1:3100",
         extraHTTPHeaders: {
@@ -41,7 +43,7 @@ test("uses Host and ignores X-Forwarded-Host", async ({ playwright }) => {
     await allowed.dispose();
 });
 
-test("redirects each site root with cookie before Accept-Language", async ({
+test("[성공] Accept-Language 이전에 쿠키를 사용하여 각 사이트를 제외하고 함", async ({
     playwright,
 }) => {
     for (const [host, cookie] of [
@@ -77,7 +79,9 @@ test("redirects each site root with cookie before Accept-Language", async ({
     await negotiated.dispose();
 });
 
-test("localizes not-found documents for every site", async ({ browser }) => {
+test("[성공] 모든 사이트에 대해 부품 수 없는 문서를 현지화함", async ({
+    browser,
+}) => {
     for (const host of [
         "jamie.localhost:3100",
         "tech.jamie.localhost:3100",
@@ -98,7 +102,7 @@ test("localizes not-found documents for every site", async ({ browser }) => {
     }
 });
 
-test("serves health independently of the host", async ({ playwright }) => {
+test("[성공] 호스트와 협력으로 건강을 보호함", async ({ playwright }) => {
     const health = await playwright.request.newContext({
         baseURL: "http://127.0.0.1:3100",
         extraHTTPHeaders: { Host: "unknown.example" },

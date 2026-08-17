@@ -5,8 +5,8 @@ import {
     isExcalidrawCodeLanguage,
 } from "./mdx-code";
 
-describe("MDX code language routing", () => {
-    it("routes Excalidraw fences to the diagram renderer", () => {
+describe("MDX 코드 종류", () => {
+    it("[성공] Excalidraw 본체를 장착 렌더러로함", () => {
         expect(
             isExcalidrawCodeLanguage(codeLanguage("language-excalidraw")),
         ).toBe(true);
@@ -24,7 +24,7 @@ describe("MDX code language routing", () => {
         });
     });
 
-    it("keeps ordinary and unlabelled fences on the code renderer", () => {
+    it("[성공] 코드 렌더러에 월하고 라벨이 없는 펜스를 유지함", () => {
         expect(
             isExcalidrawCodeLanguage(codeLanguage("language-typescript")),
         ).toBe(false);

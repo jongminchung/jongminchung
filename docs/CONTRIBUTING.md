@@ -92,19 +92,19 @@ pnpm run test:coverage:update
 
 ### Web 콘텐츠
 
-콘텐츠 manifest, loader와 검색 데이터는 MDX 소스에서 생성한다.
+콘텐츠 manifest, loader와 검색 데이터는 MDX 소스에서 생성한다. 기술 문서, 투자 노트,
+material을 함께 변경했거나 어떤 생성물이 바뀌는지 확실하지 않으면 다음 단일 명령을 사용한다.
 
 ```sh
-pnpm --filter @jongminchung/web run content:build
-pnpm --filter @jongminchung/web run content:check
-pnpm --filter @jongminchung/web run investment:build
-pnpm --filter @jongminchung/web run investment:check
+pnpm --filter @jongminchung/web run generate
 ```
 
-`apps/web/components/materials/topics`는 이 저장소가 직접 관리하는 canonical
-source이다. topic 파일과 export를 직접 수정하고
-[material 소유권 문서](apps/web/components/materials/README.md)의 계약에 따라
-추적 registry를 갱신한 뒤 다음 검사를 실행한다.
+`build`는 생성물을 쓰지 않고 `content:check`, `investment:check`, `materials:check`로 최신성을
+검증한다. 한 도메인만 변경했다면 해당 `*:build`와 `*:check` 명령을 직접 사용할 수 있다.
+
+`apps/web/components/materials/topics`는 이 저장소가 직접 관리하는 canonical source이다. topic
+파일과 export를 직접 수정하고 [material 소유권 문서](apps/web/components/materials/README.md)의
+계약에 따라 추적 registry를 갱신한다.
 
 ```sh
 pnpm --filter @jongminchung/web run materials:build

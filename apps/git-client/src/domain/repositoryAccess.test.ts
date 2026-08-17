@@ -6,8 +6,8 @@ import {
     SafeModeViolationError,
 } from "./repositoryAccess";
 
-describe("RepositoryAccessPolicy", () => {
-    it("allows repository queries while blocking every executable capability in safe mode", () => {
+describe("라우터액세스 정책", () => {
+    it("[성공] 안전 모드에서는 모든 실행 가능 여부를 감시하는 동안 쿼리를 허용함", () => {
         const policy = RepositoryAccessPolicy.create();
         policy.open("repository-a", "/tmp/project-a", "safe");
         policy.activate("repository-a");
@@ -22,7 +22,7 @@ describe("RepositoryAccessPolicy", () => {
         );
     });
 
-    it("keeps trusted and unregistered repositories fully enabled", () => {
+    it("[성공]할 수 있고 등록되지 않은 조치를 완료한 상태로 유지함", () => {
         const policy = RepositoryAccessPolicy.create();
         policy.open("repository-a", "/tmp/project-a", "trusted");
 
@@ -30,7 +30,7 @@ describe("RepositoryAccessPolicy", () => {
         expect(policy.allows("repository-b", "terminal")).toBe(true);
     });
 
-    it("allows Git queries and rejects operation requests before they reach the bridge", () => {
+    it("[실패] Git 쿼리를 허용하고 작업을 요청하기 위해 응답했습니다", () => {
         const policy = RepositoryAccessPolicy.create();
         policy.open("repository-a", "/tmp/project-a", "safe");
 
@@ -49,7 +49,7 @@ describe("RepositoryAccessPolicy", () => {
         ).toThrow(SafeModeViolationError);
     });
 
-    it("remembers safe paths without leaking repository identity across sessions", () => {
+    it("[실패] 세션에 구부러진 ID를 유지하지 않고 안전하게 저장함", () => {
         const policy = RepositoryAccessPolicy.create();
         policy.open("repository-a", "/tmp/project-a", "safe");
         policy.forget("repository-a");
@@ -66,7 +66,7 @@ describe("RepositoryAccessPolicy", () => {
         expect(policy.modeForPath("/tmp/project-a")).toBe("trusted");
     });
 
-    it("restores safe mode after restart when Electron settings contain the path", () => {
+    it("[성공] 전자 설정에 정상적으로 포함된 경우 다시 도움말 후 안전 모드를 복원함", () => {
         const restartedPolicy = RepositoryAccessPolicy.create();
 
         restoreRepositoryAccess(
@@ -83,7 +83,7 @@ describe("RepositoryAccessPolicy", () => {
         expect(restartedPolicy.modeForPath("/tmp/recent-only")).toBe("safe");
     });
 
-    it("retains a closed Safe Mode repository while it remains recent", () => {
+    it("[성공] 최신 상태로 유지되는 동안 안전한 모드를 유지함", () => {
         const policy = RepositoryAccessPolicy.create();
         policy.open("repository-a", "/tmp/project-a", "safe");
         policy.forget("repository-a");
@@ -93,7 +93,7 @@ describe("RepositoryAccessPolicy", () => {
         ]);
     });
 
-    it("forgets Safe Mode only when Recent is removed or the path is explicitly trusted", () => {
+    it("[성공] 이후 항목이 제거되어 경로가 확실하게 신뢰되는 경우에만 안전 모드를 인식하게 됨", () => {
         const policy = RepositoryAccessPolicy.create();
         policy.remember("/tmp/project-a", "safe");
         policy.forgetPath("/tmp/project-a");
@@ -104,7 +104,7 @@ describe("RepositoryAccessPolicy", () => {
         expect(policy.modeForPath("/tmp/project-a")).toBe("trusted");
     });
 
-    it("keeps an open Safe Mode repository persisted when its Recent entry is removed", () => {
+    it("[성공] 최근 항목이 제거될 때 임시 모드를 유지함", () => {
         const policy = RepositoryAccessPolicy.create();
         policy.open("repository-a", "/tmp/project-a", "safe");
         policy.forgetPath("/tmp/project-a");

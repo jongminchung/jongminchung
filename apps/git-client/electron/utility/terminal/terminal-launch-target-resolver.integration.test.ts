@@ -35,7 +35,7 @@ afterEach(async () => {
 });
 
 describe("TerminalLaunchTargetResolver", () => {
-    it("returns only source-defined descriptor IDs and resolves installed executables canonically", async () => {
+    it("[성공] 소스 설명자 ID만 무시하고 파일을 실행하여 확인함", async () => {
         const bin = await mkdtemp(
             join(tmpdir(), "git-client-terminal-targets-"),
         );
@@ -66,7 +66,7 @@ describe("TerminalLaunchTargetResolver", () => {
         expect(targets.shells.some(({ id }) => id === "sh")).toBe(true);
     });
 
-    it("rejects PATH symlinks whose canonical executable basename is not allowlisted", async () => {
+    it("[실패] 표준 실행 파일 기본 이름이 허용되는 목록에 없는 PATH 표시 링크를 포함함", async () => {
         const bin = await mkdtemp(
             join(tmpdir(), "git-client-terminal-target-link-"),
         );
@@ -86,7 +86,7 @@ describe("TerminalLaunchTargetResolver", () => {
         expect(resolver.resolve({ kind: "agent", id: "codex" })).toBeNull();
     });
 
-    it("includes conventional agent installation directories by default", async () => {
+    it("[성공] 기본적으로 무기 에이전트가 포함되었습니다", async () => {
         const home = await mkdtemp(
             join(tmpdir(), "git-client-terminal-target-home-"),
         );
@@ -107,7 +107,7 @@ describe("TerminalLaunchTargetResolver", () => {
         });
     });
 
-    it("keeps online INSTALL_AND_RUN outside the local execution policy", () => {
+    it("[성공]계획 실행을 외부에서 온라인 INSTALL_AND_RUN을 유지함", () => {
         expect(TERMINAL_AGENT_INSTALLATION_POLICY).toEqual({
             supportedMode: "RUN",
             excludedMode: "INSTALL_AND_RUN",

@@ -3,8 +3,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { ProjectToolWindow } from "./ProjectToolWindow";
 
-describe("ProjectToolWindow", () => {
-    it("exposes the Rebased project toolbar in source order", () => {
+describe("프로젝트도구창", () => {
+    it("[성공] 리베이스된 프로젝트 도구 목록을 공유하고 함께", () => {
         const markup = renderToStaticMarkup(
             createElement(ProjectToolWindow, {
                 activePath: "src/App.tsx",
@@ -50,7 +50,7 @@ describe("ProjectToolWindow", () => {
         expect(selectOpenedFile).not.toContain('disabled=""');
     });
 
-    it("disables selecting an opened file when the project has no active editor", () => {
+    it("[성공] 프로젝트에 활력 있는 편집기가 들어갈 수 있게 파일 선택을 시작함", () => {
         const markup = renderToStaticMarkup(
             createElement(ProjectToolWindow, {
                 changes: [],

@@ -86,7 +86,7 @@ afterEach(async () => {
     );
 });
 
-describe("SequenceEditorSession", () => {
+describe("현재 편집 세션", () => {
     it.each([
         {
             name: "drop",
@@ -117,7 +117,7 @@ describe("SequenceEditorSession", () => {
                 "pick 1111111 first\nreword 2222222 second\npick 3333333 third\n",
         },
     ])(
-        "rewrites a utility-created $name history operation",
+        "[성공] 유틸리티에서 생성된 $name 기록 작업을 다시 작성함",
         async (scenario) => {
             const { gitDirectory, todoPath } = await fixture();
             await writeFile(
@@ -157,7 +157,7 @@ describe("SequenceEditorSession", () => {
         },
     );
 
-    it("authenticates a plan and atomically rewrites Git's todo in visual order", async () => {
+    it("[성공] 계획을 인증하고 Git의 할일을 표시하고 나중에 다시 작성함", async () => {
         const { gitDirectory, todoPath } = await fixture();
         await writeFile(
             todoPath,
@@ -187,7 +187,7 @@ describe("SequenceEditorSession", () => {
         await session.cleanup();
     });
 
-    it("atomically replaces the todo while preserving its file permissions", async () => {
+    it("[성공] 파일 권한을 유지하면서 todo를 원자적으로 대체함", async () => {
         const { gitDirectory, todoPath } = await fixture();
         await writeFile(todoPath, "pick 1111111 first\n", "utf8");
         await chmod(todoPath, 0o640);
@@ -215,7 +215,7 @@ describe("SequenceEditorSession", () => {
         await session.cleanup();
     });
 
-    it("rejects a forged nonce without changing Git's todo", async () => {
+    it("[실패] Git의 할 일을 변경하지 않고 위조된 nonce를 가지고 있음", async () => {
         const { gitDirectory, todoPath } = await fixture();
         const original = "pick 1111111 first\n";
         await writeFile(todoPath, original, "utf8");
@@ -236,7 +236,7 @@ describe("SequenceEditorSession", () => {
         await session.cleanup();
     });
 
-    it("rejects a payload whose authenticated plan was modified", async () => {
+    it("[실패] 완벽하게 계획이 수정된 페이로드를 보유하고 있음", async () => {
         const { gitDirectory, todoPath } = await fixture();
         const original = "pick 1111111 first\n";
         await writeFile(todoPath, original, "utf8");
@@ -263,7 +263,7 @@ describe("SequenceEditorSession", () => {
         await session.cleanup();
     });
 
-    it("rejects an editor target outside the registered Git directory", async () => {
+    it("[실패] 등록된 Git 외부의 편집기 참가자함", async () => {
         const { root, gitDirectory } = await fixture();
         const outsidePath = join(root, "outside-todo");
         const original = "pick 1111111 first\n";
@@ -285,7 +285,7 @@ describe("SequenceEditorSession", () => {
         await session.cleanup();
     });
 
-    it("rejects a target path containing traversal segments", async () => {
+    it("[실패] 순회 세그먼트를 포함하는 대상에 위치함", async () => {
         const { gitDirectory, todoPath } = await fixture();
         const original = "pick 1111111 first\n";
         await writeFile(todoPath, original, "utf8");
@@ -307,7 +307,7 @@ describe("SequenceEditorSession", () => {
         await session.cleanup();
     });
 
-    it("rejects a symbolic-link editor target", async () => {
+    it("[실패] 포인터 링크 편집기 대상을 찾았습니다", async () => {
         const { root, gitDirectory, todoPath } = await fixture();
         const outsidePath = join(root, "outside-todo");
         const original = "pick 1111111 first\n";
@@ -330,7 +330,7 @@ describe("SequenceEditorSession", () => {
         await session.cleanup();
     });
 
-    it("rejects a todo containing a null byte without replacing it", async () => {
+    it("[실패] null 포인트가 포함된 할 일을 대체하지 않고 그대로 있음", async () => {
         const { gitDirectory, todoPath } = await fixture();
         const original = Buffer.from("pick 1111111 first\0forged\n", "utf8");
         await writeFile(todoPath, original);
@@ -351,7 +351,7 @@ describe("SequenceEditorSession", () => {
         await session.cleanup();
     });
 
-    it("rejects a todo larger than the bounded payload limit", async () => {
+    it("[실패] 퀸 페이로드 한도보다 큰 작업을 수행함", async () => {
         const { gitDirectory, todoPath } = await fixture();
         const original = Buffer.alloc(MAX_SEQUENCE_EDITOR_FILE_BYTES + 1, 0x61);
         await writeFile(todoPath, original);
@@ -372,7 +372,7 @@ describe("SequenceEditorSession", () => {
         await session.cleanup();
     });
 
-    it("rejects an object ID that is not present in the authenticated plan", async () => {
+    it("[실패] 인증된 계획에는 없는 ID가 있었습니다", async () => {
         const { gitDirectory, todoPath } = await fixture();
         const original = "pick 2222222 unknown\n";
         await writeFile(todoPath, original, "utf8");
@@ -393,7 +393,7 @@ describe("SequenceEditorSession", () => {
         await session.cleanup();
     });
 
-    it("rejects a plan containing a malformed object ID", async () => {
+    it("[실패] 존재하지 않는 ID가 포함된 계획을 가지고 있음", async () => {
         const { gitDirectory } = await fixture();
         const malformed = {
             ...planEntry("1", "first"),
@@ -405,7 +405,7 @@ describe("SequenceEditorSession", () => {
         ).rejects.toMatchObject({ code: "invalidInput" });
     });
 
-    it("rejects duplicate commits in an authenticated plan", async () => {
+    it("[실패]는 모든 계획에서 완벽하게 인증받았습니다", async () => {
         const { gitDirectory } = await fixture();
         const duplicate = planEntry("1", "duplicate");
 
@@ -417,7 +417,7 @@ describe("SequenceEditorSession", () => {
         ).rejects.toMatchObject({ code: "invalidInput" });
     });
 
-    it("rejects a duplicate commit in Git's todo", async () => {
+    it("[실패] Git의 할 일에서 능숙한 커밋을 받았어요", async () => {
         const { gitDirectory, todoPath } = await fixture();
         const original = "pick 1111111 first\npick 1111111 first-again\n";
         await writeFile(todoPath, original, "utf8");
@@ -438,7 +438,7 @@ describe("SequenceEditorSession", () => {
         await session.cleanup();
     });
 
-    it("rejects an abbreviated todo object ID that matches multiple plan entries", async () => {
+    it("[실패] 여러 계획과 일치하는 축약된 할 일이 가능한 ID를 포함하는 항목", async () => {
         const { gitDirectory, todoPath } = await fixture();
         const original = "pick aaaaaaa ambiguous\n";
         await writeFile(todoPath, original, "utf8");
@@ -467,7 +467,7 @@ describe("SequenceEditorSession", () => {
         await session.cleanup();
     });
 
-    it("preserves merge structure while applying non-merge plan actions", async () => {
+    it("[성공] 비병합 계획 작업을 적용하는 동안 보온 구조를 유지함", async () => {
         const { gitDirectory, todoPath } = await fixture();
         await writeFile(
             todoPath,
@@ -502,7 +502,7 @@ describe("SequenceEditorSession", () => {
         await session.cleanup();
     });
 
-    it("rejects a merge todo line without matching merge metadata", async () => {
+    it("[실패] 일기 예보 데이터와 일치하지 않는 밸브의 일을 처리하고 있음", async () => {
         const { gitDirectory, todoPath } = await fixture();
         const original =
             "label onto\npick aaaaaaa first\nmerge -C bbbbbbb side\n";
@@ -524,7 +524,7 @@ describe("SequenceEditorSession", () => {
         await session.cleanup();
     });
 
-    it("writes the authenticated reword message for the matching subject", async () => {
+    it("[성공] 일치하는 제목에 대해 인증된 재워드 메시지를 작성했습니다", async () => {
         const { gitDirectory } = await fixture();
         const messagePath = join(gitDirectory, "COMMIT_EDITMSG");
         await writeFile(
@@ -557,7 +557,7 @@ describe("SequenceEditorSession", () => {
         await session.cleanup();
     });
 
-    it("rejects a reword plan without a non-empty replacement message", async () => {
+    it("[실패] 없어 보이지 않고 대체되지 않고 재말하기를 계획하고 있음", async () => {
         const { gitDirectory } = await fixture();
 
         await expect(
@@ -568,7 +568,7 @@ describe("SequenceEditorSession", () => {
         ).rejects.toMatchObject({ code: "invalidInput" });
     });
 
-    it("rejects a reword message containing a null byte", async () => {
+    it("[실패] 널 바이트가 포함된 내용이 포함되어 있음", async () => {
         const { gitDirectory } = await fixture();
 
         await expect(
@@ -581,7 +581,7 @@ describe("SequenceEditorSession", () => {
         ).rejects.toMatchObject({ code: "invalidInput" });
     });
 
-    it("rejects a reword message larger than the bounded file limit", async () => {
+    it("[실패] 권한 파일 제한보다 큰 재워드 주소를 포함함", async () => {
         const { gitDirectory } = await fixture();
 
         await expect(
@@ -599,7 +599,7 @@ describe("SequenceEditorSession", () => {
         ).rejects.toMatchObject({ code: "invalidInput" });
     });
 
-    it("rejects duplicate reword subjects that could select the wrong message", async () => {
+    it("[실패] 잘못된 메시지를 해석할 수 있는 단어 제목을 포함함", async () => {
         const { gitDirectory } = await fixture();
 
         await expect(
@@ -613,7 +613,7 @@ describe("SequenceEditorSession", () => {
         ).rejects.toMatchObject({ code: "invalidInput" });
     });
 
-    it("removes its authenticated payload exactly once during cleanup", async () => {
+    it("[성공] 정리가 검증된 페이로드를 정확히 한 번 제거함", async () => {
         const { gitDirectory } = await fixture();
         const session = await SequenceEditorSession.create(
             gitDirectory,
@@ -627,7 +627,7 @@ describe("SequenceEditorSession", () => {
         });
     });
 
-    it("cancels before replacement and leaves no atomic-write temporary file", async () => {
+    it("[실패] 취소하고 임시 쓰기 파일을 작성해야 함", async () => {
         const { gitDirectory, todoPath } = await fixture();
         const original = "pick 1111111 first\n";
         await writeFile(todoPath, original, "utf8");
@@ -655,7 +655,7 @@ describe("SequenceEditorSession", () => {
         await session.cleanup();
     });
 
-    it("cleans up the authenticated payload when its owner cancels", async () => {
+    it("[실패] 추적을 취소하면 인증된 페이로드를 정리함", async () => {
         const { gitDirectory } = await fixture();
         const controller = new AbortController();
         const session = await SequenceEditorSession.create(
@@ -672,7 +672,7 @@ describe("SequenceEditorSession", () => {
         });
     });
 
-    it("rejects an authenticated payload copied outside the utility temp root", async () => {
+    it("[실패] 조종사 외부에 복사된 인증된 페이로드를 유지함", async () => {
         const { root, gitDirectory, todoPath } = await fixture();
         const original = "pick 1111111 first\n";
         await writeFile(todoPath, original, "utf8");
@@ -703,7 +703,7 @@ describe("SequenceEditorSession", () => {
         await session.cleanup();
     });
 
-    it("rejects a symbolic-link payload even when it points to the original envelope", async () => {
+    it("[실패] 원래 김치를 표시하는 내용에도 표시 링크가 포함되어 있음", async () => {
         const { gitDirectory, todoPath } = await fixture();
         const original = "pick 1111111 first\n";
         await writeFile(todoPath, original, "utf8");
@@ -727,7 +727,7 @@ describe("SequenceEditorSession", () => {
         await session.cleanup();
     });
 
-    it("rejects a payload whose utility-only file mode was widened", async () => {
+    it("[실패] 파일 모드가 확장된 페이로드를 가지고 있음", async () => {
         const { gitDirectory, todoPath } = await fixture();
         const original = "pick 1111111 first\n";
         await writeFile(todoPath, original, "utf8");
@@ -749,7 +749,7 @@ describe("SequenceEditorSession", () => {
         await session.cleanup();
     });
 
-    it("rejects an oversized payload before parsing it", async () => {
+    it("[실패] 파싱하기 전에 크기가 너무 커서 페이로드를 받았어요", async () => {
         const { gitDirectory, todoPath } = await fixture();
         const original = "pick 1111111 first\n";
         await writeFile(todoPath, original, "utf8");

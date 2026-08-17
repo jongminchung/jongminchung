@@ -61,8 +61,8 @@ async function compileMdx(source: string): Promise<string> {
     );
 }
 
-describe("Engineering Docs PlantUML pipeline", () => {
-    it("renders plantuml fences through Kroki with accessible alternative text", async () => {
+describe("엔지니어링 엔지니어링 플랜트UML 파이프라인", () => {
+    it("[성공] 대체 기능을 사용하여 Kroki를 통해 plantuml 외장을 백업함", async () => {
         const source =
             '```plantuml alt="Request flow"\nAlice -> Bob: hello\n```';
         const output = await compileMdx(source);
@@ -78,7 +78,7 @@ describe("Engineering Docs PlantUML pipeline", () => {
         );
     });
 
-    it("leaves puml fences as ordinary code blocks", async () => {
+    it("[실패] Puml 충전을 일반 코드 블록으로 남겨두겠습니다", async () => {
         const requestCount = requests.length;
         const output = await compileMdx("```puml\nAlice -> Bob\n```");
 
@@ -86,7 +86,7 @@ describe("Engineering Docs PlantUML pipeline", () => {
         expect(output).toContain("language-puml");
     });
 
-    it("keeps compilation available when Kroki returns an error image", async () => {
+    it("[성공] Kroki가 오류를 범할 때 계속해서 사용할 수 있음", async () => {
         const consoleError = vi
             .spyOn(console, "error")
             .mockImplementation(() => undefined);

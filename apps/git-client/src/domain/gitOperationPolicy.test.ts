@@ -56,14 +56,14 @@ const operationKinds = [
     "remoteSetUrl",
 ] as const satisfies readonly GitOperation["kind"][];
 
-describe("Git operation policies", () => {
-    it("covers every operation kind with an explicit policy", () => {
+describe("힘내 운영", () => {
+    it("[성공] 벽돌적인 것으로 모든 작업 종류를 다뤄", () => {
         expect(Object.keys(gitOperationPolicies).sort()).toEqual(
             [...operationKinds].sort(),
         );
     });
 
-    it("keeps index, stash, management, push, and default invalidations distinct", () => {
+    it("[성공] 효과, 숨김, 관리, 밀어넣기 및 기본 기능화를 유지함", () => {
         expect(gitOperationPolicies.stage.invalidations).toEqual(["status"]);
         expect(gitOperationPolicies.stashApply.invalidations).toEqual([
             "status",
@@ -86,7 +86,7 @@ describe("Git operation policies", () => {
         ]);
     });
 
-    it("centralizes recovery recording and retry behavior", () => {
+    it("[성공] 복구 기록 및 재시도 동작을 중앙 집중화함", () => {
         expect(gitOperationPolicies.commit.recordsRecovery).toBe(true);
         expect(gitOperationPolicies.stashPush.recordsRecovery).toBe(true);
         expect(gitOperationPolicies.checkout.recordsRecovery).toBe(false);

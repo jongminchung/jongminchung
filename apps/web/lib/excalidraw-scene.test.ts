@@ -30,8 +30,8 @@ function createScene(
     });
 }
 
-describe("parseExcalidrawSource", () => {
-    it("normalizes a validated scene and exposes render verification data", () => {
+describe("구문 분석ExcalidrawSource", () => {
+    it("[성공] 인증된 인정을 인정하고 인증 데이터를 준수함", () => {
         const scene = parseExcalidrawSource(
             createScene(),
             "fixture.excalidraw",
@@ -47,7 +47,7 @@ describe("parseExcalidrawSource", () => {
         expect(Object.isFrozen(scene.elements)).toBe(true);
     });
 
-    it("rejects invalid JSON, an invalid root, and an empty scene", () => {
+    it("[실패] 잘못된 JSON, 잘못된 존재 및 존재한 사건이 있었습니다", () => {
         expect(() => parseExcalidrawSource("{", "broken.excalidraw")).toThrow(
             /broken\.excalidraw: invalid JSON/u,
         );
@@ -59,7 +59,7 @@ describe("parseExcalidrawSource", () => {
         ).toThrow(/non-empty array/u);
     });
 
-    it("rejects duplicate element IDs and invalid bounds", () => {
+    it("[실패] 불완전한 요소 ID 및 유효하지 않은 경계가 있음", () => {
         const duplicate = {
             id: "same",
             type: "rectangle",
@@ -82,7 +82,7 @@ describe("parseExcalidrawSource", () => {
         ).toThrow(/non-negative, non-empty bounds/u);
     });
 
-    it("rejects image elements whose binary file is missing", () => {
+    it("[실패] 바이너리 파일이 라벨링된 이미지 요소를 포함함", () => {
         expect(() =>
             parseExcalidrawSource(
                 createScene({
@@ -103,8 +103,8 @@ describe("parseExcalidrawSource", () => {
     });
 });
 
-describe("Excalidraw asset paths", () => {
-    it("maps safe standalone filenames to one public URL", () => {
+describe("Excalidraw 세트가 어떻게 되나요?", () => {
+    it("[성공] 사업자 등록 파일 이름을 하나의 표시 URL에 매핑함", () => {
         expect(parseExcalidrawFilename("operating-system.excalidraw")).toEqual({
             filename: "operating-system.excalidraw",
             slug: "operating-system",
@@ -116,7 +116,7 @@ describe("Excalidraw asset paths", () => {
         ).toBe("operating-system");
     });
 
-    it("rejects external and parent path sources", () => {
+    it("[실패] 외부 및 상위 경로에 있음", () => {
         expect(() =>
             parseExcalidrawAssetSrc("https://example.com/diagram.excalidraw"),
         ).toThrow(/must use \/diagrams\//u);

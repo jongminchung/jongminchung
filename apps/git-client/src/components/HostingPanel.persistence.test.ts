@@ -34,12 +34,12 @@ function electronApi(
     } as unknown as DesktopApi;
 }
 
-describe("HostingPanel native persistence", () => {
+describe("HostingPanel을 실제로 사용하는 방법", () => {
     beforeEach(() => {
         platformMock.electronApi.mockReset();
     });
 
-    it("uses Electron settings, validates account metadata, and never persists a token", async () => {
+    it("[성공] 전자 설정을 사용하고 로그에 기록을 남기며 유지하지 마십시오", async () => {
         const get = vi.fn(async (key: string): Promise<unknown> => {
             if (key === "hostingAccounts") {
                 return [
@@ -81,7 +81,7 @@ describe("HostingPanel native persistence", () => {
         );
     });
 
-    it("fails closed when no Electron settings boundary exists", async () => {
+    it("[실패] 전자 설정 경계가 사라지지 않음", async () => {
         platformMock.electronApi.mockReturnValue(null);
 
         await expect(loadHostingAccounts()).rejects.toThrow(

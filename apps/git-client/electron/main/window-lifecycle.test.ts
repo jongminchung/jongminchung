@@ -5,23 +5,23 @@ import {
     WELCOME_TRAFFIC_LIGHT_POSITION,
 } from "./window-lifecycle";
 
-describe("window lifecycle", () => {
-    it("routes a workspace close request back to the renderer", () => {
+describe("창생기간", () => {
+    it("[성공] 작업공간 닫기 요청을 다시 렌더러로 나누기", () => {
         expect(shouldRequestProjectClose("workspace", false)).toBe(true);
         expect(shouldRequestProjectClose("welcome", false)).toBe(false);
     });
 
-    it("does not intercept an explicit quit", () => {
+    it("[실패] 전통적인 종료를 가로채지 않는 경우", () => {
         expect(shouldRequestProjectClose("workspace", true)).toBe(false);
     });
 
-    it("keeps a macOS application alive after its last window closes", () => {
+    it("[성공] 마지막 인스턴스 로그 macOS 구조를 유지함으로써 유지함", () => {
         expect(shouldQuitAfterLastWindow("darwin")).toBe(false);
         expect(shouldQuitAfterLastWindow("linux")).toBe(true);
         expect(shouldQuitAfterLastWindow("win32")).toBe(true);
     });
 
-    it("centers macOS traffic lights in the 27px Welcome titlebar", () => {
+    it("[성공] 27px 시작 표시줄의 macOS 신호등 중앙에 위치", () => {
         expect(WELCOME_TRAFFIC_LIGHT_POSITION).toEqual({ x: 14, y: 7 });
     });
 });

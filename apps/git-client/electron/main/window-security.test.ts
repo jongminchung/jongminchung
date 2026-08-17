@@ -4,8 +4,8 @@ import {
     isTrustedRendererNavigation,
 } from "./window-security";
 
-describe("window permission policy", () => {
-    it("denies permission checks and requests by default", () => {
+describe("창 권한 부여", () => {
+    it("[실패] 기본적으로 권한 확인 및 요청을 하였음", () => {
         const setPermissionCheckHandler = vi.fn();
         const setPermissionRequestHandler = vi.fn();
 
@@ -28,7 +28,7 @@ describe("window permission policy", () => {
         expect(callback).toHaveBeenCalledWith(false);
     });
 
-    it("trusts exact app and development origins without URL credentials", () => {
+    it("[실패] URL 자격 증명 없이 앱 및 개발을 할 수 있다는 신뢰를 갖고 있음", () => {
         const developmentUrl = "http://localhost:5173/";
         expect(
             isTrustedRendererNavigation(

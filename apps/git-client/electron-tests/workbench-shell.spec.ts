@@ -5,7 +5,7 @@ import {
     runtimeProfileName,
 } from "./packaged-app-harness";
 
-test("renders the packaged Rebased workbench shell and legible controls", async () => {
+test("[성공]고정된 Rebased Workbench 헬멧과 위험을 감수함", async () => {
     await resetQaProfile("Git Client Electron QA Fixture");
     const app = await launchPackaged(["--qa-fixture"]);
     try {
@@ -220,7 +220,7 @@ test("renders the packaged Rebased workbench shell and legible controls", async 
     }
 });
 
-test("uses the packaged Electron Welcome geometry", async () => {
+test("[성공] 패키지화된 Electron Welcome Geometry를 사용함", async () => {
     await resetQaProfile(runtimeProfileName);
     const app = await launchPackaged(["--qa-isolated-profile"]);
     try {

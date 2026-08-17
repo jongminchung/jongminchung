@@ -24,8 +24,8 @@ function deferred(): Deferred {
     };
 }
 
-describe("RepositoryMutationArbiter", () => {
-    it("serializes writes to the same repository", async () => {
+describe("표면돌연변이중재자", () => {
+    it("[성공] 클럽에 편지를 쓰고 직렬화함", async () => {
         const arbiter = new RepositoryMutationArbiter();
         const firstStarted = deferred();
         const releaseFirst = deferred();
@@ -57,7 +57,7 @@ describe("RepositoryMutationArbiter", () => {
         expect(order).toEqual(["first:start", "first:end", "second"]);
     });
 
-    it("allows writes to different repositories to run in parallel", async () => {
+    it("[성공] 다른 곳에 대한 뉘우침을 느낄 수 있음", async () => {
         const arbiter = new RepositoryMutationArbiter();
         const release = deferred();
         const started: string[] = [];
@@ -85,7 +85,7 @@ describe("RepositoryMutationArbiter", () => {
         await Promise.all([first, second]);
     });
 
-    it("removes a cancelled waiter without running its mutation", async () => {
+    it("[실패] 변형을 실행하지 않고 취소된 웨이터를 제거함", async () => {
         const arbiter = new RepositoryMutationArbiter();
         const firstStarted = deferred();
         const releaseFirst = deferred();
@@ -127,7 +127,7 @@ describe("RepositoryMutationArbiter", () => {
         ).resolves.toBe("available");
     });
 
-    it("sorts multi-repository ownership before waiting to avoid lock-order deadlocks", async () => {
+    it("[성공] 잠금 시간 교착 상태를 잠시 기다리기 전에 다수의 소유권을 대신함", async () => {
         const arbiter = new RepositoryMutationArbiter();
         const firstStarted = deferred();
         const releaseFirst = deferred();

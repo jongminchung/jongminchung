@@ -33,7 +33,7 @@ afterEach(async () => {
 });
 
 describe("SafeStorageHostingCredentialStore", () => {
-    it("persists only encrypted ciphertext and restores through safeStorage", async () => {
+    it("[성공] 메일화된 암호만 유지하고 safeStorage를 통해 복원함", async () => {
         const directory = await mkdtemp(
             join(tmpdir(), "git-client-credentials-"),
         );
@@ -67,7 +67,7 @@ describe("SafeStorageHostingCredentialStore", () => {
         await expect(restored.get(accountId)).resolves.toBeNull();
     });
 
-    it("rejects unavailable encryption, invalid ids, and invalid tokens", async () => {
+    it("[실패] 사용할 수 없는 파일, 유효하지 않은 ID 및 유효하지 않은 의미를 가지고 있음", async () => {
         const directory = await mkdtemp(
             join(tmpdir(), "git-client-credentials-"),
         );
@@ -102,7 +102,7 @@ describe("SafeStorageHostingCredentialStore", () => {
         });
     });
 
-    it("does not expose corrupt ciphertext or raw decrypt errors", async () => {
+    it("[실패] 암호문이나 원시 암호 해독을 수행하지 않음", async () => {
         const directory = await mkdtemp(
             join(tmpdir(), "git-client-credentials-"),
         );

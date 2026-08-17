@@ -14,8 +14,8 @@ function fakeTest(outcome: "expected" | "unexpected" | "flaky" | "skipped") {
     };
 }
 
-describe("compact Playwright reporter", () => {
-    it("keeps failure contracts small while retaining artifact paths", () => {
+describe("콤팩트 극작가 기자", () => {
+    it("[성공] 아티팩트 유지를 유지하는 동안 계약을 유지함", () => {
         const result = compactTestResult(
             fakeTest("unexpected"),
             {
@@ -47,7 +47,7 @@ describe("compact Playwright reporter", () => {
         });
     });
 
-    it("summarizes final outcomes without test logs", () => {
+    it("[실패] 테스트 없이 로그 작성 결과를 요약함", () => {
         expect(
             summarizeResults([
                 { outcome: "expected" },
@@ -58,7 +58,7 @@ describe("compact Playwright reporter", () => {
         ).toEqual({ passed: 1, failed: 1, flaky: 1, skipped: 1 });
     });
 
-    it("prints at most five bounded failure lines", () => {
+    it("[성공] 최대 5개의 실패 실패를 인쇄함", () => {
         const failures = Array.from({ length: 8 }, (_, index) => ({
             file: "tests/app.spec.ts",
             line: index + 1,

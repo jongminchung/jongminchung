@@ -5,8 +5,8 @@ import {
     DesktopStreamEnvelopeSchema,
 } from "./desktop-stream";
 
-describe("desktop stream contract", () => {
-    it("accepts the current handshake and rejects version skew", () => {
+describe("카트리지 연결", () => {
+    it("[실패] 현재 핸드셰이크를 마이킹하고 버전을 수정하고 있음", () => {
         expect(
             DesktopStreamConnectSchema.parse({
                 version: DESKTOP_STREAM_PROTOCOL_VERSION,
@@ -19,7 +19,7 @@ describe("desktop stream contract", () => {
         ).toThrow();
     });
 
-    it("accepts a typed Git barrier and rejects extra fields", () => {
+    it("[실패] 입력된 Git 허용을 허용하고 추가 필드를 유지함", () => {
         const barrier = {
             kind: "git.barrier" as const,
             operation: "query" as const,

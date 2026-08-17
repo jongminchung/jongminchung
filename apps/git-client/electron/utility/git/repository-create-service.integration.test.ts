@@ -55,8 +55,8 @@ afterEach(async () => {
     );
 });
 
-describe("RepositoryCreateService", () => {
-    it("initializes a canonical Unicode repository with main as the default branch", async () => {
+describe("표면CreateService", () => {
+    it("[성공] 메인을 기본 브랜치로 사용하여 어디에서든 유니코드를 찾아보세요", async () => {
         const parent = await createTemporaryDirectory();
         const requestedPath = join(parent, "한글 repository with spaces");
         const events: RepositoryCreateEvent[] = [];
@@ -89,7 +89,7 @@ describe("RepositoryCreateService", () => {
         });
     });
 
-    it("initializes a bare repository without a working tree", async () => {
+    it("[실패] 작업용 나무 없이 라이더를 불러함", async () => {
         const parent = await createTemporaryDirectory();
         const requestedPath = join(parent, "server.git");
         const service = RepositoryCreateService.create();
@@ -111,7 +111,7 @@ describe("RepositoryCreateService", () => {
         ).toBe("false");
     });
 
-    it("returns the canonical target when initializing through an existing symlink", async () => {
+    it("[실패] 기존의 릭 링크를 통해 호출할 때 표준을 받고 싶습니다", async () => {
         const parent = await createTemporaryDirectory();
         const actualPath = join(parent, "actual repository");
         const linkedPath = join(parent, "linked repository");
@@ -132,7 +132,7 @@ describe("RepositoryCreateService", () => {
         );
     });
 
-    it("clones a selected branch as a single shallow branch with streamed progress", async () => {
+    it("[성공] 스트리밍 진행을 통해 분기 분기를 단일 분기로 복제함", async () => {
         const parent = await createTemporaryDirectory();
         const source = join(parent, "source repository");
         const destination = join(parent, "cloned repository");
@@ -192,7 +192,7 @@ describe("RepositoryCreateService", () => {
         );
     });
 
-    it("delivers clone progress before the operation completes", async () => {
+    it("[성공] 작업이 끝나기 전에 처리해야 하는 상황을 전달함", async () => {
         const parent = await createTemporaryDirectory();
         const destination = join(parent, "destination");
         await mkdir(destination);
@@ -223,7 +223,7 @@ describe("RepositoryCreateService", () => {
         await expect(cloning).resolves.toMatchObject({ kind: "completed" });
     });
 
-    it("rejects arbitrary Git arguments before starting a process", async () => {
+    it("[실패] 프로세스를 시작하기 위해서는 반드시 Git을 인수해야 함", async () => {
         const runner = new RecordingCreateRunner();
         const events: RepositoryCreateEvent[] = [];
 
@@ -247,7 +247,7 @@ describe("RepositoryCreateService", () => {
         expect(runner.calls).toBe(0);
     });
 
-    it("passes clone inputs directly to Git without shell evaluation", async () => {
+    it("[실패] 헤드셋 전망을 보고 Git에 직접 전달함", async () => {
         const parent = await createTemporaryDirectory();
         const marker = join(parent, "shell-was-evaluated");
         const destination = join(parent, "destination");
@@ -270,7 +270,7 @@ describe("RepositoryCreateService", () => {
         await expect(access(marker)).rejects.toMatchObject({ code: "ENOENT" });
     });
 
-    it("blocks Git remote helpers that could execute arbitrary commands", async () => {
+    it("[실패] 임의의 조작음이 있는 Git 원격 메뉴를 차단할 수 있음", async () => {
         const parent = await createTemporaryDirectory();
         const marker = join(parent, "remote-helper-was-evaluated");
         const destination = join(parent, "destination");
@@ -293,7 +293,7 @@ describe("RepositoryCreateService", () => {
         await expect(access(marker)).rejects.toMatchObject({ code: "ENOENT" });
     });
 
-    it("redacts credentials from clone command, output, and terminal errors", async () => {
+    it("[성공] 복제품, 출력 및 터미널 오류에서 자격을 증명할 수 있음", async () => {
         const parent = await createTemporaryDirectory();
         const destination = join(parent, "destination");
         const events: RepositoryCreateEvent[] = [];
@@ -322,7 +322,7 @@ describe("RepositoryCreateService", () => {
         expect(serialized).toContain("[redacted]");
     });
 
-    it("removes only its owned staging directory after a failed clone", async () => {
+    it("[성공] 복제 실패 후 소유한 스테이징 직원만 제거함", async () => {
         const parent = await createTemporaryDirectory();
         const destination = join(parent, "destination");
 
@@ -353,7 +353,7 @@ describe("RepositoryCreateService", () => {
         ).toEqual([]);
     });
 
-    it("does not delete an existing user-owned clone destination after failure", async () => {
+    it("[실패] 실패 후 원래 사용자 소유 복제 대상을 삭제하지 않음", async () => {
         const parent = await createTemporaryDirectory();
         const destination = join(parent, "existing destination");
         await mkdir(destination);
@@ -381,7 +381,7 @@ describe("RepositoryCreateService", () => {
         ).resolves.toBeUndefined();
     });
 
-    it("recursively initializes submodules when requested", async () => {
+    it("[성공] 요청 시 하위 모듈을 재귀하게 호출함", async () => {
         const parent = await createTemporaryDirectory();
         const moduleRepository = join(parent, "module source");
         const source = join(parent, "super source");
@@ -498,7 +498,7 @@ describe("RepositoryCreateService", () => {
                 singleBranch: false,
             },
         ],
-    ])("rejects invalid clone input: %s", async (_label, request) => {
+    ])("[실패] 입력된 복제를 입력했습니다: %s", async (_label, request) => {
         const runner = new RecordingCreateRunner();
 
         const result = await RepositoryCreateService.of(runner).clone(
@@ -510,7 +510,7 @@ describe("RepositoryCreateService", () => {
         expect(runner.calls).toBe(0);
     });
 
-    it("rejects an unsafe initial branch before starting Git", async () => {
+    it("[실패] Git을 시작하기 전에 안전하지 않은 최초의 모든 것을 유지함", async () => {
         const parent = await createTemporaryDirectory();
         const runner = new RecordingCreateRunner();
 
@@ -527,7 +527,7 @@ describe("RepositoryCreateService", () => {
         expect(runner.calls).toBe(0);
     });
 
-    it("cancels before spawn and removes its owned staging directory", async () => {
+    it("[실패] 생성하기 전에 취소하고 소유한 보안 승인을 제거함", async () => {
         const parent = await createTemporaryDirectory();
         const destination = join(parent, "destination");
         const cancellation = new AbortController();

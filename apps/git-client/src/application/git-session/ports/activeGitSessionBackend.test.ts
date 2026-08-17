@@ -10,8 +10,8 @@ function backend(kind: "live" | "fixture"): GitSessionBackend<WorkspaceState> {
     return { kind } as unknown as GitSessionBackend<WorkspaceState>;
 }
 
-describe("active Git session backend", () => {
-    it("installs and restores nested backend scopes", () => {
+describe("활동 Git 세션 백엔드", () => {
+    it("[성공] 전투된 백엔드 범위 설치 및 복원", () => {
         expect(() => getGitSessionBackend()).toThrow(
             "Git session backend was not installed",
         );

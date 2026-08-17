@@ -67,8 +67,8 @@ afterEach(async () => {
     );
 });
 
-describe("IgnoreRulesService", () => {
-    it("reads missing files as empty and atomically persists both fixed files", async () => {
+describe("규칙 서비스 무시", () => {
+    it("[성공] 예제 파일을 MB 파일로 이해 두 번째 고정 파일을 원자적으로 유지함", async () => {
         const { root, service, repositoryId } = await createService();
         await expect(service.read(repositoryId)).resolves.toEqual({
             gitignore: "",
@@ -92,7 +92,7 @@ describe("IgnoreRulesService", () => {
         ).resolves.toBe(".cache/\n");
     });
 
-    it("rejects NUL, oversized content, invalid UTF-8, and symbolic-link reads", async () => {
+    it("[실패] NUL, 큰 내용, 유효하지 않은 UTF-8 및 기호 링크 그림이 포함되어 있음", async () => {
         const { root, service, repositoryId } = await createService();
         await expect(
             service.write(repositoryId, {
@@ -121,7 +121,7 @@ describe("IgnoreRulesService", () => {
         });
     });
 
-    it("replaces a destination symlink without modifying its target", async () => {
+    it("[실패]대상을 수정하지 않고 대상 릭 링크를 대체함", async () => {
         const { root, service, repositoryId } = await createService();
         const outside = join(root, "..", "outside-ignore");
         await writeFile(outside, "do-not-touch\n", "utf8");

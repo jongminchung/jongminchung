@@ -40,14 +40,14 @@ afterEach(() => {
     restore = undefined;
 });
 
-describe("active terminal service", () => {
-    it("fails clearly before renderer composition installs a service", () => {
+describe("활성 터미널 서비스", () => {
+    it("[실패] 렌더러 구성 서비스를 설치하기 전에는 실패함", () => {
         expect(() => terminalService.snapshot()).toThrow(
             "Terminal service was not installed",
         );
     });
 
-    it("forwards calls to the installed application service", async () => {
+    it("[성공] 예외적으로 서비스를 요청함을 전달함", async () => {
         const service = TerminalService.of(terminal);
         restore = installTerminalService(service);
 

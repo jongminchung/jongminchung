@@ -61,8 +61,8 @@ class FakePtySpawner implements PtySpawner {
     );
 }
 
-describe("TerminalUtility", () => {
-    it("runs the fixed shell in the repository and emits sequential output before exit", () => {
+describe("터미널유틸리티", () => {
+    it("[성공] 로그아웃에서 저장을 실행하고 종료하기 전에 출력을 내보냅니다", () => {
         const spawner = new FakePtySpawner();
         const utility = TerminalUtility.of(spawner, {
             shell: "/bin/zsh",
@@ -124,7 +124,7 @@ describe("TerminalUtility", () => {
         expect(utility.sessionCount).toBe(0);
     });
 
-    it("bounds output chunks and closes only sessions owned by the requested repository", () => {
+    it("[성공] 청크의 경계를 정하고 요청한 사용자가 소유한 세션만 ​​​​접수함", () => {
         const firstSpawner = new FakePtySpawner();
         const secondSpawner = new FakePtySpawner();
         const spawners = [firstSpawner, secondSpawner];
@@ -186,7 +186,7 @@ describe("TerminalUtility", () => {
         expect(utility.sessionCount).toBe(0);
     });
 
-    it("reports PTY spawn failures with a recoverable typed error", () => {
+    it("[성공] 복구할 수 없는 오류와 함께 PTY 생성 실패를 보고함", () => {
         const utility = TerminalUtility.of(
             {
                 spawn: () => {

@@ -680,7 +680,7 @@ class AliasingGitApi extends FakeGitApi {
 }
 
 describe("ElectronGitBridge", () => {
-    it("copies readonly transport DTO collections into generated bridge values", async () => {
+    it("[성공] 지도를 통해 전송되는 DTO 컬렉션을 생성된 위치에 복사함", async () => {
         const api = new AliasingGitApi();
         const bridge = new ElectronGitBridge(api);
 
@@ -704,7 +704,7 @@ describe("ElectronGitBridge", () => {
         expect(restored.restoredRefs).not.toBe(api.restored.restoredRefs);
     });
 
-    it("opens with the complete utility-inspected repository snapshot", async () => {
+    it("[성공] 완전한 드라이버 드라이버 스냅샷으로", async () => {
         const api = new FakeGitApi({ status: statusOutput });
         const bridge = new ElectronGitBridge(api);
 
@@ -727,7 +727,7 @@ describe("ElectronGitBridge", () => {
         expect(api.queries).toEqual([]);
     });
 
-    it("initializes and stores a status-backed repository snapshot", async () => {
+    it("[성공] 상태 지원 스프링 스냅샷을 점프하고 저장함", async () => {
         const api = new FakeGitApi({ status: statusOutput });
         const bridge = new ElectronGitBridge(api);
         const events: GitCreationEvent[] = [];
@@ -753,7 +753,7 @@ describe("ElectronGitBridge", () => {
         });
     });
 
-    it("clones and stores a status-backed repository snapshot", async () => {
+    it("[성공]상태가 지원되는 스냅샷을 복제하고 저장함", async () => {
         const api = new FakeGitApi({ status: statusOutput });
         const bridge = new ElectronGitBridge(api);
         const options: CloneOptions = {
@@ -786,7 +786,7 @@ describe("ElectronGitBridge", () => {
         expect(events.map(({ kind }) => kind)).toEqual(["started"]);
     });
 
-    it("settles once when preload delivers the terminal through both listener and Promise", async () => {
+    it("[성공] 사전 로드가 리스너와 Promise를 통해 터미널을 치료할 때 한 번 처리됨", async () => {
         const refsOutput = [
             "refs/heads/main",
             "oid",
@@ -834,7 +834,7 @@ describe("ElectronGitBridge", () => {
         ).toMatchObject({ data: "non-parser warning" });
     });
 
-    it("transports bounded diff and file reads without exposing a filesystem path API", async () => {
+    it("[실패] 파일 시스템 경로 API를 반대 방향으로 사용하지 않음 diff 및 파일 읽기를 전송함", async () => {
         const api = new FakeGitApi({
             diff: "diff --git a/tracked.txt b/tracked.txt\n+changed\n",
         });
@@ -890,7 +890,7 @@ describe("ElectronGitBridge", () => {
         ]);
     });
 
-    it("delegates branch comparison, pre-commit inspection, and commit signatures", async () => {
+    it("[성공] 브랜치패스, 커밋 전 감사, 커밋 전 사인", async () => {
         const bridge = new ElectronGitBridge(new FakeGitApi());
 
         await expect(
@@ -916,7 +916,7 @@ describe("ElectronGitBridge", () => {
         });
     });
 
-    it("delegates repository configuration, refs, submodules, remotes, and worktrees", async () => {
+    it("[성공] 교체 구성, 참조, 하위 모듈, 원격 및 작업 트리를 틀함", async () => {
         const bridge = new ElectronGitBridge(new FakeGitApi());
 
         await expect(bridge.listGitConfig(repositoryId)).resolves.toEqual([
@@ -943,7 +943,7 @@ describe("ElectronGitBridge", () => {
         );
     });
 
-    it("reads and writes repository ignore rules through the utility API", async () => {
+    it("[성공] 로그를 읽고 쓰며 유틸리티 API를 통해 규칙을 무시함", async () => {
         const api = new FakeGitApi();
         const bridge = new ElectronGitBridge(api);
 
@@ -961,7 +961,7 @@ describe("ElectronGitBridge", () => {
         });
     });
 
-    it("forwards repository invalidations and tears down the watcher before closing", async () => {
+    it("[성공] 미래화를 전달하고 닫기 전에", async () => {
         const api = new FakeGitApi({ status: statusOutput });
         const bridge = new ElectronGitBridge(api);
         const events: RepositoryChangedEvent[] = [];
@@ -983,7 +983,7 @@ describe("ElectronGitBridge", () => {
         expect(api.closed).toEqual([repositoryId]);
     });
 
-    it("transports non-operation requests without narrowing log semantics", async () => {
+    it("[실패] 로그 의미를 요청하고 비작업을 전송함", async () => {
         const api = new FakeGitApi();
         const bridge = new ElectronGitBridge(api);
         const commitDetails: GitRequest = {
@@ -1078,7 +1078,7 @@ describe("ElectronGitBridge", () => {
         });
     });
 
-    it("synthesizes started before failed when the query transport rejects", async () => {
+    it("[실패] 쿼리가 전송되지 않기 때문에 방지하기", async () => {
         const bridge = new ElectronGitBridge(new RejectingGitApi());
         const events: GitEvent[] = [];
         let resolveTerminal: (() => void) | undefined;
@@ -1108,7 +1108,7 @@ describe("ElectronGitBridge", () => {
         });
     });
 
-    it("closes the utility repository when the session unwatches it", async () => {
+    it("[성공] 세션이 닫혀 있으면 운전자가 닫힙니다", async () => {
         const api = new FakeGitApi({ status: statusOutput });
         const bridge = new ElectronGitBridge(api);
         await bridge.openRepository(repository.path);
@@ -1121,7 +1121,7 @@ describe("ElectronGitBridge", () => {
         );
     });
 
-    it("forwards cancellation without inventing a successful result", async () => {
+    it("[실패] 원정 결과를 요구하고 취소를 전달함", async () => {
         const api = new FakeGitApi();
         const bridge = new ElectronGitBridge(api);
 

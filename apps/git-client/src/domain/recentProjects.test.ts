@@ -5,8 +5,8 @@ import {
     updateRecentProjects,
 } from "./recentProjects";
 
-describe("recent projects", () => {
-    it("migrates legacy paths and rejects duplicates", () => {
+describe("최근 프로젝트", () => {
+    it("[실패] 레거시 경로를 마이그레이션하고 단독으로 사용함", () => {
         expect(
             parseRecentProjects(["/tmp/one", "/tmp/one", "/tmp/two"]),
         ).toEqual([
@@ -15,7 +15,7 @@ describe("recent projects", () => {
         ]);
     });
 
-    it("moves the latest metadata to the front", () => {
+    it("[성공] 최신 업데이트 데이터를 향후 이동함", () => {
         expect(
             updateRecentProjects(
                 [
@@ -36,7 +36,7 @@ describe("recent projects", () => {
         ).toEqual(["/tmp/two", "/tmp/one"]);
     });
 
-    it("shortens paths below the user home", () => {
+    it("[성공] 사용자 홈 아래의 경로를 단축함", () => {
         expect(homeRelativePath("/Users/test/work/repo", "/Users/test")).toBe(
             "~/work/repo",
         );

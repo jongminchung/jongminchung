@@ -5,8 +5,8 @@ import { describeGitRequest, recordGitConsoleEvent } from "./gitConsole";
 const request: GitRequest = { kind: "status", repositoryId: "repository-1" };
 const requestId = "request-1" as RequestId;
 
-describe("Git Console", () => {
-    it("uses recognizable, bounded command descriptions", () => {
+describe("힘내 콘솔", () => {
+    it("[성공] 탐지 가능하고 유용한 키보드 설명을 사용함", () => {
         expect(describeGitRequest(request)).toBe(
             "git status --porcelain=v2 --branch -z",
         );
@@ -19,7 +19,7 @@ describe("Git Console", () => {
         ).toBe("git fetch  # Fetching");
     });
 
-    it("records the ordered lifecycle and redacts credentials", () => {
+    it("[성공] 계속해서 살아남고 기록하고 자격을 증명함", () => {
         let entries = recordGitConsoleEvent(
             [],
             request,
@@ -70,7 +70,7 @@ describe("Git Console", () => {
         expect(entries[0]?.output).not.toContain("ghp_private");
     });
 
-    it("records failures and cancellations as terminal states", () => {
+    it("[성공] 실패 및 취소를 최종 상태로 기록함", () => {
         const failed = recordGitConsoleEvent(
             [],
             request,

@@ -22,8 +22,8 @@ import {
 
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
-describe("documentation content contract", () => {
-    it("parses every generated manifest and search document with the shared schemas", () => {
+describe("문서 내용 계약", () => {
+    it("[성공] 생성된 모든 매니페스트와 검색 문서를 공유하여 분석했습니다", () => {
         expect(() =>
             contentManifestEntrySchema.array().parse(manifest),
         ).not.toThrow();
@@ -37,7 +37,7 @@ describe("documentation content contract", () => {
         ).not.toThrow();
     });
 
-    it("keeps one Korean and English document for every ID", () => {
+    it("[성공] ID당 한글, 문서 보관 1", () => {
         const localesById = new Map<string, Set<string>>();
         for (const document of manifest) {
             const locales = localesById.get(document.id) ?? new Set<string>();
@@ -48,7 +48,7 @@ describe("documentation content contract", () => {
             expect([...locales].sort()).toEqual(["en", "ko"]);
     });
 
-    it("keeps source, manifest, loader, and search documents in one-to-one correspondence", async () => {
+    it("[성공] 소스, 매니페스트, 로더 및 검색 문서를 일대일 협력으로 유지함", async () => {
         const sources = await readDocuments();
         const sourceKeys = sources.map(({ metadata }) =>
             createDocumentKey(metadata.locale, metadata.id),
@@ -117,7 +117,7 @@ describe("documentation content contract", () => {
         }
     });
 
-    it("matches rendered MDX heading IDs and ignores headings inside code fences", async () => {
+    it("[성공] 확장된 MDX 본체 ID를 경기용 내부의 하우징을 무시함", async () => {
         const outline = await createOutline(`
 # Ignored page title
 
@@ -148,7 +148,7 @@ describe("documentation content contract", () => {
         ]);
     });
 
-    it("validates schema, URLs, order, links, and search output", () => {
+    it("[성공], URL, 인사말, 링크 및 검색 결과를 확인함", () => {
         const output = execFileSync(
             process.execPath,
             [resolve(appRoot, "scripts/build-content.ts"), "--check"],
@@ -160,7 +160,7 @@ describe("documentation content contract", () => {
         expect(output).toContain("localized documents.");
     });
 
-    it("rejects locale metadata drift and non-contiguous navigation order", async () => {
+    it("[실패] 로케일메 데이터를 드리프트 및 비연속 감시 시간을 갖고 있음", async () => {
         const documents = await readDocuments();
         expect(() => validateDocuments(documents)).not.toThrow();
 
@@ -191,7 +191,7 @@ describe("documentation content contract", () => {
         );
     });
 
-    it("rejects stale generated documentation data", async () => {
+    it("[실패] 오래되어 생성된 문서 데이터가 있음", async () => {
         const readStaleFile = (): Promise<string> => Promise.resolve("stale\n");
         await expect(
             checkGeneratedFiles(

@@ -224,8 +224,8 @@ afterEach(async () => {
     );
 });
 
-describe("MultiRootService", () => {
-    it("synchronizes unique repositories in deterministic order and restores exact branch state", async () => {
+describe("멀티루트서비스", () => {
+    it("[성공] 결정적으로 중요한 순간을 말하고 모두 분기 상태를 복원함", async () => {
         const { fixtures, registry } = await createRepositories(2);
         const records = fixtures.map((fixture) => fixture.record);
         const sorted = [...records].sort((left, right) =>
@@ -290,7 +290,7 @@ describe("MultiRootService", () => {
         }
     });
 
-    it("stops at the first failing repository and returns rollback only for prior successes", async () => {
+    it("[성공] 첫 번째 실패자들에서 종료하고 이전 성공에 대해서만 롤백을 반환함", async () => {
         const { fixtures, registry } = await createRepositories(3);
         const sorted = [...fixtures].sort((left, right) =>
             left.record.id.localeCompare(right.record.id, "en"),
@@ -337,7 +337,7 @@ describe("MultiRootService", () => {
         );
     });
 
-    it("rejects unsupported or non-strict operations before any mutation", async () => {
+    it("[실패] 이전에 변형되지 않은 채로 작업되지 않은 상태", async () => {
         const { fixtures, registry } = await createRepositories(1);
         const fixture = fixtures[0];
         if (fixture === undefined) throw new Error("fixture is missing");
@@ -372,7 +372,7 @@ describe("MultiRootService", () => {
         expect(state(fixture.root)).toEqual(before);
     });
 
-    it("prevents mutation when recovery recording fails and redacts credentials", async () => {
+    it("[실패] 수리 기록이 실패할 때 변형을 방지하고 증명을 수정함", async () => {
         const { fixtures, registry } = await createRepositories(1);
         const fixture = fixtures[0];
         if (fixture === undefined) throw new Error("fixture is missing");
@@ -404,7 +404,7 @@ describe("MultiRootService", () => {
         expect(state(fixture.root)).toEqual(before);
     });
 
-    it("honors cancellation and recovery timeout without changing the repository", async () => {
+    it("[실패] 변경하지 않고 취소하고 복구 시간을 초과할 수 없습니다", async () => {
         const { fixtures, registry } = await createRepositories(1);
         const fixture = fixtures[0];
         if (fixture === undefined) throw new Error("fixture is missing");
@@ -447,7 +447,7 @@ describe("MultiRootService", () => {
         expect(state(fixture.root)).toEqual(before);
     });
 
-    it("validates rollback path identity and allowed operations before applying the plan", async () => {
+    it("[성공] 계획을 적용하기 전에는 외부 ID 및 허용된 작업을 검증함", async () => {
         const { fixtures, registry } = await createRepositories(2);
         const first = fixtures[0];
         const second = fixtures[1];
@@ -497,7 +497,7 @@ describe("MultiRootService", () => {
         expect(git(first.root, "branch", "--show-current")).toBe("main");
     });
 
-    it("detects a repository directory replacement after recovery and never mutates the replacement", async () => {
+    it("[성공] 복구 후 스티커를 교체하고 교체하지 않음", async () => {
         const { fixtures, registry } = await createRepositories(1);
         const fixture = fixtures[0];
         if (fixture === undefined) throw new Error("fixture is missing");
@@ -543,7 +543,7 @@ describe("MultiRootService", () => {
         expect(git(moved, "branch", "--show-current")).toBe("main");
     });
 
-    it("serializes concurrent operations for the same repository without deadlock", async () => {
+    it("[실패] 교착상태 없이 모임에 대한 모임을 직렬화함", async () => {
         const { fixtures, registry } = await createRepositories(1);
         const fixture = fixtures[0];
         if (fixture === undefined) throw new Error("fixture is missing");

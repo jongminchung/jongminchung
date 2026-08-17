@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { createAppStore } from "./appStore";
 
-describe("AppStore", () => {
-    it("keeps app instances isolated and supports functional actions", () => {
+describe("앱 스토어", () => {
+    it("[성공] 앱을 제외된 상태로 유지하고 기능적 작업을 지원함", () => {
         const first = createAppStore();
         const second = createAppStore();
 

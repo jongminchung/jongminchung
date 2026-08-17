@@ -1,10 +1,9 @@
-import { readFile, readdir, stat, writeFile } from "node:fs/promises";
-import { basename, dirname, relative, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { glob, readFile, readdir, stat, writeFile } from "node:fs/promises";
+import { basename, relative, resolve } from "node:path";
 import ts from "typescript";
 import { toPosixPath } from "./generation-utils.ts";
 
-const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const appRoot = resolve(import.meta.dirname, "..");
 const topicsRoot = resolve(appRoot, "components/materials/topics");
 const registryPath = resolve(appRoot, "generated/materials-registry.tsx");
 const manifestPath = resolve(appRoot, "generated/materials-manifest.json");
@@ -196,19 +195,13 @@ async function listTopicDirectories(): Promise<readonly string[]> {
 }
 
 async function listSourceFiles(directory: string): Promise<readonly string[]> {
-    const entries = await readdir(directory, { withFileTypes: true });
-    const nested = await Promise.all(
-        entries.map(async (entry): Promise<readonly string[]> => {
-            const entryPath = resolve(directory, entry.name);
-            return entry.isDirectory()
-                ? listSourceFiles(entryPath)
-                : [entryPath];
-        }),
-    );
-    return nested
-        .flat()
-        .filter((filePath) => /\.tsx?$/u.test(filePath))
-        .sort();
+    const files: string[] = [];
+    for await (const filePath of glob(["**/*.ts", "**/*.tsx"], {
+        cwd: directory,
+    })) {
+        files.push(resolve(directory, filePath));
+    }
+    return files.toSorted();
 }
 
 async function validateRenderingPolicy(): Promise<void> {

@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("server HTML declares each route's default document language", async ({
+test("[성공] 서버 HTML은 각 위치의 기본 문서 언어를 선언함", async ({
     request,
 }) => {
     for (const [path, locale] of [
@@ -20,7 +20,7 @@ test("server HTML declares each route's default document language", async ({
     }
 });
 
-test("locale-prefixed 404 responses retain the requested document language", async ({
+test("[성공] 로캘 소개두사가 합류은 404 응답은 요청된 문서 언어를 유지함", async ({
     request,
 }) => {
     for (const [path, locale, heading] of [

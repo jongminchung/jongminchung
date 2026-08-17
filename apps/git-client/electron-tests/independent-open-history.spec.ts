@@ -94,7 +94,7 @@ async function persistedValues(
     return parsed.values ?? {};
 }
 
-test("opens a recent project through the packaged UI and restores its history review", async () => {
+test("[성공]패키지화된 UI를 통해 최신 프로젝트를 보호 기록 검토하고 복구함", async () => {
     test.setTimeout(60_000);
     await resetQaProfile(runtimeProfileName);
     const parent = await mkdtemp(

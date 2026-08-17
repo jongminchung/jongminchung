@@ -52,8 +52,8 @@ function renderDetails(commitIndex: number | null): string {
     );
 }
 
-describe("DetailsPane", () => {
-    it("matches the empty Rebased revision-review split and toolbar", () => {
+describe("세부정보 창", () => {
+    it("[성공] 빈 재기반 검토 검토 및 도구 모음과 일치함", () => {
         const markup = renderDetails(null);
 
         expect(markup).toContain('aria-label="Show Diff"');
@@ -65,7 +65,7 @@ describe("DetailsPane", () => {
         expect(markup).toContain("Commit details");
     });
 
-    it("shows changed files above commit metadata for a selected commit", () => {
+    it("[성공] 일부 커밋에 대한 커밋 데이터베이스에서 변경된 파일을 표시함", () => {
         const markup = renderDetails(0);
 
         expect(markup).toContain('aria-label="Changed files"');

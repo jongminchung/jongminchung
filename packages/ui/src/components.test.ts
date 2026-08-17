@@ -22,8 +22,8 @@ import { SheetContent } from "./components/sheet";
 import { Spinner } from "./components/spinner";
 import { Tabs, TabsList, TabsTrigger } from "./components/tabs";
 
-describe("shared UI behavior", () => {
-    it("limits the overflowing tab indicator to line tabs", () => {
+describe("공유 UI 동작", () => {
+    it("[성공] 추가 탭 표시기를 줄 탭으로 제한함", () => {
         const markup = renderToStaticMarkup(
             createElement(
                 Tabs,
@@ -42,7 +42,7 @@ describe("shared UI behavior", () => {
         );
     });
 
-    it("keeps buttons native and styles links without rendering a Base UI button", () => {
+    it("[실패] 기본 UI 버튼을 백업하지 않고 버튼 기본 및 스타일 링크를 유지함", () => {
         const button = renderToStaticMarkup(
             createElement(
                 Button,
@@ -76,7 +76,7 @@ describe("shared UI behavior", () => {
         expect(link).not.toContain("<button");
     });
 
-    it("connects descriptions and errors to invalid fields", () => {
+    it("[실패] 설명과 믿어지지 않는 필드에 연결함", () => {
         const markup = renderToStaticMarkup(
             createElement(
                 Field,
@@ -109,7 +109,7 @@ describe("shared UI behavior", () => {
         expect(markup).toContain('role="alert"');
     });
 
-    it("deduplicates form error messages while preserving distinct failures", () => {
+    it("[성공] 계속해서 이야기를 나누고 있음", () => {
         const markup = renderToStaticMarkup(
             createElement(FieldError, {
                 errors: [
@@ -126,7 +126,7 @@ describe("shared UI behavior", () => {
         expect(markup).toContain('role="alert"');
     });
 
-    it("filters empty form errors before selecting single-message markup", () => {
+    it("[성공] 단일 마커업을 선택하기 전에 빈 양식을 남기기 위해", () => {
         const markup = renderToStaticMarkup(
             createElement(FieldError, {
                 errors: [undefined, {}, { message: "Branch is required." }],
@@ -137,7 +137,7 @@ describe("shared UI behavior", () => {
         expect(markup).not.toContain("<ul");
     });
 
-    it("requires spinners to be explicitly labelled or decorative", () => {
+    it("[성공] 스피너에 컨트롤러를 부착하거나 장식적으로 표시해야 함", () => {
         const labelled = renderToStaticMarkup(
             createElement(Spinner, { label: "Loading repository" }),
         );
@@ -153,7 +153,7 @@ describe("shared UI behavior", () => {
         expect(decorative).not.toContain("aria-label");
     });
 
-    it("keeps the default cmdk input and item markup", () => {
+    it("[성공] 기본 cmdk 입력 및 항목 마크업을 유지함", () => {
         const markup = renderToStaticMarkup(
             createElement(
                 Command,
@@ -175,7 +175,7 @@ describe("shared UI behavior", () => {
         expect(markup).toContain('data-slot="command-item"');
     });
 
-    it("renders mixed checkboxes and preserves static versus actionable item roles", () => {
+    it("[성공] 엄지박스를 백업하고 정적 항목과 실행 가능한 항목 역할을 유지함", () => {
         const mixed = renderToStaticMarkup(
             createElement(Checkbox, {
                 "aria-label": "Select all files",
@@ -222,7 +222,7 @@ describe("shared UI behavior", () => {
         expect(actionItem).not.toContain('role="listitem"');
     });
 
-    it("enforces accessible labels for status and dismiss controls at compile time", () => {
+    it("[성공]상태에 대한 액세스 가능 레이블을 적용하고 타이머 시간에 지배를 해제함", () => {
         const compileTimeOnly = () => {
             // @ts-expect-error A visible spinner requires an explicit accessible label.
             createElement(Spinner, {});

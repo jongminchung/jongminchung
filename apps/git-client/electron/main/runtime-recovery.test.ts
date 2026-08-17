@@ -41,8 +41,8 @@ function fixture(response: number) {
     };
 }
 
-describe("runtime recovery", () => {
-    it("records renderer crashes and reloads only after explicit selection", async () => {
+describe("복구 복구", () => {
+    it("[성공] 벽돌적인 선택 후에만 렌더러 충돌 및 다시 로드를 기록함", async () => {
         const recovery = fixture(0);
         recovery.webContentsListeners.get("render-process-gone")?.(
             {} as never,
@@ -60,7 +60,7 @@ describe("runtime recovery", () => {
         expect(recovery.relaunch).not.toHaveBeenCalled();
     });
 
-    it("waits without mutating application state when an unresponsive window is dismissed", async () => {
+    it("[실패] 응답하지 않는 영원히 힐 타임 상태를 변경하지 않고 기다리겠습니다", async () => {
         const recovery = fixture(0);
         recovery.windowListeners.get("unresponsive")?.();
         await vi.waitFor(() =>

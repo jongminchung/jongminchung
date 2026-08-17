@@ -29,12 +29,12 @@ afterEach(async () => {
     );
 });
 
-describe("DMG native dependency preflight", () => {
-    it("resolves the native package root without importing private package.json subpaths", () => {
+describe("DMG 기본적으로 추진성 프리플라이트", () => {
+    it("[실패] 개인 package.json 하위 경로를 가져오지 기본 및 자율성을 확인함", () => {
         expect(resolveNativeModuleRoot("macos-alias")).toMatch(/macos-alias$/u);
     });
 
-    it("builds a missing binding before the reproducible DMG generator loads it", async () => {
+    it("[성공] DMG 생성을 로드하기 전에 바인딩을 생성함을 포함하고 있음", async () => {
         const { binding, root } = await fixture();
         const build = vi.fn(
             async (_nodeGypScript: string, moduleRoot: string) => {
@@ -60,7 +60,7 @@ describe("DMG native dependency preflight", () => {
         expect(build).toHaveBeenCalledOnce();
     });
 
-    it("does not rebuild an existing arm64 binding", async () => {
+    it("[실패] 기존 arm64 위장을 다시 제작하지 못함", async () => {
         const { binding, root } = await fixture();
         await writeFile(binding, "arm64 fixture");
         const build = vi.fn();
@@ -78,7 +78,7 @@ describe("DMG native dependency preflight", () => {
         expect(build).not.toHaveBeenCalled();
     });
 
-    it("rejects symlinked and wrong-architecture bindings", async () => {
+    it("[실패] 인디펜던트 링크 및 반환되지 않았습니다", async () => {
         const symlinkFixture = await fixture();
         const target = join(symlinkFixture.root, "target.node");
         await writeFile(target, "target");
@@ -109,7 +109,7 @@ describe("DMG native dependency preflight", () => {
         );
     });
 
-    it("builds the missing macos-alias dependency", async () => {
+    it("[성공] 배치된 macos-alias 탄력성을 구축함", async () => {
         const alias = await fixture();
         const build = vi.fn(
             async (_nodeGypScript: string, moduleRoot: string) => {

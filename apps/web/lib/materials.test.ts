@@ -50,15 +50,15 @@ async function readLocalizedMaterialIds(
     );
 }
 
-describe("material registry", () => {
-    it("contains 11 topics and 31 unique independent demos", async () => {
+describe("재료등록", () => {
+    it("[성공] 11개의 주제와 31개의 고유한 스탬프가 포함되어 있음", async () => {
         const manifest = await readManifest();
         expect(manifest).toHaveLength(31);
         expect(new Set(manifest.map((entry) => entry.id)).size).toBe(31);
         expect(new Set(manifest.map((entry) => entry.topic)).size).toBe(11);
     });
 
-    it("limits native rendering to the measured pixel exception", async () => {
+    it("[성공] 기본적으로 확장을 측정한 문자열로 제한함", async () => {
         const manifest = await readManifest();
         expect(
             manifest
@@ -68,7 +68,7 @@ describe("material registry", () => {
         ).toEqual(["the-expensive-main-thread/DynamicPriorityDemo"]);
     });
 
-    it("keeps every generated entry on the static manifest type contract", async () => {
+    it("[성공] 정적 매니페스트 유형 계약에 생성된 모든 항목을 유지함", async () => {
         const registry = await readFile(
             resolve(appRoot, "generated/materials-registry.tsx"),
             "utf8",
@@ -89,7 +89,7 @@ describe("material registry", () => {
         expect(rejectsUnexpectedRequiredProps).toBe(false);
     });
 
-    it("keeps both locale ID sets unique and exactly equal to the registry", async () => {
+    it("[성공] 두 로케일 ID set 모두 고유하고, 정확히 동일하게 유지함", async () => {
         const manifest = await readManifest();
         const expected = manifest.map((entry) => entry.id).sort();
 

@@ -28,15 +28,15 @@ const status = (changes: readonly FileChange[]): StatusModel => ({
     changes,
 });
 
-describe("change review state", () => {
-    it("creates separate index and worktree selections for partially staged files", () => {
+describe("상태변경", () => {
+    it("[성공] 부분적으로 파일에 대해 별도의 용도 및 작업 트리 선택을 생성함", () => {
         expect(changeEntries(status([file({ staged: true })]))).toMatchObject([
             { selection: { path: "src/app.ts", layer: "index" } },
             { selection: { path: "src/app.ts", layer: "worktree" } },
         ]);
     });
 
-    it("restores the opposite layer before selecting a neighboring file", () => {
+    it("[성공] 소수 파일을 선택하기 때문에 반대 레이어를 반환함", () => {
         const entries = changeEntries(
             status([
                 file({ staged: true, worktree: false }),
@@ -54,7 +54,7 @@ describe("change review state", () => {
         });
     });
 
-    it("keeps partial staging on the cached index and rejects ambiguous patch targets", () => {
+    it("[실패] 캔디된 부분에서 안정성을 유지하고 모호한 패치 대상을 유지함", () => {
         expect(
             normalizePartialPatchTarget(
                 { path: "src/app.ts", layer: "worktree" },
@@ -81,7 +81,7 @@ describe("change review state", () => {
         ).toBeNull();
     });
 
-    it("deduplicates selected paths within the requested change layer", () => {
+    it("[성공] 요청된 변경 사항 내에서 대안적인 해석을 제거함", () => {
         const partiallyStaged = changeEntries(status([file({ staged: true })]));
         expect(
             uniqueChangePaths(
@@ -94,7 +94,7 @@ describe("change review state", () => {
         ]);
     });
 
-    it("selects the first entry initially and clears an empty repository", () => {
+    it("[성공] 처음에 첫 번째 항목을 선택하고 빈자리를 지킵니다", () => {
         const entries = changeEntries(status([file({})]));
         expect(reconcileChangeSelection(null, entries)).toEqual({
             path: "src/app.ts",
@@ -105,7 +105,7 @@ describe("change review state", () => {
         ).toBeNull();
     });
 
-    it("validates persisted view, selection, preferences, and draft values", () => {
+    it("[성공]한 보기, 선택, 기본 설정 및 초안 값의 플래그를 검사함", () => {
         expect(parseRepositoryViewMode("changes")).toBe("changes");
         expect(parseRepositoryViewMode("unknown")).toBe("history");
         expect(parseChangeSelection({ path: "a.ts", layer: "index" })).toEqual({
@@ -140,7 +140,7 @@ describe("change review state", () => {
         });
     });
 
-    it("splits revision comparisons into navigable text, binary, and submodule files", () => {
+    it("[성공] 볼트판 비교를 탐색 가능한 텍스트, 바이너리 및 하위 모듈 파일로 분할함", () => {
         const entries = revisionDiffEntries(
             [
                 "diff --git a/src/app.ts b/src/app.ts",

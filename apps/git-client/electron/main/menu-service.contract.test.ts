@@ -51,8 +51,8 @@ function enclosingMethodName(node: ts.Node): string | undefined {
     return undefined;
 }
 
-describe("native menu command contract", () => {
-    it("uses only canonical manifest IDs and owns no command copy", () => {
+describe("기본 메뉴구성", () => {
+    it("[성공] 레이더 매니페스트 ID만 사용하고 버튼을 소유하지 않음", () => {
         const calls = menuCommandCalls();
         const ids = calls.flatMap((call) => {
             expect(call.arguments).toHaveLength(1);

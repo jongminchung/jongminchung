@@ -127,8 +127,8 @@ interface RequestCase {
     readonly responseKind: string;
 }
 
-describe("Electron hosting contracts", () => {
-    it("accepts only credential-free HTTPS origins without query or fragment", () => {
+describe("전자레인지 계약", () => {
+    it("[실패] 쿼리나 조각 없이 증명할 수 없는 HTTPS 원본만 허용됨", () => {
         expect(
             normalizeHostingBaseUrl(
                 " https://gitlab.example.test/groups/repository ",
@@ -164,8 +164,8 @@ describe("Electron hosting contracts", () => {
     });
 });
 
-describe("Electron hosting HTTP policy", () => {
-    it("does not follow redirects", async () => {
+describe("전자 거부 HTTP", () => {
+    it("[실패] 충전기를 추가하지 않음", async () => {
         const fetchImplementation = vi.fn<typeof fetch>(async () =>
             Promise.resolve(
                 new Response(null, {
@@ -188,7 +188,7 @@ describe("Electron hosting HTTP policy", () => {
         );
     });
 
-    it("stops reading responses at the configured byte limit", async () => {
+    it("[성공] 바이트 제한에서 응답 쓰기를 중지함", async () => {
         const client = FetchHostingHttpClient.of(
             vi.fn<typeof fetch>(async () =>
                 Promise.resolve(new Response("0123456789")),
@@ -203,8 +203,8 @@ describe("Electron hosting HTTP policy", () => {
     });
 });
 
-describe("Electron hosting foundation", () => {
-    it("authenticates and saves a GitHub account without exposing its token", async () => {
+describe("열대 전자 재단", () => {
+    it("[실패] 반대하지 않고 GitHub를 인증하고 저장함", async () => {
         const http = new MockHostingHttpClient();
         const credentials = new MemoryHostingCredentialStore();
         http.enqueue(jsonResponse({ login: "octocat" }));
@@ -237,7 +237,7 @@ describe("Electron hosting foundation", () => {
         expect(JSON.stringify(account)).not.toContain("super-secret-token");
     });
 
-    it("uses GitLab profile and private-token contracts for self-hosted accounts", async () => {
+    it("[성공] GitLab 프로필 및 개인 연락처 계약을 사용하는 주체에 대한 로그", async () => {
         const http = new MockHostingHttpClient();
         const credentials = new MemoryHostingCredentialStore();
         http.enqueue(jsonResponse({ username: "fox" }));
@@ -263,7 +263,7 @@ describe("Electron hosting foundation", () => {
         });
     });
 
-    it("rejects malformed profiles before storing credentials", async () => {
+    it("[실패] 자격 증명을 저장하기 전에 실패한 프로필을 수집함", async () => {
         const http = new MockHostingHttpClient();
         const credentials = new MemoryHostingCredentialStore();
         http.enqueue(jsonResponse({ login: "   " }));
@@ -279,7 +279,7 @@ describe("Electron hosting foundation", () => {
         expect(credentials.values.size).toBe(0);
     });
 
-    it("maps every GitHub request kind to the provider contract", async () => {
+    it("[성공] 모든 GitHub 요청 종류를 공급자 계약에 매핑함", async () => {
         const { foundation, http } = configuredFoundation("gitHub");
         const cases: readonly RequestCase[] = [
             {
@@ -514,7 +514,7 @@ describe("Electron hosting foundation", () => {
         }
     });
 
-    it("loads all GitHub-owned repository names and private-repository capability", async () => {
+    it("[성공] 모든 GitHub 소유자 이름과 개인 사용자를 로드함", async () => {
         const { foundation, http } = configuredFoundation("gitHub");
         http.enqueue(
             jsonResponse({
@@ -537,7 +537,7 @@ describe("Electron hosting foundation", () => {
         ]);
     });
 
-    it("maps every GitLab request kind and rejects unsupported fork sync", async () => {
+    it("[실패] 모든 GitLab 요청 종류를 매핑하고 지원하지 않는 것을 포함함", async () => {
         const { foundation, http } = configuredFoundation("gitLab");
         const cases: readonly RequestCase[] = [
             {
@@ -778,7 +778,7 @@ describe("Electron hosting foundation", () => {
         expect(http.requests).toHaveLength(cases.length);
     });
 
-    it("parses GitHub and GitLab response fields at the external boundary", async () => {
+    it("[성공] 외부 경계에서 GitHub 및 GitLab 응답 필드를 설치하여 분석함", async () => {
         const github = configuredFoundation("gitHub");
         github.http.enqueue(jsonResponse([GITHUB_CHANGE_REQUEST]));
         github.http.enqueue(
@@ -952,7 +952,7 @@ describe("Electron hosting foundation", () => {
         });
     });
 
-    it("maps every review event for both providers", async () => {
+    it("[성공] 두 가지 제공업체 모두에 대한 모든 리뷰 이벤트를 매핑함", async () => {
         const github = configuredFoundation("gitHub");
         const gitlab = configuredFoundation("gitLab");
         const cases = [
@@ -998,7 +998,7 @@ describe("Electron hosting foundation", () => {
         }
     });
 
-    it("derives the next page only from a full provider-sized page", async () => {
+    it("[성공] 전체 크기의 공급자 페이지에서만 다음 페이지를 장식함", async () => {
         const { foundation, http } = configuredFoundation("gitHub");
         http.enqueue(
             jsonResponse(
@@ -1015,7 +1015,7 @@ describe("Electron hosting foundation", () => {
         expect(response).toMatchObject({ kind: "changeRequests", nextPage: 4 });
     });
 
-    it("restores and deletes account metadata through an injected credential store", async () => {
+    it("[성공] 삽입된 등록명 사용자를 통해 계정에 대한 데이터를 복구하고 삭제함", async () => {
         const { foundation, credentials } = configuredFoundation("gitHub");
 
         await foundation.deleteAccount("account-1");
@@ -1030,7 +1030,7 @@ describe("Electron hosting foundation", () => {
         ).rejects.toMatchObject({ code: "accountNotFound" });
     });
 
-    it("redacts credentials from HTTP and offline errors", async () => {
+    it("[성공] HTTP 및 오프라인으로 신뢰할 수 있는 자격 증명", async () => {
         const { foundation, http } = configuredFoundation("gitLab");
         http.enqueue(
             jsonResponse(
@@ -1071,7 +1071,7 @@ describe("Electron hosting foundation", () => {
         ).toBeUndefined();
     });
 
-    it("reports redirect, timeout, size, invalid JSON, and missing credential failures", async () => {
+    it("[실패], 시간 초과, 크기, 잘못된 JSON 및 자격 증명을 보고함", async () => {
         const redirect = configuredFoundation("gitHub");
         redirect.http.enqueue(jsonResponse({}, 302, "Found"));
         const request = {

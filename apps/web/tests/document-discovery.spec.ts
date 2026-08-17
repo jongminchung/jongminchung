@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("section landings feature the latest update and preserve localized navigation", async ({
+test("[성공] 섹션 랜딩은 최신 업데이트를 제공하고 내부적으로 탐색을 유지함", async ({
     page,
 }) => {
     await page.goto("/ko/series/deep-dive");
@@ -30,7 +30,7 @@ test("section landings feature the latest update and preserve localized navigati
     ).toHaveAttribute("href", "/en/series/deep-dive");
 });
 
-test("document outline follows the visible heading and exposes the active location", async ({
+test("[성공] 문서 개요는 보이는 목록을 추가할 수 있는 위치에 추가됨", async ({
     page,
 }) => {
     await page.goto("/en/articles/nextjs-16");
@@ -52,9 +52,7 @@ test("document outline follows the visible heading and exposes the active locati
         .toBe("location");
 });
 
-test("related documentation is deterministic and excludes the current document", async ({
-    page,
-}) => {
+test("[성공] 관련 문서는 결정적이며 현재 문서를 제외함", async ({ page }) => {
     await page.goto("/en/articles/typescript-6");
     const related = page.getByRole("region", { name: "Related documentation" });
     await expect(related).toBeVisible();
@@ -75,7 +73,7 @@ test("related documentation is deterministic and excludes the current document",
     ).toHaveCount(0);
 });
 
-test("OG images and llms.txt expose static discovery assets", async ({
+test("[성공] OG 이미지 및 llms.txt는 정적 검색 자산과 함께", async ({
     page,
     request,
 }) => {

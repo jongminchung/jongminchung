@@ -57,8 +57,8 @@ async function createRepository(): Promise<{
     };
 }
 
-describe("GitPreviewService push preview", () => {
-    test("reports a new branch then an exact fast-forward lease", async () => {
+describe("GitPreviewService 푸시 미리보기", () => {
+    test("[성공] 새로운 목적지를 보고한 후, 더 빠른 냉동임원을 보고함", async () => {
         const fixture = await createRepository();
         const first = await fixture.service.pushPreview(
             fixture.repositoryId,
@@ -106,7 +106,7 @@ describe("GitPreviewService push preview", () => {
         );
     });
 
-    test("reports divergent local and remote commits after fetch", async () => {
+    test("[성공] 가져오는 장소 및 원격 커밋을 보고함", async () => {
         const fixture = await createRepository();
         git(fixture.repository, "push", "--set-upstream", "origin", "main");
         const peer = join(fixture.root, "peer");
@@ -148,7 +148,7 @@ describe("GitPreviewService push preview", () => {
         );
     });
 
-    test("rejects unsafe remote targets and detached destinations", async () => {
+    test("[실패] 안전하지 않은 원격 대상 및 격리된 대상을 포함함", async () => {
         const fixture = await createRepository();
         await expect(
             fixture.service.pushPreview(
@@ -178,8 +178,8 @@ describe("GitPreviewService push preview", () => {
     });
 });
 
-describe("GitPreviewService history rewrite preview", () => {
-    test("captures published commits and dependent refs without changing the repository", async () => {
+describe("GitPreviewService 기록 다시 쓰기 보기", () => {
+    test("[실패] 경고를 변경하지 않고 게시된 커밋 및 권고를 보고함", async () => {
         const fixture = await createRepository();
         git(fixture.repository, "push", "--set-upstream", "origin", "main");
         await writeFile(join(fixture.repository, "two.txt"), "two\n", "utf8");
@@ -233,7 +233,7 @@ describe("GitPreviewService history rewrite preview", () => {
         ).toBe(before);
     });
 
-    test("rejects detached and in-progress repositories", async () => {
+    test("[실패] 현재 진행 중인 작업을 수행하고 있음", async () => {
         const fixture = await createRepository();
         git(fixture.repository, "checkout", "--detach");
         await expect(

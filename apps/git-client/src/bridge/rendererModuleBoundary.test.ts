@@ -31,8 +31,8 @@ function moduleSpecifiers(source: string): readonly string[] {
     ].flatMap((match) => (match[1] === undefined ? [] : [match[1]]));
 }
 
-describe("production renderer module boundary", () => {
-    it("does not import Electron or Node built-ins", () => {
+describe("방문자 렌더 모듈러 경계", () => {
+    it("[실패] Electron 또는 Node 내장을 가져오지 기능이 없습니다", () => {
         const violations = productionSources(SOURCE_ROOT).flatMap((path) =>
             moduleSpecifiers(readFileSync(path, "utf8")).flatMap(
                 (specifier) => {
@@ -52,7 +52,7 @@ describe("production renderer module boundary", () => {
         expect(violations).toEqual([]);
     });
 
-    it("does not depend on Electron implementation folders", () => {
+    it("[실패] 전자 구현 폴더에 의존하지 않음", () => {
         const electronRoot = resolve(SOURCE_ROOT, "../electron");
         const violations = productionSources(SOURCE_ROOT).flatMap((path) =>
             moduleSpecifiers(readFileSync(path, "utf8")).flatMap(
@@ -70,7 +70,7 @@ describe("production renderer module boundary", () => {
         expect(violations).toEqual([]);
     });
 
-    it("centralizes workbench custom events in the typed adapter", () => {
+    it("[성공] 유형 어댑터에서 워크벤치 사용자 정의 이벤트를 중앙 집중화함", () => {
         const violations = productionSources(SOURCE_ROOT).flatMap((path) => {
             const sourcePath = relative(SOURCE_ROOT, path);
             if (sourcePath === "adapters/workbench-events/workbenchEvents.ts")
@@ -83,7 +83,7 @@ describe("production renderer module boundary", () => {
         expect(violations).toEqual([]);
     });
 
-    it("keeps Zustand slice internals behind their store composer", () => {
+    it("[성공] 수호자 후방 Zustand 내부를 유지함", () => {
         const violations = productionSources(SOURCE_ROOT).flatMap((path) => {
             const sourcePath = relative(SOURCE_ROOT, path);
             return moduleSpecifiers(readFileSync(path, "utf8")).flatMap(

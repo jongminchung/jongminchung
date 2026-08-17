@@ -59,8 +59,8 @@ const props = {
     onActiveChange: vi.fn(),
 } satisfies ComponentProps<typeof BottomPanel>;
 
-describe("BottomPanel stash", () => {
-    it("renders deterministic create, apply, pop, and drop entry points", () => {
+describe("BottomPanel 숨김", () => {
+    it("[성공] 결의적 생성, 적용, 팝 및 드롭 보존점을 연합함", () => {
         const markup = renderToStaticMarkup(
             createElement(
                 CommandProvider,
@@ -76,7 +76,7 @@ describe("BottomPanel stash", () => {
         expect(markup).toContain("stash@{0}: On main: focused stash flow");
     });
 
-    it("hides the tool-window chrome while the panel is collapsed", () => {
+    it("[성공] 패널이 작아지는 동안 도구 창 노래를 숨기기", () => {
         const markup = renderToStaticMarkup(
             createElement(
                 CommandProvider,

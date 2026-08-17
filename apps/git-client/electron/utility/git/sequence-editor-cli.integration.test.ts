@@ -63,7 +63,7 @@ afterEach(async () => {
 });
 
 describe("runSequenceEditorCli", () => {
-    it("builds a quoted packaged-application command without exposing an arbitrary entry script", async () => {
+    it("[실패]의 확장형을 반대편으로 구성할 수 있는 구조를 구축함", async () => {
         const { gitDirectory } = await fixture();
         const session = await SequenceEditorSession.create(
             gitDirectory,
@@ -88,7 +88,7 @@ describe("runSequenceEditorCli", () => {
         await session.cleanup();
     });
 
-    it("applies a utility-created plan from fixed positional arguments", async () => {
+    it("[성공] 고정된 위치 인수에서 조종사 생성 계획을 적용함", async () => {
         const { gitDirectory, todoPath } = await fixture();
         await writeFile(todoPath, "pick 1111111 first\n", "utf8");
         const session = await SequenceEditorSession.create(
@@ -117,7 +117,7 @@ describe("runSequenceEditorCli", () => {
         await session.cleanup();
     });
 
-    it("rejects missing, reordered, or extra arguments", async () => {
+    it("[실패], 귀중한 또는 추가 인수를 했습니다", async () => {
         let stderr = "";
 
         const exitCode = await runSequenceEditorCli(
@@ -129,7 +129,7 @@ describe("runSequenceEditorCli", () => {
         expect(stderr).toContain("Invalid sequence editor arguments");
     });
 
-    it("redacts credentials and never echoes the nonce on IO failure", async () => {
+    it("[성공] 자격 증명을 수정하고 IO 실패 시 nonce를 에코하지 않음", async () => {
         const { gitDirectory, todoPath } = await fixture();
         await writeFile(todoPath, "pick 1111111 first\n", "utf8");
         const secret = "very-secret-token";
@@ -159,7 +159,7 @@ describe("runSequenceEditorCli", () => {
         expect(stderr).not.toContain(nonce);
     });
 
-    it("redacts the nonce when untrusted todo content repeats it in an error", async () => {
+    it("[성공] 믿을 수 없는 할일 콘텐츠로 인해 오류가 발생하면 nonce를 수정함", async () => {
         const { gitDirectory, todoPath } = await fixture();
         const session = await SequenceEditorSession.create(
             gitDirectory,

@@ -131,7 +131,7 @@ async function executeOperation(
     );
 }
 
-test("executes all 51 packaged Git operation kinds with real disposable effects", async () => {
+test("[성공] 실제적인 도구 효과를 사용하여 51가지 패키지 작업 종류를 모두 실행함", async () => {
     test.setTimeout(240_000);
     await resetQaProfile(runtimeProfileName);
     const parent = await mkdtemp(

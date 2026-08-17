@@ -8,8 +8,8 @@ import {
 import { GET as getRobots } from "./(tech)/sites/tech/robots.txt/route";
 import sitemap from "./(tech)/sites/tech/sitemap";
 
-describe("documentation metadata routes", () => {
-    it("generates every localized document and section landing", () => {
+describe("문서가 현재 위치에 있음", () => {
+    it("[성공] 모든 내부 문서 및 섹션 임대를 생성함", () => {
         const entries = sitemap();
         const documentEntries = entries.slice(0, manifest.length);
         expect(documentEntries.map(({ url }) => url)).toEqual(
@@ -46,7 +46,7 @@ describe("documentation metadata routes", () => {
         }
     });
 
-    it("publishes the generated sitemap to crawlers", async () => {
+    it("[성공] 생성된 사이트 맵을 크롤러에 게시함", async () => {
         const response = getRobots();
         expect(await response.text()).toContain(
             "Sitemap: https://tech.jamie.kr/sitemap.xml",

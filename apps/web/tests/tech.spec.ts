@@ -4,7 +4,7 @@ import {
     expectNoHorizontalOverflow,
 } from "./assertions";
 
-test("renders Engineering Notes with isolated site tokens and no overflow", async ({
+test("[성공] 캔팅된 사이트를 사용하고 외부 플로어 주차장을 주차함", async ({
     page,
 }) => {
     await page.goto("/en");
@@ -19,7 +19,7 @@ test("renders Engineering Notes with isolated site tokens and no overflow", asyn
     await expectNoAccessibilityViolations(page);
 });
 
-test("searches generated article data and preserves the article across locales", async ({
+test("[성공] 생성된 기사 데이터를 검색하고 여러 지역에서 기사를 싫어함", async ({
     page,
 }) => {
     await page.goto("/en");
@@ -49,7 +49,7 @@ test("searches generated article data and preserves the article across locales",
     await expect(page.locator("html")).toHaveAttribute("lang", "ko");
 });
 
-test("retries a failed search index request", async ({ page }) => {
+test("[성공] 오류 검색 요청을 재시도함", async ({ page }) => {
     let requests = 0;
     await page.route("**/search/en.json", async (route) => {
         requests += 1;
@@ -67,7 +67,7 @@ test("retries a failed search index request", async ({ page }) => {
     expect(requests).toBe(3);
 });
 
-test("uses default links for history and same-page hashes", async ({
+test("[성공] 기록 및 동일 페이지에 대한 기본 링크를 사용함", async ({
     page,
 }) => {
     await page.goto("/en");
@@ -83,7 +83,7 @@ test("uses default links for history and same-page hashes", async ({
     await expect(page).toHaveURL(new RegExp(`${hash}$`, "u"));
 });
 
-test("loads diagrams and publishes tech discovery files", async ({
+test("[성공] 버퍼를 로드하고 기술 검색 파일을 게시함", async ({
     page,
     request,
 }) => {
@@ -101,9 +101,7 @@ test("loads diagrams and publishes tech discovery files", async ({
     }
 });
 
-test("renders remote diagrams through loading and ready states", async ({
-    page,
-}) => {
+test("[성공] 로딩 및 준비 상태를 통해 원격 버퍼를 백업함", async ({ page }) => {
     await page.route(
         "**/diagrams/operating-system.excalidraw",
         async (route) => {
@@ -122,7 +120,7 @@ test("renders remote diagrams through loading and ready states", async ({
     await expect(diagram).toHaveAttribute("data-source-element-count", "10");
 });
 
-test("shows a remote diagram request failure", async ({ page }) => {
+test("[성공] 원격 재부팅 요청을 실패로 보여줍니다", async ({ page }) => {
     await page.route("**/diagrams/operating-system.excalidraw", async (route) =>
         route.fulfill({ status: 503, body: "unavailable" }),
     );
@@ -137,7 +135,7 @@ test("shows a remote diagram request failure", async ({ page }) => {
     );
 });
 
-test("remembers the explicit tech locale independently", async ({ page }) => {
+test("[성공] 신비한 기술 로케일을 반응으로 기억함", async ({ page }) => {
     await page.goto("/ko");
     expect(
         (await page.context().cookies()).find(
@@ -146,9 +144,7 @@ test("remembers the explicit tech locale independently", async ({ page }) => {
     ).toBe("ko");
 });
 
-test("hydrates and persists the existing raw theme preference", async ({
-    page,
-}) => {
+test("[성공] 원시 원시 테마 선호도를 수화하고 유지함", async ({ page }) => {
     await page.addInitScript(() => localStorage.setItem("tech-theme", "dark"));
     await page.goto("/en");
 

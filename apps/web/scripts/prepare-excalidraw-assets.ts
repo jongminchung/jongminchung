@@ -1,9 +1,8 @@
 import { access, cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 
-const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const appRoot = resolve(import.meta.dirname, "..");
 const targetRoot = resolve(appRoot, "public/excalidraw-assets");
 const targetFontRoot = resolve(targetRoot, "fonts");
 const sourceMarkerPath = resolve(targetRoot, ".source-marker");
@@ -50,8 +49,7 @@ export async function prepareExcalidrawAssets(): Promise<
 function isMainModule(): boolean {
     const entryPath = process.argv[1];
     return (
-        entryPath !== undefined &&
-        resolve(entryPath) === fileURLToPath(import.meta.url)
+        entryPath !== undefined && resolve(entryPath) === import.meta.filename
     );
 }
 

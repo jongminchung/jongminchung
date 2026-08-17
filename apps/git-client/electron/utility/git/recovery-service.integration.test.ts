@@ -222,8 +222,8 @@ afterEach(async () => {
     );
 });
 
-describe("RecoveryService", () => {
-    it("records only contract-supported ref operations and persists an integrity-checked manifest", async () => {
+describe("복구 서비스", () => {
+    it("[성공]계약 지원 작업만 기록하고 선별 검사 매니페스트를 유지함", async () => {
         const fixture = await createFixture();
         const service = RecoveryService.of(fixture.registry, fixture.storage);
         const head = git(fixture.repository, "rev-parse", "HEAD");
@@ -285,7 +285,7 @@ describe("RecoveryService", () => {
         expect(metadata.mode & 0o777).toBe(0o600);
     });
 
-    it("restores refs, index, tracked worktree, and untracked bytes and records an exact inverse", async () => {
+    it("[성공] 참조, 색인, 추적된 작업 트리 및 추적되지 않은 바이트를 복원하고 역수를 기록함", async () => {
         const fixture = await createFixture();
         const service = RecoveryService.of(fixture.registry, fixture.storage);
         const first = git(fixture.repository, "rev-parse", "HEAD");
@@ -368,7 +368,7 @@ describe("RecoveryService", () => {
         ).resolves.toBe("second\n");
     });
 
-    it("round-trips partially staged, staged, deleted, untracked, Unicode, and binary state", async () => {
+    it("[성공] 부분적으로 식별된, 식별된, 삭제된, 추적되지 않은, 유니크하고 바이너리 상태의 유지", async () => {
         const fixture = await createFixture();
         await writeFile(
             join(fixture.repository, "deleted.txt"),
@@ -498,7 +498,7 @@ describe("RecoveryService", () => {
         });
     });
 
-    it("atomically restores a rename and applies oid-null as a compare-and-swap ref deletion", async () => {
+    it("[성공] 이름을 엄청나게 복원하고 비교하고 교환하기 삭제로 oid-null을 적용함", async () => {
         const fixture = await createFixture();
         const service = RecoveryService.of(fixture.registry, fixture.storage);
         const oldName = "feature-old";
@@ -534,7 +534,7 @@ describe("RecoveryService", () => {
         });
     });
 
-    it("aborts the whole multi-ref transaction on a CAS race without a partial restore", async () => {
+    it("[실패] 부분 복제 없이 CAS 경주에서 전체 참조 프로세서를 중단함", async () => {
         const fixture = await createFixture();
         const oldName = "old";
         const newName = "new";
@@ -613,7 +613,7 @@ describe("RecoveryService", () => {
         ).toBe(true);
     });
 
-    it("marks an entry unrecoverable when its recorded object has expired and refuses to mutate refs", async () => {
+    it("[성공] 기록이 종료되고 변경될 경우 항목을 복구할 수 있도록 표시함", async () => {
         const fixture = await createFixture();
         const service = RecoveryService.of(fixture.registry, fixture.storage);
         const blob = git(fixture.repository, "hash-object", "-w", "문서.txt");
@@ -653,7 +653,7 @@ describe("RecoveryService", () => {
         await expect(service.list(fixture.record.id)).resolves.toHaveLength(1);
     });
 
-    it("rejects tampered, oversized, symbolic-link, and hard-linked manifests without following them", async () => {
+    it("[실패] 크기, 크기 초과, 언더릭 링크 및 하드 링크된 매니페스트를 추가하고 포함함", async () => {
         const fixture = await createFixture();
         const service = RecoveryService.of(fixture.registry, fixture.storage);
         await service.recordBeforeOperation(
@@ -705,7 +705,7 @@ describe("RecoveryService", () => {
         await expect(readFile(outside)).resolves.toEqual(outsideBytes);
     });
 
-    it("rejects storage and repository directory symlinks without writing outside them", async () => {
+    it("[실패] 외부에 알리지 않고 알리는 링크를 표시함", async () => {
         const fixture = await createFixture();
         const outside = join(fixture.parent, "outside-storage");
         await mkdir(outside);
@@ -739,7 +739,7 @@ describe("RecoveryService", () => {
         ).rejects.toMatchObject({ code: "invalidInput" });
     });
 
-    it("fails closed before storage or repository mutation when snapshot limits are exceeded", async () => {
+    it("[실패] 스냅샷 한도를 초과하면 스토리지 또는 덮개가 변경되기 때문에 장애가 종료됨", async () => {
         const fixture = await createFixture();
         const service = RecoveryService.of(fixture.registry, fixture.storage);
         const beforeHead = git(fixture.repository, "rev-parse", "HEAD");
@@ -776,7 +776,7 @@ describe("RecoveryService", () => {
         });
     });
 
-    it("rejects a worktree parent symlink without following or mutating its target", async () => {
+    it("[실패] 대상을 변경하지 않거나 작업중인 트리 상위 링크를 포함함", async () => {
         const fixture = await createFixture();
         const nested = join(fixture.repository, "nested");
         const outside = join(fixture.parent, "outside-worktree");
@@ -803,7 +803,7 @@ describe("RecoveryService", () => {
         });
     });
 
-    it("detects a worktree race during capture and writes no recovery entry", async () => {
+    it("[성공] 작업중인 트리 경합을 감지하고 복구 항목을 감지하지 못했습니다", async () => {
         const fixture = await createFixture();
         let pathListCalls = 0;
         const runner = new DelegatingRunner((spec) => {
@@ -838,7 +838,7 @@ describe("RecoveryService", () => {
         });
     });
 
-    it("reads version 1 ref-only entries and preserves their legacy worktree behavior", async () => {
+    it("[성공] 버전 1을 참조하여 항목을 이해하고 레거시 작업 트리 동작을 유지함", async () => {
         const fixture = await createFixture();
         const service = RecoveryService.of(fixture.registry, fixture.storage);
         const entry = await service.recordBeforeOperation(
@@ -876,7 +876,7 @@ describe("RecoveryService", () => {
         ).resolves.toBe("legacy worktree remains\n");
     });
 
-    it("refuses a busy index before restore and leaves refs, index, and files unchanged", async () => {
+    it("[성공] 복원하기 전에는 사용하고 싶습니까?, 파일을 변경하고 그대로 유지하겠습니다", async () => {
         const fixture = await createFixture();
         const service = RecoveryService.of(fixture.registry, fixture.storage);
         const entry = await service.recordBeforeOperation(
@@ -928,7 +928,7 @@ describe("RecoveryService", () => {
         await expect(readFile(lockPath, "utf8")).resolves.toBe("busy");
     });
 
-    it("persists the inverse before a cancelled restore and leaves the ref untouched", async () => {
+    it("[성공] 복원이 취소되기 전에 역을 유지하고 참조를 그대로 유지함", async () => {
         const fixture = await createFixture();
         const controller = new AbortController();
         const runner = new DelegatingRunner((spec) => {
@@ -979,7 +979,7 @@ describe("RecoveryService", () => {
         });
     });
 
-    it("retains only the newest 200 entries and rejects a pre-cancelled record before storage changes", async () => {
+    it("[실패] 최신 200개 항목만 유지하고 글을 변경하기 전에 사전에 기록된 기록을 포함함", async () => {
         const fixture = await createFixture();
         const oid = git(fixture.repository, "rev-parse", "HEAD");
         const service = RecoveryService.of(

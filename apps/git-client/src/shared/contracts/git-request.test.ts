@@ -86,7 +86,7 @@ describe("GitDomainQueryRequestSchema", () => {
             localRevision: "HEAD",
         },
         { kind: "historyRewritePreview", repositoryId, fromRevision: "HEAD~2" },
-    ])("accepts $kind", (request) => {
+    ])("[성공] $kind 허용", (request) => {
         expect(GitDomainQueryRequestSchema.parse(request)).toEqual(request);
         const transportRequest = { ...request, requestId };
         expect(GitQueryRequestSchema.parse(transportRequest)).toEqual(
@@ -101,7 +101,7 @@ describe("GitDomainQueryRequestSchema", () => {
         ).toEqual({ kind: "query", correlationId, request: transportRequest });
     });
 
-    it("keeps generated and domain request variants compatible in both directions", () => {
+    it("[성공] 생성된 변형과 변형을 변형하여 유지함", () => {
         expect(compileTimeCompatibility).toEqual([true, true, true, true]);
         expect(
             GitDomainQueryRequestSchema.safeParse({
@@ -126,7 +126,7 @@ describe("GitDomainQueryRequestSchema", () => {
     });
 
     it.each(VALID_GIT_OPERATIONS)(
-        "strictly validates and transports the $kind operation request",
+        "[성공] $kind 작업을 요청하여 검증하고 전송함",
         (operation) => {
             const domainRequest = {
                 kind: "operation",
@@ -155,7 +155,7 @@ describe("GitDomainQueryRequestSchema", () => {
         },
     );
 
-    it("strictly rejects transport-only and unknown fields at the correct boundary", () => {
+    it("[실패] 정직한 경계에서 필드를 방어하고 알 수 없는 필드를 제공해야 함", () => {
         expect(
             GitDomainQueryRequestSchema.safeParse({
                 kind: "status",
@@ -173,7 +173,7 @@ describe("GitDomainQueryRequestSchema", () => {
         ).toBe(false);
     });
 
-    it("rejects structural abuse before command construction", () => {
+    it("[실패]집합 구성 이전에 구조화된 남용을 갖고 있음", () => {
         const invalid = [
             { kind: "unknown", repositoryId },
             {

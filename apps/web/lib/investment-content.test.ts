@@ -23,8 +23,8 @@ const metadata = {
     ],
 } as const;
 
-describe("investment note contract", () => {
-    it("accepts a source-grounded bilingual note shape", () => {
+describe("투자 어음계약", () => {
+    it("[성공] 소스 기반 더블 언어 노트 모양을 허용함", () => {
         expect(parseInvestmentNoteMetadata(metadata).sources[0]?.kind).toBe(
             "book",
         );
@@ -36,7 +36,7 @@ describe("investment note contract", () => {
         ).not.toThrow();
     });
 
-    it("requires URLs for non-book sources", () => {
+    it("[성공] 책이 아닌 출처에 대한 URL이 필요함", () => {
         expect(() =>
             parseInvestmentNoteMetadata({
                 ...metadata,
@@ -47,13 +47,13 @@ describe("investment note contract", () => {
         ).toThrow(/requires a URL/u);
     });
 
-    it("requires separate source summary and author notes", () => {
+    it("[성공] 별도의 소스 요약 및 작성자 메모가 필요함", () => {
         expect(() => validateInvestmentNoteBody("Freeform", "fixture")).toThrow(
             /SourceSummary/u,
         );
     });
 
-    it("rejects unknown fields, duplicate tags, and reversed dates", () => {
+    it("[실패] 알 수 없는 필드, 해석 태그 및 관계 반전을 의미함", () => {
         expect(() =>
             parseInvestmentNoteMetadata({ ...metadata, unexpected: true }),
         ).toThrow();
@@ -71,7 +71,7 @@ describe("investment note contract", () => {
         ).toThrow(/precedes/u);
     });
 
-    it("rejects invalid dates and credential-bearing source URLs", () => {
+    it("[실패] 불법 체류자격 및 자격 증명이 포함된 소스 URL이 있음을 증명함", () => {
         expect(() =>
             parseInvestmentNoteMetadata({
                 ...metadata,

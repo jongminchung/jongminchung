@@ -173,8 +173,8 @@ afterEach(async () => {
     );
 });
 
-describe("Electron Git utility", () => {
-    it("opens a large repository without creating a Local History activity", async () => {
+describe("전자 Git 유틸리티", () => {
+    it("[실패]장소 히스토리 활동을 생성하고 다루지 않는다", async () => {
         const repositoryPath = await createFixtureRepository();
         const block = Buffer.alloc(16 * 1024 * 1024, 0x61);
         for (const index of [1, 2, 3, 4]) {
@@ -205,7 +205,7 @@ describe("Electron Git utility", () => {
         expect(utility.listRepositories()).toContainEqual(repository);
     }, 30_000);
 
-    it("initializes, registers, and immediately queries a repository", async () => {
+    it("[성공] 도어를 호출하고 등록하고 즉시 쿼리함", async () => {
         const parent = await mkdtemp(
             join(tmpdir(), "git-client-electron-create-"),
         );
@@ -242,7 +242,7 @@ describe("Electron Git utility", () => {
         expect(statusEvents.at(-1)?.kind).toBe("completed");
     });
 
-    it("clones, registers, and immediately queries a repository", async () => {
+    it("[성공] 시계를 복제하고, 등록하고 즉시 쿼리함", async () => {
         const source = await createFixtureRepository();
         const parent = await mkdtemp(
             join(tmpdir(), "git-client-electron-clone-"),
@@ -288,7 +288,7 @@ describe("Electron Git utility", () => {
         ]);
     });
 
-    it("cancels repository creation through its active AbortController", async () => {
+    it("[실패] 활성 AbortController를 통해 생성을 취소함", async () => {
         const creator = new WaitingRepositoryCreator();
         const utility = new GitUtility(creator);
         const requestId = randomUUID() as GitRequestId;
@@ -316,7 +316,7 @@ describe("Electron Git utility", () => {
         ]);
     });
 
-    it("opens a canonical Unicode/space path with the stable URL namespace UUID", async () => {
+    it("[성공] 젤리 URL 스페이스 UUID를 사용하여 일반적인 유니코드/백그라운드를 사용하다", async () => {
         const repository = await createFixtureRepository();
         const runner = new GitProcessRunner();
         const registry = new RepositoryRegistry(runner);
@@ -334,7 +334,7 @@ describe("Electron Git utility", () => {
         expect(() => registry.get(record.id)).toThrow("Repository is not open");
     });
 
-    it("inspects complete snapshot fields through the utility public API", async () => {
+    it("[성공] 조종사 공개 API를 통해 전체 스냅샷 필드를 감독함", async () => {
         const repository = await createFixtureRepository();
         git(
             repository,
@@ -362,7 +362,7 @@ describe("Electron Git utility", () => {
         );
     });
 
-    it("executes every typed repository-inspection and ignore-rules request on a real fixture", async () => {
+    it("[성공] 실제 기지에 대해 모든 외부의 감시자 및 규칙 무시 요청을 실행함", async () => {
         const repository = await createFixtureRepository();
         git(
             repository,
@@ -483,7 +483,7 @@ describe("Electron Git utility", () => {
         });
     });
 
-    it("queries porcelain-v2 status, refs, log, and stashes with ordered terminal events", async () => {
+    it("[성공] 타이머 알림으로 세라믹-v2 상태, 참조, 로그인 및 숨김을 쿼리함", async () => {
         const repository = await createFixtureRepository();
         const runner = new GitProcessRunner();
         const registry = new RepositoryRegistry(runner);
@@ -562,7 +562,7 @@ describe("Electron Git utility", () => {
         ]);
     });
 
-    it("loads real topology history in 500-commit pages", async () => {
+    it("[성공] 500개의 커밋 페이지에 실제 토폴로지 기록을 로드함", async () => {
         const repository = await createFixtureRepository();
         appendFastImportCommits(repository, "refs/heads/pagination", 501);
         const runner = new GitProcessRunner();
@@ -607,7 +607,7 @@ describe("Electron Git utility", () => {
         ).toHaveLength(502);
     }, 30_000);
 
-    it("runs a bounded read-only working-tree diff with the native Git options", async () => {
+    it("[성공] 기본 Git 옵션을 사용하여 구별하기 위한 작업 트리 diff를 실행함", async () => {
         const repository = await createFixtureRepository();
         await writeFile(join(repository, "tracked.txt"), "second\n", "utf8");
         const utility = new GitUtility();
@@ -637,7 +637,7 @@ describe("Electron Git utility", () => {
         expect(stdout(events)).toContain("+second");
     });
 
-    it("dispatches a mutation through the same request lifecycle and cancellation surface", async () => {
+    it("[성공] 변함없는 서비스 제공 및 취소 표면을 통해 변형을 전달함", async () => {
         const repository = await createFixtureRepository();
         await writeFile(join(repository, "new.txt"), "new\n", "utf8");
         const utility = new GitUtility();
@@ -664,7 +664,7 @@ describe("Electron Git utility", () => {
         );
     });
 
-    it("arbitrates mutations across operation, repository-service, and direct file surfaces", async () => {
+    it("[성공] 작업, 용도 서비스 및 직접 파일 표면에 변형을 적용함", async () => {
         const firstPath = await createFixtureRepository();
         const secondPath = await createFixtureRepository();
         const hookStarted = join(firstPath, "hook-started.marker");
@@ -764,7 +764,7 @@ describe("Electron Git utility", () => {
         }
     }, 20_000);
 
-    it("reads bounded worktree, index, revision, and image content by repository id", async () => {
+    it("[성공] 슬리퍼 ID는 업무용 트리, 경주 및 이미지 콘텐츠를 처리함", async () => {
         const repository = await createFixtureRepository();
         await writeFile(join(repository, "tracked.txt"), "second\n", "utf8");
         await writeFile(
@@ -802,7 +802,7 @@ describe("Electron Git utility", () => {
         });
     });
 
-    it("owns watcher registration and closes it with the repository", async () => {
+    it("[성공] 알림자 등록을 소유하고 있으며 함께 참여하고 있음", async () => {
         const repository = await createFixtureRepository();
         const watcher = new FakeRepositoryWatcher();
         const utility = new GitUtility(undefined, () => watcher);
@@ -822,7 +822,7 @@ describe("Electron Git utility", () => {
         expect(watcher.unwatched).toEqual([record.id]);
     });
 
-    it("strictly rejects an unsafe request before starting a process", async () => {
+    it("[성공] [패키지] 프로세스를 시작하기 전에 요청하지 않고 실제로 작업을 수행했습니다", async () => {
         const repository = await createFixtureRepository();
         const runner = new GitProcessRunner();
         const registry = new RepositoryRegistry(runner);
@@ -850,7 +850,7 @@ describe("Electron Git utility", () => {
         expect(events).toEqual([]);
     });
 
-    it("bounds captured output instead of returning an unbounded Git response", async () => {
+    it("[성공] Git 응답을 반환하는 대신 범위를 캡처했습니다", async () => {
         const repository = await createFixtureRepository();
         await writeFile(
             join(repository, "large.txt"),
@@ -879,7 +879,7 @@ describe("Electron Git utility", () => {
         ).not.toContain("token=x");
     });
 
-    it("cancels an active query when its repository is closed", async () => {
+    it("[실패] 여행자가 힐 때 활성 쿼리를 취소함", async () => {
         const repository = await createFixtureRepository();
         const registry = new RepositoryRegistry(new GitProcessRunner());
         const record = await registry.open(repository);
@@ -933,7 +933,7 @@ describe("Electron Git utility", () => {
         expect(service.activeCount).toBe(0);
     });
 
-    it("makes a request cancellable before delivering its started event", async () => {
+    it("[성공] 이벤트를 전달하기 전에 요청을 취소할 수 있게 되기를 바랍니다", async () => {
         const repository = await createFixtureRepository();
         const runner = new GitProcessRunner();
         const registry = new RepositoryRegistry(runner);
@@ -959,7 +959,7 @@ describe("Electron Git utility", () => {
         expect(service.activeCount).toBe(0);
     });
 
-    it("redacts URL, header, query, GitHub, and GitLab credentials", () => {
+    it("[성공] URL, 헤더, 쿼리, GitHub 및 GitLab 자격 증명을 변경함", () => {
         const value = [
             "https://alice:secret@example.test/repository",
             "Authorization: Bearer bearer-secret",

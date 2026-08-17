@@ -184,8 +184,8 @@ function responseFor(request: HostingRequest): HostingResponse {
     }
 }
 
-describe("ElectronHostingBridge account boundary", () => {
-    it("normalizes and validates saved account identity without returning credentials", async () => {
+describe("ElectronHostingBridge 계정 경계", () => {
+    it("[실패] 자격 증명을 반환하지 않고 저장된 계정 ID를 인증하고 보증함", async () => {
         const api = new FakeElectronHostingApi();
         api.saveResult = {
             id: "gitlab-account",
@@ -212,7 +212,7 @@ describe("ElectronHostingBridge account boundary", () => {
         expect(JSON.stringify(account)).not.toContain("provider-secret-token");
     });
 
-    it("rejects malformed and mismatched accounts before they cross back into the renderer", async () => {
+    it("[실패] 형식이 잘못되어 일치하지 않는 로그가 렌더러로 다시 돌아왔기 때문에", async () => {
         const api = new FakeElectronHostingApi();
         const bridge = ElectronHostingBridge.of(api);
 
@@ -232,7 +232,7 @@ describe("ElectronHostingBridge account boundary", () => {
         ).rejects.toThrow("account response is invalid");
     });
 
-    it("restores validated accounts in order and preserves last-duplicate-wins input", async () => {
+    it("[실패] 로그인된 계정을 다시 사용하고 마지막으로 승리를 입력해야 함", async () => {
         const api = new FakeElectronHostingApi();
         const bridge = ElectronHostingBridge.of(api);
         const accounts: HostingAccount[] = [
@@ -260,7 +260,7 @@ describe("ElectronHostingBridge account boundary", () => {
         expect(api.restored).toHaveLength(1);
     });
 
-    it("keeps account deletion idempotent and validates every duplicate call", async () => {
+    it("[실패]계정 삭제를 멱등성으로 유지하고 모든 하위 명령을 확인함", async () => {
         const api = new FakeElectronHostingApi();
         const bridge = ElectronHostingBridge.of(api);
 
@@ -274,8 +274,8 @@ describe("ElectronHostingBridge account boundary", () => {
     });
 });
 
-describe("ElectronHostingBridge request boundary", () => {
-    it("validates and identity-checks all fifteen HostingRequest kinds", async () => {
+describe("ElectronHostingBridge 분야", () => {
+    it("[성공] 15가지 HostingRequest 종류를 모두 검증하고 신원을 확인함", async () => {
         const api = new FakeElectronHostingApi();
         const bridge = ElectronHostingBridge.of(api);
         const requests = [
@@ -340,7 +340,7 @@ describe("ElectronHostingBridge request boundary", () => {
         );
     });
 
-    it("rejects invalid requests, malformed responses, and response kinds for another request", async () => {
+    it("[실패] 잘못된 요청, 잘못된 응답, 다른 요청에 대한 응답 종류를 가지고 있음", async () => {
         const api = new FakeElectronHostingApi();
         const bridge = ElectronHostingBridge.of(api);
         const list: HostingRequest = {
@@ -373,7 +373,7 @@ describe("ElectronHostingBridge request boundary", () => {
         );
     });
 
-    it("keeps concurrent duplicate requests independent even when they complete out of order", async () => {
+    it("[실패] 그냥 귀찮게 요청하지 않고 접착제로 유지함", async () => {
         const api = new DeferredElectronHostingApi();
         const bridge = ElectronHostingBridge.of(api);
         const request: HostingRequest = {
@@ -406,7 +406,7 @@ describe("ElectronHostingBridge request boundary", () => {
         expect(api.executions).toHaveLength(2);
     });
 
-    it("sanitizes credential-bearing and cancellation-shaped boundary errors", async () => {
+    it("[성공] 자격 증명 및 취소됨의 경계심을 지닌 삭제함", async () => {
         const api = new FakeElectronHostingApi();
         const bridge = ElectronHostingBridge.of(api);
         const token = "plain-secret-value";

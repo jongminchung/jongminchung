@@ -4,12 +4,12 @@ import {
     parseProductSettings,
 } from "./productSettings";
 
-describe("product settings", () => {
-    it("uses Rebased regular density and 100% zoom by default", () => {
+describe("제품 설정", () => {
+    it("[성공] 기본적으로 내용을 요약하고 100% 확대/축소를 사용함", () => {
         expect(parseProductSettings(null)).toEqual(DEFAULT_PRODUCT_SETTINGS);
     });
 
-    it("does not show a shortcut-conflict balloon for a fresh profile", () => {
+    it("[실패] 새 프로필에 바로 가기 풍선 표시가 없습니다", () => {
         expect(parseProductSettings(null).showShortcutConflictWarning).toBe(
             false,
         );
@@ -18,7 +18,7 @@ describe("product settings", () => {
         );
     });
 
-    it("preserves an explicitly persisted shortcut-conflict preference", () => {
+    it("[성공] 어색하게 지내는 바로가기 충돌 기본 설정을 유지함", () => {
         expect(
             parseProductSettings({ showShortcutConflictWarning: true }),
         ).toMatchObject({
@@ -31,7 +31,7 @@ describe("product settings", () => {
         });
     });
 
-    it("accepts only supported compact, zoom, and notification values", () => {
+    it("[성공] 지원되는 압축, 확대/축소 및 알림 값에만 권한 부여", () => {
         expect(
             parseProductSettings({
                 compactMode: true,
@@ -53,7 +53,7 @@ describe("product settings", () => {
         ).toEqual(DEFAULT_PRODUCT_SETTINGS);
     });
 
-    it("restores welcome appearance, language, and region values", () => {
+    it("[성공] 환호, 언어 및 지역 가치의 복원", () => {
         expect(
             parseProductSettings({
                 editorColorScheme: "dark",
@@ -67,14 +67,14 @@ describe("product settings", () => {
         });
     });
 
-    it("defaults new settings to Asia while preserving an explicitly saved region", () => {
+    it("[성공] 지역적으로 보관된 것을 유지하면서 새 설정을 위치로 기본 설정함", () => {
         expect(parseProductSettings({}).region).toBe("asiaExceptChinaMainland");
         expect(parseProductSettings({ region: "notSpecified" }).region).toBe(
             "notSpecified",
         );
     });
 
-    it("accepts only bounded IDE font sizes", () => {
+    it("[성공] IDE 크기만 허용함", () => {
         expect(parseProductSettings({ ideFontSize: 16 }).ideFontSize).toBe(16);
         expect(parseProductSettings({ ideFontSize: 4 }).ideFontSize).toBe(13);
         expect(
@@ -82,7 +82,7 @@ describe("product settings", () => {
         ).toBe(13);
     });
 
-    it("keeps only bounded shortcut overrides", () => {
+    it("[성공] 바로가기 재정의 만 유지함", () => {
         expect(
             parseProductSettings({
                 keymapOverrides: {

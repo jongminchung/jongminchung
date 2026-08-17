@@ -5,8 +5,8 @@ import {
     buildFixturePushPreview,
 } from "./buildFixturePreviews";
 
-describe("fixture preview use cases", () => {
-    it("models a diverged destination without consulting a live backend", () => {
+describe("비중보기 사용현황", () => {
+    it("[실패] 라이브 백엔드를 반대하지 않는 다양한 대상을 모델함", () => {
         vi.spyOn(Date, "now").mockReturnValue(42);
 
         const preview = buildFixturePushPreview({
@@ -28,7 +28,7 @@ describe("fixture preview use cases", () => {
         expect(preview.warnings).toHaveLength(1);
     });
 
-    it("derives rewrite entries and publication state from repository history", () => {
+    it("[성공] 기록에서 재작성 항목 및 게시 상태를 분류함", () => {
         const preview = buildFixtureHistoryRewritePreview({
             repository: {
                 snapshot: sampleRepository.snapshot,
@@ -48,7 +48,7 @@ describe("fixture preview use cases", () => {
         );
     });
 
-    it("requires an open repository for history rewrite previews", () => {
+    it("[성공] 기록 재작성 미리보기를 위해 개방형이 필요함", () => {
         expect(() =>
             buildFixtureHistoryRewritePreview({
                 repository: null,

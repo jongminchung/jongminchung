@@ -7,8 +7,8 @@ import {
     sanitizeGitError,
 } from "./gitActivity";
 
-describe("Git activity", () => {
-    it("uses safe user-facing operation labels", () => {
+describe("힘내 활동", () => {
+    it("[성공] 안전 사용자 대상 활동 라벨을 사용함", () => {
         expect(
             operationActivityLabel({
                 kind: "fetch",
@@ -25,7 +25,7 @@ describe("Git activity", () => {
         ).toBe("Updating Git config");
     });
 
-    it("allows retry only for the idempotent fetch operation", () => {
+    it("[성공] 멱등성 가져오기 작업에 대해서만 재시도를 소유함", () => {
         expect(
             isRetryableOperation({ kind: "fetch", remote: null, prune: false }),
         ).toBe(true);
@@ -34,7 +34,7 @@ describe("Git activity", () => {
         );
     });
 
-    it("redacts credentials and control characters from errors", () => {
+    it("[성공] 오류로부터 자격 증명 및 제어 문자를 변경함", () => {
         const sanitized = sanitizeGitError(
             "fatal:\u0000 https://user:password@github.com/org/repo token=ghp_secret glpat-private",
         );
@@ -45,7 +45,7 @@ describe("Git activity", () => {
         expect(sanitized).not.toContain("secret");
     });
 
-    it("distinguishes cancellation from ordinary failures", () => {
+    it("[성공] 취소와 일반적인 실패를 거부함", () => {
         expect(isGitRequestCancelled(new GitRequestCancelledError())).toBe(
             true,
         );

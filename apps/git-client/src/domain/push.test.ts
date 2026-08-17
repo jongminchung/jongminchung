@@ -31,8 +31,8 @@ const preview = (overrides: Partial<PushPreview> = {}): PushPreview => ({
     ...overrides,
 });
 
-describe("push policy", () => {
-    it("creates normal and exact-lease operations without a boolean force path", () => {
+describe("밀어넣기", () => {
+    it("[실패] 부울 반환 없이 일반 및 임시 작업을 생성함", () => {
         expect(createPushOperation(preview(), "normal", false)).toMatchObject({
             mode: { kind: "normal" },
         });
@@ -48,7 +48,7 @@ describe("push policy", () => {
         });
     });
 
-    it("disables force without an exact verified remote oid", () => {
+    it("[실패] 자격증 인증된 원격 oid 없이 인증을 받으려면", () => {
         const unavailable = preview({
             expectedLeaseOid: null,
             remoteStateError: "offline",
@@ -59,7 +59,7 @@ describe("push policy", () => {
         ).toThrow(/exact reviewed/);
     });
 
-    it("disables normal push for divergence and confirms generic or protected force", () => {
+    it("[성공] 발산을 초대하여 초대하고 일반 또는 보호된 힘을 확인함", () => {
         const diverged = preview({ fastForward: false });
         expect(canNormalPush(diverged)).toBe(false);
         expect(

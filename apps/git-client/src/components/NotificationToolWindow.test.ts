@@ -3,8 +3,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { NotificationToolWindow } from "./NotificationToolWindow";
 
-describe("NotificationToolWindow", () => {
-    it("renders operation history and clear/close actions", () => {
+describe("알림도구창", () => {
+    it("[성공] 작업 내 역 및 지우기/닫기 작업을 마감함", () => {
         const markup = renderToStaticMarkup(
             createElement(NotificationToolWindow, {
                 notifications: [

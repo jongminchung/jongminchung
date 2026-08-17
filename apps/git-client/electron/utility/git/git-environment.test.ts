@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { createGitEnvironment } from "./git-environment";
 
-describe("createGitEnvironment", () => {
-    it("preserves the host environment needed to locate Git and authenticate over SSH", () => {
+describe("Git 환경 생성", () => {
+    it("[성공] Git을 찾고 SSH를 통해 인증받은 데 필요한 호스트 환경을 싫어함", () => {
         expect(
             createGitEnvironment({
                 HOME: "/Users/example",
@@ -18,7 +18,7 @@ describe("createGitEnvironment", () => {
         });
     });
 
-    it("removes inherited Git repository, configuration, and executable overrides", () => {
+    it("[성공] 의심스러운 Git 작성자, 구성 및 실행 파일을 제거함", () => {
         const environment = createGitEnvironment({
             GIT_ALTERNATE_OBJECT_DIRECTORIES: "/tmp/objects",
             GIT_ASKPASS: "/tmp/askpass",
@@ -39,7 +39,7 @@ describe("createGitEnvironment", () => {
         expect(environment).toEqual({});
     });
 
-    it("allows only the Git values explicitly owned by the caller", () => {
+    it("[성공] 소환자가 권위적으로 소유함 Git 값을 부여함", () => {
         const environment = createGitEnvironment(
             {
                 GIT_DIR: "/tmp/other.git",

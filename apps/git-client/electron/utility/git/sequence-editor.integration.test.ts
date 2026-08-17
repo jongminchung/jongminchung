@@ -67,8 +67,8 @@ afterEach(async () => {
     );
 });
 
-describe("sequence editor Git integration", () => {
-    it("runs a real interactive rebase with shell:false and no command injection", async () => {
+describe("편집기 Git 통합", () => {
+    it("[성공]구조 없이 shell:false를 사용하여 실제 대화형 리베이스를 실행함", async () => {
         const root = await mkdtemp(
             join(tmpdir(), "git-client-rebase-integration-"),
         );

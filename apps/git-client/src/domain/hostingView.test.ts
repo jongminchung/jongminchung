@@ -44,8 +44,8 @@ const ITEMS = [
     },
 ] as const satisfies readonly HostingChangeRequest[];
 
-describe("hosting change request view", () => {
-    it("applies the Rebased-style state scope and text search together", () => {
+describe("반응 변경 요청 보기", () => {
+    it("[성공] Rebased 스타일의 상태 범위와 텍스트 검색을 함께 적용함", () => {
         expect(filterHostingChangeRequests(ITEMS, "octocat", "open")).toEqual([
             ITEMS[0],
         ]);
@@ -57,7 +57,7 @@ describe("hosting change request view", () => {
         ]);
     });
 
-    it("moves predictably for keyboard list navigation", () => {
+    it("[성공] 키보드 목록 탐색을 위해 예상대로 이동함", () => {
         expect(adjacentHostingChangeRequest(ITEMS, null, "next")).toBe(
             ITEMS[0],
         );

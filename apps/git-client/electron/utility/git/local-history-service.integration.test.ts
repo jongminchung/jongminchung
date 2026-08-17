@@ -40,8 +40,8 @@ async function fixture(now: () => number = Date.now) {
     };
 }
 
-describe("LocalHistoryService", () => {
-    it("uses the initial project state only as a baseline", async () => {
+describe("로컬히스토리서비스", () => {
+    it("[성공] 초기 프로젝트 상태를 기준선으로만 사용함", async () => {
         const { repository, service } = await fixture();
 
         await service.initialize(repository.id);
@@ -54,7 +54,7 @@ describe("LocalHistoryService", () => {
         ).resolves.toEqual({ activities: [], nextCursor: null });
     });
 
-    it("records reverse text deltas and restores the worktree without changing the index", async () => {
+    it("[실패] 역방향 텍스트를 기록하고 최선을 다하지 않고 트리를 복원함", async () => {
         const { repository, repositoryPath, service } = await fixture();
         await service.initialize(repository.id);
         await writeFile(join(repositoryPath, "tracked.txt"), "two\n", "utf8");
@@ -88,7 +88,7 @@ describe("LocalHistoryService", () => {
         expect(git(repositoryPath, "show", ":tracked.txt")).toBe("two\n");
     });
 
-    it("records binary structure changes without storing binary content", async () => {
+    it("[실패] 바이너리 내용을 저장하지 않고 바이너리 구조 변경 사항을 기록함", async () => {
         const { repository, repositoryPath, service } = await fixture();
         await service.initialize(repository.id);
         await writeFile(
@@ -125,7 +125,7 @@ describe("LocalHistoryService", () => {
         });
     });
 
-    it("keeps labels and purges activities older than five days", async () => {
+    it("[성공] 5일 이상 라벨 및 제거 활동 유지", async () => {
         let currentTime = 1_000_000_000;
         const { repository, repositoryPath, service } = await fixture(
             () => currentTime,
@@ -148,7 +148,7 @@ describe("LocalHistoryService", () => {
         expect(page.activities[0]?.name).toBe("Editing tracked.txt");
     });
 
-    it("groups named multi-file operations and detects Unicode renames", async () => {
+    it("[성공] 다중 파일 작업 이름의 그룹을 수신하고 유니코드 이름 변경을 감지함", async () => {
         const { repository, repositoryPath, service } = await fixture();
         await writeFile(join(repositoryPath, "first.txt"), "first\n", "utf8");
         await writeFile(join(repositoryPath, "second.txt"), "second\n", "utf8");
@@ -199,7 +199,7 @@ describe("LocalHistoryService", () => {
         });
     });
 
-    it("migrates consecutive v1 snapshots and keeps the original archive", async () => {
+    it("[성공] 연속 v1 스냅샷을 마이그레이션하고 원본 보관함을 유지함", async () => {
         const { repository, storageRoot, service } = await fixture(() => 10);
         const legacy = join(storageRoot, "local-history", repository.id);
         await mkdir(legacy, { recursive: true });

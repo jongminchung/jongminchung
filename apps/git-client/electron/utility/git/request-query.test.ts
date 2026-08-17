@@ -22,7 +22,7 @@ const filters: LogFilters = {
     matchCase: false,
 };
 
-describe("buildRequestArguments", () => {
+describe("buildRequest인수", () => {
     it.each<readonly [QueryOnlyGitRequest, string]>([
         [{ kind: "status", repositoryId }, "status"],
         [{ kind: "refs", repositoryId }, "for-each-ref"],
@@ -107,11 +107,14 @@ describe("buildRequestArguments", () => {
             },
             "log",
         ],
-    ])("builds a fixed executable for $0.kind", (request, executable) => {
-        expect(buildRequestArguments(request)[0]).toBe(executable);
-    });
+    ])(
+        "[성공] $0.kind에 대한 고정 실행 파일을 빌드함",
+        (request, executable) => {
+            expect(buildRequestArguments(request)[0]).toBe(executable);
+        },
+    );
 
-    it("preserves all supported log filters and clamps page size", () => {
+    it("[성공] 지원되는 모든 임시 필터를 유지하고 페이지 크기를 고정함", () => {
         const args = buildRequestArguments({
             kind: "log",
             repositoryId,
@@ -149,7 +152,7 @@ describe("buildRequestArguments", () => {
         );
     });
 
-    it("uses case-sensitive extended regular expressions only when requested", () => {
+    it("[성공] 요청된 경우에만 대죄를 구분하는 확장식을 사용함", () => {
         const args = buildRequestArguments({
             kind: "log",
             repositoryId,
@@ -169,7 +172,7 @@ describe("buildRequestArguments", () => {
         expect(args).not.toContain("--regexp-ignore-case");
     });
 
-    it("rejects path traversal, option-like revisions, invalid refs, NUL text, and invalid pages", () => {
+    it("[실패] 고속도로 순회, 부스션과 놀라운 적용, 거짓 사용자, NUL 및 통합 페이지를 찾아드립니다", () => {
         const invalidRequests: GitRequest[] = [
             { kind: "tree", repositoryId, revision: "HEAD", path: "../secret" },
             { kind: "signature", repositoryId, revision: "--all" },

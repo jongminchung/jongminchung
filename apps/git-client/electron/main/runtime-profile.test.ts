@@ -7,8 +7,8 @@ import {
     trustsQaHostingCertificate,
 } from "./runtime-profile";
 
-describe("Electron runtime profiles", () => {
-    it("keeps the regular and repository QA profiles separate", () => {
+describe("전자 프로필", () => {
+    it("[성공] 일반 및 채용 QA 프로필을 유지함", () => {
         expect(resolveRuntimeProfile([])).toMatchObject({
             hostingCertificatePath: null,
             name: DEFAULT_PROFILE_NAME,
@@ -19,7 +19,7 @@ describe("Electron runtime profiles", () => {
         });
     });
 
-    it("requires an absolute certificate only for the isolated hosting profile", () => {
+    it("[성공] 선정된 유명인 프로필에 최고로 인정받는 사람이 필요함", () => {
         expect(
             resolveRuntimeProfile([
                 "--qa-hosting-profile",
@@ -45,13 +45,13 @@ describe("Electron runtime profiles", () => {
         ).toThrow(/absolute/u);
     });
 
-    it("rejects conflicting QA profiles", () => {
+    it("[실패]충돌하는 QA 프로필을 가지고 있음", () => {
         expect(() =>
             resolveRuntimeProfile(["--qa-fixture", "--qa-isolated-profile"]),
         ).toThrow(/mutually exclusive/u);
     });
 
-    it("trusts only the exact loopback certificate fingerprint", () => {
+    it("[성공] 루프백을 세우지 않고서는 믿음을 가질 수 없습니다", () => {
         expect(trustsQaHostingCertificate("127.0.0.1", "AA:BB", "AA:BB")).toBe(
             true,
         );

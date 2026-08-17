@@ -133,7 +133,7 @@ async function openPush(page: Page): Promise<Locator> {
     return dialog;
 }
 
-test("uses visible Fetch, Pull, Push, and exact force-with-lease controls against a real remote", async () => {
+test("[성공] 실제 리모콘에 대해 눈에 보이는 가져오기(Fetch), 거부기(Pull), 푸시(Push) 및 대신 임대 제어를 사용함", async () => {
     test.setTimeout(120_000);
     await resetQaProfile(runtimeProfileName);
     const parent = await mkdtemp(
@@ -312,7 +312,7 @@ test("uses visible Fetch, Pull, Push, and exact force-with-lease controls agains
     }
 });
 
-test("aborts a conflicting rebase from visible recovery controls and restores the Git oracle", async () => {
+test("[실패] 오류 복구 제어에서 충돌하는 리베이스를 중단하고 Git 작업을 복원함", async () => {
     test.setTimeout(90_000);
     await resetQaProfile(runtimeProfileName);
     const parent = await mkdtemp(
@@ -448,7 +448,7 @@ test("aborts a conflicting rebase from visible recovery controls and restores th
     }
 });
 
-test("resolves and continues a conflicting cherry-pick through visible history and recovery UI", async () => {
+test("[성공] 보이는 기록 및 복구 UI를 통해 충돌하는 캐시픽을 해결하고 있습니까?", async () => {
     test.setTimeout(90_000);
     await resetQaProfile(runtimeProfileName);
     const parent = await mkdtemp(

@@ -7,8 +7,8 @@ import {
     synchronizeAppearancePreference,
 } from "./appearance";
 
-describe("appearance", () => {
-    it("defaults fresh and invalid persisted values to the Rebased dark appearance", () => {
+describe("그게", () => {
+    it("[실패] 리베이스된 어두운 모양에 대한 삼삼하고 유효하지 않은 가치가 있다는 것임", () => {
         expect(storedAppearancePreference(null)).toEqual({
             theme: "dark",
             syncWithOs: false,
@@ -39,7 +39,7 @@ describe("appearance", () => {
         });
     });
 
-    it("resolves system changes while manual modes remain fixed", () => {
+    it("[성공] 매뉴얼 모드는 현재 상태로 유지하면서 시스템 변경 사항을 해결하는 중임", () => {
         expect(
             resolveAppearance({ theme: "dark", syncWithOs: true }, false),
         ).toBe("light");
@@ -54,7 +54,7 @@ describe("appearance", () => {
         ).toBe("dark");
     });
 
-    it("adopts the current system theme while synchronization is enabled", () => {
+    it("[성공] 키스가 활성화된 동안 현재 시스템 테마를 채택함", () => {
         expect(
             synchronizeAppearancePreference(
                 { theme: "dark", syncWithOs: true },
@@ -75,7 +75,7 @@ describe("appearance", () => {
         });
     });
 
-    it("persists only the validated mode contract", () => {
+    it("[성공] 가치있는 모드 계약만 유지함", () => {
         const values = new Map<string, string>();
         const storage = AppearanceStorage.of({
             getItem: (key) => values.get(key) ?? null,

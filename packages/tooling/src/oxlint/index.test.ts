@@ -1,16 +1,36 @@
 import { describe, expect, it } from "vitest";
 import { defineOxlintConfig, sharedOxlintConfig } from "./index.js";
 
-describe("Oxlint config", () => {
-    it("returns an independent copy of every shared collection", () => {
+describe("옥린트 구성", () => {
+    it("[성공] 모든 것을 공유하는 휴가를 기뻐함", () => {
         const config = defineOxlintConfig();
 
         expect(config).toEqual({
-            ...sharedOxlintConfig,
             categories: { correctness: "error" },
             plugins: ["typescript", "unicorn", "oxc", "react", "jsx-a11y"],
             options: { typeAware: true },
-            rules: sharedOxlintConfig.rules,
+            rules: {
+                "eslint/prefer-const": "error",
+                "typescript/no-explicit-any": "error",
+                "typescript/no-misused-promises": "error",
+                "jsx-a11y/label-has-associated-control": [
+                    "error",
+                    {
+                        controlComponents: [
+                            "Checkbox",
+                            "Input",
+                            "RadioGroupItem",
+                            "Select",
+                            "Textarea",
+                        ],
+                    },
+                ],
+                "jsx-a11y/no-noninteractive-tabindex": [
+                    "error",
+                    { roles: ["tabpanel", "region"] },
+                ],
+                "jsx-a11y/prefer-tag-over-role": "off",
+            },
             overrides: [],
         });
         expect(config.categories).not.toBe(sharedOxlintConfig.categories);
@@ -19,7 +39,7 @@ describe("Oxlint config", () => {
         expect(config.rules).not.toBe(sharedOxlintConfig.rules);
     });
 
-    it("merges consumer categories, plugins, options, rules, and overrides", () => {
+    it("[성공] 소비자 카테고리, 파생, 옵션, 규칙 및 재정의 형식", () => {
         const override = {
             files: ["**/*.test.ts"],
             rules: { "typescript/no-explicit-any": "off" as const },
@@ -48,5 +68,15 @@ describe("Oxlint config", () => {
         expect(config.rules?.["eslint/prefer-const"]).toBe("off");
         expect(config.rules?.["typescript/no-explicit-any"]).toBe("error");
         expect(config.overrides).toEqual([override]);
+    });
+
+    it("[성공] 소비자 구성 간 override 배열 독립성 유지", () => {
+        const first = defineOxlintConfig({
+            overrides: [{ files: ["**/*.test.ts"] }],
+        });
+        const second = defineOxlintConfig();
+
+        expect(first.overrides).not.toBe(second.overrides);
+        expect(second.overrides).toEqual([]);
     });
 });

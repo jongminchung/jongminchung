@@ -5,7 +5,7 @@ test.beforeEach(async ({ page }) => {
     await page.goto("/?fixture=qa");
 });
 
-test("matches the 800 by 650 Rebased recent-project geometry", async ({
+test("[성공] 800 x 650 리베이스된 최근 프로젝트 형상 일치", async ({
     page,
 }) => {
     await page.setViewportSize({ width: 800, height: 650 });
@@ -37,7 +37,7 @@ test("matches the 800 by 650 Rebased recent-project geometry", async ({
     await expect(page.getByText("gcloud-cloudlog")).toHaveCount(0);
 });
 
-test("keeps the Rebased empty-project state at 800 by 650", async ({
+test("[성공] 리베이스된 빈 프로젝트 상태를 800 x 650으로 유지함", async ({
     page,
 }) => {
     await page.setViewportSize({ width: 800, height: 650 });
@@ -56,7 +56,9 @@ test("keeps the Rebased empty-project state at 800 by 650", async ({
     );
 });
 
-test("matches the focused Rebased Customize geometry", async ({ page }) => {
+test("[성공] 집약된 Rebased Customize 지오메트리와 일치함", async ({
+    page,
+}) => {
     await page.setViewportSize({ width: 800, height: 650 });
     await page.goto("/");
     await page.getByRole("treeitem", { name: "Projects" }).focus();
@@ -87,9 +89,7 @@ test("matches the focused Rebased Customize geometry", async ({ page }) => {
     expect(accessibility.violations).toEqual([]);
 });
 
-test("applies and restores Welcome appearance preferences", async ({
-    page,
-}) => {
+test("[성공] 모양의 기본 설정을 적용하고 복원함", async ({ page }) => {
     await page.goto("/");
     await page.getByRole("treeitem", { name: "Customize" }).click();
     const root = page.locator("html");
@@ -137,7 +137,9 @@ test("applies and restores Welcome appearance preferences", async ({
     await expect(root).toHaveAttribute("data-theme", "light");
 });
 
-test("renders the dense three-pane Git log fixture", async ({ page }) => {
+test("[성공] 조밀한 3개 창으로 변경 Git 로그 고정 장치를 전송함", async ({
+    page,
+}) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await expect(
         page.getByRole("complementary", { name: "Branches and tags" }),
@@ -169,7 +171,7 @@ test("renders the dense three-pane Git log fixture", async ({ page }) => {
     });
 });
 
-test("renders the Codex neutral dark theme", async ({ page }) => {
+test("[성공] Codex Dark 테마를 지원함", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
     await expect(page).toHaveScreenshot("git-log-workbench-dark.png", {
@@ -177,7 +179,7 @@ test("renders the Codex neutral dark theme", async ({ page }) => {
     });
 });
 
-test("supports persisted Sync with OS, Islands Light, and Islands Dark modes", async ({
+test("[성공] OS, Islands Light 및 Islands Dark 소스와 함께 계속해서 지원함", async ({
     page,
 }) => {
     const settings = page.getByRole("button", {
@@ -209,7 +211,7 @@ test("supports persisted Sync with OS, Islands Light, and Islands Dark modes", a
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 });
 
-test("shows accessible supplemental help for icon actions", async ({
+test("[성공] 아이콘 작업에 대한 접근 지원 추가 도움말 표시함", async ({
     page,
 }) => {
     const settings = page.getByRole("button", {
@@ -230,7 +232,7 @@ test("shows accessible supplemental help for icon actions", async ({
     );
 });
 
-test("navigates appearance settings with the keyboard", async ({ page }) => {
+test("[성공] 키보드 모양 설정을 탐색함", async ({ page }) => {
     const settings = page.getByRole("button", {
         name: "IDE and Project Settings",
     });
@@ -250,7 +252,7 @@ test("navigates appearance settings with the keyboard", async ({ page }) => {
     await expect(settings).toBeFocused();
 });
 
-test("operates shadcn Select with Space, arrows, Escape, and focus restoration", async ({
+test("[성공] Space, 화살표, Escape 및 폴 복원을 사용하여 shadcn Select를 작동함", async ({
     page,
 }) => {
     await page
@@ -287,7 +289,9 @@ test("operates shadcn Select with Space, arrows, Escape, and focus restoration",
     await expect(ideFont).toBeFocused();
 });
 
-test("keeps core panes usable at the minimum window size", async ({ page }) => {
+test("[성공] 최소 창 크기에서 코어 창을 사용할 수 있도록 유지함", async ({
+    page,
+}) => {
     await page.setViewportSize({ width: 960, height: 640 });
     await expect(
         page.getByRole("complementary", { name: "Branches and tags" }),
@@ -306,7 +310,7 @@ test("keeps core panes usable at the minimum window size", async ({ page }) => {
     });
 });
 
-test("uses an in-app validated dialog for history rewrites", async ({
+test("[성공] 기록 재작성을 위해 인앱 인증 대화 상자를 사용함", async ({
     page,
 }) => {
     const head = page.getByRole("row", {
@@ -325,9 +329,7 @@ test("uses an in-app validated dialog for history rewrites", async ({
     await expect(dialog).toBeVisible();
 });
 
-test("shares action availability with the commit context menu", async ({
-    page,
-}) => {
+test("[성공] 커밋 컨텍스트 메뉴와 작업 가용성을 공유함", async ({ page }) => {
     const head = page.getByRole("row", {
         name: /Jongmin Chung now.*feat: add workspace-aware repository sessions 0000000/,
     });
@@ -343,7 +345,7 @@ test("shares action availability with the commit context menu", async ({
     ).toBeEnabled();
 });
 
-test("selects the first changed file and keeps commit details inline", async ({
+test("[성공] 변경된 첫 번째 파일을 선택하고 커밋 세부 정보를 인라인으로 유지함", async ({
     page,
 }) => {
     await page
@@ -362,7 +364,7 @@ test("selects the first changed file and keeps commit details inline", async ({
     ).toBeVisible();
 });
 
-test("opens a file navigator automatically for exactly two revisions", async ({
+test("[성공] 정확하게 두 출력판에 대해 자동으로 페인트 작업을 수행하다", async ({
     page,
 }) => {
     await page
@@ -387,7 +389,7 @@ test("opens a file navigator automatically for exactly two revisions", async ({
     ).toBeVisible();
 });
 
-test("opens Changes with the first layer selected and restores selection after staging", async ({
+test("[성공] 제외된 첫 번째 레이어로 변경 사항을 방지하기 위해 조치를 취한 후 복원함", async ({
     page,
 }) => {
     await page.getByRole("button", { name: "Commit", exact: true }).click();
@@ -432,7 +434,7 @@ test("opens Changes with the first layer selected and restores selection after s
     ).toBeVisible();
 });
 
-test("opens one reviewed Push dialog and requires exact lease confirmation", async ({
+test("[성공] 검토된 푸시 대화 상자 하나를 제외하고 임대 확인이 필요함", async ({
     page,
 }) => {
     await page.getByRole("button", { name: "Push…", exact: true }).click();
@@ -475,7 +477,7 @@ test("opens one reviewed Push dialog and requires exact lease confirmation", asy
     await expect(page.getByRole("dialog", { name: "Push" })).toBeVisible();
 });
 
-test("opens published commits in the visual interactive rebase workspace", async ({
+test("[성공] 대화형 리베이스 작업 공간에서 게시된 커밋을 조사하다", async ({
     page,
 }) => {
     const commit = page.getByRole("row", {
@@ -521,9 +523,7 @@ test("opens published commits in the visual interactive rebase workspace", async
     ).toBeChecked();
 });
 
-test("offers open, clone, and initialize repository flows", async ({
-    page,
-}) => {
+test("[성공] 작업자, 복제 및 포터를 가져오기", async ({ page }) => {
     await page.getByRole("button", { name: /Project:/ }).click();
     await page.getByRole("option", { name: "Clone Repository…" }).click();
     const dialog = page.getByRole("dialog", { name: "Repository" });
@@ -557,7 +557,9 @@ test("offers open, clone, and initialize repository flows", async ({
     await expect(dialog.getByText("Bare repository")).toBeVisible();
 });
 
-test("keeps the browser fixture terminal shell-free", async ({ page }) => {
+test("[성공] 브라우저 고정 장치 터미널을 홀더 없이 유지함", async ({
+    page,
+}) => {
     await expect(
         page.getByRole("dialog", { name: "Repository Management" }),
     ).toHaveCount(0);
@@ -585,9 +587,7 @@ test("keeps the browser fixture terminal shell-free", async ({ page }) => {
     ).toHaveCount(0);
 });
 
-test("keeps the repository workbench visible without a Manage tab", async ({
-    page,
-}) => {
+test("[실패] 탭하지 않고 작업할 수 있도록 표시함", async ({ page }) => {
     await expect(
         page.getByRole("button", { name: "Manage", exact: true }),
     ).toHaveCount(0);
@@ -599,7 +599,7 @@ test("keeps the repository workbench visible without a Manage tab", async ({
     ).toBeVisible();
 });
 
-test("opens a Rebased-style project switcher and restores focus on dismiss", async ({
+test("[성공] 리베이스된 스타일 프로젝트 전환을 지원하기 위해 시 포커스를 복원함", async ({
     page,
 }) => {
     const projectButton = page.getByRole("button", {
@@ -627,7 +627,7 @@ test("opens a Rebased-style project switcher and restores focus on dismiss", asy
     await expect(projectButton).toBeFocused();
 });
 
-test("keeps log filters and commit options available in compact popovers", async ({
+test("[성공] 강력한 팝오버에서 사용 가능한 큐 낚시 및 커밋 옵션을 유지함", async ({
     page,
 }) => {
     await page
@@ -656,7 +656,7 @@ test("keeps log filters and commit options available in compact popovers", async
     ).toBeVisible();
 });
 
-test("resizes the bottom panel with accessible keyboard controls", async ({
+test("[성공] 접근 가능한 키보드를 사용하여 하단 패널의 크기를 조정함", async ({
     page,
 }) => {
     await page.getByRole("button", { name: "Terminal", exact: true }).click();
@@ -675,7 +675,7 @@ test("resizes the bottom panel with accessible keyboard controls", async ({
     await expect(separator).toHaveAttribute("aria-valuenow", "160");
 });
 
-test("resizes and exposes v4 review panes with accessible separators", async ({
+test("[성공] v4 검토 창의 크기를 조정하고 보기를 사용하여 액세스 가능", async ({
     page,
 }) => {
     await page
@@ -707,9 +707,7 @@ test("resizes and exposes v4 review panes with accessible separators", async ({
     ).toBeVisible();
 });
 
-test("routes branch operations to a focused repository tool", async ({
-    page,
-}) => {
+test("[성공] 지붕 작업장을 집적한 작업자 도구로 고정", async ({ page }) => {
     await page
         .getByRole("banner", { name: "Main Toolbar" })
         .getByRole("button", { name: "main" })
@@ -726,7 +724,7 @@ test("routes branch operations to a focused repository tool", async ({
     await expect(dialog).toHaveCount(0);
 });
 
-test("uses the command registry for palette, views, search, drawer, and settings", async ({
+test("[성공] 기둥, 보기, 검색, 서랍 및 설정에 대한 박쥐를 사용함", async ({
     page,
 }) => {
     await expect(
@@ -828,7 +826,7 @@ test("uses the command registry for palette, views, search, drawer, and settings
     ).toBeVisible();
 });
 
-test("dismisses context, popover, and multi-selection one layer at a time", async ({
+test("[성공] 엑스트라, 팝오버 및 다중 선택을 한 번에 한 레이어씩 떼어내어 함", async ({
     page,
 }) => {
     const head = page.getByRole("row", {
@@ -868,7 +866,7 @@ test("dismisses context, popover, and multi-selection one layer at a time", asyn
     ).toBeVisible();
 });
 
-test("opens an editable file viewer from local changes", async ({ page }) => {
+test("[성공]파일 변경 내용을 기록하는 경우", async ({ page }) => {
     await page.getByRole("button", { name: "Commit", exact: true }).click();
     await page
         .getByRole("button", {
@@ -888,7 +886,7 @@ test("opens an editable file viewer from local changes", async ({ page }) => {
     );
 });
 
-test("links and closes dynamic Log and editor tabs with keyboard focus", async ({
+test("[성공] 키보드 포커스가 있는 로그인 및 편집기 HTML을 연결하고 싶습니다", async ({
     page,
 }) => {
     const expectLinkedPanel = async (
@@ -949,7 +947,7 @@ test("links and closes dynamic Log and editor tabs with keyboard focus", async (
     await expect(firstLogTab).toBeFocused();
 });
 
-test("has no serious automated accessibility violations", async ({ page }) => {
+test("[성공] 자동으로 인정받을 수 없습니다", async ({ page }) => {
     await page.getByRole("button", { name: "Commit", exact: true }).click();
     await page
         .getByRole("button", {
@@ -973,7 +971,7 @@ test("has no serious automated accessibility violations", async ({ page }) => {
     ).toEqual([]);
 });
 
-test("keeps welcome, repository, and settings surfaces accessible", async ({
+test("[성공] 환영, 사용 및 설정에 액세스할 수 있도록 유지함", async ({
     page,
 }) => {
     const expectNoSeriousViolations = async (

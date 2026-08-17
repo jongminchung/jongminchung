@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import { WelcomeWorkspace } from "./WelcomeWorkspace";
 
 describe("WelcomeWorkspace", () => {
-    it("matches the Rebased welcome project actions and category structure", () => {
+    it("[성공] Rebased 환영 프로젝트 파티 및 카테고리 구조와 일치함", () => {
         const markup = renderToStaticMarkup(
             createElement(WelcomeWorkspace, {
                 appearancePreference: { theme: "dark", syncWithOs: false },
@@ -52,7 +52,7 @@ describe("WelcomeWorkspace", () => {
         }
     });
 
-    it("renders persisted recent projects as actionable rows", () => {
+    it("[성공]에서 최근 프로젝트를 실행하는 역할을 지원함", () => {
         const markup = renderToStaticMarkup(
             createElement(WelcomeWorkspace, {
                 appearancePreference: { theme: "dark", syncWithOs: false },

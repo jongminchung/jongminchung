@@ -15,8 +15,8 @@ const session: TerminalSessionSnapshot = {
     target: { kind: "default" },
 };
 
-describe("TerminalTabStrip", () => {
-    it("preserves evidence-backed labels without nesting the close control in a tab button", () => {
+describe("터미널 탭스트립", () => {
+    it("[실패] 탭 버튼에 닫기를 무시하고 증거에 근거한 반대함", () => {
         const optionsButtonRef = { current: null };
         const agentsButtonRef = { current: null };
         const predefinedButtonRef = { current: null };

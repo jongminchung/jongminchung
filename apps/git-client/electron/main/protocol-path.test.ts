@@ -8,8 +8,8 @@ import {
 
 const rendererRoot = resolve("/private/tmp/git-client-renderer");
 
-describe("app protocol path resolution", () => {
-    it("maps the root, assets, and client-side routes inside the renderer root", () => {
+describe("앱을 사용하면 어떻게 되나요?", () => {
+    it("[성공] 렌더러 외부의 예외, 여분의 클라이언트 및 측면 경로 매핑함", () => {
         expect(resolveAppAsset(rendererRoot, "app://git-client/")).toEqual({
             kind: "asset",
             path: resolve(rendererRoot, "index.html"),
@@ -28,7 +28,7 @@ describe("app protocol path resolution", () => {
         });
     });
 
-    it("rejects traversal, malformed escapes, and foreign origins", () => {
+    it("[실패] 순회, 잘못된 형식의 탈출 및 외부 기원을 발견함", () => {
         expect(
             resolveAppAsset(
                 rendererRoot,
@@ -47,7 +47,7 @@ describe("app protocol path resolution", () => {
         });
     });
 
-    it("accepts the root itself but no parent or sibling path", () => {
+    it("[성공] 자체는 독립이지만 상위 또는 외부에서는 독립되지 않음", () => {
         expect(isPathInside(rendererRoot, rendererRoot)).toBe(true);
         expect(
             isPathInside(rendererRoot, resolve(rendererRoot, "assets/app.js")),
@@ -60,7 +60,7 @@ describe("app protocol path resolution", () => {
         ).toBe(false);
     });
 
-    it("serves renderer assets with explicit content types", () => {
+    it("[성공] 연관성 있는 콘텐츠로 렌더러 자산을 분리함", () => {
         expect(appAssetContentType("index.html")).toBe(
             "text/html; charset=utf-8",
         );

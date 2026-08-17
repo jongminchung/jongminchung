@@ -1,6 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { dirname, relative, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { relative, resolve } from "node:path";
 import { compile } from "@mdx-js/mdx";
 import matter from "gray-matter";
 import { toString } from "hast-util-to-string";
@@ -31,7 +30,7 @@ import {
     writeGeneratedFiles,
 } from "./generation-utils.ts";
 
-const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const appRoot = resolve(import.meta.dirname, "..");
 const workspaceRoot = resolve(appRoot, "../..");
 const contentRoot = resolve(appRoot, "content/tech");
 const manifestPath = resolve(appRoot, "generated/content-manifest.json");
@@ -174,10 +173,11 @@ export function validateDocuments(documents: readonly SourceDocument[]): void {
             throw new Error(`Duplicate navigation order: ${orderKey}`);
         orders.add(orderKey);
 
-        const localized =
-            byId.get(metadata.id) ?? new Map<Locale, DocMetadata>();
+        const localized = byId.getOrInsertComputed(
+            metadata.id,
+            () => new Map<Locale, DocMetadata>(),
+        );
         localized.set(metadata.locale, metadata);
-        byId.set(metadata.id, localized);
     }
 
     for (const [id, localized] of byId) {
@@ -511,8 +511,7 @@ async function main(args: readonly string[]): Promise<void> {
 function isMainModule(): boolean {
     const entryPath = process.argv[1];
     return (
-        entryPath !== undefined &&
-        resolve(entryPath) === fileURLToPath(import.meta.url)
+        entryPath !== undefined && resolve(entryPath) === import.meta.filename
     );
 }
 

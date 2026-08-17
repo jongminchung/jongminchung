@@ -71,7 +71,7 @@ class FakeElectronTerminalApi implements ElectronTerminalApi {
 }
 
 describe("ElectronTerminalBridge", () => {
-    it("creates a terminal and forwards its ordered output through the desktop API", async () => {
+    it("[성공] 터미널을 생성하고 데스크탑 API를 대신하여 출력을 전달함", async () => {
         const api = new FakeElectronTerminalApi();
         const bridge = ElectronTerminalBridge.of(api);
         const events: TerminalEvent[] = [];

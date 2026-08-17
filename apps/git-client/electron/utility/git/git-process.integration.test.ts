@@ -61,8 +61,8 @@ afterEach(async () => {
     );
 });
 
-describe("GitProcessRunner output policy", () => {
-    it("does not pass inherited Git overrides to the child process", async () => {
+describe("GitProcessRunner가 종료되었습니다", () => {
+    it("[실패] 부패한 Git 부품의 하위 프레임워크에 전달되지 않음", async () => {
         const root = await mkdtemp(
             join(tmpdir(), "git-client-process-environment-"),
         );
@@ -125,7 +125,7 @@ describe("GitProcessRunner output policy", () => {
         }
     });
 
-    it("preserves chronological order when stdout and stderr alternate", async () => {
+    it("[성공] stdout과 stderr이 교대로 실행될 때 시간순을 유지함", async () => {
         const root = await mkdtemp(join(tmpdir(), "git-client-process-order-"));
         temporaryDirectories.push(root);
         const fakeGit = join(root, "alternating-git");
@@ -157,7 +157,7 @@ describe("GitProcessRunner output policy", () => {
         ]);
     });
 
-    it("preserves repository-owned stdout only when the caller explicitly opts out of redaction", async () => {
+    it("[성공] 호출자가 권위적으로 수정을 옵트아웃하는 경우에만 소유하는 stdout을 사용함", async () => {
         const root = await mkdtemp(
             join(tmpdir(), "git-client-process-output-"),
         );
@@ -182,7 +182,7 @@ describe("GitProcessRunner output policy", () => {
         expect(stdout(protectedByDefault)).toBe("token=[redacted]\n");
     });
 
-    it("terminates an actual child process on AbortController cancellation without retaining listeners", async () => {
+    it("[실패] 리스너를 유지하지 않고 AbortController 취소 시 실제 하위 버전을 종료함", async () => {
         const root = await mkdtemp(
             join(tmpdir(), "git-client-process-cancel-"),
         );

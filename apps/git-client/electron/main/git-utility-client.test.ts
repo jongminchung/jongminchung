@@ -186,8 +186,8 @@ function statusQuery(): GitQueryRequest {
     };
 }
 
-describe("GitUtilityClient", () => {
-    it("handshakes and correlates an open repository response", async () => {
+describe("Git유틸리티클라이언트", () => {
+    it("[성공] 로고 시계를 핸드셰이크하고 연관시키다", async () => {
         const { client, transport } = await connectClient();
         const opening = client.openRepository("/tmp/repository");
         const request = lastMainMessage(transport);
@@ -204,7 +204,7 @@ describe("GitUtilityClient", () => {
         expect(client.state).toBe("ready");
     });
 
-    it("correlates a complete inspected snapshot by repository id", async () => {
+    it("[성공] 검사된 전체 스냅샷을 제자리에 연결하는 ID", async () => {
         const { client, transport } = await connectClient();
         const inspecting = client.inspectSnapshot(REPOSITORY_ID);
         const request = lastMainMessage(transport);
@@ -221,7 +221,7 @@ describe("GitUtilityClient", () => {
         await expect(inspecting).resolves.toEqual(SNAPSHOT);
     });
 
-    it("correlates strict repository inspection and ignore-rule operations", async () => {
+    it("[성공] 외부 작업자와 무시하는 작업의 성공 관계", async () => {
         const { client, transport } = await connectClient();
         const comparing = client.compareBranches(
             REPOSITORY_ID,
@@ -267,7 +267,7 @@ describe("GitUtilityClient", () => {
         await expect(writing).resolves.toBeUndefined();
     });
 
-    it("correlates strict direct push and history rewrite preview results", async () => {
+    it("[성공]콩을 직접 밀어넣고 기록 다시 쓰기 요약 보기를 연관시키는 것", async () => {
         const { client, transport } = await connectClient();
         const loadingPush = client.loadPushPreview(
             REPOSITORY_ID,
@@ -314,7 +314,7 @@ describe("GitUtilityClient", () => {
         await expect(loadingRewrite).resolves.toEqual(HISTORY_REWRITE_PREVIEW);
     });
 
-    it("correlates every typed special repository service method", async () => {
+    it("[성공] 모든 유형의 구별 서비스 방법을 연관시키는 방법", async () => {
         const { client, transport } = await connectClient();
         const shelfId = "896b19c6-dd8f-4f7b-a591-cf701e86457c";
         const changelistId = "723094e7-bf3b-4d3e-8f74-6cebe9571840";
@@ -534,7 +534,7 @@ describe("GitUtilityClient", () => {
         expect(scenarios).toHaveLength(17);
     });
 
-    it("correlates submodule, canonical-file, and multi-root service methods", async () => {
+    it("[성공] 모듈 하위, 파일 및 다중 활용 방법을 연관시키는 방법", async () => {
         const { client, transport } = await connectClient();
         const submoduleDiff = {
             path: "modules/client",
@@ -669,7 +669,7 @@ describe("GitUtilityClient", () => {
         });
     });
 
-    it("streams and correlates repository initialization", async () => {
+    it("[성공] 포터를 시작하고 성공시키려면", async () => {
         const { client, transport } = await connectClient();
         const received: GitCreationEvent[] = [];
         const creating = client.initializeRepository(
@@ -717,7 +717,7 @@ describe("GitUtilityClient", () => {
         expect(received).toEqual(events);
     });
 
-    it("forwards only a started, sequential output, terminal query lifecycle", async () => {
+    it("[성공] 서버 서버 서비스를 안전하게 전달해야 함", async () => {
         const { client, transport } = await connectClient();
         const received: GitRequestEvent[] = [];
         const executing = client.executeQuery(statusQuery(), (event) => {
@@ -765,7 +765,7 @@ describe("GitUtilityClient", () => {
         expect(received).toEqual(events);
     });
 
-    it("forwards an operation over the existing query protocol and lifecycle", async () => {
+    it("[성공] 컨테이너 작업 및 수명 주기를 통해 작업을 전달함", async () => {
         const { client, transport } = await connectClient();
         const received: GitRequestEvent[] = [];
         const operationRequest = {
@@ -807,7 +807,7 @@ describe("GitUtilityClient", () => {
         expect(received).toEqual(events);
     });
 
-    it("correlates bounded file reads and writes across the utility process", async () => {
+    it("[성공] 헬리콥터 프로세스 전체에서 소수 파일 찾기 및 덴트를 연관시켜", async () => {
         const { client, transport } = await connectClient();
         const reading = client.readFile(
             REPOSITORY_ID,
@@ -880,7 +880,7 @@ describe("GitUtilityClient", () => {
         await expect(lineLimited).resolves.toEqual(LINE_LIMIT_CONTENT);
     });
 
-    it("registers a watcher before acknowledgement and drops stale events after unwatch", async () => {
+    it("[성공] 가위를 승인하고 승인하고 남은 이벤트를 삭제함", async () => {
         const { client, transport } = await connectClient();
         const received: RepositoryChangedEvent[] = [];
         const watching = client.watchRepository(REPOSITORY_ID, (event) =>
@@ -919,7 +919,7 @@ describe("GitUtilityClient", () => {
         expect(received).toEqual([REPOSITORY_CHANGED]);
     });
 
-    it("drops a watcher listener whenever repository close completes", async () => {
+    it("[성공] 거의 끝이 나고 있을 때마다 자 리스너를 삭제함", async () => {
         const { client, transport } = await connectClient();
         const received: RepositoryChangedEvent[] = [];
         const watching = client.watchRepository(REPOSITORY_ID, (event) =>
@@ -952,7 +952,7 @@ describe("GitUtilityClient", () => {
         expect(received).toEqual([]);
     });
 
-    it("kills the utility and rejects a query on an out-of-order event", async () => {
+    it("[실패] 유틸리티를 종료하고 잠시 동안 잘못된 이벤트에 대한 쿼리를 수행함", async () => {
         const { client, transport } = await connectClient();
         const executing = client.executeQuery(statusQuery(), () => undefined);
         const request = lastMainMessage(transport);
@@ -977,7 +977,7 @@ describe("GitUtilityClient", () => {
         expect(client.state).toBe("crashed");
     });
 
-    it("rejects every pending operation when the utility crashes", async () => {
+    it("[실패] 드라이버가 충돌할 때 보고 있는 모든 작업을 수행함", async () => {
         const crashes: Error[] = [];
         const { client, transport } = await connectClient(
             new FakeUtilityProcessTransport(),
@@ -1003,7 +1003,7 @@ describe("GitUtilityClient", () => {
         expect(crashes).toHaveLength(1);
     });
 
-    it("validates incoming messages before routing them", async () => {
+    it("[성공] 수신자를 좋아하기를 축하함", async () => {
         const { client, transport } = await connectClient();
         const opening = client.openRepository("/tmp/repository");
 
@@ -1018,7 +1018,7 @@ describe("GitUtilityClient", () => {
         expect(transport.killCount).toBe(1);
     });
 
-    it("acknowledges dispose, rejects outstanding work, and tears down the process", async () => {
+    it("[실패] 반품을 인정하고, 반품을 하고, 조치를 취해야 한다고 생각함", async () => {
         const { client, transport } = await connectClient();
         const executing = client.executeQuery(statusQuery(), () => undefined);
         const disposing = client.dispose();

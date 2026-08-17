@@ -67,7 +67,7 @@ function handler(path: TestDesktopTrpcPath): InvokeHandler {
     };
 }
 
-describe("platform hosting IPC handlers", () => {
+describe("IPC 핸들러를 거부하는 플랫폼", () => {
     const account = Object.freeze({
         id: "account-1",
         provider: "gitHub" as const,
@@ -118,7 +118,7 @@ describe("platform hosting IPC handlers", () => {
         };
     }
 
-    it("validates, delegates, and unregisters every hosting channel", async () => {
+    it("[성공] 모든 제외 채널을 입력하고 등록 취소함", async () => {
         const { event, hosting } = setup();
         const token = "ghp_super-secret-token";
 
@@ -174,7 +174,7 @@ describe("platform hosting IPC handlers", () => {
         }
     });
 
-    it("rejects untrusted senders before delegation", async () => {
+    it("[실패]하기 전에는 수 없는 전투원을 가지고 있었습니다", async () => {
         const { event, hosting } = setup();
         const untrusted = { ...event, sender: {} };
 
@@ -187,7 +187,7 @@ describe("platform hosting IPC handlers", () => {
         unregisterPlatformHandlers();
     });
 
-    it("redacts credentials and rejects response kinds that do not match requests", async () => {
+    it("[실패] 자격 증명을 수정하고 요청과 일치하지 않는 응답 종류를 가지고 있음", async () => {
         const { event, hosting } = setup();
         const token = "ghp_super-secret-token";
         hosting.saveAccount.mockRejectedValueOnce(

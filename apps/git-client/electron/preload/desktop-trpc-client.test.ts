@@ -16,10 +16,10 @@ vi.mock("electron", () => ({
 
 import { createDesktopTrpcClient } from "./desktop-trpc-client";
 
-describe("Electron tRPC link", () => {
+describe("전자 tRPC 링크", () => {
     beforeEach(() => electronMock.invoke.mockReset());
 
-    it("selects one of five channels from the first path segment", async () => {
+    it("[성공] 첫 번째 노선 구간에서 5개 채널 중 하나를 선택함", async () => {
         electronMock.invoke.mockResolvedValue({ ok: true, data: undefined });
         const main = createDesktopTrpcClient<MainDesktopTrpcRouter>();
         const localHistory =
@@ -69,7 +69,7 @@ describe("Electron tRPC link", () => {
         );
     });
 
-    it("converts sanitized error envelopes and rejects malformed responses", async () => {
+    it("[실패] 삭제된 믿어지지 않는 변형하고 잘못된 응답을 했습니다", async () => {
         const client = createDesktopTrpcClient<MainDesktopTrpcRouter>();
         electronMock.invoke.mockResolvedValueOnce({
             ok: false,

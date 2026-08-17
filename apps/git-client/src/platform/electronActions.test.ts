@@ -12,12 +12,12 @@ function installElectronApi(api: Partial<DesktopApi>): void {
     vi.stubGlobal("window", { gitClient: api });
 }
 
-describe("native Electron actions", () => {
+describe("전자 동작", () => {
     afterEach(() => {
         vi.unstubAllGlobals();
     });
 
-    it("uses the typed Electron dialogs for patch import and export", async () => {
+    it("[성공] 패치를 가져오고 가져오기 위해 Electron 대화 상자를 사용함", async () => {
         const saveFile = vi.fn(async () => "/tmp/export.patch");
         const openFile = vi.fn(async () => "/tmp/import.patch");
         installElectronApi({
@@ -51,7 +51,7 @@ describe("native Electron actions", () => {
         });
     });
 
-    it("opens only credential-free HTTP(S) URLs through Electron", async () => {
+    it("[성공] Electron을 통해 자격 증명이 없는 HTTP(S) URL만 조사함", async () => {
         const openExternal = vi.fn(async () => undefined);
         installElectronApi({ shell: { openExternal } });
 
@@ -72,7 +72,7 @@ describe("native Electron actions", () => {
         expect(openExternal).toHaveBeenCalledTimes(2);
     });
 
-    it("keeps Electron commit signatures and patch actions on native boundaries", async () => {
+    it("[성공] 기본 경계에서 Electron 커밋 Sign과 패치 작업을 유지함", async () => {
         const vcsSource = await readFile(
             fileURLToPath(
                 new URL(

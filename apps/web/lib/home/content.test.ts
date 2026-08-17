@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { personSchema, principles, projects } from "./content";
 
-describe("README home content", () => {
-    it("keeps project indices, destinations, and tags complete and unique", () => {
+describe("읽어보기 홈 콘텐츠", () => {
+    it("[성공] 프로젝트 색상, 대상 및 태그를 완전하고 고유하게 유지함", () => {
         expect(new Set(projects.map((project) => project.index)).size).toBe(
             projects.length,
         );
@@ -16,7 +16,7 @@ describe("README home content", () => {
         }
     });
 
-    it("keeps working principles unique and complete", () => {
+    it("[성공] 작업 원칙을 공유하고 완전하게 유지함", () => {
         expect(new Set(principles.map((principle) => principle.key)).size).toBe(
             principles.length,
         );
@@ -26,7 +26,7 @@ describe("README home content", () => {
         }
     });
 
-    it("publishes canonical person discovery data", () => {
+    it("[성공] 표준 서비스 데이터 게시", () => {
         expect(personSchema.url).toBe("https://jamie.kr");
         expect(personSchema.sameAs).toContain(
             "https://github.com/jongminchung",

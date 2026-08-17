@@ -19,8 +19,8 @@ function createDocument(overrides: Partial<SearchDocument>): SearchDocument {
     };
 }
 
-describe("documentation search", () => {
-    it("weights a title match above body text", () => {
+describe("문서검색", () => {
+    it("[성공] 본문 텍스트의 제목을 일치시키기 위해 부여함", () => {
         const titleMatch = createDocument({
             id: "title",
             title: "defineTheme",
@@ -35,7 +35,7 @@ describe("documentation search", () => {
         );
     });
 
-    it("weights API symbols and groups ties by navigation order", () => {
+    it("[성공] 탐색 순서에 따라 중요한 API 기호 및 그룹 연결", () => {
         const laterTitle = createDocument({
             id: "later",
             order: 2,
@@ -55,7 +55,7 @@ describe("documentation search", () => {
         });
     });
 
-    it("returns the matched heading and a body snippet as an explanation", () => {
+    it("[성공] 일치하는 제목과 본체 스니펫을 설명으로 돌려보내기", () => {
         const headingMatch = createDocument({
             headings: ["Workspace contract"],
         });

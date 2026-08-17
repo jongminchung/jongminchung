@@ -307,8 +307,8 @@ async function flushServer(): Promise<void> {
     await new Promise<void>((resolve) => setImmediate(resolve));
 }
 
-describe("GitUtilityProtocolServer", () => {
-    it("requires a matching handshake and validates/routes utility messages", async () => {
+describe("Git유틸리티프로토콜서버", () => {
+    it("[성공] 일치하는 핸드셰이크가 필요하고 조종사 통신을 위한 회의/라우팅함", async () => {
         const port = new FakeServerPort();
         const utility = new FakeGitUtility();
         let disposed = false;
@@ -542,7 +542,7 @@ describe("GitUtilityProtocolServer", () => {
         expect(disposed).toBe(true);
     });
 
-    it("returns a protocol error for a mismatched handshake", async () => {
+    it("[실패] 일치하지 않는 핸드 셰이크에 대한 후속 조치를 반환함", async () => {
         const port = new FakeServerPort();
         const server = new GitUtilityProtocolServer(port, new FakeGitUtility());
         server.start();

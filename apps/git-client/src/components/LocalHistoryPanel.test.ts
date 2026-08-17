@@ -4,8 +4,8 @@ import { describe, expect, it, vi } from "vitest";
 import { CommandProvider } from "./CommandProvider";
 import { LocalHistoryPanel } from "./LocalHistoryPanel";
 
-describe("LocalHistoryPanel", () => {
-    it("renders project/file history controls and restore affordance", () => {
+describe("현장히스토리를 소개함", () => {
+    it("[성공] 프로젝트/파일 기록 제어 및 복원 어포던스를 보내함", () => {
         const markup = renderToStaticMarkup(
             createElement(
                 CommandProvider,

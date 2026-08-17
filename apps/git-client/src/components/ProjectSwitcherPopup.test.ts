@@ -5,8 +5,8 @@ import { sampleSnapshot } from "../domain/sampleData";
 import { CommandProvider } from "./CommandProvider";
 import { ProjectSwitcherPopup } from "./ProjectSwitcherPopup";
 
-describe("ProjectSwitcherPopup", () => {
-    it("starts on the direct Open action and exposes keyboard-accessible recent projects", () => {
+describe("프로젝트위처팝업", () => {
+    it("[성공] 직접 작업에서 시작하고 키보드로 액세스할 수 있는 최신 프로젝트를 옆에 있음", () => {
         const markup = renderToStaticMarkup(
             createElement(
                 CommandProvider,
