@@ -50,17 +50,16 @@ pnpm --filter @jongminchung/ui run test
 
 루트 검증 명령의 범위는 다음과 같다.
 
-| 명령                            | 검증 범위                                    |
-| ------------------------------- | -------------------------------------------- |
-| `pnpm run fmt:check`            | Oxfmt 형식 검사                              |
-| `pnpm run lint`                 | Oxlint 정적 분석                             |
-| `pnpm run typecheck`            | 루트와 모든 workspace TypeScript 검사        |
-| `pnpm run test`                 | Unit·Integration 테스트                      |
-| `pnpm run test:e2e`             | build 후 앱별 Playwright E2E                 |
-| `pnpm run check`                | format, lint, typecheck와 전체 로컬 테스트   |
-| `pnpm run check:full`           | `check`, E2E typecheck, 단일 build, core E2E |
-| `pnpm run check:full:electron`  | `check:full`과 clean package Electron E2E    |
-| `pnpm run check:full:materials` | `check:full`과 생성된 전체 material E2E      |
+| 명령                           | 검증 범위                                    |
+| ------------------------------ | -------------------------------------------- |
+| `pnpm run fmt:check`           | Oxfmt 형식 검사                              |
+| `pnpm run lint`                | Oxlint 정적 분석                             |
+| `pnpm run typecheck`           | 루트와 모든 workspace TypeScript 검사        |
+| `pnpm run test`                | Unit·Integration 테스트                      |
+| `pnpm run test:e2e`            | build 후 앱별 Playwright E2E                 |
+| `pnpm run check`               | format, lint, typecheck와 전체 로컬 테스트   |
+| `pnpm run check:full`          | `check`, E2E typecheck, 단일 build, core E2E |
+| `pnpm run check:full:electron` | `check:full`과 clean package Electron E2E    |
 
 테스트 계약은 빠른 Unit, 실제 Git·filesystem·PTY·tarball Integration, build된 앱을 검증하는
 Playwright E2E로 구분한다. Unit coverage 기준선을 의도적으로 갱신할 때만 다음 명령을 실행하고
@@ -88,34 +87,19 @@ pnpm run test:coverage:update
 
 ## 생성물과 외부 소스
 
-생성된 파일을 직접 고치지 않고 소스와 생성 명령을 함께 사용한다.
+Web 콘텐츠는 Next.js Server Component와 route handler가 MDX 원본에서 직접 읽는다.
 
 ### Web 콘텐츠
 
-콘텐츠 manifest, loader와 검색 데이터는 MDX 소스에서 생성한다. 기술 문서, 투자 노트,
-material을 함께 변경했거나 어떤 생성물이 바뀌는지 확실하지 않으면 다음 단일 명령을 사용한다.
+기술 문서와 투자 노트는 `content/`에서 바로 수정한다. 개발 서버와 production build는
+별도 manifest·loader·검색 JSON 생성 명령 없이 해당 원본을 사용한다.
+
+Excalidraw 정적 자산은 개발 서버와 production build의 lifecycle에서 준비한다. production build는
+자산과 inline scene도 함께 검증한다.
 
 ```sh
-pnpm --filter @jongminchung/web run generate
-```
-
-`build`는 생성물을 쓰지 않고 `content:check`, `investment:check`, `materials:check`로 최신성을
-검증한다. 한 도메인만 변경했다면 해당 `*:build`와 `*:check` 명령을 직접 사용할 수 있다.
-
-`apps/web/components/materials/topics`는 이 저장소가 직접 관리하는 canonical source이다. topic
-파일과 export를 직접 수정하고 [material 소유권 문서](apps/web/components/materials/README.md)의
-계약에 따라 추적 registry를 갱신한다.
-
-```sh
-pnpm --filter @jongminchung/web run materials:build
-pnpm --filter @jongminchung/web run materials:check
-```
-
-Excalidraw 정적 자산은 전용 준비·검사 명령으로 갱신한다.
-
-```sh
-pnpm --filter @jongminchung/web run excalidraw:assets
-pnpm --filter @jongminchung/web run excalidraw:check
+pnpm --filter @jongminchung/web run dev
+pnpm --filter @jongminchung/web run build
 ```
 
 Playwright snapshot은 의도적인 시각 변경만 갱신한다. 갱신 후 새 기준 이미지와 diff를 직접

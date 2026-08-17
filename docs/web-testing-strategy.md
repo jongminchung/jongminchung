@@ -4,7 +4,7 @@
 - **Vitest는 순수 규칙·생성물 계약·동기 컴포넌트 상태에 사용하고, production build를 거친 Playwright는 서버·브라우저 경계에 사용함**
 - **다중 도메인 라우팅, locale, 검색, 콘텐츠 생성, 외부 다이어그램, 공개 discovery 파일은 사용자와 크롤러의 계약이므로 유지함**
 - **정확한 콘텐츠 개수·특정 추천 목록·넓은 화면의 full-page snapshot은 제품 계약이 아닐 경우 축소하거나 일반화함**
-- **자동 접근성 검사는 대표 상태와 재사용 데모에 유지하되, 키보드와 보조기기 사용성의 전부를 대체하지 않음**
+- **자동 접근성 검사는 대표 상태에 유지하되, 키보드와 보조기기 사용성의 전부를 대체하지 않음**
 
 ## 공식 근거와 도구 경계
 
@@ -20,7 +20,7 @@
 
 - **UI assertion은 role·label·visible result를 우선하고 implementation selector는 최후 수단으로 사용함**
   - 근거: Testing Library와 Playwright는 사용자에게 보이는 동작과 접근 가능한 locator를 권장함
-  - 사례: 버튼은 CSS class가 아니라 `getByRole("button", { name })`로 찾고, `data-material-demo`는 반복 데모의 명시적 public test contract일 때만 사용함
+  - 사례: 버튼은 CSS class가 아니라 `getByRole("button", { name })`로 찾음
   - 참고: [Testing Library 소개](https://testing-library.com/docs/), [Playwright Best Practices](https://playwright.dev/docs/best-practices)
 
 ## 유지할 Vitest 테스트
@@ -37,7 +37,7 @@
 
 - **생성물과 원본의 일관성 테스트는 유지함**
   - 근거: 콘텐츠 원본, manifest, loader, search JSON의 불일치는 런타임에서 문서 누락·검색 실패로 나타남
-  - 대상: `apps/web/scripts/content-contract.integration.test.ts`, `apps/web/scripts/check-excalidraw.test.ts`, `apps/web/lib/materials.test.ts`
+  - 대상: `apps/web/scripts/content-contract.integration.test.ts`, `apps/web/scripts/check-excalidraw.test.ts`
   - 사례: 한글·영문 문서 쌍, heading ID, 내부 link, 생성물 stale 상태, manifest의 유일 ID 검증이 해당함
   - 예외: topic 수와 demo 수의 정확한 상수값은 콘텐츠 증감 자체를 실패로 만들므로 제거하고, 유일성·registry 일치·유효한 entry 검증만 유지함
 
@@ -78,14 +78,8 @@
   - 근거: outline active state와 server HTML language, OG image, `llms.txt`는 client·server·crawler가 서로 다르게 소비하는 경계임
   - 사례: scroll에 따른 `aria-current="location"`, locale-prefixed 404의 `lang`, PNG signature와 content type 검증이 해당함
 
-- **materials의 runtime smoke test와 대표 상호작용은 유지함**
-  - 대상: `apps/web/tests/materials.spec.ts`, `apps/web/tests/materials-all.spec.ts`
-  - 근거: 동적 import, `IntersectionObserver`, canvas, 개별 demo의 browser-only runtime error는 unit test에서 대체하기 어려움
-  - 사례: 등록된 모든 demo가 runtime error 없이 mount되는지, 대표 demo가 viewport 진입 시 조작 가능한지, overflow가 없는지 검증이 해당함
-  - 예외: `data-material-active`·renderer type 자체가 사용자에게 보이지 않는다면, visible control·rendered figure·runtime error assertion을 보조하는 최소 contract로만 사용함
-
 - **대표 페이지의 자동 접근성·모션·모바일 overflow 검사는 유지함**
-  - 대상: `apps/web/app/(home)/home.e2e.test.ts`와 materials의 axe 검사
+  - 대상: `apps/web/app/(home)/home.e2e.test.ts`
   - 근거: Playwright의 axe 연동은 label, contrast, duplicate ID 등 자동 탐지 가능한 회귀를 찾을 수 있음
   - 예외: axe는 모든 접근성 문제를 찾을 수 없으므로 navigation, dialog, search 등 키보드 상호작용 변경 시에는 수동 keyboard 검토가 필요함
   - 참고: [Playwright Accessibility Testing](https://playwright.dev/docs/accessibility-testing)
@@ -115,16 +109,12 @@
   - 명령: `pnpm --filter @jongminchung/web run test`
   - 근거: 빠른 규칙 검증으로 오류 위치를 콘텐츠 schema·routing·생성물 중 하나로 좁힐 수 있음
 
-- **route, Client Component, browser storage, MDX rendering 변경은 core E2E를 추가 실행함**
-  - 명령: `pnpm --filter @jongminchung/web run test:e2e:core`
+- **route, Client Component, browser storage, MDX rendering 변경은 E2E를 추가 실행함**
+  - 명령: `pnpm --filter @jongminchung/web run test:e2e`
   - 근거: Next.js 공식 가이드의 production server 기반 E2E 경계와 일치함
 
-- **materials 변경은 전체 demo smoke test를 실행함**
-  - 명령: `pnpm --filter @jongminchung/web run test:e2e:materials`
-  - 근거: 개별 demo는 dynamic import와 browser API 사용 여부가 달라 대표 페이지 검사만으로 충분하지 않음
-
 - **의도한 UI 변경에서만 visual snapshot을 검토·갱신함**
-  - 명령: `pnpm --filter @jongminchung/web run test:e2e:visual` 또는 `pnpm --filter @jongminchung/web run test:e2e:update`
+  - 명령: `pnpm --filter @jongminchung/web run test:e2e -- visual.e2e.test.ts` 또는 `pnpm --filter @jongminchung/web run test:e2e -- --update-snapshots`
   - 근거: snapshot은 기능 계약의 대체물이 아니라 시각 변경의 검토 보조 수단임
 
 ## 공식 참고 문서

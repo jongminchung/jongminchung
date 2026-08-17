@@ -16,8 +16,8 @@
 | 릴리스 전      | `check:full`, `audit:prod`, 해당 package·app dry-run               |
 
 `pnpm run check`는 네트워크 없이 재현 가능한 기본 gate다. Next.js build와 core E2E까지
-포함하려면 `pnpm run check:full`을 사용한다. Electron과 material 전체 시나리오는 각각
-`check:full:electron`, `check:full:materials`로 분리되어 있다.
+포함하려면 `pnpm run check:full`을 사용한다. Electron 전체 시나리오는
+`check:full:electron`으로 분리되어 있다.
 
 ## 의존성 업데이트
 
@@ -67,14 +67,11 @@ advisory가 발견되면 다음 순서로 처리한다.
 
 ## 생성물 관리
 
-| 대상                   | 원본                                                            | 갱신                                           | 검증                                 |
-| ---------------------- | --------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------ |
-| Web 추적 콘텐츠 생성물 | `content/tech`, `content/invest`, `components/materials/topics` | `pnpm --filter @jongminchung/web run generate` | `build`의 콘텐츠·투자·material check |
-| Excalidraw 정적 자산   | Excalidraw source asset                                         | `excalidraw:assets`                            | `excalidraw:check`                   |
-| Playwright snapshot    | 렌더링 결과                                                     | 각 workspace의 `test:e2e:update`               | visual test와 diff 직접 검토         |
-
-`apps/web/components/materials/topics`는 직접 편집하는 원본이며 registry와 manifest는
-생성물이다. material 생성물은 직접 편집하지 않고 원본 변경과 함께 diff를 검토한다.
+| 대상                 | 원본                             | 갱신                             | 검증                           |
+| -------------------- | -------------------------------- | -------------------------------- | ------------------------------ |
+| Web 콘텐츠 원본      | `content/tech`, `content/invest` | MDX 직접 수정                    | Next.js build와 route contract |
+| Excalidraw 정적 자산 | Excalidraw source asset          | Web `dev`·`build` lifecycle      | Web `build`                    |
+| Playwright snapshot  | 렌더링 결과                      | `test:e2e -- --update-snapshots` | visual test와 diff 직접 검토   |
 
 ## GitHub Actions
 
