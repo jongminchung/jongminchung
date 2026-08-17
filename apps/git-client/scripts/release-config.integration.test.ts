@@ -23,10 +23,10 @@ describe("fixed Git Client release configuration", () => {
     it("uses one manually replaced release version", () => {
         expect(packageConfig.version).toBe("1.0.0");
         expect(packageConfig.scripts.release).toBe(
-            "node scripts/publish-release.mjs",
+            "node scripts/publish-release.ts",
         );
         expect(packageConfig.scripts["release:dry-run"]).toBe(
-            "node scripts/publish-release.mjs --dry-run",
+            "node scripts/publish-release.ts --dry-run",
         );
         expectManualWorkflow(gitClientWorkflow);
         expect(gitClientWorkflow).toContain(
@@ -58,10 +58,10 @@ describe("fixed Git Client release configuration", () => {
 
     it("exposes production and explicit ad-hoc Electron release commands without an updater", () => {
         expect(packageConfig.scripts["release:build"]).toBe(
-            "node scripts/release.mjs",
+            "node scripts/release.ts",
         );
         expect(packageConfig.scripts["release:validate-local"]).toBe(
-            "node scripts/release.mjs --local-ad-hoc",
+            "node scripts/release.ts --local-ad-hoc",
         );
         expect(packageConfig.scripts["electron:package"]).toBe(
             "electron-forge package",

@@ -8,7 +8,7 @@ application.
 
 ```sh
 AUDIT_PARENT="$(mktemp -d)"
-node scripts/independent-audit/create-fixture.mjs --root "$AUDIT_PARENT/fixture"
+node scripts/independent-audit/create-fixture.ts --root "$AUDIT_PARENT/fixture"
 ```
 
 The command creates a local bare remote plus `rebased-case` and `git-client-case`. Both clones have
@@ -19,10 +19,10 @@ configuration while running Git.
 ## Capture and compare state
 
 ```sh
-node scripts/independent-audit/git-state-oracle.mjs snapshot \
+node scripts/independent-audit/git-state-oracle.ts snapshot \
   "$AUDIT_PARENT/fixture/rebased-case" > /tmp/rebased-state.json
 
-node scripts/independent-audit/git-state-oracle.mjs compare \
+node scripts/independent-audit/git-state-oracle.ts compare \
   "$AUDIT_PARENT/fixture/rebased-case" \
   "$AUDIT_PARENT/fixture/git-client-case"
 ```
@@ -34,7 +34,7 @@ when every section is equal, 2 for a state difference, and 1 for invalid input o
 Run focused tests from `apps/git-client`:
 
 ```sh
-node --test scripts/independent-audit/*.node-test.mjs
+node --test scripts/independent-audit/*.integration.node-test.ts
 ```
 
 This also validates the checked-in Rebased 1.1.11 screenshot and accessibility evidence. The

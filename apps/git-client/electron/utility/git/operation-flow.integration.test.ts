@@ -4,7 +4,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createAuditFixture } from "../../../scripts/independent-audit/create-fixture.mjs";
+import { createAuditFixture } from "../../../scripts/independent-audit/create-fixture.ts";
 import type { GitRequestId } from "../../../src/shared/contracts/git-utility";
 import type { GitOperation } from "../../../src/shared/contracts/model";
 import { GitUtility } from "./git-utility";

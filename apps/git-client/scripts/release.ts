@@ -1,3 +1,4 @@
+// oxlint-disable typescript/no-explicit-any -- Native TypeScript entry points retain dynamic process, fixture, and injected test-double boundaries.
 import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
 import {
@@ -12,10 +13,10 @@ import {
 import { tmpdir } from "node:os";
 import { basename, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { executeCommand } from "./process.mjs";
-import { createReproducibleDmg } from "./reproducible-dmg.mjs";
-import { smokeElectronPackage } from "./smoke-electron-package.mjs";
-import { verifyElectronPackage } from "./verify-electron-package.mjs";
+import { executeCommand } from "./process.ts";
+import { createReproducibleDmg } from "./reproducible-dmg.ts";
+import { smokeElectronPackage } from "./smoke-electron-package.ts";
+import { verifyElectronPackage } from "./verify-electron-package.ts";
 
 export const MAX_RELEASE_DMG_BYTES = 160 * 1024 * 1024;
 export const RELEASE_MODES = Object.freeze({
@@ -29,7 +30,7 @@ const developerIdApplicationPattern =
     /^Developer ID Application: .+ \([A-Z0-9]+\)$/u;
 const sourceShaPattern = /^[0-9a-f]{40}$/u;
 
-export function parseReleaseVersion(value) {
+export function parseReleaseVersion(value: any) {
     if (typeof value !== "string" || !stableSemverPattern.test(value)) {
         throw new Error(
             `Expected a stable semantic version, received: ${String(value)}`,
@@ -38,7 +39,7 @@ export function parseReleaseVersion(value) {
     return value;
 }
 
-export function parseReleaseMode(value) {
+export function parseReleaseMode(value: any) {
     if (
         value === RELEASE_MODES.production ||
         value === RELEASE_MODES.localAdHoc
@@ -48,8 +49,8 @@ export function parseReleaseMode(value) {
 }
 
 export function createReleaseArtifactNames(
-    value,
-    mode = RELEASE_MODES.production,
+    value: any,
+    mode: any = RELEASE_MODES.production,
 ) {
     const version = parseReleaseVersion(value);
     const validatedMode = parseReleaseMode(mode);
@@ -62,7 +63,7 @@ export function createReleaseArtifactNames(
     };
 }
 
-function parseSourceSha(value) {
+function parseSourceSha(value: any) {
     if (typeof value !== "string" || !sourceShaPattern.test(value)) {
         throw new Error(
             `Expected a full Git source SHA, received: ${String(value)}`,
@@ -72,11 +73,11 @@ function parseSourceSha(value) {
 }
 
 export async function verifyReleaseSource(
-    workspaceRoot,
-    { expectedSha = null, fetch = true, runCommand = executeCommand } = {},
+    workspaceRoot: any,
+    { expectedSha = null, fetch = true, runCommand = executeCommand }: any = {},
 ) {
     const cwd = resolve(workspaceRoot);
-    const git = async (arguments_) =>
+    const git = async (arguments_: any) =>
         runCommand("git", arguments_, {
             capture: true,
             cwd,
@@ -126,7 +127,7 @@ export async function verifyReleaseSource(
     return Object.freeze({ sourceSha });
 }
 
-export function requireMacArm64(platform, architecture) {
+export function requireMacArm64(platform: any, architecture: any) {
     if (platform !== "darwin" || architecture !== "arm64") {
         throw new Error(
             `Release builds require macOS ARM64, received: ${platform}/${architecture}`,
@@ -136,9 +137,9 @@ export function requireMacArm64(platform, architecture) {
 }
 
 export function assertReleaseBundleMetadata(
-    actualVersion,
-    actualArchitectures,
-    value,
+    actualVersion: any,
+    actualArchitectures: any,
+    value: any,
 ) {
     const version = parseReleaseVersion(value);
     if (actualVersion.trim() !== version) {
@@ -162,7 +163,7 @@ export function createElectronPackageArguments() {
 }
 
 export function createReleaseSourceGateCommands(
-    mode = RELEASE_MODES.production,
+    mode: any = RELEASE_MODES.production,
 ) {
     parseReleaseMode(mode);
     const commonGates = [
@@ -174,20 +175,23 @@ export function createReleaseSourceGateCommands(
         Object.freeze({ command: "pnpm", arguments: Object.freeze(["build"]) }),
         Object.freeze({
             command: "pnpm",
-            arguments: Object.freeze(["test:scripts"]),
+            arguments: Object.freeze(["test:integration:native"]),
         }),
     ];
     return Object.freeze(commonGates);
 }
 
-function requireEnvironmentValue(environment, name) {
+function requireEnvironmentValue(environment: any, name: any) {
     const rawValue = environment[name];
     const value = typeof rawValue === "string" ? rawValue.trim() : "";
     if (!value) throw new Error(`Production release requires ${name}`);
     return value;
 }
 
-export function resolveReleaseSecurity(mode, environment = process.env) {
+export function resolveReleaseSecurity(
+    mode: any,
+    environment: any = process.env,
+) {
     const validatedMode = parseReleaseMode(mode);
     if (validatedMode === RELEASE_MODES.localAdHoc) {
         return Object.freeze({
@@ -214,9 +218,9 @@ export function resolveReleaseSecurity(mode, environment = process.env) {
 }
 
 export function createReleaseBuildEnvironment(
-    environment,
-    value,
-    mode = RELEASE_MODES.production,
+    environment: any,
+    value: any,
+    mode: any = RELEASE_MODES.production,
 ) {
     const version = parseReleaseVersion(value);
     const security = resolveReleaseSecurity(mode, environment);
@@ -234,13 +238,13 @@ export function createReleaseBuildEnvironment(
     return releaseEnvironment;
 }
 
-export function findReleaseArguments(arguments_) {
-    const normalized = arguments_.filter((argument) => argument !== "--");
+export function findReleaseArguments(arguments_: any) {
+    const normalized = arguments_.filter((argument: any) => argument !== "--");
     const localAdHocFlags = normalized.filter(
-        (argument) => argument === "--local-ad-hoc",
+        (argument: any) => argument === "--local-ad-hoc",
     );
     const unknownFlag = normalized.find(
-        (argument) =>
+        (argument: any) =>
             argument.startsWith("--") && argument !== "--local-ad-hoc",
     );
     if (unknownFlag !== undefined)
@@ -248,7 +252,7 @@ export function findReleaseArguments(arguments_) {
     if (localAdHocFlags.length > 1)
         throw new Error("Duplicate --local-ad-hoc release argument");
     const values = normalized.filter(
-        (argument) => argument !== "--local-ad-hoc",
+        (argument: any) => argument !== "--local-ad-hoc",
     );
     if (values.length !== 1)
         throw new Error("Expected exactly one release version argument");
@@ -261,22 +265,22 @@ export function findReleaseArguments(arguments_) {
     });
 }
 
-export function findReleaseVersionArgument(arguments_) {
+export function findReleaseVersionArgument(arguments_: any) {
     return findReleaseArguments(arguments_).version;
 }
 
-async function createSha256(filePath) {
+async function createSha256(filePath: any) {
     const digest = createHash("sha256");
     for await (const chunk of createReadStream(filePath)) digest.update(chunk);
     return digest.digest("hex");
 }
 
 export async function stageReleaseArtifact(
-    source,
-    outputDirectory,
-    value,
-    sourceSha,
-    mode = RELEASE_MODES.production,
+    source: any,
+    outputDirectory: any,
+    value: any,
+    sourceSha: any,
+    mode: any = RELEASE_MODES.production,
 ) {
     const names = createReleaseArtifactNames(value, mode);
     const validatedSourceSha = parseSourceSha(sourceSha);
@@ -326,7 +330,7 @@ export async function stageReleaseArtifact(
     });
 }
 
-async function visitForgeOutput(directory, found) {
+async function visitForgeOutput(directory: any, found: any) {
     const entries = await readdir(directory, { withFileTypes: true });
     for (const entry of entries) {
         const entryPath = join(directory, entry.name);
@@ -348,31 +352,31 @@ async function visitForgeOutput(directory, found) {
     }
 }
 
-export async function discoverForgeOutputs(outputDirectory) {
-    const found = { apps: [], dmgs: [] };
+export async function discoverForgeOutputs(outputDirectory: any) {
+    const found: { apps: string[]; dmgs: string[] } = { apps: [], dmgs: [] };
     await visitForgeOutput(outputDirectory, found);
-    found.apps.sort((left, right) => left.localeCompare(right));
-    found.dmgs.sort((left, right) => left.localeCompare(right));
+    found.apps.sort((left: any, right: any) => left.localeCompare(right));
+    found.dmgs.sort((left: any, right: any) => left.localeCompare(right));
     if (found.apps.length !== 1 || found.dmgs.length !== 0) {
         throw new Error(
             `Expected exactly one Electron app and no DMG in ${outputDirectory}, found ${found.apps.length} app(s) and ${found.dmgs.length} DMG(s)`,
         );
     }
-    if (basename(found.apps[0]) !== "Git Client.app") {
-        throw new Error(
-            `Unexpected Electron app name: ${basename(found.apps[0])}`,
-        );
+    const appPath = found.apps[0];
+    if (appPath === undefined) throw new Error("Expected one Electron app");
+    if (basename(appPath) !== "Git Client.app") {
+        throw new Error(`Unexpected Electron app name: ${basename(appPath)}`);
     }
-    return Object.freeze({ app: found.apps[0] });
+    return Object.freeze({ app: appPath });
 }
 
-function commandOutput(result) {
+function commandOutput(result: any) {
     return `${result.stdout ?? ""}\n${result.stderr ?? ""}`.trim();
 }
 
 export async function assertDeveloperIdIdentityAvailable(
-    identity,
-    runCommand = executeCommand,
+    identity: any,
+    runCommand: any = executeCommand,
 ) {
     if (!developerIdApplicationPattern.test(identity)) {
         throw new Error(
@@ -385,18 +389,20 @@ export async function assertDeveloperIdIdentityAvailable(
         { capture: true },
     );
     const output = commandOutput(result);
-    if (!output.split("\n").some((line) => line.includes(`"${identity}"`))) {
+    if (
+        !output.split("\n").some((line: any) => line.includes(`"${identity}"`))
+    ) {
         throw new Error(
             `Developer ID signing identity is not available in the keychain: ${identity}`,
         );
     }
 }
 
-export function assertDeveloperIdSignatureOutput(output, identity) {
-    const lines = output.split("\n").map((line) => line.trim());
+export function assertDeveloperIdSignatureOutput(output: any, identity: any) {
+    const lines = output.split("\n").map((line: any) => line.trim());
     if (
         !lines.includes(`Authority=${identity}`) ||
-        lines.some((line) => line === "Signature=adhoc")
+        lines.some((line: any) => line === "Signature=adhoc")
     ) {
         throw new Error(
             `Release app is not signed with the requested Developer ID identity: ${identity}`,
@@ -405,9 +411,9 @@ export function assertDeveloperIdSignatureOutput(output, identity) {
 }
 
 export async function verifyProductionApp(
-    appPath,
-    identity,
-    runCommand = executeCommand,
+    appPath: any,
+    identity: any,
+    runCommand: any = executeCommand,
 ) {
     await runCommand(
         "/usr/bin/codesign",
@@ -434,11 +440,11 @@ export async function verifyProductionApp(
     });
 }
 
-async function readReleaseBundleMetadata(appPath, runCommand) {
+async function readReleaseBundleMetadata(appPath: any, runCommand: any) {
     const executableDirectory = join(appPath, "Contents", "MacOS");
     const executables = (
         await readdir(executableDirectory, { withFileTypes: true })
-    ).filter((entry) => entry.isFile() && !entry.isSymbolicLink());
+    ).filter((entry: any) => entry.isFile() && !entry.isSymbolicLink());
     if (executables.length !== 1) {
         throw new Error(
             `Expected exactly one app executable, found ${executables.length}`,
@@ -458,7 +464,7 @@ async function readReleaseBundleMetadata(appPath, runCommand) {
     );
     const architectureResult = await runCommand(
         "/usr/bin/lipo",
-        ["-archs", join(executableDirectory, executables[0].name)],
+        ["-archs", join(executableDirectory, executables[0]!.name)],
         { capture: true },
     );
     return Object.freeze({
@@ -468,14 +474,14 @@ async function readReleaseBundleMetadata(appPath, runCommand) {
 }
 
 export async function validateReleaseApp(
-    appPath,
-    value,
+    appPath: any,
+    value: any,
     {
         identity = null,
         mode = RELEASE_MODES.production,
         runCommand = executeCommand,
         verifyPackage = verifyElectronPackage,
-    } = {},
+    }: any = {},
 ) {
     const validatedMode = parseReleaseMode(mode);
     const metadata = await readReleaseBundleMetadata(appPath, runCommand);
@@ -500,7 +506,11 @@ export async function validateReleaseApp(
     return verification;
 }
 
-export async function validateReleaseDmg(dmg, value, options = {}) {
+export async function validateReleaseDmg(
+    dmg: any,
+    value: any,
+    options: any = {},
+) {
     const mountPoint = await mkdtemp(join(tmpdir(), "git-client-release-dmg-"));
     const runCommand = options.runCommand ?? executeCommand;
     let mounted = false;
@@ -523,7 +533,7 @@ export async function validateReleaseDmg(dmg, value, options = {}) {
         const apps = (
             await readdir(mountPoint, { withFileTypes: true })
         ).filter(
-            (entry) =>
+            (entry: any) =>
                 entry.isDirectory() &&
                 !entry.isSymbolicLink() &&
                 entry.name.endsWith(".app"),
@@ -533,7 +543,7 @@ export async function validateReleaseDmg(dmg, value, options = {}) {
                 `Expected exactly one app in the release DMG, found ${apps.length}`,
             );
         }
-        await validateReleaseApp(join(mountPoint, apps[0].name), value, {
+        await validateReleaseApp(join(mountPoint, apps[0]!.name), value, {
             ...options,
             runCommand,
         });
@@ -552,7 +562,7 @@ export async function validateReleaseDmg(dmg, value, options = {}) {
     }
 }
 
-export async function buildRelease(value, options = {}) {
+export async function buildRelease(value: any, options: any = {}) {
     const version = parseReleaseVersion(value);
     const mode = parseReleaseMode(options.mode ?? RELEASE_MODES.production);
     requireMacArm64(

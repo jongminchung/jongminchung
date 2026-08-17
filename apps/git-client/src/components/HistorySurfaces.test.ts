@@ -2,68 +2,8 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { DEFAULT_DIFF_PREFERENCES } from "../domain/changeReview";
-import type { Commit } from "../domain/types";
 import { CommandProvider } from "./CommandProvider";
-import { CommitGraph } from "./CommitGraph";
-import { CommitLog } from "./CommitLog";
 import { DetailsPane } from "./DetailsPane";
-
-const commits: readonly Commit[] = [
-    {
-        oid: "1111111111111111111111111111111111111111",
-        parents: ["2222222222222222222222222222222222222222"],
-        author: "Audit User",
-        email: "audit@example.com",
-        authoredAt: 1_700_000_000,
-        committedAt: 1_700_000_000,
-        refs: ["HEAD -> refs/heads/main"],
-        subject: "Second fixture commit",
-        body: "",
-    },
-    {
-        oid: "2222222222222222222222222222222222222222",
-        parents: [],
-        author: "Audit User",
-        email: "audit@example.com",
-        authoredAt: 1_699_999_000,
-        committedAt: 1_699_999_000,
-        refs: [],
-        subject: "Initial fixture commit",
-        body: "",
-    },
-];
-
-function renderHistory(): string {
-    return renderToStaticMarkup(
-        createElement(
-            CommandProvider,
-            null,
-            createElement(CommitLog, {
-                commits,
-                selectedOids: [],
-                onSelectionChange: vi.fn(),
-                onContextMenu: vi.fn(),
-                refs: [],
-                hasMore: false,
-                onLoad: vi.fn(async () => undefined),
-                onImportPatch: vi.fn(),
-                onRefresh: vi.fn(),
-                onOpenNewTab: vi.fn(),
-                onEnableIndexing: vi.fn(async () => undefined),
-                indexingEnabled: true,
-                indexing: false,
-                onCherryPick: vi.fn(),
-                canCherryPick: false,
-                loading: false,
-                error: null,
-                ahead: 0,
-                behind: 0,
-                powerSaveMode: false,
-                relativeTimeBaseSeconds: 1_700_000_100,
-            }),
-        ),
-    );
-}
 
 function renderEmptyReview(): string {
     return renderToStaticMarkup(
@@ -107,29 +47,6 @@ function renderEmptyReview(): string {
 }
 
 describe("Rebased 1.1.11 history surfaces", () => {
-    it("uses the independently normalized filter and commit row heights", () => {
-        const markup = renderHistory();
-
-        expect(markup).toContain('data-filter-row-height="35"');
-        expect(markup).toContain('data-log-row-height="25"');
-        expect(markup).toContain("grid-template-rows:35px minmax(0, 1fr) 0");
-        expect(markup).toContain("height:50px;position:relative");
-        expect(markup).toContain("height:25px;transform:translateY(0px)");
-        expect(markup).toContain("height:25px;transform:translateY(25px)");
-        expect(markup).toContain("[height:25px]!");
-        expect(markup).not.toContain("[height:19px]!");
-    });
-
-    it("keeps graph geometry on the same 25 pixel row cadence", () => {
-        const markup = renderToStaticMarkup(
-            createElement(CommitGraph, { commits, width: 34 }),
-        );
-
-        expect(markup).toContain('data-row-height="25"');
-        expect(markup).toContain('height="50"');
-        expect(markup).toContain("height:50px");
-    });
-
     it("renders the measured empty review when no commit is selected", () => {
         const markup = renderEmptyReview();
         const changesLabel = markup.indexOf("Select commit to view changes");

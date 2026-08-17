@@ -9,9 +9,9 @@ import { FusesPlugin } from "@electron-forge/plugin-fuses";
 import { VitePlugin } from "@electron-forge/plugin-vite";
 import type { ForgeConfig } from "@electron-forge/shared-types";
 import { FuseV1Options, FuseVersion } from "@electron/fuses";
-import { pruneElectronLocales } from "./scripts/electron-package-policy.mjs";
-import { ensureDmgNativeDependencies } from "./scripts/ensure-dmg-native-dependencies.mjs";
-import { verifyElectronPackage } from "./scripts/verify-electron-package.mjs";
+import { pruneElectronLocales } from "./scripts/electron-package-policy.ts";
+import { ensureDmgNativeDependencies } from "./scripts/ensure-dmg-native-dependencies.ts";
+import { verifyElectronPackage } from "./scripts/verify-electron-package.ts";
 
 const execFileAsync = promisify(execFile);
 const releaseMode = process.env.GIT_CLIENT_RELEASE_MODE?.trim() || null;

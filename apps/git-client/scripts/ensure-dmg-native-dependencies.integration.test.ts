@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
     ensureDmgNativeDependencies,
     resolveNativeModuleRoot,
-} from "./ensure-dmg-native-dependencies.mjs";
+} from "./ensure-dmg-native-dependencies.ts";
 
 const temporaryDirectories: string[] = [];
 

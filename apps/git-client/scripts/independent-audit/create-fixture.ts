@@ -1,9 +1,10 @@
 #!/usr/bin/env node
+// oxlint-disable typescript/no-explicit-any -- Native TypeScript entry points retain dynamic process, fixture, and injected test-double boundaries.
 
 import { lstat, mkdir, readdir, writeFile } from "node:fs/promises";
 import { isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { runGit } from "./git-process.mjs";
+import { runGit } from "./git-process.ts";
 
 const IDENTITY_ENV = Object.freeze({
     GIT_AUTHOR_EMAIL: "rebased-audit@example.invalid",
@@ -21,7 +22,7 @@ const FIXTURE_MANIFEST = Object.freeze({
     }),
 });
 
-export async function createAuditFixture(rootPath) {
+export async function createAuditFixture(rootPath: any) {
     const root = await prepareEmptyRoot(rootPath);
     const remotePath = join(root, FIXTURE_MANIFEST.remote);
     const seedPath = join(root, "seed");
@@ -104,7 +105,7 @@ export async function createAuditFixture(rootPath) {
     });
 }
 
-async function prepareEmptyRoot(rootPath) {
+async function prepareEmptyRoot(rootPath: any) {
     if (typeof rootPath !== "string" || !isAbsolute(rootPath)) {
         throw new Error("Fixture root must be an absolute path");
     }
@@ -131,7 +132,7 @@ async function prepareEmptyRoot(rootPath) {
     return root;
 }
 
-async function configureRepository(repositoryPath) {
+async function configureRepository(repositoryPath: any) {
     const entries = [
         ["user.name", IDENTITY_ENV.GIT_AUTHOR_NAME],
         ["user.email", IDENTITY_ENV.GIT_AUTHOR_EMAIL],
@@ -142,7 +143,7 @@ async function configureRepository(repositoryPath) {
         await runGit(repositoryPath, ["config", key, value]);
 }
 
-async function commit(repositoryPath, message, date) {
+async function commit(repositoryPath: any, message: any, date: any) {
     await runGit(repositoryPath, ["commit", "--no-gpg-sign", "-m", message], {
         env: {
             ...IDENTITY_ENV,
@@ -152,7 +153,7 @@ async function commit(repositoryPath, message, date) {
     });
 }
 
-async function seedStash(repositoryPath) {
+async function seedStash(repositoryPath: any) {
     await writeFile(
         join(repositoryPath, "README.md"),
         "# Rebased 1.1.11 audit fixture\n\nstashed baseline note\n",
@@ -168,7 +169,7 @@ async function seedStash(repositoryPath) {
     });
 }
 
-async function seedWorkingState(repositoryPath) {
+async function seedWorkingState(repositoryPath: any) {
     const sourcePath = join(repositoryPath, "src", "index.ts");
     await writeFile(
         sourcePath,
@@ -188,11 +189,9 @@ async function seedWorkingState(repositoryPath) {
     );
 }
 
-function parseRootArgument(args) {
+function parseRootArgument(args: any) {
     if (args.length !== 2 || args[0] !== "--root" || !isAbsolute(args[1])) {
-        throw new Error(
-            "Usage: create-fixture.mjs --root /absolute/empty/path",
-        );
+        throw new Error("Usage: create-fixture.ts --root /absolute/empty/path");
     }
     return args[1];
 }

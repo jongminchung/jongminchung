@@ -1,13 +1,14 @@
+// oxlint-disable typescript/no-explicit-any -- Native TypeScript entry points retain dynamic process, fixture, and injected test-double boundaries.
 import { writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { executeCommand } from "./process.mjs";
+import { executeCommand } from "./process.ts";
 import {
     buildRelease,
     createReleaseArtifactNames,
     parseReleaseVersion,
     verifyReleaseSource,
-} from "./release.mjs";
+} from "./release.ts";
 
 export const githubRepository = "jongminchung/jongminchung";
 export const fixedReleaseVersion = "1.0.0";
@@ -15,15 +16,15 @@ export const fixedReleaseVersion = "1.0.0";
 const appRoot = fileURLToPath(new URL("../", import.meta.url));
 const workspaceRoot = fileURLToPath(new URL("../../../", import.meta.url));
 
-export function createReleaseTag(value) {
+export function createReleaseTag(value: any) {
     return `git-client-${assertFixedReleaseVersion(value)}`;
 }
 
-export function createReleaseTitle(value) {
+export function createReleaseTitle(value: any) {
     return `Git Client ${assertFixedReleaseVersion(value)}`;
 }
 
-export function assertFixedReleaseVersion(value) {
+export function assertFixedReleaseVersion(value: any) {
     const version = parseReleaseVersion(value);
     if (version !== fixedReleaseVersion) {
         throw new Error(
@@ -37,7 +38,7 @@ export function createReleaseNotes() {
     return `# ${fixedReleaseVersion}\n\nManual Git Client release.\n`;
 }
 
-export function createGitHubEnvironment(environment) {
+export function createGitHubEnvironment(environment: any) {
     const token = environment.GH_TOKEN ?? environment.GH_PAT;
     if (!token)
         throw new Error(
@@ -51,7 +52,7 @@ export function createGhReleaseArguments({
     notesFile,
     sha,
     version,
-}) {
+}: any) {
     return [
         "release",
         "create",
@@ -71,7 +72,7 @@ export function createGhReleaseArguments({
     ];
 }
 
-export function createGhTagReferenceArguments(tag) {
+export function createGhTagReferenceArguments(tag: any) {
     return [
         "api",
         `repos/${githubRepository}/git/ref/tags/${tag}`,
@@ -80,7 +81,7 @@ export function createGhTagReferenceArguments(tag) {
     ];
 }
 
-export function createGhDeleteTagArguments(tag) {
+export function createGhDeleteTagArguments(tag: any) {
     return [
         "api",
         "--method",
@@ -89,7 +90,7 @@ export function createGhDeleteTagArguments(tag) {
     ];
 }
 
-export function parseReleaseMetadata(value) {
+export function parseReleaseMetadata(value: any) {
     const parsed = JSON.parse(value);
     if (
         typeof parsed !== "object" ||
@@ -107,7 +108,7 @@ export function parseReleaseMetadata(value) {
     ) {
         throw new Error("GitHub release metadata is missing required fields");
     }
-    const assets = parsed.assets.map((asset) => {
+    const assets = parsed.assets.map((asset: any) => {
         if (
             typeof asset !== "object" ||
             asset === null ||
@@ -128,12 +129,16 @@ export function parseReleaseMetadata(value) {
     };
 }
 
-export function assertReleaseMetadata(metadata, version, expectedDraft) {
+export function assertReleaseMetadata(
+    metadata: any,
+    version: any,
+    expectedDraft: any,
+) {
     const names = createReleaseArtifactNames(version);
     const expectedAssets = [names.checksum, names.dmg, names.provenance].sort(
-        (left, right) => left.localeCompare(right),
+        (left: any, right: any) => left.localeCompare(right),
     );
-    const actualAssets = [...metadata.assets].sort((left, right) =>
+    const actualAssets = [...metadata.assets].sort((left: any, right: any) =>
         left.localeCompare(right),
     );
     if (metadata.tagName !== createReleaseTag(version)) {
@@ -152,7 +157,11 @@ export function assertReleaseMetadata(metadata, version, expectedDraft) {
     }
 }
 
-async function readReleaseMetadata(tag, environment, allowFailure = false) {
+async function readReleaseMetadata(
+    tag: any,
+    environment: any,
+    allowFailure: any = false,
+) {
     const result = await executeCommand(
         "gh",
         [
@@ -170,7 +179,7 @@ async function readReleaseMetadata(tag, environment, allowFailure = false) {
     return parseReleaseMetadata(result.stdout);
 }
 
-async function removeExistingRelease(tag, environment) {
+async function removeExistingRelease(tag: any, environment: any) {
     const metadata = await readReleaseMetadata(tag, environment, true);
     if (metadata === null) return;
     await executeCommand(
@@ -188,7 +197,7 @@ async function removeExistingRelease(tag, environment) {
     );
 }
 
-async function readRemoteTagSha(tag, environment) {
+async function readRemoteTagSha(tag: any, environment: any) {
     const result = await executeCommand(
         "gh",
         createGhTagReferenceArguments(tag),
@@ -207,7 +216,11 @@ async function readRemoteTagSha(tag, environment) {
     return sha;
 }
 
-async function removeTagCreatedByCurrentRun(tag, sha, environment) {
+async function removeTagCreatedByCurrentRun(
+    tag: any,
+    sha: any,
+    environment: any,
+) {
     if ((await readRemoteTagSha(tag, environment)) !== sha) return;
     await executeCommand("gh", createGhDeleteTagArguments(tag), {
         cwd: workspaceRoot,
@@ -215,7 +228,7 @@ async function removeTagCreatedByCurrentRun(tag, sha, environment) {
     });
 }
 
-async function publishRelease(release) {
+async function publishRelease(release: any) {
     const environment = createGitHubEnvironment(process.env);
     const tag = createReleaseTag(release.version);
     const artifacts = await buildRelease(release.version);
@@ -282,8 +295,10 @@ async function publishRelease(release) {
     }
 }
 
-export function parsePublishArguments(arguments_) {
-    const unknown = arguments_.filter((argument) => argument !== "--dry-run");
+export function parsePublishArguments(arguments_: any) {
+    const unknown = arguments_.filter(
+        (argument: any) => argument !== "--dry-run",
+    );
     if (unknown.length > 0)
         throw new Error(`Unknown release argument: ${unknown[0]}`);
     return {

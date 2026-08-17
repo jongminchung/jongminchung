@@ -7,7 +7,7 @@ import type { Locator, Page } from "@playwright/test";
 import {
     captureGitState,
     compareGitStates,
-} from "../scripts/independent-audit/git-state-oracle.mjs";
+} from "../scripts/independent-audit/git-state-oracle.ts";
 import {
     launchPackaged,
     resetQaProfile,

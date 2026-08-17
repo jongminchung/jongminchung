@@ -1,13 +1,14 @@
+// oxlint-disable typescript/no-explicit-any -- Native TypeScript entry points retain dynamic process, fixture, and injected test-double boundaries.
 import assert from "node:assert/strict";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, describe, it } from "node:test";
-import { createAuditFixture } from "./create-fixture.mjs";
-import { runGit } from "./git-process.mjs";
-import { captureGitState, compareGitStates } from "./git-state-oracle.mjs";
+import { createAuditFixture } from "./create-fixture.ts";
+import { runGit } from "./git-process.ts";
+import { captureGitState, compareGitStates } from "./git-state-oracle.ts";
 
-const testRoots = [];
+const testRoots: any[] = [];
 
 async function createFixture() {
     const parent = await mkdtemp(join(tmpdir(), "rebased-111-oracle-test-"));
@@ -39,18 +40,20 @@ void describe("independent Rebased 1.1.11 Git fixture and state oracle", () => {
         assert.match(rebased.workingDiff, /export const working = true;/u);
         assert.equal(rebased.stash.length, 1);
         assert.equal(rebased.stash[0].subject, "On main: audit-baseline");
-        assert.ok(rebased.refs.some((ref) => ref.name === "refs/stash"));
-        assert.ok(rebased.refs.some((ref) => ref.name === "refs/tags/v1.0.0"));
+        assert.ok(rebased.refs.some((ref: any) => ref.name === "refs/stash"));
+        assert.ok(
+            rebased.refs.some((ref: any) => ref.name === "refs/tags/v1.0.0"),
+        );
         assert.ok(
             rebased.remoteRefs[0].refs.some(
-                (ref) => ref.name === "refs/heads/feature/topic",
+                (ref: any) => ref.name === "refs/heads/feature/topic",
             ),
         );
         assert.deepEqual(
-            rebased.refs.map((ref) => ref.name),
+            rebased.refs.map((ref: any) => ref.name),
             rebased.refs
-                .map((ref) => ref.name)
-                .toSorted((left, right) =>
+                .map((ref: any) => ref.name)
+                .toSorted((left: any, right: any) =>
                     left < right ? -1 : left > right ? 1 : 0,
                 ),
         );

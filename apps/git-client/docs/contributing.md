@@ -88,10 +88,10 @@ rebase, abort, stash와 remote refs를 비교해야 하면 독립 fixture와 ora
 
 ```sh
 AUDIT_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/git-client-audit.XXXXXX")"
-node apps/git-client/scripts/independent-audit/create-fixture.mjs \
+node apps/git-client/scripts/independent-audit/create-fixture.ts \
   --root "$AUDIT_ROOT/fixture"
 
-node apps/git-client/scripts/independent-audit/git-state-oracle.mjs snapshot \
+node apps/git-client/scripts/independent-audit/git-state-oracle.ts snapshot \
   "$AUDIT_ROOT/fixture/git-client-case"
 ```
 
@@ -107,13 +107,13 @@ pnpm --filter @jongminchung/git-client qa:compact
 
 개별 명령은 다음과 같다.
 
-| 명령                                                  | 검증 범위                                             |
-| ----------------------------------------------------- | ----------------------------------------------------- |
-| `pnpm --filter @jongminchung/git-client typecheck`    | renderer TypeScript                                   |
-| `pnpm --filter @jongminchung/git-client test`         | Vitest 단위·통합 테스트                               |
-| `pnpm --filter @jongminchung/git-client test:e2e`     | Vite QA fixture 기반 renderer Playwright              |
-| `pnpm --filter @jongminchung/git-client build`        | renderer와 Electron TypeScript, Vite production build |
-| `pnpm --filter @jongminchung/git-client test:scripts` | 독립 audit 증거·oracle과 package policy Node 테스트   |
+| 명령                                                             | 검증 범위                                             |
+| ---------------------------------------------------------------- | ----------------------------------------------------- |
+| `pnpm --filter @jongminchung/git-client typecheck`               | renderer TypeScript                                   |
+| `pnpm --filter @jongminchung/git-client test`                    | Vitest 단위·통합 테스트                               |
+| `pnpm --filter @jongminchung/git-client test:e2e`                | Vite QA fixture 기반 renderer Playwright              |
+| `pnpm --filter @jongminchung/git-client build`                   | renderer와 Electron TypeScript, Vite production build |
+| `pnpm --filter @jongminchung/git-client test:integration:native` | Integration의 독립 audit·package policy Node 검사     |
 
 실패 상세가 필요할 때만 verbose reporter를 사용한다.
 
@@ -194,7 +194,7 @@ pnpm --filter @jongminchung/git-client exec playwright test \
 pnpm --filter @jongminchung/git-client typecheck
 pnpm --filter @jongminchung/git-client test
 pnpm --filter @jongminchung/git-client test:e2e
-pnpm --filter @jongminchung/git-client test:scripts
+pnpm --filter @jongminchung/git-client test:integration:native
 pnpm --filter @jongminchung/git-client electron:package
 pnpm --filter @jongminchung/git-client electron:verify-package
 pnpm --filter @jongminchung/git-client electron:smoke-package

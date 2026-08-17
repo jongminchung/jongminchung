@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// oxlint-disable typescript/no-explicit-any -- Native TypeScript entry points retain dynamic process, fixture, and injected test-double boundaries.
 
 import { execFile } from "node:child_process";
 import { lstat, realpath } from "node:fs/promises";
@@ -14,14 +15,32 @@ import {
 import {
     packagedElectronFrameworkResourcesPath,
     verifyElectronLocales,
-} from "./electron-package-policy.mjs";
-import { resolvePackagedAppPath } from "./packaged-app-path.mjs";
+} from "./electron-package-policy.ts";
+import { resolvePackagedAppPath } from "./packaged-app-path.ts";
 
 const execFileAsync = promisify(execFile);
 const EXPECTED_BUNDLE_ID = "io.github.jongminchung.gitclient";
 const EXPECTED_ELECTRON_VERSION = "43.3.0";
 const EXPECTED_ARCHITECTURES = "arm64";
 const MAX_APP_SIZE_KIB = 250 * 1024;
+
+export interface ElectronPackageVerification {
+    readonly appPath: string;
+    readonly bundleId: string;
+    readonly electronVersion: string;
+    readonly architectures: string;
+    readonly localeCount: number;
+    readonly locales: readonly string[];
+    readonly sizeKiB: number;
+    readonly sizeMiB: number;
+    readonly asarHash: string;
+    readonly codesign: string;
+    readonly terminalRuntime: Readonly<{
+        readonly architecture: string;
+        readonly spawnHelperExecutable: boolean;
+    }>;
+    readonly fuses: Readonly<Record<string, boolean>>;
+}
 
 const expectedFuses = new Map([
     [FuseV1Options.RunAsNode, FuseState.DISABLE],
@@ -35,11 +54,11 @@ const expectedFuses = new Map([
     [FuseV1Options.WasmTrapHandlers, FuseState.ENABLE],
 ]);
 
-function trimOutput(result) {
+function trimOutput(result: any) {
     return result.stdout.trim();
 }
 
-async function plistValue(plistPath, key) {
+async function plistValue(plistPath: any, key: any) {
     return trimOutput(
         await execFileAsync("/usr/bin/plutil", [
             "-extract",
@@ -52,13 +71,13 @@ async function plistValue(plistPath, key) {
     );
 }
 
-async function architectures(binaryPath) {
+async function architectures(binaryPath: any) {
     return trimOutput(
         await execFileAsync("/usr/bin/lipo", ["-archs", binaryPath]),
     );
 }
 
-async function appSizeKiB(appPath) {
+async function appSizeKiB(appPath: any) {
     const output = trimOutput(
         await execFileAsync("/usr/bin/du", ["-sk", appPath]),
     );
@@ -70,7 +89,7 @@ async function appSizeKiB(appPath) {
     return size;
 }
 
-async function verifyAsarIntegrity(infoPlistPath) {
+async function verifyAsarIntegrity(infoPlistPath: any) {
     const output = trimOutput(
         await execFileAsync("/usr/bin/plutil", [
             "-extract",
@@ -95,7 +114,7 @@ async function verifyAsarIntegrity(infoPlistPath) {
     return appAsar.hash;
 }
 
-function verifyFuses(fuses) {
+function verifyFuses(fuses: any) {
     if (fuses.version !== FuseVersion.V1) {
         throw new Error(`Expected fuse wire V1, received ${fuses.version}`);
     }
@@ -109,7 +128,7 @@ function verifyFuses(fuses) {
     }
 }
 
-async function verifyTerminalRuntime(appPath) {
+async function verifyTerminalRuntime(appPath: any) {
     const runtimeRoot = join(
         appPath,
         "Contents",
@@ -153,7 +172,9 @@ async function verifyTerminalRuntime(appPath) {
     });
 }
 
-export async function verifyElectronPackage(inputPath) {
+export async function verifyElectronPackage(
+    inputPath: string,
+): Promise<ElectronPackageVerification> {
     if (process.platform !== "darwin") {
         throw new Error(
             "Electron package verification currently supports the macOS ARM64 release target only",
@@ -249,7 +270,7 @@ export async function verifyElectronPackage(inputPath) {
         codesign: "valid (--deep --strict)",
         terminalRuntime,
         fuses: Object.fromEntries(
-            [...expectedFuses].map(([fuse, state]) => [
+            [...expectedFuses].map(([fuse, state]: any) => [
                 FuseV1Options[fuse],
                 state === FuseState.ENABLE,
             ]),
@@ -270,9 +291,9 @@ if (isEntryPoint) {
             ? defaultAppPath
             : resolve(process.argv[2]);
     verifyElectronPackage(requestedPath).then(
-        (report) =>
+        (report: any) =>
             process.stdout.write(`${JSON.stringify(report, null, 2)}\n`),
-        (error) => {
+        (error: any) => {
             process.stderr.write(
                 `${error instanceof Error ? error.message : String(error)}\n`,
             );

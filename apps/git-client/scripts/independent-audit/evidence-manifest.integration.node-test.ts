@@ -1,3 +1,4 @@
+// oxlint-disable typescript/no-explicit-any -- Native TypeScript entry points retain dynamic process, fixture, and injected test-double boundaries.
 import assert from "node:assert/strict";
 import { cp, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -6,9 +7,9 @@ import { after, describe, it } from "node:test";
 import {
     checkedInEvidenceRoot,
     validateEvidenceBundle,
-} from "./validate-evidence.mjs";
+} from "./validate-evidence.ts";
 
-const temporaryRoots = [];
+const temporaryRoots: any[] = [];
 
 async function copyEvidence() {
     const root = await mkdtemp(join(tmpdir(), "git-client-evidence-test-"));
@@ -17,13 +18,19 @@ async function copyEvidence() {
     return root;
 }
 
-async function replaceManifestDigest(root, relativePath, digest) {
+async function replaceManifestDigest(
+    root: any,
+    relativePath: any,
+    digest: any,
+) {
     const manifestPath = join(root, "SHA256SUMS");
     const manifest = await readFile(manifestPath, "utf8");
     const suffix = `  ./${relativePath}`;
     const next = manifest
         .split("\n")
-        .map((line) => (line.endsWith(suffix) ? `${digest}${suffix}` : line))
+        .map((line: any) =>
+            line.endsWith(suffix) ? `${digest}${suffix}` : line,
+        )
         .join("\n");
     await writeFile(manifestPath, next);
 }

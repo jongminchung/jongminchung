@@ -1,5 +1,12 @@
+// oxlint-disable typescript/no-explicit-any -- Native TypeScript entry points retain dynamic process, fixture, and injected test-double boundaries.
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+
+interface ExecFileError extends Error {
+    readonly code: number;
+    readonly stderr?: string;
+    readonly stdout?: string;
+}
 
 const execFileAsync = promisify(execFile);
 
@@ -12,9 +19,9 @@ const ISOLATED_GIT_ENV = Object.freeze({
 });
 
 export async function runGit(
-    repositoryPath,
-    args,
-    { env = {}, acceptedExitCodes = [0] } = {},
+    repositoryPath: any,
+    args: any,
+    { env = {}, acceptedExitCodes = [0] }: any = {},
 ) {
     try {
         const result = await execFileAsync("git", args, {
@@ -39,7 +46,7 @@ export async function runGit(
     }
 }
 
-function isExecFileError(error) {
+function isExecFileError(error: unknown): error is ExecFileError {
     return (
         error instanceof Error &&
         "code" in error &&

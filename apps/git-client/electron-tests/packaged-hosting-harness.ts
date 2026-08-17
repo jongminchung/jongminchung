@@ -9,7 +9,7 @@ import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import { chromium } from "@playwright/test";
 import type { Browser, Page } from "@playwright/test";
-import { resolvePackagedExecutablePath } from "../scripts/packaged-app-path.mjs";
+import { resolvePackagedExecutablePath } from "../scripts/packaged-app-path.ts";
 
 const EXECUTABLE_PATH = resolvePackagedExecutablePath();
 

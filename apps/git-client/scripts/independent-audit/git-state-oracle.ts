@@ -1,10 +1,11 @@
 #!/usr/bin/env node
+// oxlint-disable typescript/no-explicit-any -- Native TypeScript entry points retain dynamic process, fixture, and injected test-double boundaries.
 
 import { isAbsolute, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { runGit } from "./git-process.mjs";
+import { runGit } from "./git-process.ts";
 
-export async function captureGitState(repositoryPath) {
+export async function captureGitState(repositoryPath: any) {
     const repository = validateRepositoryPath(repositoryPath);
     const [
         headOid,
@@ -44,7 +45,7 @@ export async function captureGitState(repositoryPath) {
 
     const remoteNames = lines(remotes).sort(compareText);
     const remoteRefs = await Promise.all(
-        remoteNames.map(async (remote) =>
+        remoteNames.map(async (remote: any) =>
             Object.freeze({
                 remote,
                 refs: parsePairs(
@@ -66,7 +67,7 @@ export async function captureGitState(repositoryPath) {
         porcelainV2,
         cachedDiff,
         workingDiff,
-        stash: lines(stash).map((line) => {
+        stash: lines(stash).map((line: any) => {
             const [oid, selector, subject] = line.split("\0", 3);
             if (!oid || !selector || subject === undefined) {
                 throw new Error(
@@ -79,7 +80,7 @@ export async function captureGitState(repositoryPath) {
     });
 }
 
-export function compareGitStates(left, right) {
+export function compareGitStates(left: any, right: any) {
     const sections = [
         "head",
         "refs",
@@ -90,7 +91,7 @@ export function compareGitStates(left, right) {
         "remoteRefs",
     ];
     const differences = sections.filter(
-        (section) =>
+        (section: any) =>
             JSON.stringify(left[section]) !== JSON.stringify(right[section]),
     );
     return Object.freeze({
@@ -99,25 +100,25 @@ export function compareGitStates(left, right) {
     });
 }
 
-async function gitText(repositoryPath, args) {
+async function gitText(repositoryPath: any, args: any) {
     return (await runGit(repositoryPath, args)).stdout;
 }
 
-function validateRepositoryPath(repositoryPath) {
+function validateRepositoryPath(repositoryPath: any) {
     if (typeof repositoryPath !== "string" || !isAbsolute(repositoryPath)) {
         throw new Error("Repository path must be absolute");
     }
     return resolve(repositoryPath);
 }
 
-function lines(value) {
+function lines(value: any) {
     return value.length === 0 ? [] : value.trimEnd().split("\n");
 }
 
-function parsePairs(value, separator) {
+function parsePairs(value: any, separator: any) {
     return Object.freeze(
         lines(value)
-            .map((line) => {
+            .map((line: any) => {
                 const separatorIndex = line.indexOf(separator);
                 if (separatorIndex < 1 || separatorIndex === line.length - 1) {
                     throw new Error(
@@ -129,15 +130,17 @@ function parsePairs(value, separator) {
                     oid: line.slice(0, separatorIndex),
                 });
             })
-            .sort((left, right) => compareText(left.name, right.name)),
+            .sort((left: any, right: any) =>
+                compareText(left.name, right.name),
+            ),
     );
 }
 
-function compareText(left, right) {
+function compareText(left: any, right: any) {
     return left < right ? -1 : left > right ? 1 : 0;
 }
 
-function parseCliArguments(args) {
+function parseCliArguments(args: any) {
     if (args[0] === "snapshot" && args.length === 2 && isAbsolute(args[1])) {
         return Object.freeze({ command: "snapshot", repository: args[1] });
     }
@@ -154,7 +157,7 @@ function parseCliArguments(args) {
         });
     }
     throw new Error(
-        "Usage: git-state-oracle.mjs snapshot /absolute/repository | compare /absolute/left /absolute/right",
+        "Usage: git-state-oracle.ts snapshot /absolute/repository | compare /absolute/left /absolute/right",
     );
 }
 

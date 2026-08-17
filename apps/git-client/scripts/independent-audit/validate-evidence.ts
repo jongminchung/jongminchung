@@ -1,3 +1,4 @@
+// oxlint-disable typescript/no-explicit-any -- Native TypeScript entry points retain dynamic process, fixture, and injected test-double boundaries.
 import { createHash } from "node:crypto";
 import { lstat, readFile, readdir } from "node:fs/promises";
 import { dirname, relative, resolve, sep } from "node:path";
@@ -18,7 +19,7 @@ export const checkedInEvidenceRoot = resolve(
     "../../independent-audit/rebased-1.1.11/evidence",
 );
 
-function normalizeRelativePath(path) {
+function normalizeRelativePath(path: any) {
     if (
         path.length === 0 ||
         path.startsWith("/") ||
@@ -26,7 +27,7 @@ function normalizeRelativePath(path) {
         path
             .split("/")
             .some(
-                (segment) =>
+                (segment: any) =>
                     segment === "" || segment === "." || segment === "..",
             )
     ) {
@@ -35,9 +36,9 @@ function normalizeRelativePath(path) {
     return path;
 }
 
-async function listEvidenceFiles(root, directory = root) {
+async function listEvidenceFiles(root: any, directory: any = root) {
     const entries = await readdir(directory, { withFileTypes: true });
-    const files = [];
+    const files: any[] = [];
 
     for (const entry of entries) {
         const absolutePath = resolve(directory, entry.name);
@@ -56,17 +57,19 @@ async function listEvidenceFiles(root, directory = root) {
         if (relativePath !== manifestName) files.push(relativePath);
     }
 
-    return files.toSorted((left, right) => left.localeCompare(right));
+    return files.toSorted((left: any, right: any) => left.localeCompare(right));
 }
 
-async function sha256(path) {
+async function sha256(path: any) {
     return createHash("sha256")
         .update(await readFile(path))
         .digest("hex");
 }
 
-function parseManifest(contents) {
-    const lines = contents.split(/\r?\n/u).filter((line) => line.length > 0);
+function parseManifest(contents: any) {
+    const lines = contents
+        .split(/\r?\n/u)
+        .filter((line: any) => line.length > 0);
     if (lines.length === 0) throw new Error("Evidence manifest is empty");
 
     const entries = new Map();
@@ -84,19 +87,19 @@ function parseManifest(contents) {
     return entries;
 }
 
-function assertSamePaths(actual, expected) {
-    const actualPaths = [...actual].toSorted((left, right) =>
+function assertSamePaths(actual: any, expected: any) {
+    const actualPaths = [...actual].toSorted((left: any, right: any) =>
         left.localeCompare(right),
     );
-    const expectedPaths = [...expected].toSorted((left, right) =>
+    const expectedPaths = [...expected].toSorted((left: any, right: any) =>
         left.localeCompare(right),
     );
     if (JSON.stringify(actualPaths) !== JSON.stringify(expectedPaths)) {
         const missing = expectedPaths.filter(
-            (path) => !actualPaths.includes(path),
+            (path: any) => !actualPaths.includes(path),
         );
         const extra = actualPaths.filter(
-            (path) => !expectedPaths.includes(path),
+            (path: any) => !expectedPaths.includes(path),
         );
         throw new Error(
             `Evidence manifest coverage mismatch (missing: ${missing.join(", ") || "none"}; extra: ${extra.join(", ") || "none"})`,
@@ -104,7 +107,7 @@ function assertSamePaths(actual, expected) {
     }
 }
 
-function assertMetadata(metadata, manifestPaths) {
+function assertMetadata(metadata: any, manifestPaths: any) {
     if (
         metadata?.application?.name !== "Rebased" ||
         metadata.application.version !== "1.1.11"
@@ -121,7 +124,7 @@ function assertMetadata(metadata, manifestPaths) {
         metadata?.welcome?.screenshot,
         metadata?.trustProject?.screenshot,
         metadata?.dirtyWorkbench?.screenshot,
-    ].map((path) => normalizeRelativePath(path ?? ""));
+    ].map((path: any) => normalizeRelativePath(path ?? ""));
     for (const path of screenshotPaths) {
         if (!path.startsWith("screenshots/") || !manifestPaths.has(path)) {
             throw new Error(
@@ -131,17 +134,21 @@ function assertMetadata(metadata, manifestPaths) {
     }
 
     const manifestedScreenshots = new Set(
-        [...manifestPaths].filter((path) => path.startsWith("screenshots/")),
+        [...manifestPaths].filter((path: any) =>
+            path.startsWith("screenshots/"),
+        ),
     );
     assertSamePaths(new Set(screenshotPaths), manifestedScreenshots);
 
     const manifestedAxPaths = new Set(
-        [...manifestPaths].filter((path) => path.startsWith("ax/")),
+        [...manifestPaths].filter((path: any) => path.startsWith("ax/")),
     );
     assertSamePaths(manifestedAxPaths, requiredAxPaths);
 }
 
-export async function validateEvidenceBundle(root = checkedInEvidenceRoot) {
+export async function validateEvidenceBundle(
+    root: any = checkedInEvidenceRoot,
+) {
     const manifest = parseManifest(
         await readFile(resolve(root, manifestName), "utf8"),
     );

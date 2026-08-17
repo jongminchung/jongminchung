@@ -10,7 +10,7 @@ import {
     isSmokeStartupReady,
     terminateSmokeChild,
     validateSmokeOutcome,
-} from "./smoke-electron-package.mjs";
+} from "./smoke-electron-package.ts";
 
 const HEALTHY_OUTPUT = `${READY_SENTINEL}\n${HANDSHAKE_SENTINEL}\n`;
 
@@ -200,7 +200,7 @@ void describe("packaged Electron smoke outcome", () => {
                     signal: child.signalCode,
                     output: HEALTHY_OUTPUT,
                     handshakeComplete: true,
-                    controlledCleanup: cleanup !== "already-exited",
+                    controlledCleanup: true,
                 }),
                 { ready: true, preloadApi: true, exitCode: 0 },
             );

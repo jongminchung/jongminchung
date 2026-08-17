@@ -14,7 +14,7 @@ export default defineConfig({
             ? [["line"]]
             : [
                   [
-                      "./scripts/qa/compact-playwright-reporter.mjs",
+                      "./scripts/qa/compact-playwright-reporter.ts",
                       {
                           suite: "renderer",
                           outputFile: "test-results/qa/renderer.json",

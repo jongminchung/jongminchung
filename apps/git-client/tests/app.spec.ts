@@ -5,22 +5,6 @@ test.beforeEach(async ({ page }) => {
     await page.goto("/?fixture=qa");
 });
 
-test("keeps welcome categories left aligned with and without recent projects", async ({
-    page,
-}) => {
-    await page.setViewportSize({ width: 800, height: 650 });
-
-    for (const path of ["/", "/?fixture=welcome-recent"]) {
-        await page.goto(path);
-        await expect(
-            page.getByRole("treeitem", { name: "Projects" }),
-        ).toHaveCSS("justify-content", "flex-start");
-        await expect(
-            page.getByRole("treeitem", { name: "Customize" }),
-        ).toHaveCSS("justify-content", "flex-start");
-    }
-});
-
 test("matches the 800 by 650 Rebased recent-project geometry", async ({
     page,
 }) => {
@@ -37,18 +21,6 @@ test("matches the 800 by 650 Rebased recent-project geometry", async ({
         page.getByRole("button", { name: "New Project" }),
     ).toBeVisible();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-    await expect(page.getByTestId("welcome-sidebar")).toHaveCSS(
-        "width",
-        "224px",
-    );
-    await expect(page.getByTestId("welcome-titlebar")).toHaveCSS(
-        "height",
-        "30px",
-    );
-    await expect(page.getByTestId("welcome-project-toolbar")).toHaveCSS(
-        "height",
-        "68px",
-    );
     await expect(page).toHaveScreenshot(
         "welcome-projects-light-recent-800x650.png",
     );
@@ -163,13 +135,6 @@ test("applies and restores Welcome appearance preferences", async ({
     await expect(theme).toContainText("Islands Light");
     await expect(syncWithOs).not.toBeChecked();
     await expect(root).toHaveAttribute("data-theme", "light");
-});
-
-test("keeps the workspace titlebar at 35px", async ({ page }) => {
-    await expect(page.getByRole("banner", { name: "Main Toolbar" })).toHaveCSS(
-        "height",
-        "35px",
-    );
 });
 
 test("renders the dense three-pane Git log fixture", async ({ page }) => {

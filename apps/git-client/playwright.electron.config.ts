@@ -12,7 +12,7 @@ export default defineConfig({
             ? [["line"]]
             : [
                   [
-                      "./scripts/qa/compact-playwright-reporter.mjs",
+                      "./scripts/qa/compact-playwright-reporter.ts",
                       {
                           suite: "electron",
                           outputFile: "test-results/qa/electron.json",

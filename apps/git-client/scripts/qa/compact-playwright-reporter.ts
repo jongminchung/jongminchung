@@ -1,3 +1,4 @@
+// oxlint-disable typescript/no-explicit-any -- Native TypeScript entry points retain dynamic process, fixture, and injected test-double boundaries.
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, relative, resolve } from "node:path";
 import { stripVTControlCharacters } from "node:util";
@@ -7,7 +8,7 @@ const MAX_STACK_LENGTH = 4_000;
 const MAX_CONSOLE_FAILURES = 5;
 const MAX_CONSOLE_MESSAGE_LENGTH = 500;
 
-function truncate(value, limit) {
+function truncate(value: any, limit: any) {
     if (typeof value !== "string") return null;
     const plainValue = stripVTControlCharacters(value);
     return plainValue.length <= limit
@@ -15,7 +16,11 @@ function truncate(value, limit) {
         : `${plainValue.slice(0, limit - 1)}…`;
 }
 
-export function compactTestResult(test, result, rootDirectory = process.cwd()) {
+export function compactTestResult(
+    test: any,
+    result: any,
+    rootDirectory: any = process.cwd(),
+) {
     const error = result.errors.at(0) ?? result.error;
     const titlePath = test.titlePath().filter(Boolean);
     const scopedTitlePath = titlePath[0]?.endsWith(".spec.ts")
@@ -30,7 +35,7 @@ export function compactTestResult(test, result, rootDirectory = process.cwd()) {
         durationMs: result.duration,
         message: truncate(error?.message, MAX_MESSAGE_LENGTH),
         stack: truncate(error?.stack, MAX_STACK_LENGTH),
-        artifacts: result.attachments.flatMap((attachment) =>
+        artifacts: result.attachments.flatMap((attachment: any) =>
             attachment.path
                 ? [
                       {
@@ -44,7 +49,7 @@ export function compactTestResult(test, result, rootDirectory = process.cwd()) {
     };
 }
 
-export function summarizeResults(results) {
+export function summarizeResults(results: any) {
     const counts = { passed: 0, failed: 0, flaky: 0, skipped: 0 };
     for (const result of results) {
         if (result.outcome === "expected") counts.passed += 1;
@@ -55,8 +60,8 @@ export function summarizeResults(results) {
     return counts;
 }
 
-export function compactFailureLines(failures) {
-    return failures.slice(0, MAX_CONSOLE_FAILURES).map((failure) => {
+export function compactFailureLines(failures: any) {
+    return failures.slice(0, MAX_CONSOLE_FAILURES).map((failure: any) => {
         const firstLine =
             failure.message?.split("\n", 1)[0] ?? "Unknown failure";
         return `- ${failure.file}:${failure.line} ${failure.title}: ${truncate(firstLine, MAX_CONSOLE_MESSAGE_LENGTH)}`;
@@ -64,7 +69,12 @@ export function compactFailureLines(failures) {
 }
 
 export default class CompactPlaywrightReporter {
-    constructor(options = {}) {
+    private readonly options: any;
+    private readonly results: Map<string, any>;
+    private readonly startedAt: number;
+    private rootDirectory?: string;
+
+    constructor(options: any = {}) {
         this.options = options;
         this.results = new Map();
         this.startedAt = Date.now();
@@ -74,14 +84,15 @@ export default class CompactPlaywrightReporter {
         this.rootDirectory = process.cwd();
     }
 
-    onTestEnd(test, result) {
+    onTestEnd(test: any, result: any) {
         this.results.set(test.id, { result, test });
     }
 
-    async onEnd(run) {
+    async onEnd(run: any) {
         const rootDirectory = this.rootDirectory ?? process.cwd();
-        const results = [...this.results.values()].map(({ result, test }) =>
-            compactTestResult(test, result, rootDirectory),
+        const results = [...this.results.values()].map(
+            ({ result, test }: any) =>
+                compactTestResult(test, result, rootDirectory),
         );
         const counts = summarizeResults(results);
         const suite = this.options.suite ?? "playwright";
@@ -97,9 +108,9 @@ export default class CompactPlaywrightReporter {
             durationMs: Date.now() - this.startedAt,
             counts,
             failures: results.filter(
-                (result) => result.outcome === "unexpected",
+                (result: any) => result.outcome === "unexpected",
             ),
-            flaky: results.filter((result) => result.outcome === "flaky"),
+            flaky: results.filter((result: any) => result.outcome === "flaky"),
         };
 
         await mkdir(dirname(outputFile), { recursive: true });

@@ -4,7 +4,7 @@ import { describe, it } from "node:test";
 import {
     resolvePackagedAppPath,
     resolvePackagedExecutablePath,
-} from "./packaged-app-path.mjs";
+} from "./packaged-app-path.ts";
 
 await describe("packaged Electron path", async () => {
     await it("derives the Forge output from platform and architecture", async () => {

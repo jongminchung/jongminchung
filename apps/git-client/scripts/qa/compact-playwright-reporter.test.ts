@@ -3,7 +3,7 @@ import {
     compactFailureLines,
     compactTestResult,
     summarizeResults,
-} from "./compact-playwright-reporter.mjs";
+} from "./compact-playwright-reporter.ts";
 
 function fakeTest(outcome: "expected" | "unexpected" | "flaky" | "skipped") {
     return {
@@ -69,6 +69,6 @@ describe("compact Playwright reporter", () => {
         const lines = compactFailureLines(failures);
 
         expect(lines).toHaveLength(5);
-        expect(lines.every((line) => line.length < 700)).toBe(true);
+        expect(lines.every((line: string) => line.length < 700)).toBe(true);
     });
 });

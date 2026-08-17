@@ -12,7 +12,7 @@ import {
     fixedReleaseVersion,
     parsePublishArguments,
     parseReleaseMetadata,
-} from "./publish-release.mjs";
+} from "./publish-release.ts";
 
 describe("fixed Git Client release publisher", () => {
     it("always uses the manual 1.0.0 release identity", () => {

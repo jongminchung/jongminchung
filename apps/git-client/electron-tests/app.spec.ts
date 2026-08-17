@@ -18,7 +18,7 @@ import type { Locator, Page } from "@playwright/test";
 import type { DesktopApi } from "../src/shared/contracts/desktop-api";
 import type { GitExecutionRequest } from "../src/shared/contracts/git-utility";
 import type { GitOperation } from "../src/shared/contracts/model";
-import { captureGitState } from "./helpers/git-state-oracle.mjs";
+import { captureGitState } from "./helpers/git-state-oracle.ts";
 import {
     launchPackaged,
     resetQaProfile,

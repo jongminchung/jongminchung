@@ -1,9 +1,10 @@
+// oxlint-disable typescript/no-explicit-any -- Native TypeScript entry points retain dynamic process, fixture, and injected test-double boundaries.
 import { cp, lstat, mkdir, mkdtemp, rm, stat, symlink } from "node:fs/promises";
 import { readFile, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { basename, dirname, join } from "node:path";
-import { executeCommand } from "./process.mjs";
+import { executeCommand } from "./process.ts";
 
 const require = createRequire(import.meta.url);
 
@@ -22,14 +23,37 @@ const UDIF_UUID_OFFSET = 64;
 const HFS_HEADER_DATE_OFFSETS = Object.freeze([16, 20, 24, 28]);
 const HFS_CATALOG_DATE_OFFSETS = Object.freeze([12, 16, 20, 24, 28]);
 
-function boundedInteger(value, label, maximum = Number.MAX_SAFE_INTEGER) {
+export interface HfsNormalizationReport {
+    readonly catalogBytes: number;
+    readonly normalizedRecords: number;
+    readonly timestamp: number;
+    readonly uuid: string;
+}
+
+export interface ReproducibleDmgReport {
+    readonly bytes: number;
+    readonly normalization: HfsNormalizationReport;
+    readonly target: string;
+    readonly udif: { readonly uuid: string };
+}
+
+interface ReproducibleDmgOptions {
+    readonly runCommand?: typeof executeCommand;
+    readonly temporaryDirectory?: string;
+}
+
+function boundedInteger(
+    value: any,
+    label: any,
+    maximum: any = Number.MAX_SAFE_INTEGER,
+) {
     if (!Number.isSafeInteger(value) || value < 0 || value > maximum) {
         throw new Error(`Invalid ${label}: ${String(value)}`);
     }
     return value;
 }
 
-function assertRange(buffer, offset, length, label) {
+function assertRange(buffer: any, offset: any, length: any, label: any) {
     boundedInteger(offset, `${label} offset`, buffer.length);
     boundedInteger(length, `${label} length`, buffer.length);
     if (offset + length > buffer.length) {
@@ -37,7 +61,7 @@ function assertRange(buffer, offset, length, label) {
     }
 }
 
-function normalizeVolumeHeader(image, offset) {
+function normalizeVolumeHeader(image: any, offset: any) {
     assertRange(image, offset, 512, "HFS volume header");
     if (image.readUInt16BE(offset) !== HFS_SIGNATURE) {
         throw new Error(`Missing HFS+ volume header at byte ${offset}`);
@@ -48,7 +72,7 @@ function normalizeVolumeHeader(image, offset) {
     HFS_FIXED_UUID.copy(image, offset + 104);
 }
 
-function readCatalog(image, volumeHeaderOffset) {
+function readCatalog(image: any, volumeHeaderOffset: any) {
     const allocationBlockSize = boundedInteger(
         image.readUInt32BE(volumeHeaderOffset + 40),
         "HFS allocation block size",
@@ -71,7 +95,7 @@ function readCatalog(image, volumeHeaderOffset) {
         image.length,
     );
     const catalog = Buffer.alloc(logicalSize);
-    const extents = [];
+    const extents: any[] = [];
     let catalogOffset = 0;
 
     for (
@@ -108,7 +132,7 @@ function readCatalog(image, volumeHeaderOffset) {
     return Object.freeze({ catalog, extents });
 }
 
-function normalizeCatalog(catalog) {
+function normalizeCatalog(catalog: any) {
     assertRange(catalog, 0, 40, "HFS catalog header node");
     const nodeSize = boundedInteger(
         catalog.readUInt16BE(32),
@@ -166,7 +190,7 @@ function normalizeCatalog(catalog) {
     return normalizedRecords;
 }
 
-function writeCatalog(image, catalog, extents) {
+function writeCatalog(image: any, catalog: any, extents: any) {
     for (const extent of extents) {
         catalog.copy(
             image,
@@ -177,7 +201,7 @@ function writeCatalog(image, catalog, extents) {
     }
 }
 
-export function normalizeHfsImageBuffer(image) {
+export function normalizeHfsImageBuffer(image: Buffer): HfsNormalizationReport {
     if (!Buffer.isBuffer(image) || image.length < 4_096) {
         throw new Error(
             "Expected a complete uncompressed HFS+ disk image buffer",
@@ -197,14 +221,18 @@ export function normalizeHfsImageBuffer(image) {
     });
 }
 
-export async function normalizeHfsImage(filePath) {
+export async function normalizeHfsImage(
+    filePath: string,
+): Promise<HfsNormalizationReport> {
     const image = await readFile(filePath);
     const report = normalizeHfsImageBuffer(image);
     await writeFile(filePath, image);
     return report;
 }
 
-export function normalizeUdifTrailerBuffer(trailer) {
+export function normalizeUdifTrailerBuffer(trailer: Buffer): {
+    readonly uuid: string;
+} {
     if (!Buffer.isBuffer(trailer) || trailer.length !== UDIF_TRAILER_BYTES) {
         throw new Error("Expected a complete 512-byte UDIF trailer");
     }
@@ -215,7 +243,9 @@ export function normalizeUdifTrailerBuffer(trailer) {
     return Object.freeze({ uuid: UDIF_FIXED_UUID.toString("hex") });
 }
 
-export async function normalizeUdifImage(filePath) {
+export async function normalizeUdifImage(
+    filePath: string,
+): Promise<{ readonly uuid: string }> {
     const image = await readFile(filePath);
     if (image.length < UDIF_TRAILER_BYTES)
         throw new Error("UDIF image is truncated");
@@ -226,9 +256,9 @@ export async function normalizeUdifImage(filePath) {
     return report;
 }
 
-function writeFinderLayout(path) {
+function writeFinderLayout(path: any) {
     const DSStore = require("ds-store");
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve: any, reject: any) => {
         const store = new DSStore();
         store.vSrn(1);
         store.setIconSize(80);
@@ -237,7 +267,7 @@ function writeFinderLayout(path) {
         store.setWindowSize(640, 480);
         store.setIconPos("Git Client.app", 192, 344);
         store.setIconPos("Applications", 448, 344);
-        store.write(path, (error) => {
+        store.write(path, (error: any) => {
             if (error) reject(error);
             else resolve();
         });
@@ -245,10 +275,13 @@ function writeFinderLayout(path) {
 }
 
 export async function createReproducibleDmg(
-    appPath,
-    targetPath,
-    { runCommand = executeCommand, temporaryDirectory = tmpdir() } = {},
-) {
+    appPath: string,
+    targetPath: string,
+    {
+        runCommand = executeCommand,
+        temporaryDirectory = tmpdir(),
+    }: ReproducibleDmgOptions = {},
+): Promise<ReproducibleDmgReport> {
     const appStats = await lstat(appPath);
     if (!appStats.isDirectory() || appStats.isSymbolicLink()) {
         throw new Error(

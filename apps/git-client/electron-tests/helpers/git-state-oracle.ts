@@ -1,7 +1,21 @@
+// oxlint-disable typescript/no-explicit-any -- Native TypeScript entry points retain dynamic process, fixture, and injected test-double boundaries.
 import { spawnSync } from "node:child_process";
 import { resolve } from "node:path";
 
-function git(repository, args, allowFailure = false) {
+export interface CapturedGitState {
+    readonly head: string;
+    readonly refs: string;
+    readonly status: string;
+    readonly index: string;
+    readonly reflog: string;
+    readonly remotes: string;
+    readonly config: string;
+    readonly worktrees: string;
+    readonly stashes: string;
+    readonly submodules: string;
+}
+
+function git(repository: any, args: any, allowFailure: any = false) {
     const result = spawnSync("git", args, {
         cwd: repository,
         encoding: "utf8",
@@ -16,7 +30,7 @@ function git(repository, args, allowFailure = false) {
     return result.status === 0 ? (result.stdout ?? "") : "";
 }
 
-export function captureGitState(repository) {
+export function captureGitState(repository: string): CapturedGitState {
     const root = resolve(repository);
     git(root, ["rev-parse", "--git-dir"]);
     return Object.freeze({

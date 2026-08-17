@@ -1,3 +1,4 @@
+// oxlint-disable typescript/no-explicit-any -- Native TypeScript entry points retain dynamic process, fixture, and injected test-double boundaries.
 import { lstat, readdir, realpath, rm } from "node:fs/promises";
 import {
     basename,
@@ -57,9 +58,21 @@ export const ELECTRON_LOCALE_ALLOWLIST = Object.freeze([
     "zh_TW_NEUTER.lproj",
 ]);
 
+export interface LocaleVerification {
+    readonly resourcesPath: string;
+    readonly locales: readonly string[];
+}
+
+export interface LocalePruneResult {
+    readonly skipped: boolean;
+    readonly resourcesPath?: string;
+    readonly removed: readonly string[];
+    readonly kept: readonly string[];
+}
+
 const allowedLocales = new Set(ELECTRON_LOCALE_ALLOWLIST);
 
-export function electronFrameworkResourcesPath(buildPath) {
+export function electronFrameworkResourcesPath(buildPath: string): string {
     if (typeof buildPath !== "string" || !isAbsolute(buildPath)) {
         throw new Error("Electron build path must be absolute");
     }
@@ -68,7 +81,9 @@ export function electronFrameworkResourcesPath(buildPath) {
     );
 }
 
-export function packagedElectronFrameworkResourcesPath(appPath) {
+export function packagedElectronFrameworkResourcesPath(
+    appPath: string,
+): string {
     if (
         typeof appPath !== "string" ||
         !isAbsolute(appPath) ||
@@ -81,9 +96,9 @@ export function packagedElectronFrameworkResourcesPath(appPath) {
     return join(resolve(appPath), ...ELECTRON_FRAMEWORK_RESOURCES);
 }
 
-async function readLocaleEntries(resourcesPath) {
+async function readLocaleEntries(resourcesPath: any) {
     const entries = await readdir(resourcesPath, { withFileTypes: true });
-    const localeEntries = entries.filter((entry) =>
+    const localeEntries = entries.filter((entry: any) =>
         entry.name.endsWith(".lproj"),
     );
 
@@ -95,12 +110,15 @@ async function readLocaleEntries(resourcesPath) {
         }
     }
 
-    return localeEntries.sort((left, right) =>
+    return localeEntries.sort((left: any, right: any) =>
         left.name.localeCompare(right.name),
     );
 }
 
-async function assertContainedLocaleDirectory(resourcesPath, localeName) {
+async function assertContainedLocaleDirectory(
+    resourcesPath: any,
+    localeName: any,
+) {
     const resourcesRealPath = await realpath(resourcesPath);
     const localePath = join(resourcesRealPath, localeName);
     const localeStat = await lstat(localePath);
@@ -129,10 +147,10 @@ async function assertContainedLocaleDirectory(resourcesPath, localeName) {
     return localeRealPath;
 }
 
-function assertAllowlistPresent(localeNames) {
+function assertAllowlistPresent(localeNames: any) {
     const localeNameSet = new Set(localeNames);
     const missingLocales = ELECTRON_LOCALE_ALLOWLIST.filter(
-        (locale) => !localeNameSet.has(locale),
+        (locale: any) => !localeNameSet.has(locale),
     );
     if (missingLocales.length > 0) {
         throw new Error(
@@ -141,14 +159,16 @@ function assertAllowlistPresent(localeNames) {
     }
 }
 
-export async function verifyElectronLocales(resourcesPath) {
+export async function verifyElectronLocales(
+    resourcesPath: string,
+): Promise<LocaleVerification> {
     const resolvedResourcesPath = await realpath(resourcesPath);
     const localeEntries = await readLocaleEntries(resolvedResourcesPath);
-    const localeNames = localeEntries.map((entry) => entry.name);
+    const localeNames = localeEntries.map((entry: any) => entry.name);
     assertAllowlistPresent(localeNames);
 
     const unexpectedLocales = localeNames.filter(
-        (locale) => !allowedLocales.has(locale),
+        (locale: any) => !allowedLocales.has(locale),
     );
     if (unexpectedLocales.length > 0) {
         throw new Error(
@@ -166,7 +186,13 @@ export async function verifyElectronLocales(resourcesPath) {
     });
 }
 
-export async function pruneElectronLocales({ buildPath, platform }) {
+export async function pruneElectronLocales({
+    buildPath,
+    platform,
+}: {
+    readonly buildPath: string;
+    readonly platform: string;
+}): Promise<LocalePruneResult> {
     if (platform !== "darwin") {
         return Object.freeze({
             skipped: true,
@@ -178,13 +204,13 @@ export async function pruneElectronLocales({ buildPath, platform }) {
     const resourcesPath = electronFrameworkResourcesPath(buildPath);
     const resolvedResourcesPath = await realpath(resourcesPath);
     const localeEntries = await readLocaleEntries(resolvedResourcesPath);
-    const localeNames = localeEntries.map((entry) => entry.name);
+    const localeNames = localeEntries.map((entry: any) => entry.name);
     assertAllowlistPresent(localeNames);
 
     const removableLocales = localeNames.filter(
-        (locale) => !allowedLocales.has(locale),
+        (locale: any) => !allowedLocales.has(locale),
     );
-    const removablePaths = [];
+    const removablePaths: any[] = [];
     for (const localeName of removableLocales) {
         removablePaths.push(
             await assertContainedLocaleDirectory(

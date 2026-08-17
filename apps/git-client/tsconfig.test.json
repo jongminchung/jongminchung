@@ -12,6 +12,7 @@
     "src/**/*.spec.tsx",
     "tests/**/*.ts",
     "electron-tests/**/*.ts",
+    "scripts/**/*.ts",
     "playwright*.ts",
     "vite.config.ts"
   ],

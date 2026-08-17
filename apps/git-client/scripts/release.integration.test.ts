@@ -30,7 +30,7 @@ import {
     stageReleaseArtifact,
     validateReleaseApp,
     verifyReleaseSource,
-} from "./release.mjs";
+} from "./release.ts";
 
 const SOURCE_SHA = "0123456789abcdef0123456789abcdef01234567";
 const productionEnvironment = Object.freeze({
@@ -228,7 +228,7 @@ describe("Electron release build contract", () => {
             { command: "pnpm", arguments: ["test"] },
             { command: "pnpm", arguments: ["test:e2e"] },
             { command: "pnpm", arguments: ["build"] },
-            { command: "pnpm", arguments: ["test:scripts"] },
+            { command: "pnpm", arguments: ["test:integration:native"] },
         ]);
         expect(
             createReleaseSourceGateCommands(RELEASE_MODES.localAdHoc),
@@ -236,7 +236,7 @@ describe("Electron release build contract", () => {
             { command: "pnpm", arguments: ["test"] },
             { command: "pnpm", arguments: ["test:e2e"] },
             { command: "pnpm", arguments: ["build"] },
-            { command: "pnpm", arguments: ["test:scripts"] },
+            { command: "pnpm", arguments: ["test:integration:native"] },
         ]);
         expect(createElectronPackageArguments()).toEqual([
             "electron:package",
@@ -619,7 +619,7 @@ describe("Electron release build contract", () => {
                 ["pnpm", ["test"]],
                 ["pnpm", ["test:e2e"]],
                 ["pnpm", ["build"]],
-                ["pnpm", ["test:scripts"]],
+                ["pnpm", ["test:integration:native"]],
                 ["pnpm", createElectronPackageArguments()],
             ]);
             expect(validateApp).toHaveBeenCalledOnce();

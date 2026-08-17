@@ -91,7 +91,7 @@
 - 신규 packaged UI→Git E2E: 기존 7개와 Safe Mode 시나리오 성공.
 - operation matrix: 51개 `GitOperationSchema` kind 회귀 없음.
 - `pnpm electron:package`: 성공.
-- `node scripts/smoke-electron-package.mjs`: `ready=true`, `preloadApi=true`, exit 0.
+- `node scripts/smoke-electron-package.ts`: `ready=true`, `preloadApi=true`, exit 0.
 - `pnpm test:electron`: 21/21 성공.
 
 ## 재현 명령
@@ -102,7 +102,7 @@
 pnpm --filter @jongminchung/git-client typecheck
 pnpm --filter @jongminchung/git-client test
 pnpm --filter @jongminchung/git-client test:e2e
-pnpm --filter @jongminchung/git-client test:scripts
+pnpm --filter @jongminchung/git-client test:integration:native
 pnpm --filter @jongminchung/git-client electron:package
 pnpm --filter @jongminchung/git-client electron:verify-package
 pnpm --filter @jongminchung/git-client electron:smoke-package

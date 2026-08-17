@@ -1,3 +1,4 @@
+// oxlint-disable typescript/no-explicit-any -- Native TypeScript entry points retain dynamic process, fixture, and injected test-double boundaries.
 import assert from "node:assert/strict";
 import { mkdir, mkdtemp, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -7,9 +8,9 @@ import {
     ELECTRON_LOCALE_ALLOWLIST,
     electronFrameworkResourcesPath,
     pruneElectronLocales,
-} from "./electron-package-policy.mjs";
+} from "./electron-package-policy.ts";
 
-const testRoots = [];
+const testRoots: any[] = [];
 
 async function makeBuildRoot() {
     const root = await mkdtemp(join(tmpdir(), "git-client-electron-locales-"));
@@ -52,7 +53,9 @@ void describe("Electron locale package policy", () => {
         assert.deepEqual(result.removed, ["de.lproj", "fr_FEMININE.lproj"]);
         assert.deepEqual(
             result.kept,
-            [...ELECTRON_LOCALE_ALLOWLIST].sort((a, b) => a.localeCompare(b)),
+            [...ELECTRON_LOCALE_ALLOWLIST].sort((a: any, b: any) =>
+                a.localeCompare(b),
+            ),
         );
     });
 

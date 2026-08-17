@@ -48,7 +48,7 @@ publisher는 새 production artifact를 먼저 만든 뒤 기존 `git-client-1.0
 ```sh
 pnpm --filter @jongminchung/git-client electron:package
 pnpm --filter @jongminchung/git-client electron:verify-package
-pnpm --filter @jongminchung/git-client test:electron-package-policy
+pnpm --filter @jongminchung/git-client run test:integration:native
 ```
 
 Developer ID가 없는 Apple Silicon Mac에서는 explicit local mode로 전체 source gate와 Forge package를 재현한다.

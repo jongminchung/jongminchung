@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
     normalizeHfsImageBuffer,
     normalizeUdifTrailerBuffer,
-} from "./reproducible-dmg.mjs";
+} from "./reproducible-dmg.ts";
 
 const IMAGE_BYTES = 16_384;
 const NODE_SIZE = 512;
@@ -12,7 +12,7 @@ const FIXED_HFS_TIMESTAMP = 3_660_681_600;
 
 describe("reproducible DMG module loading", () => {
     it("defers ds-store loading until Finder layout generation", () => {
-        const moduleUrl = new URL("./reproducible-dmg.mjs", import.meta.url)
+        const moduleUrl = new URL("./reproducible-dmg.ts", import.meta.url)
             .href;
         const script = `
       const Module = require("node:module");
