@@ -1,0 +1,55 @@
+import { describe, expect, it } from "vitest";
+import manifest from "../generated/content-manifest.json";
+import {
+    createSectionHref,
+    locales,
+    sectionLandingSections,
+} from "../lib/content-model";
+import { GET as getRobots } from "./(tech)/sites/tech/robots.txt/route";
+import sitemap from "./(tech)/sites/tech/sitemap";
+
+describe("documentation metadata routes", () => {
+    it("generates every localized document and section landing", () => {
+        const entries = sitemap();
+        const documentEntries = entries.slice(0, manifest.length);
+        expect(documentEntries.map(({ url }) => url)).toEqual(
+            manifest.map(({ href }) => `https://tech.jamie.kr${href}`),
+        );
+
+        for (const entry of documentEntries) {
+            const document = manifest.find(
+                ({ href }) => `https://tech.jamie.kr${href}` === entry.url,
+            );
+            if (document === undefined)
+                throw new Error(`Missing sitemap source for ${entry.url}.`);
+            expect(entry.lastModified).toBe(document.updatedAt);
+            expect(entry.alternates?.languages).toEqual({
+                ko: `https://tech.jamie.kr${manifest.find(({ id, locale }) => id === document.id && locale === "ko")?.href}`,
+                en: `https://tech.jamie.kr${manifest.find(({ id, locale }) => id === document.id && locale === "en")?.href}`,
+            });
+        }
+
+        const sectionEntries = entries.slice(manifest.length);
+        expect(sectionEntries.map(({ url }) => url)).toEqual(
+            locales.flatMap((locale) =>
+                sectionLandingSections.map(
+                    (section) =>
+                        `https://tech.jamie.kr${createSectionHref(locale, section)}`,
+                ),
+            ),
+        );
+        for (const entry of sectionEntries) {
+            expect(entry.alternates?.languages).toEqual({
+                ko: entry.url.replace(/\/en\//u, "/ko/"),
+                en: entry.url.replace(/\/ko\//u, "/en/"),
+            });
+        }
+    });
+
+    it("publishes the generated sitemap to crawlers", async () => {
+        const response = getRobots();
+        expect(await response.text()).toContain(
+            "Sitemap: https://tech.jamie.kr/sitemap.xml",
+        );
+    });
+});

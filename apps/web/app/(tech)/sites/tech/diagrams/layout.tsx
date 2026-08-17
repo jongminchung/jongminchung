@@ -1,0 +1,33 @@
+import type { Metadata } from "next";
+import type { ReactNode } from "react";
+import { TechDataProvider } from "#components/TechDataProvider";
+import {
+    InitialDocumentScripts,
+    rootFontClassName,
+    rootMetadata,
+} from "../../../../root-layout";
+import "../../../tech.css";
+
+export const metadata: Metadata = rootMetadata;
+
+export default function DiagramRootLayout({
+    children,
+}: {
+    readonly children: ReactNode;
+}): React.JSX.Element {
+    return (
+        <html
+            className={rootFontClassName}
+            lang="en"
+            data-theme="light"
+            suppressHydrationWarning
+        >
+            <head>
+                <InitialDocumentScripts />
+            </head>
+            <body data-site="tech">
+                <TechDataProvider>{children}</TechDataProvider>
+            </body>
+        </html>
+    );
+}

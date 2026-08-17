@@ -1,0 +1,171 @@
+"use client";
+
+import { Button } from "@jongminchung/ui/components/button";
+import {
+    Sheet,
+    SheetContent,
+    SheetTitle,
+} from "@jongminchung/ui/components/sheet";
+import { TooltipProvider } from "@jongminchung/ui/components/tooltip";
+import { usePathname } from "next/navigation";
+import type { ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
+import type {
+    CurrentNavigationEntry,
+    Locale,
+    NavigationEntry,
+} from "#lib/content-model";
+import { Icon } from "./Icon";
+import { MaterialLocaleProvider } from "./materials/MaterialLocaleContext";
+import {
+    ContextNavigation,
+    GlobalRail,
+    MobileNavigation,
+    MobileTopNavigation,
+} from "./Navigation";
+import { SearchProvider } from "./SearchPalette";
+import { TechUiProvider } from "./TechUiProvider";
+import styles from "./DocsShell.module.css";
+
+function TabletContextDrawer({
+    locale,
+    current,
+    documents,
+}: {
+    readonly locale: Locale;
+    readonly current: CurrentNavigationEntry;
+    readonly documents: readonly NavigationEntry[];
+}) {
+    const pathname = usePathname();
+    const triggerRef = useRef<HTMLButtonElement>(null);
+    const [isOpen, setIsOpen] = useState(false);
+    useEffect(() => setIsOpen(false), [pathname]);
+    const setOpen = (nextOpen: boolean): void => {
+        setIsOpen(nextOpen);
+        if (!nextOpen) requestAnimationFrame(() => triggerRef.current?.focus());
+    };
+    return (
+        <div className={styles.tabletContext}>
+            <Button
+                ref={triggerRef}
+                aria-label={
+                    locale === "ko" ? "현재 섹션 메뉴" : "Current section menu"
+                }
+                className={"h-8 gap-2 px-3 text-xs"}
+                onClick={() => setOpen(true)}
+                variant="outline"
+                size="default"
+            >
+                <Icon icon="menu" />
+                {locale === "ko" ? "현재 섹션" : "Current section"}
+            </Button>
+            <Sheet open={isOpen} onOpenChange={setOpen}>
+                <SheetContent
+                    className="w-80"
+                    closeLabel={
+                        locale === "ko"
+                            ? "현재 섹션 메뉴 닫기"
+                            : "Close current section menu"
+                    }
+                    side="left"
+                >
+                    <SheetTitle className="sr-only">
+                        {locale === "ko" ? "현재 섹션" : "Current section"}
+                    </SheetTitle>
+                    <ContextNavigation
+                        locale={locale}
+                        current={current}
+                        documents={documents}
+                    />
+                </SheetContent>
+            </Sheet>
+        </div>
+    );
+}
+
+export function DocsShell({
+    locale,
+    current,
+    documents,
+    children,
+}: {
+    readonly locale: Locale;
+    readonly current: CurrentNavigationEntry;
+    readonly documents: readonly NavigationEntry[];
+    readonly children: ReactNode;
+}) {
+    const pathname = usePathname();
+    const [isMobileOpen, setIsMobileOpen] = useState(false);
+    const mobileTriggerRef = useRef<HTMLButtonElement>(null);
+    useEffect(() => setIsMobileOpen(false), [pathname]);
+
+    const changeMobileOpen = (nextOpen: boolean): void => {
+        setIsMobileOpen(nextOpen);
+        if (!nextOpen)
+            requestAnimationFrame(() => mobileTriggerRef.current?.focus());
+    };
+
+    const navigation = (
+        <div className={styles.navigationFrame}>
+            <GlobalRail locale={locale} current={current} />
+            <ContextNavigation
+                locale={locale}
+                current={current}
+                documents={documents}
+                className={styles.contextInline}
+            />
+        </div>
+    );
+
+    return (
+        <TechUiProvider>
+            <SearchProvider locale={locale}>
+                <TooltipProvider>
+                    <div className={styles.shell}>
+                        {navigation}
+                        <main className={styles.main}>
+                            <MobileTopNavigation
+                                locale={locale}
+                                onMenuClick={() => changeMobileOpen(true)}
+                                triggerRef={mobileTriggerRef}
+                            />
+                            <Sheet
+                                open={isMobileOpen}
+                                onOpenChange={changeMobileOpen}
+                            >
+                                <SheetContent
+                                    closeLabel={
+                                        locale === "ko"
+                                            ? "모바일 문서 탐색 닫기"
+                                            : "Close mobile documentation navigation"
+                                    }
+                                    side="left"
+                                >
+                                    <SheetTitle className={styles.mobileTitle}>
+                                        {locale === "ko"
+                                            ? "모바일 문서 탐색"
+                                            : "Mobile documentation navigation"}
+                                    </SheetTitle>
+                                    <MobileNavigation
+                                        key={`${locale}:${current.section}`}
+                                        locale={locale}
+                                        current={current}
+                                        documents={documents}
+                                    />
+                                </SheetContent>
+                            </Sheet>
+                            <TabletContextDrawer
+                                locale={locale}
+                                current={current}
+                                documents={documents}
+                            />
+                            <MaterialLocaleProvider locale={locale}>
+                                {children}
+                            </MaterialLocaleProvider>
+                        </main>
+                    </div>
+                </TooltipProvider>
+            </SearchProvider>
+        </TechUiProvider>
+    );
+}

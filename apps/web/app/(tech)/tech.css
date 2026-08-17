@@ -1,0 +1,35 @@
+@import "@jongminchung/ui/globals.css";
+@import "./tech-theme.css";
+
+@source "../**/*.{ts,tsx,mdx}";
+
+@theme inline {
+    --color-warning: var(--warning);
+    --color-warning-muted: var(--warning-muted);
+    --color-warning-muted-foreground: var(--warning-muted-foreground);
+}
+
+html {
+    min-width: 320px;
+    scroll-behavior: smooth;
+}
+
+html:has([data-slot="sheet-content"][data-open]) {
+    overflow: clip;
+}
+
+body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    margin: 0;
+    font-family: var(--font-family-body);
+    text-rendering: optimizeLegibility;
+}
+
+::selection {
+    background: color-mix(in oklch, var(--primary) 22%, transparent);
+}
+:where(a, button, input, [tabindex]):focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 3px;
+}

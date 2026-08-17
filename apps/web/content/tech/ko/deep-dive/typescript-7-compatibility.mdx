@@ -1,0 +1,214 @@
+---
+id: deep-dive/typescript-7-compatibility
+locale: ko
+section: deep-dive
+title: TypeScript 7 호환성 검증
+displayTitle: TypeScript 7 호환성
+description: 컴파일러 메이저 업그레이드 전에 라이브러리 선언, Compiler API 결합, 빌드와 도구 체인을 증거로 검증합니다.
+order: 4
+publishedAt: "2026-08-11"
+updatedAt: "2026-08-11"
+verifiedAt: "2026-08-11"
+tags: [typescript, compatibility, migration, compiler, tooling]
+status: stable
+publicationStatus: published
+sourceUrl: https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/
+packageVersion: "7.0.2"
+---
+
+TypeScript 메이저 업그레이드는 `tsc --noEmit` 한 번으로 승인할 수 없다. 타입 선언만 소비하는
+라이브러리와 Compiler API를 실행하는 도구는 실패 방식이 다르고, 프레임워크가 자체 타입 검사를
+실행하면 프로젝트의 `tsc` 성공과 실제 빌드 결과도 달라질 수 있다.
+
+이 절차의 목표는 “아마 호환될 것”을 “어떤 버전과 경계에서 무엇을 실행해 확인했다”로 바꾸는
+것이다.
+
+이 저장소는 2026-08-11 현재 직접 외부 의존성 79개와 모든 workspace에서 TypeScript `6.0.3`을
+사용한다. 공개 패키지는 같은 compiler로 ESM JavaScript와 declaration을 생성한다. 아래 TS 7
+경로는 미래 전환을 위한 감사 절차이며 현재 production 구성에는 적용하지 않는다.
+
+## 1. 정확한 인벤토리를 고정한다
+
+모든 workspace manifest와 lockfile에서 직접 의존성의 정확한 버전을 수집한다. 직접 의존성은
+빠짐없이 판정하고, 전이 의존성은 TypeScript peer를 선언하거나 Compiler API를 import하는
+패키지까지 추적한다.
+
+```sh
+pnpm list -r --depth 0
+rg '"typescript"' package.json pnpm-workspace.yaml apps packages
+rg 'typescript/lib/typescript|require\\(.typescript.|from .typescript.' node_modules/.pnpm
+```
+
+패키지 이름만 기록하지 않는다. 버전, 사용하는 workspace, production/dev 구분, 실행되는
+스크립트를 함께 남겨야 같은 증거를 다시 만들 수 있다. lockfile이 바뀌면 검증 대상도 바뀐다.
+
+## 2. 결합 유형을 먼저 분류한다
+
+의존성을 다음 경계로 나누면 필요한 검사가 명확해진다.
+
+| 결합 유형         | 확인할 내용                                                                |
+| ----------------- | -------------------------------------------------------------------------- |
+| 타입 선언 소비    | TS 7이 실제 import와 공개 타입을 검사하는가                                |
+| CLI 실행          | `tsc`, build, test 명령이 TS 7 바이너리로 동작하는가                       |
+| Compiler API 소비 | `createProgram`, `readConfigFile`, AST·language service API를 import하는가 |
+| embedded language | MDX, Vue, Astro, Svelte 같은 별도 language tooling을 사용하는가            |
+| runtime/native    | Node/Electron ABI, packaging, 실제 실행이 정상인가                         |
+
+`peerDependencies.typescript`가 없다는 사실은 지원 선언이 아니다. 반대로 peer 범위에 7이 있어도
+사용 중인 API 경로와 빌드를 실행하지 않았다면 검증은 끝나지 않는다.
+
+## 3. 공식 근거와 로컬 증거를 분리한다
+
+먼저 버전이 고정된 공식 문서, release note, package manifest와 소스에서 지원 범위를 찾는다.
+그다음 현재 저장소의 typecheck, build, test 결과를 별도 열에 기록한다. 로컬 성공을 제조사의
+공식 지원 선언으로 표현하지 않는다.
+
+TypeScript 7.0은 [공식 발표](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/)에서
+안정적인 Compiler API가 없다고 명시한다. 또한 MDX 같은 embedded-language workflow는 당분간
+TypeScript 6을 유지하도록 안내한다. 이 차이는 일반적인 `.ts` 소스 호환성과 도구 체인
+호환성을 분리해야 하는 이유다.
+
+## 4. 생태계별 전환 경로를 만든다
+
+모든 패키지에 TS 7 전용 문서가 있는 것은 아니다. Compiler API, embedded language, d.ts emit처럼
+실제로 compiler에 결합된 도구는 공식 전환 경로를 찾고, 나머지는 저장소에서 실행하는 typecheck,
+build, packaging과 smoke test를 근거로 판단한다.
+
+현재 직접 의존성 79개는 다음 전환 도메인으로 모두 분류된다.
+
+| 영역            |  수 | 직접 의존성                                                                                                                                                                                                                                                                                                                         | TS 7 전환 경로                                                                                              |
+| --------------- | --: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| compiler·Nx     |   4 | `typescript`, `nx`, `@nx/devkit`, `@nx/js`                                                                                                                                                                                                                                                                                          | [Nx 공식 TS 6/7 병행 구성](https://nx.dev/docs/technologies/typescript/guides/typescript-7)과 Nx graph 검증 |
+| Next.js·MDX     |   7 | `next`, `@next/mdx`, `@mdx-js/loader`, `@mdx-js/mdx`, `@mdx-js/react`, `@types/mdx`, `remark-mdx-frontmatter`                                                                                                                                                                                                                       | Next CLI checker, MDX 지원, 콘텐츠 Compiler API를 각각 검증                                                 |
+| build·lint·test |   8 | `vite`, `@vitejs/plugin-react`, `vitest`, `oxlint`, `oxlint-tsgolint`, `oxfmt`, `@playwright/test`, `@axe-core/playwright`                                                                                                                                                                                                          | `tsc` d.ts emit, Vite build, type-aware lint, unit·E2E                                                      |
+| Electron·native |  11 | `@electron-forge/cli`, `@electron-forge/plugin-fuses`, `@electron-forge/plugin-vite`, `@electron-forge/shared-types`, `@electron/fuses`, `electron`, `ds-store`, `macos-alias`, `node-gyp`, `node-pty`, `sharp`                                                                                                                     | Forge package·release DMG 검증, native ABI, packaged app smoke                                              |
+| CSS             |   5 | `tailwindcss`, `@tailwindcss/postcss`, `@tailwindcss/vite`, `postcss`, `tw-animate-css`                                                                                                                                                                                                                                             | Vite·Next production CSS build                                                                              |
+| React·UI        |  14 | `react`, `react-dom`, `@types/react`, `@types/react-dom`, `@base-ui/react`, `@tanstack/react-virtual`, `lucide-react`, `class-variance-authority`, `clsx`, `cmdk`, `motion`, `pretendard`, `tailwind-merge`, `zod`                                                                                                                  | JSX 선언 검사와 실제 앱 build                                                                               |
+| editor          |  14 | `@codemirror/commands`, `@codemirror/lang-css`, `@codemirror/lang-html`, `@codemirror/lang-java`, `@codemirror/lang-javascript`, `@codemirror/lang-json`, `@codemirror/lang-python`, `@codemirror/language`, `@codemirror/merge`, `@codemirror/search`, `@codemirror/state`, `@codemirror/view`, `@xterm/addon-fit`, `@xterm/xterm` | Git Client typecheck·Vite build·runtime smoke                                                               |
+| content AST     |   9 | `gray-matter`, `rehype-slug`, `remark-frontmatter`, `remark-gfm`, `remark-parse`, `remark-stringify`, `unified`, `unist-util-visit`, `hast-util-to-string`                                                                                                                                                                          | 콘텐츠 생성과 manifest·검색 계약                                                                            |
+| runtime utility |   3 | `zustand`, `fflate`, `uuid`                                                                                                                                                                                                                                                                                                         | 선언 검사와 runtime smoke                                                                                   |
+| 개발 CLI        |   2 | `shadcn`, `npm-check-updates`                                                                                                                                                                                                                                                                                                       | CLI smoke; TypeScript 자동 갱신 제외 후 수동 전환                                                           |
+| 기타 선언       |   2 | `@excalidraw/excalidraw`, `@types/node`                                                                                                                                                                                                                                                                                             | `skipLibCheck: false` 비교와 앱 build                                                                       |
+
+합계는 79개다. 전이 의존성에서는 `@nx/workspace`, `ts-morph`를 추가로 추적하고, 저장소 코드에서는
+`web/scripts/build-content.ts`의 `typescript` import를 Compiler API 경계로 취급한다.
+
+공식 문서가 제공하는 핵심 경로는 다음과 같다.
+
+- TypeScript와 Nx는 TS 7 `tsc`와 TS 6 API를 병행할 수 있다.
+- Next.js `16.2.12`는
+  [`experimental.useTypeScriptCli`](https://github.com/vercel/next.js/blob/v16.2.12/docs/01-app/03-api-reference/05-config/01-next-config-js/useTypeScriptCli.mdx)로
+  production build에서 TS 7 CLI를 실행할 수 있다.
+- [Oxlint type-aware linting](https://oxc.rs/docs/guide/usage/linter/type-aware.html)은 TS 7 이상과
+  `oxlint-tsgolint@7`을 요구한다.
+- [TypeScript declaration 생성](https://www.typescriptlang.org/tsconfig/declaration.html)은 공개
+  패키지의 JavaScript emit과 같은 compiler 경계에서 실행한다.
+- [Vite](https://vite.dev/guide/features.html)와
+  [Playwright](https://playwright.dev/docs/test-typescript)는 변환과 타입 검사를 분리하며,
+  [Vitest](https://vitest.dev/guide/testing-types.html)는 typecheck 모드에서 `tsc`를 실행한다.
+- Electron Forge의 [TypeScript 설정](https://www.electronforge.io/config/typescript-configuration)과
+  Vite 플러그인은 compiler 지원 선언보다 실제 Forge package·release DMG 검증이 중요하다.
+
+공식 전환 경로가 없다는 사실을 미지원으로 단정하지 않는다. 반대로 React, CodeMirror,
+Tailwind처럼 선언만 소비하는 패키지도 실제 application build를 통과하기 전에는 지원 확인으로
+판정하지 않는다.
+
+## 5. production compiler를 하나로 유지한다
+
+production 경계 중 하나라도 TypeScript 6 Compiler API를 필요로 하면 추적되는 모든 workspace를
+최신 안정 TypeScript 6 릴리스에 맞춘다. TS 7 후보는 일회용 복사본이나 격리 브랜치에서 평가할
+수 있지만 compiler alias나 분리된 compiler tree를 production 구성으로 커밋하지 않는다.
+
+```sh
+pnpm exec tsc --version
+pnpm list -r typescript --depth 0
+pnpm exec nx show projects
+```
+
+compiler 버전, `typescript`로 import되는 패키지, 프레임워크 자체 타입 검사가 모두 같은
+workspace 기준선을 해석해야 한다. 격리된 TS 7 CLI 성공은 미래 전환의 증거일 뿐, 추적
+workspace에서 compiler 역할을 나눌 근거가 아니다.
+
+Nx가 병행 구성을 공식 지원하더라도 저장소가 반드시 그 production topology를 채택해야 하는 것은
+아니다. 이 저장소는 MDX와 자체 콘텐츠 Compiler API 경계가 남아 있으므로 모든 workspace에
+TypeScript 6.0.3 하나만 설치한다.
+
+## 6. 설정 변경을 먼저 드러낸다
+
+TypeScript 6에서 임시 `ignoreDeprecations`를 제거하고 TS 7의 기본값과 금지된 옵션을 확인한다.
+특히 `rootDir`, `types`, `module`, `moduleResolution`, `strict`,
+`noUncheckedSideEffectImports`, `libReplacement`을 실제 `--showConfig` 결과로 비교한다.
+
+```sh
+pnpm exec tsc --showConfig -p tsconfig.json
+pnpm exec tsc --noEmit --incremental false -p tsconfig.json
+```
+
+모든 tsconfig를 개별 실행한다. 루트 검사 하나가 앱, Electron main process, 패키지 build
+config를 포함한다고 가정하지 않는다.
+
+## 7. 검증 사다리를 끝까지 오른다
+
+낮은 비용의 검사부터 실제 배포 경계까지 순서대로 실행한다.
+
+1. 모든 tsconfig의 `tsc --noEmit`
+2. `skipLibCheck: false` 진단
+3. bundler와 declaration emit
+4. unit/integration/E2E test
+5. 프레임워크 자체 타입 검사와 production build
+6. watch와 editor/LSP 기능
+7. Electron/native packaging과 smoke test
+
+`skipLibCheck: false`는 좋은 감사 도구지만 항상 release gate인 것은 아니다. TS 6에서도 같은
+오류가 발생하는지 비교해 기존 선언 부채와 TS 7 회귀를 분리한다. 평소 `skipLibCheck: true`인
+프로젝트에서 TS 7 typecheck가 성공했다는 사실만으로 전이 선언 전체가 호환된다고 결론 내리지
+않는다.
+
+Next.js 16.2.12의 기본 checker는
+[검증 코드](https://github.com/vercel/next.js/blob/v16.2.12/packages/next/src/lib/verify-typescript-setup.ts)에서
+`typescript/lib/typescript.js`를 찾고,
+[타입 검사 구현](https://github.com/vercel/next.js/blob/v16.2.12/packages/next/src/lib/typescript/runTypeCheck.ts)에서
+`createProgram`과 `getPreEmitDiagnostics`를 호출한다. 다만 공식
+[`experimental.useTypeScriptCli`](https://github.com/vercel/next.js/blob/v16.2.12/docs/01-app/03-api-reference/05-config/01-next-config-js/useTypeScriptCli.mdx)를
+켜면 `next build`가 프로젝트의 TS 7 `tsc`를 대신 실행한다. 따라서 Next.js는 더 이상 절대
+차단이 아니지만, 옵션을 켜지 않은 외부 TS 7 검사나 일반 `tsc --noEmit`은 `next build` 성공을
+대신하지 않는다.
+
+## 8. 판정과 재확인 조건을 함께 남긴다
+
+| 판정                 | 사용 기준                                          |
+| -------------------- | -------------------------------------------------- |
+| 지원 확인            | 공식 범위와 실제 사용 경계가 TS 7에서 통과         |
+| 보류                 | 필수 API, framework, editor, release 경계가 미지원 |
+| 차단                 | 단일 TS 7에서 사용 경계의 실패를 재현              |
+| TypeScript 비결합    | Compiler API나 TypeScript peer와 무관              |
+| 기준선 오류로 미확정 | 기존 실패 때문에 TS 7 고유 회귀를 분리하지 못함    |
+
+보류·차단 판정에는 “어떤 릴리스나 테스트가 통과하면 다시 볼 것인지”를 반드시 적는다.
+검증일, 정확한 버전, 명령, 종료 코드와 첫 번째 원인 오류를 함께 보관한다.
+
+## 9. workspace를 하나의 경계로 이동한다
+
+하나의 후보 버전이 모든 tsconfig, package build, framework build, editor와 watch, Nx release
+graph, Electron packaging 경계를 통과한 뒤에만 compiler major를 채택한다. workspace manifest와
+lockfile을 함께 바꾸고 전체 검증을 실행한다. 필수 경계 하나라도 실패하면 단일 버전 변경을
+되돌린다.
+
+역사적 감사에서는 단일 TS 7 구성이 Nx graph, Next.js 기본 checker와 콘텐츠 Compiler API에서
+실패했다. 이후 Nx와 Next.js에는 공식 전환 경로가 생겼지만 MDX와 저장소 콘텐츠 Compiler API
+경계는 남아 있다. 현재 결정은 모든 workspace가 TypeScript 6.0.3 하나를 사용하고, TS 7
+alias나 workspace별 compiler 분리는 production에 적용하지 않는 것이다.
+
+## 참고 자료
+
+- [TypeScript 7.0 발표](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/)
+- [Nx의 TypeScript 7 병행 절차](https://nx.dev/docs/technologies/typescript/guides/typescript-7)
+- [Next.js 16.2.12 `useTypeScriptCli`](https://github.com/vercel/next.js/blob/v16.2.12/docs/01-app/03-api-reference/05-config/01-next-config-js/useTypeScriptCli.mdx)
+- [Next.js 16.2.12 TypeScript setup](https://github.com/vercel/next.js/blob/v16.2.12/packages/next/src/lib/verify-typescript-setup.ts)
+- [Oxlint type-aware linting](https://oxc.rs/docs/guide/usage/linter/type-aware.html)
+- [TypeScript declaration](https://www.typescriptlang.org/tsconfig/declaration.html)
+- [Vite TypeScript](https://vite.dev/guide/features.html)
+- [Vitest type testing](https://vitest.dev/guide/testing-types.html)
+- [Playwright TypeScript](https://playwright.dev/docs/test-typescript)
+- [Electron Forge TypeScript setup](https://www.electronforge.io/config/typescript-configuration)
+- [저장소 호환성 감사 보고서](https://github.com/jongminchung/jongminchung/blob/main/docs/typescript-7-compatibility-report.md)

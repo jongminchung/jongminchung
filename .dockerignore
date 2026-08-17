@@ -1,0 +1,16 @@
+.git
+.github
+.idea
+.next
+.nx
+.vscode
+coverage
+node_modules
+**/.next
+**/node_modules
+**/test-results
+**/playwright-report
+apps/git-client/out
+apps/git-client/.vite
+*.tsbuildinfo
+.DS_Store
