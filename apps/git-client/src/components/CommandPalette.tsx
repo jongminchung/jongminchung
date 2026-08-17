@@ -47,7 +47,9 @@ export function CommandPalette({
     readonly scope: PaletteScope;
 }): ReactNode {
     const [query, setQuery] = useState("");
+    const [selectedItemId, setSelectedItemId] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
+    const itemElementsRef = useRef(new Map<string, HTMLDivElement>());
     useEffect(() => inputRef.current?.focus(), []);
     const scopedItems = useMemo(
         () =>
@@ -60,6 +62,26 @@ export function CommandPalette({
         () => sortPaletteItems(scopedItems, query),
         [query, scopedItems],
     );
+    useEffect(() => {
+        setSelectedItemId((current) => {
+            const currentItem = results.find((item) => item.id === current);
+            if (currentItem?.availability.status !== "disabled") return current;
+            return (
+                results.find((item) => item.availability.status !== "disabled")
+                    ?.id ?? ""
+            );
+        });
+    }, [results]);
+    useEffect(() => {
+        const input = inputRef.current;
+        if (input === null) return;
+        const optionId = itemElementsRef.current.get(selectedItemId)?.id;
+        if (optionId === undefined) {
+            input.removeAttribute("aria-activedescendant");
+            return;
+        }
+        input.setAttribute("aria-activedescendant", optionId);
+    }, [results, selectedItemId]);
     const copy = PALETTE_COPY[scope];
 
     const activate = async (item: PaletteItem): Promise<void> => {
@@ -83,7 +105,12 @@ export function CommandPalette({
             purpose="info"
             width={680}
         >
-            <Command className="min-h-0 rounded-lg" shouldFilter={false}>
+            <Command
+                className="min-h-0 rounded-lg"
+                onValueChange={setSelectedItemId}
+                shouldFilter={false}
+                value={selectedItemId}
+            >
                 <div className="relative border-b border-border pr-12">
                     <CommandInput
                         aria-label={copy.label}
@@ -109,6 +136,13 @@ export function CommandPalette({
                             disabled={item.availability.status === "disabled"}
                             key={item.id}
                             onSelect={() => void activate(item)}
+                            ref={(element) => {
+                                if (element === null) {
+                                    itemElementsRef.current.delete(item.id);
+                                    return;
+                                }
+                                itemElementsRef.current.set(item.id, element);
+                            }}
                             value={item.id}
                         >
                             <span className="grid min-w-0 flex-1 gap-0.5">
