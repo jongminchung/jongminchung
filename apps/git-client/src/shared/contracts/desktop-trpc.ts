@@ -6,26 +6,11 @@ import {
     type DesktopTrpcDomain,
     type DesktopTrpcOperationType,
 } from "./desktop-trpc-wire";
-import {
-    FileContentSchema,
-    FilePreviewSchema,
-    GitCloneRepositoryRequestSchema,
-    GitCreationCancelledEventSchema,
-    GitCreationCompletedEventSchema,
-    GitCreationFailedEventSchema,
-    GitExecutionRequestSchema,
-    GitInitializeRepositoryRequestSchema,
-    GitReadFileRequestSchema,
-    GitRepositoryServiceRequestSchema,
-    GitRepositoryServiceResultSchema,
-    GitWatchRepositoryRequestSchema,
-    GitWorkingTreeFileRequestSchema,
-    GitWriteWorkingTreeFileRequestSchema,
-    OpenRepositoryRequestSchema,
-    RepositoryRecordSchema,
-    RepositorySnapshotSchema,
-} from "./git-utility";
-import { HostingAccountSchema, HostingResponseSchema } from "./hosting";
+import { createGitProcedures } from "./desktop-trpc/git";
+import { createHostingProcedures } from "./desktop-trpc/hosting";
+import { createLocalHistoryProcedures } from "./desktop-trpc/local-history";
+import { createSettingsProcedures } from "./desktop-trpc/settings";
+import { createTerminalProcedures } from "./desktop-trpc/terminal";
 import {
     ClipboardTextSchema,
     ClipboardWriteRequestSchema,
@@ -40,27 +25,14 @@ import {
     DiagnosticPathKindSchema,
     DiagnosticSnapshotSchema,
     ExternalUrlSchema,
-    GitCancelQueryRequestSchema,
-    GitCloseRepositoryRequestSchema,
-    GitRepositoryRequestSchema,
-    GitTerminalResultSchema,
-    HostingDeleteAccountRequestSchema,
-    HostingExecuteRequestSchema,
-    HostingRestoreAccountsRequestSchema,
-    HostingSaveAccountRequestSchema,
     HtmlExportRequestSchema,
-    JsonValueSchema,
     MaintenanceRelaunchRequestSchema,
     NativeCommandStatesSchema,
     OfflineInspectionFilesSchema,
     PatchTextExportRequestSchema,
     RuntimeInfoSchema,
-    SettingsDeleteRequestSchema,
-    SettingsGetRequestSchema,
-    SettingsSetRequestSchema,
     WindowPresentationModeSchema,
 } from "./ipc";
-import { LocalHistoryRepositoryRequestSchema } from "./local-history-ipc";
 export {
     DESKTOP_TRPC_CHANNELS,
     DESKTOP_TRPC_PROTOCOL_VERSION,
@@ -73,16 +45,6 @@ export {
     type DesktopTrpcResponse,
     type MainDesktopTrpcDomain,
 } from "./desktop-trpc-wire";
-import {
-    TerminalCloseRepositoryRequestSchema,
-    TerminalCloseRequestSchema,
-    TerminalCreateRequestSchema,
-    TerminalCreateResultSchema,
-    TerminalLaunchTargetsSchema,
-    TerminalListLaunchTargetsRequestSchema,
-    TerminalResizeRequestSchema,
-    TerminalWriteRequestSchema,
-} from "./terminal";
 
 interface DesktopTrpcContext {
     readonly authorize: (
@@ -103,11 +65,6 @@ const VoidSchema = z.void();
 const BooleanSchema = z.boolean();
 const DiagnosticConfigurationTextSchema = z.string().max(1_048_576);
 const DiagnosticPathResultSchema = z.string().min(1).max(32_768);
-const GitCreationTerminalResultSchema = z.discriminatedUnion("kind", [
-    GitCreationCompletedEventSchema,
-    GitCreationFailedEventSchema,
-    GitCreationCancelledEventSchema,
-]);
 
 export interface DesktopTrpcProcedureContract {
     readonly type: DesktopTrpcOperationType;
@@ -249,7 +206,7 @@ function procedureWithAuthorization<
     }
 }
 
-function query<TInput extends z.ZodType, TOutput extends z.ZodType>(
+export function query<TInput extends z.ZodType, TOutput extends z.ZodType>(
     domain: DesktopTrpcDomain,
     procedure: string,
     input: TInput,
@@ -281,7 +238,7 @@ function query<TInput extends z.ZodType, TOutput extends z.ZodType>(
     return configured.query(resolver as Parameters<typeof configured.query>[0]);
 }
 
-function mutation<TInput extends z.ZodType, TOutput extends z.ZodType>(
+export function mutation<TInput extends z.ZodType, TOutput extends z.ZodType>(
     domain: DesktopTrpcDomain,
     procedure: string,
     input: TInput,
@@ -424,36 +381,7 @@ export const platformProcedures = {
         VoidSchema,
         OfflineInspectionFilesSchema.nullable(),
     ),
-    settingsGet: query(
-        "platform",
-        "settingsGet",
-        SettingsGetRequestSchema,
-        JsonValueSchema.nullable(),
-    ),
-    settingsSet: mutation(
-        "platform",
-        "settingsSet",
-        SettingsSetRequestSchema,
-        VoidSchema,
-    ),
-    settingsDelete: mutation(
-        "platform",
-        "settingsDelete",
-        SettingsDeleteRequestSchema,
-        VoidSchema,
-    ),
-    settingsExport: mutation(
-        "platform",
-        "settingsExport",
-        VoidSchema,
-        BooleanSchema,
-    ),
-    settingsImport: mutation(
-        "platform",
-        "settingsImport",
-        VoidSchema,
-        BooleanSchema,
-    ),
+    ...createSettingsProcedures(mutation, query),
     dialogOpenDirectory: mutation(
         "platform",
         "dialogOpenDirectory",
@@ -498,189 +426,17 @@ export const platformProcedures = {
     ),
 } as const;
 
-export const gitProcedures = {
-    openRepository: mutation(
-        "git",
-        "openRepository",
-        OpenRepositoryRequestSchema,
-        RepositoryRecordSchema,
-    ),
-    initializeRepository: mutation(
-        "git",
-        "initializeRepository",
-        GitInitializeRepositoryRequestSchema,
-        GitCreationTerminalResultSchema,
-        { kind: "activeCapability", capability: "gitMutation" },
-    ),
-    cloneRepository: mutation(
-        "git",
-        "cloneRepository",
-        GitCloneRepositoryRequestSchema,
-        GitCreationTerminalResultSchema,
-        { kind: "activeCapability", capability: "gitMutation" },
-    ),
-    closeRepository: mutation(
-        "git",
-        "closeRepository",
-        GitCloseRepositoryRequestSchema,
-        BooleanSchema,
-    ),
-    inspectSnapshot: query(
-        "git",
-        "inspectSnapshot",
-        GitRepositoryRequestSchema,
-        RepositorySnapshotSchema,
-    ),
-    repositoryService: mutation(
-        "git",
-        "repositoryService",
-        GitRepositoryServiceRequestSchema,
-        GitRepositoryServiceResultSchema,
-        { kind: "repositoryCapability", capability: "gitMutation" },
-    ),
-    query: mutation(
-        "git",
-        "query",
-        GitExecutionRequestSchema,
-        GitTerminalResultSchema,
-        {
-            kind: "repositoryCapability",
-            capability: "gitMutation",
-        },
-    ),
-    cancelQuery: mutation(
-        "git",
-        "cancelQuery",
-        GitCancelQueryRequestSchema,
-        BooleanSchema,
-    ),
-    readFile: query(
-        "git",
-        "readFile",
-        GitReadFileRequestSchema,
-        FileContentSchema,
-    ),
-    readFilePreview: query(
-        "git",
-        "readFilePreview",
-        GitReadFileRequestSchema,
-        FilePreviewSchema,
-    ),
-    writeWorkingTreeFile: mutation(
-        "git",
-        "writeWorkingTreeFile",
-        GitWriteWorkingTreeFileRequestSchema,
-        VoidSchema,
-        { kind: "repositoryCapability", capability: "gitMutation" },
-    ),
-    openWorkingTreeFile: mutation(
-        "git",
-        "openWorkingTreeFile",
-        GitWorkingTreeFileRequestSchema,
-        VoidSchema,
-        { kind: "repositoryCapability", capability: "externalExecution" },
-    ),
-    watchRepository: mutation(
-        "git",
-        "watchRepository",
-        GitWatchRepositoryRequestSchema,
-        VoidSchema,
-    ),
-    unwatchRepository: mutation(
-        "git",
-        "unwatchRepository",
-        GitWatchRepositoryRequestSchema,
-        VoidSchema,
-    ),
-} as const;
+export const gitProcedures = createGitProcedures(mutation, query);
 
-export const terminalProcedures = {
-    create: mutation(
-        "terminal",
-        "create",
-        TerminalCreateRequestSchema,
-        TerminalCreateResultSchema,
-        {
-            kind: "repositoryCapability",
-            capability: "terminal",
-        },
-    ),
-    listLaunchTargets: query(
-        "terminal",
-        "listLaunchTargets",
-        TerminalListLaunchTargetsRequestSchema,
-        TerminalLaunchTargetsSchema,
-        { kind: "activeCapability", capability: "terminal" },
-    ),
-    write: mutation(
-        "terminal",
-        "write",
-        TerminalWriteRequestSchema,
-        VoidSchema,
-    ),
-    resize: mutation(
-        "terminal",
-        "resize",
-        TerminalResizeRequestSchema,
-        VoidSchema,
-    ),
-    close: mutation(
-        "terminal",
-        "close",
-        TerminalCloseRequestSchema,
-        VoidSchema,
-    ),
-    closeRepository: mutation(
-        "terminal",
-        "closeRepository",
-        TerminalCloseRepositoryRequestSchema,
-        VoidSchema,
-    ),
-} as const;
+export const terminalProcedures = createTerminalProcedures(
+    mutation,
+    query,
+    VoidSchema,
+);
 
-export const hostingProcedures = {
-    saveAccount: mutation(
-        "hosting",
-        "saveAccount",
-        HostingSaveAccountRequestSchema,
-        HostingAccountSchema,
-        { kind: "activeCapability", capability: "hosting" },
-    ),
-    restoreAccounts: mutation(
-        "hosting",
-        "restoreAccounts",
-        HostingRestoreAccountsRequestSchema,
-        VoidSchema,
-        { kind: "activeCapability", capability: "hosting" },
-    ),
-    deleteAccount: mutation(
-        "hosting",
-        "deleteAccount",
-        HostingDeleteAccountRequestSchema,
-        VoidSchema,
-        { kind: "activeCapability", capability: "hosting" },
-    ),
-    execute: mutation(
-        "hosting",
-        "execute",
-        HostingExecuteRequestSchema,
-        HostingResponseSchema,
-        {
-            kind: "activeCapability",
-            capability: "hosting",
-        },
-    ),
-} as const;
+export const hostingProcedures = createHostingProcedures(mutation, VoidSchema);
 
-export const localHistoryProcedures = {
-    repositoryService: mutation(
-        "localHistory",
-        "repositoryService",
-        LocalHistoryRepositoryRequestSchema,
-        GitRepositoryServiceResultSchema,
-        { kind: "repositoryCapability", capability: "gitMutation" },
-    ),
-} as const;
+export const localHistoryProcedures = createLocalHistoryProcedures(mutation);
 
 export const mainDesktopTrpcRouter = t.router({
     platform: t.router(platformProcedures),
