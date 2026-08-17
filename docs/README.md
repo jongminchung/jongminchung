@@ -20,6 +20,6 @@
 
 - [Git Client 문서](../apps/git-client/docs/README.md): 로컬 개발·테스트, 독립 감사와 GitHub Release
 - [Git Client 기여 가이드](../apps/git-client/CONTRIBUTING.md)
-- [Engineering Docs material 소유권](../apps/engineering-docs/components/materials/README.md)
-- [`@jongminchung/icon`](../packages/icon/README.md): 아이콘 원본과 생성 자산
+- [Web material 소유권](../apps/web/components/materials/README.md)
+- [Web 컨테이너 배포 계약](../apps/web/DEPLOYMENT.md)
 - [`@jongminchung/tooling`](../packages/tooling/README.md): Oxc 설정과 package map

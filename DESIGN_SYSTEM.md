@@ -175,7 +175,7 @@ import "./globals.css";
 - `"use client"`가 있는 공용 component는 실제 server output에서 import될 때만 client boundary 생성
 - 정적 shell, link, document content는 server rendering 유지
 - provider는 필요한 가장 작은 interactive subtree에 배치
-- `apps/engineering-docs`와 `apps/readme`는 workspace의 `@jongminchung/ui` source를 transpile
+- `apps/web`은 세 사이트에서 workspace의 `@jongminchung/ui` source를 transpile하고 사이트별 theme token을 분리함
 - Vite 기반 Git Client는 `source` export condition으로 같은 소스를 사용하고 `react`, `react-dom`을 dedupe
 - 외부 consumer는 공개 subpath의 ESM JavaScript와 declaration을 사용
 - 호환성 판단은 저장소 내부의 실제 import와 consumer를 기준으로 수행

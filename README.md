@@ -48,7 +48,7 @@ Each workspace owns its build, typecheck, and test commands. Select one with a f
 adding a package-specific wrapper to the root manifest:
 
 ```bash
-pnpm --filter @jongminchung/engineering-docs run build
+pnpm --filter @jongminchung/web run build
 ```
 
 ## Version Policy

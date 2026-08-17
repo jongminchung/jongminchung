@@ -26,14 +26,12 @@ pnpm install --frozen-lockfile
 
 ## Workspace 구조
 
-| Workspace               | 역할                                        | 주요 개발 명령                                         |
-| ----------------------- | ------------------------------------------- | ------------------------------------------------------ |
-| `apps/engineering-docs` | Next.js·MDX 기술 문서 앱                    | `pnpm --filter @jongminchung/engineering-docs run dev` |
-| `apps/readme`           | 개인 README Next.js 앱                      | `pnpm --filter @jongminchung/readme run dev`           |
-| `apps/git-client`       | macOS Electron Git 클라이언트               | `pnpm --filter @jongminchung/git-client run dev`       |
-| `packages/ui`           | 공개 UI primitive·기본 theme·semantic token | `pnpm --filter @jongminchung/ui run build`             |
-| `packages/icon`         | 아이콘 원본과 앱별 생성 자산                | `pnpm run icon:check`                                  |
-| `packages/tooling`      | Oxc 공용 설정                               | `pnpm --filter @jongminchung/tooling run test`         |
+| Workspace          | 역할                                        | 주요 개발 명령                                   |
+| ------------------ | ------------------------------------------- | ------------------------------------------------ |
+| `apps/web`         | 프로필·기술·투자 멀티도메인 Next.js 앱      | `pnpm --filter @jongminchung/web run dev`        |
+| `apps/git-client`  | macOS Electron Git 클라이언트               | `pnpm --filter @jongminchung/git-client run dev` |
+| `packages/ui`      | 공개 UI primitive·기본 theme·semantic token | `pnpm --filter @jongminchung/ui run build`       |
+| `packages/tooling` | Oxc 공용 설정                               | `pnpm --filter @jongminchung/tooling run test`   |
 
 공용 UI의 소유권, token과 component 추가 규칙은 [디자인 시스템](DESIGN_SYSTEM.md)을
 따른다. 앱별 product component를 `packages/ui`로 옮기거나 앱에서 공용 primitive를 복제하지
@@ -44,8 +42,7 @@ pnpm install --frozen-lockfile
 변경 중에는 가장 가까운 workspace 검사를 먼저 실행한다.
 
 ```sh
-pnpm --filter @jongminchung/engineering-docs run typecheck
-pnpm --filter @jongminchung/readme run typecheck
+pnpm --filter @jongminchung/web run typecheck
 pnpm --filter @jongminchung/git-client run qa:compact
 pnpm --filter @jongminchung/ui run build
 pnpm --filter @jongminchung/ui run test
@@ -58,20 +55,21 @@ pnpm --filter @jongminchung/ui run test
 | `pnpm run fmt:check`            | Oxfmt 형식 검사                              |
 | `pnpm run lint`                 | Oxlint 정적 분석                             |
 | `pnpm run typecheck`            | 루트와 모든 workspace TypeScript 검사        |
-| `pnpm run test`                 | Unit·architecture·integration·script 테스트  |
+| `pnpm run test`                 | Unit·Integration 테스트                      |
+| `pnpm run test:e2e`             | build 후 앱별 Playwright E2E                 |
 | `pnpm run check`                | format, lint, typecheck와 전체 로컬 테스트   |
 | `pnpm run check:full`           | `check`, E2E typecheck, 단일 build, core E2E |
 | `pnpm run check:full:electron`  | `check:full`과 clean package Electron E2E    |
 | `pnpm run check:full:materials` | `check:full`과 생성된 전체 material E2E      |
 
-Vitest는 빠른 Unit, 실제 Git·filesystem·PTY·tarball Integration, 의존 방향과 디자인 시스템
-Architecture project로 분리한다. Unit coverage 기준선을 의도적으로 갱신할 때만 다음 명령을
-실행하고 생성된 `coverage-baseline.json`의 변화를 검토한다.
+테스트 계약은 빠른 Unit, 실제 Git·filesystem·PTY·tarball Integration, build된 앱을 검증하는
+Playwright E2E로 구분한다. Unit coverage 기준선을 의도적으로 갱신할 때만 다음 명령을 실행하고
+생성된 `coverage-baseline.json`의 변화를 검토한다.
 
 ```sh
 pnpm run test:unit
-pnpm run test:architecture
 pnpm run test:integration
+pnpm run test:e2e
 pnpm run test:coverage:update
 ```
 
@@ -83,7 +81,7 @@ pnpm run test:coverage:update
 | React·CSS·공용 UI                      | 해당 workspace typecheck·test, 관련 Playwright, `DESIGN_SYSTEM.md` 계약 |
 | Next.js route·MDX 파이프라인           | 해당 앱 typecheck·test·build, core E2E                                  |
 | 공용 패키지                            | 해당 패키지 typecheck·test·build, 소비 앱 typecheck                     |
-| 아이콘                                 | `icon:generate`, `icon:check`, 관련 visual snapshot 확인                |
+| 웹 브랜드·파비콘                       | Web typecheck·build, 관련 visual snapshot 확인                          |
 | Git Client renderer                    | `qa:compact`                                                            |
 | Git Client main·preload·utility·native | 전용 가이드의 package verify·smoke·Electron E2E                         |
 | 릴리스·배포                            | `check:full`과 해당 dry-run·릴리스 가이드                               |
@@ -92,40 +90,32 @@ pnpm run test:coverage:update
 
 생성된 파일을 직접 고치지 않고 소스와 생성 명령을 함께 사용한다.
 
-### 아이콘
-
-`packages/icon/src/index.ts`가 아이콘 색상과 도형의 단일 원본이다. 앱의 `app/icon.svg`는
-직접 편집하지 않는다.
-
-```sh
-pnpm run icon:generate
-pnpm run icon:check
-```
-
-### Engineering Docs 콘텐츠
+### Web 콘텐츠
 
 콘텐츠 manifest, loader와 검색 데이터는 MDX 소스에서 생성한다.
 
 ```sh
-pnpm --filter @jongminchung/engineering-docs run content:build
-pnpm --filter @jongminchung/engineering-docs run content:check
+pnpm --filter @jongminchung/web run content:build
+pnpm --filter @jongminchung/web run content:check
+pnpm --filter @jongminchung/web run investment:build
+pnpm --filter @jongminchung/web run investment:check
 ```
 
-`apps/engineering-docs/components/materials/topics`는 이 저장소가 직접 관리하는 canonical
+`apps/web/components/materials/topics`는 이 저장소가 직접 관리하는 canonical
 source이다. topic 파일과 export를 직접 수정하고
-[material 소유권 문서](apps/engineering-docs/components/materials/README.md)의 계약에 따라
+[material 소유권 문서](apps/web/components/materials/README.md)의 계약에 따라
 추적 registry를 갱신한 뒤 다음 검사를 실행한다.
 
 ```sh
-pnpm --filter @jongminchung/engineering-docs run materials:build
-pnpm --filter @jongminchung/engineering-docs run materials:check
+pnpm --filter @jongminchung/web run materials:build
+pnpm --filter @jongminchung/web run materials:check
 ```
 
 Excalidraw 정적 자산은 전용 준비·검사 명령으로 갱신한다.
 
 ```sh
-pnpm --filter @jongminchung/engineering-docs run excalidraw:assets
-pnpm --filter @jongminchung/engineering-docs run excalidraw:check
+pnpm --filter @jongminchung/web run excalidraw:assets
+pnpm --filter @jongminchung/web run excalidraw:check
 ```
 
 Playwright snapshot은 의도적인 시각 변경만 갱신한다. 갱신 후 새 기준 이미지와 diff를 직접
@@ -175,7 +165,6 @@ pnpm install
 - 공개 패키지는 공통 `tsconfig.base.json`의 strict 검사를 상속하고 패키지별
   `tsconfig.build.json`에 emit 옵션만 명시해 ESM JavaScript와 declaration을 직접 생성한다.
 - 번들러 재도입 조건은 [ADR 0002](docs/adr/0002-node-library-tsc-build.md)를 따른다.
-- `packages/icon`은 private source package이므로 registry에 게시하지 않는다.
 
 ```sh
 pnpm run check

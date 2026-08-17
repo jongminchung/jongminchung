@@ -67,17 +67,16 @@ advisory가 발견되면 다음 순서로 처리한다.
 
 ## 생성물 관리
 
-| 대상                                  | 원본                            | 갱신                                                             | 검증                         |
-| ------------------------------------- | ------------------------------- | ---------------------------------------------------------------- | ---------------------------- |
-| 앱 아이콘 SVG                         | `packages/icon/src/index.ts`    | `pnpm run icon:generate`                                         | `pnpm run icon:check`        |
-| Engineering Docs 콘텐츠 manifest·검색 | `apps/engineering-docs/content` | `pnpm --filter @jongminchung/engineering-docs run content:build` | `content:check`              |
-| Engineering Docs material registry    | `components/materials/topics`   | `materials:build`                                                | `materials:check`            |
-| Excalidraw 정적 자산                  | Excalidraw source asset         | `excalidraw:assets`                                              | `excalidraw:check`           |
-| Playwright snapshot                   | 렌더링 결과                     | 각 workspace의 `test:e2e:update`                                 | visual test와 diff 직접 검토 |
+| 대상                               | 원본                          | 갱신                                                   | 검증                         |
+| ---------------------------------- | ----------------------------- | ------------------------------------------------------ | ---------------------------- |
+| Web 기술 콘텐츠 manifest·검색      | `apps/web/content/tech`       | `pnpm --filter @jongminchung/web run content:build`    | `content:check`              |
+| Web 투자 콘텐츠 manifest           | `apps/web/content/invest`     | `pnpm --filter @jongminchung/web run investment:build` | `investment:check`           |
+| Engineering Docs material registry | `components/materials/topics` | `materials:build`                                      | `materials:check`            |
+| Excalidraw 정적 자산               | Excalidraw source asset       | `excalidraw:assets`                                    | `excalidraw:check`           |
+| Playwright snapshot                | 렌더링 결과                   | 각 workspace의 `test:e2e:update`                       | visual test와 diff 직접 검토 |
 
-`apps/engineering-docs/components/materials/topics`는 직접 편집하는 원본이며 registry와 manifest는
-생성물이다. 앱의 생성 아이콘과 material 생성물은 직접 편집하지 않고 원본 변경과 함께 diff를
-검토한다.
+`apps/web/components/materials/topics`는 직접 편집하는 원본이며 registry와 manifest는
+생성물이다. material 생성물은 직접 편집하지 않고 원본 변경과 함께 diff를 검토한다.
 
 ## GitHub Actions
 
