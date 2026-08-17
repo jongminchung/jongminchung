@@ -14,7 +14,6 @@ import type {
     NavigationEntry,
 } from "#lib/content-model";
 import { Icon } from "./Icon";
-import { MaterialLocaleProvider } from "./materials/MaterialLocaleContext";
 import {
     ContextNavigation,
     GlobalRail,
@@ -71,6 +70,7 @@ function TabletContextDrawer({
     );
 }
 
+/** `DocsShell` UI 컴포넌트를 렌더링함 */
 export function DocsShell({
     locale,
     current,
@@ -137,9 +137,7 @@ export function DocsShell({
                                 current={current}
                                 documents={documents}
                             />
-                            <MaterialLocaleProvider locale={locale}>
-                                {children}
-                            </MaterialLocaleProvider>
+                            {children}
                         </main>
                     </div>
                 </TooltipProvider>

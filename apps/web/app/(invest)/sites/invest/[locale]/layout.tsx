@@ -28,6 +28,7 @@ export const metadata: Metadata = {
     },
 };
 
+/** `InvestmentLocaleLayout` 페이지 UI를 렌더링함 */
 export default async function InvestmentLocaleLayout({
     children,
     params,

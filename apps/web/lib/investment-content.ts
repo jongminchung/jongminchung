@@ -114,10 +114,12 @@ export type InvestmentNoteManifestEntry = z.infer<
     typeof investmentNoteManifestEntrySchema
 >;
 
+/** `createInvestmentNoteHref` 결과를 생성함 */
 export function createInvestmentNoteHref(locale: Locale, id: string): string {
     return `/${locale}/notes/${id}`;
 }
 
+/** `parseInvestmentNoteMetadata` 입력을 파싱함 */
 export function parseInvestmentNoteMetadata(
     value: unknown,
     source = "investment note",
@@ -128,6 +130,7 @@ export function parseInvestmentNoteMetadata(
     throw new Error(`${source} ${message}`);
 }
 
+/** `validateInvestmentNoteBody` 입력을 검증함 */
 export function validateInvestmentNoteBody(body: string, source: string): void {
     for (const component of ["SourceSummary", "JamieNotes"] as const) {
         const openings = body.match(new RegExp(`<${component}(?:\\s|>)`, "gu"));

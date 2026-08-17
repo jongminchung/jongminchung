@@ -16,11 +16,6 @@ sourceUrl: https://github.com/kciter/kciter.github.io/blob/develop/src/drafts/20
 
 컴포넌트는 React로 프론트엔드를 개발한다면 가장 중요한 개념이라 할 수 있다. 흔히 컴포넌트를 UI를 구성하는 단위 정도로 생각하지만, 실제로는 이벤트 처리, 상태 관리, 서버와의 통신까지 많은 부분을 컴포넌트가 담당한다. 로직을 컴포넌트로부터 아무리 잘 분리하더라도 사용자는 결국 컴포넌트를 통해 시스템과 만나기 때문에, 좋은 제품을 만들고 싶다면 컴포넌트에 대한 이해가 필수적이다.
 
-<MaterialImage
-    src="/materials/images/2026-07-10-react-component-based-thinking/user-meets-components.png"
-    caption="사용자는 반드시 컴포넌트를 통한다"
-/>
-
 이 시리즈에서 지금까지 [Polymorphic](/posts/polymorphic-react-component), [Render Delegation](/posts/render-delegation-react-component), [Headless](/posts/headless-react-component)라는 구체적인 패턴들을 다뤄왔다. 이번 글은 반대로 한 걸음 물러선다. 패턴은 결국 컴포넌트를 어떻게 바라보느냐에서 나오는 것이라서, 시각이 서 있지 않으면 패턴은 외운 공식이 되고 시각이 서 있으면 패턴은 자연스러운 귀결이 된다. 그래서 이 글에서는 컴포넌트란 무엇인지, 무엇으로 이루어져 있는지, 서로 어떻게 협력하는지, 그리고 컴포넌트가 아닌 것들과는 어떤 긴장 관계에 있는지를 차례로 짚는다. 말하자면 컴포넌트를 기반으로 생각하는 방법에 대한 글이다.
 
 ## 컴포넌트란 무엇인가
@@ -105,8 +100,6 @@ console.log(element);
 몇 가지만 짚어보자. "로직과 뷰의 조합"이라는 시각을 끝까지 밀고 나가면 로직만 남기고 뷰를 비운 [Headless 컴포넌트](/posts/headless-react-component)에 도착한다. "서버 상태를 반영하는 뷰"라는 시각은 컴포넌트가 데이터를 소유하는 것이 아니라 구독한다는 발상으로 이어지고, TanStack Query 같은 라이브러리의 토대가 된다. 뒤에서 다시 다룰 것이다. 나머지 시각들도 이 글 안에서 각자의 자리가 있다. "요소와 스타일의 조합"은 바로 다음 장에서 컴포넌트를 분해할 때의 언어가 되고, "주도권" 시각은 관계 장의 제어·비제어 절에서, "이벤트 통로"와 "실패와 대기의 경계" 시각은 평가 장의 신뢰성 절에서 다시 만난다.
 
 목록의 끝에 있는 상태 머신 시각이 재미있는데, 아까의 `AddToCartButton`을 다시 보자. 이 컴포넌트의 상태는 `idle`, `loading`, `added` 셋뿐이고, 클릭이라는 사건이 일어나면 정해진 규칙에 따라 다음 상태로 넘어간다. 상태의 목록이 유한하고 전이 규칙이 표로 그려진다는 뜻에서, 이것은 교과서적인 유한 상태 머신(finite state machine)이다[^4]. 아래 데모는 이 버튼의 한살이를 자동으로 반복 재생한 것이다. 왼쪽 버튼에 클릭이 들어올 때마다 오른쪽 상태 그래프에서 현재 상태가 이동한다. 그래프의 RESET은 재생을 처음으로 되돌리기 위해 얹은 전이다.
-
-<MaterialDemo id="react-component-based-thinking/StateMachineDemo" />
 
 이 시각이 유용한 이유는 **불가능한 상태를 설계 단계에서 제거**해 주기 때문이다. 같은 버튼을 boolean 두 개로 만들었다고 해보자.
 

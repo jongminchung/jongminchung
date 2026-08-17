@@ -5,11 +5,12 @@ import {
     parseExcalidrawSource,
 } from "./excalidraw-scene.ts";
 
+/** `searchIndexQueryOptions` 공개 기능을 제공함 */
 export function searchIndexQueryOptions(locale: Locale) {
     return queryOptions({
         queryKey: ["tech", "search-index", locale] as const,
         queryFn: async ({ signal }) => {
-            const response = await fetch(`/search/${locale}.json`, { signal });
+            const response = await fetch(`/${locale}/search-index`, { signal });
             if (!response.ok)
                 throw new Error(
                     `Search index request failed with ${response.status}.`,
@@ -27,6 +28,7 @@ export function searchIndexQueryOptions(locale: Locale) {
     });
 }
 
+/** `excalidrawSceneQueryOptions` 공개 기능을 제공함 */
 export function excalidrawSceneQueryOptions(src: string) {
     return queryOptions({
         queryKey: ["tech", "excalidraw-scene", src] as const,

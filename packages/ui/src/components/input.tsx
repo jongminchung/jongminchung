@@ -2,6 +2,7 @@ import { Input as InputPrimitive } from "@base-ui/react/input";
 import { cn } from "@jongminchung/ui/lib/utils";
 import * as React from "react";
 
+/** `Input` UI 컴포넌트를 렌더링함 */
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
     return (
         <InputPrimitive

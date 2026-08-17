@@ -30,7 +30,9 @@ import {
     writeGeneratedFiles,
 } from "./generation-utils.ts";
 
-const appRoot = resolve(import.meta.dirname, "..");
+const appRoot = process.cwd().endsWith("/apps/web")
+    ? process.cwd()
+    : resolve(process.cwd(), "apps/web");
 const workspaceRoot = resolve(appRoot, "../..");
 const contentRoot = resolve(appRoot, "content/tech");
 const manifestPath = resolve(appRoot, "generated/content-manifest.json");
@@ -80,6 +82,7 @@ function isHeadingElement(node: {
     );
 }
 
+/** `createOutline` 결과를 생성함 */
 export async function createOutline(
     body: string,
 ): Promise<readonly OutlineEntry[]> {
@@ -122,6 +125,7 @@ function createSearchBody(body: string): string {
         .trim();
 }
 
+/** `readDocuments` 데이터를 조회함 */
 export async function readDocuments(): Promise<readonly SourceDocument[]> {
     const files = await listFiles(contentRoot, ".mdx");
     return Promise.all(
@@ -157,6 +161,7 @@ const localizedMetadataFields = [
     "apiSymbols",
 ] as const satisfies readonly (keyof DocMetadata)[];
 
+/** `validateDocuments` 입력을 검증함 */
 export function validateDocuments(documents: readonly SourceDocument[]): void {
     const byId = new Map<string, Map<Locale, DocMetadata>>();
     const hrefs = new Set<string>();
@@ -353,6 +358,7 @@ async function readPackageApi(packageDirectory: string): Promise<PackageApi> {
     });
 }
 
+/** `validatePackageVersions` 입력을 검증함 */
 export function validatePackageVersions(
     documents: readonly SourceDocument[],
     packageContract: Pick<PackageApi, "name" | "version">,
@@ -369,6 +375,7 @@ export function validatePackageVersions(
     }
 }
 
+/** `validatePackageApi` 입력을 검증함 */
 export async function validatePackageApi(
     documents: readonly SourceDocument[],
 ): Promise<void> {
@@ -472,6 +479,7 @@ function createGeneratedFiles(
     ];
 }
 
+/** `checkGeneratedFiles` 공개 기능을 제공함 */
 export async function checkGeneratedFiles(
     files: readonly GeneratedFile[],
     readTextFile?: ReadTextFile,

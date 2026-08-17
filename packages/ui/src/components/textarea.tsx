@@ -1,6 +1,7 @@
 import { cn } from "@jongminchung/ui/lib/utils";
 import * as React from "react";
 
+/** `Textarea` UI 컴포넌트를 렌더링함 */
 function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
     return (
         <textarea

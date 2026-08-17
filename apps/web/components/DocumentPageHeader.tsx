@@ -14,6 +14,7 @@ function editHref(locale: Locale, id: string): string {
     return `https://github.com/jongminchung/jongminchung/edit/main/apps/web/content/tech/${locale}/${id}.mdx`;
 }
 
+/** `DocumentPageHeader` UI 컴포넌트를 렌더링함 */
 export function DocumentPageHeader({
     locale,
     document,

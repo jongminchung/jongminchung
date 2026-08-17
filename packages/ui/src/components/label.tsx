@@ -1,6 +1,7 @@
 import { cn } from "@jongminchung/ui/lib/utils";
 import * as React from "react";
 
+/** `Label` UI 컴포넌트를 렌더링함 */
 function Label({
     className,
     htmlFor,

@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { InvestmentNotePage } from "#components/invest/InvestmentShell";
-import { investmentNotes, loadInvestmentNote } from "#lib/investment-notes";
-import { isLocale } from "#lib/site-routing";
+import { getInvestmentNotes, loadInvestmentNote } from "#lib/investment-notes";
+import { isLocale, locales } from "#lib/site-routing";
 
 export const dynamicParams = false;
-export function generateStaticParams() {
-    return investmentNotes
-        .filter((note) => note.status === "published")
-        .map((note) => ({ locale: note.locale, slug: note.id }));
+/** 정적 생성에 사용할 경로 매개변수를 반환함 */
+export async function generateStaticParams() {
+    const notes = await Promise.all(locales.map(getInvestmentNotes));
+    return notes.flat().map((note) => ({ locale: note.locale, slug: note.id }));
 }
 
+/** 경로 매개변수에 맞는 페이지 메타데이터를 생성함 */
 export async function generateMetadata({
     params,
 }: PageProps): Promise<Metadata> {
@@ -49,6 +50,7 @@ interface PageProps {
     }>;
 }
 
+/** `NotePage` 페이지 UI를 렌더링함 */
 export default async function NotePage({
     params,
 }: PageProps): Promise<React.JSX.Element> {

@@ -1,5 +1,6 @@
 import { readdir } from "node:fs/promises";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
     parseExcalidrawFilename,
     type ExcalidrawAsset,
@@ -9,7 +10,7 @@ export interface StandaloneExcalidrawAsset extends ExcalidrawAsset {
     readonly filePath: string;
 }
 
-const appRoot = resolve(import.meta.dirname, "..");
+const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const standaloneExcalidrawRoot = resolve(appRoot, "public/diagrams");
 
 function hasErrorCode(error: unknown, code: string): boolean {
@@ -21,6 +22,7 @@ function hasErrorCode(error: unknown, code: string): boolean {
     );
 }
 
+/** `listStandaloneExcalidrawAssets` 데이터를 조회함 */
 export async function listStandaloneExcalidrawAssets(): Promise<
     readonly StandaloneExcalidrawAsset[]
 > {
@@ -46,6 +48,7 @@ export async function listStandaloneExcalidrawAssets(): Promise<
     );
 }
 
+/** `findStandaloneExcalidrawAsset` 데이터를 조회함 */
 export async function findStandaloneExcalidrawAsset(
     slug: string,
 ): Promise<StandaloneExcalidrawAsset | null> {

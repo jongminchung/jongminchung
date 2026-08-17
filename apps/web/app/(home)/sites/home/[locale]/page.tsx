@@ -13,6 +13,7 @@ import {
 } from "#components/home/HomeShell";
 import { isLocale } from "#lib/site-routing";
 
+/** 경로 매개변수에 맞는 페이지 메타데이터를 생성함 */
 export async function generateMetadata({
     params,
 }: {
@@ -34,6 +35,7 @@ export async function generateMetadata({
     };
 }
 
+/** `HomePage` 페이지 UI를 렌더링함 */
 export default async function HomePage({
     params,
 }: {

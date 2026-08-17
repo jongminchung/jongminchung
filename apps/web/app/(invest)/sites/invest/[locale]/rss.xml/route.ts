@@ -12,17 +12,19 @@ function escapeXml(value: string): string {
 
 export const dynamic = "force-static";
 export const dynamicParams = false;
+/** 정적 생성에 사용할 경로 매개변수를 반환함 */
 export function generateStaticParams() {
     return [{ locale: "ko" }, { locale: "en" }];
 }
 
+/** 요청에 대한 응답을 생성함 */
 export async function GET(
     _request: Request,
     { params }: { readonly params: Promise<{ readonly locale: string }> },
 ): Promise<Response> {
     const { locale } = await params;
     if (!isLocale(locale)) return new Response("Not found", { status: 404 });
-    const items = getInvestmentNotes(locale)
+    const items = (await getInvestmentNotes(locale))
         .map(
             (note) =>
                 `<item><title>${escapeXml(note.title)}</title><link>https://invest.jamie.kr${note.href}</link><guid isPermaLink="true">https://invest.jamie.kr${note.href}</guid><description>${escapeXml(note.description)}</description><pubDate>${new Date(`${note.publishedAt}T00:00:00Z`).toUTCString()}</pubDate></item>`,

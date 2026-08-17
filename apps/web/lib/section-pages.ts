@@ -62,12 +62,13 @@ function compareByRecentUpdate(
     );
 }
 
-export function findSectionPage(
+/** `findSectionPage` 페이지 UI를 렌더링함 */
+export async function findSectionPage(
     locale: string,
     section: string,
-): SectionPage | null {
+): Promise<SectionPage | null> {
     if (!isLocale(locale) || !isSectionLanding(section)) return null;
-    const documents = getSectionDocuments(locale, section).toSorted(
+    const documents = (await getSectionDocuments(locale, section)).toSorted(
         compareByRecentUpdate,
     );
     const latest = documents[0];

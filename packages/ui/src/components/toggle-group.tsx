@@ -19,6 +19,7 @@ const ToggleGroupContext = React.createContext<
     orientation: "horizontal",
 });
 
+/** `ToggleGroup` UI 컴포넌트를 렌더링함 */
 function ToggleGroup({
     className,
     variant,
@@ -55,6 +56,7 @@ function ToggleGroup({
     );
 }
 
+/** `ToggleGroupItem` UI 컴포넌트를 렌더링함 */
 function ToggleGroupItem({
     className,
     children,

@@ -3,6 +3,7 @@
 import { cn } from "@jongminchung/ui/lib/utils";
 import type { Locale } from "#lib/content-model";
 
+/** `LocaleSwitcher` UI 컴포넌트를 렌더링함 */
 export function LocaleSwitcher({
     locale,
     href,

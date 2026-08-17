@@ -14,28 +14,33 @@ function absoluteUrl(pathname: string): string {
 }
 
 function documentLine(
-    document: ReturnType<typeof getLocalizedDocuments>[number],
+    document: Awaited<ReturnType<typeof getLocalizedDocuments>>[number],
 ): string {
     return `- [${document.title}](${absoluteUrl(document.href)}): ${document.description} Status: ${document.status}; updated ${document.updatedAt}.`;
 }
 
-function createLocaleSections(locale: Locale): readonly string[] {
-    const documents = getLocalizedDocuments(locale);
+async function createLocaleSections(
+    locale: Locale,
+): Promise<readonly string[]> {
+    const documents = await getLocalizedDocuments(locale);
     const overview = documents.find(
         (document) => document.section === "overview",
     );
     if (overview === undefined)
         throw new Error(`Missing ${locale}/overview documentation.`);
-    const startLines = [
-        `## ${llmsSectionLabels[locale].overview}`,
-        "",
-        documentLine(overview),
-        ...sectionLandingSections.map((section) => {
-            const page = findSectionPage(locale, section);
+    const sectionLines = await Promise.all(
+        sectionLandingSections.map(async (section) => {
+            const page = await findSectionPage(locale, section);
             if (page === null)
                 throw new Error(`Missing ${locale}/${section} section page.`);
             return `- [${page.title}](${absoluteUrl(page.href)}): ${page.description}`;
         }),
+    );
+    const startLines = [
+        `## ${llmsSectionLabels[locale].overview}`,
+        "",
+        documentLine(overview),
+        ...sectionLines,
         "",
     ];
     const documentSections = sectionLandingSections.flatMap((section) => [
@@ -51,7 +56,8 @@ function createLocaleSections(locale: Locale): readonly string[] {
 
 export const dynamic = "force-static";
 
-export function GET(): Response {
+/** 요청에 대한 응답을 생성함 */
+export async function GET(): Promise<Response> {
     const lines = [
         "# Engineering Notes",
         "",
@@ -59,7 +65,7 @@ export function GET(): Response {
         "",
         "Korean and English documents share stable IDs. Prefer the language that matches the user's request.",
         "",
-        ...locales.flatMap(createLocaleSections),
+        ...(await Promise.all(locales.map(createLocaleSections))).flat(),
     ];
     return new Response(`${lines.join("\n").trimEnd()}\n`, {
         headers: {

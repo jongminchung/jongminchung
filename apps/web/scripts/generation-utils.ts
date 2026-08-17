@@ -8,10 +8,12 @@ export interface GeneratedFile {
 
 export type ReadTextFile = (filePath: string) => Promise<string | null>;
 
+/** `toPosixPath` 공개 기능을 제공함 */
 export function toPosixPath(value: string): string {
     return value.split(sep).join("/");
 }
 
+/** `listFiles` 데이터를 조회함 */
 export async function listFiles(
     directory: string,
     extension: string,
@@ -39,6 +41,7 @@ export async function listFiles(
     }
 }
 
+/** `writeGeneratedFiles` 공개 기능을 제공함 */
 export async function writeGeneratedFiles(
     files: readonly GeneratedFile[],
 ): Promise<void> {
@@ -65,6 +68,7 @@ async function readGeneratedFile(filePath: string): Promise<string | null> {
     }
 }
 
+/** `staleGeneratedFiles` 공개 기능을 제공함 */
 export async function staleGeneratedFiles(
     files: readonly GeneratedFile[],
     readTextFile: ReadTextFile = readGeneratedFile,
@@ -80,6 +84,7 @@ export async function staleGeneratedFiles(
         .map(({ file }) => file.filePath);
 }
 
+/** `relativeGeneratedPaths` 공개 기능을 제공함 */
 export function relativeGeneratedPaths(
     root: string,
     filePaths: readonly string[],

@@ -1,6 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page } from "@playwright/test";
 
+/** `expectNoHorizontalOverflow` 공개 기능을 제공함 */
 export async function expectNoHorizontalOverflow(page: Page): Promise<void> {
     await expect
         .poll(() =>
@@ -13,6 +14,7 @@ export async function expectNoHorizontalOverflow(page: Page): Promise<void> {
         .toBe(true);
 }
 
+/** `expectNoAccessibilityViolations` 공개 기능을 제공함 */
 export async function expectNoAccessibilityViolations(
     page: Page,
     selector?: string,

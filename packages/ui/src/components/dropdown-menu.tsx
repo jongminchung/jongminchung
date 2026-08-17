@@ -5,20 +5,24 @@ import { cn } from "@jongminchung/ui/lib/utils";
 import { ChevronRightIcon, CheckIcon } from "lucide-react";
 import * as React from "react";
 
+/** `DropdownMenu` UI 컴포넌트를 렌더링함 */
 function DropdownMenu({ ...props }: MenuPrimitive.Root.Props) {
     return <MenuPrimitive.Root data-slot="dropdown-menu" {...props} />;
 }
 
+/** `DropdownMenuPortal` UI 컴포넌트를 렌더링함 */
 function DropdownMenuPortal({ ...props }: MenuPrimitive.Portal.Props) {
     return <MenuPrimitive.Portal data-slot="dropdown-menu-portal" {...props} />;
 }
 
+/** `DropdownMenuTrigger` UI 컴포넌트를 렌더링함 */
 function DropdownMenuTrigger({ ...props }: MenuPrimitive.Trigger.Props) {
     return (
         <MenuPrimitive.Trigger data-slot="dropdown-menu-trigger" {...props} />
     );
 }
 
+/** `DropdownMenuContent` UI 컴포넌트를 렌더링함 */
 function DropdownMenuContent({
     align = "start",
     alignOffset = 0,
@@ -65,10 +69,12 @@ function DropdownMenuContent({
     );
 }
 
+/** `DropdownMenuGroup` UI 컴포넌트를 렌더링함 */
 function DropdownMenuGroup({ ...props }: MenuPrimitive.Group.Props) {
     return <MenuPrimitive.Group data-slot="dropdown-menu-group" {...props} />;
 }
 
+/** `DropdownMenuLabel` UI 컴포넌트를 렌더링함 */
 function DropdownMenuLabel({
     className,
     inset,
@@ -89,6 +95,7 @@ function DropdownMenuLabel({
     );
 }
 
+/** `DropdownMenuItem` UI 컴포넌트를 렌더링함 */
 function DropdownMenuItem({
     className,
     inset,
@@ -112,12 +119,14 @@ function DropdownMenuItem({
     );
 }
 
+/** `DropdownMenuSub` UI 컴포넌트를 렌더링함 */
 function DropdownMenuSub({ ...props }: MenuPrimitive.SubmenuRoot.Props) {
     return (
         <MenuPrimitive.SubmenuRoot data-slot="dropdown-menu-sub" {...props} />
     );
 }
 
+/** `DropdownMenuSubTrigger` UI 컴포넌트를 렌더링함 */
 function DropdownMenuSubTrigger({
     className,
     inset,
@@ -142,6 +151,7 @@ function DropdownMenuSubTrigger({
     );
 }
 
+/** `DropdownMenuSubContent` UI 컴포넌트를 렌더링함 */
 function DropdownMenuSubContent({
     align = "start",
     alignOffset = -3,
@@ -166,6 +176,7 @@ function DropdownMenuSubContent({
     );
 }
 
+/** `DropdownMenuCheckboxItem` UI 컴포넌트를 렌더링함 */
 function DropdownMenuCheckboxItem({
     className,
     children,
@@ -199,6 +210,7 @@ function DropdownMenuCheckboxItem({
     );
 }
 
+/** `DropdownMenuRadioGroup` UI 컴포넌트를 렌더링함 */
 function DropdownMenuRadioGroup({ ...props }: MenuPrimitive.RadioGroup.Props) {
     return (
         <MenuPrimitive.RadioGroup
@@ -208,6 +220,7 @@ function DropdownMenuRadioGroup({ ...props }: MenuPrimitive.RadioGroup.Props) {
     );
 }
 
+/** `DropdownMenuRadioItem` UI 컴포넌트를 렌더링함 */
 function DropdownMenuRadioItem({
     className,
     children,
@@ -239,6 +252,7 @@ function DropdownMenuRadioItem({
     );
 }
 
+/** `DropdownMenuSeparator` UI 컴포넌트를 렌더링함 */
 function DropdownMenuSeparator({
     className,
     ...props
@@ -252,6 +266,7 @@ function DropdownMenuSeparator({
     );
 }
 
+/** `DropdownMenuShortcut` UI 컴포넌트를 렌더링함 */
 function DropdownMenuShortcut({
     className,
     ...props

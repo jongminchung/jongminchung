@@ -6,6 +6,7 @@ import { DocumentPager } from "./DocumentPager";
 import { RelatedDocuments } from "./RelatedDocuments";
 import styles from "./DocumentPage.module.css";
 
+/** `DocumentPage` 페이지 UI를 렌더링함 */
 export function DocumentPage({
     locale,
     document,

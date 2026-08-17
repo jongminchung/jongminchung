@@ -4,6 +4,7 @@ import { Tabs as TabsPrimitive } from "@base-ui/react/tabs";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 
+/** `Tabs` UI 컴포넌트를 렌더링함 */
 function Tabs({
     className,
     orientation = "horizontal",
@@ -37,6 +38,7 @@ const tabsListVariants = cva(
     },
 );
 
+/** `TabsList` UI 컴포넌트를 렌더링함 */
 function TabsList({
     className,
     variant = "default",
@@ -52,6 +54,7 @@ function TabsList({
     );
 }
 
+/** `TabsTrigger` UI 컴포넌트를 렌더링함 */
 function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
     return (
         <TabsPrimitive.Tab
@@ -68,6 +71,7 @@ function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
     );
 }
 
+/** `TabsContent` UI 컴포넌트를 렌더링함 */
 function TabsContent({ className, ...props }: TabsPrimitive.Panel.Props) {
     return (
         <TabsPrimitive.Panel

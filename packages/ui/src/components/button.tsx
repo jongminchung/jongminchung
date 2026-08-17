@@ -39,6 +39,7 @@ const buttonVariants = cva(
     },
 );
 
+/** `Button` UI 컴포넌트를 렌더링함 */
 function Button({
     className,
     variant = "default",

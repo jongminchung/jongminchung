@@ -71,6 +71,7 @@ function RouteMap({ locale }: { readonly locale: Locale }) {
     );
 }
 
+/** `HeroSection` UI 컴포넌트를 렌더링함 */
 export function HeroSection({ locale }: { readonly locale: Locale }) {
     const { hero, thesis } = getHomeContent(locale);
     return (
@@ -128,6 +129,7 @@ export function HeroSection({ locale }: { readonly locale: Locale }) {
     );
 }
 
+/** `WorkSection` UI 컴포넌트를 렌더링함 */
 export function WorkSection({ locale }: { readonly locale: Locale }) {
     const { projects } = getHomeContent(locale);
     return (
@@ -185,12 +187,13 @@ export function WorkSection({ locale }: { readonly locale: Locale }) {
     );
 }
 
-export function WritingSection({ locale }: { readonly locale: Locale }) {
-    const tech = getLocalizedDocuments(locale)
+/** `WritingSection` UI 컴포넌트를 렌더링함 */
+export async function WritingSection({ locale }: { readonly locale: Locale }) {
+    const tech = (await getLocalizedDocuments(locale))
         .filter((document) => document.section !== "overview")
         .toSorted((a, b) => b.publishedAt.localeCompare(a.publishedAt))
         .slice(0, 3);
-    const invest = getInvestmentNotes(locale).slice(0, 3);
+    const invest = (await getInvestmentNotes(locale)).slice(0, 3);
     return (
         <section
             className={styles.writing}
@@ -250,6 +253,7 @@ export function WritingSection({ locale }: { readonly locale: Locale }) {
     );
 }
 
+/** `PrinciplesSection` UI 컴포넌트를 렌더링함 */
 export function PrinciplesSection({ locale }: { readonly locale: Locale }) {
     const { principles } = getHomeContent(locale);
     return (

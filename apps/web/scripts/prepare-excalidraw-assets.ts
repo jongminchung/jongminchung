@@ -25,6 +25,7 @@ async function readSourceMarker(): Promise<string | null> {
     }
 }
 
+/** `prepareExcalidrawAssets` 공개 기능을 제공함 */
 export async function prepareExcalidrawAssets(): Promise<
     "prepared" | "current"
 > {

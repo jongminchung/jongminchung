@@ -26,6 +26,7 @@ const toggleVariants = cva(
     },
 );
 
+/** `Toggle` UI 컴포넌트를 렌더링함 */
 function Toggle({
     className,
     variant = "default",

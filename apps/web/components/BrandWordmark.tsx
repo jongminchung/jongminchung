@@ -2,6 +2,7 @@ import styles from "./BrandWordmark.module.css";
 
 export type BrandWordmarkSuffix = "invest" | "tech";
 
+/** `BrandWordmark` UI 컴포넌트를 렌더링함 */
 export function BrandWordmark({
     suffix,
     compact = false,

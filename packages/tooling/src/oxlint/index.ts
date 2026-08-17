@@ -60,6 +60,7 @@ export const sharedOxlintConfig = defineConfig({
     },
 });
 
+/** `defineOxlintConfig` 공개 기능을 제공함 */
 export function defineOxlintConfig(config: OxlintConfig = {}): OxlintConfig {
     return defineConfig({
         ...sharedOxlintConfig,

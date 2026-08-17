@@ -1,6 +1,7 @@
 import { cn } from "@jongminchung/ui/lib/utils";
 import * as React from "react";
 
+/** `Table` UI 컴포넌트를 렌더링함 */
 function Table({ className, ...props }: React.ComponentProps<"table">) {
     return (
         <div
@@ -16,6 +17,7 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
     );
 }
 
+/** `TableHeader` UI 컴포넌트를 렌더링함 */
 function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
     return (
         <thead
@@ -26,6 +28,7 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
     );
 }
 
+/** `TableBody` UI 컴포넌트를 렌더링함 */
 function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
     return (
         <tbody
@@ -36,6 +39,7 @@ function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
     );
 }
 
+/** `TableFooter` UI 컴포넌트를 렌더링함 */
 function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
     return (
         <tfoot
@@ -49,6 +53,7 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
     );
 }
 
+/** `TableRow` UI 컴포넌트를 렌더링함 */
 function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
     return (
         <tr
@@ -62,6 +67,7 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
     );
 }
 
+/** `TableHead` UI 컴포넌트를 렌더링함 */
 function TableHead({ className, ...props }: React.ComponentProps<"th">) {
     return (
         <th
@@ -75,6 +81,7 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
     );
 }
 
+/** `TableCell` UI 컴포넌트를 렌더링함 */
 function TableCell({ className, ...props }: React.ComponentProps<"td">) {
     return (
         <td
@@ -88,6 +95,7 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
     );
 }
 
+/** `TableCaption` UI 컴포넌트를 렌더링함 */
 function TableCaption({
     className,
     ...props

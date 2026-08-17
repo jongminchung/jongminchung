@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     description: notFoundCopy.en.description,
 };
 
+/** `GlobalNotFound` 공개 기능을 제공함 */
 export default function GlobalNotFound(): React.JSX.Element {
     return (
         <html

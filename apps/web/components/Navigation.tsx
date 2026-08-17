@@ -75,6 +75,7 @@ function SectionItems({
     );
 }
 
+/** `ContextNavigation` UI 컴포넌트를 렌더링함 */
 export function ContextNavigation({
     locale,
     current,
@@ -106,6 +107,7 @@ export function ContextNavigation({
     );
 }
 
+/** `GlobalRail` UI 컴포넌트를 렌더링함 */
 export function GlobalRail({
     locale,
     current,
@@ -172,6 +174,7 @@ export function GlobalRail({
     );
 }
 
+/** `MobileNavigation` UI 컴포넌트를 렌더링함 */
 export function MobileNavigation({
     locale,
     current,
@@ -268,6 +271,7 @@ export function MobileNavigation({
     );
 }
 
+/** `MobileTopNavigation` UI 컴포넌트를 렌더링함 */
 export function MobileTopNavigation({
     locale,
     onMenuClick,

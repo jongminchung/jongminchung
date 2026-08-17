@@ -142,6 +142,7 @@ function matchFor(document: SearchDocument, query: string): SearchMatch {
     };
 }
 
+/** `scoreSearchDocument` 결과를 계산함 */
 export function scoreSearchDocument(
     document: SearchDocument,
     query: string,
@@ -163,6 +164,7 @@ export function scoreSearchDocument(
     );
 }
 
+/** `searchDocuments` 공개 기능을 제공함 */
 export function searchDocuments(
     documents: readonly SearchDocument[],
     query: string,

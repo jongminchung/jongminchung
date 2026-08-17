@@ -24,6 +24,7 @@ const modeIcon: Readonly<Record<ThemeMode, IconType>> = {
     dark: DarkThemeIcon,
 };
 
+/** `ThemeControl` UI 컴포넌트를 렌더링함 */
 export function ThemeControl({ locale }: { readonly locale: Locale }) {
     const mode = useTechUiStore((state) => state.themeMode);
     const setThemeMode = useTechUiStore((state) => state.setThemeMode);

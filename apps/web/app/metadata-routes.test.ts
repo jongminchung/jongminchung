@@ -1,16 +1,19 @@
 import { describe, expect, it } from "vitest";
-import manifest from "../generated/content-manifest.json";
 import {
     createSectionHref,
     locales,
     sectionLandingSections,
 } from "../lib/content-model";
+import { getDocuments } from "../lib/documents";
 import { GET as getRobots } from "./(tech)/sites/tech/robots.txt/route";
 import sitemap from "./(tech)/sites/tech/sitemap";
 
 describe("문서가 현재 위치에 있음", () => {
-    it("[성공] 모든 내부 문서 및 섹션 임대를 생성함", () => {
-        const entries = sitemap();
+    it("[성공] 모든 내부 문서 및 섹션 임대를 생성함", async () => {
+        const [entries, manifest] = await Promise.all([
+            sitemap(),
+            getDocuments(),
+        ]);
         const documentEntries = entries.slice(0, manifest.length);
         expect(documentEntries.map(({ url }) => url)).toEqual(
             manifest.map(({ href }) => `https://tech.jamie.kr${href}`),

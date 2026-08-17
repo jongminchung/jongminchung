@@ -33,6 +33,7 @@ const excalidrawAssetScript = `window.EXCALIDRAW_ASSET_PATH="/excalidraw-assets/
 
 export const rootFontClassName = `${inter.variable} ${interTight.variable} ${dmMono.variable}`;
 
+/** `InitialDocumentScripts` 공개 기능을 제공함 */
 export function InitialDocumentScripts(): React.JSX.Element {
     return (
         <>

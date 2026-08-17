@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     alternates: { canonical: "/diagrams" },
 };
 
+/** `DiagramsPage` 페이지 UI를 렌더링함 */
 export default async function DiagramsPage(): Promise<React.JSX.Element> {
     const assets = await listStandaloneExcalidrawAssets();
 

@@ -3,6 +3,7 @@
 import { Tooltip as TooltipPrimitive } from "@base-ui/react/tooltip";
 import { cn } from "@jongminchung/ui/lib/utils";
 
+/** `TooltipProvider` UI 컴포넌트를 렌더링함 */
 function TooltipProvider({
     delay = 0,
     ...props
@@ -16,14 +17,17 @@ function TooltipProvider({
     );
 }
 
+/** `Tooltip` UI 컴포넌트를 렌더링함 */
 function Tooltip({ ...props }: TooltipPrimitive.Root.Props) {
     return <TooltipPrimitive.Root data-slot="tooltip" {...props} />;
 }
 
+/** `TooltipTrigger` UI 컴포넌트를 렌더링함 */
 function TooltipTrigger({ ...props }: TooltipPrimitive.Trigger.Props) {
     return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />;
 }
 
+/** `TooltipContent` UI 컴포넌트를 렌더링함 */
 function TooltipContent({
     className,
     side = "top",

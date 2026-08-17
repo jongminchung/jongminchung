@@ -12,14 +12,17 @@ type SheetContentProps = SheetPrimitive.Popup.Props &
         | { closeLabel?: never; showCloseButton: false }
     );
 
+/** `Sheet` UI 컴포넌트를 렌더링함 */
 function Sheet({ ...props }: SheetPrimitive.Root.Props) {
     return <SheetPrimitive.Root data-slot="sheet" {...props} />;
 }
 
+/** `SheetTrigger` UI 컴포넌트를 렌더링함 */
 function SheetTrigger({ ...props }: SheetPrimitive.Trigger.Props) {
     return <SheetPrimitive.Trigger data-slot="sheet-trigger" {...props} />;
 }
 
+/** `SheetClose` UI 컴포넌트를 렌더링함 */
 function SheetClose({ ...props }: SheetPrimitive.Close.Props) {
     return <SheetPrimitive.Close data-slot="sheet-close" {...props} />;
 }
@@ -41,6 +44,7 @@ function SheetOverlay({ className, ...props }: SheetPrimitive.Backdrop.Props) {
     );
 }
 
+/** `SheetContent` UI 컴포넌트를 렌더링함 */
 function SheetContent({
     className,
     children,
@@ -84,6 +88,7 @@ function SheetContent({
     );
 }
 
+/** `SheetHeader` UI 컴포넌트를 렌더링함 */
 function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
     return (
         <div
@@ -94,6 +99,7 @@ function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
     );
 }
 
+/** `SheetFooter` UI 컴포넌트를 렌더링함 */
 function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
     return (
         <div
@@ -104,6 +110,7 @@ function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
     );
 }
 
+/** `SheetTitle` UI 컴포넌트를 렌더링함 */
 function SheetTitle({ className, ...props }: SheetPrimitive.Title.Props) {
     return (
         <SheetPrimitive.Title
@@ -114,6 +121,7 @@ function SheetTitle({ className, ...props }: SheetPrimitive.Title.Props) {
     );
 }
 
+/** `SheetDescription` UI 컴포넌트를 렌더링함 */
 function SheetDescription({
     className,
     ...props

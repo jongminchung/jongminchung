@@ -40,6 +40,7 @@ function findVisibleTrigger(): HTMLButtonElement | null {
     );
 }
 
+/** `SearchProvider` UI 컴포넌트를 렌더링함 */
 export function SearchProvider({
     locale,
     children,
@@ -104,6 +105,7 @@ export function SearchProvider({
     );
 }
 
+/** `SearchTrigger` UI 컴포넌트를 렌더링함 */
 export function SearchTrigger({
     compact = false,
     showShortcut = true,

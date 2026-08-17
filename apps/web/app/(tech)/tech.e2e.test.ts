@@ -51,7 +51,7 @@ test("[성공] 생성된 기사 데이터를 검색하고 여러 지역에서 �
 
 test("[성공] 오류 검색 요청을 재시도함", async ({ page }) => {
     let requests = 0;
-    await page.route("**/search/en.json", async (route) => {
+    await page.route("**/en/search-index", async (route) => {
         requests += 1;
         if (requests <= 2)
             await route.fulfill({ status: 503, body: "unavailable" });

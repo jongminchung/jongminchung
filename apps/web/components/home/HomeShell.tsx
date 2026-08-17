@@ -3,6 +3,7 @@ import type { Locale } from "#lib/site-routing";
 import { BrandWordmark } from "../BrandWordmark";
 import styles from "./home.module.css";
 
+/** `HomeHeader` UI 컴포넌트를 렌더링함 */
 export function HomeHeader({ locale }: { readonly locale: Locale }) {
     return (
         <>
@@ -42,6 +43,7 @@ export function HomeHeader({ locale }: { readonly locale: Locale }) {
     );
 }
 
+/** `HomeFooter` UI 컴포넌트를 렌더링함 */
 export function HomeFooter({ locale }: { readonly locale: Locale }) {
     return (
         <footer className={styles.footer}>
@@ -78,6 +80,7 @@ export function HomeFooter({ locale }: { readonly locale: Locale }) {
     );
 }
 
+/** `PersonStructuredData` UI 컴포넌트를 렌더링함 */
 export function PersonStructuredData() {
     return (
         <script

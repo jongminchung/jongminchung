@@ -15,6 +15,7 @@ const copy = {
     },
 } as const;
 
+/** `SectionLandingPage` 페이지 UI를 렌더링함 */
 export function SectionLandingPage({
     page,
 }: {

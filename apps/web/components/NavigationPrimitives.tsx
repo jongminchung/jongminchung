@@ -2,6 +2,7 @@ import { Badge } from "@jongminchung/ui/components/badge";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+/** `SideNav` UI 컴포넌트를 렌더링함 */
 export function SideNav({
     className,
     header,
@@ -19,6 +20,7 @@ export function SideNav({
     );
 }
 
+/** `SideNavHeading` UI 컴포넌트를 렌더링함 */
 export function SideNavHeading({
     heading,
     superheading,
@@ -46,6 +48,7 @@ export function SideNavHeading({
     );
 }
 
+/** `SideNavSection` UI 컴포넌트를 렌더링함 */
 export function SideNavSection({
     children,
 }: {
@@ -56,6 +59,7 @@ export function SideNavSection({
     return <div className="grid gap-1 p-3">{children}</div>;
 }
 
+/** `SideNavItem` UI 컴포넌트를 렌더링함 */
 export function SideNavItem({
     label,
     href,

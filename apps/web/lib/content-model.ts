@@ -198,6 +198,7 @@ function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
     return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+/** `parseDocMetadata` 입력을 파싱함 */
 export function parseDocMetadata(
     value: unknown,
     source = "document",
@@ -233,12 +234,14 @@ export function parseDocMetadata(
     throw new Error(`${source}: ${message}`);
 }
 
+/** `displayTitleFor` 공개 기능을 제공함 */
 export function displayTitleFor(
     document: Pick<DocMetadata, "displayTitle" | "title">,
 ): string {
     return document.displayTitle ?? document.title;
 }
 
+/** `createDocHref` 결과를 생성함 */
 export function createDocHref(locale: Locale, id: string): string {
     if (id === "overview") return `/${locale}`;
     const slug = id.split("/").at(-1);
@@ -246,20 +249,24 @@ export function createDocHref(locale: Locale, id: string): string {
     return `/${locale}/articles/${slug}`;
 }
 
+/** `createSectionHref` 결과를 생성함 */
 export function createSectionHref(locale: Locale, section: DocSection): string {
     return section === "overview"
         ? `/${locale}`
         : `/${locale}/series/${section}`;
 }
 
+/** `createOgImageHref` 결과를 생성함 */
 export function createOgImageHref(locale: Locale, id: string): string {
     return `/og/${locale}/${id}`;
 }
 
+/** `createDocumentKey` 결과를 생성함 */
 export function createDocumentKey(locale: string, id: string): string {
     return `${locale}/${id}`;
 }
 
+/** `toTechArticleMetadata` 공개 기능을 제공함 */
 export function toTechArticleMetadata(
     document: DocMetadata,
 ): TechArticleMetadata | null {
@@ -273,6 +280,7 @@ export function toTechArticleMetadata(
     });
 }
 
+/** `compareDocumentMetadata` 값을 비교함 */
 export function compareDocumentMetadata(
     left: Pick<DocMetadata, "id" | "locale" | "order" | "section">,
     right: Pick<DocMetadata, "id" | "locale" | "order" | "section">,
@@ -285,6 +293,7 @@ export function compareDocumentMetadata(
     );
 }
 
+/** `isSectionLanding` 조건을 판별함 */
 export function isSectionLanding(value: string): value is SectionLanding {
     return sectionLandingSchema.safeParse(value).success;
 }

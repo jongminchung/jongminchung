@@ -5,6 +5,7 @@ import type { Locale, OutlineEntry } from "#lib/content-model";
 import { BackToTopButton } from "./BackToTopButton";
 import styles from "./DocumentOutline.module.css";
 
+/** `DocumentOutline` UI 컴포넌트를 렌더링함 */
 export function DocumentOutline({
     locale,
     items,

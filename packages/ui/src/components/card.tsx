@@ -1,6 +1,7 @@
 import { cn } from "@jongminchung/ui/lib/utils";
 import * as React from "react";
 
+/** `Card` UI 컴포넌트를 렌더링함 */
 function Card({
     className,
     size = "default",
@@ -19,6 +20,7 @@ function Card({
     );
 }
 
+/** `CardHeader` UI 컴포넌트를 렌더링함 */
 function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
     return (
         <div
@@ -32,6 +34,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
     );
 }
 
+/** `CardTitle` UI 컴포넌트를 렌더링함 */
 function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
     return (
         <div
@@ -45,6 +48,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
     );
 }
 
+/** `CardDescription` UI 컴포넌트를 렌더링함 */
 function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
     return (
         <div
@@ -55,6 +59,7 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
     );
 }
 
+/** `CardAction` UI 컴포넌트를 렌더링함 */
 function CardAction({ className, ...props }: React.ComponentProps<"div">) {
     return (
         <div
@@ -68,6 +73,7 @@ function CardAction({ className, ...props }: React.ComponentProps<"div">) {
     );
 }
 
+/** `CardContent` UI 컴포넌트를 렌더링함 */
 function CardContent({ className, ...props }: React.ComponentProps<"div">) {
     return (
         <div
@@ -78,6 +84,7 @@ function CardContent({ className, ...props }: React.ComponentProps<"div">) {
     );
 }
 
+/** `CardFooter` UI 컴포넌트를 렌더링함 */
 function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
     return (
         <div

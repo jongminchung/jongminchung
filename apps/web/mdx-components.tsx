@@ -3,11 +3,6 @@ import Link from "next/link";
 import { isValidElement, type ComponentProps, type ReactNode } from "react";
 import { DocsCodeBlock } from "./components/DocsCodeBlock";
 import { ExcalidrawDiagram } from "./components/ExcalidrawDiagram";
-import { MaterialDemo } from "./components/materials/MaterialDemo";
-import {
-    MaterialImage,
-    MaterialVideo,
-} from "./components/materials/MaterialMedia";
 import {
     OverviewCards,
     OverviewCta,
@@ -49,6 +44,7 @@ function JamieNotes({ children }: { readonly children: ReactNode }) {
     );
 }
 
+/** `MdxPre` 공개 기능을 제공함 */
 export function MdxPre({ children }: ComponentProps<"pre">) {
     if (!isValidElement<CodeElementProps>(children))
         return <pre>{children}</pre>;
@@ -80,9 +76,6 @@ const components = {
     a: MdxLink,
     pre: MdxPre,
     ExcalidrawDiagram,
-    MaterialDemo,
-    MaterialImage,
-    MaterialVideo,
     OverviewCards,
     OverviewCta,
     OverviewHero,
@@ -91,6 +84,7 @@ const components = {
     JamieNotes,
 } satisfies MDXComponents;
 
+/** `useMDXComponents` 훅 상태와 제어 함수를 제공함 */
 export function useMDXComponents(): MDXComponents {
     return components;
 }

@@ -372,8 +372,6 @@ CDN의 기본 캐시 키는 URL이다. 그런데 URL은 우리 생각보다 훨�
 
 정규화가 있고 없고의 차이를 아래 애니메이션이 같은 요청 스트림으로 비교해서 보여준다. 위 표보다 훨씬 작은 스트림(요청 24개, 실제 페이지 6개)이라 수치 자체는 다르지만, 왼쪽에서만 파편이 쌓이는 모양은 같다.
 
-<MaterialDemo id="frontend-caching-strategies/CacheKeyDemo" />
-
 같은 원리로 `Vary` 헤더도 다이어트 대상이다. 앞서 봤듯 `Vary`에 오르는 헤더 하나하나가 캐시를 그 값의 가짓수만큼 쪼갠다. 정말 응답을 가르는 헤더만 남기고, 특히 `Vary: Cookie`나 `Vary: User-Agent`처럼 사실상 무한 가짓수인 헤더가 들어 있다면 다른 설계(쿠키 대신 URL로 사용자 집단을 표현, User-Agent 대신 반응형)로 풀 수 없는지 먼저 의심해야 한다.
 
 ### 유통기한이 겁날 때: TTL 대신 SWR
@@ -459,8 +457,6 @@ export async function updatePrice(id: string, price: number) {
 CDN에도 서로게이트 키(surrogate key), 캐시 태그라는 이름으로 같은 기능이 있다. 응답에 `Surrogate-Key: product-42 products`처럼 태그를 붙여두고, 변경이 일어나면 태그를 지정해 캐시를 지우는(purge) API를 호출하는 식이다. 계층은 달라도 사고방식은 하나다. **캐시를 저장할 때 "이것은 어떤 데이터에 의존하는가"를 기록해두고, 그 데이터가 바뀔 때 기록을 따라 무효화한다.**
 
 아래 애니메이션은 변경 이벤트가 태그를 조준해 관련 캐시만 골라 갱신하는 흐름을 보여준다.
-
-<MaterialDemo id="frontend-caching-strategies/TagInvalidationDemo" />
 
 ### 낙관적 업데이트: 무효화조차 기다리지 않기
 

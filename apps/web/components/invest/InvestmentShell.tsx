@@ -35,6 +35,7 @@ const copy = {
     },
 } as const;
 
+/** `InvestmentLayout` 페이지 UI를 렌더링함 */
 export function InvestmentLayout({
     locale,
     children,
@@ -78,6 +79,7 @@ export function InvestmentLayout({
     );
 }
 
+/** `InvestmentHome` UI 컴포넌트를 렌더링함 */
 export function InvestmentHome({
     locale,
     notes,
@@ -103,6 +105,7 @@ export function InvestmentHome({
     );
 }
 
+/** `NoteCollection` UI 컴포넌트를 렌더링함 */
 export function NoteCollection({
     locale,
     notes,
@@ -150,6 +153,7 @@ export function NoteCollection({
     );
 }
 
+/** `InvestmentNotePage` 페이지 UI를 렌더링함 */
 export function InvestmentNotePage({
     locale,
     note,
@@ -215,6 +219,7 @@ function SourceCard({
     );
 }
 
+/** `sourceTitle` UI 컴포넌트를 렌더링함 */
 export function sourceTitle(
     locale: Locale,
     kind: InvestmentSourceKind,

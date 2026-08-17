@@ -22,11 +22,6 @@ sourceUrl: https://kciter.so/posts/modeling-series-view-model/
 
 화면에 그려지는 뷰(View)는 여러 정보를 포함하고 있다. 이는 꼭, 사용자에게 보여질 상태만을 의미하지 않는다. 상태를 포함하여 뷰의 구조, 동작, 색상 등 모든 정보는 추상화가 가능하다.
 
-<MaterialImage
-    src="/materials/images/2025-04-18-modeling-series-view-model/view.png"
-    caption="간단하게 보이는 뷰에도 많은 정보가 내포되어 있다"
-/>
-
 뷰모델은 어려운 개념이 아니다. **뷰를 추상화하여 필요한 정보를 정리한 것을 뷰모델**이라 할 수 있다. 단순히 우리가 데이터를 JSON으로 내려주는 것도 일종의 뷰모델이라 할 수 있다. 다만, 뷰를 추상화한다는 자각 없이 데이터만을 내려주는 경우가 많을 뿐이다.
 
 이 글에서는 단순한 데이터 전달을 넘어서, **제대로 된 뷰모델이 생산성에 어떠한 이점이 있는지**를 다양한 예시와 함께 살펴보려 한다.
@@ -58,11 +53,6 @@ sourceUrl: https://kciter.so/posts/modeling-series-view-model/
 ```
 
 이렇게 구성된 리스트 데이터는 여러 방식으로 그려질 수 있다.
-
-<MaterialImage
-    src="/materials/images/2025-04-18-modeling-series-view-model/list-vs-card.png"
-    caption="리스트 뷰 VS 카드 뷰"
-/>
 
 뷰모델 설계는 **하나의 모델에서 여러 뷰가 탄생할 수 있다는 관점에서 시작**한다. 조금 더 구체적으로 살펴보자. 설계를 잘하기 위해선 필요한 것을 정확히 알고 있어야 하고, 그러기 위해선 먼저 분해를 잘해야 한다. 뷰는 다음과 같이 크게 네 가지 구성 요소로 나눌 수 있다.
 
@@ -204,12 +194,6 @@ sourceUrl: https://kciter.so/posts/modeling-series-view-model/
 
 위 스펙에 기반하여 모델을 도식화하면 다음과 같다.
 
-<MaterialImage
-    src="/materials/images/2025-04-18-modeling-series-view-model/diagram.png"
-    caption="테이블 뷰모델 도식화 (클릭하여 크게보기)"
-    expandable
-/>
-
 모델을 코드로 옮기면 다음과 같이 구현할 수 있다. 여기서는 Kotlin을 사용해서 구현했다.
 
 ```kotlin
@@ -298,8 +282,6 @@ data class TableViewModel<T>(
 
 이제 만들어진 뷰모델을 기반으로 화면에서 자동으로 처리해줄 렌더러를 구현하면 마무리된다. 필자가 Claude를 이용해 구현한 렌더러는 다음과 같다. (모바일에선 보기 흉할 수 있다)
 
-<MaterialDemo id="modeling-series-view-model/TableExample" />
-
 지금은 스타일이 없지만 적절한 스타일을 적용하면 필터링, 정렬, 페이지네이션까지 가능한 꽤 괜찮은 테이블 뷰를 만들 수 있다. 만약 렌더러 코드가 궁금하다면 [GitHub](https://github.com/kciter/kciter.github.io/tree/develop/src/materials/modeling-series-view-model/TableRenderer.tsx)에서 볼 수 있다.
 
 ## Server Driven UI
@@ -307,11 +289,6 @@ data class TableViewModel<T>(
 **뷰모델의 끝은 SDUI(Server Driven UI)라고 할 수 있다.** SDUI는 서버에서 UI를 정해서 내려주는 방식으로, 클라이언트는 서버에서 정의한대로 그리면 된다. 앞서 구현한 테이블 뷰모델처럼 복잡한 뷰모델부터 단순한 뷰모델을 모두 포함하고 이에 대한 렌더러를 모두 구현했다면 SDUI를 구현했다고 할 수 있다. 즉, SDUI는 뷰모델의 모음집이라고 할 수 있다.
 
 SDUI는 빠른 배포가 어려운 클라이언트와 달리 서버만 변경하면 되므로 UI 변경이 더욱 쉽고, A/B 테스트와 개인화된 UI를 제공하기 더 쉽다는 장점이 있어 다양한 기업들이 사용하고 있다. SDUI를 사용하는 기업은 대표적으로 Airbnb가 있으며 국내에서도 카카오스타일, 오늘의집 등의 서비스에서 사용하고 있는 것으로 알려져있다.
-
-<MaterialImage
-    src="/materials/images/2025-04-18-modeling-series-view-model/sdui.png"
-    caption="마찬가지로 데이터를 렌더러를 통해 그릴 수 있다"
-/>
 
 다만, SDUI는 굉장히 추상화된 뷰모델이다. 클라이언트가 해석할 자유는 거의 없으며 서버가 제공하는 대로 그려야 한다. 엄격하게 규칙을 관리하고 전담할 사람이 없다면 오히려 생산성에 악영향을 미칠 수도 있다. 그리고 로딩 시간, 오류 처리, 사용자 인터렉션 등 다양한 것을 고민할 필요가 있다. 이에 대한 고민이 필요하기에 도입하기 전 충분한 검토가 필요하다.
 

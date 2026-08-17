@@ -1,11 +1,11 @@
 import type { MetadataRoute } from "next";
-import manifest from "#generated/content-manifest.json";
 import {
     createDocHref,
     createSectionHref,
     locales,
     sectionLandingSections,
 } from "#lib/content-model";
+import { getDocuments } from "#lib/documents";
 
 const siteOrigin = "https://tech.jamie.kr";
 
@@ -13,7 +13,9 @@ function absoluteUrl(pathname: string): string {
     return new URL(pathname, siteOrigin).toString();
 }
 
-export default function sitemap(): MetadataRoute.Sitemap {
+/** 사이트맵 항목을 생성함 */
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+    const manifest = await getDocuments();
     const documentEntries: MetadataRoute.Sitemap = manifest.map((document) => ({
         url: absoluteUrl(document.href),
         lastModified: document.updatedAt,

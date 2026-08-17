@@ -4,6 +4,7 @@ import { Checkbox as CheckboxPrimitive } from "@base-ui/react/checkbox";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { CheckIcon, MinusIcon } from "lucide-react";
 
+/** `Checkbox` UI 컴포넌트를 렌더링함 */
 function Checkbox({ className, ...props }: CheckboxPrimitive.Root.Props) {
     return (
         <CheckboxPrimitive.Root

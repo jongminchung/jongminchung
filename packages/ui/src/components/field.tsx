@@ -19,6 +19,7 @@ function uniqueErrorMessages(
     ];
 }
 
+/** `FieldSet` UI 컴포넌트를 렌더링함 */
 function FieldSet({ className, ...props }: React.ComponentProps<"fieldset">) {
     return (
         <fieldset
@@ -32,6 +33,7 @@ function FieldSet({ className, ...props }: React.ComponentProps<"fieldset">) {
     );
 }
 
+/** `FieldLegend` UI 컴포넌트를 렌더링함 */
 function FieldLegend({
     className,
     variant = "legend",
@@ -50,6 +52,7 @@ function FieldLegend({
     );
 }
 
+/** `FieldGroup` UI 컴포넌트를 렌더링함 */
 function FieldGroup({ className, ...props }: React.ComponentProps<"div">) {
     return (
         <div
@@ -81,6 +84,7 @@ const fieldVariants = cva(
     },
 );
 
+/** `Field` UI 컴포넌트를 렌더링함 */
 function Field({
     className,
     orientation = "vertical",
@@ -97,6 +101,7 @@ function Field({
     );
 }
 
+/** `FieldContent` UI 컴포넌트를 렌더링함 */
 function FieldContent({ className, ...props }: React.ComponentProps<"div">) {
     return (
         <div
@@ -110,6 +115,7 @@ function FieldContent({ className, ...props }: React.ComponentProps<"div">) {
     );
 }
 
+/** `FieldLabel` UI 컴포넌트를 렌더링함 */
 function FieldLabel({
     className,
     ...props
@@ -127,6 +133,7 @@ function FieldLabel({
     );
 }
 
+/** `FieldTitle` UI 컴포넌트를 렌더링함 */
 function FieldTitle({ className, ...props }: React.ComponentProps<"div">) {
     return (
         <div
@@ -140,6 +147,7 @@ function FieldTitle({ className, ...props }: React.ComponentProps<"div">) {
     );
 }
 
+/** `FieldDescription` UI 컴포넌트를 렌더링함 */
 function FieldDescription({ className, ...props }: React.ComponentProps<"p">) {
     return (
         <p
@@ -155,6 +163,7 @@ function FieldDescription({ className, ...props }: React.ComponentProps<"p">) {
     );
 }
 
+/** `FieldSeparator` UI 컴포넌트를 렌더링함 */
 function FieldSeparator({
     children,
     className,
@@ -185,6 +194,7 @@ function FieldSeparator({
     );
 }
 
+/** `FieldError` UI 컴포넌트를 렌더링함 */
 function FieldError({
     className,
     children,

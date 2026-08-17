@@ -5,7 +5,7 @@ import {
     locales,
     sectionLandingSections,
 } from "#lib/content-model";
-import { documents, findDocument } from "#lib/documents";
+import { findDocument, getDocuments } from "#lib/documents";
 import { findSectionPage } from "#lib/section-pages";
 import { techSectionLabels } from "#lib/tech-copy";
 
@@ -28,13 +28,13 @@ interface StaticOgParam {
     readonly slug: readonly string[];
 }
 
-function resolvePage(
+async function resolvePage(
     locale: string,
     slug: readonly string[],
-): OgPageData | null {
+): Promise<OgPageData | null> {
     if (!isLocale(locale)) return null;
     const id = slug.join("/");
-    const sectionPage = findSectionPage(locale, id);
+    const sectionPage = await findSectionPage(locale, id);
     if (sectionPage !== null) {
         return {
             title: sectionPage.title,
@@ -43,7 +43,7 @@ function resolvePage(
             detail: `${sectionPage.documents.length} documents`,
         };
     }
-    const document = findDocument(locale, id);
+    const document = await findDocument(locale, id);
     if (document === null) return null;
     return {
         title: document.title,
@@ -56,8 +56,9 @@ function resolvePage(
 export const dynamic = "force-static";
 export const dynamicParams = false;
 
-export function generateStaticParams(): StaticOgParam[] {
-    const documentParams = documents.map((document) => ({
+/** 정적 생성에 사용할 경로 매개변수를 반환함 */
+export async function generateStaticParams(): Promise<StaticOgParam[]> {
+    const documentParams = (await getDocuments()).map((document) => ({
         locale: document.locale,
         slug: document.id.split("/"),
     }));
@@ -67,13 +68,14 @@ export function generateStaticParams(): StaticOgParam[] {
     return [...documentParams, ...sectionParams];
 }
 
+/** 요청에 대한 응답을 생성함 */
 export async function GET(
     _request: Request,
     context: RouteContext,
 ): Promise<Response> {
     const { locale, slug } = await context.params;
     if (!isLocale(locale)) return new Response("Not found", { status: 404 });
-    const page = resolvePage(locale, slug);
+    const page = await resolvePage(locale, slug);
     if (page === null) return new Response("Not found", { status: 404 });
     const titleSize = page.title.length > 38 ? 48 : 58;
     return new ImageResponse(

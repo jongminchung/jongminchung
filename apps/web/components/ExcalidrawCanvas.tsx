@@ -24,6 +24,7 @@ function readTheme(): ExcalidrawTheme {
     return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
 }
 
+/** `ExcalidrawCanvas` UI 컴포넌트를 렌더링함 */
 export function ExcalidrawCanvas({
     name,
     onReady,

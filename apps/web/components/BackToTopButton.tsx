@@ -4,6 +4,7 @@ import { Button } from "@jongminchung/ui/components/button";
 import type { Locale } from "#lib/content-model";
 import { Icon } from "./Icon";
 
+/** `BackToTopButton` UI 컴포넌트를 렌더링함 */
 export function BackToTopButton({ locale }: { readonly locale: Locale }) {
     return (
         <Button

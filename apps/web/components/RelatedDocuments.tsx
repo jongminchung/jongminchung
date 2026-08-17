@@ -2,6 +2,7 @@ import type { ContentManifestEntry, Locale } from "#lib/content-model";
 import { DocumentCard } from "./DocumentCard";
 import styles from "./RelatedDocuments.module.css";
 
+/** `RelatedDocuments` UI 컴포넌트를 렌더링함 */
 export function RelatedDocuments({
     documents,
     locale,

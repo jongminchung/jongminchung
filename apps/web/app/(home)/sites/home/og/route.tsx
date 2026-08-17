@@ -13,6 +13,7 @@ const imageTheme = {
     primaryForeground: "#ffffff",
 } as const;
 
+/** 요청에 대한 응답을 생성함 */
 export function GET(): ImageResponse {
     return new ImageResponse(
         <div

@@ -5,6 +5,7 @@ import { cn } from "@jongminchung/ui/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
 
+/** `ItemGroup` UI 컴포넌트를 렌더링함 */
 function ItemGroup({ className, ...props }: React.ComponentProps<"div">) {
     return (
         <div
@@ -19,6 +20,7 @@ function ItemGroup({ className, ...props }: React.ComponentProps<"div">) {
     );
 }
 
+/** `ItemSeparator` UI 컴포넌트를 렌더링함 */
 function ItemSeparator({
     className,
     ...props
@@ -55,6 +57,7 @@ const itemVariants = cva(
     },
 );
 
+/** `Item` UI 컴포넌트를 렌더링함 */
 function Item({
     className,
     variant = "default",
@@ -95,6 +98,7 @@ const itemMediaVariants = cva(
     },
 );
 
+/** `ItemMedia` UI 컴포넌트를 렌더링함 */
 function ItemMedia({
     className,
     variant = "default",
@@ -110,6 +114,7 @@ function ItemMedia({
     );
 }
 
+/** `ItemContent` UI 컴포넌트를 렌더링함 */
 function ItemContent({ className, ...props }: React.ComponentProps<"div">) {
     return (
         <div
@@ -123,6 +128,7 @@ function ItemContent({ className, ...props }: React.ComponentProps<"div">) {
     );
 }
 
+/** `ItemTitle` UI 컴포넌트를 렌더링함 */
 function ItemTitle({ className, ...props }: React.ComponentProps<"div">) {
     return (
         <div
@@ -136,6 +142,7 @@ function ItemTitle({ className, ...props }: React.ComponentProps<"div">) {
     );
 }
 
+/** `ItemDescription` UI 컴포넌트를 렌더링함 */
 function ItemDescription({ className, ...props }: React.ComponentProps<"p">) {
     return (
         <p
@@ -149,6 +156,7 @@ function ItemDescription({ className, ...props }: React.ComponentProps<"p">) {
     );
 }
 
+/** `ItemActions` UI 컴포넌트를 렌더링함 */
 function ItemActions({ className, ...props }: React.ComponentProps<"div">) {
     return (
         <div
@@ -159,6 +167,7 @@ function ItemActions({ className, ...props }: React.ComponentProps<"div">) {
     );
 }
 
+/** `ItemHeader` UI 컴포넌트를 렌더링함 */
 function ItemHeader({ className, ...props }: React.ComponentProps<"div">) {
     return (
         <div
@@ -172,6 +181,7 @@ function ItemHeader({ className, ...props }: React.ComponentProps<"div">) {
     );
 }
 
+/** `ItemFooter` UI 컴포넌트를 렌더링함 */
 function ItemFooter({ className, ...props }: React.ComponentProps<"div">) {
     return (
         <div

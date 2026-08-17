@@ -5,6 +5,7 @@ import { cn } from "@jongminchung/ui/lib/utils";
 import { Check, Copy } from "lucide-react";
 import { useState } from "react";
 
+/** `DocsCodeBlock` UI 컴포넌트를 렌더링함 */
 export function DocsCodeBlock({
     code,
     language,

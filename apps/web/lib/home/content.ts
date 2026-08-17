@@ -140,6 +140,7 @@ const content = {
     },
 } as const satisfies Record<Locale, HomeContent>;
 
+/** `getHomeContent` 데이터를 조회함 */
 export function getHomeContent(locale: Locale): HomeContent {
     return content[locale];
 }

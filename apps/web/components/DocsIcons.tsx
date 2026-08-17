@@ -9,6 +9,7 @@ const baseProps = {
     strokeLinejoin: "round" as const,
 };
 
+/** `OverviewIcon` UI 컴포넌트를 렌더링함 */
 export function OverviewIcon(props: SVGProps<SVGSVGElement>) {
     return (
         <svg {...baseProps} {...props}>
@@ -20,6 +21,7 @@ export function OverviewIcon(props: SVGProps<SVGSVGElement>) {
     );
 }
 
+/** `HandbookIcon` UI 컴포넌트를 렌더링함 */
 export function HandbookIcon(props: SVGProps<SVGSVGElement>) {
     return (
         <svg {...baseProps} {...props}>
@@ -29,6 +31,7 @@ export function HandbookIcon(props: SVGProps<SVGSVGElement>) {
     );
 }
 
+/** `PackageIcon` UI 컴포넌트를 렌더링함 */
 export function PackageIcon(props: SVGProps<SVGSVGElement>) {
     return (
         <svg {...baseProps} {...props}>
@@ -38,6 +41,7 @@ export function PackageIcon(props: SVGProps<SVGSVGElement>) {
     );
 }
 
+/** `DeepDiveIcon` UI 컴포넌트를 렌더링함 */
 export function DeepDiveIcon(props: SVGProps<SVGSVGElement>) {
     return (
         <svg {...baseProps} {...props}>
@@ -47,6 +51,7 @@ export function DeepDiveIcon(props: SVGProps<SVGSVGElement>) {
     );
 }
 
+/** `RepositoryIcon` UI 컴포넌트를 렌더링함 */
 export function RepositoryIcon(props: SVGProps<SVGSVGElement>) {
     return (
         <svg {...baseProps} {...props}>
@@ -56,6 +61,7 @@ export function RepositoryIcon(props: SVGProps<SVGSVGElement>) {
     );
 }
 
+/** `EditIcon` UI 컴포넌트를 렌더링함 */
 export function EditIcon(props: SVGProps<SVGSVGElement>) {
     return (
         <svg {...baseProps} {...props}>
@@ -65,6 +71,7 @@ export function EditIcon(props: SVGProps<SVGSVGElement>) {
     );
 }
 
+/** `SystemThemeIcon` UI 컴포넌트를 렌더링함 */
 export function SystemThemeIcon(props: SVGProps<SVGSVGElement>) {
     return (
         <svg {...baseProps} {...props}>
@@ -74,6 +81,7 @@ export function SystemThemeIcon(props: SVGProps<SVGSVGElement>) {
     );
 }
 
+/** `LightThemeIcon` UI 컴포넌트를 렌더링함 */
 export function LightThemeIcon(props: SVGProps<SVGSVGElement>) {
     return (
         <svg {...baseProps} {...props}>
@@ -83,6 +91,7 @@ export function LightThemeIcon(props: SVGProps<SVGSVGElement>) {
     );
 }
 
+/** `DarkThemeIcon` UI 컴포넌트를 렌더링함 */
 export function DarkThemeIcon(props: SVGProps<SVGSVGElement>) {
     return (
         <svg {...baseProps} {...props}>

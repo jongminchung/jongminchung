@@ -38,6 +38,7 @@ const icons: Readonly<
     close: X,
 };
 
+/** `Icon` UI 컴포넌트를 렌더링함 */
 export function Icon({
     icon,
     className,

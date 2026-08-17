@@ -1,6 +1,7 @@
 import { NotFoundPage } from "#components/NotFoundPage";
 import styles from "./NotFoundPage.module.css";
 
+/** `LocalizedNotFoundPage` 페이지 UI를 렌더링함 */
 export function LocalizedNotFoundPage(): React.JSX.Element {
     return (
         <>

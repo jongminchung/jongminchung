@@ -4,6 +4,7 @@ import { Radio as RadioPrimitive } from "@base-ui/react/radio";
 import { RadioGroup as RadioGroupPrimitive } from "@base-ui/react/radio-group";
 import { cn } from "@jongminchung/ui/lib/utils";
 
+/** `RadioGroup` UI 컴포넌트를 렌더링함 */
 function RadioGroup({ className, ...props }: RadioGroupPrimitive.Props) {
     return (
         <RadioGroupPrimitive
@@ -14,6 +15,7 @@ function RadioGroup({ className, ...props }: RadioGroupPrimitive.Props) {
     );
 }
 
+/** `RadioGroupItem` UI 컴포넌트를 렌더링함 */
 function RadioGroupItem({ className, ...props }: RadioPrimitive.Root.Props) {
     return (
         <RadioPrimitive.Root

@@ -1,71 +1,50 @@
-import { z } from "zod";
+import type { Locale } from "./content-contracts.ts";
 import {
-    investmentLoaders,
-    type InvestmentLoaderKey,
-} from "../generated/investment-loaders";
-import manifestData from "../generated/investment-manifest.json";
-import type { Locale } from "./content-contracts";
-import {
-    createInvestmentNoteHref,
-    investmentNoteManifestEntrySchema,
-    type InvestmentNoteManifestEntry,
-    type InvestmentSourceKind,
-} from "./investment-content";
+    notesBySource,
+    publishedInvestmentNotes,
+    readContentSnapshot,
+    renderInvestmentMdx,
+} from "./content-repository.ts";
+import type {
+    InvestmentNoteManifestEntry,
+    InvestmentSourceKind,
+} from "./investment-content.ts";
 
-function parseManifest(value: unknown): readonly InvestmentNoteManifestEntry[] {
-    const result = z
-        .array(investmentNoteManifestEntrySchema)
-        .readonly()
-        .safeParse(value);
-    if (!result.success)
-        throw new Error(
-            `Invalid investment manifest: ${result.error.issues[0]?.message ?? "unknown error"}`,
-        );
-    for (const [index, entry] of result.data.entries()) {
-        if (entry.href !== createInvestmentNoteHref(entry.locale, entry.id))
-            throw new Error(
-                `Investment manifest item ${index} has an invalid href.`,
-            );
-    }
-    return result.data;
-}
-
-export const investmentNotes = parseManifest(manifestData);
-
-export function getInvestmentNotes(
+/** `getInvestmentNotes` 데이터를 조회함 */
+export async function getInvestmentNotes(
     locale: Locale,
-): readonly InvestmentNoteManifestEntry[] {
-    return investmentNotes
-        .filter((note) => note.locale === locale && note.status === "published")
-        .toSorted(
-            (left, right) =>
-                right.publishedAt.localeCompare(left.publishedAt) ||
-                left.id.localeCompare(right.id),
-        );
-}
-
-export function getNotesBySource(
-    locale: Locale,
-    kind: InvestmentSourceKind,
-): readonly InvestmentNoteManifestEntry[] {
-    return getInvestmentNotes(locale).filter((note) =>
-        note.sources.some((source) => source.kind === kind),
+): Promise<readonly InvestmentNoteManifestEntry[]> {
+    return publishedInvestmentNotes(
+        (await readContentSnapshot()).investmentNotes,
+        locale,
     );
 }
 
-export function findInvestmentNote(
+/** `getNotesBySource` 데이터를 조회함 */
+export async function getNotesBySource(
     locale: Locale,
-    id: string,
-): InvestmentNoteManifestEntry | null {
-    return getInvestmentNotes(locale).find((note) => note.id === id) ?? null;
+    kind: InvestmentSourceKind,
+): Promise<readonly InvestmentNoteManifestEntry[]> {
+    return notesBySource(
+        (await readContentSnapshot()).investmentNotes,
+        locale,
+        kind,
+    );
 }
 
+/** `findInvestmentNote` 데이터를 조회함 */
+export async function findInvestmentNote(locale: Locale, id: string) {
+    return (
+        (await getInvestmentNotes(locale)).find((note) => note.id === id) ??
+        null
+    );
+}
+
+/** `loadInvestmentNote` 데이터를 조회함 */
 export async function loadInvestmentNote(locale: Locale, id: string) {
-    const metadata = findInvestmentNote(locale, id);
+    const metadata = await findInvestmentNote(locale, id);
     if (metadata === null) return null;
-    const key = `${locale}/${id}` as InvestmentLoaderKey;
-    const loader = investmentLoaders[key];
-    if (loader === undefined) return null;
-    const module = await loader();
-    return Object.freeze({ metadata, Content: module.default });
+    const Content = (await renderInvestmentMdx(locale, id))
+        .default as React.ComponentType;
+    return Object.freeze({ metadata, Content });
 }

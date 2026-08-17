@@ -13,6 +13,7 @@ export interface TechUiState {
 
 export type TechUiStore = StoreApi<TechUiState>;
 
+/** `createTechUiStore` 결과를 생성함 */
 export function createTechUiStore(): TechUiStore {
     return createStore<TechUiState>()((set) => ({
         themeMode: "system",

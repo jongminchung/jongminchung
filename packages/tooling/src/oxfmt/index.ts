@@ -49,6 +49,7 @@ const defaultOxfmtConfig = Object.freeze({
     overrides: [],
 }) satisfies ResolvedOxfmtConfig;
 
+/** `defineOxfmtConfig` 공개 기능을 제공함 */
 export function defineOxfmtConfig(
     overrides: OxfmtConfig = {},
 ): ResolvedOxfmtConfig {

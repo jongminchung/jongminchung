@@ -4,14 +4,17 @@ import { Popover as PopoverPrimitive } from "@base-ui/react/popover";
 import { cn } from "@jongminchung/ui/lib/utils";
 import * as React from "react";
 
+/** `Popover` UI 컴포넌트를 렌더링함 */
 function Popover({ ...props }: PopoverPrimitive.Root.Props) {
     return <PopoverPrimitive.Root data-slot="popover" {...props} />;
 }
 
+/** `PopoverTrigger` UI 컴포넌트를 렌더링함 */
 function PopoverTrigger({ ...props }: PopoverPrimitive.Trigger.Props) {
     return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />;
 }
 
+/** `PopoverContent` UI 컴포넌트를 렌더링함 */
 function PopoverContent({
     className,
     align = "center",
@@ -46,6 +49,7 @@ function PopoverContent({
     );
 }
 
+/** `PopoverHeader` UI 컴포넌트를 렌더링함 */
 function PopoverHeader({ className, ...props }: React.ComponentProps<"div">) {
     return (
         <div
@@ -56,6 +60,7 @@ function PopoverHeader({ className, ...props }: React.ComponentProps<"div">) {
     );
 }
 
+/** `PopoverTitle` UI 컴포넌트를 렌더링함 */
 function PopoverTitle({ className, ...props }: PopoverPrimitive.Title.Props) {
     return (
         <PopoverPrimitive.Title
@@ -66,6 +71,7 @@ function PopoverTitle({ className, ...props }: PopoverPrimitive.Title.Props) {
     );
 }
 
+/** `PopoverDescription` UI 컴포넌트를 렌더링함 */
 function PopoverDescription({
     className,
     ...props

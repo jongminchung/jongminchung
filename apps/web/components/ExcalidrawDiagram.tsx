@@ -45,6 +45,7 @@ function localizedText(
     return isKorean ? korean : english;
 }
 
+/** `ExcalidrawDiagram` UI 컴포넌트를 렌더링함 */
 export function ExcalidrawDiagram(
     props: ExcalidrawDiagramProps,
 ): React.JSX.Element {

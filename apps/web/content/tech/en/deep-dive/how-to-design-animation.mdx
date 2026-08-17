@@ -304,8 +304,6 @@ Almost everything so far ran in **one direction**: start to end, 0 to 1. But som
 
 The example below shows a scroll parallax designed to be bidirectional. The element enters and exits with the scroll, and the motion stays smooth when the scroll direction flips.
 
-<MaterialDemo id="how-to-design-animation/BidirectionalDemo" />
-
 Value-based animations like parallax get bidirectionality almost for free. The horizontal axis is the scroll offset, so reversing just means walking the same graph backward. Event-based animations — showing and hiding on a button click, say — take more care. Ignore bidirectionality and two problems show up:
 
 - **Jumps**: hit "hide" while the element is still appearing, and the exit animation starts from the beginning, ignoring where the element currently is. It teleports, and the motion breaks
@@ -319,11 +317,6 @@ The techniques above cover a lot of ground, but they have limits. A character wa
 
 That's what **dedicated tools** are for. Build the animation in After Effects and export it with [Lottie](https://airbnb.io/lottie/), or use something like [Rive](https://rive.app/), which specializes in interactive animation. Sometimes producing a plain **video** and playing it back is the right answer. Picking the appropriate tool beats forcing everything into code.
 
-<MaterialImage
-    src="/materials/images/2026-02-18-how-to-design-animation/lottie.gif"
-    caption="A complex animation built with Lottie"
-/>
-
 What code has that those tools don't is **real-time interaction**. Motion that responds instantly to input and changes dynamically with state can't come from a pre-rendered video. That's exactly where the techniques in this article apply.
 
 ## Closing
@@ -335,5 +328,3 @@ If you've ever stared at an animation with no idea where to begin, I hope this a
 ### ProgressMappingDemo
 
 원문 주제에 포함된 보조 시각 자료다.
-
-<MaterialDemo id="how-to-design-animation/ProgressMappingDemo" />

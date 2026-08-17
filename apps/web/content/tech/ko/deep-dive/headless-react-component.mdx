@@ -194,8 +194,6 @@ const TerminalSwitch = () => {
 
 같은 훅을 세 가지 모습으로 그려보면 다음과 같다. 직접 조작해 보자.
 
-<MaterialDemo id="headless-react-component/SwitchSkinDemo" />
-
 각 스위치 아래 표시된 `aria-checked`와 `data-state`는 실제로 요소에 붙어 있는 속성 값이다. 겉모습은 제각각이지만 스크린 리더가 읽는 정보와 키보드 동작은 셋 다 동일하다. 동작의 품질은 훅이 보장하고 겉모습의 자유는 사용하는 쪽이 가진다. 이것이 Headless 컴포넌트가 하는 거래다.
 
 ### 부품이 여러 개라면
@@ -601,8 +599,6 @@ export const Select = { Root, Trigger, Value, Listbox, Option };
 사소하지만 이름표도 하나 챙겨두자. 지금 구조에서 React DevTools나 에러 메시지는 부품을 `Trigger` 같은 민짜 이름으로 보여주는데, 각 부품에 `Trigger.displayName = 'Select.Trigger'`처럼 붙여두면 디버깅할 때 어느 컴포넌트의 부품인지 바로 알 수 있다.
 
 여기까지 만들면 처음에 그렸던 사용 코드가 그대로 동작한다. 조립하면 이런 모습이 된다. 아래 데모는 지금까지 만든 Select 구현을 실제로 그대로 사용한 것이다.
-
-<MaterialDemo id="headless-react-component/SkinSwapDemo" />
 
 스킨을 바꿔도 선택한 값이 그대로 유지되는 것에 주목하자. 세 스킨은 완전히 다른 서비스처럼 보이지만 같은 코어가 같은 상태로 렌더링하고 있다. 코어 어디에도 색이나 여백 같은 것은 없다. 하단에 표시되는 `value`와 `open`은 데모가 코어에서 건네받아 보여주는 상태이고, 스킨 사이의 차이는 전부 CSS에서 온다.
 

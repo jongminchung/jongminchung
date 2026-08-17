@@ -218,8 +218,6 @@ onClickPhoto((i) => {
 
 Feel the difference in the demo below. Sixty photos have been attached, and each preview is actually generated with per-pixel filtering. While previews are being built in order, click one of the gray tiles that isn't ready yet. In "In order" mode you wait until its turn comes; in "Clicked first" mode it skips the queue and fills in immediately. The total work is identical; only the order changed. And yet the experience is completely different.
 
-<MaterialDemo id="the-expensive-main-thread/DynamicPriorityDemo" />
-
 Priority is really just the question: what matters most to the user at this exact moment?
 
 > Modern browsers offer standards for this — the Scheduler API, TaskController. Support is still incomplete, so in practice people pair them with polyfills or build their own queues. This article uses the hand-built-queue approach.
@@ -273,8 +271,6 @@ So "not using" the main thread doesn't mean shipping arbitrary work elsewhere. I
 The compositor thread is the secret behind the CSS animation that wouldn't stop. `transform` and `opacity` don't change an element's position, size, or color in the document — they move an already-painted layer or adjust its transparency, so there's no need to redo layout or paint. That lets the browser handle them directly on the compositor thread without going through the main thread at all. However busy the main thread gets, the compositor runs independently, and the animation stays smooth.
 
 Move an element with `top`, `left`, `width`, or `height` instead, and layout must be recomputed every frame — that's main-thread work. In the demo below, the two boxes slide side to side identically, but one moves with `transform` and the other with `left`. Press the button to load down the main thread.
-
-<MaterialDemo id="the-expensive-main-thread/TransformVsLayoutDemo" />
 
 The moment the main thread gets busy, only the bottom box — the one moving with `left` — starts to stutter. The `transform` box up top is being driven by the compositor and glides on regardless of the load. The same "slide sideways" ends up on a completely different thread depending on which property you animate. This is why animations that move things should use `transform: translate` instead of `left`, and animations that resize things should use `transform: scale` instead of `width`.
 

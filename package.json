@@ -16,7 +16,7 @@
     "deps:update": "npm-check-updates -u --workspaces --target latest --packageManager pnpm --reject typescript && pnpm install",
     "fmt": "oxfmt --config oxfmt.config.ts .",
     "fmt:check": "oxfmt --config oxfmt.config.ts --check .",
-    "lint": "pnpm --filter @jongminchung/tooling run check:public-jsdoc && oxlint --config oxlint.config.ts .",
+    "lint": "oxlint --config oxlint.config.ts .",
     "publish:dry-run": "pnpm --filter @jongminchung/tooling run publish:dry-run && pnpm --filter @jongminchung/ui run publish:dry-run",
     "test": "pnpm run test:unit && pnpm run test:integration",
     "test:coverage:update": "vitest run --project unit --coverage --coverage.thresholds.autoUpdate",

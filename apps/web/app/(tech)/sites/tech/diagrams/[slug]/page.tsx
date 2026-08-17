@@ -14,6 +14,7 @@ interface PageProps {
 
 export const dynamicParams = false;
 
+/** 정적 생성에 사용할 경로 매개변수를 반환함 */
 export async function generateStaticParams(): Promise<
     { readonly slug: string }[]
 > {
@@ -21,6 +22,7 @@ export async function generateStaticParams(): Promise<
     return assets.map((asset) => ({ slug: asset.slug }));
 }
 
+/** 경로 매개변수에 맞는 페이지 메타데이터를 생성함 */
 export async function generateMetadata({
     params,
 }: PageProps): Promise<Metadata> {
@@ -33,6 +35,7 @@ export async function generateMetadata({
     };
 }
 
+/** `StandaloneExcalidrawPage` 페이지 UI를 렌더링함 */
 export default async function StandaloneExcalidrawPage({
     params,
 }: PageProps): Promise<React.JSX.Element> {

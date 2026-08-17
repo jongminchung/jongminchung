@@ -6,6 +6,7 @@ import styles from "./DocumentCard.module.css";
 
 export type DocumentCardVariant = "featured" | "list" | "related";
 
+/** `DocumentCard` UI 컴포넌트를 렌더링함 */
 export function DocumentCard({
     document,
     locale,

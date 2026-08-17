@@ -6,9 +6,10 @@
 - Kubernetes Ingress·Service·Deployment는 인프라 저장소에서 관리함
 - 컨테이너는 비루트 사용자로 `0.0.0.0:3000`에서 standalone 서버를 실행함
 - readiness와 liveness probe는 Host에 의존하지 않는 `GET /healthz`를 사용함
-- 로컬 이미지는 저장소 루트에서 `docker build -t jamie-web .`로 생성함
+- 로컬 이미지는 저장소 루트 컨텍스트와 `apps/web/docker/Dockerfile`로 생성함
 
 ```sh
+docker build -f apps/web/docker/Dockerfile -t jamie-web .
 docker run --rm -p 3000:3000 jamie-web
 curl --fail http://127.0.0.1:3000/healthz
 curl --fail -H 'Host: jamie.kr' http://127.0.0.1:3000/ko

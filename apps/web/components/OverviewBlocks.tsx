@@ -118,6 +118,7 @@ const copy = {
     },
 } as const;
 
+/** `OverviewHero` UI 컴포넌트를 렌더링함 */
 export function OverviewHero({ locale }: { readonly locale: Locale }) {
     const text = copy[locale];
     return (
@@ -167,6 +168,7 @@ export function OverviewHero({ locale }: { readonly locale: Locale }) {
     );
 }
 
+/** `QuickStart` UI 컴포넌트를 렌더링함 */
 export function QuickStart({ locale }: { readonly locale: Locale }) {
     return (
         <div className="grid grid-cols-3 gap-5 max-[760px]:grid-cols-1">
@@ -190,6 +192,7 @@ export function QuickStart({ locale }: { readonly locale: Locale }) {
     );
 }
 
+/** `OverviewCards` UI 컴포넌트를 렌더링함 */
 export function OverviewCards({ locale }: { readonly locale: Locale }) {
     const text = copy[locale];
     return (
@@ -225,6 +228,7 @@ export function OverviewCards({ locale }: { readonly locale: Locale }) {
     );
 }
 
+/** `OverviewCta` UI 컴포넌트를 렌더링함 */
 export function OverviewCta({ locale }: { readonly locale: Locale }) {
     const text = copy[locale];
     return (

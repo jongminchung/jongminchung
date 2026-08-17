@@ -24,6 +24,7 @@ function applyTheme(mode: ThemeMode, prefersDark: boolean): void {
 
 const TechUiContext = createContext<TechUiStore | null>(null);
 
+/** `TechUiProvider` UI 컴포넌트를 렌더링함 */
 export function TechUiProvider({ children }: { readonly children: ReactNode }) {
     const [store] = useState(createTechUiStore);
 
@@ -55,6 +56,7 @@ export function TechUiProvider({ children }: { readonly children: ReactNode }) {
     return <TechUiContext value={store}>{children}</TechUiContext>;
 }
 
+/** `useTechUiStore` 훅 상태와 제어 함수를 제공함 */
 export function useTechUiStore<T>(selector: (state: TechUiState) => T): T {
     const store = use(TechUiContext);
     if (store === null)

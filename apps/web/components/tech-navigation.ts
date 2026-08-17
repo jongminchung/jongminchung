@@ -46,10 +46,12 @@ export const techNavigationCopy = {
     },
 } as const;
 
+/** `otherLocale` UI 컴포넌트를 렌더링함 */
 export function otherLocale(locale: Locale): Locale {
     return locale === "ko" ? "en" : "ko";
 }
 
+/** `localizedNavigationHref` UI 컴포넌트를 렌더링함 */
 export function localizedNavigationHref(
     locale: Locale,
     current: CurrentNavigationEntry,
@@ -59,6 +61,7 @@ export function localizedNavigationHref(
         : createDocHref(locale, current.id);
 }
 
+/** `sectionNavigationItems` UI 컴포넌트를 렌더링함 */
 export function sectionNavigationItems(
     current: CurrentNavigationEntry,
     documents: readonly NavigationEntry[],
@@ -84,6 +87,7 @@ export function sectionNavigationItems(
     }));
 }
 
+/** `documentsForSection` UI 컴포넌트를 렌더링함 */
 export function documentsForSection(
     documents: readonly NavigationEntry[],
     section: DocSection,

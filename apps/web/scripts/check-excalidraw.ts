@@ -12,6 +12,7 @@ export interface ExcalidrawFence {
     readonly source: string;
 }
 
+/** `findExcalidrawFences` 데이터를 조회함 */
 export function findExcalidrawFences(
     markdown: string,
 ): readonly ExcalidrawFence[] {
@@ -25,6 +26,7 @@ export function findExcalidrawFences(
     return Object.freeze(fences);
 }
 
+/** `checkExcalidrawContent` 공개 기능을 제공함 */
 export async function checkExcalidrawContent(): Promise<{
     readonly inlineCount: number;
     readonly standaloneCount: number;

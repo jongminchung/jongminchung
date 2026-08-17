@@ -26,6 +26,7 @@ const badgeVariants = cva(
     },
 );
 
+/** `Badge` UI 컴포넌트를 렌더링함 */
 function Badge({
     className,
     variant = "default",

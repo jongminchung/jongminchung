@@ -166,6 +166,7 @@ function parseElements(
     );
 }
 
+/** `parseExcalidrawValue` 입력을 파싱함 */
 export function parseExcalidrawValue(
     value: unknown,
     sourceName = "Excalidraw scene",
@@ -212,6 +213,7 @@ export function parseExcalidrawValue(
     });
 }
 
+/** `parseExcalidrawSource` 입력을 파싱함 */
 export function parseExcalidrawSource(
     source: string,
     sourceName = "Excalidraw scene",
@@ -227,6 +229,7 @@ export function parseExcalidrawSource(
     return parseExcalidrawValue(value, sourceName);
 }
 
+/** `parseExcalidrawFilename` 입력을 파싱함 */
 export function parseExcalidrawFilename(filename: string): ExcalidrawAsset {
     if (
         !filename.endsWith(EXCALIDRAW_EXTENSION) ||
@@ -244,6 +247,7 @@ export function parseExcalidrawFilename(filename: string): ExcalidrawAsset {
     });
 }
 
+/** `parseExcalidrawAssetSrc` 입력을 파싱함 */
 export function parseExcalidrawAssetSrc(src: string): ExcalidrawAsset {
     if (!src.startsWith(EXCALIDRAW_ASSET_PREFIX)) {
         throw new Error(

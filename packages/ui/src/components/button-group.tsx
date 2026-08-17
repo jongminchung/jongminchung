@@ -21,6 +21,7 @@ const buttonGroupVariants = cva(
     },
 );
 
+/** `ButtonGroup` UI 컴포넌트를 렌더링함 */
 function ButtonGroup({
     className,
     orientation,
@@ -37,6 +38,7 @@ function ButtonGroup({
     );
 }
 
+/** `ButtonGroupText` UI 컴포넌트를 렌더링함 */
 function ButtonGroupText({
     className,
     render,
@@ -60,6 +62,7 @@ function ButtonGroupText({
     });
 }
 
+/** `ButtonGroupSeparator` UI 컴포넌트를 렌더링함 */
 function ButtonGroupSeparator({
     className,
     orientation = "vertical",

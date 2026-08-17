@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+/** `useRouteSheet` 훅 상태와 제어 함수를 제공함 */
 export function useRouteSheet() {
     const pathname = usePathname();
     const triggerRef = useRef<HTMLButtonElement>(null);

@@ -1,11 +1,12 @@
 import type { MetadataRoute } from "next";
 import { investmentSourceKinds } from "#lib/investment-content";
-import { investmentNotes } from "#lib/investment-notes";
+import { getInvestmentNotes } from "#lib/investment-notes";
 import { locales } from "#lib/site-routing";
 
 const origin = "https://invest.jamie.kr";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+/** 사이트맵 항목을 생성함 */
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const roots = locales.flatMap((locale) => [
         { url: `${origin}/${locale}`, priority: 1 },
         { url: `${origin}/${locale}/notes`, priority: 0.8 },
@@ -14,8 +15,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
             priority: 0.6,
         })),
     ]);
-    const notes = investmentNotes
-        .filter((note) => note.status === "published")
+    const notes = (await Promise.all(locales.map(getInvestmentNotes)))
+        .flat()
         .map((note) => ({
             url: `${origin}${note.href}`,
             lastModified: note.updatedAt,

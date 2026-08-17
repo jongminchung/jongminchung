@@ -7,6 +7,7 @@ import * as React from "react";
 
 const Select = SelectPrimitive.Root;
 
+/** `SelectGroup` UI 컴포넌트를 렌더링함 */
 function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
     return (
         <SelectPrimitive.Group
@@ -17,6 +18,7 @@ function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
     );
 }
 
+/** `SelectValue` UI 컴포넌트를 렌더링함 */
 function SelectValue({ className, ...props }: SelectPrimitive.Value.Props) {
     return (
         <SelectPrimitive.Value
@@ -27,6 +29,7 @@ function SelectValue({ className, ...props }: SelectPrimitive.Value.Props) {
     );
 }
 
+/** `SelectTrigger` UI 컴포넌트를 렌더링함 */
 function SelectTrigger({
     className,
     size = "default",
@@ -55,6 +58,7 @@ function SelectTrigger({
     );
 }
 
+/** `SelectContent` UI 컴포넌트를 렌더링함 */
 function SelectContent({
     className,
     positionerClassName,
@@ -100,6 +104,7 @@ function SelectContent({
     );
 }
 
+/** `SelectLabel` UI 컴포넌트를 렌더링함 */
 function SelectLabel({
     className,
     ...props
@@ -116,6 +121,7 @@ function SelectLabel({
     );
 }
 
+/** `SelectItem` UI 컴포넌트를 렌더링함 */
 function SelectItem({
     className,
     children,
@@ -144,6 +150,7 @@ function SelectItem({
     );
 }
 
+/** `SelectSeparator` UI 컴포넌트를 렌더링함 */
 function SelectSeparator({
     className,
     ...props
@@ -160,6 +167,7 @@ function SelectSeparator({
     );
 }
 
+/** `SelectScrollUpButton` UI 컴포넌트를 렌더링함 */
 function SelectScrollUpButton({
     className,
     ...props
@@ -178,6 +186,7 @@ function SelectScrollUpButton({
     );
 }
 
+/** `SelectScrollDownButton` UI 컴포넌트를 렌더링함 */
 function SelectScrollDownButton({
     className,
     ...props

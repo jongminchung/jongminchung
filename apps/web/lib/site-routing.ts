@@ -20,6 +20,7 @@ const developmentHosts: Readonly<Record<string, SiteId>> = {
     "invest.jamie.localhost": "invest",
 };
 
+/** `normalizeHost` 공개 기능을 제공함 */
 export function normalizeHost(value: string | null): string {
     const host = value?.trim().toLowerCase() ?? "";
     if (host.startsWith("[")) {
@@ -29,15 +30,18 @@ export function normalizeHost(value: string | null): string {
     return host.replace(/:\d+$/u, "");
 }
 
+/** `resolveSite` 공개 기능을 제공함 */
 export function resolveSite(host: string): SiteId | null {
     return productionHosts[host] ?? developmentHosts[host] ?? null;
 }
 
+/** `localeFromPath` 공개 기능을 제공함 */
 export function localeFromPath(pathname: string): Locale | null {
     const firstSegment = pathname.split("/")[1];
     return isLocale(firstSegment) ? firstSegment : null;
 }
 
+/** `selectLocale` 공개 기능을 제공함 */
 export function selectLocale(
     savedLocale: string | undefined,
     acceptLanguage: string | null,
@@ -101,21 +105,22 @@ export function selectLocale(
     return preferences[0]?.locale ?? "en";
 }
 
+/** `createInternalSitePath` 결과를 생성함 */
 export function createInternalSitePath(site: SiteId, pathname: string): string {
     return `/sites/${site}${pathname === "/" ? "" : pathname}`;
 }
 
+/** `localeCookieName` 공개 기능을 제공함 */
 export function localeCookieName(site: SiteId): `${SiteId}-locale` {
     return `${site}-locale`;
 }
 
+/** `isSharedAssetPath` 조건을 판별함 */
 export function isSharedAssetPath(pathname: string): boolean {
     return (
         pathname.startsWith("/_next/") ||
         pathname === "/icon.svg" ||
         pathname.startsWith("/excalidraw-assets/") ||
-        pathname.startsWith("/materials/") ||
-        pathname.startsWith("/search/") ||
         /\.(?:avif|excalidraw|gif|ico|jpe?g|mp4|png|svg|webm|webp|woff2?)$/u.test(
             pathname,
         )

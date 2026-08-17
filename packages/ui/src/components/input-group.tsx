@@ -7,6 +7,7 @@ import { cn } from "@jongminchung/ui/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
 
+/** `InputGroup` UI 컴포넌트를 렌더링함 */
 function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
     return (
         <div
@@ -42,6 +43,7 @@ const inputGroupAddonVariants = cva(
     },
 );
 
+/** `InputGroupAddon` UI 컴포넌트를 렌더링함 */
 function InputGroupAddon({
     className,
     align = "inline-start",
@@ -88,6 +90,7 @@ const inputGroupButtonVariants = cva(
     },
 );
 
+/** `InputGroupButton` UI 컴포넌트를 렌더링함 */
 function InputGroupButton({
     className,
     type = "button",
@@ -109,6 +112,7 @@ function InputGroupButton({
     );
 }
 
+/** `InputGroupText` UI 컴포넌트를 렌더링함 */
 function InputGroupText({ className, ...props }: React.ComponentProps<"span">) {
     return (
         <span
@@ -121,6 +125,7 @@ function InputGroupText({ className, ...props }: React.ComponentProps<"span">) {
     );
 }
 
+/** `InputGroupInput` UI 컴포넌트를 렌더링함 */
 function InputGroupInput({
     className,
     ...props
@@ -137,6 +142,7 @@ function InputGroupInput({
     );
 }
 
+/** `InputGroupTextarea` UI 컴포넌트를 렌더링함 */
 function InputGroupTextarea({
     className,
     ...props

@@ -18,9 +18,9 @@
 
 ## 프로젝트 문서
 
+- [Web 앱 구조](web/README.md): 다중 도메인 routing, 콘텐츠 생성, 화면 계층, 테스트와 배포 경계
 - [Web 테스트 전략](web-testing-strategy.md): Next.js 공식 Vitest·Playwright 가이드에 따른 Web 테스트 분류와 실행 기준
 - [Git Client 문서](../apps/git-client/docs/README.md): 로컬 개발·테스트, 독립 감사와 GitHub Release
 - [Git Client 기여 가이드](../apps/git-client/CONTRIBUTING.md)
-- [Web material 소유권](../apps/web/components/materials/README.md)
 - [Web 컨테이너 배포 계약](../apps/web/DEPLOYMENT.md)
 - [`@jongminchung/tooling`](../packages/tooling/README.md): Oxc 설정과 package map

@@ -42,6 +42,7 @@ function toItem(locale: Locale, hit: SearchHit): SearchItem {
     };
 }
 
+/** `SearchDialog` UI 컴포넌트를 렌더링함 */
 export function SearchDialog({
     locale,
     open,

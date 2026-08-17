@@ -10,6 +10,7 @@ type SpinnerProps = Omit<
         | { "aria-hidden"?: false; label: string }
     );
 
+/** `Spinner` UI 컴포넌트를 렌더링함 */
 function Spinner({ className, label, ...props }: SpinnerProps) {
     const hidden = props["aria-hidden"] === true;
 

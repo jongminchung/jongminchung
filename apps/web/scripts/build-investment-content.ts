@@ -18,7 +18,9 @@ import {
     writeGeneratedFiles,
 } from "./generation-utils.ts";
 
-const appRoot = resolve(import.meta.dirname, "..");
+const appRoot = process.cwd().endsWith("/apps/web")
+    ? process.cwd()
+    : resolve(process.cwd(), "apps/web");
 const workspaceRoot = resolve(appRoot, "../..");
 const contentRoot = resolve(appRoot, "content/invest");
 const manifestPath = resolve(appRoot, "generated/investment-manifest.json");
@@ -29,6 +31,7 @@ interface SourceNote {
     readonly relativePath: string;
 }
 
+/** `readInvestmentNotes` 데이터를 조회함 */
 export async function readInvestmentNotes(): Promise<readonly SourceNote[]> {
     const files = await listFiles(contentRoot, ".mdx", true);
     return Promise.all(
@@ -51,6 +54,7 @@ export async function readInvestmentNotes(): Promise<readonly SourceNote[]> {
     );
 }
 
+/** `validateInvestmentTranslations` 입력을 검증함 */
 export function validateInvestmentTranslations(
     notes: readonly SourceNote[],
 ): void {

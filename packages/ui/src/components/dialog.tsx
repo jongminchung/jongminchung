@@ -18,22 +18,27 @@ type DialogFooterProps = React.ComponentProps<"div"> &
         | { closeLabel?: never; showCloseButton?: false }
     );
 
+/** `Dialog` UI 컴포넌트를 렌더링함 */
 function Dialog({ ...props }: DialogPrimitive.Root.Props) {
     return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
 
+/** `DialogTrigger` UI 컴포넌트를 렌더링함 */
 function DialogTrigger({ ...props }: DialogPrimitive.Trigger.Props) {
     return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />;
 }
 
+/** `DialogPortal` UI 컴포넌트를 렌더링함 */
 function DialogPortal({ ...props }: DialogPrimitive.Portal.Props) {
     return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />;
 }
 
+/** `DialogClose` UI 컴포넌트를 렌더링함 */
 function DialogClose({ ...props }: DialogPrimitive.Close.Props) {
     return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
 }
 
+/** `DialogOverlay` UI 컴포넌트를 렌더링함 */
 function DialogOverlay({
     className,
     ...props
@@ -50,6 +55,7 @@ function DialogOverlay({
     );
 }
 
+/** `DialogContent` UI 컴포넌트를 렌더링함 */
 function DialogContent({
     className,
     children,
@@ -89,6 +95,7 @@ function DialogContent({
     );
 }
 
+/** `DialogHeader` UI 컴포넌트를 렌더링함 */
 function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
     return (
         <div
@@ -99,6 +106,7 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
     );
 }
 
+/** `DialogFooter` UI 컴포넌트를 렌더링함 */
 function DialogFooter({
     className,
     closeLabel,
@@ -125,6 +133,7 @@ function DialogFooter({
     );
 }
 
+/** `DialogTitle` UI 컴포넌트를 렌더링함 */
 function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
     return (
         <DialogPrimitive.Title
@@ -135,6 +144,7 @@ function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
     );
 }
 
+/** `DialogDescription` UI 컴포넌트를 렌더링함 */
 function DialogDescription({
     className,
     ...props

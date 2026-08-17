@@ -18,6 +18,7 @@ const alertVariants = cva(
     },
 );
 
+/** `Alert` UI 컴포넌트를 렌더링함 */
 function Alert({
     className,
     variant,
@@ -33,6 +34,7 @@ function Alert({
     );
 }
 
+/** `AlertTitle` UI 컴포넌트를 렌더링함 */
 function AlertTitle({ className, ...props }: React.ComponentProps<"div">) {
     return (
         <div
@@ -46,6 +48,7 @@ function AlertTitle({ className, ...props }: React.ComponentProps<"div">) {
     );
 }
 
+/** `AlertDescription` UI 컴포넌트를 렌더링함 */
 function AlertDescription({
     className,
     ...props
@@ -62,6 +65,7 @@ function AlertDescription({
     );
 }
 
+/** `AlertAction` UI 컴포넌트를 렌더링함 */
 function AlertAction({ className, ...props }: React.ComponentProps<"div">) {
     return (
         <div

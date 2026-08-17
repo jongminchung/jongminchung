@@ -6,10 +6,12 @@ import { isLocale, locales } from "#lib/site-routing";
 
 export const dynamicParams = false;
 
+/** 정적 생성에 사용할 경로 매개변수를 반환함 */
 export function generateStaticParams() {
     return locales.map((locale) => ({ locale }));
 }
 
+/** 경로 매개변수에 맞는 페이지 메타데이터를 생성함 */
 export async function generateMetadata({
     params,
 }: {
@@ -35,6 +37,7 @@ export async function generateMetadata({
     };
 }
 
+/** `InvestmentPage` 페이지 UI를 렌더링함 */
 export default async function InvestmentPage({
     params,
 }: {
@@ -43,6 +46,9 @@ export default async function InvestmentPage({
     const { locale } = await params;
     if (!isLocale(locale)) notFound();
     return (
-        <InvestmentHome locale={locale} notes={getInvestmentNotes(locale)} />
+        <InvestmentHome
+            locale={locale}
+            notes={await getInvestmentNotes(locale)}
+        />
     );
 }

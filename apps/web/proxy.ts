@@ -10,6 +10,7 @@ import {
     selectLocale,
 } from "#lib/site-routing";
 
+/** `proxy` 공개 기능을 제공함 */
 export function proxy(request: NextRequest): NextResponse {
     const pathname = request.nextUrl.pathname;
     if (pathname === "/healthz" || isSharedAssetPath(pathname)) {

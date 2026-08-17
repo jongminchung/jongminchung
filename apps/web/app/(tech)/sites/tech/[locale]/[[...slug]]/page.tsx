@@ -16,8 +16,8 @@ import {
     sectionLandingSections,
 } from "#lib/content-model";
 import {
-    documents,
     findDocument,
+    getDocuments,
     getLocalizedDocuments,
     loadDocument,
 } from "#lib/documents";
@@ -35,17 +35,17 @@ interface StaticPageParam {
     readonly slug: readonly string[];
 }
 
-function idFromRoute(
+async function idFromRoute(
     locale: string,
     slug: readonly string[] | undefined,
-): string | null {
+): Promise<string | null> {
     if (slug === undefined || slug.length === 0) return "overview";
     if (slug.length === 2 && slug[0] === "series") return slug[1] ?? null;
     if (slug.length !== 2 || slug[0] !== "articles") return null;
     const articleSlug = slug[1];
     if (articleSlug === undefined) return null;
     return (
-        documents.find(
+        (await getDocuments()).find(
             (document) =>
                 document.locale === locale &&
                 document.section !== "overview" &&
@@ -155,8 +155,9 @@ function sectionMetadata(page: SectionPage): Metadata {
 
 export const dynamicParams = true;
 
-export function generateStaticParams(): StaticPageParam[] {
-    const documentParams = documents
+/** 정적 생성에 사용할 경로 매개변수를 반환함 */
+export async function generateStaticParams(): Promise<StaticPageParam[]> {
+    const documentParams = (await getDocuments())
         .filter((document) => document.section !== "overview")
         .map((document) => ({
             locale: document.locale,
@@ -172,29 +173,32 @@ export function generateStaticParams(): StaticPageParam[] {
     return [...overviewParams, ...documentParams, ...sectionParams];
 }
 
+/** 경로 매개변수에 맞는 페이지 메타데이터를 생성함 */
 export async function generateMetadata({
     params,
 }: PageProps): Promise<Metadata> {
     const { locale, slug } = await params;
-    const id = idFromRoute(locale, slug);
+    const id = await idFromRoute(locale, slug);
     if (id === null) notFound();
-    const sectionPage = findSectionPage(locale, id);
+    const sectionPage = await findSectionPage(locale, id);
     if (sectionPage !== null) return sectionMetadata(sectionPage);
-    const document = findDocument(locale, id);
+    const document = await findDocument(locale, id);
     if (document === null) notFound();
     return documentMetadata(document);
 }
 
+/** `DocsPage` 페이지 UI를 렌더링함 */
 export default async function DocsPage({
     params,
 }: PageProps): Promise<React.JSX.Element> {
     const { locale, slug } = await params;
     if (!isLocale(locale)) notFound();
-    const id = idFromRoute(locale, slug);
+    const id = await idFromRoute(locale, slug);
     if (id === null) notFound();
-    const navigationEntries =
-        getLocalizedDocuments(locale).map(toNavigationEntry);
-    const sectionPage = findSectionPage(locale, id);
+    const navigationEntries = (await getLocalizedDocuments(locale)).map(
+        toNavigationEntry,
+    );
+    const sectionPage = await findSectionPage(locale, id);
     if (sectionPage !== null) {
         return (
             <DocsShell

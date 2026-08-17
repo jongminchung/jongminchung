@@ -29,6 +29,7 @@ type CommandDialogProps = Omit<
         | { closeLabel?: never; showCloseButton?: false }
     );
 
+/** `Command` UI 컴포넌트를 렌더링함 */
 function Command({
     className,
     ...props
@@ -45,6 +46,7 @@ function Command({
     );
 }
 
+/** `CommandDialog` UI 컴포넌트를 렌더링함 */
 function CommandDialog({
     title,
     description,
@@ -86,6 +88,7 @@ function requireCloseLabel(label: string | undefined): string {
     return label;
 }
 
+/** `CommandInput` UI 컴포넌트를 렌더링함 */
 function CommandInput({
     className,
     ref,
@@ -111,6 +114,7 @@ function CommandInput({
     );
 }
 
+/** `CommandList` UI 컴포넌트를 렌더링함 */
 function CommandList({
     className,
     ...props
@@ -127,6 +131,7 @@ function CommandList({
     );
 }
 
+/** `CommandEmpty` UI 컴포넌트를 렌더링함 */
 function CommandEmpty({
     className,
     ...props
@@ -140,6 +145,7 @@ function CommandEmpty({
     );
 }
 
+/** `CommandGroup` UI 컴포넌트를 렌더링함 */
 function CommandGroup({
     className,
     ...props
@@ -156,6 +162,7 @@ function CommandGroup({
     );
 }
 
+/** `CommandSeparator` UI 컴포넌트를 렌더링함 */
 function CommandSeparator({
     className,
     ...props
@@ -169,6 +176,7 @@ function CommandSeparator({
     );
 }
 
+/** `CommandItem` UI 컴포넌트를 렌더링함 */
 function CommandItem({
     className,
     children,
@@ -189,6 +197,7 @@ function CommandItem({
     );
 }
 
+/** `CommandShortcut` UI 컴포넌트를 렌더링함 */
 function CommandShortcut({
     className,
     ...props

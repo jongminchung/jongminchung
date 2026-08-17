@@ -12,6 +12,7 @@ export type PublicationStatus = z.infer<typeof publicationStatusSchema>;
 
 export const nonEmptyTrimmedStringSchema = z.string().trim().min(1);
 
+/** `uniqueStringArraySchema` 공개 기능을 제공함 */
 export function uniqueStringArraySchema(
     field: string,
     options: { readonly allowEmpty?: boolean } = {},
@@ -69,6 +70,7 @@ export const credentialFreeHttpsUrlSchema = z
         }
     });
 
+/** `isLocale` 조건을 판별함 */
 export function isLocale(value: unknown): value is Locale {
     return localeSchema.safeParse(value).success;
 }
