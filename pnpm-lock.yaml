@@ -84,6 +84,9 @@ catalogs:
     '@tailwindcss/vite':
       specifier: 4.3.3
       version: 4.3.3
+    '@tanstack/react-query':
+      specifier: 5.101.4
+      version: 5.101.4
     '@tanstack/react-virtual':
       specifier: 3.14.9
       version: 3.14.9
@@ -201,9 +204,6 @@ catalogs:
     shadcn:
       specifier: 4.17.0
       version: 4.17.0
-    sharp:
-      specifier: 0.35.3
-      version: 0.35.3
     tailwind-merge:
       specifier: 3.6.0
       version: 3.6.0
@@ -288,103 +288,6 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
-      vitest:
-        specifier: 'catalog:'
-        version: 4.1.10(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))
-
-  apps/engineering-docs:
-    dependencies:
-      '@excalidraw/excalidraw':
-        specifier: 'catalog:'
-        version: 0.18.1(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@jongminchung/icon':
-        specifier: workspace:*
-        version: link:../../packages/icon
-      '@jongminchung/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
-      '@mdx-js/react':
-        specifier: 'catalog:'
-        version: 3.1.1(@types/react@19.2.18)(react@19.2.8)
-      '@next/mdx':
-        specifier: 'catalog:'
-        version: 16.2.12(@mdx-js/loader@3.1.1(supports-color@8.1.1)(webpack@5.108.4(esbuild@0.27.7)(lightningcss@1.33.0)(postcss@8.5.20)))(@mdx-js/react@3.1.1(@types/react@19.2.18)(react@19.2.8))
-      lucide-react:
-        specifier: 'catalog:'
-        version: 1.30.0(react@19.2.8)
-      motion:
-        specifier: 'catalog:'
-        version: 12.42.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      next:
-        specifier: 'catalog:'
-        version: 16.2.12(@babel/core@7.29.7(supports-color@8.1.1))(@playwright/test@1.62.1)(@types/node@26.2.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(sass@1.51.0)
-      pretendard:
-        specifier: 'catalog:'
-        version: 1.3.9
-      react:
-        specifier: 'catalog:'
-        version: 19.2.8
-      react-dom:
-        specifier: 'catalog:'
-        version: 19.2.8(react@19.2.8)
-      tailwindcss:
-        specifier: 'catalog:'
-        version: 4.3.3
-    devDependencies:
-      '@axe-core/playwright':
-        specifier: 'catalog:'
-        version: 4.12.1(playwright-core@1.62.1)
-      '@mdx-js/mdx':
-        specifier: 'catalog:'
-        version: 3.1.1(supports-color@8.1.1)
-      '@playwright/test':
-        specifier: 'catalog:'
-        version: 1.62.1
-      '@tailwindcss/postcss':
-        specifier: 'catalog:'
-        version: 4.3.3
-      '@types/mdx':
-        specifier: 'catalog:'
-        version: 2.0.14
-      '@types/node':
-        specifier: 'catalog:'
-        version: 26.2.0
-      '@types/react':
-        specifier: 'catalog:'
-        version: 19.2.18
-      '@types/react-dom':
-        specifier: 'catalog:'
-        version: 19.2.4(@types/react@19.2.18)
-      gray-matter:
-        specifier: 'catalog:'
-        version: 4.0.3
-      hast-util-to-string:
-        specifier: 'catalog:'
-        version: 3.0.1
-      postcss:
-        specifier: 'catalog:'
-        version: 8.5.20
-      rehype-slug:
-        specifier: 'catalog:'
-        version: 6.0.0
-      remark-frontmatter:
-        specifier: 'catalog:'
-        version: 5.0.0(supports-color@8.1.1)
-      remark-gfm:
-        specifier: 'catalog:'
-        version: 4.0.1(supports-color@8.1.1)
-      remark-kroki:
-        specifier: 'catalog:'
-        version: 0.3.8
-      remark-mdx-frontmatter:
-        specifier: 'catalog:'
-        version: 5.2.0
-      typescript:
-        specifier: 'catalog:'
-        version: 6.0.3
-      unist-util-visit:
-        specifier: 'catalog:'
-        version: 5.1.0
       vitest:
         specifier: 'catalog:'
         version: 4.1.10(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))
@@ -531,33 +434,66 @@ importers:
         specifier: 'catalog:'
         version: 4.1.10(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))
 
-  apps/readme:
+  apps/web:
     dependencies:
-      '@jongminchung/icon':
-        specifier: workspace:*
-        version: link:../../packages/icon
+      '@excalidraw/excalidraw':
+        specifier: 'catalog:'
+        version: 0.18.1(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@jongminchung/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@mdx-js/react':
+        specifier: 'catalog:'
+        version: 3.1.1(@types/react@19.2.18)(react@19.2.8)
+      '@next/mdx':
+        specifier: 'catalog:'
+        version: 16.2.12(@mdx-js/loader@3.1.1(supports-color@8.1.1)(webpack@5.108.4(esbuild@0.27.7)(lightningcss@1.33.0)(postcss@8.5.20)))(@mdx-js/react@3.1.1(@types/react@19.2.18)(react@19.2.8))
+      '@tanstack/react-query':
+        specifier: 'catalog:'
+        version: 5.101.4(react@19.2.8)
+      lucide-react:
+        specifier: 'catalog:'
+        version: 1.30.0(react@19.2.8)
+      motion:
+        specifier: 'catalog:'
+        version: 12.42.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       next:
         specifier: 'catalog:'
-        version: 16.2.12(@babel/core@7.29.7(supports-color@8.1.1))(@playwright/test@1.62.1)(@types/node@26.2.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(sass@1.51.0)
+        version: 16.2.12(@babel/core@7.29.7(supports-color@8.1.1))(@playwright/test@1.62.1)(@types/node@26.2.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      pretendard:
+        specifier: 'catalog:'
+        version: 1.3.9
       react:
         specifier: 'catalog:'
         version: 19.2.8
       react-dom:
         specifier: 'catalog:'
         version: 19.2.8(react@19.2.8)
+      tailwindcss:
+        specifier: 'catalog:'
+        version: 4.3.3
+      zod:
+        specifier: 'catalog:'
+        version: 4.4.3
+      zustand:
+        specifier: 'catalog:'
+        version: 5.0.14(@types/react@19.2.18)(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
     devDependencies:
       '@axe-core/playwright':
         specifier: 'catalog:'
         version: 4.12.1(playwright-core@1.62.1)
+      '@mdx-js/mdx':
+        specifier: 'catalog:'
+        version: 3.1.1(supports-color@8.1.1)
       '@playwright/test':
         specifier: 'catalog:'
         version: 1.62.1
       '@tailwindcss/postcss':
         specifier: 'catalog:'
         version: 4.3.3
+      '@types/mdx':
+        specifier: 'catalog:'
+        version: 2.0.14
       '@types/node':
         specifier: 'catalog:'
         version: 26.2.0
@@ -567,27 +503,36 @@ importers:
       '@types/react-dom':
         specifier: 'catalog:'
         version: 19.2.4(@types/react@19.2.18)
+      gray-matter:
+        specifier: 'catalog:'
+        version: 4.0.3
+      hast-util-to-string:
+        specifier: 'catalog:'
+        version: 3.0.1
       postcss:
         specifier: 'catalog:'
         version: 8.5.20
-      tailwindcss:
+      rehype-slug:
         specifier: 'catalog:'
-        version: 4.3.3
+        version: 6.0.0
+      remark-frontmatter:
+        specifier: 'catalog:'
+        version: 5.0.0(supports-color@8.1.1)
+      remark-gfm:
+        specifier: 'catalog:'
+        version: 4.0.1(supports-color@8.1.1)
+      remark-kroki:
+        specifier: 'catalog:'
+        version: 0.3.8
+      remark-mdx-frontmatter:
+        specifier: 'catalog:'
+        version: 5.2.0
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
-
-  packages/icon:
-    devDependencies:
-      '@types/node':
+      unist-util-visit:
         specifier: 'catalog:'
-        version: 26.2.0
-      sharp:
-        specifier: 'catalog:'
-        version: 0.35.3(@types/node@26.2.0)
-      typescript:
-        specifier: 'catalog:'
-        version: 6.0.3
+        version: 5.1.0
       vitest:
         specifier: 'catalog:'
         version: 4.1.10(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))
@@ -2567,6 +2512,14 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7 || ^8
 
+  '@tanstack/query-core@5.101.4':
+    resolution: {integrity: sha512-gNwcvOJcRbLWPOLG/2OBm+zM+Yv+MKsXKEOWC57USuZDEsI71hEErQsiEGx5wX9rzWWkfwM0fVSPoiIFSsxfiw==}
+
+  '@tanstack/react-query@5.101.4':
+    resolution: {integrity: sha512-yRg2pfOCxIs4ZJW3XYYHU/WgtD04FHSnfHlpRT7h7pR77hwkdRG4wxbKe4aq6P0RvXUTBSQpQeadS1SUYUe+KA==}
+    peerDependencies:
+      react: ^18 || ^19
+
   '@tanstack/react-virtual@3.14.9':
     resolution: {integrity: sha512-qZyr0FZDP8rDC4WBhsryIZmAd9bveJvFGUJJtskWaew6/0dTRS6wZxnR6VQ5bY2KwL3LjerrHqQLk3a0GKcPXQ==}
     peerDependencies:
@@ -2876,6 +2829,7 @@ packages:
   '@xmldom/xmldom@0.9.10':
     resolution: {integrity: sha512-A9gOqLdi6cV4ibazAjcQufGj0B1y/vDqYrcuP6d/6x8P27gRS8643Dj9o1dEKtB6O7fwxb2FgBmJS2mX7gpvdw==}
     engines: {node: '>=14.6'}
+    deprecated: this version has critical issues, please update to the latest version
 
   '@xterm/addon-fit@0.11.0':
     resolution: {integrity: sha512-jYcgT6xtVYhnhgxh3QgYDnnNMYTcf8ElbxxFzX0IZo+vabQqSPAjC3c1wJrKB5E19VwQei89QCiZZP86DCPF7g==}
@@ -7363,7 +7317,8 @@ snapshots:
       '@iconify/types': 2.0.0
       import-meta-resolve: 4.2.0
 
-  '@img/colour@1.1.0': {}
+  '@img/colour@1.1.0':
+    optional: true
 
   '@img/sharp-darwin-arm64@0.35.3':
     optionalDependencies:
@@ -8465,6 +8420,13 @@ snapshots:
       '@tailwindcss/oxide': 4.3.3
       tailwindcss: 4.3.3
       vite: 8.2.1(@types/node@26.2.0)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0)
+
+  '@tanstack/query-core@5.101.4': {}
+
+  '@tanstack/react-query@5.101.4(react@19.2.8)':
+    dependencies:
+      '@tanstack/query-core': 5.101.4
+      react: 19.2.8
 
   '@tanstack/react-virtual@3.14.9(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -11211,7 +11173,7 @@ snapshots:
 
   neo-async@2.6.2: {}
 
-  next@16.2.12(@babel/core@7.29.7(supports-color@8.1.1))(@playwright/test@1.62.1)(@types/node@26.2.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(sass@1.51.0):
+  next@16.2.12(@babel/core@7.29.7(supports-color@8.1.1))(@playwright/test@1.62.1)(@types/node@26.2.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
     dependencies:
       '@next/env': 16.2.12
       '@swc/helpers': 0.5.15
@@ -11231,7 +11193,6 @@ snapshots:
       '@next/swc-win32-arm64-msvc': 16.2.12
       '@next/swc-win32-x64-msvc': 16.2.12
       '@playwright/test': 1.62.1
-      sass: 1.51.0
       sharp: 0.35.3(@types/node@26.2.0)
     transitivePeerDependencies:
       - '@babel/core'
@@ -12107,6 +12068,7 @@ snapshots:
       '@img/sharp-win32-ia32': 0.35.3
       '@img/sharp-win32-x64': 0.35.3
       '@types/node': 26.2.0
+    optional: true
 
   shebang-command@1.2.0:
     dependencies:

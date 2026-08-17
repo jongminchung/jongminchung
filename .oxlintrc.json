@@ -7,7 +7,7 @@
     "**/dist",
     "**/coverage",
     // content/*.mdx와 material source에서 재생성되므로 생성기와 typecheck로 검증함
-    "apps/engineering-docs/generated/**",
-    "apps/engineering-docs/public/search/**"
+    "apps/web/generated/**",
+    "apps/web/public/search/**"
   ]
 }

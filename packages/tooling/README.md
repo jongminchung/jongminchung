@@ -41,8 +41,8 @@ pnpm update --force @jongminchung/tooling@1.0.0
 {
 	"scripts": {
 		"lint": "oxlint",
-		"fmt": "oxfmt --config .oxfmtrc.mjs",
-		"fmt:check": "oxfmt --config .oxfmtrc.mjs --check"
+		"fmt": "oxfmt --config .oxfmtrc.ts",
+		"fmt:check": "oxfmt --config .oxfmtrc.ts --check"
 	}
 }
 ```

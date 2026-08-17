@@ -9,7 +9,7 @@ coverage/
 **/test-results/
 **/out/
 playwright-report/
-apps/engineering-docs/public/excalidraw-assets/
+apps/web/public/excalidraw-assets/
 *.bak
 *.old
 

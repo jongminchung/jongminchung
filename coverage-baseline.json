@@ -1,27 +1,21 @@
 {
-  "engineering-docs": {
-    "branches": 73.42,
-    "functions": 82.14,
-    "lines": 80.57,
-    "statements": 79
+  "web": {
+    "branches": 70.04,
+    "functions": 75,
+    "lines": 75.48,
+    "statements": 73.39
   },
   "git-client-application": {
-    "branches": 64.07,
-    "functions": 49.38,
-    "lines": 69.9,
-    "statements": 68.58
+    "branches": 69.56,
+    "functions": 61.9,
+    "lines": 76.79,
+    "statements": 75.15
   },
   "git-client-domain": {
-    "branches": 63.98,
+    "branches": 63.92,
     "functions": 70.5,
-    "lines": 73.73,
-    "statements": 70.6
-  },
-  "readme": {
-    "branches": 100,
-    "functions": 100,
-    "lines": 100,
-    "statements": 100
+    "lines": 74.07,
+    "statements": 70.83
   },
   "tooling": {
     "branches": 100,
@@ -30,9 +24,9 @@
     "statements": 100
   },
   "ui": {
-    "branches": 17.43,
-    "functions": 12.24,
-    "lines": 15.68,
-    "statements": 15.38
+    "branches": 19.26,
+    "functions": 14.28,
+    "lines": 18.13,
+    "statements": 17.78
   }
 }

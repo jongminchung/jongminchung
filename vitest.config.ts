@@ -9,19 +9,7 @@ const vitestExclude = [
     "**/tests/live/**",
 ];
 
-const packageIntegration = [
-    "packages/**/*.integration.test.{ts,tsx}",
-    "tests/publishing/**/*.test.{ts,tsx}",
-];
-
-const appIntegration = [
-    "apps/**/*.integration.test.{mjs,ts,tsx}",
-    "apps/git-client/electron/main/{diagnostics-log,hosting-credential-store,settings-store}.test.ts",
-    "apps/git-client/electron/utility/git/**/*.test.{ts,tsx}",
-    "apps/git-client/electron/utility/terminal/terminal-launch-target-resolver.test.ts",
-    "apps/git-client/scripts/**/*.test.{ts,tsx}",
-    "apps/engineering-docs/scripts/content-contract.test.ts",
-];
+const integrationTests = ["{apps,packages}/**/*.integration.test.{ts,tsx}"];
 
 export default defineConfig({
     resolve: {
@@ -30,7 +18,7 @@ export default defineConfig({
     test: {
         coverage: {
             exclude: [
-                "**/*.{test,spec}.{mjs,ts,tsx}",
+                "**/*.{test,spec}.{ts,tsx}",
                 "**/*.d.ts",
                 "**/generated/**",
                 "**/fixtures/**",
@@ -42,8 +30,7 @@ export default defineConfig({
                 "packages/ui/src/**/*.{ts,tsx}",
                 "apps/git-client/src/domain/**/*.ts",
                 "apps/git-client/src/application/**/*.{ts,tsx}",
-                "apps/engineering-docs/lib/**/*.ts",
-                "apps/readme/app/home-content.ts",
+                "apps/web/lib/**/*.ts",
             ],
             provider: "v8",
             reporter: ["text-summary", "json-summary"],
@@ -59,11 +46,11 @@ export default defineConfig({
                 test: {
                     exclude: [
                         ...vitestExclude,
-                        ...packageIntegration,
+                        ...integrationTests,
                         "**/*.e2e.test.ts",
                     ],
-                    include: ["packages/**/*.test.{ts,tsx}"],
-                    name: "packages-unit",
+                    include: ["{apps,packages}/**/*.test.{ts,tsx}"],
+                    name: "unit",
                     testTimeout: 10_000,
                 },
             },
@@ -71,35 +58,9 @@ export default defineConfig({
                 extends: true,
                 test: {
                     fileParallelism: false,
-                    include: packageIntegration,
-                    name: "packages-integration",
+                    include: integrationTests,
+                    name: "integration",
                     testTimeout: 60_000,
-                },
-            },
-            {
-                extends: true,
-                test: {
-                    exclude: [...vitestExclude, ...appIntegration],
-                    include: ["apps/**/*.test.{mjs,ts,tsx}"],
-                    name: "apps-unit",
-                    testTimeout: 10_000,
-                },
-            },
-            {
-                extends: true,
-                test: {
-                    fileParallelism: false,
-                    include: appIntegration,
-                    name: "apps-integration",
-                    testTimeout: 60_000,
-                },
-            },
-            {
-                extends: true,
-                test: {
-                    include: ["tests/architecture/**/*.test.{ts,tsx}"],
-                    name: "architecture",
-                    testTimeout: 30_000,
                 },
             },
         ],
