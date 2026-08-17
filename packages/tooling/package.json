@@ -11,7 +11,7 @@
   "files": [
     "dist",
     "src/oxfmt/index.ts",
-    "oxlint.json",
+    "src/oxlint/index.ts",
     "LICENSE",
     "README.md"
   ],
@@ -22,7 +22,11 @@
       "source": "./src/oxfmt/index.ts",
       "import": "./dist/oxfmt/index.js"
     },
-    "./oxlint.json": "./oxlint.json",
+    "./oxlint": {
+      "types": "./dist/oxlint/index.d.ts",
+      "source": "./src/oxlint/index.ts",
+      "import": "./dist/oxlint/index.js"
+    },
     "./package.json": "./package.json"
   },
   "publishConfig": {

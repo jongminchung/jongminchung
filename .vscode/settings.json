@@ -14,7 +14,8 @@
     "buildFlags": ["-tags=integration,e2e"]
   },
   "oxc.typeAware": true,
-  "oxc.fmt.configPath": ".oxfmtrc.mjs",
+  "oxc.configPath": "oxlint.config.ts",
+  "oxc.fmt.configPath": "oxfmt.config.ts",
   "[markdown]": {
     "editor.defaultFormatter": "oxc.oxc-vscode"
   },
@@ -22,10 +23,12 @@
     "editor.defaultFormatter": "oxc.oxc-vscode"
   },
   "[typescript]": {
-    "editor.defaultFormatter": "oxc.oxc-vscode"
+    "editor.defaultFormatter": "oxc.oxc-vscode",
+    "editor.tabSize": 4
   },
   "[typescriptreact]": {
-    "editor.defaultFormatter": "oxc.oxc-vscode"
+    "editor.defaultFormatter": "oxc.oxc-vscode",
+    "editor.tabSize": 4
   },
   "[javascript]": {
     "editor.defaultFormatter": "oxc.oxc-vscode"

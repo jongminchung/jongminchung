@@ -14,5 +14,5 @@
     "sourceMap": false,
     "target": "ES2024"
   },
-  "files": ["src/oxfmt/index.ts"]
+  "files": ["src/oxfmt/index.ts", "src/oxlint/index.ts"]
 }

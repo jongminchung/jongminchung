@@ -14,7 +14,7 @@ interface PrintedOxlintConfig {
 function readResolvedConfig(): PrintedOxlintConfig {
     const output = execFileSync(
         resolve(workspaceRoot, "node_modules/.bin/oxlint"),
-        ["--config", "packages/tooling/oxlint.json", "--print-config"],
+        ["--config", "oxlint.config.ts", "--print-config"],
         { cwd: workspaceRoot, encoding: "utf8" },
     );
     return JSON.parse(output) as PrintedOxlintConfig;

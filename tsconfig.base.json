@@ -21,7 +21,9 @@
     "noUnusedParameters": true,
     "paths": {
       "@jongminchung/tooling/oxfmt": ["./packages/tooling/src/oxfmt/index.ts"],
-      "@jongminchung/tooling/oxlint.json": ["./packages/tooling/oxlint.json"],
+      "@jongminchung/tooling/oxlint": [
+        "./packages/tooling/src/oxlint/index.ts"
+      ],
       "@jongminchung/ui/components/*": ["./packages/ui/src/components/*.tsx"],
       "@jongminchung/ui/globals.css": ["./packages/ui/src/styles/globals.css"],
       "@jongminchung/ui/lib/*": ["./packages/ui/src/lib/*.ts"],

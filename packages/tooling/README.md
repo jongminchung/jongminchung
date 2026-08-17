@@ -22,8 +22,8 @@ Install the actual formatter and linter in each consuming project. This package 
 shared settings. `oxlint-tsgolint` is required because the shared Oxlint config enables type-aware
 rules.
 
-The package ships ESM only. `defineOxfmtConfig` is its only JavaScript API, and CommonJS
-`require()` is not part of the supported package contract.
+The package ships ESM only. `defineOxfmtConfig` and `defineOxlintConfig` are its JavaScript APIs,
+and CommonJS `require()` is not part of the supported package contract.
 
 ## Version Policy
 
@@ -40,7 +40,7 @@ pnpm update --force @jongminchung/tooling@1.0.0
 ```json
 {
 	"scripts": {
-		"lint": "oxlint",
+		"lint": "oxlint --config oxlint.config.ts .",
 		"fmt": "oxfmt --config .oxfmtrc.ts",
 		"fmt:check": "oxfmt --config .oxfmtrc.ts --check"
 	}
@@ -49,13 +49,14 @@ pnpm update --force @jongminchung/tooling@1.0.0
 
 ## oxlint
 
-Oxlint configs extend the shared JSON file without adding workspace-local rule sets:
+Oxlint configs extend the shared TypeScript config without adding workspace-local rule sets:
 
-```json
-{
-	"$schema": "./node_modules/oxlint/configuration_schema.json",
-	"extends": ["./node_modules/@jongminchung/tooling/oxlint.json"]
-}
+```ts
+import { defineOxlintConfig } from "@jongminchung/tooling/oxlint";
+
+export default defineOxlintConfig({
+	ignorePatterns: ["generated/**"],
+});
 ```
 
 The shared config enables Oxlint's official `correctness` category at error level and activates the
@@ -66,9 +67,9 @@ listed a second time.
 Only repository policy outside the recommended set is explicit. Every explicit rule and exception
 has a reason plus an executable bad/good example immediately above it:
 
-```jsonc
-{
-	"rules": {
+```ts
+defineOxlintConfig({
+	rules: {
 		// any removes checking from every later property access, so narrow an external boundary instead
 		// Bad: (window as any).desktopApi
 		// Good: extend Window and access window.desktopApi through the declared contract
@@ -79,7 +80,7 @@ has a reason plus an executable bad/good example immediately above it:
 		// Rejected elsewhere: <div role="button">...</div> remains covered by recommended a11y rules
 		"jsx-a11y/prefer-tag-over-role": "off",
 	},
-}
+});
 ```
 
 The other explicit policies are `prefer-const`, type-aware `no-misused-promises`, shared control
@@ -119,6 +120,5 @@ npm pack --dry-run
 explicit public entry points as ESM JavaScript and declarations while preserving their source module
 structure.
 
-The npm package includes the compiled Oxfmt module, declarations, the directly exported Oxlint JSON
-asset, `LICENSE`, `README.md`, and `package.json`. It does not include a bundle or a separate CommonJS
-build.
+The npm package includes the compiled Oxfmt and Oxlint modules, declarations, `LICENSE`, `README.md`,
+and `package.json`. It does not include a bundle or a separate CommonJS build.
