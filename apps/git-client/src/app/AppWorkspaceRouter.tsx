@@ -5,9 +5,9 @@ import { useAppearance } from "../components/AppearanceProvider";
 import { Icon } from "../components/Icon";
 import { Notice } from "../components/Notice";
 import { EmptyState } from "../components/ProductCollections";
+import { RepositoryWorkspace } from "../features/repository";
 import type { GitSessionController } from "../features/repository/session/useGitSessionController";
 import { StartupWorkspace } from "./AppChrome";
-import { RepositoryWorkspace } from "./composition/RepositoryWorkspaceComposition";
 import { useAppStore } from "./state/AppStoreProvider";
 
 export function AppWorkspaceRouter({
