@@ -8,7 +8,7 @@ export default defineConfig({
     reporter: "list",
     use: { trace: "retain-on-failure" },
     webServer: {
-        command: "pnpm run build && pnpm run start --port 3100",
+        command: "pnpm run build && PORT=3100 pnpm run start",
         port: 3100,
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
