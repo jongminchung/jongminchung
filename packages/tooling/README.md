@@ -101,13 +101,12 @@ export default defineOxfmtConfig({
 Formatting style stays on Oxfmt's zero-config defaults: width, quotes, semicolons, trailing commas,
 and indentation are not copied into this package. The shared implementation adds only two
 repository decisions: imports use Oxfmt's default group ordering without blank lines between groups,
-and `package.json` scripts sort alphabetically.
+and `package.json` sorting remains disabled unless a consumer enables it explicitly.
 
-For example, mixed local/external imports become one ordered block, and `{ "scripts": { "test":
-"vitest", "build": "tsc" } }` becomes `{ "scripts": { "build": "tsc", "test": "vitest" } }`.
-Ignore and override arrays append to shared output exclusions. Object forms of `sortImports` and
-`sortPackageJson` merge with the two repository decisions, while booleans such as `false` replace
-them.
+For example, mixed local/external imports become one ordered block. Ignore and override arrays
+append to shared output exclusions. Object forms of `sortImports` merge with the repository
+decision, while `sortPackageJson` accepts Oxfmt's native `true`, `false`, and object forms without
+a shared default.
 
 ## Build and pack
 

@@ -14,7 +14,7 @@ describe("oxfmt 구성", () => {
             ],
             overrides: [],
             sortImports: { newlinesBetween: false },
-            sortPackageJson: { sortScripts: true },
+            sortPackageJson: false,
         });
     });
 
@@ -46,7 +46,7 @@ describe("oxfmt 구성", () => {
         expect(config).not.toHaveProperty("tabWidth");
         expect(config).not.toHaveProperty("trailingComma");
         expect(config.sortImports).toEqual({ newlinesBetween: false });
-        expect(config.sortPackageJson).toEqual({ sortScripts: true });
+        expect(config.sortPackageJson).toBe(false);
     });
 
     it("[성공] 현재 Oxfmt 옵션을 존중하고 존중하는 구성을 선언함", () => {
@@ -78,24 +78,36 @@ describe("oxfmt 구성", () => {
         expect(config.sortPackageJson).toBe(false);
     });
 
+    it("[성공] package.json 정렬 활성화 여부를 그대로 보존함", () => {
+        expect(
+            defineOxfmtConfig({ sortPackageJson: true }).sortPackageJson,
+        ).toBe(true);
+        expect(
+            defineOxfmtConfig({
+                sortPackageJson: { sortScripts: false },
+            }).sortPackageJson,
+        ).toEqual({ sortScripts: false });
+    });
+
     it("[성공] 구성하면 상관없을 것 같습니다", () => {
         const first = defineOxfmtConfig();
         const second = defineOxfmtConfig();
 
         expect(first.sortImports).not.toBe(second.sortImports);
-        expect(first.sortPackageJson).not.toBe(second.sortPackageJson);
 
-        if (
-            typeof first.sortImports !== "object" ||
-            typeof first.sortPackageJson !== "object"
-        ) {
-            throw new Error("expected default sort options to be objects");
-        }
+        if (typeof first.sortImports !== "object")
+            throw new Error("expected default sort options to be an object");
         Object.assign(first.sortImports, { newlinesBetween: true });
-        Object.assign(first.sortPackageJson, { sortScripts: false });
 
         expect(second.sortImports).toEqual({ newlinesBetween: false });
-        expect(second.sortPackageJson).toEqual({ sortScripts: true });
+    });
+
+    it("[성공] package.json 객체형 override를 공유하지 않음", () => {
+        const options = { sortScripts: false };
+        const config = defineOxfmtConfig({ sortPackageJson: options });
+
+        expect(config.sortPackageJson).toEqual(options);
+        expect(config.sortPackageJson).not.toBe(options);
     });
 
     it("[성공] 공식 Oxfmt에 대한 응답을 사용함", () => {
