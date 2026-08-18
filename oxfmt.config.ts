@@ -1,6 +1,7 @@
 import { defineOxfmtConfig } from "@jongminchung/tooling/oxfmt";
 
 export default defineOxfmtConfig({
+    sortPackageJson: false,
     ignorePatterns: [
         // 원본 예: apps/web/app/** → 생성물 예: apps/web/.next/**
         "**/.next/",
