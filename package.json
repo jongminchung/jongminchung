@@ -17,7 +17,6 @@
     "fmt": "oxfmt --config oxfmt.config.ts .",
     "fmt:check": "oxfmt --config oxfmt.config.ts --check .",
     "lint": "oxlint --config oxlint.config.ts .",
-    "publish:dry-run": "pnpm --filter @jongminchung/tooling run publish:dry-run && pnpm --filter @jongminchung/ui run publish:dry-run",
     "test": "pnpm run test:unit && pnpm run test:integration",
     "test:coverage:update": "vitest run --project unit --coverage --coverage.thresholds.autoUpdate",
     "test:e2e": "pnpm run build && pnpm --filter @jongminchung/web run test:e2e && pnpm --filter @jongminchung/git-client run test:e2e:prebuilt",
