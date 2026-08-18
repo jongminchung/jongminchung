@@ -66,6 +66,9 @@ catalogs:
     '@excalidraw/excalidraw':
       specifier: 0.18.1
       version: 0.18.1
+    '@jongminchung/tooling':
+      specifier: ^1.0.0
+      version: 1.0.0
     '@mdx-js/mdx':
       specifier: 3.1.1
       version: 3.1.1
@@ -248,8 +251,8 @@ importers:
   .:
     devDependencies:
       '@jongminchung/tooling':
-        specifier: workspace:*
-        version: link:packages/tooling
+        specifier: 'catalog:'
+        version: 1.0.0
       '@types/node':
         specifier: 'catalog:'
         version: 26.2.0
@@ -1402,6 +1405,10 @@ packages:
   '@isaacs/fs-minipass@4.0.1':
     resolution: {integrity: sha512-wgm9Ehl2jpeqP3zw/7mo3kRHFp5MEDhqAdwy1fTGkHAwnkGOVsgpvQhL8B5n1qlb01jV3n/bI0ZfZp5lWA1k4w==}
     engines: {node: '>=18.0.0'}
+
+  '@jongminchung/tooling@1.0.0':
+    resolution: {integrity: sha512-h59rBnSYJWYr+8l5YNcKJv1HOJcTgpkMKDp10/278OfPpTCnAkdj3wFlHixHr3Xy2cl53WHEAj0fw5HINTA8XQ==, tarball: https://npm.pkg.github.com/download/@jongminchung/tooling/1.0.0/911a5a30369810b383abf899537b916fb3f61cb7}
+    engines: {node: '>=24.15.0'}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -7527,6 +7534,8 @@ snapshots:
   '@isaacs/fs-minipass@4.0.1':
     dependencies:
       minipass: 7.1.3
+
+  '@jongminchung/tooling@1.0.0': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:

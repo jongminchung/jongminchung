@@ -114,15 +114,16 @@ JavaScript entry point별 `import` 조건을 유지하고 CommonJS 산출물과 
 재도입 조건을 충족할 때만 다시 검토한다.
 
 ```sh
-pnpm run check
+pnpm --filter @jongminchung/tooling --filter @jongminchung/ui install --frozen-lockfile --ignore-scripts
+pnpm --filter @jongminchung/tooling --filter @jongminchung/ui run typecheck
+pnpm --filter @jongminchung/tooling --filter @jongminchung/ui run test
 pnpm run publish:dry-run
 ```
 
 dry-run의 포함 파일, ESM JavaScript·declaration, named export와 package export를 검토한 뒤
-`main`에서 `Publish Packages` workflow를 수동 실행한다. workflow는 삭제 전에 세 tarball과
-integrity를 모두 확정하고, package별 기존 `1.0.0` 삭제와 게시를 순서대로 수행한다. 모든
-package에 404 처리와 게시 재시도를 동일하게 적용하고, 게시된 integrity와 새 소비자 설치를
-검증한다. workflow summary의 commit SHA와 준비·게시 integrity가 일치해야 완료된 배포로 본다.
+`main`에서 `Publish Packages` workflow를 수동 실행한다. workflow는 `tooling`과 `ui`만 설치·
+typecheck·test하여 Git Client와 Web의 native 의존성을 배포 범위에서 제외한다. 두 package별 기존
+`1.0.0`을 병렬 삭제한 뒤, 두 package를 `pnpm publish`로 병렬 게시한다.
 
 ## Git Client 릴리스
 

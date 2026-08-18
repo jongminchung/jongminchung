@@ -59,14 +59,15 @@ integrity, so SemVer compatibility and lockfile reproducibility are not guarante
 force a new resolution, such as `pnpm update --force <package>@1.0.0`, and commit the resulting
 lockfile whenever they adopt a replacement.
 
-The workflow validates and records all tarball integrities before deletion, then replaces each
-snapshot with uniform 404 handling and publish retries. It verifies registry integrity and a clean
-consumer installation afterward. GitHub authentication is supplied only through the `GH_PAT`
-Actions secret.
+The workflow installs, typechecks, and tests only the publish packages, so unrelated application
+native dependencies do not participate in a package snapshot release. It deletes the fixed version,
+then publishes the two packages in parallel. GitHub authentication is supplied only through the
+`GH_PAT` Actions secret.
 
 ```bash
-pnpm install
-pnpm run check
+pnpm --filter @jongminchung/tooling --filter @jongminchung/ui install --frozen-lockfile --ignore-scripts
+pnpm --filter @jongminchung/tooling --filter @jongminchung/ui run typecheck
+pnpm --filter @jongminchung/tooling --filter @jongminchung/ui run test
 pnpm run publish:dry-run
 ```
 

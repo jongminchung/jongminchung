@@ -26,6 +26,9 @@ jobs:
         run: >-
           pnpm --filter @jongminchung/${{ matrix.package }} install
           --frozen-lockfile --ignore-scripts
+      - run: >-
+          pnpm --filter @jongminchung/${{ matrix.package }} exec oxlint
+          --config ../../oxlint.config.ts .
       - run: pnpm --filter @jongminchung/${{ matrix.package }} run typecheck
       - run: pnpm --filter @jongminchung/${{ matrix.package }} run test
       - run: pnpm --filter @jongminchung/${{ matrix.package }} run publish:dry-run
@@ -45,10 +48,12 @@ jobs:
         with:
           node-version-file: .node-version
           cache: pnpm
+
       - name: Install package dependencies
         run: >-
           pnpm --filter @jongminchung/${{ matrix.package }} install
           --frozen-lockfile --ignore-scripts
+
       - name: Configure GitHub Packages auth
         env:
           GH_PAT: ${{ secrets.GH_PAT }}

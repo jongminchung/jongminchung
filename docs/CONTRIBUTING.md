@@ -151,15 +151,17 @@ pnpm install
 - 번들러 재도입 조건은 [ADR 0002](docs/adr/0002-node-library-tsc-build.md)를 따른다.
 
 ```sh
-pnpm run check
+pnpm --filter @jongminchung/tooling --filter @jongminchung/ui install --frozen-lockfile --ignore-scripts
+pnpm --filter @jongminchung/tooling --filter @jongminchung/ui run typecheck
+pnpm --filter @jongminchung/tooling --filter @jongminchung/ui run test
 pnpm run publish:dry-run
 ```
 
 `@jongminchung/tooling`, `@jongminchung/ui`는 GitHub Actions의 수동
 `Publish Packages` workflow가 GitHub Packages의 고정 `1.0.0` snapshot을 교체한다. 동일
 version의 API·내용·integrity가 바뀔 수 있으므로 SemVer 호환성과 lockfile 재현성을 보장하지
-않는다. workflow는 삭제 전에 두 tarball을 모두 검증하고 게시 후 registry integrity와 새 소비자
-설치를 확인한다. Git Client는
+않는다. workflow는 publish package만 설치·typecheck·test한 뒤, 기존 `1.0.0`을 삭제하고 두
+package를 병렬 게시한다. Git Client는
 [GitHub Release 배포 가이드](apps/git-client/docs/releases.md)를 따른다.
 
 ## 제출 체크리스트
