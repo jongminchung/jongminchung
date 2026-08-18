@@ -1,0 +1,83 @@
+import { Badge } from "@jongminchung/ui/components/badge";
+import Link from "next/link";
+import type { ReactNode } from "react";
+
+/** `SideNav` UI 컴포넌트를 렌더링함 */
+export function SideNav({
+    className,
+    header,
+    children,
+}: {
+    readonly className?: string;
+    readonly header?: ReactNode;
+    readonly children: ReactNode;
+}) {
+    return (
+        <nav aria-label="Side navigation" className={className}>
+            {header}
+            {children}
+        </nav>
+    );
+}
+
+/** `SideNavHeading` UI 컴포넌트를 렌더링함 */
+export function SideNavHeading({
+    heading,
+    superheading,
+    headingHref,
+}: {
+    readonly heading: string;
+    readonly superheading: string;
+    readonly headingHref: string;
+}) {
+    return (
+        <header className="border-b border-border px-5 py-5">
+            <p className="m-0 text-[10px] font-medium tracking-[0.08em] text-muted-foreground uppercase">
+                {superheading}
+            </p>
+            <div className="mt-1 flex items-center justify-between gap-3">
+                <Link
+                    href={headingHref}
+                    className="text-base font-semibold text-foreground no-underline"
+                >
+                    {heading}
+                </Link>
+                <Badge variant="secondary">v1</Badge>
+            </div>
+        </header>
+    );
+}
+
+/** `SideNavSection` UI 컴포넌트를 렌더링함 */
+export function SideNavSection({
+    children,
+}: {
+    readonly title?: string;
+    readonly isHeaderHidden?: boolean;
+    readonly children: ReactNode;
+}) {
+    return <div className="grid gap-1 p-3">{children}</div>;
+}
+
+/** `SideNavItem` UI 컴포넌트를 렌더링함 */
+export function SideNavItem({
+    label,
+    href,
+    isSelected = false,
+}: {
+    readonly label: string;
+    readonly href: string;
+    readonly isSelected?: boolean;
+    readonly size?: string;
+}) {
+    return (
+        <Link
+            href={href}
+            className="side-nav-item flex min-h-10 items-center rounded-md px-3 text-sm text-muted-foreground no-underline hover:bg-muted hover:text-foreground data-[selected=true]:text-primary"
+            data-selected={isSelected}
+            aria-current={isSelected ? "page" : undefined}
+        >
+            {label}
+        </Link>
+    );
+}

@@ -1,0 +1,85 @@
+.dialog {
+    overflow: hidden;
+}
+
+.inputRow {
+    display: flex;
+    min-height: 54px;
+    align-items: center;
+    gap: 10px;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.inputRow > [data-slot="command-input-wrapper"] {
+    min-width: 0;
+    flex: 1;
+    padding: 0;
+}
+
+.inputRow input {
+    min-width: 0;
+    flex: 1;
+    border: 0;
+    background: transparent;
+    color: var(--foreground);
+    font: inherit;
+    outline: none;
+}
+
+.inputRow kbd {
+    padding: 2px 6px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xs);
+    color: var(--muted-foreground);
+    font-size: 10px;
+}
+
+.list {
+    display: grid;
+    max-height: min(460px, 60vh);
+    max-height: min(460px, 60dvh);
+    gap: 2px;
+    padding: 6px;
+    overflow-y: auto;
+}
+
+.empty {
+    margin: 0;
+    padding: 30px 16px;
+    color: var(--muted-foreground);
+    text-align: center;
+}
+
+.empty p {
+    margin: 0 0 12px;
+}
+
+.result {
+    display: grid;
+    min-width: 0;
+    gap: 2px;
+}
+
+.result strong,
+.result > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.result > span {
+    color: var(--muted-foreground);
+    font-size: 12px;
+}
+
+.matchReason {
+    display: flex;
+    gap: 6px;
+}
+
+.matchReason > span {
+    flex: none;
+    color: var(--primary);
+    font-weight: 600;
+}

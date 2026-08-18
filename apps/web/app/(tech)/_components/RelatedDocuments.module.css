@@ -1,0 +1,25 @@
+.container {
+    margin-top: 64px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+}
+
+.title {
+    margin: 0 0 18px;
+    font-family: var(--font-family-heading);
+    font-size: 22px;
+    font-weight: 550;
+    letter-spacing: -0.015em;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+@media (max-width: 760px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
