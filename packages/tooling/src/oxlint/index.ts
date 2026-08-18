@@ -1,6 +1,6 @@
 import { defineConfig, type OxlintConfig } from "oxlint";
 
-export type { OxlintConfig } from "oxlint";
+export type { OxlintConfig, OxlintOverride } from "oxlint";
 
 export const sharedOxlintConfig = defineConfig({
     // Oxlint의 공식 권장 기본값을 오류로 적용함

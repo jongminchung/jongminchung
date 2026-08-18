@@ -1,7 +1,7 @@
 "use client";
 
 import { Separator as SeparatorPrimitive } from "@base-ui/react/separator";
-import { cn } from "@jongminchung/ui/lib/utils";
+import { cn } from "../lib/utils.js";
 
 /** `Separator` UI 컴포넌트를 렌더링함 */
 function Separator({

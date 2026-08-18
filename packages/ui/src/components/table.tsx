@@ -1,5 +1,5 @@
-import { cn } from "@jongminchung/ui/lib/utils";
 import * as React from "react";
+import { cn } from "../lib/utils.js";
 
 /** `Table` UI 컴포넌트를 렌더링함 */
 function Table({ className, ...props }: React.ComponentProps<"table">) {

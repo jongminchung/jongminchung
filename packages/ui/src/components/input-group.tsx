@@ -1,11 +1,11 @@
 "use client";
 
-import { Button } from "@jongminchung/ui/components/button";
-import { Input } from "@jongminchung/ui/components/input";
-import { Textarea } from "@jongminchung/ui/components/textarea";
-import { cn } from "@jongminchung/ui/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
+import { cn } from "../lib/utils.js";
+import { Button } from "./button.js";
+import { Input } from "./input.js";
+import { Textarea } from "./textarea.js";
 
 /** `InputGroup` UI 컴포넌트를 렌더링함 */
 function InputGroup({ className, ...props }: React.ComponentProps<"div">) {

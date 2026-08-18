@@ -1,10 +1,10 @@
 "use client";
 
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
-import { Button } from "@jongminchung/ui/components/button";
-import { cn } from "@jongminchung/ui/lib/utils";
 import { XIcon } from "lucide-react";
 import * as React from "react";
+import { cn } from "../lib/utils.js";
+import { Button } from "./button.js";
 
 type DialogContentProps = DialogPrimitive.Popup.Props &
     (

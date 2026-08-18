@@ -1,5 +1,5 @@
-import { cn } from "@jongminchung/ui/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "../lib/utils.js";
 
 /** `Empty` UI 컴포넌트를 렌더링함 */
 function Empty({ className, ...props }: React.ComponentProps<"div">) {

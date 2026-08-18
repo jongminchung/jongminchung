@@ -1,20 +1,17 @@
 "use client";
 
+import { Command as CommandPrimitive } from "cmdk";
+import { SearchIcon, CheckIcon } from "lucide-react";
+import * as React from "react";
+import { cn } from "../lib/utils.js";
 import {
     Dialog,
     DialogContent,
     DialogDescription,
     DialogHeader,
     DialogTitle,
-} from "@jongminchung/ui/components/dialog";
-import {
-    InputGroup,
-    InputGroupAddon,
-} from "@jongminchung/ui/components/input-group";
-import { cn } from "@jongminchung/ui/lib/utils";
-import { Command as CommandPrimitive } from "cmdk";
-import { SearchIcon, CheckIcon } from "lucide-react";
-import * as React from "react";
+} from "./dialog.js";
+import { InputGroup, InputGroupAddon } from "./input-group.js";
 
 type CommandDialogProps = Omit<
     React.ComponentProps<typeof Dialog>,
