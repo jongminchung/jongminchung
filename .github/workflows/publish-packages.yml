@@ -8,8 +8,13 @@ permissions:
   packages: write
 
 jobs:
-  publish:
+  validate:
+    name: Validate ${{ matrix.package }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [tooling, ui]
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -17,11 +22,33 @@ jobs:
         with:
           node-version-file: .node-version
           cache: pnpm
-      - name: Verify configured Node.js
-        run: test "v$(cat .node-version)" = "$(node --version)"
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm run check
-      - run: pnpm run audit:prod
+      - name: Install package dependencies
+        run: >-
+          pnpm --filter @jongminchung/${{ matrix.package }} install
+          --frozen-lockfile --ignore-scripts
+      - run: pnpm --filter @jongminchung/${{ matrix.package }} run typecheck
+      - run: pnpm --filter @jongminchung/${{ matrix.package }} run test
+      - run: pnpm --filter @jongminchung/${{ matrix.package }} run publish:dry-run
+
+  publish:
+    name: Publish ${{ matrix.package }}@1.0.0
+    needs: validate
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [tooling, ui]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - name: Install package dependencies
+        run: >-
+          pnpm --filter @jongminchung/${{ matrix.package }} install
+          --frozen-lockfile --ignore-scripts
       - name: Configure GitHub Packages auth
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
@@ -29,225 +56,15 @@ jobs:
           test -n "$GH_PAT"
           npm config set @jongminchung:registry https://npm.pkg.github.com
           npm config set //npm.pkg.github.com/:_authToken "$GH_PAT"
-      - name: Guard fixed package versions
-        run: |
-          node <<'NODE'
-          const { readFileSync } = require("node:fs");
-
-          for (const filePath of [
-            "packages/tooling/package.json",
-            "packages/ui/package.json",
-          ]) {
-            const packageJson = JSON.parse(readFileSync(filePath, "utf8"));
-
-            if (packageJson.version !== "1.0.0") {
-              throw new Error(`${packageJson.name} must reuse version 1.0.0`);
-            }
-          }
-          NODE
-      - name: Validate package dry runs
-        run: pnpm run publish:dry-run
-      - name: Build all package tarballs before replacement
-        run: |
-          tarball_dir="$RUNNER_TEMP/package-tarballs"
-          integrity_file="$RUNNER_TEMP/package-integrities.tsv"
-          mkdir -p "$tarball_dir"
-          : > "$integrity_file"
-
-          for package_name in tooling ui; do
-            pnpm --filter "@jongminchung/$package_name" pack --pack-destination "$tarball_dir"
-            tarball="$tarball_dir/jongminchung-$package_name-1.0.0.tgz"
-            test -f "$tarball"
-            integrity="$(node -e '
-              const { createHash } = require("node:crypto");
-              const { readFileSync } = require("node:fs");
-              const digest = createHash("sha512").update(readFileSync(process.argv[1])).digest("base64");
-              process.stdout.write(`sha512-${digest}`);
-            ' "$tarball")"
-            printf '@jongminchung/%s\t%s\n' "$package_name" "$integrity" >> "$integrity_file"
-          done
-
-          {
-            echo "## Mutable 1.0.0 package snapshot"
-            echo
-            echo "- Commit: \`$GITHUB_SHA\`"
-            echo
-            echo "| Package | Prepared tarball integrity |"
-            echo "| --- | --- |"
-            while IFS=$'\t' read -r package_name integrity; do
-              echo "| \`$package_name@1.0.0\` | \`$integrity\` |"
-            done < "$integrity_file"
-          } >> "$GITHUB_STEP_SUMMARY"
-      - name: Publish tooling 1.0.0 / Publish ui 1.0.0
+      - name: Delete existing 1.0.0
         env:
-          GH_PAT: ${{ secrets.GH_PAT }}
-        run: |
-          tarball_dir="$RUNNER_TEMP/package-tarballs"
-          integrity_file="$RUNNER_TEMP/package-integrities.tsv"
-
-          expected_integrity() {
-            awk -F '\t' -v package_name="$1" '$1 == package_name { print $2 }' "$integrity_file"
-          }
-
-          published_integrity() {
-            npm view "$1@1.0.0" dist.integrity --prefer-online 2>/dev/null || true
-          }
-
-          delete_version() {
-            local endpoint="$1"
-            local response
-            local status
-            set +e
-            response="$(GH_TOKEN="$GH_PAT" gh api --method DELETE "$endpoint" 2>&1)"
-            status=$?
-            set -e
-            if test "$status" -eq 0 || grep -q "HTTP 404" <<< "$response"; then
-              return 0
-            fi
-            printf '%s\n' "$response" >&2
-            return "$status"
-          }
-
-          replace_snapshot() {
-            local package_name="$1"
-            local package_spec="@jongminchung/$package_name"
-            local tarball="$tarball_dir/jongminchung-$package_name-1.0.0.tgz"
-            local expected
-            local response
-            local status
-            local version_ids
-            expected="$(expected_integrity "$package_spec")"
-            test -n "$expected"
-
-            set +e
-            response="$(
-              GH_TOKEN="$GH_PAT" gh api --paginate \
-                "/users/${GITHUB_REPOSITORY_OWNER}/packages/npm/$package_name/versions" \
-                --jq '.[] | select(.name == "1.0.0") | .id' 2>&1
-            )"
-            status=$?
-            set -e
-            if test "$status" -eq 0; then
-              version_ids="$response"
-            elif grep -q "HTTP 404" <<< "$response"; then
-              version_ids=""
-            else
-              printf '%s\n' "$response" >&2
-              return "$status"
-            fi
-
-            while IFS= read -r version_id; do
-              test -z "$version_id" || delete_version \
-                "/users/${GITHUB_REPOSITORY_OWNER}/packages/npm/$package_name/versions/$version_id"
-            done <<< "$version_ids"
-
-            for attempt in 1 2 3; do
-              if npm publish "$tarball" --access public --registry https://npm.pkg.github.com; then
-                return 0
-              fi
-              if test "$(published_integrity "$package_spec")" = "$expected"; then
-                return 0
-              fi
-              sleep "$((attempt * 5))"
-            done
-            return 1
-          }
-
-          for package_name in tooling ui; do
-            replace_snapshot "$package_name"
-          done
-      - name: Verify published integrity and consumer installation
-        run: |
-          integrity_file="$RUNNER_TEMP/package-integrities.tsv"
-          verify_integrity() {
-            local package_name="$1"
-            local expected="$2"
-            local actual
-            for attempt in 1 2 3 4 5 6; do
-              actual="$(npm view "$package_name@1.0.0" dist.integrity --prefer-online 2>/dev/null || true)"
-              if test "$actual" = "$expected"; then
-                printf '%s' "$actual"
-                return 0
-              fi
-              sleep "$((attempt * 5))"
-            done
-            printf 'Expected %s but registry returned %s for %s\n' "$expected" "$actual" "$package_name" >&2
-            return 1
-          }
-
-          {
-            echo
-            echo "| Package | Published integrity |"
-            echo "| --- | --- |"
-            while IFS=$'\t' read -r package_name expected; do
-              actual="$(verify_integrity "$package_name" "$expected")"
-              echo "| \`$package_name@1.0.0\` | \`$actual\` |"
-            done < "$integrity_file"
-          } >> "$GITHUB_STEP_SUMMARY"
-
-          consumer_dir="$RUNNER_TEMP/package-consumer"
-          mkdir -p "$consumer_dir"
-          cd "$consumer_dir"
-          npm init --yes
-          npm install --ignore-scripts --no-audit --no-fund --prefer-online \
-            @jongminchung/tooling@1.0.0 \
-            @jongminchung/ui@1.0.0 \
-            @tailwindcss/postcss@4.3.3 \
-            @types/react@19.2.18 \
-            @types/react-dom@19.2.4 \
-            oxfmt@0.59.0 \
-            postcss@8.5.20 \
-            react@19.2.8 \
-            react-dom@19.2.8 \
-            tailwindcss@4.3.3 \
-            typescript@6.0.3
-          node --input-type=module --eval '
-            await Promise.all([
-              import("@jongminchung/tooling/oxfmt"),
-              import("@jongminchung/ui/components/button"),
-            ]);
-          '
-          cat > index.tsx <<'TSX'
-          import { Button } from "@jongminchung/ui/components/button";
-
-          export const button = (
-            <Button className="bg-primary data-open:block no-scrollbar">Registry consumer</Button>
-          );
-          TSX
-          cat > tsconfig.json <<'JSON'
-          {
-            "compilerOptions": {
-              "jsx": "react-jsx",
-              "module": "NodeNext",
-              "moduleResolution": "NodeNext",
-              "noEmit": true,
-              "strict": true
-            },
-            "files": ["index.tsx"]
-          }
-          JSON
-          ./node_modules/.bin/tsc --project tsconfig.json --listFiles > typecheck-files.txt
-          grep -F '/@jongminchung/ui/dist/components/button.d.ts' typecheck-files.txt
-          printf '@import "@jongminchung/ui/globals.css";\n@source "./index.tsx";\n' > input.css
-          node --input-type=module <<'NODE'
-          import { readFile } from "node:fs/promises";
-          import { resolve } from "node:path";
-          import tailwindcss from "@tailwindcss/postcss";
-          import postcss from "postcss";
-
-          const from = resolve("input.css");
-          const result = await postcss([tailwindcss()]).process(await readFile(from, "utf8"), { from });
-          if (
-            !result.css.includes("background-color: var(--primary)") ||
-            !result.css.includes(".bg-primary") ||
-            !result.css.includes(".data-open\\:block") ||
-            !result.css.includes(".no-scrollbar")
-          ) {
-            throw new Error("expected compiled UI token, variant, and utility classes");
-          }
-          NODE
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: >-
+          .github/scripts/delete-version-ids-script.sh
+          "$GITHUB_REPOSITORY_OWNER" "${{ matrix.package }}" "1.0.0"
+      - run: pnpm --filter @jongminchung/${{ matrix.package }} publish --access public --no-git-checks
       - name: Remove GitHub Packages auth
-        if: always()
+        if: ${{ always() }}
         run: |
           npm config delete @jongminchung:registry
           npm config delete //npm.pkg.github.com/:_authToken
