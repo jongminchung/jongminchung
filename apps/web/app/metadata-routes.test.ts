@@ -5,8 +5,8 @@ import {
     sectionLandingSections,
 } from "../lib/content-model";
 import { getDocuments } from "../lib/documents";
-import { GET as getRobots } from "./(tech)/sites/tech/robots.txt/route";
-import sitemap from "./(tech)/sites/tech/sitemap";
+import { GET as getRobots } from "./(tech)/tech/robots.txt/route";
+import sitemap from "./(tech)/tech/sitemap";
 
 describe("문서가 현재 위치에 있음", () => {
     it("[성공] 모든 내부 문서 및 섹션 임대를 생성함", async () => {

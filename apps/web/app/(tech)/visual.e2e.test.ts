@@ -105,7 +105,6 @@ for (const visualCase of cases) {
             );
         });
         await expect(page).toHaveScreenshot(`${visualCase.name}.png`, {
-            animations: "disabled",
             fullPage: true,
         });
     });

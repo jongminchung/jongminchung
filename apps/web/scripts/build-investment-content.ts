@@ -7,7 +7,7 @@ import {
     validateInvestmentNoteBody,
     type InvestmentNoteManifestEntry,
     type InvestmentNoteMetadata,
-} from "../lib/investment-content.ts";
+} from "../lib/invest/content.ts";
 import { locales, type Locale } from "../lib/site-routing.ts";
 import {
     listFiles,

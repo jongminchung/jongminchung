@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
@@ -6,6 +6,10 @@ import { describe, expect, it } from "vitest";
 const root = resolve(fileURLToPath(new URL("../../..", import.meta.url)));
 const read = (path: string): string =>
     readFileSync(resolve(root, path), "utf8");
+const readComponentStyles = (path: string): readonly string[] =>
+    readdirSync(resolve(root, path), { withFileTypes: true })
+        .filter((entry) => entry.isFile() && entry.name.endsWith(".module.css"))
+        .map((entry) => read(`${path}/${entry.name}`));
 
 const sharedTheme = read("packages/ui/src/styles/theme.css");
 const tailwindTokens = read("packages/ui/src/styles/tokens.css");
@@ -14,6 +18,11 @@ const siteStyles = [
     "apps/web/app/(tech)/tech.css",
     "apps/web/app/(invest)/invest.css",
 ].map(read);
+const domainComponentStyles = [
+    ...readComponentStyles("apps/web/app/(home)/_components"),
+    ...readComponentStyles("apps/web/app/(tech)/_components"),
+    ...readComponentStyles("apps/web/app/(invest)/_components"),
+];
 
 const requiredRoles = [
     "--background",
@@ -78,9 +87,7 @@ describe("공통 디자인 토큰 계약", () => {
         const styles = [
             sharedTheme,
             ...siteStyles,
-            read("apps/web/components/home/home.module.css"),
-            read("apps/web/components/DocumentPage.module.css"),
-            read("apps/web/components/ExcalidrawDiagram.module.css"),
+            ...domainComponentStyles,
         ].join("\n");
 
         for (const token of removedDomainTokens) {

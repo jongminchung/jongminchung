@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { findDocument, getDocuments, rankRelatedDocuments } from "./documents";
-import { findSectionPage } from "./section-pages";
+import { findSectionPage } from "./tech/section-pages";
 
 async function requireDocument(locale: string, id: string) {
     const document = await findDocument(locale, id);

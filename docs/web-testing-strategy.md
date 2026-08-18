@@ -116,6 +116,16 @@
 - **의도한 UI 변경에서만 visual snapshot을 검토·갱신함**
   - 명령: `pnpm --filter @jongminchung/web run test:e2e -- visual.e2e.test.ts` 또는 `pnpm --filter @jongminchung/web run test:e2e -- --update-snapshots`
   - 근거: snapshot은 기능 계약의 대체물이 아니라 시각 변경의 검토 보조 수단임
+  - 기준: `*-actual.png`, `*-expected.png`, `*-diff.png`을 검토한 뒤 의도한 변경만 갱신함
+
+- **visual snapshot은 baseline을 만든 동일한 OS·브라우저 환경에서 실행함**
+  - 근거: 렌더링은 운영체제, 브라우저 버전, 폰트, 하드웨어, headless 여부에 따라 달라질 수 있음
+  - 현재 기준 이미지: `*-darwin.png`이므로 macOS Chromium에서 기준을 생성·검증함
+  - CI 전환 조건: Linux CI에서 visual snapshot을 실행하려면 Linux Chromium에서 승인한 기준 이미지를 별도로 생성·커밋함
+
+- **실패 분석에는 Playwright 산출물을 사용함**
+  - CI: 첫 재시도에서 trace를 기록하고, 실패한 test의 screenshot·video와 HTML report를 생성함
+  - 로컬: `pnpm --filter @jongminchung/web exec playwright test --debug` 또는 `pnpm --filter @jongminchung/web exec playwright show-report`로 재현·분석함
 
 ## 공식 참고 문서
 

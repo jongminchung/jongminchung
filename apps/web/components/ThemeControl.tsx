@@ -6,10 +6,10 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@jongminchung/ui/components/tooltip";
-import type { Locale } from "#lib/content-model";
+import type { Locale } from "#lib/site-routing";
 import type { ThemeMode } from "#lib/theme";
-import { DarkThemeIcon, LightThemeIcon, SystemThemeIcon } from "./DocsIcons";
 import { Icon, type IconType } from "./Icon";
+import { DarkThemeIcon, LightThemeIcon, SystemThemeIcon } from "./ThemeIcons";
 import { useTheme } from "./ThemeProvider";
 
 const nextMode: Readonly<Record<ThemeMode, ThemeMode>> = {

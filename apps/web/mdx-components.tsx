@@ -1,68 +1,15 @@
 import type { MDXComponents } from "mdx/types";
 import Link from "next/link";
-import { isValidElement, type ComponentProps, type ReactNode } from "react";
-import { DocsCodeBlock } from "./components/DocsCodeBlock";
-import { ExcalidrawDiagram } from "./components/ExcalidrawDiagram";
-import {
-    OverviewCards,
-    OverviewCta,
-    OverviewHero,
-    QuickStart,
-} from "./components/OverviewBlocks";
-import { classifyMdxCodeBlock } from "./lib/mdx-code";
+import type { ComponentProps } from "react";
+import { investmentMdxComponents } from "#invest-components/mdx-components";
+import { techMdxComponents } from "#tech-components/mdx-components";
 
-interface CodeElementProps {
-    readonly children?: ReactNode;
-    readonly className?: string;
-}
-
-function SourceSummary({ children }: { readonly children: ReactNode }) {
-    return (
-        <section
-            className="investment-source-summary"
-            aria-labelledby="source-summary-title"
-        >
-            <p className="investment-section-label" id="source-summary-title">
-                Source summary
-            </p>
-            {children}
-        </section>
-    );
-}
-
-function JamieNotes({ children }: { readonly children: ReactNode }) {
-    return (
-        <section
-            className="investment-jamie-notes"
-            aria-labelledby="jamie-notes-title"
-        >
-            <p className="investment-section-label" id="jamie-notes-title">
-                Jamie&apos;s notes
-            </p>
-            {children}
-        </section>
-    );
-}
-
-/** `MdxPre` 공개 기능을 제공함 */
-export function MdxPre({ children }: ComponentProps<"pre">) {
-    if (!isValidElement<CodeElementProps>(children))
-        return <pre>{children}</pre>;
-    const block = classifyMdxCodeBlock(
-        children.props.className,
-        children.props.children,
-    );
-    if (block.kind === "excalidraw") {
-        return <ExcalidrawDiagram source={block.source} />;
-    }
-    return <DocsCodeBlock code={block.source} language={block.language} />;
-}
-
-function MdxLink({ href = "", children }: ComponentProps<"a">) {
+function MdxLink({ href = "", children, ...props }: ComponentProps<"a">) {
     const isExternal =
         href.startsWith("http://") || href.startsWith("https://");
     return (
         <Link
+            {...props}
             href={href}
             target={isExternal ? "_blank" : undefined}
             rel={isExternal ? "noreferrer" : undefined}
@@ -74,14 +21,8 @@ function MdxLink({ href = "", children }: ComponentProps<"a">) {
 
 const components = {
     a: MdxLink,
-    pre: MdxPre,
-    ExcalidrawDiagram,
-    OverviewCards,
-    OverviewCta,
-    OverviewHero,
-    QuickStart,
-    SourceSummary,
-    JamieNotes,
+    ...techMdxComponents,
+    ...investmentMdxComponents,
 } satisfies MDXComponents;
 
 /** `useMDXComponents` 훅 상태와 제어 함수를 제공함 */

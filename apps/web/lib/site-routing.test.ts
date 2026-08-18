@@ -29,9 +29,9 @@ describe("여러 개의 사이트에 속해 있음", () => {
     });
 
     it("[실패] 표시되지 않고 외부 외부를 생성함", () => {
-        expect(createInternalSitePath("home", "/")).toBe("/sites/home");
+        expect(createInternalSitePath("home", "/")).toBe("/home");
         expect(createInternalSitePath("tech", "/ko/articles/modeling")).toBe(
-            "/sites/tech/ko/articles/modeling",
+            "/tech/ko/articles/modeling",
         );
     });
 

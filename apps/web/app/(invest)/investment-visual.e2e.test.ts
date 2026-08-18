@@ -23,7 +23,6 @@ for (const visualCase of cases) {
         await page.goto("/en");
         await page.evaluate(() => document.fonts.ready);
         await expect(page).toHaveScreenshot(`${visualCase.name}.png`, {
-            animations: "disabled",
             fullPage: true,
         });
     });

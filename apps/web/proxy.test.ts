@@ -58,7 +58,7 @@ describe("제조원", () => {
         expect(response.status).toBe(200);
         expect(response.headers.get("content-language")).toBe("ko");
         expect(response.headers.get("x-middleware-rewrite")).toBe(
-            "http://tech.jamie.localhost:3000/sites/tech/ko/articles/ddd",
+            "http://tech.jamie.localhost:3000/tech/ko/articles/ddd",
         );
         expect(
             response.headers.get("x-middleware-override-headers"),
@@ -71,9 +71,16 @@ describe("제조원", () => {
             "x-jamie-locale": "ko",
             "x-jamie-site": "tech",
         };
-        expect(proxy(createRequest("/sites/tech/ko", { headers })).status).toBe(
-            404,
-        );
+        for (const pathname of [
+            "/sites/tech/ko",
+            "/home/en",
+            "/tech/ko",
+            "/invest/en",
+        ]) {
+            expect(proxy(createRequest(pathname, { headers })).status).toBe(
+                404,
+            );
+        }
         expect(
             proxy(
                 createRequest("/ko", {
@@ -101,7 +108,7 @@ describe("제조원", () => {
         );
         expect(response.status).toBe(200);
         expect(response.headers.get("x-middleware-rewrite")).toContain(
-            "/sites/tech/en",
+            "/tech/en",
         );
     });
 });

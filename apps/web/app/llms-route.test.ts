@@ -5,7 +5,7 @@ import {
     sectionLandingSections,
 } from "../lib/content-model";
 import { getDocuments } from "../lib/documents";
-import { GET } from "./(tech)/sites/tech/llms.txt/route";
+import { GET } from "./(tech)/tech/llms.txt/route";
 
 describe("llms.txt", () => {
     it("[성공] 모든 내부 문서와 섹션 소개를 제안된 형식으로 게시함", async () => {

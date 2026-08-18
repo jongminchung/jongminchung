@@ -83,6 +83,21 @@ test("[성공] 기록 및 동일 페이지에 대한 기본 링크를 사용함"
     await expect(page).toHaveURL(new RegExp(`${hash}$`, "u"));
 });
 
+test("[성공] 각주 참조와 본문 사이를 이동함", async ({ page }) => {
+    await page.goto("/en/articles/the-expensive-main-thread");
+
+    const reference = page.locator("[data-footnote-ref]").first();
+    const footnote = page.locator("#user-content-fn-1");
+    await reference.click();
+
+    await expect(page).toHaveURL(/#user-content-fn-1$/u);
+    await expect(footnote).toBeInViewport();
+
+    await footnote.locator("[data-footnote-backref]").click();
+    await expect(page).toHaveURL(/#user-content-fnref-1$/u);
+    await expect(reference).toBeInViewport();
+});
+
 test("[성공] 버퍼를 로드하고 기술 검색 파일을 게시함", async ({
     page,
     request,

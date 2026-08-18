@@ -8,6 +8,7 @@ import {
     normalizeHost,
     resolveSite,
     selectLocale,
+    siteIds,
 } from "#lib/site-routing";
 
 /** `proxy` 공개 기능을 제공함 */
@@ -16,7 +17,14 @@ export function proxy(request: NextRequest): NextResponse {
     if (pathname === "/healthz" || isSharedAssetPath(pathname)) {
         return NextResponse.next();
     }
-    if (pathname === "/sites" || pathname.startsWith("/sites/")) {
+    if (
+        pathname === "/sites" ||
+        pathname.startsWith("/sites/") ||
+        siteIds.some(
+            (site) =>
+                pathname === `/${site}` || pathname.startsWith(`/${site}/`),
+        )
+    ) {
         return new NextResponse(null, { status: 404 });
     }
 

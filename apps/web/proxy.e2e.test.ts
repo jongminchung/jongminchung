@@ -4,7 +4,14 @@ test("[실패] 개인 위치, 알 수 없는 호스트 및 스푸핑된 헤더�
     request,
     playwright,
 }) => {
-    expect((await request.get("/sites/tech/en")).status()).toBe(404);
+    for (const pathname of [
+        "/sites/tech/en",
+        "/home/en",
+        "/tech/en",
+        "/invest/en",
+    ]) {
+        expect((await request.get(pathname)).status()).toBe(404);
+    }
     const unknown = await playwright.request.newContext({
         baseURL: "http://127.0.0.1:3100",
         extraHTTPHeaders: {
@@ -15,7 +22,7 @@ test("[실패] 개인 위치, 알 수 없는 호스트 및 스푸핑된 헤더�
         },
     });
     expect((await unknown.get("/")).status()).toBe(404);
-    expect((await unknown.get("/sites/tech/ko")).status()).toBe(404);
+    expect((await unknown.get("/tech/ko")).status()).toBe(404);
     await unknown.dispose();
 });
 

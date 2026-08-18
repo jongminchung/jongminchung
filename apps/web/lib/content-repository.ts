@@ -24,7 +24,7 @@ import {
     createInvestmentNoteHref,
     type InvestmentNoteManifestEntry,
     type InvestmentSourceKind,
-} from "./investment-content.ts";
+} from "./invest/content.ts";
 
 const appRoot = process.cwd().endsWith("/apps/web")
     ? process.cwd()

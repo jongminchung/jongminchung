@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { listStandaloneExcalidrawAssets } from "../lib/excalidraw-files.ts";
-import { parseExcalidrawSource } from "../lib/excalidraw-scene.ts";
+import { listStandaloneExcalidrawAssets } from "../lib/tech/excalidraw-files.ts";
+import { parseExcalidrawSource } from "../lib/tech/excalidraw-scene.ts";
 import { listFiles } from "./generation-utils.ts";
 
 const appRoot = resolve(import.meta.dirname, "..");

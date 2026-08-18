@@ -5,7 +5,10 @@
   "type": "module",
   "imports": {
     "#components/*": "./components/*.tsx",
-    "#lib/*": "./lib/*.ts"
+    "#home-components/*": "./app/(home)/_components/*.tsx",
+    "#invest-components/*": "./app/(invest)/_components/*.tsx",
+    "#lib/*": "./lib/*.ts",
+    "#tech-components/*": "./app/(tech)/_components/*.tsx"
   },
   "scripts": {
     "build": "node scripts/check-excalidraw.ts && next build",

@@ -107,7 +107,7 @@ export function selectLocale(
 
 /** `createInternalSitePath` 결과를 생성함 */
 export function createInternalSitePath(site: SiteId, pathname: string): string {
-    return `/sites/${site}${pathname === "/" ? "" : pathname}`;
+    return `/${site}${pathname === "/" ? "" : pathname}`;
 }
 
 /** `localeCookieName` 공개 기능을 제공함 */

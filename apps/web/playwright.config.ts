@@ -5,9 +5,23 @@ export default defineConfig({
     testMatch: "**/*.e2e.test.ts",
     outputDir: "./test-results",
     fullyParallel: true,
+    forbidOnly: Boolean(process.env.CI),
     retries: process.env.CI ? 2 : 0,
-    reporter: "list",
-    use: { trace: "retain-on-failure" },
+    reporter: process.env.CI
+        ? [["github"], ["html", { open: "never" }]]
+        : "list",
+    expect: {
+        toHaveScreenshot: {
+            animations: "disabled",
+            caret: "hide",
+            scale: "css",
+        },
+    },
+    use: {
+        trace: "on-first-retry",
+        screenshot: "only-on-failure",
+        video: "retain-on-failure",
+    },
     webServer: {
         command: "pnpm run build && PORT=3100 pnpm run start",
         port: 3100,
