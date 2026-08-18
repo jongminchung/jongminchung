@@ -86,71 +86,81 @@ function toCurrentSectionEntry(page: SectionPage): CurrentNavigationEntry {
     });
 }
 
-function socialImage(title: string, locale: Locale, id: string) {
-    return {
-        url: createOgImageHref(locale, id),
+function createMetadata({
+    type,
+    title,
+    description,
+    locale,
+    canonical,
+    alternatePaths,
+    imageId,
+}: {
+    readonly type: "article" | "website";
+    readonly title: string;
+    readonly description: string;
+    readonly locale: Locale;
+    readonly canonical: string;
+    readonly alternatePaths: Record<Locale, string>;
+    readonly imageId: string;
+}): Metadata {
+    const image = {
+        url: createOgImageHref(locale, imageId),
         width: 1200,
         height: 630,
         alt: `${title} · Engineering Notes`,
     };
+    return {
+        title,
+        description,
+        alternates: {
+            canonical,
+            languages: alternatePaths,
+        },
+        openGraph: {
+            type,
+            title,
+            description,
+            locale: locale === "ko" ? "ko_KR" : "en_US",
+            url: canonical,
+            images: [image],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title,
+            description,
+            images: [image],
+        },
+    };
 }
 
 function documentMetadata(document: ContentManifestEntry): Metadata {
-    const image = socialImage(document.title, document.locale, document.id);
-    return {
+    return createMetadata({
+        type: "article",
         title: document.title,
         description: document.description,
-        alternates: {
-            canonical: document.href,
-            languages: {
-                ko: createDocHref("ko", document.id),
-                en: createDocHref("en", document.id),
-            },
+        locale: document.locale,
+        canonical: document.href,
+        alternatePaths: {
+            ko: createDocHref("ko", document.id),
+            en: createDocHref("en", document.id),
         },
-        openGraph: {
-            type: "article",
-            title: document.title,
-            description: document.description,
-            locale: document.locale === "ko" ? "ko_KR" : "en_US",
-            url: document.href,
-            images: [image],
-        },
-        twitter: {
-            card: "summary_large_image",
-            title: document.title,
-            description: document.description,
-            images: [image],
-        },
-    };
+        imageId: document.id,
+    });
 }
 
 function sectionMetadata(page: SectionPage): Metadata {
-    const image = socialImage(page.title, page.locale, page.section);
-    return {
+    return createMetadata({
+        type: "website",
         title: page.title,
         description: page.description,
-        alternates: {
-            canonical: page.href,
-            languages: {
-                ko: createSectionHref("ko", page.section),
-                en: createSectionHref("en", page.section),
-            },
+        locale: page.locale,
+        canonical: page.href,
+        alternatePaths: {
+            ko: createSectionHref("ko", page.section),
+            en: createSectionHref("en", page.section),
         },
-        openGraph: {
-            type: "website",
-            title: page.title,
-            description: page.description,
-            locale: page.locale === "ko" ? "ko_KR" : "en_US",
-            url: page.href,
-            images: [image],
-        },
-        twitter: {
-            card: "summary_large_image",
-            title: page.title,
-            description: page.description,
-            images: [image],
-        },
-    };
+        imageId: page.section,
+    });
 }
 
 export const dynamicParams = true;

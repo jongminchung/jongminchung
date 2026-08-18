@@ -71,7 +71,7 @@
     overflow: hidden;
     border: 1px solid var(--border);
     border-radius: var(--radius-xs);
-    background: var(--syntax-background, var(--muted));
+    background: var(--muted);
     font-family: var(--font-family-code);
     font-size: 14px;
     line-height: 1.4rem;

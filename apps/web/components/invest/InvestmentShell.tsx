@@ -6,6 +6,7 @@ import type {
 } from "#lib/investment-content";
 import type { Locale } from "#lib/site-routing";
 import { BrandWordmark } from "../BrandWordmark";
+import { ThemeControl } from "../ThemeControl";
 import styles from "./investment.module.css";
 
 const copy = {
@@ -67,6 +68,7 @@ export function InvestmentLayout({
                     </Link>
                     <Link href={`/${locale}/sources/video`}>{text.nav[3]}</Link>
                     <a href={`/${otherLocale}`}>{otherLocale.toUpperCase()}</a>
+                    <ThemeControl locale={locale} />
                 </nav>
             </header>
             {children}

@@ -1,5 +1,4 @@
 @import "@jongminchung/ui/globals.css";
-@import "./invest-theme.css";
 
 @source "../**/*.{ts,tsx,mdx}";
 

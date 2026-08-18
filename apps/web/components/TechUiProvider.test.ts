@@ -6,16 +6,13 @@ describe("createTechUi스토어", () => {
         const first = createTechUiStore();
         const second = createTechUiStore();
 
-        first.getState().setThemeMode("dark");
         first.getState().openSearch();
 
         expect(first.getState()).toMatchObject({
-            themeMode: "dark",
             searchOpen: true,
             searchHasOpened: true,
         });
         expect(second.getState()).toMatchObject({
-            themeMode: "system",
             searchOpen: false,
             searchHasOpened: false,
         });

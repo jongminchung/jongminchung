@@ -40,3 +40,21 @@ test("[성공] 투자 장소를 선택하고 기억함", async ({ page }) => {
         )?.value,
     ).toBe("ko");
 });
+
+test("[성공] Invest 테마 선택을 적용하고 사이트별로 저장함", async ({
+    page,
+}) => {
+    await page.addInitScript(() =>
+        localStorage.setItem("invest-theme", "dark"),
+    );
+    await page.goto("/en");
+
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    await page.getByRole("button", { name: "Theme: dark" }).click();
+    await expect(
+        page.getByRole("button", { name: "Theme: system" }),
+    ).toBeVisible();
+    expect(
+        await page.evaluate(() => localStorage.getItem("invest-theme")),
+    ).toBe("system");
+});

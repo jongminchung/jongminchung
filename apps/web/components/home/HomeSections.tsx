@@ -6,74 +6,9 @@ import { getInvestmentNotes } from "#lib/investment-notes";
 import type { Locale } from "#lib/site-routing";
 import styles from "./home.module.css";
 
-function RouteMap({ locale }: { readonly locale: Locale }) {
-    const labels =
-        locale === "ko"
-            ? ["언어", "경계", "모델", "코드", "근거"]
-            : ["LANGUAGE", "BOUNDARY", "MODEL", "CODE", "PROOF"];
-    return (
-        <figure className={styles.routeMap} aria-labelledby="route-map-title">
-            <figcaption className={styles.routeCaption}>
-                <span id="route-map-title">
-                    {locale === "ko"
-                        ? "문제를 통과하는 경로"
-                        : "How I move through a problem"}
-                </span>
-                <span>
-                    {locale === "ko"
-                        ? "분리된 단계가 아닌 하나로 연결된 흐름"
-                        : "One connected route, not four separate phases."}
-                </span>
-            </figcaption>
-            <svg
-                viewBox="0 0 1000 350"
-                role="img"
-                aria-label={
-                    locale === "ko"
-                        ? "언어가 모델과 코드, 근거로 이어지는 과정"
-                        : "Language becomes a model, code, and proof"
-                }
-            >
-                <defs>
-                    <linearGradient id="route-gradient" x1="0" x2="1">
-                        <stop offset="0" stopColor="var(--brand-highlight)" />
-                        <stop
-                            offset="0.48"
-                            stopColor="var(--brand-gradient-mid)"
-                        />
-                        <stop offset="1" stopColor="var(--primary)" />
-                    </linearGradient>
-                </defs>
-                <path
-                    className={styles.routeGhost}
-                    d="M90 72H430v100c0 76 62 120 140 120h350"
-                />
-                <path
-                    className={styles.routeLine}
-                    d="M90 72H430v100c0 76 62 120 140 120h350"
-                />
-                {[
-                    [90, 72, 130],
-                    [430, 72, 130],
-                    [570, 292, 246],
-                    [755, 292, 246],
-                    [920, 292, 246],
-                ].map(([x, y, textY], index) => (
-                    <g className={styles.routeNode} key={labels[index]}>
-                        <circle cx={x} cy={y} r="25" />
-                        <text x={x} y={textY} textAnchor="middle">
-                            {labels[index]}
-                        </text>
-                    </g>
-                ))}
-            </svg>
-        </figure>
-    );
-}
-
 /** `HeroSection` UI 컴포넌트를 렌더링함 */
 export function HeroSection({ locale }: { readonly locale: Locale }) {
-    const { hero, thesis } = getHomeContent(locale);
+    const { hero } = getHomeContent(locale);
     return (
         <section className={styles.hero} id="top" aria-labelledby="hero-title">
             <div className={styles.heroCopy}>
@@ -110,21 +45,6 @@ export function HeroSection({ locale }: { readonly locale: Locale }) {
                     </a>
                 </div>
             </div>
-            <div
-                className={styles.thesis}
-                role="note"
-                aria-label={locale === "ko" ? "작업 원칙" : "Working thesis"}
-            >
-                <div className={styles.thesisTopline}>
-                    <span>WORKING THESIS</span>
-                    <span>001</span>
-                </div>
-                <p>{thesis}</p>
-                <span className={styles.thesisNote}>
-                    language → model → code
-                </span>
-            </div>
-            <RouteMap locale={locale} />
         </section>
     );
 }
@@ -143,11 +63,6 @@ export function WorkSection({ locale }: { readonly locale: Locale }) {
                             : "Things built to be read."}
                     </h2>
                 </div>
-                <p>
-                    {locale === "ko"
-                        ? "제품과 문서 모두 공개된 계약이 실제 동작을 정확히 설명해야 한다는 원칙을 따름"
-                        : "Products and documents share one rule: the public contract should tell the truth."}
-                </p>
             </div>
             <div className={styles.projectList}>
                 {projects.map((project) => (
@@ -209,8 +124,8 @@ export async function WritingSection({ locale }: { readonly locale: Locale }) {
                 </div>
                 <p>
                     {locale === "ko"
-                        ? "같은 빌드에서 생성된 콘텐츠 manifest를 사용하므로 외부 요청 없이 최신 글을 연결함"
-                        : "Latest entries come from manifests generated in the same build, without external requests."}
+                        ? "지금 읽을 수 있는 기술과 투자 기록을 모음"
+                        : "The latest engineering and investment notes, ready to read."}
                 </p>
             </div>
             <div className={styles.writingColumns}>
@@ -265,14 +180,12 @@ export function PrinciplesSection({ locale }: { readonly locale: Locale }) {
             <div className={styles.principlesIntro}>
                 <p className={styles.eyebrow}>README / HOW I WORK</p>
                 <h2 id="principles-title">
-                    {locale === "ko"
-                        ? "코드는 편집기보다 먼저 시작됨"
-                        : "The code starts before the editor."}
+                    {locale === "ko" ? "일하는 원칙" : "Working principles."}
                 </h2>
                 <p>
                     {locale === "ko"
-                        ? "첫 재료는 팀이 함께 이름 붙여야 하는 결정·제약·실패 방식의 언어임"
-                        : "The first material is language: the decisions, constraints, and failure modes that a team needs to name together."}
+                        ? "언어를 맞추고 경계를 분명히 하며, 변경을 검증함"
+                        : "Align language, clarify boundaries, and verify change."}
                 </p>
             </div>
             <ol className={styles.principleList}>

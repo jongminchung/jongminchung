@@ -28,7 +28,7 @@ export default defineConfig({
             name: "tech-chromium",
             testIgnore: [
                 /home(?:-visual)?\.e2e\.test\.ts/u,
-                /investment\.e2e\.test\.ts/u,
+                /investment(?:-visual)?\.e2e\.test\.ts/u,
             ],
             use: {
                 ...devices["Desktop Chrome"],
@@ -38,7 +38,7 @@ export default defineConfig({
         },
         {
             name: "invest-chromium",
-            testMatch: /investment\.e2e\.test\.ts/u,
+            testMatch: /investment(?:-visual)?\.e2e\.test\.ts/u,
             use: {
                 ...devices["Desktop Chrome"],
                 baseURL: "http://invest.jamie.localhost:3100",

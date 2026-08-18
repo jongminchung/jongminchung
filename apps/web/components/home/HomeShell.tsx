@@ -1,6 +1,7 @@
 import { personSchema } from "#lib/home/content";
 import type { Locale } from "#lib/site-routing";
 import { BrandWordmark } from "../BrandWordmark";
+import { ThemeControl } from "../ThemeControl";
 import styles from "./home.module.css";
 
 /** `HomeHeader` UI 컴포넌트를 렌더링함 */
@@ -30,6 +31,7 @@ export function HomeHeader({ locale }: { readonly locale: Locale }) {
                     >
                         {locale === "ko" ? "EN" : "KO"}
                     </a>
+                    <ThemeControl locale={locale} />
                     <a
                         href="https://github.com/jongminchung"
                         target="_blank"

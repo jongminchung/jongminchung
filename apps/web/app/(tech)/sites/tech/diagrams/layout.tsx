@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { TechDataProvider } from "#components/TechDataProvider";
 import {
-    InitialDocumentScripts,
-    rootFontClassName,
+    InitialTechDocumentScripts,
+    pretendard,
     rootMetadata,
 } from "../../../../root-layout";
 import "../../../tech.css";
@@ -18,13 +18,13 @@ export default function DiagramRootLayout({
 }): React.JSX.Element {
     return (
         <html
-            className={rootFontClassName}
             lang="en"
+            className={pretendard.variable}
             data-theme="light"
             suppressHydrationWarning
         >
             <head>
-                <InitialDocumentScripts />
+                <InitialTechDocumentScripts />
             </head>
             <body data-site="tech">
                 <TechDataProvider>{children}</TechDataProvider>

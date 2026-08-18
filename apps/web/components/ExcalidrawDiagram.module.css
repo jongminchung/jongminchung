@@ -1,8 +1,7 @@
 .figure {
-    --excalidraw-canvas-height: clamp(320px, 52vw, 520px);
     display: flex;
     min-width: 0;
-    min-height: var(--excalidraw-canvas-height);
+    min-height: clamp(320px, 52vw, 520px);
     flex-direction: column;
     overflow: hidden;
     border: 1px solid var(--border);
@@ -32,7 +31,7 @@
     position: relative;
     min-height: 0;
     flex: 1;
-    background: var(--excalidraw-canvas);
+    background: var(--card);
 }
 
 .canvas :global(.main-menu-trigger),
@@ -44,7 +43,7 @@
 .loading,
 .error {
     display: grid;
-    min-height: calc(var(--excalidraw-canvas-height) - 45px);
+    min-height: calc(clamp(320px, 52vw, 520px) - 45px);
     place-content: center;
     justify-items: center;
     gap: 10px;
@@ -102,7 +101,12 @@
 
 @media (max-width: 600px) {
     .figure {
-        --excalidraw-canvas-height: 360px;
+        min-height: 360px;
+    }
+
+    .loading,
+    .error {
+        min-height: 315px;
     }
 
     .toolbar {

@@ -22,7 +22,6 @@ interface HomeContent {
         readonly workAction: string;
         readonly techAction: string;
     };
-    readonly thesis: string;
     readonly projects: readonly Project[];
     readonly principles: readonly Principle[];
 }
@@ -31,11 +30,10 @@ const content = {
     en: {
         hero: {
             title: ["Complex systems", "should explain", "themselves."],
-            lead: "I turn shared language into clear boundaries, public APIs, and software that can prove what changed.",
+            lead: "I turn shared language into clear boundaries and working software.",
             workAction: "Read the work",
             techAction: "Open Engineering Notes",
         },
-        thesis: "A model is useful when it makes the next decision more obvious and the wrong state harder to build.",
         projects: [
             {
                 index: "01",
@@ -86,11 +84,10 @@ const content = {
     ko: {
         hero: {
             title: ["복잡한 시스템은", "스스로 설명할 수", "있어야 함"],
-            lead: "공유 언어를 명확한 경계와 공개 API로 옮기고, 무엇이 달라졌는지 증명할 수 있는 소프트웨어를 만듦",
+            lead: "공유 언어를 명확한 경계와 동작하는 소프트웨어로 옮김",
             workAction: "프로젝트 보기",
             techAction: "기술 글 읽기",
         },
-        thesis: "좋은 모델은 다음 결정을 더 분명하게 만들고 잘못된 상태를 만들기 어렵게 함",
         projects: [
             {
                 index: "01",
@@ -144,9 +141,6 @@ const content = {
 export function getHomeContent(locale: Locale): HomeContent {
     return content[locale];
 }
-
-export const projects = content.en.projects;
-export const principles = content.en.principles;
 
 export const personSchema = {
     "@context": "https://schema.org",

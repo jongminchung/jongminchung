@@ -69,7 +69,7 @@ export function DocumentPageHeader({
                 </Badge>
             </div>
             <div className="flex items-start gap-3">
-                <h1 className="m-0 flex-1 font-[family-name:var(--font-inter-tight)] text-[36px] leading-[1.1] font-medium tracking-[-0.025em] text-primary">
+                <h1 className="m-0 flex-1 font-sans text-[36px] leading-[1.1] font-medium tracking-[-0.025em] text-primary">
                     {title}
                 </h1>
                 <EditPageLink

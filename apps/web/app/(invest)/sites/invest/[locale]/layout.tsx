@@ -1,8 +1,12 @@
+import { TooltipProvider } from "@jongminchung/ui/components/tooltip";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { InvestmentLayout } from "#components/invest/InvestmentShell";
+import { ThemeProvider } from "#components/ThemeProvider";
 import { isLocale } from "#lib/site-routing";
+import { themeStorageKeys } from "#lib/theme";
+import { InitialThemeScript, pretendard } from "../../../../root-layout";
 import "../../../invest.css";
 
 export const metadata: Metadata = {
@@ -39,9 +43,23 @@ export default async function InvestmentLocaleLayout({
     const { locale } = await params;
     if (!isLocale(locale)) notFound();
     return (
-        <html lang={locale}>
+        <html
+            lang={locale}
+            className={pretendard.variable}
+            data-theme="light"
+            suppressHydrationWarning
+        >
+            <head>
+                <InitialThemeScript storageKey={themeStorageKeys.invest} />
+            </head>
             <body data-site="invest">
-                <InvestmentLayout locale={locale}>{children}</InvestmentLayout>
+                <ThemeProvider storageKey={themeStorageKeys.invest}>
+                    <TooltipProvider>
+                        <InvestmentLayout locale={locale}>
+                            {children}
+                        </InvestmentLayout>
+                    </TooltipProvider>
+                </ThemeProvider>
             </body>
         </html>
     );

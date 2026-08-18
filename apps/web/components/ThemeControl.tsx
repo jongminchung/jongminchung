@@ -7,10 +7,10 @@ import {
     TooltipTrigger,
 } from "@jongminchung/ui/components/tooltip";
 import type { Locale } from "#lib/content-model";
-import type { ThemeMode } from "#lib/tech-ui-store";
+import type { ThemeMode } from "#lib/theme";
 import { DarkThemeIcon, LightThemeIcon, SystemThemeIcon } from "./DocsIcons";
 import { Icon, type IconType } from "./Icon";
-import { useTechUiStore } from "./TechUiProvider";
+import { useTheme } from "./ThemeProvider";
 
 const nextMode: Readonly<Record<ThemeMode, ThemeMode>> = {
     system: "light",
@@ -26,8 +26,7 @@ const modeIcon: Readonly<Record<ThemeMode, IconType>> = {
 
 /** `ThemeControl` UI 컴포넌트를 렌더링함 */
 export function ThemeControl({ locale }: { readonly locale: Locale }) {
-    const mode = useTechUiStore((state) => state.themeMode);
-    const setThemeMode = useTechUiStore((state) => state.setThemeMode);
+    const { mode, setMode } = useTheme();
     const label = locale === "ko" ? `테마: ${mode}` : `Theme: ${mode}`;
     return (
         <Tooltip>
@@ -36,7 +35,7 @@ export function ThemeControl({ locale }: { readonly locale: Locale }) {
                     <Button
                         aria-label={label}
                         className={"size-9 gap-2 p-0 text-sm"}
-                        onClick={() => setThemeMode(nextMode[mode])}
+                        onClick={() => setMode(nextMode[mode])}
                         type="button"
                         variant="ghost"
                         size="icon"

@@ -1,11 +1,6 @@
 @import "@jongminchung/ui/globals.css";
-@import "./home-theme.css";
 
 @source "../**/*.{ts,tsx}";
-
-@theme inline {
-    --color-inverse-foreground: var(--inverse-foreground);
-}
 
 * {
     box-sizing: border-box;
@@ -44,7 +39,7 @@ a {
 }
 
 ::selection {
-    background: color-mix(in oklch, var(--brand-highlight) 35%, var(--card));
+    background: color-mix(in oklch, var(--primary) 22%, transparent);
 }
 
 :where(a, button):focus-visible {

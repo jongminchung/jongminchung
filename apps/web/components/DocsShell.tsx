@@ -23,6 +23,7 @@ import {
 import { SearchProvider } from "./SearchPalette";
 import { techNavigationCopy } from "./tech-navigation";
 import { TechUiProvider } from "./TechUiProvider";
+import { ThemeProvider } from "./ThemeProvider";
 import { useRouteSheet } from "./useRouteSheet";
 import styles from "./DocsShell.module.css";
 
@@ -102,46 +103,50 @@ export function DocsShell({
     );
 
     return (
-        <TechUiProvider>
-            <SearchProvider locale={locale}>
-                <TooltipProvider>
-                    <div className={styles.shell}>
-                        {navigation}
-                        <main className={styles.main}>
-                            <MobileTopNavigation
-                                locale={locale}
-                                onMenuClick={() => changeMobileOpen(true)}
-                                triggerRef={mobileTriggerRef}
-                            />
-                            <Sheet
-                                open={isMobileOpen}
-                                onOpenChange={changeMobileOpen}
-                            >
-                                <SheetContent
-                                    closeLabel={copy.closeMobileNavigation}
-                                    side="left"
+        <ThemeProvider storageKey="tech-theme">
+            <TechUiProvider>
+                <SearchProvider locale={locale}>
+                    <TooltipProvider>
+                        <div className={styles.shell}>
+                            {navigation}
+                            <main className={styles.main}>
+                                <MobileTopNavigation
+                                    locale={locale}
+                                    onMenuClick={() => changeMobileOpen(true)}
+                                    triggerRef={mobileTriggerRef}
+                                />
+                                <Sheet
+                                    open={isMobileOpen}
+                                    onOpenChange={changeMobileOpen}
                                 >
-                                    <SheetTitle className={styles.mobileTitle}>
-                                        {copy.mobileNavigation}
-                                    </SheetTitle>
-                                    <MobileNavigation
-                                        key={`${locale}:${current.section}`}
-                                        locale={locale}
-                                        current={current}
-                                        documents={documents}
-                                    />
-                                </SheetContent>
-                            </Sheet>
-                            <TabletContextDrawer
-                                locale={locale}
-                                current={current}
-                                documents={documents}
-                            />
-                            {children}
-                        </main>
-                    </div>
-                </TooltipProvider>
-            </SearchProvider>
-        </TechUiProvider>
+                                    <SheetContent
+                                        closeLabel={copy.closeMobileNavigation}
+                                        side="left"
+                                    >
+                                        <SheetTitle
+                                            className={styles.mobileTitle}
+                                        >
+                                            {copy.mobileNavigation}
+                                        </SheetTitle>
+                                        <MobileNavigation
+                                            key={`${locale}:${current.section}`}
+                                            locale={locale}
+                                            current={current}
+                                            documents={documents}
+                                        />
+                                    </SheetContent>
+                                </Sheet>
+                                <TabletContextDrawer
+                                    locale={locale}
+                                    current={current}
+                                    documents={documents}
+                                />
+                                {children}
+                            </main>
+                        </div>
+                    </TooltipProvider>
+                </SearchProvider>
+            </TechUiProvider>
+        </ThemeProvider>
     );
 }

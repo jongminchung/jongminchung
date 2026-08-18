@@ -1,7 +1,11 @@
+import { TooltipProvider } from "@jongminchung/ui/components/tooltip";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
+import { ThemeProvider } from "#components/ThemeProvider";
 import { isLocale } from "#lib/site-routing";
+import { themeStorageKeys } from "#lib/theme";
+import { InitialThemeScript, pretendard } from "../../../../root-layout";
 import "../../../home.css";
 
 export const metadata: Metadata = {
@@ -42,8 +46,20 @@ export default async function HomeLocaleLayout({
     const { locale } = await params;
     if (!isLocale(locale)) notFound();
     return (
-        <html lang={locale}>
-            <body data-site="home">{children}</body>
+        <html
+            lang={locale}
+            className={pretendard.variable}
+            data-theme="light"
+            suppressHydrationWarning
+        >
+            <head>
+                <InitialThemeScript storageKey={themeStorageKeys.home} />
+            </head>
+            <body data-site="home">
+                <ThemeProvider storageKey={themeStorageKeys.home}>
+                    <TooltipProvider>{children}</TooltipProvider>
+                </ThemeProvider>
+            </body>
         </html>
     );
 }

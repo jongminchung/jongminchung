@@ -81,34 +81,48 @@ test("[성공]뷰포트 내에서 모바일 노드를 유지함", async ({ page 
     ).toBeVisible();
 });
 
-test("[성공] 모션 개념을 위한 이동 모션 및 부드러운 스크롤을 위한 문의", async ({
-    page,
-}) => {
-    await page.emulateMedia({ reducedMotion: "reduce" });
+test("[성공] Home 테마 선택을 적용하고 사이트별로 저장함", async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem("home-theme", "dark"));
     await page.goto("/");
 
-    const route = page
-        .locator(
-            '[aria-label="Language becomes a model, code, and proof"] path',
-        )
-        .nth(1);
-    await expect(route).toBeVisible();
-    const routeStyle = await route.evaluate((element) => {
-        const style = getComputedStyle(element);
-        return {
-            animationName: style.animationName,
-            strokeDashoffset: style.strokeDashoffset,
-            transitionDuration: style.transitionDuration,
-        };
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    await page.getByRole("button", { name: "Theme: dark" }).click();
+    await expect(
+        page.getByRole("button", { name: "Theme: system" }),
+    ).toBeVisible();
+    expect(await page.evaluate(() => localStorage.getItem("home-theme"))).toBe(
+        "system",
+    );
+});
+
+test("[성공] 시스템 모드일 때 운영체제의 다크 설정을 따름", async ({
+    page,
+}) => {
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.addInitScript(() =>
+        localStorage.setItem("home-theme", "system"),
+    );
+    await page.goto("/");
+
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+});
+
+test("[성공] Pretendard를 Next.js 자체 호스팅 자산에서 불러옴", async ({
+    page,
+}) => {
+    const fontRequests: string[] = [];
+    page.on("request", (request) => {
+        if (request.resourceType() === "font") fontRequests.push(request.url());
     });
-    expect(routeStyle).toEqual({
-        animationName: "none",
-        strokeDashoffset: "0px",
-        transitionDuration: "0s",
-    });
+
+    await page.goto("/");
+    await page.evaluate(() => document.fonts.ready);
+
     expect(
-        await page.evaluate(
-            () => getComputedStyle(document.documentElement).scrollBehavior,
-        ),
-    ).toBe("auto");
+        fontRequests.some((url) => url.includes("/_next/static/media/")),
+    ).toBe(true);
+    const pageOrigin = new URL(page.url()).origin;
+    expect(
+        fontRequests.every((url) => new URL(url).origin === pageOrigin),
+    ).toBe(true);
 });

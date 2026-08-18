@@ -134,10 +134,10 @@ export function OverviewHero({ locale }: { readonly locale: Locale }) {
                 <span className="absolute inset-y-0 left-2/3 border-l border-border" />
             </div>
             <div className="relative z-[1] max-w-[720px]">
-                <p className="m-0 font-[family-name:var(--font-dm-mono)] text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase">
+                <p className="m-0 font-mono text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase">
                     {text.eyebrow}
                 </p>
-                <h1 className="mt-[18px] mb-4 font-[family-name:var(--font-inter-tight)] text-[40px] leading-[1.08] font-medium tracking-[-0.03em] text-primary max-[760px]:text-[36px]">
+                <h1 className="mt-[18px] mb-4 font-sans text-[40px] leading-[1.08] font-medium tracking-[-0.03em] text-primary max-[760px]:text-[36px]">
                     {text.title}
                 </h1>
                 <p className="m-0 max-w-[620px] text-base leading-[1.55] text-muted-foreground">
@@ -177,10 +177,10 @@ export function QuickStart({ locale }: { readonly locale: Locale }) {
                     key={number}
                     className="rounded-lg border border-border p-6"
                 >
-                    <span className="grid size-7 place-items-center rounded-full border border-input font-[family-name:var(--font-dm-mono)] text-xs text-primary">
+                    <span className="grid size-7 place-items-center rounded-full border border-input font-mono text-xs text-primary">
                         {number}
                     </span>
-                    <h3 className="mt-[18px] mb-2 font-[family-name:var(--font-inter-tight)] text-xl leading-[1.25] font-medium text-primary">
+                    <h3 className="mt-[18px] mb-2 font-sans text-xl leading-[1.25] font-medium text-primary">
                         {title}
                     </h3>
                     <p className="m-0 text-[14px] leading-[1.4rem] text-muted-foreground">
@@ -202,10 +202,10 @@ export function OverviewCards({ locale }: { readonly locale: Locale }) {
                     key={category}
                     className="flex min-h-[208px] flex-col rounded-lg border border-border p-6"
                 >
-                    <p className="m-0 font-[family-name:var(--font-dm-mono)] text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase">
+                    <p className="m-0 font-mono text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase">
                         {category}
                     </p>
-                    <h3 className="mt-4 mb-2 font-[family-name:var(--font-inter-tight)] text-xl leading-[1.25] font-medium text-primary">
+                    <h3 className="mt-4 mb-2 font-sans text-xl leading-[1.25] font-medium text-primary">
                         {title}
                     </h3>
                     <p className="m-0 text-[14px] leading-[1.4rem] text-muted-foreground">
@@ -234,7 +234,7 @@ export function OverviewCta({ locale }: { readonly locale: Locale }) {
     return (
         <Card className="flex items-center justify-between gap-8 rounded-lg border border-border p-8 max-[760px]:items-start max-[760px]:flex-col">
             <div>
-                <h3 className="m-0 font-[family-name:var(--font-inter-tight)] text-2xl leading-[1.25] font-medium text-primary">
+                <h3 className="m-0 font-sans text-2xl leading-[1.25] font-medium text-primary">
                     {text.ctaTitle}
                 </h3>
                 <p className="mt-2 mb-0 max-w-[640px] text-[14px] leading-[1.4rem] text-muted-foreground">

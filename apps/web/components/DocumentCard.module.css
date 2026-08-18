@@ -7,9 +7,9 @@
     color: var(--card-foreground);
     text-decoration: none;
     transition:
-        border-color var(--duration-fast) ease-out,
-        box-shadow var(--duration-fast) ease-out,
-        transform var(--duration-fast) ease-out;
+        border-color 120ms ease-out,
+        box-shadow 120ms ease-out,
+        transform 120ms ease-out;
 }
 
 .card:hover {

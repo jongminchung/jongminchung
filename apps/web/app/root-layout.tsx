@@ -1,22 +1,8 @@
 import type { Metadata } from "next";
-import { DM_Mono, Inter, Inter_Tight } from "next/font/google";
+import { themeScript } from "#lib/theme";
+import { pretendard } from "./fonts";
 
-const inter = Inter({
-    subsets: ["latin"],
-    variable: "--font-inter",
-    display: "swap",
-});
-const interTight = Inter_Tight({
-    subsets: ["latin"],
-    variable: "--font-inter-tight",
-    display: "swap",
-});
-const dmMono = DM_Mono({
-    subsets: ["latin"],
-    variable: "--font-dm-mono",
-    weight: ["400", "500"],
-    display: "swap",
-});
+export { pretendard };
 
 export const rootMetadata: Metadata = {
     metadataBase: new URL("https://tech.jamie.kr"),
@@ -28,16 +14,24 @@ export const rootMetadata: Metadata = {
         "Bilingual engineering articles organized as Handbook and Deep Dive series.",
 };
 
-const themeScript = `(()=>{try{const m=localStorage.getItem("tech-theme")||"system";const d=m==="system"?(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):m;document.documentElement.dataset.theme=d;document.documentElement.style.colorScheme=d}catch{}})()`;
 const excalidrawAssetScript = `window.EXCALIDRAW_ASSET_PATH="/excalidraw-assets/"`;
 
-export const rootFontClassName = `${inter.variable} ${interTight.variable} ${dmMono.variable}`;
+/** `InitialThemeScript` 초기 렌더링 전에 사이트 색상 모드를 적용함 */
+export function InitialThemeScript({
+    storageKey,
+}: {
+    readonly storageKey: string;
+}): React.JSX.Element {
+    return (
+        <script dangerouslySetInnerHTML={{ __html: themeScript(storageKey) }} />
+    );
+}
 
-/** `InitialDocumentScripts` 공개 기능을 제공함 */
-export function InitialDocumentScripts(): React.JSX.Element {
+/** `InitialTechDocumentScripts` Tech 전용 초기 자산 경로를 설정함 */
+export function InitialTechDocumentScripts(): React.JSX.Element {
     return (
         <>
-            <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+            <InitialThemeScript storageKey="tech-theme" />
             <script
                 dangerouslySetInnerHTML={{ __html: excalidrawAssetScript }}
             />

@@ -4,8 +4,8 @@ import type { ReactNode } from "react";
 import { TechDataProvider } from "#components/TechDataProvider";
 import { isLocale } from "#lib/content-model";
 import {
-    InitialDocumentScripts,
-    rootFontClassName,
+    InitialTechDocumentScripts,
+    pretendard,
     rootMetadata,
 } from "../../../../root-layout";
 import "../../../tech.css";
@@ -24,13 +24,13 @@ export default async function LocaleLayout({
     if (!isLocale(locale)) notFound();
     return (
         <html
-            className={rootFontClassName}
             lang={locale}
+            className={pretendard.variable}
             data-theme="light"
             suppressHydrationWarning
         >
             <head>
-                <InitialDocumentScripts />
+                <InitialTechDocumentScripts />
             </head>
             <body data-site="tech">
                 <TechDataProvider>{children}</TechDataProvider>

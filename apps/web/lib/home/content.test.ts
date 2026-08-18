@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { personSchema, principles, projects } from "./content";
+import { getHomeContent, personSchema } from "./content";
 
 describe("읽어보기 홈 콘텐츠", () => {
     it("[성공] 프로젝트 색상, 대상 및 태그를 완전하고 고유하게 유지함", () => {
+        const { projects } = getHomeContent("en");
         expect(new Set(projects.map((project) => project.index)).size).toBe(
             projects.length,
         );
@@ -17,6 +18,7 @@ describe("읽어보기 홈 콘텐츠", () => {
     });
 
     it("[성공] 작업 원칙을 공유하고 완전하게 유지함", () => {
+        const { principles } = getHomeContent("en");
         expect(new Set(principles.map((principle) => principle.key)).size).toBe(
             principles.length,
         );

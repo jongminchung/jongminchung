@@ -1,8 +1,13 @@
 import { expect, test } from "@playwright/test";
 
 const cases = [
-    { name: "readme-wide-light", width: 1440, height: 1000, theme: "light" },
-    { name: "readme-mobile-dark", width: 390, height: 844, theme: "dark" },
+    {
+        name: "investment-wide-light",
+        width: 1440,
+        height: 1000,
+        theme: "light",
+    },
+    { name: "investment-mobile-dark", width: 390, height: 844, theme: "dark" },
 ] as const;
 
 for (const visualCase of cases) {
@@ -12,10 +17,11 @@ for (const visualCase of cases) {
             height: visualCase.height,
         });
         await page.addInitScript(
-            (theme) => localStorage.setItem("home-theme", theme),
+            (theme) => localStorage.setItem("invest-theme", theme),
             visualCase.theme,
         );
-        await page.goto("/");
+        await page.goto("/en");
+        await page.evaluate(() => document.fonts.ready);
         await expect(page).toHaveScreenshot(`${visualCase.name}.png`, {
             animations: "disabled",
             fullPage: true,

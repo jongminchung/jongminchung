@@ -1,13 +1,6 @@
 @import "@jongminchung/ui/globals.css";
-@import "./tech-theme.css";
 
 @source "../**/*.{ts,tsx,mdx}";
-
-@theme inline {
-    --color-warning: var(--warning);
-    --color-warning-muted: var(--warning-muted);
-    --color-warning-muted-foreground: var(--warning-muted-foreground);
-}
 
 html {
     min-width: 320px;
