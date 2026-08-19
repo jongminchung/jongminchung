@@ -18,6 +18,17 @@ test("[성공] 섹션 랜딩은 최신 업데이트를 제공하고 내부적으
         "src",
         "/og/ko/deep-dive/typescript-7-compatibility",
     );
+    await expect
+        .poll(() =>
+            featured.locator("img").evaluate((element) => {
+                const image = element as HTMLImageElement;
+                return {
+                    naturalHeight: image.naturalHeight,
+                    naturalWidth: image.naturalWidth,
+                };
+            }),
+        )
+        .toEqual({ naturalHeight: 630, naturalWidth: 1200 });
 
     const globalNavigation = page.getByRole("navigation", {
         name: "전체 문서",

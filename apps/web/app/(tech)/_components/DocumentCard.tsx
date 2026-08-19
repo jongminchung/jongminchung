@@ -36,6 +36,7 @@ export function DocumentCard({
                 height={630}
                 preload={eager}
                 src={createOgImageHref(locale, document.id)}
+                unoptimized
                 width={1200}
             />
             <span className={styles.body}>
