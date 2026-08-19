@@ -24,6 +24,7 @@
       "@jongminchung/tooling/oxlint": [
         "./packages/tooling/src/oxlint/index.ts"
       ],
+      // Workspace에서는 UI 공개 subpath를 source로 해석해 consumer와 같은 graph를 검사함
       "@jongminchung/ui/components/*": ["./packages/ui/src/components/*.tsx"],
       "@jongminchung/ui/globals.css": ["./packages/ui/src/styles/globals.css"],
       "@jongminchung/ui/lib/*": ["./packages/ui/src/lib/*.ts"],

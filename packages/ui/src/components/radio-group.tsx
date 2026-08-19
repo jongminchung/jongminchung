@@ -2,7 +2,7 @@
 
 import { Radio as RadioPrimitive } from "@base-ui/react/radio";
 import { RadioGroup as RadioGroupPrimitive } from "@base-ui/react/radio-group";
-import { cn } from "../lib/utils.js";
+import { cn } from "@jongminchung/ui/lib/utils";
 
 /** `RadioGroup` UI 컴포넌트를 렌더링함 */
 function RadioGroup({ className, ...props }: RadioGroupPrimitive.Props) {

@@ -1,7 +1,7 @@
 "use client";
 
 import { Tooltip as TooltipPrimitive } from "@base-ui/react/tooltip";
-import { cn } from "../lib/utils.js";
+import { cn } from "@jongminchung/ui/lib/utils";
 
 /** `TooltipProvider` UI 컴포넌트를 렌더링함 */
 function TooltipProvider({

@@ -1,7 +1,7 @@
 "use client";
 
 import { ScrollArea as ScrollAreaPrimitive } from "@base-ui/react/scroll-area";
-import { cn } from "../lib/utils.js";
+import { cn } from "@jongminchung/ui/lib/utils";
 
 /** `ScrollArea` UI 컴포넌트를 렌더링함 */
 function ScrollArea({

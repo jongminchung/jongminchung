@@ -1,9 +1,9 @@
 import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
+import { Separator } from "@jongminchung/ui/components/separator";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
-import { cn } from "../lib/utils.js";
-import { Separator } from "./separator.js";
 
 /** `ItemGroup` UI 컴포넌트를 렌더링함 */
 function ItemGroup({ className, ...props }: React.ComponentProps<"div">) {

@@ -1,7 +1,7 @@
+import { Label } from "@jongminchung/ui/components/label";
+import { Separator } from "@jongminchung/ui/components/separator";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "../lib/utils.js";
-import { Label } from "./label.js";
-import { Separator } from "./separator.js";
 
 interface FieldErrorEntry {
     readonly message?: string;

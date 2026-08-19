@@ -1,9 +1,9 @@
 "use client";
 
 import { Menu as MenuPrimitive } from "@base-ui/react/menu";
+import { cn } from "@jongminchung/ui/lib/utils";
 import { ChevronRightIcon, CheckIcon } from "lucide-react";
 import * as React from "react";
-import { cn } from "../lib/utils.js";
 
 /** `DropdownMenu` UI 컴포넌트를 렌더링함 */
 function DropdownMenu({ ...props }: MenuPrimitive.Root.Props) {
