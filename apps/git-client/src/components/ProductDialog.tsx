@@ -32,6 +32,15 @@ function sizeValue(
     return typeof value === "number" ? `${value}px` : value;
 }
 
+function zoomConstrainedMaximum(
+    axis: "height" | "width",
+    requested?: number | string,
+): string {
+    const viewport = `calc((100v${axis === "width" ? "w" : "h"} - 32px) / var(--product-zoom, 1))`;
+    const value = sizeValue(requested);
+    return value === undefined ? viewport : `min(${value}, ${viewport})`;
+}
+
 export function Dialog({
     isOpen,
     isInline = false,
@@ -55,7 +64,8 @@ export function Dialog({
             ? { height: "100vh", maxHeight: "100vh", width: "100vw" }
             : {
                   width: sizeValue(width),
-                  maxHeight: sizeValue(maxHeight),
+                  maxWidth: zoomConstrainedMaximum("width"),
+                  maxHeight: zoomConstrainedMaximum("height", maxHeight),
                   padding:
                       padding === undefined ? undefined : `${padding * 4}px`,
                   ...position,
