@@ -28,8 +28,8 @@
   - remote URL 좌표 추론과 provider 판정
 - **실제 Electron package에서 account 복원과 요청 화면 회귀를 검증함**
   - 저장소와 GitHub·GitLab account metadata를 격리 profile에서 복원함
-  - empty detail에서 요청 목록을 불러오고 selection·file·timeline 상태로 전환함
-  - GitHub server-backed viewed 상태가 실제 checkbox에 반영됨을 확인함
+  - empty detail에서 GitHub 요청 목록을 불러오고 selection 상태로 전환함
+  - file·timeline·provider별 viewed 응답은 기존 hosting foundation 계약 테스트가 담당함
 
 ## 참고 저장소에서 확인한 구조
 
@@ -124,5 +124,5 @@
 ## 구현 결과
 
 - **`HostingPanel`은 화면 composition만 소유하고 `useHostingPanelController`가 비동기 상태를 소유함**
-- **package hosting test가 account·목록·selection·detail·viewed 전환을 실제 preload와 main handler를 통해 검증함**
+- **package hosting test가 account 복원·empty·목록·selection 전환을 실제 preload와 main handler를 통해 검증함**
 - **제품 component는 Git Client 내부에 유지되며 공용 UI export와 root barrel을 추가하지 않음**

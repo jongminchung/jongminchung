@@ -1,6 +1,6 @@
 # Issue 0012: Electron 보안 경계와 권한 정책 감사
 
-- 상태: 진행 중
+- 상태: 완료
 - 우선순위: P0
 - 기준일: 2026-08-19
 - 참고 OSS:
@@ -17,7 +17,7 @@
 
 - **현재 앱은 sandbox·context isolation·navigation 제한·기본 권한 거부·IPC sender 검증·Electron fuse를 이미 적용함**
 - **개별 방어가 존재하는 것과 모든 진입 경로가 같은 정책을 따르는 것은 별도 검증 대상임**
-- **Electron 공식 보안 권고를 항목별 source·test·package evidence에 연결하는 감사표가 필요함**
+- **Electron 공식 보안 권고를 항목별 source·test·package evidence에 연결한 감사표를 유지함**
 - **typed IPC는 입력 형태를 보호하지만 호출 권한과 repository capability까지 자동 보장하지 않음**
 - **완료 기준은 설정 확인이 아니라 main window·child window·preload·protocol·외부 URL의 우회 실패를 증명하는 것임**
 
@@ -34,7 +34,10 @@
   - window preference·navigation·protocol·CSP·IPC·permission·certificate·fuse를 inventory함
   - 다른 window와 subframe sender 거부를 unit test로 고정함
   - authorization 생략 기본값을 제거해 새 procedure가 권한 결정을 생략할 수 없게 함
-- **남은 범위는 production package에서 CSP와 QA 비활성화를 직접 확인하는 증거임**
+- **production package에서 CSP와 QA 비활성화를 직접 확인함**
+  - navigation response의 CSP가 `default-src 'self'`와 `object-src 'none'`을 포함함
+  - packaged renderer origin이 `app://git-client`이고 runtime의 `qaFixture`가 비활성임을 확인함
+  - package 서명·ASAR integrity·fuse·preload handshake 검증과 같은 배치에서 통과함
 
 ## 현재 상태와 위험
 

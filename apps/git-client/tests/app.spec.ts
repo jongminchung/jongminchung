@@ -15,7 +15,7 @@ test("[성공] 개발 전용 component 상태 fixture를 탐색함", async ({ pa
         "Use an owner/repository value",
     );
     await expect(
-        page.getByRole("checkbox", { name: "Selected" }),
+        page.getByRole("checkbox", { name: "Selected", exact: true }),
     ).toBeChecked();
     await expect(
         page.getByRole("checkbox", { name: "Disabled" }),

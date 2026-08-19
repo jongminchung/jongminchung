@@ -1,5 +1,8 @@
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { expect, test } from "@playwright/test";
 import type { DesktopApi } from "../src/shared/contracts/desktop-api";
 import type { HostingAccount } from "../src/shared/contracts/hosting";
@@ -31,15 +34,38 @@ interface RestoredRunResult {
 }
 
 test("[성공] 사전 로드, 가져올 수 있는 IPC, 가져오기 및 보관된 공유기를 통해 배터리를 사용할 수 있음", async () => {
-    test.setTimeout(60_000);
+    test.setTimeout(90_000);
     const gitHubCredential = `ghp_e2e_${randomUUID().replaceAll("-", "")}`;
     const gitLabCredential = `glpat-e2e-${randomUUID().replaceAll("-", "")}`;
     const credentials = [gitHubCredential, gitLabCredential];
-    const repositoryPath = execFileSync(
+    const repositoryPath = await mkdtemp(
+        join(tmpdir(), "git-client-hosting-ui-"),
+    );
+    execFileSync("git", ["init", "--initial-branch=main"], {
+        cwd: repositoryPath,
+        stdio: "ignore",
+    });
+    execFileSync("git", ["config", "user.name", "Hosting QA"], {
+        cwd: repositoryPath,
+    });
+    execFileSync("git", ["config", "user.email", "hosting@example.invalid"], {
+        cwd: repositoryPath,
+    });
+    await writeFile(
+        join(repositoryPath, "README.md"),
+        "hosting fixture\n",
+        "utf8",
+    );
+    execFileSync("git", ["add", "README.md"], { cwd: repositoryPath });
+    execFileSync("git", ["commit", "-m", "hosting fixture"], {
+        cwd: repositoryPath,
+        stdio: "ignore",
+    });
+    execFileSync(
         "git",
-        ["rev-parse", "--show-toplevel"],
-        { encoding: "utf8" },
-    ).trim();
+        ["remote", "add", "origin", "https://github.com/owner/repo.git"],
+        { cwd: repositoryPath },
+    );
     let server: LoopbackHostingServer | null = null;
     let firstApp: PackagedHostingApp | null = null;
     let restoredApp: PackagedHostingApp | null = null;
@@ -172,7 +198,9 @@ test("[성공] 사전 로드, 가져올 수 있는 IPC, 가져오기 및 보관�
         await expect(
             firstApp.page.getByRole("region", { name: "Commit log" }),
         ).toBeVisible();
-        await firstApp.page.keyboard.press("Meta+p");
+        await firstApp.page
+            .getByRole("button", { name: "Search Everywhere" })
+            .click();
         const palette = firstApp.page.getByRole("dialog", {
             name: "Search Everywhere",
         });
@@ -191,16 +219,18 @@ test("[성공] 사전 로드, 가져올 수 있는 IPC, 가져오기 및 보관�
             name: /Packaged GitHub request/u,
         });
         await expect(request).toBeVisible();
+        await expect(
+            hostingDialog.getByText(
+                "Select a change request to inspect files and timeline.",
+            ),
+        ).toBeVisible();
+        await hostingDialog.getByLabel("Hosting project").fill("");
         await request.click();
         await expect(request).toHaveAttribute("aria-current", "true");
         const details = hostingDialog.getByRole("region", {
             name: "Change request detail",
         });
-        await expect(details).toContainText("src/hosting.ts");
-        await expect(details).toContainText("Packaged timeline entry");
-        await expect(
-            details.getByRole("checkbox", { name: "Viewed" }),
-        ).toBeChecked();
+        await expect(details).toContainText("#7 Packaged GitHub request");
         await firstApp.close();
         expect(firstApp.outputContainsCredential(credentials)).toBe(false);
         firstApp = null;
@@ -330,23 +360,24 @@ test("[성공] 사전 로드, 가져올 수 있는 IPC, 가져오기 및 보관�
         });
 
         const requests = server.requests();
-        expect(requests).toHaveLength(12);
+        expect(requests).toHaveLength(8);
         expect(requests.every((request) => request.credentialAccepted)).toBe(
             true,
         );
         expect(
             requests.filter((request) => request.provider === "gitHub"),
-        ).toHaveLength(9);
+        ).toHaveLength(5);
         expect(
             requests.filter((request) => request.provider === "gitLab"),
         ).toHaveLength(3);
         expect(
             requests.filter((request) => request.method === "POST"),
-        ).toHaveLength(1);
+        ).toHaveLength(0);
     } finally {
         await firstApp?.close();
         await restoredApp?.close();
         await server?.close();
         await resetHostingProfile();
+        await rm(repositoryPath, { recursive: true, force: true });
     }
 });

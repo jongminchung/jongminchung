@@ -115,9 +115,9 @@
   - 우선순위: P2
   - 결론: report-only pilot으로 entry 정확도와 false positive를 검증한 뒤 gate 여부 결정
 - [0012: Electron 보안 경계와 권한 정책 감사](0012-electron-security-boundary-audit.md)
-  - 상태: 진행 중
+  - 상태: 완료
   - 우선순위: P0
-  - 결론: navigation과 IPC의 개발 origin 판정을 통합했으며 package 환경의 전체 우회 경로 감사를 이어감
+  - 결론: navigation·IPC·permission·CSP·QA 비활성화·package trust를 감사표와 자동 검증으로 고정함
 - [0013: Electron 프로세스 소유권과 IPC 계약 정리](0013-electron-process-ownership-and-ipc-contract.md)
   - 상태: 진행 중
   - 우선순위: P1
