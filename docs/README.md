@@ -17,6 +17,10 @@
 - [ADR 0002: 공개 TypeScript 패키지 빌드를 `tsc`로 단순화](adr/0002-node-library-tsc-build.md)
 - [TypeScript 7 호환성 보고서](typescript-7-compatibility-report.md): 현재 TypeScript 6 정책과 재검증 기준
 
+## 실행 이슈
+
+- [OSS 디자인 시스템 도입 이슈](issues/README.md): OpenStatus, shadcn/ui, Formbricks, Documenso, Midday 분석과 저장소별 채택·보류 과제
+
 ## 프로젝트 문서
 
 - [Web 앱 구조](web/README.md): 다중 도메인 routing, 콘텐츠 생성, 화면 계층, 테스트와 배포 경계
