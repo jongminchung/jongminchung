@@ -4,7 +4,14 @@ import { Button, buttonVariants } from "@jongminchung/ui/components/button";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import type { ComponentType } from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+    useSyncExternalStore,
+} from "react";
 import { parseExcalidrawSource } from "#lib/tech/excalidraw-scene";
 import { excalidrawSceneQueryOptions } from "#lib/tech/queries";
 import type { ExcalidrawCanvasProps } from "./ExcalidrawCanvas";
@@ -45,25 +52,48 @@ function localizedText(
     return isKorean ? korean : english;
 }
 
+function subscribeDocumentLanguage(onStoreChange: () => void): () => void {
+    const observer = new MutationObserver(onStoreChange);
+    observer.observe(document.documentElement, {
+        attributeFilter: ["lang"],
+        attributes: true,
+    });
+    return () => observer.disconnect();
+}
+
+function isKoreanDocument(): boolean {
+    return document.documentElement.lang.toLowerCase().startsWith("ko");
+}
+
 /** `ExcalidrawDiagram` UI 컴포넌트를 렌더링함 */
 export function ExcalidrawDiagram(
     props: ExcalidrawDiagramProps,
 ): React.JSX.Element {
     const figureRef = useRef<HTMLElement>(null);
     const [canvas, setCanvas] = useState<CanvasComponent | null>(null);
-    const [isKorean, setIsKorean] = useState(false);
+    const isKorean = useSyncExternalStore(
+        subscribeDocumentLanguage,
+        isKoreanDocument,
+        () => false,
+    );
     const [rendererError, setRendererError] = useState<string | null>(null);
     const [interactionError, setInteractionError] = useState<string | null>(
         null,
     );
     const [isFullscreen, setIsFullscreen] = useState(false);
-    const [renderedElementCount, setRenderedElementCount] = useState<
-        number | null
-    >(null);
+    const [renderedScene, setRenderedScene] = useState<{
+        readonly identity: string;
+        readonly elementCount: number;
+    } | null>(null);
     const src = props.src;
     const source = props.source;
     const variant = props.variant ?? "embedded";
     const ariaLabel = props.ariaLabel ?? "Excalidraw diagram";
+    const sceneIdentity = source ?? src ?? "";
+    const renderedElementCount =
+        renderedScene?.identity === sceneIdentity
+            ? renderedScene.elementCount
+            : null;
     const inlineScene = useMemo(() => {
         if (source === undefined) return { scene: null, error: null };
         try {
@@ -86,17 +116,11 @@ export function ExcalidrawDiagram(
         (remoteScene.error === null ? null : errorMessage(remoteScene.error));
 
     useEffect(() => {
-        setIsKorean(
-            document.documentElement.lang.toLowerCase().startsWith("ko"),
-        );
-    }, []);
-
-    useEffect(() => {
         let active = true;
         const loadRenderer = async (): Promise<void> => {
             try {
-                const module = await import("./ExcalidrawCanvas");
-                if (active) setCanvas(() => module.ExcalidrawCanvas);
+                const canvasModule = await import("./ExcalidrawCanvas");
+                if (active) setCanvas(() => canvasModule.ExcalidrawCanvas);
             } catch (error: unknown) {
                 if (active) setRendererError(errorMessage(error));
             }
@@ -106,10 +130,6 @@ export function ExcalidrawDiagram(
             active = false;
         };
     }, []);
-
-    useEffect(() => {
-        setRenderedElementCount(null);
-    }, [source, src]);
 
     useEffect(() => {
         const updateFullscreen = (): void =>
@@ -130,9 +150,12 @@ export function ExcalidrawDiagram(
         }
     }, []);
 
-    const onReady = useCallback((elementCount: number): void => {
-        setRenderedElementCount(elementCount);
-    }, []);
+    const onReady = useCallback(
+        (elementCount: number): void => {
+            setRenderedScene({ identity: sceneIdentity, elementCount });
+        },
+        [sceneIdentity],
+    );
 
     const error = rendererError ?? sceneError;
     const ready =

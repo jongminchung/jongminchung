@@ -16,13 +16,7 @@ export function DocumentOutline({
     const [activeId, setActiveId] = useState<string | null>(null);
 
     useEffect(() => {
-        if (items.length === 0) {
-            setActiveId(null);
-            return;
-        }
-        const itemIds = new Set(items.map((item) => item.id));
-        const hashId = decodeURIComponent(window.location.hash.slice(1));
-        setActiveId(itemIds.has(hashId) ? hashId : null);
+        if (items.length === 0) return;
 
         const headings = items.flatMap((item) => {
             const heading = document.getElementById(item.id);
@@ -41,7 +35,7 @@ export function DocumentOutline({
                 frameId = window.requestAnimationFrame(updateActiveHeading);
         };
 
-        updateActiveHeading();
+        frameId = window.requestAnimationFrame(updateActiveHeading);
         window.addEventListener("scroll", handleScroll, { passive: true });
         return () => {
             window.removeEventListener("scroll", handleScroll);

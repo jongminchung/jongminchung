@@ -20,7 +20,7 @@ export function generateStaticParams() {
 /** 요청에 대한 응답을 생성함 */
 export async function GET(
     _request: Request,
-    { params }: { readonly params: Promise<{ readonly locale: string }> },
+    { params }: RouteContext<"/tech/[locale]/rss.xml">,
 ): Promise<Response> {
     const { locale } = await params;
     if (!isLocale(locale)) return new Response("Not found", { status: 404 });

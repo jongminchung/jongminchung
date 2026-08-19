@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { InvestmentNotePage } from "#invest-components/InvestmentShell";
-import { getInvestmentNotes, loadInvestmentNote } from "#lib/invest/notes";
+import {
+    findInvestmentNote,
+    getInvestmentNotes,
+    loadInvestmentNote,
+} from "#lib/invest/notes";
 import { isLocale, locales } from "#lib/site-routing";
 
 export const dynamicParams = false;
@@ -14,12 +18,11 @@ export async function generateStaticParams() {
 /** 경로 매개변수에 맞는 페이지 메타데이터를 생성함 */
 export async function generateMetadata({
     params,
-}: PageProps): Promise<Metadata> {
+}: PageProps<"/invest/[locale]/notes/[slug]">): Promise<Metadata> {
     const { locale, slug } = await params;
     if (!isLocale(locale)) notFound();
-    const loaded = await loadInvestmentNote(locale, slug);
-    if (loaded === null) notFound();
-    const { metadata } = loaded;
+    const metadata = await findInvestmentNote(locale, slug);
+    if (metadata === null) notFound();
     return {
         title: metadata.title,
         description: metadata.description,
@@ -43,17 +46,10 @@ export async function generateMetadata({
     };
 }
 
-interface PageProps {
-    readonly params: Promise<{
-        readonly locale: string;
-        readonly slug: string;
-    }>;
-}
-
 /** `NotePage` 페이지 UI를 렌더링함 */
 export default async function NotePage({
     params,
-}: PageProps): Promise<React.JSX.Element> {
+}: PageProps<"/invest/[locale]/notes/[slug]">): Promise<React.JSX.Element> {
     const { locale, slug } = await params;
     if (!isLocale(locale)) notFound();
     const loaded = await loadInvestmentNote(locale, slug);

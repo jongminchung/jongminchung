@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { ContentManifestEntry, Locale } from "#lib/content-model";
 import { createOgImageHref, displayTitleFor } from "#lib/content-model";
@@ -28,14 +29,12 @@ export function DocumentCard({
             data-variant={variant}
             href={document.href}
         >
-            <img
+            <Image
                 alt=""
                 aria-hidden="true"
                 className={styles.image}
-                decoding="async"
-                fetchPriority={eager ? "high" : "auto"}
                 height={630}
-                loading={eager ? "eager" : "lazy"}
+                preload={eager}
                 src={createOgImageHref(locale, document.id)}
                 width={1200}
             />

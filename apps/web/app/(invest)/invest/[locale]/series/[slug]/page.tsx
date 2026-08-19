@@ -25,12 +25,7 @@ export async function generateStaticParams() {
 /** `SeriesPage` 페이지 UI를 렌더링함 */
 export default async function SeriesPage({
     params,
-}: {
-    readonly params: Promise<{
-        readonly locale: string;
-        readonly slug: string;
-    }>;
-}) {
+}: PageProps<"/invest/[locale]/series/[slug]">) {
     const { locale, slug } = await params;
     if (!isLocale(locale)) notFound();
     const notes = (await getInvestmentNotes(locale)).filter(

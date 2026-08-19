@@ -95,6 +95,7 @@ export function SearchProvider({
             {hasOpened ? (
                 <Suspense fallback={null}>
                     <SearchDialog
+                        key={locale}
                         locale={locale}
                         open={isOpen}
                         onOpenChange={changeOpen}

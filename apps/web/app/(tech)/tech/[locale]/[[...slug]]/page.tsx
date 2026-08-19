@@ -23,13 +23,6 @@ import { DocsShell } from "#tech-components/DocsShell";
 import { DocumentPage } from "#tech-components/DocumentPage";
 import { SectionLandingPage } from "#tech-components/SectionLanding";
 
-interface PageProps {
-    readonly params: Promise<{
-        readonly locale: string;
-        readonly slug?: readonly string[];
-    }>;
-}
-
 interface StaticPageParam {
     readonly locale: string;
     readonly slug: readonly string[];
@@ -186,7 +179,7 @@ export async function generateStaticParams(): Promise<StaticPageParam[]> {
 /** 경로 매개변수에 맞는 페이지 메타데이터를 생성함 */
 export async function generateMetadata({
     params,
-}: PageProps): Promise<Metadata> {
+}: PageProps<"/tech/[locale]/[[...slug]]">): Promise<Metadata> {
     const { locale, slug } = await params;
     const id = await idFromRoute(locale, slug);
     if (id === null) notFound();
@@ -200,7 +193,7 @@ export async function generateMetadata({
 /** `DocsPage` 페이지 UI를 렌더링함 */
 export default async function DocsPage({
     params,
-}: PageProps): Promise<React.JSX.Element> {
+}: PageProps<"/tech/[locale]/[[...slug]]">): Promise<React.JSX.Element> {
     const { locale, slug } = await params;
     if (!isLocale(locale)) notFound();
     const id = await idFromRoute(locale, slug);
@@ -232,5 +225,3 @@ export default async function DocsPage({
         </DocsShell>
     );
 }
-
-export const preferredRegion = "auto";

@@ -24,6 +24,20 @@ function readTheme(): ExcalidrawTheme {
     return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
 }
 
+function createInitialData(scene: ExcalidrawScene): ExcalidrawInitialData {
+    return {
+        elements: scene.elements,
+        appState: {
+            ...scene.appState,
+            gridModeEnabled: false,
+            viewModeEnabled: true,
+            zenModeEnabled: true,
+        },
+        files: scene.files,
+        scrollToContent: true,
+    } as ExcalidrawInitialData;
+}
+
 /** `ExcalidrawCanvas` UI 컴포넌트를 렌더링함 */
 export function ExcalidrawCanvas({
     name,
@@ -32,10 +46,9 @@ export function ExcalidrawCanvas({
 }: ExcalidrawCanvasProps): React.JSX.Element {
     const rootRef = useRef<HTMLDivElement>(null);
     const [api, setApi] = useState<ExcalidrawApi | null>(null);
-    const [theme, setTheme] = useState<ExcalidrawTheme>("light");
+    const [theme, setTheme] = useState<ExcalidrawTheme>(readTheme);
 
     useEffect(() => {
-        setTheme(readTheme());
         const observer = new MutationObserver(() => setTheme(readTheme()));
         observer.observe(document.documentElement, {
             attributeFilter: ["data-theme"],
@@ -62,21 +75,7 @@ export function ExcalidrawCanvas({
         return () => cancelAnimationFrame(frame);
     }, [api, onReady]);
 
-    const initialData = useMemo(
-        () =>
-            ({
-                elements: scene.elements,
-                appState: {
-                    ...scene.appState,
-                    gridModeEnabled: false,
-                    viewModeEnabled: true,
-                    zenModeEnabled: true,
-                },
-                files: scene.files,
-                scrollToContent: true,
-            }) as unknown as ExcalidrawInitialData,
-        [scene],
-    );
+    const initialData = useMemo(() => createInitialData(scene), [scene]);
 
     const receiveApi = useCallback((api: ExcalidrawApi): void => {
         setApi(api);

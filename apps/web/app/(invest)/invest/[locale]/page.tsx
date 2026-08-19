@@ -14,9 +14,7 @@ export function generateStaticParams() {
 /** 경로 매개변수에 맞는 페이지 메타데이터를 생성함 */
 export async function generateMetadata({
     params,
-}: {
-    readonly params: Promise<{ readonly locale: string }>;
-}): Promise<Metadata> {
+}: PageProps<"/invest/[locale]">): Promise<Metadata> {
     const { locale } = await params;
     if (!isLocale(locale)) notFound();
     const title =
@@ -40,9 +38,7 @@ export async function generateMetadata({
 /** `InvestmentPage` 페이지 UI를 렌더링함 */
 export default async function InvestmentPage({
     params,
-}: {
-    readonly params: Promise<{ readonly locale: string }>;
-}): Promise<React.JSX.Element> {
+}: PageProps<"/invest/[locale]">): Promise<React.JSX.Element> {
     const { locale } = await params;
     if (!isLocale(locale)) notFound();
     return (

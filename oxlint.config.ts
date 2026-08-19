@@ -10,4 +10,21 @@ export default defineOxlintConfig({
         "apps/web/generated/**",
         "apps/web/public/search/**",
     ],
+    overrides: [
+        {
+            files: ["apps/web/**/*.{ts,tsx}"],
+            plugins: [
+                "typescript",
+                "unicorn",
+                "oxc",
+                "react",
+                "jsx-a11y",
+                "nextjs",
+            ],
+            rules: {
+                "react/react-compiler": "error",
+                "react/rules-of-hooks": "error",
+            },
+        },
+    ],
 });

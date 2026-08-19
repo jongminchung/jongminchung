@@ -66,8 +66,6 @@ export function SearchDialog({
         ).map((hit) => toItem(locale, hit));
     }, [locale, query, searchIndex.data]);
 
-    useEffect(() => setQuery(""), [locale]);
-
     useEffect(() => {
         if (open) inputRef.current?.focus();
     }, [open]);

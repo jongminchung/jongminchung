@@ -12,9 +12,7 @@ export function generateStaticParams() {
 /** `NotesIndex` 공개 기능을 제공함 */
 export default async function NotesIndex({
     params,
-}: {
-    readonly params: Promise<{ readonly locale: string }>;
-}): Promise<React.JSX.Element> {
+}: PageProps<"/invest/[locale]/notes">): Promise<React.JSX.Element> {
     const { locale } = await params;
     if (!isLocale(locale)) notFound();
     return (

@@ -9,13 +9,6 @@ import { findDocument, getDocuments } from "#lib/documents";
 import { techSectionLabels } from "#lib/tech/copy";
 import { findSectionPage } from "#lib/tech/section-pages";
 
-interface RouteContext {
-    readonly params: Promise<{
-        readonly locale: string;
-        readonly slug: readonly string[];
-    }>;
-}
-
 interface OgPageData {
     readonly title: string;
     readonly section: DocSection;
@@ -71,7 +64,7 @@ export async function generateStaticParams(): Promise<StaticOgParam[]> {
 /** 요청에 대한 응답을 생성함 */
 export async function GET(
     _request: Request,
-    context: RouteContext,
+    context: RouteContext<"/tech/og/[locale]/[...slug]">,
 ): Promise<Response> {
     const { locale, slug } = await context.params;
     if (!isLocale(locale)) return new Response("Not found", { status: 404 });

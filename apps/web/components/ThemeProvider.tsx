@@ -43,15 +43,18 @@ export function ThemeProvider({
         const media = window.matchMedia("(prefers-color-scheme: dark)");
 
         modeRef.current = initialMode;
-        setModeState(initialMode);
         applyTheme(initialMode, media.matches);
+        const frame = requestAnimationFrame(() => setModeState(initialMode));
 
         const handleMediaChange = (): void => {
             if (modeRef.current === "system")
                 applyTheme("system", media.matches);
         };
         media.addEventListener("change", handleMediaChange);
-        return () => media.removeEventListener("change", handleMediaChange);
+        return () => {
+            cancelAnimationFrame(frame);
+            media.removeEventListener("change", handleMediaChange);
+        };
     }, [storageKey]);
 
     const setMode = useCallback(

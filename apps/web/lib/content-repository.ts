@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { evaluate } from "@mdx-js/mdx";
+import { cache } from "react";
 import * as runtime from "react/jsx-runtime";
 import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
@@ -100,7 +101,7 @@ export function readContentSnapshot(): Promise<ContentSnapshot> {
 }
 
 /** `renderTechMdx` 결과를 렌더링함 */
-export async function renderTechMdx(locale: Locale, id: string) {
+export const renderTechMdx = cache(async (locale: Locale, id: string) => {
     const filePath = resolve(techContentRoot, `${locale}/${id}.mdx`);
     const source = await readFile(filePath, "utf8");
     const { useMDXComponents } = await import("../mdx-components.tsx");
@@ -110,10 +111,10 @@ export async function renderTechMdx(locale: Locale, id: string) {
         rehypePlugins: [rehypeSlug],
         useMDXComponents,
     });
-}
+});
 
 /** `renderInvestmentMdx` 결과를 렌더링함 */
-export async function renderInvestmentMdx(locale: Locale, id: string) {
+export const renderInvestmentMdx = cache(async (locale: Locale, id: string) => {
     const filePath = resolve(
         investmentContentRoot,
         `${locale}/notes/${id}.mdx`,
@@ -126,7 +127,7 @@ export async function renderInvestmentMdx(locale: Locale, id: string) {
         rehypePlugins: [rehypeSlug],
         useMDXComponents,
     });
-}
+});
 
 /** `createSearchDocuments` 결과를 생성함 */
 export function createSearchDocuments(

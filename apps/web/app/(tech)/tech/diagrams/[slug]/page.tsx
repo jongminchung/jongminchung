@@ -8,10 +8,6 @@ import {
 import { ExcalidrawDiagram } from "#tech-components/ExcalidrawDiagram";
 import styles from "./page.module.css";
 
-interface PageProps {
-    readonly params: Promise<{ readonly slug: string }>;
-}
-
 export const dynamicParams = false;
 
 /** 정적 생성에 사용할 경로 매개변수를 반환함 */
@@ -25,7 +21,7 @@ export async function generateStaticParams(): Promise<
 /** 경로 매개변수에 맞는 페이지 메타데이터를 생성함 */
 export async function generateMetadata({
     params,
-}: PageProps): Promise<Metadata> {
+}: PageProps<"/tech/diagrams/[slug]">): Promise<Metadata> {
     const { slug } = await params;
     const asset = await findStandaloneExcalidrawAsset(slug);
     if (asset === null) return {};
@@ -38,7 +34,7 @@ export async function generateMetadata({
 /** `StandaloneExcalidrawPage` 페이지 UI를 렌더링함 */
 export default async function StandaloneExcalidrawPage({
     params,
-}: PageProps): Promise<React.JSX.Element> {
+}: PageProps<"/tech/diagrams/[slug]">): Promise<React.JSX.Element> {
     const { slug } = await params;
     const asset = await findStandaloneExcalidrawAsset(slug);
     if (asset === null) notFound();

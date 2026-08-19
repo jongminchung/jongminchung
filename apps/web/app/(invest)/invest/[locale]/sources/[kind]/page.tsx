@@ -25,12 +25,7 @@ function isSourceKind(value: string): value is InvestmentSourceKind {
 /** `SourceIndex` 공개 기능을 제공함 */
 export default async function SourceIndex({
     params,
-}: {
-    readonly params: Promise<{
-        readonly locale: string;
-        readonly kind: string;
-    }>;
-}): Promise<React.JSX.Element> {
+}: PageProps<"/invest/[locale]/sources/[kind]">): Promise<React.JSX.Element> {
     const { locale, kind } = await params;
     if (!isLocale(locale) || !isSourceKind(kind)) notFound();
     return (

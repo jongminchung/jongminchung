@@ -16,9 +16,7 @@ import { isLocale } from "#lib/site-routing";
 /** 경로 매개변수에 맞는 페이지 메타데이터를 생성함 */
 export async function generateMetadata({
     params,
-}: {
-    readonly params: Promise<{ readonly locale: string }>;
-}): Promise<Metadata> {
+}: PageProps<"/home/[locale]">): Promise<Metadata> {
     const { locale } = await params;
     if (!isLocale(locale)) return {};
     const description =
@@ -38,9 +36,7 @@ export async function generateMetadata({
 /** `HomePage` 페이지 UI를 렌더링함 */
 export default async function HomePage({
     params,
-}: {
-    readonly params: Promise<{ readonly locale: string }>;
-}) {
+}: PageProps<"/home/[locale]">) {
     const { locale } = await params;
     if (!isLocale(locale)) notFound();
     return (

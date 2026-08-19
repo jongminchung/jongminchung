@@ -13,21 +13,19 @@
   "scripts": {
     "build": "node scripts/check-excalidraw.ts && next build",
     "dev": "next dev",
-    "prebuild": "node scripts/prepare-excalidraw-assets.ts",
-    "predev": "node scripts/prepare-excalidraw-assets.ts",
+    "prebuild": "pnpm --filter @jongminchung/ui run build && node scripts/prepare-excalidraw-assets.ts",
+    "predev": "pnpm --filter @jongminchung/ui run build && node scripts/prepare-excalidraw-assets.ts",
     "start": "node scripts/prepare-standalone.ts && node --no-require-module .next/standalone/apps/web/server.js",
     "test": "vitest run --root ../.. apps/web",
     "test:e2e": "playwright test",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
     "@excalidraw/excalidraw": "catalog:",
     "@jongminchung/ui": "workspace:*",
-    "@mdx-js/react": "catalog:",
-    "@next/mdx": "catalog:",
+    "@mdx-js/mdx": "catalog:",
     "@tanstack/react-query": "catalog:",
     "lucide-react": "catalog:",
-    "motion": "catalog:",
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
@@ -37,7 +35,6 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "catalog:",
-    "@mdx-js/mdx": "catalog:",
     "@playwright/test": "catalog:",
     "@tailwindcss/postcss": "catalog:",
     "@types/mdx": "catalog:",
