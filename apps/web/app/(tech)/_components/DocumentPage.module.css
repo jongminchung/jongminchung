@@ -5,6 +5,7 @@
     font-weight: 400;
     line-height: 1.4rem;
     letter-spacing: -0.00875rem;
+    overflow-wrap: anywhere;
 }
 
 .prose > h2 {

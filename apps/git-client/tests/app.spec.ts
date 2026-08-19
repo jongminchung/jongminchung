@@ -5,6 +5,31 @@ test.beforeEach(async ({ page }) => {
     await page.goto("/?fixture=qa");
 });
 
+test("[성공] 개발 전용 component 상태 fixture를 탐색함", async ({ page }) => {
+    await page.goto("/?fixture=components");
+    await expect(
+        page.getByRole("heading", { name: "Component state fixture" }),
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Disabled" })).toBeDisabled();
+    await expect(page.getByRole("alert")).toHaveText(
+        "Use an owner/repository value",
+    );
+    await expect(
+        page.getByRole("checkbox", { name: "Selected" }),
+    ).toBeChecked();
+    await expect(
+        page.getByRole("checkbox", { name: "Disabled" }),
+    ).toBeDisabled();
+    await page.getByRole("button", { name: "Open dialog" }).click();
+    await expect(
+        page.getByRole("dialog").getByText("Fixture dialog", { exact: true }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Close fixture dialog" }).click();
+    await expect(
+        page.getByRole("button", { name: "Open dialog" }),
+    ).toBeFocused();
+});
+
 test("[성공] 최근 프로젝트를 검색하고 800×650 welcome snapshot을 유지함", async ({
     page,
 }) => {
@@ -254,6 +279,66 @@ test("[성공] Settings dialog를 키보드로 조작하고 trigger focus를 복
     await page.keyboard.press("Escape");
     await expect(dialog).toHaveCount(0);
     await expect(settings).toBeFocused();
+});
+
+test("[성공] reduced motion·forced colors·150% zoom에서 Settings 접근성을 유지함", async ({
+    page,
+}) => {
+    await page.setViewportSize({ width: 960, height: 640 });
+    await page.emulateMedia({
+        forcedColors: "active",
+        reducedMotion: "reduce",
+    });
+    await page
+        .getByRole("button", { name: "IDE and Project Settings" })
+        .click();
+
+    const dialog = page.getByRole("dialog", { name: "Settings" });
+    const zoom = dialog.getByRole("radio", { name: "150%", exact: true });
+    await zoom.focus();
+    await page.keyboard.press("Space");
+
+    await expect(zoom).toBeChecked();
+    await expect(zoom).toBeFocused();
+    await expect
+        .poll(() =>
+            page.evaluate(() =>
+                getComputedStyle(document.documentElement)
+                    .getPropertyValue("--product-zoom")
+                    .trim(),
+            ),
+        )
+        .toBe("1.5");
+    await expect
+        .poll(() =>
+            dialog.evaluate((element) => {
+                return getComputedStyle(element)
+                    .animationDuration.split(",")
+                    .every((duration) => {
+                        const value = Number.parseFloat(duration);
+                        return duration.trim().endsWith("ms")
+                            ? value <= 0.01
+                            : value <= 0.000_01;
+                    });
+            }),
+        )
+        .toBe(true);
+    await expect
+        .poll(() =>
+            page.evaluate(
+                () =>
+                    matchMedia("(forced-colors: active)").matches &&
+                    matchMedia("(prefers-reduced-motion: reduce)").matches,
+            ),
+        )
+        .toBe(true);
+
+    const bounds = await dialog.boundingBox();
+    expect(bounds).not.toBeNull();
+    expect(bounds!.x).toBeGreaterThanOrEqual(0);
+    expect(bounds!.y).toBeGreaterThanOrEqual(0);
+    expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(960);
+    expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(640);
 });
 
 test("[성공] Select를 키보드로 조작하고 dialog 위 layer와 focus를 유지함", async ({
