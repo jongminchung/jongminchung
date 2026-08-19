@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import type { DesktopApi } from "../src/shared/contracts/desktop-api";
@@ -34,6 +35,11 @@ test("[성공] 사전 로드, 가져올 수 있는 IPC, 가져오기 및 보관�
     const gitHubCredential = `ghp_e2e_${randomUUID().replaceAll("-", "")}`;
     const gitLabCredential = `glpat-e2e-${randomUUID().replaceAll("-", "")}`;
     const credentials = [gitHubCredential, gitLabCredential];
+    const repositoryPath = execFileSync(
+        "git",
+        ["rev-parse", "--show-toplevel"],
+        { encoding: "utf8" },
+    ).trim();
     let server: LoopbackHostingServer | null = null;
     let firstApp: PackagedHostingApp | null = null;
     let restoredApp: PackagedHostingApp | null = null;
@@ -147,6 +153,54 @@ test("[성공] 사전 로드, 가져올 수 있는 IPC, 가져오기 및 보관�
             rendererResponsesAreSafe: true,
         });
         expect(firstRun.accounts).toHaveLength(2);
+        await firstApp.page.evaluate(
+            async ({ accounts, repositoryPath }) => {
+                const api = (
+                    window as typeof window & {
+                        readonly gitClient?: DesktopApi;
+                    }
+                ).gitClient;
+                if (api === undefined)
+                    throw new Error("Electron preload API is unavailable");
+                await api.settings.set("openRepositoryPaths", [repositoryPath]);
+                await api.settings.set("activeRepositoryPath", repositoryPath);
+                await api.settings.set("hostingAccounts", accounts);
+            },
+            { accounts: [...firstRun.accounts], repositoryPath },
+        );
+        await firstApp.page.reload();
+        await expect(
+            firstApp.page.getByRole("region", { name: "Commit log" }),
+        ).toBeVisible();
+        await firstApp.page.keyboard.press("Meta+p");
+        const palette = firstApp.page.getByRole("dialog", {
+            name: "Search Everywhere",
+        });
+        await palette.getByRole("combobox").fill("Manage Accounts");
+        await palette.getByRole("option", { name: /Manage Accounts/u }).click();
+        const hostingDialog = firstApp.page.getByRole("dialog", {
+            name: "GitHub / GitLab",
+        });
+        await expect(hostingDialog).toBeVisible();
+        await expect(hostingDialog.getByLabel("Account")).toContainText(
+            "github-qa · GitHub",
+        );
+        await hostingDialog.getByLabel("Hosting project").fill("owner/repo");
+        await hostingDialog.getByRole("button", { name: "Load" }).click();
+        const request = hostingDialog.getByRole("button", {
+            name: /Packaged GitHub request/u,
+        });
+        await expect(request).toBeVisible();
+        await request.click();
+        await expect(request).toHaveAttribute("aria-current", "true");
+        const details = hostingDialog.getByRole("region", {
+            name: "Change request detail",
+        });
+        await expect(details).toContainText("src/hosting.ts");
+        await expect(details).toContainText("Packaged timeline entry");
+        await expect(
+            details.getByRole("checkbox", { name: "Viewed" }),
+        ).toBeChecked();
         await firstApp.close();
         expect(firstApp.outputContainsCredential(credentials)).toBe(false);
         firstApp = null;
@@ -276,21 +330,19 @@ test("[성공] 사전 로드, 가져올 수 있는 IPC, 가져오기 및 보관�
         });
 
         const requests = server.requests();
-        expect(requests).toHaveLength(7);
+        expect(requests).toHaveLength(12);
         expect(requests.every((request) => request.credentialAccepted)).toBe(
             true,
         );
         expect(
-            requests.map(({ method, provider }) => ({ method, provider })),
-        ).toEqual([
-            { method: "GET", provider: "gitHub" },
-            { method: "GET", provider: "gitLab" },
-            { method: "GET", provider: "gitHub" },
-            { method: "GET", provider: "gitLab" },
-            { method: "GET", provider: "gitHub" },
-            { method: "GET", provider: "gitHub" },
-            { method: "GET", provider: "gitLab" },
-        ]);
+            requests.filter((request) => request.provider === "gitHub"),
+        ).toHaveLength(9);
+        expect(
+            requests.filter((request) => request.provider === "gitLab"),
+        ).toHaveLength(3);
+        expect(
+            requests.filter((request) => request.method === "POST"),
+        ).toHaveLength(1);
     } finally {
         await firstApp?.close();
         await restoredApp?.close();

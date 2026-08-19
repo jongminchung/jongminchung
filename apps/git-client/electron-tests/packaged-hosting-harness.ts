@@ -273,6 +273,62 @@ function handleHostingRequest(
         return;
     }
     if (
+        provider === "gitHub" &&
+        url.pathname === "/api/v3/repos/owner/repo/pulls/7"
+    ) {
+        respond(response, 200, gitHubChangeRequest());
+        return;
+    }
+    if (
+        provider === "gitHub" &&
+        url.pathname === "/api/v3/repos/owner/repo/pulls/7/files"
+    ) {
+        respond(response, 200, [
+            {
+                filename: "src/hosting.ts",
+                status: "modified",
+                additions: 4,
+                deletions: 1,
+                patch: "@@ -1 +1 @@",
+            },
+        ]);
+        return;
+    }
+    if (
+        provider === "gitHub" &&
+        url.pathname === "/api/v3/repos/owner/repo/issues/7/timeline"
+    ) {
+        respond(response, 200, [
+            {
+                id: 42,
+                event: "commented",
+                actor: { login: "github-qa" },
+                body: "Packaged timeline entry",
+                created_at: "2026-07-19T00:01:00Z",
+            },
+        ]);
+        return;
+    }
+    if (provider === "gitHub" && url.pathname === "/api/graphql") {
+        respond(response, 200, {
+            data: {
+                repository: {
+                    pullRequest: {
+                        files: {
+                            nodes: [
+                                {
+                                    path: "src/hosting.ts",
+                                    viewerViewedState: "VIEWED",
+                                },
+                            ],
+                        },
+                    },
+                },
+            },
+        });
+        return;
+    }
+    if (
         provider === "gitLab" &&
         url.pathname === "/api/v4/projects/group%2Frepo/merge_requests"
     ) {
