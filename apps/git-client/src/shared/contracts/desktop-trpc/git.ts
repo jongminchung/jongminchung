@@ -28,6 +28,7 @@ import {
 
 const VoidSchema = z.void();
 const BooleanSchema = z.boolean();
+const TRUSTED_AUTHORIZATION = { kind: "trusted" } as const;
 const GitCreationTerminalResultSchema = z.discriminatedUnion("kind", [
     GitCreationCompletedEventSchema,
     GitCreationFailedEventSchema,
@@ -45,6 +46,7 @@ export function createGitProcedures(
             "openRepository",
             OpenRepositoryRequestSchema,
             RepositoryRecordSchema,
+            TRUSTED_AUTHORIZATION,
         ),
         initializeRepository: createMutation(
             "git",
@@ -65,12 +67,14 @@ export function createGitProcedures(
             "closeRepository",
             GitCloseRepositoryRequestSchema,
             BooleanSchema,
+            TRUSTED_AUTHORIZATION,
         ),
         inspectSnapshot: createQuery(
             "git",
             "inspectSnapshot",
             GitRepositoryRequestSchema,
             RepositorySnapshotSchema,
+            TRUSTED_AUTHORIZATION,
         ),
         repositoryService: createMutation(
             "git",
@@ -91,18 +95,21 @@ export function createGitProcedures(
             "cancelQuery",
             GitCancelQueryRequestSchema,
             BooleanSchema,
+            TRUSTED_AUTHORIZATION,
         ),
         readFile: createQuery(
             "git",
             "readFile",
             GitReadFileRequestSchema,
             FileContentSchema,
+            TRUSTED_AUTHORIZATION,
         ),
         readFilePreview: createQuery(
             "git",
             "readFilePreview",
             GitReadFileRequestSchema,
             FilePreviewSchema,
+            TRUSTED_AUTHORIZATION,
         ),
         writeWorkingTreeFile: createMutation(
             "git",
@@ -123,12 +130,14 @@ export function createGitProcedures(
             "watchRepository",
             GitWatchRepositoryRequestSchema,
             VoidSchema,
+            TRUSTED_AUTHORIZATION,
         ),
         unwatchRepository: createMutation(
             "git",
             "unwatchRepository",
             GitWatchRepositoryRequestSchema,
             VoidSchema,
+            TRUSTED_AUTHORIZATION,
         ),
     } as const;
 }

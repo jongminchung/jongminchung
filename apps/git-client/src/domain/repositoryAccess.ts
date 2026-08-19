@@ -1,32 +1,15 @@
 import type { GitRequest } from "../shared/contracts/model/index";
+import {
+    SafeModeViolationError,
+    type RepositoryAccessMode,
+    type RepositoryCapability,
+} from "../shared/contracts/repository-access";
 
-export type RepositoryAccessMode = "trusted" | "safe";
-
-export type RepositoryCapability =
-    | "query"
-    | "gitMutation"
-    | "terminal"
-    | "hosting"
-    | "externalExecution";
-
-const SAFE_MODE_CAPABILITY_LABELS = {
-    gitMutation: "Git changes",
-    terminal: "Terminal access",
-    hosting: "Hosting access",
-    externalExecution: "External execution",
-} as const satisfies Record<Exclude<RepositoryCapability, "query">, string>;
-
-export class SafeModeViolationError extends Error {
-    readonly capability: Exclude<RepositoryCapability, "query">;
-
-    constructor(capability: Exclude<RepositoryCapability, "query">) {
-        super(
-            `${SAFE_MODE_CAPABILITY_LABELS[capability]} is unavailable in Safe Mode.`,
-        );
-        this.name = "SafeModeViolationError";
-        this.capability = capability;
-    }
-}
+export {
+    SafeModeViolationError,
+    type RepositoryAccessMode,
+    type RepositoryCapability,
+} from "../shared/contracts/repository-access";
 
 export class RepositoryAccessPolicy {
     readonly #modesByRepository = new Map<string, RepositoryAccessMode>();

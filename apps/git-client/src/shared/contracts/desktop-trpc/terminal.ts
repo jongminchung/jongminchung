@@ -11,6 +11,8 @@ import {
     TerminalWriteRequestSchema,
 } from "../terminal";
 
+const TRUSTED_AUTHORIZATION = { kind: "trusted" } as const;
+
 /** Terminal owns its wire contracts and capability policy in one module. */
 export function createTerminalProcedures(
     createMutation: typeof mutation,
@@ -37,24 +39,28 @@ export function createTerminalProcedures(
             "write",
             TerminalWriteRequestSchema,
             voidSchema,
+            TRUSTED_AUTHORIZATION,
         ),
         resize: createMutation(
             "terminal",
             "resize",
             TerminalResizeRequestSchema,
             voidSchema,
+            TRUSTED_AUTHORIZATION,
         ),
         close: createMutation(
             "terminal",
             "close",
             TerminalCloseRequestSchema,
             voidSchema,
+            TRUSTED_AUTHORIZATION,
         ),
         closeRepository: createMutation(
             "terminal",
             "closeRepository",
             TerminalCloseRepositoryRequestSchema,
             voidSchema,
+            TRUSTED_AUTHORIZATION,
         ),
     } as const;
 }

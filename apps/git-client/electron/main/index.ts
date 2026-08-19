@@ -46,6 +46,7 @@ import {
 import {
     installDefaultDenyPermissionPolicy,
     isTrustedRendererNavigation,
+    isTrustedRendererRoute,
 } from "./window-security";
 
 registerPrivilegedScheme();
@@ -103,10 +104,13 @@ let utilityCrashPromptOpen = false;
 function localHistoryRepositoryFromUrl(value: string): RepositoryId | null {
     try {
         const url = new URL(value);
-        if (url.pathname !== "/local-history" || url.hash.length > 0)
-            return null;
         if (
-            !isTrustedRendererNavigation(value, MAIN_WINDOW_VITE_DEV_SERVER_URL)
+            !isTrustedRendererRoute(
+                value,
+                MAIN_WINDOW_VITE_DEV_SERVER_URL,
+                "/local-history",
+            ) ||
+            url.hash.length > 0
         )
             return null;
         return RepositoryIdSchema.parse(url.searchParams.get("repositoryId"));
@@ -227,7 +231,10 @@ async function createMainWindow(
         relaunch: () => app.relaunch(),
         quit: () => app.quit(),
     });
-    const stream = new DesktopStreamHub(window);
+    const stream = new DesktopStreamHub(
+        window,
+        MAIN_WINDOW_VITE_DEV_SERVER_URL,
+    );
     const menu = NativeMenuService.create(window, (command) => {
         stream.publish({ kind: "menu.command", command });
     });
@@ -253,6 +260,7 @@ async function createMainWindow(
         diagnostics,
         runtime,
         stream,
+        developmentServerUrl: MAIN_WINDOW_VITE_DEV_SERVER_URL,
         onWindowPresentationModeChange: (mode) => {
             presentationMode = mode;
         },

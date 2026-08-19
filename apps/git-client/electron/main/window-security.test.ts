@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
     installDefaultDenyPermissionPolicy,
     isTrustedRendererNavigation,
+    isTrustedRendererRoute,
 } from "./window-security";
 
 describe("창 권한 부여", () => {
@@ -64,6 +65,20 @@ describe("창 권한 부여", () => {
             isTrustedRendererNavigation(
                 "http://localhost:4173/",
                 developmentUrl,
+            ),
+        ).toBe(false);
+        expect(
+            isTrustedRendererRoute(
+                "http://localhost:5173/local-history?repositoryId=one",
+                developmentUrl,
+                "/local-history",
+            ),
+        ).toBe(true);
+        expect(
+            isTrustedRendererRoute(
+                "http://localhost:5173/workspace",
+                developmentUrl,
+                "/local-history",
             ),
         ).toBe(false);
     });

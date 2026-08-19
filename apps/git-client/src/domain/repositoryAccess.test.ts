@@ -30,6 +30,19 @@ describe("라우터액세스 정책", () => {
         expect(policy.allows("repository-b", "terminal")).toBe(true);
     });
 
+    it("[성공] 활성 repository가 사라지면 기본 trusted 상태로 돌아감", () => {
+        const policy = RepositoryAccessPolicy.create();
+
+        expect(policy.activeMode()).toBe("trusted");
+        policy.open("repository-a", "/tmp/project-a", "safe");
+        policy.activate("repository-a");
+        expect(policy.activeMode()).toBe("safe");
+
+        policy.forget("repository-a");
+        expect(policy.activeMode()).toBe("trusted");
+        expect(() => policy.assertActive("gitMutation")).not.toThrow();
+    });
+
     it("[실패] Git 쿼리를 허용하고 작업을 요청하기 위해 응답했습니다", () => {
         const policy = RepositoryAccessPolicy.create();
         policy.open("repository-a", "/tmp/project-a", "safe");

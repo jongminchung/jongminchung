@@ -18,7 +18,7 @@ export class DesktopStreamHub {
     readonly #disconnectListeners = new Set<() => void>();
 
     readonly #connect = (event: IpcMainEvent, raw: unknown): void => {
-        assertTrustedSender(event, this.window);
+        assertTrustedSender(event, this.window, this.developmentServerUrl);
         DesktopStreamConnectSchema.parse(raw);
         const [port] = event.ports;
         if (port === undefined || event.ports.length !== 1) {
@@ -29,7 +29,10 @@ export class DesktopStreamHub {
         this.#replacePort(port);
     };
 
-    constructor(private readonly window: BrowserWindow) {
+    constructor(
+        private readonly window: BrowserWindow,
+        private readonly developmentServerUrl?: string,
+    ) {
         window.webContents.ipc.on(DESKTOP_STREAM_CHANNEL, this.#connect);
     }
 

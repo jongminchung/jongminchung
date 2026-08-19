@@ -36,3 +36,16 @@ export function isTrustedRendererNavigation(
         return false;
     }
 }
+
+export function isTrustedRendererRoute(
+    value: string,
+    developmentServerUrl: string | undefined,
+    pathname: string,
+): boolean {
+    if (!isTrustedRendererNavigation(value, developmentServerUrl)) return false;
+    try {
+        return new URL(value).pathname === pathname;
+    } catch {
+        return false;
+    }
+}

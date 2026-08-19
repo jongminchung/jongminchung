@@ -65,6 +65,7 @@ const VoidSchema = z.void();
 const BooleanSchema = z.boolean();
 const DiagnosticConfigurationTextSchema = z.string().max(1_048_576);
 const DiagnosticPathResultSchema = z.string().min(1).max(32_768);
+const TRUSTED_AUTHORIZATION = { kind: "trusted" } as const;
 
 export interface DesktopTrpcProcedureContract {
     readonly type: DesktopTrpcOperationType;
@@ -211,7 +212,7 @@ export function query<TInput extends z.ZodType, TOutput extends z.ZodType>(
     procedure: string,
     input: TInput,
     output: TOutput,
-    authorization: DesktopTrpcAuthorization = { kind: "trusted" },
+    authorization: DesktopTrpcAuthorization,
 ) {
     registerProcedureContract(
         domain,
@@ -243,7 +244,7 @@ export function mutation<TInput extends z.ZodType, TOutput extends z.ZodType>(
     procedure: string,
     input: TInput,
     output: TOutput,
-    authorization: DesktopTrpcAuthorization = { kind: "trusted" },
+    authorization: DesktopTrpcAuthorization,
 ) {
     registerProcedureContract(
         domain,
@@ -278,108 +279,126 @@ export const platformProcedures = {
         "runtimeInfo",
         VoidSchema,
         RuntimeInfoSchema,
+        TRUSTED_AUTHORIZATION,
     ),
     runtimeLauncherInfo: query(
         "platform",
         "runtimeLauncherInfo",
         VoidSchema,
         CommandLineLauncherInfoSchema,
+        TRUSTED_AUTHORIZATION,
     ),
     windowGetFullScreen: query(
         "platform",
         "windowGetFullScreen",
         VoidSchema,
         BooleanSchema,
+        TRUSTED_AUTHORIZATION,
     ),
     windowSetFullScreen: mutation(
         "platform",
         "windowSetFullScreen",
         BooleanSchema,
         VoidSchema,
+        TRUSTED_AUTHORIZATION,
     ),
     windowSetPresentationMode: mutation(
         "platform",
         "windowSetPresentationMode",
         WindowPresentationModeSchema,
         VoidSchema,
+        TRUSTED_AUTHORIZATION,
     ),
     maintenanceRelaunch: mutation(
         "platform",
         "maintenanceRelaunch",
         MaintenanceRelaunchRequestSchema,
         VoidSchema,
+        TRUSTED_AUTHORIZATION,
     ),
     diagnosticsSnapshot: query(
         "platform",
         "diagnosticsSnapshot",
         VoidSchema,
         DiagnosticSnapshotSchema,
+        TRUSTED_AUTHORIZATION,
     ),
     diagnosticsReveal: mutation(
         "platform",
         "diagnosticsReveal",
         DiagnosticPathKindSchema,
         VoidSchema,
+        TRUSTED_AUTHORIZATION,
     ),
     diagnosticsCollectLogs: mutation(
         "platform",
         "diagnosticsCollectLogs",
         VoidSchema,
         BooleanSchema,
+        TRUSTED_AUTHORIZATION,
     ),
     diagnosticsDumpThreads: mutation(
         "platform",
         "diagnosticsDumpThreads",
         VoidSchema,
         DiagnosticPathResultSchema,
+        TRUSTED_AUTHORIZATION,
     ),
     diagnosticsReadConfiguration: query(
         "platform",
         "diagnosticsReadConfiguration",
         DiagnosticConfigurationKindSchema,
         DiagnosticConfigurationTextSchema,
+        TRUSTED_AUTHORIZATION,
     ),
     diagnosticsWriteConfiguration: mutation(
         "platform",
         "diagnosticsWriteConfiguration",
         DiagnosticConfigurationWriteRequestSchema,
         VoidSchema,
+        TRUSTED_AUTHORIZATION,
     ),
     diagnosticsKeyboardShortcutsPdf: mutation(
         "platform",
         "diagnosticsKeyboardShortcutsPdf",
         VoidSchema,
         VoidSchema,
+        TRUSTED_AUTHORIZATION,
     ),
     diagnosticsListLeftoverDirectories: query(
         "platform",
         "diagnosticsListLeftoverDirectories",
         VoidSchema,
         DiagnosticLeftoverDirectoriesSchema,
+        TRUSTED_AUTHORIZATION,
     ),
     diagnosticsDeleteLeftoverDirectories: mutation(
         "platform",
         "diagnosticsDeleteLeftoverDirectories",
         DiagnosticDeleteLeftoverDirectoriesRequestSchema,
         DiagnosticDeletedLeftoverDirectoryIdsSchema,
+        TRUSTED_AUTHORIZATION,
     ),
     exportHtml: mutation(
         "platform",
         "exportHtml",
         HtmlExportRequestSchema,
         BooleanSchema,
+        TRUSTED_AUTHORIZATION,
     ),
     exportPatchText: mutation(
         "platform",
         "exportPatchText",
         PatchTextExportRequestSchema,
         BooleanSchema,
+        TRUSTED_AUTHORIZATION,
     ),
     analysisOpenOfflineInspection: mutation(
         "platform",
         "analysisOpenOfflineInspection",
         VoidSchema,
         OfflineInspectionFilesSchema.nullable(),
+        TRUSTED_AUTHORIZATION,
     ),
     ...createSettingsProcedures(mutation, query),
     dialogOpenDirectory: mutation(
@@ -387,42 +406,49 @@ export const platformProcedures = {
         "dialogOpenDirectory",
         DialogRequestSchema,
         DialogSelectionSchema,
+        TRUSTED_AUTHORIZATION,
     ),
     dialogOpenFile: mutation(
         "platform",
         "dialogOpenFile",
         DialogRequestSchema,
         DialogSelectionSchema,
+        TRUSTED_AUTHORIZATION,
     ),
     dialogSaveFile: mutation(
         "platform",
         "dialogSaveFile",
         DialogRequestSchema,
         DialogSelectionSchema,
+        TRUSTED_AUTHORIZATION,
     ),
     shellOpenExternal: mutation(
         "platform",
         "shellOpenExternal",
         ExternalUrlSchema,
         VoidSchema,
+        TRUSTED_AUTHORIZATION,
     ),
     clipboardWriteText: mutation(
         "platform",
         "clipboardWriteText",
         ClipboardWriteRequestSchema,
         VoidSchema,
+        TRUSTED_AUTHORIZATION,
     ),
     clipboardReadText: query(
         "platform",
         "clipboardReadText",
         VoidSchema,
         ClipboardTextSchema,
+        TRUSTED_AUTHORIZATION,
     ),
     menuSyncState: mutation(
         "platform",
         "menuSyncState",
         NativeCommandStatesSchema,
         VoidSchema,
+        TRUSTED_AUTHORIZATION,
     ),
 } as const;
 

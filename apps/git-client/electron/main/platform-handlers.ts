@@ -92,6 +92,7 @@ interface PlatformHandlerDependencies {
     readonly diagnostics?: DiagnosticsService;
     readonly runtime: RuntimeInfo;
     readonly stream?: DesktopStreamPublisher;
+    readonly developmentServerUrl?: string;
     readonly onWindowPresentationModeChange?: (
         mode: WindowPresentationMode,
     ) => void;
@@ -120,6 +121,7 @@ export function registerPlatformHandlers(
         diagnostics: providedDiagnostics,
         runtime,
         stream: providedStream,
+        developmentServerUrl,
         onWindowPresentationModeChange,
     } = dependencies;
     const stream = providedStream ?? { publish: (): void => undefined };
@@ -137,7 +139,7 @@ export function registerPlatformHandlers(
         contents: window.webContents,
         procedureKeys: MAIN_DESKTOP_TRPC_PROCEDURE_KEYS,
         authorize: (_event, authorization, domain, procedure, input) => {
-            assertTrustedSender(_event, window);
+            assertTrustedSender(_event, window, developmentServerUrl);
             if (authorization.kind === "activeCapability") {
                 assertActiveCapability(authorization.capability);
             }
@@ -687,6 +689,7 @@ export function registerPlatformHandlers(
                         _event,
                         window,
                         repositoryId,
+                        developmentServerUrl,
                     );
                     const request = parseLocalHistoryRepositoryRequest(input);
                     if (

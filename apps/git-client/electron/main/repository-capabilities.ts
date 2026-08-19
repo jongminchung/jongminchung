@@ -1,4 +1,4 @@
-import { SafeModeViolationError } from "../../src/domain/repositoryAccess";
+import { SafeModeViolationError } from "../../src/shared/contracts/repository-access";
 import type { SettingsStore } from "./settings-store";
 
 const SAFE_REPOSITORY_PATHS_SETTING = "safeRepositoryPaths";
