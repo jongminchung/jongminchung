@@ -12,3 +12,13 @@ export function shouldRequestProjectClose(
 export function shouldQuitAfterLastWindow(platform: NodeJS.Platform): boolean {
     return platform !== "darwin";
 }
+
+export function shouldCreateWindowOnActivate(windowCount: number): boolean {
+    return windowCount === 0;
+}
+
+export function secondInstanceAction(): "focus-existing-window" {
+    // External argv is intentionally outside this decision until a validated
+    // application-command schema and an explicit product requirement exist.
+    return "focus-existing-window";
+}

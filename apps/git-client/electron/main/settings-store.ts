@@ -94,7 +94,11 @@ export class SettingsStore {
             ) {
                 return new SettingsStore(filePath, {});
             }
-            throw NativeError.from(error, "settings.read");
+            throw NativeError.from(
+                error,
+                "settings.read",
+                "Settings could not be read.",
+            );
         }
     }
 

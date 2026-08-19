@@ -1,6 +1,6 @@
 # Issue 0010: 의존성 갱신 lane과 검증 범위 분리
 
-- 상태: 제안
+- 상태: 완료
 - 우선순위: P2
 - 기준일: 2026-08-19
 - 영향 범위:
@@ -85,3 +85,17 @@
   - lockfile 변경이 frozen install에서 재현됨
   - 영향받는 workspace의 typecheck·test·build가 통과함
 - **최종 `pnpm run check`, `git diff --check`, `git status --short`를 실행함**
+
+## 2026-08-20 구현 결과
+
+- **모든 외부 직접 dependency를 framework·UI·desktop·test·tooling 중 하나에 정확히 매핑함**
+  - `deps:inventory`가 중복 lane과 미분류 dependency를 실패로 처리함
+  - 내부 `@jongminchung/*` workspace dependency는 update 대상에서 제외함
+- **`deps:check`와 `deps:update`가 lane 인자를 필수로 받아 한 lane만 처리하도록 변경함**
+  - `pnpm run deps:check -- framework` 형식으로 후보를 확인함
+  - `pnpm run deps:update -- framework` 형식으로 해당 직접 dependency와 lockfile만 갱신함
+- **Renovate의 단일 non-major group을 같은 5개 lane group으로 분리함**
+  - major update의 Dependency Dashboard 승인 정책은 유지함
+- **유지보수 문서에 lane별 최소 검증, release note, migration·rollback과 shadcn source 분리 계약을 기록함**
+  - TypeScript는 tooling lane에 표시되지만 기존 호환성 재감사 조건 없이 적용하지 않음
+- **framework lane dry run에서 lane 밖 dependency 후보가 출력되지 않음을 확인함**

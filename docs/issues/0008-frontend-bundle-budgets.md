@@ -1,6 +1,6 @@
 # Issue 0008: 프론트엔드 JavaScript와 CSS 성능 예산 도입
 
-- 상태: 제안
+- 상태: 완료
 - 우선순위: P1
 - 기준일: 2026-08-19
 - 영향 범위:
@@ -87,3 +87,17 @@
   - `pnpm --filter @jongminchung/web run test:e2e`
   - `pnpm --filter @jongminchung/git-client run test:e2e`
   - 최종 `pnpm run check`
+
+## 2026-08-20 구현 결과
+
+- **두 workspace에 production client asset report와 baseline 갱신 명령을 추가함**
+  - `bundle:report`는 JavaScript·CSS별 raw·gzip 합계와 논리 asset 이름을 JSON으로 출력함
+  - `bundle:baseline`은 hash를 제거한 논리 경로 기준 baseline을 갱신함
+  - source map, font와 image는 JavaScript·CSS 합계에서 제외됨
+- **baseline 대비 package별 증가·감소와 큰 asset 변화를 report-only budget으로 계산함**
+  - JavaScript는 raw 100KiB 또는 gzip 30KiB 증가, CSS는 raw 20KiB 또는 gzip 6KiB 증가를 초기 review threshold로 표시함
+  - threshold 초과 여부와 gzip 기준 상위 10개 변화 asset을 함께 출력하되 초기 단계에서는 build를 실패시키지 않음
+- **Web과 Git Client workflow가 production build 후 report artifact를 보존함**
+  - runtime source, chunk loading과 source map 배포 설정은 변경하지 않음
+- **초기 baseline은 Git Client JavaScript 2,558,750 bytes·CSS 229,784 bytes, Web client static JavaScript 9,442,393 bytes·CSS 468,805 bytes임**
+  - 모든 수치는 각 workspace의 현재 production output을 기준으로 측정됨

@@ -1,6 +1,6 @@
 # Issue 0015: Git 작업 상태와 실패 복구 계약 통합
 
-- 상태: 제안
+- 상태: 완료
 - 우선순위: P1
 - 기준일: 2026-08-19
 - 참고 OSS: [`GitHub Desktop`](https://github.com/desktop/desktop)
@@ -89,3 +89,14 @@
   - `pnpm --filter @jongminchung/git-client run test:integration:native`
   - `pnpm --filter @jongminchung/git-client run test:electron:prebuilt`
   - 최종 `pnpm run check`
+
+## 처리 결과
+
+- **공통 operation 정책이 `gitOperationPolicy`와 session controller에 구현되어 있음을 확인함**
+  - operation별 invalidation·recovery 기록·retry 가능 여부가 단일 matrix로 관리됨
+  - retry는 fetch·pull·push 같은 명시된 network operation에만 제공됨
+  - write operation 실패는 조건 없이 자동 재시도되지 않음
+- **실패와 복구 계약이 실제 Git 상태 oracle로 검증됨**
+  - operation matrix가 HEAD·refs·index·working tree를 독립 Git command로 확인함
+  - utility crash는 pending request를 reject하고 UI 재시작 또는 종료를 명시적으로 선택하게 함
+  - conflict·remote recovery·transaction rollback test가 원본 상태와 recovery evidence 보존을 검증함

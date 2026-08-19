@@ -1,6 +1,6 @@
 # Issue 0014: 패키징된 Electron 앱의 smoke test와 릴리스 신뢰성 보강
 
-- 상태: 제안
+- 상태: 완료
 - 우선순위: P1
 - 기준일: 2026-08-19
 - 참고 OSS:
@@ -86,3 +86,13 @@
   - `pnpm --filter @jongminchung/git-client run test:electron`
   - `pnpm --filter @jongminchung/git-client run release:validate-local -- 1.0.0`
   - 최종 `pnpm run check`
+
+## 처리 결과
+
+- **release provenance schema를 v2로 올리고 실제 검증 결과를 DMG digest와 연결함**
+  - package verifier의 bundle ID·architecture·Electron version·ASAR digest·codesign 결과를 기록함
+  - 동일한 Forge app에 실행한 startup smoke 결과를 기록함
+  - production에서 Developer ID·Gatekeeper·stapled notarization 검증이 모두 끝난 경우에만 production evidence를 기록함
+- **package 검증 계층을 기존 명령 경계에 유지함**
+  - 정적 검사는 `electron:verify-package`, startup은 `electron:smoke-package`, 핵심 여정은 packaged Playwright가 담당함
+  - production 전용 검증은 `release:build`가 담당하므로 ad-hoc 결과와 혼합되지 않음

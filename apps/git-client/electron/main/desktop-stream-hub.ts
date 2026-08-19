@@ -15,6 +15,7 @@ export interface DesktopStreamPublisher {
 
 export class DesktopStreamHub {
     #port: MessagePortMain | null = null;
+    #disposed = false;
     readonly #disconnectListeners = new Set<() => void>();
 
     readonly #connect = (event: IpcMainEvent, raw: unknown): void => {
@@ -25,6 +26,10 @@ export class DesktopStreamHub {
             throw new Error(
                 "Desktop stream connection requires exactly one MessagePort",
             );
+        }
+        if (this.#disposed) {
+            port.close();
+            return;
         }
         this.#replacePort(port);
     };
@@ -48,6 +53,8 @@ export class DesktopStreamHub {
     }
 
     dispose(): void {
+        if (this.#disposed) return;
+        this.#disposed = true;
         this.window.webContents.ipc.removeListener(
             DESKTOP_STREAM_CHANNEL,
             this.#connect,

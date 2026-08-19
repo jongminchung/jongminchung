@@ -1,6 +1,6 @@
 # Issue 0004: Documenso 방식의 primitive와 제품 component 계층 정리
 
-- 상태: 제안
+- 상태: 완료
 - 우선순위: P2
 - 기준일: 2026-08-19
 - 참고 저장소: [documenso/documenso](https://github.com/documenso/documenso)
@@ -105,3 +105,15 @@
   - 이전 path import 잔존 여부
   - 앱 공통 adapter의 feature import 여부
   - 새 root barrel과 순환 import 여부
+
+## 2026-08-20 pilot 결과
+
+- **hosting 영역이 이 문서의 pilot target 구조를 이미 충족해 추가 파일 이동 없이 완료함**
+  - entry는 `components/HostingPanel.tsx`, controller는 `components/hosting/useHostingPanelController.ts`로 분리됨
+  - account connection, request composer, list와 details section은 `components/hosting`에 colocate됨
+  - controller unit test와 panel persistence test가 각각 상태 로직과 사용자 저장 동작을 검증함
+- **앱 공통 adapter와 hosting 기능 사이의 의존 방향이 단방향으로 유지됨**
+  - `ProductDialog`, `ProductSelect`, `ProductFormControls`, `ProductOverlays`가 hosting 또는 `features` module을 import하지 않음
+  - hosting 기능은 공용 `@jongminchung/ui` primitive와 앱 adapter를 소비하며 `packages/ui`로 제품 의미를 이동하지 않음
+- **추가 이동은 import 책임을 줄이지 않고 기존 `RepositoryToolDialog` entry만 흔들 수 있어 수행하지 않음**
+  - 현재 구조가 유효하므로 repository inspector 등 두 번째 영역으로 범위를 확장하지 않음

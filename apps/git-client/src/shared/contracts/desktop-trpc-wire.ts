@@ -43,6 +43,7 @@ const DesktopTrpcErrorSchema = z
     .object({
         code: z.string().min(1).max(64),
         message: z.string().min(1).max(16_384),
+        field: z.string().min(1).max(128).nullable().default(null),
     })
     .strict()
     .readonly();

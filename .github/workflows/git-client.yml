@@ -2,6 +2,11 @@ name: Git Client
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: Stable semantic version for this immutable release
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -28,17 +33,21 @@ jobs:
         run: test "v$(cat .node-version)" = "$(node --version)"
       - run: pnpm install --frozen-lockfile
       - run: pnpm run audit:prod
-      - name: Guard fixed Git Client version
-        run: test "$(node -p "require('./apps/git-client/package.json').version")" = "1.0.0"
+      - name: Validate release version
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: node -e 'if (!/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(process.env.RELEASE_VERSION ?? "")) process.exit(1)'
       - run: pnpm exec oxfmt --config oxfmt.config.ts --check apps/git-client
       - run: pnpm exec oxlint --config oxlint.config.ts apps/git-client
       - run: pnpm --filter @jongminchung/git-client run typecheck
       - run: pnpm --filter @jongminchung/git-client run test
       - run: pnpm --filter @jongminchung/git-client run build
+      - name: Report Git Client renderer asset changes
+        run: pnpm --filter @jongminchung/git-client run bundle:report -- --output=apps/git-client/bundle-report.json
       - run: pnpm --filter @jongminchung/git-client exec playwright install chromium
       - run: pnpm --filter @jongminchung/git-client run test:e2e
       - name: Build and validate local ad-hoc Electron ARM64 artifacts
-        run: pnpm --filter @jongminchung/git-client run release:validate-local -- 1.0.0
+        run: pnpm --filter @jongminchung/git-client run release:validate-local -- "${{ inputs.version }}"
       - name: Upload compact QA evidence
         if: always()
         uses: actions/upload-artifact@v7
@@ -48,14 +57,15 @@ jobs:
             apps/git-client/test-results/qa/*.json
             apps/git-client/test-results/**/trace.zip
             apps/git-client/test-results/**/*-diff.png
+            apps/git-client/bundle-report.json
           if-no-files-found: ignore
       - uses: actions/upload-artifact@v7
         with:
-          name: git-client-macos-arm64-adhoc-1.0.0
+          name: git-client-macos-arm64-adhoc-${{ inputs.version }}
           path: |
             apps/git-client/out/Git Client-darwin-arm64/Git Client.app
-            apps/git-client/release-artifacts/Git-Client_1.0.0_macos_arm64_adhoc.dmg
-            apps/git-client/release-artifacts/Git-Client_1.0.0_macos_arm64_adhoc.dmg.sha256
+            apps/git-client/release-artifacts/Git-Client_${{ inputs.version }}_macos_arm64_adhoc.dmg
+            apps/git-client/release-artifacts/Git-Client_${{ inputs.version }}_macos_arm64_adhoc.dmg.sha256
 
   release:
     needs: verify
@@ -113,13 +123,13 @@ jobs:
             --team-id "$APPLE_TEAM_ID" \
             --keychain "$signing_keychain"
           rm "$signing_certificate"
-      - name: Publish fixed Git Client 1.0.0 release
+      - name: Publish immutable Git Client release
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
           GIT_CLIENT_CODESIGN_IDENTITY: ${{ secrets.GIT_CLIENT_CODESIGN_IDENTITY }}
           GIT_CLIENT_NOTARY_KEYCHAIN: ${{ runner.temp }}/git-client-signing.keychain-db
           GIT_CLIENT_NOTARY_KEYCHAIN_PROFILE: git-client-ci
-        run: pnpm --filter @jongminchung/git-client run release
+        run: pnpm --filter @jongminchung/git-client run release -- "${{ inputs.version }}"
       - name: Remove ephemeral signing keychain
         if: always()
         run: security delete-keychain "${RUNNER_TEMP}/git-client-signing.keychain-db" || true

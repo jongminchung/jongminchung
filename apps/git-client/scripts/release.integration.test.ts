@@ -336,6 +336,11 @@ describe("전자 릴리스 빌드 계약", () => {
                 output,
                 "1.2.3",
                 SOURCE_SHA,
+                RELEASE_MODES.production,
+                {
+                    package: { appAsarSha256: "a".repeat(64) },
+                    startupSmoke: { ready: true },
+                },
             );
 
             expect(artifacts).toMatchObject({
@@ -358,7 +363,7 @@ describe("전자 릴리스 빌드 계약", () => {
             expect(
                 JSON.parse(await readFile(artifacts.provenance, "utf8")),
             ).toMatchObject({
-                schemaVersion: 1,
+                schemaVersion: 2,
                 repository: "jongminchung/jongminchung",
                 ref: "refs/heads/main",
                 sourceSha: SOURCE_SHA,
@@ -366,6 +371,10 @@ describe("전자 릴리스 빌드 계약", () => {
                     name: "Git-Client_1.2.3_macos_arm64.dmg",
                     sha256: "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
                     sizeBytes: 3,
+                },
+                verification: {
+                    package: { appAsarSha256: "a".repeat(64) },
+                    startupSmoke: { ready: true },
                 },
             });
         } finally {
@@ -583,9 +592,19 @@ describe("전자 릴리스 빌드 계약", () => {
                 return { code: 0, stderr: "", stdout: "" };
             },
         );
-        const validateApp = vi.fn().mockResolvedValue(undefined);
+        const validateApp = vi.fn().mockResolvedValue({
+            architectures: "arm64",
+            asarHash: "a".repeat(64),
+            bundleId: "io.github.jongminchung.gitclient",
+            codesign: "valid (--deep --strict)",
+            electronVersion: "43.3.0",
+        });
         const validateDmg = vi.fn().mockResolvedValue(undefined);
-        const smokeApp = vi.fn().mockResolvedValue(undefined);
+        const smokeApp = vi.fn().mockResolvedValue({
+            exitCode: 0,
+            preloadApi: true,
+            ready: true,
+        });
         const verifySource = vi
             .fn()
             .mockResolvedValue({ sourceSha: SOURCE_SHA });
@@ -680,8 +699,18 @@ describe("전자 릴리스 빌드 계약", () => {
                 createDmg: (_appPath: string, target: string) =>
                     createDmgFixture(target),
                 runCommand,
-                smokeApp: vi.fn().mockResolvedValue(undefined),
-                validateApp: vi.fn().mockResolvedValue(undefined),
+                smokeApp: vi.fn().mockResolvedValue({
+                    exitCode: 0,
+                    preloadApi: true,
+                    ready: true,
+                }),
+                validateApp: vi.fn().mockResolvedValue({
+                    architectures: "arm64",
+                    asarHash: "a".repeat(64),
+                    bundleId: "io.github.jongminchung.gitclient",
+                    codesign: "valid (--deep --strict)",
+                    electronVersion: "43.3.0",
+                }),
                 validateDmg: vi.fn().mockResolvedValue(undefined),
                 verifySource,
             });

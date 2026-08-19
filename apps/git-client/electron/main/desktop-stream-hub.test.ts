@@ -78,6 +78,23 @@ describe("데스크탑 스트림허브", () => {
         expect(second.close).toHaveBeenCalledOnce();
         expect(disconnected).toHaveBeenCalledTimes(2);
         expect(listeners.has(DESKTOP_STREAM_CHANNEL)).toBe(false);
+
+        hub.dispose();
+        second.closeListener?.();
+        hub.publish({
+            kind: "menu.command",
+            command: { id: "workspace.close" },
+        });
+        expect(disconnected).toHaveBeenCalledTimes(2);
+        expect(second.posted).toEqual([{ kind: "ready", version: 1 }]);
+
+        const late = new TestPort();
+        connect(
+            { sender: webContents, senderFrame: mainFrame, ports: [late] },
+            { version: 1 },
+        );
+        expect(late.close).toHaveBeenCalledOnce();
+        expect(late.start).not.toHaveBeenCalled();
     });
 
     it("[실패] 버전을 수정하고 수정할 수 없는 프레임이 있었습니다", () => {

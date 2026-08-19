@@ -281,6 +281,7 @@ export async function stageReleaseArtifact(
     value: any,
     sourceSha: any,
     mode: any = RELEASE_MODES.production,
+    evidence: any = null,
 ) {
     const names = createReleaseArtifactNames(value, mode);
     const validatedSourceSha = parseSourceSha(sourceSha);
@@ -304,7 +305,7 @@ export async function stageReleaseArtifact(
         provenance,
         `${JSON.stringify(
             {
-                schemaVersion: 1,
+                schemaVersion: 2,
                 repository: "jongminchung/jongminchung",
                 ref: "refs/heads/main",
                 sourceSha: validatedSourceSha,
@@ -315,6 +316,7 @@ export async function stageReleaseArtifact(
                     sha256: digest,
                     sizeBytes: sourceStats.size,
                 },
+                verification: evidence,
             },
             null,
             2,
@@ -631,8 +633,12 @@ export async function buildRelease(value: any, options: any = {}) {
         verifyPackage: options.verifyPackage ?? verifyElectronPackage,
     };
     try {
-        await validateApp(forgeOutputs.app, version, validationOptions);
-        await smokeApp(forgeOutputs.app);
+        const packageVerification = await validateApp(
+            forgeOutputs.app,
+            version,
+            validationOptions,
+        );
+        const startupSmoke = await smokeApp(forgeOutputs.app);
         await createDmg(forgeOutputs.app, reproducibleDmg, { runCommand });
         await validateDmg(reproducibleDmg, version, validationOptions);
         await verifySource(workspaceRoot, {
@@ -646,6 +652,24 @@ export async function buildRelease(value: any, options: any = {}) {
             version,
             sourceSha,
             mode,
+            {
+                package: {
+                    appAsarSha256: packageVerification.asarHash,
+                    architecture: packageVerification.architectures,
+                    bundleId: packageVerification.bundleId,
+                    codesign: packageVerification.codesign,
+                    electronVersion: packageVerification.electronVersion,
+                },
+                productionOnly:
+                    mode === RELEASE_MODES.production
+                        ? {
+                              developerId: true,
+                              gatekeeper: true,
+                              notarizationStapled: true,
+                          }
+                        : null,
+                startupSmoke,
+            },
         );
         return Object.freeze({ ...artifacts, app: forgeOutputs.app });
     } finally {

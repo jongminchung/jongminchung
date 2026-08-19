@@ -1,6 +1,6 @@
 # Issue 0011: 미사용 코드·export·dependency audit 도입 검토
 
-- 상태: 제안
+- 상태: 조건부 보류
 - 우선순위: P2
 - 기준일: 2026-08-19
 - 영향 범위:
@@ -89,3 +89,18 @@
   - Electron entry는 package·smoke test
   - package export는 dry-run tarball과 consumer import
   - 최종 `pnpm run check`
+
+## 2026-08-20 pilot 결과
+
+- **dependency를 설치하지 않는 `pnpm dlx knip@latest` 일회성 report-only pilot을 실행함**
+  - 기본 report는 unused file 74개, export 57개, exported type 50개와 duplicate export 2개를 후보로 출력함
+  - 두 manifest에서 11개 dependency 이름과 catalog의 3개 이름도 후보로 출력함
+- **현재 결과는 merge gate로 사용할 정확도가 부족함**
+  - Electron Forge·Vite의 실제 entry와 preload·utility entry를 unused file로 잘못 분류함
+  - Next content loader가 filesystem convention으로 읽는 MDX 문서 전체를 unused file로 잘못 분류함
+  - Forge config가 사용하는 plugin package와 root orchestration·typecheck dependency를 unused dependency로 잘못 분류함
+  - IPC schema·test helper의 export 후보는 runtime boundary와 test import를 함께 해석해야 해 자동 삭제할 수 없음
+- **넓은 glob allowlist로 false positive를 숨기면 audit 가치가 사라지므로 config와 지속 script를 추가하지 않음**
+  - Next content manifest와 Electron multi-entry를 도구가 직접 모델링할 수 있는 좁은 설정이 확인될 때 pilot을 재개해야 함
+  - 그 전까지 삭제 후보는 기존 `rg`, typecheck, build와 runtime test를 사용해 개별 변경에서 증명해야 함
+- **pilot 정확도 부족 시 gate를 추가하지 않는 완료 조건에 따라 상태를 조건부 보류로 전환함**

@@ -1,6 +1,6 @@
 # Issue 0023: 상황 기반 Git 업무 온보딩 도입
 
-- 상태: 제안
+- 상태: 실행 계획 확정
 - 우선순위: P1
 - 기준일: 2026-08-19
 - 영향 범위:
@@ -21,6 +21,16 @@
 - **고정 제품 투어보다 현재 repository 상태에서 실행 가능한 작업을 제안하는 checklist가 적합함**
 - **온보딩은 새로운 command 구현이 아니라 기존 command를 안전한 순서와 완료 조건으로 연결하는 product layer여야 함**
 - **사용자 진행 상태는 로컬에만 저장하고 언제든 닫기·재시작·초기화할 수 있어야 함**
+
+## 처리 결과
+
+- **온보딩 action은 기존 `changes.commit`과 `repository.push` 등 command manifest ID를 실행하는 product layer로 한정함**
+  - 별도 Git mutation 경로를 만들지 않는 원칙을 확정함
+- **진행 상태 저장 키는 repository ID를 포함하고 click 여부가 아닌 refresh된 Git 상태로 완료를 계산하는 계약으로 확정함**
+  - conflict·safe mode·operation in progress에서는 mutation task를 비활성화하고 command availability 사유를 그대로 표시해야 함
+- **현재 Welcome 화면에는 열린 repository context가 없으므로 repository별 predicate를 Welcome에 직접 결합하지 않기로 결정함**
+  - 실제 task surface는 repository workbench에서 command registry와 session refresh를 함께 사용할 수 있는 경계에 배치할 필요가 있음
+- **repository 전환과 safe mode를 포함한 상태 저장 설계가 선행되지 않은 단순 checklist UI는 잘못된 완료 상태를 공유할 수 있어 이번 변경에서는 구현을 보류함**
 
 ## OSS 기준에서 확인한 제품 패턴
 

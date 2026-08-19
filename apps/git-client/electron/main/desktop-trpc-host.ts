@@ -13,6 +13,7 @@ import {
     type DesktopTrpcAuthorization,
     type DesktopTrpcDomain,
 } from "../../src/shared/contracts/desktop-trpc";
+import { NativeError } from "../shared/native-error";
 
 type Awaitable<T> = T | Promise<T>;
 type HandlerOutput<T> = [T] extends [never]
@@ -195,17 +196,20 @@ export class DesktopTrpcHost<TRouter extends AnyTRPCRouter> {
             );
             return DesktopTrpcResponseSchema.parse({ ok: true, data });
         } catch (error) {
+            const nativeError = NativeError.find(error);
             const message =
-                error instanceof Error && error.message.length > 0
+                nativeError?.message ??
+                (error instanceof Error && error.message.length > 0
                     ? error.message
-                    : "Desktop RPC failed";
+                    : "Desktop RPC failed");
             const code =
-                error instanceof TRPCError
+                nativeError?.code ??
+                (error instanceof TRPCError
                     ? error.code
-                    : "INTERNAL_SERVER_ERROR";
+                    : "INTERNAL_SERVER_ERROR");
             return DesktopTrpcResponseSchema.parse({
                 ok: false,
-                error: { code, message },
+                error: { code, message, field: nativeError?.field ?? null },
             });
         }
     }

@@ -95,5 +95,10 @@
   - `apps/web`, `packages/ui`와 직접 설정 변경에만 workflow가 실행되도록 제한함
   - Playwright 실패 artifact를 보존하도록 구성함
 - **원격 저장소 확인은 남아 있음**
-  - GitHub Actions의 성공·실패 실행 확인이 필요함
+  - 첫 원격 실행은 repo-wide install이 Linux에서 macOS 전용 `macos-alias`를 빌드해 실패함
+  - Web consumer graph만 설치하도록 filtered install로 수정했으며 다음 원격 성공 실행 확인이 필요함
   - branch protection에서 `Web verify`를 required check로 연결해야 함
+- **required check가 경로 filter 때문에 영구 pending되지 않도록 보강함**
+  - 모든 pull request에서 고정 `Web verify` job을 생성함
+  - `dorny/paths-filter`가 Web consumer 변경을 판정하고 관련 없는 PR에서는 무거운 검증 step만 생략함
+  - pull request metadata와 source에는 read-only 권한만 사용함

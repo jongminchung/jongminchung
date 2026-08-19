@@ -1,6 +1,6 @@
 # Issue 0016: Electron 창 생명주기와 deep-link 준비도 보강
 
-- 상태: 제안
+- 상태: 완료
 - 우선순위: P2
 - 기준일: 2026-08-19
 - 참고 OSS: [`Mattermost Desktop`](https://github.com/mattermost/desktop)
@@ -82,3 +82,13 @@
   - `pnpm --filter @jongminchung/git-client run test`
   - `pnpm --filter @jongminchung/git-client run test:electron`
   - 최종 `pnpm run check`
+
+## 처리 결과
+
+- **지원 중인 lifecycle 결정을 pure function으로 고정함**
+  - macOS는 마지막 창 종료 후 process를 유지하고 다른 OS는 종료함
+  - activate는 열린 창이 없을 때만 기존 application utility를 재사용해 main window를 생성함
+  - second instance는 새 utility를 만들지 않고 기존 창의 restore·focus만 수행함
+- **deep link 미지원 상태의 negative contract를 명시함**
+  - second-instance handler가 raw argv를 받거나 해석하지 않음
+  - custom scheme 제품 요구와 검증된 command schema가 생기기 전까지 외부 입력이 앱 상태를 바꾸지 않음

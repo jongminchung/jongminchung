@@ -1,6 +1,6 @@
 # Issue 0022: Hosting 변경 요청의 merge-readiness 요약
 
-- 상태: 제안
+- 상태: 실행 계획 확정
 - 우선순위: P1
 - 기준일: 2026-08-19
 - 영향 범위:
@@ -21,6 +21,17 @@
 - **첫 범위는 상태 조회와 실패 검사 상세 링크까지로 제한하고 병합·재실행 같은 mutation은 포함하지 않음**
 - **GitHub와 GitLab의 서로 다른 상태를 사용자 행동 기준인 ready·blocked·pending·unknown으로 표현해야 함**
 - **완료 기준은 모든 provider 기능의 동일화가 아니라 지원 범위와 알 수 없는 상태를 정확히 드러내는 것임**
+
+## 처리 결과
+
+- **현재 `get` 응답만으로는 required check와 approval rule을 정확히 계산할 수 없어 기존 응답에 추정 boolean을 추가하지 않기로 결정함**
+  - GitHub는 pull request detail 외에 check suite와 branch protection 조회가 필요함
+  - GitLab은 merge request detail 외에 pipeline과 approval state 조회가 필요함
+- **첫 구현 계약은 provider별 추가 요청을 병렬 조회한 뒤 `ready`·`blocked`·`pending`·`unknown`으로 정규화하는 방식으로 확정함**
+  - 일부 요청 실패 시 전체 detail을 실패시키지 않고 해당 dimension만 `unknown`과 원인으로 표시해야 함
+  - 기존 selection sequence를 모든 추가 요청에도 적용해 stale response를 차단해야 함
+- **불완전한 provider fixture로 사용자에게 잘못된 merge 가능 상태를 표시할 위험이 있어 이번 변경에서는 제품 UI 구현을 보류함**
+  - 후속 구현은 GitHub와 GitLab fixture를 함께 추가하는 단일 변경으로 수행할 필요가 있음
 
 ## OSS 기준에서 확인한 제품 패턴
 

@@ -6,6 +6,7 @@ import {
     MAIN_DESKTOP_TRPC_PROCEDURE_KEYS,
     mainDesktopTrpcRouter,
 } from "../../src/shared/contracts/desktop-trpc";
+import { NativeError } from "../shared/native-error";
 import { DesktopTrpcHost } from "./desktop-trpc-host";
 
 type Handler = (event: unknown, raw: unknown) => unknown;
@@ -104,7 +105,7 @@ describe("데스크탑Trpc호스트", () => {
             dispatch(handlers, DESKTOP_TRPC_CHANNELS.git, base),
         ).resolves.toMatchObject({
             ok: false,
-            error: { message: expect.stringContaining("wrong channel") },
+            error: { code: "INTERNAL_SERVER_ERROR", field: null },
         });
         await expect(
             dispatch(handlers, DESKTOP_TRPC_CHANNELS.platform, {
@@ -113,7 +114,7 @@ describe("데스크탑Trpc호스트", () => {
             }),
         ).resolves.toMatchObject({
             ok: false,
-            error: { message: expect.stringContaining("does not accept") },
+            error: { code: "INTERNAL_SERVER_ERROR", field: null },
         });
         await expect(
             dispatch(handlers, DESKTOP_TRPC_CHANNELS.platform, {
@@ -129,7 +130,7 @@ describe("데스크탑Trpc호스트", () => {
             }),
         ).resolves.toMatchObject({
             ok: false,
-            error: { message: expect.stringContaining("unavailable") },
+            error: { code: "INTERNAL_SERVER_ERROR", field: null },
         });
 
         host.dispose();
@@ -160,5 +161,36 @@ describe("데스크탑Trpc호스트", () => {
             error: { code: "INTERNAL_SERVER_ERROR" },
         });
         expect(JSON.stringify(response)).not.toContain("stack");
+    });
+
+    it("[실패] 안정적인 native 오류 정보만 renderer 경계로 전달함", async () => {
+        const { handlers, host } = fixture();
+        host.handle("platform", "settingsGet", () => {
+            throw NativeError.create(
+                "settings.invalid",
+                "Settings value is invalid.",
+                "appearance",
+            );
+        });
+
+        const response = await dispatch(
+            handlers,
+            DESKTOP_TRPC_CHANNELS.platform,
+            {
+                version: DESKTOP_TRPC_PROTOCOL_VERSION,
+                type: "query",
+                path: "platform.settingsGet",
+                input: { key: "appearance" },
+            },
+        );
+
+        expect(response).toEqual({
+            ok: false,
+            error: {
+                code: "settings.invalid",
+                message: "Settings value is invalid.",
+                field: "appearance",
+            },
+        });
     });
 });

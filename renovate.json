@@ -25,11 +25,91 @@
       "rangeStrategy": "bump"
     },
     {
-      "description": "Group non-major pnpm dependency updates across the monorepo.",
-      "matchDatasources": ["npm"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "pnpm dependencies",
-      "groupSlug": "pnpm-dependencies"
+      "description": "Keep dependency updates within the framework lane.",
+      "matchPackageNames": [
+        "@mdx-js/**",
+        "@next/**",
+        "@tanstack/react-query",
+        "next",
+        "react",
+        "react-dom"
+      ],
+      "groupName": "framework dependencies",
+      "groupSlug": "framework-dependencies"
+    },
+    {
+      "description": "Keep dependency updates within the UI lane.",
+      "matchPackageNames": [
+        "@base-ui/**",
+        "@excalidraw/**",
+        "@tailwindcss/**",
+        "@tanstack/react-virtual",
+        "class-variance-authority",
+        "clsx",
+        "cmdk",
+        "lucide-react",
+        "motion",
+        "shadcn",
+        "tailwind-merge",
+        "tailwindcss",
+        "tw-animate-css"
+      ],
+      "groupName": "UI dependencies",
+      "groupSlug": "ui-dependencies"
+    },
+    {
+      "description": "Keep dependency updates within the desktop lane.",
+      "matchPackageNames": [
+        "@codemirror/**",
+        "@electron/**",
+        "@electron-forge/**",
+        "@trpc/**",
+        "@xterm/**",
+        "ds-store",
+        "electron",
+        "fflate",
+        "macos-alias",
+        "node-gyp",
+        "node-pty",
+        "uuid",
+        "zod",
+        "zustand"
+      ],
+      "groupName": "desktop dependencies",
+      "groupSlug": "desktop-dependencies"
+    },
+    {
+      "description": "Keep dependency updates within the test lane.",
+      "matchPackageNames": [
+        "@axe-core/**",
+        "@playwright/**",
+        "@vitest/**",
+        "vitest"
+      ],
+      "groupName": "test dependencies",
+      "groupSlug": "test-dependencies"
+    },
+    {
+      "description": "Keep dependency updates within the tooling lane.",
+      "matchPackageNames": [
+        "@types/**",
+        "@vitejs/**",
+        "esbuild",
+        "gray-matter",
+        "hast-util-to-string",
+        "npm-check-updates",
+        "oxfmt",
+        "oxlint",
+        "oxlint-tsgolint",
+        "postcss",
+        "rehype-slug",
+        "remark-*",
+        "typescript",
+        "unist-util-visit",
+        "vite"
+      ],
+      "groupName": "tooling dependencies",
+      "groupSlug": "tooling-dependencies"
     },
     {
       "description": "Require dashboard approval before opening major pnpm dependency updates.",

@@ -1,6 +1,6 @@
 # Issue 0018: Electron 리소스 생명주기와 누수 회귀 검증
 
-- 상태: 제안
+- 상태: 완료
 - 우선순위: P2
 - 기준일: 2026-08-19
 - 참고 OSS:
@@ -91,3 +91,14 @@
   - `pnpm --filter @jongminchung/git-client run test:integration:native`
   - `pnpm --filter @jongminchung/git-client run test:electron`
   - 최종 `pnpm run check`
+
+## 처리 결과
+
+- **application·window·repository·operation·terminal별 owner와 dispose 경계를 기존 구현에서 확인함**
+  - application은 Git·terminal utility를 소유하고 `before-quit`에서 함께 정리함
+  - window는 stream·menu·platform handler를 소유하고 `closed`에서 정리함
+  - repository와 terminal service는 watcher·child process·PTY를 각 session 종료에서 정리함
+- **desktop stream의 late event와 double dispose 회귀를 보강함**
+  - dispose 이후 늦게 도착한 connection port를 즉시 닫음
+  - dispose를 반복해도 disconnect callback과 IPC cleanup이 중복되지 않음
+  - 닫힌 port로 publish하거나 late close가 발생해도 추가 event가 전달되지 않음

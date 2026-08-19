@@ -1,6 +1,6 @@
 # Issue 0027: 서명된 데스크톱 업데이트 채널 도입 준비
 
-- 상태: 조건부 제안
+- 상태: 선행 조건 완료·updater 보류
 - 우선순위: P2
 - 기준일: 2026-08-19
 - 선행 이슈:
@@ -114,3 +114,15 @@
   - 이전 version에서 현재 version으로 upgrade smoke
   - offline·metadata 오류·서명 오류 fixture
 - **최종 `pnpm run check`, `git diff --check`, `git status --short`를 실행함**
+
+## 처리 결과
+
+- **고정 `1.0.0` 교체 게시를 stable SemVer 기반 불변 release 계약으로 전환함**
+  - workflow dispatch가 release version을 필수 입력으로 받음
+  - publisher가 version별 tag·title·artifact identity를 생성함
+  - 동일 release 또는 tag가 이미 존재하면 삭제하지 않고 게시를 중단함
+  - 현재 실행이 새로 만든 미완료 draft와 tag만 실패 cleanup 대상으로 유지함
+- **앱 내부 updater는 도입 전제를 충족하지 못해 의도적으로 보류함**
+  - N-1 production artifact와 서명된 update feed가 아직 없음
+  - privacy inventory·최소 지원 version metadata·upgrade smoke 운영 환경이 아직 없음
+  - 해당 조건이 충족되기 전 production endpoint 또는 `autoUpdater`를 연결하지 않음

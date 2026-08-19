@@ -21,27 +21,43 @@
 
 ## 의존성 업데이트
 
-`renovate.json`은 pnpm과 GitHub Actions를 관리한다. minor·patch npm 업데이트는 한 PR로
-묶고, major 업데이트는 Dependency Dashboard 승인이 있어야 열리며, lockfile maintenance는
-Asia/Seoul 기준 월요일 오전 4시 이전에 예약되어 있다.
+`renovate.json`은 pnpm과 GitHub Actions를 관리한다. npm 업데이트는 framework, UI,
+desktop, test, tooling lane별 PR로 묶고, major 업데이트는 Dependency Dashboard 승인이 있어야
+열리며, lockfile maintenance는 Asia/Seoul 기준 월요일 오전 4시 이전에 예약되어 있다.
 
 수동 점검과 업데이트는 다음 순서로 진행한다.
 
 ```sh
-pnpm run deps:check
-pnpm run deps:update
-pnpm install
-pnpm run check:full
+pnpm run deps:inventory
+pnpm run deps:check -- <framework|ui|desktop|test|tooling>
+pnpm run deps:update -- <framework|ui|desktop|test|tooling>
 git diff -- pnpm-workspace.yaml pnpm-lock.yaml package.json apps packages
 ```
+
+`deps:update`는 선택한 lane의 직접 dependency만 manifest와 catalog에서 변경하고 `pnpm install`을
+실행한다. 전이 dependency 변경은 허용하지만 한 PR의 직접 dependency 목적은 한 lane으로
+유지한다. 여러 lane을 결합해야 하면 결합 이유와 lane별 rollback 단위를 변경 설명에 기록한다.
+
+| Lane      | 대표 범위                                | 최소 검증                                                  |
+| --------- | ---------------------------------------- | ---------------------------------------------------------- |
+| framework | React, Next.js, MDX runtime              | 두 앱 build, Web E2E                                       |
+| UI        | Tailwind, Base UI, shadcn, UI dependency | UI test, 두 앱 build, 영향받는 interaction test            |
+| desktop   | Electron, Forge, native·desktop runtime  | Git Client typecheck·test, Electron package·smoke          |
+| test      | Vitest, Playwright, axe, coverage        | reporter·fixture test, 대표 unit·integration·browser suite |
+| tooling   | TypeScript, Oxc, Vite, content tooling   | `pnpm run check`, 영향받는 package build                   |
+
+dependency PR 설명에는 **lane**, 주요 release note와 migration 유무, 실행한 최소 검증,
+major update의 rollback 조건을 포함한다. shadcn CLI package version 갱신과 registry source diff는
+별도 변경으로 유지한다. TypeScript는 tooling lane에 속하지만
+[호환성 보고서](typescript-7-compatibility-report.md)의 재감사 없이 갱신하지 않는다.
 
 1. package가 이미 catalog에 있으면 `pnpm-workspace.yaml`의 버전만 변경한다.
 2. 새 외부 직접 의존성은 catalog와 소비 workspace의 `package.json`에 추가한다.
 3. 내부 package는 registry 버전 대신 `workspace:*`를 사용한다.
 4. `allowBuilds` 추가는 실제 install script가 필요한 native package에만 허용한다.
 5. [기술 스택 문서](technology-stack.md)의 버전, 사용 위치와 공식 문서를 수동 갱신한다.
-6. TypeScript는 `deps:check`와 `deps:update`에서 제외되어 있으므로
-   [호환성 보고서](typescript-7-compatibility-report.md)의 재감사 절차 없이 올리지 않는다.
+6. TypeScript update 후보는 tooling lane에 표시되며 호환성 보고서의 재감사 결과가 있을 때만
+   적용한다.
 
 Renovate PR도 같은 기준으로 manifest, lockfile, release note, peer 범위와 전체 gate를 직접
 검토한다. 새 버전이 설치된다는 사실만으로 runtime·Electron packaging 호환성을 판단하지

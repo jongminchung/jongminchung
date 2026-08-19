@@ -1,6 +1,6 @@
 # Issue 0013: Electron 프로세스 소유권과 IPC 계약 정리
 
-- 상태: 진행 중
+- 상태: 완료
 - 우선순위: P1
 - 기준일: 2026-08-19
 - 참고 OSS:
@@ -35,7 +35,11 @@
   - `query`와 `mutation`의 trusted authorization 기본값을 제거함
   - 모든 procedure가 trusted·active capability·repository capability 중 하나를 명시함
   - 새 procedure가 authorization 없이 추가되면 typecheck가 실패함
-- **남은 범위는 장기 실행 request의 취소·dispose·utility crash 오류 계약 보강임**
+- **장기 실행 request의 취소·dispose·utility crash와 native 오류 직렬화 계약을 보강함**
+  - packaged E2E가 실제 hanging Git HTTP query의 cancel·terminal event·repository 불변 상태를 검증함
+  - Git·terminal utility client가 dispose 응답 뒤 pending request를 거부하고 process를 한 번만 종료함
+  - utility crash는 pending request와 listener를 정리하고 안정적인 transport code로 전달함
+  - renderer에는 명시적인 native `code`·`message`·`field`만 전달하고 native stack·cause를 제거함
 
 ## 현재 상태와 위험
 
@@ -99,6 +103,16 @@
 - **새 procedure가 authorization 없이 등록될 수 없음**
 - **오류·취소·utility crash가 renderer에 안정적인 contract로 전달됨**
 - **기존 public UI export나 component 계약을 변경하지 않음**
+
+## 구현 결과
+
+- **`NativeError`의 process 경계 계약을 명시함**
+  - 예상된 native 오류의 공개 가능한 field만 cause chain에서 식별함
+  - settings read 실패는 실제 file path 대신 안정적인 사용자 메시지를 사용함
+- **desktop tRPC wire error에 nullable `field`를 추가함**
+  - protocol parser가 이전 field 없는 응답도 `null`로 정규화함
+  - preload client는 `code`와 `field`를 error metadata로 전달함
+- **오류 payload에 stack과 원래 내부 값이 포함되지 않는 contract test를 추가함**
 
 ## 검증
 

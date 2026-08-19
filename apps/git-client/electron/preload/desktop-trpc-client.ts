@@ -51,7 +51,10 @@ export function createElectronTrpcLink<
                                 new TRPCClientError<TRouter>(
                                     response.error.message,
                                     {
-                                        meta: { code: response.error.code },
+                                        meta: {
+                                            code: response.error.code,
+                                            field: response.error.field,
+                                        },
                                     },
                                 ),
                             );

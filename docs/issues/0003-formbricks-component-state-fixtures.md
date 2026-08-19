@@ -1,6 +1,6 @@
 # Issue 0003: Formbricks 방식의 component 상태 fixture 도입
 
-- 상태: 진행 중
+- 상태: 완료
 - 우선순위: P1
 - 기준일: 2026-08-19
 - 참고 저장소: [formbricks/formbricks](https://github.com/formbricks/formbricks)
@@ -13,8 +13,8 @@
 - **Formbricks는 component source 옆에 상태별 story를 두어 복잡한 SaaS UI를 탐색 가능하게 관리함**
 - **현재 저장소는 Playwright와 screenshot 기반이 강하지만 독립적인 상태 catalog는 없음**
 - **Storybook을 새로 도입하지 않고 기존 QA fixture와 browser test를 상태 catalog로 확장하는 것이 적절함**
-- **fixture는 이미 제품 흐름에서 검증되는 interaction을 중복하지 않고 시각·상태 조합의 공백만 담당해야 함**
-- **첫 범위는 공용 primitive 전체가 아니라 회귀 비용이 높은 overlay·form·empty·loading 상태임**
+- **fixture는 제품 흐름의 interaction을 중복하지 않고 시각·상태 조합의 공백만 담당함**
+- **Dialog·Select·Menu의 light·dark snapshot과 stacking 계약까지 고정함**
 
 ## 진행 현황
 
@@ -25,7 +25,12 @@
 - **fixture는 `import.meta.env.DEV` 분기에서 lazy-load함**
   - production navigation에서 활성화되지 않음
   - production renderer output에 fixture 문구가 포함되지 않는지 build 결과로 확인함
-- **남은 범위는 light·dark screenshot과 Select·Menu open stacking surface임**
+- **overlay별 deterministic surface를 추가함**
+  - `overlay=dialog`, `overlay=select`, `overlay=menu` query로 실제 primitive의 open 상태를 분리함
+  - 각 overlay의 `z-index: 50` 계약을 role·visibility assertion과 함께 검증함
+- **light·dark screenshot 여섯 개를 추가함**
+  - 동일한 Button·Field·Checkbox·Empty·loading matrix 위에서 overlay별 결과를 검토할 수 있음
+  - snapshot 전에 appearance preference와 lazy fixture 준비 상태를 명시적으로 고정함
 
 ## 참고 저장소에서 확인한 구조
 
@@ -99,6 +104,11 @@
 - **fixture가 production route와 bundle entry에 노출되지 않음**
 - **기존 제품 E2E와 중복되는 assertion이 추가되지 않음**
 - **새 도구나 별도 workspace 없이 기존 Playwright 구성을 사용함**
+
+## 검증 결과
+
+- `pnpm --filter @jongminchung/git-client run typecheck`
+- `pnpm --filter @jongminchung/git-client exec playwright test tests/app.spec.ts --grep 'component .*상태|개발 전용 component'`
 
 ## 검증
 

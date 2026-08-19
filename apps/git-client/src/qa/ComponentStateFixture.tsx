@@ -8,6 +8,12 @@ import {
     DialogTrigger,
 } from "@jongminchung/ui/components/dialog";
 import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@jongminchung/ui/components/dropdown-menu";
+import {
     Empty,
     EmptyDescription,
     EmptyHeader,
@@ -20,6 +26,13 @@ import {
     FieldLabel,
 } from "@jongminchung/ui/components/field";
 import { Input } from "@jongminchung/ui/components/input";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@jongminchung/ui/components/select";
 import { Spinner } from "@jongminchung/ui/components/spinner";
 import { AppearanceProvider } from "../components/AppearanceProvider";
 import { GitClientTheme } from "../components/GitClientTheme";
@@ -40,6 +53,10 @@ function StateGroup({
 }
 
 export default function ComponentStateFixture() {
+    const openOverlay = new URLSearchParams(window.location.search).get(
+        "overlay",
+    );
+
     return (
         <AppearanceProvider>
             <GitClientTheme>
@@ -113,12 +130,45 @@ export default function ComponentStateFixture() {
                                 <Spinner aria-hidden /> Loading repository
                             </div>
                         </StateGroup>
-                        <StateGroup title="Overlay">
-                            <Dialog>
+                        <StateGroup title="Overlay matrix">
+                            <div className="flex flex-wrap items-start gap-3">
+                                <Select
+                                    defaultValue="main"
+                                    open={openOverlay === "select"}
+                                >
+                                    <SelectTrigger aria-label="Fixture branch">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent alignItemWithTrigger={false}>
+                                        <SelectItem value="main">
+                                            main
+                                        </SelectItem>
+                                        <SelectItem value="feature">
+                                            feature/component-fixture
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <DropdownMenu open={openOverlay === "menu"}>
+                                    <DropdownMenuTrigger
+                                        render={<Button variant="outline" />}
+                                    >
+                                        Fixture actions
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                        <DropdownMenuItem>
+                                            Open repository
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem variant="destructive">
+                                            Remove fixture
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+                            <Dialog open={openOverlay === "dialog"}>
                                 <DialogTrigger
                                     render={<Button variant="outline" />}
                                 >
-                                    Open dialog
+                                    Fixture dialog trigger
                                 </DialogTrigger>
                                 <DialogContent closeLabel="Close fixture dialog">
                                     <DialogTitle>Fixture dialog</DialogTitle>

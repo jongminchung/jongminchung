@@ -1,0 +1,1377 @@
+{
+  "schemaVersion": 1,
+  "app": "web",
+  "assetRoot": "apps/web/.next/static",
+  "totals": {
+    "javascript": {
+      "files": 185,
+      "bytes": 9442393,
+      "gzipBytes": 3032938
+    },
+    "css": {
+      "files": 9,
+      "bytes": 468805,
+      "gzipBytes": 78977
+    }
+  },
+  "assets": [
+    {
+      "path": "apps/web/.next/static/cAG4VjkwYLkDWTEnKRsio/_buildManifest.js",
+      "logicalName": "_buildManifest.js",
+      "type": "javascript",
+      "bytes": 219,
+      "gzipBytes": 154
+    },
+    {
+      "path": "apps/web/.next/static/cAG4VjkwYLkDWTEnKRsio/_clientMiddlewareManifest.js",
+      "logicalName": "_clientMiddlewareManifest.js",
+      "type": "javascript",
+      "bytes": 300,
+      "gzipBytes": 210
+    },
+    {
+      "path": "apps/web/.next/static/cAG4VjkwYLkDWTEnKRsio/_ssgManifest.js",
+      "logicalName": "_ssgManifest.js",
+      "type": "javascript",
+      "bytes": 573,
+      "gzipBytes": 180
+    },
+    {
+      "path": "apps/web/.next/static/chunks/0_4k5nychp8d-.css",
+      "logicalName": "0_4k5nychp8d-.css",
+      "type": "css",
+      "bytes": 3109,
+      "gzipBytes": 905
+    },
+    {
+      "path": "apps/web/.next/static/chunks/0-[hash].js",
+      "logicalName": "0-[hash].js",
+      "type": "javascript",
+      "bytes": 28761,
+      "gzipBytes": 9250
+    },
+    {
+      "path": "apps/web/.next/static/chunks/003e4l8as9u0s.js",
+      "logicalName": "003e4l8as9u0s.js",
+      "type": "javascript",
+      "bytes": 70026,
+      "gzipBytes": 19218
+    },
+    {
+      "path": "apps/web/.next/static/chunks/00pvd11nobhjr.js",
+      "logicalName": "00pvd11nobhjr.js",
+      "type": "javascript",
+      "bytes": 3975,
+      "gzipBytes": 1728
+    },
+    {
+      "path": "apps/web/.next/static/chunks/01gxvwp6uon6u.js",
+      "logicalName": "01gxvwp6uon6u.js",
+      "type": "javascript",
+      "bytes": 272,
+      "gzipBytes": 214
+    },
+    {
+      "path": "apps/web/.next/static/chunks/02pzy2g_mk49r.js",
+      "logicalName": "02pzy2g_mk49r.js",
+      "type": "javascript",
+      "bytes": 33044,
+      "gzipBytes": 10569
+    },
+    {
+      "path": "apps/web/.next/static/chunks/04byl--75ploy.js",
+      "logicalName": "04byl--75ploy.js",
+      "type": "javascript",
+      "bytes": 33254,
+      "gzipBytes": 11924
+    },
+    {
+      "path": "apps/web/.next/static/chunks/04h22qpd29avn.js",
+      "logicalName": "04h22qpd29avn.js",
+      "type": "javascript",
+      "bytes": 42341,
+      "gzipBytes": 11657
+    },
+    {
+      "path": "apps/web/.next/static/chunks/04vavltvib249.js",
+      "logicalName": "04vavltvib249.js",
+      "type": "javascript",
+      "bytes": 17715,
+      "gzipBytes": 5407
+    },
+    {
+      "path": "apps/web/.next/static/chunks/059oa7brer676.js",
+      "logicalName": "059oa7brer676.js",
+      "type": "javascript",
+      "bytes": 24371,
+      "gzipBytes": 8219
+    },
+    {
+      "path": "apps/web/.next/static/chunks/05l6yir_4__o4.js",
+      "logicalName": "05l6yir_4__o4.js",
+      "type": "javascript",
+      "bytes": 23635,
+      "gzipBytes": 9033
+    },
+    {
+      "path": "apps/web/.next/static/chunks/05u2kt79tzu90.js",
+      "logicalName": "05u2kt79tzu90.js",
+      "type": "javascript",
+      "bytes": 27409,
+      "gzipBytes": 8265
+    },
+    {
+      "path": "apps/web/.next/static/chunks/06m0aa9p48d8g.js",
+      "logicalName": "06m0aa9p48d8g.js",
+      "type": "javascript",
+      "bytes": 23550,
+      "gzipBytes": 7888
+    },
+    {
+      "path": "apps/web/.next/static/chunks/07o1ahdgt5pbd.js",
+      "logicalName": "07o1ahdgt5pbd.js",
+      "type": "javascript",
+      "bytes": 584,
+      "gzipBytes": 394
+    },
+    {
+      "path": "apps/web/.next/static/chunks/08j7ywb471r4b.js",
+      "logicalName": "08j7ywb471r4b.js",
+      "type": "javascript",
+      "bytes": 624,
+      "gzipBytes": 420
+    },
+    {
+      "path": "apps/web/.next/static/chunks/0admrm5d7aq4l.js",
+      "logicalName": "0admrm5d7aq4l.js",
+      "type": "javascript",
+      "bytes": 29011,
+      "gzipBytes": 9808
+    },
+    {
+      "path": "apps/web/.next/static/chunks/0aiopnn_6i-ru.js",
+      "logicalName": "0aiopnn_6i-ru.js",
+      "type": "javascript",
+      "bytes": 35386,
+      "gzipBytes": 12723
+    },
+    {
+      "path": "apps/web/.next/static/chunks/0alhfy__w_a-1.js",
+      "logicalName": "0alhfy__w_a-1.js",
+      "type": "javascript",
+      "bytes": 58634,
+      "gzipBytes": 20984
+    },
+    {
+      "path": "apps/web/.next/static/chunks/0bwpxfw8vwx5r.js",
+      "logicalName": "0bwpxfw8vwx5r.js",
+      "type": "javascript",
+      "bytes": 31393,
+      "gzipBytes": 7871
+    },
+    {
+      "path": "apps/web/.next/static/chunks/0cz1d0mv5g_q7.js",
+      "logicalName": "0cz1d0mv5g_q7.js",
+      "type": "javascript",
+      "bytes": 112594,
+      "gzipBytes": 39627
+    },
+    {
+      "path": "apps/web/.next/static/chunks/0duduejgxog9a.js",
+      "logicalName": "0duduejgxog9a.js",
+      "type": "javascript",
+      "bytes": 23510,
+      "gzipBytes": 9117
+    },
+    {
+      "path": "apps/web/.next/static/chunks/0ei1hb18g6u7z.js",
+      "logicalName": "0ei1hb18g6u7z.js",
+      "type": "javascript",
+      "bytes": 20030,
+      "gzipBytes": 7964
+    },
+    {
+      "path": "apps/web/.next/static/chunks/0g8xpe80qzd1p.css",
+      "logicalName": "0g8xpe80qzd1p.css",
+      "type": "css",
+      "bytes": 96435,
+      "gzipBytes": 16276
+    },
+    {
+      "path": "apps/web/.next/static/chunks/0gm_k3w5q78wi.js",
+      "logicalName": "0gm_k3w5q78wi.js",
+      "type": "javascript",
+      "bytes": 18379,
+      "gzipBytes": 7790
+    },
+    {
+      "path": "apps/web/.next/static/chunks/0ioc2nymg3bu6.js",
+      "logicalName": "0ioc2nymg3bu6.js",
+      "type": "javascript",
+      "bytes": 10307,
+      "gzipBytes": 4262
+    },
+    {
+      "path": "apps/web/.next/static/chunks/0jtccqpv1wpdl.css",
+      "logicalName": "0jtccqpv1wpdl.css",
+      "type": "css",
+      "bytes": 1358,
+      "gzipBytes": 492
+    },
+    {
+      "path": "apps/web/.next/static/chunks/0m-[hash].css",
+      "logicalName": "0m-[hash].css",
+      "type": "css",
+      "bytes": 142125,
+      "gzipBytes": 22358
+    },
+    {
+      "path": "apps/web/.next/static/chunks/0m3i5h4pbb474.js",
+      "logicalName": "0m3i5h4pbb474.js",
+      "type": "javascript",
+      "bytes": 260,
+      "gzipBytes": 206
+    },
+    {
+      "path": "apps/web/.next/static/chunks/0r19yqxz4b9ol.js",
+      "logicalName": "0r19yqxz4b9ol.js",
+      "type": "javascript",
+      "bytes": 22717,
+      "gzipBytes": 9392
+    },
+    {
+      "path": "apps/web/.next/static/chunks/0td1y3znogs88.js",
+      "logicalName": "0td1y3znogs88.js",
+      "type": "javascript",
+      "bytes": 8722,
+      "gzipBytes": 3451
+    },
+    {
+      "path": "apps/web/.next/static/chunks/0v6480phqg_x_.js",
+      "logicalName": "0v6480phqg_x_.js",
+      "type": "javascript",
+      "bytes": 35673,
+      "gzipBytes": 7759
+    },
+    {
+      "path": "apps/web/.next/static/chunks/0xod466joi2uy.js",
+      "logicalName": "0xod466joi2uy.js",
+      "type": "javascript",
+      "bytes": 25530,
+      "gzipBytes": 5693
+    },
+    {
+      "path": "apps/web/.next/static/chunks/0z40mkoy6oloh.js",
+      "logicalName": "0z40mkoy6oloh.js",
+      "type": "javascript",
+      "bytes": 38982,
+      "gzipBytes": 9945
+    },
+    {
+      "path": "apps/web/.next/static/chunks/0z5lridx8xxw_.js",
+      "logicalName": "0z5lridx8xxw_.js",
+      "type": "javascript",
+      "bytes": 49863,
+      "gzipBytes": 11960
+    },
+    {
+      "path": "apps/web/.next/static/chunks/0zmp6wifk2tqk.js",
+      "logicalName": "0zmp6wifk2tqk.js",
+      "type": "javascript",
+      "bytes": 33081,
+      "gzipBytes": 9500
+    },
+    {
+      "path": "apps/web/.next/static/chunks/0zqi-[hash].js",
+      "logicalName": "0zqi-[hash].js",
+      "type": "javascript",
+      "bytes": 15826,
+      "gzipBytes": 5364
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1-[hash].js",
+      "logicalName": "1-[hash].js#1",
+      "type": "javascript",
+      "bytes": 12700,
+      "gzipBytes": 5472
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1-[hash].js",
+      "logicalName": "1-[hash].js#2",
+      "type": "javascript",
+      "bytes": 16870,
+      "gzipBytes": 7009
+    },
+    {
+      "path": "apps/web/.next/static/chunks/12dnwr6ecx66i.js",
+      "logicalName": "12dnwr6ecx66i.js",
+      "type": "javascript",
+      "bytes": 1025,
+      "gzipBytes": 562
+    },
+    {
+      "path": "apps/web/.next/static/chunks/14894a-xyqeem.js",
+      "logicalName": "14894a-xyqeem.js",
+      "type": "javascript",
+      "bytes": 22208,
+      "gzipBytes": 8053
+    },
+    {
+      "path": "apps/web/.next/static/chunks/15rwuk9r5-1ng.js",
+      "logicalName": "15rwuk9r5-1ng.js",
+      "type": "javascript",
+      "bytes": 14557,
+      "gzipBytes": 6149
+    },
+    {
+      "path": "apps/web/.next/static/chunks/163x_9i6f07mc.js",
+      "logicalName": "163x_9i6f07mc.js",
+      "type": "javascript",
+      "bytes": 833,
+      "gzipBytes": 530
+    },
+    {
+      "path": "apps/web/.next/static/chunks/17_nphp88hyks.js",
+      "logicalName": "17_nphp88hyks.js",
+      "type": "javascript",
+      "bytes": 27966,
+      "gzipBytes": 9740
+    },
+    {
+      "path": "apps/web/.next/static/chunks/17i378ez3a29h.js",
+      "logicalName": "17i378ez3a29h.js",
+      "type": "javascript",
+      "bytes": 23477,
+      "gzipBytes": 9132
+    },
+    {
+      "path": "apps/web/.next/static/chunks/17mpnxpmrivwx.js",
+      "logicalName": "17mpnxpmrivwx.js",
+      "type": "javascript",
+      "bytes": 669,
+      "gzipBytes": 416
+    },
+    {
+      "path": "apps/web/.next/static/chunks/18afgt2dloevm.js",
+      "logicalName": "18afgt2dloevm.js",
+      "type": "javascript",
+      "bytes": 49476,
+      "gzipBytes": 15526
+    },
+    {
+      "path": "apps/web/.next/static/chunks/19aj9bwkwd2u3.css",
+      "logicalName": "19aj9bwkwd2u3.css",
+      "type": "css",
+      "bytes": 1667,
+      "gzipBytes": 632
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1a37514gbn5s6.js",
+      "logicalName": "1a37514gbn5s6.js",
+      "type": "javascript",
+      "bytes": 79758,
+      "gzipBytes": 26672
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1aswdu1l6l67_.css",
+      "logicalName": "1aswdu1l6l67_.css",
+      "type": "css",
+      "bytes": 96174,
+      "gzipBytes": 16162
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1c200p2oyw514.js",
+      "logicalName": "1c200p2oyw514.js",
+      "type": "javascript",
+      "bytes": 6064,
+      "gzipBytes": 2561
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1d1ayqzkd80zx.js",
+      "logicalName": "1d1ayqzkd80zx.js",
+      "type": "javascript",
+      "bytes": 260,
+      "gzipBytes": 203
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1dk-[hash].js",
+      "logicalName": "1dk-[hash].js",
+      "type": "javascript",
+      "bytes": 39285,
+      "gzipBytes": 12884
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1eo3esjb3poak.js",
+      "logicalName": "1eo3esjb3poak.js",
+      "type": "javascript",
+      "bytes": 21552,
+      "gzipBytes": 8676
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1etypzwm9vf77.js",
+      "logicalName": "1etypzwm9vf77.js",
+      "type": "javascript",
+      "bytes": 30884,
+      "gzipBytes": 7489
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1f0799u3sfjt2.js",
+      "logicalName": "1f0799u3sfjt2.js",
+      "type": "javascript",
+      "bytes": 52578,
+      "gzipBytes": 17272
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1fwt9ke3t-_na.js",
+      "logicalName": "1fwt9ke3t-_na.js",
+      "type": "javascript",
+      "bytes": 45226,
+      "gzipBytes": 9876
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1fx_bty5hv_m1.js",
+      "logicalName": "1fx_bty5hv_m1.js",
+      "type": "javascript",
+      "bytes": 69638,
+      "gzipBytes": 22439
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1g4ou2kxmfkx1.js",
+      "logicalName": "1g4ou2kxmfkx1.js",
+      "type": "javascript",
+      "bytes": 20894,
+      "gzipBytes": 7315
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1haey3b-mmj4y.js",
+      "logicalName": "1haey3b-mmj4y.js",
+      "type": "javascript",
+      "bytes": 31798,
+      "gzipBytes": 9854
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1hwgup07wtrmn.js",
+      "logicalName": "1hwgup07wtrmn.js",
+      "type": "javascript",
+      "bytes": 264,
+      "gzipBytes": 206
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1iuecn0s2i_14.js",
+      "logicalName": "1iuecn0s2i_14.js",
+      "type": "javascript",
+      "bytes": 3601,
+      "gzipBytes": 1547
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1j5atq84x5h9r.js",
+      "logicalName": "1j5atq84x5h9r.js",
+      "type": "javascript",
+      "bytes": 1656,
+      "gzipBytes": 514
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1jf75wh2sv3md.js",
+      "logicalName": "1jf75wh2sv3md.js",
+      "type": "javascript",
+      "bytes": 19805,
+      "gzipBytes": 8156
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1knm4-eqhi7f4.js",
+      "logicalName": "1knm4-eqhi7f4.js",
+      "type": "javascript",
+      "bytes": 33489,
+      "gzipBytes": 10495
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1lc1bvh7-b6bd.js",
+      "logicalName": "1lc1bvh7-b6bd.js",
+      "type": "javascript",
+      "bytes": 655683,
+      "gzipBytes": 141972
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1me8m9a0ava39.js",
+      "logicalName": "1me8m9a0ava39.js",
+      "type": "javascript",
+      "bytes": 255,
+      "gzipBytes": 209
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1ni4ngl48y2e0.js",
+      "logicalName": "1ni4ngl48y2e0.js",
+      "type": "javascript",
+      "bytes": 31669,
+      "gzipBytes": 12115
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1qi86bljv2_rk.js",
+      "logicalName": "1qi86bljv2_rk.js",
+      "type": "javascript",
+      "bytes": 28719,
+      "gzipBytes": 8309
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1ro-[hash].js",
+      "logicalName": "1ro-[hash].js",
+      "type": "javascript",
+      "bytes": 27350,
+      "gzipBytes": 9842
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1rqq-[hash].js",
+      "logicalName": "1rqq-[hash].js",
+      "type": "javascript",
+      "bytes": 36979,
+      "gzipBytes": 9051
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1rsi-[hash].js",
+      "logicalName": "1rsi-[hash].js",
+      "type": "javascript",
+      "bytes": 19737,
+      "gzipBytes": 9415
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1scd029pm3x6g.js",
+      "logicalName": "1scd029pm3x6g.js",
+      "type": "javascript",
+      "bytes": 21218,
+      "gzipBytes": 8336
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1sf3r9hrp89l6.js",
+      "logicalName": "1sf3r9hrp89l6.js",
+      "type": "javascript",
+      "bytes": 74392,
+      "gzipBytes": 20608
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1ssjq4bpvb2-4.js",
+      "logicalName": "1ssjq4bpvb2-4.js",
+      "type": "javascript",
+      "bytes": 45057,
+      "gzipBytes": 11519
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1sw9gifpdzi7c.js",
+      "logicalName": "1sw9gifpdzi7c.js",
+      "type": "javascript",
+      "bytes": 21960,
+      "gzipBytes": 6828
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1u439hpcnm97p.js",
+      "logicalName": "1u439hpcnm97p.js",
+      "type": "javascript",
+      "bytes": 238165,
+      "gzipBytes": 35434
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1ukh3naoy71_6.js",
+      "logicalName": "1ukh3naoy71_6.js",
+      "type": "javascript",
+      "bytes": 44469,
+      "gzipBytes": 13675
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1unbawggn-8a5.js",
+      "logicalName": "1unbawggn-8a5.js",
+      "type": "javascript",
+      "bytes": 1008,
+      "gzipBytes": 589
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1v2ex2qq7hx7m.css",
+      "logicalName": "1v2ex2qq7hx7m.css",
+      "type": "css",
+      "bytes": 729,
+      "gzipBytes": 323
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1vtw5arndilnj.js",
+      "logicalName": "1vtw5arndilnj.js",
+      "type": "javascript",
+      "bytes": 713,
+      "gzipBytes": 503
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1vwiirzqcll7s.js",
+      "logicalName": "1vwiirzqcll7s.js",
+      "type": "javascript",
+      "bytes": 156497,
+      "gzipBytes": 43049
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1w02731t2wq61.js",
+      "logicalName": "1w02731t2wq61.js",
+      "type": "javascript",
+      "bytes": 2225,
+      "gzipBytes": 964
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1x1a9fn403xjh.js",
+      "logicalName": "1x1a9fn403xjh.js",
+      "type": "javascript",
+      "bytes": 270,
+      "gzipBytes": 213
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1xfo9o0a1o1pl.js",
+      "logicalName": "1xfo9o0a1o1pl.js",
+      "type": "javascript",
+      "bytes": 1657,
+      "gzipBytes": 844
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1z24oep22tabd.js",
+      "logicalName": "1z24oep22tabd.js",
+      "type": "javascript",
+      "bytes": 3285,
+      "gzipBytes": 1224
+    },
+    {
+      "path": "apps/web/.next/static/chunks/1z2r40-vbi4sq.js",
+      "logicalName": "1z2r40-vbi4sq.js",
+      "type": "javascript",
+      "bytes": 274,
+      "gzipBytes": 216
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2-[hash].js",
+      "logicalName": "2-[hash].js",
+      "type": "javascript",
+      "bytes": 37751,
+      "gzipBytes": 12112
+    },
+    {
+      "path": "apps/web/.next/static/chunks/214-[hash].js",
+      "logicalName": "214-[hash].js",
+      "type": "javascript",
+      "bytes": 8629,
+      "gzipBytes": 2469
+    },
+    {
+      "path": "apps/web/.next/static/chunks/215tvfwz6jq0c.js",
+      "logicalName": "215tvfwz6jq0c.js",
+      "type": "javascript",
+      "bytes": 268,
+      "gzipBytes": 213
+    },
+    {
+      "path": "apps/web/.next/static/chunks/21olhkk5l-wi2.js",
+      "logicalName": "21olhkk5l-wi2.js",
+      "type": "javascript",
+      "bytes": 31555,
+      "gzipBytes": 8473
+    },
+    {
+      "path": "apps/web/.next/static/chunks/21sowb7mxpdds.js",
+      "logicalName": "21sowb7mxpdds.js",
+      "type": "javascript",
+      "bytes": 26001,
+      "gzipBytes": 6020
+    },
+    {
+      "path": "apps/web/.next/static/chunks/223khjma4jx4c.js",
+      "logicalName": "223khjma4jx4c.js",
+      "type": "javascript",
+      "bytes": 61846,
+      "gzipBytes": 20785
+    },
+    {
+      "path": "apps/web/.next/static/chunks/23f-[hash].css",
+      "logicalName": "23f-[hash].css",
+      "type": "css",
+      "bytes": 96026,
+      "gzipBytes": 16152
+    },
+    {
+      "path": "apps/web/.next/static/chunks/24-[hash].js",
+      "logicalName": "24-[hash].js",
+      "type": "javascript",
+      "bytes": 21889,
+      "gzipBytes": 7732
+    },
+    {
+      "path": "apps/web/.next/static/chunks/24pm470zy3duu.js",
+      "logicalName": "24pm470zy3duu.js",
+      "type": "javascript",
+      "bytes": 286704,
+      "gzipBytes": 65676
+    },
+    {
+      "path": "apps/web/.next/static/chunks/24sx34ernn_wj.js",
+      "logicalName": "24sx34ernn_wj.js",
+      "type": "javascript",
+      "bytes": 42900,
+      "gzipBytes": 15566
+    },
+    {
+      "path": "apps/web/.next/static/chunks/25cdr2bh7l8o3.js",
+      "logicalName": "25cdr2bh7l8o3.js",
+      "type": "javascript",
+      "bytes": 19558,
+      "gzipBytes": 7853
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2668ub2dkc74d.js",
+      "logicalName": "2668ub2dkc74d.js",
+      "type": "javascript",
+      "bytes": 3690,
+      "gzipBytes": 1400
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2bt94tvxwjycv.js",
+      "logicalName": "2bt94tvxwjycv.js",
+      "type": "javascript",
+      "bytes": 21546,
+      "gzipBytes": 4238
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2byqqmovcyy5u.js",
+      "logicalName": "2byqqmovcyy5u.js",
+      "type": "javascript",
+      "bytes": 45226,
+      "gzipBytes": 16053
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2e5cyow-bz_46.js",
+      "logicalName": "2e5cyow-bz_46.js",
+      "type": "javascript",
+      "bytes": 60299,
+      "gzipBytes": 21523
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2e6d-[hash].js",
+      "logicalName": "2e6d-[hash].js",
+      "type": "javascript",
+      "bytes": 117497,
+      "gzipBytes": 38282
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2emugcdolhxal.js",
+      "logicalName": "2emugcdolhxal.js",
+      "type": "javascript",
+      "bytes": 33067,
+      "gzipBytes": 10846
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2eo3fysda0f4x.js",
+      "logicalName": "2eo3fysda0f4x.js",
+      "type": "javascript",
+      "bytes": 23988,
+      "gzipBytes": 8825
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2et1j9k5zhpkc.js",
+      "logicalName": "2et1j9k5zhpkc.js",
+      "type": "javascript",
+      "bytes": 298,
+      "gzipBytes": 226
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2fyt6kks4vztj.js",
+      "logicalName": "2fyt6kks4vztj.js",
+      "type": "javascript",
+      "bytes": 17863,
+      "gzipBytes": 6488
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2gic7pm822emz.js",
+      "logicalName": "2gic7pm822emz.js",
+      "type": "javascript",
+      "bytes": 12423,
+      "gzipBytes": 4697
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2h2-[hash].js",
+      "logicalName": "2h2-[hash].js",
+      "type": "javascript",
+      "bytes": 264,
+      "gzipBytes": 213
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2hatzep937ij8.js",
+      "logicalName": "2hatzep937ij8.js",
+      "type": "javascript",
+      "bytes": 530339,
+      "gzipBytes": 178910
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2hnsn9b6kdn1i.js",
+      "logicalName": "2hnsn9b6kdn1i.js",
+      "type": "javascript",
+      "bytes": 3975,
+      "gzipBytes": 1728
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2i7k2bulqjlei.js",
+      "logicalName": "2i7k2bulqjlei.js",
+      "type": "javascript",
+      "bytes": 14220,
+      "gzipBytes": 6018
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2ia8hw2jp00-8.js",
+      "logicalName": "2ia8hw2jp00-8.js",
+      "type": "javascript",
+      "bytes": 9941,
+      "gzipBytes": 4090
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2ix0_--2jvrd9.js",
+      "logicalName": "2ix0_--2jvrd9.js",
+      "type": "javascript",
+      "bytes": 19089,
+      "gzipBytes": 7710
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2j91l8tk_3mz1.js",
+      "logicalName": "2j91l8tk_3mz1.js",
+      "type": "javascript",
+      "bytes": 22207,
+      "gzipBytes": 8671
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2ka114eog5fgj.js",
+      "logicalName": "2ka114eog5fgj.js",
+      "type": "javascript",
+      "bytes": 2436,
+      "gzipBytes": 1051
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2klim_htsytul.js",
+      "logicalName": "2klim_htsytul.js",
+      "type": "javascript",
+      "bytes": 547679,
+      "gzipBytes": 159466
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2km3fc6bo3wak.js",
+      "logicalName": "2km3fc6bo3wak.js",
+      "type": "javascript",
+      "bytes": 9222,
+      "gzipBytes": 4177
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2l2uu93i3yd5x.js",
+      "logicalName": "2l2uu93i3yd5x.js",
+      "type": "javascript",
+      "bytes": 8895,
+      "gzipBytes": 3625
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2lmkxe0p2vrdg.js",
+      "logicalName": "2lmkxe0p2vrdg.js",
+      "type": "javascript",
+      "bytes": 7439,
+      "gzipBytes": 1723
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2mkei435b0khw.js",
+      "logicalName": "2mkei435b0khw.js",
+      "type": "javascript",
+      "bytes": 1819696,
+      "gzipBytes": 734800
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2n6ui1yq40qqm.js",
+      "logicalName": "2n6ui1yq40qqm.js",
+      "type": "javascript",
+      "bytes": 24316,
+      "gzipBytes": 9361
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2nosmeft1jwta.js",
+      "logicalName": "2nosmeft1jwta.js",
+      "type": "javascript",
+      "bytes": 430028,
+      "gzipBytes": 134762
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2nt-[hash].js",
+      "logicalName": "2nt-[hash].js",
+      "type": "javascript",
+      "bytes": 19828,
+      "gzipBytes": 7925
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2ppdonyqcgj7l.js",
+      "logicalName": "2ppdonyqcgj7l.js",
+      "type": "javascript",
+      "bytes": 3482,
+      "gzipBytes": 1360
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2pw08u_qe-ky9.js",
+      "logicalName": "2pw08u_qe-ky9.js",
+      "type": "javascript",
+      "bytes": 383,
+      "gzipBytes": 262
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2qr4l1gywkblg.js",
+      "logicalName": "2qr4l1gywkblg.js",
+      "type": "javascript",
+      "bytes": 19467,
+      "gzipBytes": 7951
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2shgbfdq-6bl-.js",
+      "logicalName": "2shgbfdq-6bl-.js",
+      "type": "javascript",
+      "bytes": 28342,
+      "gzipBytes": 7058
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2t-[hash].js",
+      "logicalName": "2t-[hash].js",
+      "type": "javascript",
+      "bytes": 47194,
+      "gzipBytes": 16380
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2uifm6n377agt.js",
+      "logicalName": "2uifm6n377agt.js",
+      "type": "javascript",
+      "bytes": 20279,
+      "gzipBytes": 8321
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2uq9-[hash].js",
+      "logicalName": "2uq9-[hash].js",
+      "type": "javascript",
+      "bytes": 41547,
+      "gzipBytes": 15061
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2uwg02e_g33xr.js",
+      "logicalName": "2uwg02e_g33xr.js",
+      "type": "javascript",
+      "bytes": 14522,
+      "gzipBytes": 4982
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2wtuhmh0lvgvk.js",
+      "logicalName": "2wtuhmh0lvgvk.js",
+      "type": "javascript",
+      "bytes": 49111,
+      "gzipBytes": 15967
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2x-[hash].js",
+      "logicalName": "2x-[hash].js",
+      "type": "javascript",
+      "bytes": 21196,
+      "gzipBytes": 4041
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2xajdm675ei61.js",
+      "logicalName": "2xajdm675ei61.js",
+      "type": "javascript",
+      "bytes": 10264,
+      "gzipBytes": 4285
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2y7zas5bcdlps.css",
+      "logicalName": "2y7zas5bcdlps.css",
+      "type": "css",
+      "bytes": 31182,
+      "gzipBytes": 5677
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2yvfbti5ikgj-.js",
+      "logicalName": "2yvfbti5ikgj-.js",
+      "type": "javascript",
+      "bytes": 264,
+      "gzipBytes": 206
+    },
+    {
+      "path": "apps/web/.next/static/chunks/2zvtjmv_xedb4.js",
+      "logicalName": "2zvtjmv_xedb4.js",
+      "type": "javascript",
+      "bytes": 60032,
+      "gzipBytes": 19171
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3_e1z8xcecw5e.js",
+      "logicalName": "3_e1z8xcecw5e.js",
+      "type": "javascript",
+      "bytes": 33196,
+      "gzipBytes": 10712
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3_vvxgcmq4g9s.js",
+      "logicalName": "3_vvxgcmq4g9s.js",
+      "type": "javascript",
+      "bytes": 118688,
+      "gzipBytes": 30544
+    },
+    {
+      "path": "apps/web/.next/static/chunks/30iq9k89r1krw.js",
+      "logicalName": "30iq9k89r1krw.js",
+      "type": "javascript",
+      "bytes": 722,
+      "gzipBytes": 442
+    },
+    {
+      "path": "apps/web/.next/static/chunks/328slp8bjhsen.js",
+      "logicalName": "328slp8bjhsen.js",
+      "type": "javascript",
+      "bytes": 11140,
+      "gzipBytes": 4507
+    },
+    {
+      "path": "apps/web/.next/static/chunks/339zq_6akg9or.js",
+      "logicalName": "339zq_6akg9or.js",
+      "type": "javascript",
+      "bytes": 23217,
+      "gzipBytes": 6806
+    },
+    {
+      "path": "apps/web/.next/static/chunks/34dp9i74sy6aj.js",
+      "logicalName": "34dp9i74sy6aj.js",
+      "type": "javascript",
+      "bytes": 8748,
+      "gzipBytes": 3668
+    },
+    {
+      "path": "apps/web/.next/static/chunks/39pa6ijfw2j5n.js",
+      "logicalName": "39pa6ijfw2j5n.js",
+      "type": "javascript",
+      "bytes": 958,
+      "gzipBytes": 491
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3b_j8x1x9e80g.js",
+      "logicalName": "3b_j8x1x9e80g.js",
+      "type": "javascript",
+      "bytes": 2988,
+      "gzipBytes": 1077
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3b1gh3pzirtao.js",
+      "logicalName": "3b1gh3pzirtao.js",
+      "type": "javascript",
+      "bytes": 22579,
+      "gzipBytes": 9279
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3bc5bye2lc83t.js",
+      "logicalName": "3bc5bye2lc83t.js",
+      "type": "javascript",
+      "bytes": 42994,
+      "gzipBytes": 13934
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3bl9ublb1l646.js",
+      "logicalName": "3bl9ublb1l646.js",
+      "type": "javascript",
+      "bytes": 12928,
+      "gzipBytes": 3638
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3c698_lq-e8f9.js",
+      "logicalName": "3c698_lq-e8f9.js",
+      "type": "javascript",
+      "bytes": 3733,
+      "gzipBytes": 1350
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3d3u9832_wjkt.js",
+      "logicalName": "3d3u9832_wjkt.js",
+      "type": "javascript",
+      "bytes": 32080,
+      "gzipBytes": 10021
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3dsp7_6i2n7b7.js",
+      "logicalName": "3dsp7_6i2n7b7.js",
+      "type": "javascript",
+      "bytes": 107164,
+      "gzipBytes": 24679
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3eey0bkzo7hqf.js",
+      "logicalName": "3eey0bkzo7hqf.js",
+      "type": "javascript",
+      "bytes": 260,
+      "gzipBytes": 210
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3gelceseaci0k.js",
+      "logicalName": "3gelceseaci0k.js",
+      "type": "javascript",
+      "bytes": 30051,
+      "gzipBytes": 10170
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3h-[hash].js",
+      "logicalName": "3h-[hash].js",
+      "type": "javascript",
+      "bytes": 4136,
+      "gzipBytes": 1801
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3hei3-9ao_ued.js",
+      "logicalName": "3hei3-9ao_ued.js",
+      "type": "javascript",
+      "bytes": 73465,
+      "gzipBytes": 19951
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3i2p3oe-tyn79.js",
+      "logicalName": "3i2p3oe-tyn79.js",
+      "type": "javascript",
+      "bytes": 19820,
+      "gzipBytes": 7769
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3jd4ovdx80wf8.js",
+      "logicalName": "3jd4ovdx80wf8.js",
+      "type": "javascript",
+      "bytes": 19932,
+      "gzipBytes": 8632
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3jz_4llrcdh5e.js",
+      "logicalName": "3jz_4llrcdh5e.js",
+      "type": "javascript",
+      "bytes": 26091,
+      "gzipBytes": 8939
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3ldlfqhaqmsqj.js",
+      "logicalName": "3ldlfqhaqmsqj.js",
+      "type": "javascript",
+      "bytes": 272,
+      "gzipBytes": 213
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3mwiqhgseg4iy.js",
+      "logicalName": "3mwiqhgseg4iy.js",
+      "type": "javascript",
+      "bytes": 42350,
+      "gzipBytes": 11470
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3mxg93t9adbug.js",
+      "logicalName": "3mxg93t9adbug.js",
+      "type": "javascript",
+      "bytes": 272,
+      "gzipBytes": 213
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3myikv-bgqoq6.js",
+      "logicalName": "3myikv-bgqoq6.js",
+      "type": "javascript",
+      "bytes": 19946,
+      "gzipBytes": 8008
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3ou7tuaulcnss.js",
+      "logicalName": "3ou7tuaulcnss.js",
+      "type": "javascript",
+      "bytes": 34702,
+      "gzipBytes": 11560
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3prnw-467bmiu.js",
+      "logicalName": "3prnw-467bmiu.js",
+      "type": "javascript",
+      "bytes": 256,
+      "gzipBytes": 203
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3q1js6hf9z0fo.js",
+      "logicalName": "3q1js6hf9z0fo.js",
+      "type": "javascript",
+      "bytes": 24815,
+      "gzipBytes": 7113
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3q90nfsvxjqtv.js",
+      "logicalName": "3q90nfsvxjqtv.js",
+      "type": "javascript",
+      "bytes": 24795,
+      "gzipBytes": 9669
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3qc2q7tcpotc3.js",
+      "logicalName": "3qc2q7tcpotc3.js",
+      "type": "javascript",
+      "bytes": 19771,
+      "gzipBytes": 9411
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3t_xz1tejs12s.js",
+      "logicalName": "3t_xz1tejs12s.js",
+      "type": "javascript",
+      "bytes": 4430,
+      "gzipBytes": 1835
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3t07fhi79w7kq.js",
+      "logicalName": "3t07fhi79w7kq.js",
+      "type": "javascript",
+      "bytes": 24885,
+      "gzipBytes": 8784
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3t1_5eyj228ys.js",
+      "logicalName": "3t1_5eyj228ys.js",
+      "type": "javascript",
+      "bytes": 25131,
+      "gzipBytes": 9572
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3tg4e5ll36wyv.js",
+      "logicalName": "3tg4e5ll36wyv.js",
+      "type": "javascript",
+      "bytes": 32848,
+      "gzipBytes": 10322
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3tgezh0sse-s6.js",
+      "logicalName": "3tgezh0sse-s6.js",
+      "type": "javascript",
+      "bytes": 256,
+      "gzipBytes": 203
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3uex4_-bl3rwa.js",
+      "logicalName": "3uex4_-bl3rwa.js",
+      "type": "javascript",
+      "bytes": 18578,
+      "gzipBytes": 7638
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3v7u_fcq4jtgy.js",
+      "logicalName": "3v7u_fcq4jtgy.js",
+      "type": "javascript",
+      "bytes": 3909,
+      "gzipBytes": 1707
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3vb547bi-nju9.js",
+      "logicalName": "3vb547bi-nju9.js",
+      "type": "javascript",
+      "bytes": 229047,
+      "gzipBytes": 71660
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3vbf0r00ol764.js",
+      "logicalName": "3vbf0r00ol764.js",
+      "type": "javascript",
+      "bytes": 16132,
+      "gzipBytes": 6829
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3vyqst1v5n0j2.js",
+      "logicalName": "3vyqst1v5n0j2.js",
+      "type": "javascript",
+      "bytes": 80914,
+      "gzipBytes": 21199
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3w-[hash].js",
+      "logicalName": "3w-[hash].js",
+      "type": "javascript",
+      "bytes": 21523,
+      "gzipBytes": 8590
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3xsdmeimee4xd.js",
+      "logicalName": "3xsdmeimee4xd.js",
+      "type": "javascript",
+      "bytes": 23497,
+      "gzipBytes": 9029
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3y1jvp9crwxg8.js",
+      "logicalName": "3y1jvp9crwxg8.js",
+      "type": "javascript",
+      "bytes": 21728,
+      "gzipBytes": 8712
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3ydo7wy3w4g7d.js",
+      "logicalName": "3ydo7wy3w4g7d.js",
+      "type": "javascript",
+      "bytes": 14436,
+      "gzipBytes": 3688
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3z-[hash].js",
+      "logicalName": "3z-[hash].js",
+      "type": "javascript",
+      "bytes": 32404,
+      "gzipBytes": 9003
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3zk3bb69dmxey.js",
+      "logicalName": "3zk3bb69dmxey.js",
+      "type": "javascript",
+      "bytes": 263870,
+      "gzipBytes": 76883
+    },
+    {
+      "path": "apps/web/.next/static/chunks/3znikfmo776-j.js",
+      "logicalName": "3znikfmo776-j.js",
+      "type": "javascript",
+      "bytes": 27957,
+      "gzipBytes": 9727
+    },
+    {
+      "path": "apps/web/.next/static/chunks/4018xje7s-_39.js",
+      "logicalName": "4018xje7s-_39.js",
+      "type": "javascript",
+      "bytes": 148973,
+      "gzipBytes": 40823
+    },
+    {
+      "path": "apps/web/.next/static/chunks/411ffa1zv10an.js",
+      "logicalName": "411ffa1zv10an.js",
+      "type": "javascript",
+      "bytes": 21342,
+      "gzipBytes": 8301
+    },
+    {
+      "path": "apps/web/.next/static/chunks/419kdq72_xsta.js",
+      "logicalName": "419kdq72_xsta.js",
+      "type": "javascript",
+      "bytes": 29946,
+      "gzipBytes": 9849
+    },
+    {
+      "path": "apps/web/.next/static/chunks/41r-[hash].js",
+      "logicalName": "41r-[hash].js",
+      "type": "javascript",
+      "bytes": 29811,
+      "gzipBytes": 6848
+    },
+    {
+      "path": "apps/web/.next/static/chunks/42a-[hash].js",
+      "logicalName": "42a-[hash].js",
+      "type": "javascript",
+      "bytes": 256,
+      "gzipBytes": 206
+    },
+    {
+      "path": "apps/web/.next/static/chunks/42tnnjyxkdwzv.js",
+      "logicalName": "42tnnjyxkdwzv.js",
+      "type": "javascript",
+      "bytes": 252,
+      "gzipBytes": 203
+    },
+    {
+      "path": "apps/web/.next/static/chunks/turbopack-[hash].js",
+      "logicalName": "turbopack-[hash].js",
+      "type": "javascript",
+      "bytes": 10878,
+      "gzipBytes": 4286
+    }
+  ]
+}

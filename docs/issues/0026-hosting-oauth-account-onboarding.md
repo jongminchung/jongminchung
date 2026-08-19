@@ -1,6 +1,6 @@
 # Issue 0026: Hosting 계정의 OAuth 기반 연결 도입 검토
 
-- 상태: 조건부 제안
+- 상태: 조건부 보류
 - 우선순위: P2
 - 기준일: 2026-08-19
 - 영향 범위:
@@ -21,6 +21,15 @@
 - **OSS Git 도구는 browser 또는 device OAuth와 system credential store를 결합해 인증 진입 장벽을 줄임**
 - **자체 OAuth client 운영 책임이 생기므로 배포 대상과 provider 정책이 확정되기 전에는 구현보다 feasibility 검증이 우선임**
 - **기존 PAT 연결은 enterprise·self-hosted·복구 경로로 유지하고 OAuth를 유일한 인증 방식으로 강제하지 않음**
+
+## 처리 결과
+
+- **배포 주체가 관리하는 OAuth App·client ID·redirect URI·revocation 정책이 저장소에 정의되지 않아 OAuth 구현 조건이 충족되지 않음**
+  - desktop bundle에 client secret을 포함하는 임시 구현은 보안 경계를 위반하므로 수행하지 않음
+- **현재 가능한 fallback으로 연결 전에 provider별 최소 PAT 권한과 repository 제한·만료 설정을 안내하도록 개선함**
+- **Hosting API credential과 Git push credential이 별개임을 UI에 명시해 성공·실패 경계를 설명함**
+- **cloud와 self-hosted server 모두 PAT fallback을 유지하고 browser sign-in의 운영 전제를 명시함**
+- **OAuth App 운영 정책이 확정되면 state 검증·callback 위조·refresh·revoke fixture를 포함한 별도 구현이 필요함**
 
 ## OSS 기준에서 확인한 인증 패턴
 

@@ -1,6 +1,6 @@
 # Issue 0024: 기술 문서 freshness와 근거 검증 보고서 도입
 
-- 상태: 제안
+- 상태: 완료
 - 우선순위: P1
 - 기준일: 2026-08-19
 - 영향 범위:
@@ -22,6 +22,15 @@
 - **오래된 문서를 즉시 배포 차단하기보다 scheduled report와 severity 기반 review queue로 운영하는 것이 적합함**
 - **모든 문서에 동일한 만료 기간을 적용하지 않고 내용 유형과 upstream 변화 빈도에 따라 freshness 정책을 달리해야 함**
 - **자동화 결과는 문서가 틀렸다고 단정하지 않고 사람이 다시 검토해야 할 근거로 제공해야 함**
+
+## 처리 결과
+
+- **문서 metadata와 source 성격에서 5개 freshness policy를 결정하는 report-only 도구를 추가함**
+  - versioned technology 90일, upstream API 120일, imported source 180일, repository handbook 365일, evergreen concept 730일 기준을 적용함
+- **일반 build와 PR 검증은 network에 의존하지 않고 주간 schedule에서만 제한된 병렬 요청과 8초 timeout으로 source를 확인함**
+  - 정상·redirect·404/410·timeout/rate limit을 서로 다른 상태로 보고함
+- **report는 warning과 review-required를 구분해 artifact로 제공하며 `verifiedAt`을 자동 변경하거나 배포를 차단하지 않음**
+- **threshold 경계와 미검증 문서 분류를 결정적인 unit test로 고정함**
 
 ## OSS 기준에서 확인한 운영 패턴
 

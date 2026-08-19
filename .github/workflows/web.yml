@@ -1,17 +1,9 @@
 name: Web
 
 on:
+  schedule:
+    - cron: "17 1 * * 1"
   pull_request:
-    paths:
-      - ".github/workflows/web.yml"
-      - "apps/web/**"
-      - "packages/ui/**"
-      - "packages/tooling/**"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
-      - "tsconfig.base.json"
-      - "vitest.config.ts"
   push:
     branches: [main]
     paths:
@@ -27,6 +19,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 concurrency:
   group: web-${{ github.workflow }}-${{ github.ref }}
@@ -38,19 +31,56 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - name: Detect Web consumer changes
+        id: changes
+        if: github.event_name != 'schedule'
+        uses: dorny/paths-filter@v4
+        with:
+          filters: |
+            web:
+              - '.github/workflows/web.yml'
+              - 'apps/web/**'
+              - 'packages/ui/**'
+              - 'packages/tooling/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'tsconfig.base.json'
+              - 'vitest.config.ts'
       - uses: pnpm/action-setup@v6
+        if: steps.changes.outputs.web == 'true' || github.event_name == 'schedule'
       - uses: actions/setup-node@v7
+        if: steps.changes.outputs.web == 'true' || github.event_name == 'schedule'
         with:
           node-version-file: .node-version
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @jongminchung/web run typecheck
-      - run: pnpm --filter @jongminchung/web run test
-      - run: pnpm --filter @jongminchung/web run build
-      - run: pnpm --filter @jongminchung/web exec playwright install --with-deps chromium
-      - run: pnpm --filter @jongminchung/web run test:e2e
+      - name: Install Web consumer dependencies
+        if: steps.changes.outputs.web == 'true' || github.event_name == 'schedule'
+        run: pnpm --filter @jongminchung/web... install --frozen-lockfile
+      - if: steps.changes.outputs.web == 'true'
+        run: pnpm --filter @jongminchung/web run typecheck
+      - if: steps.changes.outputs.web == 'true'
+        run: pnpm --filter @jongminchung/web run test
+      - if: steps.changes.outputs.web == 'true'
+        run: pnpm --filter @jongminchung/web run build
+      - name: Report Web client asset changes
+        if: steps.changes.outputs.web == 'true'
+        run: pnpm --filter @jongminchung/web run bundle:report -- --output=apps/web/bundle-report.json
+      - if: steps.changes.outputs.web == 'true'
+        run: pnpm --filter @jongminchung/web exec playwright install --with-deps chromium
+      - if: steps.changes.outputs.web == 'true'
+        run: pnpm --filter @jongminchung/web run test:e2e
+      - name: Generate scheduled content evidence report
+        if: github.event_name == 'schedule'
+        run: pnpm --filter @jongminchung/web run content:evidence -- --network --output content-evidence.json
+      - name: Upload content evidence report
+        if: github.event_name == 'schedule'
+        uses: actions/upload-artifact@v7
+        with:
+          name: content-evidence
+          path: content-evidence.json
       - name: Upload browser failure artifacts
-        if: failure()
+        if: failure() && steps.changes.outputs.web == 'true'
         uses: actions/upload-artifact@v7
         with:
           name: web-playwright-failure
@@ -58,3 +88,10 @@ jobs:
             apps/web/playwright-report
             apps/web/test-results
           if-no-files-found: ignore
+      - name: Upload Web bundle report
+        if: always() && steps.changes.outputs.web == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: web-bundle-report
+          path: apps/web/bundle-report.json
+          if-no-files-found: error

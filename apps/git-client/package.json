@@ -10,6 +10,8 @@
     "#lib/*": "./src/lib/*.ts"
   },
   "scripts": {
+    "bundle:report": "node ../../scripts/report-frontend-assets.mjs --app=git-client --root=apps/git-client/dist/assets --baseline=apps/git-client/bundle-baseline.json",
+    "bundle:baseline": "pnpm run bundle:report -- --update-baseline",
     "build": "pnpm run typecheck && vite build",
     "dev": "electron-forge start",
     "electron:clean-package": "node scripts/clean-electron-package.ts",

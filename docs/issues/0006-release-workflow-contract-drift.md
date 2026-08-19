@@ -1,6 +1,6 @@
 # Issue 0006: 릴리스 workflow와 계약 테스트의 불일치 해소
 
-- 상태: 진행 중
+- 상태: 완료
 - 우선순위: P0
 - 기준일: 2026-08-19
 - 영향 범위:
@@ -14,7 +14,7 @@
 - **manual trigger·package matrix·validation 선행·삭제·publish·인증 정리 순서를 observable contract로 검증함**
 - **불명확한 테스트 제목을 실제 성공 조건을 설명하도록 정리함**
 - **`pnpm run check`는 전체 통과 상태로 복구됨**
-- **publish 후 integrity와 clean consumer 설치 검증은 아직 남아 있어 이슈를 완료 처리하지 않음**
+- **publish 후 registry integrity와 clean consumer subpath import 검증을 workflow에 연결함**
 
 ## 진행 현황
 
@@ -22,10 +22,10 @@
   - workflow test가 삭제 script 내부의 `jq` 표현을 중복 검사하지 않음
   - 삭제·publish·인증 cleanup 순서를 검증함
   - 전체 format·lint·typecheck·unit·integration 검사를 통과함
-- **남은 범위는 실제 publish 결과 검증임**
-  - registry가 반환하는 integrity 확인
-  - clean consumer 설치와 subpath import 확인
-  - 실제 외부 변경은 일반 PR test가 아니라 release workflow에서 수행함
+- **실제 publish 결과 검증을 release workflow가 소유함**
+  - registry가 반환한 `sha512` integrity를 최대 다섯 번의 제한된 retry로 확인함
+  - 임시 clean consumer가 게시 package를 scripts 없이 설치하고 대표 subpath를 import함
+  - 성공·실패와 무관하게 registry 인증 설정을 `always()` cleanup함
 
 ## 확인한 문제와 근거
 
@@ -85,6 +85,16 @@
 - **version 삭제 실패가 publish 이전에 검출됨**
 - **인증 정보 cleanup이 성공·실패 경로 모두에서 유지됨**
 - **`pnpm run check`가 전체 통과함**
+
+## 구현 결과
+
+- **`.github/scripts/verify-published-package.mjs`를 추가함**
+  - 허용된 scope·semantic version·package 소유 subpath만 입력으로 수용함
+  - 임시 consumer directory는 성공·실패 경로 모두에서 제거됨
+- **package matrix에 대표 public import를 명시함**
+  - `@jongminchung/tooling/oxfmt`
+  - `@jongminchung/ui/lib/utils`
+- **publish·integrity·consumer import·인증 cleanup 순서를 integration test로 고정함**
 
 ## 검증
 

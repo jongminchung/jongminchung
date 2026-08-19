@@ -20,15 +20,63 @@ test("[성공] 개발 전용 component 상태 fixture를 탐색함", async ({ pa
     await expect(
         page.getByRole("checkbox", { name: "Disabled" }),
     ).toBeDisabled();
-    await page.getByRole("button", { name: "Open dialog" }).click();
-    await expect(
-        page.getByRole("dialog").getByText("Fixture dialog", { exact: true }),
-    ).toBeVisible();
-    await page.getByRole("button", { name: "Close fixture dialog" }).click();
-    await expect(
-        page.getByRole("button", { name: "Open dialog" }),
-    ).toBeFocused();
+    for (const [name, slot, role, accessibleName] of [
+        ["dialog", "dialog-content", "dialog", "Fixture dialog"],
+        ["select", "select-content", "option", "feature/component-fixture"],
+        ["menu", "dropdown-menu-content", "menuitem", "Remove fixture"],
+    ] as const) {
+        await page.goto(`/?fixture=components&overlay=${name}`);
+        await expect(
+            page.getByRole(role, { name: accessibleName }),
+        ).toBeVisible();
+        const overlay = page.locator(`[data-slot="${slot}"]`);
+        await expect(overlay).toHaveCSS("z-index", "50");
+    }
 });
+
+for (const theme of ["light", "dark"] as const) {
+    for (const overlay of ["dialog", "select", "menu"] as const) {
+        test(`[성공] component ${overlay} 상태의 ${theme} snapshot을 유지함`, async ({
+            page,
+        }) => {
+            await page.evaluate(
+                ({ selectedTheme }) =>
+                    window.localStorage.setItem(
+                        "git-client.appearance-mode",
+                        JSON.stringify({
+                            theme: selectedTheme,
+                            syncWithOs: false,
+                        }),
+                    ),
+                { selectedTheme: theme },
+            );
+            await page.goto(`/?fixture=components&overlay=${overlay}`);
+            await expect(page.locator("html")).toHaveAttribute(
+                "data-theme",
+                theme,
+            );
+            if (overlay === "dialog") {
+                await expect(
+                    page.getByRole("dialog", { name: "Fixture dialog" }),
+                ).toBeVisible();
+            } else {
+                await expect(
+                    page.getByRole("heading", {
+                        name: "Component state fixture",
+                    }),
+                ).toBeVisible();
+            }
+            await expect(
+                page.locator(
+                    `[data-slot="${overlay === "menu" ? "dropdown-menu" : overlay}-content"]`,
+                ),
+            ).toBeVisible();
+            await expect(page).toHaveScreenshot(
+                `component-states-${overlay}-${theme}.png`,
+            );
+        });
+    }
+}
 
 test("[성공] 최근 프로젝트를 검색하고 800×650 welcome snapshot을 유지함", async ({
     page,

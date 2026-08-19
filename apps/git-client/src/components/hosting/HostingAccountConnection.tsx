@@ -39,6 +39,10 @@ export function HostingAccountConnection({
     const selectedAccount = accounts.find(
         (account) => account.id === accountId,
     );
+    const tokenGuidance =
+        provider === "gitHub"
+            ? "Use a fine-grained token with access only to the repositories you need. Pull requests: read/write and Contents: read/write are required for the full Hosting workflow."
+            : "Use a project or personal access token with api scope. Limit project membership and token expiry to the repositories you need.";
 
     const connect = async (): Promise<void> => {
         if (await onConnect(provider, baseUrl.trim(), token.trim()))
@@ -104,6 +108,13 @@ export function HostingAccountConnection({
                         : "Connect and store in Keychain"}
                 </Button>
             </div>
+            <p className="mt-2 text-[11px] text-muted-foreground" role="note">
+                {tokenGuidance} The credential is used only for Hosting API
+                actions; Git push credentials are managed separately. Browser
+                sign-in is unavailable until a provider OAuth application and
+                redirect policy are configured, so personal access tokens remain
+                the supported fallback for cloud and self-hosted servers.
+            </p>
             {selectedAccount && (
                 <div
                     className={`hostingAccountMeta [align-items:center] [display:flex] [gap:8px] [border-top:1px_solid_var(--border)] [color:var(--muted-foreground)] [margin-top:9px] [padding-top:8px] [&>_span:first-child]:[flex:1] hostingAccountMeta`}

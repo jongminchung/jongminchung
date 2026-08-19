@@ -1,6 +1,6 @@
 # Issue 0002: shadcn upstream 차이와 스타일 사용 방식 점검
 
-- 상태: 제안
+- 상태: 완료
 - 우선순위: P1
 - 기준일: 2026-08-19
 - 참고 저장소: [shadcn-ui/ui](https://github.com/shadcn-ui/ui)
@@ -108,3 +108,18 @@
   - Git Client 변경 시 `pnpm --filter @jongminchung/git-client run build`
   - interaction 변경 시 해당 앱 Playwright test
   - 최종 `pnpm run check`
+
+## 2026-08-20 audit 결과
+
+- **catalog의 `shadcn` 4.17.0과 현재 registry 계열 source 계약을 기준으로 28개 primitive를 모두 점검함**
+  - interaction·overlay 8개는 `checkbox`, `command`, `dialog`, `dropdown-menu`, `popover`, `select`, `tabs`, `tooltip`임
+  - form·control 10개는 `button`, `button-group`, `field`, `input`, `input-group`, `label`, `radio-group`, `textarea`, `toggle`, `toggle-group`임
+  - display·layout 10개는 `alert`, `badge`, `card`, `empty`, `item`, `scroll-area`, `separator`, `sheet`, `spinner`, `table`임
+- **공개 API를 변경하거나 제거해야 할 불필요한 drift가 확인되지 않음**
+  - `@base-ui/react`의 `data-open`, `data-closed`, portal·positioner 구조는 현재 runtime에 필요한 theme 적응으로 분류됨
+  - semantic token, `cn()`, `size-*`, `gap-*` 사용은 저장소 스타일 계약과 일치함
+  - Dialog·Select·Menu의 숫자형 app override는 제품 layer token과 fixture 검증으로 이미 대체됨
+- **primitive 내부의 `z-50`과 `dark:` 상태 class는 공용 overlay stacking과 semantic token 상태 표현으로 유지함**
+  - 앱 consumer가 별도 palette나 임의 숫자로 theme·stacking을 다시 구현하는 사례와 구분됨
+- **임시 upstream patch 또는 제거 version이 필요한 보정이 확인되지 않아 upstream PR 연결 항목이 없음**
+- **기계적 overwrite와 공개 export 변경을 수행하지 않아 source diff 없이 audit를 완료함**

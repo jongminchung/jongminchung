@@ -1,6 +1,6 @@
 # Issue 0001: OpenStatus의 UI package와 registry 운영 방식 검토
 
-- 상태: 조건부 보류
+- 상태: 조건부 보류 (2026-08-20 재확인)
 - 우선순위: P3
 - 기준일: 2026-08-19
 - 참고 저장소: [openstatusHQ/openstatus](https://github.com/openstatusHQ/openstatus)
@@ -97,3 +97,12 @@
   - `pnpm --filter @jongminchung/ui run test`
   - 영향받는 앱 build와 browser test
   - registry install 후 consumer typecheck와 production build
+
+## 2026-08-20 처리 결과
+
+- **저장소 전체 검색에서 외부 registry consumer와 복사 설치 요구가 확인되지 않아 보류 조건을 유지함**
+  - 두 앱은 계속 `@jongminchung/ui`의 workspace source를 직접 소비함
+  - `registry.json`, registry URL과 `shadcn add` 기반 외부 설치 흐름이 production source·workflow에 없음
+- **실행 조건이 하나도 충족되지 않은 상태에서 pipeline을 추가하면 검증 대상이 없는 배포 채널만 늘어나므로 구현하지 않음**
+  - 이 결론은 구현 누락이 아니라 이 문서에 정의된 조건부 보류 정책의 적용 결과임
+- **향후 외부 저장소 consumer 또는 공개 install block 요구가 생기면 이 문서의 한 개 block pilot으로 다시 시작해야 함**

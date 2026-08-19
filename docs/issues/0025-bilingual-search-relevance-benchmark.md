@@ -1,6 +1,6 @@
 # Issue 0025: 한영 기술 문서 검색 relevance benchmark 도입
 
-- 상태: 제안
+- 상태: 부분 완료
 - 우선순위: P2
 - 기준일: 2026-08-19
 - 영향 범위:
@@ -22,6 +22,14 @@
 - **검색 엔진 교체보다 대표 질의와 기대 결과를 먼저 고정해 현재 구현과 OSS 후보를 같은 기준으로 비교해야 함**
 - **Pagefind의 metadata weighting·CJK segmentation·Web Worker 패턴은 유용하지만 CJK 부분 문자열 한계가 있어 무검증 교체는 적절하지 않음**
 - **완료 기준은 특정 library 도입이 아니라 사용자가 원하는 문서를 상위 결과에서 안정적으로 찾는 것임**
+
+## 처리 결과
+
+- **`Intl.Segmenter` 기반 한영 혼합 query tokenization과 공백·구두점 차이를 흡수하는 compact match를 추가함**
+- **일부 term만 일치하는 문서는 coverage 제곱으로 감점해 정확한 API·title 일치를 우선하도록 개선함**
+- **top-1·top-3·MRR·zero-result rate를 계산하는 deterministic benchmark API와 회귀 test를 추가함**
+- **Pagefind 전환은 현재 corpus 규모에서 운영 복잡도와 CJK 부분 문자열 위험을 정당화하지 못해 채택하지 않음**
+- **30~50개 실제 query corpus와 asset budget의 자동 비교는 후속 작업으로 남아 있어 상태를 부분 완료로 유지함**
 
 ## OSS 기준에서 확인한 검색 패턴
 

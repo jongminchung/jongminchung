@@ -16,7 +16,7 @@ const packageWorkflow = readFileSync(
 function expectManualWorkflow(workflow: string): void {
     const triggerBlock = /^on:\n(?<triggers>(?: {2}.+\n)+)/mu.exec(workflow)
         ?.groups?.triggers;
-    expect(triggerBlock?.trim()).toBe("workflow_dispatch:");
+    expect(triggerBlock?.trim().split("\n")[0]).toBe("workflow_dispatch:");
 }
 
 function expectInOrder(workflow: string, fragments: readonly string[]): void {
@@ -31,7 +31,7 @@ function expectInOrder(workflow: string, fragments: readonly string[]): void {
 }
 
 describe("Git 클라이언트 릴리스 구성 변경", () => {
-    it("[성공] 매뉴얼로 교체된 릴리스 버전 하나를 사용함", () => {
+    it("[성공] manual input의 불변 semantic version release를 사용함", () => {
         expect(packageConfig.version).toBe("1.0.0");
         expect(packageConfig.scripts.release).toBe(
             "node scripts/publish-release.ts",
@@ -40,12 +40,18 @@ describe("Git 클라이언트 릴리스 구성 변경", () => {
             "node scripts/publish-release.ts --dry-run",
         );
         expectManualWorkflow(gitClientWorkflow);
+        expect(gitClientWorkflow).toContain("inputs:\n      version:");
+        expect(gitClientWorkflow).toContain(
+            "Stable semantic version for this immutable release",
+        );
         expect(gitClientWorkflow).toContain(
             'test "$GITHUB_REF" = "refs/heads/main"',
         );
-        expect(gitClientWorkflow).toContain("release:validate-local -- 1.0.0");
         expect(gitClientWorkflow).toContain(
-            "Publish fixed Git Client 1.0.0 release",
+            'release:validate-local -- "${{ inputs.version }}"',
+        );
+        expect(gitClientWorkflow).toContain(
+            "Publish immutable Git Client release",
         );
         expect(gitClientWorkflow).toContain("GH_PAT: ${{ secrets.GH_PAT }}");
         expect(gitClientWorkflow).not.toContain("secrets.GITHUB_TOKEN");
@@ -53,7 +59,14 @@ describe("Git 클라이언트 릴리스 구성 변경", () => {
 
     it("[성공] package 검증 뒤 기존 1.0.0을 교체함", () => {
         expectManualWorkflow(packageWorkflow);
-        expect(packageWorkflow).toContain("package: [tooling, ui]");
+        expect(packageWorkflow).toContain("package: tooling");
+        expect(packageWorkflow).toContain("package: ui");
+        expect(packageWorkflow).toContain(
+            'import-specifier: "@jongminchung/tooling/oxfmt"',
+        );
+        expect(packageWorkflow).toContain(
+            'import-specifier: "@jongminchung/ui/lib/utils"',
+        );
         expect(packageWorkflow).toContain("needs: validate");
         expect(packageWorkflow).toContain("run publish:dry-run");
         expect(packageWorkflow).toContain(
@@ -62,6 +75,8 @@ describe("Git 클라이언트 릴리스 구성 변경", () => {
         expectInOrder(packageWorkflow, [
             "- name: Delete existing 1.0.0",
             "publish --access public --no-git-checks",
+            "Verify registry integrity and clean consumer import",
+            "verify-published-package.mjs",
             "- name: Remove GitHub Packages auth",
         ]);
         expect(packageWorkflow).toContain("if: ${{ always() }}");

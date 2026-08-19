@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-    assertFixedReleaseVersion,
+    assertMonotonicReleaseVersion,
     assertReleaseMetadata,
     createGhDeleteTagArguments,
     createGhReleaseArguments,
@@ -9,21 +9,33 @@ import {
     createReleaseNotes,
     createReleaseTag,
     createReleaseTitle,
-    fixedReleaseVersion,
     parsePublishArguments,
     parseReleaseMetadata,
 } from "./publish-release.ts";
 
-describe("고정 Git 클라이언트 릴리스 게시자", () => {
-    it("[성공] 항상 매뉴얼 1.0.0 릴리스 ID를 사용함", () => {
-        expect(fixedReleaseVersion).toBe("1.0.0");
-        expect(assertFixedReleaseVersion("1.0.0")).toBe("1.0.0");
-        expect(() => assertFixedReleaseVersion("1.0.1")).toThrow(
-            "must reuse version 1.0.0",
+describe("불변 Git 클라이언트 릴리스 게시자", () => {
+    it("[성공] 요청한 stable version으로 릴리스 ID를 생성함", () => {
+        expect(createReleaseNotes("1.2.3")).toBe(
+            "# 1.2.3\n\nManual Git Client release.\n",
         );
-        expect(createReleaseNotes()).toBe(
-            "# 1.0.0\n\nManual Git Client release.\n",
+        expect(() => createReleaseNotes("1.2.3-beta.1")).toThrow(
+            "stable semantic version",
         );
+    });
+
+    it("[실패] 기존 stable release보다 크지 않은 version을 거부함", () => {
+        expect(
+            assertMonotonicReleaseVersion("1.2.0", [
+                "unrelated-9.0.0",
+                "git-client-1.1.9",
+            ]),
+        ).toBe("1.2.0");
+        expect(() =>
+            assertMonotonicReleaseVersion("1.2.0", ["git-client-1.2.0"]),
+        ).toThrow("newer than 1.2.0");
+        expect(() =>
+            assertMonotonicReleaseVersion("1.2.0", ["git-client-2.0.0"]),
+        ).toThrow("newer than 2.0.0");
     });
 
     it("[성공] 소속된 태그, 및 초안 작성을 사용함", () => {
@@ -112,14 +124,15 @@ describe("고정 Git 클라이언트 릴리스 게시자", () => {
     });
 
     it("[성공] 테스트 실행 게시자 지명만 인정함", () => {
-        expect(parsePublishArguments(["--dry-run"])).toEqual({
+        expect(parsePublishArguments(["--dry-run", "1.2.3"])).toEqual({
             dryRun: true,
+            version: "1.2.3",
         });
         expect(() => parsePublishArguments(["--verbose"])).toThrow(
             "Unknown release argument",
         );
-        expect(() => parsePublishArguments(["1.2.3"])).toThrow(
-            "Unknown release argument",
+        expect(() => parsePublishArguments([])).toThrow(
+            "exactly one release version",
         );
     });
 });

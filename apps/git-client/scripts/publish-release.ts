@@ -11,31 +11,49 @@ import {
 } from "./release.ts";
 
 export const githubRepository = "jongminchung/jongminchung";
-export const fixedReleaseVersion = "1.0.0";
-
 const appRoot = fileURLToPath(new URL("../", import.meta.url));
 const workspaceRoot = fileURLToPath(new URL("../../../", import.meta.url));
 
 export function createReleaseTag(value: any) {
-    return `git-client-${assertFixedReleaseVersion(value)}`;
+    return `git-client-${parseReleaseVersion(value)}`;
 }
 
 export function createReleaseTitle(value: any) {
-    return `Git Client ${assertFixedReleaseVersion(value)}`;
+    return `Git Client ${parseReleaseVersion(value)}`;
 }
 
-export function assertFixedReleaseVersion(value: any) {
+export function createReleaseNotes(value: any) {
     const version = parseReleaseVersion(value);
-    if (version !== fixedReleaseVersion) {
-        throw new Error(
-            `Git Client releases must reuse version ${fixedReleaseVersion}`,
+    return `# ${version}\n\nManual Git Client release.\n`;
+}
+
+export function assertMonotonicReleaseVersion(value: any, tags: any) {
+    const version = parseReleaseVersion(value);
+    const requested = version.split(".").map(Number);
+    for (const tag of tags) {
+        if (typeof tag !== "string" || !tag.startsWith("git-client-")) continue;
+        const existingVersion = tag.slice("git-client-".length);
+        let existing: number[];
+        try {
+            existing = parseReleaseVersion(existingVersion)
+                .split(".")
+                .map(Number);
+        } catch {
+            continue;
+        }
+        const comparison = requested.findIndex(
+            (part, index) => part !== existing[index],
         );
+        if (
+            comparison === -1 ||
+            requested[comparison]! < existing[comparison]!
+        ) {
+            throw new Error(
+                `Release version must be newer than ${existingVersion}: ${version}`,
+            );
+        }
     }
     return version;
-}
-
-export function createReleaseNotes() {
-    return `# ${fixedReleaseVersion}\n\nManual Git Client release.\n`;
 }
 
 export function createGitHubEnvironment(environment: any) {
@@ -179,9 +197,18 @@ async function readReleaseMetadata(
     return parseReleaseMetadata(result.stdout);
 }
 
-async function removeExistingRelease(tag: any, environment: any) {
+async function removeDraftCreatedByCurrentRun(
+    tag: any,
+    sha: any,
+    environment: any,
+) {
     const metadata = await readReleaseMetadata(tag, environment, true);
-    if (metadata === null) return;
+    if (
+        metadata === null ||
+        !metadata.isDraft ||
+        (await readRemoteTagSha(tag, environment)) !== sha
+    )
+        return;
     await executeCommand(
         "gh",
         [
@@ -216,6 +243,37 @@ async function readRemoteTagSha(tag: any, environment: any) {
     return sha;
 }
 
+async function readPublishedReleaseTags(environment: any) {
+    const result = await executeCommand(
+        "gh",
+        [
+            "release",
+            "list",
+            "--repo",
+            githubRepository,
+            "--exclude-drafts",
+            "--exclude-pre-releases",
+            "--limit",
+            "1000",
+            "--json",
+            "tagName",
+        ],
+        { capture: true, cwd: workspaceRoot, env: environment },
+    );
+    const releases = JSON.parse(result.stdout);
+    if (!Array.isArray(releases))
+        throw new Error("Expected GitHub release list to be an array");
+    return releases.map((release: any) => {
+        if (
+            typeof release !== "object" ||
+            release === null ||
+            typeof release.tagName !== "string"
+        )
+            throw new Error("GitHub release list contains an invalid entry");
+        return release.tagName;
+    });
+}
+
 async function removeTagCreatedByCurrentRun(
     tag: any,
     sha: any,
@@ -231,18 +289,21 @@ async function removeTagCreatedByCurrentRun(
 async function publishRelease(release: any) {
     const environment = createGitHubEnvironment(process.env);
     const tag = createReleaseTag(release.version);
+    if ((await readReleaseMetadata(tag, environment, true)) !== null)
+        throw new Error(
+            `Release identity already exists and is immutable: ${tag}`,
+        );
+    if ((await readRemoteTagSha(tag, environment)) !== null)
+        throw new Error(`Release tag already exists and is immutable: ${tag}`);
+    assertMonotonicReleaseVersion(
+        release.version,
+        await readPublishedReleaseTags(environment),
+    );
+
     const artifacts = await buildRelease(release.version);
     const sha = artifacts.sourceSha;
     const notesFile = join(appRoot, "release-artifacts", "release-notes.md");
     await writeFile(notesFile, release.notes);
-
-    await removeExistingRelease(tag, environment);
-    if ((await readRemoteTagSha(tag, environment)) !== null) {
-        await executeCommand("gh", createGhDeleteTagArguments(tag), {
-            cwd: workspaceRoot,
-            env: environment,
-        });
-    }
 
     let mayHaveCreatedDraft = false;
     try {
@@ -282,7 +343,7 @@ async function publishRelease(release: any) {
     } catch (error) {
         if (mayHaveCreatedDraft) {
             try {
-                await removeExistingRelease(tag, environment);
+                await removeDraftCreatedByCurrentRun(tag, sha, environment);
                 await removeTagCreatedByCurrentRun(tag, sha, environment);
             } catch (cleanupError) {
                 throw new AggregateError(
@@ -296,13 +357,21 @@ async function publishRelease(release: any) {
 }
 
 export function parsePublishArguments(arguments_: any) {
-    const unknown = arguments_.filter(
+    const normalized = arguments_.filter((argument: any) => argument !== "--");
+    const unknownFlag = normalized.find(
+        (argument: any) =>
+            argument.startsWith("--") && argument !== "--dry-run",
+    );
+    if (unknownFlag !== undefined)
+        throw new Error(`Unknown release argument: ${unknownFlag}`);
+    const versions = normalized.filter(
         (argument: any) => argument !== "--dry-run",
     );
-    if (unknown.length > 0)
-        throw new Error(`Unknown release argument: ${unknown[0]}`);
+    if (versions.length !== 1)
+        throw new Error("Expected exactly one release version argument");
     return {
-        dryRun: arguments_.includes("--dry-run"),
+        dryRun: normalized.includes("--dry-run"),
+        version: parseReleaseVersion(versions[0]),
     };
 }
 
@@ -310,8 +379,8 @@ async function main() {
     const options = parsePublishArguments(process.argv.slice(2));
     if (!options.dryRun) await verifyReleaseSource(workspaceRoot);
     const release = {
-        notes: createReleaseNotes(),
-        version: fixedReleaseVersion,
+        notes: createReleaseNotes(options.version),
+        version: options.version,
     };
     console.log(`Git Client release: ${release.version}`);
     if (options.dryRun) {

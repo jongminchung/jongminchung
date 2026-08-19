@@ -39,6 +39,8 @@ import { SettingsStore } from "./settings-store";
 import { NATIVE_WINDOW_BACKGROUND } from "./static-color-boundary";
 import { TerminalUtilityClient } from "./terminal-utility-client";
 import {
+    secondInstanceAction,
+    shouldCreateWindowOnActivate,
     shouldQuitAfterLastWindow,
     shouldRequestProjectClose,
     WELCOME_TRAFFIC_LIGHT_POSITION,
@@ -390,6 +392,7 @@ async function start(): Promise<void> {
     }
 
     app.on("second-instance", () => {
+        if (secondInstanceAction() !== "focus-existing-window") return;
         if (mainWindow === null) return;
         if (mainWindow.isMinimized()) mainWindow.restore();
         mainWindow.focus();
@@ -425,7 +428,8 @@ async function start(): Promise<void> {
     );
 
     app.on("activate", () => {
-        if (BrowserWindow.getAllWindows().length !== 0) return;
+        if (!shouldCreateWindowOnActivate(BrowserWindow.getAllWindows().length))
+            return;
         const utility = gitUtility;
         const terminal = terminalUtility;
         const diagnostics = diagnosticsService;
