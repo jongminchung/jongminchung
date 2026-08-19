@@ -173,9 +173,7 @@ export function SettingsDialog({
             purpose="form"
             width="min(920px, calc(100vw - 70px))"
         >
-            <section
-                className={`settingsDialog [display:grid] [grid-template-columns:230px_minmax(0,_1fr)] [grid-template-rows:auto_minmax(0,_1fr)_auto] [height:min(680px,_calc(100vh_-_70px))] [min-height:0] [&>_[data-slot=dialog-header]]:[grid-column:1/-1] [&>_aside]:[background:var(--muted)] [&>_aside]:[border-right:1px_solid_var(--border)] [&>_aside]:[display:flex] [&>_aside]:[flex-direction:column] [&>_aside]:[gap:2px] [&>_aside]:[padding:7px] [&>_aside_button]:[align-items:center] [&>_aside_button]:[background:transparent] [&>_aside_button]:[display:flex] [&>_aside_button]:[gap:8px] [&>_aside_button]:[height:31px] [&>_aside_button]:[padding:0_8px] [&>_aside_button]:[text-align:left] [&>_main]:[min-height:0] [&>_main]:[overflow:auto] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:flex] [&>_footer]:[grid-column:1/-1] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:8px_12px] settingsDialog`}
-            >
+            <section className="settingsDialog">
                 <DialogHeader
                     hasDivider
                     onOpenChange={(open) => !open && onClose()}
@@ -228,9 +226,7 @@ export function SettingsDialog({
                         </TabsTrigger>
                     </TabsList>
                     <TabsContent render={<main />} value="appearance">
-                        <div
-                            className={`settingsPage [display:flex] [flex-direction:column] [gap:14px] [padding:18px_20px] [&>_h2]:[font-size:16px] [&>_h2]:[margin:0] [&>_p]:[color:var(--muted-foreground)] [&>_p]:[line-height:1.5] [&>_p]:[margin:0] settingsPage`}
-                        >
+                        <div className="settingsPage">
                             <h2>Appearance</h2>
                             <RadioList
                                 label="Theme"
@@ -332,9 +328,7 @@ export function SettingsDialog({
                         </div>
                     </TabsContent>
                     <TabsContent render={<main />} value="keymap">
-                        <div
-                            className={`settingsPage [display:flex] [flex-direction:column] [gap:14px] [padding:18px_20px] [&>_h2]:[font-size:16px] [&>_h2]:[margin:0] [&>_p]:[color:var(--muted-foreground)] [&>_p]:[line-height:1.5] [&>_p]:[margin:0] settingsPage`}
-                        >
+                        <div className="settingsPage">
                             <h2>Keymap</h2>
                             <Selector
                                 label="Keymap"
@@ -466,9 +460,7 @@ export function SettingsDialog({
                         </div>
                     </TabsContent>
                     <TabsContent render={<main />} value="versionControl">
-                        <div
-                            className={`settingsPage [display:flex] [flex-direction:column] [gap:14px] [padding:18px_20px] [&>_h2]:[font-size:16px] [&>_h2]:[margin:0] [&>_p]:[color:var(--muted-foreground)] [&>_p]:[line-height:1.5] [&>_p]:[margin:0] settingsPage`}
-                        >
+                        <div className="settingsPage">
                             <h2>Version Control</h2>
                             {showRepositorySettings &&
                             onOpenRepositorySettings ? (
@@ -498,9 +490,7 @@ export function SettingsDialog({
                         </div>
                     </TabsContent>
                     <TabsContent render={<main />} value="notifications">
-                        <div
-                            className={`settingsPage [display:flex] [flex-direction:column] [gap:14px] [padding:18px_20px] [&>_h2]:[font-size:16px] [&>_h2]:[margin:0] [&>_p]:[color:var(--muted-foreground)] [&>_p]:[line-height:1.5] [&>_p]:[margin:0] settingsPage`}
-                        >
+                        <div className="settingsPage">
                             <h2>Notifications</h2>
                             <CheckboxInput
                                 label="Show operation notifications"

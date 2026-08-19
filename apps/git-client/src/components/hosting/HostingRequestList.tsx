@@ -70,7 +70,7 @@ export function HostingRequestList({
             tabIndex={0}
         >
             <div
-                className={`hostingListToolbar [align-items:center] [background:var(--muted)] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:5px] [padding:5px] [position:sticky] [top:0] [z-index:2] [&>_label]:[align-items:center] [&>_label]:[background:var(--secondary)] [&>_label]:[border:1px_solid_var(--border)] [&>_label]:rounded-sm [&>_label]:[display:flex] [&>_label]:[flex:1] [&>_label]:[gap:5px] [&>_label]:[padding:0_6px] [&>_label_input]:[background:transparent] [&>_label_input]:[border:0] [&>_label_input]:[min-width:0] [&>_label_input]:[outline:0] [&>_label_input]:[padding:0] [&>_label_input]:[width:100%] [&>_select]:[width:78px] hostingListToolbar [&>_label]:rounded-sm`}
+                className={`hostingListToolbar [align-items:center] [background:var(--muted)] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:5px] [padding:5px] [position:sticky] [top:0] [z-index:var(--layer-local-content)] [&>_label]:[align-items:center] [&>_label]:[background:var(--secondary)] [&>_label]:[border:1px_solid_var(--border)] [&>_label]:rounded-sm [&>_label]:[display:flex] [&>_label]:[flex:1] [&>_label]:[gap:5px] [&>_label]:[padding:0_6px] [&>_label_input]:[background:transparent] [&>_label_input]:[border:0] [&>_label_input]:[min-width:0] [&>_label_input]:[outline:0] [&>_label_input]:[padding:0] [&>_label_input]:[width:100%] [&>_select]:[width:78px] hostingListToolbar [&>_label]:rounded-sm`}
             >
                 <label>
                     <Icon name="search" size={13} />

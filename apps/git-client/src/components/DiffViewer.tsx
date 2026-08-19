@@ -285,7 +285,7 @@ export function DiffViewer({
         // oxlint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- The focusable region owns file and hunk navigation shortcuts.
         <div
             aria-label={file ? `Diff for ${file.path}` : "Diff preview"}
-            className={`${`diffViewer [background:var(--card)] [display:grid] [grid-template-rows:36px_auto_minmax(0,_1fr)] [min-height:0] [min-width:0] [outline:0] [position:relative] [&:focus-visible]:[box-shadow:inset_0_0_0_2px_color-mix(in_oklch,_var(--primary)_55%,_transparent)] diffViewer`} ${focused ? `focusedDiffViewer [background:var(--card)] rounded-lg [inset:56px_30px_18px_31px] [position:fixed] [z-index:45] focusedDiffViewer rounded-lg` : ""}`}
+            className={`${`diffViewer [background:var(--card)] [display:grid] [grid-template-rows:36px_auto_minmax(0,_1fr)] [min-height:0] [min-width:0] [outline:0] [position:relative] [&:focus-visible]:[box-shadow:inset_0_0_0_2px_color-mix(in_oklch,_var(--primary)_55%,_transparent)] diffViewer`} ${focused ? `focusedDiffViewer [background:var(--card)] rounded-lg [inset:56px_30px_18px_31px] [position:fixed] [z-index:var(--layer-focused-workspace)] focusedDiffViewer rounded-lg` : ""}`}
             data-diff-viewer
             onKeyDown={handleKeyboard}
             ref={root}

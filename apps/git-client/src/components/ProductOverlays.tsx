@@ -52,7 +52,7 @@ export function Popover({
             <PopoverContent
                 align={alignment}
                 aria-label={label}
-                className="z-[110] max-h-[min(70vh,560px)] w-auto overflow-auto border border-border p-1"
+                className="z-(--layer-popover) max-h-[min(70vh,560px)] w-auto overflow-auto border border-border p-1"
                 initialFocus={hasAutoFocus ? true : false}
                 side={SIDES[placement]}
                 sideOffset={5}

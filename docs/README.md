@@ -8,6 +8,7 @@
 
 - [기술 스택과 공식 문서](technology-stack.md): 기반 도구와 외부 직접 의존성 75개의 현재 버전·용도·공식 문서
 - [유지보수 가이드](maintenance.md): 의존성, 보안, 생성물, workflow와 릴리스 운영 절차
+- [프론트엔드 OSS 유지보수 권장안](frontend-oss-maintainability.md): Tailwind CSS·shadcn/ui·Base UI의 역할 경계, 공용 UI 소유권과 단계별 검증·업데이트 방안
 - [루트 기여 가이드](../CONTRIBUTING.md): 개발 환경, workspace별 명령과 제출 기준
 - [디자인 시스템](../DESIGN_SYSTEM.md): UI primitive·Tailwind 진입점·semantic token의 통합 소유권
 

@@ -42,12 +42,8 @@ export function ImageDiff({
     const after = imageFrom(afterPreview);
 
     return (
-        <div
-            className={`imageDiff [display:grid] [grid-template-rows:auto_minmax(0,_1fr)] [height:100%] [min-height:0] [background:var(--card)] [&_figcaption]:[position:relative] [&_figcaption]:[z-index:2] [&_figcaption]:[padding:7px_10px] [&_figcaption]:[color:var(--muted-foreground)] [&_figcaption]:[background:var(--muted)] [&_figcaption]:[border-bottom:1px_solid_var(--border)] [&_figcaption]:[font-size:11px] imageDiff`}
-        >
-            <div
-                className={`imageDiffToolbar [display:flex] [min-height:36px] [align-items:center] [justify-content:space-between] [gap:12px] [padding:5px_10px] [border-bottom:1px_solid_var(--border)] [background:var(--muted)] [&>_div]:[display:flex] [&>_div]:[align-items:center] [&>_div]:[gap:6px] [&>_label]:[display:flex] [&>_label]:[align-items:center] [&>_label]:[gap:6px] [&_input[type=range]]:[width:120px] imageDiffToolbar`}
-            >
+        <div className="imageDiff">
+            <div className="imageDiffToolbar">
                 <ToggleGroup
                     aria-label="Image comparison mode"
                     onValueChange={(value) => {
@@ -108,9 +104,7 @@ export function ImageDiff({
                 )}
             </div>
             {mode === "sideBySide" || !before || !after ? (
-                <div
-                    className={`imageDiffPair [display:grid] [grid-template-columns:repeat(2,_minmax(0,_1fr))] [min-height:0] [&_figure]:[display:grid] [&_figure]:[grid-template-rows:auto_minmax(0,_1fr)] [&_figure]:[min-width:0] [&_figure]:[min-height:0] [&_figure]:[margin:0] [&_figure]:[background-color:var(--card)] [&_figure]:[background-image:linear-gradient(45deg,_var(--muted)_25%,_transparent_25%),_linear-gradient(-45deg,_var(--muted)_25%,_transparent_25%),_linear-gradient(45deg,_transparent_75%,_var(--muted)_75%),_linear-gradient(-45deg,_transparent_75%,_var(--muted)_75%)] [&_figure]:[background-size:18px_18px] [&_figure]:[background-position:0_0,_0_9px,_9px_-9px,_-9px_0] [&_figure_+_figure]:[border-left:1px_solid_var(--border)] [&_figure_>_img]:[width:100%] [&_figure_>_img]:[height:100%] [&_figure_>_img]:[min-height:180px] [&_figure_>_img]:[object-fit:contain] [&_figure_>_img]:[padding:16px] [&_figure_>_div]:[width:100%] [&_figure_>_div]:[height:100%] [&_figure_>_div]:[min-height:180px] [&_figure_>_div]:[object-fit:contain] [&_figure_>_div]:[padding:16px] [&_figure_>_div]:[display:grid] [&_figure_>_div]:[place-items:center] [&_figure_>_div]:[color:var(--muted-foreground)] max-[960px]:[grid-template-columns:1fr] max-[960px]:[overflow:auto] max-[960px]:[&_figure_+_figure]:[border-left:0] max-[960px]:[&_figure_+_figure]:[border-top:1px_solid_var(--border)] imageDiffPair`}
-                >
+                <div className="imageDiffPair">
                     <figure>
                         <figcaption>
                             Before · {previewDescription(beforePreview)}
@@ -133,9 +127,7 @@ export function ImageDiff({
                     </figure>
                 </div>
             ) : (
-                <figure
-                    className={`imageDiffOverlay [display:grid] [grid-template-rows:auto_minmax(0,_1fr)] [min-width:0] [min-height:0] [margin:0] [background-color:var(--card)] [background-image:linear-gradient(45deg,_var(--muted)_25%,_transparent_25%),_linear-gradient(-45deg,_var(--muted)_25%,_transparent_25%),_linear-gradient(45deg,_transparent_75%,_var(--muted)_75%),_linear-gradient(-45deg,_transparent_75%,_var(--muted)_75%)] [background-size:18px_18px] [background-position:0_0,_0_9px,_9px_-9px,_-9px_0] [&>_div]:[position:relative] [&>_div]:[min-height:0] [&_img]:[position:absolute] [&_img]:[inset:0] [&_img]:[width:100%] [&_img]:[height:100%] [&_img]:[object-fit:contain] [&_img]:[padding:16px] imageDiffOverlay`}
-                >
+                <figure className="imageDiffOverlay">
                     <figcaption>Before / After</figcaption>
                     <div>
                         <img alt="Before revision" src={before.dataUrl} />

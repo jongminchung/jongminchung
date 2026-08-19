@@ -157,7 +157,7 @@ export function GitBranchesPopup({
             open
             aria-busy={busy || undefined}
             aria-label="Git Branches"
-            className={`gitBranchesPopup [background:var(--popover)] [border:1px_solid_var(--input)] rounded-lg [box-shadow:var(--shadow-lg)] [display:grid] [grid-template-rows:36px_minmax(120px,_auto)] [left:0] [max-height:min(520px,_calc(100vh_-_70px))] [min-width:368px] [overflow:hidden] [position:absolute] [top:31px] [z-index:100] gitBranchesPopup rounded-lg`}
+            className={`gitBranchesPopup [background:var(--popover)] [border:1px_solid_var(--input)] rounded-lg [box-shadow:var(--shadow-lg)] [display:grid] [grid-template-rows:36px_minmax(120px,_auto)] [left:0] [max-height:min(520px,_calc(100vh_-_70px))] [min-width:368px] [overflow:hidden] [position:absolute] [top:31px] [z-index:var(--layer-branch-picker)] gitBranchesPopup rounded-lg`}
             onKeyDown={(event) => {
                 if (event.key === "Escape") {
                     event.preventDefault();

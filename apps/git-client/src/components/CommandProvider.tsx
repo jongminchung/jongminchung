@@ -615,7 +615,7 @@ export function CommandProvider({
             )}
             {assistantMessage && (
                 <div
-                    className={`presentationAssistant [background:var(--popover)] [border:1px_solid_var(--input)] rounded-lg [bottom:42px] [box-shadow:var(--shadow-lg)] [color:var(--foreground)] [font-size:14px] [font-weight:600] [left:50%] [padding:10px_16px] [position:fixed] [transform:translateX(-50%)] [z-index:180] presentationAssistant rounded-lg`}
+                    className={`presentationAssistant [background:var(--popover)] [border:1px_solid_var(--input)] rounded-lg [bottom:42px] [box-shadow:var(--shadow-lg)] [color:var(--foreground)] [font-size:14px] [font-weight:600] [left:50%] [padding:10px_16px] [position:fixed] [transform:translateX(-50%)] [z-index:var(--layer-assistant)] presentationAssistant rounded-lg`}
                     role="status"
                 >
                     {assistantMessage}

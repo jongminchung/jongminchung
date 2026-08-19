@@ -99,6 +99,24 @@
     --duration-fast-min: 80ms;
     --duration-fast: 120ms;
     --duration-fast-max: 160ms;
+    --layer-local-content: 2;
+    --layer-resize-control: 3;
+    --layer-app-chrome: 8;
+    --layer-navigation: 9;
+    --layer-resize-handle: 12;
+    --layer-responsive-panel: 15;
+    --layer-tool-window: 35;
+    --layer-workspace-overlay: 44;
+    --layer-focused-workspace: 45;
+    --layer-notification: 75;
+    --layer-floating-panel: 80;
+    --layer-branch-picker: 100;
+    --layer-popover: 110;
+    --layer-menu: 120;
+    --layer-dialog: 121;
+    --layer-context-menu: 130;
+    --layer-select: 150;
+    --layer-assistant: 180;
     --elevation-low: 0 1px 2px oklch(0.2428 0.0037 106.67 / 0.071);
     --elevation-medium:
         0 12px 32px oklch(0.2428 0.0037 106.67 / 0.122),

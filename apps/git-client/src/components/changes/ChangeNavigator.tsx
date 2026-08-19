@@ -115,7 +115,7 @@ export function ChangeNavigator({
         label: "Staged" | "Working Tree",
         group: readonly ChangeEntry[],
     ) => (
-        <section className="changeNavigatorGroup [&>_header]:[align-items:center] [&>_header]:[background:var(--secondary)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[border-top:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[gap:6px] [&>_header]:[height:29px] [&>_header]:[padding:0_7px] [&>_header]:[position:sticky] [&>_header]:[top:0] [&>_header]:[z-index:2] [&:first-child_>_header]:[border-top:0] [&>_header_small]:[color:var(--disabled-foreground)] [&>_header_span]:[flex:1] [&>_header_button]:[background:transparent] [&>_header_button]:[color:var(--primary)] [&>_header_button]:[padding:0_5px] changeNavigatorGroup">
+        <section className="changeNavigatorGroup [&>_header]:[align-items:center] [&>_header]:[background:var(--secondary)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[border-top:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[gap:6px] [&>_header]:[height:29px] [&>_header]:[padding:0_7px] [&>_header]:[position:sticky] [&>_header]:[top:0] [&>_header]:[z-index:var(--layer-local-content)] [&:first-child_>_header]:[border-top:0] [&>_header_small]:[color:var(--disabled-foreground)] [&>_header_span]:[flex:1] [&>_header_button]:[background:transparent] [&>_header_button]:[color:var(--primary)] [&>_header_button]:[padding:0_5px] changeNavigatorGroup">
             <header>
                 <strong>{label}</strong>
                 <small>{group.length}</small>

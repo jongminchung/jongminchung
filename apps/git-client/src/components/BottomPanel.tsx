@@ -207,7 +207,7 @@ export const BottomPanel = memo(function BottomPanel({
                     aria-valuemax={MAX_BOTTOM_PANEL_HEIGHT}
                     aria-valuemin={MIN_BOTTOM_PANEL_HEIGHT}
                     aria-valuenow={height}
-                    className={`bottomResizer [background:transparent] [cursor:ns-resize] [position:relative] [z-index:3] [&::after]:[background:var(--input)] [&::after]:[content:""] [&::after]:[height:1px] [&::after]:[left:0] [&::after]:[position:absolute] [&::after]:[right:0] [&::after]:[top:1px] [&:hover::after]:[background:var(--primary)] [&:hover::after]:[height:2px] [&:focus-visible::after]:[background:var(--primary)] [&:focus-visible::after]:[height:2px] bottomResizer`}
+                    className={`bottomResizer [background:transparent] [cursor:ns-resize] [position:relative] [z-index:var(--layer-resize-control)] [&::after]:[background:var(--input)] [&::after]:[content:""] [&::after]:[height:1px] [&::after]:[left:0] [&::after]:[position:absolute] [&::after]:[right:0] [&::after]:[top:1px] [&:hover::after]:[background:var(--primary)] [&:hover::after]:[height:2px] [&:focus-visible::after]:[background:var(--primary)] [&:focus-visible::after]:[height:2px] bottomResizer`}
                     onDoubleClick={() =>
                         onHeightChange(DEFAULT_BOTTOM_PANEL_HEIGHT)
                     }

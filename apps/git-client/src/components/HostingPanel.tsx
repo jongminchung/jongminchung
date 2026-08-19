@@ -402,9 +402,7 @@ export function HostingPanel({
 
     if (!isElectronRuntime()) {
         return (
-            <section
-                className={`collectionIntro [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:10px] [min-height:48px] [padding:8px_14px] [background:var(--muted)] [&_div]:[flex:1] [&_p]:[color:var(--muted-foreground)] [&_p]:[margin:2px_0_0] collectionIntro`}
-            >
+            <section className="collectionIntro">
                 <Icon name="globe" size={18} />
                 <div>
                     <strong>GitHub and GitLab require the native app</strong>
@@ -418,13 +416,8 @@ export function HostingPanel({
     }
 
     return (
-        <div
-            className={`hostingPanel [display:flex] [flex-direction:column] [height:100%] [min-height:0] [&_input]:[background:var(--secondary)] [&_input]:[border:1px_solid_var(--border)] [&_input]:[min-height:29px] [&_input]:[padding:4px_8px] [&_select]:[background:var(--secondary)] [&_select]:[border:1px_solid_var(--border)] [&_select]:[min-height:29px] [&_select]:[padding:4px_8px] [&_textarea]:[background:var(--secondary)] [&_textarea]:[border:1px_solid_var(--border)] [&_textarea]:[min-height:29px] [&_textarea]:[padding:4px_8px] [&_button]:[align-items:center] [&_button]:[background:var(--secondary)] [&_button]:[border:1px_solid_var(--border)] [&_button]:[display:inline-flex] [&_button]:[gap:5px] [&_button]:[min-height:29px] [&_button]:[padding:0_9px] hostingPanel`}
-            aria-busy={Boolean(busy)}
-        >
-            <section
-                className={`hostingAccountBar [align-items:center] [display:flex] [gap:8px] [background:var(--muted)] [border-bottom:1px_solid_var(--border)] [min-height:52px] [padding:7px_11px] [&_label]:[color:var(--muted-foreground)] [&_label]:[display:flex] [&_label]:[flex-direction:column] [&_label]:[font-size:11px] [&_label]:[gap:3px] [&_label:nth-child(2)]:[flex:1] hostingAccountBar`}
-            >
+        <div className="hostingPanel" aria-busy={Boolean(busy)}>
+            <section className="hostingAccountBar">
                 <Selector
                     className="bg-secondary"
                     label="Account"
@@ -504,13 +497,7 @@ export function HostingPanel({
                     {notice}
                 </Notice>
             )}
-            {busy && (
-                <div
-                    className={`hostingProgress [border-bottom:1px_solid_var(--border)] [padding:7px_12px] [color:var(--primary)] hostingProgress`}
-                >
-                    {busy}…
-                </div>
-            )}
+            {busy && <div className="hostingProgress">{busy}…</div>}
 
             {showCreate && (
                 <HostingRequestComposer
@@ -520,9 +507,7 @@ export function HostingPanel({
                 />
             )}
 
-            <div
-                className={`hostingColumns [display:grid] [flex:1] [grid-template-columns:minmax(230px,_34%)_minmax(0,_1fr)] [min-height:0] hostingColumns`}
-            >
+            <div className="hostingColumns">
                 <HostingRequestList
                     items={items}
                     nextPage={nextPage}

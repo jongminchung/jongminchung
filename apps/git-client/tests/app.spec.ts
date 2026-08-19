@@ -5,7 +5,7 @@ test.beforeEach(async ({ page }) => {
     await page.goto("/?fixture=qa");
 });
 
-test("[성공] 800 x 650 리베이스된 최근 프로젝트 형상 일치", async ({
+test("[성공] 최근 프로젝트를 검색하고 800×650 welcome snapshot을 유지함", async ({
     page,
 }) => {
     await page.setViewportSize({ width: 800, height: 650 });
@@ -37,7 +37,7 @@ test("[성공] 800 x 650 리베이스된 최근 프로젝트 형상 일치", asy
     await expect(page.getByText("gcloud-cloudlog")).toHaveCount(0);
 });
 
-test("[성공] 리베이스된 빈 프로젝트 상태를 800 x 650으로 유지함", async ({
+test("[성공] 빈 프로젝트 welcome 화면을 800×650 viewport에 유지함", async ({
     page,
 }) => {
     await page.setViewportSize({ width: 800, height: 650 });
@@ -56,7 +56,7 @@ test("[성공] 리베이스된 빈 프로젝트 상태를 800 x 650으로 유지
     );
 });
 
-test("[성공] 집약된 Rebased Customize 지오메트리와 일치함", async ({
+test("[성공] Customize를 키보드로 탐색하고 접근 가능한 snapshot을 유지함", async ({
     page,
 }) => {
     await page.setViewportSize({ width: 800, height: 650 });
@@ -89,7 +89,9 @@ test("[성공] 집약된 Rebased Customize 지오메트리와 일치함", async 
     expect(accessibility.violations).toEqual([]);
 });
 
-test("[성공] 모양의 기본 설정을 적용하고 복원함", async ({ page }) => {
+test("[성공] appearance 선택과 OS 동기화 설정을 저장하고 복원함", async ({
+    page,
+}) => {
     await page.goto("/");
     await page.getByRole("treeitem", { name: "Customize" }).click();
     const root = page.locator("html");
@@ -137,7 +139,7 @@ test("[성공] 모양의 기본 설정을 적용하고 복원함", async ({ page
     await expect(root).toHaveAttribute("data-theme", "light");
 });
 
-test("[성공] 조밀한 3개 창으로 변경 Git 로그 고정 장치를 전송함", async ({
+test("[성공] 3-pane commit log와 revision details snapshot을 유지함", async ({
     page,
 }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
@@ -171,7 +173,7 @@ test("[성공] 조밀한 3개 창으로 변경 Git 로그 고정 장치를 전�
     });
 });
 
-test("[성공] Codex Dark 테마를 지원함", async ({ page }) => {
+test("[성공] dark theme의 workbench snapshot을 유지함", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
     await expect(page).toHaveScreenshot("git-log-workbench-dark.png", {
@@ -179,7 +181,7 @@ test("[성공] Codex Dark 테마를 지원함", async ({ page }) => {
     });
 });
 
-test("[성공] OS, Islands Light 및 Islands Dark 소스와 함께 계속해서 지원함", async ({
+test("[성공] Settings에서 light·dark·OS 동기화 theme를 전환함", async ({
     page,
 }) => {
     const settings = page.getByRole("button", {
@@ -211,7 +213,7 @@ test("[성공] OS, Islands Light 및 Islands Dark 소스와 함께 계속해서 
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 });
 
-test("[성공] 아이콘 작업에 대한 접근 지원 추가 도움말 표시함", async ({
+test("[성공] icon button tooltip을 pointer와 keyboard focus에 표시함", async ({
     page,
 }) => {
     const settings = page.getByRole("button", {
@@ -232,7 +234,9 @@ test("[성공] 아이콘 작업에 대한 접근 지원 추가 도움말 표시�
     );
 });
 
-test("[성공] 키보드 모양 설정을 탐색함", async ({ page }) => {
+test("[성공] Settings dialog를 키보드로 조작하고 trigger focus를 복원함", async ({
+    page,
+}) => {
     const settings = page.getByRole("button", {
         name: "IDE and Project Settings",
     });
@@ -252,7 +256,7 @@ test("[성공] 키보드 모양 설정을 탐색함", async ({ page }) => {
     await expect(settings).toBeFocused();
 });
 
-test("[성공] Space, 화살표, Escape 및 폴 복원을 사용하여 shadcn Select를 작동함", async ({
+test("[성공] Select를 키보드로 조작하고 dialog 위 layer와 focus를 유지함", async ({
     page,
 }) => {
     await page
@@ -277,6 +281,15 @@ test("[성공] Space, 화살표, Escape 및 폴 복원을 사용하여 shadcn Se
     const dialogLayer = await dialog.evaluate((element) =>
         Number(getComputedStyle(element).zIndex),
     );
+    const expectedLayers = await page.evaluate(() => {
+        const rootStyle = getComputedStyle(document.documentElement);
+        return {
+            dialog: Number(rootStyle.getPropertyValue("--layer-dialog")),
+            select: Number(rootStyle.getPropertyValue("--layer-select")),
+        };
+    });
+    expect(dialogLayer).toBe(expectedLayers.dialog);
+    expect(selectLayer).toBe(expectedLayers.select);
     expect(selectLayer).toBeGreaterThan(dialogLayer);
     await page.keyboard.press("ArrowDown");
     await page.keyboard.press("Enter");
@@ -289,7 +302,7 @@ test("[성공] Space, 화살표, Escape 및 폴 복원을 사용하여 shadcn Se
     await expect(ideFont).toBeFocused();
 });
 
-test("[성공] 최소 창 크기에서 코어 창을 사용할 수 있도록 유지함", async ({
+test("[성공] 최소 viewport에서 핵심 workbench와 keyboard focus를 유지함", async ({
     page,
 }) => {
     await page.setViewportSize({ width: 960, height: 640 });
@@ -310,7 +323,7 @@ test("[성공] 최소 창 크기에서 코어 창을 사용할 수 있도록 유
     });
 });
 
-test("[성공] 기록 재작성을 위해 인앱 인증 대화 상자를 사용함", async ({
+test("[성공] reword dialog에서 빈 commit message를 검증함", async ({
     page,
 }) => {
     const head = page.getByRole("row", {
@@ -329,7 +342,9 @@ test("[성공] 기록 재작성을 위해 인앱 인증 대화 상자를 사용�
     await expect(dialog).toBeVisible();
 });
 
-test("[성공] 커밋 컨텍스트 메뉴와 작업 가용성을 공유함", async ({ page }) => {
+test("[성공] commit context menu의 action availability를 표시함", async ({
+    page,
+}) => {
     const head = page.getByRole("row", {
         name: /Jongmin Chung now.*feat: add workspace-aware repository sessions 0000000/,
     });
@@ -345,7 +360,7 @@ test("[성공] 커밋 컨텍스트 메뉴와 작업 가용성을 공유함", asy
     ).toBeEnabled();
 });
 
-test("[성공] 변경된 첫 번째 파일을 선택하고 커밋 세부 정보를 인라인으로 유지함", async ({
+test("[성공] commit 선택 시 첫 변경 파일과 details를 함께 표시함", async ({
     page,
 }) => {
     await page
@@ -364,7 +379,7 @@ test("[성공] 변경된 첫 번째 파일을 선택하고 커밋 세부 정보�
     ).toBeVisible();
 });
 
-test("[성공] 정확하게 두 출력판에 대해 자동으로 페인트 작업을 수행하다", async ({
+test("[성공] 두 commit을 선택해 revision comparison과 diff를 표시함", async ({
     page,
 }) => {
     await page
@@ -389,7 +404,7 @@ test("[성공] 정확하게 두 출력판에 대해 자동으로 페인트 작�
     ).toBeVisible();
 });
 
-test("[성공] 제외된 첫 번째 레이어로 변경 사항을 방지하기 위해 조치를 취한 후 복원함", async ({
+test("[성공] changes workspace에서 선택·focused diff·file action을 연결함", async ({
     page,
 }) => {
     await page.getByRole("button", { name: "Commit", exact: true }).click();
@@ -434,7 +449,7 @@ test("[성공] 제외된 첫 번째 레이어로 변경 사항을 방지하기 �
     ).toBeVisible();
 });
 
-test("[성공] 검토된 푸시 대화 상자 하나를 제외하고 임대 확인이 필요함", async ({
+test("[성공] diverged branch의 force-with-lease 확인과 Push 단축키를 검증함", async ({
     page,
 }) => {
     await page.getByRole("button", { name: "Push…", exact: true }).click();
@@ -477,7 +492,7 @@ test("[성공] 검토된 푸시 대화 상자 하나를 제외하고 임대 확�
     await expect(page.getByRole("dialog", { name: "Push" })).toBeVisible();
 });
 
-test("[성공] 대화형 리베이스 작업 공간에서 게시된 커밋을 조사하다", async ({
+test("[성공] published commit을 확인하고 interactive rebase를 완료함", async ({
     page,
 }) => {
     const commit = page.getByRole("row", {
@@ -523,7 +538,9 @@ test("[성공] 대화형 리베이스 작업 공간에서 게시된 커밋을 �
     ).toBeChecked();
 });
 
-test("[성공] 작업자, 복제 및 포터를 가져오기", async ({ page }) => {
+test("[성공] repository clone form을 전환하고 필수 입력을 검증함", async ({
+    page,
+}) => {
     await page.getByRole("button", { name: /Project:/ }).click();
     await page.getByRole("option", { name: "Clone Repository…" }).click();
     const dialog = page.getByRole("dialog", { name: "Repository" });
@@ -557,7 +574,7 @@ test("[성공] 작업자, 복제 및 포터를 가져오기", async ({ page }) =
     await expect(dialog.getByText("Bare repository")).toBeVisible();
 });
 
-test("[성공] 브라우저 고정 장치 터미널을 홀더 없이 유지함", async ({
+test("[성공] QA fixture에서 shell 없이 terminal empty state를 표시함", async ({
     page,
 }) => {
     await expect(
@@ -587,7 +604,9 @@ test("[성공] 브라우저 고정 장치 터미널을 홀더 없이 유지함",
     ).toHaveCount(0);
 });
 
-test("[실패] 탭하지 않고 작업할 수 있도록 표시함", async ({ page }) => {
+test("[성공] 별도 Manage surface 없이 기본 workbench를 표시함", async ({
+    page,
+}) => {
     await expect(
         page.getByRole("button", { name: "Manage", exact: true }),
     ).toHaveCount(0);
@@ -599,7 +618,7 @@ test("[실패] 탭하지 않고 작업할 수 있도록 표시함", async ({ pag
     ).toBeVisible();
 });
 
-test("[성공] 리베이스된 스타일 프로젝트 전환을 지원하기 위해 시 포커스를 복원함", async ({
+test("[성공] project switcher를 닫은 뒤 trigger focus를 복원함", async ({
     page,
 }) => {
     const projectButton = page.getByRole("button", {
@@ -627,7 +646,7 @@ test("[성공] 리베이스된 스타일 프로젝트 전환을 지원하기 위
     await expect(projectButton).toBeFocused();
 });
 
-test("[성공] 강력한 팝오버에서 사용 가능한 큐 낚시 및 커밋 옵션을 유지함", async ({
+test("[성공] graph filter와 commit options popover를 표시함", async ({
     page,
 }) => {
     await page
@@ -656,9 +675,7 @@ test("[성공] 강력한 팝오버에서 사용 가능한 큐 낚시 및 커밋 
     ).toBeVisible();
 });
 
-test("[성공] 접근 가능한 키보드를 사용하여 하단 패널의 크기를 조정함", async ({
-    page,
-}) => {
+test("[성공] keyboard로 bottom panel separator를 조절함", async ({ page }) => {
     await page.getByRole("button", { name: "Terminal", exact: true }).click();
     const separator = page.getByRole("separator", {
         name: "Resize bottom panel",
@@ -675,7 +692,7 @@ test("[성공] 접근 가능한 키보드를 사용하여 하단 패널의 크�
     await expect(separator).toHaveAttribute("aria-valuenow", "160");
 });
 
-test("[성공] v4 검토 창의 크기를 조정하고 보기를 사용하여 액세스 가능", async ({
+test("[성공] revision review를 조절하고 commit tool window로 전환함", async ({
     page,
 }) => {
     await page
@@ -707,7 +724,9 @@ test("[성공] v4 검토 창의 크기를 조정하고 보기를 사용하여 �
     ).toBeVisible();
 });
 
-test("[성공] 지붕 작업장을 집적한 작업자 도구로 고정", async ({ page }) => {
+test("[성공] branch picker에서 Branches & Tags dialog를 열고 닫음", async ({
+    page,
+}) => {
     await page
         .getByRole("banner", { name: "Main Toolbar" })
         .getByRole("button", { name: "main" })
@@ -724,7 +743,7 @@ test("[성공] 지붕 작업장을 집적한 작업자 도구로 고정", async 
     await expect(dialog).toHaveCount(0);
 });
 
-test("[성공] 기둥, 보기, 검색, 서랍 및 설정에 대한 박쥐를 사용함", async ({
+test("[성공] workbench shortcut으로 search·palette·panel·settings를 조작함", async ({
     page,
 }) => {
     await expect(
@@ -826,7 +845,7 @@ test("[성공] 기둥, 보기, 검색, 서랍 및 설정에 대한 박쥐를 사
     ).toBeVisible();
 });
 
-test("[성공] 엑스트라, 팝오버 및 다중 선택을 한 번에 한 레이어씩 떼어내어 함", async ({
+test("[성공] menu·popover·revision comparison을 Escape로 순서대로 닫음", async ({
     page,
 }) => {
     const head = page.getByRole("row", {
@@ -866,7 +885,9 @@ test("[성공] 엑스트라, 팝오버 및 다중 선택을 한 번에 한 레�
     ).toBeVisible();
 });
 
-test("[성공]파일 변경 내용을 기록하는 경우", async ({ page }) => {
+test("[성공] changed file을 editable CodeMirror editor로 표시함", async ({
+    page,
+}) => {
     await page.getByRole("button", { name: "Commit", exact: true }).click();
     await page
         .getByRole("button", {
@@ -886,7 +907,7 @@ test("[성공]파일 변경 내용을 기록하는 경우", async ({ page }) => 
     );
 });
 
-test("[성공] 키보드 포커스가 있는 로그인 및 편집기 HTML을 연결하고 싶습니다", async ({
+test("[성공] log·editor tab과 panel을 연결하고 keyboard lifecycle을 유지함", async ({
     page,
 }) => {
     const expectLinkedPanel = async (
@@ -947,7 +968,9 @@ test("[성공] 키보드 포커스가 있는 로그인 및 편집기 HTML을 연
     await expect(firstLogTab).toBeFocused();
 });
 
-test("[성공] 자동으로 인정받을 수 없습니다", async ({ page }) => {
+test("[성공] CodeMirror editor에 serious accessibility violation이 없음", async ({
+    page,
+}) => {
     await page.getByRole("button", { name: "Commit", exact: true }).click();
     await page
         .getByRole("button", {
@@ -971,7 +994,7 @@ test("[성공] 자동으로 인정받을 수 없습니다", async ({ page }) => 
     ).toEqual([]);
 });
 
-test("[성공] 환영, 사용 및 설정에 액세스할 수 있도록 유지함", async ({
+test("[성공] welcome·workbench·Settings에 serious accessibility violation이 없음", async ({
     page,
 }) => {
     const expectNoSeriousViolations = async (

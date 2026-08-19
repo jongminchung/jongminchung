@@ -272,9 +272,7 @@ export function ChangesWorkspace({
             placement="below"
             width={250}
             content={
-                <div
-                    className={`changesViewOptions [display:grid] [gap:3px] [padding:5px] [&>_strong]:[color:var(--muted-foreground)] [&>_strong]:[font-size:10px] [&>_strong]:[font-weight:600] [&>_strong]:[margin:5px_6px_2px] [&>_strong:not(:first-child)]:[border-top:1px_solid_var(--border)] [&>_strong:not(:first-child)]:[padding-top:7px] changesViewOptions`}
-                >
+                <div className="changesViewOptions">
                     <strong>Group By</strong>
                     <CheckboxInput
                         label="Directory"
@@ -318,7 +316,12 @@ export function ChangesWorkspace({
 
     return (
         <div
-            className={`${`changesWorkspace [background:var(--card)] [display:grid] [grid-template-columns:minmax(190px,_var(--changes-navigator-width,_250px))_minmax(420px,_1fr)_minmax(280px,_var(--commit-rail-width,_315px))] [min-height:0] [min-width:0] max-[1120px]:[grid-template-columns:minmax(210px,_245px)_minmax(0,_1fr)] max-[1120px]:[position:relative] max-[1120px]:[&>_.commitRail]:[bottom:0] max-[1120px]:[&>_.commitRail]:[box-shadow:var(--shadow-lg)] max-[1120px]:[&>_.commitRail]:[position:absolute] max-[1120px]:[&>_.commitRail]:[right:0] max-[1120px]:[&>_.commitRail]:[top:0] max-[1120px]:[&>_.commitRail]:[transform:translateX(102%)] max-[1120px]:[&>_.commitRail]:[transition:transform_120ms_ease-out] max-[1120px]:[&>_.commitRail]:[width:min(var(--commit-rail-width,_340px),_calc(100%_-_220px))] max-[1120px]:[&>_.commitRail]:[z-index:15] max-[1120px]:[&.commitRailOpen_>_.commitRail]:[transform:translateX(0)] changesWorkspace`} ${toolWindow ? `changesToolWindow rounded-xl [grid-template-columns:minmax(0,_1fr)]! [grid-template-rows:29px_minmax(150px,_3fr)_minmax(120px,_2fr)] [overflow:hidden] max-[1120px]:[grid-template-columns:minmax(0,_1fr)]! max-[1120px]:[position:relative] [&>_.changeNavigator]:[border-bottom:1px_solid_var(--border)] [&>_.changeNavigator]:[border-right:0] [&>_.diffViewer]:[display:none] [&>_.focusedDiffViewer]:[display:grid] [&>_.commitRail]:[border-left:0] [&>_.commitRail]:[border-top:1px_solid_var(--border)] [&>_.commitRail]:[padding:6px] max-[1120px]:[&>_.commitRail]:[box-shadow:none] max-[1120px]:[&>_.commitRail]:[position:relative] max-[1120px]:[&>_.commitRail]:[transform:none] max-[1120px]:[&>_.commitRail]:[width:auto] changesToolWindow rounded-lg` : ""} ${focused && !toolWindow ? `changesWorkspaceFocused [grid-template-columns:0_minmax(0,_1fr)_0] [&>_.changeNavigator]:[overflow:hidden] [&>_.changeNavigator]:[visibility:hidden] [&>_.commitRail]:[overflow:hidden] [&>_.commitRail]:[visibility:hidden] changesWorkspaceFocused` : ""} ${commitRailOpen ? "commitRailOpen" : ""}`}
+            className={cn(
+                "changesWorkspace",
+                toolWindow && "changesToolWindow",
+                focused && !toolWindow && "changesWorkspaceFocused",
+                commitRailOpen && "commitRailOpen",
+            )}
             ref={workspace}
             style={
                 {
@@ -328,9 +331,7 @@ export function ChangesWorkspace({
             }
         >
             {toolWindow && (
-                <header
-                    className={`commitToolWindowHeader [align-items:center] [background:var(--secondary)] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:2px] [height:29px] [padding:0_5px_0_8px] [&>_strong]:[font-size:11px] [&>_span]:[flex:1] commitToolWindowHeader`}
-                >
+                <header className="commitToolWindowHeader">
                     <strong>Commit</strong>
                     <span />
                     {viewOptions}
@@ -433,7 +434,7 @@ export function ChangesWorkspace({
                 />
             ) : (
                 <section
-                    className={`diffPreviewHidden [align-items:center] [background:var(--card)] [color:var(--muted-foreground)] [display:flex] [flex-direction:column] [gap:7px] [justify-content:center] [min-height:0] [&>_p]:[margin:0] diffPreviewHidden`}
+                    className="diffPreviewHidden"
                     aria-label="Diff preview hidden"
                 >
                     <Icon name="changes" size={28} />

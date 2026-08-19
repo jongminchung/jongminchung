@@ -123,7 +123,7 @@ export function ProjectSwitcherPopup({
         <dialog
             open
             aria-label="Projects"
-            className={`projectSwitcherPopup [background:var(--popover)] [border:1px_solid_var(--input)] rounded-lg [box-shadow:var(--shadow-lg)] [left:0] [max-height:min(540px,_calc(100vh_-_62px))] [min-width:368px] [overflow:auto] [padding:0_0_5px] [position:absolute] [top:calc(100%_+_2px)] [z-index:80] [&_[data-project-section]]:[border-top:1px_solid_var(--border)] [&_[data-project-section]]:[color:var(--muted-foreground)] [&_[data-project-section]]:[display:block] [&_[data-project-section]]:[font-size:10px] [&_[data-project-section]]:[font-weight:600] [&_[data-project-section]]:[padding:8px_11px_4px] [&>_p]:[color:var(--destructive)] [&>_p]:[font-size:10px] [&>_p]:[margin:5px_9px] projectSwitcherPopup rounded-lg`}
+            className={`projectSwitcherPopup [background:var(--popover)] [border:1px_solid_var(--input)] rounded-lg [box-shadow:var(--shadow-lg)] [left:0] [max-height:min(540px,_calc(100vh_-_62px))] [min-width:368px] [overflow:auto] [padding:0_0_5px] [position:absolute] [top:calc(100%_+_2px)] [z-index:var(--layer-floating-panel)] [&_[data-project-section]]:[border-top:1px_solid_var(--border)] [&_[data-project-section]]:[color:var(--muted-foreground)] [&_[data-project-section]]:[display:block] [&_[data-project-section]]:[font-size:10px] [&_[data-project-section]]:[font-weight:600] [&_[data-project-section]]:[padding:8px_11px_4px] [&>_p]:[color:var(--destructive)] [&>_p]:[font-size:10px] [&>_p]:[margin:5px_9px] projectSwitcherPopup rounded-lg`}
             onKeyDown={(event) => {
                 if (event.key === "Escape") {
                     event.preventDefault();

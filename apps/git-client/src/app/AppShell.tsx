@@ -436,7 +436,7 @@ export function AppShell() {
             )}
             {sessionError && (
                 <Notice
-                    className="absolute top-20 z-[8] w-full items-center rounded-none border-x-0 px-3 py-1.5"
+                    className="absolute top-20 z-(--layer-app-chrome) w-full items-center rounded-none border-x-0 px-3 py-1.5"
                     icon={<Icon name="warning" size={14} />}
                     role="alert"
                     size="sm"
@@ -472,7 +472,7 @@ export function AppShell() {
             )}
             {sessionNotice && (
                 <Notice
-                    className="absolute top-20 z-[8] w-full items-center rounded-none border-x-0 px-3 py-1.5"
+                    className="absolute top-20 z-(--layer-app-chrome) w-full items-center rounded-none border-x-0 px-3 py-1.5"
                     icon={<Icon name="history" size={14} />}
                     role="status"
                     size="sm"

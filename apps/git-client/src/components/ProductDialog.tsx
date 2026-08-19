@@ -98,7 +98,7 @@ export function Dialog({
                 aria-label={ariaLabel}
                 aria-labelledby={ariaLabelledBy}
                 className={cn(
-                    "z-[121] block max-w-none gap-0 bg-transparent p-0 shadow-none ring-0 sm:max-w-none",
+                    "z-(--layer-dialog) block max-w-none gap-0 bg-transparent p-0 shadow-none ring-0 sm:max-w-none",
                     variant === "fullscreen" &&
                         "inset-0 top-0 left-0 translate-x-0 translate-y-0",
                 )}

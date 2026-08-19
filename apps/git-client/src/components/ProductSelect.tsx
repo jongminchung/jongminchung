@@ -22,7 +22,7 @@ export function SelectContent({
 }: ComponentProps<typeof SharedSelectContent>): ReactNode {
     return (
         <SharedSelectContent
-            positionerClassName={cn("z-[150]", positionerClassName)}
+            positionerClassName={cn("z-(--layer-select)", positionerClassName)}
             {...props}
         />
     );

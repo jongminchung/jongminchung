@@ -71,7 +71,7 @@ export function TerminalLaunchTargetMenu({
                 align="start"
                 anchor={anchor}
                 aria-label={label}
-                className="z-[120] w-60 [&_[role=menuitem]]:min-h-7"
+                className="z-(--layer-menu) w-60 [&_[role=menuitem]]:min-h-7"
                 collisionPadding={8}
                 finalFocus={false}
                 positionMethod="fixed"

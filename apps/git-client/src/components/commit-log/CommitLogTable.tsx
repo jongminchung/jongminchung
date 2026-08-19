@@ -145,7 +145,7 @@ export function CommitLogTable({
                     }}
                 >
                     <div
-                        className={`graphCanvas [left:2px] [pointer-events:none] [position:absolute] [top:0] [width:34px] [z-index:2] graphCanvas`}
+                        className={`graphCanvas [left:2px] [pointer-events:none] [position:absolute] [top:0] [width:34px] [z-index:var(--layer-local-content)] graphCanvas`}
                     >
                         <CommitGraph
                             commits={filtered}

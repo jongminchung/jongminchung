@@ -129,7 +129,7 @@ export function CommitContextMenu({
                 align="start"
                 anchor={anchor}
                 aria-label="Commit actions"
-                className="z-[130] grid max-h-[min(520px,calc(100vh-24px))] min-w-[290px] gap-0.5 overflow-auto border border-border"
+                className="z-(--layer-context-menu) grid max-h-[min(520px,calc(100vh-24px))] min-w-[290px] gap-0.5 overflow-auto border border-border"
                 collisionPadding={8}
                 finalFocus={false}
                 positionMethod="fixed"
