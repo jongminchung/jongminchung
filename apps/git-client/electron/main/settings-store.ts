@@ -17,17 +17,17 @@ function legacyBackupPath(filePath: string, now: Date): string {
     return `${filePath}.v${LEGACY_SETTINGS_SCHEMA_VERSION}.${timestamp}.backup`;
 }
 
-function parseSettings(raw: unknown): SettingsDocument {
+function parseSettings(
+    raw: unknown,
+    expectedVersion: number = SETTINGS_SCHEMA_VERSION,
+): SettingsDocument {
     if (typeof raw !== "object" || raw === null) {
         throw NativeError.create(
             "settings.invalid",
             "Settings must be a JSON object.",
         );
     }
-    if (
-        !("schemaVersion" in raw) ||
-        raw.schemaVersion !== SETTINGS_SCHEMA_VERSION
-    ) {
+    if (!("schemaVersion" in raw) || raw.schemaVersion !== expectedVersion) {
         throw NativeError.create(
             "settings.version",
             "Unsupported settings version.",
@@ -36,7 +36,8 @@ function parseSettings(raw: unknown): SettingsDocument {
     if (
         !("values" in raw) ||
         typeof raw.values !== "object" ||
-        raw.values === null
+        raw.values === null ||
+        Array.isArray(raw.values)
     ) {
         throw NativeError.create(
             "settings.invalid",
@@ -69,12 +70,18 @@ export class SettingsStore {
                 "schemaVersion" in raw &&
                 raw.schemaVersion === LEGACY_SETTINGS_SCHEMA_VERSION
             ) {
+                const document = parseSettings(
+                    raw,
+                    LEGACY_SETTINGS_SCHEMA_VERSION,
+                );
                 await copyFile(
                     filePath,
                     legacyBackupPath(filePath, new Date()),
                 );
-                const store = new SettingsStore(filePath, {});
-                await store.flush({});
+                const store = new SettingsStore(filePath, {
+                    ...document.values,
+                });
+                await store.flush(document.values);
                 return store;
             }
             const document = parseSettings(raw);
