@@ -14,8 +14,6 @@ publicationStatus: published
 sourceUrl: https://github.com/kciter/kciter.github.io/blob/develop/src/drafts/2026/2026-07-07-implementing-genetic-algorithm.mdx
 ---
 
-{/* TODO: 썸네일 다운로드 후 이 컴포넌트와 import를 제거하고 frontmatter에 image를 지정할 것 */}
-
 기계 학습이라고 하면 대부분 신경망을 떠올린다. 데이터를 잔뜩 모아 정답을 알려주고, 틀린 만큼 가중치를 조금씩 고쳐나가는 방식 말이다. 그런데 이런 질문을 던져보자. **정답을 모르는 문제는 어떻게 학습시킬까?** 정해진 트랙을 자동차가 안정적으로 도는 AI를 만들고 싶다고 해보자. 어느 순간에 핸들을 얼마나 꺾어야 하는지, 그 "정답 핸들값"을 우리는 모른다. 알았다면 애초에 AI가 필요하지도 않았을 것이다.
 
 이럴 때 쓸 수 있는 접근이 하나 있다. **자연이 이미 40억 년 동안 써온 방법이다.** 정답을 아무도 모르는 채로, 그저 잘 살아남은 것들이 자손을 남기고, 그 자손이 조금씩 달라지기를 반복하는 것. 우리는 이걸 진화라고 부르고, 이 원리를 컴퓨터로 흉내 낸 것을 **유전 알고리즘**<sup>Genetic Algorithm</sup>이라고 부른다.

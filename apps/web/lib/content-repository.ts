@@ -6,14 +6,15 @@ import * as runtime from "react/jsx-runtime";
 import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
 import {
-    readDocuments,
-    validateDocuments,
-    type SourceDocument,
-} from "../scripts/build-content.ts";
-import {
     readInvestmentNotes,
     validateInvestmentTranslations,
 } from "../scripts/build-investment-content.ts";
+import {
+    createSearchBody,
+    readDocuments,
+    type SourceDocument,
+} from "../scripts/content-source.ts";
+import { validateDocuments } from "../scripts/content-validation.ts";
 import {
     compareDocumentMetadata,
     createDocHref,
@@ -43,16 +44,6 @@ let productionSnapshot: Promise<ContentSnapshot> | undefined;
 
 function documentKey(locale: Locale, id: string): string {
     return `${locale}/${id}`;
-}
-
-function createSearchBody(body: string): string {
-    return body
-        .replace(/^---[\s\S]*?---/u, "")
-        .replace(/```[\s\S]*?```/gu, " ")
-        .replace(/<[^>]+>/gu, " ")
-        .replace(/[#>*_`~\u005b\u005d()|]/gu, " ")
-        .replace(/\s+/gu, " ")
-        .trim();
 }
 
 async function createContentSnapshot(): Promise<ContentSnapshot> {

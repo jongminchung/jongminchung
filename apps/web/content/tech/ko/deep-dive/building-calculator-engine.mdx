@@ -14,8 +14,6 @@ publicationStatus: published
 sourceUrl: https://github.com/kciter/kciter.github.io/blob/develop/src/drafts/2026/2026-07-07-building-calculator-engine.mdx
 ---
 
-{/* TODO: 썸네일 다운로드 후 이 컴포넌트와 import를 제거하고 frontmatter에 image를 지정할 것 */}
-
 [Soulver](https://soulver.app/)라는 앱이 있다. 메모장처럼 생긴 화면에 "커피 4,500원 × 3 + 버스 1,500원"이라고 적으면 오른쪽에 15,000원이 나타난다. "3km + 200m"라고 적으면 3.2km가 나오고, 위에서 계산한 값을 아래 줄에서 변수처럼 가져다 쓸 수도 있다. 처음 써보면 마술 같지만, 조금 지나면 다른 궁금증이 생긴다. 저 문자열은 대체 어떤 과정을 거쳐 답이 되는 걸까?
 
 이 질문은 생각보다 넓은 곳에 닿아 있다. 엑셀의 수식 입력줄, Notion의 formula 필드, 구글 검색창에 "3 \* 27"을 치면 나오는 계산기, JavaScript 진영에서 널리 쓰이는 [mathjs](https://mathjs.org/) 라이브러리. 전부 같은 문제를 풀고 있다. **사람이 쓴 수식 문자열을 받아서 계산 결과를 돌려주는 것.** 이런 물건을 이 글에서는 계산기 엔진이라고 부르겠다.
