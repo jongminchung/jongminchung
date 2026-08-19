@@ -1,5 +1,5 @@
 import { TooltipProvider } from "@jongminchung/ui/components/tooltip";
-import { StrictMode } from "react";
+import { lazy, StrictMode, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { installDesktopPort } from "./adapters/electron/installDesktopPort";
 import { installElectronTerminalService } from "./adapters/electron/installTerminalService";
@@ -11,6 +11,10 @@ import { RendererErrorBoundary } from "./components/RendererErrorBoundary";
 import { AppearanceStorage, resolveAppearance } from "./domain/appearance";
 import LocalHistoryWindow from "./LocalHistoryWindow";
 import "./styles/index.css";
+
+const ComponentStateFixture = import.meta.env.DEV
+    ? lazy(() => import("./qa/ComponentStateFixture"))
+    : null;
 
 installBrowserWorkbenchEventPort();
 installDesktopPort();
@@ -31,16 +35,25 @@ document.documentElement.style.colorScheme = initialColorScheme;
 
 const rootElement = document.getElementById("root");
 if (rootElement === null) throw new Error("Git Client root element is missing");
+const componentStateFixture =
+    ComponentStateFixture !== null &&
+    new URLSearchParams(window.location.search).get("fixture") ===
+        "components" ? (
+        <Suspense fallback={null}>
+            <ComponentStateFixture />
+        </Suspense>
+    ) : null;
 
 createRoot(rootElement).render(
     <StrictMode>
         <RendererErrorBoundary>
             <TooltipProvider>
-                {window.location.pathname === "/local-history" ? (
-                    <LocalHistoryWindow />
-                ) : (
-                    <App gitSession={gitSession} />
-                )}
+                {componentStateFixture ??
+                    (window.location.pathname === "/local-history" ? (
+                        <LocalHistoryWindow />
+                    ) : (
+                        <App gitSession={gitSession} />
+                    ))}
             </TooltipProvider>
         </RendererErrorBoundary>
     </StrictMode>,
