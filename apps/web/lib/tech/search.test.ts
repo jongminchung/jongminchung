@@ -110,14 +110,42 @@ describe("문서검색", () => {
             evaluateSearchBenchmark(documents, [
                 { query: "package", expectedIds: ["package"] },
                 { query: "runtime", expectedIds: ["runtime"] },
-                { query: "missing", expectedIds: [] },
+                {
+                    query: "missing",
+                    expectedIds: [],
+                    expectNoResults: true,
+                },
             ]),
         ).toEqual({
             queries: 3,
-            top1HitRate: 2 / 3,
-            top3HitRate: 2 / 3,
-            meanReciprocalRank: 2 / 3,
+            top1HitRate: 1,
+            top3HitRate: 1,
+            meanReciprocalRank: 1,
             zeroResultRate: 1 / 3,
+            positiveQueries: 2,
+            noResultQueries: 1,
+            noResultAccuracy: 1,
+            unexpectedZeroResultRate: 0,
         });
+    });
+
+    it("[실패] target query와 no-result query의 기대값을 혼합하지 않음", () => {
+        const documents = [
+            createDocument({ id: "package", title: "Package guide" }),
+        ];
+        expect(() =>
+            evaluateSearchBenchmark(documents, [
+                { query: "package", expectedIds: [] },
+            ]),
+        ).toThrow("distinguish a target from no results");
+        expect(() =>
+            evaluateSearchBenchmark(documents, [
+                {
+                    query: "package",
+                    expectedIds: ["package"],
+                    expectNoResults: true,
+                },
+            ]),
+        ).toThrow("distinguish a target from no results");
     });
 });

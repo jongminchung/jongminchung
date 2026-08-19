@@ -5,8 +5,6 @@ import {
     readContentSnapshot,
 } from "#lib/content-repository";
 
-export const runtime = "nodejs";
-
 /** 요청에 대한 응답을 생성함 */
 export async function GET(
     _request: Request,

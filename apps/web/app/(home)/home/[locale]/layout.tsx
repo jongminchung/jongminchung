@@ -33,6 +33,7 @@ export const metadata: Metadata = {
         images: ["/og"],
     },
 };
+export const instant = false;
 
 /** `HomeLocaleLayout` 페이지 UI를 렌더링함 */
 export default async function HomeLocaleLayout({

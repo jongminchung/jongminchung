@@ -1,6 +1,6 @@
 # Issue 0025: 한영 기술 문서 검색 relevance benchmark 도입
 
-- 상태: 부분 완료
+- 상태: 완료
 - 우선순위: P2
 - 기준일: 2026-08-19
 - 영향 범위:
@@ -27,9 +27,19 @@
 
 - **`Intl.Segmenter` 기반 한영 혼합 query tokenization과 공백·구두점 차이를 흡수하는 compact match를 추가함**
 - **일부 term만 일치하는 문서는 coverage 제곱으로 감점해 정확한 API·title 일치를 우선하도록 개선함**
-- **top-1·top-3·MRR·zero-result rate를 계산하는 deterministic benchmark API와 회귀 test를 추가함**
+- **실제 기술 문서에 연결된 한영 query corpus 40개와 deterministic threshold를 추가함**
+  - 영어 20개와 한국어 20개로 구성됨
+  - 자연어·한영 혼합·무공백 한국어·`createProgram`·`noUncheckedIndexedAccess` 같은 정확 API명·부분 일치·명시적 no-result를 포함함
+- **검색 품질 baseline을 locale별로 고정함**
+  - 전체 top-1은 `91.67%`, top-3는 `100%`, MRR은 `95.83%`로 측정됨
+  - 영어 top-1은 `94.44%`, MRR은 `97.22%`로 측정됨
+  - 한국어 top-1은 `88.89%`, MRR은 `94.44%`로 측정됨
+  - 명시적 no-result accuracy는 `100%`, positive query의 unexpected zero-result는 `0%`로 측정됨
+- **built-in 검색의 asset·index 비용 baseline을 품질 gate와 함께 고정함**
+  - 직렬화된 한영 search index는 `1,040,636 bytes`로 측정됨
+  - 초기 index 요청은 locale별 1회이며 추가 검색 runtime dependency는 `0 bytes`임
+  - index 상한 `1,100,000 bytes`와 runtime dependency 상한 `0 bytes`를 초과하면 회귀 test가 실패함
 - **Pagefind 전환은 현재 corpus 규모에서 운영 복잡도와 CJK 부분 문자열 위험을 정당화하지 못해 채택하지 않음**
-- **30~50개 실제 query corpus와 asset budget의 자동 비교는 후속 작업으로 남아 있어 상태를 부분 완료로 유지함**
 
 ## OSS 기준에서 확인한 검색 패턴
 
@@ -38,7 +48,7 @@
 - **`Intl.Segmenter`를 이용한 CJK query segmentation과 Web Worker 검색을 제공함**
 - **CJK fuzzy substring과 mixed-language 검색에는 공개된 한계가 있어 실제 한국어 corpus 검증이 필요함**
 
-## 현재 저장소의 공백
+## 처리 전 저장소의 공백
 
 - **query는 NFKC와 lowercase 처리 뒤 whitespace로만 분리됨**
   - 띄어쓰기가 없는 한국어 문장은 하나의 긴 term이 됨
@@ -106,3 +116,13 @@
   - document discovery E2E
   - production asset와 search index 크기 측정
 - **최종 `pnpm run check`, `git diff --check`, `git status --short`를 실행함**
+
+## 최종 선택
+
+- **현재 built-in 검색을 유지함**
+  - 별도 client 검색 library가 없어 runtime asset 증가가 없음
+  - 전체와 locale별 relevance가 고정 threshold를 충족함
+  - query corpus와 index byte baseline을 같은 test에서 비교할 수 있음
+- **Pagefind 도입은 corpus 기준으로 재평가 가능한 후보로만 유지함**
+  - 향후 문서 증가로 built-in index가 `1,100,000 bytes`를 넘거나 초기 전송 비용이 성능 예산을 위협할 때 pilot 필요함
+  - pilot은 동일 40개 corpus에서 locale별 relevance를 먼저 통과한 뒤 worker·분할 index asset 절감이 확인될 때만 채택 가능함

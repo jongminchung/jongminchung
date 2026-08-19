@@ -5,6 +5,7 @@ import type {
     HostingAccount,
     HostingChangeRequest,
     HostingChangedFile,
+    HostingMergeReadiness,
     HostingProviderKind,
     HostingRequest,
     HostingResponse,
@@ -60,6 +61,23 @@ export function inferRemoteCoordinates(
     return { project, provider, baseUrl: `https://${host}` };
 }
 
+export class HostingInspectionSequence {
+    #current = 0;
+
+    begin(): number {
+        this.#current += 1;
+        return this.#current;
+    }
+
+    invalidate(): void {
+        this.#current += 1;
+    }
+
+    isCurrent(sequence: number): boolean {
+        return this.#current === sequence;
+    }
+}
+
 export function useHostingPanelController({
     remoteUrl,
     currentBranch,
@@ -82,15 +100,27 @@ export function useHostingPanelController({
     const [timeline, setTimeline] = useState<readonly HostingTimelineEntry[]>(
         [],
     );
+    const [mergeReadiness, setMergeReadiness] =
+        useState<HostingMergeReadiness>();
     const [viewed, setViewed] = useState<ReadonlySet<string>>(new Set());
     const [showCreate, setShowCreate] = useState(false);
     const [busy, setBusy] = useState<string>();
     const [error, setError] = useState<string>();
     const [notice, setNotice] = useState<string>();
-    const inspectionSequence = useRef(0);
+    const inspectionSequence = useRef(new HostingInspectionSequence());
     const selectedAccount = accounts.find(
         (account) => account.id === accountId,
     );
+
+    useEffect(() => {
+        inspectionSequence.current.invalidate();
+        setSelected(undefined);
+        setFiles([]);
+        setTimeline([]);
+        setMergeReadiness(undefined);
+        setViewed(new Set());
+        setBusy(undefined);
+    }, [accountId, project]);
 
     useEffect(() => {
         if (!isElectronRuntime()) return;
@@ -166,11 +196,11 @@ export function useHostingPanelController({
     };
 
     const inspect = async (item: HostingChangeRequest): Promise<void> => {
-        const sequence = inspectionSequence.current + 1;
-        inspectionSequence.current = sequence;
+        const sequence = inspectionSequence.current.begin();
         setSelected(item);
         setFiles([]);
         setTimeline([]);
+        setMergeReadiness(undefined);
         setViewed(new Set());
         const projectName = project.trim();
         if (!projectName || !accountId) return;
@@ -193,6 +223,7 @@ export function useHostingPanelController({
                 detailResponse,
                 fileResponse,
                 timelineResponse,
+                readinessResponse,
                 serverViewedResponse,
                 storedViewed,
             ] = await Promise.all([
@@ -211,15 +242,22 @@ export function useHostingPanelController({
                     project: projectName,
                     number: item.number,
                 }),
+                hostingBridge.execute(accountId, {
+                    kind: "mergeReadiness",
+                    project: projectName,
+                    number: item.number,
+                }),
                 serverViewedPromise,
                 localViewedPromise,
             ]);
-            if (inspectionSequence.current !== sequence) return;
+            if (!inspectionSequence.current.isCurrent(sequence)) return;
             if (detailResponse.kind === "changeRequest")
                 setSelected(detailResponse.item);
             if (fileResponse.kind === "files") setFiles(fileResponse.items);
             if (timelineResponse.kind === "timeline")
                 setTimeline(timelineResponse.items);
+            if (readinessResponse.kind === "mergeReadiness")
+                setMergeReadiness(readinessResponse.readiness);
             setViewed(
                 selectedAccount?.provider === "gitHub" &&
                     serverViewedResponse.kind === "viewedFiles"
@@ -227,10 +265,11 @@ export function useHostingPanelController({
                     : storedViewed,
             );
         } catch (inspectError) {
-            if (inspectionSequence.current === sequence)
+            if (inspectionSequence.current.isCurrent(sequence))
                 setError(errorMessage(inspectError));
         } finally {
-            if (inspectionSequence.current === sequence) setBusy(undefined);
+            if (inspectionSequence.current.isCurrent(sequence))
+                setBusy(undefined);
         }
     };
 
@@ -399,6 +438,7 @@ export function useHostingPanelController({
         inspect,
         items,
         loadList,
+        mergeReadiness,
         nextPage,
         notice,
         postComment,

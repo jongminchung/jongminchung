@@ -10,8 +10,8 @@
 ## 핵심 요약
 
 - **package publish integrity·component state matrix·Electron 오류 경계를 완료했으며 Web CI의 원격 required check 연결이 남아 있음**
-- **Hosting merge-readiness와 Git 온보딩은 실행 계약을 확정하고 제품 구현을 후속 범위로 유지함**
-- **한영 검색은 tokenization과 benchmark API를 완료했으며 실제 corpus 30~50개 확장이 남아 있음**
+- **Hosting merge-readiness와 repository 상태 기반 Git 온보딩의 제품 구현을 완료함**
+- **한영 검색은 실제 query 40개와 relevance·index 비용 threshold까지 완료함**
 - **OAuth와 updater는 운영 전제가 없어 보류하고 PAT fallback과 불변 release 선행 계약을 완료함**
 - **Electron package trust·Git 복구·window·resource lifecycle 계약을 완료함**
 - **Web content runtime은 실제 source·validation 경계만 남겼으며 발행 문서 TODO 계약까지 완료함**
@@ -155,21 +155,21 @@
   - 우선순위: P1
   - 결론: route sheet·theme·diagram identity와 같은 element 수의 두 scene 전환 fixture를 완료함
 - [0022: Hosting 변경 요청의 merge-readiness 요약](0022-hosting-merge-readiness-summary.md)
-  - 상태: 실행 계획 확정
+  - 상태: 완료
   - 우선순위: P1
-  - 결론: provider별 추가 조회와 dimension별 `unknown`을 포함하는 read model 계약을 확정함
+  - 결론: GitHub·GitLab capability와 `ready`·`blocked`·`pending`·`unknown` summary를 구현함
 - [0023: 상황 기반 Git 업무 온보딩 도입](0023-contextual-git-workflow-onboarding.md)
-  - 상태: 실행 계획 확정
+  - 상태: 완료
   - 우선순위: P1
-  - 결론: 기존 command 계층과 repository별 onboarding 상태 소유 계약을 확정함
+  - 결론: 실제 Git·Hosting 상태 predicate와 repository별 dismiss·reset guide를 기존 command 계층에 구현함
 - [0024: 기술 문서 freshness와 근거 검증 보고서 도입](0024-tech-content-freshness-evidence-report.md)
   - 상태: 완료
   - 우선순위: P1
   - 결론: 5개 freshness policy와 weekly network report artifact·결정적 fixture를 도입함
 - [0025: 한영 기술 문서 검색 relevance benchmark 도입](0025-bilingual-search-relevance-benchmark.md)
-  - 상태: 부분 완료
+  - 상태: 완료
   - 우선순위: P2
-  - 결론: segmentation·compact match·term coverage·benchmark API를 구현하고 실제 corpus 확장을 남김
+  - 결론: 한영 query 40개에서 top-3 100%·MRR 95.83%와 index 비용 threshold를 고정함
 - [0026: Hosting 계정의 OAuth 기반 연결 도입 검토](0026-hosting-oauth-account-onboarding.md)
   - 상태: 조건부 보류
   - 우선순위: P2
@@ -187,15 +187,15 @@
   - 우선순위: P1
   - 결론: stale TODO와 404 sample 링크를 제거하고 published MDX comment 검증을 추가함
 - [0030: React 19.2·Compiler 1.0·Cache Components 적용 검토](0030-react-19-2-compiler-and-cache-components-adoption.md)
-  - 상태: 실행 계획 확정
+  - 상태: 완료
   - 우선순위: P1
-  - 결론: Effect Event와 Compiler는 작은 pilot을 채택하고 Cache Components는 route migration으로 진행하며 직접 Activity는 조건부 보류함
+  - 결론: Effect Event·Compiler annotation·Cache Components migration을 완료하고 직접 Activity만 조건부 보류함
 
 ## 권장 실행 순서
 
-- **React 현대화는 0030의 Effect Event·Compiler·Cache Components 순서로 독립 진행함**
-  - Git Client subscription의 재등록 회귀를 먼저 고정하고 Compiler annotation 범위를 순수 leaf component부터 넓힘
-  - Web Cache Components는 route config·filesystem content cache·navigation state를 한 migration에서 검증함
+- **React 현대화는 완료된 0030 pilot의 budget과 route 계약을 유지함**
+  - Compiler annotation 범위는 측정 가능한 leaf component 단위로만 확대함
+  - 직접 Activity는 Git Client resource·memory 기준이 생길 때만 재평가함
   - direct Activity는 Git Client의 multi-repository state 보존과 resource budget 요구가 생길 때만 재평가함
 - **0단계는 완료된 0019와 0020을 유지하고 0007의 원격 연결을 마무리함**
   - 문서 카드 이미지와 Web source graph의 회귀를 현재 E2E와 build로 유지함
@@ -232,15 +232,15 @@
 
 ## 제품 가치 개선 권장 실행 순서
 
-- **1단계는 확정된 0022와 0023의 제품 contract에 따라 read model과 onboarding을 구현함**
-  - Hosting 변경 요청의 병합 준비 상태와 repository별 다음 작업을 읽기 전용 모델로 먼저 고정함
-  - 0013의 IPC 경계와 0015의 Git 작업 상태를 재사용하고 새로운 mutation 경로를 만들지 않음
+- **1단계는 완료된 0022와 0023의 read model과 onboarding 계약을 유지함**
+  - Hosting readiness와 repository별 다음 작업을 기존 IPC·command 경계로 검증함
+  - 새로운 mutation 경로 없이 provider·Git 실제 상태를 완료 기준으로 사용함
 - **2단계는 완료된 0024의 freshness report를 운영함**
   - 0007의 Web CI가 안정된 뒤 scheduled report로 시작함
   - 외부 source 오류와 검증 기한 초과는 초기에는 배포 차단이 아닌 review 대상으로 관리함
-- **3단계는 0025의 실제 한영 query corpus를 30~50개로 확장함**
-  - 0024에서 정리된 metadata와 실제 한영 질의를 사용해 현재 검색과 OSS pilot을 비교함
-  - 선택한 구현의 index·bundle 비용은 0008의 성능 예산과 연결함
+- **3단계는 완료된 0025의 한영 corpus와 검색 비용 baseline을 유지함**
+  - 검색 변경 시 top-1·top-3·MRR·zero-result threshold를 비교함
+  - index·bundle 비용은 0008의 성능 예산과 함께 검증함
 - **4단계는 0026의 OAuth 운영 주체가 확정될 때 feasibility를 재개함**
   - 0017의 credential·privacy inventory와 provider별 운영 주체가 확정된 뒤 한 provider로 pilot함
   - 조건이 충족되지 않으면 PAT scope 안내와 오류 복구만 개선함

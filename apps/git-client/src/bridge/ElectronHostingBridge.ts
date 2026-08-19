@@ -91,6 +91,17 @@ function responseFromBoundary(
             };
         case "changeRequest":
             return { ...result.data, item: { ...result.data.item } };
+        case "mergeReadiness":
+            return {
+                ...result.data,
+                readiness: {
+                    ...result.data.readiness,
+                    reasons: [...result.data.readiness.reasons],
+                    capabilities: {
+                        ...result.data.readiness.capabilities,
+                    },
+                },
+            };
         case "files":
             return {
                 ...result.data,

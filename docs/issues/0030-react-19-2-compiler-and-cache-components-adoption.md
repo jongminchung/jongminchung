@@ -2,16 +2,16 @@
 
 ## 핵심 요약
 
-- **현재 `react@19.2.8`과 `next@16.3.1`은 기능 사용 조건을 충족하지만 네 기능은 코드와 build 설정에서 활성화되지 않음**
-- **가장 작은 즉시 과제는 Git Client의 반복 subscription을 `useEffectEvent` pilot으로 전환하고 listener 생명주기를 회귀 검증하는 작업임**
-- **React Compiler 1.0은 두 앱 모두 annotation mode로 시작하되 수동 memoization 288회가 있는 Git Client에서 측정 가치가 더 큼**
-- **Web의 Cache Components는 파일 기반 content를 정적 shell에 포함할 가치가 있으나 route segment config 19개와 async I/O 경계를 함께 migration해야 함**
+- **Git Client의 장기 workbench subscription을 `useEffectEvent`로 전환해 state 변경과 listener 등록 생명주기를 분리함**
+- **React Compiler 1.0을 두 앱에 annotation mode로 연결하고 leaf component pilot을 production build로 검증함**
+- **Web의 Cache Components migration을 완료하고 legacy route segment config를 partial prerender·blocking route 계약으로 전환함**
+- **Compiler와 Cache Components 적용 뒤 두 앱의 bundle budget이 초과되지 않음을 확인함**
 - **Web navigation의 Activity는 Cache Components가 제공하므로 직접 boundary를 중복 추가하지 않음**
 - **Git Client의 직접 Activity는 repository·terminal·watcher 상태 보존 요구와 resource 회귀가 증명될 때까지 조건부 보류함**
 
 ## 이슈 정보
 
-- 상태: 실행 계획 확정
+- 상태: 완료
 - 우선순위: P1
 - 기준일: 2026-08-20
 - 기준 commit: `b78c336`
@@ -145,6 +145,32 @@
 - **4단계는 Activity 도입 조건 재평가임**
   - Web은 Cache Components navigation 결과만 검증함
   - Git Client는 multi-repository back-state 제품 요구와 memory budget이 생길 때만 direct pilot을 시작함
+
+## 처리 결과
+
+- **Git Client의 workbench subscription에 `useEffectEvent`를 적용함**
+  - tool-window layout capture·apply listener가 재등록 없이 최신 layout과 setter를 관찰함
+  - bottom panel의 terminal·history·console·stash·shelf listener가 최신 action을 사용함
+  - Xterm lifecycle은 별도 resource 회귀 없이 기존 ref 계약을 유지함
+- **두 앱에 React Compiler annotation pilot을 적용함**
+  - `babel-plugin-react-compiler@1.0.0`을 catalog에 고정함
+  - Git Client는 Vite 8의 `reactCompilerPreset`과 `@rolldown/plugin-babel`을 사용함
+  - Web은 Next.js `reactCompiler.compilationMode = "annotation"`을 사용함
+  - `Notice`와 `BrandWordmark`를 `"use memo"` leaf pilot으로 지정함
+- **Web Cache Components migration을 완료함**
+  - `cacheComponents: true`를 활성화하고 `dynamic`·`dynamicParams`·`runtime` legacy route config를 제거함
+  - locale route의 정적 parameter와 빈 investment collection fallback을 명시함
+  - client provider가 포함된 route는 `instant = false`로 blocking 경계를 명시하면서 partial prerender shell을 유지함
+  - mobile navigation link가 transition 전에 sheet를 닫아 framework Activity 복원에서도 route identity 계약을 유지함
+  - production build에서 206개 page 생성과 공개 route·RSS·robots·OG·404 경계를 검증함
+- **bundle 비용이 기존 예산 안에 있음을 확인함**
+  - Git Client JavaScript는 baseline 대비 raw `-137,792 bytes`, gzip `-43,606 bytes`임
+  - Web JavaScript는 baseline 대비 raw `-20,609 bytes`, gzip `-7,663 bytes`임
+  - 두 앱 모두 JavaScript와 CSS threshold를 초과하지 않음
+- **직접 Activity는 조건부 보류를 유지함**
+  - Web navigation은 Cache Components가 제공하는 framework Activity만 사용함
+  - Git Client는 repository·terminal·watcher memory budget과 back-state 요구가 생길 때만 재평가함
+  - 직접 도입하지 않는 결정도 이 이슈의 완료 조건에 포함함
 
 ## 완료 조건
 

@@ -117,6 +117,21 @@ function responseFor(request: HostingRequest): HostingResponse {
         case "get":
         case "create":
             return { kind: "changeRequest", item: CHANGE_REQUEST };
+        case "mergeReadiness":
+            return {
+                kind: "mergeReadiness",
+                readiness: {
+                    state: "ready",
+                    reasons: [],
+                    capabilities: {
+                        checks: true,
+                        reviews: true,
+                        conflicts: true,
+                        branchUpdate: true,
+                    },
+                    checkedAt: "2026-01-02T00:00:00Z",
+                },
+            };
         case "files":
             return {
                 kind: "files",
@@ -275,12 +290,13 @@ describe("ElectronHostingBridge 계정 경계", () => {
 });
 
 describe("ElectronHostingBridge 분야", () => {
-    it("[성공] 15가지 HostingRequest 종류를 모두 검증하고 신원을 확인함", async () => {
+    it("[성공] 16가지 HostingRequest 종류를 모두 검증하고 신원을 확인함", async () => {
         const api = new FakeElectronHostingApi();
         const bridge = ElectronHostingBridge.of(api);
         const requests = [
             { kind: "list", project: "acme/repo", page: 1 },
             { kind: "get", project: "acme/repo", number: 7 },
+            { kind: "mergeReadiness", project: "acme/repo", number: 7 },
             { kind: "files", project: "acme/repo", number: 7 },
             { kind: "timeline", project: "acme/repo", number: 7 },
             { kind: "viewedFiles", project: "acme/repo", number: 7 },
@@ -325,8 +341,8 @@ describe("ElectronHostingBridge 분야", () => {
             },
         ] satisfies readonly HostingRequest[];
 
-        expect(requests).toHaveLength(15);
-        expect(new Set(requests.map((request) => request.kind)).size).toBe(15);
+        expect(requests).toHaveLength(16);
+        expect(new Set(requests.map((request) => request.kind)).size).toBe(16);
         for (const request of requests) {
             const response = responseFor(request);
             api.executeResults.push(response);

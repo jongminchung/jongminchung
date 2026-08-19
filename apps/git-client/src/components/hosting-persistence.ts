@@ -7,6 +7,7 @@ import type { JsonValue } from "../shared/contracts/ipc";
 import type { HostingAccount } from "../shared/contracts/model/index";
 
 const HOSTING_ACCOUNTS_KEY = "hostingAccounts";
+const HOSTING_ACCOUNTS_CHANGED_EVENT = "git-client:hosting-accounts-changed";
 
 async function readSetting(key: string): Promise<unknown> {
     const api = electronApi();
@@ -48,6 +49,16 @@ export async function persistHostingAccounts(
     accounts: readonly HostingAccount[],
 ): Promise<void> {
     await writeSetting(HOSTING_ACCOUNTS_KEY, accountJson(accounts));
+    if (typeof window !== "undefined")
+        window.dispatchEvent(new Event(HOSTING_ACCOUNTS_CHANGED_EVENT));
+}
+
+export function subscribeHostingAccountsChanged(
+    listener: () => void,
+): () => void {
+    window.addEventListener(HOSTING_ACCOUNTS_CHANGED_EVENT, listener);
+    return () =>
+        window.removeEventListener(HOSTING_ACCOUNTS_CHANGED_EVENT, listener);
 }
 
 export function viewedFilesKey(

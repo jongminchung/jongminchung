@@ -9,6 +9,7 @@ import {
 import "../../tech.css";
 
 export const metadata: Metadata = rootMetadata;
+export const instant = false;
 
 /** `DiagramRootLayout` 페이지 UI를 렌더링함 */
 export default function DiagramRootLayout({

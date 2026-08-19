@@ -10,6 +10,7 @@ import {
 import "../../tech.css";
 
 export const metadata: Metadata = rootMetadata;
+export const instant = false;
 
 /** `LocaleLayout` 페이지 UI를 렌더링함 */
 export default async function LocaleLayout({

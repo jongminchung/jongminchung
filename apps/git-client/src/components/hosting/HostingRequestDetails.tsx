@@ -6,6 +6,8 @@ import { useState } from "react";
 import type {
     HostingChangeRequest,
     HostingChangedFile,
+    HostingMergeReadiness,
+    HostingMergeReadinessReason,
     HostingReviewEvent,
     HostingTimelineEntry,
 } from "../../shared/contracts/model/index";
@@ -15,6 +17,7 @@ import { EmptyState } from "../ProductCollections";
 
 interface HostingRequestDetailsProps {
     readonly files: readonly HostingChangedFile[];
+    readonly mergeReadiness?: HostingMergeReadiness;
     readonly onPostComment: (body: string) => Promise<boolean>;
     readonly onSubmitReview: (
         event: HostingReviewEvent,
@@ -29,6 +32,7 @@ interface HostingRequestDetailsProps {
 
 export function HostingRequestDetails({
     files,
+    mergeReadiness,
     onPostComment,
     onSubmitReview,
     onToggleViewed,
@@ -96,6 +100,7 @@ export function HostingRequestDetails({
                             Update branch
                         </Button>
                     </header>
+                    <MergeReadinessSummary readiness={mergeReadiness} />
                     <div
                         className={`hostingReviewBar [align-items:center] [display:flex] [gap:8px] [border-bottom:1px_solid_var(--border)] [padding:8px_11px] [&_textarea]:[flex:1] [&_textarea]:[min-height:52px] [&_textarea]:[resize:vertical] hostingReviewBar`}
                     >
@@ -201,6 +206,70 @@ export function HostingRequestDetails({
                         </Button>
                     </div>
                 </>
+            )}
+        </section>
+    );
+}
+
+const READINESS_REASON_LABELS: Readonly<
+    Record<HostingMergeReadinessReason, string>
+> = Object.freeze({
+    "checks-failing": "Required checks are failing",
+    "checks-pending": "Required checks are still running",
+    conflicts: "Conflicts must be resolved",
+    draft: "Draft change request",
+    "review-required": "Required review is missing",
+    "branch-update-required": "Source branch must be updated",
+    "permission-denied": "Token cannot read merge readiness",
+    "rate-limited": "Provider rate limit reached",
+    "provider-unsupported": "Provider does not expose this signal",
+    "provider-unavailable": "Provider readiness is temporarily unavailable",
+});
+
+export function MergeReadinessSummary({
+    readiness,
+}: {
+    readonly readiness?: HostingMergeReadiness;
+}) {
+    const state = readiness?.state ?? "pending";
+    return (
+        <section
+            aria-label="Merge readiness"
+            className="border-b border-border px-3 py-2"
+        >
+            <strong>Merge readiness · {state}</strong>
+            {readiness ? (
+                <>
+                    {readiness.reasons.length > 0 && (
+                        <ul>
+                            {readiness.reasons.map((reason) => (
+                                <li key={reason}>
+                                    {READINESS_REASON_LABELS[reason]}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                    <small>
+                        Signals: checks{" "}
+                        {readiness.capabilities.checks
+                            ? "available"
+                            : "unknown"}
+                        {" · reviews "}
+                        {readiness.capabilities.reviews
+                            ? "available"
+                            : "unknown"}
+                        {" · conflicts "}
+                        {readiness.capabilities.conflicts
+                            ? "available"
+                            : "unknown"}
+                        {" · branch update "}
+                        {readiness.capabilities.branchUpdate
+                            ? "available"
+                            : "unknown"}
+                    </small>
+                </>
+            ) : (
+                <small>Loading provider signals…</small>
             )}
         </section>
     );

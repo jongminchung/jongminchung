@@ -28,6 +28,8 @@ interface StaticPageParam {
     readonly slug: readonly string[];
 }
 
+export const instant = false;
+
 async function idFromRoute(
     locale: string,
     slug: readonly string[] | undefined,
@@ -155,8 +157,6 @@ function sectionMetadata(page: SectionPage): Metadata {
         imageId: page.section,
     });
 }
-
-export const dynamicParams = true;
 
 /** 정적 생성에 사용할 경로 매개변수를 반환함 */
 export async function generateStaticParams(): Promise<StaticPageParam[]> {

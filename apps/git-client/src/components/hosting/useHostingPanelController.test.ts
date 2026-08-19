@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { inferRemoteCoordinates } from "./useHostingPanelController";
+import {
+    HostingInspectionSequence,
+    inferRemoteCoordinates,
+} from "./useHostingPanelController";
 
 describe("hosting remote 좌표", () => {
     it.each([
@@ -27,5 +30,19 @@ describe("hosting remote 좌표", () => {
         expect(inferRemoteCoordinates()).toBeUndefined();
         expect(inferRemoteCoordinates("not-a-remote")).toBeUndefined();
         expect(inferRemoteCoordinates("https://github.com")).toBeUndefined();
+    });
+});
+
+describe("Hosting 상세 선택 sequence", () => {
+    it("[경계] 늦게 도착한 이전 선택과 account 전환 응답을 폐기함", () => {
+        const guard = new HostingInspectionSequence();
+        const firstSelection = guard.begin();
+        const secondSelection = guard.begin();
+
+        expect(guard.isCurrent(firstSelection)).toBe(false);
+        expect(guard.isCurrent(secondSelection)).toBe(true);
+
+        guard.invalidate();
+        expect(guard.isCurrent(secondSelection)).toBe(false);
     });
 });

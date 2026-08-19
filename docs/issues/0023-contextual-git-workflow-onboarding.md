@@ -1,6 +1,6 @@
 # Issue 0023: 상황 기반 Git 업무 온보딩 도입
 
-- 상태: 실행 계획 확정
+- 상태: 완료
 - 우선순위: P1
 - 기준일: 2026-08-19
 - 영향 범위:
@@ -25,12 +25,20 @@
 ## 처리 결과
 
 - **온보딩 action은 기존 `changes.commit`과 `repository.push` 등 command manifest ID를 실행하는 product layer로 한정함**
-  - 별도 Git mutation 경로를 만들지 않는 원칙을 확정함
-- **진행 상태 저장 키는 repository ID를 포함하고 click 여부가 아닌 refresh된 Git 상태로 완료를 계산하는 계약으로 확정함**
-  - conflict·safe mode·operation in progress에서는 mutation task를 비활성화하고 command availability 사유를 그대로 표시해야 함
+  - `view.changes`·`changes.commit`·`repository.manageRemotes`·`repository.push`·`repository.branches`·`repository.resolveConflicts`를 재사용함
+  - 별도 Git mutation 경로를 추가하지 않음
+- **진행 상태는 click 여부가 아닌 refresh된 Git 상태에서 즉시 다시 계산함**
+  - change·commit·remote·upstream·ahead·conflict·detached HEAD·in-progress operation을 predicate에 반영함
+  - safe mode와 offline에서는 action을 비활성화하고 필요한 선행 행동을 표시함
+- **dismiss 상태 저장 키에 repository ID를 포함하고 dismiss·재실행 복원·reset을 구현함**
+  - 다른 repository의 guide 상태와 공유되지 않음
 - **현재 Welcome 화면에는 열린 repository context가 없으므로 repository별 predicate를 Welcome에 직접 결합하지 않기로 결정함**
-  - 실제 task surface는 repository workbench에서 command registry와 session refresh를 함께 사용할 수 있는 경계에 배치할 필요가 있음
-- **repository 전환과 safe mode를 포함한 상태 저장 설계가 선행되지 않은 단순 checklist UI는 잘못된 완료 상태를 공유할 수 있어 이번 변경에서는 구현을 보류함**
+  - 실제 task surface를 repository workbench의 command registry와 session refresh 경계에 배치함
+- **predicate·repository별 persistence·component와 browser dismiss 복원을 회귀 test로 추가함**
+- **Hosting account 연결 상태를 onboarding 경계에 노출함**
+  - native settings의 account 목록을 실제 완료 predicate로 사용함
+  - account 연결·삭제 시 guide가 즉시 다시 계산됨
+  - 미연결 상태의 action은 기존 `repository.manageAccounts` command로 Hosting tool을 열어 별도 credential 경로를 만들지 않음
 
 ## OSS 기준에서 확인한 제품 패턴
 

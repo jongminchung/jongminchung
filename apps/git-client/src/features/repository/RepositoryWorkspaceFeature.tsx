@@ -3,6 +3,7 @@ import type { CSSProperties } from "react";
 import { RepositoryEditorFeature } from "./editor/RepositoryEditorFeature";
 import { RepositoryEditorSurface } from "./editor/RepositoryEditorSurface";
 import { RepositoryEditorTabsFeature } from "./editor/RepositoryEditorTabsFeature";
+import { RepositoryOnboardingFeature } from "./onboarding/RepositoryOnboardingFeature";
 import {
     useRepositoryReviewCapability,
     useRepositoryToolWindowCapability,
@@ -69,6 +70,7 @@ export function RepositoryWorkspaceFeature() {
                             className={`${`activeWorkspace [background:var(--card)] rounded-lg [display:grid] [min-height:0] [min-width:0] [overflow:hidden] [padding-top:32px] [position:relative] activeWorkspace rounded-lg`} ${!hasEditorTabs ? `activeWorkspaceNoTabs [padding-top:0] activeWorkspaceNoTabs` : ""}`}
                             data-workspace-main
                         >
+                            <RepositoryOnboardingFeature />
                             <RepositoryReviewFeature />
                             <RepositoryEditorFeature />
                         </div>

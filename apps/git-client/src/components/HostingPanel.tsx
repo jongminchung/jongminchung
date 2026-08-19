@@ -31,6 +31,7 @@ export function HostingPanel({
         inspect,
         items,
         loadList,
+        mergeReadiness,
         nextPage,
         notice,
         postComment,
@@ -167,6 +168,7 @@ export function HostingPanel({
                 />
                 <HostingRequestDetails
                     files={files}
+                    mergeReadiness={mergeReadiness}
                     onPostComment={postComment}
                     onSubmitReview={submitReview}
                     onToggleViewed={(path) => void toggleViewed(path)}

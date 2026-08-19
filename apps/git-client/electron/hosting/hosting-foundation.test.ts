@@ -299,6 +299,22 @@ describe("열대 전자 재단", () => {
                 responseKind: "changeRequest",
             },
             {
+                request: {
+                    kind: "mergeReadiness",
+                    project: "acme/repo",
+                    number: 7,
+                },
+                method: "GET",
+                path: "repos/acme/repo/pulls/7",
+                payload: null,
+                response: {
+                    ...GITHUB_CHANGE_REQUEST,
+                    mergeable: false,
+                    mergeable_state: "dirty",
+                },
+                responseKind: "mergeReadiness",
+            },
+            {
                 request: { kind: "files", project: "acme/repo", number: 7 },
                 method: "GET",
                 path: "repos/acme/repo/pulls/7/files?per_page=100",
@@ -555,6 +571,23 @@ describe("열대 전자 재단", () => {
                 payload: null,
                 response: GITLAB_CHANGE_REQUEST,
                 responseKind: "changeRequest",
+            },
+            {
+                request: {
+                    kind: "mergeReadiness",
+                    project: "acme/repo",
+                    number: 7,
+                },
+                method: "GET",
+                path: "projects/acme%2Frepo/merge_requests/7",
+                payload: null,
+                response: {
+                    ...GITLAB_CHANGE_REQUEST,
+                    draft: false,
+                    detailed_merge_status: "ci_still_running",
+                    head_pipeline: { status: "running" },
+                },
+                responseKind: "mergeReadiness",
             },
             {
                 request: { kind: "files", project: "acme/repo", number: 7 },
@@ -951,6 +984,110 @@ describe("열대 전자 재단", () => {
             ],
         });
     });
+
+    it("[성공] provider merge-readiness를 공통 상태와 capability로 정규화함", async () => {
+        const github = configuredFoundation("gitHub");
+        github.http.enqueue(
+            jsonResponse({
+                ...GITHUB_CHANGE_REQUEST,
+                mergeable: false,
+                mergeable_state: "dirty",
+            }),
+        );
+        await expect(
+            github.foundation.execute("account-1", {
+                kind: "mergeReadiness",
+                project: "acme/repo",
+                number: 7,
+            }),
+        ).resolves.toMatchObject({
+            kind: "mergeReadiness",
+            readiness: {
+                state: "blocked",
+                reasons: ["provider-unsupported", "conflicts"],
+                capabilities: {
+                    checks: false,
+                    reviews: false,
+                    conflicts: true,
+                    branchUpdate: true,
+                },
+            },
+        });
+
+        const githubPending = configuredFoundation("gitHub");
+        githubPending.http.enqueue(
+            jsonResponse({
+                ...GITHUB_CHANGE_REQUEST,
+                mergeable: null,
+                mergeable_state: "unknown",
+            }),
+        );
+        await expect(
+            githubPending.foundation.execute("account-1", {
+                kind: "mergeReadiness",
+                project: "acme/repo",
+                number: 7,
+            }),
+        ).resolves.toMatchObject({
+            kind: "mergeReadiness",
+            readiness: {
+                state: "pending",
+                reasons: ["provider-unsupported", "checks-pending"],
+            },
+        });
+
+        const gitlab = configuredFoundation("gitLab");
+        gitlab.http.enqueue(
+            jsonResponse({
+                ...GITLAB_CHANGE_REQUEST,
+                draft: false,
+                detailed_merge_status: "mergeable",
+                head_pipeline: { status: "success" },
+            }),
+        );
+        await expect(
+            gitlab.foundation.execute("account-1", {
+                kind: "mergeReadiness",
+                project: "acme/repo",
+                number: 7,
+            }),
+        ).resolves.toMatchObject({
+            kind: "mergeReadiness",
+            readiness: {
+                state: "ready",
+                reasons: [],
+                capabilities: {
+                    checks: true,
+                    reviews: true,
+                    conflicts: true,
+                    branchUpdate: true,
+                },
+            },
+        });
+    });
+
+    it.each([
+        [403, "Forbidden", "permission-denied"],
+        [429, "Too Many Requests", "rate-limited"],
+    ] as const)(
+        "[경계] merge-readiness HTTP %i를 unknown 원인으로 보존함",
+        async (status, statusText, reason) => {
+            const { foundation, http } = configuredFoundation("gitHub");
+            http.enqueue(
+                jsonResponse({ message: statusText }, status, statusText),
+            );
+            await expect(
+                foundation.execute("account-1", {
+                    kind: "mergeReadiness",
+                    project: "acme/repo",
+                    number: 7,
+                }),
+            ).resolves.toMatchObject({
+                kind: "mergeReadiness",
+                readiness: { state: "unknown", reasons: [reason] },
+            });
+        },
+    );
 
     it("[성공] 두 가지 제공업체 모두에 대한 모든 리뷰 이벤트를 매핑함", async () => {
         const github = configuredFoundation("gitHub");

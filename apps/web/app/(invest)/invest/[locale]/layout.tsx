@@ -30,6 +30,7 @@ export const metadata: Metadata = {
         images: ["/investment-notes-og.png"],
     },
 };
+export const instant = false;
 
 /** `InvestmentLocaleLayout` 페이지 UI를 렌더링함 */
 export default async function InvestmentLocaleLayout({

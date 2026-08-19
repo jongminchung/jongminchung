@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+    useCallback,
+    useEffect,
+    useEffectEvent,
+    useRef,
+    useState,
+} from "react";
 import { listenWorkbenchEvent } from "../../application/workbench-events/WorkbenchEventPort";
 import { isBottomPanelTab } from "./BottomPanelTabs";
 import type { BottomPanelTab } from "./bottomPanelTypes";
@@ -54,10 +60,22 @@ export function useBottomPanelLifecycle({
         });
     }, [collapsed, onToggle]);
 
+    const openPanelTab = useEffectEvent((requested: BottomPanelTab): void => {
+        onActiveChange(requested);
+        explicitlyOpen();
+    });
+    const stashChanges = useEffectEvent((): void => {
+        openPanelTab("stash");
+        void onStashChanges();
+    });
+    const shelveChanges = useEffectEvent((): void => {
+        openPanelTab("shelf");
+        void onShelveChanges();
+    });
+
     useEffect(() => {
         return listenWorkbenchEvent("git-client:open-terminal", () => {
-            onActiveChange("terminal");
-            explicitlyOpen();
+            openPanelTab("terminal");
             window.requestAnimationFrame(() => {
                 const terminalInput = document.querySelector<HTMLElement>(
                     '[data-command-scope="terminal"] textarea, [data-command-scope="terminal"] [contenteditable="true"], [data-command-scope="terminal"]',
@@ -65,54 +83,47 @@ export function useBottomPanelLifecycle({
                 terminalInput?.focus();
             });
         });
-    }, [explicitlyOpen, onActiveChange]);
+    }, []);
 
     useEffect(() => {
         return listenWorkbenchEvent("git-client:open-local-history", () => {
             setLocalHistoryPath(undefined);
-            onActiveChange("localHistory");
-            explicitlyOpen();
+            openPanelTab("localHistory");
         });
-    }, [explicitlyOpen, onActiveChange]);
+    }, []);
 
     useEffect(() => {
         return listenWorkbenchEvent("git-client:open-git-console", () => {
-            onActiveChange("gitConsole");
-            explicitlyOpen();
+            openPanelTab("gitConsole");
             window.requestAnimationFrame(() => {
                 panelRef.current
                     ?.querySelector<HTMLElement>('[aria-label="Git Console"]')
                     ?.focus();
             });
         });
-    }, [explicitlyOpen, onActiveChange]);
+    }, []);
 
     useEffect(() => {
         return listenWorkbenchEvent(
             "git-client:open-bottom-panel",
             ({ tab: requested }) => {
                 if (!isBottomPanelTab(requested)) return;
-                onActiveChange(requested);
-                explicitlyOpen();
+                openPanelTab(requested);
             },
         );
-    }, [explicitlyOpen, onActiveChange]);
+    }, []);
 
     useEffect(() => {
         return listenWorkbenchEvent("git-client:stash-changes", () => {
-            onActiveChange("stash");
-            explicitlyOpen();
-            void onStashChanges();
+            stashChanges();
         });
-    }, [explicitlyOpen, onActiveChange, onStashChanges]);
+    }, []);
 
     useEffect(() => {
         return listenWorkbenchEvent("git-client:shelve-changes", () => {
-            onActiveChange("shelf");
-            explicitlyOpen();
-            void onShelveChanges();
+            shelveChanges();
         });
-    }, [explicitlyOpen, onActiveChange, onShelveChanges]);
+    }, []);
 
     useEffect(() => {
         const activeIsEmpty =

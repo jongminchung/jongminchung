@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useEffectEvent, useRef } from "react";
 import { listenWorkbenchEvent } from "../../../application/workbench-events/WorkbenchEventPort";
 import { parseToolWindowLayout } from "../../../domain/toolWindowLayouts";
 import type { LayoutSlice } from "../state/repositoryWorkspaceStore";
@@ -144,71 +144,56 @@ export function useRepositoryToolWindowController(
                 ?.focus(),
         );
     }, [bottomPanelTab, setBookmarksOpen, setProjectOpen, setBottomCollapsed]);
+
+    const captureToolWindowLayout = useEffectEvent(
+        (accept: (layout: ReturnType<typeof parseToolWindowLayout>) => void) =>
+            accept({
+                bookmarksOpen,
+                bottomCollapsed,
+                bottomPanelHeight,
+                bottomPanelTab,
+                changesNavigatorWidth,
+                commitRailWidth,
+                historyReviewWidth,
+                sideToolWindowWidth,
+                logOpen,
+                projectOpen,
+            }),
+    );
+    const applyToolWindowLayout = useEffectEvent((candidate: unknown) => {
+        const layout = parseToolWindowLayout(candidate);
+        setBookmarksOpen(layout.bookmarksOpen);
+        setBottomCollapsed(layout.bottomCollapsed);
+        setBottomPanelHeight(layout.bottomPanelHeight);
+        setBottomPanelTab(layout.bottomPanelTab);
+        setChangesNavigatorWidth(layout.changesNavigatorWidth);
+        setCommitRailWidth(layout.commitRailWidth);
+        setHistoryReviewWidth(layout.historyReviewWidth);
+        setSideToolWindowWidth(layout.sideToolWindowWidth);
+        setLogOpen(layout.logOpen);
+        setProjectOpen(layout.projectOpen && !layout.bookmarksOpen);
+    });
+    const showProcesses = useEffectEvent(() => setProcessesOpen(true));
+
     useEffect(() => {
         const removeCaptureListener = listenWorkbenchEvent(
             "git-client:capture-tool-window-layout",
-            ({ accept }) =>
-                accept({
-                    bookmarksOpen,
-                    bottomCollapsed,
-                    bottomPanelHeight,
-                    bottomPanelTab,
-                    changesNavigatorWidth,
-                    commitRailWidth,
-                    historyReviewWidth,
-                    sideToolWindowWidth,
-                    logOpen,
-                    projectOpen,
-                }),
+            ({ accept }) => captureToolWindowLayout(accept),
         );
         const removeApplyListener = listenWorkbenchEvent(
             "git-client:apply-tool-window-layout",
-            ({ layout: candidate }) => {
-                const layout = parseToolWindowLayout(candidate);
-                setBookmarksOpen(layout.bookmarksOpen);
-                setBottomCollapsed(layout.bottomCollapsed);
-                setBottomPanelHeight(layout.bottomPanelHeight);
-                setBottomPanelTab(layout.bottomPanelTab);
-                setChangesNavigatorWidth(layout.changesNavigatorWidth);
-                setCommitRailWidth(layout.commitRailWidth);
-                setHistoryReviewWidth(layout.historyReviewWidth);
-                setSideToolWindowWidth(layout.sideToolWindowWidth);
-                setLogOpen(layout.logOpen);
-                setProjectOpen(layout.projectOpen && !layout.bookmarksOpen);
-            },
+            ({ layout: candidate }) => applyToolWindowLayout(candidate),
         );
         const removeProcessesListener = listenWorkbenchEvent(
             "git-client:show-processes",
-            () => setProcessesOpen(true),
+            showProcesses,
         );
         return () => {
             removeCaptureListener();
             removeApplyListener();
             removeProcessesListener();
         };
-    }, [
-        bookmarksOpen,
-        bottomCollapsed,
-        bottomPanelHeight,
-        bottomPanelTab,
-        changesNavigatorWidth,
-        commitRailWidth,
-        historyReviewWidth,
-        sideToolWindowWidth,
-        logOpen,
-        projectOpen,
-        setSideToolWindowWidth,
-        setProjectOpen,
-        setCommitRailWidth,
-        setLogOpen,
-        setHistoryReviewWidth,
-        setProcessesOpen,
-        setBottomPanelTab,
-        setBottomCollapsed,
-        setBookmarksOpen,
-        setChangesNavigatorWidth,
-        setBottomPanelHeight,
-    ]);
+    }, []);
 
     return { jumpToLastToolWindow };
 }

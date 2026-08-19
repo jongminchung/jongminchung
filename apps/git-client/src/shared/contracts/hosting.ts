@@ -186,6 +186,14 @@ const HostingGetRequestSchema = z
     })
     .strict()
     .readonly();
+const HostingMergeReadinessRequestSchema = z
+    .object({
+        kind: z.literal("mergeReadiness"),
+        project: ProjectSchema,
+        number: NumberSchema,
+    })
+    .strict()
+    .readonly();
 const HostingFilesRequestSchema = z
     .object({
         kind: z.literal("files"),
@@ -339,6 +347,7 @@ export const HostingRequestSchema = z
     .discriminatedUnion("kind", [
         HostingListRequestSchema,
         HostingGetRequestSchema,
+        HostingMergeReadinessRequestSchema,
         HostingFilesRequestSchema,
         HostingTimelineRequestSchema,
         HostingViewedFilesRequestSchema,
@@ -373,6 +382,48 @@ export const HostingChangeRequestSchema = z
     .readonly();
 export type HostingChangeRequest = Readonly<
     z.infer<typeof HostingChangeRequestSchema>
+>;
+
+export const HostingMergeReadinessStateSchema = z.enum([
+    "ready",
+    "blocked",
+    "pending",
+    "unknown",
+]);
+export const HostingMergeReadinessReasonSchema = z.enum([
+    "checks-failing",
+    "checks-pending",
+    "conflicts",
+    "draft",
+    "review-required",
+    "branch-update-required",
+    "permission-denied",
+    "rate-limited",
+    "provider-unsupported",
+    "provider-unavailable",
+]);
+export type HostingMergeReadinessReason = z.infer<
+    typeof HostingMergeReadinessReasonSchema
+>;
+export const HostingMergeReadinessSchema = z
+    .object({
+        state: HostingMergeReadinessStateSchema,
+        reasons: z.array(HostingMergeReadinessReasonSchema).readonly(),
+        capabilities: z
+            .object({
+                checks: z.boolean(),
+                reviews: z.boolean(),
+                conflicts: z.boolean(),
+                branchUpdate: z.boolean(),
+            })
+            .strict()
+            .readonly(),
+        checkedAt: z.iso.datetime(),
+    })
+    .strict()
+    .readonly();
+export type HostingMergeReadiness = Readonly<
+    z.infer<typeof HostingMergeReadinessSchema>
 >;
 
 export const HostingChangedFileSchema = z
@@ -418,6 +469,13 @@ export const HostingResponseSchema = z
             .object({
                 kind: z.literal("changeRequest"),
                 item: HostingChangeRequestSchema,
+            })
+            .strict()
+            .readonly(),
+        z
+            .object({
+                kind: z.literal("mergeReadiness"),
+                readiness: HostingMergeReadinessSchema,
             })
             .strict()
             .readonly(),
@@ -502,6 +560,7 @@ export type HostingResponse = Readonly<z.infer<typeof HostingResponseSchema>>;
 export const HostingResponseKindByRequest = {
     list: "changeRequests",
     get: "changeRequest",
+    mergeReadiness: "mergeReadiness",
     files: "files",
     timeline: "timeline",
     viewedFiles: "viewedFiles",

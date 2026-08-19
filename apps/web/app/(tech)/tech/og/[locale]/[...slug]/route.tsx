@@ -46,9 +46,6 @@ async function resolvePage(
     };
 }
 
-export const dynamic = "force-static";
-export const dynamicParams = false;
-
 /** 정적 생성에 사용할 경로 매개변수를 반환함 */
 export async function generateStaticParams(): Promise<StaticOgParam[]> {
     const documentParams = (await getDocuments()).map((document) => ({

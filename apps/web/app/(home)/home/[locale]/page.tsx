@@ -11,7 +11,11 @@ import {
     HomeHeader,
     PersonStructuredData,
 } from "#home-components/HomeShell";
-import { isLocale } from "#lib/site-routing";
+import { isLocale, locales } from "#lib/site-routing";
+
+export function generateStaticParams() {
+    return locales.map((locale) => ({ locale }));
+}
 
 /** 경로 매개변수에 맞는 페이지 메타데이터를 생성함 */
 export async function generateMetadata({

@@ -10,6 +10,8 @@ export function BrandWordmark({
     readonly suffix?: BrandWordmarkSuffix;
     readonly compact?: boolean;
 }): React.JSX.Element {
+    "use memo";
+
     return (
         <span
             className={`${styles.wordmark}${compact ? ` ${styles.compact}` : ""}`}

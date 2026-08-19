@@ -2,6 +2,8 @@ import { randomUUID } from "node:crypto";
 import type {
     HostingChangeRequest,
     HostingChangedFile,
+    HostingMergeReadiness,
+    HostingMergeReadinessReason,
     HostingProviderKind,
     HostingRequest,
     HostingResponse,
@@ -243,6 +245,7 @@ export function prepareHostingRequest(
                 payload: null,
             });
         case "get":
+        case "mergeReadiness":
             return Object.freeze({
                 method: "GET",
                 path: changeRequestPath(
@@ -462,6 +465,136 @@ export function prepareHostingRequest(
     }
 }
 
+const GITHUB_READINESS_CAPABILITIES = Object.freeze({
+    checks: false,
+    reviews: false,
+    conflicts: true,
+    branchUpdate: true,
+});
+const GITLAB_READINESS_CAPABILITIES = Object.freeze({
+    checks: true,
+    reviews: true,
+    conflicts: true,
+    branchUpdate: true,
+});
+
+export function unavailableMergeReadiness(
+    provider: HostingProviderKind,
+    reason: "permission-denied" | "rate-limited" | "provider-unavailable",
+): HostingMergeReadiness {
+    return Object.freeze({
+        state: "unknown",
+        reasons: Object.freeze([reason]),
+        capabilities:
+            provider === "gitHub"
+                ? GITHUB_READINESS_CAPABILITIES
+                : GITLAB_READINESS_CAPABILITIES,
+        checkedAt: new Date().toISOString(),
+    });
+}
+
+function readinessState(
+    reasons: readonly HostingMergeReadinessReason[],
+): HostingMergeReadiness["state"] {
+    if (
+        reasons.some((reason) =>
+            [
+                "checks-failing",
+                "conflicts",
+                "draft",
+                "review-required",
+                "branch-update-required",
+            ].includes(reason),
+        )
+    )
+        return "blocked";
+    if (
+        reasons.some(
+            (reason) =>
+                reason === "checks-pending" ||
+                reason === "provider-unavailable",
+        )
+    )
+        return "pending";
+    return reasons.length === 0 ? "ready" : "unknown";
+}
+
+function parseGitHubMergeReadiness(
+    item: Readonly<Record<string, unknown>>,
+): HostingMergeReadiness {
+    const reasons: HostingMergeReadinessReason[] = [];
+    reasons.push("provider-unsupported");
+    if (optionalBoolean(item, "draft")) reasons.push("draft");
+    if (item.mergeable === null || item.mergeable_state === "unknown")
+        reasons.push("checks-pending");
+    if (item.mergeable === false || item.mergeable_state === "dirty")
+        reasons.push("conflicts");
+    if (item.mergeable_state === "behind")
+        reasons.push("branch-update-required");
+    if (item.mergeable_state === "blocked") reasons.push("review-required");
+    if (item.mergeable_state === "unstable") reasons.push("checks-failing");
+    return Object.freeze({
+        state: readinessState(reasons),
+        reasons: Object.freeze(reasons),
+        capabilities: GITHUB_READINESS_CAPABILITIES,
+        checkedAt: new Date().toISOString(),
+    });
+}
+
+function parseGitLabMergeReadiness(
+    item: Readonly<Record<string, unknown>>,
+): HostingMergeReadiness {
+    const reasons: HostingMergeReadinessReason[] = [];
+    if (optionalBoolean(item, "draft")) reasons.push("draft");
+    const status = optionalString(item, "detailed_merge_status") ?? "";
+    const knownStatuses = [
+        "mergeable",
+        "checking",
+        "unchecked",
+        "preparing",
+        "conflict",
+        "discussions_not_resolved",
+        "need_rebase",
+        "need_rebase_with_merge_method",
+        "not_approved",
+        "approval_missing",
+        "ci_must_pass",
+        "ci_still_running",
+    ];
+    if (!knownStatuses.includes(status)) reasons.push("provider-unsupported");
+    if (["checking", "unchecked", "preparing"].includes(status))
+        reasons.push("checks-pending");
+    if (["conflict", "discussions_not_resolved"].includes(status))
+        reasons.push("conflicts");
+    if (["need_rebase", "need_rebase_with_merge_method"].includes(status))
+        reasons.push("branch-update-required");
+    if (["not_approved", "approval_missing"].includes(status))
+        reasons.push("review-required");
+    if (["ci_must_pass", "ci_still_running"].includes(status))
+        reasons.push(
+            status === "ci_still_running" ? "checks-pending" : "checks-failing",
+        );
+    const pipeline = item.head_pipeline;
+    if (isRecord(pipeline)) {
+        const pipelineStatus = optionalString(pipeline, "status");
+        if (
+            ["pending", "running", "created", "preparing"].includes(
+                pipelineStatus ?? "",
+            )
+        )
+            reasons.push("checks-pending");
+        if (["failed", "canceled"].includes(pipelineStatus ?? ""))
+            reasons.push("checks-failing");
+    }
+    const uniqueReasons = [...new Set(reasons)];
+    return Object.freeze({
+        state: readinessState(uniqueReasons),
+        reasons: Object.freeze(uniqueReasons),
+        capabilities: GITLAB_READINESS_CAPABILITIES,
+        checkedAt: new Date().toISOString(),
+    });
+}
+
 function parseChangeRequest(
     provider: HostingProviderKind,
     value: unknown,
@@ -591,6 +724,16 @@ export function parseHostingResponse(
                 kind: "changeRequest",
                 item: parseChangeRequest(provider, value),
             });
+        case "mergeReadiness": {
+            const item = record(value, "merge readiness");
+            return Object.freeze({
+                kind: "mergeReadiness",
+                readiness:
+                    provider === "gitHub"
+                        ? parseGitHubMergeReadiness(item)
+                        : parseGitLabMergeReadiness(item),
+            });
+        }
         case "files": {
             const values =
                 provider === "gitHub"

@@ -54,8 +54,6 @@ async function createLocaleSections(
     return [...startLines, ...documentSections];
 }
 
-export const dynamic = "force-static";
-
 /** 요청에 대한 응답을 생성함 */
 export async function GET(): Promise<Response> {
     const lines = [

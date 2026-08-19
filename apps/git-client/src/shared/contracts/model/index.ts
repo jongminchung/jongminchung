@@ -24,6 +24,12 @@ export type { HistoryRewriteResult } from "./HistoryRewriteResult";
 export type { HostingAccount } from "./HostingAccount";
 export type { HostingChangeRequest } from "./HostingChangeRequest";
 export type { HostingChangedFile } from "./HostingChangedFile";
+export type {
+    HostingMergeReadiness,
+    HostingMergeReadinessCapability,
+    HostingMergeReadinessReason,
+    HostingMergeReadinessState,
+} from "./HostingMergeReadiness";
 export type { HostingProviderKind } from "./HostingProviderKind";
 export type { HostingRequest } from "./HostingRequest";
 export type { HostingNamespace } from "./HostingNamespace";

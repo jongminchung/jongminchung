@@ -26,6 +26,8 @@ export function Notice({
     className,
     ...props
 }: NoticeProps): ReactNode {
+    "use memo";
+
     return (
         <Alert
             className={cn(

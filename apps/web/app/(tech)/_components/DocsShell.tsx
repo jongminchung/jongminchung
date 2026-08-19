@@ -121,6 +121,14 @@ export function DocsShell({
                                 >
                                     <SheetContent
                                         closeLabel={copy.closeMobileNavigation}
+                                        onClickCapture={(event) => {
+                                            if (
+                                                event.target instanceof
+                                                    Element &&
+                                                event.target.closest("a[href]")
+                                            )
+                                                changeMobileOpen(false);
+                                        }}
                                         side="left"
                                     >
                                         <SheetTitle

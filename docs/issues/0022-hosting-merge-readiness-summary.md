@@ -1,6 +1,6 @@
 # Issue 0022: Hosting 변경 요청의 merge-readiness 요약
 
-- 상태: 실행 계획 확정
+- 상태: 완료
 - 우선순위: P1
 - 기준일: 2026-08-19
 - 영향 범위:
@@ -16,22 +16,24 @@
 
 ## 핵심 요약
 
-- **현재 Hosting 기능은 변경 요청의 목록·상세·파일·타임라인·댓글·리뷰까지 제공하지만 병합 가능 여부를 한 번에 판단할 상태가 없음**
-- **CI·필수 검사·리뷰 충족·충돌·branch update 필요 여부를 provider 공통 read model로 정규화할 필요가 있음**
-- **첫 범위는 상태 조회와 실패 검사 상세 링크까지로 제한하고 병합·재실행 같은 mutation은 포함하지 않음**
-- **GitHub와 GitLab의 서로 다른 상태를 사용자 행동 기준인 ready·blocked·pending·unknown으로 표현해야 함**
-- **완료 기준은 모든 provider 기능의 동일화가 아니라 지원 범위와 알 수 없는 상태를 정확히 드러내는 것임**
+- **GitHub와 GitLab의 mergeability 응답을 `ready`·`blocked`·`pending`·`unknown` 공통 read model로 정규화함**
+- **검사·리뷰·충돌·branch update capability를 명시해 provider가 제공하지 않는 신호를 성공으로 오인하지 않도록 함**
+- **Hosting 상세 화면에 read-only merge-readiness와 차단·대기·조회 실패 원인을 표시함**
+- **권한 부족과 rate limit은 상세 화면 전체를 실패시키지 않고 `unknown` 원인으로 보존함**
+- **변경 요청·계정·project 선택 sequence를 적용해 늦게 도착한 이전 응답이 현재 선택을 덮지 않도록 함**
 
 ## 처리 결과
 
-- **현재 `get` 응답만으로는 required check와 approval rule을 정확히 계산할 수 없어 기존 응답에 추정 boolean을 추가하지 않기로 결정함**
-  - GitHub는 pull request detail 외에 check suite와 branch protection 조회가 필요함
-  - GitLab은 merge request detail 외에 pipeline과 approval state 조회가 필요함
-- **첫 구현 계약은 provider별 추가 요청을 병렬 조회한 뒤 `ready`·`blocked`·`pending`·`unknown`으로 정규화하는 방식으로 확정함**
-  - 일부 요청 실패 시 전체 detail을 실패시키지 않고 해당 dimension만 `unknown`과 원인으로 표시해야 함
-  - 기존 selection sequence를 모든 추가 요청에도 적용해 stale response를 차단해야 함
-- **불완전한 provider fixture로 사용자에게 잘못된 merge 가능 상태를 표시할 위험이 있어 이번 변경에서는 제품 UI 구현을 보류함**
-  - 후속 구현은 GitHub와 GitLab fixture를 함께 추가하는 단일 변경으로 수행할 필요가 있음
+- **`mergeReadiness` 요청과 응답 계약을 별도 구성해 기존 변경 요청 상세 모델에 추정 boolean을 혼합하지 않도록 함**
+  - 응답은 전체 상태, 원인 배열, 네 가지 capability와 확인 시각을 포함함
+- **GitHub pull request의 `mergeable`·`mergeable_state`·draft 상태를 충돌·branch update·검사 대기·리뷰 필요 원인으로 변환함**
+  - 상세 REST 응답만으로 확인할 수 없는 required checks와 review rule은 capability `false`와 `provider-unsupported`로 표시함
+- **GitLab merge request의 `detailed_merge_status`와 `head_pipeline.status`를 검사·승인·충돌·rebase 상태로 변환함**
+  - GitLab 상세 응답에서 제공되는 네 가지 dimension의 capability를 명시함
+- **HTTP 401·403과 429를 각각 `permission-denied`와 `rate-limited`로 변환함**
+  - 다른 네트워크·provider 실패는 `provider-unavailable`로 보존함
+- **상세·파일·타임라인·readiness를 함께 조회하고 동일 inspection sequence가 유지될 때만 화면 상태를 갱신함**
+  - 계정이나 project가 바뀌면 진행 중 sequence를 무효화하고 이전 상세 상태를 비움
 
 ## OSS 기준에서 확인한 제품 패턴
 
@@ -42,17 +44,15 @@
 - **GitLab은 merge request widget에서 pipeline·status check·code quality 같은 병합 판단 정보를 한 surface에 모음**
 - **채택할 핵심은 provider API 구조가 아니라 사용자가 지금 병합 가능한지를 빠르게 판단하는 정보 계층임**
 
-## 현재 저장소의 공백
+## 구현된 계약
 
-- **`HostingRequest`에는 check·pipeline·mergeability·review decision 조회가 없음**
-  - 현재 계약은 list, get, files, timeline, viewed state, create, comment, review와 branch update를 중심으로 구성됨
-  - 변경 요청 상세를 열어도 외부 웹 페이지를 다시 확인해야 병합 준비 상태를 알 수 있음
-- **provider별 정보 차이를 표현할 명시적 capability가 없음**
-  - GitHub required check와 GitLab pipeline·approval rule은 같은 필드를 제공하지 않음
-  - 미지원과 API 오류와 아직 계산 중인 상태가 하나의 빈 값으로 합쳐질 위험이 있음
-- **polling과 stale response 정책이 정의되지 않음**
-  - 장시간 실행되는 CI 상태가 화면에 오래 남을 수 있음
-  - 다른 변경 요청으로 전환한 뒤 이전 응답이 현재 선택에 반영되지 않아야 함
+- **`HostingMergeReadiness`가 provider 차이를 사용자 행동 중심 상태로 정규화함**
+  - 차단 원인은 실패 검사·충돌·draft·리뷰·branch update로 구분됨
+  - 대기 원인은 실행 중 검사와 provider 계산 중 상태로 구분됨
+  - 알 수 없음 원인은 권한·rate limit·미지원·provider 장애로 구분됨
+- **`HostingRequestDetails`가 상태와 원인을 읽기 전용으로 표시함**
+  - 검사·리뷰·충돌·branch update별 사용 가능 여부를 함께 표시함
+- **`HostingInspectionSequence`가 selection race를 독립적으로 검증할 수 있는 수명주기 경계를 제공함**
 
 ## 채택할 내용
 
@@ -83,28 +83,16 @@
 - **고정 간격 polling을 창이 숨겨진 상태에서도 무기한 실행하지 않음**
 - **provider 웹 UI 전체를 복제하지 않음**
 
-## 실행 작업
+## 검증 결과
 
-- **GitHub와 GitLab API에서 확보 가능한 merge-readiness 필드를 inventory함**
-- **공통 contract와 provider capability matrix를 정의함**
-- **Hosting detail에 read-only summary와 실패 원인 목록을 추가함**
-- **수동 refresh와 제한된 active polling 정책을 구현함**
-- **권한 부족·rate limit·provider 미지원·stale response 회귀 test를 추가함**
-- **packaged 환경에서 Keychain account를 사용한 조회 경계를 검증함**
+- **provider fixture와 contract test가 GitHub blocked와 GitLab ready·pending 변환을 검증함**
+- **HTTP 경계 test가 권한 부족과 rate limit을 `unknown`으로 보존하는지 검증함**
+- **UI test가 blocked 원인·capability와 unknown 상태를 표시하는지 검증함**
+- **selection sequence test가 이전 선택과 계정 전환 응답을 폐기하는지 검증함**
+- **Hosting 관련 4개 test 파일의 32개 test가 통과함**
 
-## 완료 조건
+## 후속 범위
 
-- **지원되는 변경 요청에서 검사·리뷰·충돌·branch 상태를 한 화면에서 확인할 수 있음**
-- **blocked 상태마다 사용자가 취할 수 있는 다음 행동 또는 상세 링크가 제공됨**
-- **미지원·권한 부족·조회 실패가 서로 구분됨**
-- **선택을 빠르게 전환해도 이전 변경 요청의 상태가 표시되지 않음**
-- **provider 응답 fixture와 실제 contract test가 공통 상태 변환을 검증함**
-
-## 검증
-
-- **Hosting의 가까운 검증부터 실행함**
-  - `pnpm --filter @jongminchung/git-client run test`
-  - Hosting provider integration test
-  - packaged Hosting E2E
-  - `pnpm --filter @jongminchung/git-client run typecheck`
-- **최종 `pnpm run check`, `git diff --check`, `git status --short`를 실행함**
+- **GitHub required checks와 branch protection의 개별 상세는 별도 API 조회가 추가될 때 capability를 확장할 수 있음**
+- **자동 polling은 창 가시성·rate limit 예산·사용자 refresh 정책이 확정될 때 추가할 수 있음**
+- **merge와 검사 재실행 mutation은 이번 read-only 범위에 포함하지 않음**

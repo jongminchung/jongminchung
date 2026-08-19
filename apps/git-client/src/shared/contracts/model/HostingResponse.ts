@@ -1,5 +1,6 @@
 import type { HostingChangedFile } from "./HostingChangedFile";
 import type { HostingChangeRequest } from "./HostingChangeRequest";
+import type { HostingMergeReadiness } from "./HostingMergeReadiness";
 import type { HostingNamespace } from "./HostingNamespace";
 import type { HostingTimelineEntry } from "./HostingTimelineEntry";
 
@@ -10,6 +11,7 @@ export type HostingResponse =
           nextPage: number | null;
       }
     | { kind: "changeRequest"; item: HostingChangeRequest }
+    | { kind: "mergeReadiness"; readiness: HostingMergeReadiness }
     | { kind: "files"; items: Array<HostingChangedFile> }
     | { kind: "timeline"; items: Array<HostingTimelineEntry> }
     | { kind: "viewedFiles"; paths: Array<string> }

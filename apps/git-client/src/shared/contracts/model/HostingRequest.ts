@@ -3,6 +3,7 @@ import type { HostingReviewEvent } from "./HostingReviewEvent";
 export type HostingRequest =
     | { kind: "list"; project: string; page: number }
     | { kind: "get"; project: string; number: number }
+    | { kind: "mergeReadiness"; project: string; number: number }
     | { kind: "files"; project: string; number: number }
     | { kind: "timeline"; project: string; number: number }
     | { kind: "viewedFiles"; project: string; number: number }

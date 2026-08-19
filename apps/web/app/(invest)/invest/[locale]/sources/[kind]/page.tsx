@@ -10,7 +10,6 @@ import {
 import { getNotesBySource } from "#lib/invest/notes";
 import { isLocale, locales } from "#lib/site-routing";
 
-export const dynamicParams = false;
 /** 정적 생성에 사용할 경로 매개변수를 반환함 */
 export function generateStaticParams() {
     return locales.flatMap((locale) =>

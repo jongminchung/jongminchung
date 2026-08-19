@@ -8,11 +8,15 @@ import {
 } from "#lib/invest/notes";
 import { isLocale, locales } from "#lib/site-routing";
 
-export const dynamicParams = false;
 /** 정적 생성에 사용할 경로 매개변수를 반환함 */
 export async function generateStaticParams() {
     const notes = await Promise.all(locales.map(getInvestmentNotes));
-    return notes.flat().map((note) => ({ locale: note.locale, slug: note.id }));
+    const params = notes
+        .flat()
+        .map((note) => ({ locale: note.locale, slug: note.id }));
+    return params.length > 0
+        ? params
+        : locales.map((locale) => ({ locale, slug: "__empty__" }));
 }
 
 /** 경로 매개변수에 맞는 페이지 메타데이터를 생성함 */

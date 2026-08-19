@@ -44,6 +44,7 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "babel-plugin-react-compiler": "catalog:",
     "gray-matter": "catalog:",
     "hast-util-to-string": "catalog:",
     "postcss": "catalog:",

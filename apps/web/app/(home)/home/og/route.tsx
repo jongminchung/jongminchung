@@ -1,8 +1,6 @@
 import { ImageResponse } from "next/og";
 
 const size = { width: 1200, height: 630 };
-export const dynamic = "force-static";
-
 // ImageResponse does not parse OKLCH values, so this output boundary keeps an sRGB palette.
 const imageTheme = {
     background: "#f3f6ff",

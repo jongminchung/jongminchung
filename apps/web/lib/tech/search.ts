@@ -27,6 +27,7 @@ const fieldWeights = {
     description: 3,
     body: 1,
 } as const;
+const MINIMUM_MULTI_TERM_COVERAGE = 0.5;
 
 function normalize(value: string): string {
     return value.normalize("NFKC").toLocaleLowerCase();
@@ -189,6 +190,8 @@ export function scoreSearchDocument(
                 compactSearchable.includes(compact(term))),
     );
     if (matchedTerms.length === 0) return 0;
+    const coverage = matchedTerms.length / terms.length;
+    if (terms.length > 1 && coverage < MINIMUM_MULTI_TERM_COVERAGE) return 0;
 
     const fieldTotal =
         fieldScore(document.title, terms, fieldWeights.title) +
@@ -201,13 +204,14 @@ export function scoreSearchDocument(
         fieldScore(document.tags.join(" "), terms, fieldWeights.tags) +
         fieldScore(document.description, terms, fieldWeights.description) +
         fieldScore(document.body, terms, fieldWeights.body);
-    const coverage = matchedTerms.length / terms.length;
     return fieldTotal * coverage * coverage;
 }
 
 export interface SearchBenchmarkCase {
     readonly query: string;
     readonly expectedIds: readonly string[];
+    readonly locale?: SearchDocument["locale"];
+    readonly expectNoResults?: boolean;
 }
 
 export interface SearchBenchmarkReport {
@@ -216,6 +220,28 @@ export interface SearchBenchmarkReport {
     readonly top3HitRate: number;
     readonly meanReciprocalRank: number;
     readonly zeroResultRate: number;
+    readonly positiveQueries: number;
+    readonly noResultQueries: number;
+    readonly noResultAccuracy: number;
+    readonly unexpectedZeroResultRate: number;
+}
+
+export interface SearchIndexCost {
+    readonly engine: "built-in";
+    readonly indexBytes: number;
+    readonly initialRequestCount: 1;
+    readonly runtimeDependencyBytes: 0;
+}
+
+export interface SearchBenchmarkThresholds {
+    readonly minTop1HitRate: number;
+    readonly minTop3HitRate: number;
+    readonly minMeanReciprocalRank: number;
+    readonly expectedZeroResultRate: number;
+    readonly minNoResultAccuracy: number;
+    readonly maxUnexpectedZeroResultRate: number;
+    readonly maxIndexBytes: number;
+    readonly maxRuntimeDependencyBytes: number;
 }
 
 /** 동일 corpus로 검색 변경 전후의 relevance를 비교함 */
@@ -227,9 +253,34 @@ export function evaluateSearchBenchmark(
     let top3 = 0;
     let reciprocalRank = 0;
     let zeroResults = 0;
+    let positiveQueries = 0;
+    let noResultQueries = 0;
+    let correctNoResults = 0;
+    let unexpectedZeroResults = 0;
     for (const benchmark of cases) {
-        const results = searchDocuments(documents, benchmark.query);
+        if (
+            (benchmark.expectNoResults === true) !==
+            (benchmark.expectedIds.length === 0)
+        ) {
+            throw new Error(
+                `Search benchmark must distinguish a target from no results: ${benchmark.query}`,
+            );
+        }
+        const candidates =
+            benchmark.locale === undefined
+                ? documents
+                : documents.filter(
+                      (document) => document.locale === benchmark.locale,
+                  );
+        const results = searchDocuments(candidates, benchmark.query);
         if (results.length === 0) zeroResults += 1;
+        if (benchmark.expectNoResults === true) {
+            noResultQueries += 1;
+            if (results.length === 0) correctNoResults += 1;
+            continue;
+        }
+        positiveQueries += 1;
+        if (results.length === 0) unexpectedZeroResults += 1;
         const rank = results.findIndex((result) =>
             benchmark.expectedIds.includes(result.document.id),
         );
@@ -237,14 +288,58 @@ export function evaluateSearchBenchmark(
         if (rank >= 0 && rank < 3) top3 += 1;
         if (rank >= 0) reciprocalRank += 1 / (rank + 1);
     }
-    const denominator = Math.max(1, cases.length);
+    const denominator = Math.max(1, positiveQueries);
     return Object.freeze({
         queries: cases.length,
         top1HitRate: top1 / denominator,
         top3HitRate: top3 / denominator,
         meanReciprocalRank: reciprocalRank / denominator,
-        zeroResultRate: zeroResults / denominator,
+        zeroResultRate: zeroResults / Math.max(1, cases.length),
+        positiveQueries,
+        noResultQueries,
+        noResultAccuracy: correctNoResults / Math.max(1, noResultQueries),
+        unexpectedZeroResultRate:
+            unexpectedZeroResults / Math.max(1, positiveQueries),
     });
+}
+
+/** 전송되는 JSON index와 검색 runtime 의존성 비용을 계산함 */
+export function measureSearchIndexCost(
+    documents: readonly SearchDocument[],
+): SearchIndexCost {
+    return Object.freeze({
+        engine: "built-in",
+        indexBytes: new TextEncoder().encode(JSON.stringify(documents)).length,
+        initialRequestCount: 1,
+        runtimeDependencyBytes: 0,
+    });
+}
+
+/** relevance와 index 비용이 고정된 품질 예산을 만족하는지 검증함 */
+export function assertSearchBenchmarkThresholds(
+    report: SearchBenchmarkReport,
+    cost: SearchIndexCost,
+    thresholds: SearchBenchmarkThresholds,
+): void {
+    const failures = [
+        report.top1HitRate < thresholds.minTop1HitRate && "top-1 hit rate",
+        report.top3HitRate < thresholds.minTop3HitRate && "top-3 hit rate",
+        report.meanReciprocalRank < thresholds.minMeanReciprocalRank && "MRR",
+        report.zeroResultRate !== thresholds.expectedZeroResultRate &&
+            "zero-result rate",
+        report.noResultAccuracy < thresholds.minNoResultAccuracy &&
+            "no-result accuracy",
+        report.unexpectedZeroResultRate >
+            thresholds.maxUnexpectedZeroResultRate &&
+            "unexpected zero-result rate",
+        cost.indexBytes > thresholds.maxIndexBytes && "search index bytes",
+        cost.runtimeDependencyBytes > thresholds.maxRuntimeDependencyBytes &&
+            "runtime dependency bytes",
+    ].filter((failure): failure is string => typeof failure === "string");
+    if (failures.length > 0)
+        throw new Error(
+            `Search benchmark thresholds failed: ${failures.join(", ")}`,
+        );
 }
 
 /** `searchDocuments` 공개 기능을 제공함 */

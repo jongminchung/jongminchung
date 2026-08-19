@@ -23,6 +23,7 @@ import type {
 import {
     parseHostingResponse,
     prepareHostingRequest,
+    unavailableMergeReadiness,
 } from "./hosting-provider";
 
 export const HOSTING_REQUEST_TIMEOUT_MS = 120_000;
@@ -351,13 +352,28 @@ export class ElectronHostingFoundation {
             });
         }
         const prepared = prepareHostingRequest(account.provider, request);
-        const value = await this.#send(
-            account,
-            token,
-            prepared.method,
-            prepared.path,
-            prepared.payload,
-        );
+        let value: unknown;
+        try {
+            value = await this.#send(
+                account,
+                token,
+                prepared.method,
+                prepared.path,
+                prepared.payload,
+            );
+        } catch (error) {
+            if (request.kind !== "mergeReadiness") throw error;
+            const message = errorText(error);
+            const reason = /HTTP (?:401|403)\b/u.test(message)
+                ? "permission-denied"
+                : /HTTP 429\b/u.test(message)
+                  ? "rate-limited"
+                  : "provider-unavailable";
+            return {
+                kind: "mergeReadiness",
+                readiness: unavailableMergeReadiness(account.provider, reason),
+            };
+        }
         return parseHostingResponse(account.provider, request, value);
     }
 

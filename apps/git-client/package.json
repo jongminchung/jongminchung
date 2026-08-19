@@ -64,6 +64,7 @@
     "zustand": "catalog:"
   },
   "devDependencies": {
+    "@babel/core": "catalog:",
     "@axe-core/playwright": "catalog:",
     "@electron-forge/cli": "catalog:",
     "@electron-forge/plugin-fuses": "catalog:",
@@ -71,11 +72,14 @@
     "@electron-forge/shared-types": "catalog:",
     "@electron/fuses": "catalog:",
     "@playwright/test": "catalog:",
+    "@rolldown/plugin-babel": "catalog:",
     "@tailwindcss/vite": "catalog:",
     "@types/node": "catalog:",
+    "@types/babel__core": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",
+    "babel-plugin-react-compiler": "catalog:",
     "ds-store": "catalog:",
     "electron": "catalog:",
     "macos-alias": "catalog:",
