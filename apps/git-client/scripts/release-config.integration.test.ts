@@ -19,6 +19,17 @@ function expectManualWorkflow(workflow: string): void {
     expect(triggerBlock?.trim()).toBe("workflow_dispatch:");
 }
 
+function expectInOrder(workflow: string, fragments: readonly string[]): void {
+    let previousIndex = -1;
+    for (const fragment of fragments) {
+        const index = workflow.indexOf(fragment, previousIndex + 1);
+        expect(index, `Missing workflow fragment: ${fragment}`).toBeGreaterThan(
+            previousIndex,
+        );
+        previousIndex = index;
+    }
+}
+
 describe("Git 클라이언트 릴리스 구성 변경", () => {
     it("[성공] 매뉴얼로 교체된 릴리스 버전 하나를 사용함", () => {
         expect(packageConfig.version).toBe("1.0.0");
@@ -40,23 +51,26 @@ describe("Git 클라이언트 릴리스 구성 변경", () => {
         expect(gitClientWorkflow).not.toContain("secrets.GITHUB_TOKEN");
     });
 
-    it("[성공] 모든 스파이스샷을 1.0.0으로 수동으로 바뀐다", () => {
+    it("[성공] package 검증 뒤 기존 1.0.0을 교체함", () => {
         expectManualWorkflow(packageWorkflow);
-        expect(packageWorkflow).toContain('select(.name == "1.0.0")');
-        expect(packageWorkflow).toContain("Publish tooling 1.0.0");
-        expect(packageWorkflow).toContain("Publish ui 1.0.0");
-        expect(packageWorkflow).toContain("package-integrities.tsv");
+        expect(packageWorkflow).toContain("package: [tooling, ui]");
+        expect(packageWorkflow).toContain("needs: validate");
+        expect(packageWorkflow).toContain("run publish:dry-run");
         expect(packageWorkflow).toContain(
-            "Verify published integrity and consumer installation",
+            '.github/scripts/delete-version-ids-script.sh\n          "$GITHUB_REPOSITORY_OWNER" "${{ matrix.package }}" "1.0.0"',
         );
-        expect(packageWorkflow).toContain('grep -q "HTTP 404"');
+        expectInOrder(packageWorkflow, [
+            "- name: Delete existing 1.0.0",
+            "publish --access public --no-git-checks",
+            "- name: Remove GitHub Packages auth",
+        ]);
+        expect(packageWorkflow).toContain("if: ${{ always() }}");
         expect(packageWorkflow).toContain("GH_PAT: ${{ secrets.GH_PAT }}");
-        expect(packageWorkflow).toContain("Remove GitHub Packages auth");
         expect(packageWorkflow).not.toContain("remark-plantuml");
         expect(packageWorkflow).not.toContain("secrets.GITHUB_TOKEN");
     });
 
-    it("[실패]업데이트 데이터 제외 및 외계인 같은 임시 전자 방출 장치를 일치함", () => {
+    it("[성공] Electron release는 updater와 maker 없이 고정 build script를 사용함", () => {
         expect(packageConfig.scripts["release:build"]).toBe(
             "node scripts/release.ts",
         );
