@@ -28,12 +28,9 @@ overrides:
   "sharp@<0.35.0": "0.35.3"
 
 allowBuilds:
-  electron: true
   esbuild: true
   macos-alias: true
   node-pty: true
-  sharp: true
-  spawn-sync: true
 
 catalog:
   "@axe-core/playwright": "4.12.1"
@@ -112,4 +109,3 @@ catalog:
   "vitest": "4.1.10"
   "zod": "4.4.3"
   "zustand": "5.0.14"
-  '@jongminchung/tooling': ^1.0.0

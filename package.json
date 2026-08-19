@@ -25,7 +25,7 @@
     "typecheck": "tsc --noEmit && pnpm -r --if-present run typecheck"
   },
   "devDependencies": {
-    "@jongminchung/tooling": "catalog:",
+    "@jongminchung/tooling": "workspace:*",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
@@ -51,4 +51,3 @@
     "It stays separate from check because the advisory database requires network access; release workflows run it before publishing."
   ]
 }
-
