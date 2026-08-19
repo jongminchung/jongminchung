@@ -83,6 +83,25 @@ test("[성공] 기록 및 동일 페이지에 대한 기본 링크를 사용함"
     await expect(page).toHaveURL(new RegExp(`${hash}$`, "u"));
 });
 
+test("[성공] 경로를 다시 방문해도 모바일 탐색을 닫힌 상태로 시작함", async ({
+    page,
+}) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/en/articles/nextjs-16");
+    await page.getByRole("button", { name: "Open navigation" }).click();
+
+    const navigation = page.getByRole("dialog", {
+        name: "Mobile documentation navigation",
+    });
+    await expect(navigation).toBeVisible();
+    await navigation.getByRole("link", { name: "TypeScript 6" }).click();
+    await expect(page).toHaveURL(/\/en\/articles\/typescript-6$/u);
+
+    await page.goBack();
+    await expect(page).toHaveURL(/\/en\/articles\/nextjs-16$/u);
+    await expect(navigation).toBeHidden();
+});
+
 test("[성공] 각주 참조와 본문 사이를 이동함", async ({ page }) => {
     await page.goto("/en/articles/the-expensive-main-thread");
 
@@ -117,10 +136,14 @@ test("[성공] 버퍼를 로드하고 기술 검색 파일을 게시함", async 
 });
 
 test("[성공] 로딩 및 준비 상태를 통해 원격 버퍼를 백업함", async ({ page }) => {
+    let releaseResponse!: () => void;
+    const responseGate = new Promise<void>((resolve) => {
+        releaseResponse = resolve;
+    });
     await page.route(
         "**/diagrams/operating-system.excalidraw",
         async (route) => {
-            await new Promise((resolve) => setTimeout(resolve, 250));
+            await responseGate;
             await route.continue();
         },
     );
@@ -130,6 +153,7 @@ test("[성공] 로딩 및 준비 상태를 통해 원격 버퍼를 백업함", a
     });
 
     await expect(diagram).toHaveAttribute("data-excalidraw-state", "loading");
+    releaseResponse();
     await expect(diagram).toHaveAttribute("data-excalidraw-state", "ready");
     await expect(diagram).toHaveAttribute("data-rendered-element-count", "10");
     await expect(diagram).toHaveAttribute("data-source-element-count", "10");
@@ -165,6 +189,7 @@ test("[성공] 원시 원시 테마 선호도를 수화하고 유지함", async 
 
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
     const themeControl = page.getByRole("button", { name: "Theme: dark" });
+    await expect(themeControl).toBeVisible();
     await themeControl.click();
     await expect(
         page.getByRole("button", { name: "Theme: system" }),

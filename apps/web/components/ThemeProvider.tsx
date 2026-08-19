@@ -7,8 +7,7 @@ import {
     useCallback,
     useEffect,
     useMemo,
-    useRef,
-    useState,
+    useSyncExternalStore,
 } from "react";
 import { isThemeMode, type ThemeMode } from "#lib/theme";
 
@@ -18,12 +17,43 @@ interface ThemeContextValue {
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
+const themeSubscribers = new Map<string, Set<() => void>>();
 
 function applyTheme(mode: ThemeMode, prefersDark: boolean): void {
     const resolvedMode =
         mode === "system" ? (prefersDark ? "dark" : "light") : mode;
     document.documentElement.dataset.theme = resolvedMode;
     document.documentElement.style.colorScheme = resolvedMode;
+}
+
+function readThemeMode(storageKey: string): ThemeMode {
+    const storedMode = localStorage.getItem(storageKey);
+    return isThemeMode(storedMode) ? storedMode : "system";
+}
+
+function subscribeThemeMode(
+    storageKey: string,
+    onStoreChange: () => void,
+): () => void {
+    const subscribers = themeSubscribers.get(storageKey) ?? new Set();
+    subscribers.add(onStoreChange);
+    themeSubscribers.set(storageKey, subscribers);
+
+    const handleStorage = (event: StorageEvent): void => {
+        if (event.key === storageKey) onStoreChange();
+    };
+    window.addEventListener("storage", handleStorage);
+
+    return () => {
+        subscribers.delete(onStoreChange);
+        if (subscribers.size === 0) themeSubscribers.delete(storageKey);
+        window.removeEventListener("storage", handleStorage);
+    };
+}
+
+function writeThemeMode(storageKey: string, mode: ThemeMode): void {
+    localStorage.setItem(storageKey, mode);
+    themeSubscribers.get(storageKey)?.forEach((subscriber) => subscriber());
 }
 
 /** `ThemeProvider` 사이트별 테마 선택과 시스템 모드를 동기화함 */
@@ -34,38 +64,39 @@ export function ThemeProvider({
     readonly storageKey: string;
     readonly children: ReactNode;
 }): React.JSX.Element {
-    const [mode, setModeState] = useState<ThemeMode>("system");
-    const modeRef = useRef<ThemeMode>("system");
+    const subscribe = useCallback(
+        (onStoreChange: () => void) =>
+            subscribeThemeMode(storageKey, onStoreChange),
+        [storageKey],
+    );
+    const getSnapshot = useCallback(
+        () => readThemeMode(storageKey),
+        [storageKey],
+    );
+    const mode = useSyncExternalStore<ThemeMode>(
+        subscribe,
+        getSnapshot,
+        () => "system",
+    );
 
     useEffect(() => {
-        const storedMode = localStorage.getItem(storageKey);
-        const initialMode = isThemeMode(storedMode) ? storedMode : "system";
         const media = window.matchMedia("(prefers-color-scheme: dark)");
-
-        modeRef.current = initialMode;
-        applyTheme(initialMode, media.matches);
-        const frame = requestAnimationFrame(() => setModeState(initialMode));
+        applyTheme(mode, media.matches);
 
         const handleMediaChange = (): void => {
-            if (modeRef.current === "system")
-                applyTheme("system", media.matches);
+            if (mode === "system") applyTheme(mode, media.matches);
         };
         media.addEventListener("change", handleMediaChange);
-        return () => {
-            cancelAnimationFrame(frame);
-            media.removeEventListener("change", handleMediaChange);
-        };
-    }, [storageKey]);
+        return () => media.removeEventListener("change", handleMediaChange);
+    }, [mode]);
 
     const setMode = useCallback(
         (nextMode: ThemeMode): void => {
-            modeRef.current = nextMode;
-            setModeState(nextMode);
-            localStorage.setItem(storageKey, nextMode);
             applyTheme(
                 nextMode,
                 window.matchMedia("(prefers-color-scheme: dark)").matches,
             );
+            writeThemeMode(storageKey, nextMode);
         },
         [storageKey],
     );

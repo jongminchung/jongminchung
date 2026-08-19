@@ -205,6 +205,7 @@ export default async function DocsPage({
     if (sectionPage !== null) {
         return (
             <DocsShell
+                key={sectionPage.href}
                 locale={locale}
                 current={toCurrentSectionEntry(sectionPage)}
                 documents={navigationEntries}
@@ -217,6 +218,7 @@ export default async function DocsPage({
     if (document === null) notFound();
     return (
         <DocsShell
+            key={document.metadata.href}
             locale={locale}
             current={toCurrentNavigationEntry(document.metadata)}
             documents={navigationEntries}

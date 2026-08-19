@@ -14,7 +14,10 @@ import {
 } from "react";
 import { parseExcalidrawSource } from "#lib/tech/excalidraw-scene";
 import { excalidrawSceneQueryOptions } from "#lib/tech/queries";
-import type { ExcalidrawCanvasProps } from "./ExcalidrawCanvas";
+import type {
+    ExcalidrawCanvasProps,
+    ExcalidrawRenderResult,
+} from "./ExcalidrawCanvas";
 import styles from "./ExcalidrawDiagram.module.css";
 
 interface ExcalidrawDiagramBaseProps {
@@ -83,7 +86,7 @@ export function ExcalidrawDiagram(
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [renderedScene, setRenderedScene] = useState<{
         readonly identity: string;
-        readonly elementCount: number;
+        readonly result: ExcalidrawRenderResult;
     } | null>(null);
     const src = props.src;
     const source = props.source;
@@ -92,7 +95,11 @@ export function ExcalidrawDiagram(
     const sceneIdentity = source ?? src ?? "";
     const renderedElementCount =
         renderedScene?.identity === sceneIdentity
-            ? renderedScene.elementCount
+            ? renderedScene.result.elementCount
+            : null;
+    const renderedTextContent =
+        renderedScene?.identity === sceneIdentity
+            ? renderedScene.result.textContent
             : null;
     const inlineScene = useMemo(() => {
         if (source === undefined) return { scene: null, error: null };
@@ -151,8 +158,8 @@ export function ExcalidrawDiagram(
     }, []);
 
     const onReady = useCallback(
-        (elementCount: number): void => {
-            setRenderedScene({ identity: sceneIdentity, elementCount });
+        (result: ExcalidrawRenderResult): void => {
+            setRenderedScene({ identity: sceneIdentity, result });
         },
         [sceneIdentity],
     );
@@ -161,7 +168,9 @@ export function ExcalidrawDiagram(
     const ready =
         scene !== null &&
         canvas !== null &&
-        renderedElementCount === scene.elementCount;
+        renderedElementCount === scene.elementCount &&
+        JSON.stringify(renderedTextContent) ===
+            JSON.stringify(scene.textContent);
     const figureClassName = `${styles.figure} ${variant === "standalone" ? styles.standalone : ""}`;
     const Canvas = canvas;
 
@@ -174,6 +183,11 @@ export function ExcalidrawDiagram(
                 error === null ? (ready ? "ready" : "loading") : "error"
             }
             data-rendered-element-count={renderedElementCount ?? undefined}
+            data-rendered-text-content={
+                renderedTextContent === null
+                    ? undefined
+                    : JSON.stringify(renderedTextContent)
+            }
             data-source-element-count={scene?.elementCount}
         >
             <div className={styles.toolbar}>
@@ -218,7 +232,12 @@ export function ExcalidrawDiagram(
             </div>
             <div className={styles.canvas}>
                 {error === null && scene !== null && Canvas !== null ? (
-                    <Canvas name={ariaLabel} onReady={onReady} scene={scene} />
+                    <Canvas
+                        key={sceneIdentity}
+                        name={ariaLabel}
+                        onReady={onReady}
+                        scene={scene}
+                    />
                 ) : error === null ? (
                     <div className={styles.loading} role="status">
                         {localizedText(

@@ -16,8 +16,13 @@ type ExcalidrawTheme = NonNullable<ComponentProps<typeof Excalidraw>["theme"]>;
 
 export interface ExcalidrawCanvasProps {
     readonly name: string;
-    readonly onReady: (elementCount: number) => void;
+    readonly onReady: (result: ExcalidrawRenderResult) => void;
     readonly scene: ExcalidrawScene;
+}
+
+export interface ExcalidrawRenderResult {
+    readonly elementCount: number;
+    readonly textContent: readonly string[];
 }
 
 function readTheme(): ExcalidrawTheme {
@@ -70,7 +75,14 @@ export function ExcalidrawCanvas({
                 fitToViewport: true,
                 viewportZoomFactor: 0.82,
             });
-            onReady(elements.length);
+            onReady({
+                elementCount: elements.length,
+                textContent: elements.flatMap((element) =>
+                    element.type === "text" && element.text.trim().length > 0
+                        ? [element.text]
+                        : [],
+                ),
+            });
         });
         return () => cancelAnimationFrame(frame);
     }, [api, onReady]);

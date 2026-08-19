@@ -14,6 +14,7 @@ export default defineConfig({
         toHaveScreenshot: {
             animations: "disabled",
             caret: "hide",
+            maxDiffPixelRatio: 0.001,
             scale: "css",
         },
     },
@@ -23,7 +24,8 @@ export default defineConfig({
         video: "retain-on-failure",
     },
     webServer: {
-        command: "pnpm run build && PORT=3100 pnpm run start",
+        command:
+            "PLAYWRIGHT_TEST=1 pnpm run build && PLAYWRIGHT_TEST=1 PORT=3100 pnpm run start",
         port: 3100,
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
