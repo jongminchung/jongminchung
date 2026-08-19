@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import type { DesktopApi } from "../src/shared/contracts/desktop-api";
 import {
     launchPackaged,
     resetQaProfile,
@@ -224,6 +225,29 @@ test("[성공] 패키지화된 Electron Welcome Geometry를 사용함", async ()
     await resetQaProfile(runtimeProfileName);
     const app = await launchPackaged(["--qa-isolated-profile"]);
     try {
+        const response = await app.page.reload();
+        const headers = await response?.allHeaders();
+        expect(headers?.["content-security-policy"]).toContain(
+            "default-src 'self'",
+        );
+        expect(headers?.["content-security-policy"]).toContain(
+            "object-src 'none'",
+        );
+        await expect
+            .poll(() => app.page.evaluate(() => window.location.origin))
+            .toBe("app://git-client");
+        await expect
+            .poll(() =>
+                app.page.evaluate(async () => {
+                    const api = (
+                        window as typeof window & {
+                            readonly gitClient?: DesktopApi;
+                        }
+                    ).gitClient;
+                    return api?.runtime.getInfo();
+                }),
+            )
+            .toMatchObject({ qaFixture: false });
         await expect(app.page).toHaveTitle("Welcome to Git Client");
         await expect(app.page.getByTestId("welcome-titlebar")).toHaveCSS(
             "height",
