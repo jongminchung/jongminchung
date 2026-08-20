@@ -1,13 +1,16 @@
 import { v5 as uuidV5 } from "uuid";
 import { z } from "zod";
 import {
+    BeginHostingOAuthSchema,
     HostingAccountIdSchema,
     HostingAccountSchema,
     HostingAccountsSchema,
+    HostingOAuthSessionIdSchema,
     HostingRequestSchema,
     HostingResponseSchema,
     SaveHostingAccountSchema,
     type HostingAccount,
+    type HostingOAuthPrompt,
     type HostingProviderKind,
     type HostingRequest,
     type HostingResponse,
@@ -20,6 +23,14 @@ import type {
     HostingHttpRequest,
     HostingHttpResponse,
 } from "./hosting-http";
+import {
+    decodeHostingCredential,
+    encodeHostingOAuthCredential,
+    HostingOAuthService,
+    type HostingOAuthCredential,
+    type HostingOAuthServiceOptions,
+    type ResolvedHostingCredential,
+} from "./hosting-oauth-service";
 import {
     parseHostingResponse,
     prepareHostingRequest,
@@ -115,11 +126,12 @@ function requestUrl(account: RequestAccount, path: string): string {
 function authorizationHeaders(
     provider: HostingProviderKind,
     token: string,
+    credentialKind: ResolvedHostingCredential["kind"],
 ): Readonly<Record<string, string>> {
     return Object.freeze({
         Accept: "application/json",
         "User-Agent": "git-client/0.1",
-        ...(provider === "gitHub"
+        ...(provider === "gitHub" || credentialKind === "oauth"
             ? { Authorization: `Bearer ${token}` }
             : { "PRIVATE-TOKEN": token }),
     });
@@ -133,22 +145,30 @@ export class ElectronHostingFoundation {
     readonly #http: HostingHttpClient;
     readonly #credentials: HostingCredentialStore;
     readonly #policy: HostingFoundationPolicy;
+    readonly #oauth: HostingOAuthService;
     readonly #accounts = new Map<string, HostingAccount>();
+    readonly #refreshing = new Map<string, Promise<HostingOAuthCredential>>();
 
     private constructor(
         http: HostingHttpClient,
         credentials: HostingCredentialStore,
         policy: HostingFoundationPolicy,
+        oauthOptions: HostingOAuthServiceOptions,
     ) {
         this.#http = http;
         this.#credentials = credentials;
         this.#policy = policy;
+        this.#oauth = HostingOAuthService.of(http, {
+            ...oauthOptions,
+            requestTimeoutMs: oauthOptions.requestTimeoutMs ?? policy.timeoutMs,
+        });
     }
 
     static of(
         http: HostingHttpClient,
         credentials: HostingCredentialStore,
         policy: HostingFoundationPolicy = DEFAULT_POLICY,
+        oauthOptions: HostingOAuthServiceOptions = {},
     ): ElectronHostingFoundation {
         let validatedPolicy: HostingFoundationPolicy;
         try {
@@ -160,6 +180,7 @@ export class ElectronHostingFoundation {
             http,
             credentials,
             validatedPolicy,
+            oauthOptions,
         );
     }
 
@@ -181,6 +202,7 @@ export class ElectronHostingFoundation {
         const profile = await this.#send(
             { provider: input.provider, baseUrl: input.baseUrl },
             input.token,
+            "personalAccessToken",
             "GET",
             "user",
             null,
@@ -225,6 +247,96 @@ export class ElectronHostingFoundation {
         return account;
     }
 
+    async beginOAuth(
+        provider: unknown,
+        baseUrl: unknown,
+        clientId: unknown,
+    ): Promise<HostingOAuthPrompt> {
+        let input: z.infer<typeof BeginHostingOAuthSchema>;
+        try {
+            input = BeginHostingOAuthSchema.parse({
+                provider,
+                baseUrl,
+                clientId,
+            });
+        } catch (error) {
+            throw invalidInput(error);
+        }
+        return this.#oauth.begin(input.provider, input.baseUrl, input.clientId);
+    }
+
+    async awaitOAuth(sessionId: unknown): Promise<HostingAccount> {
+        let id: string;
+        try {
+            id = HostingOAuthSessionIdSchema.parse(sessionId);
+        } catch (error) {
+            throw invalidInput(error);
+        }
+        const grant = await this.#oauth.complete(id);
+        const profile = await this.#send(
+            { provider: grant.provider, baseUrl: grant.baseUrl },
+            grant.credential.accessToken,
+            "oauth",
+            "GET",
+            "user",
+            null,
+        );
+        const login = requiredString(
+            profile,
+            grant.provider === "gitHub" ? "login" : "username",
+        );
+        if (login.trim().length === 0) {
+            throw new HostingFoundationError(
+                "invalidResponse",
+                "Hosting profile login is empty",
+            );
+        }
+        const accountId = uuidV5(
+            `${providerKey(grant.provider)}:${grant.baseUrl}:${login}:oauth:${grant.credential.clientId}`,
+            uuidV5.URL,
+        );
+        let account: HostingAccount;
+        try {
+            account = HostingAccountSchema.parse({
+                id: accountId,
+                provider: grant.provider,
+                baseUrl: grant.baseUrl,
+                authentication: "oauth",
+                login,
+            });
+        } catch {
+            throw new HostingFoundationError(
+                "invalidResponse",
+                "Hosting profile is invalid",
+            );
+        }
+        const encoded = encodeHostingOAuthCredential(grant.credential);
+        try {
+            await this.#credentials.set(account.id, encoded);
+        } catch (error) {
+            throw new HostingFoundationError(
+                "credential",
+                safeHostingErrorMessage(errorText(error), [
+                    encoded,
+                    grant.credential.accessToken,
+                    grant.credential.refreshToken ?? "",
+                ]),
+            );
+        }
+        this.#accounts.set(account.id, account);
+        return account;
+    }
+
+    async cancelOAuth(sessionId: unknown): Promise<void> {
+        let id: string;
+        try {
+            id = HostingOAuthSessionIdSchema.parse(sessionId);
+        } catch (error) {
+            throw invalidInput(error);
+        }
+        await this.#oauth.cancel(id);
+    }
+
     restoreAccounts(accounts: unknown): void {
         let validatedAccounts: readonly HostingAccount[];
         try {
@@ -246,7 +358,6 @@ export class ElectronHostingFoundation {
         } catch (error) {
             throw invalidInput(error);
         }
-        this.#accounts.delete(id);
         try {
             await this.#credentials.delete(id);
         } catch (error) {
@@ -255,6 +366,7 @@ export class ElectronHostingFoundation {
                 safeHostingErrorMessage(errorText(error)),
             );
         }
+        this.#accounts.delete(id);
     }
 
     async execute(
@@ -276,26 +388,53 @@ export class ElectronHostingFoundation {
                 "Hosting account is not registered",
             );
         }
-        let token: string | null;
+        let storedCredential: string | null;
         try {
-            token = await this.#credentials.get(id);
+            storedCredential = await this.#credentials.get(id);
         } catch (error) {
             throw new HostingFoundationError(
                 "credential",
                 safeHostingErrorMessage(errorText(error)),
             );
         }
-        if (token === null || token.trim().length === 0) {
+        if (storedCredential === null || storedCredential.trim().length === 0) {
             throw new HostingFoundationError(
                 "credential",
                 "Hosting credential is unavailable",
             );
         }
-        const response = await this.#executeRequest(
+        const credential = await this.#resolveCredential(
             account,
-            token,
-            validatedRequest,
+            storedCredential,
         );
+        let response: HostingResponse;
+        try {
+            response = await this.#executeRequest(
+                account,
+                credential,
+                validatedRequest,
+            );
+        } catch (error) {
+            if (
+                credential.kind === "oauth" &&
+                error instanceof HostingFoundationError &&
+                error.code === "http"
+            ) {
+                if (/HTTP 401\b/u.test(error.message)) {
+                    throw new HostingFoundationError(
+                        "credential",
+                        "OAuth authorization expired or was revoked. Sign in again",
+                    );
+                }
+                if (/HTTP 403\b/u.test(error.message)) {
+                    throw new HostingFoundationError(
+                        "http",
+                        "OAuth account does not have permission for this Hosting action. Reauthorize the app or select a permitted repository",
+                    );
+                }
+            }
+            throw error;
+        }
         try {
             return HostingResponseSchema.parse(response);
         } catch {
@@ -306,9 +445,61 @@ export class ElectronHostingFoundation {
         }
     }
 
+    async #resolveCredential(
+        account: HostingAccount,
+        raw: string,
+    ): Promise<ResolvedHostingCredential> {
+        const credential = decodeHostingCredential(raw);
+        if (credential.kind === "personalAccessToken") return credential;
+        if (
+            credential.provider !== account.provider ||
+            credential.baseUrl !== account.baseUrl
+        ) {
+            throw new HostingFoundationError(
+                "credential",
+                "Stored OAuth credential does not match the hosting account or server",
+            );
+        }
+        if (!this.#oauth.shouldRefresh(credential)) return credential;
+        const active = this.#refreshing.get(account.id);
+        if (active !== undefined) return active;
+        const refresh = this.#refreshOAuthCredential(account, credential);
+        this.#refreshing.set(account.id, refresh);
+        try {
+            return await refresh;
+        } finally {
+            if (this.#refreshing.get(account.id) === refresh)
+                this.#refreshing.delete(account.id);
+        }
+    }
+
+    async #refreshOAuthCredential(
+        account: HostingAccount,
+        credential: HostingOAuthCredential,
+    ): Promise<HostingOAuthCredential> {
+        const refreshed = await this.#oauth.refresh(
+            credential,
+            account.baseUrl,
+        );
+        const encoded = encodeHostingOAuthCredential(refreshed);
+        try {
+            await this.#credentials.set(account.id, encoded);
+        } catch (error) {
+            throw new HostingFoundationError(
+                "credential",
+                safeHostingErrorMessage(errorText(error), [
+                    encoded,
+                    refreshed.accessToken,
+                    refreshed.refreshToken ?? "",
+                ]),
+            );
+        }
+        return refreshed;
+    }
+
     async #executeRequest(
         account: HostingAccount,
-        token: string,
+        credential: ResolvedHostingCredential,
         request: HostingRequest,
     ): Promise<HostingResponse> {
         if (
@@ -317,7 +508,8 @@ export class ElectronHostingFoundation {
         ) {
             const profile = await this.#send(
                 account,
-                token,
+                credential.accessToken,
+                credential.kind,
                 "GET",
                 "user",
                 null,
@@ -326,7 +518,8 @@ export class ElectronHostingFoundation {
             for (let page = 1; page <= 100; page += 1) {
                 const value = await this.#send(
                     account,
-                    token,
+                    credential.accessToken,
+                    credential.kind,
                     "GET",
                     `user/repos?type=owner&per_page=100&page=${page}`,
                     null,
@@ -356,7 +549,8 @@ export class ElectronHostingFoundation {
         try {
             value = await this.#send(
                 account,
-                token,
+                credential.accessToken,
+                credential.kind,
                 prepared.method,
                 prepared.path,
                 prepared.payload,
@@ -380,6 +574,7 @@ export class ElectronHostingFoundation {
     async #send(
         account: RequestAccount,
         token: string,
+        credentialKind: ResolvedHostingCredential["kind"],
         method: HostingHttpMethod,
         path: string,
         payload: unknown,
@@ -400,7 +595,7 @@ export class ElectronHostingFoundation {
             timeoutHandle = handle;
         });
         const headers = {
-            ...authorizationHeaders(account.provider, token),
+            ...authorizationHeaders(account.provider, token, credentialKind),
             ...(payload === null ? {} : { "Content-Type": "application/json" }),
         };
         const request: HostingHttpRequest = Object.freeze({

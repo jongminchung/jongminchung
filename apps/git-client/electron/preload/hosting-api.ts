@@ -1,10 +1,14 @@
 import type { DesktopApi } from "../../src/shared/contracts/desktop-api";
 import {
     HostingAccountSchema,
+    HostingOAuthPromptSchema,
     HostingResponseKindByRequest,
     HostingResponseSchema,
 } from "../../src/shared/contracts/hosting";
 import {
+    HostingAwaitOAuthRequestSchema,
+    HostingBeginOAuthRequestSchema,
+    HostingCancelOAuthRequestSchema,
     HostingDeleteAccountRequestSchema,
     HostingExecuteRequestSchema,
     HostingRestoreAccountsRequestSchema,
@@ -32,6 +36,37 @@ export function createHostingApi(): DesktopApi["hosting"] {
                 );
             }
             return account;
+        },
+        async beginOAuth(provider, baseUrl, clientId) {
+            const request = HostingBeginOAuthRequestSchema.parse({
+                provider,
+                baseUrl,
+                clientId,
+            });
+            const prompt = HostingOAuthPromptSchema.parse(
+                await desktopTrpc.hosting.beginOAuth.mutate(request),
+            );
+            if (
+                prompt.provider !== request.provider ||
+                prompt.baseUrl !== request.baseUrl
+            ) {
+                throw new Error(
+                    "Hosting OAuth prompt response did not match its request",
+                );
+            }
+            return prompt;
+        },
+        async awaitOAuth(sessionId) {
+            const request = HostingAwaitOAuthRequestSchema.parse({ sessionId });
+            return HostingAccountSchema.parse(
+                await desktopTrpc.hosting.awaitOAuth.mutate(request),
+            );
+        },
+        async cancelOAuth(sessionId): Promise<void> {
+            const request = HostingCancelOAuthRequestSchema.parse({
+                sessionId,
+            });
+            await desktopTrpc.hosting.cancelOAuth.mutate(request);
         },
         async restoreAccounts(accounts): Promise<void> {
             const request = HostingRestoreAccountsRequestSchema.parse({

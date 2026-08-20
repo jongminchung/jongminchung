@@ -9,8 +9,10 @@ import {
     RepositoryIdSchema,
 } from "./git-utility";
 import {
+    BeginHostingOAuthSchema,
     HostingAccountIdSchema,
     HostingAccountsSchema,
+    HostingOAuthSessionIdSchema,
     HostingRequestSchema,
     SaveHostingAccountSchema,
 } from "./hosting";
@@ -317,6 +319,15 @@ export const GitTerminalResultSchema = z
     .readonly();
 
 export const HostingSaveAccountRequestSchema = SaveHostingAccountSchema;
+
+export const HostingBeginOAuthRequestSchema = BeginHostingOAuthSchema;
+
+export const HostingAwaitOAuthRequestSchema = z
+    .object({ sessionId: HostingOAuthSessionIdSchema })
+    .strict()
+    .readonly();
+
+export const HostingCancelOAuthRequestSchema = HostingAwaitOAuthRequestSchema;
 
 export const HostingRestoreAccountsRequestSchema = z
     .object({ accounts: HostingAccountsSchema })

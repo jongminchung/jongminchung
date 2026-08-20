@@ -1,6 +1,9 @@
 import type { MainDesktopTrpcRouter } from "../../src/shared/contracts/desktop-trpc";
 import { safeHostingErrorMessage } from "../../src/shared/contracts/hosting-redaction";
 import {
+    HostingAwaitOAuthRequestSchema,
+    HostingBeginOAuthRequestSchema,
+    HostingCancelOAuthRequestSchema,
     HostingDeleteAccountRequestSchema,
     HostingExecuteRequestSchema,
     HostingRestoreAccountsRequestSchema,
@@ -8,6 +11,7 @@ import {
 } from "../../src/shared/contracts/ipc";
 import {
     HostingAccountSchema,
+    HostingOAuthPromptSchema,
     HostingResponseKindByRequest,
     HostingResponseSchema,
     type ElectronHostingFoundation,
@@ -53,6 +57,51 @@ export function registerHostingHandlers({
             throw hostingIpcError(error, token === null ? [] : [token]);
         }
     });
+    router.handle("hosting", "beginOAuth", async (_event, raw) => {
+        try {
+            const request = HostingBeginOAuthRequestSchema.parse(raw);
+            const prompt = HostingOAuthPromptSchema.parse(
+                await hosting.beginOAuth(
+                    request.provider,
+                    request.baseUrl,
+                    request.clientId,
+                ),
+            );
+            if (
+                prompt.provider !== request.provider ||
+                prompt.baseUrl !== request.baseUrl
+            ) {
+                throw new Error(
+                    "Hosting OAuth prompt did not match its request",
+                );
+            }
+            return prompt;
+        } catch (error) {
+            throw hostingIpcError(error);
+        }
+    });
+    router.handle("hosting", "awaitOAuth", async (_event, raw) => {
+        try {
+            const request = HostingAwaitOAuthRequestSchema.parse(raw);
+            return HostingAccountSchema.parse(
+                await hosting.awaitOAuth(request.sessionId),
+            );
+        } catch (error) {
+            throw hostingIpcError(error);
+        }
+    });
+    router.handle(
+        "hosting",
+        "cancelOAuth",
+        async (_event, raw): Promise<void> => {
+            try {
+                const request = HostingCancelOAuthRequestSchema.parse(raw);
+                await hosting.cancelOAuth(request.sessionId);
+            } catch (error) {
+                throw hostingIpcError(error);
+            }
+        },
+    );
     router.handle("hosting", "restoreAccounts", (_event, raw): void => {
         try {
             const request = HostingRestoreAccountsRequestSchema.parse(raw);

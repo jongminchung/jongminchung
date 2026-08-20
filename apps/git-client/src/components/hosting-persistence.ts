@@ -29,6 +29,9 @@ function accountJson(accounts: readonly HostingAccount[]): JsonValue {
         id: account.id,
         provider: account.provider,
         baseUrl: account.baseUrl,
+        ...(account.authentication === undefined
+            ? {}
+            : { authentication: account.authentication }),
         login: account.login,
     }));
 }

@@ -4,5 +4,6 @@ export type HostingAccount = {
     id: string;
     provider: HostingProviderKind;
     baseUrl: string;
+    authentication?: "personalAccessToken" | "oauth";
     login: string;
 };

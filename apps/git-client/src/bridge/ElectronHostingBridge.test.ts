@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type {
     HostingAccount,
     HostingChangeRequest,
+    HostingOAuthPrompt,
     HostingProviderKind,
     HostingRequest,
     HostingResponse,
@@ -17,6 +18,16 @@ const ACCOUNT: HostingAccount = {
     provider: "gitHub",
     baseUrl: "https://github.com",
     login: "octocat",
+};
+const OAUTH_SESSION_ID = "91af28cc-4493-4ceb-b405-84878dd5dbe8";
+const OAUTH_PROMPT: HostingOAuthPrompt = {
+    kind: "device",
+    sessionId: OAUTH_SESSION_ID,
+    provider: "gitHub",
+    baseUrl: "https://github.com",
+    authorizationUrl: "https://github.com/login/device",
+    userCode: "ABCD-EFGH",
+    expiresAt: 2_000_000_000_000,
 };
 
 const CHANGE_REQUEST: HostingChangeRequest = {
@@ -48,7 +59,16 @@ class FakeElectronHostingApi implements ElectronHostingApi {
     readonly restored: HostingAccount[][] = [];
     readonly deleted: string[] = [];
     readonly executions: ExecuteCall[] = [];
+    readonly oauthBegins: Readonly<{
+        provider: HostingProviderKind;
+        baseUrl: string;
+        clientId: string;
+    }>[] = [];
+    readonly oauthAwaits: string[] = [];
+    readonly oauthCancellations: string[] = [];
     saveResult: unknown = ACCOUNT;
+    oauthPromptResult: unknown = OAUTH_PROMPT;
+    oauthAccountResult: unknown = ACCOUNT;
     readonly executeResults: unknown[] = [];
     restoreError: unknown = null;
     deleteError: unknown = null;
@@ -61,6 +81,24 @@ class FakeElectronHostingApi implements ElectronHostingApi {
         this.saved.push({ provider, baseUrl, token });
         if (this.saveResult instanceof Error) throw this.saveResult;
         return this.saveResult as HostingAccount;
+    }
+
+    async beginOAuth(
+        provider: HostingProviderKind,
+        baseUrl: string,
+        clientId: string,
+    ): Promise<HostingOAuthPrompt> {
+        this.oauthBegins.push({ provider, baseUrl, clientId });
+        return this.oauthPromptResult as HostingOAuthPrompt;
+    }
+
+    async awaitOAuth(sessionId: string): Promise<HostingAccount> {
+        this.oauthAwaits.push(sessionId);
+        return this.oauthAccountResult as HostingAccount;
+    }
+
+    async cancelOAuth(sessionId: string): Promise<void> {
+        this.oauthCancellations.push(sessionId);
     }
 
     async restoreAccounts(accounts: readonly HostingAccount[]): Promise<void> {
@@ -245,6 +283,59 @@ describe("ElectronHostingBridge 계정 경계", () => {
         await expect(
             bridge.saveAccount("gitHub", "https://github.com", "secret"),
         ).rejects.toThrow("account response is invalid");
+    });
+
+    it("[성공] OAuth session 경계에서 입력을 정규화하고 prompt와 계정만 반환함", async () => {
+        const api = new FakeElectronHostingApi();
+        const bridge = ElectronHostingBridge.of(api);
+
+        await expect(
+            bridge.beginOAuth(
+                "gitHub",
+                " https://github.com/login/oauth ",
+                "  client-id  ",
+            ),
+        ).resolves.toEqual(OAUTH_PROMPT);
+        await expect(bridge.awaitOAuth(OAUTH_SESSION_ID)).resolves.toEqual(
+            ACCOUNT,
+        );
+        await expect(
+            bridge.cancelOAuth(OAUTH_SESSION_ID),
+        ).resolves.toBeUndefined();
+
+        expect(api.oauthBegins).toEqual([
+            {
+                provider: "gitHub",
+                baseUrl: "https://github.com",
+                clientId: "client-id",
+            },
+        ]);
+        expect(api.oauthAwaits).toEqual([OAUTH_SESSION_ID]);
+        expect(api.oauthCancellations).toEqual([OAUTH_SESSION_ID]);
+    });
+
+    it("[실패] 잘못되거나 요청 identity와 다른 OAuth prompt를 거부함", async () => {
+        const api = new FakeElectronHostingApi();
+        const bridge = ElectronHostingBridge.of(api);
+
+        api.oauthPromptResult = { ...OAUTH_PROMPT, userCode: undefined };
+        await expect(
+            bridge.beginOAuth("gitHub", "https://github.com", ""),
+        ).rejects.toMatchObject({ operation: "beginOAuth" });
+
+        api.oauthPromptResult = { ...OAUTH_PROMPT, provider: "gitLab" };
+        await expect(
+            bridge.beginOAuth("gitHub", "https://github.com", ""),
+        ).rejects.toThrow("identity did not match");
+
+        await expect(bridge.awaitOAuth("not-a-uuid")).rejects.toMatchObject({
+            operation: "awaitOAuth",
+        });
+        await expect(bridge.cancelOAuth("not-a-uuid")).rejects.toMatchObject({
+            operation: "cancelOAuth",
+        });
+        expect(api.oauthAwaits).toEqual([]);
+        expect(api.oauthCancellations).toEqual([]);
     });
 
     it("[실패] 로그인된 계정을 다시 사용하고 마지막으로 승리를 입력해야 함", async () => {

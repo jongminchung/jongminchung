@@ -30,6 +30,7 @@ export type {
     HostingMergeReadinessReason,
     HostingMergeReadinessState,
 } from "./HostingMergeReadiness";
+export type { HostingOAuthPrompt } from "./HostingOAuthPrompt";
 export type { HostingProviderKind } from "./HostingProviderKind";
 export type { HostingRequest } from "./HostingRequest";
 export type { HostingNamespace } from "./HostingNamespace";

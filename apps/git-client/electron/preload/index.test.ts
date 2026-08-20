@@ -1275,6 +1275,7 @@ describe("전자 사전 로드 Git API", () => {
 });
 
 describe("전자 사전 로드 거부 API", () => {
+    const oauthSessionId = "91af28cc-4493-4ceb-b405-84878dd5dbe8";
     const account = Object.freeze({
         id: "account-1",
         provider: "gitHub" as const,
@@ -1295,6 +1296,56 @@ describe("전자 사전 로드 거부 API", () => {
     });
 
     beforeEach(() => electronMock.invoke.mockReset());
+
+    it("[성공] OAuth prompt와 session 완료·취소를 tRPC mutation으로 연결함", async () => {
+        const prompt = Object.freeze({
+            kind: "device" as const,
+            sessionId: oauthSessionId,
+            provider: "gitHub" as const,
+            baseUrl: "https://github.com",
+            authorizationUrl: "https://github.com/login/device",
+            userCode: "ABCD-EFGH",
+            expiresAt: 2_000_000_000_000,
+        });
+        electronMock.invoke
+            .mockResolvedValueOnce(prompt)
+            .mockResolvedValueOnce(account)
+            .mockResolvedValueOnce(undefined);
+
+        await expect(
+            api().hosting.beginOAuth(
+                "gitHub",
+                "https://github.com/path",
+                "  client-id  ",
+            ),
+        ).resolves.toEqual(prompt);
+        await expect(api().hosting.awaitOAuth(oauthSessionId)).resolves.toEqual(
+            account,
+        );
+        await expect(
+            api().hosting.cancelOAuth(oauthSessionId),
+        ).resolves.toBeUndefined();
+
+        expect(electronMock.invoke).toHaveBeenNthCalledWith(
+            1,
+            TEST_TRPC_PATHS.hostingBeginOAuth,
+            {
+                provider: "gitHub",
+                baseUrl: "https://github.com",
+                clientId: "client-id",
+            },
+        );
+        expect(electronMock.invoke).toHaveBeenNthCalledWith(
+            2,
+            TEST_TRPC_PATHS.hostingAwaitOAuth,
+            { sessionId: oauthSessionId },
+        );
+        expect(electronMock.invoke).toHaveBeenNthCalledWith(
+            3,
+            TEST_TRPC_PATHS.hostingCancelOAuth,
+            { sessionId: oauthSessionId },
+        );
+    });
 
     it("[실패] 모든 예외 챔피언십을 심사하고 자격을 증명하지 않음", async () => {
         electronMock.invoke
@@ -1377,6 +1428,11 @@ describe("전자 사전 로드 거부 API", () => {
                 number: 7,
             }),
         ).rejects.toThrow("Hosting response did not match its request");
+
+        electronMock.invoke.mockClear();
+        await expect(api().hosting.awaitOAuth("not-a-uuid")).rejects.toThrow();
+        await expect(api().hosting.cancelOAuth("not-a-uuid")).rejects.toThrow();
+        expect(electronMock.invoke).not.toHaveBeenCalled();
     });
 
     it("[실패] 저장 요청과 일치하지 않는 계정 ID가 있음", async () => {
@@ -1392,6 +1448,22 @@ describe("전자 사전 로드 거부 API", () => {
                 "ghp_secret",
             ),
         ).rejects.toThrow("Hosting account response did not match its request");
+
+        electronMock.invoke.mockResolvedValue({
+            kind: "browser",
+            sessionId: oauthSessionId,
+            provider: "gitLab",
+            baseUrl: "https://gitlab.com",
+            authorizationUrl: "https://gitlab.com/oauth/authorize",
+            expiresAt: 2_000_000_000_000,
+        });
+        await expect(
+            api().hosting.beginOAuth(
+                "gitHub",
+                "https://github.com",
+                "client-id",
+            ),
+        ).rejects.toThrow("OAuth prompt response did not match its request");
     });
 
     it("[실패] 기본 경계를 보장받을 수 있는 모든 자격을 증명하는 현장을 유지하고 있음", async () => {

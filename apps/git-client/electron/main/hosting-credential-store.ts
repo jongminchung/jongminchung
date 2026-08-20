@@ -11,6 +11,7 @@ export interface SafeStorageLike {
 }
 
 const KEY_PREFIX = "hostingCredential:";
+const MAX_STORED_CREDENTIAL_CHARACTERS = 65_536;
 const CredentialAccountIdSchema = z.uuid();
 
 function credentialKey(accountId: string): string {
@@ -58,12 +59,12 @@ export class SafeStorageHostingCredentialStore implements HostingCredentialStore
     async set(accountId: string, token: string): Promise<void> {
         if (
             token.trim().length === 0 ||
-            token.length > 16_384 ||
+            token.length > MAX_STORED_CREDENTIAL_CHARACTERS ||
             token.includes("\0")
         ) {
             throw NativeError.create(
                 "hosting.credential.invalid",
-                "Hosting credential must be a non-empty token no longer than 16384 characters.",
+                `Hosting credential must be non-empty and no longer than ${MAX_STORED_CREDENTIAL_CHARACTERS} characters.`,
             );
         }
         this.#requireEncryption();

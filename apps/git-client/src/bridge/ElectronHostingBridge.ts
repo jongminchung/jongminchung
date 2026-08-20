@@ -3,9 +3,12 @@ import {
     type RepositoryAccessPolicy,
 } from "../domain/repositoryAccess";
 import {
+    BeginHostingOAuthSchema,
     HostingAccountIdSchema,
     HostingAccountSchema,
     HostingAccountsSchema,
+    HostingOAuthPromptSchema,
+    HostingOAuthSessionIdSchema,
     HostingRequestSchema,
     HostingResponseKindByRequest,
     HostingResponseSchema,
@@ -14,6 +17,7 @@ import {
 import { safeHostingErrorMessage } from "../shared/contracts/hosting-redaction";
 import type {
     HostingAccount,
+    HostingOAuthPrompt,
     HostingProviderKind,
     HostingRequest,
     HostingResponse,
@@ -26,6 +30,13 @@ export interface ElectronHostingApi {
         baseUrl: string,
         token: string,
     ): Promise<HostingAccount>;
+    beginOAuth(
+        provider: HostingProviderKind,
+        baseUrl: string,
+        clientId: string,
+    ): Promise<HostingOAuthPrompt>;
+    awaitOAuth(sessionId: string): Promise<HostingAccount>;
+    cancelOAuth(sessionId: string): Promise<void>;
     restoreAccounts(accounts: readonly HostingAccount[]): Promise<void>;
     deleteAccount(accountId: string): Promise<void>;
     execute(accountId: string, request: HostingRequest): Promise<unknown>;
@@ -33,6 +44,9 @@ export interface ElectronHostingApi {
 
 export type ElectronHostingBridgeOperation =
     | "saveAccount"
+    | "beginOAuth"
+    | "awaitOAuth"
+    | "cancelOAuth"
     | "restoreAccounts"
     | "deleteAccount"
     | "execute";
@@ -67,6 +81,13 @@ function accountFromBoundary(raw: unknown): HostingAccount {
     const result = HostingAccountSchema.safeParse(raw);
     if (!result.success)
         throw new Error("Electron hosting account response is invalid");
+    return { ...result.data };
+}
+
+function oauthPromptFromBoundary(raw: unknown): HostingOAuthPrompt {
+    const result = HostingOAuthPromptSchema.safeParse(raw);
+    if (!result.success)
+        throw new Error("Electron hosting OAuth prompt response is invalid");
     return { ...result.data };
 }
 
@@ -182,6 +203,63 @@ export class ElectronHostingBridge implements HostingBridge {
                 error,
                 secrets,
             );
+        }
+    }
+
+    async beginOAuth(
+        provider: HostingProviderKind,
+        baseUrl: string,
+        clientId: string,
+    ): Promise<HostingOAuthPrompt> {
+        this.#access.assertActive("hosting");
+        try {
+            const input = BeginHostingOAuthSchema.parse({
+                provider,
+                baseUrl,
+                clientId,
+            });
+            const prompt = oauthPromptFromBoundary(
+                await this.#api.beginOAuth(
+                    input.provider,
+                    input.baseUrl,
+                    input.clientId,
+                ),
+            );
+            if (
+                prompt.provider !== input.provider ||
+                prompt.baseUrl !== input.baseUrl
+            ) {
+                throw new Error(
+                    "Electron hosting OAuth prompt identity did not match its request",
+                );
+            }
+            return prompt;
+        } catch (error) {
+            throw ElectronHostingBridgeError.from("beginOAuth", error);
+        }
+    }
+
+    async awaitOAuth(sessionId: string): Promise<HostingAccount> {
+        this.#access.assertActive("hosting");
+        try {
+            const validatedSessionId =
+                HostingOAuthSessionIdSchema.parse(sessionId);
+            return accountFromBoundary(
+                await this.#api.awaitOAuth(validatedSessionId),
+            );
+        } catch (error) {
+            throw ElectronHostingBridgeError.from("awaitOAuth", error);
+        }
+    }
+
+    async cancelOAuth(sessionId: string): Promise<void> {
+        this.#access.assertActive("hosting");
+        try {
+            const validatedSessionId =
+                HostingOAuthSessionIdSchema.parse(sessionId);
+            await this.#api.cancelOAuth(validatedSessionId);
+        } catch (error) {
+            throw ElectronHostingBridgeError.from("cancelOAuth", error);
         }
     }
 

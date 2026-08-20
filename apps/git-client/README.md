@@ -41,7 +41,7 @@ Keyboard commands are defined once in `src/command-manifest.json` and shared by 
 - Repository-relative paths, refs, revisions, remotes, and URLs are validated at typed Electron IPC and utility-process boundaries.
 - Mutating operations are serialized per repository; queries remain parallel and cancellable.
 - stdout/stderr is parsed while a request is active and then discarded; displayed failures are credential-redacted summaries.
-- GitHub/GitLab PATs are encrypted with Electron `safeStorage` backed by macOS Keychain. Settings and subsequent renderer requests contain account metadata and account IDs, never tokens.
+- GitHub/GitLab PATs and OAuth access/refresh token pairs are encrypted with Electron `safeStorage` backed by macOS Keychain. Settings and subsequent renderer requests contain account metadata and account IDs, never tokens.
 - Hosting requests use HTTPS origins, a 120-second timeout, no credential-carrying redirects, and response conversion at the Electron main-process boundary.
 - Terminal input is intentionally outside the Git allowlist; its shell has the same permissions as the user and its commands are not retained by Git Client.
 - Drop, squash, and reword use the app binary as Git's sequence/message editor; non-contiguous squash plans are rejected.
@@ -49,6 +49,15 @@ Keyboard commands are defined once in `src/command-manifest.json` and shared by 
 - Every branch push opens one destination preview. Non-fast-forward pushes require an explicitly selected exact `--force-with-lease=<ref>:<oid>` mode; plain or automatic force push is not representable by the native contract.
 - Repository content is rendered as text. CSP blocks remote scripts and opener permissions only allow HTTPS URLs.
 - Files over 5 MiB/50,000 lines, binary files, and invalid UTF-8 should be opened externally rather than rendered in the text diff surface.
+
+## Hosting authentication
+
+- GitHub.com OAuth onboarding uses a GitHub App device flow. The app contacts `https://github.com/login/device/code` and `https://github.com/login/oauth/access_token`, while the user approves the displayed code at `https://github.com/login/device`.
+- GitLab.com and supported GitLab Self-Managed instances use a public OAuth application with authorization code and PKCE. Authorization and token requests use the selected instance's `/oauth/authorize` and `/oauth/token` endpoints, and the callback must exactly match that OAuth application's registered callback URL.
+- GitLab Self-Managed OAuth requires a client ID and callback registration for each instance. Instances without a compatible public OAuth application continue to use PAT authentication.
+- Packaged cloud defaults are injected with `GIT_CLIENT_GITHUB_OAUTH_CLIENT_ID` and `GIT_CLIENT_GITLAB_OAUTH_CLIENT_ID`; GitLab apps register `GIT_CLIENT_GITLAB_OAUTH_REDIRECT_URI` or the default `http://127.0.0.1:53682/oauth/callback`. These client IDs are public configuration, not secrets.
+- PAT connection remains available for both providers as a fallback and recovery path. Hosting API credentials remain separate from credentials used by system Git for clone, fetch, pull, and push.
+- Disconnect removes the account's locally stored PAT or OAuth access/refresh token pair from Keychain. It does not guarantee remote revocation of the provider authorization or previously issued tokens; users must revoke that authorization in the provider settings when remote invalidation is required.
 
 ## Scope
 

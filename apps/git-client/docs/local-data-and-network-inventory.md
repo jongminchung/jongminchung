@@ -1,15 +1,15 @@
 # 로컬 데이터와 네트워크 inventory
 
-- 기준일은 2026-08-19이며 Git Client가 생성하는 영속 데이터와 외부 연결의 owner·민감도·삭제 경계를 기록함
+- 기준일은 2026-08-20이며 Git Client가 생성하는 영속 데이터와 외부 연결의 owner·민감도·삭제 경계를 기록함
 - 경로는 Electron의 `userData`를 기준으로 하며 OS와 실행 profile에 따라 절대 위치가 달라짐
 
 ## 핵심 요약
 
-- **일반 설정과 암호화된 hosting credential은 `settings.json` 하나에 저장되지만 credential은 평문으로 기록되지 않음**
+- **일반 설정과 암호화된 hosting credential은 `settings.json` 하나에 저장되지만 PAT와 OAuth token pair는 평문으로 기록되지 않음**
 - **Local History·recovery·shelf·changelist는 Git utility가 별도 directory와 무결성 계약으로 관리함**
 - **진단 로그는 credential을 redact하고 4MiB 단위로 한 번 회전함**
 - **자동 telemetry·광고·background updater 연결은 현재 존재하지 않음**
-- **network 연결은 사용자가 실행한 hosting 요청과 외부 URL 열기에 한정됨**
+- **network 연결은 사용자가 시작한 OAuth 연결·token refresh·hosting 요청과 외부 URL 열기에 한정됨**
 
 ## 설정과 자격 증명
 
@@ -20,8 +20,12 @@
   - settings export·import 대상이며 profile 삭제로 전체 제거할 수 있음
 - **hosting credential은 credential store가 소유함**
   - 암호화 ciphertext만 `hostingCredential:*` key로 저장함
-  - renderer와 settings archive에는 token 평문을 노출하지 않음
-  - 계정 삭제 시 연결된 credential key를 함께 제거함
+  - PAT account는 PAT 하나를 저장하고 OAuth account는 access token과 refresh token pair를 저장함
+  - 인증 방식·provider·instance·login 같은 비민감 account metadata만 settings와 renderer contract에 포함함
+  - renderer·settings archive·diagnostics에는 token 평문을 노출하지 않음
+  - refresh 결과의 새 token pair를 하나의 암호문으로 교체하며 저장 실패 시 재연결이 필요함
+  - account disconnect 시 연결된 local credential key와 access·refresh token을 함께 제거함
+  - local disconnect는 provider authorization이나 이미 발급된 token의 원격 revoke를 보장하지 않음
 
 ## Git 작업 데이터
 
@@ -59,6 +63,20 @@
   - 기본 background polling을 수행하지 않음
   - GitHub.com은 공식 API endpoint를 사용하고 GitLab은 계정 base URL의 API를 사용함
   - redirect는 credential 유출을 막기 위해 provider HTTP client에서 제한함
+- **GitHub.com OAuth 연결은 GitHub App device flow endpoint만 사용함**
+  - device code는 `https://github.com/login/device/code`에서 요청함
+  - 사용자가 `https://github.com/login/device`에서 code를 승인함
+  - token 발급과 refresh는 `https://github.com/login/oauth/access_token`을 사용함
+  - device 승인 polling은 사용자가 시작한 연결 세션 동안 provider interval과 timeout을 준수함
+- **GitLab.com과 GitLab Self-Managed OAuth 연결은 instance별 public OAuth app + PKCE를 사용함**
+  - authorization은 account base URL의 `/oauth/authorize`에서 수행함
+  - code 교환과 refresh는 account base URL의 `/oauth/token`에서 수행함
+  - callback은 등록된 loopback URL에서 한 번만 수신하고 `state`와 PKCE verifier를 검증함
+  - Self-Managed token을 GitLab.com이나 다른 instance endpoint로 전송하지 않음
+  - compatible client ID와 callback이 등록되지 않은 instance는 PAT fallback만 제공함
+- **OAuth token refresh는 유효한 credential이 필요한 사용자 hosting 요청 과정에서만 수행함**
+  - refresh 자체를 위한 지속적인 background polling은 수행하지 않음
+  - refresh 실패는 expired·revoked·permission denied와 구분해 재연결 action으로 안내함
 - **외부 URL 열기는 사용자가 명시적으로 선택한 hosting·도움말 action에서만 발생함**
   - HTTP·HTTPS 등 허용된 scheme과 credential 부재를 main process에서 확인함
 - **자동 telemetry·crash upload·update check 연결은 없음**
@@ -67,7 +85,10 @@
 
 ## 삭제·export 정책
 
-- **개별 계정 credential은 계정 삭제로 제거함**
+- **개별 계정 credential은 account disconnect 또는 계정 삭제로 local Keychain에서 제거함**
+  - PAT account는 PAT를 제거하고 OAuth account는 access token과 refresh token pair를 제거함
+  - local 삭제 뒤에도 provider authorization과 원격 token이 남을 수 있음
+  - 원격 invalidation이 필요하면 사용자가 GitHub 또는 GitLab의 authorized applications 설정에서 별도로 revoke함
 - **Local History는 5일 retention으로 정리되고 recovery는 repository별 200개를 넘는 오래된 entry가 정리됨**
 - **shelf와 changelist는 각 제품 surface의 삭제 action으로 제거함**
 - **settings archive는 일반 설정만 포함하며 credential과 Git 작업 payload를 포함하지 않음**

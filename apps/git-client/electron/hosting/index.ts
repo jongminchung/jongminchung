@@ -1,8 +1,12 @@
 export {
+    BeginHostingOAuthSchema,
     HostingAccountIdSchema,
     HostingAccountSchema,
     HostingAccountsSchema,
+    HostingAuthenticationKindSchema,
     HostingBaseUrlSchema,
+    HostingOAuthPromptSchema,
+    HostingOAuthSessionIdSchema,
     HostingProviderKindSchema,
     HostingRequestSchema,
     HostingResponseKindByRequest,
@@ -15,6 +19,7 @@ export type {
     HostingAccount,
     HostingChangeRequest,
     HostingChangedFile,
+    HostingOAuthPrompt,
     HostingProviderKind,
     HostingRequest,
     HostingResponse,
@@ -39,3 +44,7 @@ export type {
     HostingCredentialStore,
     HostingFoundationPolicy,
 } from "./hosting-service";
+export type {
+    HostingOAuthClientConfig,
+    HostingOAuthServiceOptions,
+} from "./hosting-oauth-service";

@@ -6,6 +6,7 @@ import type {
     HostingChangeRequest,
     HostingChangedFile,
     HostingMergeReadiness,
+    HostingOAuthPrompt,
     HostingProviderKind,
     HostingRequest,
     HostingResponse,
@@ -15,6 +16,7 @@ import type {
 import {
     loadHostingAccounts,
     loadViewedFiles,
+    openHostingUrl,
     persistHostingAccounts,
     persistViewedFiles,
 } from "../hosting-persistence";
@@ -78,6 +80,37 @@ export class HostingInspectionSequence {
     }
 }
 
+export class HostingOAuthSequence {
+    #current = 0;
+
+    begin(): number {
+        this.#current += 1;
+        return this.#current;
+    }
+
+    invalidate(): void {
+        this.#current += 1;
+    }
+
+    isCurrent(sequence: number): boolean {
+        return this.#current === sequence;
+    }
+}
+
+export function requiresExplicitOAuthClientId(
+    provider: HostingProviderKind,
+    baseUrl: string,
+): boolean {
+    try {
+        const origin = new URL(baseUrl).origin.toLowerCase();
+        return provider === "gitHub"
+            ? origin !== "https://github.com"
+            : origin !== "https://gitlab.com";
+    } catch {
+        return true;
+    }
+}
+
 export function useHostingPanelController({
     remoteUrl,
     currentBranch,
@@ -107,7 +140,10 @@ export function useHostingPanelController({
     const [busy, setBusy] = useState<string>();
     const [error, setError] = useState<string>();
     const [notice, setNotice] = useState<string>();
+    const [oauthPrompt, setOAuthPrompt] = useState<HostingOAuthPrompt>();
     const inspectionSequence = useRef(new HostingInspectionSequence());
+    const oauthSequence = useRef(new HostingOAuthSequence());
+    const oauthSessionId = useRef<string | undefined>(undefined);
     const selectedAccount = accounts.find(
         (account) => account.id === accountId,
     );
@@ -145,6 +181,17 @@ export function useHostingPanelController({
             active = false;
         };
     }, [hostingBridge]);
+
+    useEffect(
+        () => () => {
+            oauthSequence.current.invalidate();
+            const sessionId = oauthSessionId.current;
+            oauthSessionId.current = undefined;
+            if (sessionId)
+                void hostingBridge.cancelOAuth(sessionId).catch(() => {});
+        },
+        [hostingBridge],
+    );
 
     const execute = async (
         operation: string,
@@ -311,6 +358,20 @@ export function useHostingPanelController({
         }
     };
 
+    const persistConnectedAccount = async (
+        account: HostingAccount,
+        message: string,
+    ): Promise<void> => {
+        const next = [
+            ...accounts.filter((item) => item.id !== account.id),
+            account,
+        ];
+        setAccounts(next);
+        setAccountId(account.id);
+        await persistHostingAccounts(next);
+        setNotice(message);
+    };
+
     const connect = async (
         provider: HostingProviderKind,
         baseUrl: string,
@@ -330,20 +391,99 @@ export function useHostingPanelController({
                 baseUrl,
                 token,
             );
-            const next = [
-                ...accounts.filter((item) => item.id !== account.id),
+            await persistConnectedAccount(
                 account,
-            ];
-            setAccounts(next);
-            setAccountId(account.id);
-            await persistHostingAccounts(next);
-            setNotice(
                 `Connected ${account.login}. The token is stored in macOS Keychain.`,
             );
             return true;
         } catch (connectError) {
             setError(errorMessage(connectError));
             return false;
+        } finally {
+            setBusy(undefined);
+        }
+    };
+
+    const connectOAuth = async (
+        provider: HostingProviderKind,
+        baseUrl: string,
+        clientId: string,
+    ): Promise<boolean> => {
+        const normalizedBaseUrl = baseUrl.trim();
+        const normalizedClientId = clientId.trim();
+        if (
+            !normalizedClientId &&
+            requiresExplicitOAuthClientId(provider, normalizedBaseUrl)
+        ) {
+            setError(
+                "Enter the OAuth app client ID for this self-hosted server.",
+            );
+            return false;
+        }
+
+        const sequence = oauthSequence.current.begin();
+        const previousSessionId = oauthSessionId.current;
+        let startedSessionId: string | undefined;
+        oauthSessionId.current = undefined;
+        setOAuthPrompt(undefined);
+        setBusy("Starting browser sign-in");
+        setError(undefined);
+        setNotice(undefined);
+        try {
+            if (previousSessionId)
+                await hostingBridge.cancelOAuth(previousSessionId);
+            const prompt = await hostingBridge.beginOAuth(
+                provider,
+                normalizedBaseUrl,
+                normalizedClientId,
+            );
+            if (!oauthSequence.current.isCurrent(sequence)) {
+                await hostingBridge.cancelOAuth(prompt.sessionId);
+                return false;
+            }
+
+            startedSessionId = prompt.sessionId;
+            oauthSessionId.current = prompt.sessionId;
+            setOAuthPrompt(prompt);
+            setBusy("Waiting for browser sign-in");
+            await openHostingUrl(prompt.authorizationUrl);
+            const account = await hostingBridge.awaitOAuth(prompt.sessionId);
+            if (!oauthSequence.current.isCurrent(sequence)) return false;
+
+            await persistConnectedAccount(
+                account,
+                `Connected ${account.login}. OAuth credentials are stored in macOS Keychain.`,
+            );
+            return true;
+        } catch (connectError) {
+            if (oauthSequence.current.isCurrent(sequence))
+                setError(errorMessage(connectError));
+            if (startedSessionId)
+                await hostingBridge
+                    .cancelOAuth(startedSessionId)
+                    .catch(() => {});
+            return false;
+        } finally {
+            if (oauthSequence.current.isCurrent(sequence)) {
+                oauthSessionId.current = undefined;
+                setOAuthPrompt(undefined);
+                setBusy(undefined);
+            }
+        }
+    };
+
+    const cancelOAuth = async (): Promise<void> => {
+        oauthSequence.current.invalidate();
+        const sessionId = oauthSessionId.current;
+        oauthSessionId.current = undefined;
+        setOAuthPrompt(undefined);
+        setBusy("Canceling browser sign-in");
+        setError(undefined);
+        try {
+            if (sessionId) await hostingBridge.cancelOAuth(sessionId);
+            setNotice("Browser sign-in canceled.");
+        } catch (cancelError) {
+            setError(errorMessage(cancelError));
         } finally {
             setBusy(undefined);
         }
@@ -430,7 +570,9 @@ export function useHostingPanelController({
         accountId,
         accounts,
         busy,
+        cancelOAuth,
         connect,
+        connectOAuth,
         coordinates,
         create,
         error,
@@ -441,6 +583,7 @@ export function useHostingPanelController({
         mergeReadiness,
         nextPage,
         notice,
+        oauthPrompt,
         postComment,
         project,
         removeAccount,

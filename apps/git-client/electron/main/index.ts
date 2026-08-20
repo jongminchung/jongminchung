@@ -251,6 +251,20 @@ async function createMainWindow(
             net.fetch(input instanceof URL ? input.toString() : input, init),
         ),
         new SafeStorageHostingCredentialStore(hostingSafeStorage, settings),
+        undefined,
+        {
+            clients: {
+                gitHubClientId:
+                    process.env.GIT_CLIENT_GITHUB_OAUTH_CLIENT_ID?.trim() ||
+                    undefined,
+                gitLabClientId:
+                    process.env.GIT_CLIENT_GITLAB_OAUTH_CLIENT_ID?.trim() ||
+                    undefined,
+                gitLabRedirectUri:
+                    process.env.GIT_CLIENT_GITLAB_OAUTH_REDIRECT_URI?.trim() ||
+                    undefined,
+            },
+        },
     );
     platformHandlers = registerPlatformHandlers({
         window,

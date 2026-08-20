@@ -4,6 +4,7 @@ import {
     DESKTOP_TRPC_PROTOCOL_VERSION,
     DesktopTrpcResponseSchema,
 } from "../../src/shared/contracts/desktop-trpc-wire";
+import type { HostingOAuthPrompt } from "../../src/shared/contracts/hosting";
 import {
     TEST_TRPC_PATHS,
     type TestDesktopTrpcPath,
@@ -68,6 +69,7 @@ function handler(path: TestDesktopTrpcPath): InvokeHandler {
 }
 
 describe("IPC 핸들러를 거부하는 플랫폼", () => {
+    const oauthSessionId = "91af28cc-4493-4ceb-b405-84878dd5dbe8";
     const account = Object.freeze({
         id: "account-1",
         provider: "gitHub" as const,
@@ -88,6 +90,19 @@ describe("IPC 핸들러를 거부하는 플랫폼", () => {
         const window = { isDestroyed: () => false, webContents };
         const hosting = {
             saveAccount: vi.fn(async () => account),
+            beginOAuth: vi.fn(
+                async (): Promise<HostingOAuthPrompt> => ({
+                    kind: "device",
+                    sessionId: oauthSessionId,
+                    provider: "gitHub",
+                    baseUrl: "https://github.com",
+                    authorizationUrl: "https://github.com/login/device",
+                    userCode: "ABCD-EFGH",
+                    expiresAt: 2_000_000_000_000,
+                }),
+            ),
+            awaitOAuth: vi.fn(async () => account),
+            cancelOAuth: vi.fn(async () => undefined),
             restoreAccounts: vi.fn(),
             deleteAccount: vi.fn(async () => undefined),
             execute: vi.fn(async () => ({
@@ -127,6 +142,21 @@ describe("IPC 핸들러를 거부하는 플랫폼", () => {
             baseUrl: "https://github.com/",
             token,
         });
+        const prompt = await handler(TEST_TRPC_PATHS.hostingBeginOAuth)(event, {
+            provider: "gitHub",
+            baseUrl: "https://github.com/path",
+            clientId: "  client-id  ",
+        });
+        await expect(
+            handler(TEST_TRPC_PATHS.hostingAwaitOAuth)(event, {
+                sessionId: oauthSessionId,
+            }),
+        ).resolves.toEqual(account);
+        await expect(
+            handler(TEST_TRPC_PATHS.hostingCancelOAuth)(event, {
+                sessionId: oauthSessionId,
+            }),
+        ).resolves.toBeUndefined();
         await expect(
             handler(TEST_TRPC_PATHS.hostingRestoreAccounts)(event, {
                 accounts: [account],
@@ -150,18 +180,33 @@ describe("IPC 핸들러를 거부하는 플랫폼", () => {
         ).resolves.toEqual({ kind: "completed", message: "done" });
 
         expect(saved).toEqual(account);
+        expect(prompt).toMatchObject({
+            kind: "device",
+            sessionId: oauthSessionId,
+            userCode: "ABCD-EFGH",
+        });
         expect(JSON.stringify(saved)).not.toContain(token);
         expect(hosting.saveAccount).toHaveBeenCalledWith(
             "gitHub",
             "https://github.com",
             token,
         );
+        expect(hosting.beginOAuth).toHaveBeenCalledWith(
+            "gitHub",
+            "https://github.com",
+            "client-id",
+        );
+        expect(hosting.awaitOAuth).toHaveBeenCalledWith(oauthSessionId);
+        expect(hosting.cancelOAuth).toHaveBeenCalledWith(oauthSessionId);
         expect(hosting.restoreAccounts).toHaveBeenCalledWith([account]);
         expect(hosting.deleteAccount).toHaveBeenCalledWith(account.id);
 
         unregisterPlatformHandlers();
         for (const path of [
             TEST_TRPC_PATHS.hostingSaveAccount,
+            TEST_TRPC_PATHS.hostingBeginOAuth,
+            TEST_TRPC_PATHS.hostingAwaitOAuth,
+            TEST_TRPC_PATHS.hostingCancelOAuth,
             TEST_TRPC_PATHS.hostingRestoreAccounts,
             TEST_TRPC_PATHS.hostingDeleteAccount,
             TEST_TRPC_PATHS.hostingExecute,
@@ -217,6 +262,23 @@ describe("IPC 핸들러를 거부하는 플랫폼", () => {
                 request: { kind: "files", project: "owner/repo", number: 7 },
             }),
         ).rejects.toThrow("Hosting response did not match its request");
+
+        hosting.beginOAuth.mockResolvedValueOnce({
+            kind: "device",
+            sessionId: oauthSessionId,
+            provider: "gitHub",
+            baseUrl: "https://gitlab.com",
+            authorizationUrl: "https://gitlab.com/oauth/device",
+            userCode: "ABCD-EFGH",
+            expiresAt: 2_000_000_000_000,
+        });
+        await expect(
+            handler(TEST_TRPC_PATHS.hostingBeginOAuth)(event, {
+                provider: "gitHub",
+                baseUrl: "https://github.com",
+                clientId: "",
+            }),
+        ).rejects.toThrow("did not match its request");
         unregisterPlatformHandlers();
     });
 });

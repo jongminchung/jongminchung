@@ -23,7 +23,9 @@ export function HostingPanel({
         accountId,
         accounts,
         busy,
+        cancelOAuth,
         connect,
+        connectOAuth,
         coordinates,
         create,
         error,
@@ -34,6 +36,7 @@ export function HostingPanel({
         mergeReadiness,
         nextPage,
         notice,
+        oauthPrompt,
         postComment,
         project,
         removeAccount,
@@ -76,7 +79,7 @@ export function HostingPanel({
                     options={[
                         { label: "No account", value: "" },
                         ...accounts.map((account) => ({
-                            label: `${account.login} · ${account.provider === "gitHub" ? "GitHub" : "GitLab"}`,
+                            label: `${account.login} · ${account.provider === "gitHub" ? "GitHub" : "GitLab"} · ${account.authentication === "oauth" ? "OAuth" : "PAT"}`,
                             value: account.id,
                         })),
                     ]}
@@ -135,7 +138,10 @@ export function HostingPanel({
                 initialBaseUrl={coordinates?.baseUrl ?? "https://github.com"}
                 initialProvider={coordinates?.provider ?? "gitHub"}
                 onConnect={connect}
+                onOAuthCancel={cancelOAuth}
+                onOAuthConnect={connectOAuth}
                 onRemove={removeAccount}
+                oauthPrompt={oauthPrompt}
             />
 
             {error && (

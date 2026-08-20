@@ -4,6 +4,7 @@ import { cn } from "@jongminchung/ui/lib/utils";
 import { useState } from "react";
 import type {
     HostingAccount,
+    HostingOAuthPrompt,
     HostingProviderKind,
 } from "../../shared/contracts/model/index";
 import { Selector } from "../ProductFormControls";
@@ -14,10 +15,17 @@ interface HostingAccountConnectionProps {
     readonly busy?: string;
     readonly initialBaseUrl: string;
     readonly initialProvider: HostingProviderKind;
+    readonly oauthPrompt?: HostingOAuthPrompt;
     readonly onConnect: (
         provider: HostingProviderKind,
         baseUrl: string,
         token: string,
+    ) => Promise<boolean>;
+    readonly onOAuthCancel: () => Promise<void>;
+    readonly onOAuthConnect: (
+        provider: HostingProviderKind,
+        baseUrl: string,
+        clientId: string,
     ) => Promise<boolean>;
     readonly onRemove: (accountId: string) => Promise<boolean>;
 }
@@ -28,12 +36,16 @@ export function HostingAccountConnection({
     busy,
     initialBaseUrl,
     initialProvider,
+    oauthPrompt,
     onConnect,
+    onOAuthCancel,
+    onOAuthConnect,
     onRemove,
 }: HostingAccountConnectionProps) {
     const [provider, setProvider] =
         useState<HostingProviderKind>(initialProvider);
     const [baseUrl, setBaseUrl] = useState(initialBaseUrl);
+    const [clientId, setClientId] = useState("");
     const [token, setToken] = useState("");
     const [removeAccountId, setRemoveAccountId] = useState<string>();
     const selectedAccount = accounts.find(
@@ -43,10 +55,18 @@ export function HostingAccountConnection({
         provider === "gitHub"
             ? "Use a fine-grained token with access only to the repositories you need. Pull requests: read/write and Contents: read/write are required for the full Hosting workflow."
             : "Use a project or personal access token with api scope. Limit project membership and token expiry to the repositories you need.";
+    const providerName = provider === "gitHub" ? "GitHub" : "GitLab";
+    const oauthGuidance =
+        provider === "gitHub"
+            ? "The GitHub App must have device flow enabled and be installed for the repositories you select. It requests Pull requests and Contents read/write access."
+            : "The non-confidential GitLab OAuth app must register http://127.0.0.1:53682/oauth/callback and allow api scope.";
 
     const connect = async (): Promise<void> => {
         if (await onConnect(provider, baseUrl.trim(), token.trim()))
             setToken("");
+    };
+    const connectOAuth = async (): Promise<void> => {
+        await onOAuthConnect(provider, baseUrl.trim(), clientId.trim());
     };
     const remove = async (id: string): Promise<void> => {
         if (await onRemove(id)) setRemoveAccountId(undefined);
@@ -63,6 +83,7 @@ export function HostingAccountConnection({
             >
                 <Selector
                     className="bg-secondary"
+                    isDisabled={Boolean(busy)}
                     label="Provider"
                     value={provider}
                     onChange={(value) => {
@@ -82,50 +103,134 @@ export function HostingAccountConnection({
                 <label>
                     Server URL
                     <Input
+                        disabled={Boolean(busy)}
                         onChange={(event) => setBaseUrl(event.target.value)}
                         value={baseUrl}
                     />
                 </label>
                 <label>
-                    Personal access token
+                    OAuth app client ID
                     <Input
                         autoComplete="off"
-                        onChange={(event) => setToken(event.target.value)}
-                        type="password"
-                        value={token}
+                        disabled={Boolean(busy)}
+                        onChange={(event) => setClientId(event.target.value)}
+                        placeholder="Optional for cloud providers"
+                        value={clientId}
                     />
                 </label>
                 <Button
                     disabled={Boolean(busy)}
-                    onClick={() => void connect()}
+                    onClick={() => void connectOAuth()}
                     type="button"
                     className={cn("h-7 px-2.5")}
                     variant="outline"
                     size="sm"
                 >
-                    {busy === "Verifying account"
-                        ? "Verifying…"
-                        : "Connect and store in Keychain"}
+                    {busy === "Starting browser sign-in"
+                        ? "Starting…"
+                        : busy === "Waiting for browser sign-in"
+                          ? "Waiting…"
+                          : `Sign in with ${providerName}`}
                 </Button>
             </div>
             <p className="mt-2 text-[11px] text-muted-foreground" role="note">
-                {tokenGuidance} The credential is used only for Hosting API
-                actions; Git push credentials are managed separately. Browser
-                sign-in is unavailable until a provider OAuth application and
-                redirect policy are configured, so personal access tokens remain
-                the supported fallback for cloud and self-hosted servers.
+                Leave the client ID blank to use the packaged cloud provider
+                configuration. Self-hosted servers require their own OAuth app
+                client ID. {oauthGuidance} Git push credentials are managed
+                separately.
             </p>
+            {oauthPrompt && (
+                <div
+                    className="mt-2 flex items-center gap-2 border-t border-border pt-2 text-[11px] text-muted-foreground"
+                    role="status"
+                >
+                    <span className="flex-1">
+                        Browser sign-in opened for {providerName}
+                        {oauthPrompt.userCode ? (
+                            <>
+                                {" "}
+                                with one-time code{" "}
+                                <code className="font-semibold text-foreground">
+                                    {oauthPrompt.userCode}
+                                </code>
+                            </>
+                        ) : null}
+                        . Complete authorization before{" "}
+                        <time
+                            dateTime={new Date(
+                                oauthPrompt.expiresAt,
+                            ).toISOString()}
+                        >
+                            {new Date(
+                                oauthPrompt.expiresAt,
+                            ).toLocaleTimeString()}
+                        </time>
+                        .
+                    </span>
+                    <Button
+                        onClick={() => void onOAuthCancel()}
+                        type="button"
+                        className={cn("h-7 px-2.5")}
+                        variant="outline"
+                        size="sm"
+                    >
+                        Cancel sign-in
+                    </Button>
+                </div>
+            )}
+            <details className="mt-2 border-t border-border pt-2">
+                <summary className="cursor-default text-[11px] font-semibold text-muted-foreground">
+                    Use a personal access token instead
+                </summary>
+                <div className="mt-2 flex items-end gap-2">
+                    <label className="flex min-w-0 flex-1 flex-col gap-1 text-[11px] text-muted-foreground">
+                        Personal access token
+                        <Input
+                            autoComplete="off"
+                            disabled={Boolean(busy)}
+                            onChange={(event) => setToken(event.target.value)}
+                            type="password"
+                            value={token}
+                        />
+                    </label>
+                    <Button
+                        disabled={Boolean(busy)}
+                        onClick={() => void connect()}
+                        type="button"
+                        className={cn("h-7 px-2.5")}
+                        variant="outline"
+                        size="sm"
+                    >
+                        {busy === "Verifying account"
+                            ? "Verifying…"
+                            : "Connect and store in Keychain"}
+                    </Button>
+                </div>
+                <p
+                    className="mt-2 text-[11px] text-muted-foreground"
+                    role="note"
+                >
+                    {tokenGuidance} The credential is used only for Hosting API
+                    actions. PAT connection remains available for cloud and
+                    self-hosted servers.
+                </p>
+            </details>
             {selectedAccount && (
                 <div
                     className={`hostingAccountMeta [align-items:center] [display:flex] [gap:8px] [border-top:1px_solid_var(--border)] [color:var(--muted-foreground)] [margin-top:9px] [padding-top:8px] [&>_span:first-child]:[flex:1] hostingAccountMeta`}
                 >
                     <span>
-                        {selectedAccount.login} · {selectedAccount.baseUrl}
+                        {selectedAccount.login} · {selectedAccount.baseUrl} ·{" "}
+                        {selectedAccount.authentication === "oauth"
+                            ? "OAuth"
+                            : "PAT"}
                     </span>
                     {removeAccountId === selectedAccount.id ? (
                         <>
                             <span>
-                                Removes metadata and the Keychain credential.
+                                Removes local metadata and the Keychain
+                                credential. Provider authorization is not
+                                revoked.
                             </span>
                             <Button
                                 onClick={() => void remove(selectedAccount.id)}
@@ -151,6 +256,7 @@ export function HostingAccountConnection({
                             onClick={() =>
                                 setRemoveAccountId(selectedAccount.id)
                             }
+                            title="Removes local credentials only; Provider authorization is not revoked"
                             type="button"
                             className={cn("h-7 px-2.5")}
                             variant="outline"

@@ -81,6 +81,63 @@ export function normalizeHostingBaseUrl(value: unknown): string {
 
 export const HostingProviderKindSchema = z.enum(["gitHub", "gitLab"]);
 export type HostingProviderKind = z.infer<typeof HostingProviderKindSchema>;
+export const HostingAuthenticationKindSchema = z.enum([
+    "personalAccessToken",
+    "oauth",
+]);
+
+export const HostingOAuthSessionIdSchema = z.uuid();
+
+const HostingOAuthAuthorizationUrlSchema = z
+    .url()
+    .max(MAX_URL_CHARACTERS)
+    .refine((value) => {
+        const url = new URL(value);
+        return (
+            url.protocol === "https:" &&
+            url.username.length === 0 &&
+            url.password.length === 0
+        );
+    }, "authorization URL must be credential-free HTTPS");
+
+const HostingOAuthPromptBaseSchema = z.object({
+    sessionId: HostingOAuthSessionIdSchema,
+    provider: HostingProviderKindSchema,
+    baseUrl: HostingBaseUrlSchema,
+    authorizationUrl: HostingOAuthAuthorizationUrlSchema,
+    expiresAt: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
+});
+
+export const HostingOAuthPromptSchema = z
+    .discriminatedUnion("kind", [
+        HostingOAuthPromptBaseSchema.extend({
+            kind: z.literal("device"),
+            userCode: z.string().trim().min(1).max(MAX_IDENTIFIER_CHARACTERS),
+        })
+            .strict()
+            .readonly(),
+        HostingOAuthPromptBaseSchema.extend({
+            kind: z.literal("browser"),
+        })
+            .strict()
+            .readonly(),
+    ])
+    .readonly();
+type ParsedHostingOAuthPrompt = z.infer<typeof HostingOAuthPromptSchema>;
+export type HostingOAuthPrompt =
+    | Extract<ParsedHostingOAuthPrompt, { kind: "device" }>
+    | (Extract<ParsedHostingOAuthPrompt, { kind: "browser" }> & {
+          readonly userCode?: never;
+      });
+
+export const BeginHostingOAuthSchema = z
+    .object({
+        provider: HostingProviderKindSchema,
+        baseUrl: HostingBaseUrlSchema,
+        clientId: z.string().trim().max(MAX_IDENTIFIER_CHARACTERS),
+    })
+    .strict()
+    .readonly();
 
 export const HostingAccountIdSchema = z
     .string()
@@ -92,6 +149,7 @@ export const HostingAccountSchema = z
         id: HostingAccountIdSchema,
         provider: HostingProviderKindSchema,
         baseUrl: HostingBaseUrlSchema,
+        authentication: HostingAuthenticationKindSchema.optional(),
         login: z
             .string()
             .max(MAX_IDENTIFIER_CHARACTERS)

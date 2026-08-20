@@ -1,7 +1,14 @@
 import type { z } from "zod";
 import type { mutation } from "../desktop-trpc";
-import { HostingAccountSchema, HostingResponseSchema } from "../hosting";
 import {
+    HostingAccountSchema,
+    HostingOAuthPromptSchema,
+    HostingResponseSchema,
+} from "../hosting";
+import {
+    HostingAwaitOAuthRequestSchema,
+    HostingBeginOAuthRequestSchema,
+    HostingCancelOAuthRequestSchema,
     HostingDeleteAccountRequestSchema,
     HostingExecuteRequestSchema,
     HostingRestoreAccountsRequestSchema,
@@ -19,6 +26,27 @@ export function createHostingProcedures(
             "saveAccount",
             HostingSaveAccountRequestSchema,
             HostingAccountSchema,
+            { kind: "activeCapability", capability: "hosting" },
+        ),
+        beginOAuth: createMutation(
+            "hosting",
+            "beginOAuth",
+            HostingBeginOAuthRequestSchema,
+            HostingOAuthPromptSchema,
+            { kind: "activeCapability", capability: "hosting" },
+        ),
+        awaitOAuth: createMutation(
+            "hosting",
+            "awaitOAuth",
+            HostingAwaitOAuthRequestSchema,
+            HostingAccountSchema,
+            { kind: "activeCapability", capability: "hosting" },
+        ),
+        cancelOAuth: createMutation(
+            "hosting",
+            "cancelOAuth",
+            HostingCancelOAuthRequestSchema,
+            voidSchema,
             { kind: "activeCapability", capability: "hosting" },
         ),
         restoreAccounts: createMutation(

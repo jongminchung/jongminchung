@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
     HostingInspectionSequence,
+    HostingOAuthSequence,
     inferRemoteCoordinates,
+    requiresExplicitOAuthClientId,
 } from "./useHostingPanelController";
 
 describe("hosting remote 좌표", () => {
@@ -44,5 +46,36 @@ describe("Hosting 상세 선택 sequence", () => {
 
         guard.invalidate();
         expect(guard.isCurrent(secondSelection)).toBe(false);
+    });
+});
+
+describe("Hosting OAuth 설정", () => {
+    it("[성공] cloud provider는 패키지 client ID를 사용할 수 있음", () => {
+        expect(
+            requiresExplicitOAuthClientId("gitHub", "https://github.com"),
+        ).toBe(false);
+        expect(
+            requiresExplicitOAuthClientId("gitLab", "https://gitlab.com/"),
+        ).toBe(false);
+    });
+
+    it("[경계] self-hosted 또는 잘못된 URL은 client ID를 요구함", () => {
+        expect(
+            requiresExplicitOAuthClientId(
+                "gitLab",
+                "https://gitlab.example.com",
+            ),
+        ).toBe(true);
+        expect(requiresExplicitOAuthClientId("gitHub", "not-a-url")).toBe(true);
+    });
+
+    it("[경계] 취소 뒤 늦게 도착한 OAuth 결과를 폐기함", () => {
+        const guard = new HostingOAuthSequence();
+        const pendingSignIn = guard.begin();
+
+        guard.invalidate();
+
+        expect(guard.isCurrent(pendingSignIn)).toBe(false);
+        expect(guard.isCurrent(guard.begin())).toBe(true);
     });
 });

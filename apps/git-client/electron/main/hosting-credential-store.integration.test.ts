@@ -2,6 +2,7 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
+import { encodeHostingOAuthCredential } from "../hosting/hosting-oauth-service";
 import type { SafeStorageLike } from "./hosting-credential-store";
 import { SafeStorageHostingCredentialStore } from "./hosting-credential-store";
 import { SettingsStore } from "./settings-store";
@@ -65,6 +66,39 @@ describe("SafeStorageHostingCredentialStore", () => {
         );
         await restored.delete(accountId);
         await expect(restored.get(accountId)).resolves.toBeNull();
+    });
+
+    it("[성공] OAuth access 및 refresh token pair를 하나의 암호문으로 저장함", async () => {
+        const directory = await mkdtemp(
+            join(tmpdir(), "git-client-oauth-credentials-"),
+        );
+        temporaryDirectories.push(directory);
+        const filePath = join(directory, "settings.json");
+        const store = new SafeStorageHostingCredentialStore(
+            fakeSafeStorage(),
+            await SettingsStore.of(filePath),
+        );
+        const encoded = encodeHostingOAuthCredential({
+            version: 1,
+            kind: "oauth",
+            provider: "gitLab",
+            baseUrl: "https://gitlab.com",
+            flow: "pkce",
+            clientId: "public-client-id",
+            accessToken: "oauth-access-secret",
+            accessTokenExpiresAt: 2_000_000_000_000,
+            refreshToken: "oauth-refresh-secret",
+            refreshTokenExpiresAt: 2_100_000_000_000,
+            scope: "api",
+            redirectUri: "http://127.0.0.1:53682/oauth/callback",
+        });
+
+        await store.set(accountId, encoded);
+
+        await expect(store.get(accountId)).resolves.toBe(encoded);
+        const persisted = await readFile(filePath, "utf8");
+        expect(persisted).not.toContain("oauth-access-secret");
+        expect(persisted).not.toContain("oauth-refresh-secret");
     });
 
     it("[실패] 사용할 수 없는 파일, 유효하지 않은 ID 및 유효하지 않은 의미를 가지고 있음", async () => {
