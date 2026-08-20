@@ -181,8 +181,11 @@ describe("표면CreateService", () => {
                 "for-each-ref",
                 "--format=%(refname)",
                 "refs/remotes/origin",
-            ).trim(),
-        ).toBe("refs/remotes/origin/feature");
+            )
+                .trim()
+                .split("\n")
+                .filter((ref) => ref !== "refs/remotes/origin/HEAD"),
+        ).toEqual(["refs/remotes/origin/feature"]);
         expect(events[0]?.kind).toBe("started");
         expect(events.at(-1)?.kind).toBe("completed");
         expect(events).toEqual(

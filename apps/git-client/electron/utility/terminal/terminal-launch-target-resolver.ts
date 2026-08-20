@@ -62,7 +62,7 @@ const SHELL_DEFINITIONS = Object.freeze([
         id: "sh",
         displayName: "sh",
         binaryName: "sh",
-        canonicalBasenames: ["sh"],
+        canonicalBasenames: ["sh", "dash"],
         candidateDirectories: ["/bin"],
     },
     {
