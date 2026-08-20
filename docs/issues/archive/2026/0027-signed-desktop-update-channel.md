@@ -1,6 +1,9 @@
 # Issue 0027: 서명된 데스크톱 업데이트 채널 도입 준비
 
-- 상태: 선행 조건 완료·updater 보류
+- 상태: 완료
+- 완료일: 2026-08-20
+- 최종 갱신 커밋: `a9f5b6c`
+- 후속 이슈: [`0031` 서명된 데스크톱 updater 운영 도입](../../0031-signed-desktop-updater.md)
 - 우선순위: P2
 - 기준일: 2026-08-19
 - 선행 이슈:
@@ -8,12 +11,12 @@
   [0014 package smoke와 release trust](0014-packaged-app-smoke-and-release-trust.md),
   [0017 local data와 privacy](0017-local-data-migration-and-privacy-inventory.md)
 - 영향 범위:
-  [Git Client release 문서](../../apps/git-client/docs/releases.md),
-  [Git Client package](../../apps/git-client/package.json),
-  [release publisher](../../apps/git-client/scripts/publish-release.ts),
-  [release build](../../apps/git-client/scripts/release.ts),
-  [Git Client workflow](../../.github/workflows/git-client.yml),
-  [Electron main](../../apps/git-client/electron/main)
+  [Git Client release 문서](../../../../apps/git-client/docs/releases.md),
+  [Git Client package](../../../../apps/git-client/package.json),
+  [release publisher](../../../../apps/git-client/scripts/publish-release.ts),
+  [release build](../../../../apps/git-client/scripts/release.ts),
+  [Git Client workflow](../../../../.github/workflows/git-client.yml),
+  [Electron main](../../../../apps/git-client/electron/main)
 - 참고 OSS:
   [Electron autoUpdater](https://www.electronjs.org/docs/latest/api/auto-updater),
   [Electron Updating Applications](https://www.electronjs.org/docs/latest/tutorial/updates),

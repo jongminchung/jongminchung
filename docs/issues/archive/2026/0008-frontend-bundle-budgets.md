@@ -1,13 +1,15 @@
 # Issue 0008: 프론트엔드 JavaScript와 CSS 성능 예산 도입
 
 - 상태: 완료
+- 완료일: 2026-08-20
+- 최종 갱신 커밋: `a9f5b6c`
 - 우선순위: P1
 - 기준일: 2026-08-19
 - 영향 범위:
-  [Git Client package](../../apps/git-client/package.json),
-  [Web package](../../apps/web/package.json),
-  [Git Client styles](../../apps/git-client/src/styles),
-  [Web app](../../apps/web/app)
+  [Git Client package](../../../../apps/git-client/package.json),
+  [Web package](../../../../apps/web/package.json),
+  [Git Client styles](../../../../apps/git-client/src/styles),
+  [Web app](../../../../apps/web/app)
 
 ## 핵심 요약
 

@@ -1,15 +1,17 @@
 # Issue 0024: 기술 문서 freshness와 근거 검증 보고서 도입
 
 - 상태: 완료
+- 완료일: 2026-08-20
+- 최종 갱신 커밋: `a9f5b6c`
 - 우선순위: P1
 - 기준일: 2026-08-19
 - 영향 범위:
-  [content model](../../apps/web/lib/content-model.ts),
-  [content source](../../apps/web/scripts/content-source.ts),
-  [content validation](../../apps/web/scripts/content-validation.ts),
-  [DocumentPageHeader](<../../apps/web/app/(tech)/_components/DocumentPageHeader.tsx>),
-  [Tech content](../../apps/web/content/tech),
-  [Web workflow](../../.github/workflows/web.yml)
+  [content model](../../../../apps/web/lib/content-model.ts),
+  [content source](../../../../apps/web/scripts/content-source.ts),
+  [content validation](../../../../apps/web/scripts/content-validation.ts),
+  [DocumentPageHeader](<../../../../apps/web/app/(tech)/_components/DocumentPageHeader.tsx>),
+  [Tech content](../../../../apps/web/content/tech),
+  [Web workflow](../../../../.github/workflows/web.yml)
 - 참고 OSS:
   [GitHub Docs content linter](https://docs.github.com/en/contributing/collaborating-on-github-docs/using-the-content-linter),
   [MDN content](https://github.com/mdn/content),

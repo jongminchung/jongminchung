@@ -1,17 +1,19 @@
 # Issue 0018: Electron 리소스 생명주기와 누수 회귀 검증
 
 - 상태: 완료
+- 완료일: 2026-08-20
+- 최종 갱신 커밋: `a9f5b6c`
 - 우선순위: P2
 - 기준일: 2026-08-19
 - 참고 OSS:
   [`VS Code Writing Tests`](https://github.com/microsoft/vscode/wiki/Writing-Tests),
   [`VS Code smoke test`](https://github.com/microsoft/vscode/blob/main/test/smoke/README.md)
 - 영향 범위:
-  [Electron main](../../apps/git-client/electron/main/index.ts),
-  [Git utility](../../apps/git-client/electron/utility/git),
-  [terminal utility](../../apps/git-client/electron/utility/terminal),
-  [desktop stream](../../apps/git-client/electron/main/desktop-stream-hub.ts),
-  [Electron tests](../../apps/git-client/electron-tests)
+  [Electron main](../../../../apps/git-client/electron/main/index.ts),
+  [Git utility](../../../../apps/git-client/electron/utility/git),
+  [terminal utility](../../../../apps/git-client/electron/utility/terminal),
+  [desktop stream](../../../../apps/git-client/electron/main/desktop-stream-hub.ts),
+  [Electron tests](../../../../apps/git-client/electron-tests)
 
 ## 핵심 요약
 

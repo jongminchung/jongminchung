@@ -1,6 +1,7 @@
 # Issue 0001: OpenStatus의 UI package와 registry 운영 방식 검토
 
-- 상태: 조건부 보류 (2026-08-20 재확인)
+- 상태: 조건부 보류
+- 최근 재확인: 2026-08-20
 - 우선순위: P3
 - 기준일: 2026-08-19
 - 참고 저장소: [openstatusHQ/openstatus](https://github.com/openstatusHQ/openstatus)

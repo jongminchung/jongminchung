@@ -1,14 +1,16 @@
 # Issue 0019: 다중 도메인 OG 이미지와 Next Image 회귀 해소
 
 - 상태: 완료
+- 완료일: 2026-08-20
+- 최종 갱신 커밋: `7f4a72b`
 - 우선순위: P0
 - 기준일: 2026-08-19
 - 기준 commit: `f8ece16`
 - 영향 범위:
-  [DocumentCard](<../../apps/web/app/(tech)/_components/DocumentCard.tsx>),
-  [site proxy](../../apps/web/proxy.ts),
-  [OG route](<../../apps/web/app/(tech)/tech/og/[locale]/[...slug]/route.tsx>),
-  [Web E2E](<../../apps/web/app/(tech)/document-discovery.e2e.test.ts>)
+  [DocumentCard](<../../../../apps/web/app/(tech)/_components/DocumentCard.tsx>),
+  [site proxy](../../../../apps/web/proxy.ts),
+  [OG route](<../../../../apps/web/app/(tech)/tech/og/[locale]/[...slug]/route.tsx>),
+  [Web E2E](<../../../../apps/web/app/(tech)/document-discovery.e2e.test.ts>)
 - 참고 OSS:
   [Next.js Image](https://nextjs.org/docs/app/api-reference/components/image),
   [Next.js source](https://github.com/vercel/next.js)

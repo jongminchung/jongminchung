@@ -1,14 +1,16 @@
 # Issue 0016: Electron 창 생명주기와 deep-link 준비도 보강
 
 - 상태: 완료
+- 완료일: 2026-08-20
+- 최종 갱신 커밋: `a9f5b6c`
 - 우선순위: P2
 - 기준일: 2026-08-19
 - 참고 OSS: [`Mattermost Desktop`](https://github.com/mattermost/desktop)
 - 영향 범위:
-  [Electron main](../../apps/git-client/electron/main/index.ts),
-  [window lifecycle](../../apps/git-client/electron/main/window-lifecycle.ts),
-  [window lifecycle test](../../apps/git-client/electron/main/window-lifecycle.test.ts),
-  [protocol](../../apps/git-client/electron/main/protocol.ts)
+  [Electron main](../../../../apps/git-client/electron/main/index.ts),
+  [window lifecycle](../../../../apps/git-client/electron/main/window-lifecycle.ts),
+  [window lifecycle test](../../../../apps/git-client/electron/main/window-lifecycle.test.ts),
+  [protocol](../../../../apps/git-client/electron/main/protocol.ts)
 
 ## 핵심 요약
 

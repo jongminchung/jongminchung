@@ -1,6 +1,8 @@
 # Issue 0004: Documenso 방식의 primitive와 제품 component 계층 정리
 
 - 상태: 완료
+- 완료일: 2026-08-20
+- 최종 갱신 커밋: `a9f5b6c`
 - 우선순위: P2
 - 기준일: 2026-08-19
 - 참고 저장소: [documenso/documenso](https://github.com/documenso/documenso)

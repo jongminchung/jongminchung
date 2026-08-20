@@ -1,15 +1,17 @@
 # Issue 0015: Git 작업 상태와 실패 복구 계약 통합
 
 - 상태: 완료
+- 완료일: 2026-08-20
+- 최종 갱신 커밋: `a9f5b6c`
 - 우선순위: P1
 - 기준일: 2026-08-19
 - 참고 OSS: [`GitHub Desktop`](https://github.com/desktop/desktop)
 - 영향 범위:
-  [Git utility](../../apps/git-client/electron/utility/git),
-  [Git bridge](../../apps/git-client/src/bridge/ElectronGitBridge.ts),
-  [operation E2E](../../apps/git-client/electron-tests/operation-matrix.spec.ts),
-  [recovery E2E](../../apps/git-client/electron-tests/remote-recovery-ui.spec.ts),
-  [Changes feature](../../apps/git-client/src/features)
+  [Git utility](../../../../apps/git-client/electron/utility/git),
+  [Git bridge](../../../../apps/git-client/src/bridge/ElectronGitBridge.ts),
+  [operation E2E](../../../../apps/git-client/electron-tests/operation-matrix.spec.ts),
+  [recovery E2E](../../../../apps/git-client/electron-tests/remote-recovery-ui.spec.ts),
+  [Changes feature](../../../../apps/git-client/src/features)
 
 ## 핵심 요약
 

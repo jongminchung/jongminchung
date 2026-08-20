@@ -12,17 +12,19 @@
 ## 이슈 정보
 
 - 상태: 완료
+- 완료일: 2026-08-20
+- 최종 갱신 커밋: `55a344d`
 - 우선순위: P1
 - 기준일: 2026-08-20
 - 기준 commit: `b78c336`
 - 영향 범위:
-  [Web Next 설정](../../apps/web/next.config.ts),
-  [Web content repository](../../apps/web/lib/content-repository.ts),
-  [Git Client Vite 설정](../../apps/git-client/vite.config.ts),
-  [workspace router](../../apps/git-client/src/app/AppWorkspaceRouter.tsx),
-  [tool-window controller](../../apps/git-client/src/features/repository/tool-windows/useRepositoryToolWindowController.ts),
-  [bottom-panel lifecycle](../../apps/git-client/src/components/bottom-panel/useBottomPanelLifecycle.ts),
-  [Xterm surface](../../apps/git-client/src/components/XtermSurface.tsx)
+  [Web Next 설정](../../../../apps/web/next.config.ts),
+  [Web content repository](../../../../apps/web/lib/content-repository.ts),
+  [Git Client Vite 설정](../../../../apps/git-client/vite.config.ts),
+  [workspace router](../../../../apps/git-client/src/app/AppWorkspaceRouter.tsx),
+  [tool-window controller](../../../../apps/git-client/src/features/repository/tool-windows/useRepositoryToolWindowController.ts),
+  [bottom-panel lifecycle](../../../../apps/git-client/src/components/bottom-panel/useBottomPanelLifecycle.ts),
+  [Xterm surface](../../../../apps/git-client/src/components/XtermSurface.tsx)
 - 공식 기준:
   [React 19.2](https://react.dev/blog/2025/10/01/react-19-2),
   [Activity](https://react.dev/reference/react/Activity),

@@ -1,15 +1,17 @@
 # Issue 0025: 한영 기술 문서 검색 relevance benchmark 도입
 
 - 상태: 완료
+- 완료일: 2026-08-20
+- 최종 갱신 커밋: `55a344d`
 - 우선순위: P2
 - 기준일: 2026-08-19
 - 영향 범위:
-  [Tech search](../../apps/web/lib/tech/search.ts),
-  [content repository](../../apps/web/lib/content-repository.ts),
-  [content source](../../apps/web/scripts/content-source.ts),
-  [content model](../../apps/web/lib/content-model.ts),
-  [document discovery E2E](<../../apps/web/app/(tech)/document-discovery.e2e.test.ts>),
-  [Tech content](../../apps/web/content/tech)
+  [Tech search](../../../../apps/web/lib/tech/search.ts),
+  [content repository](../../../../apps/web/lib/content-repository.ts),
+  [content source](../../../../apps/web/scripts/content-source.ts),
+  [content model](../../../../apps/web/lib/content-model.ts),
+  [document discovery E2E](<../../../../apps/web/app/(tech)/document-discovery.e2e.test.ts>),
+  [Tech content](../../../../apps/web/content/tech)
 - 참고 OSS:
   [Pagefind](https://github.com/Pagefind/pagefind),
   [Pagefind changelog](https://github.com/Pagefind/pagefind/blob/main/CHANGELOG.md),

@@ -1,12 +1,14 @@
 # Issue 0028: Web content runtime의 책임 경계와 fixture 검증 정리
 
 - 상태: 완료
+- 완료일: 2026-08-20
+- 최종 갱신 커밋: `7f4a72b`
 - 우선순위: P1
 - 기준일: 2026-08-19
 - 영향 범위:
-  [content source](../../apps/web/scripts/content-source.ts),
-  [content validation](../../apps/web/scripts/content-validation.ts),
-  [content repository](../../apps/web/lib/content-repository.ts),
+  [content source](../../../../apps/web/scripts/content-source.ts),
+  [content validation](../../../../apps/web/scripts/content-validation.ts),
+  [content repository](../../../../apps/web/lib/content-repository.ts),
   [freshness report](0024-tech-content-freshness-evidence-report.md),
   [search benchmark](0025-bilingual-search-relevance-benchmark.md)
 

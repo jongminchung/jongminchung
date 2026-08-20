@@ -1,6 +1,8 @@
 # Issue 0003: Formbricks 방식의 component 상태 fixture 도입
 
 - 상태: 완료
+- 완료일: 2026-08-20
+- 최종 갱신 커밋: `a9f5b6c`
 - 우선순위: P1
 - 기준일: 2026-08-19
 - 참고 저장소: [formbricks/formbricks](https://github.com/formbricks/formbricks)

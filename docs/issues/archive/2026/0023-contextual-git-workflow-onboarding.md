@@ -1,14 +1,16 @@
 # Issue 0023: 상황 기반 Git 업무 온보딩 도입
 
 - 상태: 완료
+- 완료일: 2026-08-20
+- 최종 갱신 커밋: `55a344d`
 - 우선순위: P1
 - 기준일: 2026-08-19
 - 영향 범위:
-  [WelcomeWorkspace](../../apps/git-client/src/components/WelcomeWorkspace.tsx),
-  [command manifest](../../apps/git-client/src/command-manifest.json),
-  [repository feature](../../apps/git-client/src/features/repository),
-  [welcome test](../../apps/git-client/src/components/WelcomeWorkspace.test.ts),
-  [app E2E](../../apps/git-client/tests/app.spec.ts)
+  [WelcomeWorkspace](../../../../apps/git-client/src/components/WelcomeWorkspace.tsx),
+  [command manifest](../../../../apps/git-client/src/command-manifest.json),
+  [repository feature](../../../../apps/git-client/src/features/repository),
+  [welcome test](../../../../apps/git-client/src/components/WelcomeWorkspace.test.ts),
+  [app E2E](../../../../apps/git-client/tests/app.spec.ts)
 - 참고 OSS:
   [VS Code UX Walkthroughs](https://code.visualstudio.com/api/ux-guidelines/overview),
   [VS Code](https://github.com/microsoft/vscode),

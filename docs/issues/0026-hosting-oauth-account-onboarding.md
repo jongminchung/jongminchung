@@ -1,35 +1,94 @@
 # Issue 0026: Hosting 계정의 OAuth 기반 연결 도입 검토
 
 - 상태: 조건부 보류
+- 상태 설명: GitHub 등록 가능·구현 조건 미충족
 - 우선순위: P2
-- 기준일: 2026-08-19
+- 기준일: 2026-08-20
 - 영향 범위:
   [HostingPanel](../../apps/git-client/src/components/HostingPanel.tsx),
   [HostingAccountConnection](../../apps/git-client/src/components/hosting/HostingAccountConnection.tsx),
   [Hosting bridge](../../apps/git-client/src/bridge/ElectronHostingBridge.ts),
   [Hosting service](../../apps/git-client/electron/hosting/hosting-service.ts),
-  [local data와 privacy issue](0017-local-data-migration-and-privacy-inventory.md)
+  [local data와 privacy issue](archive/2026/0017-local-data-migration-and-privacy-inventory.md)
 - 참고 OSS:
   [Git Credential Manager](https://github.com/git-ecosystem/git-credential-manager),
   [GCM generic OAuth](https://github.com/git-ecosystem/git-credential-manager/blob/main/docs/generic-oauth.md),
   [GitHub CLI `gh auth login`](https://cli.github.com/manual/gh_auth_login)
+- 공식 기준:
+  [GitHub OAuth App 생성](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app),
+  [GitHub OAuth App 인증](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps),
+  [GitHub OAuth App 보안 권고](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/best-practices-for-creating-an-oauth-app),
+  [GitHub App user access token](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app),
+  [GitHub App 권한표](https://docs.github.com/en/rest/authentication/permissions-required-for-github-apps)
 
 ## 핵심 요약
 
 - **현재 Hosting 연결은 사용자가 PAT를 직접 발급·복사하고 앱에 입력하는 방식임**
+- **데스크톱 앱에 공개 도메인이 없어도 GitHub OAuth 등록과 인증이 가능함**
+  - loopback callback은 `http://127.0.0.1` 주소와 실행 시 선택한 port를 사용할 수 있음
+  - device flow는 callback URL과 client secret 없이 client ID만으로 진행할 수 있음
 - **Keychain 저장은 안전한 보관을 제공하지만 token 생성 과정의 scope 선택·만료·회수 경험까지 해결하지 않음**
-- **OSS Git 도구는 browser 또는 device OAuth와 system credential store를 결합해 인증 진입 장벽을 줄임**
-- **자체 OAuth client 운영 책임이 생기므로 배포 대상과 provider 정책이 확정되기 전에는 구현보다 feasibility 검증이 우선임**
+- **GitHub cloud의 우선 후보는 fine-grained repository 권한과 device flow를 결합한 GitHub App임**
+  - classic OAuth App도 등록할 수 있지만 `repo` scope와 배포 bundle의 client secret 문제를 별도로 수용해야 함
+- **등록 가능성과 별개로 권한·token 수명주기·운영 소유자를 확정한 뒤 구현해야 함**
 - **기존 PAT 연결은 enterprise·self-hosted·복구 경로로 유지하고 OAuth를 유일한 인증 방식으로 강제하지 않음**
 
 ## 처리 결과
 
-- **배포 주체가 관리하는 OAuth App·client ID·redirect URI·revocation 정책이 저장소에 정의되지 않아 OAuth 구현 조건이 충족되지 않음**
-  - desktop bundle에 client secret을 포함하는 임시 구현은 보안 경계를 위반하므로 수행하지 않음
+- **공개 도메인 부재는 GitHub cloud 등록의 차단 조건이 아님을 확인함**
+  - browser authorization code flow는 `http://127.0.0.1/oauth/callback`을 등록하고 실행 시 임의의 loopback port를 선택할 수 있음
+  - device flow는 사용자가 `https://github.com/login/device`에서 code를 승인하므로 callback handler가 필요하지 않음
+- **GitHub App + device flow를 우선 등록안으로 선택함**
+  - client ID는 공개 설정으로 배포할 수 있음
+  - client secret과 GitHub App private key는 생성 여부와 무관하게 desktop bundle에 포함하지 않음
+  - webhook server 없이 user access token만 사용하는 구성을 검토함
+- **실제 GitHub App 등록과 client ID 발급은 GitHub Developer settings의 외부 운영 작업으로 남아 있음**
+  - 현재 Hosting endpoint에 필요한 초기 repository permission matrix는 확정함
+  - 등록 뒤 client ID·app slug·소유 계정·revocation 절차를 저장소의 공개 설정에 기록할 필요가 있음
 - **현재 가능한 fallback으로 연결 전에 provider별 최소 PAT 권한과 repository 제한·만료 설정을 안내하도록 개선함**
 - **Hosting API credential과 Git push credential이 별개임을 UI에 명시해 성공·실패 경계를 설명함**
 - **cloud와 self-hosted server 모두 PAT fallback을 유지하고 browser sign-in의 운영 전제를 명시함**
 - **OAuth App 운영 정책이 확정되면 state 검증·callback 위조·refresh·revoke fixture를 포함한 별도 구현이 필요함**
+
+## GitHub cloud 등록 초안
+
+- **등록 소유자는 현재 배포 주체인 `jongminchung`으로 지정함**
+- **등록 유형은 GitHub App을 우선함**
+  - GitHub App name은 `jongminchung-git-client`를 우선 사용함
+  - 공개 배포를 위해 설치 대상은 `Any account`로 설정함
+  - user access token용 device flow를 활성화함
+  - user access token expiration과 refresh token rotation을 유지함
+  - 설치 시 browser OAuth 요청은 활성화하지 않음
+  - webhook은 server 수신 요구가 생길 때까지 비활성화함
+  - private key를 desktop 인증에 사용하거나 package에 포함하지 않음
+- **공개 제품 주소는 저장소의 Git Client 경로를 사용함**
+  - Homepage URL: `https://github.com/jongminchung/jongminchung/tree/main/apps/git-client`
+- **device flow만 사용할 때 callback URL은 인증 경로에 사용되지 않음**
+  - 향후 browser authorization code + PKCE를 비교할 때 callback 기준값으로 `http://127.0.0.1/oauth/callback`을 사용함
+  - runtime listener는 고정 port 대신 OS가 할당한 loopback port를 사용함
+- **초기 repository 권한은 현재 Hosting endpoint inventory에서 도출한 최소값만 승인함**
+  - `Metadata: read`는 GitHub App에 자동 부여됨
+  - `Pull requests: read/write`는 PR 조회·파일·timeline·comment·review·update branch·viewed state에 사용됨
+  - `Contents: read/write`는 fork sync에 사용됨
+  - user permission과 organization permission은 요청하지 않음
+- **`Administration: write`가 필요한 새 저장소 생성은 초기 OAuth capability에서 제외함**
+  - `POST /user/repos` 하나를 위해 설치된 저장소 전체에 administration 권한을 요구하지 않음
+  - 새 저장소 생성은 기존 PAT account 또는 별도 권한 확대를 선택한 account에만 제공함
+- **등록 시 webhook과 event subscription을 모두 비활성화함**
+  - 현재 구현은 polling과 사용자 action만 사용하므로 inbound server가 필요하지 않음
+
+## classic OAuth App 대안
+
+- **classic OAuth App도 소유 도메인 없이 등록할 수 있음**
+  - Homepage URL에는 위 공개 Git Client 저장소 주소를 사용함
+  - Authorization callback URL에는 `http://127.0.0.1/oauth/callback`을 사용함
+- **authorization code + PKCE는 browser를 사용할 수 있는 native app의 우선 보안 패턴임**
+  - GitHub OAuth App의 token 교환에는 client secret이 요구되므로 public client에서 secret을 기밀로 취급할 수 없음
+  - PKCE와 `state`는 authorization code 탈취와 callback 위조 위험을 줄이지만 앱 사칭 가능성을 제거하지 않음
+- **OAuth App device flow는 client secret과 redirect URI를 사용하지 않음**
+  - CLI·headless 환경에는 적합하지만 원격 피싱에 악용될 수 있어 필요성이 명확할 때만 활성화함
+- **classic OAuth App의 넓은 scope보다 GitHub App의 repository별 설치와 fine-grained permission을 우선함**
+  - PAT보다 권한이 넓어지는 OAuth 전환은 사용자 경험 개선만으로 정당화하지 않음
 
 ## OSS 기준에서 확인한 인증 패턴
 
@@ -53,10 +112,11 @@
 
 ## 도입 전제
 
-- **지원할 provider와 cloud·self-hosted 범위를 확정함**
-- **OAuth App 또는 GitHub App의 client ID·redirect·scope·revocation 정책을 결정함**
+- **GitHub cloud는 GitHub App + device flow를 우선 범위로 확정함**
+- **GitLab cloud와 GitHub Enterprise·self-hosted GitLab의 후속 지원 범위를 별도로 확정함**
+- **GitHub App의 client ID·permission·installation·revocation 정책을 결정함**
 - **client secret을 desktop binary에 신뢰 가능한 비밀로 포함할 수 없다는 전제를 수용함**
-- **loopback redirect와 device flow 중 provider별 지원 조합을 확인함**
+- **GitHub 이외 provider의 loopback redirect와 device flow 지원 조합을 확인함**
 - **privacy inventory와 network policy에 인증 endpoint·token 수명주기를 기록함**
 
 ## 채택할 내용
@@ -86,8 +146,10 @@
 
 ## 실행 작업
 
-- **GitHub·GitLab cloud와 self-hosted 인증 capability matrix를 작성함**
-- **OAuth application 운영·redirect·scope·revocation 위협 모델을 작성함**
+- **확정한 GitHub App repository permission matrix를 등록 화면과 capability contract에 반영함**
+- **GitHub Developer settings에서 등록 초안대로 GitHub App을 생성하고 client ID를 기록함**
+- **device flow polling·user code·token 수명주기·revocation 위협 모델을 작성함**
+- **GitLab cloud와 self-hosted 인증 capability matrix를 작성함**
 - **한 provider의 read-only capability로 feasibility prototype을 수행함**
 - **Keychain access·refresh·disconnect·migration contract test를 추가함**
 - **PAT와 OAuth account가 함께 존재할 때의 선택·표시·삭제 UX를 검증함**

@@ -1,14 +1,16 @@
 # Issue 0020: Web과 UI package의 개발·빌드 소비 계약 정리
 
 - 상태: 완료
+- 완료일: 2026-08-20
+- 최종 갱신 커밋: `7f4a72b`
 - 우선순위: P1
 - 기준일: 2026-08-19
 - 기준 commit: `f8ece16`
 - 영향 범위:
-  [Web Next 설정](../../apps/web/next.config.ts),
-  [Web scripts](../../apps/web/package.json),
-  [UI package](../../packages/ui/package.json),
-  [공용 TypeScript 설정](../../tsconfig.base.json)
+  [Web Next 설정](../../../../apps/web/next.config.ts),
+  [Web scripts](../../../../apps/web/package.json),
+  [UI package](../../../../packages/ui/package.json),
+  [공용 TypeScript 설정](../../../../tsconfig.base.json)
 - 참고 OSS:
   [Next.js transpilePackages](https://nextjs.org/docs/app/api-reference/config/next-config-js/transpilePackages),
   [Next.js Turbopack](https://nextjs.org/docs/app/api-reference/turbopack),

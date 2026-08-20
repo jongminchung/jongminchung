@@ -1,6 +1,8 @@
 # Issue 0014: 패키징된 Electron 앱의 smoke test와 릴리스 신뢰성 보강
 
 - 상태: 완료
+- 완료일: 2026-08-20
+- 최종 갱신 커밋: `a9f5b6c`
 - 우선순위: P1
 - 기준일: 2026-08-19
 - 참고 OSS:
@@ -8,11 +10,11 @@
   [`VS Code smoke test`](https://github.com/microsoft/vscode/blob/main/test/smoke/README.md),
   [`Signal reproducible builds`](https://github.com/signalapp/Signal-Desktop/tree/main/reproducible-builds)
 - 영향 범위:
-  [Forge config](../../apps/git-client/forge.config.ts),
-  [package verifier](../../apps/git-client/scripts/verify-electron-package.ts),
-  [package smoke](../../apps/git-client/scripts/smoke-electron-package.ts),
-  [packaged Playwright](../../apps/git-client/playwright.electron.config.ts),
-  [release scripts](../../apps/git-client/scripts)
+  [Forge config](../../../../apps/git-client/forge.config.ts),
+  [package verifier](../../../../apps/git-client/scripts/verify-electron-package.ts),
+  [package smoke](../../../../apps/git-client/scripts/smoke-electron-package.ts),
+  [packaged Playwright](../../../../apps/git-client/playwright.electron.config.ts),
+  [release scripts](../../../../apps/git-client/scripts)
 
 ## 핵심 요약
 

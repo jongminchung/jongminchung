@@ -1,15 +1,17 @@
 # Issue 0021: React compiler lint 대응의 상태 계약 회귀 보강
 
 - 상태: 완료
+- 완료일: 2026-08-20
+- 최종 갱신 커밋: `7f4a72b`
 - 우선순위: P1
 - 기준일: 2026-08-19
 - 기준 commit: `f8ece16`
 - 영향 범위:
-  [Oxlint 설정](../../oxlint.config.ts),
-  [route sheet hook](<../../apps/web/app/(tech)/_components/useRouteSheet.ts>),
-  [ThemeProvider](../../apps/web/components/ThemeProvider.tsx),
-  [ExcalidrawDiagram](<../../apps/web/app/(tech)/_components/ExcalidrawDiagram.tsx>),
-  [ExcalidrawCanvas](<../../apps/web/app/(tech)/_components/ExcalidrawCanvas.tsx>)
+  [Oxlint 설정](../../../../oxlint.config.ts),
+  [route sheet hook](<../../../../apps/web/app/(tech)/_components/useRouteSheet.ts>),
+  [ThemeProvider](../../../../apps/web/components/ThemeProvider.tsx),
+  [ExcalidrawDiagram](<../../../../apps/web/app/(tech)/_components/ExcalidrawDiagram.tsx>),
+  [ExcalidrawCanvas](<../../../../apps/web/app/(tech)/_components/ExcalidrawCanvas.tsx>)
 - 참고 OSS:
   [Oxlint react/react-compiler](https://oxc.rs/docs/guide/usage/linter/rules/react/react-compiler.html),
   [React You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect),

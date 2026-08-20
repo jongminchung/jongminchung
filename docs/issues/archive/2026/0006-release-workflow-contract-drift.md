@@ -1,12 +1,14 @@
 # Issue 0006: 릴리스 workflow와 계약 테스트의 불일치 해소
 
 - 상태: 완료
+- 완료일: 2026-08-20
+- 최종 갱신 커밋: `a9f5b6c`
 - 우선순위: P0
 - 기준일: 2026-08-19
 - 영향 범위:
-  [릴리스 계약 테스트](../../apps/git-client/scripts/release-config.integration.test.ts),
-  [package publish workflow](../../.github/workflows/publish-packages.yml),
-  [version 삭제 script](../../.github/scripts/delete-version-ids-script.sh)
+  [릴리스 계약 테스트](../../../../apps/git-client/scripts/release-config.integration.test.ts),
+  [package publish workflow](../../../../.github/workflows/publish-packages.yml),
+  [version 삭제 script](../../../../.github/scripts/delete-version-ids-script.sh)
 
 ## 핵심 요약
 

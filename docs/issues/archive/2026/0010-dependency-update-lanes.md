@@ -1,12 +1,14 @@
 # Issue 0010: 의존성 갱신 lane과 검증 범위 분리
 
 - 상태: 완료
+- 완료일: 2026-08-20
+- 최종 갱신 커밋: `a9f5b6c`
 - 우선순위: P2
 - 기준일: 2026-08-19
 - 영향 범위:
-  [루트 package](../../package.json),
-  [pnpm workspace](../../pnpm-workspace.yaml),
-  [유지보수 가이드](../maintenance.md)
+  [루트 package](../../../../package.json),
+  [pnpm workspace](../../../../pnpm-workspace.yaml),
+  [유지보수 가이드](../../../maintenance.md)
 
 ## 핵심 요약
 

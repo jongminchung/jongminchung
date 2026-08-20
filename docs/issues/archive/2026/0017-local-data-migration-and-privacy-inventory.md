@@ -1,6 +1,8 @@
 # Issue 0017: 로컬 데이터 migration과 privacy inventory 정리
 
 - 상태: 완료
+- 완료일: 2026-08-20
+- 최종 갱신 커밋: `7f4a72b`
 - 우선순위: P2
 - 기준일: 2026-08-19
 - 참고 OSS:
@@ -8,11 +10,11 @@
   [`Joplin Privacy Policy`](https://github.com/laurent22/joplin/blob/dev/readme/privacy.md),
   [`Signal Desktop`](https://github.com/signalapp/Signal-Desktop)
 - 영향 범위:
-  [settings store](../../apps/git-client/electron/main/settings-store.ts),
-  [settings archive](../../apps/git-client/electron/main/settings-archive.ts),
-  [credential store](../../apps/git-client/electron/main/hosting-credential-store.ts),
-  [diagnostics](../../apps/git-client/electron/main/diagnostics-service.ts),
-  [hosting HTTP](../../apps/git-client/electron/hosting/hosting-http.ts)
+  [settings store](../../../../apps/git-client/electron/main/settings-store.ts),
+  [settings archive](../../../../apps/git-client/electron/main/settings-archive.ts),
+  [credential store](../../../../apps/git-client/electron/main/hosting-credential-store.ts),
+  [diagnostics](../../../../apps/git-client/electron/main/diagnostics-service.ts),
+  [hosting HTTP](../../../../apps/git-client/electron/hosting/hosting-http.ts)
 
 ## 핵심 요약
 

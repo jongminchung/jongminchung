@@ -1,17 +1,19 @@
 # Issue 0013: Electron 프로세스 소유권과 IPC 계약 정리
 
 - 상태: 완료
+- 완료일: 2026-08-20
+- 최종 갱신 커밋: `a9f5b6c`
 - 우선순위: P1
 - 기준일: 2026-08-19
 - 참고 OSS:
   [`VS Code Source Code Organization`](https://github.com/microsoft/vscode/wiki/Source-Code-Organization/e7745b74f35efcff8a6a34780d21e0acb4528b53),
   [`Insomnia Development`](https://github.com/Kong/insomnia/blob/develop/DEVELOPMENT.md)
 - 영향 범위:
-  [Electron main](../../apps/git-client/electron/main),
-  [preload](../../apps/git-client/electron/preload),
-  [shared contracts](../../apps/git-client/src/shared/contracts),
-  [renderer bridges](../../apps/git-client/src/bridge),
-  [utility processes](../../apps/git-client/electron/utility)
+  [Electron main](../../../../apps/git-client/electron/main),
+  [preload](../../../../apps/git-client/electron/preload),
+  [shared contracts](../../../../apps/git-client/src/shared/contracts),
+  [renderer bridges](../../../../apps/git-client/src/bridge),
+  [utility processes](../../../../apps/git-client/electron/utility)
 
 ## 핵심 요약
 

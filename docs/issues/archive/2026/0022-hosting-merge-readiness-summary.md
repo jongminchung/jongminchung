@@ -1,14 +1,16 @@
 # Issue 0022: Hosting 변경 요청의 merge-readiness 요약
 
 - 상태: 완료
+- 완료일: 2026-08-20
+- 최종 갱신 커밋: `55a344d`
 - 우선순위: P1
 - 기준일: 2026-08-19
 - 영향 범위:
-  [HostingPanel](../../apps/git-client/src/components/HostingPanel.tsx),
-  [Hosting 요청 계약](../../apps/git-client/src/shared/contracts/model/HostingRequest.ts),
-  [Hosting 응답 계약](../../apps/git-client/src/shared/contracts/model/HostingResponse.ts),
-  [Hosting service](../../apps/git-client/electron/hosting/hosting-service.ts),
-  [packaged Hosting E2E](../../apps/git-client/electron-tests/packaged-hosting-harness.ts)
+  [HostingPanel](../../../../apps/git-client/src/components/HostingPanel.tsx),
+  [Hosting 요청 계약](../../../../apps/git-client/src/shared/contracts/model/HostingRequest.ts),
+  [Hosting 응답 계약](../../../../apps/git-client/src/shared/contracts/model/HostingResponse.ts),
+  [Hosting service](../../../../apps/git-client/electron/hosting/hosting-service.ts),
+  [packaged Hosting E2E](../../../../apps/git-client/electron-tests/packaged-hosting-harness.ts)
 - 참고 OSS:
   [GitHub CLI `gh pr checks`](https://cli.github.com/manual/gh_pr_checks),
   [GitHub Desktop](https://github.com/desktop/desktop),

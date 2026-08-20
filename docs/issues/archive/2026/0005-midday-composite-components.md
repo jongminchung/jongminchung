@@ -1,6 +1,8 @@
 # Issue 0005: Midday 방식의 복합 제품 component 분해
 
 - 상태: 완료
+- 완료일: 2026-08-20
+- 최종 갱신 커밋: `b78c336`
 - 우선순위: P2
 - 기준일: 2026-08-19
 - 참고 저장소: [midday-ai/midday](https://github.com/midday-ai/midday)

@@ -1,17 +1,19 @@
 # Issue 0012: Electron 보안 경계와 권한 정책 감사
 
 - 상태: 완료
+- 완료일: 2026-08-20
+- 최종 갱신 커밋: `b78c336`
 - 우선순위: P0
 - 기준일: 2026-08-19
 - 참고 OSS:
   [`Electron Security`](https://github.com/electron/electron/blob/main/docs/tutorial/security.md),
   [`Signal Desktop`](https://github.com/signalapp/Signal-Desktop)
 - 영향 범위:
-  [Electron main](../../apps/git-client/electron/main/index.ts),
-  [window security](../../apps/git-client/electron/main/window-security.ts),
-  [IPC security](../../apps/git-client/electron/main/ipc-security.ts),
-  [preload](../../apps/git-client/electron/preload/index.ts),
-  [Forge config](../../apps/git-client/forge.config.ts)
+  [Electron main](../../../../apps/git-client/electron/main/index.ts),
+  [window security](../../../../apps/git-client/electron/main/window-security.ts),
+  [IPC security](../../../../apps/git-client/electron/main/ipc-security.ts),
+  [preload](../../../../apps/git-client/electron/preload/index.ts),
+  [Forge config](../../../../apps/git-client/forge.config.ts)
 
 ## 핵심 요약
 

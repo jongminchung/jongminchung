@@ -1,12 +1,14 @@
 # Issue 0009: 접근성 환경 matrix 검증 보강
 
 - 상태: 완료
+- 완료일: 2026-08-20
+- 최종 갱신 커밋: `7f4a72b`
 - 우선순위: P1
 - 기준일: 2026-08-19
 - 영향 범위:
-  [공용 globals](../../packages/ui/src/styles/globals.css),
-  [Git Client Playwright](../../apps/git-client/playwright.config.ts),
-  [Web Playwright](../../apps/web/playwright.config.ts)
+  [공용 globals](../../../../packages/ui/src/styles/globals.css),
+  [Git Client Playwright](../../../../apps/git-client/playwright.config.ts),
+  [Web Playwright](../../../../apps/web/playwright.config.ts)
 
 ## 핵심 요약
 

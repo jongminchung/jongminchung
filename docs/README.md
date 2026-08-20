@@ -19,7 +19,7 @@
 
 ## 실행 이슈
 
-- [OSS 디자인 시스템 도입 이슈](issues/README.md): OpenStatus, shadcn/ui, Formbricks, Documenso, Midday 분석과 저장소별 채택·보류 과제
+- [OSS 기반 제품·유지보수 개선 이슈](issues/README.md): 현재 진행·조건부 보류 작업과 연도별 완료 이슈 아카이브
 
 ## 프로젝트 문서
 
