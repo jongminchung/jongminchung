@@ -1,7 +1,6 @@
 {
   "editor.formatOnSave": true,
   "editor.formatOnSaveMode": "file",
-  "oxc.fmt.configPath": "${workspaceFolder}/oxfmt.config.ts",
   "oxc.configPath": "${workspaceFolder}/oxlint.config.ts",
   "[markdown][yaml][typescript][typescriptreact][javascript][javascriptreact][json][html][css]": {
     "editor.defaultFormatter": "oxc.oxc-vscode"
