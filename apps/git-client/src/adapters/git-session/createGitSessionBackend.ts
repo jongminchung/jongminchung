@@ -4,16 +4,16 @@ import { createLiveGitSessionBackend } from "../electron/liveGitSessionBackend";
 import { fixtureGitSessionBackend } from "../fixture/fixtureGitSessionBackend";
 
 export function createGitSessionBackend(
-    fixtureMode: boolean,
-    options: {
-        readonly electronRuntime?: boolean;
-        readonly workspacePersistence?: boolean;
-    } = {},
+  fixtureMode: boolean,
+  options: {
+    readonly electronRuntime?: boolean;
+    readonly workspacePersistence?: boolean;
+  } = {},
 ): GitSessionBackend<WorkspaceState> {
-    return fixtureMode
-        ? fixtureGitSessionBackend
-        : createLiveGitSessionBackend({
-              terminalAvailable: options.electronRuntime ?? false,
-              workspacePersistence: options.workspacePersistence,
-          });
+  return fixtureMode
+    ? fixtureGitSessionBackend
+    : createLiveGitSessionBackend({
+        terminalAvailable: options.electronRuntime ?? false,
+        workspacePersistence: options.workspacePersistence,
+      });
 }

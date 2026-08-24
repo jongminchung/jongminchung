@@ -1,4 +1,4 @@
 export type RecoveryRestoreResult = {
-    entryId: string;
-    restoredRefs: Array<string>;
+  entryId: string;
+  restoredRefs: Array<string>;
 };

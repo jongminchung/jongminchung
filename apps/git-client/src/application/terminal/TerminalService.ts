@@ -1,300 +1,294 @@
 import { z } from "zod";
 import {
-    repositoryAccessPolicy,
-    type RepositoryAccessPolicy,
+  repositoryAccessPolicy,
+  type RepositoryAccessPolicy,
 } from "../../domain/repositoryAccess";
 import type {
-    RepositoryId,
-    TerminalEvent,
-    TerminalId,
+  RepositoryId,
+  TerminalEvent,
+  TerminalId,
 } from "../../shared/contracts/model/index";
 import {
-    DEFAULT_TERMINAL_LAUNCH_TARGET,
-    TerminalLaunchTargetSchema,
-    type TerminalLaunchTarget,
-    type TerminalLaunchTargets,
+  DEFAULT_TERMINAL_LAUNCH_TARGET,
+  TerminalLaunchTargetSchema,
+  type TerminalLaunchTarget,
+  type TerminalLaunchTargets,
 } from "../../shared/contracts/terminal";
 import type { TerminalPort } from "./ports/TerminalPort";
 import type {
-    PersistedTerminalSessions,
-    TerminalSettingsPort,
+  PersistedTerminalSessions,
+  TerminalSettingsPort,
 } from "./ports/TerminalSettingsPort";
 
 const MAX_BACKLOG_BYTES = 2 * 1024 * 1024;
 
 export interface TerminalSessionSnapshot {
-    readonly key: string;
-    readonly repositoryId: RepositoryId;
-    readonly title: string;
-    readonly terminalId: TerminalId | null;
-    readonly status: "starting" | "running" | "exited" | "failed";
-    readonly exitCode: number | null;
-    readonly error: string | null;
-    readonly target: TerminalLaunchTarget;
+  readonly key: string;
+  readonly repositoryId: RepositoryId;
+  readonly title: string;
+  readonly terminalId: TerminalId | null;
+  readonly status: "starting" | "running" | "exited" | "failed";
+  readonly exitCode: number | null;
+  readonly error: string | null;
+  readonly target: TerminalLaunchTarget;
 }
 
 interface TerminalSessionRecord {
-    key: string;
-    repositoryId: RepositoryId;
-    title: string;
-    terminalId: TerminalId | null;
-    status: "starting" | "running" | "exited" | "failed";
-    exitCode: number | null;
-    error: string | null;
-    target: TerminalLaunchTarget;
-    events: TerminalEvent[];
-    backlogBytes: number;
+  key: string;
+  repositoryId: RepositoryId;
+  title: string;
+  terminalId: TerminalId | null;
+  status: "starting" | "running" | "exited" | "failed";
+  exitCode: number | null;
+  error: string | null;
+  target: TerminalLaunchTarget;
+  events: TerminalEvent[];
+  backlogBytes: number;
 }
 
 type Listener = () => void;
 type EventListener = (event: TerminalEvent) => void;
 
 export interface TerminalSessionCreateOptions {
-    readonly target?: TerminalLaunchTarget;
-    readonly title?: string;
+  readonly target?: TerminalLaunchTarget;
+  readonly title?: string;
 }
 
 const PersistedTerminalSessionSchema = z
-    .object({
-        title: z.string().min(1).max(128),
-        target: TerminalLaunchTargetSchema,
-    })
-    .strict()
-    .readonly();
+  .object({
+    title: z.string().min(1).max(128),
+    target: TerminalLaunchTargetSchema,
+  })
+  .strict()
+  .readonly();
 
 export class TerminalService {
-    readonly #terminal: TerminalPort;
-    readonly #settings: TerminalSettingsPort;
-    readonly #access: RepositoryAccessPolicy;
-    readonly #sessions = new Map<string, TerminalSessionRecord>();
-    readonly #listeners = new Set<Listener>();
-    readonly #eventListeners = new Map<string, Set<EventListener>>();
-    readonly #repositoryRestorations = new Map<string, Promise<void>>();
-    #version = 0;
+  readonly #terminal: TerminalPort;
+  readonly #settings: TerminalSettingsPort;
+  readonly #access: RepositoryAccessPolicy;
+  readonly #sessions = new Map<string, TerminalSessionRecord>();
+  readonly #listeners = new Set<Listener>();
+  readonly #eventListeners = new Map<string, Set<EventListener>>();
+  readonly #repositoryRestorations = new Map<string, Promise<void>>();
+  #version = 0;
 
-    private constructor(
-        terminal: TerminalPort,
-        access: RepositoryAccessPolicy,
-        settings: TerminalSettingsPort,
-    ) {
-        this.#terminal = terminal;
-        this.#access = access;
-        this.#settings = settings;
-    }
+  private constructor(
+    terminal: TerminalPort,
+    access: RepositoryAccessPolicy,
+    settings: TerminalSettingsPort,
+  ) {
+    this.#terminal = terminal;
+    this.#access = access;
+    this.#settings = settings;
+  }
 
-    static of(
-        terminal: TerminalPort,
-        access: RepositoryAccessPolicy = repositoryAccessPolicy,
-        settings: TerminalSettingsPort = {
-            read: async () => null,
-            write: async () => undefined,
-        },
-    ): TerminalService {
-        return new TerminalService(terminal, access, settings);
-    }
+  static of(
+    terminal: TerminalPort,
+    access: RepositoryAccessPolicy = repositoryAccessPolicy,
+    settings: TerminalSettingsPort = {
+      read: async () => null,
+      write: async () => undefined,
+    },
+  ): TerminalService {
+    return new TerminalService(terminal, access, settings);
+  }
 
-    subscribe = (listener: Listener): (() => void) => {
-        this.#listeners.add(listener);
-        return () => this.#listeners.delete(listener);
+  subscribe = (listener: Listener): (() => void) => {
+    this.#listeners.add(listener);
+    return () => this.#listeners.delete(listener);
+  };
+
+  snapshot = (): number => this.#version;
+
+  sessions(repositoryId: RepositoryId): readonly TerminalSessionSnapshot[] {
+    return [...this.#sessions.values()]
+      .filter((session) => session.repositoryId === repositoryId)
+      .map(
+        ({ events: _events, backlogBytes: _backlogBytes, ...session }) =>
+          session,
+      );
+  }
+
+  events(key: string): readonly TerminalEvent[] {
+    return this.#sessions.get(key)?.events ?? [];
+  }
+
+  subscribeEvents(key: string, listener: EventListener): () => void {
+    const listeners = this.#eventListeners.get(key) ?? new Set<EventListener>();
+    listeners.add(listener);
+    this.#eventListeners.set(key, listeners);
+    return () => {
+      listeners.delete(listener);
+      if (listeners.size === 0) this.#eventListeners.delete(key);
     };
+  }
 
-    snapshot = (): number => this.#version;
+  listLaunchTargets(): Promise<TerminalLaunchTargets> {
+    this.#access.assertActive("terminal");
+    return this.#terminal.listLaunchTargets();
+  }
 
-    sessions(repositoryId: RepositoryId): readonly TerminalSessionSnapshot[] {
-        return [...this.#sessions.values()]
-            .filter((session) => session.repositoryId === repositoryId)
-            .map(
-                ({
-                    events: _events,
-                    backlogBytes: _backlogBytes,
-                    ...session
-                }) => session,
-            );
-    }
-
-    events(key: string): readonly TerminalEvent[] {
-        return this.#sessions.get(key)?.events ?? [];
-    }
-
-    subscribeEvents(key: string, listener: EventListener): () => void {
-        const listeners =
-            this.#eventListeners.get(key) ?? new Set<EventListener>();
-        listeners.add(listener);
-        this.#eventListeners.set(key, listeners);
-        return () => {
-            listeners.delete(listener);
-            if (listeners.size === 0) this.#eventListeners.delete(key);
-        };
-    }
-
-    listLaunchTargets(): Promise<TerminalLaunchTargets> {
-        this.#access.assertActive("terminal");
-        return this.#terminal.listLaunchTargets();
-    }
-
-    async create(
-        repositoryId: RepositoryId,
-        options: TerminalSessionCreateOptions = {},
-    ): Promise<string> {
-        this.#access.assert(repositoryId, "terminal");
-        const key = crypto.randomUUID();
-        const target = TerminalLaunchTargetSchema.parse(
-            options.target ?? DEFAULT_TERMINAL_LAUNCH_TARGET,
-        );
-        const record: TerminalSessionRecord = {
-            key,
-            repositoryId,
-            title:
-                options.title ??
-                (this.sessions(repositoryId).length === 0
-                    ? "Local"
-                    : `Local (${this.sessions(repositoryId).length + 1})`),
-            terminalId: null,
-            status: "starting",
-            exitCode: null,
-            error: null,
-            target,
-            events: [],
-            backlogBytes: 0,
-        };
-        this.#sessions.set(key, record);
+  async create(
+    repositoryId: RepositoryId,
+    options: TerminalSessionCreateOptions = {},
+  ): Promise<string> {
+    this.#access.assert(repositoryId, "terminal");
+    const key = crypto.randomUUID();
+    const target = TerminalLaunchTargetSchema.parse(
+      options.target ?? DEFAULT_TERMINAL_LAUNCH_TARGET,
+    );
+    const record: TerminalSessionRecord = {
+      key,
+      repositoryId,
+      title:
+        options.title ??
+        (this.sessions(repositoryId).length === 0
+          ? "Local"
+          : `Local (${this.sessions(repositoryId).length + 1})`),
+      terminalId: null,
+      status: "starting",
+      exitCode: null,
+      error: null,
+      target,
+      events: [],
+      backlogBytes: 0,
+    };
+    this.#sessions.set(key, record);
+    this.#notify();
+    try {
+      const terminalId = await this.#terminal.create(
+        repositoryId,
+        100,
+        28,
+        target,
+        (event) => this.#receive(key, event),
+      );
+      const session = this.#sessions.get(key);
+      if (session) {
+        session.terminalId = terminalId;
+        if (session.status === "starting") session.status = "running";
         this.#notify();
-        try {
-            const terminalId = await this.#terminal.create(
-                repositoryId,
-                100,
-                28,
-                target,
-                (event) => this.#receive(key, event),
-            );
-            const session = this.#sessions.get(key);
-            if (session) {
-                session.terminalId = terminalId;
-                if (session.status === "starting") session.status = "running";
-                this.#notify();
-                void this.#persist();
-            } else {
-                await this.#terminal.close(terminalId);
-            }
-            return key;
-        } catch (error) {
-            this.#receive(key, {
-                kind: "failed",
-                message: error instanceof Error ? error.message : String(error),
-            });
-            return key;
+        void this.#persist();
+      } else {
+        await this.#terminal.close(terminalId);
+      }
+      return key;
+    } catch (error) {
+      this.#receive(key, {
+        kind: "failed",
+        message: error instanceof Error ? error.message : String(error),
+      });
+      return key;
+    }
+  }
+
+  async write(key: string, data: string): Promise<void> {
+    const session = this.#sessions.get(key);
+    if (session) this.#access.assert(session.repositoryId, "terminal");
+    const terminalId = session?.terminalId;
+    if (terminalId) await this.#terminal.write(terminalId, data);
+  }
+
+  async resize(key: string, cols: number, rows: number): Promise<void> {
+    const session = this.#sessions.get(key);
+    if (session) this.#access.assert(session.repositoryId, "terminal");
+    const terminalId = session?.terminalId;
+    if (terminalId) await this.#terminal.resize(terminalId, cols, rows);
+  }
+
+  async close(key: string): Promise<void> {
+    const session = this.#sessions.get(key);
+    this.#sessions.delete(key);
+    this.#eventListeners.delete(key);
+    this.#notify();
+    if (session?.terminalId) await this.#terminal.close(session.terminalId);
+    await this.#persist();
+  }
+
+  async closeRepository(repositoryId: RepositoryId): Promise<void> {
+    for (const session of this.sessions(repositoryId)) {
+      this.#sessions.delete(session.key);
+      this.#eventListeners.delete(session.key);
+    }
+    this.#notify();
+    await this.#terminal.closeRepository(repositoryId);
+    await this.#persist();
+  }
+
+  count(repositoryId: RepositoryId): number {
+    return this.sessions(repositoryId).filter(
+      (session) => session.status === "running",
+    ).length;
+  }
+
+  restore(repositoryId: RepositoryId): Promise<void> {
+    this.#access.assert(repositoryId, "terminal");
+    const active = this.#repositoryRestorations.get(repositoryId);
+    if (active !== undefined) return active;
+    const restoration = this.#restore(repositoryId);
+    this.#repositoryRestorations.set(repositoryId, restoration);
+    return restoration;
+  }
+
+  async #restore(repositoryId: RepositoryId): Promise<void> {
+    try {
+      const stored = await this.#settings.read();
+      if (!stored || typeof stored !== "object" || Array.isArray(stored))
+        return;
+      const sessions = Reflect.get(stored, repositoryId);
+      if (!Array.isArray(sessions)) return;
+      for (const value of sessions) {
+        if (typeof value === "string") {
+          await this.create(repositoryId, { title: value });
+          continue;
         }
+        const parsed = PersistedTerminalSessionSchema.safeParse(value);
+        if (parsed.success) await this.create(repositoryId, parsed.data);
+      }
+    } catch {
+      // Terminal restoration is non-critical; a new session can still be created manually.
     }
+  }
 
-    async write(key: string, data: string): Promise<void> {
-        const session = this.#sessions.get(key);
-        if (session) this.#access.assert(session.repositoryId, "terminal");
-        const terminalId = session?.terminalId;
-        if (terminalId) await this.#terminal.write(terminalId, data);
+  #receive(key: string, event: TerminalEvent): void {
+    const session = this.#sessions.get(key);
+    if (!session) return;
+    session.events.push(event);
+    if (event.kind === "output") {
+      session.backlogBytes += event.data.length;
+      while (session.backlogBytes > MAX_BACKLOG_BYTES) {
+        const removed = session.events.shift();
+        if (removed?.kind === "output")
+          session.backlogBytes -= removed.data.length;
+      }
+    } else if (event.kind === "exited") {
+      session.status = "exited";
+      session.exitCode = event.exitCode;
+    } else {
+      session.status = "failed";
+      session.error = event.message;
     }
+    for (const listener of this.#eventListeners.get(key) ?? []) listener(event);
+    this.#notify();
+  }
 
-    async resize(key: string, cols: number, rows: number): Promise<void> {
-        const session = this.#sessions.get(key);
-        if (session) this.#access.assert(session.repositoryId, "terminal");
-        const terminalId = session?.terminalId;
-        if (terminalId) await this.#terminal.resize(terminalId, cols, rows);
-    }
+  #notify(): void {
+    this.#version += 1;
+    for (const listener of this.#listeners) listener();
+  }
 
-    async close(key: string): Promise<void> {
-        const session = this.#sessions.get(key);
-        this.#sessions.delete(key);
-        this.#eventListeners.delete(key);
-        this.#notify();
-        if (session?.terminalId) await this.#terminal.close(session.terminalId);
-        await this.#persist();
+  async #persist(): Promise<void> {
+    try {
+      const value: Record<string, PersistedTerminalSessions[string]> = {};
+      for (const session of this.#sessions.values()) {
+        value[session.repositoryId] = [
+          ...(value[session.repositoryId] ?? []),
+          { title: session.title, target: session.target },
+        ];
+      }
+      await this.#settings.write(value);
+    } catch {
+      // Live terminal sessions remain usable when metadata persistence fails.
     }
-
-    async closeRepository(repositoryId: RepositoryId): Promise<void> {
-        for (const session of this.sessions(repositoryId)) {
-            this.#sessions.delete(session.key);
-            this.#eventListeners.delete(session.key);
-        }
-        this.#notify();
-        await this.#terminal.closeRepository(repositoryId);
-        await this.#persist();
-    }
-
-    count(repositoryId: RepositoryId): number {
-        return this.sessions(repositoryId).filter(
-            (session) => session.status === "running",
-        ).length;
-    }
-
-    restore(repositoryId: RepositoryId): Promise<void> {
-        this.#access.assert(repositoryId, "terminal");
-        const active = this.#repositoryRestorations.get(repositoryId);
-        if (active !== undefined) return active;
-        const restoration = this.#restore(repositoryId);
-        this.#repositoryRestorations.set(repositoryId, restoration);
-        return restoration;
-    }
-
-    async #restore(repositoryId: RepositoryId): Promise<void> {
-        try {
-            const stored = await this.#settings.read();
-            if (!stored || typeof stored !== "object" || Array.isArray(stored))
-                return;
-            const sessions = Reflect.get(stored, repositoryId);
-            if (!Array.isArray(sessions)) return;
-            for (const value of sessions) {
-                if (typeof value === "string") {
-                    await this.create(repositoryId, { title: value });
-                    continue;
-                }
-                const parsed = PersistedTerminalSessionSchema.safeParse(value);
-                if (parsed.success)
-                    await this.create(repositoryId, parsed.data);
-            }
-        } catch {
-            // Terminal restoration is non-critical; a new session can still be created manually.
-        }
-    }
-
-    #receive(key: string, event: TerminalEvent): void {
-        const session = this.#sessions.get(key);
-        if (!session) return;
-        session.events.push(event);
-        if (event.kind === "output") {
-            session.backlogBytes += event.data.length;
-            while (session.backlogBytes > MAX_BACKLOG_BYTES) {
-                const removed = session.events.shift();
-                if (removed?.kind === "output")
-                    session.backlogBytes -= removed.data.length;
-            }
-        } else if (event.kind === "exited") {
-            session.status = "exited";
-            session.exitCode = event.exitCode;
-        } else {
-            session.status = "failed";
-            session.error = event.message;
-        }
-        for (const listener of this.#eventListeners.get(key) ?? [])
-            listener(event);
-        this.#notify();
-    }
-
-    #notify(): void {
-        this.#version += 1;
-        for (const listener of this.#listeners) listener();
-    }
-
-    async #persist(): Promise<void> {
-        try {
-            const value: Record<string, PersistedTerminalSessions[string]> = {};
-            for (const session of this.#sessions.values()) {
-                value[session.repositoryId] = [
-                    ...(value[session.repositoryId] ?? []),
-                    { title: session.title, target: session.target },
-                ];
-            }
-            await this.#settings.write(value);
-        } catch {
-            // Live terminal sessions remain usable when metadata persistence fails.
-        }
-    }
+  }
 }

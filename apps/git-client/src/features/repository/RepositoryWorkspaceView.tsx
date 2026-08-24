@@ -5,13 +5,13 @@ import { RepositoryStatusFeature } from "./RepositoryStatusFeature";
 import { RepositoryWorkspaceFeature } from "./RepositoryWorkspaceFeature";
 
 export function RepositoryWorkspaceView() {
-    return (
-        <>
-            <RepositoryOverlaysFeature />
-            <RepositoryNavigationFeature />
-            <RepositoryWorkspaceFeature />
-            <RepositoryStatusFeature />
-            <RepositoryDialogsFeature />
-        </>
-    );
+  return (
+    <>
+      <RepositoryOverlaysFeature />
+      <RepositoryNavigationFeature />
+      <RepositoryWorkspaceFeature />
+      <RepositoryStatusFeature />
+      <RepositoryDialogsFeature />
+    </>
+  );
 }

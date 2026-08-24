@@ -13,8 +13,8 @@ import LocalHistoryWindow from "./LocalHistoryWindow";
 import "./styles/index.css";
 
 const ComponentStateFixture = import.meta.env.DEV
-    ? lazy(() => import("./qa/ComponentStateFixture"))
-    : null;
+  ? lazy(() => import("./qa/ComponentStateFixture"))
+  : null;
 
 installBrowserWorkbenchEventPort();
 installDesktopPort();
@@ -24,37 +24,37 @@ installGitSessionBackend(gitSession.backend);
 
 const initialPreference = AppearanceStorage.of(window.localStorage).load();
 const initialColorScheme = resolveAppearance(
-    initialPreference,
-    window.matchMedia("(prefers-color-scheme: dark)").matches,
+  initialPreference,
+  window.matchMedia("(prefers-color-scheme: dark)").matches,
 );
 document.documentElement.dataset.appearanceMode = initialPreference.syncWithOs
-    ? "system"
-    : initialPreference.theme;
+  ? "system"
+  : initialPreference.theme;
 document.documentElement.dataset.theme = initialColorScheme;
 document.documentElement.style.colorScheme = initialColorScheme;
 
 const rootElement = document.getElementById("root");
 if (rootElement === null) throw new Error("Git Client root element is missing");
 const componentStateFixture =
-    ComponentStateFixture !== null &&
-    new URLSearchParams(window.location.search).get("fixture") ===
-        "components" ? (
-        <Suspense fallback={null}>
-            <ComponentStateFixture />
-        </Suspense>
-    ) : null;
+  ComponentStateFixture !== null &&
+  new URLSearchParams(window.location.search).get("fixture") ===
+    "components" ? (
+    <Suspense fallback={null}>
+      <ComponentStateFixture />
+    </Suspense>
+  ) : null;
 
 createRoot(rootElement).render(
-    <StrictMode>
-        <RendererErrorBoundary>
-            <TooltipProvider>
-                {componentStateFixture ??
-                    (window.location.pathname === "/local-history" ? (
-                        <LocalHistoryWindow />
-                    ) : (
-                        <App gitSession={gitSession} />
-                    ))}
-            </TooltipProvider>
-        </RendererErrorBoundary>
-    </StrictMode>,
+  <StrictMode>
+    <RendererErrorBoundary>
+      <TooltipProvider>
+        {componentStateFixture ??
+          (window.location.pathname === "/local-history" ? (
+            <LocalHistoryWindow />
+          ) : (
+            <App gitSession={gitSession} />
+          ))}
+      </TooltipProvider>
+    </RendererErrorBoundary>
+  </StrictMode>,
 );

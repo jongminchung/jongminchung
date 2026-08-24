@@ -3,57 +3,57 @@ import { mergeProjectTreeEntries } from "./projectTree";
 import type { FileChange, TreeEntry } from "./types";
 
 const tracked: readonly TreeEntry[] = [
-    { mode: "040000", kind: "tree", oid: "tree-src", path: "src" },
-    { mode: "100644", kind: "blob", oid: "blob-readme", path: "README.md" },
+  { mode: "040000", kind: "tree", oid: "tree-src", path: "src" },
+  { mode: "100644", kind: "blob", oid: "blob-readme", path: "README.md" },
 ];
 
 const changes: readonly FileChange[] = [
-    { path: "README.md", status: "modified", staged: false, worktree: true },
-    {
-        path: "notes/한글 경로.md",
-        status: "untracked",
-        staged: false,
-        worktree: true,
-    },
-    { path: "src/App.tsx", status: "modified", staged: false, worktree: true },
+  { path: "README.md", status: "modified", staged: false, worktree: true },
+  {
+    path: "notes/한글 경로.md",
+    status: "untracked",
+    staged: false,
+    worktree: true,
+  },
+  { path: "src/App.tsx", status: "modified", staged: false, worktree: true },
 ];
 
 describe("프로젝트 트리", () => {
-    it("[성공] 추적된 버전 항목과 작업 트리의 정의 항목을 강조함", () => {
-        expect(mergeProjectTreeEntries("", tracked, changes)).toEqual([
-            {
-                path: "notes",
-                name: "notes",
-                kind: "tree",
-                oid: "working-tree:notes",
-            },
-            {
-                path: "src",
-                name: "src",
-                kind: "tree",
-                oid: "tree-src",
-                size: undefined,
-            },
-            {
-                path: "README.md",
-                name: "README.md",
-                kind: "blob",
-                oid: "blob-readme",
-                size: undefined,
-                status: "modified",
-            },
-        ]);
-    });
+  it("[성공] 추적된 버전 항목과 작업 트리의 정의 항목을 강조함", () => {
+    expect(mergeProjectTreeEntries("", tracked, changes)).toEqual([
+      {
+        path: "notes",
+        name: "notes",
+        kind: "tree",
+        oid: "working-tree:notes",
+      },
+      {
+        path: "src",
+        name: "src",
+        kind: "tree",
+        oid: "tree-src",
+        size: undefined,
+      },
+      {
+        path: "README.md",
+        name: "README.md",
+        kind: "blob",
+        oid: "blob-readme",
+        size: undefined,
+        status: "modified",
+      },
+    ]);
+  });
 
-    it("[성공] 내부적으로 추적되지 않은 하위 항목을 분류함", () => {
-        expect(mergeProjectTreeEntries("notes", [], changes)).toEqual([
-            {
-                path: "notes/한글 경로.md",
-                name: "한글 경로.md",
-                kind: "blob",
-                oid: "working-tree:notes/한글 경로.md",
-                status: "untracked",
-            },
-        ]);
-    });
+  it("[성공] 내부적으로 추적되지 않은 하위 항목을 분류함", () => {
+    expect(mergeProjectTreeEntries("notes", [], changes)).toEqual([
+      {
+        path: "notes/한글 경로.md",
+        name: "한글 경로.md",
+        kind: "blob",
+        oid: "working-tree:notes/한글 경로.md",
+        status: "untracked",
+      },
+    ]);
+  });
 });

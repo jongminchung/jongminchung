@@ -4,26 +4,26 @@ import { AppearanceProvider } from "./components/AppearanceProvider";
 import { CommandProvider } from "./components/CommandProvider";
 import { GitClientTheme } from "./components/GitClientTheme";
 import {
-    GitSessionStoreProvider,
-    type GitSessionStoreDependencies,
+  GitSessionStoreProvider,
+  type GitSessionStoreDependencies,
 } from "./features/repository/session/GitSessionStoreProvider";
 
 export default function App({
-    gitSession,
+  gitSession,
 }: {
-    readonly gitSession: GitSessionStoreDependencies;
+  readonly gitSession: GitSessionStoreDependencies;
 }) {
-    return (
-        <AppearanceProvider>
-            <GitClientTheme>
-                <CommandProvider>
-                    <GitSessionStoreProvider {...gitSession}>
-                        <AppStoreProvider>
-                            <AppShell />
-                        </AppStoreProvider>
-                    </GitSessionStoreProvider>
-                </CommandProvider>
-            </GitClientTheme>
-        </AppearanceProvider>
-    );
+  return (
+    <AppearanceProvider>
+      <GitClientTheme>
+        <CommandProvider>
+          <GitSessionStoreProvider {...gitSession}>
+            <AppStoreProvider>
+              <AppShell />
+            </AppStoreProvider>
+          </GitSessionStoreProvider>
+        </CommandProvider>
+      </GitClientTheme>
+    </AppearanceProvider>
+  );
 }

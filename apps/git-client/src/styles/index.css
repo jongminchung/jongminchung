@@ -5,141 +5,137 @@
 @source "../**/*.{ts,tsx}";
 
 @theme inline {
-    --color-success: var(--success);
-    --color-success-muted: var(--success-muted);
-    --color-success-muted-foreground: var(--success-muted-foreground);
-    --color-warning: var(--warning);
-    --color-warning-muted: var(--warning-muted);
-    --color-warning-muted-foreground: var(--warning-muted-foreground);
-    --color-destructive-muted: var(--destructive-muted);
-    --color-destructive-muted-foreground: var(--destructive-muted-foreground);
-    --color-disabled-foreground: var(--disabled-foreground);
+  --color-success: var(--success);
+  --color-success-muted: var(--success-muted);
+  --color-success-muted-foreground: var(--success-muted-foreground);
+  --color-warning: var(--warning);
+  --color-warning-muted: var(--warning-muted);
+  --color-warning-muted-foreground: var(--warning-muted-foreground);
+  --color-destructive-muted: var(--destructive-muted);
+  --color-destructive-muted-foreground: var(--destructive-muted-foreground);
+  --color-disabled-foreground: var(--disabled-foreground);
 }
 
 @source not "../../.vite/**/*";
 @source not "../../out/**/*";
 
 @font-face {
-    font-display: swap;
-    font-family: "JetBrains Mono Rebased";
-    font-style: normal;
-    font-weight: 400;
-    src: url("../assets/fonts/JetBrainsMono-Regular.ttf") format("truetype");
+  font-display: swap;
+  font-family: "JetBrains Mono Rebased";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../assets/fonts/JetBrainsMono-Regular.ttf") format("truetype");
 }
 
 @font-face {
-    font-display: swap;
-    font-family: "JetBrains Mono Rebased";
-    font-style: normal;
-    font-weight: 700;
-    src: url("../assets/fonts/JetBrainsMono-Bold.ttf") format("truetype");
+  font-display: swap;
+  font-family: "JetBrains Mono Rebased";
+  font-style: normal;
+  font-weight: 700;
+  src: url("../assets/fonts/JetBrainsMono-Bold.ttf") format("truetype");
 }
 
 @layer base {
-    html,
-    body,
-    #root {
-        height: 100%;
-        margin: 0;
-        overflow: hidden;
-    }
+  html,
+  body,
+  #root {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+  }
 
-    #root {
-        zoom: var(--product-zoom, 1);
-    }
+  #root {
+    zoom: var(--product-zoom, 1);
+  }
 
-    html[data-compact="true"] {
-        --radius: 0.5rem;
-    }
+  html[data-compact="true"] {
+    --radius: 0.5rem;
+  }
 
-    body {
-        font-family: var(--font-family-body);
-        font-size: var(--font-size-base);
-        -webkit-font-smoothing: antialiased;
-    }
+  body {
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-base);
+    -webkit-font-smoothing: antialiased;
+  }
 
-    code,
-    pre,
-    kbd {
-        font-family: var(--font-family-code);
-    }
+  code,
+  pre,
+  kbd {
+    font-family: var(--font-family-code);
+  }
 
-    html[data-bidi-text-direction="content"] .cm-content {
-        unicode-bidi: plaintext;
-    }
+  html[data-bidi-text-direction="content"] .cm-content {
+    unicode-bidi: plaintext;
+  }
 
-    html[data-bidi-text-direction="ltr"] .cm-content {
-        direction: ltr;
-        unicode-bidi: isolate;
-    }
+  html[data-bidi-text-direction="ltr"] .cm-content {
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
 
-    html[data-bidi-text-direction="rtl"] .cm-content {
-        direction: rtl;
-        unicode-bidi: isolate;
-    }
+  html[data-bidi-text-direction="rtl"] .cm-content {
+    direction: rtl;
+    unicode-bidi: isolate;
+  }
 
-    ::selection {
-        background: var(--accent);
-    }
+  ::selection {
+    background: var(--accent);
+  }
 
-    ::-webkit-scrollbar {
-        width: 11px;
-        height: 11px;
-    }
+  ::-webkit-scrollbar {
+    width: 11px;
+    height: 11px;
+  }
 
-    ::-webkit-scrollbar-thumb {
-        border: 3px solid transparent;
-        border-radius: var(--radius-lg);
-        background: color-mix(
-            in oklch,
-            var(--muted-foreground) 45%,
-            transparent
-        );
-        background-clip: padding-box;
-    }
+  ::-webkit-scrollbar-thumb {
+    border: 3px solid transparent;
+    border-radius: var(--radius-lg);
+    background: color-mix(in oklch, var(--muted-foreground) 45%, transparent);
+    background-clip: padding-box;
+  }
 
-    ::-webkit-scrollbar-corner {
-        background: transparent;
-    }
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
 }
 
 .cm-editor {
-    background: var(--muted) !important;
+  background: var(--muted) !important;
 }
 
 .cm-gutters {
-    background: var(--card) !important;
-    border-color: var(--border) !important;
-    color: var(--disabled-foreground) !important;
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+  color: var(--disabled-foreground) !important;
 }
 
 .cm-lineActionGutter {
-    min-width: 22px;
+  min-width: 22px;
 }
 
 .cm-lineActionMarker {
-    align-items: center;
-    color: var(--primary);
-    cursor: pointer;
-    display: flex;
-    font-size: 10px;
-    height: 100%;
-    justify-content: center;
-    width: 20px;
+  align-items: center;
+  color: var(--primary);
+  cursor: pointer;
+  display: flex;
+  font-size: 10px;
+  height: 100%;
+  justify-content: center;
+  width: 20px;
 }
 
 .cm-mergeView,
 .cm-mergeViewEditors,
 .cm-mergeViewEditor {
-    height: 100%;
-    min-height: 0;
+  height: 100%;
+  min-height: 0;
 }
 
 .cm-mergeViewEditors {
-    overflow: hidden;
+  overflow: hidden;
 }
 
 .xterm-viewport,
 .xterm-screen {
-    background: var(--card) !important;
+  background: var(--card) !important;
 }

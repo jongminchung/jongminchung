@@ -1,5 +1,5 @@
 export type CloneOptions = {
-    depth: number | null;
-    branch: string | null;
-    recurseSubmodules: boolean;
+  depth: number | null;
+  branch: string | null;
+  recurseSubmodules: boolean;
 };

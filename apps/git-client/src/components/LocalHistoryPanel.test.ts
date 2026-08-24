@@ -5,34 +5,34 @@ import { CommandProvider } from "./CommandProvider";
 import { LocalHistoryPanel } from "./LocalHistoryPanel";
 
 describe("현장히스토리를 소개함", () => {
-    it("[성공] 프로젝트/파일 기록 제어 및 복원 어포던스를 보내함", () => {
-        const markup = renderToStaticMarkup(
-            createElement(
-                CommandProvider,
-                null,
-                createElement(LocalHistoryPanel, {
-                    initialPath: "README.md",
-                    repositoryId: "723094e7-bf3b-4d3f-8f74-6cebe9571841",
-                    repositoryName: "sample",
-                    mode: "project",
-                    loadActivities: vi.fn(async () => ({
-                        activities: [],
-                        nextCursor: null,
-                    })),
-                    loadActivity: vi.fn(),
-                    loadDiff: vi.fn(async () => ""),
-                    onRevert: vi.fn(async () => undefined),
-                    onCreatePatch: vi.fn(async () => ""),
-                    onPutLabel: vi.fn(),
-                }),
-            ),
-        );
+  it("[성공] 프로젝트/파일 기록 제어 및 복원 어포던스를 보내함", () => {
+    const markup = renderToStaticMarkup(
+      createElement(
+        CommandProvider,
+        null,
+        createElement(LocalHistoryPanel, {
+          initialPath: "README.md",
+          repositoryId: "723094e7-bf3b-4d3f-8f74-6cebe9571841",
+          repositoryName: "sample",
+          mode: "project",
+          loadActivities: vi.fn(async () => ({
+            activities: [],
+            nextCursor: null,
+          })),
+          loadActivity: vi.fn(),
+          loadDiff: vi.fn(async () => ""),
+          onRevert: vi.fn(async () => undefined),
+          onCreatePatch: vi.fn(async () => ""),
+          onPutLabel: vi.fn(),
+        }),
+      ),
+    );
 
-        expect(markup).toContain('aria-label="Local History"');
-        expect(markup).toContain('aria-label="Search by file name"');
-        expect(markup).toContain('aria-label="Activity History"');
-        expect(markup).toContain("No activity in sample detected");
-        expect(markup).toContain("Revert Selected and Later Changes");
-        expect(markup).toContain("Select activity to view changes");
-    });
+    expect(markup).toContain('aria-label="Local History"');
+    expect(markup).toContain('aria-label="Search by file name"');
+    expect(markup).toContain('aria-label="Activity History"');
+    expect(markup).toContain("No activity in sample detected");
+    expect(markup).toContain("Revert Selected and Later Changes");
+    expect(markup).toContain("Select activity to view changes");
+  });
 });

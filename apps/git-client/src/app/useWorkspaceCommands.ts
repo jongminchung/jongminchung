@@ -7,9 +7,9 @@ import { createProjectCommands } from "./commands/projectCommands";
 import type { WorkspaceCommandPorts } from "./commands/workspaceCommands";
 
 export function useWorkspaceCommands(ports: WorkspaceCommandPorts): void {
-    useCommandDefinitions(createProjectCommands(ports.project));
-    useCommandDefinitions(createLayoutCommands(ports.layout));
-    useCommandDefinitions(createHelpCommands(ports.help));
-    useCommandDefinitions(createMacroCommands(ports.macro));
-    useCommandDefinitions(createAppearanceCommands(ports.appearance));
+  useCommandDefinitions(createProjectCommands(ports.project));
+  useCommandDefinitions(createLayoutCommands(ports.layout));
+  useCommandDefinitions(createHelpCommands(ports.help));
+  useCommandDefinitions(createMacroCommands(ports.macro));
+  useCommandDefinitions(createAppearanceCommands(ports.appearance));
 }

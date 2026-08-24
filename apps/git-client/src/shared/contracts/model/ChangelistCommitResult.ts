@@ -1,4 +1,4 @@
 export type ChangelistCommitResult = {
-    changelistId: string;
-    commitOid: string;
+  changelistId: string;
+  commitOid: string;
 };

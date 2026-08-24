@@ -4,44 +4,44 @@ import { RepositoryWorkspaceFeatureProvider } from "./RepositoryWorkspaceFeature
 import { RepositoryWorkspaceView } from "./RepositoryWorkspaceView";
 import { RepositoryWorkspaceStoreProvider } from "./state/RepositoryWorkspaceStoreProvider";
 import {
-    useRepositoryWorkspaceFeature,
-    type RepositoryWorkspaceProps,
+  useRepositoryWorkspaceFeature,
+  type RepositoryWorkspaceProps,
 } from "./useRepositoryWorkspaceFeature";
 
 export type { RepositoryWorkspaceProps } from "./useRepositoryWorkspaceFeature";
 
 export function RepositoryWorkspace(props: RepositoryWorkspaceProps) {
-    return (
-        <RepositoryWorkspaceProvider repository={props.repository}>
-            <RepositoryWorkspaceContent {...props} />
-        </RepositoryWorkspaceProvider>
-    );
+  return (
+    <RepositoryWorkspaceProvider repository={props.repository}>
+      <RepositoryWorkspaceContent {...props} />
+    </RepositoryWorkspaceProvider>
+  );
 }
 
 function RepositoryWorkspaceProvider({
-    children,
-    repository,
+  children,
+  repository,
 }: {
-    readonly children: ReactNode;
-    readonly repository: RepositoryWorkspaceProps["repository"];
+  readonly children: ReactNode;
+  readonly repository: RepositoryWorkspaceProps["repository"];
 }) {
-    return (
-        <RepositoryWorkspaceStoreProvider
-            electronRuntime={isElectronRuntime()}
-            repositoryId={repository.snapshot.id}
-            repositoryName={repository.snapshot.name}
-            selectedRef={repository.refs.find((ref) => ref.current)?.name}
-        >
-            {children}
-        </RepositoryWorkspaceStoreProvider>
-    );
+  return (
+    <RepositoryWorkspaceStoreProvider
+      electronRuntime={isElectronRuntime()}
+      repositoryId={repository.snapshot.id}
+      repositoryName={repository.snapshot.name}
+      selectedRef={repository.refs.find((ref) => ref.current)?.name}
+    >
+      {children}
+    </RepositoryWorkspaceStoreProvider>
+  );
 }
 
 function RepositoryWorkspaceContent(props: RepositoryWorkspaceProps) {
-    const model = useRepositoryWorkspaceFeature(props);
-    return (
-        <RepositoryWorkspaceFeatureProvider model={model}>
-            <RepositoryWorkspaceView />
-        </RepositoryWorkspaceFeatureProvider>
-    );
+  const model = useRepositoryWorkspaceFeature(props);
+  return (
+    <RepositoryWorkspaceFeatureProvider model={model}>
+      <RepositoryWorkspaceView />
+    </RepositoryWorkspaceFeatureProvider>
+  );
 }

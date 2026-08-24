@@ -5,25 +5,23 @@ import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import { defaultClientConditions, defineConfig } from "vite";
 
 export default defineConfig({
-    clearScreen: false,
-    plugins: [
-        react(),
-        babel({
-            presets: [reactCompilerPreset({ compilationMode: "annotation" })],
-        }),
-        tailwindcss(),
-    ],
-    resolve: {
-        alias: [
-            { find: "@", replacement: resolve(import.meta.dirname, "src") },
-        ],
-        conditions: ["source", ...defaultClientConditions],
-        dedupe: ["react", "react-dom"],
-        preserveSymlinks: false,
-    },
-    server: {
-        host: false,
-        port: 1420,
-        strictPort: true,
-    },
+  clearScreen: false,
+  plugins: [
+    react(),
+    babel({
+      presets: [reactCompilerPreset({ compilationMode: "annotation" })],
+    }),
+    tailwindcss(),
+  ],
+  resolve: {
+    alias: [{ find: "@", replacement: resolve(import.meta.dirname, "src") }],
+    conditions: ["source", ...defaultClientConditions],
+    dedupe: ["react", "react-dom"],
+    preserveSymlinks: false,
+  },
+  server: {
+    host: false,
+    port: 1420,
+    strictPort: true,
+  },
 });

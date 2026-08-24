@@ -1,22 +1,22 @@
 // oxlint-disable typescript/no-explicit-any -- Native TypeScript entry points retain dynamic process, fixture, and injected test-double boundaries.
 import { lstat, readdir, realpath, rm } from "node:fs/promises";
 import {
-    basename,
-    dirname,
-    isAbsolute,
-    join,
-    relative,
-    resolve,
-    sep,
+  basename,
+  dirname,
+  isAbsolute,
+  join,
+  relative,
+  resolve,
+  sep,
 } from "node:path";
 
 const ELECTRON_FRAMEWORK_RESOURCES = [
-    "Contents",
-    "Frameworks",
-    "Electron Framework.framework",
-    "Versions",
-    "A",
-    "Resources",
+  "Contents",
+  "Frameworks",
+  "Electron Framework.framework",
+  "Versions",
+  "A",
+  "Resources",
 ];
 
 /**
@@ -32,203 +32,198 @@ const ELECTRON_FRAMEWORK_RESOURCES = [
  *   zh-Hant -> zh_TW
  */
 export const ELECTRON_LOCALE_ALLOWLIST = Object.freeze([
-    "en.lproj",
-    "en_FEMININE.lproj",
-    "en_GB.lproj",
-    "en_GB_FEMININE.lproj",
-    "en_GB_MASCULINE.lproj",
-    "en_GB_NEUTER.lproj",
-    "en_MASCULINE.lproj",
-    "en_NEUTER.lproj",
-    "ja.lproj",
-    "ja_FEMININE.lproj",
-    "ja_MASCULINE.lproj",
-    "ja_NEUTER.lproj",
-    "ko.lproj",
-    "ko_FEMININE.lproj",
-    "ko_MASCULINE.lproj",
-    "ko_NEUTER.lproj",
-    "zh_CN.lproj",
-    "zh_CN_FEMININE.lproj",
-    "zh_CN_MASCULINE.lproj",
-    "zh_CN_NEUTER.lproj",
-    "zh_TW.lproj",
-    "zh_TW_FEMININE.lproj",
-    "zh_TW_MASCULINE.lproj",
-    "zh_TW_NEUTER.lproj",
+  "en.lproj",
+  "en_FEMININE.lproj",
+  "en_GB.lproj",
+  "en_GB_FEMININE.lproj",
+  "en_GB_MASCULINE.lproj",
+  "en_GB_NEUTER.lproj",
+  "en_MASCULINE.lproj",
+  "en_NEUTER.lproj",
+  "ja.lproj",
+  "ja_FEMININE.lproj",
+  "ja_MASCULINE.lproj",
+  "ja_NEUTER.lproj",
+  "ko.lproj",
+  "ko_FEMININE.lproj",
+  "ko_MASCULINE.lproj",
+  "ko_NEUTER.lproj",
+  "zh_CN.lproj",
+  "zh_CN_FEMININE.lproj",
+  "zh_CN_MASCULINE.lproj",
+  "zh_CN_NEUTER.lproj",
+  "zh_TW.lproj",
+  "zh_TW_FEMININE.lproj",
+  "zh_TW_MASCULINE.lproj",
+  "zh_TW_NEUTER.lproj",
 ]);
 
 export interface LocaleVerification {
-    readonly resourcesPath: string;
-    readonly locales: readonly string[];
+  readonly resourcesPath: string;
+  readonly locales: readonly string[];
 }
 
 export interface LocalePruneResult {
-    readonly skipped: boolean;
-    readonly resourcesPath?: string;
-    readonly removed: readonly string[];
-    readonly kept: readonly string[];
+  readonly skipped: boolean;
+  readonly resourcesPath?: string;
+  readonly removed: readonly string[];
+  readonly kept: readonly string[];
 }
 
 const allowedLocales = new Set(ELECTRON_LOCALE_ALLOWLIST);
 
 export function electronFrameworkResourcesPath(buildPath: string): string {
-    if (typeof buildPath !== "string" || !isAbsolute(buildPath)) {
-        throw new Error("Electron build path must be absolute");
-    }
-    return packagedElectronFrameworkResourcesPath(
-        join(resolve(buildPath), "Electron.app"),
-    );
+  if (typeof buildPath !== "string" || !isAbsolute(buildPath)) {
+    throw new Error("Electron build path must be absolute");
+  }
+  return packagedElectronFrameworkResourcesPath(
+    join(resolve(buildPath), "Electron.app"),
+  );
 }
 
 export function packagedElectronFrameworkResourcesPath(
-    appPath: string,
+  appPath: string,
 ): string {
-    if (
-        typeof appPath !== "string" ||
-        !isAbsolute(appPath) ||
-        !appPath.endsWith(".app")
-    ) {
-        throw new Error(
-            "Packaged Electron app path must be an absolute .app path",
-        );
-    }
-    return join(resolve(appPath), ...ELECTRON_FRAMEWORK_RESOURCES);
+  if (
+    typeof appPath !== "string" ||
+    !isAbsolute(appPath) ||
+    !appPath.endsWith(".app")
+  ) {
+    throw new Error("Packaged Electron app path must be an absolute .app path");
+  }
+  return join(resolve(appPath), ...ELECTRON_FRAMEWORK_RESOURCES);
 }
 
 async function readLocaleEntries(resourcesPath: any) {
-    const entries = await readdir(resourcesPath, { withFileTypes: true });
-    const localeEntries = entries.filter((entry: any) =>
-        entry.name.endsWith(".lproj"),
-    );
+  const entries = await readdir(resourcesPath, { withFileTypes: true });
+  const localeEntries = entries.filter((entry: any) =>
+    entry.name.endsWith(".lproj"),
+  );
 
-    for (const entry of localeEntries) {
-        if (!entry.isDirectory() || entry.isSymbolicLink()) {
-            throw new Error(
-                `Refusing to modify non-directory Electron locale: ${entry.name}`,
-            );
-        }
+  for (const entry of localeEntries) {
+    if (!entry.isDirectory() || entry.isSymbolicLink()) {
+      throw new Error(
+        `Refusing to modify non-directory Electron locale: ${entry.name}`,
+      );
     }
+  }
 
-    return localeEntries.sort((left: any, right: any) =>
-        left.name.localeCompare(right.name),
-    );
+  return localeEntries.sort((left: any, right: any) =>
+    left.name.localeCompare(right.name),
+  );
 }
 
 async function assertContainedLocaleDirectory(
-    resourcesPath: any,
-    localeName: any,
+  resourcesPath: any,
+  localeName: any,
 ) {
-    const resourcesRealPath = await realpath(resourcesPath);
-    const localePath = join(resourcesRealPath, localeName);
-    const localeStat = await lstat(localePath);
+  const resourcesRealPath = await realpath(resourcesPath);
+  const localePath = join(resourcesRealPath, localeName);
+  const localeStat = await lstat(localePath);
 
-    if (!localeStat.isDirectory() || localeStat.isSymbolicLink()) {
-        throw new Error(
-            `Refusing to modify non-directory Electron locale: ${localeName}`,
-        );
-    }
+  if (!localeStat.isDirectory() || localeStat.isSymbolicLink()) {
+    throw new Error(
+      `Refusing to modify non-directory Electron locale: ${localeName}`,
+    );
+  }
 
-    const localeRealPath = await realpath(localePath);
-    const relativePath = relative(resourcesRealPath, localeRealPath);
-    if (
-        relativePath.length === 0 ||
-        relativePath.startsWith(`..${sep}`) ||
-        relativePath === ".." ||
-        isAbsolute(relativePath) ||
-        dirname(localeRealPath) !== resourcesRealPath ||
-        basename(localeRealPath) !== localeName
-    ) {
-        throw new Error(
-            `Electron locale resolved outside the expected resources directory: ${localeName}`,
-        );
-    }
+  const localeRealPath = await realpath(localePath);
+  const relativePath = relative(resourcesRealPath, localeRealPath);
+  if (
+    relativePath.length === 0 ||
+    relativePath.startsWith(`..${sep}`) ||
+    relativePath === ".." ||
+    isAbsolute(relativePath) ||
+    dirname(localeRealPath) !== resourcesRealPath ||
+    basename(localeRealPath) !== localeName
+  ) {
+    throw new Error(
+      `Electron locale resolved outside the expected resources directory: ${localeName}`,
+    );
+  }
 
-    return localeRealPath;
+  return localeRealPath;
 }
 
 function assertAllowlistPresent(localeNames: any) {
-    const localeNameSet = new Set(localeNames);
-    const missingLocales = ELECTRON_LOCALE_ALLOWLIST.filter(
-        (locale: any) => !localeNameSet.has(locale),
+  const localeNameSet = new Set(localeNames);
+  const missingLocales = ELECTRON_LOCALE_ALLOWLIST.filter(
+    (locale: any) => !localeNameSet.has(locale),
+  );
+  if (missingLocales.length > 0) {
+    throw new Error(
+      `Electron locale allowlist is incomplete: ${missingLocales.join(", ")}`,
     );
-    if (missingLocales.length > 0) {
-        throw new Error(
-            `Electron locale allowlist is incomplete: ${missingLocales.join(", ")}`,
-        );
-    }
+  }
 }
 
 export async function verifyElectronLocales(
-    resourcesPath: string,
+  resourcesPath: string,
 ): Promise<LocaleVerification> {
-    const resolvedResourcesPath = await realpath(resourcesPath);
-    const localeEntries = await readLocaleEntries(resolvedResourcesPath);
-    const localeNames = localeEntries.map((entry: any) => entry.name);
-    assertAllowlistPresent(localeNames);
+  const resolvedResourcesPath = await realpath(resourcesPath);
+  const localeEntries = await readLocaleEntries(resolvedResourcesPath);
+  const localeNames = localeEntries.map((entry: any) => entry.name);
+  assertAllowlistPresent(localeNames);
 
-    const unexpectedLocales = localeNames.filter(
-        (locale: any) => !allowedLocales.has(locale),
+  const unexpectedLocales = localeNames.filter(
+    (locale: any) => !allowedLocales.has(locale),
+  );
+  if (unexpectedLocales.length > 0) {
+    throw new Error(
+      `Unexpected Electron locales remain: ${unexpectedLocales.join(", ")}`,
     );
-    if (unexpectedLocales.length > 0) {
-        throw new Error(
-            `Unexpected Electron locales remain: ${unexpectedLocales.join(", ")}`,
-        );
-    }
+  }
 
-    for (const localeName of localeNames) {
-        await assertContainedLocaleDirectory(resolvedResourcesPath, localeName);
-    }
+  for (const localeName of localeNames) {
+    await assertContainedLocaleDirectory(resolvedResourcesPath, localeName);
+  }
 
-    return Object.freeze({
-        resourcesPath: resolvedResourcesPath,
-        locales: Object.freeze(localeNames),
-    });
+  return Object.freeze({
+    resourcesPath: resolvedResourcesPath,
+    locales: Object.freeze(localeNames),
+  });
 }
 
 export async function pruneElectronLocales({
-    buildPath,
-    platform,
+  buildPath,
+  platform,
 }: {
-    readonly buildPath: string;
-    readonly platform: string;
+  readonly buildPath: string;
+  readonly platform: string;
 }): Promise<LocalePruneResult> {
-    if (platform !== "darwin") {
-        return Object.freeze({
-            skipped: true,
-            removed: Object.freeze([]),
-            kept: Object.freeze([]),
-        });
-    }
-
-    const resourcesPath = electronFrameworkResourcesPath(buildPath);
-    const resolvedResourcesPath = await realpath(resourcesPath);
-    const localeEntries = await readLocaleEntries(resolvedResourcesPath);
-    const localeNames = localeEntries.map((entry: any) => entry.name);
-    assertAllowlistPresent(localeNames);
-
-    const removableLocales = localeNames.filter(
-        (locale: any) => !allowedLocales.has(locale),
-    );
-    const removablePaths: any[] = [];
-    for (const localeName of removableLocales) {
-        removablePaths.push(
-            await assertContainedLocaleDirectory(
-                resolvedResourcesPath,
-                localeName,
-            ),
-        );
-    }
-
-    for (const localePath of removablePaths) {
-        await rm(localePath, { recursive: true, force: false });
-    }
-
-    const verification = await verifyElectronLocales(resolvedResourcesPath);
+  if (platform !== "darwin") {
     return Object.freeze({
-        skipped: false,
-        resourcesPath: verification.resourcesPath,
-        removed: Object.freeze(removableLocales),
-        kept: verification.locales,
+      skipped: true,
+      removed: Object.freeze([]),
+      kept: Object.freeze([]),
     });
+  }
+
+  const resourcesPath = electronFrameworkResourcesPath(buildPath);
+  const resolvedResourcesPath = await realpath(resourcesPath);
+  const localeEntries = await readLocaleEntries(resolvedResourcesPath);
+  const localeNames = localeEntries.map((entry: any) => entry.name);
+  assertAllowlistPresent(localeNames);
+
+  const removableLocales = localeNames.filter(
+    (locale: any) => !allowedLocales.has(locale),
+  );
+  const removablePaths: any[] = [];
+  for (const localeName of removableLocales) {
+    removablePaths.push(
+      await assertContainedLocaleDirectory(resolvedResourcesPath, localeName),
+    );
+  }
+
+  for (const localePath of removablePaths) {
+    await rm(localePath, { recursive: true, force: false });
+  }
+
+  const verification = await verifyElectronLocales(resolvedResourcesPath);
+  return Object.freeze({
+    skipped: false,
+    resourcesPath: verification.resourcesPath,
+    removed: Object.freeze(removableLocales),
+    kept: verification.locales,
+  });
 }

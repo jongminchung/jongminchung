@@ -25,10 +25,10 @@ export type { HostingAccount } from "./HostingAccount";
 export type { HostingChangeRequest } from "./HostingChangeRequest";
 export type { HostingChangedFile } from "./HostingChangedFile";
 export type {
-    HostingMergeReadiness,
-    HostingMergeReadinessCapability,
-    HostingMergeReadinessReason,
-    HostingMergeReadinessState,
+  HostingMergeReadiness,
+  HostingMergeReadinessCapability,
+  HostingMergeReadinessReason,
+  HostingMergeReadinessState,
 } from "./HostingMergeReadiness";
 export type { HostingOAuthPrompt } from "./HostingOAuthPrompt";
 export type { HostingProviderKind } from "./HostingProviderKind";

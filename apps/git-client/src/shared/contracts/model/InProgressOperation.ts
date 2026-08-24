@@ -1,6 +1,6 @@
 export type InProgressOperation =
-    | "merge"
-    | "rebase"
-    | "cherryPick"
-    | "revert"
-    | "bisect";
+  | "merge"
+  | "rebase"
+  | "cherryPick"
+  | "revert"
+  | "bisect";

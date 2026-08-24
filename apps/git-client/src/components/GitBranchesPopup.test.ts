@@ -6,53 +6,51 @@ import { CommandProvider } from "./CommandProvider";
 import { GitBranchesPopup } from "./GitBranchesPopup";
 
 describe("GitBranches팝업", () => {
-    it("[성공] Rebased 검색, 작업 도구 모음 및 분기 트리를 연결함", () => {
-        const markup = renderToStaticMarkup(
-            createElement(
-                CommandProvider,
-                null,
-                createElement(GitBranchesPopup, {
-                    refs: sampleRefs,
-                    currentBranch: "main",
-                    onCheckout: vi.fn(() => Promise.resolve()),
-                    onOperation: vi.fn(() => Promise.resolve()),
-                    onCompare: vi.fn(() =>
-                        Promise.resolve({
-                            ahead: 1,
-                            behind: 2,
-                            leftOnly: [],
-                            rightOnly: [],
-                        }),
-                    ),
-                    onCommit: vi.fn(),
-                    onOpenSettings: vi.fn(),
-                    onClose: vi.fn(),
-                    remotes: [
-                        {
-                            name: "origin",
-                            fetchUrl: "git@example.test/repo.git",
-                            pushUrl: "git@example.test/repo.git",
-                        },
-                    ],
-                }),
-            ),
-        );
+  it("[성공] Rebased 검색, 작업 도구 모음 및 분기 트리를 연결함", () => {
+    const markup = renderToStaticMarkup(
+      createElement(
+        CommandProvider,
+        null,
+        createElement(GitBranchesPopup, {
+          refs: sampleRefs,
+          currentBranch: "main",
+          onCheckout: vi.fn(() => Promise.resolve()),
+          onOperation: vi.fn(() => Promise.resolve()),
+          onCompare: vi.fn(() =>
+            Promise.resolve({
+              ahead: 1,
+              behind: 2,
+              leftOnly: [],
+              rightOnly: [],
+            }),
+          ),
+          onCommit: vi.fn(),
+          onOpenSettings: vi.fn(),
+          onClose: vi.fn(),
+          remotes: [
+            {
+              name: "origin",
+              fetchUrl: "git@example.test/repo.git",
+              pushUrl: "git@example.test/repo.git",
+            },
+          ],
+        }),
+      ),
+    );
 
-        expect(markup).toContain('aria-label="Search"');
-        expect(markup).not.toContain('autofocus=""');
-        expect(markup).toContain(
-            'placeholder="Search for branches and actions"',
-        );
-        expect(markup).toContain('aria-label="Branches Tree"');
-        expect(markup).toContain('role="tree"');
-        expect(markup).toContain('role="treeitem"');
-        expect(markup).toContain("Commit…");
-        expect(markup).toContain("New Branch…");
-        expect(markup).toContain("Checkout Tag or Revision…");
-        expect(markup).toContain('aria-label="Fetch"');
-        expect(markup).toContain('aria-label="Settings"');
-        expect(markup).toContain(">Local<");
-        expect(markup).toContain(">Remote<");
-        expect(markup).not.toContain("New Branch from…");
-    });
+    expect(markup).toContain('aria-label="Search"');
+    expect(markup).not.toContain('autofocus=""');
+    expect(markup).toContain('placeholder="Search for branches and actions"');
+    expect(markup).toContain('aria-label="Branches Tree"');
+    expect(markup).toContain('role="tree"');
+    expect(markup).toContain('role="treeitem"');
+    expect(markup).toContain("Commit…");
+    expect(markup).toContain("New Branch…");
+    expect(markup).toContain("Checkout Tag or Revision…");
+    expect(markup).toContain('aria-label="Fetch"');
+    expect(markup).toContain('aria-label="Settings"');
+    expect(markup).toContain(">Local<");
+    expect(markup).toContain(">Remote<");
+    expect(markup).not.toContain("New Branch from…");
+  });
 });

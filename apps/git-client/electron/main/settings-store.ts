@@ -5,163 +5,152 @@ import { JsonValueSchema } from "../../src/shared/contracts/ipc";
 import { NativeError } from "../shared/native-error";
 
 interface SettingsDocument {
-    readonly schemaVersion: 2;
-    readonly values: Readonly<Record<string, JsonValue>>;
+  readonly schemaVersion: 2;
+  readonly values: Readonly<Record<string, JsonValue>>;
 }
 
 const SETTINGS_SCHEMA_VERSION = 2;
 const LEGACY_SETTINGS_SCHEMA_VERSION = 1;
 
 function legacyBackupPath(filePath: string, now: Date): string {
-    const timestamp = now.toISOString().replaceAll(/[:.]/gu, "-");
-    return `${filePath}.v${LEGACY_SETTINGS_SCHEMA_VERSION}.${timestamp}.backup`;
+  const timestamp = now.toISOString().replaceAll(/[:.]/gu, "-");
+  return `${filePath}.v${LEGACY_SETTINGS_SCHEMA_VERSION}.${timestamp}.backup`;
 }
 
 function parseSettings(
-    raw: unknown,
-    expectedVersion: number = SETTINGS_SCHEMA_VERSION,
+  raw: unknown,
+  expectedVersion: number = SETTINGS_SCHEMA_VERSION,
 ): SettingsDocument {
-    if (typeof raw !== "object" || raw === null) {
-        throw NativeError.create(
-            "settings.invalid",
-            "Settings must be a JSON object.",
-        );
-    }
-    if (!("schemaVersion" in raw) || raw.schemaVersion !== expectedVersion) {
-        throw NativeError.create(
-            "settings.version",
-            "Unsupported settings version.",
-        );
-    }
-    if (
-        !("values" in raw) ||
-        typeof raw.values !== "object" ||
-        raw.values === null ||
-        Array.isArray(raw.values)
-    ) {
-        throw NativeError.create(
-            "settings.invalid",
-            "Settings values are missing.",
-        );
-    }
+  if (typeof raw !== "object" || raw === null) {
+    throw NativeError.create(
+      "settings.invalid",
+      "Settings must be a JSON object.",
+    );
+  }
+  if (!("schemaVersion" in raw) || raw.schemaVersion !== expectedVersion) {
+    throw NativeError.create(
+      "settings.version",
+      "Unsupported settings version.",
+    );
+  }
+  if (
+    !("values" in raw) ||
+    typeof raw.values !== "object" ||
+    raw.values === null ||
+    Array.isArray(raw.values)
+  ) {
+    throw NativeError.create(
+      "settings.invalid",
+      "Settings values are missing.",
+    );
+  }
 
-    const values: Record<string, JsonValue> = {};
-    for (const [key, value] of Object.entries(raw.values)) {
-        values[key] = JsonValueSchema.parse(value);
-    }
-    return { schemaVersion: SETTINGS_SCHEMA_VERSION, values };
+  const values: Record<string, JsonValue> = {};
+  for (const [key, value] of Object.entries(raw.values)) {
+    values[key] = JsonValueSchema.parse(value);
+  }
+  return { schemaVersion: SETTINGS_SCHEMA_VERSION, values };
 }
 
 export class SettingsStore {
-    private writeQueue: Promise<void> = Promise.resolve();
+  private writeQueue: Promise<void> = Promise.resolve();
 
-    private constructor(
-        private readonly filePath: string,
-        private values: Record<string, JsonValue>,
-    ) {}
+  private constructor(
+    private readonly filePath: string,
+    private values: Record<string, JsonValue>,
+  ) {}
 
-    static async of(filePath: string): Promise<SettingsStore> {
-        try {
-            const rawText = await readFile(filePath, "utf8");
-            const raw = JSON.parse(rawText) as unknown;
-            if (
-                typeof raw === "object" &&
-                raw !== null &&
-                "schemaVersion" in raw &&
-                raw.schemaVersion === LEGACY_SETTINGS_SCHEMA_VERSION
-            ) {
-                const document = parseSettings(
-                    raw,
-                    LEGACY_SETTINGS_SCHEMA_VERSION,
-                );
-                await copyFile(
-                    filePath,
-                    legacyBackupPath(filePath, new Date()),
-                );
-                const store = new SettingsStore(filePath, {
-                    ...document.values,
-                });
-                await store.flush(document.values);
-                return store;
-            }
-            const document = parseSettings(raw);
-            return new SettingsStore(filePath, { ...document.values });
-        } catch (error) {
-            if (
-                error instanceof Error &&
-                "code" in error &&
-                error.code === "ENOENT"
-            ) {
-                return new SettingsStore(filePath, {});
-            }
-            throw NativeError.from(
-                error,
-                "settings.read",
-                "Settings could not be read.",
-            );
-        }
+  static async of(filePath: string): Promise<SettingsStore> {
+    try {
+      const rawText = await readFile(filePath, "utf8");
+      const raw = JSON.parse(rawText) as unknown;
+      if (
+        typeof raw === "object" &&
+        raw !== null &&
+        "schemaVersion" in raw &&
+        raw.schemaVersion === LEGACY_SETTINGS_SCHEMA_VERSION
+      ) {
+        const document = parseSettings(raw, LEGACY_SETTINGS_SCHEMA_VERSION);
+        await copyFile(filePath, legacyBackupPath(filePath, new Date()));
+        const store = new SettingsStore(filePath, {
+          ...document.values,
+        });
+        await store.flush(document.values);
+        return store;
+      }
+      const document = parseSettings(raw);
+      return new SettingsStore(filePath, { ...document.values });
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        "code" in error &&
+        error.code === "ENOENT"
+      ) {
+        return new SettingsStore(filePath, {});
+      }
+      throw NativeError.from(
+        error,
+        "settings.read",
+        "Settings could not be read.",
+      );
     }
+  }
 
-    get(key: string): JsonValue | null {
-        return this.values[key] ?? null;
-    }
+  get(key: string): JsonValue | null {
+    return this.values[key] ?? null;
+  }
 
-    async set(key: string, value: JsonValue): Promise<void> {
-        this.values = { ...this.values, [key]: value };
-        await this.enqueueFlush();
-    }
+  async set(key: string, value: JsonValue): Promise<void> {
+    this.values = { ...this.values, [key]: value };
+    await this.enqueueFlush();
+  }
 
-    async delete(key: string): Promise<void> {
-        this.values = Object.fromEntries(
-            Object.entries(this.values).filter(
-                ([entryKey]) => entryKey !== key,
-            ),
-        );
-        await this.enqueueFlush();
-    }
+  async delete(key: string): Promise<void> {
+    this.values = Object.fromEntries(
+      Object.entries(this.values).filter(([entryKey]) => entryKey !== key),
+    );
+    await this.enqueueFlush();
+  }
 
-    async replace(values: Readonly<Record<string, JsonValue>>): Promise<void> {
-        this.values = Object.fromEntries(
-            Object.entries(values).map(([key, value]) => [
-                key,
-                JsonValueSchema.parse(value),
-            ]),
-        );
-        await this.enqueueFlush();
-    }
+  async replace(values: Readonly<Record<string, JsonValue>>): Promise<void> {
+    this.values = Object.fromEntries(
+      Object.entries(values).map(([key, value]) => [
+        key,
+        JsonValueSchema.parse(value),
+      ]),
+    );
+    await this.enqueueFlush();
+  }
 
-    createSnapshot(): Readonly<Record<string, JsonValue>> {
-        return { ...this.values };
-    }
+  createSnapshot(): Readonly<Record<string, JsonValue>> {
+    return { ...this.values };
+  }
 
-    private enqueueFlush(): Promise<void> {
-        const snapshot = this.createSnapshot();
-        const write = this.writeQueue
-            .catch(() => undefined)
-            .then(async () => this.flush(snapshot));
-        this.writeQueue = write;
-        return write;
-    }
+  private enqueueFlush(): Promise<void> {
+    const snapshot = this.createSnapshot();
+    const write = this.writeQueue
+      .catch(() => undefined)
+      .then(async () => this.flush(snapshot));
+    this.writeQueue = write;
+    return write;
+  }
 
-    private async flush(
-        values: Readonly<Record<string, JsonValue>>,
-    ): Promise<void> {
-        await mkdir(dirname(this.filePath), { recursive: true, mode: 0o700 });
-        const temporaryPath = `${this.filePath}.tmp`;
-        const document: SettingsDocument = {
-            schemaVersion: SETTINGS_SCHEMA_VERSION,
-            values,
-        };
-        const handle = await open(temporaryPath, "w", 0o600);
-        try {
-            await handle.writeFile(
-                `${JSON.stringify(document, null, 2)}\n`,
-                "utf8",
-            );
-            await handle.sync();
-        } finally {
-            await handle.close();
-        }
-        await rename(temporaryPath, this.filePath);
+  private async flush(
+    values: Readonly<Record<string, JsonValue>>,
+  ): Promise<void> {
+    await mkdir(dirname(this.filePath), { recursive: true, mode: 0o700 });
+    const temporaryPath = `${this.filePath}.tmp`;
+    const document: SettingsDocument = {
+      schemaVersion: SETTINGS_SCHEMA_VERSION,
+      values,
+    };
+    const handle = await open(temporaryPath, "w", 0o600);
+    try {
+      await handle.writeFile(`${JSON.stringify(document, null, 2)}\n`, "utf8");
+      await handle.sync();
+    } finally {
+      await handle.close();
     }
+    await rename(temporaryPath, this.filePath);
+  }
 }

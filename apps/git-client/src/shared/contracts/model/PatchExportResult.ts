@@ -1,5 +1,5 @@
 export type PatchExportResult = {
-    path: string;
-    sizeBytes: number;
-    commitCount: number;
+  path: string;
+  sizeBytes: number;
+  commitCount: number;
 };

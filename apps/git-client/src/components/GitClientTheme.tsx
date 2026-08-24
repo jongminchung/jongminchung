@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 
 export function GitClientTheme({
-    children,
+  children,
 }: {
-    readonly children: ReactNode;
+  readonly children: ReactNode;
 }): ReactNode {
-    return children;
+  return children;
 }
