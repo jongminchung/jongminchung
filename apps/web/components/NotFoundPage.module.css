@@ -1,38 +1,38 @@
 .page {
-    display: grid;
-    min-height: 100vh;
-    min-height: 100dvh;
-    place-content: center;
-    justify-items: start;
-    padding: 32px;
+  display: grid;
+  min-height: 100vh;
+  min-height: 100dvh;
+  place-content: center;
+  justify-items: start;
+  padding: 32px;
 }
 
 .mark {
-    margin: 0;
-    color: var(--muted-foreground);
-    font-family: var(--font-family-code);
-    font-size: 18px;
+  margin: 0;
+  color: var(--muted-foreground);
+  font-family: var(--font-family-code);
+  font-size: 18px;
 }
 
 .page h1 {
-    margin: 12px 0;
-    font-family: var(--font-family-heading);
-    font-size: 36px;
-    font-weight: 500;
-    line-height: 1.1;
-    letter-spacing: -0.025em;
+  margin: 12px 0;
+  font-family: var(--font-family-heading);
+  font-size: 36px;
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
 }
 
 .page p {
-    color: var(--muted-foreground);
+  color: var(--muted-foreground);
 }
 
 .page a {
-    margin-top: 18px;
-    color: var(--foreground);
+  margin-top: 18px;
+  color: var(--foreground);
 }
 
 :global(html[lang="en"]) .localeOption[data-locale-option="ko"],
 :global(html[lang="ko"]) .localeOption[data-locale-option="en"] {
-    display: none;
+  display: none;
 }

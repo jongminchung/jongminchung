@@ -11,10 +11,10 @@ await rm(join(standaloneRoot, "public"), { force: true, recursive: true });
 await rm(standaloneStaticRoot, { force: true, recursive: true });
 await mkdir(join(standaloneRoot, ".next"), { recursive: true });
 await cp(join(appRoot, "public"), join(standaloneRoot, "public"), {
-    recursive: true,
+  recursive: true,
 });
 await cp(join(appRoot, ".next", "static"), standaloneStaticRoot, {
-    recursive: true,
+  recursive: true,
 });
 
 process.stdout.write(`Prepared standalone Web assets in ${standaloneRoot}.\n`);

@@ -7,122 +7,120 @@ export { isLocale, locales };
 export type { Locale };
 
 const productionHosts: Readonly<Record<string, SiteId>> = {
-    "jamie.kr": "home",
-    "tech.jamie.kr": "tech",
-    "invest.jamie.kr": "invest",
+  "jamie.kr": "home",
+  "tech.jamie.kr": "tech",
+  "invest.jamie.kr": "invest",
 };
 
 const developmentHosts: Readonly<Record<string, SiteId>> = {
-    localhost: "home",
-    "127.0.0.1": "home",
-    "jamie.localhost": "home",
-    "tech.jamie.localhost": "tech",
-    "invest.jamie.localhost": "invest",
+  localhost: "home",
+  "127.0.0.1": "home",
+  "jamie.localhost": "home",
+  "tech.jamie.localhost": "tech",
+  "invest.jamie.localhost": "invest",
 };
 
 /** `normalizeHost` 공개 기능을 제공함 */
 export function normalizeHost(value: string | null): string {
-    const host = value?.trim().toLowerCase() ?? "";
-    if (host.startsWith("[")) {
-        const closingBracket = host.indexOf("]");
-        return closingBracket === -1 ? host : host.slice(1, closingBracket);
-    }
-    return host.replace(/:\d+$/u, "");
+  const host = value?.trim().toLowerCase() ?? "";
+  if (host.startsWith("[")) {
+    const closingBracket = host.indexOf("]");
+    return closingBracket === -1 ? host : host.slice(1, closingBracket);
+  }
+  return host.replace(/:\d+$/u, "");
 }
 
 /** `resolveSite` 공개 기능을 제공함 */
 export function resolveSite(host: string): SiteId | null {
-    return productionHosts[host] ?? developmentHosts[host] ?? null;
+  return productionHosts[host] ?? developmentHosts[host] ?? null;
 }
 
 /** `localeFromPath` 공개 기능을 제공함 */
 export function localeFromPath(pathname: string): Locale | null {
-    const firstSegment = pathname.split("/")[1];
-    return isLocale(firstSegment) ? firstSegment : null;
+  const firstSegment = pathname.split("/")[1];
+  return isLocale(firstSegment) ? firstSegment : null;
 }
 
 /** `selectLocale` 공개 기능을 제공함 */
 export function selectLocale(
-    savedLocale: string | undefined,
-    acceptLanguage: string | null,
+  savedLocale: string | undefined,
+  acceptLanguage: string | null,
 ): Locale {
-    if (isLocale(savedLocale)) return savedLocale;
+  if (isLocale(savedLocale)) return savedLocale;
 
-    const preferences = (acceptLanguage ?? "")
-        .split(",")
-        .map((entry, order) => {
-            const [languageRange = "", ...parameters] = entry
-                .trim()
-                .toLowerCase()
-                .split(";");
-            let quality = 1;
-            let hasInvalidQuality = false;
-            for (const parameter of parameters) {
-                if (!/^\s*q\s*=/u.test(parameter)) continue;
-                const match =
-                    /^\s*q\s*=\s*(\d(?:\.\d{0,3})?|\.\d{1,3})\s*$/u.exec(
-                        parameter,
-                    );
-                if (match === null) {
-                    hasInvalidQuality = true;
-                    break;
-                }
-                quality = Number(match[1]);
-            }
-            if (
-                hasInvalidQuality ||
-                !Number.isFinite(quality) ||
-                quality <= 0 ||
-                quality > 1
-            ) {
-                return null;
-            }
-            const primaryLanguage = languageRange.split("-", 1)[0];
-            return {
-                locale: isLocale(primaryLanguage)
-                    ? primaryLanguage
-                    : languageRange === "*"
-                      ? "en"
-                      : null,
-                order,
-                quality,
-            };
-        })
-        .filter(
-            (
-                preference,
-            ): preference is {
-                readonly locale: Locale;
-                readonly order: number;
-                readonly quality: number;
-            } => preference !== null && preference.locale !== null,
-        )
-        .sort(
-            (left, right) =>
-                right.quality - left.quality || left.order - right.order,
+  const preferences = (acceptLanguage ?? "")
+    .split(",")
+    .map((entry, order) => {
+      const [languageRange = "", ...parameters] = entry
+        .trim()
+        .toLowerCase()
+        .split(";");
+      let quality = 1;
+      let hasInvalidQuality = false;
+      for (const parameter of parameters) {
+        if (!/^\s*q\s*=/u.test(parameter)) continue;
+        const match = /^\s*q\s*=\s*(\d(?:\.\d{0,3})?|\.\d{1,3})\s*$/u.exec(
+          parameter,
         );
+        if (match === null) {
+          hasInvalidQuality = true;
+          break;
+        }
+        quality = Number(match[1]);
+      }
+      if (
+        hasInvalidQuality ||
+        !Number.isFinite(quality) ||
+        quality <= 0 ||
+        quality > 1
+      ) {
+        return null;
+      }
+      const primaryLanguage = languageRange.split("-", 1)[0];
+      return {
+        locale: isLocale(primaryLanguage)
+          ? primaryLanguage
+          : languageRange === "*"
+            ? "en"
+            : null,
+        order,
+        quality,
+      };
+    })
+    .filter(
+      (
+        preference,
+      ): preference is {
+        readonly locale: Locale;
+        readonly order: number;
+        readonly quality: number;
+      } => preference !== null && preference.locale !== null,
+    )
+    .sort(
+      (left, right) => right.quality - left.quality || left.order - right.order,
+    );
 
-    return preferences[0]?.locale ?? "en";
+  return preferences[0]?.locale ?? "en";
 }
 
 /** `createInternalSitePath` 결과를 생성함 */
 export function createInternalSitePath(site: SiteId, pathname: string): string {
-    return `/${site}${pathname === "/" ? "" : pathname}`;
+  return `/${site}${pathname === "/" ? "" : pathname}`;
 }
 
 /** `localeCookieName` 공개 기능을 제공함 */
 export function localeCookieName(site: SiteId): `${SiteId}-locale` {
-    return `${site}-locale`;
+  return `${site}-locale`;
 }
 
 /** `isSharedAssetPath` 조건을 판별함 */
 export function isSharedAssetPath(pathname: string): boolean {
-    return (
-        pathname.startsWith("/_next/") ||
-        pathname === "/icon.svg" ||
-        pathname.startsWith("/excalidraw-assets/") ||
-        /\.(?:avif|excalidraw|gif|ico|jpe?g|mp4|png|svg|webm|webp|woff2?)$/u.test(
-            pathname,
-        )
-    );
+  return (
+    pathname.startsWith("/_next/") ||
+    pathname === "/icon.svg" ||
+    pathname.startsWith("/excalidraw-assets/") ||
+    /\.(?:avif|excalidraw|gif|ico|jpe?g|mp4|png|svg|webm|webp|woff2?)$/u.test(
+      pathname,
+    )
+  );
 }

@@ -1,0 +1,392 @@
+---
+id: the-expensive-main-thread
+locale: en
+title: "The Browser's Main Thread Is Expensive"
+description: "Explore frame budgets, task chunking, priorities, and rendering costs on the browser main thread."
+publishedAt: "2026-07-12"
+updatedAt: "2026-07-12"
+verifiedAt: "2026-08-06"
+tags: [frontend, performance, browser, animation]
+status: stable
+publicationStatus: published
+sourceUrl: https://kciter.so/posts/the-expensive-main-thread/
+---
+
+What comes to mind when you hear "frontend optimization"? For most of us it's cutting network requests, shrinking the bundle, using the cache well. Beyond that, maybe reducing re-renders or tuning when resources load. The main thread rarely makes the list, and for good reason: on most screens it never actually becomes a problem. But on interaction-heavy screens — where data pours in live and scrolling, animation, and input all tangle together — the story changes. Save all the network and bundle bytes you want; the moment the main thread is blocked, the screen freezes.
+
+You've probably used a site where scrolling stutters, a button responds a beat late, or letters appear in the search box half a beat after you type them. Not bad enough to be infuriating, just subtly grating. That jank is what a blocked main thread feels like.
+
+When we hit jank like this as developers, the instinct is to ask "is my code slow?" and start dissecting algorithms or hunting for wasted computation. Most of the time, though, the problem isn't the speed of the code at all. **The code isn't too slow — it just happens to be holding the main thread.**
+
+The browser has many threads, but nearly everything we can touch from code funnels into one of them. Computation, rendering, event handling, network response callbacks, your framework's internals — the main thread handles all of it. One resource, a mountain of work.
+
+The browser's main thread is expensive. Most of the time you can get away with ignoring that, but the moment you try to build something ambitious, managing it becomes the thing that matters. This article is about how to handle that expensive resource.
+
+## What Does the Main Thread Do?
+
+Let's start with what the main thread actually does. Its work falls into two broad categories.
+
+The first is **running JavaScript**. Your code, event handlers, timers, network response callbacks, your framework's internals — every piece of JavaScript runs here. These tasks execute in queue order, whenever there's a gap, with no relation to the screen's refresh cycle.
+
+The second is **drawing the screen**. When the DOM or styles change and the screen needs updating, the browser produces a frame by walking through roughly these steps in order:
+
+- Run `requestAnimationFrame` callbacks - JavaScript registered to run just before the frame is drawn
+- Style calculation - compute the final CSS values for each element
+- Layout - compute each element's position and size (also called reflow)
+- Paint - generate paint commands describing what to draw in which colors
+
+If nothing changed, these steps are skipped entirely, so they don't necessarily run every frame. Only the final compositing step — taking the produced output and assembling it on screen — moves off to the compositor thread[^1]. In other words, most of the front half of the pipeline that draws your screen belongs to the main thread.
+
+For the screen to look smooth, frames have to be produced at the display's refresh rate. On the most common 60Hz display that's 60 frames per second — **about 16.6 milliseconds** per frame. And you don't even get all of it. After subtracting the browser's own overhead, the practical budget is usually taken to be around 10 milliseconds[^2], and on a 120Hz device the budget itself is cut in half.
+
+The problem is that the two kinds of work above **stand in a single line on the same thread**. JavaScript was designed around a **single-threaded event loop**. The main thread processes one task at a time, and **while that task runs, nothing else can happen.** If one JavaScript function runs for 200 milliseconds, then for 200 milliseconds the browser cannot repaint the screen or accept a click. Against a frame budget of barely 10 milliseconds, that's an eternity. A task that holds the main thread this long is called a long task, and anything over 50 milliseconds is generally considered a problem.
+
+Words only go so far, so let's feel it. In the demo below, pressing the button makes JavaScript grab the main thread for a moment.
+
+The instant you press the button, the JS animation stops and typing into the input field does nothing. The CSS animation, meanwhile, keeps running. We'll get to where that difference comes from later. What to remember for now: **holding the main thread for a long time is the same as freezing the screen.**
+
+This connects directly to web performance metrics. INP (Interaction to Next Paint), which measures how long the screen takes to respond after the user does something, and TBT (Total Blocking Time), which measures the total time the main thread was blocked during page load, are both essentially expressions of one question: how long was the main thread blocked? A large part of performance optimization comes down to how carefully you spend this one thread.
+
+And the ways to spend it carefully fall into two families. One is to divide the main thread's time wisely from within. The other is to move work off the main thread entirely. Let's take them in order.
+
+## Using the Expensive Resource Wisely
+
+The first family is about staying on the main thread but **spending its time intelligently**. There are four core moves:
+
+- How do you split up work that runs too long?
+- How do you group work that runs too often?
+- Among several tasks, which goes first?
+- How do you postpone work that doesn't need to happen now?
+
+We'll call these splitting, batching, prioritizing, and deferring. The first two shape the **size** of tasks; the last two decide their **timing**. Of these, splitting is the foundation for the rest — only once tasks have boundaries can you decide what to slot in between them and what to push back. So we start with splitting.
+
+### Splitting
+
+Picture the chat pane of a live stream. On a popular stream, chat can burst to hundreds of messages per second. In that environment messages don't arrive one at a time. When traffic spikes, the server sends them in clumps of dozens, and the moment you enter a room, hundreds of backlogged messages come down at once. What happens if you render that whole clump in one go the moment it arrives? Every message you draw drags along DOM creation, style calculation, layout, and paint — and those hundreds of iterations run back to back inside a single task. Meanwhile the user trying to type their own message gets a stuttering input field, and every other animation on screen hitches. Other people's chat is monopolizing the main thread and blocking yours.
+
+The fix is exactly what we said above: cut the clump into small pieces, and between pieces, hand control of the main thread back for a moment. In those gaps the browser catches up on the screen updates and input handling it had queued.
+
+The demo below simulates a streaming chat pane. Press "Flood the chat" and messages start pouring in. Try typing in the input field while watching the smoothness gauge and fps up top, and compare the "Immediate render" and "Yielding render" modes.
+
+In "Immediate render" mode, the DOM is touched the moment each message arrives, so while chat is flooding in, fps craters, the gauge stutters, and the input field lags. Look closely and the chat messages themselves start appearing noticeably more slowly: the callback that receives and processes them is itself a task waiting in the main thread's line, so it gets delayed along with everything else. Now switch to "Yielding render". Messages are still drawn one at a time, exactly as before, yet input comes back to life and the screen moves again. The only change: after every 20 messages, the main thread is released for a moment.
+
+Don't misread what happened: **yielding does not make the work faster.** The total amount of work is unchanged, and the few milliseconds spent waiting at each yield are pure overhead, so in wall-clock terms it actually takes longer. Then why did rendering recover, and not just input?
+
+As we saw earlier, the main thread can do nothing while a task is running. The rendering pipeline that produces frames cannot cut into the middle of a task — it can only run **between tasks**. Yielding is the act of creating those gaps. The backlogged input and frame production get their turn in the gaps, and to the user it feels like performance improved.
+
+At the code level, the classic way to yield is `setTimeout`, pushing the continuation into the next task. Have a look:
+
+```js
+// A batch of chat messages arrives at once
+socket.on("messages", (chats) => {
+  renderChats(chats);
+});
+
+// Draw the messages, yielding the main thread after every 20
+async function renderChats(chats) {
+  let count = 0;
+  for (const chat of chats) {
+    appendChatNode(chat); // draw one message
+
+    if (++count % 20 === 0) {
+      await new Promise((resolve) => setTimeout(resolve, 0)); // yield here
+    }
+  }
+}
+```
+
+Now no matter how hard chat floods in, the DOM work never occupies the main thread wholesale, and between the pieces there's room for the user's input and animations to be processed.
+
+The star of this code is `setTimeout`. It schedules the resumption of the remaining work as a new task, which ends the current task right there — and in that gap, the backlogged input and rendering run. `await` pauses the function until that scheduled task comes back around, then picks up where it left off.
+
+The example above split the incoming work by **count**. But if an animation is already running, or the user is mid-scroll, splitting by **time** is safer. An animation is spending a slice of the main thread every frame, so a heavy job has to keep checking the clock to avoid swallowing what's left of the frame's budget.
+
+```js
+async function processDuringAnimation(items) {
+  let i = 0;
+  let frameStart = performance.now();
+  while (i < items.length) {
+    // Work only until 5ms have passed since the frame started
+    while (i < items.length && performance.now() - frameStart < 5) {
+      doWork(items[i++]);
+    }
+    frameStart = await new Promise(requestAnimationFrame); // resume with the next frame's start time
+  }
+}
+```
+
+Here `performance.now()` is the stopwatch that checks whether we've blown the budget, and `requestAnimationFrame` is the alarm that says "wake me just before the next frame is drawn." This is also why we yield with rAF rather than `setTimeout` when splitting by time: the resumption lands in step with the frame cycle.
+
+Note that rAF passes its callback the frame's start timestamp, and the code above uses it as the budget's reference point. That's because the function doesn't have the frame to itself. If animation callbacks ran earlier in the same frame, our share has to shrink by however much time they used, or we blow the frame budget. Anchoring to the frame's start time turns "use 5ms" into "use until 5ms after the frame started," which makes the code cooperate naturally when several animations share one frame.
+
+> Why 5 milliseconds? There's nothing special about the number. We said the practical budget is around 10 milliseconds, so handing roughly half to background work and leaving the rest for animation callbacks, style, layout, and paint is a reasonable heuristic. If your animations are heavy, shrink it.
+
+With this in place, even while heavy work grinds on, there's room to draw the screen every frame — the work and the animation run smoothly side by side. Try the demo below. Moving the mouse scatters 4,000 particles away from the cursor, and nearby particles also push each other apart, so deciding one particle's direction means checking its distance to every other particle. That's roughly 16 million distance calculations per pass — recomputing everything every frame blows the budget on its own. Compare the "Compute all at once" and "5ms per frame" modes.
+
+Splitting is the most fundamental way to stretch the main thread's time, and it buys the perceived performance that matters to users: fast responses and a smooth screen.
+
+A few caveats to close the topic. First, **splitting too finely backfires.** Yielding and coming back has a cost of its own, so if the pieces are too small, that overhead can outweigh the work you're actually trying to do.
+
+Second, yielding with `setTimeout` carries a minimum delay[^3], so each piece can wait a few milliseconds for nothing. Usually this doesn't matter, but when you need serious responsiveness, the delay can hurt.
+
+That's why some code schedules the next task by posting a message through a `MessageChannel` instead — React's scheduler does this. More recently a standard API has arrived for exactly this problem: `scheduler.yield()`. Its advantage is that after yielding, the original work resumes ahead of other queued tasks instead of going to the back of the line. Browser support is still uneven, though.
+
+Third, **different yielding tools come back at different times.** `setTimeout` and `scheduler.yield()` resume without regard to the rendering cycle, while `requestAnimationFrame` resumes just before a frame is drawn — so for work that needs to keep pace with screen updates, rAF fits better. If you want finer control over priorities, you can build your own queue on `MessageChannel` and manage the yield-and-resume yourself.
+
+Finally, splitting isn't always possible. Parsing a multi-megabyte response with `JSON.parse` is a single atomic synchronous call — there is no way to stop halfway and yield. Until the parse finishes, the main thread is simply gone. Heavy, unsplittable work like this is the hard limit of "using it wisely." At that point the answer is to flip the premise and not do the work on the main thread at all. We'll get there in "Not Using the Expensive Resource."
+
+### Batching
+
+Splitting alone doesn't solve everything, though. Think back to the streaming chat example. Yielding rescued input and rendering, but it did nothing to make chat draw faster. If anything, throughput — messages drawn per unit time — went down by the overhead of yielding. So what happens if chat pours in faster than the throughput? Arrivals outpace processing, the backlog grows, and the messages reaching the screen get staler and staler. This situation is called **backpressure**.
+
+Raising throughput takes a different tool than splitting. For instance, instead of drawing messages one by one, draw the accumulated batch in one go — the fixed per-message cost folds together, and the same amount of time renders more chat. First split, now batch? It sounds like a contradiction, but the point of both is to trim tasks to the right size: splitting tames tasks so long that rendering can't get a word in, and batching tames tasks so frequent that you end up paying the pipeline's fixed cost over and over.
+
+The best batching targets are events. Scroll, resize, and input events can fire dozens or hundreds of times in a short window. Run a heavy handler on every one and the main thread doesn't stand a chance. So we collapse many events into one execution — "run once after things quiet down" or "run at most once per interval." These are called debounce and throttle, respectively.
+
+Next up is a markdown editor with a long CHANGELOG open. Building the preview means parsing the entire document (about 2,000 lines) and rebuilding its DOM wholesale — far too expensive to run on every keystroke. Type quickly into the left editor with "No debounce": the preview rebuilds once per character and your input lags behind. Switch to "Debounce 300ms" and the render happens exactly once, after you stop typing — and the typing turns smooth.
+
+For visual updates there's `requestAnimationFrame`. The screen only gets drawn once per frame anyway, so no matter how many update requests pile up, actually drawing once per frame is enough.
+
+```js
+let scheduled = false;
+
+socket.on("tick", (tick) => {
+  chart.push(tick); // keep every data point — nothing is thrown away
+  if (scheduled) return; // this frame's draw is already booked
+  scheduled = true;
+  requestAnimationFrame(() => {
+    renderBoard(); // draw once per frame
+    scheduled = false;
+  });
+});
+```
+
+Below, a board of 60 tickers is fed over 1,000 messages per second. "Render every tick" mode redraws the whole board on every message — calling a chart library's `update()` per message is a common mistake, and this is exactly what it looks like. Flip it to "Once per frame" and every arriving data point is still reflected, but the fps comes back.
+
+DOM writes can be batched too. Appending a hundred nodes in one operation instead of one by one, or toggling a single class instead of poking style properties individually, collapses many changes into one. The old trick of assembling an HTML string and assigning it to `innerHTML` in one shot has the same essence: gather the writes so the rendering pipeline's fixed cost is paid once.
+
+Frontend developers know this pattern well — React's virtual DOM is itself a batching device. However many times state changes, the changes accumulate in the virtual tree, get diffed first, and only the actual differences hit the real DOM in one commit. Merging several state updates inside one event handler into a single re-render, or queueing analytics events and sending them in one request instead of individually, is the same story: a fixed cost that would repeat per item gets paid once per batch.
+
+### Prioritizing
+
+If splitting and batching shape the size of work, prioritizing decides its order. Reacting to the button the user just pressed needs to happen fast; precomputing statistics for content that's off screen can wait. Prioritizing means ranking the urgent ahead of the non-urgent.
+
+Order matters because on a main thread that nothing can interrupt, order _is_ the responsiveness the user feels. The usual structure is a queue you push work into and pull work out of. Jobs come out FIFO, but when something urgent arrives, it gets pulled to the front of the line.
+
+```js
+const queue = [];
+const channel = new MessageChannel();
+
+// One message = one task. Process a piece, then book the next one
+channel.port1.onmessage = () => {
+  const job = queue.shift(); // take whatever is at the front right now
+  if (!job) return; // guard against duplicate bookings
+  job();
+  if (queue.length > 0) channel.port2.postMessage(null);
+};
+
+function postJob(job, urgent = false) {
+  if (urgent)
+    queue.unshift(job); // urgent jobs cut to the front
+  else queue.push(job);
+  if (queue.length === 1) channel.port2.postMessage(null);
+}
+```
+
+What makes this structure worthwhile is that priority isn't a fixed value. Work that wasn't urgent can suddenly become urgent because of something the user did. Say the user attaches a few dozen photos to a post. To save bandwidth, the client sometimes resizes images before uploading — and that resizing is low-urgency work, fine to process in order.
+
+> React works along similar lines, with more sophisticated machinery on top — starvation protection, batching, continuations. Use `startTransition` or `useDeferredValue` and a scheduler spins up inside that yields via `MessageChannel` and orders work with its own priority queue.
+
+But the instant the user clicks a specific photo to check that it attached properly, that photo's preview becomes the most urgent job in the app. With a priority queue like the one above, it can be handled first. This approach — do it leisurely while idle, but rush it the moment it's needed — is sometimes called the idle-until-urgent pattern[^4].
+
+```js
+// Build previews for the attached photos, in order
+files.forEach((file, i) => {
+  const job = () => createPreview(file, i);
+  job.photoId = i; // tag it so we can find it in the queue later
+  postJob(job);
+});
+
+// Clicking a photo that isn't ready pulls its job to the front → priority bump
+onClickPhoto((i) => {
+  const idx = queue.findIndex((job) => job.photoId === i);
+  if (idx > 0) queue.unshift(queue.splice(idx, 1)[0]);
+});
+```
+
+Feel the difference in the demo below. Sixty photos have been attached, and each preview is actually generated with per-pixel filtering. While previews are being built in order, click one of the gray tiles that isn't ready yet. In "In order" mode you wait until its turn comes; in "Clicked first" mode it skips the queue and fills in immediately. The total work is identical; only the order changed. And yet the experience is completely different.
+
+Priority is really just the question: what matters most to the user at this exact moment?
+
+> Modern browsers offer standards for this — the Scheduler API, TaskController. Support is still incomplete, so in practice people pair them with polyfills or build their own queues. This article uses the hand-built-queue approach.
+
+### Deferring
+
+The last and most reliable way to save the main thread: **don't do now what doesn't need doing now.** Splitting and batching ask "at what size," prioritizing asks "in what order" — deferring asks "does this need to happen at all right now?"
+
+Initial page load is the classic case for deferring. There's no need to download and execute all your JavaScript up front. With code splitting, only the code the current screen needs runs first, and the rest loads when it becomes necessary — keeping the main thread from bogging down from the very start.
+
+You can defer rendering itself, too. Think of a social feed. Some apps freeze for a moment when you come back from the notifications tab after scrolling deep enough to accumulate hundreds of posts. Even if the feed's DOM was kept alive across the tab switch, the moment it becomes visible again the browser recomputes style and layout for all several hundred posts at once — including the ones nowhere near the viewport. So what if off-screen posts were left as empty shells that only hold their height, and got filled with real content just as they approach the screen? The tool that announces that "approaching" moment is `IntersectionObserver`. It's exactly what image lazy-loading libraries use.
+
+```js
+const io = new IntersectionObserver(
+  (entries) => {
+    for (const entry of entries) {
+      if (entry.isIntersecting)
+        fill(entry.target); // fill as it approaches
+      else empty(entry.target); // empty it when it leaves, keeping its place
+    }
+  },
+  { rootMargin: "400px" }, // headroom to fill before the scroll arrives
+);
+
+feed.querySelectorAll(".feed-item").forEach((el) => io.observe(el));
+```
+
+Here's a feed with 1,500 posts piled up[^5]. It starts with "Render only when visible" on. Visit the notifications tab and come back — the return is instant, regardless of how much has accumulated. Now switch to "Render everything" and make the round trip again. Every return freezes for hundreds of milliseconds while all 1,500 posts are laid out again. Apart from unfilled slots flashing briefly during fast scrolling, the two modes look identical.
+
+Rendering isn't the only thing this defers. Off-screen posts never get their DOM built at all, so the cost of creating and maintaining it is deferred along with everything else. If a widget carries heavy initialization, that too can wait until it nears the screen. There's also a CSS property that aims for a similar effect in one line: `content-visibility: auto`. As of this writing, though, engine implementations vary — Safari has a performance bug that makes returns slower, not faster — so for now `IntersectionObserver` behaves predictably everywhere.
+
+**Continuously running work** — carousels, animated promo banners, live charts — is pure waste while off screen. You're spending main-thread time redrawing a picture nobody can see, every frame. Run it while visible, stop it when it leaves. In fact, that's the secret to how the dozen-plus demos in this article coexist on a single page: each one stops the moment it scrolls out of view.
+
+## Not Using the Expensive Resource
+
+Everything so far was about using the main thread carefully. The second family of techniques is about not doing the work **on the main thread in the first place**.
+
+Let's return to the question left hanging in the long-task demo. The main thread was completely blocked — why did the CSS animation keep running, unbothered? Because that animation was never running on the main thread to begin with. Inside the browser, several threads divide up the work. The notable ones:
+
+- **Main thread**: runs JavaScript, manipulates the DOM, calculates styles, performs layout, handles events.
+- **Compositor thread**: composites already-drawn layers onto the screen. Handles scrolling and certain animations.
+- **Raster threads**: turn paint commands into actual pixels.
+- **Worker threads**: separate JavaScript execution spaces that we create explicitly.
+
+Unfortunately we can't command these threads at will. The compositor and raster threads are the browser's own territory — no direct orders accepted — and worker threads, which we can create, come with one major restriction: no DOM access.
+
+So "not using" the main thread doesn't mean shipping arbitrary work elsewhere. It means **picking out the work that can take a form other threads accept, and sending that**. There are two main ways.
+
+### Moving Work to the Compositor
+
+The compositor thread is the secret behind the CSS animation that wouldn't stop. `transform` and `opacity` don't change an element's position, size, or color in the document — they move an already-painted layer or adjust its transparency, so there's no need to redo layout or paint. That lets the browser handle them directly on the compositor thread without going through the main thread at all. However busy the main thread gets, the compositor runs independently, and the animation stays smooth.
+
+Move an element with `top`, `left`, `width`, or `height` instead, and layout must be recomputed every frame — that's main-thread work. In the demo below, the two boxes slide side to side identically, but one moves with `transform` and the other with `left`. Press the button to load down the main thread.
+
+The moment the main thread gets busy, only the bottom box — the one moving with `left` — starts to stutter. The `transform` box up top is being driven by the compositor and glides on regardless of the load. The same "slide sideways" ends up on a completely different thread depending on which property you animate. This is why animations that move things should use `transform: translate` instead of `left`, and animations that resize things should use `transform: scale` instead of `width`.
+
+But what about animations where layout genuinely has to change? Picture a list where deleting an item makes the items below slide smoothly up into place. That's not decorative motion — positions really change. Yet animating `top` means layout on every frame. The technique that resolves this dilemma is FLIP (First, Last, Invert, Play)[^6]. In one line: **cause exactly one layout change, and let transform carry the entire journey.** The steps:
+
+- First: measure the position before the move
+- Last: actually change the layout and measure the new position. Layout happens exactly once, here
+- Invert: apply a transform to the element in its new position so it appears to still be in the old one
+- Play: animate that transform away. This part belongs to the compositor
+
+```js
+const first = el.getBoundingClientRect(); // First: where it is now
+
+list.prepend(el); // the one and only layout change
+
+const last = el.getBoundingClientRect(); // Last: where it ended up
+const dx = first.left - last.left;
+const dy = first.top - last.top;
+
+// Invert: make it look like it's back at the old position → Play: release it
+el.animate(
+  [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "none" }],
+  {
+    duration: 300,
+    easing: "ease-in-out",
+  },
+);
+```
+
+To the user's eye the element glides from its old spot to its new one, but in reality it's already there — the transform briefly drags it back, then lets it go. While the animation plays, the only per-frame work is the compositor interpolating a transform. Most list-reordering animations are built this way; Vue's `TransitionGroup` and Framer Motion's layout animations are FLIP under the hood.
+
+See the difference at a glance below. Press "Play rank shuffle" and both ranking lists reshuffle identically. The left list animates `top` with a transition; the right list moves only `transform`, via FLIP. With no load, both look silky. Now turn on "Load the main thread" and play again. The left one staggers its way to the finish; the right one stays smooth no matter what.
+
+Two things worth knowing before handing work to the compositor. One is `will-change: transform`. It hints to the browser that "this element is about to change, prepare it as its own layer in advance," which smooths the start of an animation. Overuse it, though, and layers proliferate and waste memory.
+
+The other is reading layout values, which you just saw in the FLIP code. Get the ordering of layout reads (`getBoundingClientRect`, `offsetWidth`) and style writes wrong, and you get a problem called layout thrashing.
+
+```js
+// 🔴 Reads and writes interleaved — forces a layout recalculation every iteration
+for (const el of elements) {
+  const width = el.offsetWidth; // read (needs layout)
+  el.style.width = width + 10 + "px"; // write (invalidates layout)
+}
+
+// 🟢 Finish all the reads, then do the writes together
+const widths = elements.map((el) => el.offsetWidth); // gather reads
+elements.forEach((el, i) => {
+  el.style.width = widths[i] + 10 + "px"; // gather writes
+});
+```
+
+Read a layout value right after changing one, and the browser has no choice but to recompute layout on the spot to give you a fresh answer. Let that happen inside a loop and layout runs dozens of times in a single frame, dragging the main thread down. The habit of grouping reads with reads and writes with writes is all it takes to avoid it.
+
+### Sending Work to a Worker
+
+Then what about heavy work that can't be re-expressed as `transform` — parsing huge payloads, processing images, running complex computation? Pure calculation like that can be shipped wholesale off the main thread with a web worker.
+
+A worker runs JavaScript on its own thread, fully separated from the main one. Hand it the heavy computation, and the main thread is free to do nothing but keep the UI responsive.
+
+```js
+// Main thread
+const worker = new Worker("parser.js");
+worker.postMessage(hugeRawData);
+worker.onmessage = (e) => {
+  render(e.data); // receive only the result and put it on screen
+};
+```
+
+It isn't free, of course. As noted above, workers can't touch the DOM, so they can't update the screen themselves — they compute, then send results back to the main thread. And the two sides talk only through `postMessage`, which copies (serializes) the data; with large payloads that cost is real.
+
+So workers aren't a cure-all. They shine when the computation is heavy enough to outweigh the communication cost and has nothing to do with the DOM. Ship a short, light job to a worker and the messaging costs more than the math — a net loss. The discipline is to keep asking: "does this really need to run on the main thread?"
+
+Enough theory — let's bring in genuinely heavy image work. Seam carving is an algorithm that finds the vertical path of lowest energy (least color change) through a photo and removes it one column-path at a time, narrowing the image while preserving the important subject[^7]. Removing a single seam means sweeping hundreds of thousands of pixels, so removing 250-odd seams adds up to hundreds of millions of operations. Run that on the main thread and the page will freeze solid. Send it to a worker and the screen stays responsive the whole time the computation grinds.
+
+Press "Run on main thread" in the demo below. For the one or two seconds the computation runs, the entire page freezes, and the result pops in all at once at the end — with no task boundaries for paint to slip into, you couldn't show intermediate progress even if you wanted to. Now try "Run in worker". The same computation runs, and you get to watch the image narrow in real time.
+
+The smooth intermediate frames have one more secret. If the worker copied a multi-megabyte pixel buffer every time it sent a frame, that cost would sting too. So `postMessage` offers an alternative to copying: **transferring ownership outright.** Transferable objects like `ArrayBuffer` move by reference, so the cost is near zero regardless of size. The sender loses access to the buffer — that's the trade for making the copy cost vanish.
+
+```js
+// Hand the pixel buffer to the worker without copying
+// After the transfer, this side can no longer use it
+worker.postMessage({ buf: pixels.buffer, width, height }, [pixels.buffer]);
+```
+
+### Eliminating the Work Itself
+
+So far we've asked, "does this really need to run on the main thread?" Now let's ask a sharper question: **does this work need to happen at all?** The best thing for performance is work that never runs.
+
+Backpressure came up earlier: however well you batch, once inflow exceeds maximum throughput, the backlog grows without bound. And unfortunately the browser has no good way to tell the server "slow down." At some point you have to abandon the idea of doing everything you're given. Eliminating work usually takes one of three shapes.
+
+The first is **dropping**. For data that just flows past — live logs, say — once processing falls behind, you can quietly discard the oldest entries and users won't notice. Keeping up with the present matters more than showing everything.
+
+The second is **merging**. For data where only the latest value means anything — rankings, for instance — merge the backlogged updates and apply just the final value. Merge-style processing pins the amount of work to what the screen can digest, no matter how fast the inflow gets.
+
+The third, **skipping**, targets repeated work rather than incoming work. If a computation gives the same result for the same input, there's no reason to do it a second time. Remembering results and reusing them is called memoization.
+
+This idea has been hiding all over the article, in fact. Debounce skipped executions during typing; the feed demo skipped rendering invisible posts. Look at it from this angle and half of this article was about eliminating work all along.
+
+When you study optimization, the eye is drawn to clever ways of doing work — but the biggest wins usually come from deleting it. Before making some task faster, ask first: does this work have to happen, now, here, at all?
+
+## Closing
+
+Some people — even fellow developers — think of frontend work as the easy kind. But the browser is a far more intricate system than we tend to assume. Drawing screens with HTML, CSS, and JavaScript is not the whole story.
+
+Apps built on real-time data (streaming platforms) or on screens that never stop changing (image editors, maps, games) start to feel slow the moment the main thread gets busy. Not everyone is on the latest hardware, which makes optimization non-negotiable for services like these. And solving these problems takes more than optimizing code. It takes understanding how the browser works — spending the main thread's time carefully, and refusing to spend it on work that doesn't need doing.
+
+Dig deep enough and nothing is easy. So much of development is trade-offs, and choosing well depends on the situation — which ultimately comes down to the developer's experience and judgment. Neither is built quickly, but both absolutely can be built, through study and experiment. I hope this article helps a little along the way.
+
+[^1]: The compositor thread is responsible for compositing already-drawn layers onto the screen. We'll come back to it later in the article.
+
+[^2]: https://web.dev/articles/rendering-performance
+
+[^3]: The HTML spec mandates a minimum 4-millisecond delay once `setTimeout` calls nest more than 5 levels deep. Yielding repeatedly inside a loop, as in the code above, trips this condition almost immediately — so even with the delay set to 0, each piece waits at least 4 milliseconds.
+
+[^4]: https://philipwalton.com/articles/idle-until-urgent/
+
+[^5]: Granted, 1,500 posts rarely pile up on one page in practice. The demo stacks that many on purpose, to make the effect of deferred rendering dramatic.
+
+[^6]: https://aerotwist.com/blog/flip-your-animations/
+
+[^7]: https://en.wikipedia.org/wiki/Seam_carving

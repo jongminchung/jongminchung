@@ -1,0 +1,29 @@
+---
+id: latency-and-discipline
+locale: en
+title: Latency is a product decision before it is an infrastructure metric
+description: A temporary research note on tracing response time back to ownership, queueing, and capital allocation
+publishedAt: "2026-08-03"
+updatedAt: "2026-08-03"
+status: published
+tags: [systems, incentives, operations]
+series: Operating notes
+sources:
+  - kind: article
+    title: How OpenAI delivers low-latency voice AI at scale
+    creator: OpenAI
+    url: https://openai.com/index/delivering-low-latency-voice-ai-at-scale/
+    publishedAt: "2026-05-04"
+---
+
+<SourceSummary>
+
+The source describes an architecture that keeps session ownership in one place and keeps routing deliberately narrow. It treats latency as a complete system property: the public network path, the routing layer, state ownership, and deployment constraints all contribute to what a person experiences.
+
+</SourceSummary>
+
+<JamieNotes>
+
+For an investor, the useful question is not whether a team can quote a lower p50. It is whether the organization can make a latency promise, identify its owners, and continue to improve it as usage grows. That discipline often appears before the metric becomes visible in a quarterly report.
+
+</JamieNotes>

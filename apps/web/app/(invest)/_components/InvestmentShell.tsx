@@ -1,246 +1,319 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 import { BrandWordmark } from "#components/BrandWordmark";
+import {
+  EditorialArticle,
+  EditorialCard,
+  EditorialFooter,
+  EditorialHeader,
+  EditorialIndex,
+  type EditorialCopy,
+} from "#components/Editorial";
 import { ThemeControl } from "#components/ThemeControl";
+import {
+  parseEditorialQuery,
+  rankRelatedEditorialItems,
+  type EditorialSearchParams,
+} from "#lib/editorial";
+import { toInvestmentEditorialItem } from "#lib/editorial-adapters";
 import type {
-    InvestmentNoteManifestEntry,
-    InvestmentSourceKind,
+  InvestmentNoteManifestEntry,
+  InvestmentSourceKind,
 } from "#lib/invest/content";
 import type { Locale } from "#lib/site-routing";
-import styles from "./investment.module.css";
 
 const copy = {
-    ko: {
-        label: "INVESTMENT NOTES",
-        nav: ["노트", "책", "의견", "영상"],
-        intro: "출처를 읽고, 요약과 해석 사이의 경계를 남깁니다",
-        description:
-            "책, 투자자의 공개 발언, 영상과 인터뷰를 근거로 핵심 주장과 Jamie의 판단을 분리해 기록합니다",
-        empty: "첫 리서치 노트를 준비하고 있습니다",
-        emptyBody:
-            "모든 글은 출처 요약과 개인 의견을 구분하고 한국어와 영어를 함께 제공합니다",
-        sourceSummary: "원자료",
-        updated: "업데이트",
-    },
-    en: {
-        label: "INVESTMENT NOTES",
-        nav: ["Notes", "Books", "Voices", "Videos"],
-        intro: "Read the source and preserve the boundary between summary and judgment",
-        description:
-            "Books, public commentary, videos, and interviews become source-grounded notes that separate the original claim from Jamie's interpretation",
-        empty: "The first research note is in preparation",
-        emptyBody:
-            "Every note separates source summary from personal commentary and ships in Korean and English",
-        sourceSummary: "Sources",
-        updated: "Updated",
-    },
+  ko: {
+    label: "INVESTMENT NOTES",
+    nav: ["노트", "책", "의견", "영상"],
+    intro: "출처를 읽고, 요약과 해석 사이의 경계를 남깁니다",
+    description:
+      "책, 투자자의 공개 발언, 영상과 인터뷰를 근거로 핵심 주장과 Jamie의 판단을 분리해 기록합니다",
+    empty: "첫 리서치 노트를 준비하고 있습니다",
+    emptyBody:
+      "모든 글은 출처 요약과 개인 의견을 구분하고 한국어와 영어를 함께 제공합니다",
+    sourceSummary: "원자료",
+    updated: "업데이트",
+  },
+  en: {
+    label: "INVESTMENT NOTES",
+    nav: ["Notes", "Books", "Voices", "Videos"],
+    intro:
+      "Read the source and preserve the boundary between summary and judgment",
+    description:
+      "Books, public commentary, videos, and interviews become source-grounded notes that separate the original claim from Jamie's interpretation",
+    empty: "The first research note is in preparation",
+    emptyBody:
+      "Every note separates source summary from personal commentary and ships in Korean and English",
+    sourceSummary: "Sources",
+    updated: "Updated",
+  },
 } as const;
+
+const indexCopy: Record<Locale, EditorialCopy> = {
+  ko: {
+    eyebrow: "INVESTMENT NOTES",
+    title: "출처와 판단을 분리한 투자 리서치",
+    description: copy.ko.description,
+    all: "모든 노트",
+    newest: "최신순",
+    oldest: "오래된순",
+    grid: "그리드",
+    list: "목록",
+    loadMore: "더 보기",
+    empty: "선택한 조건과 일치하는 노트가 없습니다",
+    related: "관련 노트",
+  },
+  en: {
+    eyebrow: "INVESTMENT NOTES",
+    title: "Investment research with source and judgment kept apart",
+    description: copy.en.description,
+    all: "All notes",
+    newest: "Newest",
+    oldest: "Oldest",
+    grid: "Grid",
+    list: "List",
+    loadMore: "Load more",
+    empty: "No notes match the selected filters.",
+    related: "Related notes",
+  },
+};
 
 /** `InvestmentLayout` 페이지 UI를 렌더링함 */
 export function InvestmentLayout({
-    locale,
-    children,
+  locale,
+  children,
 }: {
-    readonly locale: Locale;
-    readonly children: ReactNode;
+  readonly locale: Locale;
+  readonly children: ReactNode;
 }): React.JSX.Element {
-    const text = copy[locale];
-    const otherLocale = locale === "ko" ? "en" : "ko";
-    return (
-        <div className={styles.site}>
-            <header className={styles.header}>
-                <Link
-                    aria-label="jongminchung invest"
-                    className={styles.brand}
-                    href={`/${locale}`}
-                >
-                    <BrandWordmark suffix="invest" />
-                </Link>
-                <nav
-                    aria-label={
-                        locale === "ko" ? "투자 노트" : "Investment notes"
-                    }
-                >
-                    <Link href={`/${locale}/notes`}>{text.nav[0]}</Link>
-                    <Link href={`/${locale}/sources/book`}>{text.nav[1]}</Link>
-                    <Link href={`/${locale}/sources/social`}>
-                        {text.nav[2]}
-                    </Link>
-                    <Link href={`/${locale}/sources/video`}>{text.nav[3]}</Link>
-                    <a href={`/${otherLocale}`}>{otherLocale.toUpperCase()}</a>
-                    <ThemeControl locale={locale} />
-                </nav>
-            </header>
-            {children}
-            <footer className={styles.footer}>
-                <span>Investment Notes · Jamie</span>
-                <a href="https://jamie.kr">jamie.kr ↗</a>
-                <span>Source summary ≠ personal judgment</span>
-            </footer>
-        </div>
-    );
+  const text = copy[locale];
+  const otherLocale = locale === "ko" ? "en" : "ko";
+  return (
+    <div className="min-h-dvh bg-background text-foreground">
+      <EditorialHeader
+        actions={<ThemeControl locale={locale} />}
+        brand={<BrandWordmark suffix="invest" />}
+        brandLabel="jongminchung invest"
+        homeHref={`/${locale}`}
+        localeHref={`/${otherLocale}`}
+        localeLabel={otherLocale.toUpperCase()}
+        navigation={[
+          { href: `/${locale}/notes`, label: text.nav[0] },
+          { href: `/${locale}/sources/book`, label: text.nav[1] },
+          { href: `/${locale}/sources/social`, label: text.nav[2] },
+          { href: `/${locale}/sources/video`, label: text.nav[3] },
+        ]}
+      />
+      {children}
+      <EditorialFooter
+        groups={[
+          {
+            label: locale === "ko" ? "탐색" : "Explore",
+            links: [
+              { href: `/${locale}`, label: "Home" },
+              { href: `/${locale}/notes`, label: text.nav[0] },
+            ],
+          },
+          {
+            label: locale === "ko" ? "출처" : "Sources",
+            links: [
+              { href: `/${locale}/sources/book`, label: text.nav[1] },
+              { href: `/${locale}/rss.xml`, label: "RSS" },
+            ],
+          },
+          {
+            label: "Elsewhere",
+            links: [{ href: "https://jamie.kr", label: "jamie.kr ↗" }],
+          },
+        ]}
+        note="Source summary ≠ personal judgment"
+      />
+    </div>
+  );
 }
 
 /** `InvestmentHome` UI 컴포넌트를 렌더링함 */
 export function InvestmentHome({
-    locale,
-    notes,
+  locale,
+  notes,
+  searchParams = {},
 }: {
-    readonly locale: Locale;
-    readonly notes: readonly InvestmentNoteManifestEntry[];
+  readonly locale: Locale;
+  readonly notes: readonly InvestmentNoteManifestEntry[];
+  readonly searchParams?: EditorialSearchParams;
 }): React.JSX.Element {
-    const text = copy[locale];
-    return (
-        <main className={styles.main}>
-            <section className={styles.hero}>
-                <p className={styles.kicker}>{text.label}</p>
-                <h1>{text.intro}</h1>
-                <p>{text.description}</p>
-                <div className={styles.method}>
-                    <span>01 · Source</span>
-                    <span>02 · Summary</span>
-                    <span>03 · Jamie&apos;s notes</span>
-                </div>
-            </section>
-            <NoteCollection locale={locale} notes={notes} />
-        </main>
-    );
+  return (
+    <EditorialIndex
+      copy={indexCopy[locale]}
+      items={notes.map(toInvestmentEditorialItem)}
+      pathname={`/${locale}`}
+      query={parseEditorialQuery(
+        searchParams,
+        notes.flatMap((note) => toInvestmentEditorialItem(note).tags),
+      )}
+    />
+  );
 }
 
 /** `NoteCollection` UI 컴포넌트를 렌더링함 */
 export function NoteCollection({
-    locale,
-    notes,
-    title,
+  locale,
+  notes,
+  title,
+  pathname = `/${locale}/notes`,
+  searchParams = {},
 }: {
-    readonly locale: Locale;
-    readonly notes: readonly InvestmentNoteManifestEntry[];
-    readonly title?: string;
+  readonly locale: Locale;
+  readonly notes: readonly InvestmentNoteManifestEntry[];
+  readonly title?: string;
+  readonly pathname?: string;
+  readonly searchParams?: EditorialSearchParams;
 }): React.JSX.Element {
-    const text = copy[locale];
-    return (
-        <section className={styles.collection}>
-            <div className={styles.collectionHeading}>
-                <p>INDEX / {String(notes.length).padStart(2, "0")}</p>
-                <h2>
-                    {title ?? (locale === "ko" ? "최근 노트" : "Recent notes")}
-                </h2>
-            </div>
-            {notes.length === 0 ? (
-                <div className={styles.empty}>
-                    <p>{text.empty}</p>
-                    <span>{text.emptyBody}</span>
-                </div>
-            ) : (
-                <ol className={styles.noteList}>
-                    {notes.map((note, index) => (
-                        <li key={note.id}>
-                            <Link href={note.href}>
-                                <span>
-                                    {String(index + 1).padStart(2, "0")}
-                                </span>
-                                <div>
-                                    <h3>{note.title}</h3>
-                                    <p>{note.description}</p>
-                                </div>
-                                <time dateTime={note.updatedAt}>
-                                    {note.updatedAt}
-                                </time>
-                            </Link>
-                        </li>
-                    ))}
-                </ol>
-            )}
-        </section>
-    );
+  return (
+    <EditorialIndex
+      copy={{ ...indexCopy[locale], title: title ?? indexCopy[locale].title }}
+      items={notes.map(toInvestmentEditorialItem)}
+      pathname={pathname}
+      query={parseEditorialQuery(
+        searchParams,
+        notes.flatMap((note) => toInvestmentEditorialItem(note).tags),
+      )}
+    />
+  );
 }
 
 /** `InvestmentNotePage` 페이지 UI를 렌더링함 */
 export function InvestmentNotePage({
-    locale,
-    note,
-    children,
+  locale,
+  note,
+  children,
+  related = [],
 }: {
-    readonly locale: Locale;
-    readonly note: InvestmentNoteManifestEntry;
-    readonly children: ReactNode;
+  readonly locale: Locale;
+  readonly note: InvestmentNoteManifestEntry;
+  readonly children: ReactNode;
+  readonly related?: readonly InvestmentNoteManifestEntry[];
 }): React.JSX.Element {
-    const text = copy[locale];
-    return (
-        <main className={styles.notePage}>
-            <header className={styles.noteHeader}>
-                <p>{note.series ?? "Research note"}</p>
-                <h1>{note.title}</h1>
-                <p>{note.description}</p>
-                <time dateTime={note.updatedAt}>
-                    {text.updated} · {note.updatedAt}
-                </time>
-            </header>
-            <aside className={styles.sources} aria-label={text.sourceSummary}>
-                <p>{text.sourceSummary}</p>
-                {note.sources.map((source) => (
-                    <SourceCard
-                        key={`${source.kind}:${source.title}`}
-                        source={source}
-                    />
+  const text = copy[locale];
+  const relatedItems = rankRelatedEditorialItems(
+    toInvestmentEditorialItem(note),
+    related.map(toInvestmentEditorialItem),
+  );
+  return (
+    <EditorialArticle
+      footer={
+        <>
+          {relatedItems.length === 0 ? null : (
+            <section
+              className="mt-16 border-t pt-7"
+              aria-labelledby="related-notes"
+            >
+              <h2
+                className="mt-0 mb-5 text-[22px] font-medium"
+                id="related-notes"
+              >
+                {locale === "ko" ? "관련 노트" : "Related notes"}
+              </h2>
+              <div className="grid grid-cols-3 gap-4 max-[760px]:grid-cols-1">
+                {relatedItems.map((item) => (
+                  <EditorialCard item={item} key={item.id} />
                 ))}
-            </aside>
-            <article className={styles.noteBody}>{children}</article>
-            <p className={styles.disclaimer}>
-                {locale === "ko"
-                    ? "이 글은 출처를 이해하기 위한 개인 기록이며 투자 권유가 아닙니다"
-                    : "This is a personal research note, not investment advice"}
-            </p>
-        </main>
-    );
+              </div>
+            </section>
+          )}
+          <p className="mt-10 border-t pt-6 text-xs text-muted-foreground">
+            {locale === "ko"
+              ? "이 글은 출처를 이해하기 위한 개인 기록이며 투자 권유가 아닙니다"
+              : "This is a personal research note, not investment advice"}
+          </p>
+        </>
+      }
+      header={
+        <>
+          <p className="m-0 font-mono text-[11px] uppercase text-primary">
+            {note.series ?? "Research note"}
+          </p>
+          <h1 className="my-4 text-[clamp(44px,6vw,72px)] font-medium leading-none tracking-[-.05em]">
+            {note.title}
+          </h1>
+          <p className="m-0 max-w-[680px] text-[18px] leading-[1.6] text-muted-foreground">
+            {note.description}
+          </p>
+          <time
+            className="mt-5 block font-mono text-[11px] text-muted-foreground"
+            dateTime={note.updatedAt}
+          >
+            {text.updated} · {note.updatedAt}
+          </time>
+        </>
+      }
+      rail={
+        <div aria-label={text.sourceSummary}>
+          <p className="m-0 font-mono text-[11px] uppercase">
+            {text.sourceSummary}
+          </p>
+          {note.sources.map((source) => (
+            <SourceCard
+              key={`${source.kind}:${source.title}`}
+              source={source}
+            />
+          ))}
+        </div>
+      }
+    >
+      {children}
+    </EditorialArticle>
+  );
 }
 
 function SourceCard({
-    source,
+  source,
 }: {
-    readonly source: InvestmentNoteManifestEntry["sources"][number];
+  readonly source: InvestmentNoteManifestEntry["sources"][number];
 }): React.JSX.Element {
-    const body = (
-        <>
-            <span>{source.kind}</span>
-            <strong>{source.title}</strong>
-            <small>{source.creator}</small>
-        </>
-    );
-    return source.url === undefined ? (
-        <div className={styles.sourceCard}>{body}</div>
-    ) : (
-        <a
-            className={styles.sourceCard}
-            href={source.url}
-            rel="noreferrer"
-            target="_blank"
-        >
-            {body}
-        </a>
-    );
+  const body = (
+    <>
+      <span>{source.kind}</span>
+      <strong>{source.title}</strong>
+      <small>{source.creator}</small>
+    </>
+  );
+  return source.url === undefined ? (
+    <div className="mt-3 flex flex-col gap-[5px] border bg-card p-[18px] [&_span]:font-mono [&_span]:text-[10px] [&_span]:text-muted-foreground [&_small]:font-mono [&_small]:text-[10px] [&_small]:text-muted-foreground">
+      {body}
+    </div>
+  ) : (
+    <a
+      className="mt-3 flex flex-col gap-[5px] border bg-card p-[18px] [&_span]:font-mono [&_span]:text-[10px] [&_span]:text-muted-foreground [&_small]:font-mono [&_small]:text-[10px] [&_small]:text-muted-foreground"
+      href={source.url}
+      rel="noreferrer"
+      target="_blank"
+    >
+      {body}
+    </a>
+  );
 }
 
 /** `sourceTitle` UI 컴포넌트를 렌더링함 */
 export function sourceTitle(
-    locale: Locale,
-    kind: InvestmentSourceKind,
+  locale: Locale,
+  kind: InvestmentSourceKind,
 ): string {
-    const labels = {
-        ko: {
-            book: "책",
-            social: "공개 의견",
-            video: "영상",
-            interview: "인터뷰",
-            article: "아티클",
-        },
-        en: {
-            book: "Books",
-            social: "Public voices",
-            video: "Videos",
-            interview: "Interviews",
-            article: "Articles",
-        },
-    } as const;
-    return labels[locale][kind];
+  const labels = {
+    ko: {
+      book: "책",
+      social: "공개 의견",
+      video: "영상",
+      interview: "인터뷰",
+      article: "아티클",
+    },
+    en: {
+      book: "Books",
+      social: "Public voices",
+      video: "Videos",
+      interview: "Interviews",
+      article: "Articles",
+    },
+  } as const;
+  return labels[locale][kind];
 }

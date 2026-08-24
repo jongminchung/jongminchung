@@ -90,22 +90,22 @@
 
   ```ts
   type TechPageModel =
-  	| Readonly<{
-  			kind: "document";
-  			locale: Locale;
-  			page: LoadedDocument;
-  			current: CurrentDocumentNavigationEntry;
-  			navigation: readonly NavigationEntry[];
-  			metadata: Metadata;
-  	  }>
-  	| Readonly<{
-  			kind: "section";
-  			locale: Locale;
-  			page: SectionPage;
-  			current: CurrentSectionNavigationEntry;
-  			navigation: readonly NavigationEntry[];
-  			metadata: Metadata;
-  	  }>;
+    | Readonly<{
+        kind: "document";
+        locale: Locale;
+        page: LoadedDocument;
+        current: CurrentDocumentNavigationEntry;
+        navigation: readonly NavigationEntry[];
+        metadata: Metadata;
+      }>
+    | Readonly<{
+        kind: "section";
+        locale: Locale;
+        page: SectionPage;
+        current: CurrentSectionNavigationEntry;
+        navigation: readonly NavigationEntry[];
+        metadata: Metadata;
+      }>;
   ```
 
 - **`resolveTechPage(locale, slug)`가 route 해석과 조회 순서를 한 번 소유함**

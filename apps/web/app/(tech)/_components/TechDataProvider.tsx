@@ -5,26 +5,24 @@ import { type ReactNode, useState } from "react";
 
 /** `createTechQueryClient` 결과를 생성함 */
 export function createTechQueryClient(): QueryClient {
-    return new QueryClient({
-        defaultOptions: {
-            queries: {
-                refetchOnWindowFocus: false,
-                retry: 1,
-            },
-        },
-    });
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: false,
+        retry: 1,
+      },
+    },
+  });
 }
 
 /** `TechDataProvider` UI 컴포넌트를 렌더링함 */
 export function TechDataProvider({
-    children,
+  children,
 }: {
-    readonly children: ReactNode;
+  readonly children: ReactNode;
 }): React.JSX.Element {
-    const [queryClient] = useState(createTechQueryClient);
-    return (
-        <QueryClientProvider client={queryClient}>
-            {children}
-        </QueryClientProvider>
-    );
+  const [queryClient] = useState(createTechQueryClient);
+  return (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
 }

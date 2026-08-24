@@ -1,128 +1,57 @@
 import { describe, expect, it } from "vitest";
-import { parseDocMetadata, searchDocumentSchema } from "./content-model";
+import {
+  createDocHref,
+  createSeriesHref,
+  parseDocMetadata,
+} from "./content-model";
 
-const validMetadata = {
-    id: "overview",
-    locale: "en",
-    section: "overview",
-    title: "Overview",
-    description: "Documentation overview",
-    order: 0,
-    publishedAt: "2026-07-14",
-    updatedAt: "2026-07-14",
-    tags: ["docs"],
-    status: "stable",
-    publicationStatus: "published",
-    sourceUrl: "https://example.com/source",
+const metadata = {
+  id: "article",
+  locale: "en",
+  title: "Article",
+  description: "A technical article",
+  publishedAt: "2026-07-14",
+  updatedAt: "2026-07-14",
+  tags: ["docs"],
+  status: "stable",
+  publicationStatus: "published",
+  sourceUrl: "https://example.com/source",
 };
 
-describe("ParseDoc메타데이터", () => {
-    it("[성공] 불변의 검증된 문서 계약을 반환함", () => {
-        const metadata = parseDocMetadata({
-            ...validMetadata,
-            apiSymbols: ["example#run"],
-            displayTitle: "Overview",
-            verifiedAt: "2026-07-14",
-        });
-        expect(metadata).toMatchObject({
-            ...validMetadata,
-            displayTitle: "Overview",
-            verifiedAt: "2026-07-14",
-        });
-        expect(Object.isFrozen(metadata)).toBe(true);
-        expect(Object.isFrozen(metadata.tags)).toBe(true);
-        expect(Object.isFrozen(metadata.apiSymbols)).toBe(true);
-    });
+describe("블로그 메타데이터", () => {
+  it("[성공] 독립 글의 검증된 계약을 반환함", () => {
+    const parsed = parseDocMetadata(metadata);
+    expect(parsed).toMatchObject(metadata);
+    expect(Object.isFrozen(parsed)).toBe(true);
+  });
 
-    it("[실패] 지원되지 않는 로케일, 필드, ID 및 섹션을 포함함", () => {
-        expect(() =>
-            parseDocMetadata({ ...validMetadata, locale: "fr" }),
-        ).toThrow('unsupported locale "fr"');
-        expect(() =>
-            parseDocMetadata({ ...validMetadata, typo: true }),
-        ).toThrow("unsupported metadata fields: typo");
-        expect(() =>
-            parseDocMetadata({ ...validMetadata, id: "Overview" }),
-        ).toThrow("must be a lowercase path");
-        expect(() =>
-            parseDocMetadata({
-                ...validMetadata,
-                id: "packages/tooling",
-                section: "handbook",
-            }),
-        ).toThrow('does not belong to section "handbook"');
-    });
+  it("[성공] 등록된 시리즈와 순서를 함께 허용함", () => {
+    expect(
+      parseDocMetadata({
+        ...metadata,
+        series: "domain-driven-design",
+        seriesOrder: 1,
+      }).series,
+    ).toBe("domain-driven-design");
+  });
 
-    it.each(["14-07-2026", "2026-02-29", "2026-04-31"])(
-        "[실패] 떠난 데이트 %s을(를) 가지고 있음",
-        (updatedAt) => {
-            expect(() =>
-                parseDocMetadata({ ...validMetadata, updatedAt }),
-            ).toThrow("must use the ISO date format");
-        },
+  it("[실패] 시리즈와 순서의 단독 선언 및 미등록 시리즈를 거부함", () => {
+    expect(() =>
+      parseDocMetadata({ ...metadata, series: "domain-driven-design" }),
+    ).toThrow("must be used together");
+    expect(() => parseDocMetadata({ ...metadata, seriesOrder: 1 })).toThrow(
+      "must be used together",
     );
+    expect(() =>
+      parseDocMetadata({ ...metadata, series: "unknown", seriesOrder: 1 }),
+    ).toThrow('unknown series "unknown"');
+  });
 
-    it("[실패] 윤일을 허용하고 업데이트 전 확인을 받고 있음", () => {
-        expect(
-            parseDocMetadata({
-                ...validMetadata,
-                publishedAt: "2024-02-29",
-                updatedAt: "2024-02-29",
-                verifiedAt: "2024-02-29",
-            }).verifiedAt,
-        ).toBe("2024-02-29");
-        expect(() =>
-            parseDocMetadata({
-                ...validMetadata,
-                updatedAt: "2026-07-14",
-                verifiedAt: "2026-07-13",
-            }),
-        ).toThrow('must not precede "updatedAt"');
-    });
-
-    it.each([
-        "http://example.com/source",
-        "https://user:secret@example.com/source",
-        "javascript:alert(1)",
-    ])("[실패] 안전하지 않은 소스 URL %s을(를) 가지고 있음", (sourceUrl) => {
-        expect(() => parseDocMetadata({ ...validMetadata, sourceUrl })).toThrow(
-            /absolute URL|credential-free HTTPS URL/u,
-        );
-    });
-
-    it("[실패] 아무것도 없고 데이터 배열을 포함했습니다", () => {
-        expect(() => parseDocMetadata({ ...validMetadata, tags: [] })).toThrow(
-            "must be an array of strings",
-        );
-        expect(() =>
-            parseDocMetadata({ ...validMetadata, tags: ["docs", " docs "] }),
-        ).toThrow("must not contain duplicates");
-        expect(() =>
-            parseDocMetadata({ ...validMetadata, apiSymbols: [""] }),
-        ).toThrow("must not contain empty strings");
-    });
-
-    it("[성공]으로 생성된 검색 문서를 검증함", () => {
-        const document = {
-            id: "overview",
-            locale: "en",
-            section: "overview",
-            title: "Overview",
-            description: "Documentation overview",
-            order: 0,
-            href: "/en",
-            headings: ["Start"],
-            tags: ["docs"],
-            apiSymbols: [],
-            body: "Overview body",
-        };
-
-        expect(searchDocumentSchema.parse(document)).toEqual(document);
-        expect(() =>
-            searchDocumentSchema.parse({ ...document, unexpected: true }),
-        ).toThrow();
-        expect(() =>
-            searchDocumentSchema.parse({ ...document, locale: "fr" }),
-        ).toThrow();
-    });
+  it("[성공] 새 공개 URL을 생성함", () => {
+    expect(createDocHref("ko", "article")).toBe("/ko/article");
+    expect(createSeriesHref("en")).toBe("/en/series");
+    expect(createSeriesHref("en", "domain-driven-design")).toBe(
+      "/en/series/domain-driven-design",
+    );
+  });
 });

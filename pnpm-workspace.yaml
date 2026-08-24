@@ -115,3 +115,4 @@ catalog:
   "vitest": "4.1.10"
   "zod": "4.4.3"
   "zustand": "5.0.14"
+  happy-dom: ^20.11.6

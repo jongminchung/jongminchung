@@ -1,0 +1,826 @@
+---
+id: headless-react-component
+locale: ko
+title: "Headless한 React 컴포넌트 만들기"
+description: "동작과 표현을 분리하고 합성 가능한 Headless React 컴포넌트를 설계합니다."
+publishedAt: "2026-07-10"
+updatedAt: "2026-07-10"
+verifiedAt: "2026-08-06"
+tags: [react, frontend, components, accessibility]
+status: experimental
+publicationStatus: published
+sourceUrl: https://github.com/kciter/kciter.github.io/blob/develop/src/drafts/2026/2026-07-10-headless-react-component.mdx
+---
+
+이전에 [Polymorphic한 React 컴포넌트 만들기](/posts/polymorphic-react-component)에서는 `as` 속성을 이용해 컴포넌트가 어떤 요소로든 렌더링될 수 있게 만들었고, [Render Delegation하는 React 컴포넌트 만들기](/posts/render-delegation-react-component)에서는 `asChild`를 이용해 렌더링 자체를 자식 컴포넌트에게 위임했다. 두 글 모두 결국 같은 방향을 가리키고 있었다. 컴포넌트가 스스로 결정하는 것을 줄일수록 더 넓은 곳에서 쓸 수 있다는 것이다. 이번 글은 그 방향의 끝에 있는 패턴을 다룬다. 화면을 그리는 일 자체를 내려놓은 컴포넌트, **Headless 컴포넌트**다.
+
+Headless라는 단어를 처음 보면 뜻이 잘 와닿지 않을 수 있는데, 소프트웨어에서는 "화면이 없다"라는 의미로 오래 쓰여온 표현이다[^1]. Headless 컴포넌트도 마찬가지다. 상태 관리, 이벤트 처리, 키보드 조작, 접근성 속성까지 컴포넌트가 해야 할 일은 전부 하지만, 그 결과를 어떤 색과 모양으로 보여줄지는 결정하지 않는다. 그리는 일은 통째로 사용하는 쪽의 몫이다.
+
+이 패턴이 왜 필요해졌는지부터 시작해서 훅과 컴포넌트라는 두 가지 방식으로 직접 만들어보고, 이를 토대로 디자인 시스템을 어떻게 조립할 수 있는지 살펴볼 것이다. 마지막에는 여러 서비스를 만들며 디자인 시스템의 원형(archetype)을 만들려 했던 필자의 경험도 함께 정리했다.
+
+## 문제 인식하기
+
+React로 제품을 만들다 보면 UI 라이브러리를 도입하는 순간이 온다. [MUI](https://mui.com)나 [Ant Design](https://ant.design)처럼 완성된 디자인이 입혀진 라이브러리를 설치하면 첫 화면은 놀라울 정도로 빨리 나온다. 문제는 디자이너의 시안이 도착한 다음부터다. 시안 속 버튼은 라이브러리의 버튼과 높이가 다르고, 모서리 곡률이 다르고, 라이브러리가 자랑하는 물결 애니메이션 같은 것은 시안에 존재하지 않는다. 그때부터 개발자의 일은 컴포넌트를 만드는 것이 아니라 라이브러리가 이미 그려둔 것을 지우는 것이 된다.
+
+```tsx
+// 시안을 따라가기 위해 MUI 버튼에서 MUI를 지우는 코드
+<Button
+  disableRipple
+  disableElevation
+  sx={{
+    borderRadius: "12px",
+    textTransform: "none",
+    fontWeight: 600,
+    backgroundColor: "#1a1a1a",
+    "&:hover": { backgroundColor: "#333333", boxShadow: "none" },
+    "&.Mui-disabled": { backgroundColor: "#e9ecef", color: "#adb5bd" },
+    "& .MuiButton-startIcon": { marginRight: "6px" },
+  }}
+>
+  구매하기
+</Button>
+```
+
+이런 코드는 한 번 등장하면 끝나지 않는다. 버튼에서 이겼다면 다음은 Select, 그다음은 DatePicker다. 라이브러리 내부 클래스 이름(`.Mui-disabled` 같은)에 의존하기 시작하면 라이브러리 버전을 올릴 때마다 스타일이 깨질 각오도 해야 한다. 분명 시간을 아끼려고 도입한 라이브러리인데, 어느 순간부터 라이브러리와 싸우는 데 시간을 쓰고 있는 것이다.
+
+그렇다면 처음부터 직접 만들면 되지 않을까? 버튼 정도는 그래도 된다. 그런데 동작이 있는 컴포넌트로 넘어가면 이야기가 달라진다. 시안에 있는 정렬 셀렉트를 `div`로 직접 만들었다고 해보자. 화면은 시안과 똑같이 나왔다. 이제 남은 일을 세어보자.
+
+- 바깥을 클릭하면 목록이 닫혀야 한다
+- <kbd>↑</kbd> <kbd>↓</kbd>로 옵션을 이동하고 <kbd>Enter</kbd>로 선택,
+  <kbd>Escape</kbd>로 닫을 수 있어야 한다
+- 목록이 길어지면 키보드 하이라이트를 따라 스크롤이 움직여야 한다
+- 스크린 리더[^2] 사용자에게 지금 목록이 열려 있는지, 무엇이 선택되어 있는지 알려줘야 한다
+- 열 때는 선택된 옵션부터 하이라이트되어야 하고, 닫히면 포커스가 제자리로 돌아와야 한다
+
+전부 네이티브 `<select>`를 쓸 때는 브라우저가 공짜로 해주던 일들이다[^3]. 그리고 이 목록은 서비스가 무엇이든 달라지지 않는다. 커머스의 정렬 셀렉트든 어드민의 필터 셀렉트든 <kbd>Escape</kbd>가 다르게 동작할 이유는 없다. 서비스마다 달라지는 것은 색과 여백과 글꼴, 즉 디자인뿐이다.
+
+여기까지 오면 문제의 구조가 보인다. 컴포넌트 안에는 서비스마다 달라지는 부분(디자인)과 달라지지 않는 부분(동작)이 함께 들어 있는데, 스타일이 입혀진 UI 라이브러리는 이 둘을 한 덩어리로 묶어서 판다. 그래서 디자인만 바꾸고 싶어도 덩어리째 뜯어내야 했던 것이다. 변하는 것과 변하지 않는 것을 분리하라는 오래된 설계 원칙을 컴포넌트에 적용하면 답이 하나 나온다. 동작만 남기고 디자인을 비워둔 컴포넌트, Headless 컴포넌트다.
+
+사실 이 분리가 새로운 발상은 아니다. 데스크톱 GUI 시절부터 MVC나 Presentation Model이라는 이름으로 화면에서 상태와 동작을 떼어내려는 시도는 계속 있었고, martinfowler.com에 실린 [Headless Component](https://martinfowler.com/articles/headless-component.html)라는 글은 이 패턴을 그 계보의 연장선에서 정리한다. 수십 년 된 분리의 시도가 컴포넌트라는 단위 위에서 다시 나타난 것이다.
+
+## 살펴보기
+
+Headless 컴포넌트는 이미 여러 라이브러리로 나와 있고, 제공되는 형태는 크게 두 가지다. 하나는 **훅(Hook) 형태**다. 컴포넌트조차 제공하지 않고 상태와 동작이 담긴 훅만 제공하는 방식으로, [Downshift](https://www.downshift-js.com), [TanStack Table](https://tanstack.com/table), [React Aria](https://react-spectrum.adobe.com/react-aria/hooks.html)의 훅들이 대표적이다. 예를 들어 TanStack Table은 정렬, 필터링, 페이지네이션 같은 테이블 로직을 전부 계산해 주지만 `<table>` 태그 하나 렌더링하지 않는다.
+
+```tsx
+const table = useReactTable({
+  data,
+  columns,
+  getCoreRowModel: getCoreRowModel(),
+});
+
+// 계산된 행을 어떤 태그로, 어떤 스타일로 그릴지는 전적으로 사용하는 쪽의 몫이다
+return (
+  <table>
+    {table.getRowModel().rows.map((row) => (
+      <tr key={row.id}>...</tr>
+    ))}
+  </table>
+);
+```
+
+다른 하나는 **컴포넌트 형태**다. 스타일 없는 컴포넌트를 제공하고 사용자가 이를 조립해서 쓰는 방식으로, [Radix Primitives](https://www.radix-ui.com/primitives), [Headless UI](https://headlessui.com), [Ariakit](https://ariakit.org), [Base UI](https://base-ui.com)가 여기에 속한다.
+
+```tsx
+import * as Select from "@radix-ui/react-select";
+
+// 동작과 접근성은 전부 들어 있지만 아무 스타일도 없다
+<Select.Root>
+  <Select.Trigger className="my-trigger">
+    <Select.Value placeholder="정렬 기준" />
+  </Select.Trigger>
+  <Select.Content className="my-content">...</Select.Content>
+</Select.Root>;
+```
+
+이 시리즈에서 다룬 Render Delegation(`asChild`)이 Radix에서 나온 것은 우연이 아니다. 스타일을 사용자에게 맡기는 라이브러리라면 렌더링할 요소까지 사용자가 바꿀 수 있어야 표현의 자유가 완성되기 때문이다. Polymorphic과 Render Delegation이 "무엇으로 그릴 것인가"를 열어주는 패턴이었다면, Headless는 "어떻게 그릴 것인가"를 통째로 열어주는 패턴인 셈이다.
+
+두 형태는 쓰임새가 조금 다르다. 테이블이나 자동완성처럼 DOM 구조 자체가 제품마다 완전히 달라지는 컴포넌트는 훅 형태가 어울리고, Select나 Dialog처럼 구조는 대체로 정해져 있고 스타일만 달라지는 컴포넌트는 조립하기 편한 컴포넌트 형태가 어울린다. 그래서 두 가지를 모두 만들어볼 것이다. 동작 원리를 알고 나면 침착하게 접근했을 때 생각보다 간단하다.
+
+## 훅으로 만드는 Headless 컴포넌트
+
+가장 작은 동작 컴포넌트인 토글 스위치부터 시작해 보자. 켜짐과 꺼짐, 두 상태를 오가는 컴포넌트다. 상태와 동작만 남기고 화면을 지우면 이렇게 된다.
+
+```tsx
+export function useSwitch({ defaultChecked = false } = {}) {
+  const [checked, setChecked] = useState(defaultChecked);
+  const toggle = () => setChecked((prev) => !prev);
+  return { checked, toggle };
+}
+```
+
+사용하는 쪽은 `checked`를 보고 마음대로 그리면 된다.
+
+```tsx
+const IosSwitch = () => {
+  const { checked, toggle } = useSwitch();
+  return (
+    <button className={`track ${checked ? "on" : ""}`} onClick={toggle}>
+      <span className="knob" />
+    </button>
+  );
+};
+```
+
+동작하긴 하지만 이것을 Headless 컴포넌트라고 부르기는 민망하다. 그냥 상태 훅이기 때문이다. 앞서 본 목록을 떠올려보면 컴포넌트에는 상태 말고도 해야 할 일이 있다. 스크린 리더에게 이것이 스위치이고 지금 켜져 있다고 알려주려면 `role="switch"`와 `aria-checked`가 필요하고, `button`이 아닌 요소로 그리는 사용자를 위해 키보드 처리와 `tabIndex`도 필요하다. 이 일들을 사용하는 쪽에 맡기면 매번 다시 구현해야 하고, 한 번은 반드시 잊어버린다.
+
+그래서 훅 형태의 Headless 컴포넌트는 **prop getter**라는 패턴을 사용한다[^4]. 요소에 그대로 펼쳐 넣을 수 있는 속성 묶음을 함수로 제공하는 것이다.
+
+```tsx
+export function useSwitch({ defaultChecked = false, disabled = false } = {}) {
+  const [checked, setChecked] = useState(defaultChecked);
+
+  const toggle = () => {
+    if (disabled) return;
+    setChecked((prev) => !prev);
+  };
+
+  // 요소에 펼쳐 넣을 속성 묶음을 만들어주는 함수
+  const getSwitchProps = (userProps = {}) => ({
+    role: "switch",
+    "aria-checked": checked,
+    "aria-disabled": disabled || undefined,
+    tabIndex: disabled ? -1 : 0,
+    "data-state": checked ? "checked" : "unchecked",
+    ...userProps,
+    onClick: composeHandlers(userProps.onClick, toggle),
+    onKeyDown: composeHandlers(userProps.onKeyDown, (event) => {
+      if (event.key === " " || event.key === "Enter") {
+        event.preventDefault();
+        toggle();
+      }
+    }),
+  });
+
+  return { checked, toggle, getSwitchProps };
+}
+```
+
+`composeHandlers`는 사용자가 넘긴 핸들러와 훅의 핸들러를 순서대로 실행해 주는 작은 함수다. Render Delegation 글에서 `Slot`의 prop을 병합하며 만들었던 `mergeProps`와 같은 문제 의식이다. 사용자의 속성이 훅의 속성을 덮어쓸 수 있게 하되, 이벤트 핸들러만큼은 어느 한쪽이 사라지면 안 되기 때문에 합성한다.
+
+```tsx
+function composeHandlers(theirs, ours) {
+  return (event) => {
+    theirs?.(event);
+    ours?.(event);
+  };
+}
+```
+
+이제 사용하는 쪽은 이렇게 바뀐다.
+
+```tsx
+const IosSwitch = () => {
+  const { getSwitchProps } = useSwitch();
+  return (
+    <button {...getSwitchProps({ className: "ios-track" })}>
+      <span className="knob" />
+    </button>
+  );
+};
+
+const TerminalSwitch = () => {
+  const { checked, getSwitchProps } = useSwitch();
+  // button이 아닌 요소로 그려도 role, tabIndex, 키보드 처리가 따라온다
+  return (
+    <div {...getSwitchProps({ className: "terminal" })}>
+      {checked ? "[ ON ]" : "[ OFF ]"}
+    </div>
+  );
+};
+```
+
+같은 훅을 세 가지 모습으로 그려보면 다음과 같다. 직접 조작해 보자.
+
+각 스위치 아래 표시된 `aria-checked`와 `data-state`는 실제로 요소에 붙어 있는 속성 값이다. 겉모습은 제각각이지만 스크린 리더가 읽는 정보와 키보드 동작은 셋 다 동일하다. 동작의 품질은 훅이 보장하고 겉모습의 자유는 사용하는 쪽이 가진다. 이것이 Headless 컴포넌트가 하는 거래다.
+
+### 부품이 여러 개라면
+
+useSwitch는 요소가 하나뿐이라 prop getter도 하나면 충분했다. 부품이 여러 개인 컴포넌트도 같은 방식으로 제공할 수 있는데, 이때는 prop getter가 부품 수만큼 늘어난다. prop getter 패턴을 널리 알린 Downshift가 Select의 로직을 제공하는 `useSelect` 훅을 보자.
+
+```tsx
+import { useSelect } from "downshift";
+
+const SortSelect = ({ items }) => {
+  const {
+    isOpen,
+    selectedItem,
+    getToggleButtonProps,
+    getMenuProps,
+    getItemProps,
+  } = useSelect({
+    items,
+  });
+
+  return (
+    <div>
+      <button {...getToggleButtonProps()}>{selectedItem ?? "정렬 기준"}</button>
+      <ul {...getMenuProps()}>
+        {isOpen &&
+          items.map((item, index) => (
+            <li key={item} {...getItemProps({ item, index })}>
+              {item}
+            </li>
+          ))}
+      </ul>
+    </div>
+  );
+};
+```
+
+트리거에는 `getToggleButtonProps`, 목록에는 `getMenuProps`, 옵션 하나하나에는 `getItemProps`를 붙인다. 우리가 만든 `getSwitchProps`가 부품 수만큼 늘어났을 뿐이고, ARIA 속성과 키보드 처리가 각 getter 안에 들어 있는 것도 같다. 이 방식의 진짜 강점은 훅이 DOM 구조에 대해 아무것도 가정하지 않는다는 것이다. 옵션을 `ul` 목록 대신 카드 그리드로 그리든, 가상 스크롤 라이브러리 안에 넣든, 훅은 개의치 않는다. 자동완성이나 테이블처럼 화면 구조가 제품마다 완전히 달라지는 컴포넌트에서 훅 형태가 강세인 이유다. 그 대신 어떤 getter를 어느 요소에 붙일지 사용하는 쪽이 전부 챙겨야 하니, 구조가 뻔한 컴포넌트에서는 사용 코드가 필요 이상으로 장황해진다.
+
+### 로직을 데이터로, 상태 머신
+
+훅 형태를 한계까지 밀고 나간 사례로 [Zag.js](https://zagjs.com)가 있다. 우리가 만든 useSwitch를 다시 보면 상태는 checked와 unchecked 둘뿐이고, 클릭이든 키보드든 결국 "TOGGLE이라는 사건이 일어나면 반대 상태로 넘어간다"가 동작의 전부다. 이렇게 컴포넌트의 동작을 유한한 상태 목록과 전이 규칙의 표, 즉 상태 머신(state machine)으로 적을 수 있다는 것이 Zag.js의 출발점이다. Zag.js는 Select, Combobox, Dialog 같은 컴포넌트의 로직을 React와 무관한 상태 머신으로 정의해 두고, 프레임워크별 어댑터가 그 머신을 구동한다.
+
+```tsx
+// 개념만 추린 모습이다
+import { useId } from "react";
+import * as select from "@zag-js/select";
+import { useMachine, normalizeProps } from "@zag-js/react";
+
+const SortSelect = ({ items }) => {
+  const service = useMachine(select.machine, {
+    id: useId(),
+    collection: select.collection({ items }),
+  });
+  const api = select.connect(service, normalizeProps);
+
+  return (
+    <div>
+      <button {...api.getTriggerProps()}>
+        {api.valueAsString || "정렬 기준"}
+      </button>
+      <ul {...api.getContentProps()}>
+        {items.map((item) => (
+          <li key={item} {...api.getItemProps({ item })}>
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+```
+
+`connect`가 돌려주는 `api`는 결국 상태 값과 prop getter의 묶음이니 사용하는 감각은 Downshift와 크게 다르지 않다. 재미있는 것은 같은 상태 머신이 `@zag-js/vue`와 `@zag-js/solid` 어댑터를 통해 Vue와 Solid에서도 그대로 돌아간다는 점이다. 참고로 Vue 진영은 이렇게 화면 없이 로직만 제공하는 컴포넌트를 renderless 컴포넌트라고 불러왔다. Headless 컴포넌트가 동작과 스킨을 분리하는 것이었다면, Zag.js는 한 발 더 나아가 동작을 UI 프레임워크로부터도 분리했다. 로직이 프레임워크 문법이 아니라 데이터에 가까운 형태로 존재하니 렌더링 없이 로직만 테스트하기도 쉽다. 매번 getter를 배선하는 것이 번거롭다면 Zag.js 위에 컴포넌트 형태의 조립층을 얹은 [Ark UI](https://ark-ui.com)를 쓰면 되는데, 이 둘은 디자인을 입히는 장에서 다시 만나게 될 것이다.
+
+## 컴포넌트로 만드는 Headless 컴포넌트
+
+Select는 트리거, 목록, 옵션이라는 부품 구조가 사실상 정해져 있는 컴포넌트다. 방금 본 Downshift나 Zag.js의 사용 코드처럼 뻔한 구조를 매번 손으로 배선하게 하는 대신, 부품을 아예 컴포넌트로 제공하고 사용자가 JSX로 조립하게 하는 편이 낫다.
+
+이때 쓰이는 것이 **합성 컴포넌트(Compound Component)** 패턴이다. `<select>`와 `<option>`처럼 여러 컴포넌트가 한 묶음으로 협력하도록 만드는 패턴으로, 부품들이 부모의 상태를 공유해야 하기 때문에 보통 React의 Context[^5]를 함께 사용한다. 우리가 만들 Select의 최종 사용 모습부터 그려보자.
+
+```tsx
+<Select.Root value={value} onValueChange={setValue}>
+  <Select.Trigger className="trigger">
+    <Select.Value placeholder="정렬 기준 선택" />
+  </Select.Trigger>
+  <Select.Listbox className="listbox">
+    <Select.Option value="latest">최신순</Select.Option>
+    <Select.Option value="popular">인기순</Select.Option>
+    <Select.Option value="price-asc">낮은 가격순</Select.Option>
+  </Select.Listbox>
+</Select.Root>
+```
+
+스타일은 한 줄도 없지만 구조는 명확하다. 이제 안쪽을 채워보자.
+
+### 뼈대 잡기
+
+먼저 부품들이 공유할 상태를 Context에 담는다. 열림 여부, 선택된 값, 그리고 등록된 옵션 목록이다.
+
+```tsx
+const SelectContext = createContext(null);
+
+// 부품이 Root 바깥에서 쓰이면 조립 실수이므로 바로 알려준다
+function useSelectContext(part) {
+  const context = useContext(SelectContext);
+  if (!context) {
+    throw new Error(`<Select.${part}>는 <Select.Root> 안에서만 사용할 수 있다`);
+  }
+  return context;
+}
+```
+
+`Root`는 상태의 주인이다. UI는 감싸는 `div` 하나가 전부다.
+
+```tsx
+const Root = ({ value, onValueChange, children, ...props }) => {
+  const [open, setOpen] = useState(false);
+  const [options, setOptions] = useState([]); // 등록된 옵션 목록
+  const [activeIndex, setActiveIndex] = useState(-1); // 키보드 하이라이트 위치
+  const rootRef = useRef(null);
+  const listboxId = useId();
+
+  // 옵션이 마운트될 때 자신을 등록하고, 사라질 때 해제할 수 있게 한다
+  const registerOption = useCallback((option) => {
+    setOptions((prev) => [...prev, option]);
+    return () => setOptions((prev) => prev.filter((o) => o.id !== option.id));
+  }, []);
+
+  const select = (next) => {
+    onValueChange?.(next);
+    setOpen(false);
+  };
+
+  // 열 때는 선택된 옵션(없으면 첫 옵션)부터 하이라이트한다
+  const openListbox = () => {
+    const selectedIndex = options.findIndex((o) => o.value === value);
+    setActiveIndex(selectedIndex >= 0 ? selectedIndex : 0);
+    setOpen(true);
+  };
+
+  return (
+    <SelectContext.Provider
+      value={{
+        open,
+        setOpen,
+        openListbox,
+        value,
+        select,
+        options,
+        registerOption,
+        activeIndex,
+        setActiveIndex,
+        moveActive,
+        listboxId,
+      }}
+    >
+      {" "}
+      {/* moveActive는 잠시 뒤 키보드를 다루며 만든다 */}
+      <div ref={rootRef} data-state={open ? "open" : "closed"} {...props}>
+        {children}
+      </div>
+    </SelectContext.Provider>
+  );
+};
+```
+
+`registerOption`이 낯설 수 있는데, 곧 만들 `Option` 컴포넌트가 마운트되면서 자신의 값과 라벨을 부모에게 알리는 통로다. `Root`는 자식 JSX를 들여다볼 수 없으므로[^6] 옵션들이 스스로 신고하게 만드는 것이다. 덕분에 키보드로 하이라이트를 움직일 때 "다음 옵션이 무엇인지"를 `Root`가 알 수 있다.
+
+바깥 클릭 처리도 상태의 주인인 `Root`가 맡는다.
+
+```tsx
+useEffect(() => {
+  if (!open) return;
+  const onPointerDown = (event) => {
+    if (!rootRef.current?.contains(event.target)) {
+      setOpen(false);
+    }
+  };
+  document.addEventListener("pointerdown", onPointerDown);
+  return () => document.removeEventListener("pointerdown", onPointerDown);
+}, [open]);
+```
+
+### Trigger와 Value
+
+`Trigger`는 목록을 여닫는 버튼이다. 여기에 이 컴포넌트의 접근성 절반이 들어간다.
+
+```tsx
+const Trigger = ({ children, ...props }) => {
+  const {
+    open,
+    setOpen,
+    openListbox,
+    options,
+    activeIndex,
+    select,
+    moveActive,
+    listboxId,
+  } = useSelectContext("Trigger");
+
+  const activeOption =
+    open && activeIndex >= 0 ? options[activeIndex] : undefined;
+
+  return (
+    <button
+      type="button"
+      role="combobox"
+      aria-expanded={open}
+      aria-controls={listboxId}
+      aria-activedescendant={activeOption?.id}
+      data-state={open ? "open" : "closed"}
+      {...props}
+      onClick={composeHandlers(props.onClick, () =>
+        open ? setOpen(false) : openListbox(),
+      )}
+      onKeyDown={composeHandlers(props.onKeyDown, handleKeyDown)}
+    >
+      {children}
+    </button>
+  );
+};
+```
+
+`handleKeyDown`과 `moveActive`는 아직 만들지 않았다. 잠시 뒤 키보드를 다루는 절에서 채울 것이니 자리만 기억해 두자.
+
+속성이 여러 개 붙었는데 하나씩 뜯어보면 어렵지 않다. `role="combobox"`는 스크린 리더에게 "선택지를 펼칠 수 있는 입력"이라고 알려주는 역할 표시이고, `aria-expanded`는 지금 펼쳐져 있는지, `aria-controls`는 어떤 목록을 조종하는지를 가리킨다[^7]. `aria-activedescendant`는 조금 특별하다. 목록이 열려도 키보드 포커스는 트리거 버튼에 그대로 두고, "지금 가리키고 있는 옵션"의 id만 이 속성으로 알려준다. 포커스를 실제로 옮기지 않기 때문에 닫힐 때 포커스를 되돌리는 처리도 필요 없어진다. 일종의 가상 포커스인 셈이다.
+
+`Value`는 선택된 옵션의 라벨을 보여주는 작은 부품이다. 등록된 옵션 목록에서 라벨을 찾아준다.
+
+```tsx
+const Value = ({ placeholder = "선택", ...props }) => {
+  const { value, options } = useSelectContext("Value");
+  const selected = options.find((o) => o.value === value);
+  return (
+    <span data-placeholder={selected ? undefined : ""} {...props}>
+      {selected ? selected.label : placeholder}
+    </span>
+  );
+};
+```
+
+### Listbox와 Option
+
+`Listbox`는 옵션들이 담기는 목록이다. 눈여겨볼 부분은 닫혀 있어도 `null`을 반환하지 않고 `hidden` 속성으로 숨긴다는 점이다. 옵션을 언마운트해 버리면 방금 만든 등록 정보가 사라져서 닫힌 상태의 `Value`가 라벨을 찾을 수 없기 때문이다[^8].
+
+```tsx
+const Listbox = ({ children, ...props }) => {
+  const { open, listboxId } = useSelectContext("Listbox");
+  return (
+    <ul
+      role="listbox"
+      id={listboxId}
+      hidden={!open}
+      data-state={open ? "open" : "closed"}
+      {...props}
+    >
+      {children}
+    </ul>
+  );
+};
+```
+
+`Option`은 마운트되면서 자신을 등록하고, 자신이 선택되었는지와 하이라이트되었는지를 `data-*` 속성으로 드러낸다.
+
+```tsx
+const Option = ({ value, children, ...props }) => {
+  const {
+    registerOption,
+    select,
+    value: selectedValue,
+    options,
+    activeIndex,
+    setActiveIndex,
+  } = useSelectContext("Option");
+  const id = useId();
+  const ref = useRef(null);
+  const label = typeof children === "string" ? children : value;
+
+  // 마운트될 때 자신을 등록하고, 사라질 때 등록을 해제한다
+  useEffect(() => {
+    return registerOption({ id, value, label });
+  }, [registerOption, id, value, label]);
+
+  const index = options.findIndex((o) => o.id === id);
+  const isActive = index >= 0 && index === activeIndex;
+  const isSelected = selectedValue === value;
+
+  // 키보드로 하이라이트가 옮겨오면 스크롤이 따라온다
+  useEffect(() => {
+    if (isActive) ref.current?.scrollIntoView({ block: "nearest" });
+  }, [isActive]);
+
+  return (
+    <li
+      ref={ref}
+      id={id}
+      role="option"
+      aria-selected={isSelected}
+      data-state={isSelected ? "checked" : "unchecked"}
+      data-highlighted={isActive ? "" : undefined}
+      {...props}
+      onClick={composeHandlers(props.onClick, () => select(value))}
+      onPointerMove={composeHandlers(props.onPointerMove, () => {
+        if (!isActive && index >= 0) setActiveIndex(index);
+      })}
+    >
+      {children}
+    </li>
+  );
+};
+```
+
+마우스를 올렸을 때 `onMouseEnter`가 아니라 `onPointerMove`로 하이라이트를 옮기는 것은 사소해 보이지만 이유가 있다. 키보드로 하이라이트를 내리는 도중에 마우스 커서가 우연히 목록 위에 놓여 있으면, `onMouseEnter`는 스크롤 때문에 커서 밑으로 들어온 옵션을 하이라이트로 빼앗아 간다. 실제로 움직인 포인터에만 반응해야 두 입력이 싸우지 않는다.
+
+### 키보드 다루기
+
+이제 마지막 조각, 앞서 `Trigger`에 걸어둔 `handleKeyDown`을 채울 차례다. 포커스가 트리거에 머무는 설계이므로 키보드 처리는 이 한 곳에 모인다.
+
+```tsx
+const handleKeyDown = (event) => {
+  // 닫혀 있을 때: 화살표나 Enter, Space로 연다
+  if (!open) {
+    if (["ArrowDown", "ArrowUp", "Enter", " "].includes(event.key)) {
+      event.preventDefault();
+      openListbox();
+    }
+    return;
+  }
+
+  // 열려 있을 때
+  switch (event.key) {
+    case "ArrowDown":
+      event.preventDefault();
+      moveActive("next");
+      break;
+    case "ArrowUp":
+      event.preventDefault();
+      moveActive("prev");
+      break;
+    case "Home":
+      event.preventDefault();
+      moveActive("first");
+      break;
+    case "End":
+      event.preventDefault();
+      moveActive("last");
+      break;
+    case "Enter":
+    case " ": {
+      event.preventDefault();
+      const active = options[activeIndex];
+      if (active) select(active.value);
+      break;
+    }
+    case "Escape":
+      event.preventDefault();
+      setOpen(false);
+      break;
+    case "Tab":
+      setOpen(false);
+      break; // 포커스가 떠나면 조용히 닫는다
+  }
+};
+```
+
+`handleKeyDown`이 사용하는 `moveActive`는 옵션 목록을 아는 `Root`에 두고 Context로 내려보내는 이동 헬퍼로, 경계를 벗어나지 않게 인덱스를 움직여줄 뿐이다.
+
+```tsx
+const moveActive = (to) => {
+  if (options.length === 0) return;
+  setActiveIndex((prev) => {
+    switch (to) {
+      case "first":
+        return 0;
+      case "last":
+        return options.length - 1;
+      case "next":
+        return Math.min(prev + 1, options.length - 1);
+      case "prev":
+        return Math.max(prev - 1, 0);
+    }
+  });
+};
+```
+
+### 하나의 이름 아래 묶기
+
+부품이 다섯 개가 됐으니 마지막으로 이들을 묶어서 내보내자. 낱개로 내보내도 동작에는 문제가 없지만, 사용하는 쪽에서 `import { Root, Trigger, Option }`처럼 가져오는 순간 이 부품들이 한 묶음이라는 사실이 코드에서 사라진다. Trigger나 Option처럼 흔한 이름은 다른 컴포넌트의 부품과 충돌하기도 쉽다.
+
+```tsx
+export const Select = { Root, Trigger, Value, Listbox, Option };
+```
+
+가장 간단한 방법은 이렇게 부품을 담은 객체 하나를 내보내는 것이다. 사용하는 쪽은 `<Select.Root>`, `<Select.Trigger>`처럼 점 표기로 부품을 꺼내 쓰게 되고, 에디터에서 `Select.`까지만 입력하면 자동 완성이 부품 목록을 그대로 보여준다. 별도 문서를 열지 않아도 이 컴포넌트에 어떤 부품이 있는지 드러나는 셈이라 합성 컴포넌트와 궁합이 좋다. 이 구성을 부르는 굳어진 용어는 딱히 없어서 dot notation, 네임스페이스 컴포넌트 등으로 불린다.
+
+변형도 몇 가지 있다. Radix는 파일(모듈) 자체를 네임스페이스로 쓴다. 부품을 전부 낱개로 내보내고 사용자가 `import * as Select from '@radix-ui/react-select'`로 가져오는 방식인데(최근 문서는 통합 패키지에서 `import { Select } from 'radix-ui'`를 안내하지만, 이 역시 모듈 네임스페이스를 재수출한 것이라 구조는 같다), 안 쓰는 코드를 번들에서 제거하는 최적화인 tree shaking에 유리하다. 객체로 묶으면 한 부품만 써도 객체째 번들에 들어가기 때문이다. 합성 컴포넌트는 어차피 세트로 쓰이니 실질적인 손해는 크지 않지만, 부품이 독립적으로도 쓰일 라이브러리라면 모듈 네임스페이스 쪽이 낫다. 이 외에 Ant Design의 `<Form>`과 `<Form.Item>`처럼 대표 부품에 나머지를 정적 속성으로 붙이는(`Object.assign(Root, { Item })`) 방식도 오래 쓰여왔다. 어느 쪽이든 목적은 같다. 부품이 흩어지지 않고 한 이름 아래에서 발견되게 하는 것이다.
+
+사소하지만 이름표도 하나 챙겨두자. 지금 구조에서 React DevTools나 에러 메시지는 부품을 `Trigger` 같은 민짜 이름으로 보여주는데, 각 부품에 `Trigger.displayName = 'Select.Trigger'`처럼 붙여두면 디버깅할 때 어느 컴포넌트의 부품인지 바로 알 수 있다.
+
+여기까지 만들면 처음에 그렸던 사용 코드가 그대로 동작한다. 조립하면 이런 모습이 된다. 아래 데모는 지금까지 만든 Select 구현을 실제로 그대로 사용한 것이다.
+
+스킨을 바꿔도 선택한 값이 그대로 유지되는 것에 주목하자. 세 스킨은 완전히 다른 서비스처럼 보이지만 같은 코어가 같은 상태로 렌더링하고 있다. 코어 어디에도 색이나 여백 같은 것은 없다. 하단에 표시되는 `value`와 `open`은 데모가 코어에서 건네받아 보여주는 상태이고, 스킨 사이의 차이는 전부 CSS에서 온다.
+
+물론 실무 라이브러리는 여기서 더 나아간다. 타이핑으로 옵션을 찾아가는 기능, 목록을 `Portal`로 띄워 부모의 `overflow`에 잘리지 않게 하는 처리, 화면 밖으로 나가지 않게 위치를 잡아주는 로직 같은 것들이다. 방향은 같고 두께만 다르니, 원리를 이해했다면 Radix 같은 라이브러리의 소스를 읽는 것도 어렵지 않을 것이다.
+
+## 제어와 비제어, 둘 다 지원하기
+
+방금 만든 `Root`는 `value`를 밖에서 받기만 한다. 상태의 주도권이 사용하는 쪽에 있다는 뜻으로, 이런 방식을 **제어(controlled)** 컴포넌트라고 부른다. 반대로 컴포넌트가 상태를 스스로 들고 있는 방식을 **비제어(uncontrolled)** 컴포넌트라고 부른다. `<input value={...}>`와 `<input defaultValue={...}>`의 차이와 같다.
+
+둘 중 하나만 지원하면 반드시 아쉬운 순간이 온다. 폼 안에서 가볍게 쓸 때는 상태를 만들어 넘기는 것 자체가 번거롭고(비제어가 편하다), 선택 값에 따라 다른 UI를 갱신해야 할 때는 상태가 밖에 있어야 한다(제어가 필요하다). 그래서 Headless 라이브러리들은 관례처럼 두 방식을 모두 지원하는데, 그 심장이 다음 훅이다.
+
+```tsx
+function useControllableState({ value, defaultValue, onChange }) {
+  const [internal, setInternal] = useState(defaultValue);
+  const isControlled = value !== undefined; // value가 넘어왔다면 제어 모드
+  const current = isControlled ? value : internal;
+
+  const set = (next) => {
+    if (!isControlled) setInternal(next); // 비제어일 때만 내부 상태를 갱신
+    onChange?.(next);
+  };
+
+  return [current, set];
+}
+```
+
+`value`가 넘어왔다면 내부 상태를 무시하고 그것을 진실로 삼고, 넘어오지 않았다면 내부 상태로 동작한다. 어느 쪽이든 변경 시도는 `onChange`로 알려준다. 이 훅으로 `Root`의 상태 두 개를 감싸면 열림 상태까지 포함해 네 가지 조합을 모두 지원하게 된다.
+
+```tsx
+const Root = ({ value: controlledValue, defaultValue = null, onValueChange,
+                open: controlledOpen, defaultOpen = false, onOpenChange, ... }) => {
+  const [value, setValue] = useControllableState({
+    value: controlledValue, defaultValue, onChange: onValueChange,
+  });
+  const [open, setOpen] = useControllableState({
+    value: controlledOpen, defaultValue: defaultOpen, onChange: onOpenChange,
+  });
+
+  // onValueChange를 직접 부르던 select도 setValue를 부르도록 바뀐다
+  const select = next => {
+    setValue(next);
+    setOpen(false);
+  };
+
+  // 나머지 코드는 그대로
+};
+```
+
+`select`가 `setValue`를 부르도록 바뀐 것에 주의하자. 예전처럼 `onValueChange`만 직접 부르면 비제어 모드일 때 내부 상태가 영영 갱신되지 않는다.
+
+앞의 데모가 스킨을 오가도 값을 기억했던 것이 바로 이 구조 덕분이다. 데모는 `value`와 `open`을 제어 모드로 붙잡고 있어서, 스킨이 바뀌며 컴포넌트가 다시 마운트되어도 상태가 데모 쪽에 남는다. Headless 컴포넌트를 만들 일이 있다면 이 훅은 사실상 기본 장비라고 봐도 된다.
+
+## 디자인 입히기
+
+이제 만들어진 코어에 디자인을 입혀보자. Headless 컴포넌트는 받은 `className`과 `style`을 그대로 요소에 통과시키므로 사실 어떤 스타일링 도구를 써도 된다. 관건은 하나다. "열려 있을 때", "선택되었을 때" 같은 **상태에 따른 스타일**을 어떻게 표현할 것인가.
+
+우리가 코어를 만들며 요소마다 `data-state`, `data-highlighted` 같은 속성을 심어둔 것이 여기서 빛을 발한다. CSS의 속성 선택자만으로 상태별 스타일이 해결되기 때문이다.
+
+```css
+.trigger {
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 9px 14px;
+}
+
+/* 열리면 화살표가 뒤집힌다 */
+.trigger[data-state="open"] .chevron {
+  transform: rotate(180deg);
+}
+
+/* 키보드 하이라이트 */
+.option[data-highlighted] {
+  background: #e7f5ff;
+}
+
+/* 선택된 옵션 */
+.option[data-state="checked"]::after {
+  content: " ✓";
+}
+```
+
+상태를 prop으로 받아 클래스 이름을 조립하는 방법도 있지만, `data-*` 속성 방식은 JavaScript를 한 줄도 거치지 않고 상태가 CSS에 도달한다는 점에서 우아하다. 스킨을 만드는 사람은 컴포넌트의 내부 상태 구조를 몰라도 되고, 요소에 어떤 `data-*`가 붙는지만 알면 된다. Tailwind CSS를 쓴다면 같은 계약을 `data-[state=open]:rotate-180` 같은 표기로 이용할 수 있다.
+
+이 계약을 한 단계 더 밀고 나가면 **해부도(anatomy)**라는 개념에 닿는다. 컴포넌트가 어떤 부품으로 이루어지는지를 정리한 공식 목록을 말하는데, Radix 문서가 컴포넌트마다 Anatomy 절로 부품 구조부터 보여주는 것이 그 예다. 앞서 만난 Zag.js와 Ark UI는 여기서 더 나아가 해부도를 코드로 만든다. 부품 목록을 정의해 두고, 각 부품이 렌더링될 때 자신이 어느 컴포넌트의 어떤 부품인지를 `data-scope`와 `data-part` 속성으로 요소에 찍는 것이다.
+
+```html
+<button data-scope="select" data-part="trigger" data-state="closed">...</button>
+<ul data-scope="select" data-part="listbox">
+  <li data-scope="select" data-part="option" data-highlighted>...</li>
+</ul>
+```
+
+이렇게 하면 스킨은 클래스 이름조차 필요로 하지 않는다.
+
+```css
+[data-scope="select"][data-part="trigger"] {
+  /* 트리거 스킨 */
+}
+[data-scope="select"][data-part="option"][data-highlighted] {
+  /* 하이라이트된 옵션 */
+}
+```
+
+부품과 상태가 모두 속성으로 드러나 있으니 CSS 파일 하나가 곧 스킨이 된다. 해부도가 문서이면서 동시에 스타일을 붙이는 셀렉터 체계가 되는 것이다. 컴포넌트가 수십 개인 디자인 시스템에서는 부품 이름 규칙이 컴포넌트마다 제각각이 되기 쉬운데, 해부도를 먼저 정의하는 습관은 그 규칙을 강제해 준다. 우리가 만든 Select에 적용하고 싶다면 각 부품의 JSX에 두 속성을 추가하는 것만으로 충분하다.
+
+버튼처럼 상태보다 변형(variant)이 다양한 컴포넌트라면 [cva](https://cva.style) 같은 도구로 스킨 층을 정리할 수 있다.
+
+```tsx
+const trigger = cva("trigger-base", {
+  variants: {
+    size: { sm: "h-8 text-sm", md: "h-10 text-base" },
+    tone: {
+      default: "border-gray-200",
+      danger: "border-red-400 text-red-600",
+    },
+  },
+  defaultVariants: { size: "md", tone: "default" },
+});
+
+<Select.Trigger className={trigger({ size: "sm" })}>...</Select.Trigger>;
+```
+
+어떤 도구를 쓰든 구조는 같다. 동작이 담긴 코어가 있고, 그 위에 `className` 묶음으로서의 스킨이 있다. 스킨은 파일 몇 개로 분리될 수 있을 만큼 얇고, 그래서 갈아끼울 수 있다.
+
+## Headless로 디자인 시스템 만들기
+
+여기까지는 컴포넌트 하나의 이야기였다. 이제 시야를 넓혀보자. 디자인 시스템[^9]을 만든다는 것은 결국 이런 컴포넌트 수십 개를 일관된 규칙 아래 묶는 일인데, Headless 관점으로 보면 디자인 시스템은 자연스럽게 세 개의 층으로 나뉜다.
+
+- 디자인 토큰: 색, 간격, 글꼴, 모서리 같은 디자인 결정을 변수로 만든 것이다. `#228be6` 대신 `--color-primary`라고 부르는 순간, 브랜드가 바뀌어도 코드는 바뀌지 않는다.
+- Headless 코어: 이 글에서 만든 것들, 즉 동작과 상태와 접근성이다. 브랜드와 무관하게 재사용된다.
+- 스킨: 토큰을 참조하는 `className` 묶음으로, 코어에 브랜드의 얼굴을 입힌다.
+
+폴더 구조로 그려보면 이렇게 된다.
+
+```
+design-system/
+├── tokens/          # --color-primary, --radius-md, --font-body ...
+├── core/            # 직접 만든 headless 컴포넌트 또는 Radix 재수출
+│   ├── Select.tsx
+│   ├── Switch.tsx
+│   └── Dialog.tsx
+└── components/      # core + tokens = 완성된 컴포넌트
+    ├── Select.tsx   # <Core.Trigger className="...">
+    ├── Switch.tsx
+    └── Dialog.tsx
+```
+
+`components/Select.tsx`는 놀라울 만큼 얇다. 코어를 가져와 스킨을 입히고 자주 쓰는 형태로 조립해 둔 것이 전부다.
+
+```tsx
+import { Select as Core } from "../core/Select";
+import styles from "./select.module.css";
+
+export const Select = ({ options, ...props }) => (
+  <Core.Root {...props}>
+    <Core.Trigger className={styles.trigger}>
+      <Core.Value placeholder="선택하세요" />
+      <ChevronIcon className={styles.chevron} />
+    </Core.Trigger>
+    <Core.Listbox className={styles.listbox}>
+      {options.map((option) => (
+        <Core.Option
+          key={option.value}
+          className={styles.option}
+          value={option.value}
+        >
+          {option.label}
+        </Core.Option>
+      ))}
+    </Core.Listbox>
+  </Core.Root>
+);
+```
+
+실무에서 코어 층을 전부 직접 만들 필요는 없다. Select 하나에도 Portal이니 위치 계산이니 하는 두꺼운 처리가 남아 있음을 보았는데, Dialog나 Popover, Tooltip까지 그 품질로 만들려면 그것만으로 팀 하나가 필요하다. 코어는 Radix나 React Aria, Base UI에서 사 오고, 우리 팀의 자산은 토큰과 스킨과 조립에 집중하는 것이 현실적인 전략이다. 요즘 널리 쓰이는 [shadcn/ui](https://ui.shadcn.com)가 정확히 이 구조다. Radix 코어 위에 Tailwind 스킨을 입힌 컴포넌트를 npm 패키지가 아니라 **사용자의 저장소로 복사해 주는** 도구인데[^10], 코드를 소유하게 하는 이 방식이 왜 설득력을 얻었는지는 잠시 뒤 필자의 경험과 함께 다시 이야기하겠다.
+
+코어를 사 올 때 저울에 함께 올릴 것이 하나 더 있는데, 번들 크기다. 여러 라이브러리에서 Select 하나를 가져다 번들링했을 때의 크기를 실측해 보았다. esbuild로 압축(minify)하고 react와 react-dom을 제외한 min+gzip 기준이다.
+
+| 구현                         | min+gzip |
+| ---------------------------- | -------- |
+| 이 글에서 만든 Select        | 1.7kB    |
+| Downshift `useSelect` (v9.4) | 13.6kB   |
+| Radix Select (v2.3)          | 27.5kB   |
+| Zag.js Select (v1.42)        | 28.6kB   |
+| Headless UI Listbox (v2.2)   | 34.8kB   |
+| MUI Select + MenuItem (v9.2) | 60.1kB   |
+
+표에서 두 가지가 보인다. 먼저 스타일이 입혀진 라이브러리는 확실히 무겁다. MUI의 Select에는 컴포넌트 로직만이 아니라 스타일 엔진(emotion)과 테마 시스템의 무게가 함께 실려 온다. 그런데 headless라고 해서 공짜인 것도 아니다. Radix의 27.5kB와 우리가 만든 1.7kB 사이의 간극이 바로 앞서 말한 "남은 두꺼운 처리" — Portal, 위치 계산, 타이핑 탐색, 스크롤 잠금 — 의 무게다. headless 코어가 상대적으로 가벼운 것은 스타일 엔진을 싣지 않기 때문이지, 동작의 무게까지 사라지는 것은 아니다. 그러니 코어 후보를 고를 때는 [bundlephobia](https://bundlephobia.com) 같은 도구나 위처럼 esbuild로 직접 재보는 것이 가장 정확하다. 참고로 shadcn/ui 같은 복사 모델은 쓰는 컴포넌트만 저장소에 존재하니 안 쓰는 부품이 번들에 섞여 들어갈 여지 자체가 없다.
+
+## 디자인 시스템의 원형을 만들려던 경험
+
+필자는 서비스를 새로 띄우는 일이 잦은 환경에서 일해왔다. 회사가 새로운 실험을 시작할 때마다 프론트엔드를 처음부터 세팅했는데, 몇 번을 반복하다 보니 묘한 기시감이 들었다. 서비스마다 디자인은 분명 다른데, 만들고 있는 것은 매번 같았다. 세 번째쯤 새 저장소에서 또 Select의 키보드 처리 코드를 옮겨 붙이던 날, 이 반복을 끝내고 싶어졌다.
+
+그래서 디자인 시스템의 **원형(archetype)**을 만들기로 했다. 완성된 디자인 시스템이 아니라, 어떤 디자인 시스템이든 그것으로부터 시작할 수 있는 틀이다. 원형에는 세 가지를 담았다. 이 글에서 만든 것과 같은 headless 코어, 값은 비어 있고 자리만 정의된 토큰 슬롯(`--color-primary`가 무슨 색인지는 몰라도 그런 변수가 있다는 것은 안다), 그리고 컴포넌트를 조립하는 구조 규칙 — 앞서 말한 해부도다. 새 서비스를 시작하면 원형을 가져다 토큰에 브랜드 값을 채우고 스킨을 그리면 된다. 계획대로라면 디자인 시스템 구축이 몇 달짜리 프로젝트에서 몇 주짜리로 줄어들 터였다.
+
+절반은 계획대로 됐다. 동작이 무거운 컴포넌트일수록 원형의 효과는 확실했다. Select, Dialog, Dropdown, Tooltip 같은 것들은 어느 서비스에서든 코어를 그대로 쓰고 스킨만 새로 그렸고, 접근성 품질도 따라왔다. 예전에는 서비스마다 품질이 들쭉날쭉했는데(어떤 서비스의 모달은 <kbd>Escape</kbd>로 닫히고 어떤 서비스는 안 닫히는 식으로) 코어를 공유하니 최소선이 자동으로 지켜졌다. 새 서비스의 UI 기반을 잡는 시간도 실제로 크게 줄었다.
+
+문제는 나머지 절반이었다. 먼저 **스킨의 경계를 넘는 차이**가 생각보다 많았다. 어떤 모바일 중심 서비스에서는 Select가 드롭다운 대신 화면 아래에서 올라오는 바텀 시트로 떠야 했다. 이것은 색이나 여백의 문제가 아니라 DOM 구조와 인터랙션 자체가 다른 문제라, 스킨으로는 해결되지 않고 코어 옆에 변종을 하나 더 만들어야 했다. 토큰 슬롯도 마찬가지였다. 원형은 `primary`와 `secondary`라는 2단 색 체계를 가정했는데, 어떤 브랜드는 그라데이션이 정체성이었고 어떤 브랜드는 색 대신 두꺼운 테두리가 정체성이었다. 슬롯을 일반화할수록 슬롯의 개수가 늘어났고, 어느 순간부터는 "이 슬롯이 무슨 역할인지" 설명하는 문서가 슬롯 자체보다 무거워졌다.
+
+가장 뼈아픈 것은 유지보수였다. 원형을 별도 패키지로 두고 서비스들이 의존하게 했더니, 원형의 버그 수정 하나가 모든 서비스의 회귀 테스트를 요구했다. 서비스가 셋일 때는 감당이 됐지만 다섯이 되니 원형을 고치는 일이 점점 무서워졌고, 무서워지니 안 고치게 됐다. 우스운 결말이지만, 재사용하려고 만든 것이 가장 손대기 어려운 코드가 되어 있었다.
+
+지금 돌아보면 원형에서 끝까지 살아남은 것은 두 가지다. 하나는 headless 코어, 즉 이 글에서 다룬 동작 층이다. 이것은 정말로 서비스를 가리지 않았다. 다른 하나는 코드가 아니라 **결정**들이었다. 닫힐 때 포커스는 어디로 돌아가는가, 옵션 등록은 어떤 방식으로 하는가, 상태는 어떤 `data-*` 속성으로 노출하는가. 새 서비스에서 컴포넌트를 만들 때 이 결정들을 다시 고민하지 않아도 된다는 것이 원형의 진짜 가치였다. 반대로 완성된 스킨과 패키지 의존성처럼 "코드 그 자체"를 공유하려던 부분일수록 서비스의 개성과 부딪히며 마모됐다.
+
+shadcn/ui가 패키지가 아니라 복사를 택한 것을 보고 무릎을 친 것이 이 지점이다. 코드를 중앙에서 소유하면 모든 사용처의 사정을 책임져야 하지만, 복사해 주면 결정과 출발점만 공유하고 소유권은 각자에게 넘어간다. 필자의 원형이 앓았던 유지보수 문제를 소유권 이전으로 풀어낸 것이다. 여러 서비스를 오가는 환경에 있다면, 완성품을 공유하려 하기보다 headless 코어와 결정의 기록을 공유하는 쪽을 권하고 싶다.
+
+## 마치며
+
+이 시리즈는 계속 한 가지 질문을 다르게 물어온 셈이다. Polymorphic 컴포넌트는 "무엇으로 렌더링할지"를 사용자에게 열어줬고, Render Delegation은 "렌더링 자체"를 자식에게 위임했으며, Headless 컴포넌트는 "그리는 일"을 통째로 사용하는 쪽에 넘겼다. 컴포넌트가 덜 결정할수록 더 오래, 더 넓게 쓰인다는 방향은 셋 모두 같다.
+
+물론 덜 결정하는 데는 값이 따른다. Headless 컴포넌트를 쓴다는 것은 모든 픽셀을 직접 책임진다는 뜻이므로, 디자이너 없이 빠르게 만들어야 하는 어드민이라면 완성된 디자인의 라이브러리가 여전히 좋은 선택이다. 코어와 스킨 사이에 계층이 하나 늘어나는 만큼 버튼 하나의 동작을 추적할 때 거쳐야 하는 파일이 늘어나는 것도 값에 포함된다. 서비스가 하나뿐이고 디자인이 안정적이라면 코어와 스킨을 나누는 수고가 과할 수도 있다. 이 패턴이 빛나는 곳은 디자인이 자주 바뀌거나, 하나의 동작을 여러 브랜드로 그려야 하는 곳이다. 도입하기 전에 자신이 어느 쪽에 서 있는지부터 살펴보자.
+
+마지막으로 하나만 덧붙이자면, 이 글에서 접근성 속성들을 성실하게 붙인 것은 장식이 아니다. Headless 컴포넌트의 존재 이유가 "동작의 품질을 한 번만 구현해서 모두가 공유하는 것"인 만큼, 그 품질에 키보드 사용자와 스크린 리더 사용자가 포함되지 않는다면 절반짜리 코어다. 직접 만들 자신이 없다면 Radix나 React Aria처럼 접근성을 검증해 둔 코어 위에서 시작하자. 스킨은 언제든 다시 그릴 수 있지만, 동작의 품질은 코어를 고를 때 결정된다.
+
+[^1]: 모니터 없이 돌아가는 서버를 headless server라고 부르던 데서 온 표현이다. 화면 없이 동작하는 브라우저를 headless browser, 화면(프론트엔드) 없이 콘텐츠 API만 제공하는 CMS를 headless CMS라고 부르는 것과 같은 계보다.
+
+[^2]: 화면의 내용을 음성으로 읽어주는 보조 기술이다. 시각 장애가 있는 사용자는 스크린 리더가 읽어주는 정보와 키보드만으로 웹을 사용한다.
+
+[^3]: 커스텀 셀렉트가 갖춰야 할 동작의 전체 목록은 W3C의 [ARIA Authoring Practices Guide](https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/)에 정리되어 있다. 브라우저가 해주던 일을 직접 떠안는다는 것이 어떤 의미인지 실감하고 싶다면 한 번 읽어보길 권한다.
+
+[^4]: [Downshift](https://www.downshift-js.com)를 만든 Kent C. Dodds가 널리 알린 패턴이다. 훅이 "무엇을 렌더링할지"는 모르지만 "렌더링될 요소에 무엇이 붙어야 하는지"는 알고 있다는 발상의 전환이 핵심이다.
+
+[^5]: prop을 거치지 않고 컴포넌트 트리 아래로 값을 전달하는 React의 기능이다. 부모가 Provider로 값을 걸어두면 깊이와 무관하게 자손이 꺼내 쓸 수 있어, 합성 컴포넌트의 부품들을 연결하는 데 자주 쓰인다.
+
+[^6]: 정확히는 `React.Children`으로 들여다볼 수는 있지만, 자식이 한 겹 감싸져 있거나 배열로 렌더링되면 금세 한계에 부딪힌다. 등록 방식은 중간에 무엇이 끼어 있든 동작하기 때문에 실무 라이브러리들이 이쪽을 택한다. 참고로 등록 순서는 마운트 순서를 따르므로, 실제 라이브러리들은 DOM 위치를 기준으로 다시 정렬하는 처리를 더하기도 한다.
+
+[^7]: 이 구성은 APG의 [Select-Only Combobox 패턴](https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/)을 따른 것이다. 예전에는 버튼과 listbox에 포커스를 옮겨 다니게 하는 패턴도 쓰였지만, 현재 권장되는 방식은 combobox 역할을 가진 요소에 포커스를 고정하는 쪽이다.
+
+[^8]: Radix는 `Portal`과 지연 마운트를 쓰면서도 이 문제를 피하기 위해 별도의 컬렉션 관리 장치를 두는데, 그만큼 코드가 두꺼워진다. 항상 렌더링하고 CSS로 숨기는 것은 목록이 무겁지 않은 Select에서 충분히 실용적인 절충이다.
+
+[^9]: 색과 글꼴 같은 시각 요소부터 컴포넌트, 사용 지침까지를 하나의 체계로 묶은 것을 말한다. 잘 만든 디자인 시스템이 있으면 여러 팀이 만든 화면이 한 제품처럼 보인다.
+
+[^10]: `npx shadcn add select`를 실행하면 shadcn/ui라는 패키지가 의존성으로 추가되는 것이 아니라, 필요한 Radix 코어 패키지를 설치하면서 Select 컴포넌트의 소스 코드를 프로젝트에 파일로 복사해 준다. 복사된 코드의 수정과 책임은 온전히 사용하는 쪽의 몫이 된다.

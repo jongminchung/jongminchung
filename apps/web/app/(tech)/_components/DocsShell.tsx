@@ -1,160 +1,101 @@
 "use client";
 
-import { Button } from "@jongminchung/ui/components/button";
-import {
-    Sheet,
-    SheetContent,
-    SheetTitle,
-} from "@jongminchung/ui/components/sheet";
 import { TooltipProvider } from "@jongminchung/ui/components/tooltip";
 import type { ReactNode } from "react";
-import { Icon } from "#components/Icon";
+import { EditorialFooter, EditorialHeader } from "#components/Editorial";
+import { ThemeControl } from "#components/ThemeControl";
 import { ThemeProvider } from "#components/ThemeProvider";
-import type {
-    CurrentNavigationEntry,
-    Locale,
-    NavigationEntry,
-} from "#lib/content-model";
-import {
-    ContextNavigation,
-    GlobalRail,
-    MobileNavigation,
-    MobileTopNavigation,
-} from "./Navigation";
-import { SearchProvider } from "./SearchPalette";
-import { techNavigationCopy } from "./tech-navigation";
+import type { Locale } from "#lib/content-model";
+import { LocaleSwitcher } from "./LocaleSwitcher";
+import { SearchProvider, SearchTrigger } from "./SearchPalette";
 import { TechUiProvider } from "./TechUiProvider";
-import { useRouteSheet } from "./useRouteSheet";
-import styles from "./DocsShell.module.css";
 
-function TabletContextDrawer({
-    locale,
-    current,
-    documents,
-}: {
-    readonly locale: Locale;
-    readonly current: CurrentNavigationEntry;
-    readonly documents: readonly NavigationEntry[];
-}) {
-    const { isOpen, setOpen, triggerRef } = useRouteSheet();
-    const copy = techNavigationCopy[locale];
-    return (
-        <div className={styles.tabletContext}>
-            <Button
-                ref={triggerRef}
-                aria-label={copy.tabletMenu}
-                className={"h-8 gap-2 px-3 text-xs"}
-                onClick={() => setOpen(true)}
-                variant="outline"
-                size="default"
-            >
-                <Icon icon="menu" />
-                {copy.tabletSection}
-            </Button>
-            <Sheet open={isOpen} onOpenChange={setOpen}>
-                <SheetContent
-                    className="w-80"
-                    closeLabel={copy.closeTabletMenu}
-                    side="left"
-                >
-                    <SheetTitle className="sr-only">
-                        {copy.tabletSection}
-                    </SheetTitle>
-                    <ContextNavigation
-                        locale={locale}
-                        current={current}
-                        documents={documents}
-                    />
-                </SheetContent>
-            </Sheet>
-        </div>
-    );
-}
-
-/** `DocsShell` UI 컴포넌트를 렌더링함 */
+/** `DocsShell` 블로그와 시리즈의 공통 셸을 렌더링함 */
 export function DocsShell({
-    locale,
-    current,
-    documents,
-    children,
+  locale,
+  alternateHref,
+  children,
 }: {
-    readonly locale: Locale;
-    readonly current: CurrentNavigationEntry;
-    readonly documents: readonly NavigationEntry[];
-    readonly children: ReactNode;
+  readonly locale: Locale;
+  readonly alternateHref: string;
+  readonly children: ReactNode;
 }) {
-    const {
-        isOpen: isMobileOpen,
-        setOpen: changeMobileOpen,
-        triggerRef: mobileTriggerRef,
-    } = useRouteSheet();
-    const copy = techNavigationCopy[locale];
-
-    const navigation = (
-        <div className={styles.navigationFrame}>
-            <GlobalRail locale={locale} current={current} />
-            <ContextNavigation
-                locale={locale}
-                current={current}
-                documents={documents}
-                className={styles.contextInline}
-            />
-        </div>
-    );
-
-    return (
-        <ThemeProvider storageKey="tech-theme">
-            <TechUiProvider>
-                <SearchProvider locale={locale}>
-                    <TooltipProvider>
-                        <div className={styles.shell}>
-                            {navigation}
-                            <main className={styles.main}>
-                                <MobileTopNavigation
-                                    locale={locale}
-                                    onMenuClick={() => changeMobileOpen(true)}
-                                    triggerRef={mobileTriggerRef}
-                                />
-                                <Sheet
-                                    open={isMobileOpen}
-                                    onOpenChange={changeMobileOpen}
-                                >
-                                    <SheetContent
-                                        closeLabel={copy.closeMobileNavigation}
-                                        onClickCapture={(event) => {
-                                            if (
-                                                event.target instanceof
-                                                    Element &&
-                                                event.target.closest("a[href]")
-                                            )
-                                                changeMobileOpen(false);
-                                        }}
-                                        side="left"
-                                    >
-                                        <SheetTitle
-                                            className={styles.mobileTitle}
-                                        >
-                                            {copy.mobileNavigation}
-                                        </SheetTitle>
-                                        <MobileNavigation
-                                            key={`${locale}:${current.section}`}
-                                            locale={locale}
-                                            current={current}
-                                            documents={documents}
-                                        />
-                                    </SheetContent>
-                                </Sheet>
-                                <TabletContextDrawer
-                                    locale={locale}
-                                    current={current}
-                                    documents={documents}
-                                />
-                                {children}
-                            </main>
-                        </div>
-                    </TooltipProvider>
-                </SearchProvider>
-            </TechUiProvider>
-        </ThemeProvider>
-    );
+  const labels =
+    locale === "ko"
+      ? { blog: "블로그", series: "시리즈" }
+      : { blog: "Blog", series: "Series" };
+  return (
+    <ThemeProvider storageKey="tech-theme">
+      <TechUiProvider>
+        <SearchProvider locale={locale}>
+          <TooltipProvider>
+            <div className="min-h-dvh bg-background">
+              <EditorialHeader
+                actions={
+                  <>
+                    <SearchTrigger compact />
+                    <ThemeControl locale={locale} />
+                  </>
+                }
+                brand={
+                  <>
+                    <span>jongminchung</span>
+                    <span className="ml-1 align-top text-[9px]">tech</span>
+                  </>
+                }
+                brandLabel="jongminchung tech"
+                homeHref={`/${locale}`}
+                localeControl={
+                  <LocaleSwitcher
+                    compact
+                    href={alternateHref}
+                    locale={locale}
+                  />
+                }
+                localeHref={alternateHref}
+                localeLabel={locale === "ko" ? "EN" : "KO"}
+                navigation={[
+                  { href: `/${locale}`, label: labels.blog },
+                  { href: `/${locale}/series`, label: labels.series },
+                ]}
+              />
+              <div className="min-w-0">{children}</div>
+              <EditorialFooter
+                groups={[
+                  {
+                    label: locale === "ko" ? "탐색" : "Explore",
+                    links: [{ href: `/${locale}`, label: labels.blog }],
+                  },
+                  {
+                    label: locale === "ko" ? "모음" : "Collections",
+                    links: [
+                      { href: `/${locale}/series`, label: labels.series },
+                    ],
+                  },
+                  {
+                    label: "Feed",
+                    links: [{ href: `/${locale}/rss.xml`, label: "RSS" }],
+                  },
+                  {
+                    label: locale === "ko" ? "언어" : "Language",
+                    links: [
+                      {
+                        href: alternateHref,
+                        label: locale === "ko" ? "English" : "한국어",
+                      },
+                    ],
+                  },
+                  {
+                    label: "Elsewhere",
+                    links: [{ href: "https://jamie.kr", label: "jamie.kr ↗" }],
+                  },
+                ]}
+                note="Engineering Notes · Jamie"
+              />
+            </div>
+          </TooltipProvider>
+        </SearchProvider>
+      </TechUiProvider>
+    </ThemeProvider>
+  );
 }

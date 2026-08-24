@@ -39,11 +39,11 @@ pnpm update --force @jongminchung/tooling@1.0.0
 
 ```json
 {
-	"scripts": {
-		"lint": "oxlint --config oxlint.config.ts .",
-		"fmt": "oxfmt --config .oxfmtrc.ts",
-		"fmt:check": "oxfmt --config .oxfmtrc.ts --check"
-	}
+  "scripts": {
+    "lint": "oxlint --config oxlint.config.ts .",
+    "fmt": "oxfmt --config .oxfmtrc.ts",
+    "fmt:check": "oxfmt --config .oxfmtrc.ts --check"
+  }
 }
 ```
 
@@ -55,7 +55,7 @@ Oxlint configs extend the shared TypeScript config without adding workspace-loca
 import { defineOxlintConfig } from "@jongminchung/tooling/oxlint";
 
 export default defineOxlintConfig({
-	ignorePatterns: ["generated/**"],
+  ignorePatterns: ["generated/**"],
 });
 ```
 
@@ -69,17 +69,17 @@ has a reason plus an executable bad/good example immediately above it:
 
 ```ts
 defineOxlintConfig({
-	rules: {
-		// any removes checking from every later property access, so narrow an external boundary instead
-		// Bad: (window as any).desktopApi
-		// Good: extend Window and access window.desktopApi through the declared contract
-		"typescript/no-explicit-any": "error",
+  rules: {
+    // any removes checking from every later property access, so narrow an external boundary instead
+    // Bad: (window as any).desktopApi
+    // Good: extend Window and access window.desktopApi through the declared contract
+    "typescript/no-explicit-any": "error",
 
-		// role=group does not always mean fieldset, which could change non-form UI semantics
-		// Allowed: <div role="group" aria-label="Editor tools">...</div>
-		// Rejected elsewhere: <div role="button">...</div> remains covered by recommended a11y rules
-		"jsx-a11y/prefer-tag-over-role": "off",
-	},
+    // role=group does not always mean fieldset, which could change non-form UI semantics
+    // Allowed: <div role="group" aria-label="Editor tools">...</div>
+    // Rejected elsewhere: <div role="button">...</div> remains covered by recommended a11y rules
+    "jsx-a11y/prefer-tag-over-role": "off",
+  },
 });
 ```
 
@@ -93,8 +93,8 @@ names for `label-has-associated-control`, and named scroll regions for
 import { defineOxfmtConfig } from "@jongminchung/tooling/oxfmt";
 
 export default defineOxfmtConfig({
-	// Source: content/topic files; generated counterpart: tracked manifests and search indexes.
-	ignorePatterns: ["generated/", "public/search/"],
+  // Source: content/topic files; generated counterpart: tracked manifests and search indexes.
+  ignorePatterns: ["generated/", "public/search/"],
 });
 ```
 
