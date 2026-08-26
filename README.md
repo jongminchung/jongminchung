@@ -74,15 +74,15 @@ pnpm run publish:dry-run
 <!-- prettier-ignore-start -->
 
 <!--START_SECTION:waka-->
-![AI Code Time](http://img.shields.io/badge/AI%20Code%20Time-684%20hrs%2035%20mins-blue?style=flat)
+![AI Code Time](http://img.shields.io/badge/AI%20Code%20Time-692%20hrs%2038%20mins-blue?style=flat)
 
 **I'm a Night 🦉** 
 
 ```text
-🌞 Morning                961 commits         ███░░░░░░░░░░░░░░░░░░░░░░   10.80 % 
-🌆 Daytime                1884 commits        █████░░░░░░░░░░░░░░░░░░░░   21.18 % 
-🌃 Evening                3553 commits        ██████████░░░░░░░░░░░░░░░   39.93 % 
-🌙 Night                  2499 commits        ███████░░░░░░░░░░░░░░░░░░   28.09 % 
+🌞 Morning                966 commits         ███░░░░░░░░░░░░░░░░░░░░░░   10.85 % 
+🌆 Daytime                1888 commits        █████░░░░░░░░░░░░░░░░░░░░   21.21 % 
+🌃 Evening                3550 commits        ██████████░░░░░░░░░░░░░░░   39.87 % 
+🌙 Night                  2499 commits        ███████░░░░░░░░░░░░░░░░░░   28.07 % 
 ```
 
 
@@ -90,37 +90,37 @@ pnpm run publish:dry-run
 
 ```text
 💬 Programming Languages: 
-Markdown                 11 hrs 49 mins      ███████░░░░░░░░░░░░░░░░░░   29.36 % 
-TypeScript               6 hrs 24 mins       ████░░░░░░░░░░░░░░░░░░░░░   15.89 % 
-Other                    6 hrs 5 mins        ████░░░░░░░░░░░░░░░░░░░░░   15.15 % 
-YAML                     4 hrs 51 mins       ███░░░░░░░░░░░░░░░░░░░░░░   12.06 % 
-Bash                     2 hrs 50 mins       ██░░░░░░░░░░░░░░░░░░░░░░░   07.07 % 
+Markdown                 12 hrs 17 mins      ███████░░░░░░░░░░░░░░░░░░   27.79 % 
+YAML                     9 hrs 30 mins       █████░░░░░░░░░░░░░░░░░░░░   21.47 % 
+TypeScript               6 hrs 8 mins        ███░░░░░░░░░░░░░░░░░░░░░░   13.88 % 
+Other                    6 hrs 6 mins        ███░░░░░░░░░░░░░░░░░░░░░░   13.80 % 
+Bash                     4 hrs 7 mins        ██░░░░░░░░░░░░░░░░░░░░░░░   09.30 % 
 ```
 
 🤖 **AI Coding This Week** 
 
 ```text
-⏱ AI Coding Time: 35 hrs 16 mins (87.59%)
+⏱ AI Coding Time: 39 hrs 37 mins (89.53%)
 
-✍️ 38,005 lines written by AI, 977 lines written by hand (97.49% AI-written)
+✍️ 47,349 lines written by AI, 893 lines written by hand (98.15% AI-written)
 
-🔤 30,768,982 Input Tokens, 4,245,262 Output Tokens
+🔤 35,668,987 Input Tokens, 5,034,587 Output Tokens
 
-💵 $554.30 Estimated AI Cost This Week
+💵 $626.76 Estimated AI Cost This Week
 
-🧠 171 AI Sessions, 655 AI Prompts
+🧠 184 AI Sessions, 721 AI Prompts
 
-GPT                      40,141 lines        █████████████████████████   99.85 % 
-Codex-Cli                59 lines            ░░░░░░░░░░░░░░░░░░░░░░░░░   00.15 % 
+GPT                      49,265 lines        █████████████████████████   99.88 % 
+Codex-Cli                59 lines            ░░░░░░░░░░░░░░░░░░░░░░░░░   00.12 % 
 Codex-Vscode             0 lines             ░░░░░░░░░░░░░░░░░░░░░░░░░   00.00 % 
 Opencode-Cli             0 lines             ░░░░░░░░░░░░░░░░░░░░░░░░░   00.00 % 
 Claude-Code              0 lines             ░░░░░░░░░░░░░░░░░░░░░░░░░   00.00 % 
 
 🔎 AI Coding Insights:
-🤖 AI-Driven — 97.49% of written lines came from AI
-📄 Detailed Prompter — average 629 characters per prompt
+🤖 AI-Driven — 98.15% of written lines came from AI
+📄 Detailed Prompter — average 646 characters per prompt
 🔁 Iterative Prompter — average 4 prompts per session
-🚀 High AI Trust — 7.25% of changed lines were hand-edited
+🚀 High AI Trust — 5.19% of changed lines were hand-edited
 ```
 
 
