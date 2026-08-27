@@ -117,7 +117,7 @@ function ReviewAllRow({
 
   return (
     <article
-      className={`reviewAllRow [border-bottom:1px_solid_var(--border)] [min-height:340px] [&>_header]:[align-items:center] [&>_header]:[background:var(--secondary)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[gap:7px] [&>_header]:[height:32px] [&>_header]:[padding:0_9px] [&>_header]:[position:sticky] [&>_header]:[top:0] [&>_header_>_span:nth-last-child(2)]:[flex:1] [&>_header_small]:[color:var(--disabled-foreground)] [&_pre]:[font-family:var(--font-family-code)] [&_pre]:[font-size:11px] [&_pre]:[line-height:1.5] [&_pre]:[margin:0] [&_pre]:[max-height:480px] [&_pre]:[overflow:auto] [&_pre]:[padding:10px] reviewAllRow`}
+      className={`reviewAllRow reviewAllRow [min-height:340px] [border-bottom:1px_solid_var(--border)] [&_pre]:[margin:0] [&_pre]:[max-height:480px] [&_pre]:[overflow:auto] [&_pre]:[padding:10px] [&_pre]:[font-family:var(--font-family-code)] [&_pre]:[font-size:11px] [&_pre]:[line-height:1.5] [&>_header]:[position:sticky] [&>_header]:[top:0] [&>_header]:[display:flex] [&>_header]:[height:32px] [&>_header]:[align-items:center] [&>_header]:[gap:7px] [&>_header]:[padding:0_9px] [&>_header]:[background:var(--secondary)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header_>_span:nth-last-child(2)]:[flex:1] [&>_header_small]:[color:var(--disabled-foreground)]`}
     >
       <header>
         <StatusBadge className={statusClass(file.status)}>
@@ -186,7 +186,7 @@ function ReviewAll({
   });
   return (
     <div
-      className={`reviewAll [min-height:0] [overflow:auto] reviewAll`}
+      className={`reviewAll reviewAll [min-height:0] [overflow:auto]`}
       ref={parent}
     >
       <div
@@ -317,7 +317,7 @@ export const DetailsPane = memo(function DetailsPane({
 
   return (
     <aside
-      className={`detailsPane [background:var(--card)] [min-height:0] [min-width:0] [border-left:1px_solid_var(--border)] [display:grid] [grid-template-rows:26px_minmax(0,_1fr)] [position:relative] [&>_.verticalResizeHandle]:[left:-4px] [&>_.verticalResizeHandle]:[right:auto] detailsPane`}
+      className={`detailsPane detailsPane [position:relative] [display:grid] [min-height:0] [min-width:0] [grid-template-rows:26px_minmax(0,_1fr)] [background:var(--card)] [border-left:1px_solid_var(--border)] [&>_.verticalResizeHandle]:[right:auto] [&>_.verticalResizeHandle]:[left:-4px]`}
       aria-label="Revision review"
       data-commit-selection={commit ? "selected" : "empty"}
       style={
@@ -333,7 +333,7 @@ export const DetailsPane = memo(function DetailsPane({
         value={reviewWidth}
       />
       <div
-        className={`detailsToolbar [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:1px] [padding:2px_5px] [&>_select]:[background:var(--secondary)] [&>_select]:[border:1px_solid_var(--border)] [&>_select]:[height:25px] [&>_select]:[max-width:170px] [&>_select]:[padding:0_6px] detailsToolbar`}
+        className={`detailsToolbar detailsToolbar [display:flex] [align-items:center] [gap:1px] [padding:2px_5px] [border-bottom:1px_solid_var(--border)] [&>_select]:[height:25px] [&>_select]:[max-width:170px] [&>_select]:[padding:0_6px] [&>_select]:[background:var(--secondary)] [&>_select]:[border:1px_solid_var(--border)]`}
       >
         <Tooltip>
           <TooltipTrigger
@@ -382,7 +382,7 @@ export const DetailsPane = memo(function DetailsPane({
             width={250}
             content={
               <div
-                className={`detailsViewOptions [display:grid] [gap:3px] [padding:5px] detailsViewOptions`}
+                className={`detailsViewOptions detailsViewOptions [display:grid] [gap:3px] [padding:5px]`}
               >
                 <CheckboxInput
                   isDisabled={!commit || files.length === 0}
@@ -421,7 +421,7 @@ export const DetailsPane = memo(function DetailsPane({
           </Popover>
           <TooltipContent>View Options</TooltipContent>
         </Tooltip>
-        <span className={`filterSpacer [flex:1] filterSpacer`} />
+        <span className={`filterSpacer filterSpacer [flex:1]`} />
         <Tooltip>
           <TooltipTrigger
             render={
@@ -482,11 +482,11 @@ export const DetailsPane = memo(function DetailsPane({
         />
       ) : (
         <div
-          className={`revisionSummary [display:grid] [grid-template-rows:minmax(0,_2fr)_minmax(150px,_1fr)] [min-height:0] [min-width:0] [position:relative] revisionSummary`}
+          className={`revisionSummary revisionSummary [position:relative] [display:grid] [min-height:0] [min-width:0] [grid-template-rows:minmax(0,_2fr)_minmax(150px,_1fr)]`}
         >
           <nav
             aria-label="Changed files"
-            className={`revisionFileList [border-bottom:1px_solid_var(--border)] [min-height:0] [overflow:auto] [padding:4px] [&>_button]:[align-items:center] [&>_button]:[background:transparent] [&>_button]:[display:flex] [&>_button]:[gap:5px] [&>_button]:[min-height:28px] [&>_button]:[padding:3px_6px] [&>_button]:[text-align:left] [&>_button]:[width:100%] [&>_button.selected]:[background:var(--accent)] [&>_button[aria-current=true]]:[background:var(--accent)] [&>_button_small]:[color:var(--disabled-foreground)] [&>_button_small]:[flex:none] [&>_button_small]:[font-size:9px] revisionFileList`}
+            className={`revisionFileList revisionFileList [min-height:0] [overflow:auto] [padding:4px] [border-bottom:1px_solid_var(--border)] [&>_button]:[display:flex] [&>_button]:[min-height:28px] [&>_button]:[width:100%] [&>_button]:[align-items:center] [&>_button]:[gap:5px] [&>_button]:[padding:3px_6px] [&>_button]:[text-align:left] [&>_button]:[background:transparent] [&>_button_small]:[flex:none] [&>_button_small]:[font-size:9px] [&>_button_small]:[color:var(--disabled-foreground)] [&>_button.selected]:[background:var(--accent)] [&>_button[aria-current=true]]:[background:var(--accent)]`}
           >
             {loading ? (
               <Spinner
@@ -507,9 +507,9 @@ export const DetailsPane = memo(function DetailsPane({
                   }}
                   type="button"
                   className={cn(
-                    "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+                    "min-h-[29px] w-full justify-start gap-1.5 px-2 py-1 text-left text-xs whitespace-normal aria-current:bg-accent aria-selected:bg-accent",
                     selectedPath === file.path
-                      ? `selected [background:var(--accent)] [color:var(--foreground)] selected`
+                      ? `selected selected [color:var(--foreground)] [background:var(--accent)]`
                       : undefined,
                   )}
                   variant="ghost"
@@ -519,7 +519,7 @@ export const DetailsPane = memo(function DetailsPane({
                     {statusLetter(file.status)}
                   </StatusBadge>
                   <span
-                    className={`${`ellipsis [min-width:0] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap] ellipsis`} grid`}
+                    className={`${`ellipsis ellipsis [min-width:0] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap]`} grid`}
                     title={file.path}
                   >
                     <strong className="truncate">
@@ -539,7 +539,7 @@ export const DetailsPane = memo(function DetailsPane({
             )}
           </nav>
           <section
-            className={`revisionCommitDetails [border-top:1px_solid_var(--border)] [display:flex] [flex-direction:column] [gap:5px] [min-height:0] [overflow:auto] [padding:7px_8px] [&>_header]:[align-items:center] [&>_header]:[display:flex] [&>_header]:[gap:2px] [&>_header_strong]:[flex:1] [&>_header_button]:[background:transparent] [&>_header_button]:[height:22px] [&>_header_button]:[width:22px] [&>_strong]:[overflow-wrap:anywhere] [&>_span]:[color:var(--muted-foreground)] [&>_small]:[color:var(--disabled-foreground)] [&>_code]:[color:var(--disabled-foreground)] [&>_code]:[font-size:10px] [&>_code]:[overflow-wrap:anywhere] [&>_select]:[background:var(--secondary)] [&>_select]:[border:1px_solid_var(--border)] [&>_select]:[height:25px] [&>_select]:[width:100%] [&>_footer]:[display:flex] [&>_footer]:[flex-wrap:wrap] [&>_footer]:[gap:4px] [&>_footer_button]:[background:var(--secondary)] [&>_footer_button]:[border:1px_solid_var(--border)] [&>_footer_button]:[height:25px] [&>_footer_button]:[padding:0_6px] revisionCommitDetails`}
+            className={`revisionCommitDetails revisionCommitDetails [display:flex] [min-height:0] [flex-direction:column] [gap:5px] [overflow:auto] [padding:7px_8px] [border-top:1px_solid_var(--border)] [&>_code]:[font-size:10px] [&>_code]:[overflow-wrap:anywhere] [&>_code]:[color:var(--disabled-foreground)] [&>_footer]:[display:flex] [&>_footer]:[flex-wrap:wrap] [&>_footer]:[gap:4px] [&>_footer_button]:[height:25px] [&>_footer_button]:[padding:0_6px] [&>_footer_button]:[background:var(--secondary)] [&>_footer_button]:[border:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[align-items:center] [&>_header]:[gap:2px] [&>_header_button]:[height:22px] [&>_header_button]:[width:22px] [&>_header_button]:[background:transparent] [&>_header_strong]:[flex:1] [&>_select]:[height:25px] [&>_select]:[width:100%] [&>_select]:[background:var(--secondary)] [&>_select]:[border:1px_solid_var(--border)] [&>_small]:[color:var(--disabled-foreground)] [&>_span]:[color:var(--muted-foreground)] [&>_strong]:[overflow-wrap:anywhere]`}
           >
             <header>
               <strong>Commit details</strong>
@@ -609,10 +609,10 @@ export const DetailsPane = memo(function DetailsPane({
               <span
                 className={
                   signature.status === "G"
-                    ? `signatureGood [color:var(--success)] signatureGood`
+                    ? `signatureGood signatureGood [color:var(--success)]`
                     : signature.status === "N"
-                      ? `muted [color:var(--disabled-foreground)] [font-size:10px] muted`
-                      : `signatureBad [color:var(--destructive)] signatureBad`
+                      ? `muted muted [font-size:10px] [color:var(--disabled-foreground)]`
+                      : `signatureBad signatureBad [color:var(--destructive)]`
                 }
               >
                 {signature.status === "G"

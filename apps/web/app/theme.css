@@ -1,0 +1,26 @@
+@source "../components/**/*.{ts,tsx}";
+@source "../mdx-components.tsx";
+
+:where(:root) {
+  --font-family-body:
+    var(--font-pretendard, ui-sans-serif), -apple-system, BlinkMacSystemFont,
+    "Segoe UI", system-ui, sans-serif;
+  --font-family-heading: var(--font-family-body);
+}
+
+/* 제품별 editorial 배경만 Web이 소유하고 공용 semantic role은 공유함 */
+:where(html[data-site="tech"]) {
+  --background: oklch(1 0 0);
+}
+
+:where(html[data-site="invest"]) {
+  --background: oklch(0.975 0.002 90);
+}
+
+:where(html[data-site="tech"][data-theme="dark"]) {
+  --background: oklch(0.18 0.014 235);
+}
+
+:where(html[data-site="invest"][data-theme="dark"]) {
+  --background: oklch(0.18 0.003 90);
+}

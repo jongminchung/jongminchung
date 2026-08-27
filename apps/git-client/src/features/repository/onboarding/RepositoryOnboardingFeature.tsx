@@ -47,7 +47,7 @@ export function RepositoryOnboardingPanel({
     return (
       <Button
         aria-label="Show Git workflow guide"
-        className="absolute right-2 top-2 z-20 h-7 px-2.5 text-xs"
+        className="absolute top-2 right-2 z-20 h-7 px-2.5 text-xs"
         onClick={onReset}
         size="sm"
         variant="outline"
@@ -60,7 +60,7 @@ export function RepositoryOnboardingPanel({
   return (
     <aside
       aria-label="Git workflow guide"
-      className="absolute right-2 top-2 z-20 w-[min(340px,calc(100%-16px))] rounded-md border border-border bg-popover p-3 text-popover-foreground shadow-lg"
+      className="absolute top-2 right-2 z-20 w-[min(340px,calc(100%-16px))] rounded-md border border-border bg-popover p-3 text-popover-foreground shadow-lg"
     >
       <header className="mb-2 flex items-start gap-2">
         <div className="min-w-0 flex-1">

@@ -57,6 +57,18 @@ jobs:
       - name: Install Web consumer dependencies
         if: steps.changes.outputs.web == 'true' || github.event_name == 'schedule'
         run: pnpm --filter @jongminchung/web... install --frozen-lockfile
+      - name: Validate shadcn workspace manifests
+        if: steps.changes.outputs.web == 'true'
+        run: |
+          pnpm --filter @jongminchung/ui exec shadcn info --json
+          pnpm --filter @jongminchung/web exec shadcn info --json
+          pnpm --filter @jongminchung/git-client exec shadcn info --json
+      - name: Verify shared UI package
+        if: steps.changes.outputs.web == 'true'
+        run: |
+          pnpm --filter @jongminchung/ui run typecheck
+          pnpm --filter @jongminchung/ui run test
+          pnpm --filter @jongminchung/ui run build
       - if: steps.changes.outputs.web == 'true'
         run: pnpm --filter @jongminchung/web run typecheck
       - if: steps.changes.outputs.web == 'true'

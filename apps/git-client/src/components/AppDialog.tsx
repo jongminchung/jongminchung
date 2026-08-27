@@ -195,7 +195,7 @@ export function useAppDialog(): AppDialogController {
               width="100%"
             />
           ) : request.options.impact ? (
-            <pre className="m-0 max-h-48 overflow-auto whitespace-pre-wrap rounded-md border border-border bg-muted p-3 text-muted-foreground">
+            <pre className="m-0 max-h-48 overflow-auto rounded-md border border-border bg-muted p-3 whitespace-pre-wrap text-muted-foreground">
               {request.options.impact}
             </pre>
           ) : null}

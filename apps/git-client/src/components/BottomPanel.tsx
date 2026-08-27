@@ -195,7 +195,7 @@ export const BottomPanel = memo(function BottomPanel({
   return (
     <section
       aria-label={`${active} Tool Window`}
-      className={`${`bottomPanel [background:var(--card)] rounded-t-xl rounded-b-none [display:grid] [grid-template-rows:4px_31px_minmax(0,_1fr)] [min-height:0] [overflow:hidden] bottomPanel rounded-t-xl rounded-b-none`} ${collapsed ? `bottomCollapsed [border-top:0] [height:0] [grid-template-rows:0] [overflow:hidden] bottomCollapsed` : ""} ${active === "terminal" ? `bottomTerminalPanel [grid-template-rows:4px_minmax(0,_1fr)] bottomTerminalPanel` : ""}`}
+      className={`${`bottomPanel bottomPanel [display:grid] [min-height:0] [grid-template-rows:4px_31px_minmax(0,_1fr)] [overflow:hidden] rounded-t-xl rounded-b-none [background:var(--card)]`} ${collapsed ? `bottomCollapsed bottomCollapsed [height:0] [grid-template-rows:0] [overflow:hidden] [border-top:0]` : ""} ${active === "terminal" ? `bottomTerminalPanel bottomTerminalPanel [grid-template-rows:4px_minmax(0,_1fr)]` : ""}`}
       data-tool-window-position="bottom"
       ref={lifecycle.panelRef}
       style={collapsed ? undefined : { height }}
@@ -207,7 +207,7 @@ export const BottomPanel = memo(function BottomPanel({
           aria-valuemax={MAX_BOTTOM_PANEL_HEIGHT}
           aria-valuemin={MIN_BOTTOM_PANEL_HEIGHT}
           aria-valuenow={height}
-          className={`bottomResizer [background:transparent] [cursor:ns-resize] [position:relative] [z-index:var(--layer-resize-control)] [&::after]:[background:var(--input)] [&::after]:[content:""] [&::after]:[height:1px] [&::after]:[left:0] [&::after]:[position:absolute] [&::after]:[right:0] [&::after]:[top:1px] [&:hover::after]:[background:var(--primary)] [&:hover::after]:[height:2px] [&:focus-visible::after]:[background:var(--primary)] [&:focus-visible::after]:[height:2px] bottomResizer`}
+          className={`bottomResizer bottomResizer [position:relative] [z-index:var(--layer-resize-control)] [cursor:ns-resize] [background:transparent] [&::after]:[position:absolute] [&::after]:[top:1px] [&::after]:[right:0] [&::after]:[left:0] [&::after]:[height:1px] [&::after]:[content:""] [&::after]:[background:var(--input)] [&:focus-visible::after]:[height:2px] [&:focus-visible::after]:[background:var(--primary)] [&:hover::after]:[height:2px] [&:hover::after]:[background:var(--primary)]`}
           onDoubleClick={() => onHeightChange(DEFAULT_BOTTOM_PANEL_HEIGHT)}
           onKeyDown={resizePanelWithKeyboard}
           onPointerDown={resizePanel}
@@ -229,7 +229,7 @@ export const BottomPanel = memo(function BottomPanel({
       {!collapsed && (
         <div
           aria-labelledby={`bottom-tool-tab-${active}`}
-          className={`toolContent [min-height:0] [overflow:hidden] toolContent`}
+          className={`toolContent toolContent [min-height:0] [overflow:hidden]`}
           id="bottom-tool-panel"
           role="tabpanel"
         >

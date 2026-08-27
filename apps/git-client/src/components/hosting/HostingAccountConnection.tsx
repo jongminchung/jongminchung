@@ -71,12 +71,12 @@ export function HostingAccountConnection({
 
   return (
     <details
-      className={`hostingConnect [border-bottom:1px_solid_var(--border)] [padding:8px_11px] [&_summary]:[color:var(--muted-foreground)] [&_summary]:[cursor:default] [&_summary]:[font-weight:600] hostingConnect`}
+      className={`hostingConnect hostingConnect [padding:8px_11px] [border-bottom:1px_solid_var(--border)] [&_summary]:[cursor:default] [&_summary]:[font-weight:600] [&_summary]:[color:var(--muted-foreground)]`}
       open={accounts.length === 0}
     >
       <summary>Connect a GitHub or GitLab account</summary>
       <div
-        className={`hostingFormGrid [&_label]:[color:var(--muted-foreground)] [&_label]:[display:flex] [&_label]:[flex-direction:column] [&_label]:[font-size:11px] [&_label]:[gap:3px] [align-items:end] [display:grid] [gap:8px] [grid-template-columns:110px_minmax(190px,_1fr)_minmax(190px,_1fr)_auto] [padding-top:9px] hostingFormGrid`}
+        className={`hostingFormGrid hostingFormGrid [display:grid] [grid-template-columns:110px_minmax(190px,_1fr)_minmax(190px,_1fr)_auto] [align-items:end] [gap:8px] [padding-top:9px] [&_label]:[display:flex] [&_label]:[flex-direction:column] [&_label]:[gap:3px] [&_label]:[font-size:11px] [&_label]:[color:var(--muted-foreground)]`}
       >
         <Selector
           className="bg-secondary"
@@ -201,7 +201,7 @@ export function HostingAccountConnection({
       </details>
       {selectedAccount && (
         <div
-          className={`hostingAccountMeta [align-items:center] [display:flex] [gap:8px] [border-top:1px_solid_var(--border)] [color:var(--muted-foreground)] [margin-top:9px] [padding-top:8px] [&>_span:first-child]:[flex:1] hostingAccountMeta`}
+          className={`hostingAccountMeta hostingAccountMeta [margin-top:9px] [display:flex] [align-items:center] [gap:8px] [padding-top:8px] [color:var(--muted-foreground)] [border-top:1px_solid_var(--border)] [&>_span:first-child]:[flex:1]`}
         >
           <span>
             {selectedAccount.login} · {selectedAccount.baseUrl} ·{" "}

@@ -119,7 +119,7 @@ export function ReplaceInFilesDialog({
       width="min(820px, calc(100vw - 70px))"
     >
       <section
-        className={`replaceInFilesDialog [display:grid] [grid-template-rows:auto_auto_auto_minmax(0,_1fr)_auto] [height:min(680px,_calc(100vh_-_70px))] [min-height:0] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:flex] [&>_footer]:[gap:8px] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:9px_12px] replaceInFilesDialog`}
+        className={`replaceInFilesDialog replaceInFilesDialog [display:grid] [height:min(680px,_calc(100vh_-_70px))] [min-height:0] [grid-template-rows:auto_auto_auto_minmax(0,_1fr)_auto] [&>_footer]:[display:flex] [&>_footer]:[justify-content:flex-end] [&>_footer]:[gap:8px] [&>_footer]:[padding:9px_12px] [&>_footer]:[border-top:1px_solid_var(--border)]`}
       >
         <DialogHeader
           hasDivider
@@ -127,7 +127,7 @@ export function ReplaceInFilesDialog({
           title="Replace in Files"
         />
         <div
-          className={`replaceInFilesQuery [border-bottom:1px_solid_var(--border)] [display:grid] [gap:8px] [grid-template-columns:minmax(0,_1fr)_minmax(0,_1fr)_auto] [padding:10px_12px] [&>_div:last-child]:[align-items:flex-end] [&>_div:last-child]:[display:flex] [&>_div:last-child]:[gap:4px] replaceInFilesQuery`}
+          className={`replaceInFilesQuery replaceInFilesQuery [display:grid] [grid-template-columns:minmax(0,_1fr)_minmax(0,_1fr)_auto] [gap:8px] [padding:10px_12px] [border-bottom:1px_solid_var(--border)] [&>_div:last-child]:[display:flex] [&>_div:last-child]:[align-items:flex-end] [&>_div:last-child]:[gap:4px]`}
         >
           <TextInput
             hasAutoFocus
@@ -145,7 +145,7 @@ export function ReplaceInFilesDialog({
           <div>
             <Toggle
               aria-label="Match case"
-              className="inline-flex h-7 items-center justify-center gap-1.5 rounded-md px-2 text-xs outline-none hover:bg-accent data-pressed:bg-accent data-pressed:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/45 disabled:opacity-45"
+              className="inline-flex h-7 items-center justify-center gap-1.5 rounded-md px-2 text-xs outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/45 disabled:opacity-45 data-pressed:bg-accent data-pressed:text-accent-foreground"
               onPressedChange={(matchCase) =>
                 setOptions((current) => ({
                   ...current,
@@ -159,7 +159,7 @@ export function ReplaceInFilesDialog({
             </Toggle>
             <Toggle
               aria-label="Words"
-              className="inline-flex h-7 items-center justify-center gap-1.5 rounded-md px-2 text-xs outline-none hover:bg-accent data-pressed:bg-accent data-pressed:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/45 disabled:opacity-45"
+              className="inline-flex h-7 items-center justify-center gap-1.5 rounded-md px-2 text-xs outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/45 disabled:opacity-45 data-pressed:bg-accent data-pressed:text-accent-foreground"
               onPressedChange={(words) =>
                 setOptions((current) => ({ ...current, words }))
               }
@@ -170,7 +170,7 @@ export function ReplaceInFilesDialog({
             </Toggle>
             <Toggle
               aria-label="Regex"
-              className="inline-flex h-7 items-center justify-center gap-1.5 rounded-md px-2 text-xs outline-none hover:bg-accent data-pressed:bg-accent data-pressed:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/45 disabled:opacity-45"
+              className="inline-flex h-7 items-center justify-center gap-1.5 rounded-md px-2 text-xs outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/45 disabled:opacity-45 data-pressed:bg-accent data-pressed:text-accent-foreground"
               onPressedChange={(regex) =>
                 setOptions((current) => ({ ...current, regex }))
               }
@@ -182,7 +182,7 @@ export function ReplaceInFilesDialog({
           </div>
         </div>
         <div
-          className={`replaceInFilesStatus [align-items:center] [background:var(--muted)] [border-bottom:1px_solid_var(--border)] [color:var(--muted-foreground)] [display:flex] [min-height:30px] [padding:4px_12px] [&>_span]:[flex:1] [&>_button]:[background:transparent] [&>_button]:[color:var(--primary)] replaceInFilesStatus`}
+          className={`replaceInFilesStatus replaceInFilesStatus [display:flex] [min-height:30px] [align-items:center] [padding:4px_12px] [color:var(--muted-foreground)] [background:var(--muted)] [border-bottom:1px_solid_var(--border)] [&>_button]:[color:var(--primary)] [&>_button]:[background:transparent] [&>_span]:[flex:1]`}
         >
           <span>
             {loading
@@ -208,7 +208,7 @@ export function ReplaceInFilesDialog({
           )}
         </div>
         <div
-          className={`replaceInFilesResults [min-height:0] [overflow:auto] [padding:5px_7px] [&>_p]:[color:var(--muted-foreground)] [&>_p]:[margin:24px] [&>_p[role=alert]]:[color:var(--destructive)] [&_li]:rounded-sm [&_li_code]:[color:var(--disabled-foreground)] [&_li_code]:[font-size:9px] replaceInFilesResults [&_li]:rounded-sm`}
+          className={`replaceInFilesResults replaceInFilesResults [min-height:0] [overflow:auto] [padding:5px_7px] [&_li]:rounded-sm [&_li_code]:[font-size:9px] [&_li_code]:[color:var(--disabled-foreground)] [&>_p]:[margin:24px] [&>_p]:[color:var(--muted-foreground)] [&>_p[role=alert]]:[color:var(--destructive)]`}
         >
           {loading ? (
             <Spinner label="Searching project…" size="lg" />

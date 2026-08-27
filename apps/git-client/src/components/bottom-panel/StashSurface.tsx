@@ -45,10 +45,10 @@ export function StashSurface({
 }) {
   return (
     <div
-      className={`collectionTool [&_button]:[background:var(--muted)] [&_button]:[border:1px_solid_var(--border)] [&_button]:rounded-sm [&_button]:[height:27px] [&_button]:[padding:0_9px] [&_button]:[white-space:nowrap] [height:100%] [overflow:auto] collectionTool [&_button]:rounded-sm`}
+      className={`collectionTool collectionTool [height:100%] [overflow:auto] [&_button]:[height:27px] [&_button]:rounded-sm [&_button]:[padding:0_9px] [&_button]:[white-space:nowrap] [&_button]:[background:var(--muted)] [&_button]:[border:1px_solid_var(--border)]`}
     >
       <div
-        className={`collectionIntro [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:10px] [min-height:48px] [padding:8px_14px] [background:var(--muted)] [&_div]:[flex:1] [&_p]:[color:var(--muted-foreground)] [&_p]:[margin:2px_0_0] collectionIntro`}
+        className={`collectionIntro collectionIntro [display:flex] [min-height:48px] [align-items:center] [gap:10px] [padding:8px_14px] [background:var(--muted)] [border-bottom:1px_solid_var(--border)] [&_div]:[flex:1] [&_p]:[margin:2px_0_0] [&_p]:[color:var(--muted-foreground)]`}
       >
         <Icon name="stash" size={24} />
         <div>
@@ -96,11 +96,11 @@ export function StashSurface({
       ) : (
         stashes.map((stash) => (
           <div
-            className={`stashEntry [border-bottom:1px_solid_var(--border)] [&.collectionRow]:[border-bottom:0] stashEntry`}
+            className={`stashEntry stashEntry [border-bottom:1px_solid_var(--border)] [&.collectionRow]:[border-bottom:0]`}
             key={stash.oid}
           >
             <div
-              className={`collectionRow [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:10px] [min-height:48px] [padding:8px_14px] [&_div]:[flex:1] [&_small]:[color:var(--disabled-foreground)] [&_small]:[display:block] [&_small]:[margin-top:3px] [border-bottom:0] collectionRow`}
+              className={`collectionRow collectionRow [display:flex] [min-height:48px] [align-items:center] [gap:10px] [padding:8px_14px] [border-bottom:0] [border-bottom:1px_solid_var(--border)] [&_div]:[flex:1] [&_small]:[margin-top:3px] [&_small]:[display:block] [&_small]:[color:var(--disabled-foreground)]`}
             >
               <Icon name="commit" size={16} />
               <div>
@@ -194,7 +194,7 @@ export function StashSurface({
             </div>
             {stashFiles[stash.oid] && (
               <div
-                className={`stashFiles [background:var(--muted)] [display:grid] [gap:3px] [padding:6px_14px_8px_48px] [&_span]:[color:var(--muted-foreground)] [&_span]:[font-family:var(--font-family-code)] [&_strong]:[color:var(--primary)] [&_strong]:[display:inline-block] [&_strong]:[margin-right:8px] [&_strong]:[width:12px] stashFiles`}
+                className={`stashFiles stashFiles [display:grid] [gap:3px] [padding:6px_14px_8px_48px] [background:var(--muted)] [&_span]:[font-family:var(--font-family-code)] [&_span]:[color:var(--muted-foreground)] [&_strong]:[margin-right:8px] [&_strong]:[display:inline-block] [&_strong]:[width:12px] [&_strong]:[color:var(--primary)]`}
               >
                 {(stashFiles[stash.oid] ?? []).map((file) => (
                   <span key={`${stash.oid}-${file.path}`}>

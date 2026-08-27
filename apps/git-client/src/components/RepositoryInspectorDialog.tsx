@@ -266,7 +266,7 @@ export function RepositoryInspectorDialog({
       aria-label={embedded ? `Editor: ${path || "Repository"}` : undefined}
       className={
         embedded
-          ? `inspectorEmbedded [display:grid] [grid-template-rows:38px_minmax(0,_1fr)] [height:100%] [min-height:0] [overflow:hidden] [&>_nav]:[align-items:center] [&>_nav]:[border-bottom:1px_solid_var(--border)] inspectorEmbedded`
+          ? `inspectorEmbedded inspectorEmbedded [display:grid] [height:100%] [min-height:0] [grid-template-rows:38px_minmax(0,_1fr)] [overflow:hidden] [&>_nav]:[align-items:center] [&>_nav]:[border-bottom:1px_solid_var(--border)]`
           : "grid h-[min(720px,calc(100vh-70px))] min-h-0 grid-rows-[auto_auto_minmax(0,1fr)] overflow-hidden"
       }
     >
@@ -297,25 +297,25 @@ export function RepositoryInspectorDialog({
             className="inline-flex h-7 items-center rounded-md bg-muted p-0.5"
           >
             <TabsTrigger
-              className="h-full rounded px-2.5 text-xs text-muted-foreground outline-none hover:text-foreground data-active:bg-background data-active:text-foreground data-active:shadow-xs focus-visible:ring-2 focus-visible:ring-ring/45"
+              className="h-full rounded px-2.5 text-xs text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/45 data-active:bg-background data-active:text-foreground data-active:shadow-xs"
               value="tree"
             >
               Tree
             </TabsTrigger>
             <TabsTrigger
-              className="h-full rounded px-2.5 text-xs text-muted-foreground outline-none hover:text-foreground data-active:bg-background data-active:text-foreground data-active:shadow-xs focus-visible:ring-2 focus-visible:ring-ring/45"
+              className="h-full rounded px-2.5 text-xs text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/45 data-active:bg-background data-active:text-foreground data-active:shadow-xs"
               value="file"
             >
               File
             </TabsTrigger>
             <TabsTrigger
-              className="h-full rounded px-2.5 text-xs text-muted-foreground outline-none hover:text-foreground data-active:bg-background data-active:text-foreground data-active:shadow-xs focus-visible:ring-2 focus-visible:ring-ring/45"
+              className="h-full rounded px-2.5 text-xs text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/45 data-active:bg-background data-active:text-foreground data-active:shadow-xs"
               value="history"
             >
               File History
             </TabsTrigger>
             <TabsTrigger
-              className="h-full rounded px-2.5 text-xs text-muted-foreground outline-none hover:text-foreground data-active:bg-background data-active:text-foreground data-active:shadow-xs focus-visible:ring-2 focus-visible:ring-ring/45"
+              className="h-full rounded px-2.5 text-xs text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/45 data-active:bg-background data-active:text-foreground data-active:shadow-xs"
               value="blame"
             >
               Blame
@@ -403,7 +403,7 @@ export function RepositoryInspectorDialog({
                   }}
                   type="button"
                   className={cn(
-                    "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+                    "min-h-[29px] w-full justify-start gap-1.5 px-2 py-1 text-left text-xs whitespace-normal aria-current:bg-accent aria-selected:bg-accent",
                   )}
                   variant="ghost"
                   size="default"

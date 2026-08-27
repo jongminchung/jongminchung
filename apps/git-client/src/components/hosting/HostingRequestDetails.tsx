@@ -53,7 +53,7 @@ export function HostingRequestDetails({
 
   return (
     <section
-      className={`hostingDetail [&>_header]:[align-items:center] [&>_header]:[display:flex] [&>_header]:[gap:8px] [min-height:0] [overflow:auto] [&_small]:[color:var(--disabled-foreground)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[padding:9px_11px] [&>_header_>_div]:[display:flex] [&>_header_>_div]:[flex:1] [&>_header_>_div]:[flex-direction:column] [&>_header_>_div]:[min-width:0] [&>_header_small]:[overflow:hidden] [&>_header_small]:[text-overflow:ellipsis] [&>_header_small]:[white-space:nowrap] [&_h3]:[color:var(--muted-foreground)] [&_h3]:[font-size:12px] [&_h3]:[margin:0] [&_h3]:[padding:10px_11px_6px] hostingDetail`}
+      className={`hostingDetail hostingDetail [min-height:0] [overflow:auto] [&_h3]:[margin:0] [&_h3]:[padding:10px_11px_6px] [&_h3]:[font-size:12px] [&_h3]:[color:var(--muted-foreground)] [&_small]:[color:var(--disabled-foreground)] [&>_header]:[display:flex] [&>_header]:[align-items:center] [&>_header]:[gap:8px] [&>_header]:[padding:9px_11px] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header_>_div]:[display:flex] [&>_header_>_div]:[min-width:0] [&>_header_>_div]:[flex:1] [&>_header_>_div]:[flex-direction:column] [&>_header_small]:[overflow:hidden] [&>_header_small]:[text-overflow:ellipsis] [&>_header_small]:[white-space:nowrap]`}
       aria-label="Change request detail"
     >
       {!selected ? (
@@ -100,7 +100,7 @@ export function HostingRequestDetails({
           </header>
           <MergeReadinessSummary readiness={mergeReadiness} />
           <div
-            className={`hostingReviewBar [align-items:center] [display:flex] [gap:8px] [border-bottom:1px_solid_var(--border)] [padding:8px_11px] [&_textarea]:[flex:1] [&_textarea]:[min-height:52px] [&_textarea]:[resize:vertical] hostingReviewBar`}
+            className={`hostingReviewBar hostingReviewBar [display:flex] [align-items:center] [gap:8px] [padding:8px_11px] [border-bottom:1px_solid_var(--border)] [&_textarea]:[min-height:52px] [&_textarea]:[flex:1] [&_textarea]:[resize:vertical]`}
           >
             <Textarea
               aria-label="Review body"
@@ -140,7 +140,7 @@ export function HostingRequestDetails({
           <h3>Changed files · {files.length}</h3>
           {files.map((file) => (
             <article
-              className={`hostingFile [border-top:1px_solid_var(--border)] [padding:8px_11px] [&>_label]:[float:right] [&>_strong]:[display:block] [&>_small]:[display:block] [&_pre]:[background:var(--muted)] [&_pre]:[border:1px_solid_var(--border)] [&_pre]:rounded-lg [&_pre]:[font-size:12px] [&_pre]:[max-height:280px] [&_pre]:[overflow:auto] [&_pre]:[padding:9px] hostingFile [&_pre]:rounded-lg`}
+              className={`hostingFile hostingFile [padding:8px_11px] [border-top:1px_solid_var(--border)] [&_pre]:[max-height:280px] [&_pre]:[overflow:auto] [&_pre]:rounded-lg [&_pre]:[padding:9px] [&_pre]:[font-size:12px] [&_pre]:[background:var(--muted)] [&_pre]:[border:1px_solid_var(--border)] [&>_label]:[float:right] [&>_small]:[display:block] [&>_strong]:[display:block]`}
               key={file.path}
             >
               <label>
@@ -168,7 +168,7 @@ export function HostingRequestDetails({
           <h3>Timeline · {timeline.length}</h3>
           {timeline.map((entry) => (
             <article
-              className={`hostingTimeline [border-top:1px_solid_var(--border)] [padding:8px_11px] [&_p]:[line-height:1.45] [&_p]:[margin:5px_0_0] [&_p]:[white-space:pre-wrap] [&_small]:[float:right] hostingTimeline`}
+              className={`hostingTimeline hostingTimeline [padding:8px_11px] [border-top:1px_solid_var(--border)] [&_p]:[margin:5px_0_0] [&_p]:[line-height:1.45] [&_p]:[white-space:pre-wrap] [&_small]:[float:right]`}
               key={entry.id}
             >
               <strong>{entry.author || entry.kind}</strong>
@@ -177,7 +177,7 @@ export function HostingRequestDetails({
             </article>
           ))}
           <div
-            className={`hostingDiscussionComposer [align-items:flex-end] [border-top:1px_solid_var(--border)] [display:flex] [gap:8px] [padding:8px_11px] [&_textarea]:[flex:1] [&_textarea]:[min-height:54px] [&_textarea]:[resize:vertical] hostingDiscussionComposer`}
+            className={`hostingDiscussionComposer hostingDiscussionComposer [display:flex] [align-items:flex-end] [gap:8px] [padding:8px_11px] [border-top:1px_solid_var(--border)] [&_textarea]:[min-height:54px] [&_textarea]:[flex:1] [&_textarea]:[resize:vertical]`}
           >
             <Textarea
               aria-label="Add timeline comment"

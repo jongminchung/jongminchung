@@ -39,7 +39,7 @@ export function CommandLineLauncherDialog({
       width={560}
     >
       <section
-        className={`commandLineLauncherDialog [display:grid] [grid-template-rows:auto_minmax(180px,_auto)_auto] [&>_main]:[align-content:center] [&>_main]:[display:grid] [&>_main]:[gap:10px] [&>_main]:[padding:18px] [&>_main_p]:[color:var(--muted-foreground)] [&>_main_p]:[line-height:1.5] [&>_main_p]:[margin:0] [&>_main_code]:[color:var(--foreground)] [&>_main_pre]:[background:var(--muted)] [&>_main_pre]:[border:1px_solid_var(--border)] [&>_main_pre]:rounded-md [&>_main_pre]:[font-family:var(--font-family-code)] [&>_main_pre]:[margin:0] [&>_main_pre]:[overflow:auto] [&>_main_pre]:[padding:9px_11px] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:flex] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:8px_10px] commandLineLauncherDialog [&>_main_pre]:rounded-md`}
+        className={`commandLineLauncherDialog commandLineLauncherDialog [display:grid] [grid-template-rows:auto_minmax(180px,_auto)_auto] [&>_footer]:[display:flex] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:8px_10px] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_main]:[display:grid] [&>_main]:[align-content:center] [&>_main]:[gap:10px] [&>_main]:[padding:18px] [&>_main_code]:[color:var(--foreground)] [&>_main_p]:[margin:0] [&>_main_p]:[line-height:1.5] [&>_main_p]:[color:var(--muted-foreground)] [&>_main_pre]:[margin:0] [&>_main_pre]:[overflow:auto] [&>_main_pre]:rounded-md [&>_main_pre]:[padding:9px_11px] [&>_main_pre]:[font-family:var(--font-family-code)] [&>_main_pre]:[background:var(--muted)] [&>_main_pre]:[border:1px_solid_var(--border)]`}
       >
         <DialogHeader
           hasDivider

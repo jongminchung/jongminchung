@@ -43,7 +43,7 @@ export class RendererErrorBoundary extends Component<
             restart the application explicitly.
           </p>
           <p
-            className="mt-3 break-words font-mono text-xs text-destructive"
+            className="mt-3 font-mono text-xs break-words text-destructive"
             role="alert"
           >
             {this.state.error.message}

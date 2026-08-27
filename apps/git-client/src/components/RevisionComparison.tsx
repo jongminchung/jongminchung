@@ -93,7 +93,7 @@ export function RevisionComparison({
   return (
     <aside
       aria-label="Revision comparison"
-      className={`revisionComparison [border-left:1px_solid_var(--border)] [display:grid] [grid-template-rows:36px_minmax(0,_1fr)] [min-height:0] [min-width:0] [position:relative] [&>_.verticalResizeHandle]:[left:-4px] [&>_.verticalResizeHandle]:[right:auto] [&>_header]:[align-items:center] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[gap:7px] [&>_header]:[padding:0_9px] [&>_header_strong]:[margin-right:auto] [&>_header_code]:[color:var(--muted-foreground)] [&>_header_code]:[font-size:11px] [&>_[data-revision-content]]:[display:grid] [&>_[data-revision-content]]:[grid-template-columns:minmax(155px,_195px)_minmax(0,_1fr)] [&>_[data-revision-content]]:[min-height:0] [&_nav]:[border-right:1px_solid_var(--border)] [&_nav]:[min-height:0] [&_nav]:[overflow:auto] [&_nav]:[padding:4px] [&_nav_button]:[align-items:center] [&_nav_button]:[background:transparent] [&_nav_button]:[display:flex] [&_nav_button]:[gap:6px] [&_nav_button]:[min-height:28px] [&_nav_button]:[padding:3px_6px] [&_nav_button]:[text-align:left] [&_nav_button]:[width:100%] [&_nav_button.selected]:[background:var(--accent)] [&_nav_button[aria-current=true]]:[background:var(--accent)] revisionComparison`}
+      className={`revisionComparison revisionComparison [position:relative] [display:grid] [min-height:0] [min-width:0] [grid-template-rows:36px_minmax(0,_1fr)] [border-left:1px_solid_var(--border)] [&_nav]:[min-height:0] [&_nav]:[overflow:auto] [&_nav]:[padding:4px] [&_nav]:[border-right:1px_solid_var(--border)] [&_nav_button]:[display:flex] [&_nav_button]:[min-height:28px] [&_nav_button]:[width:100%] [&_nav_button]:[align-items:center] [&_nav_button]:[gap:6px] [&_nav_button]:[padding:3px_6px] [&_nav_button]:[text-align:left] [&_nav_button]:[background:transparent] [&_nav_button.selected]:[background:var(--accent)] [&_nav_button[aria-current=true]]:[background:var(--accent)] [&>_.verticalResizeHandle]:[right:auto] [&>_.verticalResizeHandle]:[left:-4px] [&>_[data-revision-content]]:[display:grid] [&>_[data-revision-content]]:[min-height:0] [&>_[data-revision-content]]:[grid-template-columns:minmax(155px,_195px)_minmax(0,_1fr)] [&>_header]:[display:flex] [&>_header]:[align-items:center] [&>_header]:[gap:7px] [&>_header]:[padding:0_9px] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header_code]:[font-size:11px] [&>_header_code]:[color:var(--muted-foreground)] [&>_header_strong]:[margin-right:auto]`}
     >
       <VerticalResizeHandle
         direction={-1}
@@ -137,7 +137,7 @@ export function RevisionComparison({
                 className={cn(
                   "h-7 px-2.5",
                   selected?.file.path === entry.file.path
-                    ? `selected [background:var(--accent)] [color:var(--foreground)] selected`
+                    ? `selected selected [color:var(--foreground)] [background:var(--accent)]`
                     : undefined,
                 )}
                 variant="outline"
@@ -147,7 +147,7 @@ export function RevisionComparison({
                   {entry.file.status.charAt(0).toUpperCase()}
                 </StatusBadge>
                 <span
-                  className={`ellipsis [min-width:0] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap] ellipsis`}
+                  className={`ellipsis ellipsis [min-width:0] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap]`}
                 >
                   {entry.file.path}
                 </span>

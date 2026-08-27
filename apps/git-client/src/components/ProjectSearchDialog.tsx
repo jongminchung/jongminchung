@@ -275,7 +275,7 @@ export function ProjectSearchDialog({
       width="min(760px, calc(100vw - 72px))"
     >
       <section
-        className={`projectSearchDialog [display:grid] [grid-template-rows:auto_auto_27px_minmax(210px,_1fr)] [height:min(610px,_calc(100vh_-_82px))] [min-height:0] [overflow:hidden] projectSearchDialog`}
+        className={`projectSearchDialog projectSearchDialog [display:grid] [height:min(610px,_calc(100vh_-_82px))] [min-height:0] [grid-template-rows:auto_auto_27px_minmax(210px,_1fr)] [overflow:hidden]`}
       >
         <DialogHeader
           hasDivider
@@ -283,7 +283,7 @@ export function ProjectSearchDialog({
           title={copy.title}
         />
         <div
-          className={`projectSearchQuery [align-items:end] [border-bottom:1px_solid_var(--border)] [display:grid] [gap:5px] [grid-template-columns:minmax(0,_1fr)_auto_auto_auto_auto] [padding:8px_9px] [&>_button]:[min-width:28px] projectSearchQuery`}
+          className={`projectSearchQuery projectSearchQuery [display:grid] [grid-template-columns:minmax(0,_1fr)_auto_auto_auto_auto] [align-items:end] [gap:5px] [padding:8px_9px] [border-bottom:1px_solid_var(--border)] [&>_button]:[min-width:28px]`}
         >
           <TextInput
             hasAutoFocus
@@ -302,7 +302,7 @@ export function ProjectSearchDialog({
             <>
               <Toggle
                 aria-label="In Project"
-                className="inline-flex h-7 items-center justify-center gap-1.5 rounded-md px-2 text-xs outline-none hover:bg-accent data-pressed:bg-accent data-pressed:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/45 disabled:opacity-45"
+                className="inline-flex h-7 items-center justify-center gap-1.5 rounded-md px-2 text-xs outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/45 disabled:opacity-45 data-pressed:bg-accent data-pressed:text-accent-foreground"
                 pressed
                 type="button"
               >
@@ -311,7 +311,7 @@ export function ProjectSearchDialog({
               </Toggle>
               <Toggle
                 aria-label="Match case"
-                className="inline-flex h-7 items-center justify-center gap-1.5 rounded-md px-2 text-xs outline-none hover:bg-accent data-pressed:bg-accent data-pressed:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/45 disabled:opacity-45"
+                className="inline-flex h-7 items-center justify-center gap-1.5 rounded-md px-2 text-xs outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/45 disabled:opacity-45 data-pressed:bg-accent data-pressed:text-accent-foreground"
                 onPressedChange={(matchCase) =>
                   setOptions((current) => ({
                     ...current,
@@ -325,7 +325,7 @@ export function ProjectSearchDialog({
               </Toggle>
               <Toggle
                 aria-label="Words"
-                className="inline-flex h-7 items-center justify-center gap-1.5 rounded-md px-2 text-xs outline-none hover:bg-accent data-pressed:bg-accent data-pressed:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/45 disabled:opacity-45"
+                className="inline-flex h-7 items-center justify-center gap-1.5 rounded-md px-2 text-xs outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/45 disabled:opacity-45 data-pressed:bg-accent data-pressed:text-accent-foreground"
                 onPressedChange={(words) =>
                   setOptions((current) => ({
                     ...current,
@@ -339,7 +339,7 @@ export function ProjectSearchDialog({
               </Toggle>
               <Toggle
                 aria-label="Regex"
-                className="inline-flex h-7 items-center justify-center gap-1.5 rounded-md px-2 text-xs outline-none hover:bg-accent data-pressed:bg-accent data-pressed:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/45 disabled:opacity-45"
+                className="inline-flex h-7 items-center justify-center gap-1.5 rounded-md px-2 text-xs outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/45 disabled:opacity-45 data-pressed:bg-accent data-pressed:text-accent-foreground"
                 onPressedChange={(regex) =>
                   setOptions((current) => ({
                     ...current,
@@ -355,7 +355,7 @@ export function ProjectSearchDialog({
           )}
         </div>
         <div
-          className={`projectSearchStatus [align-items:center] [background:var(--muted)] [border-bottom:1px_solid_var(--border)] [color:var(--muted-foreground)] [display:flex] [font-size:10px] [padding:0_6px_0_10px] [&>_span]:[flex:1] [&>_button]:[height:23px] [&>_button]:[font-size:10px] projectSearchStatus`}
+          className={`projectSearchStatus projectSearchStatus [display:flex] [align-items:center] [padding:0_6px_0_10px] [font-size:10px] [color:var(--muted-foreground)] [background:var(--muted)] [border-bottom:1px_solid_var(--border)] [&>_button]:[height:23px] [&>_button]:[font-size:10px] [&>_span]:[flex:1]`}
           aria-live="polite"
         >
           <span>
@@ -384,7 +384,7 @@ export function ProjectSearchDialog({
           )}
         </div>
         <div
-          className={`projectSearchResults [min-height:0] [overflow:auto] [padding:4px] [&>_[role=status]]:[margin:36px_auto] [&>_p]:[color:var(--muted-foreground)] [&>_p]:[padding:36px_12px] [&>_p]:[text-align:center] [&_li]:[min-height:39px] [&_li_[data-slot=item-description]]:[font-family:var(--font-family-code)] [&_li_[data-slot=item-description]]:[font-size:10px] [&_li_code]:[color:var(--disabled-foreground)] [&_li_code]:[font-size:9px] [&_li_code]:[max-width:310px] [&_li_code]:[overflow:hidden] [&_li_code]:[text-overflow:ellipsis] [&_li_code]:[white-space:nowrap] projectSearchResults`}
+          className={`projectSearchResults projectSearchResults [min-height:0] [overflow:auto] [padding:4px] [&_li]:[min-height:39px] [&_li_[data-slot=item-description]]:[font-family:var(--font-family-code)] [&_li_[data-slot=item-description]]:[font-size:10px] [&_li_code]:[max-width:310px] [&_li_code]:[overflow:hidden] [&_li_code]:[font-size:9px] [&_li_code]:[text-overflow:ellipsis] [&_li_code]:[white-space:nowrap] [&_li_code]:[color:var(--disabled-foreground)] [&>_[role=status]]:[margin:36px_auto] [&>_p]:[padding:36px_12px] [&>_p]:[text-align:center] [&>_p]:[color:var(--muted-foreground)]`}
         >
           {loading && results.length === 0 ? (
             <Spinner label="Searching project…" size="lg" />

@@ -52,7 +52,7 @@ export function RepositoryWorkspaceFeature() {
         <RepositoryToolStripeFeature />
         <RepositoryEditorSurface maximizedToolWindow={maximizedToolWindow}>
           <div
-            className={`${`workbenchContent [display:grid] [gap:3px] [grid-template-columns:minmax(0,_1fr)] [min-height:0] [min-width:0] [html[data-distraction-free-mode=true]_&]:grid-cols-[minmax(0,1fr)]! [html[data-presentation-mode=true]_&]:grid-cols-[minmax(0,1fr)]! workbenchContent`} ${leftToolWindowOpen ? `projectToolOpen [grid-template-columns:minmax(302px,_var(--side-tool-window-width,_clamp(352px,_32.7vw,_458px)))_minmax(0,_1fr)] projectToolOpen` : ""} ${maximizedToolWindow === "project" || maximizedToolWindow === "bookmarks" ? `maximizedSideTool [grid-template-columns:minmax(0,_1fr)] [&>_[data-workspace-main]]:[display:none] maximizedSideTool` : ""}`}
+            className={`${`workbenchContent workbenchContent [display:grid] [min-height:0] [min-width:0] [grid-template-columns:minmax(0,_1fr)] [gap:3px] [html[data-distraction-free-mode=true]_&]:grid-cols-[minmax(0,1fr)]! [html[data-presentation-mode=true]_&]:grid-cols-[minmax(0,1fr)]!`} ${leftToolWindowOpen ? `projectToolOpen projectToolOpen [grid-template-columns:minmax(302px,_var(--side-tool-window-width,_clamp(352px,_32.7vw,_458px)))_minmax(0,_1fr)]` : ""} ${maximizedToolWindow === "project" || maximizedToolWindow === "bookmarks" ? `maximizedSideTool maximizedSideTool [grid-template-columns:minmax(0,_1fr)] [&>_[data-workspace-main]]:[display:none]` : ""}`}
             style={
               {
                 "--side-tool-window-width": `${repositoryViewMode === "changes" ? 302 : sideToolWindowWidth}px`,
@@ -63,7 +63,7 @@ export function RepositoryWorkspaceFeature() {
             <RepositorySideToolWindowsFeature />
             {repositoryViewMode === "changes" && <RepositoryChangesFeature />}
             <div
-              className={`${`activeWorkspace [background:var(--card)] rounded-lg [display:grid] [min-height:0] [min-width:0] [overflow:hidden] [padding-top:32px] [position:relative] activeWorkspace rounded-lg`} ${!hasEditorTabs ? `activeWorkspaceNoTabs [padding-top:0] activeWorkspaceNoTabs` : ""}`}
+              className={`${`activeWorkspace activeWorkspace [position:relative] [display:grid] [min-height:0] [min-width:0] [overflow:hidden] rounded-lg [padding-top:32px] [background:var(--card)]`} ${!hasEditorTabs ? `activeWorkspaceNoTabs activeWorkspaceNoTabs [padding-top:0]` : ""}`}
               data-workspace-main
             >
               <RepositoryOnboardingFeature />

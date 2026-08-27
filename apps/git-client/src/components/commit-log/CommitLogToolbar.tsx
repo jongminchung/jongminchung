@@ -80,11 +80,11 @@ export function CommitLogToolbar({
 
   return (
     <div
-      className={`logFilters [align-items:center] [background:var(--secondary)] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:1px] [overflow:hidden] [padding:0_3px] [&>_label]:[flex:none] logFilters`}
+      className={`logFilters logFilters [display:flex] [align-items:center] [gap:1px] [overflow:hidden] [padding:0_3px] [background:var(--secondary)] [border-bottom:1px_solid_var(--border)] [&>_label]:[flex:none]`}
       style={{ height: 35 }}
     >
       <div
-        className={`logSearchControls [flex:0_1_145px] [height:22px] [max-width:145px] [min-width:125px] [position:relative] [&_input]:[padding-right:39px]! [&>_button]:[position:absolute] [&>_button]:[top:1px] [&>_button:nth-of-type(1)]:[right:19px] [&>_button:nth-of-type(2)]:[right:0] logSearchControls`}
+        className={`logSearchControls logSearchControls [position:relative] [height:22px] [max-width:145px] [min-width:125px] [flex:0_1_145px] [&_input]:[padding-right:39px]! [&>_button]:[position:absolute] [&>_button]:[top:1px] [&>_button:nth-of-type(1)]:[right:19px] [&>_button:nth-of-type(2)]:[right:0]`}
         style={{ height: 35 }}
       >
         <TextInput
@@ -180,7 +180,7 @@ export function CommitLogToolbar({
         value={filterState.path}
         width={65}
       />
-      <span className={`filterSpacer [flex:1] filterSpacer`} />
+      <span className={`filterSpacer filterSpacer [flex:1]`} />
       <GraphFilterOptions
         activeFilterCount={activeFilterCount}
         authors={authors}
@@ -195,7 +195,7 @@ export function CommitLogToolbar({
               onClick={onOpenNewTab}
               type="button"
               aria-label="Open New Git Log Tab"
-              className={cn("h-5 min-w-5 px-0 aspect-square")}
+              className={cn("aspect-square h-5 min-w-5 px-0")}
               variant="ghost"
               size="icon-xs"
             >
@@ -216,7 +216,7 @@ export function CommitLogToolbar({
                 type="button"
                 aria-label={indexingLabel}
                 disabled={indexing || powerSaveMode}
-                className={cn("h-5 min-w-5 px-0 aspect-square")}
+                className={cn("aspect-square h-5 min-w-5 px-0")}
                 variant="ghost"
                 size="icon-xs"
               >
@@ -234,7 +234,7 @@ export function CommitLogToolbar({
               onClick={onRefresh}
               type="button"
               aria-label="Refresh"
-              className={cn("h-5 min-w-5 px-0 aspect-square")}
+              className={cn("aspect-square h-5 min-w-5 px-0")}
               variant="ghost"
               size="icon-xs"
             >
@@ -252,7 +252,7 @@ export function CommitLogToolbar({
               type="button"
               aria-label="Cherry-Pick"
               disabled={!canCherryPick}
-              className={cn("h-5 min-w-5 px-0 aspect-square")}
+              className={cn("aspect-square h-5 min-w-5 px-0")}
               variant="ghost"
               size="icon-xs"
             >
@@ -270,7 +270,7 @@ export function CommitLogToolbar({
               onClick={() => searchInputRef.current?.focus()}
               type="button"
               aria-label="Go To Hash/Branch/Tag"
-              className={cn("h-5 min-w-5 px-0 aspect-square")}
+              className={cn("aspect-square h-5 min-w-5 px-0")}
               variant="ghost"
               size="icon-xs"
             >
@@ -286,7 +286,7 @@ export function CommitLogToolbar({
         type="button"
         className={cn(
           "h-7 px-2.5",
-          `srOnly [clip:rect(0_0_0_0)] [clip-path:inset(50%)] [height:1px] [overflow:hidden] [position:absolute] [left:0] [top:0] [white-space:nowrap] [width:1px] srOnly`,
+          `srOnly srOnly [position:absolute] [top:0] [left:0] [height:1px] [width:1px] [overflow:hidden] [white-space:nowrap] [clip-path:inset(50%)] [clip:rect(0_0_0_0)]`,
         )}
         variant="outline"
         size="sm"

@@ -68,7 +68,7 @@ export function RepositoryEditorTabs({
   const inspector = hasInspector;
   return (
     <div
-      className={`commandbar [html[data-tool-window-bars-visible=false]_&]:left-0! [html[data-tool-window-bars-visible=false]_&]:right-0! [html[data-distraction-free-mode=true]_&]:hidden! [html[data-presentation-mode=true]_&]:hidden! [html[data-navigation-bar=top]_&]:top-[59px]! [align-items:center] [background:var(--card)] [border-bottom:1px_solid_var(--border)] rounded-t-lg rounded-b-none [display:flex] [gap:3px] [height:32px] [left:var(--editor-left,_39px)] [padding:0_5px_0_0] [position:absolute] [right:35px] [top:35px] [z-index:var(--layer-app-chrome)] [&>_button]:[align-items:center] [&>_button]:[background:transparent] [&>_button]:[display:flex] [&>_button]:[gap:6px] [&>_button]:[height:30px] [&>_button]:[padding:0_7px] [&>_button:hover]:[background:var(--muted)] [&>_button_>_em]:[align-items:center] [&>_button_>_em]:[background:var(--primary)] [&>_button_>_em]:rounded-lg [&>_button_>_em]:[color:var(--primary-foreground)] [&>_button_>_em]:[display:inline-flex] [&>_button_>_em]:[font-size:9px] [&>_button_>_em]:[font-style:normal] [&>_button_>_em]:[height:15px] [&>_button_>_em]:[justify-content:center] [&>_button_>_em]:[min-width:15px] [&>_button_>_em]:[padding:0_4px] commandbar rounded-t-lg rounded-b-none [&>_button_>_em]:rounded-lg`}
+      className={`commandbar commandbar [position:absolute] [top:35px] [right:35px] [left:var(--editor-left,_39px)] [z-index:var(--layer-app-chrome)] [display:flex] [height:32px] [align-items:center] [gap:3px] rounded-t-lg rounded-b-none [padding:0_5px_0_0] [background:var(--card)] [border-bottom:1px_solid_var(--border)] [&>_button]:[display:flex] [&>_button]:[height:30px] [&>_button]:[align-items:center] [&>_button]:[gap:6px] [&>_button]:[padding:0_7px] [&>_button]:[background:transparent] [&>_button_>_em]:[display:inline-flex] [&>_button_>_em]:[height:15px] [&>_button_>_em]:[min-width:15px] [&>_button_>_em]:[align-items:center] [&>_button_>_em]:[justify-content:center] [&>_button_>_em]:rounded-lg [&>_button_>_em]:[padding:0_4px] [&>_button_>_em]:[font-size:9px] [&>_button_>_em]:[color:var(--primary-foreground)] [&>_button_>_em]:[font-style:normal] [&>_button_>_em]:[background:var(--primary)] [&>_button:hover]:[background:var(--muted)] [html[data-distraction-free-mode=true]_&]:hidden! [html[data-navigation-bar=top]_&]:top-[59px]! [html[data-presentation-mode=true]_&]:hidden! [html[data-tool-window-bars-visible=false]_&]:right-0! [html[data-tool-window-bars-visible=false]_&]:left-0!`}
       style={
         {
           "--editor-left":
@@ -82,7 +82,7 @@ export function RepositoryEditorTabs({
         render={
           <nav
             aria-label={!inspector ? "Log" : "Editor tabs"}
-            className={`editorTabs [align-items:center] [align-self:stretch] [display:flex] [&_button[aria-current=page]]:rounded-sm [&_button[aria-current=page]]:bg-muted! [&_button[aria-current=page]]:text-foreground! [&_button[aria-current=page]]:shadow-[inset_0_0_0_1px_var(--input)]! [&_button:hover:not([aria-current=page])]:rounded-sm [&_button:hover:not([aria-current=page])]:bg-overlay-hover editorTabs`}
+            className={`editorTabs [&_button:hover:not([aria-current=page])]:bg-overlay-hover editorTabs [display:flex] [align-items:center] [align-self:stretch] [&_button:hover:not([aria-current=page])]:rounded-sm [&_button[aria-current=page]]:rounded-sm [&_button[aria-current=page]]:bg-muted! [&_button[aria-current=page]]:text-foreground! [&_button[aria-current=page]]:shadow-[inset_0_0_0_1px_var(--input)]!`}
           />
         }
       >
@@ -94,7 +94,7 @@ export function RepositoryEditorTabs({
               <span
                 className={cn(
                   "group",
-                  `workspaceTab [display:inline-flex] [flex:0_0_auto] [&_em]:[color:var(--destructive)] [&_em]:[font-size:15px] [&_em]:[font-style:normal] [&_em]:[line-height:1] data-[preview=true]:[&>button:first-child]:italic data-[pinned=true]:[&>button:first-child]:after:size-1 data-[pinned=true]:[&>button:first-child]:after:rounded-full data-[pinned=true]:[&>button:first-child]:after:bg-current data-[pinned=true]:[&>button:first-child]:after:opacity-55 data-[pinned=true]:[&>button:first-child]:after:content-[""] workspaceTab`,
+                  `workspaceTab workspaceTab [display:inline-flex] [flex:0_0_auto] [&_em]:[font-size:15px] [&_em]:[line-height:1] [&_em]:[color:var(--destructive)] [&_em]:[font-style:normal] data-[pinned=true]:[&>button:first-child]:after:size-1 data-[pinned=true]:[&>button:first-child]:after:rounded-full data-[pinned=true]:[&>button:first-child]:after:bg-current data-[pinned=true]:[&>button:first-child]:after:opacity-55 data-[pinned=true]:[&>button:first-child]:after:content-[""] data-[preview=true]:[&>button:first-child]:italic`,
                 )}
                 key={tabId}
                 role="presentation"
@@ -130,7 +130,7 @@ export function RepositoryEditorTabs({
                         <span className="truncate">{label}</span>
                         <span
                           aria-hidden="true"
-                          className="inline-flex h-6 shrink-0 items-center justify-center rounded-md px-1 text-muted-foreground opacity-0 transition-all hover:bg-muted hover:text-foreground group-hover:opacity-100 group-focus-within:opacity-100"
+                          className="inline-flex h-6 shrink-0 items-center justify-center rounded-md px-1 text-muted-foreground opacity-0 transition-all group-focus-within:opacity-100 group-hover:opacity-100 hover:bg-muted hover:text-foreground"
                           data-close-tab={value}
                           onClick={(event) => {
                             event.preventDefault();
@@ -160,7 +160,7 @@ export function RepositoryEditorTabs({
             <span
               className={cn(
                 "group",
-                `workspaceTab [display:inline-flex] [flex:0_0_auto] [&_em]:[color:var(--destructive)] [&_em]:[font-size:15px] [&_em]:[font-style:normal] [&_em]:[line-height:1] data-[preview=true]:[&>button:first-child]:italic data-[pinned=true]:[&>button:first-child]:after:size-1 data-[pinned=true]:[&>button:first-child]:after:rounded-full data-[pinned=true]:[&>button:first-child]:after:bg-current data-[pinned=true]:[&>button:first-child]:after:opacity-55 data-[pinned=true]:[&>button:first-child]:after:content-[""] workspaceTab`,
+                `workspaceTab workspaceTab [display:inline-flex] [flex:0_0_auto] [&_em]:[font-size:15px] [&_em]:[line-height:1] [&_em]:[color:var(--destructive)] [&_em]:[font-style:normal] data-[pinned=true]:[&>button:first-child]:after:size-1 data-[pinned=true]:[&>button:first-child]:after:rounded-full data-[pinned=true]:[&>button:first-child]:after:bg-current data-[pinned=true]:[&>button:first-child]:after:opacity-55 data-[pinned=true]:[&>button:first-child]:after:content-[""] data-[preview=true]:[&>button:first-child]:italic`,
               )}
               data-pinned={pinnedInspectorKeys.has(key)}
               data-preview={previewInspectorKey === key}
@@ -203,7 +203,7 @@ export function RepositoryEditorTabs({
                       )}
                       <span
                         aria-hidden="true"
-                        className="inline-flex h-6 shrink-0 items-center justify-center rounded-md px-1 text-muted-foreground opacity-0 transition-all hover:bg-muted hover:text-foreground group-hover:opacity-100 group-focus-within:opacity-100"
+                        className="inline-flex h-6 shrink-0 items-center justify-center rounded-md px-1 text-muted-foreground opacity-0 transition-all group-focus-within:opacity-100 group-hover:opacity-100 hover:bg-muted hover:text-foreground"
                         data-close-tab={value}
                         onClick={(event) => {
                           event.preventDefault();
@@ -226,7 +226,7 @@ export function RepositoryEditorTabs({
           );
         })}
       </TabsList>
-      <span className={`editorToolbarSpacer [flex:1] editorToolbarSpacer`} />
+      <span className={`editorToolbarSpacer editorToolbarSpacer [flex:1]`} />
       {sessionStale && <StatePill>Changed</StatePill>}
       {repository.snapshot.isShallow && <StatePill>Shallow</StatePill>}
       {repository.snapshot.isBare && <StatePill>Bare</StatePill>}

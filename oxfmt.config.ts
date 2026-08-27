@@ -1,6 +1,10 @@
 import { defineOxfmtConfig } from "./packages/tooling/src/oxfmt/index.ts";
 
 export default defineOxfmtConfig({
+  sortTailwindcss: {
+    stylesheet: "./packages/ui/src/styles/globals.css",
+    functions: ["cn", "cva"],
+  },
   ignorePatterns: [
     // 원본 예: apps/web/app/** → 생성물 예: apps/web/.next/**
     "**/.next/",

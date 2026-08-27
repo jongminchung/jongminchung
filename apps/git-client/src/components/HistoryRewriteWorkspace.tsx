@@ -236,7 +236,7 @@ export function HistoryRewriteWorkspace({
                 {(currentHeadOid ?? "Refreshing…").slice(0, 10)}
               </code>
               {preview.publishedCommitCount > 0 && (
-                <p className="m-0 rounded-lg border border-warning bg-warning/10 p-3">
+                <p className="border-warning bg-warning/10 m-0 rounded-lg border p-3">
                   {preview.publishedCommitCount} published commit(s) changed.
                   Review the destination before pushing.
                 </p>
@@ -264,7 +264,7 @@ export function HistoryRewriteWorkspace({
             </div>
           ) : preview ? (
             <div className="grid min-h-0 grid-cols-[minmax(0,1fr)_320px] max-[900px]:grid-cols-1 max-[900px]:grid-rows-[minmax(0,1fr)_auto]">
-              <ScrollArea className="min-h-0 border-r border-border max-[900px]:border-b max-[900px]:border-r-0">
+              <ScrollArea className="min-h-0 border-r border-border max-[900px]:border-r-0 max-[900px]:border-b">
                 <Table className="border-collapse text-left text-xs">
                   <TableHeader className="sticky top-0 z-10 bg-card text-muted-foreground">
                     <TableRow>
@@ -345,7 +345,7 @@ export function HistoryRewriteWorkspace({
                         <TableCell className="p-2">
                           <div className="flex flex-wrap gap-1">
                             {entry.published && (
-                              <span className="rounded bg-warning/15 px-1.5 py-0.5 text-warning">
+                              <span className="bg-warning/15 text-warning rounded px-1.5 py-0.5">
                                 Published
                               </span>
                             )}
@@ -382,14 +382,14 @@ export function HistoryRewriteWorkspace({
                       : `Base ${preview.base?.slice(0, 10)}`}
                   </span>
                   {preview.protectedBranch && (
-                    <span className="rounded bg-warning/15 px-2 py-1 text-warning">
+                    <span className="bg-warning/15 text-warning rounded px-2 py-1">
                       Protected branch
                     </span>
                   )}
                 </section>
                 {preview.warnings.map((warning) => (
                   <p
-                    className="m-0 rounded-lg border border-warning bg-warning/10 p-3 text-xs"
+                    className="border-warning bg-warning/10 m-0 rounded-lg border p-3 text-xs"
                     key={warning}
                   >
                     {warning}

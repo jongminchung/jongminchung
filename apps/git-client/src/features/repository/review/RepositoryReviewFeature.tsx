@@ -95,7 +95,7 @@ export function RepositoryReviewFeature() {
           return (
             <TabsContent
               aria-labelledby={editorTabDomId(editorTabsId, value)}
-              className={`editorSurface [height:100%] [min-height:0] [min-width:0] [&[hidden]]:[display:none] editorSurface`}
+              className={`editorSurface editorSurface [height:100%] [min-height:0] [min-width:0] [&[hidden]]:[display:none]`}
               id={editorPanelDomId(editorTabsId, value)}
               keepMounted
               key={tabId}
@@ -103,7 +103,7 @@ export function RepositoryReviewFeature() {
             >
               {tabId === activeLogTabId && (
                 <div
-                  className={`mainPanes [display:grid] [grid-template-columns:30px_minmax(0,_1fr)_var(--details-pane-width,_253px)] [height:100%] [min-height:0] [min-width:0] max-[900px]:[grid-template-columns:30px_minmax(0,_1fr)] max-[900px]:[&>_*:last-child]:[display:none] [html[data-distraction-free-mode=true]_&>*:first-child]:hidden! [html[data-distraction-free-mode=true]_&>*:last-child]:hidden! [html[data-presentation-mode=true]_&>*:first-child]:hidden! [html[data-presentation-mode=true]_&>*:last-child]:hidden! mainPanes`}
+                  className={`mainPanes mainPanes [display:grid] [height:100%] [min-height:0] [min-width:0] [grid-template-columns:30px_minmax(0,_1fr)_var(--details-pane-width,_253px)] max-[900px]:[grid-template-columns:30px_minmax(0,_1fr)] max-[900px]:[&>_*:last-child]:[display:none] [html[data-distraction-free-mode=true]_&>*:first-child]:hidden! [html[data-distraction-free-mode=true]_&>*:last-child]:hidden! [html[data-presentation-mode=true]_&>*:first-child]:hidden! [html[data-presentation-mode=true]_&>*:last-child]:hidden!`}
                   style={
                     {
                       "--history-review-width": `${historyReviewWidth}px`,

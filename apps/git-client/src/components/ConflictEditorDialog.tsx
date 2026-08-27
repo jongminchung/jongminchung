@@ -48,7 +48,7 @@ function TextPane({
 }) {
   return (
     <section
-      className={`conflictPane [&_select]:[background:var(--muted)] [&_select]:[border:1px_solid_var(--border)] [&_select]:rounded-sm [&_select]:[min-height:26px] [&_select]:[padding:0_8px] [display:grid] [grid-template-rows:32px_minmax(0,_1fr)] [min-height:0] [min-width:0] [&:nth-child(odd)]:[border-right:1px_solid_var(--border)] [&:nth-child(-n_+_2)]:[border-bottom:1px_solid_var(--border)] [&>_header]:[align-items:center] [&>_header]:[background:var(--muted)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[gap:4px] [&>_header]:[padding:2px_7px] [&>_header_strong]:[flex:1] [&>_div]:[min-height:0] [&>_div]:[overflow:hidden] conflictPane [&_select]:rounded-sm`}
+      className={`conflictPane conflictPane [display:grid] [min-height:0] [min-width:0] [grid-template-rows:32px_minmax(0,_1fr)] [&_select]:[min-height:26px] [&_select]:rounded-sm [&_select]:[padding:0_8px] [&_select]:[background:var(--muted)] [&_select]:[border:1px_solid_var(--border)] [&:nth-child(-n_+_2)]:[border-bottom:1px_solid_var(--border)] [&:nth-child(odd)]:[border-right:1px_solid_var(--border)] [&>_div]:[min-height:0] [&>_div]:[overflow:hidden] [&>_header]:[display:flex] [&>_header]:[align-items:center] [&>_header]:[gap:4px] [&>_header]:[padding:2px_7px] [&>_header]:[background:var(--muted)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header_strong]:[flex:1]`}
     >
       <header>
         <strong>{label}</strong>
@@ -259,7 +259,7 @@ export function ConflictEditorDialog({
               aria-label={"Close conflict editor"}
               aria-keyshortcuts="Escape"
               disabled={pendingAction !== null}
-              className={cn("h-7 px-2.5 aspect-square px-0")}
+              className={cn("aspect-square h-7 px-0 px-2.5")}
               variant="ghost"
               size="icon-sm"
             >
@@ -277,7 +277,7 @@ export function ConflictEditorDialog({
           )}
           {content.binary ? (
             <div
-              className={`binaryConflict [align-items:center] [display:flex] [flex-direction:column] [justify-content:center] [padding:40px] [text-align:center] [&_p]:[color:var(--muted-foreground)] [&_p]:[max-width:480px] [&>_div]:[display:flex] [&>_div]:[gap:8px] binaryConflict`}
+              className={`binaryConflict binaryConflict [display:flex] [flex-direction:column] [align-items:center] [justify-content:center] [padding:40px] [text-align:center] [&_p]:[max-width:480px] [&_p]:[color:var(--muted-foreground)] [&>_div]:[display:flex] [&>_div]:[gap:8px]`}
             >
               <Icon name="warning" size={32} />
               <strong>Binary or oversized conflict</strong>
@@ -322,7 +322,7 @@ export function ConflictEditorDialog({
             </div>
           ) : (
             <div
-              className={`conflictGrid [display:grid] [grid-template-columns:repeat(2,_minmax(0,_1fr))] [grid-template-rows:repeat(2,_minmax(0,_1fr))] [min-height:0] conflictGrid`}
+              className={`conflictGrid conflictGrid [display:grid] [min-height:0] [grid-template-columns:repeat(2,_minmax(0,_1fr))] [grid-template-rows:repeat(2,_minmax(0,_1fr))]`}
             >
               <TextPane
                 label="Base"
@@ -340,7 +340,7 @@ export function ConflictEditorDialog({
                 onAccept={() => setResult(content.remote ?? "")}
               />
               <section
-                className={`conflictPane [&_select]:[background:var(--muted)] [&_select]:[border:1px_solid_var(--border)] [&_select]:rounded-sm [&_select]:[min-height:26px] [&_select]:[padding:0_8px] [display:grid] [grid-template-rows:32px_minmax(0,_1fr)] [min-height:0] [min-width:0] [&:nth-child(odd)]:[border-right:1px_solid_var(--border)] [&:nth-child(-n_+_2)]:[border-bottom:1px_solid_var(--border)] [&>_header]:[align-items:center] [&>_header]:[background:var(--muted)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[gap:4px] [&>_header]:[padding:2px_7px] [&>_header_strong]:[flex:1] [&>_div]:[min-height:0] [&>_div]:[overflow:hidden] conflictPane [&_select]:rounded-sm`}
+                className={`conflictPane conflictPane [display:grid] [min-height:0] [min-width:0] [grid-template-rows:32px_minmax(0,_1fr)] [&_select]:[min-height:26px] [&_select]:rounded-sm [&_select]:[padding:0_8px] [&_select]:[background:var(--muted)] [&_select]:[border:1px_solid_var(--border)] [&:nth-child(-n_+_2)]:[border-bottom:1px_solid_var(--border)] [&:nth-child(odd)]:[border-right:1px_solid_var(--border)] [&>_div]:[min-height:0] [&>_div]:[overflow:hidden] [&>_header]:[display:flex] [&>_header]:[align-items:center] [&>_header]:[gap:4px] [&>_header]:[padding:2px_7px] [&>_header]:[background:var(--muted)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header_strong]:[flex:1]`}
               >
                 <header>
                   <strong>Result</strong>

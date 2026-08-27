@@ -50,14 +50,21 @@ Import the shared Tailwind entry point from the application's global stylesheet:
 
 ```css
 @import "@jongminchung/ui/globals.css";
+
+@source "../**/*.{ts,tsx}";
+@source not "../**/*.{test,spec}.{ts,tsx}";
 ```
 
-`globals.css` includes the default neutral light and dark themes. Override any semantic token by
-importing application styles afterward:
+`globals.css` includes the default neutral light and dark themes and scans the shared UI package.
+Automatic project scanning is disabled, so every consumer registers its own source tree explicitly.
+Override any semantic token by importing application styles afterward:
 
 ```css
 @import "@jongminchung/ui/globals.css";
 @import "./theme.css";
+
+@source "../**/*.{ts,tsx}";
+@source not "../**/*.{test,spec}.{ts,tsx}";
 ```
 
 ```css
@@ -72,6 +79,10 @@ importing application styles afterward:
 
 The default theme is also available directly from `@jongminchung/ui/theme.css`. The value-free
 Tailwind token adapter is exported as `@jongminchung/ui/tokens.css`.
+
+`@jongminchung/ui/root.css` remains as a deprecated compatibility facade. New and migrated
+consumers use `@jongminchung/ui/globals.css`; remove the facade only after the external consumer
+inventory is empty or a breaking release is prepared.
 
 Set `data-theme="dark"` on the root element to enable the dark theme. Product-specific tokens,
 layout, state, and behavior remain the responsibility of each application.

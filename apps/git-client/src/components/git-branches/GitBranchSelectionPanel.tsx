@@ -38,7 +38,7 @@ function BranchAction({
   return (
     <Button
       className={cn(
-        "gap-1.5 min-h-[25px] px-1.5 text-xs text-muted-foreground",
+        "min-h-[25px] gap-1.5 px-1.5 text-xs text-muted-foreground",
       )}
       disabled={disabled}
       onClick={() => void onRun()}

@@ -397,7 +397,7 @@ export function ShareProjectDialog({
       width={530}
     >
       <section
-        className={`shareProjectDialog [display:grid] [grid-template-rows:auto_minmax(0,_1fr)_auto] [max-height:min(720px,_calc(100vh_-_70px))] [&>_main]:[display:grid] [&>_main]:[gap:12px] [&>_main]:[min-height:0] [&>_main]:[overflow:auto] [&>_main]:[padding:14px] [&>_main>_p]:[color:var(--muted-foreground)] [&>_main>_p]:[margin:0] [&>_main>_p[role=alert]]:[color:var(--destructive)] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:flex] [&>_footer]:[gap:8px] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:8px_10px] shareProjectDialog`}
+        className={`shareProjectDialog shareProjectDialog [display:grid] [max-height:min(720px,_calc(100vh_-_70px))] [grid-template-rows:auto_minmax(0,_1fr)_auto] [&>_footer]:[display:flex] [&>_footer]:[justify-content:flex-end] [&>_footer]:[gap:8px] [&>_footer]:[padding:8px_10px] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_main]:[display:grid] [&>_main]:[min-height:0] [&>_main]:[gap:12px] [&>_main]:[overflow:auto] [&>_main]:[padding:14px] [&>_main>_p]:[margin:0] [&>_main>_p]:[color:var(--muted-foreground)] [&>_main>_p[role=alert]]:[color:var(--destructive)]`}
       >
         <DialogHeader
           hasDivider
@@ -407,7 +407,7 @@ export function ShareProjectDialog({
         <main>
           {provider === "gitLab" && (
             <div
-              className={`shareProjectAccount [align-items:end] [display:grid] [gap:8px] [grid-template-columns:minmax(0,_1fr)_auto] shareProjectAccount`}
+              className={`shareProjectAccount shareProjectAccount [display:grid] [grid-template-columns:minmax(0,_1fr)_auto] [align-items:end] [gap:8px]`}
             >
               <Selector
                 isDisabled={loading || busy || created !== null}
@@ -434,7 +434,7 @@ export function ShareProjectDialog({
           )}
           {provider === "gitLab" && (
             <div
-              className={`shareProjectAccount [align-items:end] [display:grid] [gap:8px] [grid-template-columns:minmax(0,_1fr)_auto] shareProjectAccount`}
+              className={`shareProjectAccount shareProjectAccount [display:grid] [grid-template-columns:minmax(0,_1fr)_auto] [align-items:end] [gap:8px]`}
             >
               <Selector
                 isDisabled={busy || created !== null || !accountId}
@@ -475,7 +475,7 @@ export function ShareProjectDialog({
                         created !== null ||
                         !accountId
                       }
-                      className={cn("h-8 px-3 aspect-square px-0")}
+                      className={cn("aspect-square h-8 px-0 px-3")}
                       variant="outline"
                       size="icon"
                     >
@@ -488,7 +488,7 @@ export function ShareProjectDialog({
             </div>
           )}
           <div
-            className={`shareProjectCoordinates [align-items:end] [display:grid] [gap:12px] [grid-template-columns:minmax(0,_1fr)_auto] shareProjectCoordinates`}
+            className={`shareProjectCoordinates shareProjectCoordinates [display:grid] [grid-template-columns:minmax(0,_1fr)_auto] [align-items:end] [gap:12px]`}
           >
             <TextInput
               hasAutoFocus
@@ -551,7 +551,7 @@ export function ShareProjectDialog({
           )}
           {provider === "gitHub" && !loading && accounts.length !== 1 && (
             <div
-              className={`shareProjectAccount [align-items:end] [display:grid] [gap:8px] [grid-template-columns:minmax(0,_1fr)_auto] shareProjectAccount`}
+              className={`shareProjectAccount shareProjectAccount [display:grid] [grid-template-columns:minmax(0,_1fr)_auto] [align-items:end] [gap:8px]`}
             >
               <Selector
                 isDisabled={busy || created !== null}

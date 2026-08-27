@@ -31,7 +31,7 @@ export function BookmarkGroupSelectDialog({
       width={430}
     >
       <section
-        className={`bookmarkGroupSelectDialog [display:grid] [grid-template-rows:auto_minmax(110px,_260px)_auto_auto_auto] [gap:10px] [padding-bottom:12px] [&>_*:not(:first-child)]:[margin-left:12px] [&>_*:not(:first-child)]:[margin-right:12px] [&>_[role=listbox]]:[border:1px_solid_var(--border)] [&>_[role=listbox]]:rounded-sm [&>_[role=listbox]]:[min-height:0] [&>_[role=listbox]]:[overflow:auto] [&>_p]:[color:var(--muted-foreground)] [&>_p]:[font-size:10px] [&>_p]:[margin-bottom:0] [&>_p]:[margin-top:-5px] [&>_footer]:[display:flex] [&>_footer]:[gap:7px] [&>_footer]:[justify-content:flex-end] bookmarkGroupSelectDialog [&>_[role=listbox]]:rounded-sm`}
+        className={`bookmarkGroupSelectDialog bookmarkGroupSelectDialog [display:grid] [grid-template-rows:auto_minmax(110px,_260px)_auto_auto_auto] [gap:10px] [padding-bottom:12px] [&>_*:not(:first-child)]:[margin-right:12px] [&>_*:not(:first-child)]:[margin-left:12px] [&>_[role=listbox]]:[min-height:0] [&>_[role=listbox]]:[overflow:auto] [&>_[role=listbox]]:rounded-sm [&>_[role=listbox]]:[border:1px_solid_var(--border)] [&>_footer]:[display:flex] [&>_footer]:[justify-content:flex-end] [&>_footer]:[gap:7px] [&>_p]:[margin-top:-5px] [&>_p]:[margin-bottom:0] [&>_p]:[font-size:10px] [&>_p]:[color:var(--muted-foreground)]`}
       >
         <DialogHeader
           hasDivider

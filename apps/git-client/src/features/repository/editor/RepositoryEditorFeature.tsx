@@ -77,7 +77,7 @@ export function RepositoryEditorFeature() {
         return (
           <TabsContent
             aria-labelledby={editorTabDomId(editorTabsId, value)}
-            className={`editorSurface [height:100%] [min-height:0] [min-width:0] [&[hidden]]:[display:none] editorSurface`}
+            className={`editorSurface editorSurface [height:100%] [min-height:0] [min-width:0] [&[hidden]]:[display:none]`}
             id={editorPanelDomId(editorTabsId, value)}
             keepMounted
             key={key}

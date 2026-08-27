@@ -23,7 +23,7 @@ export function RecentFindUsagesDialog({
       width={480}
     >
       <section
-        className={`recentFindUsagesDialog [display:grid] [grid-template-rows:auto_minmax(190px,_1fr)] [max-height:min(480px,_calc(100vh_-_90px))] [&>_[data-slot=empty-state]]:[min-height:190px] [&>_div[role=listbox]]:[min-height:0] [&>_div[role=listbox]]:[overflow:auto] [&>_div[role=listbox]]:[padding:6px] recentFindUsagesDialog`}
+        className={`recentFindUsagesDialog recentFindUsagesDialog [display:grid] [max-height:min(480px,_calc(100vh_-_90px))] [grid-template-rows:auto_minmax(190px,_1fr)] [&>_[data-slot=empty-state]]:[min-height:190px] [&>_div[role=listbox]]:[min-height:0] [&>_div[role=listbox]]:[overflow:auto] [&>_div[role=listbox]]:[padding:6px]`}
       >
         <DialogHeader
           hasDivider

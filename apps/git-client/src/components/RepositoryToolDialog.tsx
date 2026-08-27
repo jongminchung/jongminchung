@@ -107,7 +107,7 @@ export function RepositoryToolDialog({
           ) : kind === "remotes" ? (
             <>
               <div
-                className={`managementToolbar [&>_span]:[flex:1] [align-items:center] [background:var(--muted)] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:5px] [height:38px] [padding:0_11px] [&>_button]:[align-items:center] [&>_button]:[background:var(--card)] [&>_button]:[border:1px_solid_var(--border)] [&>_button]:rounded-sm [&>_button]:[display:flex] [&>_button]:[gap:5px] [&>_button]:[min-height:27px] [&>_button]:[padding:0_8px] [background:var(--card)] managementToolbar [&>_button]:rounded-sm`}
+                className={`managementToolbar managementToolbar [display:flex] [height:38px] [align-items:center] [gap:5px] [padding:0_11px] [background:var(--card)] [background:var(--muted)] [border-bottom:1px_solid_var(--border)] [&>_button]:[display:flex] [&>_button]:[min-height:27px] [&>_button]:[align-items:center] [&>_button]:[gap:5px] [&>_button]:rounded-sm [&>_button]:[padding:0_8px] [&>_button]:[background:var(--card)] [&>_button]:[border:1px_solid_var(--border)] [&>_span]:[flex:1]`}
               >
                 <strong>Remotes</strong>
                 <span />
@@ -141,7 +141,7 @@ export function RepositoryToolDialog({
               </div>
               {remotes.map((remote) => (
                 <article
-                  className={`managementRow [&>_button]:[align-items:center] [&>_button]:[background:var(--card)] [&>_button]:[border:1px_solid_var(--border)] [&>_button]:rounded-sm [&>_button]:[display:flex] [&>_button]:[gap:5px] [&>_button]:[min-height:27px] [&>_button]:[padding:0_8px] [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:9px] [min-height:66px] [padding:8px_11px] [&>_div]:[flex:1] [&>_div]:[min-width:0] [&_small]:[color:var(--disabled-foreground)] [&_small]:[display:block] [&_small]:[margin-top:2px] [&_small]:[overflow:hidden] [&_small]:[text-overflow:ellipsis] [&_small]:[white-space:nowrap] managementRow [&>_button]:rounded-sm`}
+                  className={`managementRow managementRow [display:flex] [min-height:66px] [align-items:center] [gap:9px] [padding:8px_11px] [border-bottom:1px_solid_var(--border)] [&_small]:[margin-top:2px] [&_small]:[display:block] [&_small]:[overflow:hidden] [&_small]:[text-overflow:ellipsis] [&_small]:[white-space:nowrap] [&_small]:[color:var(--disabled-foreground)] [&>_button]:[display:flex] [&>_button]:[min-height:27px] [&>_button]:[align-items:center] [&>_button]:[gap:5px] [&>_button]:rounded-sm [&>_button]:[padding:0_8px] [&>_button]:[background:var(--card)] [&>_button]:[border:1px_solid_var(--border)] [&>_div]:[min-width:0] [&>_div]:[flex:1]`}
                   key={remote.name}
                 >
                   <Icon name="remote" size={18} />
@@ -200,7 +200,7 @@ export function RepositoryToolDialog({
           ) : kind === "worktrees" ? (
             <>
               <div
-                className={`managementToolbar [&>_span]:[flex:1] [align-items:center] [background:var(--muted)] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:5px] [height:38px] [padding:0_11px] [&>_button]:[align-items:center] [&>_button]:[background:var(--card)] [&>_button]:[border:1px_solid_var(--border)] [&>_button]:rounded-sm [&>_button]:[display:flex] [&>_button]:[gap:5px] [&>_button]:[min-height:27px] [&>_button]:[padding:0_8px] [background:var(--card)] managementToolbar [&>_button]:rounded-sm`}
+                className={`managementToolbar managementToolbar [display:flex] [height:38px] [align-items:center] [gap:5px] [padding:0_11px] [background:var(--card)] [background:var(--muted)] [border-bottom:1px_solid_var(--border)] [&>_button]:[display:flex] [&>_button]:[min-height:27px] [&>_button]:[align-items:center] [&>_button]:[gap:5px] [&>_button]:rounded-sm [&>_button]:[padding:0_8px] [&>_button]:[background:var(--card)] [&>_button]:[border:1px_solid_var(--border)] [&>_span]:[flex:1]`}
               >
                 <strong>Worktrees</strong>
                 <span />
@@ -240,7 +240,7 @@ export function RepositoryToolDialog({
               </div>
               {worktrees.map((worktree) => (
                 <article
-                  className={`managementRow [&>_button]:[align-items:center] [&>_button]:[background:var(--card)] [&>_button]:[border:1px_solid_var(--border)] [&>_button]:rounded-sm [&>_button]:[display:flex] [&>_button]:[gap:5px] [&>_button]:[min-height:27px] [&>_button]:[padding:0_8px] [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:9px] [min-height:66px] [padding:8px_11px] [&>_div]:[flex:1] [&>_div]:[min-width:0] [&_small]:[color:var(--disabled-foreground)] [&_small]:[display:block] [&_small]:[margin-top:2px] [&_small]:[overflow:hidden] [&_small]:[text-overflow:ellipsis] [&_small]:[white-space:nowrap] managementRow [&>_button]:rounded-sm`}
+                  className={`managementRow managementRow [display:flex] [min-height:66px] [align-items:center] [gap:9px] [padding:8px_11px] [border-bottom:1px_solid_var(--border)] [&_small]:[margin-top:2px] [&_small]:[display:block] [&_small]:[overflow:hidden] [&_small]:[text-overflow:ellipsis] [&_small]:[white-space:nowrap] [&_small]:[color:var(--disabled-foreground)] [&>_button]:[display:flex] [&>_button]:[min-height:27px] [&>_button]:[align-items:center] [&>_button]:[gap:5px] [&>_button]:rounded-sm [&>_button]:[padding:0_8px] [&>_button]:[background:var(--card)] [&>_button]:[border:1px_solid_var(--border)] [&>_div]:[min-width:0] [&>_div]:[flex:1]`}
                   key={worktree.path}
                 >
                   <Icon name="worktree" size={18} />

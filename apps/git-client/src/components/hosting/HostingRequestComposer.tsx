@@ -45,7 +45,7 @@ export function HostingRequestComposer({
 
   return (
     <section
-      className={`hostingComposer [&>_footer]:[align-items:center] [&>_footer]:[display:flex] [&>_footer]:[gap:8px] [&_label]:[color:var(--muted-foreground)] [&_label]:[display:flex] [&_label]:[flex-direction:column] [&_label]:[font-size:11px] [&_label]:[gap:3px] [background:var(--secondary)] [border-bottom:1px_solid_var(--border)] [display:flex] [flex-direction:column] [gap:8px] [padding:11px] [&_textarea]:[min-height:64px] [&_textarea]:[resize:vertical] [&>_div]:[align-items:end] [&>_div]:[display:grid] [&>_div]:[gap:8px] [&>_div]:[grid-template-columns:1fr_1fr_auto] [&>_footer]:[justify-content:flex-end] hostingComposer`}
+      className={`hostingComposer hostingComposer [display:flex] [flex-direction:column] [gap:8px] [padding:11px] [background:var(--secondary)] [border-bottom:1px_solid_var(--border)] [&_label]:[display:flex] [&_label]:[flex-direction:column] [&_label]:[gap:3px] [&_label]:[font-size:11px] [&_label]:[color:var(--muted-foreground)] [&_textarea]:[min-height:64px] [&_textarea]:[resize:vertical] [&>_div]:[display:grid] [&>_div]:[grid-template-columns:1fr_1fr_auto] [&>_div]:[align-items:end] [&>_div]:[gap:8px] [&>_footer]:[display:flex] [&>_footer]:[align-items:center] [&>_footer]:[justify-content:flex-end] [&>_footer]:[gap:8px]`}
       id="hosting-create-request"
     >
       <strong>Create change request</strong>
@@ -79,7 +79,7 @@ export function HostingRequestComposer({
           />
         </label>
         <label
-          className={`inlineCheck [align-items:center] [flex-direction:row]! [min-height:29px] [&_input]:[min-height:auto] inlineCheck`}
+          className={`inlineCheck inlineCheck [min-height:29px] [flex-direction:row]! [align-items:center] [&_input]:[min-height:auto]`}
         >
           <Checkbox checked={draft} onCheckedChange={setDraft} /> Draft
         </label>

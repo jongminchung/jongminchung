@@ -230,10 +230,10 @@ export function InvestmentNotePage({
       }
       header={
         <>
-          <p className="m-0 font-mono text-[11px] uppercase text-primary">
+          <p className="m-0 font-mono text-[11px] text-primary uppercase">
             {note.series ?? "Research note"}
           </p>
-          <h1 className="my-4 text-[clamp(44px,6vw,72px)] font-medium leading-none tracking-[-.05em]">
+          <h1 className="my-4 text-[clamp(44px,6vw,72px)] leading-none font-medium tracking-[-.05em]">
             {note.title}
           </h1>
           <p className="m-0 max-w-[680px] text-[18px] leading-[1.6] text-muted-foreground">
@@ -279,12 +279,12 @@ function SourceCard({
     </>
   );
   return source.url === undefined ? (
-    <div className="mt-3 flex flex-col gap-[5px] border bg-card p-[18px] [&_span]:font-mono [&_span]:text-[10px] [&_span]:text-muted-foreground [&_small]:font-mono [&_small]:text-[10px] [&_small]:text-muted-foreground">
+    <div className="mt-3 flex flex-col gap-[5px] border bg-card p-[18px] [&_small]:font-mono [&_small]:text-[10px] [&_small]:text-muted-foreground [&_span]:font-mono [&_span]:text-[10px] [&_span]:text-muted-foreground">
       {body}
     </div>
   ) : (
     <a
-      className="mt-3 flex flex-col gap-[5px] border bg-card p-[18px] [&_span]:font-mono [&_span]:text-[10px] [&_span]:text-muted-foreground [&_small]:font-mono [&_small]:text-[10px] [&_small]:text-muted-foreground"
+      className="mt-3 flex flex-col gap-[5px] border bg-card p-[18px] [&_small]:font-mono [&_small]:text-[10px] [&_small]:text-muted-foreground [&_span]:font-mono [&_span]:text-[10px] [&_span]:text-muted-foreground"
       href={source.url}
       rel="noreferrer"
       target="_blank"

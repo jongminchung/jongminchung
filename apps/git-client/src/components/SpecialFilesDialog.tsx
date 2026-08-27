@@ -59,7 +59,7 @@ export function SpecialFilesDialog({
       width={560}
     >
       <section
-        className={`specialFilesDialog [display:grid] [grid-template-rows:auto_minmax(260px,_1fr)_auto] [&>_div[role=list]]:[padding:6px] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:flex] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:8px_10px] specialFilesDialog`}
+        className={`specialFilesDialog specialFilesDialog [display:grid] [grid-template-rows:auto_minmax(260px,_1fr)_auto] [&>_div[role=list]]:[padding:6px] [&>_footer]:[display:flex] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:8px_10px] [&>_footer]:[border-top:1px_solid_var(--border)]`}
       >
         <DialogHeader
           hasDivider

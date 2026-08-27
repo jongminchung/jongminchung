@@ -57,7 +57,7 @@ export function CodeAnalysisScopeDialog({
       width={560}
     >
       <section
-        className={`codeAnalysisScopeDialog [display:grid] [grid-template-rows:auto_minmax(0,_1fr)_auto] [&>_main]:[display:grid] [&>_main]:[gap:16px] [&>_main]:[padding:18px_20px] [&>_main_p]:[color:var(--destructive)] [&>_main_p]:[margin:0] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:flex] [&>_footer]:[gap:8px] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:9px_11px] codeAnalysisScopeDialog`}
+        className={`codeAnalysisScopeDialog codeAnalysisScopeDialog [display:grid] [grid-template-rows:auto_minmax(0,_1fr)_auto] [&>_footer]:[display:flex] [&>_footer]:[justify-content:flex-end] [&>_footer]:[gap:8px] [&>_footer]:[padding:9px_11px] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_main]:[display:grid] [&>_main]:[gap:16px] [&>_main]:[padding:18px_20px] [&>_main_p]:[margin:0] [&>_main_p]:[color:var(--destructive)]`}
       >
         <DialogHeader
           hasDivider

@@ -39,7 +39,7 @@ export default async function StandaloneExcalidrawPage({
   const source = await readFile(asset.filePath, "utf8");
 
   return (
-    <main className="flex min-h-[480px] h-dvh w-full flex-col overflow-hidden bg-background">
+    <main className="flex h-dvh min-h-[480px] w-full flex-col overflow-hidden bg-background">
       <header className="flex min-h-[52px] items-center gap-3 border-b bg-card px-4 py-2">
         <Link
           aria-label="All diagrams"

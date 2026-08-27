@@ -23,10 +23,10 @@ export function ShelfSurface({
 }) {
   return (
     <div
-      className={`collectionTool [&_button]:[background:var(--muted)] [&_button]:[border:1px_solid_var(--border)] [&_button]:rounded-sm [&_button]:[height:27px] [&_button]:[padding:0_9px] [&_button]:[white-space:nowrap] [height:100%] [overflow:auto] collectionTool [&_button]:rounded-sm`}
+      className={`collectionTool collectionTool [height:100%] [overflow:auto] [&_button]:[height:27px] [&_button]:rounded-sm [&_button]:[padding:0_9px] [&_button]:[white-space:nowrap] [&_button]:[background:var(--muted)] [&_button]:[border:1px_solid_var(--border)]`}
     >
       <div
-        className={`collectionIntro [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:10px] [min-height:48px] [padding:8px_14px] [background:var(--muted)] [&_div]:[flex:1] [&_p]:[color:var(--muted-foreground)] [&_p]:[margin:2px_0_0] collectionIntro`}
+        className={`collectionIntro collectionIntro [display:flex] [min-height:48px] [align-items:center] [gap:10px] [padding:8px_14px] [background:var(--muted)] [border-bottom:1px_solid_var(--border)] [&_div]:[flex:1] [&_p]:[margin:2px_0_0] [&_p]:[color:var(--muted-foreground)]`}
       >
         <Icon name="shelf" size={24} />
         <div>
@@ -58,7 +58,7 @@ export function ShelfSurface({
       )}
       {shelves.map((shelf) => (
         <div
-          className={`collectionRow [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:10px] [min-height:48px] [padding:8px_14px] [&_div]:[flex:1] [&_small]:[color:var(--disabled-foreground)] [&_small]:[display:block] [&_small]:[margin-top:3px] [border-bottom:0] collectionRow`}
+          className={`collectionRow collectionRow [display:flex] [min-height:48px] [align-items:center] [gap:10px] [padding:8px_14px] [border-bottom:0] [border-bottom:1px_solid_var(--border)] [&_div]:[flex:1] [&_small]:[margin-top:3px] [&_small]:[display:block] [&_small]:[color:var(--disabled-foreground)]`}
           key={shelf.id}
         >
           <Icon name="patch" size={16} />

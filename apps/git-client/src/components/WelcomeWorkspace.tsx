@@ -152,7 +152,7 @@ export function WelcomeWorkspace({
     <main
       aria-label="Welcome workspace"
       className={
-        "welcomeWorkspace [background:var(--card)] [display:grid] [grid-column:1] [grid-row:2_/_-1] [grid-template-columns:224px_minmax(0,_1fr)] [height:100%] [min-height:0] [overflow:hidden]"
+        "welcomeWorkspace [grid-column:1] [grid-row:2_/_-1] [display:grid] [height:100%] [min-height:0] [grid-template-columns:224px_minmax(0,_1fr)] [overflow:hidden] [background:var(--card)]"
       }
       ref={dropTargetRef}
       style={{
@@ -161,20 +161,20 @@ export function WelcomeWorkspace({
     >
       <aside
         className={
-          "welcomeSidebar [background:var(--sidebar)] [border-right:1px_solid_var(--border)] [min-height:0] [position:relative]"
+          "welcomeSidebar [position:relative] [min-height:0] [background:var(--sidebar)] [border-right:1px_solid_var(--border)]"
         }
         data-testid="welcome-sidebar"
         style={{ width: WELCOME_SIDEBAR_WIDTH }}
       >
         <div
           className={
-            "welcomeBrand [align-items:center] [display:flex] [gap:10px] [height:64px] [padding:12px_16px_8px] [&>_span:last-child]:[display:flex] [&>_span:last-child]:[flex-direction:column] [&_strong]:[font-size:13px] [&_strong]:[font-weight:500] [&_small]:[color:var(--muted-foreground)] [&_small]:[font-size:10px]"
+            "welcomeBrand [display:flex] [height:64px] [align-items:center] [gap:10px] [padding:12px_16px_8px] [&_small]:[font-size:10px] [&_small]:[color:var(--muted-foreground)] [&_strong]:[font-size:13px] [&_strong]:[font-weight:500] [&>_span:last-child]:[display:flex] [&>_span:last-child]:[flex-direction:column]"
           }
         >
           <a
             aria-label="Copy About"
             className={
-              "welcomeBrandMark [align-items:center] [background:var(--primary)] rounded-sm [color:var(--primary-foreground)] [display:flex] [height:31px] [justify-content:center] [width:31px]"
+              "welcomeBrandMark [display:flex] [height:31px] [width:31px] [align-items:center] [justify-content:center] rounded-sm [color:var(--primary-foreground)] [background:var(--primary)]"
             }
             href="#copy-about"
             onClick={(event) => {
@@ -192,7 +192,7 @@ export function WelcomeWorkspace({
         <div
           aria-label="Welcome screen categories"
           className={
-            "welcomeNavigation [display:flex] [flex-direction:column] [gap:1px] [padding:20px_12px] [&>_button]:[background:transparent] [&>_button]:[height:32px] [&>_button]:[justify-content:flex-start] [&>_button]:[padding:0_23px] [&>_button]:[text-align:left] [&>_button:hover]:[background:color-mix(in_oklch,_var(--foreground)_5%,_transparent)] [&>_button[aria-current=page]]:[background:var(--sidebar-accent)] [&>_button:focus-visible]:[outline:2px_solid_var(--primary)] [&>_button:focus-visible]:[outline-offset:-2px]"
+            "welcomeNavigation [display:flex] [flex-direction:column] [gap:1px] [padding:20px_12px] [&>_button]:[height:32px] [&>_button]:[justify-content:flex-start] [&>_button]:[padding:0_23px] [&>_button]:[text-align:left] [&>_button]:[background:transparent] [&>_button:focus-visible]:[outline:2px_solid_var(--primary)] [&>_button:focus-visible]:[outline-offset:-2px] [&>_button:hover]:[background:color-mix(in_oklch,_var(--foreground)_5%,_transparent)] [&>_button[aria-current=page]]:[background:var(--sidebar-accent)]"
           }
           role="tree"
         >
@@ -213,7 +213,7 @@ export function WelcomeWorkspace({
               }}
               type="button"
               className={cn(
-                "gap-1.5 text-xs h-7 px-2.5 text-muted-foreground aria-selected:bg-accent aria-selected:text-foreground aria-current:bg-accent aria-current:text-foreground",
+                "h-7 gap-1.5 px-2.5 text-xs text-muted-foreground aria-current:bg-accent aria-current:text-foreground aria-selected:bg-accent aria-selected:text-foreground",
               )}
               variant="ghost"
               size="sm"
@@ -239,7 +239,7 @@ export function WelcomeWorkspace({
         <section
           aria-labelledby="welcome-title"
           className={
-            "welcomeProjects [display:grid] [grid-template-rows:auto_auto_minmax(0,_1fr)] [min-height:0] [padding:104px_30px_34px] [position:relative] [&>_header]:[text-align:center] [&>_header_h1]:[font-size:27px] [&>_header_h1]:[line-height:1.2] [&>_header_h1]:[margin:0_0_20px] [&>_header_p]:[color:var(--muted-foreground)] [&>_header_p]:[font-size:13px] [&>_header_p]:[margin:0_0_7px] [&>_.welcomeProjectActions]:[margin-top:42px]"
+            "welcomeProjects [position:relative] [display:grid] [min-height:0] [grid-template-rows:auto_auto_minmax(0,_1fr)] [padding:104px_30px_34px] [&>_.welcomeProjectActions]:[margin-top:42px] [&>_header]:[text-align:center] [&>_header_h1]:[margin:0_0_20px] [&>_header_h1]:[font-size:27px] [&>_header_h1]:[line-height:1.2] [&>_header_p]:[margin:0_0_7px] [&>_header_p]:[font-size:13px] [&>_header_p]:[color:var(--muted-foreground)]"
           }
         >
           <header>
@@ -250,7 +250,7 @@ export function WelcomeWorkspace({
           <div
             aria-label="Project actions"
             className={
-              "welcomeProjectActions [display:flex] [gap:56px] [justify-content:center] [&>_button]:[align-items:center] [&>_button]:[background:transparent] [&>_button]:[display:flex] [&>_button]:[flex-direction:column] [&>_button]:[font-size:13px] [&>_button]:[gap:12px] [&>_button]:[min-width:64px] [&>_button]:[padding:0] [&>_button>_span]:[align-items:center] [&>_button>_span]:[background:var(--muted)] [&>_button>_span]:rounded-sm [&>_button>_span]:[color:var(--primary)] [&>_button>_span]:[display:flex] [&>_button>_span]:[height:54px] [&>_button>_span]:[justify-content:center] [&>_button>_span]:[width:54px] [&>_button:hover>_span]:[background:var(--accent)]"
+              "welcomeProjectActions [display:flex] [justify-content:center] [gap:56px] [&>_button]:[display:flex] [&>_button]:[min-width:64px] [&>_button]:[flex-direction:column] [&>_button]:[align-items:center] [&>_button]:[gap:12px] [&>_button]:[padding:0] [&>_button]:[font-size:13px] [&>_button]:[background:transparent] [&>_button:hover>_span]:[background:var(--accent)] [&>_button>_span]:[display:flex] [&>_button>_span]:[height:54px] [&>_button>_span]:[width:54px] [&>_button>_span]:[align-items:center] [&>_button>_span]:[justify-content:center] [&>_button>_span]:rounded-sm [&>_button>_span]:[color:var(--primary)] [&>_button>_span]:[background:var(--muted)]"
             }
           >
             <Button
@@ -383,7 +383,7 @@ export function WelcomeWorkspace({
                   tabIndex={selectedProject === index ? 0 : -1}
                   type="button"
                   className={cn(
-                    "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+                    "min-h-[29px] w-full justify-start gap-1.5 px-2 py-1 text-left text-xs whitespace-normal aria-current:bg-accent aria-selected:bg-accent",
                     "flex min-h-[58px] w-full items-start gap-[13px] rounded px-[23px] py-[8px] pr-12 text-left hover:bg-[var(--muted)] focus-visible:bg-[var(--accent)]",
                   )}
                   variant="ghost"
@@ -393,7 +393,7 @@ export function WelcomeWorkspace({
                     {projectMonogram(project.name)}
                   </span>
                   <span className="min-w-0">
-                    <strong className="block text-[13px] font-medium leading-[18px]">
+                    <strong className="block text-[13px] leading-[18px] font-medium">
                       {project.name}
                     </strong>
                     <small className="block truncate text-[12px] leading-[17px] text-[var(--muted-foreground)]">
@@ -432,11 +432,11 @@ export function WelcomeWorkspace({
         <section
           aria-label="Customize"
           className={
-            "welcomeCustomize [background:var(--card)] [min-height:0] [overflow:auto] [padding:30px_30px_18px]"
+            "welcomeCustomize [min-height:0] [overflow:auto] [padding:30px_30px_18px] [background:var(--card)]"
           }
         >
           <section>
-            <h1 className="m-0 mb-[18px] text-[16px] font-semibold leading-[20px]">
+            <h1 className="m-0 mb-[18px] text-[16px] leading-[20px] font-semibold">
               Appearance
             </h1>
             <div className="grid grid-cols-[59px_280px_minmax(0,1fr)] items-center gap-x-[10px] gap-y-[10px]">
@@ -465,7 +465,7 @@ export function WelcomeWorkspace({
               />
               <span className="flex -translate-x-[89px] items-center">
                 <CheckboxInput
-                  className="min-h-7 items-center whitespace-nowrap text-[13px]"
+                  className="min-h-7 items-center text-[13px] whitespace-nowrap"
                   label="Sync with OS"
                   onChange={(syncWithOs) =>
                     onAppearancePreferenceChange({

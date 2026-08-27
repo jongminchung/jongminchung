@@ -63,14 +63,14 @@ export function HostingRequestList({
 
   return (
     <div
-      className={`hostingList [min-height:0] [overflow:auto] [border-right:1px_solid_var(--border)] [&>_button]:[align-items:stretch] [&>_button]:[background:transparent] [&>_button]:[border:0] [&>_button]:[border-bottom:1px_solid_var(--border)] [&>_button]:rounded-none [&>_button]:[display:flex] [&>_button]:[flex-direction:column] [&>_button]:[gap:4px] [&>_button]:[padding:10px_11px] [&>_button]:[text-align:left] [&>_button]:[width:100%] [&_small]:[color:var(--disabled-foreground)] hostingList [&>_button]:rounded-none`}
+      className={`hostingList hostingList [min-height:0] [overflow:auto] [border-right:1px_solid_var(--border)] [&_small]:[color:var(--disabled-foreground)] [&>_button]:[display:flex] [&>_button]:[width:100%] [&>_button]:[flex-direction:column] [&>_button]:[align-items:stretch] [&>_button]:[gap:4px] [&>_button]:rounded-none [&>_button]:[padding:10px_11px] [&>_button]:[text-align:left] [&>_button]:[background:transparent] [&>_button]:[border-bottom:1px_solid_var(--border)] [&>_button]:[border:0]`}
       aria-label="Pull and merge requests"
       onKeyDown={navigate}
       role="grid"
       tabIndex={0}
     >
       <div
-        className={`hostingListToolbar [align-items:center] [background:var(--muted)] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:5px] [padding:5px] [position:sticky] [top:0] [z-index:var(--layer-local-content)] [&>_label]:[align-items:center] [&>_label]:[background:var(--secondary)] [&>_label]:[border:1px_solid_var(--border)] [&>_label]:rounded-sm [&>_label]:[display:flex] [&>_label]:[flex:1] [&>_label]:[gap:5px] [&>_label]:[padding:0_6px] [&>_label_input]:[background:transparent] [&>_label_input]:[border:0] [&>_label_input]:[min-width:0] [&>_label_input]:[outline:0] [&>_label_input]:[padding:0] [&>_label_input]:[width:100%] [&>_select]:[width:78px] hostingListToolbar [&>_label]:rounded-sm`}
+        className={`hostingListToolbar hostingListToolbar [position:sticky] [top:0] [z-index:var(--layer-local-content)] [display:flex] [align-items:center] [gap:5px] [padding:5px] [background:var(--muted)] [border-bottom:1px_solid_var(--border)] [&>_label]:[display:flex] [&>_label]:[flex:1] [&>_label]:[align-items:center] [&>_label]:[gap:5px] [&>_label]:rounded-sm [&>_label]:[padding:0_6px] [&>_label]:[background:var(--secondary)] [&>_label]:[border:1px_solid_var(--border)] [&>_label_input]:[width:100%] [&>_label_input]:[min-width:0] [&>_label_input]:[padding:0] [&>_label_input]:[outline:0] [&>_label_input]:[background:transparent] [&>_label_input]:[border:0] [&>_select]:[width:78px]`}
       >
         <label>
           <Icon name="search" size={13} />
@@ -114,7 +114,7 @@ export function HostingRequestList({
           key={item.number}
           onClick={() => onInspect(item)}
           type="button"
-          className="min-h-[29px] w-full justify-start gap-1.5 whitespace-normal px-2 py-1 text-left text-xs aria-current:bg-accent aria-current:text-foreground"
+          className="min-h-[29px] w-full justify-start gap-1.5 px-2 py-1 text-left text-xs whitespace-normal aria-current:bg-accent aria-current:text-foreground"
           variant="ghost"
           size="default"
         >
@@ -132,7 +132,7 @@ export function HostingRequestList({
         <Button
           onClick={() => onLoadMore(nextPage)}
           type="button"
-          className="min-h-[29px] w-full items-center justify-start gap-1.5 whitespace-normal px-2 py-1 text-left text-xs text-primary"
+          className="min-h-[29px] w-full items-center justify-start gap-1.5 px-2 py-1 text-left text-xs whitespace-normal text-primary"
           variant="ghost"
           size="default"
         >

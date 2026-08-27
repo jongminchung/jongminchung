@@ -16,7 +16,7 @@ function PageLink({
   return (
     <Link
       className={cn(
-        "inline-flex h-auto min-h-[68px] shrink-0 items-center gap-2 whitespace-nowrap rounded-md border border-border bg-card px-5 text-sm font-medium text-card-foreground outline-none transition-colors",
+        "inline-flex h-auto min-h-[68px] shrink-0 items-center gap-2 rounded-md border border-border bg-card px-5 text-sm font-medium whitespace-nowrap text-card-foreground transition-colors outline-none",
         isPrevious ? "justify-start" : "justify-end",
         "hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/60",
       )}
@@ -28,7 +28,7 @@ function PageLink({
           isPrevious ? "text-left" : "text-right",
         )}
       >
-        <small className="text-primary text-[10px] font-medium uppercase">
+        <small className="text-[10px] font-medium text-primary uppercase">
           {locale === "ko"
             ? isPrevious
               ? "이전"

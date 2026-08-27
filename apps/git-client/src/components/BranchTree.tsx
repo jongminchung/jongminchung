@@ -95,7 +95,7 @@ export const BranchTree = memo(function BranchTree({
   if (compact) {
     return (
       <aside
-        className={`branchRail [background:var(--card)] [border-right:1px_solid_var(--border)] [min-height:0] [overflow:hidden] [&_button]:[align-items:center] [&_button]:[background:transparent] [&_button]:[color:var(--muted-foreground)] [&_button]:[display:flex] [&_button]:[flex-direction:column] [&_button]:[gap:5px] [&_button]:[height:100%] [&_button]:[justify-content:flex-start] [&_button]:[padding:7px_0] [&_button]:[width:100%] [&_button_span]:[font-size:10px] [&_button_span]:[writing-mode:vertical-rl] [&_button_span]:[transform:rotate(180deg)] branchRail`}
+        className={`branchRail branchRail [min-height:0] [overflow:hidden] [background:var(--card)] [border-right:1px_solid_var(--border)] [&_button]:[display:flex] [&_button]:[height:100%] [&_button]:[width:100%] [&_button]:[flex-direction:column] [&_button]:[align-items:center] [&_button]:[justify-content:flex-start] [&_button]:[gap:5px] [&_button]:[padding:7px_0] [&_button]:[color:var(--muted-foreground)] [&_button]:[background:transparent] [&_button_span]:[transform:rotate(180deg)] [&_button_span]:[font-size:10px] [&_button_span]:[writing-mode:vertical-rl]`}
         aria-label="Branches and tags"
       >
         <Tooltip>
@@ -106,7 +106,7 @@ export const BranchTree = memo(function BranchTree({
                 onClick={onActivate}
                 type="button"
                 className={cn(
-                  "gap-1.5 text-xs h-[31px] w-[30px] rounded-none p-0 text-muted-foreground aria-pressed:text-primary",
+                  "h-[31px] w-[30px] gap-1.5 rounded-none p-0 text-xs text-muted-foreground aria-pressed:text-primary",
                 )}
                 variant="ghost"
                 size="default"
@@ -124,11 +124,11 @@ export const BranchTree = memo(function BranchTree({
 
   return (
     <aside
-      className={`branchPane [background:var(--card)] [min-height:0] [min-width:0] [border-right:1px_solid_var(--border)] [display:grid] [grid-template-rows:31px_38px_29px_minmax(0,_1fr)] max-[1050px]:[display:none] branchPane`}
+      className={`branchPane branchPane [display:grid] [min-height:0] [min-width:0] [grid-template-rows:31px_38px_29px_minmax(0,_1fr)] [background:var(--card)] [border-right:1px_solid_var(--border)] max-[1050px]:[display:none]`}
       aria-label="Branches and tags"
     >
       <div
-        className={`paneTitle [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [font-weight:650] [padding:0_6px_0_10px] [&_span]:[flex:1] paneTitle`}
+        className={`paneTitle paneTitle [display:flex] [align-items:center] [padding:0_6px_0_10px] [font-weight:650] [border-bottom:1px_solid_var(--border)] [&_span]:[flex:1]`}
       >
         <span>Repositories</span>
         <Tooltip>
@@ -150,7 +150,7 @@ export const BranchTree = memo(function BranchTree({
         </Tooltip>
       </div>
       <div
-        className={`treeSearch [align-items:center] [background:var(--secondary)] [border:1px_solid_var(--border)] rounded-sm [display:flex] [gap:5px] [margin:6px_7px] [padding:0_7px] [&:focus-within]:[border-color:var(--primary)] [&:focus-within]:[box-shadow:0_0_0_1px_color-mix(in_oklch,_var(--primary)_20%,_transparent)] [&_input]:[background:transparent] [&_input]:[border:0] [&_input]:[height:24px] [&_input]:[min-width:0] [&_input]:[outline:0] [&_input]:[width:100%] treeSearch rounded-sm`}
+        className={`treeSearch treeSearch [margin:6px_7px] [display:flex] [align-items:center] [gap:5px] rounded-sm [padding:0_7px] [background:var(--secondary)] [border:1px_solid_var(--border)] [&_input]:[height:24px] [&_input]:[width:100%] [&_input]:[min-width:0] [&_input]:[outline:0] [&_input]:[background:transparent] [&_input]:[border:0] [&:focus-within]:[border-color:var(--primary)] [&:focus-within]:[box-shadow:0_0_0_1px_color-mix(in_oklch,_var(--primary)_20%,_transparent)]`}
       >
         <Icon name="search" size={14} />
         <Input
@@ -161,18 +161,18 @@ export const BranchTree = memo(function BranchTree({
         />
       </div>
       <div
-        className={`headRow [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:6px] [padding:0_10px] [&.muted]:[color:var(--disabled-foreground)] [&.muted]:[font-size:10px] headRow`}
+        className={`headRow headRow [display:flex] [align-items:center] [gap:6px] [padding:0_10px] [border-bottom:1px_solid_var(--border)] [&.muted]:[font-size:10px] [&.muted]:[color:var(--disabled-foreground)]`}
       >
         <Icon name="commit" size={14} />
         <strong>HEAD</strong>
         <span
-          className={`muted [color:var(--disabled-foreground)] [font-size:10px] muted`}
+          className={`muted muted [font-size:10px] [color:var(--disabled-foreground)]`}
         >
           (Current Branch)
         </span>
       </div>
       <div
-        className={`virtualTree [min-height:0] [overflow:auto] virtualTree`}
+        className={`virtualTree virtualTree [min-height:0] [overflow:auto]`}
         ref={parentRef}
       >
         <div
@@ -186,7 +186,7 @@ export const BranchTree = memo(function BranchTree({
             if (!row) return null;
             return (
               <div
-                className={`treeVirtualRow [height:27px] [left:0] [position:absolute] [right:0] [top:0] treeVirtualRow`}
+                className={`treeVirtualRow treeVirtualRow [position:absolute] [top:0] [right:0] [left:0] [height:27px]`}
                 key={row.type === "group" ? row.key : row.ref.name}
                 style={{
                   transform: `translateY(${item.start}px)`,
@@ -198,7 +198,7 @@ export const BranchTree = memo(function BranchTree({
                     type="button"
                     className={cn(
                       "flex min-h-0 text-xs text-muted-foreground",
-                      `treeGroup [align-items:center] [background:transparent] [display:flex] [gap:5px] [height:27px] [padding:0_8px] [text-align:left] [width:100%] [color:var(--muted-foreground)] [font-size:11px] [font-weight:650] [text-transform:uppercase] [&_small]:[color:var(--disabled-foreground)] [&_small]:[font-weight:400] [&_small]:[margin-left:auto] [&_svg:first-child]:[transform:rotate(0deg)] [&_svg:first-child]:[transition:transform_0.12s] [&.rotated]:[transform:rotate(90deg)] [&:hover]:[background:var(--muted)] treeGroup`,
+                      `treeGroup treeGroup [display:flex] [height:27px] [width:100%] [align-items:center] [gap:5px] [padding:0_8px] [text-align:left] [font-size:11px] [font-weight:650] [color:var(--muted-foreground)] [text-transform:uppercase] [background:transparent] [&_small]:[margin-left:auto] [&_small]:[font-weight:400] [&_small]:[color:var(--disabled-foreground)] [&_svg:first-child]:[transform:rotate(0deg)] [&_svg:first-child]:[transition:transform_0.12s] [&.rotated]:[transform:rotate(90deg)] [&:hover]:[background:var(--muted)]`,
                     )}
                     variant="ghost"
                     size="default"
@@ -207,7 +207,7 @@ export const BranchTree = memo(function BranchTree({
                       className={
                         collapsed.has(row.key)
                           ? undefined
-                          : `rotated [transform:rotate(90deg)] rotated`
+                          : `rotated rotated [transform:rotate(90deg)]`
                       }
                       name="chevron"
                       size={13}
@@ -234,17 +234,17 @@ export const BranchTree = memo(function BranchTree({
                           type="button"
                           className={cn(
                             "flex min-h-0 text-xs",
-                            `${`refRow [align-items:center] [background:transparent] [display:flex] [gap:5px] [height:27px] [padding:0_8px] [text-align:left] [width:100%] [&:hover]:[background:var(--muted)] [&.selected]:[background:var(--accent)] [&.selected]:[color:var(--foreground)] refRow`} ${selected === row.ref.name ? `selected [background:var(--accent)] [color:var(--foreground)] selected` : ""}`,
+                            `${`refRow refRow [display:flex] [height:27px] [width:100%] [align-items:center] [gap:5px] [padding:0_8px] [text-align:left] [background:transparent] [&.selected]:[color:var(--foreground)] [&.selected]:[background:var(--accent)] [&:hover]:[background:var(--muted)]`} ${selected === row.ref.name ? `selected selected [color:var(--foreground)] [background:var(--accent)]` : ""}`,
                           )}
                           variant="ghost"
                           size="default"
                         >
                           <span
-                            className={`refIndent [width:15px] refIndent`}
+                            className={`refIndent refIndent [width:15px]`}
                           />
                           {row.ref.favorite ? (
                             <Icon
-                              className={`favorite [color:var(--bookmark)] [fill:var(--bookmark)] favorite`}
+                              className={`favorite favorite [fill:var(--bookmark)] [color:var(--bookmark)]`}
                               name="star"
                               size={13}
                             />
@@ -252,7 +252,7 @@ export const BranchTree = memo(function BranchTree({
                             <Icon name="branch" size={13} />
                           )}
                           <span
-                            className={`ellipsis [min-width:0] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap] ellipsis`}
+                            className={`ellipsis ellipsis [min-width:0] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap]`}
                           >
                             {row.ref.shortName}
                           </span>

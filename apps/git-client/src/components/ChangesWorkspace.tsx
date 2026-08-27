@@ -305,7 +305,7 @@ export function ChangesWorkspace({
       <Button
         type="button"
         aria-label={"View Options"}
-        className={cn("h-[26px] min-w-[26px] px-2 aspect-square px-0")}
+        className={cn("aspect-square h-[26px] min-w-[26px] px-0 px-2")}
         variant="ghost"
         size="icon-sm"
       >

@@ -27,7 +27,7 @@ export function SavedMacrosDialog({
       width={520}
     >
       <section
-        className={`savedMacrosDialog [display:grid] [grid-template-rows:auto_minmax(240px,_1fr)_auto] [max-height:min(560px,_calc(100vh_-_80px))] [&>_main]:[min-height:0] [&>_main]:[overflow:auto] [&>_main]:[padding:6px] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:flex] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:8px_10px] savedMacrosDialog`}
+        className={`savedMacrosDialog savedMacrosDialog [display:grid] [max-height:min(560px,_calc(100vh_-_80px))] [grid-template-rows:auto_minmax(240px,_1fr)_auto] [&>_footer]:[display:flex] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:8px_10px] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_main]:[min-height:0] [&>_main]:[overflow:auto] [&>_main]:[padding:6px]`}
       >
         <DialogHeader
           hasDivider

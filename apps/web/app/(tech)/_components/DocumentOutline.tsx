@@ -51,7 +51,7 @@ export function DocumentOutline({
         {locale === "ko" ? "이 페이지에서" : "On this page"}
       </p>
       <nav aria-label={locale === "ko" ? "문서 목차" : "Document outline"}>
-        <ul className="m-0 grid list-none gap-0.5 p-0 [&_a]:block [&_a]:py-1 [&_a]:text-[11px] [&_a]:leading-[1.35] [&_a]:text-muted-foreground [&_a:hover]:text-foreground [&_li[data-level='3']_a]:pl-3 [&_li[data-active=true]_a]:font-medium [&_li[data-active=true]_a]:text-foreground">
+        <ul className="m-0 grid list-none gap-0.5 p-0 [&_a]:block [&_a]:py-1 [&_a]:text-[11px] [&_a]:leading-[1.35] [&_a]:text-muted-foreground [&_a:hover]:text-foreground [&_li[data-active=true]_a]:font-medium [&_li[data-active=true]_a]:text-foreground [&_li[data-level='3']_a]:pl-3">
           {items.map((item) => (
             <li
               key={item.id}

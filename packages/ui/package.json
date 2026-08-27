@@ -11,6 +11,7 @@
   "files": [
     "dist",
     "src/components/*.tsx",
+    "src/hooks/*.ts",
     "src/lib/*.ts",
     "src/styles/*.css",
     "LICENSE",
@@ -22,6 +23,7 @@
   ],
   "imports": {
     "#components/*": "./src/components/*.tsx",
+    "#hooks/*": "./src/hooks/*.ts",
     "#lib/*": "./src/lib/*.ts"
   },
   "exports": {
@@ -38,6 +40,11 @@
       "source": "./src/components/*.tsx",
       "types": "./dist/components/*.d.ts",
       "import": "./dist/components/*.js"
+    },
+    "./hooks/*": {
+      "source": "./src/hooks/*.ts",
+      "types": "./dist/hooks/*.d.ts",
+      "import": "./dist/hooks/*.js"
     },
     "./package.json": "./package.json"
   },

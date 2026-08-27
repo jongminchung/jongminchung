@@ -32,7 +32,7 @@ export default async function DiagramsPage(): Promise<React.JSX.Element> {
               key={asset.filename}
             >
               <Link
-                className="min-w-0 overflow-hidden font-mono text-sm font-medium text-ellipsis whitespace-nowrap hover:underline [text-underline-offset:4px]"
+                className="min-w-0 overflow-hidden font-mono text-sm font-medium text-ellipsis whitespace-nowrap [text-underline-offset:4px] hover:underline"
                 href={`/diagrams/${asset.slug}`}
               >
                 {asset.filename}

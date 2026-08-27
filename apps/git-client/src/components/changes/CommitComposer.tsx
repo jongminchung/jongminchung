@@ -67,7 +67,7 @@ export function CommitComposer({
 
   return (
     <aside
-      className={`commitRail [border-left:1px_solid_var(--border)] [display:grid] [gap:7px] [grid-template-rows:34px_auto_auto_minmax(110px,_1fr)_auto] [min-height:0] [min-width:0] [padding:7px] [position:relative] [&>_.verticalResizeHandle]:[left:-4px] [&>_.verticalResizeHandle]:[right:auto] [&>_header]:[align-items:center] [&>_header]:[display:flex] [&>_header]:[gap:6px] [&>_header_small]:[color:var(--disabled-foreground)] [&>_header_small]:[margin-left:auto] [&_textarea]:[background:var(--secondary)] [&_textarea]:[border:1px_solid_var(--border)] [&_textarea]:[min-height:110px] [&_textarea]:[padding:9px] [&_textarea]:[resize:none] [&>_footer]:[align-items:center] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:grid] [&>_footer]:[gap:5px] [&>_footer]:[grid-template-columns:minmax(0,_1fr)_auto_auto] [&>_footer]:[padding-top:7px] [&>_footer_>_button]:[background:var(--secondary)] [&>_footer_>_button]:[border:1px_solid_var(--border)] [&>_footer_>_button]:[min-height:29px] [&>_footer_>_button]:[padding:0_9px] max-[1120px]:[bottom:0] max-[1120px]:[box-shadow:var(--shadow-lg)] max-[1120px]:[position:absolute] max-[1120px]:[right:0] max-[1120px]:[top:0] max-[1120px]:[transform:translateX(102%)] max-[1120px]:[transition:transform_120ms_ease-out] max-[1120px]:[width:min(var(--commit-rail-width,_340px),_calc(100%_-_220px))] max-[1120px]:[z-index:var(--layer-responsive-panel)] max-[1120px]:[&>_.verticalResizeHandle]:[display:none] commitRail`}
+      className={`commitRail commitRail [position:relative] [display:grid] [min-height:0] [min-width:0] [grid-template-rows:34px_auto_auto_minmax(110px,_1fr)_auto] [gap:7px] [padding:7px] [border-left:1px_solid_var(--border)] max-[1120px]:[position:absolute] max-[1120px]:[top:0] max-[1120px]:[right:0] max-[1120px]:[bottom:0] max-[1120px]:[z-index:var(--layer-responsive-panel)] max-[1120px]:[width:min(var(--commit-rail-width,_340px),_calc(100%_-_220px))] max-[1120px]:[transform:translateX(102%)] max-[1120px]:[box-shadow:var(--shadow-lg)] max-[1120px]:[transition:transform_120ms_ease-out] [&_textarea]:[min-height:110px] [&_textarea]:[resize:none] [&_textarea]:[padding:9px] [&_textarea]:[background:var(--secondary)] [&_textarea]:[border:1px_solid_var(--border)] [&>_.verticalResizeHandle]:[right:auto] [&>_.verticalResizeHandle]:[left:-4px] max-[1120px]:[&>_.verticalResizeHandle]:[display:none] [&>_footer]:[display:grid] [&>_footer]:[grid-template-columns:minmax(0,_1fr)_auto_auto] [&>_footer]:[align-items:center] [&>_footer]:[gap:5px] [&>_footer]:[padding-top:7px] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer_>_button]:[min-height:29px] [&>_footer_>_button]:[padding:0_9px] [&>_footer_>_button]:[background:var(--secondary)] [&>_footer_>_button]:[border:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[align-items:center] [&>_header]:[gap:6px] [&>_header_small]:[margin-left:auto] [&>_header_small]:[color:var(--disabled-foreground)]`}
     >
       {!toolWindow && (
         <VerticalResizeHandle
@@ -85,7 +85,7 @@ export function CommitComposer({
             onClick={closeCommitComposer}
             type="button"
             aria-label={"Close commit composer"}
-            className="aspect-square h-[26px] min-w-[26px] px-0 [display:none]! max-[1120px]:[display:inline-flex]!"
+            className="[display:none]! aspect-square h-[26px] min-w-[26px] px-0 max-[1120px]:[display:inline-flex]!"
             variant="ghost"
             size="icon-sm"
           >
@@ -94,7 +94,7 @@ export function CommitComposer({
         )}
       </header>
       <div
-        className={`changelistBar [display:flex] [gap:5px] [min-width:0] [padding-bottom:5px] [&_select]:[background:var(--secondary)] [&_select]:[border:1px_solid_var(--border)] [&_select]:rounded-sm [&_select]:[flex:1] [&_select]:[min-width:0] [&_select]:[padding:0_6px] [&_button]:[height:24px] changelistBar [&_select]:rounded-sm`}
+        className={`changelistBar changelistBar [display:flex] [min-width:0] [gap:5px] [padding-bottom:5px] [&_button]:[height:24px] [&_select]:[min-width:0] [&_select]:[flex:1] [&_select]:rounded-sm [&_select]:[padding:0_6px] [&_select]:[background:var(--secondary)] [&_select]:[border:1px_solid_var(--border)]`}
       >
         <Selector
           isLabelHidden
@@ -140,7 +140,7 @@ export function CommitComposer({
           disabled={changelistMutation !== null}
           onClick={() => void deleteSelectedChangelist()}
           className={cn(
-            "h-7 px-2.5 border-border bg-secondary shadow-xs hover:border-destructive hover:bg-destructive-muted active:bg-destructive-muted/80",
+            "hover:bg-destructive-muted active:bg-destructive-muted/80 h-7 border-border bg-secondary px-2.5 shadow-xs hover:border-destructive",
             "w-full",
             "deleteChangelistButton [grid-row:3]",
           )}

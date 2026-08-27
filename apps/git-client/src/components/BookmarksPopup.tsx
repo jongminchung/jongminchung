@@ -58,7 +58,7 @@ export function BookmarksPopup({
       }
     >
       <section
-        className={`bookmarksPopup [display:grid] [grid-template-rows:auto_minmax(180px,_1fr)] [max-height:min(640px,_calc(100vh_-_82px))] [min-height:330px] [&>_[role=listbox]]:[min-height:0] [&>_[role=listbox]]:[overflow:auto] bookmarksPopup`}
+        className={`bookmarksPopup bookmarksPopup [display:grid] [max-height:min(640px,_calc(100vh_-_82px))] [min-height:330px] [grid-template-rows:auto_minmax(180px,_1fr)] [&>_[role=listbox]]:[min-height:0] [&>_[role=listbox]]:[overflow:auto]`}
       >
         <DialogHeader
           hasDivider

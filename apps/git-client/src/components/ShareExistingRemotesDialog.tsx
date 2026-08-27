@@ -27,7 +27,7 @@ export function ShareExistingRemotesDialog({
       width={510}
     >
       <section
-        className={`shareExistingRemotesDialog [display:grid] [grid-template-rows:auto_minmax(120px,_auto)_auto] [&>_main]:[align-items:start] [&>_main]:[display:grid] [&>_main]:[gap:12px] [&>_main]:[grid-template-columns:32px_minmax(0,_1fr)] [&>_main]:[padding:18px] [&>_main_p]:[margin:0_0_8px] [&>_main_>_section_>_div[role=list]]:[padding:0] [&>_main_>_section_>_div[role=list]_li]:[color:var(--primary)] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:flex] [&>_footer]:[gap:8px] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:8px_10px] shareExistingRemotesDialog`}
+        className={`shareExistingRemotesDialog shareExistingRemotesDialog [display:grid] [grid-template-rows:auto_minmax(120px,_auto)_auto] [&>_footer]:[display:flex] [&>_footer]:[justify-content:flex-end] [&>_footer]:[gap:8px] [&>_footer]:[padding:8px_10px] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_main]:[display:grid] [&>_main]:[grid-template-columns:32px_minmax(0,_1fr)] [&>_main]:[align-items:start] [&>_main]:[gap:12px] [&>_main]:[padding:18px] [&>_main_>_section_>_div[role=list]]:[padding:0] [&>_main_>_section_>_div[role=list]_li]:[color:var(--primary)] [&>_main_p]:[margin:0_0_8px]`}
       >
         <DialogHeader
           hasDivider

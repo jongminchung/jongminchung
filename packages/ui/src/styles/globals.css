@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import "tailwindcss" source(none);
 @import "tw-animate-css";
 @import "./theme.css";
 @import "./tokens.css";
@@ -68,6 +68,7 @@
 }
 
 @source "../**/*.{ts,tsx}";
+@source not "../**/*.{test,spec}.{ts,tsx}";
 
 @layer base {
   * {

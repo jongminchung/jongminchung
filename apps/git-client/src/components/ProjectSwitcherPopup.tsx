@@ -123,7 +123,7 @@ export function ProjectSwitcherPopup({
     <dialog
       open
       aria-label="Projects"
-      className={`projectSwitcherPopup [background:var(--popover)] [border:1px_solid_var(--input)] rounded-lg [box-shadow:var(--shadow-lg)] [left:0] [max-height:min(540px,_calc(100vh_-_62px))] [min-width:368px] [overflow:auto] [padding:0_0_5px] [position:absolute] [top:calc(100%_+_2px)] [z-index:var(--layer-floating-panel)] [&_[data-project-section]]:[border-top:1px_solid_var(--border)] [&_[data-project-section]]:[color:var(--muted-foreground)] [&_[data-project-section]]:[display:block] [&_[data-project-section]]:[font-size:10px] [&_[data-project-section]]:[font-weight:600] [&_[data-project-section]]:[padding:8px_11px_4px] [&>_p]:[color:var(--destructive)] [&>_p]:[font-size:10px] [&>_p]:[margin:5px_9px] projectSwitcherPopup rounded-lg`}
+      className={`projectSwitcherPopup projectSwitcherPopup [position:absolute] [top:calc(100%_+_2px)] [left:0] [z-index:var(--layer-floating-panel)] [max-height:min(540px,_calc(100vh_-_62px))] [min-width:368px] [overflow:auto] rounded-lg [padding:0_0_5px] [box-shadow:var(--shadow-lg)] [background:var(--popover)] [border:1px_solid_var(--input)] [&_[data-project-section]]:[display:block] [&_[data-project-section]]:[padding:8px_11px_4px] [&_[data-project-section]]:[font-size:10px] [&_[data-project-section]]:[font-weight:600] [&_[data-project-section]]:[color:var(--muted-foreground)] [&_[data-project-section]]:[border-top:1px_solid_var(--border)] [&>_p]:[margin:5px_9px] [&>_p]:[font-size:10px] [&>_p]:[color:var(--destructive)]`}
       onKeyDown={(event) => {
         if (event.key === "Escape") {
           event.preventDefault();
@@ -157,7 +157,7 @@ export function ProjectSwitcherPopup({
     >
       <div aria-label="Projects" role="listbox">
         <div
-          className={`projectSwitcherActions [border-bottom:1px_solid_var(--border)] [display:grid] [padding:5px] [&_button]:[align-items:center] [&_button]:[background:transparent] [&_button]:rounded-sm [&_button]:[display:flex] [&_button]:[gap:8px] [&_button]:[height:30px] [&_button]:[padding:0_8px] [&_button:hover]:[background:var(--muted)] [&_button[aria-selected=true]]:[background:var(--accent)] projectSwitcherActions [&_button]:rounded-sm`}
+          className={`projectSwitcherActions projectSwitcherActions [display:grid] [padding:5px] [border-bottom:1px_solid_var(--border)] [&_button]:[display:flex] [&_button]:[height:30px] [&_button]:[align-items:center] [&_button]:[gap:8px] [&_button]:rounded-sm [&_button]:[padding:0_8px] [&_button]:[background:transparent] [&_button:hover]:[background:var(--muted)] [&_button[aria-selected=true]]:[background:var(--accent)]`}
           role="presentation"
         >
           <Button
@@ -173,7 +173,7 @@ export function ProjectSwitcherPopup({
             role="option"
             type="button"
             className={cn(
-              "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+              "min-h-[29px] w-full justify-start gap-1.5 px-2 py-1 text-left text-xs whitespace-normal aria-current:bg-accent aria-selected:bg-accent",
             )}
             variant="ghost"
             size="default"
@@ -195,7 +195,7 @@ export function ProjectSwitcherPopup({
             role="option"
             type="button"
             className={cn(
-              "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+              "min-h-[29px] w-full justify-start gap-1.5 px-2 py-1 text-left text-xs whitespace-normal aria-current:bg-accent aria-selected:bg-accent",
             )}
             variant="ghost"
             size="default"
@@ -226,14 +226,14 @@ export function ProjectSwitcherPopup({
             role="option"
             type="button"
             className={cn(
-              "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
-              `projectSwitcherRow [align-items:center] [background:transparent] [display:grid] [gap:8px] [grid-template-columns:24px_minmax(0,_1fr)_16px] [min-height:45px] [padding:5px_8px] [text-align:left] [width:100%] [&:hover]:[background:var(--muted)] [&[aria-selected=true]]:[background:var(--accent)] [&>_span:nth-child(2)]:[display:flex] [&>_span:nth-child(2)]:[flex-direction:column] [&>_span:nth-child(2)]:[min-width:0] [&_b]:[font-weight:600] [&_b]:[overflow:hidden] [&_b]:[text-overflow:ellipsis] [&_b]:[white-space:nowrap] [&_small]:[color:var(--disabled-foreground)] [&_small]:[font-size:10px] [&_small]:[overflow:hidden] [&_small]:[text-overflow:ellipsis] [&_small]:[white-space:nowrap] projectSwitcherRow`,
+              "min-h-[29px] w-full justify-start gap-1.5 px-2 py-1 text-left text-xs whitespace-normal aria-current:bg-accent aria-selected:bg-accent",
+              `projectSwitcherRow projectSwitcherRow [display:grid] [min-height:45px] [width:100%] [grid-template-columns:24px_minmax(0,_1fr)_16px] [align-items:center] [gap:8px] [padding:5px_8px] [text-align:left] [background:transparent] [&_b]:[overflow:hidden] [&_b]:[font-weight:600] [&_b]:[text-overflow:ellipsis] [&_b]:[white-space:nowrap] [&_small]:[overflow:hidden] [&_small]:[font-size:10px] [&_small]:[text-overflow:ellipsis] [&_small]:[white-space:nowrap] [&_small]:[color:var(--disabled-foreground)] [&:hover]:[background:var(--muted)] [&>_span:nth-child(2)]:[display:flex] [&>_span:nth-child(2)]:[min-width:0] [&>_span:nth-child(2)]:[flex-direction:column] [&[aria-selected=true]]:[background:var(--accent)]`,
             )}
             variant="ghost"
             size="default"
           >
             <span
-              className={`projectMark [align-items:center] [background:var(--primary)] rounded-xs [color:var(--primary-foreground)] [display:inline-flex] [font-size:9px] [font-weight:700] [height:16px] [justify-content:center] [width:16px] projectMark rounded-xs`}
+              className={`projectMark projectMark [display:inline-flex] [height:16px] [width:16px] [align-items:center] [justify-content:center] rounded-xs [font-size:9px] [font-weight:700] [color:var(--primary-foreground)] [background:var(--primary)]`}
             >
               {repository.name.charAt(0).toUpperCase()}
             </span>
@@ -268,14 +268,14 @@ export function ProjectSwitcherPopup({
               type="button"
               data-project-switcher-row
               className={cn(
-                "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
-                `projectSwitcherRow [align-items:center] [background:transparent] [display:grid] [gap:8px] [grid-template-columns:24px_minmax(0,_1fr)_16px] [min-height:45px] [padding:5px_8px] [text-align:left] [width:100%] [&:hover]:[background:var(--muted)] [&[aria-selected=true]]:[background:var(--accent)] [&>_span:nth-child(2)]:[display:flex] [&>_span:nth-child(2)]:[flex-direction:column] [&>_span:nth-child(2)]:[min-width:0] [&_b]:[font-weight:600] [&_b]:[overflow:hidden] [&_b]:[text-overflow:ellipsis] [&_b]:[white-space:nowrap] [&_small]:[color:var(--disabled-foreground)] [&_small]:[font-size:10px] [&_small]:[overflow:hidden] [&_small]:[text-overflow:ellipsis] [&_small]:[white-space:nowrap] projectSwitcherRow`,
+                "min-h-[29px] w-full justify-start gap-1.5 px-2 py-1 text-left text-xs whitespace-normal aria-current:bg-accent aria-selected:bg-accent",
+                `projectSwitcherRow projectSwitcherRow [display:grid] [min-height:45px] [width:100%] [grid-template-columns:24px_minmax(0,_1fr)_16px] [align-items:center] [gap:8px] [padding:5px_8px] [text-align:left] [background:transparent] [&_b]:[overflow:hidden] [&_b]:[font-weight:600] [&_b]:[text-overflow:ellipsis] [&_b]:[white-space:nowrap] [&_small]:[overflow:hidden] [&_small]:[font-size:10px] [&_small]:[text-overflow:ellipsis] [&_small]:[white-space:nowrap] [&_small]:[color:var(--disabled-foreground)] [&:hover]:[background:var(--muted)] [&>_span:nth-child(2)]:[display:flex] [&>_span:nth-child(2)]:[min-width:0] [&>_span:nth-child(2)]:[flex-direction:column] [&[aria-selected=true]]:[background:var(--accent)]`,
               )}
               variant="ghost"
               size="default"
             >
               <span
-                className={`projectMark [align-items:center] [background:var(--primary)] rounded-xs [color:var(--primary-foreground)] [display:inline-flex] [font-size:9px] [font-weight:700] [height:16px] [justify-content:center] [width:16px] projectMark rounded-xs`}
+                className={`projectMark projectMark [display:inline-flex] [height:16px] [width:16px] [align-items:center] [justify-content:center] rounded-xs [font-size:9px] [font-weight:700] [color:var(--primary-foreground)] [background:var(--primary)]`}
               >
                 {project.name.charAt(0).toUpperCase()}
               </span>

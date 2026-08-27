@@ -159,7 +159,7 @@ export function SearchDialog({
                     >
                       <span className="grid min-w-0 gap-0.5 [&_strong]:overflow-hidden [&_strong]:text-ellipsis [&_strong]:whitespace-nowrap">
                         <strong>{item.label}</strong>
-                        <span className="flex gap-1.5 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-muted-foreground [&>span]:shrink-0 [&>span]:font-semibold [&>span]:text-primary">
+                        <span className="flex gap-1.5 overflow-hidden text-xs text-ellipsis whitespace-nowrap text-muted-foreground [&>span]:shrink-0 [&>span]:font-semibold [&>span]:text-primary">
                           <span>{item.matchLabel}</span>
                           {item.matchText}
                         </span>

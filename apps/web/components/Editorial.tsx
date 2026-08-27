@@ -342,7 +342,7 @@ export function EditorialIndex({
   const page = paginateEditorialItems(selected, query.page);
   return (
     <main
-      className="mx-auto w-full max-w-[1200px] px-6 pt-[clamp(64px,9vw,112px)] pb-24 max-[680px]:px-4 max-[680px]:pt-12 data-[variant=engineering]:pt-[clamp(70px,8vw,112px)]"
+      className="mx-auto w-full max-w-[1200px] px-6 pt-[clamp(64px,9vw,112px)] pb-24 data-[variant=engineering]:pt-[clamp(70px,8vw,112px)] max-[680px]:px-4 max-[680px]:pt-12"
       data-variant={variant}
     >
       <header className="max-w-[760px] border-b pb-12 data-[variant=engineering]:max-w-none data-[variant=engineering]:border-b-0 data-[variant=engineering]:pb-3">
@@ -485,7 +485,7 @@ export function EditorialArticle({
 }): React.JSX.Element {
   return (
     <main
-      className="mx-auto grid w-full max-w-[1080px] grid-cols-[180px_minmax(0,680px)] gap-x-16 px-8 pt-[76px] pb-24 max-[960px]:block max-[960px]:max-w-[760px] max-[600px]:px-4 max-[600px]:pt-10 data-[variant=engineering]:max-w-[1200px] data-[variant=engineering]:grid-cols-[160px_minmax(0,680px)] data-[variant=engineering]:gap-x-20 data-[variant=engineering]:pt-[clamp(48px,6vw,80px)]"
+      className="mx-auto grid w-full max-w-[1080px] grid-cols-[180px_minmax(0,680px)] gap-x-16 px-8 pt-[76px] pb-24 data-[variant=engineering]:max-w-[1200px] data-[variant=engineering]:grid-cols-[160px_minmax(0,680px)] data-[variant=engineering]:gap-x-20 data-[variant=engineering]:pt-[clamp(48px,6vw,80px)] max-[960px]:block max-[960px]:max-w-[760px] max-[600px]:px-4 max-[600px]:pt-10"
       data-variant={variant}
     >
       <header

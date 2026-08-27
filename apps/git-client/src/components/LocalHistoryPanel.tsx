@@ -294,7 +294,7 @@ export function LocalHistoryPanel({
 
   return (
     <section
-      className="grid h-full min-h-0 min-w-0 overflow-hidden bg-card [grid-template-columns:minmax(280px,38%)_minmax(360px,1fr)]"
+      className="grid h-full min-h-0 min-w-0 [grid-template-columns:minmax(280px,38%)_minmax(360px,1fr)] overflow-hidden bg-card"
       data-local-history-activity
       aria-busy={loading}
       aria-label="Local History"
@@ -320,7 +320,7 @@ export function LocalHistoryPanel({
                   onClick={() => void putLabel()}
                   type="button"
                   className={cn(
-                    "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
+                    "min-h-[26px] min-w-[26px] gap-1.5 p-1 text-xs text-muted-foreground",
                   )}
                   variant="ghost"
                   size="icon-sm"
@@ -340,7 +340,7 @@ export function LocalHistoryPanel({
                   pressed={showSystemEvents}
                   type="button"
                   className={cn(
-                    "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[26px] min-w-[26px] p-1 text-muted-foreground hover:text-foreground",
+                    "inline-flex min-h-[26px] min-w-[26px] items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent p-1 text-xs text-foreground text-muted-foreground transition-[color,background-color,border-color,box-shadow] outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0",
                   )}
                 >
                   <Icon name="more" size={13} />
@@ -351,7 +351,7 @@ export function LocalHistoryPanel({
           </Tooltip>
         </header>
         <div
-          className="min-h-0 overflow-auto [&>button]:grid [&>button]:min-h-[30px] [&>button]:w-full [&>button]:grid-cols-[17px_minmax(0,1fr)] [&>button]:gap-1.5 [&>button]:rounded-none [&>button]:px-2 [&>button]:py-1 [&>button]:text-left [&>button[aria-selected=true]]:bg-accent [&_small]:block [&_small]:truncate [&_small]:text-[length:var(--font-size-xs)] [&_small]:font-normal [&_small]:text-disabled-foreground [&_span]:min-w-0 [&_span]:truncate [&_strong]:block [&_strong]:truncate"
+          className="[&_small]:text-disabled-foreground min-h-0 overflow-auto [&_small]:block [&_small]:truncate [&_small]:text-[length:var(--font-size-xs)] [&_small]:font-normal [&_span]:min-w-0 [&_span]:truncate [&_strong]:block [&_strong]:truncate [&>button]:grid [&>button]:min-h-[30px] [&>button]:w-full [&>button]:grid-cols-[17px_minmax(0,1fr)] [&>button]:gap-1.5 [&>button]:rounded-none [&>button]:px-2 [&>button]:py-1 [&>button]:text-left [&>button[aria-selected=true]]:bg-accent"
           role="listbox"
           aria-label="Activity History"
         >
@@ -363,7 +363,7 @@ export function LocalHistoryPanel({
               role="option"
               type="button"
               className={cn(
-                "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+                "min-h-[29px] w-full justify-start gap-1.5 px-2 py-1 text-left text-xs whitespace-normal aria-current:bg-accent aria-selected:bg-accent",
               )}
               variant="ghost"
               size="default"
@@ -384,7 +384,7 @@ export function LocalHistoryPanel({
             </Button>
           ))}
           {!loading && activities.length === 0 && (
-            <div className="flex h-full min-h-[58px] items-center justify-center p-3 text-center text-disabled-foreground">
+            <div className="text-disabled-foreground flex h-full min-h-[58px] items-center justify-center p-3 text-center">
               No activity in {repositoryName} detected
             </div>
           )}
@@ -393,7 +393,7 @@ export function LocalHistoryPanel({
               onClick={() => void loadMore()}
               type="button"
               className={cn(
-                "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+                "min-h-[29px] w-full justify-start gap-1.5 px-2 py-1 text-left text-xs whitespace-normal aria-current:bg-accent aria-selected:bg-accent",
                 "block min-h-[30px] text-center text-primary",
               )}
               variant="ghost"
@@ -425,7 +425,7 @@ export function LocalHistoryPanel({
             Create Patch…
           </Button>
         </div>
-        <header className="flex min-w-0 items-center gap-[5px] border-b border-border px-[7px] [&>strong]:min-w-0 [&>strong]:flex-1 [&>strong]:truncate [&_button]:min-h-6 [&_button]:border-0 [&_button]:bg-transparent [&_button]:px-1.5 [&_button]:text-muted-foreground">
+        <header className="flex min-w-0 items-center gap-[5px] border-b border-border px-[7px] [&_button]:min-h-6 [&_button]:border-0 [&_button]:bg-transparent [&_button]:px-1.5 [&_button]:text-muted-foreground [&>strong]:min-w-0 [&>strong]:flex-1 [&>strong]:truncate">
           <strong>Changes</strong>
           <Tooltip>
             <TooltipTrigger
@@ -435,7 +435,7 @@ export function LocalHistoryPanel({
                   pressed={groupByDirectory}
                   type="button"
                   className={cn(
-                    "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
+                    "inline-flex min-h-[25px] items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent px-1.5 text-xs text-foreground text-muted-foreground transition-[color,background-color,border-color,box-shadow] outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0",
                   )}
                 >
                   Group By
@@ -449,14 +449,14 @@ export function LocalHistoryPanel({
             pressed={showDiff}
             type="button"
             className={cn(
-              "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[25px] px-1.5 text-muted-foreground hover:text-foreground",
+              "inline-flex min-h-[25px] items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent px-1.5 text-xs text-foreground text-muted-foreground transition-[color,background-color,border-color,box-shadow] outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0",
             )}
           >
             Show Diff
           </Toggle>
         </header>
         <div
-          className="min-h-0 overflow-auto [&>button]:grid [&>button]:min-h-[30px] [&>button]:w-full [&>button]:grid-cols-[17px_minmax(0,1fr)_auto] [&>button]:gap-1.5 [&>button]:rounded-none [&>button]:px-2 [&>button]:py-1 [&>button]:text-left [&>button[aria-selected=true]]:bg-accent [&_small]:truncate [&_small]:text-[length:var(--font-size-xs)] [&_small]:font-normal [&_small]:text-disabled-foreground [&_span]:min-w-0 [&_span]:truncate"
+          className="[&_small]:text-disabled-foreground min-h-0 overflow-auto [&_small]:truncate [&_small]:text-[length:var(--font-size-xs)] [&_small]:font-normal [&_span]:min-w-0 [&_span]:truncate [&>button]:grid [&>button]:min-h-[30px] [&>button]:w-full [&>button]:grid-cols-[17px_minmax(0,1fr)_auto] [&>button]:gap-1.5 [&>button]:rounded-none [&>button]:px-2 [&>button]:py-1 [&>button]:text-left [&>button[aria-selected=true]]:bg-accent"
           role="tree"
           aria-label="Changes"
         >
@@ -468,7 +468,7 @@ export function LocalHistoryPanel({
               role="treeitem"
               type="button"
               className={cn(
-                "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+                "min-h-[29px] w-full justify-start gap-1.5 px-2 py-1 text-left text-xs whitespace-normal aria-current:bg-accent aria-selected:bg-accent",
               )}
               variant="ghost"
               size="default"
@@ -491,12 +491,12 @@ export function LocalHistoryPanel({
             </Button>
           ))}
           {detail !== null && detail.changes.length === 0 && (
-            <div className="flex h-full min-h-[58px] items-center justify-center p-3 text-center text-disabled-foreground">
+            <div className="text-disabled-foreground flex h-full min-h-[58px] items-center justify-center p-3 text-center">
               Label has no file changes
             </div>
           )}
           {detail === null && (
-            <div className="flex h-full min-h-[58px] items-center justify-center p-3 text-center text-disabled-foreground">
+            <div className="text-disabled-foreground flex h-full min-h-[58px] items-center justify-center p-3 text-center">
               Select activity to view changes
             </div>
           )}
@@ -511,7 +511,7 @@ export function LocalHistoryPanel({
         tabIndex={0}
       />
       <main className="grid min-h-0 min-w-0 grid-rows-[35px_minmax(0,1fr)] [&>pre]:m-0 [&>pre]:overflow-auto [&>pre]:bg-card [&>pre]:px-3 [&>pre]:py-2.5 [&>pre]:text-[11px] [&>pre]:leading-[1.45] [&>pre]:[tab-size:4]">
-        <header className="flex min-w-0 items-center gap-[5px] border-b border-border px-[7px] [&>strong]:min-w-0 [&>strong]:flex-1 [&>strong]:truncate [&_button]:min-h-6 [&_button]:border-0 [&_button]:bg-transparent [&_button]:px-1.5 [&_button]:text-muted-foreground">
+        <header className="flex min-w-0 items-center gap-[5px] border-b border-border px-[7px] [&_button]:min-h-6 [&_button]:border-0 [&_button]:bg-transparent [&_button]:px-1.5 [&_button]:text-muted-foreground [&>strong]:min-w-0 [&>strong]:flex-1 [&>strong]:truncate">
           <Tooltip>
             <TooltipTrigger
               render={
@@ -567,7 +567,7 @@ export function LocalHistoryPanel({
           </Button>
         </header>
         {!showDiff ? (
-          <div className="flex h-full min-h-[58px] items-center justify-center p-3 text-center text-disabled-foreground">
+          <div className="text-disabled-foreground flex h-full min-h-[58px] items-center justify-center p-3 text-center">
             Nothing to show
           </div>
         ) : error !== null ? (
@@ -578,13 +578,13 @@ export function LocalHistoryPanel({
             {error}
           </div>
         ) : selectedChange?.contentAvailability === "unavailable" ? (
-          <div className="flex h-full min-h-[58px] items-center justify-center p-3 text-center text-disabled-foreground">
+          <div className="text-disabled-foreground flex h-full min-h-[58px] items-center justify-center p-3 text-center">
             Content unavailable
           </div>
         ) : patch.length > 0 ? (
           <pre>{patch}</pre>
         ) : (
-          <div className="flex h-full min-h-[58px] items-center justify-center p-3 text-center text-disabled-foreground">
+          <div className="text-disabled-foreground flex h-full min-h-[58px] items-center justify-center p-3 text-center">
             Nothing to show
           </div>
         )}

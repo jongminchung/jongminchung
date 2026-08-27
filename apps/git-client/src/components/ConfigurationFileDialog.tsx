@@ -65,7 +65,7 @@ export function ConfigurationFileDialog({
       width="min(720px, calc(100vw - 70px))"
     >
       <section
-        className={`configurationFileDialog [display:grid] [grid-template-rows:auto_minmax(360px,_1fr)_auto] [max-height:min(700px,_calc(100vh_-_70px))] [&>_main]:[display:grid] [&>_main]:[gap:10px] [&>_main]:[min-height:0] [&>_main]:[padding:12px] [&>_main>_p]:[color:var(--muted-foreground)] [&>_main>_p]:[margin:0] [&>_main>_div[role=alert]]:[color:var(--destructive)] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:flex] [&>_footer]:[gap:8px] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:8px_10px] configurationFileDialog`}
+        className={`configurationFileDialog configurationFileDialog [display:grid] [max-height:min(700px,_calc(100vh_-_70px))] [grid-template-rows:auto_minmax(360px,_1fr)_auto] [&>_footer]:[display:flex] [&>_footer]:[justify-content:flex-end] [&>_footer]:[gap:8px] [&>_footer]:[padding:8px_10px] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_main]:[display:grid] [&>_main]:[min-height:0] [&>_main]:[gap:10px] [&>_main]:[padding:12px] [&>_main>_div[role=alert]]:[color:var(--destructive)] [&>_main>_p]:[margin:0] [&>_main>_p]:[color:var(--muted-foreground)]`}
       >
         <DialogHeader
           hasDivider

@@ -112,7 +112,7 @@ export function ChangeNavigator({
     label: "Staged" | "Working Tree",
     group: readonly ChangeEntry[],
   ) => (
-    <section className="changeNavigatorGroup [&>_header]:[align-items:center] [&>_header]:[background:var(--secondary)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[border-top:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[gap:6px] [&>_header]:[height:29px] [&>_header]:[padding:0_7px] [&>_header]:[position:sticky] [&>_header]:[top:0] [&>_header]:[z-index:var(--layer-local-content)] [&:first-child_>_header]:[border-top:0] [&>_header_small]:[color:var(--disabled-foreground)] [&>_header_span]:[flex:1] [&>_header_button]:[background:transparent] [&>_header_button]:[color:var(--primary)] [&>_header_button]:[padding:0_5px] changeNavigatorGroup">
+    <section className="changeNavigatorGroup changeNavigatorGroup [&:first-child_>_header]:[border-top:0] [&>_header]:[position:sticky] [&>_header]:[top:0] [&>_header]:[z-index:var(--layer-local-content)] [&>_header]:[display:flex] [&>_header]:[height:29px] [&>_header]:[align-items:center] [&>_header]:[gap:6px] [&>_header]:[padding:0_7px] [&>_header]:[background:var(--secondary)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[border-top:1px_solid_var(--border)] [&>_header_button]:[padding:0_5px] [&>_header_button]:[color:var(--primary)] [&>_header_button]:[background:transparent] [&>_header_small]:[color:var(--disabled-foreground)] [&>_header_span]:[flex:1]">
       <header>
         <strong>{label}</strong>
         <small>{group.length}</small>
@@ -151,8 +151,8 @@ export function ChangeNavigator({
                   pressed={multiSelected}
                   type="button"
                   className={cn(
-                    "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 min-h-[29px] w-full justify-start whitespace-normal rounded-sm px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
-                    `changeNavigatorRow [align-items:center] [background:transparent] rounded-none! [display:flex] [gap:5px] [min-height:29px] [padding:3px_7px] [text-align:left] [width:100%] [&.selected]:[background:var(--accent)] [&[aria-current=true]]:[background:var(--accent)] [&.multiSelected]:[background:color-mix(in_oklch,_var(--accent)_62%,_transparent)] [&_small]:[color:var(--disabled-foreground)] changeNavigatorRow rounded-none! ${active ? "selected [background:var(--accent)] [color:var(--foreground)] selected" : ""} ${multiSelected && !active ? "multiSelected [background:color-mix(in_oklch,_var(--accent)_62%,_transparent)] multiSelected" : ""}`,
+                    "inline-flex min-h-[29px] w-full items-center justify-center justify-start gap-1.5 rounded-sm border border-transparent bg-transparent px-2 py-1 text-left text-xs whitespace-normal text-foreground transition-[color,background-color,border-color,box-shadow] outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 aria-current:bg-accent aria-selected:bg-accent [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                    `changeNavigatorRow changeNavigatorRow [display:flex] [min-height:29px] [width:100%] [align-items:center] [gap:5px] rounded-none! [padding:3px_7px] [text-align:left] [background:transparent] [&_small]:[color:var(--disabled-foreground)] [&.multiSelected]:[background:color-mix(in_oklch,_var(--accent)_62%,_transparent)] [&.selected]:[background:var(--accent)] [&[aria-current=true]]:[background:var(--accent)] ${active ? "selected selected [color:var(--foreground)] [background:var(--accent)]" : ""} ${multiSelected && !active ? "multiSelected multiSelected [background:color-mix(in_oklch,_var(--accent)_62%,_transparent)]" : ""}`,
                   )}
                 >
                   <StatusBadge className={statusClass(entry.file)}>
@@ -162,7 +162,7 @@ export function ChangeNavigator({
                     name={entry.file.submodule ? "worktree" : "file"}
                     size={13}
                   />
-                  <span className="ellipsis grid [min-width:0] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap] ellipsis">
+                  <span className="ellipsis ellipsis grid [min-width:0] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap]">
                     <strong className="truncate">
                       {treeMode ? filename : entry.file.path}
                     </strong>
@@ -170,7 +170,7 @@ export function ChangeNavigator({
                       <small className="truncate">{folders.join("/")}</small>
                     )}
                   </span>
-                  <span className="diffStat [display:flex] [font-size:9px] [gap:4px] [margin-left:auto] [&_i]:[color:var(--success)] [&_i]:[font-style:normal] [&_b]:[color:var(--destructive)] [&_b]:[font-weight:400] diffStat">
+                  <span className="diffStat diffStat [margin-left:auto] [display:flex] [gap:4px] [font-size:9px] [&_b]:[font-weight:400] [&_b]:[color:var(--destructive)] [&_i]:[color:var(--success)] [&_i]:[font-style:normal]">
                     <i>+{entry.file.additions ?? 0}</i>
                     <b>−{entry.file.deletions ?? 0}</b>
                   </span>
@@ -188,7 +188,7 @@ export function ChangeNavigator({
     // oxlint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- The focusable landmark owns file-navigation keyboard shortcuts.
     <aside
       aria-label="Changed files"
-      className="changeNavigator [border-right:1px_solid_var(--border)] [display:grid] [grid-template-rows:38px_minmax(0,_1fr)_auto] [min-height:0] [min-width:0] [outline:0] [position:relative] changeNavigator"
+      className="changeNavigator changeNavigator [position:relative] [display:grid] [min-height:0] [min-width:0] [grid-template-rows:38px_minmax(0,_1fr)_auto] [outline:0] [border-right:1px_solid_var(--border)]"
       onKeyDown={onKeyDown}
       ref={(node) => {
         navigator.current = node;
@@ -204,7 +204,7 @@ export function ChangeNavigator({
           value={navigatorWidth}
         />
       )}
-      <header className="changeNavigatorToolbar [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:4px] [padding:5px_6px] [&>_label]:[align-items:center] [&>_label]:[background:var(--secondary)] [&>_label]:[border:1px_solid_var(--border)] [&>_label]:rounded-lg [&>_label]:[display:flex] [&>_label]:[flex:1] [&>_label]:[gap:5px] [&>_label]:[height:27px] [&>_label]:[padding:0_7px] [&>_label:focus-within]:[border-color:var(--primary)] [&>_label:focus-within]:[box-shadow:0_0_0_2px_color-mix(in_oklch,_var(--primary)_22%,_transparent)] [&_input]:[background:transparent] [&_input]:[border:0] [&_input]:[min-width:0] [&_input]:[outline:0] [&_input]:[width:100%] changeNavigatorToolbar [&>_label]:rounded-lg">
+      <header className="changeNavigatorToolbar changeNavigatorToolbar [display:flex] [align-items:center] [gap:4px] [padding:5px_6px] [border-bottom:1px_solid_var(--border)] [&_input]:[width:100%] [&_input]:[min-width:0] [&_input]:[outline:0] [&_input]:[background:transparent] [&_input]:[border:0] [&>_label]:[display:flex] [&>_label]:[height:27px] [&>_label]:[flex:1] [&>_label]:[align-items:center] [&>_label]:[gap:5px] [&>_label]:rounded-lg [&>_label]:[padding:0_7px] [&>_label]:[background:var(--secondary)] [&>_label]:[border:1px_solid_var(--border)] [&>_label:focus-within]:[border-color:var(--primary)] [&>_label:focus-within]:[box-shadow:0_0_0_2px_color-mix(in_oklch,_var(--primary)_22%,_transparent)]">
         <label>
           <Icon name="search" size={13} />
           <Input
@@ -232,14 +232,14 @@ export function ChangeNavigator({
           hidden={toolWindow}
           onClick={onOpenCommitComposer}
           type="button"
-          className="text-muted-foreground [display:none]! max-[1120px]:[display:inline-flex]!"
+          className="[display:none]! text-muted-foreground max-[1120px]:[display:inline-flex]!"
           variant="ghost"
           size="icon-sm"
         >
           <Icon name="commit" size={13} />
         </Button>
       </header>
-      <div className="changeNavigatorList [min-height:0] [overflow:auto] changeNavigatorList">
+      <div className="changeNavigatorList changeNavigatorList [min-height:0] [overflow:auto]">
         {entries.length === 0 ? (
           <EmptyState title="Working tree clean." />
         ) : filteredEntries.length === 0 ? (
@@ -252,7 +252,7 @@ export function ChangeNavigator({
         )}
       </div>
       {selectedEntry && (
-        <footer className="changeNavigatorActions [border-top:1px_solid_var(--border)] [display:flex] [flex-wrap:wrap] [gap:4px] [padding:5px] [&_button]:[background:transparent] [&_button]:[color:var(--muted-foreground)] [&_button]:[min-height:25px] [&_button]:[padding:0_6px] changeNavigatorActions">
+        <footer className="changeNavigatorActions changeNavigatorActions [display:flex] [flex-wrap:wrap] [gap:4px] [padding:5px] [border-top:1px_solid_var(--border)] [&_button]:[min-height:25px] [&_button]:[padding:0_6px] [&_button]:[color:var(--muted-foreground)] [&_button]:[background:transparent]">
           {effectiveSelectedEntries.some(
             (entry) => entry.selection.layer === "worktree",
           ) && (

@@ -65,7 +65,7 @@ export function AppWorkspaceRouter({
   return (
     <>
       {activeError?.kind === "error" ? (
-        <main className="min-h-0 [grid-row:2_/_-1]">
+        <main className="[grid-row:2_/_-1] min-h-0">
           <EmptyState
             className="gap-2 px-10 py-10 [&_[data-slot=empty-title]]:text-foreground"
             description={<code>{activeError.path}</code>}

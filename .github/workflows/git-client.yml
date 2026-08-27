@@ -32,6 +32,8 @@ jobs:
       - name: Verify configured Node.js
         run: test "v$(cat .node-version)" = "$(node --version)"
       - run: pnpm install --frozen-lockfile
+      - name: Validate shadcn workspace manifest
+        run: pnpm --filter @jongminchung/git-client exec shadcn info --json
       - run: pnpm run audit:prod
       - name: Validate release version
         env:

@@ -588,7 +588,7 @@ export function CommandProvider({
       )}
       {assistantMessage && (
         <div
-          className={`presentationAssistant [background:var(--popover)] [border:1px_solid_var(--input)] rounded-lg [bottom:42px] [box-shadow:var(--shadow-lg)] [color:var(--foreground)] [font-size:14px] [font-weight:600] [left:50%] [padding:10px_16px] [position:fixed] [transform:translateX(-50%)] [z-index:var(--layer-assistant)] presentationAssistant rounded-lg`}
+          className={`presentationAssistant presentationAssistant [position:fixed] [bottom:42px] [left:50%] [z-index:var(--layer-assistant)] [transform:translateX(-50%)] rounded-lg [padding:10px_16px] [font-size:14px] [font-weight:600] [color:var(--foreground)] [box-shadow:var(--shadow-lg)] [background:var(--popover)] [border:1px_solid_var(--input)]`}
           role="status"
         >
           {assistantMessage}
@@ -596,7 +596,7 @@ export function CommandProvider({
       )}
       <span
         aria-live="polite"
-        className={`srOnly [clip:rect(0_0_0_0)] [clip-path:inset(50%)] [height:1px] [overflow:hidden] [position:absolute] [left:0] [top:0] [white-space:nowrap] [width:1px] srOnly`}
+        className={`srOnly srOnly [position:absolute] [top:0] [left:0] [height:1px] [width:1px] [overflow:hidden] [white-space:nowrap] [clip-path:inset(50%)] [clip:rect(0_0_0_0)]`}
         data-command-status
         role="status"
       >

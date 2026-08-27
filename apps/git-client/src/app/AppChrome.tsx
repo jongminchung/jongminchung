@@ -61,14 +61,14 @@ export function WorkspaceTitlebar({
   }, [onProjectSwitcherOpenChange]);
   return (
     <header
-      className={`titlebar [align-items:center] [background:var(--card)] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:2px] [padding-right:5px] [user-select:none] [&>_button]:[align-items:center] [&>_button]:[background:transparent] [&>_button]:[color:var(--muted-foreground)] [&>_button]:[display:flex] [&>_button]:[height:26px] [&>_button]:[justify-content:center] [&>_button:hover]:[background:var(--muted)] [&>_button:hover]:[color:var(--foreground)] bg-background! border-transparent! [html[data-toolbar-visible=false]_&>*:not(.trafficSpace):not(.mainToolbarDragRegion)]:hidden! [html[data-distraction-free-mode=true]_&>*:not(.trafficSpace):not(.mainToolbarDragRegion)]:hidden! [html[data-presentation-mode=true]_&>*:not(.trafficSpace):not(.mainToolbarDragRegion)]:hidden! titlebar`}
+      className={`titlebar titlebar [display:flex] [align-items:center] [gap:2px] border-transparent! bg-background! [padding-right:5px] [background:var(--card)] [border-bottom:1px_solid_var(--border)] [user-select:none] [&>_button]:[display:flex] [&>_button]:[height:26px] [&>_button]:[align-items:center] [&>_button]:[justify-content:center] [&>_button]:[color:var(--muted-foreground)] [&>_button]:[background:transparent] [&>_button:hover]:[color:var(--foreground)] [&>_button:hover]:[background:var(--muted)] [html[data-distraction-free-mode=true]_&>*:not(.trafficSpace):not(.mainToolbarDragRegion)]:hidden! [html[data-presentation-mode=true]_&>*:not(.trafficSpace):not(.mainToolbarDragRegion)]:hidden! [html[data-toolbar-visible=false]_&>*:not(.trafficSpace):not(.mainToolbarDragRegion)]:hidden!`}
       aria-label="Main Toolbar"
     >
       <div
-        className={`trafficSpace [flex:0_0_74px] max-[1050px]:[flex-basis:64px] trafficSpace`}
+        className={`trafficSpace trafficSpace [flex:0_0_74px] max-[1050px]:[flex-basis:64px]`}
       />
       <div
-        className={`mainToolbarPopupAnchor [align-self:stretch] [display:flex] [position:relative] mainToolbarPopupAnchor`}
+        className={`mainToolbarPopupAnchor mainToolbarPopupAnchor [position:relative] [display:flex] [align-self:stretch]`}
       >
         <Tooltip>
           <TooltipTrigger
@@ -85,7 +85,7 @@ export function WorkspaceTitlebar({
                 size="default"
               >
                 <span
-                  className={`projectMark [align-items:center] [background:var(--primary)] rounded-xs [color:var(--primary-foreground)] [display:inline-flex] [font-size:9px] [font-weight:700] [height:16px] [justify-content:center] [width:16px] projectMark rounded-xs`}
+                  className={`projectMark projectMark [display:inline-flex] [height:16px] [width:16px] [align-items:center] [justify-content:center] rounded-xs [font-size:9px] [font-weight:700] [color:var(--primary-foreground)] [background:var(--primary)]`}
                 >
                   {repository?.snapshot.name.trim().charAt(0).toUpperCase() ||
                     "G"}
@@ -155,7 +155,7 @@ export function WorkspaceTitlebar({
             <TooltipContent>Push…</TooltipContent>
           </Tooltip>
           <div
-            className={`mainToolbarPopupAnchor [align-self:stretch] [display:flex] [position:relative] mainToolbarPopupAnchor`}
+            className={`mainToolbarPopupAnchor mainToolbarPopupAnchor [position:relative] [display:flex] [align-self:stretch]`}
           >
             <Tooltip>
               <TooltipTrigger
@@ -221,7 +221,7 @@ export function WorkspaceTitlebar({
         </span>
       )}
       <span
-        className={`mainToolbarDragRegion [flex:1] [height:100%] mainToolbarDragRegion`}
+        className={`mainToolbarDragRegion mainToolbarDragRegion [height:100%] [flex:1]`}
       />
       <Tooltip>
         <TooltipTrigger
@@ -263,7 +263,7 @@ export function WelcomeTitlebar() {
   return (
     <header
       className={
-        "welcomeTitlebar [align-items:center] [background:var(--card)] [border-bottom:1px_solid_var(--border)] [display:flex] [font-weight:600] [grid-row:1] [height:30px] [padding-left:84px] [user-select:none]"
+        "welcomeTitlebar [grid-row:1] [display:flex] [height:30px] [align-items:center] [padding-left:84px] [font-weight:600] [background:var(--card)] [border-bottom:1px_solid_var(--border)] [user-select:none]"
       }
       data-testid="welcome-titlebar"
     >
@@ -295,11 +295,11 @@ export function StartupWorkspace({
   if (restoring) {
     return (
       <main
-        className={`startupWorkspace [grid-row:2_/_-1] [min-height:0] [background:var(--card)] [display:grid] [grid-template-rows:auto_minmax(0,_1fr)] [overflow:hidden] startupWorkspace`}
+        className={`startupWorkspace startupWorkspace [grid-row:2_/_-1] [display:grid] [min-height:0] [grid-template-rows:auto_minmax(0,_1fr)] [overflow:hidden] [background:var(--card)]`}
         aria-busy="true"
       >
         <EmptyState
-          className="p-0 [grid-row:1_/_-1] [&_[data-slot=empty-title]]:font-medium [&_[data-slot=empty-title]]:text-foreground"
+          className="[grid-row:1_/_-1] p-0 [&_[data-slot=empty-title]]:font-medium [&_[data-slot=empty-title]]:text-foreground"
           description="Reopening repositories and validating saved paths."
           icon={<SpinnerIcon aria-hidden className="size-3" />}
           role="status"

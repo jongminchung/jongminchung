@@ -22,7 +22,7 @@ export function ScratchEditor({
   return (
     <section
       aria-label={`Scratch file: ${file.name}`}
-      className={`scratchEditor [background:var(--card)] [height:100%] [min-height:0] [min-width:0] [overflow:hidden] scratchEditor`}
+      className={`scratchEditor scratchEditor [height:100%] [min-height:0] [min-width:0] [overflow:hidden] [background:var(--card)]`}
     >
       <Suspense
         fallback={

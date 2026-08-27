@@ -79,7 +79,7 @@ function MdxBlockquote(props: ComponentProps<"blockquote">) {
 function MdxTable(props: ComponentProps<"table">) {
   return (
     <table
-      className="my-4 block w-full overflow-x-auto border-collapse text-sm"
+      className="my-4 block w-full border-collapse overflow-x-auto text-sm"
       {...props}
     />
   );

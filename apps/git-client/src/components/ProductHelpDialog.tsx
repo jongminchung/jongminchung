@@ -46,7 +46,7 @@ export function ProductHelpDialog({
       width={620}
     >
       <section
-        className={`productHelpDialog [display:grid] [grid-template-rows:auto_minmax(300px,_1fr)_auto] [&>_main]:[min-height:0] [&>_main]:[overflow:auto] [&>_main>_p]:[color:var(--muted-foreground)] [&>_main>_p]:[margin:14px_16px_8px] [&>_main>_div[role=list]]:[padding:5px_9px_12px] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:flex] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:8px_10px] productHelpDialog`}
+        className={`productHelpDialog productHelpDialog [display:grid] [grid-template-rows:auto_minmax(300px,_1fr)_auto] [&>_footer]:[display:flex] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:8px_10px] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_main]:[min-height:0] [&>_main]:[overflow:auto] [&>_main>_div[role=list]]:[padding:5px_9px_12px] [&>_main>_p]:[margin:14px_16px_8px] [&>_main>_p]:[color:var(--muted-foreground)]`}
       >
         <DialogHeader
           hasDivider

@@ -134,7 +134,7 @@ export function GraphFilterOptions({
       <Button
         type="button"
         aria-label="Graph Options"
-        className={cn("h-5 min-w-5 px-0 aspect-square")}
+        className={cn("aspect-square h-5 min-w-5 px-0")}
         variant="ghost"
         size="icon-xs"
       >
@@ -176,7 +176,7 @@ export function GraphViewOptions({
         width={264}
         content={
           <div
-            className={`logViewOptions [display:grid] [gap:3px] [padding:5px] [&>_strong]:[border-top:1px_solid_var(--border)] [&>_strong]:[color:var(--muted-foreground)] [&>_strong]:[font-size:10px] [&>_strong]:[margin:4px_5px_1px] [&>_strong]:[padding-top:6px] logViewOptions`}
+            className={`logViewOptions logViewOptions [display:grid] [gap:3px] [padding:5px] [&>_strong]:[margin:4px_5px_1px] [&>_strong]:[padding-top:6px] [&>_strong]:[font-size:10px] [&>_strong]:[color:var(--muted-foreground)] [&>_strong]:[border-top:1px_solid_var(--border)]`}
           >
             <CheckboxInput
               isDisabled
@@ -241,7 +241,7 @@ export function GraphViewOptions({
             <Button
               type="button"
               aria-label="View Options"
-              className={cn("h-5 min-w-5 px-0 aspect-square")}
+              className={cn("aspect-square h-5 min-w-5 px-0")}
               variant="ghost"
               size="icon-xs"
             >

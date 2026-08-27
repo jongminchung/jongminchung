@@ -26,7 +26,7 @@ export function ProcessesDialog({
       width={520}
     >
       <section
-        className={`processesDialog [display:grid] [grid-template-rows:auto_minmax(220px,_1fr)_auto] [max-height:min(580px,_calc(100vh_-_80px))] [&>_main]:[min-height:0] [&>_main]:[overflow:auto] [&>_main>_div[role=list]]:[padding:6px] [&>_main>_[data-slot=empty-state]]:[min-height:220px] [&>_footer]:[align-items:center] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:flex] [&>_footer]:[gap:8px] [&>_footer]:[padding:8px_10px] [&>_footer>_span]:[flex:1] processesDialog`}
+        className={`processesDialog processesDialog [display:grid] [max-height:min(580px,_calc(100vh_-_80px))] [grid-template-rows:auto_minmax(220px,_1fr)_auto] [&>_footer]:[display:flex] [&>_footer]:[align-items:center] [&>_footer]:[gap:8px] [&>_footer]:[padding:8px_10px] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer>_span]:[flex:1] [&>_main]:[min-height:0] [&>_main]:[overflow:auto] [&>_main>_[data-slot=empty-state]]:[min-height:220px] [&>_main>_div[role=list]]:[padding:6px]`}
       >
         <DialogHeader
           hasDivider

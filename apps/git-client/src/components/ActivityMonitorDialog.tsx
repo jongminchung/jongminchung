@@ -58,7 +58,7 @@ export function ActivityMonitorDialog({
       width="min(680px, calc(100vw - 70px))"
     >
       <section
-        className={`activityMonitorDialog [display:grid] [grid-template-rows:auto_30px_minmax(300px,_1fr)_auto] [height:min(620px,_calc(100vh_-_80px))] [&>_header]:[align-items:center] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[color:var(--muted-foreground)] [&>_header]:[display:grid] [&>_header]:[grid-template-columns:minmax(0,_1fr)_90px_100px] [&>_header]:[padding:0_12px] [&>_header]:[font-size:11px] [&>_main]:[min-height:0] [&>_main]:[overflow:auto] [&>_main>_div[role=list]]:[padding:5px] [&>_footer]:[align-items:center] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[color:var(--muted-foreground)] [&>_footer]:[display:flex] [&>_footer]:[justify-content:space-between] [&>_footer]:[padding:8px_10px] activityMonitorDialog`}
+        className={`activityMonitorDialog activityMonitorDialog [display:grid] [height:min(620px,_calc(100vh_-_80px))] [grid-template-rows:auto_30px_minmax(300px,_1fr)_auto] [&>_footer]:[display:flex] [&>_footer]:[align-items:center] [&>_footer]:[justify-content:space-between] [&>_footer]:[padding:8px_10px] [&>_footer]:[color:var(--muted-foreground)] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_header]:[display:grid] [&>_header]:[grid-template-columns:minmax(0,_1fr)_90px_100px] [&>_header]:[align-items:center] [&>_header]:[padding:0_12px] [&>_header]:[font-size:11px] [&>_header]:[color:var(--muted-foreground)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_main]:[min-height:0] [&>_main]:[overflow:auto] [&>_main>_div[role=list]]:[padding:5px]`}
       >
         <DialogHeader
           hasDivider
@@ -86,7 +86,7 @@ export function ActivityMonitorDialog({
                   description={`PID ${process.pid}`}
                   endContent={
                     <span
-                      className={`activityMonitorMetrics [display:grid] [font-variant-numeric:tabular-nums] [grid-template-columns:90px_100px] [text-align:right] activityMonitorMetrics`}
+                      className={`activityMonitorMetrics activityMonitorMetrics [display:grid] [grid-template-columns:90px_100px] [text-align:right] [font-variant-numeric:tabular-nums]`}
                     >
                       <span>{process.cpuPercent.toFixed(1)}%</span>
                       <span>{bytesLabel(process.memoryBytes)}</span>

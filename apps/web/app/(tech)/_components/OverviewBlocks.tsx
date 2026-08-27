@@ -226,7 +226,7 @@ export function OverviewCards({ locale }: { readonly locale: Locale }) {
 export function OverviewCta({ locale }: { readonly locale: Locale }) {
   const text = copy[locale];
   return (
-    <Card className="flex items-center justify-between gap-8 rounded-lg border border-border p-8 max-[760px]:items-start max-[760px]:flex-col">
+    <Card className="flex items-center justify-between gap-8 rounded-lg border border-border p-8 max-[760px]:flex-col max-[760px]:items-start">
       <div>
         <h3 className="m-0 font-sans text-2xl leading-[1.25] font-medium text-primary">
           {text.ctaTitle}

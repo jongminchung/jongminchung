@@ -48,7 +48,7 @@ export function GitConsolePanel({
 
   return (
     <section
-      className={`gitConsolePanel [display:grid] [grid-template-rows:31px_minmax(0,_1fr)] [height:100%] [min-height:0] [&>_header]:[align-items:center] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[gap:5px] [&>_header]:[padding:0_6px] [&>_header_span]:[color:var(--muted-foreground)] [&>_header_i]:[flex:1] [&>_header_button]:[background:transparent] [&>_header_button]:[font-size:10px] [&>_header_button]:[height:24px] [&>_header_button]:[padding:0_6px] gitConsolePanel`}
+      className={`gitConsolePanel gitConsolePanel [display:grid] [height:100%] [min-height:0] [grid-template-rows:31px_minmax(0,_1fr)] [&>_header]:[display:flex] [&>_header]:[align-items:center] [&>_header]:[gap:5px] [&>_header]:[padding:0_6px] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header_button]:[height:24px] [&>_header_button]:[padding:0_6px] [&>_header_button]:[font-size:10px] [&>_header_button]:[background:transparent] [&>_header_i]:[flex:1] [&>_header_span]:[color:var(--muted-foreground)]`}
       aria-label="Git Console"
       tabIndex={-1}
     >
@@ -63,7 +63,7 @@ export function GitConsolePanel({
           }
           type="button"
           className={cn(
-            "gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground",
+            "min-h-[25px] gap-1.5 px-1.5 text-xs text-muted-foreground",
           )}
           variant="ghost"
           size="default"
@@ -75,7 +75,7 @@ export function GitConsolePanel({
           onClick={() => setExpanded(new Set())}
           type="button"
           className={cn(
-            "gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground",
+            "min-h-[25px] gap-1.5 px-1.5 text-xs text-muted-foreground",
           )}
           variant="ghost"
           size="default"
@@ -92,7 +92,7 @@ export function GitConsolePanel({
           }
           type="button"
           className={cn(
-            "gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground",
+            "min-h-[25px] gap-1.5 px-1.5 text-xs text-muted-foreground",
           )}
           variant="ghost"
           size="default"
@@ -104,7 +104,7 @@ export function GitConsolePanel({
           onClick={onClear}
           type="button"
           className={cn(
-            "gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground",
+            "min-h-[25px] gap-1.5 px-1.5 text-xs text-muted-foreground",
           )}
           variant="ghost"
           size="default"
@@ -116,7 +116,7 @@ export function GitConsolePanel({
         <EmptyState title="Git commands will be shown here." />
       ) : (
         <div
-          className={`gitConsoleList [min-height:0] [overflow:auto] [&_article]:[border-bottom:1px_solid_var(--border)] [&_article[aria-selected=true]]:[background:var(--accent)] [&_article>_button]:[align-items:center] [&_article>_button]:[background:transparent] [&_article>_button]:[display:grid] [&_article>_button]:[gap:8px] [&_article>_button]:[grid-template-columns:16px_minmax(0,_1fr)_80px_62px] [&_article>_button]:[height:27px] [&_article>_button]:[padding:0_7px] [&_article>_button]:[text-align:left] [&_article>_button]:[width:100%] [&_article_code]:[overflow:hidden] [&_article_code]:[text-overflow:ellipsis] [&_article_code]:[white-space:nowrap] [&_article_small]:[color:var(--disabled-foreground)] [&_article_small]:[font-size:9px] [&_article_pre]:[background:var(--muted)] [&_article_pre]:[border-top:1px_solid_var(--border)] [&_article_pre]:[font-family:var(--font-family-code)] [&_article_pre]:[font-size:10px] [&_article_pre]:[margin:0] [&_article_pre]:[max-height:180px] [&_article_pre]:[overflow:auto] [&_article_pre]:[padding:7px_30px] [&_article_pre]:[white-space:pre-wrap] gitConsoleList`}
+          className={`gitConsoleList gitConsoleList [min-height:0] [overflow:auto] [&_article]:[border-bottom:1px_solid_var(--border)] [&_article_code]:[overflow:hidden] [&_article_code]:[text-overflow:ellipsis] [&_article_code]:[white-space:nowrap] [&_article_pre]:[margin:0] [&_article_pre]:[max-height:180px] [&_article_pre]:[overflow:auto] [&_article_pre]:[padding:7px_30px] [&_article_pre]:[font-family:var(--font-family-code)] [&_article_pre]:[font-size:10px] [&_article_pre]:[white-space:pre-wrap] [&_article_pre]:[background:var(--muted)] [&_article_pre]:[border-top:1px_solid_var(--border)] [&_article_small]:[font-size:9px] [&_article_small]:[color:var(--disabled-foreground)] [&_article>_button]:[display:grid] [&_article>_button]:[height:27px] [&_article>_button]:[width:100%] [&_article>_button]:[grid-template-columns:16px_minmax(0,_1fr)_80px_62px] [&_article>_button]:[align-items:center] [&_article>_button]:[gap:8px] [&_article>_button]:[padding:0_7px] [&_article>_button]:[text-align:left] [&_article>_button]:[background:transparent] [&_article[aria-selected=true]]:[background:var(--accent)]`}
           role="listbox"
           aria-label="Git command history"
         >

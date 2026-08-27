@@ -342,7 +342,7 @@ function NativeTerminalPanel({
   return (
     <div
       aria-label="Local Tool Window"
-      className={`terminalTool [display:grid] [grid-template-rows:30px_minmax(0,_1fr)] [height:100%] [min-height:0] terminalTool`}
+      className={`terminalTool terminalTool [display:grid] [height:100%] [min-height:0] [grid-template-rows:30px_minmax(0,_1fr)]`}
       onKeyDownCapture={(event: KeyboardEvent<HTMLDivElement>) => {
         if (terminalActionForKeyboard(event.nativeEvent) !== "newTab") return;
         event.preventDefault();
@@ -369,7 +369,7 @@ function NativeTerminalPanel({
         showAgents
       />
       <div
-        className={`terminalSurface [background:var(--terminal-background)] [min-height:0] [overflow:hidden] [&>_div:not([data-slot=empty])]:[height:100%] [&>div:not([data-slot=empty])]:box-border [&>div:not([data-slot=empty])]:pl-1 terminalSurface`}
+        className={`terminalSurface terminalSurface [min-height:0] [overflow:hidden] [background:var(--terminal-background)] [&>_div:not([data-slot=empty])]:[height:100%] [&>div:not([data-slot=empty])]:box-border [&>div:not([data-slot=empty])]:pl-1`}
       >
         {activeKey ? (
           <Suspense

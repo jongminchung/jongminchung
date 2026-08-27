@@ -85,7 +85,7 @@ export const CommitLog = memo(function CommitLog({
 
   return (
     <section
-      className={`logPane [background:var(--card)] [min-height:0] [min-width:0] [display:grid] [grid-template-rows:35px_minmax(0,_1fr)_0] logPane`}
+      className={`logPane logPane [display:grid] [min-height:0] [min-width:0] [grid-template-rows:35px_minmax(0,_1fr)_0] [background:var(--card)]`}
       aria-busy={loading}
       aria-label="Commit log"
       data-filter-row-height={LOG_FILTER_ROW_HEIGHT}
@@ -135,7 +135,7 @@ export const CommitLog = memo(function CommitLog({
         upstreamRef={state.upstreamRef}
         viewOptions={state.viewOptions}
       />
-      <div className={`logFooter [display:none] logFooter`}>
+      <div className={`logFooter logFooter [display:none]`}>
         <span>
           {loading
             ? "Loading…"

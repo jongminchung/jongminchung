@@ -54,7 +54,7 @@ export function RepositoryDialogsFeature() {
       )}
       {diffState && (
         <section
-          className={`standaloneDiff [background:var(--card)] [display:grid] [grid-template-rows:38px_minmax(0,_1fr)] [inset:70px_0_23px] [position:fixed] [z-index:var(--layer-workspace-overlay)] [&>_header]:[align-items:center] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[padding:0_9px] [&>_header_span]:[flex:1] standaloneDiff`}
+          className={`standaloneDiff standaloneDiff [position:fixed] [inset:70px_0_23px] [z-index:var(--layer-workspace-overlay)] [display:grid] [grid-template-rows:38px_minmax(0,_1fr)] [background:var(--card)] [&>_header]:[display:flex] [&>_header]:[align-items:center] [&>_header]:[padding:0_9px] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header_span]:[flex:1]`}
           aria-label="Standalone diff review"
         >
           <header>
@@ -153,7 +153,7 @@ export function RepositoryDialogsFeature() {
       {dialog.node}
       {toast && (
         <div
-          className={`toast [align-items:center] [background:var(--inverse)] rounded-lg [bottom:36px] [box-shadow:var(--shadow-lg)] [color:var(--inverse-foreground)] [display:flex] [gap:7px] [left:50%] [padding:9px_13px] [position:fixed] [transform:translateX(-50%)] [z-index:var(--layer-floating-panel)] toast rounded-lg`}
+          className={`toast toast [position:fixed] [bottom:36px] [left:50%] [z-index:var(--layer-floating-panel)] [display:flex] [transform:translateX(-50%)] [align-items:center] [gap:7px] rounded-lg [padding:9px_13px] [color:var(--inverse-foreground)] [box-shadow:var(--shadow-lg)] [background:var(--inverse)]`}
         >
           <Icon name="check" size={15} />
           {toast}

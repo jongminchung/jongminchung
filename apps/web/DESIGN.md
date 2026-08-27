@@ -30,7 +30,8 @@
   - 공용 UI는 `--web-*`, `--docs-*`, `--research-*`를 직접 참조하지 않음
 - **기본 디자인 theme와 global entrypoint는 `@jongminchung/ui/globals.css`가 제공하고 Web은 이를 직접 import함**
   - `packages/ui/src/styles/theme.css`는 light·dark generic semantic role을, `tokens.css`는 Tailwind mapping을, `globals.css`는 이들의 공통 entrypoint를 소유함
-  - Web은 별도의 `app/global.css` 또는 `app/design-theme.css` provider를 만들지 않고 `--background`, `--foreground`, `--card`, `--muted`, `--primary`, `--ring` 같은 공용 역할을 사용함
+  - `apps/web/app/theme.css`는 Web font와 `tech`·`invest`의 제품별 `--background` override만 소유함
+  - Web route entry는 공용 `globals.css` 뒤에 앱 `theme.css`를 import하고 나머지 semantic role은 공용 값을 사용함
 - **site-scoped alias는 site마다 필요한 도메인 역할만 추가함**
   - `home`은 custom property alias를 추가하지 않고 공용 token과 portfolio composition만 사용함
   - `tech`는 `--docs-code-*`, `--docs-nav-current*`, `--docs-outline-current*`만 사용함

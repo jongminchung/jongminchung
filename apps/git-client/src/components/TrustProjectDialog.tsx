@@ -34,7 +34,7 @@ export function TrustProjectDialog({
       width={637}
     >
       <section className="grid min-h-[192px] grid-cols-[32px_minmax(0,1fr)] gap-x-3 p-5">
-        <Icon className="mt-0.5 text-warning" name="warning" size={28} />
+        <Icon className="text-warning mt-0.5" name="warning" size={28} />
         <div className="flex min-w-0 flex-col">
           <h2 className="m-0 text-[15px] font-semibold">{title}</h2>
           <p className="mt-2 mb-2 text-[13px] leading-[18px] text-muted-foreground">

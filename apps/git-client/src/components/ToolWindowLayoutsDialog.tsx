@@ -24,7 +24,7 @@ export function ToolWindowLayoutsDialog({
       width={420}
     >
       <section
-        className={`toolWindowLayoutsDialog [display:grid] [grid-template-rows:auto_minmax(180px,_1fr)] [max-height:min(520px,_calc(100vh_-_80px))] [&>_div[role=listbox]]:[min-height:0] [&>_div[role=listbox]]:[overflow:auto] [&>_div[role=listbox]]:[padding:6px] toolWindowLayoutsDialog`}
+        className={`toolWindowLayoutsDialog toolWindowLayoutsDialog [display:grid] [max-height:min(520px,_calc(100vh_-_80px))] [grid-template-rows:auto_minmax(180px,_1fr)] [&>_div[role=listbox]]:[min-height:0] [&>_div[role=listbox]]:[overflow:auto] [&>_div[role=listbox]]:[padding:6px]`}
       >
         <DialogHeader
           hasDivider

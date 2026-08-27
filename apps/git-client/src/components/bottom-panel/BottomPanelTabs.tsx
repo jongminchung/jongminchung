@@ -51,7 +51,7 @@ export function BottomPanelTabs({
       value={active}
     >
       <div
-        className={`toolTabs [align-items:stretch] [background:var(--secondary)] [display:flex] [&_button]:[align-items:center] [&_button]:[background:transparent] [&_button]:[border-right:1px_solid_var(--border)] [&_button]:[color:var(--muted-foreground)] [&_button]:[display:flex] [&_button]:[gap:6px] [&_button]:[padding:0_12px] [&_button:hover]:[background:var(--muted)] [&_button:hover]:[color:var(--foreground)] [&_.activeToolTab]:[box-shadow:inset_0_-2px_var(--primary)] [&_.activeToolTab]:[color:var(--foreground)] [&_.activeToolTab]:[font-weight:600] [&_button_em]:[align-items:center] [&_button_em]:[background:var(--muted)] [&_button_em]:rounded-lg [&_button_em]:[display:flex] [&_button_em]:[font-size:9px] [&_button_em]:[font-style:normal] [&_button_em]:[height:14px] [&_button_em]:[justify-content:center] [&_button_em]:[min-width:14px] [&>_span]:[flex:1] [background:var(--card)] toolTabs [&_button_em]:rounded-lg`}
+        className={`toolTabs toolTabs [display:flex] [align-items:stretch] [background:var(--card)] [background:var(--secondary)] [&_.activeToolTab]:[font-weight:600] [&_.activeToolTab]:[color:var(--foreground)] [&_.activeToolTab]:[box-shadow:inset_0_-2px_var(--primary)] [&_button]:[display:flex] [&_button]:[align-items:center] [&_button]:[gap:6px] [&_button]:[padding:0_12px] [&_button]:[color:var(--muted-foreground)] [&_button]:[background:transparent] [&_button]:[border-right:1px_solid_var(--border)] [&_button_em]:[display:flex] [&_button_em]:[height:14px] [&_button_em]:[min-width:14px] [&_button_em]:[align-items:center] [&_button_em]:[justify-content:center] [&_button_em]:rounded-lg [&_button_em]:[font-size:9px] [&_button_em]:[font-style:normal] [&_button_em]:[background:var(--muted)] [&_button:hover]:[color:var(--foreground)] [&_button:hover]:[background:var(--muted)] [&>_span]:[flex:1]`}
       >
         <TabsList
           activateOnFocus
@@ -71,9 +71,9 @@ export function BottomPanelTabs({
               }}
               value={tab.id}
               className={cn(
-                "inline-flex h-7 items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent px-2.5 text-xs text-muted-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 data-active:bg-accent data-active:text-foreground disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                "inline-flex h-7 items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent px-2.5 text-xs text-muted-foreground transition-[color,background-color,border-color,box-shadow] outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 data-active:bg-accent data-active:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
                 active === tab.id
-                  ? `activeToolTab [box-shadow:inset_0_-2px_var(--primary)] [color:var(--foreground)] [font-weight:600] [background:var(--accent)]! [color:var(--foreground)]! activeToolTab`
+                  ? `activeToolTab activeToolTab [font-weight:600] [color:var(--foreground)] [color:var(--foreground)]! [box-shadow:inset_0_-2px_var(--primary)] [background:var(--accent)]!`
                   : undefined,
               )}
             >

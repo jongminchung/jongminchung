@@ -16,7 +16,7 @@ export function HeroSection({ locale }: { readonly locale: Locale }) {
     >
       <div className="mx-auto w-full max-w-190 self-center text-center">
         <h1
-          className="m-0 max-w-190 text-[clamp(36px,5vw,58px)] font-semibold leading-[1.08] tracking-[-0.045em] max-[720px]:text-[clamp(49px,14vw,68px)] max-[720px]:leading-[.86]"
+          className="m-0 max-w-190 text-[clamp(36px,5vw,58px)] leading-[1.08] font-semibold tracking-[-0.045em] max-[720px]:text-[clamp(49px,14vw,68px)] max-[720px]:leading-[.86]"
           id="hero-title"
         >
           {locale === "ko" ? "무엇을 함께 만들까요?" : "Where should we begin?"}
@@ -41,7 +41,7 @@ export function HeroSection({ locale }: { readonly locale: Locale }) {
           <a
             className={cn(
               buttonVariants({ variant: "default", size: "lg" }),
-              "border-foreground bg-foreground font-mono text-xs text-inverse-foreground transition-[background,color,transform] hover:-translate-x-0.75 hover:-translate-y-0.75 hover:bg-accent hover:text-accent-foreground",
+              "border-foreground bg-foreground font-mono text-xs text-background transition-[background,color,transform] hover:-translate-x-0.75 hover:-translate-y-0.75 hover:bg-accent hover:text-accent-foreground",
               "min-h-[50px] gap-[26px] px-[18px]",
             )}
             href="#work"
@@ -126,7 +126,7 @@ export function WorkSection({ locale }: { readonly locale: Locale }) {
             </p>
             <div className="flex items-center justify-between gap-5 max-[980px]:col-start-2 max-[720px]:col-auto">
               <ul
-                className="m-0 flex flex-wrap gap-2 p-0 list-none"
+                className="m-0 flex list-none flex-wrap gap-2 p-0"
                 aria-label={`${project.title} technologies`}
               >
                 {project.tags.map((tag) => (
@@ -183,7 +183,7 @@ export async function WritingSection({ locale }: { readonly locale: Locale }) {
         </p>
       </div>
       <div className="grid grid-cols-2 gap-[clamp(36px,7vw,110px)] max-[720px]:grid-cols-1">
-        <div className="[&_h3]:m-0 [&_h3]:border-b [&_h3]:border-foreground [&_h3]:pb-[18px] [&_h3]:font-mono [&_h3]:text-xs [&_h3]:tracking-[.08em] [&_h3]:uppercase [&_a]:grid [&_a]:grid-cols-[104px_1fr_auto] [&_a]:items-baseline [&_a]:gap-[18px] [&_a]:border-b [&_a]:py-[22px] [&_a_span:first-child]:font-mono [&_a_span:first-child]:text-[11px] [&_a_span:first-child]:text-muted-foreground [&_a_strong]:text-lg max-[720px]:[&_a]:grid-cols-[86px_1fr_auto]">
+        <div className="[&_a]:grid [&_a]:grid-cols-[104px_1fr_auto] [&_a]:items-baseline [&_a]:gap-[18px] [&_a]:border-b [&_a]:py-[22px] max-[720px]:[&_a]:grid-cols-[86px_1fr_auto] [&_a_span:first-child]:font-mono [&_a_span:first-child]:text-[11px] [&_a_span:first-child]:text-muted-foreground [&_a_strong]:text-lg [&_h3]:m-0 [&_h3]:border-b [&_h3]:border-foreground [&_h3]:pb-[18px] [&_h3]:font-mono [&_h3]:text-xs [&_h3]:tracking-[.08em] [&_h3]:uppercase">
           <h3>Engineering Notes</h3>
           {tech.map((article) => (
             <a key={article.id} href={`https://tech.jamie.kr${article.href}`}>
@@ -193,7 +193,7 @@ export async function WritingSection({ locale }: { readonly locale: Locale }) {
             </a>
           ))}
         </div>
-        <div className="[&_h3]:m-0 [&_h3]:border-b [&_h3]:border-foreground [&_h3]:pb-4.5 [&_h3]:font-mono [&_h3]:text-xs [&_h3]:tracking-[.08em] [&_h3]:uppercase [&_a]:grid [&_a]:grid-cols-[104px_1fr_auto] [&_a]:items-baseline [&_a]:gap-[18px] [&_a]:border-b [&_a]:py-[22px] [&_a_span:first-child]:font-mono [&_a_span:first-child]:text-[11px] [&_a_span:first-child]:text-muted-foreground [&_a_strong]:text-lg max-[720px]:[&_a]:grid-cols-[86px_1fr_auto]">
+        <div className="[&_a]:grid [&_a]:grid-cols-[104px_1fr_auto] [&_a]:items-baseline [&_a]:gap-[18px] [&_a]:border-b [&_a]:py-[22px] max-[720px]:[&_a]:grid-cols-[86px_1fr_auto] [&_a_span:first-child]:font-mono [&_a_span:first-child]:text-[11px] [&_a_span:first-child]:text-muted-foreground [&_a_strong]:text-lg [&_h3]:m-0 [&_h3]:border-b [&_h3]:border-foreground [&_h3]:pb-4.5 [&_h3]:font-mono [&_h3]:text-xs [&_h3]:tracking-[.08em] [&_h3]:uppercase">
           <h3>Investment Notes</h3>
           {invest.length === 0 ? (
             <p className="m-0 border-b py-7.5 font-mono text-[11px] text-muted-foreground">

@@ -120,7 +120,7 @@ pnpm exec shadcn add <component-or-block>
 
 - 기준: [shadcn theming contract](https://ui.shadcn.com/docs/theming)
 - `@jongminchung/ui/globals.css` 소유 범위
-  - Tailwind와 `tw-animate-css` import
+  - 자동 project scan을 비활성화한 Tailwind와 `tw-animate-css` import
   - 실제 사용하는 data-state variant와 `no-scrollbar` 정의
   - `theme.css`의 neutral light·dark 기본값 import
   - 값이 없는 `tokens.css` 계약 import
@@ -129,7 +129,8 @@ pnpm exec shadcn add <component-or-block>
 - 각 앱의 책임
   - `@jongminchung/ui/globals.css` import
   - 공용 기본값을 바꿀 때 그 뒤에서 앱의 `theme.css` import
-  - 앱 source tree를 `@source`로 등록
+  - 앱 source tree와 route 밖에서 Tailwind class를 실제 소유하는 component를 `@source`로 명시적으로 등록
+  - test·build output·generated evidence는 `@source not`으로 제외
 - 소비자는 앱의 전역 CSS에서 공용 진입점을 한 번만 import하고, 해당 CSS를 framework entry에서 기존 Tailwind 방식대로 로드
 
 ```css
@@ -144,6 +145,7 @@ import "./globals.css";
 ```
 
 - `globals.css`가 Tailwind, animation, 상태 variant, 기본 theme, token mapping과 공용 UI source scanning을 제공
+- `root.css`는 외부 consumer migration을 위한 deprecated facade이며 신규 내부 import에 사용하지 않음
 - 소비자는 `tailwindcss`, `tw-animate-css` 또는 공용 UI source를 중복 import·등록하지 않음
 - 앱 `theme.css` import는 공용 기본 token을 덮어쓸 때만 추가
 - 공용 기본값은 `@jongminchung/ui/theme.css`로도 export

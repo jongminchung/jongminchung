@@ -59,7 +59,7 @@ export function RepositoryStatusBar({
   return (
     <footer
       aria-label="Status Bar"
-      className={`statusbar [align-items:center] [background:var(--card)] [border-top:1px_solid_var(--border)] [color:var(--muted-foreground)] [display:flex] [font-size:9px] [gap:5px] [padding:0_5px_0_8px] [&>_nav]:[flex:1] [&>_nav]:[min-width:0] [&>_span]:[align-items:center] [&>_span]:[display:flex] [&>_span]:[gap:4px] bg-background! border-transparent! statusbar`}
+      className={`statusbar statusbar [display:flex] [align-items:center] [gap:5px] border-transparent! bg-background! [padding:0_5px_0_8px] [font-size:9px] [color:var(--muted-foreground)] [background:var(--card)] [border-top:1px_solid_var(--border)] [&>_nav]:[min-width:0] [&>_nav]:[flex:1] [&>_span]:[display:flex] [&>_span]:[align-items:center] [&>_span]:[gap:4px]`}
     >
       {productSettings.navigationBar === "status" && (
         <nav aria-label="Navigation Bar">
@@ -85,10 +85,10 @@ export function RepositoryStatusBar({
       )}
       {productSettings.navigationBar !== "status" && (
         <span
-          className={`statusbarSpacer [flex:1] [min-width:0] statusbarSpacer`}
+          className={`statusbarSpacer statusbarSpacer [min-width:0] [flex:1]`}
         />
       )}
-      <span className={`activitySlot [min-width:0] activitySlot`}>
+      <span className={`activitySlot activitySlot [min-width:0]`}>
         {activity &&
           (productSettings.statusBarWidgets.statusText ||
             productSettings.statusBarWidgets.fileSystemSync) && (
@@ -133,13 +133,13 @@ export function RepositoryStatusBar({
           )}
       </span>
       <span
-        className={`statusbarWidgets [align-self:stretch] [display:flex] [gap:0]! statusbarWidgets`}
+        className={`statusbarWidgets statusbarWidgets [display:flex] [gap:0]! [align-self:stretch]`}
       >
         {productSettings.statusBarWidgets.fileSystemSync && (
           <Button
             aria-label="Refresh repository"
             className={cn(
-              "h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:text-disabled-foreground disabled:opacity-100",
+              "disabled:text-disabled-foreground h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:opacity-100",
             )}
             onClick={() => void reload()}
             variant="ghost"
@@ -152,7 +152,7 @@ export function RepositoryStatusBar({
           <Button
             aria-label="Open notifications"
             className={cn(
-              "h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:text-disabled-foreground disabled:opacity-100",
+              "disabled:text-disabled-foreground h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:opacity-100",
             )}
             onClick={() => setNotificationOpen(true)}
             variant="ghost"
@@ -168,7 +168,7 @@ export function RepositoryStatusBar({
                 <Button
                   aria-label="Go to Line"
                   className={cn(
-                    "h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:text-disabled-foreground disabled:opacity-100",
+                    "disabled:text-disabled-foreground h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:opacity-100",
                   )}
                   onClick={toVoidHandler(async () => {
                     const value = await dialog.input({
@@ -210,7 +210,7 @@ export function RepositoryStatusBar({
                 <Button
                   aria-label="Language Services Button"
                   className={cn(
-                    "h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:text-disabled-foreground disabled:opacity-100",
+                    "disabled:text-disabled-foreground h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:opacity-100",
                   )}
                   onClick={() =>
                     setToast(
@@ -233,7 +233,7 @@ export function RepositoryStatusBar({
           <Button
             aria-label="Grid position"
             className={cn(
-              "h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:text-disabled-foreground disabled:opacity-100",
+              "disabled:text-disabled-foreground h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:opacity-100",
             )}
             variant="ghost"
             size="xs"
@@ -245,7 +245,7 @@ export function RepositoryStatusBar({
           <Button
             aria-label="Line separator"
             className={cn(
-              "h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:text-disabled-foreground disabled:opacity-100",
+              "disabled:text-disabled-foreground h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:opacity-100",
             )}
             variant="ghost"
             size="xs"
@@ -257,7 +257,7 @@ export function RepositoryStatusBar({
           <Button
             aria-label="File encoding"
             className={cn(
-              "h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:text-disabled-foreground disabled:opacity-100",
+              "disabled:text-disabled-foreground h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:opacity-100",
             )}
             variant="ghost"
             size="xs"
@@ -271,7 +271,7 @@ export function RepositoryStatusBar({
               render={
                 <Toggle
                   aria-label="Column selection mode"
-                  className="group/toggle inline-flex h-full min-w-5 shrink-0 items-center justify-center rounded-none bg-transparent px-1 text-[9px] font-medium text-muted-foreground outline-none transition-all hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:shrink-0 data-pressed:bg-accent data-pressed:text-foreground"
+                  className="group/toggle disabled:text-disabled-foreground inline-flex h-full min-w-5 shrink-0 items-center justify-center rounded-none bg-transparent px-1 text-[9px] font-medium text-muted-foreground transition-all outline-none hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-100 data-pressed:bg-accent data-pressed:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0"
                   data-slot="toggle"
                   onPressedChange={() =>
                     dispatchWorkbenchEvent(
@@ -295,7 +295,7 @@ export function RepositoryStatusBar({
                 <Button
                   aria-label="Power Save Mode"
                   className={cn(
-                    "h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:text-disabled-foreground disabled:opacity-100",
+                    "disabled:text-disabled-foreground h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:opacity-100",
                   )}
                   variant="ghost"
                   size="xs"
@@ -315,7 +315,7 @@ export function RepositoryStatusBar({
           <Button
             aria-label="Indentation"
             className={cn(
-              "h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:text-disabled-foreground disabled:opacity-100",
+              "disabled:text-disabled-foreground h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:opacity-100",
             )}
             variant="ghost"
             size="xs"
@@ -334,7 +334,7 @@ export function RepositoryStatusBar({
                       : "Make file writable"
                   }
                   className={cn(
-                    "h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:text-disabled-foreground disabled:opacity-100",
+                    "disabled:text-disabled-foreground h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:opacity-100",
                   )}
                   onClick={() =>
                     setToast(
@@ -364,7 +364,7 @@ export function RepositoryStatusBar({
                 <Button
                   aria-label="Memory Indicator"
                   className={cn(
-                    "h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:text-disabled-foreground disabled:opacity-100",
+                    "disabled:text-disabled-foreground h-full min-w-5 rounded-none px-1 text-[9px] text-muted-foreground disabled:opacity-100",
                   )}
                   variant="ghost"
                   size="xs"
@@ -385,7 +385,7 @@ export function RepositoryStatusBar({
                 <Button
                   aria-label="IDE error occurred"
                   className={cn(
-                    "h-full min-w-5 rounded-none bg-transparent px-1 text-[9px] hover:bg-destructive-muted",
+                    "hover:bg-destructive-muted h-full min-w-5 rounded-none bg-transparent px-1 text-[9px]",
                   )}
                   onClick={() => setNotificationOpen(true)}
                   variant="destructive"

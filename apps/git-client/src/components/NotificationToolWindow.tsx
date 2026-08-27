@@ -64,7 +64,7 @@ export function NotificationBalloon({
               action === "openUrl" && notification.url ? (
                 <a
                   className={cn(
-                    "inline-flex min-h-[26px] min-w-[26px] items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent p-1 text-xs text-muted-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/55",
+                    "inline-flex min-h-[26px] min-w-[26px] items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent p-1 text-xs text-muted-foreground transition-[color,background-color,border-color,box-shadow] outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/55",
                   )}
                   href={notification.url}
                   key={action}
@@ -81,7 +81,7 @@ export function NotificationBalloon({
                   onClick={() => onAction(action)}
                   type="button"
                   className={cn(
-                    "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
+                    "min-h-[26px] min-w-[26px] gap-1.5 p-1 text-xs text-muted-foreground",
                   )}
                   variant="ghost"
                   size="xs"
@@ -98,7 +98,7 @@ export function NotificationBalloon({
         onClick={onDismiss}
         type="button"
         className={cn(
-          "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
+          "min-h-[26px] min-w-[26px] gap-1.5 p-1 text-xs text-muted-foreground",
         )}
         variant="ghost"
         size="icon-sm"
@@ -132,7 +132,7 @@ export function NotificationToolWindow({
                 onClick={onClear}
                 type="button"
                 className={cn(
-                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
+                  "min-h-[26px] min-w-[26px] gap-1.5 p-1 text-xs text-muted-foreground",
                 )}
                 variant="ghost"
                 size="icon-sm"
@@ -151,7 +151,7 @@ export function NotificationToolWindow({
                 onClick={onClose}
                 type="button"
                 className={cn(
-                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
+                  "min-h-[26px] min-w-[26px] gap-1.5 p-1 text-xs text-muted-foreground",
                 )}
                 variant="ghost"
                 size="icon-sm"

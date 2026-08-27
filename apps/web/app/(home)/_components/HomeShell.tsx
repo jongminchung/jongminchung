@@ -22,7 +22,7 @@ export function HomeHeader({ locale }: { readonly locale: Locale }) {
           <BrandWordmark />
         </a>
         <nav
-          className="flex items-center gap-[clamp(10px,1.8vw,22px)] text-[13px] [&_a]:relative [&_a]:after:absolute [&_a]:after:right-0 [&_a]:after:-bottom-2 [&_a]:after:left-0 [&_a]:after:h-0.5 [&_a]:after:origin-left [&_a]:after:scale-x-0 [&_a]:after:bg-primary [&_a]:after:transition-transform [&_a:hover]:after:scale-x-100 max-[720px]:gap-[15px] max-[720px]:[&_a:nth-child(-n+2)]:hidden"
+          className="flex items-center gap-[clamp(10px,1.8vw,22px)] text-[13px] max-[720px]:gap-[15px] [&_a]:relative [&_a]:after:absolute [&_a]:after:right-0 [&_a]:after:-bottom-2 [&_a]:after:left-0 [&_a]:after:h-0.5 [&_a]:after:origin-left [&_a]:after:scale-x-0 [&_a]:after:bg-primary [&_a]:after:transition-transform [&_a:hover]:after:scale-x-100 max-[720px]:[&_a:nth-child(-n+2)]:hidden"
           aria-label="Primary navigation"
         >
           <a href="#work">{locale === "ko" ? "프로젝트" : "Work"}</a>
@@ -71,7 +71,7 @@ export function HomeFooter({ locale }: { readonly locale: Locale }) {
         </a>
       </div>
       <p
-        className="mt-[clamp(70px,10vw,150px)] whitespace-nowrap text-[clamp(90px,20vw,320px)] leading-[0.72] tracking-[-0.095em] text-transparent [-webkit-text-stroke:2px_color-mix(in_oklch,var(--background)_26%,transparent)] max-[720px]:mt-20 max-[720px]:text-[25vw]"
+        className="mt-[clamp(70px,10vw,150px)] text-[clamp(90px,20vw,320px)] leading-[0.72] tracking-[-0.095em] whitespace-nowrap text-transparent [-webkit-text-stroke:2px_color-mix(in_oklch,var(--background)_26%,transparent)] max-[720px]:mt-20 max-[720px]:text-[25vw]"
         aria-hidden="true"
       >
         JAMIE.KR

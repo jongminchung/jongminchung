@@ -121,11 +121,11 @@ export function RefManagementPanel({
 
   return (
     <div
-      className={`refManagement [height:100%] [overflow:auto] [&_input]:[background:var(--secondary)] [&_input]:[border:1px_solid_var(--border)] [&_input]:[min-height:29px] [&_input]:[padding:0_9px] [&_select]:[background:var(--secondary)] [&_select]:[border:1px_solid_var(--border)] [&_select]:[min-height:29px] [&_select]:[padding:0_9px] [&_button]:[background:var(--secondary)] [&_button]:[border:1px_solid_var(--border)] [&_button]:[min-height:29px] [&_button]:[padding:0_9px] refManagement`}
+      className={`refManagement refManagement [height:100%] [overflow:auto] [&_button]:[min-height:29px] [&_button]:[padding:0_9px] [&_button]:[background:var(--secondary)] [&_button]:[border:1px_solid_var(--border)] [&_input]:[min-height:29px] [&_input]:[padding:0_9px] [&_input]:[background:var(--secondary)] [&_input]:[border:1px_solid_var(--border)] [&_select]:[min-height:29px] [&_select]:[padding:0_9px] [&_select]:[background:var(--secondary)] [&_select]:[border:1px_solid_var(--border)]`}
       aria-busy={busy}
     >
       <div
-        className={`managementToolbar [&>_span]:[flex:1] [align-items:center] [background:var(--muted)] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:5px] [height:38px] [padding:0_11px] [&>_button]:[align-items:center] [&>_button]:[background:var(--card)] [&>_button]:[border:1px_solid_var(--border)] [&>_button]:rounded-sm [&>_button]:[display:flex] [&>_button]:[gap:5px] [&>_button]:[min-height:27px] [&>_button]:[padding:0_8px] [background:var(--card)] managementToolbar [&>_button]:rounded-sm`}
+        className={`managementToolbar managementToolbar [display:flex] [height:38px] [align-items:center] [gap:5px] [padding:0_11px] [background:var(--card)] [background:var(--muted)] [border-bottom:1px_solid_var(--border)] [&>_button]:[display:flex] [&>_button]:[min-height:27px] [&>_button]:[align-items:center] [&>_button]:[gap:5px] [&>_button]:rounded-sm [&>_button]:[padding:0_8px] [&>_button]:[background:var(--card)] [&>_button]:[border:1px_solid_var(--border)] [&>_span]:[flex:1]`}
       >
         <strong>Branches & tags</strong>
         <span />
@@ -173,7 +173,7 @@ export function RefManagementPanel({
         </Notice>
       )}
       <section
-        className={`refActionBar [align-items:end] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:8px] [padding:9px_11px] [&>_label]:[color:var(--muted-foreground)] [&>_label]:[display:flex] [&>_label]:[flex:1] [&>_label]:[flex-direction:column] [&>_label]:[font-size:11px] [&>_label]:[gap:4px] [&>_label:nth-child(2)]:[flex:0_0_130px] max-[1120px]:[align-items:stretch] max-[1120px]:[flex-wrap:wrap] refActionBar`}
+        className={`refActionBar refActionBar [display:flex] [align-items:end] [gap:8px] [padding:9px_11px] [border-bottom:1px_solid_var(--border)] max-[1120px]:[flex-wrap:wrap] max-[1120px]:[align-items:stretch] [&>_label]:[display:flex] [&>_label]:[flex:1] [&>_label]:[flex-direction:column] [&>_label]:[gap:4px] [&>_label]:[font-size:11px] [&>_label]:[color:var(--muted-foreground)] [&>_label:nth-child(2)]:[flex:0_0_130px]`}
       >
         <Selector
           className="bg-secondary"
@@ -260,7 +260,7 @@ export function RefManagementPanel({
         )}
       </section>
       <section
-        className={`refForms [&_form]:[align-items:end] [&_form]:[border-bottom:1px_solid_var(--border)] [&_form]:[display:flex] [&_form]:[gap:8px] [&_form]:[padding:9px_11px] [display:grid] [gap:10px] [grid-template-columns:repeat(2,_minmax(260px,_1fr))] [padding:11px] [&_form]:[align-items:stretch] [&_form]:[background:var(--secondary)] [&_form]:[border:1px_solid_var(--border)] [&_form]:rounded-lg [&_form]:[flex-direction:column] [&_form]:[padding:11px] [&_form_strong]:[min-height:29px] max-[1120px]:[grid-template-columns:1fr] refForms [&_form]:rounded-lg`}
+        className={`refForms refForms [display:grid] [grid-template-columns:repeat(2,_minmax(260px,_1fr))] [gap:10px] [padding:11px] max-[1120px]:[grid-template-columns:1fr] [&_form]:[display:flex] [&_form]:[flex-direction:column] [&_form]:[align-items:end] [&_form]:[align-items:stretch] [&_form]:[gap:8px] [&_form]:rounded-lg [&_form]:[padding:9px_11px] [&_form]:[padding:11px] [&_form]:[background:var(--secondary)] [&_form]:[border-bottom:1px_solid_var(--border)] [&_form]:[border:1px_solid_var(--border)] [&_form_strong]:[min-height:29px]`}
       >
         <form
           onSubmit={(event) => {
@@ -387,7 +387,7 @@ export function RefManagementPanel({
         </form>
       </section>
       <section
-        className={`mergeOptions [align-items:center] [border-top:1px_solid_var(--border)] [display:flex] [gap:10px] [padding:10px_11px] [&_label]:[align-items:center] [&_label]:[color:var(--muted-foreground)] [&_label]:[display:inline-flex] [&_label]:[gap:4px] [&>_span]:[flex:1] mergeOptions`}
+        className={`mergeOptions mergeOptions [display:flex] [align-items:center] [gap:10px] [padding:10px_11px] [border-top:1px_solid_var(--border)] [&_label]:[display:inline-flex] [&_label]:[align-items:center] [&_label]:[gap:4px] [&_label]:[color:var(--muted-foreground)] [&>_span]:[flex:1]`}
       >
         <strong>Integrate selected reference</strong>
         <label>
@@ -445,7 +445,7 @@ export function RefManagementPanel({
       </section>
       {comparison && (
         <section
-          className={`branchComparison [display:flex] [flex-direction:column] [gap:6px] [padding:12px] [&>_span]:[color:var(--muted-foreground)] [&_pre]:[background:var(--muted)] [&_pre]:[border:1px_solid_var(--border)] [&_pre]:rounded-lg [&_pre]:[max-height:220px] [&_pre]:[overflow:auto] [&_pre]:[padding:8px] branchComparison [&_pre]:rounded-lg`}
+          className={`branchComparison branchComparison [display:flex] [flex-direction:column] [gap:6px] [padding:12px] [&_pre]:[max-height:220px] [&_pre]:[overflow:auto] [&_pre]:rounded-lg [&_pre]:[padding:8px] [&_pre]:[background:var(--muted)] [&_pre]:[border:1px_solid_var(--border)] [&>_span]:[color:var(--muted-foreground)]`}
         >
           <strong>
             {currentBranch} ↔ {selected?.shortName}
@@ -467,7 +467,7 @@ export function RefManagementPanel({
       )}
       {mergedBranches.length > 0 && (
         <section
-          className={`mergedBranches [border-top:1px_solid_var(--border)] [display:flex] [flex-direction:column] [gap:6px] [padding:11px] [&>_span]:[align-items:center] [&>_span]:[display:flex] [&>_span]:[gap:8px] [&_code]:[flex:1] mergedBranches`}
+          className={`mergedBranches mergedBranches [display:flex] [flex-direction:column] [gap:6px] [padding:11px] [border-top:1px_solid_var(--border)] [&_code]:[flex:1] [&>_span]:[display:flex] [&>_span]:[align-items:center] [&>_span]:[gap:8px]`}
         >
           <strong>Merged into {currentBranch}</strong>
           {mergedBranches.map((branch) => (

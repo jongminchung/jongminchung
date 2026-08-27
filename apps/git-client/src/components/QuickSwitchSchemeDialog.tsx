@@ -57,7 +57,7 @@ export function QuickSwitchSchemeDialog({
       width={520}
     >
       <section
-        className={`quickSwitchSchemeDialog [display:grid] [gap:10px] [grid-template-columns:1fr_1fr] [padding-bottom:12px] [&>_*:not(:first-child)]:[margin-left:12px] [&>_*:not(:first-child)]:[margin-right:12px] [&>_header]:[grid-column:1_/_3] [&>_div:first-of-type]:[grid-column:1_/_3] [&_h3]:[font-size:11px] [&_h3]:[margin:0_0_5px] [&_select]:[background:var(--secondary)] [&_select]:[border:1px_solid_var(--border)] [&_select]:rounded-sm [&_select]:[color:var(--foreground)] [&_select]:[height:28px] [&_select]:[width:100%] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:flex] [&>_footer]:[grid-column:1_/_3] [&>_footer]:[justify-content:flex-end] [&>_footer]:[margin-left:0]! [&>_footer]:[margin-right:0]! [&>_footer]:[padding:10px_12px_0] quickSwitchSchemeDialog [&_select]:rounded-sm`}
+        className={`quickSwitchSchemeDialog quickSwitchSchemeDialog [display:grid] [grid-template-columns:1fr_1fr] [gap:10px] [padding-bottom:12px] [&_h3]:[margin:0_0_5px] [&_h3]:[font-size:11px] [&_select]:[height:28px] [&_select]:[width:100%] [&_select]:rounded-sm [&_select]:[color:var(--foreground)] [&_select]:[background:var(--secondary)] [&_select]:[border:1px_solid_var(--border)] [&>_*:not(:first-child)]:[margin-right:12px] [&>_*:not(:first-child)]:[margin-left:12px] [&>_div:first-of-type]:[grid-column:1_/_3] [&>_footer]:[grid-column:1_/_3] [&>_footer]:[margin-right:0]! [&>_footer]:[margin-left:0]! [&>_footer]:[display:flex] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:10px_12px_0] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_header]:[grid-column:1_/_3]`}
       >
         <DialogHeader
           hasDivider

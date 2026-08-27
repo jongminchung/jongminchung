@@ -58,7 +58,7 @@ export function BookmarkMnemonicDialog({
       width={430}
     >
       <section
-        className={`bookmarkMnemonicDialog [display:grid] [gap:12px] [padding-bottom:12px] [&>_*:not(:first-child)]:[margin-left:12px] [&>_*:not(:first-child)]:[margin-right:12px] [&>_p]:[color:var(--muted-foreground)] [&>_p]:[font-size:10px] [&>_p]:[margin-bottom:0] [&>_p]:[margin-top:-3px] [&>_footer]:[display:flex] [&>_footer]:[gap:7px] [&>_footer]:[justify-content:flex-end] bookmarkMnemonicDialog`}
+        className={`bookmarkMnemonicDialog bookmarkMnemonicDialog [display:grid] [gap:12px] [padding-bottom:12px] [&>_*:not(:first-child)]:[margin-right:12px] [&>_*:not(:first-child)]:[margin-left:12px] [&>_footer]:[display:flex] [&>_footer]:[justify-content:flex-end] [&>_footer]:[gap:7px] [&>_p]:[margin-top:-3px] [&>_p]:[margin-bottom:0] [&>_p]:[font-size:10px] [&>_p]:[color:var(--muted-foreground)]`}
       >
         <DialogHeader
           hasDivider
@@ -66,7 +66,7 @@ export function BookmarkMnemonicDialog({
           title={title}
         />
         <div
-          className={`bookmarkMnemonicGrid [display:grid] [gap:4px] [grid-template-columns:repeat(10,_1fr)] [&>_button]:[background:var(--muted)] [&>_button]:[border:1px_solid_transparent] [&>_button]:rounded-sm [&>_button]:[color:var(--foreground)] [&>_button]:[font-family:var(--font-family-code)] [&>_button]:[font-size:11px] [&>_button]:[height:28px] [&>_button:hover]:[background:var(--overlay-hover)] [&>_button[aria-selected=true]]:[background:var(--accent)] [&>_button[aria-selected=true]]:[border-color:var(--primary)] [&>_button[data-assigned=true]]:[color:var(--disabled-foreground)] [&>_button[data-assigned=true]]:[text-decoration:underline] bookmarkMnemonicGrid [&>_button]:rounded-sm`}
+          className={`bookmarkMnemonicGrid bookmarkMnemonicGrid [display:grid] [grid-template-columns:repeat(10,_1fr)] [gap:4px] [&>_button]:[height:28px] [&>_button]:rounded-sm [&>_button]:[font-family:var(--font-family-code)] [&>_button]:[font-size:11px] [&>_button]:[color:var(--foreground)] [&>_button]:[background:var(--muted)] [&>_button]:[border:1px_solid_transparent] [&>_button:hover]:[background:var(--overlay-hover)] [&>_button[aria-selected=true]]:[border-color:var(--primary)] [&>_button[aria-selected=true]]:[background:var(--accent)] [&>_button[data-assigned=true]]:[color:var(--disabled-foreground)] [&>_button[data-assigned=true]]:[text-decoration:underline]`}
           role="listbox"
           aria-label="Bookmark mnemonics"
         >
@@ -85,7 +85,7 @@ export function BookmarkMnemonicDialog({
               role="option"
               type="button"
               className={cn(
-                "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+                "min-h-[29px] w-full justify-start gap-1.5 px-2 py-1 text-left text-xs whitespace-normal aria-current:bg-accent aria-selected:bg-accent",
               )}
               variant="ghost"
               size="default"

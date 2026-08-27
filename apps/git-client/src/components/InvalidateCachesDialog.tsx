@@ -21,7 +21,7 @@ export function InvalidateCachesDialog({
       width={540}
     >
       <section
-        className={`invalidateCachesDialog [display:grid] [grid-template-rows:auto_minmax(0,_1fr)_auto] [min-height:220px] [&>_main]:[display:flex] [&>_main]:[flex-direction:column] [&>_main]:[gap:10px] [&>_main]:[padding:18px_20px] [&>_main_p]:[color:var(--muted-foreground)] [&>_main_p]:[line-height:1.5] [&>_main_p]:[margin:0] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:flex] [&>_footer]:[gap:8px] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:10px_12px] invalidateCachesDialog`}
+        className={`invalidateCachesDialog invalidateCachesDialog [display:grid] [min-height:220px] [grid-template-rows:auto_minmax(0,_1fr)_auto] [&>_footer]:[display:flex] [&>_footer]:[justify-content:flex-end] [&>_footer]:[gap:8px] [&>_footer]:[padding:10px_12px] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_main]:[display:flex] [&>_main]:[flex-direction:column] [&>_main]:[gap:10px] [&>_main]:[padding:18px_20px] [&>_main_p]:[margin:0] [&>_main_p]:[line-height:1.5] [&>_main_p]:[color:var(--muted-foreground)]`}
       >
         <DialogHeader
           hasDivider

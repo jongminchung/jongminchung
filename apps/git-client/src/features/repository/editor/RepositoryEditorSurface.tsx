@@ -12,7 +12,7 @@ export function RepositoryEditorSurface({
 }: RepositoryEditorSurfaceProps) {
   return (
     <div
-      className={`workbenchSurface [background:var(--background)] [display:grid] [grid-template-rows:minmax(0,_1fr)_auto] [min-height:0] [min-width:0] workbenchSurface ${maximizedToolWindow === "bottom" ? "maximizedBottomTool [grid-template-rows:minmax(0,_1fr)] [&>_.workbenchContent]:[display:none] [&>_[data-tool-window-position=bottom]]:[height:100%!important] maximizedBottomTool" : ""}`}
+      className={`workbenchSurface workbenchSurface [display:grid] [min-height:0] [min-width:0] [grid-template-rows:minmax(0,_1fr)_auto] [background:var(--background)] ${maximizedToolWindow === "bottom" ? "maximizedBottomTool maximizedBottomTool [grid-template-rows:minmax(0,_1fr)] [&>_.workbenchContent]:[display:none] [&>_[data-tool-window-position=bottom]]:[height:100%!important]" : ""}`}
     >
       {children}
     </div>

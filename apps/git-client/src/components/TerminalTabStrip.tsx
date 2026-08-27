@@ -66,10 +66,10 @@ export function TerminalTabStrip({
 
   return (
     <div
-      className={`terminalTabs [align-items:stretch] [background:var(--card)] [border-bottom:1px_solid_var(--border)] [display:flex] [min-width:0] [&_.activeTerminalTab]:[background:var(--accent)] [&_.activeTerminalTab]:[color:var(--foreground)] [&>_.terminalToolbar:last-child]:[margin-left:auto] terminalTabs`}
+      className={`terminalTabs terminalTabs [display:flex] [min-width:0] [align-items:stretch] [background:var(--card)] [border-bottom:1px_solid_var(--border)] [&_.activeTerminalTab]:[color:var(--foreground)] [&_.activeTerminalTab]:[background:var(--accent)] [&>_.terminalToolbar:last-child]:[margin-left:auto]`}
     >
       <strong
-        className={`terminalToolTitle [align-items:center] [display:flex] [font-size:12px] [padding:0_9px] terminalToolTitle`}
+        className={`terminalToolTitle terminalToolTitle [display:flex] [align-items:center] [padding:0_9px] [font-size:12px]`}
       >
         Terminal
       </strong>
@@ -83,7 +83,7 @@ export function TerminalTabStrip({
         <div
           className={cn(
             "relative",
-            `terminalTabList [align-items:stretch] [display:flex] [flex:none] [min-width:0] [overflow-x:auto] terminalTabList`,
+            `terminalTabList terminalTabList [display:flex] [min-width:0] [flex:none] [align-items:stretch] [overflow-x:auto]`,
           )}
         >
           <TabsList
@@ -93,7 +93,7 @@ export function TerminalTabStrip({
           >
             {sessions.map((session) => (
               <div
-                className={`terminalTabItem [align-items:center] [background:var(--accent)] rounded-sm [display:flex] [margin:3px_0] [min-width:0] terminalTabItem rounded-sm`}
+                className={`terminalTabItem terminalTabItem [margin:3px_0] [display:flex] [min-width:0] [align-items:center] rounded-sm [background:var(--accent)]`}
                 key={session.key}
                 role="presentation"
               >
@@ -107,13 +107,13 @@ export function TerminalTabStrip({
                   type="button"
                   value={session.key}
                   className={cn(
-                    "inline-flex items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent text-xs text-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 h-7 px-2.5 text-muted-foreground data-active:bg-accent data-active:text-foreground",
-                    `${`terminalTab [align-items:center] [background:transparent] [color:var(--muted-foreground)] [display:flex] [gap:6px] [min-width:0] [padding:0_4px_0_9px] [&>_span:last-child]:[overflow:hidden] [&>_span:last-child]:[text-overflow:ellipsis] [&>_span:last-child]:[white-space:nowrap] terminalTab`}${activeKey === session.key ? ` ${`activeTerminalTab [background:var(--card)] [color:var(--foreground)] activeTerminalTab`}` : ""}`,
+                    "inline-flex h-7 items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent px-2.5 text-xs text-foreground text-muted-foreground transition-[color,background-color,border-color,box-shadow] outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 data-active:bg-accent data-active:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                    `${`terminalTab terminalTab [display:flex] [min-width:0] [align-items:center] [gap:6px] [padding:0_4px_0_9px] [color:var(--muted-foreground)] [background:transparent] [&>_span:last-child]:[overflow:hidden] [&>_span:last-child]:[text-overflow:ellipsis] [&>_span:last-child]:[white-space:nowrap]`}${activeKey === session.key ? ` ${`activeTerminalTab activeTerminalTab [color:var(--foreground)] [background:var(--card)]`}` : ""}`,
                   )}
                 >
                   <span
                     aria-hidden="true"
-                    className={`${`terminalStatus [display:none] terminalStatus`} ${TERMINAL_STATUS_CLASS[session.status]}`}
+                    className={`${`terminalStatus terminalStatus [display:none]`} ${TERMINAL_STATUS_CLASS[session.status]}`}
                     title={session.error ?? session.status}
                   />
                   <span>{session.title}</span>
@@ -139,11 +139,11 @@ export function TerminalTabStrip({
                   aria-hidden="true"
                   className={cn(
                     "invisible inline-flex h-7 items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent px-2.5 text-xs text-muted-foreground [&_svg]:shrink-0",
-                    `${`terminalTab [align-items:center] [background:transparent] [color:var(--muted-foreground)] [display:flex] [gap:6px] [min-width:0] [padding:0_4px_0_9px] [&>_span:last-child]:[overflow:hidden] [&>_span:last-child]:[text-overflow:ellipsis] [&>_span:last-child]:[white-space:nowrap] terminalTab`}${activeKey === session.key ? ` ${`activeTerminalTab [background:var(--card)] [color:var(--foreground)] activeTerminalTab`}` : ""}`,
+                    `${`terminalTab terminalTab [display:flex] [min-width:0] [align-items:center] [gap:6px] [padding:0_4px_0_9px] [color:var(--muted-foreground)] [background:transparent] [&>_span:last-child]:[overflow:hidden] [&>_span:last-child]:[text-overflow:ellipsis] [&>_span:last-child]:[white-space:nowrap]`}${activeKey === session.key ? ` ${`activeTerminalTab activeTerminalTab [color:var(--foreground)] [background:var(--card)]`}` : ""}`,
                   )}
                 >
                   <span
-                    className={`${`terminalStatus [display:none] terminalStatus`} ${TERMINAL_STATUS_CLASS[session.status]}`}
+                    className={`${`terminalStatus terminalStatus [display:none]`} ${TERMINAL_STATUS_CLASS[session.status]}`}
                   />
                   <span>{session.title}</span>
                 </span>
@@ -155,7 +155,7 @@ export function TerminalTabStrip({
                         type="button"
                         aria-label={`Close ${session.title}`}
                         className={cn(
-                          "pointer-events-auto h-6 min-w-5 aspect-square gap-1.5 px-0 text-xs hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+                          "pointer-events-auto aspect-square h-6 min-w-5 gap-1.5 px-0 text-xs hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
                         )}
                         variant="ghost"
                         size="icon-xs"
@@ -173,7 +173,7 @@ export function TerminalTabStrip({
       </Tabs>
       <div
         aria-label="Action Toolbar"
-        className={`terminalToolbar [align-items:stretch] [display:flex] terminalToolbar`}
+        className={`terminalToolbar terminalToolbar [display:flex] [align-items:stretch]`}
         role="toolbar"
       >
         <Tooltip>
@@ -185,7 +185,7 @@ export function TerminalTabStrip({
                 type="button"
                 aria-label="New Tab"
                 className={cn(
-                  "h-[29px] min-w-[29px] px-[7px] aspect-square px-0 rounded-none border-l border-y-0 border-r-0 bg-transparent text-muted-foreground hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+                  "aspect-square h-[29px] min-w-[29px] rounded-none border-y-0 border-r-0 border-l bg-transparent px-0 px-[7px] text-muted-foreground hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
                 )}
                 variant="outline"
                 size="icon"
@@ -206,7 +206,7 @@ export function TerminalTabStrip({
                 aria-label="New Predefined Session"
                 disabled={!hasPredefinedSessions}
                 className={cn(
-                  "h-[29px] min-w-[29px] px-[7px] aspect-square px-0 rounded-none border-l border-y-0 border-r-0 bg-transparent text-muted-foreground hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+                  "aspect-square h-[29px] min-w-[29px] rounded-none border-y-0 border-r-0 border-l bg-transparent px-0 px-[7px] text-muted-foreground hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
                 )}
                 variant="outline"
                 size="icon"
@@ -220,7 +220,7 @@ export function TerminalTabStrip({
       </div>
       <div
         aria-label="Action Toolbar"
-        className={`terminalToolbar [align-items:stretch] [display:flex] terminalToolbar`}
+        className={`terminalToolbar terminalToolbar [display:flex] [align-items:stretch]`}
         role="toolbar"
       >
         {showAgents && (
@@ -229,7 +229,7 @@ export function TerminalTabStrip({
             ref={agentsButtonRef}
             type="button"
             className={cn(
-              "h-[29px] min-w-[29px] px-[7px] rounded-none border-l border-y-0 border-r-0 bg-transparent text-muted-foreground hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+              "h-[29px] min-w-[29px] rounded-none border-y-0 border-r-0 border-l bg-transparent px-[7px] text-muted-foreground hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
             )}
             variant="outline"
             size="sm"
@@ -247,7 +247,7 @@ export function TerminalTabStrip({
                 type="button"
                 aria-label="Options"
                 className={cn(
-                  "h-[29px] min-w-[29px] px-[7px] aspect-square px-0 rounded-none border-l border-y-0 border-r-0 bg-transparent text-muted-foreground hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+                  "aspect-square h-[29px] min-w-[29px] rounded-none border-y-0 border-r-0 border-l bg-transparent px-0 px-[7px] text-muted-foreground hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
                 )}
                 variant="outline"
                 size="icon"
@@ -266,7 +266,7 @@ export function TerminalTabStrip({
                 type="button"
                 aria-label="Hide"
                 className={cn(
-                  "h-[29px] min-w-[29px] px-[7px] aspect-square px-0 rounded-none border-l border-y-0 border-r-0 bg-transparent text-muted-foreground hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
+                  "aspect-square h-[29px] min-w-[29px] rounded-none border-y-0 border-r-0 border-l bg-transparent px-0 px-[7px] text-muted-foreground hover:text-accent-foreground active:bg-[var(--overlay-pressed)]",
                 )}
                 variant="outline"
                 size="icon"

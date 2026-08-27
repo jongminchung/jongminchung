@@ -1,3 +1,5 @@
-@import "@jongminchung/ui/root.css";
+@import "@jongminchung/ui/globals.css";
+@import "../theme.css";
 
-@source "../**/*.{ts,tsx}";
+@source "./**/*.{ts,tsx}";
+@source not "./**/*.{test,spec}.{ts,tsx}";

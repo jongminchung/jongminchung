@@ -283,7 +283,7 @@ export function DiffViewer({
     // oxlint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- The focusable region owns file and hunk navigation shortcuts.
     <div
       aria-label={file ? `Diff for ${file.path}` : "Diff preview"}
-      className={`${`diffViewer [background:var(--card)] [display:grid] [grid-template-rows:36px_auto_minmax(0,_1fr)] [min-height:0] [min-width:0] [outline:0] [position:relative] [&:focus-visible]:[box-shadow:inset_0_0_0_2px_color-mix(in_oklch,_var(--primary)_55%,_transparent)] diffViewer`} ${focused ? `focusedDiffViewer [background:var(--card)] rounded-lg [inset:56px_30px_18px_31px] [position:fixed] [z-index:var(--layer-focused-workspace)] focusedDiffViewer rounded-lg` : ""}`}
+      className={`${`diffViewer diffViewer [position:relative] [display:grid] [min-height:0] [min-width:0] [grid-template-rows:36px_auto_minmax(0,_1fr)] [outline:0] [background:var(--card)] [&:focus-visible]:[box-shadow:inset_0_0_0_2px_color-mix(in_oklch,_var(--primary)_55%,_transparent)]`} ${focused ? `focusedDiffViewer focusedDiffViewer [position:fixed] [inset:56px_30px_18px_31px] [z-index:var(--layer-focused-workspace)] rounded-lg [background:var(--card)]` : ""}`}
       data-diff-viewer
       onKeyDown={handleKeyboard}
       ref={root}
@@ -292,7 +292,7 @@ export function DiffViewer({
       tabIndex={0}
     >
       <header
-        className={`diffViewerHeader [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:6px] [min-width:0] [padding:4px_7px] [&>_span:last-of-type]:[flex:1] [&_strong]:[min-width:40px] [&_small]:[color:var(--disabled-foreground)] [&_small]:[flex:none] diffViewerHeader`}
+        className={`diffViewerHeader diffViewerHeader [display:flex] [min-width:0] [align-items:center] [gap:6px] [padding:4px_7px] [border-bottom:1px_solid_var(--border)] [&_small]:[flex:none] [&_small]:[color:var(--disabled-foreground)] [&_strong]:[min-width:40px] [&>_span:last-of-type]:[flex:1]`}
       >
         <Tooltip>
           <TooltipTrigger
@@ -334,7 +334,7 @@ export function DiffViewer({
           <>
             <StatusBadge>{file.status.charAt(0).toUpperCase()}</StatusBadge>
             <strong
-              className={`ellipsis [min-width:0] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap] ellipsis`}
+              className={`ellipsis ellipsis [min-width:0] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap]`}
             >
               {file.path}
             </strong>
@@ -345,7 +345,7 @@ export function DiffViewer({
         )}
         <span />
         <label
-          className={`diffSearch [align-items:center] [background:var(--secondary)] [border:1px_solid_var(--border)] rounded-lg [display:flex] [height:26px] [padding:0_6px] [width:128px] [&:focus-within]:[border-color:var(--primary)] [&:focus-within]:[box-shadow:0_0_0_2px_color-mix(in_oklch,_var(--primary)_22%,_transparent)] [&_input]:[background:transparent] [&_input]:[border:0] [&_input]:[min-width:0] [&_input]:[outline:0] [&_input]:[width:100%] [&_small]:[color:var(--disabled-foreground)] diffSearch rounded-lg`}
+          className={`diffSearch diffSearch [display:flex] [height:26px] [width:128px] [align-items:center] rounded-lg [padding:0_6px] [background:var(--secondary)] [border:1px_solid_var(--border)] [&_input]:[width:100%] [&_input]:[min-width:0] [&_input]:[outline:0] [&_input]:[background:transparent] [&_input]:[border:0] [&_small]:[color:var(--disabled-foreground)] [&:focus-within]:[border-color:var(--primary)] [&:focus-within]:[box-shadow:0_0_0_2px_color-mix(in_oklch,_var(--primary)_22%,_transparent)]`}
         >
           <Icon name="search" size={13} />
           <Input
@@ -398,7 +398,7 @@ export function DiffViewer({
         )}
       </header>
       <div
-        className={`diffViewerToolbar [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:6px] [min-width:0] [padding:4px_7px] [&>_span]:[flex:1] [background:var(--secondary)] [flex-wrap:wrap] [min-height:34px] [&_label]:[align-items:center] [&_label]:[color:var(--muted-foreground)] [&_label]:[display:inline-flex] [&_label]:[font-size:10px] [&_label]:[gap:5px] [&_label]:[white-space:nowrap] [&_button]:[background:var(--card)] [&_button]:[border:1px_solid_var(--border)] [&_button]:[min-height:25px] [&_button]:[padding:0_7px] [&_select]:[background:var(--card)] [&_select]:[border:1px_solid_var(--border)] [&_select]:[min-height:25px] [&_select]:[padding:0_7px] diffViewerToolbar`}
+        className={`diffViewerToolbar diffViewerToolbar [display:flex] [min-height:34px] [min-width:0] [flex-wrap:wrap] [align-items:center] [gap:6px] [padding:4px_7px] [background:var(--secondary)] [border-bottom:1px_solid_var(--border)] [&_button]:[min-height:25px] [&_button]:[padding:0_7px] [&_button]:[background:var(--card)] [&_button]:[border:1px_solid_var(--border)] [&_label]:[display:inline-flex] [&_label]:[align-items:center] [&_label]:[gap:5px] [&_label]:[font-size:10px] [&_label]:[white-space:nowrap] [&_label]:[color:var(--muted-foreground)] [&_select]:[min-height:25px] [&_select]:[padding:0_7px] [&_select]:[background:var(--card)] [&_select]:[border:1px_solid_var(--border)] [&>_span]:[flex:1]`}
       >
         <label>
           View
@@ -662,7 +662,7 @@ export function DiffViewer({
       </div>
       <div
         aria-label={file ? `Diff content for ${file.path}` : "Diff content"}
-        className={`diffViewerContent [min-height:0] [overflow:auto] [&>_pre]:[font-family:var(--font-family-code)] [&>_pre]:[font-size:11px] [&>_pre]:[line-height:1.55] [&>_pre]:[margin:0] [&>_pre]:[min-height:100%] [&>_pre]:[padding:12px] [&>_pre]:[white-space:pre] [&>_pre.wrappedDiff]:[white-space:pre-wrap] [&>_pre.wrappedDiff]:[word-break:break-word] [&>_pre_>_span]:[display:inline] diffViewerContent`}
+        className={`diffViewerContent diffViewerContent [min-height:0] [overflow:auto] [&>_pre]:[margin:0] [&>_pre]:[min-height:100%] [&>_pre]:[padding:12px] [&>_pre]:[font-family:var(--font-family-code)] [&>_pre]:[font-size:11px] [&>_pre]:[line-height:1.55] [&>_pre]:[white-space:pre] [&>_pre_>_span]:[display:inline] [&>_pre.wrappedDiff]:[word-break:break-word] [&>_pre.wrappedDiff]:[white-space:pre-wrap]`}
         role="region"
         // oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Focus enables keyboard scrolling inside the diff region.
         tabIndex={0}
@@ -681,7 +681,7 @@ export function DiffViewer({
           />
         ) : file.submodule && submoduleDiff ? (
           <div
-            className={`submoduleDiff [display:grid] [align-content:center] [justify-items:center] [gap:10px] [min-height:100%] [padding:28px] [color:var(--muted-foreground)] [text-align:center] [&>_strong]:[color:var(--foreground)] [&>_div]:[display:grid] [&>_div]:[grid-template-columns:minmax(0,_1fr)_auto_minmax(0,_1fr)] [&>_div]:[align-items:center] [&>_div]:[gap:12px] [&>_div]:[width:min(680px,_100%)] [&_section]:[display:grid] [&_section]:[gap:6px] [&_section]:[min-width:0] [&_section]:[padding:12px] [&_section]:[border:1px_solid_var(--border)] [&_section]:rounded-lg [&_section]:[background:var(--secondary)] [&_section]:[text-align:left] [&_code]:[overflow:hidden] [&_code]:[color:var(--foreground)] [&_code]:[font-size:11px] [&_code]:[text-overflow:ellipsis] submoduleDiff [&_section]:rounded-lg`}
+            className={`submoduleDiff submoduleDiff [display:grid] [min-height:100%] [align-content:center] [justify-items:center] [gap:10px] [padding:28px] [text-align:center] [color:var(--muted-foreground)] [&_code]:[overflow:hidden] [&_code]:[font-size:11px] [&_code]:[text-overflow:ellipsis] [&_code]:[color:var(--foreground)] [&_section]:[display:grid] [&_section]:[min-width:0] [&_section]:[gap:6px] [&_section]:rounded-lg [&_section]:[padding:12px] [&_section]:[text-align:left] [&_section]:[background:var(--secondary)] [&_section]:[border:1px_solid_var(--border)] [&>_div]:[display:grid] [&>_div]:[width:min(680px,_100%)] [&>_div]:[grid-template-columns:minmax(0,_1fr)_auto_minmax(0,_1fr)] [&>_div]:[align-items:center] [&>_div]:[gap:12px] [&>_strong]:[color:var(--foreground)]`}
           >
             <Icon name="worktree" size={24} />
             <strong>Submodule pointer change</strong>
@@ -715,7 +715,7 @@ export function DiffViewer({
           </div>
         ) : unsupportedReason ? (
           <div
-            className={`unsupportedDiff [align-items:center] [color:var(--muted-foreground)] [display:flex] [flex-direction:column] [height:100%] [justify-content:center] [text-align:center] [&_strong]:[color:var(--foreground)] [&_strong]:[margin-top:9px] [&_p]:[max-width:380px] [&_button]:[align-items:center] [&_button]:[background:var(--muted)] [&_button]:[border:1px_solid_var(--border)] [&_button]:rounded-sm [&_button]:[display:inline-flex] [&_button]:[gap:6px] [&_button]:[height:29px] [&_button]:[padding:0_10px] unsupportedDiff [&_button]:rounded-sm`}
+            className={`unsupportedDiff unsupportedDiff [display:flex] [height:100%] [flex-direction:column] [align-items:center] [justify-content:center] [text-align:center] [color:var(--muted-foreground)] [&_button]:[display:inline-flex] [&_button]:[height:29px] [&_button]:[align-items:center] [&_button]:[gap:6px] [&_button]:rounded-sm [&_button]:[padding:0_10px] [&_button]:[background:var(--muted)] [&_button]:[border:1px_solid_var(--border)] [&_p]:[max-width:380px] [&_strong]:[margin-top:9px] [&_strong]:[color:var(--foreground)]`}
           >
             <Icon name={file.submodule ? "worktree" : "warning"} size={24} />
             <strong>{unsupportedReason}</strong>
@@ -726,7 +726,7 @@ export function DiffViewer({
             </p>
             {file.binary && (
               <div
-                className={`binaryMetadata [display:grid] [gap:4px] [color:var(--muted-foreground)] [font-family:var(--font-family-code)] [font-size:11px] binaryMetadata`}
+                className={`binaryMetadata binaryMetadata [display:grid] [gap:4px] [font-family:var(--font-family-code)] [font-size:11px] [color:var(--muted-foreground)]`}
               >
                 <span>Before: {previewDescription(beforePreview)}</span>
                 <span>After: {previewDescription(afterPreview)}</span>
@@ -777,7 +777,7 @@ export function DiffViewer({
           </Suspense>
         ) : (
           <div
-            className={`unsupportedDiff [align-items:center] [color:var(--muted-foreground)] [display:flex] [flex-direction:column] [height:100%] [justify-content:center] [text-align:center] [&_strong]:[color:var(--foreground)] [&_strong]:[margin-top:9px] [&_p]:[max-width:380px] [&_button]:[align-items:center] [&_button]:[background:var(--muted)] [&_button]:[border:1px_solid_var(--border)] [&_button]:rounded-sm [&_button]:[display:inline-flex] [&_button]:[gap:6px] [&_button]:[height:29px] [&_button]:[padding:0_10px] unsupportedDiff [&_button]:rounded-sm`}
+            className={`unsupportedDiff unsupportedDiff [display:flex] [height:100%] [flex-direction:column] [align-items:center] [justify-content:center] [text-align:center] [color:var(--muted-foreground)] [&_button]:[display:inline-flex] [&_button]:[height:29px] [&_button]:[align-items:center] [&_button]:[gap:6px] [&_button]:rounded-sm [&_button]:[padding:0_10px] [&_button]:[background:var(--muted)] [&_button]:[border:1px_solid_var(--border)] [&_p]:[max-width:380px] [&_strong]:[margin-top:9px] [&_strong]:[color:var(--foreground)]`}
           >
             <Icon name="warning" size={24} />
             <strong>Semantic preview unavailable</strong>

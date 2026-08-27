@@ -82,7 +82,7 @@ export function CommitLogTable({
       aria-colcount={4}
       aria-label="Git log"
       aria-rowcount={filtered.length}
-      className={`commitScroller [background:var(--card)] [min-height:0] [overflow:auto] [position:relative] commitScroller`}
+      className={`commitScroller commitScroller [position:relative] [min-height:0] [overflow:auto] [background:var(--card)]`}
       onScroll={(event) => {
         const target = event.currentTarget;
         if (
@@ -98,7 +98,7 @@ export function CommitLogTable({
       tabIndex={0}
     >
       <div
-        className={`srOnly [clip:rect(0_0_0_0)] [clip-path:inset(50%)] [height:1px] [overflow:hidden] [position:absolute] [left:0] [top:0] [white-space:nowrap] [width:1px] srOnly`}
+        className={`srOnly srOnly [position:absolute] [top:0] [left:0] [height:1px] [width:1px] [overflow:hidden] [white-space:nowrap] [clip-path:inset(50%)] [clip:rect(0_0_0_0)]`}
         role="row"
       >
         <span role="columnheader">Graph</span>
@@ -141,7 +141,7 @@ export function CommitLogTable({
           }}
         >
           <div
-            className={`graphCanvas [left:2px] [pointer-events:none] [position:absolute] [top:0] [width:34px] [z-index:var(--layer-local-content)] graphCanvas`}
+            className={`graphCanvas graphCanvas [pointer-events:none] [position:absolute] [top:0] [left:2px] [z-index:var(--layer-local-content)] [width:34px]`}
           >
             <CommitGraph
               commits={filtered}
@@ -196,8 +196,8 @@ export function CommitLogTable({
                 }}
                 type="button"
                 className={cn(
-                  "grid min-h-0 text-xs whitespace-normal text-left aria-selected:bg-accent aria-current:bg-accent",
-                  `${HISTORY_COMMIT_ROW_CLASS} ${selected ? `selectedCommit [background:var(--accent)]! selectedCommit` : ""}`,
+                  "grid min-h-0 text-left text-xs whitespace-normal aria-current:bg-accent aria-selected:bg-accent",
+                  `${HISTORY_COMMIT_ROW_CLASS} ${selected ? `selectedCommit selectedCommit [background:var(--accent)]!` : ""}`,
                 )}
                 variant="ghost"
                 size="default"
@@ -205,12 +205,12 @@ export function CommitLogTable({
                 <span aria-hidden="true" />
                 <span
                   aria-label={commit.subject}
-                  className={`commitSubject [gap:6px] [&_em]:[background:color-mix(in_oklch,_var(--primary)_16%,_var(--card))] [&_em]:[border:1px_solid_color-mix(in_oklch,_var(--primary)_35%,_var(--border))] [&_em]:rounded-xs [&_em]:[color:var(--primary)] [&_em]:[flex:none] [&_em]:[font-size:9px] [&_em]:[font-style:normal] [&_em]:[padding:1px_4px] [&_code]:[color:var(--disabled-foreground)] [&_code]:[font-size:9px] [&_code]:[margin-left:auto] commitSubject [&_em]:rounded-xs`}
+                  className={`commitSubject commitSubject [gap:6px] [&_code]:[margin-left:auto] [&_code]:[font-size:9px] [&_code]:[color:var(--disabled-foreground)] [&_em]:[flex:none] [&_em]:rounded-xs [&_em]:[padding:1px_4px] [&_em]:[font-size:9px] [&_em]:[color:var(--primary)] [&_em]:[font-style:normal] [&_em]:[background:color-mix(in_oklch,_var(--primary)_16%,_var(--card))] [&_em]:[border:1px_solid_color-mix(in_oklch,_var(--primary)_35%,_var(--border))]`}
                   role="cell"
                 >
                   {viewOptions.referencesOnLeft && referenceBadges}
                   <span
-                    className={`ellipsis [min-width:0] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap] ellipsis`}
+                    className={`ellipsis ellipsis [min-width:0] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap]`}
                   >
                     {commit.subject}
                   </span>
@@ -220,14 +220,14 @@ export function CommitLogTable({
                   )}
                 </span>
                 <span
-                  className={`ellipsis [min-width:0] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap] ellipsis`}
+                  className={`ellipsis ellipsis [min-width:0] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap]`}
                   hidden={!viewOptions.showAuthor}
                   role="cell"
                 >
                   {commit.author}
                 </span>
                 <span
-                  className={`ellipsis [min-width:0] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap] ellipsis`}
+                  className={`ellipsis ellipsis [min-width:0] [overflow:hidden] [text-overflow:ellipsis] [white-space:nowrap]`}
                   hidden={!viewOptions.showDate}
                   role="cell"
                 >

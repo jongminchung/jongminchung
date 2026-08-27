@@ -3,6 +3,7 @@
 @import "./product-surfaces.css";
 
 @source "../**/*.{ts,tsx}";
+@source not "../**/*.{test,spec}.{ts,tsx}";
 
 @theme inline {
   --color-success: var(--success);

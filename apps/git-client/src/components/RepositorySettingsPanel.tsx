@@ -164,11 +164,11 @@ export function RepositorySettingsPanel({
 
   return (
     <div
-      className={`repositorySettings [height:100%] [overflow:auto] repositorySettings`}
+      className={`repositorySettings repositorySettings [height:100%] [overflow:auto]`}
       aria-busy={busy}
     >
       <div
-        className={`managementToolbar [&>_span]:[flex:1] [align-items:center] [background:var(--muted)] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:5px] [height:38px] [padding:0_11px] [&>_button]:[align-items:center] [&>_button]:[background:var(--card)] [&>_button]:[border:1px_solid_var(--border)] [&>_button]:rounded-sm [&>_button]:[display:flex] [&>_button]:[gap:5px] [&>_button]:[min-height:27px] [&>_button]:[padding:0_8px] [background:var(--card)] managementToolbar [&>_button]:rounded-sm`}
+        className={`managementToolbar managementToolbar [display:flex] [height:38px] [align-items:center] [gap:5px] [padding:0_11px] [background:var(--card)] [background:var(--muted)] [border-bottom:1px_solid_var(--border)] [&>_button]:[display:flex] [&>_button]:[min-height:27px] [&>_button]:[align-items:center] [&>_button]:[gap:5px] [&>_button]:rounded-sm [&>_button]:[padding:0_8px] [&>_button]:[background:var(--card)] [&>_button]:[border:1px_solid_var(--border)] [&>_span]:[flex:1]`}
       >
         <strong>Repository settings</strong>
         <span />
@@ -214,30 +214,30 @@ export function RepositorySettingsPanel({
       >
         <TabsList
           aria-label="Repository settings sections"
-          className={`settingsTabs [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [gap:4px] [padding:8px_11px] [&>_button]:[background:transparent] [&>_button]:[min-height:29px] [&>_button]:[padding:0_10px] [&_em]:[color:var(--disabled-foreground)] [&_em]:[font-size:10px] [&_em]:[font-style:normal] [&_em]:[margin-left:4px] settingsTabs`}
+          className={`settingsTabs settingsTabs [display:flex] [align-items:center] [gap:4px] [padding:8px_11px] [border-bottom:1px_solid_var(--border)] [&_em]:[margin-left:4px] [&_em]:[font-size:10px] [&_em]:[color:var(--disabled-foreground)] [&_em]:[font-style:normal] [&>_button]:[min-height:29px] [&>_button]:[padding:0_10px] [&>_button]:[background:transparent]`}
           render={<nav />}
         >
           <TabsTrigger
-            className="inline-flex h-7 items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent px-2.5 text-xs text-muted-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 data-active:bg-accent data-active:text-foreground"
+            className="inline-flex h-7 items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent px-2.5 text-xs text-muted-foreground transition-[color,background-color,border-color,box-shadow] outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 data-active:bg-accent data-active:text-foreground"
             value="ignore"
           >
             Ignore
           </TabsTrigger>
           <TabsTrigger
-            className="inline-flex h-7 items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent px-2.5 text-xs text-muted-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 data-active:bg-accent data-active:text-foreground"
+            className="inline-flex h-7 items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent px-2.5 text-xs text-muted-foreground transition-[color,background-color,border-color,box-shadow] outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 data-active:bg-accent data-active:text-foreground"
             value="submodules"
           >
             Submodules <em>{submodules.length}</em>
           </TabsTrigger>
           <TabsTrigger
-            className="inline-flex h-7 items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent px-2.5 text-xs text-muted-foreground outline-none transition-[color,background-color,border-color,box-shadow] hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 data-active:bg-accent data-active:text-foreground"
+            className="inline-flex h-7 items-center justify-center gap-1.5 rounded-sm border border-transparent bg-transparent px-2.5 text-xs text-muted-foreground transition-[color,background-color,border-color,box-shadow] outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/55 disabled:pointer-events-none disabled:opacity-45 data-active:bg-accent data-active:text-foreground"
             value="config"
           >
             Git Config
           </TabsTrigger>
         </TabsList>
         <TabsContent
-          className={`settingsSection [border-bottom:1px_solid_var(--border)] [&>_header]:[align-items:center] [&>_header]:[background:var(--muted)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[gap:8px] [&>_header]:[min-height:37px] [&>_header]:[padding:6px_11px] [&>_header_>_span]:[flex:1] [&_button]:[background:var(--secondary)] [&_button]:[border:1px_solid_var(--border)] [&_button]:[min-height:28px] [&_button]:[padding:0_8px] [&_input]:[background:var(--secondary)] [&_input]:[border:1px_solid_var(--border)] [&_input]:[min-height:28px] [&_input]:[padding:0_8px] [&_select]:[background:var(--secondary)] [&_select]:[border:1px_solid_var(--border)] [&_select]:[min-height:28px] [&_select]:[padding:0_8px] settingsSection`}
+          className={`settingsSection settingsSection [border-bottom:1px_solid_var(--border)] [&_button]:[min-height:28px] [&_button]:[padding:0_8px] [&_button]:[background:var(--secondary)] [&_button]:[border:1px_solid_var(--border)] [&_input]:[min-height:28px] [&_input]:[padding:0_8px] [&_input]:[background:var(--secondary)] [&_input]:[border:1px_solid_var(--border)] [&_select]:[min-height:28px] [&_select]:[padding:0_8px] [&_select]:[background:var(--secondary)] [&_select]:[border:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[min-height:37px] [&>_header]:[align-items:center] [&>_header]:[gap:8px] [&>_header]:[padding:6px_11px] [&>_header]:[background:var(--muted)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header_>_span]:[flex:1]`}
           render={<section />}
           value="ignore"
         >
@@ -256,7 +256,7 @@ export function RepositorySettingsPanel({
             </Button>
           </header>
           <div
-            className={`ignoreEditors [display:grid] [gap:10px] [grid-template-columns:1fr_1fr] [padding:10px_11px] [&_label]:[color:var(--muted-foreground)] [&_label]:[display:flex] [&_label]:[flex-direction:column] [&_label]:[font-size:11px] [&_label]:[gap:5px] [&_textarea]:[background:var(--muted)] [&_textarea]:[border:1px_solid_var(--border)] [&_textarea]:rounded-lg [&_textarea]:[color:var(--foreground)] [&_textarea]:[font-family:var(--font-family-code)] [&_textarea]:[font-size:12px] [&_textarea]:[min-height:150px] [&_textarea]:[padding:8px] [&_textarea]:[resize:vertical] max-[1120px]:[grid-template-columns:1fr] ignoreEditors [&_textarea]:rounded-lg`}
+            className={`ignoreEditors ignoreEditors [display:grid] [grid-template-columns:1fr_1fr] [gap:10px] [padding:10px_11px] max-[1120px]:[grid-template-columns:1fr] [&_label]:[display:flex] [&_label]:[flex-direction:column] [&_label]:[gap:5px] [&_label]:[font-size:11px] [&_label]:[color:var(--muted-foreground)] [&_textarea]:[min-height:150px] [&_textarea]:[resize:vertical] [&_textarea]:rounded-lg [&_textarea]:[padding:8px] [&_textarea]:[font-family:var(--font-family-code)] [&_textarea]:[font-size:12px] [&_textarea]:[color:var(--foreground)] [&_textarea]:[background:var(--muted)] [&_textarea]:[border:1px_solid_var(--border)]`}
           >
             <label>
               .gitignore
@@ -285,7 +285,7 @@ export function RepositorySettingsPanel({
           </div>
         </TabsContent>
         <TabsContent
-          className={`settingsSection [border-bottom:1px_solid_var(--border)] [&>_header]:[align-items:center] [&>_header]:[background:var(--muted)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[gap:8px] [&>_header]:[min-height:37px] [&>_header]:[padding:6px_11px] [&>_header_>_span]:[flex:1] [&_button]:[background:var(--secondary)] [&_button]:[border:1px_solid_var(--border)] [&_button]:[min-height:28px] [&_button]:[padding:0_8px] [&_input]:[background:var(--secondary)] [&_input]:[border:1px_solid_var(--border)] [&_input]:[min-height:28px] [&_input]:[padding:0_8px] [&_select]:[background:var(--secondary)] [&_select]:[border:1px_solid_var(--border)] [&_select]:[min-height:28px] [&_select]:[padding:0_8px] settingsSection`}
+          className={`settingsSection settingsSection [border-bottom:1px_solid_var(--border)] [&_button]:[min-height:28px] [&_button]:[padding:0_8px] [&_button]:[background:var(--secondary)] [&_button]:[border:1px_solid_var(--border)] [&_input]:[min-height:28px] [&_input]:[padding:0_8px] [&_input]:[background:var(--secondary)] [&_input]:[border:1px_solid_var(--border)] [&_select]:[min-height:28px] [&_select]:[padding:0_8px] [&_select]:[background:var(--secondary)] [&_select]:[border:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[min-height:37px] [&>_header]:[align-items:center] [&>_header]:[gap:8px] [&>_header]:[padding:6px_11px] [&>_header]:[background:var(--muted)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header_>_span]:[flex:1]`}
           render={<section />}
           value="submodules"
         >
@@ -314,7 +314,7 @@ export function RepositorySettingsPanel({
           ) : (
             submodules.map((submodule) => (
               <article
-                className={`settingRow [align-items:center] [border-top:1px_solid_var(--border)] [display:flex] [gap:8px] [min-height:48px] [padding:7px_11px] [&>_div]:[display:flex] [&>_div]:[flex:1] [&>_div]:[flex-direction:column] [&>_div]:[min-width:0] [&_small]:[color:var(--disabled-foreground)] [&_small]:[overflow:hidden] [&_small]:[text-overflow:ellipsis] [&_small]:[white-space:nowrap] settingRow`}
+                className={`settingRow settingRow [display:flex] [min-height:48px] [align-items:center] [gap:8px] [padding:7px_11px] [border-top:1px_solid_var(--border)] [&_small]:[overflow:hidden] [&_small]:[text-overflow:ellipsis] [&_small]:[white-space:nowrap] [&_small]:[color:var(--disabled-foreground)] [&>_div]:[display:flex] [&>_div]:[min-width:0] [&>_div]:[flex:1] [&>_div]:[flex-direction:column]`}
                 key={submodule.path}
               >
                 <Icon name="worktree" size={15} />
@@ -331,7 +331,7 @@ export function RepositorySettingsPanel({
           )}
         </TabsContent>
         <TabsContent
-          className={`settingsSection [border-bottom:1px_solid_var(--border)] [&>_header]:[align-items:center] [&>_header]:[background:var(--muted)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[gap:8px] [&>_header]:[min-height:37px] [&>_header]:[padding:6px_11px] [&>_header_>_span]:[flex:1] [&_button]:[background:var(--secondary)] [&_button]:[border:1px_solid_var(--border)] [&_button]:[min-height:28px] [&_button]:[padding:0_8px] [&_input]:[background:var(--secondary)] [&_input]:[border:1px_solid_var(--border)] [&_input]:[min-height:28px] [&_input]:[padding:0_8px] [&_select]:[background:var(--secondary)] [&_select]:[border:1px_solid_var(--border)] [&_select]:[min-height:28px] [&_select]:[padding:0_8px] settingsSection`}
+          className={`settingsSection settingsSection [border-bottom:1px_solid_var(--border)] [&_button]:[min-height:28px] [&_button]:[padding:0_8px] [&_button]:[background:var(--secondary)] [&_button]:[border:1px_solid_var(--border)] [&_input]:[min-height:28px] [&_input]:[padding:0_8px] [&_input]:[background:var(--secondary)] [&_input]:[border:1px_solid_var(--border)] [&_select]:[min-height:28px] [&_select]:[padding:0_8px] [&_select]:[background:var(--secondary)] [&_select]:[border:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[min-height:37px] [&>_header]:[align-items:center] [&>_header]:[gap:8px] [&>_header]:[padding:6px_11px] [&>_header]:[background:var(--muted)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header_>_span]:[flex:1]`}
           render={<section />}
           value="config"
         >
@@ -366,7 +366,7 @@ export function RepositorySettingsPanel({
             />
           </header>
           <div
-            className={`configComposer [display:grid] [gap:8px] [grid-template-columns:minmax(180px,_1fr)_minmax(220px,_2fr)_auto] [padding:9px_11px] configComposer`}
+            className={`configComposer configComposer [display:grid] [grid-template-columns:minmax(180px,_1fr)_minmax(220px,_2fr)_auto] [gap:8px] [padding:9px_11px]`}
           >
             <Input
               aria-label="Config key"

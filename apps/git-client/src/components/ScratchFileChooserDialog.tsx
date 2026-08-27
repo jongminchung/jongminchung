@@ -37,7 +37,7 @@ export function ScratchFileChooserDialog({
       width={440}
     >
       <section
-        className={`scratchFileChooserDialog [display:grid] [grid-template-rows:auto_auto_minmax(0,_1fr)] [max-height:min(540px,_calc(100vh_-_90px))] [min-height:360px] [&>_[data-slot=text-input]]:[margin:10px_12px_6px] [&>_div[role=listbox]]:[min-height:0] [&>_div[role=listbox]]:[overflow:auto] [&>_div[role=listbox]]:[padding:3px_7px_9px] [&>_div[role=listbox]_button]:[align-items:center] [&>_div[role=listbox]_button]:[background:transparent] [&>_div[role=listbox]_button]:[display:grid] [&>_div[role=listbox]_button]:[gap:8px] [&>_div[role=listbox]_button]:[grid-template-columns:18px_minmax(0,_1fr)_auto] [&>_div[role=listbox]_button]:[min-height:30px] [&>_div[role=listbox]_button]:[padding:0_8px] [&>_div[role=listbox]_button]:[text-align:left] [&>_div[role=listbox]_button]:[width:100%] [&>_div[role=listbox]_button:hover]:[background:var(--muted)] [&>_div[role=listbox]_button:focus]:[background:var(--accent)] [&>_div[role=listbox]_button_small]:[color:var(--disabled-foreground)] scratchFileChooserDialog`}
+        className={`scratchFileChooserDialog scratchFileChooserDialog [display:grid] [max-height:min(540px,_calc(100vh_-_90px))] [min-height:360px] [grid-template-rows:auto_auto_minmax(0,_1fr)] [&>_[data-slot=text-input]]:[margin:10px_12px_6px] [&>_div[role=listbox]]:[min-height:0] [&>_div[role=listbox]]:[overflow:auto] [&>_div[role=listbox]]:[padding:3px_7px_9px] [&>_div[role=listbox]_button]:[display:grid] [&>_div[role=listbox]_button]:[min-height:30px] [&>_div[role=listbox]_button]:[width:100%] [&>_div[role=listbox]_button]:[grid-template-columns:18px_minmax(0,_1fr)_auto] [&>_div[role=listbox]_button]:[align-items:center] [&>_div[role=listbox]_button]:[gap:8px] [&>_div[role=listbox]_button]:[padding:0_8px] [&>_div[role=listbox]_button]:[text-align:left] [&>_div[role=listbox]_button]:[background:transparent] [&>_div[role=listbox]_button_small]:[color:var(--disabled-foreground)] [&>_div[role=listbox]_button:focus]:[background:var(--accent)] [&>_div[role=listbox]_button:hover]:[background:var(--muted)]`}
       >
         <DialogHeader
           hasDivider
@@ -65,7 +65,7 @@ export function ScratchFileChooserDialog({
               role="option"
               type="button"
               className={cn(
-                "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+                "min-h-[29px] w-full justify-start gap-1.5 px-2 py-1 text-left text-xs whitespace-normal aria-current:bg-accent aria-selected:bg-accent",
               )}
               variant="ghost"
               size="default"

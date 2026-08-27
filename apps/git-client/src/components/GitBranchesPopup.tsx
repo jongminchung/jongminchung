@@ -151,7 +151,7 @@ export function GitBranchesPopup({
       open
       aria-busy={busy || undefined}
       aria-label="Git Branches"
-      className={`gitBranchesPopup [background:var(--popover)] [border:1px_solid_var(--input)] rounded-lg [box-shadow:var(--shadow-lg)] [display:grid] [grid-template-rows:36px_minmax(120px,_auto)] [left:0] [max-height:min(520px,_calc(100vh_-_70px))] [min-width:368px] [overflow:hidden] [position:absolute] [top:31px] [z-index:var(--layer-branch-picker)] gitBranchesPopup rounded-lg`}
+      className={`gitBranchesPopup gitBranchesPopup [position:absolute] [top:31px] [left:0] [z-index:var(--layer-branch-picker)] [display:grid] [max-height:min(520px,_calc(100vh_-_70px))] [min-width:368px] [grid-template-rows:36px_minmax(120px,_auto)] [overflow:hidden] rounded-lg [box-shadow:var(--shadow-lg)] [background:var(--popover)] [border:1px_solid_var(--input)]`}
       onKeyDown={(event) => {
         if (event.key === "Escape") {
           event.preventDefault();
@@ -198,7 +198,7 @@ export function GitBranchesPopup({
       ref={popup}
     >
       <div
-        className={`gitBranchesSearch [align-items:center] [border-bottom:1px_solid_var(--border)] [display:grid] [gap:5px] [grid-template-columns:minmax(0,_1fr)_auto] [padding:4px_5px] [&>_label]:[align-items:center] [&>_label]:[background:var(--secondary)] [&>_label]:[border:1px_solid_var(--border)] [&>_label]:rounded-sm [&>_label]:[display:flex] [&>_label]:[gap:5px] [&>_label]:[padding:0_6px] [&>_label:focus-within]:[border-color:var(--primary)] [&_input]:[background:transparent] [&_input]:[border:0] [&_input]:[height:25px] [&_input]:[min-width:0] [&_input]:[outline:0] [&_input]:[width:100%] [&_[role=toolbar]]:[display:flex] [&_[role=toolbar]_button]:[align-items:center] [&_[role=toolbar]_button]:[background:transparent] [&_[role=toolbar]_button]:[display:flex] [&_[role=toolbar]_button]:[height:26px] [&_[role=toolbar]_button]:[justify-content:center] [&_[role=toolbar]_button]:[width:26px] gitBranchesSearch [&>_label]:rounded-sm`}
+        className={`gitBranchesSearch gitBranchesSearch [display:grid] [grid-template-columns:minmax(0,_1fr)_auto] [align-items:center] [gap:5px] [padding:4px_5px] [border-bottom:1px_solid_var(--border)] [&_[role=toolbar]]:[display:flex] [&_[role=toolbar]_button]:[display:flex] [&_[role=toolbar]_button]:[height:26px] [&_[role=toolbar]_button]:[width:26px] [&_[role=toolbar]_button]:[align-items:center] [&_[role=toolbar]_button]:[justify-content:center] [&_[role=toolbar]_button]:[background:transparent] [&_input]:[height:25px] [&_input]:[width:100%] [&_input]:[min-width:0] [&_input]:[outline:0] [&_input]:[background:transparent] [&_input]:[border:0] [&>_label]:[display:flex] [&>_label]:[align-items:center] [&>_label]:[gap:5px] [&>_label]:rounded-sm [&>_label]:[padding:0_6px] [&>_label]:[background:var(--secondary)] [&>_label]:[border:1px_solid_var(--border)] [&>_label:focus-within]:[border-color:var(--primary)]`}
       >
         <label>
           <Icon name="search" size={14} />
@@ -242,7 +242,7 @@ export function GitBranchesPopup({
                   }
                   type="button"
                   className={cn(
-                    "gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground",
+                    "min-h-[25px] gap-1.5 px-1.5 text-xs text-muted-foreground",
                   )}
                   variant="ghost"
                   size="default"
@@ -261,7 +261,7 @@ export function GitBranchesPopup({
                   onClick={onOpenSettings}
                   type="button"
                   className={cn(
-                    "gap-1.5 text-xs min-h-[25px] px-1.5 text-muted-foreground",
+                    "min-h-[25px] gap-1.5 px-1.5 text-xs text-muted-foreground",
                   )}
                   variant="ghost"
                   size="default"
@@ -276,7 +276,7 @@ export function GitBranchesPopup({
       </div>
       <div
         aria-label="Branches Tree"
-        className={`gitBranchesList [min-height:0] [overflow:auto] [padding:4px] [&_[role=separator]]:[border-top:1px_solid_var(--border)] [&_[role=separator]]:[height:5px] [&_[role=separator]]:[margin-top:4px] [&_[role=treeitem]]:[align-items:center] [&_[role=treeitem]]:[background:transparent] [&_[role=treeitem]]:rounded-sm [&_[role=treeitem]]:[display:grid] [&_[role=treeitem]]:[gap:6px] [&_[role=treeitem]]:[grid-template-columns:17px_minmax(0,_1fr)_auto_auto] [&_[role=treeitem]]:[height:27px] [&_[role=treeitem]]:[padding:0_7px] [&_[role=treeitem]]:[text-align:left] [&_[role=treeitem]]:[width:100%] [&_[role=treeitem]:hover]:[background:var(--muted)] [&_[role=treeitem][aria-selected=true]]:[background:var(--accent)] [&_[role=group]_[role=treeitem]]:[padding-left:25px] [&_[data-branch-group=true]]:[font-weight:600] [&_kbd]:[color:var(--disabled-foreground)] [&_kbd]:[font:inherit] [&_small]:[color:var(--disabled-foreground)] [&_small]:[font-size:10px] [&>_p]:[color:var(--muted-foreground)] [&>_p]:[padding:20px] [&>_p]:[text-align:center] gitBranchesList [&_[role=treeitem]]:rounded-sm`}
+        className={`gitBranchesList gitBranchesList [min-height:0] [overflow:auto] [padding:4px] [&_[data-branch-group=true]]:[font-weight:600] [&_[role=group]_[role=treeitem]]:[padding-left:25px] [&_[role=separator]]:[margin-top:4px] [&_[role=separator]]:[height:5px] [&_[role=separator]]:[border-top:1px_solid_var(--border)] [&_[role=treeitem]]:[display:grid] [&_[role=treeitem]]:[height:27px] [&_[role=treeitem]]:[width:100%] [&_[role=treeitem]]:[grid-template-columns:17px_minmax(0,_1fr)_auto_auto] [&_[role=treeitem]]:[align-items:center] [&_[role=treeitem]]:[gap:6px] [&_[role=treeitem]]:rounded-sm [&_[role=treeitem]]:[padding:0_7px] [&_[role=treeitem]]:[text-align:left] [&_[role=treeitem]]:[background:transparent] [&_[role=treeitem]:hover]:[background:var(--muted)] [&_[role=treeitem][aria-selected=true]]:[background:var(--accent)] [&_kbd]:[color:var(--disabled-foreground)] [&_kbd]:[font:inherit] [&_small]:[font-size:10px] [&_small]:[color:var(--disabled-foreground)] [&>_p]:[padding:20px] [&>_p]:[text-align:center] [&>_p]:[color:var(--muted-foreground)]`}
         id="git-branches-list"
         role="tree"
       >
@@ -291,7 +291,7 @@ export function GitBranchesPopup({
             role="treeitem"
             type="button"
             className={cn(
-              "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+              "min-h-[29px] w-full justify-start gap-1.5 px-2 py-1 text-left text-xs whitespace-normal aria-current:bg-accent aria-selected:bg-accent",
             )}
             variant="ghost"
             size="default"
@@ -310,7 +310,7 @@ export function GitBranchesPopup({
             role="treeitem"
             type="button"
             className={cn(
-              "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+              "min-h-[29px] w-full justify-start gap-1.5 px-2 py-1 text-left text-xs whitespace-normal aria-current:bg-accent aria-selected:bg-accent",
             )}
             variant="ghost"
             size="default"
@@ -328,7 +328,7 @@ export function GitBranchesPopup({
             role="treeitem"
             type="button"
             className={cn(
-              "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+              "min-h-[29px] w-full justify-start gap-1.5 px-2 py-1 text-left text-xs whitespace-normal aria-current:bg-accent aria-selected:bg-accent",
             )}
             variant="ghost"
             size="default"
@@ -353,7 +353,7 @@ export function GitBranchesPopup({
                 role="treeitem"
               >
                 <Icon
-                  className={`rotated [transform:rotate(90deg)] rotated`}
+                  className={`rotated rotated [transform:rotate(90deg)]`}
                   name="chevron"
                   size={11}
                 />
@@ -379,9 +379,9 @@ export function GitBranchesPopup({
                           role="treeitem"
                           type="button"
                           className={cn(
-                            "gap-1.5 text-xs min-h-[29px] w-full justify-start whitespace-normal px-2 py-1 text-left aria-selected:bg-accent aria-current:bg-accent",
+                            "min-h-[29px] w-full justify-start gap-1.5 px-2 py-1 text-left text-xs whitespace-normal aria-current:bg-accent aria-selected:bg-accent",
                             index === activeIndex
-                              ? `selected [background:var(--accent)] [color:var(--foreground)] selected`
+                              ? `selected selected [color:var(--foreground)] [background:var(--accent)]`
                               : undefined,
                           )}
                           variant="ghost"
@@ -401,7 +401,7 @@ export function GitBranchesPopup({
                           <span>{row.label}</span>
                           {row.ref.favorite && (
                             <Icon
-                              className={`favorite [color:var(--bookmark)] [fill:var(--bookmark)] favorite`}
+                              className={`favorite favorite [fill:var(--bookmark)] [color:var(--bookmark)]`}
                               name="star"
                               size={12}
                             />

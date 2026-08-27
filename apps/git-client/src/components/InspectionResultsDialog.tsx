@@ -29,7 +29,7 @@ export function InspectionResultsDialog({
       width="min(860px, calc(100vw - 70px))"
     >
       <section
-        className={`inspectionResultsDialog [display:grid] [grid-template-rows:auto_32px_minmax(300px,_1fr)_auto] [height:min(680px,_calc(100vh_-_80px))] [&>_header]:[align-items:center] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[gap:7px] [&>_header]:[padding:0_10px] [&>_header_span]:[color:var(--muted-foreground)] [&>_div[role=listbox]]:[min-height:0] [&>_div[role=listbox]]:[overflow:auto] [&>_div[role=listbox]]:[padding:5px_7px] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:flex] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:8px_10px] inspectionResultsDialog`}
+        className={`inspectionResultsDialog inspectionResultsDialog [display:grid] [height:min(680px,_calc(100vh_-_80px))] [grid-template-rows:auto_32px_minmax(300px,_1fr)_auto] [&>_div[role=listbox]]:[min-height:0] [&>_div[role=listbox]]:[overflow:auto] [&>_div[role=listbox]]:[padding:5px_7px] [&>_footer]:[display:flex] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:8px_10px] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_header]:[display:flex] [&>_header]:[align-items:center] [&>_header]:[gap:7px] [&>_header]:[padding:0_10px] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header_span]:[color:var(--muted-foreground)]`}
       >
         <DialogHeader
           hasDivider

@@ -100,7 +100,7 @@ export function LeftoverDirectoriesDialog({
         width="min(720px, calc(100vw - 70px))"
       >
         <section
-          className={`leftoverDirectoriesDialog [display:grid] [grid-template-rows:auto_auto_30px_minmax(260px,_1fr)_auto] [height:min(620px,_calc(100vh_-_80px))] [&>_p]:[color:var(--muted-foreground)] [&>_p]:[margin:0] [&>_p]:[padding:11px_13px] [&>_header]:[align-items:center] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_header]:[color:var(--muted-foreground)] [&>_header]:[display:grid] [&>_header]:[font-size:11px] [&>_header]:[grid-template-columns:minmax(0,_1fr)_130px_90px] [&>_header]:[padding:0_12px_0_46px] [&>_main]:[min-height:0] [&>_main]:[overflow:auto] [&>_main>_div[role=list]]:[padding:5px] [&>_footer]:[align-items:center] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:flex] [&>_footer]:[gap:8px] [&>_footer]:[padding:8px_10px] [&>_footer>_span]:[color:var(--muted-foreground)] [&>_footer>_span]:[flex:1] leftoverDirectoriesDialog`}
+          className={`leftoverDirectoriesDialog leftoverDirectoriesDialog [display:grid] [height:min(620px,_calc(100vh_-_80px))] [grid-template-rows:auto_auto_30px_minmax(260px,_1fr)_auto] [&>_footer]:[display:flex] [&>_footer]:[align-items:center] [&>_footer]:[gap:8px] [&>_footer]:[padding:8px_10px] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer>_span]:[flex:1] [&>_footer>_span]:[color:var(--muted-foreground)] [&>_header]:[display:grid] [&>_header]:[grid-template-columns:minmax(0,_1fr)_130px_90px] [&>_header]:[align-items:center] [&>_header]:[padding:0_12px_0_46px] [&>_header]:[font-size:11px] [&>_header]:[color:var(--muted-foreground)] [&>_header]:[border-bottom:1px_solid_var(--border)] [&>_main]:[min-height:0] [&>_main]:[overflow:auto] [&>_main>_div[role=list]]:[padding:5px] [&>_p]:[margin:0] [&>_p]:[padding:11px_13px] [&>_p]:[color:var(--muted-foreground)]`}
         >
           <DialogHeader
             hasDivider
@@ -135,7 +135,7 @@ export function LeftoverDirectoriesDialog({
                     description="Obsolete Git Client Electron profile"
                     endContent={
                       <span
-                        className={`leftoverDirectoryMetrics [align-items:center] [color:var(--muted-foreground)] [display:grid] [font-variant-numeric:tabular-nums] [grid-template-columns:130px_90px] [&>_span]:[text-align:right] leftoverDirectoryMetrics`}
+                        className={`leftoverDirectoryMetrics leftoverDirectoryMetrics [display:grid] [grid-template-columns:130px_90px] [align-items:center] [color:var(--muted-foreground)] [font-variant-numeric:tabular-nums] [&>_span]:[text-align:right]`}
                       >
                         <time
                           dateTime={new Date(

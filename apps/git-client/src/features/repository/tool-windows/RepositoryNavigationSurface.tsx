@@ -26,7 +26,7 @@ export function RepositoryNavigationSurface({
   return (
     <nav
       aria-label="Navigation Bar"
-      className={`topNavigationBar [align-items:center] [background:var(--card)] [border-bottom:1px_solid_var(--border)] [display:flex] [height:26px] [left:31px] [padding:0_8px] [position:absolute] [right:30px] [top:30px] [z-index:var(--layer-navigation)] [html[data-presentation-mode=true]_&]:hidden! topNavigationBar`}
+      className={`topNavigationBar topNavigationBar [position:absolute] [top:30px] [right:30px] [left:31px] [z-index:var(--layer-navigation)] [display:flex] [height:26px] [align-items:center] [padding:0_8px] [background:var(--card)] [border-bottom:1px_solid_var(--border)] [html[data-presentation-mode=true]_&]:hidden!`}
     >
       <Tooltip>
         <TooltipTrigger

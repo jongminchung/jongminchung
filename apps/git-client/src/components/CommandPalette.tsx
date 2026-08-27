@@ -119,11 +119,11 @@ export function CommandPalette({
             placeholder={copy.placeholder}
             value={query}
           />
-          <kbd className="absolute right-3 top-1/2 -translate-y-1/2">Esc</kbd>
+          <kbd className="absolute top-1/2 right-3 -translate-y-1/2">Esc</kbd>
         </div>
         <CommandList
           aria-label={copy.label}
-          className="min-h-0 max-h-[492px] overflow-auto"
+          className="max-h-[492px] min-h-0 overflow-auto"
         >
           <CommandEmpty>
             No commands or loaded items match “{query}”.
@@ -151,7 +151,7 @@ export function CommandPalette({
                     : item.detail}
                 </small>
               </span>
-              <em className="not-italic text-muted-foreground">
+              <em className="text-muted-foreground not-italic">
                 {item.category}
               </em>
               {item.shortcut && <kbd>{item.shortcut}</kbd>}

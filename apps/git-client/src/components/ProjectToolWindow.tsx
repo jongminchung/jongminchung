@@ -293,7 +293,7 @@ export function ProjectToolWindow({
   return (
     <section
       aria-label="Project Tool Window"
-      className={`projectToolWindow [html[data-distraction-free-mode=true]_&]:hidden! [html[data-presentation-mode=true]_&]:hidden! [background:var(--card)] rounded-lg [display:grid] [grid-template-rows:34px_minmax(0,_1fr)] [min-height:0] [min-width:0] [overflow:hidden] [position:relative] [&>_.verticalResizeHandle]:[right:0] projectToolWindow rounded-lg`}
+      className={`projectToolWindow projectToolWindow [position:relative] [display:grid] [min-height:0] [min-width:0] [grid-template-rows:34px_minmax(0,_1fr)] [overflow:hidden] rounded-lg [background:var(--card)] [&>_.verticalResizeHandle]:[right:0] [html[data-distraction-free-mode=true]_&]:hidden! [html[data-presentation-mode=true]_&]:hidden!`}
     >
       <VerticalResizeHandle
         direction={1}
@@ -302,7 +302,7 @@ export function ProjectToolWindow({
         value={width}
       />
       <header
-        className={`projectToolHeader [align-items:center] [border-bottom:1px_solid_var(--border)] [display:flex] [padding:0_3px_0_6px] [&>_span]:[flex:1] [&>_button]:[align-items:center] [&>_button]:[background:transparent] [&>_button]:rounded-sm [&>_button]:[color:var(--muted-foreground)] [&>_button]:[display:flex] [&>_button]:[height:24px] [&>_button]:[justify-content:center] [&>_button]:[width:24px] [&>_button:first-child]:[color:var(--foreground)] [&>_button:first-child]:[font-size:12px] [&>_button:first-child]:[padding:0_4px] [&>_button:first-child]:[width:auto] [&>_button:hover]:[background:var(--muted)] [&>_button:hover]:[color:var(--foreground)] projectToolHeader [&>_button]:rounded-sm`}
+        className={`projectToolHeader projectToolHeader [display:flex] [align-items:center] [padding:0_3px_0_6px] [border-bottom:1px_solid_var(--border)] [&>_button]:[display:flex] [&>_button]:[height:24px] [&>_button]:[width:24px] [&>_button]:[align-items:center] [&>_button]:[justify-content:center] [&>_button]:rounded-sm [&>_button]:[color:var(--muted-foreground)] [&>_button]:[background:transparent] [&>_button:first-child]:[width:auto] [&>_button:first-child]:[padding:0_4px] [&>_button:first-child]:[font-size:12px] [&>_button:first-child]:[color:var(--foreground)] [&>_button:hover]:[color:var(--foreground)] [&>_button:hover]:[background:var(--muted)] [&>_span]:[flex:1]`}
       >
         <Tooltip>
           <TooltipTrigger
@@ -311,7 +311,7 @@ export function ProjectToolWindow({
                 aria-label="Project"
                 type="button"
                 className={cn(
-                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
+                  "min-h-[26px] min-w-[26px] gap-1.5 p-1 text-xs text-muted-foreground",
                 )}
                 variant="ghost"
                 size="xs"
@@ -331,7 +331,7 @@ export function ProjectToolWindow({
                 onClick={onNew}
                 type="button"
                 className={cn(
-                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
+                  "min-h-[26px] min-w-[26px] gap-1.5 p-1 text-xs text-muted-foreground",
                 )}
                 variant="ghost"
                 size="icon-sm"
@@ -351,7 +351,7 @@ export function ProjectToolWindow({
                 onClick={() => void revealActiveFile()}
                 type="button"
                 className={cn(
-                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
+                  "min-h-[26px] min-w-[26px] gap-1.5 p-1 text-xs text-muted-foreground",
                 )}
                 variant="ghost"
                 size="icon-sm"
@@ -380,7 +380,7 @@ export function ProjectToolWindow({
                 }}
                 type="button"
                 className={cn(
-                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
+                  "min-h-[26px] min-w-[26px] gap-1.5 p-1 text-xs text-muted-foreground",
                 )}
                 variant="ghost"
                 size="icon-sm"
@@ -399,7 +399,7 @@ export function ProjectToolWindow({
                 onClick={() => setExpanded(new Set())}
                 type="button"
                 className={cn(
-                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
+                  "min-h-[26px] min-w-[26px] gap-1.5 p-1 text-xs text-muted-foreground",
                 )}
                 variant="ghost"
                 size="icon-sm"
@@ -421,7 +421,7 @@ export function ProjectToolWindow({
             width={286}
             content={
               <div
-                className={`projectViewOptions [display:grid] [gap:3px] [padding:5px] [&>_strong]:[color:var(--muted-foreground)] [&>_strong]:[font-size:10px] [&>_strong]:[font-weight:600] [&>_strong]:[margin:5px_6px_2px] [&>_strong:not(:first-child)]:[border-top:1px_solid_var(--border)] [&>_strong:not(:first-child)]:[padding-top:7px] projectViewOptions`}
+                className={`projectViewOptions projectViewOptions [display:grid] [gap:3px] [padding:5px] [&>_strong]:[margin:5px_6px_2px] [&>_strong]:[font-size:10px] [&>_strong]:[font-weight:600] [&>_strong]:[color:var(--muted-foreground)] [&>_strong:not(:first-child)]:[padding-top:7px] [&>_strong:not(:first-child)]:[border-top:1px_solid_var(--border)]`}
               >
                 <strong>Behavior</strong>
                 <CheckboxInput
@@ -480,7 +480,7 @@ export function ProjectToolWindow({
                   aria-label="Options"
                   type="button"
                   className={cn(
-                    "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
+                    "min-h-[26px] min-w-[26px] gap-1.5 p-1 text-xs text-muted-foreground",
                   )}
                   variant="ghost"
                   size="icon-sm"
@@ -500,7 +500,7 @@ export function ProjectToolWindow({
                 onClick={onClose}
                 type="button"
                 className={cn(
-                  "gap-1.5 text-xs min-h-[26px] min-w-[26px] p-1 text-muted-foreground",
+                  "min-h-[26px] min-w-[26px] gap-1.5 p-1 text-xs text-muted-foreground",
                 )}
                 variant="ghost"
                 size="icon-sm"
@@ -514,7 +514,7 @@ export function ProjectToolWindow({
       </header>
       <div
         aria-label="Project structure tree"
-        className={`projectTree [min-height:0] [overflow:auto] [padding:3px_0] projectTree`}
+        className={`projectTree projectTree [min-height:0] [overflow:auto] [padding:3px_0]`}
         role="tree"
       >
         <Button
@@ -532,8 +532,8 @@ export function ProjectToolWindow({
           style={{ "--tree-depth": 0 } as React.CSSProperties}
           type="button"
           className={cn(
-            "grid min-h-0 text-xs whitespace-normal text-left aria-selected:bg-muted! aria-current:bg-muted!",
-            `projectTreeRow [align-items:center] [background:transparent] [border:0] [color:var(--foreground)] [display:grid] [font-size:12px] [gap:4px] [grid-template-columns:14px_16px_minmax(0,_1fr)_auto] [height:20px] [padding:0_7px_0_calc(7px_+_var(--tree-depth)_*_14px)] [text-align:left] [width:100%] [&:hover]:[background:var(--overlay-hover)] [&[aria-selected=true]]:[background:var(--accent)] [&>_span:nth-child(3)]:[overflow:hidden] [&>_span:nth-child(3)]:[text-overflow:ellipsis] [&>_span:nth-child(3)]:[white-space:nowrap] [&_small]:[color:var(--disabled-foreground)] [&_small]:[font-size:9px] [&_em]:[color:var(--primary)] [&_em]:[font-size:10px] [&_em]:[font-style:normal] [&_em[data-status=untracked]]:[color:var(--success)] [&_em[data-status=deleted]]:[color:var(--destructive)] [&_em[data-status=conflicted]]:[color:var(--destructive)] [html[data-compact=true]_&]:h-[22px]! projectTreeRow`,
+            "grid min-h-0 text-left text-xs whitespace-normal aria-current:bg-muted! aria-selected:bg-muted!",
+            `projectTreeRow projectTreeRow [display:grid] [height:20px] [width:100%] [grid-template-columns:14px_16px_minmax(0,_1fr)_auto] [align-items:center] [gap:4px] [padding:0_7px_0_calc(7px_+_var(--tree-depth)_*_14px)] [text-align:left] [font-size:12px] [color:var(--foreground)] [background:transparent] [border:0] [&_em]:[font-size:10px] [&_em]:[color:var(--primary)] [&_em]:[font-style:normal] [&_em[data-status=conflicted]]:[color:var(--destructive)] [&_em[data-status=deleted]]:[color:var(--destructive)] [&_em[data-status=untracked]]:[color:var(--success)] [&_small]:[font-size:9px] [&_small]:[color:var(--disabled-foreground)] [&:hover]:[background:var(--overlay-hover)] [&>_span:nth-child(3)]:[overflow:hidden] [&>_span:nth-child(3)]:[text-overflow:ellipsis] [&>_span:nth-child(3)]:[white-space:nowrap] [&[aria-selected=true]]:[background:var(--accent)] [html[data-compact=true]_&]:h-[22px]!`,
           )}
           variant="ghost"
           size="default"
@@ -542,19 +542,19 @@ export function ProjectToolWindow({
           <Icon
             className={
               expanded.has("")
-                ? `rotated [transform:rotate(90deg)] rotated`
+                ? `rotated rotated [transform:rotate(90deg)]`
                 : undefined
             }
             name="chevron"
             size={12}
           />
           <Icon
-            className={`projectFolderIcon [color:var(--project-folder)] projectFolderIcon`}
+            className={`projectFolderIcon projectFolderIcon [color:var(--project-folder)]`}
             name="folder"
             size={15}
           />
           <span
-            className={`projectRootLabel [align-items:center] [display:flex]! [gap:5px] [&_strong]:[font-weight:600] [&_small]:[color:var(--disabled-foreground)] [&_small]:[font-size:10px] [&_small]:[overflow:hidden] [&_small]:[text-overflow:ellipsis] [&_small]:[white-space:nowrap] projectRootLabel`}
+            className={`projectRootLabel projectRootLabel [display:flex]! [align-items:center] [gap:5px] [&_small]:[overflow:hidden] [&_small]:[font-size:10px] [&_small]:[text-overflow:ellipsis] [&_small]:[white-space:nowrap] [&_small]:[color:var(--disabled-foreground)] [&_strong]:[font-weight:600]`}
           >
             <strong>{repositoryName}</strong>
             <small>{repositoryPath}</small>
@@ -593,8 +593,8 @@ export function ProjectToolWindow({
                     }
                     type="button"
                     className={cn(
-                      "grid min-h-0 text-xs whitespace-normal text-left aria-selected:bg-accent aria-current:bg-accent",
-                      `projectTreeRow [align-items:center] [background:transparent] [border:0] [color:var(--foreground)] [display:grid] [font-size:12px] [gap:4px] [grid-template-columns:14px_16px_minmax(0,_1fr)_auto] [height:20px] [padding:0_7px_0_calc(7px_+_var(--tree-depth)_*_14px)] [text-align:left] [width:100%] [&:hover]:[background:var(--overlay-hover)] [&[aria-selected=true]]:[background:var(--accent)] [&>_span:nth-child(3)]:[overflow:hidden] [&>_span:nth-child(3)]:[text-overflow:ellipsis] [&>_span:nth-child(3)]:[white-space:nowrap] [&_small]:[color:var(--disabled-foreground)] [&_small]:[font-size:9px] [&_em]:[color:var(--primary)] [&_em]:[font-size:10px] [&_em]:[font-style:normal] [&_em[data-status=untracked]]:[color:var(--success)] [&_em[data-status=deleted]]:[color:var(--destructive)] [&_em[data-status=conflicted]]:[color:var(--destructive)] [html[data-compact=true]_&]:h-[22px]! projectTreeRow`,
+                      "grid min-h-0 text-left text-xs whitespace-normal aria-current:bg-accent aria-selected:bg-accent",
+                      `projectTreeRow projectTreeRow [display:grid] [height:20px] [width:100%] [grid-template-columns:14px_16px_minmax(0,_1fr)_auto] [align-items:center] [gap:4px] [padding:0_7px_0_calc(7px_+_var(--tree-depth)_*_14px)] [text-align:left] [font-size:12px] [color:var(--foreground)] [background:transparent] [border:0] [&_em]:[font-size:10px] [&_em]:[color:var(--primary)] [&_em]:[font-style:normal] [&_em[data-status=conflicted]]:[color:var(--destructive)] [&_em[data-status=deleted]]:[color:var(--destructive)] [&_em[data-status=untracked]]:[color:var(--success)] [&_small]:[font-size:9px] [&_small]:[color:var(--disabled-foreground)] [&:hover]:[background:var(--overlay-hover)] [&>_span:nth-child(3)]:[overflow:hidden] [&>_span:nth-child(3)]:[text-overflow:ellipsis] [&>_span:nth-child(3)]:[white-space:nowrap] [&[aria-selected=true]]:[background:var(--accent)] [html[data-compact=true]_&]:h-[22px]!`,
                     )}
                     variant="ghost"
                     size="default"
@@ -604,7 +604,7 @@ export function ProjectToolWindow({
                       <Icon
                         className={
                           expanded.has(entry.path)
-                            ? `rotated [transform:rotate(90deg)] rotated`
+                            ? `rotated rotated [transform:rotate(90deg)]`
                             : undefined
                         }
                         name="chevron"
@@ -612,14 +612,14 @@ export function ProjectToolWindow({
                       />
                     ) : (
                       <span
-                        className={`projectTreeIndent [display:block] [height:12px] [width:12px] projectTreeIndent`}
+                        className={`projectTreeIndent projectTreeIndent [display:block] [height:12px] [width:12px]`}
                       />
                     )}
                     <Icon
                       className={
                         directory
-                          ? `projectFolderIcon [color:var(--project-folder)] projectFolderIcon`
-                          : `projectFileIcon [color:var(--muted-foreground)] projectFileIcon`
+                          ? `projectFolderIcon projectFolderIcon [color:var(--project-folder)]`
+                          : `projectFileIcon projectFileIcon [color:var(--muted-foreground)]`
                       }
                       name={directory ? "folder" : "file"}
                       size={15}
@@ -664,8 +664,8 @@ export function ProjectToolWindow({
                   role="treeitem"
                   type="button"
                   className={cn(
-                    "flex min-h-0 text-xs whitespace-normal text-left aria-selected:bg-accent aria-current:bg-accent",
-                    `projectScratches [align-items:center] [background:transparent] [color:var(--muted-foreground)] [display:flex] [gap:4px] [height:22px] [padding:0_8px] [text-align:left] projectScratches`,
+                    "flex min-h-0 text-left text-xs whitespace-normal aria-current:bg-accent aria-selected:bg-accent",
+                    `projectScratches projectScratches [display:flex] [height:22px] [align-items:center] [gap:4px] [padding:0_8px] [text-align:left] [color:var(--muted-foreground)] [background:transparent]`,
                   )}
                   variant="ghost"
                   size="default"
@@ -674,7 +674,7 @@ export function ProjectToolWindow({
                   <Icon
                     className={
                       scratchesExpanded
-                        ? `rotated [transform:rotate(90deg)] rotated`
+                        ? `rotated rotated [transform:rotate(90deg)]`
                         : undefined
                     }
                     name="chevron"
@@ -703,8 +703,8 @@ export function ProjectToolWindow({
                     role="treeitem"
                     type="button"
                     className={cn(
-                      "grid min-h-0 text-xs whitespace-normal text-left aria-selected:bg-accent aria-current:bg-accent",
-                      `projectScratchFile [align-items:center] [background:transparent] [display:grid] [gap:4px] [grid-template-columns:12px_16px_minmax(0,_1fr)] [height:22px] [padding:0_8px] [text-align:left] [width:100%] [&:hover]:[background:var(--muted)] [&:focus]:[background:var(--accent)] [&>_span:last-child]:[overflow:hidden] [&>_span:last-child]:[text-overflow:ellipsis] [&>_span:last-child]:[white-space:nowrap] projectScratchFile`,
+                      "grid min-h-0 text-left text-xs whitespace-normal aria-current:bg-accent aria-selected:bg-accent",
+                      `projectScratchFile projectScratchFile [display:grid] [height:22px] [width:100%] [grid-template-columns:12px_16px_minmax(0,_1fr)] [align-items:center] [gap:4px] [padding:0_8px] [text-align:left] [background:transparent] [&:focus]:[background:var(--accent)] [&:hover]:[background:var(--muted)] [&>_span:last-child]:[overflow:hidden] [&>_span:last-child]:[text-overflow:ellipsis] [&>_span:last-child]:[white-space:nowrap]`,
                     )}
                     variant="ghost"
                     size="default"

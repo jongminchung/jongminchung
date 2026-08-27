@@ -33,7 +33,7 @@ export function DocsCodeBlock({
         aria-label={copied ? "Copied" : "Copy code"}
         className={cn(
           "absolute top-2 right-2 grid size-[30px] place-items-center p-0 text-muted-foreground opacity-0",
-          "transition-opacity duration-150 ease-out group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 motion-reduce:transition-none",
+          "transition-opacity duration-150 ease-out group-focus-within:opacity-100 group-hover:opacity-100 focus-visible:opacity-100 motion-reduce:transition-none",
           "[&_svg]:size-3.5",
         )}
         onClick={() => void copy()}

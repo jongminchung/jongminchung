@@ -39,7 +39,7 @@ export function RunInspectionDialog({
       width={600}
     >
       <section
-        className={`runInspectionDialog [display:grid] [grid-template-rows:auto_auto_minmax(260px,_1fr)_auto] [height:min(580px,_calc(100vh_-_80px))] [&>_[data-slot=text-input]]:[margin:10px_12px_5px] [&>_div[role=listbox]]:[min-height:0] [&>_div[role=listbox]]:[overflow:auto] [&>_div[role=listbox]]:[padding:5px_7px] [&>_footer]:[border-top:1px_solid_var(--border)] [&>_footer]:[display:flex] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:8px_10px] runInspectionDialog`}
+        className={`runInspectionDialog runInspectionDialog [display:grid] [height:min(580px,_calc(100vh_-_80px))] [grid-template-rows:auto_auto_minmax(260px,_1fr)_auto] [&>_[data-slot=text-input]]:[margin:10px_12px_5px] [&>_div[role=listbox]]:[min-height:0] [&>_div[role=listbox]]:[overflow:auto] [&>_div[role=listbox]]:[padding:5px_7px] [&>_footer]:[display:flex] [&>_footer]:[justify-content:flex-end] [&>_footer]:[padding:8px_10px] [&>_footer]:[border-top:1px_solid_var(--border)]`}
       >
         <DialogHeader
           hasDivider

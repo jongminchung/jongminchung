@@ -317,7 +317,7 @@ export function TextArea({
     >
       <span aria-busy={isLoading || undefined} className="relative flex">
         {startIcon ? (
-          <span className="absolute left-2 top-2 text-muted-foreground">
+          <span className="absolute top-2 left-2 text-muted-foreground">
             {startIcon}
           </span>
         ) : null}
