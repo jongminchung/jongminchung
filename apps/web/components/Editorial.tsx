@@ -329,15 +329,31 @@ export function EditorialIndex({
   items,
   query,
   copy,
+  promotedTags = [],
+  tagLabels = {},
   variant = "default",
 }: {
   readonly pathname: string;
   readonly items: readonly EditorialItem[];
   readonly query: EditorialQuery;
   readonly copy: EditorialCopy;
+  readonly promotedTags?: readonly string[];
+  readonly tagLabels?: Readonly<Record<string, string>>;
   readonly variant?: "default" | "engineering";
 }): React.JSX.Element {
-  const tags = getEditorialTags(items);
+  const tagPriority = new Map(
+    promotedTags.map((tag, index) => [tag, index] as const),
+  );
+  const tags = getEditorialTags(items).toSorted((left, right) => {
+    const leftPriority = tagPriority.get(left.tag);
+    const rightPriority = tagPriority.get(right.tag);
+    if (leftPriority !== undefined || rightPriority !== undefined)
+      return (
+        (leftPriority ?? Number.POSITIVE_INFINITY) -
+        (rightPriority ?? Number.POSITIVE_INFINITY)
+      );
+    return right.count - left.count || left.tag.localeCompare(right.tag);
+  });
   const selected = filterEditorialItems(items, query);
   const page = paginateEditorialItems(selected, query.page);
   return (
@@ -379,7 +395,8 @@ export function EditorialIndex({
             href={queryHref(pathname, query, { tag, page: 1 })}
             key={tag}
           >
-            {tag} <span className="font-mono text-[10px]">{count}</span>
+            {tagLabels[tag] ?? tag}{" "}
+            <span className="font-mono text-[10px]">{count}</span>
           </Link>
         ))}
       </nav>

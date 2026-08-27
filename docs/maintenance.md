@@ -86,8 +86,13 @@ advisory가 발견되면 다음 순서로 처리한다.
 | 대상                 | 원본                             | 갱신                             | 검증                           |
 | -------------------- | -------------------------------- | -------------------------------- | ------------------------------ |
 | Web 콘텐츠 원본      | `content/tech`, `content/invest` | MDX 직접 수정                    | Next.js build와 route contract |
+| Fumadocs entry       | `source.config.ts`와 MDX 원본    | Web install·build lifecycle      | Web typecheck·build            |
 | Excalidraw 정적 자산 | Excalidraw source asset          | Web `dev`·`build` lifecycle      | Web `build`                    |
 | Playwright snapshot  | 렌더링 결과                      | `test:e2e -- --update-snapshots` | visual test와 diff 직접 검토   |
+
+- `.source`는 Fumadocs가 생성하는 비커밋 산출물이므로 직접 수정하지 않음
+  - 새 MDX 추가 후 `pnpm --filter @jongminchung/web exec fumadocs-mdx` 또는 Web `build`로 다시 생성함
+- PlantUML은 Kroki GET URL만 빌드하므로 Web build가 Kroki 네트워크 상태에 의존하지 않음
 
 ## GitHub Actions
 

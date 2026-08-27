@@ -35,6 +35,18 @@ describe("블로그 메타데이터", () => {
     ).toBe("domain-driven-design");
   });
 
+  it("[성공] Diátaxis 문서 유형을 허용함", () => {
+    expect(
+      parseDocMetadata({ ...metadata, documentKind: "how-to" }).documentKind,
+    ).toBe("how-to");
+  });
+
+  it("[실패] 지원하지 않는 문서 유형을 거부함", () => {
+    expect(() =>
+      parseDocMetadata({ ...metadata, documentKind: "guide" }),
+    ).toThrow();
+  });
+
   it("[실패] 시리즈와 순서의 단독 선언 및 미등록 시리즈를 거부함", () => {
     expect(() =>
       parseDocMetadata({ ...metadata, series: "domain-driven-design" }),

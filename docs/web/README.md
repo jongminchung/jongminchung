@@ -44,9 +44,9 @@
   - 근거: 서버 전용 콘텐츠 repository가 기술 문서와 투자 노트의 metadata·번역·순서 계약을 검증함
   - 사례: `next dev`는 route 요청 시 최신 MDX 원본을 읽고, `next build`는 `generateStaticParams`로 정적 경로를 생성함
 
-- **MDX 변환은 Next.js 설정과 remark plugin에서 일관되게 구성됨**
-  - 근거: `next.config.ts`가 MDX page extension과 `remark-plugins.ts`를 등록함
-  - 사례: 코드 블록과 Excalidraw 다이어그램은 `mdx-components.tsx`, `remark-kroki-next.ts`, `lib/excalidraw-scene.ts`를 통해 렌더링 경계를 가짐
+- **MDX 변환은 Fumadocs Config API와 remark plugin에서 일관되게 구성됨**
+  - 근거: `source.config.ts`가 collection schema와 `lib/remark-kroki-url.ts`를 등록하고 `next.config.ts`가 Fumadocs MDX를 연결함
+  - 사례: 코드 블록과 Excalidraw 다이어그램은 `mdx-components.tsx`, `lib/remark-kroki-url.ts`, `lib/excalidraw-scene.ts`를 통해 렌더링 경계를 가짐
 
 ## 공개 자산과 배포
 

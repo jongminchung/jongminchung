@@ -1,10 +1,12 @@
 import { TooltipProvider } from "@jongminchung/ui/components/tooltip";
 import type { Metadata } from "next";
+import { NextIntlClientProvider } from "next-intl";
 import { notFound } from "next/navigation";
 import { ThemeProvider } from "#components/ThemeProvider";
+import { messagesFor } from "#lib/i18n-messages";
 import { isLocale } from "#lib/site-routing";
 import { themeStorageKeys } from "#lib/theme";
-import { InitialThemeScript, pretendard } from "../../../root-layout";
+import { pretendard } from "../../../root-layout";
 import "../../home.css";
 
 export const metadata: Metadata = {
@@ -49,13 +51,12 @@ export default async function HomeLocaleLayout({
       data-theme="light"
       suppressHydrationWarning
     >
-      <head>
-        <InitialThemeScript storageKey={themeStorageKeys.home} />
-      </head>
       <body data-site="home">
-        <ThemeProvider storageKey={themeStorageKeys.home}>
-          <TooltipProvider>{children}</TooltipProvider>
-        </ThemeProvider>
+        <NextIntlClientProvider locale={locale} messages={messagesFor(locale)}>
+          <ThemeProvider storageKey={themeStorageKeys.home}>
+            <TooltipProvider>{children}</TooltipProvider>
+          </ThemeProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

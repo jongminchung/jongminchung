@@ -1,0 +1,33 @@
+{
+  "shared": {
+    "theme": {
+      "label": "테마: {mode}"
+    }
+  },
+  "tech": {
+    "locale": {
+      "switchToEnglish": "Read in English",
+      "switchToKorean": "한국어로 읽기"
+    },
+    "outline": {
+      "backToTop": "맨 위로",
+      "documentOutline": "문서 목차",
+      "onThisPage": "이 페이지에서"
+    },
+    "search": {
+      "body": "본문",
+      "dialogTitle": "문서 검색",
+      "failed": "검색하지 못했습니다",
+      "heading": "글 제목",
+      "noResults": "검색 결과가 없습니다",
+      "placeholder": "제목, API, 주제 검색",
+      "resultGroupBlog": "블로그",
+      "results": "검색 결과",
+      "retry": "다시 시도",
+      "searching": "검색하는 중",
+      "shortLabel": "검색",
+      "title": "제목",
+      "triggerLabel": "문서 검색"
+    }
+  }
+}

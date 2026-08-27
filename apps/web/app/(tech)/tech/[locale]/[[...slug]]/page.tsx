@@ -23,6 +23,7 @@ import { BlogIndex } from "#tech-components/BlogIndex";
 import { DocsShell } from "#tech-components/DocsShell";
 import { DocumentPage } from "#tech-components/DocumentPage";
 import { SeriesDetail, SeriesIndex } from "#tech-components/SeriesPages";
+import { ShowcasePage } from "#tech-components/ShowcasePage";
 
 interface StaticPageParam {
   readonly locale: string;
@@ -105,6 +106,7 @@ export async function generateStaticParams(): Promise<StaticPageParam[]> {
   return [
     ...locales.map((locale) => ({ locale, slug: [] })),
     ...locales.map((locale) => ({ locale, slug: ["series"] })),
+    ...locales.map((locale) => ({ locale, slug: ["showcase"] })),
     ...locales.flatMap((locale) =>
       Object.keys(seriesRegistry).map((id) => ({
         locale,
@@ -141,6 +143,21 @@ export async function generateMetadata({
         en: createSeriesHref("en"),
       },
       imageId: "series",
+    });
+  if (slug.length === 1 && slug[0] === "showcase")
+    return metadata({
+      title: locale === "ko" ? "애니메이션 쇼케이스" : "Animation Showcase",
+      description:
+        locale === "ko"
+          ? "인터랙티브 타임라인과 코드 기반 설명 애니메이션의 제작 모델을 비교합니다."
+          : "Compare interactive timelines with code-authored explanatory animation.",
+      locale,
+      canonical: `/${locale}/showcase`,
+      alternatePaths: {
+        ko: "/ko/showcase",
+        en: "/en/showcase",
+      },
+      imageId: "showcase",
     });
   if (slug.length === 2 && slug[0] === "series" && isSeriesId(slug[1] ?? "")) {
     const id = slug[1] as SeriesId;
@@ -181,10 +198,10 @@ export default async function DocsPage({
   searchParams,
 }: PageProps<"/tech/[locale]/[[...slug]]">): Promise<React.JSX.Element> {
   const { locale, slug } = await params;
-  const query = await searchParams;
   if (!isLocale(locale)) notFound();
   const alternate = otherLocale(locale);
-  if (slug === undefined || slug.length === 0)
+  if (slug === undefined || slug.length === 0) {
+    const query = await searchParams;
     return (
       <DocsShell alternateHref={`/${alternate}`} locale={locale}>
         <BlogIndex
@@ -194,6 +211,7 @@ export default async function DocsPage({
         />
       </DocsShell>
     );
+  }
   if (slug.length === 1 && slug[0] === "series") {
     const documents = await getLocalizedDocuments(locale);
     const counts = Object.fromEntries(
@@ -208,6 +226,12 @@ export default async function DocsPage({
       </DocsShell>
     );
   }
+  if (slug.length === 1 && slug[0] === "showcase")
+    return (
+      <DocsShell alternateHref={`/${alternate}/showcase`} locale={locale}>
+        <ShowcasePage locale={locale} />
+      </DocsShell>
+    );
   if (slug.length === 2 && slug[0] === "series" && isSeriesId(slug[1] ?? "")) {
     const id = slug[1] as SeriesId;
     const documents = (await getLocalizedDocuments(locale))

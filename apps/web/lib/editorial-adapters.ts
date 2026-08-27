@@ -5,6 +5,7 @@ import {
 } from "./content-model";
 import type { EditorialItem } from "./editorial";
 import type { InvestmentNoteManifestEntry } from "./invest/content";
+import { documentKindLabel } from "./tech/document-kind";
 import { getSeries } from "./tech/series";
 
 /** `toTechEditorialItem` 기술 문서를 공통 editorial 항목으로 변환함 */
@@ -18,13 +19,18 @@ export function toTechEditorialItem(
     title: displayTitleFor(document),
     description: document.description,
     publishedAt: document.publishedAt,
-    tags: document.tags,
+    tags:
+      document.documentKind === undefined
+        ? document.tags
+        : [...document.tags, document.documentKind],
     kind:
-      document.series === undefined
-        ? locale === "ko"
-          ? "기술 글"
-          : "Engineering article"
-        : (getSeries(document.series, locale)?.title ?? document.series),
+      document.documentKind !== undefined
+        ? documentKindLabel(locale, document.documentKind)
+        : document.series === undefined
+          ? locale === "ko"
+            ? "기술 글"
+            : "Engineering article"
+          : (getSeries(document.series, locale)?.title ?? document.series),
     mediaSeed: `${document.id}:${document.tags.join(":")}`,
   });
 }

@@ -14,13 +14,13 @@ import {
   DialogContent,
   DialogTitle,
 } from "@jongminchung/ui/components/dialog";
-import { useQuery } from "@tanstack/react-query";
+import type { SortedResult } from "fumadocs-core/search";
+import { useDocsSearch } from "fumadocs-core/search/client";
+import { fetchClient } from "fumadocs-core/search/client/fetch";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Locale } from "#lib/content-model";
-import { searchMatchLabels } from "#lib/tech/copy";
-import { searchIndexQueryOptions } from "#lib/tech/queries";
-import { searchDocuments, type SearchHit } from "#lib/tech/search";
 import { getSeries } from "#lib/tech/series";
 
 interface SearchItem {
@@ -31,20 +31,56 @@ interface SearchItem {
   readonly group: string;
 }
 
-function toItem(locale: Locale, hit: SearchHit): SearchItem {
-  return {
-    href: hit.document.href,
-    label: hit.document.title,
-    group:
-      hit.document.series === undefined
-        ? locale === "ko"
-          ? "블로그"
-          : "Blog"
-        : (getSeries(hit.document.series, locale)?.title ??
-          hit.document.series),
-    matchLabel: searchMatchLabels[locale][hit.match.field],
-    matchText: hit.match.text,
-  };
+interface SearchCopy {
+  readonly body: string;
+  readonly heading: string;
+  readonly resultGroupBlog: string;
+  readonly title: string;
+}
+
+const emptyResults: readonly SortedResult[] = [];
+
+function plainText(value: string): string {
+  return value.replace(/<\/?mark>/gu, "");
+}
+
+function toItems(
+  locale: Locale,
+  results: readonly SortedResult[],
+  copy: SearchCopy,
+): SearchItem[] {
+  const groups: SortedResult[][] = [];
+  for (const result of results) {
+    if (result.type === "page") groups.push([result]);
+    else groups.at(-1)?.push(result);
+  }
+  return groups.map((resultsForPage) => {
+    const page = resultsForPage[0];
+    if (page === undefined) throw new Error("Search result group is empty");
+    const match =
+      resultsForPage.find(({ type }) => type === "heading") ??
+      resultsForPage.find(({ type }) => type === "text") ??
+      page;
+    const pageTitle = plainText(page.content);
+    const series = page.breadcrumbs?.[0];
+    const group =
+      series === undefined
+        ? copy.resultGroupBlog
+        : (getSeries(series, locale)?.title ?? series);
+    const matchLabel =
+      match.type === "page"
+        ? copy.title
+        : match.type === "heading"
+          ? copy.heading
+          : copy.body;
+    return {
+      href: match.url,
+      label: pageTitle,
+      group,
+      matchLabel,
+      matchText: plainText(match.content),
+    };
+  });
 }
 
 /** `SearchDialog` UI 컴포넌트를 렌더링함 */
@@ -59,17 +95,41 @@ export function SearchDialog({
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  const [query, setQuery] = useState("");
-  const searchIndex = useQuery(searchIndexQueryOptions(locale));
+  const t = useTranslations("tech.search");
+  const [retryNonce, setRetryNonce] = useState(0);
+  const searchClient = useMemo(
+    () =>
+      fetchClient({
+        api: `/${locale}/search`,
+        locale,
+        cache: new Map(),
+      }),
+    [locale],
+  );
+  const searchDependencies = useMemo(
+    () => [locale, retryNonce] as const,
+    [locale, retryNonce],
+  );
+  const search = useDocsSearch(
+    { client: searchClient, allowEmpty: true },
+    searchDependencies,
+  );
+  const query = search.search;
+  const setQuery = search.setSearch;
+  const results = Array.isArray(search.query.data)
+    ? search.query.data
+    : emptyResults;
 
-  const items = useMemo(() => {
-    if (searchIndex.data === undefined) return [];
-    return searchDocuments(
-      searchIndex.data,
-      query,
-      query === "" ? 8 : undefined,
-    ).map((hit) => toItem(locale, hit));
-  }, [locale, query, searchIndex.data]);
+  const items = useMemo(
+    () =>
+      toItems(locale, results, {
+        body: t("body"),
+        heading: t("heading"),
+        resultGroupBlog: t("resultGroupBlog"),
+        title: t("title"),
+      }).slice(0, query === "" ? 8 : 32),
+    [locale, query, results, t],
+  );
 
   useEffect(() => {
     if (open) inputRef.current?.focus();
@@ -81,8 +141,8 @@ export function SearchDialog({
   };
 
   const select = (item: SearchItem): void => {
-    changeOpen(false);
     router.push(item.href);
+    changeOpen(false);
   };
 
   return (
@@ -92,67 +152,56 @@ export function SearchDialog({
         aria-describedby={undefined}
         showCloseButton={false}
       >
-        <DialogTitle className="sr-only">
-          {locale === "ko" ? "문서 검색" : "Search documentation"}
-        </DialogTitle>
-        <Command key={locale} className="rounded-lg" shouldFilter={false}>
+        <DialogTitle className="sr-only">{t("dialogTitle")}</DialogTitle>
+        <Command
+          key={`${locale}:${String(open)}`}
+          className="rounded-lg"
+          shouldFilter={false}
+        >
           <div className="flex min-h-[54px] items-center gap-2.5 border-b px-4 [&_[data-slot=command-input-wrapper]]:min-w-0 [&_[data-slot=command-input-wrapper]]:flex-1 [&_input]:min-w-0 [&_input]:flex-1 [&_input]:border-0 [&_input]:bg-transparent [&_input]:outline-none [&_kbd]:rounded-[var(--radius-xs)] [&_kbd]:border [&_kbd]:px-1.5 [&_kbd]:py-0.5 [&_kbd]:text-[10px] [&_kbd]:text-muted-foreground">
             <CommandInput
               ref={inputRef}
               value={query}
               onValueChange={setQuery}
-              placeholder={
-                locale === "ko"
-                  ? "제목, API, 주제 검색"
-                  : "Search titles, APIs, and topics"
-              }
+              placeholder={t("placeholder")}
             />
             <kbd>Esc</kbd>
           </div>
           <CommandList
             className="grid max-h-[min(460px,60dvh)] gap-0.5 overflow-y-auto p-1.5"
-            aria-label={locale === "ko" ? "검색 결과" : "Search results"}
+            aria-label={t("results")}
           >
-            {searchIndex.isPending ? (
+            {search.query.isLoading ? (
               <p
                 className="m-0 px-4 py-[30px] text-center text-muted-foreground"
                 role="status"
               >
-                {locale === "ko"
-                  ? "검색 색인을 불러오는 중"
-                  : "Loading search index"}
+                {t("searching")}
               </p>
             ) : null}
-            {searchIndex.isError ? (
+            {search.query.error !== undefined ? (
               <div
                 className="m-0 px-4 py-[30px] text-center text-muted-foreground"
                 role="alert"
               >
-                <p>
-                  {locale === "ko"
-                    ? "검색 색인을 불러오지 못했습니다"
-                    : "Search index failed"}
-                </p>
+                <p>{t("failed")}</p>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => void searchIndex.refetch()}
+                  onClick={() => setRetryNonce((value) => value + 1)}
                 >
-                  {locale === "ko" ? "다시 시도" : "Retry"}
+                  {t("retry")}
                 </Button>
               </div>
             ) : null}
-            {searchIndex.isSuccess ? (
+            {!search.query.isLoading && search.query.error === undefined ? (
               <>
-                <CommandEmpty>
-                  {locale === "ko"
-                    ? "검색 결과가 없습니다"
-                    : "No matching documents"}
-                </CommandEmpty>
+                <CommandEmpty>{t("noResults")}</CommandEmpty>
                 <CommandGroup>
                   {items.map((item) => (
                     <CommandItem
                       className="min-h-[58px] justify-between gap-4"
+                      data-href={item.href}
                       key={item.href}
                       value={`${item.href} ${item.label} ${item.matchText}`}
                       onSelect={() => select(item)}

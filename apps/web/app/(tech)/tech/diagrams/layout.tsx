@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
+import { NextIntlClientProvider } from "next-intl";
 import type { ReactNode } from "react";
-import { TechDataProvider } from "#tech-components/TechDataProvider";
-import {
-  InitialTechDocumentScripts,
-  pretendard,
-  rootMetadata,
-} from "../../../root-layout";
+import { ThemeProvider } from "#components/ThemeProvider";
+import { messagesFor } from "#lib/i18n-messages";
+import { themeStorageKeys } from "#lib/theme";
+import { pretendard, rootMetadata } from "../../../root-layout";
 import "../../tech.css";
 
 export const metadata: Metadata = rootMetadata;
@@ -24,11 +23,12 @@ export default function DiagramRootLayout({
       data-theme="light"
       suppressHydrationWarning
     >
-      <head>
-        <InitialTechDocumentScripts />
-      </head>
       <body data-site="tech">
-        <TechDataProvider>{children}</TechDataProvider>
+        <NextIntlClientProvider locale="en" messages={messagesFor("en")}>
+          <ThemeProvider storageKey={themeStorageKeys.tech}>
+            {children}
+          </ThemeProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

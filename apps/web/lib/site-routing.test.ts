@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   createInternalSitePath,
+  isVercelDeploymentHost,
   localeFromPath,
   localeCookieName,
   normalizeHost,
+  parseLocalSiteOverride,
   resolveSite,
   selectLocale,
 } from "./site-routing";
@@ -26,6 +28,34 @@ describe("여러 개의 사이트에 속해 있음", () => {
       resolveSite(normalizeHost("tech.jamie.kr, ingress.local")),
     ).toBeNull();
     expect(resolveSite("unknown.example")).toBeNull();
+  });
+
+  it("[성공] Vercel이 발급한 배포 hostname만 식별함", () => {
+    expect(isVercelDeploymentHost("jongminchung-web.vercel.app")).toBe(true);
+    expect(
+      isVercelDeploymentHost("jongminchung-web-git-docs.vercel.app:443"),
+    ).toBe(true);
+    expect(isVercelDeploymentHost("vercel.app.example.com")).toBe(false);
+    expect(isVercelDeploymentHost("tech.jamie.kr")).toBe(false);
+  });
+
+  it("[성공] 개발 loopback 호스트만 선택한 사이트로 재정의함", () => {
+    expect(resolveSite("localhost", "tech")).toBe("tech");
+    expect(resolveSite("127.0.0.1", "invest")).toBe("invest");
+    expect(resolveSite(normalizeHost("[::1]:3000"), "tech")).toBe("tech");
+    expect(resolveSite("tech.jamie.localhost", "invest")).toBe("tech");
+    expect(resolveSite("jamie.kr", "invest")).toBe("home");
+    expect(resolveSite("unknown.example", "tech")).toBeNull();
+  });
+
+  it("[실패] 개발 환경 외부와 잘못된 사이트 선택값을 거부함", () => {
+    expect(parseLocalSiteOverride("production", "tech")).toBeNull();
+    expect(parseLocalSiteOverride("test", "tech")).toBeNull();
+    expect(parseLocalSiteOverride("development", undefined)).toBeNull();
+    expect(parseLocalSiteOverride("development", "invest")).toBe("invest");
+    expect(() => parseLocalSiteOverride("development", "docs")).toThrow(
+      /JAMIE_LOCAL_SITE/u,
+    );
   });
 
   it("[실패] 표시되지 않고 외부 외부를 생성함", () => {

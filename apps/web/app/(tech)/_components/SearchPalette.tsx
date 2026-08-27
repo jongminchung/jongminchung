@@ -3,32 +3,20 @@
 import { Button } from "@jongminchung/ui/components/button";
 import { cn } from "@jongminchung/ui/lib/utils";
 import {
-  createContext,
-  lazy,
-  type ReactNode,
-  Suspense,
-  use,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-} from "react";
+  SearchProvider as FumadocsSearchProvider,
+  useSearchContext,
+  type SharedProps,
+} from "fumadocs-ui/contexts/search";
+import { useTranslations } from "next-intl";
+import { lazy, type ReactNode, useEffect, useRef } from "react";
 import { Icon } from "#components/Icon";
 import type { Locale } from "#lib/content-model";
-import { useTechUiStore } from "./TechUiProvider";
 
 const SearchDialog = lazy(() =>
   import("./SearchDialog").then((module) => ({
     default: module.SearchDialog,
   })),
 );
-
-interface SearchContextValue {
-  readonly locale: Locale;
-  readonly open: (trigger: HTMLButtonElement | null) => void;
-}
-
-const SearchContext = createContext<SearchContextValue | null>(null);
 
 function findVisibleTrigger(): HTMLButtonElement | null {
   return (
@@ -48,59 +36,40 @@ export function SearchProvider({
   readonly locale: Locale;
   readonly children: ReactNode;
 }) {
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const isOpen = useTechUiStore((state) => state.searchOpen);
-  const hasOpened = useTechUiStore((state) => state.searchHasOpened);
-  const openSearch = useTechUiStore((state) => state.openSearch);
-  const closeSearch = useTechUiStore((state) => state.closeSearch);
-
-  const open = useCallback(
-    (trigger: HTMLButtonElement | null): void => {
-      triggerRef.current = trigger ?? findVisibleTrigger();
-      openSearch();
-    },
-    [openSearch],
+  return (
+    <FumadocsSearchProvider
+      preload={false}
+      SearchDialog={FumadocsSearchDialog}
+      options={{ locale }}
+    >
+      {children}
+    </FumadocsSearchProvider>
   );
+}
+
+function FumadocsSearchDialog({
+  locale,
+  onOpenChange,
+  open,
+}: SharedProps & { readonly locale: Locale }) {
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
-    const handleShortcut = (event: globalThis.KeyboardEvent): void => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
-        event.preventDefault();
-        open(null);
-      }
-    };
-    window.addEventListener("keydown", handleShortcut);
-    return () => window.removeEventListener("keydown", handleShortcut);
+    if (open && triggerRef.current === null)
+      triggerRef.current = findVisibleTrigger();
   }, [open]);
 
-  const changeOpen = useCallback(
-    (nextOpen: boolean): void => {
-      if (nextOpen) openSearch();
-      else {
-        closeSearch();
-        requestAnimationFrame(() => triggerRef.current?.focus());
-      }
-    },
-    [closeSearch, openSearch],
-  );
+  const changeOpen = (nextOpen: boolean): void => {
+    onOpenChange(nextOpen);
+    if (!nextOpen) {
+      requestAnimationFrame(() => {
+        triggerRef.current?.focus();
+        triggerRef.current = null;
+      });
+    }
+  };
 
-  const context = useMemo(() => ({ locale, open }), [locale, open]);
-
-  return (
-    <SearchContext value={context}>
-      {children}
-      {hasOpened ? (
-        <Suspense fallback={null}>
-          <SearchDialog
-            key={locale}
-            locale={locale}
-            open={isOpen}
-            onOpenChange={changeOpen}
-          />
-        </Suspense>
-      ) : null}
-    </SearchContext>
-  );
+  return <SearchDialog locale={locale} open={open} onOpenChange={changeOpen} />;
 }
 
 /** `SearchTrigger` UI 컴포넌트를 렌더링함 */
@@ -111,10 +80,9 @@ export function SearchTrigger({
   readonly compact?: boolean;
   readonly showShortcut?: boolean;
 }) {
-  const context = use(SearchContext);
-  if (context === null)
-    throw new Error("SearchTrigger must be rendered inside SearchProvider.");
-  const label = context.locale === "ko" ? "문서 검색" : "Search documentation";
+  const search = useSearchContext();
+  const t = useTranslations("tech.search");
+  const label = t("triggerLabel");
   return (
     <Button
       aria-label={label}
@@ -125,15 +93,15 @@ export function SearchTrigger({
           : "h-8 w-full justify-between px-3 text-xs",
       )}
       data-docs-search-trigger="true"
-      onClick={(event) => context.open(event.currentTarget)}
+      onClick={() => {
+        search.setOpenSearch(true);
+      }}
       size={compact ? "icon" : "default"}
       variant="ghost"
     >
       <span className="inline-flex items-center gap-[7px]">
         <Icon icon="search" />
-        {compact ? null : (
-          <span>{context.locale === "ko" ? "검색" : "Search"}</span>
-        )}
+        {compact ? null : <span>{t("shortLabel")}</span>}
       </span>
       {showShortcut && !compact ? <kbd>⌘K</kbd> : null}
     </Button>

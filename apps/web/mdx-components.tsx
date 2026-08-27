@@ -18,7 +18,7 @@ function MdxLink({ href = "", children, ...props }: ComponentProps<"a">) {
   );
 }
 
-const components = {
+export const mdxComponents = {
   a: MdxLink,
   ...techMdxComponents,
   ...investmentMdxComponents,
@@ -26,5 +26,5 @@ const components = {
 
 /** `useMDXComponents` 훅 상태와 제어 함수를 제공함 */
 export function useMDXComponents(): MDXComponents {
-  return components;
+  return mdxComponents;
 }

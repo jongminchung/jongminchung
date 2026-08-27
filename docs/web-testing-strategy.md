@@ -41,10 +41,10 @@
   - 사례: 한글·영문 문서 쌍, heading ID, 내부 link, 생성물 stale 상태, manifest의 유일 ID 검증이 해당함
   - 예외: topic 수와 demo 수의 정확한 상수값은 콘텐츠 증감 자체를 실패로 만들므로 제거하고, 유일성·registry 일치·유효한 entry 검증만 유지함
 
-- **서버 route와 query adapter의 공개 응답 계약 테스트는 유지함**
-  - 근거: route·query adapter는 UI와 정적 산출물 사이의 작은 통합 경계임
-  - 대상: `apps/web/app/llms-route.test.ts`, `apps/web/app/metadata-routes.test.ts`, `apps/web/lib/tech-queries.test.ts`, `apps/web/remark-plugins.test.ts`
-  - 사례: sitemap·`llms.txt`, query cache key와 HTTP·Zod failure, Kroki 성공·오류 fallback 검증이 해당함
+- **서버 route와 콘텐츠 adapter의 공개 응답 계약 테스트는 유지함**
+  - 근거: route·콘텐츠 adapter는 UI와 Fumadocs collection 사이의 작은 통합 경계임
+  - 대상: `apps/web/app/llms-route.test.ts`, `apps/web/lib/remark-kroki-url.test.ts`, 콘텐츠 검증 테스트
+  - 사례: `llms.txt`, Fumadocs metadata 변환, Kroki URL의 가역적 인코딩 검증이 해당함
 
 - **작은 client state 규칙 테스트는 유지함**
   - 근거: browser storage나 provider instance 분리는 E2E만으로 원인 위치를 좁히기 어려움

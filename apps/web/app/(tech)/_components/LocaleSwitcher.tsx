@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@jongminchung/ui/lib/utils";
+import { useTranslations } from "next-intl";
 import type { Locale } from "#lib/content-model";
 
 /** `LocaleSwitcher` UI 컴포넌트를 렌더링함 */
@@ -13,8 +14,10 @@ export function LocaleSwitcher({
   readonly href: string;
   readonly compact?: boolean;
 }) {
+  const t = useTranslations("tech.locale");
   const nextLocale = locale === "ko" ? "en" : "ko";
-  const label = locale === "ko" ? "Read in English" : "한국어로 읽기";
+  const label =
+    nextLocale === "en" ? t("switchToEnglish") : t("switchToKorean");
   const rememberLocale = (): void => {
     localStorage.setItem("tech-locale", nextLocale);
     document.cookie = `tech-locale=${nextLocale}; Path=/; Max-Age=31536000; SameSite=Lax`;

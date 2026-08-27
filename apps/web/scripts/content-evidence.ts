@@ -1,7 +1,6 @@
 import { writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import type { DocMetadata } from "../lib/content-model.ts";
-import { readDocuments } from "./content-source.ts";
 
 export type FreshnessPolicy =
   | "versioned-technology"
@@ -96,12 +95,11 @@ export async function createEvidenceReport(
   now = new Date(),
   network = false,
 ): Promise<unknown> {
-  const documents = await readDocuments();
+  const { readContentSnapshot } = await import("../lib/content-repository.ts");
+  const documents = readContentSnapshot().documents;
   const sourceResults = new Map<string, SourceResult>();
   if (network) {
-    const urls = [
-      ...new Set(documents.map(({ metadata }) => metadata.sourceUrl)),
-    ];
+    const urls = [...new Set(documents.map(({ sourceUrl }) => sourceUrl))];
     for (let index = 0; index < urls.length; index += 5) {
       const batch = urls.slice(index, index + 5);
       const results = await Promise.all(batch.map(checkSource));
@@ -110,7 +108,7 @@ export async function createEvidenceReport(
       );
     }
   }
-  const items = documents.map(({ metadata, relativePath }) => {
+  const items = documents.map((metadata) => {
     const freshness = assessFreshness(metadata, now);
     const source = sourceResults.get(metadata.sourceUrl) ?? {
       state: "not-checked" as const,
@@ -124,7 +122,7 @@ export async function createEvidenceReport(
           ? "warning"
           : "none";
     return {
-      relativePath,
+      relativePath: `${metadata.locale}/${metadata.id}.mdx`,
       id: metadata.id,
       locale: metadata.locale,
       verifiedAt: metadata.verifiedAt ?? null,

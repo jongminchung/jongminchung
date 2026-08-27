@@ -1,0 +1,33 @@
+{
+  "shared": {
+    "theme": {
+      "label": "Theme: {mode}"
+    }
+  },
+  "tech": {
+    "locale": {
+      "switchToEnglish": "Read in English",
+      "switchToKorean": "한국어로 읽기"
+    },
+    "outline": {
+      "backToTop": "Back to top",
+      "documentOutline": "Document outline",
+      "onThisPage": "On this page"
+    },
+    "search": {
+      "body": "Body",
+      "dialogTitle": "Search documentation",
+      "failed": "Search failed",
+      "heading": "Heading",
+      "noResults": "No matching documents",
+      "placeholder": "Search titles, APIs, and topics",
+      "resultGroupBlog": "Blog",
+      "results": "Search results",
+      "retry": "Retry",
+      "searching": "Searching documentation",
+      "shortLabel": "Search",
+      "title": "Title",
+      "triggerLabel": "Search documentation"
+    }
+  }
+}

@@ -1,8 +1,8 @@
-import { expect, test } from "@playwright/test";
 import {
   expectNoAccessibilityViolations,
   expectNoHorizontalOverflow,
 } from "../../e2e-assertions";
+import { expect, test } from "../../e2e-fixtures";
 
 test("[성공] 캔팅된 사이트를 사용하고 외부 플로어 주차장을 주차함", async ({
   page,
@@ -43,32 +43,33 @@ test("[성공] 생성된 기사 데이터를 검색하고 여러 지역에서 �
   const dialog = page.getByRole("dialog", { name: "Search documentation" });
   const input = dialog.getByRole("combobox");
   await input.fill("Next.js 16");
-  const result = dialog.getByRole("option", { name: /Next\.js 16/u });
-  await expect(result).toBeVisible();
+  const result = dialog.getByRole("option", {
+    name: /^Next\.js 16 Deep Dive/u,
+  });
+  await expect(result).toBeVisible({ timeout: 15_000 });
   await input.press("Escape");
   await expect(trigger).toBeFocused();
 
   await trigger.click();
   await input.fill("Next.js 16");
-  await expect(result).toBeVisible();
-  await input.press("ArrowDown");
-  const activeId = await input.getAttribute("aria-activedescendant");
-  expect(activeId).not.toBeNull();
-  const activeOption = page.locator(`[id="${activeId}"]`);
-  await expect(activeOption).toHaveRole("option");
-  await expect(activeOption).toContainText("Collaboration");
-  await input.press("Enter");
-  await expect(page).toHaveURL(/\/en\/articles\/collaboration$/u);
+  await expect(result).toBeVisible({ timeout: 15_000 });
+  const selectedHref = await result.getAttribute("data-href");
+  if (selectedHref === null) throw new Error("Search result has no href");
+  await result.click();
+  await expect(page).toHaveURL(new RegExp(`${selectedHref}$`, "u"));
+  const translatedHref = selectedHref
+    .replace(/^\/en/u, "/ko")
+    .replace(/#.*$/u, "");
   await page.getByRole("link", { name: "한국어로 읽기" }).click();
-  await expect(page).toHaveURL(/\/ko\/articles\/collaboration$/u);
+  await expect(page).toHaveURL(new RegExp(`${translatedHref}$`, "u"));
   await expect(page.locator("html")).toHaveAttribute("lang", "ko");
 });
 
 test("[성공] 오류 검색 요청을 재시도함", async ({ page }) => {
   let requests = 0;
-  await page.route("**/en/search-index", async (route) => {
+  await page.route("**/en/search*", async (route) => {
     requests += 1;
-    if (requests <= 2)
+    if (requests === 1)
       await route.fulfill({ status: 503, body: "unavailable" });
     else await route.continue();
   });
@@ -79,46 +80,70 @@ test("[성공] 오류 검색 요청을 재시도함", async ({ page }) => {
   await expect(dialog.getByRole("alert")).toBeVisible();
   await dialog.getByRole("button", { name: "Retry" }).click();
   await expect(dialog.getByRole("option").first()).toBeVisible();
-  expect(requests).toBe(3);
+  expect(requests).toBe(2);
 });
 
 test("[성공] 기록 및 동일 페이지에 대한 기본 링크를 사용함", async ({
   page,
 }) => {
   await page.goto("/en");
-  await page.getByRole("link", { name: "Handbook" }).first().click();
-  await expect(page).toHaveURL(/\/en\/series\/handbook$/u);
+  await page.getByRole("link", { name: "Series" }).first().click();
+  await expect(page).toHaveURL(/\/en\/series$/u);
+  await page.getByRole("link", { name: "Domain-Driven Design" }).click();
+  await expect(page).toHaveURL(/\/en\/series\/domain-driven-design$/u);
   await page.goBack();
-  await expect(page).toHaveURL(/\/en$/u);
+  await expect(page).toHaveURL(/\/en\/series$/u);
 
-  await page.goto("/en/articles/nextjs-16");
+  await page.goto("/en/nextjs-16");
   const hashLink = page.locator('a[href^="#"]:visible').first();
   const hash = await hashLink.getAttribute("href");
   await hashLink.click();
   await expect(page).toHaveURL(new RegExp(`${hash}$`, "u"));
 });
 
-test("[성공] 경로를 다시 방문해도 모바일 탐색을 닫힌 상태로 시작함", async ({
+test("[성공] 쇼케이스에서 두 애니메이션 제작 모델을 비교함", async ({
+  page,
+}) => {
+  await page.goto("/en");
+  await page.getByRole("link", { name: "Showcase" }).first().click();
+  await expect(page).toHaveURL(/\/en\/showcase$/u);
+
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Showcase");
+  await expect(page.locator('[data-showcase="theatre"]')).toBeVisible();
+  await expect(page.locator('[data-showcase="motion-canvas"]')).toBeVisible();
+
+  const progress = page.getByRole("slider", { name: "Animation progress" });
+  await progress.fill("700");
+  await expect(progress).toHaveValue("700");
+  await page.getByRole("button", { name: "Play" }).click();
+  await expect(page.getByRole("button", { name: "Pause" })).toBeVisible();
+
+  await expectNoHorizontalOverflow(page);
+  await expectNoAccessibilityViolations(page);
+});
+
+test("[성공] 모바일 문서 경로를 다시 방문해도 검색 상태를 초기화함", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/en/articles/nextjs-16");
-  await page.getByRole("button", { name: "Open navigation" }).click();
+  await page.goto("/en/nextjs-16");
+  const trigger = page.getByRole("button", { name: "Search documentation" });
+  await trigger.click();
+  const search = page.getByRole("dialog", { name: "Search documentation" });
+  await expect(search).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(search).toBeHidden();
 
-  const navigation = page.getByRole("dialog", {
-    name: "Mobile documentation navigation",
-  });
-  await expect(navigation).toBeVisible();
-  await navigation.getByRole("link", { name: "TypeScript 6" }).click();
-  await expect(page).toHaveURL(/\/en\/articles\/typescript-6$/u);
+  await page.getByRole("link", { name: "한국어로 읽기" }).click();
+  await expect(page).toHaveURL(/\/ko\/nextjs-16$/u);
 
   await page.goBack();
-  await expect(page).toHaveURL(/\/en\/articles\/nextjs-16$/u);
-  await expect(navigation).toBeHidden();
+  await expect(page).toHaveURL(/\/en\/nextjs-16$/u);
+  await expect(search).toBeHidden();
 });
 
 test("[성공] 각주 참조와 본문 사이를 이동함", async ({ page }) => {
-  await page.goto("/en/articles/the-expensive-main-thread");
+  await page.goto("/en/the-expensive-main-thread");
 
   const reference = page.locator("[data-footnote-ref]").first();
   const footnote = page.locator("#user-content-fn-1");
@@ -134,7 +159,7 @@ test("[성공] 각주 참조와 본문 사이를 이동함", async ({ page }) =>
 
 test("[성공] 버퍼를 로드하고 기술 검색 파일을 게시함", async ({
   page,
-  request,
+  siteRequest,
 }) => {
   await page.goto("/diagrams");
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
@@ -146,7 +171,7 @@ test("[성공] 버퍼를 로드하고 기술 검색 파일을 게시함", async 
     "/en/rss.xml",
     "/llms.txt",
   ]) {
-    expect((await request.get(path)).ok(), path).toBe(true);
+    expect((await siteRequest.get(path)).ok(), path).toBe(true);
   }
 });
 

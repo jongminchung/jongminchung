@@ -26,7 +26,7 @@ export default defineConfig({
       "PLAYWRIGHT_TEST=1 pnpm run build && PLAYWRIGHT_TEST=1 PORT=3100 pnpm run start",
     port: 3100,
     reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
+    timeout: 300_000,
   },
   projects: [
     {

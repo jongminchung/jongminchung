@@ -1,15 +1,17 @@
-import type { ComponentType } from "react";
+import type { TOCItemType } from "fumadocs-core/toc";
+import type { MDXContent } from "mdx/types";
 import {
   compareDocumentMetadata,
   isLocale,
   type ContentManifestEntry,
   type Locale,
 } from "./content-model.ts";
-import { readContentSnapshot, renderTechMdx } from "./content-repository.ts";
+import { loadTechContent, readContentSnapshot } from "./content-repository.ts";
 
 export interface LoadedDocument {
   readonly metadata: ContentManifestEntry;
-  readonly Content: ComponentType;
+  readonly Content: MDXContent;
+  readonly toc: readonly TOCItemType[];
   readonly previous: ContentManifestEntry | null;
   readonly next: ContentManifestEntry | null;
   readonly related: readonly ContentManifestEntry[];
@@ -17,7 +19,7 @@ export interface LoadedDocument {
 
 /** `getDocuments` 데이터를 조회함 */
 export async function getDocuments(): Promise<readonly ContentManifestEntry[]> {
-  return (await readContentSnapshot()).documents;
+  return readContentSnapshot().documents;
 }
 
 /** `getLocalizedDocuments` 데이터를 조회함 */
@@ -122,13 +124,16 @@ export async function loadDocument(locale: Locale, id: string) {
                 left.id.localeCompare(right.id),
             ),
     ),
-    renderTechMdx(locale, id),
+    loadTechContent(locale, id),
     getRelatedDocuments(locale, id),
   ]);
+  if (ContentModule === null)
+    throw new Error(`Missing compiled content for ${locale}/${id}.`);
   const index = seriesDocuments.findIndex((document) => document.id === id);
   return Object.freeze({
     metadata,
-    Content: ContentModule.default as ComponentType,
+    Content: ContentModule.body,
+    toc: ContentModule.toc,
     previous: index <= 0 ? null : (seriesDocuments[index - 1] ?? null),
     next:
       index < 0 || index >= seriesDocuments.length - 1

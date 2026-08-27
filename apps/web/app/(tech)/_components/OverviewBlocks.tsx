@@ -10,8 +10,8 @@ const copy = {
     eyebrow: "ENGINEERING NOTES",
     title: "문제를 이해하고, 모델을 만들고, 동작하는 코드로 연결하세요.",
     lead: "협업 원칙부터 플랫폼의 동작 원리와 실패 사례까지 두 개의 시리즈에서 필요한 깊이로 이동할 수 있습니다.",
-    start: "핸드북부터 시작",
-    deepDive: "Deep Dive 보기",
+    start: "도메인 설계부터 시작",
+    deepDive: "유지보수 시리즈 보기",
     steps: [
       ["1", "원칙을 맞춥니다", "협업과 도메인 설계의 기준을 먼저 공유합니다."],
       [
@@ -27,22 +27,22 @@ const copy = {
     ],
     cards: [
       [
-        "Handbook",
-        "협업과 DDD",
+        "Domain Design",
+        "협업과 도메인 설계",
         "문제와 변경을 설명하는 공통 언어를 만듭니다.",
-        "/ko/series/handbook",
+        "/ko/series/domain-driven-design",
       ],
       [
         "Articles",
         "독립적으로 읽는 기술 글",
         "구현과 분석을 하나의 완결된 글로 읽습니다.",
-        "/ko/articles/react-component-based-thinking",
+        "/ko/react-component-based-thinking",
       ],
       [
-        "Deep Dive",
-        "도구를 선택한 이유",
-        "Next.js, pnpm, Node.js와 TypeScript를 깊이 다룹니다.",
-        "/ko/series/deep-dive",
+        "Maintainability",
+        "변경 권한과 경계",
+        "Tailwind와 shadcn/ui의 유지보수 경계를 목적별로 다룹니다.",
+        "/ko/series/frontend-maintainability",
       ],
       [
         "Bilingual",
@@ -62,8 +62,8 @@ const copy = {
     title:
       "Understand the problem, shape the model, and connect it to working code.",
     lead: "Move from collaboration principles to platform behavior and failure cases through two focused series.",
-    start: "Start with the handbook",
-    deepDive: "Browse Deep Dives",
+    start: "Start with domain design",
+    deepDive: "Browse maintainability",
     steps: [
       [
         "1",
@@ -83,22 +83,22 @@ const copy = {
     ],
     cards: [
       [
-        "Handbook",
-        "Collaboration and DDD",
+        "Domain Design",
+        "Collaboration and domain design",
         "Create a shared language for problems and change.",
-        "/en/series/handbook",
+        "/en/series/domain-driven-design",
       ],
       [
         "Articles",
         "Standalone engineering writing",
         "Read implementation and analysis as complete articles.",
-        "/en/articles/react-component-based-thinking",
+        "/en/react-component-based-thinking",
       ],
       [
-        "Deep Dive",
-        "Why each tool is here",
-        "Explore Next.js, pnpm, Node.js, and TypeScript.",
-        "/en/series/deep-dive",
+        "Maintainability",
+        "Ownership and change boundaries",
+        "Separate Tailwind and shadcn/ui responsibilities by purpose.",
+        "/en/series/frontend-maintainability",
       ],
       [
         "Bilingual",
@@ -146,7 +146,7 @@ export function OverviewHero({ locale }: { readonly locale: Locale }) {
               buttonVariants({ variant: "default", size: "lg" }),
               "h-11 px-5",
             )}
-            href={`/${locale}/series/handbook`}
+            href={`/${locale}/series/domain-driven-design`}
           >
             {text.start}
           </Link>
@@ -155,7 +155,7 @@ export function OverviewHero({ locale }: { readonly locale: Locale }) {
               buttonVariants({ variant: "outline", size: "lg" }),
               "h-11 px-5",
             )}
-            href={`/${locale}/series/deep-dive`}
+            href={`/${locale}/series/frontend-maintainability`}
           >
             {text.deepDive}
           </Link>

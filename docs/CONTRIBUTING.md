@@ -102,6 +102,30 @@ pnpm --filter @jongminchung/web run dev
 pnpm --filter @jongminchung/web run build
 ```
 
+Web 개발 서버는 host 기반 proxy를 항상 사용한다. 기본 `dev`는 Home을 열고, 특정 사이트만
+`localhost`에서 개발할 때는 사이트 선택 명령을 사용한다.
+
+```sh
+pnpm --filter @jongminchung/web run dev:home
+pnpm --filter @jongminchung/web run dev:tech
+pnpm --filter @jongminchung/web run dev:invest
+```
+
+각 명령은 `http://localhost:3000/en`을 선택한 사이트로 연결한다. production host와
+`*.jamie.localhost`의 명시적 사이트 매핑은 이 개발 전용 선택값의 영향을 받지 않는다.
+
+브라우저 외부의 Linux CLI가 `*.localhost`를 해석하지 못할 때만 다음 항목을 `/etc/hosts`에
+선택적으로 추가한다. [RFC 6761의 localhost 규정](https://www.rfc-editor.org/rfc/rfc6761.html#section-6.3)은
+하위 이름도 loopback으로 취급하지만, [Node.js `dns.lookup()`](https://nodejs.org/api/dns.html#dnslookuphostname-options-callback)은
+OS 이름 해석 기능을 사용하므로 Linux 구성에 따라 결과가 다를 수 있다. 자동 테스트는 이 설정에
+의존하지 않는다.
+
+```text
+127.0.0.1 jamie.localhost
+127.0.0.1 tech.jamie.localhost
+127.0.0.1 invest.jamie.localhost
+```
+
 Playwright snapshot은 의도적인 시각 변경만 갱신한다. 갱신 후 새 기준 이미지와 diff를 직접
 검토하고 단순히 실패를 없애기 위해 snapshot을 덮어쓰지 않는다.
 

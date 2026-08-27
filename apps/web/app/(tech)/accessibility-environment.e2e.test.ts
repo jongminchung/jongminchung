@@ -9,10 +9,10 @@ test("[성공] 접근성 환경에서도 문서 탐색과 focus 계약을 유지
     forcedColors: "active",
     reducedMotion: "reduce",
   });
-  await page.goto("/en/articles/nextjs-16");
+  await page.goto("/en/nextjs-16");
 
   await expectNoHorizontalOverflow(page);
-  const trigger = page.getByRole("button", { name: "Open navigation" });
+  const trigger = page.getByRole("button", { name: "Search documentation" });
   await trigger.focus();
   await expect(trigger).toBeFocused();
   expect(
@@ -28,11 +28,9 @@ test("[성공] 접근성 환경에서도 문서 탐색과 focus 계약을 유지
   ).toBeLessThanOrEqual(0.1);
 
   await trigger.click();
-  const navigation = page.getByRole("dialog", {
-    name: "Mobile documentation navigation",
-  });
-  await expect(navigation).toBeVisible();
+  const search = page.getByRole("dialog", { name: "Search documentation" });
+  await expect(search).toBeVisible();
   await page.keyboard.press("Escape");
-  await expect(navigation).toBeHidden();
+  await expect(search).toBeHidden();
   await expect(trigger).toBeFocused();
 });

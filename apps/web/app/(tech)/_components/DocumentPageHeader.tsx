@@ -6,6 +6,7 @@ import {
   type Locale,
 } from "#lib/content-model";
 import type { LoadedDocument } from "#lib/documents";
+import { documentKindLabel } from "#lib/tech/document-kind";
 import { getSeries } from "#lib/tech/series";
 import { EditPageLink } from "./EditPageLink";
 
@@ -60,7 +61,9 @@ export function DocumentPageHeader({
         </ol>
       </nav>
       <p className="m-0 font-mono text-[11px] font-medium tracking-[.08em] text-muted-foreground">
-        {section}
+        {metadata.documentKind === undefined
+          ? section
+          : `${section} · ${documentKindLabel(locale, metadata.documentKind)}`}
       </p>
       <div className="mt-4 flex items-start gap-3">
         <h1 className="m-0 flex-1 font-sans text-[clamp(40px,4.5vw,58px)] leading-[1.03] font-medium tracking-[-0.045em] text-foreground">
@@ -93,7 +96,7 @@ export function DocumentPageHeader({
           target="_blank"
           rel="noreferrer"
         >
-          {locale === "ko" ? "공식 출처" : "Official source"}
+          {locale === "ko" ? "근거 자료" : "Source"}
           <Icon icon="externalLink" className="size-3" />
         </a>
       </div>

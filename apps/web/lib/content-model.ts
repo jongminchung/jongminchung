@@ -25,11 +25,21 @@ export const documentStatuses = [
 export const documentStatusSchema = z.enum(documentStatuses);
 export type DocumentStatus = z.infer<typeof documentStatusSchema>;
 
+export const documentKinds = [
+  "tutorial",
+  "how-to",
+  "reference",
+  "explanation",
+] as const;
+export const documentKindSchema = z.enum(documentKinds);
+export type DocumentKind = z.infer<typeof documentKindSchema>;
+
 const DOCUMENT_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 
 const docMetadataShape = {
   id: nonEmptyTrimmedStringSchema,
   locale: localeSchema,
+  documentKind: documentKindSchema.optional(),
   series: nonEmptyTrimmedStringSchema.optional(),
   seriesOrder: z.number().int().positive().optional(),
   title: nonEmptyTrimmedStringSchema,
@@ -116,42 +126,11 @@ export const docMetadataSchema = z
   .superRefine(validateDocMetadata)
   .readonly();
 
-export const outlineEntrySchema = z
-  .strictObject({
-    id: nonEmptyTrimmedStringSchema,
-    label: nonEmptyTrimmedStringSchema,
-    level: z.union([z.literal(2), z.literal(3)]),
-  })
-  .readonly();
-
-export const contentManifestEntrySchema = z
-  .strictObject({
-    ...docMetadataShape,
-    href: nonEmptyTrimmedStringSchema,
-    outline: z.array(outlineEntrySchema).readonly(),
-  })
-  .superRefine(validateDocMetadata)
-  .readonly();
-
-export const searchDocumentSchema = z
-  .strictObject({
-    id: nonEmptyTrimmedStringSchema,
-    locale: localeSchema,
-    series: nonEmptyTrimmedStringSchema.optional(),
-    title: nonEmptyTrimmedStringSchema,
-    description: nonEmptyTrimmedStringSchema,
-    href: nonEmptyTrimmedStringSchema,
-    headings: uniqueStringArraySchema("headings"),
-    tags: uniqueStringArraySchema("tags"),
-    apiSymbols: uniqueStringArraySchema("apiSymbols", { allowEmpty: true }),
-    body: z.string(),
-  })
-  .readonly();
-
 export type DocMetadata = z.infer<typeof docMetadataSchema>;
-export type OutlineEntry = z.infer<typeof outlineEntrySchema>;
-export type ContentManifestEntry = z.infer<typeof contentManifestEntrySchema>;
-export type SearchDocument = z.infer<typeof searchDocumentSchema>;
+export type ContentManifestEntry = DocMetadata &
+  Readonly<{
+    href: string;
+  }>;
 
 function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
   return typeof value === "object" && value !== null && !Array.isArray(value);

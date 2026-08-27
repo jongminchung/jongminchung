@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ContentManifestEntry, Locale } from "#lib/content-model";
 import { displayTitleFor } from "#lib/content-model";
+import { documentKindLabel } from "#lib/tech/document-kind";
 
 export type DocumentCardVariant = "featured" | "list" | "related";
 
@@ -26,7 +27,7 @@ export function DocumentCard({
   return (
     <Link
       aria-label={title}
-      className="group flex overflow-hidden rounded-[var(--radius)] border bg-card text-card-foreground transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-input hover:shadow-[var(--elevation-medium)] data-[variant=featured]:block data-[variant=related]:block max-[680px]:block"
+      className="group flex overflow-hidden rounded-[var(--radius)] border bg-card text-card-foreground transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-input hover:shadow-[var(--elevation-medium)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[variant=featured]:block data-[variant=related]:block max-[680px]:block"
       data-variant={variant}
       href={document.href}
     >
@@ -41,7 +42,13 @@ export function DocumentCard({
       />
       <span className="flex min-w-0 flex-1 flex-col justify-center px-[22px] py-5 group-data-[variant=featured]:px-[26px] group-data-[variant=featured]:pt-6 group-data-[variant=featured]:pb-[26px] group-data-[variant=related]:min-h-[148px] group-data-[variant=related]:justify-start group-data-[variant=related]:p-4 max-[680px]:p-[18px]">
         <span className="mb-2.5 flex flex-wrap items-center gap-2 font-mono text-[10px] font-medium tracking-[.08em] text-muted-foreground uppercase">
-          {label ?? series ?? (locale === "ko" ? "블로그" : "Blog")}
+          {label ??
+            series ??
+            (document.documentKind === undefined
+              ? locale === "ko"
+                ? "블로그"
+                : "Blog"
+              : documentKindLabel(locale, document.documentKind))}
           <span aria-hidden="true">·</span>
           <time dateTime={document.updatedAt}>{document.updatedAt}</time>
           <span aria-hidden="true">·</span>

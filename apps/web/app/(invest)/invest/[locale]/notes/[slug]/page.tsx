@@ -7,6 +7,7 @@ import {
   loadInvestmentNote,
 } from "#lib/invest/notes";
 import { isLocale, locales } from "#lib/site-routing";
+import { mdxComponents } from "#mdx-components";
 
 /** 정적 생성에 사용할 경로 매개변수를 반환함 */
 export async function generateStaticParams() {
@@ -64,7 +65,7 @@ export default async function NotePage({
       note={loaded.metadata}
       related={await getInvestmentNotes(locale)}
     >
-      <loaded.Content />
+      <loaded.Content components={mdxComponents} />
     </InvestmentNotePage>
   );
 }

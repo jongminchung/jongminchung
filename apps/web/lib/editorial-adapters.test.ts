@@ -14,8 +14,18 @@ describe("editorial data adapter", () => {
       id: document.id,
       href: document.href,
       publishedAt: document.publishedAt,
-      tags: document.tags,
+      tags: expect.arrayContaining([...document.tags]),
     });
+  });
+
+  it("[성공] Diátaxis 문서 유형을 표시하고 tag filter에 노출함", async () => {
+    const document = (await getLocalizedDocuments("ko")).find(
+      ({ id }) => id === "tutorial-maintainable-tailwind-shadcn",
+    );
+    if (document === undefined) throw new Error("Missing tutorial fixture.");
+    const item = toTechEditorialItem(document, "ko");
+    expect(item.kind).toBe("튜토리얼");
+    expect(item.tags).toContain("tutorial");
   });
 
   it("[성공] 투자 노트가 source kind를 포함한 공통 editorial 항목으로 변환됨", async () => {

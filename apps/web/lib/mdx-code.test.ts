@@ -1,3 +1,4 @@
+import { createElement } from "react";
 import { describe, expect, it } from "vitest";
 import {
   classifyMdxCodeBlock,
@@ -33,5 +34,20 @@ describe("MDX 코드 종류", () => {
       language: "typescript",
       source: "const ready = true;",
     });
+  });
+
+  it("[성공] Shiki가 중첩한 React 노드에서 원본 문자열을 복원함", () => {
+    const highlighted = createElement(
+      "span",
+      { className: "line" },
+      createElement("span", null, '{"type":'),
+      createElement("span", null, '"excalidraw"}'),
+    );
+    expect(
+      classifyMdxCodeBlock(
+        "shiki language-excalidraw",
+        createElement("span", null, highlighted),
+      ),
+    ).toEqual({ kind: "excalidraw", source: '{"type":"excalidraw"}' });
   });
 });

@@ -1,0 +1,244 @@
+---
+id: reconciliation-in-openstack-and-kubernetes
+locale: ko
+series: distributed-failure-handling
+seriesOrder: 3
+title: "분산 장애 처리 3편: OpenStack와 Kubernetes는 실패를 어떻게 수렴시키는가"
+description: "OpenStack Nova와 Kubernetes가 전역 트랜잭션 대신 영속 상태, 비동기 명령, 멱등 조정 루프, fencing으로 분산 장애를 다루는 방식을 비교합니다."
+publishedAt: "2026-08-25"
+updatedAt: "2026-08-25"
+verifiedAt: "2026-08-25"
+tags: [openstack, kubernetes, reconciliation, control-loop, distributed-systems]
+status: experimental
+publicationStatus: published
+sourceUrl: https://github.com/jongminchung/jongminchung/blob/main/apps/web/content/tech/ko/reconciliation-in-openstack-and-kubernetes.mdx
+---
+
+## 핵심 요약
+
+- **OpenStack와 Kubernetes는 분산 변경을 하나의 전역 ACID 트랜잭션으로 묶기보다 영속 상태를 기록하고 반복 조정해 원하는 상태로 수렴시킴**
+- **Kubernetes는 API object의 desired state와 observed state를 controller가 비교하는 reconciliation loop를 핵심 복구 모델로 사용**함
+- **OpenStack Nova는 DB 상태, message queue, conductor, compute worker, periodic task를 분리해 장기 인프라 작업과 실제 hypervisor 상태를 조정**함
+- **두 플랫폼 모두 stable identity, status, retry, ownership, leader election, fencing을 사용하지만 정확히 한 번 실행을 보장하지 않음**
+- **finalizer와 TaskFlow 같은 장치는 정리·재개를 돕지만 외부 부작용의 멱등성과 운영자 복구 책임까지 없애지는 않음**
+- **애플리케이션이 배워야 할 핵심은 명령의 성공 응답보다 영속적인 목표·관측 상태와 재조정 가능성을 설계하는 것**임
+
+## 두 플랫폼은 전역 트랜잭션을 목표로 하지 않음
+
+- **VM 생성과 Pod 배치는 여러 독립 구성 요소와 물리 자원을 거치는 장기 작업**임
+  - API, scheduler, database, message broker, node agent, network, storage가 모두 참여함
+  - 하나의 구성 요소가 느리거나 재시작돼도 전체 control plane을 lock한 채 기다릴 수 없음
+  - 물리 장치나 외부 서비스는 일반적인 DB의 prepare·commit protocol에 참여하지 않음
+
+- **해법은 요청 stack에 진행 상태를 두지 않고 내구성 있는 resource에 의도를 기록하는 것**임
+  - API는 stable identity를 가진 resource를 생성하거나 변경함
+  - worker와 controller는 자신이 소유한 단계의 현재 상태를 관측함
+  - 실패하면 저장된 상태를 기준으로 재시도하거나 명시적인 오류 상태를 기록함
+  - 이후의 controller·periodic task·운영자가 다시 수렴을 시도함
+
+- **이 모델의 성공 기준은 모든 단계가 한 번만 실행되는 것이 아니라 반복 실행 뒤에도 같은 최종 상태에 도달하는 것**임
+  - create는 이미 존재하는 stable ID를 다시 확인할 수 있어야 함
+  - delete는 대상이 이미 없어도 완료로 판단할 수 있어야 함
+  - update는 stale version이 최신 상태를 덮어쓰지 않게 해야 함
+  - 외부 action은 이미 적용됐는지 조회한 뒤 필요한 차이만 반영해야 함
+
+```plantuml alt="Durable state and reconciliation loop"
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+actor User
+component "API" as API
+database "Durable desired and observed state" as Store
+queue "Command or watch stream" as Queue
+component "Controller / Conductor" as Coordinator
+component "Node worker" as Worker
+cloud "Actual resource\nPod / VM / network / volume" as Resource
+
+User --> API : declare or request
+API --> Store : persist identity and intent
+Store --> Queue : change or command
+Queue --> Coordinator : observe work
+Coordinator --> Worker : scoped action
+Worker --> Resource : create / inspect / update / delete
+Worker --> Store : observed state and error
+Coordinator --> Store : retry or converge
+@enduml
+```
+
+## Kubernetes는 desired state와 현재 상태의 차이를 줄임
+
+- **Kubernetes controller는 API resource를 관찰하고 현재 상태를 원하는 상태에 가깝게 만드는 control loop**임
+  - Deployment controller는 필요한 ReplicaSet을 관리함
+  - Job controller는 완료 수가 목표에 도달할 때까지 Pod를 다시 생성할 수 있음
+  - node controller는 heartbeat와 condition을 바탕으로 node 가용성을 판단함
+
+- **resource의 이름과 UID는 재시도 가능한 조작의 기준 identity가 됨**
+  - Kubernetes API object는 group·resource·namespace·name 조합으로 조회 가능함
+  - create timeout 뒤 같은 이름을 조회해 생성 여부를 확인할 수 있음
+  - controller는 owner reference와 label로 자신이 관리할 하위 resource를 구분함
+
+- **`spec`과 `status`의 분리는 의도와 관측 결과가 동시에 존재하게 함**
+  - 사용자는 replica 수나 image 같은 desired state를 선언함
+  - controller는 실제 replica, condition, observed generation 같은 결과를 기록함
+  - API 요청 성공은 의도 저장의 성공이며 실제 resource 준비 완료와 같지 않을 수 있음
+
+- **reconciliation은 한 번의 함수 호출이 아니라 반복 가능한 차이 계산**임
+  - 이미 존재하는 하위 resource를 다시 만들지 않음
+  - 일부 단계만 성공했으면 남은 차이만 적용함
+  - stale `resourceVersion` 갱신은 충돌로 거절하고 최신 object를 다시 읽어 계산함
+  - controller가 재시작돼도 API에 남은 object에서 작업을 다시 발견함
+
+- **Kubernetes도 정확히 한 번 실행을 보장하지 않음**
+  - node 장애나 kubelet 재시작으로 같은 Job index의 Pod가 둘 이상 시작될 수 있음
+  - controller의 create 응답이 유실되면 list·get으로 실제 결과를 확인해야 함
+  - custom controller가 외부 API를 호출한다면 stable external key와 멱등성 처리가 별도로 필요함
+
+## Kubernetes는 삭제와 리더십도 상태로 표현함
+
+- **finalizer는 삭제 요청과 실제 정리 완료를 분리하는 영속적인 대기 조건**임
+  - 삭제 요청 시 object에 `deletionTimestamp`가 기록되고 API는 `202 Accepted`를 반환할 수 있음
+  - controller가 외부 load balancer·volume 같은 하위 resource를 정리한 뒤 finalizer를 제거함
+  - controller가 중간에 죽어도 object가 남아 정리 작업을 다시 발견할 수 있음
+
+- **finalizer는 보상 실행 엔진이 아니라 정리 책임의 표식**임
+  - 이름 자체에는 실행 코드가 들어 있지 않음
+  - 정리 명령이 멱등하지 않으면 controller 재시도에서 부작용이 중복될 수 있음
+  - 영구 오류를 condition과 event로 노출하지 않으면 object가 `Terminating`에 계속 머물 수 있음
+
+- **Lease는 node heartbeat와 control-plane leader election에 사용하는 시간 제한 coordination object**임
+  - 여러 controller replica 중 active leader를 선택할 수 있음
+  - leader가 사라지면 lease 만료 뒤 다른 replica가 작업을 이어받을 수 있음
+  - lease만으로 늦게 살아난 이전 worker의 외부 쓰기를 막을 수 없으면 fencing token이 추가로 필요함
+
+- **probe와 PDB는 reconciliation을 보조하지만 정합성 경계가 아님**
+  - readiness는 새 트래픽을 줄이는 관측 신호임
+  - liveness는 restart를 유도하는 복구 신호임
+  - PDB는 일부 자발적 disruption을 제한하지만 OOM·node 장애·모든 삭제를 막지 않음
+
+## OpenStack Nova는 역할과 상태를 분리해 조정함
+
+- **Nova는 REST API, SQL DB, `oslo.messaging`, scheduler, conductor, compute service를 분리한 message 기반 구조**임
+  - API가 요청을 검증하고 DB를 갱신한 뒤 필요한 작업을 RPC로 전달함
+  - scheduler가 instance를 실행할 compute host를 선택함
+  - conductor가 build·resize처럼 coordination이 필요한 요청과 DB 접근을 중재함
+  - `nova-compute`가 hypervisor를 호출해 실제 VM action을 수행함
+
+- **instance의 상태를 하나의 문자열로 축약하지 않고 VM state, task state, power state 관점으로 나눔**
+  - VM state는 사용자에게 보이는 장기 lifecycle을 나타냄
+  - task state는 build·resize 같은 진행 중 작업을 나타냄
+  - power state는 hypervisor에서 관측한 실제 전원 상태를 나타냄
+  - API DB의 기대와 hypervisor 현실이 다를 수 있음을 데이터 모델에 허용함
+
+- **periodic task는 DB 상태와 실제 infrastructure 상태의 차이를 다시 확인함**
+  - Nova에는 DB의 instance power state와 hypervisor 상태를 주기적으로 동기화하는 설정이 있음
+  - 일시적 RPC 실패나 외부 조작으로 상태가 달라져도 이후 관측으로 수정할 기회를 가짐
+  - 모든 차이를 자동 수정할 수 있는 것은 아니며 `ERROR` 상태와 운영자 복구가 필요할 수 있음
+
+- **Nova의 conductor는 중앙 coordinator 역할을 하지만 하나의 전역 트랜잭션을 제공하지 않음**
+  - Neutron network, Cinder volume, Glance image, hypervisor action은 각각 독립 실패 경계를 가짐
+  - conductor와 서비스는 단계 상태와 예외를 기록하고 retry·cleanup·error 전이를 수행함
+  - instance evacuation에는 원본 host가 fencing돼 같은 VM이 두 곳에서 실행되지 않는 전제조건이 있음
+
+- **Cells v2는 DB와 message queue를 cell 단위로 나눠 확장성과 장애 격리를 얻는 구조**임
+  - cell 내부 conductor·compute·DB·queue가 해당 instance 작업을 담당함
+  - 한 cell의 통신 장애가 다른 cell 전체로 직접 확산되는 범위를 줄일 수 있음
+  - 분할은 cross-cell 조회·coordination과 운영 복잡성을 추가하는 트레이드오프임
+
+## OpenStack TaskFlow는 일부 workflow에 재개 기반을 제공함
+
+- **TaskFlow는 OpenStack 서비스가 task와 flow의 실행 결과를 저장하고 재개할 수 있게 하는 library**임
+  - persistence backend는 실행 이력과 atom의 입력·출력을 저장함
+  - 저장된 checkpoint를 사용하면 다른 process나 host에서 engine을 다시 구성할 수 있음
+  - retry와 revert는 task별 정책으로 정의할 수 있음
+
+- **TaskFlow를 사용한다고 모든 OpenStack action이 자동으로 정확히 한 번 실행되는 것은 아님**
+  - persistence 기록 직전 외부 장치 action이 성공하면 결과 불명확성이 남을 수 있음
+  - task의 `execute`와 `revert`가 재호출돼도 안전하도록 구현해야 함
+  - 사용 서비스와 workflow마다 실제 persistence backend와 복구 지원 범위를 확인해야 함
+
+- **OpenStack가 사용하는 상태 머신과 coordinator의 비용도 사라지지 않음**
+  - VM state·task state 조합과 허용 command를 유지해야 함
+  - 장기 작업의 중간 실패와 cleanup을 프로젝트별로 구현해야 함
+  - stuck resource를 확인하고 reset·evacuate·rebuild하는 운영 절차가 필요함
+
+## 두 플랫폼의 공통 패턴과 차이를 구분함
+
+| 설계 요소          | Kubernetes                               | OpenStack Nova                              |
+| ------------------ | ---------------------------------------- | ------------------------------------------- |
+| 영속 의도          | API object `spec`                        | API·cell DB의 instance와 task 상태          |
+| 실제 상태 관측     | resource `status`, condition, node agent | compute service, hypervisor power state     |
+| 작업 전달          | watch·work queue·controller loop         | `oslo.messaging` RPC                        |
+| coordinator        | resource별 controller                    | conductor·scheduler·서비스 manager          |
+| 중복 억제 identity | name·UID·owner reference                 | instance UUID·request·resource identity     |
+| 재조정             | 반복 reconcile                           | periodic task·상태 동기화·workflow recovery |
+| 삭제 책임          | finalizer·garbage collection             | 서비스별 cleanup·delete·TaskFlow revert     |
+| active 실행자 선택 | Lease 기반 leader election               | service group·queue consumer·host fencing   |
+| 장애 격리          | namespace·node·zone·control-plane 구성   | cell별 DB·message queue·compute             |
+
+- **Kubernetes는 범용 declarative resource control loop를 플랫폼 중심 추상화로 제공**함
+  - custom resource와 controller도 같은 모델을 확장할 수 있음
+  - 최종 사용자가 desired state를 지속적으로 유지하고 싶을 때 적합함
+
+- **OpenStack Nova는 VM lifecycle의 명령·상태 전이와 service 역할 분리를 중심으로 구성**됨
+  - create·resize·evacuate 같은 장기 action을 여러 infrastructure service가 협력해 수행함
+  - 모든 OpenStack 프로젝트가 동일한 내부 workflow 구현을 사용하는 것은 아님
+
+- **두 플랫폼 모두 실패를 정상 상태로 모델링하고 나중에 다시 관측할 수 있게 한다는 공통점**이 있음
+  - API 응답과 실제 완료를 분리함
+  - 진행 중 상태와 오류 상태를 영속화함
+  - 주기적 또는 event 기반 worker가 차이를 다시 처리함
+
+## 애플리케이션에는 조정 루프의 원칙만 가져옴
+
+- **인프라 resource처럼 비즈니스 operation에도 stable identity와 목표 상태를 부여할 수 있음**
+
+```text title="business-operation-resource.txt"
+operation_id: ord-20260825-001
+spec:
+  desired: fulfilled
+  order_id: order-001
+status:
+  phase: payment_unknown
+  observed_version: 7
+  provider_reference: pay-8421
+  next_attempt_at: 2026-08-25T03:10:00Z
+  condition: AwaitingProviderReconciliation
+```
+
+- **애플리케이션 reconciler는 현재 phase 이름만 보고 명령을 반복하면 안 됨**
+  - 내부 DB와 외부 제공자의 authoritative status를 함께 조회함
+  - 이미 완료된 부작용은 stable key로 확인하고 건너뜀
+  - version 조건부 갱신으로 다른 worker가 먼저 수렴시킨 결과를 덮어쓰지 않음
+  - retry budget을 소진하면 reason과 수동 개입 명령을 노출함
+
+- **삭제·취소에도 finalizer와 비슷한 명시적 책임 경계를 적용할 수 있음**
+  - 주문 취소 요청과 환불·재고 해제 완료를 별도 상태로 둠
+  - 모든 cleanup이 확인된 뒤 terminal state로 전이함
+  - 고객에게는 취소 접수와 취소 완료를 구분해 표시함
+
+- **플랫폼 패턴을 그대로 복제하기보다 도메인 규모에 맞게 줄여야 함**
+  - 단일 DB 트랜잭션으로 끝나는 요청에는 controller framework가 필요하지 않음
+  - 낮은 처리량의 비동기 작업은 operation table과 scheduler 하나로 충분할 수 있음
+  - 외부 시스템·timer·분기·장기 실행이 늘 때만 전용 workflow engine을 검토함
+
+## 결론 및 실행 제안
+
+- **OpenStack와 Kubernetes의 핵심 해법은 실패를 제거하는 것이 아니라 stable identity와 영속 상태를 남겨 반복 조정할 수 있게 만드는 것**임
+- **두 플랫폼의 controller·conductor가 애플리케이션 결제나 주문의 정합성을 대신 해결하지는 않음**
+- **애플리케이션은 로컬 트랜잭션과 멱등성을 먼저 확보하고 결과 불명확성이 남는 경계에만 status와 reconciler를 추가**함
+- **custom controller나 orchestrator를 만들 때는 create·observe·update·delete가 중복 호출돼도 안전한지와 stale worker fencing을 배포 조건으로 설정**함
+- **최종 운영 기준은 성공 응답률뿐 아니라 오래된 진행 상태, 조정 지연, 반복 실패, 수동 복구 대상을 지속적으로 관측하는 것**임
+
+## 참고 문서
+
+- [Kubernetes controllers](https://kubernetes.io/docs/concepts/architecture/controller/)
+- [Kubernetes API concepts](https://kubernetes.io/docs/reference/using-api/api-concepts/)
+- [Kubernetes finalizers](https://kubernetes.io/docs/concepts/overview/working-with-objects/finalizers/)
+- [Kubernetes Leases](https://kubernetes.io/docs/concepts/architecture/leases/)
+- [Kubernetes Jobs](https://kubernetes.io/docs/concepts/workloads/controllers/job/)
+- [OpenStack Nova system architecture](https://docs.openstack.org/nova/latest/admin/architecture)
+- [OpenStack Nova VM states and transitions](https://docs.openstack.org/nova/latest/reference/vm-states.html)
+- [OpenStack Nova configuration reference](https://docs.openstack.org/nova/latest/configuration/config.html)
+- [OpenStack Nova Cells v2](https://docs.openstack.org/nova/latest/admin/cells.html)
+- [OpenStack TaskFlow persistence](https://docs.openstack.org/taskflow/latest/user/persistence)
+- [OpenStack Compute API server evacuation](https://docs.openstack.org/api-ref/compute/)

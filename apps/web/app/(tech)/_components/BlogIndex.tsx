@@ -1,10 +1,15 @@
 import { EditorialIndex, type EditorialCopy } from "#components/Editorial";
-import type { ContentManifestEntry, Locale } from "#lib/content-model";
+import {
+  documentKinds,
+  type ContentManifestEntry,
+  type Locale,
+} from "#lib/content-model";
 import {
   parseEditorialQuery,
   type EditorialSearchParams,
 } from "#lib/editorial";
 import { toTechEditorialItem } from "#lib/editorial-adapters";
+import { documentKindLabel } from "#lib/tech/document-kind";
 
 const copy: Record<Locale, EditorialCopy> = {
   ko: {
@@ -54,9 +59,13 @@ export function BlogIndex({
       copy={copy[locale]}
       items={items}
       pathname={`/${locale}`}
+      promotedTags={documentKinds}
       query={parseEditorialQuery(
         searchParams,
         items.flatMap((item) => item.tags),
+      )}
+      tagLabels={Object.fromEntries(
+        documentKinds.map((kind) => [kind, documentKindLabel(locale, kind)]),
       )}
       variant="engineering"
     />

@@ -2,6 +2,7 @@ node_modules/
 coverage/
 .nx/
 .next/
+.source/
 .tmp*/
 **/.output/
 **/.wxt/
@@ -27,3 +28,4 @@ apps/web/public/search/
 
 # Intellij
 .idea/
+.vercel

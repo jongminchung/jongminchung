@@ -1,15 +1,17 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../../e2e-fixtures";
 
 test("[성공] 서버 HTML은 각 위치의 기본 문서 언어를 선언함", async ({
-  request,
+  siteRequest,
 }) => {
   for (const [path, locale] of [
     ["/en", "en"],
     ["/ko", "ko"],
+    ["/en/showcase", "en"],
+    ["/ko/showcase", "ko"],
     ["/diagrams", "en"],
     ["/diagrams/operating-system", "en"],
   ] as const) {
-    const response = await request.get(path);
+    const response = await siteRequest.get(path);
     expect(response.status(), path).toBe(200);
     if (path.startsWith("/en") || path.startsWith("/ko")) {
       expect(response.headers()["content-language"], path).toBe(locale);
@@ -21,7 +23,7 @@ test("[성공] 서버 HTML은 각 위치의 기본 문서 언어를 선언함", 
 });
 
 test("[성공] 로캘 소개두사가 합류은 404 응답은 요청된 문서 언어를 유지함", async ({
-  request,
+  siteRequest,
 }) => {
   for (const [path, locale, heading] of [
     ["/en/not-a-document", "en", "Document not found"],
@@ -29,7 +31,7 @@ test("[성공] 로캘 소개두사가 합류은 404 응답은 요청된 문서 �
     ["/en/extra", "en", "Document not found"],
     ["/ko/packages/ui", "ko", "문서를 찾을 수 없습니다"],
   ] as const) {
-    const response = await request.get(path);
+    const response = await siteRequest.get(path);
     expect(response.status(), path).toBe(404);
     expect(response.headers()["content-language"], path).toBe(locale);
     const html = await response.text();

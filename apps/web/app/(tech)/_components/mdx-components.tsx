@@ -1,3 +1,9 @@
+import {
+  CodeBlockTab,
+  CodeBlockTabs,
+  CodeBlockTabsList,
+  CodeBlockTabsTrigger,
+} from "fumadocs-ui/components/codeblock";
 import type { MDXComponents } from "mdx/types";
 import {
   isValidElement,
@@ -7,6 +13,7 @@ import {
 } from "react";
 import { classifyMdxCodeBlock } from "#lib/mdx-code";
 import { DocsCodeBlock } from "./DocsCodeBlock";
+import { Callout, Card, Cards, Step, Steps } from "./DocsMdxPrimitives";
 import { ExcalidrawDiagram } from "./ExcalidrawDiagram";
 import {
   OverviewCards,
@@ -21,16 +28,21 @@ interface CodeElementProps {
 }
 
 /** `TechMdxPre` 기술 문서 코드 블록을 렌더링함 */
-export function TechMdxPre({ children }: ComponentProps<"pre">) {
-  if (!isValidElement<CodeElementProps>(children)) return <pre>{children}</pre>;
-  const block = classifyMdxCodeBlock(
-    children.props.className,
-    children.props.children,
-  );
-  if (block.kind === "excalidraw") {
-    return <ExcalidrawDiagram source={block.source} />;
+export function TechMdxPre({
+  ref: _ref,
+  children,
+  ...props
+}: ComponentProps<"pre">) {
+  if (isValidElement<CodeElementProps>(children)) {
+    const block = classifyMdxCodeBlock(
+      children.props.className,
+      children.props.children,
+    );
+    if (block.kind === "excalidraw") {
+      return <ExcalidrawDiagram source={block.source} />;
+    }
   }
-  return <DocsCodeBlock code={block.source} language={block.language} />;
+  return <DocsCodeBlock {...props}>{children}</DocsCodeBlock>;
 }
 
 function MdxHeading2({ children, className, ...props }: ComponentProps<"h2">) {
@@ -98,22 +110,12 @@ function MdxHeaderCell(props: ComponentProps<"th">) {
   );
 }
 
-function MdxCode(props: ComponentProps<"code">) {
-  return (
-    <code
-      className="rounded-[var(--radius-xs)] bg-accent/55 px-[.3rem] font-mono text-[.875rem] text-primary"
-      {...props}
-    />
-  );
-}
-
 function MdxDiv(props: HTMLAttributes<HTMLDivElement>) {
   return <div className="my-4" {...props} />;
 }
 
 export const techMdxComponents = {
   blockquote: MdxBlockquote,
-  code: MdxCode,
   div: MdxDiv,
   h2: MdxHeading2,
   h3: MdxHeading3,
@@ -124,9 +126,18 @@ export const techMdxComponents = {
   td: MdxDataCell,
   th: MdxHeaderCell,
   ul: MdxUnorderedList,
+  Callout,
+  Card,
+  Cards,
+  CodeBlockTab,
+  CodeBlockTabs,
+  CodeBlockTabsList,
+  CodeBlockTabsTrigger,
   ExcalidrawDiagram,
   OverviewCards,
   OverviewCta,
   OverviewHero,
   QuickStart,
+  Step,
+  Steps,
 } satisfies MDXComponents;

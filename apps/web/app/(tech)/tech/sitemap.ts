@@ -61,5 +61,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       },
     })),
   ]);
-  return [...blogEntries, ...documentEntries, ...seriesEntries];
+  const showcaseEntries = locales.map((locale) => ({
+    url: absoluteUrl(`/${locale}/showcase`),
+    alternates: {
+      languages: Object.fromEntries(
+        locales.map((candidate) => [
+          candidate,
+          absoluteUrl(`/${candidate}/showcase`),
+        ]),
+      ),
+    },
+  }));
+  return [
+    ...blogEntries,
+    ...documentEntries,
+    ...seriesEntries,
+    ...showcaseEntries,
+  ];
 }

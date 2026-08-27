@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
+import { NextIntlClientProvider } from "next-intl";
 import { notFound } from "next/navigation";
+import { ThemeProvider } from "#components/ThemeProvider";
 import { isLocale } from "#lib/content-model";
-import { TechDataProvider } from "#tech-components/TechDataProvider";
-import {
-  InitialTechDocumentScripts,
-  pretendard,
-  rootMetadata,
-} from "../../../root-layout";
+import { messagesFor } from "#lib/i18n-messages";
+import { themeStorageKeys } from "#lib/theme";
+import { pretendard, rootMetadata } from "../../../root-layout";
 import "../../tech.css";
 
 export const metadata: Metadata = rootMetadata;
@@ -27,11 +26,12 @@ export default async function LocaleLayout({
       data-theme="light"
       suppressHydrationWarning
     >
-      <head>
-        <InitialTechDocumentScripts />
-      </head>
       <body>
-        <TechDataProvider>{children}</TechDataProvider>
+        <NextIntlClientProvider locale={locale} messages={messagesFor(locale)}>
+          <ThemeProvider storageKey={themeStorageKeys.tech}>
+            {children}
+          </ThemeProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

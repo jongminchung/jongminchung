@@ -15,10 +15,27 @@ const productionHosts: Readonly<Record<string, SiteId>> = {
 const developmentHosts: Readonly<Record<string, SiteId>> = {
   localhost: "home",
   "127.0.0.1": "home",
+  "::1": "home",
   "jamie.localhost": "home",
   "tech.jamie.localhost": "tech",
   "invest.jamie.localhost": "invest",
 };
+
+const loopbackHosts = new Set(["localhost", "127.0.0.1", "::1"]);
+const vercelDeploymentHostPattern =
+  /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.vercel\.app$/u;
+
+/** `parseLocalSiteOverride` 개발 환경의 사이트 선택값을 검증함 */
+export function parseLocalSiteOverride(
+  nodeEnvironment: string | undefined,
+  value: string | undefined,
+): SiteId | null {
+  if (nodeEnvironment !== "development" || value === undefined) return null;
+  if (siteIds.some((site) => site === value)) return value as SiteId;
+  throw new Error(
+    `JAMIE_LOCAL_SITE must be one of ${siteIds.join(", ")}; received ${JSON.stringify(value)}`,
+  );
+}
 
 /** `normalizeHost` 공개 기능을 제공함 */
 export function normalizeHost(value: string | null): string {
@@ -30,9 +47,21 @@ export function normalizeHost(value: string | null): string {
   return host.replace(/:\d+$/u, "");
 }
 
+/** Vercel이 발급한 preview·production hostname인지 확인함 */
+export function isVercelDeploymentHost(host: string): boolean {
+  return vercelDeploymentHostPattern.test(normalizeHost(host));
+}
+
 /** `resolveSite` 공개 기능을 제공함 */
-export function resolveSite(host: string): SiteId | null {
-  return productionHosts[host] ?? developmentHosts[host] ?? null;
+export function resolveSite(
+  host: string,
+  localSiteOverride: SiteId | null = null,
+): SiteId | null {
+  const fixedSite = productionHosts[host];
+  if (fixedSite !== undefined) return fixedSite;
+  if (localSiteOverride !== null && loopbackHosts.has(host))
+    return localSiteOverride;
+  return developmentHosts[host] ?? null;
 }
 
 /** `localeFromPath` 공개 기능을 제공함 */

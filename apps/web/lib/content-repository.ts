@@ -1,151 +1,159 @@
-import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
-import { evaluate } from "@mdx-js/mdx";
-import { cache } from "react";
-import * as runtime from "react/jsx-runtime";
-import rehypeSlug from "rehype-slug";
-import remarkFrontmatter from "remark-frontmatter";
-import remarkGfm from "remark-gfm";
-import {
-  readInvestmentNotes,
-  validateInvestmentTranslations,
-} from "../scripts/build-investment-content.ts";
-import {
-  createSearchBody,
-  readDocuments,
-  type SourceDocument,
-} from "../scripts/content-source.ts";
-import { validateDocuments } from "../scripts/content-validation.ts";
 import {
   compareDocumentMetadata,
   createDocHref,
+  docMetadataSchema,
   type ContentManifestEntry,
+  type DocMetadata,
   type Locale,
-  type SearchDocument,
 } from "./content-model.ts";
 import {
+  validateDocuments,
+  validateInvestmentNotes,
+  type ValidatedContentSource,
+} from "./content-validation.ts";
+import { investmentSource, techSource } from "./fumadocs-source.ts";
+import {
   createInvestmentNoteHref,
+  investmentNoteMetadataSchema,
   type InvestmentNoteManifestEntry,
+  type InvestmentNoteMetadata,
   type InvestmentSourceKind,
 } from "./invest/content.ts";
 
-const appRoot = process.cwd().endsWith("/apps/web")
-  ? process.cwd()
-  : resolve(process.cwd(), "apps/web");
-const techContentRoot = resolve(appRoot, "content/tech");
-const investmentContentRoot = resolve(appRoot, "content/invest");
-
 export interface ContentSnapshot {
   readonly documents: readonly ContentManifestEntry[];
-  readonly sources: ReadonlyMap<string, SourceDocument>;
   readonly investmentNotes: readonly InvestmentNoteManifestEntry[];
 }
 
-let productionSnapshot: Promise<ContentSnapshot> | undefined;
+let productionSnapshot: ContentSnapshot | undefined;
 
-function documentKey(locale: Locale, id: string): string {
-  return `${locale}/${id}`;
+function relativePath(path: string): string {
+  return path.replace(/^[/\\]+/u, "").replaceAll("\\", "/");
 }
 
-async function createContentSnapshot(): Promise<ContentSnapshot> {
-  const sourceDocuments = await readDocuments();
-  validateDocuments(sourceDocuments);
-  const sourceNotes = await readInvestmentNotes();
-  validateInvestmentTranslations(sourceNotes);
-
-  const documents = sourceDocuments
-    .map(({ metadata, outline }) => ({
-      ...metadata,
-      href: createDocHref(metadata.locale, metadata.id),
-      outline,
-    }))
-    .sort(compareDocumentMetadata);
-  const sources = new Map(
-    sourceDocuments.map((source) => [
-      documentKey(source.metadata.locale, source.metadata.id),
-      source,
-    ]),
-  );
-  const investmentNotes = sourceNotes
-    .map(({ metadata }) => ({
-      ...metadata,
-      href: createInvestmentNoteHref(metadata.locale, metadata.id),
-    }))
-    .toSorted(
-      (left, right) =>
-        left.locale.localeCompare(right.locale) ||
-        right.publishedAt.localeCompare(left.publishedAt) ||
-        left.id.localeCompare(right.id),
-    );
-
-  return Object.freeze({
-    documents: Object.freeze(documents),
-    sources,
-    investmentNotes: Object.freeze(investmentNotes),
+function techMetadata(value: DocMetadata): DocMetadata {
+  return docMetadataSchema.parse({
+    id: value.id,
+    locale: value.locale,
+    documentKind: value.documentKind,
+    series: value.series,
+    seriesOrder: value.seriesOrder,
+    title: value.title,
+    displayTitle: value.displayTitle,
+    description: value.description,
+    publishedAt: value.publishedAt,
+    updatedAt: value.updatedAt,
+    verifiedAt: value.verifiedAt,
+    tags: value.tags,
+    status: value.status,
+    publicationStatus: value.publicationStatus,
+    sourceUrl: value.sourceUrl,
+    packageName: value.packageName,
+    packageVersion: value.packageVersion,
+    apiSymbols: value.apiSymbols,
   });
 }
 
-/** `readContentSnapshot` 데이터를 조회함 */
-export function readContentSnapshot(): Promise<ContentSnapshot> {
+function investmentMetadata(
+  value: InvestmentNoteMetadata,
+): InvestmentNoteMetadata {
+  return investmentNoteMetadataSchema.parse({
+    id: value.id,
+    locale: value.locale,
+    title: value.title,
+    description: value.description,
+    publishedAt: value.publishedAt,
+    updatedAt: value.updatedAt,
+    status: value.status,
+    tags: value.tags,
+    series: value.series,
+    sources: value.sources,
+  });
+}
+
+function loadTechDocuments(): readonly ContentManifestEntry[] {
+  const loaded = techSource.getPages().map((page) => {
+    const metadata = techMetadata(page.data);
+    const manifest = Object.freeze({
+      ...metadata,
+      href: createDocHref(metadata.locale, metadata.id),
+    } satisfies ContentManifestEntry);
+    const validationSource: ValidatedContentSource<DocMetadata> = {
+      metadata,
+      body: "",
+      filePath: page.data.info.fullPath,
+      relativePath: relativePath(page.data.info.path),
+      extractedReferences: [],
+    };
+    return { manifest, validationSource };
+  });
+
+  validateDocuments(loaded.map(({ validationSource }) => validationSource));
+  return Object.freeze(
+    loaded.map(({ manifest }) => manifest).sort(compareDocumentMetadata),
+  );
+}
+
+function loadInvestmentNotes(): readonly InvestmentNoteManifestEntry[] {
+  const loaded = investmentSource.getPages().map((page) => {
+    const metadata = investmentMetadata(page.data);
+    const manifest = Object.freeze({
+      ...metadata,
+      href: createInvestmentNoteHref(metadata.locale, metadata.id),
+    } satisfies InvestmentNoteManifestEntry);
+    const validationSource: ValidatedContentSource<InvestmentNoteMetadata> = {
+      metadata,
+      body: "",
+      filePath: page.data.info.fullPath,
+      relativePath: relativePath(page.data.info.path),
+      extractedReferences: [],
+    };
+    return { manifest, validationSource };
+  });
+
+  validateInvestmentNotes(
+    loaded.map(({ validationSource }) => validationSource),
+    false,
+  );
+  return Object.freeze(
+    loaded
+      .map(({ manifest }) => manifest)
+      .toSorted(
+        (left, right) =>
+          left.locale.localeCompare(right.locale) ||
+          right.publishedAt.localeCompare(left.publishedAt) ||
+          left.id.localeCompare(right.id),
+      ),
+  );
+}
+
+function createContentSnapshot(): ContentSnapshot {
+  return Object.freeze({
+    documents: loadTechDocuments(),
+    investmentNotes: loadInvestmentNotes(),
+  });
+}
+
+/** Fumadocs 컬렉션을 검증된 제품 도메인 스냅샷으로 변환함 */
+export function readContentSnapshot(): ContentSnapshot {
   if (process.env.NODE_ENV === "development") return createContentSnapshot();
   productionSnapshot ??= createContentSnapshot();
   return productionSnapshot;
 }
 
-/** `renderTechMdx` 결과를 렌더링함 */
-export const renderTechMdx = cache(async (locale: Locale, id: string) => {
-  const filePath = resolve(techContentRoot, `${locale}/${id}.mdx`);
-  const source = await readFile(filePath, "utf8");
-  const { useMDXComponents } = await import("../mdx-components.tsx");
-  return evaluate(source, {
-    ...runtime,
-    remarkPlugins: [remarkFrontmatter, remarkGfm],
-    rehypePlugins: [rehypeSlug],
-    useMDXComponents,
-  });
-});
-
-/** `renderInvestmentMdx` 결과를 렌더링함 */
-export const renderInvestmentMdx = cache(async (locale: Locale, id: string) => {
-  const filePath = resolve(investmentContentRoot, `${locale}/notes/${id}.mdx`);
-  const source = await readFile(filePath, "utf8");
-  const { useMDXComponents } = await import("../mdx-components.tsx");
-  return evaluate(source, {
-    ...runtime,
-    remarkPlugins: [remarkFrontmatter, remarkGfm],
-    rehypePlugins: [rehypeSlug],
-    useMDXComponents,
-  });
-});
-
-/** `createSearchDocuments` 결과를 생성함 */
-export function createSearchDocuments(
-  documents: readonly ContentManifestEntry[],
-  sources: ReadonlyMap<string, SourceDocument>,
-  locale: Locale,
-): readonly SearchDocument[] {
-  return documents
-    .filter((document) => document.locale === locale)
-    .map((document) => {
-      const source = sources.get(documentKey(locale, document.id));
-      if (source === undefined)
-        throw new Error(`Missing source for ${locale}/${document.id}.`);
-      return Object.freeze({
-        id: document.id,
-        locale: document.locale,
-        ...(document.series === undefined ? {} : { series: document.series }),
-        title: document.title,
-        description: document.description,
-        href: document.href,
-        headings: document.outline.map((item) => item.label),
-        tags: document.tags,
-        apiSymbols: document.apiSymbols ?? [],
-        body: createSearchBody(source.body),
-      });
-    });
+/** Fumadocs가 색인한 기술 문서 본문을 locale과 공개 ID로 조회함 */
+export async function loadTechContent(locale: Locale, id: string) {
+  return (await techSource.getPage([id], locale)?.data.load()) ?? null;
 }
 
-/** `publishedInvestmentNotes` 공개 기능을 제공함 */
+/** Fumadocs가 색인한 투자 노트 본문을 locale과 공개 ID로 조회함 */
+export async function loadInvestmentContent(locale: Locale, id: string) {
+  return (
+    (await investmentSource.getPage(["notes", id], locale)?.data.load()) ?? null
+  );
+}
+
+/** 게시된 투자 노트를 반환함 */
 export function publishedInvestmentNotes(
   notes: readonly InvestmentNoteManifestEntry[],
   locale: Locale,
@@ -155,7 +163,7 @@ export function publishedInvestmentNotes(
   );
 }
 
-/** `notesBySource` 공개 기능을 제공함 */
+/** source 종류에 맞는 투자 노트를 반환함 */
 export function notesBySource(
   notes: readonly InvestmentNoteManifestEntry[],
   locale: Locale,

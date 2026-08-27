@@ -4,6 +4,7 @@ import {
   type ContentManifestEntry,
   type Locale,
 } from "#lib/content-model";
+import { documentKindLabel } from "#lib/tech/document-kind";
 import { type SeriesId, seriesRegistry } from "#lib/tech/series";
 import { DocumentCard } from "./DocumentCard";
 
@@ -86,13 +87,20 @@ export function SeriesDetail({
           {series.description[locale]}
         </p>
       </header>
-      <div className="grid grid-cols-3 gap-x-5 gap-y-9 max-[840px]:grid-cols-2 max-[560px]:grid-cols-1">
+      <div
+        className="grid grid-cols-3 gap-x-5 gap-y-9 max-[840px]:grid-cols-2 max-[560px]:grid-cols-1"
+        data-document-grid="true"
+      >
         {documents.map((document, index) => (
           <DocumentCard
             document={document}
             eager={index < 3}
             key={document.id}
-            label={`${document.seriesOrder}. ${series.title[locale]}`}
+            label={`${document.seriesOrder}. ${
+              document.documentKind === undefined
+                ? series.title[locale]
+                : documentKindLabel(locale, document.documentKind)
+            }`}
             locale={locale}
             variant="related"
           />

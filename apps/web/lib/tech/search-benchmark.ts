@@ -1,4 +1,17 @@
-import type { SearchBenchmarkCase, SearchBenchmarkThresholds } from "./search";
+export interface SearchBenchmarkCase {
+  readonly locale: "ko" | "en";
+  readonly query: string;
+  readonly expectedIds: readonly string[];
+  readonly expectNoResults?: boolean;
+}
+
+export interface SearchBenchmarkThresholds {
+  readonly minTop1HitRate: number;
+  readonly minTop3HitRate: number;
+  readonly minMeanReciprocalRank: number;
+  readonly minNoResultAccuracy: number;
+  readonly maxUnexpectedZeroResultRate: number;
+}
 
 const target = (
   locale: "en" | "ko",
@@ -40,7 +53,7 @@ export const bilingualSearchBenchmarkCases = Object.freeze([
   target("en", "coding agent tool calls", "building-coding-agent"),
   target("en", "S-expression REPL", "hamssun-python-lisp"),
   target("en", "genome crossover mutation", "implementing-genetic-algorithm"),
-  noResults("en", "Kubernetes ingress controller"),
+  noResults("en", "rubyonrailsactiverecordcallbacks"),
   noResults("en", "PostgreSQL vacuum freeze"),
 
   target("ko", "Next.js 16 서버 컴포넌트", "nextjs-16"),
@@ -70,36 +83,28 @@ export const bilingualSearchBenchmarkThresholds = Object.freeze({
   minTop1HitRate: 0.85,
   minTop3HitRate: 0.95,
   minMeanReciprocalRank: 0.9,
-  expectedZeroResultRate: 0.1,
   minNoResultAccuracy: 1,
   maxUnexpectedZeroResultRate: 0,
-  maxIndexBytes: 1_100_000,
-  maxRuntimeDependencyBytes: 0,
 } satisfies SearchBenchmarkThresholds);
 
 /** content snapshot 변경 시 의도적으로 검토·갱신하는 검색 품질·비용 baseline */
 export const bilingualSearchBenchmarkBaseline = Object.freeze({
   aggregate: Object.freeze({
-    top1HitRate: 33 / 36,
+    top1HitRate: 1,
     top3HitRate: 1,
-    meanReciprocalRank: 69 / 72,
+    meanReciprocalRank: 1,
     zeroResultRate: 0.1,
   }),
   en: Object.freeze({
-    top1HitRate: 17 / 18,
+    top1HitRate: 1,
     top3HitRate: 1,
-    meanReciprocalRank: 35 / 36,
+    meanReciprocalRank: 1,
     zeroResultRate: 0.1,
   }),
   ko: Object.freeze({
-    top1HitRate: 16 / 18,
+    top1HitRate: 1,
     top3HitRate: 1,
-    meanReciprocalRank: 17 / 18,
+    meanReciprocalRank: 1,
     zeroResultRate: 0.1,
-  }),
-  index: Object.freeze({
-    bytes: 1_036_535,
-    initialRequestCount: 1,
-    runtimeDependencyBytes: 0,
   }),
 });

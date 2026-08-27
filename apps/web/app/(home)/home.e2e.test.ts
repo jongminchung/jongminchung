@@ -1,8 +1,8 @@
-import { expect, test } from "@playwright/test";
 import {
   expectNoAccessibilityViolations,
   expectNoHorizontalOverflow,
 } from "../../e2e-assertions";
+import { expect, test } from "../../e2e-fixtures";
 
 test("[성공] 현재 상황 데이터로 Jamie의 작업을 제시함", async ({ page }) => {
   await page.goto("/");
@@ -40,17 +40,17 @@ test("[성공] 작업 대상으로 편집 작업을 전송함", async ({ page })
   await expect(page).toHaveURL(/#work$/u);
 });
 
-test("[성공] 검색 파일 게시", async ({ page, request }) => {
+test("[성공] 검색 파일 게시", async ({ page, siteRequest }) => {
   await page.goto("/en");
   const socialImageUrl = await page
     .locator('meta[property="og:image"]')
     .getAttribute("content");
   expect(socialImageUrl).not.toBeNull();
   const [favicon, robots, sitemap, socialImage] = await Promise.all([
-    request.get("/icon.svg"),
-    request.get("/robots.txt"),
-    request.get("/sitemap.xml"),
-    request.get(new URL(socialImageUrl ?? "", "https://jamie.kr").pathname),
+    siteRequest.get("/icon.svg"),
+    siteRequest.get("/robots.txt"),
+    siteRequest.get("/sitemap.xml"),
+    siteRequest.get(new URL(socialImageUrl ?? "", "https://jamie.kr").pathname),
   ]);
 
   expect(favicon.ok()).toBe(true);

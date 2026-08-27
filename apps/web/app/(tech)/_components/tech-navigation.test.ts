@@ -15,7 +15,7 @@ const documents: readonly NavigationEntry[] = [
   },
   {
     id: "ddd",
-    href: "/en/articles/ddd",
+    href: "/en/ddd",
     section: "handbook",
     title: "DDD",
   },
@@ -26,7 +26,7 @@ describe("섹션NavigationItems", () => {
     const current: CurrentNavigationEntry = {
       kind: "document",
       id: "ddd",
-      href: "/en/articles/ddd",
+      href: "/en/ddd",
       title: "DDD",
       section: "handbook",
       outline: [

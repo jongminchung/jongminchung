@@ -1,7 +1,7 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./e2e-fixtures";
 
 test("[실패] 개인 위치, 알 수 없는 호스트 및 스푸핑된 헤더를 갖고 있음", async ({
-  request,
+  siteRequest,
   playwright,
 }) => {
   for (const pathname of [
@@ -10,7 +10,7 @@ test("[실패] 개인 위치, 알 수 없는 호스트 및 스푸핑된 헤더�
     "/tech/en",
     "/invest/en",
   ]) {
-    expect((await request.get(pathname)).status()).toBe(404);
+    expect((await siteRequest.get(pathname)).status()).toBe(404);
   }
   const unknown = await playwright.request.newContext({
     baseURL: "http://127.0.0.1:3100",

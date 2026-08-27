@@ -1,4 +1,23 @@
+import { resolve } from "node:path";
+import { fumadocsMdx } from "fumadocs-mdx/vite";
 import { defineConfig } from "vitest/config";
+
+const webRoot = resolve(import.meta.dirname, "apps/web");
+
+function createWebMdxPlugins() {
+  const plugins = fumadocsMdx({
+    index: false,
+    updateViteConfig: false,
+  });
+  const controller = plugins[0];
+  if (controller === undefined || typeof controller.config !== "function")
+    throw new Error("Fumadocs Vite controller is unavailable.");
+  const configure = controller.config;
+  controller.config = async function configureWebMdx(config, environment) {
+    await configure.call(this, { ...config, root: webRoot }, environment);
+  };
+  return plugins;
+}
 
 const vitestExclude = [
   "**/node_modules/**",
@@ -13,8 +32,17 @@ const vitestExclude = [
 const integrationTests = ["{apps,packages}/**/*.integration.test.{ts,tsx}"];
 
 export default defineConfig({
+  oxc: {
+    jsx: { runtime: "automatic" },
+  },
+  plugins: createWebMdxPlugins(),
   resolve: {
     conditions: ["source", "module", "browser", "development|production"],
+  },
+  ssr: {
+    resolve: {
+      conditions: ["source", "module", "node", "development|production"],
+    },
   },
   test: {
     coverage: {
@@ -23,6 +51,8 @@ export default defineConfig({
         "**/*.d.ts",
         "**/generated/**",
         "apps/web/lib/content-repository.ts",
+        "apps/web/lib/fumadocs-source.ts",
+        "apps/web/lib/tech/search-server.ts",
         "**/fixtures/**",
         "**/__fixtures__/**",
         "apps/git-client/src/adapters/**",

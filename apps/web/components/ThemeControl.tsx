@@ -6,6 +6,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@jongminchung/ui/components/tooltip";
+import { useTranslations } from "next-intl";
 import type { Locale } from "#lib/site-routing";
 import type { ThemeMode } from "#lib/theme";
 import { Icon, type IconType } from "./Icon";
@@ -25,9 +26,10 @@ const modeIcon: Readonly<Record<ThemeMode, IconType>> = {
 };
 
 /** `ThemeControl` UI 컴포넌트를 렌더링함 */
-export function ThemeControl({ locale }: { readonly locale: Locale }) {
+export function ThemeControl({ locale: _locale }: { readonly locale: Locale }) {
   const { mode, setMode } = useTheme();
-  const label = locale === "ko" ? `테마: ${mode}` : `Theme: ${mode}`;
+  const t = useTranslations("shared.theme");
+  const label = t("label", { mode });
   return (
     <Tooltip>
       <TooltipTrigger

@@ -1,8 +1,8 @@
-import { expect, test } from "@playwright/test";
 import {
   expectNoAccessibilityViolations,
   expectNoHorizontalOverflow,
 } from "../../e2e-assertions";
+import { expect, test } from "../../e2e-fixtures";
 
 test("[실패] 수평 바닥 바닥 없이 더블 언어 빈 연구 보고서를 제출함", async ({
   page,
@@ -24,9 +24,9 @@ test("[실패] 수평 바닥 바닥 없이 더블 언어 빈 연구 보고서를
   await expectNoAccessibilityViolations(page);
 });
 
-test("[성공] 관계자 투자 관찰 파일을 게시함", async ({ request }) => {
+test("[성공] 관계자 투자 관찰 파일을 게시함", async ({ siteRequest }) => {
   for (const path of ["/robots.txt", "/sitemap.xml", "/en/rss.xml"]) {
-    const response = await request.get(path);
+    const response = await siteRequest.get(path);
     expect(response.ok(), path).toBe(true);
   }
 });

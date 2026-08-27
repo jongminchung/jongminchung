@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { proxy } from "./proxy";
 
 function createRequest(
@@ -18,6 +18,8 @@ function createRequest(
 }
 
 describe("제조원", () => {
+  afterEach(() => vi.unstubAllEnvs());
+
   it("[성공] 쿠키 및 Accept-Language를 통해 사이트를 종료함", () => {
     const saved = proxy(
       createRequest("/", {
@@ -61,6 +63,25 @@ describe("제조원", () => {
       "http://tech.jamie.localhost:3000/tech/ko/articles/ddd",
     );
     expect(response.headers.get("x-middleware-override-headers")).toBeNull();
+  });
+
+  it("[성공] 개발 loopback 호스트를 선택한 사이트로 다시 작성함", () => {
+    vi.stubEnv("NODE_ENV", "development");
+    vi.stubEnv("JAMIE_LOCAL_SITE", "invest");
+
+    const response = proxy(createRequest("/en", { host: "localhost:3000" }));
+    expect(response.headers.get("x-middleware-rewrite")).toBe(
+      "http://localhost:3000/invest/en",
+    );
+  });
+
+  it("[성공] Vercel 기본 hostname은 Tech preview로 제공함", () => {
+    const response = proxy(
+      createRequest("/ko", { host: "jongminchung-web-git-docs.vercel.app" }),
+    );
+    expect(response.headers.get("x-middleware-rewrite")).toBe(
+      "http://jongminchung-web-git-docs.vercel.app/tech/ko",
+    );
   });
 
   it("[실패] 스푸핑된 내부 헤더 및 개인 위치를 유지함", () => {

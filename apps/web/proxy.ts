@@ -2,10 +2,12 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import {
   createInternalSitePath,
+  isVercelDeploymentHost,
   isSharedAssetPath,
   localeCookieName,
   localeFromPath,
   normalizeHost,
+  parseLocalSiteOverride,
   resolveSite,
   selectLocale,
   siteIds,
@@ -29,7 +31,14 @@ export function proxy(request: NextRequest): NextResponse {
 
   const requestHost = request.headers.get("host") ?? "";
   const host = normalizeHost(requestHost);
-  const site = resolveSite(host);
+  const site =
+    resolveSite(
+      host,
+      parseLocalSiteOverride(
+        process.env.NODE_ENV,
+        process.env.JAMIE_LOCAL_SITE,
+      ),
+    ) ?? (isVercelDeploymentHost(host) ? "tech" : null);
   if (site === null) return new NextResponse(null, { status: 404 });
 
   if (pathname === "/") {

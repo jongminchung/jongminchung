@@ -8,7 +8,11 @@ const absoluteUrl = (pathname: string): string =>
 function documentLine(
   document: Awaited<ReturnType<typeof getLocalizedDocuments>>[number],
 ): string {
-  return `- [${document.title}](${absoluteUrl(document.href)}): ${document.description} Status: ${document.status}; published ${document.publishedAt}.`;
+  const kind =
+    document.documentKind === undefined
+      ? ""
+      : ` Type: ${document.documentKind};`;
+  return `- [${document.title}](${absoluteUrl(document.href)}): ${document.description}${kind} Status: ${document.status}; published ${document.publishedAt}.`;
 }
 
 async function createLocaleSection(locale: Locale): Promise<readonly string[]> {
