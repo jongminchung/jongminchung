@@ -22,6 +22,15 @@ describe("투자 노트 Fumadocs 어댑터", () => {
     const loaded = await loadInvestmentNote("en", "latency-and-discipline");
     expect(loaded?.metadata).toBe(note);
     expect(loaded?.Content).toBeTypeOf("function");
+    expect(loaded?.toc).toEqual([]);
+
+    const article = await loadInvestmentNote(
+      "en",
+      "reading-the-13f-difference",
+    );
+    expect(article?.toc[0]?.url).toBe(
+      "#start-by-limiting-what-a-13f-can-tell-us",
+    );
   });
 
   it("[실패] 없는 투자 노트는 로드하지 않음", async () => {

@@ -136,10 +136,9 @@ export function parseInvestmentNoteMetadata(
 /** `validateInvestmentNoteBody` 입력을 검증함 */
 export function validateInvestmentNoteBody(body: string, source: string): void {
   for (const component of ["SourceSummary", "JamieNotes"] as const) {
-    const openings = body.match(new RegExp(`<${component}(?:\\s|>)`, "gu"));
-    const closings = body.match(new RegExp(`</${component}>`, "gu"));
-    if (openings?.length !== 1 || closings?.length !== 1) {
-      throw new Error(`${source} must contain one <${component}> section.`);
-    }
+    if (new RegExp(`<${component}(?:\\s|>)`, "u").test(body))
+      throw new Error(
+        `${source} must use ordinary Markdown instead of <${component}>.`,
+      );
   }
 }

@@ -25,12 +25,12 @@ const metadata = {
   ],
 } as const;
 
-describe("투자 어음계약", () => {
-  it("[성공] 소스 기반 더블 언어 노트 모양을 허용함", () => {
+describe("투자 글 계약", () => {
+  it("[성공] 일반 Markdown 본문을 허용함", () => {
     expect(parseInvestmentNoteMetadata(metadata).sources[0]?.kind).toBe("book");
     expect(() =>
       validateInvestmentNoteBody(
-        "<SourceSummary>Summary</SourceSummary>\n<JamieNotes>Notes</JamieNotes>",
+        "## Margin of safety\n\nArticle body",
         "fixture",
       ),
     ).not.toThrow();
@@ -45,10 +45,13 @@ describe("투자 어음계약", () => {
     ).toThrow(/requires a URL/u);
   });
 
-  it("[성공] 별도의 소스 요약 및 작성자 메모가 필요함", () => {
-    expect(() => validateInvestmentNoteBody("Freeform", "fixture")).toThrow(
-      /SourceSummary/u,
-    );
+  it("[실패] 과거 요약 및 작성자 메모 wrapper를 거부함", () => {
+    expect(() =>
+      validateInvestmentNoteBody(
+        "<SourceSummary>Summary</SourceSummary>",
+        "fixture",
+      ),
+    ).toThrow(/ordinary Markdown/u);
   });
 
   it("[실패] 알 수 없는 필드, 해석 태그 및 관계 반전을 의미함", () => {

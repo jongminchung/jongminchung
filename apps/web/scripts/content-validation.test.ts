@@ -106,7 +106,7 @@ function createInvestmentNote(
   };
   return {
     metadata,
-    body: "<SourceSummary>Source</SourceSummary>\n<JamieNotes>Notes</JamieNotes>",
+    body: `## ${locale} durable investing\n\nArticle body`,
     filePath: `/fixture/${locale}/notes/${metadata.id}.mdx`,
     relativePath: `${locale}/notes/${metadata.id}.mdx`,
     extractedReferences: [],
@@ -210,11 +210,14 @@ describe("투자 노트 계약", () => {
     ).toThrow("expected en/notes/durable-investing.mdx");
   });
 
-  test("본문을 로드한 경우에만 필수 섹션을 검증함", () => {
-    const empty = notes().map((note) => ({ ...note, body: "" }));
-    expect(() => validateInvestmentNotes(empty)).toThrow(
-      "must contain one <SourceSummary> section",
+  test("일반 Markdown을 허용하고 과거 구분 wrapper를 거부함", () => {
+    const legacy = notes().map((note) => ({
+      ...note,
+      body: "<SourceSummary>Source</SourceSummary>",
+    }));
+    expect(() => validateInvestmentNotes(legacy)).toThrow(
+      "must use ordinary Markdown",
     );
-    expect(() => validateInvestmentNotes(empty, false)).not.toThrow();
+    expect(() => validateInvestmentNotes(legacy, false)).not.toThrow();
   });
 });

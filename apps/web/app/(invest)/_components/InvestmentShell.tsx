@@ -1,3 +1,4 @@
+import type { TOCItemType } from "fumadocs-core/toc";
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -28,31 +29,30 @@ import {
   createInvestmentArticleStructuredData,
   createInvestmentCollectionStructuredData,
 } from "#lib/structured-data";
+import { DocumentOutline } from "#tech-components/DocumentOutline";
 
 const copy = {
   ko: {
     label: "INVESTMENT NOTES",
     nav: ["노트", "책"],
-    intro: "출처를 읽고, 요약과 해석 사이의 경계를 남깁니다",
+    intro: "공시와 원문에서 투자 아이디어를 읽고 기록합니다",
     description:
-      "13F 공시, 책과 인터뷰를 근거로 투자자의 선택을 분석하고 원문 사실과 Jamie의 판단을 분리해 기록합니다",
+      "13F 공시, 책과 인터뷰를 바탕으로 투자자의 선택과 시장의 구조를 분석합니다",
     empty: "첫 리서치 노트를 준비하고 있습니다",
-    emptyBody:
-      "모든 글은 출처 요약과 개인 의견을 구분하고 한국어와 영어를 함께 제공합니다",
-    sourceSummary: "원자료",
+    emptyBody: "투자 아이디어와 분석을 한국어와 영어로 함께 제공합니다",
+    sources: "참고 자료",
     updated: "업데이트",
   },
   en: {
     label: "INVESTMENT NOTES",
     nav: ["Notes", "Books"],
-    intro:
-      "Read the source and preserve the boundary between summary and judgment",
+    intro: "Read filings and original sources to develop investment ideas",
     description:
-      "13F filings, books, and interviews become source-grounded notes that separate reported facts from Jamie's interpretation",
+      "Essays on investor decisions and market structure grounded in 13F filings, books, and interviews",
     empty: "The first research note is in preparation",
     emptyBody:
-      "Every note separates source summary from personal commentary and ships in Korean and English",
-    sourceSummary: "Sources",
+      "Investment ideas and analysis are published in both Korean and English",
+    sources: "Sources",
     updated: "Updated",
   },
 } as const;
@@ -60,7 +60,7 @@ const copy = {
 const indexCopy: Record<Locale, EditorialCopy> = {
   ko: {
     eyebrow: "INVESTMENT NOTES",
-    title: "출처와 판단을 분리한 투자 리서치",
+    title: "공시와 원문에서 출발한 투자 리서치",
     description: copy.ko.description,
     all: "모든 노트",
     newest: "최신순",
@@ -73,7 +73,7 @@ const indexCopy: Record<Locale, EditorialCopy> = {
   },
   en: {
     eyebrow: "INVESTMENT NOTES",
-    title: "Investment research with source and judgment kept apart",
+    title: "Investment research grounded in filings and primary sources",
     description: copy.en.description,
     all: "All notes",
     newest: "Newest",
@@ -132,7 +132,7 @@ export function InvestmentLayout({
             links: [{ href: "https://www.jamie.kr", label: "jamie.kr ↗" }],
           },
         ]}
-        note="Source summary ≠ personal judgment"
+        note="Independent investment research · Not investment advice"
       />
     </div>
   );
@@ -225,11 +225,13 @@ export function InvestmentNotePage({
   note,
   children,
   related = [],
+  toc,
 }: {
   readonly locale: Locale;
   readonly note: InvestmentNoteManifestEntry;
   readonly children: ReactNode;
   readonly related?: readonly InvestmentNoteManifestEntry[];
+  readonly toc: readonly TOCItemType[];
 }): React.JSX.Element {
   const text = copy[locale];
   const relatedItems = rankRelatedEditorialItems(
@@ -242,6 +244,25 @@ export function InvestmentNotePage({
       <EditorialArticle
         footer={
           <>
+            <section
+              className="mt-16 border-t pt-7"
+              aria-labelledby="investment-sources"
+            >
+              <h2
+                className="mt-0 mb-5 text-[22px] font-medium"
+                id="investment-sources"
+              >
+                {text.sources}
+              </h2>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {note.sources.map((source) => (
+                  <SourceCard
+                    key={`${source.kind}:${source.title}`}
+                    source={source}
+                  />
+                ))}
+              </div>
+            </section>
             {relatedItems.length === 0 ? null : (
               <section
                 className="mt-16 border-t pt-7"
@@ -309,24 +330,13 @@ export function InvestmentNotePage({
             </nav>
           </>
         }
-        rail={
-          <div aria-label={text.sourceSummary}>
-            <p className="m-0 font-mono text-[11px] uppercase">
-              {text.sourceSummary}
-            </p>
-            {note.sources.map((source) => (
-              <SourceCard
-                key={`${source.kind}:${source.title}`}
-                source={source}
-              />
-            ))}
-          </div>
-        }
+        rail={<DocumentOutline items={toc} />}
+        variant="engineering"
       >
         <figure className="mt-0 mb-10">
           <Image
             alt={note.imageAlt}
-            className="aspect-[1.6] w-full border object-cover"
+            className="aspect-[1.6] w-full rounded-[var(--radius)] border object-cover"
             data-investment-hero="true"
             height={1000}
             preload
@@ -334,7 +344,7 @@ export function InvestmentNotePage({
             src={note.image}
             width={1600}
           />
-          <figcaption className="mt-3 text-xs leading-5 text-muted-foreground">
+          <figcaption className="mt-2 text-center text-xs leading-5 text-muted-foreground">
             {locale === "ko"
               ? "글의 주제를 바탕으로 OpenAI로 생성한 이미지"
               : "Image generated with OpenAI from the article topic"}
@@ -359,12 +369,12 @@ function SourceCard({
     </>
   );
   return source.url === undefined ? (
-    <div className="mt-3 flex flex-col gap-[5px] border bg-card p-[18px] [&_small]:font-mono [&_small]:text-[10px] [&_small]:text-muted-foreground [&_span]:font-mono [&_span]:text-[10px] [&_span]:text-muted-foreground">
+    <div className="flex flex-col gap-[5px] border bg-card p-[18px] [&_small]:font-mono [&_small]:text-[10px] [&_small]:text-muted-foreground [&_span]:font-mono [&_span]:text-[10px] [&_span]:text-muted-foreground">
       {body}
     </div>
   ) : (
     <a
-      className="mt-3 flex flex-col gap-[5px] border bg-card p-[18px] [&_small]:font-mono [&_small]:text-[10px] [&_small]:text-muted-foreground [&_span]:font-mono [&_span]:text-[10px] [&_span]:text-muted-foreground"
+      className="flex flex-col gap-[5px] border bg-card p-[18px] [&_small]:font-mono [&_small]:text-[10px] [&_small]:text-muted-foreground [&_span]:font-mono [&_span]:text-[10px] [&_span]:text-muted-foreground"
       href={source.url}
       rel="noreferrer"
       target="_blank"

@@ -19,8 +19,8 @@ export async function generateMetadata({
     locale === "ko" ? "투자 리서치 노트" : "Investment research notes";
   const description =
     locale === "ko"
-      ? "13F 공시와 원문 자료를 분석하고 사실과 Jamie의 판단을 분리해 기록합니다"
-      : "Source-grounded analysis of 13F filings and original investment materials";
+      ? "13F 공시와 원문 자료를 바탕으로 투자자의 선택과 시장 구조를 분석합니다"
+      : "Investment analysis grounded in 13F filings and original materials";
   return {
     title: { absolute: `${title} · Investment Notes` },
     description,

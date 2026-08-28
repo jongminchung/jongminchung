@@ -5,7 +5,7 @@ const cases = [
   {
     name: "investment-wide-light",
     path: "/en",
-    heading: "Investment research with source and judgment",
+    heading: "Investment research grounded in filings and primary sources",
     contract: "index",
     width: 1440,
     height: 1000,
@@ -14,7 +14,7 @@ const cases = [
   {
     name: "investment-mobile-dark",
     path: "/en",
-    heading: "Investment research with source and judgment",
+    heading: "Investment research grounded in filings and primary sources",
     contract: "index",
     width: 390,
     height: 844,
@@ -61,9 +61,7 @@ for (const visualCase of cases) {
 
     if (visualCase.contract === "editorial") {
       const article = page.locator('[data-editorial-article="true"]');
-      const paragraph = article
-        .locator('[data-investment-section="true"] > p')
-        .first();
+      const paragraph = article.locator("h2 + p").first();
       const tableScroller = article
         .locator("figure > div.overflow-x-auto")
         .first();

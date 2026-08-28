@@ -27,8 +27,7 @@ const baseMetadata = {
   ],
 } as const satisfies InvestmentNoteMetadata;
 
-const body =
-  "<SourceSummary>Summary</SourceSummary>\n<JamieNotes>Notes</JamieNotes>";
+const body = "## Margin of safety\n\nArticle body";
 
 function source(
   locale: "ko" | "en",
@@ -91,12 +90,12 @@ describe("Investment source collection", () => {
     ).toThrow(/expected en\/notes\/margin-of-safety\.mdx/u);
   });
 
-  it("필수 본문 section 누락을 구분해 거부함", () => {
+  it("과거 구분 wrapper를 사용한 본문을 거부함", () => {
     expect(() =>
       createInvestmentNoteCollection([
         source("ko", {}, "<SourceSummary>Summary</SourceSummary>"),
         source("en"),
       ]),
-    ).toThrow(/JamieNotes/u);
+    ).toThrow(/ordinary Markdown/u);
   });
 });

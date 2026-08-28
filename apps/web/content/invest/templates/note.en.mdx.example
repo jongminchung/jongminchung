@@ -2,7 +2,7 @@
 id: note-slug
 locale: en
 title: Note title
-description: A concise statement of the source and research question
+description: A concise statement of the article's question and conclusion
 publishedAt: 2026-01-01
 updatedAt: 2026-01-01
 status: draft
@@ -17,18 +17,10 @@ sources:
     url: https://example.com/source
 ---
 
-<SourceSummary>
+## Central argument
 
-## Claims in the source
+Develop the article's central argument and supporting evidence in ordinary prose
 
-Summarize only the source's claims and evidence
+## Analysis and implications
 
-</SourceSummary>
-
-<JamieNotes>
-
-## Jamie's interpretation
-
-Record judgments and follow-up questions separately from the summary
-
-</JamieNotes>
+Continue with implications, limitations, and follow-up questions

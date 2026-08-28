@@ -10,12 +10,12 @@ function copy(locale: "ko" | "en") {
     ? {
         title: "모든 투자 리서치 노트",
         description:
-          "책과 공개 자료의 핵심 주장과 Jamie의 판단을 분리해 기록한 투자 리서치 노트 전체 모음",
+          "책, 공시, 공개 자료를 바탕으로 작성한 투자 리서치 글 전체 모음",
       }
     : {
         title: "All investment research notes",
         description:
-          "All source-grounded investment research notes separating original claims from Jamie's judgment.",
+          "All investment research essays grounded in books, filings, and public materials.",
       };
 }
 

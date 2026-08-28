@@ -13,14 +13,16 @@ test("[실패] 수평 바닥 바닥 없이 더블 언어 빈 연구 보고서를
     page.getByRole("link", { name: "jongminchung invest" }),
   ).toContainText("jongminchunginvest");
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "Investment research with source and judgment",
+    "Investment research grounded in filings and primary sources",
   );
   await expect(
     page.getByRole("link", {
       name: "Efficiency compounds when the feedback loop is owned end to end",
     }),
   ).toBeVisible();
-  await expect(page.locator('[data-editorial-image="true"]')).toHaveCount(5);
+  const editorialImages = page.locator('[data-editorial-image="true"]');
+  await expect(editorialImages.first()).toBeVisible();
+  expect(await editorialImages.count()).toBeGreaterThanOrEqual(5);
   await expect(
     page.locator('link[rel="alternate"][hreflang="x-default"]'),
   ).toHaveAttribute("href", "https://invest.jamie.kr/en");
@@ -106,13 +108,29 @@ test("[성공] 투자 노트와 collection의 검색 엔터티를 연결함", as
 test("[성공] 투자 장소를 선택하고 기억함", async ({ page }) => {
   await page.goto("/ko");
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "출처와 판단",
+    "공시와 원문",
   );
   expect(
     (await page.context().cookies()).find(
       ({ name }) => name === "invest-locale",
     )?.value,
   ).toBe("ko");
+});
+
+test("[성공] 투자 글에 Tech와 같은 문서 내 목차를 제공함", async ({ page }) => {
+  await page.goto("/en/notes/reading-the-13f-difference");
+
+  const outline = page.getByRole("navigation", { name: "Document outline" });
+  await expect(outline).toBeVisible();
+  await expect(
+    outline.getByRole("link", {
+      name: "Start by limiting what a 13F can tell us",
+    }),
+  ).toHaveAttribute("href", "#start-by-limiting-what-a-13f-can-tell-us");
+  await expect(page.getByText("Jamie's notes", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Source summary", { exact: true })).toHaveCount(
+    0,
+  );
 });
 
 test("[성공] Invest 코드블록이 Tech 타이포그래피와 외형을 공유함", async ({

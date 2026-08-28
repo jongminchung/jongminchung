@@ -28,8 +28,8 @@ export async function generateStaticParams() {
 
 function description(locale: "ko" | "en", tag: string): string {
   return locale === "ko"
-    ? `${tag} 주제의 원자료 요약과 Jamie의 판단을 분리해 기록한 투자 리서치 노트 모음`
-    : `Source-grounded investment research notes about ${tag}, separating original claims from Jamie's judgment.`;
+    ? `${tag} 주제를 공시와 공개 자료를 바탕으로 분석한 투자 리서치 글 모음`
+    : `Investment research essays about ${tag}, grounded in filings and public materials.`;
 }
 
 /** tag collection의 메타데이터를 생성함 */

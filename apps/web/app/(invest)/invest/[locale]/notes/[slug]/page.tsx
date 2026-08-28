@@ -75,6 +75,7 @@ export default async function NotePage({
       locale={locale}
       note={loaded.metadata}
       related={await getInvestmentNotes(locale)}
+      toc={loaded.toc}
     >
       <loaded.Content components={editorialMdxComponents} />
     </InvestmentNotePage>

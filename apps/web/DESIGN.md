@@ -16,8 +16,8 @@
   - 프로젝트·글·원칙의 anchor와 locale·navigation 의미론은 유지함
 - **`tech`는 탐색형 문서의 rail, 검색, outline, 코드 가독성을 우선함**
   - desktop rail과 mobile sheet는 같은 탐색 구조와 focus return을 유지함
-- **`invest`는 source·summary·judgment·evidence의 경계를 우선함**
-  - MDX의 source summary와 개인 판단은 시각적으로 구분하되 의미 구조를 변경하지 않음
+- **`invest`는 일반 블로그형 본문과 문서 내 목차를 우선함**
+  - MDX는 별도 요약·작성자 의견 wrapper 없이 제목과 문단이 이어지는 읽기 흐름을 사용함
 - **`tech`와 `invest`의 editorial 화면 차이는 `--background`의 채도에만 제한함**
   - `html[data-site="tech"]`는 cool-neutral, `html[data-site="invest"]`는 warm-neutral page background을 제공함
   - `card`, text, border, action, focus를 포함한 나머지 semantic role은 두 도메인에서 같은 token 값을 사용함
@@ -35,7 +35,7 @@
 - **site-scoped alias는 site마다 필요한 도메인 역할만 추가함**
   - `home`은 custom property alias를 추가하지 않고 공용 token과 portfolio composition만 사용함
   - `tech`는 `--docs-code-*`, `--docs-nav-current*`, `--docs-outline-current*`만 사용함
-  - `invest`는 `--research-source*`, `--research-judgment*`, `--research-evidence*`만 사용함
+  - `invest`는 별도 site alias 없이 공용 editorial token을 사용함
 - **`html[data-site][data-theme]` 조합은 공용 semantic role과 해당 site alias를 완결해야 함**
   - `data-site`는 locale layout의 `<html>`이 source of truth이며 `body`에 중복 설정하지 않음
   - Home CSS는 custom property provider를 선언하지 않고, Tech·Invest CSS는 정해진 domain alias만 provider로 선언함

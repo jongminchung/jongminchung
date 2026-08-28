@@ -33,8 +33,8 @@ export async function generateStaticParams() {
 
 function description(locale: "ko" | "en", series: string): string {
   return locale === "ko"
-    ? `${series} 시리즈의 원자료 요약과 Jamie의 판단을 순서대로 연결한 투자 리서치 노트 모음`
-    : `An ordered ${series} collection of source-grounded investment research notes and Jamie's judgment.`;
+    ? `${series} 주제를 순서대로 연결한 투자 리서치 글 모음`
+    : `An ordered collection of investment research essays in the ${series} series.`;
 }
 
 /** series collection의 메타데이터를 생성함 */

@@ -103,7 +103,7 @@ const content = {
         category: "투자 리서치",
         title: "Investment Notes",
         description:
-          "13F 공시와 투자 원문을 분석하고 공시 사실과 Jamie의 해석을 분리한 리서치 노트를 기록함",
+          "13F 공시와 투자 원문에서 투자자의 선택과 시장 구조를 분석한 글을 한영으로 기록함",
         tags: ["Research", "Sources", "Bilingual"],
         href: "https://invest.jamie.kr/ko",
       },

@@ -66,5 +66,9 @@ export async function loadInvestmentNote(locale: Locale, id: string) {
   const compiled = await loadInvestmentContent(locale, id);
   if (compiled === null)
     throw new Error(`Missing compiled investment note ${locale}/${id}.`);
-  return Object.freeze({ metadata, Content: compiled.body });
+  return Object.freeze({
+    metadata,
+    Content: compiled.body,
+    toc: compiled.toc,
+  });
 }

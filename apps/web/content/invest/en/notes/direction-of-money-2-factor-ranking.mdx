@@ -1,0 +1,112 @@
+---
+id: direction-of-money-2-factor-ranking
+locale: en
+title: The craft and philosophy of finding market leaders
+description: Designs a reproducible process for reading market, sector, and stock strength and ranking candidates with percentile-based multi-factor scores
+publishedAt: "2026-08-29"
+updatedAt: "2026-08-29"
+status: published
+tags: [factor-investing, ranking, portfolio-construction, backtesting]
+series: Direction of Money
+image: /invest/direction-of-money-factor-ranking.png
+imageAlt: Many candidates passing through four measurement gates into a small ranked set
+sources:
+  - kind: article
+    title: Foundations of Factor Investing
+    creator: Dimitris Melas · Remy Briand · Subramanian Aylur · MSCI
+    url: https://www.msci.com/research-and-insights/paper/foundations-of-factor-investing
+    publishedAt: "2013-01-31"
+  - kind: article
+    title: Kenneth R. French Data Library
+    creator: Kenneth R. French · Dartmouth College
+    url: https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/data_Library.html
+  - kind: article
+    title: Value and Momentum Everywhere
+    creator: Cliff Asness · Tobias Moskowitz · Lasse Pedersen · AQR
+    url: https://www.aqr.com/insights/research/journal-article/value-and-momentum-everywhere
+    publishedAt: "2013-06-01"
+  - kind: article
+    title: Factor Momentum Everywhere
+    creator: Tarun Gupta · Bryan Kelly · AQR
+    url: https://www.aqr.com/Insights/Research/Working-Paper/Factor-Momentum-Everywhere
+    publishedAt: "2019-02-28"
+  - kind: article
+    title: Asset Allocation and Diversification
+    creator: U.S. Securities and Exchange Commission · Investor.gov
+    url: https://www.investor.gov/introduction-investing/getting-started/asset-allocation
+---
+
+<KeyPoints
+  title="Key points"
+  items={[
+    "Money movement is easier to interpret through three layers: aggregate risk appetite, sector relative strength, and company-level confirmation",
+    "Percentile ranks put unlike measurements on a common scale, but they discard information about the magnitude of gaps between observations",
+    "COMP is the article's comparison-based composite with starting weights of 40 momentum, 30 quality, 20 growth, and 10 value",
+    "Smart money is not directly observable; volume, filings, and estimate changes are delayed proxies rather than privileged forecasts",
+    "A 52-week record should preserve signals, orders, costs, and rejection reasons so the process—not merely the return—can be audited",
+  ]}
+/>
+
+## Chapter 1. Read where money is moving before searching for leaders
+
+### Money continuously moves within the market
+
+A rising index does not mean cash is entering every constituent. Mark-to-market gains can lift the index, and a few large companies can dominate a capitalization-weighted return. Price, turnover, fund flows, and credit supply should therefore be separated: price is fast but does not explain cause, while filings and fund data are more direct but delayed.
+
+### Three lenses for a leading sector
+
+The first lens is aggregate risk appetite, observed through relative asset returns, credit spreads, volatility, and dollar funding. The second is sector relative strength and breadth. The third is company confirmation through estimates, orders, margins, and cash flow. A theme becomes more credible when all three layers improve rather than when only a headline index rises.
+
+### Finding a signal that has just turned on
+
+An early signal is closer to rising relative-strength lows, the first material estimate upgrades, and persistent turnover than to a single 52-week high. Because early evidence is sparse, initial positions should be smaller and expanded only as results or industry data confirm the thesis.
+
+## Chapter 2. COMP: ranking leadership numerically
+
+### Why one signal is not enough
+
+Value can select a deteriorating business, growth can purchase extreme expectations, momentum can reverse, and quality can be fully priced. A composite should reveal conflicts, not average away fatal balance-sheet or liquidity problems.
+
+### PERCENTRANK: one language for different units
+
+Percentile ranks translate each observation into a position between zero and one within a defined peer group. The peer group is decisive: country, industry, size, and accounting conventions should be aligned before a bank and a software company are compared. Ranks reduce outlier influence but erase the absolute gap, so raw values, distributions, missing-data rules, and timestamps must be retained.
+
+### Rank momentum and live price momentum
+
+A common momentum definition ranks the prior 12-month return while excluding the most recent month to reduce short-term reversal exposure. Relative momentum can still select the least-bad stock in a falling market, so an absolute trend or cash-allocation rule may be needed separately.
+
+Medium-term relative strength, distance from long-term trend, proximity to highs, and up-versus-down volume contain overlapping information. Adding all of them can count the same signal several times.
+
+### Smart money footprints and valuation as a guardrail
+
+Institutional filings, block trades, options, and analyst revisions are imperfect proxies. Filings arrive late, every block has another side, and a hedge cannot be identified from position data alone. These signals are safer as confirmation that volume and fundamentals agree.
+
+Valuation is a guardrail against expectations that leave no room for error. Peer multiples, the company's own history, and reverse DCF assumptions can be compared without demanding a low multiple from every early-stage winner.
+
+### One COMP number built on four pillars
+
+COMP here means `Comparison-based Composite`, not a standard academic factor. The starting weights are momentum 40, quality 30, growth 20, and value 10 after each component is converted to an industry-relative percentile. The weights express an investment belief and must be tested against equal weighting, turnover, drawdown, and realistic costs.
+
+<ComparisonTable
+  caption="A starting COMP specification and hard exclusions"
+  headers={["Pillar", "Weight", "Primary question", "Separate exclusion"]}
+  rows={[
+    ["Momentum", "40", "Is the stock stronger than its market?", "Trading halt or unusable liquidity"],
+    ["Quality", "30", "Do earnings convert to cash with sustainable debt?", "Going-concern or audit warning"],
+    ["Growth", "20", "Are growth and estimates improving together?", "Acquisition-only optical growth"],
+    ["Value", "10", "Can price tolerate expectation error?", "Implausible reverse-DCF assumptions"],
+  ]}
+  note="These are pre-validation defaults, not permanent or universal weights"
+/>
+
+### The 52-week operating record
+
+A credible record uses only data available at each date, retains delisted securities, separates signal and order dates, and includes spreads, tax, currency conversion, and failed fills. Return versus a benchmark is insufficient; drawdown, turnover, factor contribution, rejection rates, and parameter sensitivity are needed to distinguish a process from a lucky winner.
+
+## A composite score should make judgment reproducible, not manufacture certainty
+
+COMP intentionally loses detail to sort a large universe. As the number becomes more precise, the illusion of objectivity grows, so the raw observations, peer set, weights, and exclusions should remain visible beside the score.
+
+The strongest robustness test asks whether a small specification change overturns the candidates. If nine months rather than twelve, or a weight of 35 rather than 40, produces an unrelated portfolio, the model may depend more on parameters than on the intended signal.
+
+A simple monthly routine—finalized data, liquidity screen, manual review, next-day execution, and quarterly attribution—is a better starting point than constant optimization. Backtests do not guarantee future results, and each investor must separately account for tax, capacity, time horizon, and risk budget.

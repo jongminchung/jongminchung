@@ -33,8 +33,8 @@ export function sourceDescription(
 ): string {
   const title = sourceTitle(locale, kind);
   return locale === "ko"
-    ? `${title}을 원자료로 삼아 핵심 주장과 Jamie의 판단을 분리한 투자 리서치 노트 모음`
-    : `Investment research notes grounded in ${title.toLowerCase()} that separate source claims from Jamie's judgment.`;
+    ? `${title}을 바탕으로 투자 아이디어와 시장 구조를 분석한 글 모음`
+    : `Investment research essays grounded in ${title.toLowerCase()}.`;
 }
 
 /** `investmentSeriesSlug` 표시용 series 이름을 안정적인 URL slug로 변환함 */
