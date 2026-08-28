@@ -26,6 +26,9 @@ describe("Fumadocs Tech code block", () => {
     expect(html).toContain('class="line highlighted"');
     expect(html).toContain('aria-label="Copy Text"');
     expect(html).toContain('aria-label="Code block: config.ts (');
+    expect(html).toContain("font-size:13px");
+    expect(html).toContain("letter-spacing:0px");
+    expect(html).toContain("line-height:1.6");
   });
 
   it("[성공] 문서에서 복사를 명시적으로 끌 수 있음", () => {
@@ -37,5 +40,31 @@ describe("Fumadocs Tech code block", () => {
 
     expect(html).not.toContain('aria-label="Copy Text"');
     expect(html).toContain("pnpm run build");
+  });
+
+  it("[성공] 호출자가 다른 스타일을 전달해도 코드 타이포 리듬을 보존함", () => {
+    const html = renderToStaticMarkup(
+      <DocsCodeBlock
+        viewportProps={{
+          className: "custom-viewport",
+          style: {
+            color: "red",
+            fontSize: "8px",
+            letterSpacing: "1em",
+            lineHeight: "1",
+          },
+        }}
+      >
+        <code>pnpm run test</code>
+      </DocsCodeBlock>,
+    );
+
+    expect(html).toContain("custom-viewport");
+    expect(html).toContain("color:red");
+    expect(html).toContain("font-size:13px");
+    expect(html).toContain("letter-spacing:0px");
+    expect(html).toContain("line-height:1.6");
+    expect(html).not.toContain("font-size:8px");
+    expect(html).not.toContain("letter-spacing:1em");
   });
 });

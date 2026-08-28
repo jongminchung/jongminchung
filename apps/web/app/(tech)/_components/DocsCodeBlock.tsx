@@ -17,12 +17,22 @@ export function DocsCodeBlock({
     typeof title === "string"
       ? `Code block: ${title} (${regionId})`
       : `Code block ${regionId}`;
+  const viewportStyle = {
+    ...viewportProps?.style,
+    fontSize: "13px",
+    letterSpacing: "0px",
+    lineHeight: "1.6",
+  };
   return (
     <CodeBlock
       {...props}
       data-docs-code-block="true"
       title={title}
-      viewportProps={{ "aria-label": regionLabel, ...viewportProps }}
+      viewportProps={{
+        "aria-label": regionLabel,
+        ...viewportProps,
+        style: viewportStyle,
+      }}
     >
       <Pre className="[&_code]:rounded-none [&_code]:bg-transparent [&_code]:p-0 [&_code]:text-inherit">
         {children}

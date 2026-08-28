@@ -246,6 +246,39 @@ test("[성공] 정적 SVG와 원본 다운로드를 제공함", async ({ page })
   ).toHaveAttribute("href", "/diagrams/operating-system.excalidraw");
 });
 
+test("[성공] 코드블록 타이포그래피 리듬을 일관되게 보장함", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/ko/docs/k8s/cilium-gateway-api-foundations");
+
+  const viewports = page.locator(
+    '[data-docs-code-block="true"] [role="region"]',
+  );
+  await expect(viewports.first()).toBeVisible();
+  await expect
+    .poll(() =>
+      viewports.evaluateAll((elements) => {
+        return elements.map((element) => {
+          const style = getComputedStyle(element);
+          return {
+            fontSize: style.fontSize,
+            letterSpacing: style.letterSpacing,
+            lineHeight: style.lineHeight,
+          };
+        });
+      }),
+    )
+    .toEqual(
+      Array.from({ length: await viewports.count() }, () => ({
+        fontSize: "13px",
+        letterSpacing: "normal",
+        lineHeight: "20.8px",
+      })),
+    );
+  await expectNoHorizontalOverflow(page);
+});
+
 test("[성공] 신비한 기술 로케일을 반응으로 기억함", async ({ page }) => {
   await page.goto("/ko");
   expect(
