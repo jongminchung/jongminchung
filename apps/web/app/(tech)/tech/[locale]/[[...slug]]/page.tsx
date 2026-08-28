@@ -348,6 +348,7 @@ export default async function DocsPage({
         <DocsShell
           active="docs"
           alternateHref={createDocsHref(alternate, categoryId)}
+          docsCategory={categoryId}
           locale={locale}
         >
           <DocsCategoryPage
@@ -372,6 +373,7 @@ export default async function DocsPage({
             categoryId,
             document.metadata.id,
           )}
+          docsCategory={categoryId}
           locale={locale}
         >
           <DocsArticlePage

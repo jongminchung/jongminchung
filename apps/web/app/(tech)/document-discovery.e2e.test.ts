@@ -154,18 +154,26 @@ test("[성공] FE 유지보수 시리즈는 문서 유형과 MDX 접근성 계�
   ).not.toBe("none");
 });
 
-test("[성공] 상단 Docs 탭에서 FE와 K8s 문서를 계층적으로 탐색함", async ({
+test("[성공] 상단 Docs 드롭다운에서 문서 분야를 선택하고 탐색함", async ({
   page,
 }) => {
   await page.goto("/ko");
   const globalNavigation = page.getByRole("navigation", {
     name: "Editorial navigation",
   });
+  const docsMenuTrigger = globalNavigation.getByRole("button", {
+    name: "Docs: 문서 분야 선택",
+  });
+  await docsMenuTrigger.click();
+  const docsMenu = page.getByRole("menu", { name: "문서 분야 선택" });
   await expect(
-    globalNavigation.getByRole("link", { name: "Docs" }),
+    docsMenu.getByRole("menuitem", { name: "모든 문서" }),
   ).toHaveAttribute("href", "/ko/docs");
+  await expect(
+    docsMenu.getByRole("menuitem", { name: "FE · 프론트엔드" }),
+  ).toHaveAttribute("href", "/ko/docs/fe");
 
-  await globalNavigation.getByRole("link", { name: "Docs" }).click();
+  await docsMenu.getByRole("menuitem", { name: "모든 문서" }).click();
   await expect(page).toHaveURL(/\/ko\/docs$/u);
   await expect(
     page.getByRole("heading", { level: 1, name: "Docs" }),
@@ -174,6 +182,16 @@ test("[성공] 상단 Docs 탭에서 FE와 K8s 문서를 계층적으로 탐색�
     "href",
     "/ko/docs/fe",
   );
+  await expect(page.getByRole("navigation", { name: "문서 분야" })).toHaveCount(
+    0,
+  );
+
+  await docsMenuTrigger.click();
+  await page
+    .getByRole("menu", { name: "문서 분야 선택" })
+    .getByRole("menuitem", { name: "FE · 프론트엔드" })
+    .click();
+  await expect(page).toHaveURL(/\/ko\/docs\/fe$/u);
 
   await page.goto("/ko/docs/fe/tutorial-maintainable-tailwind-shadcn");
   await expect(page.getByRole("heading", { level: 1 })).toContainText(

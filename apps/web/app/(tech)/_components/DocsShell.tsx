@@ -3,6 +3,12 @@ import type { ReactNode } from "react";
 import { EditorialFooter, EditorialHeader } from "#components/Editorial";
 import { ThemeControl } from "#components/ThemeControl";
 import type { Locale } from "#lib/content-model";
+import {
+  createDocsHref,
+  docsCategoryIds,
+  getDocsCategory,
+  type DocsCategoryId,
+} from "#lib/tech/docs";
 import { LocaleSwitcher } from "./LocaleSwitcher";
 import { SearchProvider, SearchTrigger } from "./SearchPalette";
 
@@ -11,11 +17,13 @@ export function DocsShell({
   locale,
   alternateHref,
   active = "blog",
+  docsCategory,
   children,
 }: {
   readonly locale: Locale;
   readonly alternateHref: string;
   readonly active?: "blog" | "series" | "showcase" | "docs";
+  readonly docsCategory?: DocsCategoryId;
   readonly children: ReactNode;
 }) {
   const labels =
@@ -68,9 +76,26 @@ export function DocsShell({
                 isActive: active === "showcase",
               },
               {
-                href: `/${locale}/docs`,
+                href: createDocsHref(locale),
                 label: labels.docs,
                 isActive: active === "docs",
+                menuLabel:
+                  locale === "ko" ? "문서 분야 선택" : "Choose a docs area",
+                options: [
+                  {
+                    href: createDocsHref(locale),
+                    label: locale === "ko" ? "모든 문서" : "All Docs",
+                    isActive: active === "docs" && docsCategory === undefined,
+                  },
+                  ...docsCategoryIds.map((id) => {
+                    const category = getDocsCategory(id, locale);
+                    return {
+                      href: createDocsHref(locale, id),
+                      label: `${category.label} · ${category.title}`,
+                      isActive: active === "docs" && docsCategory === id,
+                    };
+                  }),
+                ],
               },
             ]}
           />

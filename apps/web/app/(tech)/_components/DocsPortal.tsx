@@ -62,42 +62,6 @@ function editHref(locale: Locale, id: string): string {
   return `https://github.com/jongminchung/jongminchung/edit/main/apps/web/content/tech/${locale}/${id}.mdx`;
 }
 
-function DocsCategoryTabs({
-  locale,
-  current,
-}: {
-  readonly locale: Locale;
-  readonly current?: DocsCategoryId;
-}) {
-  const text = copy[locale];
-  return (
-    <nav
-      aria-label={text.categories}
-      className="sticky top-14 z-10 border-b bg-background/95 backdrop-blur-xl"
-    >
-      <div className="mx-auto flex min-h-12 w-full max-w-[1440px] items-center gap-1 overflow-x-auto px-6 max-[680px]:px-4">
-        <Link
-          aria-current={current === undefined ? "page" : undefined}
-          className="shrink-0 rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground aria-[current=page]:bg-muted aria-[current=page]:font-medium aria-[current=page]:text-foreground"
-          href={createDocsHref(locale)}
-        >
-          {text.allCategories}
-        </Link>
-        {docsCategoryIds.map((id) => (
-          <Link
-            aria-current={current === id ? "page" : undefined}
-            className="shrink-0 rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground aria-[current=page]:bg-muted aria-[current=page]:font-medium aria-[current=page]:text-foreground"
-            href={createDocsHref(locale, id)}
-            key={id}
-          >
-            {getDocsCategory(id, locale).label}
-          </Link>
-        ))}
-      </div>
-    </nav>
-  );
-}
-
 function DocsSidebar({
   locale,
   categoryId,
@@ -201,40 +165,37 @@ export function DocsLandingPage({
 }) {
   const text = copy[locale];
   return (
-    <>
-      <DocsCategoryTabs locale={locale} />
-      <main className="mx-auto w-full max-w-[1200px] px-6 pt-[clamp(64px,9vw,112px)] pb-24 max-[680px]:px-4 max-[680px]:pt-12">
-        <header className="max-w-[760px]">
-          <p className="m-0 font-mono text-[11px] font-medium tracking-[.12em] text-primary uppercase">
-            {text.eyebrow}
-          </p>
-          <h1 className="mt-4 mb-4 text-[clamp(48px,7vw,76px)] leading-none font-semibold tracking-[-.055em]">
-            {text.title}
-          </h1>
-          <p className="m-0 max-w-[680px] text-[18px] leading-7 text-muted-foreground">
-            {text.description}
-          </p>
-        </header>
-        <section aria-labelledby="docs-categories" className="mt-16">
-          <h2
-            className="mb-5 font-mono text-[11px] font-medium tracking-[.08em] text-muted-foreground uppercase"
-            id="docs-categories"
-          >
-            {text.categories}
-          </h2>
-          <div className="grid grid-cols-2 gap-5 max-[760px]:grid-cols-1">
-            {docsCategoryIds.map((id) => (
-              <CategoryCard
-                categoryId={id}
-                documents={documents}
-                key={id}
-                locale={locale}
-              />
-            ))}
-          </div>
-        </section>
-      </main>
-    </>
+    <main className="mx-auto w-full max-w-[1200px] px-6 pt-[clamp(64px,9vw,112px)] pb-24 max-[680px]:px-4 max-[680px]:pt-12">
+      <header className="max-w-[760px]">
+        <p className="m-0 font-mono text-[11px] font-medium tracking-[.12em] text-primary uppercase">
+          {text.eyebrow}
+        </p>
+        <h1 className="mt-4 mb-4 text-[clamp(48px,7vw,76px)] leading-none font-semibold tracking-[-.055em]">
+          {text.title}
+        </h1>
+        <p className="m-0 max-w-[680px] text-[18px] leading-7 text-muted-foreground">
+          {text.description}
+        </p>
+      </header>
+      <section aria-labelledby="docs-categories" className="mt-16">
+        <h2
+          className="mb-5 font-mono text-[11px] font-medium tracking-[.08em] text-muted-foreground uppercase"
+          id="docs-categories"
+        >
+          {text.categories}
+        </h2>
+        <div className="grid grid-cols-2 gap-5 max-[760px]:grid-cols-1">
+          {docsCategoryIds.map((id) => (
+            <CategoryCard
+              categoryId={id}
+              documents={documents}
+              key={id}
+              locale={locale}
+            />
+          ))}
+        </div>
+      </section>
+    </main>
   );
 }
 
@@ -251,69 +212,63 @@ export function DocsCategoryPage({
   const category = getDocsCategory(categoryId, locale);
   const groups = groupDocsDocuments(documents, categoryId, locale);
   return (
-    <>
-      <DocsCategoryTabs current={categoryId} locale={locale} />
-      <main className="mx-auto grid w-full max-w-[1440px] grid-cols-[240px_minmax(0,1fr)] gap-12 px-6 py-14 max-[960px]:block max-[680px]:px-4 max-[680px]:py-10">
-        <aside
-          aria-label={`${category.title} ${copy[locale].documents}`}
-          className="sticky top-32 max-h-[calc(100dvh-9rem)] self-start overflow-y-auto pr-4 max-[960px]:hidden"
-        >
-          <DocsSidebar
-            categoryId={categoryId}
-            documents={documents}
-            locale={locale}
-          />
-        </aside>
-        <div className="max-w-[920px] min-w-0">
-          <header className="mb-14 border-b pb-10">
-            <Badge variant="secondary">{category.label}</Badge>
-            <h1 className="mt-5 mb-3 text-[clamp(40px,5vw,64px)] leading-none font-semibold tracking-[-.05em]">
-              {category.title}
-            </h1>
-            <p className="m-0 max-w-[720px] text-[17px] leading-7 text-muted-foreground">
-              {category.description}
-            </p>
-          </header>
-          <div className="grid gap-14">
-            {groups.map((group) => (
-              <section
-                aria-labelledby={`docs-group-${group.id}`}
-                key={group.id}
+    <main className="mx-auto grid w-full max-w-[1440px] grid-cols-[240px_minmax(0,1fr)] gap-12 px-6 py-14 max-[960px]:block max-[680px]:px-4 max-[680px]:py-10">
+      <aside
+        aria-label={`${category.title} ${copy[locale].documents}`}
+        className="sticky top-20 max-h-[calc(100dvh-6rem)] self-start overflow-y-auto pr-4 max-[960px]:hidden"
+      >
+        <DocsSidebar
+          categoryId={categoryId}
+          documents={documents}
+          locale={locale}
+        />
+      </aside>
+      <div className="max-w-[920px] min-w-0">
+        <header className="mb-14 border-b pb-10">
+          <Badge variant="secondary">{category.label}</Badge>
+          <h1 className="mt-5 mb-3 text-[clamp(40px,5vw,64px)] leading-none font-semibold tracking-[-.05em]">
+            {category.title}
+          </h1>
+          <p className="m-0 max-w-[720px] text-[17px] leading-7 text-muted-foreground">
+            {category.description}
+          </p>
+        </header>
+        <div className="grid gap-14">
+          {groups.map((group) => (
+            <section aria-labelledby={`docs-group-${group.id}`} key={group.id}>
+              <h2
+                className="mb-5 text-2xl font-semibold tracking-[-.025em]"
+                id={`docs-group-${group.id}`}
               >
-                <h2
-                  className="mb-5 text-2xl font-semibold tracking-[-.025em]"
-                  id={`docs-group-${group.id}`}
-                >
-                  {group.label}
-                </h2>
-                <div className="grid gap-3">
-                  {group.documents.map((document) => (
-                    <Link
-                      className="group grid grid-cols-[1fr_auto] gap-6 rounded-lg border bg-card p-5 no-underline hover:border-input hover:shadow-[var(--elevation-low)] max-[560px]:block"
-                      href={createDocsHref(locale, categoryId, document.id)}
-                      key={document.id}
-                    >
-                      <span>
-                        <span className="block text-base font-medium text-foreground">
-                          {displayTitleFor(document)}
-                        </span>
-                        <span className="mt-1.5 block text-sm leading-5 text-muted-foreground">
-                          {document.description}
-                        </span>
+                {group.label}
+              </h2>
+              <div className="grid gap-3">
+                {group.documents.map((document) => (
+                  <Link
+                    className="group grid grid-cols-[1fr_auto] gap-6 rounded-lg border bg-card p-5 no-underline hover:border-input hover:shadow-[var(--elevation-low)] max-[560px]:block"
+                    href={createDocsHref(locale, categoryId, document.id)}
+                    key={document.id}
+                  >
+                    <span>
+                      <span className="block text-base font-medium text-foreground">
+                        {displayTitleFor(document)}
                       </span>
-                      <Icon
-                        className="mt-1 size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 max-[560px]:mt-4"
-                        icon="chevronRight"
-                      />
-                    </Link>
-                  ))}
-                </div>
-              </section>
-            ))}
-          </div>
+                      <span className="mt-1.5 block text-sm leading-5 text-muted-foreground">
+                        {document.description}
+                      </span>
+                    </span>
+                    <Icon
+                      className="mt-1 size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 max-[560px]:mt-4"
+                      icon="chevronRight"
+                    />
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ))}
         </div>
-      </main>
-    </>
+      </div>
+    </main>
   );
 }
 
@@ -390,7 +345,6 @@ export function DocsArticlePage({
   const text = copy[locale];
   return (
     <>
-      <DocsCategoryTabs current={categoryId} locale={locale} />
       <details className="mx-4 mt-5 rounded-lg border p-3 min-[961px]:hidden">
         <summary className="cursor-pointer text-sm font-medium">
           {text.openMenu}
@@ -406,7 +360,7 @@ export function DocsArticlePage({
       <main className="mx-auto grid w-full max-w-[1440px] grid-cols-[240px_minmax(0,760px)_200px] justify-center gap-x-12 px-6 pt-14 pb-24 max-[1280px]:grid-cols-[240px_minmax(0,760px)] max-[960px]:block max-[680px]:px-4 max-[680px]:pt-10">
         <aside
           aria-label={`${category.title} ${text.documents}`}
-          className="sticky top-32 col-start-1 row-span-2 max-h-[calc(100dvh-9rem)] self-start overflow-y-auto pr-4 max-[960px]:hidden"
+          className="sticky top-20 col-start-1 row-span-2 max-h-[calc(100dvh-6rem)] self-start overflow-y-auto pr-4 max-[960px]:hidden"
         >
           <DocsSidebar
             categoryId={categoryId}

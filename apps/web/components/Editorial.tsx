@@ -7,6 +7,10 @@ import {
   type EditorialItem,
   type EditorialQuery,
 } from "#lib/editorial";
+import {
+  EditorialNavigationMenu,
+  type EditorialNavigationMenuOption,
+} from "./EditorialNavigationMenu";
 
 export interface EditorialCopy {
   readonly eyebrow: string;
@@ -26,6 +30,8 @@ export interface EditorialNavigationItem {
   readonly href: string;
   readonly label: string;
   readonly isActive?: boolean;
+  readonly menuLabel?: string;
+  readonly options?: readonly EditorialNavigationMenuOption[];
 }
 
 /** `EditorialHeader` 두 editorial 도메인의 탐색 순서를 공유함 */
@@ -62,16 +68,26 @@ export function EditorialHeader({
           className="flex items-center gap-5 text-muted-foreground max-[520px]:hidden"
           aria-label="Editorial navigation"
         >
-          {navigation.map((item) => (
-            <Link
-              aria-current={item.isActive ? "page" : undefined}
-              className="hover:text-foreground aria-[current=page]:font-medium aria-[current=page]:text-foreground"
-              href={item.href}
-              key={item.href}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {navigation.map((item) =>
+            item.options === undefined || item.menuLabel === undefined ? (
+              <Link
+                aria-current={item.isActive ? "page" : undefined}
+                className="hover:text-foreground aria-[current=page]:font-medium aria-[current=page]:text-foreground"
+                href={item.href}
+                key={item.href}
+              >
+                {item.label}
+              </Link>
+            ) : (
+              <EditorialNavigationMenu
+                isActive={item.isActive}
+                key={item.href}
+                label={item.label}
+                menuLabel={item.menuLabel}
+                options={item.options}
+              />
+            ),
+          )}
         </nav>
         <div className="ml-auto flex items-center gap-2">
           {actions}
