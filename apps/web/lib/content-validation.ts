@@ -18,6 +18,9 @@ const appRoot = process.cwd().endsWith("/apps/web")
   : resolve(process.cwd(), "apps/web");
 const workspaceRoot = resolve(appRoot, "../..");
 
+/** locale별 overview를 제외한 canonical Docs inventory임 */
+export const docsInventoryPerLocale = 20;
+
 export interface ContentEntry<Metadata> {
   readonly metadata: Metadata;
   readonly body: string;
@@ -221,9 +224,9 @@ export function validateDocsPages(
     const migrated = localized.filter(
       ({ metadata }) => !metadata.id.endsWith("-overview"),
     );
-    if (migrated.length !== 19)
+    if (migrated.length !== docsInventoryPerLocale)
       throw new Error(
-        `Docs ${locale} must contain 19 migrated pages; found ${migrated.length}.`,
+        `Docs ${locale} must contain ${String(docsInventoryPerLocale)} migrated pages; found ${migrated.length}.`,
       );
     for (const area of docsAreas) {
       if (!localized.some(({ metadata }) => metadata.area === area))

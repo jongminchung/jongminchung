@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 2,
+  "measurement": "cold-cache same-origin PerformanceResourceTiming after document.fonts.ready",
+  "previousKoreanFontDecodedBytesPerRoute": 2057688,
+  "routes": [
+    {
+      "site": "home",
+      "locale": "en",
+      "url": "http://jamie.localhost:3100/en",
+      "expectedFontFamily": "pretendard",
+      "maxInitialFontTransferBytes": 310000,
+      "maxInitialFontDecodedBytes": 291680,
+      "maxInitialJavaScriptTransferBytes": 230000,
+      "maxInitialJavaScriptDecodedBytes": 700000
+    },
+    {
+      "site": "home",
+      "locale": "ko",
+      "url": "http://jamie.localhost:3100/ko",
+      "expectedFontFamily": "Pretendard Variable",
+      "maxInitialFontTransferBytes": 400000,
+      "maxInitialFontDecodedBytes": 380000,
+      "maxInitialJavaScriptTransferBytes": 230000,
+      "maxInitialJavaScriptDecodedBytes": 700000
+    },
+    {
+      "site": "tech",
+      "locale": "en",
+      "url": "http://tech.jamie.localhost:3100/en",
+      "expectedFontFamily": "pretendard",
+      "maxInitialFontTransferBytes": 310000,
+      "maxInitialFontDecodedBytes": 291680,
+      "maxInitialJavaScriptTransferBytes": 360000,
+      "maxInitialJavaScriptDecodedBytes": 1050000
+    },
+    {
+      "site": "tech",
+      "locale": "ko",
+      "url": "http://tech.jamie.localhost:3100/ko",
+      "expectedFontFamily": "Pretendard Variable",
+      "maxInitialFontTransferBytes": 335000,
+      "maxInitialFontDecodedBytes": 320000,
+      "maxInitialJavaScriptTransferBytes": 360000,
+      "maxInitialJavaScriptDecodedBytes": 1050000
+    },
+    {
+      "site": "invest",
+      "locale": "en",
+      "url": "http://invest.jamie.localhost:3100/en",
+      "expectedFontFamily": "pretendard",
+      "maxInitialFontTransferBytes": 310000,
+      "maxInitialFontDecodedBytes": 291680,
+      "maxInitialJavaScriptTransferBytes": 285000,
+      "maxInitialJavaScriptDecodedBytes": 850000
+    },
+    {
+      "site": "invest",
+      "locale": "ko",
+      "url": "http://invest.jamie.localhost:3100/ko",
+      "expectedFontFamily": "Pretendard Variable",
+      "maxInitialFontTransferBytes": 330000,
+      "maxInitialFontDecodedBytes": 320000,
+      "maxInitialJavaScriptTransferBytes": 285000,
+      "maxInitialJavaScriptDecodedBytes": 850000
+    }
+  ]
+}

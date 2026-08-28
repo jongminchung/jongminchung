@@ -6,7 +6,10 @@ import { ThemeProvider } from "#components/ThemeProvider";
 import { messagesFor } from "#lib/i18n-messages";
 import { isLocale } from "#lib/site-routing";
 import { themeStorageKeys } from "#lib/theme";
-import { localeFontClassName } from "../../../root-layout";
+import {
+  localeFontClassName,
+  pretendardStylesheetHref,
+} from "../../../root-layout";
 import "../../home.css";
 
 export const metadata: Metadata = {
@@ -51,6 +54,9 @@ export default async function HomeLocaleLayout({
       data-theme="light"
       suppressHydrationWarning
     >
+      <head>
+        <link href={pretendardStylesheetHref} rel="stylesheet" />
+      </head>
       <body data-site="home">
         <NextIntlClientProvider locale={locale} messages={messagesFor(locale)}>
           <ThemeProvider storageKey={themeStorageKeys.home}>

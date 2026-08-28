@@ -1,0 +1,138 @@
+---
+id: nextjs-initial-loading-performance
+locale: ko
+area: fe
+documentKind: how-to
+title: "Next.js 초기 폰트와 JavaScript 전송량 줄이기"
+description: "next/font, Server Component와 지연 로딩을 사용해 첫 화면의 폰트와 클라이언트 JavaScript 비용을 줄이고 회귀 예산으로 관리합니다."
+publishedAt: "2026-08-28"
+updatedAt: "2026-08-28"
+verifiedAt: "2026-08-28"
+tags: [nextjs, performance, web-font, javascript, app-router]
+status: stable
+publicationStatus: published
+sourceUrl: https://nextjs.org/docs/app/api-reference/components/font
+packageVersion: "16.3.1"
+---
+
+<Callout title="핵심 판단" type="info">
+  브라우저는 프로덕션에서 TypeScript 원본을 받지 않지만 Client Component로
+  연결된 JavaScript는 받아서 실행함. 폰트는 JavaScript 실행을 막지 않더라도 같은
+  네트워크 대역폭을 사용하므로 route별로 필요한 glyph와 client boundary를 함께
+  줄여야 함
+</Callout>
+
+## 브라우저가 받는 리소스를 먼저 구분함
+
+Next.js App Router의 첫 방문에는 HTML, React Server Component payload, CSS, 폰트와 Client Component JavaScript가 포함될 수 있음. `.ts`와 `.tsx` 원본은 브라우저로 전송되지 않으며 빌드 결과의 route별 JavaScript chunk만 전송됨
+
+| 리소스           | 브라우저 비용                           | 기본 개선 방향                            |
+| ---------------- | --------------------------------------- | ----------------------------------------- |
+| Server Component | HTML과 RSC payload                      | 서버에 유지하고 직렬화할 props를 줄임     |
+| Client Component | JavaScript 다운로드·파싱·실행·hydration | interactive boundary를 작게 유지함        |
+| 웹폰트           | 다운로드·decode·font swap               | glyph 범위와 route scope를 줄임           |
+| CSS              | 렌더링 차단 가능성                      | route와 component ownership에 맞게 유지함 |
+
+[Server와 Client Component 공식 문서](https://nextjs.org/docs/app/getting-started/server-and-client-components)는 상태, event handler와 browser API가 필요한 부분만 Client Component로 두도록 안내함. 파일에 `"use client"`를 선언하면 그 파일의 import와 하위 component가 client module graph에 포함되므로 경계를 가능한 아래에 배치해야 함
+
+## `next/font`의 최적화 경계를 적용함
+
+[Next.js Font Module](https://nextjs.org/docs/app/api-reference/components/font)은 폰트를 build asset으로 self-host하고 외부 browser 요청을 제거함. 가변 폰트, `display`, fallback metric 보정, CSS variable과 layout 기반 preload scope를 제공함
+
+<Steps>
+  <Step>
+    ### 폰트 정의를 한 파일에서 소유함
+
+    같은 폰트를 여러 곳에서 `localFont()`로 다시 호출하면 별도 instance가 생성됨. 하나의 `fonts.ts`에서 정의하고 layout은 생성된 font object만 import함
+
+  </Step>
+
+  <Step>
+    ### locale에 필요한 glyph 파일을 선택함
+
+    `next/font/local`은 Google Font의 `subsets` 옵션을 제공하지 않음. 영어는 Pretendard Std Variable을 `next/font/local`로 적용하고, 한국어는 Pretendard 공식 `unicode-range` dynamic subset CSS를 적용함. 브라우저는 페이지에 실제로 사용된 glyph가 포함된 subset 파일만 내려받음
+
+    ```ts
+    import localFont from "next/font/local";
+
+    export const pretendard = localFont({
+      src: "./fonts/PretendardStdVariable.woff2",
+      adjustFontFallback: "Arial",
+      display: "swap",
+      preload: false,
+      variable: "--font-pretendard",
+      weight: "45 920",
+    });
+
+    export function localeFontClassName(locale: "ko" | "en") {
+      return locale === "ko" ? "font-pretendard-korean" : pretendard.variable;
+    }
+    ```
+
+    한국어 class는 self-host한 공식 dynamic subset family를 가리킴. 각 `@font-face`가 서로 다른 `unicode-range`를 소유하며, 앱은 공식 파일 92개의 버전·전체 크기·통합 hash를 `font-assets.json`으로 검증함
+
+  </Step>
+
+  <Step>
+    ### preload와 font swap을 별도 결정으로 관리함
+
+    `preload`의 기본값은 `true`이며 font definition이 page, layout 또는 root layout 중 어디에서 사용되는지에 따라 적용 route가 달라짐. 이 앱은 동적 locale layout이 한국어 route에서 영어 local font를 선로드하지 않도록 영어 폰트에 `preload: false`를 사용함. 한국어 `unicode-range` 규칙은 CSS와 실제 텍스트가 확인된 뒤 일치하는 subset source만 선택하게 함
+
+    `display: "swap"`은 fallback text를 먼저 표시해 보이지 않는 텍스트를 피함. `adjustFontFallback: "Arial"`은 local font fallback metric을 보정해 font 교체 시 layout shift를 줄이는 Next.js 계약을 명시함
+
+  </Step>
+</Steps>
+
+## Client JavaScript를 interactive island로 제한함
+
+[Next.js 지연 로딩 공식 문서](https://nextjs.org/docs/app/guides/lazy-loading)는 Server Component가 기본적으로 code split되며 지연 로딩의 주요 대상은 Client Component와 client library라고 설명함
+
+- 문서 본문, metadata, page tree와 정적 navigation은 Server Component로 유지함
+- 검색 dialog처럼 사용자 action 전에는 필요하지 않은 UI는 `React.lazy()` 또는 `next/dynamic`으로 분리함
+- 검색 engine이나 editor 같은 무거운 library는 사용자 입력이나 열기 action 이후 `import()`함
+- provider는 전체 `<html>`보다 실제 consumer에 가까운 위치에서 children을 감싸도록 구성함
+- `ssr: false`는 browser API 때문에 필요한 Client Component에만 사용함
+
+```tsx
+"use client";
+
+import { lazy } from "react";
+
+const SearchDialog = lazy(() =>
+  import("./SearchDialog").then((module) => ({
+    default: module.SearchDialog,
+  })),
+);
+```
+
+이 앱의 Tech 검색은 provider의 preload를 끄고 dialog를 lazy import하므로 검색을 열기 전에는 검색 UI와 query client를 초기 client chunk에서 분리함
+
+## byte와 사용자 지표를 함께 검증함
+
+전송량 감소만으로 렌더링 개선을 단정하지 않음. same-origin 리소스를 `PerformanceResourceTiming`으로 측정하고 전송 크기와 decode 크기를 분리한 뒤 실제 사용자 지표를 함께 관찰함
+
+| 지표                  | 확인하는 위험                                 |
+| --------------------- | --------------------------------------------- |
+| font 전송·decode 크기 | 잘못된 locale font 또는 전체 font 회귀        |
+| route JavaScript byte | client boundary 확대와 heavy dependency 유입  |
+| FCP·LCP               | 첫 콘텐츠와 주요 콘텐츠 표시 지연             |
+| CLS                   | fallback에서 web font로 교체될 때 layout 이동 |
+| INP·hydration         | client JavaScript 실행과 상호작용 준비 지연   |
+
+영어 route는 Pretendard Std source 하나에서 `291,680 bytes`를 decode함. 한국어 route는 초기 페이지에 필요한 glyph subset만 decode하며 Home `375,888 bytes`, Tech `314,612 bytes`, Invest `311,860 bytes`로 측정됨. 기존 `2,057,688-byte` 전체 source 대비 대표 route에서 약 `81.7–84.8%` 감소함
+
+같은 navigation에서 decode한 초기 JavaScript는 Home `673,144 bytes`, Tech `1,024,160 bytes`, Invest `823,237 bytes`임. 네트워크 전송량은 각각 `212,202`, `336,306`, `263,502 bytes`임. `initial-transfer-budget.json`은 전송량과 decode 상한을 독립 관리해 압축된 네트워크 비용과 parsing 입력을 혼동하지 않게 함
+
+```bash
+pnpm --filter @jongminchung/web run build
+pnpm --filter @jongminchung/web exec playwright test app/initial-transfer.e2e.test.ts --project tech-chromium
+pnpm --filter @jongminchung/web run bundle:report
+```
+
+## 완료 조건
+
+- 모든 locale에서 의도한 Pretendard font가 적용됨
+- 한국어 route가 초기 텍스트에 필요한 `unicode-range` subset만 요청함
+- route 초기 JavaScript에 action 이후 필요한 기능이 포함되지 않음
+- font byte budget과 bundle report가 독립적으로 통과함
+- FCP·LCP·CLS와 상호작용 결과가 이전보다 악화되지 않음

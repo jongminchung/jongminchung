@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { docsInventoryPerLocale } from "./content-validation";
 import {
   findDocument,
   findDocsPage,
@@ -77,7 +78,7 @@ describe("블로그 문서 발견", () => {
     );
   });
 
-  it("[성공] locale별 Blog 24개와 Docs 이관 19개를 독립 inventory로 유지함", async () => {
+  it("[성공] locale별 Blog와 Docs를 독립 canonical inventory로 유지함", async () => {
     const [blog, docs] = await Promise.all([getBlogPosts(), getDocsPages()]);
     for (const locale of ["ko", "en"] as const) {
       expect(blog.filter((post) => post.locale === locale)).toHaveLength(24);
@@ -85,7 +86,7 @@ describe("블로그 문서 발견", () => {
         docs.filter(
           (page) => page.locale === locale && !page.id.endsWith("-overview"),
         ),
-      ).toHaveLength(19);
+      ).toHaveLength(docsInventoryPerLocale);
       expect(
         new Set(
           docs.filter((page) => page.locale === locale).map(({ area }) => area),

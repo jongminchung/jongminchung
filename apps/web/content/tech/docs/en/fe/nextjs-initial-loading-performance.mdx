@@ -1,0 +1,138 @@
+---
+id: nextjs-initial-loading-performance
+locale: en
+area: fe
+documentKind: how-to
+title: "Reduce Initial Font and JavaScript Transfer in Next.js"
+description: "Use next/font, Server Components, and lazy loading to reduce initial font and client JavaScript cost and protect it with route budgets."
+publishedAt: "2026-08-28"
+updatedAt: "2026-08-28"
+verifiedAt: "2026-08-28"
+tags: [nextjs, performance, web-font, javascript, app-router]
+status: stable
+publicationStatus: published
+sourceUrl: https://nextjs.org/docs/app/api-reference/components/font
+packageVersion: "16.3.1"
+---
+
+<Callout title="Core decision" type="info">
+  Production browsers do not download TypeScript source, but they do download
+  and execute JavaScript reachable from Client Components. Fonts do not execute
+  like JavaScript, yet they compete for the same network bandwidth, so optimize
+  route glyph coverage and client boundaries together.
+</Callout>
+
+## Separate the resources a browser receives
+
+An initial App Router visit can include HTML, the React Server Component payload, CSS, fonts, and Client Component JavaScript. Browsers do not receive `.ts` or `.tsx` source files; they receive only the route JavaScript chunks produced by the build.
+
+| Resource         | Browser cost                                         | Default optimization                                |
+| ---------------- | ---------------------------------------------------- | --------------------------------------------------- |
+| Server Component | HTML and RSC payload                                 | keep work on the server and reduce serialized props |
+| Client Component | JavaScript transfer, parse, execution, and hydration | keep interactive boundaries small                   |
+| Web font         | transfer, decode, and font swap                      | reduce glyph coverage and route scope               |
+| CSS              | may block rendering                                  | keep ownership aligned with routes and components   |
+
+The [Server and Client Components guide](https://nextjs.org/docs/app/getting-started/server-and-client-components) recommends Client Components only where state, event handlers, or browser APIs are required. A `"use client"` declaration adds that module's imports and descendants to the client module graph, so place the boundary as low as practical.
+
+## Apply the `next/font` optimization boundary
+
+The [Next.js Font Module](https://nextjs.org/docs/app/api-reference/components/font) self-hosts fonts as build assets and removes external browser requests. It supports variable fonts, `display`, fallback metric adjustment, CSS variables, and layout-scoped preloading.
+
+<Steps>
+  <Step>
+    ### Own font definitions in one file
+
+    Calling `localFont()` again creates another hosted instance. Define each font once in `fonts.ts`, then import the generated font objects from layouts.
+
+  </Step>
+
+  <Step>
+    ### Select the source with the glyphs required by each locale
+
+    `next/font/local` does not provide the Google Font `subsets` option. Use Pretendard Std Variable through `next/font/local` for English, and use Pretendard's official `unicode-range` dynamic subset CSS for Korean. The browser then downloads only the subset files containing glyphs used on the page.
+
+    ```ts
+    import localFont from "next/font/local";
+
+    export const pretendard = localFont({
+      src: "./fonts/PretendardStdVariable.woff2",
+      adjustFontFallback: "Arial",
+      display: "swap",
+      preload: false,
+      variable: "--font-pretendard",
+      weight: "45 920",
+    });
+
+    export function localeFontClassName(locale: "ko" | "en") {
+      return locale === "ko" ? "font-pretendard-korean" : pretendard.variable;
+    }
+    ```
+
+    The Korean class points to the self-hosted official dynamic subset family. Each `@font-face` rule owns a different `unicode-range`; the app preserves all 92 official files and verifies their version, total size, and aggregate hash through `font-assets.json`.
+
+  </Step>
+
+  <Step>
+    ### Treat preload and font swap as separate decisions
+
+    `preload` defaults to `true`, and its route scope depends on whether the font is used by a page, layout, or root layout. This app uses `preload: false` for the English local font because a dynamic locale layout must not preload it on Korean routes. The Korean `unicode-range` rules let the browser select only matching subset sources after CSS and text are known.
+
+    `display: "swap"` renders fallback text first instead of hiding it. Explicit `adjustFontFallback: "Arial"` uses the local-font fallback metric contract to reduce layout shift during the swap.
+
+  </Step>
+</Steps>
+
+## Keep Client JavaScript in interactive islands
+
+The [Next.js lazy-loading guide](https://nextjs.org/docs/app/guides/lazy-loading) explains that Server Components are code-split by default and that lazy loading primarily applies to Client Components and client libraries.
+
+- Keep document content, metadata, page trees, and static navigation in Server Components.
+- Split UI that is unnecessary before an action, such as a search dialog, with `React.lazy()` or `next/dynamic`.
+- Load heavy search engines or editors with `import()` after input or an open action.
+- Place providers close to their consumers instead of wrapping the entire `<html>` tree.
+- Use `ssr: false` only for Client Components that require browser APIs.
+
+```tsx
+"use client";
+
+import { lazy } from "react";
+
+const SearchDialog = lazy(() =>
+  import("./SearchDialog").then((module) => ({
+    default: module.SearchDialog,
+  })),
+);
+```
+
+The Tech search in this app disables provider preloading and lazy-imports the dialog, keeping the search UI and query client out of the initial client chunk until the user opens search.
+
+## Verify bytes and user metrics together
+
+Do not infer rendering improvements from transfer reduction alone. Measure same-origin resources with `PerformanceResourceTiming`, keep transfer and decoded sizes separate, then observe user-facing metrics.
+
+| Metric                   | Risk it detects                                      |
+| ------------------------ | ---------------------------------------------------- |
+| font transfer and decode | wrong locale source or full-font regression          |
+| route JavaScript bytes   | wider client boundaries or a heavy dependency        |
+| FCP and LCP              | delayed first and primary content                    |
+| CLS                      | movement while fallback text changes to the web font |
+| INP and hydration        | delayed interaction from client JavaScript execution |
+
+The English routes decode `291,680 bytes` from one Pretendard Std source. Korean routes now decode only the glyph subsets needed by the initial page: Home `375,888 bytes`, Tech `314,612 bytes`, and Invest `311,860 bytes`. Compared with the previous `2,057,688-byte` full source, this is a reduction of about `81.7–84.8%` on the representative routes.
+
+Initial JavaScript decoded in the same navigation is `673,144 bytes` for Home, `1,024,160 bytes` for Tech, and `823,237 bytes` for Invest. Network transfer is `212,202`, `336,306`, and `263,502 bytes`, respectively. `initial-transfer-budget.json` keeps independent transfer and decoded caps to catch wider client boundaries without confusing compressed network cost with parse input.
+
+```bash
+pnpm --filter @jongminchung/web run build
+pnpm --filter @jongminchung/web exec playwright test app/initial-transfer.e2e.test.ts --project tech-chromium
+pnpm --filter @jongminchung/web run bundle:report
+```
+
+## Completion criteria
+
+- Every locale uses the intended Pretendard source.
+- Korean routes request only `unicode-range` subsets needed by their initial text.
+- Features needed only after an action stay out of initial route JavaScript.
+- The font byte budget and bundle report pass independently.
+- FCP, LCP, CLS, and interaction behavior do not regress.

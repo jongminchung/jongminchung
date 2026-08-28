@@ -149,7 +149,7 @@ export function isSharedAssetPath(pathname: string): boolean {
     pathname.startsWith("/_next/") ||
     pathname === "/icon.svg" ||
     pathname.startsWith("/excalidraw-assets/") ||
-    /\.(?:avif|excalidraw|gif|ico|jpe?g|mp4|png|svg|webm|webp|woff2?)$/u.test(
+    /\.(?:avif|css|excalidraw|gif|ico|jpe?g|mp4|png|svg|webm|webp|woff2?)$/u.test(
       pathname,
     )
   );

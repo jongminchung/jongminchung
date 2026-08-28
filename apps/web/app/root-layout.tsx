@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
-import { localeFontClassName, pretendard } from "./fonts";
+import {
+  localeFontClassName,
+  pretendard,
+  pretendardStylesheetHref,
+} from "./fonts";
 
-export { localeFontClassName, pretendard };
+export { localeFontClassName, pretendard, pretendardStylesheetHref };
 
 export const rootMetadata: Metadata = {
   metadataBase: new URL("https://tech.jamie.kr"),

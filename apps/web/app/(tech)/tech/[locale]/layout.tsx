@@ -7,7 +7,11 @@ import { isLocale } from "#lib/content-model";
 import { messagesFor } from "#lib/i18n-messages";
 import { createWebsiteStructuredData, techOrigin } from "#lib/structured-data";
 import { themeStorageKeys } from "#lib/theme";
-import { localeFontClassName, rootMetadata } from "../../../root-layout";
+import {
+  localeFontClassName,
+  pretendardStylesheetHref,
+  rootMetadata,
+} from "../../../root-layout";
 import "../../tech.css";
 
 export const metadata: Metadata = rootMetadata;
@@ -28,6 +32,9 @@ export default async function LocaleLayout({
       data-theme="light"
       suppressHydrationWarning
     >
+      <head>
+        <link href={pretendardStylesheetHref} rel="stylesheet" />
+      </head>
       <body>
         <StructuredData
           value={createWebsiteStructuredData({

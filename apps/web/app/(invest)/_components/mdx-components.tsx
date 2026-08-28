@@ -42,12 +42,14 @@ function ArticleFigure({
   caption,
   width = 1536,
   height = 1024,
+  eager = false,
 }: {
   readonly src: string;
   readonly alt: string;
   readonly caption: string;
   readonly width?: number;
   readonly height?: number;
+  readonly eager?: boolean;
 }) {
   return (
     <figure className="my-10">
@@ -55,7 +57,7 @@ function ArticleFigure({
         alt={alt}
         className="h-auto w-full border object-cover"
         height={height}
-        loading="eager"
+        loading={eager ? "eager" : "lazy"}
         sizes="(max-width: 760px) 100vw, 680px"
         src={src}
         width={width}

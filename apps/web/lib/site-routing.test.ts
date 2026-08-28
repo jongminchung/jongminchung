@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   createInternalSitePath,
+  isSharedAssetPath,
   isVercelDeploymentHost,
   localeFromPath,
   localeCookieName,
@@ -88,5 +89,16 @@ describe("여러 개의 사이트에 속해 있음", () => {
     expect(localeFromPath("/ko/articles/modeling")).toBe("ko");
     expect(localeFromPath("/articles/modeling")).toBeNull();
     expect(localeCookieName("invest")).toBe("invest-locale");
+  });
+
+  it("[성공] 공용 font stylesheet와 source를 site rewrite에서 제외함", () => {
+    expect(
+      isSharedAssetPath("/fonts/pretendard-variable/dynamic-subset.css"),
+    ).toBe(true);
+    expect(
+      isSharedAssetPath(
+        "/fonts/pretendard-variable/PretendardVariable.subset.91.woff2",
+      ),
+    ).toBe(true);
   });
 });

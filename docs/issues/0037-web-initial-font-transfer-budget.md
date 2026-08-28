@@ -5,7 +5,9 @@
 - 기준일: 2026-08-20
 - 영향 범위:
   [font registration](../../apps/web/app/fonts.ts),
-  [Pretendard source](../../apps/web/app/fonts/PretendardVariable.woff2),
+  [font asset manifest](../../apps/web/font-assets.json),
+  [Pretendard dynamic subset CSS](../../apps/web/public/fonts/pretendard-variable/dynamic-subset.css),
+  [Pretendard Std source](../../apps/web/app/fonts/PretendardStdVariable.woff2),
   [root layout](../../apps/web/app/root-layout.tsx),
   [shared typography tokens](../../packages/ui/src/styles/theme.css),
   [frontend asset report](../../scripts/report-frontend-assets.mjs),
@@ -87,16 +89,20 @@
 
 ## 처리 결과
 
-- **영어 route는 system font를 사용하고 한국어 route에만 Pretendard CSS variable을 활성화함**
+- **제품 typography 일관성을 위해 영어와 한국어 route 모두 Pretendard CSS variable을 활성화함**
   - `next/font/local`의 preload를 비활성화해 동적 locale layout이 전체 font를 공통 선로드하지 않게 함
-  - 한국어 route는 기존 `PretendardVariable.woff2`와 `font-display: swap`을 유지해 glyph·weight 범위를 보존함
+  - 영어 route는 공식 Latin·Greek·Cyrillic 배포 파일인 `PretendardStdVariable.woff2`를 사용함
+  - 한국어 route는 공식 dynamic subset 92개와 `unicode-range` CSS를 self-host해 실제 glyph에 필요한 파일만 요청함
+  - 두 locale 모두 `font-display: swap`과 Arial 기반 fallback metric 보정을 사용함
 - **Home·Tech·Invest의 영어·한국어 대표 route를 독립 font budget으로 고정함**
-  - 영어 route의 cold-cache 초기 font budget은 `0 bytes`임
-  - 한국어 route의 상한은 기존 source 크기인 `2,057,688 bytes`임
-  - 측정 기준과 route별 상한은 `apps/web/font-budget.json`이 소유함
-- **선택 이유는 영어 초기 전송량을 즉시 제거하면서 한국어 glyph subsetting의 품질 위험을 만들지 않기 위함임**
-  - 한국어 전송량 자체의 추가 축소는 공식 dynamic subset 또는 glyph coverage 자동 검증을 확보한 뒤 별도 작업으로 진행함
-- **cold-cache browser 검증에서 Home·Tech·Invest의 route budget 6개가 모두 통과함**
-  - 영어 세 route는 초기 font request `0건`·`0 bytes`임
-  - 한국어 세 route는 초기 font request `1건`·`2,057,688 bytes`임
-  - 기존 Home·Invest visual baseline drift는 이번 범위에서 갱신하지 않음
+  - 영어 route의 decode 상한은 `291,680 bytes`, 전송 상한은 `310,000 bytes`임
+  - 한국어 route의 decode 상한은 제품별 `320,000–380,000 bytes`, 전송 상한은 `330,000–400,000 bytes`임
+  - 측정 기준과 route별 상한은 `apps/web/initial-transfer-budget.json`이 소유함
+- **두 locale에서 Pretendard typography를 유지하면서 전체 한국어 font의 초기 전송을 제거함**
+  - 영어 source는 기존 전체 source보다 `1,766,008 bytes`·약 `85.8%` 작음
+  - `Pretendard Std Variable`은 Pretendard 공식 `v1.3.9` 배포판을 same-origin으로 self-host함
+  - 한국어 decode 크기는 Home `375,888 bytes`, Tech `314,612 bytes`, Invest `311,860 bytes`로 기존보다 약 `81.7–84.8%` 감소함
+- **cold-cache browser 검증은 요청 개수 대신 실제 glyph에 따른 총 전송량을 요구함**
+  - `PerformanceResourceTiming`으로 font와 JavaScript의 전송 크기·decode 크기를 분리함
+  - dynamic subset 요청 수는 페이지 glyph에 따라 달라질 수 있으므로 총량과 적용 font family를 계약으로 검증함
+  - Home·Tech·Invest의 영어·한국어 대표 route 6개가 변경 후 실제 측정을 통과함

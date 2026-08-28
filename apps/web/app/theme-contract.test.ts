@@ -18,6 +18,9 @@ const sharedGlobals = read("packages/ui/src/styles/globals.css");
 const sharedRootFacade = read("packages/ui/src/styles/root.css");
 const tailwindTokens = read("packages/ui/src/styles/tokens.css");
 const webTheme = read("apps/web/app/theme.css");
+const dynamicFontCss = read(
+  "apps/web/public/fonts/pretendard-variable/dynamic-subset.css",
+);
 const homeSections = read("apps/web/app/(home)/_components/HomeSections.tsx");
 const siteStylePaths = [
   "apps/web/app/(home)/home.css",
@@ -150,10 +153,18 @@ describe("공통 디자인 토큰 계약", () => {
     const fontDefinition = read("apps/web/app/fonts.ts");
 
     expect(fontDefinition).toContain('from "next/font/local"');
-    expect(fontDefinition).toContain("PretendardVariable.woff2");
+    expect(fontDefinition).toContain("PretendardStdVariable.woff2");
+    expect(fontDefinition).toContain('adjustFontFallback: "Arial"');
     expect(fontDefinition).toContain("preload: false");
     expect(fontDefinition).toContain('variable: "--font-pretendard"');
-    expect(fontDefinition).toContain('locale === "ko"');
+    expect(fontDefinition).toContain('en: "font-pretendard-dynamic"');
+    expect(fontDefinition).toContain('ko: "font-pretendard-dynamic"');
+    expect(fontDefinition).toContain(
+      '"/fonts/pretendard-variable/dynamic-subset.css"',
+    );
+    expect(dynamicFontCss.match(/@font-face/gu)).toHaveLength(93);
+    expect(dynamicFontCss).toContain(".font-pretendard-dynamic");
+    expect(dynamicFontCss).toContain("size-adjust: 101.55%");
     expect(webTheme).toContain("var(--font-pretendard, ui-sans-serif)");
   });
 

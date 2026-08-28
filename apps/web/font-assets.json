@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "pretendardVersion": "1.3.9",
+  "pretendardStd": {
+    "path": "app/fonts/PretendardStdVariable.woff2",
+    "bytes": 291680,
+    "sha256Base64": "ZKK3EQRU7fDl9VV4UnO1gX1+OgoQelWs+OQVDgmjFVc="
+  },
+  "pretendardDynamicSubset": {
+    "stylesheet": {
+      "path": "public/fonts/pretendard-variable/dynamic-subset.css",
+      "bytes": 59318,
+      "sha256Base64": "o8xY4WrnBF4B9G8SFjvhoIm/DrjPIpsU+33UAzSu5AA="
+    },
+    "directory": "public/fonts/pretendard-variable",
+    "files": 92,
+    "bytes": 2957724,
+    "aggregateSha256Base64": "m7BnFmxSyNGvzlaVHBoQfioJVVKB6NvPDmcykgDQ41A="
+  }
+}
