@@ -14,7 +14,7 @@ test("[성공] 현재 상황 데이터로 Jamie의 작업을 제시함", async (
   await expect(page.locator('[data-project="true"]').first()).toBeVisible();
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",
-    "https://jamie.kr/en",
+    "https://www.jamie.kr/en",
   );
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
     "content",
@@ -50,15 +50,17 @@ test("[성공] 검색 파일 게시", async ({ page, siteRequest }) => {
     siteRequest.get("/icon.svg"),
     siteRequest.get("/robots.txt"),
     siteRequest.get("/sitemap.xml"),
-    siteRequest.get(new URL(socialImageUrl ?? "", "https://jamie.kr").pathname),
+    siteRequest.get(
+      new URL(socialImageUrl ?? "", "https://www.jamie.kr").pathname,
+    ),
   ]);
 
   expect(favicon.ok()).toBe(true);
   expect(await favicon.text()).not.toContain("<text");
   expect(robots.ok()).toBe(true);
-  expect(await robots.text()).toContain("https://jamie.kr/sitemap.xml");
+  expect(await robots.text()).toContain("https://www.jamie.kr/sitemap.xml");
   expect(sitemap.ok()).toBe(true);
-  expect(await sitemap.text()).toContain("https://jamie.kr");
+  expect(await sitemap.text()).toContain("https://www.jamie.kr");
   expect(socialImage.ok()).toBe(true);
   expect(socialImage.headers()["content-type"]).toContain("image/png");
 });

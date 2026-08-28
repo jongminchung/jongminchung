@@ -8,11 +8,10 @@ const origin = "https://invest.jamie.kr";
 /** 사이트맵 항목을 생성함 */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const roots = locales.flatMap((locale) => [
-    { url: `${origin}/${locale}`, priority: 1 },
-    { url: `${origin}/${locale}/notes`, priority: 0.8 },
+    { url: `${origin}/${locale}` },
+    { url: `${origin}/${locale}/notes` },
     ...investmentSourceKinds.map((kind) => ({
       url: `${origin}/${locale}/sources/${kind}`,
-      priority: 0.6,
     })),
   ]);
   const notes = (await Promise.all(locales.map(getInvestmentNotes)))

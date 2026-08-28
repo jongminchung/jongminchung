@@ -31,8 +31,8 @@ export const docsCategoryRegistry: Readonly<
     label: "FE",
     title: { ko: "프론트엔드", en: "Frontend" },
     description: {
-      ko: "React 컴포넌트, 디자인 시스템, 브라우저 성능과 유지보수 경계를 실무 관점에서 설명함",
-      en: "Practical guidance for React components, design systems, browser performance, and maintainability boundaries.",
+      ko: "프론트엔드 문서는 React 컴포넌트, 디자인 시스템, 브라우저 성능과 유지보수 경계를 구현·검증하는 실무 기준을 설명함",
+      en: "Frontend documentation that explains practical standards for implementing and validating React components, design systems, browser performance, and maintainability boundaries.",
     },
     matches: hasTag("frontend"),
     section: (document) => {

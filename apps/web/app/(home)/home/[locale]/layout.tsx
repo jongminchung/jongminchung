@@ -10,7 +10,7 @@ import { pretendard } from "../../../root-layout";
 import "../../home.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://jamie.kr"),
+  metadataBase: new URL("https://www.jamie.kr"),
   title: "Jamie — Jongmin Chung",
   description:
     "Jongmin Chung builds software that turns shared language into clear models, public APIs, and verifiable change.",

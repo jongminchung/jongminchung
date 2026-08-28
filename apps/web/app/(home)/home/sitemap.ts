@@ -4,13 +4,11 @@ import { locales } from "#lib/site-routing";
 /** 사이트맵 항목을 생성함 */
 export default function sitemap(): MetadataRoute.Sitemap {
   return locales.map((locale) => ({
-    url: `https://jamie.kr/${locale}`,
-    changeFrequency: "monthly",
-    priority: 1,
+    url: `https://www.jamie.kr/${locale}`,
     alternates: {
       languages: {
-        ko: "https://jamie.kr/ko",
-        en: "https://jamie.kr/en",
+        ko: "https://www.jamie.kr/ko",
+        en: "https://www.jamie.kr/en",
       },
     },
   }));

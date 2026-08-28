@@ -147,7 +147,7 @@ export const personSchema = {
   "@type": "Person",
   name: "Jongmin Chung",
   alternateName: "Jamie",
-  url: "https://jamie.kr",
+  url: "https://www.jamie.kr",
   sameAs: ["https://github.com/jongminchung"],
   knowsAbout: [
     "Domain-Driven Design",

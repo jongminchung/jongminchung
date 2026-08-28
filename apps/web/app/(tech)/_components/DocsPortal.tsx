@@ -2,12 +2,17 @@ import { Badge } from "@jongminchung/ui/components/badge";
 import { cn } from "@jongminchung/ui/lib/utils";
 import Link from "next/link";
 import { Icon } from "#components/Icon";
+import { StructuredData } from "#components/StructuredData";
 import {
   displayTitleFor,
   type ContentManifestEntry,
   type Locale,
 } from "#lib/content-model";
 import type { LoadedDocument } from "#lib/documents";
+import {
+  createDocsCategoryStructuredData,
+  createTechArticleStructuredData,
+} from "#lib/structured-data";
 import {
   createDocsHref,
   docsCategoryIds,
@@ -211,64 +216,77 @@ export function DocsCategoryPage({
 }) {
   const category = getDocsCategory(categoryId, locale);
   const groups = groupDocsDocuments(documents, categoryId, locale);
+  const categoryDocuments = documentsForDocsCategory(documents, categoryId);
   return (
-    <main className="mx-auto grid w-full max-w-[1440px] grid-cols-[240px_minmax(0,1fr)] gap-12 px-6 py-14 max-[960px]:block max-[680px]:px-4 max-[680px]:py-10">
-      <aside
-        aria-label={`${category.title} ${copy[locale].documents}`}
-        className="sticky top-20 max-h-[calc(100dvh-6rem)] self-start overflow-y-auto pr-4 max-[960px]:hidden"
-      >
-        <DocsSidebar
-          categoryId={categoryId}
-          documents={documents}
-          locale={locale}
-        />
-      </aside>
-      <div className="max-w-[920px] min-w-0">
-        <header className="mb-14 border-b pb-10">
-          <Badge variant="secondary">{category.label}</Badge>
-          <h1 className="mt-5 mb-3 text-[clamp(40px,5vw,64px)] leading-none font-semibold tracking-[-.05em]">
-            {category.title}
-          </h1>
-          <p className="m-0 max-w-[720px] text-[17px] leading-7 text-muted-foreground">
-            {category.description}
-          </p>
-        </header>
-        <div className="grid gap-14">
-          {groups.map((group) => (
-            <section aria-labelledby={`docs-group-${group.id}`} key={group.id}>
-              <h2
-                className="mb-5 text-2xl font-semibold tracking-[-.025em]"
-                id={`docs-group-${group.id}`}
+    <>
+      <StructuredData
+        value={createDocsCategoryStructuredData({
+          category,
+          documents: categoryDocuments,
+          locale,
+        })}
+      />
+      <main className="mx-auto grid w-full max-w-[1440px] grid-cols-[240px_minmax(0,1fr)] gap-12 px-6 py-14 max-[960px]:block max-[680px]:px-4 max-[680px]:py-10">
+        <aside
+          aria-label={`${category.title} ${copy[locale].documents}`}
+          className="sticky top-20 max-h-[calc(100dvh-6rem)] self-start overflow-y-auto pr-4 max-[960px]:hidden"
+        >
+          <DocsSidebar
+            categoryId={categoryId}
+            documents={documents}
+            locale={locale}
+          />
+        </aside>
+        <div className="max-w-[920px] min-w-0">
+          <header className="mb-14 border-b pb-10">
+            <Badge variant="secondary">{category.label}</Badge>
+            <h1 className="mt-5 mb-3 text-[clamp(40px,5vw,64px)] leading-none font-semibold tracking-[-.05em]">
+              {category.title}
+            </h1>
+            <p className="m-0 max-w-[720px] text-[17px] leading-7 text-muted-foreground">
+              {category.description}
+            </p>
+          </header>
+          <div className="grid gap-14">
+            {groups.map((group) => (
+              <section
+                aria-labelledby={`docs-group-${group.id}`}
+                key={group.id}
               >
-                {group.label}
-              </h2>
-              <div className="grid gap-3">
-                {group.documents.map((document) => (
-                  <Link
-                    className="group grid grid-cols-[1fr_auto] gap-6 rounded-lg border bg-card p-5 no-underline hover:border-input hover:shadow-[var(--elevation-low)] max-[560px]:block"
-                    href={createDocsHref(locale, categoryId, document.id)}
-                    key={document.id}
-                  >
-                    <span>
-                      <span className="block text-base font-medium text-foreground">
-                        {displayTitleFor(document)}
+                <h2
+                  className="mb-5 text-2xl font-semibold tracking-[-.025em]"
+                  id={`docs-group-${group.id}`}
+                >
+                  {group.label}
+                </h2>
+                <div className="grid gap-3">
+                  {group.documents.map((document) => (
+                    <Link
+                      className="group grid grid-cols-[1fr_auto] gap-6 rounded-lg border bg-card p-5 no-underline hover:border-input hover:shadow-[var(--elevation-low)] max-[560px]:block"
+                      href={createDocsHref(locale, categoryId, document.id)}
+                      key={document.id}
+                    >
+                      <span>
+                        <span className="block text-base font-medium text-foreground">
+                          {displayTitleFor(document)}
+                        </span>
+                        <span className="mt-1.5 block text-sm leading-5 text-muted-foreground">
+                          {document.description}
+                        </span>
                       </span>
-                      <span className="mt-1.5 block text-sm leading-5 text-muted-foreground">
-                        {document.description}
-                      </span>
-                    </span>
-                    <Icon
-                      className="mt-1 size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 max-[560px]:mt-4"
-                      icon="chevronRight"
-                    />
-                  </Link>
-                ))}
-              </div>
-            </section>
-          ))}
+                      <Icon
+                        className="mt-1 size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 max-[560px]:mt-4"
+                        icon="chevronRight"
+                      />
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }
 
@@ -345,6 +363,7 @@ export function DocsArticlePage({
   const text = copy[locale];
   return (
     <>
+      <StructuredData value={createTechArticleStructuredData(metadata)} />
       <details className="mx-4 mt-5 rounded-lg border p-3 min-[961px]:hidden">
         <summary className="cursor-pointer text-sm font-medium">
           {text.openMenu}
@@ -387,10 +406,10 @@ export function DocsArticlePage({
                 </>
               )}
             </nav>
-            <h1 className="m-0 text-[clamp(36px,4.5vw,54px)] leading-[1.06] font-semibold tracking-[-.045em]">
+            <h1 className="m-0 text-[clamp(36px,4.5vw,54px)] leading-[1.06] font-semibold tracking-[-.045em] text-balance [overflow-wrap:anywhere] break-keep max-[680px]:text-[32px] max-[380px]:text-[29px]">
               {displayTitleFor(metadata)}
             </h1>
-            <p className="mt-5 mb-0 text-[17px] leading-7 text-muted-foreground">
+            <p className="mt-5 mb-0 text-[17px] leading-7 text-pretty text-muted-foreground max-[680px]:text-base max-[680px]:[overflow-wrap:anywhere] max-[680px]:break-keep">
               {metadata.description}
             </p>
             <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
@@ -415,7 +434,7 @@ export function DocsArticlePage({
           </header>
           <div
             className={cn(
-              "pt-8 text-base leading-[1.6] tracking-[-.01em] break-words [&_[data-footnotes]]:mt-12 [&_[data-footnotes]]:border-t [&_[data-footnotes]]:pt-5 [&_[data-footnotes]]:text-sm [&_[data-footnotes]]:leading-[1.6] [&_[data-footnotes]]:text-muted-foreground [&_[data-footnotes]_a]:text-primary [&_code:not(pre_code)]:rounded-[var(--radius-xs)] [&_code:not(pre_code)]:bg-accent/55 [&_code:not(pre_code)]:px-[.3rem] [&_code:not(pre_code)]:font-mono [&_code:not(pre_code)]:text-[.875rem] [&_code:not(pre_code)]:text-primary [&_li+li]:mt-1.5 [&_table]:my-6 [&_table]:block [&_table]:w-full [&_table]:overflow-x-auto [&_td]:border [&_td]:px-3 [&_td]:py-2.5 [&_th]:border [&_th]:bg-muted [&_th]:px-3 [&_th]:py-2.5",
+              "pt-8 text-base leading-[1.6] tracking-[-.01em] break-words [&_[data-footnotes]]:mt-12 [&_[data-footnotes]]:border-t [&_[data-footnotes]]:pt-5 [&_[data-footnotes]]:text-sm [&_[data-footnotes]]:leading-[1.6] [&_[data-footnotes]]:text-muted-foreground [&_[data-footnotes]_a]:text-primary [&_code:not(pre_code)]:rounded-[var(--radius-xs)] [&_code:not(pre_code)]:bg-accent/55 [&_code:not(pre_code)]:px-[.3rem] [&_code:not(pre_code)]:font-mono [&_code:not(pre_code)]:text-[.875rem] [&_code:not(pre_code)]:text-primary [&_li+li]:mt-1.5 [&_td]:border [&_td]:px-3 [&_td]:py-2.5 [&_th]:border [&_th]:bg-muted [&_th]:px-3 [&_th]:py-2.5",
             )}
             data-docs-prose="true"
             lang={locale}

@@ -29,7 +29,7 @@ describe("읽어보기 홈 콘텐츠", () => {
   });
 
   it("[성공] 표준 서비스 데이터 게시", () => {
-    expect(personSchema.url).toBe("https://jamie.kr");
+    expect(personSchema.url).toBe("https://www.jamie.kr");
     expect(personSchema.sameAs).toContain("https://github.com/jongminchung");
     expect(personSchema.knowsAbout).toEqual(
       expect.arrayContaining(["TypeScript", "Developer tooling"]),

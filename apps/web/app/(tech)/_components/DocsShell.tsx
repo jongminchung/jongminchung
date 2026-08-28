@@ -128,7 +128,7 @@ export function DocsShell({
               },
               {
                 label: "Elsewhere",
-                links: [{ href: "https://jamie.kr", label: "jamie.kr ↗" }],
+                links: [{ href: "https://www.jamie.kr", label: "jamie.kr ↗" }],
               },
             ]}
             note="Engineering Notes · Jamie"

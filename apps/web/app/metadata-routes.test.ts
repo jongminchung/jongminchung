@@ -19,6 +19,11 @@ describe("블로그 메타데이터 경로", () => {
       expect(urls).toContain(`https://tech.jamie.kr${document.href}`);
     expect(
       urls.some(
+        (url) => url.includes("/docs/fe/") || url.includes("/docs/k8s/"),
+      ),
+    ).toBe(false);
+    expect(
+      urls.some(
         (url) =>
           url.includes("/articles/") ||
           url.endsWith("/series/handbook") ||

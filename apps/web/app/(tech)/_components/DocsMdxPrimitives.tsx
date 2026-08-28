@@ -41,7 +41,7 @@ export function Callout({
   return (
     <div
       aria-label={title}
-      className="my-6 grid grid-cols-[auto_1fr] gap-x-3 rounded-lg border bg-card p-4 text-card-foreground shadow-xs data-[callout-type=error]:border-destructive/35 data-[callout-type=warning]:border-primary/35"
+      className="my-6 grid grid-cols-[auto_1fr] gap-x-3 rounded-lg border bg-card p-4 text-card-foreground shadow-xs data-[callout-type=error]:border-destructive/35 data-[callout-type=warning]:border-primary/35 max-[480px]:gap-x-2.5 max-[480px]:p-3.5"
       data-callout-type={normalizedType}
       data-docs-callout="true"
       role="note"
@@ -78,7 +78,7 @@ export function Steps({ children }: { readonly children: ReactNode }) {
 /** Fumadocs Step 패턴의 단일 단계를 렌더링함 */
 export function Step({ children }: { readonly children: ReactNode }) {
   return (
-    <li className="relative border-l border-border pb-8 pl-8 [counter-increment:docs-step] before:absolute before:-left-3.5 before:grid before:size-7 before:place-items-center before:rounded-full before:border before:bg-background before:font-mono before:text-xs before:font-medium before:text-primary before:content-[counter(docs-step)] [&>h3:first-child]:mt-0">
+    <li className="relative border-l border-border pb-8 pl-8 [counter-increment:docs-step] before:absolute before:-left-3.5 before:grid before:size-7 before:place-items-center before:rounded-full before:border before:bg-background before:font-mono before:text-xs before:font-medium before:text-primary before:content-[counter(docs-step)] max-[480px]:pl-6 [&>h3:first-child]:mt-0">
       {children}
     </li>
   );

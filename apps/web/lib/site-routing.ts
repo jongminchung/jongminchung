@@ -8,6 +8,7 @@ export type { Locale };
 
 const productionHosts: Readonly<Record<string, SiteId>> = {
   "jamie.kr": "home",
+  "www.jamie.kr": "home",
   "tech.jamie.kr": "tech",
   "invest.jamie.kr": "invest",
 };

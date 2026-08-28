@@ -211,7 +211,10 @@ export async function generateMetadata({
     const category = getDocsCategory(categoryId, locale);
     if (slug.length === 2)
       return metadata({
-        title: `${category.label} Docs`,
+        title:
+          locale === "ko"
+            ? `${category.title} 엔지니어링 문서`
+            : `${category.title} Engineering Docs`,
         description: category.description,
         locale,
         canonical: createDocsHref(locale, categoryId),
@@ -232,10 +235,10 @@ export async function generateMetadata({
         title: document.title,
         description: document.description,
         locale,
-        canonical: createDocsHref(locale, categoryId, document.id),
+        canonical: document.href,
         alternatePaths: {
-          ko: createDocsHref("ko", categoryId, document.id),
-          en: createDocsHref("en", categoryId, document.id),
+          ko: createDocHref("ko", document.id),
+          en: createDocHref("en", document.id),
         },
         imageId: document.id,
         type: "article",

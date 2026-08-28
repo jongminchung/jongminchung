@@ -13,6 +13,7 @@ import {
 describe("여러 개의 사이트에 속해 있음", () => {
   it.each([
     ["jamie.kr", "home"],
+    ["www.jamie.kr", "home"],
     ["tech.jamie.kr", "tech"],
     ["invest.jamie.kr", "invest"],
     ["jamie.localhost:3000", "home"],
@@ -45,6 +46,7 @@ describe("여러 개의 사이트에 속해 있음", () => {
     expect(resolveSite(normalizeHost("[::1]:3000"), "tech")).toBe("tech");
     expect(resolveSite("tech.jamie.localhost", "invest")).toBe("tech");
     expect(resolveSite("jamie.kr", "invest")).toBe("home");
+    expect(resolveSite("www.jamie.kr", "invest")).toBe("home");
     expect(resolveSite("unknown.example", "tech")).toBeNull();
   });
 

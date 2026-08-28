@@ -1,7 +1,8 @@
 import { BrandWordmark } from "#components/BrandWordmark";
+import { StructuredData } from "#components/StructuredData";
 import { ThemeControl } from "#components/ThemeControl";
-import { personSchema } from "#lib/home/content";
 import type { Locale } from "#lib/site-routing";
+import { createHomeProfileStructuredData } from "#lib/structured-data";
 
 /** `HomeHeader` UI 컴포넌트를 렌더링함 */
 export function HomeHeader({ locale }: { readonly locale: Locale }) {
@@ -88,13 +89,6 @@ export function HomeFooter({ locale }: { readonly locale: Locale }) {
 }
 
 /** `PersonStructuredData` UI 컴포넌트를 렌더링함 */
-export function PersonStructuredData() {
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{
-        __html: JSON.stringify(personSchema).replaceAll("<", "\\u003c"),
-      }}
-    />
-  );
+export function PersonStructuredData({ locale }: { readonly locale: Locale }) {
+  return <StructuredData value={createHomeProfileStructuredData(locale)} />;
 }

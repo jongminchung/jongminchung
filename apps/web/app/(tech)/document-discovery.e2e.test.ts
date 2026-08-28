@@ -206,6 +206,10 @@ test("[성공] 상단 Docs 드롭다운에서 문서 분야를 선택하고 탐�
   await page.keyboard.press("Escape");
 
   await page.goto("/ko/docs/fe/tutorial-maintainable-tailwind-shadcn");
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    "href",
+    "https://tech.jamie.kr/ko/tutorial-maintainable-tailwind-shadcn",
+  );
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "유지보수 가능한 Tailwind",
   );

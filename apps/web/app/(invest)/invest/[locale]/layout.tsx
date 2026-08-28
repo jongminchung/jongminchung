@@ -2,10 +2,15 @@ import { TooltipProvider } from "@jongminchung/ui/components/tooltip";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { notFound } from "next/navigation";
+import { StructuredData } from "#components/StructuredData";
 import { ThemeProvider } from "#components/ThemeProvider";
 import { InvestmentLayout } from "#invest-components/InvestmentShell";
 import { messagesFor } from "#lib/i18n-messages";
 import { isLocale } from "#lib/site-routing";
+import {
+  createWebsiteStructuredData,
+  investOrigin,
+} from "#lib/structured-data";
 import { themeStorageKeys } from "#lib/theme";
 import { pretendard } from "../../../root-layout";
 import "../../invest.css";
@@ -50,6 +55,17 @@ export default async function InvestmentLocaleLayout({
       suppressHydrationWarning
     >
       <body>
+        <StructuredData
+          value={createWebsiteStructuredData({
+            origin: investOrigin,
+            name: "Investment Notes",
+            description:
+              locale === "ko"
+                ? "원문 요약과 개인 판단을 분리한 투자 리서치 노트"
+                : "Source-grounded investment research notes that separate summary from personal judgment.",
+            locale,
+          })}
+        />
         <NextIntlClientProvider locale={locale} messages={messagesFor(locale)}>
           <ThemeProvider storageKey={themeStorageKeys.invest}>
             <TooltipProvider>

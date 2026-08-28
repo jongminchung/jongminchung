@@ -1,11 +1,7 @@
 import type { MetadataRoute } from "next";
 import { createSeriesHref, locales } from "#lib/content-model";
 import { getDocuments } from "#lib/documents";
-import {
-  createDocsHref,
-  docsCategoryIds,
-  documentsForDocsCategory,
-} from "#lib/tech/docs";
+import { createDocsHref, docsCategoryIds } from "#lib/tech/docs";
 import { seriesRegistry } from "#lib/tech/series";
 
 const siteOrigin = "https://tech.jamie.kr";
@@ -78,9 +74,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   }));
   const docsEntries = locales.flatMap((locale) => {
-    const localizedDocuments = documents.filter(
-      (document) => document.locale === locale,
-    );
     return [
       {
         url: absoluteUrl(createDocsHref(locale)),
@@ -93,33 +86,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           ),
         },
       },
-      ...docsCategoryIds.flatMap((category) => [
-        {
-          url: absoluteUrl(createDocsHref(locale, category)),
-          alternates: {
-            languages: Object.fromEntries(
-              locales.map((candidate) => [
-                candidate,
-                absoluteUrl(createDocsHref(candidate, category)),
-              ]),
-            ),
-          },
+      ...docsCategoryIds.map((category) => ({
+        url: absoluteUrl(createDocsHref(locale, category)),
+        alternates: {
+          languages: Object.fromEntries(
+            locales.map((candidate) => [
+              candidate,
+              absoluteUrl(createDocsHref(candidate, category)),
+            ]),
+          ),
         },
-        ...documentsForDocsCategory(localizedDocuments, category).map(
-          (document) => ({
-            url: absoluteUrl(createDocsHref(locale, category, document.id)),
-            lastModified: document.updatedAt,
-            alternates: {
-              languages: Object.fromEntries(
-                locales.map((candidate) => [
-                  candidate,
-                  absoluteUrl(createDocsHref(candidate, category, document.id)),
-                ]),
-              ),
-            },
-          }),
-        ),
-      ]),
+      })),
     ];
   });
   return [

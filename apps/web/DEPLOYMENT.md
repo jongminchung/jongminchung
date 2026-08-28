@@ -7,7 +7,7 @@
 - Vercel이 지원하는 Node.js `24.x`를 build와 function runtime으로 사용하며 repository engine은 Node.js 24 이상을 허용함
 - `*.vercel.app` preview·production hostname은 Tech 사이트로 제공함
 - `tech.jamie.kr`은 Vercel project의 domain으로 연결하며 DNS와 domain verification은 Vercel dashboard에서 관리함
-- `jamie.kr`과 `invest.jamie.kr`을 같은 project에 추가하면 기존 Host 기반 home·invest routing을 그대로 사용함
+- `jamie.kr`, `www.jamie.kr`, `invest.jamie.kr`을 같은 project에 추가하며 Home의 primary domain은 `www.jamie.kr`로 유지함
 - Production Branch는 `main`으로 설정하고 pull request deployment는 Preview 환경으로 유지함
 - Fumadocs 검색 Route Handler, OG image, RSS와 `llms.txt`는 정적 export로 변환하지 않고 Vercel의 Next.js runtime에서 제공함
 - Vercel build는 managed Next.js output을 사용하고 `output: "standalone"`은 Container build에서만 사용함
@@ -22,7 +22,7 @@ curl --fail https://<project>.vercel.app/ko/series/frontend-maintainability
 
 ## Container
 
-- 하나의 컨테이너가 `jamie.kr`, `tech.jamie.kr`, `invest.jamie.kr`의 원래 `Host` 헤더를 받음
+- 하나의 컨테이너가 `jamie.kr`, `www.jamie.kr`, `tech.jamie.kr`, `invest.jamie.kr`의 원래 `Host` 헤더를 받음
 - Ingress는 원래 `Host`를 보존하며 애플리케이션은 `Forwarded`와 `X-Forwarded-Host`를 라우팅 입력으로 사용하지 않음
 - `/ko`와 `/en` 응답은 URL과 일치하는 `Content-Language`를 제공함
 - Kubernetes Ingress·Service·Deployment는 인프라 저장소에서 관리함
@@ -38,6 +38,7 @@ docker build -f apps/web/docker/Dockerfile -t jamie-web .
 docker run --rm -p 3000:3000 jamie-web
 curl --fail http://127.0.0.1:3000/healthz
 curl --fail -H 'Host: jamie.kr' http://127.0.0.1:3000/ko
+curl --fail -H 'Host: www.jamie.kr' http://127.0.0.1:3000/ko
 curl --fail -H 'Host: tech.jamie.kr' http://127.0.0.1:3000/ko
 curl --fail -H 'Host: invest.jamie.kr' http://127.0.0.1:3000/ko
 ```

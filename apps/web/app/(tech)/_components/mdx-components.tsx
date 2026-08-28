@@ -1,3 +1,4 @@
+import { cn } from "@jongminchung/ui/lib/utils";
 import {
   CodeBlockTab,
   CodeBlockTabs,
@@ -98,12 +99,20 @@ function MdxBlockquote(props: ComponentProps<"blockquote">) {
   );
 }
 
-function MdxTable(props: ComponentProps<"table">) {
+export function MdxTable({ className, ...props }: ComponentProps<"table">) {
   return (
-    <table
-      className="my-4 block w-full border-collapse overflow-x-auto text-sm"
-      {...props}
-    />
+    <div
+      className="my-6 w-full max-w-full overflow-x-auto overscroll-x-contain"
+      data-docs-table-scroll="true"
+    >
+      <table
+        {...props}
+        className={cn(
+          "w-full min-w-[560px] border-collapse text-sm max-[680px]:text-[13px] [&_td:first-child]:whitespace-nowrap [&_th]:whitespace-nowrap",
+          className,
+        )}
+      />
+    </div>
   );
 }
 

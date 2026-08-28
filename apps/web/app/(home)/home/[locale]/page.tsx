@@ -31,8 +31,11 @@ export async function generateMetadata({
     title: "Jamie — Jongmin Chung",
     description,
     alternates: {
-      canonical: `https://jamie.kr/${locale}`,
-      languages: { ko: "https://jamie.kr/ko", en: "https://jamie.kr/en" },
+      canonical: `https://www.jamie.kr/${locale}`,
+      languages: {
+        ko: "https://www.jamie.kr/ko",
+        en: "https://www.jamie.kr/en",
+      },
     },
   };
 }
@@ -53,7 +56,7 @@ export default async function HomePage({
         <PrinciplesSection locale={locale} />
       </main>
       <HomeFooter locale={locale} />
-      <PersonStructuredData />
+      <PersonStructuredData locale={locale} />
     </>
   );
 }

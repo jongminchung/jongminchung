@@ -8,6 +8,7 @@ import {
   EditorialIndex,
   type EditorialCopy,
 } from "#components/Editorial";
+import { StructuredData } from "#components/StructuredData";
 import { ThemeControl } from "#components/ThemeControl";
 import {
   parseEditorialQuery,
@@ -20,6 +21,7 @@ import type {
   InvestmentSourceKind,
 } from "#lib/invest/content";
 import type { Locale } from "#lib/site-routing";
+import { createInvestmentArticleStructuredData } from "#lib/structured-data";
 
 const copy = {
   ko: {
@@ -123,7 +125,7 @@ export function InvestmentLayout({
           },
           {
             label: "Elsewhere",
-            links: [{ href: "https://jamie.kr", label: "jamie.kr ↗" }],
+            links: [{ href: "https://www.jamie.kr", label: "jamie.kr ↗" }],
           },
         ]}
         note="Source summary ≠ personal judgment"
@@ -200,69 +202,72 @@ export function InvestmentNotePage({
     related.map(toInvestmentEditorialItem),
   );
   return (
-    <EditorialArticle
-      footer={
-        <>
-          {relatedItems.length === 0 ? null : (
-            <section
-              className="mt-16 border-t pt-7"
-              aria-labelledby="related-notes"
-            >
-              <h2
-                className="mt-0 mb-5 text-[22px] font-medium"
-                id="related-notes"
+    <>
+      <StructuredData value={createInvestmentArticleStructuredData(note)} />
+      <EditorialArticle
+        footer={
+          <>
+            {relatedItems.length === 0 ? null : (
+              <section
+                className="mt-16 border-t pt-7"
+                aria-labelledby="related-notes"
               >
-                {locale === "ko" ? "관련 노트" : "Related notes"}
-              </h2>
-              <div className="grid grid-cols-3 gap-4 max-[760px]:grid-cols-1">
-                {relatedItems.map((item) => (
-                  <EditorialCard item={item} key={item.id} />
-                ))}
-              </div>
-            </section>
-          )}
-          <p className="mt-10 border-t pt-6 text-xs text-muted-foreground">
-            {locale === "ko"
-              ? "이 글은 출처를 이해하기 위한 개인 기록이며 투자 권유가 아닙니다"
-              : "This is a personal research note, not investment advice"}
-          </p>
-        </>
-      }
-      header={
-        <>
-          <p className="m-0 font-mono text-[11px] text-primary uppercase">
-            {note.series ?? "Research note"}
-          </p>
-          <h1 className="my-4 text-[clamp(44px,6vw,72px)] leading-none font-medium tracking-[-.05em]">
-            {note.title}
-          </h1>
-          <p className="m-0 max-w-[680px] text-[18px] leading-[1.6] text-muted-foreground">
-            {note.description}
-          </p>
-          <time
-            className="mt-5 block font-mono text-[11px] text-muted-foreground"
-            dateTime={note.updatedAt}
-          >
-            {text.updated} · {note.updatedAt}
-          </time>
-        </>
-      }
-      rail={
-        <div aria-label={text.sourceSummary}>
-          <p className="m-0 font-mono text-[11px] uppercase">
-            {text.sourceSummary}
-          </p>
-          {note.sources.map((source) => (
-            <SourceCard
-              key={`${source.kind}:${source.title}`}
-              source={source}
-            />
-          ))}
-        </div>
-      }
-    >
-      {children}
-    </EditorialArticle>
+                <h2
+                  className="mt-0 mb-5 text-[22px] font-medium"
+                  id="related-notes"
+                >
+                  {locale === "ko" ? "관련 노트" : "Related notes"}
+                </h2>
+                <div className="grid grid-cols-3 gap-4 max-[760px]:grid-cols-1">
+                  {relatedItems.map((item) => (
+                    <EditorialCard item={item} key={item.id} />
+                  ))}
+                </div>
+              </section>
+            )}
+            <p className="mt-10 border-t pt-6 text-xs text-muted-foreground">
+              {locale === "ko"
+                ? "이 글은 출처를 이해하기 위한 개인 기록이며 투자 권유가 아닙니다"
+                : "This is a personal research note, not investment advice"}
+            </p>
+          </>
+        }
+        header={
+          <>
+            <p className="m-0 font-mono text-[11px] text-primary uppercase">
+              {note.series ?? "Research note"}
+            </p>
+            <h1 className="my-4 text-[clamp(44px,6vw,72px)] leading-none font-medium tracking-[-.05em]">
+              {note.title}
+            </h1>
+            <p className="m-0 max-w-[680px] text-[18px] leading-[1.6] text-muted-foreground">
+              {note.description}
+            </p>
+            <time
+              className="mt-5 block font-mono text-[11px] text-muted-foreground"
+              dateTime={note.updatedAt}
+            >
+              {text.updated} · {note.updatedAt}
+            </time>
+          </>
+        }
+        rail={
+          <div aria-label={text.sourceSummary}>
+            <p className="m-0 font-mono text-[11px] uppercase">
+              {text.sourceSummary}
+            </p>
+            {note.sources.map((source) => (
+              <SourceCard
+                key={`${source.kind}:${source.title}`}
+                source={source}
+              />
+            ))}
+          </div>
+        }
+      >
+        {children}
+      </EditorialArticle>
+    </>
   );
 }
 

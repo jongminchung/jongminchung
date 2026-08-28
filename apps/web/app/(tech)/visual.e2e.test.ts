@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { expectNoHorizontalOverflow } from "../../e2e-assertions";
 
 const cases = [
   {
@@ -63,6 +64,15 @@ const cases = [
     width: 390,
     height: 844,
     theme: "dark",
+  },
+  {
+    name: "frontend-docs-playwright-mobile-light",
+    path: "/ko/docs/fe/playwright-visual-regression-testing",
+    heading: "Playwright로 유의미한 시각 회귀 테스트 만들기",
+    contract: "docs-article",
+    width: 390,
+    height: 844,
+    theme: "light",
   },
   {
     name: "ddd-wide-light",
@@ -131,6 +141,7 @@ for (const visualCase of cases) {
       page.getByRole("heading", { level: 1, name: visualCase.heading }),
     ).toBeVisible();
     await expect(page.getByRole("main")).toBeVisible();
+    await expectNoHorizontalOverflow(page);
     if (visualCase.contract === "index") {
       await expect(
         page.getByRole("navigation", {
@@ -173,6 +184,25 @@ for (const visualCase of cases) {
               { exact: true },
             ),
           ).toBeVisible();
+        }
+        if (visualCase.name === "frontend-docs-playwright-mobile-light") {
+          const tableScroll = article
+            .locator('[data-docs-table-scroll="true"]')
+            .first();
+          await expect(tableScroll).toBeVisible();
+          await expect
+            .poll(() =>
+              tableScroll.evaluate((element) => ({
+                isContained:
+                  element.getBoundingClientRect().right <=
+                  document.documentElement.clientWidth,
+                isScrollable: element.scrollWidth > element.clientWidth,
+              })),
+            )
+            .toEqual({
+              isContained: true,
+              isScrollable: true,
+            });
         }
       }
     }
