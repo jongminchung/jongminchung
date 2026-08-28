@@ -38,6 +38,7 @@ export const docsCategoryRegistry: Readonly<
     section: (document) => {
       if (document.series === "frontend-maintainability")
         return "maintainability";
+      if (hasTag("testing")(document)) return "testing";
       if (hasTag("react", "components", "design-system")(document))
         return "components";
       return "performance";
@@ -50,6 +51,10 @@ export const docsCategoryRegistry: Readonly<
       components: {
         ko: "React와 UI 아키텍처",
         en: "React and UI Architecture",
+      },
+      testing: {
+        ko: "테스트와 품질",
+        en: "Testing and Quality",
       },
       performance: {
         ko: "성능과 인터랙션",

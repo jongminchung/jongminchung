@@ -32,6 +32,18 @@ describe("기술 문서 카테고리", () => {
     expect(new Set(grouped.map(({ id }) => id)).size).toBe(grouped.length);
   });
 
+  it("[성공] Playwright 시각 회귀 안내서를 FE 문서로 분류함", async () => {
+    const documents = await getLocalizedDocuments("ko");
+    const testing = groupDocsDocuments(documents, "fe", "ko").find(
+      ({ id }) => id === "testing",
+    );
+
+    expect(testing?.label).toBe("테스트와 품질");
+    expect(testing?.documents.map(({ id }) => id)).toContain(
+      "playwright-visual-regression-testing",
+    );
+  });
+
   it("[성공] 허브·카테고리·본문 URL을 한 계약으로 생성함", () => {
     expect(createDocsHref("ko")).toBe("/ko/docs");
     expect(createDocsHref("ko", "fe")).toBe("/ko/docs/fe");

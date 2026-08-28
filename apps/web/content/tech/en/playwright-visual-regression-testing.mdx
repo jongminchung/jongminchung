@@ -1,0 +1,307 @@
+---
+id: playwright-visual-regression-testing
+locale: en
+documentKind: how-to
+title: "Build Meaningful Visual Regression Tests with Playwright"
+description: "Combine user contracts, deterministic rendering, and baseline review to build trustworthy Playwright visual regression tests."
+publishedAt: "2026-08-28"
+updatedAt: "2026-08-28"
+verifiedAt: "2026-08-28"
+tags: [frontend, testing, playwright, visual-regression]
+status: stable
+publicationStatus: published
+sourceUrl: https://playwright.dev/docs/test-snapshots
+---
+
+<Callout title="Core principle" type="info">
+  Matching screenshots alone do not prove that a feature works. A visual test
+  becomes a product contract when assertions verify user-visible behavior and
+  the resulting stable screen is compared against a reviewed baseline.
+</Callout>
+
+Playwright's [`toHaveScreenshot()`](https://playwright.dev/docs/test-snapshots) creates a reference image on the first run and compares subsequent renders with it. This comparison can catch changes to layout, color, typography, and responsive placement at once. It becomes untrustworthy, however, when data or execution environments drift, or when updated baselines are approved without review.
+
+This guide uses `apps/web/app/(tech)/visual.e2e.test.ts` to explain what to verify, how to classify a failure, and when to update a reference image.
+
+## Verify user contracts before screenshots
+
+A visual test contains three distinct contracts. Do not make one screenshot stand in for all of them.
+
+| Contract   | Question                                                            | Primary verification                                 |
+| ---------- | ------------------------------------------------------------------- | ---------------------------------------------------- |
+| Behavior   | Can the user complete the intended task?                            | Role-based locators and web-first assertions         |
+| Structure  | Are required content and accessible names present?                  | `toBeVisible()`, `toHaveText()`, `toHaveAttribute()` |
+| Appearance | Do layout, spacing, color, and responsive results match the intent? | `toHaveScreenshot()`                                 |
+
+Judge meaningfulness by the product risk a failure explains, not by the number of assertions.
+
+- Make the test name reveal the relevant starting state, user action, and expected outcome
+- Let one case protect one user risk, and group assertions only when they describe the same outcome
+- Verify roles, accessible names, and visible results instead of CSS classes or DOM depth
+- Keep the result unchanged when the test runs alone or in a different order by avoiding dependencies on another test's cookies, storage, or data
+- Be able to explain which regression would become invisible if the test were deleted
+
+[Playwright best practices](https://playwright.dev/docs/best-practices) recommend testing user-visible behavior instead of implementation details and using locators and web-first assertions with automatic waiting and retries. The [test isolation guide](https://playwright.dev/docs/browser-contexts) also explains that every test runs in an isolated browser context to prevent cascading failures and order dependencies. Let each test prepare its own preconditions, then assert that the page's essential meaning is ready immediately before taking a screenshot.
+
+```ts
+test("visual: overview-wide-light", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.addInitScript(() => {
+    localStorage.setItem("tech-theme", "light");
+  });
+  await page.goto("/en");
+
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Engineering" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("navigation", { name: "Editorial navigation" }),
+  ).toBeVisible();
+
+  await expect(page).toHaveScreenshot("overview-wide-light.png", {
+    fullPage: true,
+  });
+});
+```
+
+- Treat a heading or navigation assertion failure as a content, accessibility, or routing problem
+- Treat a screenshot assertion failure as an appearance or rendering-environment problem
+- Separating the failures avoids guessing whether a feature works from a pixel diff alone
+
+## Select cases by risk instead of screen count
+
+Capturing the product of every page and viewport increases storage and review cost without necessarily increasing confidence. Every case should explain the regression it catches in one sentence.
+
+| Representative case | Risk under test                                                |
+| ------------------- | -------------------------------------------------------------- |
+| Wide index          | Grid columns, maximum width, global navigation, and footer     |
+| Tablet document     | Transition between article and outline layouts                 |
+| Mobile dark screen  | Single column, overflow, theme tokens, and long-title wrapping |
+| Series landing      | Card order, metadata, and collection layout                    |
+| Long-form document  | Code blocks, tables, images, and full document flow            |
+
+Require the following when adding a case.
+
+- It represents a user risk that differs from existing cases
+- Its viewport width clearly represents one side of a real breakpoint
+- Its light, dark, and locale combination represents a distinct layout or token risk instead of every permutation
+- Its name makes the intended route, screen size, and theme discoverable
+- The regression-detection capability lost by deleting it can be explained
+
+Use a full-page screenshot when navigation through footer form one product contract. Use a locator screenshot to reduce the diff surface when only an independent component or region matters.
+
+```ts
+const article = page.getByRole("article");
+
+await expect(article).toBeVisible();
+await expect(article).toHaveScreenshot("document-article.png");
+```
+
+## Make inputs and rendering deterministic before capture
+
+The [official visual comparison guide](https://playwright.dev/docs/test-snapshots) warns that rendering can vary with the OS, browser version, settings, and hardware, and recommends verifying screenshots in the same environment that generated the baseline. Apply the same principle to page state.
+
+<Steps>
+  <Step>
+    ### Fix the environment before navigation
+
+    Set values that affect the initial render, such as theme, locale cookies, reduced motion, and authentication state, before `page.goto()`.
+
+    ```ts
+    await page.addInitScript(() => {
+      localStorage.setItem("tech-theme", "dark");
+    });
+    await page.goto("/en");
+    ```
+
+  </Step>
+
+  <Step>
+    ### Control time and data
+
+    When dates or relative time appear on screen, fix time with [`page.clock.setFixedTime()`](https://playwright.dev/docs/clock). When API responses change the screen, return a small fixed fixture with [`page.route()`](https://playwright.dev/docs/mock), or use deterministic build-time data.
+
+    ```ts
+    await page.clock.setFixedTime(new Date("2026-08-28T00:00:00Z"));
+    await page.route("**/api/articles", async (route) => {
+      await route.fulfill({
+        json: [{ id: "visual-contract", title: "Visual contract" }],
+      });
+    });
+    ```
+
+    Separate tests of real backend integration from visual fixture tests. Do not make the current state of an external API part of the visual baseline.
+
+  </Step>
+
+  <Step>
+    ### Wait for observable readiness
+
+    Use web-first assertions on user-visible elements instead of fixed timeouts. When fonts and image dimensions affect layout, wait for those resources as well.
+
+    ```ts
+    await expect(page.getByRole("main")).toBeVisible();
+    await page.evaluate(() => document.fonts.ready);
+
+    await page.evaluate(async () => {
+      await Promise.all(
+        [...document.images].map((image) =>
+          image.decode().catch(() => undefined),
+        ),
+      );
+    });
+    ```
+
+    Avoid `waitForTimeout()` and arbitrary long delays because they increase runtime without proving readiness.
+
+  </Step>
+
+  <Step>
+    ### Remove only irrelevant volatility
+
+    Disable animations and the caret in screenshot configuration. Control volatile regions that are not under test, such as ads or random avatars, with [`mask` or `stylePath`](https://playwright.dev/docs/api/class-pageassertions#page-assertions-to-have-screenshot-1).
+
+    If a real timestamp, error state, or loading indicator is under test, fix its input instead of hiding it. Broad masks can conceal real regressions.
+
+  </Step>
+</Steps>
+
+## Manage tolerances as contracts, not noise controls
+
+`maxDiffPixelRatio`, `maxDiffPixels`, and `threshold` control different concerns.
+
+| Option              | Meaning                                       | When to use it                                            |
+| ------------------- | --------------------------------------------- | --------------------------------------------------------- |
+| `maxDiffPixelRatio` | Ratio of differing pixels over the full image | A shared ratio across pages with different viewport sizes |
+| `maxDiffPixels`     | Absolute number of differing pixels           | Bounded micro-noise in a fixed-size component             |
+| `threshold`         | Color-distance sensitivity at the same pixel  | A measured anti-aliasing difference has a clear cause     |
+
+- Stabilize data, fonts, animations, and the execution environment first
+- Measure repeated non-product differences before choosing the smallest tolerance
+- Do not immediately increase a global tolerance just to make a failure pass
+- Document the reason and removal condition next to an assertion that needs an exception
+- Treat a different image height or moved primary component as a layout change, not a tolerance problem
+
+The current Web configuration disables animations, hides carets, uses CSS pixel scale, and permits a maximum diff ratio of `0.001`. This value is a boundary that produces a diff for human review, not an automatic approval rule.
+
+## Classify failures with expected, actual, and diff together
+
+A visual failure can mean either a product bug or an invalid test environment. Narrow the cause in this order.
+
+1. Confirm that behavior assertions and the URL passed first
+2. Compare the width and height of expected and actual images
+3. Determine whether the diff is localized to one component or spreads across the page
+4. Confirm that fonts, images, dates, locale, and API data match
+5. Inspect navigation, console, and network failures in the trace
+6. Accept a baseline candidate only when the product change explains the diff
+
+Playwright retries screenshot assertions until two consecutive captures match, then compares the last capture with the baseline. Therefore, `captured a stable screenshot` means that two browser captures matched each other; it does not prove that data and environment conform to the product contract.
+
+The current `trace: "on-first-retry"` setting, failure screenshot, and video provide evidence for CI failures. Following the [official CI debugging guidance](https://playwright.dev/docs/best-practices#debugging-on-ci), inspect the trace's DOM snapshots, action log, and network activity together.
+
+## Treat baselines as reviewed changes, not generated output
+
+Updating a reference image approves a new UI; it does not fix a test. Narrow the update to a failing case instead of overwriting every baseline.
+
+<Steps>
+  <Step>
+    ### Run the target without updating it
+
+    From the repository root, first confirm what the current baseline detects.
+
+    ```bash
+    pnpm --filter @jongminchung/web exec playwright test \
+      visual.e2e.test.ts \
+      --project=tech-chromium \
+      --grep "visual: overview-wide-light"
+    ```
+
+  </Step>
+
+  <Step>
+    ### Compare failure evidence with the product change
+
+    Inspect `*-expected.png`, `*-actual.png`, `*-diff.png`, and the trace under `apps/web/test-results`. If regions outside the change request differ, do not update the baseline; fix the cause.
+
+  </Step>
+
+  <Step>
+    ### Update one case in the CI-equivalent environment
+
+    Generate Linux CI baselines with the same Playwright and Chromium versions in a Linux environment.
+
+    ```bash
+    pnpm --filter @jongminchung/web exec playwright test \
+      visual.e2e.test.ts \
+      --project=tech-chromium \
+      --grep "visual: overview-wide-light" \
+      --update-snapshots=changed
+    ```
+
+    Do not replace a Linux CI baseline with a `*-darwin.png` generated on macOS.
+
+  </Step>
+
+  <Step>
+    ### Verify again without the update option
+
+    Run the same command without `--update-snapshots`. Then run all Tech visual tests to confirm that one baseline update did not hide a regression in another screen.
+
+    ```bash
+    pnpm --filter @jongminchung/web exec playwright test \
+      visual.e2e.test.ts \
+      --project=tech-chromium
+    ```
+
+  </Step>
+
+  <Step>
+    ### Review the baseline lifecycle in the Git diff
+
+    ```bash
+    git status --short -- \
+      'apps/web/app/(tech)/visual.e2e.test.ts' \
+      'apps/web/app/(tech)/visual.e2e.test.ts-snapshots'
+    git diff --check
+    ```
+
+    Confirm that every added case has a baseline and that deleted or renamed cases leave no orphan image. Do not approve a PNG merely because it changed; record the meaning of its visual diff in review.
+
+  </Step>
+</Steps>
+
+## Make CI guarantee reproducibility and failure evidence
+
+The [Playwright CI guide](https://playwright.dev/docs/ci) installs browser and system dependencies before running tests and recommends worker `1` when CI stability takes priority. Maintain the following contracts for visual regression CI.
+
+- Pin Playwright and Chromium versions with the lockfile
+- Match the Linux baseline-generation and verification environments
+- If parallel execution produces intermittent diffs, measure resource contention and reduce CI workers
+- Preserve `playwright-report` and `test-results` as failure artifacts
+- Track a visual test that passes only on retry as a flaky signal
+- Review PNG changes and product code changes together in a pull request
+
+## Completion criteria
+
+- Every screenshot case explains the user risk it protects
+- Web-first assertions verify user behavior and essential structure before capture
+- Dates, API data, theme, locale, fonts, and images reach deterministic states
+- Full-page and locator screenshot scopes match their verification intent
+- Tolerances and masks do not hide real product regressions
+- Baselines are generated with the same OS and browser environment as CI
+- Expected, actual, diff, and trace are reviewed before a baseline is updated
+- Targeted and full tests pass without `--update-snapshots` after an update
+- No required baseline is missing and no deleted case leaves an orphan image
+
+## Official documentation
+
+- [Writing tests](https://playwright.dev/docs/writing-tests)
+- [Visual comparisons](https://playwright.dev/docs/test-snapshots)
+- [Best practices](https://playwright.dev/docs/best-practices)
+- [Isolation](https://playwright.dev/docs/browser-contexts)
+- [Locators](https://playwright.dev/docs/locators)
+- [Assertions](https://playwright.dev/docs/test-assertions)
+- [`toHaveScreenshot()` API](https://playwright.dev/docs/api/class-pageassertions#page-assertions-to-have-screenshot-1)
+- [Clock](https://playwright.dev/docs/clock)
+- [Mock APIs](https://playwright.dev/docs/mock)
+- [Continuous Integration](https://playwright.dev/docs/ci)

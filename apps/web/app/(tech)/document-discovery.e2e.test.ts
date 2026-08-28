@@ -42,7 +42,7 @@ test("[성공] 시리즈 랜딩은 등록 순서와 언어 전환 경로를 유�
     name: "Editorial navigation",
   });
   await expect(
-    globalNavigation.getByRole("link", { name: "시리즈" }),
+    globalNavigation.getByRole("link", { name: "Series" }),
   ).toHaveAttribute("href", "/ko/series");
   await expect(
     page.getByRole("link", { name: "Read in English" }),
@@ -164,7 +164,8 @@ test("[성공] 상단 Docs 드롭다운에서 문서 분야를 선택하고 탐�
   const docsMenuTrigger = globalNavigation.getByRole("button", {
     name: "Docs: 문서 분야 선택",
   });
-  await docsMenuTrigger.click();
+  await docsMenuTrigger.focus();
+  await docsMenuTrigger.press("ArrowDown");
   const docsMenu = page.getByRole("menu", { name: "문서 분야 선택" });
   await expect(
     docsMenu.getByRole("menuitem", { name: "모든 문서" }),
@@ -172,7 +173,11 @@ test("[성공] 상단 Docs 드롭다운에서 문서 분야를 선택하고 탐�
   await expect(
     docsMenu.getByRole("menuitem", { name: "FE · 프론트엔드" }),
   ).toHaveAttribute("href", "/ko/docs/fe");
+  await page.keyboard.press("Escape");
+  await expect(docsMenu).toBeHidden();
+  await expect(docsMenuTrigger).toBeFocused();
 
+  await docsMenuTrigger.click();
   await docsMenu.getByRole("menuitem", { name: "모든 문서" }).click();
   await expect(page).toHaveURL(/\/ko\/docs$/u);
   await expect(
@@ -192,6 +197,13 @@ test("[성공] 상단 Docs 드롭다운에서 문서 분야를 선택하고 탐�
     .getByRole("menuitem", { name: "FE · 프론트엔드" })
     .click();
   await expect(page).toHaveURL(/\/ko\/docs\/fe$/u);
+  await docsMenuTrigger.click();
+  await expect(
+    page
+      .getByRole("menu", { name: "문서 분야 선택" })
+      .getByRole("menuitem", { name: "FE · 프론트엔드" }),
+  ).toHaveAttribute("aria-current", "page");
+  await page.keyboard.press("Escape");
 
   await page.goto("/ko/docs/fe/tutorial-maintainable-tailwind-shadcn");
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
@@ -208,6 +220,14 @@ test("[성공] 상단 Docs 드롭다운에서 문서 분야를 선택하고 탐�
   );
   await expectNoHorizontalOverflow(page);
   await expectNoAccessibilityViolations(page);
+
+  await page.goto("/ko/docs/fe/playwright-visual-regression-testing");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(
+    "Playwright로 유의미한 시각 회귀 테스트 만들기",
+  );
+  await expect(
+    page.getByRole("link", { name: "Read in English" }),
+  ).toHaveAttribute("href", "/en/docs/fe/playwright-visual-regression-testing");
 });
 
 test("[성공] OG 이미지 및 llms.txt는 정적 검색 자산과 함께", async ({

@@ -23,7 +23,7 @@ export function SeriesIndex({
 }) {
   const text = copy[locale];
   return (
-    <div className="mx-auto w-full max-w-[1200px] px-6 pt-[clamp(64px,9vw,112px)] pb-24 max-[680px]:px-4 max-[680px]:pt-12">
+    <main className="mx-auto w-full max-w-[1200px] px-6 pt-[clamp(64px,9vw,112px)] pb-24 max-[680px]:px-4 max-[680px]:pt-12">
       <header className="mb-12">
         <p className="font-mono text-[11px] font-medium tracking-[.12em] text-primary uppercase">
           {text.eyebrow}
@@ -58,7 +58,7 @@ export function SeriesIndex({
             </Link>
           ))}
       </div>
-    </div>
+    </main>
   );
 }
 
@@ -75,7 +75,7 @@ export function SeriesDetail({
   const text = copy[locale];
   const series = seriesRegistry[id]!;
   return (
-    <div className="mx-auto w-full max-w-[1200px] px-6 pt-[clamp(64px,9vw,112px)] pb-24 max-[680px]:px-4 max-[680px]:pt-12">
+    <main className="mx-auto w-full max-w-[1200px] px-6 pt-[clamp(64px,9vw,112px)] pb-24 max-[680px]:px-4 max-[680px]:pt-12">
       <header className="mb-12 max-w-[680px]">
         <p className="font-mono text-[11px] font-medium tracking-[.12em] text-primary uppercase">
           {text.eyebrow}
@@ -106,6 +106,6 @@ export function SeriesDetail({
           />
         ))}
       </div>
-    </div>
+    </main>
   );
 }
