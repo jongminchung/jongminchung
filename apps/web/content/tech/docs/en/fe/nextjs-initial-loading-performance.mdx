@@ -50,12 +50,12 @@ The [Next.js Font Module](https://nextjs.org/docs/app/api-reference/components/f
   <Step>
     ### Select the source with the glyphs required by each locale
 
-    `next/font/local` does not provide the Google Font `subsets` option. Use Pretendard Std Variable through `next/font/local` for English, and use Pretendard's official `unicode-range` dynamic subset CSS for Korean. The browser then downloads only the subset files containing glyphs used on the page.
+    `next/font/local` does not provide the Google Font `subsets` option. This app therefore uses Pretendard's official `unicode-range` dynamic subset CSS for both English and Korean locale routes. The browser downloads only files containing glyphs used on the page. Pretendard Std through `next/font/local` remains limited to standalone fixtures without a locale layout.
 
     ```ts
     import localFont from "next/font/local";
 
-    export const pretendard = localFont({
+    export const fixtureFont = localFont({
       src: "./fonts/PretendardStdVariable.woff2",
       adjustFontFallback: "Arial",
       display: "swap",
@@ -64,19 +64,23 @@ The [Next.js Font Module](https://nextjs.org/docs/app/api-reference/components/f
       weight: "45 920",
     });
 
-    export function localeFontClassName(locale: "ko" | "en") {
-      return locale === "ko" ? "font-pretendard-korean" : pretendard.variable;
-    }
+    const localeFontClasses = {
+      en: "font-pretendard-dynamic",
+      ko: "font-pretendard-dynamic",
+    } as const;
+
+    export const pretendardStylesheetHref =
+      "/fonts/pretendard-variable/dynamic-subset.css";
     ```
 
-    The Korean class points to the self-hosted official dynamic subset family. Each `@font-face` rule owns a different `unicode-range`; the app preserves all 92 official files and verifies their version, total size, and aggregate hash through `font-assets.json`.
+    The shared locale class points to the self-hosted official dynamic subset family. Each `@font-face` rule owns a different `unicode-range`; the app preserves all 92 official files and verifies the stylesheet, version, total size, and aggregate hash through `font-assets.json`.
 
   </Step>
 
   <Step>
     ### Treat preload and font swap as separate decisions
 
-    `preload` defaults to `true`, and its route scope depends on whether the font is used by a page, layout, or root layout. This app uses `preload: false` for the English local font because a dynamic locale layout must not preload it on Korean routes. The Korean `unicode-range` rules let the browser select only matching subset sources after CSS and text are known.
+    `preload` defaults to `true`, and its route scope depends on whether the font is used by a page, layout, or root layout. Locale layouts link one same-origin dynamic subset stylesheet, and its `unicode-range` rules let the browser select only matching sources after CSS and text are known. The standalone fixture font keeps `preload: false` because those test and diagram routes do not require an eager font request.
 
     `display: "swap"` renders fallback text first instead of hiding it. Explicit `adjustFontFallback: "Arial"` uses the local-font fallback metric contract to reduce layout shift during the swap.
 
@@ -111,15 +115,18 @@ The Tech search in this app disables provider preloading and lazy-imports the di
 
 Do not infer rendering improvements from transfer reduction alone. Measure same-origin resources with `PerformanceResourceTiming`, keep transfer and decoded sizes separate, then observe user-facing metrics.
 
-| Metric                   | Risk it detects                                      |
-| ------------------------ | ---------------------------------------------------- |
-| font transfer and decode | wrong locale source or full-font regression          |
-| route JavaScript bytes   | wider client boundaries or a heavy dependency        |
-| FCP and LCP              | delayed first and primary content                    |
-| CLS                      | movement while fallback text changes to the web font |
-| INP and hydration        | delayed interaction from client JavaScript execution |
+| Metric                         | Risk it detects                                      |
+| ------------------------------ | ---------------------------------------------------- |
+| font transfer and decode       | wrong glyph source or full-font regression           |
+| stylesheet transfer and decode | render-blocking CSS or public asset regression       |
+| route JavaScript bytes         | wider client boundaries or a heavy dependency        |
+| FCP and LCP                    | delayed first and primary content                    |
+| CLS                            | movement while fallback text changes to the web font |
+| INP and hydration              | delayed interaction from client JavaScript execution |
 
-The English routes decode `291,680 bytes` from one Pretendard Std source. Korean routes now decode only the glyph subsets needed by the initial page: Home `375,888 bytes`, Tech `314,612 bytes`, and Invest `311,860 bytes`. Compared with the previous `2,057,688-byte` full source, this is a reduction of about `81.7–84.8%` on the representative routes.
+English routes now decode Home `91,844 bytes`, Tech `37,996 bytes`, and Invest `37,996 bytes` of font subsets. Korean routes decode Home `375,888 bytes`, Tech `314,612 bytes`, and Invest `311,860 bytes`. Compared with the original `2,057,688-byte` full source, the representative routes reduce initial font decode size by about `81.7–98.2%`.
+
+The shared dynamic subset stylesheet is `59,318 bytes` decoded and about `14.7 KB` transferred with compression. The route budget includes all initial stylesheets, not just bundled Next.js CSS, so moving this file to `public` does not hide its render-path cost.
 
 Initial JavaScript decoded in the same navigation is `673,144 bytes` for Home, `1,024,160 bytes` for Tech, and `823,237 bytes` for Invest. Network transfer is `212,202`, `336,306`, and `263,502 bytes`, respectively. `initial-transfer-budget.json` keeps independent transfer and decoded caps to catch wider client boundaries without confusing compressed network cost with parse input.
 
@@ -132,7 +139,7 @@ pnpm --filter @jongminchung/web run bundle:report
 ## Completion criteria
 
 - Every locale uses the intended Pretendard source.
-- Korean routes request only `unicode-range` subsets needed by their initial text.
+- English and Korean routes request only `unicode-range` subsets needed by their initial text.
 - Features needed only after an action stay out of initial route JavaScript.
 - The font byte budget and bundle report pass independently.
 - FCP, LCP, CLS, and interaction behavior do not regress.

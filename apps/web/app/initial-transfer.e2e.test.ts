@@ -9,6 +9,8 @@ interface InitialTransferBudgetRoute {
   readonly expectedFontFamily: string;
   readonly maxInitialFontTransferBytes: number;
   readonly maxInitialFontDecodedBytes: number;
+  readonly maxInitialStylesheetTransferBytes: number;
+  readonly maxInitialStylesheetDecodedBytes: number;
   readonly maxInitialJavaScriptTransferBytes: number;
   readonly maxInitialJavaScriptDecodedBytes: number;
 }
@@ -47,12 +49,18 @@ for (const route of budget.routes) {
       const scripts = resources.filter((entry) =>
         new URL(entry.name).pathname.endsWith(".js"),
       );
+      const stylesheets = resources.filter((entry) =>
+        new URL(entry.name).pathname.endsWith(".css"),
+      );
 
       return {
         fontFamily: getComputedStyle(document.body).fontFamily,
         fontRequests: fonts.length,
         fontTransferBytes: sum(fonts, "transferSize"),
         fontDecodedBytes: sum(fonts, "decodedBodySize"),
+        stylesheetRequests: stylesheets.length,
+        stylesheetTransferBytes: sum(stylesheets, "transferSize"),
+        stylesheetDecodedBytes: sum(stylesheets, "decodedBodySize"),
         javaScriptRequests: scripts.length,
         javaScriptTransferBytes: sum(scripts, "transferSize"),
         javaScriptDecodedBytes: sum(scripts, "decodedBodySize"),
@@ -66,6 +74,13 @@ for (const route of budget.routes) {
     );
     expect(measurement.fontDecodedBytes).toBeLessThanOrEqual(
       route.maxInitialFontDecodedBytes,
+    );
+    expect(measurement.stylesheetRequests).toBeGreaterThan(0);
+    expect(measurement.stylesheetTransferBytes).toBeLessThanOrEqual(
+      route.maxInitialStylesheetTransferBytes,
+    );
+    expect(measurement.stylesheetDecodedBytes).toBeLessThanOrEqual(
+      route.maxInitialStylesheetDecodedBytes,
     );
     expect(measurement.javaScriptRequests).toBeGreaterThan(0);
     expect(measurement.javaScriptTransferBytes).toBeLessThanOrEqual(

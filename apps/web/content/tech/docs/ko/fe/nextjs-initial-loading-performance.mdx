@@ -50,12 +50,12 @@ Next.js App Router의 첫 방문에는 HTML, React Server Component payload, CSS
   <Step>
     ### locale에 필요한 glyph 파일을 선택함
 
-    `next/font/local`은 Google Font의 `subsets` 옵션을 제공하지 않음. 영어는 Pretendard Std Variable을 `next/font/local`로 적용하고, 한국어는 Pretendard 공식 `unicode-range` dynamic subset CSS를 적용함. 브라우저는 페이지에 실제로 사용된 glyph가 포함된 subset 파일만 내려받음
+    `next/font/local`은 Google Font의 `subsets` 옵션을 제공하지 않음. 이 앱은 영어와 한국어 locale route 모두 Pretendard 공식 `unicode-range` dynamic subset CSS를 적용함. 브라우저는 페이지에 실제로 사용된 glyph가 포함된 파일만 내려받음. `next/font/local`의 Pretendard Std는 locale layout이 없는 독립 fixture에만 유지함
 
     ```ts
     import localFont from "next/font/local";
 
-    export const pretendard = localFont({
+    export const fixtureFont = localFont({
       src: "./fonts/PretendardStdVariable.woff2",
       adjustFontFallback: "Arial",
       display: "swap",
@@ -64,19 +64,23 @@ Next.js App Router의 첫 방문에는 HTML, React Server Component payload, CSS
       weight: "45 920",
     });
 
-    export function localeFontClassName(locale: "ko" | "en") {
-      return locale === "ko" ? "font-pretendard-korean" : pretendard.variable;
-    }
+    const localeFontClasses = {
+      en: "font-pretendard-dynamic",
+      ko: "font-pretendard-dynamic",
+    } as const;
+
+    export const pretendardStylesheetHref =
+      "/fonts/pretendard-variable/dynamic-subset.css";
     ```
 
-    한국어 class는 self-host한 공식 dynamic subset family를 가리킴. 각 `@font-face`가 서로 다른 `unicode-range`를 소유하며, 앱은 공식 파일 92개의 버전·전체 크기·통합 hash를 `font-assets.json`으로 검증함
+    공통 locale class는 self-host한 공식 dynamic subset family를 가리킴. 각 `@font-face`가 서로 다른 `unicode-range`를 소유하며, 앱은 stylesheet와 공식 파일 92개의 버전·전체 크기·통합 hash를 `font-assets.json`으로 검증함
 
   </Step>
 
   <Step>
     ### preload와 font swap을 별도 결정으로 관리함
 
-    `preload`의 기본값은 `true`이며 font definition이 page, layout 또는 root layout 중 어디에서 사용되는지에 따라 적용 route가 달라짐. 이 앱은 동적 locale layout이 한국어 route에서 영어 local font를 선로드하지 않도록 영어 폰트에 `preload: false`를 사용함. 한국어 `unicode-range` 규칙은 CSS와 실제 텍스트가 확인된 뒤 일치하는 subset source만 선택하게 함
+    `preload`의 기본값은 `true`이며 font definition이 page, layout 또는 root layout 중 어디에서 사용되는지에 따라 적용 route가 달라짐. locale layout은 same-origin dynamic subset stylesheet 하나를 연결하고, `unicode-range` 규칙은 CSS와 실제 텍스트가 확인된 뒤 일치하는 source만 선택하게 함. 독립 fixture font는 test·diagram route가 eager 요청을 요구하지 않으므로 `preload: false`를 유지함
 
     `display: "swap"`은 fallback text를 먼저 표시해 보이지 않는 텍스트를 피함. `adjustFontFallback: "Arial"`은 local font fallback metric을 보정해 font 교체 시 layout shift를 줄이는 Next.js 계약을 명시함
 
@@ -111,15 +115,18 @@ const SearchDialog = lazy(() =>
 
 전송량 감소만으로 렌더링 개선을 단정하지 않음. same-origin 리소스를 `PerformanceResourceTiming`으로 측정하고 전송 크기와 decode 크기를 분리한 뒤 실제 사용자 지표를 함께 관찰함
 
-| 지표                  | 확인하는 위험                                 |
-| --------------------- | --------------------------------------------- |
-| font 전송·decode 크기 | 잘못된 locale font 또는 전체 font 회귀        |
-| route JavaScript byte | client boundary 확대와 heavy dependency 유입  |
-| FCP·LCP               | 첫 콘텐츠와 주요 콘텐츠 표시 지연             |
-| CLS                   | fallback에서 web font로 교체될 때 layout 이동 |
-| INP·hydration         | client JavaScript 실행과 상호작용 준비 지연   |
+| 지표                        | 확인하는 위험                                 |
+| --------------------------- | --------------------------------------------- |
+| font 전송·decode 크기       | 잘못된 glyph source 또는 전체 font 회귀       |
+| stylesheet 전송·decode 크기 | render-blocking CSS 또는 public asset 회귀    |
+| route JavaScript byte       | client boundary 확대와 heavy dependency 유입  |
+| FCP·LCP                     | 첫 콘텐츠와 주요 콘텐츠 표시 지연             |
+| CLS                         | fallback에서 web font로 교체될 때 layout 이동 |
+| INP·hydration               | client JavaScript 실행과 상호작용 준비 지연   |
 
-영어 route는 Pretendard Std source 하나에서 `291,680 bytes`를 decode함. 한국어 route는 초기 페이지에 필요한 glyph subset만 decode하며 Home `375,888 bytes`, Tech `314,612 bytes`, Invest `311,860 bytes`로 측정됨. 기존 `2,057,688-byte` 전체 source 대비 대표 route에서 약 `81.7–84.8%` 감소함
+영어 route의 font subset decode 크기는 Home `91,844 bytes`, Tech `37,996 bytes`, Invest `37,996 bytes`임. 한국어 route는 Home `375,888 bytes`, Tech `314,612 bytes`, Invest `311,860 bytes`임. 기존 `2,057,688-byte` 전체 source 대비 대표 route의 초기 font decode 크기가 약 `81.7–98.2%` 감소함
+
+공통 dynamic subset stylesheet는 decode 기준 `59,318 bytes`, 압축 전송 기준 약 `14.7 KB`임. route 예산은 Next.js bundle CSS뿐 아니라 모든 초기 stylesheet를 포함하므로 파일을 `public`으로 이동해도 렌더링 경로 비용이 누락되지 않음
 
 같은 navigation에서 decode한 초기 JavaScript는 Home `673,144 bytes`, Tech `1,024,160 bytes`, Invest `823,237 bytes`임. 네트워크 전송량은 각각 `212,202`, `336,306`, `263,502 bytes`임. `initial-transfer-budget.json`은 전송량과 decode 상한을 독립 관리해 압축된 네트워크 비용과 parsing 입력을 혼동하지 않게 함
 
@@ -132,7 +139,7 @@ pnpm --filter @jongminchung/web run bundle:report
 ## 완료 조건
 
 - 모든 locale에서 의도한 Pretendard font가 적용됨
-- 한국어 route가 초기 텍스트에 필요한 `unicode-range` subset만 요청함
+- 영어와 한국어 route가 초기 텍스트에 필요한 `unicode-range` subset만 요청함
 - route 초기 JavaScript에 action 이후 필요한 기능이 포함되지 않음
 - font byte budget과 bundle report가 독립적으로 통과함
 - FCP·LCP·CLS와 상호작용 결과가 이전보다 악화되지 않음

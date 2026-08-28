@@ -90,19 +90,18 @@
 ## 처리 결과
 
 - **제품 typography 일관성을 위해 영어와 한국어 route 모두 Pretendard CSS variable을 활성화함**
-  - `next/font/local`의 preload를 비활성화해 동적 locale layout이 전체 font를 공통 선로드하지 않게 함
-  - 영어 route는 공식 Latin·Greek·Cyrillic 배포 파일인 `PretendardStdVariable.woff2`를 사용함
-  - 한국어 route는 공식 dynamic subset 92개와 `unicode-range` CSS를 self-host해 실제 glyph에 필요한 파일만 요청함
+  - 두 locale route가 공식 dynamic subset 92개와 `unicode-range` CSS를 self-host해 실제 glyph에 필요한 파일만 요청함
+  - `PretendardStdVariable.woff2`와 `next/font/local`은 locale 없는 fixture로 범위를 제한함
   - 두 locale 모두 `font-display: swap`과 Arial 기반 fallback metric 보정을 사용함
 - **Home·Tech·Invest의 영어·한국어 대표 route를 독립 font budget으로 고정함**
-  - 영어 route의 decode 상한은 `291,680 bytes`, 전송 상한은 `310,000 bytes`임
+  - 영어 route의 decode 상한은 제품별 `40,000–95,000 bytes`, 전송 상한은 `45,000–100,000 bytes`임
   - 한국어 route의 decode 상한은 제품별 `320,000–380,000 bytes`, 전송 상한은 `330,000–400,000 bytes`임
-  - 측정 기준과 route별 상한은 `apps/web/initial-transfer-budget.json`이 소유함
+  - 초기 stylesheet도 제품별 전송·decode 상한을 적용하며 `apps/web/initial-transfer-budget.json`이 소유함
 - **두 locale에서 Pretendard typography를 유지하면서 전체 한국어 font의 초기 전송을 제거함**
-  - 영어 source는 기존 전체 source보다 `1,766,008 bytes`·약 `85.8%` 작음
-  - `Pretendard Std Variable`은 Pretendard 공식 `v1.3.9` 배포판을 same-origin으로 self-host함
+  - 영어 decode 크기는 Home `91,844 bytes`, Tech·Invest `37,996 bytes`로 감소함
   - 한국어 decode 크기는 Home `375,888 bytes`, Tech `314,612 bytes`, Invest `311,860 bytes`로 기존보다 약 `81.7–84.8%` 감소함
+  - 공통 dynamic subset stylesheet `59,318 bytes`도 초기 route 예산에 포함함
 - **cold-cache browser 검증은 요청 개수 대신 실제 glyph에 따른 총 전송량을 요구함**
-  - `PerformanceResourceTiming`으로 font와 JavaScript의 전송 크기·decode 크기를 분리함
+  - `PerformanceResourceTiming`으로 font·stylesheet·JavaScript의 전송 크기와 decode 크기를 분리함
   - dynamic subset 요청 수는 페이지 glyph에 따라 달라질 수 있으므로 총량과 적용 font family를 계약으로 검증함
   - Home·Tech·Invest의 영어·한국어 대표 route 6개가 변경 후 실제 측정을 통과함
