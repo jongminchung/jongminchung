@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://invest.jamie.kr"),
   title: { default: "Investment Notes", template: "%s · Investment Notes" },
   description:
-    "Source-grounded investment research notes that separate summary from personal judgment.",
+    "Analysis of 13F filings and original investment sources with reported facts kept separate from interpretation.",
   openGraph: {
     siteName: "Investment Notes",
     type: "website",
@@ -61,8 +61,8 @@ export default async function InvestmentLocaleLayout({
             name: "Investment Notes",
             description:
               locale === "ko"
-                ? "원문 요약과 개인 판단을 분리한 투자 리서치 노트"
-                : "Source-grounded investment research notes that separate summary from personal judgment.",
+                ? "13F 공시와 투자 원문을 분석하고 사실과 개인 판단을 분리한 투자 리서치 노트"
+                : "Analysis of 13F filings and original investment sources with reported facts kept separate from interpretation.",
             locale,
           })}
         />

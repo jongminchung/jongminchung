@@ -49,7 +49,7 @@ const content = {
         category: "Investment research",
         title: "Investment Notes",
         description:
-          "Source-grounded research notes that keep summaries separate from my interpretation.",
+          "13F filings and original investment sources analyzed with reported facts kept separate from interpretation.",
         tags: ["Research", "Sources", "Bilingual"],
         href: "https://invest.jamie.kr/en",
       },
@@ -103,7 +103,7 @@ const content = {
         category: "투자 리서치",
         title: "Investment Notes",
         description:
-          "책·영상·아티클의 출처 요약과 Jamie의 해석을 분리한 리서치 노트를 기록함",
+          "13F 공시와 투자 원문을 분석하고 공시 사실과 Jamie의 해석을 분리한 리서치 노트를 기록함",
         tags: ["Research", "Sources", "Bilingual"],
         href: "https://invest.jamie.kr/ko",
       },

@@ -26,10 +26,10 @@ import { createInvestmentArticleStructuredData } from "#lib/structured-data";
 const copy = {
   ko: {
     label: "INVESTMENT NOTES",
-    nav: ["노트", "책", "의견", "영상"],
+    nav: ["노트", "책"],
     intro: "출처를 읽고, 요약과 해석 사이의 경계를 남깁니다",
     description:
-      "책, 투자자의 공개 발언, 영상과 인터뷰를 근거로 핵심 주장과 Jamie의 판단을 분리해 기록합니다",
+      "13F 공시, 책과 인터뷰를 근거로 투자자의 선택을 분석하고 원문 사실과 Jamie의 판단을 분리해 기록합니다",
     empty: "첫 리서치 노트를 준비하고 있습니다",
     emptyBody:
       "모든 글은 출처 요약과 개인 의견을 구분하고 한국어와 영어를 함께 제공합니다",
@@ -38,11 +38,11 @@ const copy = {
   },
   en: {
     label: "INVESTMENT NOTES",
-    nav: ["Notes", "Books", "Voices", "Videos"],
+    nav: ["Notes", "Books"],
     intro:
       "Read the source and preserve the boundary between summary and judgment",
     description:
-      "Books, public commentary, videos, and interviews become source-grounded notes that separate the original claim from Jamie's interpretation",
+      "13F filings, books, and interviews become source-grounded notes that separate reported facts from Jamie's interpretation",
     empty: "The first research note is in preparation",
     emptyBody:
       "Every note separates source summary from personal commentary and ships in Korean and English",
@@ -102,8 +102,6 @@ export function InvestmentLayout({
         navigation={[
           { href: `/${locale}/notes`, label: text.nav[0] },
           { href: `/${locale}/sources/book`, label: text.nav[1] },
-          { href: `/${locale}/sources/social`, label: text.nav[2] },
-          { href: `/${locale}/sources/video`, label: text.nav[3] },
         ]}
       />
       {children}
