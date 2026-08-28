@@ -18,11 +18,30 @@ import {
   FieldLabel,
 } from "./components/field";
 import { Item, ItemContent, ItemTitle } from "./components/item";
+import { PreviewCard, PreviewCardTrigger } from "./components/preview-card";
 import { SheetContent } from "./components/sheet";
 import { Spinner } from "./components/spinner";
 import { Tabs, TabsList, TabsTrigger } from "./components/tabs";
 
 describe("공유 UI 동작", () => {
+  it("[성공] preview card trigger를 실제 링크로 렌더링함", () => {
+    const markup = renderToStaticMarkup(
+      createElement(
+        PreviewCard,
+        null,
+        createElement(
+          PreviewCardTrigger,
+          { href: "#footnote", id: "footnote-reference" },
+          "1",
+        ),
+      ),
+    );
+
+    expect(markup).toContain('data-slot="preview-card-trigger"');
+    expect(markup).toContain('href="#footnote"');
+    expect(markup).toContain('id="footnote-reference"');
+  });
+
   it("[성공] line variant에서만 탭 표시기를 렌더링함", () => {
     const markup = renderToStaticMarkup(
       createElement(

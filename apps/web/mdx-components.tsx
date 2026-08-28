@@ -1,10 +1,19 @@
 import type { MDXComponents } from "mdx/types";
 import Link from "next/link";
 import type { ComponentProps } from "react";
+import { FootnoteReference } from "#components/FootnoteReference";
 import { investmentMdxComponents } from "#invest-components/mdx-components";
 import { techMdxComponents } from "#tech-components/mdx-components";
 
 function MdxLink({ href = "", children, ...props }: ComponentProps<"a">) {
+  if ("data-footnote-ref" in props) {
+    return (
+      <FootnoteReference {...props} href={href}>
+        {children}
+      </FootnoteReference>
+    );
+  }
+
   const isExternal = href.startsWith("http://") || href.startsWith("https://");
   return (
     <Link

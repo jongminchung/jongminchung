@@ -146,10 +146,50 @@ test("[성공] 모바일 문서 경로를 다시 방문해도 검색 상태를 �
   await expect(search).toBeHidden();
 });
 
-test("[성공] 각주 참조와 본문 사이를 이동함", async ({ page }) => {
+test("[성공] 각주를 미리 보고 참조와 본문 사이를 이동함", async ({ page }) => {
   await page.goto("/en/the-expensive-main-thread");
 
-  const reference = page.locator("[data-footnote-ref]").first();
+  const references = page.locator("[data-footnote-ref]");
+  const reference = references.first();
+  const preview = page.locator('[data-footnote-preview="true"]');
+
+  await reference.focus();
+  await expect(preview).toBeVisible();
+  await expect(preview).toContainText(
+    "The compositor thread is responsible for compositing",
+  );
+  await expect(preview.locator("[data-footnote-backref]")).toHaveCount(0);
+  await expect(preview.locator("[id]")).toHaveCount(0);
+  await expectNoHorizontalOverflow(page);
+  await expectNoAccessibilityViolations(page, '[data-footnote-preview="true"]');
+  await page.keyboard.press("Escape");
+  await expect(preview).toBeHidden();
+  await expect(reference).toBeFocused();
+
+  await reference.evaluate((element) => element.blur());
+  await page.mouse.move(0, 0);
+  await reference.hover();
+  await expect(preview).toBeVisible();
+  await page.mouse.move(0, 0);
+  await expect(preview).toBeHidden();
+  await reference.focus();
+  await expect(preview).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(preview).toBeHidden();
+  await expect(reference).toBeFocused();
+
+  const sourceReference = references.nth(1);
+  await sourceReference.focus();
+  await expect(preview).toBeVisible();
+  const sourceLink = preview.getByRole("link", {
+    name: "https://web.dev/articles/rendering-performance",
+  });
+  await expect(sourceLink).toHaveAttribute("target", "_blank");
+  await expect(sourceLink).toHaveAttribute("rel", "noopener noreferrer");
+  await page.keyboard.press("Tab");
+  await expect(sourceLink).toBeFocused();
+  await page.keyboard.press("Escape");
+
   const footnote = page.locator("#user-content-fn-1");
   await reference.click();
 
@@ -159,6 +199,14 @@ test("[성공] 각주 참조와 본문 사이를 이동함", async ({ page }) =>
   await footnote.locator("[data-footnote-backref]").click();
   await expect(page).toHaveURL(/#user-content-fnref-1$/u);
   await expect(reference).toBeInViewport();
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/en/the-expensive-main-thread");
+  const mobileReference = page.locator("[data-footnote-ref]").first();
+  await expect(preview).toBeHidden();
+  await mobileReference.click();
+  await expect(page).toHaveURL(/#user-content-fn-1$/u);
+  await expect(page.locator("#user-content-fn-1")).toBeInViewport();
 });
 
 test("[성공] 버퍼를 로드하고 기술 검색 파일을 게시함", async ({
