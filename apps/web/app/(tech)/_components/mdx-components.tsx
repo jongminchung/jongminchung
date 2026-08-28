@@ -49,7 +49,7 @@ function MdxHeading2({ children, className, ...props }: ComponentProps<"h2">) {
   return (
     <h2
       {...props}
-      className={`scroll-mt-6 text-[32px] leading-[1.2] font-medium tracking-[-.02em] ${className ?? ""}`}
+      className={`mt-[52px] mb-[26px] scroll-mt-20 text-[26px] leading-[1.5] font-semibold tracking-[-.023em] ${className ?? ""}`}
     >
       {children}
     </h2>
@@ -60,7 +60,7 @@ function MdxHeading3({ children, className, ...props }: ComponentProps<"h3">) {
   return (
     <h3
       {...props}
-      className={`scroll-mt-6 text-2xl leading-[1.25] font-medium tracking-[-.012em] ${className ?? ""}`}
+      className={`mt-10 mb-3 scroll-mt-20 text-xl leading-[1.3] font-semibold tracking-[-.01em] ${className ?? ""}`}
     >
       {children}
     </h3>
@@ -68,21 +68,31 @@ function MdxHeading3({ children, className, ...props }: ComponentProps<"h3">) {
 }
 
 function MdxParagraph(props: ComponentProps<"p">) {
-  return <p className="my-4 text-sm leading-[1.4rem]" {...props} />;
+  return <p className="mt-0 mb-4 text-base leading-[1.6]" {...props} />;
 }
 
 function MdxUnorderedList(props: ComponentProps<"ul">) {
-  return <ul className="my-4 pl-6 text-sm leading-[1.4rem]" {...props} />;
+  return (
+    <ul
+      className="mt-0 mb-6 pl-[26px] text-base leading-[1.6] [&>li]:pl-1.5"
+      {...props}
+    />
+  );
 }
 
 function MdxOrderedList(props: ComponentProps<"ol">) {
-  return <ol className="my-4 pl-6 text-sm leading-[1.4rem]" {...props} />;
+  return (
+    <ol
+      className="mt-0 mb-6 pl-[26px] text-base leading-[1.6] [&>li]:pl-1.5"
+      {...props}
+    />
+  );
 }
 
 function MdxBlockquote(props: ComponentProps<"blockquote">) {
   return (
     <blockquote
-      className="my-4 border-l-[3px] border-input bg-muted px-[18px] py-[14px] text-sm leading-[1.4rem] text-muted-foreground"
+      className="my-[1.6rem] border-l-4 border-input bg-transparent py-0 pl-4 text-base leading-[1.6] text-foreground [&>p:last-child]:mb-0"
       {...props}
     />
   );

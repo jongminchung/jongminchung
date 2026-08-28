@@ -14,12 +14,24 @@ import {
   loadDocument,
 } from "#lib/documents";
 import {
+  createDocsHref,
+  docsCategoryIds,
+  documentsForDocsCategory,
+  getDocsCategory,
+  isDocsCategoryId,
+} from "#lib/tech/docs";
+import {
   getSeries,
   isSeriesId,
   seriesRegistry,
   type SeriesId,
 } from "#lib/tech/series";
 import { BlogIndex } from "#tech-components/BlogIndex";
+import {
+  DocsArticlePage,
+  DocsCategoryPage,
+  DocsLandingPage,
+} from "#tech-components/DocsPortal";
 import { DocsShell } from "#tech-components/DocsShell";
 import { DocumentPage } from "#tech-components/DocumentPage";
 import { SeriesDetail, SeriesIndex } from "#tech-components/SeriesPages";
@@ -107,6 +119,21 @@ export async function generateStaticParams(): Promise<StaticPageParam[]> {
     ...locales.map((locale) => ({ locale, slug: [] })),
     ...locales.map((locale) => ({ locale, slug: ["series"] })),
     ...locales.map((locale) => ({ locale, slug: ["showcase"] })),
+    ...locales.map((locale) => ({ locale, slug: ["docs"] })),
+    ...locales.flatMap((locale) =>
+      docsCategoryIds.map((category) => ({
+        locale,
+        slug: ["docs", category],
+      })),
+    ),
+    ...documents.flatMap((entries) =>
+      docsCategoryIds.flatMap((category) =>
+        documentsForDocsCategory(entries, category).map((document) => ({
+          locale: document.locale,
+          slug: ["docs", category, document.id],
+        })),
+      ),
+    ),
     ...locales.flatMap((locale) =>
       Object.keys(seriesRegistry).map((id) => ({
         locale,
@@ -159,6 +186,62 @@ export async function generateMetadata({
       },
       imageId: "showcase",
     });
+  if (slug.length === 1 && slug[0] === "docs")
+    return metadata({
+      title: "Docs",
+      description:
+        locale === "ko"
+          ? "프론트엔드와 Kubernetes 기술 지식을 주제별 문서로 탐색합니다."
+          : "Explore topic-oriented frontend and Kubernetes engineering documentation.",
+      locale,
+      canonical: createDocsHref(locale),
+      alternatePaths: {
+        ko: createDocsHref("ko"),
+        en: createDocsHref("en"),
+      },
+      imageId: "docs",
+    });
+  if (
+    slug.length >= 2 &&
+    slug[0] === "docs" &&
+    slug[1] !== undefined &&
+    isDocsCategoryId(slug[1])
+  ) {
+    const categoryId = slug[1];
+    const category = getDocsCategory(categoryId, locale);
+    if (slug.length === 2)
+      return metadata({
+        title: `${category.label} Docs`,
+        description: category.description,
+        locale,
+        canonical: createDocsHref(locale, categoryId),
+        alternatePaths: {
+          ko: createDocsHref("ko", categoryId),
+          en: createDocsHref("en", categoryId),
+        },
+        imageId: `docs/${categoryId}`,
+      });
+    if (slug.length === 3 && slug[2] !== undefined) {
+      const document = await findDocument(locale, slug[2]);
+      if (
+        document === null ||
+        !documentsForDocsCategory([document], categoryId).includes(document)
+      )
+        notFound();
+      return metadata({
+        title: document.title,
+        description: document.description,
+        locale,
+        canonical: createDocsHref(locale, categoryId, document.id),
+        alternatePaths: {
+          ko: createDocsHref("ko", categoryId, document.id),
+          en: createDocsHref("en", categoryId, document.id),
+        },
+        imageId: document.id,
+        type: "article",
+      });
+    }
+  }
   if (slug.length === 2 && slug[0] === "series" && isSeriesId(slug[1] ?? "")) {
     const id = slug[1] as SeriesId;
     const series = getSeries(id, locale);
@@ -221,17 +304,87 @@ export default async function DocsPage({
       ]),
     ) as Record<SeriesId, number>;
     return (
-      <DocsShell alternateHref={createSeriesHref(alternate)} locale={locale}>
+      <DocsShell
+        active="series"
+        alternateHref={createSeriesHref(alternate)}
+        locale={locale}
+      >
         <SeriesIndex counts={counts} locale={locale} />
       </DocsShell>
     );
   }
   if (slug.length === 1 && slug[0] === "showcase")
     return (
-      <DocsShell alternateHref={`/${alternate}/showcase`} locale={locale}>
+      <DocsShell
+        active="showcase"
+        alternateHref={`/${alternate}/showcase`}
+        locale={locale}
+      >
         <ShowcasePage locale={locale} />
       </DocsShell>
     );
+  if (slug.length === 1 && slug[0] === "docs") {
+    const documents = await getLocalizedDocuments(locale);
+    return (
+      <DocsShell
+        active="docs"
+        alternateHref={createDocsHref(alternate)}
+        locale={locale}
+      >
+        <DocsLandingPage documents={documents} locale={locale} />
+      </DocsShell>
+    );
+  }
+  if (
+    slug.length >= 2 &&
+    slug[0] === "docs" &&
+    slug[1] !== undefined &&
+    isDocsCategoryId(slug[1])
+  ) {
+    const categoryId = slug[1];
+    const documents = await getLocalizedDocuments(locale);
+    if (slug.length === 2)
+      return (
+        <DocsShell
+          active="docs"
+          alternateHref={createDocsHref(alternate, categoryId)}
+          locale={locale}
+        >
+          <DocsCategoryPage
+            categoryId={categoryId}
+            documents={documents}
+            locale={locale}
+          />
+        </DocsShell>
+      );
+    if (slug.length === 3 && slug[2] !== undefined) {
+      const document = await loadDocument(locale, slug[2]);
+      if (
+        document === null ||
+        documentsForDocsCategory([document.metadata], categoryId).length === 0
+      )
+        notFound();
+      return (
+        <DocsShell
+          active="docs"
+          alternateHref={createDocsHref(
+            alternate,
+            categoryId,
+            document.metadata.id,
+          )}
+          locale={locale}
+        >
+          <DocsArticlePage
+            categoryId={categoryId}
+            document={document}
+            documents={documents}
+            locale={locale}
+          />
+        </DocsShell>
+      );
+    }
+    notFound();
+  }
   if (slug.length === 2 && slug[0] === "series" && isSeriesId(slug[1] ?? "")) {
     const id = slug[1] as SeriesId;
     const documents = (await getLocalizedDocuments(locale))
@@ -241,6 +394,7 @@ export default async function DocsPage({
       );
     return (
       <DocsShell
+        active="series"
         alternateHref={createSeriesHref(alternate, id)}
         locale={locale}
       >

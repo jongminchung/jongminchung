@@ -29,7 +29,7 @@ function OutlineItems({ items }: { readonly items: readonly TOCItemType[] }) {
   const currentId = selectedId ?? activeId;
 
   return (
-    <ul className="m-0 grid list-none gap-0.5 p-0 [&_a]:block [&_a]:py-1 [&_a]:text-[11px] [&_a]:leading-[1.35] [&_a]:text-muted-foreground [&_a:hover]:text-foreground [&_a[data-active=true]]:font-medium [&_a[data-active=true]]:text-foreground [&_li[data-level='3']_a]:pl-3">
+    <ul className="relative m-0 ml-3 grid list-none gap-3 border-l-2 border-border p-0 [&_a]:-ml-0.5 [&_a]:block [&_a]:border-l-2 [&_a]:border-transparent [&_a]:py-0 [&_a]:pl-4 [&_a]:text-sm [&_a]:leading-5 [&_a]:text-muted-foreground [&_a]:transition-colors [&_a:hover]:text-foreground [&_a[data-active=true]]:border-primary [&_a[data-active=true]]:font-medium [&_a[data-active=true]]:text-foreground">
       {items.map((item) => {
         const id = item.url.replace(/^#/u, "");
         return (
@@ -54,14 +54,12 @@ export function DocumentOutline({
   readonly items: readonly TOCItemType[];
 }): React.JSX.Element {
   const t = useTranslations("tech.outline");
-  const outlineItems = items.filter(({ depth }) => depth <= 3);
+  const outlineItems = items.filter(({ depth }) => depth === 2);
 
   return (
     <AnchorProvider toc={outlineItems} single>
-      <div className="grid gap-2.5 py-3" aria-label={t("onThisPage")}>
-        <p className="mb-1 font-mono text-[10px] tracking-[.08em] text-muted-foreground uppercase">
-          {t("onThisPage")}
-        </p>
+      <div className="grid gap-5 py-3" aria-label={t("onThisPage")}>
+        <p className="sr-only">{t("onThisPage")}</p>
         <nav aria-label={t("documentOutline")}>
           <OutlineItems items={outlineItems} />
         </nav>

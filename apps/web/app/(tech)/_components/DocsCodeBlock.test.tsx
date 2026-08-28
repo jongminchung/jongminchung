@@ -25,6 +25,7 @@ describe("Fumadocs Tech code block", () => {
     expect(html).toContain('data-code-icon="typescript"');
     expect(html).toContain('class="line highlighted"');
     expect(html).toContain('aria-label="Copy Text"');
+    expect(html).toContain('aria-label="Code block: config.ts (');
   });
 
   it("[성공] 문서에서 복사를 명시적으로 끌 수 있음", () => {

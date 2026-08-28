@@ -10,16 +10,23 @@ import { SearchProvider, SearchTrigger } from "./SearchPalette";
 export function DocsShell({
   locale,
   alternateHref,
+  active = "blog",
   children,
 }: {
   readonly locale: Locale;
   readonly alternateHref: string;
+  readonly active?: "blog" | "series" | "showcase" | "docs";
   readonly children: ReactNode;
 }) {
   const labels =
     locale === "ko"
-      ? { blog: "블로그", series: "시리즈", showcase: "쇼케이스" }
-      : { blog: "Blog", series: "Series", showcase: "Showcase" };
+      ? {
+          blog: "Blog",
+          series: "Series",
+          showcase: "Showcase",
+          docs: "Docs",
+        }
+      : { blog: "Blog", series: "Series", showcase: "Showcase", docs: "Docs" };
   return (
     <SearchProvider locale={locale}>
       <TooltipProvider>
@@ -45,9 +52,26 @@ export function DocsShell({
             localeHref={alternateHref}
             localeLabel={locale === "ko" ? "EN" : "KO"}
             navigation={[
-              { href: `/${locale}`, label: labels.blog },
-              { href: `/${locale}/series`, label: labels.series },
-              { href: `/${locale}/showcase`, label: labels.showcase },
+              {
+                href: `/${locale}`,
+                label: labels.blog,
+                isActive: active === "blog",
+              },
+              {
+                href: `/${locale}/series`,
+                label: labels.series,
+                isActive: active === "series",
+              },
+              {
+                href: `/${locale}/showcase`,
+                label: labels.showcase,
+                isActive: active === "showcase",
+              },
+              {
+                href: `/${locale}/docs`,
+                label: labels.docs,
+                isActive: active === "docs",
+              },
             ]}
           />
           <div className="min-w-0">{children}</div>
@@ -55,7 +79,10 @@ export function DocsShell({
             groups={[
               {
                 label: locale === "ko" ? "탐색" : "Explore",
-                links: [{ href: `/${locale}`, label: labels.blog }],
+                links: [
+                  { href: `/${locale}`, label: labels.blog },
+                  { href: `/${locale}/docs`, label: labels.docs },
+                ],
               },
               {
                 label: locale === "ko" ? "모음" : "Collections",

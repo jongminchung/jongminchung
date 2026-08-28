@@ -30,8 +30,12 @@ export function DocumentPageHeader({
         ? "Engineering"
         : "Engineering"
       : (getSeries(metadata.series, locale)?.title ?? "Engineering");
+  const category =
+    metadata.documentKind === undefined
+      ? section
+      : `${section} · ${documentKindLabel(locale, metadata.documentKind)}`;
   return (
-    <div>
+    <div className="text-center">
       <nav
         aria-label={locale === "ko" ? "현재 위치" : "Breadcrumb"}
         className="sr-only"
@@ -60,24 +64,22 @@ export function DocumentPageHeader({
           </li>
         </ol>
       </nav>
-      <p className="m-0 font-mono text-[11px] font-medium tracking-[.08em] text-muted-foreground">
-        {metadata.documentKind === undefined
-          ? section
-          : `${section} · ${documentKindLabel(locale, metadata.documentKind)}`}
-      </p>
-      <div className="mt-4 flex items-start gap-3">
-        <h1 className="m-0 flex-1 font-sans text-[clamp(40px,4.5vw,58px)] leading-[1.03] font-medium tracking-[-0.045em] text-foreground">
-          {title}
-        </h1>
-        <EditPageLink
-          label={locale === "ko" ? "이 페이지 편집" : "Edit this page"}
-          href={editHref(locale, metadata.id)}
-        />
+      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm">
+        <time
+          className="font-medium text-foreground"
+          dateTime={metadata.publishedAt}
+        >
+          {metadata.publishedAt}
+        </time>
+        <span className="text-muted-foreground">{category}</span>
       </div>
-      <p className="mt-5 mb-0 max-w-[650px] text-[17px] leading-[1.55] text-muted-foreground">
+      <h1 className="mx-auto mt-2 mb-0 max-w-[780px] font-sans text-[clamp(32px,4vw,40px)] leading-[1.12] font-semibold tracking-[-0.03em] text-foreground">
+        {title}
+      </h1>
+      <p className="mx-auto mt-3 mb-0 max-w-xl text-[18px] leading-[1.625] text-muted-foreground">
         {metadata.description}
       </p>
-      <div className="mt-6 flex flex-wrap gap-x-[18px] gap-y-2 font-mono text-[11px] text-muted-foreground">
+      <div className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
         <span>
           {metadata.verifiedAt === undefined
             ? locale === "ko"
@@ -91,7 +93,7 @@ export function DocumentPageHeader({
           </time>
         </span>
         <a
-          className="inline-flex items-center gap-1 text-primary"
+          className="inline-flex items-center gap-1 font-medium text-primary underline underline-offset-4"
           href={metadata.sourceUrl}
           target="_blank"
           rel="noreferrer"
@@ -99,6 +101,10 @@ export function DocumentPageHeader({
           {locale === "ko" ? "근거 자료" : "Source"}
           <Icon icon="externalLink" className="size-3" />
         </a>
+        <EditPageLink
+          label={locale === "ko" ? "이 페이지 편집" : "Edit this page"}
+          href={editHref(locale, metadata.id)}
+        />
       </div>
     </div>
   );

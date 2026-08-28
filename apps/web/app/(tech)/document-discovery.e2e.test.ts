@@ -1,3 +1,7 @@
+import {
+  expectNoAccessibilityViolations,
+  expectNoHorizontalOverflow,
+} from "../../e2e-assertions";
 import { expect, test } from "../../e2e-fixtures";
 
 test("[성공] 시리즈 랜딩은 등록 순서와 언어 전환 경로를 유지함", async ({
@@ -54,6 +58,34 @@ test("[성공] 문서 개요 링크는 현재 위치와 URL hash를 함께 갱�
   await link.click();
   await expect(page).toHaveURL(/#mdx-pipeline$/u);
   await expect(link).toHaveAttribute("aria-current", "location");
+});
+
+test("[성공] 기술 글은 넓은 본문과 우측 개요를 반응형으로 배치함", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/en/nextjs-16");
+
+  const article = page.locator('main[data-variant="engineering"] > article');
+  const rail = page.locator('main[data-variant="engineering"] > aside');
+  const paragraph = article.locator("[data-docs-prose] > p").first();
+  const heading = article.locator("[data-docs-prose] > h2").first();
+  const [articleBox, railBox] = await Promise.all([
+    article.boundingBox(),
+    rail.boundingBox(),
+  ]);
+
+  expect(articleBox?.width).toBe(872);
+  expect(railBox?.width).toBe(200);
+  expect(railBox?.x).toBeGreaterThan(
+    (articleBox?.x ?? 0) + (articleBox?.width ?? 0),
+  );
+  await expect(paragraph).toHaveCSS("font-size", "16px");
+  await expect(paragraph).toHaveCSS("line-height", "25.6px");
+  await expect(heading).toHaveCSS("font-size", "26px");
+
+  await page.setViewportSize({ width: 1024, height: 900 });
+  await expect(rail).toBeHidden();
 });
 
 test("[성공] 관련 문서는 결정적이며 현재 문서를 제외함", async ({ page }) => {
@@ -120,6 +152,44 @@ test("[성공] FE 유지보수 시리즈는 문서 유형과 MDX 접근성 계�
       (element) => getComputedStyle(element).outlineStyle,
     ),
   ).not.toBe("none");
+});
+
+test("[성공] 상단 Docs 탭에서 FE와 K8s 문서를 계층적으로 탐색함", async ({
+  page,
+}) => {
+  await page.goto("/ko");
+  const globalNavigation = page.getByRole("navigation", {
+    name: "Editorial navigation",
+  });
+  await expect(
+    globalNavigation.getByRole("link", { name: "Docs" }),
+  ).toHaveAttribute("href", "/ko/docs");
+
+  await globalNavigation.getByRole("link", { name: "Docs" }).click();
+  await expect(page).toHaveURL(/\/ko\/docs$/u);
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Docs" }),
+  ).toBeVisible();
+  await expect(page.getByRole("link", { name: /프론트엔드/u })).toHaveAttribute(
+    "href",
+    "/ko/docs/fe",
+  );
+
+  await page.goto("/ko/docs/fe/tutorial-maintainable-tailwind-shadcn");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(
+    "유지보수 가능한 Tailwind",
+  );
+  await expect(
+    page.getByRole("navigation", { name: "프론트엔드 문서" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Read in English" }),
+  ).toHaveAttribute(
+    "href",
+    "/en/docs/fe/tutorial-maintainable-tailwind-shadcn",
+  );
+  await expectNoHorizontalOverflow(page);
+  await expectNoAccessibilityViolations(page);
 });
 
 test("[성공] OG 이미지 및 llms.txt는 정적 검색 자산과 함께", async ({

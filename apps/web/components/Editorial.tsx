@@ -25,6 +25,7 @@ export interface EditorialCopy {
 export interface EditorialNavigationItem {
   readonly href: string;
   readonly label: string;
+  readonly isActive?: boolean;
 }
 
 /** `EditorialHeader` 두 editorial 도메인의 탐색 순서를 공유함 */
@@ -63,7 +64,8 @@ export function EditorialHeader({
         >
           {navigation.map((item) => (
             <Link
-              className="hover:text-foreground"
+              aria-current={item.isActive ? "page" : undefined}
+              className="hover:text-foreground aria-[current=page]:font-medium aria-[current=page]:text-foreground"
               href={item.href}
               key={item.href}
             >
@@ -500,24 +502,44 @@ export function EditorialArticle({
   readonly footer?: ReactNode;
   readonly variant?: "default" | "engineering";
 }): React.JSX.Element {
+  const isEngineering = variant === "engineering";
+
   return (
     <main
-      className="mx-auto grid w-full max-w-[1080px] grid-cols-[180px_minmax(0,680px)] gap-x-16 px-8 pt-[76px] pb-24 data-[variant=engineering]:max-w-[1200px] data-[variant=engineering]:grid-cols-[160px_minmax(0,680px)] data-[variant=engineering]:gap-x-20 data-[variant=engineering]:pt-[clamp(48px,6vw,80px)] max-[960px]:block max-[960px]:max-w-[760px] max-[600px]:px-4 max-[600px]:pt-10"
+      className={
+        isEngineering
+          ? "mx-auto grid w-full max-w-[1200px] grid-cols-[minmax(0,872px)_200px] justify-center gap-x-12 px-8 pt-[clamp(48px,6vw,80px)] pb-24 max-[1279px]:block max-[1279px]:max-w-[936px] max-[600px]:px-4 max-[600px]:pt-10"
+          : "mx-auto grid w-full max-w-[1080px] grid-cols-[180px_minmax(0,680px)] gap-x-16 px-8 pt-[76px] pb-24 max-[960px]:block max-[960px]:max-w-[760px] max-[600px]:px-4 max-[600px]:pt-10"
+      }
       data-variant={variant}
     >
       <header
-        className="col-start-2 border-b pb-8 data-[variant=engineering]:border-b-0 data-[variant=engineering]:pb-7"
+        className={
+          isEngineering
+            ? "col-start-1 row-start-1 pb-10"
+            : "col-start-2 border-b pb-8"
+        }
         data-variant={variant}
       >
         {header}
       </header>
       <aside
-        className="sticky top-20 col-start-1 row-start-2 mt-8 max-h-[calc(100dvh-96px)] self-start overflow-auto border-r pr-5 data-[variant=engineering]:border-r-0 data-[variant=engineering]:pr-0 max-[960px]:relative max-[960px]:top-auto max-[960px]:my-8 max-[960px]:max-h-none max-[960px]:border-r-0 max-[960px]:border-b max-[960px]:pb-8"
+        className={
+          isEngineering
+            ? "sticky top-20 col-start-2 row-span-2 row-start-1 -mt-10 max-h-[calc(100dvh-96px)] self-start overflow-auto max-[1279px]:hidden"
+            : "sticky top-20 col-start-1 row-start-2 mt-8 max-h-[calc(100dvh-96px)] self-start overflow-auto border-r pr-5 max-[960px]:relative max-[960px]:top-auto max-[960px]:my-8 max-[960px]:max-h-none max-[960px]:border-r-0 max-[960px]:border-b max-[960px]:pb-8"
+        }
         data-variant={variant}
       >
         {rail}
       </aside>
-      <article className="col-start-2 row-start-2 min-w-0 pt-[18px] text-[16px] leading-[1.8]">
+      <article
+        className={
+          isEngineering
+            ? "col-start-1 row-start-2 min-w-0 pt-4 text-base leading-[1.6]"
+            : "col-start-2 row-start-2 min-w-0 pt-[18px] text-[16px] leading-[1.8]"
+        }
+      >
         {children}
         {footer}
       </article>
