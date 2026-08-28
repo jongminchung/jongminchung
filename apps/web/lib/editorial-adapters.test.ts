@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getLocalizedDocuments } from "./documents";
+import { getLocalizedDocsPages, getLocalizedDocuments } from "./documents";
 import {
   toInvestmentEditorialItem,
   toTechEditorialItem,
@@ -19,7 +19,7 @@ describe("editorial data adapter", () => {
   });
 
   it("[성공] Diátaxis 문서 유형을 표시하고 tag filter에 노출함", async () => {
-    const document = (await getLocalizedDocuments("ko")).find(
+    const document = (await getLocalizedDocsPages("ko")).find(
       ({ id }) => id === "tutorial-maintainable-tailwind-shadcn",
     );
     if (document === undefined) throw new Error("Missing tutorial fixture.");

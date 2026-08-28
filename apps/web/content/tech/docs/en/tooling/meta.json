@@ -1,0 +1,15 @@
+{
+  "title": "Tooling",
+  "defaultOpen": true,
+  "pages": [
+    "index",
+    "---Tutorial---",
+    "---How-to---",
+    "typescript-7-compatibility",
+    "---Reference---",
+    "node-26",
+    "pnpm-11",
+    "typescript-6",
+    "---Explanation---"
+  ]
+}

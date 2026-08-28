@@ -1,8 +1,11 @@
 import { relative, resolve } from "node:path";
 import {
-  createDocHref,
+  createBlogPostHref,
+  docsAreas,
   locales,
+  type BlogPostMetadata,
   type DocMetadata,
+  type DocsPageMetadata,
   type Locale,
 } from "./content-model.ts";
 import {
@@ -28,8 +31,7 @@ export interface ValidatedContentSource<
   readonly extractedReferences: readonly Readonly<{ href: string }>[];
 }
 
-const localizedMetadataFields = [
-  "documentKind",
+const sharedLocalizedMetadataFields = [
   "series",
   "seriesOrder",
   "status",
@@ -38,6 +40,12 @@ const localizedMetadataFields = [
   "packageVersion",
   "apiSymbols",
 ] as const satisfies readonly (keyof DocMetadata)[];
+
+const docsLocalizedMetadataFields = [
+  ...sharedLocalizedMetadataFields,
+  "area",
+  "documentKind",
+] as const satisfies readonly (keyof DocsPageMetadata)[];
 
 function getOrCreateLocalizedMetadata<Metadata>(
   byId: Map<string, Map<Locale, Metadata>>,
@@ -59,19 +67,11 @@ function containsBlockingTodo(body: string): boolean {
 }
 
 function referencePath(href: string): string | null {
-  if (!/^\/(?:ko|en)\//u.test(href)) return null;
+  if (!/^\/(?:ko|en)(?:\/|$)/u.test(href)) return null;
   return href.split(/[?#]/u, 1)[0] ?? null;
 }
 
-/** 단일 기술 문서의 경로와 게시 가능한 본문 계약을 검증함 */
-export function validateDocumentEntry(
-  document: ContentEntry<DocMetadata>,
-): void {
-  const expectedPath = `${document.metadata.locale}/${document.metadata.id}.mdx`;
-  if (document.relativePath !== expectedPath)
-    throw new Error(
-      `${document.relativePath}: expected path ${expectedPath} from metadata.`,
-    );
+function validatePublishedBody(document: ContentEntry<DocMetadata>): void {
   if (
     document.metadata.publicationStatus === "published" &&
     containsBlockingTodo(document.body)
@@ -80,14 +80,194 @@ export function validateDocumentEntry(
       `${document.relativePath}: published document contains a blocking TODO comment.`,
     );
   }
-  if (
-    document.metadata.series === "frontend-maintainability" &&
-    document.metadata.documentKind === undefined
-  ) {
+}
+
+/** 단일 Blog 글의 경로와 게시 가능한 본문 계약을 검증함 */
+export function validateBlogPostEntry(
+  post: ContentEntry<BlogPostMetadata>,
+): void {
+  const expectedPath = `${post.metadata.locale}/${post.metadata.id}.mdx`;
+  if (post.relativePath !== expectedPath)
     throw new Error(
-      `${document.relativePath}: frontend-maintainability documents require documentKind.`,
+      `${post.relativePath}: expected path ${expectedPath} from metadata.`,
     );
+  validatePublishedBody(post);
+}
+
+function expectedDocsPath(metadata: DocsPageMetadata): string {
+  if (metadata.id === "docs-overview") return `${metadata.locale}/index.mdx`;
+  if (metadata.id === `${metadata.area}-overview`)
+    return `${metadata.locale}/${metadata.area}/index.mdx`;
+  const filename = metadata.id.endsWith("-overview")
+    ? metadata.id.slice(0, -"-overview".length)
+    : metadata.id;
+  return `${metadata.locale}/${metadata.area}/${filename}.mdx`;
+}
+
+/** 단일 Docs 페이지의 영역·Diátaxis·경로 계약을 검증함 */
+export function validateDocsPageEntry(
+  page: ContentEntry<DocsPageMetadata>,
+): void {
+  const expectedPath = expectedDocsPath(page.metadata);
+  if (page.relativePath !== expectedPath)
+    throw new Error(
+      `${page.relativePath}: expected path ${expectedPath} from metadata.`,
+    );
+  validatePublishedBody(page);
+}
+
+/** Docs 파일 상대 경로를 canonical 공개 URL로 변환함 */
+export function docsHrefFromRelativePath(relativePath: string): string {
+  const [locale, ...segments] = relativePath.replace(/\.mdx$/u, "").split("/");
+  if (locale === undefined || !locales.includes(locale as Locale))
+    throw new Error(`Invalid localized docs path: ${relativePath}`);
+  if (segments.at(-1) === "index") segments.pop();
+  return `/${locale}/docs${segments.length === 0 ? "" : `/${segments.join("/")}`}`;
+}
+
+function validateLocalizedPairs<Metadata extends DocMetadata>(
+  label: string,
+  documents: readonly ValidatedContentSource<Metadata>[],
+  fields: readonly (keyof Metadata)[],
+): void {
+  const byId = new Map<string, Map<Locale, Metadata>>();
+  for (const document of documents) {
+    const localized = getOrCreateLocalizedMetadata(byId, document.metadata.id);
+    if (localized.has(document.metadata.locale))
+      throw new Error(
+        `Duplicate ${label} ID: ${document.metadata.locale}/${document.metadata.id}`,
+      );
+    localized.set(document.metadata.locale, document.metadata);
   }
+
+  for (const [id, localized] of byId) {
+    const missing = locales.filter((locale) => !localized.has(locale));
+    if (missing.length > 0)
+      throw new Error(
+        `${label} ${id} is missing locales: ${missing.join(", ")}`,
+      );
+
+    const reference = localized.get(locales[0]);
+    if (reference === undefined)
+      throw new Error(`${label} ${id} has no reference locale.`);
+    for (const locale of locales.slice(1)) {
+      const candidate = localized.get(locale);
+      if (candidate === undefined) continue;
+      for (const field of fields) {
+        if (
+          JSON.stringify(reference[field]) !== JSON.stringify(candidate[field])
+        ) {
+          throw new Error(
+            `${label} ${id} has inconsistent "${String(field)}" across locales.`,
+          );
+        }
+      }
+    }
+  }
+}
+
+function validateSeriesOrders(
+  documents: readonly ValidatedContentSource<DocMetadata>[],
+): void {
+  const seriesOrders = new Set<string>();
+  for (const { metadata } of documents) {
+    if (metadata.series === undefined || metadata.seriesOrder === undefined)
+      continue;
+    const orderKey = `${metadata.locale}:${metadata.series}:${metadata.seriesOrder}`;
+    if (seriesOrders.has(orderKey))
+      throw new Error(`Duplicate series order: ${orderKey}`);
+    seriesOrders.add(orderKey);
+  }
+}
+
+function validateInternalLinks(
+  documents: readonly ValidatedContentSource<DocMetadata>[],
+  knownPaths: ReadonlySet<string>,
+): void {
+  for (const document of documents) {
+    for (const reference of document.extractedReferences) {
+      const href = referencePath(reference.href);
+      if (href !== null && !knownPaths.has(href))
+        throw new Error(
+          `${relative(workspaceRoot, document.filePath)}: broken internal link ${href}`,
+        );
+    }
+  }
+}
+
+/** Blog collection의 개수·번역·canonical 계약을 검증함 */
+export function validateBlogPosts(
+  posts: readonly ValidatedContentSource<BlogPostMetadata>[],
+): void {
+  for (const post of posts) validateBlogPostEntry(post);
+  validateLocalizedPairs("Blog post", posts, sharedLocalizedMetadataFields);
+  validateSeriesOrders(posts);
+}
+
+/** Docs collection의 개수·영역·번역·canonical 계약을 검증함 */
+export function validateDocsPages(
+  pages: readonly ValidatedContentSource<DocsPageMetadata>[],
+  enforceInventory = false,
+): void {
+  for (const page of pages) validateDocsPageEntry(page);
+  validateLocalizedPairs("Docs page", pages, docsLocalizedMetadataFields);
+  validateSeriesOrders(pages);
+
+  if (!enforceInventory) return;
+  for (const locale of locales) {
+    const localized = pages.filter(
+      ({ metadata }) => metadata.locale === locale,
+    );
+    const migrated = localized.filter(
+      ({ metadata }) => !metadata.id.endsWith("-overview"),
+    );
+    if (migrated.length !== 19)
+      throw new Error(
+        `Docs ${locale} must contain 19 migrated pages; found ${migrated.length}.`,
+      );
+    for (const area of docsAreas) {
+      if (!localized.some(({ metadata }) => metadata.area === area))
+        throw new Error(`Docs ${locale} is missing area ${area}.`);
+    }
+  }
+}
+
+/** Blog와 Docs를 합친 ID·canonical·내부 링크 계약을 검증함 */
+export function validateTechContent(
+  posts: readonly ValidatedContentSource<BlogPostMetadata>[],
+  pages: readonly ValidatedContentSource<DocsPageMetadata>[],
+  options: Readonly<{ enforceInventory?: boolean }> = {},
+): void {
+  validateBlogPosts(posts);
+  validateDocsPages(pages, options.enforceInventory);
+
+  if (options.enforceInventory === true) {
+    for (const locale of locales) {
+      const count = posts.filter(
+        ({ metadata }) => metadata.locale === locale,
+      ).length;
+      if (count !== 24)
+        throw new Error(
+          `Blog ${locale} must contain 24 posts; found ${count}.`,
+        );
+    }
+  }
+
+  const blogIds = new Set(posts.map(({ metadata }) => metadata.id));
+  const duplicateId = pages.find(({ metadata }) => blogIds.has(metadata.id));
+  if (duplicateId !== undefined)
+    throw new Error(`Duplicate Blog/Docs ID: ${duplicateId.metadata.id}`);
+
+  const blogPaths = posts.map(({ metadata }) =>
+    createBlogPostHref(metadata.locale, metadata.id),
+  );
+  const docsPaths = pages.map(({ relativePath }) =>
+    docsHrefFromRelativePath(relativePath),
+  );
+  const knownPaths = new Set([...blogPaths, ...docsPaths]);
+  if (knownPaths.size !== blogPaths.length + docsPaths.length)
+    throw new Error("Blog and Docs canonical URL sets overlap.");
+  validateInternalLinks([...posts, ...pages], knownPaths);
 }
 
 /** 단일 투자 노트의 경로와 필수 본문 계약을 검증함 */
@@ -99,75 +279,6 @@ export function validateInvestmentNoteEntry(
   if (note.relativePath !== expectedPath)
     throw new Error(`${note.relativePath}: expected ${expectedPath}.`);
   if (validateBody) validateInvestmentNoteBody(note.body, note.relativePath);
-}
-
-/** 정규화된 기술 문서 집합의 locale·navigation·link 계약을 검증함 */
-export function validateDocuments(
-  documents: readonly ValidatedContentSource<DocMetadata>[],
-): void {
-  const byId = new Map<string, Map<Locale, DocMetadata>>();
-  const hrefs = new Set<string>();
-  const seriesOrders = new Set<string>();
-
-  for (const document of documents) {
-    validateDocumentEntry(document);
-    const { metadata } = document;
-    const href = createDocHref(metadata.locale, metadata.id);
-    if (hrefs.has(href)) throw new Error(`Duplicate document URL: ${href}`);
-    hrefs.add(href);
-
-    if (metadata.series !== undefined && metadata.seriesOrder !== undefined) {
-      const orderKey = `${metadata.locale}:${metadata.series}:${metadata.seriesOrder}`;
-      if (seriesOrders.has(orderKey))
-        throw new Error(`Duplicate series order: ${orderKey}`);
-      seriesOrders.add(orderKey);
-    }
-
-    const localized = getOrCreateLocalizedMetadata(byId, metadata.id);
-    if (localized.has(metadata.locale))
-      throw new Error(`Duplicate document URL: ${href}`);
-    localized.set(metadata.locale, metadata);
-  }
-
-  for (const [id, localized] of byId) {
-    const missing = locales.filter((locale) => !localized.has(locale));
-    if (missing.length > 0)
-      throw new Error(
-        `Document ${id} is missing locales: ${missing.join(", ")}`,
-      );
-
-    const reference = localized.get(locales[0]);
-    if (reference === undefined)
-      throw new Error(`Document ${id} has no reference locale.`);
-    for (const locale of locales.slice(1)) {
-      const candidate = localized.get(locale);
-      if (candidate === undefined) continue;
-      for (const field of localizedMetadataFields) {
-        if (
-          JSON.stringify(reference[field]) !== JSON.stringify(candidate[field])
-        ) {
-          throw new Error(
-            `Document ${id} has inconsistent "${field}" across locales.`,
-          );
-        }
-      }
-    }
-  }
-
-  const knownPaths = new Set(
-    documents.map(({ metadata }) =>
-      createDocHref(metadata.locale, metadata.id),
-    ),
-  );
-  for (const document of documents) {
-    for (const reference of document.extractedReferences) {
-      const href = referencePath(reference.href);
-      if (href !== null && !knownPaths.has(href))
-        throw new Error(
-          `${relative(workspaceRoot, document.filePath)}: broken internal link ${href}`,
-        );
-    }
-  }
 }
 
 /** 투자 노트의 경로·필수 섹션·번역 완전성 계약을 검증함 */

@@ -1,0 +1,18 @@
+{
+  "title": "Frontend",
+  "defaultOpen": true,
+  "pages": [
+    "index",
+    "---Tutorial---",
+    "tutorial-maintainable-tailwind-shadcn",
+    "---How-to---",
+    "how-to-audit-tailwind-shadcn",
+    "playwright-visual-regression-testing",
+    "---Reference---",
+    "tailwind-shadcn-maintainability-reference",
+    "nextjs-16",
+    "---Explanation---",
+    "why-tailwind-shadcn-maintainability-needs-ownership",
+    "frontend-maintainability"
+  ]
+}

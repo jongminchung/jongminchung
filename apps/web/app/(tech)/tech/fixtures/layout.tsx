@@ -7,7 +7,10 @@ import { themeStorageKeys } from "#lib/theme";
 import { pretendard, rootMetadata } from "../../../root-layout";
 import "../../tech.css";
 
-export const metadata: Metadata = rootMetadata;
+export const metadata: Metadata = {
+  ...rootMetadata,
+  robots: { index: false, follow: false },
+};
 export const instant = false;
 
 /** Playwright 전용 공용 UI fixture의 document shell을 제공함 */

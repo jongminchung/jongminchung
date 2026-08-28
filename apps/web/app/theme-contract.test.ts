@@ -151,7 +151,9 @@ describe("공통 디자인 토큰 계약", () => {
 
     expect(fontDefinition).toContain('from "next/font/local"');
     expect(fontDefinition).toContain("PretendardVariable.woff2");
+    expect(fontDefinition).toContain("preload: false");
     expect(fontDefinition).toContain('variable: "--font-pretendard"');
+    expect(fontDefinition).toContain('locale === "ko"');
     expect(webTheme).toContain("var(--font-pretendard, ui-sans-serif)");
   });
 

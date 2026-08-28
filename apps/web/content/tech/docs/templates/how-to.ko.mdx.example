@@ -1,0 +1,27 @@
+---
+id: how-to-slug
+locale: ko
+area: tooling
+documentKind: how-to
+title: "구체적인 작업을 완료하는 방법"
+description: "숙련 사용자가 해결할 작업과 결과를 설명"
+publishedAt: "YYYY-MM-DD"
+updatedAt: "YYYY-MM-DD"
+verifiedAt: "YYYY-MM-DD"
+tags: [topic, how-to]
+status: stable
+publicationStatus: draft
+sourceUrl: https://example.com/primary-source
+---
+
+## 적용 조건
+
+이 절차를 사용할 상황과 사용하지 않을 상황을 구분함
+
+## 작업 절차
+
+필요한 선택과 명령을 완료 순서로 제시함
+
+## 검증
+
+결과를 확인하는 명령과 실패 시 되돌릴 지점을 명시함

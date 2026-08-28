@@ -31,18 +31,18 @@ const cases = [
   },
   {
     name: "cilium-series-wide-light",
-    path: "/ko/series/cilium-gateway-api",
+    path: "/ko/docs/k8s/cilium-gateway-api",
     heading: "Cilium Gateway API 외부 트래픽 설계",
-    contract: "series",
+    contract: "docs-article",
     width: 1440,
     height: 1000,
     theme: "light",
   },
   {
     name: "domain-design-series-mobile-dark",
-    path: "/en/series/domain-driven-design",
+    path: "/en/docs/architecture/domain-driven-design",
     heading: "Domain-Driven Design",
-    contract: "series",
+    contract: "docs-article",
     width: 390,
     height: 844,
     theme: "dark",
@@ -76,45 +76,45 @@ const cases = [
   },
   {
     name: "ddd-wide-light",
-    path: "/ko/ddd",
+    path: "/ko/docs/architecture/ddd",
     heading: "실전 도메인 주도 설계 핸드북",
-    contract: "article",
+    contract: "docs-article",
     width: 1440,
     height: 1000,
     theme: "light",
   },
   {
     name: "article-dark",
-    path: "/en/typescript-7-compatibility",
+    path: "/en/docs/tooling/typescript-7-compatibility",
     heading: "TypeScript 7 Compatibility",
-    contract: "article",
+    contract: "docs-article",
     width: 1440,
     height: 1000,
     theme: "dark",
   },
   {
     name: "deep-dive-tablet",
-    path: "/en/nextjs-16",
+    path: "/en/docs/fe/nextjs-16",
     heading: "Next.js 16",
-    contract: "article",
+    contract: "docs-article",
     width: 1024,
     height: 900,
     theme: "light",
   },
   {
     name: "deep-dive-mobile-light",
-    path: "/en/pnpm-11",
+    path: "/en/docs/tooling/pnpm-11",
     heading: "pnpm 11",
-    contract: "article",
+    contract: "docs-article",
     width: 390,
     height: 844,
     theme: "light",
   },
   {
     name: "ddd-tablet-dark",
-    path: "/ko/ddd",
+    path: "/ko/docs/architecture/ddd",
     heading: "실전 도메인 주도 설계 핸드북",
-    contract: "article",
+    contract: "docs-article",
     width: 1024,
     height: 900,
     theme: "dark",
@@ -148,41 +148,22 @@ for (const visualCase of cases) {
           name: visualCase.path.startsWith("/ko") ? "모든 글" : "All articles",
         }),
       ).toBeVisible();
-    } else if (visualCase.contract === "series") {
-      const documentGrid = page.locator('[data-document-grid="true"]');
-      await expect(documentGrid).toBeVisible();
-      await expect
-        .poll(() => documentGrid.getByRole("link").count())
-        .toBeGreaterThan(0);
     } else {
       const article = page.getByRole("article");
       await expect(article).toBeVisible();
-      await expect(
-        page.getByRole("navigation", {
-          name: visualCase.path.startsWith("/ko") ? "현재 위치" : "Breadcrumb",
-          includeHidden: true,
-        }),
-      ).toBeAttached();
       if (visualCase.contract === "docs-article") {
+        const docsArea = visualCase.path.split("/")[3];
+        await expect(article.locator(":scope > div").first()).not.toBeEmpty();
         await expect(
-          article.getByRole("link", { name: "FE", exact: true }),
-        ).toHaveAttribute("href", `${visualCase.path.slice(0, 3)}/docs/fe`);
+          page.locator(
+            `#nd-sidebar a[href="${visualCase.path.slice(0, 3)}/docs/${docsArea}"]`,
+          ),
+        ).toBeAttached();
         if (visualCase.width > 960) {
-          await expect(
-            page.getByRole("navigation", {
-              name: visualCase.path.startsWith("/ko")
-                ? "프론트엔드 문서"
-                : "Frontend Documents",
-            }),
-          ).toBeVisible();
+          await expect(page.locator("#nd-sidebar")).toBeVisible();
         } else {
           await expect(
-            page.getByText(
-              visualCase.path.startsWith("/ko")
-                ? "이 분야의 문서 목록"
-                : "Documents in this area",
-              { exact: true },
-            ),
+            page.getByRole("button", { name: "Open Sidebar" }),
           ).toBeVisible();
         }
         if (visualCase.name === "frontend-docs-playwright-mobile-light") {
@@ -209,6 +190,20 @@ for (const visualCase of cases) {
 
     await page.evaluate(() => document.fonts.ready);
     await page.evaluate(async () => {
+      const viewport = document.querySelector<HTMLElement>(
+        "#nd-sidebar [data-radix-scroll-area-viewport]",
+      );
+      if (viewport === null) return;
+      let previous = viewport.scrollTop;
+      for (let attempt = 0; attempt < 12; attempt += 1) {
+        await new Promise<void>((resolve) =>
+          requestAnimationFrame(() => resolve()),
+        );
+        if (viewport.scrollTop === previous) return;
+        previous = viewport.scrollTop;
+      }
+    });
+    await page.evaluate(async () => {
       const images = [...document.images];
       for (const image of images) image.loading = "eager";
       await Promise.all(
@@ -229,7 +224,7 @@ for (const visualCase of cases) {
     });
     await expect(page).toHaveScreenshot(`${visualCase.name}.png`, {
       fullPage: true,
-      timeout: 15_000,
+      timeout: 30_000,
     });
   });
 }

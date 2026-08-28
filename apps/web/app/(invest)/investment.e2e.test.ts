@@ -20,6 +20,13 @@ test("[실패] 수평 바닥 바닥 없이 더블 언어 빈 연구 보고서를
       name: "Efficiency compounds when the feedback loop is owned end to end",
     }),
   ).toBeVisible();
+  await expect(
+    page.locator('link[rel="alternate"][hreflang="x-default"]'),
+  ).toHaveAttribute("href", "https://invest.jamie.kr/en");
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+    "content",
+    "https://invest.jamie.kr/investment-notes-og.png",
+  );
   await expectNoHorizontalOverflow(page);
   await expectNoAccessibilityViolations(page);
 });
@@ -29,6 +36,62 @@ test("[성공] 관계자 투자 관찰 파일을 게시함", async ({ siteReques
     const response = await siteRequest.get(path);
     expect(response.ok(), path).toBe(true);
   }
+  const sitemap = await (await siteRequest.get("/sitemap.xml")).text();
+  expect(sitemap).toContain("/en/series/operating-notes");
+  expect(sitemap).toContain("/en/sources/article");
+  expect(sitemap).not.toContain("/en/sources/book");
+});
+
+test("[성공] 투자 노트와 collection의 검색 엔터티를 연결함", async ({
+  page,
+}) => {
+  await page.goto("/en/notes/efficiency-compounds");
+
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    "href",
+    "https://invest.jamie.kr/en/notes/efficiency-compounds",
+  );
+  await expect(
+    page.locator('meta[property="article:published_time"]'),
+  ).toHaveAttribute("content", "2026-07-29");
+  await expect(
+    page.getByRole("link", { name: "Operating notes", exact: true }),
+  ).toHaveAttribute("href", "/en/series/operating-notes");
+  await expect(page.getByRole("link", { name: "#efficiency" })).toHaveAttribute(
+    "href",
+    "/en/tags/efficiency",
+  );
+  const schemaTypes = await page
+    .locator('script[type="application/ld+json"]')
+    .evaluateAll((scripts) =>
+      scripts.flatMap((script) => {
+        const schema = JSON.parse(script.textContent ?? "{}") as {
+          "@type"?: string;
+          "@graph"?: { "@type"?: string }[];
+        };
+        return (
+          schema["@graph"]?.map((node) => node["@type"] ?? "") ?? [
+            schema["@type"] ?? "",
+          ]
+        );
+      }),
+    );
+  expect(schemaTypes).toEqual(
+    expect.arrayContaining(["WebSite", "Article", "BreadcrumbList"]),
+  );
+
+  await page.goto("/en/series/Operating%20notes");
+  await expect(page).toHaveURL(/\/en\/series\/operating-notes$/u);
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    "href",
+    "https://invest.jamie.kr/en/series/operating-notes",
+  );
+
+  await page.goto("/en/sources/book");
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+    "content",
+    /noindex/u,
+  );
 });
 
 test("[성공] 투자 장소를 선택하고 기억함", async ({ page }) => {

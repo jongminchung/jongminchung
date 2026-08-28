@@ -1,89 +1,60 @@
 import {
+  createDocsPageHref,
   displayTitleFor,
+  docsAreas,
+  documentKinds,
   type ContentManifestEntry,
+  type DocsArea,
+  type DocsPageManifestEntry,
   type Locale,
 } from "../content-model.ts";
 import { getSeries } from "./series.ts";
 
-export const docsCategoryIds = ["fe", "k8s"] as const;
-export type DocsCategoryId = (typeof docsCategoryIds)[number];
+export const docsCategoryIds = docsAreas;
+export type DocsCategoryId = DocsArea;
 
-interface DocsCategoryDefinition {
-  readonly label: string;
-  readonly title: Readonly<Record<Locale, string>>;
-  readonly description: Readonly<Record<Locale, string>>;
-  readonly matches: (document: ContentManifestEntry) => boolean;
-  readonly section: (document: ContentManifestEntry) => string;
-  readonly sectionLabels: Readonly<
-    Record<string, Readonly<Record<Locale, string>>>
-  >;
-}
-
-const hasTag =
-  (...tags: readonly string[]) =>
-  (document: ContentManifestEntry): boolean =>
-    tags.some((tag) => document.tags.includes(tag));
-
-export const docsCategoryRegistry: Readonly<
-  Record<DocsCategoryId, DocsCategoryDefinition>
-> = {
+const docsCategoryRegistry = {
   fe: {
     label: "FE",
     title: { ko: "프론트엔드", en: "Frontend" },
     description: {
-      ko: "프론트엔드 문서는 React 컴포넌트, 디자인 시스템, 브라우저 성능과 유지보수 경계를 구현·검증하는 실무 기준을 설명함",
-      en: "Frontend documentation that explains practical standards for implementing and validating React components, design systems, browser performance, and maintainability boundaries.",
-    },
-    matches: hasTag("frontend"),
-    section: (document) => {
-      if (document.series === "frontend-maintainability")
-        return "maintainability";
-      if (hasTag("testing")(document)) return "testing";
-      if (hasTag("react", "components", "design-system")(document))
-        return "components";
-      return "performance";
-    },
-    sectionLabels: {
-      maintainability: {
-        ko: "Tailwind와 shadcn/ui 유지보수",
-        en: "Tailwind and shadcn/ui Maintainability",
-      },
-      components: {
-        ko: "React와 UI 아키텍처",
-        en: "React and UI Architecture",
-      },
-      testing: {
-        ko: "테스트와 품질",
-        en: "Testing and Quality",
-      },
-      performance: {
-        ko: "성능과 인터랙션",
-        en: "Performance and Interaction",
-      },
+      ko: "유지보수 가능한 UI, 테스트, 프레임워크 계약을 목적별로 탐색하는 문서",
+      en: "Purpose-oriented guidance for maintainable UI, testing, and framework contracts.",
     },
   },
   k8s: {
     label: "K8s",
     title: { ko: "Kubernetes", en: "Kubernetes" },
     description: {
-      ko: "Kubernetes 네트워킹, Cilium Gateway API와 분산 제어 루프의 설계·운영 기준을 정리함",
-      en: "Design and operational guidance for Kubernetes networking, Cilium Gateway API, and distributed control loops.",
-    },
-    matches: hasTag("kubernetes", "cilium"),
-    section: (document) =>
-      document.series === "cilium-gateway-api" ? "cilium" : "operations",
-    sectionLabels: {
-      cilium: {
-        ko: "Cilium Gateway API",
-        en: "Cilium Gateway API",
-      },
-      operations: {
-        ko: "운영과 신뢰성",
-        en: "Operations and Reliability",
-      },
+      ko: "Cilium Gateway API와 Kubernetes 네트워크 운영을 위한 문서",
+      en: "Documentation for Cilium Gateway API and Kubernetes network operations.",
     },
   },
-};
+  architecture: {
+    label: "Architecture",
+    title: { ko: "아키텍처", en: "Architecture" },
+    description: {
+      ko: "도메인 경계와 분산 실패를 설계하고 복구하는 방법을 연결하는 문서",
+      en: "Documentation connecting domain boundaries with distributed failure design and recovery.",
+    },
+  },
+  tooling: {
+    label: "Tooling",
+    title: { ko: "도구", en: "Tooling" },
+    description: {
+      ko: "Node.js, pnpm, TypeScript의 버전별 동작과 전환 절차를 조회하는 문서",
+      en: "Versioned behavior and migration guidance for Node.js, pnpm, and TypeScript.",
+    },
+  },
+  practices: {
+    label: "Practices",
+    title: { ko: "엔지니어링 실천", en: "Engineering Practices" },
+    description: {
+      ko: "기술 작업을 검증 가능한 협업 기록으로 연결하는 실천 문서",
+      en: "Practices for connecting technical work to verifiable collaboration records.",
+    },
+  },
+} as const;
 
 export interface LocalizedDocsCategory {
   readonly id: DocsCategoryId;
@@ -95,15 +66,15 @@ export interface LocalizedDocsCategory {
 export interface DocsDocumentGroup {
   readonly id: string;
   readonly label: string;
-  readonly documents: readonly ContentManifestEntry[];
+  readonly documents: readonly DocsPageManifestEntry[];
 }
 
-/** `isDocsCategoryId` 등록된 문서 카테고리 식별자를 판별함 */
+/** 등록된 문서 영역 식별자를 판별함 */
 export function isDocsCategoryId(value: string): value is DocsCategoryId {
   return docsCategoryIds.includes(value as DocsCategoryId);
 }
 
-/** `getDocsCategory` 지역화된 문서 카테고리 정보를 반환함 */
+/** 지역화된 문서 영역 정보를 반환함 */
 export function getDocsCategory(
   id: DocsCategoryId,
   locale: Locale,
@@ -117,63 +88,56 @@ export function getDocsCategory(
   });
 }
 
-/** `createDocsHref` 문서 허브와 카테고리·본문 경로를 생성함 */
+/** Docs root·영역·본문 canonical 경로를 생성함 */
 export function createDocsHref(
   locale: Locale,
   category?: DocsCategoryId,
   documentId?: string,
 ): string {
-  if (category === undefined) return `/${locale}/docs`;
-  if (documentId === undefined) return `/${locale}/docs/${category}`;
-  return `/${locale}/docs/${category}/${documentId}`;
+  return createDocsPageHref(locale, category, documentId);
 }
 
-function compareDocs(
-  left: ContentManifestEntry,
-  right: ContentManifestEntry,
-): number {
-  const leftSeries = left.series ?? "";
-  const rightSeries = right.series ?? "";
-  return (
-    leftSeries.localeCompare(rightSeries) ||
-    (left.seriesOrder ?? Number.POSITIVE_INFINITY) -
-      (right.seriesOrder ?? Number.POSITIVE_INFINITY) ||
-    displayTitleFor(left).localeCompare(displayTitleFor(right))
-  );
-}
-
-/** `documentsForDocsCategory` 카테고리에 포함되는 공개 문서를 반환함 */
+/** 지정 영역의 공개 Docs 페이지만 반환함 */
 export function documentsForDocsCategory(
   documents: readonly ContentManifestEntry[],
   categoryId: DocsCategoryId,
-): readonly ContentManifestEntry[] {
+): readonly DocsPageManifestEntry[] {
   return documents
-    .filter(docsCategoryRegistry[categoryId].matches)
-    .toSorted(compareDocs);
+    .filter(
+      (document): document is DocsPageManifestEntry =>
+        document.contentType === "docs" && document.area === categoryId,
+    )
+    .toSorted(
+      (left, right) =>
+        documentKinds.indexOf(left.documentKind) -
+          documentKinds.indexOf(right.documentKind) ||
+        (left.seriesOrder ?? Number.POSITIVE_INFINITY) -
+          (right.seriesOrder ?? Number.POSITIVE_INFINITY) ||
+        displayTitleFor(left).localeCompare(displayTitleFor(right)),
+    );
 }
 
-/** `groupDocsDocuments` 카테고리 문서를 좌측 탐색 섹션으로 묶음 */
+/** 영역 문서를 Diátaxis 유형 순서의 sidebar 그룹으로 묶음 */
 export function groupDocsDocuments(
   documents: readonly ContentManifestEntry[],
   categoryId: DocsCategoryId,
   locale: Locale,
 ): readonly DocsDocumentGroup[] {
-  const definition = docsCategoryRegistry[categoryId];
-  const grouped = new Map<string, ContentManifestEntry[]>();
-  for (const document of documentsForDocsCategory(documents, categoryId)) {
-    const section = definition.section(document);
-    const entries = grouped.get(section) ?? [];
-    entries.push(document);
-    grouped.set(section, entries);
-  }
-  return [...grouped].map(([id, entries]) => ({
-    id,
-    label: definition.sectionLabels[id]?.[locale] ?? id,
-    documents: Object.freeze(entries),
+  const labels = {
+    tutorial: { ko: "Tutorial · 학습", en: "Tutorial" },
+    "how-to": { ko: "How-to · 작업", en: "How-to" },
+    reference: { ko: "Reference · 조회", en: "Reference" },
+    explanation: { ko: "Explanation · 이해", en: "Explanation" },
+  } as const;
+  const pages = documentsForDocsCategory(documents, categoryId);
+  return documentKinds.map((kind) => ({
+    id: kind,
+    label: labels[kind][locale],
+    documents: pages.filter((page) => page.documentKind === kind),
   }));
 }
 
-/** `docsSeriesLabel` 문서가 속한 시리즈 이름을 지역화함 */
+/** 문서가 속한 시리즈 이름을 지역화함 */
 export function docsSeriesLabel(
   document: ContentManifestEntry,
   locale: Locale,

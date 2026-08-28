@@ -1,0 +1,12 @@
+{
+  "title": "Engineering Practices",
+  "defaultOpen": true,
+  "pages": [
+    "index",
+    "---Tutorial---",
+    "---How-to---",
+    "collaboration",
+    "---Reference---",
+    "---Explanation---"
+  ]
+}

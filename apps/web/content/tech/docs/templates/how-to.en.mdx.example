@@ -1,0 +1,27 @@
+---
+id: how-to-slug
+locale: en
+area: tooling
+documentKind: how-to
+title: "How to complete a specific task"
+description: "Describe the task and outcome for an experienced practitioner."
+publishedAt: "YYYY-MM-DD"
+updatedAt: "YYYY-MM-DD"
+verifiedAt: "YYYY-MM-DD"
+tags: [topic, how-to]
+status: stable
+publicationStatus: draft
+sourceUrl: https://example.com/primary-source
+---
+
+## When to use this procedure
+
+State the conditions where this procedure applies.
+
+## Procedure
+
+Present decisions and commands in completion order.
+
+## Verification
+
+Show how to verify the result and where to roll back after failure.

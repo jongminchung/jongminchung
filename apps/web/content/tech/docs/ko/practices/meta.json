@@ -1,0 +1,12 @@
+{
+  "title": "엔지니어링 실천",
+  "defaultOpen": true,
+  "pages": [
+    "index",
+    "---Tutorial · 학습---",
+    "---How-to · 작업---",
+    "collaboration",
+    "---Reference · 조회---",
+    "---Explanation · 이해---"
+  ]
+}

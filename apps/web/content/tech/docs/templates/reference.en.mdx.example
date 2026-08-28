@@ -1,0 +1,27 @@
+---
+id: reference-slug
+locale: en
+area: tooling
+documentKind: reference
+title: "A precise contract for lookup"
+description: "Define the version, API, configuration, or data contract in scope."
+publishedAt: "YYYY-MM-DD"
+updatedAt: "YYYY-MM-DD"
+verifiedAt: "YYYY-MM-DD"
+tags: [topic, reference]
+status: stable
+publicationStatus: draft
+sourceUrl: https://example.com/primary-source
+---
+
+## Scope
+
+State versions and support boundaries.
+
+## Contract
+
+List fields, types, defaults, and error conditions consistently.
+
+## Limitations
+
+Document exceptions and compatibility boundaries.

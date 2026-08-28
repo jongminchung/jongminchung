@@ -3,10 +3,16 @@ import type { MDXContent } from "mdx/types";
 import {
   compareDocumentMetadata,
   isLocale,
+  type BlogPostManifestEntry,
   type ContentManifestEntry,
+  type DocsPageManifestEntry,
   type Locale,
 } from "./content-model.ts";
-import { loadTechContent, readContentSnapshot } from "./content-repository.ts";
+import {
+  loadBlogContent,
+  loadDocsContent,
+  readContentSnapshot,
+} from "./content-repository.ts";
 
 export interface LoadedDocument {
   readonly metadata: ContentManifestEntry;
@@ -17,15 +23,43 @@ export interface LoadedDocument {
   readonly related: readonly ContentManifestEntry[];
 }
 
-/** `getDocuments` 데이터를 조회함 */
+/** validation·evidence용 전체 source 문서를 반환함 */
+export async function getSourceDocuments(): Promise<
+  readonly ContentManifestEntry[]
+> {
+  return readContentSnapshot().sourceTech.documents;
+}
+
+/** 공개된 Blog와 Docs 문서만 반환함 */
 export async function getDocuments(): Promise<readonly ContentManifestEntry[]> {
-  return readContentSnapshot().documents;
+  return readContentSnapshot().publishedTech.documents;
+}
+
+/** 전체 Blog 글을 반환함 */
+export async function getBlogPosts(): Promise<
+  readonly BlogPostManifestEntry[]
+> {
+  return readContentSnapshot().publishedTech.blogPosts;
+}
+
+/** 전체 Docs 페이지를 반환함 */
+export async function getDocsPages(): Promise<
+  readonly DocsPageManifestEntry[]
+> {
+  return readContentSnapshot().publishedTech.docsPages;
 }
 
 /** `getLocalizedDocuments` 데이터를 조회함 */
 export async function getLocalizedDocuments(locale: Locale) {
-  return (await getDocuments())
-    .filter((document) => document.locale === locale)
+  return (await getBlogPosts())
+    .filter((post) => post.locale === locale)
+    .sort(compareDocumentMetadata);
+}
+
+/** locale별 Docs 페이지를 반환함 */
+export async function getLocalizedDocsPages(locale: Locale) {
+  return (await getDocsPages())
+    .filter((page) => page.locale === locale)
     .sort(compareDocumentMetadata);
 }
 
@@ -35,6 +69,29 @@ export async function findDocument(locale: string, id: string) {
   return (
     (await getDocuments()).find(
       (document) => document.locale === locale && document.id === id,
+    ) ?? null
+  );
+}
+
+/** locale과 ID로 Blog 글만 조회함 */
+export async function findBlogPost(locale: string, id: string) {
+  if (!isLocale(locale)) return null;
+  return (
+    (await getBlogPosts()).find(
+      (post) => post.locale === locale && post.id === id,
+    ) ?? null
+  );
+}
+
+/** locale과 route slugs로 Docs 페이지만 조회함 */
+export async function findDocsPage(locale: string, slugs: readonly string[]) {
+  if (!isLocale(locale)) return null;
+  return (
+    (await getDocsPages()).find(
+      (page) =>
+        page.locale === locale &&
+        page.slugs.length === slugs.length &&
+        page.slugs.every((slug, index) => slug === slugs[index]),
     ) ?? null
   );
 }
@@ -60,6 +117,7 @@ export function rankRelatedDocuments(
     .flatMap((candidate) => {
       if (
         candidate.locale !== current.locale ||
+        candidate.contentType !== current.contentType ||
         candidate.id === current.id ||
         candidate.status === "deprecated"
       )
@@ -124,7 +182,9 @@ export async function loadDocument(locale: Locale, id: string) {
                 left.id.localeCompare(right.id),
             ),
     ),
-    loadTechContent(locale, id),
+    metadata.contentType === "blog"
+      ? loadBlogContent(locale, id)
+      : loadDocsContent(locale, [...metadata.slugs]),
     getRelatedDocuments(locale, id),
   ]);
   if (ContentModule === null)
@@ -140,5 +200,31 @@ export async function loadDocument(locale: Locale, id: string) {
         ? null
         : (seriesDocuments[index + 1] ?? null),
     related,
+  } satisfies LoadedDocument);
+}
+
+/** Blog 글 본문과 탐색 정보를 로드함 */
+export async function loadBlogPost(locale: Locale, id: string) {
+  const post = await findBlogPost(locale, id);
+  if (post === null) return null;
+  return loadDocument(locale, post.id);
+}
+
+/** Docs 본문과 page tree 경로를 로드함 */
+export async function loadDocsPage(locale: Locale, slugs: readonly string[]) {
+  const page = await findDocsPage(locale, slugs);
+  if (page === null) return null;
+  const ContentModule = await loadDocsContent(locale, [...slugs]);
+  if (ContentModule === null)
+    throw new Error(
+      `Missing compiled docs content for ${locale}/${slugs.join("/")}.`,
+    );
+  return Object.freeze({
+    metadata: page,
+    Content: ContentModule.body,
+    toc: ContentModule.toc,
+    previous: null,
+    next: null,
+    related: await getRelatedDocuments(locale, page.id),
   } satisfies LoadedDocument);
 }

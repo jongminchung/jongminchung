@@ -1,0 +1,31 @@
+---
+id: tutorial-slug
+locale: en
+area: fe
+documentKind: tutorial
+title: "A learning experience with a clear outcome"
+description: "Explain what the reader will build and how completion is verified."
+publishedAt: "YYYY-MM-DD"
+updatedAt: "YYYY-MM-DD"
+verifiedAt: "YYYY-MM-DD"
+tags: [topic, tutorial]
+status: stable
+publicationStatus: draft
+sourceUrl: https://example.com/primary-source
+---
+
+## Outcome
+
+Define the observable result the learner will reach.
+
+## Prerequisites
+
+List the required environment and prior knowledge.
+
+## Guided steps
+
+Lead the reader through an experience that produces the outcome.
+
+## Completion check
+
+Verify success and point to the next learning path.

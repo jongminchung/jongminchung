@@ -1,0 +1,18 @@
+{
+  "title": "프론트엔드",
+  "defaultOpen": true,
+  "pages": [
+    "index",
+    "---Tutorial · 학습---",
+    "tutorial-maintainable-tailwind-shadcn",
+    "---How-to · 작업---",
+    "how-to-audit-tailwind-shadcn",
+    "playwright-visual-regression-testing",
+    "---Reference · 조회---",
+    "tailwind-shadcn-maintainability-reference",
+    "nextjs-16",
+    "---Explanation · 이해---",
+    "why-tailwind-shadcn-maintainability-needs-ownership",
+    "frontend-maintainability"
+  ]
+}

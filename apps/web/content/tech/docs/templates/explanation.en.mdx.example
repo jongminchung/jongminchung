@@ -1,0 +1,27 @@
+---
+id: explanation-slug
+locale: en
+area: architecture
+documentKind: explanation
+title: "Connect a concept to its design rationale"
+description: "Define the concept, context, and design choices being explained."
+publishedAt: "YYYY-MM-DD"
+updatedAt: "YYYY-MM-DD"
+verifiedAt: "YYYY-MM-DD"
+tags: [topic, explanation]
+status: stable
+publicationStatus: draft
+sourceUrl: https://example.com/primary-source
+---
+
+## Core concept
+
+Define the model the reader needs to understand.
+
+## Why it matters
+
+Connect context to the design pressures involved.
+
+## Alternatives and limits
+
+Explain when another choice is valid and where this explanation stops.

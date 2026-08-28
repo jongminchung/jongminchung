@@ -1,0 +1,167 @@
+---
+id: failure-safe-distributed-transactions
+locale: en
+area: architecture
+documentKind: explanation
+series: distributed-failure-handling
+seriesOrder: 1
+title: "Distributed Failure Handling Part 1: How Far Did the Request Get?"
+description: "Analyze ambiguous outcomes caused by process termination and response loss, then establish a minimum safety boundary with transactions, idempotency, outbox, and reconciliation."
+publishedAt: "2026-08-25"
+updatedAt: "2026-08-25"
+verifiedAt: "2026-08-25"
+tags:
+  [
+    distributed-systems,
+    transactions,
+    idempotency,
+    reliability,
+    failure-handling,
+  ]
+status: experimental
+publicationStatus: published
+sourceUrl: https://github.com/jongminchung/jongminchung/blob/main/apps/web/content/tech/docs/en/architecture/failure-safe-distributed-transactions.mdx
+---
+
+## Key takeaways
+
+- **The hardest distributed-systems failure is often an ambiguous outcome where nobody can prove whether a request succeeded**
+- **A process can stop between database commit, an external API call, message publication, and response delivery**
+- **A failed response is not proof of failed processing, so the same command must be safe to inspect or execute again**
+- **The minimum safety boundary combines business invariants, local transactions, idempotency, Outbox, bounded retries, and reconciliation**
+- **Replicas and automatic restart improve availability for new requests but do not recover the consistency of an interrupted request**
+- **Reduce the problem with one store and simple asynchronous boundaries before selecting a complex pattern such as Saga**
+
+## One request has more than success and failure
+
+- **The outcome observed by a client can differ from the outcome durably stored by the server**
+  - Termination before database commit normally rolls back a local transaction
+  - Termination after commit but before response leaves the change complete while the client sees a timeout or `5xx`
+  - Retrying as a new request can duplicate a payment, order, or points credit
+
+- **A network timeout means unknown rather than failed**
+  - The remote system might not have received the request
+  - It might have succeeded and lost only the response
+  - It might still be processing the request
+  - One generic exception handler cannot produce a safe retry policy for all three cases
+
+| Termination point                              | Durable state             | Client observation  | Safe next action                          |
+| ---------------------------------------------- | ------------------------- | ------------------- | ----------------------------------------- |
+| Before database commit                         | No change                 | Disconnect or `5xx` | Retry with the same key                   |
+| After commit, before response                  | Change completed          | Timeout or `5xx`    | Look up or retry with the same key        |
+| Before external API call                       | Internal preparation only | Pending or failed   | Redeliver the stored command              |
+| After external success, before local result    | External effect may exist | `unknown`           | Query by external reference and reconcile |
+| After message handling, before acknowledgement | Consumer change completed | Message redelivered | Deduplicate in an idempotent consumer     |
+
+## Echo servers and transaction services fail differently
+
+- **A stateless echo server usually loses only the request that was running when its process stops**
+  - It has no durable partial commit to repair
+  - Another replica can accept a new request but cannot continue the disconnected one
+  - Resource headroom, probes, replicas, and timeout behavior are its main deployment checks
+
+- **An order or payment service can leave side effects behind a failed response**
+  - Payment authorization can complete before order persistence fails
+  - Inventory reservation can complete before event publication fails
+  - A refund can complete while its operation remains stuck in `compensating`
+
+- **Different infrastructure events expose a similar application failure**
+  - Kubernetes OOM kills, Pod replacement, and node failure can terminate the process
+  - OpenStack VM reboot, compute-host failure, and network loss can terminate the connection
+  - Deployment and operations automation can create the same boundary during otherwise healthy traffic
+
+## Fix business invariants in the durable store first
+
+- **Define each fact that may happen once as both a requirement and a database constraint**
+  - One `order_id` has at most one successful payment
+  - Total refunds for a `payment_id` cannot exceed the captured amount
+  - One `reservation_id` applies an inventory reservation only once
+  - Reusing an idempotency key with a different request body returns `409 Conflict`
+
+- **An application-side existence check cannot prevent duplicates by itself**
+  - Concurrent requests can both observe that a record is absent
+  - A database `PRIMARY KEY`, `UNIQUE`, or conditional `UPDATE` must be the final atomic guard
+  - A constraint conflict should lead to the existing result rather than an internal server error
+
+- **Prefer one local transaction whenever one database can enforce the invariant**
+  - Complete validation and authorization before side effects
+  - Store the order and idempotent result in the same commit boundary
+  - Let pre-commit termination roll back and post-commit retry discover the stored result
+
+```sql title="idempotent-operation.sql"
+CREATE TABLE operations (
+  scope text NOT NULL,
+  idempotency_key text NOT NULL,
+  request_hash text NOT NULL,
+  status text NOT NULL,
+  response_code integer,
+  response_body jsonb,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (scope, idempotency_key)
+);
+```
+
+## Add durable boundaries when work leaves the database
+
+- **A dual write that updates a database and then publishes a message becomes inconsistent when the second call fails**
+  - Store the business change and outbox event in one database transaction
+  - Let a separate publisher deliver unpublished events to the broker
+  - Allow duplicate delivery because the publisher can die immediately after a successful publish
+
+- **Consumers must be idempotent under at-least-once delivery**
+  - Track a stable `message_id` or business key
+  - Acknowledge only after the local transaction commits
+  - Move exhausted work to a dead-letter queue with an approved replay procedure
+
+![Ambiguous outcome and reconciliation path](https://kroki.io/plantuml/svg/eNpdkLFu4zAMhnc9BZE1SB_AQ9H6vHQ4NLgbunShJTYRIpMuRSX12x_kOIlxkyj-n0j9_0s2VCtDcvkUeUTFAbwMozCx_bUpESh5Qz4kWiH5iEEukQ_whSmTQ2-i8CtFYnP397B510AKr_u3DWCupwto2GOmm9a1nywjKVoUhi3I3N2CFOvlZ37Wte67UCHY_Kac8UDQq5xIZ7Gdy_XOPU5DLS6iN-hjLp1PUsIDGFXOMSzIfrmsJ_0hL-xjWpDH1bmrVdjtnqsraGpoA3KALcRAwyhG7Cc40eSqXrmuhQaECZJ4TGCKnNFX23dkmdqAUi7JQBQe2bx1rmtn7Oq5TptDgrH0KeYjqVuUCl09QwNou0SYbSfsCQKleCad3KJX9OYdGsiGfaJ7NLOBFTl7iFyXbpdPukcs8PS0IF-RQ52VqHoofGK5cG0Y_c-vln8X0gmw2FE0Glo8023JC3EoQ_oHqZ_sQw)
+
+- **An external API timeout needs authoritative status lookup and reconciliation**
+  - Connect the provider's idempotency key to the internal `operation_id`
+  - Let a reconciler inspect operations that remain `pending` beyond their deadline
+  - Use `review_required` and an operator decision when automatic classification is unsafe
+
+## Design retry and termination as one contract
+
+- **Every network call needs a timeout, retryable-error classification, attempt limit, and total time budget**
+  - Connection refusal, selected `5xx` responses, and rate limits can use backoff with jitter
+  - Validation errors, authorization failures, and insufficient inventory are permanent failures
+  - A gateway must not retry non-idempotent writes without a stable key
+
+- **Graceful shutdown improves availability but is not a consistency prerequisite**
+  - Stop accepting new HTTP requests and queue leases on `SIGTERM`
+  - Finish current work within the grace period or return it to a safe checkpoint
+  - OOM and host failure can skip hooks, so every command boundary must remain safe under termination
+
+- **Represent long work as an operation resource that outlives an HTTP connection**
+  - A start request can return `202 Accepted` with an `operation_id`
+  - A status API distinguishes `pending`, `succeeded`, `failed`, `unknown`, and `review_required`
+  - The client inspects the same operation instead of creating new work
+
+## Failure-point tests become deployment gates
+
+- **Inject termination immediately before and after side-effect boundaries rather than at arbitrary source lines**
+  - Kill the process immediately before and after database commit
+  - Lose the response immediately after an external API succeeds
+  - Stop publishers and consumers around broker publish and acknowledgement
+  - Deliver identical HTTP requests and messages concurrently
+
+- **Business measurements must survive infrastructure recovery**
+  - Duplicate orders, duplicate payments, and negative inventory remain at zero
+  - Expired `pending` operations are detected and reconciled
+  - Outbox oldest age, retry count, DLQ count, and unknown outcome count feed alerts
+  - Logs, traces, and events share one `operation_id` and causation ID
+
+## Conclusion and next articles
+
+- **The first deployment gate is evidence for invariants, local transactions, idempotency, Outbox, result lookup, and reconciliation rather than a workflow engine**
+- **Saga and explicit workflow state become candidates only for long-running multi-service work that cannot fit within this boundary**
+- **The next article explains [why Saga, state machines, and orchestrators are difficult to maintain](/en/docs/architecture/saga-state-machine-orchestrator-costs)**
+- **The final article compares [how OpenStack and Kubernetes converge after failures](/en/docs/architecture/reconciliation-in-openstack-and-kubernetes) with application design**
+
+## References
+
+- [Kubernetes Pod lifecycle](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/)
+- [Kubernetes resource management for Pods and containers](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)
+- [Kubernetes Jobs](https://kubernetes.io/docs/concepts/workloads/controllers/job/)
+- [OpenStack Compute API server evacuation](https://docs.openstack.org/api-ref/compute/)
+- [AWS Prescriptive Guidance transactional outbox pattern](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html)

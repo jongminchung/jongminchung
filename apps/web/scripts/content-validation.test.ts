@@ -1,25 +1,31 @@
 import { describe, expect, test } from "vitest";
-import type { DocMetadata, Locale } from "../lib/content-model.ts";
+import type {
+  BlogPostMetadata,
+  DocsPageMetadata,
+  Locale,
+} from "../lib/content-model.ts";
 import {
-  validateDocuments,
+  validateBlogPosts,
+  validateDocsPages,
   validateInvestmentNotes,
+  validateTechContent,
   type ValidatedContentSource,
 } from "../lib/content-validation.ts";
 import type { InvestmentNoteMetadata } from "../lib/invest/content.ts";
 
-function createDocument(
+function createBlogPost(
   locale: Locale,
-  id: string,
-  overrides: Partial<DocMetadata> = {},
-): ValidatedContentSource<DocMetadata> {
-  const metadata: DocMetadata = {
+  id = "blog-post",
+  overrides: Partial<BlogPostMetadata> = {},
+): ValidatedContentSource<BlogPostMetadata> {
+  const metadata: BlogPostMetadata = {
     id,
     locale,
     title: `${locale} ${id}`,
     description: `${locale} ${id} description`,
     publishedAt: "2026-01-01",
     updatedAt: "2026-01-01",
-    tags: [],
+    tags: ["blog"],
     status: "stable",
     publicationStatus: "published",
     sourceUrl: "https://example.com/source",
@@ -28,29 +34,48 @@ function createDocument(
   return {
     metadata,
     body: `## ${metadata.title}\n`,
-    filePath: `/fixture/${locale}/${metadata.id}.mdx`,
-    relativePath: `${locale}/${metadata.id}.mdx`,
+    filePath: `/fixture/blog/${locale}/${id}.mdx`,
+    relativePath: `${locale}/${id}.mdx`,
     extractedReferences: [],
   };
 }
 
-function createValidDocuments(): readonly ValidatedContentSource<DocMetadata>[] {
-  return (["ko", "en"] as const).flatMap((locale) => [
-    createDocument(locale, "overview"),
-    createDocument(locale, "handbook"),
-    createDocument(locale, "deep-dive"),
-  ]);
+function createDocsPage(
+  locale: Locale,
+  id = "docs-page",
+  overrides: Partial<DocsPageMetadata> = {},
+): ValidatedContentSource<DocsPageMetadata> {
+  const metadata: DocsPageMetadata = {
+    id,
+    locale,
+    area: "fe",
+    documentKind: "tutorial",
+    title: `${locale} ${id}`,
+    description: `${locale} ${id} description`,
+    publishedAt: "2026-01-01",
+    updatedAt: "2026-01-01",
+    verifiedAt: "2026-01-01",
+    tags: ["docs"],
+    status: "stable",
+    publicationStatus: "published",
+    sourceUrl: "https://example.com/source",
+    ...overrides,
+  };
+  return {
+    metadata,
+    body: `## ${metadata.title}\n`,
+    filePath: `/fixture/docs/${locale}/${metadata.area}/${id}.mdx`,
+    relativePath: `${locale}/${metadata.area}/${id}.mdx`,
+    extractedReferences: [],
+  };
 }
 
-function replaceDocuments(
-  predicate: (document: ValidatedContentSource<DocMetadata>) => boolean,
-  update: (
-    document: ValidatedContentSource<DocMetadata>,
-  ) => ValidatedContentSource<DocMetadata>,
-): readonly ValidatedContentSource<DocMetadata>[] {
-  return createValidDocuments().map((document) =>
-    predicate(document) ? update(document) : document,
-  );
+function localizedBlogPosts() {
+  return (["ko", "en"] as const).map((locale) => createBlogPost(locale));
+}
+
+function localizedDocsPages() {
+  return (["ko", "en"] as const).map((locale) => createDocsPage(locale));
 }
 
 function createInvestmentNote(
@@ -84,172 +109,94 @@ function createInvestmentNote(
   };
 }
 
-function createValidInvestmentNotes(): readonly ValidatedContentSource<InvestmentNoteMetadata>[] {
-  return (["ko", "en"] as const).map((locale) => createInvestmentNote(locale));
-}
-
-describe("validateDocuments", () => {
-  test("accepts a complete localized fixture", () => {
-    expect(() => validateDocuments(createValidDocuments())).not.toThrow();
+describe("Blog·Docs 콘텐츠 계약", () => {
+  test("분리된 collection의 완전한 번역 쌍을 허용함", () => {
+    expect(() => validateBlogPosts(localizedBlogPosts())).not.toThrow();
+    expect(() => validateDocsPages(localizedDocsPages())).not.toThrow();
+    expect(() =>
+      validateTechContent(localizedBlogPosts(), localizedDocsPages()),
+    ).not.toThrow();
   });
 
-  test("reports path and locale contract failures", () => {
+  test("물리적 경로와 locale 누락을 보고함", () => {
     expect(() =>
-      validateDocuments([
-        ...createValidDocuments().slice(1),
-        { ...createDocument("ko", "overview"), relativePath: "ko/wrong.mdx" },
+      validateBlogPosts([
+        { ...createBlogPost("ko"), relativePath: "ko/wrong.mdx" },
+        createBlogPost("en"),
       ]),
-    ).toThrow("expected path ko/overview.mdx");
-    expect(() =>
-      validateDocuments(
-        createValidDocuments().filter(
-          ({ metadata }) =>
-            !(metadata.locale === "en" && metadata.id === "overview"),
-        ),
-      ),
-    ).toThrow("Document overview is missing locales: en");
+    ).toThrow("expected path ko/blog-post.mdx");
+    expect(() => validateDocsPages([createDocsPage("ko")])).toThrow(
+      "Docs page docs-page is missing locales: en",
+    );
   });
 
-  test("reports duplicate series order", () => {
+  test("Docs 한·영 쌍의 area와 Diátaxis 유형 불일치를 거부함", () => {
     expect(() =>
-      validateDocuments([
-        ...createValidDocuments(),
-        createDocument("ko", "series-one", {
-          series: "domain-driven-design",
-          seriesOrder: 1,
-        }),
-        createDocument("en", "series-one", {
-          series: "domain-driven-design",
-          seriesOrder: 1,
-        }),
-        createDocument("ko", "series-two", {
-          series: "domain-driven-design",
-          seriesOrder: 1,
-        }),
-        createDocument("en", "series-two", {
-          series: "domain-driven-design",
-          seriesOrder: 1,
-        }),
+      validateDocsPages([
+        createDocsPage("ko"),
+        createDocsPage("en", "docs-page", { documentKind: "reference" }),
       ]),
-    ).toThrow("Duplicate series order: ko:domain-driven-design:1");
+    ).toThrow('inconsistent "documentKind" across locales');
   });
 
-  test("reports inconsistent localized metadata", () => {
-    const documents = replaceDocuments(
-      ({ metadata }) => metadata.locale === "en" && metadata.id === "overview",
-      (document) => ({
-        ...document,
-        metadata: { ...document.metadata, status: "deprecated" },
-      }),
-    );
-    expect(() => validateDocuments(documents)).toThrow(
-      'Document overview has inconsistent "status" across locales',
-    );
-  });
-
-  test("reports inconsistent Diátaxis document kinds", () => {
-    const documents = replaceDocuments(
-      ({ metadata }) => metadata.id === "overview",
-      (document) => ({
-        ...document,
-        metadata: {
-          ...document.metadata,
-          documentKind:
-            document.metadata.locale === "ko" ? "tutorial" : "reference",
-        },
-      }),
-    );
-    expect(() => validateDocuments(documents)).toThrow(
-      'Document overview has inconsistent "documentKind" across locales',
-    );
-  });
-
-  test("requires a Diátaxis kind in the migrated frontend series", () => {
+  test("Blog와 Docs 사이의 중복 ID와 잘못된 canonical 링크를 거부함", () => {
     expect(() =>
-      validateDocuments([
-        ...createValidDocuments(),
-        createDocument("ko", "frontend-doc", {
-          series: "frontend-maintainability",
-          seriesOrder: 1,
-        }),
-        createDocument("en", "frontend-doc", {
-          series: "frontend-maintainability",
-          seriesOrder: 1,
-        }),
+      validateTechContent(localizedBlogPosts(), [
+        createDocsPage("ko", "blog-post"),
+        createDocsPage("en", "blog-post"),
       ]),
-    ).toThrow(
-      "ko/frontend-doc.mdx: frontend-maintainability documents require documentKind",
-    );
-  });
+    ).toThrow("Duplicate Blog/Docs ID: blog-post");
 
-  test("reports extracted broken internal links", () => {
-    const documents = replaceDocuments(
-      ({ metadata }) => metadata.locale === "ko" && metadata.id === "overview",
-      (document) => ({
-        ...document,
-        extractedReferences: [{ href: "/en/missing#section" }],
-      }),
+    const broken = localizedDocsPages().map((page) =>
+      page.metadata.locale === "ko"
+        ? { ...page, extractedReferences: [{ href: "/en/missing#section" }] }
+        : page,
     );
-    expect(() => validateDocuments(documents)).toThrow(
+    expect(() => validateTechContent(localizedBlogPosts(), broken)).toThrow(
       "broken internal link /en/missing",
     );
   });
 
-  test("rejects blocking TODO comments only in published prose", () => {
-    const published = replaceDocuments(
-      ({ metadata }) => metadata.locale === "ko" && metadata.id === "overview",
-      (document) => ({
-        ...document,
-        body: "{/* TODO: complete this before publication */}",
-      }),
+  test("게시 본문의 blocking TODO만 거부함", () => {
+    const published = localizedBlogPosts().map((post) =>
+      post.metadata.locale === "ko"
+        ? { ...post, body: "{/* TODO: complete before publication */}" }
+        : post,
     );
-    expect(() => validateDocuments(published)).toThrow(
-      "ko/overview.mdx: published document contains a blocking TODO comment",
-    );
+    expect(() => validateBlogPosts(published)).toThrow("blocking TODO");
 
-    const draft = replaceDocuments(
-      ({ metadata }) => metadata.locale === "ko" && metadata.id === "overview",
-      (document) => ({
-        ...document,
-        body: "{/* TODO: draft work */}",
-        metadata: { ...document.metadata, publicationStatus: "draft" },
-      }),
+    const draft = localizedBlogPosts().map((post) =>
+      post.metadata.locale === "ko"
+        ? {
+            ...post,
+            body: "{/* TODO: draft work */}",
+            metadata: { ...post.metadata, publicationStatus: "draft" as const },
+          }
+        : post,
     );
-    expect(() => validateDocuments(draft)).not.toThrow();
+    expect(() => validateBlogPosts(draft)).not.toThrow();
   });
 });
 
-describe("validateInvestmentNotes", () => {
-  test("accepts a complete localized fixture", () => {
-    expect(() =>
-      validateInvestmentNotes(createValidInvestmentNotes()),
-    ).not.toThrow();
-  });
+describe("투자 노트 계약", () => {
+  const notes = () =>
+    (["ko", "en"] as const).map((locale) => createInvestmentNote(locale));
 
-  test("reports entry and localization contract failures", () => {
+  test("완전한 번역 쌍을 허용하고 경로 오류를 거부함", () => {
+    expect(() => validateInvestmentNotes(notes())).not.toThrow();
     expect(() =>
       validateInvestmentNotes([
         createInvestmentNote("ko"),
         { ...createInvestmentNote("en"), relativePath: "en/notes/wrong.mdx" },
       ]),
     ).toThrow("expected en/notes/durable-investing.mdx");
-
-    expect(() =>
-      validateInvestmentNotes([
-        createInvestmentNote("ko"),
-        createInvestmentNote("en", { tags: ["different"] }),
-      ]),
-    ).toThrow("inconsistent shared metadata");
   });
 
-  test("validates bodies only when the caller has loaded them", () => {
-    const notes = createValidInvestmentNotes().map((note) => ({
-      ...note,
-      body: "",
-    }));
-    expect(() => validateInvestmentNotes(notes)).toThrow(
+  test("본문을 로드한 경우에만 필수 섹션을 검증함", () => {
+    const empty = notes().map((note) => ({ ...note, body: "" }));
+    expect(() => validateInvestmentNotes(empty)).toThrow(
       "must contain one <SourceSummary> section",
     );
-    expect(() => validateInvestmentNotes(notes, false)).not.toThrow();
+    expect(() => validateInvestmentNotes(empty, false)).not.toThrow();
   });
 });

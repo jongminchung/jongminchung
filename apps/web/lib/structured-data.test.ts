@@ -4,8 +4,26 @@ import type { InvestmentNoteManifestEntry } from "./invest/content";
 import {
   createDocsCategoryStructuredData,
   createInvestmentArticleStructuredData,
+  createInvestmentCollectionStructuredData,
   createTechArticleStructuredData,
 } from "./structured-data";
+
+function graphNode(
+  schema: Readonly<Record<string, unknown>>,
+  type: string,
+): Readonly<Record<string, unknown>> {
+  const graph = schema["@graph"];
+  if (!Array.isArray(graph)) throw new Error("Expected a JSON-LD graph.");
+  const node = graph.find(
+    (candidate) =>
+      typeof candidate === "object" &&
+      candidate !== null &&
+      (candidate as Record<string, unknown>)["@type"] === type,
+  );
+  if (typeof node !== "object" || node === null)
+    throw new Error(`Missing ${type} graph node.`);
+  return node as Readonly<Record<string, unknown>>;
+}
 
 const document = {
   id: "seo-contract",
@@ -18,23 +36,25 @@ const document = {
   status: "stable",
   publicationStatus: "published",
   sourceUrl: "https://developers.google.com/search/docs",
+  contentType: "blog",
   href: "/ko/seo-contract",
 } as const satisfies ContentManifestEntry;
 
 describe("구조화 데이터", () => {
-  it("[성공] 기술 문서에 canonical URL과 저자·날짜·근거를 연결함", () => {
+  it("[성공] Blog 글에 canonical URL과 저자·날짜·근거를 연결함", () => {
     const schema = createTechArticleStructuredData(document);
+    const article = graphNode(schema, "BlogPosting");
 
-    expect(schema["@type"]).toBe("TechArticle");
-    expect(schema.mainEntityOfPage).toBe(
+    expect(article.mainEntityOfPage).toBe(
       "https://tech.jamie.kr/ko/seo-contract",
     );
-    expect(schema.dateModified).toBe("2026-08-02");
-    expect(schema.author).toMatchObject({
+    expect(article.dateModified).toBe("2026-08-02");
+    expect(graphNode(schema, "Person")).toMatchObject({
       "@type": "Person",
       name: "Jongmin Chung",
     });
-    expect(schema.citation).toBe("https://developers.google.com/search/docs");
+    expect(article.citation).toBe("https://developers.google.com/search/docs");
+    expect(graphNode(schema, "BreadcrumbList")).toBeDefined();
   });
 
   it("[성공] 문서 카테고리가 canonical 기술 문서를 포함함", () => {
@@ -78,8 +98,24 @@ describe("구조화 데이터", () => {
       href: "/en/notes/source-note",
     } as const satisfies InvestmentNoteManifestEntry;
 
-    expect(createInvestmentArticleStructuredData(note).citation).toEqual([
+    const schema = createInvestmentArticleStructuredData(note);
+    expect(graphNode(schema, "Article").citation).toEqual([
       "https://example.com/source",
+    ]);
+    expect(graphNode(schema, "BreadcrumbList")).toBeDefined();
+
+    expect(
+      createInvestmentCollectionStructuredData({
+        locale: "en",
+        pathname: "/en/notes",
+        title: "All notes",
+        description: "All research notes",
+        notes: [note],
+      }).hasPart,
+    ).toEqual([
+      expect.objectContaining({
+        url: "https://invest.jamie.kr/en/notes/source-note",
+      }),
     ]);
   });
 });

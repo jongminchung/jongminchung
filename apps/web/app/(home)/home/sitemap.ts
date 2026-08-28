@@ -9,6 +9,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       languages: {
         ko: "https://www.jamie.kr/ko",
         en: "https://www.jamie.kr/en",
+        "x-default": "https://www.jamie.kr/en",
       },
     },
   }));

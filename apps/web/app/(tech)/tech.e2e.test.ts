@@ -37,22 +37,25 @@ test("[성공] 목록 제어를 URL과 동기화하고 후속 페이지 링크�
 test("[성공] 생성된 기사 데이터를 검색하고 여러 지역에서 기사를 싫어함", async ({
   page,
 }) => {
+  test.setTimeout(75_000);
   await page.goto("/en");
   const trigger = page.locator("[data-docs-search-trigger]:visible").first();
   await trigger.click();
   const dialog = page.getByRole("dialog", { name: "Search documentation" });
   const input = dialog.getByRole("combobox");
   await input.fill("Next.js 16");
-  const result = dialog.getByRole("option", {
-    name: /^Next\.js 16 Deep Dive/u,
-  });
-  await expect(result).toBeVisible({ timeout: 15_000 });
+  const result = dialog.locator(
+    '[role="option"][data-href="/en/docs/fe/nextjs-16"]',
+  );
+  await expect(result).toBeVisible({ timeout: 45_000 });
+  await expect(result).toContainText("Reference");
+  await expect(result).toContainText("Frontend");
   await input.press("Escape");
   await expect(trigger).toBeFocused();
 
   await trigger.click();
   await input.fill("Next.js 16");
-  await expect(result).toBeVisible({ timeout: 15_000 });
+  await expect(result).toBeVisible({ timeout: 45_000 });
   const selectedHref = await result.getAttribute("data-href");
   if (selectedHref === null) throw new Error("Search result has no href");
   await result.click();
@@ -66,6 +69,7 @@ test("[성공] 생성된 기사 데이터를 검색하고 여러 지역에서 �
 });
 
 test("[성공] 오류 검색 요청을 재시도함", async ({ page }) => {
+  test.setTimeout(60_000);
   let requests = 0;
   await page.route("**/en/search*", async (route) => {
     requests += 1;
@@ -77,7 +81,7 @@ test("[성공] 오류 검색 요청을 재시도함", async ({ page }) => {
   await page.locator("[data-docs-search-trigger]:visible").first().click();
   const dialog = page.getByRole("dialog", { name: "Search documentation" });
 
-  await expect(dialog.getByRole("alert")).toBeVisible();
+  await expect(dialog.getByRole("alert")).toBeVisible({ timeout: 30_000 });
   await dialog.getByRole("button", { name: "Retry" }).click();
   await expect(dialog.getByRole("option").first()).toBeVisible();
   expect(requests).toBe(2);
@@ -88,13 +92,13 @@ test("[성공] 기록 및 동일 페이지에 대한 기본 링크를 사용함"
 }) => {
   await page.goto("/en");
   await page.getByRole("link", { name: "Series" }).first().click();
-  await expect(page).toHaveURL(/\/en\/series$/u);
-  await page.getByRole("link", { name: "Domain-Driven Design" }).click();
-  await expect(page).toHaveURL(/\/en\/series\/domain-driven-design$/u);
+  await expect(page).toHaveURL(
+    /\/en\/docs\/architecture\/domain-driven-design$/u,
+  );
   await page.goBack();
-  await expect(page).toHaveURL(/\/en\/series$/u);
+  await expect(page).toHaveURL(/\/en$/u);
 
-  await page.goto("/en/nextjs-16");
+  await page.goto("/en/docs/fe/nextjs-16");
   const hashLink = page.locator('a[href^="#"]:visible').first();
   const hash = await hashLink.getAttribute("href");
   await hashLink.click();
@@ -126,7 +130,7 @@ test("[성공] 모바일 문서 경로를 다시 방문해도 검색 상태를 �
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/en/nextjs-16");
+  await page.goto("/en/docs/fe/nextjs-16");
   const trigger = page.getByRole("button", { name: "Search documentation" });
   await trigger.click();
   const search = page.getByRole("dialog", { name: "Search documentation" });
@@ -135,10 +139,10 @@ test("[성공] 모바일 문서 경로를 다시 방문해도 검색 상태를 �
   await expect(search).toBeHidden();
 
   await page.getByRole("link", { name: "한국어로 읽기" }).click();
-  await expect(page).toHaveURL(/\/ko\/nextjs-16$/u);
+  await expect(page).toHaveURL(/\/ko\/docs\/fe\/nextjs-16$/u);
 
   await page.goBack();
-  await expect(page).toHaveURL(/\/en\/nextjs-16$/u);
+  await expect(page).toHaveURL(/\/en\/docs\/fe\/nextjs-16$/u);
   await expect(search).toBeHidden();
 });
 

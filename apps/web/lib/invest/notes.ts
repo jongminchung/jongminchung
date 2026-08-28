@@ -1,7 +1,6 @@
 import type { Locale } from "../content-contracts.ts";
 import {
   notesBySource,
-  loadInvestmentContent,
   publishedInvestmentNotes,
   readContentSnapshot,
 } from "../content-repository.ts";
@@ -9,6 +8,8 @@ import type {
   InvestmentNoteManifestEntry,
   InvestmentSourceKind,
 } from "./content.ts";
+import { investmentSeriesSlug } from "./routing.ts";
+import { loadInvestmentContent } from "./source.ts";
 
 /** `getInvestmentNotes` 데이터를 조회함 */
 export async function getInvestmentNotes(
@@ -26,6 +27,29 @@ export async function getNotesBySource(
   kind: InvestmentSourceKind,
 ): Promise<readonly InvestmentNoteManifestEntry[]> {
   return notesBySource(readContentSnapshot().investmentNotes, locale, kind);
+}
+
+/** `getNotesByTag` tag에 속한 공개 투자 노트를 반환함 */
+export async function getNotesByTag(
+  locale: Locale,
+  tag: string,
+): Promise<readonly InvestmentNoteManifestEntry[]> {
+  return (await getInvestmentNotes(locale)).filter((note) =>
+    note.tags.includes(tag),
+  );
+}
+
+/** `getNotesBySeriesSlug` URL slug에 해당하는 투자 series 노트를 반환함 */
+export async function getNotesBySeriesSlug(
+  locale: Locale,
+  slug: string,
+): Promise<readonly InvestmentNoteManifestEntry[]> {
+  const normalizedSlug = investmentSeriesSlug(slug);
+  return (await getInvestmentNotes(locale)).filter(
+    (note) =>
+      note.series !== undefined &&
+      investmentSeriesSlug(note.series) === normalizedSlug,
+  );
 }
 
 /** `findInvestmentNote` 데이터를 조회함 */

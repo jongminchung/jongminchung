@@ -23,6 +23,7 @@ test("[성공] 서버 HTML은 각 위치의 기본 문서 언어를 선언함", 
 });
 
 test("[성공] 로캘 소개두사가 합류은 404 응답은 요청된 문서 언어를 유지함", async ({
+  page,
   siteRequest,
 }) => {
   for (const [path, locale, heading] of [
@@ -34,8 +35,10 @@ test("[성공] 로캘 소개두사가 합류은 404 응답은 요청된 문서 �
     const response = await siteRequest.get(path);
     expect(response.status(), path).toBe(404);
     expect(response.headers()["content-language"], path).toBe(locale);
-    const html = await response.text();
-    expect(html, path).toContain(`\\"lang\\":\\"${locale}\\"`);
-    expect(html, path).toContain(heading);
+    await page.goto(path);
+    await expect(page.locator("html"), path).toHaveAttribute("lang", locale);
+    await expect(page.getByRole("heading", { level: 1 }), path).toHaveText(
+      heading,
+    );
   }
 });

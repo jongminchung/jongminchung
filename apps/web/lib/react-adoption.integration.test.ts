@@ -47,7 +47,9 @@ describe("React 19.2 adoption contract", () => {
       [
         "apps/web/app/(invest)/invest/[locale]/page.tsx",
         "apps/web/app/(invest)/invest/[locale]/notes/page.tsx",
-        "apps/web/app/(tech)/tech/[locale]/[[...slug]]/page.tsx",
+        "apps/web/app/(tech)/tech/[locale]/(blog)/page.tsx",
+        "apps/web/app/(tech)/tech/[locale]/(blog)/[slug]/page.tsx",
+        "apps/web/app/(tech)/tech/[locale]/docs/[[...slug]]/page.tsx",
         "apps/web/app/(tech)/tech/[locale]/search/route.ts",
       ].map(readRepositoryFile),
     );

@@ -1,7 +1,6 @@
 @import "@jongminchung/ui/globals.css";
 @import "fumadocs-ui/css/shadcn.css";
-@import "fumadocs-ui/css/lib/base.css";
-@import "fumadocs-ui/css/lib/shiki.css";
+@import "fumadocs-ui/css/preset.css";
 @import "../theme.css";
 
 @source "./**/*.{ts,tsx,mdx}";

@@ -1,0 +1,16 @@
+{
+  "title": "Kubernetes",
+  "defaultOpen": true,
+  "pages": [
+    "index",
+    "---Tutorial---",
+    "---How-to---",
+    "cilium-gateway-api-external-load-balancer",
+    "cilium-gateway-api-multi-control-plane",
+    "cilium-gateway-api-direct-public-ip",
+    "---Reference---",
+    "---Explanation---",
+    "cilium-gateway-api-foundations",
+    "cilium-gateway-api"
+  ]
+}

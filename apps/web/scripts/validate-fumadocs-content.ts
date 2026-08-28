@@ -1,29 +1,51 @@
-import { investmentCollection, techCollection } from "../.source/server.ts";
-import type { DocMetadata } from "../lib/content-model.ts";
 import {
-  validateDocuments,
+  blogCollection,
+  docsCollection,
+  investmentCollection,
+} from "../.source/server.ts";
+import type {
+  BlogPostMetadata,
+  DocsPageMetadata,
+} from "../lib/content-model.ts";
+import {
   validateInvestmentNotes,
+  validateTechContent,
   type ValidatedContentSource,
 } from "../lib/content-validation.ts";
 import type { InvestmentNoteMetadata } from "../lib/invest/content.ts";
 
 async function validateTech(): Promise<void> {
-  const sources = await Promise.all(
-    techCollection.map(
-      async (entry): Promise<ValidatedContentSource<DocMetadata>> => {
-        const compiled = await entry.load();
-        const raw = await entry.getText("raw");
-        return {
-          metadata: entry,
-          body: raw,
-          filePath: entry.info.fullPath,
-          relativePath: entry.info.path,
-          extractedReferences: compiled.extractedReferences ?? [],
-        };
-      },
+  const [blogSources, docsSources] = await Promise.all([
+    Promise.all(
+      blogCollection.map(
+        async (entry): Promise<ValidatedContentSource<BlogPostMetadata>> => {
+          const compiled = await entry.load();
+          return {
+            metadata: entry,
+            body: await entry.getText("raw"),
+            filePath: entry.info.fullPath,
+            relativePath: entry.info.path,
+            extractedReferences: compiled.extractedReferences ?? [],
+          };
+        },
+      ),
     ),
-  );
-  validateDocuments(sources);
+    Promise.all(
+      docsCollection.docs.map(
+        async (entry): Promise<ValidatedContentSource<DocsPageMetadata>> => {
+          const compiled = await entry.load();
+          return {
+            metadata: entry,
+            body: await entry.getText("raw"),
+            filePath: entry.info.fullPath,
+            relativePath: entry.info.path,
+            extractedReferences: compiled.extractedReferences ?? [],
+          };
+        },
+      ),
+    ),
+  ]);
+  validateTechContent(blogSources, docsSources, { enforceInventory: true });
 }
 
 async function validateInvestment(): Promise<void> {
@@ -48,5 +70,5 @@ async function validateInvestment(): Promise<void> {
 
 await Promise.all([validateTech(), validateInvestment()]);
 process.stdout.write(
-  `Validated ${techCollection.length} technical documents and ${investmentCollection.length} investment notes.\n`,
+  `Validated ${blogCollection.length} blog posts, ${docsCollection.docs.length} docs pages, and ${investmentCollection.length} investment notes.\n`,
 );

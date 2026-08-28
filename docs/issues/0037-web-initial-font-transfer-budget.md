@@ -1,6 +1,6 @@
 # Issue 0037: Web 초기 폰트 전송량과 예산 정리
 
-- 상태: 진행 중
+- 상태: 구현 완료·visual baseline 검토 대기
 - 우선순위: P2
 - 기준일: 2026-08-20
 - 영향 범위:
@@ -84,3 +84,19 @@
 - `pnpm --filter @jongminchung/web run test:e2e`
 - `pnpm run check`
 - `git diff --check`
+
+## 처리 결과
+
+- **영어 route는 system font를 사용하고 한국어 route에만 Pretendard CSS variable을 활성화함**
+  - `next/font/local`의 preload를 비활성화해 동적 locale layout이 전체 font를 공통 선로드하지 않게 함
+  - 한국어 route는 기존 `PretendardVariable.woff2`와 `font-display: swap`을 유지해 glyph·weight 범위를 보존함
+- **Home·Tech·Invest의 영어·한국어 대표 route를 독립 font budget으로 고정함**
+  - 영어 route의 cold-cache 초기 font budget은 `0 bytes`임
+  - 한국어 route의 상한은 기존 source 크기인 `2,057,688 bytes`임
+  - 측정 기준과 route별 상한은 `apps/web/font-budget.json`이 소유함
+- **선택 이유는 영어 초기 전송량을 즉시 제거하면서 한국어 glyph subsetting의 품질 위험을 만들지 않기 위함임**
+  - 한국어 전송량 자체의 추가 축소는 공식 dynamic subset 또는 glyph coverage 자동 검증을 확보한 뒤 별도 작업으로 진행함
+- **cold-cache browser 검증에서 Home·Tech·Invest의 route budget 6개가 모두 통과함**
+  - 영어 세 route는 초기 font request `0건`·`0 bytes`임
+  - 한국어 세 route는 초기 font request `1건`·`2,057,688 bytes`임
+  - 기존 Home·Invest visual baseline drift는 이번 범위에서 갱신하지 않음

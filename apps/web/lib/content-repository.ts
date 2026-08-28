@@ -1,27 +1,36 @@
 import {
+  blogPostMetadataSchema,
   compareDocumentMetadata,
-  createDocHref,
-  docMetadataSchema,
+  createBlogPostHref,
+  docsPageMetadataSchema,
+  type BlogPostManifestEntry,
+  type BlogPostMetadata,
   type ContentManifestEntry,
-  type DocMetadata,
+  type DocsPageManifestEntry,
+  type DocsPageMetadata,
   type Locale,
 } from "./content-model.ts";
 import {
-  validateDocuments,
-  validateInvestmentNotes,
+  validateTechContent,
   type ValidatedContentSource,
 } from "./content-validation.ts";
-import { investmentSource, techSource } from "./fumadocs-source.ts";
+import { blogSource, docsSource } from "./fumadocs-source.ts";
 import {
-  createInvestmentNoteHref,
-  investmentNoteMetadataSchema,
   type InvestmentNoteManifestEntry,
-  type InvestmentNoteMetadata,
   type InvestmentSourceKind,
 } from "./invest/content.ts";
+import { readInvestmentNoteCollection } from "./invest/source.ts";
+import { publishedContentOnly } from "./tech/publication.ts";
+
+export interface TechContentCollection {
+  readonly blogPosts: readonly BlogPostManifestEntry[];
+  readonly docsPages: readonly DocsPageManifestEntry[];
+  readonly documents: readonly ContentManifestEntry[];
+}
 
 export interface ContentSnapshot {
-  readonly documents: readonly ContentManifestEntry[];
+  readonly sourceTech: TechContentCollection;
+  readonly publishedTech: TechContentCollection;
   readonly investmentNotes: readonly InvestmentNoteManifestEntry[];
 }
 
@@ -31,11 +40,10 @@ function relativePath(path: string): string {
   return path.replace(/^[/\\]+/u, "").replaceAll("\\", "/");
 }
 
-function techMetadata(value: DocMetadata): DocMetadata {
-  return docMetadataSchema.parse({
+function sharedMetadata(value: BlogPostMetadata | DocsPageMetadata) {
+  return {
     id: value.id,
     locale: value.locale,
-    documentKind: value.documentKind,
     series: value.series,
     seriesOrder: value.seriesOrder,
     title: value.title,
@@ -43,7 +51,6 @@ function techMetadata(value: DocMetadata): DocMetadata {
     description: value.description,
     publishedAt: value.publishedAt,
     updatedAt: value.updatedAt,
-    verifiedAt: value.verifiedAt,
     tags: value.tags,
     status: value.status,
     publicationStatus: value.publicationStatus,
@@ -51,34 +58,34 @@ function techMetadata(value: DocMetadata): DocMetadata {
     packageName: value.packageName,
     packageVersion: value.packageVersion,
     apiSymbols: value.apiSymbols,
+  };
+}
+
+function blogMetadata(value: BlogPostMetadata): BlogPostMetadata {
+  return blogPostMetadataSchema.parse({
+    ...sharedMetadata(value),
+    verifiedAt: value.verifiedAt,
   });
 }
 
-function investmentMetadata(
-  value: InvestmentNoteMetadata,
-): InvestmentNoteMetadata {
-  return investmentNoteMetadataSchema.parse({
-    id: value.id,
-    locale: value.locale,
-    title: value.title,
-    description: value.description,
-    publishedAt: value.publishedAt,
-    updatedAt: value.updatedAt,
-    status: value.status,
-    tags: value.tags,
-    series: value.series,
-    sources: value.sources,
+function docsMetadata(value: DocsPageMetadata): DocsPageMetadata {
+  return docsPageMetadataSchema.parse({
+    ...sharedMetadata(value),
+    area: value.area,
+    documentKind: value.documentKind,
+    verifiedAt: value.verifiedAt,
   });
 }
 
-function loadTechDocuments(): readonly ContentManifestEntry[] {
-  const loaded = techSource.getPages().map((page) => {
-    const metadata = techMetadata(page.data);
+function loadBlogPosts() {
+  return blogSource.getPages().map((page) => {
+    const metadata = blogMetadata(page.data);
     const manifest = Object.freeze({
       ...metadata,
-      href: createDocHref(metadata.locale, metadata.id),
-    } satisfies ContentManifestEntry);
-    const validationSource: ValidatedContentSource<DocMetadata> = {
+      contentType: "blog",
+      href: createBlogPostHref(metadata.locale, metadata.id),
+    } satisfies BlogPostManifestEntry);
+    const validationSource: ValidatedContentSource<BlogPostMetadata> = {
       metadata,
       body: "",
       filePath: page.data.info.fullPath,
@@ -87,21 +94,18 @@ function loadTechDocuments(): readonly ContentManifestEntry[] {
     };
     return { manifest, validationSource };
   });
-
-  validateDocuments(loaded.map(({ validationSource }) => validationSource));
-  return Object.freeze(
-    loaded.map(({ manifest }) => manifest).sort(compareDocumentMetadata),
-  );
 }
 
-function loadInvestmentNotes(): readonly InvestmentNoteManifestEntry[] {
-  const loaded = investmentSource.getPages().map((page) => {
-    const metadata = investmentMetadata(page.data);
+function loadDocsPages() {
+  return docsSource.getPages().map((page) => {
+    const metadata = docsMetadata(page.data);
     const manifest = Object.freeze({
       ...metadata,
-      href: createInvestmentNoteHref(metadata.locale, metadata.id),
-    } satisfies InvestmentNoteManifestEntry);
-    const validationSource: ValidatedContentSource<InvestmentNoteMetadata> = {
+      contentType: "docs",
+      href: page.url,
+      slugs: Object.freeze([...page.slugs]),
+    } satisfies DocsPageManifestEntry);
+    const validationSource: ValidatedContentSource<DocsPageMetadata> = {
       metadata,
       body: "",
       filePath: page.data.info.fullPath,
@@ -110,27 +114,38 @@ function loadInvestmentNotes(): readonly InvestmentNoteManifestEntry[] {
     };
     return { manifest, validationSource };
   });
-
-  validateInvestmentNotes(
-    loaded.map(({ validationSource }) => validationSource),
-    false,
-  );
-  return Object.freeze(
-    loaded
-      .map(({ manifest }) => manifest)
-      .toSorted(
-        (left, right) =>
-          left.locale.localeCompare(right.locale) ||
-          right.publishedAt.localeCompare(left.publishedAt) ||
-          left.id.localeCompare(right.id),
-      ),
-  );
 }
 
 function createContentSnapshot(): ContentSnapshot {
+  const blog = loadBlogPosts();
+  const docs = loadDocsPages();
+  validateTechContent(
+    blog.map(({ validationSource }) => validationSource),
+    docs.map(({ validationSource }) => validationSource),
+    { enforceInventory: true },
+  );
+  const blogPosts = Object.freeze(
+    blog.map(({ manifest }) => manifest).sort(compareDocumentMetadata),
+  );
+  const docsPages = Object.freeze(
+    docs.map(({ manifest }) => manifest).sort(compareDocumentMetadata),
+  );
+  const sourceTech = Object.freeze({
+    blogPosts,
+    docsPages,
+    documents: Object.freeze([...blogPosts, ...docsPages]),
+  } satisfies TechContentCollection);
+  const publishedBlogPosts = publishedContentOnly(blogPosts);
+  const publishedDocsPages = publishedContentOnly(docsPages);
+  const publishedTech = Object.freeze({
+    blogPosts: publishedBlogPosts,
+    docsPages: publishedDocsPages,
+    documents: Object.freeze([...publishedBlogPosts, ...publishedDocsPages]),
+  } satisfies TechContentCollection);
   return Object.freeze({
-    documents: loadTechDocuments(),
-    investmentNotes: loadInvestmentNotes(),
+    sourceTech,
+    publishedTech,
+    investmentNotes: readInvestmentNoteCollection(),
   });
 }
 
@@ -141,16 +156,14 @@ export function readContentSnapshot(): ContentSnapshot {
   return productionSnapshot;
 }
 
-/** Fumadocs가 색인한 기술 문서 본문을 locale과 공개 ID로 조회함 */
-export async function loadTechContent(locale: Locale, id: string) {
-  return (await techSource.getPage([id], locale)?.data.load()) ?? null;
+/** Fumadocs가 색인한 Blog 본문을 locale과 공개 ID로 조회함 */
+export async function loadBlogContent(locale: Locale, id: string) {
+  return (await blogSource.getPage([id], locale)?.data.load()) ?? null;
 }
 
-/** Fumadocs가 색인한 투자 노트 본문을 locale과 공개 ID로 조회함 */
-export async function loadInvestmentContent(locale: Locale, id: string) {
-  return (
-    (await investmentSource.getPage(["notes", id], locale)?.data.load()) ?? null
-  );
+/** Fumadocs가 색인한 Docs 본문을 locale과 slugs로 조회함 */
+export async function loadDocsContent(locale: Locale, slugs: string[]) {
+  return (await docsSource.getPage(slugs, locale)?.data.load()) ?? null;
 }
 
 /** 게시된 투자 노트를 반환함 */

@@ -12,7 +12,7 @@ import {
   investOrigin,
 } from "#lib/structured-data";
 import { themeStorageKeys } from "#lib/theme";
-import { pretendard } from "../../../root-layout";
+import { localeFontClassName } from "../../../root-layout";
 import "../../invest.css";
 
 export const metadata: Metadata = {
@@ -49,7 +49,7 @@ export default async function InvestmentLocaleLayout({
   return (
     <html
       lang={locale}
-      className={pretendard.variable}
+      className={localeFontClassName(locale)}
       data-site="invest"
       data-theme="light"
       suppressHydrationWarning

@@ -33,13 +33,24 @@ export async function generateMetadata({
     description: metadata.description,
     alternates: {
       canonical: metadata.href,
-      languages: { ko: `/ko/notes/${slug}`, en: `/en/notes/${slug}` },
+      languages: {
+        ko: `/ko/notes/${slug}`,
+        en: `/en/notes/${slug}`,
+        "x-default": `/en/notes/${slug}`,
+      },
+      types: { "application/rss+xml": `/${locale}/rss.xml` },
     },
     openGraph: {
       type: "article",
       title: metadata.title,
       description: metadata.description,
       url: metadata.href,
+      locale: locale === "ko" ? "ko_KR" : "en_US",
+      alternateLocale: [locale === "ko" ? "en_US" : "ko_KR"],
+      publishedTime: metadata.publishedAt,
+      modifiedTime: metadata.updatedAt,
+      authors: ["https://www.jamie.kr"],
+      tags: [...metadata.tags],
       images: ["/investment-notes-og.png"],
     },
     twitter: {

@@ -1,119 +1,82 @@
 import type { SortedResult } from "fumadocs-core/search";
 import { createFromSource } from "fumadocs-core/search/server";
-import { techSource } from "../fumadocs-source.ts";
+import { displayTitleFor, type Locale } from "../content-model.ts";
+import { readContentSnapshot } from "../content-repository.ts";
+import { blogSource, docsSource } from "../fumadocs-source.ts";
+import { getDocsCategory } from "./docs.ts";
+import { isPublishedContent } from "./publication.ts";
+import {
+  createSearchAliases,
+  filterSearchResults,
+  interleaveSearchResults,
+  normalizeSearchText,
+  segmentSearchQuery,
+} from "./search.ts";
 
-/** 검색어와 색인 별칭에 공통 적용할 Unicode 정규화를 수행함 */
-export function normalizeSearchText(value: string): string {
-  return value
-    .normalize("NFKC")
-    .toLocaleLowerCase()
-    .replace(/\s+/gu, " ")
-    .trim();
-}
+const publicBlogSource = {
+  ...blogSource,
+  getPages: (locale?: string) =>
+    blogSource.getPages(locale).filter((page) => isPublishedContent(page.data)),
+};
+const publicDocsSource = {
+  ...docsSource,
+  getPages: (locale?: string) =>
+    docsSource.getPages(locale).filter((page) => isPublishedContent(page.data)),
+};
 
-function compact(value: string): string {
-  return normalizeSearchText(value).replace(/[^\p{L}\p{N}]+/gu, "");
-}
-
+const sources = [publicBlogSource, publicDocsSource] as const;
 const searchTerms = new Map(
   (["ko", "en"] as const).map((locale) => [
     locale,
     new Set(
-      techSource
-        .getPages(locale)
-        .flatMap((page) =>
-          [
-            page.data.title,
-            page.data.description,
-            ...page.data.tags,
-            ...(page.data.apiSymbols ?? []),
-          ].flatMap(
-            (value) =>
-              normalizeSearchText(value).match(/[\p{L}\p{N}]+/gu) ?? [],
+      sources.flatMap((source) =>
+        source
+          .getPages(locale)
+          .flatMap((page) =>
+            [
+              page.data.title,
+              page.data.description,
+              ...page.data.tags,
+              ...(page.data.apiSymbols ?? []),
+            ].flatMap(
+              (value) =>
+                normalizeSearchText(value).match(/[\p{L}\p{N}]+/gu) ?? [],
+            ),
           ),
-        ),
+      ),
     ),
   ]),
 );
 
-/** 공백 없는 질의를 locale 메타데이터 사전의 가장 긴 단어열로 분해함 */
-export function segmentSearchQuery(query: string, locale: "ko" | "en"): string {
-  const normalized = normalizeSearchText(query);
-  if (normalized.includes(" ")) return normalized;
-  const input = compact(normalized);
-  const dictionary = [...(searchTerms.get(locale) ?? [])]
-    .map(compact)
-    .filter((term) => term.length >= 2 && input.includes(term))
-    .toSorted((left, right) => right.length - left.length);
-  const paths = new Map<number, string[]>([[0, []]]);
-  for (let index = 0; index < input.length; index += 1) {
-    const path = paths.get(index);
-    if (path === undefined) continue;
-    for (const term of dictionary) {
-      if (!input.startsWith(term, index)) continue;
-      const next = index + term.length;
-      const candidate = [...path, term];
-      const current = paths.get(next);
-      if (current === undefined || candidate.length < current.length)
-        paths.set(next, candidate);
-    }
-  }
-  return paths.get(input.length)?.join(" ") ?? normalized;
+async function searchIndex(page: typeof blogSource.$inferPage) {
+  const structuredData = await page.data.structuredData();
+  const aliases = createSearchAliases([
+    page.data.title,
+    page.data.description,
+    ...page.data.tags,
+    ...(page.data.apiSymbols ?? []),
+    ...structuredData.headings.map(({ content }) => content),
+  ]);
+  return {
+    id: page.url,
+    title: page.data.title,
+    description: page.data.description,
+    breadcrumbs: ["Blog"],
+    url: page.url,
+    structuredData: {
+      headings: structuredData.headings,
+      contents: [
+        ...structuredData.contents,
+        ...aliases.map((content) => ({ heading: undefined, content })),
+      ],
+    },
+  };
 }
 
-/** 띄어쓰기 없는 한영 질의를 위한 연속 단어 별칭을 생성함 */
-export function createSearchAliases(
-  values: readonly string[],
-): readonly string[] {
-  const aliases = new Set<string>();
-  for (const value of values) {
-    const normalized = normalizeSearchText(value);
-    if (normalized.length === 0) continue;
-    aliases.add(normalized);
-    const words = normalized.split(" ").filter(Boolean);
-    for (let start = 0; start < words.length; start += 1) {
-      for (
-        let length = 2;
-        length <= 8 && start + length <= words.length;
-        length += 1
-      ) {
-        aliases.add(words.slice(start, start + length).join(""));
-      }
-    }
-  }
-  return Object.freeze([...aliases]);
-}
-
-function groupResults(
-  results: readonly SortedResult[],
-): readonly SortedResult[][] {
-  const groups: SortedResult[][] = [];
-  for (const result of results) {
-    if (result.type === "page") groups.push([result]);
-    else groups.at(-1)?.push(result);
-  }
-  return groups;
-}
-
-/** 결과 그룹에 검색 토큰 절반 이상이 실제 포함된 경우만 유지함 */
-export function filterSearchResults(
-  results: readonly SortedResult[],
-  query: string,
-): readonly SortedResult[] {
-  const tokens = normalizeSearchText(query)
-    .split(" ")
-    .map(compact)
-    .filter(Boolean);
-  if (tokens.length === 0) return results;
-  const required = Math.ceil(tokens.length / 2);
-  return groupResults(results).flatMap((group) => {
-    const corpus = compact(group.map(({ content }) => content).join(" "));
-    const matched = tokens.filter((token) => corpus.includes(token)).length;
-    return matched >= required ? group : [];
-  });
-}
-
-const searchApi = createFromSource(techSource, {
+const blogSearch = createFromSource(publicBlogSource, {
+  buildIndex: searchIndex,
+});
+const docsSearch = createFromSource(publicDocsSource, {
   buildIndex: async (page) => {
     const structuredData = await page.data.structuredData();
     const aliases = createSearchAliases([
@@ -127,8 +90,10 @@ const searchApi = createFromSource(techSource, {
       id: page.url,
       title: page.data.title,
       description: page.data.description,
-      breadcrumbs: page.data.series === undefined ? [] : [page.data.series],
-      tag: [...page.data.tags],
+      breadcrumbs: [
+        page.data.documentKind,
+        getDocsCategory(page.data.area, page.data.locale).title,
+      ],
       url: page.url,
       structuredData: {
         headings: structuredData.headings,
@@ -141,13 +106,60 @@ const searchApi = createFromSource(techSource, {
   },
 });
 
-/** locale별 ZBSearch 결과를 제품 검색 품질 규칙으로 후처리함 */
+function emptyQueryResults(locale: Locale): readonly SortedResult[] {
+  const snapshot = readContentSnapshot();
+  const blog = snapshot.publishedTech.blogPosts
+    .filter((post) => post.locale === locale)
+    .slice(0, 4)
+    .map(
+      (post): SortedResult => ({
+        id: post.href,
+        url: post.href,
+        type: "page",
+        content: displayTitleFor(post),
+        breadcrumbs: ["Blog"],
+      }),
+    );
+  const docs = snapshot.publishedTech.docsPages
+    .filter(
+      (page) =>
+        page.locale === locale &&
+        (page.id === "docs-overview" || page.id.endsWith("-overview")),
+    )
+    .slice(0, 6)
+    .map(
+      (page): SortedResult => ({
+        id: page.href,
+        url: page.href,
+        type: "page",
+        content: displayTitleFor(page),
+        breadcrumbs: [
+          page.documentKind,
+          getDocsCategory(page.area, locale).title,
+        ],
+      }),
+    );
+  return interleaveSearchResults(blog, docs, 8);
+}
+
+/** Blog와 Docs 색인을 locale 범위에서 결정적으로 통합함 */
 export async function searchTechDocuments(
   query: string,
-  locale: "ko" | "en",
+  locale: Locale,
   limit = 32,
 ): Promise<readonly SortedResult[]> {
-  const effectiveQuery = segmentSearchQuery(query, locale);
-  const results = await searchApi.search(effectiveQuery, { locale, limit });
-  return filterSearchResults(results, effectiveQuery);
+  const effectiveQuery = segmentSearchQuery(
+    query,
+    searchTerms.get(locale) ?? [],
+  );
+  if (effectiveQuery.length === 0) return emptyQueryResults(locale);
+  const [blogResults, docsResults] = await Promise.all([
+    blogSearch.search(effectiveQuery, { locale, limit }),
+    docsSearch.search(effectiveQuery, { locale, limit }),
+  ]);
+  return interleaveSearchResults(
+    filterSearchResults(blogResults, effectiveQuery),
+    filterSearchResults(docsResults, effectiveQuery),
+    limit,
+  );
 }

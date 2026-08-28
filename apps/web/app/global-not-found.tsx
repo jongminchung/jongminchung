@@ -9,6 +9,7 @@ import "./(tech)/tech.css";
 export const metadata: Metadata = {
   title: { absolute: notFoundCopy.en.heading },
   description: notFoundCopy.en.description,
+  robots: { index: false, follow: false },
 };
 
 /** `GlobalNotFound` 공개 기능을 제공함 */

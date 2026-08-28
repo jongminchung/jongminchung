@@ -1,6 +1,6 @@
 # Issue 0033: Investment content의 obsolete 생성 pipeline 제거
 
-- 상태: 진행 중
+- 상태: 구현 완료·반영 대기
 - 우선순위: P1
 - 기준일: 2026-08-20
 - 영향 범위:
@@ -82,3 +82,19 @@
 - `pnpm --filter @jongminchung/web run build`
 - `pnpm run check`
 - `git diff --check`
+
+## 처리 결과
+
+- **Investment source collection의 소유권을 `lib/invest/source.ts`로 분리함**
+  - Fumadocs source를 manifest로 변환하고 locale pair·metadata·path·본문 section을 한 경계에서 검증함
+  - `content-repository.ts`는 생성 script가 아닌 source module의 검증된 collection만 소비함
+- **과거 생성 pipeline의 잔여 helper를 제거함**
+  - consumer가 없는 generated file write·stale 비교·상대 경로 helper를 `generation-utils.ts`에서 제거함
+  - Excalidraw가 실제 사용하는 결정적 file discovery helper만 유지함
+- **작은 source fixture로 실패 원인을 구분함**
+  - locale 누락·공유 metadata 불일치·metadata와 path 불일치·필수 section 누락을 각각 검증함
+- **현재 Fumadocs source-first 구조에는 `generated/investment-*`와 `investment:build` 경로가 존재하지 않음**
+  - module 위치가 고정된 source API를 사용하므로 실행 `cwd`에 따른 Investment path 분기가 없음
+- **검증 결과는 Investment 관련 3개 파일·13개 test와 Web 전체 31개 파일·121개 test 통과임**
+  - obsolete 생성 경로와 제거한 helper의 잔여 참조가 없음
+  - Web typecheck와 production build가 통과함

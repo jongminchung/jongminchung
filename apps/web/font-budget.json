@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "measurement": "cold-cache browser font responses after document.fonts.ready",
+  "previousBytesPerRoute": 2057688,
+  "routes": [
+    {
+      "site": "home",
+      "locale": "en",
+      "url": "http://jamie.localhost:3100/en",
+      "maxInitialFontBytes": 0
+    },
+    {
+      "site": "home",
+      "locale": "ko",
+      "url": "http://jamie.localhost:3100/ko",
+      "maxInitialFontBytes": 2057688
+    },
+    {
+      "site": "tech",
+      "locale": "en",
+      "url": "http://tech.jamie.localhost:3100/en",
+      "maxInitialFontBytes": 0
+    },
+    {
+      "site": "tech",
+      "locale": "ko",
+      "url": "http://tech.jamie.localhost:3100/ko",
+      "maxInitialFontBytes": 2057688
+    },
+    {
+      "site": "invest",
+      "locale": "en",
+      "url": "http://invest.jamie.localhost:3100/en",
+      "maxInitialFontBytes": 0
+    },
+    {
+      "site": "invest",
+      "locale": "ko",
+      "url": "http://invest.jamie.localhost:3100/ko",
+      "maxInitialFontBytes": 2057688
+    }
+  ]
+}

@@ -7,7 +7,7 @@ import { isLocale } from "#lib/content-model";
 import { messagesFor } from "#lib/i18n-messages";
 import { createWebsiteStructuredData, techOrigin } from "#lib/structured-data";
 import { themeStorageKeys } from "#lib/theme";
-import { pretendard, rootMetadata } from "../../../root-layout";
+import { localeFontClassName, rootMetadata } from "../../../root-layout";
 import "../../tech.css";
 
 export const metadata: Metadata = rootMetadata;
@@ -23,7 +23,7 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
-      className={pretendard.variable}
+      className={localeFontClassName(locale)}
       data-site="tech"
       data-theme="light"
       suppressHydrationWarning

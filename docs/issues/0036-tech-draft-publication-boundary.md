@@ -1,6 +1,6 @@
 # Issue 0036: Tech 초안의 공개 경계 차단
 
-- 상태: 진행 중
+- 상태: 구현 완료·반영 대기
 - 우선순위: P1
 - 기준일: 2026-08-20
 - 영향 범위:
@@ -89,3 +89,20 @@
 - draft route·navigation·search·metadata focused test
 - `pnpm run check`
 - `git diff --check`
+
+## 처리 결과
+
+- **content snapshot을 `sourceTech`와 `publishedTech` collection으로 분리함**
+  - locale pair·metadata·path·내부 링크와 evidence 검사는 draft를 포함한 전체 source collection을 사용함
+  - page·Home·관련 문서·sitemap·RSS·`llms.txt`·OG consumer는 published getter만 사용함
+- **검색과 Docs navigation도 같은 publication selector를 적용함**
+  - Fumadocs 검색 source는 published page만 색인해 draft title·body·alias가 결과에 포함되지 않음
+  - Fumadocs page tree는 published URL 집합으로 필터링해 draft page와 빈 folder를 제거함
+- **draft 직접 URL과 정적 route 생성을 published lookup으로 차단함**
+  - Blog·Docs `generateStaticParams`와 lookup은 published collection만 사용함
+  - draft lookup은 null이 되어 기존 page route의 `notFound()` 경계로 연결됨
+- **작은 fixture가 raw와 public collection의 차이와 navigation 제거를 검증함**
+  - source fixture에는 published·draft가 모두 남고 public fixture에는 draft ID·title·body가 없음
+- **검증 결과는 publication·document·metadata·`llms.txt`·evidence unit 5개 파일·15개 test 통과임**
+  - 실제 bilingual 검색 corpus integration과 Web 전체 31개 파일·121개 test가 통과함
+  - 48 Blog·58 Docs source validation과 354개 route production build가 통과함

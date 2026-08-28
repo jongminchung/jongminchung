@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { BrandWordmark } from "#components/BrandWordmark";
 import {
@@ -16,12 +17,16 @@ import {
   type EditorialSearchParams,
 } from "#lib/editorial";
 import { toInvestmentEditorialItem } from "#lib/editorial-adapters";
-import type {
-  InvestmentNoteManifestEntry,
-  InvestmentSourceKind,
-} from "#lib/invest/content";
+import type { InvestmentNoteManifestEntry } from "#lib/invest/content";
+import {
+  createInvestmentSeriesHref,
+  createInvestmentTagHref,
+} from "#lib/invest/routing";
 import type { Locale } from "#lib/site-routing";
-import { createInvestmentArticleStructuredData } from "#lib/structured-data";
+import {
+  createInvestmentArticleStructuredData,
+  createInvestmentCollectionStructuredData,
+} from "#lib/structured-data";
 
 const copy = {
   ko: {
@@ -142,16 +147,28 @@ export function InvestmentHome({
   readonly notes: readonly InvestmentNoteManifestEntry[];
   readonly searchParams?: EditorialSearchParams;
 }): React.JSX.Element {
+  const description = indexCopy[locale].description;
   return (
-    <EditorialIndex
-      copy={indexCopy[locale]}
-      items={notes.map(toInvestmentEditorialItem)}
-      pathname={`/${locale}`}
-      query={parseEditorialQuery(
-        searchParams,
-        notes.flatMap((note) => toInvestmentEditorialItem(note).tags),
-      )}
-    />
+    <>
+      <StructuredData
+        value={createInvestmentCollectionStructuredData({
+          locale,
+          pathname: `/${locale}`,
+          title: indexCopy[locale].title,
+          description,
+          notes,
+        })}
+      />
+      <EditorialIndex
+        copy={indexCopy[locale]}
+        items={notes.map(toInvestmentEditorialItem)}
+        pathname={`/${locale}`}
+        query={parseEditorialQuery(
+          searchParams,
+          notes.flatMap((note) => toInvestmentEditorialItem(note).tags),
+        )}
+      />
+    </>
   );
 }
 
@@ -160,25 +177,44 @@ export function NoteCollection({
   locale,
   notes,
   title,
+  description,
   pathname = `/${locale}/notes`,
   searchParams = {},
 }: {
   readonly locale: Locale;
   readonly notes: readonly InvestmentNoteManifestEntry[];
   readonly title?: string;
+  readonly description?: string;
   readonly pathname?: string;
   readonly searchParams?: EditorialSearchParams;
 }): React.JSX.Element {
+  const collectionTitle = title ?? indexCopy[locale].title;
+  const collectionDescription = description ?? indexCopy[locale].description;
   return (
-    <EditorialIndex
-      copy={{ ...indexCopy[locale], title: title ?? indexCopy[locale].title }}
-      items={notes.map(toInvestmentEditorialItem)}
-      pathname={pathname}
-      query={parseEditorialQuery(
-        searchParams,
-        notes.flatMap((note) => toInvestmentEditorialItem(note).tags),
-      )}
-    />
+    <>
+      <StructuredData
+        value={createInvestmentCollectionStructuredData({
+          locale,
+          pathname,
+          title: collectionTitle,
+          description: collectionDescription,
+          notes,
+        })}
+      />
+      <EditorialIndex
+        copy={{
+          ...indexCopy[locale],
+          title: collectionTitle,
+          description: collectionDescription,
+        }}
+        items={notes.map(toInvestmentEditorialItem)}
+        pathname={pathname}
+        query={parseEditorialQuery(
+          searchParams,
+          notes.flatMap((note) => toInvestmentEditorialItem(note).tags),
+        )}
+      />
+    </>
   );
 }
 
@@ -232,9 +268,18 @@ export function InvestmentNotePage({
         }
         header={
           <>
-            <p className="m-0 font-mono text-[11px] text-primary uppercase">
-              {note.series ?? "Research note"}
-            </p>
+            {note.series === undefined ? (
+              <p className="m-0 font-mono text-[11px] text-primary uppercase">
+                Research note
+              </p>
+            ) : (
+              <Link
+                className="font-mono text-[11px] text-primary uppercase underline-offset-4 hover:underline"
+                href={createInvestmentSeriesHref(locale, note.series)}
+              >
+                {note.series}
+              </Link>
+            )}
             <h1 className="my-4 text-[clamp(44px,6vw,72px)] leading-none font-medium tracking-[-.05em]">
               {note.title}
             </h1>
@@ -247,6 +292,20 @@ export function InvestmentNotePage({
             >
               {text.updated} · {note.updatedAt}
             </time>
+            <nav
+              aria-label={locale === "ko" ? "노트 주제" : "Note topics"}
+              className="mt-4 flex flex-wrap gap-2"
+            >
+              {note.tags.map((tag) => (
+                <Link
+                  className="rounded-full border px-2.5 py-1 font-mono text-[10px] text-muted-foreground hover:border-input hover:text-foreground"
+                  href={createInvestmentTagHref(locale, tag)}
+                  key={tag}
+                >
+                  #{tag}
+                </Link>
+              ))}
+            </nav>
           </>
         }
         rail={
@@ -295,28 +354,4 @@ function SourceCard({
       {body}
     </a>
   );
-}
-
-/** `sourceTitle` UI 컴포넌트를 렌더링함 */
-export function sourceTitle(
-  locale: Locale,
-  kind: InvestmentSourceKind,
-): string {
-  const labels = {
-    ko: {
-      book: "책",
-      social: "공개 의견",
-      video: "영상",
-      interview: "인터뷰",
-      article: "아티클",
-    },
-    en: {
-      book: "Books",
-      social: "Public voices",
-      video: "Videos",
-      interview: "Interviews",
-      article: "Articles",
-    },
-  } as const;
-  return labels[locale][kind];
 }

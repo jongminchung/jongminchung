@@ -55,7 +55,12 @@ export function DocsShell({
             brandLabel="jongminchung tech"
             homeHref={`/${locale}`}
             localeControl={
-              <LocaleSwitcher compact href={alternateHref} locale={locale} />
+              <LocaleSwitcher
+                compact
+                href={alternateHref}
+                locale={locale}
+                preserveCurrentPath={active === "docs"}
+              />
             }
             localeHref={alternateHref}
             localeLabel={locale === "ko" ? "EN" : "KO"}
@@ -66,7 +71,11 @@ export function DocsShell({
                 isActive: active === "blog",
               },
               {
-                href: `/${locale}/series`,
+                href: createDocsHref(
+                  locale,
+                  "architecture",
+                  "domain-driven-design",
+                ),
                 label: labels.series,
                 isActive: active === "series",
               },
@@ -111,7 +120,16 @@ export function DocsShell({
               },
               {
                 label: locale === "ko" ? "모음" : "Collections",
-                links: [{ href: `/${locale}/series`, label: labels.series }],
+                links: [
+                  {
+                    href: createDocsHref(
+                      locale,
+                      "architecture",
+                      "domain-driven-design",
+                    ),
+                    label: labels.series,
+                  },
+                ],
               },
               {
                 label: "Feed",

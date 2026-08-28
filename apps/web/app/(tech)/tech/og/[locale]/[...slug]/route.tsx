@@ -1,6 +1,17 @@
 import { ImageResponse } from "next/og";
-import { isLocale, locales, type Locale } from "#lib/content-model";
-import { findDocument } from "#lib/documents";
+import {
+  displayTitleFor,
+  isLocale,
+  locales,
+  type Locale,
+} from "#lib/content-model";
+import {
+  findBlogPost,
+  findDocsPage,
+  getBlogPosts,
+  getDocsPages,
+} from "#lib/documents";
+import { documentKindLabel } from "#lib/tech/document-kind";
 import { getSeries, isSeriesId, seriesRegistry } from "#lib/tech/series";
 
 interface StaticOgParam {
@@ -41,8 +52,19 @@ async function resolvePage(
           label: locale === "ko" ? "시리즈" : "Series",
         };
   }
+  if (slug[0] === "docs") {
+    const page = await findDocsPage(locale, slug.slice(1));
+    return page === null
+      ? null
+      : {
+          title: displayTitleFor(page),
+          detail: page.description,
+          label: documentKindLabel(locale, page.documentKind),
+          updatedAt: page.updatedAt,
+        };
+  }
   if (slug.length !== 1 || slug[0] === undefined) return null;
-  const document = await findDocument(locale, slug[0]);
+  const document = await findBlogPost(locale, slug[0]);
   return document === null
     ? null
     : {
@@ -58,12 +80,18 @@ async function resolvePage(
 
 /** 정적 생성에 사용할 경로 매개변수를 반환함 */
 export async function generateStaticParams(): Promise<StaticOgParam[]> {
-  const { getDocuments } = await import("#lib/documents");
-  const documents = await getDocuments();
+  const [blogPosts, docsPages] = await Promise.all([
+    getBlogPosts(),
+    getDocsPages(),
+  ]);
   return [
-    ...documents.map((document) => ({
-      locale: document.locale,
-      slug: [document.id],
+    ...blogPosts.map((post) => ({
+      locale: post.locale,
+      slug: [post.id],
+    })),
+    ...docsPages.map((page) => ({
+      locale: page.locale,
+      slug: ["docs", ...page.slugs],
     })),
     ...locales.flatMap((locale) => [
       { locale, slug: ["blog"] },

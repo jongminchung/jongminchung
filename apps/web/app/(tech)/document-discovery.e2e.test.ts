@@ -4,133 +4,104 @@ import {
 } from "../../e2e-assertions";
 import { expect, test } from "../../e2e-fixtures";
 
-test("[성공] 시리즈 랜딩은 등록 순서와 언어 전환 경로를 유지함", async ({
-  page,
+test("[성공] 이전 Blog·Series·태그 기반 Docs URL은 최종 canonical로 한 번만 308 이동함", async ({
+  siteRequest,
 }) => {
-  await page.goto("/ko/series/cilium-gateway-api");
+  const redirects = [
+    ["/en/nextjs-16", "/en/docs/fe/nextjs-16"],
+    [
+      "/en/series/domain-driven-design",
+      "/en/docs/architecture/domain-driven-design",
+    ],
+    ["/en/docs/architecture/ascii-3d-renderer", "/en/ascii-3d-renderer"],
+  ] as const;
 
-  await expect(
-    page.getByRole("heading", {
-      level: 1,
-      name: "Cilium Gateway API 외부 트래픽 설계",
-    }),
-  ).toBeVisible();
-  const cards = page.locator('[data-document-grid="true"]');
-  await expect(cards).toBeVisible();
-  const latest = cards.locator('a[data-variant="related"]').first();
-  await expect(latest).toHaveAttribute(
-    "href",
-    "/ko/cilium-gateway-api-foundations",
-  );
-  await expect(latest.locator("img")).toHaveAttribute(
-    "src",
-    /_next\/image\?url=%2Ftech%2Farticle-thumbnail-system\.png/u,
-  );
-  await expect
-    .poll(() =>
-      latest.locator("img").evaluate((element) => {
-        const image = element as HTMLImageElement;
-        return {
-          naturalHeight: image.naturalHeight,
-          naturalWidth: image.naturalWidth,
-        };
-      }),
-    )
-    .toEqual({ naturalHeight: 675, naturalWidth: 1200 });
-
-  const globalNavigation = page.getByRole("navigation", {
-    name: "Editorial navigation",
-  });
-  await expect(
-    globalNavigation.getByRole("link", { name: "Series" }),
-  ).toHaveAttribute("href", "/ko/series");
-  await expect(
-    page.getByRole("link", { name: "Read in English" }),
-  ).toHaveAttribute("href", "/en/series/cilium-gateway-api");
+  for (const [source, target] of redirects) {
+    const response = await siteRequest.get(source, { maxRedirects: 0 });
+    expect(response.status(), source).toBe(308);
+    expect(
+      new Set((response.headers().location ?? "").split(", ")),
+      source,
+    ).toEqual(new Set([target]));
+    expect((await siteRequest.get(target)).status(), target).toBe(200);
+  }
 });
 
-test("[성공] 문서 개요 링크는 현재 위치와 URL hash를 함께 갱신함", async ({
+test("[성공] Docs canonical은 TechArticle·학습 유형·breadcrumb·TOC를 제공함", async ({
   page,
 }) => {
-  await page.goto("/en/nextjs-16");
-  const outline = page.getByRole("navigation", { name: "Document outline" });
+  await page.goto("/en/docs/fe/nextjs-16");
+
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    "href",
+    "https://tech.jamie.kr/en/docs/fe/nextjs-16",
+  );
+  await expect(
+    page.locator('link[rel="alternate"][hreflang="x-default"]'),
+  ).toHaveAttribute("href", "https://tech.jamie.kr/en/docs/fe/nextjs-16");
+
+  const schemas = await page
+    .locator('script[type="application/ld+json"]')
+    .evaluateAll((scripts) =>
+      scripts.map((script) => JSON.parse(script.textContent ?? "{}") as object),
+    );
+  expect(JSON.stringify(schemas)).toContain('"@type":"TechArticle"');
+  expect(JSON.stringify(schemas)).toContain(
+    '"learningResourceType":"reference"',
+  );
+  expect(JSON.stringify(schemas)).toContain('"name":"Frontend"');
+
+  const outline = page.locator("#nd-toc");
+  await expect(outline).toContainText("On this page");
   const link = outline.getByRole("link", { name: "MDX pipeline" });
   await link.click();
   await expect(page).toHaveURL(/#mdx-pipeline$/u);
-  await expect(link).toHaveAttribute("aria-current", "location");
 });
 
-test("[성공] 기술 글은 넓은 본문과 우측 개요를 반응형으로 배치함", async ({
+test("[성공] Docs page tree는 Diátaxis 순서와 현재 문서 및 이전·다음 탐색을 표시함", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/en/nextjs-16");
+  await page.goto("/en/docs/fe/tutorial-maintainable-tailwind-shadcn");
 
-  const article = page.locator('main[data-variant="engineering"] > article');
-  const rail = page.locator('main[data-variant="engineering"] > aside');
-  const paragraph = article.locator("[data-docs-prose] > p").first();
-  const heading = article.locator("[data-docs-prose] > h2").first();
-  const [articleBox, railBox] = await Promise.all([
-    article.boundingBox(),
-    rail.boundingBox(),
-  ]);
-
-  expect(articleBox?.width).toBe(872);
-  expect(railBox?.width).toBe(200);
-  expect(railBox?.x).toBeGreaterThan(
-    (articleBox?.x ?? 0) + (articleBox?.width ?? 0),
+  const sidebar = page.locator("#nd-sidebar");
+  await expect(sidebar).toBeVisible();
+  const sidebarText = await sidebar.innerText();
+  expect(sidebarText.indexOf("Tutorial")).toBeLessThan(
+    sidebarText.indexOf("How-to"),
   );
-  await expect(paragraph).toHaveCSS("font-size", "16px");
-  await expect(paragraph).toHaveCSS("line-height", "25.6px");
-  await expect(heading).toHaveCSS("font-size", "26px");
+  expect(sidebarText.indexOf("How-to")).toBeLessThan(
+    sidebarText.indexOf("Reference"),
+  );
+  expect(sidebarText.indexOf("Reference")).toBeLessThan(
+    sidebarText.indexOf("Explanation"),
+  );
+  await expect(
+    sidebar.locator(
+      'a[href="/en/docs/fe/tutorial-maintainable-tailwind-shadcn"]',
+    ),
+  ).toHaveAttribute("data-active", "true");
+  await expect(
+    page.getByRole("link", { name: "한국어로 읽기" }),
+  ).toHaveAttribute(
+    "href",
+    "/ko/docs/fe/tutorial-maintainable-tailwind-shadcn",
+  );
 
-  await page.setViewportSize({ width: 1024, height: 900 });
-  await expect(rail).toBeHidden();
+  await expect(
+    page.locator('#nd-page > div[class*="@container"]').last(),
+  ).toContainText("Frontend Documentation");
+  await expect(
+    page.locator(
+      '#nd-page > div[class*="@container"] a[href="/en/docs/fe/how-to-audit-tailwind-shadcn"]',
+    ),
+  ).toBeVisible();
 });
 
-test("[성공] 관련 문서는 결정적이며 현재 문서를 제외함", async ({ page }) => {
-  await page.goto("/en/typescript-6");
-  const related = page.getByRole("region", { name: "Related articles" });
-  await expect(related).toBeVisible();
-  await expect(related.locator("a")).toHaveCount(3);
-  expect(
-    await related
-      .locator("a")
-      .evaluateAll((links) => links.map((link) => link.getAttribute("href"))),
-  ).toEqual([
-    "/en/typescript-7-compatibility",
-    "/en/node-26",
-    "/en/building-calculator-engine",
-  ]);
-  await expect(related.locator('a[href="/en/typescript-6"]')).toHaveCount(0);
-});
-
-test("[성공] FE 유지보수 시리즈는 문서 유형과 MDX 접근성 계약을 노출함", async ({
+test("[성공] Tutorial과 Explanation은 이관 후에도 MDX 학습 계약과 키보드 초점을 유지함", async ({
   page,
 }) => {
-  await page.goto("/ko?tag=tutorial");
-  await expect(
-    page.getByRole("navigation", { name: "모든 글" }).getByRole("link", {
-      name: "튜토리얼 1",
-    }),
-  ).toHaveAttribute("aria-current", "page");
-  await expect(page.getByText("모든 글 / 01")).toBeVisible();
-
-  await page.goto("/ko/series/frontend-maintainability");
-
-  const cards = page.locator('[data-document-grid="true"]');
-  await expect(cards.locator('a[data-variant="related"]')).toHaveCount(4);
-  await expect(cards.locator('a[data-variant="related"]')).toContainText([
-    "1. 설명",
-    "2. 튜토리얼",
-    "3. 방법 안내",
-    "4. 기술 참조",
-  ]);
-  await expect(
-    page.getByRole("link", { name: "Read in English" }),
-  ).toHaveAttribute("href", "/en/series/frontend-maintainability");
-
-  await page.goto("/ko/tutorial-maintainable-tailwind-shadcn");
+  await page.goto("/ko/docs/fe/tutorial-maintainable-tailwind-shadcn");
   const steps = page.locator('[data-docs-steps="true"]');
   await expect(steps).toHaveRole("list");
   await expect(steps.locator(":scope > li")).toHaveCount(5);
@@ -140,7 +111,9 @@ test("[성공] FE 유지보수 시리즈는 문서 유형과 MDX 접근성 계�
     "https://news.hada.io/topic?id=32073",
   );
 
-  await page.goto("/ko/why-tailwind-shadcn-maintainability-needs-ownership");
+  await page.goto(
+    "/ko/docs/fe/why-tailwind-shadcn-maintainability-needs-ownership",
+  );
   const linkedCard = page
     .locator('[data-docs-cards="true"]')
     .getByRole("link")
@@ -154,94 +127,75 @@ test("[성공] FE 유지보수 시리즈는 문서 유형과 MDX 접근성 계�
   ).not.toBe("none");
 });
 
-test("[성공] 상단 Docs 드롭다운에서 문서 분야를 선택하고 탐색함", async ({
+test("[성공] Editorial Docs 메뉴와 Fumadocs mobile sheet가 다섯 영역을 탐색함", async ({
   page,
 }) => {
   await page.goto("/ko");
-  const globalNavigation = page.getByRole("navigation", {
-    name: "Editorial navigation",
-  });
-  const docsMenuTrigger = globalNavigation.getByRole("button", {
+  const docsTrigger = page.getByRole("button", {
     name: "Docs: 문서 분야 선택",
   });
-  await docsMenuTrigger.focus();
-  await docsMenuTrigger.press("ArrowDown");
+  await docsTrigger.click();
   const docsMenu = page.getByRole("menu", { name: "문서 분야 선택" });
-  await expect(
-    docsMenu.getByRole("menuitem", { name: "모든 문서" }),
-  ).toHaveAttribute("href", "/ko/docs");
-  await expect(
-    docsMenu.getByRole("menuitem", { name: "FE · 프론트엔드" }),
-  ).toHaveAttribute("href", "/ko/docs/fe");
-  await page.keyboard.press("Escape");
-  await expect(docsMenu).toBeHidden();
-  await expect(docsMenuTrigger).toBeFocused();
-
-  await docsMenuTrigger.click();
-  await docsMenu.getByRole("menuitem", { name: "모든 문서" }).click();
-  await expect(page).toHaveURL(/\/ko\/docs$/u);
-  await expect(
-    page.getByRole("heading", { level: 1, name: "Docs" }),
-  ).toBeVisible();
-  await expect(page.getByRole("link", { name: /프론트엔드/u })).toHaveAttribute(
-    "href",
-    "/ko/docs/fe",
-  );
-  await expect(page.getByRole("navigation", { name: "문서 분야" })).toHaveCount(
-    0,
-  );
-
-  await docsMenuTrigger.click();
-  await page
-    .getByRole("menu", { name: "문서 분야 선택" })
-    .getByRole("menuitem", { name: "FE · 프론트엔드" })
+  await expect(docsMenu.locator('[role="menuitem"]')).toHaveCount(6);
+  await docsMenu
+    .locator('[role="menuitem"]', { hasText: "FE · 프론트엔드" })
     .click();
   await expect(page).toHaveURL(/\/ko\/docs\/fe$/u);
-  await docsMenuTrigger.click();
   await expect(
-    page
-      .getByRole("menu", { name: "문서 분야 선택" })
-      .getByRole("menuitem", { name: "FE · 프론트엔드" }),
-  ).toHaveAttribute("aria-current", "page");
-  await page.keyboard.press("Escape");
-
-  await page.goto("/ko/docs/fe/tutorial-maintainable-tailwind-shadcn");
-  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
-    "href",
-    "https://tech.jamie.kr/ko/tutorial-maintainable-tailwind-shadcn",
-  );
-  await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "유지보수 가능한 Tailwind",
-  );
-  await expect(
-    page.getByRole("navigation", { name: "프론트엔드 문서" }),
+    page.getByRole("heading", { level: 1, name: "프론트엔드 문서" }),
   ).toBeVisible();
-  await expect(
-    page.getByRole("link", { name: "Read in English" }),
-  ).toHaveAttribute(
-    "href",
-    "/en/docs/fe/tutorial-maintainable-tailwind-shadcn",
-  );
-  await expectNoHorizontalOverflow(page);
-  await expectNoAccessibilityViolations(page);
 
+  await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/ko/docs/fe/playwright-visual-regression-testing");
-  await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "Playwright로 유의미한 시각 회귀 테스트 만들기",
-  );
-  await expect(
-    page.getByRole("link", { name: "Read in English" }),
-  ).toHaveAttribute("href", "/en/docs/fe/playwright-visual-regression-testing");
+  await expectNoHorizontalOverflow(page);
+  const openSidebar = page.getByRole("button", { name: "Open Sidebar" });
+  await openSidebar.click();
+  const mobileSidebar = page.locator("#nd-sidebar-mobile");
+  await expect(mobileSidebar).toBeVisible();
+  await expect(mobileSidebar).toContainText("프론트엔드");
+  await expect(mobileSidebar).toContainText("Tutorial · 학습");
+  await mobileSidebar.getByRole("button", { name: "Close Sidebar" }).click();
+  await expect(mobileSidebar).toBeHidden();
+  await expectNoAccessibilityViolations(page);
 });
 
-test("[성공] OG 이미지 및 llms.txt는 정적 검색 자산과 함께", async ({
+test("[성공] Blog와 Docs는 서로 다른 schema를 사용하고 RSS·sitemap·llms 계약을 분리함", async ({
   page,
   siteRequest,
 }) => {
-  await page.goto("/en/typescript-7-compatibility");
+  await page.goto("/en/building-calculator-engine");
+  expect(
+    await page.locator('script[type="application/ld+json"]').allTextContents(),
+  ).toContainEqual(expect.stringContaining('"@type":"BlogPosting"'));
+
+  const [rss, sitemap, llms] = await Promise.all([
+    siteRequest.get("/en/rss.xml"),
+    siteRequest.get("/sitemap.xml"),
+    siteRequest.get("/llms.txt"),
+  ]);
+  const rssText = await rss.text();
+  const sitemapText = await sitemap.text();
+  const llmsText = await llms.text();
+  expect(rssText).toContain("/en/building-calculator-engine");
+  expect(rssText).not.toContain("/en/docs/fe/nextjs-16");
+  expect(sitemapText).toContain("/en/docs/fe/nextjs-16");
+  expect(sitemapText).not.toContain("/en/nextjs-16");
+  expect(sitemapText).not.toContain("/en/series/");
+  expect(llmsText).toContain("## English Blog");
+  expect(llmsText).toContain("## English Docs");
+  expect(llmsText).toContain(
+    "[Next.js 16](https://tech.jamie.kr/en/docs/fe/nextjs-16)",
+  );
+});
+
+test("[성공] Docs OG 이미지는 canonical 경로를 사용하고 정적 이미지 자산을 제공함", async ({
+  page,
+  siteRequest,
+}) => {
+  await page.goto("/en/docs/tooling/typescript-7-compatibility");
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
     "content",
-    "https://tech.jamie.kr/og/en/typescript-7-compatibility",
+    "https://tech.jamie.kr/og/en/docs/tooling/typescript-7-compatibility",
   );
   await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
     "content",
@@ -249,18 +203,11 @@ test("[성공] OG 이미지 및 llms.txt는 정적 검색 자산과 함께", asy
   );
 
   const image = await siteRequest.get(
-    "/og/ko/server-monitoring-analysis-guide",
+    "/og/en/docs/tooling/typescript-7-compatibility",
   );
   expect(image.ok()).toBe(true);
   expect(image.headers()["content-type"]).toBe("image/png");
   expect([...(await image.body()).subarray(0, 8)]).toEqual([
     137, 80, 78, 71, 13, 10, 26, 10,
   ]);
-
-  const llms = await siteRequest.get("/llms.txt");
-  expect(llms.ok()).toBe(true);
-  expect(llms.headers()["content-type"]).toBe("text/plain; charset=utf-8");
-  expect(await llms.text()).toContain(
-    "[TypeScript 7 Compatibility Verification](https://tech.jamie.kr/en/typescript-7-compatibility)",
-  );
 });

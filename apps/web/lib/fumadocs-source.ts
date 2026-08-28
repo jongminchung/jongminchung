@@ -1,7 +1,11 @@
 import { defineI18n } from "fumadocs-core/i18n";
 import { loader } from "fumadocs-core/source";
 import { toFumadocsSource } from "fumadocs-mdx/runtime/server";
-import { investmentCollection, techCollection } from "../.source/server.ts";
+import {
+  blogCollection,
+  docsCollection,
+  investmentCollection,
+} from "../.source/server.ts";
 
 export const contentI18n = defineI18n({
   languages: ["ko", "en"],
@@ -10,11 +14,19 @@ export const contentI18n = defineI18n({
   fallbackLanguage: null,
 });
 
-export const techSource = loader({
+export const blogSource = loader({
   baseUrl: "/",
-  source: toFumadocsSource(techCollection, []),
+  source: toFumadocsSource(blogCollection, []),
   i18n: contentI18n,
   url: (slugs, locale) => `/${locale ?? "en"}/${slugs.at(-1) ?? ""}`,
+});
+
+export const docsSource = loader({
+  baseUrl: "/docs",
+  source: docsCollection.toFumadocsSource(),
+  i18n: contentI18n,
+  url: (slugs, locale) =>
+    `/${locale ?? "en"}/docs${slugs.length === 0 ? "" : `/${slugs.join("/")}`}`,
 });
 
 export const investmentSource = loader({

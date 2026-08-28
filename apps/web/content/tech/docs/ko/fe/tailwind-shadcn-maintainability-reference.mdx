@@ -1,0 +1,137 @@
+---
+id: tailwind-shadcn-maintainability-reference
+locale: ko
+area: fe
+documentKind: reference
+series: frontend-maintainability
+seriesOrder: 4
+title: "Tailwind와 shadcn/ui 유지보수 참조"
+description: "owner, semantic token, class 작성, shadcn lifecycle과 검증 명령을 빠르게 조회하는 참조입니다."
+publishedAt: "2026-08-27"
+updatedAt: "2026-08-27"
+verifiedAt: "2026-08-27"
+tags: [frontend, tailwindcss, shadcn, design-system, maintainability]
+status: stable
+publicationStatus: published
+sourceUrl: https://news.hada.io/topic?id=32073
+---
+
+<Callout title="범위" type="info">
+  Next.js App Router, Tailwind CSS v4, shadcn/ui `base-nova`, Base UI와 pnpm
+  monorepo 기준의 **기술 참조**임
+</Callout>
+
+## owner 결정표
+
+| 질문                                                   | owner                  |
+| ------------------------------------------------------ | ---------------------- |
+| light·dark 실제 값이나 app font가 바뀌는가             | theme provider         |
+| utility로 공개할 semantic role이 바뀌는가              | token adapter          |
+| keyboard·focus·ARIA·범용 visual state가 바뀌는가       | shared primitive       |
+| 업무 문구·domain state·primitive 조합이 바뀌는가       | product composition    |
+| routing·grid·container·responsive placement가 바뀌는가 | page·feature           |
+| 제어할 수 없는 markup이나 vendor selector인가          | scoped integration CSS |
+
+## semantic role
+
+| 범주    | 우선 role                                          | 조건                                                      |
+| ------- | -------------------------------------------------- | --------------------------------------------------------- |
+| surface | `background`, `card`, `popover`, `muted`, `accent` | `accent`를 brand primary 동의어로 쓰지 않음               |
+| action  | `primary`, `secondary`, `destructive`              | background에는 foreground pair를 제공함                   |
+| 상태    | `success`, `warning`, `info`                       | 제품 전반에 반복될 때 provider·adapter·test를 함께 추가함 |
+| 제품 값 | terminal, repository, marketing                    | 앱 theme 또는 composition에서 소유함                      |
+
+## component 선택 순서
+
+1. 설치된 primitive와 built-in variant 확인
+2. 기존 primitive composition으로 표현
+3. registry와 공식 docs에서 component 확인
+4. 반복되는 제품 composition 작성
+5. 제품 중립 동작이 실제로 빠진 경우에만 shared primitive 작성
+
+## class 작성 규칙
+
+| 상황                   | 사용할 방식                       | 피할 방식                                 |
+| ---------------------- | --------------------------------- | ----------------------------------------- |
+| runtime 상태           | 완성된 class map 또는 `cva`       | `bg-${tone}-600`                          |
+| runtime 수치           | typed CSS variable과 정적 utility | runtime class 문자열                      |
+| sibling spacing        | flex·grid `gap-*`                 | 반복 margin과 `space-*` 남용              |
+| 같은 width·height      | `size-*`                          | `w-* h-*` 반복                            |
+| ellipsis               | `truncate`                        | 세 utility 직접 조합                      |
+| RTL 가능한 공용 UI     | `start`, `end`, `ms`, `me`        | 방향이 고정된 `left`, `right`, `ml`, `mr` |
+| one-off layout formula | arbitrary value 허용              | 의미 없는 near-scale 숫자 drift           |
+| raw color              | renderer allowlist에만 제한       | 일반 consumer의 hex·palette utility       |
+
+## `cva`, `cn`, `className`
+
+- `cva`는 `variant`, `size`, `tone`, `density`처럼 유한하고 반복되는 공개 API에 사용함
+- `cn`은 조건부 class와 의도적인 Tailwind conflict merge에 사용함
+- consumer `className`은 margin, width, grid·flex placement와 responsive layout에 한정함
+- color, typography, border, shadow, 내부 padding과 interaction state는 variant 또는 별도 API로 승격함
+
+## shadcn 명령
+
+```bash
+pnpm exec shadcn info --json -c apps/web
+pnpm exec shadcn docs <component> -c apps/web
+pnpm exec shadcn search @shadcn -q "<need>" -c apps/web
+pnpm exec shadcn add <component> --dry-run -c apps/web
+pnpm exec shadcn add <component> --diff <file> -c apps/web
+```
+
+- `--overwrite`는 local 변경이 없는 generated-only 계층이거나 local 변경 폐기가 명시된 경우만 사용함
+- Base UI는 `render`, Radix는 `asChild`를 사용하며 두 API를 혼용하지 않음
+- component 추가 후 import, icon, accessible name, group 구조와 loading state를 확인함
+
+## Tailwind v4 source 계약
+
+```css
+@import "@jongminchung/ui/globals.css";
+@import "./theme.css";
+
+@source "../**/*.{ts,tsx,mdx}";
+@source not "../../.next/**/*";
+```
+
+- class는 scanner가 읽을 수 있는 완성된 정적 문자열로 source에 둠
+- linked workspace와 route 밖 component는 명시적 `@source`로 등록함
+- generated selector 존재는 production CSS contract로 확인함
+- `@reference`는 별도 stylesheet가 Tailwind compile context를 실제로 요구할 때만 사용함
+
+## 검증 행렬
+
+| 변경                  | 최소 검증                         | 추가 검증             |
+| --------------------- | --------------------------------- | --------------------- |
+| utility·layout        | format, typecheck, 관련 test      | responsive screenshot |
+| primitive style       | UI typecheck·test, consumer build | light·dark screenshot |
+| primitive behavior    | UI test, browser interaction      | 영향 앱 E2E           |
+| token·global CSS      | theme contract, consumer build    | contrast와 visual     |
+| source·package export | generated CSS contract, tarball   | Next.js·Vite fixture  |
+| shadcn update         | dry run, diff, UI test            | 접근성·migration      |
+
+## 저장소 명령
+
+```bash
+pnpm run fmt:check
+pnpm run lint
+pnpm run typecheck
+pnpm run test
+pnpm --filter @jongminchung/web run build
+```
+
+## 연결 문서
+
+<Cards>
+  <Card
+    title="왜 소유권이 필요한가"
+    href="/ko/docs/fe/why-tailwind-shadcn-maintainability-needs-ownership"
+  />
+  <Card
+    title="처음부터 구현하기"
+    href="/ko/docs/fe/tutorial-maintainable-tailwind-shadcn"
+  />
+  <Card
+    title="기존 화면 감사하기"
+    href="/ko/docs/fe/how-to-audit-tailwind-shadcn"
+  />
+</Cards>

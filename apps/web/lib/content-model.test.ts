@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  createDocsPageHref,
   createDocHref,
   createSeriesHref,
+  parseDocsPageMetadata,
   parseDocMetadata,
 } from "./content-model";
 
@@ -35,15 +37,28 @@ describe("블로그 메타데이터", () => {
     ).toBe("domain-driven-design");
   });
 
-  it("[성공] Diátaxis 문서 유형을 허용함", () => {
+  it("[성공] Docs에 영역·Diátaxis 유형·검증일을 요구함", () => {
     expect(
-      parseDocMetadata({ ...metadata, documentKind: "how-to" }).documentKind,
-    ).toBe("how-to");
+      parseDocsPageMetadata({
+        ...metadata,
+        area: "tooling",
+        documentKind: "how-to",
+        verifiedAt: "2026-07-14",
+      }),
+    ).toMatchObject({ area: "tooling", documentKind: "how-to" });
   });
 
-  it("[실패] 지원하지 않는 문서 유형을 거부함", () => {
+  it("[실패] Blog의 Docs 전용 필드와 지원하지 않는 문서 유형을 거부함", () => {
     expect(() =>
-      parseDocMetadata({ ...metadata, documentKind: "guide" }),
+      parseDocMetadata({ ...metadata, documentKind: "how-to" }),
+    ).toThrow("unsupported metadata fields");
+    expect(() =>
+      parseDocsPageMetadata({
+        ...metadata,
+        area: "tooling",
+        documentKind: "guide",
+        verifiedAt: "2026-07-14",
+      }),
     ).toThrow();
   });
 
@@ -64,6 +79,9 @@ describe("블로그 메타데이터", () => {
     expect(createSeriesHref("en")).toBe("/en/series");
     expect(createSeriesHref("en", "domain-driven-design")).toBe(
       "/en/series/domain-driven-design",
+    );
+    expect(createDocsPageHref("ko", "tooling", "typescript-6")).toBe(
+      "/ko/docs/tooling/typescript-6",
     );
   });
 });

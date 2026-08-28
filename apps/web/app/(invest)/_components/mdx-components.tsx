@@ -166,7 +166,13 @@ function ComparisonTable({
   );
 }
 
-function VideoEmbed({ id, title }: { readonly id: string; readonly title: string }) {
+function VideoEmbed({
+  id,
+  title,
+}: {
+  readonly id: string;
+  readonly title: string;
+}) {
   return (
     <figure className="my-10">
       <div className="aspect-video overflow-hidden border bg-black">

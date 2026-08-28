@@ -34,12 +34,21 @@ export const documentKinds = [
 export const documentKindSchema = z.enum(documentKinds);
 export type DocumentKind = z.infer<typeof documentKindSchema>;
 
+export const docsAreas = [
+  "fe",
+  "k8s",
+  "architecture",
+  "tooling",
+  "practices",
+] as const;
+export const docsAreaSchema = z.enum(docsAreas);
+export type DocsArea = z.infer<typeof docsAreaSchema>;
+
 const DOCUMENT_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 
-const docMetadataShape = {
+const sharedMetadataShape = {
   id: nonEmptyTrimmedStringSchema,
   locale: localeSchema,
-  documentKind: documentKindSchema.optional(),
   series: nonEmptyTrimmedStringSchema.optional(),
   seriesOrder: z.number().int().positive().optional(),
   title: nonEmptyTrimmedStringSchema,
@@ -47,7 +56,6 @@ const docMetadataShape = {
   description: nonEmptyTrimmedStringSchema,
   publishedAt: z.string(),
   updatedAt: z.string(),
-  verifiedAt: z.string().optional(),
   tags: uniqueStringArraySchema("tags"),
   status: documentStatusSchema,
   publicationStatus: publicationStatusSchema,
@@ -59,8 +67,22 @@ const docMetadataShape = {
   }).optional(),
 } as const;
 
-function validateDocMetadata(
-  value: z.infer<z.ZodObject<typeof docMetadataShape>>,
+const blogPostMetadataShape = {
+  ...sharedMetadataShape,
+  verifiedAt: z.string().optional(),
+} as const;
+
+const docsPageMetadataShape = {
+  ...sharedMetadataShape,
+  area: docsAreaSchema,
+  documentKind: documentKindSchema,
+  verifiedAt: z.string(),
+} as const;
+
+function validateSharedMetadata(
+  value: z.infer<z.ZodObject<typeof sharedMetadataShape>> & {
+    readonly verifiedAt?: string;
+  },
   context: z.RefinementCtx,
 ): void {
   if (!DOCUMENT_ID_PATTERN.test(value.id)) {
@@ -121,28 +143,54 @@ function validateDocMetadata(
   }
 }
 
-export const docMetadataSchema = z
-  .strictObject(docMetadataShape)
-  .superRefine(validateDocMetadata)
+export const blogPostMetadataSchema = z
+  .strictObject(blogPostMetadataShape)
+  .superRefine(validateSharedMetadata)
   .readonly();
 
-export type DocMetadata = z.infer<typeof docMetadataSchema>;
-export type ContentManifestEntry = DocMetadata &
+export const docsPageMetadataSchema = z
+  .strictObject(docsPageMetadataShape)
+  .superRefine(validateSharedMetadata)
+  .readonly();
+
+export type BlogPostMetadata = z.infer<typeof blogPostMetadataSchema>;
+export type DocsPageMetadata = z.infer<typeof docsPageMetadataSchema>;
+export type DocMetadata = BlogPostMetadata | DocsPageMetadata;
+
+export type BlogPostManifestEntry = BlogPostMetadata &
   Readonly<{
+    area?: undefined;
+    contentType: "blog";
+    documentKind?: undefined;
     href: string;
+    slugs?: undefined;
   }>;
+
+export type DocsPageManifestEntry = DocsPageMetadata &
+  Readonly<{
+    contentType: "docs";
+    href: string;
+    slugs: readonly string[];
+  }>;
+
+export type ContentManifestEntry =
+  | BlogPostManifestEntry
+  | DocsPageManifestEntry;
 
 function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-/** `parseDocMetadata` 입력을 파싱함 */
-export function parseDocMetadata(
+function parseMetadata<Output>(
+  schema: {
+    readonly safeParse: (value: unknown) => z.ZodSafeParseResult<Output>;
+  },
+  fields: Readonly<Record<string, unknown>>,
   value: unknown,
-  source = "document",
-): DocMetadata {
+  source: string,
+): Output {
   if (isRecord(value)) {
-    const supported = new Set(Object.keys(docMetadataShape));
+    const supported = new Set(Object.keys(fields));
     const unknownFields = Object.keys(value).filter(
       (key) => !supported.has(key),
     );
@@ -157,35 +205,78 @@ export function parseDocMetadata(
       throw new Error(`${source}: unsupported locale "${value.locale}".`);
     }
   }
-  const result = docMetadataSchema.safeParse(value);
+  const result = schema.safeParse(value);
   if (result.success) return result.data;
   const message = result.error.issues[0]?.message ?? "invalid metadata.";
   throw new Error(`${source}: ${message}`);
 }
 
-/** `displayTitleFor` 공개 기능을 제공함 */
+/** Blog frontmatter를 검증된 공개 모델로 파싱함 */
+export function parseBlogPostMetadata(
+  value: unknown,
+  source = "blog post",
+): BlogPostMetadata {
+  return parseMetadata(
+    blogPostMetadataSchema,
+    blogPostMetadataShape,
+    value,
+    source,
+  );
+}
+
+/** Docs frontmatter를 검증된 공개 모델로 파싱함 */
+export function parseDocsPageMetadata(
+  value: unknown,
+  source = "docs page",
+): DocsPageMetadata {
+  return parseMetadata(
+    docsPageMetadataSchema,
+    docsPageMetadataShape,
+    value,
+    source,
+  );
+}
+
+/** @deprecated Blog 메타데이터는 `parseBlogPostMetadata`로 파싱함 */
+export const parseDocMetadata = parseBlogPostMetadata;
+
+/** 문서의 표시 제목을 반환함 */
 export function displayTitleFor(
   document: Pick<DocMetadata, "displayTitle" | "title">,
 ): string {
   return document.displayTitle ?? document.title;
 }
 
-/** `createDocHref` 결과를 생성함 */
-export function createDocHref(locale: Locale, id: string): string {
+/** Blog canonical 경로를 생성함 */
+export function createBlogPostHref(locale: Locale, id: string): string {
   return `/${locale}/${id}`;
 }
 
-/** `createSeriesHref` 결과를 생성함 */
+/** @deprecated Blog canonical은 `createBlogPostHref`로 생성함 */
+export const createDocHref = createBlogPostHref;
+
+/** Docs canonical 경로를 생성함 */
+export function createDocsPageHref(
+  locale: Locale,
+  area?: DocsArea,
+  id?: string,
+): string {
+  if (area === undefined) return `/${locale}/docs`;
+  if (id === undefined) return `/${locale}/docs/${area}`;
+  return `/${locale}/docs/${area}/${id}`;
+}
+
+/** 과거 Series 경로를 생성함 */
 export function createSeriesHref(locale: Locale, id?: string): string {
   return id === undefined ? `/${locale}/series` : `/${locale}/series/${id}`;
 }
 
-/** `createOgImageHref` 결과를 생성함 */
+/** OG 이미지 경로를 생성함 */
 export function createOgImageHref(locale: Locale, id: string): string {
   return `/og/${locale}/${id}`;
 }
 
-/** `compareDocumentMetadata` 최신 게시 순서를 비교함 */
+/** 콘텐츠를 locale·최신 게시 순서로 비교함 */
 export function compareDocumentMetadata(
   left: Pick<DocMetadata, "id" | "locale" | "publishedAt">,
   right: Pick<DocMetadata, "id" | "locale" | "publishedAt">,

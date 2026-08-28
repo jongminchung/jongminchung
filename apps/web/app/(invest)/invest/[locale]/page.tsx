@@ -26,10 +26,24 @@ export async function generateMetadata({
     description,
     alternates: {
       canonical: `/${locale}`,
-      languages: { ko: "/ko", en: "/en" },
+      languages: { ko: "/ko", en: "/en", "x-default": "/en" },
+      types: { "application/rss+xml": `/${locale}/rss.xml` },
     },
-    openGraph: { title, description, url: `/${locale}` },
-    twitter: { card: "summary", title, description },
+    openGraph: {
+      type: "website",
+      title,
+      description,
+      url: `/${locale}`,
+      locale: locale === "ko" ? "ko_KR" : "en_US",
+      alternateLocale: [locale === "ko" ? "en_US" : "ko_KR"],
+      images: ["/investment-notes-og.png"],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/investment-notes-og.png"],
+    },
   };
 }
 

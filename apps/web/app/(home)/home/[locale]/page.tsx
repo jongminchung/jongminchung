@@ -27,15 +27,39 @@ export async function generateMetadata({
     locale === "ko"
       ? "Jamie 정민의 소개와 프로젝트, 최근 기술·투자 기록을 연결하는 프로필 허브"
       : "Jamie's profile, projects, and latest engineering and investment writing";
+  const url = `https://www.jamie.kr/${locale}`;
   return {
     title: "Jamie — Jongmin Chung",
     description,
     alternates: {
-      canonical: `https://www.jamie.kr/${locale}`,
+      canonical: url,
       languages: {
         ko: "https://www.jamie.kr/ko",
         en: "https://www.jamie.kr/en",
+        "x-default": "https://www.jamie.kr/en",
       },
+    },
+    openGraph: {
+      type: "profile",
+      title: "Jamie — Jongmin Chung",
+      description,
+      url,
+      locale: locale === "ko" ? "ko_KR" : "en_US",
+      alternateLocale: [locale === "ko" ? "en_US" : "ko_KR"],
+      images: [
+        {
+          url: "/og",
+          width: 1200,
+          height: 630,
+          alt: "Jamie — Jongmin Chung",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "Jamie — Jongmin Chung",
+      description,
+      images: ["/og"],
     },
   };
 }

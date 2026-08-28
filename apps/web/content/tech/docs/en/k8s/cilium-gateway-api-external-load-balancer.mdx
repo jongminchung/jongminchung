@@ -1,0 +1,184 @@
+---
+id: cilium-gateway-api-external-load-balancer
+locale: en
+area: k8s
+documentKind: how-to
+series: cilium-gateway-api
+seriesOrder: 2
+title: "Cilium Gateway API Part 2: An External Load Balancer in Front"
+description: "Compare LoadBalancer, NodePort, and hostNetwork paths from an existing external load balancer to Cilium Gateway API."
+publishedAt: "2026-08-25"
+updatedAt: "2026-08-25"
+verifiedAt: "2026-08-25"
+tags: [cilium, kubernetes, gateway-api, networking, envoy]
+status: experimental
+publicationStatus: published
+sourceUrl: https://github.com/jongminchung/jongminchung/blob/main/apps/web/content/tech/docs/en/k8s/cilium-gateway-api-external-load-balancer.mdx
+---
+
+## Key takeaways
+
+- **Use the default `LoadBalancer` mode when the external LB integration can manage Kubernetes Services directly**
+- **For an independent appliance or virtual LB, target a generated `NodePort` and automate port synchronization**
+- **Use selected-node `hostNetwork` listeners when fixed node ports `80/443` matter more than the Service-mode flexibility**
+- **Health checks must exercise the Gateway data path instead of checking the Kubernetes API server**
+- **Choose either L4 source preservation or trusted L7 forwarding headers and enforce the same trust boundary at the node firewall**
+
+## Separate LB and Gateway responsibilities
+
+- **The external LB should select healthy nodes, while Cilium Gateway owns TLS and L7 routing in the baseline design**
+  - TLS passthrough keeps certificates and host routing at the Gateway
+  - TLS termination at the LB requires an explicit re-encryption and forwarding-header policy
+
+![External load balancer in front of Cilium Gateway API](https://kroki.io/plantuml/svg/eNqVkEFrAjEQhe_5FcPeV9T15KFoxENhEUHoyUtIprthsxNJZrVS-t-LibaWlpYe38vHe2-yiKwCD70TsbN0UEH1oH1_8ITEOz47hICaFTUO75DYKuNPlhp4Vi6iUJp9gJWzSCy084OBYv3CGEg5qGdQyz09PW5hOq5G49FkUo0m4wJUhFoK8gahsNQEjBGSWhbwKuBzCBQbb3DrA4MPe2p95A3yyYcuhSwvL1_5lXV26GFNR3--xF2oJMTbT4Xyf4Xyj0KZqVvhHSaV7pAM7DAcrcbMZU-I_H9Qlg9QS5jDbFaJWiadToQ5tKgct6VuUXdogFVokG-Q_BXKESksD5MfxnVp9rNz3SS_WwskM_TuHWRpvGA)
+
+## Select one of three integration patterns
+
+- **Pattern A lets a cloud controller synchronize the generated `LoadBalancer` Service with the external LB**
+  - It uses the default Cilium Gateway behavior and needs no custom GatewayClass
+  - Cloud-specific annotations can be passed to the generated Service through `Gateway.spec.infrastructure.annotations`
+  - A missing external address usually indicates a LoadBalancer implementation or permission problem
+
+- **Pattern B configures a generated `NodePort` Service as the external LB target**
+  - `CiliumGatewayClassConfig` can change the generated Service type
+  - Pin and test Cilium upgrades because this configuration API is `v2alpha1`
+
+```yaml title="nodeport-gateway-class.yaml"
+apiVersion: cilium.io/v2alpha1
+kind: CiliumGatewayClassConfig
+metadata:
+  name: external-lb
+  namespace: edge
+spec:
+  service:
+    type: NodePort
+    externalTrafficPolicy: Cluster
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: cilium-external-lb
+spec:
+  controllerName: io.cilium/gateway-controller
+  parametersRef:
+    group: cilium.io
+    kind: CiliumGatewayClassConfig
+    name: external-lb
+    namespace: edge
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: public
+  namespace: edge
+spec:
+  gatewayClassName: cilium-external-lb
+  listeners:
+    - name: https
+      protocol: HTTPS
+      port: 443
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: wildcard-example-com
+```
+
+- **Synchronize the allocated node port into the external LB configuration**
+
+```bash
+kubectl -n edge get svc cilium-gateway-public \
+  -o jsonpath='{range .spec.ports[*]}{.name}{"="}{.nodePort}{"\n"}{end}'
+```
+
+- **Pattern C binds listeners directly with `hostNetwork`**
+  - The LB can target `nodeIP:443` without discovering a NodePort
+  - This mode is mutually exclusive with LoadBalancer Service mode and has `TCPRoute` and `UDPRoute` limitations
+  - [Part 4](/en/docs/k8s/cilium-gateway-api-direct-public-ip) contains the full host-network configuration
+
+## Limit targets to ingress nodes
+
+- **Make the external LB target set an explicit operational role**
+
+```bash
+kubectl label node worker-a worker-b gateway.cilium.io/expose=true
+kubectl get nodes -l gateway.cilium.io/expose=true -o wide
+```
+
+- **NodePort can listen broadly, so the LB target group and firewall must narrow actual exposure**
+  - Publish only the external LB VIP to the Internet
+  - Permit the NodePort only from LB source CIDRs
+  - Exclude control-plane nodes with LB target filters or `node.kubernetes.io/exclude-from-external-load-balancers`
+
+- **`externalTrafficPolicy: Cluster` remains a practical default for this Gateway Service**
+  - Cilium's Envoy TPROXY path differs from a conventional Service source-IP path
+  - Avoid `Local` when Cilium Node IPAM LB is used with Gateway API because of its dummy Endpoint limitation
+
+## Check the complete Gateway path
+
+- **A TCP health check only proves that a port accepts connections**
+  - Use it when quick node removal is the dominant requirement
+  - Use a dedicated hostname and `/healthz` Route when TLS, Route, and backend readiness must also be tested
+
+```yaml title="gateway-health-route.yaml"
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: gateway-health
+  namespace: edge
+spec:
+  parentRefs:
+    - name: public
+  hostnames: ["gateway-health.example.com"]
+  rules:
+    - matches:
+        - path:
+            type: Exact
+            value: /healthz
+      backendRefs:
+        - name: gateway-health
+          port: 8080
+```
+
+- **Never use the API server `/readyz` endpoint as the Gateway health check**
+  - A healthy API server does not prove that Envoy, Route, and backend traffic work
+  - An already programmed Envoy data path can continue serving during a short API-server disruption
+
+## Establish one client-IP authority
+
+- **Keep `gatewayAPI.useRemoteAddress=true` when an L4 LB preserves the source address**
+  - If the LB applies SNAT, evaluate DSR or the provider's source-preservation mode
+
+- **Configure trusted hops only for a controlled L7 LB that creates `X-Forwarded-For`**
+
+```yaml title="values-trusted-l7-lb.yaml"
+gatewayAPI:
+  enabled: true
+  useRemoteAddress: false
+  xffNumTrustedHops: 1
+```
+
+- **The trusted-hop count must match the real proxy chain**
+  - Check append behavior when both a CDN and an external LB are present
+  - Block direct node access so a client cannot forge a trusted header
+
+## Test failures and changes
+
+- **Drain or stop Envoy on one ingress node and measure LB removal time**
+  - Record health-check intervals and failure thresholds
+  - Observe existing keep-alive connections separately from new connections
+  - Confirm that recovered targets return to service safely
+
+- **Recreate a Gateway and verify that NodePort changes propagate automatically**
+  - If the external appliance only supports static manual targets, evaluate `hostNetwork` or a separately managed stable Service
+
+## Recommended action
+
+- **Evaluate default `LoadBalancer`, then `NodePort`, then `hostNetwork` in that order based on the LB's Kubernetes integration and fixed-port requirements**
+- **Do not release until a health check and failure drill cover `LB → node → Envoy → Route → backend`**
+
+## References
+
+- [Cilium Gateway API reference](https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/gateway-api/)
+- [Cilium parameterized GatewayClass](https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/parameterized-gatewayclass/)
+- [Cilium source IP visibility](https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/gateway-api/#source-ip-visibility)
+- [Cilium Node IPAM LB](https://docs.cilium.io/en/stable/network/node-ipam/)

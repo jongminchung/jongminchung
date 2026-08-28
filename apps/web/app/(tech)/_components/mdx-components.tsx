@@ -23,6 +23,8 @@ import {
   QuickStart,
 } from "./OverviewBlocks";
 
+/* oxlint-disable jsx-a11y/no-noninteractive-tabindex -- Horizontal table scrollers need Safari keyboard access. */
+
 interface CodeElementProps {
   readonly children?: ReactNode;
   readonly className?: string;
@@ -104,6 +106,7 @@ export function MdxTable({ className, ...props }: ComponentProps<"table">) {
     <div
       className="my-6 w-full max-w-full overflow-x-auto overscroll-x-contain"
       data-docs-table-scroll="true"
+      tabIndex={0}
     >
       <table
         {...props}

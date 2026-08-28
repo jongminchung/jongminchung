@@ -7,7 +7,10 @@ import { themeStorageKeys } from "#lib/theme";
 import { pretendard, rootMetadata } from "../../../root-layout";
 import "../../tech.css";
 
-export const metadata: Metadata = rootMetadata;
+export const metadata: Metadata = {
+  ...rootMetadata,
+  robots: { index: false, follow: false },
+};
 export const instant = false;
 
 /** `DiagramRootLayout` 페이지 UI를 렌더링함 */

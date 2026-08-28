@@ -1,0 +1,137 @@
+---
+id: tailwind-shadcn-maintainability-reference
+locale: en
+area: fe
+documentKind: reference
+series: frontend-maintainability
+seriesOrder: 4
+title: "Tailwind and shadcn/ui Maintainability Reference"
+description: "Quickly look up ownership, semantic tokens, class rules, the shadcn lifecycle, and verification commands."
+publishedAt: "2026-08-27"
+updatedAt: "2026-08-27"
+verifiedAt: "2026-08-27"
+tags: [frontend, tailwindcss, shadcn, design-system, maintainability]
+status: stable
+publicationStatus: published
+sourceUrl: https://news.hada.io/topic?id=32073
+---
+
+<Callout title="Scope" type="info">
+  This **reference** targets Next.js App Router, Tailwind CSS v4, shadcn/ui
+  `base-nova`, Base UI, and a pnpm monorepo.
+</Callout>
+
+## Ownership table
+
+| Question                                                     | Owner                  |
+| ------------------------------------------------------------ | ---------------------- |
+| Do actual light and dark values or an app font change?       | theme provider         |
+| Does a semantic role exposed as a utility change?            | token adapter          |
+| Do keyboard, focus, ARIA, or reusable visual states change?  | shared primitive       |
+| Do domain copy, state, and primitive composition change?     | product composition    |
+| Do routing, grid, container, or responsive placement change? | page or feature        |
+| Is the markup controlled by a vendor?                        | scoped integration CSS |
+
+## Semantic roles
+
+| Category      | Preferred roles                                    | Condition                                                          |
+| ------------- | -------------------------------------------------- | ------------------------------------------------------------------ |
+| surface       | `background`, `card`, `popover`, `muted`, `accent` | do not use `accent` as a synonym for brand primary                 |
+| action        | `primary`, `secondary`, `destructive`              | provide a foreground pair for a background role                    |
+| status        | `success`, `warning`, `info`                       | add provider, adapter, and tests when the role recurs product-wide |
+| product value | terminal, repository, marketing                    | keep it in the app theme or composition                            |
+
+## Component selection order
+
+1. Inspect installed primitives and built-in variants.
+2. Compose existing primitives.
+3. Inspect the registry and current official docs.
+4. Create a recurring product composition.
+5. Add a shared primitive only when product-neutral behavior is missing.
+
+## Class rules
+
+| Situation              | Use                                   | Avoid                                    |
+| ---------------------- | ------------------------------------- | ---------------------------------------- |
+| runtime state          | complete class map or `cva`           | `bg-${tone}-600`                         |
+| runtime number         | typed CSS variable and static utility | runtime class strings                    |
+| sibling spacing        | flex or grid `gap-*`                  | repeated margins and excessive `space-*` |
+| equal width and height | `size-*`                              | repeated `w-* h-*`                       |
+| ellipsis               | `truncate`                            | a manual three-utility combination       |
+| shared RTL-capable UI  | `start`, `end`, `ms`, `me`            | fixed `left`, `right`, `ml`, `mr`        |
+| one-off layout formula | allow an arbitrary value              | unexplained near-scale drift             |
+| raw color              | renderer allowlist only               | hex and palette utilities in consumers   |
+
+## `cva`, `cn`, and `className`
+
+- Use `cva` for closed recurring APIs such as `variant`, `size`, `tone`, and `density`.
+- Use `cn` for conditional classes and deliberate Tailwind conflict merging.
+- Limit consumer `className` to margins, width, grid or flex placement, and responsive layout.
+- Promote colors, typography, borders, shadows, internal padding, and interaction states to a variant or dedicated API.
+
+## shadcn commands
+
+```bash
+pnpm exec shadcn info --json -c apps/web
+pnpm exec shadcn docs <component> -c apps/web
+pnpm exec shadcn search @shadcn -q "<need>" -c apps/web
+pnpm exec shadcn add <component> --dry-run -c apps/web
+pnpm exec shadcn add <component> --diff <file> -c apps/web
+```
+
+- Use `--overwrite` only for an unmodified generated-only layer or an explicit decision to discard local changes.
+- Use Base UI `render` and Radix `asChild`; do not mix the two APIs.
+- After adding a component, inspect imports, icons, accessible names, group structure, and loading states.
+
+## Tailwind v4 source contract
+
+```css
+@import "@jongminchung/ui/globals.css";
+@import "./theme.css";
+
+@source "../**/*.{ts,tsx,mdx}";
+@source not "../../.next/**/*";
+```
+
+- Keep complete static class strings in scanner-visible source.
+- Register linked workspaces and components outside route trees with explicit `@source` entries.
+- Check required selectors in compiled production CSS.
+- Use `@reference` only when a separate stylesheet genuinely needs Tailwind compile context.
+
+## Verification matrix
+
+| Change                   | Minimum verification                  | Additional verification     |
+| ------------------------ | ------------------------------------- | --------------------------- |
+| utility or layout        | format, typecheck, focused test       | responsive screenshot       |
+| primitive style          | UI typecheck and test, consumer build | light and dark screenshot   |
+| primitive behavior       | UI test, browser interaction          | affected app E2E            |
+| token or global CSS      | theme contract, consumer build        | contrast and visual review  |
+| source or package export | generated CSS contract, tarball       | Next.js and Vite fixtures   |
+| shadcn update            | dry run, diff, UI test                | accessibility and migration |
+
+## Repository commands
+
+```bash
+pnpm run fmt:check
+pnpm run lint
+pnpm run typecheck
+pnpm run test
+pnpm --filter @jongminchung/web run build
+```
+
+## Related documents
+
+<Cards>
+  <Card
+    title="Why ownership matters"
+    href="/en/docs/fe/why-tailwind-shadcn-maintainability-needs-ownership"
+  />
+  <Card
+    title="Build from scratch"
+    href="/en/docs/fe/tutorial-maintainable-tailwind-shadcn"
+  />
+  <Card
+    title="Audit an existing screen"
+    href="/en/docs/fe/how-to-audit-tailwind-shadcn"
+  />
+</Cards>

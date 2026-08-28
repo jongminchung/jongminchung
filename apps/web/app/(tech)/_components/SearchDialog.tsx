@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@jongminchung/ui/components/badge";
 import { Button } from "@jongminchung/ui/components/button";
 import {
   Command,
@@ -21,7 +22,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Locale } from "#lib/content-model";
-import { getSeries } from "#lib/tech/series";
+import { documentKindLabel } from "#lib/tech/document-kind";
 
 interface SearchItem {
   readonly href: string;
@@ -29,6 +30,7 @@ interface SearchItem {
   readonly matchLabel: string;
   readonly matchText: string;
   readonly group: string;
+  readonly badge: string;
 }
 
 interface SearchCopy {
@@ -62,11 +64,16 @@ function toItems(
       resultsForPage.find(({ type }) => type === "text") ??
       page;
     const pageTitle = plainText(page.content);
-    const series = page.breadcrumbs?.[0];
+    const [type = "Blog", ...breadcrumbs] = page.breadcrumbs ?? [];
+    const badge =
+      type === "Blog"
+        ? "Blog"
+        : documentKindLabel(
+            locale,
+            type as "tutorial" | "how-to" | "reference" | "explanation",
+          );
     const group =
-      series === undefined
-        ? copy.resultGroupBlog
-        : (getSeries(series, locale)?.title ?? series);
+      breadcrumbs.length === 0 ? copy.resultGroupBlog : breadcrumbs.join(" · ");
     const matchLabel =
       match.type === "page"
         ? copy.title
@@ -77,6 +84,7 @@ function toItems(
       href: match.url,
       label: pageTitle,
       group,
+      badge,
       matchLabel,
       matchText: plainText(match.content),
     };
@@ -206,8 +214,13 @@ export function SearchDialog({
                       value={`${item.href} ${item.label} ${item.matchText}`}
                       onSelect={() => select(item)}
                     >
-                      <span className="grid min-w-0 gap-0.5 [&_strong]:overflow-hidden [&_strong]:text-ellipsis [&_strong]:whitespace-nowrap">
-                        <strong>{item.label}</strong>
+                      <span className="grid min-w-0 gap-1 [&_strong]:overflow-hidden [&_strong]:text-ellipsis [&_strong]:whitespace-nowrap">
+                        <span className="flex min-w-0 items-center gap-2">
+                          <Badge className="shrink-0" variant="secondary">
+                            {item.badge}
+                          </Badge>
+                          <strong>{item.label}</strong>
+                        </span>
                         <span className="flex gap-1.5 overflow-hidden text-xs text-ellipsis whitespace-nowrap text-muted-foreground [&>span]:shrink-0 [&>span]:font-semibold [&>span]:text-primary">
                           <span>{item.matchLabel}</span>
                           {item.matchText}

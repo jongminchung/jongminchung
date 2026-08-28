@@ -1,0 +1,17 @@
+{
+  "title": "Architecture",
+  "defaultOpen": true,
+  "pages": [
+    "index",
+    "---Tutorial---",
+    "---How-to---",
+    "ddd",
+    "---Reference---",
+    "---Explanation---",
+    "failure-safe-distributed-transactions",
+    "saga-state-machine-orchestrator-costs",
+    "reconciliation-in-openstack-and-kubernetes",
+    "domain-driven-design",
+    "distributed-failure-handling"
+  ]
+}

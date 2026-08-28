@@ -1,49 +1,41 @@
-import { locales, type Locale } from "#lib/content-model";
-import { getLocalizedDocuments } from "#lib/documents";
-import { getSeries, seriesRegistry } from "#lib/tech/series";
+import { displayTitleFor, locales, type Locale } from "#lib/content-model";
+import { getBlogPosts, getDocsPages } from "#lib/documents";
+import { getDocsCategory } from "#lib/tech/docs";
 
 const siteOrigin = "https://tech.jamie.kr";
 const absoluteUrl = (pathname: string): string =>
   new URL(pathname, siteOrigin).toString();
-function documentLine(
-  document: Awaited<ReturnType<typeof getLocalizedDocuments>>[number],
-): string {
-  const kind =
-    document.documentKind === undefined
-      ? ""
-      : ` Type: ${document.documentKind};`;
-  return `- [${document.title}](${absoluteUrl(document.href)}): ${document.description}${kind} Status: ${document.status}; published ${document.publishedAt}.`;
-}
 
 async function createLocaleSection(locale: Locale): Promise<readonly string[]> {
-  const documents = await getLocalizedDocuments(locale);
+  const [posts, docs] = await Promise.all([getBlogPosts(), getDocsPages()]);
+  const localizedPosts = posts.filter((post) => post.locale === locale);
+  const localizedDocs = docs.filter((page) => page.locale === locale);
   return [
-    `## ${locale === "ko" ? "한국어 블로그" : "English blog"}`,
+    `## ${locale === "ko" ? "한국어 Blog" : "English Blog"}`,
     "",
-    ...documents.map(documentLine),
+    ...localizedPosts.map(
+      (post) =>
+        `- [${displayTitleFor(post)}](${absoluteUrl(post.href)}): ${post.description} Status: ${post.status}; published ${post.publishedAt}.`,
+    ),
     "",
-    `## ${locale === "ko" ? "시리즈" : "Series"}`,
+    `## ${locale === "ko" ? "한국어 Docs" : "English Docs"}`,
     "",
-    ...Object.keys(seriesRegistry).flatMap((id) => {
-      const series = getSeries(id, locale);
-      return series === null
-        ? []
-        : [
-            `- [${series.title}](${absoluteUrl(`/${locale}/series/${id}`)}): ${series.description}`,
-          ];
+    ...localizedDocs.map((page) => {
+      const area = getDocsCategory(page.area, locale);
+      return `- [${displayTitleFor(page)}](${absoluteUrl(page.href)}): Area: ${area.title}; Type: ${page.documentKind}; ${page.description} Status: ${page.status}; verified ${page.verifiedAt}.`;
     }),
     "",
   ];
 }
 
-/** 요청에 대한 응답을 생성함 */
+/** Blog와 Docs canonical을 분리된 section으로 출력함 */
 export async function GET(): Promise<Response> {
   const lines = [
     "# Engineering Notes",
     "",
-    "> Bilingual engineering blog articles with optional ordered series.",
+    "> Bilingual engineering Blog articles and Diátaxis-oriented Docs.",
     "",
-    "Korean and English articles share stable IDs. Prefer the language that matches the user's request.",
+    "Korean and English content shares stable IDs. Prefer the language that matches the user's request.",
     "",
     ...(await Promise.all(locales.map(createLocaleSection))).flat(),
   ];

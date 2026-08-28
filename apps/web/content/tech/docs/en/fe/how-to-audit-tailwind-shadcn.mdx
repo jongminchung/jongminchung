@@ -1,0 +1,119 @@
+---
+id: how-to-audit-tailwind-shadcn
+locale: en
+area: fe
+documentKind: how-to
+series: frontend-maintainability
+seriesOrder: 3
+title: "How to Audit an Existing Tailwind and shadcn/ui Screen"
+description: "Find ownership leaks, raw colors, dynamic classes, and risky shadcn updates, then refactor them safely."
+publishedAt: "2026-08-27"
+updatedAt: "2026-08-27"
+verifiedAt: "2026-08-27"
+tags: [frontend, tailwindcss, shadcn, design-system, maintainability]
+status: stable
+publicationStatus: published
+sourceUrl: https://news.hada.io/topic?id=32073
+---
+
+<Callout title="When to use this guide" type="info">
+  Use this how-to guide when a Tailwind and shadcn/ui screen has unclear change
+  locations or accumulating consumer overrides.
+</Callout>
+
+## Fix the goal and scope
+
+Limit the audit to one feature or one change flow. Do not turn it into a repository-wide class-reduction exercise. The output is an owner-classified issue list, edits within those owners, and verification evidence.
+
+<Steps>
+  <Step>
+    ### Collect live context
+
+    ```bash
+    pnpm exec shadcn info --json -c apps/web
+    rg -n "@theme|@source|@custom-variant" packages/ui apps/web
+    rg -n "@base-ui/react|#[0-9a-fA-F]{3,8}|(?:bg|text|border)-(?:slate|gray|zinc|neutral)-" apps/web
+    ```
+
+    Read `DESIGN_SYSTEM.md`, the nearest `AGENTS.md`, `components.json`, theme providers, token adapters, the `cn` implementation, and the target primitives.
+
+  </Step>
+
+  <Step>
+    ### Assign one owner to every issue
+
+    | Observation | Owner | Default action |
+    | --- | --- | --- |
+    | Light and dark values differ by call site | theme provider | unify the actual value of a semantic role |
+    | The same intent repeats padding and color overrides | shared primitive | use or add a closed variant |
+    | Shared source contains domain copy and state | product composition | move it into the app |
+    | A one-off grid formula is present | page or feature | keep it at the call site |
+    | Vendor markup requires `!important` | scoped integration CSS | record version and removal condition |
+
+    Split changes with two owners and explain their dependency direction.
+
+  </Step>
+
+  <Step>
+    ### Correct high-risk patterns first
+
+    Prioritize dynamic class fragments, nonexistent semantic utilities, direct headless imports from the app, raw colors, and repeated internal-style overrides.
+
+    ```tsx
+    // Avoid
+    <div className={`bg-${tone}-600`} />
+
+    // Prefer
+    const toneClass = {
+      default: "bg-primary text-primary-foreground",
+      danger: "bg-destructive text-destructive-foreground",
+    } as const;
+    ```
+
+    Do not convert every layout formula or renderer literal into a token. Keep exceptions whose owners and reasons to change are distinct in an inventory.
+
+  </Step>
+
+  <Step>
+    ### Preview shadcn source changes
+
+    ```bash
+    pnpm exec shadcn docs button -c apps/web
+    pnpm exec shadcn add button --dry-run -c apps/web
+    pnpm exec shadcn add button --diff button.tsx -c apps/web
+    ```
+
+    Separate upstream accessibility and API changes from local variants, then merge only what is needed. Do not make `--overwrite` the default for a locally modified layer.
+
+  </Step>
+
+  <Step>
+    ### Verify in proportion to the owner
+
+    ```bash
+    pnpm run fmt:check
+    pnpm run lint
+    pnpm --filter @jongminchung/web run typecheck
+    pnpm --filter @jongminchung/web run test
+    pnpm --filter @jongminchung/web run build
+    ```
+
+    For primitive behavior, verify keyboard use, focus, accessible names, and dismissal. For tokens, verify every consumer in light and dark modes.
+
+  </Step>
+</Steps>
+
+## Report by owner
+
+- State which decisions moved to a theme, primitive, composition, or page.
+- Name the reused variant and semantic token.
+- Record the commands run and their results.
+- Give every retained exception an owner, reason, scope, and removal condition.
+
+## Completion criteria
+
+- No new dynamic class fragments or consumer raw colors remain.
+- Apps do not bypass the shared accessibility boundary.
+- Repeated overrides converge into a variant or product composition.
+- `components.json` aliases and Tailwind `@source` entries resolve to real paths.
+- Interaction and visual results match the scope of the change.

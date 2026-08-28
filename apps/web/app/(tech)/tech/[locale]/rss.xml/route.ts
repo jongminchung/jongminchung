@@ -23,7 +23,6 @@ export async function GET(
   const { locale } = await params;
   if (!isLocale(locale)) return new Response("Not found", { status: 404 });
   const items = (await getLocalizedDocuments(locale))
-    .filter((document) => document.publicationStatus === "published")
     .toSorted((left, right) =>
       right.publishedAt.localeCompare(left.publishedAt),
     )

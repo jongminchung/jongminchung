@@ -1,6 +1,6 @@
 # Issue 0032: Web 검색 runtime과 benchmark 실행 경계 분리
 
-- 상태: 진행 중
+- 상태: 구현 완료·반영 대기
 - 우선순위: P1
 - 기준일: 2026-08-20
 - 영향 범위:
@@ -80,3 +80,16 @@
 - `pnpm --filter @jongminchung/web run test`
 - `pnpm --filter @jongminchung/web run build`
 - `git diff --check`
+
+## 처리 결과
+
+- **제품 검색 규칙을 `search.ts`의 순수 runtime API로 분리함**
+  - Unicode 정규화·질의 분해·별칭·결과 필터·source interleave가 Fumadocs source와 benchmark 정의에 의존하지 않음
+  - 작은 in-memory fixture가 제품 검색 규칙을 unit project에서 검증함
+- **실제 bilingual corpus benchmark는 integration project로 이동함**
+  - `search-benchmark.integration.test.ts`가 별도 server runner를 한 번 실행해 40개 query와 기존 품질 baseline을 검증함
+  - unit coverage 실행은 실제 MDX corpus와 server index를 읽지 않음
+- **검색 UI의 production import graph에는 benchmark case·threshold·평가 runner가 포함되지 않음**
+- **검증 결과는 unit 5개·integration corpus 1개와 Web 전체 31개 파일·121개 test 통과임**
+  - root unit coverage 142개 파일·747개 test와 integration 37개 파일·281개 test도 통과함
+  - Web typecheck와 production build가 통과함

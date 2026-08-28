@@ -1,0 +1,31 @@
+---
+id: tutorial-slug
+locale: ko
+area: fe
+documentKind: tutorial
+title: "완료 상태가 분명한 학습 제목"
+description: "독자가 무엇을 만들고 어떤 상태에 도달하는지 설명"
+publishedAt: "YYYY-MM-DD"
+updatedAt: "YYYY-MM-DD"
+verifiedAt: "YYYY-MM-DD"
+tags: [topic, tutorial]
+status: stable
+publicationStatus: draft
+sourceUrl: https://example.com/primary-source
+---
+
+## 완료할 결과
+
+학습을 마치면 확인할 수 있는 동작과 산출물을 정의함
+
+## 준비 사항
+
+필요한 환경과 선행 지식을 명시함
+
+## 단계별 구현
+
+독자가 따라 하며 결과를 확인할 수 있는 순서로 구성함
+
+## 완료 확인
+
+성공 조건과 다음 학습 경로를 제시함

@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { NoteCollection } from "#invest-components/InvestmentShell";
-import { getInvestmentNotes } from "#lib/invest/notes";
+import { getInvestmentNotes, getNotesByTag } from "#lib/invest/notes";
+import { createInvestmentTagHref } from "#lib/invest/routing";
+import { createInvestmentCollectionMetadata } from "#lib/invest/seo";
 import { isLocale, locales } from "#lib/site-routing";
 
 /** 정적 생성에 사용할 경로 매개변수를 반환함 */
@@ -22,19 +25,52 @@ export async function generateStaticParams() {
     ? params
     : locales.map((locale) => ({ locale, slug: "__empty__" }));
 }
+
+function description(locale: "ko" | "en", tag: string): string {
+  return locale === "ko"
+    ? `${tag} 주제의 원자료 요약과 Jamie의 판단을 분리해 기록한 투자 리서치 노트 모음`
+    : `Source-grounded investment research notes about ${tag}, separating original claims from Jamie's judgment.`;
+}
+
+/** tag collection의 메타데이터를 생성함 */
+export async function generateMetadata({
+  params,
+}: PageProps<"/invest/[locale]/tags/[slug]">): Promise<Metadata> {
+  const { locale, slug } = await params;
+  if (!isLocale(locale)) notFound();
+  const notes = await getNotesByTag(locale, slug);
+  if (notes.length === 0) notFound();
+  const otherLocale = locale === "ko" ? "en" : "ko";
+  const alternateNotes = await getNotesByTag(otherLocale, slug);
+  return createInvestmentCollectionMetadata({
+    locale,
+    title: `#${slug}`,
+    description: description(locale, slug),
+    pathname: createInvestmentTagHref(locale, slug),
+    alternatePathname:
+      alternateNotes.length < 2
+        ? undefined
+        : createInvestmentTagHref(otherLocale, slug),
+    index: notes.length >= 2,
+  });
+}
 /** `TagPage` 페이지 UI를 렌더링함 */
 export default async function TagPage({
   params,
 }: PageProps<"/invest/[locale]/tags/[slug]">) {
   const { locale, slug } = await params;
   if (!isLocale(locale)) notFound();
-  const notes = (await getInvestmentNotes(locale)).filter((note) =>
-    note.tags.includes(slug),
-  );
+  const notes = await getNotesByTag(locale, slug);
   if (notes.length === 0) notFound();
   return (
     <main>
-      <NoteCollection locale={locale} notes={notes} title={`#${slug}`} />
+      <NoteCollection
+        locale={locale}
+        notes={notes}
+        description={description(locale, slug)}
+        pathname={createInvestmentTagHref(locale, slug)}
+        title={`#${slug}`}
+      />
     </main>
   );
 }

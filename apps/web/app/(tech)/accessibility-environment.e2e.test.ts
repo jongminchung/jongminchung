@@ -9,7 +9,7 @@ test("[성공] 접근성 환경에서도 문서 탐색과 focus 계약을 유지
     forcedColors: "active",
     reducedMotion: "reduce",
   });
-  await page.goto("/en/nextjs-16");
+  await page.goto("/en/docs/fe/nextjs-16");
 
   await expectNoHorizontalOverflow(page);
   const trigger = page.getByRole("button", { name: "Search documentation" });

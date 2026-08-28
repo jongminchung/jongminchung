@@ -2,11 +2,18 @@ import {
   applyMdxPreset,
   defineCollections,
   defineConfig,
+  defineDocs,
 } from "fumadocs-mdx/config";
 import type { RefinementCtx } from "zod";
-import { docMetadataSchema, type DocMetadata } from "./lib/content-model.ts";
 import {
-  validateDocumentEntry,
+  blogPostMetadataSchema,
+  docsPageMetadataSchema,
+  type BlogPostMetadata,
+  type DocsPageMetadata,
+} from "./lib/content-model.ts";
+import {
+  validateBlogPostEntry,
+  validateDocsPageEntry,
   validateInvestmentNoteEntry,
   type ContentEntry,
 } from "./lib/content-validation.ts";
@@ -16,9 +23,9 @@ import {
 } from "./lib/invest/content.ts";
 import { remarkKrokiUrl } from "./lib/remark-kroki-url.ts";
 
-function collectionPath(path: string, collection: "invest" | "tech"): string {
+function collectionPath(path: string, collectionRoot: string): string {
   const normalized = path.replaceAll("\\", "/");
-  return normalized.split(`/content/${collection}/`).at(-1) ?? normalized;
+  return normalized.split(`/content/${collectionRoot}/`).at(-1) ?? normalized;
 }
 
 function addValidationIssue(context: RefinementCtx, validate: () => void) {
@@ -32,14 +39,25 @@ function addValidationIssue(context: RefinementCtx, validate: () => void) {
   }
 }
 
-function techSchema({ path, source }: { path: string; source: string }) {
-  return docMetadataSchema.superRefine((metadata, context) => {
-    const entry: ContentEntry<DocMetadata> = {
+function blogSchema({ path, source }: { path: string; source: string }) {
+  return blogPostMetadataSchema.superRefine((metadata, context) => {
+    const entry: ContentEntry<BlogPostMetadata> = {
       metadata,
       body: source,
-      relativePath: collectionPath(path, "tech"),
+      relativePath: collectionPath(path, "tech/blog"),
     };
-    addValidationIssue(context, () => validateDocumentEntry(entry));
+    addValidationIssue(context, () => validateBlogPostEntry(entry));
+  });
+}
+
+function docsSchema({ path, source }: { path: string; source: string }) {
+  return docsPageMetadataSchema.superRefine((metadata, context) => {
+    const entry: ContentEntry<DocsPageMetadata> = {
+      metadata,
+      body: source,
+      relativePath: collectionPath(path, "tech/docs"),
+    };
+    addValidationIssue(context, () => validateDocsPageEntry(entry));
   });
 }
 
@@ -54,22 +72,37 @@ function investmentSchema({ path, source }: { path: string; source: string }) {
   });
 }
 
-export const techCollection = defineCollections({
-  type: "doc",
-  dir: "content/tech",
-  files: ["**/*.mdx"],
-  async: true,
-  mdxOptions: applyMdxPreset({
+function techMdxOptions() {
+  return applyMdxPreset({
     rehypeCodeOptions: {
       addLanguageClass: true,
       fallbackLanguage: "plaintext",
       langAlias: { excalidraw: "plaintext" },
       themes: { light: "github-light", dark: "github-dark" },
     },
-    remarkPlugins: (plugins) => [...plugins, remarkKrokiUrl],
-  }),
-  schema: techSchema,
+    remarkPlugins: [remarkKrokiUrl],
+  });
+}
+
+export const blogCollection = defineCollections({
+  type: "doc",
+  dir: "content/tech/blog",
+  files: ["**/*.mdx"],
+  async: true,
+  mdxOptions: techMdxOptions(),
+  schema: blogSchema,
   postprocess: { extractLinkReferences: true },
+});
+
+export const docsCollection = defineDocs({
+  dir: "content/tech/docs",
+  docs: {
+    files: ["**/*.mdx"],
+    async: true,
+    mdxOptions: techMdxOptions(),
+    schema: docsSchema,
+    postprocess: { extractLinkReferences: true },
+  },
 });
 
 export const investmentCollection = defineCollections({

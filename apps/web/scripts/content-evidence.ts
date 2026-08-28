@@ -95,8 +95,8 @@ export async function createEvidenceReport(
   now = new Date(),
   network = false,
 ): Promise<unknown> {
-  const { readContentSnapshot } = await import("../lib/content-repository.ts");
-  const documents = readContentSnapshot().documents;
+  const { getSourceDocuments } = await import("../lib/documents.ts");
+  const documents = await getSourceDocuments();
   const sourceResults = new Map<string, SourceResult>();
   if (network) {
     const urls = [...new Set(documents.map(({ sourceUrl }) => sourceUrl))];
