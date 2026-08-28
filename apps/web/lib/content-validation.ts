@@ -266,9 +266,9 @@ export function validateTechContent(
       const count = posts.filter(
         ({ metadata }) => metadata.locale === locale,
       ).length;
-      if (count !== 24)
+      if (count !== 25)
         throw new Error(
-          `Blog ${locale} must contain 24 posts; found ${count}.`,
+          `Blog ${locale} must contain 25 posts; found ${count}.`,
         );
     }
   }
@@ -329,7 +329,8 @@ export function validateInvestmentNotes(
       reference?.publishedAt !== translation?.publishedAt ||
       reference?.status !== translation?.status ||
       JSON.stringify(reference?.tags) !== JSON.stringify(translation?.tags) ||
-      reference?.series !== translation?.series
+      reference?.series !== translation?.series ||
+      reference?.image !== translation?.image
     ) {
       throw new Error(
         `Investment note ${id} has inconsistent shared metadata.`,

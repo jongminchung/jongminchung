@@ -21,6 +21,7 @@ export const investmentSourceKindSchema = z.enum(investmentSourceKinds);
 export type InvestmentSourceKind = z.infer<typeof investmentSourceKindSchema>;
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
+const INVESTMENT_IMAGE_PATTERN = /^\/invest\/[a-z0-9]+(?:-[a-z0-9]+)*\.png$/u;
 
 export const investmentSourceSchema = z
   .strictObject({
@@ -62,6 +63,8 @@ const investmentNoteShape = {
   status: publicationStatusSchema,
   tags: uniqueStringArraySchema("tags"),
   series: nonEmptyTrimmedStringSchema.optional(),
+  image: z.string().regex(INVESTMENT_IMAGE_PATTERN),
+  imageAlt: nonEmptyTrimmedStringSchema,
   sources: z.array(investmentSourceSchema).min(1).readonly(),
 } as const;
 

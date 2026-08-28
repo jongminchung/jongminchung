@@ -20,6 +20,7 @@ test("[실패] 수평 바닥 바닥 없이 더블 언어 빈 연구 보고서를
       name: "Efficiency compounds when the feedback loop is owned end to end",
     }),
   ).toBeVisible();
+  await expect(page.locator('[data-editorial-image="true"]')).toHaveCount(5);
   await expect(
     page.locator('link[rel="alternate"][hreflang="x-default"]'),
   ).toHaveAttribute("href", "https://invest.jamie.kr/en");
@@ -50,6 +51,14 @@ test("[성공] 투자 노트와 collection의 검색 엔터티를 연결함", as
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",
     "https://invest.jamie.kr/en/notes/efficiency-compounds",
+  );
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+    "content",
+    "https://invest.jamie.kr/invest/efficiency-feedback-loop.png",
+  );
+  await expect(page.locator('[data-investment-hero="true"]')).toHaveAttribute(
+    "src",
+    /efficiency-feedback-loop\.png/u,
   );
   await expect(
     page.locator('meta[property="article:published_time"]'),
@@ -104,6 +113,46 @@ test("[성공] 투자 장소를 선택하고 기억함", async ({ page }) => {
       ({ name }) => name === "invest-locale",
     )?.value,
   ).toBe("ko");
+});
+
+test("[성공] Invest 코드블록이 Tech 타이포그래피와 외형을 공유함", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/en/fixtures/code-block");
+
+  const codeBlock = page.locator('[data-docs-code-block="true"]');
+  const viewport = codeBlock.getByRole("region", {
+    name: /Code block: analysis\.ts/u,
+  });
+  await expect(codeBlock).toBeVisible();
+  await expect(
+    codeBlock.getByRole("button", { name: "Copy Text" }),
+  ).toBeVisible();
+  await expect(
+    viewport.evaluate((element) => {
+      const viewportStyle = getComputedStyle(element);
+      const figureStyle = getComputedStyle(
+        element.closest('[data-docs-code-block="true"]')!,
+      );
+      return {
+        borderStyle: figureStyle.borderStyle,
+        fontSize: viewportStyle.fontSize,
+        letterSpacing: viewportStyle.letterSpacing,
+        lineHeight: viewportStyle.lineHeight,
+        overflowX: viewportStyle.overflowX,
+        overflowY: viewportStyle.overflowY,
+      };
+    }),
+  ).resolves.toEqual({
+    borderStyle: "solid",
+    fontSize: "13px",
+    letterSpacing: "normal",
+    lineHeight: "20.8px",
+    overflowX: "auto",
+    overflowY: "auto",
+  });
+  await expectNoHorizontalOverflow(page);
 });
 
 test("[성공] Invest 목록 제어가 URL 상태와 선택 결과를 일치시킴", async ({

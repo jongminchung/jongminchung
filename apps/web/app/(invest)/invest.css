@@ -1,5 +1,16 @@
 @import "@jongminchung/ui/globals.css";
+@import "fumadocs-ui/css/shadcn.css";
+@import "fumadocs-ui/css/preset.css";
 @import "../theme.css";
 
 @source "./**/*.{ts,tsx,mdx}";
 @source not "./**/*.{test,spec}.{ts,tsx}";
+@source "../../node_modules/fumadocs-ui/dist/components/codeblock.js";
+@source "../../node_modules/fumadocs-ui/dist/components/ui/button.js";
+
+/* Tech와 동일하게 data-theme 기반 Shiki dark token을 사용함 */
+:where(html[data-theme="dark"]) .shiki:not(.not-fumadocs-codeblock *) code span,
+:where(html[data-theme="dark"]) code.shiki:not(.not-fumadocs-code *) span {
+  color: var(--shiki-dark);
+  font-style: var(--shiki-dark-font-style);
+}

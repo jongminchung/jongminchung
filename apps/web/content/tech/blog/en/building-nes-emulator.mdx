@@ -4,10 +4,12 @@ locale: en
 series: building-from-first-principles
 seriesOrder: 6
 title: "Building an NES Emulator"
-description: "Connect a 6502 CPU, PPU, tiles, audio, and WebAssembly to emulate the NES in a browser."
+description: "NES emulation accuracy depends less on CPU instruction coverage than on reproducing the timing contract shared by the CPU, PPU, and APU."
+thesis: "An emulator is not an instruction interpreter; it is a software reconstruction of the timing contracts among hardware components."
+counterargument: "Most games run with approximate timing, so emphasizing cycle accuracy in an educational emulator is unnecessary complexity."
 publishedAt: "2026-07-07"
-updatedAt: "2026-07-07"
-verifiedAt: "2026-08-06"
+updatedAt: "2026-08-28"
+verifiedAt: "2026-08-28"
 tags: [emulator, wasm, rust, game]
 status: experimental
 publicationStatus: published

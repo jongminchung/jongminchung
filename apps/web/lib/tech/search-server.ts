@@ -25,6 +25,7 @@ const publicDocsSource = {
 };
 
 const sources = [publicBlogSource, publicDocsSource] as const;
+
 const searchTerms = new Map(
   (["ko", "en"] as const).map((locale) => [
     locale,

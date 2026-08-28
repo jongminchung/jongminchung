@@ -23,6 +23,8 @@ function createBlogPost(
     locale,
     title: `${locale} ${id}`,
     description: `${locale} ${id} description`,
+    thesis: `${locale} ${id} thesis`,
+    counterargument: `${locale} ${id} counterargument`,
     publishedAt: "2026-01-01",
     updatedAt: "2026-01-01",
     tags: ["blog"],
@@ -91,6 +93,8 @@ function createInvestmentNote(
     updatedAt: "2026-01-01",
     status: "published",
     tags: ["portfolio"],
+    image: "/invest/durable-investing.png",
+    imageAlt: `${locale} durable investing thumbnail`,
     sources: [
       {
         kind: "book",

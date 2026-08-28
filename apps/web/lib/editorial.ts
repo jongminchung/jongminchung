@@ -8,6 +8,10 @@ export interface EditorialItem {
   readonly tags: readonly string[];
   readonly kind: string;
   readonly mediaSeed: string;
+  readonly image?: Readonly<{
+    readonly src: string;
+    readonly alt: string;
+  }>;
 }
 
 export type EditorialSort = "newest" | "oldest";

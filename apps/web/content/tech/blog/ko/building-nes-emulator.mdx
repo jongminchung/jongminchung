@@ -4,10 +4,12 @@ locale: ko
 series: building-from-first-principles
 seriesOrder: 6
 title: "NES 에뮬레이터 만들기"
-description: "6502 CPU, PPU, 타일, 오디오와 WASM을 연결해 브라우저에서 NES를 에뮬레이션합니다."
+description: "NES 에뮬레이터의 정확성은 CPU 명령 구현보다 CPU·PPU·APU가 시간을 공유하는 계약을 재현할 때 결정됩니다."
+thesis: "에뮬레이터는 명령어 해석기가 아니라 여러 하드웨어 부품의 시간 계약을 소프트웨어로 재현한 시스템입니다."
+counterargument: "대부분의 게임은 대략적인 타이밍에서도 실행되므로 교육용 에뮬레이터에 사이클 정확성까지 강조하는 것은 과도하다는 반론이 가능합니다."
 publishedAt: "2026-07-07"
-updatedAt: "2026-07-07"
-verifiedAt: "2026-08-06"
+updatedAt: "2026-08-28"
+verifiedAt: "2026-08-28"
 tags: [emulator, wasm, rust, game]
 status: experimental
 publicationStatus: published

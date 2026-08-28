@@ -22,6 +22,8 @@ const copy: Record<Locale, EditorialCopy> = {
     grid: "그리드",
     list: "목록",
     loadMore: "더 보기",
+    loading: "다음 글을 불러오는 중",
+    end: "모든 글을 불러왔습니다",
     empty: "선택한 조건과 일치하는 글이 없습니다",
     related: "관련 글",
   },
@@ -36,6 +38,8 @@ const copy: Record<Locale, EditorialCopy> = {
     grid: "Grid",
     list: "List",
     loadMore: "Load more",
+    loading: "Loading more articles",
+    end: "All articles loaded",
     empty: "No articles match the selected filters.",
     related: "Related articles",
   },
@@ -59,6 +63,7 @@ export function BlogIndex({
       copy={copy[locale]}
       items={items}
       pathname={`/${locale}`}
+      pagination="infinite"
       promotedTags={documentKinds}
       query={parseEditorialQuery(
         searchParams,

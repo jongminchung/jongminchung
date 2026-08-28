@@ -2,10 +2,12 @@
 id: the-weight-of-trivial-code
 locale: en
 title: "The Weight of Trivial Code"
-description: "Analyze the contract cost of seemingly trivial choices such as awaitless returns, mutable defaults, and three-valued logic."
+description: "A seemingly trivial line should be judged by the contract cost it spreads to callers and the type system, not by local convenience."
+thesis: "Code risk should be judged by the size of the implicit contract a line extends across the system, not by its line count."
+counterargument: "Treating every small idiom as a contract problem slows review and exaggerates risks that tests and linters can control."
 publishedAt: "2026-07-04"
-updatedAt: "2026-07-04"
-verifiedAt: "2026-08-06"
+updatedAt: "2026-08-28"
+verifiedAt: "2026-08-28"
 tags: [code-quality, types, contracts, software-engineering]
 status: experimental
 publicationStatus: published

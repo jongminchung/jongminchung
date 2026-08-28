@@ -62,6 +62,8 @@ const sharedMetadataShape = {
 
 const blogPostMetadataShape = {
   ...sharedMetadataShape,
+  thesis: nonEmptyTrimmedStringSchema,
+  counterargument: nonEmptyTrimmedStringSchema,
   series: nonEmptyTrimmedStringSchema.optional(),
   seriesOrder: z.number().int().positive().optional(),
   verifiedAt: z.string().optional(),
@@ -300,6 +302,11 @@ export function createSeriesHref(locale: Locale, id?: string): string {
 /** OG 이미지 경로를 생성함 */
 export function createOgImageHref(locale: Locale, id: string): string {
   return `/og/${locale}/${id}`;
+}
+
+/** 기술 블로그 글의 주제별 이미지 경로를 생성함 */
+export function createTechArticleImageHref(id: string): string {
+  return `/tech/articles/${id}.png`;
 }
 
 /** 콘텐츠를 locale·최신 게시 순서로 비교함 */

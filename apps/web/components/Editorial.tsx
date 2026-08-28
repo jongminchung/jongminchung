@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import {
@@ -7,6 +8,7 @@ import {
   type EditorialItem,
   type EditorialQuery,
 } from "#lib/editorial";
+import { EditorialInfiniteResults } from "./EditorialInfiniteResults";
 import {
   EditorialNavigationMenu,
   type EditorialNavigationMenuOption,
@@ -22,6 +24,8 @@ export interface EditorialCopy {
   readonly grid: string;
   readonly list: string;
   readonly loadMore: string;
+  readonly loading?: string;
+  readonly end?: string;
   readonly empty: string;
   readonly related: string;
 }
@@ -319,7 +323,20 @@ export function EditorialCard({
         className="block data-[variant=engineering]:overflow-hidden data-[variant=engineering]:rounded-[.2rem]"
         data-variant={variant}
       >
-        <EditorialGraphic seed={item.mediaSeed} variant={variant} />
+        {item.image === undefined ? (
+          <EditorialGraphic seed={item.mediaSeed} variant={variant} />
+        ) : (
+          <Image
+            alt={item.image.alt}
+            className="aspect-[1.6] w-full border-b object-cover"
+            data-editorial-image="true"
+            height={1000}
+            loading={eager ? "eager" : "lazy"}
+            sizes="(max-width: 560px) calc(100vw - 32px), (max-width: 840px) calc((100vw - 68px) / 2), 373px"
+            src={item.image.src}
+            width={1600}
+          />
+        )}
       </span>
       <span
         className="block p-5 data-[variant=engineering]:px-0 data-[variant=engineering]:pt-3 data-[variant=engineering]:pb-0"
@@ -341,7 +358,7 @@ export function EditorialCard({
   );
 }
 
-/** `EditorialIndex` URL 동기화 topic·sort·view·pagination 목록을 렌더링함 */
+/** `EditorialIndex` URL 동기화 topic·sort·view·점진 목록을 렌더링함 */
 export function EditorialIndex({
   pathname,
   items,
@@ -350,6 +367,7 @@ export function EditorialIndex({
   promotedTags = [],
   tagLabels = {},
   variant = "default",
+  pagination = "links",
 }: {
   readonly pathname: string;
   readonly items: readonly EditorialItem[];
@@ -358,6 +376,7 @@ export function EditorialIndex({
   readonly promotedTags?: readonly string[];
   readonly tagLabels?: Readonly<Record<string, string>>;
   readonly variant?: "default" | "engineering";
+  readonly pagination?: "links" | "infinite";
 }): React.JSX.Element {
   const tagPriority = new Map(
     promotedTags.map((tag, index) => [tag, index] as const),
@@ -374,6 +393,10 @@ export function EditorialIndex({
   });
   const selected = filterEditorialItems(items, query);
   const page = paginateEditorialItems(selected, query.page);
+  const resultClassName =
+    query.view === "grid"
+      ? "grid grid-cols-3 gap-x-5 gap-y-12 max-[840px]:grid-cols-2 max-[560px]:grid-cols-1"
+      : "grid gap-4";
   return (
     <main
       className="mx-auto w-full max-w-[1200px] px-6 pt-[clamp(64px,9vw,112px)] pb-24 data-[variant=engineering]:pt-[clamp(70px,8vw,112px)] max-[680px]:px-4 max-[680px]:pt-12"
@@ -465,17 +488,31 @@ export function EditorialIndex({
             </Link>
           </div>
         </div>
-        {page.items.length === 0 ? (
+        {selected.length === 0 ? (
           <p className="border bg-card p-8 text-muted-foreground">
             {copy.empty}
           </p>
+        ) : pagination === "infinite" ? (
+          <EditorialInfiniteResults
+            className={resultClassName}
+            endLabel={copy.end ?? copy.empty}
+            initialPage={query.page}
+            key={`${query.tag ?? "all"}:${query.sort}:${query.view}`}
+            loadingLabel={copy.loading ?? copy.loadMore}
+            view={query.view}
+          >
+            {selected.map((item, index) => (
+              <EditorialCard
+                eager={index < 3}
+                item={item}
+                key={item.id}
+                variant={variant}
+              />
+            ))}
+          </EditorialInfiniteResults>
         ) : (
           <div
-            className={
-              query.view === "grid"
-                ? "grid grid-cols-3 gap-x-5 gap-y-12 max-[840px]:grid-cols-2 max-[560px]:grid-cols-1"
-                : "grid gap-4"
-            }
+            className={resultClassName}
             data-document-grid={query.view === "grid" ? "true" : undefined}
             data-view={query.view}
           >
@@ -489,7 +526,7 @@ export function EditorialIndex({
             ))}
           </div>
         )}
-        {page.hasMore ? (
+        {pagination === "links" && page.hasMore ? (
           <div className="mt-10 flex justify-center">
             <Link
               className="border px-5 py-3 text-sm hover:bg-muted"

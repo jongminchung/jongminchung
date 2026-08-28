@@ -13,6 +13,8 @@ const metadata = {
   updatedAt: "2026-08-16",
   status: "published",
   tags: ["risk"],
+  image: "/invest/margin-of-safety.png",
+  imageAlt: "A protected stack of capital representing margin of safety",
   sources: [
     {
       kind: "book",

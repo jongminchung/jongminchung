@@ -28,6 +28,8 @@ const siteStylePaths = [
   "apps/web/app/(invest)/invest.css",
 ] as const;
 const siteStyles = siteStylePaths.map(read);
+const techStyles = siteStyles[1];
+const investStyles = siteStyles[2];
 const domainComponentStyles = [
   ...readComponentStyles("apps/web/app/(home)/_components"),
   ...readComponentStyles("apps/web/app/(tech)/_components"),
@@ -184,6 +186,21 @@ describe("공통 디자인 토큰 계약", () => {
     expect(uiPackage.exports).toHaveProperty("./root.css");
     expect(sharedRootFacade).toContain("Deprecated compatibility facade");
     expect(sharedRootFacade).toContain('@import "./globals.css";');
+  });
+
+  it("[성공] Tech와 Invest가 동일한 코드블록 CSS 계약을 사용함", () => {
+    for (const stylesheet of [techStyles, investStyles]) {
+      expect(stylesheet).toContain('@import "fumadocs-ui/css/shadcn.css";');
+      expect(stylesheet).toContain('@import "fumadocs-ui/css/preset.css";');
+      expect(stylesheet).toContain(
+        '@source "../../node_modules/fumadocs-ui/dist/components/codeblock.js";',
+      );
+      expect(stylesheet).toContain(
+        '@source "../../node_modules/fumadocs-ui/dist/components/ui/button.js";',
+      );
+      expect(stylesheet).toContain('html[data-theme="dark"]');
+      expect(stylesheet).toContain("--shiki-dark");
+    }
   });
 
   it("[성공] 승인된 semantic utility가 실제 CSS selector로 생성됨", async () => {

@@ -8,6 +8,8 @@ updatedAt: 2026-01-01
 status: draft
 tags: [research]
 series: optional-series
+image: /invest/note-slug.png
+imageAlt: A concise description of the note thumbnail
 sources:
   - kind: article
     title: Source title

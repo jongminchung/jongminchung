@@ -30,8 +30,8 @@ export const seriesRegistry = seriesRegistrySchema.parse({
       en: "Building from First Principles",
     },
     description: {
-      ko: "계산기부터 에뮬레이터와 언어 모델까지 핵심 원리를 직접 구현하며 이해하는 글 모음",
-      en: "Articles that build core ideas directly, from calculators and emulators to language models.",
+      ko: "직접 구현은 완성품을 재현하는 일이 아니라 추상화가 숨긴 경계와 실패 조건을 드러내는 가장 빠른 조사법이라는 주장을 검증하는 시리즈",
+      en: "A series testing the claim that implementation is the fastest way to expose boundaries and failure modes hidden by abstractions.",
     },
   },
   "react-ui-architecture": {
@@ -41,8 +41,8 @@ export const seriesRegistry = seriesRegistrySchema.parse({
       en: "Designing React UI",
     },
     description: {
-      ko: "컴포넌트 경계, 뷰 모델, Headless 패턴으로 React UI의 책임을 설계하는 글 모음",
-      en: "Articles on React UI responsibility through component boundaries, view models, and headless patterns.",
+      ko: "좋은 React UI는 컴포넌트 수가 아니라 상태·동작·표현의 책임 경계를 명시할 때 만들어진다는 주장을 검증하는 시리즈",
+      en: "A series testing the claim that good React UI comes from explicit ownership of state, behavior, and presentation—not component count.",
     },
   },
 });

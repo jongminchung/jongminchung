@@ -30,6 +30,8 @@ const document = {
   locale: "ko",
   title: "SEO 계약",
   description: "검색 엔진이 읽는 문서 계약",
+  thesis: "검색 가능한 주장은 구조화 데이터 계약의 일부임",
+  counterargument: "본문만으로도 검색 엔진에 충분한 정보를 제공할 수 있음",
   publishedAt: "2026-08-01",
   updatedAt: "2026-08-02",
   tags: ["frontend"],
@@ -54,6 +56,9 @@ describe("구조화 데이터", () => {
       name: "Jongmin Chung",
     });
     expect(article.citation).toBe("https://developers.google.com/search/docs");
+    expect(article.image).toBe(
+      "https://tech.jamie.kr/tech/articles/seo-contract.png",
+    );
     expect(graphNode(schema, "BreadcrumbList")).toBeDefined();
   });
 
@@ -87,6 +92,8 @@ describe("구조화 데이터", () => {
       updatedAt: "2026-08-02",
       status: "published",
       tags: ["research"],
+      image: "/invest/source-note.png",
+      imageAlt: "Source note research thumbnail",
       sources: [
         {
           kind: "article",
@@ -102,6 +109,9 @@ describe("구조화 데이터", () => {
     expect(graphNode(schema, "Article").citation).toEqual([
       "https://example.com/source",
     ]);
+    expect(graphNode(schema, "Article").image).toBe(
+      "https://invest.jamie.kr/invest/source-note.png",
+    );
     expect(graphNode(schema, "BreadcrumbList")).toBeDefined();
 
     expect(

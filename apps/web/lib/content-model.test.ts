@@ -12,6 +12,8 @@ const metadata = {
   locale: "en",
   title: "Article",
   description: "A technical article",
+  thesis: "A contestable technical claim",
+  counterargument: "The strongest reasonable objection",
   publishedAt: "2026-07-14",
   updatedAt: "2026-07-14",
   tags: ["docs"],
@@ -19,6 +21,12 @@ const metadata = {
   publicationStatus: "published",
   sourceUrl: "https://example.com/source",
 };
+
+const {
+  thesis: _thesis,
+  counterargument: _counterargument,
+  ...docsMetadata
+} = metadata;
 
 describe("블로그 메타데이터", () => {
   it("[성공] 독립 글의 검증된 계약을 반환함", () => {
@@ -40,7 +48,7 @@ describe("블로그 메타데이터", () => {
   it("[성공] Docs에 영역·Diátaxis 유형·검증일을 요구함", () => {
     expect(
       parseDocsPageMetadata({
-        ...metadata,
+        ...docsMetadata,
         area: "be",
         documentKind: "how-to",
         verifiedAt: "2026-07-14",
@@ -48,7 +56,7 @@ describe("블로그 메타데이터", () => {
     ).toMatchObject({ area: "be", documentKind: "how-to" });
     expect(
       parseDocsPageMetadata({
-        ...metadata,
+        ...docsMetadata,
         id: "docs-overview",
         verifiedAt: "2026-07-14",
       }),
@@ -61,7 +69,7 @@ describe("블로그 메타데이터", () => {
     ).toThrow("unsupported metadata fields");
     expect(() =>
       parseDocsPageMetadata({
-        ...metadata,
+        ...docsMetadata,
         area: "be",
         documentKind: "guide",
         verifiedAt: "2026-07-14",
@@ -72,7 +80,7 @@ describe("블로그 메타데이터", () => {
   it("[실패] Docs의 Series 필드와 실제 문서의 영역 누락을 거부함", () => {
     expect(() =>
       parseDocsPageMetadata({
-        ...metadata,
+        ...docsMetadata,
         area: "be",
         documentKind: "how-to",
         verifiedAt: "2026-07-14",
@@ -82,7 +90,7 @@ describe("블로그 메타데이터", () => {
     ).toThrow("unsupported metadata fields");
     expect(() =>
       parseDocsPageMetadata({
-        ...metadata,
+        ...docsMetadata,
         documentKind: "how-to",
         verifiedAt: "2026-07-14",
       }),
@@ -102,6 +110,15 @@ describe("블로그 메타데이터", () => {
     expect(() =>
       parseDocMetadata({ ...metadata, series: "unknown", seriesOrder: 1 }),
     ).toThrow('unknown series "unknown"');
+  });
+
+  it("[실패] Blog는 반론 가능한 주장과 예상 반론을 모두 요구함", () => {
+    expect(() =>
+      parseDocMetadata({ ...metadata, thesis: undefined }),
+    ).toThrow();
+    expect(() =>
+      parseDocMetadata({ ...metadata, counterargument: undefined }),
+    ).toThrow();
   });
 
   it("[성공] 새 공개 URL을 생성함", () => {

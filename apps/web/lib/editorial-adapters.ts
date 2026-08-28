@@ -1,4 +1,5 @@
 import {
+  createTechArticleImageHref,
   displayTitleFor,
   type ContentManifestEntry,
   type Locale,
@@ -32,6 +33,14 @@ export function toTechEditorialItem(
             : "Engineering article"
           : (getSeries(document.series, locale)?.title ?? document.series),
     mediaSeed: `${document.id}:${document.tags.join(":")}`,
+    ...(document.contentType === "blog"
+      ? {
+          image: {
+            src: createTechArticleImageHref(document.id),
+            alt: displayTitleFor(document),
+          },
+        }
+      : {}),
   });
 }
 
@@ -48,5 +57,6 @@ export function toInvestmentEditorialItem(
     tags: [...new Set([...note.tags, ...note.sources.map(({ kind }) => kind)])],
     kind: note.series ?? "Research note",
     mediaSeed: `${note.id}:${note.tags.join(":")}`,
+    image: { src: note.image, alt: note.imageAlt },
   });
 }

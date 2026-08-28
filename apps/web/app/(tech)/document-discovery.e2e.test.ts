@@ -69,6 +69,51 @@ test("[성공] Docs canonical은 TechArticle·학습 유형·breadcrumb·TOC를 
   await expect(page).toHaveURL(/#mdx-pipeline$/u);
 });
 
+test("[성공] Blog는 주제 이미지와 주장·반론으로 시작하고 Docs는 사실 문서 구조를 유지함", async ({
+  page,
+}) => {
+  await page.goto("/ko/server-monitoring-analysis-guide");
+  const hero = page.locator('[data-tech-article-hero="true"]');
+  await expect(hero).toBeVisible();
+  await expect(hero.locator("img")).toHaveAttribute(
+    "src",
+    /server-monitoring-analysis-guide\.png/u,
+  );
+  const argument = page.locator('[data-article-argument="true"]');
+  await expect(argument).toBeVisible();
+  await expect(
+    page.locator(
+      '[data-tech-article-hero="true"] + [data-article-argument="true"]',
+    ),
+  ).toBeVisible();
+  await expect(argument).toContainText("이 글의 주장");
+  await expect(argument).toContainText("가장 강한 반론");
+  await expect(argument).toContainText("가설을 반증하는 절차");
+
+  await page.goto("/ko/docs/fe/nextjs-16");
+  await expect(page.locator('[data-tech-article-hero="true"]')).toHaveCount(0);
+  await expect(page.locator('[data-article-argument="true"]')).toHaveCount(0);
+});
+
+test("[성공] Blog 목록과 공유 메타데이터는 글별 주제 이미지를 사용함", async ({
+  page,
+}) => {
+  await page.goto("/en");
+  const cardImage = page.locator(
+    'a[href="/en/server-monitoring-analysis-guide"] img[data-editorial-image="true"]',
+  );
+  await expect(cardImage).toHaveAttribute(
+    "src",
+    /server-monitoring-analysis-guide\.png/u,
+  );
+
+  await page.goto("/en/building-calculator-engine");
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+    "content",
+    "https://tech.jamie.kr/tech/articles/building-calculator-engine.png",
+  );
+});
+
 test("[성공] Series 상세는 Blog 멤버만 seriesOrder 순서로 표시함", async ({
   page,
 }) => {

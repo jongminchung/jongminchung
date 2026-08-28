@@ -2,10 +2,12 @@
 id: frontend-caching-strategies
 locale: en
 title: "Frontend Caching Strategies"
-description: "Study cache layers, freshness, stampedes, keys, and tag invalidation on the frontend."
+description: "Frontend caching succeeds when freshness and invalidation ownership are explainable, not when more cache layers are added."
+thesis: "A caching strategy is primarily a decision about who owns invalidation for which keys and when, not a choice of storage location."
+counterargument: "Short TTLs and library defaults are enough for most frontend products, while explicit invalidation contracts add needless complexity."
 publishedAt: "2026-07-10"
-updatedAt: "2026-07-10"
-verifiedAt: "2026-08-06"
+updatedAt: "2026-08-28"
+verifiedAt: "2026-08-28"
 tags: [frontend, cache, performance, architecture]
 status: experimental
 publicationStatus: published

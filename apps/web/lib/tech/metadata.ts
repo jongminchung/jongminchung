@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import {
   createOgImageHref,
+  createTechArticleImageHref,
   type ContentManifestEntry,
   type Locale,
 } from "../content-model.ts";
@@ -23,12 +24,20 @@ export function techPageMetadata({
   readonly imageId: string;
   readonly article?: ContentManifestEntry;
 }): Metadata {
-  const image = {
-    url: createOgImageHref(locale, imageId),
-    width: 1200,
-    height: 630,
-    alt: `${title} · Engineering Notes`,
-  };
+  const image =
+    article?.contentType === "blog"
+      ? {
+          url: createTechArticleImageHref(article.id),
+          width: 1536,
+          height: 1024,
+          alt: title,
+        }
+      : {
+          url: createOgImageHref(locale, imageId),
+          width: 1200,
+          height: 630,
+          alt: `${title} · Engineering Notes`,
+        };
   return {
     title,
     description,

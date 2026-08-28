@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { BrandWordmark } from "#components/BrandWordmark";
@@ -322,6 +323,23 @@ export function InvestmentNotePage({
           </div>
         }
       >
+        <figure className="mt-0 mb-10">
+          <Image
+            alt={note.imageAlt}
+            className="aspect-[1.6] w-full border object-cover"
+            data-investment-hero="true"
+            height={1000}
+            preload
+            sizes="(max-width: 600px) calc(100vw - 32px), (max-width: 960px) calc(100vw - 64px), 760px"
+            src={note.image}
+            width={1600}
+          />
+          <figcaption className="mt-3 text-xs leading-5 text-muted-foreground">
+            {locale === "ko"
+              ? "글의 주제를 바탕으로 OpenAI로 생성한 이미지"
+              : "Image generated with OpenAI from the article topic"}
+          </figcaption>
+        </figure>
         {children}
       </EditorialArticle>
     </>

@@ -15,6 +15,8 @@ const baseMetadata = {
   status: "published",
   tags: ["risk"],
   series: "Risk",
+  image: "/invest/margin-of-safety.png",
+  imageAlt: "안전마진을 표현한 투자 리서치 이미지",
   sources: [
     {
       kind: "book",
@@ -40,6 +42,10 @@ function source(
       title: locale === "ko" ? "안전마진" : "Margin of Safety",
       description:
         locale === "ko" ? "원문 기반 투자 노트" : "A source-grounded note",
+      imageAlt:
+        locale === "ko"
+          ? "안전마진을 표현한 투자 리서치 이미지"
+          : "An investment research image representing margin of safety",
       ...overrides,
     },
     body: sourceBody,

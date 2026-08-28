@@ -2,10 +2,12 @@
 id: do-we-really-know-pagination
 locale: en
 title: "Do We Really Understand Pagination?"
-description: "Analyze pagination through offsets, cursors, tombstones, scatter-gather, and fanout."
+description: "Pagination is not a UI technique for splitting lists; it is a consistency contract for order, duplication, and omission under change."
+thesis: "A pagination strategy is not merely a performance option but a data-consistency contract that determines which list users actually observe."
+counterargument: "Most product lists tolerate weak consistency, so simple offsets are more practical than elaborate cursor contracts."
 publishedAt: "2026-07-05"
-updatedAt: "2026-07-05"
-verifiedAt: "2026-08-06"
+updatedAt: "2026-08-28"
+verifiedAt: "2026-08-28"
 tags: [database, pagination, distributed-systems, backend]
 status: experimental
 publicationStatus: published

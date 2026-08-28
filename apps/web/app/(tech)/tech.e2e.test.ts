@@ -19,11 +19,12 @@ test("[성공] 캔팅된 사이트를 사용하고 외부 플로어 주차장을
   await expectNoAccessibilityViolations(page);
 });
 
-test("[성공] 목록 제어를 URL과 동기화하고 후속 페이지 링크를 제공함", async ({
+test("[성공] 목록 제어를 URL과 동기화하고 다음 글을 자동으로 이어 붙임", async ({
   page,
 }) => {
-  await page.goto("/en?sort=oldest&view=list&page=2");
-  await expect(page.locator("[data-view=list]")).toBeVisible();
+  await page.goto("/en?sort=oldest&view=list");
+  const results = page.locator("[data-view=list]");
+  await expect(results).toBeVisible();
   await expect(page.getByRole("link", { name: "Newest" })).toHaveAttribute(
     "href",
     /view=list/u,
@@ -32,6 +33,17 @@ test("[성공] 목록 제어를 URL과 동기화하고 후속 페이지 링크�
     "href",
     /sort=oldest/u,
   );
+  await expect(page.getByRole("link", { name: "Load more" })).toHaveCount(0);
+  await expect(results.locator(":scope > a")).toHaveCount(9);
+
+  await page
+    .locator('[data-infinite-scroll-sentinel="true"]')
+    .scrollIntoViewIfNeeded();
+  await expect.poll(() => results.locator(":scope > a").count()).toBe(18);
+  await expect(page).toHaveURL(/page=2/u);
+
+  await page.reload();
+  await expect(page.locator("[data-view=list] > a")).toHaveCount(18);
 });
 
 test("[성공] 생성된 기사 데이터를 검색하고 여러 지역에서 기사를 싫어함", async ({

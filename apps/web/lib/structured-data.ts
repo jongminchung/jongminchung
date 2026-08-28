@@ -1,5 +1,6 @@
 import {
   createOgImageHref,
+  createTechArticleImageHref,
   displayTitleFor,
   type BlogPostManifestEntry,
   type ContentManifestEntry,
@@ -90,12 +91,12 @@ function articleGraph(
         description: document.description,
         image: absoluteUrl(
           techOrigin,
-          createOgImageHref(
-            document.locale,
-            document.contentType === "docs"
-              ? ["docs", ...document.slugs].join("/")
-              : document.id,
-          ),
+          document.contentType === "blog"
+            ? createTechArticleImageHref(document.id)
+            : createOgImageHref(
+                document.locale,
+                ["docs", ...document.slugs].join("/"),
+              ),
         ),
         inLanguage: document.locale,
         datePublished: document.publishedAt,
@@ -255,7 +256,7 @@ export function createInvestmentArticleStructuredData(
         mainEntityOfPage: url,
         headline: note.title,
         description: note.description,
-        image: `${investOrigin}/investment-notes-og.png`,
+        image: absoluteUrl(investOrigin, note.image),
         inLanguage: note.locale,
         datePublished: note.publishedAt,
         dateModified: note.updatedAt,

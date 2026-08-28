@@ -51,13 +51,13 @@ export async function generateMetadata({
       modifiedTime: metadata.updatedAt,
       authors: ["https://www.jamie.kr"],
       tags: [...metadata.tags],
-      images: ["/investment-notes-og.png"],
+      images: [{ url: metadata.image, alt: metadata.imageAlt }],
     },
     twitter: {
       card: "summary_large_image",
       title: metadata.title,
       description: metadata.description,
-      images: ["/investment-notes-og.png"],
+      images: [metadata.image],
     },
   };
 }

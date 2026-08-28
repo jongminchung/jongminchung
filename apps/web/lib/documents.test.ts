@@ -52,7 +52,7 @@ describe("블로그 문서 발견", () => {
 
   it("[성공] 글을 최신 게시일 순으로 제공함", async () => {
     const documents = await getLocalizedDocuments("ko");
-    expect(documents).toHaveLength(24);
+    expect(documents).toHaveLength(25);
     expect(documents.map(({ publishedAt }) => publishedAt)).toEqual(
       documents
         .map(({ publishedAt }) => publishedAt)
@@ -116,7 +116,7 @@ describe("블로그 문서 발견", () => {
   it("[성공] locale별 Blog와 Docs를 독립 canonical inventory로 유지함", async () => {
     const [blog, docs] = await Promise.all([getBlogPosts(), getDocsPages()]);
     for (const locale of ["ko", "en"] as const) {
-      expect(blog.filter((post) => post.locale === locale)).toHaveLength(24);
+      expect(blog.filter((post) => post.locale === locale)).toHaveLength(25);
       expect(docs.filter((page) => page.locale === locale)).toHaveLength(
         docsPagesPerLocale,
       );

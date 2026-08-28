@@ -69,6 +69,8 @@ export function readInvestmentNoteCollection(): readonly InvestmentNoteManifestE
         status: page.data.status,
         tags: page.data.tags,
         series: page.data.series,
+        image: page.data.image,
+        imageAlt: page.data.imageAlt,
         sources: page.data.sources,
       },
       body: "",

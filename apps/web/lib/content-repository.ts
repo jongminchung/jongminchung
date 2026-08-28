@@ -62,6 +62,8 @@ function sharedMetadata(value: BlogPostMetadata | DocsPageMetadata) {
 function blogMetadata(value: BlogPostMetadata): BlogPostMetadata {
   return blogPostMetadataSchema.parse({
     ...sharedMetadata(value),
+    thesis: value.thesis,
+    counterargument: value.counterargument,
     series: value.series,
     seriesOrder: value.seriesOrder,
     verifiedAt: value.verifiedAt,
