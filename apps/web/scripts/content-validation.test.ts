@@ -139,6 +139,20 @@ describe("Blog·Docs 콘텐츠 계약", () => {
     ).toThrow('inconsistent "documentKind" across locales');
   });
 
+  test("Blog Series 안의 중복 순서를 locale별로 거부함", () => {
+    const posts = (["ko", "en"] as const).flatMap((locale) => [
+      createBlogPost(locale, "first-post", {
+        series: "building-from-first-principles",
+        seriesOrder: 1,
+      }),
+      createBlogPost(locale, "second-post", {
+        series: "building-from-first-principles",
+        seriesOrder: 1,
+      }),
+    ]);
+    expect(() => validateBlogPosts(posts)).toThrow("Duplicate series order");
+  });
+
   test("Blog와 Docs 사이의 중복 ID와 잘못된 canonical 링크를 거부함", () => {
     expect(() =>
       validateTechContent(localizedBlogPosts(), [

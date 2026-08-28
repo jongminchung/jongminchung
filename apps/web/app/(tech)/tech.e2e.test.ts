@@ -92,9 +92,10 @@ test("[성공] 기록 및 동일 페이지에 대한 기본 링크를 사용함"
 }) => {
   await page.goto("/en");
   await page.getByRole("link", { name: "Series" }).first().click();
-  await expect(page).toHaveURL(
-    /\/en\/docs\/architecture\/domain-driven-design$/u,
-  );
+  await expect(page).toHaveURL(/\/en\/series$/u);
+  await expect(
+    page.getByRole("link", { name: /Building from First Principles/u }),
+  ).toBeVisible();
   await page.goBack();
   await expect(page).toHaveURL(/\/en$/u);
 

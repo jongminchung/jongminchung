@@ -16,12 +16,12 @@ import {
 import {
   createDocsHref,
   docsCategoryIds,
-  docsSeriesLabel,
   documentsForDocsCategory,
   getDocsCategory,
   groupDocsDocuments,
   type DocsCategoryId,
 } from "#lib/tech/docs";
+import { documentKindLabel } from "#lib/tech/document-kind";
 import { mdxComponents } from "#mdx-components";
 import { DocumentOutline } from "./DocumentOutline";
 import { EditPageLink } from "./EditPageLink";
@@ -359,7 +359,6 @@ export function DocsArticlePage({
 }) {
   const { Content, metadata } = document;
   const category = getDocsCategory(categoryId, locale);
-  const series = docsSeriesLabel(metadata, locale);
   const text = copy[locale];
   return (
     <>
@@ -399,10 +398,12 @@ export function DocsArticlePage({
               <Link href={createDocsHref(locale, categoryId)}>
                 {category.label}
               </Link>
-              {series === undefined ? null : (
+              {metadata.documentKind === undefined ? null : (
                 <>
                   <Icon className="size-3.5" icon="chevronRight" />
-                  <span>{series}</span>
+                  <span>
+                    {documentKindLabel(locale, metadata.documentKind)}
+                  </span>
                 </>
               )}
             </nav>

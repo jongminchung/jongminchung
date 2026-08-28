@@ -1,0 +1,221 @@
+---
+id: typescript-7-compatibility
+locale: en
+area: fe
+documentKind: how-to
+title: TypeScript 7 Compatibility Verification
+displayTitle: TypeScript 7 Compatibility
+description: Verify library declarations, Compiler API coupling, builds, and tooling before a compiler major upgrade.
+publishedAt: "2026-08-11"
+updatedAt: "2026-08-11"
+verifiedAt: "2026-08-11"
+tags: [typescript, compatibility, migration, compiler, tooling]
+status: stable
+publicationStatus: published
+sourceUrl: https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/
+packageVersion: "7.0.2"
+---
+
+A TypeScript major upgrade cannot be approved with one `tsc --noEmit` run. A library that only
+publishes declarations fails differently from a tool that executes the Compiler API. A framework
+may also run its own type checker, making a successful project `tsc` run different from a successful
+production build.
+
+This procedure replaces "it is probably compatible" with "we ran this evidence at this version and
+boundary."
+
+As of August 11, 2026, this repository has 79 direct external dependencies and uses TypeScript
+`6.0.3` in every workspace. The public packages use the same compiler to emit ESM JavaScript and
+declarations. The TS 7 routes below are an audit procedure for a future migration and are not applied
+to the current production configuration.
+
+## 1. Freeze an exact inventory
+
+Collect exact direct dependency versions from every workspace manifest and the lockfile. Decide on
+every direct dependency, then follow transitive packages that declare a TypeScript peer or import
+the Compiler API.
+
+```sh
+pnpm list -r --depth 0
+rg '"typescript"' package.json pnpm-workspace.yaml apps packages
+rg 'typescript/lib/typescript|require\\(.typescript.|from .typescript.' node_modules/.pnpm
+```
+
+Record more than package names: include the version, consuming workspace, production or development
+role, and scripts that execute it. A lockfile change creates a new verification target.
+
+## 2. Classify the coupling first
+
+The required evidence becomes clearer when dependencies are divided by boundary.
+
+| Coupling              | What to verify                                                                |
+| --------------------- | ----------------------------------------------------------------------------- |
+| Declaration consumer  | TS 7 checks real imports and public types                                     |
+| CLI execution         | `tsc`, build, and test commands execute with the TS 7 binary                  |
+| Compiler API consumer | Code imports `createProgram`, `readConfigFile`, AST, or language-service APIs |
+| Embedded language     | MDX, Vue, Astro, or Svelte uses separate language tooling                     |
+| Runtime or native     | Node/Electron ABI, packaging, and real execution still work                   |
+
+The absence of `peerDependencies.typescript` is not a support statement. Conversely, a peer range
+that includes 7 is insufficient until the API path and build used by the repository have run.
+
+## 3. Separate official claims from local evidence
+
+Start with versioned official documentation, release notes, published manifests, and source. Record
+repository typecheck, build, and test results in a separate evidence column. Do not present a local
+success as a vendor support commitment.
+
+The [TypeScript 7 announcement](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/)
+states that 7.0 has no stable Compiler API. It also advises embedded-language workflows such as MDX
+to remain on TypeScript 6 for now. That distinction is why source compatibility and toolchain
+compatibility require separate decisions.
+
+## 4. Map ecosystem-specific migration routes
+
+Not every package publishes a TS 7-specific guide. For tools coupled through the Compiler API,
+embedded languages, or declaration emit, find an official migration route. For the rest, use the
+repository's typecheck, build, packaging, and smoke-test boundaries as evidence.
+
+All 79 current direct dependencies fit into the following migration domains.
+
+| Domain                | Count | Direct dependencies                                                                                                                                                                                                                                                                                                                 | Evidence required for TS 7                                                                                     |
+| --------------------- | ----: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Compiler and Nx       |     4 | `typescript`, `nx`, `@nx/devkit`, `@nx/js`                                                                                                                                                                                                                                                                                          | [Nx's official TS 6/7 setup](https://nx.dev/docs/technologies/typescript/guides/typescript-7) and the Nx graph |
+| Next.js and MDX       |     7 | `next`, `@next/mdx`, `@mdx-js/loader`, `@mdx-js/mdx`, `@mdx-js/react`, `@types/mdx`, `remark-mdx-frontmatter`                                                                                                                                                                                                                       | Validate the Next CLI checker, MDX compilation, and runtime content loading separately                         |
+| Build, lint, and test |     8 | `vite`, `@vitejs/plugin-react`, `vitest`, `oxlint`, `oxlint-tsgolint`, `oxfmt`, `@playwright/test`, `@axe-core/playwright`                                                                                                                                                                                                          | `tsc` declaration emit, Vite build, type-aware lint, unit tests, and E2E                                       |
+| Electron and native   |    11 | `@electron-forge/cli`, `@electron-forge/plugin-fuses`, `@electron-forge/plugin-vite`, `@electron-forge/shared-types`, `@electron/fuses`, `electron`, `ds-store`, `macos-alias`, `node-gyp`, `node-pty`, `sharp`                                                                                                                     | Forge package, release DMG validation, native ABI, and packaged-app smoke tests                                |
+| CSS                   |     5 | `tailwindcss`, `@tailwindcss/postcss`, `@tailwindcss/vite`, `postcss`, `tw-animate-css`                                                                                                                                                                                                                                             | Vite and Next production CSS builds                                                                            |
+| React and UI          |    14 | `react`, `react-dom`, `@types/react`, `@types/react-dom`, `@base-ui/react`, `@tanstack/react-virtual`, `lucide-react`, `class-variance-authority`, `clsx`, `cmdk`, `motion`, `pretendard`, `tailwind-merge`, `zod`                                                                                                                  | JSX declaration checks and real application builds                                                             |
+| Editors               |    14 | `@codemirror/commands`, `@codemirror/lang-css`, `@codemirror/lang-html`, `@codemirror/lang-java`, `@codemirror/lang-javascript`, `@codemirror/lang-json`, `@codemirror/lang-python`, `@codemirror/language`, `@codemirror/merge`, `@codemirror/search`, `@codemirror/state`, `@codemirror/view`, `@xterm/addon-fit`, `@xterm/xterm` | Git Client typecheck, Vite build, and runtime smoke tests                                                      |
+| Content AST           |     9 | `gray-matter`, `rehype-slug`, `remark-frontmatter`, `remark-gfm`, `remark-parse`, `remark-stringify`, `unified`, `unist-util-visit`, `hast-util-to-string`                                                                                                                                                                          | MDX source normalization and runtime search contracts                                                          |
+| Runtime utilities     |     3 | `zustand`, `fflate`, `uuid`                                                                                                                                                                                                                                                                                                         | Declaration checks and runtime smoke tests                                                                     |
+| Development CLIs      |     2 | `shadcn`, `npm-check-updates`                                                                                                                                                                                                                                                                                                       | CLI smoke tests; exclude TypeScript from automatic updates and migrate it explicitly                           |
+| Other declarations    |     2 | `@excalidraw/excalidraw`, `@types/node`                                                                                                                                                                                                                                                                                             | Compare with `skipLibCheck: false` and run application builds                                                  |
+
+The total is 79. Follow `@nx/workspace` and `ts-morph` as transitive dependencies. The repository
+does not currently import the TypeScript Compiler API at runtime, so a future consumer must add its
+own explicit compatibility evidence.
+
+The important official routes are:
+
+- TypeScript and Nx can run the TS 7 `tsc` alongside the TypeScript 6 API.
+- Next.js `16.2.12` can run the TS 7 CLI during a production build with
+  [`experimental.useTypeScriptCli`](https://github.com/vercel/next.js/blob/v16.2.12/docs/01-app/03-api-reference/05-config/01-next-config-js/useTypeScriptCli.mdx).
+- [Oxlint type-aware linting](https://oxc.rs/docs/guide/usage/linter/type-aware.html) requires TS 7 or
+  newer and `oxlint-tsgolint@7`.
+- [TypeScript declaration emit](https://www.typescriptlang.org/tsconfig/declaration.html) runs in the
+  same compiler boundary as JavaScript emit for the public packages.
+- [Vite](https://vite.dev/guide/features.html) and
+  [Playwright](https://playwright.dev/docs/test-typescript) separate transformation from type
+  checking, while [Vitest](https://vitest.dev/guide/testing-types.html) invokes `tsc` in typecheck
+  mode.
+- Electron Forge's [TypeScript configuration](https://www.electronforge.io/config/typescript-configuration)
+  and Vite plugin require real Forge package and release DMG validation rather than relying on a
+  compiler support statement.
+
+Do not interpret the absence of a dedicated migration guide as lack of support. Conversely, packages
+that only expose declarations, such as React, CodeMirror, and Tailwind integrations, are not verified
+until the real application build passes.
+
+## 5. Keep one production compiler
+
+When any production boundary still needs the TypeScript 6 Compiler API, keep every tracked
+workspace on the latest stable TypeScript 6 release. A TS 7 candidate may be evaluated in a
+disposable copy or isolated branch, but do not commit compiler aliases or a split compiler tree as a
+production configuration.
+
+```sh
+pnpm exec tsc --version
+pnpm list -r typescript --depth 0
+pnpm exec nx show projects
+```
+
+The compiler version, the package imported as `typescript`, and framework-owned type checking must
+all resolve to the same workspace baseline. A successful isolated TS 7 CLI run is evidence for a
+future migration, not permission to mix compiler roles in the tracked workspace.
+
+Even though Nx officially supports a side-by-side setup, a repository does not have to adopt that
+production topology. This repository still has MDX and a repository-owned content Compiler API
+boundary, so every workspace installs only TypeScript 6.0.3.
+
+## 6. Surface configuration changes first
+
+Remove temporary `ignoreDeprecations` settings on TypeScript 6, then inspect the new defaults and
+removed options in TypeScript 7. Compare the effective values of `rootDir`, `types`, `module`,
+`moduleResolution`, `strict`, `noUncheckedSideEffectImports`, and `libReplacement`.
+
+```sh
+pnpm exec tsc --showConfig -p tsconfig.json
+pnpm exec tsc --noEmit --incremental false -p tsconfig.json
+```
+
+Run every tsconfig explicitly. A root check does not necessarily include application, Electron main
+process, package build, or test configurations.
+
+## 7. Complete the verification ladder
+
+Move from inexpensive checks to the actual delivery boundary.
+
+1. `tsc --noEmit` for every tsconfig
+2. A diagnostic run with `skipLibCheck: false`
+3. Bundler and declaration emit
+4. Unit, integration, and E2E tests
+5. Framework-owned type checking and production builds
+6. Watch mode and editor/LSP behavior
+7. Electron/native packaging and smoke tests
+
+`skipLibCheck: false` is a useful audit, but it does not have to be the normal release gate. Compare
+the same failures on TypeScript 6 to separate existing declaration debt from a TS 7 regression. A
+successful TS 7 check in a project that normally uses `skipLibCheck: true` does not prove that every
+transitive declaration is compatible.
+
+Next.js 16.2.12's default checker looks for `typescript/lib/typescript.js` in its
+[setup verification](https://github.com/vercel/next.js/blob/v16.2.12/packages/next/src/lib/verify-typescript-setup.ts)
+and calls `createProgram` and `getPreEmitDiagnostics` in
+[its type checker](https://github.com/vercel/next.js/blob/v16.2.12/packages/next/src/lib/typescript/runTypeCheck.ts).
+However, the official
+[`experimental.useTypeScriptCli`](https://github.com/vercel/next.js/blob/v16.2.12/docs/01-app/03-api-reference/05-config/01-next-config-js/useTypeScriptCli.mdx)
+option makes `next build` invoke the project's TS 7 `tsc` instead. Next.js is therefore no longer an
+absolute blocker, but an external TS 7 run without that option, or a plain `tsc --noEmit`, still does
+not replace a `next build`.
+
+## 8. Record a decision and a recheck trigger
+
+| Decision               | When to use it                                                          |
+| ---------------------- | ----------------------------------------------------------------------- |
+| Verified               | An official range and the actual usage boundary pass on TS 7            |
+| Deferred               | Any required API, framework, editor, or release boundary is unsupported |
+| Blocked                | The usage boundary fails in a uniform TS 7 configuration                |
+| TypeScript-independent | No Compiler API or TypeScript peer coupling exists                      |
+| Inconclusive baseline  | Existing failures prevent isolating a TS 7 regression                   |
+
+Every deferred or blocked decision needs a recheck trigger: name the release or test that would
+change the result. Preserve the verification date, exact versions, command, exit code, and first
+causal error.
+
+## 9. Move the workspace as one boundary
+
+Adopt a compiler major only after one candidate version passes every tsconfig, package build,
+framework build, editor and watch workflow, Nx release graph, and Electron packaging boundary.
+Update the workspace manifests and lockfile together, then run the full validation suite. Roll back
+the single version change if any required boundary fails.
+
+In the historical audit, a uniform TS 7 setup failed at the Nx graph, the default Next.js checker,
+and the content Compiler API. Nx and Next.js now provide official migration routes, but the MDX and
+repository-owned content Compiler API boundaries remain. The current decision is to use only
+TypeScript 6.0.3 in every workspace and not apply TS 7 aliases or per-workspace compiler splits in
+production.
+
+## References
+
+- [Announcing TypeScript 7.0](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/)
+- [Nx TypeScript 7 side-by-side setup](https://nx.dev/docs/technologies/typescript/guides/typescript-7)
+- [Next.js 16.2.12 `useTypeScriptCli`](https://github.com/vercel/next.js/blob/v16.2.12/docs/01-app/03-api-reference/05-config/01-next-config-js/useTypeScriptCli.mdx)
+- [Next.js 16.2.12 TypeScript setup](https://github.com/vercel/next.js/blob/v16.2.12/packages/next/src/lib/verify-typescript-setup.ts)
+- [Oxlint type-aware linting](https://oxc.rs/docs/guide/usage/linter/type-aware.html)
+- [TypeScript declaration](https://www.typescriptlang.org/tsconfig/declaration.html)
+- [Vite TypeScript](https://vite.dev/guide/features.html)
+- [Vitest type testing](https://vitest.dev/guide/testing-types.html)
+- [Playwright TypeScript](https://playwright.dev/docs/test-typescript)
+- [Electron Forge TypeScript setup](https://www.electronforge.io/config/typescript-configuration)
+- [Repository compatibility audit](https://github.com/jongminchung/jongminchung/blob/main/docs/typescript-7-compatibility-report.md)

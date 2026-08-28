@@ -1,7 +1,7 @@
 ---
 id: reference-slug
 locale: en
-area: tooling
+area: fe
 documentKind: reference
 title: "A precise contract for lookup"
 description: "Define the version, API, configuration, or data contract in scope."

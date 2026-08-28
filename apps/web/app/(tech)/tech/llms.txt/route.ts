@@ -21,6 +21,8 @@ async function createLocaleSection(locale: Locale): Promise<readonly string[]> {
     `## ${locale === "ko" ? "한국어 Docs" : "English Docs"}`,
     "",
     ...localizedDocs.map((page) => {
+      if (page.area === undefined || page.documentKind === undefined)
+        return `- [${displayTitleFor(page)}](${absoluteUrl(page.href)}): Docs overview; ${page.description} Status: ${page.status}; verified ${page.verifiedAt}.`;
       const area = getDocsCategory(page.area, locale);
       return `- [${displayTitleFor(page)}](${absoluteUrl(page.href)}): Area: ${area.title}; Type: ${page.documentKind}; ${page.description} Status: ${page.status}; verified ${page.verifiedAt}.`;
     }),

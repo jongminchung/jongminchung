@@ -1,5 +1,6 @@
 import type { Folder, Node, Root } from "fumadocs-core/page-tree";
 import type { PublicationStatus } from "../content-contracts.ts";
+import type { DocsArea } from "../content-model.ts";
 
 export interface PublicationMetadata {
   readonly publicationStatus: PublicationStatus;
@@ -56,5 +57,25 @@ export function publicPageTree(
       tree.fallback === undefined
         ? undefined
         : publicPageTree(tree.fallback, publicUrls),
+  };
+}
+
+/** 공개 page tree에서 선택한 Docs 영역만 독립 root로 반환함 */
+export function publicPageTreeForArea(
+  tree: Root,
+  area: DocsArea,
+  publicUrls: ReadonlySet<string>,
+): Root {
+  const published = publicPageTree(tree, publicUrls);
+  const folder = published.children.find(
+    (node): node is Folder =>
+      node.type === "folder" && node.$id?.endsWith(`:${area}`) === true,
+  );
+  if (folder === undefined)
+    throw new Error(`Missing Fumadocs page tree root for Docs area ${area}.`);
+  return {
+    ...published,
+    name: folder.name,
+    children: folder.children,
   };
 }

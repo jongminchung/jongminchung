@@ -31,21 +31,28 @@ describe("블로그 메타데이터", () => {
     expect(
       parseDocMetadata({
         ...metadata,
-        series: "domain-driven-design",
+        series: "building-from-first-principles",
         seriesOrder: 1,
       }).series,
-    ).toBe("domain-driven-design");
+    ).toBe("building-from-first-principles");
   });
 
   it("[성공] Docs에 영역·Diátaxis 유형·검증일을 요구함", () => {
     expect(
       parseDocsPageMetadata({
         ...metadata,
-        area: "tooling",
+        area: "be",
         documentKind: "how-to",
         verifiedAt: "2026-07-14",
       }),
-    ).toMatchObject({ area: "tooling", documentKind: "how-to" });
+    ).toMatchObject({ area: "be", documentKind: "how-to" });
+    expect(
+      parseDocsPageMetadata({
+        ...metadata,
+        id: "docs-overview",
+        verifiedAt: "2026-07-14",
+      }),
+    ).toMatchObject({ id: "docs-overview" });
   });
 
   it("[실패] Blog의 Docs 전용 필드와 지원하지 않는 문서 유형을 거부함", () => {
@@ -55,8 +62,28 @@ describe("블로그 메타데이터", () => {
     expect(() =>
       parseDocsPageMetadata({
         ...metadata,
-        area: "tooling",
+        area: "be",
         documentKind: "guide",
+        verifiedAt: "2026-07-14",
+      }),
+    ).toThrow();
+  });
+
+  it("[실패] Docs의 Series 필드와 실제 문서의 영역 누락을 거부함", () => {
+    expect(() =>
+      parseDocsPageMetadata({
+        ...metadata,
+        area: "be",
+        documentKind: "how-to",
+        verifiedAt: "2026-07-14",
+        series: "building-from-first-principles",
+        seriesOrder: 1,
+      }),
+    ).toThrow("unsupported metadata fields");
+    expect(() =>
+      parseDocsPageMetadata({
+        ...metadata,
+        documentKind: "how-to",
         verifiedAt: "2026-07-14",
       }),
     ).toThrow();
@@ -64,7 +91,10 @@ describe("블로그 메타데이터", () => {
 
   it("[실패] 시리즈와 순서의 단독 선언 및 미등록 시리즈를 거부함", () => {
     expect(() =>
-      parseDocMetadata({ ...metadata, series: "domain-driven-design" }),
+      parseDocMetadata({
+        ...metadata,
+        series: "building-from-first-principles",
+      }),
     ).toThrow("must be used together");
     expect(() => parseDocMetadata({ ...metadata, seriesOrder: 1 })).toThrow(
       "must be used together",
@@ -77,11 +107,11 @@ describe("블로그 메타데이터", () => {
   it("[성공] 새 공개 URL을 생성함", () => {
     expect(createDocHref("ko", "article")).toBe("/ko/article");
     expect(createSeriesHref("en")).toBe("/en/series");
-    expect(createSeriesHref("en", "domain-driven-design")).toBe(
-      "/en/series/domain-driven-design",
+    expect(createSeriesHref("en", "react-ui-architecture")).toBe(
+      "/en/series/react-ui-architecture",
     );
-    expect(createDocsPageHref("ko", "tooling", "typescript-6")).toBe(
-      "/ko/docs/tooling/typescript-6",
+    expect(createDocsPageHref("ko", "fe", "typescript-6")).toBe(
+      "/ko/docs/fe/typescript-6",
     );
   });
 });

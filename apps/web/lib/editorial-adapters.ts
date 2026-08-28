@@ -26,7 +26,7 @@ export function toTechEditorialItem(
     kind:
       document.documentKind !== undefined
         ? documentKindLabel(locale, document.documentKind)
-        : document.series === undefined
+        : document.contentType !== "blog" || document.series === undefined
           ? locale === "ko"
             ? "기술 글"
             : "Engineering article"

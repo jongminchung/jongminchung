@@ -1,10 +1,9 @@
 import Link from "next/link";
 import {
   createSeriesHref,
-  type ContentManifestEntry,
+  type BlogPostManifestEntry,
   type Locale,
 } from "#lib/content-model";
-import { documentKindLabel } from "#lib/tech/document-kind";
 import { type SeriesId, seriesRegistry } from "#lib/tech/series";
 import { DocumentCard } from "./DocumentCard";
 
@@ -70,7 +69,7 @@ export function SeriesDetail({
 }: {
   readonly locale: Locale;
   readonly id: SeriesId;
-  readonly documents: readonly ContentManifestEntry[];
+  readonly documents: readonly BlogPostManifestEntry[];
 }) {
   const text = copy[locale];
   const series = seriesRegistry[id]!;
@@ -96,11 +95,7 @@ export function SeriesDetail({
             document={document}
             eager={index < 3}
             key={document.id}
-            label={`${document.seriesOrder}. ${
-              document.documentKind === undefined
-                ? series.title[locale]
-                : documentKindLabel(locale, document.documentKind)
-            }`}
+            label={`${document.seriesOrder}. ${series.title[locale]}`}
             locale={locale}
             variant="related"
           />

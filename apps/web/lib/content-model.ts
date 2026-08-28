@@ -34,13 +34,8 @@ export const documentKinds = [
 export const documentKindSchema = z.enum(documentKinds);
 export type DocumentKind = z.infer<typeof documentKindSchema>;
 
-export const docsAreas = [
-  "fe",
-  "k8s",
-  "architecture",
-  "tooling",
-  "practices",
-] as const;
+export const docsAreas = ["fe", "be", "k8s", "ansible"] as const;
+export const publicDocsAreas = ["fe", "be", "k8s"] as const;
 export const docsAreaSchema = z.enum(docsAreas);
 export type DocsArea = z.infer<typeof docsAreaSchema>;
 
@@ -49,8 +44,6 @@ const DOCUMENT_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 const sharedMetadataShape = {
   id: nonEmptyTrimmedStringSchema,
   locale: localeSchema,
-  series: nonEmptyTrimmedStringSchema.optional(),
-  seriesOrder: z.number().int().positive().optional(),
   title: nonEmptyTrimmedStringSchema,
   displayTitle: nonEmptyTrimmedStringSchema.optional(),
   description: nonEmptyTrimmedStringSchema,
@@ -69,14 +62,31 @@ const sharedMetadataShape = {
 
 const blogPostMetadataShape = {
   ...sharedMetadataShape,
+  series: nonEmptyTrimmedStringSchema.optional(),
+  seriesOrder: z.number().int().positive().optional(),
   verifiedAt: z.string().optional(),
 } as const;
 
-const docsPageMetadataShape = {
+const docsSharedMetadataShape = {
   ...sharedMetadataShape,
+  verifiedAt: z.string(),
+} as const;
+
+const docsOverviewMetadataShape = {
+  ...docsSharedMetadataShape,
+  id: z.literal("docs-overview"),
+  area: z.undefined().optional(),
+  documentKind: z.undefined().optional(),
+} as const;
+
+const docsContentMetadataShape = {
+  ...docsSharedMetadataShape,
+  id: nonEmptyTrimmedStringSchema.refine(
+    (id) => id !== "docs-overview",
+    'only the Docs root may use ID "docs-overview".',
+  ),
   area: docsAreaSchema,
   documentKind: documentKindSchema,
-  verifiedAt: z.string(),
 } as const;
 
 function validateSharedMetadata(
@@ -90,21 +100,6 @@ function validateSharedMetadata(
       code: "custom",
       path: ["id"],
       message: 'metadata field "id" must be a lowercase slug.',
-    });
-  }
-  if ((value.series === undefined) !== (value.seriesOrder === undefined)) {
-    context.addIssue({
-      code: "custom",
-      path: value.series === undefined ? ["seriesOrder"] : ["series"],
-      message:
-        'metadata fields "series" and "seriesOrder" must be used together.',
-    });
-  }
-  if (value.series !== undefined && !isSeriesId(value.series)) {
-    context.addIssue({
-      code: "custom",
-      path: ["series"],
-      message: `metadata references unknown series "${String(value.series)}".`,
     });
   }
   if (
@@ -143,14 +138,45 @@ function validateSharedMetadata(
   }
 }
 
+function validateBlogMetadata(
+  value: z.infer<z.ZodObject<typeof blogPostMetadataShape>>,
+  context: z.RefinementCtx,
+): void {
+  validateSharedMetadata(value, context);
+  if ((value.series === undefined) !== (value.seriesOrder === undefined)) {
+    context.addIssue({
+      code: "custom",
+      path: value.series === undefined ? ["seriesOrder"] : ["series"],
+      message:
+        'metadata fields "series" and "seriesOrder" must be used together.',
+    });
+  }
+  if (value.series !== undefined && !isSeriesId(value.series)) {
+    context.addIssue({
+      code: "custom",
+      path: ["series"],
+      message: `metadata references unknown series "${String(value.series)}".`,
+    });
+  }
+}
+
 export const blogPostMetadataSchema = z
   .strictObject(blogPostMetadataShape)
+  .superRefine(validateBlogMetadata)
+  .readonly();
+
+const docsOverviewMetadataSchema = z
+  .strictObject(docsOverviewMetadataShape)
+  .superRefine(validateSharedMetadata)
+  .readonly();
+
+const docsContentMetadataSchema = z
+  .strictObject(docsContentMetadataShape)
   .superRefine(validateSharedMetadata)
   .readonly();
 
 export const docsPageMetadataSchema = z
-  .strictObject(docsPageMetadataShape)
-  .superRefine(validateSharedMetadata)
+  .union([docsOverviewMetadataSchema, docsContentMetadataSchema])
   .readonly();
 
 export type BlogPostMetadata = z.infer<typeof blogPostMetadataSchema>;
@@ -231,7 +257,7 @@ export function parseDocsPageMetadata(
 ): DocsPageMetadata {
   return parseMetadata(
     docsPageMetadataSchema,
-    docsPageMetadataShape,
+    { ...docsOverviewMetadataShape, ...docsContentMetadataShape },
     value,
     source,
   );

@@ -1,4 +1,4 @@
 {
   "title": "엔지니어링 문서",
-  "pages": ["index", "fe", "k8s", "architecture", "tooling", "practices"]
+  "pages": ["index", "fe", "be", "k8s"]
 }

@@ -141,6 +141,8 @@ export function createBlogPostingStructuredData(
 export function createDocsArticleStructuredData(
   page: DocsPageManifestEntry,
 ): Readonly<Record<string, unknown>> {
+  if (page.area === undefined || page.documentKind === undefined)
+    throw new Error("Docs overview cannot be represented as a TechArticle.");
   const url = absoluteUrl(techOrigin, page.href);
   const areaUrl = `${techOrigin}/${page.locale}/docs/${page.area}`;
   const area = getDocsCategory(page.area, page.locale);

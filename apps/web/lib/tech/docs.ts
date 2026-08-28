@@ -4,13 +4,14 @@ import {
   docsAreas,
   documentKinds,
   type ContentManifestEntry,
+  type DocumentKind,
   type DocsArea,
   type DocsPageManifestEntry,
   type Locale,
 } from "../content-model.ts";
-import { getSeries } from "./series.ts";
 
-export const docsCategoryIds = docsAreas;
+export const registeredDocsCategoryIds = docsAreas;
+export const docsCategoryIds = ["fe", "be", "k8s"] as const;
 export type DocsCategoryId = DocsArea;
 
 const docsCategoryRegistry = {
@@ -22,6 +23,14 @@ const docsCategoryRegistry = {
       en: "Purpose-oriented guidance for maintainable UI, testing, and framework contracts.",
     },
   },
+  be: {
+    label: "BE",
+    title: { ko: "백엔드", en: "Backend" },
+    description: {
+      ko: "도메인 경계, 분산 실패 처리, 시스템 아키텍처와 협업을 연결하는 문서",
+      en: "Documentation connecting domain boundaries, distributed failure handling, system architecture, and collaboration.",
+    },
+  },
   k8s: {
     label: "K8s",
     title: { ko: "Kubernetes", en: "Kubernetes" },
@@ -30,28 +39,12 @@ const docsCategoryRegistry = {
       en: "Documentation for Cilium Gateway API and Kubernetes network operations.",
     },
   },
-  architecture: {
-    label: "Architecture",
-    title: { ko: "아키텍처", en: "Architecture" },
+  ansible: {
+    label: "Ansible",
+    title: { ko: "Ansible", en: "Ansible" },
     description: {
-      ko: "도메인 경계와 분산 실패를 설계하고 복구하는 방법을 연결하는 문서",
-      en: "Documentation connecting domain boundaries with distributed failure design and recovery.",
-    },
-  },
-  tooling: {
-    label: "Tooling",
-    title: { ko: "도구", en: "Tooling" },
-    description: {
-      ko: "Node.js, pnpm, TypeScript의 버전별 동작과 전환 절차를 조회하는 문서",
-      en: "Versioned behavior and migration guidance for Node.js, pnpm, and TypeScript.",
-    },
-  },
-  practices: {
-    label: "Practices",
-    title: { ko: "엔지니어링 실천", en: "Engineering Practices" },
-    description: {
-      ko: "기술 작업을 검증 가능한 협업 기록으로 연결하는 실천 문서",
-      en: "Practices for connecting technical work to verifiable collaboration records.",
+      ko: "자동화 문서가 추가되면 공개되는 Ansible 영역",
+      en: "An Ansible area that becomes public when automation documents are added.",
     },
   },
 } as const;
@@ -69,9 +62,12 @@ export interface DocsDocumentGroup {
   readonly documents: readonly DocsPageManifestEntry[];
 }
 
+type CategorizedDocsPage = DocsPageManifestEntry &
+  Readonly<{ area: DocsCategoryId; documentKind: DocumentKind }>;
+
 /** 등록된 문서 영역 식별자를 판별함 */
 export function isDocsCategoryId(value: string): value is DocsCategoryId {
-  return docsCategoryIds.includes(value as DocsCategoryId);
+  return registeredDocsCategoryIds.includes(value as DocsCategoryId);
 }
 
 /** 지역화된 문서 영역 정보를 반환함 */
@@ -101,18 +97,18 @@ export function createDocsHref(
 export function documentsForDocsCategory(
   documents: readonly ContentManifestEntry[],
   categoryId: DocsCategoryId,
-): readonly DocsPageManifestEntry[] {
+): readonly CategorizedDocsPage[] {
   return documents
     .filter(
-      (document): document is DocsPageManifestEntry =>
-        document.contentType === "docs" && document.area === categoryId,
+      (document): document is CategorizedDocsPage =>
+        document.contentType === "docs" &&
+        document.area === categoryId &&
+        document.documentKind !== undefined,
     )
     .toSorted(
       (left, right) =>
         documentKinds.indexOf(left.documentKind) -
           documentKinds.indexOf(right.documentKind) ||
-        (left.seriesOrder ?? Number.POSITIVE_INFINITY) -
-          (right.seriesOrder ?? Number.POSITIVE_INFINITY) ||
         displayTitleFor(left).localeCompare(displayTitleFor(right)),
     );
 }
@@ -135,14 +131,4 @@ export function groupDocsDocuments(
     label: labels[kind][locale],
     documents: pages.filter((page) => page.documentKind === kind),
   }));
-}
-
-/** 문서가 속한 시리즈 이름을 지역화함 */
-export function docsSeriesLabel(
-  document: ContentManifestEntry,
-  locale: Locale,
-): string | undefined {
-  return document.series === undefined
-    ? undefined
-    : getSeries(document.series, locale)?.title;
 }

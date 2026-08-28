@@ -3,7 +3,7 @@ import { createFromSource } from "fumadocs-core/search/server";
 import { displayTitleFor, type Locale } from "../content-model.ts";
 import { readContentSnapshot } from "../content-repository.ts";
 import { blogSource, docsSource } from "../fumadocs-source.ts";
-import { getDocsCategory } from "./docs.ts";
+import { docsCategoryIds, getDocsCategory } from "./docs.ts";
 import { isPublishedContent } from "./publication.ts";
 import {
   createSearchAliases,
@@ -86,14 +86,18 @@ const docsSearch = createFromSource(publicDocsSource, {
       ...(page.data.apiSymbols ?? []),
       ...structuredData.headings.map(({ content }) => content),
     ]);
+    const breadcrumbs =
+      page.data.area === undefined || page.data.documentKind === undefined
+        ? ["Docs"]
+        : [
+            page.data.documentKind,
+            getDocsCategory(page.data.area, page.data.locale).title,
+          ];
     return {
       id: page.url,
       title: page.data.title,
       description: page.data.description,
-      breadcrumbs: [
-        page.data.documentKind,
-        getDocsCategory(page.data.area, page.data.locale).title,
-      ],
+      breadcrumbs,
       url: page.url,
       structuredData: {
         headings: structuredData.headings,
@@ -120,22 +124,26 @@ function emptyQueryResults(locale: Locale): readonly SortedResult[] {
         breadcrumbs: ["Blog"],
       }),
     );
-  const docs = snapshot.publishedTech.docsPages
-    .filter(
-      (page) =>
-        page.locale === locale &&
-        (page.id === "docs-overview" || page.id.endsWith("-overview")),
-    )
-    .slice(0, 6)
+  const docs = docsCategoryIds
+    .map((area) => {
+      const page = snapshot.publishedTech.docsPages.find(
+        (page) =>
+          page.locale === locale &&
+          page.area === area &&
+          page.id === `${area}-overview`,
+      );
+      return page === undefined ? undefined : { area, page };
+    })
+    .filter((entry) => entry !== undefined)
     .map(
-      (page): SortedResult => ({
+      ({ area, page }): SortedResult => ({
         id: page.href,
         url: page.href,
         type: "page",
         content: displayTitleFor(page),
         breadcrumbs: [
-          page.documentKind,
-          getDocsCategory(page.area, locale).title,
+          page.documentKind ?? "Docs",
+          getDocsCategory(area, locale).title,
         ],
       }),
     );

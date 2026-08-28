@@ -30,6 +30,33 @@ const cases = [
     theme: "dark",
   },
   {
+    name: "series-index-wide-light",
+    path: "/en/series",
+    heading: "Series",
+    contract: "collection",
+    width: 1440,
+    height: 1000,
+    theme: "light",
+  },
+  {
+    name: "series-first-principles-wide-light",
+    path: "/ko/series/building-from-first-principles",
+    heading: "바닥부터 직접 만들어보기",
+    contract: "collection",
+    width: 1440,
+    height: 1000,
+    theme: "light",
+  },
+  {
+    name: "docs-root-wide-light",
+    path: "/en/docs",
+    heading: "Docs",
+    contract: "collection",
+    width: 1440,
+    height: 1000,
+    theme: "light",
+  },
+  {
     name: "cilium-series-wide-light",
     path: "/ko/docs/k8s/cilium-gateway-api",
     heading: "Cilium Gateway API 외부 트래픽 설계",
@@ -40,7 +67,7 @@ const cases = [
   },
   {
     name: "domain-design-series-mobile-dark",
-    path: "/en/docs/architecture/domain-driven-design",
+    path: "/en/docs/be/domain-driven-design",
     heading: "Domain-Driven Design",
     contract: "docs-article",
     width: 390,
@@ -76,7 +103,7 @@ const cases = [
   },
   {
     name: "ddd-wide-light",
-    path: "/ko/docs/architecture/ddd",
+    path: "/ko/docs/be/ddd",
     heading: "실전 도메인 주도 설계 핸드북",
     contract: "docs-article",
     width: 1440,
@@ -85,7 +112,7 @@ const cases = [
   },
   {
     name: "article-dark",
-    path: "/en/docs/tooling/typescript-7-compatibility",
+    path: "/en/docs/fe/typescript-7-compatibility",
     heading: "TypeScript 7 Compatibility",
     contract: "docs-article",
     width: 1440,
@@ -103,7 +130,7 @@ const cases = [
   },
   {
     name: "deep-dive-mobile-light",
-    path: "/en/docs/tooling/pnpm-11",
+    path: "/en/docs/fe/pnpm-11",
     heading: "pnpm 11",
     contract: "docs-article",
     width: 390,
@@ -112,7 +139,7 @@ const cases = [
   },
   {
     name: "ddd-tablet-dark",
-    path: "/ko/docs/architecture/ddd",
+    path: "/ko/docs/be/ddd",
     heading: "실전 도메인 주도 설계 핸드북",
     contract: "docs-article",
     width: 1024,
@@ -148,43 +175,41 @@ for (const visualCase of cases) {
           name: visualCase.path.startsWith("/ko") ? "모든 글" : "All articles",
         }),
       ).toBeVisible();
-    } else {
+    } else if (visualCase.contract === "docs-article") {
       const article = page.getByRole("article");
       await expect(article).toBeVisible();
-      if (visualCase.contract === "docs-article") {
-        const docsArea = visualCase.path.split("/")[3];
-        await expect(article.locator(":scope > div").first()).not.toBeEmpty();
+      const docsArea = visualCase.path.split("/")[3];
+      await expect(article.locator(":scope > div").first()).not.toBeEmpty();
+      await expect(
+        page.locator(
+          `#nd-sidebar a[href="${visualCase.path.slice(0, 3)}/docs/${docsArea}"]`,
+        ),
+      ).toBeAttached();
+      if (visualCase.width > 960) {
+        await expect(page.locator("#nd-sidebar")).toBeVisible();
+      } else {
         await expect(
-          page.locator(
-            `#nd-sidebar a[href="${visualCase.path.slice(0, 3)}/docs/${docsArea}"]`,
-          ),
-        ).toBeAttached();
-        if (visualCase.width > 960) {
-          await expect(page.locator("#nd-sidebar")).toBeVisible();
-        } else {
-          await expect(
-            page.getByRole("button", { name: "Open Sidebar" }),
-          ).toBeVisible();
-        }
-        if (visualCase.name === "frontend-docs-playwright-mobile-light") {
-          const tableScroll = article
-            .locator('[data-docs-table-scroll="true"]')
-            .first();
-          await expect(tableScroll).toBeVisible();
-          await expect
-            .poll(() =>
-              tableScroll.evaluate((element) => ({
-                isContained:
-                  element.getBoundingClientRect().right <=
-                  document.documentElement.clientWidth,
-                isScrollable: element.scrollWidth > element.clientWidth,
-              })),
-            )
-            .toEqual({
-              isContained: true,
-              isScrollable: true,
-            });
-        }
+          page.getByRole("button", { name: "Open Sidebar" }),
+        ).toBeVisible();
+      }
+      if (visualCase.name === "frontend-docs-playwright-mobile-light") {
+        const tableScroll = article
+          .locator('[data-docs-table-scroll="true"]')
+          .first();
+        await expect(tableScroll).toBeVisible();
+        await expect
+          .poll(() =>
+            tableScroll.evaluate((element) => ({
+              isContained:
+                element.getBoundingClientRect().right <=
+                document.documentElement.clientWidth,
+              isScrollable: element.scrollWidth > element.clientWidth,
+            })),
+          )
+          .toEqual({
+            isContained: true,
+            isScrollable: true,
+          });
       }
     }
 

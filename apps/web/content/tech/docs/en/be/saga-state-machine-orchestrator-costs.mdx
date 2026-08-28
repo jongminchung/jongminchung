@@ -1,0 +1,189 @@
+---
+id: saga-state-machine-orchestrator-costs
+locale: en
+area: be
+documentKind: explanation
+title: "Account for the Hidden Cost of Saga and Orchestration"
+description: "Analyze the transition, compensation, versioning, and operational costs that Saga, state machines, choreography, and orchestrators add outside the happy path."
+publishedAt: "2026-08-25"
+updatedAt: "2026-08-25"
+verifiedAt: "2026-08-25"
+tags: [distributed-systems, saga, state-machine, orchestration, maintainability]
+status: experimental
+publicationStatus: published
+sourceUrl: https://github.com/jongminchung/jongminchung/blob/main/apps/web/content/tech/docs/en/be/saga-state-machine-orchestrator-costs.mdx
+---
+
+## Key takeaways
+
+- **Saga does not roll back a distributed transaction but drives local transactions and compensations toward an acceptable final state**
+- **A state machine is difficult because it must handle duplicate events, timeouts, concurrent transitions, and old executions rather than because naming states is hard**
+- **An orchestrator relocates complexity into another operated system that owns workflow state, retries, compensation, and versioning**
+- **Choreography removes a central component but makes event dependencies, cycles, and end-to-end diagnosis harder as participants grow**
+- **Compensation does not turn back time and is itself a new business command that can fail or run twice**
+- **Combining Saga, a state-machine framework, and an orchestrator for a small service can cost more to maintain than the workflow itself**
+
+## One happy path expands into many failure paths
+
+- **An order, inventory, and payment flow has three happy-path steps but far more than three operational states**
+  - The order can be cancelled before payment begins
+  - Inventory reservation can time out even though it succeeded remotely
+  - Payment can succeed while the order service loses the result event
+  - Inventory release can fail during compensation
+  - A late automatic compensation can arrive after an operator issues a manual refund
+
+- **Every remote step has at least five classes of outcome**
+  - `pending` before execution
+  - `running` at the participant
+  - confirmed `succeeded`
+  - confirmed `failed`
+  - outcome `unknown`
+
+- **Independent booleans express invalid combinations as ordinary program states**
+  - `inventoryReserved=true`, `paymentCaptured=true`, and `orderCancelled=true` can coexist
+  - Replacing booleans with an enum still leaves invalid event ordering and duplication
+  - A state model includes allowed commands, guards, side effects, and recovery ownership as well as stored values
+
+![Forward, unknown, and compensation paths in an order workflow](https://kroki.io/plantuml/svg/eNptj0FrwzAMhe_-FToP-gdyGIXCboMy2GnsIGyl1SrLwZaT9d-PJNtI0txkve89-R2LYbYaxZUba4cZI5QrhjSwXqBFKeQ-nj7hcHiGM2lgvZzxHknNrZ8zgRygge535ZO2nCOFfXaa3_WmaVBowDhSquY2wiI3k0_qWRiNk_7Flz3HCdWTCO3YMn2Rt9HFYWJfqrQsMhYe4UK5J2DtSS3lu1vIU3KKnZBNye0sbcruGEgL2nygoxxRR0eLLDWTWwGPn2-rhkX6A_2KWlHeqGcaoAH_rycF-r5iLUbBrajtkdRRRkt5bJ-kp-KOpKFG-QGXoMHb)
+
+## Saga inherits problems that ACID rollback hides
+
+- **Saga sequences local transactions and chooses forward recovery or compensation after failure**
+  - A transient infrastructure fault can retry the current step and continue forward
+  - A permanent business failure can compensate already completed steps
+  - After a pivot, completing the remaining retryable steps can be safer than attempting reversal
+
+- **Saga does not provide the isolation of one ACID transaction**
+  - Other commands can observe or change intermediate state
+  - New legitimate transactions can modify the same data before compensation begins
+  - Restoring an old value can overwrite changes made by those transactions
+
+- **Compensation is a domain transaction rather than a mathematical inverse**
+  - Payment cancellation creates a refund or reversal ledger entry instead of deleting the payment
+  - Reservation cancellation can apply time-dependent fees and refund rules
+  - Email, shipping, and external ledgers can contain irreversible side effects
+  - Compensation has its own timeout, duplication, and permanent-failure modes
+
+- **The decision to compensate is itself business policy**
+  - A hotel failure can cancel flights or trigger a search for another hotel
+  - Inventory shortage after payment can create a backorder or refund
+  - High-value and ambiguous outcomes may require operator approval
+
+## State machines are difficult across time and versions
+
+- **Event lifecycle design costs more than listing state names**
+  - A duplicate event must be ignored after the first application
+  - A stale event arriving after a newer transition must be rejected or recorded separately
+  - Concurrent workers require conditional update or version checks
+  - An owner must move a state after its deadline expires
+
+- **An explicit state machine reveals missing paths without eliminating the state space**
+
+| Added requirement          | Newly required design                                       |
+| -------------------------- | ----------------------------------------------------------- |
+| Retry                      | Attempt count, next execution time, and last error          |
+| Timeout                    | Deadline, timeout event, and late-success handling          |
+| Compensation               | Compensation state, reason, retries, and manual termination |
+| Operator intervention      | Approver, audit record, and resume command                  |
+| Concurrent update          | Version, compare-and-set, and conflict policy               |
+| Deployment during workflow | Workflow version, old handlers, and migration               |
+
+- **Deploying a long-running workflow becomes a data-migration problem**
+  - Yesterday's execution can reference a state name removed today
+  - New code must read old event payloads
+  - A reordered flow changes the resume point of executions already in progress
+  - Replay-based engines require workflow code to follow determinism and versioning rules
+
+- **One generic `failed` state cannot support recovery operations**
+  - Transient failure, permanent failure, unknown outcome, compensation failure, and manual review require distinct handling
+  - State needs a reason or condition that exposes its next command and owning team
+  - A terminal-looking state must be distinguishable from one that still requires reconciliation
+
+## An orchestrator becomes another stateful service
+
+- **An orchestrator provides one place to inspect and control the whole workflow**
+  - Participants can implement only their local commands
+  - Timeouts, retries, branches, and compensation order can use central policy
+  - One `workflow_id` can connect audit and operational views
+
+- **Central visibility creates central operating responsibility**
+  - The orchestrator database and queue require durability and high availability
+  - Schedulers, timers, and workers must remain safe under duplicate execution
+  - Workflow definitions and participant APIs require compatible deployments
+  - Operators need tools to inspect, edit, resume, and terminate stuck executions
+
+- **A missing success event forces the orchestrator to query the participant's authoritative state**
+  - Blind re-execution can duplicate an external side effect
+  - Orchestrator state alone cannot distinguish event loss from participant failure
+  - Each participant still needs idempotent commands and an authoritative status API
+
+- **More orchestrator replicas do not complete high availability by themselves**
+  - Leader election or competing-consumer policy is required
+  - Fencing is needed when an expired worker continues as a zombie
+  - Co-located databases, brokers, and timer stores can share one fault domain despite many replicas
+
+## Choreography and orchestration place cost differently
+
+- **Choreography distributes decisions across services reacting to events**
+  - A small flow can start without a central coordinator
+  - Producers and consumers can deploy loosely
+  - One central engine does not become the failure point for every flow
+
+- **A larger choreography scatters workflow logic across codebases and topics**
+  - Explaining the full order requires reading multiple repositories and schemas
+  - Cyclic event dependencies and unintended re-entry can appear
+  - Global timeout, compensation order, and progress become difficult to evaluate centrally
+
+| Criterion                | Choreography                          | Orchestration                             |
+| ------------------------ | ------------------------------------- | ----------------------------------------- |
+| Flow ownership           | Distributed across participants       | Concentrated in the orchestrator          |
+| End-to-end visibility    | Requires trace and event correlation  | Can use workflow state                    |
+| Coupling location        | Event schema and subscriptions        | Workflow definition and command contracts |
+| Common retry and timeout | Implemented by each participant       | Implemented as central policy             |
+| Main failure risk        | Event-chain diagnosis and cycles      | Central state system and engine failure   |
+| Natural scale            | Few participants and simple reactions | Many steps and explicit central policy    |
+
+- **Neither approach removes idempotency, Outbox, schema versioning, or observability**
+  - Choreography repeats these responsibilities in every participant
+  - Orchestration moves them into the contract between the engine and participants
+
+## Choose patterns with a complexity budget
+
+- **Evaluate coordination from the smallest consistency boundary upward**
+
+| Stage                           | Prefer when                                                 | Added cost                                     |
+| ------------------------------- | ----------------------------------------------------------- | ---------------------------------------------- |
+| Single database transaction     | One store can enforce the invariant                         | Locks, isolation, and deadlocks                |
+| Idempotency plus result lookup  | Responses can be lost and requests replayed                 | Key retention, conflicts, and stored responses |
+| Outbox plus idempotent consumer | Database-to-broker dual writes exist                        | Publisher lag, duplicates, and DLQ operations  |
+| Status column plus reconciler   | Async completion and `unknown` exist                        | Stale detection and replay tools               |
+| Saga                            | Independent systems require real compensation               | Compensation, isolation, and long-lived state  |
+| Dedicated workflow orchestrator | Branching, timers, parallelism, and durable resume dominate | Platform, versioning, and operating staff      |
+
+- **Saga is likely excessive for a two-step flow that one team can reduce to one database**
+  - Reconsider data ownership before locking in service separation
+  - Rare exceptions can be cheaper with a `failed_operations` view and an approved replay command
+  - Test whether one status column and conditional `UPDATE` are sufficient
+
+- **Saga earns its cost only when every adoption question has an answer**
+  - A documented reason prevents reduction to one atomic store
+  - The business accepts externally visible intermediate state
+  - Every step exposes idempotency and authoritative result lookup
+  - Compensable, pivot, and retryable steps are classified
+  - Compensation failure and manual intervention have named owners
+  - A team owns workflow-version migration and retention
+
+## Conclusion and related document
+
+- **The main cost of Saga, state machines, and orchestrators is permanent ownership of failure paths rather than learning a tool**
+- **Adoption without compensation policy and operational ownership can add named intermediate states without making failure recoverable**
+- **Small flows should pay for a local transaction, idempotency, Outbox, and a simple reconciler in that order before the machinery costs more than the workflow**
+- **[Reconciliation in OpenStack and Kubernetes](/en/docs/be/reconciliation-in-openstack-and-kubernetes) shows how platforms converge complex distributed state with reconciliation loops**
+
+## References
+
+- [AWS Prescriptive Guidance Saga patterns](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/saga-patterns.html)
+- [AWS Prescriptive Guidance Saga pattern considerations](https://docs.aws.amazon.com/prescriptive-guidance/latest/modernization-data-persistence/saga-pattern.html)
+- [Microsoft Azure Architecture Center Saga pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/saga)
+- [Microsoft Azure Architecture Center compensating transaction pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/compensating-transaction)
+- [Microsoft Azure Architecture Center choreography pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/choreography)

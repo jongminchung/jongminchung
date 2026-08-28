@@ -3,9 +3,7 @@ id: cilium-gateway-api-external-load-balancer
 locale: en
 area: k8s
 documentKind: how-to
-series: cilium-gateway-api
-seriesOrder: 2
-title: "Cilium Gateway API Part 2: An External Load Balancer in Front"
+title: "Use an External Load Balancer with Cilium Gateway API"
 description: "Compare LoadBalancer, NodePort, and hostNetwork paths from an existing external load balancer to Cilium Gateway API."
 publishedAt: "2026-08-25"
 updatedAt: "2026-08-25"
@@ -93,7 +91,7 @@ kubectl -n edge get svc cilium-gateway-public \
 - **Pattern C binds listeners directly with `hostNetwork`**
   - The LB can target `nodeIP:443` without discovering a NodePort
   - This mode is mutually exclusive with LoadBalancer Service mode and has `TCPRoute` and `UDPRoute` limitations
-  - [Part 4](/en/docs/k8s/cilium-gateway-api-direct-public-ip) contains the full host-network configuration
+  - [Per-node cloud public IPs](/en/docs/k8s/cilium-gateway-api-direct-public-ip) contains the full host-network configuration
 
 ## Limit targets to ingress nodes
 

@@ -1,7 +1,7 @@
 ---
 id: explanation-slug
 locale: en
-area: architecture
+area: be
 documentKind: explanation
 title: "Connect a concept to its design rationale"
 description: "Define the concept, context, and design choices being explained."

@@ -9,9 +9,13 @@
     "how-to-audit-tailwind-shadcn",
     "nextjs-initial-loading-performance",
     "playwright-visual-regression-testing",
+    "typescript-7-compatibility",
     "---Reference · 조회---",
     "tailwind-shadcn-maintainability-reference",
     "nextjs-16",
+    "node-26",
+    "pnpm-11",
+    "typescript-6",
     "---Explanation · 이해---",
     "why-tailwind-shadcn-maintainability-needs-ownership",
     "frontend-maintainability"

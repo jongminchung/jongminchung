@@ -1,0 +1,18 @@
+{
+  "title": "백엔드",
+  "defaultOpen": true,
+  "pages": [
+    "index",
+    "---Tutorial · 학습---",
+    "---How-to · 작업---",
+    "ddd",
+    "collaboration",
+    "---Reference · 조회---",
+    "---Explanation · 이해---",
+    "failure-safe-distributed-transactions",
+    "saga-state-machine-orchestrator-costs",
+    "reconciliation-in-openstack-and-kubernetes",
+    "domain-driven-design",
+    "distributed-failure-handling"
+  ]
+}

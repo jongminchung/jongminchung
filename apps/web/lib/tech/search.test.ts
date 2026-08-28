@@ -1,5 +1,6 @@
 import type { SortedResult } from "fumadocs-core/search";
 import { describe, expect, it } from "vitest";
+import { searchTechDocuments } from "./search-server.ts";
 import {
   createSearchAliases,
   filterSearchResults,
@@ -67,5 +68,14 @@ describe("검색 runtime", () => {
     expect(interleaveSearchResults(left, right, 8).map(({ id }) => id)).toEqual(
       ["blog-1", "blog-heading", "docs-1", "blog-2"],
     );
+  });
+
+  it("빈 검색 추천에는 공개 FE·BE·K8s landing만 포함함", async () => {
+    const results = await searchTechDocuments("", "en");
+    const docsUrls = results
+      .filter(({ type, url }) => type === "page" && url.includes("/docs/"))
+      .map(({ url }) => url);
+    expect(docsUrls).toEqual(["/en/docs/fe", "/en/docs/be", "/en/docs/k8s"]);
+    expect(docsUrls.some((url) => url.includes("ansible"))).toBe(false);
   });
 });

@@ -44,8 +44,6 @@ function sharedMetadata(value: BlogPostMetadata | DocsPageMetadata) {
   return {
     id: value.id,
     locale: value.locale,
-    series: value.series,
-    seriesOrder: value.seriesOrder,
     title: value.title,
     displayTitle: value.displayTitle,
     description: value.description,
@@ -64,6 +62,8 @@ function sharedMetadata(value: BlogPostMetadata | DocsPageMetadata) {
 function blogMetadata(value: BlogPostMetadata): BlogPostMetadata {
   return blogPostMetadataSchema.parse({
     ...sharedMetadata(value),
+    series: value.series,
+    seriesOrder: value.seriesOrder,
     verifiedAt: value.verifiedAt,
   });
 }

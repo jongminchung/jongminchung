@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
-import { locales, type Locale } from "#lib/content-model";
+import { createSeriesHref, locales, type Locale } from "#lib/content-model";
 import { getBlogPosts, getDocsPages } from "#lib/documents";
+import { seriesRegistry, type SeriesId } from "#lib/tech/series";
 
 const siteOrigin = "https://tech.jamie.kr";
 const absoluteUrl = (pathname: string): string =>
@@ -48,9 +49,35 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       return counterpart.href;
     }),
   }));
+  const seriesEntries = locales.flatMap((locale) => [
+    {
+      url: absoluteUrl(createSeriesHref(locale)),
+      lastModified: latestUpdate(
+        posts.filter((post) => post.locale === locale),
+      ),
+      alternates: localizedAlternates((candidate) =>
+        createSeriesHref(candidate),
+      ),
+    },
+    ...(Object.keys(seriesRegistry) as SeriesId[]).map((id) => ({
+      url: absoluteUrl(createSeriesHref(locale, id)),
+      lastModified: latestUpdate(
+        posts.filter((post) => post.locale === locale && post.series === id),
+      ),
+      alternates: localizedAlternates((candidate) =>
+        createSeriesHref(candidate, id),
+      ),
+    })),
+  ]);
   const showcaseEntries = locales.map((locale) => ({
     url: absoluteUrl(`/${locale}/showcase`),
     alternates: localizedAlternates((candidate) => `/${candidate}/showcase`),
   }));
-  return [...blogRoots, ...blogEntries, ...docsEntries, ...showcaseEntries];
+  return [
+    ...blogRoots,
+    ...blogEntries,
+    ...seriesEntries,
+    ...docsEntries,
+    ...showcaseEntries,
+  ];
 }

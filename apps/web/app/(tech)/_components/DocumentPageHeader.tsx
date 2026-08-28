@@ -11,7 +11,7 @@ import { getSeries } from "#lib/tech/series";
 import { EditPageLink } from "./EditPageLink";
 
 function editHref(locale: Locale, id: string): string {
-  return `https://github.com/jongminchung/jongminchung/edit/main/apps/web/content/tech/${locale}/${id}.mdx`;
+  return `https://github.com/jongminchung/jongminchung/edit/main/apps/web/content/tech/blog/${locale}/${id}.mdx`;
 }
 
 /** `DocumentPageHeader` UI 컴포넌트를 렌더링함 */
@@ -23,13 +23,14 @@ export function DocumentPageHeader({
   readonly document: LoadedDocument;
 }) {
   const { metadata } = document;
+  const series = metadata.contentType === "blog" ? metadata.series : undefined;
   const title = displayTitleFor(metadata);
   const section =
-    metadata.series === undefined
+    series === undefined
       ? locale === "ko"
         ? "Engineering"
         : "Engineering"
-      : (getSeries(metadata.series, locale)?.title ?? "Engineering");
+      : (getSeries(series, locale)?.title ?? "Engineering");
   const category =
     metadata.documentKind === undefined
       ? section
@@ -47,11 +48,11 @@ export function DocumentPageHeader({
           <li aria-hidden="true">
             <Icon icon="chevronRight" className="size-3" />
           </li>
-          {metadata.series === undefined ? null : (
+          {series === undefined ? null : (
             <>
               <li>
-                <Link href={createSeriesHref(locale, metadata.series)}>
-                  {getSeries(metadata.series, locale)?.title}
+                <Link href={createSeriesHref(locale, series)}>
+                  {getSeries(series, locale)?.title}
                 </Link>
               </li>
               <li aria-hidden="true">

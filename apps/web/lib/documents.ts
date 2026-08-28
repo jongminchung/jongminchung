@@ -124,7 +124,10 @@ export function rankRelatedDocuments(
         return [];
       const sharedTags = countSharedTags(current, candidate);
       const sameSeries =
-        current.series !== undefined && candidate.series === current.series;
+        current.contentType === "blog" &&
+        candidate.contentType === "blog" &&
+        current.series !== undefined &&
+        candidate.series === current.series;
       if (sharedTags === 0 && !sameSeries) return [];
       return [
         {
@@ -172,7 +175,7 @@ export async function loadDocument(locale: Locale, id: string) {
   if (metadata === null) return null;
   const [seriesDocuments, ContentModule, related] = await Promise.all([
     getLocalizedDocuments(locale).then((documents) =>
-      metadata.series === undefined
+      metadata.contentType !== "blog" || metadata.series === undefined
         ? documents
         : documents
             .filter((document) => document.series === metadata.series)

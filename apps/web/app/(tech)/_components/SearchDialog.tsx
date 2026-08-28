@@ -68,10 +68,12 @@ function toItems(
     const badge =
       type === "Blog"
         ? "Blog"
-        : documentKindLabel(
-            locale,
-            type as "tutorial" | "how-to" | "reference" | "explanation",
-          );
+        : type === "Docs"
+          ? "Docs"
+          : documentKindLabel(
+              locale,
+              type as "tutorial" | "how-to" | "reference" | "explanation",
+            );
     const group =
       breadcrumbs.length === 0 ? copy.resultGroupBlog : breadcrumbs.join(" · ");
     const matchLabel =

@@ -3,9 +3,7 @@ id: cilium-gateway-api-foundations
 locale: ko
 area: k8s
 documentKind: explanation
-series: cilium-gateway-api
-seriesOrder: 1
-title: "Cilium Gateway API 1편: 외부 트래픽 진입점 선택하기"
+title: "Cilium Gateway API 외부 트래픽 진입점 선택하기"
 description: "Cilium Gateway API의 데이터 경로를 이해하고 LoadBalancer, NodePort, hostNetwork 중 환경에 맞는 외부 노출 방식을 선택합니다."
 publishedAt: "2026-08-25"
 updatedAt: "2026-08-25"
@@ -39,7 +37,7 @@ sourceUrl: https://github.com/jongminchung/jongminchung/blob/main/apps/web/conte
 
 ## 공통 전제조건을 먼저 고정함
 
-- **이 시리즈의 예시는 검증일 기준 Cilium `1.20.1`과 Gateway API `1.6.1`을 기준으로 작성**함
+- **관련 문서의 예시는 검증일 기준 Cilium `1.20.1`과 Gateway API `1.6.1`을 기준으로 작성**함
   - 실제 적용 시 설치된 Cilium 버전의 공식 문서와 업그레이드 가이드를 먼저 확인해야 함
   - `CiliumGatewayClassConfig`는 `v2alpha1`이므로 릴리스 간 변경 가능성이 있음
 
@@ -177,7 +175,7 @@ curl --fail-with-body --resolve shop.example.com:443:203.0.113.10 \
   https://shop.example.com/healthz
 ```
 
-- **다음 편부터는 같은 Gateway 계약을 유지한 채 외부 진입점만 바꾸는 방법을 다룸**
+- **관련 문서는 같은 Gateway 계약을 유지한 채 외부 진입점만 바꾸는 방법을 다룸**
   - [외부 LB가 있는 구성](/ko/docs/k8s/cilium-gateway-api-external-load-balancer)
   - [멀티 컨트롤 플레인 구성](/ko/docs/k8s/cilium-gateway-api-multi-control-plane)
   - [LB 없이 노드별 클라우드 공인 IP로 받는 구성](/ko/docs/k8s/cilium-gateway-api-direct-public-ip)

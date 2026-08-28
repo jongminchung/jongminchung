@@ -1,8 +1,8 @@
 import { relative, resolve } from "node:path";
 import {
   createBlogPostHref,
-  docsAreas,
   locales,
+  publicDocsAreas,
   type BlogPostMetadata,
   type DocMetadata,
   type DocsPageMetadata,
@@ -20,6 +20,8 @@ const workspaceRoot = resolve(appRoot, "../..");
 
 /** locale별 overview를 제외한 canonical Docs inventory임 */
 export const docsInventoryPerLocale = 20;
+/** locale별 root·영역 landing을 포함한 전체 Docs 파일 수임 */
+export const docsPagesPerLocale = 28;
 
 export interface ContentEntry<Metadata> {
   readonly metadata: Metadata;
@@ -35,14 +37,18 @@ export interface ValidatedContentSource<
 }
 
 const sharedLocalizedMetadataFields = [
-  "series",
-  "seriesOrder",
   "status",
   "tags",
   "packageName",
   "packageVersion",
   "apiSymbols",
 ] as const satisfies readonly (keyof DocMetadata)[];
+
+const blogLocalizedMetadataFields = [
+  ...sharedLocalizedMetadataFields,
+  "series",
+  "seriesOrder",
+] as const satisfies readonly (keyof BlogPostMetadata)[];
 
 const docsLocalizedMetadataFields = [
   ...sharedLocalizedMetadataFields,
@@ -99,6 +105,10 @@ export function validateBlogPostEntry(
 
 function expectedDocsPath(metadata: DocsPageMetadata): string {
   if (metadata.id === "docs-overview") return `${metadata.locale}/index.mdx`;
+  if (metadata.area === undefined)
+    throw new Error(
+      `${metadata.locale}/${String(metadata.id)}: Docs area is required.`,
+    );
   if (metadata.id === `${metadata.area}-overview`)
     return `${metadata.locale}/${metadata.area}/index.mdx`;
   const filename = metadata.id.endsWith("-overview")
@@ -170,7 +180,7 @@ function validateLocalizedPairs<Metadata extends DocMetadata>(
 }
 
 function validateSeriesOrders(
-  documents: readonly ValidatedContentSource<DocMetadata>[],
+  documents: readonly ValidatedContentSource<BlogPostMetadata>[],
 ): void {
   const seriesOrders = new Set<string>();
   for (const { metadata } of documents) {
@@ -203,7 +213,7 @@ export function validateBlogPosts(
   posts: readonly ValidatedContentSource<BlogPostMetadata>[],
 ): void {
   for (const post of posts) validateBlogPostEntry(post);
-  validateLocalizedPairs("Blog post", posts, sharedLocalizedMetadataFields);
+  validateLocalizedPairs("Blog post", posts, blogLocalizedMetadataFields);
   validateSeriesOrders(posts);
 }
 
@@ -214,13 +224,16 @@ export function validateDocsPages(
 ): void {
   for (const page of pages) validateDocsPageEntry(page);
   validateLocalizedPairs("Docs page", pages, docsLocalizedMetadataFields);
-  validateSeriesOrders(pages);
 
   if (!enforceInventory) return;
   for (const locale of locales) {
     const localized = pages.filter(
       ({ metadata }) => metadata.locale === locale,
     );
+    if (localized.length !== docsPagesPerLocale)
+      throw new Error(
+        `Docs ${locale} must contain ${String(docsPagesPerLocale)} pages; found ${localized.length}.`,
+      );
     const migrated = localized.filter(
       ({ metadata }) => !metadata.id.endsWith("-overview"),
     );
@@ -228,10 +241,14 @@ export function validateDocsPages(
       throw new Error(
         `Docs ${locale} must contain ${String(docsInventoryPerLocale)} migrated pages; found ${migrated.length}.`,
       );
-    for (const area of docsAreas) {
+    for (const area of publicDocsAreas) {
       if (!localized.some(({ metadata }) => metadata.area === area))
         throw new Error(`Docs ${locale} is missing area ${area}.`);
     }
+    if (localized.some(({ metadata }) => metadata.area === "ansible"))
+      throw new Error(
+        `Docs ${locale} must keep Ansible private until content exists.`,
+      );
   }
 }
 

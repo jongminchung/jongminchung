@@ -59,7 +59,10 @@ async function resolvePage(
       : {
           title: displayTitleFor(page),
           detail: page.description,
-          label: documentKindLabel(locale, page.documentKind),
+          label:
+            page.documentKind === undefined
+              ? "Docs"
+              : documentKindLabel(locale, page.documentKind),
           updatedAt: page.updatedAt,
         };
   }

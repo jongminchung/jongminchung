@@ -18,10 +18,17 @@ describe("블로그 메타데이터 경로", () => {
     }
     for (const document of documents)
       expect(urls).toContain(`https://tech.jamie.kr${document.href}`);
+    expect(urls).toContain("https://tech.jamie.kr/en/docs/fe/typescript-6");
+    expect(urls).toContain("https://tech.jamie.kr/en/series");
     expect(urls).toContain(
-      "https://tech.jamie.kr/en/docs/tooling/typescript-6",
+      "https://tech.jamie.kr/en/series/building-from-first-principles",
     );
-    expect(urls.some((url) => url.includes("/series"))).toBe(false);
+    expect(urls).toContain(
+      "https://tech.jamie.kr/en/series/react-ui-architecture",
+    );
+    expect(urls).not.toContain(
+      "https://tech.jamie.kr/en/series/domain-driven-design",
+    );
     expect(
       urls.some(
         (url) =>

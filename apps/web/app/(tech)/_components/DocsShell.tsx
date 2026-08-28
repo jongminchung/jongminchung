@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { EditorialFooter, EditorialHeader } from "#components/Editorial";
 import { ThemeControl } from "#components/ThemeControl";
 import type { Locale } from "#lib/content-model";
+import { createSeriesHref } from "#lib/content-model";
 import {
   createDocsHref,
   docsCategoryIds,
@@ -71,11 +72,7 @@ export function DocsShell({
                 isActive: active === "blog",
               },
               {
-                href: createDocsHref(
-                  locale,
-                  "architecture",
-                  "domain-driven-design",
-                ),
+                href: createSeriesHref(locale),
                 label: labels.series,
                 isActive: active === "series",
               },
@@ -122,11 +119,7 @@ export function DocsShell({
                 label: locale === "ko" ? "모음" : "Collections",
                 links: [
                   {
-                    href: createDocsHref(
-                      locale,
-                      "architecture",
-                      "domain-driven-design",
-                    ),
+                    href: createSeriesHref(locale),
                     label: labels.series,
                   },
                 ],
