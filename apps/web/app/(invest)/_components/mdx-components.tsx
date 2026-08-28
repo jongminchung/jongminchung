@@ -58,7 +58,7 @@ function ArticleFigure({
         className="h-auto w-full border object-cover"
         height={height}
         loading={eager ? "eager" : "lazy"}
-        sizes="(max-width: 760px) 100vw, 680px"
+        sizes="(max-width: 600px) calc(100vw - 32px), (max-width: 824px) calc(100vw - 64px), 760px"
         src={src}
         width={width}
       />
@@ -77,7 +77,10 @@ function InvestmentSection({
   readonly children: ReactNode;
 }) {
   return (
-    <section className="my-12 [&>p]:my-4 [&>p]:leading-[1.8] [&>ul]:my-5 [&>ul]:list-disc [&>ul]:space-y-2 [&>ul]:pl-5">
+    <section
+      className="my-12 [&>p]:my-4 [&>p]:leading-[1.75] [&>ul]:my-5 [&>ul]:list-disc [&>ul]:space-y-2 [&>ul]:pl-5"
+      data-investment-section="true"
+    >
       <h2 className="mt-0 mb-6 text-[clamp(26px,4vw,34px)] leading-tight font-medium tracking-[-.035em]">
         {title}
       </h2>

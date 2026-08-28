@@ -524,8 +524,8 @@ export function EditorialArticle({
     <main
       className={
         isEngineering
-          ? "mx-auto grid w-full max-w-[1200px] grid-cols-[minmax(0,872px)_200px] justify-center gap-x-12 px-8 pt-[clamp(48px,6vw,80px)] pb-24 max-[1279px]:block max-[1279px]:max-w-[936px] max-[600px]:px-4 max-[600px]:pt-10"
-          : "mx-auto grid w-full max-w-[1080px] grid-cols-[180px_minmax(0,680px)] gap-x-16 px-8 pt-[76px] pb-24 max-[960px]:block max-[960px]:max-w-[760px] max-[600px]:px-4 max-[600px]:pt-10"
+          ? "mx-auto grid w-full max-w-[1200px] grid-cols-[minmax(0,760px)_200px] justify-center gap-x-12 px-8 pt-[clamp(48px,6vw,80px)] pb-24 max-[1279px]:block max-[1279px]:max-w-[824px] max-[600px]:px-4 max-[600px]:pt-10"
+          : "mx-auto grid w-full max-w-[1080px] grid-cols-[180px_minmax(0,760px)] gap-x-16 px-8 pt-[76px] pb-24 max-[960px]:block max-[960px]:max-w-[824px] max-[600px]:px-4 max-[600px]:pt-10"
       }
       data-variant={variant}
     >
@@ -550,11 +550,12 @@ export function EditorialArticle({
         {rail}
       </aside>
       <article
-        className={
+        className={`${
           isEngineering
-            ? "col-start-1 row-start-2 min-w-0 pt-4 text-base leading-[1.6]"
-            : "col-start-2 row-start-2 min-w-0 pt-[18px] text-[16px] leading-[1.8]"
-        }
+            ? "col-start-1 row-start-2 pt-4"
+            : "col-start-2 row-start-2 pt-[18px]"
+        } min-w-0 text-[16px] leading-7`}
+        data-editorial-article="true"
       >
         {children}
         {footer}

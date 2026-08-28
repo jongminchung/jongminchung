@@ -146,6 +146,24 @@ const cases = [
     height: 900,
     theme: "dark",
   },
+  {
+    name: "server-monitoring-wide-light",
+    path: "/ko/server-monitoring-analysis-guide",
+    heading: "서버 모니터링 분석 가이드",
+    contract: "editorial",
+    width: 1440,
+    height: 1000,
+    theme: "light",
+  },
+  {
+    name: "server-monitoring-mobile-light",
+    path: "/ko/server-monitoring-analysis-guide",
+    heading: "서버 모니터링 분석 가이드",
+    contract: "editorial",
+    width: 390,
+    height: 844,
+    theme: "light",
+  },
 ] as const;
 
 for (const visualCase of cases) {
@@ -210,6 +228,82 @@ for (const visualCase of cases) {
             isContained: true,
             isScrollable: true,
           });
+      }
+    } else if (visualCase.contract === "editorial") {
+      const article = page.locator('[data-editorial-article="true"]');
+      const prose = article.locator('[data-docs-prose="true"]');
+      const paragraph = prose.locator(":scope > p").first();
+      const heading2 = prose.locator(":scope > h2").first();
+      const heading3 = prose.locator(":scope > h3").first();
+
+      await expect(article).toBeVisible();
+      await expect(paragraph).toBeVisible();
+      await expect
+        .poll(() =>
+          article.evaluate((element) => element.getBoundingClientRect().width),
+        )
+        .toBeLessThanOrEqual(760);
+      await expect(
+        paragraph.evaluate((element) => {
+          const style = getComputedStyle(element);
+          return {
+            fontSize: style.fontSize,
+            lineHeight: style.lineHeight,
+            marginBottom: style.marginBottom,
+          };
+        }),
+      ).resolves.toEqual({
+        fontSize: "16px",
+        lineHeight: "28px",
+        marginBottom: "16px",
+      });
+      await expect(
+        heading2.evaluate((element) => {
+          const style = getComputedStyle(element);
+          return {
+            fontSize: style.fontSize,
+            marginBottom: style.marginBottom,
+            marginTop: style.marginTop,
+          };
+        }),
+      ).resolves.toEqual({
+        fontSize: "28px",
+        marginBottom: "20px",
+        marginTop: "56px",
+      });
+      await expect(
+        heading3.evaluate((element) => {
+          const style = getComputedStyle(element);
+          return {
+            fontSize: style.fontSize,
+            marginBottom: style.marginBottom,
+            marginTop: style.marginTop,
+          };
+        }),
+      ).resolves.toEqual({
+        fontSize: "22px",
+        marginBottom: "16px",
+        marginTop: "44px",
+      });
+
+      if (visualCase.width <= 600) {
+        const title = page.getByRole("heading", {
+          level: 1,
+          name: visualCase.heading,
+        });
+        const blockquote = prose.locator("blockquote").first();
+        const footnotes = prose.locator("[data-footnotes]");
+        await expect
+          .poll(() =>
+            title.evaluate(
+              (element) =>
+                element.getBoundingClientRect().right <=
+                document.documentElement.clientWidth,
+            ),
+          )
+          .toBe(true);
+        await expect(blockquote).toBeAttached();
+        await expect(footnotes).toBeAttached();
       }
     }
 
