@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { Locale } from "../content-contracts.ts";
+import { alternateLocale, getLocaleProtocol } from "../locale.ts";
 
 const image = "/investment-notes-og.png";
 
@@ -19,7 +20,8 @@ export function createInvestmentCollectionMetadata({
   readonly alternatePathname?: string;
   readonly index?: boolean;
 }): Metadata {
-  const otherLocale = locale === "ko" ? "en" : "ko";
+  const otherLocale = alternateLocale(locale);
+  const protocol = getLocaleProtocol(locale);
   const languages: Record<string, string> = { [locale]: pathname };
   if (alternatePathname !== undefined) {
     languages[otherLocale] = alternatePathname;
@@ -38,8 +40,8 @@ export function createInvestmentCollectionMetadata({
       title,
       description,
       url: pathname,
-      locale: locale === "ko" ? "ko_KR" : "en_US",
-      alternateLocale: [locale === "ko" ? "en_US" : "ko_KR"],
+      locale: protocol.openGraph,
+      alternateLocale: [getLocaleProtocol(otherLocale).openGraph],
       images: [image],
     },
     twitter: {

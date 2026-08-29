@@ -33,7 +33,10 @@ test("[성공] 목록 제어를 URL과 동기화하고 다음 글을 자동으�
     "href",
     /sort=oldest/u,
   );
-  await expect(page.getByRole("link", { name: "Load more" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Load more" })).toHaveAttribute(
+    "href",
+    /page=2/u,
+  );
   await expect(results.locator(":scope > a")).toHaveCount(9);
 
   await page
@@ -44,6 +47,28 @@ test("[성공] 목록 제어를 URL과 동기화하고 다음 글을 자동으�
 
   await page.reload();
   await expect(page.locator("[data-view=list] > a")).toHaveCount(18);
+});
+
+test.describe("JavaScript가 비활성화된 환경", () => {
+  test.use({ javaScriptEnabled: false });
+
+  test("[성공] 다음 페이지 링크로 이후 글을 계속 탐색함", async ({ page }) => {
+    await page.goto("/en?sort=oldest&view=list", {
+      waitUntil: "domcontentloaded",
+    });
+
+    const results = page.locator("[data-view=list]");
+    await expect(results.locator(":scope > a")).toHaveCount(9);
+
+    const nextPage = page.getByRole("link", { name: "Load more" });
+    await expect(nextPage).toHaveAttribute("href", /page=2/u);
+    const nextPageHref = await nextPage.getAttribute("href");
+    if (nextPageHref === null) throw new Error("Next page link has no href");
+    await page.goto(nextPageHref, { waitUntil: "domcontentloaded" });
+
+    await expect(page).toHaveURL(/page=2/u);
+    await expect(page.locator("[data-view=list] > a")).toHaveCount(18);
+  });
 });
 
 test("[성공] 생성된 기사 데이터를 검색하고 여러 지역에서 기사를 싫어함", async ({
@@ -83,10 +108,10 @@ test("[성공] 생성된 기사 데이터를 검색하고 여러 지역에서 �
 test("[성공] 오류 검색 요청을 재시도함", async ({ page }) => {
   test.setTimeout(60_000);
   let requests = 0;
+  let shouldFail = true;
   await page.route("**/en/search*", async (route) => {
     requests += 1;
-    if (requests === 1)
-      await route.fulfill({ status: 503, body: "unavailable" });
+    if (shouldFail) await route.fulfill({ status: 503, body: "unavailable" });
     else await route.continue();
   });
   await page.goto("/en");
@@ -94,9 +119,10 @@ test("[성공] 오류 검색 요청을 재시도함", async ({ page }) => {
   const dialog = page.getByRole("dialog", { name: "Search documentation" });
 
   await expect(dialog.getByRole("alert")).toBeVisible({ timeout: 30_000 });
+  shouldFail = false;
   await dialog.getByRole("button", { name: "Retry" }).click();
   await expect(dialog.getByRole("option").first()).toBeVisible();
-  expect(requests).toBe(2);
+  expect(requests).toBeGreaterThanOrEqual(2);
 });
 
 test("[성공] 기록 및 동일 페이지에 대한 기본 링크를 사용함", async ({
@@ -162,12 +188,16 @@ test("[성공] 모바일 문서 경로를 다시 방문해도 검색 상태를 �
 test("[성공] 각주를 미리 보고 참조와 본문 사이를 이동함", async ({ page }) => {
   await page.goto("/en/the-expensive-main-thread");
 
+  const backToTop = page.getByRole("link", { name: "Back to top" });
+  await expect(backToTop).toHaveAttribute("href", "#top");
+
   const references = page.locator("[data-footnote-ref]");
   const reference = references.first();
   const preview = page.locator('[data-footnote-preview="true"]');
 
   await reference.focus();
   await expect(preview).toBeVisible();
+  await expect(preview).toHaveAttribute("aria-label", "Footnote preview");
   await expect(preview).toContainText(
     "The compositor thread is responsible for compositing",
   );

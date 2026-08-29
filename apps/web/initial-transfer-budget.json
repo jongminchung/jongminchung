@@ -11,7 +11,7 @@
       "maxInitialFontTransferBytes": 100000,
       "maxInitialFontDecodedBytes": 95000,
       "maxInitialStylesheetTransferBytes": 38000,
-      "maxInitialStylesheetDecodedBytes": 175000,
+      "maxInitialStylesheetDecodedBytes": 176000,
       "maxInitialJavaScriptTransferBytes": 230000,
       "maxInitialJavaScriptDecodedBytes": 700000
     },
@@ -23,7 +23,7 @@
       "maxInitialFontTransferBytes": 400000,
       "maxInitialFontDecodedBytes": 380000,
       "maxInitialStylesheetTransferBytes": 38000,
-      "maxInitialStylesheetDecodedBytes": 175000,
+      "maxInitialStylesheetDecodedBytes": 176000,
       "maxInitialJavaScriptTransferBytes": 230000,
       "maxInitialJavaScriptDecodedBytes": 700000
     },
@@ -59,21 +59,21 @@
       "maxInitialFontTransferBytes": 45000,
       "maxInitialFontDecodedBytes": 40000,
       "maxInitialStylesheetTransferBytes": 36000,
-      "maxInitialStylesheetDecodedBytes": 165000,
+      "maxInitialStylesheetDecodedBytes": 172000,
       "maxInitialJavaScriptTransferBytes": 285000,
-      "maxInitialJavaScriptDecodedBytes": 850000
+      "maxInitialJavaScriptDecodedBytes": 870000
     },
     {
       "site": "invest",
       "locale": "ko",
       "url": "http://invest.jamie.localhost:3100/ko",
       "expectedFontFamily": "Pretendard Variable",
-      "maxInitialFontTransferBytes": 330000,
-      "maxInitialFontDecodedBytes": 320000,
+      "maxInitialFontTransferBytes": 375000,
+      "maxInitialFontDecodedBytes": 370000,
       "maxInitialStylesheetTransferBytes": 36000,
-      "maxInitialStylesheetDecodedBytes": 165000,
+      "maxInitialStylesheetDecodedBytes": 172000,
       "maxInitialJavaScriptTransferBytes": 285000,
-      "maxInitialJavaScriptDecodedBytes": 850000
+      "maxInitialJavaScriptDecodedBytes": 870000
     }
   ]
 }

@@ -6,6 +6,7 @@ import {
   type Locale,
 } from "#lib/content-model";
 import type { LoadedDocument } from "#lib/documents";
+import { getTechMessages } from "#lib/tech/copy";
 import { documentKindLabel } from "#lib/tech/document-kind";
 import { getSeries } from "#lib/tech/series";
 import { EditPageLink } from "./EditPageLink";
@@ -23,13 +24,12 @@ export function DocumentPageHeader({
   readonly document: LoadedDocument;
 }) {
   const { metadata } = document;
+  const text = getTechMessages(locale).article;
   const series = metadata.contentType === "blog" ? metadata.series : undefined;
   const title = displayTitleFor(metadata);
   const section =
     series === undefined
-      ? locale === "ko"
-        ? "Engineering"
-        : "Engineering"
+      ? "Engineering"
       : (getSeries(series, locale)?.title ?? "Engineering");
   const category =
     metadata.documentKind === undefined
@@ -37,13 +37,10 @@ export function DocumentPageHeader({
       : `${section} · ${documentKindLabel(locale, metadata.documentKind)}`;
   return (
     <div className="text-center">
-      <nav
-        aria-label={locale === "ko" ? "현재 위치" : "Breadcrumb"}
-        className="sr-only"
-      >
+      <nav aria-label={text.breadcrumb} className="sr-only">
         <ol>
           <li>
-            <Link href={`/${locale}`}>Articles</Link>
+            <Link href={`/${locale}`}>{text.articles}</Link>
           </li>
           <li aria-hidden="true">
             <Icon icon="chevronRight" className="size-3" />
@@ -82,13 +79,7 @@ export function DocumentPageHeader({
       </p>
       <div className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
         <span>
-          {metadata.verifiedAt === undefined
-            ? locale === "ko"
-              ? "업데이트"
-              : "Updated"
-            : locale === "ko"
-              ? "검증일"
-              : "Verified"}{" "}
+          {metadata.verifiedAt === undefined ? text.updated : text.verified}{" "}
           <time dateTime={metadata.verifiedAt ?? metadata.updatedAt}>
             {metadata.verifiedAt ?? metadata.updatedAt}
           </time>
@@ -99,13 +90,10 @@ export function DocumentPageHeader({
           target="_blank"
           rel="noreferrer"
         >
-          {locale === "ko" ? "근거 자료" : "Source"}
+          {text.source}
           <Icon icon="externalLink" className="size-3" />
         </a>
-        <EditPageLink
-          label={locale === "ko" ? "이 페이지 편집" : "Edit this page"}
-          href={editHref(locale, metadata.id)}
-        />
+        <EditPageLink label={text.edit} href={editHref(locale, metadata.id)} />
       </div>
     </div>
   );

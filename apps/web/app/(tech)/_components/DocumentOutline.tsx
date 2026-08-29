@@ -63,7 +63,7 @@ export function DocumentOutline({
         <nav aria-label={t("documentOutline")}>
           <OutlineItems items={outlineItems} />
         </nav>
-        <BackToTopButton />
+        <BackToTopButton label={t("backToTop")} />
       </div>
     </AnchorProvider>
   );

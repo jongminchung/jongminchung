@@ -1,5 +1,6 @@
 import { displayTitleFor, locales, type Locale } from "#lib/content-model";
 import { getBlogPosts, getDocsPages } from "#lib/documents";
+import { getTechMessages } from "#lib/tech/copy";
 import { getDocsCategory } from "#lib/tech/docs";
 
 const siteOrigin = "https://tech.jamie.kr";
@@ -10,15 +11,16 @@ async function createLocaleSection(locale: Locale): Promise<readonly string[]> {
   const [posts, docs] = await Promise.all([getBlogPosts(), getDocsPages()]);
   const localizedPosts = posts.filter((post) => post.locale === locale);
   const localizedDocs = docs.filter((page) => page.locale === locale);
+  const text = getTechMessages(locale).metadata;
   return [
-    `## ${locale === "ko" ? "한국어 Blog" : "English Blog"}`,
+    `## ${text.llmsBlog}`,
     "",
     ...localizedPosts.map(
       (post) =>
         `- [${displayTitleFor(post)}](${absoluteUrl(post.href)}): ${post.description} Status: ${post.status}; published ${post.publishedAt}.`,
     ),
     "",
-    `## ${locale === "ko" ? "한국어 Docs" : "English Docs"}`,
+    `## ${text.llmsDocs}`,
     "",
     ...localizedDocs.map((page) => {
       if (page.area === undefined || page.documentKind === undefined)

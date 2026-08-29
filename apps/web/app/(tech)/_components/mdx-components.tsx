@@ -52,7 +52,10 @@ function MdxHeading2({ children, className, ...props }: ComponentProps<"h2">) {
   return (
     <h2
       {...props}
-      className={`mt-[52px] mb-[26px] scroll-mt-20 text-[26px] leading-[1.5] font-semibold tracking-[-.023em] ${className ?? ""}`}
+      className={cn(
+        "mt-[52px] mb-[26px] scroll-mt-20 text-[26px] leading-[1.5] font-semibold tracking-[-.023em]",
+        className,
+      )}
     >
       {children}
     </h2>
@@ -63,40 +66,57 @@ function MdxHeading3({ children, className, ...props }: ComponentProps<"h3">) {
   return (
     <h3
       {...props}
-      className={`mt-10 mb-3 scroll-mt-20 text-xl leading-[1.3] font-semibold tracking-[-.01em] ${className ?? ""}`}
+      className={cn(
+        "mt-10 mb-3 scroll-mt-20 text-xl leading-[1.3] font-semibold tracking-[-.01em]",
+        className,
+      )}
     >
       {children}
     </h3>
   );
 }
 
-function MdxParagraph(props: ComponentProps<"p">) {
-  return <p className="mt-0 mb-4 text-base leading-[1.6]" {...props} />;
+function MdxParagraph({ className, ...props }: ComponentProps<"p">) {
+  return (
+    <p
+      {...props}
+      className={cn("mt-0 mb-4 text-base leading-[1.6]", className)}
+    />
+  );
 }
 
-function MdxUnorderedList(props: ComponentProps<"ul">) {
+function MdxUnorderedList({ className, ...props }: ComponentProps<"ul">) {
   return (
     <ul
-      className="mt-0 mb-6 pl-[26px] text-base leading-[1.6] [&>li]:pl-1.5"
       {...props}
+      className={cn(
+        "mt-0 mb-6 pl-[26px] text-base leading-[1.6] [&>li]:pl-1.5",
+        className,
+      )}
     />
   );
 }
 
-function MdxOrderedList(props: ComponentProps<"ol">) {
+function MdxOrderedList({ className, ...props }: ComponentProps<"ol">) {
   return (
     <ol
-      className="mt-0 mb-6 pl-[26px] text-base leading-[1.6] [&>li]:pl-1.5"
       {...props}
+      className={cn(
+        "mt-0 mb-6 pl-[26px] text-base leading-[1.6] [&>li]:pl-1.5",
+        className,
+      )}
     />
   );
 }
 
-function MdxBlockquote(props: ComponentProps<"blockquote">) {
+function MdxBlockquote({ className, ...props }: ComponentProps<"blockquote">) {
   return (
     <blockquote
-      className="my-[1.6rem] border-l-4 border-input bg-transparent py-0 pl-4 text-base leading-[1.6] text-foreground [&>p:last-child]:mb-0"
       {...props}
+      className={cn(
+        "my-[1.6rem] border-l-4 border-input bg-transparent py-0 pl-4 text-base leading-[1.6] text-foreground [&>p:last-child]:mb-0",
+        className,
+      )}
     />
   );
 }
@@ -119,21 +139,29 @@ export function MdxTable({ className, ...props }: ComponentProps<"table">) {
   );
 }
 
-function MdxDataCell(props: ComponentProps<"td">) {
-  return <td className="border px-3 py-2.5 text-left text-sm" {...props} />;
-}
-
-function MdxHeaderCell(props: ComponentProps<"th">) {
+function MdxDataCell({ className, ...props }: ComponentProps<"td">) {
   return (
-    <th
-      className="border bg-muted px-3 py-2.5 text-left text-sm font-semibold"
+    <td
       {...props}
+      className={cn("border px-3 py-2.5 text-left text-sm", className)}
     />
   );
 }
 
-function MdxDiv(props: HTMLAttributes<HTMLDivElement>) {
-  return <div className="my-4" {...props} />;
+function MdxHeaderCell({ className, ...props }: ComponentProps<"th">) {
+  return (
+    <th
+      {...props}
+      className={cn(
+        "border bg-muted px-3 py-2.5 text-left text-sm font-semibold",
+        className,
+      )}
+    />
+  );
+}
+
+function MdxDiv({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+  return <div {...props} className={cn("my-4", className)} />;
 }
 
 export const techMdxComponents = {

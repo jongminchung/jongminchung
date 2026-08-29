@@ -1,3 +1,4 @@
+import { cn } from "@jongminchung/ui/lib/utils";
 import type { MDXComponents } from "mdx/types";
 import Link from "next/link";
 import type { ComponentProps } from "react";
@@ -35,7 +36,10 @@ function EditorialHeading2({
   return (
     <h2
       {...props}
-      className={`mt-14 mb-5 scroll-mt-20 text-[28px] leading-[1.35] font-semibold tracking-[-.023em] ${className ?? ""}`}
+      className={cn(
+        "mt-14 mb-5 scroll-mt-20 text-[28px] leading-[1.35] font-semibold tracking-[-.023em]",
+        className,
+      )}
     >
       {children}
     </h2>
@@ -50,7 +54,10 @@ function EditorialHeading3({
   return (
     <h3
       {...props}
-      className={`mt-11 mb-4 scroll-mt-20 text-[22px] leading-[1.4] font-semibold tracking-[-.01em] ${className ?? ""}`}
+      className={cn(
+        "mt-11 mb-4 scroll-mt-20 text-[22px] leading-[1.4] font-semibold tracking-[-.01em]",
+        className,
+      )}
     >
       {children}
     </h3>
@@ -61,7 +68,7 @@ function EditorialParagraph({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
       {...props}
-      className={`mt-0 mb-4 text-[16px] leading-7 ${className ?? ""}`}
+      className={cn("mt-0 mb-4 text-[16px] leading-7", className)}
     />
   );
 }
@@ -70,7 +77,10 @@ function EditorialUnorderedList({ className, ...props }: ComponentProps<"ul">) {
   return (
     <ul
       {...props}
-      className={`mt-0 mb-6 pl-[26px] text-[16px] leading-7 [&>li]:pl-1.5 [&>li+li]:mt-2 ${className ?? ""}`}
+      className={cn(
+        "mt-0 mb-6 pl-[26px] text-[16px] leading-7 [&>li]:pl-1.5 [&>li+li]:mt-2",
+        className,
+      )}
     />
   );
 }
@@ -79,7 +89,10 @@ function EditorialOrderedList({ className, ...props }: ComponentProps<"ol">) {
   return (
     <ol
       {...props}
-      className={`mt-0 mb-6 pl-[26px] text-[16px] leading-7 [&>li]:pl-1.5 [&>li+li]:mt-2 ${className ?? ""}`}
+      className={cn(
+        "mt-0 mb-6 pl-[26px] text-[16px] leading-7 [&>li]:pl-1.5 [&>li+li]:mt-2",
+        className,
+      )}
     />
   );
 }
@@ -91,7 +104,10 @@ function EditorialBlockquote({
   return (
     <blockquote
       {...props}
-      className={`my-7 border-l-4 border-input bg-transparent py-0 pl-4 text-[16px] leading-7 text-foreground [&>p:last-child]:mb-0 ${className ?? ""}`}
+      className={cn(
+        "my-7 border-l-4 border-input bg-transparent py-0 pl-4 text-[16px] leading-7 text-foreground [&>p:last-child]:mb-0",
+        className,
+      )}
     />
   );
 }

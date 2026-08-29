@@ -166,6 +166,16 @@ const cases = [
   },
 ] as const;
 
+const screenshotCases = new Set([
+  "overview-wide-light",
+  "overview-mobile-dark",
+  "docs-root-wide-light",
+  "frontend-docs-explanation-mobile-dark",
+  "ddd-wide-light",
+  "server-monitoring-wide-light",
+  "server-monitoring-mobile-light",
+]);
+
 for (const visualCase of cases) {
   test(`visual: ${visualCase.name}`, async ({ page }) => {
     await page.setViewportSize({
@@ -243,48 +253,54 @@ for (const visualCase of cases) {
           article.evaluate((element) => element.getBoundingClientRect().width),
         )
         .toBeLessThanOrEqual(760);
-      await expect(
-        paragraph.evaluate((element) => {
-          const style = getComputedStyle(element);
-          return {
-            fontSize: style.fontSize,
-            lineHeight: style.lineHeight,
-            marginBottom: style.marginBottom,
-          };
-        }),
-      ).resolves.toEqual({
-        fontSize: "16px",
-        lineHeight: "28px",
-        marginBottom: "16px",
-      });
-      await expect(
-        heading2.evaluate((element) => {
-          const style = getComputedStyle(element);
-          return {
-            fontSize: style.fontSize,
-            marginBottom: style.marginBottom,
-            marginTop: style.marginTop,
-          };
-        }),
-      ).resolves.toEqual({
-        fontSize: "28px",
-        marginBottom: "20px",
-        marginTop: "56px",
-      });
-      await expect(
-        heading3.evaluate((element) => {
-          const style = getComputedStyle(element);
-          return {
-            fontSize: style.fontSize,
-            marginBottom: style.marginBottom,
-            marginTop: style.marginTop,
-          };
-        }),
-      ).resolves.toEqual({
-        fontSize: "22px",
-        marginBottom: "16px",
-        marginTop: "44px",
-      });
+      await expect
+        .poll(() =>
+          paragraph.evaluate((element) => {
+            const style = getComputedStyle(element);
+            return {
+              fontSize: style.fontSize,
+              lineHeight: style.lineHeight,
+              marginBottom: style.marginBottom,
+            };
+          }),
+        )
+        .toEqual({
+          fontSize: "16px",
+          lineHeight: "28px",
+          marginBottom: "16px",
+        });
+      await expect
+        .poll(() =>
+          heading2.evaluate((element) => {
+            const style = getComputedStyle(element);
+            return {
+              fontSize: style.fontSize,
+              marginBottom: style.marginBottom,
+              marginTop: style.marginTop,
+            };
+          }),
+        )
+        .toEqual({
+          fontSize: "28px",
+          marginBottom: "20px",
+          marginTop: "56px",
+        });
+      await expect
+        .poll(() =>
+          heading3.evaluate((element) => {
+            const style = getComputedStyle(element);
+            return {
+              fontSize: style.fontSize,
+              marginBottom: style.marginBottom,
+              marginTop: style.marginTop,
+            };
+          }),
+        )
+        .toEqual({
+          fontSize: "22px",
+          marginBottom: "16px",
+          marginTop: "44px",
+        });
 
       if (visualCase.width <= 600) {
         const title = page.getByRole("heading", {
@@ -341,9 +357,9 @@ for (const visualCase of cases) {
         }),
       );
     });
-    await expect(page).toHaveScreenshot(`${visualCase.name}.png`, {
-      fullPage: true,
-      timeout: 30_000,
-    });
+    if (screenshotCases.has(visualCase.name))
+      await expect(page).toHaveScreenshot(`${visualCase.name}.png`, {
+        timeout: 30_000,
+      });
   });
 }

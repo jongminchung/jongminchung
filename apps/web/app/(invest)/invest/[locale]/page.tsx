@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { InvestmentHome } from "#invest-components/InvestmentShell";
+import { InvestmentHome } from "#invest-components/InvestmentCollection";
+import { getInvestmentMessages } from "#lib/invest/copy";
 import { getInvestmentNotes } from "#lib/invest/notes";
+import { alternateLocale, getLocaleProtocol } from "#lib/locale";
 import { isLocale, locales } from "#lib/site-routing";
 
 /** 정적 생성에 사용할 경로 매개변수를 반환함 */
@@ -15,12 +17,8 @@ export async function generateMetadata({
 }: PageProps<"/invest/[locale]">): Promise<Metadata> {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
-  const title =
-    locale === "ko" ? "투자 리서치 노트" : "Investment research notes";
-  const description =
-    locale === "ko"
-      ? "13F 공시와 원문 자료를 바탕으로 투자자의 선택과 시장 구조를 분석합니다"
-      : "Investment analysis grounded in 13F filings and original materials";
+  const { title, description } = getInvestmentMessages(locale).homeMetadata;
+  const protocol = getLocaleProtocol(locale);
   return {
     title: { absolute: `${title} · Investment Notes` },
     description,
@@ -34,8 +32,8 @@ export async function generateMetadata({
       title,
       description,
       url: `/${locale}`,
-      locale: locale === "ko" ? "ko_KR" : "en_US",
-      alternateLocale: [locale === "ko" ? "en_US" : "ko_KR"],
+      locale: protocol.openGraph,
+      alternateLocale: [getLocaleProtocol(alternateLocale(locale)).openGraph],
       images: ["/investment-notes-og.png"],
     },
     twitter: {

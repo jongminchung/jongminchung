@@ -1,6 +1,6 @@
 import { cn } from "@jongminchung/ui/lib/utils";
 import Image from "next/image";
-import { EditorialArticle } from "#components/Editorial";
+import { EditorialArticle } from "#components/EditorialArticle";
 import { StructuredData } from "#components/StructuredData";
 import {
   createTechArticleImageHref,
@@ -8,7 +8,9 @@ import {
   type Locale,
 } from "#lib/content-model";
 import type { LoadedDocument } from "#lib/documents";
+import { editorialProseClassName } from "#lib/mdx-styles";
 import { createTechArticleStructuredData } from "#lib/structured-data";
+import { getTechMessages } from "#lib/tech/copy";
 import { editorialMdxComponents } from "#mdx-components";
 import { DocumentOutline } from "./DocumentOutline";
 import { DocumentPageHeader } from "./DocumentPageHeader";
@@ -24,13 +26,10 @@ function ArticleArgument({
   readonly thesis: string;
   readonly counterargument: string;
 }) {
-  const labels =
-    locale === "ko"
-      ? { thesis: "이 글의 주장", counterargument: "가장 강한 반론" }
-      : { thesis: "Thesis", counterargument: "Strongest counterargument" };
+  const labels = getTechMessages(locale).article;
   return (
     <aside
-      aria-label={locale === "ko" ? "글의 논지" : "Article argument"}
+      aria-label={labels.argument}
       className="mb-10 grid gap-5 border-y py-6 sm:grid-cols-2 sm:gap-8"
       data-article-argument="true"
     >
@@ -63,6 +62,7 @@ export function DocumentPage({
   readonly document: LoadedDocument;
 }) {
   const { Content, metadata, previous, next } = document;
+  const text = getTechMessages(locale).article;
   return (
     <>
       <StructuredData value={createTechArticleStructuredData(metadata)} />
@@ -73,10 +73,7 @@ export function DocumentPage({
       >
         <div className="w-full text-[15px]" lang={locale}>
           <div
-            className={cn(
-              "text-[16px] leading-7 tracking-[-.01em] break-words [&_[data-footnotes]]:mt-12 [&_[data-footnotes]]:border-t [&_[data-footnotes]]:pt-5 [&_[data-footnotes]]:text-sm [&_[data-footnotes]]:leading-[1.6] [&_[data-footnotes]]:text-muted-foreground [&_[data-footnotes]_a]:text-primary [&_code:not(pre_code)]:rounded-[var(--radius-xs)] [&_code:not(pre_code)]:bg-accent/55 [&_code:not(pre_code)]:px-[.3rem] [&_code:not(pre_code)]:font-mono [&_code:not(pre_code)]:text-[.875rem] [&_code:not(pre_code)]:text-primary [&_li+li]:mt-2 [&_td]:border [&_td]:px-3 [&_td]:py-2.5 [&_th]:border [&_th]:bg-muted [&_th]:px-3 [&_th]:py-2.5",
-              "pt-0",
-            )}
+            className={cn(editorialProseClassName, "pt-0")}
             data-docs-prose="true"
           >
             {metadata.contentType === "blog" ? (
@@ -92,9 +89,7 @@ export function DocumentPage({
                     width={1536}
                   />
                   <figcaption className="mt-2 text-center text-xs text-muted-foreground">
-                    {locale === "ko"
-                      ? "글의 주제를 바탕으로 OpenAI로 생성한 이미지"
-                      : "Image generated with OpenAI from the article topic"}
+                    {text.generatedImage}
                   </figcaption>
                 </figure>
                 <ArticleArgument

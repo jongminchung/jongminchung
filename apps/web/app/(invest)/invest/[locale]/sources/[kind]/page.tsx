@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { NoteCollection } from "#invest-components/InvestmentShell";
+import { NoteCollection } from "#invest-components/InvestmentCollection";
 import {
   investmentSourceKinds,
   type InvestmentSourceKind,
@@ -12,6 +12,7 @@ import {
   sourceTitle,
 } from "#lib/invest/routing";
 import { createInvestmentCollectionMetadata } from "#lib/invest/seo";
+import { alternateLocale } from "#lib/locale";
 import { isLocale, locales } from "#lib/site-routing";
 
 /** 정적 생성에 사용할 경로 매개변수를 반환함 */
@@ -32,7 +33,7 @@ export async function generateMetadata({
   const { locale, kind } = await params;
   if (!isLocale(locale) || !isSourceKind(kind)) notFound();
   const notes = await getNotesBySource(locale, kind);
-  const otherLocale = locale === "ko" ? "en" : "ko";
+  const otherLocale = alternateLocale(locale);
   const alternateNotes = await getNotesBySource(otherLocale, kind);
   return createInvestmentCollectionMetadata({
     locale,

@@ -26,6 +26,108 @@ interface HomeContent {
   readonly principles: readonly Principle[];
 }
 
+interface HomeMessages {
+  readonly shell: {
+    readonly skipToContent: string;
+    readonly navigation: string;
+    readonly work: string;
+    readonly writing: string;
+    readonly principles: string;
+    readonly alternateLocaleShort: string;
+    readonly footerQuestion: string;
+    readonly footerAction: string;
+    readonly disciplines: string;
+  };
+  readonly hero: {
+    readonly title: string;
+    readonly description: string;
+    readonly prompt: string;
+    readonly viewProjects: string;
+    readonly readNotes: string;
+  };
+  readonly workTitle: string;
+  readonly writing: {
+    readonly title: string;
+    readonly description: string;
+    readonly emptyInvestment: string;
+  };
+  readonly principles: {
+    readonly title: string;
+    readonly description: string;
+  };
+  readonly metadataDescription: string;
+}
+
+const messages = {
+  ko: {
+    shell: {
+      skipToContent: "본문으로 건너뛰기",
+      navigation: "주요 탐색",
+      work: "프로젝트",
+      writing: "글",
+      principles: "원칙",
+      alternateLocaleShort: "EN",
+      footerQuestion: "더 명확한 언어가 필요한 시스템이 있나요?",
+      footerAction: "저장소에서 시작하기",
+      disciplines: "언어 · 모델 · 코드",
+    },
+    hero: {
+      title: "무엇을 함께 만들까요?",
+      description:
+        "프로젝트, 기술 문서와 리서치 노트를 한곳에서 탐색할 수 있음",
+      prompt: "무엇이든 물어보세요",
+      viewProjects: "프로젝트 보기",
+      readNotes: "최근 글 읽기",
+    },
+    workTitle: "읽고 이해할 수 있게 만든 것",
+    writing: {
+      title: "최근 기록",
+      description: "지금 읽을 수 있는 기술과 투자 기록을 모음",
+      emptyInvestment: "첫 리서치 노트를 준비 중임",
+    },
+    principles: {
+      title: "일하는 원칙",
+      description: "언어를 맞추고 경계를 분명히 하며, 변경을 검증함",
+    },
+    metadataDescription:
+      "Jamie 정민의 소개와 프로젝트, 최근 기술·투자 기록을 연결하는 프로필 허브",
+  },
+  en: {
+    shell: {
+      skipToContent: "Skip to content",
+      navigation: "Primary navigation",
+      work: "Work",
+      writing: "Writing",
+      principles: "Principles",
+      alternateLocaleShort: "KO",
+      footerQuestion: "Have a system that needs clearer words?",
+      footerAction: "Start with the repository",
+      disciplines: "Language · Models · Code",
+    },
+    hero: {
+      title: "Where should we begin?",
+      description:
+        "Explore projects, engineering notes, and research in one place.",
+      prompt: "Ask anything",
+      viewProjects: "View projects",
+      readNotes: "Read recent notes",
+    },
+    workTitle: "Things built to be read.",
+    writing: {
+      title: "Recent notes.",
+      description:
+        "The latest engineering and investment notes, ready to read.",
+      emptyInvestment: "The first research note is in preparation.",
+    },
+    principles: {
+      title: "Working principles.",
+      description: "Align language, clarify boundaries, and verify change.",
+    },
+    metadataDescription:
+      "Jamie's profile, projects, and latest engineering and investment writing",
+  },
+} as const satisfies Record<Locale, HomeMessages>;
+
 const content = {
   en: {
     hero: {
@@ -122,6 +224,11 @@ const content = {
 /** `getHomeContent` 데이터를 조회함 */
 export function getHomeContent(locale: Locale): HomeContent {
   return content[locale];
+}
+
+/** locale에 맞는 Home UI와 metadata copy를 반환함 */
+export function getHomeMessages(locale: Locale): HomeMessages {
+  return messages[locale];
 }
 
 export const personSchema = {

@@ -11,6 +11,7 @@ import {
   getBlogPosts,
   getDocsPages,
 } from "#lib/documents";
+import { getTechMessages } from "#lib/tech/copy";
 import { documentKindLabel } from "#lib/tech/document-kind";
 import { getSeries, isSeriesId, seriesRegistry } from "#lib/tech/series";
 
@@ -29,17 +30,17 @@ async function resolvePage(
   locale: Locale,
   slug: readonly string[],
 ): Promise<OgPageData | null> {
+  const text = getTechMessages(locale).metadata;
   if (slug.length === 1 && slug[0] === "blog")
     return {
-      title: locale === "ko" ? "기술 블로그" : "Engineering Blog",
-      detail: locale === "ko" ? "최신 기술 글" : "Latest technical articles",
+      title: text.blogTitle,
+      detail: text.latestArticles,
       label: "Blog",
     };
   if (slug.length === 1 && slug[0] === "series")
     return {
-      title: locale === "ko" ? "시리즈" : "Series",
-      detail:
-        locale === "ko" ? "순서 있는 글 모음" : "Ordered article collections",
+      title: text.seriesLabel,
+      detail: text.orderedCollections,
       label: "Series",
     };
   if (slug.length === 2 && slug[0] === "series" && isSeriesId(slug[1] ?? "")) {
@@ -49,7 +50,7 @@ async function resolvePage(
       : {
           title: series.title,
           detail: series.description,
-          label: locale === "ko" ? "시리즈" : "Series",
+          label: text.seriesLabel,
         };
   }
   if (slug[0] === "docs") {

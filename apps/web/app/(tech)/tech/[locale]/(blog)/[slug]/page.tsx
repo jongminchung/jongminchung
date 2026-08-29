@@ -5,6 +5,7 @@ import {
   isLocale,
 } from "#lib/content-model";
 import { findBlogPost, getDocsPages, loadBlogPost } from "#lib/documents";
+import { alternateLocale } from "#lib/locale";
 import { techPageMetadata } from "#lib/tech/metadata";
 import { DocsShell } from "#tech-components/DocsShell";
 import { DocumentPage } from "#tech-components/DocumentPage";
@@ -65,7 +66,7 @@ export default async function BlogArticlePage({
     if (moved !== undefined) permanentRedirect(moved.href);
     notFound();
   }
-  const alternate = locale === "ko" ? "en" : "ko";
+  const alternate = alternateLocale(locale);
   return (
     <DocsShell
       alternateHref={createBlogPostHref(alternate, document.metadata.id)}

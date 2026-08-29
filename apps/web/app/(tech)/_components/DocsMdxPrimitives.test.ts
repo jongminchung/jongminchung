@@ -2,7 +2,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { Callout, Card, Step, Steps } from "./DocsMdxPrimitives";
-import { MdxTable } from "./mdx-components";
+import { MdxTable, techMdxComponents } from "./mdx-components";
 
 describe("Tech MDX composition", () => {
   it("[성공] 순서 있는 단계의 native list semantics를 유지함", () => {
@@ -57,5 +57,18 @@ describe("Tech MDX composition", () => {
     expect(html).toContain("overflow-x-auto");
     expect(html).toContain("min-w-[560px]");
     expect(html).toContain("<table");
+  });
+
+  it("[성공] MDX 요소의 기본 스타일과 전달 className을 함께 유지함", () => {
+    const html = renderToStaticMarkup(
+      createElement(
+        techMdxComponents.p,
+        { className: "content-override" },
+        "Body",
+      ),
+    );
+
+    expect(html).toContain("mt-0 mb-4 text-base");
+    expect(html).toContain("content-override");
   });
 });

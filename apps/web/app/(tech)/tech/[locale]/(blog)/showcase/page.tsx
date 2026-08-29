@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 import { isLocale, locales } from "#lib/content-model";
+import { alternateLocale } from "#lib/locale";
+import { getTechMessages } from "#lib/tech/copy";
 import { techPageMetadata } from "#lib/tech/metadata";
 import { DocsShell } from "#tech-components/DocsShell";
 import { ShowcasePage } from "#tech-components/ShowcasePage";
@@ -15,12 +17,10 @@ export async function generateMetadata({
 }) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
+  const text = getTechMessages(locale).metadata;
   return techPageMetadata({
-    title: locale === "ko" ? "애니메이션 쇼케이스" : "Animation Showcase",
-    description:
-      locale === "ko"
-        ? "인터랙티브 타임라인과 코드 기반 설명 애니메이션의 제작 모델을 비교합니다."
-        : "Compare interactive timelines with code-authored explanatory animation.",
+    title: text.showcaseTitle,
+    description: text.showcaseDescription,
     locale,
     canonical: `/${locale}/showcase`,
     alternatePaths: { ko: "/ko/showcase", en: "/en/showcase" },
@@ -35,7 +35,7 @@ export default async function Page({
 }) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
-  const alternate = locale === "ko" ? "en" : "ko";
+  const alternate = alternateLocale(locale);
   return (
     <DocsShell
       active="showcase"

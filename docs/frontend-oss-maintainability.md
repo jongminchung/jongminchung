@@ -101,22 +101,24 @@
   - registry는 시작점과 비교 기준이며 runtime dependency의 숨겨진 구현이 아님
   - 로컬 접근성 보정, variant와 API 결정은 일반 source와 동일하게 review·test·commit함
   - upstream 최신 코드와 일치하는 것보다 저장소의 공개 계약과 소비 앱을 깨뜨리지 않는 것이 우선임
-- **신규 component는 앱 workspace에서 dry run 후 추가함**
+- **공용 primitive의 shadcn 실행 위치는 `packages/ui`로 고정함**
 
   ```sh
-  pnpm --filter <app-package> exec shadcn add <component> --dry-run
-  pnpm --filter <app-package> exec shadcn add <component>
+  pnpm --filter @jongminchung/ui exec shadcn add <component> --dry-run
+  pnpm --filter @jongminchung/ui exec shadcn add <component>
   ```
 
-  - CLI가 primitive를 `packages/ui`로, 제품 block을 앱으로 라우팅하는지 확인함
-  - dependency, alias, `components.json`, generated source와 app import를 각각 검토함
+  - `packages/ui/components.json`을 공용 primitive 생성·갱신의 canonical 설정으로 사용함
+  - `apps/web/components.json`은 consumer alias와 경로 점검용이며 공용 primitive add·update 명령에 사용하지 않음
+  - 앱 전용 block을 registry에서 검토할 때는 `--dry-run`으로 생성 위치와 dependency owner를 먼저 확인함
+  - dependency, alias, canonical `components.json`, generated source와 app import를 각각 검토함
   - 모든 workspace가 같은 `style`, `iconLibrary`, `baseColor`를 유지하고 Tailwind v4의 config 경로를 비워
     두어야 한다는 [공식 monorepo 계약](https://ui.shadcn.com/docs/monorepo)을 따름
 
 - **기존 component는 overwrite가 아니라 diff 병합으로 갱신함**
 
   ```sh
-  pnpm --filter <app-package> exec shadcn add <component> --diff
+  pnpm --filter @jongminchung/ui exec shadcn add <component> --diff
   ```
 
   - upstream의 접근성·동작·style 변경을 구분함
@@ -162,6 +164,8 @@
   - 제3자가 package를 설치하는 시점에는 같은 version의 API·integrity가 달라지는 정책을 중단하고
     SemVer, changelog, migration note와 immutable release를 도입해야 함
   - 이는 현재 오류라기보다 소비자 범위가 바뀔 때 반드시 충족해야 하는 전환 조건임
+  - 독립 배포 주기나 `^1.0.0` 같은 SemVer 범위를 기대하는 첫 외부 consumer를 받기 전에 전환을 완료함
+  - 전환 변경에는 version bump 규칙, changelog, migration note, immutable artifact와 rollback 절차를 함께 포함함
 
 ## 검증과 업데이트를 변경 유형별로 계층화함
 
@@ -218,7 +222,7 @@
 | Base UI·Tailwind 갱신 | package test, Web build               | focus·generated CSS 변화 시 E2E            |
 | package export        | build, dry-run tarball                | 외부 소비자가 있으면 compatibility fixture |
 
-## 현재 저장소는 자동화 공백부터 보완함
+## 현재 저장소는 자동화된 경계를 확장함
 
 - **유지할 강점은 이미 명확함**
   - `packages/ui`가 primitive, theme, token adapter와 Tailwind 진입점을 함께 소유함
@@ -226,11 +230,11 @@
   - 앱이 공용 component를 explicit subpath로 import하고 Base UI 직접 사용을 공용 package로 제한함
   - Web theme contract와 UI server markup test가 이미 존재함
   - catalog, peer dependency와 source-first export가 모노레포의 version·개발 경계를 명시함
-- **1순위는 문서에만 있는 경계 규칙을 정적 계약으로 옮기는 것임**
+- **문서에만 있던 경계 규칙을 빠른 정적 계약으로 이전함**
   - `components.json` routing과 설정 일치 검사를 추가함
   - 앱의 Base UI 직접 import, 공용 primitive 복사와 package root import 방지 검사를 추가함
-  - CSS entry·`@source`·package export 계약을 하나의 빠른 UI architecture test로 검증함
-  - 이 검사는 새 lint 도구보다 기존 Vitest와 filesystem assertion으로 먼저 구현하는 것이 적절함
+  - CSS entry·`@source`·package export 계약을 하나의 UI architecture test로 검증함
+  - 새 lint 도구 없이 기존 Vitest와 filesystem assertion으로 전체 계약에 포함함
 - **2순위는 복합 primitive의 browser interaction 증거를 보강하는 것임**
   - SSR test가 증명하지 못하는 Dialog focus 복원, Select keyboard 탐색, Menu dismissal을 우선함
   - 이미 존재하는 앱 Playwright fixture를 활용해 별도 component explorer 도입 없이 시작함
@@ -248,9 +252,9 @@
 - **현재 아키텍처는 교체보다 강화가 적절함**으로 `Tailwind CSS → semantic token`,
   `shadcn/ui → reviewed source`, `Base UI → accessible behavior`, `@jongminchung/ui → repository policy`,
   `apps → product composition`의 경계를 유지함
-- **다음 구현 PR은 빠른 UI architecture contract test 하나로 시작하는 것이 적절함**
-  - `components.json`, import boundary, primitive duplication, CSS entry와 export map을 함께 검사함
-  - 이후 Dialog·Select·Menu의 browser interaction test를 작은 PR로 분리함
+- **다음 package 구현은 복합 primitive의 browser interaction 증거를 보강하는 것이 적절함**
+  - UI architecture contract가 `components.json`, import boundary, primitive duplication, CSS entry와 export map을 함께 검사함
+  - 이후 Dialog·Select·Menu의 focus·keyboard interaction test를 작은 PR로 분리함
 - **새 도구 도입은 조건이 발생한 뒤 결정함**으로 현재는 Storybook·별도 token package·추가 wrapper보다
   기존 Vitest·Playwright·package contract의 빈틈을 메우는 편이 변경 비용과 운영 복잡도를 더 낮춤
 - **이 문서의 권장안이 실제 규칙으로 확정되면** [디자인 시스템](../DESIGN_SYSTEM.md)의 검증 목록과

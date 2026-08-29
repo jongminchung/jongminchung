@@ -156,6 +156,16 @@ pnpm install
 
 ## 게시와 릴리스
 
+공용 shadcn primitive는 `packages/ui/components.json`을 canonical 설정으로 사용하며 다음 순서로
+검토한다. `apps/web/components.json`은 consumer alias 확인용이며 공용 primitive 생성·갱신에는
+사용하지 않는다.
+
+```sh
+pnpm --filter @jongminchung/ui exec shadcn add <component> --dry-run
+pnpm --filter @jongminchung/ui exec shadcn add <component> --diff
+pnpm --filter @jongminchung/ui exec shadcn add <component>
+```
+
 공개 패키지는 제출 전에 pack 결과를 확인한다.
 
 - `packages/*/src`의 공개 API는 named export만 사용한다.

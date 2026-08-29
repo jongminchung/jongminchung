@@ -1,5 +1,4 @@
 import { Badge } from "@jongminchung/ui/components/badge";
-import { cn } from "@jongminchung/ui/lib/utils";
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import {
   DocsBody,
@@ -16,19 +15,16 @@ import {
   type DocumentKind,
   type Locale,
 } from "#lib/content-model";
-import {
-  findBlogPost,
-  findDocsPage,
-  getDocsPages,
-  loadDocsPage,
-} from "#lib/documents";
+import { getDocsPages } from "#lib/documents";
 import { docsSource } from "#lib/fumadocs-source";
+import { docsProseClassName } from "#lib/mdx-styles";
 import { createDocsArticleStructuredData } from "#lib/structured-data";
+import { getTechMessages } from "#lib/tech/copy";
+import { getDocsCategory } from "#lib/tech/docs";
 import {
-  docsCategoryIds,
-  getDocsCategory,
-  isDocsCategoryId,
-} from "#lib/tech/docs";
+  loadResolvedTechDocsPage,
+  resolveTechDocsPage,
+} from "#lib/tech/docs-page";
 import { documentKindLabel } from "#lib/tech/document-kind";
 import { techPageMetadata } from "#lib/tech/metadata";
 import { publicPageTreeForArea } from "#lib/tech/publication";
@@ -46,28 +42,9 @@ const kindLabel: Readonly<Record<DocumentKind, string>> = {
   explanation: "Explanation",
 };
 
-function otherLocale(locale: Locale): Locale {
-  return locale === "ko" ? "en" : "ko";
-}
-
 function editHref(locale: Locale, slugs: readonly string[]): string {
   const path = slugs.length === 0 ? "index" : slugs.join("/");
   return `https://github.com/jongminchung/jongminchung/edit/main/apps/web/content/tech/docs/${locale}/${path}.mdx`;
-}
-
-function legacyDocsDestination(
-  locale: Locale,
-  slugs: readonly string[],
-): string | null {
-  const [area, ...rest] = slugs;
-  if (area === "architecture")
-    return `/${locale}/docs/be${rest.length === 0 ? "" : `/${rest.join("/")}`}`;
-  if (area === "tooling")
-    return `/${locale}/docs/fe${rest.length === 0 ? "" : `/${rest.join("/")}`}`;
-  if (area === "practices" && rest.length === 0) return `/${locale}/docs/be`;
-  if (area === "practices" && rest.length === 1 && rest[0] === "collaboration")
-    return `/${locale}/docs/be/collaboration`;
-  return null;
 }
 
 /** Docs page tree의 모든 canonical 경로를 정적으로 생성함 */
@@ -89,11 +66,9 @@ export async function generateMetadata({
 }) {
   const { locale, slug = [] } = await params;
   if (!isLocale(locale)) notFound();
-  const page = await findDocsPage(locale, slug);
-  if (page === null) return {};
-  const alternatePage = await findDocsPage(otherLocale(locale), slug);
-  if (alternatePage === null)
-    throw new Error(`Missing localized Docs counterpart for ${page.href}.`);
+  const model = await resolveTechDocsPage(locale, slug);
+  if (model.kind === "not-found" || model.kind === "redirect") return {};
+  const { page, alternatePage } = model;
   return techPageMetadata({
     title: displayTitleFor(page),
     description: page.description,
@@ -101,7 +76,7 @@ export async function generateMetadata({
     canonical: page.href,
     alternatePaths: {
       [locale]: page.href,
-      [otherLocale(locale)]: alternatePage.href,
+      [alternatePage.locale]: alternatePage.href,
     } as Record<Locale, string>,
     imageId: ["docs", ...slug].join("/"),
     article: page,
@@ -119,93 +94,35 @@ export default async function TechDocsPage({
 }) {
   const { locale, slug = [] } = await params;
   if (!isLocale(locale)) notFound();
-  if (
-    ["architecture", "tooling", "practices"].includes(slug[0] ?? "") &&
-    slug.length === 2 &&
-    slug[1] !== undefined
-  ) {
-    const id = slug[1];
-    const [moved, blog] = await Promise.all([
-      getDocsPages().then((pages) =>
-        pages.find((page) => page.locale === locale && page.id === id),
-      ),
-      findBlogPost(locale, id),
-    ]);
-    if (moved !== undefined) permanentRedirect(moved.href);
-    if (blog !== null) permanentRedirect(blog.href);
-  }
-  const legacyDestination = legacyDocsDestination(locale, slug);
-  if (legacyDestination !== null) permanentRedirect(legacyDestination);
-  const document = await loadDocsPage(locale, slug);
-  if (document === null) {
-    const id = slug.at(-1);
-    if (id !== undefined) {
-      const [movedDocs, blog] = await Promise.all([
-        getDocsPages().then((pages) =>
-          pages.find((page) => page.locale === locale && page.id === id),
-        ),
-        findBlogPost(locale, id),
-      ]);
-      if (movedDocs !== undefined) permanentRedirect(movedDocs.href);
-      if (blog !== null) permanentRedirect(blog.href);
-    }
-    notFound();
-  }
-
-  const { Content, metadata } = document;
-  const alternate = otherLocale(locale);
-  if (slug.length === 0) {
-    const documents = (await getDocsPages()).filter(
-      (page) => page.locale === locale && page.area !== undefined,
-    );
+  const model = await resolveTechDocsPage(locale, slug);
+  if (model.kind === "redirect") permanentRedirect(model.destination);
+  if (model.kind === "not-found") notFound();
+  if (model.kind === "landing") {
     return (
       <DocsShell
         active="docs"
-        alternateHref={`/${alternate}/docs`}
+        alternateHref={model.alternatePage.href}
         locale={locale}
       >
-        <DocsLandingPage documents={documents} locale={locale} />
+        <DocsLandingPage documents={model.documents} locale={locale} />
       </DocsShell>
     );
   }
-  const area = slug[0];
-  if (
-    area === undefined ||
-    !isDocsCategoryId(area) ||
-    !docsCategoryIds.includes(area as (typeof docsCategoryIds)[number]) ||
-    metadata.area === undefined ||
-    metadata.documentKind === undefined
-  )
+  const document = await loadResolvedTechDocsPage(model);
+  const { Content, metadata } = document;
+  if (metadata.area === undefined || metadata.documentKind === undefined)
     notFound();
   const category = getDocsCategory(metadata.area, locale);
-  const text =
-    locale === "ko"
-      ? {
-          updated: "업데이트",
-          verified: "검증",
-          source: "근거 자료",
-          edit: "이 페이지 편집",
-        }
-      : {
-          updated: "Updated",
-          verified: "Verified",
-          source: "Source",
-          edit: "Edit this page",
-        };
-  const publicUrls = new Set(
-    (await getDocsPages())
-      .filter((page) => page.locale === locale && page.area === metadata.area)
-      .map((page) => page.href),
-  );
+  const text = getTechMessages(locale).docs;
   const tree = publicPageTreeForArea(
     docsSource.getPageTree(locale),
     metadata.area,
-    publicUrls,
+    model.publicUrls,
   );
   return (
     <DocsShell
       active="docs"
-      alternateHref={`/${alternate}/docs/${slug.join("/")}`}
+      alternateHref={model.alternatePage.href}
       docsCategory={metadata.area}
       locale={locale}
     >
@@ -227,7 +144,7 @@ export default async function TechDocsPage({
             toc={[...document.toc]}
           >
             <nav
-              aria-label={locale === "ko" ? "현재 위치" : "Breadcrumb"}
+              aria-label={text.breadcrumb}
               className="mb-5 flex flex-wrap items-center gap-2 text-sm text-muted-foreground"
             >
               <Link href={`/${locale}/docs`}>Docs</Link>
@@ -265,11 +182,7 @@ export default async function TechDocsPage({
               <Link href={editHref(locale, metadata.slugs)}>{text.edit}</Link>
             </div>
             <DocsBody
-              className={cn(
-                "mt-8 text-base leading-[1.65] tracking-[-.01em] break-words",
-                "[&_code:not(pre_code)]:rounded-[var(--radius-xs)] [&_code:not(pre_code)]:bg-accent/55 [&_code:not(pre_code)]:px-[.3rem] [&_code:not(pre_code)]:font-mono [&_code:not(pre_code)]:text-[.875rem] [&_code:not(pre_code)]:text-primary",
-                "[&_td]:border [&_td]:px-3 [&_td]:py-2.5 [&_th]:border [&_th]:bg-muted [&_th]:px-3 [&_th]:py-2.5",
-              )}
+              className={docsProseClassName}
               data-docs-prose="true"
               lang={locale}
             >

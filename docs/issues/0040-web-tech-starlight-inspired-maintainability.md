@@ -1,6 +1,6 @@
 # Issue 0040: Starlight 전환 없이 Web Tech 유지보수 경계 단순화
 
-- 상태: 진행 중
+- 상태: 완료
 - 우선순위: P2
 - 기준일: 2026-08-20
 - 선행 이슈:
@@ -12,12 +12,12 @@
   [Starlight 전환 영향](0039-web-tech-starlight-migration-assessment.md)
 - 영향 범위:
   [content model](../../apps/web/lib/content-model.ts),
-  [content source](../../apps/web/scripts/content-source.ts),
-  [content validation](../../apps/web/scripts/content-validation.ts),
-  [Tech page route](<../../apps/web/app/(tech)/tech/[locale]/[[...slug]]/page.tsx>),
+  [content repository](../../apps/web/lib/content-repository.ts),
+  [content validation](../../apps/web/lib/content-validation.ts),
+  [Tech Docs page route](<../../apps/web/app/(tech)/tech/[locale]/docs/[[...slug]]/page.tsx>),
   [Docs shell](<../../apps/web/app/(tech)/_components/DocsShell.tsx>),
-  [Tech data provider](<../../apps/web/app/(tech)/_components/TechDataProvider.tsx>),
-  [Tech UI provider](<../../apps/web/app/(tech)/_components/TechUiProvider.tsx>),
+  [Tech search provider](<../../apps/web/app/(tech)/_components/SearchPalette.tsx>),
+  [Fumadocs provider](<../../apps/web/app/(tech)/_components/TechFumadocsProvider.tsx>),
   [Tech copy](../../apps/web/lib/tech/copy.ts)
 - 공식 근거:
   [Astro islands](https://docs.astro.build/en/concepts/islands/),
@@ -29,8 +29,8 @@
 ## 핵심 요약
 
 - **Next.js와 현재 UI를 유지하면서 Astro·Starlight의 content collection·route data·island 원칙만 적용하는 방향임**
-- **문서 파일 경로에서 `locale`·`section`·`id`를 도출해 64개 MDX에 반복된 identity metadata와 경로 일치 검사를 제거함**
-- **route 해석·metadata·navigation·목차·pagination을 immutable `TechPageModel`로 한 번 조립해 page route와 component의 중복 조회를 줄임**
+- **문서 파일 경로에서 `locale`·`id`와 Docs `area`를 도출해 108개 MDX에 반복된 identity metadata를 제거함**
+- **Docs route 해석·metadata·navigation·목차 입력을 immutable `ResolvedTechDocsPage`로 한 번 조립해 page route와 component의 중복 조회를 줄임**
 - **`DocsShell` 전체 client boundary와 전역 Query·Zustand provider를 search·sheet·outline·Excalidraw 같은 실제 상호작용 island로 축소함**
 - **컴포넌트 안의 한영 삼항 분기를 typed message catalog로 이동해 locale 추가와 문구 변경의 탐색 범위를 한정함**
 - **Astro·Starlight·Pagefind dependency, 별도 workspace·배포물과 공개 UI 변경은 이 이슈에 포함하지 않음**
@@ -56,21 +56,22 @@
 
 ## 파일 경로를 문서 identity의 단일 기준으로 만듦
 
-- **`content/tech/<locale>/<section>/<slug>.mdx` 경로에서 identity를 도출함**
-  - `en/handbook/ddd.mdx`는 `locale: en`, `section: handbook`, `id: handbook/ddd`로 정규화함
-  - `ko/deep-dive/nextjs-16.mdx`는 `locale: ko`, `section: deep-dive`, `id: deep-dive/nextjs-16`으로 정규화함
-  - `ko/overview.mdx`와 `en/overview.mdx`는 `section: overview`, `id: overview`인 명시적 special case로 처리함
+- **Blog와 Docs collection의 상대 경로에서 identity를 도출함**
+  - `blog/en/building-llm.mdx`는 `locale: en`, `id: building-llm`로 정규화함
+  - `docs/ko/fe/nextjs-16.mdx`는 `locale: ko`, `area: fe`, `id: nextjs-16`으로 정규화함
+  - Docs root와 area `index.mdx`는 각각 `docs-overview`, `<area>-overview`로 정규화함
+  - 파일명과 다른 landing ID가 필요한 문서만 `overview: true`라는 편집 의미를 명시함
 - **작성자가 입력하는 frontmatter와 runtime metadata type을 분리함**
   - `DocFrontmatter`는 title·description·order·date·tags·status·publication·source 같은 편집 대상만 소유함
   - `DocMetadata`는 `DocFrontmatter`에 경로에서 도출한 `locale`·`section`·`id`를 더한 정규화 결과로 정의함
   - `parseTechContentPath(relativePath)`가 허용되지 않은 locale·section·깊이·확장자를 하나의 오류 경계에서 거부함
-- **64개 Tech MDX에서 중복 identity field를 제거함**
+- **108개 Tech MDX에서 중복 identity field를 제거함**
 
   ```yaml
   # 제거 대상
-  id: deep-dive/nextjs-16
+  id: nextjs-16
   locale: en
-  section: deep-dive
+  area: fe
 
   # 유지 대상
   title: Next.js 16 Deep Dive
@@ -80,47 +81,39 @@
 
 - **collection 수준 계약은 약화하지 않음**
   - locale pair와 번역 간 order·status·tags·package metadata 일치를 계속 검증함
-  - public URL이 article slug만 사용하므로 서로 다른 section의 같은 slug 충돌을 계속 거부함
-  - section별 연속 order·broken internal link·published TODO 검증을 계속 유지함
+  - public URL이 article slug만 사용하므로 서로 다른 collection의 같은 slug 충돌을 계속 거부함
+  - Docs area inventory·broken internal link·published TODO 검증을 계속 유지함
   - `0036`이 정의하는 source collection과 published public collection 분리를 먼저 반영함
 
 ## 하나의 Tech page model이 route와 UI를 연결함
 
-- **route별 렌더링 입력을 `TechPageModel` discriminated union으로 조립함**
+- **Docs route별 렌더링 입력을 `ResolvedTechDocsPage` discriminated union으로 조립함**
 
   ```ts
-  type TechPageModel =
+  type ResolvedTechDocsPage =
+    | Readonly<{ kind: "not-found" }>
+    | Readonly<{ kind: "redirect"; destination: string }>
     | Readonly<{
-        kind: "document";
+        kind: "landing" | "article";
         locale: Locale;
-        page: LoadedDocument;
-        current: CurrentDocumentNavigationEntry;
-        navigation: readonly NavigationEntry[];
-        metadata: Metadata;
-      }>
-    | Readonly<{
-        kind: "section";
-        locale: Locale;
-        page: SectionPage;
-        current: CurrentSectionNavigationEntry;
-        navigation: readonly NavigationEntry[];
-        metadata: Metadata;
+        page: DocsPageManifestEntry;
+        alternatePage: DocsPageManifestEntry;
       }>;
   ```
 
-- **`resolveTechPage(locale, slug)`가 route 해석과 조회 순서를 한 번 소유함**
-  - locale·slug를 public route identity로 변환함
-  - published document 또는 section landing을 찾음
-  - current navigation·localized navigation·alternate URL·OG metadata를 같은 source에서 계산함
-  - 존재하지 않는 route는 `null`로 반환하고 Next route가 `notFound()`를 결정함
+- **`resolveTechDocsPage(locale, slugs)`가 route 해석과 조회 순서를 한 번 소유함**
+  - locale·slugs를 public route identity로 변환함
+  - published document 또는 Docs root landing을 찾음
+  - redirect·alternate URL·page tree 공개 URL·related 입력을 같은 source에서 계산함
+  - 존재하지 않는 route는 `not-found` model로 반환하고 Next route가 `notFound()`를 결정함
 - **`generateMetadata`와 page render가 같은 cached resolver를 사용함**
-  - `idFromRoute`, `documentMetadata`, `sectionMetadata`와 navigation 변환 함수를 route file 밖의 순수 module로 이동함
-  - 같은 요청에서 content snapshot·section page·document를 반복 조회하지 않도록 React `cache()` 또는 repository의 immutable snapshot을 사용함
+  - redirect와 collection 해석을 route file 밖의 순수 module로 이동함
+  - 같은 요청에서 content snapshot·page를 반복 조회하지 않도록 React `cache()`와 repository의 immutable snapshot을 사용함
   - process 전역의 mutable request state나 service container를 추가하지 않음
 - **UI component는 이미 결정된 page model을 렌더링함**
-  - `DocsShell`은 current·navigation과 server-rendered content를 받음
-  - `DocumentPage`는 document·related·pagination을 다시 조회하지 않음
-  - section landing과 document page가 동일한 navigation·metadata source를 사용함
+  - `DocsShell`은 resolver가 결정한 alternate URL과 server-rendered content를 받음
+  - article 본문 loader는 resolver가 결정한 metadata·related 입력을 다시 조회하지 않음
+  - root landing과 article page가 동일한 localized collection source를 사용함
 
 ## 상호작용만 작은 client island로 남김
 
@@ -162,13 +155,32 @@
   - locale switch의 target locale과 href 계산은 content model helper가 계속 소유함
   - translation runtime·외부 i18n dependency와 fallback language 기능은 추가하지 않음
 
+## 현재 확인된 interaction 후속 항목을 구체화함
+
+- **localized route에 남은 고정 영어 accessible name을 typed message catalog로 이동함**
+  - `EditorialHeader`의 `Editorial navigation`과 `EditorialIndex`의 `Editorial controls`가 locale과 관계없이 영어로 노출됨
+  - `FootnoteReference`의 preview region도 `Footnote preview`를 고정값으로 사용함
+  - product name·protocol name을 제외한 navigation·control·region label은 현재 document language와 일치해야 함
+- **검색 단축키 표기가 실제 platform input과 일치하도록 정리함**
+  - `SearchTrigger`가 모든 환경에서 `⌘K`를 표시함
+  - macOS는 `⌘K`, Windows·Linux는 `Ctrl K`를 표시하되 server markup과 hydration mismatch를 만들지 않는 경계를 정해야 함
+  - 화면에 표시하는 단축키와 Fumadocs provider가 실제 처리하는 key combination을 같은 browser test에서 검증해야 함
+- **맨 위 이동을 native navigation과 focus context로 완결함**
+  - 완료 이슈 [`0042`](archive/2026/0042-web-editorial-progressive-navigation.md)는 기존 button이 reduced motion을 존중하도록 보강함
+  - 후속 단계에서는 `#top` anchor와 focus 가능한 target을 사용해 JavaScript 없이도 이동할 수 있어야 함
+  - keyboard와 screen reader 사용자가 이동 뒤 문서 시작 위치를 인지할 수 있도록 focus·route announcement 영향을 검증해야 함
+- **기본 동작을 유지하는 control에는 client state를 추가하지 않음**
+  - mobile 목차의 native `details`와 locale switch anchor는 JavaScript가 없어도 핵심 탐색을 수행함
+  - disclosure 자동 닫기나 locale preference 저장 편의 기능은 hydration 비용과 focus 회귀가 없는 경우에만 추가함
+  - storage 접근 실패는 locale 목적지 탐색과 분리된 best-effort persistence로 유지해야 함
+
 ## 적용하지 않을 내용과 이슈 경계를 지킴
 
 - **`astro`, `@astrojs/starlight`, Pagefind와 Astro adapter를 dependency에 추가하지 않음**
   - 설계 원칙만 가져오며 Next build·standalone·Host routing 계약을 유지함
 - **Starlight의 component 이름과 directory 구조를 그대로 복제하지 않음**
   - `Astro.locals`나 route middleware를 흉내 낸 global context를 만들지 않음
-  - 현재 제품 언어에 맞는 `TechPageModel`, content source와 client control 이름을 사용함
+  - 현재 제품 언어에 맞는 `ResolvedTechDocsPage`, content source와 client control 이름을 사용함
 - **consumer 없는 generated manifest와 static artifact를 다시 도입하지 않음**
   - runtime content repository와 published collection이 실제 consumer를 계속 제공함
   - 검색 artifact 변경은 benchmark와 runtime consumer를 가진 `0032`에서만 결정함
@@ -187,14 +199,14 @@
   - `0032`의 search runtime·benchmark 경계와 `0034`의 URL·feed helper를 완료함
   - `0035`의 작은 fixture를 route data와 navigation 회귀 검증에 재사용함
 - **구현은 독립적으로 검증 가능한 네 단계로 나눔**
-  - 1단계에서 path identity parser와 `DocFrontmatter`를 도입하고 64개 MDX의 중복 field를 제거함
-  - 2단계에서 `TechPageModel` resolver를 추가하고 metadata·page render의 중복 조회를 통합함
+  - 1단계에서 path identity parser와 frontmatter schema를 도입하고 108개 MDX의 중복 field를 제거함
+  - 2단계에서 `ResolvedTechDocsPage` resolver를 추가하고 metadata·page render의 중복 조회를 통합함
   - 3단계에서 typed message catalog를 도입하고 component locale 분기를 제거함
   - 4단계에서 Docs shell·search·query·code copy·outline client boundary를 축소함
 - **완료 조건은 코드 이동이 아니라 중복 owner 제거로 판단함**
-  - `id`·`locale`·`section`을 Tech frontmatter에 직접 작성하지 않음
+  - `id`·`locale`과 Docs `area`를 Tech frontmatter에 직접 작성하지 않음
   - path identity와 normalized metadata의 정상·실패 fixture가 존재함
-  - metadata와 page render가 같은 `TechPageModel` resolver를 사용함
+  - metadata와 page render가 같은 `ResolvedTechDocsPage` resolver를 사용함
   - Tech root에 전역 Query provider가 없고 query consumer가 local owner를 가짐
   - search open state만을 위한 Zustand store와 provider가 남지 않음
   - code block마다 별도 React copy state를 만들지 않음

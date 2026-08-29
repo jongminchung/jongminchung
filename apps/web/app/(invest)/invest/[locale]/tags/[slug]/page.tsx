@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { NoteCollection } from "#invest-components/InvestmentShell";
+import { NoteCollection } from "#invest-components/InvestmentCollection";
+import { investmentTagDescription } from "#lib/invest/copy";
 import { getInvestmentNotes, getNotesByTag } from "#lib/invest/notes";
 import { createInvestmentTagHref } from "#lib/invest/routing";
 import { createInvestmentCollectionMetadata } from "#lib/invest/seo";
+import { alternateLocale } from "#lib/locale";
 import { isLocale, locales } from "#lib/site-routing";
 
 /** 정적 생성에 사용할 경로 매개변수를 반환함 */
@@ -26,12 +28,6 @@ export async function generateStaticParams() {
     : locales.map((locale) => ({ locale, slug: "__empty__" }));
 }
 
-function description(locale: "ko" | "en", tag: string): string {
-  return locale === "ko"
-    ? `${tag} 주제를 공시와 공개 자료를 바탕으로 분석한 투자 리서치 글 모음`
-    : `Investment research essays about ${tag}, grounded in filings and public materials.`;
-}
-
 /** tag collection의 메타데이터를 생성함 */
 export async function generateMetadata({
   params,
@@ -40,12 +36,12 @@ export async function generateMetadata({
   if (!isLocale(locale)) notFound();
   const notes = await getNotesByTag(locale, slug);
   if (notes.length === 0) notFound();
-  const otherLocale = locale === "ko" ? "en" : "ko";
+  const otherLocale = alternateLocale(locale);
   const alternateNotes = await getNotesByTag(otherLocale, slug);
   return createInvestmentCollectionMetadata({
     locale,
     title: `#${slug}`,
-    description: description(locale, slug),
+    description: investmentTagDescription(locale, slug),
     pathname: createInvestmentTagHref(locale, slug),
     alternatePathname:
       alternateNotes.length < 2
@@ -67,7 +63,7 @@ export default async function TagPage({
       <NoteCollection
         locale={locale}
         notes={notes}
-        description={description(locale, slug)}
+        description={investmentTagDescription(locale, slug)}
         pathname={createInvestmentTagHref(locale, slug)}
         title={`#${slug}`}
       />

@@ -1,6 +1,7 @@
-import { EditorialCard } from "#components/Editorial";
+import { EditorialCard } from "#components/EditorialCard";
 import type { ContentManifestEntry, Locale } from "#lib/content-model";
 import { toTechEditorialItem } from "#lib/editorial-adapters";
+import { getTechMessages } from "#lib/tech/copy";
 
 /** `RelatedDocuments` UI 컴포넌트를 렌더링함 */
 export function RelatedDocuments({
@@ -11,7 +12,7 @@ export function RelatedDocuments({
   readonly locale: Locale;
 }): React.JSX.Element | null {
   if (documents.length === 0) return null;
-  const title = locale === "ko" ? "관련 글" : "Related articles";
+  const title = getTechMessages(locale).article.related;
   return (
     <section
       aria-labelledby="related-documentation"

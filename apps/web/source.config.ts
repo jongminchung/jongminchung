@@ -6,7 +6,9 @@ import {
 } from "fumadocs-mdx/config";
 import type { RefinementCtx } from "zod";
 import {
+  blogPostFrontmatterSchema,
   blogPostMetadataSchema,
+  docsPageFrontmatterSchema,
   docsPageMetadataSchema,
   type BlogPostMetadata,
   type DocsPageMetadata,
@@ -22,6 +24,10 @@ import {
   type InvestmentNoteMetadata,
 } from "./lib/invest/content.ts";
 import { remarkKrokiUrl } from "./lib/remark-kroki-url.ts";
+import {
+  parseBlogContentPath,
+  parseDocsContentPath,
+} from "./lib/tech/content-path.ts";
 
 function collectionPath(path: string, collectionRoot: string): string {
   const normalized = path.replaceAll("\\", "/");
@@ -40,25 +46,37 @@ function addValidationIssue(context: RefinementCtx, validate: () => void) {
 }
 
 function blogSchema({ path, source }: { path: string; source: string }) {
-  return blogPostMetadataSchema.superRefine((metadata, context) => {
-    const entry: ContentEntry<BlogPostMetadata> = {
-      metadata,
-      body: source,
-      relativePath: collectionPath(path, "tech/blog"),
-    };
-    addValidationIssue(context, () => validateBlogPostEntry(entry));
-  });
+  const relativePath = collectionPath(path, "tech/blog");
+  const identity = parseBlogContentPath(relativePath);
+  return blogPostFrontmatterSchema
+    .transform((frontmatter) => ({ ...frontmatter, ...identity }))
+    .pipe(blogPostMetadataSchema)
+    .superRefine((metadata, context) => {
+      const entry: ContentEntry<BlogPostMetadata> = {
+        metadata,
+        body: source,
+        relativePath,
+      };
+      addValidationIssue(context, () => validateBlogPostEntry(entry));
+    });
 }
 
 function docsSchema({ path, source }: { path: string; source: string }) {
-  return docsPageMetadataSchema.superRefine((metadata, context) => {
-    const entry: ContentEntry<DocsPageMetadata> = {
-      metadata,
-      body: source,
-      relativePath: collectionPath(path, "tech/docs"),
-    };
-    addValidationIssue(context, () => validateDocsPageEntry(entry));
-  });
+  const relativePath = collectionPath(path, "tech/docs");
+  return docsPageFrontmatterSchema
+    .transform(({ overview, ...frontmatter }) => ({
+      ...frontmatter,
+      ...parseDocsContentPath(relativePath, overview),
+    }))
+    .pipe(docsPageMetadataSchema)
+    .superRefine((metadata, context) => {
+      const entry: ContentEntry<DocsPageMetadata> = {
+        metadata,
+        body: source,
+        relativePath,
+      };
+      addValidationIssue(context, () => validateDocsPageEntry(entry));
+    });
 }
 
 function investmentSchema({ path, source }: { path: string; source: string }) {

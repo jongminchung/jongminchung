@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { expectNoHorizontalOverflow } from "../../e2e-assertions";
 
 const cases = [
   { name: "readme-wide-light", width: 1440, height: 1000, theme: "light" },
@@ -16,8 +17,10 @@ for (const visualCase of cases) {
       visualCase.theme,
     );
     await page.goto("/");
-    await expect(page).toHaveScreenshot(`${visualCase.name}.png`, {
-      fullPage: true,
-    });
+    await expect(page.getByRole("main")).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await page.evaluate(() => document.fonts.ready);
+    await expect(page).toHaveScreenshot(`${visualCase.name}.png`);
   });
 }

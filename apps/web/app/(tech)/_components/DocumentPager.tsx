@@ -2,6 +2,7 @@ import { cn } from "@jongminchung/ui/lib/utils";
 import Link from "next/link";
 import { displayTitleFor, type Locale } from "#lib/content-model";
 import type { LoadedDocument } from "#lib/documents";
+import { getTechMessages } from "#lib/tech/copy";
 
 function PageLink({
   direction,
@@ -13,6 +14,7 @@ function PageLink({
   readonly locale: Locale;
 }) {
   const isPrevious = direction === "previous";
+  const text = getTechMessages(locale).article;
   return (
     <Link
       className={cn(
@@ -29,13 +31,7 @@ function PageLink({
         )}
       >
         <small className="text-[10px] font-medium text-primary uppercase">
-          {locale === "ko"
-            ? isPrevious
-              ? "이전"
-              : "다음"
-            : isPrevious
-              ? "Previous"
-              : "Next"}
+          {isPrevious ? text.previous : text.next}
         </small>
         {displayTitleFor(document)}
       </span>
@@ -53,12 +49,11 @@ export function DocumentPager({
   readonly previous: LoadedDocument["previous"];
   readonly next: LoadedDocument["next"];
 }) {
+  const text = getTechMessages(locale).article;
   return (
     <nav
       className="mt-[72px] grid grid-cols-2 gap-3 border-t border-border pt-6 max-[600px]:grid-cols-1 [&>*]:min-h-[68px]"
-      aria-label={
-        locale === "ko" ? "이전 및 다음 문서" : "Previous and next documents"
-      }
+      aria-label={text.pagination}
     >
       {previous === null ? (
         <span />

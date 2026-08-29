@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { InvestmentNotePage } from "#invest-components/InvestmentShell";
+import { InvestmentNotePage } from "#invest-components/InvestmentNotePage";
 import {
   findInvestmentNote,
   getInvestmentNotes,
   loadInvestmentNote,
 } from "#lib/invest/notes";
+import { alternateLocale, getLocaleProtocol } from "#lib/locale";
 import { isLocale, locales } from "#lib/site-routing";
 import { editorialMdxComponents } from "#mdx-components";
 
@@ -28,6 +29,7 @@ export async function generateMetadata({
   if (!isLocale(locale)) notFound();
   const metadata = await findInvestmentNote(locale, slug);
   if (metadata === null) notFound();
+  const protocol = getLocaleProtocol(locale);
   return {
     title: metadata.title,
     description: metadata.description,
@@ -45,8 +47,8 @@ export async function generateMetadata({
       title: metadata.title,
       description: metadata.description,
       url: metadata.href,
-      locale: locale === "ko" ? "ko_KR" : "en_US",
-      alternateLocale: [locale === "ko" ? "en_US" : "ko_KR"],
+      locale: protocol.openGraph,
+      alternateLocale: [getLocaleProtocol(alternateLocale(locale)).openGraph],
       publishedTime: metadata.publishedAt,
       modifiedTime: metadata.updatedAt,
       authors: ["https://www.jamie.kr"],

@@ -1,4 +1,5 @@
 import { getInvestmentNotes } from "#lib/invest/notes";
+import { getLocaleProtocol } from "#lib/locale";
 import { isLocale } from "#lib/site-routing";
 
 function escapeXml(value: string): string {
@@ -28,7 +29,7 @@ export async function GET(
         `<item><title>${escapeXml(note.title)}</title><link>https://invest.jamie.kr${note.href}</link><guid isPermaLink="true">https://invest.jamie.kr${note.href}</guid><description>${escapeXml(note.description)}</description><pubDate>${new Date(`${note.publishedAt}T00:00:00Z`).toUTCString()}</pubDate></item>`,
     )
     .join("");
-  const body = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Investment Notes</title><link>https://invest.jamie.kr/${locale}</link><description>Source-grounded investment research notes</description><language>${locale === "ko" ? "ko-KR" : "en-US"}</language>${items}</channel></rss>`;
+  const body = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Investment Notes</title><link>https://invest.jamie.kr/${locale}</link><description>Source-grounded investment research notes</description><language>${getLocaleProtocol(locale).rss}</language>${items}</channel></rss>`;
   return new Response(body, {
     headers: {
       "Content-Type": "application/rss+xml; charset=utf-8",

@@ -1,23 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { NoteCollection } from "#invest-components/InvestmentShell";
+import { NoteCollection } from "#invest-components/InvestmentCollection";
+import { getInvestmentMessages } from "#lib/invest/copy";
 import { getInvestmentNotes } from "#lib/invest/notes";
 import { createInvestmentCollectionMetadata } from "#lib/invest/seo";
+import { alternateLocale } from "#lib/locale";
 import { isLocale, locales } from "#lib/site-routing";
-
-function copy(locale: "ko" | "en") {
-  return locale === "ko"
-    ? {
-        title: "모든 투자 리서치 노트",
-        description:
-          "책, 공시, 공개 자료를 바탕으로 작성한 투자 리서치 글 전체 모음",
-      }
-    : {
-        title: "All investment research notes",
-        description:
-          "All investment research essays grounded in books, filings, and public materials.",
-      };
-}
 
 /** 정적 생성에 사용할 경로 매개변수를 반환함 */
 export function generateStaticParams() {
@@ -32,9 +20,9 @@ export async function generateMetadata({
   if (!isLocale(locale)) notFound();
   return createInvestmentCollectionMetadata({
     locale,
-    ...copy(locale),
+    ...getInvestmentMessages(locale).allNotes,
     pathname: `/${locale}/notes`,
-    alternatePathname: `/${locale === "ko" ? "en" : "ko"}/notes`,
+    alternatePathname: `/${alternateLocale(locale)}/notes`,
   });
 }
 
@@ -46,7 +34,7 @@ export default async function NotesIndex({
   const { locale } = await params;
   const query = await searchParams;
   if (!isLocale(locale)) notFound();
-  const text = copy(locale);
+  const text = getInvestmentMessages(locale).allNotes;
   return (
     <main>
       <NoteCollection

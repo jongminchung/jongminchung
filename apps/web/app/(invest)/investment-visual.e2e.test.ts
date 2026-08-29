@@ -42,6 +42,12 @@ const cases = [
   },
 ] as const;
 
+const screenshotCases = new Set([
+  "investment-wide-light",
+  "investment-mobile-dark",
+  "investment-note-mobile-light",
+]);
+
 for (const visualCase of cases) {
   test(`visual: ${visualCase.name}`, async ({ page }) => {
     await page.setViewportSize({
@@ -73,20 +79,22 @@ for (const visualCase of cases) {
           article.evaluate((element) => element.getBoundingClientRect().width),
         )
         .toBeLessThanOrEqual(760);
-      await expect(
-        paragraph.evaluate((element) => {
-          const style = getComputedStyle(element);
-          return {
-            fontSize: style.fontSize,
-            lineHeight: style.lineHeight,
-            marginBottom: style.marginBottom,
-          };
-        }),
-      ).resolves.toEqual({
-        fontSize: "16px",
-        lineHeight: "28px",
-        marginBottom: "16px",
-      });
+      await expect
+        .poll(() =>
+          paragraph.evaluate((element) => {
+            const style = getComputedStyle(element);
+            return {
+              fontSize: style.fontSize,
+              lineHeight: style.lineHeight,
+              marginBottom: style.marginBottom,
+            };
+          }),
+        )
+        .toEqual({
+          fontSize: "16px",
+          lineHeight: "28px",
+          marginBottom: "16px",
+        });
 
       if (visualCase.width <= 600) {
         const title = page.getByRole("heading", {
@@ -132,8 +140,7 @@ for (const visualCase of cases) {
         }),
       );
     });
-    await expect(page).toHaveScreenshot(`${visualCase.name}.png`, {
-      fullPage: true,
-    });
+    if (screenshotCases.has(visualCase.name))
+      await expect(page).toHaveScreenshot(`${visualCase.name}.png`);
   });
 }

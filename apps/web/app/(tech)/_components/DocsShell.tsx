@@ -1,9 +1,10 @@
 import { TooltipProvider } from "@jongminchung/ui/components/tooltip";
 import type { ReactNode } from "react";
-import { EditorialFooter, EditorialHeader } from "#components/Editorial";
+import { EditorialFooter, EditorialHeader } from "#components/EditorialChrome";
 import { ThemeControl } from "#components/ThemeControl";
 import type { Locale } from "#lib/content-model";
 import { createSeriesHref } from "#lib/content-model";
+import { getTechMessages } from "#lib/tech/copy";
 import {
   createDocsHref,
   docsCategoryIds,
@@ -27,15 +28,7 @@ export function DocsShell({
   readonly docsCategory?: DocsCategoryId;
   readonly children: ReactNode;
 }) {
-  const labels =
-    locale === "ko"
-      ? {
-          blog: "Blog",
-          series: "Series",
-          showcase: "Showcase",
-          docs: "Docs",
-        }
-      : { blog: "Blog", series: "Series", showcase: "Showcase", docs: "Docs" };
+  const labels = getTechMessages(locale).shell;
   return (
     <SearchProvider locale={locale}>
       <TooltipProvider>
@@ -54,6 +47,7 @@ export function DocsShell({
               </>
             }
             brandLabel="jongminchung tech"
+            navigationLabel={labels.navigation}
             homeHref={`/${locale}`}
             localeControl={
               <LocaleSwitcher
@@ -64,7 +58,7 @@ export function DocsShell({
               />
             }
             localeHref={alternateHref}
-            localeLabel={locale === "ko" ? "EN" : "KO"}
+            localeLabel={labels.alternateLocaleShort}
             navigation={[
               {
                 href: `/${locale}`,
@@ -85,12 +79,11 @@ export function DocsShell({
                 href: createDocsHref(locale),
                 label: labels.docs,
                 isActive: active === "docs",
-                menuLabel:
-                  locale === "ko" ? "문서 분야 선택" : "Choose a docs area",
+                menuLabel: labels.chooseDocsArea,
                 options: [
                   {
                     href: createDocsHref(locale),
-                    label: locale === "ko" ? "모든 문서" : "All Docs",
+                    label: labels.allDocs,
                     isActive: active === "docs" && docsCategory === undefined,
                   },
                   ...docsCategoryIds.map((id) => {
@@ -109,14 +102,14 @@ export function DocsShell({
           <EditorialFooter
             groups={[
               {
-                label: locale === "ko" ? "탐색" : "Explore",
+                label: labels.explore,
                 links: [
                   { href: `/${locale}`, label: labels.blog },
                   { href: `/${locale}/docs`, label: labels.docs },
                 ],
               },
               {
-                label: locale === "ko" ? "모음" : "Collections",
+                label: labels.collections,
                 links: [
                   {
                     href: createSeriesHref(locale),
@@ -129,11 +122,11 @@ export function DocsShell({
                 links: [{ href: `/${locale}/rss.xml`, label: "RSS" }],
               },
               {
-                label: locale === "ko" ? "언어" : "Language",
+                label: labels.language,
                 links: [
                   {
                     href: alternateHref,
-                    label: locale === "ko" ? "English" : "한국어",
+                    label: labels.alternateLanguage,
                   },
                 ],
               },

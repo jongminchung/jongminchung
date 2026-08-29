@@ -6,7 +6,10 @@ import {
   PreviewCardTrigger,
 } from "@jongminchung/ui/components/preview-card";
 import { type ComponentProps, useRef, useState } from "react";
-import { createFootnotePreviewHtml } from "#lib/footnote-preview";
+import {
+  createFootnotePreviewHtml,
+  footnotePreviewLabel,
+} from "#lib/footnote-preview";
 
 /** 각주 이동을 유지하면서 데스크톱 미리보기를 제공함 */
 export function FootnoteReference({
@@ -17,13 +20,20 @@ export function FootnoteReference({
   onMouseEnter,
   ...props
 }: ComponentProps<"a">) {
-  const [previewHtml, setPreviewHtml] = useState<string | null>(null);
+  const [preview, setPreview] = useState<{
+    readonly html: string;
+    readonly label: string;
+  } | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
 
   const loadPreview = () => {
-    if (previewHtml !== null) return;
+    if (preview !== null) return;
     const html = createFootnotePreviewHtml(href);
-    if (html !== null) setPreviewHtml(html);
+    if (html !== null)
+      setPreview({
+        html,
+        label: footnotePreviewLabel(document.documentElement.lang),
+      });
   };
 
   return (
@@ -55,16 +65,14 @@ export function FootnoteReference({
       >
         {children}
       </PreviewCardTrigger>
-      {previewHtml === null ? null : (
-        <PreviewCardContent
-          ref={previewRef}
-          aria-label="Footnote preview"
-          className="[&_a]:font-medium [&_a]:text-inherit [&_a]:underline [&_a]:decoration-background/55 [&_a]:underline-offset-2 [&_code]:rounded-sm [&_code]:bg-background/15 [&_code]:px-1 [&_p]:m-0"
-          data-footnote-preview="true"
-          dangerouslySetInnerHTML={{ __html: previewHtml }}
-          role="region"
-        />
-      )}
+      <PreviewCardContent
+        ref={previewRef}
+        aria-label={preview?.label}
+        className="[&_a]:font-medium [&_a]:text-inherit [&_a]:underline [&_a]:decoration-background/55 [&_a]:underline-offset-2 [&_code]:rounded-sm [&_code]:bg-background/15 [&_code]:px-1 [&_p]:m-0"
+        data-footnote-preview="true"
+        dangerouslySetInnerHTML={{ __html: preview?.html ?? "" }}
+        role="region"
+      />
     </PreviewCard>
   );
 }

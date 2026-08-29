@@ -1,21 +1,19 @@
-"use client";
-
-import { Button } from "@jongminchung/ui/components/button";
-import { useTranslations } from "next-intl";
+import { buttonVariants } from "@jongminchung/ui/components/button";
 import { Icon } from "#components/Icon";
 
-/** `BackToTopButton` UI 컴포넌트를 렌더링함 */
-export function BackToTopButton() {
-  const t = useTranslations("tech.outline");
+/** JavaScript 없이 페이지 시작 위치로 이동하는 링크를 렌더링함 */
+export function BackToTopButton({ label }: { readonly label: string }) {
   return (
-    <Button
-      className="h-8 px-3 text-xs"
-      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-      size="sm"
-      variant="ghost"
+    <a
+      className={buttonVariants({
+        className: "h-8 px-3 text-xs",
+        size: "sm",
+        variant: "ghost",
+      })}
+      href="#top"
     >
       <Icon icon="arrowUp" />
-      {t("backToTop")}
-    </Button>
+      {label}
+    </a>
   );
 }

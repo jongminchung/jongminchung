@@ -14,6 +14,23 @@ export interface EditorialItem {
   }>;
 }
 
+/** 두 editorial 목록이 공유하는 locale copy 계약임 */
+export interface EditorialCopy {
+  readonly eyebrow: string;
+  readonly title: string;
+  readonly description: string;
+  readonly all: string;
+  readonly newest: string;
+  readonly oldest: string;
+  readonly grid: string;
+  readonly list: string;
+  readonly loadMore: string;
+  readonly end?: string;
+  readonly empty: string;
+  readonly related: string;
+  readonly controls: string;
+}
+
 export type EditorialSort = "newest" | "oldest";
 export type EditorialView = "grid" | "list";
 

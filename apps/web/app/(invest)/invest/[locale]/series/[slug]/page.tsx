@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
-import { NoteCollection } from "#invest-components/InvestmentShell";
+import { NoteCollection } from "#invest-components/InvestmentCollection";
+import { investmentSeriesDescription } from "#lib/invest/copy";
 import { getInvestmentNotes, getNotesBySeriesSlug } from "#lib/invest/notes";
 import {
   createInvestmentSeriesHref,
   investmentSeriesSlug,
 } from "#lib/invest/routing";
 import { createInvestmentCollectionMetadata } from "#lib/invest/seo";
+import { alternateLocale } from "#lib/locale";
 import { isLocale, locales } from "#lib/site-routing";
 
 /** 정적 생성에 사용할 경로 매개변수를 반환함 */
@@ -31,12 +33,6 @@ export async function generateStaticParams() {
     : locales.map((locale) => ({ locale, slug: "__empty__" }));
 }
 
-function description(locale: "ko" | "en", series: string): string {
-  return locale === "ko"
-    ? `${series} 주제를 순서대로 연결한 투자 리서치 글 모음`
-    : `An ordered collection of investment research essays in the ${series} series.`;
-}
-
 /** series collection의 메타데이터를 생성함 */
 export async function generateMetadata({
   params,
@@ -49,12 +45,12 @@ export async function generateMetadata({
   const notes = await getNotesBySeriesSlug(locale, slug);
   const series = notes[0]?.series;
   if (series === undefined) notFound();
-  const otherLocale = locale === "ko" ? "en" : "ko";
+  const otherLocale = alternateLocale(locale);
   const alternateNotes = await getNotesBySeriesSlug(otherLocale, slug);
   return createInvestmentCollectionMetadata({
     locale,
     title: series,
-    description: description(locale, series),
+    description: investmentSeriesDescription(locale, series),
     pathname: createInvestmentSeriesHref(locale, series),
     alternatePathname:
       alternateNotes.length < 2
@@ -80,7 +76,7 @@ export default async function SeriesPage({
       <NoteCollection
         locale={locale}
         notes={notes}
-        description={description(locale, series)}
+        description={investmentSeriesDescription(locale, series)}
         pathname={createInvestmentSeriesHref(locale, series)}
         title={series}
       />

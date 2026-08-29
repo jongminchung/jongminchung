@@ -1,11 +1,19 @@
 // @vitest-environment happy-dom
 
 import { beforeEach, describe, expect, it } from "vitest";
-import { createFootnotePreviewHtml } from "./footnote-preview";
+import {
+  createFootnotePreviewHtml,
+  footnotePreviewLabel,
+} from "./footnote-preview";
 
 describe("각주 미리보기 마크업", () => {
   beforeEach(() => {
     document.body.innerHTML = "";
+  });
+
+  it("[성공] document locale에 맞는 미리보기 이름을 반환함", () => {
+    expect(footnotePreviewLabel("ko")).toBe("각주 미리보기");
+    expect(footnotePreviewLabel("en")).toBe("Footnote preview");
   });
 
   it("[성공] 설명·강조·코드를 보존하고 복귀 링크와 id를 제거함", () => {

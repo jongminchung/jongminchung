@@ -1,4 +1,4 @@
-import { EditorialIndex, type EditorialCopy } from "#components/Editorial";
+import { EditorialIndex } from "#components/EditorialIndex";
 import {
   documentKinds,
   type ContentManifestEntry,
@@ -6,6 +6,7 @@ import {
 } from "#lib/content-model";
 import {
   parseEditorialQuery,
+  type EditorialCopy,
   type EditorialSearchParams,
 } from "#lib/editorial";
 import { toTechEditorialItem } from "#lib/editorial-adapters";
@@ -22,10 +23,10 @@ const copy: Record<Locale, EditorialCopy> = {
     grid: "그리드",
     list: "목록",
     loadMore: "더 보기",
-    loading: "다음 글을 불러오는 중",
     end: "모든 글을 불러왔습니다",
     empty: "선택한 조건과 일치하는 글이 없습니다",
     related: "관련 글",
+    controls: "글 목록 제어",
   },
   en: {
     eyebrow: "ENGINEERING NOTES",
@@ -38,10 +39,10 @@ const copy: Record<Locale, EditorialCopy> = {
     grid: "Grid",
     list: "List",
     loadMore: "Load more",
-    loading: "Loading more articles",
     end: "All articles loaded",
     empty: "No articles match the selected filters.",
     related: "Related articles",
+    controls: "Article list controls",
   },
 };
 

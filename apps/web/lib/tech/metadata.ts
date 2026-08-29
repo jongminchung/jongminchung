@@ -5,6 +5,8 @@ import {
   type ContentManifestEntry,
   type Locale,
 } from "../content-model.ts";
+import { alternateLocale, getLocaleProtocol } from "../locale.ts";
+import { getTechMessages } from "./copy.ts";
 
 /** Tech 페이지의 canonical·hreflang·공유 메타데이터를 생성함 */
 export function techPageMetadata({
@@ -24,6 +26,7 @@ export function techPageMetadata({
   readonly imageId: string;
   readonly article?: ContentManifestEntry;
 }): Metadata {
+  const protocol = getLocaleProtocol(locale);
   const image =
     article?.contentType === "blog"
       ? {
@@ -50,8 +53,8 @@ export function techPageMetadata({
       type: article === undefined ? "website" : "article",
       title,
       description,
-      locale: locale === "ko" ? "ko_KR" : "en_US",
-      alternateLocale: [locale === "ko" ? "en_US" : "ko_KR"],
+      locale: protocol.openGraph,
+      alternateLocale: [getLocaleProtocol(alternateLocale(locale)).openGraph],
       url: canonical,
       images: [image],
       ...(article === undefined
@@ -74,19 +77,10 @@ export function techPageMetadata({
 
 /** Blog index 메타데이터를 생성함 */
 export function blogIndexMetadata(locale: Locale): Metadata {
-  const copy =
-    locale === "ko"
-      ? {
-          title: "기술 블로그",
-          description: "소프트웨어를 이해하기 쉽게 만드는 방법에 관한 기술 글",
-        }
-      : {
-          title: "Engineering Blog",
-          description:
-            "Technical articles about building understandable software.",
-        };
+  const copy = getTechMessages(locale).metadata;
   return techPageMetadata({
-    ...copy,
+    title: copy.blogTitle,
+    description: copy.blogDescription,
     locale,
     canonical: `/${locale}`,
     alternatePaths: { ko: "/ko", en: "/en" },

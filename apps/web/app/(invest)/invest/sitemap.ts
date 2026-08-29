@@ -7,6 +7,7 @@ import {
   createInvestmentSourceHref,
   createInvestmentTagHref,
 } from "#lib/invest/routing";
+import { alternateLocale } from "#lib/locale";
 import { locales } from "#lib/site-routing";
 
 const origin = "https://invest.jamie.kr";
@@ -31,6 +32,17 @@ function alternates(
     languages["x-default"] = `${origin}${enPath}`;
   }
   return { languages };
+}
+
+function localizedAlternates(
+  locale: Locale,
+  currentPath: string,
+  alternatePath?: string,
+): ReturnType<typeof alternates> {
+  const paths: Partial<Record<Locale, string>> = { [locale]: currentPath };
+  if (alternatePath !== undefined)
+    paths[alternateLocale(locale)] = alternatePath;
+  return alternates(paths.ko, paths.en);
 }
 
 /** 사이트맵 항목을 생성함 */
@@ -64,7 +76,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         note.sources.some((source) => source.kind === kind),
       );
       if (matching.length < 2) return [];
-      const otherLocale = locale === "ko" ? "en" : "ko";
+      const otherLocale = alternateLocale(locale);
       const otherMatching = notesByLocale[otherLocale].filter((note) =>
         note.sources.some((source) => source.kind === kind),
       );
@@ -72,17 +84,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         {
           url: `${origin}${createInvestmentSourceHref(locale, kind)}`,
           lastModified: latestUpdate(matching),
-          alternates: alternates(
-            locale === "ko"
-              ? createInvestmentSourceHref("ko", kind)
-              : otherMatching.length >= 2
-                ? createInvestmentSourceHref("ko", kind)
-                : undefined,
-            locale === "en"
-              ? createInvestmentSourceHref("en", kind)
-              : otherMatching.length >= 2
-                ? createInvestmentSourceHref("en", kind)
-                : undefined,
+          alternates: localizedAlternates(
+            locale,
+            createInvestmentSourceHref(locale, kind),
+            otherMatching.length >= 2
+              ? createInvestmentSourceHref(otherLocale, kind)
+              : undefined,
           ),
         },
       ];
@@ -94,7 +101,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       (tag) => {
         const matching = localeNotes.filter((note) => note.tags.includes(tag));
         if (matching.length < 2) return [];
-        const otherLocale = locale === "ko" ? "en" : "ko";
+        const otherLocale = alternateLocale(locale);
         const otherMatching = notesByLocale[otherLocale].filter((note) =>
           note.tags.includes(tag),
         );
@@ -102,17 +109,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           {
             url: `${origin}${createInvestmentTagHref(locale, tag)}`,
             lastModified: latestUpdate(matching),
-            alternates: alternates(
-              locale === "ko"
-                ? createInvestmentTagHref("ko", tag)
-                : otherMatching.length >= 2
-                  ? createInvestmentTagHref("ko", tag)
-                  : undefined,
-              locale === "en"
-                ? createInvestmentTagHref("en", tag)
-                : otherMatching.length >= 2
-                  ? createInvestmentTagHref("en", tag)
-                  : undefined,
+            alternates: localizedAlternates(
+              locale,
+              createInvestmentTagHref(locale, tag),
+              otherMatching.length >= 2
+                ? createInvestmentTagHref(otherLocale, tag)
+                : undefined,
             ),
           },
         ];
@@ -130,7 +132,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ].flatMap((name) => {
       const matching = localeNotes.filter((note) => note.series === name);
       if (matching.length < 2) return [];
-      const otherLocale = locale === "ko" ? "en" : "ko";
+      const otherLocale = alternateLocale(locale);
       const otherMatching = notesByLocale[otherLocale].filter(
         (note) => note.series === name,
       );
@@ -138,17 +140,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         {
           url: `${origin}${createInvestmentSeriesHref(locale, name)}`,
           lastModified: latestUpdate(matching),
-          alternates: alternates(
-            locale === "ko"
-              ? createInvestmentSeriesHref("ko", name)
-              : otherMatching.length >= 2
-                ? createInvestmentSeriesHref("ko", name)
-                : undefined,
-            locale === "en"
-              ? createInvestmentSeriesHref("en", name)
-              : otherMatching.length >= 2
-                ? createInvestmentSeriesHref("en", name)
-                : undefined,
+          alternates: localizedAlternates(
+            locale,
+            createInvestmentSeriesHref(locale, name),
+            otherMatching.length >= 2
+              ? createInvestmentSeriesHref(otherLocale, name)
+              : undefined,
           ),
         },
       ];
@@ -156,24 +153,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   });
   const noteEntries = locales.flatMap((locale) =>
     notesByLocale[locale].map((note) => {
-      const otherLocale = locale === "ko" ? "en" : "ko";
+      const otherLocale = alternateLocale(locale);
       const hasOther = notesByLocale[otherLocale].some(
         (candidate) => candidate.id === note.id,
       );
       return {
         url: `${origin}${note.href}`,
         lastModified: note.updatedAt,
-        alternates: alternates(
-          locale === "ko"
-            ? note.href
-            : hasOther
-              ? `/ko/notes/${note.id}`
-              : undefined,
-          locale === "en"
-            ? note.href
-            : hasOther
-              ? `/en/notes/${note.id}`
-              : undefined,
+        alternates: localizedAlternates(
+          locale,
+          note.href,
+          hasOther ? `/${otherLocale}/notes/${note.id}` : undefined,
         ),
       };
     }),

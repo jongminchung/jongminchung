@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { locales } from "#lib/site-routing";
 import { DocsCodeBlock } from "#tech-components/DocsCodeBlock";
+import "../../../../invest-code.css";
 
 /** Playwright fixture의 locale별 정적 경로를 반환함 */
 export function generateStaticParams() {

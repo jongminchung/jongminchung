@@ -104,7 +104,7 @@ test("[성공] 시스템 모드일 때 운영체제의 다크 설정을 따름",
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 });
 
-test("[성공] Pretendard를 Next.js 자체 호스팅 자산에서 불러옴", async ({
+test("[성공] Pretendard dynamic subset을 자체 호스팅 자산에서 불러옴", async ({
   page,
 }) => {
   const fontRequests: string[] = [];
@@ -115,9 +115,11 @@ test("[성공] Pretendard를 Next.js 자체 호스팅 자산에서 불러옴", a
   await page.goto("/");
   await page.evaluate(() => document.fonts.ready);
 
-  expect(fontRequests.some((url) => url.includes("/_next/static/media/"))).toBe(
-    true,
-  );
+  expect(
+    fontRequests.some((url) =>
+      url.includes("/fonts/pretendard-variable/PretendardVariable.subset."),
+    ),
+  ).toBe(true);
   const pageOrigin = new URL(page.url()).origin;
   expect(fontRequests.every((url) => new URL(url).origin === pageOrigin)).toBe(
     true,

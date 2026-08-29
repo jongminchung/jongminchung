@@ -41,9 +41,7 @@ export type DocsArea = z.infer<typeof docsAreaSchema>;
 
 const DOCUMENT_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 
-const sharedMetadataShape = {
-  id: nonEmptyTrimmedStringSchema,
-  locale: localeSchema,
+const sharedFrontmatterShape = {
   title: nonEmptyTrimmedStringSchema,
   displayTitle: nonEmptyTrimmedStringSchema.optional(),
   description: nonEmptyTrimmedStringSchema,
@@ -60,8 +58,14 @@ const sharedMetadataShape = {
   }).optional(),
 } as const;
 
-const blogPostMetadataShape = {
-  ...sharedMetadataShape,
+const sharedMetadataShape = {
+  id: nonEmptyTrimmedStringSchema,
+  locale: localeSchema,
+  ...sharedFrontmatterShape,
+} as const;
+
+const blogPostFrontmatterShape = {
+  ...sharedFrontmatterShape,
   thesis: nonEmptyTrimmedStringSchema,
   counterargument: nonEmptyTrimmedStringSchema,
   series: nonEmptyTrimmedStringSchema.optional(),
@@ -69,9 +73,21 @@ const blogPostMetadataShape = {
   verifiedAt: z.string().optional(),
 } as const;
 
-const docsSharedMetadataShape = {
-  ...sharedMetadataShape,
+const blogPostMetadataShape = {
+  id: nonEmptyTrimmedStringSchema,
+  locale: localeSchema,
+  ...blogPostFrontmatterShape,
+} as const;
+
+const docsSharedFrontmatterShape = {
+  ...sharedFrontmatterShape,
   verifiedAt: z.string(),
+} as const;
+
+const docsSharedMetadataShape = {
+  id: nonEmptyTrimmedStringSchema,
+  locale: localeSchema,
+  ...docsSharedFrontmatterShape,
 } as const;
 
 const docsOverviewMetadataShape = {
@@ -165,6 +181,18 @@ function validateBlogMetadata(
 export const blogPostMetadataSchema = z
   .strictObject(blogPostMetadataShape)
   .superRefine(validateBlogMetadata)
+  .readonly();
+
+export const blogPostFrontmatterSchema = z
+  .strictObject(blogPostFrontmatterShape)
+  .readonly();
+
+export const docsPageFrontmatterSchema = z
+  .strictObject({
+    ...docsSharedFrontmatterShape,
+    documentKind: documentKindSchema.optional(),
+    overview: z.literal(true).optional(),
+  })
   .readonly();
 
 const docsOverviewMetadataSchema = z

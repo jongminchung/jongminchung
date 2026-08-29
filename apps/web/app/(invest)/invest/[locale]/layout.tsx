@@ -4,8 +4,9 @@ import { NextIntlClientProvider } from "next-intl";
 import { notFound } from "next/navigation";
 import { StructuredData } from "#components/StructuredData";
 import { ThemeProvider } from "#components/ThemeProvider";
-import { InvestmentLayout } from "#invest-components/InvestmentShell";
+import { InvestmentLayout } from "#invest-components/InvestmentLayout";
 import { messagesFor } from "#lib/i18n-messages";
+import { getInvestmentMessages } from "#lib/invest/copy";
 import { isLocale } from "#lib/site-routing";
 import {
   createWebsiteStructuredData,
@@ -49,6 +50,7 @@ export default async function InvestmentLocaleLayout({
 }: LayoutProps<"/invest/[locale]">): Promise<React.JSX.Element> {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
+  const text = getInvestmentMessages(locale);
   return (
     <html
       lang={locale}
@@ -65,10 +67,7 @@ export default async function InvestmentLocaleLayout({
           value={createWebsiteStructuredData({
             origin: investOrigin,
             name: "Investment Notes",
-            description:
-              locale === "ko"
-                ? "13F 공시, 책, 인터뷰와 투자 원문을 바탕으로 작성한 투자 리서치 글"
-                : "Investment essays grounded in 13F filings, books, interviews, and original sources.",
+            description: text.siteDescription,
             locale,
           })}
         />

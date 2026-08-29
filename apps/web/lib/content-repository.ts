@@ -158,6 +158,11 @@ export function readContentSnapshot(): ContentSnapshot {
   return productionSnapshot;
 }
 
+/** 공개 Tech collection을 한 번의 repository snapshot에서 반환함 */
+export function readPublishedTechContent(): TechContentCollection {
+  return readContentSnapshot().publishedTech;
+}
+
 /** Fumadocs가 색인한 Blog 본문을 locale과 공개 ID로 조회함 */
 export async function loadBlogContent(locale: Locale, id: string) {
   return (await blogSource.getPage([id], locale)?.data.load()) ?? null;

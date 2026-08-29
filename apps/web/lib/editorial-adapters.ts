@@ -6,6 +6,7 @@ import {
 } from "./content-model";
 import type { EditorialItem } from "./editorial";
 import type { InvestmentNoteManifestEntry } from "./invest/content";
+import { getTechMessages } from "./tech/copy";
 import { documentKindLabel } from "./tech/document-kind";
 import { getSeries } from "./tech/series";
 
@@ -28,9 +29,7 @@ export function toTechEditorialItem(
       document.documentKind !== undefined
         ? documentKindLabel(locale, document.documentKind)
         : document.contentType !== "blog" || document.series === undefined
-          ? locale === "ko"
-            ? "기술 글"
-            : "Engineering article"
+          ? getTechMessages(locale).article.engineeringArticle
           : (getSeries(document.series, locale)?.title ?? document.series),
     mediaSeed: `${document.id}:${document.tags.join(":")}`,
     ...(document.contentType === "blog"

@@ -1,5 +1,6 @@
 import type { TOCItemType } from "fumadocs-core/toc";
 import type { Locale } from "#lib/content-model";
+import { getTechMessages } from "#lib/tech/copy";
 
 /** tablet 이하에서 문서 목차를 semantic details navigation으로 제공함 */
 export function TechDocsMobileToc({
@@ -10,7 +11,7 @@ export function TechDocsMobileToc({
   readonly toc: readonly TOCItemType[];
 }) {
   if (toc.length === 0) return null;
-  const label = locale === "ko" ? "이 페이지의 목차" : "On this page";
+  const label = getTechMessages(locale).docs.mobileToc;
   return (
     <nav
       aria-label={label}

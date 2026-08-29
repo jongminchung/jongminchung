@@ -103,7 +103,13 @@ export function SearchTrigger({
         <Icon icon="search" />
         {compact ? null : <span>{t("shortLabel")}</span>}
       </span>
-      {showShortcut && !compact ? <kbd>⌘K</kbd> : null}
+      {showShortcut && !compact ? (
+        <span aria-hidden="true" className="inline-flex gap-0.5">
+          {search.hotKey.map((hotKey, index) => (
+            <kbd key={index}>{hotKey.display}</kbd>
+          ))}
+        </span>
+      ) : null}
     </Button>
   );
 }

@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import {
-  HeroSection,
-  PrinciplesSection,
-  WorkSection,
-  WritingSection,
-} from "#home-components/HomeSections";
+import { HeroSection } from "#home-components/HomeHeroSection";
+import { PrinciplesSection } from "#home-components/HomePrinciplesSection";
 import {
   HomeFooter,
   HomeHeader,
   PersonStructuredData,
 } from "#home-components/HomeShell";
+import { WorkSection } from "#home-components/HomeWorkSection";
+import { WritingSection } from "#home-components/HomeWritingSection";
+import { getHomeMessages } from "#lib/home/content";
+import { alternateLocale, getLocaleProtocol } from "#lib/locale";
 import { isLocale, locales } from "#lib/site-routing";
 
 export function generateStaticParams() {
@@ -23,11 +23,9 @@ export async function generateMetadata({
 }: PageProps<"/home/[locale]">): Promise<Metadata> {
   const { locale } = await params;
   if (!isLocale(locale)) return {};
-  const description =
-    locale === "ko"
-      ? "Jamie 정민의 소개와 프로젝트, 최근 기술·투자 기록을 연결하는 프로필 허브"
-      : "Jamie's profile, projects, and latest engineering and investment writing";
+  const description = getHomeMessages(locale).metadataDescription;
   const url = `https://www.jamie.kr/${locale}`;
+  const protocol = getLocaleProtocol(locale);
   return {
     title: "Jamie — Jongmin Chung",
     description,
@@ -44,8 +42,8 @@ export async function generateMetadata({
       title: "Jamie — Jongmin Chung",
       description,
       url,
-      locale: locale === "ko" ? "ko_KR" : "en_US",
-      alternateLocale: [locale === "ko" ? "en_US" : "ko_KR"],
+      locale: protocol.openGraph,
+      alternateLocale: [getLocaleProtocol(alternateLocale(locale)).openGraph],
       images: [
         {
           url: "/og",

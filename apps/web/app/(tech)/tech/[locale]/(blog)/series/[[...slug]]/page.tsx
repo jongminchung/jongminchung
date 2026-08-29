@@ -1,11 +1,8 @@
 import { notFound, permanentRedirect } from "next/navigation";
-import {
-  createSeriesHref,
-  isLocale,
-  locales,
-  type Locale,
-} from "#lib/content-model";
+import { createSeriesHref, isLocale, locales } from "#lib/content-model";
 import { getLocalizedDocuments } from "#lib/documents";
+import { alternateLocale } from "#lib/locale";
+import { getTechMessages } from "#lib/tech/copy";
 import { techPageMetadata } from "#lib/tech/metadata";
 import {
   docsOverviewForSeries,
@@ -38,14 +35,12 @@ export async function generateMetadata({
 }) {
   const { locale, slug } = await params;
   if (!isLocale(locale)) notFound();
+  const text = getTechMessages(locale).metadata;
   const id = slug?.[0];
   if (slug === undefined || slug.length === 0)
     return techPageMetadata({
-      title: locale === "ko" ? "블로그 시리즈" : "Blog Series",
-      description:
-        locale === "ko"
-          ? "순서에 따라 읽는 기술 블로그 글 모음"
-          : "Ordered collections of engineering blog articles.",
+      title: text.seriesTitle,
+      description: text.seriesDescription,
       locale,
       canonical: createSeriesHref(locale),
       alternatePaths: {
@@ -91,7 +86,7 @@ export default async function BlogSeriesPage({
 }) {
   const { locale, slug } = await params;
   if (!isLocale(locale)) notFound();
-  const alternate: Locale = locale === "ko" ? "en" : "ko";
+  const alternate = alternateLocale(locale);
   if (slug === undefined || slug.length === 0) {
     const documents = await getLocalizedDocuments(locale);
     return (

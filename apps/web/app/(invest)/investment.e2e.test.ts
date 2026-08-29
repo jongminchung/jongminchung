@@ -15,11 +15,9 @@ test("[실패] 수평 바닥 바닥 없이 더블 언어 빈 연구 보고서를
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "Investment research grounded in filings and primary sources",
   );
-  await expect(
-    page.getByRole("link", {
-      name: "Efficiency compounds when the feedback loop is owned end to end",
-    }),
-  ).toBeVisible();
+  const initialResults = page.locator('[data-document-grid="true"]');
+  await expect(initialResults).toBeVisible();
+  await expect(initialResults.getByRole("link")).toHaveCount(9);
   const editorialImages = page.locator('[data-editorial-image="true"]');
   await expect(editorialImages.first()).toBeVisible();
   expect(await editorialImages.count()).toBeGreaterThanOrEqual(5);

@@ -6,6 +6,7 @@ import { ThemeProvider } from "#components/ThemeProvider";
 import { isLocale } from "#lib/content-model";
 import { messagesFor } from "#lib/i18n-messages";
 import { createWebsiteStructuredData, techOrigin } from "#lib/structured-data";
+import { getTechMessages } from "#lib/tech/copy";
 import { themeStorageKeys } from "#lib/theme";
 import {
   localeFontClassName,
@@ -24,6 +25,7 @@ export default async function LocaleLayout({
 }: LayoutProps<"/tech/[locale]">): Promise<React.JSX.Element> {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
+  const text = getTechMessages(locale).metadata;
   return (
     <html
       lang={locale}
@@ -40,10 +42,7 @@ export default async function LocaleLayout({
           value={createWebsiteStructuredData({
             origin: techOrigin,
             name: "Engineering Notes",
-            description:
-              locale === "ko"
-                ? "소프트웨어를 이해하기 쉽게 만드는 기술 문서와 글"
-                : "Engineering documentation and articles about building understandable software.",
+            description: text.siteDescription,
             locale,
           })}
         />

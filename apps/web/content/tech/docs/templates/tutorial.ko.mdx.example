@@ -1,7 +1,4 @@
 ---
-id: tutorial-slug
-locale: ko
-area: fe
 documentKind: tutorial
 title: "완료 상태가 분명한 학습 제목"
 description: "독자가 무엇을 만들고 어떤 상태에 도달하는지 설명"

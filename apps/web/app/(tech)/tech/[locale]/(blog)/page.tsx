@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { isLocale, locales } from "#lib/content-model";
 import { getLocalizedDocuments } from "#lib/documents";
+import { alternateLocale } from "#lib/locale";
 import { blogIndexMetadata } from "#lib/tech/metadata";
 import { BlogIndex } from "#tech-components/BlogIndex";
 import { DocsShell } from "#tech-components/DocsShell";
@@ -32,7 +33,7 @@ export default async function BlogPage({
 }) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
-  const alternate = locale === "ko" ? "en" : "ko";
+  const alternate = alternateLocale(locale);
   return (
     <DocsShell alternateHref={`/${alternate}`} locale={locale}>
       <BlogIndex

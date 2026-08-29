@@ -5,6 +5,7 @@ import {
   createTechArticleImageHref,
   displayTitleFor,
 } from "#lib/content-model";
+import { getTechMessages } from "#lib/tech/copy";
 import { documentKindLabel } from "#lib/tech/document-kind";
 
 export type DocumentCardVariant = "featured" | "list" | "related";
@@ -26,6 +27,7 @@ export function DocumentCard({
   readonly eager?: boolean;
 }): React.JSX.Element {
   const title = displayTitleFor(document);
+  const text = getTechMessages(locale).article;
   const isBlogPost = document.contentType === "blog";
   const imageSource = isBlogPost
     ? createTechArticleImageHref(document.id)
@@ -52,9 +54,7 @@ export function DocumentCard({
           {label ??
             series ??
             (document.documentKind === undefined
-              ? locale === "ko"
-                ? "블로그"
-                : "Blog"
+              ? text.blog
               : documentKindLabel(locale, document.documentKind))}
           <span aria-hidden="true">·</span>
           <time dateTime={document.updatedAt}>{document.updatedAt}</time>

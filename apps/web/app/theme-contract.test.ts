@@ -21,7 +21,14 @@ const webTheme = read("apps/web/app/theme.css");
 const dynamicFontCss = read(
   "apps/web/public/fonts/pretendard-variable/dynamic-subset.css",
 );
-const homeSections = read("apps/web/app/(home)/_components/HomeSections.tsx");
+const homeSections = [
+  "HomeHeroSection.tsx",
+  "HomePrinciplesSection.tsx",
+  "HomeWorkSection.tsx",
+  "HomeWritingSection.tsx",
+]
+  .map((file) => read(`apps/web/app/(home)/_components/${file}`))
+  .join("\n");
 const siteStylePaths = [
   "apps/web/app/(home)/home.css",
   "apps/web/app/(tech)/tech.css",
@@ -29,7 +36,7 @@ const siteStylePaths = [
 ] as const;
 const siteStyles = siteStylePaths.map(read);
 const techStyles = siteStyles[1];
-const investStyles = siteStyles[2];
+const investCodeStyles = read("apps/web/app/(invest)/invest-code.css");
 const domainComponentStyles = [
   ...readComponentStyles("apps/web/app/(home)/_components"),
   ...readComponentStyles("apps/web/app/(tech)/_components"),
@@ -189,7 +196,7 @@ describe("공통 디자인 토큰 계약", () => {
   });
 
   it("[성공] Tech와 Invest가 동일한 코드블록 CSS 계약을 사용함", () => {
-    for (const stylesheet of [techStyles, investStyles]) {
+    for (const stylesheet of [techStyles, investCodeStyles]) {
       expect(stylesheet).toContain('@import "fumadocs-ui/css/shadcn.css";');
       expect(stylesheet).toContain('@import "fumadocs-ui/css/preset.css";');
       expect(stylesheet).toContain(

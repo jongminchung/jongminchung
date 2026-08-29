@@ -1,6 +1,4 @@
 ---
-id: reading-coding-test-constraints
-locale: en
 title: "Coding Tests Start with Input Size"
 description: "Input size should eliminate impossible solutions before any algorithmic pattern is considered."
 thesis: "Coding tests become reliably solvable when constraints are read first and the allowed complexity can be explained before implementation."
@@ -44,17 +42,17 @@ sourceUrl: https://kciter.so/posts/coding-test-story
 
 - **The following table is a first-pass guide under a typical time limit and a single test case**
 
-| Time complexity | `N = 1,000` | `N = 100,000` | `N = 1,000,000` | Typical algorithms |
-|---|---:|---:|---:|---|
-| `O(1)` | Feasible | Feasible | Feasible | Hash lookup, formulas |
-| `O(log N)` | Feasible | Feasible | Feasible | Binary search |
-| `O(N)` | Feasible | Feasible | Feasible | One pass, two pointers |
-| `O(N log N)` | Feasible | Feasible | Feasible | Sorting, heaps |
-| `O(N√N)` | Feasible | Caution | Usually difficult | Block decomposition |
-| `O(N²)` | Feasible | Difficult | Infeasible | Comparing every pair |
-| `O(N³)` | Caution | Infeasible | Infeasible | Enumerating triples |
-| `O(2^N)` | About `N ≤ 20` | Infeasible | Infeasible | Subset enumeration |
-| `O(N!)` | About `N ≤ 10` | Infeasible | Infeasible | Permutation enumeration |
+| Time complexity |    `N = 1,000` | `N = 100,000` |   `N = 1,000,000` | Typical algorithms      |
+| --------------- | -------------: | ------------: | ----------------: | ----------------------- |
+| `O(1)`          |       Feasible |      Feasible |          Feasible | Hash lookup, formulas   |
+| `O(log N)`      |       Feasible |      Feasible |          Feasible | Binary search           |
+| `O(N)`          |       Feasible |      Feasible |          Feasible | One pass, two pointers  |
+| `O(N log N)`    |       Feasible |      Feasible |          Feasible | Sorting, heaps          |
+| `O(N√N)`        |       Feasible |       Caution | Usually difficult | Block decomposition     |
+| `O(N²)`         |       Feasible |     Difficult |        Infeasible | Comparing every pair    |
+| `O(N³)`         |        Caution |    Infeasible |        Infeasible | Enumerating triples     |
+| `O(2^N)`        | About `N ≤ 20` |    Infeasible |        Infeasible | Subset enumeration      |
+| `O(N!)`         | About `N ≤ 10` |    Infeasible |        Infeasible | Permutation enumeration |
 
 - **“Feasible” is not a guarantee, while “infeasible” means micro-optimization is unlikely to save the approach**
   - An `O(N log N)` solution can still time out when comparisons are expensive or the same work is repeated
