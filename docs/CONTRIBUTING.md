@@ -1,17 +1,15 @@
 # 기여 가이드
 
-이 문서는 pnpm 모노레포의 공통 개발·검증 절차를 설명한다. Git Client의 Electron 실행,
-fixture, 패키징과 릴리스 절차는 [Git Client 기여 가이드](apps/git-client/CONTRIBUTING.md)를
-함께 따른다. `plugins/go-lsp`는 별도 빌드이므로 이 문서의 범위에 포함하지 않는다.
+이 문서는 pnpm 모노레포의 공통 개발·검증 절차를 설명한다. `plugins/go-lsp`는 별도
+빌드이므로 이 문서의 범위에 포함하지 않는다.
 
 ## 개발 환경
 
-| 도구    | 버전·조건                                              | 기준 파일                               |
-| ------- | ------------------------------------------------------ | --------------------------------------- |
-| Node.js | `26.5.0`                                               | `.node-version`, `package.json#engines` |
-| pnpm    | `11.15.1`                                              | `package.json#packageManager`           |
-| Git     | 일반 개발에 필요, Git Client는 `2.39+`                 | 시스템 설치                             |
-| macOS   | Git Client의 패키지·Electron 검증은 Apple Silicon 필요 | 앱 지원 정책                            |
+| 도구    | 버전·조건        | 기준 파일                               |
+| ------- | ---------------- | --------------------------------------- |
+| Node.js | `26.5.0`         | `.node-version`, `package.json#engines` |
+| pnpm    | `11.15.1`        | `package.json#packageManager`           |
+| Git     | 일반 개발에 필요 | 시스템 설치                             |
 
 저장소 루트에서 버전을 확인하고 잠금 파일을 변경하지 않는 설치를 수행한다.
 
@@ -26,12 +24,11 @@ pnpm install --frozen-lockfile
 
 ## Workspace 구조
 
-| Workspace          | 역할                                        | 주요 개발 명령                                   |
-| ------------------ | ------------------------------------------- | ------------------------------------------------ |
-| `apps/web`         | 프로필·기술·투자 멀티도메인 Next.js 앱      | `pnpm --filter @jongminchung/web run dev`        |
-| `apps/git-client`  | macOS Electron Git 클라이언트               | `pnpm --filter @jongminchung/git-client run dev` |
-| `packages/ui`      | 공개 UI primitive·기본 theme·semantic token | `pnpm --filter @jongminchung/ui run build`       |
-| `packages/tooling` | Oxc 공용 설정                               | `pnpm --filter @jongminchung/tooling run test`   |
+| Workspace          | 역할                                        | 주요 개발 명령                                 |
+| ------------------ | ------------------------------------------- | ---------------------------------------------- |
+| `apps/web`         | 프로필·기술·투자 멀티도메인 Next.js 앱      | `pnpm --filter @jongminchung/web run dev`      |
+| `packages/ui`      | 공개 UI primitive·기본 theme·semantic token | `pnpm --filter @jongminchung/ui run build`     |
+| `packages/tooling` | Oxc 공용 설정                               | `pnpm --filter @jongminchung/tooling run test` |
 
 공용 UI의 소유권, token과 component 추가 규칙은 [디자인 시스템](DESIGN_SYSTEM.md)을
 따른다. 앱별 product component를 `packages/ui`로 옮기거나 앱에서 공용 primitive를 복제하지
@@ -43,26 +40,24 @@ pnpm install --frozen-lockfile
 
 ```sh
 pnpm --filter @jongminchung/web run typecheck
-pnpm --filter @jongminchung/git-client run qa:compact
 pnpm --filter @jongminchung/ui run build
 pnpm --filter @jongminchung/ui run test
 ```
 
 루트 검증 명령의 범위는 다음과 같다.
 
-| 명령                           | 검증 범위                                    |
-| ------------------------------ | -------------------------------------------- |
-| `pnpm run fmt:check`           | Oxfmt 형식 검사                              |
-| `pnpm run lint`                | Oxlint 정적 분석                             |
-| `pnpm run typecheck`           | 루트와 모든 workspace TypeScript 검사        |
-| `pnpm run test`                | Unit·Integration 테스트                      |
-| `pnpm run test:e2e`            | build 후 앱별 Playwright E2E                 |
-| `pnpm run check`               | format, lint, typecheck와 전체 로컬 테스트   |
-| `pnpm run check:full`          | `check`, E2E typecheck, 단일 build, core E2E |
-| `pnpm run check:full:electron` | `check:full`과 clean package Electron E2E    |
+| 명령                  | 검증 범위                                    |
+| --------------------- | -------------------------------------------- |
+| `pnpm run fmt:check`  | Oxfmt 형식 검사                              |
+| `pnpm run lint`       | Oxlint 정적 분석                             |
+| `pnpm run typecheck`  | 루트와 모든 workspace TypeScript 검사        |
+| `pnpm run test`       | Unit·Integration 테스트                      |
+| `pnpm run test:e2e`   | build 후 앱별 Playwright E2E                 |
+| `pnpm run check`      | format, lint, typecheck와 전체 로컬 테스트   |
+| `pnpm run check:full` | `check`, E2E typecheck, 단일 build, core E2E |
 
-테스트 계약은 빠른 Unit, 실제 Git·filesystem·PTY·tarball Integration, build된 앱을 검증하는
-Playwright E2E로 구분한다. Unit coverage 기준선을 의도적으로 갱신할 때만 다음 명령을 실행하고
+테스트 계약은 빠른 Unit, 실제 콘텐츠·filesystem Integration, build된 앱을 검증하는 Playwright
+E2E로 구분한다. Unit coverage 기준선을 의도적으로 갱신할 때만 다음 명령을 실행하고
 생성된 `coverage-baseline.json`의 변화를 검토한다.
 
 ```sh
@@ -74,16 +69,14 @@ pnpm run test:coverage:update
 
 변경 유형별 최소 검증은 다음을 기준으로 한다.
 
-| 변경 유형                              | 최소 검증                                                               |
-| -------------------------------------- | ----------------------------------------------------------------------- |
-| Markdown·설정 문서                     | `fmt:check`, `lint`, 상대 링크와 명령 직접 확인                         |
-| React·CSS·공용 UI                      | 해당 workspace typecheck·test, 관련 Playwright, `DESIGN_SYSTEM.md` 계약 |
-| Next.js route·MDX 파이프라인           | 해당 앱 typecheck·test·build, core E2E                                  |
-| 공용 패키지                            | 해당 패키지 typecheck·test·build, 소비 앱 typecheck                     |
-| 웹 브랜드·파비콘                       | Web typecheck·build, 관련 visual snapshot 확인                          |
-| Git Client renderer                    | `qa:compact`                                                            |
-| Git Client main·preload·utility·native | 전용 가이드의 package verify·smoke·Electron E2E                         |
-| 릴리스·배포                            | `check:full`과 해당 dry-run·릴리스 가이드                               |
+| 변경 유형                    | 최소 검증                                                               |
+| ---------------------------- | ----------------------------------------------------------------------- |
+| Markdown·설정 문서           | `fmt:check`, `lint`, 상대 링크와 명령 직접 확인                         |
+| React·CSS·공용 UI            | 해당 workspace typecheck·test, 관련 Playwright, `DESIGN_SYSTEM.md` 계약 |
+| Next.js route·MDX 파이프라인 | 해당 앱 typecheck·test·build, core E2E                                  |
+| 공용 패키지                  | 해당 패키지 typecheck·test·build, 소비 앱 typecheck                     |
+| 웹 브랜드·파비콘             | Web typecheck·build, 관련 visual snapshot 확인                          |
+| 릴리스·배포                  | `check:full`과 해당 dry-run·릴리스 가이드                               |
 
 ## 생성물과 외부 소스
 
@@ -135,8 +128,9 @@ Playwright snapshot은 의도적인 시각 변경만 갱신한다. 갱신 후 �
 사용한다. 내부 패키지는 `workspace:*`로 연결한다.
 
 ```sh
-pnpm run deps:check
-pnpm run deps:update
+pnpm run deps:inventory
+pnpm run deps:check -- <framework|ui|test|tooling>
+pnpm run deps:update -- <framework|ui|test|tooling>
 pnpm install
 ```
 
@@ -156,9 +150,7 @@ pnpm install
 - token, 인증서, keychain password와 `.npmrc` 인증값을 커밋하지 않는다.
 - GitHub Actions secret은 workflow에 정의된 이름으로만 주입하고 문서에는 값이나 예시
   token을 기록하지 않는다.
-- `GH_PAT`는 package 게시와 Git Client release에만 사용한다.
-- Apple 서명·공증 secret은 Git Client production release job에서만 사용한다.
-- 보안 문제를 수정할 때 renderer·preload·main 등 신뢰 경계를 우회하는 API를 추가하지 않는다.
+- `GH_PAT`는 package 게시에만 사용한다.
 
 현재 secret 목록과 workflow별 용도는 [유지보수 가이드](docs/maintenance.md)에 정리되어 있다.
 
@@ -185,8 +177,7 @@ pnpm run publish:dry-run
 `Publish Packages` workflow가 GitHub Packages의 고정 `1.0.0` snapshot을 교체한다. 동일
 version의 API·내용·integrity가 바뀔 수 있으므로 SemVer 호환성과 lockfile 재현성을 보장하지
 않는다. workflow는 publish package만 설치·typecheck·test한 뒤, 기존 `1.0.0`을 삭제하고 두
-package를 병렬 게시한다. Git Client는
-[GitHub Release 배포 가이드](apps/git-client/docs/releases.md)를 따른다.
+package를 병렬 게시한다.
 
 ## 제출 체크리스트
 

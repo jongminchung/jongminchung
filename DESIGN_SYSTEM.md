@@ -20,7 +20,6 @@
   - 한 앱만 사용하는 범용 primitive도 `@jongminchung/ui`에서 소유
   - 여러 앱에서 형태가 비슷한 제품 composition도 제품 의미와 동작이 다르면 각 앱에서 소유
 - 앱별 제품 소유 범위
-  - Git Client: Repository, Commit, Diff, Terminal UI와 제품 token
   - Engineering Docs: Navigation, SearchPalette, 문서 card와 문서 theme
   - README: landing page composition, 브랜드 표현과 marketing theme
 - 공용 primitive는 파일 단위 named export만 제공
@@ -97,8 +96,6 @@ pnpm exec shadcn add <component-or-block>
   - `resolvePackageJsonImports: true`
 - 로컬 `@/*` compiler path 추가 금지
 - 생성된 registry import를 별도 alias 방식으로 임의 변경 금지
-- Git Client의 빈 `paths` 객체는 root test alias가 `rootDir`을 넘지 않도록 차단하는 용도
-- Git Client의 빈 `paths` 객체를 별도 import alias로 사용하지 않음
 
 ## Variant
 
@@ -159,7 +156,7 @@ import "./globals.css";
   - border·input·ring
   - chart와 sidebar
   - radius
-- terminal 색상이나 status panel처럼 제품 의미가 있는 token은 해당 앱에서 소유
+- 문서 상태나 marketing surface처럼 제품 의미가 있는 token은 해당 앱에서 소유
 - 같은 의미와 consumer 계약을 둘 이상의 앱이 공유할 때만 공용 token으로 이동
 - dark mode 선택자: `data-theme="dark"`
 - 공용 `@custom-variant dark`도 같은 data attribute를 대상으로 유지
@@ -178,7 +175,6 @@ import "./globals.css";
 - 정적 shell, link, document content는 server rendering 유지
 - provider는 필요한 가장 작은 interactive subtree에 배치
 - `apps/web`은 세 사이트에서 workspace의 `@jongminchung/ui` source를 transpile하고 사이트별 theme token을 분리함
-- Vite 기반 Git Client는 `source` export condition으로 같은 소스를 사용하고 `react`, `react-dom`을 dedupe
 - 외부 consumer는 공개 subpath의 ESM JavaScript와 declaration을 사용
 - 호환성 판단은 저장소 내부의 실제 import와 consumer를 기준으로 수행
 - GitHub Packages 배포는 고정 `1.0.0`을 대체하는 source-first 내부 배포 정책을 유지
@@ -191,7 +187,6 @@ import "./globals.css";
   - release graph 검증
 - production에서 workspace별 compiler 분리 또는 dual compiler 구성 금지
 - 제품 동작은 각 앱에서 소유
-- Git Client의 dismissal policy, inline·fullscreen dialog layout, navigation, command 실행은 `Product*` component와 controller에서 관리
 
 ## 검증
 

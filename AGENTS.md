@@ -19,7 +19,6 @@
   - 범용 루트 `dev` 명령으로 여러 앱 실행을 암묵적으로 결합하지 않음
 - 단일 workspace 명령은 `pnpm --filter <package-name> run <script>` 형식으로 실행함
   - 멀티도메인 Web 개발 서버는 `pnpm --filter @jongminchung/web run dev`로 실행함
-  - Git Client 개발 서버는 `pnpm --filter @jongminchung/git-client run dev`로 실행함
 - package script를 호출할 때는 `run`을 명시함
 - 루트 script를 추가하기 전에 기존 workspace script와 `pnpm -r --if-present run <script>` 조합으로 해결 가능한지 먼저 확인함
 

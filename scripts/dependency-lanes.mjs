@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { readFile } from "node:fs/promises";
+import { glob, readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 const lanes = {
@@ -8,16 +8,21 @@ const lanes = {
     "@mdx-js/react",
     "@next/mdx",
     "@tanstack/react-query",
+    "babel-plugin-react-compiler",
+    "fumadocs-core",
+    "fumadocs-mdx",
+    "fumadocs-ui",
     "next",
+    "next-intl",
+    "next-themes",
     "react",
     "react-dom",
+    "zod",
   ],
   ui: [
     "@base-ui/react",
     "@excalidraw/excalidraw",
     "@tailwindcss/postcss",
-    "@tailwindcss/vite",
-    "@tanstack/react-virtual",
     "class-variance-authority",
     "clsx",
     "cmdk",
@@ -28,50 +33,19 @@ const lanes = {
     "tailwindcss",
     "tw-animate-css",
   ],
-  desktop: [
-    "@codemirror/commands",
-    "@codemirror/lang-css",
-    "@codemirror/lang-html",
-    "@codemirror/lang-java",
-    "@codemirror/lang-javascript",
-    "@codemirror/lang-json",
-    "@codemirror/lang-python",
-    "@codemirror/language",
-    "@codemirror/merge",
-    "@codemirror/search",
-    "@codemirror/state",
-    "@codemirror/view",
-    "@electron-forge/cli",
-    "@electron-forge/plugin-fuses",
-    "@electron-forge/plugin-vite",
-    "@electron-forge/shared-types",
-    "@electron/fuses",
-    "@trpc/client",
-    "@trpc/server",
-    "@xterm/addon-fit",
-    "@xterm/xterm",
-    "ds-store",
-    "electron",
-    "fflate",
-    "macos-alias",
-    "node-gyp",
-    "node-pty",
-    "uuid",
-    "zod",
-    "zustand",
-  ],
   test: [
     "@axe-core/playwright",
     "@playwright/test",
     "@vitest/coverage-v8",
+    "happy-dom",
     "vitest",
   ],
   tooling: [
+    "@types/mdast",
     "@types/mdx",
     "@types/node",
     "@types/react",
     "@types/react-dom",
-    "@vitejs/plugin-react",
     "esbuild",
     "gray-matter",
     "hast-util-to-string",
@@ -87,7 +61,6 @@ const lanes = {
     "remark-mdx-frontmatter",
     "typescript",
     "unist-util-visit",
-    "vite",
   ],
 };
 
@@ -96,13 +69,17 @@ const update = arguments_.includes("--update");
 const inventoryOnly = arguments_.includes("--inventory");
 const lane = arguments_.find((argument) => !argument.startsWith("--"));
 
-const packageFiles = [
-  "package.json",
-  "apps/git-client/package.json",
-  "apps/web/package.json",
-  "packages/tooling/package.json",
-  "packages/ui/package.json",
-];
+const rootManifest = JSON.parse(
+  await readFile(resolve("package.json"), "utf8"),
+);
+const workspacePackageFiles = new Set();
+for (const workspacePattern of rootManifest.workspaces ?? []) {
+  for await (const packageFile of glob(`${workspacePattern}/package.json`))
+    workspacePackageFiles.add(packageFile);
+}
+const packageFiles = ["package.json", ...workspacePackageFiles].sort(
+  (left, right) => left.localeCompare(right),
+);
 const directDependencies = new Set();
 for (const packageFile of packageFiles) {
   const manifest = JSON.parse(await readFile(resolve(packageFile), "utf8"));

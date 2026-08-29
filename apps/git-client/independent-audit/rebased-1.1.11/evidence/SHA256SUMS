@@ -1,9 +1,0 @@
-2ae0cefe93d7d350a5fc70bf7f7167f112718e6c49cc25081228d616782f2f69  ./README.md
-b7c233fabb3fd198fa9752b82726d4e0f26cc6d4ab5b556319ed018c91943b55  ./ax/01-welcome.txt
-cb09ebaad646fd520ac321a2aca07dd7f89a54d434591b83396ae36457f1ef66  ./ax/02-open-file-or-project.txt
-5851cba977850c058a6c5c5a5fa4f19c8efb9876599acbbf72a5e6e93cea7fe3  ./ax/03-trust-project.txt
-bf6f83e07a6875a1bd9741c01bad0e186241eebc58ceecf5af7062ebbb1e7057  ./ax/04-dirty-workbench-default.txt
-8915b7b9412dd1cded41763e790c03ad3644690d8896e1dd54b4630b5443ef4e  ./evidence.json
-f63b61e7a007190e32e6ea04a9b72ccbc301b9856fb49391cac27ef4c801decb  ./screenshots/01-welcome.png
-017ead53f37e0818894eb96b00672e6eff4aee3617efd9425439158ba66c156e  ./screenshots/02-trust-project.png
-2954465eace6d2add20e72adcb117aca9e7ea51e69487fa5fd1cf767e77591cf  ./screenshots/04-dirty-workbench-default.png

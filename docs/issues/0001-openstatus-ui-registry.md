@@ -42,7 +42,7 @@
   - component와 CSS를 명시적인 subpath로 공개함
   - workspace의 `source` 조건과 외부 consumer용 ESM·declaration 조건을 함께 제공함
 - **현재 저장소에는 shadcn registry가 없음**
-  - Web과 Git Client는 같은 monorepo에서 package source를 직접 소비함
+  - Web은 같은 monorepo에서 package source를 직접 소비함
   - 외부 프로젝트가 block을 복사 설치해야 하는 요구가 없음
   - registry를 추가하면 build·검증·versioning 경계가 하나 더 생김
 - **현재 제품 component 경계는 OpenStatus보다 더 엄격함**

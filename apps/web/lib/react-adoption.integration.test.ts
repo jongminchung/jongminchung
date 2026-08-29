@@ -9,34 +9,14 @@ async function readRepositoryFile(path: string): Promise<string> {
 }
 
 describe("React 19.2 adoption contract", () => {
-  it("keeps compiler pilots opt-in in both applications", async () => {
-    const [viteConfig, nextConfig, gitClientLeaf, webLeaf] = await Promise.all([
-      readRepositoryFile("apps/git-client/vite.config.ts"),
+  it("keeps the compiler opt-in in the Web application", async () => {
+    const [nextConfig, webLeaf] = await Promise.all([
       readRepositoryFile("apps/web/next.config.ts"),
-      readRepositoryFile("apps/git-client/src/components/Notice.tsx"),
       readRepositoryFile("apps/web/components/BrandWordmark.tsx"),
     ]);
 
-    expect(viteConfig).toContain('compilationMode: "annotation"');
     expect(nextConfig).toContain('compilationMode: "annotation"');
-    expect(gitClientLeaf).toContain('"use memo"');
     expect(webLeaf).toContain('"use memo"');
-  });
-
-  it("uses Effect Events for long-lived workbench subscriptions", async () => {
-    const [toolWindows, bottomPanel] = await Promise.all([
-      readRepositoryFile(
-        "apps/git-client/src/features/repository/tool-windows/useRepositoryToolWindowController.ts",
-      ),
-      readRepositoryFile(
-        "apps/git-client/src/components/bottom-panel/useBottomPanelLifecycle.ts",
-      ),
-    ]);
-
-    expect(toolWindows).toContain("useEffectEvent");
-    expect(toolWindows).toContain("captureToolWindowLayout");
-    expect(bottomPanel).toContain("useEffectEvent");
-    expect(bottomPanel).toContain("openPanelTab");
   });
 
   it("keeps Cache Components enabled without legacy route config", async () => {

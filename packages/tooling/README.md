@@ -71,8 +71,8 @@ has a reason plus an executable bad/good example immediately above it:
 defineOxlintConfig({
   rules: {
     // any removes checking from every later property access, so narrow an external boundary instead
-    // Bad: (window as any).desktopApi
-    // Good: extend Window and access window.desktopApi through the declared contract
+    // Bad: (window as any).hostApi
+    // Good: extend Window and access window.hostApi through the declared contract
     "typescript/no-explicit-any": "error",
 
     // role=group does not always mean fieldset, which could change non-form UI semantics

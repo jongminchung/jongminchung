@@ -59,8 +59,7 @@ integrity, so SemVer compatibility and lockfile reproducibility are not guarante
 force a new resolution, such as `pnpm update --force <package>@1.0.0`, and commit the resulting
 lockfile whenever they adopt a replacement.
 
-The workflow installs, typechecks, and tests only the publish packages, so unrelated application
-native dependencies do not participate in a package snapshot release. It deletes the fixed version,
+The workflow installs, typechecks, and tests only the publish packages. It deletes the fixed version,
 then publishes the two packages in parallel. GitHub authentication is supplied only through the
 `GH_PAT` Actions secret.
 

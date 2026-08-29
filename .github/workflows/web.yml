@@ -62,7 +62,6 @@ jobs:
         run: |
           pnpm --filter @jongminchung/ui exec shadcn info --json
           pnpm --filter @jongminchung/web exec shadcn info --json
-          pnpm --filter @jongminchung/git-client exec shadcn info --json
       - name: Verify shared UI package
         if: steps.changes.outputs.web == 'true'
         run: |

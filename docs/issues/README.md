@@ -6,9 +6,9 @@
 
 ## 핵심 요약
 
-- **현재 진행 중인 이슈는 `0026`과 Web 개선 `0032`~~`0038`·`0040`~~`0041` 10건임**
-- **조건부 보류 이슈는 `0001`·`0011`·`0031`·`0039` 4건이며 명시된 재개 조건이 충족될 때만 작업함**
-- **일반 완료 26건과 선행 범위를 완료한 `0027`은 `archive/2026`에 보관함**
+- **현재 진행 중인 이슈는 Web 개선 `0032`~~`0038`·`0040`~~`0041` 9건임**
+- **조건부 보류 이슈는 `0001`·`0011`·`0039` 3건이며 명시된 재개 조건이 충족될 때만 작업함**
+- **완료 이슈 11건은 `archive/2026`에 보관함**
 - **지속적으로 적용할 계약은 코드·테스트·ADR·운영 문서가 소유하고 이슈는 결정과 검증 근거를 보존함**
 - **완료와 보류가 섞인 작업은 완료된 범위를 보관하고 남은 범위를 별도 이슈로 분리함**
 
@@ -26,11 +26,6 @@
 
 ## 진행 중 작업
 
-- [`0026`: Hosting 계정의 OAuth 기반 연결 도입](0026-hosting-oauth-account-onboarding.md)
-  - 상태: 진행 중
-  - 우선순위: P2
-  - 구현 범위: GitHub.com GitHub App device flow, GitLab.com·GitLab Self-Managed public OAuth app + PKCE, 양쪽 PAT fallback
-  - 남은 외부 조건: provider app client ID·GitLab callback 등록과 실계정 sandbox 검증
 - [`0032`: Web 검색 runtime과 benchmark 실행 경계 분리](0032-web-search-runtime-benchmark-boundary.md)
   - 상태: 진행 중
   - 우선순위: P1
@@ -77,11 +72,7 @@
 - [`0011`: 미사용 코드·export·dependency audit 도입 검토](0011-unused-code-and-dependency-audit.md)
   - 상태: 조건부 보류
   - 우선순위: P2
-  - 재개 조건: Next·Electron multi-entry를 좁은 설정으로 모델링할 수 있는 audit 정확도의 확보
-- [`0031`: 서명된 데스크톱 updater 운영 도입](0031-signed-desktop-updater.md)
-  - 상태: 조건부 보류
-  - 우선순위: P2
-  - 재개 조건: 서명된 N-1 artifact·update feed·privacy inventory·upgrade smoke 환경의 확보
+  - 재개 조건: Next route·generated content entry를 좁은 설정으로 모델링할 수 있는 audit 정확도의 확보
 - [`0039`: Web Tech 문서의 Starlight 전환 영향 검토](0039-web-tech-starlight-migration-assessment.md)
   - 상태: 조건부 보류
   - 우선순위: P3
@@ -89,14 +80,12 @@
 
 ## 완료 이슈 아카이브
 
-- **2026년 완료 이슈 27건은 [2026년 완료 이슈 아카이브](archive/2026/README.md)에서 관리함**
-  - 일반 완료 26건과 선행 release 계약을 완료한 `0027`을 포함함
+- **2026년 완료 이슈 11건은 [2026년 완료 이슈 아카이브](archive/2026/README.md)에서 관리함**
   - 구현 결과·채택하지 않은 선택지·검증 명령을 향후 회귀 분석 근거로 보존함
 
 ## 권장 실행 순서
 
 - **후속 운영 확인은 월요일 scheduled content evidence의 첫 성공과 `content-evidence` artifact 생성 확인임**
-- **OAuth 작업은 `0026`의 account onboarding과 외부 provider 등록·sandbox 검증을 계속함**
 - **Web 작업은 공개 결함 `0036`을 먼저 처리한 뒤 `0032` → `0033` → `0034` → `0037` → `0038` → `0035` → `0040` → `0041` 순서로 실행함**
 - **그 밖의 구현 작업은 조건부 이슈의 재개 조건 발생 여부를 제품 요구와 운영 환경 변화 시점에 확인한 뒤 결정함**
 - **Starlight 전환은 `0039`의 네 가지 재개 조건을 합의한 뒤 isolated pilot으로 검색·URL·배포 계약을 먼저 검증함**

@@ -53,15 +53,6 @@ const content = {
         tags: ["Research", "Sources", "Bilingual"],
         href: "https://invest.jamie.kr/en",
       },
-      {
-        index: "03",
-        category: "Developer tooling",
-        title: "Git Client",
-        description:
-          "A focused desktop interface for understanding repository state and changes.",
-        tags: ["TypeScript", "Desktop", "Git"],
-        href: "https://github.com/jongminchung/jongminchung/tree/main/apps/git-client",
-      },
     ],
     principles: [
       {
@@ -106,15 +97,6 @@ const content = {
           "13F 공시와 투자 원문에서 투자자의 선택과 시장 구조를 분석한 글을 한영으로 기록함",
         tags: ["Research", "Sources", "Bilingual"],
         href: "https://invest.jamie.kr/ko",
-      },
-      {
-        index: "03",
-        category: "개발자 도구",
-        title: "Git Client",
-        description:
-          "저장소 상태와 변경 내용을 이해하는 데 집중한 데스크톱 인터페이스임",
-        tags: ["TypeScript", "Desktop", "Git"],
-        href: "https://github.com/jongminchung/jongminchung/tree/main/apps/git-client",
       },
     ],
     principles: [

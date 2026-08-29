@@ -11,7 +11,6 @@
     "build": "pnpm -r --if-present run build",
     "check": "pnpm run fmt:check && pnpm run lint && pnpm run typecheck && pnpm run test",
     "check:full": "pnpm run check && pnpm run test:e2e",
-    "check:full:electron": "pnpm run check:full && pnpm --filter @jongminchung/git-client run test:electron",
     "deps:check": "node scripts/dependency-lanes.mjs",
     "deps:inventory": "node scripts/dependency-lanes.mjs --inventory",
     "deps:update": "node scripts/dependency-lanes.mjs --update",
@@ -20,8 +19,8 @@
     "lint": "oxlint --config oxlint.config.ts .",
     "test": "pnpm run test:unit && pnpm run test:integration",
     "test:coverage:update": "vitest run --project unit --coverage --coverage.thresholds.autoUpdate",
-    "test:e2e": "pnpm run build && pnpm --filter @jongminchung/web run test:e2e && pnpm --filter @jongminchung/git-client run test:e2e:prebuilt",
-    "test:integration": "vitest run --project integration && pnpm --filter @jongminchung/git-client run test:integration:native",
+    "test:e2e": "pnpm run build && pnpm --filter @jongminchung/web run test:e2e",
+    "test:integration": "vitest run --project integration",
     "test:unit": "vitest run --project unit --coverage",
     "typecheck": "tsc --noEmit && pnpm -r --if-present run typecheck"
   },

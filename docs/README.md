@@ -6,7 +6,7 @@
 
 ## 유지보수
 
-- [기술 스택과 공식 문서](technology-stack.md): 기반 도구와 외부 직접 의존성 75개의 현재 버전·용도·공식 문서
+- [기술 스택과 공식 문서](technology-stack.md): 기반 도구와 외부 직접 의존성의 현재 버전·용도·공식 문서
 - [유지보수 가이드](maintenance.md): 의존성, 보안, 생성물, workflow와 릴리스 운영 절차
 - [프론트엔드 OSS 유지보수 권장안](frontend-oss-maintainability.md): Tailwind CSS·shadcn/ui·Base UI의 역할 경계, 공용 UI 소유권과 단계별 검증·업데이트 방안
 - [루트 기여 가이드](../CONTRIBUTING.md): 개발 환경, workspace별 명령과 제출 기준
@@ -25,7 +25,5 @@
 
 - [Web 앱 구조](web/README.md): 다중 도메인 routing, 콘텐츠 생성, 화면 계층, 테스트와 배포 경계
 - [Web 테스트 전략](web-testing-strategy.md): Next.js 공식 Vitest·Playwright 가이드에 따른 Web 테스트 분류와 실행 기준
-- [Git Client 문서](../apps/git-client/docs/README.md): 로컬 개발·테스트, 독립 감사와 GitHub Release
-- [Git Client 기여 가이드](../apps/git-client/CONTRIBUTING.md)
 - [Web 컨테이너 배포 계약](../apps/web/DEPLOYMENT.md)
 - [`@jongminchung/tooling`](../packages/tooling/README.md): Oxc 설정과 package map

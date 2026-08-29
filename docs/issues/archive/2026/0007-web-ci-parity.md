@@ -57,7 +57,6 @@
 ## 채택하지 않을 내용
 
 - **Web CI에서 production deploy를 수행하지 않음**
-- **Git Client workflow와 Web workflow를 하나의 거대한 job으로 결합하지 않음**
 - **Web 단일 workspace 명령을 전달하는 루트 script를 새로 만들지 않음**
 - **artifact에 environment secret이나 전체 build output을 무조건 포함하지 않음**
 - **경로 filter 때문에 root 설정 변경이 누락되지 않도록 함**
@@ -99,7 +98,6 @@
   - `apps/web`, `packages/ui`, `packages/tooling`과 직접 설정 변경에만 push workflow가 실행되도록 제한함
   - Playwright 실패 artifact를 보존하도록 구성함
 - **`main` push의 원격 검증을 완료함**
-  - 첫 원격 실행은 repo-wide install이 Linux에서 macOS 전용 `macos-alias`를 빌드해 실패함
   - Web consumer graph만 filtered install하고 Linux snapshot 14개를 추가해 후속 실행을 성공시킴
 - **고정 job과 consumer 경로 판정을 유지함**
   - 모든 pull request에서 고정 `Web verify` job을 생성함

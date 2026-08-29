@@ -1,7 +1,7 @@
 # 프론트엔드 OSS 유지보수 권장안
 
 - 기준일은 2026-08-19이며 현재 저장소의 `Tailwind CSS 4`, `shadcn/ui`, `Base UI`,
-  `@jongminchung/ui`, Next.js Web 앱과 Electron Git Client를 범위로 함
+  `@jongminchung/ui`, Next.js Web 앱을 범위로 함
 - 세부 구현 계약은 [디자인 시스템](../DESIGN_SYSTEM.md), 일반 변경 절차는
   [유지보수 가이드](maintenance.md)를 단일 기준으로 사용함
 - 이 문서는 특정 OSS 프로젝트의 코드를 그대로 모방하는 규칙이 아니라, 공식 계약과 현재
@@ -41,13 +41,13 @@
 
 ## 각 도구는 하나의 책임만 가져야 함
 
-| 계층        | 도구·위치                     | 소유하는 책임                                                   | 소유하지 않는 책임                               |
-| ----------- | ----------------------------- | --------------------------------------------------------------- | ------------------------------------------------ |
-| 스타일 엔진 | `Tailwind CSS`                | utility 생성, theme variable 매핑, variant와 source detection   | 제품 component API, 접근성 동작, 디자인 의사결정 |
-| 소스 유입   | `shadcn` CLI와 registry       | component 초안, dependency·alias routing, upstream diff         | 런타임 UI 소유권, 자동 overwrite, 제품 요구사항  |
-| 동작 기반   | `Base UI`                     | headless interaction, keyboard, focus, ARIA 기반 primitive      | 시각 theme, 제품 문구, 앱 상태                   |
-| 저장소 정책 | `packages/ui`                 | 공용 primitive API, semantic token, 기본 theme, Tailwind 진입점 | 제품 layout, 도메인 상태, 앱별 workflow          |
-| 제품 구현   | `apps/web`, `apps/git-client` | composition, 제품 token, 화면 layout, 상태와 사용자 흐름        | 공용 primitive 복사, 공용 동작 기반의 직접 우회  |
+| 계층        | 도구·위치               | 소유하는 책임                                                   | 소유하지 않는 책임                               |
+| ----------- | ----------------------- | --------------------------------------------------------------- | ------------------------------------------------ |
+| 스타일 엔진 | `Tailwind CSS`          | utility 생성, theme variable 매핑, variant와 source detection   | 제품 component API, 접근성 동작, 디자인 의사결정 |
+| 소스 유입   | `shadcn` CLI와 registry | component 초안, dependency·alias routing, upstream diff         | 런타임 UI 소유권, 자동 overwrite, 제품 요구사항  |
+| 동작 기반   | `Base UI`               | headless interaction, keyboard, focus, ARIA 기반 primitive      | 시각 theme, 제품 문구, 앱 상태                   |
+| 저장소 정책 | `packages/ui`           | 공용 primitive API, semantic token, 기본 theme, Tailwind 진입점 | 제품 layout, 도메인 상태, 앱별 workflow          |
+| 제품 구현   | `apps/web`              | composition, 제품 token, 화면 layout, 상태와 사용자 흐름        | 공용 primitive 복사, 공용 동작 기반의 직접 우회  |
 
 - **이 분리는 공식 도구의 의도와도 일치함**
   - `shadcn/ui`는 실제 component source를 전달하는 Open Code 모델이며 사용자가 코드를 소유한다고
@@ -72,7 +72,7 @@
 - **공용 token은 시각값이 아니라 안정된 의미를 표현해야 함**
   - `background`, `foreground`, `primary`, `destructive`, `ring`처럼 여러 primitive가 공유하는 역할은
     공용 계약으로 유지함
-  - terminal ANSI 색상, repository 상태, marketing gradient처럼 제품 의미가 있는 값은 앱에서 소유함
+  - 문서 상태와 marketing gradient처럼 제품 의미가 있는 값은 앱에서 소유함
   - 새 token은 light·dark provider, Tailwind adapter, 실제 consumer와 계약 테스트를 같은 변경에서 추가함
 - **Tailwind class는 source에서 완전한 문자열로 보여야 함**
   - 상태별 class는 문자열 일부를 조합하지 않고 완결된 class map 또는 `cva` variant로 정의함
@@ -143,14 +143,12 @@
   - React·Tailwind처럼 소비 앱과 단일 instance 또는 compiler 계약을 공유하는 항목은 peer 범위를 유지함
 - **공용화 판단은 소비 앱 수보다 추상화 수준을 우선함**
 
-| 변경 사례                             | 권장 소유 위치          | 판단 근거                            |
-| ------------------------------------- | ----------------------- | ------------------------------------ |
-| keyboard·focus를 포함한 범용 `Select` | `packages/ui`           | 제품과 무관한 primitive 동작임       |
-| Git branch 선택 panel                 | `apps/git-client`       | Git 도메인 상태와 문구를 포함함      |
-| 문서 검색 dialog                      | `apps/web`              | 검색 index와 route 동작을 포함함     |
-| 공통 `primary`·`ring` 역할            | `packages/ui` token     | 여러 primitive의 안정된 의미임       |
-| terminal ANSI·repository 상태 색상    | `apps/git-client` theme | 제품 renderer와 도메인 의미에 종속됨 |
-| 한 화면의 grid 계산식                 | 호출 위치               | 재사용 계약이 없는 layout 값임       |
+| 변경 사례                             | 권장 소유 위치      | 판단 근거                        |
+| ------------------------------------- | ------------------- | -------------------------------- |
+| keyboard·focus를 포함한 범용 `Select` | `packages/ui`       | 제품과 무관한 primitive 동작임   |
+| 문서 검색 dialog                      | `apps/web`          | 검색 index와 route 동작을 포함함 |
+| 공통 `primary`·`ring` 역할            | `packages/ui` token | 여러 primitive의 안정된 의미임   |
+| 한 화면의 grid 계산식                 | 호출 위치           | 재사용 계약이 없는 layout 값임   |
 
 - **variant는 제품 이름이 아니라 semantic intent를 표현함**
   - `destructive`, `outline`, `ghost`처럼 어느 앱에서도 같은 의미를 갖는 상태만 primitive API에 포함함
@@ -183,13 +181,13 @@
   - light·dark, reduced motion, pointer와 keyboard 입력을 중요한 조합에 포함함
   - `axe` 자동 검사는 보조 gate로 사용하고 accessible name과 읽기 순서는 role 기반 assertion으로 검증함
 - **4단계 앱 E2E와 시각 회귀는 제품 composition을 검증함**
-  - Web과 Git Client의 핵심 사용자 흐름에서 공용 primitive와 앱 상태의 결합을 확인함
+  - Web의 핵심 사용자 흐름에서 공용 primitive와 앱 상태의 결합을 확인함
   - screenshot은 안정된 viewport·font·OS 조건에서만 기준선으로 사용함
   - 변경된 snapshot은 자동 승인하지 않고 의도한 token·layout 변경인지 직접 검토함
 - **5단계 package 검증은 외부 경계를 증명함**
   - dry-run tarball의 source, ESM JavaScript, declaration, CSS와 export map을 확인함
-  - 실제 consumer build를 통해 Next.js와 Vite 양쪽 호환성을 확인함
-  - 의존성 major 변경은 package test만이 아니라 두 consumer build와 주요 E2E까지 검증함
+  - 실제 consumer build를 통해 Next.js 호환성을 확인함
+  - 의존성 major 변경은 package test만이 아니라 Web consumer build와 주요 E2E까지 검증함
 - **Storybook은 즉시 필수 도구가 아니라 탐색·협업 문제에 대한 선택지임**
   - component 상태를 찾기 어렵거나 PR에서 isolated review가 반복적으로 필요할 때 도입함
   - 세 개 이상의 독립 consumer, 외부 기여자 증가, 시각 QA 병목 중 하나가 지속될 때 재평가함
@@ -216,17 +214,17 @@
 | 문서·주석             | format, link와 명령 확인              | 계약을 바꾸면 관련 test 추가               |
 | primitive style       | UI typecheck·test, consumer 영향 확인 | 시각 변화가 있으면 screenshot              |
 | primitive behavior    | UI test, browser interaction          | 앱 흐름 영향이 있으면 E2E                  |
-| token·global CSS      | theme contract, 두 앱 build           | light·dark screenshot                      |
-| Base UI·Tailwind 갱신 | package test, 두 앱 build             | focus·generated CSS 변화 시 E2E            |
+| token·global CSS      | theme contract, Web build             | light·dark screenshot                      |
+| Base UI·Tailwind 갱신 | package test, Web build               | focus·generated CSS 변화 시 E2E            |
 | package export        | build, dry-run tarball                | 외부 소비자가 있으면 compatibility fixture |
 
 ## 현재 저장소는 자동화 공백부터 보완함
 
 - **유지할 강점은 이미 명확함**
   - `packages/ui`가 primitive, theme, token adapter와 Tailwind 진입점을 함께 소유함
-  - 세 workspace의 `components.json`이 `base-nova`, Lucide, neutral과 Tailwind v4 구성을 맞춤
+  - Web과 UI package의 `components.json`이 `base-nova`, Lucide, neutral과 Tailwind v4 구성을 맞춤
   - 앱이 공용 component를 explicit subpath로 import하고 Base UI 직접 사용을 공용 package로 제한함
-  - Web theme contract, UI server markup test, Git Client Playwright·axe·snapshot 검증이 이미 존재함
+  - Web theme contract와 UI server markup test가 이미 존재함
   - catalog, peer dependency와 source-first export가 모노레포의 version·개발 경계를 명시함
 - **1순위는 문서에만 있는 경계 규칙을 정적 계약으로 옮기는 것임**
   - `components.json` routing과 설정 일치 검사를 추가함

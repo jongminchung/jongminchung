@@ -20,8 +20,8 @@ export const sharedOxlintConfig = defineConfig({
     "eslint/prefer-const": "error",
 
     // any는 이후 접근의 타입 검사를 모두 우회하므로 경계 타입이나 type guard를 사용함
-    // 나쁜 예: (window as any).desktopApi
-    // 좋은 예: Window 인터페이스를 확장하고 window.desktopApi를 사용함
+    // 나쁜 예: (window as any).hostApi
+    // 좋은 예: Window 인터페이스를 확장하고 window.hostApi를 사용함
     "typescript/no-explicit-any": "error",
 
     // void callback에 Promise를 직접 전달하면 rejection 처리 계약이 사라질 수 있음

@@ -32,7 +32,8 @@
         "@tanstack/react-query",
         "next",
         "react",
-        "react-dom"
+        "react-dom",
+        "zod"
       ],
       "groupName": "framework dependencies",
       "groupSlug": "framework-dependencies"
@@ -43,7 +44,6 @@
         "@base-ui/**",
         "@excalidraw/**",
         "@tailwindcss/**",
-        "@tanstack/react-virtual",
         "class-variance-authority",
         "clsx",
         "cmdk",
@@ -56,27 +56,6 @@
       ],
       "groupName": "UI dependencies",
       "groupSlug": "ui-dependencies"
-    },
-    {
-      "description": "Keep dependency updates within the desktop lane.",
-      "matchPackageNames": [
-        "@codemirror/**",
-        "@electron/**",
-        "@electron-forge/**",
-        "@trpc/**",
-        "@xterm/**",
-        "ds-store",
-        "electron",
-        "fflate",
-        "macos-alias",
-        "node-gyp",
-        "node-pty",
-        "uuid",
-        "zod",
-        "zustand"
-      ],
-      "groupName": "desktop dependencies",
-      "groupSlug": "desktop-dependencies"
     },
     {
       "description": "Keep dependency updates within the test lane.",

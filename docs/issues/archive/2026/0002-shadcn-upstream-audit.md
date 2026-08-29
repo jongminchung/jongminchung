@@ -41,9 +41,6 @@
   - provider 값과 `@theme inline` adapter가 분리됨
   - palette utility 대신 semantic utility를 사용함
   - 앱은 공용 globals 뒤에서 제품 token만 override함
-- **Git Client의 stacking layer도 최근 semantic token으로 전환됨**
-  - 숫자형 `z-index`가 제품 layer token으로 치환됨
-  - Dialog·Select의 실제 layer 순서를 Playwright로 검증함
 - **공용 primitive 검증은 전체 surface를 동일한 깊이로 다루지 않음**
   - `packages/ui/src/components`에는 28개 primitive가 있음
   - server markup test는 대표 semantic을 검증하지만 모든 interactive primitive의 upstream 차이를 설명하지 않음
@@ -107,7 +104,6 @@
   - `pnpm --filter @jongminchung/ui run build`
 - **영향받는 consumer를 확인함**
   - Web 변경 시 `pnpm --filter @jongminchung/web run build`
-  - Git Client 변경 시 `pnpm --filter @jongminchung/git-client run build`
   - interaction 변경 시 해당 앱 Playwright test
   - 최종 `pnpm run check`
 
