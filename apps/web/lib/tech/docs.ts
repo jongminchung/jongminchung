@@ -35,8 +35,8 @@ const docsCategoryRegistry = {
     label: "K8s",
     title: { ko: "Kubernetes", en: "Kubernetes" },
     description: {
-      ko: "Cilium Gateway API와 Kubernetes 네트워크 운영을 위한 문서",
-      en: "Documentation for Cilium Gateway API and Kubernetes network operations.",
+      ko: "RKE2 플랫폼 자동화, GitOps와 Cilium Gateway API 운영을 위한 문서",
+      en: "Documentation for RKE2 platform automation, GitOps, and Cilium Gateway API operations.",
     },
   },
   ansible: {

@@ -1,0 +1,311 @@
+---
+id: ansible-rke2-gitops-platform
+locale: ko
+area: k8s
+documentKind: reference
+title: "rke2spray와 GitOps 운영 참조"
+description: "현재 코드가 선언한 RKE2 클러스터, Ansible 수명주기, GitOps 인계, 애플리케이션과 검증 계약을 조회합니다."
+publishedAt: "2026-08-30"
+updatedAt: "2026-08-30"
+verifiedAt: "2026-08-30"
+tags: [ansible, kubernetes, rke2, argocd, gitops, platform-engineering]
+status: stable
+publicationStatus: published
+sourceUrl: https://github.com/jongminchung/rke2spray
+---
+
+## 핵심 요약
+
+- **`rke2spray`는 호스트, RKE2, 클러스터 기반 AddOn과 Argo CD bootstrap을 소유함**
+- **GitOps 저장소는 Root Application 이후의 플랫폼, 데이터, 관측성과 스토리지 리소스를 소유함**
+- **클러스터별 RKE2, CNI, 토폴로지와 네트워크 값은 `inventory/<cluster>/`에서 선언됨**
+- **GitOps는 root `bootstrap`을 포함한 15개 Argo CD `Application`과 총 `299Gi`의 애플리케이션 PVC를 검증함**
+- **NFS endpoint, 외부 L4 load balancer와 외부 backup 부재가 현재 가용성·복구 경계를 구성함**
+
+## 문서 범위와 기준
+
+- **검증 기준일은 `2026-08-30`이며 두 저장소의 현재 `main` 코드를 기준으로 함**
+  - `rke2spray` 기준 저장소는 [`jongminchung/rke2spray`](https://github.com/jongminchung/rke2spray)임
+  - GitOps 기준은 대상 저장소의 `bootstrap/`, `apps/`와 `tests/` 코드임
+  - README와 실행 코드가 다르면 Inventory, Playbook, manifest와 검증 script를 우선함
+
+| 조회 대상              | 기준 코드                                           |
+| ---------------------- | --------------------------------------------------- |
+| 클러스터 버전·토폴로지 | `rke2spray/inventory/<cluster>/`                    |
+| Ansible 공개 API       | `rke2spray/cluster.yml`, root Playbook과 `Makefile` |
+| Kubespray 호환 범위    | `rke2spray/docs/kubespray-api-compatibility.yml`    |
+| GitOps 인계 조건       | `rke2spray/extra_playbooks/gitops_bootstrap.yml`    |
+| Argo CD 애플리케이션   | `bootstrap/templates/applications.yaml`             |
+| Workload 선언값        | `apps/`                                             |
+| 배포 완료 조건         | `tests/integration/verify.sh`                       |
+
+## 저장소 소유권
+
+| 리소스 또는 상태                           | 소유 저장소   | 소유 코드                                                              |
+| ------------------------------------------ | ------------- | ---------------------------------------------------------------------- |
+| 호스트 준비와 system package               | `rke2spray`   | `roles/bootstrap-os`, `roles/system_packages`                          |
+| RKE2 server·agent와 embedded etcd          | `rke2spray`   | `roles/kubernetes`, `roles/etcd`                                       |
+| Cilium과 Gateway API 기반                  | `rke2spray`   | Inventory와 `roles/network_plugin`                                     |
+| cert-manager, trust-manager와 external-dns | `rke2spray`   | `roles/kubernetes-apps/rke2_native`                                    |
+| NFS CSI와 StorageClass                     | `rke2spray`   | `roles/kubernetes-apps/rke2_native`                                    |
+| Argo CD 설치와 Root Application            | `rke2spray`   | `roles/kubernetes-apps/argocd`, `extra_playbooks/gitops_bootstrap.yml` |
+| Namespace, NetworkPolicy와 플랫폼 기반     | GitOps 저장소 | `apps/platform`                                                        |
+| PostgreSQL과 Pooler                        | GitOps 저장소 | `apps/data`                                                            |
+| ClickStack과 OpenTelemetry                 | GitOps 저장소 | `apps/observability`                                                   |
+| SeaweedFS와 S3 경로                        | GitOps 저장소 | `apps/storage`                                                         |
+| Rancher·HyperDX 공개 경로                  | GitOps 저장소 | `apps/platform-routes`                                                 |
+
+- **동일 Kubernetes 리소스의 동시 소유는 허용되지 않음**
+  - RKE2 manifest owner는 `/var/lib/rancher/rke2/server/manifests/<owner>`에 대응함
+  - AddOn 소유권 이전은 `native-addons-handoff`의 owner·basename·checksum 검증을 사용함
+  - `ownership-only` ledger 항목은 Kubernetes 리소스를 삭제하지 않고 소유권만 이전함
+  - `prune` ledger 항목은 정확한 확인 문자열과 일치할 때만 제거 대상이 됨
+
+## rke2spray 클러스터 선언
+
+### 토폴로지
+
+| 항목                  | 선언 변수 또는 group                         |
+| --------------------- | -------------------------------------------- |
+| Inventory profile     | `inventory/<cluster>/`                       |
+| RKE2 topology         | `rke2_topology_mode`                         |
+| Control plane         | `kube_control_plane` Inventory group         |
+| Worker                | `kube_node` Inventory group                  |
+| Datastore             | embedded etcd 또는 `rke2_external_datastore` |
+| Bootstrap host        | `rke2_bootstrap_server`                      |
+| Failure-domain label  | `rke2_failure_domain_mode`                   |
+| Registration endpoint | `rke2_registration_address`                  |
+
+### 버전과 네트워크
+
+| 항목                          | 선언 변수                                      |
+| ----------------------------- | ---------------------------------------------- |
+| Kubernetes                    | `kube_version`                                 |
+| RKE2                          | `rke2_version`과 checksum release lock         |
+| CNI                           | `kube_network_plugin`, `cilium_version`        |
+| RKE2 Cilium chart             | `rke2_cilium_chart_url`                        |
+| kube-proxy                    | `kube_proxy_remove`                            |
+| Cilium kube-proxy replacement | `cilium_kube_proxy_replacement`                |
+| Gateway API                   | `gateway_api_enabled`, `gateway_api_channel`   |
+| Gateway exposure              | `cilium_gateway_exposure_mode`                 |
+| Gateway 대상                  | `cilium_gateway_host_network_nodes`            |
+| Pod CIDR                      | `kube_pods_subnet`                             |
+| Service CIDR                  | `kube_service_addresses`                       |
+| cert-manager                  | `cert_manager_enabled`, `cert_manager_version` |
+| RKE2 ingress controller       | `rke2_ingress_controller`                      |
+
+### 스토리지와 snapshot
+
+| 항목                   | 선언 변수                           |
+| ---------------------- | ----------------------------------- |
+| Storage profile        | `rke2_storage_profile`              |
+| NFS endpoint           | `rke2_nfs_server`, `rke2_nfs_share` |
+| NFS version            | `rke2_nfs_version`                  |
+| RWO 계약               | `rke2_storage_contract.durable_rwo` |
+| RWX 계약               | `rke2_storage_contract.shared_rwx`  |
+| local-path provisioner | `local_path_provisioner_enabled`    |
+| etcd snapshot 주기     | `rke2_etcd_snapshot_schedule_cron`  |
+| etcd snapshot 보존 수  | `rke2_etcd_snapshot_retention`      |
+| etcd snapshot 압축     | `rke2_etcd_snapshot_compress`       |
+
+- **`durable-rwo`와 `shared-rwx`는 workload 의도이며 현재는 동일한 NFS 장애 도메인을 사용함**
+- **`Retain`과 `onDelete: retain`은 PV 삭제를 제한하며 NFS 데이터 backup을 제공하지 않음**
+
+### RKE2 native AddOn profile
+
+| Source               | 역할                                    |
+| -------------------- | --------------------------------------- |
+| `external-dns.yaml`  | 허용된 공개 DNS 레코드 관리             |
+| `nfs-csi.yaml`       | NFS CSI controller와 node plugin 관리   |
+| `nfs-csi-pdb.yaml`   | NFS CSI controller 가용성 정책 관리     |
+| `reloader.yaml`      | Secret·ConfigMap 변경 기반 rollout 관리 |
+| `trust-manager.yaml` | 클러스터 trust bundle 관리              |
+
+## rke2spray 운영 명령
+
+- **다음 target은 저장소 root의 `Makefile`을 기준으로 함**
+
+| Target                                                 | 주요 입력                          | 동작                                                  |
+| ------------------------------------------------------ | ---------------------------------- | ----------------------------------------------------- |
+| `make check`                                           | 개발 도구                          | lint, unit, contract, parity와 syntax 검사            |
+| `make inventory-graph`                                 | `INVENTORY`, `VAULT_PASSWORD_FILE` | 해석된 Inventory graph 출력                           |
+| `make inventory-vault-check`                           | `INVENTORY`, `VAULT_PASSWORD_FILE` | SSH 없이 Vault 입력과 파일 권한 검사                  |
+| `make inventory-preflight`                             | Inventory와 환경변수               | 실제 노드의 토폴로지·포트·스토리지 사전 검사          |
+| `make cluster-converge`                                | Inventory와 Vault                  | `cluster.yml` 실행                                    |
+| `make cluster-health`                                  | Inventory와 Vault                  | API, Node, etcd와 service 상태 조회                   |
+| `make cluster-scale NODE=<node>`                       | worker 이름                        | 선택한 worker를 `scale.yml`로 수렴                    |
+| `make cluster-add-server NODE=<node>`                  | server 이름                        | 선택한 server를 `cluster.yml --limit`로 수렴          |
+| `make cluster-upgrade`                                 | 갱신된 version lock                | cordon, drain, release 변경과 readiness 검사          |
+| `make cluster-snapshot SNAPSHOT=<name>`                | snapshot 이름                      | 수동 embedded-etcd snapshot 생성                      |
+| `make cluster-recover SERVER=<server> SNAPSHOT=<path>` | server와 절대 경로                 | checksum 검증 후 control-plane 복구                   |
+| `make cluster-remove-node NODE=<node>`                 | node와 LB 제거 확인                | LB·etcd·Kubernetes Node와 RKE2 상태 제거              |
+| `make cluster-rotate-certificates`                     | Inventory와 Vault                  | RKE2 인증서 rotation 실행                             |
+| `make gateway-access`                                  | Inventory와 Vault                  | Gateway 접근 계약 조회·검증                           |
+| `make gitops-bootstrap`                                | GitOps 입력과 Vault                | 준비 gate 통과 후 Argo CD와 Root Application 적용     |
+| `make gitops-integration`                              | `GITOPS_INTEGRATION_SCRIPT`        | GitOps integration script를 bootstrap server에서 실행 |
+
+- **`cluster-reset`, `cluster-recover`, `cluster-remove-node`, AddOn prune과 장애 검증은 파괴 가능 작업임**
+  - 각 target은 대상, 확인 문자열 또는 opt-in 환경변수를 요구함
+  - server 제거 전 외부 LB의 `80`, `443`, `6443`, `9345` backend 제거 상태가 필요함
+  - snapshot의 off-host 복사와 보관은 `rke2spray` 범위에 포함되지 않음
+
+## GitOps 인계 계약
+
+### Argo CD 선언
+
+| 항목                          | 선언 값 또는 변수                           |
+| ----------------------------- | ------------------------------------------- |
+| Argo CD                       | `3.5.1`                                     |
+| Argo CD Helm chart            | `10.4.0`                                    |
+| helm-secrets                  | `4.7.7`                                     |
+| SOPS                          | `3.13.3`                                    |
+| Repository                    | `argocd_gitops_repo_url`                    |
+| Revision                      | `argocd_gitops_revision`                    |
+| Destination                   | `argocd_gitops_destination_server`          |
+| 초기 설치 지연                | `argocd_defer_install_until_platform_ready` |
+| 일반 cluster 실행의 Root 적용 | `argocd_apply_root_application`             |
+
+### Bootstrap gate
+
+- **`extra_playbooks/gitops_bootstrap.yml`은 다음 조건을 모두 검사함**
+  - RKE2 API `/readyz` 응답이 `ok`인 상태
+  - 모든 RKE2 Node가 `Ready`인 상태
+  - Cilium과 CoreDNS rollout이 완료된 상태
+  - Gateway API CRD가 `Established`이고 Cilium `GatewayClass`가 `Accepted`인 상태
+  - cert-manager와 NFS CSI rollout이 완료된 상태
+  - NFS migration gate의 status, database status, StorageClass UID와 cluster UID가 일치하는 상태
+
+- **비밀정보는 Ansible Vault에서 Argo CD Secret으로 전달됨**
+  - Git repository용 read-only SSH private key
+  - GitHub known-hosts 값
+  - SOPS age private key
+  - 평문 private key는 두 저장소에 저장되지 않음
+
+## GitOps 애플리케이션
+
+### Application inventory
+
+| Application            |  Wave | Source                              | Prune   |
+| ---------------------- | ----: | ----------------------------------- | ------- |
+| `bootstrap`            |  root | `bootstrap/` chart                  | `true`  |
+| `platform`             | `-40` | `apps/platform`                     | `true`  |
+| `cloudnative-pg`       | `-30` | chart `0.29.0`                      | `true`  |
+| `clickstack-operators` | `-30` | chart `1.1.0`                       | `true`  |
+| `clickstack`           | `-20` | chart `3.1.1`과 SOPS values         | `false` |
+| `postgresql`           | `-10` | `apps/data/postgresql`              | `false` |
+| `rancher`              | `-10` | chart `2.14.3`                      | `true`  |
+| `seaweedfs-database`   |  `-9` | `apps/storage/seaweedfs-database`   | `false` |
+| `seaweedfs-foundation` |  `-8` | `apps/storage/seaweedfs-foundation` | `true`  |
+| `seaweedfs`            |  `-7` | chart `4.42.0`                      | `false` |
+| `seaweedfs-route`      |  `-6` | `apps/storage/seaweedfs-route`      | `true`  |
+| `otel-agent`           |   `0` | OTel chart `0.170.0`                | `true`  |
+| `otel-cluster`         |   `0` | OTel chart `0.170.0`                | `true`  |
+| `otel-gateway`         |   `0` | OTel chart `0.170.0`                | `false` |
+| `platform-routes`      |   `1` | `apps/platform-routes`              | `true`  |
+
+- **Prune이 `false`인 Application은 finalizer를 사용하지 않음**
+- **Prune이 `true`인 Application은 `resources-finalizer.argocd.argoproj.io`를 사용함**
+- **모든 Application은 automated sync와 `selfHeal: true`를 사용함**
+
+### Workload topology
+
+| Workload               | 현재 topology        |             영속 용량 |
+| ---------------------- | -------------------- | --------------------: |
+| PostgreSQL             | 3 instances          |     instance당 `10Gi` |
+| PgBouncer RW·RO        | 각 2 instances       |                  없음 |
+| ClickHouse             | 1 shard × 3 replicas |      replica당 `60Gi` |
+| Keeper                 | 3 replicas           |       replica당 `2Gi` |
+| MongoDB                | 3 replicas           | data `5Gi`, log `1Gi` |
+| HyperDX                | 2 replicas           |                  없음 |
+| ClickStack ingestion   | 2 replicas           |                  없음 |
+| OTel Agent             | worker별 DaemonSet   |                  없음 |
+| OTel Cluster Collector | 1 replica            |                  없음 |
+| OTel Gateway           | 2 replicas           | replica당 `1Gi` queue |
+| SeaweedFS Master       | 3 replicas           |       replica당 `1Gi` |
+| SeaweedFS Volume       | 3 replicas           |      replica당 `20Gi` |
+| SeaweedFS Filer        | 2 replicas           |    CNPG metadata 사용 |
+| SeaweedFS S3           | 2 replicas           |                  없음 |
+
+- **애플리케이션 PVC 논리 합계는 `299Gi`이며 배포 상한은 `400Gi`임**
+- **PostgreSQL, ClickHouse, Keeper, MongoDB, SeaweedFS Master와 Volume은 서로 다른 세 worker에 분산됨**
+
+## 서비스와 공개 경로
+
+### ClusterIP 서비스
+
+| 용도          | Endpoint                                                 |
+| ------------- | -------------------------------------------------------- |
+| OTLP gRPC     | `otel-gateway.observability.svc.cluster.local:4317`      |
+| OTLP HTTP     | `otel-gateway.observability.svc.cluster.local:4318`      |
+| PostgreSQL RW | `postgresql-pooler-rw.postgresql.svc.cluster.local:5432` |
+| PostgreSQL RO | `postgresql-pooler-ro.postgresql.svc.cluster.local:5432` |
+
+- **`observability`, `postgresql`과 `seaweedfs`의 데이터 서비스에는 `NodePort`와 `LoadBalancer`가 허용되지 않음**
+
+### Gateway API 경로
+
+| Hostname                   | Backend                             | Listener        |
+| -------------------------- | ----------------------------------- | --------------- |
+| `<rancher-hostname>`       | `cattle-system/rancher:80`          | `apps-https`    |
+| `<observability-hostname>` | `observability/clickstack-app:3000` | `apps-https`    |
+| `<s3-hostname>`            | `seaweedfs/seaweedfs-s3:8333`       | `s3-root-https` |
+| `<s3-wildcard-hostname>`   | `seaweedfs/seaweedfs-s3:8333`       | `s3-https`      |
+
+## 검증 계약
+
+### rke2spray 정적 검증
+
+| 명령                         | 검사 범위                                                                           |
+| ---------------------------- | ----------------------------------------------------------------------------------- |
+| `make check`                 | YAML·Ansible lint, unit, Role interface, release lock, lifecycle, topology와 syntax |
+| `make parity`                | 고정된 Kubespray baseline과 공개 API parity                                         |
+| `make inventory-vault-check` | `.vault_pass` mode와 Inventory Vault 값                                             |
+
+### GitOps 정적 검증
+
+| 명령                       | 검사 범위                                         |
+| -------------------------- | ------------------------------------------------- |
+| `tests/static/validate.sh` | policy, YAML·shell lint, gitleaks와 SOPS 암호화   |
+| `tests/static/render.sh`   | bootstrap chart, 외부 chart와 Kustomize rendering |
+| `kubeconform`              | Kubernetes와 추출된 CRD schema                    |
+
+### Live cluster 검증
+
+- **`tests/integration/verify.sh`은 다음 상태를 완료 계약으로 사용함**
+  - 15개 Argo CD Application이 모두 `Synced`·`Healthy`인 상태
+  - Stateful·stateless Application의 prune과 finalizer 정책이 일치하는 상태
+  - 세 replica workload가 서로 다른 세 worker에서 `Ready`인 상태
+  - 공개 금지 Service가 모두 `ClusterIP`인 상태
+  - Pending Pod가 없고 모든 Node root filesystem 사용률이 `60%` 미만인 상태
+  - `durable-rwo`가 `nfs.csi.k8s.io`, `Immediate`, `Retain`, `onDelete=retain`인 상태
+  - 대상 PVC가 모두 `durable-rwo`를 사용하고 논리 합계가 `299Gi`인 상태
+  - Gateway `HTTPRoute`가 `Accepted=True`·`ResolvedRefs=True`인 상태
+
+- **쓰기·삭제를 포함하는 검증은 명시적인 opt-in 변수를 요구함**
+  - NFS 성능 gate는 `RUN_NFS_PERFORMANCE_GATE=true`를 요구함
+  - Database gate는 `RUN_NFS_DATABASE_GATE=true`를 요구함
+  - Workload 장애 검증은 `RUN_DISRUPTIVE_TESTS=true`를 요구함
+
+## 제한과 복구 경계
+
+| 경계                        | 현재 계약                                               |
+| --------------------------- | ------------------------------------------------------- |
+| 단일 node 장애              | control plane과 주요 stateful workload의 replica로 대응 |
+| 외부 LB 장애                | 저장소 외부의 인프라 장애 도메인                        |
+| NFS endpoint 장애           | 모든 NFS 기반 stateful workload에 영향을 줄 수 있음     |
+| PVC 삭제                    | `Retain`과 stateful `prune: false`로 자동 삭제 제한     |
+| NFS 전체 손실               | 저장소 내부 자산만으로 복구 불가                        |
+| PostgreSQL backup·PITR      | 현재 범위 밖                                            |
+| 기존 PVC·legacy workload    | 자동 migration 범위 밖                                  |
+| etcd snapshot off-host 보관 | `rke2spray` 범위 밖                                     |
+| Argo CD SSO·운영 RBAC 강화  | 현재 범위 밖                                            |
+
+## 문서 갱신 계약
+
+- **다음 코드가 변경되면 이 참조 문서의 `updatedAt`과 `verifiedAt`을 갱신해야 함**
+  - `inventory/<cluster>`의 version, topology, network 또는 storage 입력
+  - `Makefile`의 공개 운영 target과 필수 변수
+  - `gitops_bootstrap.yml`의 readiness gate
+  - `bootstrap/templates/applications.yaml`의 Application, wave, chart version 또는 prune 정책
+  - `apps/`의 replica, PVC, Service 또는 공개 route
+  - `tests/integration/verify.sh`의 완료 조건

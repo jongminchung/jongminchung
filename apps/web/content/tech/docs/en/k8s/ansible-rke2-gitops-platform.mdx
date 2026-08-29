@@ -1,0 +1,311 @@
+---
+id: ansible-rke2-gitops-platform
+locale: en
+area: k8s
+documentKind: reference
+title: "rke2spray and GitOps Operations Reference"
+description: "Look up the RKE2 cluster, Ansible lifecycle, GitOps handoff, applications, and verification contracts declared by the current code."
+publishedAt: "2026-08-30"
+updatedAt: "2026-08-30"
+verifiedAt: "2026-08-30"
+tags: [ansible, kubernetes, rke2, argocd, gitops, platform-engineering]
+status: stable
+publicationStatus: published
+sourceUrl: https://github.com/jongminchung/rke2spray
+---
+
+## Key facts
+
+- **`rke2spray` owns hosts, RKE2, cluster-foundation add-ons, and the Argo CD bootstrap**
+- **The GitOps repository owns platform, data, observability, and storage resources after the root Application**
+- **Cluster-specific RKE2, CNI, topology, and network values are declared under `inventory/<cluster>/`**
+- **GitOps verifies 15 Argo CD `Application` resources including the root `bootstrap`, and `299Gi` of application PVC requests**
+- **The NFS endpoint, external L4 load balancer, and absence of external backups define the current availability and recovery boundaries**
+
+## Scope and authority
+
+- **This page was verified on `2026-08-30` against the current `main` code in both repositories**
+  - [`jongminchung/rke2spray`](https://github.com/jongminchung/rke2spray) is the cluster source
+  - The target repository's `bootstrap/`, `apps/`, and `tests/` directories define the GitOps contract
+  - When prose differs from executable code, inventory, Playbooks, manifests, and verification scripts are authoritative
+
+| Information                   | Authoritative code                                      |
+| ----------------------------- | ------------------------------------------------------- |
+| Cluster versions and topology | `rke2spray/inventory/<cluster>/`                        |
+| Ansible public API            | `rke2spray/cluster.yml`, root Playbooks, and `Makefile` |
+| Kubespray compatibility       | `rke2spray/docs/kubespray-api-compatibility.yml`        |
+| GitOps handoff gates          | `rke2spray/extra_playbooks/gitops_bootstrap.yml`        |
+| Argo CD applications          | `bootstrap/templates/applications.yaml`                 |
+| Workload declarations         | `apps/`                                                 |
+| Deployment completion         | `tests/integration/verify.sh`                           |
+
+## Repository ownership
+
+| Resource or state                                    | Owner             | Owning code                                                            |
+| ---------------------------------------------------- | ----------------- | ---------------------------------------------------------------------- |
+| Host preparation and system packages                 | `rke2spray`       | `roles/bootstrap-os`, `roles/system_packages`                          |
+| RKE2 servers, agents, and embedded etcd              | `rke2spray`       | `roles/kubernetes`, `roles/etcd`                                       |
+| Cilium and the Gateway API foundation                | `rke2spray`       | Inventory and `roles/network_plugin`                                   |
+| cert-manager, trust-manager, and external-dns        | `rke2spray`       | `roles/kubernetes-apps/rke2_native`                                    |
+| NFS CSI and StorageClasses                           | `rke2spray`       | `roles/kubernetes-apps/rke2_native`                                    |
+| Argo CD installation and root Application            | `rke2spray`       | `roles/kubernetes-apps/argocd`, `extra_playbooks/gitops_bootstrap.yml` |
+| Namespaces, NetworkPolicies, and platform foundation | GitOps repository | `apps/platform`                                                        |
+| PostgreSQL and poolers                               | GitOps repository | `apps/data`                                                            |
+| ClickStack and OpenTelemetry                         | GitOps repository | `apps/observability`                                                   |
+| SeaweedFS and its S3 route                           | GitOps repository | `apps/storage`                                                         |
+| Rancher and HyperDX public routes                    | GitOps repository | `apps/platform-routes`                                                 |
+
+- **Concurrent ownership of the same Kubernetes resource is not supported**
+  - An RKE2 manifest owner maps to `/var/lib/rancher/rke2/server/manifests/<owner>`
+  - `native-addons-handoff` verifies owner, basename, and checksum during an ownership transfer
+  - An `ownership-only` ledger entry transfers ownership without deleting the Kubernetes resource
+  - A `prune` ledger entry is removable only with the exact confirmation value
+
+## rke2spray cluster declaration
+
+### Topology
+
+| Item                  | Declaration variable or group              |
+| --------------------- | ------------------------------------------ |
+| Inventory profile     | `inventory/<cluster>/`                     |
+| RKE2 topology         | `rke2_topology_mode`                       |
+| Control plane         | `kube_control_plane` inventory group       |
+| Workers               | `kube_node` inventory group                |
+| Datastore             | Embedded etcd or `rke2_external_datastore` |
+| Bootstrap host        | `rke2_bootstrap_server`                    |
+| Failure-domain label  | `rke2_failure_domain_mode`                 |
+| Registration endpoint | `rke2_registration_address`                |
+
+### Versions and networking
+
+| Item                          | Declaration variable                           |
+| ----------------------------- | ---------------------------------------------- |
+| Kubernetes                    | `kube_version`                                 |
+| RKE2                          | `rke2_version` and checksum release lock       |
+| CNI                           | `kube_network_plugin`, `cilium_version`        |
+| RKE2 Cilium chart             | `rke2_cilium_chart_url`                        |
+| kube-proxy                    | `kube_proxy_remove`                            |
+| Cilium kube-proxy replacement | `cilium_kube_proxy_replacement`                |
+| Gateway API                   | `gateway_api_enabled`, `gateway_api_channel`   |
+| Gateway exposure              | `cilium_gateway_exposure_mode`                 |
+| Gateway nodes                 | `cilium_gateway_host_network_nodes`            |
+| Pod CIDR                      | `kube_pods_subnet`                             |
+| Service CIDR                  | `kube_service_addresses`                       |
+| cert-manager                  | `cert_manager_enabled`, `cert_manager_version` |
+| RKE2 ingress controller       | `rke2_ingress_controller`                      |
+
+### Storage and snapshots
+
+| Item                      | Declaration variable                |
+| ------------------------- | ----------------------------------- |
+| Storage profile           | `rke2_storage_profile`              |
+| NFS endpoint              | `rke2_nfs_server`, `rke2_nfs_share` |
+| NFS version               | `rke2_nfs_version`                  |
+| RWO contract              | `rke2_storage_contract.durable_rwo` |
+| RWX contract              | `rke2_storage_contract.shared_rwx`  |
+| local-path provisioner    | `local_path_provisioner_enabled`    |
+| etcd snapshot schedule    | `rke2_etcd_snapshot_schedule_cron`  |
+| etcd snapshot retention   | `rke2_etcd_snapshot_retention`      |
+| etcd snapshot compression | `rke2_etcd_snapshot_compress`       |
+
+- **`durable-rwo` and `shared-rwx` express workload intent and currently share one NFS failure domain**
+- **`Retain` and `onDelete: retain` restrict PV deletion and do not provide NFS data backups**
+
+### RKE2 native add-on profile
+
+| Source               | Function                                             |
+| -------------------- | ---------------------------------------------------- |
+| `external-dns.yaml`  | Manage the allowed public DNS records                |
+| `nfs-csi.yaml`       | Manage NFS CSI controllers and node plugins          |
+| `nfs-csi-pdb.yaml`   | Manage NFS CSI controller availability policy        |
+| `reloader.yaml`      | Roll out workloads after Secret or ConfigMap changes |
+| `trust-manager.yaml` | Manage the cluster trust bundle                      |
+
+## rke2spray operator commands
+
+- **These targets are defined by the repository-root `Makefile`**
+
+| Target                                                 | Main inputs                        | Behavior                                                     |
+| ------------------------------------------------------ | ---------------------------------- | ------------------------------------------------------------ |
+| `make check`                                           | Development tools                  | Run lint, unit, contract, parity, and syntax checks          |
+| `make inventory-graph`                                 | `INVENTORY`, `VAULT_PASSWORD_FILE` | Print the resolved inventory graph                           |
+| `make inventory-vault-check`                           | `INVENTORY`, `VAULT_PASSWORD_FILE` | Check Vault inputs and file mode without SSH                 |
+| `make inventory-preflight`                             | Inventory and environment          | Check live topology, ports, and storage prerequisites        |
+| `make cluster-converge`                                | Inventory and Vault                | Run `cluster.yml`                                            |
+| `make cluster-health`                                  | Inventory and Vault                | Inspect API, Node, etcd, and service health                  |
+| `make cluster-scale NODE=<node>`                       | Worker name                        | Reconcile one selected worker with `scale.yml`               |
+| `make cluster-add-server NODE=<node>`                  | Server name                        | Reconcile one server with `cluster.yml --limit`              |
+| `make cluster-upgrade`                                 | Updated version lock               | Cordon, drain, change release, and verify readiness          |
+| `make cluster-snapshot SNAPSHOT=<name>`                | Snapshot name                      | Create a manual embedded-etcd snapshot                       |
+| `make cluster-recover SERVER=<server> SNAPSHOT=<path>` | Server and absolute path           | Restore the control plane after checksum validation          |
+| `make cluster-remove-node NODE=<node>`                 | Node and LB-removal confirmation   | Remove LB, etcd, Kubernetes Node, and RKE2 state             |
+| `make cluster-rotate-certificates`                     | Inventory and Vault                | Rotate RKE2 certificates                                     |
+| `make gateway-access`                                  | Inventory and Vault                | Inspect and verify the Gateway access contract               |
+| `make gitops-bootstrap`                                | GitOps inputs and Vault            | Apply Argo CD and the root Application after readiness gates |
+| `make gitops-integration`                              | `GITOPS_INTEGRATION_SCRIPT`        | Run a GitOps integration script on the bootstrap server      |
+
+- **`cluster-reset`, `cluster-recover`, `cluster-remove-node`, add-on pruning, and failure probes can destroy or interrupt state**
+  - Each target requires a bounded target, confirmation value, or opt-in environment variable
+  - Server removal requires prior removal from external LB backends on ports `80`, `443`, `6443`, and `9345`
+  - Off-host snapshot transfer and retention are outside the `rke2spray` contract
+
+## GitOps handoff contract
+
+### Argo CD declaration
+
+| Item                                 | Declared value or variable                  |
+| ------------------------------------ | ------------------------------------------- |
+| Argo CD                              | `3.5.1`                                     |
+| Argo CD Helm chart                   | `10.4.0`                                    |
+| helm-secrets                         | `4.7.7`                                     |
+| SOPS                                 | `3.13.3`                                    |
+| Repository                           | `argocd_gitops_repo_url`                    |
+| Revision                             | `argocd_gitops_revision`                    |
+| Destination                          | `argocd_gitops_destination_server`          |
+| Initial-install deferral             | `argocd_defer_install_until_platform_ready` |
+| Root apply during normal cluster run | `argocd_apply_root_application`             |
+
+### Bootstrap gates
+
+- **`extra_playbooks/gitops_bootstrap.yml` requires all of the following conditions**
+  - RKE2 API `/readyz` returns `ok`
+  - Every RKE2 Node reports `Ready`
+  - Cilium and CoreDNS rollouts are complete
+  - Gateway API CRDs report `Established` and the Cilium `GatewayClass` reports `Accepted`
+  - cert-manager and NFS CSI rollouts are complete
+  - NFS migration-gate status, database status, StorageClass UID, and cluster UID match the live cluster
+
+- **Secrets move from Ansible Vault into Argo CD Secrets**
+  - Read-only SSH private key for the Git repository
+  - GitHub known-hosts value
+  - SOPS age private key
+  - Neither repository stores plaintext private keys
+
+## GitOps applications
+
+### Application inventory
+
+| Application            |  Wave | Source                              | Prune   |
+| ---------------------- | ----: | ----------------------------------- | ------- |
+| `bootstrap`            |  root | `bootstrap/` chart                  | `true`  |
+| `platform`             | `-40` | `apps/platform`                     | `true`  |
+| `cloudnative-pg`       | `-30` | chart `0.29.0`                      | `true`  |
+| `clickstack-operators` | `-30` | chart `1.1.0`                       | `true`  |
+| `clickstack`           | `-20` | chart `3.1.1` and SOPS values       | `false` |
+| `postgresql`           | `-10` | `apps/data/postgresql`              | `false` |
+| `rancher`              | `-10` | chart `2.14.3`                      | `true`  |
+| `seaweedfs-database`   |  `-9` | `apps/storage/seaweedfs-database`   | `false` |
+| `seaweedfs-foundation` |  `-8` | `apps/storage/seaweedfs-foundation` | `true`  |
+| `seaweedfs`            |  `-7` | chart `4.42.0`                      | `false` |
+| `seaweedfs-route`      |  `-6` | `apps/storage/seaweedfs-route`      | `true`  |
+| `otel-agent`           |   `0` | OTel chart `0.170.0`                | `true`  |
+| `otel-cluster`         |   `0` | OTel chart `0.170.0`                | `true`  |
+| `otel-gateway`         |   `0` | OTel chart `0.170.0`                | `false` |
+| `platform-routes`      |   `1` | `apps/platform-routes`              | `true`  |
+
+- **Applications with pruning disabled do not use a finalizer**
+- **Applications with pruning enabled use `resources-finalizer.argocd.argoproj.io`**
+- **Every Application uses automated sync and `selfHeal: true`**
+
+### Workload topology
+
+| Workload               | Current topology     |    Persistent allocation |
+| ---------------------- | -------------------- | -----------------------: |
+| PostgreSQL             | 3 instances          |      `10Gi` per instance |
+| PgBouncer RW and RO    | 2 instances each     |                     None |
+| ClickHouse             | 1 shard × 3 replicas |       `60Gi` per replica |
+| Keeper                 | 3 replicas           |        `2Gi` per replica |
+| MongoDB                | 3 replicas           | `5Gi` data and `1Gi` log |
+| HyperDX                | 2 replicas           |                     None |
+| ClickStack ingestion   | 2 replicas           |                     None |
+| OTel Agent             | DaemonSet on workers |                     None |
+| OTel Cluster Collector | 1 replica            |                     None |
+| OTel Gateway           | 2 replicas           |  `1Gi` queue per replica |
+| SeaweedFS Master       | 3 replicas           |        `1Gi` per replica |
+| SeaweedFS Volume       | 3 replicas           |       `20Gi` per replica |
+| SeaweedFS Filer        | 2 replicas           |            CNPG metadata |
+| SeaweedFS S3           | 2 replicas           |                     None |
+
+- **Application PVC requests total `299Gi` and the deployment ceiling is `400Gi`**
+- **PostgreSQL, ClickHouse, Keeper, MongoDB, and SeaweedFS Master and Volume replicas spread across three distinct workers**
+
+## Services and public routes
+
+### ClusterIP services
+
+| Purpose       | Endpoint                                                 |
+| ------------- | -------------------------------------------------------- |
+| OTLP gRPC     | `otel-gateway.observability.svc.cluster.local:4317`      |
+| OTLP HTTP     | `otel-gateway.observability.svc.cluster.local:4318`      |
+| PostgreSQL RW | `postgresql-pooler-rw.postgresql.svc.cluster.local:5432` |
+| PostgreSQL RO | `postgresql-pooler-ro.postgresql.svc.cluster.local:5432` |
+
+- **Data services in `observability`, `postgresql`, and `seaweedfs` may not use `NodePort` or `LoadBalancer`**
+
+### Gateway API routes
+
+| Hostname                   | Backend                             | Listener        |
+| -------------------------- | ----------------------------------- | --------------- |
+| `<rancher-hostname>`       | `cattle-system/rancher:80`          | `apps-https`    |
+| `<observability-hostname>` | `observability/clickstack-app:3000` | `apps-https`    |
+| `<s3-hostname>`            | `seaweedfs/seaweedfs-s3:8333`       | `s3-root-https` |
+| `<s3-wildcard-hostname>`   | `seaweedfs/seaweedfs-s3:8333`       | `s3-https`      |
+
+## Verification contracts
+
+### rke2spray static verification
+
+| Command                      | Coverage                                                                                   |
+| ---------------------------- | ------------------------------------------------------------------------------------------ |
+| `make check`                 | YAML and Ansible lint, unit, role interface, release lock, lifecycle, topology, and syntax |
+| `make parity`                | Public API parity with the pinned Kubespray baseline                                       |
+| `make inventory-vault-check` | `.vault_pass` mode and inventory Vault values                                              |
+
+### GitOps static verification
+
+| Command                    | Coverage                                                   |
+| -------------------------- | ---------------------------------------------------------- |
+| `tests/static/validate.sh` | Policy, YAML and shell lint, gitleaks, and SOPS encryption |
+| `tests/static/render.sh`   | Bootstrap chart, upstream charts, and Kustomize rendering  |
+| `kubeconform`              | Kubernetes and extracted CRD schemas                       |
+
+### Live-cluster verification
+
+- **`tests/integration/verify.sh` defines the following completion state**
+  - All 15 Argo CD Applications report `Synced` and `Healthy`
+  - Stateful and stateless Application prune and finalizer policies match
+  - Three-replica workloads are `Ready` on three distinct workers
+  - Services excluded from public exposure remain `ClusterIP`
+  - No Pod is Pending and every Node root filesystem remains below `60%` usage
+  - `durable-rwo` uses `nfs.csi.k8s.io`, `Immediate`, `Retain`, and `onDelete=retain`
+  - All target PVCs use `durable-rwo` and total `299Gi`
+  - Gateway `HTTPRoute` resources report `Accepted=True` and `ResolvedRefs=True`
+
+- **Verification that writes or deletes state requires an explicit opt-in variable**
+  - The NFS performance gate requires `RUN_NFS_PERFORMANCE_GATE=true`
+  - The database gate requires `RUN_NFS_DATABASE_GATE=true`
+  - Workload disruption checks require `RUN_DISRUPTIVE_TESTS=true`
+
+## Limits and recovery boundaries
+
+| Boundary                                | Current contract                                                     |
+| --------------------------------------- | -------------------------------------------------------------------- |
+| Single-node failure                     | Control-plane and major stateful-workload replicas provide tolerance |
+| External LB failure                     | Infrastructure failure domain outside both repositories              |
+| NFS endpoint failure                    | Can affect every NFS-backed stateful workload                        |
+| PVC deletion                            | `Retain` and stateful `prune: false` restrict automatic deletion     |
+| Complete NFS loss                       | Not recoverable from repository assets alone                         |
+| PostgreSQL backup and PITR              | Out of scope                                                         |
+| Existing PVC and legacy workloads       | Automatic migration is out of scope                                  |
+| Off-host etcd snapshot retention        | Outside the `rke2spray` contract                                     |
+| Argo CD SSO and operator RBAC hardening | Out of scope                                                         |
+
+## Documentation update contract
+
+- **Update this page's `updatedAt` and `verifiedAt` when any of the following code changes**
+  - Version, topology, network, or storage inputs in `inventory/<cluster>`
+  - Public operator targets or required variables in `Makefile`
+  - Readiness gates in `gitops_bootstrap.yml`
+  - Applications, waves, chart versions, or prune policies in `bootstrap/templates/applications.yaml`
+  - Replicas, PVCs, Services, or public routes under `apps/`
+  - Completion assertions in `tests/integration/verify.sh`

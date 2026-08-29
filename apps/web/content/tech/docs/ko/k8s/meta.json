@@ -9,6 +9,7 @@
     "cilium-gateway-api-multi-control-plane",
     "cilium-gateway-api-direct-public-ip",
     "---Reference · 조회---",
+    "ansible-rke2-gitops-platform",
     "---Explanation · 이해---",
     "cilium-gateway-api-foundations",
     "cilium-gateway-api"
