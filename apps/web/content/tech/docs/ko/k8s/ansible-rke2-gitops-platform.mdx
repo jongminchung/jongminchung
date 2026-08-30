@@ -19,7 +19,9 @@ sourceUrl: https://github.com/jongminchung/rke2spray
 - **GitOps는 root `bootstrap`을 포함한 15개 Argo CD `Application`과 총 `299Gi`의 애플리케이션 PVC를 검증함**
 - **NFS endpoint, 외부 L4 load balancer와 외부 backup 부재가 현재 가용성·복구 경계를 구성함**
 
-## 문서 범위와 기준
+<Arc42CoverageMap locale="ko" />
+
+## 1. 목표와 검증 기준
 
 - **검증 기준일은 `2026-08-30`이며 두 저장소의 현재 `main` 코드를 기준으로 함**
   - `rke2spray` 기준 저장소는 [`jongminchung/rke2spray`](https://github.com/jongminchung/rke2spray)임
@@ -36,7 +38,20 @@ sourceUrl: https://github.com/jongminchung/rke2spray
 | Workload 선언값        | `apps/`                                             |
 | 배포 완료 조건         | `tests/integration/verify.sh`                       |
 
-## 저장소 소유권
+## 2. 아키텍처 제약
+
+- **Kubernetes 배포판은 `RKE2 v1.36.3+rke2r1`, CNI는 `Cilium 1.20.1`로 고정됨**
+  - `jamie-kr-gitops/ansible/rke2spray.rev`가 검증된 `rke2spray` commit을 선택함
+- **Control plane API와 Gateway 트래픽은 저장소 밖의 stable external TCP load balancer에 의존함**
+  - LB backend 제거는 server 제거보다 먼저 수행해야 함
+- **영속 workload는 현재 하나의 관리형 NFS endpoint를 공유함**
+  - `durable-rwo`와 replica 분산은 NFS 자체의 장애나 손실을 격리하지 못함
+- **비밀정보 평문은 Git에 저장하지 않음**
+  - Host bootstrap 값은 Ansible Vault, Kubernetes 애플리케이션 값은 SOPS와 age 경계를 사용함
+
+## 3. 시스템 컨텍스트와 저장소 소유권
+
+<C4ArchitectureMap level="context" locale="ko" />
 
 | 리소스 또는 상태                           | 소유 저장소   | 소유 코드                                                              |
 | ------------------------------------------ | ------------- | ---------------------------------------------------------------------- |
@@ -58,7 +73,20 @@ sourceUrl: https://github.com/jongminchung/rke2spray
   - `ownership-only` ledger 항목은 Kubernetes 리소스를 삭제하지 않고 소유권만 이전함
   - `prune` ledger 항목은 정확한 확인 문자열과 일치할 때만 제거 대상이 됨
 
-## rke2spray 클러스터 선언
+## 4. 솔루션 전략은 API 준비 전후에 수렴 엔진을 전환함
+
+- **`rke2spray`가 Kubernetes API 생성 전 host와 RKE2 desired state를 수렴함**
+  - Kubespray 형태의 Inventory를 검증하고 RKE2 server·agent lifecycle로 변환함
+- **Bootstrap gate가 API 생성과 플랫폼 준비의 경계를 실행 가능한 조건으로 고정함**
+  - Node, Cilium, CoreDNS, Gateway API, cert-manager와 NFS CSI 준비 상태를 검사함
+- **Argo CD가 API 생성 후 애플리케이션 desired state를 지속적으로 수렴함**
+  - Root Application이 역할별 child Application과 sync wave를 생성함
+- **두 엔진은 같은 환경 release를 소비하지만 동일 리소스를 동시에 소유하지 않음**
+  - 이 경계가 Ansible IaC와 GitOps를 한 저장소에서 안전하게 결합하는 전제임
+
+<C4ArchitectureMap level="container" locale="ko" />
+
+## 5. rke2spray 빌딩 블록
 
 ### 토폴로지
 
@@ -118,7 +146,7 @@ sourceUrl: https://github.com/jongminchung/rke2spray
 | `reloader.yaml`      | Secret·ConfigMap 변경 기반 rollout 관리 |
 | `trust-manager.yaml` | 클러스터 trust bundle 관리              |
 
-## rke2spray 운영 명령
+## 6. rke2spray 운영 Runtime
 
 - **다음 target은 저장소 root의 `Makefile`을 기준으로 함**
 
@@ -146,7 +174,7 @@ sourceUrl: https://github.com/jongminchung/rke2spray
   - server 제거 전 외부 LB의 `80`, `443`, `6443`, `9345` backend 제거 상태가 필요함
   - snapshot의 off-host 복사와 보관은 `rke2spray` 범위에 포함되지 않음
 
-## GitOps 인계 계약
+## 6. GitOps 인계 Runtime
 
 ### Argo CD 선언
 
@@ -178,7 +206,15 @@ sourceUrl: https://github.com/jongminchung/rke2spray
   - SOPS age private key
   - 평문 private key는 두 저장소에 저장되지 않음
 
-## GitOps 애플리케이션
+<ExcalidrawAssetDiagram
+  ariaLabel="jamie-kr-gitops와 rke2spray의 소유권과 수렴 엔진 경계"
+  caption="환경 저장소의 두 선언 영역이 rke2spray와 Argo CD라는 서로 다른 수렴 엔진으로 전달됨"
+  src="/diagrams/rke2-gitops-ownership.excalidraw"
+/>
+
+<PlatformConvergenceFlow locale="ko" />
+
+## 7. 배포 뷰: GitOps 애플리케이션
 
 ### Application inventory
 
@@ -226,7 +262,7 @@ sourceUrl: https://github.com/jongminchung/rke2spray
 - **애플리케이션 PVC 논리 합계는 `299Gi`이며 배포 상한은 `400Gi`임**
 - **PostgreSQL, ClickHouse, Keeper, MongoDB, SeaweedFS Master와 Volume은 서로 다른 세 worker에 분산됨**
 
-## 서비스와 공개 경로
+## 7. 배포 뷰: 서비스와 공개 경로
 
 ### ClusterIP 서비스
 
@@ -248,7 +284,7 @@ sourceUrl: https://github.com/jongminchung/rke2spray
 | `<s3-hostname>`            | `seaweedfs/seaweedfs-s3:8333`       | `s3-root-https` |
 | `<s3-wildcard-hostname>`   | `seaweedfs/seaweedfs-s3:8333`       | `s3-https`      |
 
-## 검증 계약
+## 10. 품질 요구사항과 검증 계약
 
 ### rke2spray 정적 검증
 
@@ -283,7 +319,7 @@ sourceUrl: https://github.com/jongminchung/rke2spray
   - Database gate는 `RUN_NFS_DATABASE_GATE=true`를 요구함
   - Workload 장애 검증은 `RUN_DISRUPTIVE_TESTS=true`를 요구함
 
-## 제한과 복구 경계
+## 11. 위험과 복구 경계
 
 | 경계                        | 현재 계약                                               |
 | --------------------------- | ------------------------------------------------------- |
@@ -296,6 +332,17 @@ sourceUrl: https://github.com/jongminchung/rke2spray
 | 기존 PVC·legacy workload    | 자동 migration 범위 밖                                  |
 | etcd snapshot off-host 보관 | `rke2spray` 범위 밖                                     |
 | Argo CD SSO·운영 RBAC 강화  | 현재 범위 밖                                            |
+
+## 12. 핵심 용어
+
+| 용어                 | 이 문서에서 사용하는 의미                                              |
+| -------------------- | ---------------------------------------------------------------------- |
+| Desired state        | Git에서 검토되고 각 수렴 엔진이 실제 상태와 일치시키는 선언            |
+| Inventory            | Kubernetes API 생성 전 host·topology·환경 입력                         |
+| Bootstrap gate       | Argo CD 인계 전에 API·Node·CNI·Storage 준비 상태를 확인하는 검사       |
+| Native AddOn         | `rke2spray`가 RKE2 manifest 또는 `HelmChart`로 소유하는 cluster 기반   |
+| Root Application     | `jamie-kr-gitops/bootstrap`을 자식 Application graph로 확장하는 진입점 |
+| Reconciliation owner | 특정 리소스의 desired state를 실제 상태로 수렴시키는 단일 주체         |
 
 ## 문서 갱신 계약
 

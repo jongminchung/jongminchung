@@ -1,0 +1,533 @@
+.figure {
+  --architecture-accent: var(--primary);
+  position: relative;
+  margin-block: 1.5rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background:
+    radial-gradient(
+      circle at 12% 0%,
+      color-mix(in oklab, var(--architecture-accent) 12%, transparent),
+      transparent 32%
+    ),
+    var(--card);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pauseControl {
+  display: inline-flex;
+  min-height: 2rem;
+  align-items: center;
+  gap: 0.45rem;
+  padding-inline: 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--muted-foreground);
+  cursor: pointer;
+  font-size: 0.75rem;
+  user-select: none;
+}
+
+.pauseControl:hover {
+  color: var(--foreground);
+}
+
+.pauseControl input {
+  accent-color: var(--architecture-accent);
+}
+
+.canvas {
+  position: relative;
+  padding: clamp(1rem, 3vw, 1.75rem);
+}
+
+.contextGrid {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.3fr) minmax(0, 0.85fr);
+  align-items: center;
+  gap: clamp(0.65rem, 2vw, 1.4rem);
+}
+
+.contextGrid::before {
+  position: absolute;
+  top: 50%;
+  right: 8%;
+  left: 8%;
+  height: 2px;
+  background: color-mix(
+    in oklab,
+    var(--architecture-accent) 35%,
+    var(--border)
+  );
+  content: "";
+}
+
+.contextGrid::after {
+  position: absolute;
+  top: 50%;
+  left: 8%;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--architecture-accent);
+  box-shadow: 0 0 0 4px
+    color-mix(in oklab, var(--architecture-accent) 18%, transparent);
+  content: "";
+  transform: translate(-50%, -50%);
+  animation: architecture-context-traverse 4.8s ease-in-out infinite;
+}
+
+.centerStack {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.node {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  padding: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklab, var(--card) 93%, var(--architecture-accent));
+  box-shadow: 0 8px 26px color-mix(in oklab, var(--foreground) 7%, transparent);
+}
+
+.node[data-kind="system"] {
+  border-color: color-mix(
+    in oklab,
+    var(--architecture-accent) 60%,
+    var(--border)
+  );
+  background: color-mix(in oklab, var(--card) 86%, var(--architecture-accent));
+}
+
+.node strong,
+.node span {
+  display: block;
+}
+
+.node strong {
+  overflow-wrap: anywhere;
+  font-size: 0.86rem;
+}
+
+.node span {
+  margin-top: 0.28rem;
+  color: var(--muted-foreground);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.relationship {
+  position: relative;
+  height: 2px;
+  overflow: visible;
+  background: color-mix(
+    in oklab,
+    var(--architecture-accent) 35%,
+    var(--border)
+  );
+}
+
+.relationship::after {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--architecture-accent);
+  box-shadow: 0 0 0 4px
+    color-mix(in oklab, var(--architecture-accent) 18%, transparent);
+  content: "";
+  transform: translate(-50%, -50%);
+  animation: architecture-traverse-x 3.4s ease-in-out infinite;
+}
+
+.relationship[data-delay="1"]::after {
+  animation-delay: -1.7s;
+}
+
+.containerGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: clamp(0.5rem, 1.4vw, 0.85rem);
+}
+
+.containerGrid .node {
+  min-height: 7.4rem;
+}
+
+.containerGrid .node:not(:last-child)::after {
+  position: absolute;
+  top: 50%;
+  right: calc(clamp(0.5rem, 1.4vw, 0.85rem) * -1);
+  width: clamp(0.5rem, 1.4vw, 0.85rem);
+  height: 2px;
+  background: color-mix(
+    in oklab,
+    var(--architecture-accent) 42%,
+    var(--border)
+  );
+  content: "";
+}
+
+.containerGrid .node::before {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: var(--architecture-accent);
+  content: "";
+  opacity: 0.25;
+  animation: architecture-node-pulse 5s ease-in-out infinite;
+}
+
+.containerGrid .node:nth-child(2)::before {
+  animation-delay: 1s;
+}
+
+.containerGrid .node:nth-child(3)::before {
+  animation-delay: 2s;
+}
+
+.containerGrid .node:nth-child(4)::before {
+  animation-delay: 3s;
+}
+
+.containerGrid .node:nth-child(5)::before {
+  animation-delay: 4s;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0.7rem 1rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted-foreground);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.timeline {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: clamp(0.5rem, 1.4vw, 0.9rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.timeline::before {
+  position: absolute;
+  top: 3.55rem;
+  right: clamp(1.4rem, 4vw, 2.6rem);
+  left: clamp(1.4rem, 4vw, 2.6rem);
+  height: 2px;
+  background: color-mix(
+    in oklab,
+    var(--architecture-accent) 30%,
+    var(--border)
+  );
+  content: "";
+}
+
+.timelineItem {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  padding-top: 2.2rem;
+  text-align: center;
+}
+
+.timelineItem::before {
+  position: absolute;
+  top: 1.65rem;
+  left: 50%;
+  width: 0.9rem;
+  height: 0.9rem;
+  border: 2px solid var(--card);
+  border-radius: 999px;
+  background: var(--muted-foreground);
+  box-shadow: 0 0 0 1px var(--border);
+  content: "";
+  transform: translate(-50%, -50%);
+  animation: architecture-stage 10s ease-in-out infinite;
+}
+
+.timelineItem:nth-child(2)::before {
+  animation-delay: 2s;
+}
+
+.timelineItem:nth-child(3)::before {
+  animation-delay: 4s;
+}
+
+.timelineItem:nth-child(4)::before {
+  animation-delay: 6s;
+}
+
+.timelineItem:nth-child(5)::before {
+  animation-delay: 8s;
+}
+
+.timelineItem strong,
+.timelineItem span {
+  display: block;
+}
+
+.timelineItem strong {
+  font-size: 0.78rem;
+  overflow-wrap: anywhere;
+}
+
+.timelineItem span {
+  margin-top: 0.3rem;
+  color: var(--muted-foreground);
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+.arcGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.arcItem {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  gap: 0.6rem;
+  align-items: start;
+  min-width: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklab, var(--card) 96%, var(--architecture-accent));
+}
+
+.arcNumber {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--architecture-accent) 16%, var(--muted));
+  color: var(--foreground);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.arcItem strong,
+.arcItem span {
+  display: block;
+}
+
+.arcItem strong {
+  font-size: 0.78rem;
+}
+
+.arcItem span {
+  margin-top: 0.22rem;
+  color: var(--muted-foreground);
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+.figure:has(.pauseControl input:checked) .contextGrid::after,
+.figure:has(.pauseControl input:checked) .relationship::after,
+.figure:has(.pauseControl input:checked) .node::before,
+.figure:has(.pauseControl input:checked) .timelineItem::before {
+  animation-play-state: paused;
+}
+
+@keyframes architecture-context-traverse {
+  0%,
+  10% {
+    left: 8%;
+    opacity: 0;
+  }
+  20%,
+  80% {
+    opacity: 1;
+  }
+  90%,
+  100% {
+    left: 92%;
+    opacity: 0;
+  }
+}
+
+@keyframes architecture-traverse-x {
+  0%,
+  12% {
+    left: 0;
+    opacity: 0;
+  }
+  22%,
+  78% {
+    opacity: 1;
+  }
+  88%,
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes architecture-node-pulse {
+  0%,
+  16%,
+  100% {
+    opacity: 0.2;
+    transform: scale(0.8);
+  }
+  8% {
+    opacity: 1;
+    transform: scale(1.35);
+  }
+}
+
+@keyframes architecture-stage {
+  0%,
+  18%,
+  100% {
+    background: var(--muted-foreground);
+    box-shadow: 0 0 0 1px var(--border);
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  5%,
+  13% {
+    background: var(--architecture-accent);
+    box-shadow: 0 0 0 6px
+      color-mix(in oklab, var(--architecture-accent) 16%, transparent);
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@media (max-width: 760px) {
+  .contextGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .contextGrid::before {
+    top: 8%;
+    right: auto;
+    bottom: 8%;
+    left: 50%;
+    width: 2px;
+    height: auto;
+  }
+
+  .contextGrid::after {
+    top: 8%;
+    left: 50%;
+    animation-name: architecture-context-traverse-y;
+  }
+
+  .relationship {
+    width: 2px;
+    height: 2.2rem;
+    margin-inline: auto;
+  }
+
+  .relationship::after {
+    top: 0;
+    left: 50%;
+    animation-name: architecture-traverse-y;
+  }
+
+  .containerGrid,
+  .timeline,
+  .arcGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .containerGrid .node {
+    min-height: auto;
+  }
+
+  .containerGrid .node:not(:last-child)::after,
+  .timeline::before {
+    display: none;
+  }
+
+  .timelineItem {
+    padding: 0 0 0 2.2rem;
+    text-align: left;
+  }
+
+  .timelineItem::before {
+    top: 0.5rem;
+    left: 0.55rem;
+  }
+}
+
+@keyframes architecture-traverse-y {
+  0%,
+  12% {
+    top: 0;
+    opacity: 0;
+  }
+  22%,
+  78% {
+    opacity: 1;
+  }
+  88%,
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes architecture-context-traverse-y {
+  0%,
+  10% {
+    top: 8%;
+    opacity: 0;
+  }
+  20%,
+  80% {
+    opacity: 1;
+  }
+  90%,
+  100% {
+    top: 92%;
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .relationship::after,
+  .contextGrid::after,
+  .containerGrid .node::before,
+  .timelineItem::before {
+    animation: none;
+  }
+}

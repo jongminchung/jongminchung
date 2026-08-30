@@ -1,0 +1,216 @@
+---
+documentKind: explanation
+title: "rke2spray와 Kubespray 비교"
+description: "Ansible 자동화 계층, Kubespray의 kubeadm 실행 계층, rke2spray의 RKE2 실행 계층을 분리해 비교합니다."
+publishedAt: "2026-08-30"
+updatedAt: "2026-08-30"
+verifiedAt: "2026-08-30"
+tags: [ansible, kubernetes, rke2, kubespray, platform-engineering]
+status: stable
+publicationStatus: published
+sourceUrl: https://github.com/jongminchung/rke2spray/blob/main/docs/kubespray-comparison.md
+---
+
+## 핵심 요약
+
+- **Ansible 관점의 직접 비교 대상은 `Kubespray`와 `rke2spray`의 Inventory·Playbook·Role·변수·검증 계약**임
+- **`kubeadm`과 `RKE2`의 bootstrap·runtime·PKI 차이는 두 Ansible 저장소 자체가 아니라 각 저장소가 선택한 Kubernetes 실행 엔진의 차이**임
+- **Kubespray는 kubeadm 기반 Kubernetes를 구성하는 upstream 원본이고, `rke2spray`는 그 공개 API를 RKE2 lifecycle로 변환하는 별도 Ansible 구현체**임
+- **동일한 `cluster.yml`·Inventory group·Role 경로는 운영 의도와 이름의 호환성을 뜻하며 task 본문·변수 의미·결과 상태의 동일성을 보장하지 않음**
+- **`rke2spray`는 범용 코어와 sample Inventory만 제공하고 실제 `jamie-kr` Inventory는 `jamie-kr-gitops`가 소비자 코드로 소유함**
+- **선택은 Ansible 재사용만이 아니라 kubeadm 구성요소 선택권과 RKE2 표준화 중 어느 운영 모델을 소유할지로 결정해야 함**
+
+## 비교는 세 계층을 분리함
+
+| 계층                 | Kubespray 경로                | `rke2spray` 경로                      | 비교 질문                                    |
+| -------------------- | ----------------------------- | ------------------------------------- | -------------------------------------------- |
+| Ansible 자동화       | Kubespray 원본 Playbook·Role  | Kubespray API를 추적하는 RKE2 adapter | 입력과 task를 어떻게 해석하는가              |
+| Kubernetes bootstrap | `kubeadm init/join`           | RKE2 server·agent join                | 클러스터를 어떻게 생성하는가                 |
+| Node 실행·운영       | 개별 Kubernetes 구성요소 조합 | RKE2 service·release 단위             | 업그레이드와 복구를 무엇을 단위로 수행하는가 |
+
+- **Ansible 계층이 사용자의 Inventory와 명령을 해석하고 실행 엔진 계층으로 전달함**
+- **설치 엔진의 차이가 Ansible Role·변수·tag의 구현 차이를 만드는 인과관계**임
+- **이 문서의 `rke2spray` 판정 기준은 검증일의 `main`과 `docs/kubespray-api-compatibility.yml`**임
+
+<ExcalidrawAssetDiagram
+  ariaLabel="Kubespray와 rke2spray가 공유 API 형태를 서로 다른 실행 모델로 해석하는 구조"
+  caption="같은 Inventory·Playbook·Role 이름은 공통 진입 형태이며 kubeadm과 RKE2의 내부 task graph는 서로 다름"
+  src="/diagrams/rke2spray-kubespray-execution-models.excalidraw"
+/>
+
+## 실제 Inventory는 jamie-kr-gitops가 소유함
+
+- **`rke2spray`와 `jamie-kr-gitops`는 제공자와 소비자 관계로 분리함**
+  - `rke2spray`는 범용 Playbook·Role·plugin·defaults·`inventory/sample`을 제공함
+  - `jamie-kr-gitops`는 실제 host·group 변수·host 변수·암호화된 Vault 값과 실행 wrapper를 소유함
+- **의존 방향은 `jamie-kr-gitops`가 고정된 `rke2spray` release를 선택하는 단방향으로 유지함**
+  - `rke2spray` 코어에서 `jamie-kr` 이름·주소·도메인·토폴로지를 참조하지 않음
+  - `jamie-kr-gitops`에서 Collection 또는 고정된 checkout을 통해 `rke2spray`를 호출함
+
+```text
+jamie-kr-gitops/
+├── inventory/
+│   └── jamie-kr/
+│       ├── hosts.yml
+│       ├── group_vars/
+│       └── host_vars/
+├── ansible/
+│   └── rke2spray.rev
+└── apps/
+    └── ...
+            │
+            └── consumes pinned rke2spray checkout
+
+rke2spray/
+├── cluster.yml
+├── roles/
+├── plugins/
+└── inventory/
+    └── sample/
+```
+
+- **`jamie-kr-gitops`는 Ansible IaC와 Argo CD GitOps의 환경 선언을 함께 관리함**
+  - `inventory/`와 `ansible/rke2spray.rev`는 Kubernetes API 생성 전 수렴 입력임
+  - `bootstrap/`과 `apps/`는 Kubernetes API 생성 후 Argo CD 수렴 입력임
+- **Inventory 이동 후 실행 기준 경로는 `jamie-kr-gitops` 저장소임**
+
+```bash
+make inventory-vault-check
+make inventory-preflight
+make cluster-converge
+make gitops-bootstrap
+```
+
+- **저장소 이름의 GitOps는 관리 기법이고 Ansible IaC 소유를 배제하는 경계가 아님**
+  - Inventory는 Kubernetes API가 생성되기 전의 선언적 cluster desired state임
+  - `apps/`는 Kubernetes API가 생성된 후 Argo CD가 수렴하는 platform desired state임
+  - 두 상태는 같은 환경 release로 검토할 수 있지만 각 실행 엔진은 `rke2spray`와 Argo CD로 구분됨
+
+<C4ArchitectureMap level="context" locale="ko" />
+
+## Ansible 관점에서 공개 API의 해석이 다름
+
+| Ansible 영역    | Kubespray                                              | `rke2spray`                                                   |
+| --------------- | ------------------------------------------------------ | ------------------------------------------------------------- |
+| 프로젝트 역할   | Kubernetes SIGs가 유지하는 upstream 원본               | Kubespray API와 RKE2 사이의 adapter                           |
+| Collection      | `kubernetes_sigs.kubespray`                            | `jongminchung.rke2spray`                                      |
+| API 기준        | 현재 저장소의 Playbook·Role·defaults·tag가 기준        | `KUBESPRAY_BASELINE`에 고정한 upstream API를 추적             |
+| Inventory group | `kube_control_plane`·`kube_node`·`etcd` 등의 원본 의미 | 같은 이름을 RKE2 server·agent·datastore topology로 재해석     |
+| Root Playbook   | lifecycle의 canonical 구현                             | 이름과 운영 의도를 유지한 adapter entrypoint                  |
+| Role 본문       | kubeadm·runtime·CNI·etcd task를 직접 실행              | `supported`·`adapter`·`conditional`·`unsupported` Role로 분류 |
+| Defaults 변수   | 해당 Kubespray Role이 직접 사용                        | RKE2 config로 변환하거나 등가 표현이 없으면 preflight 실패    |
+| Tag             | upstream task 선택 단위                                | 이름은 parity 대상이지만 RKE2 task 선택 단위                  |
+| 확장 위치       | upstream `roles/`·`contrib/`·문서                      | RKE2 전용 `extra_playbooks/`·native AddOn·acceptance harness  |
+| 호환성 실패     | upstream 검증과 Role 실행 결과                         | silent ignore를 금지하고 대안을 포함한 preflight 오류         |
+| 변경 수용       | Kubespray release·`master` 변경을 직접 소유            | baseline 갱신 PR에서 mapping·예외·test를 검토한 후 수용       |
+
+- **Ansible 관점의 핵심 차이는 “같은 이름이 어떤 task graph로 해석되는가”**임
+  - Kubespray의 `kubernetes/kubeadm`은 kubeadm task를 실행함
+  - `rke2spray`의 `kubernetes/kubeadm`은 RKE2 bootstrap·node·control-plane Role을 연결하는 adapter임
+- **`rke2spray`의 변수 존재는 기능 지원을 자동으로 의미하지 않음**
+  - `container_manager: docker`, `container_manager: crio`, kubeadm patch와 external CNI 직접 설치 입력은 현재 계약에서 거부됨
+  - 변환 가능한 registry mirror·auth·TLS는 RKE2 `registries.yaml`로 mapping됨
+- **공통 Inventory와 Playbook 이름은 runbook 전환 비용을 줄일 수 있으나 drop-in compatibility를 만들지 않음**
+
+## kubeadm 관점에서 Kubespray의 실행 모델을 봄
+
+- **이 계층은 Kubespray와 `rke2spray`의 Ansible API 차이가 아니라 Kubespray가 자동화하는 kubeadm 기반 클러스터 모델**임
+
+| 영역          | kubeadm 기반 Kubespray 구현                                                             |
+| ------------- | --------------------------------------------------------------------------------------- |
+| Bootstrap     | `kubeadm init`·`kubeadm join`과 phase를 사용                                            |
+| Control plane | kubeadm config와 static Pod manifest를 통해 API server·scheduler·controller를 구성      |
+| Kubelet       | binary·config·systemd unit을 Kubespray Role이 관리                                      |
+| Runtime       | containerd·CRI-O·Docker 계열을 별도 Role로 설치·구성                                    |
+| CNI           | Kubernetes API bootstrap과 CNI별 Role·manifest 적용 순서를 Ansible이 관리               |
+| etcd          | `etcd` Inventory group에 따라 동일 host 배치 또는 분리 topology를 Kubespray Role이 구성 |
+| PKI           | kubeadm·Kubespray certificate 경로와 명령을 사용                                        |
+| Version       | Kubernetes·etcd·runtime·CNI 버전을 구성요소별로 조합                                    |
+| Upgrade       | cordon·drain 후 각 구성요소를 고정된 순서로 교체                                        |
+
+- **kubeadm 모델의 장점은 Kubernetes 구성요소를 세부 선택하고 별도로 교체할 수 있는 유연성**임
+- **한계는 구성 조합이 많아질수록 팀이 component 간 호환성·upgrade 순서·장애 경계를 함께 소유해야 한다는 점**임
+
+## RKE2 관점에서 rke2spray의 실행 모델을 봄
+
+- **이 계층은 Ansible 인터페이스 차이가 아니라 `rke2spray`가 자동화하는 RKE2 배포판 모델**임
+
+| 영역          | RKE2 기반 `rke2spray` 구현                                                          |
+| ------------- | ----------------------------------------------------------------------------------- |
+| Bootstrap     | token·bootstrap server·supervisor `:9345`를 사용한 server·agent join                |
+| Control plane | `rke2-server` service가 API server·scheduler·controller lifecycle을 bundle로 관리   |
+| Kubelet       | `rke2-server` 또는 `rke2-agent` lifecycle에 포함                                    |
+| Runtime       | RKE2 bundled containerd로 고정하고 registry 입력만 `registries.yaml`로 관리         |
+| CNI           | packaged Canal·Calico·Cilium·Flannel을 RKE2 `cni` config로 선택                     |
+| etcd          | embedded etcd를 기본으로 사용하고 선택적으로 Kubespray-managed external etcd에 연결 |
+| PKI           | RKE2 certificate 명령·파일 경로·자동 rotation 계약을 사용                           |
+| Version       | Kubernetes patch와 RKE2 revision이 결합된 checksum-locked `rke2_version`을 사용     |
+| Upgrade       | server를 순차 교체하고 agent를 제한된 batch로 RKE2 release에 수렴                   |
+
+- **RKE2 모델의 장점은 runtime·PKI·control-plane lifecycle을 release와 service 단위로 표준화하는 점**임
+- **한계는 alternate runtime, kubeadm phase, external·custom CNI처럼 RKE2 표준 계약 밖의 요구가 즉시 제약으로 바뀐다는 점**임
+- **RKE2에서 기술적으로 가능한 기능과 현재 `rke2spray` adapter가 지원하는 기능은 구분해야 함**
+
+## 엔진 차이가 Ansible 계약으로 변환됨
+
+| Kubespray API                           | Kubespray task                | `rke2spray` 해석                                      | 분류        |
+| --------------------------------------- | ----------------------------- | ----------------------------------------------------- | ----------- |
+| `kube_version`                          | Kubernetes 구성요소 버전 선택 | 같은 patch의 `rke2_version`과 release lock 검증       | Adapter     |
+| `kubernetes/kubeadm`                    | kubeadm bootstrap·join 실행   | RKE2 server·agent bootstrap으로 전환                  | Adapter     |
+| `container-engine`                      | runtime 설치·tuning           | bundled containerd의 registry 설정만 관리             | Adapter     |
+| `container_manager: docker` 또는 `crio` | 선택한 runtime 설치           | lifecycle 시작 전 거부                                | Unsupported |
+| `network_plugin`                        | CNI별 Role·manifest 실행      | packaged CNI 선택으로 전환                            | Adapter     |
+| external·custom CNI                     | 외부 manifest 설치            | 현재 bootstrap·Ready 순서 adapter 미완성으로 거부     | Unsupported |
+| `etcd` Role                             | etcd 설치·구성                | external datastore를 선택했을 때만 실행               | Conditional |
+| `recover-control-plane.yml`             | etcd·control-plane 복구       | embedded-etcd snapshot에서 RKE2 cluster reset·restore | Conditional |
+
+- **Adapter는 의도를 변환하지만 실행체를 복제하지 않음**
+- **Conditional은 datastore·topology 같은 전제가 충족될 때만 공개 API가 유효함을 뜻함**
+- **Unsupported는 RKE2 자체의 영구적 불가능이 아니라 현재 `rke2spray` 공개 실행 계약에 안전한 adapter가 없음을 뜻할 수 있음**
+
+## 공통 Playbook은 의도만 유지함
+
+| 운영 의도   | 공통 entrypoint       | Kubespray 실행                     | `rke2spray` 실행                  |
+| ----------- | --------------------- | ---------------------------------- | --------------------------------- |
+| 설치·재조정 | `cluster.yml`         | kubeadm·runtime·CNI·etcd task 수렴 | RKE2 server·agent 수렴            |
+| Worker 증설 | `scale.yml`           | kubelet·runtime·CNI 구성           | RKE2 agent 설치                   |
+| 업그레이드  | `upgrade-cluster.yml` | 구성요소별 순차 교체               | checksum-locked RKE2 release 교체 |
+| Node 제거   | `remove-node.yml`     | Kubernetes·etcd·host 상태 정리     | RKE2 service·state 정리           |
+| 초기화      | `reset.yml`           | kubeadm·runtime·network 상태 정리  | RKE2 공식 uninstaller 기반 정리   |
+
+- **`rke2spray`는 공통 Playbook 외에 health·snapshot·certificate rotation·AddOn plan·converge·prune을 `extra_playbooks/`로 제공함**
+- **제거·복구·소유권 이전 같은 고위험 경로에 confirmation과 preflight gate를 추가함**
+
+## 선택은 Ansible 재사용과 실행 모델을 함께 평가함
+
+| 요구 조건                                                     | 우선 검토   | 이유                                               |
+| ------------------------------------------------------------- | ----------- | -------------------------------------------------- |
+| Kubespray Role·변수·tag를 원본 의미로 사용해야 함             | Kubespray   | upstream task graph가 공개 API의 실체임            |
+| RKE2가 조직 표준이고 Kubespray 형태의 runbook을 유지하고 싶음 | `rke2spray` | 공개 이름을 RKE2 lifecycle로 변환함                |
+| custom CNI·alternate runtime·kubeadm phase 제어가 필수임      | Kubespray   | 현재 `rke2spray` 계약의 거부 대상임                |
+| 단일 release·service·PKI 계약으로 운영 표면을 줄이고 싶음     | `rke2spray` | RKE2 배포판을 실행 단위로 삼음                     |
+| 넓은 community·provider·CNI 조합이 우선임                     | Kubespray   | Kubernetes SIGs upstream을 직접 사용함             |
+| Kubespray·RKE2 두 upstream adapter를 전담할 소유자가 있음     | `rke2spray` | baseline·mapping·acceptance 유지보수 책임을 감수함 |
+
+- **기존 Kubespray 클러스터를 `rke2spray`로 바꾸는 작업은 Ansible 저장소 교체가 아닌 Kubernetes 엔진 migration으로 계획해야 함**
+  - 공통 Inventory group이 기존 cluster state·PKI·datastore·CNI를 자동 변환하지 않음
+  - 기존 변수와 custom Role을 compatibility contract의 `supported`·`adapter`·`conditional`·`unsupported` 분류와 대조해야 함
+
+## 결론과 실행 제안
+
+- **Ansible 관점에서 Kubespray는 원본 구현, `rke2spray`는 공개 이름을 유지하는 RKE2 adapter로 구분함**
+- **실행 엔진 관점에서 kubeadm은 구성요소 조합, RKE2는 배포판·service·release 통합으로 구분함**
+- **운영 소유권 관점에서 실제 Inventory는 `jamie-kr-gitops`, 범용 설치 엔진은 `rke2spray`로 구분함**
+- **PoC는 공통 `cluster.yml` 실행만이 아니라 변수 mapping, tag 도달성, upgrade, node 제거와 snapshot 복구를 함께 검증해야 함**
+
+## 기준 자료
+
+- [rke2spray Kubespray 비교](https://github.com/jongminchung/rke2spray/blob/main/docs/kubespray-comparison.md)
+- [rke2spray Kubespray API 호환성 계약](https://github.com/jongminchung/rke2spray/blob/main/docs/kubespray-api-compatibility.yml)
+- [Kubespray 저장소와 지원 구성요소](https://github.com/kubernetes-sigs/kubespray)
+- [Kubespray Ansible Inventory](https://github.com/kubernetes-sigs/kubespray/blob/master/docs/ansible/inventory.md)
+- [Kubespray upgrade](https://github.com/kubernetes-sigs/kubespray/blob/master/docs/operations/upgrades.md)
+- [RKE2 architecture](https://docs.rke2.io/architecture)
+- [RKE2 server configuration](https://docs.rke2.io/reference/server_config)
+- [RKE2 network options](https://docs.rke2.io/networking/basic_network_options)
+- [RKE2 backup and restore](https://docs.rke2.io/datastore/backup_restore)

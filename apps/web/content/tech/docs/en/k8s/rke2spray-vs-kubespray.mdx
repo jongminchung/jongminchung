@@ -1,0 +1,216 @@
+---
+documentKind: explanation
+title: "rke2spray vs. Kubespray"
+description: "Compare the Ansible automation layer separately from Kubespray's kubeadm execution layer and rke2spray's RKE2 execution layer."
+publishedAt: "2026-08-30"
+updatedAt: "2026-08-30"
+verifiedAt: "2026-08-30"
+tags: [ansible, kubernetes, rke2, kubespray, platform-engineering]
+status: stable
+publicationStatus: published
+sourceUrl: https://github.com/jongminchung/rke2spray/blob/main/docs/kubespray-comparison.md
+---
+
+## Key takeaways
+
+- **The direct Ansible comparison is between the inventory, playbook, role, variable, tag, and validation contracts of Kubespray and `rke2spray`**
+- **The bootstrap, runtime, and PKI differences between kubeadm and RKE2 belong to the Kubernetes execution-engine layer rather than the Ansible repository layer**
+- **Kubespray is the upstream kubeadm-based implementation, while `rke2spray` is a separate Ansible implementation that translates its public API into an RKE2 lifecycle**
+- **Shared `cluster.yml`, inventory groups, and role paths preserve names and operational intent without guaranteeing identical task bodies, variable semantics, or resulting state**
+- **`rke2spray` provides only the reusable core and sample inventory, while `jamie-kr-gitops` owns the real `jamie-kr` inventory as consumer code**
+- **Selection must consider both Ansible reuse and whether the team wants to own kubeadm component choice or RKE2 standardization**
+
+## The comparison separates three layers
+
+| Layer                        | Kubespray path                         | `rke2spray` path                           | Comparison question                  |
+| ---------------------------- | -------------------------------------- | ------------------------------------------ | ------------------------------------ |
+| Ansible automation           | Original Kubespray playbooks and roles | RKE2 adapters that track the Kubespray API | How are inputs and tasks interpreted |
+| Kubernetes bootstrap         | `kubeadm init/join`                    | RKE2 server and agent join                 | How is the cluster created           |
+| Node execution and operation | Composed Kubernetes components         | RKE2 service and release unit              | What unit is upgraded and recovered  |
+
+- **The Ansible layer interprets inventory and commands before passing them to the execution-engine layer**
+- **The engine difference causes the implementation differences in Ansible roles, variables, and tags**
+- **The `rke2spray` findings follow the verified `main` code and `docs/kubespray-api-compatibility.yml`**
+
+<ExcalidrawAssetDiagram
+  ariaLabel="Kubespray and rke2spray interpreting a shared API shape through different execution models"
+  caption="Shared Inventory, Playbook, and Role names provide a common entry shape; kubeadm and RKE2 still use different internal task graphs"
+  src="/diagrams/rke2spray-kubespray-execution-models.excalidraw"
+/>
+
+## jamie-kr-gitops owns the real inventory
+
+- **`rke2spray` and `jamie-kr-gitops` are separated as provider and consumer**
+  - `rke2spray` provides reusable playbooks, roles, plugins, defaults, and `inventory/sample`
+  - `jamie-kr-gitops` owns real hosts, group variables, host variables, encrypted Vault values, and execution wrappers
+- **The dependency remains one-way, with `jamie-kr-gitops` selecting a pinned `rke2spray` release**
+  - The `rke2spray` core does not reference `jamie-kr` names, addresses, domains, or topology
+  - `jamie-kr-gitops` invokes `rke2spray` through a Collection or pinned checkout
+
+```text
+jamie-kr-gitops/
+├── inventory/
+│   └── jamie-kr/
+│       ├── hosts.yml
+│       ├── group_vars/
+│       └── host_vars/
+├── ansible/
+│   └── rke2spray.rev
+└── apps/
+    └── ...
+            │
+            └── consumes a pinned rke2spray checkout
+
+rke2spray/
+├── cluster.yml
+├── roles/
+├── plugins/
+└── inventory/
+    └── sample/
+```
+
+- **`jamie-kr-gitops` manages both Ansible IaC and Argo CD GitOps declarations for the environment**
+  - `inventory/` and `ansible/rke2spray.rev` are reconciliation inputs used before the Kubernetes API exists
+  - `bootstrap/` and `apps/` are reconciliation inputs used by Argo CD after the Kubernetes API exists
+- **After the inventory migration, commands run from the `jamie-kr-gitops` repository**
+
+```bash
+make inventory-vault-check
+make inventory-preflight
+make cluster-converge
+make gitops-bootstrap
+```
+
+- **GitOps in the repository name describes the management model and does not exclude Ansible IaC ownership**
+  - Inventory is declarative cluster desired state consumed before the Kubernetes API exists
+  - `apps/` is platform desired state reconciled by Argo CD after the Kubernetes API exists
+  - Both states can be reviewed as one environment release while `rke2spray` and Argo CD remain separate execution engines
+
+<C4ArchitectureMap level="context" locale="en" />
+
+## The Ansible layer interprets the public API differently
+
+| Ansible area          | Kubespray                                                         | `rke2spray`                                                                     |
+| --------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Project role          | Upstream implementation maintained under Kubernetes SIGs          | Adapter between the Kubespray API and RKE2                                      |
+| Collection            | `kubernetes_sigs.kubespray`                                       | `jongminchung.rke2spray`                                                        |
+| API baseline          | Current repository playbooks, roles, defaults, and tags           | Upstream API pinned by `KUBESPRAY_BASELINE`                                     |
+| Inventory groups      | Original meaning of `kube_control_plane`, `kube_node`, and `etcd` | Same names reinterpreted as RKE2 server, agent, and datastore topology          |
+| Root playbooks        | Canonical lifecycle implementation                                | Adapter entrypoints that preserve names and operational intent                  |
+| Role bodies           | Execute kubeadm, runtime, CNI, and etcd tasks directly            | Classify roles as `supported`, `adapter`, `conditional`, or `unsupported`       |
+| Default variables     | Consumed directly by the corresponding Kubespray roles            | Mapped to RKE2 configuration or rejected at preflight when no equivalent exists |
+| Tags                  | Select upstream tasks                                             | Preserve parity names while selecting RKE2 tasks                                |
+| Extension points      | Upstream `roles/`, `contrib/`, and documentation                  | RKE2 `extra_playbooks/`, native add-ons, and acceptance harness                 |
+| Compatibility failure | Determined by upstream validation and role execution              | Forbids silent ignore and reports a preflight error with an alternative         |
+| Change intake         | Consumes Kubespray releases and `master` directly                 | Reviews mappings, exceptions, and tests in baseline update pull requests        |
+
+- **The central Ansible difference is which task graph a shared public name resolves to**
+  - Kubespray's `kubernetes/kubeadm` role executes kubeadm tasks
+  - The `rke2spray` role at that path connects RKE2 bootstrap, node, and control-plane adapters
+- **A variable present in `rke2spray` does not automatically mean that the Kubespray feature is supported**
+  - `container_manager: docker`, `container_manager: crio`, kubeadm patches, and direct external CNI installation are currently rejected
+  - Registry mirror, authentication, and TLS inputs that can be represented losslessly map to RKE2 `registries.yaml`
+- **Shared inventory and playbook names can reduce runbook translation cost without creating drop-in compatibility**
+
+## The kubeadm layer describes Kubespray's execution model
+
+- **This layer describes the kubeadm-based cluster model automated by Kubespray, not the Ansible API difference between the two repositories**
+
+| Area          | Kubespray implementation on kubeadm                                                                               |
+| ------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Bootstrap     | Uses `kubeadm init`, `kubeadm join`, and phases                                                                   |
+| Control plane | Builds API server, scheduler, and controller configuration through kubeadm configuration and static Pod manifests |
+| Kubelet       | Kubespray roles manage its binary, configuration, and systemd unit                                                |
+| Runtime       | Separate roles install and configure containerd, CRI-O, or the Docker path                                        |
+| CNI           | Ansible controls the ordering between Kubernetes API bootstrap and CNI-specific roles or manifests                |
+| etcd          | Kubespray roles configure colocated or separate topology according to the `etcd` inventory group                  |
+| PKI           | Uses kubeadm and Kubespray certificate commands and paths                                                         |
+| Versions      | Composes Kubernetes, etcd, runtime, and CNI versions by component                                                 |
+| Upgrade       | Cordons and drains before replacing components in a defined order                                                 |
+
+- **The kubeadm model provides flexibility to select and replace Kubernetes components individually**
+- **Its tradeoff is that the team owns compatibility, upgrade ordering, and failure boundaries across more combinations**
+
+## The RKE2 layer describes rke2spray's execution model
+
+- **This layer describes the RKE2 distribution automated by `rke2spray`, not the Ansible interface difference**
+
+| Area          | `rke2spray` implementation on RKE2                                                               |
+| ------------- | ------------------------------------------------------------------------------------------------ |
+| Bootstrap     | Joins servers and agents through a token, bootstrap server, and supervisor `:9345`               |
+| Control plane | The `rke2-server` service owns the API server, scheduler, and controller lifecycle as a bundle   |
+| Kubelet       | Included in the `rke2-server` or `rke2-agent` lifecycle                                          |
+| Runtime       | Fixes execution to bundled containerd and manages only registry inputs through `registries.yaml` |
+| CNI           | Selects packaged Canal, Calico, Cilium, or Flannel through RKE2 `cni` configuration              |
+| etcd          | Defaults to embedded etcd and can connect to Kubespray-managed external etcd                     |
+| PKI           | Uses RKE2 certificate commands, paths, and automatic rotation contracts                          |
+| Versions      | Uses a checksum-locked `rke2_version` that combines a Kubernetes patch and RKE2 revision         |
+| Upgrade       | Converges servers sequentially and agents in bounded batches to an RKE2 release                  |
+
+- **The RKE2 model standardizes the runtime, PKI, and control-plane lifecycle around a release and service unit**
+- **Its tradeoff is that requirements such as alternate runtimes, kubeadm phases, and external or custom CNIs become constraints outside the current standard contract**
+- **A feature technically possible in RKE2 must be distinguished from one supported by the current `rke2spray` adapter**
+
+## Engine differences translate into Ansible contracts
+
+| Kubespray API                         | Kubespray task                            | `rke2spray` interpretation                                          | Classification |
+| ------------------------------------- | ----------------------------------------- | ------------------------------------------------------------------- | -------------- |
+| `kube_version`                        | Selects Kubernetes component versions     | Validates a release-locked `rke2_version` with the same patch       | Adapter        |
+| `kubernetes/kubeadm`                  | Executes kubeadm bootstrap and join       | Translates into RKE2 server and agent bootstrap                     | Adapter        |
+| `container-engine`                    | Installs and tunes a runtime              | Manages only registry configuration for bundled containerd          | Adapter        |
+| `container_manager: docker` or `crio` | Installs the selected runtime             | Rejects before lifecycle mutation                                   | Unsupported    |
+| `network_plugin`                      | Executes CNI-specific roles and manifests | Translates into packaged CNI selection                              | Adapter        |
+| External or custom CNI                | Installs external manifests               | Rejects because the bootstrap and Ready-order adapter is incomplete | Unsupported    |
+| `etcd` role                           | Installs and configures etcd              | Runs only when external datastore mode is selected                  | Conditional    |
+| `recover-control-plane.yml`           | Recovers etcd and control-plane state     | Runs RKE2 cluster reset and restore from an embedded-etcd snapshot  | Conditional    |
+
+- **An adapter translates intent without reproducing the original implementation**
+- **Conditional means the public API is valid only when a datastore or topology prerequisite holds**
+- **Unsupported can mean that the current `rke2spray` contract lacks a safe adapter, not that RKE2 can never implement the feature**
+
+## Shared playbooks preserve intent only
+
+| Operational intent   | Shared entrypoint     | Kubespray execution                             | `rke2spray` execution                   |
+| -------------------- | --------------------- | ----------------------------------------------- | --------------------------------------- |
+| Install or reconcile | `cluster.yml`         | Converges kubeadm, runtime, CNI, and etcd tasks | Converges RKE2 servers and agents       |
+| Add workers          | `scale.yml`           | Configures kubelet, runtime, and CNI            | Installs the RKE2 agent                 |
+| Upgrade              | `upgrade-cluster.yml` | Replaces components sequentially                | Replaces a checksum-locked RKE2 release |
+| Remove a node        | `remove-node.yml`     | Cleans Kubernetes, etcd, and host state         | Cleans the RKE2 service and state       |
+| Reset                | `reset.yml`           | Cleans kubeadm, runtime, and network state      | Uses the official RKE2 uninstaller path |
+
+- **`rke2spray` adds health, snapshots, certificate rotation, and add-on plan, converge, and prune operations under `extra_playbooks/`**
+- **Destructive removal, recovery, and ownership-transfer paths add confirmation and preflight gates**
+
+## Selection evaluates Ansible reuse and the execution model together
+
+| Requirement                                                               | Evaluate first | Reason                                                              |
+| ------------------------------------------------------------------------- | -------------- | ------------------------------------------------------------------- |
+| Kubespray roles, variables, and tags must retain their original semantics | Kubespray      | Its upstream task graph is the public API implementation            |
+| RKE2 is the standard while Kubespray-shaped runbooks should be retained   | `rke2spray`    | It translates the public names into the RKE2 lifecycle              |
+| Custom CNI, alternate runtime, or kubeadm phase control is mandatory      | Kubespray      | Those inputs are rejected by the current `rke2spray` contract       |
+| Operations should use one release, service, and PKI contract              | `rke2spray`    | It treats the RKE2 distribution as the execution unit               |
+| Broad community, provider, and CNI combinations are the priority          | Kubespray      | It consumes the Kubernetes SIGs upstream directly                   |
+| A dedicated owner can maintain an adapter across Kubespray and RKE2       | `rke2spray`    | The team accepts baseline, mapping, and acceptance-test maintenance |
+
+- **Moving an existing Kubespray cluster to `rke2spray` is a Kubernetes engine migration rather than an Ansible repository swap**
+  - Shared inventory groups do not convert current cluster state, PKI, datastore, or CNI state
+  - Existing variables and custom roles must be audited against the `supported`, `adapter`, `conditional`, and `unsupported` classifications
+
+## Conclusion and next actions
+
+- **At the Ansible layer, Kubespray is the original implementation and `rke2spray` is an RKE2 adapter that preserves public names**
+- **At the execution layer, kubeadm composes components while RKE2 integrates the distribution, service, and release lifecycle**
+- **At the ownership layer, `jamie-kr-gitops` owns the real inventory while `rke2spray` remains the reusable installation engine**
+- **A proof of concept should validate variable mappings, tag reachability, upgrades, node removal, and snapshot recovery in addition to running the shared `cluster.yml` entrypoint**
+
+## Sources
+
+- [rke2spray Kubespray comparison](https://github.com/jongminchung/rke2spray/blob/main/docs/kubespray-comparison.md)
+- [rke2spray Kubespray API compatibility contract](https://github.com/jongminchung/rke2spray/blob/main/docs/kubespray-api-compatibility.yml)
+- [Kubespray repository and supported components](https://github.com/kubernetes-sigs/kubespray)
+- [Kubespray Ansible inventory](https://github.com/kubernetes-sigs/kubespray/blob/master/docs/ansible/inventory.md)
+- [Kubespray upgrades](https://github.com/kubernetes-sigs/kubespray/blob/master/docs/operations/upgrades.md)
+- [RKE2 architecture](https://docs.rke2.io/architecture)
+- [RKE2 server configuration](https://docs.rke2.io/reference/server_config)
+- [RKE2 network options](https://docs.rke2.io/networking/basic_network_options)
+- [RKE2 backup and restore](https://docs.rke2.io/datastore/backup_restore)

@@ -31,6 +31,13 @@ import { publicPageTreeForArea } from "#lib/tech/publication";
 import { mdxComponents } from "#mdx-components";
 import { DocsLandingPage } from "#tech-components/DocsPortal";
 import { DocsShell } from "#tech-components/DocsShell";
+import {
+  Arc42CoverageMap,
+  C4ArchitectureMap,
+  ObservabilityPipelineFlow,
+  PlatformConvergenceFlow,
+  TelemetryStorageLifecycle,
+} from "#tech-components/PlatformArchitectureVisuals";
 import { TechDocsMobileHeader } from "#tech-components/TechDocsMobileHeader";
 import { TechDocsMobileToc } from "#tech-components/TechDocsMobileToc";
 import { TechFumadocsProvider } from "#tech-components/TechFumadocsProvider";
@@ -40,6 +47,15 @@ const kindLabel: Readonly<Record<DocumentKind, string>> = {
   "how-to": "How-to",
   reference: "Reference",
   explanation: "Explanation",
+};
+
+const docsMdxComponents = {
+  ...mdxComponents,
+  Arc42CoverageMap,
+  C4ArchitectureMap,
+  ObservabilityPipelineFlow,
+  PlatformConvergenceFlow,
+  TelemetryStorageLifecycle,
 };
 
 function editHref(locale: Locale, slugs: readonly string[]): string {
@@ -186,7 +202,7 @@ export default async function TechDocsPage({
               data-docs-prose="true"
               lang={locale}
             >
-              <Content components={mdxComponents} />
+              <Content components={docsMdxComponents} />
             </DocsBody>
           </DocsPage>
         </DocsLayout>

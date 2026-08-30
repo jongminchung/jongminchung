@@ -15,6 +15,7 @@ import {
 import { classifyMdxCodeBlock } from "#lib/mdx-code";
 import { DocsCodeBlock } from "./DocsCodeBlock";
 import { Callout, Card, Cards, Step, Steps } from "./DocsMdxPrimitives";
+import { ExcalidrawAssetDiagram } from "./ExcalidrawAssetDiagram";
 import { ExcalidrawDiagram } from "./ExcalidrawDiagram";
 import {
   OverviewCards,
@@ -184,6 +185,7 @@ export const techMdxComponents = {
   CodeBlockTabsList,
   CodeBlockTabsTrigger,
   ExcalidrawDiagram,
+  ExcalidrawAssetDiagram,
   OverviewCards,
   OverviewCta,
   OverviewHero,

@@ -11,6 +11,7 @@
     "---Reference---",
     "ansible-rke2-gitops-platform",
     "---Explanation---",
+    "rke2spray-vs-kubespray",
     "cilium-gateway-api-foundations",
     "cilium-gateway-api"
   ]
