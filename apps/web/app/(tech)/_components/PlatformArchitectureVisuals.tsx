@@ -116,7 +116,7 @@ const copy = {
           },
           {
             name: "SeaweedFS S3",
-            detail: "Private two-replica gateway for cold parts",
+            detail: "Private gateway ×3 and 001 two-copy cold volumes",
           },
         ],
         legend:
@@ -263,7 +263,7 @@ const copy = {
           },
           {
             name: "SeaweedFS S3",
-            detail: "Cold part 전용 private 2-replica gateway",
+            detail: "Private gateway ×3와 001 two-copy cold volume",
           },
         ],
         legend:
