@@ -1,4 +1,4 @@
 {
   "title": "Engineering Documentation",
-  "pages": ["index", "fe", "be", "k8s"]
+  "pages": ["index", "rke2spray", "fe", "be", "k8s"]
 }

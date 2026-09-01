@@ -10,10 +10,17 @@ import {
 } from "./docs";
 
 describe("기술 문서 카테고리", () => {
-  it("[성공] 세 공개 Docs 영역과 비공개 Ansible 영역을 구분함", async () => {
+  it("[성공] 네 공개 Docs 영역과 비공개 Ansible 영역을 구분함", async () => {
     const documents = await getLocalizedDocsPages("ko");
-    expect(docsCategoryIds).toEqual(["fe", "be", "k8s"]);
-    expect(registeredDocsCategoryIds).toEqual(["fe", "be", "k8s", "ansible"]);
+    expect(docsCategoryIds).toEqual(["rke2spray", "fe", "be", "k8s"]);
+    expect(registeredDocsCategoryIds).toEqual([
+      "rke2spray",
+      "fe",
+      "be",
+      "k8s",
+      "ansible",
+    ]);
+    expect(documentsForDocsCategory(documents, "rke2spray")).toHaveLength(7);
     expect(documentsForDocsCategory(documents, "fe").length).toBeGreaterThan(4);
     expect(
       documentsForDocsCategory(documents, "k8s").every(

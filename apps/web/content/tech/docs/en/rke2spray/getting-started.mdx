@@ -1,0 +1,99 @@
+---
+documentKind: tutorial
+title: "Get started with rke2spray"
+description: "Prepare the repository, validate an Inventory, and converge the first RKE2 cluster."
+publishedAt: "2026-09-01"
+updatedAt: "2026-09-01"
+verifiedAt: "2026-09-01"
+tags: [ansible, kubernetes, rke2, rke2spray, operations]
+status: stable
+publicationStatus: published
+sourceUrl: https://github.com/jongminchung/rke2spray/blob/main/docs/onboarding/00-start-here.md
+---
+
+## Core summary
+
+- **Root Playbooks in a source checkout are the canonical execution path.**
+- **An Inventory must define Linux hosts, role groups, RKE2 tokens, and the endpoint mode.**
+- **Both `inventory-vault-check` and `inventory-preflight` must pass before the first change.**
+- **Install through `cluster.yml` or the equivalent `make cluster-converge` contract.**
+- **Completion requires healthy RKE2 services, the Kubernetes API, and Ready Nodes.**
+
+## Verify the prerequisites
+
+- **Choose an Ansible, Python, operating-system, and RKE2 combination from the current release's `docs/support-matrix.md`.**
+- **Target hosts must allow SSH, privilege escalation, and the required node-to-node ports.**
+- **A multi-server topology needs a stable registration endpoint before installation.**
+
+## Converge the first cluster
+
+<Steps>
+  <Step>
+    ### Prepare the repository and dependencies
+
+    ```bash
+    git clone https://github.com/jongminchung/rke2spray.git
+    cd rke2spray
+    python -m pip install -r requirements.txt
+    ansible-galaxy collection install -r requirements.yml
+    ```
+
+  </Step>
+  <Step>
+    ### Copy the sample Inventory into an environment directory
+
+    ```bash
+    cp -a inventory/sample inventory/my-cluster
+    ```
+
+    Update `hosts.yml`, `group_vars/`, and required `host_vars/` with the real addresses and topology.
+
+  </Step>
+  <Step>
+    ### Validate Vault and Inventory without changing hosts
+
+    ```bash
+    make inventory-vault-check \
+      INVENTORY=inventory/my-cluster/hosts.yml \
+      VAULT_PASSWORD_FILE=.vault_pass
+
+    make inventory-preflight \
+      INVENTORY=inventory/my-cluster/hosts.yml \
+      VAULT_PASSWORD_FILE=.vault_pass
+    ```
+
+  </Step>
+  <Step>
+    ### Converge the cluster
+
+    ```bash
+    ansible-playbook \
+      -i inventory/my-cluster/hosts.yml \
+      --vault-password-file .vault_pass \
+      cluster.yml
+    ```
+
+  </Step>
+  <Step>
+    ### Verify the result
+
+    ```bash
+    make cluster-health \
+      INVENTORY=inventory/my-cluster/hosts.yml \
+      VAULT_PASSWORD_FILE=.vault_pass
+    ```
+
+  </Step>
+</Steps>
+
+## Confirm the completion state
+
+- **Each Linux node must run the expected active `rke2-server` or `rke2-agent` service.**
+- **The Kubernetes API `/readyz` endpoint must return successfully.**
+- **Every Node declared in Inventory must report `Ready`.**
+- **The selected CNI and CoreDNS rollout must complete.**
+
+## Next step
+
+- **Review topology and adapter boundaries in [Architecture](/en/docs/rke2spray/architecture).**
+- **Read the safety boundaries in [Operations](/en/docs/rke2spray/operations) before production changes.**

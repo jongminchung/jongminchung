@@ -1,0 +1,65 @@
+---
+documentKind: reference
+title: "Kubespray API compatibility"
+description: "Supported, adapter, conditional, and explicitly rejected Kubespray Playbooks, Roles, and variables."
+publishedAt: "2026-09-01"
+updatedAt: "2026-09-01"
+verifiedAt: "2026-09-01"
+tags: [ansible, kubernetes, rke2, rke2spray, operations]
+status: stable
+publicationStatus: published
+sourceUrl: https://github.com/jongminchung/rke2spray/blob/main/docs/kubespray-api-compatibility.yml
+---
+
+## Core summary
+
+- **The compatibility contract covers root Playbooks, public Role paths, Inventory groups, default variables, and tags.**
+- **It does not promise identical internal Kubespray task bodies or resulting state.**
+- **Inputs without a safe RKE2 translation fail before host mutation instead of being silently ignored.**
+- **`docs/kubespray-api-compatibility.yml` is the canonical source for support status.**
+- **Upstream baseline changes require mapping and reachability review and are never merged automatically.**
+
+## Interpret input status consistently
+
+| Classification | Meaning                                                   | Example                                   |
+| -------------- | --------------------------------------------------------- | ----------------------------------------- |
+| Supported      | Operates with the same intent above the Kubernetes API    | General `kubernetes-apps` Roles           |
+| Adapter        | Translates a public name into RKE2 behavior               | `kubernetes/kubeadm`, `container-engine`  |
+| Conditional    | Operates only with a topology or feature prerequisite     | Embedded-etcd control-plane recovery      |
+| Unsupported    | Has no current safe equivalent and is explicitly rejected | kubeadm phases, Docker or CRI-O selection |
+| Adapter gap    | RKE2 can support it, but the adapter is incomplete        | Current external or custom CNI path       |
+
+## Check representative rejected inputs
+
+| Input                                            | Handling                                        |
+| ------------------------------------------------ | ----------------------------------------------- |
+| `container_manager: docker` or `crio`            | Preflight failure                               |
+| Non-empty `kubeadm_patches`                      | Preflight failure                               |
+| Invalid union of control-plane and worker groups | Inventory validation failure                    |
+| External or custom CNI                           | Current preflight failure                       |
+| Windows control plane                            | Unsupported                                     |
+| External datastore with control-plane recovery   | Use the external datastore's recovery procedure |
+
+## Review upstream changes
+
+1. **Move `KUBESPRAY_BASELINE` to the commit under review.**
+2. **Inspect parity output for added or removed Playbooks, Roles, variables, groups, and tags.**
+3. **Classify each API as Supported, Adapter, Conditional, or Unsupported.**
+4. **Record the mapping and rationale in the compatibility manifest.**
+5. **Test reachability and failure behavior through canonical root Playbooks.**
+6. **Review the synchronization PR manually without automatic merging.**
+
+## Run completion checks
+
+```bash
+make check PYTHON_BIN=/path/to/python
+```
+
+- **Unsupported inputs must never be silently ignored.**
+- **Root Playbooks must resolve from a source checkout without an external Collection.**
+- **A production cluster must not become an unapproved change-test target.**
+
+## Conclusion
+
+- **Before applying a Kubespray variable, look up its current classification in the machine-readable contract.**
+- **When prose and code differ, prefer the current release's compatibility manifest and preflight result.**

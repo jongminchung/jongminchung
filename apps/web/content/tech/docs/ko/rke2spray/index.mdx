@@ -1,0 +1,70 @@
+---
+documentKind: explanation
+title: "rke2spray 문서"
+description: "Kubespray의 공개 API와 익숙한 운영 흐름을 유지하면서 RKE2 클러스터를 설치하고 운영하는 방법"
+publishedAt: "2026-09-01"
+updatedAt: "2026-09-01"
+verifiedAt: "2026-09-01"
+tags: [ansible, kubernetes, rke2, rke2spray, operations]
+status: stable
+publicationStatus: published
+sourceUrl: https://github.com/jongminchung/rke2spray
+---
+
+## 핵심 요약
+
+- **`rke2spray`는 Kubespray의 Inventory·Playbook·Role 공개 형태를 RKE2 server·agent 수명주기로 변환함**
+- **처음 사용하는 경우 시작 안내에서 설치 전 검사와 첫 클러스터 수렴까지 순서대로 진행함**
+- **기존 Kubespray 사용자는 아키텍처와 호환성 문서에서 동일한 이름과 달라진 실행 의미를 먼저 확인해야 함**
+- **운영 변경 전에는 Vault 검사, Inventory preflight와 클러스터 상태 확인이 필요함**
+- **지원 범위의 최종 기준은 저장소의 machine-readable 호환성 계약과 support matrix임**
+
+<Callout title="한 문장으로 이해하기" type="info">
+  Kubespray 공개 API를 사용하고, 실행 엔진은 RKE2를 사용함
+</Callout>
+
+## 작업에 맞는 문서를 선택함
+
+<Cards>
+  <Card
+    title="시작하기"
+    description="요구사항 확인부터 첫 cluster.yml 실행까지 진행함"
+    href="/ko/docs/rke2spray/getting-started"
+  />
+  <Card
+    title="구조와 실행 모델"
+    description="Kubespray 이름이 RKE2 동작으로 변환되는 경계를 이해함"
+    href="/ko/docs/rke2spray/architecture"
+  />
+  <Card
+    title="Inventory와 Vault"
+    description="노드 역할, 변수 배치와 비밀정보 관리 규칙을 구성함"
+    href="/ko/docs/rke2spray/inventory-and-vault"
+  />
+  <Card
+    title="핵심 설정"
+    description="버전, CNI, endpoint, datastore와 registry 입력을 조회함"
+    href="/ko/docs/rke2spray/configuration"
+  />
+  <Card
+    title="운영 Lifecycle"
+    description="확장, 업그레이드, snapshot, 복구와 제거 절차를 실행함"
+    href="/ko/docs/rke2spray/operations"
+  />
+  <Card
+    title="호환성 참조"
+    description="지원, adapter, 조건부 지원과 명시적 예외를 판별함"
+    href="/ko/docs/rke2spray/compatibility"
+  />
+</Cards>
+
+## 문서의 기준을 확인함
+
+- **이 웹 문서는 운영자가 빠르게 탐색할 수 있도록 `rke2spray` 저장소 문서를 재구성한 안내 계층임**
+- **변수와 지원 상태가 다르면 원본 저장소의 현재 release와 `docs/kubespray-api-compatibility.yml`을 우선함**
+- **환경별 Inventory와 Vault ciphertext는 `rke2spray`가 아니라 이를 소비하는 환경 저장소가 소유함**
+
+## 다음 단계
+
+- **새 클러스터는 [시작하기](/ko/docs/rke2spray/getting-started)에서 설치 전 조건부터 확인함**
+- **기존 Kubespray 자동화는 [호환성 참조](/ko/docs/rke2spray/compatibility)에서 입력별 처리 상태를 대조함**

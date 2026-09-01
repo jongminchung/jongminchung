@@ -222,7 +222,7 @@ test("[성공] 플랫폼 아키텍처 시각화는 관련 Docs에서 스타일�
   ).toBeVisible();
 });
 
-test("[성공] Docs 루트에는 sidebar가 없고 FE·BE·K8s sidebar는 현재 영역만 표시함", async ({
+test("[성공] Docs 루트에는 sidebar가 없고 분야별 sidebar는 현재 영역만 표시함", async ({
   page,
 }) => {
   await page.goto("/ko/docs");
@@ -230,6 +230,7 @@ test("[성공] Docs 루트에는 sidebar가 없고 FE·BE·K8s sidebar는 현재
     page.getByRole("heading", { level: 1, name: "Docs" }),
   ).toBeVisible();
   await expect(page.locator("#nd-sidebar")).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /rke2spray/u })).toBeVisible();
   await expect(page.getByRole("link", { name: /프론트엔드/u })).toBeVisible();
 
   await page.goto("/ko");
@@ -240,7 +241,7 @@ test("[성공] Docs 루트에는 sidebar가 없고 FE·BE·K8s sidebar는 현재
   await docsTrigger.click();
   const docsMenu = page.getByRole("menu", { name: "문서 분야 선택" });
   await expect(docsMenu).toBeVisible();
-  await expect(docsMenu.locator('[role="menuitem"]')).toHaveCount(4);
+  await expect(docsMenu.locator('[role="menuitem"]')).toHaveCount(5);
   await docsMenu
     .locator('[role="menuitem"]', { hasText: "FE · 프론트엔드" })
     .click();
@@ -249,6 +250,15 @@ test("[성공] Docs 루트에는 sidebar가 없고 FE·BE·K8s sidebar는 현재
     page.getByRole("heading", { level: 1, name: "프론트엔드 문서" }),
   ).toBeVisible();
   await expect(page.locator('#nd-sidebar a[href^="/ko/docs/be"]')).toHaveCount(
+    0,
+  );
+  await expect(page.locator('#nd-sidebar a[href^="/ko/docs/k8s"]')).toHaveCount(
+    0,
+  );
+
+  await page.goto("/ko/docs/rke2spray");
+  await expect(page.locator("#nd-sidebar")).toContainText("rke2spray 문서");
+  await expect(page.locator('#nd-sidebar a[href^="/ko/docs/fe"]')).toHaveCount(
     0,
   );
   await expect(page.locator('#nd-sidebar a[href^="/ko/docs/k8s"]')).toHaveCount(

@@ -26,8 +26,8 @@ export const documentKinds = [
 const documentKindSchema = z.enum(documentKinds);
 export type DocumentKind = z.infer<typeof documentKindSchema>;
 
-export const docsAreas = ["fe", "be", "k8s", "ansible"] as const;
-export const publicDocsAreas = ["fe", "be", "k8s"] as const;
+export const docsAreas = ["rke2spray", "fe", "be", "k8s", "ansible"] as const;
+export const publicDocsAreas = ["rke2spray", "fe", "be", "k8s"] as const;
 export const docsAreaSchema = z.enum(docsAreas);
 export type DocsArea = z.infer<typeof docsAreaSchema>;
 

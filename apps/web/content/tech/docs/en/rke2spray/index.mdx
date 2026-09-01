@@ -1,0 +1,70 @@
+---
+documentKind: explanation
+title: "rke2spray Documentation"
+description: "Install and operate RKE2 clusters while retaining the Kubespray public API and familiar workflows."
+publishedAt: "2026-09-01"
+updatedAt: "2026-09-01"
+verifiedAt: "2026-09-01"
+tags: [ansible, kubernetes, rke2, rke2spray, operations]
+status: stable
+publicationStatus: published
+sourceUrl: https://github.com/jongminchung/rke2spray
+---
+
+## Core summary
+
+- **`rke2spray` translates the Kubespray Inventory, Playbook, and Role API into RKE2 server and agent lifecycles.**
+- **New users should follow the getting-started guide from preflight checks through the first cluster convergence.**
+- **Existing Kubespray users should review the architecture and compatibility boundaries before reusing inputs.**
+- **Every operational change starts with Vault validation, Inventory preflight, and a cluster health check.**
+- **The machine-readable compatibility contract and support matrix remain the final authority for supported inputs.**
+
+<Callout title="In one sentence" type="info">
+  Use the Kubespray public API while running RKE2 as the execution engine.
+</Callout>
+
+## Choose a guide for the task
+
+<Cards>
+  <Card
+    title="Getting started"
+    description="Move from prerequisites to the first cluster.yml run."
+    href="/en/docs/rke2spray/getting-started"
+  />
+  <Card
+    title="Architecture"
+    description="Understand how Kubespray names translate into RKE2 behavior."
+    href="/en/docs/rke2spray/architecture"
+  />
+  <Card
+    title="Inventory and Vault"
+    description="Define node roles, variable ownership, and secret boundaries."
+    href="/en/docs/rke2spray/inventory-and-vault"
+  />
+  <Card
+    title="Configuration"
+    description="Look up version, CNI, endpoint, datastore, and registry inputs."
+    href="/en/docs/rke2spray/configuration"
+  />
+  <Card
+    title="Operations"
+    description="Run scaling, upgrades, snapshots, recovery, and removal."
+    href="/en/docs/rke2spray/operations"
+  />
+  <Card
+    title="Compatibility"
+    description="Distinguish supported, adapter, conditional, and rejected APIs."
+    href="/en/docs/rke2spray/compatibility"
+  />
+</Cards>
+
+## Understand the documentation boundary
+
+- **This site reorganizes repository documentation into a fast operator-facing navigation layer.**
+- **When variables or support status differ, prefer the current release and `docs/kubespray-api-compatibility.yml`.**
+- **Environment-specific Inventory and Vault ciphertext belong to a consuming environment repository, not the reusable `rke2spray` core.**
+
+## Next step
+
+- **For a new cluster, begin with [Getting started](/en/docs/rke2spray/getting-started).**
+- **For existing Kubespray automation, compare each input in [Compatibility](/en/docs/rke2spray/compatibility).**

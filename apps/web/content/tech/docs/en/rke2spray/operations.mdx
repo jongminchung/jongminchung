@@ -1,0 +1,83 @@
+---
+documentKind: how-to
+title: "Operate the cluster lifecycle"
+description: "Check health, scale, upgrade, snapshot, recover, and remove nodes from an RKE2 cluster."
+publishedAt: "2026-09-01"
+updatedAt: "2026-09-01"
+verifiedAt: "2026-09-01"
+tags: [ansible, kubernetes, rke2, rke2spray, operations]
+status: stable
+publicationStatus: published
+sourceUrl: https://github.com/jongminchung/rke2spray/blob/main/docs/onboarding/04-operations.md
+---
+
+## Core summary
+
+- **Every change begins with an Inventory review, Vault check, preflight, and current health check.**
+- **Add workers through `scale.yml` and add servers one at a time through `cluster.yml`.**
+- **Upgrades sequence cordon, drain, release replacement, readiness verification, and uncordon.**
+- **Recovery and removal require topology-specific prerequisites and exact confirmation.**
+- **Do not treat CNI or cluster-CIDR changes as ordinary convergence of an existing cluster.**
+
+## Follow the common execution sequence
+
+<Steps>
+  <Step>
+    ### Review Inventory and inline Vault diffs
+  </Step>
+  <Step>
+    ### Validate local Vault structure and remote topology
+
+    ```bash
+    make inventory-vault-check
+    make inventory-preflight
+    ```
+
+  </Step>
+  <Step>
+    ### Preserve the current cluster state
+
+    ```bash
+    make cluster-health
+    ```
+
+  </Step>
+  <Step>
+    ### Confirm targets and scope, then run the lifecycle
+  </Step>
+  <Step>
+    ### Verify completion with the same health checks
+  </Step>
+</Steps>
+
+## Select the operation entrypoint
+
+| Task                  | Playbook or target                             | RKE2 behavior                                       |
+| --------------------- | ---------------------------------------------- | --------------------------------------------------- |
+| Install or reconverge | `cluster.yml` / `make cluster-converge`        | Configure servers and agents, then verify readiness |
+| Add worker            | `scale.yml --limit=<worker>`                   | Converge only the selected agent batch              |
+| Add server            | `cluster.yml --limit=<server>`                 | Join one server at a time                           |
+| Upgrade               | `upgrade-cluster.yml` / `make cluster-upgrade` | Sequential drain and release replacement            |
+| Health                | `make cluster-health`                          | Read-only service, API, Node, and etcd checks       |
+| Snapshot              | `make cluster-snapshot`                        | Create an RKE2 embedded-etcd snapshot               |
+| Recovery              | `recover-control-plane.yml`                    | Recover embedded etcd from a selected snapshot      |
+| Remove node           | `remove-node.yml`                              | Drain, verify membership, and uninstall RKE2        |
+| Reset all             | `reset.yml`                                    | Stop services and run the official uninstaller      |
+
+## Enforce destructive-operation boundaries
+
+- **Remove only one server at a time and leave at least two servers.**
+- **Do not remove the bootstrap server without a separate lifecycle-identity review.**
+- **With an external load balancer, first remove the server from the `80`, `443`, `6443`, and `9345` backends.**
+- **Do not use `recover-control-plane.yml` for an external datastore.**
+- **Never bypass confirmations for `reset`, `remove`, `recover`, or AddOn pruning.**
+
+<Callout title="Operational boundary" type="warning">
+  Off-host snapshot copies and long-term retention belong to a separate backup
+  system; creating a local snapshot alone does not complete disaster recovery.
+</Callout>
+
+## Conclusion
+
+- **Preserve evidence from checks before and after each change instead of treating the command as the whole operation.**
+- **When a prerequisite is unclear, check [Compatibility](/en/docs/rke2spray/compatibility) first.**

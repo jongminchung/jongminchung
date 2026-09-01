@@ -83,7 +83,7 @@ export function DocsLandingPage({
         >
           {text.categories}
         </h2>
-        <div className="grid grid-cols-3 gap-5 max-[960px]:grid-cols-2 max-[680px]:grid-cols-1">
+        <div className="grid grid-cols-2 gap-5 max-[680px]:grid-cols-1">
           {docsCategoryIds.map((id) => (
             <CategoryCard
               categoryId={id}

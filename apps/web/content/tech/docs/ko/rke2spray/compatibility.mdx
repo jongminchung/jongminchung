@@ -1,0 +1,65 @@
+---
+documentKind: reference
+title: "Kubespray API 호환성"
+description: "Kubespray 공개 Playbook·Role·변수의 지원, adapter, 조건부 지원과 명시적 예외 분류"
+publishedAt: "2026-09-01"
+updatedAt: "2026-09-01"
+verifiedAt: "2026-09-01"
+tags: [ansible, kubernetes, rke2, rke2spray, operations]
+status: stable
+publicationStatus: published
+sourceUrl: https://github.com/jongminchung/rke2spray/blob/main/docs/kubespray-api-compatibility.yml
+---
+
+## 핵심 요약
+
+- **호환 계약은 root Playbook, 공개 Role 경로, Inventory group, defaults 변수와 tag를 대상으로 함**
+- **Kubespray 내부 task 본문 전체와 결과 상태의 동일성은 계약에 포함되지 않음**
+- **RKE2로 안전하게 변환할 수 없는 입력은 무시하지 않고 host 변경 전에 실패함**
+- **지원 상태의 canonical source는 `docs/kubespray-api-compatibility.yml`임**
+- **upstream baseline 변경은 자동 병합하지 않고 mapping과 도달성 검증을 거침**
+
+## 입력 상태를 일관되게 해석함
+
+| 분류        | 의미                                           | 예시                                     |
+| ----------- | ---------------------------------------------- | ---------------------------------------- |
+| Supported   | Kubernetes API 위에서 같은 의도로 동작함       | 일반 `kubernetes-apps` Role              |
+| Adapter     | 공개 이름을 RKE2 동작으로 변환함               | `kubernetes/kubeadm`, `container-engine` |
+| Conditional | topology 또는 feature 전제에서만 동작함        | embedded-etcd control-plane 복구         |
+| Unsupported | 현재 안전한 등가 동작이 없어 명시적으로 거부함 | kubeadm phase, Docker·CRI-O 선택         |
+| Adapter gap | RKE2에서는 가능하지만 adapter가 완성되지 않음  | 현재 external·custom CNI 경로            |
+
+## 대표적인 거부 입력을 확인함
+
+| 입력                                             | 처리                          |
+| ------------------------------------------------ | ----------------------------- |
+| `container_manager: docker` 또는 `crio`          | preflight 실패                |
+| non-empty `kubeadm_patches`                      | preflight 실패                |
+| control-plane·worker group의 잘못된 합집합       | Inventory validation 실패     |
+| 외부·custom CNI                                  | 현재 preflight 실패           |
+| Windows control-plane                            | 지원하지 않음                 |
+| external datastore와 control-plane recovery 조합 | 외부 datastore 복구 절차 사용 |
+
+## upstream 변경을 검토함
+
+1. **`KUBESPRAY_BASELINE`을 검토 대상 commit으로 이동함**
+2. **Playbook, Role, 변수, group과 tag의 추가·삭제를 parity 결과로 확인함**
+3. **각 API를 Supported, Adapter, Conditional 또는 Unsupported로 분류함**
+4. **mapping과 근거를 compatibility manifest에 기록함**
+5. **canonical root Playbook에서 도달성과 실패 동작을 테스트함**
+6. **동기화 PR을 사람이 검토하며 자동 병합하지 않음**
+
+## 완료 검사를 실행함
+
+```bash
+make check PYTHON_BIN=/path/to/python
+```
+
+- **지원하지 않는 입력이 silent ignore되지 않아야 함**
+- **외부 Collection 없는 source checkout에서 root Playbook이 해석되어야 함**
+- **production cluster를 별도 승인 없는 변경 테스트 대상으로 사용하지 않아야 함**
+
+## 결론
+
+- **새 Kubespray 변수를 적용하기 전에 machine-readable 계약에서 현재 분류를 확인함**
+- **문서 설명과 코드가 다르면 current release의 compatibility manifest와 preflight 결과를 우선함**

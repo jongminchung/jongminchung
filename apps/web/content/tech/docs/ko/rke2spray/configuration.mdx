@@ -1,0 +1,69 @@
+---
+documentKind: reference
+title: "핵심 설정 참조"
+description: "RKE2 release, network, endpoint, datastore, registry와 raw config 입력의 소유권"
+publishedAt: "2026-09-01"
+updatedAt: "2026-09-01"
+verifiedAt: "2026-09-01"
+tags: [ansible, kubernetes, rke2, rke2spray, operations]
+status: stable
+publicationStatus: published
+sourceUrl: https://github.com/jongminchung/rke2spray/blob/main/docs/onboarding/03-configuration.md
+---
+
+## 핵심 요약
+
+- **`kube_version`은 checksum이 고정된 호환 `rke2_version`으로 해석됨**
+- **container runtime은 RKE2 bundled containerd로 고정됨**
+- **Canal, Calico, Cilium과 Flannel을 bundled CNI로 지원함**
+- **다중 server 환경은 external load balancer 또는 Kube-VIP endpoint가 필요함**
+- **Role이 소유한 핵심 key를 raw RKE2 config로 덮어쓰면 preflight가 실패함**
+
+## Kubespray 입력을 RKE2 결과로 매핑함
+
+| 목적               | 공개 입력                 | RKE2 결과                                  |
+| ------------------ | ------------------------- | ------------------------------------------ |
+| Kubernetes version | `kube_version`            | 호환되는 checksum-locked RKE2 release 선택 |
+| RKE2 revision      | `rke2_version`            | 같은 Kubernetes patch의 RKE2 build 고정    |
+| Runtime            | `container_manager`       | `containerd`만 허용                        |
+| CNI                | `kube_network_plugin`     | RKE2 `cni` config 생성                     |
+| Pod·Service CIDR   | Kubespray network 변수    | `cluster-cidr`, `service-cidr` 생성        |
+| API endpoint       | `rke2_endpoint`           | direct, external 또는 Kube-VIP 선택        |
+| Datastore          | `etcd` group              | embedded etcd 또는 external datastore 선택 |
+| Registry           | Kubespray containerd 변수 | RKE2 `registries.yaml` 생성                |
+| Ingress            | `rke2_ingress_controller` | packaged ingress 선택 또는 비활성화        |
+
+## CNI 지원 범위를 확인함
+
+| 값                                  | 상태                      |
+| ----------------------------------- | ------------------------- |
+| `canal`                             | bundled 지원              |
+| `calico`                            | bundled 지원              |
+| `cilium`                            | bundled 지원              |
+| `flannel`                           | bundled 지원              |
+| `kube_network_plugin_multus: true`  | primary CNI와 함께 지원   |
+| `none`, `custom_cni`, 기타 외부 CNI | 현재 adapter gap으로 거부 |
+
+- **Windows agent가 있으면 Calico 또는 Flannel만 선택함**
+- **CNI, Multus, Pod CIDR과 Service CIDR은 설치 후 변경하지 않음**
+
+## Endpoint와 datastore topology를 선택함
+
+| 조건                   | 설정                                         |
+| ---------------------- | -------------------------------------------- |
+| 단일 server            | `rke2_endpoint.mode: direct`                 |
+| 다중 server와 기존 LB  | `rke2_endpoint.mode: external`               |
+| 다중 server와 관리 VIP | `rke2_endpoint.mode: kube_vip`               |
+| embedded etcd          | `etcd` group을 control-plane과 동일하게 구성 |
+| external etcd          | 별도 `etcd` host를 구성                      |
+
+## Raw config의 소유권 충돌을 피함
+
+- **확장 입력은 `rke2_cluster_config`, `rke2_server_config`, `rke2_agent_config`와 `rke2_host_config`로 제한함**
+- **token, node identity, endpoint, CIDR, CNI와 datastore key는 Role이 소유함**
+- **Kubespray 변수로 표현 가능한 값은 raw config보다 공개 변수를 우선함**
+
+## 결론
+
+- **release 선택은 원본 저장소의 `docs/support-matrix.md`를 기준으로 함**
+- **설정 적용 전 [호환성 참조](/ko/docs/rke2spray/compatibility)와 preflight 결과를 함께 확인함**

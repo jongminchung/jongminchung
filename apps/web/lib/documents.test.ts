@@ -131,7 +131,7 @@ describe("블로그 문서 발견", () => {
             .filter((page) => page.locale === locale && page.area !== undefined)
             .map(({ area }) => area),
         ),
-      ).toEqual(new Set(["fe", "be", "k8s"]));
+      ).toEqual(new Set(["rke2spray", "fe", "be", "k8s"]));
     }
   });
 });

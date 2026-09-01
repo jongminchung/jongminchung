@@ -11,10 +11,18 @@ import {
 } from "../content-model.ts";
 
 export const registeredDocsCategoryIds = docsAreas;
-export const docsCategoryIds = ["fe", "be", "k8s"] as const;
+export const docsCategoryIds = ["rke2spray", "fe", "be", "k8s"] as const;
 export type DocsCategoryId = DocsArea;
 
 const docsCategoryRegistry = {
+  rke2spray: {
+    label: "RKE2",
+    title: { ko: "rke2spray", en: "rke2spray" },
+    description: {
+      ko: "Kubespray 공개 API로 RKE2 클러스터를 설치하고 운영하는 실무 문서",
+      en: "Operational documentation for deploying RKE2 through the Kubespray public API.",
+    },
+  },
   fe: {
     label: "FE",
     title: { ko: "프론트엔드", en: "Frontend" },

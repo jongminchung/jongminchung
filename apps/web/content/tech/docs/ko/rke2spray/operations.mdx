@@ -1,0 +1,83 @@
+---
+documentKind: how-to
+title: "클러스터 Lifecycle 운영"
+description: "RKE2 클러스터의 상태 확인, 확장, 업그레이드, snapshot, 복구와 제거 절차"
+publishedAt: "2026-09-01"
+updatedAt: "2026-09-01"
+verifiedAt: "2026-09-01"
+tags: [ansible, kubernetes, rke2, rke2spray, operations]
+status: stable
+publicationStatus: published
+sourceUrl: https://github.com/jongminchung/rke2spray/blob/main/docs/onboarding/04-operations.md
+---
+
+## 핵심 요약
+
+- **모든 변경은 Inventory 검토, Vault 검사, preflight와 기존 상태 확인 순서로 시작함**
+- **worker는 `scale.yml`, server는 `cluster.yml`로 한 대씩 추가함**
+- **upgrade는 cordon, drain, release 교체, readiness 확인과 uncordon을 순차 실행함**
+- **복구와 제거는 topology별 전제와 정확한 confirmation을 요구함**
+- **CNI와 cluster CIDR 변경은 기존 클러스터의 일반 재수렴으로 처리하지 않음**
+
+## 공통 실행 순서를 지킴
+
+<Steps>
+  <Step>
+    ### Inventory와 inline Vault diff를 검토함
+  </Step>
+  <Step>
+    ### 로컬 Vault 구조와 원격 topology를 검사함
+
+    ```bash
+    make inventory-vault-check
+    make inventory-preflight
+    ```
+
+  </Step>
+  <Step>
+    ### 기존 클러스터 상태를 보존함
+
+    ```bash
+    make cluster-health
+    ```
+
+  </Step>
+  <Step>
+    ### 대상과 변경 범위를 확인한 뒤 lifecycle을 실행함
+  </Step>
+  <Step>
+    ### 같은 health 검사로 완료 상태를 확인함
+  </Step>
+</Steps>
+
+## 작업별 진입점을 선택함
+
+| 작업        | Playbook 또는 target                           | RKE2 동작                             |
+| ----------- | ---------------------------------------------- | ------------------------------------- |
+| 설치·재수렴 | `cluster.yml` / `make cluster-converge`        | server·agent 구성과 readiness 검증    |
+| Worker 추가 | `scale.yml --limit=<worker>`                   | 선택 agent만 batch 수렴               |
+| Server 추가 | `cluster.yml --limit=<server>`                 | server를 한 대씩 가입                 |
+| Upgrade     | `upgrade-cluster.yml` / `make cluster-upgrade` | 순차 drain과 release 교체             |
+| 상태 확인   | `make cluster-health`                          | service·API·Node·etcd 읽기 전용 확인  |
+| Snapshot    | `make cluster-snapshot`                        | RKE2 embedded-etcd snapshot 생성      |
+| 복구        | `recover-control-plane.yml`                    | 선택 snapshot으로 embedded etcd 복구  |
+| Node 제거   | `remove-node.yml`                              | drain, membership 검증과 RKE2 제거    |
+| 전체 초기화 | `reset.yml`                                    | service 정지 후 공식 uninstaller 실행 |
+
+## 파괴 가능 작업의 안전선을 확인함
+
+- **server 제거는 한 번에 한 대만 허용하며 최소 두 server를 남김**
+- **bootstrap server는 lifecycle identity anchor이므로 별도 검토 없이 제거하지 않음**
+- **external LB를 사용하면 대상 server를 `80`, `443`, `6443`, `9345` backend에서 먼저 제거함**
+- **external datastore 복구에 `recover-control-plane.yml`을 사용하지 않음**
+- **`reset`, `remove`, `recover`와 AddOn prune의 confirmation을 생략하지 않음**
+
+<Callout title="운영 경계" type="warning">
+  Snapshot의 off-host 복사와 장기 보관은 별도 백업 체계가 소유해야 하며 로컬
+  snapshot 생성만으로 재해 복구가 완료되지 않음
+</Callout>
+
+## 결론
+
+- **운영 자동화는 명령 실행보다 변경 전후의 검증 증거를 한 흐름으로 보존하는 것이 중요함**
+- **지원 조건이 불명확하면 [호환성 참조](/ko/docs/rke2spray/compatibility)를 먼저 확인함**

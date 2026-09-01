@@ -1,0 +1,69 @@
+---
+documentKind: reference
+title: "Core configuration reference"
+description: "Ownership of RKE2 releases, networking, endpoints, datastores, registries, and raw configuration."
+publishedAt: "2026-09-01"
+updatedAt: "2026-09-01"
+verifiedAt: "2026-09-01"
+tags: [ansible, kubernetes, rke2, rke2spray, operations]
+status: stable
+publicationStatus: published
+sourceUrl: https://github.com/jongminchung/rke2spray/blob/main/docs/onboarding/03-configuration.md
+---
+
+## Core summary
+
+- **`kube_version` resolves to a compatible checksum-locked `rke2_version`.**
+- **The container runtime is fixed to the containerd bundled with RKE2.**
+- **Canal, Calico, Cilium, and Flannel are supported as bundled CNIs.**
+- **Multi-server environments require an external load balancer or Kube-VIP endpoint.**
+- **Preflight rejects raw RKE2 configuration that overrides Role-owned keys.**
+
+## Map Kubespray inputs to RKE2 results
+
+| Purpose               | Public input                   | RKE2 result                                      |
+| --------------------- | ------------------------------ | ------------------------------------------------ |
+| Kubernetes version    | `kube_version`                 | Select a compatible checksum-locked RKE2 release |
+| RKE2 revision         | `rke2_version`                 | Pin an RKE2 build for the same Kubernetes patch  |
+| Runtime               | `container_manager`            | Allow only `containerd`                          |
+| CNI                   | `kube_network_plugin`          | Generate RKE2 `cni` configuration                |
+| Pod and Service CIDRs | Kubespray network variables    | Generate `cluster-cidr` and `service-cidr`       |
+| API endpoint          | `rke2_endpoint`                | Select direct, external, or Kube-VIP mode        |
+| Datastore             | `etcd` group                   | Select embedded etcd or an external datastore    |
+| Registry              | Kubespray containerd variables | Generate RKE2 `registries.yaml`                  |
+| Ingress               | `rke2_ingress_controller`      | Select or disable packaged ingress               |
+
+## Check CNI support
+
+| Value                                     | Status                              |
+| ----------------------------------------- | ----------------------------------- |
+| `canal`                                   | Bundled and supported               |
+| `calico`                                  | Bundled and supported               |
+| `cilium`                                  | Bundled and supported               |
+| `flannel`                                 | Bundled and supported               |
+| `kube_network_plugin_multus: true`        | Supported alongside a primary CNI   |
+| `none`, `custom_cni`, other external CNIs | Rejected by the current adapter gap |
+
+- **Use only Calico or Flannel when Windows agents are present.**
+- **Do not change CNI, Multus, Pod CIDR, or Service CIDR after installation.**
+
+## Choose endpoint and datastore topology
+
+| Condition                                       | Configuration                                 |
+| ----------------------------------------------- | --------------------------------------------- |
+| Single server                                   | `rke2_endpoint.mode: direct`                  |
+| Multiple servers with an existing load balancer | `rke2_endpoint.mode: external`                |
+| Multiple servers with a managed VIP             | `rke2_endpoint.mode: kube_vip`                |
+| Embedded etcd                                   | Make the `etcd` group match the control plane |
+| External etcd                                   | Define separate `etcd` hosts                  |
+
+## Avoid raw-config ownership conflicts
+
+- **Extension inputs are limited to `rke2_cluster_config`, `rke2_server_config`, `rke2_agent_config`, and `rke2_host_config`.**
+- **Roles own tokens, node identity, endpoint, CIDRs, CNI, and datastore keys.**
+- **Prefer public Kubespray variables when they can express the desired value.**
+
+## Conclusion
+
+- **Choose releases from `docs/support-matrix.md` in the source repository.**
+- **Review [Compatibility](/en/docs/rke2spray/compatibility) and preflight output before applying configuration.**

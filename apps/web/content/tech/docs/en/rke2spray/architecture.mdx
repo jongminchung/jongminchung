@@ -1,0 +1,63 @@
+---
+documentKind: explanation
+title: "Architecture and execution model"
+description: "How Kubespray public paths and variables translate into the RKE2 server and agent model."
+publishedAt: "2026-09-01"
+updatedAt: "2026-09-01"
+verifiedAt: "2026-09-01"
+tags: [ansible, kubernetes, rke2, rke2spray, operations]
+status: stable
+publicationStatus: published
+sourceUrl: https://github.com/jongminchung/rke2spray/blob/main/docs/onboarding/01-architecture.md
+---
+
+## Core summary
+
+- **Shared Playbook, Role, and Inventory names preserve operational intent.**
+- **The actual bootstrap uses RKE2 servers, agents, and bundled containerd instead of kubeadm.**
+- **A public Role performs a native action, an RKE2 adapter action, or an explicit preflight failure.**
+- **Embedded etcd is the default; a separate `etcd` group selects the external datastore boundary.**
+- **A matching name does not guarantee identical Kubespray task bodies or resulting state.**
+
+## Separate retained APIs from replaced execution
+
+| Concern       | Kubespray-compatible shape       | RKE2 execution meaning             |
+| ------------- | -------------------------------- | ---------------------------------- |
+| Entrypoint    | Root Playbook names              | Internal lifecycle orchestration   |
+| Roles         | Public Role paths and tags       | Replaced kubeadm and kubelet tasks |
+| Targets       | Inventory group names            | Server and agent role resolution   |
+| Configuration | `kube_version` and CNI variables | RKE2 config and release locks      |
+| AddOns        | `kubernetes-apps` boundary       | RKE2 `HelmChart` or manifest       |
+
+## Repository paths divide responsibility
+
+| Path                                              | Responsibility                                      |
+| ------------------------------------------------- | --------------------------------------------------- |
+| `cluster.yml`, `scale.yml`, `upgrade-cluster.yml` | Kubespray-shaped root API                           |
+| `playbooks/`                                      | RKE2 lifecycle orchestration                        |
+| `roles/`                                          | Public Roles and RKE2 adapters                      |
+| `inventory/sample/`                               | Reusable examples without secrets                   |
+| `extra_playbooks/`                                | Health, snapshot, certificate, and AddOn operations |
+| `docs/kubespray-api-compatibility.yml`            | Canonical mappings and exceptions                   |
+| `KUBESPRAY_BASELINE`                              | Pinned upstream commit                              |
+
+## Execution validates before convergence
+
+1. **A root Playbook imports the matching lifecycle from `playbooks/`.**
+2. **`kubespray_defaults` normalizes Kubespray variables and RKE2 extensions.**
+3. **`validate_inventory` checks topology, versions, runtime, and raw-config conflicts.**
+4. **Public Roles run native tasks, adapters, or explicit failures.**
+5. **The lifecycle verifies services, the API, and Node readiness.**
+
+## Interpret public names by runtime behavior
+
+- **`kubernetes/kubeadm` is an RKE2 bootstrap adapter, not a kubeadm executor.**
+- **`kubernetes/control-plane` manages `rke2-server` and API readiness.**
+- **`kubernetes/node` manages RKE2 configuration and the agent lifecycle.**
+- **`container-engine` manages the bundled-containerd boundary rather than installing a standalone runtime.**
+- **`etcd` chooses embedded or external datastore behavior from topology.**
+
+## Conclusion
+
+- **Treat `rke2spray` as an adapter that translates a public operational shape into RKE2, not as a task-for-task Kubespray copy.**
+- **Determine support from [Compatibility](/en/docs/rke2spray/compatibility) and preflight results, not from path existence alone.**

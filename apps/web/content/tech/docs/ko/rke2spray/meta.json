@@ -1,0 +1,17 @@
+{
+  "title": "rke2spray",
+  "defaultOpen": true,
+  "pages": [
+    "index",
+    "---시작하기---",
+    "getting-started",
+    "---핵심 개념---",
+    "architecture",
+    "inventory-and-vault",
+    "---설정과 운영---",
+    "configuration",
+    "operations",
+    "---참조---",
+    "compatibility"
+  ]
+}

@@ -1,0 +1,80 @@
+---
+documentKind: tutorial
+title: "Configure Inventory and Vault"
+description: "Define RKE2 node roles, environment variables, and inline Ansible Vault secrets safely."
+publishedAt: "2026-09-01"
+updatedAt: "2026-09-01"
+verifiedAt: "2026-09-01"
+tags: [ansible, kubernetes, rke2, rke2spray, operations]
+status: stable
+publicationStatus: published
+sourceUrl: https://github.com/jongminchung/rke2spray/blob/main/docs/onboarding/02-inventory-and-vault.md
+---
+
+## Core summary
+
+- **A separate consuming environment repository owns environment-specific Inventory.**
+- **`kube_control_plane` maps to RKE2 servers, while `kube_node` hosts that are not servers map to agents.**
+- **Store each secret as inline `!vault` in the group or host variables that consume it.**
+- **Never commit `.vault_pass` or plaintext secrets.**
+- **Run Vault validation and read-only preflight before remote changes.**
+
+## Create the Inventory structure
+
+```text
+inventory/<cluster-name>/
+├── hosts.yml
+├── group_vars/
+│   ├── all/all.yml
+│   └── k8s_cluster/k8s-cluster.yml
+└── host_vars/
+    └── <host>.yml
+```
+
+## Map groups to RKE2 roles
+
+| Inventory group      | RKE2 role                    | Constraint                                                     |
+| -------------------- | ---------------------------- | -------------------------------------------------------------- |
+| `k8s_cluster`        | All Linux servers and agents | Exact union of control-plane and worker hosts                  |
+| `kube_control_plane` | RKE2 server                  | At least one; the first host is the default bootstrap server   |
+| `kube_node`          | Workload-eligible Linux node | May overlap servers; remaining hosts become agents             |
+| `etcd`               | Datastore topology           | Matching control plane means embedded; separate means external |
+| `win_nodes`          | Windows RKE2 agent           | Server role is rejected                                        |
+| `bastion`            | SSH jump host                | Not an RKE2 installation target                                |
+
+## Place values with their closest owner
+
+| Value                                         | Recommended location                                      |
+| --------------------------------------------- | --------------------------------------------------------- |
+| Cluster-wide values                           | `group_vars/k8s_cluster/k8s-cluster.yml`                  |
+| Shared SSH values                             | `group_vars/all/all.yml`                                  |
+| Host address, name, or connection differences | `host_vars/<host>.yml`                                    |
+| RKE2 server and agent tokens                  | Inline `!vault` in cluster vars                           |
+| Provider API tokens                           | Individual inline `!vault` beside the consuming variables |
+| `ansible_password`                            | Inline `!vault` in the corresponding host vars            |
+
+## Preserve the Vault boundary
+
+- **Keep `.vault_pass` permissions at `0600`.**
+- **Do not create a central `vault.yml`, `vault_*` indirection, or plaintext secret file.**
+- **Do not place real addresses, credentials, or environment-specific topology in shared sample Inventory.**
+
+<Callout title="Required checks" type="warning">
+  `inventory-vault-check` validates ciphertext and local permissions without
+  SSH; `inventory-preflight` connects read-only to validate topology and host
+  requirements.
+</Callout>
+
+```bash
+make inventory-vault-check \
+  INVENTORY=inventory/my-cluster/hosts.yml \
+  VAULT_PASSWORD_FILE=.vault_pass
+
+make inventory-preflight \
+  INVENTORY=inventory/my-cluster/hosts.yml \
+  VAULT_PASSWORD_FILE=.vault_pass
+```
+
+## Next step
+
+- **Continue with version, CNI, and endpoint selection in [Configuration](/en/docs/rke2spray/configuration).**

@@ -1,0 +1,17 @@
+{
+  "title": "rke2spray",
+  "defaultOpen": true,
+  "pages": [
+    "index",
+    "---Getting Started---",
+    "getting-started",
+    "---Core Concepts---",
+    "architecture",
+    "inventory-and-vault",
+    "---Configuration and Operations---",
+    "configuration",
+    "operations",
+    "---Reference---",
+    "compatibility"
+  ]
+}

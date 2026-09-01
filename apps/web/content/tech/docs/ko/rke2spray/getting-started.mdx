@@ -1,0 +1,99 @@
+---
+documentKind: tutorial
+title: "rke2spray 시작하기"
+description: "저장소 준비, Inventory 검증과 첫 RKE2 클러스터 수렴까지 완료하는 입문 절차"
+publishedAt: "2026-09-01"
+updatedAt: "2026-09-01"
+verifiedAt: "2026-09-01"
+tags: [ansible, kubernetes, rke2, rke2spray, operations]
+status: stable
+publicationStatus: published
+sourceUrl: https://github.com/jongminchung/rke2spray/blob/main/docs/onboarding/00-start-here.md
+---
+
+## 핵심 요약
+
+- **소스 checkout의 root Playbook이 기본 실행 경로임**
+- **Inventory에는 Linux host, 역할 group, RKE2 token과 endpoint 선택이 필요함**
+- **첫 변경 전 `inventory-vault-check`와 `inventory-preflight`를 모두 통과해야 함**
+- **설치는 `cluster.yml` 또는 같은 계약의 `make cluster-converge`로 실행함**
+- **완료 상태는 RKE2 service, Kubernetes API와 모든 Node의 Ready 상태로 확인함**
+
+## 설치 전에 전제를 확인함
+
+- **지원되는 Ansible·Python·운영체제·RKE2 조합은 현재 release의 `docs/support-matrix.md`에서 선택함**
+- **대상 host는 관리 노드의 SSH 접속, privilege escalation과 노드 간 필수 port를 허용해야 함**
+- **다중 server 토폴로지는 안정적인 registration endpoint를 먼저 준비해야 함**
+
+## 첫 클러스터를 수렴함
+
+<Steps>
+  <Step>
+    ### 저장소와 의존성을 준비함
+
+    ```bash
+    git clone https://github.com/jongminchung/rke2spray.git
+    cd rke2spray
+    python -m pip install -r requirements.txt
+    ansible-galaxy collection install -r requirements.yml
+    ```
+
+  </Step>
+  <Step>
+    ### Sample Inventory를 환경 디렉터리로 복사함
+
+    ```bash
+    cp -a inventory/sample inventory/my-cluster
+    ```
+
+    `hosts.yml`, `group_vars/`와 필요한 `host_vars/`를 실제 주소와 토폴로지에 맞게 수정함
+
+  </Step>
+  <Step>
+    ### Vault와 Inventory를 변경 없이 검사함
+
+    ```bash
+    make inventory-vault-check \
+      INVENTORY=inventory/my-cluster/hosts.yml \
+      VAULT_PASSWORD_FILE=.vault_pass
+
+    make inventory-preflight \
+      INVENTORY=inventory/my-cluster/hosts.yml \
+      VAULT_PASSWORD_FILE=.vault_pass
+    ```
+
+  </Step>
+  <Step>
+    ### 클러스터를 수렴함
+
+    ```bash
+    ansible-playbook \
+      -i inventory/my-cluster/hosts.yml \
+      --vault-password-file .vault_pass \
+      cluster.yml
+    ```
+
+  </Step>
+  <Step>
+    ### 설치 결과를 확인함
+
+    ```bash
+    make cluster-health \
+      INVENTORY=inventory/my-cluster/hosts.yml \
+      VAULT_PASSWORD_FILE=.vault_pass
+    ```
+
+  </Step>
+</Steps>
+
+## 완료 상태를 판정함
+
+- **각 Linux node에서 기대한 `rke2-server` 또는 `rke2-agent` service가 active 상태여야 함**
+- **Kubernetes API의 `/readyz`가 정상 응답해야 함**
+- **Inventory에 선언한 모든 Node가 `Ready` 상태여야 함**
+- **선택한 CNI와 CoreDNS rollout이 완료되어야 함**
+
+## 다음 단계
+
+- **토폴로지와 adapter 경계는 [구조와 실행 모델](/ko/docs/rke2spray/architecture)에서 확인함**
+- **실제 운영 전에는 [운영 Lifecycle](/ko/docs/rke2spray/operations)의 안전선을 검토함**
