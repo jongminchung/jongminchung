@@ -26,3 +26,17 @@
 :where(html[data-site="invest"][data-theme="dark"]) {
   --background: #000;
 }
+
+/* 화면 전환 중에도 새 화면의 컨트롤이 즉시 입력을 받을 수 있게 함 */
+::view-transition {
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-delay: 0s !important;
+    animation-duration: 0s !important;
+  }
+}

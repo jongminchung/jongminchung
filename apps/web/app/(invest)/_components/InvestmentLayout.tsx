@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode, ViewTransition } from "react";
 import { BrandWordmark } from "#components/BrandWordmark";
 import { EditorialFooter, EditorialHeader } from "#components/EditorialChrome";
 import { ThemeControl } from "#components/ThemeControl";
@@ -36,7 +36,15 @@ export function InvestmentLayout({
           { href: `/${locale}/sources/book`, label: text.books },
         ]}
       />
-      {children}
+      <ViewTransition
+        enter="auto"
+        exit="auto"
+        name="page-content"
+        share="auto"
+        update="auto"
+      >
+        {children}
+      </ViewTransition>
       <EditorialFooter
         groups={[
           {

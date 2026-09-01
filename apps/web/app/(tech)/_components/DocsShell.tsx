@@ -1,5 +1,5 @@
 import { TooltipProvider } from "@jongminchung/ui/components/tooltip";
-import type { ReactNode } from "react";
+import { type ReactNode, ViewTransition } from "react";
 import { EditorialFooter, EditorialHeader } from "#components/EditorialChrome";
 import { ThemeControl } from "#components/ThemeControl";
 import type { Locale } from "#lib/content-model";
@@ -100,7 +100,15 @@ export function DocsShell({
               },
             ]}
           />
-          <div className="min-w-0">{children}</div>
+          <ViewTransition
+            enter="auto"
+            exit="auto"
+            name="page-content"
+            share="auto"
+            update="auto"
+          >
+            <div className="min-w-0">{children}</div>
+          </ViewTransition>
           <EditorialFooter
             groups={[
               {

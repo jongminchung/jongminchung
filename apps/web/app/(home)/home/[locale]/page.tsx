@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { ViewTransition } from "react";
 import { HeroSection } from "#home-components/HomeHeroSection";
 import { PrinciplesSection } from "#home-components/HomePrinciplesSection";
 import {
@@ -71,13 +72,21 @@ export default async function HomePage({
   return (
     <>
       <HomeHeader locale={locale} />
-      <main id="main-content">
-        <HeroSection locale={locale} />
-        <WorkSection locale={locale} />
-        <WritingSection locale={locale} />
-        <PrinciplesSection locale={locale} />
-      </main>
-      <HomeFooter locale={locale} />
+      <ViewTransition
+        enter="auto"
+        exit="auto"
+        name="page-content"
+        share="auto"
+        update="auto"
+      >
+        <main id="main-content">
+          <HeroSection locale={locale} />
+          <WorkSection locale={locale} />
+          <WritingSection locale={locale} />
+          <PrinciplesSection locale={locale} />
+        </main>
+        <HomeFooter locale={locale} />
+      </ViewTransition>
       <PersonStructuredData locale={locale} />
     </>
   );
