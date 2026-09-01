@@ -18,7 +18,11 @@ export function InvestmentLayout({
   const text = getInvestmentMessages(locale).layout;
   const alternate = alternateLocale(locale);
   return (
-    <div className="min-h-dvh bg-background text-foreground">
+    <div
+      className="min-h-dvh bg-background text-foreground"
+      id="top"
+      tabIndex={-1}
+    >
       <EditorialHeader
         actions={<ThemeControl labelTemplate={themeLabelTemplateFor(locale)} />}
         brand={<BrandWordmark suffix="invest" />}

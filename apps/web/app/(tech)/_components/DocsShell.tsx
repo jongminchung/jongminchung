@@ -34,7 +34,7 @@ export function DocsShell({
   return (
     <SearchProvider locale={locale}>
       <TooltipProvider>
-        <div className="min-h-dvh bg-background">
+        <div className="min-h-dvh bg-background" id="top" tabIndex={-1}>
           <EditorialHeader
             actions={
               <>

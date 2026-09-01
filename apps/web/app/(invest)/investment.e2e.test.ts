@@ -125,6 +125,16 @@ test("[성공] 투자 글에 Tech와 같은 문서 내 목차를 제공함", asy
       name: "Start by limiting what a 13F can tell us",
     }),
   ).toHaveAttribute("href", "#start-by-limiting-what-a-13f-can-tell-us");
+  await page
+    .getByRole("heading", {
+      name: "Berkshire shows the persistence of concentration",
+    })
+    .scrollIntoViewIfNeeded();
+  await expect
+    .poll(() => page.evaluate(() => window.scrollY))
+    .toBeGreaterThan(0);
+  await page.getByRole("link", { name: "Back to top" }).click();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
   await expect(page.getByText("Jamie's notes", { exact: true })).toHaveCount(0);
   await expect(page.getByText("Source summary", { exact: true })).toHaveCount(
     0,

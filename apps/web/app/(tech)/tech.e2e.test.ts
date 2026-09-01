@@ -258,6 +258,19 @@ test("[성공] 각주를 미리 보고 참조와 본문 사이를 이동함", as
   await expect(page.locator("#user-content-fn-1")).toBeInViewport();
 });
 
+test("[성공] 개별 글에서 페이지 맨 위로 이동함", async ({ page }) => {
+  await page.goto("/en/the-expensive-main-thread");
+
+  await page
+    .getByRole("heading", { name: "Using the Expensive Resource Wisely" })
+    .scrollIntoViewIfNeeded();
+  await expect
+    .poll(() => page.evaluate(() => window.scrollY))
+    .toBeGreaterThan(0);
+  await page.getByRole("link", { name: "Back to top" }).click();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+});
+
 test("[성공] 다이어그램과 검색 엔진용 자산을 제공함", async ({
   page,
   siteRequest,

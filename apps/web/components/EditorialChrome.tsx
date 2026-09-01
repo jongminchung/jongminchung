@@ -36,11 +36,7 @@ export function EditorialHeader({
   readonly actions?: ReactNode;
 }): React.JSX.Element {
   return (
-    <header
-      className="sticky top-0 z-40 h-16 border-b bg-background/95 backdrop-blur-xl"
-      id="top"
-      tabIndex={-1}
-    >
+    <header className="sticky top-0 z-40 h-16 border-b bg-background/95 backdrop-blur-xl">
       <div className="flex h-full w-full items-center gap-4 px-4 text-sm md:px-8 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-6">
         <Link
           aria-label={brandLabel}
