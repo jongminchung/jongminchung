@@ -37,7 +37,7 @@ export function LocaleSwitcher({
     <a
       aria-label={label}
       className={cn(
-        "inline-flex h-8 shrink-0 items-center justify-center gap-2 rounded-md border border-transparent bg-transparent px-3 text-xs font-medium whitespace-nowrap transition-colors outline-none",
+        "inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-md border border-transparent bg-transparent px-3 text-xs font-medium whitespace-nowrap transition-colors outline-none",
         "hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60",
       )}
       href={targetHref}

@@ -17,6 +17,7 @@ import { DocumentOutline } from "./DocumentOutline";
 import { DocumentPageHeader } from "./DocumentPageHeader";
 import { DocumentPager } from "./DocumentPager";
 import { RelatedDocuments } from "./RelatedDocuments";
+import { TechDocsMobileToc } from "./TechDocsMobileToc";
 
 function ArticleArgument({
   locale,
@@ -35,18 +36,42 @@ function ArticleArgument({
       data-article-argument="true"
     >
       <div>
-        <p className="m-0 font-mono text-[11px] font-medium tracking-[.1em] text-primary uppercase">
+        <p
+          className={cn(
+            "m-0 text-primary",
+            locale === "ko"
+              ? "font-sans text-xs font-semibold tracking-normal"
+              : "font-mono text-[11px] font-medium tracking-[.1em] uppercase",
+          )}
+        >
           {labels.thesis}
         </p>
-        <p className="mt-2 mb-0 text-[16px] leading-7 font-medium text-foreground">
+        <p
+          className={cn(
+            "mt-2 mb-0 text-[16px] leading-7 font-medium text-foreground",
+            locale === "ko" && "[overflow-wrap:anywhere] break-keep",
+          )}
+        >
           {thesis}
         </p>
       </div>
       <div>
-        <p className="m-0 font-mono text-[11px] font-medium tracking-[.1em] text-muted-foreground uppercase">
+        <p
+          className={cn(
+            "m-0 text-muted-foreground",
+            locale === "ko"
+              ? "font-sans text-xs font-semibold tracking-normal"
+              : "font-mono text-[11px] font-medium tracking-[.1em] uppercase",
+          )}
+        >
           {labels.counterargument}
         </p>
-        <p className="mt-2 mb-0 text-[15px] leading-7 text-muted-foreground">
+        <p
+          className={cn(
+            "mt-2 mb-0 text-[15px] leading-7 text-muted-foreground",
+            locale === "ko" && "[overflow-wrap:anywhere] break-keep",
+          )}
+        >
           {counterargument}
         </p>
       </div>
@@ -64,22 +89,33 @@ export function DocumentPage({
 }) {
   const { Content, metadata, previous, next } = document;
   const text = getTechMessages(locale).article;
+  const outlineLabels = documentOutlineLabelsFor(locale);
   return (
     <>
       <StructuredData value={createTechArticleStructuredData(metadata)} />
       <EditorialArticle
         header={<DocumentPageHeader locale={locale} document={document} />}
-        rail={
-          <DocumentOutline
-            items={document.toc}
-            labels={documentOutlineLabelsFor(locale)}
-          />
-        }
+        rail={<DocumentOutline items={document.toc} labels={outlineLabels} />}
         variant="engineering"
       >
-        <div className="w-full text-[15px]" lang={locale}>
+        <TechDocsMobileToc
+          backToTopLabel={outlineLabels.backToTop}
+          label={text.mobileToc}
+          locale={locale}
+          toc={document.toc.filter(({ depth }) => depth === 2)}
+          variant="editorial"
+        />
+        <div
+          className={cn(
+            "w-full text-[15px]",
+            locale === "ko" &&
+              "[overflow-wrap:anywhere] break-keep [&_p]:[text-wrap:pretty]",
+          )}
+          lang={locale}
+        >
           <div
             className={cn(editorialProseClassName, "pt-0")}
+            data-copy-article="true"
             data-docs-prose="true"
           >
             {metadata.contentType === "blog" ? (

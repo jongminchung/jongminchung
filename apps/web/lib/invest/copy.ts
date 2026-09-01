@@ -8,6 +8,8 @@ interface InvestmentMessages {
     readonly books: string;
     readonly explore: string;
     readonly sources: string;
+    readonly mobileMenu: string;
+    readonly closeMenu: string;
   };
   readonly index: EditorialCopy;
   readonly article: {
@@ -38,6 +40,8 @@ const messages = {
       books: "책",
       explore: "탐색",
       sources: "출처",
+      mobileMenu: "투자 콘텐츠 메뉴",
+      closeMenu: "메뉴 닫기",
     },
     index: {
       eyebrow: "INVESTMENT NOTES",
@@ -84,6 +88,8 @@ const messages = {
       books: "Books",
       explore: "Explore",
       sources: "Sources",
+      mobileMenu: "Investment content menu",
+      closeMenu: "Close menu",
     },
     index: {
       eyebrow: "INVESTMENT NOTES",

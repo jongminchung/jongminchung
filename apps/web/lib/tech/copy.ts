@@ -14,6 +14,8 @@ interface TechMessages {
     readonly language: string;
     readonly alternateLocaleShort: string;
     readonly alternateLanguage: string;
+    readonly mobileMenu: string;
+    readonly closeMenu: string;
   };
   readonly article: {
     readonly argument: string;
@@ -32,6 +34,10 @@ interface TechMessages {
     readonly edit: string;
     readonly blog: string;
     readonly engineeringArticle: string;
+    readonly copy: string;
+    readonly copied: string;
+    readonly copyFailed: string;
+    readonly mobileToc: string;
   };
   readonly docs: {
     readonly eyebrow: string;
@@ -86,6 +92,8 @@ const messages = {
       language: "언어",
       alternateLocaleShort: "EN",
       alternateLanguage: "English",
+      mobileMenu: "기술 콘텐츠 메뉴",
+      closeMenu: "메뉴 닫기",
     },
     article: {
       argument: "글의 논지",
@@ -104,6 +112,10 @@ const messages = {
       edit: "이 페이지 편집",
       blog: "블로그",
       engineeringArticle: "기술 글",
+      copy: "본문 복사",
+      copied: "복사됨",
+      copyFailed: "복사 실패",
+      mobileToc: "이 글에서",
     },
     docs: {
       eyebrow: "ENGINEERING DOCUMENTATION",
@@ -158,6 +170,8 @@ const messages = {
       language: "Language",
       alternateLocaleShort: "KO",
       alternateLanguage: "한국어",
+      mobileMenu: "Engineering content menu",
+      closeMenu: "Close menu",
     },
     article: {
       argument: "Article argument",
@@ -176,6 +190,10 @@ const messages = {
       edit: "Edit this page",
       blog: "Blog",
       engineeringArticle: "Engineering article",
+      copy: "Copy article",
+      copied: "Copied",
+      copyFailed: "Copy failed",
+      mobileToc: "In this article",
     },
     docs: {
       eyebrow: "ENGINEERING DOCUMENTATION",

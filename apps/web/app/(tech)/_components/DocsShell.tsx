@@ -61,6 +61,8 @@ export function DocsShell({
             }
             localeHref={alternateHref}
             localeLabel={labels.alternateLocaleShort}
+            mobileMenuCloseLabel={labels.closeMenu}
+            mobileMenuLabel={labels.mobileMenu}
             navigation={[
               {
                 href: `/${locale}`,

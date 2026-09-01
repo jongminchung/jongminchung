@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { EditorialMobileNavigation } from "./EditorialMobileNavigation";
 import {
   EditorialNavigationMenu,
   type EditorialNavigationMenuOption,
@@ -24,6 +25,8 @@ export function EditorialHeader({
   localeLabel,
   localeControl,
   actions,
+  mobileMenuLabel,
+  mobileMenuCloseLabel,
 }: {
   readonly brand: ReactNode;
   readonly brandLabel: string;
@@ -34,6 +37,8 @@ export function EditorialHeader({
   readonly localeLabel: string;
   readonly localeControl?: ReactNode;
   readonly actions?: ReactNode;
+  readonly mobileMenuLabel: string;
+  readonly mobileMenuCloseLabel: string;
 }): React.JSX.Element {
   return (
     <header className="sticky top-0 z-40 h-16 border-b bg-background/95 backdrop-blur-xl">
@@ -71,6 +76,11 @@ export function EditorialHeader({
           )}
         </nav>
         <div className="ml-auto flex items-center gap-1 lg:ml-0 lg:justify-self-end">
+          <EditorialMobileNavigation
+            closeLabel={mobileMenuCloseLabel}
+            label={mobileMenuLabel}
+            navigation={navigation}
+          />
           {actions}
           {localeControl ?? (
             <Link className="font-mono text-[11px]" href={localeHref}>

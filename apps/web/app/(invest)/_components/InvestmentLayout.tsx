@@ -31,6 +31,8 @@ export function InvestmentLayout({
         homeHref={`/${locale}`}
         localeHref={`/${alternate}`}
         localeLabel={alternate.toUpperCase()}
+        mobileMenuCloseLabel={text.closeMenu}
+        mobileMenuLabel={text.mobileMenu}
         navigation={[
           { href: `/${locale}/notes`, label: text.notes },
           { href: `/${locale}/sources/book`, label: text.books },

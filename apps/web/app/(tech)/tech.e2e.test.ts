@@ -191,6 +191,75 @@ test("[성공] 모바일 문서 경로를 다시 방문해도 검색 상태를 �
   await expect(search).toBeHidden();
 });
 
+test("[성공] 모바일 블로그에서 전체 탐색과 글 목차를 유지함", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/ko/building-coding-agent");
+
+  await page.getByRole("button", { name: "기술 콘텐츠 메뉴" }).click();
+  const menu = page.getByRole("dialog", { name: "기술 콘텐츠 메뉴" });
+  await expect(menu).toBeVisible();
+  await expect(menu.getByRole("link", { name: "Blog" })).toBeVisible();
+  await expect(menu.getByRole("link", { name: "Series" })).toBeVisible();
+  await expect(menu.getByRole("link", { name: "Showcase" })).toBeVisible();
+  await expect(
+    menu.getByRole("link", { name: "Docs", exact: true }),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(menu).toBeHidden();
+
+  const toc = page.locator('[data-mobile-toc="editorial"]');
+  await expect(toc).toBeVisible();
+  await toc.getByText("이 글에서", { exact: true }).click();
+  await expect(
+    toc.getByRole("link", { name: "에이전트란 무엇인가" }),
+  ).toBeVisible();
+  await expect(toc.getByRole("link", { name: "맨 위로" })).toHaveAttribute(
+    "href",
+    "#top",
+  );
+});
+
+test("[성공] 한글 글의 줄바꿈·날짜·복사·터치 영역을 현지화함", async ({
+  page,
+}) => {
+  await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/ko/building-coding-agent");
+
+  const title = page.getByRole("heading", {
+    level: 1,
+    name: "코딩 에이전트 만들어보기",
+  });
+  await expect(title).toHaveCSS("word-break", "keep-all");
+  await expect(page.locator("[data-copy-description]")).toHaveCSS(
+    "word-break",
+    "keep-all",
+  );
+  await expect(page.locator("time").first()).toHaveText("2026. 7. 10.");
+
+  const copy = page.getByRole("button", { name: "본문 복사" });
+  await copy.click();
+  await expect(page.getByRole("button", { name: "복사됨" })).toBeVisible();
+  const clipboard = await page.evaluate(() => navigator.clipboard.readText());
+  expect(clipboard).toContain("코딩 에이전트 만들어보기");
+  expect(clipboard).toContain("터미널에 claude나 codex를 치고");
+
+  for (const control of [
+    page.getByRole("button", { name: "기술 콘텐츠 메뉴" }),
+    page.getByRole("button", { name: "문서 검색" }),
+    page.getByRole("button", { name: /^테마:/u }),
+    page.getByRole("link", { name: "Read in English" }),
+  ]) {
+    const box = await control.boundingBox();
+    expect(box?.height).toBeGreaterThanOrEqual(44);
+  }
+  await expectNoHorizontalOverflow(page);
+  await expectNoAccessibilityViolations(page, "header");
+  await expectNoAccessibilityViolations(page, '[data-mobile-toc="editorial"]');
+});
+
 test("[성공] 각주를 미리 보고 참조와 본문 사이를 이동함", async ({ page }) => {
   await page.goto("/en/the-expensive-main-thread");
 

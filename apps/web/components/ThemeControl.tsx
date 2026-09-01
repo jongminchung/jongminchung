@@ -37,7 +37,7 @@ export function ThemeControl({
         render={
           <Button
             aria-label={label}
-            className={"size-9 gap-2 p-0 text-sm"}
+            className="size-11 gap-2 p-0 text-sm"
             onClick={() => setMode(nextMode[mode])}
             type="button"
             variant="ghost"

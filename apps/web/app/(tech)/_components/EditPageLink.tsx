@@ -33,7 +33,7 @@ export function EditPageLink({
       aria-label={label}
       className={cn(
         buttonVariants({ variant: "ghost", size: "icon" }),
-        "size-9",
+        "-my-2 size-11",
       )}
       href={href}
       rel="noreferrer"
