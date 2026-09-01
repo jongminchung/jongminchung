@@ -1,10 +1,11 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { blogMdxComponents } from "#mdx-components";
 import { Callout, Card, Step, Steps } from "./DocsMdxPrimitives";
-import { MdxTable, techMdxComponents } from "./mdx-components";
+import { DocsMdxTable, docsMdxComponents } from "./mdx-components";
 
-describe("Tech MDX composition", () => {
+describe("Docs MDX composition", () => {
   it("[성공] 순서 있는 단계의 native list semantics를 유지함", () => {
     const html = renderToStaticMarkup(
       createElement(
@@ -43,7 +44,7 @@ describe("Tech MDX composition", () => {
   it("[성공] 넓은 표를 본문 폭 안의 독립 스크롤 영역으로 렌더링함", () => {
     const html = renderToStaticMarkup(
       createElement(
-        MdxTable,
+        DocsMdxTable,
         null,
         createElement(
           "tbody",
@@ -62,7 +63,7 @@ describe("Tech MDX composition", () => {
   it("[성공] MDX 요소의 기본 스타일과 전달 className을 함께 유지함", () => {
     const html = renderToStaticMarkup(
       createElement(
-        techMdxComponents.p,
+        docsMdxComponents.p,
         { className: "content-override" },
         "Body",
       ),
@@ -70,5 +71,20 @@ describe("Tech MDX composition", () => {
 
     expect(html).toContain("mt-0 mb-4 text-base");
     expect(html).toContain("content-override");
+  });
+
+  it("[성공] 비순서 목록의 marker를 옅은 semantic 색상으로 표시함", () => {
+    for (const component of [docsMdxComponents.ul, blogMdxComponents.ul]) {
+      const html = renderToStaticMarkup(
+        createElement(
+          component,
+          null,
+          createElement("li", null, "Read documentation"),
+        ),
+      );
+
+      expect(html).toContain("[&amp;&gt;li]:marker:text-border");
+      expect(html).toContain("<li>Read documentation</li>");
+    }
   });
 });

@@ -31,8 +31,8 @@ interface CodeElementProps {
   readonly className?: string;
 }
 
-/** `TechMdxPre` 기술 문서 코드 블록을 렌더링함 */
-function TechMdxPre({ ref: _ref, children, ...props }: ComponentProps<"pre">) {
+/** `DocsMdxPre` 기술 문서 코드 블록을 렌더링함 */
+function DocsMdxPre({ ref: _ref, children, ...props }: ComponentProps<"pre">) {
   if (isValidElement<CodeElementProps>(children)) {
     const block = classifyMdxCodeBlock(
       children.props.className,
@@ -45,7 +45,11 @@ function TechMdxPre({ ref: _ref, children, ...props }: ComponentProps<"pre">) {
   return <DocsCodeBlock {...props}>{children}</DocsCodeBlock>;
 }
 
-function MdxHeading2({ children, className, ...props }: ComponentProps<"h2">) {
+function DocsMdxHeading2({
+  children,
+  className,
+  ...props
+}: ComponentProps<"h2">) {
   return (
     <h2
       {...props}
@@ -59,7 +63,11 @@ function MdxHeading2({ children, className, ...props }: ComponentProps<"h2">) {
   );
 }
 
-function MdxHeading3({ children, className, ...props }: ComponentProps<"h3">) {
+function DocsMdxHeading3({
+  children,
+  className,
+  ...props
+}: ComponentProps<"h3">) {
   return (
     <h3
       {...props}
@@ -73,7 +81,7 @@ function MdxHeading3({ children, className, ...props }: ComponentProps<"h3">) {
   );
 }
 
-function MdxParagraph({ className, ...props }: ComponentProps<"p">) {
+function DocsMdxParagraph({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
       {...props}
@@ -82,19 +90,19 @@ function MdxParagraph({ className, ...props }: ComponentProps<"p">) {
   );
 }
 
-function MdxUnorderedList({ className, ...props }: ComponentProps<"ul">) {
+function DocsMdxUnorderedList({ className, ...props }: ComponentProps<"ul">) {
   return (
     <ul
       {...props}
       className={cn(
-        "mt-0 mb-6 pl-[26px] text-base leading-[1.6] [&>li]:pl-1.5",
+        "mt-0 mb-6 pl-[26px] text-base leading-[1.6] [&>li]:pl-1.5 [&>li]:marker:text-border",
         className,
       )}
     />
   );
 }
 
-function MdxOrderedList({ className, ...props }: ComponentProps<"ol">) {
+function DocsMdxOrderedList({ className, ...props }: ComponentProps<"ol">) {
   return (
     <ol
       {...props}
@@ -106,7 +114,10 @@ function MdxOrderedList({ className, ...props }: ComponentProps<"ol">) {
   );
 }
 
-function MdxBlockquote({ className, ...props }: ComponentProps<"blockquote">) {
+function DocsMdxBlockquote({
+  className,
+  ...props
+}: ComponentProps<"blockquote">) {
   return (
     <blockquote
       {...props}
@@ -118,7 +129,7 @@ function MdxBlockquote({ className, ...props }: ComponentProps<"blockquote">) {
   );
 }
 
-export function MdxTable({ className, ...props }: ComponentProps<"table">) {
+export function DocsMdxTable({ className, ...props }: ComponentProps<"table">) {
   return (
     <div
       className="my-6 w-full max-w-full overflow-x-auto overscroll-x-contain"
@@ -136,7 +147,7 @@ export function MdxTable({ className, ...props }: ComponentProps<"table">) {
   );
 }
 
-function MdxDataCell({ className, ...props }: ComponentProps<"td">) {
+function DocsMdxDataCell({ className, ...props }: ComponentProps<"td">) {
   return (
     <td
       {...props}
@@ -145,7 +156,7 @@ function MdxDataCell({ className, ...props }: ComponentProps<"td">) {
   );
 }
 
-function MdxHeaderCell({ className, ...props }: ComponentProps<"th">) {
+function DocsMdxHeaderCell({ className, ...props }: ComponentProps<"th">) {
   return (
     <th
       {...props}
@@ -157,22 +168,22 @@ function MdxHeaderCell({ className, ...props }: ComponentProps<"th">) {
   );
 }
 
-function MdxDiv({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+function DocsMdxDiv({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return <div {...props} className={cn("my-4", className)} />;
 }
 
-export const techMdxComponents = {
-  blockquote: MdxBlockquote,
-  div: MdxDiv,
-  h2: MdxHeading2,
-  h3: MdxHeading3,
-  ol: MdxOrderedList,
-  p: MdxParagraph,
-  pre: TechMdxPre,
-  table: MdxTable,
-  td: MdxDataCell,
-  th: MdxHeaderCell,
-  ul: MdxUnorderedList,
+export const docsMdxComponents = {
+  blockquote: DocsMdxBlockquote,
+  div: DocsMdxDiv,
+  h2: DocsMdxHeading2,
+  h3: DocsMdxHeading3,
+  ol: DocsMdxOrderedList,
+  p: DocsMdxParagraph,
+  pre: DocsMdxPre,
+  table: DocsMdxTable,
+  td: DocsMdxDataCell,
+  th: DocsMdxHeaderCell,
+  ul: DocsMdxUnorderedList,
   Callout,
   Card,
   Cards,

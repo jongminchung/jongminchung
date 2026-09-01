@@ -12,7 +12,7 @@ import { documentOutlineLabelsFor } from "#lib/i18n-messages";
 import { editorialProseClassName } from "#lib/mdx-styles";
 import { createTechArticleStructuredData } from "#lib/structured-data";
 import { getTechMessages } from "#lib/tech/copy";
-import { editorialMdxComponents } from "#mdx-components";
+import { blogMdxComponents } from "#mdx-components";
 import { DocumentOutline } from "./DocumentOutline";
 import { DocumentPageHeader } from "./DocumentPageHeader";
 import { DocumentPager } from "./DocumentPager";
@@ -141,7 +141,7 @@ export function DocumentPage({
                 />
               </>
             ) : null}
-            <Content components={editorialMdxComponents} />
+            <Content components={blogMdxComponents} />
           </div>
           <RelatedDocuments documents={document.related} locale={locale} />
           <DocumentPager locale={locale} previous={previous} next={next} />
