@@ -5,6 +5,7 @@
     "index",
     "---Tutorial---",
     "---How-to---",
+    "external-otlp-gateway-auth",
     "cilium-gateway-api-external-load-balancer",
     "cilium-gateway-api-multi-control-plane",
     "cilium-gateway-api-direct-public-ip",

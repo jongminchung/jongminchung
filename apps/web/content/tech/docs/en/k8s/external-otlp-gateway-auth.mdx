@@ -1,0 +1,267 @@
+---
+documentKind: how-to
+title: "Protect External OTLP Ingestion with Gateway API ExternalAuth"
+description: "Accept logs, metrics, and traces from external OpenTelemetry clients through one HTTPS endpoint, validate a bearer token, and forward authorized requests to a Collector."
+publishedAt: "2026-09-02"
+updatedAt: "2026-09-02"
+verifiedAt: "2026-09-02"
+tags:
+  [kubernetes, gateway-api, opentelemetry, otlp, authentication, observability]
+status: stable
+publicationStatus: published
+sourceUrl: https://github.com/jongminchung/jongminchung/blob/main/apps/web/content/tech/docs/en/k8s/external-otlp-gateway-auth.mdx
+---
+
+## Key takeaways
+
+- **Expose only Kubernetes Gateway port `443` and keep Collector ports `4317` and `4318` inside the cluster**
+- **Use the `HTTPRoute` `ExternalAuth` filter to validate `Authorization: Bearer <token>` before forwarding a request**
+- **Store only SOPS ciphertext in Git and materialize the token as a Kubernetes `Secret` at deployment time**
+- **Route OTLP/gRPC method paths to internal port `4317` and `/v1/logs`, `/v1/metrics`, and `/v1/traces` to internal port `4318`**
+- **Provide Codex credentials through the standard `OTEL_EXPORTER_OTLP_HEADERS` environment variable from `mise` and keep only endpoints in `config.toml`**
+
+## Check the prerequisites
+
+- **The Gateway controller must support the `HTTPRoute` `ExternalAuth` filter**
+  - Controller support determines portability, so verify compatibility before changing Gateway implementations
+  - The listener must support HTTP/2 and TLS to accept OTLP/gRPC through the same public `443` endpoint
+- **The OTel Collector must listen on OTLP/gRPC `4317` and OTLP/HTTP `4318` inside the cluster**
+  - External clients must not have a direct path to the Collector Service or a NodePort
+- **DNS and the TLS certificate must include the public OTLP hostname**
+  - The verified deployment in this guide uses `otel.jamie.kr`
+
+## Split the request path into two trust boundaries
+
+```text
+Codex or external SDK
+  │ HTTPS :443 + Authorization
+  ▼
+Gateway / HTTPRoute
+  ├─ ExternalAuth ──► auth Service :8080 ──► 200 or 401
+  └─ authorized request
+       ├─ gRPC method path ──► otel-gateway :4317
+       └─ /v1/{logs,metrics,traces} ──► otel-gateway :4318
+```
+
+- **The Gateway owns Internet exposure, TLS termination, hostname matching, and the allowed paths**
+- **The auth Service compares credentials without storing or forwarding telemetry payloads**
+- **The Collector owns decoding, processing, and exporter queues after authorization succeeds**
+- **This separation applies one policy to every OTLP signal without coupling public authentication to Collector configuration**
+
+## Manage the bearer token as encrypted desired state
+
+- **Generate a random 256-bit token without placing it in shell history or command arguments**
+
+```bash
+openssl rand -hex 32 | \
+  sops set --value-stdin \
+    apps/observability/clickstack/secrets.enc.yaml \
+    '["hyperdx"]["secrets"]["OTLP_INGEST_TOKEN"]'
+```
+
+- **Materialize the SOPS value as a Kubernetes `Secret` during Helm or GitOps rendering**
+
+```yaml title="otel-external-auth-secret.yaml"
+apiVersion: v1
+kind: Secret
+metadata:
+  name: otel-external-auth-token
+  namespace: observability
+type: Opaque
+stringData:
+  token: "{{ .Values.hyperdx.secrets.OTLP_INGEST_TOKEN }}"
+```
+
+- **Only SOPS ciphertext should remain in Git**
+  - Check the diff and run a secret scanner before publishing the change
+  - A Kubernetes Secret is the runtime credential, not the encrypted Git storage format
+
+## Deploy a minimal auth Service
+
+- **Return `200` for an exact bearer-token match and `401` for every other request**
+
+```caddyfile title="Caddyfile"
+{
+  admin off
+  auto_https off
+}
+
+:8080 {
+  route {
+    @health path /healthz
+    respond @health "ok" 200
+
+    @authorized header Authorization "Bearer {$OTLP_BEARER_TOKEN}"
+    header @authorized X-OTLP-Authenticated "true"
+    respond @authorized 200
+
+    respond 401
+  }
+}
+```
+
+- **Read the token from the `Secret` in a Deployment and expose only a `ClusterIP` Service on port `8080`**
+  - Set `automountServiceAccountToken: false`
+  - Run as non-root with a read-only root filesystem and dropped capabilities
+  - Use an unauthenticated `/healthz` endpoint for readiness and liveness probes
+  - Use two replicas and a `PodDisruptionBudget` so replacing one Pod does not stop all authentication
+
+## Allow only exact OTLP signal paths
+
+- **Separate gRPC method paths and OTLP/HTTP paths into two rules in one `HTTPRoute`**
+
+```yaml title="otel-external-route.yaml"
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: otel-external
+  namespace: observability
+spec:
+  parentRefs:
+    - name: public
+      namespace: gateway-system
+      sectionName: apps-https
+  hostnames: [otel.jamie.kr]
+  rules:
+    - matches:
+        - path:
+            type: Exact
+            value: /opentelemetry.proto.collector.logs.v1.LogsService/Export
+        - path:
+            type: Exact
+            value: /opentelemetry.proto.collector.metrics.v1.MetricsService/Export
+        - path:
+            type: Exact
+            value: /opentelemetry.proto.collector.trace.v1.TraceService/Export
+      filters:
+        - type: ExternalAuth
+          externalAuth:
+            protocol: HTTP
+            backendRef:
+              name: otel-external-auth
+              port: 8080
+            http:
+              path: /authorize
+              allowedHeaders: [Authorization]
+              allowedResponseHeaders: [X-OTLP-Authenticated]
+      backendRefs:
+        - name: otel-gateway
+          port: 4317
+    - matches:
+        - path: { type: Exact, value: /v1/logs }
+        - path: { type: Exact, value: /v1/metrics }
+        - path: { type: Exact, value: /v1/traces }
+      filters:
+        - type: ExternalAuth
+          externalAuth:
+            protocol: HTTP
+            backendRef:
+              name: otel-external-auth
+              port: 8080
+            http:
+              path: /authorize
+              allowedHeaders: [Authorization]
+              allowedResponseHeaders: [X-OTLP-Authenticated]
+      backendRefs:
+        - name: otel-gateway
+          port: 4318
+```
+
+- **Exact path matching prevents unrelated requests from reaching the Collector**
+- **Pass only the `Authorization` header required by the auth backend**
+- **Use NetworkPolicy to allow only the required ingress-data-plane flows to auth port `8080` and Collector ports `4317` and `4318`**
+
+## Inject the Codex credential with `mise`
+
+- **Run a credential helper from `mise` and expose its output as a redacted environment variable**
+
+```toml title="mise.toml"
+[env]
+OTEL_EXPORTER_OTLP_HEADERS = { value = "{{ exec(command='/secure/bin/otlp-authorization') | trim }}", redact = true }
+```
+
+- **The helper must emit the OpenTelemetry header environment-variable format instead of a bare token**
+
+```text
+Authorization=Bearer%20<64-hex-token>
+```
+
+- **Keep only signal-specific HTTPS endpoints in the Codex configuration**
+
+```toml title="~/.codex/config.toml"
+[otel]
+environment = "production"
+log_user_prompt = false
+exporter = { otlp-http = { endpoint = "https://otel.jamie.kr/v1/logs", protocol = "binary" } }
+metrics_exporter = { otlp-http = { endpoint = "https://otel.jamie.kr/v1/metrics", protocol = "binary" } }
+trace_exporter = { otlp-http = { endpoint = "https://otel.jamie.kr/v1/traces", protocol = "binary" } }
+```
+
+- **As verified with Codex `0.151.0`, `headers = { Authorization = "${TOKEN}" }` is sent literally instead of being expanded**
+  - Use the standard `OTEL_EXPORTER_OTLP_HEADERS` environment variable
+  - Restart Codex because it reads the environment and configuration when the process starts
+
+```bash
+mise exec -- codex
+```
+
+## Verify both denial and acceptance
+
+- **A request without a token must return `401` at the Gateway**
+
+```bash
+curl --silent --output /dev/null --write-out '%{http_code}\n' \
+  --request POST \
+  --header 'Content-Type: application/x-protobuf' \
+  --data-binary '' \
+  https://otel.jamie.kr/v1/logs
+```
+
+- **A request using the `mise` token must reach the Collector and return `200`**
+
+```bash
+mise exec -- bash -c '
+  authorization="${OTEL_EXPORTER_OTLP_HEADERS#Authorization=}"
+  authorization="${authorization//%20/ }"
+  curl --silent --output /dev/null --write-out "%{http_code}\n" \
+    --request POST \
+    --header "Content-Type: application/x-protobuf" \
+    --header "Authorization: ${authorization}" \
+    --data-binary "" \
+    https://otel.jamie.kr/v1/logs
+  unset authorization
+'
+```
+
+- **Check Route conditions and backend rollout status inside Kubernetes**
+
+```bash
+kubectl -n observability get httproute otel-external -o wide
+kubectl -n observability rollout status deployment/otel-external-auth
+kubectl -n observability rollout status statefulset/otel-gateway
+```
+
+- **Completion requires logs, metrics, and traces to be queryable in the storage backend, not only successful authentication**
+  - A short Codex startup test may emit only logs, so verify all three signals after a real turn
+
+## Operate token rotation and known limits
+
+- **Write a new token to SOPS, wait for the auth Deployment to restart with the new Secret, and then restart clients**
+- **A single-token comparison does not provide an overlap window for zero-downtime rotation**
+  - Add an explicit temporary two-token contract when uninterrupted rotation is required
+- **A shared bearer token does not provide client identity, granular authorization, or per-client revocation**
+  - Consider a token-hash registry, mTLS, or OIDC when audit and individual revocation matter
+- **Authentication does not prevent an authorized client from sending excessive telemetry**
+  - Add request-size, rate, queue, and memory limits at the Gateway or Collector
+
+## Execution recommendation
+
+- **Prove `401` and `200` behavior on OTLP/HTTP logs first, then expand verification to metrics, traces, and gRPC**
+- **Apply the production change in `DNS/TLS → Secret → auth Service → HTTPRoute → NetworkPolicy → client` order**
+- **Include token rotation, Route conditions, Collector queues, and final storage queries in the incident runbook**
+
+## References
+
+- [OpenAI Codex observability and telemetry](https://developers.openai.com/codex/config-advanced#observability-and-telemetry)
+- [Kubernetes Gateway API HTTPRoute](https://gateway-api.sigs.k8s.io/api-types/httproute/)
+- [OpenTelemetry OTLP exporter configuration](https://opentelemetry.io/docs/languages/sdk-configuration/otlp-exporter/)

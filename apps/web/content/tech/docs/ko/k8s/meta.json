@@ -5,6 +5,7 @@
     "index",
     "---Tutorial · 학습---",
     "---How-to · 작업---",
+    "external-otlp-gateway-auth",
     "cilium-gateway-api-external-load-balancer",
     "cilium-gateway-api-multi-control-plane",
     "cilium-gateway-api-direct-public-ip",
