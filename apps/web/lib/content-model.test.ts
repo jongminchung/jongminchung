@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  createBlogPostHref,
   createDocsPageHref,
-  createDocHref,
   createSeriesHref,
+  parseBlogPostMetadata,
   parseDocsPageMetadata,
-  parseDocMetadata,
 } from "./content-model";
 
 const metadata = {
@@ -30,14 +30,14 @@ const {
 
 describe("블로그 메타데이터", () => {
   it("[성공] 독립 글의 검증된 계약을 반환함", () => {
-    const parsed = parseDocMetadata(metadata);
+    const parsed = parseBlogPostMetadata(metadata);
     expect(parsed).toMatchObject(metadata);
     expect(Object.isFrozen(parsed)).toBe(true);
   });
 
   it("[성공] 등록된 시리즈와 순서를 함께 허용함", () => {
     expect(
-      parseDocMetadata({
+      parseBlogPostMetadata({
         ...metadata,
         series: "building-from-first-principles",
         seriesOrder: 1,
@@ -65,7 +65,7 @@ describe("블로그 메타데이터", () => {
 
   it("[실패] Blog의 Docs 전용 필드와 지원하지 않는 문서 유형을 거부함", () => {
     expect(() =>
-      parseDocMetadata({ ...metadata, documentKind: "how-to" }),
+      parseBlogPostMetadata({ ...metadata, documentKind: "how-to" }),
     ).toThrow("unsupported metadata fields");
     expect(() =>
       parseDocsPageMetadata({
@@ -99,30 +99,34 @@ describe("블로그 메타데이터", () => {
 
   it("[실패] 시리즈와 순서의 단독 선언 및 미등록 시리즈를 거부함", () => {
     expect(() =>
-      parseDocMetadata({
+      parseBlogPostMetadata({
         ...metadata,
         series: "building-from-first-principles",
       }),
     ).toThrow("must be used together");
-    expect(() => parseDocMetadata({ ...metadata, seriesOrder: 1 })).toThrow(
-      "must be used together",
-    );
     expect(() =>
-      parseDocMetadata({ ...metadata, series: "unknown", seriesOrder: 1 }),
+      parseBlogPostMetadata({ ...metadata, seriesOrder: 1 }),
+    ).toThrow("must be used together");
+    expect(() =>
+      parseBlogPostMetadata({
+        ...metadata,
+        series: "unknown",
+        seriesOrder: 1,
+      }),
     ).toThrow('unknown series "unknown"');
   });
 
   it("[실패] Blog는 반론 가능한 주장과 예상 반론을 모두 요구함", () => {
     expect(() =>
-      parseDocMetadata({ ...metadata, thesis: undefined }),
+      parseBlogPostMetadata({ ...metadata, thesis: undefined }),
     ).toThrow();
     expect(() =>
-      parseDocMetadata({ ...metadata, counterargument: undefined }),
+      parseBlogPostMetadata({ ...metadata, counterargument: undefined }),
     ).toThrow();
   });
 
   it("[성공] 새 공개 URL을 생성함", () => {
-    expect(createDocHref("ko", "article")).toBe("/ko/article");
+    expect(createBlogPostHref("ko", "article")).toBe("/ko/article");
     expect(createSeriesHref("en")).toBe("/en/series");
     expect(createSeriesHref("en", "react-ui-architecture")).toBe(
       "/en/series/react-ui-architecture",

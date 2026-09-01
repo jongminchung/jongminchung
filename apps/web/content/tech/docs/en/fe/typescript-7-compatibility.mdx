@@ -82,7 +82,7 @@ Current direct dependencies fit into the following migration domains.
 | Build, lint, and test | `esbuild`, `vitest`, `oxlint`, `oxlint-tsgolint`, `@playwright/test`        | Declaration emit, type-aware lint, unit tests, and E2E         |
 | CSS                   | `tailwindcss`, `@tailwindcss/postcss`, `postcss`, `tw-animate-css`          | Next production CSS build                                      |
 | React and UI          | `react`, `react-dom`, `@base-ui/react`, `lucide-react`, `cmdk`, `zod`       | JSX declaration checks and real application builds             |
-| Development CLIs      | `shadcn`, `npm-check-updates`                                               | CLI smoke tests and an explicit TypeScript migration           |
+| Development CLIs      | `shadcn`                                                                    | CLI smoke tests and an explicit TypeScript migration           |
 | Other declarations    | `@excalidraw/excalidraw`, `@types/node`, `@types/react`, `@types/react-dom` | Compare with `skipLibCheck: false` and run application builds  |
 
 The repository does not currently import the TypeScript Compiler API at runtime, so a future
@@ -201,4 +201,3 @@ production.
 - [TypeScript declaration](https://www.typescriptlang.org/tsconfig/declaration.html)
 - [Vitest type testing](https://vitest.dev/guide/testing-types.html)
 - [Playwright TypeScript](https://playwright.dev/docs/test-typescript)
-- [Repository compatibility audit](https://github.com/jongminchung/jongminchung/blob/main/docs/typescript-7-compatibility-report.md)

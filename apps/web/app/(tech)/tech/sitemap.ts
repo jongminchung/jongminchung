@@ -1,11 +1,11 @@
 import type { MetadataRoute } from "next";
 import { createSeriesHref, locales, type Locale } from "#lib/content-model";
 import { getBlogPosts, getDocsPages } from "#lib/documents";
+import { siteOrigins } from "#lib/site-routing";
 import { seriesRegistry, type SeriesId } from "#lib/tech/series";
 
-const siteOrigin = "https://tech.jamie.kr";
 const absoluteUrl = (pathname: string): string =>
-  new URL(pathname, siteOrigin).toString();
+  new URL(pathname, siteOrigins.tech).toString();
 
 function latestUpdate(
   documents: readonly { readonly updatedAt: string }[],

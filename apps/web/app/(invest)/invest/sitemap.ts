@@ -8,9 +8,9 @@ import {
   createInvestmentTagHref,
 } from "#lib/invest/routing";
 import { alternateLocale } from "#lib/locale";
-import { locales } from "#lib/site-routing";
+import { locales, siteOrigins } from "#lib/site-routing";
 
-const origin = "https://invest.jamie.kr";
+const origin = siteOrigins.invest;
 
 function latestUpdate(
   notes: readonly { readonly updatedAt: string }[],
@@ -46,12 +46,10 @@ function localizedAlternates(
 }
 
 /** 사이트맵 항목을 생성함 */
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+export default function sitemap(): MetadataRoute.Sitemap {
   const notesByLocale = Object.fromEntries(
-    await Promise.all(
-      locales.map(async (locale) => [locale, await getInvestmentNotes(locale)]),
-    ),
-  ) as Record<Locale, Awaited<ReturnType<typeof getInvestmentNotes>>>;
+    locales.map((locale) => [locale, getInvestmentNotes(locale)]),
+  ) as Record<Locale, ReturnType<typeof getInvestmentNotes>>;
   const localizedRoots = alternates("/ko", "/en");
   const localizedNotes = alternates("/ko/notes", "/en/notes");
   const roots = locales.flatMap((locale) => {

@@ -9,11 +9,14 @@ import {
 } from "./content-model.ts";
 import { personSchema } from "./home/content.ts";
 import type { InvestmentNoteManifestEntry } from "./invest/content.ts";
+import { siteOrigins } from "./site-routing.ts";
 import { getDocsCategory, type LocalizedDocsCategory } from "./tech/docs.ts";
 
-export const homeOrigin = "https://www.jamie.kr";
-export const techOrigin = "https://tech.jamie.kr";
-export const investOrigin = "https://invest.jamie.kr";
+const {
+  home: homeOrigin,
+  tech: techOrigin,
+  invest: investOrigin,
+} = siteOrigins;
 
 const personId = `${homeOrigin}/#person`;
 

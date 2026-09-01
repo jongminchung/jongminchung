@@ -1,0 +1,26 @@
+@startuml
+title 문서 요청 런타임 · arc42 Runtime View
+
+actor 방문자 as user
+participant 브라우저 as browser
+participant "proxy.ts" as proxy
+participant "App Router page" as route
+participant "Content repository" as repository
+participant "Fumadocs MDX loader" as mdx
+participant Kroki as kroki
+
+user -> browser: tech.jamie.kr/docs 요청
+browser -> proxy: GET /ko/docs/fe/nextjs-16\nHost: tech.jamie.kr
+proxy -> proxy: Host=tech, locale=ko 해석
+proxy -> route: /tech/ko/docs/fe/nextjs-16로 rewrite
+route -> repository: 공개 문서 metadata 조회
+repository -> repository: production snapshot 재사용\ndevelopment에서는 매번 재검증
+route -> mdx: locale·slug 본문 load()
+mdx --> route: React MDX component, TOC, frontmatter
+route --> browser: HTML, RSC payload, 필요한 client bundle
+browser --> user: 문서와 탐색 UI 표시
+opt 본문에 PlantUML 다이어그램이 있음
+  browser -> kroki: 인코딩된 SVG URL 요청
+  kroki --> browser: SVG
+end
+@enduml

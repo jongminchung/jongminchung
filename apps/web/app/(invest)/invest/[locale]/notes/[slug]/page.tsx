@@ -7,14 +7,13 @@ import {
   loadInvestmentNote,
 } from "#lib/invest/notes";
 import { alternateLocale, getLocaleProtocol } from "#lib/locale";
-import { isLocale, locales } from "#lib/site-routing";
+import { isLocale, locales, siteOrigins } from "#lib/site-routing";
 import { editorialMdxComponents } from "#mdx-components";
 
 /** 정적 생성에 사용할 경로 매개변수를 반환함 */
-export async function generateStaticParams() {
-  const notes = await Promise.all(locales.map(getInvestmentNotes));
-  const params = notes
-    .flat()
+export function generateStaticParams() {
+  const params = locales
+    .flatMap(getInvestmentNotes)
     .map((note) => ({ locale: note.locale, slug: note.id }));
   return params.length > 0
     ? params
@@ -27,7 +26,7 @@ export async function generateMetadata({
 }: PageProps<"/invest/[locale]/notes/[slug]">): Promise<Metadata> {
   const { locale, slug } = await params;
   if (!isLocale(locale)) notFound();
-  const metadata = await findInvestmentNote(locale, slug);
+  const metadata = findInvestmentNote(locale, slug);
   if (metadata === null) notFound();
   const protocol = getLocaleProtocol(locale);
   return {
@@ -51,7 +50,7 @@ export async function generateMetadata({
       alternateLocale: [getLocaleProtocol(alternateLocale(locale)).openGraph],
       publishedTime: metadata.publishedAt,
       modifiedTime: metadata.updatedAt,
-      authors: ["https://www.jamie.kr"],
+      authors: [siteOrigins.home],
       tags: [...metadata.tags],
       images: [{ url: metadata.image, alt: metadata.imageAlt }],
     },
@@ -76,7 +75,7 @@ export default async function NotePage({
     <InvestmentNotePage
       locale={locale}
       note={loaded.metadata}
-      related={await getInvestmentNotes(locale)}
+      related={getInvestmentNotes(locale)}
       toc={loaded.toc}
     >
       <loaded.Content components={editorialMdxComponents} />

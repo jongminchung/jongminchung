@@ -6,6 +6,7 @@ import {
   type Locale,
 } from "../content-model.ts";
 import { alternateLocale, getLocaleProtocol } from "../locale.ts";
+import { siteOrigins } from "../site-routing.ts";
 import { getTechMessages } from "./copy.ts";
 
 /** Tech 페이지의 canonical·hreflang·공유 메타데이터를 생성함 */
@@ -62,7 +63,7 @@ export function techPageMetadata({
         : {
             publishedTime: article.publishedAt,
             modifiedTime: article.updatedAt,
-            authors: ["https://www.jamie.kr"],
+            authors: [siteOrigins.home],
             tags: article.tags,
           }),
     },

@@ -6,7 +6,7 @@
 - 영향 범위:
   [검색 runtime](../../apps/web/lib/tech/search.ts),
   [검색 benchmark 정의](../../apps/web/lib/tech/search-benchmark.ts),
-  [실제 corpus benchmark](../../apps/web/lib/tech/search-benchmark.test.ts),
+  [실제 corpus benchmark](../../apps/web/lib/tech/search-benchmark.integration.test.ts),
   [검색 UI](<../../apps/web/app/(tech)/_components/SearchDialog.tsx>)
 
 ## 핵심 요약

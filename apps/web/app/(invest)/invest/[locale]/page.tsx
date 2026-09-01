@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { InvestmentHome } from "#invest-components/InvestmentCollection";
+import { InvestmentCollection } from "#invest-components/InvestmentCollection";
 import { getInvestmentMessages } from "#lib/invest/copy";
 import { getInvestmentNotes } from "#lib/invest/notes";
-import { alternateLocale, getLocaleProtocol } from "#lib/locale";
+import { createInvestmentCollectionMetadata } from "#lib/invest/seo";
+import { alternateLocale } from "#lib/locale";
 import { isLocale, locales } from "#lib/site-routing";
 
 /** 정적 생성에 사용할 경로 매개변수를 반환함 */
@@ -18,30 +19,17 @@ export async function generateMetadata({
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const { title, description } = getInvestmentMessages(locale).homeMetadata;
-  const protocol = getLocaleProtocol(locale);
+  const pathname = `/${locale}`;
   return {
+    ...createInvestmentCollectionMetadata({
+      locale,
+      title,
+      description,
+      pathname,
+      alternatePathname: `/${alternateLocale(locale)}`,
+      index: true,
+    }),
     title: { absolute: `${title} · Investment Notes` },
-    description,
-    alternates: {
-      canonical: `/${locale}`,
-      languages: { ko: "/ko", en: "/en", "x-default": "/en" },
-      types: { "application/rss+xml": `/${locale}/rss.xml` },
-    },
-    openGraph: {
-      type: "website",
-      title,
-      description,
-      url: `/${locale}`,
-      locale: protocol.openGraph,
-      alternateLocale: [getLocaleProtocol(alternateLocale(locale)).openGraph],
-      images: ["/investment-notes-og.png"],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: ["/investment-notes-og.png"],
-    },
   };
 }
 
@@ -53,11 +41,15 @@ export default async function InvestmentPage({
   const { locale } = await params;
   const query = await searchParams;
   if (!isLocale(locale)) notFound();
+  const { title, description } = getInvestmentMessages(locale).index;
   return (
-    <InvestmentHome
+    <InvestmentCollection
+      description={description}
       locale={locale}
-      notes={await getInvestmentNotes(locale)}
+      notes={getInvestmentNotes(locale)}
+      pathname={`/${locale}`}
       searchParams={query}
+      title={title}
     />
   );
 }

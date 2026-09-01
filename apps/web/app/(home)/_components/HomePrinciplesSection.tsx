@@ -16,7 +16,7 @@ export function PrinciplesSection({ locale }: { readonly locale: Locale }) {
           README / HOW I WORK
         </p>
         <h2
-          className="m-0 max-w-212.5 text-[clamp(42px,6.4vw,96px)] leading-[.9] tracking-[-.07em]"
+          className="m-0 max-w-212.5 text-[clamp(40px,5.2vw,72px)] leading-[.96] font-semibold tracking-[-.05em]"
           id="principles-title"
         >
           {text.title}

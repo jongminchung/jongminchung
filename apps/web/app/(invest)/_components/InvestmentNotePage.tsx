@@ -7,6 +7,7 @@ import { EditorialCard } from "#components/EditorialCard";
 import { StructuredData } from "#components/StructuredData";
 import { rankRelatedEditorialItems } from "#lib/editorial";
 import { toInvestmentEditorialItem } from "#lib/editorial-adapters";
+import { documentOutlineLabelsFor } from "#lib/i18n-messages";
 import type { InvestmentNoteManifestEntry } from "#lib/invest/content";
 import { getInvestmentMessages } from "#lib/invest/copy";
 import {
@@ -46,13 +47,13 @@ export function InvestmentNotePage({
   locale,
   note,
   children,
-  related = [],
+  related,
   toc,
 }: {
   readonly locale: Locale;
   readonly note: InvestmentNoteManifestEntry;
   readonly children: ReactNode;
-  readonly related?: readonly InvestmentNoteManifestEntry[];
+  readonly related: readonly InvestmentNoteManifestEntry[];
   readonly toc: readonly TOCItemType[];
 }): React.JSX.Element {
   const text = getInvestmentMessages(locale).article;
@@ -122,7 +123,7 @@ export function InvestmentNotePage({
                 {note.series}
               </Link>
             )}
-            <h1 className="my-4 text-[clamp(44px,6vw,72px)] leading-none font-medium tracking-[-.05em]">
+            <h1 className="my-4 text-[clamp(38px,5vw,56px)] leading-[1.05] font-semibold tracking-[-.04em]">
               {note.title}
             </h1>
             <p className="m-0 max-w-[680px] text-[18px] leading-[1.6] text-muted-foreground">
@@ -147,7 +148,12 @@ export function InvestmentNotePage({
             </nav>
           </>
         }
-        rail={<DocumentOutline items={toc} />}
+        rail={
+          <DocumentOutline
+            items={toc}
+            labels={documentOutlineLabelsFor(locale)}
+          />
+        }
         variant="engineering"
       >
         <figure className="mt-0 mb-10">

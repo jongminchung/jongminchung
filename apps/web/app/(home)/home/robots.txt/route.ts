@@ -1,9 +1,5 @@
+import { createRobotsResponse } from "#lib/robots";
+import { siteOrigins } from "#lib/site-routing";
+
 /** 요청에 대한 응답을 생성함 */
-export function GET(): Response {
-  return new Response(
-    "User-agent: *\nAllow: /\nSitemap: https://www.jamie.kr/sitemap.xml\n",
-    {
-      headers: { "Content-Type": "text/plain; charset=utf-8" },
-    },
-  );
-}
+export const GET = (): Response => createRobotsResponse(siteOrigins.home);

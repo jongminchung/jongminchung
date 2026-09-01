@@ -2,6 +2,7 @@ import { BrandWordmark } from "#components/BrandWordmark";
 import { StructuredData } from "#components/StructuredData";
 import { ThemeControl } from "#components/ThemeControl";
 import { getHomeMessages } from "#lib/home/content";
+import { themeLabelTemplateFor } from "#lib/i18n-messages";
 import { alternateLocale } from "#lib/locale";
 import type { Locale } from "#lib/site-routing";
 import { createHomeProfileStructuredData } from "#lib/structured-data";
@@ -18,7 +19,7 @@ export function HomeHeader({ locale }: { readonly locale: Locale }) {
       >
         {text.skipToContent}
       </a>
-      <header className="sticky top-0 z-20 flex min-h-[58px] w-full items-center justify-between bg-background/92 px-[clamp(18px,3vw,42px)] backdrop-blur-[18px] max-[720px]:min-h-16">
+      <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b bg-background/95 px-4 backdrop-blur-xl md:px-8">
         <a
           className="inline-flex items-center"
           href="#top"
@@ -27,7 +28,7 @@ export function HomeHeader({ locale }: { readonly locale: Locale }) {
           <BrandWordmark />
         </a>
         <nav
-          className="flex items-center gap-[clamp(10px,1.8vw,22px)] text-[13px] max-[720px]:gap-[15px] [&_a]:relative [&_a]:after:absolute [&_a]:after:right-0 [&_a]:after:-bottom-2 [&_a]:after:left-0 [&_a]:after:h-0.5 [&_a]:after:origin-left [&_a]:after:scale-x-0 [&_a]:after:bg-primary [&_a]:after:transition-transform [&_a:hover]:after:scale-x-100 max-[720px]:[&_a:nth-child(-n+2)]:hidden"
+          className="flex items-center gap-1 text-sm [&_a]:rounded-md [&_a]:px-2.5 [&_a]:py-1 [&_a]:text-muted-foreground [&_a]:transition-colors [&_a:hover]:bg-accent [&_a:hover]:text-foreground max-[720px]:[&_a:nth-child(-n+2)]:hidden"
           aria-label={text.navigation}
         >
           <a href="#work">{text.work}</a>
@@ -36,7 +37,7 @@ export function HomeHeader({ locale }: { readonly locale: Locale }) {
           <a href={`/${alternate}`} hrefLang={alternate}>
             {text.alternateLocaleShort}
           </a>
-          <ThemeControl locale={locale} />
+          <ThemeControl labelTemplate={themeLabelTemplateFor(locale)} />
           <a
             href="https://github.com/jongminchung"
             target="_blank"

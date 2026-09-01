@@ -1,0 +1,9 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "workspaces": {
+    "apps/web": {
+      "entry": ["scripts/search-benchmark-runner.ts"],
+      "ignore": ["public/fonts/pretendard-variable/dynamic-subset.css"]
+    }
+  }
+}

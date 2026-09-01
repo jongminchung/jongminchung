@@ -37,27 +37,27 @@ export function EditorialHeader({
 }): React.JSX.Element {
   return (
     <header
-      className="sticky top-0 z-20 border-b bg-background/95 backdrop-blur-xl"
+      className="sticky top-0 z-40 h-16 border-b bg-background/95 backdrop-blur-xl"
       id="top"
       tabIndex={-1}
     >
-      <div className="mx-auto flex min-h-14 w-full max-w-[1200px] items-center gap-5 px-6 text-[12px] max-[680px]:px-4">
+      <div className="flex h-full w-full items-center gap-4 px-4 text-sm md:px-8 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-6">
         <Link
           aria-label={brandLabel}
-          className="mr-2 font-semibold tracking-[-.04em]"
+          className="flex min-h-11 min-w-11 items-center font-semibold tracking-[-.045em] lg:justify-self-start"
           href={homeHref}
         >
           {brand}
         </Link>
         <nav
           aria-label={navigationLabel}
-          className="flex items-center gap-5 text-muted-foreground max-[520px]:hidden"
+          className="flex items-center justify-center gap-1 text-muted-foreground max-[640px]:hidden lg:justify-self-center"
         >
           {navigation.map((item) =>
             item.options === undefined || item.menuLabel === undefined ? (
               <Link
                 aria-current={item.isActive ? "page" : undefined}
-                className="hover:text-foreground aria-[current=page]:font-medium aria-[current=page]:text-foreground"
+                className="rounded-md px-2.5 py-1 text-sm transition-colors hover:bg-accent hover:text-foreground aria-[current=page]:bg-secondary aria-[current=page]:font-medium aria-[current=page]:text-foreground"
                 href={item.href}
                 key={item.href}
               >
@@ -74,7 +74,7 @@ export function EditorialHeader({
             ),
           )}
         </nav>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-1 lg:ml-0 lg:justify-self-end">
           {actions}
           {localeControl ?? (
             <Link className="font-mono text-[11px]" href={localeHref}>
@@ -99,7 +99,7 @@ export function EditorialFooter({
   readonly note: string;
 }): React.JSX.Element {
   return (
-    <footer className="mx-auto grid w-full max-w-[1200px] grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-x-8 gap-y-10 border-t px-6 pt-10 pb-8 font-mono text-[10px] text-muted-foreground max-[640px]:grid-cols-1 max-[640px]:px-4">
+    <footer className="mx-auto grid w-full max-w-[1200px] grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-x-8 gap-y-10 border-t px-6 pt-10 pb-8 text-xs text-muted-foreground max-[640px]:grid-cols-1 max-[640px]:px-4">
       {groups.map((group) => (
         <section key={group.label}>
           <p className="mb-3 text-foreground">{group.label}</p>

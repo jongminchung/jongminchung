@@ -4,7 +4,7 @@ import {
 } from "../../e2e-assertions";
 import { expect, test } from "../../e2e-fixtures";
 
-test("[성공] 캔팅된 사이트를 사용하고 외부 플로어 주차장을 주차함", async ({
+test("[성공] Tech 사이트의 핵심 콘텐츠와 접근성 계약을 제공함", async ({
   page,
 }) => {
   await page.goto("/en");
@@ -39,9 +39,17 @@ test("[성공] 목록 제어를 URL과 동기화하고 다음 글을 자동으�
   );
   await expect(results.locator(":scope > a")).toHaveCount(9);
 
+  const nextPageResponse = page.waitForResponse((response) => {
+    const url = new URL(response.url());
+    return (
+      response.request().headers().rsc === "1" &&
+      url.searchParams.get("page") === "2"
+    );
+  });
   await page
     .locator('[data-infinite-scroll-sentinel="true"]')
     .scrollIntoViewIfNeeded();
+  await nextPageResponse;
   await expect.poll(() => results.locator(":scope > a").count()).toBe(18);
   await expect(page).toHaveURL(/page=2/u);
 
@@ -71,7 +79,7 @@ test.describe("JavaScript가 비활성화된 환경", () => {
   });
 });
 
-test("[성공] 생성된 기사 데이터를 검색하고 여러 지역에서 기사를 싫어함", async ({
+test("[성공] 생성된 검색 색인으로 문서를 찾고 번역 문서로 이동함", async ({
   page,
 }) => {
   test.setTimeout(75_000);
@@ -125,9 +133,7 @@ test("[성공] 오류 검색 요청을 재시도함", async ({ page }) => {
   expect(requests).toBeGreaterThanOrEqual(2);
 });
 
-test("[성공] 기록 및 동일 페이지에 대한 기본 링크를 사용함", async ({
-  page,
-}) => {
+test("[성공] 브라우저 기록과 문서 내부 링크로 이동함", async ({ page }) => {
   await page.goto("/en");
   await page.getByRole("link", { name: "Series" }).first().click();
   await expect(page).toHaveURL(/\/en\/series$/u);
@@ -252,7 +258,7 @@ test("[성공] 각주를 미리 보고 참조와 본문 사이를 이동함", as
   await expect(page.locator("#user-content-fn-1")).toBeInViewport();
 });
 
-test("[성공] 버퍼를 로드하고 기술 검색 파일을 게시함", async ({
+test("[성공] 다이어그램과 검색 엔진용 자산을 제공함", async ({
   page,
   siteRequest,
 }) => {
@@ -321,7 +327,7 @@ test("[성공] 코드블록 타이포그래피 리듬을 일관되게 보장함"
   await expectNoHorizontalOverflow(page);
 });
 
-test("[성공] 신비한 기술 로케일을 반응으로 기억함", async ({ page }) => {
+test("[성공] 선택한 Tech 로캘을 쿠키에 저장함", async ({ page }) => {
   await page.goto("/ko");
   expect(
     (await page.context().cookies()).find(({ name }) => name === "tech-locale")
@@ -329,7 +335,7 @@ test("[성공] 신비한 기술 로케일을 반응으로 기억함", async ({ p
   ).toBe("ko");
 });
 
-test("[성공] 원시 원시 테마 선호도를 수화하고 유지함", async ({ page }) => {
+test("[성공] 저장된 Tech 테마를 복원하고 변경함", async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("tech-theme", "dark"));
   await page.goto("/en");
 
@@ -340,7 +346,7 @@ test("[성공] 원시 원시 테마 선호도를 수화하고 유지함", async 
   await expect(
     page.getByRole("button", { name: "Theme: system" }),
   ).toBeVisible();
-  expect(await page.evaluate(() => localStorage.getItem("tech-theme"))).toBe(
-    "system",
-  );
+  await expect
+    .poll(() => page.evaluate(() => localStorage.getItem("tech-theme")))
+    .toBe("system");
 });

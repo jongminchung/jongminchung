@@ -10,6 +10,8 @@ import {
 import { EditorialCard } from "./EditorialCard";
 import { EditorialInfiniteResults } from "./EditorialInfiniteResults";
 
+const PAGE_SIZE = 9;
+
 function queryHref(
   pathname: string,
   query: EditorialQuery,
@@ -33,8 +35,8 @@ export function EditorialIndex({
   copy,
   promotedTags = [],
   tagLabels = {},
-  variant = "default",
-  pagination = "links",
+  variant,
+  pagination,
 }: {
   readonly pathname: string;
   readonly items: readonly EditorialItem[];
@@ -42,8 +44,8 @@ export function EditorialIndex({
   readonly copy: EditorialCopy;
   readonly promotedTags?: readonly string[];
   readonly tagLabels?: Readonly<Record<string, string>>;
-  readonly variant?: "default" | "engineering";
-  readonly pagination?: "links" | "infinite";
+  readonly variant: "default" | "engineering";
+  readonly pagination: "links" | "infinite";
 }): React.JSX.Element {
   const tagPriority = new Map(
     promotedTags.map((tag, index) => [tag, index] as const),
@@ -59,24 +61,25 @@ export function EditorialIndex({
     return right.count - left.count || left.tag.localeCompare(right.tag);
   });
   const selected = filterEditorialItems(items, query);
-  const page = paginateEditorialItems(selected, query.page);
+  const page = paginateEditorialItems(selected, query.page, PAGE_SIZE);
+  const infiniteItems = selected.slice(0, query.page * PAGE_SIZE);
   const resultClassName =
     query.view === "grid"
       ? "grid grid-cols-3 gap-x-5 gap-y-12 max-[840px]:grid-cols-2 max-[560px]:grid-cols-1"
       : "grid gap-4";
   return (
     <main
-      className="mx-auto w-full max-w-[1200px] px-6 pt-[clamp(64px,9vw,112px)] pb-24 data-[variant=engineering]:pt-[clamp(70px,8vw,112px)] max-[680px]:px-4 max-[680px]:pt-12"
+      className="mx-auto w-full max-w-[1200px] px-6 pt-[clamp(56px,7vw,88px)] pb-24 data-[variant=engineering]:pt-[clamp(56px,7vw,88px)] max-[680px]:px-4 max-[680px]:pt-10"
       data-variant={variant}
     >
-      <header className="max-w-[760px] border-b pb-12 data-[variant=engineering]:max-w-none data-[variant=engineering]:border-b-0 data-[variant=engineering]:pb-3">
-        <p className="font-mono text-[11px] font-medium tracking-[.12em] text-primary uppercase">
+      <header className="max-w-[760px] border-b pb-10 data-[variant=engineering]:max-w-none data-[variant=engineering]:border-b-0 data-[variant=engineering]:pb-3">
+        <p className="text-xs font-medium tracking-[.02em] text-muted-foreground">
           {copy.eyebrow}
         </p>
-        <h1 className="mt-4 mb-0 text-[clamp(44px,6vw,76px)] leading-[.98] font-medium tracking-[-.055em] data-[variant=engineering]:text-[clamp(44px,5vw,64px)]">
+        <h1 className="mt-4 mb-0 text-[clamp(40px,5vw,56px)] leading-[1.02] font-semibold tracking-[-.04em] data-[variant=engineering]:text-[clamp(40px,5vw,56px)]">
           {copy.title}
         </h1>
-        <p className="mt-6 mb-0 text-[clamp(17px,2vw,21px)] leading-[1.6] text-muted-foreground">
+        <p className="mt-5 mb-0 text-[clamp(16px,2vw,18px)] leading-[1.6] text-muted-foreground">
           {copy.description}
         </p>
       </header>
@@ -87,7 +90,7 @@ export function EditorialIndex({
       >
         <Link
           aria-current={query.tag === undefined ? "page" : undefined}
-          className="shrink-0 border px-3 py-1.5 text-xs data-[current=true]:bg-foreground data-[current=true]:text-background data-[variant=engineering]:border-0 data-[variant=engineering]:p-0 data-[variant=engineering]:text-muted-foreground data-[variant=engineering]:data-[current=true]:bg-transparent data-[variant=engineering]:data-[current=true]:font-medium data-[variant=engineering]:data-[current=true]:text-foreground"
+          className="shrink-0 rounded-lg border px-3 py-1.5 text-xs transition-colors hover:bg-accent data-[current=true]:border-secondary data-[current=true]:bg-secondary data-[current=true]:font-medium data-[current=true]:text-foreground data-[variant=engineering]:border-0 data-[variant=engineering]:p-0 data-[variant=engineering]:text-muted-foreground data-[variant=engineering]:hover:bg-transparent data-[variant=engineering]:data-[current=true]:bg-transparent data-[variant=engineering]:data-[current=true]:font-medium data-[variant=engineering]:data-[current=true]:text-foreground"
           data-current={query.tag === undefined}
           data-variant={variant}
           href={queryHref(pathname, query, { tag: undefined, page: 1 })}
@@ -97,7 +100,7 @@ export function EditorialIndex({
         {tags.slice(0, 7).map(({ tag, count }) => (
           <Link
             aria-current={query.tag === tag ? "page" : undefined}
-            className="shrink-0 border px-3 py-1.5 text-xs data-[current=true]:bg-foreground data-[current=true]:text-background data-[variant=engineering]:border-0 data-[variant=engineering]:p-0 data-[variant=engineering]:text-muted-foreground data-[variant=engineering]:data-[current=true]:bg-transparent data-[variant=engineering]:data-[current=true]:font-medium data-[variant=engineering]:data-[current=true]:text-foreground"
+            className="shrink-0 rounded-lg border px-3 py-1.5 text-xs transition-colors hover:bg-accent data-[current=true]:border-secondary data-[current=true]:bg-secondary data-[current=true]:font-medium data-[current=true]:text-foreground data-[variant=engineering]:border-0 data-[variant=engineering]:p-0 data-[variant=engineering]:text-muted-foreground data-[variant=engineering]:hover:bg-transparent data-[variant=engineering]:data-[current=true]:bg-transparent data-[variant=engineering]:data-[current=true]:font-medium data-[variant=engineering]:data-[current=true]:text-foreground"
             data-current={query.tag === tag}
             data-variant={variant}
             href={queryHref(pathname, query, { tag, page: 1 })}
@@ -126,14 +129,14 @@ export function EditorialIndex({
           >
             <Link
               aria-current={query.sort === "newest" ? "page" : undefined}
-              className="border px-2.5 py-1.5"
+              className="rounded-md border px-2.5 py-1.5 transition-colors hover:bg-accent aria-[current=page]:bg-secondary"
               href={queryHref(pathname, query, { sort: "newest", page: 1 })}
             >
               {copy.newest}
             </Link>
             <Link
               aria-current={query.sort === "oldest" ? "page" : undefined}
-              className="border px-2.5 py-1.5"
+              className="rounded-md border px-2.5 py-1.5 transition-colors hover:bg-accent aria-[current=page]:bg-secondary"
               href={queryHref(pathname, query, { sort: "oldest", page: 1 })}
             >
               {copy.oldest}
@@ -141,14 +144,14 @@ export function EditorialIndex({
             <span aria-hidden="true" className="mx-1 h-4 border-l" />
             <Link
               aria-current={query.view === "grid" ? "page" : undefined}
-              className="border px-2.5 py-1.5"
+              className="rounded-md border px-2.5 py-1.5 transition-colors hover:bg-accent aria-[current=page]:bg-secondary"
               href={queryHref(pathname, query, { view: "grid" })}
             >
               {copy.grid}
             </Link>
             <Link
               aria-current={query.view === "list" ? "page" : undefined}
-              className="border px-2.5 py-1.5"
+              className="rounded-md border px-2.5 py-1.5 transition-colors hover:bg-accent aria-[current=page]:bg-secondary"
               href={queryHref(pathname, query, { view: "list" })}
             >
               {copy.list}
@@ -163,15 +166,15 @@ export function EditorialIndex({
           <EditorialInfiniteResults
             className={resultClassName}
             endLabel={copy.end ?? copy.empty}
-            initialPage={query.page}
-            initialNextPageHref={queryHref(pathname, query, {
+            hasMore={infiniteItems.length < selected.length}
+            nextPageHref={queryHref(pathname, query, {
               page: query.page + 1,
             })}
             key={`${query.tag ?? "all"}:${query.sort}:${query.view}`}
             loadMoreLabel={copy.loadMore}
             view={query.view}
           >
-            {selected.map((item, index) => (
+            {infiniteItems.map((item, index) => (
               <EditorialCard
                 eager={index < 3}
                 item={item}

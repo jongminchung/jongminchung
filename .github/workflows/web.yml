@@ -74,9 +74,6 @@ jobs:
         run: pnpm --filter @jongminchung/web run test
       - if: steps.changes.outputs.web == 'true'
         run: pnpm --filter @jongminchung/web run build
-      - name: Report Web client asset changes
-        if: steps.changes.outputs.web == 'true'
-        run: pnpm --filter @jongminchung/web run bundle:report -- --output=apps/web/bundle-report.json
       - if: steps.changes.outputs.web == 'true'
         run: pnpm --filter @jongminchung/web exec playwright install --with-deps chromium
       - if: steps.changes.outputs.web == 'true'
@@ -99,10 +96,3 @@ jobs:
             apps/web/playwright-report
             apps/web/test-results
           if-no-files-found: ignore
-      - name: Upload Web bundle report
-        if: always() && steps.changes.outputs.web == 'true'
-        uses: actions/upload-artifact@v7
-        with:
-          name: web-bundle-report
-          path: apps/web/bundle-report.json
-          if-no-files-found: error

@@ -9,14 +9,13 @@
   "scripts": {
     "audit:prod": "pnpm audit --prod --audit-level high",
     "build": "pnpm -r --if-present run build",
-    "check": "pnpm run fmt:check && pnpm run lint && pnpm run typecheck && pnpm run test",
+    "check": "pnpm run fmt:check && pnpm run lint && pnpm run typecheck && pnpm run deadcode && pnpm run test",
     "check:full": "pnpm run check && pnpm run test:e2e",
-    "deps:check": "node scripts/dependency-lanes.mjs",
-    "deps:inventory": "node scripts/dependency-lanes.mjs --inventory",
-    "deps:update": "node scripts/dependency-lanes.mjs --update",
+    "deadcode": "knip --include files --include duplicates --no-config-hints",
     "fmt": "oxfmt --config oxfmt.config.ts .",
     "fmt:check": "oxfmt --config oxfmt.config.ts --check .",
     "lint": "oxlint --config oxlint.config.ts .",
+    "links:check": "scripts/check-links.sh",
     "test": "pnpm run test:unit && pnpm run test:integration",
     "test:coverage:update": "vitest run --project unit --coverage --coverage.thresholds.autoUpdate",
     "test:e2e": "pnpm run build && pnpm --filter @jongminchung/web run test:e2e",
@@ -32,7 +31,7 @@
     "@vitest/coverage-v8": "catalog:",
     "esbuild": "catalog:",
     "fumadocs-mdx": "catalog:",
-    "npm-check-updates": "catalog:",
+    "knip": "catalog:",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
     "oxlint-tsgolint": "catalog:",
@@ -49,6 +48,6 @@
   "packageManager": "pnpm@11.15.1",
   "//": [
     "audit:prod checks production dependency advisories at high severity or above.",
-    "It stays separate from check because the advisory database requires network access; release workflows run it before publishing."
+    "It stays separate from check because the advisory database requires network access; run it manually before publishing."
   ]
 }

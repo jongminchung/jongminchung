@@ -130,7 +130,6 @@ const SearchDialog = lazy(() =>
 ```bash
 pnpm --filter @jongminchung/web run build
 pnpm --filter @jongminchung/web exec playwright test app/initial-transfer.e2e.test.ts --project tech-chromium
-pnpm --filter @jongminchung/web run bundle:report
 ```
 
 ## 완료 조건
@@ -138,5 +137,5 @@ pnpm --filter @jongminchung/web run bundle:report
 - 모든 locale에서 의도한 Pretendard font가 적용됨
 - 영어와 한국어 route가 초기 텍스트에 필요한 `unicode-range` subset만 요청함
 - route 초기 JavaScript에 action 이후 필요한 기능이 포함되지 않음
-- font byte budget과 bundle report가 독립적으로 통과함
+- font byte budget과 초기 JavaScript·CSS 전송 budget이 독립적으로 통과함
 - FCP·LCP·CLS와 상호작용 결과가 이전보다 악화되지 않음

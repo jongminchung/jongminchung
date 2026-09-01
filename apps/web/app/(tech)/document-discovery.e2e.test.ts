@@ -203,6 +203,25 @@ test("[성공] Tutorial과 Explanation은 이관 후에도 MDX 학습 계약과 
   ).not.toBe("none");
 });
 
+test("[성공] 플랫폼 아키텍처 시각화는 관련 Docs에서 스타일과 접근성 계약을 유지함", async ({
+  page,
+}) => {
+  await page.goto("/en/docs/k8s/ansible-rke2-gitops-platform");
+
+  const coverageMap = page.getByRole("figure", {
+    name: "arc42 sections used to document the RKE2 and GitOps platform",
+  });
+  const contextMap = page.getByRole("figure", {
+    name: /C4 system context showing an operator/u,
+  });
+  await expect(coverageMap).toBeVisible();
+  await expect(contextMap).toBeVisible();
+  await expect(contextMap).toHaveCSS("overflow", "hidden");
+  await expect(
+    contextMap.getByRole("checkbox", { name: "Pause motion" }),
+  ).toBeVisible();
+});
+
 test("[성공] Docs 루트에는 sidebar가 없고 FE·BE·K8s sidebar는 현재 영역만 표시함", async ({
   page,
 }) => {
@@ -214,7 +233,6 @@ test("[성공] Docs 루트에는 sidebar가 없고 FE·BE·K8s sidebar는 현재
   await expect(page.getByRole("link", { name: /프론트엔드/u })).toBeVisible();
 
   await page.goto("/ko");
-  await page.waitForLoadState("networkidle");
   const docsTrigger = page.getByRole("button", {
     name: "Docs: 문서 분야 선택",
   });

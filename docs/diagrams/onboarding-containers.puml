@@ -1,0 +1,34 @@
+@startuml
+!include <C4/C4_Container>
+
+title jongminchung 컨테이너 · C4 Level 2
+
+LAYOUT_LEFT_RIGHT()
+
+Person(visitor, "방문자")
+Person(maintainer, "기여자·유지보수자")
+System_Ext(kroki, "Kroki", "PlantUML SVG 렌더러")
+System_Ext(packages, "GitHub Packages", "개인 범위 npm registry")
+
+System_Boundary(repository, "jongminchung 모노레포") {
+  Container(web, "@jongminchung/web", "Next.js, React, TypeScript", "Host와 locale을 분기하고 Home·Tech·Invest 화면과 시스템 route를 제공함")
+  Container(content, "콘텐츠 원본", "MDX, JSON, Excalidraw", "기술 문서·블로그·투자 노트와 다이어그램을 보관함")
+  Container(ui, "@jongminchung/ui", "React, Tailwind CSS, Base UI", "공유 primitive·semantic token·전역 스타일을 제공함")
+  Container(tooling, "@jongminchung/tooling", "Oxfmt, Oxlint", "공용 형식·정적 분석 설정을 제공함")
+  Container(automation, "저장소 자동화", "pnpm, Vitest, Playwright, GitHub Actions", "검사·E2E·링크 점검·패키지 게시를 조정함")
+}
+
+Rel(visitor, web, "사이트 이용", "HTTPS")
+Rel(maintainer, content, "MDX와 자산 편집", "Git")
+Rel(maintainer, web, "route·component·domain rule 편집", "Git")
+Rel(web, content, "schema 검증 후 컴파일·조회", "Fumadocs MDX")
+Rel(web, ui, "source-first subpath import", "workspace:*")
+Rel(web, kroki, "PlantUML 이미지 URL 노출", "HTTPS")
+Rel(automation, web, "typecheck·unit·integration·build·E2E")
+Rel(automation, ui, "typecheck·test·build·publish")
+Rel(automation, tooling, "typecheck·test·build·publish")
+Rel(ui, packages, "ESM·CSS 스냅샷 게시", "npm protocol")
+Rel(tooling, packages, "ESM 설정 스냅샷 게시", "npm protocol")
+
+SHOW_LEGEND()
+@enduml

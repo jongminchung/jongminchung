@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import { NextIntlClientProvider } from "next-intl";
 import { NotFoundPage, notFoundCopy } from "#components/NotFoundPage";
 import { ThemeProvider } from "#components/ThemeProvider";
-import { messagesFor } from "#lib/i18n-messages";
 import { themeStorageKeys } from "#lib/theme";
 import "./(tech)/tech.css";
 
@@ -17,11 +15,9 @@ export default function GlobalNotFound(): React.JSX.Element {
   return (
     <html lang="en" data-theme="light" suppressHydrationWarning>
       <body>
-        <NextIntlClientProvider locale="en" messages={messagesFor("en")}>
-          <ThemeProvider storageKey={themeStorageKeys.tech}>
-            <NotFoundPage locale="en" />
-          </ThemeProvider>
-        </NextIntlClientProvider>
+        <ThemeProvider storageKey={themeStorageKeys.tech}>
+          <NotFoundPage locale="en" />
+        </ThemeProvider>
       </body>
     </html>
   );

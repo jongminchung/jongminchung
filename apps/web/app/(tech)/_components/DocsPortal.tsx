@@ -25,7 +25,7 @@ function CategoryCard({
   const text = getTechMessages(locale).docs;
   return (
     <Link
-      className="group flex min-h-[260px] flex-col rounded-xl border bg-card p-7 no-underline transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-input hover:shadow-[var(--elevation-medium)]"
+      className="group flex min-h-[228px] flex-col rounded-lg border bg-card p-6 no-underline transition-[border-color,background-color] hover:border-input hover:bg-muted/35"
       href={createDocsHref(locale, categoryId)}
     >
       <span className="flex items-center justify-between gap-4">
@@ -34,13 +34,13 @@ function CategoryCard({
           {categoryDocuments.length} {text.documents}
         </span>
       </span>
-      <span className="mt-10 block text-[28px] leading-tight font-semibold tracking-[-.035em] text-foreground">
+      <span className="mt-9 block text-[24px] leading-tight font-semibold tracking-[-.025em] text-foreground">
         {category.title}
       </span>
       <span className="mt-3 block text-sm leading-6 text-muted-foreground">
         {category.description}
       </span>
-      <span className="mt-auto flex items-center gap-1 pt-8 text-sm font-medium text-primary">
+      <span className="mt-auto flex items-center gap-1 pt-7 text-sm font-medium text-foreground">
         {text.explore}
         <Icon
           className="size-4 transition-transform group-hover:translate-x-0.5"
@@ -61,26 +61,29 @@ export function DocsLandingPage({
 }) {
   const text = getTechMessages(locale).docs;
   return (
-    <main className="mx-auto w-full max-w-[1200px] px-6 pt-[clamp(64px,9vw,112px)] pb-24 max-[680px]:px-4 max-[680px]:pt-12">
+    <main className="mx-auto w-full max-w-[1200px] px-6 pt-[clamp(56px,7vw,88px)] pb-24 max-[680px]:px-4 max-[680px]:pt-10">
       <header className="max-w-[760px]">
-        <p className="m-0 font-mono text-[11px] font-medium tracking-[.12em] text-primary uppercase">
+        <p className="m-0 text-xs font-medium tracking-[.02em] text-muted-foreground">
           {text.eyebrow}
         </p>
-        <h1 className="mt-4 mb-4 text-[clamp(48px,7vw,76px)] leading-none font-semibold tracking-[-.055em]">
+        <h1 className="mt-4 mb-4 text-[clamp(36px,5vw,48px)] leading-[1.05] font-semibold tracking-[-.035em]">
           {text.title}
         </h1>
-        <p className="m-0 max-w-[680px] text-[18px] leading-7 text-muted-foreground">
+        <p className="m-0 max-w-[680px] text-[17px] leading-7 text-muted-foreground">
           {text.description}
         </p>
       </header>
-      <section aria-labelledby="docs-categories" className="mt-16">
+      <section
+        aria-labelledby="docs-categories"
+        className="mt-14 border-t pt-10"
+      >
         <h2
-          className="mb-5 font-mono text-[11px] font-medium tracking-[.08em] text-muted-foreground uppercase"
+          className="mb-5 text-[28px] leading-tight font-semibold tracking-[-.025em]"
           id="docs-categories"
         >
           {text.categories}
         </h2>
-        <div className="grid grid-cols-2 gap-5 max-[760px]:grid-cols-1">
+        <div className="grid grid-cols-3 gap-5 max-[960px]:grid-cols-2 max-[680px]:grid-cols-1">
           {docsCategoryIds.map((id) => (
             <CategoryCard
               categoryId={id}

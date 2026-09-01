@@ -15,7 +15,7 @@ sourceUrl: https://github.com/jongminchung/rke2spray
 
 - **`rke2spray`는 호스트, RKE2, 클러스터 기반 AddOn과 Argo CD bootstrap을 소유함**
 - **GitOps 저장소는 Root Application 이후의 플랫폼, 데이터, 관측성과 스토리지 리소스를 소유함**
-- **클러스터별 RKE2, CNI, 토폴로지와 네트워크 값은 `inventory/<cluster>/`에서 선언됨**
+- **단일 `jamie-kr` 환경의 RKE2, CNI, 토폴로지와 네트워크 값은 `inventory/`에서 선언됨**
 - **GitOps는 root `bootstrap`을 포함한 15개 Argo CD `Application`과 총 `299Gi`의 애플리케이션 PVC를 검증함**
 - **NFS endpoint, 외부 L4 load balancer와 외부 backup 부재가 현재 가용성·복구 경계를 구성함**
 
@@ -30,7 +30,7 @@ sourceUrl: https://github.com/jongminchung/rke2spray
 
 | 조회 대상              | 기준 코드                                           |
 | ---------------------- | --------------------------------------------------- |
-| 클러스터 버전·토폴로지 | `rke2spray/inventory/<cluster>/`                    |
+| 클러스터 버전·토폴로지 | `jamie-kr-gitops/inventory/`                        |
 | Ansible 공개 API       | `rke2spray/cluster.yml`, root Playbook과 `Makefile` |
 | Kubespray 호환 범위    | `rke2spray/docs/kubespray-api-compatibility.yml`    |
 | GitOps 인계 조건       | `rke2spray/extra_playbooks/gitops_bootstrap.yml`    |
@@ -92,7 +92,7 @@ sourceUrl: https://github.com/jongminchung/rke2spray
 
 | 항목                  | 선언 변수 또는 group                         |
 | --------------------- | -------------------------------------------- |
-| Inventory profile     | `inventory/<cluster>/`                       |
+| Inventory profile     | `jamie-kr-gitops/inventory/`                 |
 | RKE2 topology         | `rke2_topology_mode`                         |
 | Control plane         | `kube_control_plane` Inventory group         |
 | Worker                | `kube_node` Inventory group                  |
@@ -347,7 +347,7 @@ sourceUrl: https://github.com/jongminchung/rke2spray
 ## 문서 갱신 계약
 
 - **다음 코드가 변경되면 이 참조 문서의 `updatedAt`과 `verifiedAt`을 갱신해야 함**
-  - `inventory/<cluster>`의 version, topology, network 또는 storage 입력
+  - `inventory/`의 version, topology, network 또는 storage 입력
   - `Makefile`의 공개 운영 target과 필수 변수
   - `gitops_bootstrap.yml`의 readiness gate
   - `bootstrap/templates/applications.yaml`의 Application, wave, chart version 또는 prune 정책

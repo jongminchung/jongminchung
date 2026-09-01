@@ -4,7 +4,7 @@ import {
 } from "../../e2e-assertions";
 import { expect, test } from "../../e2e-fixtures";
 
-test("[실패] 수평 바닥 바닥 없이 더블 언어 빈 연구 보고서를 제출함", async ({
+test("[성공] 연구 목록과 메타데이터를 수평 overflow 없이 제공함", async ({
   page,
 }) => {
   await page.goto("/en");
@@ -20,7 +20,7 @@ test("[실패] 수평 바닥 바닥 없이 더블 언어 빈 연구 보고서를
   await expect(initialResults.getByRole("link")).toHaveCount(9);
   const editorialImages = page.locator('[data-editorial-image="true"]');
   await expect(editorialImages.first()).toBeVisible();
-  expect(await editorialImages.count()).toBeGreaterThanOrEqual(5);
+  await expect.poll(() => editorialImages.count()).toBeGreaterThanOrEqual(5);
   await expect(
     page.locator('link[rel="alternate"][hreflang="x-default"]'),
   ).toHaveAttribute("href", "https://invest.jamie.kr/en");
@@ -32,7 +32,7 @@ test("[실패] 수평 바닥 바닥 없이 더블 언어 빈 연구 보고서를
   await expectNoAccessibilityViolations(page);
 });
 
-test("[성공] 관계자 투자 관찰 파일을 게시함", async ({ siteRequest }) => {
+test("[성공] 검색 엔진과 구독용 자산을 제공함", async ({ siteRequest }) => {
   for (const path of ["/robots.txt", "/sitemap.xml", "/en/rss.xml"]) {
     const response = await siteRequest.get(path);
     expect(response.ok(), path).toBe(true);
@@ -103,7 +103,7 @@ test("[성공] 투자 노트와 collection의 검색 엔터티를 연결함", as
   );
 });
 
-test("[성공] 투자 장소를 선택하고 기억함", async ({ page }) => {
+test("[성공] 선택한 Invest 로캘을 쿠키에 저장함", async ({ page }) => {
   await page.goto("/ko");
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "공시와 원문",
@@ -180,6 +180,19 @@ test("[성공] Invest 목록 제어가 URL 상태와 선택 결과를 일치시�
     "href",
     /view=list/u,
   );
+
+  for (const pathname of [
+    "/en/tags/factor-investing",
+    "/en/series/direction-of-money",
+    "/en/sources/book",
+  ]) {
+    await page.goto(`${pathname}?view=list&sort=oldest`);
+    await expect(page.locator("[data-view=list]")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Oldest" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+  }
 });
 
 test("[성공] Invest 테마 선택을 적용하고 사이트별로 저장함", async ({
@@ -193,7 +206,7 @@ test("[성공] Invest 테마 선택을 적용하고 사이트별로 저장함", 
   await expect(
     page.getByRole("button", { name: "Theme: system" }),
   ).toBeVisible();
-  expect(await page.evaluate(() => localStorage.getItem("invest-theme"))).toBe(
-    "system",
-  );
+  await expect
+    .poll(() => page.evaluate(() => localStorage.getItem("invest-theme")))
+    .toBe("system");
 });

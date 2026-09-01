@@ -80,7 +80,7 @@ build, packaging과 smoke test를 근거로 판단한다.
 | build·lint·test | `esbuild`, `vitest`, `oxlint`, `oxlint-tsgolint`, `@playwright/test`        | declaration emit, type-aware lint, unit·E2E        |
 | CSS             | `tailwindcss`, `@tailwindcss/postcss`, `postcss`, `tw-animate-css`          | Next production CSS build                          |
 | React·UI        | `react`, `react-dom`, `@base-ui/react`, `lucide-react`, `cmdk`, `zod`       | JSX 선언 검사와 실제 앱 build                      |
-| 개발 CLI        | `shadcn`, `npm-check-updates`                                               | CLI smoke와 명시적인 TypeScript 전환               |
+| 개발 CLI        | `shadcn`                                                                    | CLI smoke와 명시적인 TypeScript 전환               |
 | 기타 선언       | `@excalidraw/excalidraw`, `@types/node`, `@types/react`, `@types/react-dom` | `skipLibCheck: false` 비교와 앱 build              |
 
 현재 저장소는 runtime에서 TypeScript Compiler API를 import하지 않으므로 향후 consumer가 생기면
@@ -196,4 +196,3 @@ alias나 workspace별 compiler 분리는 production에 적용하지 않는 것�
 - [TypeScript declaration](https://www.typescriptlang.org/tsconfig/declaration.html)
 - [Vitest type testing](https://vitest.dev/guide/testing-types.html)
 - [Playwright TypeScript](https://playwright.dev/docs/test-typescript)
-- [저장소 호환성 감사 보고서](https://github.com/jongminchung/jongminchung/blob/main/docs/typescript-7-compatibility-report.md)

@@ -8,7 +8,7 @@
 - 영향 범위:
   [Tech search](../../../../apps/web/lib/tech/search.ts),
   [content repository](../../../../apps/web/lib/content-repository.ts),
-  [content source](../../../../apps/web/scripts/content-source.ts),
+  [content repository](../../../../apps/web/lib/content-repository.ts),
   [content model](../../../../apps/web/lib/content-model.ts),
   [document discovery E2E](<../../../../apps/web/app/(tech)/document-discovery.e2e.test.ts>),
   [Tech content](../../../../apps/web/content/tech)

@@ -1,7 +1,7 @@
 import { buttonVariants } from "@jongminchung/ui/components/button";
 import { cn } from "@jongminchung/ui/lib/utils";
 import { getHomeContent, getHomeMessages } from "#lib/home/content";
-import type { Locale } from "#lib/site-routing";
+import { siteOrigins, type Locale } from "#lib/site-routing";
 
 /** `HeroSection` UI 컴포넌트를 렌더링함 */
 export function HeroSection({ locale }: { readonly locale: Locale }) {
@@ -49,7 +49,7 @@ export function HeroSection({ locale }: { readonly locale: Locale }) {
               "border-x-0 border-t-0 border-b border-foreground bg-transparent font-mono text-xs leading-[1.8] text-foreground hover:bg-muted hover:text-foreground",
               "h-9 px-4",
             )}
-            href={`https://tech.jamie.kr/${locale}`}
+            href={`${siteOrigins.tech}/${locale}`}
           >
             {hero.techAction} <span aria-hidden="true">↗</span>
           </a>

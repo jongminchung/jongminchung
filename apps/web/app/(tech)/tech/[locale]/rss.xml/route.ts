@@ -1,6 +1,7 @@
 import { isLocale } from "#lib/content-model";
 import { getLocalizedDocuments } from "#lib/documents";
 import { getLocaleProtocol } from "#lib/locale";
+import { siteOrigins } from "#lib/site-routing";
 
 function escapeXml(value: string): string {
   return value
@@ -29,10 +30,10 @@ export async function GET(
     )
     .map(
       (document) =>
-        `<item><title>${escapeXml(document.title)}</title><link>https://tech.jamie.kr${document.href}</link><guid isPermaLink="true">https://tech.jamie.kr${document.href}</guid><description>${escapeXml(document.description)}</description><pubDate>${new Date(`${document.publishedAt}T00:00:00Z`).toUTCString()}</pubDate></item>`,
+        `<item><title>${escapeXml(document.title)}</title><link>${siteOrigins.tech}${document.href}</link><guid isPermaLink="true">${siteOrigins.tech}${document.href}</guid><description>${escapeXml(document.description)}</description><pubDate>${new Date(`${document.publishedAt}T00:00:00Z`).toUTCString()}</pubDate></item>`,
     )
     .join("");
-  const body = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Engineering Notes</title><link>https://tech.jamie.kr/${locale}</link><description>Bilingual engineering articles</description><language>${getLocaleProtocol(locale).rss}</language>${items}</channel></rss>`;
+  const body = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Engineering Notes</title><link>${siteOrigins.tech}/${locale}</link><description>Bilingual engineering articles</description><language>${getLocaleProtocol(locale).rss}</language>${items}</channel></rss>`;
   return new Response(body, {
     headers: {
       "Content-Type": "application/rss+xml; charset=utf-8",

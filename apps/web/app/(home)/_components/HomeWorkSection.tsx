@@ -17,7 +17,7 @@ export function WorkSection({ locale }: { readonly locale: Locale }) {
             SELECTED WORK / 2026
           </p>
           <h2
-            className="m-0 max-w-212.5 text-[clamp(42px,6.4vw,96px)] leading-[.9] tracking-[-.07em]"
+            className="m-0 max-w-212.5 text-[clamp(40px,5.2vw,72px)] leading-[.96] font-semibold tracking-[-.05em]"
             id="work-title"
           >
             {text.workTitle}
@@ -53,7 +53,7 @@ export function WorkSection({ locale }: { readonly locale: Locale }) {
               >
                 {project.tags.map((tag) => (
                   <li
-                    className="border px-2 py-1.5 font-mono text-[9px] tracking-[.04em]"
+                    className="rounded-full border px-2.5 py-1.5 font-mono text-[9px] tracking-[.04em]"
                     key={tag}
                   >
                     {tag}
@@ -61,7 +61,7 @@ export function WorkSection({ locale }: { readonly locale: Locale }) {
                 ))}
               </ul>
               <span
-                className="grid size-11 shrink-0 place-items-center border border-foreground text-xl transition-transform group-hover:rotate-[8deg]"
+                className="grid size-11 shrink-0 place-items-center rounded-full border border-foreground text-xl transition-transform group-hover:rotate-[8deg]"
                 aria-hidden="true"
               >
                 ↗

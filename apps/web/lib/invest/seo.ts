@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { Locale } from "../content-contracts.ts";
 import { alternateLocale, getLocaleProtocol } from "../locale.ts";
 
-const image = "/investment-notes-og.png";
+export const investmentOgImage = "/investment-notes-og.png";
 
 /** `createInvestmentCollectionMetadata` 투자 collection의 검색·소셜 계약을 생성함 */
 export function createInvestmentCollectionMetadata({
@@ -11,14 +11,14 @@ export function createInvestmentCollectionMetadata({
   description,
   pathname,
   alternatePathname,
-  index = true,
+  index,
 }: {
   readonly locale: Locale;
   readonly title: string;
   readonly description: string;
   readonly pathname: string;
   readonly alternatePathname?: string;
-  readonly index?: boolean;
+  readonly index: boolean;
 }): Metadata {
   const otherLocale = alternateLocale(locale);
   const protocol = getLocaleProtocol(locale);
@@ -42,13 +42,13 @@ export function createInvestmentCollectionMetadata({
       url: pathname,
       locale: protocol.openGraph,
       alternateLocale: [getLocaleProtocol(otherLocale).openGraph],
-      images: [image],
+      images: [investmentOgImage],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [image],
+      images: [investmentOgImage],
     },
     robots: index ? undefined : { index: false, follow: true },
   };

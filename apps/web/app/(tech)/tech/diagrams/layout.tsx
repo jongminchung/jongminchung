@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import { NextIntlClientProvider } from "next-intl";
 import type { ReactNode } from "react";
 import { ThemeProvider } from "#components/ThemeProvider";
-import { messagesFor } from "#lib/i18n-messages";
 import { themeStorageKeys } from "#lib/theme";
 import { pretendard, rootMetadata } from "../../../root-layout";
 import "../../tech.css";
@@ -23,15 +21,14 @@ export default function DiagramRootLayout({
     <html
       lang="en"
       className={pretendard.variable}
+      data-site="tech"
       data-theme="light"
       suppressHydrationWarning
     >
-      <body data-site="tech">
-        <NextIntlClientProvider locale="en" messages={messagesFor("en")}>
-          <ThemeProvider storageKey={themeStorageKeys.tech}>
-            {children}
-          </ThemeProvider>
-        </NextIntlClientProvider>
+      <body>
+        <ThemeProvider storageKey={themeStorageKeys.tech}>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

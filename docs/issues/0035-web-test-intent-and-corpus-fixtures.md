@@ -7,8 +7,8 @@
   [document tests](../../apps/web/lib/documents.test.ts),
   [site routing tests](../../apps/web/lib/site-routing.test.ts),
   [proxy tests](../../apps/web/proxy.test.ts),
-  [Tech UI store tests](<../../apps/web/app/(tech)/_components/TechUiProvider.test.ts>),
-  [Tech navigation tests](<../../apps/web/app/(tech)/_components/tech-navigation.test.ts>)
+  [UI primitive interaction tests](<../../apps/web/app/(tech)/ui-primitives.e2e.test.ts>),
+  [Tech navigation tests](<../../apps/web/app/(tech)/tech.e2e.test.ts>)
 
 ## 핵심 요약
 

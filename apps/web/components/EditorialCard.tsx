@@ -15,13 +15,13 @@ export function EditorialCard({
 }): React.JSX.Element {
   return (
     <Link
-      className="group block overflow-hidden border bg-card text-card-foreground transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-input hover:shadow-[var(--elevation-medium)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[variant=engineering]:overflow-visible data-[variant=engineering]:border-0 data-[variant=engineering]:bg-transparent data-[variant=engineering]:hover:translate-y-0 data-[variant=engineering]:hover:shadow-none"
+      className="group block overflow-hidden rounded-lg border bg-card text-card-foreground transition-[border-color,background-color] hover:border-input hover:bg-muted/35 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[variant=engineering]:overflow-visible data-[variant=engineering]:rounded-none data-[variant=engineering]:border-0 data-[variant=engineering]:bg-transparent data-[variant=engineering]:hover:bg-transparent"
       data-variant={variant}
       href={item.href}
       prefetch={eager}
     >
       <span
-        className="block data-[variant=engineering]:overflow-hidden data-[variant=engineering]:rounded-[.2rem]"
+        className="block data-[variant=engineering]:overflow-hidden data-[variant=engineering]:rounded-lg"
         data-variant={variant}
       >
         {item.image === undefined ? (

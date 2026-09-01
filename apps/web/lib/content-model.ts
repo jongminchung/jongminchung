@@ -7,23 +7,15 @@ import {
   locales,
   nonEmptyTrimmedStringSchema,
   publicationStatusSchema,
-  publicationStatuses,
   uniqueStringArraySchema,
   type Locale,
-  type PublicationStatus,
 } from "./content-contracts.ts";
 import { isSeriesId } from "./tech/series.ts";
 
-export { isLocale, locales, publicationStatuses };
-export type { Locale, PublicationStatus };
+export { isLocale, locales };
+export type { Locale };
 
-export const documentStatuses = [
-  "stable",
-  "deprecated",
-  "experimental",
-] as const;
-export const documentStatusSchema = z.enum(documentStatuses);
-export type DocumentStatus = z.infer<typeof documentStatusSchema>;
+const documentStatusSchema = z.enum(["stable", "deprecated", "experimental"]);
 
 export const documentKinds = [
   "tutorial",
@@ -31,7 +23,7 @@ export const documentKinds = [
   "reference",
   "explanation",
 ] as const;
-export const documentKindSchema = z.enum(documentKinds);
+const documentKindSchema = z.enum(documentKinds);
 export type DocumentKind = z.infer<typeof documentKindSchema>;
 
 export const docsAreas = ["fe", "be", "k8s", "ansible"] as const;
@@ -40,13 +32,17 @@ export const docsAreaSchema = z.enum(docsAreas);
 export type DocsArea = z.infer<typeof docsAreaSchema>;
 
 const DOCUMENT_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
+const documentIdSchema = nonEmptyTrimmedStringSchema.regex(
+  DOCUMENT_ID_PATTERN,
+  'metadata field "id" must be a lowercase slug.',
+);
 
 const sharedFrontmatterShape = {
   title: nonEmptyTrimmedStringSchema,
   displayTitle: nonEmptyTrimmedStringSchema.optional(),
   description: nonEmptyTrimmedStringSchema,
-  publishedAt: z.string(),
-  updatedAt: z.string(),
+  publishedAt: isoDateSchema,
+  updatedAt: isoDateSchema,
   tags: uniqueStringArraySchema("tags"),
   status: documentStatusSchema,
   publicationStatus: publicationStatusSchema,
@@ -59,7 +55,7 @@ const sharedFrontmatterShape = {
 } as const;
 
 const sharedMetadataShape = {
-  id: nonEmptyTrimmedStringSchema,
+  id: documentIdSchema,
   locale: localeSchema,
   ...sharedFrontmatterShape,
 } as const;
@@ -70,22 +66,22 @@ const blogPostFrontmatterShape = {
   counterargument: nonEmptyTrimmedStringSchema,
   series: nonEmptyTrimmedStringSchema.optional(),
   seriesOrder: z.number().int().positive().optional(),
-  verifiedAt: z.string().optional(),
+  verifiedAt: isoDateSchema.optional(),
 } as const;
 
 const blogPostMetadataShape = {
-  id: nonEmptyTrimmedStringSchema,
+  id: documentIdSchema,
   locale: localeSchema,
   ...blogPostFrontmatterShape,
 } as const;
 
 const docsSharedFrontmatterShape = {
   ...sharedFrontmatterShape,
-  verifiedAt: z.string(),
+  verifiedAt: isoDateSchema,
 } as const;
 
 const docsSharedMetadataShape = {
-  id: nonEmptyTrimmedStringSchema,
+  id: documentIdSchema,
   locale: localeSchema,
   ...docsSharedFrontmatterShape,
 } as const;
@@ -99,7 +95,7 @@ const docsOverviewMetadataShape = {
 
 const docsContentMetadataShape = {
   ...docsSharedMetadataShape,
-  id: nonEmptyTrimmedStringSchema.refine(
+  id: documentIdSchema.refine(
     (id) => id !== "docs-overview",
     'only the Docs root may use ID "docs-overview".',
   ),
@@ -113,41 +109,14 @@ function validateSharedMetadata(
   },
   context: z.RefinementCtx,
 ): void {
-  if (!DOCUMENT_ID_PATTERN.test(value.id)) {
-    context.addIssue({
-      code: "custom",
-      path: ["id"],
-      message: 'metadata field "id" must be a lowercase slug.',
-    });
-  }
-  if (
-    !isoDateSchema.safeParse(value.publishedAt).success ||
-    !isoDateSchema.safeParse(value.updatedAt).success
-  ) {
-    context.addIssue({
-      code: "custom",
-      message: "publication dates must use the ISO date format.",
-    });
-  } else if (value.updatedAt < value.publishedAt) {
+  if (value.updatedAt < value.publishedAt) {
     context.addIssue({
       code: "custom",
       path: ["updatedAt"],
       message: 'metadata field "updatedAt" must not precede "publishedAt".',
     });
   }
-  if (
-    value.verifiedAt !== undefined &&
-    !isoDateSchema.safeParse(value.verifiedAt).success
-  ) {
-    context.addIssue({
-      code: "custom",
-      path: ["verifiedAt"],
-      message: 'metadata field "verifiedAt" must be an ISO date.',
-    });
-  } else if (
-    value.verifiedAt !== undefined &&
-    value.verifiedAt < value.updatedAt
-  ) {
+  if (value.verifiedAt !== undefined && value.verifiedAt < value.updatedAt) {
     context.addIssue({
       code: "custom",
       path: ["verifiedAt"],
@@ -293,9 +262,6 @@ export function parseDocsPageMetadata(
   );
 }
 
-/** @deprecated Blog 메타데이터는 `parseBlogPostMetadata`로 파싱함 */
-export const parseDocMetadata = parseBlogPostMetadata;
-
 /** 문서의 표시 제목을 반환함 */
 export function displayTitleFor(
   document: Pick<DocMetadata, "displayTitle" | "title">,
@@ -307,9 +273,6 @@ export function displayTitleFor(
 export function createBlogPostHref(locale: Locale, id: string): string {
   return `/${locale}/${id}`;
 }
-
-/** @deprecated Blog canonical은 `createBlogPostHref`로 생성함 */
-export const createDocHref = createBlogPostHref;
 
 /** Docs canonical 경로를 생성함 */
 export function createDocsPageHref(

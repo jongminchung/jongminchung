@@ -76,7 +76,6 @@
         "esbuild",
         "gray-matter",
         "hast-util-to-string",
-        "npm-check-updates",
         "oxfmt",
         "oxlint",
         "oxlint-tsgolint",

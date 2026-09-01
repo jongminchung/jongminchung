@@ -9,27 +9,31 @@ import { promisify } from "node:util";
 const execFileAsync = promisify(execFile);
 const [packageName, version, importSpecifier] = process.argv.slice(2);
 
-if (!/^@jongminchung\/[a-z0-9-]+$/.test(packageName ?? ""))
+if (
+  packageName === undefined ||
+  !/^@jongminchung\/[a-z0-9-]+$/.test(packageName)
+)
   throw new Error("Expected an @jongminchung package name");
-if (!/^\d+\.\d+\.\d+$/.test(version ?? ""))
+if (version === undefined || !/^\d+\.\d+\.\d+$/.test(version))
   throw new Error("Expected a semantic package version");
 if (
-  importSpecifier !== packageName &&
-  !importSpecifier?.startsWith(`${packageName}/`)
+  importSpecifier === undefined ||
+  (importSpecifier !== packageName &&
+    !importSpecifier.startsWith(`${packageName}/`))
 )
   throw new Error("Import specifier must belong to the published package");
 
 const packageVersion = `${packageName}@${version}`;
 
-async function npm(...arguments_) {
+async function npm(...arguments_: string[]) {
   return execFileAsync("npm", arguments_, {
     encoding: "utf8",
     maxBuffer: 10 * 1024 * 1024,
   });
 }
 
-async function readPublishedIntegrity() {
-  let lastError;
+async function readPublishedIntegrity(): Promise<string> {
+  let lastError: unknown;
   for (let attempt = 1; attempt <= 5; attempt += 1) {
     try {
       const { stdout } = await npm(
@@ -45,7 +49,9 @@ async function readPublishedIntegrity() {
     } catch (error) {
       lastError = error;
       if (attempt < 5)
-        await new Promise((resolve) => setTimeout(resolve, attempt * 2_000));
+        await new Promise<void>((resolve) =>
+          setTimeout(resolve, attempt * 2_000),
+        );
     }
   }
   throw lastError;

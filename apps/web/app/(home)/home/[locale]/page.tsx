@@ -11,7 +11,7 @@ import { WorkSection } from "#home-components/HomeWorkSection";
 import { WritingSection } from "#home-components/HomeWritingSection";
 import { getHomeMessages } from "#lib/home/content";
 import { alternateLocale, getLocaleProtocol } from "#lib/locale";
-import { isLocale, locales } from "#lib/site-routing";
+import { isLocale, locales, siteOrigins } from "#lib/site-routing";
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -24,7 +24,7 @@ export async function generateMetadata({
   const { locale } = await params;
   if (!isLocale(locale)) return {};
   const description = getHomeMessages(locale).metadataDescription;
-  const url = `https://www.jamie.kr/${locale}`;
+  const url = `${siteOrigins.home}/${locale}`;
   const protocol = getLocaleProtocol(locale);
   return {
     title: "Jamie — Jongmin Chung",
@@ -32,9 +32,9 @@ export async function generateMetadata({
     alternates: {
       canonical: url,
       languages: {
-        ko: "https://www.jamie.kr/ko",
-        en: "https://www.jamie.kr/en",
-        "x-default": "https://www.jamie.kr/en",
+        ko: `${siteOrigins.home}/ko`,
+        en: `${siteOrigins.home}/en`,
+        "x-default": `${siteOrigins.home}/en`,
       },
     },
     openGraph: {

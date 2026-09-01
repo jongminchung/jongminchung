@@ -129,7 +129,7 @@
 - **Query client를 실제 query consumer 가까이 이동함**
   - Tech locale layout과 diagram layout의 전역 `TechDataProvider`를 제거함
   - search와 remote Excalidraw가 각각 필요한 cache·retry 경계를 local provider 또는 작은 query adapter로 소유함
-  - TanStack Query 제거 여부는 local 경계 적용 후 dependency 가치와 bundle report를 보고 별도로 결정함
+  - TanStack Query 제거 여부는 local 경계 적용 후 dependency 가치와 초기 전송 test를 보고 별도로 결정함
 - **작은 동작은 React hydration보다 progressive enhancement를 우선함**
   - `BackToTopButton`은 `#top` anchor와 CSS smooth scroll로 대체 가능함
   - `DocsCodeBlock`은 server-rendered code·button과 page당 한 개의 delegated copy controller로 구성함
@@ -213,14 +213,15 @@
   - targeted Tech component에 사용자 문구를 선택하는 `locale === "ko"` 분기가 남지 않음
   - 기존 URL·search·theme·locale·navigation·outline·related·diagram E2E가 통과함
 - **client boundary 변경 전후를 같은 기준으로 비교함**
-  - `bundle:report`에서 Tech route의 initial·async client asset과 dependency owner를 비교함
+  - route별 초기 전송량 테스트에서 Tech의 client asset과 예산을 비교함
+  - action 이후 요청되는 async asset과 dependency owner는 production Playwright와 source dependency graph로 확인함
   - page source와 hydration warning이 없는지 production Playwright로 확인함
   - visual snapshot 변경이 발생하면 구조 변경의 의도된 결과인지 별도로 검토함
 - **영향받는 workspace와 전체 저장소 계약을 검증함**
   - `pnpm --filter @jongminchung/web run typecheck`
   - `pnpm --filter @jongminchung/web run test`
   - `pnpm --filter @jongminchung/web run build`
-  - `pnpm --filter @jongminchung/web run bundle:report`
+  - `pnpm --filter @jongminchung/web exec playwright test app/initial-transfer.e2e.test.ts --project tech-chromium`
   - `pnpm --filter @jongminchung/web run test:e2e`
   - `pnpm run check`
   - `git diff --check`

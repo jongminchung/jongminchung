@@ -6,11 +6,11 @@
 - 영향 범위:
   [content repository](../../apps/web/lib/content-repository.ts),
   [document queries](../../apps/web/lib/documents.ts),
-  [Tech page route](<../../apps/web/app/(tech)/tech/[locale]/[[...slug]]/page.tsx>),
+  [Tech Docs page route](<../../apps/web/app/(tech)/tech/[locale]/docs/[[...slug]]/page.tsx>),
   [Tech sitemap](<../../apps/web/app/(tech)/tech/sitemap.ts>),
-  [Tech search index](<../../apps/web/app/(tech)/tech/[locale]/search-index/route.ts>),
+  [Tech search index](<../../apps/web/app/(tech)/tech/[locale]/search/route.ts>),
   [`llms.txt`](<../../apps/web/app/(tech)/tech/llms.txt/route.ts>),
-  [Home writing](<../../apps/web/app/(home)/_components/HomeSections.tsx>)
+  [Home writing](<../../apps/web/app/(home)/_components/HomeWritingSection.tsx>)
 
 ## 핵심 요약
 

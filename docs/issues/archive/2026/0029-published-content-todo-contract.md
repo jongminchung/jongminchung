@@ -7,8 +7,8 @@
 - 기준일: 2026-08-19
 - 영향 범위:
   [Tech content](../../../../apps/web/content/tech),
-  [content source](../../../../apps/web/scripts/content-source.ts),
-  [content validation](../../../../apps/web/scripts/content-validation.ts),
+  [content repository](../../../../apps/web/lib/content-repository.ts),
+  [content validation](../../../../apps/web/lib/content-validation.ts),
   [validation fixtures](../../../../apps/web/scripts/content-validation.test.ts)
 
 ## 핵심 요약

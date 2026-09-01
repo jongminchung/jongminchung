@@ -8,6 +8,7 @@ import {
   type Locale,
 } from "#lib/content-model";
 import type { LoadedDocument } from "#lib/documents";
+import { documentOutlineLabelsFor } from "#lib/i18n-messages";
 import { editorialProseClassName } from "#lib/mdx-styles";
 import { createTechArticleStructuredData } from "#lib/structured-data";
 import { getTechMessages } from "#lib/tech/copy";
@@ -68,7 +69,12 @@ export function DocumentPage({
       <StructuredData value={createTechArticleStructuredData(metadata)} />
       <EditorialArticle
         header={<DocumentPageHeader locale={locale} document={document} />}
-        rail={<DocumentOutline items={document.toc} />}
+        rail={
+          <DocumentOutline
+            items={document.toc}
+            labels={documentOutlineLabelsFor(locale)}
+          />
+        }
         variant="engineering"
       >
         <div className="w-full text-[15px]" lang={locale}>

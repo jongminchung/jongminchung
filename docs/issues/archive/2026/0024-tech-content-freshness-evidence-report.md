@@ -7,8 +7,8 @@
 - 기준일: 2026-08-19
 - 영향 범위:
   [content model](../../../../apps/web/lib/content-model.ts),
-  [content source](../../../../apps/web/scripts/content-source.ts),
-  [content validation](../../../../apps/web/scripts/content-validation.ts),
+  [content repository](../../../../apps/web/lib/content-repository.ts),
+  [content validation](../../../../apps/web/lib/content-validation.ts),
   [DocumentPageHeader](<../../../../apps/web/app/(tech)/_components/DocumentPageHeader.tsx>),
   [Tech content](../../../../apps/web/content/tech),
   [Web workflow](../../../../.github/workflows/web.yml)

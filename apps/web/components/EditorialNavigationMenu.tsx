@@ -31,7 +31,7 @@ export function EditorialNavigationMenu({
     <DropdownMenu>
       <DropdownMenuTrigger
         aria-label={`${label}: ${menuLabel}`}
-        className="inline-flex items-center gap-1 hover:text-foreground data-popup-open:text-foreground data-[active=true]:font-medium data-[active=true]:text-foreground"
+        className="inline-flex items-center gap-1 rounded-md px-2.5 py-1 transition-colors hover:bg-accent hover:text-foreground data-popup-open:bg-accent data-popup-open:text-foreground data-[active=true]:bg-secondary data-[active=true]:font-medium data-[active=true]:text-foreground"
         data-active={isActive}
       >
         {label}

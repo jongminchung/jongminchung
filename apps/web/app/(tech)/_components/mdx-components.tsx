@@ -32,11 +32,7 @@ interface CodeElementProps {
 }
 
 /** `TechMdxPre` 기술 문서 코드 블록을 렌더링함 */
-export function TechMdxPre({
-  ref: _ref,
-  children,
-  ...props
-}: ComponentProps<"pre">) {
+function TechMdxPre({ ref: _ref, children, ...props }: ComponentProps<"pre">) {
   if (isValidElement<CodeElementProps>(children)) {
     const block = classifyMdxCodeBlock(
       children.props.className,

@@ -130,7 +130,6 @@ Initial JavaScript decoded in the same navigation is `673,144 bytes` for Home, `
 ```bash
 pnpm --filter @jongminchung/web run build
 pnpm --filter @jongminchung/web exec playwright test app/initial-transfer.e2e.test.ts --project tech-chromium
-pnpm --filter @jongminchung/web run bundle:report
 ```
 
 ## Completion criteria
@@ -138,5 +137,5 @@ pnpm --filter @jongminchung/web run bundle:report
 - Every locale uses the intended Pretendard source.
 - English and Korean routes request only `unicode-range` subsets needed by their initial text.
 - Features needed only after an action stay out of initial route JavaScript.
-- The font byte budget and bundle report pass independently.
+- The font byte budget and initial JavaScript and CSS transfer budgets pass independently.
 - FCP, LCP, CLS, and interaction behavior do not regress.

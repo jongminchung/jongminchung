@@ -130,7 +130,7 @@ export function validateDocsPageEntry(
 }
 
 /** Docs 파일 상대 경로를 canonical 공개 URL로 변환함 */
-export function docsHrefFromRelativePath(relativePath: string): string {
+function docsHrefFromRelativePath(relativePath: string): string {
   const [locale, ...segments] = relativePath.replace(/\.mdx$/u, "").split("/");
   if (locale === undefined || !locales.includes(locale as Locale))
     throw new Error(`Invalid localized docs path: ${relativePath}`);

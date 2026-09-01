@@ -12,8 +12,6 @@
     "#tech-components/*": "./app/(tech)/_components/*.tsx"
   },
   "scripts": {
-    "bundle:report": "node ../../scripts/report-frontend-assets.mjs --app=web --root=apps/web/.next/static --baseline=apps/web/bundle-baseline.json",
-    "bundle:baseline": "pnpm run bundle:report -- --update-baseline",
     "build": "fumadocs-mdx && node --import ./scripts/register-content-loader.ts scripts/validate-fumadocs-content.ts && node scripts/check-excalidraw.ts && next build",
     "content:evidence": "node --import ./scripts/register-content-loader.ts scripts/content-evidence.ts",
     "dev": "next dev",

@@ -50,11 +50,11 @@ const copy: Record<Locale, EditorialCopy> = {
 export function BlogIndex({
   locale,
   documents,
-  searchParams = {},
+  searchParams,
 }: {
   readonly locale: Locale;
   readonly documents: readonly ContentManifestEntry[];
-  readonly searchParams?: EditorialSearchParams;
+  readonly searchParams: EditorialSearchParams;
 }): React.JSX.Element {
   const items = documents.map((document) =>
     toTechEditorialItem(document, locale),

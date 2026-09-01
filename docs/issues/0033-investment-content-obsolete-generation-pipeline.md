@@ -6,7 +6,7 @@
 - 영향 범위:
   [content repository](../../apps/web/lib/content-repository.ts),
   [Investment content model](../../apps/web/lib/invest/content.ts),
-  [Investment content loader](../../apps/web/scripts/build-investment-content.ts),
+  [Investment content source](../../apps/web/lib/invest/source.ts),
   [generation utilities](../../apps/web/scripts/generation-utils.ts),
   [Web package](../../apps/web/package.json)
 

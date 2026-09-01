@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { NoteCollection } from "#invest-components/InvestmentCollection";
+import { InvestmentCollection } from "#invest-components/InvestmentCollection";
 import { getInvestmentMessages } from "#lib/invest/copy";
 import { getInvestmentNotes } from "#lib/invest/notes";
 import { createInvestmentCollectionMetadata } from "#lib/invest/seo";
@@ -23,6 +23,7 @@ export async function generateMetadata({
     ...getInvestmentMessages(locale).allNotes,
     pathname: `/${locale}/notes`,
     alternatePathname: `/${alternateLocale(locale)}/notes`,
+    index: true,
   });
 }
 
@@ -36,14 +37,13 @@ export default async function NotesIndex({
   if (!isLocale(locale)) notFound();
   const text = getInvestmentMessages(locale).allNotes;
   return (
-    <main>
-      <NoteCollection
-        locale={locale}
-        notes={await getInvestmentNotes(locale)}
-        description={text.description}
-        searchParams={query}
-        title={text.title}
-      />
-    </main>
+    <InvestmentCollection
+      locale={locale}
+      notes={getInvestmentNotes(locale)}
+      description={text.description}
+      pathname={`/${locale}/notes`}
+      searchParams={query}
+      title={text.title}
+    />
   );
 }

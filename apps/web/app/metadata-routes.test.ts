@@ -50,8 +50,8 @@ describe("블로그 메타데이터 경로", () => {
     );
   });
 
-  it("[성공] Invest 사이트맵에 색인 가치가 있는 collection만 포함함", async () => {
-    const entries = await investSitemap();
+  it("[성공] Invest 사이트맵에 색인 가치가 있는 collection만 포함함", () => {
+    const entries = investSitemap();
     const urls = entries.map(({ url }) => url);
 
     expect(urls).toContain("https://invest.jamie.kr/ko/series/operating-notes");

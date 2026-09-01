@@ -35,8 +35,8 @@ describe("editorial data adapter", () => {
     expect(item.image).toBeUndefined();
   });
 
-  it("[성공] 투자 노트가 source kind를 포함한 공통 editorial 항목으로 변환됨", async () => {
-    const note = (await getInvestmentNotes("en"))[0];
+  it("[성공] 투자 노트가 source kind를 포함한 공통 editorial 항목으로 변환됨", () => {
+    const note = getInvestmentNotes("en")[0];
     if (note === undefined) throw new Error("Missing investment fixture.");
     const item = toInvestmentEditorialItem(note);
     expect(item).toMatchObject({

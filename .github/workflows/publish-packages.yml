@@ -74,7 +74,7 @@ jobs:
       - run: pnpm --filter @jongminchung/${{ matrix.package }} publish --access public --no-git-checks
       - name: Verify registry integrity and clean consumer import
         run: >-
-          node .github/scripts/verify-published-package.mjs
+          node .github/scripts/verify-published-package.ts
           "@jongminchung/${{ matrix.package }}" "1.0.0"
           "${{ matrix.import-specifier }}"
       - name: Remove GitHub Packages auth

@@ -8,19 +8,21 @@
   --font-family-heading: var(--font-family-body);
 }
 
-/* 제품별 editorial 배경만 Web이 소유하고 공용 semantic role은 공유함 */
+/* OpenAI Docs형 neutral surface를 세 Web 제품에 동일하게 적용함 */
+:where(html[data-site="home"]),
 :where(html[data-site="tech"]) {
-  --background: oklch(1 0 0);
+  --background: #fff;
 }
 
 :where(html[data-site="invest"]) {
-  --background: oklch(0.975 0.002 90);
+  --background: #fff;
 }
 
+:where(html[data-site="home"][data-theme="dark"]),
 :where(html[data-site="tech"][data-theme="dark"]) {
-  --background: oklch(0.18 0.014 235);
+  --background: #000;
 }
 
 :where(html[data-site="invest"][data-theme="dark"]) {
-  --background: oklch(0.18 0.003 90);
+  --background: #000;
 }

@@ -7,7 +7,7 @@ import {
   investmentCollection,
 } from "../.source/server.ts";
 
-export const contentI18n = defineI18n({
+const contentI18n = defineI18n({
   languages: ["ko", "en"],
   defaultLanguage: "en",
   parser: "dir",

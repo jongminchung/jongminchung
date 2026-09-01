@@ -18,9 +18,9 @@
   - desktop rail과 mobile sheet는 같은 탐색 구조와 focus return을 유지함
 - **`invest`는 일반 블로그형 본문과 문서 내 목차를 우선함**
   - MDX는 별도 요약·작성자 의견 wrapper 없이 제목과 문단이 이어지는 읽기 흐름을 사용함
-- **`tech`와 `invest`의 editorial 화면 차이는 `--background`의 채도에만 제한함**
-  - `html[data-site="tech"]`는 cool-neutral, `html[data-site="invest"]`는 warm-neutral page background을 제공함
-  - `card`, text, border, action, focus를 포함한 나머지 semantic role은 두 도메인에서 같은 token 값을 사용함
+- **세 사이트의 기본 surface는 OpenAI Docs형 neutral gray 계층으로 통일함**
+  - `html[data-site="tech"]`와 `html[data-site="invest"]`는 light에서 white, dark에서 black page background을 공유함
+  - `card`, text, border, action, focus를 포함한 semantic role은 제품별 색상 대신 같은 중립 token 값을 사용함
 
 ## 토큰 소유권과 cascade
 
@@ -30,7 +30,7 @@
   - 공용 UI는 `--web-*`, `--docs-*`, `--research-*`를 직접 참조하지 않음
 - **기본 디자인 theme와 global entrypoint는 `@jongminchung/ui/globals.css`가 제공하고 Web은 이를 직접 import함**
   - `packages/ui/src/styles/theme.css`는 light·dark generic semantic role을, `tokens.css`는 Tailwind mapping을, `globals.css`는 이들의 공통 entrypoint를 소유함
-  - `apps/web/app/theme.css`는 Web font와 `tech`·`invest`의 제품별 `--background` override만 소유함
+  - `apps/web/app/theme.css`는 Web font와 `tech`·`invest`의 동일한 neutral `--background` override만 소유함
   - Web route entry는 공용 `globals.css` 뒤에 앱 `theme.css`를 import하고 나머지 semantic role은 공용 값을 사용함
 - **site-scoped alias는 site마다 필요한 도메인 역할만 추가함**
   - `home`은 custom property alias를 추가하지 않고 공용 token과 portfolio composition만 사용함
@@ -73,4 +73,4 @@
 - **브라우저 검증은 axe, keyboard focus, ESC focus return, overflow, forced colors, reduced motion을 포함함**
   - 대표 route는 desktop·tablet·390px mobile과 200% zoom에서 확인함
 - **visual baseline은 의도된 변경만 darwin·Linux Chromium에서 검토 후 갱신함**
-  - font loading, client boundary, `bundle:report`, asset loading 변화를 release 전에 확인함
+  - font loading, client boundary, route별 초기 전송량, asset loading 변화를 release 전에 확인함

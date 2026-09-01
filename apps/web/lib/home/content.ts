@@ -1,4 +1,4 @@
-import type { Locale } from "#lib/site-routing";
+import { siteOrigins, type Locale } from "#lib/site-routing";
 
 export interface Project {
   readonly category: string;
@@ -144,7 +144,7 @@ const content = {
         description:
           "Bilingual articles, handbooks, and deep dives about building understandable software.",
         tags: ["Next.js", "MDX", "Engineering"],
-        href: "https://tech.jamie.kr/en",
+        href: `${siteOrigins.tech}/en`,
       },
       {
         index: "02",
@@ -153,7 +153,7 @@ const content = {
         description:
           "13F filings and original investment sources analyzed with reported facts kept separate from interpretation.",
         tags: ["Research", "Sources", "Bilingual"],
-        href: "https://invest.jamie.kr/en",
+        href: `${siteOrigins.invest}/en`,
       },
     ],
     principles: [
@@ -189,7 +189,7 @@ const content = {
         description:
           "이해할 수 있는 소프트웨어를 만들기 위한 글과 Handbook·Deep Dive를 한영으로 기록함",
         tags: ["Next.js", "MDX", "Engineering"],
-        href: "https://tech.jamie.kr/ko",
+        href: `${siteOrigins.tech}/ko`,
       },
       {
         index: "02",
@@ -198,7 +198,7 @@ const content = {
         description:
           "13F 공시와 투자 원문에서 투자자의 선택과 시장 구조를 분석한 글을 한영으로 기록함",
         tags: ["Research", "Sources", "Bilingual"],
-        href: "https://invest.jamie.kr/ko",
+        href: `${siteOrigins.invest}/ko`,
       },
     ],
     principles: [
@@ -236,7 +236,7 @@ export const personSchema = {
   "@type": "Person",
   name: "Jongmin Chung",
   alternateName: "Jamie",
-  url: "https://www.jamie.kr",
+  url: siteOrigins.home,
   sameAs: ["https://github.com/jongminchung"],
   knowsAbout: [
     "Domain-Driven Design",

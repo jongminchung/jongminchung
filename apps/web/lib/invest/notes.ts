@@ -12,9 +12,9 @@ import { investmentSeriesSlug } from "./routing.ts";
 import { loadInvestmentContent } from "./source.ts";
 
 /** `getInvestmentNotes` 데이터를 조회함 */
-export async function getInvestmentNotes(
+export function getInvestmentNotes(
   locale: Locale,
-): Promise<readonly InvestmentNoteManifestEntry[]> {
+): readonly InvestmentNoteManifestEntry[] {
   return publishedInvestmentNotes(
     readContentSnapshot().investmentNotes,
     locale,
@@ -22,30 +22,28 @@ export async function getInvestmentNotes(
 }
 
 /** `getNotesBySource` 데이터를 조회함 */
-export async function getNotesBySource(
+export function getNotesBySource(
   locale: Locale,
   kind: InvestmentSourceKind,
-): Promise<readonly InvestmentNoteManifestEntry[]> {
+): readonly InvestmentNoteManifestEntry[] {
   return notesBySource(readContentSnapshot().investmentNotes, locale, kind);
 }
 
 /** `getNotesByTag` tag에 속한 공개 투자 노트를 반환함 */
-export async function getNotesByTag(
+export function getNotesByTag(
   locale: Locale,
   tag: string,
-): Promise<readonly InvestmentNoteManifestEntry[]> {
-  return (await getInvestmentNotes(locale)).filter((note) =>
-    note.tags.includes(tag),
-  );
+): readonly InvestmentNoteManifestEntry[] {
+  return getInvestmentNotes(locale).filter((note) => note.tags.includes(tag));
 }
 
 /** `getNotesBySeriesSlug` URL slug에 해당하는 투자 series 노트를 반환함 */
-export async function getNotesBySeriesSlug(
+export function getNotesBySeriesSlug(
   locale: Locale,
   slug: string,
-): Promise<readonly InvestmentNoteManifestEntry[]> {
+): readonly InvestmentNoteManifestEntry[] {
   const normalizedSlug = investmentSeriesSlug(slug);
-  return (await getInvestmentNotes(locale)).filter(
+  return getInvestmentNotes(locale).filter(
     (note) =>
       note.series !== undefined &&
       investmentSeriesSlug(note.series) === normalizedSlug,
@@ -53,15 +51,13 @@ export async function getNotesBySeriesSlug(
 }
 
 /** `findInvestmentNote` 데이터를 조회함 */
-export async function findInvestmentNote(locale: Locale, id: string) {
-  return (
-    (await getInvestmentNotes(locale)).find((note) => note.id === id) ?? null
-  );
+export function findInvestmentNote(locale: Locale, id: string) {
+  return getInvestmentNotes(locale).find((note) => note.id === id) ?? null;
 }
 
 /** `loadInvestmentNote` 데이터를 조회함 */
 export async function loadInvestmentNote(locale: Locale, id: string) {
-  const metadata = await findInvestmentNote(locale, id);
+  const metadata = findInvestmentNote(locale, id);
   if (metadata === null) return null;
   const compiled = await loadInvestmentContent(locale, id);
   if (compiled === null)

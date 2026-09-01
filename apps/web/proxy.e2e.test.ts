@@ -1,6 +1,6 @@
 import { expect, test } from "./e2e-fixtures";
 
-test("[실패] 개인 위치, 알 수 없는 호스트 및 스푸핑된 헤더를 갖고 있음", async ({
+test("[실패] 내부 경로와 알 수 없는 Host의 spoofing 요청을 거부함", async ({
   siteRequest,
   playwright,
 }) => {
@@ -50,7 +50,7 @@ test("[성공] 호스트를 사용하고 X-Forwarded-Host를 무시함", async (
   await allowed.dispose();
 });
 
-test("[성공] Accept-Language 이전에 쿠키를 사용하여 각 사이트를 제외하고 함", async ({
+test("[성공] 각 사이트의 로캘 쿠키를 Accept-Language보다 우선함", async ({
   playwright,
 }) => {
   for (const [host, cookie] of [
@@ -86,7 +86,7 @@ test("[성공] Accept-Language 이전에 쿠키를 사용하여 각 사이트를
   await negotiated.dispose();
 });
 
-test("[성공] 모든 사이트에 대해 부품 수 없는 문서를 현지화함", async ({
+test("[성공] 모든 사이트의 404 문서를 요청 로캘로 제공함", async ({
   browser,
 }) => {
   for (const host of [
@@ -108,7 +108,9 @@ test("[성공] 모든 사이트에 대해 부품 수 없는 문서를 현지화�
   }
 });
 
-test("[성공] 호스트와 협력으로 건강을 보호함", async ({ playwright }) => {
+test("[성공] 알려지지 않은 Host에서도 health endpoint를 제공함", async ({
+  playwright,
+}) => {
   const health = await playwright.request.newContext({
     baseURL: "http://127.0.0.1:3100",
     extraHTTPHeaders: { Host: "unknown.example" },

@@ -6,11 +6,17 @@ export type SiteId = (typeof siteIds)[number];
 export { isLocale, locales };
 export type { Locale };
 
+export const siteOrigins = {
+  home: "https://www.jamie.kr",
+  tech: "https://tech.jamie.kr",
+  invest: "https://invest.jamie.kr",
+} as const satisfies Readonly<Record<SiteId, string>>;
+
 const productionHosts: Readonly<Record<string, SiteId>> = {
   "jamie.kr": "home",
-  "www.jamie.kr": "home",
-  "tech.jamie.kr": "tech",
-  "invest.jamie.kr": "invest",
+  [new URL(siteOrigins.home).hostname]: "home",
+  [new URL(siteOrigins.tech).hostname]: "tech",
+  [new URL(siteOrigins.invest).hostname]: "invest",
 };
 
 const developmentHosts: Readonly<Record<string, SiteId>> = {

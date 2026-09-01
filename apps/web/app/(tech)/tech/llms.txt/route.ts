@@ -1,11 +1,11 @@
 import { displayTitleFor, locales, type Locale } from "#lib/content-model";
 import { getBlogPosts, getDocsPages } from "#lib/documents";
+import { siteOrigins } from "#lib/site-routing";
 import { getTechMessages } from "#lib/tech/copy";
 import { getDocsCategory } from "#lib/tech/docs";
 
-const siteOrigin = "https://tech.jamie.kr";
 const absoluteUrl = (pathname: string): string =>
-  new URL(pathname, siteOrigin).toString();
+  new URL(pathname, siteOrigins.tech).toString();
 
 async function createLocaleSection(locale: Locale): Promise<readonly string[]> {
   const [posts, docs] = await Promise.all([getBlogPosts(), getDocsPages()]);

@@ -2,9 +2,10 @@ import type { ReactNode } from "react";
 import { BrandWordmark } from "#components/BrandWordmark";
 import { EditorialFooter, EditorialHeader } from "#components/EditorialChrome";
 import { ThemeControl } from "#components/ThemeControl";
+import { themeLabelTemplateFor } from "#lib/i18n-messages";
 import { getInvestmentMessages } from "#lib/invest/copy";
 import { alternateLocale } from "#lib/locale";
-import type { Locale } from "#lib/site-routing";
+import { siteOrigins, type Locale } from "#lib/site-routing";
 
 /** Invest 도메인의 공통 header와 footer를 렌더링함 */
 export function InvestmentLayout({
@@ -19,7 +20,7 @@ export function InvestmentLayout({
   return (
     <div className="min-h-dvh bg-background text-foreground">
       <EditorialHeader
-        actions={<ThemeControl locale={locale} />}
+        actions={<ThemeControl labelTemplate={themeLabelTemplateFor(locale)} />}
         brand={<BrandWordmark suffix="invest" />}
         brandLabel="jongminchung invest"
         navigationLabel={text.navigation}
@@ -50,7 +51,7 @@ export function InvestmentLayout({
           },
           {
             label: "Elsewhere",
-            links: [{ href: "https://www.jamie.kr", label: "jamie.kr ↗" }],
+            links: [{ href: siteOrigins.home, label: "jamie.kr ↗" }],
           },
         ]}
         note="Independent investment research · Not investment advice"

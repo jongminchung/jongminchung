@@ -4,6 +4,8 @@ import { EditorialFooter, EditorialHeader } from "#components/EditorialChrome";
 import { ThemeControl } from "#components/ThemeControl";
 import type { Locale } from "#lib/content-model";
 import { createSeriesHref } from "#lib/content-model";
+import { themeLabelTemplateFor } from "#lib/i18n-messages";
+import { siteOrigins } from "#lib/site-routing";
 import { getTechMessages } from "#lib/tech/copy";
 import {
   createDocsHref,
@@ -37,7 +39,7 @@ export function DocsShell({
             actions={
               <>
                 <SearchTrigger compact />
-                <ThemeControl locale={locale} />
+                <ThemeControl labelTemplate={themeLabelTemplateFor(locale)} />
               </>
             }
             brand={
@@ -132,7 +134,7 @@ export function DocsShell({
               },
               {
                 label: "Elsewhere",
-                links: [{ href: "https://www.jamie.kr", label: "jamie.kr ↗" }],
+                links: [{ href: siteOrigins.home, label: "jamie.kr ↗" }],
               },
             ]}
             note="Engineering Notes · Jamie"

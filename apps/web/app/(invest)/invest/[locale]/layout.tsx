@@ -1,17 +1,13 @@
 import { TooltipProvider } from "@jongminchung/ui/components/tooltip";
 import type { Metadata } from "next";
-import { NextIntlClientProvider } from "next-intl";
 import { notFound } from "next/navigation";
 import { StructuredData } from "#components/StructuredData";
 import { ThemeProvider } from "#components/ThemeProvider";
 import { InvestmentLayout } from "#invest-components/InvestmentLayout";
-import { messagesFor } from "#lib/i18n-messages";
 import { getInvestmentMessages } from "#lib/invest/copy";
-import { isLocale } from "#lib/site-routing";
-import {
-  createWebsiteStructuredData,
-  investOrigin,
-} from "#lib/structured-data";
+import { investmentOgImage } from "#lib/invest/seo";
+import { isLocale, siteOrigins } from "#lib/site-routing";
+import { createWebsiteStructuredData } from "#lib/structured-data";
 import { themeStorageKeys } from "#lib/theme";
 import {
   localeFontClassName,
@@ -20,7 +16,7 @@ import {
 import "../../invest.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://invest.jamie.kr"),
+  metadataBase: new URL(siteOrigins.invest),
   title: { default: "Investment Notes", template: "%s · Investment Notes" },
   description:
     "Investment essays grounded in 13F filings, books, interviews, and original sources.",
@@ -29,7 +25,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/investment-notes-og.png",
+        url: investmentOgImage,
         width: 1200,
         height: 630,
         alt: "Investment Notes research journal",
@@ -38,7 +34,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    images: ["/investment-notes-og.png"],
+    images: [investmentOgImage],
   },
 };
 export const instant = false;
@@ -65,19 +61,17 @@ export default async function InvestmentLocaleLayout({
       <body>
         <StructuredData
           value={createWebsiteStructuredData({
-            origin: investOrigin,
+            origin: siteOrigins.invest,
             name: "Investment Notes",
             description: text.siteDescription,
             locale,
           })}
         />
-        <NextIntlClientProvider locale={locale} messages={messagesFor(locale)}>
-          <ThemeProvider storageKey={themeStorageKeys.invest}>
-            <TooltipProvider>
-              <InvestmentLayout locale={locale}>{children}</InvestmentLayout>
-            </TooltipProvider>
-          </ThemeProvider>
-        </NextIntlClientProvider>
+        <ThemeProvider storageKey={themeStorageKeys.invest}>
+          <TooltipProvider>
+            <InvestmentLayout locale={locale}>{children}</InvestmentLayout>
+          </TooltipProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

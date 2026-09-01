@@ -10,14 +10,14 @@
   [Pretendard Std source](../../apps/web/app/fonts/PretendardStdVariable.woff2),
   [root layout](../../apps/web/app/root-layout.tsx),
   [shared typography tokens](../../packages/ui/src/styles/theme.css),
-  [frontend asset report](../../scripts/report-frontend-assets.mjs),
-  [Web bundle baseline](../../apps/web/bundle-baseline.json)
+  [initial transfer test](../../apps/web/app/initial-transfer.e2e.test.ts),
+  [initial transfer budget](../../apps/web/initial-transfer-budget.json)
 
 ## 핵심 요약
 
 - **Home·Tech·Invest의 한국어와 영어 HTML이 모두 `2,057,688 bytes` Pretendard variable font를 선로드함**
 - **WOFF2 단일 파일이라 영어 경로도 한국어 glyph를 포함한 전체 전송 비용을 지불함**
-- **기존 bundle report는 JavaScript와 CSS만 집계하므로 초기 렌더링의 가장 큰 단일 asset이 예산에서 제외됨**
+- **정적 JavaScript와 CSS 산출물 합계만으로는 초기 렌더링의 가장 큰 단일 asset이 예산에서 제외됨**
 - **locale별 glyph 요구와 typography 회귀를 유지하면서 subset·unicode-range·system fallback 대안을 비교해야 함**
 - **폰트는 JavaScript·CSS와 합산하지 않고 route 초기 전송량의 독립 예산으로 관리해야 함**
 
@@ -31,9 +31,9 @@
   - 로컬 production build의 `jamie.localhost/en`, `tech.jamie.localhost/en`, `invest.jamie.localhost/en` 응답이 같은 WOFF2를 `Link: rel=preload`로 제공함
   - font 응답의 `Content-Length`는 `2,057,688`이며 이미 WOFF2이므로 HTTP 압축으로 추가 감소하지 않음
   - HTML 크기보다 큰 공통 font가 방문 route와 무관하게 초기 요청에 포함됨
-- **현재 성능 보고서가 font 회귀를 관찰하지 못함**
-  - `report-frontend-assets.mjs`는 `.js`·`.mjs`·`.css`만 수집함
-  - `bundle-baseline.json`은 font·image를 포함하지 않음
+- **정적 산출물 집계가 font 회귀를 관찰하지 못함**
+  - JavaScript·CSS 파일 합계는 실제 route에서 요청한 font를 포함하지 않음
+  - 전체 빌드 산출물 크기는 브라우저의 초기 전송량을 나타내지 않음
   - 완료된 Issue `0008`도 font와 image를 JavaScript·CSS와 별도 분류하도록 결정했지만 별도 budget은 구현하지 않음
 
 ## 채택할 내용
@@ -51,7 +51,7 @@
 - **Web route 단위 font budget을 별도로 기록함**
   - Home·Tech·Invest 대표 영어·한국어 route를 측정함
   - raw source 파일 합계가 아니라 브라우저가 초기 렌더링에서 요청한 font를 측정함
-  - JavaScript·CSS baseline과 독립된 threshold와 변경 사유를 유지함
+  - JavaScript·CSS와 구분된 threshold와 변경 사유를 유지함
 
 ## 채택하지 않을 내용
 
@@ -75,14 +75,13 @@
 - **대표 영어 route의 초기 font 전송량이 현재 `2,057,688 bytes`보다 유의미하게 감소함**
 - **한국어와 영어의 필수 glyph·weight·font-display 동작이 유지됨**
 - **Home·Tech·Invest visual snapshot과 접근성 검사가 유지됨**
-- **font 증가가 기존 JavaScript·CSS report와 별도로 PR에서 확인 가능함**
+- **font 증가가 route별 JavaScript·CSS 예산과 구분되어 PR에서 확인 가능함**
 - **font baseline 변경에 전후 byte와 선택 이유가 기록됨**
 
 ## 검증
 
 - `pnpm --filter @jongminchung/web run build`
-- `pnpm --filter @jongminchung/web run bundle:report`
-- 대표 Home·Tech·Invest cold-cache font request 측정
+- `pnpm --filter @jongminchung/web exec playwright test app/initial-transfer.e2e.test.ts --project tech-chromium`
 - `pnpm --filter @jongminchung/web run test:e2e`
 - `pnpm run check`
 - `git diff --check`

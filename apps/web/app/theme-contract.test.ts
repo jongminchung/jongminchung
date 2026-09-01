@@ -134,6 +134,9 @@ describe("공통 디자인 토큰 계약", () => {
     expect(sharedTheme).not.toContain("--font-pretendard");
     expect(webTheme).toContain('html[data-site="tech"]');
     expect(webTheme).toContain('html[data-site="invest"]');
+    expect(read("apps/web/app/(home)/home/[locale]/layout.tsx")).toContain(
+      'data-site="home"',
+    );
     expect(webTheme).toContain("var(--font-pretendard, ui-sans-serif)");
     expect(read("apps/web/app/(tech)/tech/[locale]/layout.tsx")).toContain(
       'data-site="tech"',

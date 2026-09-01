@@ -1,10 +1,8 @@
 import { TooltipProvider } from "@jongminchung/ui/components/tooltip";
 import type { Metadata } from "next";
-import { NextIntlClientProvider } from "next-intl";
 import { notFound } from "next/navigation";
 import { ThemeProvider } from "#components/ThemeProvider";
-import { messagesFor } from "#lib/i18n-messages";
-import { isLocale } from "#lib/site-routing";
+import { isLocale, siteOrigins } from "#lib/site-routing";
 import { themeStorageKeys } from "#lib/theme";
 import {
   localeFontClassName,
@@ -13,7 +11,7 @@ import {
 import "../../home.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.jamie.kr"),
+  metadataBase: new URL(siteOrigins.home),
   title: "Jamie — Jongmin Chung",
   description:
     "Jongmin Chung builds software that turns shared language into clear models, public APIs, and verifiable change.",
@@ -51,18 +49,17 @@ export default async function HomeLocaleLayout({
     <html
       lang={locale}
       className={localeFontClassName(locale)}
+      data-site="home"
       data-theme="light"
       suppressHydrationWarning
     >
       <head>
         <link href={pretendardStylesheetHref} rel="stylesheet" />
       </head>
-      <body data-site="home">
-        <NextIntlClientProvider locale={locale} messages={messagesFor(locale)}>
-          <ThemeProvider storageKey={themeStorageKeys.home}>
-            <TooltipProvider>{children}</TooltipProvider>
-          </ThemeProvider>
-        </NextIntlClientProvider>
+      <body>
+        <ThemeProvider storageKey={themeStorageKeys.home}>
+          <TooltipProvider>{children}</TooltipProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

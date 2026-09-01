@@ -22,9 +22,8 @@ contract, component ownership rules, and runtime exception policy.
 ## Documentation
 
 - [Repository documentation](./docs/README.md)
-- [Technology stack and official references](./docs/technology-stack.md)
 - [Maintenance guide](./docs/maintenance.md)
-- [Contributing guide](./CONTRIBUTING.md)
+- [Contributing guide](./docs/CONTRIBUTING.md)
 
 ## Workspace scripts
 
@@ -34,6 +33,7 @@ when the current directory is inside an app or package:
 ```bash
 pnpm -w run fmt
 pnpm -w run check
+pnpm -w run links:check
 pnpm -w run audit:prod
 ```
 
@@ -43,6 +43,9 @@ unrelated system command when the current package does not define `fmt`.
 `audit:prod` queries the registry advisory database and fails on high-severity production
 dependency findings. It requires network access and is run manually during maintenance and before
 releases instead of being part of the offline-reproducible `check` chain.
+
+`links:check` runs the pinned Lychee container with the repository mounted read-only. It checks
+local links and anchors in Markdown and HTML without making network requests.
 
 Each workspace owns its build, typecheck, and test commands. Select one with a filter instead of
 adding a package-specific wrapper to the root manifest:

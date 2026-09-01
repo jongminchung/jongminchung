@@ -8,10 +8,10 @@
 - 기준 commit: `f8ece16`
 - 영향 범위:
   [Oxlint 설정](../../../../oxlint.config.ts),
-  [route sheet hook](<../../../../apps/web/app/(tech)/_components/useRouteSheet.ts>),
+  route sheet hook `apps/web/app/(tech)/_components/useRouteSheet.ts` (제거됨),
   [ThemeProvider](../../../../apps/web/components/ThemeProvider.tsx),
   [ExcalidrawDiagram](<../../../../apps/web/app/(tech)/_components/ExcalidrawDiagram.tsx>),
-  [ExcalidrawCanvas](<../../../../apps/web/app/(tech)/_components/ExcalidrawCanvas.tsx>)
+  `apps/web/app/(tech)/_components/ExcalidrawCanvas.tsx` (제거됨)
 - 참고 OSS:
   [Oxlint react/react-compiler](https://oxc.rs/docs/guide/usage/linter/rules/react/react-compiler.html),
   [React You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect),

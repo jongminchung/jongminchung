@@ -36,7 +36,7 @@ export function DocumentPageHeader({
       ? section
       : `${section} · ${documentKindLabel(locale, metadata.documentKind)}`;
   return (
-    <div className="text-center">
+    <div>
       <nav aria-label={text.breadcrumb} className="sr-only">
         <ol>
           <li>
@@ -62,7 +62,7 @@ export function DocumentPageHeader({
           </li>
         </ol>
       </nav>
-      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
         <time
           className="font-medium text-foreground"
           dateTime={metadata.publishedAt}
@@ -71,13 +71,13 @@ export function DocumentPageHeader({
         </time>
         <span className="text-muted-foreground">{category}</span>
       </div>
-      <h1 className="mx-auto mt-2 mb-0 max-w-[780px] font-sans text-[clamp(32px,4vw,40px)] leading-[1.12] font-semibold tracking-[-0.03em] text-foreground">
+      <h1 className="mt-3 mb-0 max-w-[780px] font-sans text-[clamp(34px,4vw,44px)] leading-[1.1] font-semibold tracking-[-0.035em] text-foreground">
         {title}
       </h1>
-      <p className="mx-auto mt-3 mb-0 max-w-xl text-[18px] leading-[1.625] text-muted-foreground">
+      <p className="mt-3 mb-0 max-w-2xl text-[17px] leading-[1.625] text-muted-foreground">
         {metadata.description}
       </p>
-      <div className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+      <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
         <span>
           {metadata.verifiedAt === undefined ? text.updated : text.verified}{" "}
           <time dateTime={metadata.verifiedAt ?? metadata.updatedAt}>

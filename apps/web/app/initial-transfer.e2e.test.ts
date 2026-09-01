@@ -28,12 +28,10 @@ const budget = JSON.parse(
 
 for (const route of budget.routes) {
   test(`initial transfer budget: ${route.site}/${route.locale}`, async ({
-    browser,
-  }) => {
-    const context = await browser.newContext();
-    const page = await context.newPage();
-
-    await page.goto(route.url, { waitUntil: "networkidle" });
+    page,
+  }, testInfo) => {
+    const response = await page.goto(route.url, { waitUntil: "networkidle" });
+    expect(response?.ok()).toBe(true);
     await page.evaluate(() => document.fonts.ready);
     const measurement = await page.evaluate(() => {
       const resources = performance.getEntriesByType(
@@ -67,28 +65,32 @@ for (const route of budget.routes) {
       };
     });
 
-    expect(measurement.fontFamily).toContain(route.expectedFontFamily);
-    expect(measurement.fontRequests).toBeGreaterThan(0);
-    expect(measurement.fontTransferBytes).toBeLessThanOrEqual(
-      route.maxInitialFontTransferBytes,
-    );
-    expect(measurement.fontDecodedBytes).toBeLessThanOrEqual(
-      route.maxInitialFontDecodedBytes,
-    );
-    expect(measurement.stylesheetRequests).toBeGreaterThan(0);
-    expect(measurement.stylesheetTransferBytes).toBeLessThanOrEqual(
-      route.maxInitialStylesheetTransferBytes,
-    );
-    expect(measurement.stylesheetDecodedBytes).toBeLessThanOrEqual(
-      route.maxInitialStylesheetDecodedBytes,
-    );
-    expect(measurement.javaScriptRequests).toBeGreaterThan(0);
-    expect(measurement.javaScriptTransferBytes).toBeLessThanOrEqual(
-      route.maxInitialJavaScriptTransferBytes,
-    );
-    expect(measurement.javaScriptDecodedBytes).toBeLessThanOrEqual(
-      route.maxInitialJavaScriptDecodedBytes,
-    );
-    await context.close();
+    await testInfo.attach("initial-transfer.json", {
+      body: JSON.stringify(measurement, null, 2),
+      contentType: "application/json",
+    });
+
+    expect.soft(measurement.fontFamily).toContain(route.expectedFontFamily);
+    expect.soft(measurement.fontRequests).toBeGreaterThan(0);
+    expect
+      .soft(measurement.fontTransferBytes)
+      .toBeLessThanOrEqual(route.maxInitialFontTransferBytes);
+    expect
+      .soft(measurement.fontDecodedBytes)
+      .toBeLessThanOrEqual(route.maxInitialFontDecodedBytes);
+    expect.soft(measurement.stylesheetRequests).toBeGreaterThan(0);
+    expect
+      .soft(measurement.stylesheetTransferBytes)
+      .toBeLessThanOrEqual(route.maxInitialStylesheetTransferBytes);
+    expect
+      .soft(measurement.stylesheetDecodedBytes)
+      .toBeLessThanOrEqual(route.maxInitialStylesheetDecodedBytes);
+    expect.soft(measurement.javaScriptRequests).toBeGreaterThan(0);
+    expect
+      .soft(measurement.javaScriptTransferBytes)
+      .toBeLessThanOrEqual(route.maxInitialJavaScriptTransferBytes);
+    expect
+      .soft(measurement.javaScriptDecodedBytes)
+      .toBeLessThanOrEqual(route.maxInitialJavaScriptDecodedBytes);
   });
 }

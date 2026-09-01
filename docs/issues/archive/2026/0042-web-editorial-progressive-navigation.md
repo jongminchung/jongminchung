@@ -6,7 +6,7 @@
 - 기준일: 2026-08-29
 - 기준 commit: `b3badda`
 - 영향 범위:
-  [editorial 목록](../../../../apps/web/components/Editorial.tsx),
+  [editorial 목록](../../../../apps/web/components/EditorialIndex.tsx),
   [무한 목록 controller](../../../../apps/web/components/EditorialInfiniteResults.tsx),
   [Tech blog copy](<../../../../apps/web/app/(tech)/_components/BlogIndex.tsx>),
   [맨 위 이동 control](<../../../../apps/web/app/(tech)/_components/BackToTopButton.tsx>),

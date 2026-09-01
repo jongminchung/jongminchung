@@ -225,7 +225,7 @@
   - [ ] source·summary·judgment의 semantic heading과 accessible relationship을 검토함
 - [ ] **통합 품질 gate와 release evidence를 완료함**
   - [ ] darwin·Linux Chromium visual baseline을 한 번에 검토하고 승인된 diff만 갱신함
-  - [ ] `bundle:report`, font transfer, client boundary, asset loading 변화를 이전 기준과 비교함
+  - [ ] route별 초기 전송량, font transfer, client boundary, asset loading 변화를 이전 기준과 비교함
   - [ ] rollback 대상 artifact와 대표 route smoke result를 release 기록에 남김
 
 ## 검증 기준
@@ -242,7 +242,7 @@
   - screenshot diff는 Home·Tech·Invest의 intended visual change를 설명하는 review와 함께 승인되어야 함
 - **성능과 release는 production artifact를 기준으로 검증되어야 함**
   - Pretendard 요청이 same-origin을 유지하고, font 전송량은 `0037`의 예산과 함께 검토되어야 함
-  - client boundary와 asset size 변화는 `bundle:report`로 비교되어야 함
+  - client boundary와 초기 asset size 변화는 route별 초기 전송량 테스트로 비교되어야 함
   - release 전후의 theme persistence, locale, navigation, content metadata smoke를 기록해야 함
 
 ## 실행 명령과 완료 조건
@@ -252,7 +252,7 @@
   - `pnpm --filter @jongminchung/web run test`
   - `pnpm --filter @jongminchung/web run build`
 - **통합 전에는 production browser와 asset 검증을 실행해야 함**
-  - `pnpm --filter @jongminchung/web run bundle:report`
+  - `pnpm --filter @jongminchung/web exec playwright test app/initial-transfer.e2e.test.ts --project tech-chromium`
   - `pnpm --filter @jongminchung/web run test:e2e`
 - **마지막으로 저장소 전체 계약과 변경 범위를 검증해야 함**
   - `pnpm run check`

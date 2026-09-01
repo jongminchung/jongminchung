@@ -30,7 +30,7 @@ pnpm install --frozen-lockfile
 | `packages/ui`      | 공개 UI primitive·기본 theme·semantic token | `pnpm --filter @jongminchung/ui run build`     |
 | `packages/tooling` | Oxc 공용 설정                               | `pnpm --filter @jongminchung/tooling run test` |
 
-공용 UI의 소유권, token과 component 추가 규칙은 [디자인 시스템](DESIGN_SYSTEM.md)을
+공용 UI의 소유권, token과 component 추가 규칙은 [디자인 시스템](../DESIGN_SYSTEM.md)을
 따른다. 앱별 product component를 `packages/ui`로 옮기거나 앱에서 공용 primitive를 복제하지
 않는다.
 
@@ -46,15 +46,17 @@ pnpm --filter @jongminchung/ui run test
 
 루트 검증 명령의 범위는 다음과 같다.
 
-| 명령                  | 검증 범위                                    |
-| --------------------- | -------------------------------------------- |
-| `pnpm run fmt:check`  | Oxfmt 형식 검사                              |
-| `pnpm run lint`       | Oxlint 정적 분석                             |
-| `pnpm run typecheck`  | 루트와 모든 workspace TypeScript 검사        |
-| `pnpm run test`       | Unit·Integration 테스트                      |
-| `pnpm run test:e2e`   | build 후 앱별 Playwright E2E                 |
-| `pnpm run check`      | format, lint, typecheck와 전체 로컬 테스트   |
-| `pnpm run check:full` | `check`, E2E typecheck, 단일 build, core E2E |
+| 명령                   | 검증 범위                                            |
+| ---------------------- | ---------------------------------------------------- |
+| `pnpm run fmt:check`   | Oxfmt 형식 검사                                      |
+| `pnpm run lint`        | Oxlint 정적 분석                                     |
+| `pnpm run typecheck`   | 루트와 모든 workspace TypeScript 검사                |
+| `pnpm run deadcode`    | 미사용 파일과 중복 export 검사                       |
+| `pnpm run links:check` | Docker 기반 Markdown·HTML 로컬 링크 검사             |
+| `pnpm run test`        | Unit·Integration 테스트                              |
+| `pnpm run test:e2e`    | build 후 앱별 Playwright E2E                         |
+| `pnpm run check`       | format, lint, typecheck, deadcode와 전체 로컬 테스트 |
+| `pnpm run check:full`  | `check`, E2E typecheck, 단일 build, core E2E         |
 
 테스트 계약은 빠른 Unit, 실제 콘텐츠·filesystem Integration, build된 앱을 검증하는 Playwright
 E2E로 구분한다. Unit coverage 기준선을 의도적으로 갱신할 때만 다음 명령을 실행하고
@@ -71,7 +73,7 @@ pnpm run test:coverage:update
 
 | 변경 유형                    | 최소 검증                                                               |
 | ---------------------------- | ----------------------------------------------------------------------- |
-| Markdown·설정 문서           | `fmt:check`, `lint`, 상대 링크와 명령 직접 확인                         |
+| Markdown·설정 문서           | `fmt:check`, `links:check`, 명령 직접 확인                              |
 | React·CSS·공용 UI            | 해당 workspace typecheck·test, 관련 Playwright, `DESIGN_SYSTEM.md` 계약 |
 | Next.js route·MDX 파이프라인 | 해당 앱 typecheck·test·build, core E2E                                  |
 | 공용 패키지                  | 해당 패키지 typecheck·test·build, 소비 앱 typecheck                     |
@@ -128,9 +130,8 @@ Playwright snapshot은 의도적인 시각 변경만 갱신한다. 갱신 후 �
 사용한다. 내부 패키지는 `workspace:*`로 연결한다.
 
 ```sh
-pnpm run deps:inventory
-pnpm run deps:check -- <framework|ui|test|tooling>
-pnpm run deps:update -- <framework|ui|test|tooling>
+pnpm outdated --recursive
+# pnpm-workspace.yaml 또는 해당 package.json의 대상 버전 변경
 pnpm install
 ```
 
@@ -138,8 +139,8 @@ pnpm install
 
 1. 해당 `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`의 일관성
 2. native install script가 필요하면 `allowBuilds`에 최소 범위만 추가했는지
-3. [기술 스택과 공식 문서](docs/technology-stack.md)의 패키지·버전·링크
-4. TypeScript 변경이면 [TypeScript 7 호환성 보고서](docs/typescript-7-compatibility-report.md)의 현재 정책
+3. dependency lane, 현재 버전과 검토한 공식 release note
+4. TypeScript 변경이면 [TypeScript 7 호환성 보고서](../apps/web/content/tech/docs/ko/fe/typescript-7-compatibility.mdx)의 현재 정책
 5. 관련 workspace 검사와 `pnpm run check:full`
 
 `pnpm run audit:prod`는 registry advisory database를 조회하므로 네트워크가 필요하다. 기본
@@ -152,7 +153,7 @@ pnpm install
   token을 기록하지 않는다.
 - `GH_PAT`는 package 게시에만 사용한다.
 
-현재 secret 목록과 workflow별 용도는 [유지보수 가이드](docs/maintenance.md)에 정리되어 있다.
+현재 secret 목록과 workflow별 용도는 [유지보수 가이드](maintenance.md)에 정리되어 있다.
 
 ## 게시와 릴리스
 
@@ -174,7 +175,7 @@ pnpm --filter @jongminchung/ui exec shadcn add <component>
 - CommonJS build, `require` 조건, JavaScript `default` fallback을 추가하지 않는다.
 - 공개 패키지는 공통 `tsconfig.base.json`의 strict 검사를 상속하고 패키지별
   `tsconfig.build.json`에 emit 옵션만 명시해 ESM JavaScript와 declaration을 직접 생성한다.
-- 번들러 재도입 조건은 [ADR 0002](docs/adr/0002-node-library-tsc-build.md)를 따른다.
+- 번들러 재도입 조건은 [ADR 0001](adr/0001-node-library-tsc-build.md)을 따른다.
 
 ```sh
 pnpm --filter @jongminchung/tooling --filter @jongminchung/ui install --frozen-lockfile --ignore-scripts

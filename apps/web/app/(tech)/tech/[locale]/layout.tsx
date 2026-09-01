@@ -5,7 +5,8 @@ import { StructuredData } from "#components/StructuredData";
 import { ThemeProvider } from "#components/ThemeProvider";
 import { isLocale } from "#lib/content-model";
 import { messagesFor } from "#lib/i18n-messages";
-import { createWebsiteStructuredData, techOrigin } from "#lib/structured-data";
+import { siteOrigins } from "#lib/site-routing";
+import { createWebsiteStructuredData } from "#lib/structured-data";
 import { getTechMessages } from "#lib/tech/copy";
 import { themeStorageKeys } from "#lib/theme";
 import {
@@ -40,7 +41,7 @@ export default async function LocaleLayout({
       <body>
         <StructuredData
           value={createWebsiteStructuredData({
-            origin: techOrigin,
+            origin: siteOrigins.tech,
             name: "Engineering Notes",
             description: text.siteDescription,
             locale,

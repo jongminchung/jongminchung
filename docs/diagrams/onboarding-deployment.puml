@@ -1,0 +1,30 @@
+@startuml
+!include <C4/C4_Deployment>
+
+title 배포 관점 · arc42 Deployment View
+
+Person(developer, "기여자")
+System_Ext(github, "GitHub 저장소·Actions")
+
+Deployment_Node(vercel, "Vercel", "Managed Next.js runtime") {
+  Container(vercelWeb, "Web deployment", "Next.js managed output", "Vercel adapter가 구성한 Web 앱")
+}
+
+Deployment_Node(oci, "대안 OCI 환경", "Container runtime") {
+  Deployment_Node(container, "node:26-alpine", "non-root uid 1001, PORT 3000") {
+    Container(standaloneWeb, "Web standalone", "Next.js standalone server", "정적 자산과 public 디렉터리를 포함한 런타임")
+  }
+}
+
+System_Ext(browser, "사용자 브라우저")
+System_Ext(registry, "GitHub Packages")
+
+Rel(developer, github, "push·PR·workflow_dispatch")
+Rel(github, vercelWeb, "Git 연동 배포로 추정됨", "저장소 밖 설정")
+Rel(github, standaloneWeb, "Dockerfile로 이미지 빌드 가능", "명시적 배포 자동화는 저장소 밖")
+Rel(browser, vercelWeb, "Home·Tech·Invest", "HTTPS")
+Rel(browser, standaloneWeb, "Home·Tech·Invest", "HTTP/HTTPS ingress")
+Rel(github, registry, "tooling·ui의 1.0.0 교체 게시", "수동 Actions")
+
+SHOW_LEGEND()
+@enduml

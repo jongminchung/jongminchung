@@ -6,6 +6,7 @@ import {
 } from "./content-model";
 import type { EditorialItem } from "./editorial";
 import type { InvestmentNoteManifestEntry } from "./invest/content";
+import { getInvestmentMessages } from "./invest/copy";
 import { getTechMessages } from "./tech/copy";
 import { documentKindLabel } from "./tech/document-kind";
 import { getSeries } from "./tech/series";
@@ -54,7 +55,8 @@ export function toInvestmentEditorialItem(
     description: note.description,
     publishedAt: note.publishedAt,
     tags: [...new Set([...note.tags, ...note.sources.map(({ kind }) => kind)])],
-    kind: note.series ?? "Research note",
+    kind:
+      note.series ?? getInvestmentMessages(note.locale).article.researchNote,
     mediaSeed: `${note.id}:${note.tags.join(":")}`,
     image: { src: note.image, alt: note.imageAlt },
   });

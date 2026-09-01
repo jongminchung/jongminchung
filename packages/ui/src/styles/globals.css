@@ -71,12 +71,36 @@
 @source not "../**/*.{test,spec}.{ts,tsx}";
 
 @layer base {
+  html {
+    scrollbar-gutter: stable;
+  }
+
   * {
     @apply border-border outline-ring/50;
   }
 
   body {
     @apply bg-background text-foreground;
+    min-height: 100dvh;
+    font-family: var(--font-family-body);
+    letter-spacing: -0.01em;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background: var(--secondary);
+    color: var(--foreground);
+  }
+
+  a,
+  button,
+  input,
+  select,
+  textarea {
+    transition-duration: 150ms;
+    transition-timing-function: ease;
   }
 }
 
