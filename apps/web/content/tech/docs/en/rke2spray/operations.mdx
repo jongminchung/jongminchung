@@ -3,8 +3,8 @@ documentKind: how-to
 title: "Operate the cluster lifecycle"
 description: "Check health, scale, upgrade, snapshot, recover, and remove nodes from an RKE2 cluster."
 publishedAt: "2026-09-01"
-updatedAt: "2026-09-01"
-verifiedAt: "2026-09-01"
+updatedAt: "2026-09-02"
+verifiedAt: "2026-09-02"
 tags: [ansible, kubernetes, rke2, rke2spray, operations]
 status: stable
 publicationStatus: published
@@ -63,6 +63,27 @@ sourceUrl: https://github.com/jongminchung/rke2spray/blob/main/docs/onboarding/0
 | Recovery              | `recover-control-plane.yml`                    | Recover embedded etcd from a selected snapshot      |
 | Remove node           | `remove-node.yml`                              | Drain, verify membership, and uninstall RKE2        |
 | Reset all             | `reset.yml`                                    | Stop services and run the official uninstaller      |
+
+## Compare Kubespray and rke2spray operations
+
+| Operation or scenario                            | Kubespray baseline behavior                                                                                       | rke2spray behavior                                                                                                                                                                        | Compatibility              |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| `cluster.yml`                                    | Prepares hosts and the container runtime, installs etcd, runs kubeadm, installs the CNI, and applies cluster apps | Configures checksum-locked RKE2 servers and agents, uses bundled containerd, joins embedded-etcd members, and verifies services, the API, and Nodes                                       | Adapter                    |
+| `scale.yml`                                      | Adds Inventory-selected Kubernetes nodes through the Kubespray node lifecycle                                     | Adds only selected `kube_node` workers as RKE2 agents; servers continue to use `cluster.yml`                                                                                              | Adapter                    |
+| `upgrade-cluster.yml`                            | Upgrades kubeadm-managed Kubernetes components and the selected runtime lifecycle                                 | Replaces the checksum-locked RKE2 release one server at a time and agents in bounded batches                                                                                              | Adapter                    |
+| `remove-node.yml` with a reachable node          | Drains the Node, removes an etcd member when applicable, and resets the target host                               | Drains the Node, verifies the exact embedded-etcd member, deletes the Node, and runs the official RKE2 uninstaller                                                                        | Adapter                    |
+| `remove-node.yml` with an unreachable server     | Cannot complete the target-host reset; the operator must move to control-plane recovery or repair host access     | Does not pretend that target-host cleanup succeeded; use `recover-control-plane.yml` with the server fenced and removed from load balancer backends                                       | Explicit recovery boundary |
+| `recover-control-plane.yml` with quorum retained | For non-kubeadm etcd, checks endpoint health, removes broken members, and reruns `cluster.yml`                    | Verifies exact peer membership, quorum, and learner absence; creates a protected snapshot, removes the exact dead member from a survivor, and joins the replacement through `cluster.yml` | Safety-expanded adapter    |
+| `recover-control-plane.yml` after quorum loss    | For non-kubeadm etcd, creates or accepts a snapshot, restores one etcd member, and reruns `cluster.yml`           | Validates snapshot ownership, mode, and checksum; performs RKE2 `cluster-reset`, rejoins installed servers, and converges clean replacements through `cluster.yml`                        | RKE2 restore adapter       |
+| `reset.yml`                                      | Runs the Kubespray reset lifecycle for kubeadm, services, networking, and the selected runtime                    | Stops RKE2 services and runs the official RKE2 uninstaller                                                                                                                                | Adapter                    |
+| Health and snapshot helpers                      | No equivalent stable root Playbook API in this compatibility contract                                             | Keeps read-only health checks and RKE2 snapshot creation under `extra_playbooks/` and Make targets                                                                                        | Kubespray extension point  |
+
+<Callout title="Compatibility scope" type="info">
+  The shared Playbook name preserves the public operational intent, not the
+  kubeadm task implementation. Consult
+  [Compatibility](/en/docs/rke2spray/compatibility) before assuming that an
+  upstream variable or internal Role has an RKE2 equivalent.
+</Callout>
 
 ## Enforce destructive-operation boundaries
 
