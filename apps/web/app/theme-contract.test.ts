@@ -8,10 +8,19 @@ import { describe, expect, it } from "vitest";
 const root = resolve(fileURLToPath(new URL("../../..", import.meta.url)));
 const read = (path: string): string =>
   readFileSync(resolve(root, path), "utf8");
-const readComponentStyles = (path: string): readonly string[] =>
-  readdirSync(resolve(root, path), { withFileTypes: true })
-    .filter((entry) => entry.isFile() && entry.name.endsWith(".module.css"))
-    .map((entry) => read(`${path}/${entry.name}`));
+const ignoredModuleCssDirectories = new Set([".next", "node_modules"]);
+const findModuleCssPaths = (path: string): readonly string[] =>
+  readdirSync(resolve(root, path), { withFileTypes: true }).flatMap((entry) => {
+    const entryPath = `${path}/${entry.name}`;
+    if (entry.isDirectory()) {
+      return ignoredModuleCssDirectories.has(entry.name)
+        ? []
+        : findModuleCssPaths(entryPath);
+    }
+    return entry.isFile() && entry.name.endsWith(".module.css")
+      ? [entryPath]
+      : [];
+  });
 
 const sharedTheme = read("packages/ui/src/styles/theme.css");
 const sharedGlobals = read("packages/ui/src/styles/globals.css");
@@ -37,11 +46,7 @@ const siteStylePaths = [
 const siteStyles = siteStylePaths.map(read);
 const techStyles = siteStyles[1];
 const investCodeStyles = read("apps/web/app/(invest)/invest-code.css");
-const domainComponentStyles = [
-  ...readComponentStyles("apps/web/app/(home)/_components"),
-  ...readComponentStyles("apps/web/app/(tech)/_components"),
-  ...readComponentStyles("apps/web/app/(invest)/_components"),
-];
+const webModuleCssPaths = findModuleCssPaths("apps/web");
 
 const requiredRoles = [
   "--background",
@@ -147,18 +152,17 @@ describe("공통 디자인 토큰 계약", () => {
   });
 
   it("[성공] 제거한 도메인 토큰을 다시 사용하지 않음", () => {
-    const styles = [
-      sharedTheme,
-      webTheme,
-      ...siteStyles,
-      ...domainComponentStyles,
-    ].join("\n");
+    const styles = [sharedTheme, webTheme, ...siteStyles].join("\n");
 
     for (const token of removedDomainTokens) {
       expect(styles).not.toContain(`--${token}`);
     }
     expect(homeSections).not.toContain("text-inverse-foreground");
     expect(homeSections).toContain("text-background");
+  });
+
+  it("[성공] Web 앱에서 CSS Module을 사용하지 않음", () => {
+    expect(webModuleCssPaths).toEqual([]);
   });
 
   it("[성공] Pretendard를 next/font의 자체 호스팅 폰트로 등록함", () => {

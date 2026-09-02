@@ -1,4 +1,5 @@
-import styles from "./PlatformArchitectureVisuals.module.css";
+import { cn } from "@jongminchung/ui/lib/utils";
+import type { CSSProperties, ReactNode } from "react";
 
 type ArchitectureLocale = "en" | "ko";
 type C4Level = "container" | "context";
@@ -15,6 +16,73 @@ interface NodeCopy {
   readonly detail: string;
   readonly name: string;
 }
+
+const figureClassName =
+  "relative my-6! overflow-hidden rounded-[var(--radius-md)] border bg-card";
+const figureHeaderClassName =
+  "flex items-center justify-between gap-4 border-b px-4 py-[.8rem]";
+const eyebrowClassName =
+  "m-0! font-mono text-[.72rem] font-[650] tracking-[.08em] text-muted-foreground uppercase";
+const canvasClassName = "relative p-[clamp(1rem,3vw,1.75rem)]";
+const legendClassName =
+  "m-0! flex flex-wrap gap-x-4 gap-y-2 border-t px-4 py-[.7rem] text-[.72rem] leading-[1.45] text-muted-foreground";
+const nodeClassName =
+  "relative z-[1] min-w-0 rounded-[var(--radius-sm)] border bg-[color-mix(in_oklab,var(--card)_93%,var(--architecture-accent))] p-[.85rem] shadow-[0_8px_26px_color-mix(in_oklab,var(--foreground)_7%,transparent)] data-[kind=system]:border-[color-mix(in_oklab,var(--architecture-accent)_60%,var(--border))] data-[kind=system]:bg-[color-mix(in_oklab,var(--card)_86%,var(--architecture-accent))] [&_span]:mt-[.28rem] [&_span]:block [&_span]:text-[.72rem] [&_span]:leading-[1.45] [&_span]:text-muted-foreground [&_strong]:block [&_strong]:text-[.86rem] [&_strong]:[overflow-wrap:anywhere]";
+const containerNodeClassName =
+  "min-h-[7.4rem] before:absolute before:top-[.7rem] before:right-[.7rem] before:size-[.45rem] before:animate-[architecture-node-pulse_5s_ease-in-out_infinite] before:rounded-full before:bg-[var(--architecture-accent)] before:opacity-25 before:[animation-delay:var(--architecture-delay)] before:content-[''] max-[760px]:min-h-0";
+const connectedNodeClassName =
+  "after:absolute after:top-1/2 after:right-[calc(clamp(.5rem,1.4vw,.85rem)*-1)] after:h-0.5 after:w-[clamp(.5rem,1.4vw,.85rem)] after:bg-[color-mix(in_oklab,var(--architecture-accent)_42%,var(--border))] after:content-[''] max-[760px]:after:hidden";
+const timelineClassName =
+  "relative m-0! grid list-none grid-cols-5 gap-[clamp(.5rem,1.4vw,.9rem)] p-0! before:absolute before:top-[3.55rem] before:right-[clamp(1.4rem,4vw,2.6rem)] before:left-[clamp(1.4rem,4vw,2.6rem)] before:h-0.5 before:bg-[color-mix(in_oklab,var(--architecture-accent)_30%,var(--border))] before:content-[''] max-[760px]:grid-cols-1 max-[760px]:before:hidden";
+const timelineItemClassName =
+  "relative z-[1] min-w-0 pt-[2.2rem] text-center before:absolute before:top-[1.65rem] before:left-1/2 before:size-[.9rem] before:-translate-x-1/2 before:-translate-y-1/2 before:animate-[architecture-stage_10s_ease-in-out_infinite] before:rounded-full before:border-2 before:border-card before:bg-muted-foreground before:shadow-[0_0_0_1px_var(--border)] before:[animation-delay:var(--architecture-delay)] before:content-[''] [&_span]:mt-[.3rem] [&_span]:block [&_span]:text-[.68rem] [&_span]:leading-[1.4] [&_span]:text-muted-foreground [&_strong]:block [&_strong]:text-[.78rem] [&_strong]:[overflow-wrap:anywhere] max-[760px]:pt-0 max-[760px]:pb-0 max-[760px]:pl-[2.2rem] max-[760px]:text-left max-[760px]:before:top-2 max-[760px]:before:left-[.55rem]";
+
+const architectureMotionStyles = `
+@keyframes architecture-context-traverse {
+  0%, 10% { left: 8%; opacity: 0; }
+  20%, 80% { opacity: 1; }
+  90%, 100% { left: 92%; opacity: 0; }
+}
+@keyframes architecture-context-traverse-y {
+  0%, 10% { top: 8%; opacity: 0; }
+  20%, 80% { opacity: 1; }
+  90%, 100% { top: 92%; opacity: 0; }
+}
+@keyframes architecture-node-pulse {
+  0%, 16%, 100% { opacity: 0.2; transform: scale(0.8); }
+  8% { opacity: 1; transform: scale(1.35); }
+}
+@keyframes architecture-stage {
+  0%, 18%, 100% {
+    background: var(--muted-foreground);
+    box-shadow: 0 0 0 1px var(--border);
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  5%, 13% {
+    background: var(--architecture-accent);
+    box-shadow: 0 0 0 6px color-mix(in oklab, var(--architecture-accent) 16%, transparent);
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+[data-architecture-figure]:has([data-architecture-motion]:checked) [data-architecture-context]::after,
+[data-architecture-figure]:has([data-architecture-motion]:checked) [data-architecture-node]::before,
+[data-architecture-figure]:has([data-architecture-motion]:checked) [data-architecture-timeline-item]::before {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-architecture-context]::after,
+  [data-architecture-node]::before,
+  [data-architecture-timeline-item]::before {
+    animation: none;
+  }
+}
+`;
+
+const figureStyle = {
+  "--architecture-accent": "var(--primary)",
+  background:
+    "radial-gradient(circle at 12% 0%, color-mix(in oklab, var(--architecture-accent) 12%, transparent), transparent 32%), var(--card)",
+} as CSSProperties;
 
 const copy = {
   en: {
@@ -316,38 +384,95 @@ function ArchitectureFigure({
   locale,
 }: ArchitectureVisualProps & {
   readonly ariaLabel: string;
-  readonly children: React.ReactNode;
+  readonly children: ReactNode;
   readonly eyebrow: string;
   readonly legend: string;
 }): React.JSX.Element {
   const controlId = `architecture-motion-${eyebrow.replace(/[^a-z0-9]+/giu, "-").toLowerCase()}`;
   return (
-    <figure aria-label={ariaLabel} className={styles.figure}>
-      <div className={styles.header}>
-        <p className={styles.eyebrow}>{eyebrow}</p>
-        <label className={styles.pauseControl} htmlFor={controlId}>
-          <input id={controlId} type="checkbox" />
+    <figure
+      aria-label={ariaLabel}
+      className={figureClassName}
+      data-architecture-figure="true"
+      style={figureStyle}
+    >
+      <style>{architectureMotionStyles}</style>
+      <div className={figureHeaderClassName}>
+        <p className={eyebrowClassName}>{eyebrow}</p>
+        <label
+          className="inline-flex min-h-8 cursor-pointer items-center gap-[.45rem] rounded-[var(--radius-sm)] border px-[.65rem] text-xs text-muted-foreground select-none hover:text-foreground [&_input]:accent-[var(--architecture-accent)]"
+          htmlFor={controlId}
+        >
+          <input
+            data-architecture-motion="true"
+            id={controlId}
+            type="checkbox"
+          />
           {copy[locale].pause}
         </label>
       </div>
-      <div className={styles.canvas}>{children}</div>
-      <figcaption className={styles.legend}>{legend}</figcaption>
+      <div className={canvasClassName}>{children}</div>
+      <figcaption className={legendClassName}>{legend}</figcaption>
     </figure>
   );
 }
 
 function ArchitectureNode({
+  connected = false,
+  containerIndex,
   copy: nodeCopy,
   kind,
 }: {
+  readonly connected?: boolean;
+  readonly containerIndex?: number;
   readonly copy: NodeCopy;
   readonly kind?: "system";
 }): React.JSX.Element {
   return (
-    <div className={styles.node} data-kind={kind}>
+    <div
+      className={cn(
+        nodeClassName,
+        containerIndex !== undefined && containerNodeClassName,
+        connected && connectedNodeClassName,
+      )}
+      data-architecture-node={containerIndex === undefined ? undefined : "true"}
+      data-kind={kind}
+      style={
+        containerIndex === undefined
+          ? undefined
+          : ({ "--architecture-delay": `${containerIndex}s` } as CSSProperties)
+      }
+    >
       <strong>{nodeCopy.name}</strong>
       <span>{nodeCopy.detail}</span>
     </div>
+  );
+}
+
+function ArchitectureTimeline({
+  flow,
+  stages,
+}: {
+  readonly flow:
+    | "convergence"
+    | "observability-pipeline"
+    | "telemetry-storage-lifecycle";
+  readonly stages: readonly NodeCopy[];
+}): React.JSX.Element {
+  return (
+    <ol className={timelineClassName} data-architecture-flow={flow}>
+      {stages.map((stage, index) => (
+        <li
+          className={timelineItemClassName}
+          data-architecture-timeline-item="true"
+          key={stage.name}
+          style={{ "--architecture-delay": `${index * 2}s` } as CSSProperties}
+        >
+          <strong>{stage.name}</strong>
+          <span>{stage.detail}</span>
+        </li>
+      ))}
+    </ol>
   );
 }
 
@@ -365,9 +490,13 @@ export function C4ArchitectureMap({
         legend={view.legend}
         locale={locale}
       >
-        <div className={styles.contextGrid} data-c4-level="context">
+        <div
+          className="relative grid grid-cols-[minmax(0,.85fr)_minmax(0,1.3fr)_minmax(0,.85fr)] items-center gap-[clamp(.65rem,2vw,1.4rem)] before:absolute before:top-1/2 before:right-[8%] before:left-[8%] before:h-0.5 before:bg-[color-mix(in_oklab,var(--architecture-accent)_35%,var(--border))] before:content-[''] after:absolute after:top-1/2 after:left-[8%] after:size-2 after:-translate-x-1/2 after:-translate-y-1/2 after:animate-[architecture-context-traverse_4.8s_ease-in-out_infinite] after:rounded-full after:bg-[var(--architecture-accent)] after:shadow-[0_0_0_4px_color-mix(in_oklab,var(--architecture-accent)_18%,transparent)] after:content-[''] max-[760px]:grid-cols-1 max-[760px]:before:top-[8%] max-[760px]:before:right-auto max-[760px]:before:bottom-[8%] max-[760px]:before:left-1/2 max-[760px]:before:h-auto max-[760px]:before:w-0.5 max-[760px]:after:top-[8%] max-[760px]:after:left-1/2 max-[760px]:after:[animation-name:architecture-context-traverse-y]"
+          data-architecture-context="true"
+          data-c4-level="context"
+        >
           <ArchitectureNode copy={view.operator} />
-          <div className={styles.centerStack}>
+          <div className="grid gap-3">
             <ArchitectureNode copy={view.environment} kind="system" />
             <ArchitectureNode copy={view.engine} kind="system" />
             <ArchitectureNode copy={view.cluster} kind="system" />
@@ -385,9 +514,18 @@ export function C4ArchitectureMap({
       legend={view.legend}
       locale={locale}
     >
-      <div className={styles.containerGrid} data-c4-level="container">
-        {view.nodes.map((node) => (
-          <ArchitectureNode copy={node} key={node.name} kind="system" />
+      <div
+        className="grid grid-cols-5 gap-[clamp(.5rem,1.4vw,.85rem)] max-[760px]:grid-cols-1"
+        data-c4-level="container"
+      >
+        {view.nodes.map((node, index) => (
+          <ArchitectureNode
+            connected={index < view.nodes.length - 1}
+            containerIndex={index}
+            copy={node}
+            key={node.name}
+            kind="system"
+          />
         ))}
       </div>
     </ArchitectureFigure>
@@ -406,14 +544,7 @@ export function PlatformConvergenceFlow({
       legend={view.legend}
       locale={locale}
     >
-      <ol className={styles.timeline} data-architecture-flow="convergence">
-        {view.stages.map((stage) => (
-          <li className={styles.timelineItem} key={stage.name}>
-            <strong>{stage.name}</strong>
-            <span>{stage.detail}</span>
-          </li>
-        ))}
-      </ol>
+      <ArchitectureTimeline flow="convergence" stages={view.stages} />
     </ArchitectureFigure>
   );
 }
@@ -430,17 +561,10 @@ export function ObservabilityPipelineFlow({
       legend={view.legend}
       locale={locale}
     >
-      <ol
-        className={styles.timeline}
-        data-architecture-flow="observability-pipeline"
-      >
-        {view.stages.map((stage) => (
-          <li className={styles.timelineItem} key={stage.name}>
-            <strong>{stage.name}</strong>
-            <span>{stage.detail}</span>
-          </li>
-        ))}
-      </ol>
+      <ArchitectureTimeline
+        flow="observability-pipeline"
+        stages={view.stages}
+      />
     </ArchitectureFigure>
   );
 }
@@ -457,17 +581,10 @@ export function TelemetryStorageLifecycle({
       legend={view.legend}
       locale={locale}
     >
-      <ol
-        className={styles.timeline}
-        data-architecture-flow="telemetry-storage-lifecycle"
-      >
-        {view.stages.map((stage) => (
-          <li className={styles.timelineItem} key={stage.name}>
-            <strong>{stage.name}</strong>
-            <span>{stage.detail}</span>
-          </li>
-        ))}
-      </ol>
+      <ArchitectureTimeline
+        flow="telemetry-storage-lifecycle"
+        stages={view.stages}
+      />
     </ArchitectureFigure>
   );
 }
@@ -478,15 +595,27 @@ export function Arc42CoverageMap({
 }: ArchitectureVisualProps): React.JSX.Element {
   const view = copy[locale].arc42;
   return (
-    <figure aria-label={view.ariaLabel} className={styles.figure}>
-      <div className={styles.header}>
-        <p className={styles.eyebrow}>{view.eyebrow}</p>
+    <figure
+      aria-label={view.ariaLabel}
+      className={figureClassName}
+      style={figureStyle}
+    >
+      <div className={figureHeaderClassName}>
+        <p className={eyebrowClassName}>{view.eyebrow}</p>
       </div>
-      <div className={styles.canvas}>
-        <div className={styles.arcGrid} data-architecture-map="arc42">
+      <div className={canvasClassName}>
+        <div
+          className="grid grid-cols-3 gap-[.65rem] max-[760px]:grid-cols-1"
+          data-architecture-map="arc42"
+        >
           {view.items.map(([number, title, detail]) => (
-            <div className={styles.arcItem} key={number}>
-              <span className={styles.arcNumber}>{number}</span>
+            <div
+              className="grid min-w-0 grid-cols-[2rem_minmax(0,1fr)] items-start gap-[.6rem] rounded-[var(--radius-sm)] border bg-[color-mix(in_oklab,var(--card)_96%,var(--architecture-accent))] p-3 [&_span]:mt-[.22rem] [&_span]:block [&_span]:text-[.68rem] [&_span]:leading-[1.4] [&_span]:text-muted-foreground [&_strong]:block [&_strong]:text-[.78rem]"
+              key={number}
+            >
+              <span className="grid size-8 place-items-center rounded-full bg-[color-mix(in_oklab,var(--architecture-accent)_16%,var(--muted))] font-mono text-[.7rem] font-bold text-foreground">
+                {number}
+              </span>
               <span>
                 <strong>{title}</strong>
                 <span>{detail}</span>

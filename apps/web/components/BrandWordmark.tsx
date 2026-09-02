@@ -1,4 +1,4 @@
-import styles from "./BrandWordmark.module.css";
+import { cn } from "@jongminchung/ui/lib/utils";
 
 export type BrandWordmarkSuffix = "invest" | "tech";
 
@@ -14,11 +14,16 @@ export function BrandWordmark({
 
   return (
     <span
-      className={`${styles.wordmark}${compact ? ` ${styles.compact}` : ""}`}
+      className={cn(
+        "inline-flex items-start gap-[.22em] [font-family:var(--font-family-heading)] text-[20px] leading-none font-bold tracking-[-.065em] whitespace-nowrap text-current",
+        compact && "text-[15px]",
+      )}
     >
       <span>jongminchung</span>
       {suffix === undefined ? null : (
-        <span className={styles.suffix}>{suffix}</span>
+        <span className="-mt-[.18em] text-[.5em] font-semibold tracking-[-.035em]">
+          {suffix}
+        </span>
       )}
     </span>
   );

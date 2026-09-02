@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { Locale } from "#lib/site-routing";
-import styles from "./NotFoundPage.module.css";
 
 export const notFoundCopy = {
   en: {
@@ -30,11 +29,17 @@ export function NotFoundPage({
 }): React.JSX.Element {
   const text = notFoundCopy[locale];
   return (
-    <main className={styles.page}>
-      <p className={styles.mark}>404</p>
-      <h1>{text.heading}</h1>
-      <p>{text.description}</p>
-      <Link href={`/${locale}`}>{text.link}</Link>
+    <main className="grid min-h-dvh min-h-screen place-content-center justify-items-start p-8">
+      <p className="m-0 [font-family:var(--font-family-code)] text-lg text-muted-foreground">
+        404
+      </p>
+      <h1 className="my-3 [font-family:var(--font-family-heading)] text-[36px] leading-[1.1] font-medium tracking-[-.025em]">
+        {text.heading}
+      </h1>
+      <p className="text-muted-foreground">{text.description}</p>
+      <Link className="mt-[18px] text-foreground" href={`/${locale}`}>
+        {text.link}
+      </Link>
     </main>
   );
 }
