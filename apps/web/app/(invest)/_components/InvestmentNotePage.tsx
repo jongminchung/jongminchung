@@ -1,3 +1,4 @@
+import { cn } from "@jongminchung/ui/lib/utils";
 import type { TOCItemType } from "fumadocs-core/toc";
 import Image from "next/image";
 import Link from "next/link";
@@ -14,6 +15,7 @@ import {
   createInvestmentSeriesHref,
   createInvestmentTagHref,
 } from "#lib/invest/routing";
+import { articleProseClassName } from "#lib/mdx-styles";
 import type { Locale } from "#lib/site-routing";
 import { createInvestmentArticleStructuredData } from "#lib/structured-data";
 import { DocumentOutline } from "#tech-components/DocumentOutline";
@@ -171,7 +173,16 @@ export function InvestmentNotePage({
             {text.generatedImage}
           </figcaption>
         </figure>
-        {children}
+        <div
+          className={cn(
+            articleProseClassName(locale),
+            locale === "ko" && "break-keep",
+          )}
+          data-docs-prose="true"
+          lang={locale}
+        >
+          {children}
+        </div>
       </EditorialArticle>
     </>
   );

@@ -4,7 +4,10 @@ import Link from "next/link";
 import type { ComponentProps } from "react";
 import { FootnoteReference } from "#components/FootnoteReference";
 import { investmentMdxComponents } from "#invest-components/mdx-components";
-import { docsMdxComponents } from "#tech-components/mdx-components";
+import {
+  docsMdxTypographyComponents,
+  sharedMdxContentComponents,
+} from "#tech-components/mdx-components";
 
 function MdxLink({ href = "", children, ...props }: ComponentProps<"a">) {
   if ("data-footnote-ref" in props) {
@@ -28,7 +31,7 @@ function MdxLink({ href = "", children, ...props }: ComponentProps<"a">) {
   );
 }
 
-function BlogMdxHeading2({
+function ArticleMdxHeading2({
   children,
   className,
   ...props
@@ -37,7 +40,7 @@ function BlogMdxHeading2({
     <h2
       {...props}
       className={cn(
-        "mt-14 mb-5 scroll-mt-20 text-[28px] leading-[1.35] font-semibold tracking-[-.023em]",
+        "mt-[52px] mb-[26px] scroll-mt-20 text-[26px] leading-[1.5] font-semibold tracking-[-.023em]",
         className,
       )}
     >
@@ -46,7 +49,7 @@ function BlogMdxHeading2({
   );
 }
 
-function BlogMdxHeading3({
+function ArticleMdxHeading3({
   children,
   className,
   ...props
@@ -55,7 +58,7 @@ function BlogMdxHeading3({
     <h3
       {...props}
       className={cn(
-        "mt-11 mb-4 scroll-mt-20 text-[22px] leading-[1.4] font-semibold tracking-[-.01em]",
+        "mt-10 mb-3 scroll-mt-20 text-[20px] leading-[1.4] font-semibold tracking-[-.01em]",
         className,
       )}
     >
@@ -64,72 +67,27 @@ function BlogMdxHeading3({
   );
 }
 
-function BlogMdxParagraph({ className, ...props }: ComponentProps<"p">) {
-  return (
-    <p
-      {...props}
-      className={cn("mt-0 mb-4 text-[16px] leading-7", className)}
-    />
-  );
-}
-
-function BlogMdxUnorderedList({ className, ...props }: ComponentProps<"ul">) {
-  return (
-    <ul
-      {...props}
-      className={cn(
-        "mt-0 mb-6 pl-[26px] text-[16px] leading-7 [&>li]:pl-1.5 [&>li]:marker:text-border [&>li+li]:mt-2",
-        className,
-      )}
-    />
-  );
-}
-
-function BlogMdxOrderedList({ className, ...props }: ComponentProps<"ol">) {
-  return (
-    <ol
-      {...props}
-      className={cn(
-        "mt-0 mb-6 pl-[26px] text-[16px] leading-7 [&>li]:pl-1.5 [&>li+li]:mt-2",
-        className,
-      )}
-    />
-  );
-}
-
-function BlogMdxBlockquote({
-  className,
-  ...props
-}: ComponentProps<"blockquote">) {
-  return (
-    <blockquote
-      {...props}
-      className={cn(
-        "my-7 border-l-4 border-input bg-transparent py-0 pl-4 text-[16px] leading-7 text-foreground [&>p:last-child]:mb-0",
-        className,
-      )}
-    />
-  );
-}
-
-export const mdxComponents = {
+/** 모든 콘텐츠 유형이 공유하는 링크·코드·표·목록 semantics를 제공함 */
+export const sharedMdxComponents = {
   a: MdxLink,
-  ...docsMdxComponents,
-  ...investmentMdxComponents,
+  ...sharedMdxContentComponents,
 } satisfies MDXComponents;
 
-/** Tech Blog와 Invest Note에만 적용되는 장문 읽기 리듬을 제공함 */
-export const blogMdxComponents = {
-  ...mdxComponents,
-  blockquote: BlogMdxBlockquote,
-  h2: BlogMdxHeading2,
-  h3: BlogMdxHeading3,
-  ol: BlogMdxOrderedList,
-  p: BlogMdxParagraph,
-  ul: BlogMdxUnorderedList,
+/** 빠른 탐색과 실행을 위한 Docs MDX 구성을 제공함 */
+export const docsMdxComponents = {
+  ...sharedMdxComponents,
+  ...docsMdxTypographyComponents,
+} satisfies MDXComponents;
+
+/** Tech Blog와 Invest Note의 장문 읽기 리듬을 제공함 */
+export const articleMdxComponents = {
+  ...sharedMdxComponents,
+  ...investmentMdxComponents,
+  h2: ArticleMdxHeading2,
+  h3: ArticleMdxHeading3,
 } satisfies MDXComponents;
 
 /** `useMDXComponents` 훅 상태와 제어 함수를 제공함 */
 export function useMDXComponents(): MDXComponents {
-  return mdxComponents;
+  return docsMdxComponents;
 }

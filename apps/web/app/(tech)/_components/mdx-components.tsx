@@ -31,8 +31,12 @@ interface CodeElementProps {
   readonly className?: string;
 }
 
-/** `DocsMdxPre` 기술 문서 코드 블록을 렌더링함 */
-function DocsMdxPre({ ref: _ref, children, ...props }: ComponentProps<"pre">) {
+/** Blog와 Docs에서 사용하는 코드 블록을 렌더링함 */
+function SharedMdxPre({
+  ref: _ref,
+  children,
+  ...props
+}: ComponentProps<"pre">) {
   if (isValidElement<CodeElementProps>(children)) {
     const block = classifyMdxCodeBlock(
       children.props.className,
@@ -54,7 +58,7 @@ function DocsMdxHeading2({
     <h2
       {...props}
       className={cn(
-        "mt-[52px] mb-[26px] scroll-mt-20 text-[26px] leading-[1.5] font-semibold tracking-[-.023em]",
+        "mt-7 mb-2 scroll-mt-20 text-[20px] leading-[26px] font-semibold tracking-[-.01em]",
         className,
       )}
     >
@@ -72,7 +76,7 @@ function DocsMdxHeading3({
     <h3
       {...props}
       className={cn(
-        "mt-10 mb-3 scroll-mt-20 text-xl leading-[1.3] font-semibold tracking-[-.01em]",
+        "mt-7 mb-2 scroll-mt-20 text-[18px] leading-6 font-semibold tracking-[-.01em]",
         className,
       )}
     >
@@ -81,40 +85,35 @@ function DocsMdxHeading3({
   );
 }
 
-function DocsMdxParagraph({ className, ...props }: ComponentProps<"p">) {
-  return (
-    <p
-      {...props}
-      className={cn("mt-0 mb-4 text-base leading-[1.6]", className)}
-    />
-  );
+function SharedMdxParagraph({ className, ...props }: ComponentProps<"p">) {
+  return <p {...props} className={cn("mt-0 mb-4", className)} />;
 }
 
-function DocsMdxUnorderedList({ className, ...props }: ComponentProps<"ul">) {
+function SharedMdxUnorderedList({ className, ...props }: ComponentProps<"ul">) {
   return (
     <ul
       {...props}
       className={cn(
-        "mt-0 mb-6 pl-[26px] text-base leading-[1.6] [&>li]:pl-1.5 [&>li]:marker:text-border",
+        "mt-0 mb-6 list-disc pl-[26px] [&:lang(en)>li]:leading-[1.6] [&:lang(ko)>li]:leading-7 [&:lang(ko)>li+li]:mt-2 [&>li]:my-0 [&>li]:pl-1.5 [&>li]:marker:text-border",
         className,
       )}
     />
   );
 }
 
-function DocsMdxOrderedList({ className, ...props }: ComponentProps<"ol">) {
+function SharedMdxOrderedList({ className, ...props }: ComponentProps<"ol">) {
   return (
     <ol
       {...props}
       className={cn(
-        "mt-0 mb-6 pl-[26px] text-base leading-[1.6] [&>li]:pl-1.5",
+        "mt-0 mb-6 list-decimal pl-[26px] [&:lang(en)>li]:leading-[1.6] [&:lang(ko)>li]:leading-7 [&:lang(ko)>li+li]:mt-2 [&>li]:my-0 [&>li]:pl-1.5 [&>li]:marker:text-muted-foreground",
         className,
       )}
     />
   );
 }
 
-function DocsMdxBlockquote({
+function SharedMdxBlockquote({
   className,
   ...props
 }: ComponentProps<"blockquote">) {
@@ -122,14 +121,17 @@ function DocsMdxBlockquote({
     <blockquote
       {...props}
       className={cn(
-        "my-[1.6rem] border-l-4 border-input bg-transparent py-0 pl-4 text-base leading-[1.6] text-foreground [&>p:last-child]:mb-0",
+        "my-7 border-l-4 border-input bg-transparent py-0 pl-4 text-foreground [&>p:last-child]:mb-0",
         className,
       )}
     />
   );
 }
 
-export function DocsMdxTable({ className, ...props }: ComponentProps<"table">) {
+export function SharedMdxTable({
+  className,
+  ...props
+}: ComponentProps<"table">) {
   return (
     <div
       className="my-6 w-full max-w-full overflow-x-auto overscroll-x-contain"
@@ -147,7 +149,7 @@ export function DocsMdxTable({ className, ...props }: ComponentProps<"table">) {
   );
 }
 
-function DocsMdxDataCell({ className, ...props }: ComponentProps<"td">) {
+function SharedMdxDataCell({ className, ...props }: ComponentProps<"td">) {
   return (
     <td
       {...props}
@@ -156,7 +158,7 @@ function DocsMdxDataCell({ className, ...props }: ComponentProps<"td">) {
   );
 }
 
-function DocsMdxHeaderCell({ className, ...props }: ComponentProps<"th">) {
+function SharedMdxHeaderCell({ className, ...props }: ComponentProps<"th">) {
   return (
     <th
       {...props}
@@ -168,22 +170,20 @@ function DocsMdxHeaderCell({ className, ...props }: ComponentProps<"th">) {
   );
 }
 
-function DocsMdxDiv({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+function SharedMdxDiv({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return <div {...props} className={cn("my-4", className)} />;
 }
 
-export const docsMdxComponents = {
-  blockquote: DocsMdxBlockquote,
-  div: DocsMdxDiv,
-  h2: DocsMdxHeading2,
-  h3: DocsMdxHeading3,
-  ol: DocsMdxOrderedList,
-  p: DocsMdxParagraph,
-  pre: DocsMdxPre,
-  table: DocsMdxTable,
-  td: DocsMdxDataCell,
-  th: DocsMdxHeaderCell,
-  ul: DocsMdxUnorderedList,
+export const sharedMdxContentComponents = {
+  blockquote: SharedMdxBlockquote,
+  div: SharedMdxDiv,
+  ol: SharedMdxOrderedList,
+  p: SharedMdxParagraph,
+  pre: SharedMdxPre,
+  table: SharedMdxTable,
+  td: SharedMdxDataCell,
+  th: SharedMdxHeaderCell,
+  ul: SharedMdxUnorderedList,
   Callout,
   Card,
   Cards,
@@ -199,4 +199,10 @@ export const docsMdxComponents = {
   QuickStart,
   Step,
   Steps,
+} satisfies MDXComponents;
+
+/** 빠른 탐색과 절차 확인을 위한 Docs 제목 리듬을 제공함 */
+export const docsMdxTypographyComponents = {
+  h2: DocsMdxHeading2,
+  h3: DocsMdxHeading3,
 } satisfies MDXComponents;

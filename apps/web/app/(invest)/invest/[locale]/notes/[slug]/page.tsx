@@ -8,7 +8,7 @@ import {
 } from "#lib/invest/notes";
 import { alternateLocale, getLocaleProtocol } from "#lib/locale";
 import { isLocale, locales, siteOrigins } from "#lib/site-routing";
-import { blogMdxComponents } from "#mdx-components";
+import { articleMdxComponents } from "#mdx-components";
 
 /** 정적 생성에 사용할 경로 매개변수를 반환함 */
 export function generateStaticParams() {
@@ -78,7 +78,7 @@ export default async function NotePage({
       related={getInvestmentNotes(locale)}
       toc={loaded.toc}
     >
-      <loaded.Content components={blogMdxComponents} />
+      <loaded.Content components={articleMdxComponents} />
     </InvestmentNotePage>
   );
 }

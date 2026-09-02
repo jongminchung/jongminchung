@@ -28,7 +28,7 @@ import {
 import { documentKindLabel } from "#lib/tech/document-kind";
 import { techPageMetadata } from "#lib/tech/metadata";
 import { publicPageTreeForArea } from "#lib/tech/publication";
-import { mdxComponents } from "#mdx-components";
+import { docsMdxComponents } from "#mdx-components";
 import { DocsLandingPage } from "#tech-components/DocsPortal";
 import { DocsShell } from "#tech-components/DocsShell";
 import {
@@ -49,8 +49,8 @@ const kindLabel: Readonly<Record<DocumentKind, string>> = {
   explanation: "Explanation",
 };
 
-const docsMdxComponents = {
-  ...mdxComponents,
+const docsPageMdxComponents = {
+  ...docsMdxComponents,
   Arc42CoverageMap,
   C4ArchitectureMap,
   ObservabilityPipelineFlow,
@@ -198,11 +198,11 @@ export default async function TechDocsPage({
               <Link href={editHref(locale, metadata.slugs)}>{text.edit}</Link>
             </div>
             <DocsBody
-              className={docsProseClassName}
+              className={docsProseClassName(locale)}
               data-docs-prose="true"
               lang={locale}
             >
-              <Content components={docsMdxComponents} />
+              <Content components={docsPageMdxComponents} />
             </DocsBody>
           </DocsPage>
         </DocsLayout>

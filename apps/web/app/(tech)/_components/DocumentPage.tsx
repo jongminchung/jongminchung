@@ -9,10 +9,10 @@ import {
 } from "#lib/content-model";
 import type { LoadedDocument } from "#lib/documents";
 import { documentOutlineLabelsFor } from "#lib/i18n-messages";
-import { editorialProseClassName } from "#lib/mdx-styles";
+import { articleProseClassName } from "#lib/mdx-styles";
 import { createTechArticleStructuredData } from "#lib/structured-data";
 import { getTechMessages } from "#lib/tech/copy";
-import { blogMdxComponents } from "#mdx-components";
+import { articleMdxComponents } from "#mdx-components";
 import { DocumentOutline } from "./DocumentOutline";
 import { DocumentPageHeader } from "./DocumentPageHeader";
 import { DocumentPager } from "./DocumentPager";
@@ -105,16 +105,9 @@ export function DocumentPage({
           toc={document.toc.filter(({ depth }) => depth === 2)}
           variant="editorial"
         />
-        <div
-          className={cn(
-            "w-full text-[15px]",
-            locale === "ko" &&
-              "[overflow-wrap:anywhere] break-keep [&_p]:[text-wrap:pretty]",
-          )}
-          lang={locale}
-        >
+        <div className="w-full" lang={locale}>
           <div
-            className={cn(editorialProseClassName, "pt-0")}
+            className={cn(articleProseClassName(locale), "pt-0")}
             data-copy-article="true"
             data-docs-prose="true"
           >
@@ -141,7 +134,7 @@ export function DocumentPage({
                 />
               </>
             ) : null}
-            <Content components={blogMdxComponents} />
+            <Content components={articleMdxComponents} />
           </div>
           <RelatedDocuments documents={document.related} locale={locale} />
           <DocumentPager locale={locale} previous={previous} next={next} />
