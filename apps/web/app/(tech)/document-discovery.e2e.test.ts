@@ -75,9 +75,9 @@ test("[성공] Blog는 주제 이미지와 주장·반론으로 시작하고 Doc
   await page.goto("/ko/server-monitoring-analysis-guide");
   const hero = page.locator('[data-tech-article-hero="true"]');
   await expect(hero).toBeVisible();
-  await expect(hero.locator("img")).toHaveAttribute(
+  await expect(hero.locator("img:visible")).toHaveAttribute(
     "src",
-    /server-monitoring-analysis-guide\.png/u,
+    /server-monitoring-analysis-guide\.light\.png/u,
   );
   const argument = page.locator('[data-article-argument="true"]');
   await expect(argument).toBeVisible();
@@ -100,17 +100,17 @@ test("[성공] Blog 목록과 공유 메타데이터는 글별 주제 이미지�
 }) => {
   await page.goto("/en");
   const cardImage = page.locator(
-    'a[href="/en/server-monitoring-analysis-guide"] img[data-editorial-image="true"]',
+    'a[href="/en/server-monitoring-analysis-guide"] img[data-editorial-image="true"]:visible',
   );
   await expect(cardImage).toHaveAttribute(
     "src",
-    /server-monitoring-analysis-guide\.png/u,
+    /server-monitoring-analysis-guide\.light\.png/u,
   );
 
   await page.goto("/en/building-calculator-engine");
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
     "content",
-    "https://tech.jamie.kr/tech/articles/building-calculator-engine.png",
+    "https://tech.jamie.kr/tech/articles/building-calculator-engine.light.png",
   );
 });
 

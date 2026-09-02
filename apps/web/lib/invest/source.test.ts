@@ -15,7 +15,8 @@ const baseMetadata = {
   status: "published",
   tags: ["risk"],
   series: "Risk",
-  image: "/invest/margin-of-safety.png",
+  image: "/invest/margin-of-safety.light.png",
+  imageDark: "/invest/margin-of-safety.dark.png",
   imageAlt: "안전마진을 표현한 투자 리서치 이미지",
   sources: [
     {

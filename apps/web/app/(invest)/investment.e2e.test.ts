@@ -54,12 +54,11 @@ test("[성공] 투자 노트와 collection의 검색 엔터티를 연결함", as
   );
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
     "content",
-    "https://invest.jamie.kr/invest/efficiency-feedback-loop.png",
+    "https://invest.jamie.kr/invest/efficiency-feedback-loop.light.png",
   );
-  await expect(page.locator('[data-investment-hero="true"]')).toHaveAttribute(
-    "src",
-    /efficiency-feedback-loop\.png/u,
-  );
+  await expect(
+    page.locator('[data-investment-hero="true"]:visible'),
+  ).toHaveAttribute("src", /efficiency-feedback-loop\.light\.png/u);
   await expect(
     page.locator('meta[property="article:published_time"]'),
   ).toHaveAttribute("content", "2026-07-29");
@@ -212,6 +211,9 @@ test("[성공] Invest 테마 선택을 적용하고 사이트별로 저장함", 
   await page.goto("/en");
 
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect(
+    page.locator('img[data-editorial-image="true"]:visible').first(),
+  ).toHaveAttribute("src", /\.dark\.png/u);
   await page.getByRole("button", { name: "Theme: dark" }).click();
   await expect(
     page.getByRole("button", { name: "Theme: system" }),

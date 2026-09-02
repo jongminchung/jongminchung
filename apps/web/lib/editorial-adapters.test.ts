@@ -18,7 +18,8 @@ describe("editorial data adapter", () => {
       publishedAt: document.publishedAt,
       tags: expect.arrayContaining([...document.tags]),
       image: {
-        src: `/tech/articles/${document.id}.png`,
+        srcLight: `/tech/articles/${document.id}.light.png`,
+        srcDark: `/tech/articles/${document.id}.dark.png`,
         alt: document.displayTitle ?? document.title,
       },
     });
@@ -43,7 +44,11 @@ describe("editorial data adapter", () => {
       id: note.id,
       href: note.href,
       publishedAt: note.publishedAt,
-      image: { src: note.image, alt: note.imageAlt },
+      image: {
+        srcLight: note.image,
+        srcDark: note.imageDark,
+        alt: note.imageAlt,
+      },
     });
     expect(item.tags).toEqual(
       expect.arrayContaining(note.sources.map(({ kind }) => kind)),

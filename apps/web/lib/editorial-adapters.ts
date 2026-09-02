@@ -36,7 +36,8 @@ export function toTechEditorialItem(
     ...(document.contentType === "blog"
       ? {
           image: {
-            src: createTechArticleImageHref(document.id),
+            srcLight: createTechArticleImageHref(document.id, "light"),
+            srcDark: createTechArticleImageHref(document.id, "dark"),
             alt: displayTitleFor(document),
           },
         }
@@ -58,6 +59,10 @@ export function toInvestmentEditorialItem(
     kind:
       note.series ?? getInvestmentMessages(note.locale).article.researchNote,
     mediaSeed: `${note.id}:${note.tags.join(":")}`,
-    image: { src: note.image, alt: note.imageAlt },
+    image: {
+      srcLight: note.image,
+      srcDark: note.imageDark,
+      alt: note.imageAlt,
+    },
   });
 }

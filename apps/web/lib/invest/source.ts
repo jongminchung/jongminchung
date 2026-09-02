@@ -70,6 +70,7 @@ export function readInvestmentNoteCollection(): readonly InvestmentNoteManifestE
         tags: page.data.tags,
         series: page.data.series,
         image: page.data.image,
+        imageDark: page.data.imageDark,
         imageAlt: page.data.imageAlt,
         sources: page.data.sources,
       },

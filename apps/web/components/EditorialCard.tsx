@@ -1,7 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { EditorialItem } from "#lib/editorial";
 import { EditorialGraphic } from "./EditorialGraphic";
+import { ThemeImage } from "./ThemeImage";
 
 /** `EditorialCard` type·date·title·summary 순서의 단일 링크 카드임 */
 export function EditorialCard({
@@ -27,14 +27,15 @@ export function EditorialCard({
         {item.image === undefined ? (
           <EditorialGraphic seed={item.mediaSeed} variant={variant} />
         ) : (
-          <Image
+          <ThemeImage
             alt={item.image.alt}
             className="aspect-[1.6] w-full border-b object-cover"
             data-editorial-image="true"
+            eager={eager}
             height={1000}
-            loading={eager ? "eager" : "lazy"}
             sizes="(max-width: 560px) calc(100vw - 32px), (max-width: 840px) calc((100vw - 68px) / 2), 373px"
-            src={item.image.src}
+            srcDark={item.image.srcDark}
+            srcLight={item.image.srcLight}
             width={1600}
           />
         )}

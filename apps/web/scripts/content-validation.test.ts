@@ -93,7 +93,8 @@ function createInvestmentNote(
     updatedAt: "2026-01-01",
     status: "published",
     tags: ["portfolio"],
-    image: "/invest/durable-investing.png",
+    image: "/invest/durable-investing.light.png",
+    imageDark: "/invest/durable-investing.dark.png",
     imageAlt: `${locale} durable investing thumbnail`,
     sources: [
       {

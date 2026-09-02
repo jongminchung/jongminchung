@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ThemeImage } from "#components/ThemeImage";
 import type { ContentManifestEntry, Locale } from "#lib/content-model";
 import {
   createTechArticleImageHref,
@@ -29,9 +30,8 @@ export function DocumentCard({
   const title = displayTitleFor(document);
   const text = getTechMessages(locale).article;
   const isBlogPost = document.contentType === "blog";
-  const imageSource = isBlogPost
-    ? createTechArticleImageHref(document.id)
-    : "/tech/article-thumbnail-system.png";
+  const imageClassName =
+    "block min-h-[150px] w-[210px] shrink-0 self-stretch border-r bg-muted object-cover group-data-[variant=featured]:aspect-[1200/630] group-data-[variant=featured]:min-h-0 group-data-[variant=featured]:w-full group-data-[variant=featured]:border-r-0 group-data-[variant=featured]:border-b group-data-[variant=related]:aspect-[1200/630] group-data-[variant=related]:min-h-0 group-data-[variant=related]:w-full group-data-[variant=related]:border-r-0 group-data-[variant=related]:border-b max-[680px]:aspect-[1200/630] max-[680px]:min-h-0 max-[680px]:w-full max-[680px]:border-r-0 max-[680px]:border-b";
   return (
     <Link
       aria-label={title}
@@ -39,16 +39,28 @@ export function DocumentCard({
       data-variant={variant}
       href={document.href}
     >
-      <Image
-        alt={isBlogPost ? title : ""}
-        aria-hidden={isBlogPost ? undefined : "true"}
-        className="block min-h-[150px] w-[210px] shrink-0 self-stretch border-r bg-muted object-cover group-data-[variant=featured]:aspect-[1200/630] group-data-[variant=featured]:min-h-0 group-data-[variant=featured]:w-full group-data-[variant=featured]:border-r-0 group-data-[variant=featured]:border-b group-data-[variant=related]:aspect-[1200/630] group-data-[variant=related]:min-h-0 group-data-[variant=related]:w-full group-data-[variant=related]:border-r-0 group-data-[variant=related]:border-b max-[680px]:aspect-[1200/630] max-[680px]:min-h-0 max-[680px]:w-full max-[680px]:border-r-0 max-[680px]:border-b"
-        height={630}
-        preload={eager}
-        src={imageSource}
-        width={1200}
-        {...(isBlogPost ? { "data-tech-thumbnail": "true" } : {})}
-      />
+      {isBlogPost ? (
+        <ThemeImage
+          alt={title}
+          className={imageClassName}
+          data-tech-thumbnail="true"
+          eager={eager}
+          height={630}
+          srcDark={createTechArticleImageHref(document.id, "dark")}
+          srcLight={createTechArticleImageHref(document.id, "light")}
+          width={1200}
+        />
+      ) : (
+        <Image
+          alt=""
+          aria-hidden="true"
+          className={imageClassName}
+          height={630}
+          loading="lazy"
+          src="/tech/article-thumbnail-system.png"
+          width={1200}
+        />
+      )}
       <span className="flex min-w-0 flex-1 flex-col justify-center px-[22px] py-5 group-data-[variant=featured]:px-[26px] group-data-[variant=featured]:pt-6 group-data-[variant=featured]:pb-[26px] group-data-[variant=related]:min-h-[148px] group-data-[variant=related]:justify-start group-data-[variant=related]:p-4 max-[680px]:p-[18px]">
         <span className="mb-2.5 flex flex-wrap items-center gap-2 font-mono text-[10px] font-medium tracking-[.08em] text-muted-foreground uppercase">
           {label ??

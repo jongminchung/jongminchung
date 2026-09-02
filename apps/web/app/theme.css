@@ -27,6 +27,12 @@
   --background: #000;
 }
 
+/* 테마별 편집 이미지는 초기 HTML의 data-theme 계약으로 전환함 */
+:where(html[data-theme="dark"]) [data-theme-image="light"],
+:where(html:not([data-theme="dark"])) [data-theme-image="dark"] {
+  display: none;
+}
+
 /* 화면 전환 중에도 새 화면의 컨트롤이 즉시 입력을 받을 수 있게 함 */
 ::view-transition {
   pointer-events: none;

@@ -9,7 +9,8 @@ export interface EditorialItem {
   readonly kind: string;
   readonly mediaSeed: string;
   readonly image?: Readonly<{
-    readonly src: string;
+    readonly srcLight: string;
+    readonly srcDark: string;
     readonly alt: string;
   }>;
 }

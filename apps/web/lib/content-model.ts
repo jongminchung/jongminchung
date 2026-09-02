@@ -295,9 +295,12 @@ export function createOgImageHref(locale: Locale, id: string): string {
   return `/og/${locale}/${id}`;
 }
 
-/** 기술 블로그 글의 주제별 이미지 경로를 생성함 */
-export function createTechArticleImageHref(id: string): string {
-  return `/tech/articles/${id}.png`;
+/** 기술 블로그 글의 주제별 테마 이미지 경로를 생성함 */
+export function createTechArticleImageHref(
+  id: string,
+  theme: "light" | "dark" = "light",
+): string {
+  return `/tech/articles/${id}.${theme}.png`;
 }
 
 /** 콘텐츠를 locale·최신 게시 순서로 비교함 */

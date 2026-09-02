@@ -422,6 +422,9 @@ test("[성공] 저장된 Tech 테마를 복원하고 변경함", async ({ page }
   await page.goto("/en");
 
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect(
+    page.locator('img[data-editorial-image="true"]:visible').first(),
+  ).toHaveAttribute("src", /\.dark\.png/u);
   const themeControl = page.getByRole("button", { name: "Theme: dark" });
   await expect(themeControl).toBeVisible();
   await themeControl.click();
