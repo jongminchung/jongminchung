@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import { messagesFor } from "./i18n-messages.ts";
 
 function leafPaths(value: unknown, prefix = ""): readonly string[] {

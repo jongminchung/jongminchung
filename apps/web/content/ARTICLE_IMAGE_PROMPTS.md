@@ -1,39 +1,38 @@
 # Article image prompts
 
 This document is the reproducible art direction for article thumbnails. Every
-article owns one semantic concept and two theme variants. The light image is
-generated from the previous thumbnail as a subject reference. The dark image
-is an edit of the generated light image so the composition does not drift.
+article owns one semantic concept and one image that remains legible in both
+light and dark themes. Existing thumbnails can be supplied only as a semantic
+subject and broad composition reference.
 
-## Light base prompt
+## Base prompt
 
 > Create a 3:2 landscape thumbnail for a thoughtful technology, investing, or
 > systems essay. Use the supplied existing thumbnail only as a semantic subject
 > and broad composition reference, then reinterpret it as an original polished
 > editorial motion-design still: soft 3D and 2D hybrid, translucent layered
-> materials, rounded geometry, tactile paper grain, warm off-white to pearl
-> gradient background, and restrained coral, lilac, blue, mint, and amber
-> accents. Keep the image intelligent, optimistic, human-friendly, and legible
+> materials, rounded geometry, tactile paper grain, balanced mid-tone surfaces,
+> and restrained coral, lilac, blue, mint, and amber accents. Use enough tonal
+> separation and color contrast for the same image to remain legible against
+> both white and black page backgrounds. Keep the central visual element clear
 > at small size, with generous breathing room and one strong visual metaphor.
 > No text, letters, numbers, logos, watermarks, UI labels, or code glyphs. Avoid
-> black backgrounds, neon-green hacker aesthetics, harsh cyberpunk, fear, and
-> ominous imagery. Preserve the article's symbolic thumbnail concept.
+> pure white or black edge backgrounds, neon-green hacker aesthetics, harsh
+> cyberpunk, fear, and ominous imagery. Preserve the article's symbolic
+> thumbnail concept.
 
-## Dark conversion prompt
+## OpenAI Developer Blog reference policy
 
-> Edit this exact light image into its dark-theme counterpart. Preserve the
-> exact subject, composition, object count, silhouettes, camera angle, spacing,
-> motion paths, and semantic relationships. Change only the environment,
-> material values, and lighting: use a deep graphite-to-midnight-indigo gradient
-> with tactile paper grain, smoked translucent glass, softly illuminated
-> surfaces, and restrained coral, lilac, blue, mint, and amber accents. Keep it
-> warm, intelligent, approachable, and legible at thumbnail size. Avoid
-> cyberpunk, ominous hacker imagery, harsh neon green, black crush, excessive
-> glow, text, logos, and watermarks.
+- Use `content/image-examples/openai-developer-blog/` only as an art-direction
+  reference for composition, material, lighting, depth, and editorial tone.
+- Do not reproduce any reference image's text, logos, branded marks, distinctive
+  UI layout, object arrangement, or other uniquely identifying composition.
+- Create an original visual metaphor from the article concept below rather than
+  treating a reference image as a template.
 
 ## Technology article concepts
 
-| Article ID                         | Subject prompt appended to the light base prompt                                                                                                          |
+| Article ID                         | Subject prompt appended to the base prompt                                                                                                                |
 | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ascii-3d-renderer`                | An ASCII character grid bends into a spatial landscape through a camera and depth pipeline, preserving the renderer metaphor                              |
 | `beyond-beautiful-code`            | A pristine local code object connects to contracts, tests, and operators, showing that durable software extends beyond surface elegance                   |
@@ -63,7 +62,7 @@ is an edit of the generated light image so the composition does not drift.
 
 ## Investment article concepts
 
-| Image ID                               | Subject prompt appended to the light base prompt                                                                                     |
+| Image ID                               | Subject prompt appended to the base prompt                                                                                           |
 | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | `13f-portfolio-reading`                | Three portfolio constellations are examined through lenses for concentrated compounding, tactical rotation, and diversified systems  |
 | `direction-of-money-factor-ranking`    | Many candidates pass sequential percentile gates for market, sector, stock, and factors, narrowing into a small shortlist            |
@@ -79,10 +78,8 @@ is an edit of the generated light image so the composition does not drift.
 
 ## Output contract
 
-- Technology images: `public/tech/articles/<article-id>.light.png` and
-  `public/tech/articles/<article-id>.dark.png`
-- Investment images: `public/invest/<image-id>.light.png` and
-  `public/invest/<image-id>.dark.png`
+- Technology images: `public/tech/articles/<article-id>.png`
+- Investment images: `public/invest/<image-id>.png`
 - Dimensions: `1536x1024` PNG, 3:2 landscape
-- Social metadata: canonical light image
-- In-page presentation: theme-matched image through `ThemeImage`
+- Social metadata and in-page presentation: the same canonical image through
+  `EditorialImage`

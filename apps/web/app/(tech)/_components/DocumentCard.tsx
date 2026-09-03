@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ThemeImage } from "#components/ThemeImage";
+import { EditorialImage } from "#components/EditorialImage";
 import type { ContentManifestEntry, Locale } from "#lib/content-model";
 import {
   createTechArticleImageHref,
@@ -40,14 +40,13 @@ export function DocumentCard({
       href={document.href}
     >
       {isBlogPost ? (
-        <ThemeImage
+        <EditorialImage
           alt={title}
           className={imageClassName}
           data-tech-thumbnail="true"
           eager={eager}
           height={630}
-          srcDark={createTechArticleImageHref(document.id, "dark")}
-          srcLight={createTechArticleImageHref(document.id, "light")}
+          src={createTechArticleImageHref(document.id)}
           width={1200}
         />
       ) : (

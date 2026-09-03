@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, test } from "bun:test";
 import type {
   BlogPostMetadata,
   DocsPageMetadata,
@@ -93,8 +93,7 @@ function createInvestmentNote(
     updatedAt: "2026-01-01",
     status: "published",
     tags: ["portfolio"],
-    image: "/invest/durable-investing.light.png",
-    imageDark: "/invest/durable-investing.dark.png",
+    image: "/invest/durable-investing.png",
     imageAlt: `${locale} durable investing thumbnail`,
     sources: [
       {

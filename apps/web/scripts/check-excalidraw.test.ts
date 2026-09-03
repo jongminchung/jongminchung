@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import { findExcalidrawFences } from "./check-excalidraw";
 
 describe("findExcalidraw울타리", () => {

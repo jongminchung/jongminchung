@@ -27,22 +27,20 @@ contract, component ownership rules, and runtime exception policy.
 
 ## Workspace scripts
 
-Repository-wide scripts are owned by the workspace root. Use `-w` so they resolve to the root even
-when the current directory is inside an app or package:
+Repository-wide scripts are owned by the workspace root and are run from that directory:
 
 ```bash
-pnpm -w run fmt
-pnpm -w run check
-pnpm -w run links:check
-pnpm -w run audit:prod
+bun run fmt
+bun run check
+bun run links:check
+bun run audit
 ```
 
-Always include `run` for package scripts. The shorter `pnpm fmt` form can fall through to an
-unrelated system command when the current package does not define `fmt`.
+Always include `run` for package scripts so commands are visibly distinguished from Bun subcommands.
 
-`audit:prod` queries the registry advisory database and fails on high-severity production
-dependency findings. It requires network access and is run manually during maintenance and before
-releases instead of being part of the offline-reproducible `check` chain.
+`audit` queries the registry advisory database and fails on high-severity dependency findings. It
+requires network access and is run manually during maintenance and before releases instead of being
+part of the offline-reproducible `check` chain.
 
 `links:check` runs the pinned Lychee container with the repository mounted read-only. It checks
 local links and anchors in Markdown and HTML without making network requests.
@@ -51,7 +49,7 @@ Each workspace owns its build, typecheck, and test commands. Select one with a f
 adding a package-specific wrapper to the root manifest:
 
 ```bash
-pnpm --filter @jongminchung/web run build
+bun run --filter @jongminchung/web build
 ```
 
 ## Version Policy
@@ -59,18 +57,18 @@ pnpm --filter @jongminchung/web run build
 The manually triggered package workflow always republishes the personal packages as `1.0.0`.
 This is a mutable snapshot channel: the same version can have different API, contents, and
 integrity, so SemVer compatibility and lockfile reproducibility are not guaranteed. Consumers must
-force a new resolution, such as `pnpm update --force <package>@1.0.0`, and commit the resulting
+force a new resolution, such as `bun update --force <package>@1.0.0`, and commit the resulting
 lockfile whenever they adopt a replacement.
 
-The workflow installs, typechecks, and tests only the publish packages. It deletes the fixed version,
-then publishes the two packages in parallel. GitHub authentication is supplied only through the
-`GH_PAT` Actions secret.
+The workflow installs the shared lockfile from the repository root, then typechecks and tests only
+the publish packages. It deletes the fixed version, then publishes the two packages in parallel.
+GitHub authentication is supplied only through the `GH_PAT` Actions secret.
 
 ```bash
-pnpm --filter @jongminchung/tooling --filter @jongminchung/ui install --frozen-lockfile --ignore-scripts
-pnpm --filter @jongminchung/tooling --filter @jongminchung/ui run typecheck
-pnpm --filter @jongminchung/tooling --filter @jongminchung/ui run test
-pnpm run publish:dry-run
+bun install --frozen-lockfile --ignore-scripts
+bun run --filter @jongminchung/tooling --filter @jongminchung/ui typecheck
+bun run --filter @jongminchung/tooling --filter @jongminchung/ui test
+bun run --filter @jongminchung/tooling --filter @jongminchung/ui publish:dry-run
 ```
 
 <!-- prettier-ignore-start -->

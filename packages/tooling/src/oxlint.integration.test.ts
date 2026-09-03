@@ -1,6 +1,6 @@
+import { describe, expect, it } from "bun:test";
 import { execFileSync } from "node:child_process";
 import { resolve } from "node:path";
-import { describe, expect, it } from "vitest";
 
 const workspaceRoot = resolve(import.meta.dirname, "../../..");
 

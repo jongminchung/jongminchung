@@ -46,6 +46,7 @@
 
 - **MDX 변환은 Fumadocs Config API와 remark plugin에서 일관되게 구성됨**
   - 근거: `source.config.ts`가 collection schema와 `lib/remark-kroki-url.ts`를 등록하고 `next.config.ts`가 Fumadocs MDX를 연결함
+  - 조건: Kroki URL 정규화가 `remark-image`보다 먼저 실행되어 build가 외부 이미지 크기 조회에 의존하지 않음
   - 사례: 코드 블록과 Excalidraw 다이어그램은 `mdx-components.tsx`, `lib/remark-kroki-url.ts`, `lib/excalidraw-scene.ts`를 통해 렌더링 경계를 가짐
 
 ## 공개 자산과 배포
@@ -56,22 +57,22 @@
 
 - **Next standalone output은 컨테이너 실행 단위로 준비됨**
   - 근거: `next.config.ts`의 `output: "standalone"`과 `scripts/prepare-standalone.ts`가 실행 환경을 구성함
-  - 사례: `pnpm --filter @jongminchung/web run start`는 `.next/standalone/apps/web/server.js`를 실행함
+  - 사례: `bun run --filter @jongminchung/web start`는 `.next/standalone/apps/web/server.js`를 실행함
 
 - **배포 환경 변수와 컨테이너 계약은 별도 문서에서 관리됨**
   - 근거: 앱 구조 문서와 인프라 운영 절차를 분리하면 route·콘텐츠 변경이 배포 세부사항을 불필요하게 포함하지 않음
   - 사례: [Web 컨테이너 배포 계약](../../apps/web/DEPLOYMENT.md)이 image와 runtime 계약을 설명함
-  - 호환성 계획: [Node 26 standalone 호환성](node-26-standalone-compatibility.md)이 Node 모듈 해석과 standalone runtime 결정·검증 기준을 기록함
+  - 런타임 계획: [Bun standalone 런타임](bun-standalone-runtime.md)이 앱과 공개 package의 런타임 경계·검증 기준을 기록함
 
 ## 테스트와 변경 원칙
 
-- **`*.test.ts`는 빠른 Vitest 규칙 테스트, `*.e2e.test.ts`는 Playwright 브라우저 계약 테스트임**
+- **`*.test.ts`는 빠른 Bun 규칙 테스트, `*.e2e.test.ts`는 Playwright 브라우저 계약 테스트임**
   - 근거: `lib/`, `components/`, `scripts/`의 단위 테스트는 구현과 인접하고, E2E는 home·tech·invest route group 또는 proxy 경계에 배치됨
   - 사례: `app/(tech)/tech.e2e.test.ts`는 검색·locale·브라우저 동작을, `proxy.e2e.test.ts`는 실제 Host routing을 검증함
 
 - **E2E 테스트 수집은 명시적 접미사로 제한됨**
-  - 근거: `playwright.config.ts`의 `testMatch: "**/*.e2e.test.ts"`가 Vitest 테스트와 Playwright 테스트의 실행 환경을 분리함
-  - 사례: `pnpm --filter @jongminchung/web run test:e2e`는 production server 기반 전체 브라우저 흐름을 실행함
+  - 근거: `bunfig.toml`의 `pathIgnorePatterns`와 `playwright.config.ts`의 `testMatch`가 Bun 테스트와 Playwright 테스트의 실행 환경을 분리함
+  - 사례: `bun run --filter @jongminchung/web test:e2e`는 production server 기반 전체 브라우저 흐름을 실행함
 
 - **변경 전에는 원본·생성물·route·테스트 경계를 함께 판단해야 함**
   - 근거: 콘텐츠 원본 변경은 generated manifest와 search index에, routing 변경은 세 도메인과 locale cookie에 영향을 줄 수 있음

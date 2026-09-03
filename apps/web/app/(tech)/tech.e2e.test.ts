@@ -422,9 +422,11 @@ test("[성공] 저장된 Tech 테마를 복원하고 변경함", async ({ page }
   await page.goto("/en");
 
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await expect(
-    page.locator('img[data-editorial-image="true"]:visible').first(),
-  ).toHaveAttribute("src", /\.dark\.png/u);
+  const editorialImage = page
+    .locator('img[data-editorial-image="true"]:visible')
+    .first();
+  await expect(editorialImage).toHaveAttribute("src", /\.png/u);
+  const imageSrc = await editorialImage.getAttribute("src");
   const themeControl = page.getByRole("button", { name: "Theme: dark" });
   await expect(themeControl).toBeVisible();
   await themeControl.click();
@@ -434,4 +436,5 @@ test("[성공] 저장된 Tech 테마를 복원하고 변경함", async ({ page }
   await expect
     .poll(() => page.evaluate(() => localStorage.getItem("tech-theme")))
     .toBe("system");
+  await expect(editorialImage).toHaveAttribute("src", imageSrc ?? "");
 });

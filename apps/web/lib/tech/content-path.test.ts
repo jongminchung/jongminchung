@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import { parseBlogContentPath, parseDocsContentPath } from "./content-path";
 
 describe("Tech content path identity", () => {

@@ -54,9 +54,10 @@
   },
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
-    "prepack": "pnpm run build",
-    "publish:dry-run": "pnpm publish --dry-run --access public --no-git-checks",
-    "test": "vitest run --root ../.. packages/ui",
+    "prepack": "bun run build",
+    "publish:dry-run": "bun publish --dry-run --access public",
+    "test": "bun test",
+    "test:node": "bun run build && node ../../.github/scripts/verify-package-build.ts .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -69,14 +70,14 @@
     "tw-animate-css": "catalog:"
   },
   "devDependencies": {
+    "@types/bun": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "tailwindcss": "catalog:",
-    "typescript": "catalog:",
-    "vitest": "catalog:"
+    "typescript": "catalog:"
   },
   "peerDependencies": {
     "react": "catalog:ui-peer",

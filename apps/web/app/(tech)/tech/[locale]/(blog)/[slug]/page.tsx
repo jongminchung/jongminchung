@@ -4,7 +4,12 @@ import {
   displayTitleFor,
   isLocale,
 } from "#lib/content-model";
-import { findBlogPost, getDocsPages, loadBlogPost } from "#lib/documents";
+import {
+  findBlogPost,
+  getBlogPosts,
+  getDocsPages,
+  loadBlogPost,
+} from "#lib/documents";
 import { alternateLocale } from "#lib/locale";
 import { techPageMetadata } from "#lib/tech/metadata";
 import { DocsShell } from "#tech-components/DocsShell";
@@ -14,9 +19,7 @@ export const instant = false;
 
 /** Blog 글과 과거 Docs canonical을 정적으로 열거함 */
 export async function generateStaticParams() {
-  const posts = await import("#lib/documents").then(({ getBlogPosts }) =>
-    getBlogPosts(),
-  );
+  const posts = await getBlogPosts();
   return posts.map(({ locale, id }) => ({ locale, slug: id }));
 }
 

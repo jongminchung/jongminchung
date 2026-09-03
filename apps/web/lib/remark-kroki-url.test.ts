@@ -1,6 +1,6 @@
+import { describe, expect, test } from "bun:test";
 import { inflateSync } from "node:zlib";
 import type { Root } from "mdast";
-import { describe, expect, test } from "vitest";
 import { remarkKrokiUrl } from "./remark-kroki-url.ts";
 
 function transform(tree: Root): Root {
@@ -23,7 +23,14 @@ describe("remarkKrokiUrl", () => {
       ],
     });
     const image = tree.children[0];
-    const url = image?.type === "image" ? image.url : "";
+    const attributes =
+      image?.type === "mdxJsxFlowElement" ? image.attributes : [];
+    const attribute = (name: string) =>
+      attributes.find(
+        (item) => item.type === "mdxJsxAttribute" && item.name === name,
+      );
+    const url = attribute("src")?.value;
+    if (typeof url !== "string") throw new Error("Kroki URL is missing");
     const encoded = url.split("/").at(-1);
 
     expect(encoded).toBeDefined();
@@ -31,11 +38,20 @@ describe("remarkKrokiUrl", () => {
       inflateSync(Buffer.from(encoded ?? "", "base64url")).toString("utf8"),
     ).toBe(diagram);
     expect(image).toMatchObject({
-      alt: "Request flow",
-      type: "image",
-      url: expect.stringMatching(
-        /^https:\/\/example\.com\/plantuml\/svg\/[A-Za-z0-9_-]+$/u,
-      ),
+      attributes: expect.arrayContaining([
+        { name: "alt", type: "mdxJsxAttribute", value: "Request flow" },
+        {
+          name: "src",
+          type: "mdxJsxAttribute",
+          value: expect.stringMatching(
+            /^https:\/\/example\.com\/plantuml\/svg\/[A-Za-z0-9_-]+$/u,
+          ),
+        },
+        { name: "loading", type: "mdxJsxAttribute", value: "lazy" },
+      ]),
+      children: [],
+      name: "img",
+      type: "mdxJsxFlowElement",
     });
   });
 
@@ -48,5 +64,26 @@ describe("remarkKrokiUrl", () => {
     const tree = transform({ type: "root", children: [code] });
 
     expect(tree.children[0]).toEqual(code);
+  });
+
+  test("normalizes existing Kroki Markdown images without changing their URL", () => {
+    const url = "https://example.com/plantuml/svg/already-encoded";
+    const tree = transform({
+      type: "root",
+      children: [{ type: "image", alt: "Existing diagram", url }],
+    });
+
+    expect(tree.children[0]).toMatchObject({
+      attributes: expect.arrayContaining([
+        {
+          name: "alt",
+          type: "mdxJsxAttribute",
+          value: "Existing diagram",
+        },
+        { name: "src", type: "mdxJsxAttribute", value: url },
+      ]),
+      name: "img",
+      type: "mdxJsxFlowElement",
+    });
   });
 });

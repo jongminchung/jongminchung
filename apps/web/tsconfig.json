@@ -3,7 +3,8 @@
   "compilerOptions": {
     "incremental": true,
     "jsx": "preserve",
-    "plugins": [{ "name": "next" }]
+    "plugins": [{ "name": "next" }],
+    "types": ["bun", "node"]
   },
   "include": [
     "next-env.d.ts",

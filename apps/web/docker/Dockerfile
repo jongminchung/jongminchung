@@ -1,30 +1,25 @@
-FROM node:26-alpine AS dependencies
+FROM oven/bun:1.4.0-alpine AS dependencies
 
-ENV PNPM_HOME=/pnpm
-ENV PATH=$PNPM_HOME:$PATH
 WORKDIR /workspace
-RUN npm install --global pnpm@11.15.1
+RUN apk add --no-cache nodejs
 COPY . .
-RUN pnpm install --frozen-lockfile --filter @jongminchung/web...
+RUN bun install --frozen-lockfile
 
 FROM dependencies AS builder
-RUN pnpm --filter @jongminchung/web run build
+RUN bun run --filter @jongminchung/web build
 
-FROM node:26-alpine AS runner
+FROM oven/bun:1.4.0-alpine AS runner
 
 ENV NODE_ENV=production
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
 WORKDIR /app/apps/web
 
-RUN addgroup --system --gid 1001 nodejs \
-    && adduser --system --uid 1001 nextjs
+COPY --from=builder --chown=bun:bun /workspace/apps/web/.next/standalone /app
+COPY --from=builder --chown=bun:bun /workspace/apps/web/public ./public
+COPY --from=builder --chown=bun:bun /workspace/apps/web/.next/static ./.next/static
 
-COPY --from=builder --chown=nextjs:nodejs /workspace/apps/web/.next/standalone /app
-COPY --from=builder --chown=nextjs:nodejs /workspace/apps/web/public ./public
-COPY --from=builder --chown=nextjs:nodejs /workspace/apps/web/.next/static ./.next/static
-
-USER nextjs
+USER bun
 EXPOSE 3000
 
-CMD ["node", "--no-require-module", "server.js"]
+CMD ["bun", "server.js"]

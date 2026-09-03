@@ -4,8 +4,8 @@ title: TypeScript 7 Compatibility Verification
 displayTitle: TypeScript 7 Compatibility
 description: Verify library declarations, Compiler API coupling, builds, and tooling before a compiler major upgrade.
 publishedAt: "2026-08-11"
-updatedAt: "2026-08-11"
-verifiedAt: "2026-08-11"
+updatedAt: "2026-09-03"
+verifiedAt: "2026-09-03"
 tags: [typescript, compatibility, migration, compiler, tooling]
 status: stable
 publicationStatus: published
@@ -21,10 +21,10 @@ production build.
 This procedure replaces "it is probably compatible" with "we ran this evidence at this version and
 boundary."
 
-As of August 29, 2026, this repository uses TypeScript `6.0.3` in every workspace. The public
-packages use the same compiler to emit ESM JavaScript and
-declarations. The TS 7 routes below are an audit procedure for a future migration and are not applied
-to the current production configuration.
+As of September 3, 2026, this repository uses TypeScript `7.0.2` in every workspace. The public
+packages use the same compiler to emit Node-compatible ESM JavaScript and declarations, while the
+Web app uses Next.js's TypeScript CLI path. The procedure below records the adoption evidence and
+the revalidation criteria for the next compiler change.
 
 ## 1. Freeze an exact inventory
 
@@ -33,9 +33,9 @@ every direct dependency, then follow transitive packages that declare a TypeScri
 the Compiler API.
 
 ```sh
-pnpm list -r --depth 0
-rg '"typescript"' package.json pnpm-workspace.yaml apps packages
-rg 'typescript/lib/typescript|require\\(.typescript.|from .typescript.' node_modules/.pnpm
+bun pm ls --all
+rg '"typescript"' package.json bun.lock apps packages
+rg 'typescript/lib/typescript|require\\(.typescript.|from .typescript.' node_modules
 ```
 
 Record more than package names: include the version, consuming workspace, production or development
@@ -63,9 +63,9 @@ repository typecheck, build, and test results in a separate evidence column. Do 
 success as a vendor support commitment.
 
 The [TypeScript 7 announcement](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/)
-states that 7.0 has no stable Compiler API. It also advises embedded-language workflows such as MDX
-to remain on TypeScript 6 for now. That distinction is why source compatibility and toolchain
-compatibility require separate decisions.
+describes the native Go compiler and states that 7.0 has no stable Compiler API. This repository does
+not import that API directly and transforms MDX through Fumadocs's Bun plugin, so source compatibility
+and embedded-language toolchain compatibility remain separate decisions.
 
 ## 4. Map ecosystem-specific migration routes
 
@@ -79,7 +79,7 @@ Current direct dependencies fit into the following migration domains.
 | --------------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------- |
 | Compiler              | `typescript`                                                                | CLI checks, declaration emit, and framework integration        |
 | Next.js and content   | `next`, `fumadocs-mdx`, `fumadocs-core`, `@types/mdx`                       | Next CLI checker, MDX compilation, and runtime content loading |
-| Build, lint, and test | `esbuild`, `vitest`, `oxlint`, `oxlint-tsgolint`, `@playwright/test`        | Declaration emit, type-aware lint, unit tests, and E2E         |
+| Build, lint, and test | `esbuild`, `bun:test`, `oxlint`, `oxlint-tsgolint`, `@playwright/test`      | Declaration emit, type-aware lint, unit tests, and E2E         |
 | CSS                   | `tailwindcss`, `@tailwindcss/postcss`, `postcss`, `tw-animate-css`          | Next production CSS build                                      |
 | React and UI          | `react`, `react-dom`, `@base-ui/react`, `lucide-react`, `cmdk`, `zod`       | JSX declaration checks and real application builds             |
 | Development CLIs      | `shadcn`                                                                    | CLI smoke tests and an explicit TypeScript migration           |
@@ -90,15 +90,15 @@ consumer must add its own explicit compatibility evidence.
 
 The important official routes are:
 
-- Next.js `16.2.12` can run the TS 7 CLI during a production build with
-  [`experimental.useTypeScriptCli`](https://github.com/vercel/next.js/blob/v16.2.12/docs/01-app/03-api-reference/05-config/01-next-config-js/useTypeScriptCli.mdx).
+- Next.js `16.3.1` can run the TS 7 CLI during a production build with
+  [`experimental.useTypeScriptCli`](https://github.com/vercel/next.js/blob/v16.3.1/docs/01-app/03-api-reference/05-config/01-next-config-js/useTypeScriptCli.mdx).
 - [Oxlint type-aware linting](https://oxc.rs/docs/guide/usage/linter/type-aware.html) requires TS 7 or
   newer and `oxlint-tsgolint@7`.
 - [TypeScript declaration emit](https://www.typescriptlang.org/tsconfig/declaration.html) runs in the
   same compiler boundary as JavaScript emit for the public packages.
-- [Playwright](https://playwright.dev/docs/test-typescript) separates transformation from type
-  checking, while [Vitest](https://vitest.dev/guide/testing-types.html) invokes `tsc` in typecheck
-  mode.
+- [Playwright](https://playwright.dev/docs/test-typescript) and [Bun test](https://bun.sh/docs/test)
+  separate TypeScript execution from type checking, so `bun run typecheck` remains a distinct
+  release gate.
 
 Do not interpret the absence of a dedicated migration guide as lack of support. Conversely, packages
 that only expose declarations, such as React, CodeMirror, and Tailwind integrations, are not verified
@@ -106,24 +106,23 @@ until the real application build passes.
 
 ## 5. Keep one production compiler
 
-When any production boundary still needs the TypeScript 6 Compiler API, keep every tracked
-workspace on the latest stable TypeScript 6 release. A TS 7 candidate may be evaluated in a
-disposable copy or isolated branch, but do not commit compiler aliases or a split compiler tree as a
-production configuration.
+When a production boundary needs a Compiler API that the current compiler does not provide, use the
+tool's official CLI route or defer adoption. A candidate compiler may be evaluated in a disposable
+copy or isolated branch, but do not commit compiler aliases or a split compiler tree as production
+configuration.
 
 ```sh
-pnpm exec tsc --version
-pnpm list -r typescript --depth 0
-pnpm exec nx show projects
+bun run tsc --version
+bun pm ls --all | rg typescript
 ```
 
 The compiler version, the package imported as `typescript`, and framework-owned type checking must
 all resolve to the same workspace baseline. A successful isolated TS 7 CLI run is evidence for a
 future migration, not permission to mix compiler roles in the tracked workspace.
 
-Even though Nx officially supports a side-by-side setup, a repository does not have to adopt that
-production topology. This repository still has MDX and a repository-owned content Compiler API
-boundary, so every workspace installs only TypeScript 6.0.3.
+This repository installs only TypeScript `7.0.2` across every workspace without a compiler alias.
+Next.js uses `experimental.useTypeScriptCli: true`, while Fumadocs tests and scripts use the
+`fumadocs-mdx/bun` plugin without introducing a Compiler API dependency.
 
 ## 6. Surface configuration changes first
 
@@ -132,8 +131,8 @@ removed options in TypeScript 7. Compare the effective values of `rootDir`, `typ
 `moduleResolution`, `strict`, `noUncheckedSideEffectImports`, and `libReplacement`.
 
 ```sh
-pnpm exec tsc --showConfig -p tsconfig.json
-pnpm exec tsc --noEmit --incremental false -p tsconfig.json
+bun run tsc --showConfig -p tsconfig.json
+bun run tsc --noEmit --incremental false -p tsconfig.json
 ```
 
 Run every tsconfig explicitly. A root check does not necessarily include application, package build,
@@ -155,12 +154,12 @@ the same failures on TypeScript 6 to separate existing declaration debt from a T
 successful TS 7 check in a project that normally uses `skipLibCheck: true` does not prove that every
 transitive declaration is compatible.
 
-Next.js 16.2.12's default checker looks for `typescript/lib/typescript.js` in its
-[setup verification](https://github.com/vercel/next.js/blob/v16.2.12/packages/next/src/lib/verify-typescript-setup.ts)
+Next.js 16.3.1's default checker looks for `typescript/lib/typescript.js` in its
+[setup verification](https://github.com/vercel/next.js/blob/v16.3.1/packages/next/src/lib/verify-typescript-setup.ts)
 and calls `createProgram` and `getPreEmitDiagnostics` in
-[its type checker](https://github.com/vercel/next.js/blob/v16.2.12/packages/next/src/lib/typescript/runTypeCheck.ts).
+[its type checker](https://github.com/vercel/next.js/blob/v16.3.1/packages/next/src/lib/typescript/runTypeCheck.ts).
 However, the official
-[`experimental.useTypeScriptCli`](https://github.com/vercel/next.js/blob/v16.2.12/docs/01-app/03-api-reference/05-config/01-next-config-js/useTypeScriptCli.mdx)
+[`experimental.useTypeScriptCli`](https://github.com/vercel/next.js/blob/v16.3.1/docs/01-app/03-api-reference/05-config/01-next-config-js/useTypeScriptCli.mdx)
 option makes `next build` invoke the project's TS 7 `tsc` instead. Next.js is therefore no longer an
 absolute blocker, but an external TS 7 run without that option, or a plain `tsc --noEmit`, still does
 not replace a `next build`.
@@ -186,18 +185,17 @@ framework build, and editor and watch workflow.
 Update the workspace manifests and lockfile together, then run the full validation suite. Roll back
 the single version change if any required boundary fails.
 
-In the historical audit, a uniform TS 7 setup failed at the Nx graph, the default Next.js checker,
-and the content Compiler API. Nx and Next.js now provide official migration routes, but the MDX and
-repository-owned content Compiler API boundaries remain. The current decision is to use only
-TypeScript 6.0.3 in every workspace and not apply TS 7 aliases or per-workspace compiler splits in
-production.
+The current adoption runs root and workspace type checks, public-package declaration emit, Bun tests,
+the Next.js production build, and Node runtime smoke checks with one TypeScript `7.0.2` installation.
+The current decision is to keep this single compiler boundary without TS 7 aliases or per-workspace
+compiler splits.
 
 ## References
 
 - [Announcing TypeScript 7.0](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/)
-- [Next.js 16.2.12 `useTypeScriptCli`](https://github.com/vercel/next.js/blob/v16.2.12/docs/01-app/03-api-reference/05-config/01-next-config-js/useTypeScriptCli.mdx)
-- [Next.js 16.2.12 TypeScript setup](https://github.com/vercel/next.js/blob/v16.2.12/packages/next/src/lib/verify-typescript-setup.ts)
+- [Next.js 16.3.1 `useTypeScriptCli`](https://github.com/vercel/next.js/blob/v16.3.1/docs/01-app/03-api-reference/05-config/01-next-config-js/useTypeScriptCli.mdx)
+- [Next.js 16.3.1 TypeScript setup](https://github.com/vercel/next.js/blob/v16.3.1/packages/next/src/lib/verify-typescript-setup.ts)
 - [Oxlint type-aware linting](https://oxc.rs/docs/guide/usage/linter/type-aware.html)
 - [TypeScript declaration](https://www.typescriptlang.org/tsconfig/declaration.html)
-- [Vitest type testing](https://vitest.dev/guide/testing-types.html)
+- [Bun test runner](https://bun.sh/docs/test)
 - [Playwright TypeScript](https://playwright.dev/docs/test-typescript)

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import { locales } from "../lib/content-model";
 import { getDocuments } from "../lib/documents";
 import investSitemap from "./(invest)/invest/sitemap";

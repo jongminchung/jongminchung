@@ -98,7 +98,7 @@ function techMdxOptions() {
       langAlias: { excalidraw: "plaintext" },
       themes: { light: "github-light", dark: "github-dark" },
     },
-    remarkPlugins: [remarkKrokiUrl],
+    remarkPlugins: (plugins) => [remarkKrokiUrl, ...plugins],
   });
 }
 

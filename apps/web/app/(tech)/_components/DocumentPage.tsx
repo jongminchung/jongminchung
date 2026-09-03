@@ -1,7 +1,7 @@
 import { cn } from "@jongminchung/ui/lib/utils";
 import { EditorialArticle } from "#components/EditorialArticle";
+import { EditorialImage } from "#components/EditorialImage";
 import { StructuredData } from "#components/StructuredData";
-import { ThemeImage } from "#components/ThemeImage";
 import {
   createTechArticleImageHref,
   displayTitleFor,
@@ -114,14 +114,13 @@ export function DocumentPage({
             {metadata.contentType === "blog" ? (
               <>
                 <figure className="mt-0 mb-10" data-tech-article-hero="true">
-                  <ThemeImage
+                  <EditorialImage
                     alt={displayTitleFor(metadata)}
                     className="aspect-[1.6] w-full rounded-[var(--radius)] border object-cover"
                     eager
                     height={1024}
                     sizes="(max-width: 600px) calc(100vw - 32px), (max-width: 1279px) calc(100vw - 64px), 760px"
-                    srcDark={createTechArticleImageHref(metadata.id, "dark")}
-                    srcLight={createTechArticleImageHref(metadata.id, "light")}
+                    src={createTechArticleImageHref(metadata.id)}
                     width={1536}
                   />
                   <figcaption className="mt-2 text-center text-xs text-muted-foreground">

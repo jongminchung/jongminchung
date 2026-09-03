@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import { formatEditorialDate } from "./i18n-date";
 
 describe("formatEditorialDate", () => {

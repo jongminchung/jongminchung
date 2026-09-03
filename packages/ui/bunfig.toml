@@ -1,0 +1,12 @@
+[test]
+coverage = true
+coverageReporter = ["text", "lcov"]
+coverageDir = "../../coverage/ui"
+coverageSkipTestFiles = true
+# Bun enforces thresholds for every loaded file, so this is the minimum file-level floor
+coverageThreshold = { lines = 0.06, functions = 0 }
+coveragePathIgnorePatterns = [
+  "**/*.d.ts",
+  "**/fixtures/**",
+  "**/__fixtures__/**",
+]

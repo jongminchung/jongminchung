@@ -1,5 +1,5 @@
+import { afterEach, describe, expect, it } from "bun:test";
 import { NextRequest } from "next/server";
-import { afterEach, describe, expect, it, vi } from "vitest";
 import { proxy } from "./proxy";
 
 function createRequest(
@@ -18,7 +18,13 @@ function createRequest(
 }
 
 describe("제조원", () => {
-  afterEach(() => vi.unstubAllEnvs());
+  const originalNodeEnv = process.env.NODE_ENV;
+  const originalLocalSite = process.env.JAMIE_LOCAL_SITE;
+
+  afterEach(() => {
+    restoreEnvironmentVariable("NODE_ENV", originalNodeEnv);
+    restoreEnvironmentVariable("JAMIE_LOCAL_SITE", originalLocalSite);
+  });
 
   it("[성공] 쿠키 및 Accept-Language를 통해 사이트를 종료함", () => {
     const saved = proxy(
@@ -66,8 +72,8 @@ describe("제조원", () => {
   });
 
   it("[성공] 개발 loopback 호스트를 선택한 사이트로 다시 작성함", () => {
-    vi.stubEnv("NODE_ENV", "development");
-    vi.stubEnv("JAMIE_LOCAL_SITE", "invest");
+    Reflect.set(process.env, "NODE_ENV", "development");
+    process.env.JAMIE_LOCAL_SITE = "invest";
 
     const response = proxy(createRequest("/en", { host: "localhost:3000" }));
     expect(response.headers.get("x-middleware-rewrite")).toBe(
@@ -127,3 +133,8 @@ describe("제조원", () => {
     expect(response.headers.get("x-middleware-rewrite")).toContain("/tech/en");
   });
 });
+
+function restoreEnvironmentVariable(name: string, value: string | undefined) {
+  if (value === undefined) delete process.env[name];
+  else process.env[name] = value;
+}

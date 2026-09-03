@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import type { InvestmentNoteMetadata } from "./content.ts";
 import {
   createInvestmentNoteCollection,
@@ -15,8 +15,7 @@ const baseMetadata = {
   status: "published",
   tags: ["risk"],
   series: "Risk",
-  image: "/invest/margin-of-safety.light.png",
-  imageDark: "/invest/margin-of-safety.dark.png",
+  image: "/invest/margin-of-safety.png",
   imageAlt: "안전마진을 표현한 투자 리서치 이미지",
   sources: [
     {

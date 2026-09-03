@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import { getDocuments } from "../lib/documents";
 import { GET } from "./(tech)/tech/llms.txt/route";
 

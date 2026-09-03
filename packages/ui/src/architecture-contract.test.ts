@@ -1,6 +1,6 @@
+import { describe, expect, it } from "bun:test";
 import { glob, readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { describe, expect, it } from "vitest";
 
 const repositoryRoot = resolve(import.meta.dirname, "../../..");
 

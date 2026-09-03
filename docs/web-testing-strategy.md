@@ -1,21 +1,21 @@
 # Web 테스트 전략
 
 - **`apps/web`의 테스트 목적은 구현을 고정하는 일이 아니라 공개 콘텐츠 계약과 사용자가 겪는 흐름의 회귀를 탐지하는 데 있음**
-- **Vitest는 순수 규칙·생성물 계약·동기 컴포넌트 상태에 사용하고, production build를 거친 Playwright는 서버·브라우저 경계에 사용함**
+- **Bun 내장 test runner는 순수 규칙·생성물 계약·동기 컴포넌트 상태에 사용하고, production build를 거친 Playwright는 서버·브라우저 경계에 사용함**
 - **다중 도메인 라우팅, locale, 검색, 콘텐츠 생성, 외부 다이어그램, 공개 discovery 파일은 사용자와 크롤러의 계약이므로 유지함**
 - **정확한 콘텐츠 개수·특정 추천 목록·넓은 화면의 full-page snapshot은 제품 계약이 아닐 경우 축소하거나 일반화함**
 - **자동 접근성 검사는 대표 상태에 유지하되, 키보드와 보조기기 사용성의 전부를 대체하지 않음**
 
 ## 공식 근거와 도구 경계
 
-- **Vitest는 독립적으로 실행 가능한 함수, 동기 Server Component, Client Component의 규칙 검증에 사용함**
-  - 근거: Next.js는 Vitest와 React Testing Library를 unit test 조합으로 안내하며, 동기 Server·Client Component는 단위 테스트할 수 있다고 설명함
-  - 예외: `async` Server Component는 Vitest가 지원하지 않으므로 E2E test로 검증해야 함
-  - 참고: [Next.js Vitest 가이드](https://nextjs.org/docs/pages/guides/testing/vitest)
+- **Bun test는 독립 함수, 동기 component markup, 콘텐츠 loader와 생성물 계약 검증에 사용함**
+  - 근거: Bun은 TypeScript·JSX, lifecycle hook, mock, snapshot과 coverage를 내장 test runner에서 제공함
+  - 예외: `async` Server Component와 hydration·browser API가 결합된 흐름은 production E2E test로 검증해야 함
+  - 참고: [Bun test runner](https://bun.sh/docs/test)
 
 - **Playwright는 production build에서 실제 HTTP 응답, hydration, browser API, 사용자 흐름을 검증하는 데 사용함**
   - 근거: Next.js는 실제 Next.js application을 대상으로 하는 Playwright E2E에는 서버가 필요하며, production code 대상으로 실행할 것을 권장함
-  - 사례: `apps/web/playwright.config.ts`의 `pnpm run build` 후 `pnpm run start` 구성은 이 경계에 부합함
+  - 사례: `apps/web/playwright.config.ts`의 `bun run build` 후 `bun run start` 구성은 이 경계에 부합함
   - 참고: [Next.js Playwright 가이드](https://nextjs.org/docs/pages/guides/testing/playwright)
 
 - **UI assertion은 role·label·visible result를 우선하고 implementation selector는 최후 수단으로 사용함**
@@ -23,7 +23,7 @@
   - 사례: 버튼은 CSS class가 아니라 `getByRole("button", { name })`로 찾음
   - 참고: [Testing Library 소개](https://testing-library.com/docs/), [Playwright Best Practices](https://playwright.dev/docs/best-practices)
 
-## 유지할 Vitest 테스트
+## 유지할 Bun 테스트
 
 - **콘텐츠 schema와 입력 검증 테스트는 유지함**
   - 근거: MDX frontmatter와 투자 노트는 build·검색·route가 공유하는 데이터 경계임
@@ -105,16 +105,16 @@
 
 ## 실행 원칙
 
-- **문서·라우팅·query rule 변경은 Vitest 관련 범위를 먼저 실행함**
-  - 명령: `pnpm --filter @jongminchung/web run test`
+- **문서·라우팅·query rule 변경은 Bun test 관련 범위를 먼저 실행함**
+  - 명령: `bun run --filter @jongminchung/web test`
   - 근거: 빠른 규칙 검증으로 오류 위치를 콘텐츠 schema·routing·생성물 중 하나로 좁힐 수 있음
 
 - **route, Client Component, browser storage, MDX rendering 변경은 E2E를 추가 실행함**
-  - 명령: `pnpm --filter @jongminchung/web run test:e2e`
+  - 명령: `bun run --filter @jongminchung/web test:e2e`
   - 근거: Next.js 공식 가이드의 production server 기반 E2E 경계와 일치함
 
 - **의도한 UI 변경에서만 visual snapshot을 검토·갱신함**
-  - 명령: `pnpm --filter @jongminchung/web run test:e2e -- visual.e2e.test.ts` 또는 `pnpm --filter @jongminchung/web run test:e2e -- --update-snapshots`
+  - 명령: `bun run --filter @jongminchung/web test:e2e -- visual.e2e.test.ts` 또는 `bun run --filter @jongminchung/web test:e2e -- --update-snapshots`
   - 근거: snapshot은 기능 계약의 대체물이 아니라 시각 변경의 검토 보조 수단임
   - 기준: `*-actual.png`, `*-expected.png`, `*-diff.png`을 검토한 뒤 의도한 변경만 갱신함
 
@@ -125,11 +125,12 @@
 
 - **실패 분석에는 Playwright 산출물을 사용함**
   - CI: 첫 재시도에서 trace를 기록하고, 실패한 test의 screenshot·video와 HTML report를 생성함
-  - 로컬: `pnpm --filter @jongminchung/web exec playwright test --debug` 또는 `pnpm --filter @jongminchung/web exec playwright show-report`로 재현·분석함
+  - 로컬: `bunx playwright test --config apps/web/playwright.config.ts --debug` 또는 `bunx playwright show-report apps/web/playwright-report`로 재현·분석함
 
 ## 공식 참고 문서
 
-- [Next.js Vitest 가이드](https://nextjs.org/docs/pages/guides/testing/vitest)는 동기 Server·Client Component의 unit test와 async Server Component의 E2E 필요성을 구분함
+- [Bun test runner](https://bun.sh/docs/test)는 TypeScript·JSX, lifecycle, mock, coverage와 test discovery 계약을 설명함
+- [Bun test configuration](https://bun.sh/docs/test/configuration)은 preload, ignore pattern, coverage reporter와 파일별 threshold를 설명함
 - [Next.js Playwright 가이드](https://nextjs.org/docs/pages/guides/testing/playwright)는 production code에 대한 실제 browser E2E 실행과 `webServer` 사용을 안내함
 - [Next.js Testing 개요](https://nextjs.org/docs/pages/guides/testing)는 unit, component, integration, E2E, snapshot test의 역할을 구분함
 - [Testing Library 소개](https://testing-library.com/docs/)는 사용자 사용 방식과 유사한 테스트, 구현 세부사항 회피 원칙을 안내함

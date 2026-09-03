@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import { defineOxlintConfig, sharedOxlintConfig } from "./index.js";
 
 describe("옥린트 구성", () => {

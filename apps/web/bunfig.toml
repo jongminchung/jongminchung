@@ -1,0 +1,34 @@
+[test]
+preload = ["./scripts/register-content-plugin.ts"]
+pathIgnorePatterns = [
+  "**/.next/**",
+  "**/.output/**",
+  "**/.tmp-*/**",
+  "**/.wxt/**",
+  "**/tests/live/**",
+  "**/*.e2e.test.*",
+]
+coverage = true
+coverageReporter = ["text", "lcov"]
+coverageDir = "../../coverage/web"
+coverageSkipTestFiles = true
+# Bun enforces thresholds for every loaded file, so this is the minimum file-level floor
+coverageThreshold = { lines = 0.2, functions = 0 }
+coveragePathIgnorePatterns = [
+  ".source/**",
+  "app/**",
+  "components/**",
+  "content/**",
+  "scripts/**",
+  "source.config.ts",
+  "mdx-components.tsx",
+  "proxy.ts",
+  "../../packages/**",
+  "lib/content-repository.ts",
+  "lib/fumadocs-source.ts",
+  "lib/tech/search-server.ts",
+  "**/*.d.ts",
+  "**/generated/**",
+  "**/fixtures/**",
+  "**/__fixtures__/**",
+]

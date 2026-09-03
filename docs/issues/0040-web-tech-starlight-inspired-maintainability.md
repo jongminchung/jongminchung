@@ -67,6 +67,7 @@
   - `parseTechContentPath(relativePath)`가 허용되지 않은 locale·section·깊이·확장자를 하나의 오류 경계에서 거부함
 - **108개 Tech MDX에서 중복 identity field를 제거함**
 
+  <!-- prettier-ignore -->
   ```yaml
   # 제거 대상
   id: nextjs-16
@@ -77,6 +78,7 @@
   title: Next.js 16 Deep Dive
   order: 0
   publicationStatus: published
+  <!-- prettier-ignore -->
   ```
 
 - **collection 수준 계약은 약화하지 않음**
@@ -89,6 +91,7 @@
 
 - **Docs route별 렌더링 입력을 `ResolvedTechDocsPage` discriminated union으로 조립함**
 
+  <!-- prettier-ignore -->
   ```ts
   type ResolvedTechDocsPage =
     | Readonly<{ kind: "not-found" }>
@@ -99,6 +102,7 @@
         page: DocsPageManifestEntry;
         alternatePage: DocsPageManifestEntry;
       }>;
+  <!-- prettier-ignore -->
   ```
 
 - **`resolveTechDocsPage(locale, slugs)`가 route 해석과 조회 순서를 한 번 소유함**

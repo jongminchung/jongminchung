@@ -1,6 +1,6 @@
+import { describe, expect, it } from "bun:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
 import { articleProseClassName, docsProseClassName } from "#lib/mdx-styles";
 import {
   articleMdxComponents,

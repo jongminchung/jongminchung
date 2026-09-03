@@ -1,6 +1,6 @@
 # 저장소 문서
 
-이 디렉터리는 pnpm 모노레포의 기술 선택, 유지보수 절차와 의사결정 기록을 관리한다.
+이 디렉터리는 Bun 모노레포의 기술 선택, 유지보수 절차와 의사결정 기록을 관리한다.
 별도 안내가 없으면 명령은 저장소 루트에서 실행한다. `plugins/go-lsp` 문서는 이 인덱스의
 범위에 포함하지 않는다.
 
@@ -15,7 +15,7 @@
 ## 기술 기록
 
 - [ADR 0001: 공개 TypeScript 패키지 빌드를 `tsc`로 단순화](adr/0001-node-library-tsc-build.md)
-- [TypeScript 7 호환성 보고서](../apps/web/content/tech/docs/ko/fe/typescript-7-compatibility.mdx): 현재 TypeScript 6 정책과 재검증 기준
+- [TypeScript 7 호환성 보고서](../apps/web/content/tech/docs/ko/fe/typescript-7-compatibility.mdx): 현재 TypeScript 7 채택 근거와 재검증 기준
 
 ## 실행 이슈
 
@@ -24,6 +24,6 @@
 ## 프로젝트 문서
 
 - [Web 앱 구조](web/README.md): 다중 도메인 routing, 콘텐츠 생성, 화면 계층, 테스트와 배포 경계
-- [Web 테스트 전략](web-testing-strategy.md): Next.js 공식 Vitest·Playwright 가이드에 따른 Web 테스트 분류와 실행 기준
+- [Web 테스트 전략](web-testing-strategy.md): Bun 내장 test runner와 Playwright의 테스트 분류 및 실행 기준
 - [Web 컨테이너 배포 계약](../apps/web/DEPLOYMENT.md)
 - [`@jongminchung/tooling`](../packages/tooling/README.md): Oxc 설정과 package map

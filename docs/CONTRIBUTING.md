@@ -1,34 +1,34 @@
 # 기여 가이드
 
-이 문서는 pnpm 모노레포의 공통 개발·검증 절차를 설명한다. `plugins/go-lsp`는 별도
+이 문서는 Bun 모노레포의 공통 개발·검증 절차를 설명한다. `plugins/go-lsp`는 별도
 빌드이므로 이 문서의 범위에 포함하지 않는다.
 
 ## 개발 환경
 
-| 도구    | 버전·조건        | 기준 파일                               |
-| ------- | ---------------- | --------------------------------------- |
-| Node.js | `26.5.0`         | `.node-version`, `package.json#engines` |
-| pnpm    | `11.15.1`        | `package.json#packageManager`           |
-| Git     | 일반 개발에 필요 | 시스템 설치                             |
+| 도구    | 버전·조건                        | 기준 파일                      |
+| ------- | -------------------------------- | ------------------------------ |
+| Bun     | `1.4.0`                          | `.bun-version`, `package.json` |
+| Node.js | 공개 패키지 검증용 `24.0.0` 이상 | `.node-version`, `packages/*`  |
+| Git     | 일반 개발에 필요                 | 시스템 설치                    |
 
 저장소 루트에서 버전을 확인하고 잠금 파일을 변경하지 않는 설치를 수행한다.
 
 ```sh
+bun --version
 node --version
-pnpm --version
 git --version
-pnpm install --frozen-lockfile
+bun install --frozen-lockfile
 ```
 
 의존성은 workspace별로 따로 설치하지 않는다.
 
 ## Workspace 구조
 
-| Workspace          | 역할                                        | 주요 개발 명령                                 |
-| ------------------ | ------------------------------------------- | ---------------------------------------------- |
-| `apps/web`         | 프로필·기술·투자 멀티도메인 Next.js 앱      | `pnpm --filter @jongminchung/web run dev`      |
-| `packages/ui`      | 공개 UI primitive·기본 theme·semantic token | `pnpm --filter @jongminchung/ui run build`     |
-| `packages/tooling` | Oxc 공용 설정                               | `pnpm --filter @jongminchung/tooling run test` |
+| Workspace          | 역할                                        | 주요 개발 명령                                |
+| ------------------ | ------------------------------------------- | --------------------------------------------- |
+| `apps/web`         | 프로필·기술·투자 멀티도메인 Next.js 앱      | `bun run --filter @jongminchung/web dev`      |
+| `packages/ui`      | 공개 UI primitive·기본 theme·semantic token | `bun run --filter @jongminchung/ui build`     |
+| `packages/tooling` | Oxc 공용 설정                               | `bun run --filter @jongminchung/tooling test` |
 
 공용 UI의 소유권, token과 component 추가 규칙은 [디자인 시스템](../DESIGN_SYSTEM.md)을
 따른다. 앱별 product component를 `packages/ui`로 옮기거나 앱에서 공용 primitive를 복제하지
@@ -39,34 +39,35 @@ pnpm install --frozen-lockfile
 변경 중에는 가장 가까운 workspace 검사를 먼저 실행한다.
 
 ```sh
-pnpm --filter @jongminchung/web run typecheck
-pnpm --filter @jongminchung/ui run build
-pnpm --filter @jongminchung/ui run test
+bun run --filter @jongminchung/web typecheck
+bun run --filter @jongminchung/ui build
+bun run --filter @jongminchung/ui test
 ```
 
 루트 검증 명령의 범위는 다음과 같다.
 
-| 명령                   | 검증 범위                                            |
-| ---------------------- | ---------------------------------------------------- |
-| `pnpm run fmt:check`   | Oxfmt 형식 검사                                      |
-| `pnpm run lint`        | Oxlint 정적 분석                                     |
-| `pnpm run typecheck`   | 루트와 모든 workspace TypeScript 검사                |
-| `pnpm run deadcode`    | 미사용 파일과 중복 export 검사                       |
-| `pnpm run links:check` | Docker 기반 Markdown·HTML 로컬 링크 검사             |
-| `pnpm run test`        | Unit·Integration 테스트                              |
-| `pnpm run test:e2e`    | build 후 앱별 Playwright E2E                         |
-| `pnpm run check`       | format, lint, typecheck, deadcode와 전체 로컬 테스트 |
-| `pnpm run check:full`  | `check`, E2E typecheck, 단일 build, core E2E         |
+| 명령                  | 검증 범위                                            |
+| --------------------- | ---------------------------------------------------- |
+| `bun run fmt:check`   | Oxfmt 형식 검사                                      |
+| `bun run lint`        | Oxlint 정적 분석                                     |
+| `bun run typecheck`   | 루트와 모든 workspace TypeScript 검사                |
+| `bun run deadcode`    | 미사용 파일과 중복 export 검사                       |
+| `bun run links:check` | Docker 기반 Markdown·HTML 로컬 링크 검사             |
+| `bun run test`        | Bun Unit·Integration과 Node package runtime smoke    |
+| `bun run test:e2e`    | build 후 앱별 Playwright E2E                         |
+| `bun run check`       | format, lint, typecheck, deadcode와 전체 로컬 테스트 |
+| `bun run check:full`  | `check`, E2E typecheck, 단일 build, core E2E         |
 
-테스트 계약은 빠른 Unit, 실제 콘텐츠·filesystem Integration, build된 앱을 검증하는 Playwright
-E2E로 구분한다. Unit coverage 기준선을 의도적으로 갱신할 때만 다음 명령을 실행하고
-생성된 `coverage-baseline.json`의 변화를 검토한다.
+테스트 계약은 Bun 내장 runner의 Unit·Integration, 공개 package의 Node runtime smoke,
+build된 앱을 검증하는 Playwright E2E로 구분한다. workspace별 Bun coverage 결과는
+`coverage/{web,tooling,ui}`에서 검토한다.
 
 ```sh
-pnpm run test:unit
-pnpm run test:integration
-pnpm run test:e2e
-pnpm run test:coverage:update
+bun run test
+bun run --filter @jongminchung/web test
+bun run --filter @jongminchung/ui test
+bun run --filter @jongminchung/tooling test
+bun run test:e2e
 ```
 
 변경 유형별 최소 검증은 다음을 기준으로 한다.
@@ -93,17 +94,17 @@ Excalidraw 정적 자산은 개발 서버와 production build의 lifecycle에서
 자산과 inline scene도 함께 검증한다.
 
 ```sh
-pnpm --filter @jongminchung/web run dev
-pnpm --filter @jongminchung/web run build
+bun run --filter @jongminchung/web dev
+bun run --filter @jongminchung/web build
 ```
 
 Web 개발 서버는 host 기반 proxy를 항상 사용한다. 기본 `dev`는 Home을 열고, 특정 사이트만
 `localhost`에서 개발할 때는 사이트 선택 명령을 사용한다.
 
 ```sh
-pnpm --filter @jongminchung/web run dev:home
-pnpm --filter @jongminchung/web run dev:tech
-pnpm --filter @jongminchung/web run dev:invest
+bun run --filter @jongminchung/web dev:home
+bun run --filter @jongminchung/web dev:tech
+bun run --filter @jongminchung/web dev:invest
 ```
 
 각 명령은 `http://localhost:3000/en`을 선택한 사이트로 연결한다. production host와
@@ -126,24 +127,24 @@ Playwright snapshot은 의도적인 시각 변경만 갱신한다. 갱신 후 �
 
 ## 의존성 변경
 
-공통 버전은 `pnpm-workspace.yaml`의 catalog에서 고정하고 workspace manifest는 `catalog:`을
+공통 버전은 루트 `package.json#workspaces.catalog`에서 고정하고 workspace manifest는 `catalog:`을
 사용한다. 내부 패키지는 `workspace:*`로 연결한다.
 
 ```sh
-pnpm outdated --recursive
-# pnpm-workspace.yaml 또는 해당 package.json의 대상 버전 변경
-pnpm install
+bun outdated --recursive
+# 루트 catalog 또는 해당 package.json의 대상 버전 변경
+bun install
 ```
 
 의존성을 추가·삭제하거나 버전을 변경할 때는 다음을 함께 검토한다.
 
-1. 해당 `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`의 일관성
-2. native install script가 필요하면 `allowBuilds`에 최소 범위만 추가했는지
+1. 해당 `package.json`, `bunfig.toml`, `bun.lock`의 일관성
+2. native install script가 필요하면 `trustedDependencies`에 최소 범위만 추가했는지
 3. dependency lane, 현재 버전과 검토한 공식 release note
 4. TypeScript 변경이면 [TypeScript 7 호환성 보고서](../apps/web/content/tech/docs/ko/fe/typescript-7-compatibility.mdx)의 현재 정책
-5. 관련 workspace 검사와 `pnpm run check:full`
+5. 관련 workspace 검사와 `bun run check:full`
 
-`pnpm run audit:prod`는 registry advisory database를 조회하므로 네트워크가 필요하다. 기본
+`bun run audit`는 registry advisory database를 조회하므로 네트워크가 필요하다. 기본
 `check`에는 포함되지 않으며 정기 점검과 릴리스 전에 수동으로 실행한다.
 
 ## Secret과 보안
@@ -162,9 +163,9 @@ pnpm install
 사용하지 않는다.
 
 ```sh
-pnpm --filter @jongminchung/ui exec shadcn add <component> --dry-run
-pnpm --filter @jongminchung/ui exec shadcn add <component> --diff
-pnpm --filter @jongminchung/ui exec shadcn add <component>
+bunx --bun shadcn add <component> --dry-run -c packages/ui
+bunx --bun shadcn add <component> --diff -c packages/ui
+bunx --bun shadcn add <component> -c packages/ui
 ```
 
 공개 패키지는 제출 전에 pack 결과를 확인한다.
@@ -178,10 +179,10 @@ pnpm --filter @jongminchung/ui exec shadcn add <component>
 - 번들러 재도입 조건은 [ADR 0001](adr/0001-node-library-tsc-build.md)을 따른다.
 
 ```sh
-pnpm --filter @jongminchung/tooling --filter @jongminchung/ui install --frozen-lockfile --ignore-scripts
-pnpm --filter @jongminchung/tooling --filter @jongminchung/ui run typecheck
-pnpm --filter @jongminchung/tooling --filter @jongminchung/ui run test
-pnpm run publish:dry-run
+bun install --filter @jongminchung/tooling --filter @jongminchung/ui --frozen-lockfile --ignore-scripts
+bun run --filter @jongminchung/tooling --filter @jongminchung/ui typecheck
+bun run --filter @jongminchung/tooling --filter @jongminchung/ui test
+bun run --filter @jongminchung/tooling --filter @jongminchung/ui publish:dry-run
 ```
 
 `@jongminchung/tooling`, `@jongminchung/ui`는 GitHub Actions의 수동

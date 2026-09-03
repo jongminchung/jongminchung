@@ -8,8 +8,7 @@ updatedAt: 2026-01-01
 status: draft
 tags: [research]
 series: optional-series
-image: /invest/note-slug.light.png
-imageDark: /invest/note-slug.dark.png
+image: /invest/note-slug.png
 imageAlt: 노트 썸네일을 설명하는 간결한 대체 텍스트
 sources:
   - kind: article

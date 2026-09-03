@@ -4,8 +4,8 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { EditorialArticle } from "#components/EditorialArticle";
 import { EditorialCard } from "#components/EditorialCard";
+import { EditorialImage } from "#components/EditorialImage";
 import { StructuredData } from "#components/StructuredData";
-import { ThemeImage } from "#components/ThemeImage";
 import { rankRelatedEditorialItems } from "#lib/editorial";
 import { toInvestmentEditorialItem } from "#lib/editorial-adapters";
 import { documentOutlineLabelsFor } from "#lib/i18n-messages";
@@ -159,15 +159,14 @@ export function InvestmentNotePage({
         variant="engineering"
       >
         <figure className="mt-0 mb-10">
-          <ThemeImage
+          <EditorialImage
             alt={note.imageAlt}
             className="aspect-[1.6] w-full rounded-[var(--radius)] border object-cover"
             data-investment-hero="true"
             eager
             height={1000}
             sizes="(max-width: 600px) calc(100vw - 32px), (max-width: 960px) calc(100vw - 64px), 760px"
-            srcDark={note.imageDark}
-            srcLight={note.image}
+            src={note.image}
             width={1600}
           />
           <figcaption className="mt-2 text-center text-xs leading-5 text-muted-foreground">

@@ -20,10 +20,7 @@ const investmentSourceKindSchema = z.enum(investmentSourceKinds);
 export type InvestmentSourceKind = z.infer<typeof investmentSourceKindSchema>;
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
-const INVESTMENT_LIGHT_IMAGE_PATTERN =
-  /^\/invest\/[a-z0-9]+(?:-[a-z0-9]+)*\.light\.png$/u;
-const INVESTMENT_DARK_IMAGE_PATTERN =
-  /^\/invest\/[a-z0-9]+(?:-[a-z0-9]+)*\.dark\.png$/u;
+const INVESTMENT_IMAGE_PATTERN = /^\/invest\/[a-z0-9]+(?:-[a-z0-9]+)*\.png$/u;
 const investmentNoteIdSchema = nonEmptyTrimmedStringSchema.regex(
   SLUG_PATTERN,
   "has an invalid ID.",
@@ -65,8 +62,7 @@ const investmentNoteShape = {
   status: publicationStatusSchema,
   tags: uniqueStringArraySchema("tags"),
   series: nonEmptyTrimmedStringSchema.optional(),
-  image: z.string().regex(INVESTMENT_LIGHT_IMAGE_PATTERN),
-  imageDark: z.string().regex(INVESTMENT_DARK_IMAGE_PATTERN),
+  image: z.string().regex(INVESTMENT_IMAGE_PATTERN),
   imageAlt: nonEmptyTrimmedStringSchema,
   sources: z.array(investmentSourceSchema).min(1).readonly(),
 } as const;

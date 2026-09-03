@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import {
   findInvestmentNote,
   getInvestmentNotes,
@@ -16,6 +16,7 @@ describe("투자 노트 Fumadocs 어댑터", () => {
   it("[성공] 컴파일된 투자 노트 본문을 로드함", async () => {
     const note = findInvestmentNote("en", "latency-and-discipline");
     expect(note?.id).toBe("latency-and-discipline");
+    if (note === null) throw new Error("expected investment note fixture");
 
     const loaded = await loadInvestmentNote("en", "latency-and-discipline");
     expect(loaded?.metadata).toBe(note);
@@ -33,6 +34,6 @@ describe("투자 노트 Fumadocs 어댑터", () => {
 
   it("[실패] 없는 투자 노트는 로드하지 않음", async () => {
     expect(findInvestmentNote("en", "missing")).toBeNull();
-    await expect(loadInvestmentNote("en", "missing")).resolves.toBeNull();
+    expect(await loadInvestmentNote("en", "missing")).toBeNull();
   });
 });

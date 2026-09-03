@@ -69,11 +69,11 @@ Override any semantic token by importing application styles afterward:
 
 ```css
 :root {
-  --primary: oklch(0.55 0.2 265);
+	--primary: oklch(0.55 0.2 265);
 }
 
 :root[data-theme="dark"] {
-  --primary: oklch(0.72 0.15 265);
+	--primary: oklch(0.72 0.15 265);
 }
 ```
 
@@ -94,9 +94,9 @@ CLI from this workspace, inspect the dry run, and review generated dependencies 
 committing:
 
 ```bash
-pnpm --filter @jongminchung/ui exec shadcn add <component> --dry-run
-pnpm --filter @jongminchung/ui exec shadcn add <component>
-pnpm --filter @jongminchung/ui exec shadcn add <component> --diff
+bunx --bun shadcn add <component> --dry-run -c packages/ui
+bunx --bun shadcn add <component> -c packages/ui
+bunx --bun shadcn add <component> --diff -c packages/ui
 ```
 
 `apps/web/components.json` describes consumer aliases and is not the add or update entry point for
@@ -106,8 +106,8 @@ merging local accessibility, semantic token, and public API decisions.
 ## Build and pack
 
 ```bash
-pnpm run build
-pnpm publish --dry-run --access public
+bun run build
+bun publish --dry-run --access public
 ```
 
 The package includes compiled ESM JavaScript, generated declarations, source components for
@@ -123,7 +123,7 @@ contents, and integrity. Force a new resolution and commit the updated downstrea
 replacement is published:
 
 ```bash
-pnpm update --force @jongminchung/ui@1.0.0
+bun update --force @jongminchung/ui@1.0.0
 ```
 
 This policy is limited to source-first workspace consumers and explicitly coordinated personal

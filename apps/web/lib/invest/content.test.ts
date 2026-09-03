@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import {
   parseInvestmentNoteMetadata,
   validateInvestmentNoteBody,
@@ -13,8 +13,7 @@ const metadata = {
   updatedAt: "2026-08-16",
   status: "published",
   tags: ["risk"],
-  image: "/invest/margin-of-safety.light.png",
-  imageDark: "/invest/margin-of-safety.dark.png",
+  image: "/invest/margin-of-safety.png",
   imageAlt: "A protected stack of capital representing margin of safety",
   sources: [
     {
@@ -71,6 +70,27 @@ describe("투자 글 계약", () => {
         updatedAt: "2026-08-15",
       }),
     ).toThrow(/precedes/u);
+  });
+
+  it("[실패] 과거 테마별 이미지 계약을 거부함", () => {
+    expect(() =>
+      parseInvestmentNoteMetadata({
+        ...metadata,
+        imageDark: "/invest/margin-of-safety.dark.png",
+      }),
+    ).toThrow();
+    expect(() =>
+      parseInvestmentNoteMetadata({
+        ...metadata,
+        image: "/invest/margin-of-safety.light.png",
+      }),
+    ).toThrow();
+    expect(() =>
+      parseInvestmentNoteMetadata({
+        ...metadata,
+        image: "/invest/margin-of-safety.dark.png",
+      }),
+    ).toThrow();
   });
 
   it("[실패] 불법 체류자격 및 자격 증명이 포함된 소스 URL이 있음을 증명함", () => {

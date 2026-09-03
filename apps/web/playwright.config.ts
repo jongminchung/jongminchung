@@ -23,7 +23,7 @@ export default defineConfig({
   },
   webServer: {
     command:
-      "PLAYWRIGHT_TEST=1 pnpm run build && PLAYWRIGHT_TEST=1 PORT=3100 pnpm run start",
+      "PLAYWRIGHT_TEST=1 bun run build && PLAYWRIGHT_TEST=1 PORT=3100 bun run start",
     port: 3100,
     reuseExistingServer: !process.env.CI,
     timeout: 300_000,

@@ -1,9 +1,9 @@
+import { describe, expect, it } from "bun:test";
 import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/postcss";
 import postcss from "postcss";
-import { describe, expect, it } from "vitest";
 
 const root = resolve(fileURLToPath(new URL("../../..", import.meta.url)));
 const read = (path: string): string =>
@@ -196,8 +196,8 @@ describe("공통 디자인 토큰 계약", () => {
     );
     expect(webTheme).toContain('@source "../components/**/*.{ts,tsx}";');
     expect(webTheme).toContain('@source "../mdx-components.tsx";');
-    expect(uiPackage.exports).toHaveProperty("./globals.css");
-    expect(uiPackage.exports).toHaveProperty("./root.css");
+    expect(Object.hasOwn(uiPackage.exports, "./globals.css")).toBe(true);
+    expect(Object.hasOwn(uiPackage.exports, "./root.css")).toBe(true);
     expect(sharedRootFacade).toContain("Deprecated compatibility facade");
     expect(sharedRootFacade).toContain('@import "./globals.css";');
   });

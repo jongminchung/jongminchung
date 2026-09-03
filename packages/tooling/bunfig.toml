@@ -1,0 +1,11 @@
+[test]
+coverage = true
+coverageReporter = ["text", "lcov"]
+coverageDir = "../../coverage/tooling"
+coverageSkipTestFiles = true
+coverageThreshold = { lines = 1, functions = 1 }
+coveragePathIgnorePatterns = [
+  "**/*.d.ts",
+  "**/fixtures/**",
+  "**/__fixtures__/**",
+]

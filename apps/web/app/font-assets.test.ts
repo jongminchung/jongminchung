@@ -1,7 +1,7 @@
+import { describe, expect, it } from "bun:test";
 import { createHash } from "node:crypto";
 import { readFile, readdir, stat } from "node:fs/promises";
 import { resolve } from "node:path";
-import { describe, expect, it } from "vitest";
 
 interface FontAssetBudget {
   readonly schemaVersion: number;

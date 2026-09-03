@@ -1,14 +1,14 @@
 # `jongminchung` 기술·아키텍처·유지보수 온보딩
 
-> 기준일 `2026-09-01` · 저장소의 manifest, 설정, 소스와 workflow를 기준으로 검증함
+> 기준일 `2026-09-03` · 저장소의 manifest, 설정, 소스와 workflow를 기준으로 검증함
 
 ## 핵심 요약
 
-- **이 저장소는 `pnpm` 모노레포이며 `apps/web`, `packages/ui`, `packages/tooling`의 세 workspace를 하나의 루트 검증 계약으로 관리함**
+- **이 저장소는 Bun 모노레포이며 `apps/web`, `packages/ui`, `packages/tooling`의 세 workspace를 하나의 루트 검증 계약으로 관리함**
 - **Web은 React 19와 Next.js 16 App Router로 구현된 단일 배포물이며 요청 Host에 따라 Home·Tech Docs·Invest 사이트를 분리함**
 - **콘텐츠는 외부 CMS나 데이터베이스가 아니라 저장소의 MDX·Excalidraw 원본이며 Fumadocs와 Zod가 빌드 시 구조와 게시 계약을 검증함**
 - **스타일은 Tailwind CSS 4의 CSS-first 방식과 `@jongminchung/ui`의 semantic token·Base UI primitive를 사용하며 제품 조합은 `apps/web`이 소유함**
-- **일상 변경은 가장 가까운 workspace 검사 후 `pnpm run check`로 닫고 route·UI·배포 변경은 build와 Playwright E2E까지 검증함**
+- **일상 변경은 가장 가까운 workspace 검사 후 `bun run check`로 닫고 route·UI·배포 변경은 build와 Playwright E2E까지 검증함**
 - **이 문서는 arc42의 12개 관점과 C4의 Context·Container·Component 관점을 연결하며 모든 다이어그램은 수정 가능한 PlantUML 원본을 가짐**
 
 ## 문서를 읽고 첫 실행까지 완료함
@@ -30,11 +30,11 @@
 
 ### 개발 환경을 저장소 계약과 일치시킴
 
-- **정확한 로컬 기준은 `.node-version`의 Node.js `26.7.0`과 루트 `package.json#packageManager`의 pnpm `11.15.1`임**
-  - 루트 engine은 Node.js `>=24.0.0`, pnpm `>=11.13.0`의 허용 범위를 제공하지만 재현 가능한 온보딩에는 고정 버전을 권장함
-  - Node.js의 역할은 Next.js 실행, Fumadocs 콘텐츠 컴파일, Vitest와 저장소 script의 런타임 제공임
-  - pnpm의 역할은 workspace 연결, 단일 lockfile, `catalog:` 버전과 filter 기반 명령 실행임
-  - 공식 학습 자료는 [Node.js 문서](https://nodejs.org/docs/latest/api/)와 [pnpm workspace](https://pnpm.io/workspaces), [catalog](https://pnpm.io/catalogs), [filter](https://pnpm.io/filtering) 문서임
+- **정확한 앱·도구 기준은 `.bun-version`과 루트 `package.json#packageManager`의 Bun `1.4.0`임**
+  - 루트 engine은 Bun `>=1.4.0`의 허용 범위를 제공하지만 재현 가능한 온보딩에는 고정 버전을 권장함
+  - Bun은 workspace 연결, 단일 lockfile, catalog·filter 명령과 Web의 Next.js main·standalone 런타임을 제공함
+  - `.node-version`의 Node.js `26.7.0`은 Fumadocs·Turbopack loader worker, 공개 `packages/*`의 호환 테스트와 게시 후 소비자 검증에 사용함
+  - 공식 학습 자료는 [Bun runtime](https://bun.sh/docs/runtime), [workspace](https://bun.sh/docs/pm/workspaces), [catalog](https://bun.sh/docs/pm/catalogs), [filter](https://bun.sh/docs/pm/filter) 문서임
 - **일반 로컬 개발에는 애플리케이션 secret이나 외부 데이터베이스가 필요하지 않음**
   - 코드가 직접 읽는 개발 선택값은 `JAMIE_LOCAL_SITE`이며 `dev:home`, `dev:tech`, `dev:invest` script가 안전한 값으로 설정함
   - `VERCEL`, `CI`, `PLAYWRIGHT_TEST`, `NODE_ENV`는 배포·CI·테스트 도구가 설정하는 실행 경계임
@@ -44,10 +44,9 @@
 ```sh
 git clone https://github.com/jongminchung/jongminchung.git
 cd jongminchung
-npm install --global pnpm@11.15.1
+bun --version
 node --version
-pnpm --version
-pnpm install --frozen-lockfile
+bun install --frozen-lockfile
 ```
 
 - **설치가 실패하면 lockfile을 재작성하기 전에 런타임 버전과 registry 접근 여부를 먼저 확인함**
@@ -60,7 +59,7 @@ pnpm install --frozen-lockfile
 - **첫 실행은 Home 하나를 loopback Host에서 여는 다음 명령으로 시작함**
 
 ```sh
-pnpm --filter @jongminchung/web run dev
+bun run --filter @jongminchung/web dev
 ```
 
 - **개발 서버가 준비되면 Host별 공개 경계를 확인함**
@@ -71,9 +70,9 @@ pnpm --filter @jongminchung/web run dev
 - **하나의 사이트만 `localhost`로 확인할 때는 명시적 site 선택 script를 사용함**
 
 ```sh
-pnpm --filter @jongminchung/web run dev:home
-pnpm --filter @jongminchung/web run dev:tech
-pnpm --filter @jongminchung/web run dev:invest
+bun run --filter @jongminchung/web dev:home
+bun run --filter @jongminchung/web dev:tech
+bun run --filter @jongminchung/web dev:invest
 ```
 
 - **첫 코드 탐색은 다음 파일을 순서대로 열어 요청이 화면으로 바뀌는 경로를 따라감**
@@ -86,9 +85,9 @@ pnpm --filter @jongminchung/web run dev:invest
 - **기본 상태 확인은 가장 가까운 Web 검사와 저장소 전체 검사로 완료함**
 
 ```sh
-pnpm --filter @jongminchung/web run typecheck
-pnpm --filter @jongminchung/web run test
-pnpm run check
+bun run --filter @jongminchung/web typecheck
+bun run --filter @jongminchung/web test
+bun run check
 ```
 
 ## 목표·제약·시스템 경계를 파악함
@@ -111,9 +110,9 @@ pnpm run check
 ### arc42 2 · 기술과 조직 제약을 변경 전에 확인함
 
 - **루트 `package.json`은 저장소 전체 orchestration만 소유하며 단일 workspace 명령의 전달 별칭을 만들지 않음**
-  - 단일 workspace는 `pnpm --filter <package-name> run <script>` 형식으로 실행함
+  - 단일 workspace는 `bun run --filter <package-name> <script>` 형식으로 실행함
   - package script를 실행할 때는 시스템 명령과의 충돌을 막기 위해 `run`을 생략하지 않음
-  - 공통 버전은 `pnpm-workspace.yaml`의 strict catalog에 고정하고 내부 package는 `workspace:*`로 연결함
+  - 공통 버전은 루트 `package.json#workspaces.catalog`에 고정하고 내부 package는 `workspace:*`로 연결함
 - **Web 코드를 변경하기 전 설치된 Next.js 버전의 로컬 문서를 우선 확인해야 함**
   - `apps/web/AGENTS.md`는 현재 Next.js의 breaking change 가능성 때문에 `apps/web/node_modules/next/dist/docs/`를 기준으로 작업하도록 요구함
   - 온라인 공식 문서는 개념과 최신 공개 설명에 유용하지만 실제 코드 변경은 lockfile에 설치된 버전과 로컬 문서가 우선함
@@ -132,7 +131,7 @@ pnpm run check
   - 기여자의 변경은 GitHub와 CI를 거쳐 검증됨
   - 외부 소비자는 Web이 아니라 GitHub Packages에서 두 package를 받음
   - PlantUML 다이어그램은 정적 이미지가 아닌 Kroki URL을 통해 브라우저에서 렌더됨
-- ![jongminchung 시스템 컨텍스트 C4 Level 1](https://kroki.io/plantuml/svg/eNptlN9u2kgUxu95irO-IpKVtlIuV6tUJBuipQ0C0u5eIccZETfGzuIBpXdugColqcKqkDWRYV2J3dAVlSiQmtWmNzyO5_gddsfhX0qv7JnRfN_55vxm1g0q5Wg-q4a-UzRZze8T-D6y9iCylo7oGiXH9IdQiCpUJfBC1zJZRZMP8loG8MzGStsv24D_dvzyWz6ojGDsQmQNYqRAVHgUCsUe_7Kzm0rHNn9MpRPbW9FUeCUUipOcoWvhgmIoVM-JILDeB9YdYasqiCD4ddu7-YiXw7GL1iu8HLL3NkT1LBEhReQD2NBlQ4RtrUAMCvjF8stVHDnsz1vwi1UsvvHrHWFl6pGVFI1Kika4jTfq4e9dbFXHLtoOXptsMMRTa-KbenlEknJOOeKqNfbOFuHJxs9zBxF2t8E_7_gnbbw2sWECtqrsouE3atycDUyv_-XOPPnSoCQbXjyv_-0Xh3dBLXZiYdOCp-SYrr4wgPV6_kWXdW-9wS2w36rg9Wy-7g1u0Hbm5twPX5-j7XCNSg2OtKMssL87rDxizql_0Z0Vkd48puGMQg_yeyIIWwqN5ve4Od9eaY_deF5VIUF-zRODjt3HMlV0zRi7cUk-lDLECJwc2xvcLCYLRAskJxNVBOFZ8APMqvJSdiLbwP7o-UUTWyXuNA33nOwB1j9hszTJ6dctb-BANJWKJwGvatj_yBexb7G_ukt2hzn9UBFB-Il_uW5clTS6-yQ26RavNPlsi8PCnHP2tsauXy2JyLpm5LMBDNgYsc8mP0b2Twn8Wom9t9Fp-pURF19fbNaDvMLbfX-O6rqqaJmg4pMuXn24MwsliDon-ysCZixNUOVOQXxhJdi3SOvSVh5y7PJ7UrIntAl3LRWD_n9DY9b3eAK8vum_dgJsTy120ZjTBF7_HM9swLO2f7lU01Tjq3q8vsljN8wlHWHGGUxwmijdV5jhE3Bx0sPPNuveTtBY5CYraVKG7E_5Mqik7UuqrpFvyk4xYWdtbA7xcui5I9bqwG4iBlhsYunTPXb0AsnBYtw5IbPD8wYOOnV4tPpw9SFgpc2KZSy6wB2u-OPE3i1mnt4czkIyuvM8Hdvc2ny6EV4JrRNtnz-z_wFWRIWf)
+- ![jongminchung 시스템 컨텍스트 C4 Level 1](https://kroki.io/plantuml/svg/eNptlFtPGkEUx9_5FKc8aUK8JD42jRatmHohXLR9MogTXF12Lbtr9A0FjPUSTQp2MavdJrRigwmKCk31hY_DzHyHnlm5eXkgy8zu-f_PmfObM6zpkYRuxGXXG0mJysYigbfeoX7v0LxXVXSyrr9zuXRJlwksq0osjt8sGUoM2J7Fdgs8YwH7V-SZA7HYrUG9Ct4hmCRrRIZBl2ty5PNMODQ_OfYhNB-YGPeFenpdLj9JaKrSsyZpkq4mPOCm5QtaqrGzIzcueM5q3F6y45t6lZmb-KQ_LfCpceKBEIkuwaga1TwwoawRTQf2YPLMEavZ9Nc98NQRS33luaK7t-URj0iKjj8ibBq1MvteQhtUtmx2nqSVG7ZjNn1DG6skGE1Iq0I1S79ZHpga_dRx8EB4Avh-kW8VMJTlk4CB9DDP81lhTivJxvXDo3lwQ9NJvKf7vNCgeykM3xsKzJEFoOUyPyzR0n2jcg_TKp4_N2s8b0Kjcot5djyFDdvexz2eM-luFuifIs3UqL2D8W3b-bF1vScm6UvGApqMS7rPWBB2InK3UK_6DVmGAPli4PnVqyNRXVIVDbcj0ZVIjGiOiW2hd3ctjugaSUSJjFKzzh-g5pHIYsY7AfRHmaeS7CwtnKYRmr5lzSmO5a7YabpZI6bdqNjgC4X8QWAnWXZ9KV6ya5P-Lr2wW0moKxLKfRRPoeuXI4oenpps9kdkGpwdF3hQe58eZOn55guRKBZnxJ32s3yN3iXFCdK_aeDZNEYy-xSpFeLD3e3pNyTR4Kd7uqrKkhJzMt4qsZOLRzNXgMgdlp_1vE1PE07h5JSPgSKum88XoaLIelXcjLTV5Mv92FIPIDyvSLTb7g9A4zrJt22H0x0TOe1whK_28friFS7w4xcptTSepYNyomqUe67jbmMGTZqaSk8V2vQ4WGyV2Z2FzDfJ6MYmHlEQxMUWXjielMWIrCrkVdkWJXSvwE5vcFw0qjV6VoRwADlJnbL01RN0VEwDusvtANI-PGSU2TkY7BvoGwC8MzSVYakqCIcTMY2wLV01ty6OQCHom5nDYTc-Nj2Kg26YKItirv4HFcR8BQ)
   - 수정 원본은 [`diagrams/onboarding-context.puml`](diagrams/onboarding-context.puml)임
 - **Vercel Git 연동과 OCI image 배포 대상의 세부 설정은 저장소 밖에 있을 가능성이 있으며 문서의 연결선은 코드와 `vercel.json`·Dockerfile에 근거한 추론임**
   - 저장소 안 GitHub Actions의 `Web` workflow는 검증을 수행하지만 production 배포 명령은 포함하지 않음
@@ -165,7 +164,7 @@ pnpm run check
   - `packages/tooling`은 Oxfmt·Oxlint의 공유 설정 API를 소유함
   - `apps/web/content`는 사람이 수정하는 MDX 원본을 소유함
   - 루트 script와 GitHub Actions는 여러 workspace를 묶는 검증·게시 흐름을 소유함
-- ![jongminchung 컨테이너 C4 Level 2](https://kroki.io/plantuml/svg/eNqNVdFO40YUffdX3PopqdyutOKpqip2QxZoYUEkbOkTcpzZZBZ7xrLHhGhVKUBSIUi7qQRdYBNqJLZAlaoRya4tLX3x58Tjf2jHCRAKrfYp0njOPXfOOfdm3GaqxRxDlz7BRNOdPIIvU2MPUmPLKUqYigmyvpIkhpmO4AUlBQMTreiQAvAPZ1Gtzlu9sLoFgQepMZhBq0iHh5I08-i7ucXs8kz6SXZ5YXpyKptIStI8smxKEqvYxoxaCshh5zxs-_yoISevPhoqHpIqIPf9Dn_d5keNwONNl59Wwm6Pb-0PAJmyzZCxnF5jiRWLrmAF5G_Er6yAPK-rhC3OzkDm2SSEbj38cTf8tX0bZKrailpAtgLyJGZTTg7mhyeiQr_T5C0fwotd3qwCMQ2wUAHbzCrLSemqzGPqkLxqlRMWMmn8qPI_0Fsihb-fhTU_dLeiV205CS8lgGtZEyWUU0AeHwU8KKGc4H-K1tjnL2wFFpCqMQWyZRNlNAubTHydojbjBxXQqabqiLeqEL6v9v1OtLff77owRQ0UeFmkFQNvmqwim0F0sBue9_rdS-A7Tb59EtWaYFGHofDtJXC32e--i_bO5OSt_jRKGCJMAZn_tR_VGtx3gb9phF1fNDE7saTA15m5pwqk1zRVx3lLLclD27ZcENZWm4EX-rvhcbPv-YEXbQk3Iaz50bYvHhDunPBWj__S63t-eHQWv6Tb6_cqd5tx8B2tnNjsK4VUrJcwyUMqk1HgsWojWJyO2-m-400XTAsbmOFVFHg2MlTCsAaMriASeNyt8td_gJBls8Jbl6KN_9KEUapjUrjTy_BcEM6tPTeYAnNrOibsqoPDc4j29_hOS9DtcXddWMarLeDVE3HwP5Sqw6ihMkyJcMKt8KO3_Ic68KNG-OogOtgVFCYxDQWeYYZspsC8rpZLFi4UmQLDcD_SRIFBti8qfKMdeOmH6cALT9ej9TZwt9G_qAReVD-LNk74aQX6F3W-04zjcdzh7t6gr-8laQHpNzM8iDDfaPNWL9r2Qbh5eB5nNJudz8jJ-ProVN-EanZiSWSAHzX4Rgein3x--rM8GMd7cAOmOLOBp1HDpAQRFnh5Km6B5ejo3hox7obU1orIUEFo8FsLojdV4B96Ub3OW5eBx4870WFd4J84hpqnmg2zE0ujheIU2tSxNPTZc2zZDGwnZ6qsCNgwqRXbXaLWim2qGvri01Ho1Za6Xk5idf7pC60XF2bEUPD3zX8rN-r9QAFWNpFWRNpK4DkEs8DDhKGCFd8JvJyD9Xxs7T0F4uZH8CIs1xDTyenYLt4Du4n8x2EFzch2TWdmAy-VyYj5CjdrfNMbZku8VWxW06KMalQfwq_pbtcYDsrHVJEyU3PfLs-kJ9NPJxJJaRyRvPh_-xsGKwQk)
+- ![jongminchung 컨테이너 C4 Level 2](https://kroki.io/plantuml/svg/eNqNVd9PG0cQfr-_YuonUrmNFPFUVRWBOEDLL2GTtk_oOG_sje9urbs9wIoqOWAqFNyGStAYYlMjkQYqqrrYyZ0U-nJ_jnfvf-js2YApNMrTnXbnm_lm5pvZEZfrDvcsU_uE2obpZQl8OTZ8d2x4cYzZXKc2cb7SNE65SeAJs3MWWuU9Owfy_XG0UZWNjqhsQujD2DBMkWViwj1Nm7r__exCZnEq9TCzOD85PpEZuqNpc8RxmT20TF3KmZOEhGidiNNAHmwn7lxcWhiwFxTvu0FLvjzF-9CX9aZ8Uxbtjtys9QDpksuJtZha5UMFhxUo2n-jvgn8mTN1my9MT0H60TiIZlX8tCN-O70OKupGQc8RF83HKZ_wlmCuf6I8dFt12QhAnO3IegXsogUOyVGXOyX0cuFmlHl2VndKQw4psjipEkKvFUn8cSw2AtHcjF5gfHiqAVyWdWiFLKH9yCDgLp6p-DNklX_-BMnNE93gSciUiiRtOLTI1e0Ec7ncK4PJDN0kslEB8a6C1Yp2a912EyaYRUI_Q4x86E_ay8TlEO3tiJNOt30Ocqsunx9FG3VwmMeJeI1HzXq3_TbaPcbcBvkZ-EdsjJ6Q_9SijW0ZNEG-2hbtQJGYfvBdEr5Oz84kIbWKPGjW0VcS_bZtNkG1tlIPfRHsiMN61w9CP9pU3QSsSPQ8UAmIrSMUkPy1g9fi4DjOpN3pdso3yXj0Rq28uNkXFdKpuULtLIyl00kY1V0CC5MxnfZbVA8UHWpRTpexMi6xUB_UAM4KxEZxNSvy5Z-gyrJelo1zReP_asIZM6mdu8Glf64Czq4-tpDQ7Coe8AsG-ycQ1XblVkOF25XNZ6plstIAWTlSBx8IqXucWTqnzFadaJblwWv5YxWwkuLFHjZWhRj18HKGZUksmkeUY9OTgHNQWnFoLo__fZHfN5Qjt48Bufu3EoVCIr8g2qtBVD2O1o5w2mSjBt2zslw7Df3uWRWFE4vlsIV8eyx_0LR5Yl5NdE_QCMCmYodB9Xb_JFZsJjOXRoQyH5zxK4mhnJQiMCu51oLo50C--SXRG85bcL1IsYJD32BWkdnoJvSzTFmB4-G2us1HjLsK6hp51EKc5e8NiF5hE953oiputXPs02Er2q8q_EPP0rPMcAFJDjqKNekyzzHIZ4-pg3PmektFneeBIiMnbv4KcwouLhvyxaeD0Iuddbmq1CL9CwmXYWF-So2IfFf_b-UGldCrAMe9gDkYhdD3bIoFwBKRnBPbhP6SR81s6KfupW5xEJMfwCvJXEKK3pJJ3fwtsKsB-DisCjOwa1Pp6dDHEVXTJtY35LoPPW2pXNWeLTqMM4OZffhluOs--mPzMV609MTst_gUjadmHuAzNELsrHrt_gVy2Ahq)
   - 수정 원본은 [`diagrams/onboarding-containers.puml`](diagrams/onboarding-containers.puml)임
 - **변경 위치는 재사용 횟수가 아니라 추상화 책임으로 결정함**
   - 제품 이름·locale 문구·site navigation·콘텐츠 의미가 있으면 `apps/web`에 둠
@@ -184,7 +183,7 @@ pnpm run check
   - 수정 원본은 [`diagrams/onboarding-web-components.puml`](diagrams/onboarding-web-components.puml)임
 - **새 기능은 route에서 모든 로직을 작성하기보다 규칙의 수명에 맞는 계층으로 분리함**
   - HTTP parameter와 redirect·not-found는 route에 둠
-  - 반복 계산과 validation·ranking은 `lib`의 순수 함수로 두고 Vitest로 검사함
+  - 반복 계산과 validation·ranking은 `lib`의 순수 함수로 두고 Bun 내장 test runner로 검사함
   - 사용자 interaction과 시각 조합은 component에 두고 필요한 경우에만 client boundary로 만듦
   - 재사용 가능한 접근성 primitive가 없을 때만 `packages/ui`의 shadcn source workflow를 사용함
 
@@ -211,14 +210,14 @@ pnpm run check
 - **Web은 Vercel managed output과 Next.js standalone container의 두 빌드 경계를 코드로 지원함**
   - `VERCEL=1`이면 Vercel adapter가 output을 구성하도록 `output: standalone`을 생략함
   - 그 외 build는 monorepo tracing root를 가진 standalone output을 생성함
-  - `apps/web/docker/Dockerfile`은 Node 26 Alpine, non-root 사용자, `PORT=3000`, multi-stage build를 사용함
+  - `apps/web/docker/Dockerfile`은 Bun 1 Alpine, 비루트 `bun` 사용자, `PORT=3000`, multi-stage build를 사용함
   - `/healthz`는 공통 JSON health endpoint이며 Host rewrite보다 먼저 통과함
 - **공유 package 게시와 Web 배포는 서로 다른 운영 흐름임**
   - `Publish Packages` workflow는 수동 실행되며 `tooling`, `ui`를 검사한 뒤 기존 `1.0.0`을 삭제하고 다시 게시함
   - Web의 `Web` workflow는 PR·main push·주간 schedule에서 typecheck·test·build·E2E 또는 콘텐츠 evidence를 수행함
   - `Links` workflow는 Markdown·HTML 로컬 링크를 검사함
   - `Waka Readme` workflow는 README 통계 구간을 갱신함
-- ![배포 관점](https://kroki.io/plantuml/svg/eNp1VF1PE0EUfd9fcd0nmhQoSHwwxmAKARKFBgg8NtvdSzuynWlmZ0FiSCqiQWhCE1v5SKk1EUXTxAXBYoIv_Tk70_9gdim01Pi2uXPPOfeeObOjjjC4cLO2do9Q03YthEfxkcH4SHIMczZbyyIVjzVNEGEjSM9r7dbBP8-rWhGaDTC4OTIMnU5YILiqaQnkDqN9Fq6gzXLIo6D7l57aq6tqUY9oc2uOwGxy_IXoSxORcVNR0CeImHRToGp5VT1WbwvNxhNTEEYdPaJpHYHkNLOwbwW5iXYU9IXwQ4-C_sygRhotmMYXYuC5A9ylgmRRj8BLDSDOqDAIRd6GLmKguYgpsG6pA5YbdLbNxlyRc8OTayUwLCMnkPteHvyLuto8bZUrEPCo8qke0db_nZWZJAq6LORVeQtm4lPQOtj3z_4EnLdT9UzbS2He9EVBp8zCh8MP-g07RyjqYYX2c8YEuMSCoVhsKAqJmdl5uB-LxdqE3QY4wqCWYTOKHRM6tW4TOlVwkK8gDw5Vraxqr0BVi2rD839eQc5N2cQEWSrJ2rvWpie_1OXxFbR2663ySeCO_Oi1XudVdVOPaADrgUddAUhxtuqEm6mNujr8pqpFkJcFeXSlDj1Vy9-NC8c0cQRf6wQmYZjLRhrDmMyi3Z2522zlXCfTbCRmm41VxpeXbLaatIiTM4SZ0SMh6qa1Ox0TRIDa8-TuQTv38lMF1K-SqpVl8eTai3ZYQXofQG1-VrVyD2Gv22PMXEa-RGwM2Y7O5Y9L9TUP8ndBvq-A7-Xl9nHALb-_UTuVwOr2o1PVotw9aB2U5HYJ7ii3JW-d7F5ikmWx2ZhHM9NsTNEVdMIwT87PJ-Z6Yb2j_h86GOKB0DRHx-nZuOuKBGM2oelmwyXqaB-GBmIDMfAviursHPyzgtqphC5u7Qcedz33ucmZxeTT8Ynx6bG-iDaK1Ar-T38BalPryQ)
+- ![배포 관점](https://kroki.io/plantuml/svg/eNp1VF1PE0EUfd9fce1TSaQU7ZMxBi2Ekig00MBjs90dysp2ZrM7WyCGpGI1iE1oYisfKVgTUTRNXBAtJvjSn9OZ_gfv1tIuNb5sJnPvOffOuefuhMNVm7s5U7llUM10dQL347GxeCw9SSyTbeQI5Q8UhRvcJCA8r7PbgPZFQdbL0GqCamuxOzDIhEWDrClKktgOo2Gd5InJLGLfhlD70pN7DXlcDo0oCxsOJ7n01DoPZw2-4mYwPm3whJsBWS_I4xP5qtRqPtS4waiD-cqgQHqW6SScJ7ZGTEQtdg8hPD1RqZolOjxyKYyD7VJu5EhoBJ4pAHFGuWpQYveAS8SviF_Q-8Q-xyxZ55GnDuR6XMzllsuBUZ811C8Hqq5anNhtrwDtHw1ZPOtUa-DTyeoZtrv5b8NMMxAuSgVZ3Ya5-Ax0Dvbb5799zn5zQ00PU2jXeYhheULHMi69Nx6JRaKjqmlhwCejjI7ajHHAILiOn5ycm0_B3Wg02uMNyoGzp7pqMkoGkgzugpIMbgFZUUY_KOtVWX8OOFS55bW_X4HlZkxDA1GpiPrrTtETnxri5ArQM53qqS-SeO91XuCEiygTwKYvVcAMGZutdXsOya2GPPyCxCAuS-LoSh566Iyb1rFJ1nC4vTEwT1LVVnFwXcvMEzPov77PLNdZaTWT863mGrNXl022ltYNx1K5toIwH3WdGvQKFgC554ndg94OiA81kD8rqIAon_7VomdcTHgHsvgRQ0OEw2pPMm2V2MuGSbpsRxfi26X8XADxqyTe1gDtJXZOfG7x9aV8U_Ol7i0gCoOtdA4qYqcCNyr3SvaVDD4iwXKk1UwRDQWYoXnidE2fSKWSC8Ow4Vb_Dx3r4sGgWZs4ztCLAyPijJmY1Gq6hjzah_FINBLF7SnL8wton5fwfV0Vt_d9jQOrv5CYW0o_npqemp0MjygThOr-v-oPzI3v5g)
   - 수정 원본은 [`diagrams/onboarding-deployment.puml`](diagrams/onboarding-deployment.puml)임
 - **배포 전에는 [Next.js 배포 공식 문서](https://nextjs.org/docs/app/getting-started/deploying), [Vercel Next.js 공식 문서](https://vercel.com/docs/frameworks/full-stack/nextjs), [GitHub Packages npm 공식 문서](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry)를 현재 운영 설정과 함께 확인함**
   - 공식 문서는 가능한 배포 방식을 설명하지만 실제 project ID·domain·rollback·registry retention은 저장소 밖 운영 설정이 최종 기준임
@@ -262,14 +261,14 @@ pnpm run check
 - **공유 primitive 추가는 dry-run → 실제 생성 → diff 검토 순서로 수행함**
 
 ```sh
-pnpm --filter @jongminchung/ui exec shadcn add <component> --dry-run
-pnpm --filter @jongminchung/ui exec shadcn add <component>
-pnpm --filter @jongminchung/ui exec shadcn add <component> --diff
+bunx --bun shadcn add <component> --dry-run -c packages/ui
+bunx --bun shadcn add <component> -c packages/ui
+bunx --bun shadcn add <component> --diff -c packages/ui
 ```
 
 ### arc42 8 · TypeScript·콘텐츠·국제화 계약을 이해함
 
-- **TypeScript `6.0.3`은 `strict`, `noUncheckedIndexedAccess`, `noUnusedLocals`, `noUnusedParameters`, `verbatimModuleSyntax`로 경계를 강제함**
+- **TypeScript `7.0.2`는 `strict`, `noUncheckedIndexedAccess`, `noUnusedLocals`, `noUnusedParameters`, `verbatimModuleSyntax`로 경계를 강제함**
   - root·Web typecheck는 emit 없이 오류를 찾음
   - 공개 package build만 `tsconfig.build.json`을 통해 ESM JavaScript와 declaration을 emit함
   - type assertion으로 오류를 숨기기보다 외부 입력을 Zod나 type guard에서 좁힘
@@ -291,11 +290,11 @@ pnpm --filter @jongminchung/ui exec shadcn add <component> --diff
 
 ### arc42 8 · 테스트·정적 분석·의존성 자동화를 이해함
 
-- **Vitest `4.1.10`은 순수 규칙과 component 계약을 빠르게 검사하며 unit과 integration project를 분리함**
-  - unit은 `*.test.ts(x)`, integration은 `*.integration.test.ts(x)`를 사용함
-  - coverage는 Web `lib`, UI, tooling별 threshold를 적용함
-  - baseline은 의도적으로 품질 기준을 바꿀 때만 `test:coverage:update`로 갱신함
-  - 공식 자료는 [Vitest 시작 문서](https://vitest.dev/guide/), [workspace projects](https://vitest.dev/guide/projects), [coverage](https://vitest.dev/guide/coverage) 문서임
+- **Bun `1.4.0`의 내장 test runner는 TypeScript·JSX·mock·coverage를 별도 runner dependency 없이 실행함**
+  - unit은 `*.test.ts(x)`, integration은 `*.integration.test.ts(x)`를 사용하며 같은 workspace process에서 실행함
+  - Web은 공식 `fumadocs-mdx/bun` plugin을 preload해 실제 MDX collection을 로드함
+  - coverage는 workspace별 `bunfig.toml`에서 파일별 line threshold와 LCOV 출력 위치를 관리함
+  - 공식 자료는 [Bun test runner](https://bun.sh/docs/test), [Bun test 설정](https://bun.sh/docs/test/configuration), [Bun coverage](https://bun.sh/docs/test/code-coverage) 문서임
 - **Playwright `1.62.1`은 production build와 standalone server를 띄워 실제 Host·route·브라우저 동작을 검사함**
   - Home·Tech·Invest project가 서로 다른 base URL을 사용함
   - visual snapshot은 animation과 caret을 통제하고 `0.001`의 pixel ratio 기준을 사용함
@@ -303,12 +302,12 @@ pnpm --filter @jongminchung/ui exec shadcn add <component> --diff
   - snapshot 갱신 전 diff를 직접 확인하고 환경 차이인지 의도한 디자인 변경인지 판별함
   - 공식 자료는 [Playwright Test](https://playwright.dev/docs/intro), [visual comparison](https://playwright.dev/docs/test-snapshots), [Trace Viewer](https://playwright.dev/docs/trace-viewer) 문서임
 - **Oxfmt·Oxlint·Knip은 형식, correctness·React·a11y 규칙, 미사용 파일·중복 export를 각각 담당함**
-  - `pnpm run fmt`는 저장소를 수정하고 `pnpm run fmt:check`는 수정 없이 검사함
-  - `pnpm run lint`는 type-aware rule을 포함한 공유 Oxc 정책을 적용함
-  - `pnpm run deadcode`는 Knip의 file·duplicate 검사를 실행함
+  - `bun run fmt`는 저장소를 수정하고 `bun run fmt:check`는 수정 없이 검사함
+  - `bun run lint`는 type-aware rule을 포함한 공유 Oxc 정책을 적용함
+  - `bun run deadcode`는 Knip의 file·duplicate 검사를 실행함
   - 공식 자료는 [Oxfmt](https://oxc.rs/docs/guide/usage/formatter), [Oxlint](https://oxc.rs/docs/guide/usage/linter), [Knip](https://knip.dev/overview/getting-started) 문서임
 - **Renovate는 framework·UI·test·tooling lane별로 dependency PR을 묶고 major는 dashboard 승인을 요구함**
-  - 공통 version은 catalog 한 곳에서 바꾸고 lockfile을 `pnpm install`로 재계산함
+  - 공통 version은 catalog 한 곳에서 바꾸고 lockfile을 `bun install`로 재계산함
   - security override는 제거 조건과 upstream fix version을 남김
   - 공식 자료는 [Renovate 공식 문서](https://docs.renovatebot.com/)임
 
@@ -349,7 +348,7 @@ pnpm --filter @jongminchung/ui exec shadcn add <component> --diff
 ### arc42 11 · 현재 위험과 기술 부채를 인지함
 
 - **가장 큰 package 위험은 같은 `1.0.0`이 다른 내용과 integrity로 교체되는 mutable snapshot 정책임**
-  - 외부 소비자는 `pnpm update --force <package>@1.0.0`으로 다시 resolve하고 lockfile을 커밋해야 함
+  - 외부 소비자는 `bun update --force <package>@1.0.0`으로 다시 resolve하고 lockfile을 커밋해야 함
   - 독립된 외부 소비자가 생기기 전 immutable SemVer·changelog·migration·rollback으로 전환할 필요가 있음
 - **Web production 배포와 rollback의 실제 소유권이 저장소 안 workflow에 완전히 표현되지 않은 운영 위험이 있음**
   - Vercel Git integration, OCI registry, domain과 rollback runbook을 운영 시스템에서 별도로 확인해야 함
@@ -358,7 +357,7 @@ pnpm --filter @jongminchung/ui exec shadcn add <component> --diff
   - 중요한 운영 diagram은 `.puml` 원본을 반드시 함께 보존함
   - 완전한 독립성이 필요해지면 CI에서 SVG를 생성해 같은 PR에서 source와 결과를 검증하는 방식을 검토할 수 있음
 - **빠르게 움직이는 framework version과 수동 문서 version이 어긋날 위험이 있음**
-  - version 사실은 `.node-version`, `package.json`, `pnpm-workspace.yaml`, lockfile이 우선함
+  - version 사실은 `.bun-version`, `.node-version`, `package.json`, `bun.lock`이 우선함
   - 의존성 PR은 onboarding의 version과 공식 release note link도 함께 검토함
 - **단일 Web deployment는 재사용과 운영 단순성을 주지만 한 site의 build·runtime 결함이 세 site의 release를 함께 막을 수 있음**
   - site별 E2E와 route group 경계로 회귀 범위를 줄임
@@ -366,7 +365,7 @@ pnpm --filter @jongminchung/ui exec shadcn add <component> --diff
 
 ### arc42 12 · 저장소 용어를 같은 의미로 사용함
 
-- **Workspace**는 `pnpm-workspace.yaml`에 등록된 독립 package 단위임
+- **Workspace**는 루트 `package.json#workspaces.packages`에 등록된 독립 package 단위임
 - **App Router**는 `app/`의 폴더와 특수 파일로 route·layout·server render를 정의하는 Next.js router임
 - **Server Component**는 기본적으로 서버에서 실행되어 client JavaScript graph에 포함되지 않는 React component임
 - **Client Component**는 `use client` entry 아래에서 state·event·browser API를 사용할 수 있는 component임
@@ -378,7 +377,7 @@ pnpm --filter @jongminchung/ui exec shadcn add <component> --diff
 - **Primitive**는 제품 문구와 업무 의미를 갖지 않는 접근성·상호작용 중심 UI 부품임
 - **Product component**는 site navigation·문서 카드·투자 노트처럼 제품 의미와 조합을 소유하는 component임
 - **Source-first**는 workspace 개발에서 package의 build 결과보다 TypeScript·CSS 원본을 직접 resolve하는 방식임
-- **Catalog**는 여러 workspace가 사용할 외부 dependency version을 `pnpm-workspace.yaml`에서 중앙 관리하는 기능임
+- **Catalog**는 여러 workspace가 사용할 외부 dependency version을 루트 `package.json#workspaces`에서 중앙 관리하는 기능임
 - **Unit·Integration·E2E**는 각각 순수 규칙·실제 filesystem과 pipeline·build된 브라우저 경계를 검사하는 test 수준임
 - **Snapshot**은 visual 기준 이미지 또는 production에서 재사용하는 불변 콘텐츠 모음이며 문맥에 따라 구분해야 함
 - **Mutable package snapshot**은 동일 version을 덮어쓰는 현재 개인용 GitHub Packages release 정책임
@@ -386,59 +385,59 @@ pnpm --filter @jongminchung/ui exec shadcn add <component> --diff
 ### 변경 유형별 최소 실행 절차를 적용함
 
 - **모든 변경은 기존 작업 확인 → 가장 가까운 검사 → 저장소 gate → diff 범위 확인 순서로 닫음**
-- ![변경 검증 흐름](https://kroki.io/plantuml/svg/eNp9kj-P0zAYxnd_infsDV0QUzpwEl8AOAlmX-K0VtMkShxV3TJYp4NWgoFCD6VVTyrlhg5RU5TecEs-jv3mO6CEhPsjYLT9-vc8fvychoIGIho5RHDhMNBZrPZ3oPYxbpdQLj_prYQiBxqYz5_B64g6XEzgLWdjQuqrxOhzAaGgIgr1dQLqmOL1oeWUV3NcHnvEaNZ4McNkDWMvGIY-NRlexaD2dyqTgNOlzmSPEG5DR--OKBP9Y9aAyvnNixMQA-ZCBxeXJwTA8F1_BEHkgj0Shjlg5rD3aNvh7jBsD5gTMujgXOrpJS42NUClMa6-g0pjdTvDbwcQE5_V80UuWCgAp5vyy_uKWnl6w6gpivzl2VmRB14k2rBwJZ96q-CHWK9v4B07h_OIO1aRv3LoZBzw_uAhmLkWtxsBlf2swvGpOaT9_9PbmQZdua2irNTwYqZv5f1b_iJ2n1GbTn3wO_ntQW93-GFT5DpNy4-7IlfZGhNZfl3829ITomFHjvP4N2hkcWH4gWf9kaubY3Hbhm63MfKgTNDthgMvEFWp9P4zJhJwtWsLFQrPJ6fMtarq_gKDuj_X)
+- ![변경 검증 흐름](https://kroki.io/plantuml/svg/eNp9Uj1P6zAU3f0r7ggDC2JKB5DeH-CB9JjT1GmtmrZKblR1yxAhPirB8Arlqa2KVPoYOlRNUcrAkp8TO_8BOyRQEDBYtq_uPef4-Oy5aDroHXOCDDkFEfrJ4hmShS-nQ0iHV2IaQByB6Vg72_DbMznDDvxhtE1INkqMKkNQR_RccTeAZDWXd8sCJ73tyeGqRIz8Lk-6cjCGdtOpuy3TovLWV1zPSRiAvBiKMCgRwmzYELOVDAbifzcHSnsPu5uANdqADdk_3SQARtlrgKOWfYyGVaNWvbRe5axRd4s65S5Vg71AXJzK_iQbT-a-HN2D2pKnrvy3BOy0aNYfR0hdVIIm6fWZBtWKDqhpYRz9OjyMI6fpYWGVHAWflWnwpS_GD3BEy1D2GK_E0T43O22HVWvrwLRRYXZOkISP2hrlSt2s_oxe9OTQWq02UrMpg8VT8P6WL8jeLCrMyeqvtk-XYjqT55M4EvN5ejmLoyQcy0GQ3vS_V_QR0LA9zj98helVGL7xZHlRJxu2tnIFaxFSRbfWdFBHSSz-KmqQo1kRIxebLbKngHRgXwDy9Dua)
   - 수정 원본은 [`diagrams/onboarding-change-flow.puml`](diagrams/onboarding-change-flow.puml)임
 - **Markdown·일반 문서 변경은 형식과 로컬 링크를 검사함**
 
 ```sh
-pnpm run fmt:check
-pnpm run links:check
+bun run fmt:check
+bun run links:check
 git diff --check
 ```
 
 - **React·CSS·Web domain rule 변경은 typecheck·unit test와 관련 E2E를 실행함**
 
 ```sh
-pnpm --filter @jongminchung/web run typecheck
-pnpm --filter @jongminchung/web run test
-pnpm --filter @jongminchung/web run build
-pnpm --filter @jongminchung/web run test:e2e
+bun run --filter @jongminchung/web typecheck
+bun run --filter @jongminchung/web test
+bun run --filter @jongminchung/web build
+bun run --filter @jongminchung/web test:e2e
 ```
 
 - **공유 UI 변경은 package와 소비 Web을 함께 검사함**
 
 ```sh
-pnpm --filter @jongminchung/ui run typecheck
-pnpm --filter @jongminchung/ui run test
-pnpm --filter @jongminchung/ui run build
-pnpm --filter @jongminchung/web run typecheck
+bun run --filter @jongminchung/ui typecheck
+bun run --filter @jongminchung/ui test
+bun run --filter @jongminchung/ui build
+bun run --filter @jongminchung/web typecheck
 ```
 
 - **공유 tooling 변경은 package API와 실제 root 소비 설정을 함께 검사함**
 
 ```sh
-pnpm --filter @jongminchung/tooling run typecheck
-pnpm --filter @jongminchung/tooling run test
-pnpm --filter @jongminchung/tooling run build
-pnpm run lint
-pnpm run fmt:check
+bun run --filter @jongminchung/tooling typecheck
+bun run --filter @jongminchung/tooling test
+bun run --filter @jongminchung/tooling build
+bun run lint
+bun run fmt:check
 ```
 
 - **의존성 변경은 lane을 하나로 제한하고 manifest·catalog·lockfile·release note를 함께 검토함**
 
 ```sh
-pnpm outdated --recursive
-# pnpm-workspace.yaml 또는 대상 package.json 변경
-pnpm install
-pnpm run check:full
-pnpm run audit:prod
+bun outdated --recursive
+# 루트 catalog 또는 대상 package.json 변경
+bun install
+bun run check:full
+bun run audit
 ```
 
 - **저장소 전체 기본 gate와 고위험 gate를 구분함**
-  - `pnpm run check`는 format, lint, typecheck, deadcode, unit, integration을 실행함
-  - `pnpm run check:full`은 기본 gate 뒤에 build와 Playwright E2E를 실행함
-  - `pnpm run audit:prod`는 registry advisory database가 필요하므로 네트워크 의존 gate로 별도 실행함
-  - `pnpm run links:check`는 고정 Lychee container로 Markdown·HTML의 로컬 link와 anchor를 검사함
+  - `bun run check`는 format, lint, typecheck, deadcode, unit, integration을 실행함
+  - `bun run check:full`은 기본 gate 뒤에 build와 Playwright E2E를 실행함
+  - `bun run audit`는 registry advisory database가 필요하므로 네트워크 의존 gate로 별도 실행함
+  - `bun run links:check`는 고정 Lychee container로 Markdown·HTML의 로컬 link와 anchor를 검사함
 
 ### 첫 기여를 작은 수직 변경으로 완료함
 
@@ -456,12 +455,12 @@ pnpm run audit:prod
   - 2일차에는 하나의 Tech Docs request를 proxy부터 MDX component까지 추적할 수 있어야 함
   - 3일차에는 Tailwind token과 shared primitive·product component의 소유권을 구분할 수 있어야 함
   - 4일차에는 unit·integration·E2E 실패 artifact를 읽고 적절한 최소 검사를 선택할 수 있어야 함
-  - 5일차에는 작은 수직 변경을 `pnpm run check`와 필요한 추가 gate까지 통과시킬 수 있어야 함
+  - 5일차에는 작은 수직 변경을 `bun run check`와 필요한 추가 gate까지 통과시킬 수 있어야 함
 
 ## 결론과 실행 제안
 
-- **지금 바로 `pnpm install --frozen-lockfile`과 Web 개발 서버를 실행하고 Home·Tech·Invest 세 Host를 확인하는 것이 첫 단계임**
+- **지금 바로 `bun install --frozen-lockfile`과 Web 개발 서버를 실행하고 Home·Tech·Invest 세 Host를 확인하는 것이 첫 단계임**
 - **그다음 `proxy.ts`에서 Tech Docs page까지 한 요청을 추적하고 C4 Component 그림의 각 상자를 실제 파일과 대응시키는 것이 두 번째 단계임**
-- **첫 변경은 하나의 workspace에 제한하고 가장 가까운 검사 뒤 `pnpm run check`를 실행하는 것이 안전한 완료 기준임**
+- **첫 변경은 하나의 workspace에 제한하고 가장 가까운 검사 뒤 `bun run check`를 실행하는 것이 안전한 완료 기준임**
 - **architecture·package export·배포·데이터 원천을 바꾸는 제안은 구현 전에 arc42 품질 목표와 위험을 갱신하고 ADR로 결정하는 것이 필요함**
 - **의존성이나 실행 계약이 바뀔 때 이 문서의 version·공식 링크·다이어그램·명령을 같은 PR에서 갱신해야 문서 단독 온보딩 가치가 유지됨**

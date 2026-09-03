@@ -77,8 +77,9 @@ test("[성공] Blog는 주제 이미지와 주장·반론으로 시작하고 Doc
   await expect(hero).toBeVisible();
   await expect(hero.locator("img:visible")).toHaveAttribute(
     "src",
-    /server-monitoring-analysis-guide\.light\.png/u,
+    /server-monitoring-analysis-guide\.png/u,
   );
+  await expect(hero.locator("img")).toHaveCount(1);
   const argument = page.locator('[data-article-argument="true"]');
   await expect(argument).toBeVisible();
   await expect(
@@ -104,14 +105,33 @@ test("[성공] Blog 목록과 공유 메타데이터는 글별 주제 이미지�
   );
   await expect(cardImage).toHaveAttribute(
     "src",
-    /server-monitoring-analysis-guide\.light\.png/u,
+    /server-monitoring-analysis-guide\.png/u,
   );
+  await expect(cardImage).toHaveCount(1);
 
   await page.goto("/en/building-calculator-engine");
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
     "content",
-    "https://tech.jamie.kr/tech/articles/building-calculator-engine.light.png",
+    "https://tech.jamie.kr/tech/articles/building-calculator-engine.png",
   );
+  await expect(page.locator('[data-tech-article-hero="true"] img')).toHaveCount(
+    1,
+  );
+});
+
+test("[성공] 과거 Tech 테마 이미지 URL을 단일 이미지로 영구 이동함", async ({
+  siteRequest,
+}) => {
+  for (const theme of ["light", "dark"] as const) {
+    const response = await siteRequest.get(
+      `/tech/articles/building-calculator-engine.${theme}.png`,
+      { maxRedirects: 0 },
+    );
+    expect(response.status()).toBe(308);
+    expect(response.headers().location).toBe(
+      "/tech/articles/building-calculator-engine.png",
+    );
+  }
 });
 
 test("[성공] Series 상세는 Blog 멤버만 seriesOrder 순서로 표시함", async ({

@@ -62,6 +62,7 @@
 
 - **generic token은 공용 UI와 Home이 직접 소비하고, Tech·Invest alias는 해당 site composition만 소비해야 함**
 
+  <!-- prettier-ignore -->
   ```css
   /* packages/ui/src/styles/theme.css */
   :where(:root) {
@@ -77,6 +78,7 @@
     --primary: var(--signal-400);
     --ring: var(--signal-400);
   }
+  <!-- prettier-ignore -->
   ```
 
   - primitive는 `--background`, `--foreground`, `--primary`, `--ring`처럼 제품 중립 역할만 참조함
@@ -84,6 +86,7 @@
 
 - **세 route group은 공용 global entrypoint를 import하고 필요한 domain alias만 선언해야 함**
 
+  <!-- prettier-ignore -->
   ```css
   /* apps/web/app/(tech)/tech.css */
   @import "@jongminchung/ui/globals.css";
@@ -102,6 +105,7 @@
     --research-judgment: var(--foreground);
     --research-evidence: var(--border);
   }
+  <!-- prettier-ignore -->
   ```
 
   - Home CSS도 `@jongminchung/ui/globals.css`를 import하고 generic semantic role만 사용해 불필요한 domain token 증가를 막음
@@ -110,6 +114,7 @@
 
 - **site identity는 locale layout의 `<html>`에서 한 번만 선언해야 함**
 
+  <!-- prettier-ignore -->
   ```tsx
   <html
     lang={locale}
@@ -120,6 +125,7 @@
   >
     <body>{children}</body>
   </html>
+  <!-- prettier-ignore -->
   ```
 
   - theme 초기화 script는 같은 `<html>`의 `data-theme`만 변경함
@@ -129,6 +135,7 @@
 
 - **공용 primitive는 composition 가능한 작은 API를 유지해야 함**
 
+  <!-- prettier-ignore -->
   ```tsx
   // packages/ui/src/components/badge.tsx
   const badgeVariants = cva("inline-flex items-center rounded-full", {
@@ -142,6 +149,7 @@
     },
     defaultVariants: { variant: "default" },
   });
+  <!-- prettier-ignore -->
   ```
 
   - `research`, `technical`, `portfolio` 같은 product name을 `variant`로 추가하지 않음
@@ -149,6 +157,7 @@
 
 - **site는 primitive를 감싸는 domain composition에서 의미를 제공해야 함**
 
+  <!-- prettier-ignore -->
   ```tsx
   // apps/web/app/(invest)/_components/ResearchEvidence.tsx
   export function ResearchEvidence({ source, children }: Props) {
@@ -161,6 +170,7 @@
       </section>
     );
   }
+  <!-- prettier-ignore -->
   ```
 
   - Invest의 source·judgment·evidence 구분은 `Badge` variant가 아니라 semantic HTML과 `--research-*` alias가 소유함
@@ -168,6 +178,7 @@
 
 - **contract test는 값이 아니라 cascade의 완결성과 금지 규칙을 검증해야 함**
 
+  <!-- prettier-ignore -->
   ```ts
   for (const theme of ["light", "dark"]) {
     expect(genericThemeBlock(theme)).toContain("--background:");
@@ -179,6 +190,7 @@
   expect(techCss).not.toMatch(/^\s*--(?!docs-)[\w-]+\s*:/mu);
   expect(investCss).not.toMatch(/^\s*--(?!research-)[\w-]+\s*:/mu);
   expect(siteCss).not.toMatch(/#[\da-f]{3,8}\b|(?:rgb|hsl|oklch)\(/iu);
+  <!-- prettier-ignore -->
   ```
 
   - theme contract는 light·dark generic role 누락과 site CSS의 허용 범위 밖 provider·literal 회귀를 조기에 차단함

@@ -12,19 +12,19 @@
     "#tech-components/*": "./app/(tech)/_components/*.tsx"
   },
   "scripts": {
-    "build": "fumadocs-mdx && node --import ./scripts/register-content-loader.ts scripts/validate-fumadocs-content.ts && node scripts/check-excalidraw.ts && next build",
-    "content:evidence": "node --import ./scripts/register-content-loader.ts scripts/content-evidence.ts",
-    "dev": "next dev",
-    "dev:home": "JAMIE_LOCAL_SITE=home pnpm run dev",
-    "dev:invest": "JAMIE_LOCAL_SITE=invest pnpm run dev",
-    "dev:tech": "JAMIE_LOCAL_SITE=tech pnpm run dev",
-    "prebuild": "node scripts/prepare-excalidraw-assets.ts",
-    "predev": "node scripts/prepare-excalidraw-assets.ts",
-    "postinstall": "fumadocs-mdx",
-    "start": "node scripts/prepare-standalone.ts && node --no-require-module .next/standalone/apps/web/server.js",
-    "test": "vitest run --root ../.. apps/web",
+    "build": "bun run --bun fumadocs-mdx && bun --preload ./scripts/register-content-plugin.ts scripts/validate-fumadocs-content.ts && bun scripts/check-excalidraw.ts && bun run --bun next build",
+    "content:evidence": "bun --preload ./scripts/register-content-plugin.ts scripts/content-evidence.ts",
+    "dev": "bun run --bun next dev",
+    "dev:home": "JAMIE_LOCAL_SITE=home bun run dev",
+    "dev:invest": "JAMIE_LOCAL_SITE=invest bun run dev",
+    "dev:tech": "JAMIE_LOCAL_SITE=tech bun run dev",
+    "prebuild": "bun scripts/prepare-excalidraw-assets.ts",
+    "predev": "bun scripts/prepare-excalidraw-assets.ts",
+    "postinstall": "bun run --bun fumadocs-mdx",
+    "start": "bun scripts/prepare-standalone.ts && bun .next/standalone/apps/web/server.js",
+    "test": "bun test --timeout 60000",
     "test:e2e": "playwright test",
-    "typecheck": "next typegen && tsc --noEmit"
+    "typecheck": "bun run --bun next typegen && bun run --bun tsc --noEmit"
   },
   "dependencies": {
     "@excalidraw/excalidraw": "catalog:",
@@ -45,6 +45,7 @@
     "@axe-core/playwright": "catalog:",
     "@playwright/test": "catalog:",
     "@tailwindcss/postcss": "catalog:",
+    "@types/bun": "catalog:",
     "@types/mdast": "catalog:",
     "@types/mdx": "catalog:",
     "@types/node": "catalog:",
@@ -53,9 +54,9 @@
     "babel-plugin-react-compiler": "catalog:",
     "esbuild": "catalog:",
     "happy-dom": "catalog:",
+    "mdast-util-mdx-jsx": "catalog:",
     "postcss": "catalog:",
     "typescript": "catalog:",
-    "unist-util-visit": "catalog:",
-    "vitest": "catalog:"
+    "unist-util-visit": "catalog:"
   }
 }

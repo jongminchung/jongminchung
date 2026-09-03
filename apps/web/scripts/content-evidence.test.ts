@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import { assessFreshness, freshnessPolicyFor } from "./content-evidence.ts";
 
 const base = {

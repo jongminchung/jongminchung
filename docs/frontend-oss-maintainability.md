@@ -20,7 +20,7 @@
 - **다음 우선순위는 새 도구 도입보다 기존 계약의 자동 검증 확대임**으로 alias·source routing,
   직접 의존성 우회, primitive 복사, 키보드·focus·접근성 동작을 CI에서 증명할 필요가 있음
 - **Storybook과 정식 SemVer 배포는 조건부 도입이 적절함**으로 외부 소비자나 다수 기여자의 탐색·
-  검토 비용이 실제 병목이 되기 전에는 현재 Playwright·Vitest 체계를 우선 활용해야 함
+  검토 비용이 실제 병목이 되기 전에는 현재 Playwright·Bun test 체계를 우선 활용해야 함
 
 ## 유지보수성은 변경 비용과 복구 가능성으로 판단함
 
@@ -104,8 +104,8 @@
 - **공용 primitive의 shadcn 실행 위치는 `packages/ui`로 고정함**
 
   ```sh
-  pnpm --filter @jongminchung/ui exec shadcn add <component> --dry-run
-  pnpm --filter @jongminchung/ui exec shadcn add <component>
+  bunx --bun shadcn add <component> --dry-run -c packages/ui
+  bunx --bun shadcn add <component> -c packages/ui
   ```
 
   - `packages/ui/components.json`을 공용 primitive 생성·갱신의 canonical 설정으로 사용함
@@ -118,7 +118,7 @@
 - **기존 component는 overwrite가 아니라 diff 병합으로 갱신함**
 
   ```sh
-  pnpm --filter @jongminchung/ui exec shadcn add <component> --diff
+  bunx --bun shadcn add <component> --diff -c packages/ui
   ```
 
   - upstream의 접근성·동작·style 변경을 구분함
@@ -234,7 +234,7 @@
   - `components.json` routing과 설정 일치 검사를 추가함
   - 앱의 Base UI 직접 import, 공용 primitive 복사와 package root import 방지 검사를 추가함
   - CSS entry·`@source`·package export 계약을 하나의 UI architecture test로 검증함
-  - 새 lint 도구 없이 기존 Vitest와 filesystem assertion으로 전체 계약에 포함함
+  - 새 lint 도구 없이 Bun 내장 test runner와 filesystem assertion으로 전체 계약에 포함함
 - **2순위는 복합 primitive의 browser interaction 증거를 보강하는 것임**
   - SSR test가 증명하지 못하는 Dialog focus 복원, Select keyboard 탐색, Menu dismissal을 우선함
   - 이미 존재하는 앱 Playwright fixture를 활용해 별도 component explorer 도입 없이 시작함
@@ -256,6 +256,6 @@
   - UI architecture contract가 `components.json`, import boundary, primitive duplication, CSS entry와 export map을 함께 검사함
   - 이후 Dialog·Select·Menu의 focus·keyboard interaction test를 작은 PR로 분리함
 - **새 도구 도입은 조건이 발생한 뒤 결정함**으로 현재는 Storybook·별도 token package·추가 wrapper보다
-  기존 Vitest·Playwright·package contract의 빈틈을 메우는 편이 변경 비용과 운영 복잡도를 더 낮춤
+  기존 Bun test·Playwright·package contract의 빈틈을 메우는 편이 변경 비용과 운영 복잡도를 더 낮춤
 - **이 문서의 권장안이 실제 규칙으로 확정되면** [디자인 시스템](../DESIGN_SYSTEM.md)의 검증 목록과
   CI 구현을 같은 변경에서 맞추고, 외부 소비자 발생 시 배포 정책을 별도 ADR로 기록할 필요가 있음

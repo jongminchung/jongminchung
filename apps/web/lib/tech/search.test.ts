@@ -1,5 +1,5 @@
+import { describe, expect, it } from "bun:test";
 import type { SortedResult } from "fumadocs-core/search";
-import { describe, expect, it } from "vitest";
 import { searchTechDocuments } from "./search-server.ts";
 import {
   createSearchAliases,

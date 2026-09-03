@@ -11,11 +11,11 @@ on:
       - "apps/web/**"
       - "packages/ui/**"
       - "packages/tooling/**"
+      - ".bun-version"
       - "package.json"
-      - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
+      - "bun.lock"
+      - "bunfig.toml"
       - "tsconfig.base.json"
-      - "vitest.config.ts"
 
 permissions:
   contents: read
@@ -42,45 +42,46 @@ jobs:
               - 'apps/web/**'
               - 'packages/ui/**'
               - 'packages/tooling/**'
+              - '.bun-version'
               - 'package.json'
-              - 'pnpm-lock.yaml'
-              - 'pnpm-workspace.yaml'
+              - 'bun.lock'
+              - 'bunfig.toml'
               - 'tsconfig.base.json'
-              - 'vitest.config.ts'
-      - uses: pnpm/action-setup@v6
+      - uses: oven-sh/setup-bun@v2
         if: steps.changes.outputs.web == 'true' || github.event_name == 'schedule'
+        with:
+          bun-version-file: .bun-version
       - uses: actions/setup-node@v7
         if: steps.changes.outputs.web == 'true' || github.event_name == 'schedule'
         with:
           node-version-file: .node-version
-          cache: pnpm
       - name: Install Web consumer dependencies
         if: steps.changes.outputs.web == 'true' || github.event_name == 'schedule'
-        run: pnpm --filter @jongminchung/web... install --frozen-lockfile
+        run: bun install --frozen-lockfile
       - name: Validate shadcn workspace manifests
         if: steps.changes.outputs.web == 'true'
         run: |
-          pnpm --filter @jongminchung/ui exec shadcn info --json
-          pnpm --filter @jongminchung/web exec shadcn info --json
+          bunx --bun shadcn info --json -c packages/ui
+          bunx --bun shadcn info --json -c apps/web
       - name: Verify shared UI package
         if: steps.changes.outputs.web == 'true'
         run: |
-          pnpm --filter @jongminchung/ui run typecheck
-          pnpm --filter @jongminchung/ui run test
-          pnpm --filter @jongminchung/ui run build
+          bun run --filter @jongminchung/ui typecheck
+          bun run --filter @jongminchung/ui test
+          bun run --filter @jongminchung/ui build
       - if: steps.changes.outputs.web == 'true'
-        run: pnpm --filter @jongminchung/web run typecheck
+        run: bun run --filter @jongminchung/web typecheck
       - if: steps.changes.outputs.web == 'true'
-        run: pnpm --filter @jongminchung/web run test
+        run: bun run --filter @jongminchung/web test
       - if: steps.changes.outputs.web == 'true'
-        run: pnpm --filter @jongminchung/web run build
+        run: bun run --filter @jongminchung/web build
       - if: steps.changes.outputs.web == 'true'
-        run: pnpm --filter @jongminchung/web exec playwright install --with-deps chromium
+        run: bunx playwright install --with-deps chromium
       - if: steps.changes.outputs.web == 'true'
-        run: pnpm --filter @jongminchung/web run test:e2e
+        run: bun run --filter @jongminchung/web test:e2e
       - name: Generate scheduled content evidence report
         if: github.event_name == 'schedule'
-        run: pnpm --filter @jongminchung/web run content:evidence -- --network --output content-evidence.json
+        run: bun run --filter @jongminchung/web content:evidence -- --network --output content-evidence.json
       - name: Upload content evidence report
         if: github.event_name == 'schedule'
         uses: actions/upload-artifact@v7

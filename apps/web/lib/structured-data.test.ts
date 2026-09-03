@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import type { ContentManifestEntry } from "./content-model";
 import type { InvestmentNoteManifestEntry } from "./invest/content";
 import {
@@ -57,7 +57,7 @@ describe("구조화 데이터", () => {
     });
     expect(article.citation).toBe("https://developers.google.com/search/docs");
     expect(article.image).toBe(
-      "https://tech.jamie.kr/tech/articles/seo-contract.light.png",
+      "https://tech.jamie.kr/tech/articles/seo-contract.png",
     );
     expect(graphNode(schema, "BreadcrumbList")).toBeDefined();
   });
@@ -92,8 +92,7 @@ describe("구조화 데이터", () => {
       updatedAt: "2026-08-02",
       status: "published",
       tags: ["research"],
-      image: "/invest/source-note.light.png",
-      imageDark: "/invest/source-note.dark.png",
+      image: "/invest/source-note.png",
       imageAlt: "Source note research thumbnail",
       sources: [
         {
@@ -111,7 +110,7 @@ describe("구조화 데이터", () => {
       "https://example.com/source",
     ]);
     expect(graphNode(schema, "Article").image).toBe(
-      "https://invest.jamie.kr/invest/source-note.light.png",
+      "https://invest.jamie.kr/invest/source-note.png",
     );
     expect(graphNode(schema, "BreadcrumbList")).toBeDefined();
 

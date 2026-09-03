@@ -1,5 +1,5 @@
+import { describe, expect, it } from "bun:test";
 import type { Root } from "fumadocs-core/page-tree";
-import { describe, expect, it } from "vitest";
 import { publicPageTree, publishedContentOnly } from "./publication.ts";
 
 const source = [

@@ -42,7 +42,7 @@
   - unresolved workspace entry
 - **framework별 entry point를 명시함**
   - Next App Router convention
-  - Vitest·Playwright config와 test helper
+  - Bun·Playwright config와 test helper
   - package export map·scripts·CSS side effect
 - **결과를 세 범주로 분류함**
   - 안전하게 제거 가능

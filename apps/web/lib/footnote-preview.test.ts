@@ -1,12 +1,13 @@
-// @vitest-environment happy-dom
-
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "bun:test";
+import { Window } from "happy-dom";
 import {
   createFootnotePreviewHtml,
   footnotePreviewLabel,
 } from "./footnote-preview";
 
 describe("각주 미리보기 마크업", () => {
+  const document = new Window().document as unknown as Document;
+
   beforeEach(() => {
     document.body.innerHTML = "";
   });
@@ -27,7 +28,7 @@ describe("각주 미리보기 마크업", () => {
       </ol>
     `;
 
-    const html = createFootnotePreviewHtml("#user-content-fn-1");
+    const html = createFootnotePreviewHtml("#user-content-fn-1", document);
 
     expect(html).toContain("Main <strong>thread</strong>");
     expect(html).toContain("<code>setTimeout</code>");
@@ -45,7 +46,7 @@ describe("각주 미리보기 마크업", () => {
       </li>
     `;
 
-    const html = createFootnotePreviewHtml("#user-content-fn-source");
+    const html = createFootnotePreviewHtml("#user-content-fn-source", document);
     const container = document.createElement("div");
     container.innerHTML = html ?? "";
 
@@ -58,8 +59,8 @@ describe("각주 미리보기 마크업", () => {
   });
 
   it("[성공] 연결 대상이 없거나 해시가 잘못되면 미리보기를 만들지 않음", () => {
-    expect(createFootnotePreviewHtml("/another-page")).toBeNull();
-    expect(createFootnotePreviewHtml("#missing-footnote")).toBeNull();
-    expect(createFootnotePreviewHtml("#%E0%A4%A")).toBeNull();
+    expect(createFootnotePreviewHtml("/another-page", document)).toBeNull();
+    expect(createFootnotePreviewHtml("#missing-footnote", document)).toBeNull();
+    expect(createFootnotePreviewHtml("#%E0%A4%A", document)).toBeNull();
   });
 });

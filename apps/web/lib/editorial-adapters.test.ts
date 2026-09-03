@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import { getLocalizedDocsPages, getLocalizedDocuments } from "./documents";
 import {
   toInvestmentEditorialItem,
@@ -18,8 +18,7 @@ describe("editorial data adapter", () => {
       publishedAt: document.publishedAt,
       tags: expect.arrayContaining([...document.tags]),
       image: {
-        srcLight: `/tech/articles/${document.id}.light.png`,
-        srcDark: `/tech/articles/${document.id}.dark.png`,
+        src: `/tech/articles/${document.id}.png`,
         alt: document.displayTitle ?? document.title,
       },
     });
@@ -45,8 +44,7 @@ describe("editorial data adapter", () => {
       href: note.href,
       publishedAt: note.publishedAt,
       image: {
-        srcLight: note.image,
-        srcDark: note.imageDark,
+        src: note.image,
         alt: note.imageAlt,
       },
     });

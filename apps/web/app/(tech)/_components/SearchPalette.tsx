@@ -8,15 +8,10 @@ import {
   type SharedProps,
 } from "fumadocs-ui/contexts/search";
 import { useTranslations } from "next-intl";
-import { lazy, type ReactNode, useEffect, useRef } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 import { Icon } from "#components/Icon";
 import type { Locale } from "#lib/content-model";
-
-const SearchDialog = lazy(() =>
-  import("./SearchDialog").then((module) => ({
-    default: module.SearchDialog,
-  })),
-);
+import { SearchDialog } from "./SearchDialog";
 
 function findVisibleTrigger(): HTMLButtonElement | null {
   return (

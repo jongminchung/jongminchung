@@ -9,29 +9,30 @@ permissions:
 
 jobs:
   validate:
-    name: Validate ${{ matrix.package }}
+    name: Validate ${{ matrix.package }} on Node ${{ matrix.node-version }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         package: [tooling, ui]
+        node-version: [24, 26]
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
       - uses: actions/setup-node@v7
         with:
-          node-version-file: .node-version
-          cache: pnpm
+          node-version: ${{ matrix.node-version }}
       - name: Install package dependencies
-        run: >-
-          pnpm --filter @jongminchung/${{ matrix.package }} install
-          --frozen-lockfile --ignore-scripts
+        run: bun install --frozen-lockfile --ignore-scripts
       - run: >-
-          pnpm --filter @jongminchung/${{ matrix.package }} exec oxlint
-          --config ../../oxlint.config.ts .
-      - run: pnpm --filter @jongminchung/${{ matrix.package }} run typecheck
-      - run: pnpm --filter @jongminchung/${{ matrix.package }} run test
-      - run: pnpm --filter @jongminchung/${{ matrix.package }} run publish:dry-run
+          bunx oxlint --config oxlint.config.ts
+          packages/${{ matrix.package }}
+      - run: bun run --filter @jongminchung/${{ matrix.package }} typecheck
+      - run: bun run --filter @jongminchung/${{ matrix.package }} test
+      - run: bun run --filter @jongminchung/${{ matrix.package }} test:node
+      - run: bun run --filter @jongminchung/${{ matrix.package }} publish:dry-run
 
   publish:
     name: Publish ${{ matrix.package }}@1.0.0
@@ -47,16 +48,15 @@ jobs:
             import-specifier: "@jongminchung/ui/lib/utils"
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
       - uses: actions/setup-node@v7
         with:
           node-version-file: .node-version
-          cache: pnpm
 
       - name: Install package dependencies
-        run: >-
-          pnpm --filter @jongminchung/${{ matrix.package }} install
-          --frozen-lockfile --ignore-scripts
+        run: bun install --frozen-lockfile --ignore-scripts
 
       - name: Configure GitHub Packages auth
         env:
@@ -71,7 +71,7 @@ jobs:
         run: >-
           .github/scripts/delete-version-ids-script.sh
           "$GITHUB_REPOSITORY_OWNER" "${{ matrix.package }}" "1.0.0"
-      - run: pnpm --filter @jongminchung/${{ matrix.package }} publish --access public --no-git-checks
+      - run: bun publish --cwd packages/${{ matrix.package }} --access public
       - name: Verify registry integrity and clean consumer import
         run: >-
           node .github/scripts/verify-published-package.ts

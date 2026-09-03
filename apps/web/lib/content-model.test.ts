@@ -1,8 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import {
   createBlogPostHref,
   createDocsPageHref,
   createSeriesHref,
+  createTechArticleImageHref,
   parseBlogPostMetadata,
   parseDocsPageMetadata,
 } from "./content-model";
@@ -133,6 +134,9 @@ describe("블로그 메타데이터", () => {
     );
     expect(createDocsPageHref("ko", "fe", "typescript-6")).toBe(
       "/ko/docs/fe/typescript-6",
+    );
+    expect(createTechArticleImageHref("article")).toBe(
+      "/tech/articles/article.png",
     );
   });
 });

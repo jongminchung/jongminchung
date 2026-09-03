@@ -9,7 +9,7 @@
     ":semanticCommitTypeAll(chore)"
   ],
   "timezone": "Asia/Seoul",
-  "enabledManagers": ["pnpm", "github-actions"],
+  "enabledManagers": ["bun", "bun-version", "dockerfile", "github-actions"],
   "labels": ["dependencies"],
   "dependencyDashboardTitle": "Dependency Dashboard",
   "prConcurrentLimit": 5,
@@ -21,7 +21,7 @@
   "packageRules": [
     {
       "description": "Keep workspace package ranges moving without pinning published package dependencies.",
-      "matchManagers": ["pnpm"],
+      "matchManagers": ["bun"],
       "rangeStrategy": "bump"
     },
     {
@@ -59,12 +59,7 @@
     },
     {
       "description": "Keep dependency updates within the test lane.",
-      "matchPackageNames": [
-        "@axe-core/**",
-        "@playwright/**",
-        "@vitest/**",
-        "vitest"
-      ],
+      "matchPackageNames": ["@axe-core/**", "@playwright/**"],
       "groupName": "test dependencies",
       "groupSlug": "test-dependencies"
     },
@@ -90,7 +85,7 @@
       "groupSlug": "tooling-dependencies"
     },
     {
-      "description": "Require dashboard approval before opening major pnpm dependency updates.",
+      "description": "Require dashboard approval before opening major Bun dependency updates.",
       "matchDatasources": ["npm"],
       "matchUpdateTypes": ["major"],
       "dependencyDashboardApproval": true

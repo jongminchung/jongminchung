@@ -48,11 +48,10 @@ import { cn } from "@jongminchung/ui/lib/utils";
   - variant: 제품과 무관한 semantic intent를 표현할 때 primitive API로 제공
   - composition: 공식 composition 구조를 지키면서 primitive를 조합하고 사용하는 앱에서 소유
   - 앱 overlay: 앱 theme 값, 제품 token, layout, 상태와 동작을 앱의 style과 component에서 적용
-- 실행 위치: component나 block을 사용할 앱 workspace
+- 실행 위치: 저장소 루트이며 `-c`로 component나 block을 사용할 앱 workspace를 지정
 
 ```bash
-cd apps/<app>
-pnpm exec shadcn add <component-or-block>
+bunx --bun shadcn add <component-or-block> -c apps/<app>
 ```
 
 - CLI 라우팅
@@ -68,7 +67,7 @@ pnpm exec shadcn add <component-or-block>
 - CLI 실행 후 primitive가 `packages/ui`에 생성되고 앱 composition이 해당 앱에 남는지 확인
 - 앱별 제품 component는 앱의 component 디렉터리에서 공용 primitive를 조합해 구현
 - 기존 primitive 갱신 절차
-  - 사용하는 앱 workspace에서 `pnpm exec shadcn add <component> --diff` 실행
+  - 저장소 루트에서 `bunx --bun shadcn add <component> --diff -c apps/<app>` 실행
   - 공식 registry와 저장소 source 차이를 검토하고 접근성·API·style 변경 중 필요한 항목만 수동 병합
   - 로컬 variant와 앱 overlay를 확인하며 `--overwrite`로 일괄 교체하지 않음
   - 영향받는 UI package와 앱 검증 후 변경을 commit

@@ -1,6 +1,6 @@
+import { describe, expect, it } from "bun:test";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { describe, expect, it } from "vitest";
 
 const repositoryRoot = resolve(import.meta.dirname, "../../..");
 
@@ -17,6 +17,11 @@ describe("React 19.2 adoption contract", () => {
 
     expect(nextConfig).toContain('compilationMode: "annotation"');
     expect(webLeaf).toContain('"use memo"');
+  });
+
+  it("keeps the TypeScript 7 CLI enabled for Next.js checks", async () => {
+    const nextConfig = await readRepositoryFile("apps/web/next.config.ts");
+    expect(nextConfig).toContain("useTypeScriptCli: true");
   });
 
   it("keeps Cache Components enabled without legacy route config", async () => {

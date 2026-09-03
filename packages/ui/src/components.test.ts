@@ -1,6 +1,6 @@
+import { describe, expect, it } from "bun:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
 import { Button, buttonVariants } from "./components/button";
 import { Checkbox } from "./components/checkbox";
 import {

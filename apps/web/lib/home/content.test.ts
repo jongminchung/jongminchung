@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import { getHomeContent, personSchema } from "./content";
 
 describe("읽어보기 홈 콘텐츠", () => {

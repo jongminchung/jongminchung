@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import {
   docsInventoryPerLocale,
   docsPagesPerLocale,
@@ -45,7 +45,7 @@ describe("블로그 문서 발견", () => {
           .toSorted(
             (left, right) => (left.seriesOrder ?? 0) - (right.seriesOrder ?? 0),
           );
-        expect(actual.map(({ id }) => id)).toEqual(ids);
+        expect(actual.map(({ id }) => id)).toEqual([...ids]);
       }
     }
   });
@@ -82,10 +82,10 @@ describe("블로그 문서 발견", () => {
   });
 
   it("[실패] 지원하지 않는 locale과 없는 글은 조회하지 않음", async () => {
-    await expect(findDocument("fr", "ddd")).resolves.toBeNull();
-    await expect(findDocument("en", "missing")).resolves.toBeNull();
-    await expect(getRelatedDocuments("en", "missing")).resolves.toEqual([]);
-    await expect(loadDocument("en", "missing")).resolves.toBeNull();
+    expect(await findDocument("fr", "ddd")).toBeNull();
+    expect(await findDocument("en", "missing")).toBeNull();
+    expect(await getRelatedDocuments("en", "missing")).toEqual([]);
+    expect(await loadDocument("en", "missing")).toBeNull();
   });
 
   it("[성공] Fumadocs 본문과 목차를 제품 문서 모델로 로드함", async () => {

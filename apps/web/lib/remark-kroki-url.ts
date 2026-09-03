@@ -1,5 +1,6 @@
 import { deflateSync } from "node:zlib";
-import type { Code, Image, Root } from "mdast";
+import type { Code, Root } from "mdast";
+import type { MdxJsxFlowElement } from "mdast-util-mdx-jsx";
 import { visit } from "unist-util-visit";
 
 export interface KrokiUrlOptions {
@@ -22,6 +23,19 @@ export function encodeKrokiDiagram(source: string): string {
   );
 }
 
+function krokiImage(alt: string, url: string): MdxJsxFlowElement {
+  return {
+    type: "mdxJsxFlowElement",
+    name: "img",
+    attributes: [
+      { type: "mdxJsxAttribute", name: "alt", value: alt },
+      { type: "mdxJsxAttribute", name: "src", value: url },
+      { type: "mdxJsxAttribute", name: "loading", value: "lazy" },
+    ],
+    children: [],
+  };
+}
+
 /** PlantUML 코드 블록을 빌드 네트워크 호출이 없는 Kroki 이미지 URL로 변환함 */
 export function remarkKrokiUrl({
   server = "https://kroki.io",
@@ -36,12 +50,22 @@ export function remarkKrokiUrl({
         parent === undefined
       )
         return;
-      const image: Image = {
-        type: "image",
-        alt: codeBlockAlt(node.meta),
-        url: `${baseUrl}/plantuml/svg/${encodeKrokiDiagram(node.value)}`,
-      };
-      parent.children[index] = image;
+      parent.children[index] = krokiImage(
+        codeBlockAlt(node.meta),
+        `${baseUrl}/plantuml/svg/${encodeKrokiDiagram(node.value)}`,
+      );
+    });
+    visit(tree, "image", (node, index, parent) => {
+      if (
+        !node.url.startsWith(`${baseUrl}/`) ||
+        index === undefined ||
+        parent === undefined
+      )
+        return;
+      parent.children[index] = krokiImage(
+        node.alt ?? "PlantUML diagram",
+        node.url,
+      );
     });
   };
 }

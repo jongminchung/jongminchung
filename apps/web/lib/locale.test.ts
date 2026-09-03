@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import { alternateLocale, getLocaleProtocol } from "./locale";
 
 describe("locale protocol mapping", () => {

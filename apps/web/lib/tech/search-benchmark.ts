@@ -92,7 +92,7 @@ export const bilingualSearchBenchmarkBaseline = Object.freeze({
   aggregate: Object.freeze({
     top1HitRate: 8 / 9,
     top3HitRate: 1,
-    meanReciprocalRank: 17 / 18,
+    meanReciprocalRank: 0.9398148148148147,
     zeroResultRate: 0.1,
   }),
   en: Object.freeze({

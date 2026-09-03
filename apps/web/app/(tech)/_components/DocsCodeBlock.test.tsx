@@ -1,5 +1,5 @@
+import { describe, expect, it } from "bun:test";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
 import { DocsCodeBlock } from "./DocsCodeBlock";
 
 describe("Fumadocs Tech code block", () => {
