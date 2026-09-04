@@ -1,0 +1,239 @@
+---
+documentKind: reference
+title: "OpenTelemetry, ClickStack, and SeaweedFS cold-tier operations reference"
+description: "Reference the external OTLP boundary, node-agent loop prevention, gateway durability queue, ClickHouse cold S3 retention, and SeaweedFS S3 audit path."
+publishedAt: "2026-09-04"
+updatedAt: "2026-09-04"
+verifiedAt: "2026-09-04"
+tags:
+  [kubernetes, opentelemetry, otlp, clickstack, clickhouse, seaweedfs, s3, audit, observability]
+status: stable
+publicationStatus: published
+sourceUrl: https://github.com/jongminchung/jongminchung/blob/main/apps/web/content/tech/docs/en/k8s/opentelemetry-clickstack-cold-tier.mdx
+---
+
+## Key takeaways
+
+- **External OTLP enters only through `otel.jamie.kr:443`, where Gateway API `ExternalAuth` validates a bearer token before forwarding to the internal `otel-gateway`**
+- **The node agent drops only `clickstack-ingest`'s own container logs, preventing a collection loop while preserving logs from other workloads**
+- **`otel-gateway` receives OTLP on `4317` and `4318` plus Fluent Forward on `8006`, and absorbs downstream failures with a file-backed queue**
+- **ClickHouse recompresses at two days, moves data to `cold_s3` at three days, and deletes at fourteen days to separate hot storage from SeaweedFS S3 retention**
+- **SeaweedFS S3 access audit reaches the gateway through Fluent Forward and is isolated from ordinary telemetry with the `seaweedfs.s3.access` dataset**
+
+## Separate collection paths and ownership
+
+```text
+External Codex and SDKs                  Kubernetes nodes
+   │ HTTPS :443 + bearer token              │ container, host, and kubelet telemetry
+   ▼                                        ▼
+Gateway API ── ExternalAuth ──► otel-gateway ◄── otel-node DaemonSet
+   │                                     │
+   │ OTLP/gRPC :4317, HTTP :4318           ├── OTLP sink ──► clickstack-ingest
+   │                                       │                    │
+SeaweedFS S3 ── Fluent Forward :8006 ─────┘                    ▼
+                                                               ClickHouse
+                                                                 ├── hot disk
+                                                                 └── SeaweedFS S3 cold tier
+```
+
+- **Gateway API owns Internet exposure, TLS termination, hostname matching, and the OTLP path allowlist**
+  - `otel.jamie.kr` resolves to a Gateway HTTPS listener
+  - Collector Service and Pod ports `4317` and `4318` do not have a direct public path
+- **`otel-gateway` owns authenticated signals, node telemetry, and S3 audit at one exporter boundary**
+  - The gateway owns retry and its disk-backed sending queue
+  - `clickstack-ingest` accepts ingress only from the gateway OTLP sink
+- **ClickHouse owns telemetry queries and TTL execution while SeaweedFS owns cold objects and S3 access audit**
+  - SeaweedFS Master and Volume data PVCs use `object-rwo` on `10.25.140.6:/s3_data`
+  - Separating the object store's physical storage from the ClickHouse hot disk makes NFS capacity causes independently observable
+
+## Authenticate external OTLP before reaching the gateway
+
+- **gRPC and OTLP/HTTP use different paths, so one HTTPS endpoint routes them to different internal ports**
+
+| Request type | Public path | Internal backend |
+| --- | --- | --- |
+| OTLP/gRPC logs, metrics, and traces | `/opentelemetry.proto.collector.*.v1.*Service/Export` | `otel-gateway:4317` |
+| OTLP/HTTP logs | `/v1/logs` | `otel-gateway:4318` |
+| OTLP/HTTP metrics | `/v1/metrics` | `otel-gateway:4318` |
+| OTLP/HTTP traces | `/v1/traces` | `otel-gateway:4318` |
+
+- **Each route rule calls `otel-external-auth:8080` through `ExternalAuth` before selecting a backend**
+  - The auth Service returns `200` only for an exact `Authorization: Bearer <token>` value
+  - A missing or mismatched token terminates at the gateway with `401`
+  - The route sends only `Authorization` to the auth backend and limits the success marker to `X-OTLP-Authenticated`
+- **The token stays as SOPS ciphertext in Git and is materialized into a Kubernetes Secret**
+  - Clients set the standard `OTEL_EXPORTER_OTLP_HEADERS` variable to `Authorization=Bearer%20<token>`
+  - Codex configuration keeps only the `/v1/logs`, `/v1/metrics`, and `/v1/traces` endpoints
+- **Public ingress and internal backends are constrained separately with NetworkPolicy**
+  - Gateway ingress may reach only gateway `4317` and `4318`
+  - The auth Service permits only ingress, host, and remote-node traffic to `8080`
+
+```bash title="Check rejection, acceptance, and route state"
+curl --silent --output /dev/null --write-out '%{http_code}\n' \
+  --request POST --header 'Content-Type: application/x-protobuf' \
+  --data-binary '' https://otel.jamie.kr/v1/logs
+
+kubectl -n observability get httproute otel-external -o wide
+kubectl -n observability rollout status statefulset/otel-gateway
+kubectl -n observability rollout status deployment/otel-external-auth
+```
+
+- **Acceptance requires `401` without credentials, `200` with valid credentials, and a resulting signal visible in ClickHouse**
+- **See [Protect External OTLP Ingestion with Gateway API ExternalAuth](/en/docs/k8s/external-otlp-gateway-auth) for the detailed route and Codex client configuration**
+
+## Prevent the node agent from collecting ClickStack again
+
+- **A loop occurs when the node agent reads logs written by the collector and sends them back to the same collector**
+  - `clickstack-ingest` receives the OTLP sink, so collecting its stdout and stderr again can amplify volume
+  - Broadly excluding an application or a namespace would create an observability gap, so the exclusion must be exact
+- **The `otel-node` DaemonSet uses a filter that checks both the namespace and the StatefulSet Pod name**
+
+```yaml title="Logs processor order in otel-agent values"
+processors:
+  filter/drop-clickstack-ingest-self:
+    error_mode: ignore
+    logs:
+      log_record:
+        - >-
+          resource.attributes["k8s.namespace.name"] == "observability" and
+          IsMatch(resource.attributes["k8s.pod.name"], "^clickstack-ingest-[0-9]+$")
+
+service:
+  pipelines:
+    logs:
+      processors:
+        - memory_limiter
+        - resource/role
+        - filter/drop-clickstack-ingest-self
+        - batch
+```
+
+- **The regular expression targets only StatefulSet Pods, so observability workloads other than `clickstack-ingest-*` continue to be collected**
+  - Do not widen the condition to just a deployment name or namespace, because future workloads could be unintentionally excluded
+  - Update the filter together with the runtime metadata if the collector release or Pod names change
+- **Verify both the excluded target and ongoing collection volume**
+
+```sql title="Check for a recent collection loop in ClickHouse"
+SELECT
+  ResourceAttributes['k8s.pod.name'] AS pod,
+  count() AS records
+FROM default.otel_logs
+WHERE Timestamp >= now() - INTERVAL 3 MINUTE
+  AND ResourceAttributes['k8s.namespace.name'] = 'observability'
+  AND match(ResourceAttributes['k8s.pod.name'], '^clickstack-ingest-[0-9]+$')
+GROUP BY pod
+ORDER BY records DESC;
+```
+
+- **The expected outcome after rollout is zero matching records while logs from other applications remain present**
+
+## Give the gateway signal-specific pipelines and a durable queue
+
+- **`otel-gateway` runs as a two-replica StatefulSet with a retained `1Gi` queue PVC for each replica**
+  - The `file_storage` extension stores queued telemetry in `/var/lib/otel/storage`
+  - Queue PVCs are retained on scale-down or StatefulSet deletion, so cleanup needs an explicit approval and procedure
+- **Regular OTLP and S3 audit use separate receivers, resource processors, and logs pipelines**
+
+| Pipeline | Receiver | Shared exporter | Distinguishing attribute |
+| --- | --- | --- | --- |
+| `logs` | OTLP | `otlp/sink` | `platform.telemetry.role=gateway` |
+| `metrics` | OTLP | `otlp/sink` | `platform.telemetry.role=gateway` |
+| `traces` | OTLP | `otlp/sink` | `platform.telemetry.role=gateway` |
+| `logs/s3-audit` | Fluent Forward `8006` | `otlp/sink` | `event.dataset=seaweedfs.s3.access` |
+
+- **The gateway exporter uses a queue size of `8192`, retries from `5s` to `30s`, and has no retry expiry**
+  - Prolonged sink failure can fill PVC and node storage, so alert on queue usage, retries, and exporter errors together
+  - A queue improves delivery resilience but does not replace ClickHouse retention or backup policy
+- **Gateway ingress limits telemetry namespaces, SeaweedFS audit senders, and public ingress by port**
+  - `4317` and `4318` are used only for OTLP
+  - TCP and UDP `8006` are used only for Fluent Forward audit from SeaweedFS and `clickhouse-s3-gateway`
+
+```bash title="Inspect gateway receivers and queue PVCs"
+kubectl -n observability get svc otel-gateway
+kubectl -n observability get pvc -l app.kubernetes.io/instance=otel-gateway
+kubectl -n observability logs statefulset/otel-gateway --since=10m
+```
+
+## Retain ClickHouse cold S3 data with a least-privilege identity
+
+- **ClickHouse uses a `hot_cold` storage policy that combines the local default disk with the SeaweedFS S3 `cold_s3` disk**
+  - The internal `clickhouse-s3-gateway:8333` is the S3 endpoint that forwards to the SeaweedFS filer
+  - The cold-data bucket is `clickhouse-observability`
+  - `object-rwo` is the physical-storage contract for SeaweedFS Master and Volume data; ClickHouse does not mount that NFS path directly
+- **Telemetry-table TTL defines the separation between hot cost and query retention**
+
+| Data age | ClickHouse action | Storage location |
+| --- | --- | --- |
+| 0–2 days | Default codec and hot queries | default disk |
+| 2 days | `ZSTD(3)` recompression | default disk |
+| 3 days | `TO DISK 'cold_s3'` | SeaweedFS S3 |
+| 14 days | `DELETE` | deleted |
+
+- **The cold tier uses a dedicated `otel-cold-tier` AccessKey and SecretKey**
+  - The identity has `Admin`, `Read`, `List`, `Tagging`, and `Write` actions only on the `clickhouse-observability` bucket
+  - ClickHouse configuration does not use a SeaweedFS global-admin identity
+  - Credentials and SeaweedFS identity configuration remain as SOPS ciphertext in Git
+- **Confirm convergence on every replica before treating a TTL or policy change as complete, then inspect the disk of old parts**
+
+```sql title="Inspect cold S3 parts and the TTL definition"
+SELECT disk_name, count() AS parts, formatReadableSize(sum(bytes_on_disk)) AS size
+FROM system.parts
+WHERE active AND disk_name = 'cold_s3'
+GROUP BY disk_name;
+
+SELECT name, create_table_query
+FROM system.tables
+WHERE database = 'default'
+  AND position(create_table_query, "storage_policy = 'hot_cold'") > 0;
+```
+
+- **An NFS PVC request is not an NFS-server quota, so observe physical free space and S3 object growth separately**
+
+## Collect SeaweedFS S3 access audit with Fluent Forward
+
+- **Both the public SeaweedFS S3 service and internal `clickhouse-s3-gateway` use `auditLogConfig` to send audit records to the same gateway**
+  - The destination is `otel-gateway.observability.svc.cluster.local:8006`
+  - `request_ack: true` waits for a receiver acknowledgement, making a network failure observable
+  - Tag prefixes provide supplemental distinction between public S3 and the cold-tier gateway
+- **The gateway `fluent_forward/s3-audit` receiver adds standard resource attributes to audit records**
+  - `k8s.cluster.name=jamie-kr`
+  - `service.name=seaweedfs-s3-audit`
+  - `event.dataset=seaweedfs.s3.access`
+- **The audit pipeline tracks S3 request outcomes and actors; it is not the data pipeline that stores object payloads**
+  - Audit field structure can vary by SeaweedFS version and operation, so inspect raw attributes before fixing a query schema
+  - Audit follows ordinary telemetry TTL, so a long-term or regulatory retention requirement needs a separate export and retention contract
+
+```sql title="Query recent SeaweedFS S3 audit records"
+SELECT
+  Timestamp,
+  Body,
+  ResourceAttributes['service.name'] AS service,
+  ResourceAttributes['event.dataset'] AS dataset
+FROM default.otel_logs
+WHERE Timestamp >= now() - INTERVAL 15 MINUTE
+  AND ResourceAttributes['event.dataset'] = 'seaweedfs.s3.access'
+ORDER BY Timestamp DESC
+LIMIT 100;
+```
+
+## Preserve the verification and change order
+
+- **Before changing a route, receiver, identity, storage policy, or NetworkPolicy, confirm that GitOps desired state owns it**
+  - Directly editing a runtime Secret or collector config will be reverted by the next Argo CD sync
+  - Do not place SOPS plaintext in terminal output, commits, CI logs, or debugging artifacts
+- **After deployment, run acceptance checks at each boundary in order**
+  1. Confirm external OTLP returns `401` without credentials and `200` with credentials
+  2. Inspect gateway signal flow plus exporter retry and queue state
+  3. Confirm zero re-collected `clickstack-ingest` records from the node agent
+  4. Inspect ClickHouse `hot_cold`, TTL, and `cold_s3` parts
+  5. Perform a bucket-scoped S3 request with the `otel-cold-tier` credential
+  6. Confirm the resulting `seaweedfs.s3.access` audit record
+- **Approve SeaweedFS PVC migration and Released-PV cleanup separately from object integrity and rollback retention**
+  - Deleting previous `/k8s_data` PVs immediately after migration removes the storage-path rollback option
+  - End rollback-PV retention only after data copy, SeaweedFS readiness, S3 access, cold parts, and audit ingestion have all been verified
+
+## Recommended next actions
+
+- **Keep receiver, exporter, and TTL changes in one GitOps sync but execute acceptance queries separately for signal, storage, and audit boundaries**
+- **Use one S3 identity per workload and never deploy SeaweedFS global-admin credentials into telemetry runtime**
+- **Dashboard queue use, cold-S3 object growth, fourteen-day TTL deletion, and audit arrival together to detect both cost drift and missing data**

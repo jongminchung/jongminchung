@@ -10,6 +10,7 @@
     "cilium-gateway-api-multi-control-plane",
     "cilium-gateway-api-direct-public-ip",
     "---Reference · 조회---",
+    "opentelemetry-clickstack-cold-tier",
     "ansible-rke2-gitops-platform",
     "---Explanation · 이해---",
     "rke2spray-vs-kubespray",
