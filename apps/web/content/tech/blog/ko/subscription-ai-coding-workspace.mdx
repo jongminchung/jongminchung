@@ -1,0 +1,278 @@
+---
+series: subscription-first-ai-workspace
+seriesOrder: 1
+title: "월 US$20 AI 코딩 구독 비교와 API 키 없는 워크스페이스"
+description: "Gemini CLI, Codex, Claude Code의 월 US$20 구독을 중심으로 Z.ai, Kimi Code, OpenCode Go의 비용·한도·연결 조건을 비교하고, API 키 없이 완료 작업당 사용량을 낮추는 워크스페이스를 설계합니다."
+thesis: "구독형 AI 도구의 효율은 한 서비스에 모든 일을 몰아넣는 방식보다, 공식 클라이언트를 역할별로 분리하고 공통 작업 계약으로 넘겨주는 방식에서 높아집니다."
+counterargument: "여러 구독을 병렬로 쓰면 전환 비용과 월 고정비가 늘어나므로, 한 모델의 품질과 사용 한도가 충분한 사용자에게는 단일 구독이 더 경제적일 수 있습니다."
+publishedAt: "2026-09-04"
+updatedAt: "2026-09-04"
+verifiedAt: "2026-09-04"
+tags: [ai, coding, subscriptions, productivity]
+status: experimental
+publicationStatus: published
+sourceUrl: https://learn.chatgpt.com/docs/pricing
+---
+
+## 핵심 요약
+
+- **API 키를 쓰지 않는 조건에서는 여러 구독을 하나의 모델 라우터에 합칠 수 없으며, 각 공급자의 공식 클라이언트를 같은 저장소에서 병렬로 쓰는 구성이 정직한 해법임**
+- **동일 예산 비교의 핵심군은 월 US$19.99의 `Google AI Pro`, US$20의 `ChatGPT Plus`, US$20의 `Claude Pro`로 잡는 것이 적절함**
+- **서로 다른 단위를 완전히 동일시할 수는 없지만, 공개 한도를 기준으로 `Gemini CLI`는 명목 사용량이 많음, `Codex`는 모델에 따라 중간에서 많음, `Claude Code`는 적음에서 중간 정도로 대략 비교할 수 있음**
+- **`Z.ai GLM Coding Plan`과 `OpenCode Go`도 구독형 모델 접근을 제공하지만, 두 서비스 모두 공식 연결 절차가 API 키를 요구하므로 API 키 금지 워크스페이스의 실행 후보에서는 제외해야 함**
+- **토큰을 아끼는 가장 큰 수단은 더 싼 모델로 바꾸는 일이 아니라, 작업마다 세션을 비우고 읽을 파일·검증 명령·완료 조건을 먼저 제한하는 일임**
+- **공개 수치의 대략적 등급은 구독 후보를 고르는 데 쓰고, 실제 절감 여부는 동일 작업 표본의 ‘검증 통과한 완료 작업 1건당 소진한 할당량’과 재작업률로 판정해야 함**
+
+## 8편은 구매 후보에서 해지 판단까지 이어짐
+
+- **이 시리즈는 도구를 먼저 늘리지 않고 비교·측정·최적화·운영·결제 판단 순서로 진행함**
+  - 각 편의 산출물을 다음 편의 입력으로 사용하므로 1편부터 순서대로 읽는 구성이 가장 자연스러움
+  - 이미 구독을 보유했다면 2편의 기준선부터 시작하고 8편에서 유지 여부를 다시 판단할 수 있음
+
+| 순서 | 편별 주제                                                                | 다음 편에 넘기는 산출물     |
+| ---: | ------------------------------------------------------------------------ | --------------------------- |
+|    1 | **월 US$20 핵심 구독과 API 키 없는 연결 조건 비교**                      | 후보 구독과 역할 가설       |
+|    2 | [완료 작업당 사용량 기준선](/ko/subscription-ai-usage-baseline)          | `tasks.csv`, `baseline.csv` |
+|    3 | [컨텍스트 예산과 지침 파일 다이어트](/ko/subscription-ai-context-budget) | `context-profile.md`        |
+|    4 | [새 세션·압축·증거 중심 handoff](/ko/subscription-ai-session-handoff)    | `handoff.md`                |
+|    5 | [로그·테스트·diff·MCP 출력 예산](/ko/subscription-ai-tool-output-budget) | `tool-budget.md`            |
+|    6 | [가벼운 모델부터 올리는 라우팅](/ko/subscription-ai-model-routing)       | `routing-policy.md`         |
+|    7 | [여러 구독의 탐색·구현·리뷰 분업](/ko/subscription-ai-orchestration)     | `orchestration-log.csv`     |
+|    8 | [완료 작업당 총비용과 해지 기준](/ko/subscription-ai-break-even)         | 월별 유지·상향·해지 결정    |
+
+## 비교의 범위와 단위가 먼저 정해져야 함
+
+- **이 비교는 개인 개발자가 월 구독에 로그인해 쓰는 제품만 다룸**
+  - API 종량제, API 키, 크레딧 자동 충전, 키를 환경 변수에 넣어 타사 클라이언트를 연결하는 방법은 제외함
+  - 구독 한도를 넘긴 뒤 제시되는 별도 사용 크레딧도 기본 비용 비교에는 포함하지 않음
+
+- **표의 가격은 2026-09-04에 각 공급자가 공개한 월간 기준 목록가이며, 국가·세금·연간 결제 할인·프로모션에 따라 실제 청구액이 달라질 수 있음**
+  - 따라서 가격은 구독 후보를 좁히는 기준일 뿐, ‘토큰당 가격’으로 환산해 우열을 단정하는 근거가 될 수 없음
+
+| 서비스                  | 개인 구독의 대표 시작점                                          | 코딩 사용량의 성격                                           | API 키 없이 허용되는 연결                      | 이 조건에서의 역할                 |
+| ----------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------- | ---------------------------------- |
+| Google `Gemini CLI`     | `Google AI Pro` US$19.99[^gemini-pricing]                        | 유료 고정 요금제는 사용자당 일일 모델 요청 한도를 제공함     | 구독 Google 계정으로 공식 CLI 로그인           | 저장소 탐색·대안 구현·독립 검증    |
+| OpenAI `Codex`          | `ChatGPT Plus` US$20[^openai-pricing]                            | Codex·ChatGPT Work 등 에이전트 기능이 공용 할당량을 공유함   | ChatGPT 계정으로 Codex 공식 앱·CLI 로그인      | 어려운 구현·리뷰·최종 검증         |
+| Anthropic `Claude Code` | `Pro` US$20[^claude-plan]                                        | Claude와 Claude Code가 같은 사용 한도를 공유함               | Claude 계정으로 공식 CLI·지원 IDE 로그인       | 계획 수립·넓은 변경·설명           |
+| Z.ai `GLM Coding Plan`  | `Lite` US$18, `Pro` US$80, `Max` US$168[^zai-pricing]            | 5시간 및 주간 한도와 크레딧으로 관리됨                       | 공식 절차가 Coding Plan API 키를 요구함        | API 키 허용 시 비교 후보           |
+| Moonshot `Kimi Code`    | `Andante` ¥49, `Moderato` ¥99, `Allegretto` ¥199, `Allegro` ¥699 | 멤버십 공용 크레딧과 별도 5시간·주간 코딩 한도가 함께 적용됨 | 공식 Kimi Code CLI·VS Code 확장의 OAuth 로그인 | 대용량 탐색·독립 보조 작업         |
+| `OpenCode Go`           | US$10[^opencode-go]                                              | 모델별 달러 가치 한도와 5시간·주간·월간 한도로 관리됨        | 공식 절차가 OpenCode Go API 키를 요구함        | API 키 허용 시 다중 모델 비교 후보 |
+
+- **`Gemini CLI`는 핵심군에서 가장 명시적인 요청 한도를 공개함**
+  - Google은 `Google AI Pro` 구독자에게 Gemini CLI·Code Assist의 상향된 한도를 제공한다고 밝히며, 연결된 공식 할당량 표는 `Gemini Code Assist Standard` 기준 사용자당 하루 1,500회의 모델 요청 한도를 제시함[^gemini-cli-quota]
+  - 무료 Google 계정도 하루 1,000회·분당 60회를 제공하므로, 유료 구독의 코딩 증분 가치는 요청량뿐 아니라 Gemini 앱·저장공간·Google 제품 혜택까지 함께 평가해야 함[^gemini-cli-quota]
+  - 한 번의 사용자 지시가 에이전트 내부에서 여러 모델 요청을 만들 수 있으므로 ‘1,500회 요청’을 ‘1,500개 완료 작업’으로 해석하면 안 됨
+
+- **`Codex`의 한도는 고정 메시지 수가 아니라 작업의 복잡도, 컨텍스트, 추론, 도구와 실행 장소의 영향을 받는 사용량임**
+  - OpenAI의 현재 `Plus` 추정치는 5시간당 로컬 메시지 기준 `GPT-5.6 Sol` 10–100회, `Terra` 25–200회, `Luna` 250–2,000회이며 주간 한도가 추가될 수 있음[^openai-usage]
+  - OpenAI는 이 숫자가 고정 상한이 아니며 작업·모델·컨텍스트·도구·검색·캐시의 영향을 받는다고 명시함[^openai-usage]
+  - 따라서 `Plus`에서 작업 하나가 끝났다는 사실만으로 `Pro`가 필요한지 판단하면 안 됨
+
+- **`Claude`의 월 구독 가격과 용량 배수는 명확하지만, 실제 세션에서 소진되는 양은 대화 길이와 모델 선택에 좌우됨**
+  - Anthropic은 `Pro` US$20의 세션 한도가 5시간마다 재설정되고 모든 모델에 걸친 주간 한도도 적용된다고 안내하지만, 현재 고정 프롬프트 수는 공개하지 않음[^claude-plan]
+  - Anthropic이 공식 도움말에서 제시한 과거 대표 추정치는 `Claude Code` 프롬프트 10–40회/5시간이며, 현재 정책에서는 보장값이 아니라 작은 저장소의 가벼운 코딩을 가정한 참고값으로만 사용할 수 있음[^claude-estimate]
+  - Claude Code 공식 안내는 이전 대화, 프로젝트 지침, 읽은 파일, 새 프롬프트가 모두 매 턴 전송되며 긴 세션이 비용과 컨텍스트 한도의 원인이라고 설명함[^claude-limits]
+
+- **월 약 US$20 핵심군의 명목 반복 가능량은 다음처럼 대략 비교할 수 있음**
+
+| 핵심 구독                    | 공식 공개 수치                                            | 대략적 사용량 등급 | 해석 조건                                                      |
+| ---------------------------- | --------------------------------------------------------- | ------------------ | -------------------------------------------------------------- |
+| `Google AI Pro`·`Gemini CLI` | 모델 요청 1,500회/일                                      | 많음               | 한 프롬프트가 여러 모델 요청을 만들므로 실제 지시 수는 더 적음 |
+| `ChatGPT Plus`·`Codex Terra` | 로컬 메시지 25–200회/5시간                                | 중간–많음          | 일상 코딩 기준이며 `Sol`은 10–100회, `Luna`는 250–2,000회임    |
+| `Claude Pro`·`Claude Code`   | 대표 추정 프롬프트 10–40회/5시간, 현재는 변동 한도만 명시 | 적음–중간          | 코드베이스·대화 길이·모델과 Claude 채팅 사용량에 좌우됨        |
+
+- **이 등급은 처리 품질이나 완료 작업 수가 아니라 사용자가 반복을 시도할 수 있는 명목 여유를 뜻함**
+  - `Claude Code`의 10회가 `Gemini CLI` 모델 요청 10회보다 더 많은 작업을 끝낼 수 있으므로 ‘많음’이 곧 더 높은 가성비를 의미하지 않음
+  - 비교표의 실용적 용도는 대량의 작은 작업에는 명목 한도가 큰 후보를, 긴 리팩터링에는 완료율이 높은 후보를 먼저 시험하는 우선순위 설정임
+
+- **`Z.ai`·`Kimi`·`OpenCode Go`는 US$20 핵심군의 승자를 정하는 제품이 아니라 가격·인증 조건이 다른 보조 비교군임**
+  - Z.ai는 5시간 한도 외에 7일 주기 주간 한도가 있고, 지원 도구가 같은 구독 할당량을 공유한다고 안내함[^zai-faq]
+  - Kimi는 모든 멤버십 기능이 크레딧 풀을 공유하고 Kimi Code에는 별도 5시간·주간 한도가 적용된다고 설명함[^kimi-membership]
+  - 각 제품의 크레딧·프롬프트·달러 가치 원단위를 보존하면서 적음·중간·많음 등급을 함께 기록해야 함
+
+## API 키 금지 조건은 연결 방식을 바꿈
+
+- **‘여러 구독을 연결한다’는 말은 한 CLI에 타사 모델을 주입한다는 뜻이 아니라, 같은 Git 작업 계약을 여러 공식 클라이언트가 읽는다는 뜻으로 바꿔야 함**
+  - `Gemini CLI`에는 Google 로그인, `Codex`에는 ChatGPT 로그인, `Claude Code`에는 Claude 로그인, `Kimi Code`에는 Kimi OAuth 로그인만 사용함
+  - Gemini CLI 공식 인증 안내는 `Google AI Pro` 구독 계정에 `Login with Google` 방식을 사용하라고 명시하므로 API 키가 필요하지 않음[^gemini-auth]
+  - 공급자별 자격 증명은 각 앱의 로그인 저장소에만 두고, 저장소의 `.env`, `settings.json`, 셸 설정과 문서에 키를 넣지 않음
+
+- **`Z.ai GLM Coding Plan`은 이 조건에서 제외해야 함**
+  - 현재 공식 시작 안내는 구독 뒤 Individual 또는 Team Coding Plan API 키를 만들고, 지원 도구에 해당 키와 전용 엔드포인트를 설정하는 순서를 제시함[^zai-quickstart]
+  - 따라서 `GLM-5.3`과 `GLM-5.3-Flash`를 제공하는 구독 모델임에도, API 키를 만들지 않겠다는 조건에서는 실행 슬롯으로 배정할 수 없음[^zai-faq]
+
+- **`Kimi Code`의 타사 에이전트 연결도 이 조건에서 제외해야 함**
+  - Kimi는 공식 CLI와 VS Code 확장에서 OAuth 자동 인증으로 키 관리가 필요 없다고 밝힘[^kimi-auth]
+  - 반대로 Claude Code·Roo Code·OpenCode 같은 타사 개발 도구 연결에는 API 키를 직접 구성해야 한다고 명시함[^kimi-auth]
+
+- **`OpenCode Go`도 구독제이지만 API 키 없는 대안은 아님**
+  - OpenCode는 월 US$10 구독 후 키를 복사해 `/connect`에 붙여 넣는 절차를 공식 안내함[^opencode-go]
+  - 따라서 OpenCode Go는 ‘구독형 다중 모델 접근’ 비교에는 포함하되, 이 글의 API 키 금지 워크스페이스에는 연결하지 않음
+
+## 구독형 모델 게이트웨이는 별도 단위로 비교해야 함
+
+- **`Z.ai GLM Coding Plan`은 자체 모델군을 지원 도구에 제공하는 구독제임**
+  - 현재 FAQ 기준 전 요금제는 `GLM-5.3`과 `GLM-5.3-Flash`를 지원하며, 지원 도구 전체가 동일 구독 할당량을 공유함[^zai-faq]
+  - Lite·Pro·Max의 동시성은 각각 단일 프로젝트, 1–2개 프로젝트, 2개 이상 프로젝트를 권장하므로, 단일 사용자가 여러 에이전트를 동시에 실행할 때는 모델 성능뿐 아니라 동시성 제한도 비교 대상이 됨[^zai-policy]
+  - `Lite`는 5시간 2,000·주간 10,000크레딧이며, 95–98% 캐시 적중률 가정에서 `GLM-5.3` 주간 4,800만–1억 400만 토큰 또는 `Flash` 1억 4,600만–3억 1,700만 토큰으로 안내됨[^zai-usage]
+
+- **`OpenCode Go`는 여러 공급자의 모델을 하나의 구독으로 제공하는 모델 게이트웨이임**
+  - 현재 공개 모델 목록에는 `GLM-5.3`, `GLM-5.3-Flash`, `Kimi K3`, `Kimi K2.7 Code` 외에도 GPT·Grok·Qwen·DeepSeek 계열이 포함되며, 목록은 변경될 수 있음[^opencode-go]
+  - 기본 한도는 5시간 US$12 상당, 주간 US$30 상당, 월간 US$60 상당이며, 실제 요청 수는 선택 모델의 비용에 따라 달라짐[^opencode-go]
+  - 예를 들어 공식 표의 5시간 추정 요청 수는 `GLM-5.3` 220회, `GLM-5.3-Flash` 1,580회, `Kimi K3` 110회로 크게 다르므로, ‘월 US$10’만 보고 사용량이 같다고 보면 안 됨[^opencode-go]
+
+- **보조 비교군도 공식 가정 안에서는 대략적인 월 사용량으로 나란히 볼 수 있음**
+  - `Kimi`가 제시한 간단한 코드 작성 1건당 월 크레딧 0.5–2%를 역산하면, 다른 기능을 전혀 쓰지 않는 조건에서 약 50–200건/월이지만 별도 5시간·주간 한도가 먼저 걸릴 수 있음[^kimi-membership]
+  - `OpenCode Go`의 공식 월 추정치는 `GLM-5.3` 1,080회, `GLM-5.3-Flash` 7,900회, `Kimi K3` 490회, `Kimi K2.7 Code` 6,750회로 모델 비용에 따라 큰 차이가 있음[^opencode-go]
+  - `Z.ai Lite`는 토큰·캐시 가정, `Kimi`는 작업당 크레딧 비율, `OpenCode Go`는 전형적 요청 크기를 사용하므로 숫자의 자릿수보다 적음·중간·많음 구간을 비교하는 편이 적절함
+
+- **두 서비스는 같은 GLM·Kimi 이름을 제공하더라도 같은 사용량 상품이 아님**
+  - Z.ai는 자기 구독의 지원 도구·크레딧·동시성 규칙을 적용함
+  - OpenCode Go는 공급자별 모델 비용을 달러 가치 한도와 요청 수 추정치로 환산함
+  - 따라서 API 키 사용을 허용하는 별도 실험에서만 같은 작업 표본으로 완료 작업당 할당량을 비교해야 함
+
+- **한 서비스의 구독을 다른 서비스의 사용량 한도로 바꾸는 우회 구성은 설계 대상이 아님**
+  - 구독은 개인 계정과 공식 지원 도구에 묶여 있고, Z.ai는 지원하지 않는 도구나 일반 API 사용을 제한함[^zai-terms]
+  - 이 경계를 지키면 결제·약관·보안 문제를 피하면서도 공급자 장애나 한도 도달 때 다음 공식 클라이언트로 작업을 넘길 수 있음
+
+## 공통 파일을 중심으로 워크스페이스를 구성함
+
+- **워크스페이스의 공통 인터페이스는 모델 설정이 아니라 저장소 안의 짧은 작업 파일이어야 함**
+  - 각 CLI가 같은 파일을 읽으면 대화 전문을 복사하지 않고도 다른 구독으로 작업을 넘길 수 있음
+  - 공급자 전용 설정 파일을 공유 포맷으로 삼으면 API 키 금지 조건을 깨거나 특정 도구에 종속될 가능성이 있음
+
+```text
+repository/
+├── AGENTS.md                 # 모든 에이전트가 따라야 할 불변 규칙
+├── docs/ai/
+│   ├── task.md               # 목표·수정 허용 경로·완료 조건
+│   ├── context.md            # 현재 결정·이미 확인한 사실·열어볼 파일
+│   ├── handoff.md            # 다음 도구에 넘길 결과와 미해결 질문
+│   └── metrics.csv           # 작업별 사용량·결과 기록
+├── .gitignore                # .env, 개인 설정, 자격 증명 제외
+└── worktrees/
+    ├── feature-a/            # Codex 작업 공간
+    ├── explore-a/            # Gemini 탐색 공간
+    └── review-a/             # Claude 또는 Kimi 검토 공간
+```
+
+- **`AGENTS.md`에는 자주 바뀌지 않는 규칙만 두어야 함**
+  - 패키지 관리자, 금지 명령, 테스트 명령, 코드 스타일, PR의 완료 기준처럼 모든 작업에 필요한 정보만 기록함
+  - 현재 버그의 긴 로그나 조사 메모까지 넣으면 매 턴 컨텍스트가 커지므로 `docs/ai/context.md`로 분리함
+
+- **`task.md`는 한 작업을 8줄 안팎으로 닫는 계약이어야 함**
+  - 목표, 수정 허용 경로, 수정 금지 경로, 실행할 검증 명령, 완료 조건, 예산 경계만 기록함
+  - 예를 들어 ‘`apps/web`의 검색 결과 정렬 수정, `lib/search`와 테스트만 변경, `bun run --filter @jongminchung/web test` 통과, 디자인 변경 금지’처럼 씀
+
+- **`handoff.md`는 대화 전문 대신 증거를 넘기는 파일이어야 함**
+  - 바꾼 파일, 실행한 명령과 결과, 아직 확인하지 못한 가설, 다음 에이전트의 한 가지 질문만 남김
+  - ‘위 대화를 읽어라’는 지시는 새 세션이 읽을 수 없고, 긴 대화를 붙여 넣으면 가장 비싼 입력이 됨
+
+- **동시에 파일을 고치는 에이전트는 별도 Git worktree에서 실행해야 함**
+  - 구현과 리뷰를 같은 작업 트리에서 병렬 실행하면 충돌 해결 자체가 추가 토큰과 사람 시간을 만듦
+  - 하나는 수정, 다른 하나는 읽기 전용 검토 또는 별도 worktree 수정으로 역할을 분리함
+
+## 사용량은 작업 설계에서 먼저 줄어듦
+
+- **새 작업마다 세션을 비우고, 같은 작업을 이어갈 때만 요약을 유지해야 함**
+  - Claude Code는 새 작업에서는 `/clear`, 긴 동일 작업에서는 `/compact`를 권장하며, 과거 대화가 매 턴 다시 전송되는 구조를 설명함[^claude-limits]
+  - 같은 원리는 다른 에이전트에도 적용되므로, 작업 전환 때는 `handoff.md`를 남기고 새 세션을 여는 편이 안전함
+
+- **큰 변경은 ‘읽기 전용 계획 → 사람의 범위 승인 → 구현’의 세 단계로 나눠야 함**
+  - 계획 단계에서는 수정하지 말고 후보 파일, 위험, 검증 명령만 출력하게 함
+  - 계획이 틀린 상태에서 수백 줄을 생성하고 되돌리는 비용이, 먼저 몇백 토큰으로 범위를 바로잡는 비용보다 훨씬 클 가능성이 있음
+
+- **기본 모델과 고속 모드는 일상 작업에 과하게 쓰지 않아야 함**
+  - Claude는 빠르고 비용 효율적인 모델을 대부분의 코딩 작업에 쓰고, 더 깊은 추론 모델은 어려운 리팩터링·디버깅·설계 판단에만 쓰도록 안내함[^claude-limits]
+  - Kimi의 `HighSpeed`는 같은 코딩 능력에서 출력 속도는 약 5–6배지만 크레딧 사용은 약 3배라고 공개하므로, 대기 시간이 병목인 짧은 반복에만 선택하는 편이 합리적임[^kimi-auth]
+
+- **도구와 입력 범위를 먼저 제한해야 함**
+  - ‘저장소 전체를 읽고 고쳐라’ 대신 파일 경로·검색어·최대 세 파일·필요한 로그 일부를 지정함
+  - 웹 검색, 대형 MCP, 전체 테스트, 자동 승인 명령은 완료 조건에 필요할 때만 켜며, 특히 연결 도구의 출력은 요약을 우선 요청함
+
+- **각 구독에는 겹치지 않는 기본 역할을 부여해야 함**
+  - `Codex` 또는 `Claude Code` 중 주 에이전트 하나만 수정 권한을 가지게 함
+  - `Gemini CLI`는 넓은 저장소 탐색이나 독립 대안 검증을 맡기고, 다른 구독은 계획 검토·테스트 실패 분석·diff 리뷰처럼 읽기 중심 역할을 맡겨 동일한 탐색을 반복하지 않게 함
+  - 주 구독의 남은 한도가 실제로 병목일 때만 `Kimi Code` 또는 `ZCode`에서 독립 worktree 작업을 시작함
+
+## 절감 평가는 대략적 환산 뒤 완료 작업당 할당량으로 확정함
+
+- **서로 다른 공급자의 수치를 적음·중간·많음으로 대략 비교하는 것은 가능하지만 정밀한 토큰 순위로 표현하면 안 됨**
+  - Kimi는 기능 전체에 공용 크레딧을 차감하고, Z.ai는 크레딧과 시간·주간 한도를 함께 관리하며, OpenCode Go는 모델별 달러 가치 한도를 사용하고, OpenAI와 Claude도 제품 기능 간 공용 한도를 둠
+  - 공개 수치는 구매 전 처리량 가설을 세우는 데 사용하고, 모델·캐시·도구 호출 차이는 실제 작업 측정으로 보정해야 함
+
+- **같은 난이도의 작업 표본으로 변경 전후를 비교해야 함**
+  - 버그 수정, 작은 기능, 테스트 보강, 리팩터링처럼 4개 유형을 섞어 최소 20건을 선정함
+  - 각 유형마다 변경 전 방식 10건, 새 워크스페이스 방식 10건을 가능한 한 같은 저장소·브랜치 상태·검증 명령에서 수행함
+
+- **`metrics.csv`에는 공급자별 표시값과 품질 결과를 함께 기록해야 함**
+
+```csv
+task_id,kind,provider,mode,started_at,ended_at,quota_before,quota_after,turns,tests_passed,accepted,rework_minutes
+WEB-41,bugfix,codex,standard,09:10,09:34,72%,64%,7,true,true,0
+WEB-42,review,claude,sonnet,10:05,10:17,55%,52%,4,true,true,6
+```
+
+- **주 지표는 ‘검증을 통과하고 수용된 작업 1건당 소진한 구독 할당량’이어야 함**
+  - `작업당 할당량 소진 = quota_before - quota_after`로 기록하되, 퍼센트·크레딧·남은 시간처럼 각 대시보드가 제공하는 단위를 그대로 보존함
+  - 같은 공급자 안에서는 작업당 중앙값을 비교하고, 공급자 간에는 완료 작업 수, 사람 재작업 시간, 한도 도달 전까지의 수용 작업 수를 비교함
+
+- **절감 판정에는 품질 하한을 함께 둬야 함**
+  - 새 방식의 작업당 할당량 중앙값이 기준선보다 20% 이상 낮고, 테스트 통과율과 수용률이 기준선보다 5%p 이상 떨어지지 않으며, 재작업 중앙 시간이 늘지 않을 때만 ‘사용량을 줄였다’고 평가함
+  - 테스트가 없는 작업은 사람이 정의한 수용 체크리스트와 코드 리뷰 통과 여부를 같은 열에 기록함
+
+- **대시보드와 CLI 상태는 측정의 원자료로만 사용해야 함**
+  - Gemini CLI는 `/stats`에서 현재 세션의 토큰·도구 호출·시간을 확인할 수 있지만, Google OAuth에서는 캐시 절감량을 표시하지 않으므로 총 토큰과 완료 결과를 함께 기록해야 함[^gemini-stats]
+  - Codex는 사용량 대시보드와 CLI의 `/status`에서 한도·재설정 시점을 확인하도록 안내함[^openai-usage]
+  - Claude Code는 `/usage`와 `/context`로 구독 상태와 컨텍스트 점유를 확인할 수 있음[^claude-cheatsheet]
+  - Kimi는 구독 화면에서 남은 크레딧, 재설정 시점, 최근 사용 기록을 제공한다고 설명함[^kimi-membership]
+  - 이 값은 시점별 스냅샷이므로, 작업 시작·종료 직후에 기록하고 월말 청구 금액과 혼동하지 않음
+
+## 실행 제안
+
+- **첫 달에는 `Gemini CLI`·`Codex`·`Claude Code` 중 한 개만 주 수정 에이전트로 선택하고, 이미 보유한 다른 구독은 읽기 전용 검토 역할로 제한하는 구성이 적절함**
+  - 월 약 US$20 구간의 세 구독을 같은 작업 표본으로 측정한 뒤 보조 구독이나 상위 요금제를 추가하는 편이 고정비 위험을 낮춤
+
+- **API 키 금지 구성에서는 `Gemini CLI`·`Codex`·`Claude Code`·Kimi 공식 CLI 또는 VS Code 확장만 실행 슬롯으로 검토해야 함**
+  - `Z.ai GLM Coding Plan`과 `OpenCode Go`는 유용한 구독 비교 대상이지만, 현재 공식 연결 절차가 키 생성을 전제하므로 별도 API 키 허용 실험으로 분리해야 함
+
+- **2주 동안 20건을 기록해 ‘작업당 소진량·수용률·재작업 시간’을 비교하고, 개선이 확인된 역할만 유지해야 함**
+  - 이 결과가 없다면 여러 구독을 늘리는 일은 사용량 최적화가 아니라 단순한 고정비 증가일 가능성이 있음
+
+[^gemini-pricing]: [Google, Google AI 구독 요금제](https://gemini.google/subscriptions/) — `Google AI Pro`의 미국 월 목록가와 포함 혜택을 제시함
+
+[^gemini-cli-quota]: [Google, AI Pro 구독자의 Gemini CLI·Code Assist 상향 한도](https://blog.google/innovation-and-ai/technology/developers-tools/gemini-cli-code-assist-higher-limits/)와 [Gemini Code Assist 할당량](https://docs.cloud.google.com/gemini/docs/quotas) — 유료 구독의 상향 혜택, Standard 일일 1,500회 한도, 한 프롬프트가 여러 요청을 만들 수 있다는 조건을 설명하며, 무료 Google 로그인 한도는 [Gemini CLI 할당량 문서](https://google-gemini.github.io/gemini-cli/docs/quota-and-pricing.html)를 근거로 함
+
+[^gemini-auth]: [Google, Gemini CLI 인증 설정](https://google-gemini.github.io/gemini-cli/docs/get-started/authentication.html) — `Google AI Pro` 구독자의 브라우저 기반 Google 계정 로그인을 안내함
+
+[^gemini-stats]: [Google, Gemini CLI 명령](https://google-gemini.github.io/gemini-cli/docs/cli/commands.html) — `/stats`의 토큰·캐시·세션 시간 표시 범위를 설명함
+
+[^openai-usage]: [OpenAI, Codex 가격과 사용량](https://learn.chatgpt.com/docs/pricing) — `Plus`의 모델별 예상 사용량, 공용 한도, 대시보드와 `/status`를 설명함
+
+[^openai-pricing]: [OpenAI, Codex 가격과 사용량](https://learn.chatgpt.com/docs/pricing) — `ChatGPT Plus` 월 요금과 Codex 제공 범위를 제시함
+
+[^claude-plan]: [Anthropic, Claude 개인 요금제 선택](https://support.claude.com/en/articles/11049762-choose-a-claude-plan) — Pro와 Max의 월 요금 및 용량 배수를 제시함
+
+[^claude-estimate]: [Anthropic, Pro 또는 Max 구독으로 Claude Code 사용](https://support.anthropic.com/en/articles/11145838-using-claude-code-with-your-pro-or-max-plan) — Pro의 대표적인 5시간당 Claude Code 프롬프트 추정치와 변동 조건을 제시함
+
+[^claude-limits]: [Anthropic, Claude Code의 모델·사용량·한도](https://support.claude.com/en/articles/14552983-models-usage-and-limits-in-claude-code) — 컨텍스트 구성, `/clear`, `/compact`, 모델 역할을 설명함
+
+[^zai-faq]: [Z.ai, GLM Coding Plan FAQ](https://docs.z.ai/devpack/faq) — 지원 도구, 크레딧, 5시간·주간 한도 및 구독 할당량 사용 조건을 설명함
+
+[^zai-usage]: [Z.ai, GLM Coding Plan 개요](https://docs.z.ai/devpack/overview) — 요금제별 5시간·주간 크레딧과 캐시 적중률·시간대별 예상 토큰 범위를 제시함
+
+[^zai-quickstart]: [Z.ai, GLM Coding Plan 시작하기](https://docs.z.ai/devpack/quick-start) — Coding Plan 키 생성, 지원 도구, 전용 엔드포인트 설정을 설명함
+
+[^zai-policy]: [Z.ai, GLM Coding Plan 사용 정책](https://docs.z.ai/devpack/usage-policy) — 요금제별 동시 프로젝트 권장 수와 개인 구독의 사용 경계를 설명함
+
+[^zai-pricing]: [Z.ai, GLM Coding Plan](https://z.ai/subscribe) — Coding Plan의 공개 월간 가격과 등급을 제시함
+
+[^zai-terms]: [Z.ai, 구독·요금·결제 약관](https://docs.z.ai/legal-agreement/subscription-terms) — 구독 할당량의 지원 도구 및 일반 API 사용 제한을 명시함
+
+[^kimi-membership]: [Kimi, 멤버십 구독 혜택](https://www.kimi.com/en/help/membership/membership-overview) — 요금제, 공용 크레딧, Kimi Code 한도와 사용 기록을 설명함
+
+[^kimi-auth]: [Kimi, Kimi Code 멤버십 가이드](https://www.kimi.com/en/help/kimi-code/membership-guide) — 공식 클라이언트 OAuth와 타사 도구 API 키 요구 사항, HighSpeed의 사용량을 설명함
+
+[^opencode-go]: [OpenCode, Go 구독 문서](https://dev.opencode.ai/docs/go/) — 월 요금, 키 기반 연결, 현재 모델 목록, 모델별 사용량 한도와 요청 수 추정치를 제시함
+
+[^claude-cheatsheet]: [Anthropic, Claude Code 명령 요약](https://support.claude.com/en/articles/14553413-claude-code-cheatsheet) — `/usage`와 `/context`의 상태 확인 방법을 설명함

@@ -1,0 +1,126 @@
+---
+series: subscription-first-ai-workspace
+seriesOrder: 3
+title: "Put a budget on AI coding context"
+description: "Reduce repeated subscription usage by separating durable rules, task contracts, and temporary evidence instead of duplicating long AGENTS.md, CLAUDE.md, and GEMINI.md files."
+thesis: "Context savings come from separating durable rules, task facts, and client adapters by lifetime—not from deleting information indiscriminately."
+counterargument: "Long instruction files can prevent agent mistakes, so shortening them may increase omissions and rework."
+publishedAt: "2026-09-04"
+updatedAt: "2026-09-04"
+verifiedAt: "2026-09-04"
+tags: [ai, coding, context, productivity]
+status: experimental
+publicationStatus: published
+sourceUrl: https://learn.chatgpt.com/guides/best-practices
+---
+
+## Key takeaways
+
+- **Part 3 creates a context budget that reduces repeated instructions and files while preserving completion quality**
+- **Separate durable repository rules, a per-task contract, and temporary investigation evidence by their lifetimes**
+- **Copying the same long text into `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` expands every client's startup context**
+- **Measure irrelevant-input share, repeated questions, and rework rather than celebrating a smaller file alone**
+- **This part produces thin instruction files and `context-profile.md` for Part 4's session protocol**
+
+## Find repeated input in the baseline
+
+- **Classify baseline failures before removing context**
+  - Separate failures caused by missing rules from failures caused by important constraints being buried in excess text
+  - Lower input with worse quality merely defers cost to retries
+
+- **Divide context into three lifetimes**
+  - Repository-lived context covers the package manager, prohibited actions, and verification contract
+  - Task-lived context covers the goal, allowed paths, and acceptance criteria
+  - Investigation-lived context covers log excerpts, hypotheses, and rejected approaches
+
+- **OpenAI recommends goals, context, constraints, and done conditions in a task prompt, with durable guidance in `AGENTS.md`[^codex-best-practices]**
+  - That does not imply that every transient fact belongs in `AGENTS.md`
+  - Keep changing goals and logs in a compact task contract
+
+## Define shared rules once
+
+- **Keep canonical repository rules in the root `AGENTS.md`**
+  - OpenAI documents hierarchical discovery from global guidance toward the current directory, with closer instructions applied later[^codex-agents]
+  - In a monorepo, add only area-specific overrides in nested files
+
+- **Make provider files thin adapters**
+  - `CLAUDE.md` should point to shared rules and contain only Claude-specific memory or commands
+  - `GEMINI.md` should point to shared rules and contain only Gemini-specific context and tool constraints
+  - If a client does not automatically load the canonical file, use one explicit “read this first” instruction
+
+```text
+AGENTS.md                # canonical repository rules
+apps/web/AGENTS.md       # web-only overrides
+CLAUDE.md                # canonical pointer + Claude notes
+GEMINI.md                # canonical pointer + Gemini notes
+docs/ai/task.md          # one task contract
+docs/ai/context.md       # temporary evidence
+```
+
+- **Write each rule as an action with a verifiable outcome**
+  - “Modify only `apps/web` and run its workspace test” is shorter and testable compared with “be careful”
+  - Move background explanation to linked design documents that are read only when relevant
+
+## Close each task in roughly eight lines
+
+- **The first input should explain its own purpose and boundaries**
+  - Include goal, symptom, allowed paths, protected paths, verification command, and completion condition
+  - Add one or two confirmed facts and one unresolved question
+
+```md
+# WEB-41
+
+- Goal: stabilize tied search-result ordering
+- Symptom: equal scores change order between runs
+- Allowed: apps/web/lib/tech/search*
+- Protected: UI and content files
+- Verify: bun run --filter @jongminchung/web test
+- Done: regression test passes and the search benchmark holds
+- Known: score calculation is stable
+- Unknown: whether locale affects the final tie-breaker
+```
+
+- **Read search-narrowed candidates instead of the whole repository**
+  - Search filenames and symbols, then open only relevant ranges from the strongest candidates
+  - Expand one boundary only when implementation evidence demands it
+
+- **Gemini CLI exposes context filenames and discovery limits[^gemini-config]**
+  - `context.fileName` and `context.discoveryMaxDirs` can bound automatic discovery
+  - A low number is not inherently correct; test it against the monorepo's real depth
+
+## Validate the context diet with matched tasks
+
+- **Match similar tasks from Part 2 and assign control and budgeted variants**
+  - The control keeps existing instructions and exploration
+  - The treatment uses thin guidance, an eight-line contract, and a limited initial candidate set
+
+- **Input reduction alone is not success**
+  - Compare allowance per completed task and turn count within the provider
+  - Record wrong-file changes, repeated rule questions, human hints, and rework
+
+- **The author's starting rule is a 15% median reduction with quality held constant**
+  - This is an operating threshold, not a provider guarantee
+  - Restore a missing rule when acceptance falls by more than five percentage points
+
+## Hand a context profile to the next part
+
+- **`context-profile.md` should distinguish always-read, conditional, and prohibited input**
+  - Always read the root rules and current `task.md`
+  - Conditionally read relevant design docs, tests, and the recent diff
+  - Do not paste full conversations, full build logs, or unrelated directories
+
+- **Part 4 keeps the profile fixed while changing only session lifecycle**
+  - This separation prevents context and session effects from becoming one experiment
+  - On a task change, pass only `handoff.md`, not a transcript
+
+## Action plan
+
+- **Move issue-specific logs, old decisions, and duplicated explanations out of root guidance**
+- **Reduce provider instruction files to adapters instead of shared-rule copies**
+- **Keep only rules that improve both allowance consumption and rework over ten matched runs**
+
+[^codex-best-practices]: [OpenAI, Codex best practices](https://learn.chatgpt.com/guides/best-practices) — explains goal, context, constraints, done conditions, and durable instructions
+
+[^codex-agents]: [OpenAI, custom instructions with `AGENTS.md`](https://learn.chatgpt.com/docs/agent-configuration/agents-md) — documents hierarchical instruction discovery and precedence
+
+[^gemini-config]: [Google, Gemini CLI configuration](https://google-gemini.github.io/gemini-cli/docs/get-started/configuration.html) — documents context filenames, discovery directories, and session-turn settings

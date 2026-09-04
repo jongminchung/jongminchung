@@ -90,9 +90,9 @@ export const bilingualSearchBenchmarkThresholds = Object.freeze({
 /** content snapshot 변경 시 의도적으로 검토·갱신하는 검색 품질·비용 baseline */
 export const bilingualSearchBenchmarkBaseline = Object.freeze({
   aggregate: Object.freeze({
-    top1HitRate: 8 / 9,
+    top1HitRate: 0.8611111111111112,
     top3HitRate: 1,
-    meanReciprocalRank: 0.9398148148148147,
+    meanReciprocalRank: 0.9212962962962963,
     zeroResultRate: 0.1,
   }),
   en: Object.freeze({

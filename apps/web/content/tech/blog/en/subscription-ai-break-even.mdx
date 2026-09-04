@@ -1,0 +1,132 @@
+---
+series: subscription-first-ai-workspace
+seriesOrder: 8
+title: "Set break-even and cancellation rules for AI subscriptions"
+description: "Compare one US$20 subscription, several core subscriptions, and a higher tier by total cost per accepted task, then define explicit rules to keep, add, upgrade, or cancel."
+thesis: "The best AI subscription portfolio is the smallest combination that minimizes subscription and human cost per quality-approved task—not the combination with the most purchased capacity."
+counterargument: "Exploration value and emergency redundancy are difficult to express through monthly completed-work counts, so canceling solely on low utilization can remove useful options."
+publishedAt: "2026-09-04"
+updatedAt: "2026-09-04"
+verifiedAt: "2026-09-04"
+tags: [ai, subscriptions, economics, productivity]
+status: experimental
+publicationStatus: published
+sourceUrl: https://learn.chatgpt.com/docs/pricing
+---
+
+## Key takeaways
+
+- **Part 8 uses Parts 2–7 to calculate total cost per accepted task for one subscription, several subscriptions, and an upgrade**
+- **Total cost includes subscription fees and the human time lost to rework, handoffs, conflicts, and waiting**
+- **The default is the smallest set with real roles; consuming every included unit is not the goal**
+- **Add a subscription only when recovered work value consistently exceeds its fee and coordination cost**
+- **The series ends with a repeatable monthly keep, upgrade, or cancel rule rather than a permanent provider ranking**
+
+## Turn list prices into completed-work economics
+
+- **Part 1 equalized entry prices, not total cost**
+  - Google AI Pro, ChatGPT Plus, and Claude Pro have similar list prices but different units and bundled benefits
+  - Storage, general chat, or document features may justify allocating only part of a plan's price to coding
+
+- **Use quality-adjusted total cost per accepted task**
+
+```text
+monthly total cost = subscription fees + rework time value + handoff and conflict time value
+quality-adjusted task cost = monthly total cost / accepted and verified tasks
+effective utilization = included allowance used / included allowance purchased
+```
+
+- **Choose a personal value for human time**
+  - Fifteen, 30, and 60-minute bands are enough when an exact hourly value is unavailable
+  - Omitting time hides the cost of coordinating several agents
+
+- **Do not combine provider allowances into one token count**
+  - Calculate utilization in each product's native displayed unit
+  - Combine the portfolio only through accepted work and total cost
+
+## Compare four portfolios from the same records
+
+- **One core subscription is the low-fixed-cost control**
+  - Keep it when limits rarely interrupt valuable work and acceptance is sufficient
+  - It likely fits occasional users who value simplicity over model diversity
+
+- **Two core subscriptions become a candidate when implementation and exploration or review are genuinely distinct**
+  - The second plan is duplicate fixed cost if it adds no accepted work or rework reduction
+  - Record actual failover events if redundancy is part of its value
+
+- **The roughly US$60 Gemini, Codex, and Claude combination needs all three roles every week**
+  - Voting on the same answer raises both allowance and human-review consumption
+  - Value can emerge when explorer, implementer, and reviewer artifacts do not overlap
+
+- **A higher tier from one provider can increase headroom without cross-provider handoffs**
+  - It fits a workflow whose quality is sufficient and whose recurring bottleneck is allowance alone
+  - Recheck official prices, capacity, and overage policy immediately before purchase[^codex-pricing][^claude-plan][^gemini-pricing]
+
+| Portfolio        | Can fit when                            | Main risk                                |
+| ---------------- | --------------------------------------- | ---------------------------------------- |
+| One core plan    | headroom and completion are sufficient  | outage and task-specific weakness        |
+| Two core plans   | distinct roles or meaningful failover   | switching and handoff cost               |
+| Three core plans | all three roles recur weekly            | duplicate discovery and low utilization  |
+| One higher tier  | quality works and only allowance blocks | high fixed cost and less model diversity |
+
+## Require recoverable value for additions and upgrades
+
+- **A second subscription breaks even through work that would otherwise be delayed**
+  - It is a candidate when `added monthly cost < newly accepted work value + reduced rework value`
+  - Reaching a limit does not prove that another product will complete the task better
+
+- **Consider an upgrade when all three conditions hold**
+  - Valuable work stops because of the current plan at least twice a month
+  - Context, session, output, and routing optimizations are already active
+  - Monthly delay and handoff cost exceeds the upgrade price
+
+- **The count and threshold are author-defined starting rules**
+  - One production incident can justify an upgrade when delay is expensive
+  - A hobby project can rationally wait through several resets
+
+## Decide keep and cancel rules in advance
+
+- **Review two billing cycles rather than deciding from the mood before renewal**
+  - Inspect accepted work, effective utilization, failovers, rework reduction, and coordination
+  - Mark the learning cost of a new product separately in its first month
+
+- **The author's default cancellation alert is below 25% utilization for two months with no unique role**
+  - It is a forgotten-subscription detector, not a universal economic law
+  - Keep a plan when emergency backup, storage, or general-chat value is explicitly worth the cost
+
+- **High usage does not rescue low quality**
+  - A plan exhausted through retries has high failure cost, not high productive utilization
+  - Prioritize accepted-task cost and rework time
+
+- **If the no-key constraint changes, start a separate experiment**
+  - Adding Z.ai GLM Coding Plan or OpenCode Go as a key-based gateway changes authentication, terms, and units
+  - Do not merge it into the existing baseline
+
+## Audit the series' total savings claim
+
+- **Compare Part 2's baseline with the final Part 7 operating period using the same task types**
+  - Compare median native allowance per completed task within each provider
+  - Compare acceptance, test pass rate, rework, and human coordination together
+  - Segment periods where models or limit policies changed
+
+- **Keep source facts separate from author judgment**
+  - Date and cite official prices and limits
+  - Label 15%, 20%, and 25% thresholds as operating choices
+  - State that another user or repository may not reproduce the outcome
+
+- **Success means equal quality with less waste, not a larger subscription stack**
+  - Finishing with one plan can be the correct optimization result
+  - Every retained plan should have a unique loss that can be described if removed
+
+## Conclusion and action plan
+
+- **Occasional users should begin with one core plan and Part 2's measurement sheet**
+- **Daily single-repository users should optimize the base plan, then test either one role-specific auxiliary plan or an upgrade**
+- **Parallel multi-repository users should require worktrees, one writer, and coordination tracking before adopting several subscriptions**
+- **Record keep, upgrade, or cancel three days before each renewal and revalidate official pricing and limits quarterly**
+
+[^codex-pricing]: [OpenAI, Codex pricing and usage](https://learn.chatgpt.com/docs/pricing) — explains current plan access and variable included usage
+
+[^claude-plan]: [Anthropic, choose a Claude plan](https://support.claude.com/en/articles/11049762-choose-a-claude-plan) — lists current personal-plan prices and capacity structure
+
+[^gemini-pricing]: [Google, Google AI subscriptions](https://gemini.google/subscriptions/) — lists current personal subscription prices and included benefits

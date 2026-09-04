@@ -1,0 +1,120 @@
+---
+series: subscription-first-ai-workspace
+seriesOrder: 2
+title: "Measure subscription AI by completed work"
+description: "Build a baseline that compares verified work per consumed allowance and rework time without pretending that provider requests, messages, credits, and tokens are interchangeable."
+thesis: "Subscription AI savings become reproducible only when measured as consumed allowance per accepted, verified task on the same work sample rather than as a converted provider unit."
+counterargument: "A solo user cannot fully control real tasks, so a precise experiment may cost more effort than a monthly subjective review is worth."
+publishedAt: "2026-09-04"
+updatedAt: "2026-09-04"
+verifiedAt: "2026-09-04"
+tags: [ai, subscriptions, measurement, productivity]
+status: experimental
+publicationStatus: published
+sourceUrl: https://google-gemini.github.io/gemini-cli/docs/cli/commands.html
+---
+
+## Key takeaways
+
+- **Part 2 creates a baseline by running the current workflow before any optimization begins**
+- **Compare each provider in its native allowance unit, then compare providers by accepted work and human rework instead of token conversion**
+- **Balance the sample across bug fixes, small features, test additions, and refactors to reduce task-type bias**
+- **A savings claim needs quality floors for test pass rate, acceptance rate, and rework time**
+- **This part produces `tasks.csv` and `baseline.csv`, which become the control for Part 3's context experiment**
+
+## Turn Part 1's bands into testable hypotheses
+
+- **The low, medium, and high bands in Part 1 shortlist products; they are not a final performance ranking**
+  - A Gemini model request, a Codex message, and a Claude Code prompt can contain different amounts of internal work
+  - Converting them to one precise-looking number would likely hide rather than remove that difference
+
+- **Separate within-provider and cross-provider comparisons**
+  - Within a provider, compare the difference between its own start and end readings
+  - Across providers, compare accepted tasks before a limit, rework time, and task completion rate
+
+- **Use subscription sign-in only throughout the experiment**
+  - Anthropic says sign-in determines whether Claude Code consumes an included subscription allowance or incurs API billing[^claude-metering]
+  - Record authentication state before a run because a leftover API-key environment variable can invalidate a subscription-only comparison
+
+## Build a small, repeatable work sample
+
+- **Start with 20 tasks: five each for bug fixes, small features, test additions, and refactors**
+  - A bug fix needs a reproducible failure
+  - A feature needs limited paths and explicit acceptance criteria
+  - A test task should add a failure boundary without product-code changes
+  - A refactor should preserve externally observable behavior
+
+- **Start every candidate from the same repository state and verification command**
+  - Fix the branch, commit, dependencies, allowed paths, and command in `tasks.csv`
+  - Rotate provider order so the learning benefit of the first run does not consistently favor one product
+
+- **Set a stopping rule before a failing run grows into a session-length test**
+  - Use a turn cap or a 30-minute boundary
+  - Record human hints separately so assisted completion is not mistaken for independent completion
+
+```csv
+task_id,kind,commit,allowed_paths,verify_command,time_limit_minutes
+WEB-01,bugfix,abc123,apps/web/lib/search,bun run --filter @jongminchung/web test,30
+WEB-02,test,def456,apps/web/lib/documents,bun run --filter @jongminchung/web test,30
+```
+
+## Keep raw readings and outcomes on one row
+
+- **Preserve the unit shown by the provider in `baseline.csv`**
+  - Store percentage, credit, message, or token beside `quota_unit`
+  - If a product shows no number, retain a status snapshot or limit band instead of inventing a token equivalent
+
+- **Capture client status immediately before and after each task**
+  - Gemini CLI `/stats` shows current-session tokens, cache savings when available, and duration[^gemini-stats]
+  - Codex documents its usage dashboard and `/status` for current limits[^codex-pricing]
+  - Claude Code exposes plan limits through `/usage` and context composition through `/context`[^claude-cheatsheet]
+
+```csv
+task_id,provider,model,quota_unit,before,after,turns,tool_calls,minutes,tests_passed,accepted,rework_minutes
+WEB-01,codex,terra,percent,72,64,7,18,24,true,true,0
+WEB-02,claude,sonnet,percent,55,52,4,11,12,true,true,6
+```
+
+- **Define the primary measure as consumed allowance per verified task**
+  - Calculate `before - after` only within the same provider and unit
+  - Define completion as both verification passing and human acceptance
+  - Keep the allowance spent on failures in the total so failure cost remains visible
+
+## Use medians and quality floors
+
+- **Prefer the median and interquartile range over the mean**
+  - One unusually difficult debugging task can dominate the mean
+  - Report medians by task type as well as overall to expose an easy-task imbalance
+
+- **The series uses an author-defined operating threshold, not a provider guarantee**
+  - Median allowance per completed task should improve by at least 20% within a provider
+  - Test and acceptance rates should not fall by more than five percentage points
+  - Median rework time should not increase
+
+- **Declare no winner when the difference is small**
+  - Twenty tasks can guide a personal workflow but cannot establish a general model benchmark
+  - A provider policy, model revision, or repository change can invalidate the result
+
+## Hand the baseline to the next part
+
+- **Part 2 is complete when `tasks.csv` and an unoptimized `baseline.csv` exist**
+  - Do not shorten instructions or change models yet
+  - Leave an unavailable reading blank with a reason rather than estimating it
+
+- **Part 3 applies a context budget to only one side of matched tasks**
+  - The control keeps the current instructions and natural exploration
+  - The treatment uses thin durable instructions, an eight-line task contract, and a limited initial file set
+
+## Action plan
+
+- **Select five recent tasks from each category and pin their commits and verification commands**
+- **Change one variable at a time for two weeks and capture status immediately before and after each run**
+- **Do not add a subscription or upgrade a tier on perceived speed before the sample is complete**
+
+[^gemini-stats]: [Google, Gemini CLI commands](https://google-gemini.github.io/gemini-cli/docs/cli/commands.html) — defines `/stats`, its session metrics, and the OAuth cache-reporting limitation
+
+[^codex-pricing]: [OpenAI, Codex pricing and usage](https://learn.chatgpt.com/docs/pricing) — explains the usage dashboard, `/status`, and usage variation by model, task, and context
+
+[^claude-metering]: [Anthropic, models, usage, and limits in Claude Code](https://support.claude.com/en/articles/14552983-models-usage-and-limits-in-claude-code) — distinguishes subscription and API-key metering
+
+[^claude-cheatsheet]: [Anthropic, Claude Code cheatsheet](https://support.claude.com/en/articles/14553413-claude-code-cheatsheet) — defines `/usage`, `/context`, and `/cost`

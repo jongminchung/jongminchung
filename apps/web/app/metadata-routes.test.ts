@@ -26,6 +26,9 @@ describe("블로그 메타데이터 경로", () => {
     expect(urls).toContain(
       "https://tech.jamie.kr/en/series/react-ui-architecture",
     );
+    expect(urls).toContain(
+      "https://tech.jamie.kr/en/series/subscription-first-ai-workspace",
+    );
     expect(urls).not.toContain(
       "https://tech.jamie.kr/en/series/domain-driven-design",
     );

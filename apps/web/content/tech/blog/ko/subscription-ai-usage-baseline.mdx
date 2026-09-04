@@ -1,0 +1,120 @@
+---
+series: subscription-first-ai-workspace
+seriesOrder: 2
+title: "구독형 AI 사용량은 완료 작업으로 측정해야 함"
+description: "서로 다른 AI 구독의 요청·메시지·크레딧을 억지로 토큰으로 환산하지 않고, 검증된 완료 작업당 소진량과 재작업 시간으로 비교하는 기준선을 설계합니다."
+thesis: "구독형 AI의 절감 효과는 공급자가 표시하는 단위보다 동일한 작업 표본에서 검증을 통과한 완료 작업당 소진량으로 측정해야 재현할 수 있습니다."
+counterargument: "개인 사용자는 작업을 완전히 통제하기 어려우므로 정밀한 실험보다 월말 체감만으로도 충분하다고 볼 수 있습니다."
+publishedAt: "2026-09-04"
+updatedAt: "2026-09-04"
+verifiedAt: "2026-09-04"
+tags: [ai, subscriptions, measurement, productivity]
+status: experimental
+publicationStatus: published
+sourceUrl: https://google-gemini.github.io/gemini-cli/docs/cli/commands.html
+---
+
+## 핵심 요약
+
+- **2편의 목표는 최적화를 시작하기 전에 같은 작업을 현재 방식으로 수행한 기준선을 만드는 것임**
+- **공급자 간에는 토큰을 직접 환산하지 않고, 공급자 내부 소진량과 검증된 완료 작업 수를 함께 비교해야 함**
+- **표본은 버그 수정·작은 기능·테스트 보강·리팩터링을 같은 수로 섞어야 특정 작업 유형의 편향을 줄일 수 있음**
+- **절감 판정에는 사용량뿐 아니라 테스트 통과율·수용률·재작업 시간이라는 품질 하한이 필요함**
+- **이 편의 산출물은 다음 편에서 컨텍스트를 줄이는 실험의 기준이 되는 `tasks.csv`와 `baseline.csv`임**
+
+## 1편의 비교표를 측정 가능한 가설로 바꿈
+
+- **1편의 적음·중간·많음 등급은 구매 후보를 좁히는 가설이며 최종 성능 순위가 아님**
+  - `Gemini CLI`의 모델 요청, `Codex`의 메시지, `Claude Code`의 프롬프트는 서로 다른 내부 작업을 포함함
+  - 동일한 숫자로 맞추면 정밀해 보이지만 실제 완료량을 왜곡할 가능성이 있음
+
+- **공급자 내부 비교와 공급자 간 비교를 분리해야 함**
+  - 공급자 내부에서는 시작·종료 시점의 대시보드 표시값 차이를 그대로 비교함
+  - 공급자 간에는 한도에 도달하기 전 수용된 작업 수와 사람의 재작업 시간을 비교함
+
+- **측정은 구독 로그인 경로만 사용해야 함**
+  - `Claude Code`는 로그인 방식에 따라 구독 할당량과 API 종량제가 달라진다고 명시함[^claude-metering]
+  - API 키 환경 변수가 남아 있으면 구독 실험이 아니라 별도 API 청구 실험이 될 수 있으므로 시작 전 인증 상태를 기록해야 함
+
+## 작업 표본은 작지만 반복 가능해야 함
+
+- **첫 기준선은 네 유형을 다섯 건씩 묶은 20건으로 시작하는 편이 적절함**
+  - 버그 수정은 재현 테스트가 있는 결함으로 제한함
+  - 작은 기능은 허용 경로와 완료 조건이 두세 문장으로 닫히는 변경으로 제한함
+  - 테스트 보강은 제품 코드 변경 없이 실패 경계를 추가하는 작업으로 제한함
+  - 리팩터링은 외부 동작을 바꾸지 않고 중복이나 책임 경계를 정리하는 작업으로 제한함
+
+- **모든 후보는 같은 저장소 상태와 검증 명령에서 시작해야 함**
+  - 브랜치·커밋·설치된 의존성·허용 경로·테스트 명령을 `tasks.csv`에 고정함
+  - 공급자별 실행 순서는 교대로 바꾸어 첫 실행의 학습 효과를 한 제품에 몰지 않음
+
+- **한 번 실패한 작업을 무한히 이어가면 긴 세션의 비용만 측정하게 됨**
+  - 최대 턴 수나 30분 같은 중단 조건을 먼저 정함
+  - 중단 뒤 사람이 제공한 힌트는 `human_hint_count`로 기록해 독립 완료와 구분함
+
+```csv
+task_id,kind,commit,allowed_paths,verify_command,time_limit_minutes
+WEB-01,bugfix,abc123,apps/web/lib/search,bun run --filter @jongminchung/web test,30
+WEB-02,test,def456,apps/web/lib/documents,bun run --filter @jongminchung/web test,30
+```
+
+## 원자료와 판정 지표를 한 행에 남김
+
+- **`baseline.csv`는 공급자가 보여 주는 원단위를 버리지 않아야 함**
+  - 백분율·크레딧·메시지·토큰처럼 화면에 보이는 단위를 `quota_unit`과 함께 기록함
+  - 숫자가 없는 제품은 시작·종료 상태의 스크린샷 또는 제한 단계만 기록하고 임의의 토큰으로 환산하지 않음
+
+- **CLI 상태 명령은 작업 직전과 직후에 실행해야 함**
+  - `Gemini CLI`의 `/stats`는 현재 세션 토큰·사용 가능할 때의 캐시 절감·세션 시간을 표시함[^gemini-stats]
+  - `Codex`는 `/status`에서 현재 모델과 사용 한도 상태를 확인하도록 안내함[^codex-pricing]
+  - `Claude Code`는 `/usage`로 요금제 한도, `/context`로 현재 컨텍스트 구성을 확인할 수 있음[^claude-cheatsheet]
+
+```csv
+task_id,provider,model,quota_unit,before,after,turns,tool_calls,minutes,tests_passed,accepted,rework_minutes
+WEB-01,codex,terra,percent,72,64,7,18,24,true,true,0
+WEB-02,claude,sonnet,percent,55,52,4,11,12,true,true,6
+```
+
+- **주 지표는 `검증된 완료 작업당 소진량`으로 정의함**
+  - `소진량 = before - after`를 같은 공급자 안에서 계산함
+  - `완료 작업 = 검증 명령 통과 && 사람 수용`으로 정의함
+  - 실패 작업의 소진량도 분모에서 빼지 않아야 실패 비용이 숨지 않음
+
+## 중앙값과 품질 하한으로 절감을 판정함
+
+- **평균보다 중앙값과 사분위 범위를 우선해야 함**
+  - 한 번의 어려운 디버깅이 평균을 크게 움직일 수 있음
+  - 작업 유형별 중앙값과 전체 중앙값을 함께 보면 쉬운 작업 비중의 편향을 찾을 수 있음
+
+- **이 시리즈의 권장 절감 기준은 공급자 공식 기준이 아니라 작성자의 운영 규칙임**
+  - 같은 공급자에서 완료 작업당 소진량 중앙값이 기준선보다 20% 이상 낮아야 함
+  - 테스트 통과율과 수용률이 5%p 넘게 떨어지지 않아야 함
+  - 재작업 시간 중앙값이 늘지 않아야 함
+
+- **차이가 작으면 승패를 선언하지 않는 편이 맞음**
+  - 20건은 개인 운영 결정을 위한 작은 표본이며 일반적인 모델 성능 평가가 아님
+  - 공급자 정책·모델 버전·저장소가 바뀌면 기존 결과가 유지된다고 단정할 수 없음
+
+## 다음 편으로 기준선을 넘김
+
+- **2편의 완료 조건은 `tasks.csv`와 손대지 않은 현재 방식의 `baseline.csv`가 존재하는 상태임**
+  - 아직 지침 파일을 줄이거나 모델을 바꾸지 않아야 기준선이 오염되지 않음
+  - 누락된 값은 빈칸과 사유로 남기고 추정값으로 채우지 않음
+
+- **3편에서는 동일 표본의 절반에만 컨텍스트 예산을 적용함**
+  - 비교 대상은 긴 지침과 넓은 파일 탐색을 유지한 기준선임
+  - 실험 대상은 얇은 공통 지침과 작업별 파일 범위를 적용한 구성임
+
+## 실행 제안
+
+- **오늘 할 일은 최근 완료한 작업에서 네 유형별 후보 다섯 건을 골라 커밋과 검증 명령을 고정하는 것임**
+- **다음 2주 동안 한 번에 한 변수만 바꾸고, 작업 직전·직후의 상태와 품질 결과를 기록해야 함**
+- **20건이 끝나기 전에는 체감상 빠르다는 이유만으로 구독을 추가하거나 상위 요금제로 올리지 않는 편이 적절함**
+
+[^gemini-stats]: [Google, Gemini CLI 명령](https://google-gemini.github.io/gemini-cli/docs/cli/commands.html) — `/stats`가 보여 주는 세션 통계와 OAuth에서 캐시 절감량이 표시되지 않는 조건을 설명함
+
+[^codex-pricing]: [OpenAI, Codex 가격과 사용량](https://learn.chatgpt.com/docs/pricing) — 사용량 대시보드와 `/status`, 모델·작업·컨텍스트에 따른 변동을 설명함
+
+[^claude-metering]: [Anthropic, Claude Code의 모델·사용량·한도](https://support.claude.com/en/articles/14552983-models-usage-and-limits-in-claude-code) — 구독 로그인과 API 키 로그인에 따른 과금 방식 차이를 설명함
+
+[^claude-cheatsheet]: [Anthropic, Claude Code 치트시트](https://support.claude.com/en/articles/14553413-claude-code-cheatsheet) — `/usage`, `/context`, `/cost`의 용도를 설명함

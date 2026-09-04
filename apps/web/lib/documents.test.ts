@@ -17,7 +17,7 @@ import {
 } from "./documents";
 
 describe("블로그 문서 발견", () => {
-  it("[성공] 두 Blog Series의 멤버와 순서를 locale별로 동일하게 유지함", async () => {
+  it("[성공] Blog Series의 멤버와 순서를 locale별로 동일하게 유지함", async () => {
     const expected = {
       "building-from-first-principles": [
         "building-calculator-engine",
@@ -36,6 +36,16 @@ describe("블로그 문서 발견", () => {
         "modeling-series-view-model",
         "headless-react-component",
       ],
+      "subscription-first-ai-workspace": [
+        "subscription-ai-coding-workspace",
+        "subscription-ai-usage-baseline",
+        "subscription-ai-context-budget",
+        "subscription-ai-session-handoff",
+        "subscription-ai-tool-output-budget",
+        "subscription-ai-model-routing",
+        "subscription-ai-orchestration",
+        "subscription-ai-break-even",
+      ],
     } as const;
     const posts = await getBlogPosts();
     for (const locale of ["ko", "en"] as const) {
@@ -52,7 +62,7 @@ describe("블로그 문서 발견", () => {
 
   it("[성공] 글을 최신 게시일 순으로 제공함", async () => {
     const documents = await getLocalizedDocuments("ko");
-    expect(documents).toHaveLength(25);
+    expect(documents).toHaveLength(33);
     expect(documents.map(({ publishedAt }) => publishedAt)).toEqual(
       documents
         .map(({ publishedAt }) => publishedAt)
@@ -116,7 +126,7 @@ describe("블로그 문서 발견", () => {
   it("[성공] locale별 Blog와 Docs를 독립 canonical inventory로 유지함", async () => {
     const [blog, docs] = await Promise.all([getBlogPosts(), getDocsPages()]);
     for (const locale of ["ko", "en"] as const) {
-      expect(blog.filter((post) => post.locale === locale)).toHaveLength(25);
+      expect(blog.filter((post) => post.locale === locale)).toHaveLength(33);
       expect(docs.filter((page) => page.locale === locale)).toHaveLength(
         docsPagesPerLocale,
       );

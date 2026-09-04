@@ -1,0 +1,131 @@
+---
+series: subscription-first-ai-workspace
+seriesOrder: 7
+title: "API 키 없이 여러 AI 구독을 오케스트레이션하는 법"
+description: "Gemini CLI, Codex, Claude Code, Kimi Code의 공식 로그인 클라이언트를 같은 저장소에서 탐색자·구현자·리뷰어로 나누고 중복 작업을 막는 방법을 설계합니다."
+thesis: "여러 구독의 가치는 같은 질문에 여러 답을 받는 데 있지 않고, 쓰기 권한과 증거 계약이 다른 역할을 병렬화하는 데 있습니다."
+counterargument: "한 사람이 여러 에이전트의 상태와 충돌을 관리하면 전환 비용이 늘어나 단일 구독보다 실제 처리량이 낮아질 수 있습니다."
+publishedAt: "2026-09-04"
+updatedAt: "2026-09-04"
+verifiedAt: "2026-09-04"
+tags: [ai, coding, orchestration, productivity]
+status: experimental
+publicationStatus: published
+sourceUrl: https://learn.chatgpt.com/docs/environments/git-worktrees
+---
+
+## 핵심 요약
+
+- **7편의 목표는 API 키 없이 공식 로그인 클라이언트들을 탐색자·구현자·리뷰어로 분리해 하나의 작업 흐름으로 연결하는 것임**
+- **기본 규칙은 한 작업에 한 명의 쓰기 소유자, 읽기 전용 보조자, 증거 중심 handoff임**
+- **같은 문제를 모든 구독에 처음부터 묻는 방식은 독립성보다 중복 탐색과 컨텍스트 복사를 늘릴 가능성이 큼**
+- **병렬 수정이 필요하면 별도 Git worktree와 겹치지 않는 허용 경로를 사용해야 함**
+- **이 편의 산출물인 `orchestration-log.csv`는 8편에서 구독 추가 비용의 손익분기점을 계산하는 근거가 됨**
+
+## 여러 구독을 하나의 조직처럼 다룸
+
+- **탐색자는 수정하지 않고 후보 파일·위험·검증 명령을 찾음**
+  - 명목 한도가 넉넉하거나 큰 컨텍스트 탐색에 유리한 공식 클라이언트를 배정함
+  - 결과는 파일 경로·근거 줄·미해결 질문으로 제한함
+
+- **구현자는 한 명만 두고 최종 diff를 소유하게 함**
+  - 6편의 라우팅 정책에서 현재 난이도에 맞는 주 구독을 선택함
+  - 구현자는 탐색자의 결론을 재검증하되 저장소 전체 조사를 처음부터 반복하지 않음
+
+- **리뷰어는 diff와 완료 조건만 독립적으로 검사함**
+  - 원래 대화와 구현자의 자기 설명을 먼저 읽지 않아 확증 편향을 줄임
+  - 발견 사항은 재현 명령·영향 파일·심각도와 함께 넘김
+
+- **Kimi 공식 CLI와 VS Code 확장은 OAuth 로그인을 지원하지만 타사 연결은 API 키가 필요함[^kimi-guide]**
+  - 이 시리즈의 무키 구성에서는 Kimi를 자체 공식 클라이언트 슬롯으로만 사용함
+  - `Z.ai`와 `OpenCode Go`는 현재 키 기반 연결이므로 실행 슬롯에 넣지 않는 1편의 조건을 유지함
+
+## 쓰기 권한과 작업 트리를 분리함
+
+- **같은 작업 트리에서는 구현자만 수정 권한을 가짐**
+  - 탐색자와 리뷰어는 읽기 전용 명령만 수행함
+  - 포맷터·코드 생성·자동 수정 lint도 쓰기 작업이므로 구현자에게만 허용함
+
+- **두 구현을 정말 비교해야 할 때만 별도 worktree를 만듦**
+  - OpenAI는 Codex 작업을 격리된 Git worktree에서 실행하고 원래 저장소와 독립적으로 검토하는 흐름을 문서화함[^codex-worktrees]
+  - 두 worktree는 같은 파일을 고치지 않거나 비교 후 하나만 채택하는 계약을 먼저 둠
+
+```text
+repository/                 # human integration tree
+worktrees/explore-web/      # read-only exploration
+worktrees/implement-web/    # one writer
+worktrees/review-web/       # clean-state verification
+```
+
+- **브랜치 수가 에이전트 수를 자동으로 따라가면 안 됨**
+  - 독립 작업이 없는 보조자는 새 worktree 없이 읽기 전용으로 충분함
+  - 병합 충돌 해결 시간이 절약한 에이전트 시간보다 커지면 병렬화가 실패한 것임
+
+## 큐와 handoff로 중복 탐색을 막음
+
+- **작업 상태는 `queued → exploring → implementing → reviewing → accepted`로 한 방향 이동함**
+  - 각 상태의 소유자와 완료 산출물을 `task.md`에 기록함
+  - 이전 상태로 돌아갈 때는 실패 근거와 새 질문을 추가함
+
+- **다음 에이전트에는 결론과 재현 가능한 증거만 넘김**
+  - 탐색자는 상위 세 후보와 제외 이유를 넘김
+  - 구현자는 변경 파일·검증 결과·남은 위험을 넘김
+  - 리뷰어는 통과 또는 재현 가능한 결함 한 건씩을 넘김
+
+- **Codex의 subagent 문서는 역할마다 별도 컨텍스트와 도구 권한을 구성할 수 있음을 설명함[^codex-subagents]**
+  - 이 글의 여러 구독은 Codex 내부 subagent와 동일한 기능이 아님
+  - 다만 역할을 좁히고 결과를 부모 작업에 요약해 반환하는 설계 원칙은 구독 간 handoff에도 적용할 수 있음
+
+## 한도와 장애는 사전에 라우팅함
+
+- **주 구독의 한도가 낮아지면 새 작업만 보조 구독으로 보냄**
+  - 진행 중인 복잡한 작업을 중간에 옮기면 복구 컨텍스트가 더 클 수 있음
+  - 현재 작업은 handoff가 자연스럽게 닫히는 검증 단계에서 전환함
+
+- **공급자 장애와 모델 품질 문제를 구분함**
+  - 로그인·서비스 장애는 같은 난이도 역할의 다른 구독으로 전환함
+  - 반복되는 품질 실패는 3편의 컨텍스트와 6편의 라우팅 정책을 먼저 검토함
+
+- **한도를 모두 소진하려고 불필요한 작업을 만들면 안 됨**
+  - 남은 할당량은 매몰 비용이 아니라 다음 실제 작업을 위한 여유임
+  - 사용률이 낮다는 사실은 8편에서 구독을 해지할 근거가 될 수 있음
+
+## 오케스트레이션의 순이익을 측정함
+
+- **`orchestration-log.csv`에는 중복과 조정 비용을 직접 기록함**
+
+```csv
+task_id,explorer,implementer,reviewer,duplicate_commands,handoff_turns,merge_conflicts,human_coordination_minutes,accepted
+WEB-41,gemini,codex,claude,1,2,0,6,true
+```
+
+- **여러 구독의 성공 지표는 총 에이전트 시간이 아니라 사람에게 전달된 완료 작업임**
+  - 단일 구독 기준선보다 수용 작업 수가 늘어야 함
+  - 사람의 조정·리뷰·충돌 해결 시간이 늘지 않아야 함
+  - 동일 명령과 동일 파일 탐색의 중복 비율이 낮아야 함
+
+- **작성자의 중단 기준은 조정 시간이 작업 시간의 20%를 넘는 상태가 두 주 지속되는 경우임**
+  - 이 수치는 공식 기준이 아니라 개인 워크플로를 단순화하기 위한 운영 규칙임
+  - 먼저 리뷰어를 필요 시 호출로 바꾸고, 그래도 개선되지 않으면 보조 구독을 제거함
+
+## 다음 편으로 비용 데이터를 넘김
+
+- **8편에는 월 구독료와 함께 실제 사용률·수용 작업·재작업·조정 시간을 넘김**
+  - 구독료만 나누면 실패 작업과 사람 시간을 공짜로 취급하게 됨
+  - 명목 한도가 큰 구독도 역할이 없어 사용되지 않았다면 포트폴리오 가치를 만들지 못함
+
+- **7편의 완료 조건은 공급자 수가 아니라 역할 중복이 줄어든 상태임**
+  - 두 구독으로 충분하면 세 번째 슬롯을 비워 둠
+  - 한 구독이 탐색·구현·리뷰를 모두 안정적으로 끝내면 단일 구독이 더 경제적일 수 있음
+
+## 실행 제안
+
+- **첫 2주에는 탐색자와 구현자 두 역할만 운영하고 독립 리뷰어는 위험한 변경에만 추가해야 함**
+- **한 작업에 한 명의 쓰기 소유자와 하나의 handoff 파일을 강제해야 함**
+- **중복 명령·충돌·조정 시간을 기록하지 못한다면 다중 구독의 처리량 증가도 입증할 수 없음**
+
+[^kimi-guide]: [Kimi, Kimi Code 멤버십 가이드](https://www.kimi.com/en/help/kimi-code/membership-guide) — 공식 클라이언트 OAuth와 타사 도구의 API 키 연결 차이를 설명함
+
+[^codex-worktrees]: [OpenAI, Codex Git worktree](https://learn.chatgpt.com/docs/environments/git-worktrees) — 병렬 작업을 격리된 worktree에서 실행하고 변경을 검토하는 흐름을 설명함
+
+[^codex-subagents]: [OpenAI, Codex subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents) — 역할·모델·도구 권한이 다른 보조 에이전트의 구성과 결과 반환 방식을 설명함

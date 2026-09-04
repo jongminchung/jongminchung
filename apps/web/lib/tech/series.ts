@@ -45,6 +45,17 @@ export const seriesRegistry = seriesRegistrySchema.parse({
       en: "A series testing the claim that good React UI comes from explicit ownership of state, behavior, and presentation—not component count.",
     },
   },
+  "subscription-first-ai-workspace": {
+    order: 2,
+    title: {
+      ko: "구독형 AI 워크스페이스",
+      en: "A Subscription-First AI Workspace",
+    },
+    description: {
+      ko: "월 US$20 구독 비교에서 시작해 측정·컨텍스트·세션·도구 출력·모델 라우팅·다중 구독·손익분기점 순으로 사용량 대비 완료 작업을 높이는 8편 시리즈",
+      en: "An eight-part series moving from US$20 plan comparison through measurement, context, sessions, tool output, model routing, orchestration, and break-even decisions.",
+    },
+  },
 });
 
 export type SeriesId = keyof typeof seriesRegistry;

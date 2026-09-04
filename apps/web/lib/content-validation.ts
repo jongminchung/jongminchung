@@ -266,9 +266,9 @@ export function validateTechContent(
       const count = posts.filter(
         ({ metadata }) => metadata.locale === locale,
       ).length;
-      if (count !== 25)
+      if (count !== 33)
         throw new Error(
-          `Blog ${locale} must contain 25 posts; found ${count}.`,
+          `Blog ${locale} must contain 33 posts; found ${count}.`,
         );
     }
   }

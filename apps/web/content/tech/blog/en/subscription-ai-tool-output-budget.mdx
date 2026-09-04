@@ -1,0 +1,118 @@
+---
+series: subscription-first-ai-workspace
+seriesOrder: 5
+title: "Budget logs, tests, diffs, and MCP output"
+description: "Constrain shell logs, test results, diffs, searches, and MCP responses in stages so an agent keeps the evidence needed to solve the problem without carrying unbounded tool output."
+thesis: "Controlling how much output tools return to the conversation reduces repeated input cost more directly than merely reducing the number of tool calls."
+counterargument: "Truncating too early can hide the first cause of a failure and increase total usage through repeated diagnosis."
+publishedAt: "2026-09-04"
+updatedAt: "2026-09-04"
+verifiedAt: "2026-09-04"
+tags: [ai, coding, tooling, productivity]
+status: experimental
+publicationStatus: published
+sourceUrl: https://learn.chatgpt.com/docs/extend/mcp
+---
+
+## Key takeaways
+
+- **Part 5 sets default budgets for shell, test, search, diff, and MCP output, expanding only when evidence demands it**
+- **Long output can remain in a session and return on later turns, making early bounds disproportionately useful**
+- **A practical starting point is 50 search paths, roughly 30 failure-log lines, summaries for passing tests, and diff stats before hunks**
+- **Track repeated calls and diagnostic success because a hidden cause can erase any saving**
+- **This part produces `tool-budget.md`, whose escalation signals feed Part 6's model routing**
+
+## Tool output is the largest handoff payload
+
+- **A short handoff does not undo an unbounded log already loaded into the session**
+  - Full test output, minified stack traces, and thousands of search matches are common sources
+  - Control output volume before optimizing command count
+
+- **Use a wide-to-narrow diagnostic funnel**
+  - Find filenames, symbols, or error-code locations first
+  - Open nearby context from the strongest candidates second
+  - Read the full range only when it can distinguish competing hypotheses
+
+- **Anthropic recommends trimming long logs to the relevant section or roughly the last 20–30 lines[^claude-limits]**
+  - Treat that number as an initial diagnostic window rather than a universal hard cap
+  - Expand a named range when the earliest cause or a failure chain falls outside it
+
+## Set a default budget by output type
+
+- **Bound both search result count and fields**
+  - Start with 50 file paths or 30 text matches including line numbers
+  - Narrow by extension, path, or symbol before asking for more results
+
+- **Make tests failure-first**
+  - On success, retain the command, pass count, and duration
+  - On failure, read one message and about 20–30 stack lines before the next failure
+  - Run the full suite for completion, but do not paste its complete success stream
+
+- **Move from diff size to content progressively**
+  - Inspect `git diff --stat` and changed files first
+  - Review relevant hunks second
+  - Read the complete diff during final verification, treating generated files separately
+
+| Output        |              Starting budget | Expand when                          |
+| ------------- | ---------------------------: | ------------------------------------ |
+| File search   |                     50 paths | all candidates are irrelevant        |
+| Text search   |                   30 matches | the call path is incomplete          |
+| Failure log   |               about 30 lines | the first cause is outside the range |
+| Passing tests |             one summary line | investigating flakiness              |
+| Diff          |    stat, then relevant hunks | final review or cross-file effects   |
+| Web or MCP    | relevant fields per question | evidence conflicts or is incomplete  |
+
+- **These are author-defined starting values**
+  - A compiler error and a distributed trace need different windows
+  - Tune the values against real missed diagnoses
+
+## Use client-side output controls
+
+- **Gemini CLI can assign a token budget to shell-output summarization[^gemini-config]**
+  - `model.summarizeToolOutput.run_shell_command.tokenBudget` bounds the summary
+  - Preserve where the raw log lives and how to query it because summarization can omit an important row
+
+- **Codex MCP configuration supports tool allowlists and per-tool output token limits[^codex-mcp]**
+  - `enabled_tools` can remove irrelevant tools and their accidental invocation paths
+  - `tools.<tool>.output_token_limit` is particularly useful for large search or issue responses
+
+- **MCP tool instructions also consume context**
+  - OpenAI says the first 512 characters of server `instructions` should make sense on their own[^codex-mcp]
+  - Put essential constraints first and move long examples into on-demand documentation
+
+## Detect over-truncation through retry cost
+
+- **Record total output and repeated diagnosis together**
+  - Add `tool_output_lines`, `tool_calls`, `repeated_calls`, and `time_to_first_hypothesis`
+  - Three widening reruns of the same command suggest that its initial window may be too small
+
+- **A successful budget improves completed-work output without lowering diagnostic quality**
+  - Median output per completed task should fall
+  - Time to the first correct hypothesis and test pass rate should not worsen
+  - Human time spent reopening truncated logs must not rise
+
+- **Sensitive-data removal remains a separate, stronger constraint**
+  - Remove credentials, personal information, and private URLs before summarization
+  - A shorter output is not automatically safe to send to an external model
+
+## Hand difficulty signals to the next part
+
+- **Record both the default budget and the conditions that expand it in `tool-budget.md`**
+  - Failures across packages, non-reproducible errors, and a third failed hypothesis signal higher difficulty
+  - A single file, clear error, and one verifier signal a lightweight-model candidate
+
+- **Part 6 does not choose a stronger model merely because raw output is large**
+  - Narrow the output first, then route on the remaining reasoning difficulty
+  - Escalate only at observable events such as two failed verification hypotheses
+
+## Action plan
+
+- **Identify the five noisiest commands and document their default window and exact requery command**
+- **Enable only task-relevant MCP tools and cap the largest responses first**
+- **If ten tasks show lower output but more retries or slower diagnosis, restore one budget level**
+
+[^claude-limits]: [Anthropic, models, usage, and limits in Claude Code](https://support.claude.com/en/articles/14552983-models-usage-and-limits-in-claude-code) — recommends trimming long logs to relevant sections
+
+[^gemini-config]: [Google, Gemini CLI configuration](https://google-gemini.github.io/gemini-cli/docs/get-started/configuration.html) — documents shell-output summarization and `tokenBudget`
+
+[^codex-mcp]: [OpenAI, Model Context Protocol in Codex](https://learn.chatgpt.com/docs/extend/mcp) — documents tool allowlists, per-tool output limits, and server instruction guidance

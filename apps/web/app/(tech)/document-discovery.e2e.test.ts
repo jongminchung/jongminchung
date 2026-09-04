@@ -152,6 +152,18 @@ test("[성공] Series 상세는 Blog 멤버만 seriesOrder 순서로 표시함",
 
   await page.goto("/en/series/react-ui-architecture");
   await expect(page.locator('[data-document-grid="true"] a')).toHaveCount(3);
+
+  await page.goto("/en/series/subscription-first-ai-workspace");
+  const subscriptionCards = page.locator('[data-document-grid="true"] a');
+  await expect(subscriptionCards).toHaveCount(8);
+  await expect(subscriptionCards.first()).toHaveAttribute(
+    "href",
+    "/en/subscription-ai-coding-workspace",
+  );
+  await expect(subscriptionCards.last()).toHaveAttribute(
+    "href",
+    "/en/subscription-ai-break-even",
+  );
 });
 
 test("[성공] Docs page tree는 Diátaxis 순서와 현재 문서 및 이전·다음 탐색을 표시함", async ({

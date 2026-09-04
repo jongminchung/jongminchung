@@ -1,0 +1,131 @@
+---
+series: subscription-first-ai-workspace
+seriesOrder: 6
+title: "Route subscription work from light to deep models"
+description: "Classify work as exploration, everyday implementation, or high-stakes reasoning, then start with the lightest suitable model and escalate only on observable failure signals."
+thesis: "A subscription allowance lasts longer when model choice escalates with task difficulty and failure evidence instead of keeping the strongest model as the default."
+counterargument: "Frequent switching can require re-explanation and revalidation, consuming more allowance than beginning with a strong model."
+publishedAt: "2026-09-04"
+updatedAt: "2026-09-04"
+verifiedAt: "2026-09-04"
+tags: [ai, coding, models, productivity]
+status: experimental
+publicationStatus: published
+sourceUrl: https://learn.chatgpt.com/docs/models
+---
+
+## Key takeaways
+
+- **Part 6 builds a light, standard, and deep model ladder around task difficulty rather than provider branding**
+- **Use light models for search and limited edits, standard models for everyday implementation, and deep models for cross-cutting or high-risk judgment**
+- **Escalate on observable evidence such as two failed independent hypotheses, three responsibility areas, or conflicting constraints**
+- **De-escalate from a strong planning model once files, invariants, steps, and verification are settled**
+- **This part produces `routing-policy.md`, which Part 7 uses to assign roles across subscriptions**
+
+## Classify the task before the model
+
+- **Light work has short scope and cheap verification**
+  - File lookup, log summarization, formatting, and a clear single-file edit fit here
+  - A test or known answer should expose failure quickly
+
+- **Standard work covers everyday product implementation**
+  - Small multi-file features, regression tests, and known-pattern refactors fit here
+  - Most work should begin at the provider's default coding model
+
+- **Deep work couples reasoning and failure cost**
+  - Cross-package refactors, hard-to-reproduce bugs, architecture, security, and compatibility decisions fit here
+  - Choose it when reworking a bad broad change is likely to cost more than deeper reasoning
+
+- **Do not confuse long input with hard reasoning**
+  - Apply Part 5's output budget before classifying a noisy log as difficult
+  - A large repository does not make every task a deep-model task
+
+## Map provider models onto the same ladder
+
+- **Map available Codex models to lightweight exploration, everyday coding, and complex-problem roles**
+  - OpenAI says higher reasoning can improve difficult work while taking longer and using more tokens[^codex-models]
+  - Model names and availability change, so update the mapping from the account's current selector
+
+- **Claude Code explicitly distinguishes `Haiku`, `Sonnet`, and `Opus` roles[^claude-limits]**
+  - Anthropic recommends Sonnet for most coding, Haiku for lookups and simple edits, and Opus for hard refactors, debugging, and architecture
+  - It also gives planning with Opus and executing with Sonnet as a common pattern
+
+- **Apply the same role mapping to the fast and deep choices currently visible in Gemini CLI**
+  - Exact choices vary by subscription, region, and date
+  - Revalidate with `/model` and the same work sample rather than permanently endorsing one version
+
+| Difficulty | Example                                | Starting role             | Escalate when                       |
+| ---------- | -------------------------------------- | ------------------------- | ----------------------------------- |
+| Light      | search, summary, simple edit           | fastest suitable model    | verification fails or scope grows   |
+| Standard   | implementation, tests, review          | default coding model      | two independent hypotheses fail     |
+| Deep       | architecture, security, broad refactor | strongest reasoning model | failure cost is high from the start |
+
+- **The table defines a starting rule, not a model ranking**
+  - Completion varies by repository and language
+  - Confirm what a US$20 account currently exposes and whether a separate limit applies
+
+## Make escalation and de-escalation symmetric
+
+- **Escalate on evidence rather than dissatisfaction**
+  - Two distinct hypotheses fail verification
+  - Scope crosses three responsibility boundaries
+  - Security, data loss, or public-API compatibility raises failure cost
+  - Conflicting requirements need a priority decision
+
+- **De-escalate after the strong model closes the plan**
+  - A standard model can implement once candidate files, invariants, steps, and commands are explicit
+  - Pass the accepted plan and evidence rather than its full conversation
+
+- **Repeating the same failure with a third model may indicate a task-contract problem**
+  - Repair reproduction, acceptance criteria, or verification first
+  - Check for a product decision that requires a human before switching providers
+
+## Evaluate speed modes as a separate tradeoff
+
+- **Faster output is not synonymous with token savings**
+  - Kimi says HighSpeed is roughly five to six times faster at the same coding capability while consuming about three times the credits[^kimi-guide]
+  - It can be rational when waiting is the bottleneck, but not as a default when allowance longevity is the goal
+
+- **Choose reasoning and speed using both allowance and human time**
+  - A slower mode costs little if the user can do other work
+  - An incident where ten minutes matters may justify greater consumption
+
+- **Track both accepted tasks per allowance and accepted tasks per hour**
+  - One metric alone can favor a fast expensive mode or a slow failure-prone mode
+
+## Validate the routing policy against the baseline
+
+- **Add expected and actual tiers to Part 2's sample**
+  - Record `initial_tier`, `final_tier`, `escalation_reason`, and `accepted`
+  - Compare the ladder with a strongest-model baseline within each task type
+
+- **Success is not merely a lower share of deep-model turns**
+  - Allowance per completed task should fall
+  - Acceptance and rework should hold
+  - Discarded work before escalation should not grow
+
+- **If more than half the tasks escalate, the classifier or default is probably wrong**
+  - Everyday work in that repository may be harder than the policy assumes
+  - Raise only the recurring task type's starting tier
+
+## Hand role policy to the next part
+
+- **Write task roles and escalation signals before model names in `routing-policy.md`**
+  - Provider model changes then require only a mapping update
+  - Keep account-specific availability in a separate table
+
+- **Part 7 combines model tiers with subscription roles**
+  - Explorer, implementer, and reviewer should not duplicate the same discovery
+  - Reaching a limit can trigger a provider handoff, but never a transcript copy
+
+## Action plan
+
+- **Label the previous 20 tasks by difficulty and compare the labels with actual failures and rework**
+- **Start the next ten at the lightest suitable tier and escalate one step only at a recorded signal**
+- **Revalidate model names and availability against official documentation and the account once a month**
+
+[^codex-models]: [OpenAI, Codex models](https://learn.chatgpt.com/docs/models) — explains the relationship between reasoning effort, token use, latency, and current model selection
+
+[^claude-limits]: [Anthropic, models, usage, and limits in Claude Code](https://support.claude.com/en/articles/14552983-models-usage-and-limits-in-claude-code) — defines recommended roles for `Haiku`, `Sonnet`, and `Opus`
+
+[^kimi-guide]: [Kimi, Kimi Code membership guide](https://www.kimi.com/en/help/kimi-code/membership-guide) — states the speed and credit tradeoff of HighSpeed

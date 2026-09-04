@@ -1,0 +1,131 @@
+---
+series: subscription-first-ai-workspace
+seriesOrder: 7
+title: "Orchestrate AI subscriptions without API keys"
+description: "Use the official signed-in Gemini CLI, Codex, Claude Code, and Kimi Code clients as explorer, implementer, and reviewer roles in one repository without duplicating work."
+thesis: "Multiple subscriptions create value through distinct write permissions and evidence contracts, not by asking every model the same question."
+counterargument: "The context switching and conflict management required by several agents can lower actual throughput below a single-subscription workflow."
+publishedAt: "2026-09-04"
+updatedAt: "2026-09-04"
+verifiedAt: "2026-09-04"
+tags: [ai, coding, orchestration, productivity]
+status: experimental
+publicationStatus: published
+sourceUrl: https://learn.chatgpt.com/docs/environments/git-worktrees
+---
+
+## Key takeaways
+
+- **Part 7 assigns official signed-in clients to explorer, implementer, and reviewer roles without API keys**
+- **Use one writer per task, read-only assistants, and evidence-based handoffs as the default**
+- **Asking every subscription the same initial question usually increases duplicate discovery and review work**
+- **When parallel edits are necessary, isolate them in Git worktrees with non-overlapping path contracts**
+- **This part produces `orchestration-log.csv`, which Part 8 uses for the subscription break-even calculation**
+
+## Operate subscriptions like a small organization
+
+- **The explorer finds candidate files, risks, and verification commands without editing**
+  - Assign a signed-in client with suitable headroom or repository exploration capability
+  - Return file paths, evidence lines, and one unresolved question
+
+- **One implementer owns the final diff**
+  - Select the primary subscription through Part 6's routing policy
+  - Revalidate the explorer's conclusion without repeating a repository-wide search
+
+- **The reviewer checks only the diff and completion contract independently**
+  - Delay the implementer's narrative to reduce confirmation bias
+  - Return a reproduction command, affected file, and severity for each finding
+
+- **Kimi's official CLI and VS Code extension support OAuth, while third-party connections require an API key[^kimi-guide]**
+  - In this no-key workflow, Kimi can occupy only its official-client slot
+  - Z.ai and OpenCode Go remain outside execution because their documented connection path is key-based
+
+## Separate write ownership and worktrees
+
+- **Only the implementer writes in a shared working tree**
+  - Explorers and reviewers use read-only commands
+  - Formatters, generators, and auto-fixing linters also count as writes
+
+- **Create another worktree only when comparing two real implementations**
+  - OpenAI documents running Codex tasks in isolated Git worktrees and reviewing the result independently[^codex-worktrees]
+  - Give the worktrees non-overlapping files or agree to adopt only one result
+
+```text
+repository/                 # human integration tree
+worktrees/explore-web/      # read-only exploration
+worktrees/implement-web/    # one writer
+worktrees/review-web/       # clean-state verification
+```
+
+- **Do not let branch count automatically follow agent count**
+  - A read-only assistant does not need its own worktree
+  - Parallelization has failed when merge repair exceeds the agent time saved
+
+## Prevent duplicate discovery with a queue
+
+- **Move work through `queued → exploring → implementing → reviewing → accepted`**
+  - Record the owner and required artifact for each state in `task.md`
+  - Add failure evidence and a new question before moving backward
+
+- **Pass conclusions with reproducible evidence**
+  - The explorer passes up to three candidates and exclusion reasons
+  - The implementer passes changed files, verification results, and residual risk
+  - The reviewer passes either acceptance or individually reproducible defects
+
+- **Codex subagent documentation shows how focused roles can have separate context and tool permissions[^codex-subagents]**
+  - Separate subscriptions are not the same mechanism as Codex subagents
+  - The design principle—narrow roles and summarized results returning to a parent task—still informs the handoff
+
+## Route around limits and outages deliberately
+
+- **When the primary allowance runs low, send new work to the auxiliary subscription**
+  - Moving a complex active task may cost more recovery context than waiting
+  - Switch at a natural verification boundary with a completed handoff
+
+- **Distinguish provider outages from quality failures**
+  - Route login or service failures to another client at the same difficulty role
+  - For repeated quality failures, inspect context and model-routing policy first
+
+- **Do not invent work merely to consume remaining allowance**
+  - Unused capacity preserves an option for real work
+  - Low utilization can become evidence to cancel in Part 8
+
+## Measure net orchestration benefit
+
+- **Record coordination and duplication directly in `orchestration-log.csv`**
+
+```csv
+task_id,explorer,implementer,reviewer,duplicate_commands,handoff_turns,merge_conflicts,human_coordination_minutes,accepted
+WEB-41,gemini,codex,claude,1,2,0,6,true
+```
+
+- **The success measure is accepted work delivered to the user, not total agent activity**
+  - Accepted work should increase against the single-subscription baseline
+  - Human coordination, review, and conflict time should not rise
+  - Duplicate commands and repeated file discovery should decline
+
+- **The author's stop rule is coordination above 20% of work time for two weeks**
+  - This is a simplification trigger, not a provider standard
+  - Make review on-demand first, then remove an auxiliary subscription if the ratio remains high
+
+## Hand cost evidence to the final part
+
+- **Part 8 receives subscription price, utilization, accepted work, rework, and coordination time**
+  - Price alone treats failed work and human coordination as free
+  - A high nominal allowance creates no portfolio value when no role uses it
+
+- **Part 7 is complete when role duplication falls, regardless of provider count**
+  - Leave the third slot empty when two subscriptions suffice
+  - A single subscription is preferable when it reliably explores, implements, and reviews within its allowance
+
+## Action plan
+
+- **Run explorer and implementer roles for two weeks, adding independent review only to risky changes**
+- **Enforce one write owner and one handoff file per task**
+- **Do not claim multi-subscription throughput without measuring duplicate commands, conflicts, and coordination time**
+
+[^kimi-guide]: [Kimi, Kimi Code membership guide](https://www.kimi.com/en/help/kimi-code/membership-guide) — distinguishes OAuth in official clients from API-key setup in third-party tools
+
+[^codex-worktrees]: [OpenAI, Codex Git worktrees](https://learn.chatgpt.com/docs/environments/git-worktrees) — documents isolated parallel task execution and review
+
+[^codex-subagents]: [OpenAI, Codex subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents) — documents focused roles, model and tool permissions, and result handoff
