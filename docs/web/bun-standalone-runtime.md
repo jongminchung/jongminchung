@@ -29,7 +29,9 @@
 ## 배포 런타임을 같은 계열로 유지함
 
 - **Vercel은 `vercel.json#bunVersion`의 `1.x`로 Bun Function runtime을 선택함**
-  - Vercel이 minor·patch를 관리하므로 로컬의 정확한 `1.4.0` pin과 patch 수준은 다를 수 있음
+  - 의존성 설치는 `bunx bun@1.4.0 install --frozen-lockfile`로 실행해 Bun `1.4.0`이 생성한 `bun.lock`을 같은 버전으로 해석함
+  - Vercel이 Function runtime의 minor·patch를 관리하므로 앱 실행 시점의 patch 수준은 설치 도구와 다를 수 있음
+  - Bun 버전을 올릴 때는 `.bun-version`, `package.json#packageManager`, Vercel Install Command와 컨테이너 이미지를 함께 갱신해야 함
   - Bun 고유 API를 추가할 때는 Vercel이 제공하는 Bun 1 범위에서도 동작하는지 Preview 배포로 확인해야 함
 
 - **컨테이너는 build와 runner stage 모두 `oven/bun:1.4.0-alpine`을 사용함**

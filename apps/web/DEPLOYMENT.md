@@ -3,7 +3,8 @@
 ## Vercel
 
 - Vercel project는 GitHub의 `jongminchung/jongminchung` repository를 연결하고 Root Directory를 `apps/web`으로 설정함
-- Framework Preset은 `Next.js`를 사용하고 install command는 `bun install --frozen-lockfile`, build command는 `bun run build`를 사용함
+- Framework Preset은 `Next.js`를 사용하고 install command는 `bunx bun@1.4.0 install --frozen-lockfile`, build command는 `bun run build`를 사용함
+- Install Command에서 저장소 기준과 같은 Bun `1.4.0`을 직접 실행해 `bun.lock` 형식 호환성을 보장함
 - `vercel.json#bunVersion`의 `1.x` 설정으로 build와 Next.js Function runtime에 Vercel 관리형 Bun 1을 사용함
 - `*.vercel.app` preview·production hostname은 Tech 사이트로 제공함
 - `tech.jamie.kr`은 Vercel project의 domain으로 연결하며 DNS와 domain verification은 Vercel dashboard에서 관리함
