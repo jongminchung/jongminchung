@@ -1,0 +1,16 @@
+{
+  "name": "@jongminchung/generate-article-image-skill",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "generate-article-image": "./scripts/generate-article-image.ts"
+  },
+  "scripts": {
+    "test": "bun test scripts",
+    "typecheck": "tsc --noEmit --project tsconfig.json"
+  },
+  "dependencies": {
+    "sharp": "0.35.3"
+  }
+}

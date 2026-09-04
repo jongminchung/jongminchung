@@ -1,6 +1,9 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {
+    ".agents/skills/generate-article-image": {
+      "entry": ["scripts/generate-article-image.ts"]
+    },
     "apps/web": {
       "entry": ["scripts/search-benchmark-runner.ts"],
       "ignore": ["public/fonts/pretendard-variable/dynamic-subset.css"]

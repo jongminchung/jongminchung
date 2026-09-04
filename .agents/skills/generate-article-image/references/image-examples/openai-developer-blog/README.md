@@ -6,6 +6,8 @@
 - 보관 방식: 원본 `PNG` 또는 `WebP`를 리사이즈, 재압축, 색상 변환 없이 저장함
 - 사용 범위: 배포 자산이 아닌 내부 아트 디렉션 참고 자료로만 사용함
 - 참고 원칙: 구성·재질·조명·편집 톤만 참고하며 텍스트, 로고, 고유 UI, 식별 가능한 구성을 복제하지 않음
+- 스킬 내 위치: `references/image-examples/openai-developer-blog/`
+- 생성 지침: `.agents/skills/generate-article-image/SKILL.md`를 아티클 이미지 생성과 검수의 단일 기준으로 사용함
 
 ## 수집 목록
 

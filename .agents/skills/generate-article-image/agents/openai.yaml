@@ -1,0 +1,4 @@
+interface:
+  display_name: "Generate article image"
+  short_description: "Create editorial artwork from the live article content"
+  default_prompt: "Use $generate-article-image to create an article image, and first ask me for the source MDX file path if I have not provided one."
