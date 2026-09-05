@@ -66,7 +66,7 @@
 - **`IntersectionObserver` polyfill을 추가하지 않음**
     - 제품 동작은 표준 anchor만으로 완결되므로 추가 JavaScript dependency가 필요하지 않음
 - **맨 위 이동을 native `#top` anchor로 바꾸는 구조 변경은 포함하지 않음**
-    - Server Component와 작은 client island 경계 단순화는 활성 이슈 [`0040`](../../0040-web-tech-starlight-inspired-maintainability.md)이 소유함
+    - Server Component와 작은 client island 경계 단순화는 완료 이슈 [`0040`](0040-web-tech-starlight-inspired-maintainability.md)이 소유함
     - 이번 범위는 기존 control의 모션 설정 위반만 수정함
 - **디자인 token과 visual 표현형은 변경하지 않음**
     - 공용 디자인 시스템과 세 site 표현형은 활성 이슈 [`0041`](../../0041-web-openai-reference-design-system-application.md)이 소유함

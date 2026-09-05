@@ -11,6 +11,11 @@ interface FontAssetBudget {
     bytes: number;
     sha256Base64: string;
   }>;
+  readonly pretendardLatin: Readonly<{
+    path: string;
+    bytes: number;
+    sha256Base64: string;
+  }>;
   readonly pretendardDynamicSubset: Readonly<{
     stylesheet: Readonly<{
       path: string;
@@ -34,6 +39,16 @@ function sha256Base64(value: Buffer): string {
 }
 
 describe("Pretendard asset integrity", () => {
+  it("[성공] 영문 subset의 크기와 무결성을 유지함", async () => {
+    const source = await readFile(
+      resolve(webRoot, budget.pretendardLatin.path),
+    );
+
+    expect(source.byteLength).toBe(budget.pretendardLatin.bytes);
+    expect(source.byteLength).toBeLessThanOrEqual(45_000);
+    expect(sha256Base64(source)).toBe(budget.pretendardLatin.sha256Base64);
+  });
+
   it("[성공] 공식 Pretendard Std variable source를 유지함", async () => {
     const path = resolve(webRoot, budget.pretendardStd.path);
     const source = await readFile(path);

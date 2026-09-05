@@ -90,14 +90,19 @@ function investmentSchema({ path, source }: { path: string; source: string }) {
   });
 }
 
+// CLI의 링크·검색 데이터 추출에는 렌더링 전용 구문 강조가 필요하지 않음
+const metadataOnly = process.env.JAMIE_MDX_METADATA_ONLY === "1";
+
 function techMdxOptions() {
   return applyMdxPreset({
-    rehypeCodeOptions: {
-      addLanguageClass: true,
-      fallbackLanguage: "plaintext",
-      langAlias: { excalidraw: "plaintext" },
-      themes: { light: "github-light", dark: "github-dark" },
-    },
+    rehypeCodeOptions: metadataOnly
+      ? false
+      : {
+          addLanguageClass: true,
+          fallbackLanguage: "plaintext",
+          langAlias: { excalidraw: "plaintext" },
+          themes: { light: "github-light", dark: "github-dark" },
+        },
     remarkPlugins: (plugins) => [remarkKrokiUrl, ...plugins],
   });
 }
@@ -128,7 +133,9 @@ export const investmentCollection = defineCollections({
   dir: "content/invest",
   files: ["**/notes/*.mdx"],
   async: true,
-  mdxOptions: applyMdxPreset(),
+  mdxOptions: applyMdxPreset({
+    rehypeCodeOptions: metadataOnly ? false : undefined,
+  }),
   schema: investmentSchema,
   postprocess: { extractLinkReferences: true },
 });

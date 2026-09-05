@@ -1,7 +1,7 @@
 import localFont from "next/font/local";
 import type { Locale } from "#lib/content-contracts";
 
-/** 영어와 locale 없는 route에서 사용하는 자체 호스팅 가변 폰트임 */
+/** locale 없는 route에서 사용하는 자체 호스팅 가변 폰트임 */
 export const pretendard = localFont({
   src: "./fonts/PretendardStdVariable.woff2",
   adjustFontFallback: "Arial",
@@ -12,7 +12,7 @@ export const pretendard = localFont({
 });
 
 const localeFontClassNames = {
-  en: "font-pretendard-dynamic",
+  en: "font-pretendard-latin",
   ko: "font-pretendard-dynamic",
 } as const satisfies Readonly<Record<Locale, string>>;
 

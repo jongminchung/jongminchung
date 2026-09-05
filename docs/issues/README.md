@@ -6,9 +6,9 @@
 
 ## 핵심 요약
 
-- **현재 진행 중인 이슈는 Web 개선 `0032`~~`0038`·`0040`~~`0041` 9건임**
+- **현재 구현·검증 작업은 `0032`–`0038`·`0041` 8건이며 구현 완료·반영 대기를 구분함**
 - **조건부 보류 이슈는 `0001`·`0011`·`0039` 3건이며 명시된 재개 조건이 충족될 때만 작업함**
-- **완료 이슈 11건은 `archive/2026`에 보관함**
+- **완료 이슈 12건은 `archive/2026`에 보관함**
 - **지속적으로 적용할 계약은 코드·테스트·ADR·운영 문서가 소유하고 이슈는 결정과 검증 근거를 보존함**
 - **완료와 보류가 섞인 작업은 완료된 범위를 보관하고 남은 범위를 별도 이슈로 분리함**
 
@@ -27,11 +27,11 @@
 ## 진행 중 작업
 
 - [`0032`: Web 검색 runtime과 benchmark 실행 경계 분리](0032-web-search-runtime-benchmark-boundary.md)
-    - 상태: 진행 중
+    - 상태: 구현 완료·반영 대기
     - 우선순위: P1
     - 구현 범위: 제품 검색 module과 benchmark runner 분리, 실제 corpus test의 integration 경계 정리
 - [`0033`: Investment content의 obsolete 생성 pipeline 제거](0033-investment-content-obsolete-generation-pipeline.md)
-    - 상태: 진행 중
+    - 상태: 구현 완료·반영 대기
     - 우선순위: P1
     - 구현 범위: runtime source loader 분리, consumer 없는 generated manifest·loader·CLI 제거
 - [`0034`: Web multi-site URL과 feed 계약 통합](0034-web-multisite-url-feed-contract.md)
@@ -43,21 +43,17 @@
     - 우선순위: P3
     - 구현 범위: 의미가 불명확한 test 이름과 실제 corpus에 결합된 알고리즘 assertion 정리
 - [`0036`: Tech 초안의 공개 경계 차단](0036-tech-draft-publication-boundary.md)
-    - 상태: 진행 중
+    - 상태: 구현 완료·반영 대기
     - 우선순위: P1
     - 구현 범위: validation용 전체 collection과 published public collection 분리, draft route·discovery 차단
 - [`0037`: Web 초기 폰트 전송량과 예산 정리](0037-web-initial-font-transfer-budget.md)
-    - 상태: 진행 중
+    - 상태: 구현 완료·반영 대기
     - 우선순위: P2
     - 구현 범위: 2.06MB 공통 Pretendard preload 축소와 locale별 font 전송 budget 도입
 - [`0038`: Web 응답 보안 헤더와 배포 소유권 정리](0038-web-response-security-header-contract.md)
     - 상태: 진행 중
     - 우선순위: P2
     - 구현 범위: application·Ingress header owner 확정, 정적 방어 헤더와 CSP 단계 분리
-- [`0040`: Starlight 전환 없이 Web Tech 유지보수 경계 단순화](0040-web-tech-starlight-inspired-maintainability.md)
-    - 상태: 진행 중
-    - 우선순위: P2
-    - 구현 범위: path 기반 content identity, Tech page model, typed locale message와 client island 경계 도입
 - [`0041`: OpenAI 공개 참조 디자인 시스템을 Web 세 사이트에 적용](0041-web-openai-reference-design-system-application.md)
     - 상태: 진행 중
     - 우선순위: P2
@@ -80,13 +76,13 @@
 
 ## 완료 이슈 아카이브
 
-- **2026년 완료 이슈 11건은 [2026년 완료 이슈 아카이브](archive/2026/README.md)에서 관리함**
+- **2026년 완료 이슈 12건은 [2026년 완료 이슈 아카이브](archive/2026/README.md)에서 관리함**
     - 구현 결과·채택하지 않은 선택지·검증 명령을 향후 회귀 분석 근거로 보존함
 
 ## 권장 실행 순서
 
 - **후속 운영 확인은 월요일 scheduled content evidence의 첫 성공과 `content-evidence` artifact 생성 확인임**
-- **Web 작업은 공개 결함 `0036`을 먼저 처리한 뒤 `0032` → `0033` → `0034` → `0037` → `0038` → `0035` → `0040` → `0041` 순서로 실행함**
+- **이미 구현된 `0032`·`0033`·`0036`의 반영 확인과 `0037`의 전송량·화면 검증을 먼저 마무리하고, `0034`·`0038`·`0035`·`0041`의 남은 범위를 진행함**
 - **그 밖의 구현 작업은 조건부 이슈의 재개 조건 발생 여부를 제품 요구와 운영 환경 변화 시점에 확인한 뒤 결정함**
 - **Starlight 전환은 `0039`의 네 가지 재개 조건을 합의한 뒤 isolated pilot으로 검색·URL·배포 계약을 먼저 검증함**
 - **새 이슈는 하나의 완료 상태만 갖도록 범위를 나누고 혼합 상태가 생기면 후속 이슈로 분리함**

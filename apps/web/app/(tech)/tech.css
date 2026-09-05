@@ -1,19 +1,13 @@
 @import "@jongminchung/ui/globals.css";
-@import "fumadocs-ui/css/shadcn.css";
-@import "fumadocs-ui/css/preset.css";
+@import "../mdx-theme.css";
+@import "fumadocs-ui/css/generated/docs.css";
+@import "fumadocs-ui/css/generated/shared.css";
 @import "../theme.css";
 
+/* Tech에서 사용하는 Docs layout과 typography만 생성함 */
+@plugin "@fumadocs/tailwind/typography";
 @source "./**/*.{ts,tsx,mdx}";
 @source not "./**/*.{test,spec}.{ts,tsx}";
-@source "../../node_modules/fumadocs-ui/dist/components/codeblock.js";
-@source "../../node_modules/fumadocs-ui/dist/components/ui/button.js";
-
-/* Fumadocs의 `.dark` Shiki 계약을 Web의 data-theme 계약에 연결함 */
-:where(html[data-theme="dark"]) .shiki:not(.not-fumadocs-codeblock *) code span,
-:where(html[data-theme="dark"]) code.shiki:not(.not-fumadocs-code *) span {
-  color: var(--shiki-dark);
-  font-style: var(--shiki-dark-font-style);
-}
 
 @keyframes showcase-motion-token {
   0%,

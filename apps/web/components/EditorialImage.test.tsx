@@ -19,5 +19,20 @@ describe("EditorialImage", () => {
     expect(markup).toContain('data-image-contract="single"');
     expect(markup).toContain("article.png");
     expect(markup).toContain('fetchPriority="high"');
+    expect(markup).toContain('loading="eager"');
+  });
+
+  it("목록의 후속 이미지는 지연 로딩함", () => {
+    const markup = renderToStaticMarkup(
+      <EditorialImage
+        alt="Later article"
+        height={900}
+        src="/later.png"
+        width={1600}
+      />,
+    );
+
+    expect(markup).toContain('loading="lazy"');
+    expect(markup).not.toContain('fetchPriority="high"');
   });
 });

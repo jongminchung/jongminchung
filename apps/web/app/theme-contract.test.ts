@@ -173,7 +173,7 @@ describe("공통 디자인 토큰 계약", () => {
     expect(fontDefinition).toContain('adjustFontFallback: "Arial"');
     expect(fontDefinition).toContain("preload: false");
     expect(fontDefinition).toContain('variable: "--font-pretendard"');
-    expect(fontDefinition).toContain('en: "font-pretendard-dynamic"');
+    expect(fontDefinition).toContain('en: "font-pretendard-latin"');
     expect(fontDefinition).toContain('ko: "font-pretendard-dynamic"');
     expect(fontDefinition).toContain(
       '"/fonts/pretendard-variable/dynamic-subset.css"',
@@ -203,18 +203,16 @@ describe("공통 디자인 토큰 계약", () => {
   });
 
   it("[성공] Tech와 Invest가 동일한 코드블록 CSS 계약을 사용함", () => {
+    const mdxTheme = read("apps/web/app/mdx-theme.css");
     for (const stylesheet of [techStyles, investCodeStyles]) {
-      expect(stylesheet).toContain('@import "fumadocs-ui/css/shadcn.css";');
-      expect(stylesheet).toContain('@import "fumadocs-ui/css/preset.css";');
-      expect(stylesheet).toContain(
-        '@source "../../node_modules/fumadocs-ui/dist/components/codeblock.js";',
-      );
-      expect(stylesheet).toContain(
-        '@source "../../node_modules/fumadocs-ui/dist/components/ui/button.js";',
-      );
-      expect(stylesheet).toContain('html[data-theme="dark"]');
-      expect(stylesheet).toContain("--shiki-dark");
+      expect(stylesheet).toContain('@import "../mdx-theme.css";');
+      expect(stylesheet).not.toContain("fumadocs-ui/css/preset.css");
     }
+    expect(mdxTheme).toContain('@import "fumadocs-ui/css/lib/shiki.css";');
+    expect(mdxTheme).toContain('html[data-theme="dark"]');
+    expect(mdxTheme).toContain("dist/components/codeblock.js");
+    expect(techStyles).toContain("fumadocs-ui/css/generated/docs.css");
+    expect(techStyles).toContain('@plugin "@fumadocs/tailwind/typography";');
   });
 
   it("[성공] 승인된 semantic utility가 실제 CSS selector로 생성됨", async () => {

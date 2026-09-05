@@ -20,7 +20,7 @@ import { useDocsSearch } from "fumadocs-core/search/client";
 import { fetchClient } from "fumadocs-core/search/client/fetch";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { Locale } from "#lib/content-model";
 import { documentKindLabel } from "#lib/tech/document-kind";
 
@@ -98,10 +98,12 @@ export function SearchDialog({
   locale,
   open,
   onOpenChange,
+  finalFocus,
 }: {
   readonly locale: Locale;
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
+  readonly finalFocus: () => HTMLElement | null;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
@@ -141,10 +143,6 @@ export function SearchDialog({
     [locale, query, results, t],
   );
 
-  useEffect(() => {
-    if (open) inputRef.current?.focus();
-  }, [open]);
-
   const changeOpen = (nextOpen: boolean): void => {
     if (!nextOpen) setQuery("");
     onOpenChange(nextOpen);
@@ -158,6 +156,8 @@ export function SearchDialog({
   return (
     <Dialog open={open} onOpenChange={changeOpen}>
       <DialogContent
+        initialFocus={inputRef}
+        finalFocus={finalFocus}
         className="max-w-xl overflow-hidden p-0"
         aria-describedby={undefined}
         showCloseButton={false}

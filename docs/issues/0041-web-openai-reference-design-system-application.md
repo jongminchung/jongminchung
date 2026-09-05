@@ -5,7 +5,7 @@
 - 기준일: 2026-08-23
 - 선행 이슈:
   [초기 font 전송량과 예산](0037-web-initial-font-transfer-budget.md),
-  [Tech 유지보수 경계](0040-web-tech-starlight-inspired-maintainability.md)
+  [Tech 유지보수 경계](archive/2026/0040-web-tech-starlight-inspired-maintainability.md)
 - 영향 범위:
   [공개 참조 디자인 시스템](../../DESIGN.md),
   [Web 디자인 명세](../../apps/web/DESIGN.md),

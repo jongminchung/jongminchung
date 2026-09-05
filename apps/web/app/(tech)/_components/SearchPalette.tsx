@@ -8,10 +8,15 @@ import {
   type SharedProps,
 } from "fumadocs-ui/contexts/search";
 import { useTranslations } from "next-intl";
-import { type ReactNode, useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
+import type { ReactNode } from "react";
 import { Icon } from "#components/Icon";
 import type { Locale } from "#lib/content-model";
-import { SearchDialog } from "./SearchDialog";
+
+const SearchDialog = dynamic(
+  () => import("./SearchDialog").then((module) => module.SearchDialog),
+  { ssr: false },
+);
 
 function findVisibleTrigger(): HTMLButtonElement | null {
   return (
@@ -47,24 +52,14 @@ function FumadocsSearchDialog({
   onOpenChange,
   open,
 }: SharedProps & { readonly locale: Locale }) {
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
-
-  useEffect(() => {
-    if (open && triggerRef.current === null)
-      triggerRef.current = findVisibleTrigger();
-  }, [open]);
-
-  const changeOpen = (nextOpen: boolean): void => {
-    onOpenChange(nextOpen);
-    if (!nextOpen) {
-      requestAnimationFrame(() => {
-        triggerRef.current?.focus();
-        triggerRef.current = null;
-      });
-    }
-  };
-
-  return <SearchDialog locale={locale} open={open} onOpenChange={changeOpen} />;
+  return (
+    <SearchDialog
+      locale={locale}
+      open={open}
+      onOpenChange={onOpenChange}
+      finalFocus={findVisibleTrigger}
+    />
+  );
 }
 
 /** `SearchTrigger` UI 컴포넌트를 렌더링함 */

@@ -7,7 +7,6 @@
 - 기준일: 2026-08-19
 - 영향 범위:
   [루트 package](../../../../package.json),
-  [pnpm workspace](../../../../pnpm-workspace.yaml),
   [유지보수 가이드](../../../maintenance.md)
 
 ## 핵심 요약

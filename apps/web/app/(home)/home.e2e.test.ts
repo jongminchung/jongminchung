@@ -111,7 +111,7 @@ test("[성공] 시스템 모드일 때 운영체제의 다크 설정을 따름",
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 });
 
-test("[성공] Pretendard dynamic subset을 자체 호스팅 자산에서 불러옴", async ({
+test("[성공] 영문 UI subset을 자체 호스팅 자산에서 불러옴", async ({
   page,
 }) => {
   const fontRequests: string[] = [];
@@ -123,8 +123,8 @@ test("[성공] Pretendard dynamic subset을 자체 호스팅 자산에서 불러
   await page.evaluate(() => document.fonts.ready);
 
   expect(
-    fontRequests.some((url) =>
-      url.includes("/fonts/pretendard-variable/PretendardVariable.subset."),
+    fontRequests.some(
+      (url) => new URL(url).pathname === "/fonts/pretendard-latin.woff2",
     ),
   ).toBe(true);
   const pageOrigin = new URL(page.url()).origin;

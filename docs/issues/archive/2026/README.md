@@ -5,7 +5,7 @@
 
 ## 핵심 요약
 
-- **완료 이슈 11건을 보관함**
+- **완료 이슈 12건을 보관함**
 - **아카이브 파일은 구현 결과·비채택 선택지·검증 명령을 추적하기 위한 완료 기록임**
 - **현재 운영 계약의 기준은 관련 코드·테스트·ADR·운영 문서이며 이슈 파일 자체가 아님**
 - **아카이브 이슈에서 추가 작업이 발견되면 상태를 되돌리지 않고 새로운 번호의 이슈로 분리함**
@@ -16,6 +16,7 @@
 - [`0019`: 다중 도메인 OG 이미지와 Next Image 회귀 해소](0019-next-image-multidomain-og-regression.md)
 - [`0020`: Web과 UI package의 개발·빌드 소비 계약 정리](0020-web-ui-package-development-contract.md)
 - [`0021`: React compiler lint 대응의 상태 계약 회귀 보강](0021-react-compiler-remediation-state-contract.md)
+- [`0040`: Tech content identity·page model·client island 경계 정리](0040-web-tech-starlight-inspired-maintainability.md)
 - [`0042`: Web editorial 목록의 점진적 탐색과 모션 계약 보강](0042-web-editorial-progressive-navigation.md)
 
 ## Tooling과 릴리스

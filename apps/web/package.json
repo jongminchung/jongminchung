@@ -12,7 +12,7 @@
     "#tech-components/*": "./app/(tech)/_components/*.tsx"
   },
   "scripts": {
-    "build": "bun run --bun fumadocs-mdx && bun --preload ./scripts/register-content-plugin.ts scripts/validate-fumadocs-content.ts && bun scripts/check-excalidraw.ts && bun run --bun next build",
+    "build": "bun run --bun fumadocs-mdx && JAMIE_MDX_METADATA_ONLY=1 bun --preload ./scripts/register-content-plugin.ts scripts/validate-fumadocs-content.ts && bun scripts/check-excalidraw.ts && bun run --bun next build",
     "content:evidence": "bun --preload ./scripts/register-content-plugin.ts scripts/content-evidence.ts",
     "dev": "bun run --bun next dev",
     "dev:home": "JAMIE_LOCAL_SITE=home bun run dev",
@@ -43,6 +43,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "catalog:",
+    "@fumadocs/tailwind": "catalog:",
     "@playwright/test": "catalog:",
     "@tailwindcss/postcss": "catalog:",
     "@types/bun": "catalog:",

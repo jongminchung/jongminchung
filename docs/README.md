@@ -14,6 +14,8 @@
 
 ## 기술 기록
 
+- [프론트엔드 개선 기록](web/frontend-improvements.md): Next·React·TypeScript·Tailwind·shadcn/ui 구현 개선과 후속 우선순위
+
 - [ADR 0001: 공개 TypeScript 패키지 빌드를 `tsc`로 단순화](adr/0001-node-library-tsc-build.md)
 - [TypeScript 7 호환성 보고서](../apps/web/content/tech/docs/ko/fe/typescript-7-compatibility.mdx): 현재 TypeScript 7 채택 근거와 재검증 기준
 

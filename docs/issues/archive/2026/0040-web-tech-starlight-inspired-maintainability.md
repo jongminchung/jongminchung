@@ -4,21 +4,21 @@
 - 우선순위: P2
 - 기준일: 2026-08-20
 - 선행 이슈:
-  [Tech 공개 collection 경계](0036-tech-draft-publication-boundary.md),
-  [검색 runtime 경계](0032-web-search-runtime-benchmark-boundary.md),
-  [URL·feed 계약](0034-web-multisite-url-feed-contract.md),
-  [test fixture 경계](0035-web-test-intent-and-corpus-fixtures.md)
+  [Tech 공개 collection 경계](../../0036-tech-draft-publication-boundary.md),
+  [검색 runtime 경계](../../0032-web-search-runtime-benchmark-boundary.md),
+  [URL·feed 계약](../../0034-web-multisite-url-feed-contract.md),
+  [test fixture 경계](../../0035-web-test-intent-and-corpus-fixtures.md)
 - 관련 검토:
-  [Starlight 전환 영향](0039-web-tech-starlight-migration-assessment.md)
+  [Starlight 전환 영향](../../0039-web-tech-starlight-migration-assessment.md)
 - 영향 범위:
-  [content model](../../apps/web/lib/content-model.ts),
-  [content repository](../../apps/web/lib/content-repository.ts),
-  [content validation](../../apps/web/lib/content-validation.ts),
-  [Tech Docs page route](<../../apps/web/app/(tech)/tech/[locale]/docs/[[...slug]]/page.tsx>),
-  [Docs shell](<../../apps/web/app/(tech)/_components/DocsShell.tsx>),
-  [Tech search provider](<../../apps/web/app/(tech)/_components/SearchPalette.tsx>),
-  [Fumadocs provider](<../../apps/web/app/(tech)/_components/TechFumadocsProvider.tsx>),
-  [Tech copy](../../apps/web/lib/tech/copy.ts)
+  [content model](../../../../apps/web/lib/content-model.ts),
+  [content repository](../../../../apps/web/lib/content-repository.ts),
+  [content validation](../../../../apps/web/lib/content-validation.ts),
+  [Tech Docs page route](<../../../../apps/web/app/(tech)/tech/[locale]/docs/[[...slug]]/page.tsx>),
+  [Docs shell](<../../../../apps/web/app/(tech)/_components/DocsShell.tsx>),
+  [Tech search provider](<../../../../apps/web/app/(tech)/_components/SearchPalette.tsx>),
+  [Fumadocs provider](<../../../../apps/web/app/(tech)/_components/TechFumadocsProvider.tsx>),
+  [Tech copy](../../../../apps/web/lib/tech/copy.ts)
 - 공식 근거:
   [Astro islands](https://docs.astro.build/en/concepts/islands/),
   [Starlight route data](https://starlight.astro.build/guides/route-data/),
@@ -172,7 +172,7 @@
     - macOS는 `⌘K`, Windows·Linux는 `Ctrl K`를 표시하되 server markup과 hydration mismatch를 만들지 않는 경계를 정해야 함
     - 화면에 표시하는 단축키와 Fumadocs provider가 실제 처리하는 key combination을 같은 browser test에서 검증해야 함
 - **맨 위 이동을 native navigation과 focus context로 완결함**
-    - 완료 이슈 [`0042`](archive/2026/0042-web-editorial-progressive-navigation.md)는 기존 button이 reduced motion을 존중하도록 보강함
+    - 완료 이슈 [`0042`](0042-web-editorial-progressive-navigation.md)는 기존 button이 reduced motion을 존중하도록 보강함
     - 후속 단계에서는 `#top` anchor와 focus 가능한 target을 사용해 JavaScript 없이도 이동할 수 있어야 함
     - keyboard와 screen reader 사용자가 이동 뒤 문서 시작 위치를 인지할 수 있도록 focus·route announcement 영향을 검증해야 함
 - **기본 동작을 유지하는 control에는 client state를 추가하지 않음**

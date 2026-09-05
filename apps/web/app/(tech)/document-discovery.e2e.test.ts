@@ -100,6 +100,15 @@ test("[성공] Blog 목록과 공유 메타데이터는 글별 주제 이미지�
   page,
 }) => {
   await page.goto("/en");
+  // 게시 순서와 무관하게 실제 목록의 이미지를 검증함
+  const articleHref = "/en/server-monitoring-analysis-guide";
+  while ((await page.locator(`a[href="${articleHref}"]`).count()) === 0) {
+    const loadMore = page.locator('[data-infinite-scroll-fallback="true"]');
+    await expect(loadMore).toBeVisible();
+    const nextHref = await loadMore.getAttribute("href");
+    if (nextHref === null) throw new Error("Missing next article page");
+    await page.goto(nextHref);
+  }
   const cardImage = page.locator(
     'a[href="/en/server-monitoring-analysis-guide"] img[data-editorial-image="true"]:visible',
   );

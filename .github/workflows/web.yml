@@ -106,7 +106,8 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: content-evidence
-          path: content-evidence.json
+          path: apps/web/content-evidence.json
+          if-no-files-found: error
       - name: Upload browser failure artifacts
         if: failure() && steps.changes.outputs.web == 'true'
         uses: actions/upload-artifact@v7

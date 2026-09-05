@@ -1,0 +1,15 @@
+/* 앱에서 공유하는 코드블록 스타일만 포함함 */
+@import "fumadocs-ui/css/shadcn.css";
+@import "fumadocs-ui/css/lib/base.css";
+@import "fumadocs-ui/css/lib/shiki.css";
+
+@source "../../../node_modules/fumadocs-ui/dist/components/codeblock.js";
+@source "../../../node_modules/fumadocs-ui/dist/components/ui/button.js";
+@source "../../../node_modules/fumadocs-ui/dist/components/ui/tabs.js";
+
+/* Fumadocs의 Shiki dark token을 Web의 data-theme 계약에 연결함 */
+:where(html[data-theme="dark"]) .shiki:not(.not-fumadocs-codeblock *) code span,
+:where(html[data-theme="dark"]) code.shiki:not(.not-fumadocs-code *) span {
+  color: var(--shiki-dark);
+  font-style: var(--shiki-dark-font-style);
+}

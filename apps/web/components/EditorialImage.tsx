@@ -17,7 +17,7 @@ export function EditorialImage({
     <Image
       {...props}
       fetchPriority={eager ? "high" : undefined}
-      loading="lazy"
+      loading={eager ? "eager" : "lazy"}
     />
   );
 }

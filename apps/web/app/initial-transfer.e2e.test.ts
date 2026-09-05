@@ -52,6 +52,11 @@ for (const route of budget.routes) {
       );
 
       return {
+        resources: [...fonts, ...stylesheets, ...scripts].map((entry) => ({
+          path: new URL(entry.name).pathname,
+          transferBytes: entry.transferSize,
+          decodedBytes: entry.decodedBodySize,
+        })),
         fontFamily: getComputedStyle(document.body).fontFamily,
         fontRequests: fonts.length,
         fontTransferBytes: sum(fonts, "transferSize"),

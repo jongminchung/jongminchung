@@ -16,5 +16,14 @@
     "files": 92,
     "bytes": 2957724,
     "aggregateSha256Base64": "m7BnFmxSyNGvzlaVHBoQfioJVVKB6NvPDmcykgDQ41A="
+  },
+  "pretendardLatin": {
+    "path": "public/fonts/pretendard-latin.woff2",
+    "bytes": 44876,
+    "sha256Base64": "N+YK1RHDl249nC/Q6ZV9j/pYhBYwS8kHsJ1uQEDPSMc=",
+    "fonttoolsVersion": "4.59.0",
+    "unicodes": "U+0020-007E,U+00A0,U+00A3,U+00A5,U+00A9,U+00AE,U+00B0-00B1,U+00B7,U+00D7,U+00F7,U+2010-2027,U+2030-203A,U+20A9,U+20AC,U+2122,U+2212,U+2190-2199,U+AD6D,U+C5B4,U+D55C",
+    "sourceUrl": "https://raw.githubusercontent.com/orioncactus/pretendard/v1.3.9/packages/pretendard/dist/web/variable/woff2/PretendardVariable.woff2",
+    "sourceSha256Hex": "9599f12fd42fc0bce1cd50b47a0c022e108d7aa64dd0d1bb0ed44f3282d900b4"
   }
 }
