@@ -44,7 +44,7 @@ sourceUrl: https://kciter.so/posts/how-to-design-animation/
 
 ```js
 function lerp(a, b, t) {
-  return a + (b - a) * t;
+    return a + (b - a) * t;
 }
 ```
 
@@ -119,23 +119,23 @@ current += velocity * dt;
 
 ```js
 for (const obj of objects) {
-  // 힘 계산
-  const gravity = { x: 0, y: 9.8 * obj.mass };
-  const friction = { x: -obj.vx * drag, y: -obj.vy * drag };
-  const fx = gravity.x + friction.x;
-  const fy = gravity.y + friction.y;
+    // 힘 계산
+    const gravity = { x: 0, y: 9.8 * obj.mass };
+    const friction = { x: -obj.vx * drag, y: -obj.vy * drag };
+    const fx = gravity.x + friction.x;
+    const fy = gravity.y + friction.y;
 
-  // 적분
-  obj.vx += (fx / obj.mass) * dt;
-  obj.vy += (fy / obj.mass) * dt;
-  obj.x += obj.vx * dt;
-  obj.y += obj.vy * dt;
+    // 적분
+    obj.vx += (fx / obj.mass) * dt;
+    obj.vy += (fy / obj.mass) * dt;
+    obj.x += obj.vx * dt;
+    obj.y += obj.vy * dt;
 
-  // 제약 처리 (바닥 충돌)
-  if (obj.y > floorY) {
-    obj.y = floorY;
-    obj.vy *= -restitution; // 반발 계수만큼 튕김
-  }
+    // 제약 처리 (바닥 충돌)
+    if (obj.y > floorY) {
+        obj.y = floorY;
+        obj.vy *= -restitution; // 반발 계수만큼 튕김
+    }
 }
 ```
 
@@ -184,8 +184,8 @@ const y = amplitude * Math.sin(time * frequency);
 
 ```js
 items.forEach((item, i) => {
-  const y = amplitude * Math.sin(time * frequency + i * phaseOffset);
-  item.style.transform = `translateY(${y}px)`;
+    const y = amplitude * Math.sin(time * frequency + i * phaseOffset);
+    item.style.transform = `translateY(${y}px)`;
 });
 ```
 

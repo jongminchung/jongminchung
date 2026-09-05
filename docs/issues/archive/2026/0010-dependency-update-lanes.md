@@ -21,32 +21,32 @@
 ## 현재 문제와 근거
 
 - **`deps:check`와 `deps:update`가 모든 workspace를 동일한 단위로 처리함**
-  - 업데이트 가능한 package를 한 번에 표시하고 적용함
-  - runtime과 dev tooling 변경을 구분하지 않음
-  - lockfile diff에서 원인별 dependency graph를 분리하기 어려움
+    - 업데이트 가능한 package를 한 번에 표시하고 적용함
+    - runtime과 dev tooling 변경을 구분하지 않음
+    - lockfile diff에서 원인별 dependency graph를 분리하기 어려움
 - **UI stack은 minor·patch도 interaction을 바꿀 수 있음**
-  - Tailwind generated CSS
-  - Base UI focus·portal·keyboard 동작
-  - cmdk selection과 ARIA
-  - shadcn registry source
+    - Tailwind generated CSS
+    - Base UI focus·portal·keyboard 동작
+    - cmdk selection과 ARIA
+    - shadcn registry source
 - **Next.js는 framework 고유 검증 경계를 요구함**
-  - standalone build·Host routing·browser test가 중요함
+    - standalone build·Host routing·browser test가 중요함
 
 ## 채택할 내용
 
 - **dependency를 다음 lane으로 분류함**
-  - framework: React·React DOM·Next.js
-  - UI: Tailwind CSS·shadcn CLI·Base UI·cmdk·animation
-  - test: Vitest·Playwright·axe·coverage
-  - tooling: TypeScript·Oxc·formatter·build tooling
+    - framework: React·React DOM·Next.js
+    - UI: Tailwind CSS·shadcn CLI·Base UI·cmdk·animation
+    - test: Vitest·Playwright·axe·coverage
+    - tooling: TypeScript·Oxc·formatter·build tooling
 - **한 변경에는 원칙적으로 하나의 lane만 포함함**
-  - lockfile의 전이 변경은 허용하되 직접 dependency 목적은 하나로 유지함
-  - 여러 lane을 함께 올려야 하면 결합 이유와 rollback 단위를 명시함
+    - lockfile의 전이 변경은 허용하되 직접 dependency 목적은 하나로 유지함
+    - 여러 lane을 함께 올려야 하면 결합 이유와 rollback 단위를 명시함
 - **lane별 최소 검증을 연결함**
-  - framework lane은 Web build와 Web E2E
-  - UI lane은 UI test와 Web build, 관련 interaction test
-  - test lane은 reporter·fixture 자체 test와 대표 suite
-  - tooling lane은 root check와 package build
+    - framework lane은 Web build와 Web E2E
+    - UI lane은 UI test와 Web build, 관련 interaction test
+    - test lane은 reporter·fixture 자체 test와 대표 suite
+    - tooling lane은 root check와 package build
 - **정기 report는 update 가능 항목만 알리고 자동 병합하지 않음**
 
 ## 채택하지 않을 내용
@@ -63,9 +63,9 @@
 - **`npm-check-updates` 실행 시 lane 하나만 선택하는 재현 가능한 방법을 정함**
 - **PR template 또는 automation output에 lane·release note·검증 결과를 포함함**
 - **scheduled report 도입 여부를 검토함**
-  - repository write 권한 없이 report만 생성
-  - major와 deprecated package를 별도 표시
-  - 자동 PR이 필요해질 때 별도 결정
+    - repository write 권한 없이 report만 생성
+    - major와 deprecated package를 별도 표시
+    - 자동 PR이 필요해질 때 별도 결정
 - **기존 `deps:check`와 `deps:update`의 역할을 전체 orchestration 관점에서 재검토함**
 
 ## 완료 조건
@@ -80,21 +80,21 @@
 ## 검증
 
 - **lane별 sample update를 dry run으로 확인함**
-  - 대상 lane 밖의 direct dependency가 변경되지 않음
-  - lockfile 변경이 frozen install에서 재현됨
-  - 영향받는 workspace의 typecheck·test·build가 통과함
+    - 대상 lane 밖의 direct dependency가 변경되지 않음
+    - lockfile 변경이 frozen install에서 재현됨
+    - 영향받는 workspace의 typecheck·test·build가 통과함
 - **최종 `pnpm run check`, `git diff --check`, `git status --short`를 실행함**
 
 ## 2026-08-20 구현 결과
 
 - **모든 외부 직접 dependency를 framework·UI·test·tooling 중 하나에 정확히 매핑함**
-  - `deps:inventory`가 중복 lane과 미분류 dependency를 실패로 처리함
-  - 내부 `@jongminchung/*` workspace dependency는 update 대상에서 제외함
+    - `deps:inventory`가 중복 lane과 미분류 dependency를 실패로 처리함
+    - 내부 `@jongminchung/*` workspace dependency는 update 대상에서 제외함
 - **`deps:check`와 `deps:update`가 lane 인자를 필수로 받아 한 lane만 처리하도록 변경함**
-  - `pnpm run deps:check -- framework` 형식으로 후보를 확인함
-  - `pnpm run deps:update -- framework` 형식으로 해당 직접 dependency와 lockfile만 갱신함
+    - `pnpm run deps:check -- framework` 형식으로 후보를 확인함
+    - `pnpm run deps:update -- framework` 형식으로 해당 직접 dependency와 lockfile만 갱신함
 - **Renovate의 단일 non-major group을 같은 4개 lane group으로 분리함**
-  - major update의 Dependency Dashboard 승인 정책은 유지함
+    - major update의 Dependency Dashboard 승인 정책은 유지함
 - **유지보수 문서에 lane별 최소 검증, release note, migration·rollback과 shadcn source 분리 계약을 기록함**
-  - TypeScript는 tooling lane에 표시되지만 기존 호환성 재감사 조건 없이 적용하지 않음
+    - TypeScript는 tooling lane에 표시되지만 기존 호환성 재감사 조건 없이 적용하지 않음
 - **framework lane dry run에서 lane 밖 dependency 후보가 출력되지 않음을 확인함**

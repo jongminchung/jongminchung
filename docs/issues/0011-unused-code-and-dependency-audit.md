@@ -19,35 +19,35 @@
 ## 현재 문제와 근거
 
 - **저장소에 여러 종류의 암묵적 entry point가 있음**
-  - Next App Router의 route·layout·metadata file
-  - Web content와 asset 생성 script
-  - Playwright config·reporter·fixture
-  - package export map과 `source` condition
+    - Next App Router의 route·layout·metadata file
+    - Web content와 asset 생성 script
+    - Playwright config·reporter·fixture
+    - package export map과 `source` condition
 - **정적 import 횟수만으로 사용 여부를 판단하기 어려움**
-  - dynamic import와 lazy dialog
-  - JSON manifest가 참조하는 command
-  - framework convention으로 호출되는 module
-  - build·release script에서만 사용하는 dependency
+    - dynamic import와 lazy dialog
+    - JSON manifest가 참조하는 command
+    - framework convention으로 호출되는 module
+    - build·release script에서만 사용하는 dependency
 - **장기적으로 feature 제거 뒤 잔여 코드가 남을 가능성이 있음**
-  - component와 stylesheet가 많음
-  - app·package 경계를 함께 검색해야 함
-  - dependency와 devDependency 오분류도 수동 검토 대상임
+    - component와 stylesheet가 많음
+    - app·package 경계를 함께 검색해야 함
+    - dependency와 devDependency 오분류도 수동 검토 대상임
 
 ## 채택할 내용
 
 - **report-only dead-code audit를 pilot으로 실행함**
-  - unused file
-  - unused export
-  - unused dependency와 devDependency
-  - unresolved workspace entry
+    - unused file
+    - unused export
+    - unused dependency와 devDependency
+    - unresolved workspace entry
 - **framework별 entry point를 명시함**
-  - Next App Router convention
-  - Bun·Playwright config와 test helper
-  - package export map·scripts·CSS side effect
+    - Next App Router convention
+    - Bun·Playwright config와 test helper
+    - package export map·scripts·CSS side effect
 - **결과를 세 범주로 분류함**
-  - 안전하게 제거 가능
-  - dynamic 또는 convention entry로 사용 중
-  - 구조 개선 뒤 재검토
+    - 안전하게 제거 가능
+    - dynamic 또는 convention entry로 사용 중
+    - 구조 개선 뒤 재검토
 - **pilot 정확도가 확인된 검사만 repo-wide check 후보로 승격함**
 
 ## 채택하지 않을 내용
@@ -78,33 +78,33 @@
 ## 검증
 
 - **삭제 후보가 생기면 영향받는 workspace부터 확인함**
-  - `pnpm --filter <package-name> run typecheck`
-  - `pnpm --filter <package-name> run test`
-  - `pnpm --filter <package-name> run build`
+    - `pnpm --filter <package-name> run typecheck`
+    - `pnpm --filter <package-name> run test`
+    - `pnpm --filter <package-name> run build`
 - **entry point 변경 시 해당 runtime test를 추가함**
-  - Web route는 Playwright E2E
-  - package export는 dry-run tarball과 consumer import
-  - 최종 `pnpm run check`
+    - Web route는 Playwright E2E
+    - package export는 dry-run tarball과 consumer import
+    - 최종 `pnpm run check`
 
 ## 2026-08-20 pilot 결과
 
 - **dependency를 설치하지 않는 `pnpm dlx knip@latest` 일회성 report-only pilot을 실행함**
-  - 기본 report는 unused file 74개, export 57개, exported type 50개와 duplicate export 2개를 후보로 출력함
-  - 두 manifest에서 11개 dependency 이름과 catalog의 3개 이름도 후보로 출력함
+    - 기본 report는 unused file 74개, export 57개, exported type 50개와 duplicate export 2개를 후보로 출력함
+    - 두 manifest에서 11개 dependency 이름과 catalog의 3개 이름도 후보로 출력함
 - **현재 결과는 merge gate로 사용할 정확도가 부족함**
-  - Next content loader가 filesystem convention으로 읽는 MDX 문서 전체를 unused file로 잘못 분류함
-  - IPC schema·test helper의 export 후보는 runtime boundary와 test import를 함께 해석해야 해 자동 삭제할 수 없음
+    - Next content loader가 filesystem convention으로 읽는 MDX 문서 전체를 unused file로 잘못 분류함
+    - IPC schema·test helper의 export 후보는 runtime boundary와 test import를 함께 해석해야 해 자동 삭제할 수 없음
 - **넓은 glob allowlist로 false positive를 숨기면 audit 가치가 사라지므로 config와 지속 script를 추가하지 않음**
-  - Next content manifest와 route entry를 도구가 직접 모델링할 수 있는 좁은 설정이 확인될 때 pilot을 재개해야 함
-  - 그 전까지 삭제 후보는 기존 `rg`, typecheck, build와 runtime test를 사용해 개별 변경에서 증명해야 함
+    - Next content manifest와 route entry를 도구가 직접 모델링할 수 있는 좁은 설정이 확인될 때 pilot을 재개해야 함
+    - 그 전까지 삭제 후보는 기존 `rg`, typecheck, build와 runtime test를 사용해 개별 변경에서 증명해야 함
 - **pilot 정확도 부족 시 gate를 추가하지 않는 완료 조건에 따라 상태를 조건부 보류로 전환함**
 
 ## 2026-08-31 제한적 도입 결과
 
 - **미사용 파일과 duplicate export만 지속 gate로 도입함**
-  - `knip --include files --include duplicates --no-config-hints`를 루트 `deadcode` script로 실행함
-  - `pnpm run check`가 format·lint·typecheck 이후 `deadcode`를 실행함
-  - 검색 benchmark runner를 명시적 entry로 등록하고 생성 font CSS 한 파일만 ignore함
+    - `knip --include files --include duplicates --no-config-hints`를 루트 `deadcode` script로 실행함
+    - `pnpm run check`가 format·lint·typecheck 이후 `deadcode`를 실행함
+    - 검색 benchmark runner를 명시적 entry로 등록하고 생성 font CSS 한 파일만 ignore함
 - **미사용 export와 dependency 검사는 기존 조건부 보류를 유지함**
-  - Next.js route·MDX·package subpath의 false positive를 넓은 allowlist로 숨기지 않음
-  - 현재 좁은 검사가 안정적으로 통과하더라도 자동 삭제나 전체 export 검사를 의미하지 않음
+    - Next.js route·MDX·package subpath의 false positive를 넓은 allowlist로 숨기지 않음
+    - 현재 좁은 검사가 안정적으로 통과하더라도 자동 삭제나 전체 export 검사를 의미하지 않음

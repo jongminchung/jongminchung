@@ -15,6 +15,11 @@ on:
       - "package.json"
       - "bun.lock"
       - "bunfig.toml"
+      - "Makefile"
+      - ".editorconfig"
+      - "oxfmt.config.ts"
+      - "oxlint.config.ts"
+      - "scripts/style-shell.sh"
       - "tsconfig.base.json"
 
 permissions:
@@ -46,6 +51,11 @@ jobs:
               - 'package.json'
               - 'bun.lock'
               - 'bunfig.toml'
+              - 'Makefile'
+              - '.editorconfig'
+              - 'oxfmt.config.ts'
+              - 'oxlint.config.ts'
+              - 'scripts/style-shell.sh'
               - 'tsconfig.base.json'
       - uses: oven-sh/setup-bun@v2
         if: steps.changes.outputs.web == 'true' || github.event_name == 'schedule'
@@ -58,6 +68,15 @@ jobs:
       - name: Install Web consumer dependencies
         if: steps.changes.outputs.web == 'true' || github.event_name == 'schedule'
         run: bun install --frozen-lockfile
+      - uses: actions/setup-go@v7
+        if: steps.changes.outputs.web == 'true'
+        with:
+          go-version: "1.27.0"
+      - name: Check repository formatting and lint
+        if: steps.changes.outputs.web == 'true'
+        run: |
+          go install mvdan.cc/sh/v3/cmd/shfmt@v3.12.0
+          make lint
       - name: Validate shadcn workspace manifests
         if: steps.changes.outputs.web == 'true'
         run: |

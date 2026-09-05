@@ -44,7 +44,7 @@ So how does a curve come out of control points? Through **linear interpolation, 
 
 ```js
 function lerp(a, b, t) {
-  return a + (b - a) * t;
+    return a + (b - a) * t;
 }
 ```
 
@@ -119,23 +119,23 @@ The structure of a physics simulation is simple. Every frame, three steps:
 
 ```js
 for (const obj of objects) {
-  // Compute forces
-  const gravity = { x: 0, y: 9.8 * obj.mass };
-  const friction = { x: -obj.vx * drag, y: -obj.vy * drag };
-  const fx = gravity.x + friction.x;
-  const fy = gravity.y + friction.y;
+    // Compute forces
+    const gravity = { x: 0, y: 9.8 * obj.mass };
+    const friction = { x: -obj.vx * drag, y: -obj.vy * drag };
+    const fx = gravity.x + friction.x;
+    const fy = gravity.y + friction.y;
 
-  // Integrate
-  obj.vx += (fx / obj.mass) * dt;
-  obj.vy += (fy / obj.mass) * dt;
-  obj.x += obj.vx * dt;
-  obj.y += obj.vy * dt;
+    // Integrate
+    obj.vx += (fx / obj.mass) * dt;
+    obj.vy += (fy / obj.mass) * dt;
+    obj.x += obj.vx * dt;
+    obj.y += obj.vy * dt;
 
-  // Apply constraints (floor collision)
-  if (obj.y > floorY) {
-    obj.y = floorY;
-    obj.vy *= -restitution; // bounce scaled by restitution
-  }
+    // Apply constraints (floor collision)
+    if (obj.y > floorY) {
+        obj.y = floorY;
+        obj.vy *= -restitution; // bounce scaled by restitution
+    }
 }
 ```
 
@@ -184,8 +184,8 @@ The phase is where it gets interesting. Give each item in a list a phase proport
 
 ```js
 items.forEach((item, i) => {
-  const y = amplitude * Math.sin(time * frequency + i * phaseOffset);
-  item.style.transform = `translateY(${y}px)`;
+    const y = amplitude * Math.sin(time * frequency + i * phaseOffset);
+    item.style.transform = `translateY(${y}px)`;
 });
 ```
 

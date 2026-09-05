@@ -26,8 +26,8 @@ sourceUrl: https://learn.chatgpt.com/docs/pricing
 ## Eight parts lead from purchase candidates to cancellation
 
 - **The series moves through comparison, measurement, optimization, operation, and purchasing decisions before adding more tools**
-  - Each part produces the input for the next, so the most natural route begins with Part 1
-  - A reader with existing subscriptions can begin at Part 2's baseline and reassess the portfolio in Part 8
+    - Each part produces the input for the next, so the most natural route begins with Part 1
+    - A reader with existing subscriptions can begin at Part 2's baseline and reassess the portfolio in Part 8
 
 | Order | Topic                                                                                   | Artifact for the next part                |
 | ----: | --------------------------------------------------------------------------------------- | ----------------------------------------- |
@@ -43,11 +43,11 @@ sourceUrl: https://learn.chatgpt.com/docs/pricing
 ## The comparison needs a clear scope and unit
 
 - **This comparison covers products used by signing into a personal monthly subscription**
-  - It excludes API billing, API keys, automatic credit reloads, and key-based configuration of third-party clients
-  - It also excludes optional overage credits from the base subscription comparison
+    - It excludes API billing, API keys, automatic credit reloads, and key-based configuration of third-party clients
+    - It also excludes optional overage credits from the base subscription comparison
 
 - **Prices are public monthly list prices checked on 2026-09-04 and can vary by country, tax, annual billing, and promotions**
-  - Price narrows the shortlist; it is not a defensible cross-vendor “price per token” calculation
+    - Price narrows the shortlist; it is not a defensible cross-vendor “price per token” calculation
 
 | Service                 | Representative personal entry point                              | How coding usage is metered                                                    | Connection allowed without an API key                          | Role under this constraint                                                 |
 | ----------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------- | -------------------------------------------------------------------------- |
@@ -59,18 +59,18 @@ sourceUrl: https://learn.chatgpt.com/docs/pricing
 | `OpenCode Go`           | US$10[^opencode-go]                                              | Model-priced dollar-value limits across five-hour, weekly, and monthly windows | Official setup requires an OpenCode Go API key                 | Multi-model comparison candidate if keys are allowed                       |
 
 - **Gemini CLI publishes the most explicit request allowance in the core group**
-  - Google says Google AI Pro subscribers receive higher Gemini CLI and Code Assist limits, and the linked official quota table lists 1,500 model requests per user per day for Gemini Code Assist Standard[^gemini-cli-quota]
-  - A free Google login already provides 1,000 requests per day and 60 per minute, so the subscription's incremental value should include the Gemini app, storage, and other Google benefits—not only CLI requests[^gemini-cli-quota]
-  - One user instruction can trigger several internal model requests, so 1,500 requests does not mean 1,500 completed coding tasks
+    - Google says Google AI Pro subscribers receive higher Gemini CLI and Code Assist limits, and the linked official quota table lists 1,500 model requests per user per day for Gemini Code Assist Standard[^gemini-cli-quota]
+    - A free Google login already provides 1,000 requests per day and 60 per minute, so the subscription's incremental value should include the Gemini app, storage, and other Google benefits—not only CLI requests[^gemini-cli-quota]
+    - One user instruction can trigger several internal model requests, so 1,500 requests does not mean 1,500 completed coding tasks
 
 - **Codex capacity depends on work, not a stable message quota**
-  - OpenAI currently estimates 10–100 local messages for `GPT-5.6 Sol`, 25–200 for `Terra`, and 250–2,000 for `Luna` per five-hour window on Plus, with possible weekly limits[^openai-usage]
-  - OpenAI labels these estimates rather than fixed caps because task, model, context, tools, retrieval, and caching affect consumption[^openai-usage]
+    - OpenAI currently estimates 10–100 local messages for `GPT-5.6 Sol`, 25–200 for `Terra`, and 250–2,000 for `Luna` per five-hour window on Plus, with possible weekly limits[^openai-usage]
+    - OpenAI labels these estimates rather than fixed caps because task, model, context, tools, retrieval, and caching affect consumption[^openai-usage]
 
 - **Claude publishes plan prices and capacity multipliers, but session consumption still depends on conversation length and model choice**
-  - Anthropic says the US$20 Pro session limit resets every five hours and a weekly limit applies across models, but it does not currently publish one fixed prompt count[^claude-plan]
-  - An officially published Anthropic guidance page estimated 10–40 Claude Code prompts per five hours for Pro; treat it as a historical reference for light coding on a small repository, not a guaranteed current quota[^claude-estimate]
-  - Its Claude Code guide says each turn includes prior conversation, project instructions, files read, and the new prompt[^claude-limits]
+    - Anthropic says the US$20 Pro session limit resets every five hours and a weekly limit applies across models, but it does not currently publish one fixed prompt count[^claude-plan]
+    - An officially published Anthropic guidance page estimated 10–40 Claude Code prompts per five hours for Pro; treat it as a historical reference for light coding on a small repository, not a guaranteed current quota[^claude-estimate]
+    - Its Claude Code guide says each turn includes prior conversation, project instructions, files read, and the new prompt[^claude-limits]
 
 - **The core subscriptions' nominal iteration capacity can be compared approximately as follows**
 
@@ -81,64 +81,64 @@ sourceUrl: https://learn.chatgpt.com/docs/pricing
 | `Claude Pro`·`Claude Code`   | Reference estimate of 10–40 prompts/five hours; now dynamic | Low–medium        | Depends on codebase, conversation, model, and shared Claude usage |
 
 - **These bands describe nominal opportunities to iterate, not quality or completed work**
-  - Ten Claude Code prompts may complete more work than ten Gemini model requests, so a higher band does not automatically mean better value
-  - The table is useful for choosing high-headroom candidates for small repeated tasks and high-completion candidates for long refactors
+    - Ten Claude Code prompts may complete more work than ten Gemini model requests, so a higher band does not automatically mean better value
+    - The table is useful for choosing high-headroom candidates for small repeated tasks and high-completion candidates for long refactors
 
 - **Treat Z.ai, Kimi, and OpenCode Go as reference groups with different prices or authentication—not as candidates for winning the US$20 core comparison**
-  - Z.ai combines five-hour and seven-day limits and shares its subscription quota across supported tools[^zai-faq]
-  - Kimi shares one credit pool across membership features and adds separate five-hour and weekly Kimi Code limits[^kimi-membership]
-  - Preserve each provider's credits, prompts, or dollar-value allowance and add a low, medium, or high volume band beside it
+    - Z.ai combines five-hour and seven-day limits and shares its subscription quota across supported tools[^zai-faq]
+    - Kimi shares one credit pool across membership features and adds separate five-hour and weekly Kimi Code limits[^kimi-membership]
+    - Preserve each provider's credits, prompts, or dollar-value allowance and add a low, medium, or high volume band beside it
 
 ## The no-key rule changes what “connected” means
 
 - **Connecting subscriptions must mean that official clients read the same Git task contract, not that one CLI routes to another provider's model**
-  - Use Google login for Gemini CLI, ChatGPT login for Codex, Claude login for Claude Code, and Kimi OAuth for Kimi Code
-  - Gemini CLI explicitly recommends `Login with Google` for Google AI Pro subscribers, so no API key is required[^gemini-auth]
-  - Keep credentials in each application's login store; never place keys in repository `.env` files, `settings.json`, shell configuration, or documentation
+    - Use Google login for Gemini CLI, ChatGPT login for Codex, Claude login for Claude Code, and Kimi OAuth for Kimi Code
+    - Gemini CLI explicitly recommends `Login with Google` for Google AI Pro subscribers, so no API key is required[^gemini-auth]
+    - Keep credentials in each application's login store; never place keys in repository `.env` files, `settings.json`, shell configuration, or documentation
 
 - **Exclude Z.ai GLM Coding Plan under this condition**
-  - Its current official quick start asks individual and team subscribers to create a Coding Plan API key and configure that key with a dedicated endpoint in a supported tool[^zai-quickstart]
-  - The plan does provide `GLM-5.3` and `GLM-5.3-Flash`, but it cannot be assigned an execution slot when creating an API key is prohibited[^zai-faq]
+    - Its current official quick start asks individual and team subscribers to create a Coding Plan API key and configure that key with a dedicated endpoint in a supported tool[^zai-quickstart]
+    - The plan does provide `GLM-5.3` and `GLM-5.3-Flash`, but it cannot be assigned an execution slot when creating an API key is prohibited[^zai-faq]
 
 - **Exclude Kimi Code integrations with third-party agents under this condition**
-  - Kimi documents automatic OAuth authentication for its official CLI and VS Code extension[^kimi-auth]
-  - The same guide explicitly requires manual API-key configuration for third-party development tools[^kimi-auth]
+    - Kimi documents automatic OAuth authentication for its official CLI and VS Code extension[^kimi-auth]
+    - The same guide explicitly requires manual API-key configuration for third-party development tools[^kimi-auth]
 
 - **OpenCode Go is also a subscription, but not a no-key alternative**
-  - OpenCode documents a US$10 monthly subscription followed by copying a key into `/connect`[^opencode-go]
-  - Include Go in a comparison of subscription model gateways, but do not connect it in this no-key workflow
+    - OpenCode documents a US$10 monthly subscription followed by copying a key into `/connect`[^opencode-go]
+    - Include Go in a comparison of subscription model gateways, but do not connect it in this no-key workflow
 
 - **Do not design around transforming one provider's subscription into another provider's allowance**
-  - Subscriptions are tied to personal accounts and supported tools; Z.ai also restricts general API and unsupported-tool use of its coding-plan quota[^zai-terms]
-  - Respecting that boundary still permits a handoff to the next official client when a provider is at its limit or unavailable
+    - Subscriptions are tied to personal accounts and supported tools; Z.ai also restricts general API and unsupported-tool use of its coding-plan quota[^zai-terms]
+    - Respecting that boundary still permits a handoff to the next official client when a provider is at its limit or unavailable
 
 ## Compare subscription model gateways in their own unit
 
 - **Z.ai GLM Coding Plan is a subscription that provides its own model family through supported tools**
-  - The current FAQ says every plan supports `GLM-5.3` and `GLM-5.3-Flash`, with supported tools sharing one plan allowance[^zai-faq]
-  - Z.ai recommends Lite for one project at a time, Pro for one or two, and Max for two or more, so concurrency limits matter alongside model quality when a user runs several agents[^zai-policy]
-  - Lite includes 2,000 credits per five hours and 10,000 weekly; at 95–98% cache hit rates, Z.ai estimates 48–104 million weekly tokens for `GLM-5.3` or 146–317 million for Flash[^zai-usage]
+    - The current FAQ says every plan supports `GLM-5.3` and `GLM-5.3-Flash`, with supported tools sharing one plan allowance[^zai-faq]
+    - Z.ai recommends Lite for one project at a time, Pro for one or two, and Max for two or more, so concurrency limits matter alongside model quality when a user runs several agents[^zai-policy]
+    - Lite includes 2,000 credits per five hours and 10,000 weekly; at 95–98% cache hit rates, Z.ai estimates 48–104 million weekly tokens for `GLM-5.3` or 146–317 million for Flash[^zai-usage]
 
 - **OpenCode Go is a model gateway that bundles multiple providers behind one subscription**
-  - Its current catalog includes `GLM-5.3`, `GLM-5.3-Flash`, `Kimi K3`, and `Kimi K2.7 Code`, alongside GPT, Grok, Qwen, and DeepSeek families, and the list may change[^opencode-go]
-  - Its base limits are US$12 of value per five hours, US$30 weekly, and US$60 monthly; request count changes with the selected model's cost[^opencode-go]
-  - The official five-hour estimates illustrate the difference: 220 requests for `GLM-5.3`, 1,580 for `GLM-5.3-Flash`, and 110 for `Kimi K3`[^opencode-go]
+    - Its current catalog includes `GLM-5.3`, `GLM-5.3-Flash`, `Kimi K3`, and `Kimi K2.7 Code`, alongside GPT, Grok, Qwen, and DeepSeek families, and the list may change[^opencode-go]
+    - Its base limits are US$12 of value per five hours, US$30 weekly, and US$60 monthly; request count changes with the selected model's cost[^opencode-go]
+    - The official five-hour estimates illustrate the difference: 220 requests for `GLM-5.3`, 1,580 for `GLM-5.3-Flash`, and 110 for `Kimi K3`[^opencode-go]
 
 - **The reference group also supports a rough monthly comparison within each provider's stated assumptions**
-  - Kimi estimates a simple piece of code at 0.5–2% of monthly credits, implying roughly 50–200 pieces per month if no other feature uses credits, although separate five-hour and weekly limits may bind first[^kimi-membership]
-  - OpenCode Go estimates 1,080 monthly requests for `GLM-5.3`, 7,900 for `GLM-5.3-Flash`, 490 for `Kimi K3`, and 6,750 for `Kimi K2.7 Code`[^opencode-go]
-  - Z.ai assumes tokens and cache rates, Kimi assumes credit percentage per task, and OpenCode assumes a typical request shape, so order-of-magnitude bands matter more than exact digits
+    - Kimi estimates a simple piece of code at 0.5–2% of monthly credits, implying roughly 50–200 pieces per month if no other feature uses credits, although separate five-hour and weekly limits may bind first[^kimi-membership]
+    - OpenCode Go estimates 1,080 monthly requests for `GLM-5.3`, 7,900 for `GLM-5.3-Flash`, 490 for `Kimi K3`, and 6,750 for `Kimi K2.7 Code`[^opencode-go]
+    - Z.ai assumes tokens and cache rates, Kimi assumes credit percentage per task, and OpenCode assumes a typical request shape, so order-of-magnitude bands matter more than exact digits
 
 - **The same GLM or Kimi model name does not imply the same allowance product**
-  - Z.ai applies its own supported-tool, credit, and concurrency rules
-  - OpenCode Go converts model costs into dollar-value limits and estimated request counts
-  - Compare them only in a separate, API-key-permitted experiment using the same task sample and completed work per allowance
+    - Z.ai applies its own supported-tool, credit, and concurrency rules
+    - OpenCode Go converts model costs into dollar-value limits and estimated request counts
+    - Compare them only in a separate, API-key-permitted experiment using the same task sample and completed work per allowance
 
 ## Organize the workflow around shared files
 
 - **Use compact repository files as the shared interface, not a shared model configuration**
-  - Every CLI can read the same files, so work can move between subscriptions without copying a conversation transcript
-  - Provider-specific configuration risks either violating the no-key condition or coupling the workflow to one tool
+    - Every CLI can read the same files, so work can move between subscriptions without copying a conversation transcript
+    - Provider-specific configuration risks either violating the no-key condition or coupling the workflow to one tool
 
 ```text
 repository/
@@ -156,53 +156,53 @@ repository/
 ```
 
 - **Put only durable project rules in `AGENTS.md`**
-  - Record the package manager, prohibited commands, test commands, style rules, and definition of done
-  - Put long logs and temporary investigation notes in `docs/ai/context.md` so they do not inflate every turn
+    - Record the package manager, prohibited commands, test commands, style rules, and definition of done
+    - Put long logs and temporary investigation notes in `docs/ai/context.md` so they do not inflate every turn
 
 - **Make `task.md` a small closed contract**
-  - Include the goal, allowed paths, protected paths, exact verification command, completion criterion, and budget boundary
-  - For example: fix search ordering in `apps/web`; modify `lib/search` and tests only; run the package test command; do not change design
+    - Include the goal, allowed paths, protected paths, exact verification command, completion criterion, and budget boundary
+    - For example: fix search ordering in `apps/web`; modify `lib/search` and tests only; run the package test command; do not change design
 
 - **Make `handoff.md` transfer evidence, not chat history**
-  - Record changed files, commands run and results, unverified hypotheses, and one next question
-  - A new session cannot read “the conversation above,” while pasting it creates expensive input context
+    - Record changed files, commands run and results, unverified hypotheses, and one next question
+    - A new session cannot read “the conversation above,” while pasting it creates expensive input context
 
 - **Use separate Git worktrees when two agents may edit at once**
-  - Parallel editing in one tree creates merge resolution work, which wastes both allowance and human attention
-  - Give one agent modification authority and make the other read-only, or give it a separate worktree
+    - Parallel editing in one tree creates merge resolution work, which wastes both allowance and human attention
+    - Give one agent modification authority and make the other read-only, or give it a separate worktree
 
 ## Reduce usage before choosing a cheaper model
 
 - **Clear the session for a new task and compact only when continuing the same task**
-  - Claude Code recommends `/clear` for a new task and `/compact` for a long continuing task because old conversation is resent on every turn[^claude-limits]
-  - Apply the same principle elsewhere: write a handoff and begin a fresh session when changing tasks
+    - Claude Code recommends `/clear` for a new task and `/compact` for a long continuing task because old conversation is resent on every turn[^claude-limits]
+    - Apply the same principle elsewhere: write a handoff and begin a fresh session when changing tasks
 
 - **Split broad work into read-only planning, scope approval, and implementation**
-  - Ask the planning stage for candidate files, risks, and verification commands without edits
-  - A few hundred tokens spent correcting a plan are likely cheaper than generating, reverting, and regenerating a wrong large diff
+    - Ask the planning stage for candidate files, risks, and verification commands without edits
+    - A few hundred tokens spent correcting a plan are likely cheaper than generating, reverting, and regenerating a wrong large diff
 
 - **Reserve expensive reasoning and high-speed modes for the work that needs them**
-  - Anthropic recommends its fast, cost-efficient model for most coding work and deeper reasoning for hard refactors, debugging, and architecture[^claude-limits]
-  - Kimi says HighSpeed has the same coding ability and roughly 5–6× output speed, but consumes roughly 3× the credits; use it only when output wait time is the bottleneck[^kimi-auth]
+    - Anthropic recommends its fast, cost-efficient model for most coding work and deeper reasoning for hard refactors, debugging, and architecture[^claude-limits]
+    - Kimi says HighSpeed has the same coding ability and roughly 5–6× output speed, but consumes roughly 3× the credits; use it only when output wait time is the bottleneck[^kimi-auth]
 
 - **Constrain tools and input before the agent starts exploring**
-  - Name file paths, search terms, a maximum file count, and the needed log excerpt instead of asking it to inspect the whole repository
-  - Enable web search, large MCP tools, full tests, and auto-approved commands only when the completion criterion requires them
+    - Name file paths, search terms, a maximum file count, and the needed log excerpt instead of asking it to inspect the whole repository
+    - Enable web search, large MCP tools, full tests, and auto-approved commands only when the completion criterion requires them
 
 - **Assign non-overlapping default roles to subscriptions**
-  - Give only one primary agent—Codex or Claude Code—write authority
-  - Give Gemini CLI broad repository exploration or independent alternative verification, and use other subscriptions for plan review, failure analysis, or diff review so they do not repeat the same exploration
-  - Start independent Kimi Code or ZCode worktree implementation only when the primary plan's remaining allowance is the real bottleneck
+    - Give only one primary agent—Codex or Claude Code—write authority
+    - Give Gemini CLI broad repository exploration or independent alternative verification, and use other subscriptions for plan review, failure analysis, or diff review so they do not repeat the same exploration
+    - Start independent Kimi Code or ZCode worktree implementation only when the primary plan's remaining allowance is the real bottleneck
 
 ## Approximate first, then validate savings per accepted task
 
 - **It is reasonable to compare different provider units as low, medium, or high volume, but not as a precise token ranking**
-  - Kimi exposes shared credits, Z.ai combines credits and time windows, OpenCode Go uses model-priced dollar-value limits, and OpenAI and Anthropic share limits across product surfaces
-  - Use published figures to form a pre-purchase throughput hypothesis, then correct for model, caching, and tool differences with observed task outcomes
+    - Kimi exposes shared credits, Z.ai combines credits and time windows, OpenCode Go uses model-priced dollar-value limits, and OpenAI and Anthropic share limits across product surfaces
+    - Use published figures to form a pre-purchase throughput hypothesis, then correct for model, caching, and tool differences with observed task outcomes
 
 - **Compare before and after on a representative task sample**
-  - Select at least 20 tasks across bug fixes, small features, test additions, and refactors
-  - Run ten baseline and ten new-workflow tasks per type where possible, against comparable repository states and the same verification command
+    - Select at least 20 tasks across bug fixes, small features, test additions, and refactors
+    - Run ten baseline and ten new-workflow tasks per type where possible, against comparable repository states and the same verification command
 
 - **Record provider-visible allowance and quality outcomes together in `metrics.csv`**
 
@@ -213,30 +213,30 @@ WEB-42,review,claude,sonnet,10:05,10:17,55%,52%,4,true,true,6
 ```
 
 - **Use allowance spent per verified, accepted task as the primary metric**
-  - Record `quota_before - quota_after` in the unit each dashboard provides—percentage, credits, or remaining time
-  - Compare medians within the same provider; compare accepted work count, rework time, and accepted tasks before a limit across providers
+    - Record `quota_before - quota_after` in the unit each dashboard provides—percentage, credits, or remaining time
+    - Compare medians within the same provider; compare accepted work count, rework time, and accepted tasks before a limit across providers
 
 - **Require a quality floor before claiming a saving**
-  - Call the change a saving only when median allowance per task falls at least 20%, test-pass and acceptance rates fall by no more than five percentage points, and median rework time does not rise
-  - For work without automated tests, put a human acceptance checklist and code-review outcome in the same record
+    - Call the change a saving only when median allowance per task falls at least 20%, test-pass and acceptance rates fall by no more than five percentage points, and median rework time does not rise
+    - For work without automated tests, put a human acceptance checklist and code-review outcome in the same record
 
 - **Treat dashboards and CLI status as source measurements, not invoices**
-  - Gemini CLI exposes tokens, tool calls, and session duration through `/stats`, but Google OAuth does not expose cached-token savings, so record total usage with the completed outcome[^gemini-stats]
-  - OpenAI directs Codex users to the usage dashboard and CLI `/status` for limits and reset time[^openai-usage]
-  - Claude Code exposes subscription status and context through `/usage` and `/context`[^claude-cheatsheet]
-  - Kimi describes a subscription view with remaining credits, next reset, and recent usage records[^kimi-membership]
-  - Record snapshots immediately before and after a task, and do not confuse them with month-end billed amounts
+    - Gemini CLI exposes tokens, tool calls, and session duration through `/stats`, but Google OAuth does not expose cached-token savings, so record total usage with the completed outcome[^gemini-stats]
+    - OpenAI directs Codex users to the usage dashboard and CLI `/status` for limits and reset time[^openai-usage]
+    - Claude Code exposes subscription status and context through `/usage` and `/context`[^claude-cheatsheet]
+    - Kimi describes a subscription view with remaining credits, next reset, and recent usage records[^kimi-membership]
+    - Record snapshots immediately before and after a task, and do not confuse them with month-end billed amounts
 
 ## Recommended rollout
 
 - **For the first month, choose one of Gemini CLI, Codex, or Claude Code as the sole primary editing agent and keep subscriptions already owned in read-only review roles**
-  - Measure all three against the same task sample at roughly US$20 before adding a reference subscription or higher tier
+    - Measure all three against the same task sample at roughly US$20 before adding a reference subscription or higher tier
 
 - **For a no-key configuration, consider only Gemini CLI, Codex, Claude Code, and the official Kimi CLI or VS Code extension as execution slots**
-  - Z.ai GLM Coding Plan and OpenCode Go remain useful subscription comparison points, but their current official connection flows require keys and belong in a separate key-permitted experiment
+    - Z.ai GLM Coding Plan and OpenCode Go remain useful subscription comparison points, but their current official connection flows require keys and belong in a separate key-permitted experiment
 
 - **Record 20 tasks over two weeks and retain only roles that improve allowance per task, acceptance rate, or rework time**
-  - Without that evidence, adding subscriptions is likely an increase in fixed spend rather than a usage optimization
+    - Without that evidence, adding subscriptions is likely an increase in fixed spend rather than a usage optimization
 
 [^gemini-pricing]: [Google: Google AI subscriptions](https://gemini.google/subscriptions/) — US list price and included benefits for Google AI Pro
 

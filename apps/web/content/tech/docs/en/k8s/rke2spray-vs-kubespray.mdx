@@ -33,19 +33,19 @@ sourceUrl: https://github.com/jongminchung/rke2spray/blob/main/docs/kubespray-co
 - **The `rke2spray` findings follow the verified `main` code and `docs/kubespray-api-compatibility.yml`**
 
 <ExcalidrawAssetDiagram
-  ariaLabel="Kubespray and rke2spray interpreting a shared API shape through different execution models"
-  caption="Shared Inventory, Playbook, and Role names provide a common entry shape; kubeadm and RKE2 still use different internal task graphs"
-  src="/diagrams/rke2spray-kubespray-execution-models.excalidraw"
+    ariaLabel="Kubespray and rke2spray interpreting a shared API shape through different execution models"
+    caption="Shared Inventory, Playbook, and Role names provide a common entry shape; kubeadm and RKE2 still use different internal task graphs"
+    src="/diagrams/rke2spray-kubespray-execution-models.excalidraw"
 />
 
 ## jamie-kr-gitops owns the real inventory
 
 - **`rke2spray` and `jamie-kr-gitops` are separated as provider and consumer**
-  - `rke2spray` provides reusable playbooks, roles, plugins, defaults, and `inventory/sample`
-  - `jamie-kr-gitops` owns real hosts, group variables, host variables, encrypted Vault values, and execution wrappers
+    - `rke2spray` provides reusable playbooks, roles, plugins, defaults, and `inventory/sample`
+    - `jamie-kr-gitops` owns real hosts, group variables, host variables, encrypted Vault values, and execution wrappers
 - **The dependency remains one-way, with `jamie-kr-gitops` selecting a pinned `rke2spray` release**
-  - The `rke2spray` core does not reference `jamie-kr` names, addresses, domains, or topology
-  - `jamie-kr-gitops` invokes `rke2spray` through a Collection or pinned checkout
+    - The `rke2spray` core does not reference `jamie-kr` names, addresses, domains, or topology
+    - `jamie-kr-gitops` invokes `rke2spray` through a Collection or pinned checkout
 
 ```text
 jamie-kr-gitops/
@@ -69,8 +69,8 @@ rke2spray/
 ```
 
 - **`jamie-kr-gitops` manages both Ansible IaC and Argo CD GitOps declarations for the environment**
-  - `inventory/` and `ansible/rke2spray.rev` are reconciliation inputs used before the Kubernetes API exists
-  - `bootstrap/` and `apps/` are reconciliation inputs used by Argo CD after the Kubernetes API exists
+    - `inventory/` and `ansible/rke2spray.rev` are reconciliation inputs used before the Kubernetes API exists
+    - `bootstrap/` and `apps/` are reconciliation inputs used by Argo CD after the Kubernetes API exists
 - **After the inventory migration, commands run from the `jamie-kr-gitops` repository**
 
 ```bash
@@ -81,9 +81,9 @@ make gitops-bootstrap
 ```
 
 - **GitOps in the repository name describes the management model and does not exclude Ansible IaC ownership**
-  - Inventory is declarative cluster desired state consumed before the Kubernetes API exists
-  - `apps/` is platform desired state reconciled by Argo CD after the Kubernetes API exists
-  - Both states can be reviewed as one environment release while `rke2spray` and Argo CD remain separate execution engines
+    - Inventory is declarative cluster desired state consumed before the Kubernetes API exists
+    - `apps/` is platform desired state reconciled by Argo CD after the Kubernetes API exists
+    - Both states can be reviewed as one environment release while `rke2spray` and Argo CD remain separate execution engines
 
 <C4ArchitectureMap level="context" locale="en" />
 
@@ -104,11 +104,11 @@ make gitops-bootstrap
 | Change intake         | Consumes Kubespray releases and `master` directly                 | Reviews mappings, exceptions, and tests in baseline update pull requests        |
 
 - **The central Ansible difference is which task graph a shared public name resolves to**
-  - Kubespray's `kubernetes/kubeadm` role executes kubeadm tasks
-  - The `rke2spray` role at that path connects RKE2 bootstrap, node, and control-plane adapters
+    - Kubespray's `kubernetes/kubeadm` role executes kubeadm tasks
+    - The `rke2spray` role at that path connects RKE2 bootstrap, node, and control-plane adapters
 - **A variable present in `rke2spray` does not automatically mean that the Kubespray feature is supported**
-  - `container_manager: docker`, `container_manager: crio`, kubeadm patches, and direct external CNI installation are currently rejected
-  - Registry mirror, authentication, and TLS inputs that can be represented losslessly map to RKE2 `registries.yaml`
+    - `container_manager: docker`, `container_manager: crio`, kubeadm patches, and direct external CNI installation are currently rejected
+    - Registry mirror, authentication, and TLS inputs that can be represented losslessly map to RKE2 `registries.yaml`
 - **Shared inventory and playbook names can reduce runbook translation cost without creating drop-in compatibility**
 
 ## The kubeadm layer describes Kubespray's execution model
@@ -192,8 +192,8 @@ make gitops-bootstrap
 | A dedicated owner can maintain an adapter across Kubespray and RKE2       | `rke2spray`    | The team accepts baseline, mapping, and acceptance-test maintenance |
 
 - **Moving an existing Kubespray cluster to `rke2spray` is a Kubernetes engine migration rather than an Ansible repository swap**
-  - Shared inventory groups do not convert current cluster state, PKI, datastore, or CNI state
-  - Existing variables and custom roles must be audited against the `supported`, `adapter`, `conditional`, and `unsupported` classifications
+    - Shared inventory groups do not convert current cluster state, PKI, datastore, or CNI state
+    - Existing variables and custom roles must be audited against the `supported`, `adapter`, `conditional`, and `unsupported` classifications
 
 ## Conclusion and next actions
 

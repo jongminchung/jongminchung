@@ -52,7 +52,7 @@ function main() {
       gh api --method DELETE \
         "/users/${owner}/packages/npm/${package_name}/versions/${version_id}"
     fi
-  done <<< "${version_ids}"
+  done <<<"${version_ids}"
 }
 
 main "$@"

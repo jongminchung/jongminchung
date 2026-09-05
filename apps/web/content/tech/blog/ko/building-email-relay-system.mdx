@@ -105,72 +105,72 @@ SMTP 서버 구현이라고 하면 거창하게 들리지만, 위 대화 스크�
 import net from "node:net";
 
 export interface InboundMail {
-  from: string; // 봉투의 발신자 (MAIL FROM)
-  to: string[]; // 봉투의 수신자들 (RCPT TO)
-  raw: string; // DATA로 받은 메시지 원문
+    from: string; // 봉투의 발신자 (MAIL FROM)
+    to: string[]; // 봉투의 수신자들 (RCPT TO)
+    raw: string; // DATA로 받은 메시지 원문
 }
 
 export function createSmtpServer(onMail: (mail: InboundMail) => void) {
-  return net.createServer((socket) => {
-    let from = "";
-    let to: string[] = [];
-    let dataLines: string[] | null = null; // null이면 명령 모드, 배열이면 DATA 수신 모드
-    let buffer = "";
+    return net.createServer((socket) => {
+        let from = "";
+        let to: string[] = [];
+        let dataLines: string[] | null = null; // null이면 명령 모드, 배열이면 DATA 수신 모드
+        let buffer = "";
 
-    const reply = (line: string) => socket.write(line + "\r\n");
-    reply("220 relay.example.com ESMTP ready");
+        const reply = (line: string) => socket.write(line + "\r\n");
+        reply("220 relay.example.com ESMTP ready");
 
-    socket.on("data", (chunk) => {
-      buffer += chunk.toString("utf8");
-      // SMTP는 줄 단위 프로토콜이다. CRLF가 나올 때까지 모았다가 한 줄씩 처리한다
-      let idx;
-      while ((idx = buffer.indexOf("\r\n")) !== -1) {
-        const line = buffer.slice(0, idx);
-        buffer = buffer.slice(idx + 2);
+        socket.on("data", (chunk) => {
+            buffer += chunk.toString("utf8");
+            // SMTP는 줄 단위 프로토콜이다. CRLF가 나올 때까지 모았다가 한 줄씩 처리한다
+            let idx;
+            while ((idx = buffer.indexOf("\r\n")) !== -1) {
+                const line = buffer.slice(0, idx);
+                buffer = buffer.slice(idx + 2);
 
-        if (dataLines !== null) {
-          // DATA 수신 모드: 마침표 하나만 있는 줄이 본문의 끝이다
-          if (line === ".") {
-            const raw = dataLines
-              .map((l) => (l.startsWith("..") ? l.slice(1) : l)) // dot-stuffing 복원
-              .join("\r\n");
-            onMail({ from, to, raw });
-            dataLines = null;
-            from = "";
-            to = [];
-            reply("250 OK: queued");
-          } else {
-            dataLines.push(line);
-          }
-          continue;
-        }
+                if (dataLines !== null) {
+                    // DATA 수신 모드: 마침표 하나만 있는 줄이 본문의 끝이다
+                    if (line === ".") {
+                        const raw = dataLines
+                            .map((l) => (l.startsWith("..") ? l.slice(1) : l)) // dot-stuffing 복원
+                            .join("\r\n");
+                        onMail({ from, to, raw });
+                        dataLines = null;
+                        from = "";
+                        to = [];
+                        reply("250 OK: queued");
+                    } else {
+                        dataLines.push(line);
+                    }
+                    continue;
+                }
 
-        const cmd = line.split(" ")[0].toUpperCase();
-        if (cmd === "HELO" || cmd === "EHLO") {
-          reply("250 relay.example.com");
-        } else if (cmd === "MAIL") {
-          from = line.match(/<(.*)>/)?.[1] ?? "";
-          reply("250 OK");
-        } else if (cmd === "RCPT") {
-          const rcpt = line.match(/<(.*)>/)?.[1] ?? "";
-          if (rcpt.startsWith("reply+")) {
-            to.push(rcpt);
-            reply("250 OK");
-          } else {
-            reply("550 No such user"); // 답장 주소가 아니면 받지 않는다
-          }
-        } else if (cmd === "DATA") {
-          dataLines = [];
-          reply("354 End data with <CR><LF>.<CR><LF>");
-        } else if (cmd === "QUIT") {
-          reply("221 Bye");
-          socket.end();
-        } else {
-          reply("500 Unknown command");
-        }
-      }
+                const cmd = line.split(" ")[0].toUpperCase();
+                if (cmd === "HELO" || cmd === "EHLO") {
+                    reply("250 relay.example.com");
+                } else if (cmd === "MAIL") {
+                    from = line.match(/<(.*)>/)?.[1] ?? "";
+                    reply("250 OK");
+                } else if (cmd === "RCPT") {
+                    const rcpt = line.match(/<(.*)>/)?.[1] ?? "";
+                    if (rcpt.startsWith("reply+")) {
+                        to.push(rcpt);
+                        reply("250 OK");
+                    } else {
+                        reply("550 No such user"); // 답장 주소가 아니면 받지 않는다
+                    }
+                } else if (cmd === "DATA") {
+                    dataLines = [];
+                    reply("354 End data with <CR><LF>.<CR><LF>");
+                } else if (cmd === "QUIT") {
+                    reply("221 Bye");
+                    socket.end();
+                } else {
+                    reply("500 Unknown command");
+                }
+            }
+        });
     });
-  });
 }
 ```
 
@@ -207,23 +207,23 @@ Content-Transfer-Encoding: quoted-printable
 ```typescript
 // =?UTF-8?B?...?= 또는 =?UTF-8?Q?...?= 형태의 encoded-word를 디코딩한다
 export function decodeEncodedWords(value: string): string {
-  return value.replace(
-    /=\?([^?]+)\?([BQbq])\?([^?]*)\?=/g,
-    (_, charset, enc, payload) => {
-      const bytes =
-        enc.toUpperCase() === "B"
-          ? Buffer.from(payload, "base64")
-          : Buffer.from(
-              payload
-                .replace(/_/g, " ")
-                .replace(/=([0-9A-F]{2})/gi, (_m, h) =>
-                  String.fromCharCode(parseInt(h, 16)),
-                ),
-              "latin1",
-            );
-      return new TextDecoder(charset).decode(bytes);
-    },
-  );
+    return value.replace(
+        /=\?([^?]+)\?([BQbq])\?([^?]*)\?=/g,
+        (_, charset, enc, payload) => {
+            const bytes =
+                enc.toUpperCase() === "B"
+                    ? Buffer.from(payload, "base64")
+                    : Buffer.from(
+                          payload
+                              .replace(/_/g, " ")
+                              .replace(/=([0-9A-F]{2})/gi, (_m, h) =>
+                                  String.fromCharCode(parseInt(h, 16)),
+                              ),
+                          "latin1",
+                      );
+            return new TextDecoder(charset).decode(bytes);
+        },
+    );
 }
 ```
 
@@ -232,17 +232,20 @@ export function decodeEncodedWords(value: string): string {
 ```typescript
 // quoted-printable 디코딩: =XX를 바이트로 되돌리고, 줄 끝의 =(soft break)를 지운다
 export function decodeQuotedPrintable(body: string): string {
-  const joined = body.replace(/=\r\n/g, "");
-  const bytes: number[] = [];
-  for (let i = 0; i < joined.length; i++) {
-    if (joined[i] === "=" && /[0-9A-F]{2}/i.test(joined.slice(i + 1, i + 3))) {
-      bytes.push(parseInt(joined.slice(i + 1, i + 3), 16));
-      i += 2;
-    } else {
-      bytes.push(joined.charCodeAt(i));
+    const joined = body.replace(/=\r\n/g, "");
+    const bytes: number[] = [];
+    for (let i = 0; i < joined.length; i++) {
+        if (
+            joined[i] === "=" &&
+            /[0-9A-F]{2}/i.test(joined.slice(i + 1, i + 3))
+        ) {
+            bytes.push(parseInt(joined.slice(i + 1, i + 3), 16));
+            i += 2;
+        } else {
+            bytes.push(joined.charCodeAt(i));
+        }
     }
-  }
-  return new TextDecoder("utf-8").decode(new Uint8Array(bytes));
+    return new TextDecoder("utf-8").decode(new Uint8Array(bytes));
 }
 ```
 
@@ -261,33 +264,35 @@ multipart/mixed                 ← 전체
 ```typescript
 // 메시지(또는 파트)에서 text/plain 본문을 찾아 디코딩한다
 export function parseMail(raw: string): ParsedMail {
-  const sep = raw.indexOf("\r\n\r\n"); // 빈 줄이 헤더와 본문의 경계다
-  if (sep === -1) return { headers: parseHeaders(raw), text: "" };
-  const headers = parseHeaders(raw.slice(0, sep));
-  const body = raw.slice(sep + 4);
-  const contentType = headers.get("content-type") ?? "text/plain";
+    const sep = raw.indexOf("\r\n\r\n"); // 빈 줄이 헤더와 본문의 경계다
+    if (sep === -1) return { headers: parseHeaders(raw), text: "" };
+    const headers = parseHeaders(raw.slice(0, sep));
+    const body = raw.slice(sep + 4);
+    const contentType = headers.get("content-type") ?? "text/plain";
 
-  if (contentType.startsWith("multipart/")) {
-    const boundary = contentType.match(/boundary="?([^";]+)"?/)?.[1];
-    if (!boundary) return { headers, text: "" };
-    // 경계선으로 파트를 쪼갠다. 첫 조각(preamble)과 --boundary-- 뒤는 버린다
-    const parts = body.split(`--${boundary}`).slice(1, -1);
-    for (const part of parts) {
-      // 파트도 헤더 + 빈 줄 + 본문 구조이므로 재귀로 처리하면 된다.
-      // 첨부가 있어 multipart가 겹겹인 구조도 이 재귀가 알아서 파고든다
-      const parsed = parseMail(part.replace(/^\r\n/, "").replace(/\r\n$/, ""));
-      const partType = parsed.headers.get("content-type") ?? "text/plain";
-      if (
-        partType.startsWith("text/plain") ||
-        (partType.startsWith("multipart/") && parsed.text)
-      ) {
-        return { headers, text: parsed.text };
-      }
+    if (contentType.startsWith("multipart/")) {
+        const boundary = contentType.match(/boundary="?([^";]+)"?/)?.[1];
+        if (!boundary) return { headers, text: "" };
+        // 경계선으로 파트를 쪼갠다. 첫 조각(preamble)과 --boundary-- 뒤는 버린다
+        const parts = body.split(`--${boundary}`).slice(1, -1);
+        for (const part of parts) {
+            // 파트도 헤더 + 빈 줄 + 본문 구조이므로 재귀로 처리하면 된다.
+            // 첨부가 있어 multipart가 겹겹인 구조도 이 재귀가 알아서 파고든다
+            const parsed = parseMail(
+                part.replace(/^\r\n/, "").replace(/\r\n$/, ""),
+            );
+            const partType = parsed.headers.get("content-type") ?? "text/plain";
+            if (
+                partType.startsWith("text/plain") ||
+                (partType.startsWith("multipart/") && parsed.text)
+            ) {
+                return { headers, text: parsed.text };
+            }
+        }
+        return { headers, text: "" };
     }
-    return { headers, text: "" };
-  }
 
-  return { headers, text: decodeBody(body, headers) }; // CTE에 따라 base64/QP 디코딩
+    return { headers, text: decodeBody(body, headers) }; // CTE에 따라 base64/QP 디코딩
 }
 ```
 
@@ -320,52 +325,52 @@ import crypto from "node:crypto";
 const SECRET = "relay-secret-please-change"; // 실제로는 환경 변수로
 
 export interface ReplyContext {
-  ticketId: number;
-  userId: number;
-  exp: number; // 만료 시각 (unix seconds)
+    ticketId: number;
+    userId: number;
+    exp: number; // 만료 시각 (unix seconds)
 }
 
 export function signReplyToken(ctx: ReplyContext): string {
-  const payload = `${ctx.ticketId}.${ctx.userId}.${ctx.exp}`;
-  const sig = crypto
-    .createHmac("sha256", SECRET)
-    .update(payload)
-    .digest("hex")
-    .slice(0, 16); // 로컬 파트 64자 제한 안에 들어가도록 잘라 쓴다
-  return `${payload}.${sig}`;
+    const payload = `${ctx.ticketId}.${ctx.userId}.${ctx.exp}`;
+    const sig = crypto
+        .createHmac("sha256", SECRET)
+        .update(payload)
+        .digest("hex")
+        .slice(0, 16); // 로컬 파트 64자 제한 안에 들어가도록 잘라 쓴다
+    return `${payload}.${sig}`;
 }
 
 export function verifyReplyToken(
-  token: string,
-  now: number,
+    token: string,
+    now: number,
 ): ReplyContext | null {
-  const parts = token.split(".");
-  if (parts.length !== 4) return null;
-  const [ticketId, userId, exp, sig] = parts;
-  const expected = crypto
-    .createHmac("sha256", SECRET)
-    .update(`${ticketId}.${userId}.${exp}`)
-    .digest("hex")
-    .slice(0, 16);
-  const ok =
-    sig.length === expected.length &&
-    crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected));
-  if (!ok) return null;
-  if (Number(exp) < now) return null;
-  return {
-    ticketId: Number(ticketId),
-    userId: Number(userId),
-    exp: Number(exp),
-  };
+    const parts = token.split(".");
+    if (parts.length !== 4) return null;
+    const [ticketId, userId, exp, sig] = parts;
+    const expected = crypto
+        .createHmac("sha256", SECRET)
+        .update(`${ticketId}.${userId}.${exp}`)
+        .digest("hex")
+        .slice(0, 16);
+    const ok =
+        sig.length === expected.length &&
+        crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected));
+    if (!ok) return null;
+    if (Number(exp) < now) return null;
+    return {
+        ticketId: Number(ticketId),
+        userId: Number(userId),
+        exp: Number(exp),
+    };
 }
 
 export function replyAddress(ctx: ReplyContext): string {
-  return `reply+${signReplyToken(ctx)}@relay.example.com`;
+    return `reply+${signReplyToken(ctx)}@relay.example.com`;
 }
 
 // 수신 주소에서 토큰을 꺼낸다
 export function extractToken(address: string): string | null {
-  return address.match(/^reply\+(.+)@/)?.[1] ?? null;
+    return address.match(/^reply\+(.+)@/)?.[1] ?? null;
 }
 ```
 
@@ -410,85 +415,87 @@ export function extractToken(address: string): string | null {
 // 인용 헤더: 클라이언트가 인용문 위에 끼워 넣는 "누가 언제 썼다" 문구.
 // 다음 줄부터 실제 인용(>)이 이어질 때만 인용 헤더로 취급한다
 const QUOTE_HEADER_PATTERNS = [
-  /^On .+ wrote:$/, // Gmail 영문
-  /^20\d{2}년 .+님이 작성:$/, // Gmail 한글
-  /^\d{4}\. \d{1,2}\. \d{1,2}\..* 작성:$/, // Apple Mail 한글
+    /^On .+ wrote:$/, // Gmail 영문
+    /^20\d{2}년 .+님이 작성:$/, // Gmail 한글
+    /^\d{4}\. \d{1,2}\. \d{1,2}\..* 작성:$/, // Apple Mail 한글
 ];
 
 // 강한 구분선: 이 줄 아래는 전부 원문 인용이다.
 // Outlook 계열은 인용문에 > 를 붙이지 않기 때문에
 // "다음 줄이 > 로 시작하는가"로는 판별할 수 없다
 const HARD_SEPARATOR_PATTERNS = [
-  /^-{2,}\s*Original Message\s*-{2,}$/i, // Outlook 영문
-  /^-{2,}\s*원본 (메일|메시지)\s*-{2,}$/, // Outlook 한글
-  /^_{10,}$/, // Outlook 웹의 밑줄 구분선
-  /^보낸 ?사람\s*:.+/, // Outlook식 인라인 헤더 블록의 첫 줄
-  /^From\s*:\s*.+@.+/, // 같은 블록의 영문판
+    /^-{2,}\s*Original Message\s*-{2,}$/i, // Outlook 영문
+    /^-{2,}\s*원본 (메일|메시지)\s*-{2,}$/, // Outlook 한글
+    /^_{10,}$/, // Outlook 웹의 밑줄 구분선
+    /^보낸 ?사람\s*:.+/, // Outlook식 인라인 헤더 블록의 첫 줄
+    /^From\s*:\s*.+@.+/, // 같은 블록의 영문판
 ];
 
 // 시그니처의 시작
 const SIGNATURE_PATTERNS = [
-  /^-- $/, // 표준 시그니처 구분자 (대시 둘 + 공백 하나)
-  /^--$/, // 공백을 지워버리는 클라이언트가 많아 이것도 받아준다
-  /^(Sent from my|Get Outlook for) /,
-  /^i(Phone|Pad)에서 보냄$/,
-  /^Android에서 .*보냄$/,
+    /^-- $/, // 표준 시그니처 구분자 (대시 둘 + 공백 하나)
+    /^--$/, // 공백을 지워버리는 클라이언트가 많아 이것도 받아준다
+    /^(Sent from my|Get Outlook for) /,
+    /^i(Phone|Pad)에서 보냄$/,
+    /^Android에서 .*보냄$/,
 ];
 
 export function classifyLines(body: string): ClassifiedLine[] {
-  const lines = body.replace(/\r\n/g, "\n").split("\n");
+    const lines = body.replace(/\r\n/g, "\n").split("\n");
 
-  // 1차: 위에서 아래로 줄의 종류를 정한다
-  const kinds: LineKind[] = [];
-  let afterHardSeparator = false;
-  let inSignature = false;
+    // 1차: 위에서 아래로 줄의 종류를 정한다
+    const kinds: LineKind[] = [];
+    let afterHardSeparator = false;
+    let inSignature = false;
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trimEnd();
-    if (afterHardSeparator) {
-      kinds.push("quote"); // 강한 구분선 아래는 전부 인용이다
-    } else if (HARD_SEPARATOR_PATTERNS.some((p) => p.test(line))) {
-      afterHardSeparator = true;
-      kinds.push("quote-header");
-    } else if (line.startsWith(">")) {
-      inSignature = false;
-      kinds.push("quote");
-    } else if (QUOTE_HEADER_PATTERNS.some((p) => p.test(line))) {
-      const next = lines.slice(i + 1).find((l) => l.trim() !== "");
-      kinds.push(
-        next === undefined || next.startsWith(">") ? "quote-header" : "content",
-      );
-    } else if (inSignature) {
-      kinds.push("signature");
-    } else if (SIGNATURE_PATTERNS.some((p) => p.test(line))) {
-      inSignature = true;
-      kinds.push("signature");
-    } else {
-      kinds.push("content");
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trimEnd();
+        if (afterHardSeparator) {
+            kinds.push("quote"); // 강한 구분선 아래는 전부 인용이다
+        } else if (HARD_SEPARATOR_PATTERNS.some((p) => p.test(line))) {
+            afterHardSeparator = true;
+            kinds.push("quote-header");
+        } else if (line.startsWith(">")) {
+            inSignature = false;
+            kinds.push("quote");
+        } else if (QUOTE_HEADER_PATTERNS.some((p) => p.test(line))) {
+            const next = lines.slice(i + 1).find((l) => l.trim() !== "");
+            kinds.push(
+                next === undefined || next.startsWith(">")
+                    ? "quote-header"
+                    : "content",
+            );
+        } else if (inSignature) {
+            kinds.push("signature");
+        } else if (SIGNATURE_PATTERNS.some((p) => p.test(line))) {
+            inSignature = true;
+            kinds.push("signature");
+        } else {
+            kinds.push("content");
+        }
     }
-  }
 
-  // 2차: 아래에서 위로 걷어낸다. 맨 아래에 붙은 인용·인용 헤더·시그니처·빈 줄
-  // 덩어리가 걷어낼 대상이고, 본문(content)을 만나는 순간 걷어내기를 멈춘다
-  const hidden = new Array<boolean>(lines.length).fill(false);
-  for (let i = lines.length - 1; i >= 0; i--) {
-    if (kinds[i] === "content" && lines[i].trim() !== "") break;
-    hidden[i] = true;
-  }
+    // 2차: 아래에서 위로 걷어낸다. 맨 아래에 붙은 인용·인용 헤더·시그니처·빈 줄
+    // 덩어리가 걷어낼 대상이고, 본문(content)을 만나는 순간 걷어내기를 멈춘다
+    const hidden = new Array<boolean>(lines.length).fill(false);
+    for (let i = lines.length - 1; i >= 0; i--) {
+        if (kinds[i] === "content" && lines[i].trim() !== "") break;
+        hidden[i] = true;
+    }
 
-  return lines.map((text, i) => ({
-    text,
-    kind: kinds[i],
-    hidden: hidden[i],
-  }));
+    return lines.map((text, i) => ({
+        text,
+        kind: kinds[i],
+        hidden: hidden[i],
+    }));
 }
 
 export function extractReply(body: string): string {
-  return classifyLines(body)
-    .filter((l) => !l.hidden)
-    .map((l) => l.text)
-    .join("\n")
-    .trim();
+    return classifyLines(body)
+        .filter((l) => !l.hidden)
+        .map((l) => l.text)
+        .join("\n")
+        .trim();
 }
 ```
 
@@ -541,39 +548,39 @@ Outlook식 답장(인용 표시가 없는 경우)과 모바일 시그니처도 �
 ```typescript
 // helpdesk.ts — 상담원이 답변을 달면 고객에게 나가는 알림 메일을 조립한다
 export function composeNotification(
-  ticket: Ticket,
-  agentName: string,
-  body: string,
-  now: number,
+    ticket: Ticket,
+    agentName: string,
+    body: string,
+    now: number,
 ): string {
-  const messageId = `<ticket-${ticket.id}-${crypto.randomBytes(8).toString("hex")}@relay.example.com>`;
-  const replyTo = replyAddress({
-    ticketId: ticket.id,
-    userId: ticket.requester.userId,
-    exp: now + 14 * 24 * 3600, // 2주 뒤 만료
-  });
-  const headers = [
-    `From: ${encodeHeader(`${agentName} (도움말센터)`)} <notify@relay.example.com>`,
-    `Reply-To: ${replyTo}`,
-    `To: ${ticket.requester.email}`,
-    `Subject: ${encodeHeader(`Re: [티켓 #${ticket.id}] ${ticket.subject}`)}`,
-    `Message-ID: ${messageId}`,
-    ...(ticket.lastMessageId
-      ? [
-          `In-Reply-To: ${ticket.lastMessageId}`,
-          `References: ${ticket.lastMessageId}`,
-        ]
-      : []),
-    `Auto-Submitted: auto-generated`, // 자동 발송 메일임을 표시해 응답 루프를 예방한다
-    `MIME-Version: 1.0`,
-    `Content-Type: text/plain; charset=utf-8`,
-    `Content-Transfer-Encoding: base64`,
-  ];
-  ticket.lastMessageId = messageId;
-  const encodedBody = Buffer.from(body, "utf8")
-    .toString("base64")
-    .replace(/(.{76})/g, "$1\r\n");
-  return headers.join("\r\n") + "\r\n\r\n" + encodedBody;
+    const messageId = `<ticket-${ticket.id}-${crypto.randomBytes(8).toString("hex")}@relay.example.com>`;
+    const replyTo = replyAddress({
+        ticketId: ticket.id,
+        userId: ticket.requester.userId,
+        exp: now + 14 * 24 * 3600, // 2주 뒤 만료
+    });
+    const headers = [
+        `From: ${encodeHeader(`${agentName} (도움말센터)`)} <notify@relay.example.com>`,
+        `Reply-To: ${replyTo}`,
+        `To: ${ticket.requester.email}`,
+        `Subject: ${encodeHeader(`Re: [티켓 #${ticket.id}] ${ticket.subject}`)}`,
+        `Message-ID: ${messageId}`,
+        ...(ticket.lastMessageId
+            ? [
+                  `In-Reply-To: ${ticket.lastMessageId}`,
+                  `References: ${ticket.lastMessageId}`,
+              ]
+            : []),
+        `Auto-Submitted: auto-generated`, // 자동 발송 메일임을 표시해 응답 루프를 예방한다
+        `MIME-Version: 1.0`,
+        `Content-Type: text/plain; charset=utf-8`,
+        `Content-Transfer-Encoding: base64`,
+    ];
+    ticket.lastMessageId = messageId;
+    const encodedBody = Buffer.from(body, "utf8")
+        .toString("base64")
+        .replace(/(.{76})/g, "$1\r\n");
+    return headers.join("\r\n") + "\r\n\r\n" + encodedBody;
 }
 ```
 
@@ -594,35 +601,35 @@ export function composeNotification(
 ```typescript
 // 수신 메일 → 코멘트. 실패 사유를 문자열로 돌려준다
 export function handleInbound(mail: InboundMail, now: number): string {
-  // 1. 봉투 수신 주소에서 토큰을 꺼내 검증한다
-  const token = extractToken(mail.to[0]);
-  if (!token) return "reject: 토큰 없음";
-  const ctx = verifyReplyToken(token, now);
-  if (!ctx) return "reject: 토큰 검증 실패";
+    // 1. 봉투 수신 주소에서 토큰을 꺼내 검증한다
+    const token = extractToken(mail.to[0]);
+    if (!token) return "reject: 토큰 없음";
+    const ctx = verifyReplyToken(token, now);
+    if (!ctx) return "reject: 토큰 검증 실패";
 
-  const ticket = tickets.get(ctx.ticketId);
-  if (!ticket) return "reject: 없는 티켓";
+    const ticket = tickets.get(ctx.ticketId);
+    if (!ticket) return "reject: 없는 티켓";
 
-  // 2. MIME을 풀어 text/plain 본문을 얻는다
-  const parsed = parseMail(mail.raw);
+    // 2. MIME을 풀어 text/plain 본문을 얻는다
+    const parsed = parseMail(mail.raw);
 
-  // 3. 같은 메일이 두 번 배달되어도 코멘트가 두 개 달리지 않게 막는다
-  const messageId = parsed.headers.get("message-id");
-  if (messageId && processedMessageIds.has(messageId))
-    return "skip: 이미 처리한 메일";
-  if (messageId) processedMessageIds.add(messageId);
+    // 3. 같은 메일이 두 번 배달되어도 코멘트가 두 개 달리지 않게 막는다
+    const messageId = parsed.headers.get("message-id");
+    if (messageId && processedMessageIds.has(messageId))
+        return "skip: 이미 처리한 메일";
+    if (messageId) processedMessageIds.add(messageId);
 
-  // 4. 자동 응답(부재중 알림 등)은 버린다
-  const autoSubmitted = parsed.headers.get("auto-submitted");
-  if (autoSubmitted && autoSubmitted !== "no") return "skip: 자동 응답 메일";
+    // 4. 자동 응답(부재중 알림 등)은 버린다
+    const autoSubmitted = parsed.headers.get("auto-submitted");
+    if (autoSubmitted && autoSubmitted !== "no") return "skip: 자동 응답 메일";
 
-  // 5. 인용문과 시그니처를 걷어내고 새로 쓴 부분만 남긴다
-  const body = extractReply(parsed.text);
-  if (!body) return "reject: 본문이 비어 있음";
+    // 5. 인용문과 시그니처를 걷어내고 새로 쓴 부분만 남긴다
+    const body = extractReply(parsed.text);
+    if (!body) return "reject: 본문이 비어 있음";
 
-  // 6. 작성자는 From 헤더가 아니라 토큰의 userId로 정한다
-  ticket.comments.push({ author: ticket.requester.name, body, via: "email" });
-  return `ok: 티켓 #${ticket.id}에 코멘트 추가됨`;
+    // 6. 작성자는 From 헤더가 아니라 토큰의 userId로 정한다
+    ticket.comments.push({ author: ticket.requester.name, body, via: "email" });
+    return `ok: 티켓 #${ticket.id}에 코멘트 추가됨`;
 }
 ```
 

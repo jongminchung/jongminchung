@@ -937,11 +937,11 @@ impl NesConsole {
 
 ```js
 const loop = () => {
-  console.run_frame(); // 1/60초어치 에뮬레이션
-  const buf = new Uint8ClampedArray(console.frame());
-  ctx.putImageData(new ImageData(buf, 256, 240), 0, 0);
-  audioNode.port.postMessage(console.audio()); // APU 샘플을 스피커로
-  requestAnimationFrame(loop);
+    console.run_frame(); // 1/60초어치 에뮬레이션
+    const buf = new Uint8ClampedArray(console.frame());
+    ctx.putImageData(new ImageData(buf, 256, 240), 0, 0);
+    audioNode.port.postMessage(console.audio()); // APU 샘플을 스피커로
+    requestAnimationFrame(loop);
 };
 ```
 

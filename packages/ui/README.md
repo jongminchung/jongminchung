@@ -69,11 +69,11 @@ Override any semantic token by importing application styles afterward:
 
 ```css
 :root {
-	--primary: oklch(0.55 0.2 265);
+    --primary: oklch(0.55 0.2 265);
 }
 
 :root[data-theme="dark"] {
-	--primary: oklch(0.72 0.15 265);
+    --primary: oklch(0.72 0.15 265);
 }
 ```
 

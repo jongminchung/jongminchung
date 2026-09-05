@@ -25,28 +25,28 @@ sourceUrl: https://learn.chatgpt.com/guides/best-practices
 ## Find repeated input in the baseline
 
 - **Classify baseline failures before removing context**
-  - Separate failures caused by missing rules from failures caused by important constraints being buried in excess text
-  - Lower input with worse quality merely defers cost to retries
+    - Separate failures caused by missing rules from failures caused by important constraints being buried in excess text
+    - Lower input with worse quality merely defers cost to retries
 
 - **Divide context into three lifetimes**
-  - Repository-lived context covers the package manager, prohibited actions, and verification contract
-  - Task-lived context covers the goal, allowed paths, and acceptance criteria
-  - Investigation-lived context covers log excerpts, hypotheses, and rejected approaches
+    - Repository-lived context covers the package manager, prohibited actions, and verification contract
+    - Task-lived context covers the goal, allowed paths, and acceptance criteria
+    - Investigation-lived context covers log excerpts, hypotheses, and rejected approaches
 
 - **OpenAI recommends goals, context, constraints, and done conditions in a task prompt, with durable guidance in `AGENTS.md`[^codex-best-practices]**
-  - That does not imply that every transient fact belongs in `AGENTS.md`
-  - Keep changing goals and logs in a compact task contract
+    - That does not imply that every transient fact belongs in `AGENTS.md`
+    - Keep changing goals and logs in a compact task contract
 
 ## Define shared rules once
 
 - **Keep canonical repository rules in the root `AGENTS.md`**
-  - OpenAI documents hierarchical discovery from global guidance toward the current directory, with closer instructions applied later[^codex-agents]
-  - In a monorepo, add only area-specific overrides in nested files
+    - OpenAI documents hierarchical discovery from global guidance toward the current directory, with closer instructions applied later[^codex-agents]
+    - In a monorepo, add only area-specific overrides in nested files
 
 - **Make provider files thin adapters**
-  - `CLAUDE.md` should point to shared rules and contain only Claude-specific memory or commands
-  - `GEMINI.md` should point to shared rules and contain only Gemini-specific context and tool constraints
-  - If a client does not automatically load the canonical file, use one explicit “read this first” instruction
+    - `CLAUDE.md` should point to shared rules and contain only Claude-specific memory or commands
+    - `GEMINI.md` should point to shared rules and contain only Gemini-specific context and tool constraints
+    - If a client does not automatically load the canonical file, use one explicit “read this first” instruction
 
 ```text
 AGENTS.md                # canonical repository rules
@@ -58,14 +58,14 @@ docs/ai/context.md       # temporary evidence
 ```
 
 - **Write each rule as an action with a verifiable outcome**
-  - “Modify only `apps/web` and run its workspace test” is shorter and testable compared with “be careful”
-  - Move background explanation to linked design documents that are read only when relevant
+    - “Modify only `apps/web` and run its workspace test” is shorter and testable compared with “be careful”
+    - Move background explanation to linked design documents that are read only when relevant
 
 ## Close each task in roughly eight lines
 
 - **The first input should explain its own purpose and boundaries**
-  - Include goal, symptom, allowed paths, protected paths, verification command, and completion condition
-  - Add one or two confirmed facts and one unresolved question
+    - Include goal, symptom, allowed paths, protected paths, verification command, and completion condition
+    - Add one or two confirmed facts and one unresolved question
 
 ```md
 # WEB-41
@@ -81,37 +81,37 @@ docs/ai/context.md       # temporary evidence
 ```
 
 - **Read search-narrowed candidates instead of the whole repository**
-  - Search filenames and symbols, then open only relevant ranges from the strongest candidates
-  - Expand one boundary only when implementation evidence demands it
+    - Search filenames and symbols, then open only relevant ranges from the strongest candidates
+    - Expand one boundary only when implementation evidence demands it
 
 - **Gemini CLI exposes context filenames and discovery limits[^gemini-config]**
-  - `context.fileName` and `context.discoveryMaxDirs` can bound automatic discovery
-  - A low number is not inherently correct; test it against the monorepo's real depth
+    - `context.fileName` and `context.discoveryMaxDirs` can bound automatic discovery
+    - A low number is not inherently correct; test it against the monorepo's real depth
 
 ## Validate the context diet with matched tasks
 
 - **Match similar tasks from Part 2 and assign control and budgeted variants**
-  - The control keeps existing instructions and exploration
-  - The treatment uses thin guidance, an eight-line contract, and a limited initial candidate set
+    - The control keeps existing instructions and exploration
+    - The treatment uses thin guidance, an eight-line contract, and a limited initial candidate set
 
 - **Input reduction alone is not success**
-  - Compare allowance per completed task and turn count within the provider
-  - Record wrong-file changes, repeated rule questions, human hints, and rework
+    - Compare allowance per completed task and turn count within the provider
+    - Record wrong-file changes, repeated rule questions, human hints, and rework
 
 - **The author's starting rule is a 15% median reduction with quality held constant**
-  - This is an operating threshold, not a provider guarantee
-  - Restore a missing rule when acceptance falls by more than five percentage points
+    - This is an operating threshold, not a provider guarantee
+    - Restore a missing rule when acceptance falls by more than five percentage points
 
 ## Hand a context profile to the next part
 
 - **`context-profile.md` should distinguish always-read, conditional, and prohibited input**
-  - Always read the root rules and current `task.md`
-  - Conditionally read relevant design docs, tests, and the recent diff
-  - Do not paste full conversations, full build logs, or unrelated directories
+    - Always read the root rules and current `task.md`
+    - Conditionally read relevant design docs, tests, and the recent diff
+    - Do not paste full conversations, full build logs, or unrelated directories
 
 - **Part 4 keeps the profile fixed while changing only session lifecycle**
-  - This separation prevents context and session effects from becoming one experiment
-  - On a task change, pass only `handoff.md`, not a transcript
+    - This separation prevents context and session effects from becoming one experiment
+    - On a task change, pass only `handoff.md`, not a transcript
 
 ## Action plan
 

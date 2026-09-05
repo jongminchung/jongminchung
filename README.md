@@ -125,3 +125,5 @@ Codex-Vscode             0 lines             ░░░░░░░░░░░�
 <!--END_SECTION:waka-->
 
 <!-- prettier-ignore-end -->
+
+- 설치와 공통 `make fmt`·`make lint` 사용법은 [기여 가이드](CONTRIBUTING.md)를 참고함

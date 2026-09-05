@@ -26,26 +26,26 @@ React 공식 문서는 컴포넌트를 "앱의 재사용 가능한 UI 조각"이
 
 ```tsx
 const AddToCartButton = ({ productId }) => {
-  const [status, setStatus] = useState("idle"); // 'idle' | 'loading' | 'added'
+    const [status, setStatus] = useState("idle"); // 'idle' | 'loading' | 'added'
 
-  const handleClick = async () => {
-    if (status !== "idle") return;
-    setStatus("loading");
-    await addCartItem(productId);
-    setStatus("added");
-  };
+    const handleClick = async () => {
+        if (status !== "idle") return;
+        setStatus("loading");
+        await addCartItem(productId);
+        setStatus("added");
+    };
 
-  return (
-    <button
-      className="add-to-cart"
-      disabled={status === "loading"}
-      onClick={handleClick}
-    >
-      {status === "idle" && "장바구니 담기"}
-      {status === "loading" && "담는 중..."}
-      {status === "added" && "담김 ✓"}
-    </button>
-  );
+    return (
+        <button
+            className="add-to-cart"
+            disabled={status === "loading"}
+            onClick={handleClick}
+        >
+            {status === "idle" && "장바구니 담기"}
+            {status === "loading" && "담는 중..."}
+            {status === "added" && "담김 ✓"}
+        </button>
+    );
 };
 ```
 
@@ -148,21 +148,21 @@ React의 데이터 흐름은 한 방향이다. 부모는 자식에게 props로 �
 
 ```tsx
 const ProductPage = ({ product }) => {
-  const [cartCount, setCartCount] = useState(0);
+    const [cartCount, setCartCount] = useState(0);
 
-  return (
-    <>
-      <Header>
-        <CartBadge count={cartCount} />
-      </Header>
-      <ProductDetail>
-        <AddToCartButton
-          productId={product.id}
-          onAdded={() => setCartCount((count) => count + 1)}
-        />
-      </ProductDetail>
-    </>
-  );
+    return (
+        <>
+            <Header>
+                <CartBadge count={cartCount} />
+            </Header>
+            <ProductDetail>
+                <AddToCartButton
+                    productId={product.id}
+                    onAdded={() => setCartCount((count) => count + 1)}
+                />
+            </ProductDetail>
+        </>
+    );
 };
 ```
 
@@ -178,15 +178,15 @@ const ProductPage = ({ product }) => {
 
 ```tsx
 <ConfirmModal
-  title="주문을 취소할까?"
-  description="취소한 주문은 되돌릴 수 없다"
-  confirmText="취소하기"
-  confirmVariant="danger"
-  cancelText="돌아가기"
-  showCloseButton
-  footerAlign="right"
-  onConfirm={cancelOrder}
-  onCancel={close}
+    title="주문을 취소할까?"
+    description="취소한 주문은 되돌릴 수 없다"
+    confirmText="취소하기"
+    confirmVariant="danger"
+    cancelText="돌아가기"
+    showCloseButton
+    footerAlign="right"
+    onConfirm={cancelOrder}
+    onCancel={close}
 />
 ```
 
@@ -194,19 +194,19 @@ const ProductPage = ({ product }) => {
 
 ```tsx
 <Modal onClose={close}>
-  <Modal.Title>주문을 취소할까?</Modal.Title>
-  <Modal.Body>
-    취소한 주문은 되돌릴 수 없다
-    <RefundSummary orderId={order.id} />
-  </Modal.Body>
-  <Modal.Footer>
-    <Button variant="ghost" onClick={close}>
-      돌아가기
-    </Button>
-    <Button variant="danger" onClick={cancelOrder}>
-      취소하기
-    </Button>
-  </Modal.Footer>
+    <Modal.Title>주문을 취소할까?</Modal.Title>
+    <Modal.Body>
+        취소한 주문은 되돌릴 수 없다
+        <RefundSummary orderId={order.id} />
+    </Modal.Body>
+    <Modal.Footer>
+        <Button variant="ghost" onClick={close}>
+            돌아가기
+        </Button>
+        <Button variant="danger" onClick={cancelOrder}>
+            취소하기
+        </Button>
+    </Modal.Footer>
 </Modal>
 ```
 
@@ -220,14 +220,14 @@ const ProductPage = ({ product }) => {
 const CartContext = createContext(null);
 
 const App = () => (
-  <CartContext.Provider value={cart}>
-    <ProductPage /> {/* 몇 단계 아래의 CartBadge가 바로 꺼내 쓴다 */}
-  </CartContext.Provider>
+    <CartContext.Provider value={cart}>
+        <ProductPage /> {/* 몇 단계 아래의 CartBadge가 바로 꺼내 쓴다 */}
+    </CartContext.Provider>
 );
 
 const CartBadge = () => {
-  const cart = useContext(CartContext);
-  return <span className="badge">{cart.items.length}</span>;
+    const cart = useContext(CartContext);
+    return <span className="badge">{cart.items.length}</span>;
 };
 ```
 
@@ -245,15 +245,15 @@ Context는 편리한 만큼 남용되기 쉬운 도구다. 두 가지만 기억�
 
 ```tsx
 useSelect({
-  items,
-  stateReducer: (state, { changes, type }) => {
-    // 멀티 셀렉트: 옵션을 골라도 목록이 닫히지 않도록 전이를 고쳐서 돌려준다
-    // (키보드로 선택하는 케이스는 지면상 생략했다)
-    if (type === useSelect.stateChangeTypes.ItemClick) {
-      return { ...changes, isOpen: true };
-    }
-    return changes;
-  },
+    items,
+    stateReducer: (state, { changes, type }) => {
+        // 멀티 셀렉트: 옵션을 골라도 목록이 닫히지 않도록 전이를 고쳐서 돌려준다
+        // (키보드로 선택하는 케이스는 지면상 생략했다)
+        if (type === useSelect.stateChangeTypes.ItemClick) {
+            return { ...changes, isOpen: true };
+        }
+        return changes;
+    },
 });
 ```
 
@@ -303,32 +303,32 @@ src/
 
 ```tsx
 function useAddToCart(productId) {
-  const [status, setStatus] = useState("idle");
+    const [status, setStatus] = useState("idle");
 
-  const add = async () => {
-    if (status !== "idle") return;
-    setStatus("loading");
-    await addCartItem(productId);
-    setStatus("added");
-  };
+    const add = async () => {
+        if (status !== "idle") return;
+        setStatus("loading");
+        await addCartItem(productId);
+        setStatus("added");
+    };
 
-  return { status, add };
+    return { status, add };
 }
 
 const AddToCartButton = ({ productId }) => {
-  const { status, add } = useAddToCart(productId);
+    const { status, add } = useAddToCart(productId);
 
-  return (
-    <button
-      className="add-to-cart"
-      disabled={status === "loading"}
-      onClick={add}
-    >
-      {status === "idle" && "장바구니 담기"}
-      {status === "loading" && "담는 중..."}
-      {status === "added" && "담김 ✓"}
-    </button>
-  );
+    return (
+        <button
+            className="add-to-cart"
+            disabled={status === "loading"}
+            onClick={add}
+        >
+            {status === "idle" && "장바구니 담기"}
+            {status === "loading" && "담는 중..."}
+            {status === "added" && "담김 ✓"}
+        </button>
+    );
 };
 ```
 
@@ -342,9 +342,9 @@ export default withRouter(withCart(AddToCartButton));
 
 // render props 시절 — 로직이 함수를 자식으로 받아 JSX 안에 들어왔다
 <CartProvider>
-  {({ status, add }) => (
-    <button onClick={() => add(productId)}>장바구니 담기</button>
-  )}
+    {({ status, add }) => (
+        <button onClick={() => add(productId)}>장바구니 담기</button>
+    )}
 </CartProvider>;
 ```
 
@@ -362,18 +362,18 @@ HOC는 감싸는 층이 쌓일수록 이 컴포넌트의 props가 어느 래퍼�
 
 ```tsx
 function useAddToCart(productId) {
-  const queryClient = useQueryClient();
+    const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: () => addCartItem(productId),
-    // 담기에 성공하면 'cart' 키의 캐시를 무효화한다. 구독자들은 새 데이터를 다시 받는다.
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cart"] }),
-  });
+    return useMutation({
+        mutationFn: () => addCartItem(productId),
+        // 담기에 성공하면 'cart' 키의 캐시를 무효화한다. 구독자들은 새 데이터를 다시 받는다.
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cart"] }),
+    });
 }
 
 const CartBadge = () => {
-  const { data: cart } = useQuery({ queryKey: ["cart"], queryFn: fetchCart });
-  return <span className="badge">{cart?.items.length ?? 0}</span>;
+    const { data: cart } = useQuery({ queryKey: ["cart"], queryFn: fetchCart });
+    return <span className="badge">{cart?.items.length ?? 0}</span>;
 };
 ```
 
@@ -386,13 +386,15 @@ const CartBadge = () => {
 ```tsx
 // features/order/calculateRefund.ts — React를 모르는 파일
 export function calculateRefund(order, policy) {
-  const usedAmount = order.items
-    .filter((item) => item.status === "delivered")
-    .reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const usedAmount = order.items
+        .filter((item) => item.status === "delivered")
+        .reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  const fee =
-    order.shippingFee > 0 && usedAmount === 0 ? policy.returnShippingFee : 0;
-  return { refundAmount: order.paidAmount - usedAmount - fee, fee };
+    const fee =
+        order.shippingFee > 0 && usedAmount === 0
+            ? policy.returnShippingFee
+            : 0;
+    return { refundAmount: order.paidAmount - usedAmount - fee, fee };
 }
 ```
 
@@ -418,9 +420,9 @@ export function calculateRefund(order, policy) {
 
 ```tsx
 const Button = ({ label, onClick }) => (
-  <button className="btn" onClick={onClick}>
-    {label}
-  </button>
+    <button className="btn" onClick={onClick}>
+        {label}
+    </button>
 );
 ```
 
@@ -428,9 +430,9 @@ const Button = ({ label, onClick }) => (
 
 ```tsx
 const Button = ({ className, children, ...props }) => (
-  <button className={clsx("btn", className)} {...props}>
-    {children}
-  </button>
+    <button className={clsx("btn", className)} {...props}>
+        {children}
+    </button>
 );
 ```
 
@@ -442,9 +444,9 @@ const Button = ({ className, children, ...props }) => (
 
 ```tsx
 const OrderTable = ({ orders }) => {
-  orders.sort((a, b) => b.createdAt - a.createdAt); // 부모의 배열을 그 자리에서 파괴한다
+    orders.sort((a, b) => b.createdAt - a.createdAt); // 부모의 배열을 그 자리에서 파괴한다
 
-  return <table>{/* ... */}</table>;
+    return <table>{/* ... */}</table>;
 };
 ```
 
@@ -456,9 +458,9 @@ const OrderTable = ({ orders }) => {
 
 ```tsx
 <ErrorBoundary fallback={<p>추천 상품을 불러오지 못했다</p>}>
-  <Suspense fallback={<WidgetSkeleton />}>
-    <RecommendedProducts productId={product.id} />
-  </Suspense>
+    <Suspense fallback={<WidgetSkeleton />}>
+        <RecommendedProducts productId={product.id} />
+    </Suspense>
 </ErrorBoundary>
 ```
 

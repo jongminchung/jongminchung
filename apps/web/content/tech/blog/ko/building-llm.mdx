@@ -265,7 +265,7 @@ def train_tokenizer(texts, save_path="data/tokenizer.json"):
 
 ```json
 {
-  "text": "<|im_start|>user\n안녕<|im_end|>\n<|im_start|>assistant\n반가워.<|im_end|>"
+    "text": "<|im_start|>user\n안녕<|im_end|>\n<|im_start|>assistant\n반가워.<|im_end|>"
 }
 ```
 
@@ -943,39 +943,39 @@ def export_onnx(output_path="checkpoints/hamsterlm.onnx", quantize=True):
 
 ```javascript title="web/app.js"
 function buildTokenizer(json) {
-  const vocab = json.model.vocab;
-  const merges = json.model.merges;
+    const vocab = json.model.vocab;
+    const merges = json.model.merges;
 
-  // merge 순위 룩업 (순위가 낮을수록 우선순위 높음)
-  const mergeRank = {};
-  for (let i = 0; i < merges.length; i++) {
-    mergeRank[merges[i].join(" ")] = i;
-  }
-
-  function bpe(word) {
-    let pieces = word.slice();
-    while (pieces.length > 1) {
-      // 가장 낮은 순위의 merge를 찾아 적용
-      let bestRank = Infinity,
-        bestIdx = -1;
-      for (let i = 0; i < pieces.length - 1; i++) {
-        const rank = mergeRank[pieces[i] + " " + pieces[i + 1]];
-        if (rank !== undefined && rank < bestRank) {
-          bestRank = rank;
-          bestIdx = i;
-        }
-      }
-      if (bestIdx === -1) break;
-      pieces = [
-        ...pieces.slice(0, bestIdx),
-        pieces[bestIdx] + pieces[bestIdx + 1],
-        ...pieces.slice(bestIdx + 2),
-      ];
+    // merge 순위 룩업 (순위가 낮을수록 우선순위 높음)
+    const mergeRank = {};
+    for (let i = 0; i < merges.length; i++) {
+        mergeRank[merges[i].join(" ")] = i;
     }
-    return pieces;
-  }
-  // ... encode, decode 함수
-  return { encode, decode };
+
+    function bpe(word) {
+        let pieces = word.slice();
+        while (pieces.length > 1) {
+            // 가장 낮은 순위의 merge를 찾아 적용
+            let bestRank = Infinity,
+                bestIdx = -1;
+            for (let i = 0; i < pieces.length - 1; i++) {
+                const rank = mergeRank[pieces[i] + " " + pieces[i + 1]];
+                if (rank !== undefined && rank < bestRank) {
+                    bestRank = rank;
+                    bestIdx = i;
+                }
+            }
+            if (bestIdx === -1) break;
+            pieces = [
+                ...pieces.slice(0, bestIdx),
+                pieces[bestIdx] + pieces[bestIdx + 1],
+                ...pieces.slice(bestIdx + 2),
+            ];
+        }
+        return pieces;
+    }
+    // ... encode, decode 함수
+    return { encode, decode };
 }
 ```
 
@@ -989,20 +989,20 @@ ONNX 파일은 90MB다. GitHub Pages에 올리자니 파일당 100MB 제한(LFS 
 
 ```javascript title="web/app.js"
 async function loadModel() {
-  const MODEL_URL =
-    "https://huggingface.co/kciter/HamsterLM/resolve/main/hamsterlm.onnx";
-  const cache = await caches.open("hamsterlm-v1");
+    const MODEL_URL =
+        "https://huggingface.co/kciter/HamsterLM/resolve/main/hamsterlm.onnx";
+    const cache = await caches.open("hamsterlm-v1");
 
-  // 캐시에 있으면 바로 사용
-  let response = await cache.match(MODEL_URL);
-  if (!response) {
-    // 없으면 다운로드 + 캐시
-    response = await fetch(MODEL_URL);
-    await cache.put(MODEL_URL, response.clone());
-  }
+    // 캐시에 있으면 바로 사용
+    let response = await cache.match(MODEL_URL);
+    if (!response) {
+        // 없으면 다운로드 + 캐시
+        response = await fetch(MODEL_URL);
+        await cache.put(MODEL_URL, response.clone());
+    }
 
-  const buffer = await response.arrayBuffer();
-  return await ort.InferenceSession.create(buffer);
+    const buffer = await response.arrayBuffer();
+    return await ort.InferenceSession.create(buffer);
 }
 ```
 
@@ -1016,15 +1016,15 @@ ChatGPT처럼 답변이 한 글자씩 흘러나오게 하려면 **토큰 스트�
 
 ```javascript title="web/app.js"
 async function* generateStream(inputIds) {
-  let ids = inputIds.slice();
-  for (let i = 0; i < maxTokens; i++) {
-    const logits = await runInference(ids);
-    const nextToken = sampleTopK(logits, topK, temperature);
-    if (nextToken === EOS_ID) break;
-    ids.push(nextToken);
-    yield nextToken; // 토큰 하나가 생성될 때마다 yield  [!code highlight]
-    await yieldToMain(); // 브라우저 이벤트 루프에 제어권 양보 [!code highlight]
-  }
+    let ids = inputIds.slice();
+    for (let i = 0; i < maxTokens; i++) {
+        const logits = await runInference(ids);
+        const nextToken = sampleTopK(logits, topK, temperature);
+        if (nextToken === EOS_ID) break;
+        ids.push(nextToken);
+        yield nextToken; // 토큰 하나가 생성될 때마다 yield  [!code highlight]
+        await yieldToMain(); // 브라우저 이벤트 루프에 제어권 양보 [!code highlight]
+    }
 }
 
 // 사용 측 — 토큰을 하나씩 따로 디코드하면 한글(UTF-8 멀티바이트)이
@@ -1032,8 +1032,8 @@ async function* generateStream(inputIds) {
 // 매번 누적된 토큰 전체를 다시 디코드해서 표시한다
 const outputIds = [];
 for await (const tokenId of generateStream(inputIds)) {
-  outputIds.push(tokenId);
-  responseDiv.textContent = tokenizer.decode(outputIds);
+    outputIds.push(tokenId);
+    responseDiv.textContent = tokenizer.decode(outputIds);
 }
 ```
 

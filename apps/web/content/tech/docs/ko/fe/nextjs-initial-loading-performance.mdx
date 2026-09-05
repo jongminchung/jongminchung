@@ -13,10 +13,10 @@ packageVersion: "16.3.1"
 ---
 
 <Callout title="핵심 판단" type="info">
-  브라우저는 프로덕션에서 TypeScript 원본을 받지 않지만 Client Component로
-  연결된 JavaScript는 받아서 실행함. 폰트는 JavaScript 실행을 막지 않더라도 같은
-  네트워크 대역폭을 사용하므로 route별로 필요한 glyph와 client boundary를 함께
-  줄여야 함
+    브라우저는 프로덕션에서 TypeScript 원본을 받지 않지만 Client Component로
+    연결된 JavaScript는 받아서 실행함. 폰트는 JavaScript 실행을 막지 않더라도
+    같은 네트워크 대역폭을 사용하므로 route별로 필요한 glyph와 client boundary를
+    함께 줄여야 함
 </Callout>
 
 ## 브라우저가 받는 리소스를 먼저 구분함
@@ -100,9 +100,9 @@ Next.js App Router의 첫 방문에는 HTML, React Server Component payload, CSS
 import { lazy } from "react";
 
 const SearchDialog = lazy(() =>
-  import("./SearchDialog").then((module) => ({
-    default: module.SearchDialog,
-  })),
+    import("./SearchDialog").then((module) => ({
+        default: module.SearchDialog,
+    })),
 );
 ```
 

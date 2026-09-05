@@ -20,33 +20,33 @@
 ## 현재 문제와 근거
 
 - **`search.ts` 364줄에 서로 다른 변경 이유가 결합되어 있음**
-  - tokenization·field score·snippet·결과 정렬은 제품 runtime 책임임
-  - top-k·MRR·zero-result 평가와 index 비용·threshold 검증은 benchmark 책임임
-  - `SearchDialog`는 `searchDocuments`와 `SearchHit`만 사용함
+    - tokenization·field score·snippet·결과 정렬은 제품 runtime 책임임
+    - top-k·MRR·zero-result 평가와 index 비용·threshold 검증은 benchmark 책임임
+    - `SearchDialog`는 `searchDocuments`와 `SearchHit`만 사용함
 - **실제 corpus benchmark가 unit test의 시간 계약과 맞지 않음**
-  - `readContentSnapshot`으로 모든 MDX source를 읽고 outline과 검색 본문을 구성함
-  - 40개 query를 전체·영어·한국어로 반복 평가함
-  - `vitest` coverage 실행에서 첫 corpus test가 약 11.7초 소요되어 unit test의 10초 제한을 초과함
+    - `readContentSnapshot`으로 모든 MDX source를 읽고 outline과 검색 본문을 구성함
+    - 40개 query를 전체·영어·한국어로 반복 평가함
+    - `vitest` coverage 실행에서 첫 corpus test가 약 11.7초 소요되어 unit test의 10초 제한을 초과함
 - **일반 Web test 통과만으로 root unit coverage 계약을 증명할 수 없음**
-  - `pnpm --filter @jongminchung/web run test`는 22개 파일·85개 test가 통과함
-  - coverage를 사용하는 unit 실행에서는 동일 test가 timeout으로 실패함
+    - `pnpm --filter @jongminchung/web run test`는 22개 파일·85개 test가 통과함
+    - coverage를 사용하는 unit 실행에서는 동일 test가 timeout으로 실패함
 
 ## 채택할 내용
 
 - **제품 검색 module에는 브라우저에서 사용하는 API만 유지함**
-  - query tokenization
-  - field score와 match 선택
-  - snippet과 결과 정렬
-  - `SearchHit`·`SearchMatch` 계약
+    - query tokenization
+    - field score와 match 선택
+    - snippet과 결과 정렬
+    - `SearchHit`·`SearchMatch` 계약
 - **benchmark runner를 별도 module로 분리함**
-  - benchmark case와 report type
-  - relevance 평가
-  - search index 비용 측정
-  - threshold 검증
+    - benchmark case와 report type
+    - relevance 평가
+    - search index 비용 측정
+    - threshold 검증
 - **test 종류를 실행 비용에 맞게 분류함**
-  - 작은 in-memory fixture는 `search.test.ts` unit test로 유지함
-  - 실제 MDX corpus는 `search-benchmark.integration.test.ts`로 이동함
-  - corpus와 locale별 search document는 test 생명주기에서 한 번만 구성함
+    - 작은 in-memory fixture는 `search.test.ts` unit test로 유지함
+    - 실제 MDX corpus는 `search-benchmark.integration.test.ts`로 이동함
+    - corpus와 locale별 search document는 test 생명주기에서 한 번만 구성함
 
 ## 채택하지 않을 내용
 
@@ -84,12 +84,12 @@
 ## 처리 결과
 
 - **제품 검색 규칙을 `search.ts`의 순수 runtime API로 분리함**
-  - Unicode 정규화·질의 분해·별칭·결과 필터·source interleave가 Fumadocs source와 benchmark 정의에 의존하지 않음
-  - 작은 in-memory fixture가 제품 검색 규칙을 unit project에서 검증함
+    - Unicode 정규화·질의 분해·별칭·결과 필터·source interleave가 Fumadocs source와 benchmark 정의에 의존하지 않음
+    - 작은 in-memory fixture가 제품 검색 규칙을 unit project에서 검증함
 - **실제 bilingual corpus benchmark는 integration project로 이동함**
-  - `search-benchmark.integration.test.ts`가 별도 server runner를 한 번 실행해 40개 query와 기존 품질 baseline을 검증함
-  - unit coverage 실행은 실제 MDX corpus와 server index를 읽지 않음
+    - `search-benchmark.integration.test.ts`가 별도 server runner를 한 번 실행해 40개 query와 기존 품질 baseline을 검증함
+    - unit coverage 실행은 실제 MDX corpus와 server index를 읽지 않음
 - **검색 UI의 production import graph에는 benchmark case·threshold·평가 runner가 포함되지 않음**
 - **검증 결과는 unit 5개·integration corpus 1개와 Web 전체 31개 파일·121개 test 통과임**
-  - root unit coverage 142개 파일·747개 test와 integration 37개 파일·281개 test도 통과함
-  - Web typecheck와 production build가 통과함
+    - root unit coverage 142개 파일·747개 test와 integration 37개 파일·281개 test도 통과함
+    - Web typecheck와 production build가 통과함

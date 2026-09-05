@@ -6,7 +6,17 @@ publishedAt: "2026-09-04"
 updatedAt: "2026-09-04"
 verifiedAt: "2026-09-04"
 tags:
-  [kubernetes, opentelemetry, otlp, clickstack, clickhouse, seaweedfs, s3, audit, observability]
+    [
+        kubernetes,
+        opentelemetry,
+        otlp,
+        clickstack,
+        clickhouse,
+        seaweedfs,
+        s3,
+        audit,
+        observability,
+    ]
 status: stable
 publicationStatus: published
 sourceUrl: https://github.com/jongminchung/jongminchung/blob/main/apps/web/content/tech/docs/ko/k8s/opentelemetry-clickstack-cold-tier.mdx
@@ -37,36 +47,36 @@ SeaweedFS S3 ── Fluent Forward :8006 ───┘                    ▼
 ```
 
 - **Gateway API는 인터넷 노출, TLS 종료, hostname과 OTLP path allowlist를 소유함**
-  - `otel.jamie.kr`은 Gateway의 HTTPS listener에 연결됨
-  - Collector Service와 Pod의 `4317`, `4318`은 외부에 직접 노출하지 않음
+    - `otel.jamie.kr`은 Gateway의 HTTPS listener에 연결됨
+    - Collector Service와 Pod의 `4317`, `4318`은 외부에 직접 노출하지 않음
 - **`otel-gateway`는 인증된 signal, node telemetry와 S3 audit을 하나의 exporter 경계에서 처리함**
-  - gateway는 sink retry와 disk-backed sending queue를 소유함
-  - `clickstack-ingest`는 gateway의 OTLP sink만 ingress로 허용함
+    - gateway는 sink retry와 disk-backed sending queue를 소유함
+    - `clickstack-ingest`는 gateway의 OTLP sink만 ingress로 허용함
 - **ClickHouse는 telemetry 조회와 TTL 실행을 소유하고 SeaweedFS는 cold object와 S3 access audit을 소유함**
-  - SeaweedFS Master·Volume data PVC는 `object-rwo` StorageClass로 `10.25.140.6:/s3_data`에 배치됨
-  - object data의 물리 저장소와 ClickHouse hot disk를 분리해 NFS 용량 압박의 원인을 구분함
+    - SeaweedFS Master·Volume data PVC는 `object-rwo` StorageClass로 `10.25.140.6:/s3_data`에 배치됨
+    - object data의 물리 저장소와 ClickHouse hot disk를 분리해 NFS 용량 압박의 원인을 구분함
 
 ## 외부 OTLP를 인증 후 gateway로 전달함
 
 - **gRPC와 OTLP/HTTP는 path가 다르므로 같은 HTTPS endpoint에서 별도 backend port로 분기함**
 
-| 요청 종류 | 공개 경로 | 내부 backend |
-| --- | --- | --- |
+| 요청 종류                     | 공개 경로                                             | 내부 backend        |
+| ----------------------------- | ----------------------------------------------------- | ------------------- |
 | OTLP/gRPC logs·metrics·traces | `/opentelemetry.proto.collector.*.v1.*Service/Export` | `otel-gateway:4317` |
-| OTLP/HTTP logs | `/v1/logs` | `otel-gateway:4318` |
-| OTLP/HTTP metrics | `/v1/metrics` | `otel-gateway:4318` |
-| OTLP/HTTP traces | `/v1/traces` | `otel-gateway:4318` |
+| OTLP/HTTP logs                | `/v1/logs`                                            | `otel-gateway:4318` |
+| OTLP/HTTP metrics             | `/v1/metrics`                                         | `otel-gateway:4318` |
+| OTLP/HTTP traces              | `/v1/traces`                                          | `otel-gateway:4318` |
 
 - **각 route rule은 `ExternalAuth`로 `otel-external-auth:8080`을 먼저 호출함**
-  - auth Service는 정확한 `Authorization: Bearer <token>`에만 `200`을 반환함
-  - 토큰이 없거나 일치하지 않는 요청은 gateway에서 `401`으로 종료됨
-  - route는 `Authorization`만 auth backend로 전달하고 인증 성공 표시는 `X-OTLP-Authenticated`로 제한함
+    - auth Service는 정확한 `Authorization: Bearer <token>`에만 `200`을 반환함
+    - 토큰이 없거나 일치하지 않는 요청은 gateway에서 `401`으로 종료됨
+    - route는 `Authorization`만 auth backend로 전달하고 인증 성공 표시는 `X-OTLP-Authenticated`로 제한함
 - **token 원문은 Git에 두지 않고 SOPS ciphertext에서 Kubernetes Secret으로 materialize함**
-  - 클라이언트는 표준 `OTEL_EXPORTER_OTLP_HEADERS`로 `Authorization=Bearer%20<token>`을 주입함
-  - Codex 설정에는 `/v1/logs`, `/v1/metrics`, `/v1/traces` endpoint만 유지함
+    - 클라이언트는 표준 `OTEL_EXPORTER_OTLP_HEADERS`로 `Authorization=Bearer%20<token>`을 주입함
+    - Codex 설정에는 `/v1/logs`, `/v1/metrics`, `/v1/traces` endpoint만 유지함
 - **공개 ingress와 내부 backend는 NetworkPolicy로 별도 제한함**
-  - Gateway ingress entity는 gateway의 `4317`, `4318`에만 접근 가능해야 함
-  - auth Service는 ingress, host와 remote node의 `8080`만 허용함
+    - Gateway ingress entity는 gateway의 `4317`, `4318`에만 접근 가능해야 함
+    - auth Service는 ingress, host와 remote node의 `8080`만 허용함
 
 ```bash title="거부·허용과 route 상태 확인"
 curl --silent --output /dev/null --write-out '%{http_code}\n' \
@@ -84,33 +94,33 @@ kubectl -n observability rollout status deployment/otel-external-auth
 ## node agent가 ClickStack 재수집을 막음
 
 - **재수집은 collector가 쓴 로그를 node agent가 다시 읽어 같은 collector로 보내는 순환 구조에서 발생함**
-  - `clickstack-ingest`는 OTLP sink의 수신 workload이므로 자신의 container stdout·stderr를 다시 수집하면 volume이 증폭될 수 있음
-  - 다른 application 로그를 넓게 제외하면 관측 공백이 생기므로 자기 자신만 정확히 제외해야 함
+    - `clickstack-ingest`는 OTLP sink의 수신 workload이므로 자신의 container stdout·stderr를 다시 수집하면 volume이 증폭될 수 있음
+    - 다른 application 로그를 넓게 제외하면 관측 공백이 생기므로 자기 자신만 정확히 제외해야 함
 - **`otel-node` DaemonSet의 logs pipeline은 namespace와 Pod 이름을 함께 검사하는 filter를 적용함**
 
 ```yaml title="otel-agent values의 logs processor 순서"
 processors:
-  filter/drop-clickstack-ingest-self:
-    error_mode: ignore
-    logs:
-      log_record:
-        - >-
-          resource.attributes["k8s.namespace.name"] == "observability" and
-          IsMatch(resource.attributes["k8s.pod.name"], "^clickstack-ingest-[0-9]+$")
+    filter/drop-clickstack-ingest-self:
+        error_mode: ignore
+        logs:
+            log_record:
+                - >-
+                    resource.attributes["k8s.namespace.name"] == "observability" and
+                    IsMatch(resource.attributes["k8s.pod.name"], "^clickstack-ingest-[0-9]+$")
 
 service:
-  pipelines:
-    logs:
-      processors:
-        - memory_limiter
-        - resource/role
-        - filter/drop-clickstack-ingest-self
-        - batch
+    pipelines:
+        logs:
+            processors:
+                - memory_limiter
+                - resource/role
+                - filter/drop-clickstack-ingest-self
+                - batch
 ```
 
 - **정규식은 StatefulSet Pod만 대상으로 하므로 `clickstack-ingest-*`가 아닌 observability workload는 계속 수집됨**
-  - deployment 이름이나 namespace 단독 match로 확대하면 새 workload가 의도치 않게 제외될 수 있음
-  - collector release 이름이나 Pod 이름이 바뀌면 filter와 실제 metadata를 함께 갱신해야 함
+    - deployment 이름이나 namespace 단독 match로 확대하면 새 workload가 의도치 않게 제외될 수 있음
+    - collector release 이름이나 Pod 이름이 바뀌면 filter와 실제 metadata를 함께 갱신해야 함
 - **검증은 수집량과 제외 대상을 함께 조회해야 함**
 
 ```sql title="ClickHouse에서 최근 재수집 여부 조회"
@@ -130,23 +140,23 @@ ORDER BY records DESC;
 ## gateway가 신호별 pipeline과 내구성 queue를 제공함
 
 - **`otel-gateway`는 두 replica StatefulSet으로 실행하고 각 replica에 `1Gi`의 retained queue PVC를 제공함**
-  - `file_storage` extension은 `/var/lib/otel/storage`에 queue를 저장함
-  - replica 축소나 StatefulSet 삭제 때 queue PVC가 `Retain`이므로 데이터 정리에는 별도 승인과 절차가 필요함
+    - `file_storage` extension은 `/var/lib/otel/storage`에 queue를 저장함
+    - replica 축소나 StatefulSet 삭제 때 queue PVC가 `Retain`이므로 데이터 정리에는 별도 승인과 절차가 필요함
 - **일반 OTLP와 S3 audit은 다른 receiver·resource processor·logs pipeline으로 처리함**
 
-| pipeline | receiver | 공통 exporter | 구분 attribute |
-| --- | --- | --- | --- |
-| `logs` | OTLP | `otlp/sink` | `platform.telemetry.role=gateway` |
-| `metrics` | OTLP | `otlp/sink` | `platform.telemetry.role=gateway` |
-| `traces` | OTLP | `otlp/sink` | `platform.telemetry.role=gateway` |
-| `logs/s3-audit` | Fluent Forward `8006` | `otlp/sink` | `event.dataset=seaweedfs.s3.access` |
+| pipeline        | receiver              | 공통 exporter | 구분 attribute                      |
+| --------------- | --------------------- | ------------- | ----------------------------------- |
+| `logs`          | OTLP                  | `otlp/sink`   | `platform.telemetry.role=gateway`   |
+| `metrics`       | OTLP                  | `otlp/sink`   | `platform.telemetry.role=gateway`   |
+| `traces`        | OTLP                  | `otlp/sink`   | `platform.telemetry.role=gateway`   |
+| `logs/s3-audit` | Fluent Forward `8006` | `otlp/sink`   | `event.dataset=seaweedfs.s3.access` |
 
 - **gateway exporter는 queue `8192`, retry 초기 간격 `5s`, 최대 간격 `30s`, 무기한 retry를 사용함**
-  - sink 장애가 장기화되면 PVC와 node storage가 채워질 수 있으므로 queue 사용량, retry와 exporter error를 함께 alert해야 함
-  - queue는 delivery resilience를 제공하지만 ClickHouse retention이나 백업 정책을 대체하지 않음
+    - sink 장애가 장기화되면 PVC와 node storage가 채워질 수 있으므로 queue 사용량, retry와 exporter error를 함께 alert해야 함
+    - queue는 delivery resilience를 제공하지만 ClickHouse retention이나 백업 정책을 대체하지 않음
 - **gateway ingress는 telemetry namespace, SeaweedFS audit sender와 public ingress의 port별 흐름으로 제한함**
-  - `4317`, `4318`은 OTLP에만 사용함
-  - TCP와 UDP `8006`은 SeaweedFS와 `clickhouse-s3-gateway`의 Fluent Forward audit에만 사용함
+    - `4317`, `4318`은 OTLP에만 사용함
+    - TCP와 UDP `8006`은 SeaweedFS와 `clickhouse-s3-gateway`의 Fluent Forward audit에만 사용함
 
 ```bash title="gateway 수신과 queue 확인"
 kubectl -n observability get svc otel-gateway
@@ -157,22 +167,22 @@ kubectl -n observability logs statefulset/otel-gateway --since=10m
 ## ClickHouse cold S3를 최소 권한 계정으로 보존함
 
 - **ClickHouse는 local default disk와 SeaweedFS S3 `cold_s3` disk를 묶은 `hot_cold` storage policy를 사용함**
-  - internal `clickhouse-s3-gateway:8333`이 SeaweedFS filer를 향하는 S3 endpoint임
-  - cold data bucket은 `clickhouse-observability`임
-  - `object-rwo`는 SeaweedFS 자체 Master·Volume data의 physical storage 계약이며 ClickHouse S3 client가 NFS를 직접 mount하는 경로가 아님
+    - internal `clickhouse-s3-gateway:8333`이 SeaweedFS filer를 향하는 S3 endpoint임
+    - cold data bucket은 `clickhouse-observability`임
+    - `object-rwo`는 SeaweedFS 자체 Master·Volume data의 physical storage 계약이며 ClickHouse S3 client가 NFS를 직접 mount하는 경로가 아님
 - **telemetry 테이블 TTL은 hot cost와 조회 기간을 명시적으로 분리함**
 
-| 데이터 연령 | ClickHouse 동작 | 저장 위치 |
-| --- | --- | --- |
-| 0~2일 | 기본 codec·hot query | default disk |
-| 2일 | `ZSTD(3)` 재압축 | default disk |
-| 3일 | `TO DISK 'cold_s3'` | SeaweedFS S3 |
-| 14일 | `DELETE` | 삭제됨 |
+| 데이터 연령 | ClickHouse 동작      | 저장 위치    |
+| ----------- | -------------------- | ------------ |
+| 0~2일       | 기본 codec·hot query | default disk |
+| 2일         | `ZSTD(3)` 재압축     | default disk |
+| 3일         | `TO DISK 'cold_s3'`  | SeaweedFS S3 |
+| 14일        | `DELETE`             | 삭제됨       |
 
 - **cold tier는 `otel-cold-tier` 전용 AccessKey와 SecretKey를 사용함**
-  - account는 `clickhouse-observability` bucket에만 `Admin`, `Read`, `List`, `Tagging`, `Write` action을 가짐
-  - SeaweedFS 전역 admin identity를 ClickHouse 설정에 사용하지 않음
-  - credentials와 SeaweedFS identity configuration은 SOPS ciphertext로 Git에 보관함
+    - account는 `clickhouse-observability` bucket에만 `Admin`, `Read`, `List`, `Tagging`, `Write` action을 가짐
+    - SeaweedFS 전역 admin identity를 ClickHouse 설정에 사용하지 않음
+    - credentials와 SeaweedFS identity configuration은 SOPS ciphertext로 Git에 보관함
 - **TTL과 storage policy 변경은 모든 replica에서 수렴했는지 확인한 뒤 오래된 part의 disk를 조회해야 함**
 
 ```sql title="cold S3 part와 TTL 정의 조회"
@@ -192,16 +202,16 @@ WHERE database = 'default'
 ## SeaweedFS S3 access audit을 Fluent Forward로 수집함
 
 - **공개 SeaweedFS S3와 internal `clickhouse-s3-gateway` 모두 `auditLogConfig`를 사용해 동일 gateway로 audit을 전송함**
-  - destination은 `otel-gateway.observability.svc.cluster.local:8006`임
-  - `request_ack: true`는 audit receiver의 acknowledgement를 기다려 network failure를 감지함
-  - tag prefix는 public S3와 cold tier gateway를 구분하는 보조 정보임
+    - destination은 `otel-gateway.observability.svc.cluster.local:8006`임
+    - `request_ack: true`는 audit receiver의 acknowledgement를 기다려 network failure를 감지함
+    - tag prefix는 public S3와 cold tier gateway를 구분하는 보조 정보임
 - **gateway의 `fluent_forward/s3-audit` receiver는 audit record에 표준 resource attribute를 추가함**
-  - `k8s.cluster.name=jamie-kr`
-  - `service.name=seaweedfs-s3-audit`
-  - `event.dataset=seaweedfs.s3.access`
+    - `k8s.cluster.name=jamie-kr`
+    - `service.name=seaweedfs-s3-audit`
+    - `event.dataset=seaweedfs.s3.access`
 - **audit pipeline은 S3 요청의 성공·실패와 actor를 추적할 수 있지만 object payload를 보관하는 data pipeline이 아님**
-  - audit record의 필드 구조는 SeaweedFS version과 operation에 따라 달라질 수 있으므로 query 전에 raw attribute를 확인해야 함
-  - audit retention은 일반 telemetry TTL을 따르므로 장기 보존·규제 요구가 있으면 별도 export와 retention 계약이 필요함
+    - audit record의 필드 구조는 SeaweedFS version과 operation에 따라 달라질 수 있으므로 query 전에 raw attribute를 확인해야 함
+    - audit retention은 일반 telemetry TTL을 따르므로 장기 보존·규제 요구가 있으면 별도 export와 retention 계약이 필요함
 
 ```sql title="최근 SeaweedFS S3 audit 조회"
 SELECT
@@ -219,18 +229,18 @@ LIMIT 100;
 ## 운영 검증과 변경 순서를 유지함
 
 - **변경 전에는 route, receiver, identity, storage policy와 NetworkPolicy의 소유자가 모두 GitOps desired state인지 확인함**
-  - runtime에서 Secret 또는 collector config를 직접 수정하면 다음 Argo CD sync에서 되돌아갈 수 있음
-  - SOPS plaintext를 terminal 출력, commit message, CI log와 debugging artifact에 남기지 않음
+    - runtime에서 Secret 또는 collector config를 직접 수정하면 다음 Argo CD sync에서 되돌아갈 수 있음
+    - SOPS plaintext를 terminal 출력, commit message, CI log와 debugging artifact에 남기지 않음
 - **배포 후에는 경계별 acceptance check를 순서대로 실행함**
-  1. 외부 OTLP 무인증 `401`과 인증 `200` 확인
-  2. gateway OTLP signal 및 exporter retry·queue 상태 확인
-  3. node agent의 `clickstack-ingest` 재수집 `0` record 확인
-  4. ClickHouse `hot_cold` 정책·TTL과 `cold_s3` part 확인
-  5. `otel-cold-tier` credential로 bucket scoped S3 요청 확인
-  6. S3 요청 뒤 `seaweedfs.s3.access` audit record 확인
+    1. 외부 OTLP 무인증 `401`과 인증 `200` 확인
+    2. gateway OTLP signal 및 exporter retry·queue 상태 확인
+    3. node agent의 `clickstack-ingest` 재수집 `0` record 확인
+    4. ClickHouse `hot_cold` 정책·TTL과 `cold_s3` part 확인
+    5. `otel-cold-tier` credential로 bucket scoped S3 요청 확인
+    6. S3 요청 뒤 `seaweedfs.s3.access` audit record 확인
 - **SeaweedFS PVC migration과 Released PV cleanup은 object integrity와 rollback 보존 기간을 분리해 승인함**
-  - migration 직후의 이전 `/k8s_data` PV를 삭제하면 storage path rollback 선택지가 사라짐
-  - data copy, SeaweedFS readiness, S3 access, cold part와 audit 수집을 모두 검증한 뒤 rollback PV 보존 종료를 진행함
+    - migration 직후의 이전 `/k8s_data` PV를 삭제하면 storage path rollback 선택지가 사라짐
+    - data copy, SeaweedFS readiness, S3 access, cold part와 audit 수집을 모두 검증한 뒤 rollback PV 보존 종료를 진행함
 
 ## 실행 제안
 

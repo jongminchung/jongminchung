@@ -22,23 +22,23 @@ sourceUrl: https://github.com/jongminchung/jongminchung/blob/main/apps/web/conte
 ## 두 개의 로드 밸런서 경계를 분리함
 
 - **API server LB는 클러스터 관리 트래픽을, Gateway LB는 사용자 요청을 처리하는 별도 시스템**임
-  - API server LB는 `6443/TCP`와 `/readyz`를 기준으로 control-plane 노드를 선택함
-  - Gateway LB는 `80/443`과 애플리케이션 헬스 Route를 기준으로 ingress 노드를 선택함
-  - 두 역할을 하나의 VIP나 같은 대상 그룹에 섞으면 장애 원인과 접근 제어가 결합됨
+    - API server LB는 `6443/TCP`와 `/readyz`를 기준으로 control-plane 노드를 선택함
+    - Gateway LB는 `80/443`과 애플리케이션 헬스 Route를 기준으로 ingress 노드를 선택함
+    - 두 역할을 하나의 VIP나 같은 대상 그룹에 섞으면 장애 원인과 접근 제어가 결합됨
 
 ![Separated control plane and Cilium Gateway data plane](https://kroki.io/plantuml/svg/eNptkU1rwzAMhu_-FSL3NIOVMXooS8oogcICY7ddNEftTB0p2E5LKf3vI3bCOthF6JUfffD6xQd0Yeis8kfDPTrsQEvXCxOH93CxBI50QD5YukP8N7ZyNnyAPVpPCnUQB2XbGZ7yD09OaStDC1nZ1LCrPnn1tFw-ZoAeyt7sqvl5i4HOeEnI80OxmqnteVcplpYg08LBic17i0xQFlWxicimgauC35MhOw5flGNvPLkTubStqf8yG2PN0IH05DBIgt4moW7TSsN7hxDzsqgiU8fS9d9hr3ySS6Ripm7qjqlQH4lbaKT1kZkKSkXPIM_XkycxJt3Uaj4KFot1mgur8UOEtbEEWnhvDmr0OrZEw8YQVbojdY163vlC3A6d_QHpNKXc)
 
 - **DNS 이름과 인증서도 역할별로 분리해야 함**
-  - `api.cluster.example.com`은 kubeconfig와 Cilium의 `k8sServiceHost`가 사용하는 관리 주소임
-  - `app.example.com`은 Gateway listener와 사용자 인증서가 사용하는 서비스 주소임
-  - 외부 Gateway 설정에 API server의 VIP를 재사용하지 않음
+    - `api.cluster.example.com`은 kubeconfig와 Cilium의 `k8sServiceHost`가 사용하는 관리 주소임
+    - `app.example.com`은 Gateway listener와 사용자 인증서가 사용하는 서비스 주소임
+    - 외부 Gateway 설정에 API server의 VIP를 재사용하지 않음
 
 ## 기본안은 전용 인그레스 노드를 사용함
 
 - **전용 infra 노드는 애플리케이션 외부 트래픽의 용량과 변경을 control-plane에서 분리함**
-  - Envoy CPU·메모리와 연결 수가 API server·etcd 자원과 경쟁하지 않음
-  - 보안 그룹에서 인터넷 또는 외부 LB 접근을 infra 노드에만 허용할 수 있음
-  - control-plane 유지보수와 Gateway 노드 유지보수를 독립적으로 수행할 수 있음
+    - Envoy CPU·메모리와 연결 수가 API server·etcd 자원과 경쟁하지 않음
+    - 보안 그룹에서 인터넷 또는 외부 LB 접근을 infra 노드에만 허용할 수 있음
+    - control-plane 유지보수와 Gateway 노드 유지보수를 독립적으로 수행할 수 있음
 
 ```bash
 kubectl label node infra-a infra-b \
@@ -53,24 +53,24 @@ kubectl get nodes \
 
 ```yaml title="values-gateway-infra-nodes.yaml"
 gatewayAPI:
-  enabled: true
-  hostNetwork:
     enabled: true
-    nodes:
-      matchLabels:
-        role: infra
-        component: gateway-api
+    hostNetwork:
+        enabled: true
+        nodes:
+            matchLabels:
+                role: infra
+                component: gateway-api
 ```
 
 - **Service 기반 모드에서는 외부 LB 대상 그룹이나 BGP/L2 정책의 node selector로 대상 노드를 제한함**
-  - NodePort 자체의 수신 범위와 외부 LB가 실제로 전송하는 대상 범위는 구분해야 함
-  - BGP advertisement와 L2 announcement는 선택된 노드와 Service 정책이 일치해야 함
+    - NodePort 자체의 수신 범위와 외부 LB가 실제로 전송하는 대상 범위는 구분해야 함
+    - BGP advertisement와 L2 announcement는 선택된 노드와 Service 정책이 일치해야 함
 
 ## control-plane 노드를 써야 할 때 조건을 강화함
 
 - **노드 수가 적거나 별도 worker가 없는 클러스터에서는 control-plane 노드가 Gateway 데이터 경로를 겸할 수 있음**
-  - 이 선택은 기술적 필수 조건이 아니라 비용·규모 제약에 따른 운영 트레이드오프임
-  - 공용 트래픽 폭증이 API server와 etcd 안정성에 영향을 줄 수 있음을 수용해야 함
+    - 이 선택은 기술적 필수 조건이 아니라 비용·규모 제약에 따른 운영 트레이드오프임
+    - 공용 트래픽 폭증이 API server와 etcd 안정성에 영향을 줄 수 있음을 수용해야 함
 
 - **control-plane taint와 Cilium Envoy 배치 상태를 먼저 확인해야 함**
 
@@ -88,32 +88,32 @@ kubectl label node cp-a cp-b cp-c gateway.cilium.io/expose=true
 
 ```yaml title="values-gateway-control-plane-nodes.yaml"
 gatewayAPI:
-  enabled: true
-  hostNetwork:
     enabled: true
-    nodes:
-      matchLabels:
-        gateway.cilium.io/expose: "true"
+    hostNetwork:
+        enabled: true
+        nodes:
+            matchLabels:
+                gateway.cilium.io/expose: "true"
 ```
 
 - **노드별 포트와 방화벽을 분리해야 함**
-  - `6443`은 관리자·노드·클러스터 구성 요소의 신뢰 네트워크만 허용함
-  - `80/443`은 외부 LB 소스 또는 인터넷 정책에 맞춰 별도로 허용함
-  - etcd `2379/2380`, kubelet `10250`, Cilium 상태 포트는 공개하지 않음
+    - `6443`은 관리자·노드·클러스터 구성 요소의 신뢰 네트워크만 허용함
+    - `80/443`은 외부 LB 소스 또는 인터넷 정책에 맞춰 별도로 허용함
+    - etcd `2379/2380`, kubelet `10250`, Cilium 상태 포트는 공개하지 않음
 
 ## control plane 장애와 데이터 plane 장애를 따로 시험함
 
 - **API server 한 대 장애는 reconcile 용량을 줄이지만 Gateway 사용자 요청을 즉시 중단시키면 안 됨**
-  - `Gateway` 변경이 없는 동안 기존 Envoy 설정이 계속 요청을 처리하는지 확인함
-  - operator leader 전환과 condition 갱신 지연을 관찰함
+    - `Gateway` 변경이 없는 동안 기존 Envoy 설정이 계속 요청을 처리하는지 확인함
+    - operator leader 전환과 condition 갱신 지연을 관찰함
 
 - **모든 API server가 일시적으로 단절되면 새 Route·Secret·Endpoint 변경 반영이 멈출 수 있음**
-  - 기존 경로의 지속 여부와 신규 배포의 실패를 구분해 기록함
-  - 인증서 갱신과 Endpoint 변화가 필요한 장애 구간의 최대 허용 시간을 정함
+    - 기존 경로의 지속 여부와 신규 배포의 실패를 구분해 기록함
+    - 인증서 갱신과 Endpoint 변화가 필요한 장애 구간의 최대 허용 시간을 정함
 
 - **Gateway 노드 한 대 장애는 외부 LB나 라우팅 계층이 해당 대상을 제거해야 함**
-  - control-plane quorum이 유지되어도 외부 LB가 실패 노드를 계속 선택하면 사용자 오류가 지속됨
-  - 최소 두 Gateway 노드를 서로 다른 zone 또는 물리 호스트에 배치함
+    - control-plane quorum이 유지되어도 외부 LB가 실패 노드를 계속 선택하면 사용자 오류가 지속됨
+    - 최소 두 Gateway 노드를 서로 다른 zone 또는 물리 호스트에 배치함
 
 | 장애                  | 예상 영향                        | 확인 지표                          |
 | --------------------- | -------------------------------- | ---------------------------------- |
@@ -125,10 +125,10 @@ gatewayAPI:
 ## 가용성 검증 기준을 수치로 남김
 
 - **각 계층의 복구 목표를 별도로 측정해야 함**
-  - API LB의 control-plane 대상 제거 시간
-  - Gateway LB 또는 BGP의 ingress 노드 철회 시간
-  - DNS TTL과 health-checked DNS의 변경 전파 시간
-  - Envoy가 Endpoint 변화를 반영하는 시간
+    - API LB의 control-plane 대상 제거 시간
+    - Gateway LB 또는 BGP의 ingress 노드 철회 시간
+    - DNS TTL과 health-checked DNS의 변경 전파 시간
+    - Envoy가 Endpoint 변화를 반영하는 시간
 
 - **정상 상태 검증은 관리 경로와 사용자 경로를 동시에 확인함**
 
@@ -140,9 +140,9 @@ curl --fail-with-body https://app.example.com/healthz
 ```
 
 - **control-plane 노드를 Gateway로 겸용한다면 부하 보호 장치를 추가해야 함**
-  - Envoy resource request·limit와 노드 예약 자원을 설정함
-  - 외부 LB connection limit와 rate limit를 사용함
-  - API server와 etcd의 지연·디스크·CPU 경보를 Gateway 트래픽 지표와 함께 비교함
+    - Envoy resource request·limit와 노드 예약 자원을 설정함
+    - 외부 LB connection limit와 rate limit를 사용함
+    - API server와 etcd의 지연·디스크·CPU 경보를 Gateway 트래픽 지표와 함께 비교함
 
 ## 실행 제안
 

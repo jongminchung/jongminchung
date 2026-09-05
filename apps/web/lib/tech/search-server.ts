@@ -116,15 +116,13 @@ function emptyQueryResults(locale: Locale): readonly SortedResult[] {
   const blog = snapshot.publishedTech.blogPosts
     .filter((post) => post.locale === locale)
     .slice(0, 4)
-    .map(
-      (post): SortedResult => ({
-        id: post.href,
-        url: post.href,
-        type: "page",
-        content: displayTitleFor(post),
-        breadcrumbs: ["Blog"],
-      }),
-    );
+    .map((post): SortedResult => ({
+      id: post.href,
+      url: post.href,
+      type: "page",
+      content: displayTitleFor(post),
+      breadcrumbs: ["Blog"],
+    }));
   const docs = docsCategoryIds
     .map((area) => {
       const page = snapshot.publishedTech.docsPages.find(
@@ -136,18 +134,16 @@ function emptyQueryResults(locale: Locale): readonly SortedResult[] {
       return page === undefined ? undefined : { area, page };
     })
     .filter((entry) => entry !== undefined)
-    .map(
-      ({ area, page }): SortedResult => ({
-        id: page.href,
-        url: page.href,
-        type: "page",
-        content: displayTitleFor(page),
-        breadcrumbs: [
-          page.documentKind ?? "Docs",
-          getDocsCategory(area, locale).title,
-        ],
-      }),
-    );
+    .map(({ area, page }): SortedResult => ({
+      id: page.href,
+      url: page.href,
+      type: "page",
+      content: displayTitleFor(page),
+      breadcrumbs: [
+        page.documentKind ?? "Docs",
+        getDocsCategory(area, locale).title,
+      ],
+    }));
   return interleaveSearchResults(blog, docs, 8);
 }
 

@@ -21,34 +21,34 @@
 ## 현재 문제와 근거
 
 - **test 이름과 검증 내용의 연결이 약한 사례가 있음**
-  - `업데이트 휴가 휴가 목록`
-  - `공급자 전원 상태를 펀치함`
-  - `제조원`
-  - `표시되지 않고 외부 외부를 생성함`
-  - 실패 시 이름만으로 깨진 제품 계약을 판단하기 어려움
+    - `업데이트 휴가 휴가 목록`
+    - `공급자 전원 상태를 펀치함`
+    - `제조원`
+    - `표시되지 않고 외부 외부를 생성함`
+    - 실패 시 이름만으로 깨진 제품 계약을 판단하기 어려움
 - **실제 corpus test가 알고리즘 세부 계약까지 소유함**
-  - `documents.test.ts`가 한국어 Deep Dive 문서 29개의 전체 순서를 ID 배열로 고정함
-  - 정상적인 문서 추가·삭제·날짜 변경도 같은 배열 failure를 발생시킴
-  - 최신순·동률 order·ID tie-break 규칙을 작은 fixture로 직접 설명하지 않음
+    - `documents.test.ts`가 한국어 Deep Dive 문서 29개의 전체 순서를 ID 배열로 고정함
+    - 정상적인 문서 추가·삭제·날짜 변경도 같은 배열 failure를 발생시킴
+    - 최신순·동률 order·ID tie-break 규칙을 작은 fixture로 직접 설명하지 않음
 - **unit과 integration 책임이 test data 선택에서 구분되지 않음**
-  - ranking 함수의 pure behavior와 실제 repository content의 현재 결과가 같은 test file에 존재함
-  - corpus 변경과 ranking 회귀의 원인을 분리하기 어려움
+    - ranking 함수의 pure behavior와 실제 repository content의 현재 결과가 같은 test file에 존재함
+    - corpus 변경과 ranking 회귀의 원인을 분리하기 어려움
 
 ## 채택할 내용
 
 - **test 이름을 조건과 관찰 결과 중심으로 정리함**
-  - `[성공] 저장된 locale을 Accept-Language보다 우선함`
-  - `[실패] 알 수 없는 host와 내부 route 직접 접근을 거부함`
-  - `[성공] 같은 section에서 최신 update와 order로 문서를 정렬함`
+    - `[성공] 저장된 locale을 Accept-Language보다 우선함`
+    - `[실패] 알 수 없는 host와 내부 route 직접 접근을 거부함`
+    - `[성공] 같은 section에서 최신 update와 order로 문서를 정렬함`
 - **문서 정렬과 related ranking을 작은 fixture로 검증함**
-  - update date 우선순위
-  - 같은 날짜의 navigation order
-  - ID tie-break
-  - shared tag와 same-section fallback
+    - update date 우선순위
+    - 같은 날짜의 navigation order
+    - ID tie-break
+    - shared tag와 same-section fallback
 - **실제 corpus 검증은 제품 연결 smoke로 제한함**
-  - locale별 section이 비어 있지 않음
-  - URL과 document ID가 중복되지 않음
-  - 대표 문서가 검색·navigation·related 결과에 포함됨
+    - locale별 section이 비어 있지 않음
+    - URL과 document ID가 중복되지 않음
+    - 대표 문서가 검색·navigation·related 결과에 포함됨
 - **기존 assertion이 나타내는 제품 계약을 먼저 확인한 뒤 이름만 변경함**
 
 ## 채택하지 않을 내용

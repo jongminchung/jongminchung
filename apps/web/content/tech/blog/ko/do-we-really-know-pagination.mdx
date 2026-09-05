@@ -403,10 +403,10 @@ ZRANGE feed:sess:8f3a 40 59 REV                                      # "3페이�
 
 ```json
 {
-  "reqId": "rank-8f3a",
-  "served": [1024, 887, 1201],
-  "candidateOffset": 120,
-  "v": 2
+    "reqId": "rank-8f3a",
+    "served": [1024, 887, 1201],
+    "candidateOffset": 120,
+    "v": 2
 }
 ```
 
@@ -502,19 +502,19 @@ GraphQL 진영에는 Relay Connection 스펙이 사실상의 표준이다.
 
 ```graphql
 {
-  orders(first: 20, after: "b3JkZXI6MTg2MDQ0OA==") {
-    edges {
-      cursor
-      node {
-        id
-        totalAmount
-      }
+    orders(first: 20, after: "b3JkZXI6MTg2MDQ0OA==") {
+        edges {
+            cursor
+            node {
+                id
+                totalAmount
+            }
+        }
+        pageInfo {
+            hasNextPage
+            endCursor
+        }
     }
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
-  }
 }
 ```
 
@@ -558,10 +558,10 @@ URL과의 관계도 여기서 갈린다. `?page=3`은 새로고침해도, 북마
 
 ```typescript
 const { data, fetchNextPage, hasNextPage } = useInfiniteQuery({
-  queryKey: ["orders", filters], // 필터가 바뀌면 캐시도 분리된다
-  queryFn: ({ pageParam }) => fetchOrders({ cursor: pageParam, ...filters }),
-  initialPageParam: undefined,
-  getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    queryKey: ["orders", filters], // 필터가 바뀌면 캐시도 분리된다
+    queryFn: ({ pageParam }) => fetchOrders({ cursor: pageParam, ...filters }),
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
 });
 ```
 

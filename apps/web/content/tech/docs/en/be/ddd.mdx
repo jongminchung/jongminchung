@@ -57,14 +57,14 @@ A domain model is valuable because it makes invalid states difficult to construc
 
 ```ts
 type ConfirmedOrder = Readonly<{
-  kind: "confirmed";
-  orderId: string;
-  confirmedAt: Date;
+    kind: "confirmed";
+    orderId: string;
+    confirmedAt: Date;
 }>;
 
 type ConfirmationResult =
-  | Readonly<{ kind: "accepted"; order: ConfirmedOrder }>
-  | Readonly<{ kind: "rejected"; reason: "empty" | "already-confirmed" }>;
+    | Readonly<{ kind: "accepted"; order: ConfirmedOrder }>
+    | Readonly<{ kind: "rejected"; reason: "empty" | "already-confirmed" }>;
 ```
 
 Represent state combinations with discriminated unions instead of several booleans. Return recoverable domain failures as values. Reserve fast failure for programming errors and broken invariants.
@@ -123,11 +123,11 @@ Model tests verify observable rules, not private fields. Use examples to explain
 
 ```ts
 it("does not confirm an order twice", () => {
-  const first = order.confirm(clock.now());
-  expect(first.kind).toBe("accepted");
+    const first = order.confirm(clock.now());
+    expect(first.kind).toBe("accepted");
 
-  const second = order.confirm(clock.now());
-  expect(second).toEqual({ kind: "rejected", reason: "already-confirmed" });
+    const second = order.confirm(clock.now());
+    expect(second).toEqual({ kind: "rejected", reason: "already-confirmed" });
 });
 ```
 

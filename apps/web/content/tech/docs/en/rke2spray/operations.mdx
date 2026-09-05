@@ -79,10 +79,10 @@ sourceUrl: https://github.com/jongminchung/rke2spray/blob/main/docs/onboarding/0
 | Health and snapshot helpers                      | No equivalent stable root Playbook API in this compatibility contract                                             | Keeps read-only health checks and RKE2 snapshot creation under `extra_playbooks/` and Make targets                                                                                        | Kubespray extension point  |
 
 <Callout title="Compatibility scope" type="info">
-  The shared Playbook name preserves the public operational intent, not the
-  kubeadm task implementation. Consult
-  [Compatibility](/en/docs/rke2spray/compatibility) before assuming that an
-  upstream variable or internal Role has an RKE2 equivalent.
+    The shared Playbook name preserves the public operational intent, not the
+    kubeadm task implementation. Consult
+    [Compatibility](/en/docs/rke2spray/compatibility) before assuming that an
+    upstream variable or internal Role has an RKE2 equivalent.
 </Callout>
 
 ## Enforce destructive-operation boundaries
@@ -94,8 +94,8 @@ sourceUrl: https://github.com/jongminchung/rke2spray/blob/main/docs/onboarding/0
 - **Never bypass confirmations for `reset`, `remove`, `recover`, or AddOn pruning.**
 
 <Callout title="Operational boundary" type="warning">
-  Off-host snapshot copies and long-term retention belong to a separate backup
-  system; creating a local snapshot alone does not complete disaster recovery.
+    Off-host snapshot copies and long-term retention belong to a separate backup
+    system; creating a local snapshot alone does not complete disaster recovery.
 </Callout>
 
 ## Conclusion

@@ -100,7 +100,7 @@ Web MDX의 app route는 기존 content validation과 build가 별도로 검증�
 | Playwright snapshot  | 렌더링 결과                      | `test:e2e -- --update-snapshots` | visual test와 diff 직접 검토   |
 
 - `.source`는 Fumadocs가 생성하는 비커밋 산출물이므로 직접 수정하지 않음
-  - 새 MDX 추가 후 `bun run --filter @jongminchung/web postinstall` 또는 Web `build`로 다시 생성함
+    - 새 MDX 추가 후 `bun run --filter @jongminchung/web postinstall` 또는 Web `build`로 다시 생성함
 - PlantUML은 Kroki GET URL만 빌드하므로 Web build가 Kroki 네트워크 상태에 의존하지 않음
 
 ## GitHub Actions

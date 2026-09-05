@@ -12,9 +12,9 @@ sourceUrl: https://playwright.dev/docs/test-snapshots
 ---
 
 <Callout title="핵심 원칙" type="info">
-  스크린샷이 같다는 사실만으로 기능이 올바르다고 볼 수 없음. 사용자에게 보이는
-  동작을 assertion으로 확인하고, 그 동작이 만들어 낸 안정된 화면을 스크린샷으로
-  비교할 때 시각 회귀 테스트가 제품 계약이 됨
+    스크린샷이 같다는 사실만으로 기능이 올바르다고 볼 수 없음. 사용자에게 보이는
+    동작을 assertion으로 확인하고, 그 동작이 만들어 낸 안정된 화면을
+    스크린샷으로 비교할 때 시각 회귀 테스트가 제품 계약이 됨
 </Callout>
 
 Playwright의 [`toHaveScreenshot()`](https://playwright.dev/docs/test-snapshots)은 첫 실행에서 기준 이미지를 만들고 이후 실행에서 실제 렌더링과 비교한다. 이 비교는 레이아웃, 색상, 타이포그래피와 반응형 배치의 변화를 한 번에 찾을 수 있지만, 데이터와 실행 환경이 흔들리거나 변경된 기준선을 검토 없이 승인하면 신뢰할 수 없는 테스트가 된다.
@@ -43,22 +43,22 @@ Playwright의 [`toHaveScreenshot()`](https://playwright.dev/docs/test-snapshots)
 
 ```ts
 test("visual: overview-wide-light", async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.addInitScript(() => {
-    localStorage.setItem("tech-theme", "light");
-  });
-  await page.goto("/en");
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.addInitScript(() => {
+        localStorage.setItem("tech-theme", "light");
+    });
+    await page.goto("/en");
 
-  await expect(
-    page.getByRole("heading", { level: 1, name: "Engineering" }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("navigation", { name: "Editorial navigation" }),
-  ).toBeVisible();
+    await expect(
+        page.getByRole("heading", { level: 1, name: "Engineering" }),
+    ).toBeVisible();
+    await expect(
+        page.getByRole("navigation", { name: "Editorial navigation" }),
+    ).toBeVisible();
 
-  await expect(page).toHaveScreenshot("overview-wide-light.png", {
-    fullPage: true,
-  });
+    await expect(page).toHaveScreenshot("overview-wide-light.png", {
+        fullPage: true,
+    });
 });
 ```
 

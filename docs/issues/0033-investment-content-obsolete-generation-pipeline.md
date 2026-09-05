@@ -21,33 +21,33 @@
 ## 현재 문제와 근거
 
 - **runtime module에서 CLI module로 향하는 의존성이 있음**
-  - `content-repository.ts`가 `scripts/build-investment-content.ts`의 `readInvestmentNotes`와 `validateInvestmentTranslations`를 사용함
-  - 파일 이름과 실제 역할이 일치하지 않아 runtime owner를 찾기 어려움
+    - `content-repository.ts`가 `scripts/build-investment-content.ts`의 `readInvestmentNotes`와 `validateInvestmentTranslations`를 사용함
+    - 파일 이름과 실제 역할이 일치하지 않아 runtime owner를 찾기 어려움
 - **generated artifact 경로에는 실제 consumer가 없음**
-  - `build-investment-content.ts`가 `generated/investment-manifest.json`과 `generated/investment-loaders.ts`를 구성함
-  - `apps/web/generated` 디렉터리가 존재하지 않음
-  - production source와 package script가 generated manifest·loader를 읽거나 생성하지 않음
+    - `build-investment-content.ts`가 `generated/investment-manifest.json`과 `generated/investment-loaders.ts`를 구성함
+    - `apps/web/generated` 디렉터리가 존재하지 않음
+    - production source와 package script가 generated manifest·loader를 읽거나 생성하지 않음
 - **복구 안내와 실제 명령 계약이 불일치함**
-  - stale artifact 오류는 `pnpm --filter @jongminchung/web run investment:build`를 안내함
-  - `apps/web/package.json`에는 `investment:build` script가 없음
+    - stale artifact 오류는 `pnpm --filter @jongminchung/web run investment:build`를 안내함
+    - `apps/web/package.json`에는 `investment:build` script가 없음
 - **경로 해석이 실행 위치에 의존함**
-  - `process.cwd()`가 `apps/web`로 끝나는지 검사해 app root를 결정함
-  - module 위치가 고정되어 있음에도 호출한 작업 디렉터리에 따라 경로 계산 방식이 달라짐
+    - `process.cwd()`가 `apps/web`로 끝나는지 검사해 app root를 결정함
+    - module 위치가 고정되어 있음에도 호출한 작업 디렉터리에 따라 경로 계산 방식이 달라짐
 
 ## 채택할 내용
 
 - **Investment source parsing과 collection validation을 실제 runtime module로 분리함**
-  - MDX file discovery와 frontmatter parsing
-  - metadata와 본문 component 계약 검증
-  - locale pair와 공유 metadata 검증
-  - source relative path 검증
+    - MDX file discovery와 frontmatter parsing
+    - metadata와 본문 component 계약 검증
+    - locale pair와 공유 metadata 검증
+    - source relative path 검증
 - **content repository가 생성 CLI가 아닌 source module을 직접 사용하도록 함**
 - **module 위치를 기준으로 content root와 workspace-relative path를 계산함**
 - **source와 validation failure를 작은 fixture로 검증함**
-  - locale 누락
-  - 공유 metadata 불일치
-  - path와 metadata ID 불일치
-  - `SourceSummary`·`JamieNotes` section 누락
+    - locale 누락
+    - 공유 metadata 불일치
+    - path와 metadata ID 불일치
+    - `SourceSummary`·`JamieNotes` section 누락
 
 ## 채택하지 않을 내용
 
@@ -86,15 +86,15 @@
 ## 처리 결과
 
 - **Investment source collection의 소유권을 `lib/invest/source.ts`로 분리함**
-  - Fumadocs source를 manifest로 변환하고 locale pair·metadata·path·본문 section을 한 경계에서 검증함
-  - `content-repository.ts`는 생성 script가 아닌 source module의 검증된 collection만 소비함
+    - Fumadocs source를 manifest로 변환하고 locale pair·metadata·path·본문 section을 한 경계에서 검증함
+    - `content-repository.ts`는 생성 script가 아닌 source module의 검증된 collection만 소비함
 - **과거 생성 pipeline의 잔여 helper를 제거함**
-  - consumer가 없는 generated file write·stale 비교·상대 경로 helper를 `generation-utils.ts`에서 제거함
-  - Excalidraw가 실제 사용하는 결정적 file discovery helper만 유지함
+    - consumer가 없는 generated file write·stale 비교·상대 경로 helper를 `generation-utils.ts`에서 제거함
+    - Excalidraw가 실제 사용하는 결정적 file discovery helper만 유지함
 - **작은 source fixture로 실패 원인을 구분함**
-  - locale 누락·공유 metadata 불일치·metadata와 path 불일치·필수 section 누락을 각각 검증함
+    - locale 누락·공유 metadata 불일치·metadata와 path 불일치·필수 section 누락을 각각 검증함
 - **현재 Fumadocs source-first 구조에는 `generated/investment-*`와 `investment:build` 경로가 존재하지 않음**
-  - module 위치가 고정된 source API를 사용하므로 실행 `cwd`에 따른 Investment path 분기가 없음
+    - module 위치가 고정된 source API를 사용하므로 실행 `cwd`에 따른 Investment path 분기가 없음
 - **검증 결과는 Investment 관련 3개 파일·13개 test와 Web 전체 31개 파일·121개 test 통과임**
-  - obsolete 생성 경로와 제거한 helper의 잔여 참조가 없음
-  - Web typecheck와 production build가 통과함
+    - obsolete 생성 경로와 제거한 helper의 잔여 참조가 없음
+    - Web typecheck와 production build가 통과함
