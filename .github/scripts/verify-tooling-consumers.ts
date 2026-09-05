@@ -18,6 +18,12 @@ const published = process.argv.includes("--published");
 const directory = await mkdtemp(join(tmpdir(), "tooling-consumer-"));
 const options = {
   cwd: directory,
+  // A mutable version must not reuse npm metadata cached by an earlier consumer.
+  env: {
+    ...process.env,
+    npm_config_cache: join(directory, ".npm-cache"),
+    npm_config_prefer_online: "true",
+  },
   encoding: "utf8" as const,
   maxBuffer: 10 * 1024 * 1024,
 };
