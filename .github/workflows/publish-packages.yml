@@ -2,6 +2,17 @@ name: Publish Packages
 
 on:
   workflow_dispatch:
+    inputs:
+      package:
+        description: Package to replace at version 1.0.0
+        type: choice
+        required: true
+        default: tooling
+        options: [tooling, ui, all]
+
+concurrency:
+  group: publish-personal-packages
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -14,7 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [tooling, ui]
+        package: ${{ fromJSON(inputs.package == 'all' && '["tooling","ui"]' || format('["{0}"]', inputs.package)) }}
         node-version: [24, 26]
     steps:
       - uses: actions/checkout@v7
@@ -41,11 +52,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - package: tooling
-            import-specifier: "@jongminchung/tooling/oxfmt"
-          - package: ui
-            import-specifier: "@jongminchung/ui/lib/utils"
+        package: ${{ fromJSON(inputs.package == 'all' && '["tooling","ui"]' || format('["{0}"]', inputs.package)) }}
     steps:
       - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
@@ -58,6 +65,11 @@ jobs:
       - name: Install package dependencies
         run: bun install --frozen-lockfile --ignore-scripts
 
+      - name: Build the exact archive before replacing the published version
+        run: bun pm pack --cwd packages/${{ matrix.package }} --filename "${RUNNER_TEMP}/package.tgz"
+      - name: Verify formatter-only and full lint consumers
+        if: matrix.package == 'tooling'
+        run: node .github/scripts/verify-tooling-consumers.ts "${RUNNER_TEMP}/package.tgz"
       - name: Configure GitHub Packages auth
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
@@ -71,12 +83,17 @@ jobs:
         run: >-
           .github/scripts/delete-version-ids-script.sh
           "$GITHUB_REPOSITORY_OWNER" "${{ matrix.package }}" "1.0.0"
-      - run: bun publish --cwd packages/${{ matrix.package }} --access public
+      - run: npm publish "${RUNNER_TEMP}/package.tgz" --access public --registry https://npm.pkg.github.com
       - name: Verify registry integrity and clean consumer import
         run: >-
           node .github/scripts/verify-published-package.ts
           "@jongminchung/${{ matrix.package }}" "1.0.0"
-          "${{ matrix.import-specifier }}"
+          "${{ matrix.package == 'tooling' && '@jongminchung/tooling/oxfmt' || '@jongminchung/ui/lib/utils' }}"
+      - name: Verify exact tooling archive and both published consumer profiles
+        if: matrix.package == 'tooling'
+        env:
+          GITHUB_PACKAGES_TOKEN: ${{ secrets.GH_PAT }}
+        run: node .github/scripts/verify-tooling-consumers.ts "${RUNNER_TEMP}/package.tgz" --published
       - name: Remove GitHub Packages auth
         if: ${{ always() }}
         run: |

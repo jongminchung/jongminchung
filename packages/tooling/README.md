@@ -15,7 +15,9 @@ that has `read:packages`; public package downloads still require authentication.
 Keep the token in the environment rather than committing it to `.npmrc`.
 
 ```bash
-npm install --save-dev @jongminchung/tooling oxfmt oxlint oxlint-tsgolint
+npm install --save-dev @jongminchung/tooling@1.0.0 oxfmt@0.66.0
+# JS/TS lint consumers also install these optional peers explicitly:
+npm install --save-dev oxlint@1.81.0 oxlint-tsgolint@7.0.2001
 ```
 
 Install the actual formatter and linter in each consuming project. This package only centralizes the
@@ -27,7 +29,9 @@ and CommonJS `require()` is not part of the supported package contract.
 
 ## Version Policy
 
-The manual package workflow always replaces the personal `1.0.0` package version. It is a mutable
+Select `tooling` in the manual package workflow to replace only this package. The workflow builds
+and validates the exact archive before deletion, then compares registry and installed integrity.
+It always replaces the personal `1.0.0` package version. It is a mutable
 snapshot channel rather than a reproducible SemVer release. Refresh the downstream resolution and
 commit the changed lockfile whenever a replacement is published:
 
@@ -39,11 +43,11 @@ bun update --force @jongminchung/tooling@1.0.0
 
 ```json
 {
-	"scripts": {
-		"lint": "oxlint --config oxlint.config.ts .",
-		"fmt": "oxfmt --config .oxfmtrc.ts",
-		"fmt:check": "oxfmt --config .oxfmtrc.ts --check"
-	}
+    "scripts": {
+        "lint": "oxlint --config oxlint.config.ts .",
+        "fmt": "oxfmt --config oxfmt.config.ts .",
+        "fmt:check": "oxfmt --config oxfmt.config.ts --check ."
+    }
 }
 ```
 
@@ -55,7 +59,7 @@ Oxlint configs extend the shared TypeScript config without adding workspace-loca
 import { defineOxlintConfig } from "@jongminchung/tooling/oxlint";
 
 export default defineOxlintConfig({
-	ignorePatterns: ["generated/**"],
+    ignorePatterns: ["generated/**"],
 });
 ```
 
@@ -69,17 +73,17 @@ has a reason plus an executable bad/good example immediately above it:
 
 ```ts
 defineOxlintConfig({
-	rules: {
-		// any removes checking from every later property access, so narrow an external boundary instead
-		// Bad: (window as any).hostApi
-		// Good: extend Window and access window.hostApi through the declared contract
-		"typescript/no-explicit-any": "error",
+    rules: {
+        // any removes checking from every later property access, so narrow an external boundary instead
+        // Bad: (window as any).hostApi
+        // Good: extend Window and access window.hostApi through the declared contract
+        "typescript/no-explicit-any": "error",
 
-		// role=group does not always mean fieldset, which could change non-form UI semantics
-		// Allowed: <div role="group" aria-label="Editor tools">...</div>
-		// Rejected elsewhere: <div role="button">...</div> remains covered by recommended a11y rules
-		"jsx-a11y/prefer-tag-over-role": "off",
-	},
+        // role=group does not always mean fieldset, which could change non-form UI semantics
+        // Allowed: <div role="group" aria-label="Editor tools">...</div>
+        // Rejected elsewhere: <div role="button">...</div> remains covered by recommended a11y rules
+        "jsx-a11y/prefer-tag-over-role": "off",
+    },
 });
 ```
 
@@ -93,13 +97,15 @@ names for `label-has-associated-control`, and named scroll regions for
 import { defineOxfmtConfig } from "@jongminchung/tooling/oxfmt";
 
 export default defineOxfmtConfig({
-	// Source: content/topic files; generated counterpart: tracked manifests and search indexes.
-	ignorePatterns: ["generated/", "public/search/"],
+    // Source: content/topic files; generated counterpart: tracked manifests and search indexes.
+    ignorePatterns: ["generated/", "public/search/"],
 });
 ```
 
-Formatting style stays on Oxfmt's zero-config defaults: width, quotes, semicolons, trailing commas,
-and indentation are not copied into this package. The shared implementation adds only two
+Formatting width, indentation, line endings and the final newline come from the consumer's
+`.editorconfig`; these fields are intentionally absent from the shared config. Use width 80, spaces 2,
+Python/Markdown/MDX spaces 4 and Go/Makefile tabs. Preserve Markdown trailing spaces. Ruff consumers
+must mirror the Python values in `pyproject.toml` because Ruff does not read `.editorconfig`. The shared implementation adds only two
 repository decisions: imports use Oxfmt's default group ordering without blank lines between groups,
 and `package.json` sorting remains disabled unless a consumer enables it explicitly.
 

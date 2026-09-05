@@ -15,7 +15,7 @@ export default defineOxlintConfig({
       files: ["apps/web/**/*.{ts,tsx}"],
       plugins: ["typescript", "unicorn", "oxc", "react", "jsx-a11y", "nextjs"],
       rules: {
-        "react/react-compiler": "error",
+        // Oxlint 1.81 replaces react-compiler with the recommended correctness rules.
         "react/rules-of-hooks": "error",
       },
     },
