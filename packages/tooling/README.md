@@ -15,7 +15,7 @@ that has `read:packages`; public package downloads still require authentication.
 Keep the token in the environment rather than committing it to `.npmrc`.
 
 ```bash
-npm install --save-dev @jongminchung/tooling@1.0.0 oxfmt@0.66.0
+npm install --save-dev --omit=peer @jongminchung/tooling@1.0.0 oxfmt@0.66.0
 # JS/TS lint consumers also install these optional peers explicitly:
 npm install --save-dev oxlint@1.81.0 oxlint-tsgolint@7.0.2001
 ```
@@ -23,6 +23,12 @@ npm install --save-dev oxlint@1.81.0 oxlint-tsgolint@7.0.2001
 Install the actual formatter and linter in each consuming project. This package only centralizes the
 shared settings. `oxlint-tsgolint` is required because the shared Oxlint config enables type-aware
 rules.
+
+GitHub Packages currently omits `peerDependenciesMeta` from registry metadata even though the
+published archive includes it. Formatter-only npm consumers must use `--omit=peer`; Bun consumers
+set `[install] peer = false` in `bunfig.toml` (or install with `--omit=peer`) and explicitly declare
+`oxfmt`. Full lint consumers explicitly declare all three tools. The release verifier checks the
+archive's optional-peer declarations and both installed consumer profiles.
 
 The package ships ESM only. `defineOxfmtConfig` and `defineOxlintConfig` are its JavaScript APIs,
 and CommonJS `require()` is not part of the supported package contract.

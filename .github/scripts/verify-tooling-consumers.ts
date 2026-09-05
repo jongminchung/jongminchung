@@ -63,12 +63,22 @@ try {
       "--ignore-scripts",
       "--no-audit",
       "--no-fund",
+      // GitHub Packages omits peerDependenciesMeta from its packument.
+      // Explicit tools plus omit=peer preserve formatter-only consumers there.
+      ...(published ? ["--omit=peer"] : []),
       published ? `${packageName}@1.0.0` : archivePath,
       "oxfmt@0.66.0",
     ],
     options,
   );
+  const manifest = JSON.parse(
+    await readFile(
+      join(directory, "node_modules", packageName, "package.json"),
+      "utf8",
+    ),
+  ) as { peerDependenciesMeta: Record<string, { optional?: boolean }> };
   for (const dependency of ["oxlint", "oxlint-tsgolint"]) {
+    assert.equal(manifest.peerDependenciesMeta[dependency]?.optional, true);
     await assert.rejects(
       access(join(directory, "node_modules", dependency)),
       `${dependency} must remain optional`,
