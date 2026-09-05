@@ -66,7 +66,7 @@
     - 우선순위: P3
     - 재개 조건: 외부 저장소 consumer·복사 설치·공개 install block 요구 중 하나의 발생
 - [`0011`: 미사용 코드·export·dependency audit 도입 검토](0011-unused-code-and-dependency-audit.md)
-    - 상태: 조건부 보류
+    - 상태: 미사용 export 검사는 조건부 보류; 파일·의존성 검사는 적용
     - 우선순위: P2
     - 재개 조건: Next route·generated content entry를 좁은 설정으로 모델링할 수 있는 audit 정확도의 확보
 - [`0039`: Web Tech 문서의 Starlight 전환 영향 검토](0039-web-tech-starlight-migration-assessment.md)

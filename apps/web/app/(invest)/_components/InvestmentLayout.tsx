@@ -6,6 +6,7 @@ import { themeLabelTemplateFor } from "#lib/i18n-messages";
 import { getInvestmentMessages } from "#lib/invest/copy";
 import { alternateLocale } from "#lib/locale";
 import { siteOrigins, type Locale } from "#lib/site-routing";
+import { InvestmentLocaleLink } from "./InvestmentLocaleLink";
 
 /** Invest 도메인의 공통 header와 footer를 렌더링함 */
 export function InvestmentLayout({
@@ -31,6 +32,7 @@ export function InvestmentLayout({
         homeHref={`/${locale}`}
         localeHref={`/${alternate}`}
         localeLabel={alternate.toUpperCase()}
+        localeControl={<InvestmentLocaleLink locale={locale} />}
         mobileMenuCloseLabel={text.closeMenu}
         mobileMenuLabel={text.mobileMenu}
         navigation={[

@@ -1,104 +1,11 @@
 @import "@jongminchung/ui/globals.css";
-@import "../mdx-theme.css";
+/* 공통 utility는 한 번에 정렬하여 문서 전환 후에도 반응형 우선순위를 유지함 */
 @import "fumadocs-ui/css/generated/docs.css";
 @import "fumadocs-ui/css/generated/shared.css";
 @import "../theme.css";
+/* 본문에서 쓸 fd utility를 생성하되 문서 CSS 자체는 해당 경로에서 로드함 */
+@reference "fumadocs-ui/css/shadcn.css";
+@reference "fumadocs-ui/css/lib/base.css";
 
-/* Tech에서 사용하는 Docs layout과 typography만 생성함 */
-@plugin "@fumadocs/tailwind/typography";
 @source "./**/*.{ts,tsx,mdx}";
 @source not "./**/*.{test,spec}.{ts,tsx}";
-
-@keyframes showcase-motion-token {
-  0%,
-  8% {
-    transform: translate(76px, 175px);
-    opacity: 0;
-  }
-  14% {
-    opacity: 1;
-  }
-  32% {
-    transform: translate(233px, 175px);
-    opacity: 1;
-  }
-  54% {
-    transform: translate(391px, 175px);
-    opacity: 1;
-  }
-  76% {
-    transform: translate(548px, 175px);
-    opacity: 1;
-  }
-  88%,
-  100% {
-    transform: translate(548px, 175px);
-    opacity: 0;
-  }
-}
-
-@keyframes showcase-motion-node {
-  0%,
-  100% {
-    opacity: 0.42;
-    transform: translateY(0);
-  }
-  12%,
-  28% {
-    opacity: 1;
-    transform: translateY(-7px);
-  }
-  36% {
-    opacity: 0.42;
-    transform: translateY(0);
-  }
-}
-
-@keyframes showcase-motion-progress {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
-}
-
-.showcase-motion-token {
-  animation: showcase-motion-token 7s cubic-bezier(0.65, 0, 0.35, 1) infinite;
-}
-
-.showcase-motion-node {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: showcase-motion-node 7s ease-in-out infinite;
-}
-
-.showcase-motion-node-2 {
-  animation-delay: 1.45s;
-}
-
-.showcase-motion-node-3 {
-  animation-delay: 2.9s;
-}
-
-.showcase-motion-node-4 {
-  animation-delay: 4.35s;
-}
-
-.showcase-motion-progress {
-  transform-box: fill-box;
-  transform-origin: left;
-  animation: showcase-motion-progress 7s linear infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .showcase-motion-token,
-  .showcase-motion-node,
-  .showcase-motion-progress {
-    animation: none;
-  }
-
-  .showcase-motion-token {
-    transform: translate(391px, 175px);
-  }
-}

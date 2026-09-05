@@ -1,0 +1,4 @@
+@import "./tech-document.css";
+
+@plugin "@fumadocs/tailwind/typography";
+@source inline("prose");

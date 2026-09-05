@@ -1,6 +1,6 @@
 # Issue 0011: 미사용 코드·export·dependency audit 도입 검토
 
-- 상태: 조건부 보류
+- 상태: 미사용 export 검사는 조건부 보류; 파일·의존성 검사는 적용
 - 우선순위: P2
 - 기준일: 2026-08-19
 - 영향 범위:
@@ -101,10 +101,11 @@
 
 ## 2026-08-31 제한적 도입 결과
 
-- **미사용 파일과 duplicate export만 지속 gate로 도입함**
-    - `knip --include files --include duplicates --no-config-hints`를 루트 `deadcode` script로 실행함
-    - `pnpm run check`가 format·lint·typecheck 이후 `deadcode`를 실행함
+- **미사용 파일과 duplicate export부터 지속 gate로 도입함**
+    - 최초에는 파일·중복 export만 검사했고, 2026-09-05에 의존성·미선언 의존성 검사까지 확장함
+    - 현재 명령과 좁은 예외의 근거는 [유지보수 가이드](../maintenance.md)를 따름
+    - `bun run check`가 format·lint·typecheck 이후 `deadcode`를 실행함
     - 검색 benchmark runner를 명시적 entry로 등록하고 생성 font CSS 한 파일만 ignore함
-- **미사용 export와 dependency 검사는 기존 조건부 보류를 유지함**
+- **미사용 export 검사는 조건부 보류를 유지함**
     - Next.js route·MDX·package subpath의 false positive를 넓은 allowlist로 숨기지 않음
     - 현재 좁은 검사가 안정적으로 통과하더라도 자동 삭제나 전체 export 검사를 의미하지 않음

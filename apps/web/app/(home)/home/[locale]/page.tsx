@@ -10,7 +10,7 @@ import {
 } from "#home-components/HomeShell";
 import { WorkSection } from "#home-components/HomeWorkSection";
 import { WritingSection } from "#home-components/HomeWritingSection";
-import { getHomeMessages } from "#lib/home/content";
+import { getHomeContent } from "#lib/home/content";
 import { alternateLocale, getLocaleProtocol } from "#lib/locale";
 import { isLocale, locales, siteOrigins } from "#lib/site-routing";
 
@@ -24,7 +24,7 @@ export async function generateMetadata({
 }: PageProps<"/home/[locale]">): Promise<Metadata> {
   const { locale } = await params;
   if (!isLocale(locale)) return {};
-  const description = getHomeMessages(locale).metadataDescription;
+  const description = getHomeContent(locale).metadataDescription;
   const url = `${siteOrigins.home}/${locale}`;
   const protocol = getLocaleProtocol(locale);
   return {

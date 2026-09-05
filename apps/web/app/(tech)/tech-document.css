@@ -1,0 +1,7 @@
+@reference "@jongminchung/ui/globals.css";
+/* 문서 기본 utility보다 공통 shell의 반응형 utility가 우선하도록 함 */
+@import "tailwindcss/utilities.css" layer(components) source(none);
+@import "../mdx-theme.css";
+
+/* @reference가 가져오는 공용 UI source는 이미 tech.css에서 생성함 */
+@source not "../../../../packages/ui/src/**";

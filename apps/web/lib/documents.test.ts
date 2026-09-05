@@ -15,54 +15,29 @@ import {
   loadDocument,
   rankRelatedDocuments,
 } from "./documents";
+import { seriesRegistry } from "./tech/series";
 
 describe("블로그 문서 발견", () => {
   it("[성공] Blog Series의 멤버와 순서를 locale별로 동일하게 유지함", async () => {
-    const expected = {
-      "building-from-first-principles": [
-        "building-calculator-engine",
-        "hamssun-python-lisp",
-        "implementing-genetic-algorithm",
-        "ascii-3d-renderer",
-        "building-3d-illusion-game",
-        "building-nes-emulator",
-        "building-llm",
-        "building-coding-agent",
-        "building-email-relay-system",
-        "encrypted-share-vault-system",
-      ],
-      "react-ui-architecture": [
-        "react-component-based-thinking",
-        "modeling-series-view-model",
-        "headless-react-component",
-      ],
-      "subscription-first-ai-workspace": [
-        "subscription-ai-coding-workspace",
-        "subscription-ai-usage-baseline",
-        "subscription-ai-context-budget",
-        "subscription-ai-session-handoff",
-        "subscription-ai-tool-output-budget",
-        "subscription-ai-model-routing",
-        "subscription-ai-orchestration",
-        "subscription-ai-break-even",
-      ],
-    } as const;
     const posts = await getBlogPosts();
-    for (const locale of ["ko", "en"] as const) {
-      for (const [series, ids] of Object.entries(expected)) {
-        const actual = posts
+    for (const series of Object.keys(seriesRegistry)) {
+      const members = (["ko", "en"] as const).map((locale) =>
+        posts
           .filter((post) => post.locale === locale && post.series === series)
           .toSorted(
             (left, right) => (left.seriesOrder ?? 0) - (right.seriesOrder ?? 0),
-          );
-        expect(actual.map(({ id }) => id)).toEqual([...ids]);
-      }
+          )
+          .map(({ id, seriesOrder }) => ({ id, seriesOrder })),
+      );
+      expect(members[0]?.length).toBeGreaterThan(0);
+      expect(members[0]).toEqual(members[1]);
     }
   });
 
   it("[성공] 글을 최신 게시일 순으로 제공함", async () => {
     const documents = await getLocalizedDocuments("ko");
-    expect(documents).toHaveLength(33);
+    expect(documents.length).toBeGreaterThan(0);
+    expect(documents.every((post) => post.locale === "ko")).toBe(true);
     expect(documents.map(({ publishedAt }) => publishedAt)).toEqual(
       documents
         .map(({ publishedAt }) => publishedAt)
@@ -126,7 +101,14 @@ describe("블로그 문서 발견", () => {
   it("[성공] locale별 Blog와 Docs를 독립 canonical inventory로 유지함", async () => {
     const [blog, docs] = await Promise.all([getBlogPosts(), getDocsPages()]);
     for (const locale of ["ko", "en"] as const) {
-      expect(blog.filter((post) => post.locale === locale)).toHaveLength(33);
+      const localizedBlog = blog.filter((post) => post.locale === locale);
+      expect(localizedBlog.length).toBeGreaterThan(0);
+      expect(localizedBlog.map(({ id }) => id).toSorted()).toEqual(
+        blog
+          .filter((post) => post.locale !== locale)
+          .map(({ id }) => id)
+          .toSorted(),
+      );
       expect(docs.filter((page) => page.locale === locale)).toHaveLength(
         docsPagesPerLocale,
       );

@@ -26,12 +26,7 @@ export async function generateStaticParams() {
 /** BlogPosting 메타데이터를 생성함 */
 export async function generateMetadata({
   params,
-}: {
-  readonly params: Promise<{
-    readonly locale: string;
-    readonly slug: string;
-  }>;
-}) {
+}: PageProps<"/tech/[locale]/[slug]">) {
   const { locale, slug } = await params;
   if (!isLocale(locale)) notFound();
   const post = await findBlogPost(locale, slug);
@@ -53,12 +48,7 @@ export async function generateMetadata({
 /** Blog 글을 렌더링하고 이관된 과거 URL을 한 번의 308로 연결함 */
 export default async function BlogArticlePage({
   params,
-}: {
-  readonly params: Promise<{
-    readonly locale: string;
-    readonly slug: string;
-  }>;
-}) {
+}: PageProps<"/tech/[locale]/[slug]">) {
   const { locale, slug } = await params;
   if (!isLocale(locale)) notFound();
   const document = await loadBlogPost(locale, slug);

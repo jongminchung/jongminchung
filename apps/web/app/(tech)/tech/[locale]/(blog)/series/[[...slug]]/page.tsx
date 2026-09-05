@@ -27,12 +27,7 @@ export function generateStaticParams() {
 /** Blog Series 목록과 상세의 canonical 메타데이터를 생성함 */
 export async function generateMetadata({
   params,
-}: {
-  readonly params: Promise<{
-    readonly locale: string;
-    readonly slug?: string[];
-  }>;
-}) {
+}: PageProps<"/tech/[locale]/series/[[...slug]]">) {
   const { locale, slug } = await params;
   if (!isLocale(locale)) notFound();
   const text = getTechMessages(locale).metadata;
@@ -78,12 +73,7 @@ function seriesCounts(
 /** Blog 데이터만 사용하는 Series 목록과 상세를 렌더링함 */
 export default async function BlogSeriesPage({
   params,
-}: {
-  readonly params: Promise<{
-    readonly locale: string;
-    readonly slug?: string[];
-  }>;
-}) {
+}: PageProps<"/tech/[locale]/series/[[...slug]]">) {
   const { locale, slug } = await params;
   if (!isLocale(locale)) notFound();
   const alternate = alternateLocale(locale);

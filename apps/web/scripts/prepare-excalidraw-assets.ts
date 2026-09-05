@@ -1,5 +1,6 @@
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { build } from "esbuild";
 import { Window } from "happy-dom";
 import { listStandaloneExcalidrawAssets } from "../lib/tech/excalidraw-files.ts";
@@ -70,7 +71,7 @@ async function loadExporter(): Promise<ExcalidrawExporter> {
   await mkdir(generatedRoot, { recursive: true });
   await build({
     bundle: true,
-    entryPoints: ["@excalidraw/excalidraw"],
+    entryPoints: [fileURLToPath(import.meta.resolve("@excalidraw/excalidraw"))],
     format: "esm",
     loader: { ".json": "json" },
     outfile: bundlePath,

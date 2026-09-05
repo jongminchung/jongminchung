@@ -27,29 +27,29 @@
 
 - **콘텐츠 schema와 입력 검증 테스트는 유지함**
     - 근거: MDX frontmatter와 투자 노트는 build·검색·route가 공유하는 데이터 경계임
-    - 대상: `apps/web/lib/content-model.test.ts`, `apps/web/lib/investment-content.test.ts`, `apps/web/lib/excalidraw-scene.test.ts`
+    - 대상: `apps/web/lib/content-model.test.ts`, `apps/web/lib/invest/content.test.ts`, `apps/web/lib/tech/excalidraw-scene.test.ts`
     - 사례: 지원하지 않는 locale·field, 중복 tag·element ID, credential을 포함한 URL, 누락된 Excalidraw binary asset 거부가 해당함
 
 - **결정 규칙과 안전 경계 테스트는 유지함**
     - 근거: 순수 함수의 결정성은 빠른 단위 테스트로 가장 명확하게 보장됨
-    - 대상: `apps/web/lib/search.test.ts`, `apps/web/lib/documents.test.ts`, `apps/web/lib/site-routing.test.ts`, `apps/web/proxy.test.ts`
+    - 대상: `apps/web/lib/tech/search.test.ts`, `apps/web/lib/documents.test.ts`, `apps/web/lib/site-routing.test.ts`, `apps/web/proxy.test.ts`
     - 사례: title 우선 검색, 관련 문서 fallback, `Accept-Language` 품질값 협상, private path·spoofed routing header 차단이 해당함
 
 - **생성물과 원본의 일관성 테스트는 유지함**
-    - 근거: 콘텐츠 원본, manifest, loader, search JSON의 불일치는 런타임에서 문서 누락·검색 실패로 나타남
-    - 대상: `apps/web/scripts/content-contract.integration.test.ts`, `apps/web/scripts/check-excalidraw.test.ts`
+    - 근거: 콘텐츠 원본, Fumadocs collection, 검색 응답의 불일치는 런타임에서 문서 누락·검색 실패로 나타남
+    - 대상: `apps/web/scripts/content-validation.test.ts`, `apps/web/scripts/check-excalidraw.test.ts`
     - 사례: 한글·영문 문서 쌍, heading ID, 내부 link, 생성물 stale 상태, manifest의 유일 ID 검증이 해당함
     - 예외: topic 수와 demo 수의 정확한 상수값은 콘텐츠 증감 자체를 실패로 만들므로 제거하고, 유일성·registry 일치·유효한 entry 검증만 유지함
 
 - **서버 route와 콘텐츠 adapter의 공개 응답 계약 테스트는 유지함**
     - 근거: route·콘텐츠 adapter는 UI와 Fumadocs collection 사이의 작은 통합 경계임
-    - 대상: `apps/web/app/llms-route.test.ts`, `apps/web/lib/remark-kroki-url.test.ts`, 콘텐츠 검증 테스트
+    - 대상: `apps/web/app/llms-route.test.ts`, `apps/web/app/metadata-routes.test.ts`, `apps/web/lib/remark-kroki-url.test.ts`, 콘텐츠 검증 테스트
     - 사례: `llms.txt`, Fumadocs metadata 변환, Kroki URL의 가역적 인코딩 검증이 해당함
 
-- **작은 client state 규칙 테스트는 유지함**
-    - 근거: browser storage나 provider instance 분리는 E2E만으로 원인 위치를 좁히기 어려움
-    - 대상: `apps/web/components/TechUiProvider.test.ts`
-    - 사례: store instance 간 state 격리와 search lazy-open marker의 유지가 해당함
+- **작은 client 입력·표시 규칙은 Bun에서 확인함**
+    - 대상: `apps/web/lib/i18n-messages.test.ts`, `apps/web/lib/tech/search-results.test.ts`
+    - 사례: 번역 키의 일치, 검색 결과의 제목·본문 우선순위와 표시 label을 검증함
+    - browser storage·초점·검색창 lazy loading은 실제 provider를 사용하는 Playwright에서 확인함
 
 - **정적 홈 카피 검증은 공개 계약만 남김**
     - 대상: `apps/web/lib/home/content.test.ts`
@@ -86,6 +86,15 @@
 
 ## 축소하거나 성격을 바꿀 테스트
 
+- **framework 설정은 소스 문자열 대신 실제 합성된 설정을 확인함**
+    - 대상: `apps/web/next.config.test.ts`
+    - MDX·i18n plugin을 적용한 설정의 Compiler·Cache Components·TypeScript 정책을 확인함
+    - 특정 컴포넌트의 `use memo` 문구나 route 파일 목록을 고정하지 않음. Compiler 적용과 허용되지 않는 route 설정은 실제 Next build에서 검증함
+
+- **공용 목차는 브라우저에서 상태 일치를 확인함**
+    - 대상: `apps/web/components/DocumentOutline.e2e.test.ts`
+    - Blog·Invest에서 클릭, hash가 그대로인 스크롤, 뒤로 가기, 새로고침 후 현재 제목의 강조와 `aria-current`가 일치하는지 확인함
+
 - **full-page visual snapshot은 layout boundary별 대표 화면만 유지함**
     - 대상: `apps/web/app/(tech)/visual.e2e.test.ts`, `apps/web/app/(home)/home-visual.e2e.test.ts`
     - 근거: 모든 문서·viewport·theme의 full-page screenshot은 문서 내용, 이미지, font rendering 변화로 인해 높은 변경 비용을 만듦
@@ -97,6 +106,7 @@
     - 근거: 특정 문서 ID와 순서를 E2E에 고정하면 정상 콘텐츠 추가·편집도 실패 원인이 됨
     - 유지 사례: 현재 문서 제외, 유효한 locale URL, 최대 표시 개수, 관련 문서 존재 여부를 E2E에서 검증함
     - 이전 사례: ranking, tag 우선순위, fallback 순서는 `apps/web/lib/documents.test.ts`에서 fixture 기반으로 검증함
+    - Blog corpus의 고정 개수·시리즈별 ID 목록은 복제하지 않음. 게시 글이 존재하고 locale별 ID·시리즈 순서가 일치하는지 검사하여 새 글 추가가 정상적으로 통과하도록 함
 
 - **페이지의 정적 문구 존재 여부는 역할·목적을 검증하는 assertion으로 바꿈**
     - 대상: `apps/web/app/(home)/home.e2e.test.ts`, `apps/web/app/(tech)/document-discovery.e2e.test.ts`의 정적 문서명 assertion 일부
@@ -120,8 +130,8 @@
 
 - **visual snapshot은 baseline을 만든 동일한 OS·브라우저 환경에서 실행함**
     - 근거: 렌더링은 운영체제, 브라우저 버전, 폰트, 하드웨어, headless 여부에 따라 달라질 수 있음
-    - 현재 기준 이미지: `*-darwin.png`이므로 macOS Chromium에서 기준을 생성·검증함
-    - CI 전환 조건: Linux CI에서 visual snapshot을 실행하려면 Linux Chromium에서 승인한 기준 이미지를 별도로 생성·커밋함
+    - 현재 기준 이미지: `*-linux.png`이므로 Linux Chromium에서 기준을 생성·검증함
+    - CI 전환 조건: OS나 Chromium 버전이 달라지면 별도 검토한 기준 이미지를 사용함
 
 - **실패 분석에는 Playwright 산출물을 사용함**
     - CI: 첫 재시도에서 trace를 기록하고, 실패한 test의 screenshot·video와 HTML report를 생성함

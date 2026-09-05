@@ -1,4 +1,18 @@
-import type { DocumentKind, Locale } from "../content-model.ts";
+import type { Locale } from "../content-contracts.ts";
+
+export const documentKinds = [
+  "tutorial",
+  "how-to",
+  "reference",
+  "explanation",
+] as const;
+
+export type DocumentKind = (typeof documentKinds)[number];
+
+/** 서버 schema를 로드하지 않고 외부 응답의 문서 유형을 판별함 */
+export function isDocumentKind(value: unknown): value is DocumentKind {
+  return documentKinds.some((kind) => kind === value);
+}
 
 const documentKindLabels = {
   ko: {

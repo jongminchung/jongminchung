@@ -5,7 +5,14 @@ import {
   PreviewCardContent,
   PreviewCardTrigger,
 } from "@jongminchung/ui/components/preview-card";
-import { type ComponentProps, useRef, useState } from "react";
+import {
+  type ComponentProps,
+  useEffect,
+  useEffectEvent,
+  useId,
+  useRef,
+  useState,
+} from "react";
 import {
   createFootnotePreviewHtml,
   footnotePreviewLabel,
@@ -14,39 +21,51 @@ import {
 /** 각주 이동을 유지하면서 데스크톱 미리보기를 제공함 */
 export function FootnoteReference({
   href = "",
+  id,
   children,
-  onFocus,
   onKeyDown,
-  onMouseEnter,
   ...props
 }: ComponentProps<"a">) {
+  const generatedId = useId();
+  const triggerId = id ?? generatedId;
+  const [open, setOpen] = useState(false);
   const [preview, setPreview] = useState<{
     readonly html: string;
     readonly label: string;
   } | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
 
-  const loadPreview = () => {
-    if (preview !== null) return;
-    const html = createFootnotePreviewHtml(href);
-    if (html !== null)
-      setPreview({
-        html,
-        label: footnotePreviewLabel(document.documentElement.lang),
-      });
+  const changeOpen = (nextOpen: boolean) => {
+    if (nextOpen && preview === null) {
+      const html = createFootnotePreviewHtml(href);
+      if (html !== null)
+        setPreview({
+          html,
+          label: footnotePreviewLabel(document.documentElement.lang),
+        });
+    }
+    setOpen(nextOpen);
   };
 
+  const restoreFocusedPreview = useEffectEvent(() => {
+    const focused = document.activeElement;
+    if (focused?.id === triggerId && focused.matches(":focus-visible"))
+      changeOpen(true);
+  });
+  useEffect(() => {
+    // HTML에 먼저 도달한 키보드 초점은 hydration 이후 focus 이벤트를 다시 보내지 않는다.
+    // oxlint-disable-next-line react/set-state-in-effect -- Synchronize DOM focus established before React hydrated; it cannot be derived from props.
+    restoreFocusedPreview();
+  }, []);
+
   return (
-    <PreviewCard>
+    <PreviewCard open={open} onOpenChange={changeOpen} triggerId={triggerId}>
       <PreviewCardTrigger
         {...props}
         href={href}
+        id={triggerId}
         closeDelay={150}
         delay={150}
-        onFocus={(event) => {
-          onFocus?.(event);
-          loadPreview();
-        }}
         onKeyDown={(event) => {
           onKeyDown?.(event);
           if (event.defaultPrevented || event.key !== "Tab" || event.shiftKey)
@@ -57,10 +76,6 @@ export function FootnoteReference({
           if (firstLink === undefined || firstLink === null) return;
           event.preventDefault();
           firstLink.focus();
-        }}
-        onMouseEnter={(event) => {
-          onMouseEnter?.(event);
-          loadPreview();
         }}
       >
         {children}

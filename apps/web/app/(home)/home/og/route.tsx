@@ -1,17 +1,6 @@
 import { ImageResponse } from "next/og";
 
-const size = { width: 1200, height: 630 };
-// ImageResponse does not parse OKLCH values, so this output boundary keeps an sRGB palette.
-const imageTheme = {
-  background: "#f3f6ff",
-  border: "#cdd5e7",
-  foreground: "#11131a",
-  mutedForeground: "#596174",
-  primary: "#2457ff",
-  primaryForeground: "#ffffff",
-} as const;
-
-/** 요청에 대한 응답을 생성함 */
+/** Home의 중립적인 화면과 Tech·Invest 연결을 공유 이미지에도 반영한다. */
 export function GET(): ImageResponse {
   return new ImageResponse(
     <div
@@ -21,68 +10,50 @@ export function GET(): ImageResponse {
         height: "100%",
         flexDirection: "column",
         justifyContent: "space-between",
-        padding: "66px 72px",
-        background: imageTheme.background,
-        color: imageTheme.foreground,
+        padding: "64px 72px",
+        background: "#ffffff",
+        color: "#0d0d0d",
         fontFamily: "Arial, sans-serif",
       }}
     >
       <div
         style={{
           display: "flex",
-          fontSize: 34,
-          fontWeight: 800,
-          letterSpacing: -2,
+          justifyContent: "space-between",
+          alignItems: "center",
         }}
       >
-        jongminchung
+        <span style={{ fontSize: 30, fontWeight: 700, letterSpacing: -1.5 }}>
+          jongminchung
+        </span>
+        <span style={{ fontSize: 16, color: "#5d5d5d" }}>Personal space</span>
       </div>
-
-      <div style={{ display: "flex", flexDirection: "column" }}>
-        <div
-          style={{
-            fontSize: 78,
-            fontWeight: 900,
-            letterSpacing: -5,
-            lineHeight: 0.92,
-          }}
-        >
-          Complex systems
-        </div>
-        <div
-          style={{
-            display: "flex",
-            alignSelf: "flex-start",
-            marginTop: 10,
-            padding: "2px 14px 8px",
-            background: imageTheme.primary,
-            color: imageTheme.primaryForeground,
-            fontSize: 78,
-            fontWeight: 900,
-            letterSpacing: -5,
-            lineHeight: 0.92,
-          }}
-        >
-          should explain themselves.
-        </div>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          fontSize: 72,
+          letterSpacing: -3,
+          lineHeight: 1.12,
+        }}
+      >
+        <span>Build with curiosity.</span>
+        <span>Think with evidence.</span>
       </div>
-
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
-          borderTop: `2px solid ${imageTheme.border}`,
-          paddingTop: 22,
-          color: imageTheme.mutedForeground,
-          fontSize: 16,
-          letterSpacing: 2,
+          borderTop: "1px solid #dfdfdf",
+          paddingTop: 28,
+          fontSize: 20,
         }}
       >
-        <span>JONGMIN CHUNG</span>
-        <span>LANGUAGE → MODELS → CODE</span>
-        <span>JAMIE.KR</span>
+        <span>Tech / Software &amp; experiments</span>
+        <span>Invest / Sources &amp; research</span>
+        <span style={{ color: "#5d5d5d" }}>jamie.kr</span>
       </div>
     </div>,
-    size,
+    { width: 1200, height: 630 },
   );
 }

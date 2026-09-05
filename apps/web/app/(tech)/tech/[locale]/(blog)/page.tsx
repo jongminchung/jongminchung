@@ -15,9 +15,7 @@ export function generateStaticParams() {
 /** Blog index 메타데이터를 생성함 */
 export async function generateMetadata({
   params,
-}: {
-  readonly params: Promise<{ readonly locale: string }>;
-}) {
+}: PageProps<"/tech/[locale]">) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   return blogIndexMetadata(locale);
@@ -27,10 +25,7 @@ export async function generateMetadata({
 export default async function BlogPage({
   params,
   searchParams,
-}: {
-  readonly params: Promise<{ readonly locale: string }>;
-  readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
+}: PageProps<"/tech/[locale]">) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const alternate = alternateLocale(locale);

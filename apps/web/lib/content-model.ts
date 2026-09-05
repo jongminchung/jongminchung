@@ -10,21 +10,17 @@ import {
   uniqueStringArraySchema,
   type Locale,
 } from "./content-contracts.ts";
+import { documentKinds } from "./tech/document-kind.ts";
 import { isSeriesId } from "./tech/series.ts";
 
 export { isLocale, locales };
 export type { Locale };
+export { documentKinds };
+export type { DocumentKind } from "./tech/document-kind.ts";
 
 const documentStatusSchema = z.enum(["stable", "deprecated", "experimental"]);
 
-export const documentKinds = [
-  "tutorial",
-  "how-to",
-  "reference",
-  "explanation",
-] as const;
 const documentKindSchema = z.enum(documentKinds);
-export type DocumentKind = z.infer<typeof documentKindSchema>;
 
 export const docsAreas = ["rke2spray", "fe", "be", "k8s", "ansible"] as const;
 export const publicDocsAreas = ["rke2spray", "fe", "be", "k8s"] as const;

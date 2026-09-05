@@ -45,6 +45,8 @@ const siteStylePaths = [
 ] as const;
 const siteStyles = siteStylePaths.map(read);
 const techStyles = siteStyles[1];
+const techDocumentStyles = read("apps/web/app/(tech)/tech-document.css");
+const techDocsStyles = read("apps/web/app/(tech)/tech-docs.css");
 const investCodeStyles = read("apps/web/app/(invest)/invest-code.css");
 const webModuleCssPaths = findModuleCssPaths("apps/web");
 
@@ -204,7 +206,7 @@ describe("공통 디자인 토큰 계약", () => {
 
   it("[성공] Tech와 Invest가 동일한 코드블록 CSS 계약을 사용함", () => {
     const mdxTheme = read("apps/web/app/mdx-theme.css");
-    for (const stylesheet of [techStyles, investCodeStyles]) {
+    for (const stylesheet of [techDocumentStyles, investCodeStyles]) {
       expect(stylesheet).toContain('@import "../mdx-theme.css";');
       expect(stylesheet).not.toContain("fumadocs-ui/css/preset.css");
     }
@@ -212,7 +214,10 @@ describe("공통 디자인 토큰 계약", () => {
     expect(mdxTheme).toContain('html[data-theme="dark"]');
     expect(mdxTheme).toContain("dist/components/codeblock.js");
     expect(techStyles).toContain("fumadocs-ui/css/generated/docs.css");
-    expect(techStyles).toContain('@plugin "@fumadocs/tailwind/typography";');
+    expect(techDocsStyles).toContain(
+      '@plugin "@fumadocs/tailwind/typography";',
+    );
+    expect(techStyles).not.toContain('@import "../mdx-theme.css";');
   });
 
   it("[성공] 승인된 semantic utility가 실제 CSS selector로 생성됨", async () => {
@@ -247,5 +252,8 @@ describe("공통 디자인 토큰 계약", () => {
       expect(css).not.toContain(".text-inverse-foreground");
     }
     expect(compiledSites[0]).toContain(".text-background");
+    expect(compiledSites[1]).not.toContain(".shiki");
+    expect(compiledSites[1]).not.toContain(".prose :where");
+    expect(compiledSites[1]).not.toContain("@keyframes showcase-motion-token");
   });
 });

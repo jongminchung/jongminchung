@@ -34,10 +34,10 @@
       "expectedFontFamily": "Jamie Latin",
       "maxInitialFontTransferBytes": 46000,
       "maxInitialFontDecodedBytes": 45000,
-      "maxInitialStylesheetTransferBytes": 49000,
-      "maxInitialStylesheetDecodedBytes": 250000,
-      "maxInitialJavaScriptTransferBytes": 360000,
-      "maxInitialJavaScriptDecodedBytes": 1050000
+      "maxInitialStylesheetTransferBytes": 46000,
+      "maxInitialStylesheetDecodedBytes": 240000,
+      "maxInitialJavaScriptTransferBytes": 260000,
+      "maxInitialJavaScriptDecodedBytes": 820000
     },
     {
       "site": "tech",
@@ -46,10 +46,10 @@
       "expectedFontFamily": "Pretendard Variable",
       "maxInitialFontTransferBytes": 360000,
       "maxInitialFontDecodedBytes": 350000,
-      "maxInitialStylesheetTransferBytes": 49000,
-      "maxInitialStylesheetDecodedBytes": 250000,
-      "maxInitialJavaScriptTransferBytes": 360000,
-      "maxInitialJavaScriptDecodedBytes": 1050000
+      "maxInitialStylesheetTransferBytes": 46000,
+      "maxInitialStylesheetDecodedBytes": 240000,
+      "maxInitialJavaScriptTransferBytes": 260000,
+      "maxInitialJavaScriptDecodedBytes": 820000
     },
     {
       "site": "invest",

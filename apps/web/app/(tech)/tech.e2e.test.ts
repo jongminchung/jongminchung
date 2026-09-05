@@ -133,6 +133,102 @@ test("[성공] 오류 검색 요청을 재시도함", async ({ page }) => {
   expect(requests).toBeGreaterThanOrEqual(2);
 });
 
+test("[성공] 알 수 없는 검색 문서 유형에도 결과와 이동을 유지함", async ({
+  page,
+}) => {
+  await page.route("**/en/search*", (route) =>
+    route.fulfill({
+      json: [
+        {
+          id: "future-document",
+          type: "page",
+          url: "/en/docs/fe/nextjs-16",
+          content: "Future document",
+          breadcrumbs: ["future-kind", "Frontend"],
+        },
+      ],
+    }),
+  );
+  await page.goto("/en");
+  await page.locator("[data-docs-search-trigger]:visible").first().click();
+  const dialog = page.getByRole("dialog", { name: "Search documentation" });
+  const result = dialog.getByRole("option", { name: /Future document/u });
+  await expect(result).toContainText("Docs");
+  await expect(result).toContainText("Frontend");
+  await result.click();
+  await expect(page).toHaveURL(/\/en\/docs\/fe\/nextjs-16$/u);
+  await expect(dialog).toBeHidden();
+});
+
+test("[성공] 문서 CSS를 탐색 시 로드하고 목록 복귀 시 shell 스타일을 유지함", async ({
+  page,
+}) => {
+  const stylesheets: string[] = [];
+  const styles = new Set<Promise<void>>();
+  page.on("response", (response) => {
+    if (new URL(response.url()).pathname.endsWith(".css")) {
+      styles.add(
+        response.text().then((css) => {
+          stylesheets.push(css);
+        }),
+      );
+    }
+  });
+  await page.goto("/en", { waitUntil: "networkidle" });
+  await Promise.all(styles);
+  expect(stylesheets.some((css) => css.includes(".shiki"))).toBe(false);
+  expect(
+    stylesheets.some((css) => css.includes("@keyframes showcase-motion-token")),
+  ).toBe(false);
+  const header = page.locator("header").first();
+  const shellStyle = await header.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      height: style.height,
+      position: style.position,
+      background: style.backgroundColor,
+    };
+  });
+  // 검색 결과를 통한 App Router 전환에서도 문서 전용 CSS가 따라와야 함.
+  await page.route("**/en/search*", (route) =>
+    route.fulfill({
+      json: [
+        {
+          id: "docs",
+          type: "page",
+          url: "/en/docs/fe/nextjs-16",
+          content: "Next.js 16",
+          breadcrumbs: ["reference", "Frontend"],
+        },
+      ],
+    }),
+  );
+  await page.locator("[data-docs-search-trigger]:visible").first().click();
+  await page.getByRole("option", { name: /Next.js 16/u }).click();
+  await expect(page).toHaveURL(/\/en\/docs\/fe\/nextjs-16$/u);
+  await expect(page.locator("#nd-docs-layout")).toHaveCSS("display", "grid");
+  await expect(page.locator("[data-docs-code-block]").first()).toBeVisible();
+  await page.waitForLoadState("networkidle");
+  await Promise.all(styles);
+  expect(stylesheets.some((css) => css.includes(".shiki"))).toBe(true);
+  await page.goBack();
+  await expect(page).toHaveURL(/\/en$/u);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(
+    "Engineering",
+  );
+  expect(
+    await header.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        height: style.height,
+        position: style.position,
+        background: style.backgroundColor,
+      };
+    }),
+  ).toEqual(shellStyle);
+  await expectNoHorizontalOverflow(page);
+});
+
 test("[성공] 브라우저 기록과 문서 내부 링크로 이동함", async ({ page }) => {
   await page.goto("/en");
   await page.getByRole("link", { name: "Series" }).first().click();

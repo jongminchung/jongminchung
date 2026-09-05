@@ -46,17 +46,17 @@ bun run --filter @jongminchung/ui test
 
 루트 검증 명령의 범위는 다음과 같다.
 
-| 명령                  | 검증 범위                                            |
-| --------------------- | ---------------------------------------------------- |
-| `bun run fmt:check`   | Oxfmt 형식 검사                                      |
-| `bun run lint`        | Oxlint 정적 분석                                     |
-| `bun run typecheck`   | 루트와 모든 workspace TypeScript 검사                |
-| `bun run deadcode`    | 미사용 파일과 중복 export 검사                       |
-| `bun run links:check` | Docker 기반 Markdown·HTML 로컬 링크 검사             |
-| `bun run test`        | Bun Unit·Integration과 Node package runtime smoke    |
-| `bun run test:e2e`    | build 후 앱별 Playwright E2E                         |
-| `bun run check`       | format, lint, typecheck, deadcode와 전체 로컬 테스트 |
-| `bun run check:full`  | `check`, E2E typecheck, 단일 build, core E2E         |
+| 명령                  | 검증 범위                                                                |
+| --------------------- | ------------------------------------------------------------------------ |
+| `bun run fmt:check`   | Oxfmt 형식 검사                                                          |
+| `bun run lint`        | Oxlint 정적 분석                                                         |
+| `bun run typecheck`   | 루트와 모든 workspace TypeScript 검사                                    |
+| `bun run deadcode`    | 미사용 파일·의존성·catalog, 미선언 의존성·catalog 참조, 중복 export 검사 |
+| `bun run links:check` | Docker 기반 Markdown·HTML 로컬 링크 검사                                 |
+| `bun run test`        | Bun Unit·Integration과 Node package runtime smoke                        |
+| `bun run test:e2e`    | build 후 앱별 Playwright E2E                                             |
+| `bun run check`       | format, lint, typecheck, deadcode와 전체 로컬 테스트                     |
+| `bun run check:full`  | `check`와 production build·전체 Playwright E2E                           |
 
 테스트 계약은 Bun 내장 runner의 Unit·Integration, 공개 package의 Node runtime smoke,
 build된 앱을 검증하는 Playwright E2E로 구분한다. workspace별 Bun coverage 결과는
@@ -71,6 +71,8 @@ bun run test:e2e
 ```
 
 변경 유형별 최소 검증은 다음을 기준으로 한다.
+
+작업별 수정 파일과 오류 확인 순서는 [Web 직접 유지보수 안내](web/README.md)를 따른다.
 
 | 변경 유형                    | 최소 검증                                                               |
 | ---------------------------- | ----------------------------------------------------------------------- |

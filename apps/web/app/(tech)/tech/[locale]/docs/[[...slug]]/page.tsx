@@ -74,12 +74,7 @@ export async function generateStaticParams() {
 /** Docs canonical·hreflang·TechArticle 메타데이터를 생성함 */
 export async function generateMetadata({
   params,
-}: {
-  readonly params: Promise<{
-    readonly locale: string;
-    readonly slug?: string[];
-  }>;
-}) {
+}: PageProps<"/tech/[locale]/docs/[[...slug]]">) {
   const { locale, slug = [] } = await params;
   if (!isLocale(locale)) notFound();
   const model = await resolveTechDocsPage(locale, slug);
@@ -102,12 +97,7 @@ export async function generateMetadata({
 /** Fumadocs DocsPage·TOC·page tree 이전/다음 탐색으로 문서를 렌더링함 */
 export default async function TechDocsPage({
   params,
-}: {
-  readonly params: Promise<{
-    readonly locale: string;
-    readonly slug?: string[];
-  }>;
-}) {
+}: PageProps<"/tech/[locale]/docs/[[...slug]]">) {
   const { locale, slug = [] } = await params;
   if (!isLocale(locale)) notFound();
   const model = await resolveTechDocsPage(locale, slug);

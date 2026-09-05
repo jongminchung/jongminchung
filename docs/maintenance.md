@@ -58,6 +58,14 @@ major update의 rollback 조건을 포함한다. shadcn CLI package version 갱�
 6. TypeScript update 후보는 tooling lane에 표시되며 호환성 보고서의 재감사 결과가 있을 때만
    적용한다.
 
+`bun run deadcode`는 미사용 파일·의존성·catalog 항목, 미선언 의존성,
+해석할 수 없는 catalog 참조, 중복 export를 검사한다.
+catalog는 소비 workspace가 있는 항목만 유지한다. `knip.json`의 루트 의존성 예외는
+CLI를 설치하는 `@jongminchung/generate-article-image-skill`과, 로컬 source로 설정을 읽는
+workspace 연결인 `@jongminchung/tooling` 두 개다. Excalidraw는 생성 script의
+`import.meta.resolve`로 사용처를 명시한다. 새 예외는 실제 사용 경로를 확인하고 여기에
+이유를 기록한다. 의존성 갱신 시 예외가 여전히 필요한지도 다시 확인한다.
+
 Renovate PR도 같은 기준으로 manifest, lockfile, release note, peer 범위와 전체 gate를 직접
 검토한다. 새 버전이 설치된다는 사실만으로 runtime·framework 호환성을 판단하지 않는다.
 
@@ -105,13 +113,14 @@ Web MDX의 app route는 기존 content validation과 build가 별도로 검증�
 
 ## GitHub Actions
 
-현재 저장소에는 세 workflow가 있다.
+현재 저장소에는 네 workflow가 있다.
 
-| Workflow           | Trigger                     | 역할                                                   | 주요 secret                    |
-| ------------------ | --------------------------- | ------------------------------------------------------ | ------------------------------ |
-| `Publish Packages` | `workflow_dispatch`         | 검사 후 `tooling`, `ui`의 GitHub Packages `1.0.0` 교체 | `GH_PAT`                       |
-| `Waka Readme`      | 매일 `15:00 UTC`, 수동 실행 | README Waka 통계 구간 갱신                             | `WAKATIME_API_KEY`, `GH_TOKEN` |
-| `Links`            | 문서 PR·`main` push         | Docker 기반 Markdown·HTML 로컬 링크 검사               | 없음                           |
+| Workflow           | Trigger                       | 역할                                                   | 주요 secret                    |
+| ------------------ | ----------------------------- | ------------------------------------------------------ | ------------------------------ |
+| `Publish Packages` | `workflow_dispatch`           | 검사 후 `tooling`, `ui`의 GitHub Packages `1.0.0` 교체 | `GH_PAT`                       |
+| `Waka Readme`      | 매일 `15:00 UTC`, 수동 실행   | README Waka 통계 구간 갱신                             | `WAKATIME_API_KEY`, `GH_TOKEN` |
+| `Links`            | 문서 PR·`main` push           | Docker 기반 Markdown·HTML 로컬 링크 검사               | 없음                           |
+| `Web`              | PR·관련 `main` push·주간 예약 | Web 검사·브라우저 회귀, 주간 콘텐츠 근거 보고서        | 없음                           |
 
 ## 패키지 게시
 

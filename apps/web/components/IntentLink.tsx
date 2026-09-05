@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, type ComponentProps } from "react";
 
-/** 읽으려는 카드에 포인터나 키보드 초점이 닿으면 Next의 미리 읽기를 활성화함 */
+/** 링크에 포인터나 키보드 초점이 닿으면 Next의 미리 읽기를 활성화함 */
 export function IntentLink({
   onPointerEnter,
   onFocus,

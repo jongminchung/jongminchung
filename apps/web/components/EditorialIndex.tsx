@@ -12,6 +12,12 @@ import { EditorialInfiniteResults } from "./EditorialInfiniteResults";
 
 const PAGE_SIZE = 9;
 
+const tagLinkClassName =
+  "shrink-0 rounded-lg border px-3 py-1.5 text-xs transition-colors hover:bg-accent data-[current=true]:border-secondary data-[current=true]:bg-secondary data-[current=true]:font-medium data-[current=true]:text-foreground data-[variant=engineering]:border-0 data-[variant=engineering]:p-0 data-[variant=engineering]:text-muted-foreground data-[variant=engineering]:hover:bg-transparent data-[variant=engineering]:data-[current=true]:bg-transparent data-[variant=engineering]:data-[current=true]:font-medium data-[variant=engineering]:data-[current=true]:text-foreground";
+
+const controlLinkClassName =
+  "rounded-md border px-2.5 py-1.5 transition-colors hover:bg-accent aria-[current=page]:bg-secondary";
+
 function queryHref(
   pathname: string,
   query: EditorialQuery,
@@ -90,7 +96,7 @@ export function EditorialIndex({
       >
         <Link
           aria-current={query.tag === undefined ? "page" : undefined}
-          className="shrink-0 rounded-lg border px-3 py-1.5 text-xs transition-colors hover:bg-accent data-[current=true]:border-secondary data-[current=true]:bg-secondary data-[current=true]:font-medium data-[current=true]:text-foreground data-[variant=engineering]:border-0 data-[variant=engineering]:p-0 data-[variant=engineering]:text-muted-foreground data-[variant=engineering]:hover:bg-transparent data-[variant=engineering]:data-[current=true]:bg-transparent data-[variant=engineering]:data-[current=true]:font-medium data-[variant=engineering]:data-[current=true]:text-foreground"
+          className={tagLinkClassName}
           data-current={query.tag === undefined}
           data-variant={variant}
           href={queryHref(pathname, query, { tag: undefined, page: 1 })}
@@ -100,7 +106,7 @@ export function EditorialIndex({
         {tags.slice(0, 7).map(({ tag, count }) => (
           <Link
             aria-current={query.tag === tag ? "page" : undefined}
-            className="shrink-0 rounded-lg border px-3 py-1.5 text-xs transition-colors hover:bg-accent data-[current=true]:border-secondary data-[current=true]:bg-secondary data-[current=true]:font-medium data-[current=true]:text-foreground data-[variant=engineering]:border-0 data-[variant=engineering]:p-0 data-[variant=engineering]:text-muted-foreground data-[variant=engineering]:hover:bg-transparent data-[variant=engineering]:data-[current=true]:bg-transparent data-[variant=engineering]:data-[current=true]:font-medium data-[variant=engineering]:data-[current=true]:text-foreground"
+            className={tagLinkClassName}
             data-current={query.tag === tag}
             data-variant={variant}
             href={queryHref(pathname, query, { tag, page: 1 })}
@@ -129,14 +135,14 @@ export function EditorialIndex({
           >
             <Link
               aria-current={query.sort === "newest" ? "page" : undefined}
-              className="rounded-md border px-2.5 py-1.5 transition-colors hover:bg-accent aria-[current=page]:bg-secondary"
+              className={controlLinkClassName}
               href={queryHref(pathname, query, { sort: "newest", page: 1 })}
             >
               {copy.newest}
             </Link>
             <Link
               aria-current={query.sort === "oldest" ? "page" : undefined}
-              className="rounded-md border px-2.5 py-1.5 transition-colors hover:bg-accent aria-[current=page]:bg-secondary"
+              className={controlLinkClassName}
               href={queryHref(pathname, query, { sort: "oldest", page: 1 })}
             >
               {copy.oldest}
@@ -144,14 +150,14 @@ export function EditorialIndex({
             <span aria-hidden="true" className="mx-1 h-4 border-l" />
             <Link
               aria-current={query.view === "grid" ? "page" : undefined}
-              className="rounded-md border px-2.5 py-1.5 transition-colors hover:bg-accent aria-[current=page]:bg-secondary"
+              className={controlLinkClassName}
               href={queryHref(pathname, query, { view: "grid" })}
             >
               {copy.grid}
             </Link>
             <Link
               aria-current={query.view === "list" ? "page" : undefined}
-              className="rounded-md border px-2.5 py-1.5 transition-colors hover:bg-accent aria-[current=page]:bg-secondary"
+              className={controlLinkClassName}
               href={queryHref(pathname, query, { view: "list" })}
             >
               {copy.list}

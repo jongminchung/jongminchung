@@ -21,77 +21,10 @@ import { fetchClient } from "fumadocs-core/search/client/fetch";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
-import type { Locale } from "#lib/content-model";
-import { documentKindLabel } from "#lib/tech/document-kind";
-
-interface SearchItem {
-  readonly href: string;
-  readonly label: string;
-  readonly matchLabel: string;
-  readonly matchText: string;
-  readonly group: string;
-  readonly badge: string;
-}
-
-interface SearchCopy {
-  readonly body: string;
-  readonly heading: string;
-  readonly resultGroupBlog: string;
-  readonly title: string;
-}
+import type { Locale } from "#lib/content-contracts";
+import { toSearchItems, type SearchItem } from "#lib/tech/search-results";
 
 const emptyResults: readonly SortedResult[] = [];
-
-function plainText(value: string): string {
-  return value.replace(/<\/?mark>/gu, "");
-}
-
-function toItems(
-  locale: Locale,
-  results: readonly SortedResult[],
-  copy: SearchCopy,
-): SearchItem[] {
-  const groups: SortedResult[][] = [];
-  for (const result of results) {
-    if (result.type === "page") groups.push([result]);
-    else groups.at(-1)?.push(result);
-  }
-  return groups.map((resultsForPage) => {
-    const page = resultsForPage[0];
-    if (page === undefined) throw new Error("Search result group is empty");
-    const match =
-      resultsForPage.find(({ type }) => type === "heading") ??
-      resultsForPage.find(({ type }) => type === "text") ??
-      page;
-    const pageTitle = plainText(page.content);
-    const [type = "Blog", ...breadcrumbs] = page.breadcrumbs ?? [];
-    const badge =
-      type === "Blog"
-        ? "Blog"
-        : type === "Docs"
-          ? "Docs"
-          : documentKindLabel(
-              locale,
-              type as "tutorial" | "how-to" | "reference" | "explanation",
-            );
-    const group =
-      breadcrumbs.length === 0 ? copy.resultGroupBlog : breadcrumbs.join(" · ");
-    const matchLabel =
-      match.type === "page"
-        ? copy.title
-        : match.type === "heading"
-          ? copy.heading
-          : copy.body;
-    return {
-      href: match.url,
-      label: pageTitle,
-      group,
-      badge,
-      matchLabel,
-      matchText: plainText(match.content),
-    };
-  });
-}
 
 /** `SearchDialog` UI 컴포넌트를 렌더링함 */
 export function SearchDialog({
@@ -105,6 +38,8 @@ export function SearchDialog({
   readonly onOpenChange: (open: boolean) => void;
   readonly finalFocus: () => HTMLElement | null;
 }) {
+  "use memo";
+
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const t = useTranslations("tech.search");
@@ -132,15 +67,17 @@ export function SearchDialog({
     ? search.query.data
     : emptyResults;
 
+  // 응답이 그대로인 입력·debounce 구간에는 결과 배열을 재사용함.
+  const resultLimit = query === "" ? 8 : 32;
   const items = useMemo(
     () =>
-      toItems(locale, results, {
+      toSearchItems(locale, results, {
         body: t("body"),
         heading: t("heading"),
         resultGroupBlog: t("resultGroupBlog"),
         title: t("title"),
-      }).slice(0, query === "" ? 8 : 32),
-    [locale, query, results, t],
+      }).slice(0, resultLimit),
+    [locale, resultLimit, results, t],
   );
 
   const changeOpen = (nextOpen: boolean): void => {

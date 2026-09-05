@@ -12,9 +12,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({
   params,
-}: {
-  readonly params: Promise<{ readonly locale: string }>;
-}) {
+}: PageProps<"/tech/[locale]/showcase">) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const text = getTechMessages(locale).metadata;
@@ -30,9 +28,7 @@ export async function generateMetadata({
 
 export default async function Page({
   params,
-}: {
-  readonly params: Promise<{ readonly locale: string }>;
-}) {
+}: PageProps<"/tech/[locale]/showcase">) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const alternate = alternateLocale(locale);

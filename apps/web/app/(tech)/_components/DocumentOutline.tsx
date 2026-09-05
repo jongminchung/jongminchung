@@ -6,26 +6,10 @@ import {
   type TOCItemType,
   useActiveAnchor,
 } from "fumadocs-core/toc";
-import { useSyncExternalStore } from "react";
 import { BackToTopButton } from "./BackToTopButton";
-
-function subscribeToHashChange(onStoreChange: () => void): () => void {
-  window.addEventListener("hashchange", onStoreChange);
-  return () => window.removeEventListener("hashchange", onStoreChange);
-}
-
-function getHashId(): string | null {
-  return window.location.hash.slice(1) || null;
-}
 
 function OutlineItems({ items }: { readonly items: readonly TOCItemType[] }) {
   const activeId = useActiveAnchor();
-  const selectedId = useSyncExternalStore(
-    subscribeToHashChange,
-    getHashId,
-    () => null,
-  );
-  const currentId = selectedId ?? activeId;
 
   return (
     <ul className="relative m-0 grid list-none gap-1 p-0 [&_a]:block [&_a]:rounded-lg [&_a]:px-3 [&_a]:py-1.5 [&_a]:text-sm [&_a]:leading-5 [&_a]:text-muted-foreground [&_a]:transition-colors [&_a:hover]:bg-accent [&_a:hover]:text-foreground [&_a[data-active=true]]:bg-secondary [&_a[data-active=true]]:font-medium [&_a[data-active=true]]:text-foreground">
@@ -34,7 +18,7 @@ function OutlineItems({ items }: { readonly items: readonly TOCItemType[] }) {
         return (
           <li key={item.url} data-level={item.depth}>
             <TOCItem
-              aria-current={currentId === id ? "location" : undefined}
+              aria-current={activeId === id ? "location" : undefined}
               href={item.url}
             >
               {item.title}

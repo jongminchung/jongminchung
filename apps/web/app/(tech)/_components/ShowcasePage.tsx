@@ -1,5 +1,6 @@
 import type { Locale } from "#lib/content-model";
 import { AnimationShowcase } from "./AnimationShowcase";
+import "../tech-showcase.css";
 
 const copy = {
   ko: {

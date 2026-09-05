@@ -1,3 +1,4 @@
+import "server-only";
 import { defineI18n } from "fumadocs-core/i18n";
 import { loader } from "fumadocs-core/source";
 import { toFumadocsSource } from "fumadocs-mdx/runtime/server";

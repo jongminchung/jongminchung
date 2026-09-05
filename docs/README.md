@@ -25,7 +25,7 @@
 
 ## 프로젝트 문서
 
-- [Web 앱 구조](web/README.md): 다중 도메인 routing, 콘텐츠 생성, 화면 계층, 테스트와 배포 경계
+- [Web 앱 구조와 직접 유지보수](web/README.md): 작업별 수정 파일, 다중 도메인 routing, 라이브러리 역할, 생성물과 오류 확인 순서
 - [Web 테스트 전략](web-testing-strategy.md): Bun 내장 test runner와 Playwright의 테스트 분류 및 실행 기준
 - [Web 컨테이너 배포 계약](../apps/web/DEPLOYMENT.md)
 - [`@jongminchung/tooling`](../packages/tooling/README.md): Oxc 설정과 package map

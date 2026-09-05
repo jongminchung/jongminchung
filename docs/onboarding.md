@@ -301,10 +301,10 @@ bunx --bun shadcn add <component> --diff -c packages/ui
     - 실패 시 trace·screenshot·video가 CI artifact로 보존됨
     - snapshot 갱신 전 diff를 직접 확인하고 환경 차이인지 의도한 디자인 변경인지 판별함
     - 공식 자료는 [Playwright Test](https://playwright.dev/docs/intro), [visual comparison](https://playwright.dev/docs/test-snapshots), [Trace Viewer](https://playwright.dev/docs/trace-viewer) 문서임
-- **Oxfmt·Oxlint·Knip은 형식, correctness·React·a11y 규칙, 미사용 파일·중복 export를 각각 담당함**
+- **Oxfmt·Oxlint·Knip은 형식, correctness·React·a11y 규칙, 미사용 파일·의존성·중복 export와 미선언 의존성을 각각 담당함**
     - `bun run fmt`는 저장소를 수정하고 `bun run fmt:check`는 수정 없이 검사함
     - `bun run lint`는 type-aware rule을 포함한 공유 Oxc 정책을 적용함
-    - `bun run deadcode`는 Knip의 file·duplicate 검사를 실행함
+    - `bun run deadcode`는 Knip으로 파일·의존성·catalog·중복 export와 미선언 참조를 검사함
     - 공식 자료는 [Oxfmt](https://oxc.rs/docs/guide/usage/formatter), [Oxlint](https://oxc.rs/docs/guide/usage/linter), [Knip](https://knip.dev/overview/getting-started) 문서임
 - **Renovate는 framework·UI·test·tooling lane별로 dependency PR을 묶고 major는 dashboard 승인을 요구함**
     - 공통 version은 catalog 한 곳에서 바꾸고 lockfile을 `bun install`로 재계산함

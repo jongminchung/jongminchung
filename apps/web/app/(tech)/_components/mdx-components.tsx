@@ -128,6 +128,15 @@ function SharedMdxBlockquote({
   );
 }
 
+function DocsMdxBlockquote({
+  className,
+  ...props
+}: ComponentProps<"blockquote">) {
+  return (
+    <SharedMdxBlockquote {...props} className={cn("my-[1.6em]", className)} />
+  );
+}
+
 export function SharedMdxTable({
   className,
   ...props
@@ -201,8 +210,9 @@ export const sharedMdxContentComponents = {
   Steps,
 } satisfies MDXComponents;
 
-/** 빠른 탐색과 절차 확인을 위한 Docs 제목 리듬을 제공함 */
+/** 빠른 탐색과 절차 확인을 위한 Docs 본문 typography를 제공함 */
 export const docsMdxTypographyComponents = {
+  blockquote: DocsMdxBlockquote,
   h2: DocsMdxHeading2,
   h3: DocsMdxHeading3,
 } satisfies MDXComponents;

@@ -5,6 +5,7 @@ import {
   EditorialNavigationMenu,
   type EditorialNavigationMenuOption,
 } from "./EditorialNavigationMenu";
+import { IntentLink } from "./IntentLink";
 
 export interface EditorialNavigationItem {
   readonly href: string;
@@ -56,14 +57,14 @@ export function EditorialHeader({
         >
           {navigation.map((item) =>
             item.options === undefined || item.menuLabel === undefined ? (
-              <Link
+              <IntentLink
                 aria-current={item.isActive ? "page" : undefined}
                 className="rounded-md px-2.5 py-1 text-sm transition-colors hover:bg-accent hover:text-foreground aria-[current=page]:bg-secondary aria-[current=page]:font-medium aria-[current=page]:text-foreground"
                 href={item.href}
                 key={item.href}
               >
                 {item.label}
-              </Link>
+              </IntentLink>
             ) : (
               <EditorialNavigationMenu
                 isActive={item.isActive}

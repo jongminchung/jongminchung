@@ -22,7 +22,7 @@ export function articleProseClassName(locale: Locale): string {
 /** Fumadocs DocsBody의 언어별 탐색·읽기 typography 계약을 제공함 */
 export function docsProseClassName(locale: Locale): string {
   return cn(
-    "mt-8 text-[16px]",
+    "prose-no-margin mt-8 text-[16px]",
     localeReadingClassName(locale),
     sharedMdxProseClassName,
   );
