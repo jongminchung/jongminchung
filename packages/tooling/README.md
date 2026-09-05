@@ -42,7 +42,8 @@ snapshot channel rather than a reproducible SemVer release. Refresh the downstre
 commit the changed lockfile whenever a replacement is published:
 
 ```bash
-bun update --force @jongminchung/tooling@1.0.0
+bun remove --ignore-scripts @jongminchung/tooling
+bun add --dev --exact --ignore-scripts --no-cache @jongminchung/tooling@1.0.0
 ```
 
 ## Package scripts
