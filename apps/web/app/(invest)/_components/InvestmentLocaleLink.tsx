@@ -16,7 +16,7 @@ export function InvestmentLocaleLink({ locale }: { readonly locale: Locale }) {
   return (
     <Link
       aria-label={alternate === "en" ? "Read in English" : "한국어로 읽기"}
-      className="font-mono text-[11px]"
+      className="inline-flex min-h-11 min-w-11 items-center justify-center font-mono text-[11px]"
       href={href}
     >
       {alternate.toUpperCase()}

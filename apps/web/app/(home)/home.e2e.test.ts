@@ -29,9 +29,10 @@ for (const locale of ["ko", "en"] as const) {
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`/${locale}`);
-    const navigation = page.getByRole("navigation", {
-      name: locale === "ko" ? "주요 탐색" : "Primary navigation",
-    });
+    await page
+      .getByRole("button", { name: locale === "ko" ? "홈 메뉴" : "Home menu" })
+      .click();
+    const navigation = page.getByRole("dialog");
     for (const site of ["tech", "invest"] as const) {
       const label = site === "tech" ? "Tech" : "Invest";
       const link = navigation.getByRole("link", { name: label, exact: true });
@@ -46,6 +47,7 @@ for (const locale of ["ko", "en"] as const) {
         `https://${site}.jamie.kr/${locale}`,
       );
     }
+    await page.keyboard.press("Escape");
     const latest = page.getByRole("link", {
       name: locale === "ko" ? "최근 기록 읽기" : "Read the latest",
       exact: true,
@@ -68,7 +70,10 @@ for (const locale of ["ko", "en"] as const) {
 test("키보드와 JavaScript 없는 환경에서도 목적지와 언어를 탐색함", async ({
   browser,
 }) => {
-  const context = await browser.newContext({ javaScriptEnabled: false });
+  const context = await browser.newContext({
+    javaScriptEnabled: false,
+    viewport: { width: 390, height: 844 },
+  });
   const page = await context.newPage();
   try {
     await page.goto("http://jamie.localhost:3100/en");
@@ -130,9 +135,8 @@ test("[성공] 모바일에서 수평 overflow 없이 탐색할 수 있음", asy
   await page.goto("/");
 
   await expectNoHorizontalOverflow(page);
-  await expect(
-    page.getByRole("navigation", { name: "Primary navigation" }),
-  ).toBeVisible();
+  await page.getByRole("button", { name: "Home menu" }).click();
+  await expect(page.getByRole("dialog", { name: "Home menu" })).toBeVisible();
 });
 
 for (const [savedMode, nextMode] of [

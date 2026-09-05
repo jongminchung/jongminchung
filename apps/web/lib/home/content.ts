@@ -15,6 +15,8 @@ interface HomeContent {
     readonly skipToContent: string;
     readonly writing: string;
     readonly principles: string;
+    readonly mobileMenu: string;
+    readonly closeMenu: string;
     readonly switchLocale: string;
   };
   readonly hero: {
@@ -50,6 +52,8 @@ const content = {
       skipToContent: "본문으로 건너뛰기",
       writing: "최근 기록",
       principles: "작업 원칙",
+      mobileMenu: "홈 메뉴",
+      closeMenu: "메뉴 닫기",
       switchLocale: "Read in English",
     },
     hero: {
@@ -117,6 +121,8 @@ const content = {
       skipToContent: "Skip to content",
       writing: "Latest notes",
       principles: "Principles",
+      mobileMenu: "Home menu",
+      closeMenu: "Close menu",
       switchLocale: "한국어로 읽기",
     },
     hero: {

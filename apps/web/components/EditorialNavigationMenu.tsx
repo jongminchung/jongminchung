@@ -8,6 +8,7 @@ import {
 } from "@jongminchung/ui/components/dropdown-menu";
 import { ChevronDownIcon, CheckIcon } from "lucide-react";
 import Link from "next/link";
+import { useHeaderOverlay } from "./useHeaderOverlay";
 
 export interface EditorialNavigationMenuOption {
   readonly href: string;
@@ -27,11 +28,14 @@ export function EditorialNavigationMenu({
   readonly options: readonly EditorialNavigationMenuOption[];
   readonly isActive?: boolean;
 }): React.JSX.Element {
+  const { open, setOpen, triggerRef, finalFocus } = useHeaderOverlay();
+
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger
+        ref={triggerRef}
         aria-label={`${label}: ${menuLabel}`}
-        className="inline-flex items-center gap-1 rounded-md px-2.5 py-1 transition-colors hover:bg-accent hover:text-foreground data-popup-open:bg-accent data-popup-open:text-foreground data-[active=true]:bg-secondary data-[active=true]:font-medium data-[active=true]:text-foreground"
+        className="inline-flex min-h-11 items-center gap-1 rounded-md px-2.5 py-1 transition-colors hover:bg-accent hover:text-foreground data-popup-open:bg-accent data-popup-open:text-foreground data-[active=true]:bg-secondary data-[active=true]:font-medium data-[active=true]:text-foreground"
         data-active={isActive}
       >
         {label}
@@ -39,13 +43,14 @@ export function EditorialNavigationMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent
         aria-label={menuLabel}
+        finalFocus={finalFocus}
         className="w-64"
         sideOffset={10}
       >
         {options.map((option) => (
           <DropdownMenuItem
             aria-current={option.isActive ? "page" : undefined}
-            className="min-h-9 px-2.5 aria-[current=page]:bg-accent aria-[current=page]:font-medium"
+            className="min-h-11 px-2.5 aria-[current=page]:bg-accent aria-[current=page]:font-medium"
             key={option.href}
             render={<Link href={option.href} />}
           >

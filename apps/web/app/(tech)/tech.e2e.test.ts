@@ -279,7 +279,11 @@ test("[성공] 모바일 문서 경로를 다시 방문해도 검색 상태를 �
   await page.keyboard.press("Escape");
   await expect(search).toBeHidden();
 
-  await page.getByRole("link", { name: "한국어로 읽기" }).click();
+  await page.getByRole("button", { name: "Engineering content menu" }).click();
+  await page
+    .getByRole("dialog", { name: "Engineering content menu" })
+    .getByRole("link", { name: "한국어로 읽기" })
+    .click();
   await expect(page).toHaveURL(/\/ko\/docs\/fe\/nextjs-16$/u);
 
   await page.goBack();
@@ -346,13 +350,18 @@ test("[성공] 한글 글의 줄바꿈·날짜·복사·터치 영역을 현지�
     page.getByRole("button", { name: "기술 콘텐츠 메뉴" }),
     page.getByRole("button", { name: "문서 검색" }),
     page.getByRole("button", { name: /^테마:/u }),
-    page.getByRole("link", { name: "Read in English" }),
   ]) {
     const box = await control.boundingBox();
     expect(box?.height).toBeGreaterThanOrEqual(44);
   }
   await expectNoHorizontalOverflow(page);
   await expectNoAccessibilityViolations(page, "header");
+  await page.getByRole("button", { name: "기술 콘텐츠 메뉴" }).click();
+  const language = page
+    .getByRole("dialog")
+    .getByRole("link", { name: "Read in English" });
+  expect((await language.boundingBox())?.height).toBeGreaterThanOrEqual(44);
+  await page.keyboard.press("Escape");
   await expectNoAccessibilityViolations(page, '[data-mobile-toc="editorial"]');
 });
 

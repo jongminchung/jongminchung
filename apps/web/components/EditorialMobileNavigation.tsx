@@ -11,26 +11,33 @@ import {
 } from "@jongminchung/ui/components/sheet";
 import { cn } from "@jongminchung/ui/lib/utils";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import type { EditorialNavigationItem } from "./EditorialChrome";
 import { Icon } from "./Icon";
+import { useHeaderOverlay } from "./useHeaderOverlay";
 
 /** 작은 화면에서 editorial 목적지를 대체 탐색으로 제공함 */
 export function EditorialMobileNavigation({
   closeLabel,
   label,
   navigation,
+  localeControl,
 }: {
+  readonly localeControl: ReactNode;
   readonly closeLabel: string;
   readonly label: string;
   readonly navigation: readonly EditorialNavigationItem[];
 }) {
+  const { open, setOpen, triggerRef, finalFocus } = useHeaderOverlay();
+
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
+        ref={triggerRef}
         render={
           <Button
             aria-label={label}
-            className="size-11 min-[641px]:hidden"
+            className="size-11 md:hidden"
             size="icon"
             variant="ghost"
           />
@@ -38,11 +45,19 @@ export function EditorialMobileNavigation({
       >
         <Icon icon="menu" />
       </SheetTrigger>
-      <SheetContent closeLabel={closeLabel} side="right">
-        <SheetHeader className="border-b pr-16">
+      <SheetContent
+        className="overflow-hidden"
+        finalFocus={finalFocus}
+        closeLabel={closeLabel}
+        side="right"
+      >
+        <SheetHeader className="shrink-0 border-b pr-16">
           <SheetTitle>{label}</SheetTitle>
         </SheetHeader>
-        <nav aria-label={label} className="grid gap-5 px-4 pb-6">
+        <nav
+          aria-label={label}
+          className="grid min-h-0 gap-5 overflow-y-auto overscroll-contain px-4 pb-6"
+        >
           {navigation.map((item) => (
             <div className="grid gap-1" key={item.href}>
               <SheetClose
@@ -75,6 +90,15 @@ export function EditorialMobileNavigation({
               )}
             </div>
           ))}
+          <div
+            className="border-t pt-4"
+            onClickCapture={(event) => {
+              if (event.target instanceof Element && event.target.closest("a"))
+                setOpen(false);
+            }}
+          >
+            {localeControl}
+          </div>
         </nav>
       </SheetContent>
     </Sheet>

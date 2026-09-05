@@ -15,7 +15,7 @@ export interface EditorialNavigationItem {
   readonly options?: readonly EditorialNavigationMenuOption[];
 }
 
-/** 두 editorial 도메인의 공통 header 탐색을 렌더링함 */
+/** 세 사이트의 공통 header 탐색을 렌더링함 */
 export function EditorialHeader({
   brand,
   brandLabel,
@@ -41,56 +41,83 @@ export function EditorialHeader({
   readonly mobileMenuLabel: string;
   readonly mobileMenuCloseLabel: string;
 }): React.JSX.Element {
+  const languageControl = localeControl ?? (
+    <Link
+      className="inline-flex min-h-11 min-w-11 items-center justify-center font-mono text-[11px]"
+      href={localeHref}
+    >
+      {localeLabel}
+    </Link>
+  );
+
   return (
-    <header className="sticky top-0 z-40 h-16 border-b bg-background/95 backdrop-blur-xl">
-      <div className="flex h-full w-full items-center gap-4 px-4 text-sm md:px-8 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-6">
-        <Link
-          aria-label={brandLabel}
-          className="flex min-h-11 min-w-11 items-center font-semibold tracking-[-.045em] lg:justify-self-start"
-          href={homeHref}
-        >
-          {brand}
-        </Link>
+    <>
+      <header className="sticky top-0 z-40 h-16 border-b bg-background/95 backdrop-blur-xl">
+        <div className="flex h-full w-full items-center gap-0 px-4 text-sm md:grid md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:gap-4 md:px-8">
+          <Link
+            aria-label={brandLabel}
+            className="flex min-h-11 min-w-11 shrink-0 items-center font-semibold tracking-[-.045em] md:justify-self-start"
+            href={homeHref}
+          >
+            {brand}
+          </Link>
+          <nav
+            aria-label={navigationLabel}
+            className="hidden items-center justify-center gap-1 text-muted-foreground md:flex md:justify-self-center"
+          >
+            {navigation.map((item) =>
+              item.options === undefined || item.menuLabel === undefined ? (
+                <IntentLink
+                  aria-current={item.isActive ? "page" : undefined}
+                  className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md px-2.5 py-1 text-sm transition-colors hover:bg-accent hover:text-foreground aria-[current=page]:bg-secondary aria-[current=page]:font-medium aria-[current=page]:text-foreground"
+                  href={item.href}
+                  key={item.href}
+                >
+                  {item.label}
+                </IntentLink>
+              ) : (
+                <EditorialNavigationMenu
+                  isActive={item.isActive}
+                  key={item.href}
+                  label={item.label}
+                  menuLabel={item.menuLabel}
+                  options={item.options}
+                />
+              ),
+            )}
+          </nav>
+          <div className="ml-auto flex shrink-0 items-center gap-0 md:ml-0 md:gap-1 md:justify-self-end">
+            {actions}
+            <div className="hidden md:flex">{languageControl}</div>
+            <EditorialMobileNavigation
+              closeLabel={mobileMenuCloseLabel}
+              label={mobileMenuLabel}
+              localeControl={languageControl}
+              navigation={navigation}
+            />
+          </div>
+        </div>
+      </header>
+      <noscript>
         <nav
           aria-label={navigationLabel}
-          className="flex items-center justify-center gap-1 text-muted-foreground max-[640px]:hidden lg:justify-self-center"
+          className="flex flex-wrap items-center gap-x-4 border-b px-4 py-2 md:px-8"
         >
-          {navigation.map((item) =>
-            item.options === undefined || item.menuLabel === undefined ? (
-              <IntentLink
-                aria-current={item.isActive ? "page" : undefined}
-                className="rounded-md px-2.5 py-1 text-sm transition-colors hover:bg-accent hover:text-foreground aria-[current=page]:bg-secondary aria-[current=page]:font-medium aria-[current=page]:text-foreground"
+          {navigation
+            .flatMap((item) => [item, ...(item.options ?? [])])
+            .map((item, index) => (
+              <a
+                className="inline-flex min-h-11 items-center text-sm"
                 href={item.href}
-                key={item.href}
+                key={`${item.href}-${index}`}
               >
                 {item.label}
-              </IntentLink>
-            ) : (
-              <EditorialNavigationMenu
-                isActive={item.isActive}
-                key={item.href}
-                label={item.label}
-                menuLabel={item.menuLabel}
-                options={item.options}
-              />
-            ),
-          )}
+              </a>
+            ))}
+          {languageControl}
         </nav>
-        <div className="ml-auto flex items-center gap-1 lg:ml-0 lg:justify-self-end">
-          <EditorialMobileNavigation
-            closeLabel={mobileMenuCloseLabel}
-            label={mobileMenuLabel}
-            navigation={navigation}
-          />
-          {actions}
-          {localeControl ?? (
-            <Link className="font-mono text-[11px]" href={localeHref}>
-              {localeLabel}
-            </Link>
-          )}
-        </div>
-      </div>
-    </header>
+      </noscript>
+    </>
   );
 }
 

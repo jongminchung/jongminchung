@@ -1,5 +1,6 @@
 import { ArrowUpRightIcon } from "lucide-react";
 import { BrandWordmark } from "#components/BrandWordmark";
+import { EditorialHeader } from "#components/EditorialChrome";
 import { StructuredData } from "#components/StructuredData";
 import { ThemeControl } from "#components/ThemeControl";
 import { getHomeContent } from "#lib/home/content";
@@ -19,36 +20,38 @@ export function HomeHeader({ locale }: { readonly locale: Locale }) {
       >
         {navigation.skipToContent}
       </a>
-      <header className="home-header bg-background/95">
-        <div className="home-header-inner">
+      <EditorialHeader
+        brand={<BrandWordmark />}
+        brandLabel="jongminchung home"
+        homeHref={`/${locale}`}
+        navigationLabel={navigation.label}
+        navigation={[
+          ...destinations.map((destination) => ({
+            href: destination.href,
+            label: destination.title,
+          })),
+          { href: "#writing", label: navigation.writing },
+          { href: "#principles", label: navigation.principles },
+        ]}
+        localeHref={`/${alternate}`}
+        localeLabel={alternate.toUpperCase()}
+        localeControl={
           <a
-            className="home-brand"
-            href={`/${locale}`}
-            aria-label="jongminchung home"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md font-mono text-[11px] hover:bg-muted"
+            href={`/${alternate}`}
+            hrefLang={alternate}
+            aria-label={navigation.switchLocale}
           >
-            <BrandWordmark />
+            {alternate.toUpperCase()}
           </a>
-          <nav className="home-navigation" aria-label={navigation.label}>
-            {destinations.map((destination) => (
-              <a href={destination.href} key={destination.id}>
-                {destination.title}
-              </a>
-            ))}
-            <a href="#writing">{navigation.writing}</a>
-            <a href="#principles">{navigation.principles}</a>
-          </nav>
-          <div className="home-controls">
-            <a
-              className="home-locale"
-              href={`/${alternate}`}
-              hrefLang={alternate}
-              aria-label={navigation.switchLocale}
-            >
-              {alternate.toUpperCase()}
-            </a>
+        }
+        mobileMenuLabel={navigation.mobileMenu}
+        mobileMenuCloseLabel={navigation.closeMenu}
+        actions={
+          <>
             <ThemeControl labelTemplate={themeLabelTemplateFor(locale)} />
             <a
-              className="home-github"
+              className="hidden min-h-11 items-center gap-1.5 rounded-md px-3 text-xs text-muted-foreground hover:bg-muted hover:text-foreground lg:inline-flex"
               href="https://github.com/jongminchung"
               target="_blank"
               rel="noreferrer"
@@ -56,9 +59,9 @@ export function HomeHeader({ locale }: { readonly locale: Locale }) {
               GitHub
               <ArrowUpRightIcon aria-hidden="true" className="size-3.5" />
             </a>
-          </div>
-        </div>
-      </header>
+          </>
+        }
+      />
     </>
   );
 }

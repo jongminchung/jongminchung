@@ -1,5 +1,6 @@
 import { TooltipProvider } from "@jongminchung/ui/components/tooltip";
 import { type ReactNode, ViewTransition } from "react";
+import { BrandWordmark } from "#components/BrandWordmark";
 import { EditorialFooter, EditorialHeader } from "#components/EditorialChrome";
 import { ThemeControl } from "#components/ThemeControl";
 import type { Locale } from "#lib/content-model";
@@ -42,12 +43,7 @@ export function DocsShell({
                 <ThemeControl labelTemplate={themeLabelTemplateFor(locale)} />
               </>
             }
-            brand={
-              <>
-                <span>jongminchung</span>
-                <span className="ml-1 align-top text-[9px]">tech</span>
-              </>
-            }
+            brand={<BrandWordmark suffix="tech" />}
             brandLabel="jongminchung tech"
             navigationLabel={labels.navigation}
             homeHref={`/${locale}`}
