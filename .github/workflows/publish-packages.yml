@@ -43,7 +43,7 @@ jobs:
       - run: bun run --filter @jongminchung/${{ matrix.package }} typecheck
       - run: bun run --filter @jongminchung/${{ matrix.package }} test
       - run: bun run --filter @jongminchung/${{ matrix.package }} test:node
-      - run: bun run --filter @jongminchung/${{ matrix.package }} publish:dry-run
+      - run: bun pm pack --cwd packages/${{ matrix.package }} --dry-run
 
   publish:
     name: Publish ${{ matrix.package }}@1.0.0
