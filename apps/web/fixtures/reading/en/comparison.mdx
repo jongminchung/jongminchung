@@ -1,0 +1,23 @@
+---
+title: "Before, after, and diff"
+purpose: "Compare the effect of a change under the same conditions."
+caution: "Give each item a specific title and explain changes with text and +/− markers as well as color."
+---
+
+<Comparison title="Before and after">
+    <ComparisonItem title="Before">
+        Using only the user identifier conflates different requests.
+    </ComparisonItem>
+    <ComparisonItem title="After">
+        Include the request identifier to distinguish operations.
+    </ComparisonItem>
+</Comparison>
+
+<CodeExample>
+
+```ts title="key-change.ts"
+const key = userId; // [!code --]
+const key = userId + ":" + requestId; // [!code ++]
+```
+
+</CodeExample>

@@ -1,4 +1,11 @@
 @theme inline {
+  --color-highlight: var(--highlight);
+  --color-highlight-foreground: var(--highlight-foreground);
+  --color-annotation-note: var(--annotation-note);
+  --color-annotation-tip: var(--annotation-tip);
+  --color-annotation-important: var(--annotation-important);
+  --color-annotation-warning: var(--annotation-warning);
+  --color-annotation-caution: var(--annotation-caution);
   --text-metadata: var(--font-size-metadata);
   --text-caption: var(--font-size-caption);
   --tracking-metadata: var(--letter-spacing-metadata);

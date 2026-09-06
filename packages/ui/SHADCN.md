@@ -1,12 +1,12 @@
 # shadcn 갱신 기록과 보존 계약
 
-2026-09-06에 현재 저장소 소스를 검토해 작성했다. 구성은 `base-nova`, CSS variables, neutral, Lucide이며 Base UI 1.6.0·cmdk 1.1.1·shadcn CLI 4.17.0을 사용한다. 최초 생성에 사용한 registry revision은 기록되어 있지 않다. 이 버전을 최초 생성 버전이라고 간주하지 않는다.
+2026-09-06에 현재 저장소 소스를 검토해 작성했다. 구성은 `base-nova`, CSS variables, neutral, Lucide이며 Base UI 1.8.0·cmdk 1.1.1·shadcn CLI 4.21.0을 사용한다. 최초 생성에 사용한 registry revision은 기록되어 있지 않다. 이 버전을 최초 생성 버전이라고 간주하지 않는다.
 
-`components.json`, [검토한 로컬 소스의 SHA-256 목록](./shadcn-baseline.json), 현재 Git diff를 비교의 출발점으로 사용한다. SHA-256은 이 검토 시점의 실제 파일을 식별하며 upstream hash가 아니다. 갱신 후 계약 검증을 완료했을 때 해당 파일 hash와 검토일·비교 환경을 함께 갱신한다. registry 응답은 CLI 버전을 고정해도 바뀔 수 있으므로, 갱신할 때 dry-run·diff 원문을 PR에 첨부하고 실제 사용한 registry URL·조회일·응답 SHA-256을 기록한다. 아직 조회하지 않은 upstream hash를 임의로 기록하지 않는다.
+`components.json`, [검토한 로컬 소스의 SHA-256 목록](./shadcn-baseline.json), 현재 Git diff를 비교의 출발점으로 사용한다. `files`의 SHA-256은 이 검토 시점의 실제 로컬 파일을 식별한다. `registry.files`에는 비교에 사용한 upstream 응답의 URL과 SHA-256을 별도로 기록한다. 갱신 후 계약 검증을 완료했을 때 해당 파일 hash와 검토일·비교 환경을 함께 갱신한다. registry 응답은 CLI 버전을 고정해도 바뀔 수 있으므로, 갱신할 때 dry-run·diff 원문을 PR에 첨부하고 실제 사용한 registry URL·조회일·응답 SHA-256을 기록한다. 최초 생성 시점의 upstream revision과 이번 조회 결과를 혼동하지 않는다.
 
 ```bash
-bunx --bun shadcn@4.17.0 add <component> --dry-run -c packages/ui
-bunx --bun shadcn@4.17.0 add <component> --diff -c packages/ui
+bunx --bun shadcn@4.21.0 add <component> --dry-run -c packages/ui
+bunx --bun shadcn@4.21.0 add <component> --diff -c packages/ui
 ```
 
 먼저 위 결과와 아래 공개 계약을 비교하고, 변경을 병합한 후 다음 검사를 수행한다.
@@ -63,3 +63,24 @@ bun run --filter @jongminchung/web test:e2e ui-primitives.e2e.test.ts
 - 2026-09-06: 앱의 제품별 data-variant 스타일 재도입을 architecture 검사로 차단했다. 공용 primitive 상태·size·side modifier와 기존 공용 API는 유지한다.
 
 다음 갱신 기록에는 대상 컴포넌트, 이전 Git commit, registry URL·조회일·SHA-256, 받아들인 변경, 보존한 로컬 수정, 실행한 검사 결과를 남긴다.
+
+## 2026-09-06 최신 안정 버전 검토
+
+npm `latest`를 조회해 CLI 4.17.0 → 4.21.0, Base UI 1.6.0 → 1.8.0을 적용했다. Tailwind CSS와 `@tailwindcss/postcss` 4.3.3, tailwind-merge 3.6.0, tw-animate-css 1.4.0은 이미 최신 안정 버전이었다. Tailwind 버전과 테마는 그대로 유지한다.
+
+공식 `https://ui.shadcn.com/r/styles/base-nova/{name}.json` 29개 응답을 조회했다. `preview-card`는 upstream의 `hover-card`에 대응한다. baseline의 `registry.files`는 응답 원문 SHA-256과 URL이며, `files`는 병합 후 로컬 소스 SHA-256이다. CLI 버전과 registry 배포 시점은 서로 독립적이다.
+
+- PreviewCard에 upstream의 `inline-start`·`inline-end` 방향별 진입 애니메이션을 반영했다. 기존 top/bottom/left/right 동작은 같다.
+- 29개 모두의 구조·props·상태 처리를 비교했다. 나머지 차이는 아래 보존 계약과 생성 시 변환에 해당하며, 전체 덮어쓰기는 수행하지 않았다. CLI의 `IconPlaceholder`, `cn-font-heading`, `cn-menu-*`는 생성 템플릿 표식이므로 제품 코드에 복사하지 않는다. Lucide 및 workspace의 `cn` import를 유지한다.
+- Button·Card의 반경/색상, Dialog·Sheet의 overlay/닫기 버튼 크기, Command의 utility 재정의, PreviewCard의 위치·색상·줄바꿈, Tabs 표시기와 접근성 API를 유지했다.
+- 최신 FieldLabel의 카드 전체 hover/focus 효과와 Checkbox/Radio의 내부 focus ring 억제는 기존 표시를 변경하므로 적용하지 않았다. 현재 키보드 focus 표시를 유지하며, 추후 디자인 변경이 허용될 때 세 컴포넌트를 함께 변경해야 한다.
+- 서버에서 사용 가능한 Field·Label·Table을 client component로 바꾸지 않았다. Field 오류 정규화와 InputGroup의 pointer 이벤트 취소 계약도 보존했다.
+
+추가 개선은 업데이트 차단 사유가 아닌 별도 범위다. E2E의 고정 origin/port를 공통 설정으로 모으면 독립 검증 서버를 쉽게 사용할 수 있다. 브라우저 회귀 검사를 Firefox/WebKit까지 확대하고, 아직 브라우저 fixture가 없는 primitive의 키보드·폼 조합을 보강할 수 있다. 새로운 제품 variant나 테마 교체는 필요하지 않다.
+
+### 검증 결과
+
+- `bun run check` 통과: lint, workspace typecheck, deadcode, UI 24개·Web 209개 단위 검사, Node/source 조건별 30개 export 검증.
+- 독립 checkout에서 production build와 전체 브라우저 검사 수행. 검증 서버는 3112를 사용했고, 작업과 무관한 미완성 글 두 파일은 검증 복사본에서 제외했다. 테스트와 transfer JSON의 고정 origin도 복사본에서만 3112로 변경했다.
+- 148개 중 146개는 통과했다. 시각 비교 2개는 첫 실행 실패 후 같은 빌드 재실행에서 통과했다. 기준 스크린샷을 수정하지 않았다.
+- 남은 홈 en/ko 초기 JavaScript 전송량 2개는 갱신 전 의존성에서도 실패했다. 한도 230,000 bytes, 갱신 전 230,533 bytes, 갱신 후 231,552 bytes로 측정했다. 이번 의존성 증가분은 1,019 bytes다. 기준 한도를 완화하지 않았으며 홈 초기 JavaScript 경량화를 후속 개선으로 남긴다.

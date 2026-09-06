@@ -1,20 +1,21 @@
 import type { Locale } from "#lib/content-model";
 import { AnimationShowcase } from "./AnimationShowcase";
+import { MdxShowcase } from "./MdxShowcase";
 import "../tech-showcase.css";
 
 const copy = {
   ko: {
-    eyebrow: "ANIMATION SYSTEMS",
+    eyebrow: "ANIMATION & MDX",
     title: "Showcase",
     description:
-      "같은 시스템 흐름을 조작 가능한 타임라인과 렌더링 중심 장면으로 표현합니다",
+      "조작 가능한 애니메이션과 MDX 읽기 도구를 살펴보고 작성 문법을 복사해 사용하세요",
     note: "두 데모는 현재 페이지에 맞춘 경량 SVG 프로토타입이며 각 도구의 제작 모델과 경계를 보여줍니다",
   },
   en: {
-    eyebrow: "ANIMATION SYSTEMS",
+    eyebrow: "ANIMATION & MDX",
     title: "Showcase",
     description:
-      "One system flow, expressed as an interactive timeline and a rendered explanatory scene",
+      "Explore interactive animations and MDX reading tools, with syntax you can copy into your writing",
     note: "Both demos are lightweight SVG prototypes for this page, showing each tool's authoring model and boundary",
   },
 } as const;
@@ -45,6 +46,7 @@ export function ShowcasePage({
       <p className="mt-8 max-w-[760px] border-l-2 border-primary pl-4 text-sm leading-6 text-muted-foreground">
         {text.note}
       </p>
+      <MdxShowcase locale={locale} />
     </main>
   );
 }

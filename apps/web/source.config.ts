@@ -4,7 +4,7 @@ import {
   defineConfig,
   defineDocs,
 } from "fumadocs-mdx/config";
-import type { RefinementCtx } from "zod";
+import { z, type RefinementCtx } from "zod";
 import {
   blogPostFrontmatterSchema,
   blogPostMetadataSchema,
@@ -24,6 +24,11 @@ import {
   type InvestmentNoteMetadata,
 } from "./lib/invest/content.ts";
 import { remarkKrokiUrl } from "./lib/remark-kroki-url.ts";
+import {
+  remarkReadingAnnotations,
+  readingStructureOptions,
+} from "./lib/remark-reading-annotations.ts";
+import { remarkReadingSource } from "./lib/remark-reading-source.ts";
 import {
   parseBlogContentPath,
   parseDocsContentPath,
@@ -93,8 +98,9 @@ function investmentSchema({ path, source }: { path: string; source: string }) {
 // CLI의 링크·검색 데이터 추출에는 렌더링 전용 구문 강조가 필요하지 않음
 const metadataOnly = process.env.JAMIE_MDX_METADATA_ONLY === "1";
 
-function techMdxOptions() {
+function techMdxOptions(preserveSource = false) {
   return applyMdxPreset({
+    remarkStructureOptions: readingStructureOptions,
     rehypeCodeOptions: metadataOnly
       ? false
       : {
@@ -103,7 +109,12 @@ function techMdxOptions() {
           langAlias: { excalidraw: "plaintext" },
           themes: { light: "github-light", dark: "github-dark" },
         },
-    remarkPlugins: (plugins) => [remarkKrokiUrl, ...plugins],
+    remarkPlugins: (plugins) => [
+      ...(preserveSource ? [remarkReadingSource] : []),
+      remarkReadingAnnotations,
+      remarkKrokiUrl,
+      ...plugins,
+    ],
   });
 }
 
@@ -133,9 +144,27 @@ export const investmentCollection = defineCollections({
   dir: "content/invest",
   files: ["**/notes/*.mdx"],
   async: true,
-  mdxOptions: applyMdxPreset(metadataOnly ? { rehypeCodeOptions: false } : {}),
+  mdxOptions: applyMdxPreset({
+    remarkStructureOptions: readingStructureOptions,
+    ...(metadataOnly ? { rehypeCodeOptions: false } : {}),
+    remarkPlugins: (plugins) => [remarkReadingAnnotations, ...plugins],
+  }),
   schema: investmentSchema,
   postprocess: { extractLinkReferences: true },
+});
+
+// Showcase와 브라우저 테스트가 공유함. 콘텐츠 검색·RSS·사이트맵에는 연결하지 않음.
+export const readingSamples = defineCollections({
+  type: "doc",
+  dir: "fixtures/reading",
+  files: ["**/*.mdx"],
+  async: true,
+  mdxOptions: techMdxOptions(true),
+  schema: z.object({
+    title: z.string(),
+    purpose: z.string(),
+    caution: z.string(),
+  }),
 });
 
 export default defineConfig();

@@ -1,0 +1,23 @@
+---
+title: "Code highlights, line numbers, and notes"
+purpose: "Connect the code lines that matter with their explanation."
+caution: "Update CodeNote lines whenever code changes. Preserve title, lineNumbers, and annotation comments in the fence."
+---
+
+<CodeExample>
+
+```ts title="request-key.ts" lineNumbers
+const userId = "reader";
+const requestId = "request-1";
+const key = userId + ":" + requestId; // [!code highlight]
+```
+
+<CodeNotes>
+    <CodeNote lines="Lines 1–2">Identify the user and request.</CodeNote>
+    <CodeNote lines="Line 3">
+        Combine both identifiers. A production implementation also needs expiry
+        and concurrency handling.
+    </CodeNote>
+</CodeNotes>
+
+</CodeExample>

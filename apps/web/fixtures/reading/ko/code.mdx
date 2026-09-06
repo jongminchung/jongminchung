@@ -1,0 +1,23 @@
+---
+title: "코드 강조·줄 번호·설명"
+purpose: "주목할 코드 줄과 설명을 함께 제공합니다."
+caution: "코드가 바뀌면 CodeNote의 lines도 갱신합니다. title, lineNumbers와 강조 주석을 코드 울타리에 그대로 작성합니다."
+---
+
+<CodeExample>
+
+```ts title="request-key.ts" lineNumbers
+const userId = "reader";
+const requestId = "request-1";
+const key = userId + ":" + requestId; // [!code highlight]
+```
+
+<CodeNotes>
+    <CodeNote lines="1–2행">사용자와 요청의 식별자를 준비합니다.</CodeNote>
+    <CodeNote lines="3행">
+        두 값을 연결해 <mark>사용자별 요청</mark>을 구분합니다. 실제 구현에서는
+        만료와 동시성도 처리해야 합니다.
+    </CodeNote>
+</CodeNotes>
+
+</CodeExample>

@@ -13,3 +13,41 @@
   color: var(--shiki-dark);
   font-style: var(--shiki-dark-font-style);
 }
+
+/* 새 읽기 블록 안에서만 생성된 Shiki 강조/diff의 글자 대비를 보완함. */
+.reading-code .shiki:not(.not-fumadocs-codeblock *) code .line.highlighted span,
+.reading-code .shiki:not(.not-fumadocs-codeblock *) code .line.diff span {
+  color: var(--foreground);
+}
+
+.reading-code .shiki:not(.not-fumadocs-codeblock *) .diff.remove {
+  opacity: 1;
+}
+
+.reading-code
+  .shiki:not(.not-fumadocs-codeblock *)[data-line-numbers]
+  .line::after {
+  color: var(--muted-foreground);
+}
+
+@media (forced-colors: active) {
+  .reading-code
+    .shiki:not(.not-fumadocs-codeblock *)[data-line-numbers]
+    .line::after,
+  .reading-code [data-docs-code-block],
+  .reading-code [data-docs-code-block] figcaption,
+  .reading-code .shiki:not(.not-fumadocs-codeblock *) code span {
+    color: CanvasText;
+    background-color: Canvas;
+  }
+
+  .reading-code
+    .shiki:not(.not-fumadocs-codeblock *)
+    code
+    .line.highlighted
+    span,
+  .reading-code .shiki:not(.not-fumadocs-codeblock *) code .line.diff span,
+  .reading-code .shiki:not(.not-fumadocs-codeblock *) .diff::before {
+    color: CanvasText;
+  }
+}

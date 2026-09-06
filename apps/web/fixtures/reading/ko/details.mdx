@@ -1,0 +1,15 @@
+---
+title: "부연 설명 접기"
+purpose: "본문 흐름을 유지하면서 추가 설명을 선택해 읽게 합니다."
+caution: "summary는 첫 자식으로 작성하고 Markdown 앞뒤에 빈 줄을 둡니다. 핵심 결론이나 경고는 접지 않습니다."
+---
+
+<details>
+<summary>왜 요청 식별자를 저장하나요?</summary>
+
+같은 요청을 다시 받았을 때 이미 처리한 결과를 반환하기 위해서입니다.
+
+- 처리한 요청의 식별자를 저장합니다.
+- 자세한 정의는 [멱등성](#showcase-ko-glossary-idempotency)을 확인하세요.
+
+</details>

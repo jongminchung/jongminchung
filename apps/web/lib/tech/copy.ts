@@ -145,9 +145,9 @@ const messages = {
       blogDescription: "소프트웨어를 이해하기 쉽게 만드는 방법에 관한 기술 글",
       seriesTitle: "블로그 시리즈",
       seriesDescription: "순서에 따라 읽는 기술 블로그 글 모음",
-      showcaseTitle: "애니메이션 쇼케이스",
+      showcaseTitle: "애니메이션·MDX 쇼케이스",
       showcaseDescription:
-        "인터랙티브 타임라인과 코드 기반 설명 애니메이션의 제작 모델을 비교합니다.",
+        "인터랙티브 애니메이션과 MDX 읽기 도구의 미리보기, 복사 가능한 작성 문법을 살펴봅니다.",
       latestArticles: "최신 기술 글",
       orderedCollections: "순서 있는 글 모음",
       llmsBlog: "한국어 Blog",
@@ -224,9 +224,9 @@ const messages = {
         "Technical articles about building understandable software.",
       seriesTitle: "Blog Series",
       seriesDescription: "Ordered collections of engineering blog articles.",
-      showcaseTitle: "Animation Showcase",
+      showcaseTitle: "Animation & MDX Showcase",
       showcaseDescription:
-        "Compare interactive timelines with code-authored explanatory animation.",
+        "Explore interactive animations and MDX reading tools with live previews and copyable authoring syntax.",
       latestArticles: "Latest technical articles",
       orderedCollections: "Ordered article collections",
       llmsBlog: "English Blog",

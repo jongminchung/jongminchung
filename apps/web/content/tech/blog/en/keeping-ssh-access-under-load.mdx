@@ -1,0 +1,162 @@
+---
+title: "Keeping SSH usable when a server is under load"
+description: "A memory-pressure incident explains workload isolation, management-access testing, and AWS EC2 recovery through alternative access, rebooting, and offline repair."
+thesis: "Reliable management access comes from aggregate workload limits and recovery tests more than from raising sshd priority."
+counterargument: "Resource limits reduce throughput and cannot guarantee SSH on a shared kernel and disk, so replacing the instance may be more practical."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: [linux, ssh, monitoring, devops, aws]
+status: stable
+publicationStatus: published
+sourceUrl: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/TroubleshootingInstancesConnecting.html
+---
+
+A heavy job made a server slow. Opening SSH to stop the job failed too. Terminating the job required a shell, but starting that shell required resources the workload was already consuming.
+
+Administrators need to break that dependency: preserve resources for management during workload overload, and maintain external recovery when the OS cannot execute commands. The configuration below is a design example for Linux, systemd, and cgroup v2. It was not applied to the incident server.
+
+## What the incident established
+
+After restarting a 4-vCPU server with about 7.8 GiB of RAM, we inspected its previous boot journal. This server used OpenStack/KVM; the EC2 procedures later in this article are a comparison with AWS guidance. Addresses and account identifiers are omitted.
+
+| Time — September 6, 2026, KST | Observation                                                              |
+| ----------------------------- | ------------------------------------------------------------------------ |
+| 20:21:24–20:38:48             | Repeated journald memory-pressure cache flushes                          |
+| 20:26:19                      | SSH PAM session release failed                                           |
+| 20:27:38                      | D-Bus authentication timeout: 30-second limit, about 113 seconds elapsed |
+| 20:29:47                      | logind session cleanup timed out                                         |
+| 20:38:49                      | sshd logged MaxStartups throttling and a dropped connection              |
+| 20:39:33 / 20:40:45           | Previous journal ended / new boot logs began                             |
+
+At shutdown, systemd reported memory peaks of 7.2G and 6.4G for two root sessions, and 7.3G for their parent user slice. These are lifetime peaks, not simultaneous measurements. Adding them would also double-count child and parent usage.
+
+Memory pressure, management delays, and a rejected SSH connection are facts. Slow authentication accumulating unauthenticated connections is a plausible explanation, not a proven causal chain. The MaxStartups message coincided with shutdown and does not establish the original trigger. No OOM kill, panic, or disk I/O error was found in the retained kernel logs; missing errors do not prove that resources were healthy.
+
+Ansible was inspecting installation files and image archives shortly before the pressure began. Without process-level history, that identifies a candidate workload rather than a culprit. Low utilization after reboot cannot reconstruct the earlier bottleneck.
+
+## A console bypasses SSH, not resource exhaustion
+
+```text
+SSH     → instance network → sshd → authentication → administrator shell
+Console → hypervisor display/keyboard or serial port → OS login → shell
+```
+
+A console bypasses the guest network and sshd, but getty and login do not have a special resource reservation. The screen can open while the guest cannot process input. EC2 Serial Console provides network-independent access, subject to instance support, IAM permissions, and OS preparation. [Serial Console](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-serial-console.html), [prerequisites](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-serial-console-prerequisites.html).
+
+Define a measurable objective: under the supported maximum workload, a new SSH authentication and shell should complete within five seconds, and the operator should be able to stop an approved job. Five seconds is an example test target, not an AWS guarantee. Kernel hangs, storage failures, and management-network outages need a separate recovery objective.
+
+## Limit the workload as a whole
+
+Heavy jobs launched directly from a root shell share the management session's resource hierarchy. Limiting or stopping the entire root user slice can affect the operator too. Run jobs in separate services or scopes, outside the administrator session, with an aggregate parent limit.
+
+```text
+-.slice
+├─ system.slice    # sshd and login/network services
+├─ user.slice      # administrator shells, without heavy jobs
+└─ workload.slice  # aggregate workload limits
+   ├─ batch.service
+   └─ build.service
+```
+
+For example, `/etc/systemd/system/workload.slice` could contain:
+
+```ini
+[Unit]
+Description=Bounded application workloads
+
+[Slice]
+CPUQuota=300%
+MemoryHigh=5G
+MemoryMax=6G
+MemorySwapMax=512M
+TasksMax=512
+```
+
+Choose values after measuring normal demand and services outside the boundary. CPU quota limits execution time to three CPUs' worth; it does not reserve a particular core. MemoryHigh induces reclaim and throttling, while MemoryMax can cause cgroup-local OOM termination. Swap limits bound capacity, and TasksMax includes threads. Remaining RAM is shared headroom, not an exclusive SSH reservation. [systemd resource controls](https://github.com/systemd/systemd/blob/main/man/systemd.resource-control.xml).
+
+Use `systemctl edit batch.service` to add:
+
+```ini
+[Service]
+Slice=workload.slice
+```
+
+After preparing the units, run `systemctl daemon-reload` and restart the workload service in a maintenance window after draining existing work. Reloading alone does not move running processes. Verify the resulting hierarchy:
+
+```bash
+systemctl show batch.service -p ControlGroup
+systemctl show workload.slice -p CPUQuotaPerSecUSec -p MemoryHigh -p MemoryMax -p TasksMax
+systemd-cgls
+cat /proc/$$/cgroup
+```
+
+Container runtimes can create processes in a different cgroup. Wrapping a Docker, Podman, or Kubernetes client does not prove that its containers inherit the limit. Check the runtime's cgroup-parent configuration and actual process placement. Workload accounts should not have unnecessary privileges to escape the boundary. [Kernel cgroup v2 documentation](https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v2.html).
+
+### I/O needs its own budget
+
+If storage is the bottleneck, set device-specific read/write bandwidth and IOPS limits using IOReadBandwidthMax, IOWriteBandwidthMax, IOReadIOPSMax, and IOWriteIOPSMax. Resolve backing devices with findmnt and lsblk; do not assume the same controls cover network filesystems or complex storage layers.
+
+CPUWeight and IOWeight control relative allocation during contention, not a fixed reservation. AllowedCPUs can restrict where jobs run but does not isolate interrupts or hypervisor contention. Verify controls on the actual storage stack. [systemd resource controls](https://github.com/systemd/systemd/blob/main/man/systemd.resource-control.xml).
+
+Consider separate workload storage or a separate VM when management and jobs compete heavily for the OS disk. Separate volumes can still share instance-level bandwidth. If limits prevent required throughput, reduce worker counts, queue lengths, or input rate, or increase capacity.
+
+## Operate both monitoring and recovery tests
+
+Retain available memory, swap traffic, disk latency, runnable tasks, and cgroup usage and limit events. PSI measures time stalled by CPU, memory, and I/O pressure. Missing telemetry is also a signal: an exhausted monitoring agent may stop reporting. [Linux PSI](https://www.kernel.org/doc/html/latest/accounting/psi.html).
+
+On EC2, collect guest memory and other OS metrics with an agent rather than relying on default monitoring alone. Keep important logs and metrics outside the affected instance. [CloudWatch Agent](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Install-CloudWatch-Agent.html).
+
+| Occasion                      | Operator responsibility                                                                 |
+| ----------------------------- | --------------------------------------------------------------------------------------- |
+| New or changed job            | Record concurrency, memory peak, cancellation procedure, retry limit, and owner         |
+| Deployment or capacity change | Test existing shells and new SSH logins under individual and combined resource pressure |
+| Routine monitoring            | Authenticate and execute a short command from outside; alert on missing telemetry       |
+| Recovery drills               | Test on-call access to SSM, console, external power control, and backup restoration     |
+
+Use a recoverable test environment, with external control and abort conditions prepared. Saturate only the workload boundary. Record new login within five seconds, a short command within two seconds, and successful termination of the designated job. An open TCP port does not prove that authentication or shell creation works.
+
+Run automated intervention outside the workload boundary. Sustained pressure combined with access delays can trigger pausing new work, reducing concurrency, and finally stopping preapproved disposable jobs. Do not kill whichever process is largest. Add backoff and retry limits so termination does not become a restart loop. This automation preserves time for manual intervention.
+
+## How AWS handles inaccessible EC2 instances
+
+AWS publishes cause-specific procedures. This is a synthesis of those documents, not a mandatory universal AWS sequence.
+
+Start with status checks, system logs, and CloudWatch. For connection timeouts, examine security groups, routes, NACLs, and CPU load; for authentication failures, examine users, keys, and permissions. Status checks do not replace a real login test. [EC2 connection troubleshooting](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/TroubleshootingInstancesConnecting.html).
+
+| Path                 | Dependencies and purpose                                                                    |
+| -------------------- | ------------------------------------------------------------------------------------------- |
+| EC2 Instance Connect | SSH-based; cannot bypass an unresponsive sshd                                               |
+| Session Manager      | Requires SSM Agent, IAM permissions, and service connectivity                               |
+| EC2 Serial Console   | Bypasses instance networking; requires supported instances, permissions, and OS preparation |
+| EC2 console/API      | Can request reboot or stop/start without an internal shell                                  |
+
+Test Session Manager before an incident. Prepare serial-console permissions and login credentials too. Linux GRUB and SysRq provide additional diagnostic paths, but neither implies that a guest shell or kernel will always respond. [Instance Connect](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-connect-methods.html), [Session Manager prerequisites](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-prerequisites.html), [Serial Console preparation](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-serial-console-prerequisites.html).
+
+AWS's out-of-memory guidance explicitly includes rebooting for temporary recovery or stopping an EBS-backed instance and changing to a larger or memory-optimized type. Leaving the capacity problem unresolved can lead to recurrence. [Memory exhaustion guidance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/TroubleshootingInstances.html#OutOfMemory).
+
+For configuration issues that survive reboot, AWSSupport-TroubleshootSSH provides read-only diagnosis by default, with offline repair requiring explicit enablement. Offline remediation through AWSSupport-ExecuteEC2Rescue includes stopping the instance and repairing its root volume. It is not a remote process-killing facility for a live overloaded server. [SSH runbook](https://docs.aws.amazon.com/systems-manager-automation-runbooks/latest/userguide/automation-awssupport-troubleshootssh.html), [EC2Rescue for unreachable instances](https://docs.aws.amazon.com/systems-manager/latest/userguide/automation-ec2rescue.html).
+
+## Decisions during an incident
+
+| Condition                       | Action                                                                                      |
+| ------------------------------- | ------------------------------------------------------------------------------------------- |
+| Existing SSH commands work      | Preserve the session, pause incoming work, stop only the identified workload                |
+| New SSH connections fail        | Try prepared SSM or console access; distinguish access configuration from resource pressure |
+| All internal command paths fail | Time-box evidence gathering against the recovery objective and consider external reboot     |
+| Reboot does not recover access  | Select stop/start, resizing, offline repair, or backup restoration based on the cause       |
+| Access returns                  | Prevent automatic recurrence, investigate, and revise limits and tests                      |
+
+Stop/start is different from reboot. Stopping an EBS-backed instance erases instance-store data, and an automatically assigned public IPv4 address can change on start unless retained through an Elastic IP. Bypassing graceful shutdown risks unfinished writes. Document persistent storage and these consequences before an incident. [EC2 stop/start](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Stop_Start.html).
+
+After recovery, select the relevant boot with `journalctl --list-boots`. For the immediately preceding boot:
+
+```bash
+journalctl -b -1 -k --no-pager
+journalctl -b -1 -p warning --no-pager
+journalctl -b -1 --grep='memory pressure|MaxStartups|timed out' --no-pager
+```
+
+Configure persistent journal retention with a storage budget and external forwarding for important logs. Avoid generating huge dumps into an already saturated disk. Separate observations, hypotheses, and missing evidence in the incident report.
+
+Replacing instances or moving work to another VM can be a better tradeoff than preserving an individual host. That still requires tested traffic transfer, durable-data recovery, and duplicate-safe retries. The operational commitment is usable management access under the tested workload envelope, plus an executable recovery procedure when the failure exceeds it.

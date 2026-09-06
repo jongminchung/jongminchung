@@ -2,6 +2,13 @@
   --font-size-metadata: 10px;
   --font-size-caption: 11px;
   --letter-spacing-metadata: 0.08em;
+  --highlight: #fff29a;
+  --highlight-foreground: #292400;
+  --annotation-note: #0969da;
+  --annotation-tip: #1a7f37;
+  --annotation-important: #8250df;
+  --annotation-warning: #7d4e00;
+  --annotation-caution: #a40e26;
   --radius: 0.5rem;
   --background: #fff;
   --foreground: #0d0d0d;
@@ -50,6 +57,13 @@
 }
 
 :where(:root[data-theme="dark"]) {
+  --highlight: #655800;
+  --highlight-foreground: #fff4ba;
+  --annotation-note: #79c0ff;
+  --annotation-tip: #7ee787;
+  --annotation-important: #d2a8ff;
+  --annotation-warning: #f2cc60;
+  --annotation-caution: #ff7b72;
   --background: #0d0d0d;
   --foreground: #fff;
   --card: #131313;

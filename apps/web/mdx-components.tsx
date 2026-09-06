@@ -3,6 +3,20 @@ import type { MDXComponents } from "mdx/types";
 import Link from "next/link";
 import type { ComponentProps } from "react";
 import { FootnoteReference } from "#components/FootnoteReference";
+import { Highlight, MarkdownAlert } from "#components/ReadingAnnotations";
+import {
+  Details,
+  Summary,
+  Glossary,
+  Term,
+  Definition,
+  CodeNotes,
+  CodeExample,
+  CodeNote,
+  Comparison,
+  ComparisonItem,
+  ExpectedResult,
+} from "#components/ReadingBlocks";
 import { investmentMdxComponents } from "#invest-components/mdx-components";
 import {
   docsMdxTypographyComponents,
@@ -86,7 +100,21 @@ function ArticleMdxHeading3({
 /** 모든 콘텐츠 유형이 공유하는 링크·코드·표·목록 semantics를 제공함 */
 export const sharedMdxComponents = {
   a: MdxLink,
+  Details,
+  Summary,
+  Glossary,
+  Term,
+  Definition,
+  CodeNotes,
+  CodeExample,
+  CodeNote,
+  Comparison,
+  ComparisonItem,
+  ExpectedResult,
+  Highlight,
+  MarkdownAlert,
   ...sharedMdxContentComponents,
+  ...investmentMdxComponents,
 } satisfies MDXComponents;
 
 /** 빠른 탐색과 실행을 위한 Docs MDX 구성을 제공함 */
@@ -98,7 +126,6 @@ export const docsMdxComponents = {
 /** Tech Blog와 Invest Note의 장문 읽기 리듬을 제공함 */
 export const articleMdxComponents = {
   ...sharedMdxComponents,
-  ...investmentMdxComponents,
   h2: ArticleMdxHeading2,
   h3: ArticleMdxHeading3,
 } satisfies MDXComponents;

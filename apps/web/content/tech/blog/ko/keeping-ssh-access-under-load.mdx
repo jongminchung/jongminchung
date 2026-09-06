@@ -1,0 +1,168 @@
+---
+title: "서버가 바쁠 때도 SSH로 복구할 수 있게 운영하기"
+description: "메모리 압박으로 SSH까지 막힌 사례를 바탕으로, 업무 자원 격리와 관리 접속 시험, AWS EC2의 대체 접속·재부팅·오프라인 복구 절차를 정리합니다."
+thesis: "관리 접속의 신뢰성은 sshd의 우선순위보다 업무 전체의 자원 상한과 실제 과부하 복구 시험에서 만들어집니다."
+counterargument: "자원 제한은 처리량을 낮추며 같은 커널과 디스크를 공유하는 한 SSH를 완전히 보장할 수 없으므로 인스턴스 교체가 더 실용적일 수 있습니다."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: [linux, ssh, monitoring, devops, aws]
+status: stable
+publicationStatus: published
+sourceUrl: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/TroubleshootingInstancesConnecting.html
+---
+
+서버에서 무거운 작업을 실행했다. 응답이 느려져 작업을 정리하려고 SSH로 접속했는데, 그 접속부터 실패했다. 프로세스를 종료하려면 셸이 필요하고, 셸을 얻으려면 서버에 여유가 있어야 했다.
+
+서버 관리자가 준비해야 하는 것은 이 순환을 끊는 방법이다. 업무 과부하에서는 관리 명령이 실행되도록 여유를 남기고, OS가 명령을 실행하지 못하는 장애에서는 서버 밖에서 복구할 수 있어야 한다. 아래 설정은 Linux·systemd·cgroup v2를 전제로 한 설계 예시다. 실제 장애 로그를 읽은 결과와 아직 실행하지 않은 예방 설정을 구분한다.
+
+## 로그가 말해 준 것과 말해 주지 않은 것
+
+4 vCPU, RAM 약 7.8 GiB 서버가 재시작된 뒤 이전 부팅의 journal을 확인했다. 이 사례의 서버는 OpenStack/KVM 환경이다. 뒤에서 소개하는 EC2 절차는 AWS의 운영 방법을 비교하기 위한 것이다. 주소와 계정 식별 정보는 생략했다.
+
+| 시각 — 2026년 9월 6일, KST | 관측                                                      |
+| -------------------------- | --------------------------------------------------------- |
+| 20:21:24~20:38:48          | journald의 `Under memory pressure, flushing caches.` 반복 |
+| 20:26:19                   | SSH PAM 세션 해제 실패                                    |
+| 20:27:38                   | D-Bus 인증 timeout: 제한 30초, 기록된 경과 약 113초       |
+| 20:29:47                   | logind의 세션 정리 시간 초과                              |
+| 20:38:49                   | sshd의 `beginning MaxStartups throttling` 및 연결 거절    |
+| 20:39:33 / 20:40:45        | 이전 journal 종료 / 새 부팅 로그 시작                     |
+
+종료 시 systemd가 기록한 root 세션 두 개의 메모리 최고치는 각각 7.2G와 6.4G였고, 부모인 root 사용자 slice는 7.3G였다. **각 범위의 생존 기간 중 최고치이므로 합산할 수 없고, 장애 순간의 동시 사용량도 아니다.** 자식과 부모의 수치를 더하면 중복 계산까지 생긴다.
+
+메모리 압박과 관리 서비스 지연, SSH 연결 거절은 확인된 사실이다. 압박 때문에 인증 처리가 늦어져 미인증 연결이 쌓였다는 것은 가능한 설명이다. `MaxStartups` 기록은 종료 절차 시작 시점과 겹치므로 최초 장애 원인으로 단정하지 않는다. 커널 로그에서 OOM kill·panic·디스크 I/O 오류는 발견하지 못했지만, 오류 기록이 없다는 사실이 자원 고갈의 부재를 증명하지는 않는다.
+
+장애 직전 세션에는 Ansible이 설치 파일과 이미지 아카이브를 검사한 기록도 있었다. 그러나 프로세스별 시계열이 없어 특정 작업을 원인으로 확정할 수 없었다. 재부팅 후 CPU와 메모리에 여유가 있다는 사실 역시 과거의 병목을 설명하지 못한다.
+
+## SSH와 콘솔이 보장하는 범위
+
+다음 두 경로는 진입점이 다르다.
+
+```text
+SSH        → 인스턴스 네트워크 → sshd → 인증 → 관리자 셸
+가상 콘솔  → 가상화 호스트의 화면·키보드/직렬 포트 → OS 로그인 → 셸
+```
+
+콘솔은 게스트 네트워크와 sshd를 우회할 수 있다. 하지만 `getty`나 콘솔 로그인에 특별한 CPU·메모리 예약이 있는 것은 아니다. 화면은 열려도 OS가 입력을 처리하지 못할 수 있다. AWS Serial Console도 인스턴스 네트워크 없이 접근하는 경로를 제공하며, 지원 인스턴스·IAM 권한·OS 준비가 필요하다. [EC2 Serial Console](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-serial-console.html), [사전 조건](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-serial-console-prerequisites.html).
+
+운영 목표는 “어떤 장애에서도 SSH 접속 성공”보다 구체적이어야 한다. 예를 들어 **지원하는 최대 업무 부하에서 새 SSH 인증과 셸 실행이 5초 안에 끝나고, 지정된 업무를 중지할 수 있다**고 정한다. 커널 정지·스토리지 장애·관리 네트워크 단절은 별도의 복구 목표로 다룬다. 5초는 AWS의 보장이나 보편적인 기준이 아니라 이 글의 시험 목표 예시다.
+
+## 업무 전체의 자원 상한을 먼저 만든다
+
+관리자 셸에서 빌드와 배치를 직접 실행하면 관리 작업과 업무가 같은 로그인 세션 아래에 섞인다. 이때 `user-0.slice`를 제한하거나 종료하면 관리자 자신도 영향을 받는다. 업무는 별도 서비스·scope로 실행하고, 관리자 셸과 인증 관련 서비스는 업무 제한 밖에 둔다.
+
+서비스마다 RAM 상한을 설정해도 동시에 실행한 작업의 합계가 서버 용량을 넘을 수 있다. 다음처럼 공통 부모에 합산 상한을 둔다.
+
+```text
+-.slice
+├─ system.slice    # sshd, 로그인·네트워크 등 시스템 서비스
+├─ user.slice      # 관리자 셸; 업무를 직접 실행하지 않음
+└─ workload.slice  # 업무 전체 합산 제한
+   ├─ batch.service
+   └─ build.service
+```
+
+다음은 `/etc/systemd/system/workload.slice`의 예시다. **현재 서버에 적용한 설정이 아니다.** 정상 사용량과 제한 밖 서비스의 사용량을 측정한 뒤 시험 환경에서 조정한다.
+
+```ini
+[Unit]
+Description=Bounded application workloads
+
+[Slice]
+CPUQuota=300%
+MemoryHigh=5G
+MemoryMax=6G
+MemorySwapMax=512M
+TasksMax=512
+```
+
+`CPUQuota=300%`는 코어 세 개 분량의 실행 시간 상한이다. 특정 코어를 예약하지 않는다. `MemoryHigh`는 회수와 실행 지연을 유도하고, `MemoryMax`는 최종 상한으로 cgroup 내부 OOM 종료를 유발할 수 있다. `MemorySwapMax`는 swap 용량을, `TasksMax`는 스레드를 포함한 작업 수를 제한한다. 남는 RAM은 관리 서비스만의 예약이 아니므로 제한 밖 사용량도 계속 관측해야 한다. [systemd 자원 제어](https://github.com/systemd/systemd/blob/main/man/systemd.resource-control.xml).
+
+기존 업무 서비스에는 `systemctl edit batch.service`로 다음 drop-in을 추가한다.
+
+```ini
+[Service]
+Slice=workload.slice
+```
+
+unit 파일을 준비한 뒤 `systemctl daemon-reload`를 실행하고, 진행 중인 작업을 마무리한 유지보수 시점에 해당 업무 서비스를 재시작한다. reload만으로 실행 중인 프로세스가 새 slice로 이동하지는 않는다. 재시작 이후 실제 배치를 확인한다.
+
+```bash
+systemctl show batch.service -p ControlGroup
+systemctl show workload.slice -p CPUQuotaPerSecUSec -p MemoryHigh -p MemoryMax -p TasksMax
+systemd-cgls
+cat /proc/$$/cgroup
+```
+
+컨테이너는 특히 확인이 필요하다. Docker·Podman·Kubernetes가 실제 프로세스를 다른 cgroup에 만들면 실행 명령을 감싼 것만으로 합산 제한이 적용되지 않을 수 있다. 런타임의 cgroup 부모 설정과 실제 프로세스 위치를 확인한다. 업무 계정에는 제한을 벗어날 수 있는 불필요한 root·관리 권한을 주지 않는다. [커널 cgroup v2 문서](https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v2.html).
+
+### CPU 제한만으로 I/O 장애를 막을 수는 없다
+
+디스크가 병목이면 읽기·쓰기 대역폭과 IOPS를 따로 제한한다. `IOReadBandwidthMax`, `IOWriteBandwidthMax`, `IOReadIOPSMax`, `IOWriteIOPSMax`에 실제 backing block device와 시험으로 정한 상한을 지정한다. `findmnt`와 `lsblk`로 장치 관계부터 확인해야 한다. 네트워크 파일시스템과 복잡한 스토리지 계층에서는 같은 방식이 그대로 적용된다고 가정하지 않는다.
+
+`CPUWeight`·`IOWeight`는 경합 시 상대 배분이며 절대적인 여유 예약이 아니다. `AllowedCPUs`로 업무 실행 CPU를 좁힐 수 있지만, 이것만으로 인터럽트나 하이퍼바이저 경합까지 격리하지는 못한다. 실제 디스크에서 제한이 작동하는지 부하 시험으로 확인한다. [systemd 자원 제어 설정](https://github.com/systemd/systemd/blob/main/man/systemd.resource-control.xml).
+
+관리 기능과 업무가 같은 OS 디스크를 심하게 경쟁한다면 업무 데이터를 별도 볼륨으로 분리하거나 업무를 별도 VM으로 옮기는 비용도 비교한다. 장치를 나눠도 인스턴스 전체 대역폭 등 공유 한계는 남는다. 자원 제한으로 정상 처리량을 만족하지 못하면 워커 수·큐 길이·입력 속도를 낮추거나 용량을 늘려야 한다.
+
+## 관리자는 그래프와 복구 시험을 함께 운영한다
+
+CPU 사용률 경보 하나로는 부족하다. 메모리 `available`, swap 입출력, 디스크 지연, 실행 대기 작업, cgroup별 사용량과 제한 도달 횟수를 함께 저장한다. PSI는 CPU·메모리·I/O 때문에 작업이 지연된 시간을 보여준다. 에이전트가 멈추며 데이터가 끊기는 것도 경보 대상이다. [Linux PSI 문서](https://www.kernel.org/doc/html/latest/accounting/psi.html).
+
+EC2에서는 기본 모니터링만으로 게스트 메모리 상태가 충분히 보이지 않는다. CloudWatch Agent 등으로 OS 내부 지표와 로그를 수집하고, 장애 인스턴스 밖에 이력을 보관한다. [CloudWatch Agent](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Install-CloudWatch-Agent.html).
+
+다음은 운영 정책의 시작점이다. 수치는 서비스의 정상 기준선과 복구 목표에 맞춰 결정한다.
+
+| 시점              | 운영자가 확인할 것                                                          |
+| ----------------- | --------------------------------------------------------------------------- |
+| 작업 등록·변경 시 | 최대 병렬도, 메모리 최고치, 취소 방법, 자동 재시작 횟수, 담당자             |
+| 배포·용량 변경 시 | CPU·메모리·I/O 단독 및 복합 부하에서도 기존 셸과 새 SSH 로그인이 동작하는지 |
+| 평상시            | 외부에서 인증 후 짧은 명령까지 실행하는 접속 검사, 지표 수집 중단 경보      |
+| 정기 복구 훈련 시 | 당직자의 SSM·콘솔·외부 전원 제어 권한, 실제 로그인, 백업 복원               |
+
+부하 시험은 운영 서버가 아닌 복구 가능한 시험 환경에서 수행한다. 외부 제어권과 중단 조건을 준비하고, 업무만 한도까지 부하를 올린다. 새 SSH 로그인 5초 이내, 짧은 명령 2초 이내, 지정 업무 중지 성공 등을 기록한다. 포트 22가 열리는지만 확인하면 인증·셸 실행 실패를 놓친다.
+
+자동 대응은 관리 영역에서 실행하고, 지속적인 압박과 접속 지연이 함께 나타나면 **신규 업무 중단 → 병렬도 축소 → 사전 지정한 중단 가능한 업무 종료**로 구성한다. 가장 큰 프로세스를 임의로 죽이지 않는다. 종료 후 재시작 루프가 생기지 않도록 backoff와 재시도 상한도 둔다. 이것은 관리자가 직접 개입할 시간을 확보하는 보조 수단이다.
+
+## AWS는 SSH가 막혔을 때 무엇을 안내하는가
+
+AWS 문서는 원인별로 나뉘어 있다. 다음 순서는 여러 공식 문서를 하나의 운영 흐름으로 정리한 것이며, 모든 상황에 강제되는 단일 AWS 순서는 아니다.
+
+먼저 EC2 상태 검사·시스템 로그·CloudWatch 지표로 범위를 좁힌다. timeout이면 보안 그룹·라우팅·NACL과 CPU 부하를 확인하고, 인증 오류라면 계정·키·권한을 확인한다. 상태 검사가 통과해도 실제 SSH 로그인 시험을 대신할 수는 없다. [EC2 연결 문제 해결](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/TroubleshootingInstancesConnecting.html).
+
+| 접근 방법              | 의존성과 용도                                                    |
+| ---------------------- | ---------------------------------------------------------------- |
+| EC2 Instance Connect   | SSH 기반 접속이므로 멈춘 sshd를 우회하지 못함                    |
+| Session Manager        | SSH 포트 없이 접근하지만 SSM Agent·IAM·서비스 통신 경로가 필요함 |
+| EC2 Serial Console     | 인스턴스 네트워크를 우회. 지원 인스턴스·접근 권한·OS 설정 필요   |
+| EC2 제어 API·관리 화면 | 내부 셸 없이 인스턴스 재부팅·중지/시작 가능                      |
+
+Session Manager는 장애 전에 연결을 시험한다. Serial Console도 접근 권한과 로그인 수단을 미리 준비한다. Linux에서는 GRUB·SysRq를 사용하는 진단 경로도 제공되지만, 일반 셸이나 커널이 언제나 응답한다는 의미는 아니다. [Instance Connect](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-connect-methods.html), [Session Manager 사전 조건](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-prerequisites.html), [Serial Console 준비](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-serial-console-prerequisites.html).
+
+AWS의 메모리 고갈 문서는 재부팅으로 일시 회복하거나, EBS 기반 인스턴스를 중지하고 더 큰 또는 메모리 최적화 유형으로 변경하는 방법을 제시한다. 근본적인 용량 문제를 남기면 재발할 수 있다. [메모리 고갈 대응](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/TroubleshootingInstances.html#OutOfMemory).
+
+재부팅으로 접속이 회복되지 않는 설정 문제에는 `AWSSupport-TroubleshootSSH`가 있다. 기본은 읽기 전용 진단이며, 오프라인 복구는 별도 허용이 필요하다. `AWSSupport-ExecuteEC2Rescue`를 통한 오프라인 복구는 인스턴스 중지와 루트 볼륨을 이용한 수리를 포함한다. 실행 중인 과부하 프로세스를 원격으로 골라 종료하는 도구와는 용도가 다르다. [SSH 진단 런북](https://docs.aws.amazon.com/systems-manager-automation-runbooks/latest/userguide/automation-awssupport-troubleshootssh.html), [접속 불가 인스턴스의 EC2Rescue](https://docs.aws.amazon.com/systems-manager/latest/userguide/automation-ec2rescue.html).
+
+## 장애가 이미 발생했을 때의 판단표
+
+| 상태                            | 행동                                                        |
+| ------------------------------- | ----------------------------------------------------------- |
+| 기존 SSH에서 명령 실행 가능     | 세션 유지, 신규 업무 중단, 확인된 업무 서비스만 종료        |
+| 새 SSH만 실패                   | SSM 또는 콘솔 시도, 네트워크·인증 오류와 자원 압박 구분     |
+| 모든 내부 명령 경로가 응답 없음 | 복구 목표 안에서 증거 수집 시간을 제한하고 외부 재부팅 판단 |
+| 재부팅해도 회복하지 않음        | 원인에 따라 중지/시작·사양 변경·오프라인 수리·백업 복원     |
+| 복구됨                          | 문제 업무의 자동 재실행 차단, 원인 분석, 제한과 시험 갱신   |
+
+EBS 기반 EC2의 **중지/시작은 재부팅과 다르다.** 중지하면 instance store 데이터가 사라지며, Elastic IP가 아닌 자동 할당 공인 IPv4는 바뀔 수 있다. 정상 종료를 건너뛰는 강제 조치는 미완료 쓰기 손실 위험이 있다. 담당자는 이 차이와 영구 저장 위치를 장애 전에 기록해야 한다. [EC2 중지와 시작](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Stop_Start.html).
+
+접근이 회복되면 `journalctl --list-boots`로 대상 부팅을 먼저 고른다. 가장 최근 재시작의 직전 부팅이라면 다음과 같이 확인한다.
+
+```bash
+journalctl -b -1 -k --no-pager
+journalctl -b -1 -p warning --no-pager
+journalctl -b -1 --grep='memory pressure|MaxStartups|timed out' --no-pager
+```
+
+이전 journal이 남도록 보존 정책과 용량 상한을 함께 설정하고, 중요한 로그는 외부에도 전송한다. 장애 때 대량 덤프를 무작정 생성해 디스크 압박을 더하지 않는다. 복구 보고서에는 관측 사실, 추정 원인, 부족한 증거를 나누어 남긴다.
+
+별도 VM이나 인스턴스 교체가 더 적합한 서비스도 있다. 그 경우에도 입력을 다른 인스턴스로 넘기는 방법, 영구 데이터 복구, 재시도 중복 처리까지 시험해야 한다. **관리자가 보장할 것은 모든 장애에서 살아 있는 SSH 한 개가 아니라, 예상한 과부하에서는 작동하는 관리 접속과 그 범위를 넘었을 때 실행할 수 있는 복구 절차다.**
