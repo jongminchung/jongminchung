@@ -6,7 +6,7 @@ describe("Next.js framework configuration", () => {
     const config = await nextConfig;
 
     expect(config.reactCompiler).toMatchObject({
-      compilationMode: "annotation",
+      compilationMode: "infer",
     });
     expect(config.experimental?.useTypeScriptCli).toBe(true);
     expect(config.cacheComponents).toBe(true);

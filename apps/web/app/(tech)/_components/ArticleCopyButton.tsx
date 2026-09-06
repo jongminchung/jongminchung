@@ -16,6 +16,8 @@ export function ArticleCopyButton({
   readonly copiedLabel: string;
   readonly failedLabel: string;
 }) {
+  "use no memo";
+  // Compiler 1.0은 try/catch 내부 throw를 변환하지 못하므로 복사 실패 처리를 유지함.
   const [state, setState] = useState<CopyState>("idle");
   const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 

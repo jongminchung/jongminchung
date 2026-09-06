@@ -74,6 +74,8 @@ function seriesCounts(
 export default async function BlogSeriesPage({
   params,
 }: PageProps<"/tech/[locale]/series/[[...slug]]">) {
+  "use no memo";
+  // Compiler 1.0의 논리식 제어 흐름 변환 오류를 피하고 서버 목록 정렬 동작을 유지함.
   const { locale, slug } = await params;
   if (!isLocale(locale)) notFound();
   const alternate = alternateLocale(locale);

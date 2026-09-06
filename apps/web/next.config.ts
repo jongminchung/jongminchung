@@ -35,9 +35,12 @@ const securityHeaders = [
 ] as const;
 
 const nextConfig = {
+  // 정적 shell과 동적 스트리밍을 함께 사용하고 use cache로 캐시 범위를 명시함.
   cacheComponents: true,
   experimental: {
+    // 여러 root layout 바깥에서도 공통 global-not-found 응답을 제공함.
     globalNotFound: true,
+    // 프로젝트에 설치된 TS CLI로 빌드 타입 검사와 설정 로딩을 수행함.
     useTypeScriptCli: true,
   },
   // Vercel의 Next.js adapter가 managed output을 구성하며 standalone은 컨테이너 빌드에서만 사용함
@@ -45,11 +48,15 @@ const nextConfig = {
     ? {}
     : {
         output: "standalone" as const,
+        // 앱 밖의 공유 workspace 파일도 standalone 추적 범위에 포함함.
         outputFileTracingRoot: resolve(appRoot, "../.."),
       }),
+  // 컴포넌트·Hook을 자동으로 판별해 메모이제이션함. 기존 use memo 선언도 유지됨.
+  // babel-plugin-react-compiler가 필요하며 비호환 함수는 use no memo로 개별 제외할 수 있음.
   reactCompiler: {
-    compilationMode: "annotation",
+    compilationMode: "infer",
   },
+  // 개발 중 추가 렌더링·Effect 검사로 순수성 및 cleanup 누락을 드러냄.
   reactStrictMode: true,
   async headers() {
     return [{ source: "/(.*)", headers: [...securityHeaders] }];
@@ -82,4 +89,5 @@ const nextConfig = {
   transpilePackages: ["@jongminchung/ui"],
 } satisfies NextConfig;
 
+// MDX 컴파일과 요청별 국제화 설정을 Next 빌드에 연결함.
 export default createMDX()(withNextIntl(nextConfig));

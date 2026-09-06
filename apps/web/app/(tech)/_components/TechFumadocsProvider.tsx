@@ -1,7 +1,5 @@
 "use client";
 
-/* oxlint-disable react-compiler -- FrameworkProvider requires passing framework hook adapters as values. */
-
 import { FrameworkProvider } from "fumadocs-core/framework";
 import { RootProvider } from "fumadocs-ui/provider/base";
 import {
@@ -22,6 +20,8 @@ export function TechFumadocsProvider({
 }: {
   readonly children: ReactNode;
 }) {
+  "use no memo";
+  // Fumadocs는 Hook 함수를 adapter prop으로 받으므로 이 연결부는 자동 최적화에서 제외함.
   return (
     <FrameworkProvider
       useParams={useParams}
