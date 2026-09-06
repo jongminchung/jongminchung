@@ -7,6 +7,7 @@
       "devDependencies": {
         "@jongminchung/generate-article-image-skill": "file:.agents/skills/generate-article-image",
         "@jongminchung/tooling": "workspace:*",
+        "@types/bun": "catalog:",
         "@types/node": "catalog:",
         "knip": "catalog:",
         "oxfmt": "catalog:",

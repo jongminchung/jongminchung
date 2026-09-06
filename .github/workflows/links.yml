@@ -7,7 +7,7 @@ on:
       - "**/*.md"
       - ".gitignore"
       - ".github/workflows/links.yml"
-      - "scripts/check-links.sh"
+      - "scripts/check-links.ts"
   push:
     branches: [main]
     paths:
@@ -15,7 +15,7 @@ on:
       - "**/*.md"
       - ".gitignore"
       - ".github/workflows/links.yml"
-      - "scripts/check-links.sh"
+      - "scripts/check-links.ts"
 
 permissions:
   contents: read
@@ -26,4 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - run: scripts/check-links.sh
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+      - run: bun scripts/check-links.ts

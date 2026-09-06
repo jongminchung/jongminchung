@@ -20,7 +20,7 @@ on:
       - ".editorconfig"
       - "oxfmt.config.ts"
       - "oxlint.config.ts"
-      - "scripts/style-shell.sh"
+      - "scripts/style-shell.ts"
       - "tsconfig.base.json"
 
 permissions:
@@ -57,7 +57,7 @@ jobs:
               - '.editorconfig'
               - 'oxfmt.config.ts'
               - 'oxlint.config.ts'
-              - 'scripts/style-shell.sh'
+              - 'scripts/style-shell.ts'
               - 'tsconfig.base.json'
       - uses: oven-sh/setup-bun@v2
         if: steps.changes.outputs.web == 'true' || github.event_name == 'schedule'

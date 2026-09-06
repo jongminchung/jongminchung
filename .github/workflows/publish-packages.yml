@@ -81,7 +81,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: >-
-          .github/scripts/delete-version-ids-script.sh
+          bun .github/scripts/delete-version-ids-script.ts
           "$GITHUB_REPOSITORY_OWNER" "${{ matrix.package }}" "1.0.0"
       - run: npm publish "${RUNNER_TEMP}/package.tgz" --access public --registry https://npm.pkg.github.com
       - name: Verify registry integrity and clean consumer import
