@@ -66,6 +66,11 @@ image digest로 복구하고 같은 확인을 반복한다. 복구 위치와 조
 
 ## 공용 패키지 게시
 
+폐기한 공용 설정 패키지의 기존 설치는 보존한다. `Retire Tooling Package` 수동
+workflow는 레지스트리의 기존 버전에 사용 중단 안내를 표시하고 결과를 확인한다.
+이 작업은 패키지를 삭제하거나 새 버전을 게시하지 않는다. 소비 저장소는 Oxfmt·Oxlint를
+직접 설치하고 로컬 설정을 관리한다.
+
 [Publish Packages workflow](../../.github/workflows/publish-packages.yml)는 수동 실행한다.
 UI 패키지만 검증하고 게시한다.
 
