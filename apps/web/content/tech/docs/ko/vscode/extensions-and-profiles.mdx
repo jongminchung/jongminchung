@@ -1,0 +1,176 @@
+---
+documentKind: "how-to"
+title: "언어별 확장과 조합별 Profile 설치"
+description: "언어별 확장 선택, 추천 목록·Pack·Profile의 설치 범위와 Bash·PowerShell 예제"
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "development-workflow"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://code.visualstudio.com/docs/configure/extensions/extension-marketplace"
+---
+
+## 언어 조합으로 설치할 수 있나요?
+
+가능합니다. 이 가이드는 프로젝트의 언어 조합별로 **하나의 Profile에 필요한 확장을 모으는 방법**을 사용합니다. Web·Python Profile 두 개를 동시에 합성하는 방식은 아닙니다. 한 창에서 사용하는 조합을 `Web + Python`처럼 명시하고, 별도 프로젝트는 다른 Profile이나 창에서 엽니다.
+
+## 무엇이 함께 설치되는가
+
+| 방법                       | 설치 동작                                 | 적합한 용도               |
+| -------------------------- | ----------------------------------------- | ------------------------- |
+| `.vscode/extensions.json`  | 추천만 표시; 사용자가 개별 또는 일괄 설치 | 저장소의 권장 구성 공유   |
+| Extension Pack             | Pack에 나열된 확장들을 함께 설치          | 배포 가능한 설치 묶음     |
+| `code --install-extension` | 지정 ID와 필요한 종속 확장 설치           | 선택한 조합의 명시적 설치 |
+| Profile 가져오기           | 선택한 설정·키맵·확장 구성을 가져옴       | 개인 작업 환경 전환·공유  |
+
+`extensions.json`을 커밋하거나 `.py` 파일을 여는 것만으로 모든 추천이 자동 설치되지는 않습니다. 반대로 Pack을 설치하면 이름에 적힌 언어 기능 하나만 생기는 것이 아니라 포함된 확장도 설치됩니다. [확장 관리](https://code.visualstudio.com/docs/configure/extensions/extension-marketplace)
+
+설치됨, 사용하도록 설정됨(enabled), 실제 실행됨(activated)은 다릅니다. 확장은 언어 파일·명령·디버깅·시작 이벤트 등에 반응하므로 모든 설치 확장이 항상 실행되는 것도, 현재 파일의 언어 확장만 실행되는 것도 아닙니다. `Developer: Show Running Extensions`로 확인합니다. [활성화 이벤트](https://code.visualstudio.com/api/references/activation-events)
+
+## 언어별 시작 구성과 추가 조건
+
+여기서 시작 구성은 아래 개발 작업에 필요한 선택입니다. 문법 색상만 보거나 CLI로 작업하는 사람에게 모든 항목이 필수라는 뜻은 아닙니다. 확장 ID 링크에서 게시자와 현재 포함 항목을 확인합니다.
+
+| 언어·작업           | 시작 구성                                                                                                                                                                                                    | 필요할 때 추가·외부 도구                                                                                                                                                                                                                                                                                     |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| JS·TS·React         | 언어 지원·JS 디버거는 내장; Oxfmt/Oxlint 프로젝트는 [Oxc](https://marketplace.visualstudio.com/items?itemName=oxc.oxc-vscode)                                                                                | Node·프로젝트 TypeScript·lint 패키지는 별도. React 스니펫 확장은 선택                                                                                                                                                                                                                                        |
+| Vue·Svelte·Tailwind | 위 Web 구성                                                                                                                                                                                                  | 해당 프로젝트에서만 [Vue.volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar), [svelte.svelte-vscode](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode), [bradlc.vscode-tailwindcss](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss) |
+| Java                | [vscjava.vscode-java-pack](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-pack)                                                                                                     | JDK·빌드 wrapper 준비; Spring은 [vmware.vscode-boot-dev-pack](https://marketplace.visualstudio.com/items?itemName=vmware.vscode-boot-dev-pack)                                                                                                                                                               |
+| Go                  | [golang.Go](https://marketplace.visualstudio.com/items?itemName=golang.Go)                                                                                                                                   | Go SDK, gopls, 디버깅용 Delve 확인; 별도 gofmt 확장은 불필요                                                                                                                                                                                                                                                 |
+| Python              | [ms-python.python](https://marketplace.visualstudio.com/items?itemName=ms-python.python), [charliermarsh.ruff](https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff)                       | Python·가상환경·pytest 별도; 노트북에만 `ms-toolsai.jupyter` 추가                                                                                                                                                                                                                                            |
+| YAML                | [redhat.vscode-yaml](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml)                                                                                                                 | yamllint는 별도 CLI·Task; Oxfmt를 쓰면 YAML 확장의 formatter와 역할 조정                                                                                                                                                                                                                                     |
+| Shell               | [foxundermoon.shell-format](https://marketplace.visualstudio.com/items?itemName=foxundermoon.shell-format), [timonwong.shellcheck](https://marketplace.visualstudio.com/items?itemName=timonwong.shellcheck) | shfmt·ShellCheck 실행 파일 경로 확인                                                                                                                                                                                                                                                                         |
+| 공통 텍스트 규칙    | [EditorConfig.EditorConfig](https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig)                                                                                                   | 저장소 `.editorconfig` 작성                                                                                                                                                                                                                                                                                  |
+
+Java Pack은 확인일 기준 언어 지원·디버거·테스트·Maven·Gradle·프로젝트 관리 확장을 포함합니다. 이 중 일부만 원하면 Pack 대신 `redhat.java`, `vscjava.vscode-java-debug`, `vscjava.vscode-java-test`처럼 필요한 ID를 개별 설치합니다. Spring Pack은 별도 선택입니다. [Java Pack 구성](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-pack)
+
+Python 확장은 기본적으로 Pylance, Python Debugger, Python Environments를 추가 설치합니다. 따라서 위 표의 두 ID를 설치한 결과가 정확히 두 개일 필요는 없습니다. 이들은 선택적 의존성이며 사용 여부를 조정할 수 있습니다. Ruff는 별도 선택입니다. [Python의 추가 설치 항목](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
+
+확장 설치만으로 Node·JDK·Go·Python과 프로젝트 의존성이 모두 준비되지는 않습니다. 일부 확장이 보조 도구를 내려받더라도 CLI·CI 환경은 별도로 재현해야 합니다. 내장 TypeScript 언어 지원과 프로젝트 compiler도 구분합니다. [TypeScript 공식 안내](https://code.visualstudio.com/docs/languages/typescript)
+
+## 저장소에 추천 목록을 둔다
+
+Web + Python 저장소의 `.vscode/extensions.json` 예시입니다. 기존 목록에는 필요한 ID만 병합합니다. Extensions 화면에서 `@recommended`로 확인하고 원하는 항목을 설치합니다.
+
+```json
+{
+    "recommendations": [
+        "EditorConfig.EditorConfig",
+        "oxc.oxc-vscode",
+        "ms-python.python",
+        "charliermarsh.ruff"
+    ]
+}
+```
+
+전체 목록 설치를 선택하면 목록의 다른 언어 확장도 함께 설치될 수 있습니다. 모노레포 전체 추천과 개인의 작업 범위가 다르면 아래 Profile 설치로 좁힙니다. 이 파일은 버전 lockfile이나 설치 강제 정책이 아닙니다.
+
+## Profile을 지정해 설치한다
+
+VS Code Desktop의 `code` CLI가 PATH에 있어야 합니다. macOS는 Command Palette의 `Shell Command: Install 'code' command in PATH`를 사용합니다. 먼저 Profiles에서 이름이 `Web + Python`인 **Empty Profile**을 만듭니다. 또는 `code . --profile "Web + Python"`으로 창을 열고 Profile 생성이 완료됐는지 확인한 다음 아래 설치 명령을 실행합니다. [CLI 옵션](https://code.visualstudio.com/docs/configure/command-line)
+
+창 열기와 확장 설치의 Profile 처리는 다릅니다. `--install-extension --profile ...`은 기존 Profile을 찾으므로 없는 이름이면 실패할 수 있습니다. 설치 명령이 Profile도 만든다고 가정하지 않습니다. [VS Code CLI 구현](https://github.com/microsoft/vscode/blob/main/src/vs/code/node/cliProcessMain.ts)
+
+```sh
+code --profile "Web + Python" --install-extension EditorConfig.EditorConfig
+code --profile "Web + Python" --install-extension oxc.oxc-vscode
+code --profile "Web + Python" --install-extension ms-python.python
+code --profile "Web + Python" --install-extension charliermarsh.ruff
+code --profile "Web + Python" --list-extensions --show-versions
+code . --profile "Web + Python"
+```
+
+이 명령은 설치를 추가하며 기존 불필요한 확장을 제거하지 않습니다. 결과 목록을 확인하고 Profile을 프로젝트에 연결합니다. 일반적인 Profile은 확장 버전과 파일을 완전히 격리한 컨테이너가 아닙니다. `Apply Extension to all Profiles`로 지정한 확장도 확인합니다. [Profile 관리](https://code.visualstudio.com/docs/configure/profiles)
+
+## 조합 선택 스크립트
+
+다음 내용을 학습 프로젝트의 `install-vscode-extensions.sh`로 저장합니다. Bash가 있는 macOS·Linux·WSL에서 실행하며, 이 스크립트는 **선택한 case만** 설치합니다. 실행 전에 선택한 Profile 이름(`Web + Python`, `Web + Java`, `Go + Infra`)으로 빈 Profile을 생성해 둡니다. 세 조합을 모두 실행하면 각 Profile에 해당 조합이 추가됩니다.
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+choice="${1:-web-python}"
+case "$choice" in
+  web-python)
+    profile="Web + Python"
+    extensions=(oxc.oxc-vscode ms-python.python charliermarsh.ruff)
+    ;;
+  web-java)
+    profile="Web + Java"
+    extensions=(oxc.oxc-vscode vscjava.vscode-java-pack)
+    ;;
+  go-infra)
+    profile="Go + Infra"
+    extensions=(golang.Go redhat.vscode-yaml foxundermoon.shell-format timonwong.shellcheck)
+    ;;
+  *)
+    printf 'Usage: %s {web-python|web-java|go-infra}\n' "$0" >&2
+    exit 2
+    ;;
+esac
+
+command -v code >/dev/null
+for extension_id in EditorConfig.EditorConfig "${extensions[@]}"; do
+  code --profile "$profile" --install-extension "$extension_id"
+done
+code --profile "$profile" --list-extensions --show-versions
+```
+
+```sh
+bash install-vscode-extensions.sh web-python
+code . --profile "Web + Python"
+```
+
+Java와 Web을 함께 쓰면 인수를 `web-java`, Go·운영 파일을 다루면 `go-infra`로 바꿉니다. Spring·Jupyter·Vue는 실제 프로젝트가 요구할 때 해당 배열에 추가합니다. ESLint·Prettier 프로젝트라면 Oxc ID를 그 프로젝트의 구성으로 바꾸고 [포맷 충돌 해결](/ko/docs/vscode/format-lint-contract)을 따릅니다.
+
+Windows PowerShell에서는 같은 Web + Python 목록을 다음과 같이 설치할 수 있습니다.
+
+```powershell
+$profileName = "Web + Python"
+$extensionIds = @(
+  "EditorConfig.EditorConfig",
+  "oxc.oxc-vscode",
+  "ms-python.python",
+  "charliermarsh.ruff"
+)
+foreach ($extensionId in $extensionIds) {
+  code --profile $profileName --install-extension $extensionId
+  if ($LASTEXITCODE -ne 0) { throw "Extension install failed: $extensionId" }
+}
+code --profile $profileName --list-extensions --show-versions
+```
+
+중간 설치에 실패하면 이미 설치한 항목은 남습니다. 원인을 해결한 뒤 재실행하고 목록을 확인합니다. 설치 목록은 도구 버전 잠금이나 원자적 배포를 제공하지 않습니다.
+
+## 자체 Extension Pack이 필요한 시점
+
+여러 저장소에서 같은 설치 묶음을 배포하고 담당자가 갱신할 때 고려합니다. 몇 개의 조합이면 위 ID 목록으로 시작할 수 있습니다. Pack의 `package.json` 예시는 다음과 같으며 게시자 ID는 실제 배포 계정에 맞춰야 합니다.
+
+```json
+{
+    "name": "team-web-python",
+    "displayName": "Team Web + Python",
+    "publisher": "your-publisher-id",
+    "version": "0.0.1",
+    "engines": { "vscode": "^1.85.0" },
+    "categories": ["Extension Packs"],
+    "extensionPack": [
+        "EditorConfig.EditorConfig",
+        "oxc.oxc-vscode",
+        "ms-python.python",
+        "charliermarsh.ruff"
+    ]
+}
+```
+
+`extensionPack`은 함께 설치할 ID 목록이고, `extensionDependencies`는 확장 실행에 필요한 의존성을 선언합니다. 단순 추천 파일을 Pack으로 해석하지 않습니다. 이 manifest만 저장소에 두어서는 설치되지 않으며 VSIX 패키징·설치 또는 Marketplace 배포가 필요합니다. Pack도 JDK·Python·npm 패키지를 설치하는 환경 관리자는 아닙니다. [확장 manifest](https://code.visualstudio.com/api/references/extension-manifest)
+
+## 설치 완료 확인
+
+Profile의 설치 목록을 기록한 뒤 해당 파일에서 정의 이동·Rename·테스트 디버깅·포맷을 한 번씩 수행합니다. [단축키 표](/ko/docs/vscode/keyboard-shortcuts)를 사용하고 [Java](/ko/docs/vscode/java), [TypeScript](/ko/docs/vscode/typescript), [Go](/ko/docs/vscode/go), [Python](/ko/docs/vscode/python)의 SDK 확인 절차를 따릅니다.
+
+SSH·WSL·Dev Container에서는 언어 확장이 실행될 위치도 확인합니다. 로컬에 설치한 목록이 원격에 자동으로 동일 적용된다고 가정하지 말고 Extensions의 Local/원격 구분과 `Install in ...`를 확인합니다. [Remote SSH 확장 관리](https://code.visualstudio.com/docs/remote/ssh)
+
+자료 확인일은 2026-09-06입니다. Bash 스크립트의 분기·인수·실패 처리는 모의 CLI로 검사했습니다. PowerShell 예제는 실행 검증하지 않았으며, 실제 Marketplace 설치·GUI 활성화는 독자의 환경에서 위 절차로 확인합니다.

@@ -19,9 +19,9 @@ const appRoot = process.cwd().endsWith("/apps/web")
 const workspaceRoot = resolve(appRoot, "../..");
 
 /** locale별 overview를 제외한 canonical Docs inventory임 */
-export const docsInventoryPerLocale = 47;
+export const docsInventoryPerLocale = 49;
 /** locale별 root·영역 landing을 포함한 전체 Docs 파일 수임 */
-export const docsPagesPerLocale = 57;
+export const docsPagesPerLocale = 59;
 
 export interface ContentEntry<Metadata> {
   readonly metadata: Metadata;

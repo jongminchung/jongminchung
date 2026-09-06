@@ -1,0 +1,176 @@
+---
+documentKind: "how-to"
+title: "Language Extensions and Combined Profiles"
+description: "Choose language extensions and install combinations with recommendations, Packs, Profiles, Bash, and PowerShell."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "development-workflow"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://code.visualstudio.com/docs/configure/extensions/extension-marketplace"
+---
+
+## Can languages be installed as a combination?
+
+Yes. Put the extensions needed by a project into **one combined Profile**, such as `Web + Python`. This does not merge two active Profiles. Use another Profile or window for a different project.
+
+## What gets installed?
+
+| Mechanism                  | Installation behavior                               | Use                          |
+| -------------------------- | --------------------------------------------------- | ---------------------------- |
+| `.vscode/extensions.json`  | Recommendations; the user chooses installation      | Repository guidance          |
+| Extension Pack             | Installs the extensions listed in the pack          | Distributable bundle         |
+| `code --install-extension` | Installs the requested ID and required dependencies | Explicit selection           |
+| Profile import             | Imports selected settings, bindings, and extensions | Personal environment sharing |
+
+Opening a Python file or committing recommendations does not automatically install every recommendation. Installing a Pack does install its members. [Extension management](https://code.visualstudio.com/docs/configure/extensions/extension-marketplace)
+
+Installed, enabled, and activated are different states. Extensions may start for languages, commands, debugging, or startup events. Neither “everything always runs” nor “only the current language runs” is reliable. Inspect `Developer: Show Running Extensions`. [Activation events](https://code.visualstudio.com/api/references/activation-events)
+
+## Starting sets by language
+
+These are choices for the workflows below, not mandatory downloads for everyone who opens a text file. Follow the ID links to check publishers and current contents.
+
+| Workflow              | Starting set                                                                                                                                                                                                 | Conditional additions and external tools                                                                                                                                                                                                                                                                          |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| JS, TS, React         | Built-in language support and JS debugger; [Oxc](https://marketplace.visualstudio.com/items?itemName=oxc.oxc-vscode) for Oxfmt/Oxlint projects                                                               | Install Node, project TypeScript, and lint packages separately; React snippets are optional                                                                                                                                                                                                                       |
+| Vue, Svelte, Tailwind | Web set                                                                                                                                                                                                      | Add only the relevant [Vue.volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar), [svelte.svelte-vscode](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode), or [bradlc.vscode-tailwindcss](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss) |
+| Java                  | [vscjava.vscode-java-pack](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-pack)                                                                                                     | JDK and build wrapper; [vmware.vscode-boot-dev-pack](https://marketplace.visualstudio.com/items?itemName=vmware.vscode-boot-dev-pack) for Spring                                                                                                                                                                  |
+| Go                    | [golang.Go](https://marketplace.visualstudio.com/items?itemName=golang.Go)                                                                                                                                   | Go SDK, gopls, Delve; no separate gofmt extension                                                                                                                                                                                                                                                                 |
+| Python                | [ms-python.python](https://marketplace.visualstudio.com/items?itemName=ms-python.python), [charliermarsh.ruff](https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff)                       | Python, virtual environment, pytest; `ms-toolsai.jupyter` for notebooks                                                                                                                                                                                                                                           |
+| YAML                  | [redhat.vscode-yaml](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml)                                                                                                                 | Separate yamllint CLI/Task; coordinate YAML formatting with Oxfmt                                                                                                                                                                                                                                                 |
+| Shell                 | [foxundermoon.shell-format](https://marketplace.visualstudio.com/items?itemName=foxundermoon.shell-format), [timonwong.shellcheck](https://marketplace.visualstudio.com/items?itemName=timonwong.shellcheck) | Verify shfmt and ShellCheck binary paths                                                                                                                                                                                                                                                                          |
+| Shared text rules     | [EditorConfig.EditorConfig](https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig)                                                                                                   | Repository `.editorconfig`                                                                                                                                                                                                                                                                                        |
+
+The Java Pack currently includes language support, debugging, testing, Maven, Gradle, and project management. For a smaller set, install individual IDs such as `redhat.java`, `vscjava.vscode-java-debug`, and `vscjava.vscode-java-test`. Spring is a separate choice. [Java Pack contents](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-pack)
+
+Python installs Pylance, Python Debugger, and Python Environments by default as optional dependencies. Installing the two IDs in the table can therefore produce more than two installed extensions. Ruff remains a separate choice. [Python companion extensions](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
+
+Extensions do not prepare every runtime or project dependency. Even when an extension downloads helper tools, reproduce the CLI/CI environment separately. Built-in TypeScript language support is distinct from the project compiler. [TypeScript documentation](https://code.visualstudio.com/docs/languages/typescript)
+
+## Share repository recommendations
+
+For a Web + Python repository, merge these IDs into `.vscode/extensions.json`, then inspect `@recommended` in Extensions and choose what to install.
+
+```json
+{
+    "recommendations": [
+        "EditorConfig.EditorConfig",
+        "oxc.oxc-vscode",
+        "ms-python.python",
+        "charliermarsh.ruff"
+    ]
+}
+```
+
+Choosing to install the entire recommendation list can include languages outside your own work. For a broad monorepo, narrow your personal selection with a Profile. This file does not lock versions or enforce installation.
+
+## Install into a Profile
+
+Use VS Code Desktop with `code` on PATH. On macOS, run `Shell Command: Install 'code' command in PATH` from the Command Palette. First create an **Empty Profile** named `Web + Python` in Profiles. Alternatively, open `code . --profile "Web + Python"` and confirm Profile creation has finished before running the installation commands below. [CLI options](https://code.visualstudio.com/docs/configure/command-line)
+
+Opening a window and installing extensions handle Profiles differently. `--install-extension --profile ...` looks up an existing Profile and can fail if the name is missing. Do not rely on installation to create it. [VS Code CLI implementation](https://github.com/microsoft/vscode/blob/main/src/vs/code/node/cliProcessMain.ts)
+
+```sh
+code --profile "Web + Python" --install-extension EditorConfig.EditorConfig
+code --profile "Web + Python" --install-extension oxc.oxc-vscode
+code --profile "Web + Python" --install-extension ms-python.python
+code --profile "Web + Python" --install-extension charliermarsh.ruff
+code --profile "Web + Python" --list-extensions --show-versions
+code . --profile "Web + Python"
+```
+
+These commands add extensions; they do not remove unwanted existing ones. Review the result and associate the Profile with the project. Profiles are not containers with fully isolated extension files and versions. Check extensions marked `Apply Extension to all Profiles`. [Profiles](https://code.visualstudio.com/docs/configure/profiles)
+
+## Select a combination with a script
+
+Save the following as `install-vscode-extensions.sh` in a learning project. It runs in Bash on macOS, Linux, or WSL and installs **only the selected case**. Before running it, create the selected empty Profile (`Web + Python`, `Web + Java`, or `Go + Infra`). Running all three choices adds each set to its respective Profile.
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+choice="${1:-web-python}"
+case "$choice" in
+  web-python)
+    profile="Web + Python"
+    extensions=(oxc.oxc-vscode ms-python.python charliermarsh.ruff)
+    ;;
+  web-java)
+    profile="Web + Java"
+    extensions=(oxc.oxc-vscode vscjava.vscode-java-pack)
+    ;;
+  go-infra)
+    profile="Go + Infra"
+    extensions=(golang.Go redhat.vscode-yaml foxundermoon.shell-format timonwong.shellcheck)
+    ;;
+  *)
+    printf 'Usage: %s {web-python|web-java|go-infra}\n' "$0" >&2
+    exit 2
+    ;;
+esac
+
+command -v code >/dev/null
+for extension_id in EditorConfig.EditorConfig "${extensions[@]}"; do
+  code --profile "$profile" --install-extension "$extension_id"
+done
+code --profile "$profile" --list-extensions --show-versions
+```
+
+```sh
+bash install-vscode-extensions.sh web-python
+code . --profile "Web + Python"
+```
+
+Use `web-java` for Java and Web, or `go-infra` for Go and operational files. Add Spring, Jupyter, or Vue only when required. For an ESLint/Prettier project, replace the Oxc ID with that project's extensions and follow [format ownership](/en/docs/vscode/format-lint-contract).
+
+The same Web + Python set in Windows PowerShell:
+
+```powershell
+$profileName = "Web + Python"
+$extensionIds = @(
+  "EditorConfig.EditorConfig",
+  "oxc.oxc-vscode",
+  "ms-python.python",
+  "charliermarsh.ruff"
+)
+foreach ($extensionId in $extensionIds) {
+  code --profile $profileName --install-extension $extensionId
+  if ($LASTEXITCODE -ne 0) { throw "Extension install failed: $extensionId" }
+}
+code --profile $profileName --list-extensions --show-versions
+```
+
+If installation fails halfway, already installed extensions remain. Resolve the failure, rerun, and inspect the list. This is neither a version lock nor an atomic deployment.
+
+## When to create an Extension Pack
+
+Consider a maintained Pack when several repositories need the same distributable bundle. Start with explicit ID lists for a few combinations. A Pack's `package.json` could contain the following; replace the publisher ID with the actual distribution account.
+
+```json
+{
+    "name": "team-web-python",
+    "displayName": "Team Web + Python",
+    "publisher": "your-publisher-id",
+    "version": "0.0.1",
+    "engines": { "vscode": "^1.85.0" },
+    "categories": ["Extension Packs"],
+    "extensionPack": [
+        "EditorConfig.EditorConfig",
+        "oxc.oxc-vscode",
+        "ms-python.python",
+        "charliermarsh.ruff"
+    ]
+}
+```
+
+`extensionPack` lists bundled installations; `extensionDependencies` declares runtime dependencies of an extension. A recommendations file is not a Pack. Saving this manifest in a repository does not install anything: package/install a VSIX or publish through Marketplace. A Pack does not install JDKs, Python, or npm dependencies. [Extension manifest](https://code.visualstudio.com/api/references/extension-manifest)
+
+## Verify the result
+
+Record the Profile's extension list, then test definition navigation, Rename, test debugging, and formatting. Use the [shortcut reference](/en/docs/vscode/keyboard-shortcuts) and the SDK checks in [Java](/en/docs/vscode/java), [TypeScript](/en/docs/vscode/typescript), [Go](/en/docs/vscode/go), and [Python](/en/docs/vscode/python).
+
+In SSH, WSL, or Dev Containers, check the execution location too. A local installation list is not automatically an identical remote installation. Inspect the Local/remote sections and `Install in ...` actions. [Remote SSH extensions](https://code.visualstudio.com/docs/remote/ssh)
+
+Sources checked on 2026-09-06. The Bash script's branches, arguments, and failure handling were checked with a mock CLI. The PowerShell example was not executed; verify actual Marketplace installation and GUI activation in your environment using the procedure above.

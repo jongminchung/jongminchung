@@ -1,0 +1,66 @@
+---
+documentKind: "reference"
+title: "Essential Keyboard Shortcuts"
+description: "Navigation, editing, debugging, and shortcut troubleshooting on Windows, Linux, and macOS."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "development-workflow"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://code.visualstudio.com/docs/reference/default-keybindings"
+---
+
+## Learn actions first
+
+Start with Command Palette, Quick Open, definition/references, Rename, and Quick Fix. Practice following a call path and completing a small change. Shortcuts do not install extensions: language actions such as F12 and F2 require a working language service.
+
+## Defaults by operating system
+
+Checked on 2026-09-06 with the default US keyboard layout. An arrow means a chord: press the first combination, then the second. Function keys on macOS may require Fn. **Linux differs from Windows for Peek Definition, Go Back, and Format Document.**
+
+| Command                          | Windows         | Linux           | macOS          |
+| -------------------------------- | --------------- | --------------- | -------------- |
+| Command Palette                  | Ctrl+Shift+P    | Ctrl+Shift+P    | Cmd+Shift+P    |
+| Quick Open                       | Ctrl+P          | Ctrl+P          | Cmd+P          |
+| Search                           | Ctrl+Shift+F    | Ctrl+Shift+F    | Cmd+Shift+F    |
+| Go to Symbol in Editor           | Ctrl+Shift+O    | Ctrl+Shift+O    | Cmd+Shift+O    |
+| Go to Symbol in Workspace        | Ctrl+T          | Ctrl+T          | Cmd+T          |
+| Go to Definition                 | F12             | F12             | F12            |
+| Peek Definition                  | Alt+F12         | Ctrl+Shift+F10  | Option+F12     |
+| Go to References                 | Shift+F12       | Shift+F12       | Shift+F12      |
+| Go Back                          | Alt+Left        | Ctrl+Alt+-      | Ctrl+-         |
+| Rename Symbol                    | F2              | F2              | F2             |
+| Quick Fix                        | Ctrl+.          | Ctrl+.          | Cmd+.          |
+| Go to Next Error or Warning      | F8              | F8              | F8             |
+| Format Document                  | Shift+Alt+F     | Ctrl+Shift+I    | Shift+Option+F |
+| Move Line Up/Down                | Alt+Up/Down     | Alt+Up/Down     | Option+Up/Down |
+| Add Selection to Next Find Match | Ctrl+D          | Ctrl+D          | Cmd+D          |
+| Toggle Line Comment              | Ctrl+/          | Ctrl+/          | Cmd+/          |
+| Problems                         | Ctrl+Shift+M    | Ctrl+Shift+M    | Cmd+Shift+M    |
+| Toggle Integrated Terminal       | Ctrl+Backtick   | Ctrl+Backtick   | Ctrl+Backtick  |
+| Keyboard Shortcuts               | Ctrl+K → Ctrl+S | Ctrl+K → Ctrl+S | Cmd+K → Cmd+S  |
+| Toggle Breakpoint                | F9              | F9              | F9             |
+| Start/Continue Debugging         | F5              | F5              | F5             |
+| Step Over                        | F10             | F10             | F10            |
+| Step Into                        | F11             | F11             | F11            |
+| Step Out                         | Shift+F11       | Shift+F11       | Shift+F11      |
+| Stop Debugging                   | Shift+F5        | Shift+F5        | Shift+F5       |
+
+Sources: [command reference](https://code.visualstudio.com/docs/reference/default-keybindings), [Windows PDF](https://code.visualstudio.com/shortcuts/keyboard-shortcuts-windows.pdf), [Linux PDF](https://code.visualstudio.com/shortcuts/keyboard-shortcuts-linux.pdf), [macOS PDF](https://code.visualstudio.com/shortcuts/keyboard-shortcuts-macos.pdf).
+
+## Diagnose a shortcut
+
+Find the command in Keyboard Shortcuts, record the pressed keys, and inspect competing bindings and their `when` conditions. Terminal focus, the OS, or an input method can change which action receives a key. Use `Developer: Toggle Keyboard Shortcuts Troubleshooting` to inspect dispatch, then turn logging off. [Keybinding troubleshooting](https://code.visualstudio.com/docs/configure/keybindings)
+
+With an IntelliJ or Vim keymap, prefer the current Keyboard Shortcuts display over this table. Keep personal bindings in your Profile.
+
+## Five-minute exercise
+
+1. Append `:42` to an actual filename in Quick Open.
+2. Visit a function definition and its references, then navigate back.
+3. Rename it with F2 and run tests. Ctrl+D selects matching text; it does not replace symbol-aware Rename.
+4. Set a breakpoint and try F5, F10, F11, and Shift+F11 while watching variables. Practice on a function call; debugger settings may skip asynchronous or external code.
+5. Format the document and inspect the diff. Formatting invokes the selected provider, not type checking or every lint rule.
+
+Start language-specific tests, test debugging, and import organization through extension commands or CodeLens. They do not share a universal default shortcut. Continue with [extensions](/en/docs/vscode/extensions-and-profiles) and the [navigation exercise](/en/docs/vscode/workspace-and-navigation).
