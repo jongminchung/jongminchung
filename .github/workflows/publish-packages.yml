@@ -41,7 +41,7 @@ jobs:
           bunx oxlint --config oxlint.config.ts
           packages/${{ matrix.package }}
       - run: bun run --filter @jongminchung/${{ matrix.package }} typecheck
-      - run: bun run --filter @jongminchung/${{ matrix.package }} test
+      - run: bun run --filter @jongminchung/${{ matrix.package }} test:coverage
       - run: bun run --filter @jongminchung/${{ matrix.package }} test:node
       - run: bun pm pack --cwd packages/${{ matrix.package }} --dry-run
 

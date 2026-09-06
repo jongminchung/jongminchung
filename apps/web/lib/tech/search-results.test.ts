@@ -15,7 +15,7 @@ function page(breadcrumbs?: string[]): SortedResult {
     type: "page",
     url: "/en/docs/fe/example",
     content: "A <mark>document</mark>",
-    breadcrumbs,
+    ...(breadcrumbs === undefined ? {} : { breadcrumbs }),
   };
 }
 

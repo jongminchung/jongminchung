@@ -1,9 +1,13 @@
 {
+  // E2E를 별도 검사할 때 웹의 공통 타입 정책을 재사용함.
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    // 웹 검사와 동일한 증분 캐시를 공유하지 않도록 별도 검사에서는 캐시를 끔.
     "incremental": false,
+    // 브라우저 테스트는 Next 편집기 플러그인 없이 검사함.
     "plugins": []
   },
+  // Playwright 설정과 E2E 진입점으로 범위를 제한함. import된 파일은 함께 검사됨.
   "include": ["playwright*.config.ts", "e2e-assertions.ts", "**/*.e2e.test.ts"],
   "exclude": ["node_modules"]
 }

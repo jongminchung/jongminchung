@@ -77,7 +77,7 @@ export function EditorialHeader({
                 </IntentLink>
               ) : (
                 <EditorialNavigationMenu
-                  isActive={item.isActive}
+                  isActive={item.isActive ?? false}
                   key={item.href}
                   label={item.label}
                   menuLabel={item.menuLabel}

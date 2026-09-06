@@ -24,7 +24,8 @@
     "start": "bun scripts/prepare-standalone.ts && bun .next/standalone/apps/web/server.js",
     "test": "bun test --timeout 60000",
     "test:e2e": "playwright test",
-    "typecheck": "bun run --bun next typegen && bun run --bun tsc --noEmit"
+    "typecheck": "bun run --bun next typegen && bun run --bun tsc --noEmit && bun run --bun tsc -p tsconfig.e2e.json --noEmit",
+    "test:coverage": "bun test --coverage --timeout 60000"
   },
   "dependencies": {
     "@excalidraw/excalidraw": "catalog:",
@@ -60,5 +61,20 @@
     "postcss": "catalog:",
     "typescript": "catalog:",
     "unist-util-visit": "catalog:"
-  }
+  },
+  "//": [
+    "next는 App Router·서버 렌더링·빌드를, react는 컴포넌트 모델을, react-dom은 DOM 렌더링과 hydration을 제공함.",
+    "@types/react·@types/react-dom은 JSX와 React API의 정적 타입이며 런타임 패키지를 대신하지 않음.",
+    "babel-plugin-react-compiler는 next.config.ts의 infer 모드에 필요함. 컴포넌트와 Hook을 자동 판별해 최적화함.",
+    "next-intl은 locale별 메시지와 요청 설정을, next-themes는 클라이언트 테마 전환을 담당함.",
+    "fumadocs-mdx는 MDX와 메타데이터를 생성하고 fumadocs-core·fumadocs-ui는 문서 탐색·검색·화면을 구성함.",
+    "zod는 외부 콘텐츠의 frontmatter를 런타임 검증함. TypeScript만으로는 입력 데이터의 유효성을 보장하지 못함.",
+    "server-only는 콘텐츠 로더가 Client Component에 잘못 import되는 것을 빌드에서 감지함.",
+    "@excalidraw/excalidraw는 문서 도형을 표시함. 관련 자산은 predev·prebuild에서 준비함.",
+    "@jongminchung/ui는 공용 UI와 스타일을, lucide-react는 React 아이콘을 제공함.",
+    "@tailwindcss/postcss·postcss는 Tailwind CSS 빌드에, @fumadocs/tailwind는 문서 스타일 통합에 사용함.",
+    "@playwright/test는 실제 브라우저 E2E·시각 회귀를, @axe-core/playwright는 자동 접근성 검사를 담당함.",
+    "happy-dom은 Bun 컴포넌트 테스트의 DOM 환경임. 실제 브라우저 렌더링 검증은 Playwright가 담당함.",
+    "React Compiler는 infer 모드로 적용하며 성능 효과는 화면별로 측정함. 설정 근거: https://nextjs.org/docs/app/api-reference/config/next-config-js/reactCompiler"
+  ]
 }

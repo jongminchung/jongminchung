@@ -1,11 +1,19 @@
 {
+  // 루트 공통 정책에 Next 앱의 JSX·생성 타입·Bun 환경을 추가함.
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    // 브라우저 UI가 사용하는 DOM API 타입을 이 workspace에만 추가함.
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    // 반복 검사에서 이전 타입 검사 정보를 재사용함.
     "incremental": true,
+    // JSX 변환을 Next에 맡겨 React Compiler를 포함한 빌드 파이프라인을 사용함.
     "jsx": "preserve",
+    // 편집기에서 Next 전용 타입 진단을 제공함. CLI 검사는 typecheck script가 담당함.
     "plugins": [{ "name": "next" }],
+    // Bun 스크립트·테스트와 Node 서버 API의 전역 타입을 허용함.
     "types": ["bun", "node"]
   },
+  // next-env와 next typegen의 라우트 타입을 포함함. MDX 타입은 Fumadocs 생성 선언도 사용함.
   "include": [
     "next-env.d.ts",
     ".next/types/**/*.ts",
@@ -13,5 +21,12 @@
     "**/*.tsx",
     "**/*.mdx"
   ],
-  "exclude": ["node_modules", "tests"]
+  // 단위 테스트는 포함하고 Playwright 진입점은 tsconfig.e2e.json에서 별도로 검사함.
+  "exclude": [
+    "node_modules",
+    "tests",
+    "**/*.e2e.test.ts",
+    "playwright*.config.ts",
+    "e2e-assertions.ts"
+  ]
 }

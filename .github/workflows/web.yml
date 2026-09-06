@@ -91,12 +91,12 @@ jobs:
         if: steps.changes.outputs.web == 'true'
         run: |
           bun run --filter @jongminchung/ui typecheck
-          bun run --filter @jongminchung/ui test
+          bun run --filter @jongminchung/ui test:coverage
           bun run --filter @jongminchung/ui build
       - if: steps.changes.outputs.web == 'true'
         run: bun run --filter @jongminchung/web typecheck
       - if: steps.changes.outputs.web == 'true'
-        run: bun run --filter @jongminchung/web test
+        run: bun run --filter @jongminchung/web test:coverage
       - if: steps.changes.outputs.web == 'true'
         run: bun run --filter @jongminchung/web build
       - if: steps.changes.outputs.web == 'true'

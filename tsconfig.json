@@ -1,11 +1,15 @@
 {
+  // 공통 타입 정책을 상속하고 루트의 자동화·도구 설정만 검사함.
+  // 앱과 패키지는 각 tsconfig로 검사하며 루트 typecheck script가 전체를 실행함.
   "extends": "./tsconfig.base.json",
   "compilerOptions": { "types": ["node", "bun"] },
+  // 루트 검사 범위를 제한해 웹의 Next 생성 타입·Bun 테스트 환경과 분리함.
   "include": [
     ".github/scripts/**/*.ts",
     ".oxfmtrc.ts",
     "*.config.ts",
     "scripts/**/*.ts"
   ],
+  // 설치된 의존성과 빌드 산출물을 루트 검사 진입점에서 제외함.
   "exclude": ["node_modules", "dist"]
 }

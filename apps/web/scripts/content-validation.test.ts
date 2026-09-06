@@ -45,7 +45,7 @@ function createBlogPost(
 function createDocsPage(
   locale: Locale,
   id = "docs-page",
-  overrides: Partial<DocsPageMetadata> = {},
+  overrides: Partial<Extract<DocsPageMetadata, { documentKind: string }>> = {},
 ): ValidatedContentSource<DocsPageMetadata> {
   const metadata: DocsPageMetadata = {
     id,

@@ -57,8 +57,9 @@
     "prepack": "bun run build",
     "publish:dry-run": "bun publish --dry-run --access public",
     "test": "bun test",
-    "test:node": "bun run build && node ../../.github/scripts/verify-package-build.ts .",
-    "typecheck": "tsc --noEmit"
+    "test:node": "bun run build && node scripts/verify-exports.ts && node --conditions=source scripts/verify-exports.ts source",
+    "typecheck": "tsc --noEmit",
+    "test:coverage": "bun test --coverage"
   },
   "dependencies": {
     "@base-ui/react": "catalog:",
@@ -86,5 +87,14 @@
   },
   "engines": {
     "node": ">=24.0.0"
-  }
+  },
+  "//": [
+    "@base-ui/react는 상호작용 UI primitive를 제공함. 접근성은 실제 조합을 브라우저 테스트로 확인함.",
+    "class-variance-authority는 컴포넌트 variant별 클래스와 타입을 관리함.",
+    "clsx는 조건부 클래스를 조합하고 tailwind-merge는 충돌하는 Tailwind 유틸리티를 정리함. src/lib/utils.ts의 cn에서 함께 사용함.",
+    "cmdk는 명령 검색 UI, lucide-react는 아이콘, tw-animate-css는 공통 애니메이션 스타일에 사용함.",
+    "react·react-dom·tailwindcss는 소비 앱과 공유할 peerDependencies이며 devDependencies는 패키지 자체 개발·검사용임.",
+    "sideEffects의 CSS 목록은 번들러가 스타일 import를 불필요한 코드로 제거하지 않도록 유지함.",
+    "exports의 types·import는 배포 dist를 가리킴. 저장소 개발에서는 tsconfig paths와 Next transpilePackages도 함께 확인함."
+  ]
 }

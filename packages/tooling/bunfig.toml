@@ -1,5 +1,6 @@
 [test]
-coverage = true
+# 개별 테스트에는 커버리지를 강제하지 않음. 전체 검증은 test:coverage에서 실행함.
+coverage = false
 coverageReporter = ["text", "lcov"]
 coverageDir = "../../coverage/tooling"
 coverageSkipTestFiles = true

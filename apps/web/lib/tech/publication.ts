@@ -40,7 +40,10 @@ function publicNodes(
         ? node.index
         : undefined;
     if (children.length === 0 && index === undefined) continue;
-    output.push({ ...node, children, index } satisfies Folder);
+    const folder: Folder = { ...node, children };
+    if (index === undefined) delete folder.index;
+    else folder.index = index;
+    output.push(folder);
   }
   return output;
 }
@@ -53,10 +56,9 @@ export function publicPageTree(
   return {
     ...tree,
     children: publicNodes(tree.children, publicUrls),
-    fallback:
-      tree.fallback === undefined
-        ? undefined
-        : publicPageTree(tree.fallback, publicUrls),
+    ...(tree.fallback === undefined
+      ? {}
+      : { fallback: publicPageTree(tree.fallback, publicUrls) }),
   };
 }
 

@@ -101,7 +101,8 @@ const docsContentMetadataShape = {
 
 function validateSharedMetadata(
   value: z.infer<z.ZodObject<typeof sharedMetadataShape>> & {
-    readonly verifiedAt?: string;
+    // Zod optional 입력은 속성 생략과 명시적 undefined를 모두 허용함.
+    readonly verifiedAt?: string | undefined;
   },
   context: z.RefinementCtx,
 ): void {

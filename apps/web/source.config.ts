@@ -133,9 +133,7 @@ export const investmentCollection = defineCollections({
   dir: "content/invest",
   files: ["**/notes/*.mdx"],
   async: true,
-  mdxOptions: applyMdxPreset({
-    rehypeCodeOptions: metadataOnly ? false : undefined,
-  }),
+  mdxOptions: applyMdxPreset(metadataOnly ? { rehypeCodeOptions: false } : {}),
   schema: investmentSchema,
   postprocess: { extractLinkReferences: true },
 });

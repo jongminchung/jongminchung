@@ -9,10 +9,23 @@ import {
   sharedMdxContentComponents,
 } from "#tech-components/mdx-components";
 
-function MdxLink({ href = "", children, ...props }: ComponentProps<"a">) {
+function MdxLink({
+  href = "",
+  children,
+  onClick,
+  onMouseEnter,
+  onTouchStart,
+  ...props
+}: ComponentProps<"a">) {
   if ("data-footnote-ref" in props) {
     return (
-      <FootnoteReference {...props} href={href}>
+      <FootnoteReference
+        {...props}
+        href={href}
+        onClick={onClick}
+        onMouseEnter={onMouseEnter}
+        onTouchStart={onTouchStart}
+      >
         {children}
       </FootnoteReference>
     );
@@ -22,6 +35,9 @@ function MdxLink({ href = "", children, ...props }: ComponentProps<"a">) {
   return (
     <Link
       {...props}
+      {...(onClick === undefined ? {} : { onClick })}
+      {...(onMouseEnter === undefined ? {} : { onMouseEnter })}
+      {...(onTouchStart === undefined ? {} : { onTouchStart })}
       href={href}
       target={isExternal ? "_blank" : undefined}
       rel={isExternal ? "noreferrer" : undefined}

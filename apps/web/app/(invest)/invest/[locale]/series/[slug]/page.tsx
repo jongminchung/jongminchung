@@ -60,10 +60,14 @@ export async function generateMetadata({
     title: collection.title,
     description: collection.description,
     pathname: collection.pathname,
-    alternatePathname:
-      alternateNotes.length < 2
-        ? undefined
-        : createInvestmentSeriesHref(otherLocale, collection.title),
+    ...(alternateNotes.length < 2
+      ? {}
+      : {
+          alternatePathname: createInvestmentSeriesHref(
+            otherLocale,
+            collection.title,
+          ),
+        }),
     index: collection.notes.length >= 2,
   });
 }

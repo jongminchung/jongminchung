@@ -113,3 +113,44 @@ describe("공유 UI architecture 계약", () => {
     });
   });
 });
+
+// manifest·편집기·shadcn이 서로 다른 경로를 가리키는 변경을 막음.
+it("모든 UI 공개 source 경로를 TypeScript와 shadcn에서 해석함", async () => {
+  const command = Bun.spawnSync(
+    ["bun", "run", "--bun", "tsc", "--showConfig", "-p", "tsconfig.json"],
+    { cwd: repositoryRoot },
+  );
+  expect(command.exitCode, command.stderr.toString()).toBe(0);
+  const config = JSON.parse(command.stdout.toString()) as {
+    compilerOptions: { paths: Record<string, string[]> };
+  };
+  const manifest = await readJson("packages/ui/package.json");
+  const exports = manifest.exports as Record<
+    string,
+    string | { source: string }
+  >;
+  for (const [subpath, target] of Object.entries(exports)) {
+    if (subpath === "./package.json") continue;
+    const source = typeof target === "string" ? target : target.source;
+    const specifier = `@jongminchung/ui${subpath.slice(1)}`;
+    const paths = config.compilerOptions.paths[specifier];
+    expect(paths, specifier).toBeDefined();
+    expect(
+      paths?.map((path) => resolve(repositoryRoot, path)),
+      specifier,
+    ).toEqual([resolve(repositoryRoot, "packages/ui", source)]);
+  }
+  const consumer = await readJson("apps/web/components.json");
+  const aliases = consumer.aliases as Record<string, string>;
+  for (const alias of Object.values(aliases)) {
+    if (!alias.startsWith("@jongminchung/ui/")) continue;
+    const subpath = `.${alias.slice("@jongminchung/ui".length)}`;
+    const matches = Object.keys(exports).some(
+      (key) =>
+        key === subpath ||
+        key === `${subpath}/*` ||
+        (key.endsWith("/*") && subpath.startsWith(key.slice(0, -1))),
+    );
+    expect(matches, alias).toBe(true);
+  }
+});

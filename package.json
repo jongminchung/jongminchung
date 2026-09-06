@@ -74,8 +74,8 @@
     "lint": "oxlint --config oxlint.config.ts .",
     "links:check": "bun scripts/check-links.ts",
     "postinstall": "bun run --filter @jongminchung/web postinstall",
-    "test": "bun run --workspaces --if-present test && bun run test:node",
-    "test:e2e": "bun run build && bun run --filter @jongminchung/web test:e2e",
+    "test": "bun run --workspaces --if-present test:coverage && bun run test:node",
+    "test:e2e": "bun run --workspaces --if-present test:e2e",
     "test:node": "bun run --workspaces --if-present test:node",
     "typecheck": "tsc --noEmit && bun run --workspaces --if-present typecheck"
   },
@@ -109,6 +109,10 @@
   ],
   "//": [
     "audit checks dependency advisories at high severity or above.",
-    "It stays separate from check because the advisory database requires network access; run it manually before publishing."
+    "It stays separate from check because the advisory database requires network access; run it manually before publishing.",
+    "workspaces.catalog는 TS·React·Next와 도구 버전을 한 곳에서 관리해 workspace 간 버전 차이를 줄임.",
+    "typescript는 정적 타입 검사, @types/node는 루트 자동화 스크립트의 Node API 선언에 필요함.",
+    "oxlint·oxlint-tsgolint는 코드 및 타입 기반 린트, oxfmt는 포맷, knip은 미사용 파일·의존성 검사를 담당함.",
+    "개선 후보: TS·React·Next 업그레이드는 catalog와 lockfile을 함께 갱신하고 typecheck·test·build로 호환성을 확인함."
   ]
 }

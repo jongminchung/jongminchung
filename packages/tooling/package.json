@@ -39,7 +39,8 @@
     "publish:dry-run": "bun publish --dry-run --access public",
     "test": "bun test",
     "test:node": "bun run build && node ../../.github/scripts/verify-package-build.ts .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:coverage": "bun test --coverage"
   },
   "devDependencies": {
     "@types/bun": "catalog:",

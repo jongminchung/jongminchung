@@ -51,10 +51,9 @@ export async function generateMetadata({
     title: collection.title,
     description: collection.description,
     pathname: collection.pathname,
-    alternatePathname:
-      alternateNotes.length < 2
-        ? undefined
-        : createInvestmentTagHref(otherLocale, slug),
+    ...(alternateNotes.length < 2
+      ? {}
+      : { alternatePathname: createInvestmentTagHref(otherLocale, slug) }),
     index: collection.notes.length >= 2,
   });
 }

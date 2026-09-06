@@ -185,7 +185,7 @@ test("Home menu anchors close the menu and clear the sticky header", async ({
   for (const [name, id] of [
     ["Latest notes", "writing"],
     ["Principles", "principles"],
-  ]) {
+  ] as const) {
     await page.getByRole("button", { name: "Home menu" }).click();
     const dialog = page.getByRole("dialog");
     await dialog.getByRole("link", { name, exact: true }).click();

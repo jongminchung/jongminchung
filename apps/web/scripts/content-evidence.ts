@@ -76,7 +76,11 @@ async function checkSource(url: string): Promise<SourceResult> {
     });
     const destination = response.headers.get("location") ?? undefined;
     if (response.status >= 300 && response.status < 400)
-      return { state: "redirect", status: response.status, destination };
+      return {
+        state: "redirect",
+        status: response.status,
+        ...(destination === undefined ? {} : { destination }),
+      };
     if (response.status === 404 || response.status === 410)
       return { state: "missing", status: response.status };
     if (

@@ -51,7 +51,7 @@ export function parseBlogContentPath(
 export function parseDocsContentPath(
   relativePath: string,
   overview = false,
-): Readonly<{ locale: Locale; id: string; area?: DocsArea }> {
+): Readonly<{ locale: Locale; id: string; area?: DocsArea | undefined }> {
   const { locale, segments } = localizedPath(relativePath, [2, 3]);
   if (segments.length === 1) {
     const filename = segments[0];
