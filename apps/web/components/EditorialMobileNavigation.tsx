@@ -10,10 +10,10 @@ import {
   SheetTrigger,
 } from "@jongminchung/ui/components/sheet";
 import { cn } from "@jongminchung/ui/lib/utils";
+import { Menu } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { EditorialNavigationItem } from "./EditorialChrome";
-import { Icon } from "./Icon";
 import { useHeaderOverlay } from "./useHeaderOverlay";
 
 /** 작은 화면에서 editorial 목적지를 대체 탐색으로 제공함 */
@@ -43,7 +43,7 @@ export function EditorialMobileNavigation({
           />
         }
       >
-        <Icon icon="menu" />
+        <Menu aria-hidden="true" className="size-4" />
       </SheetTrigger>
       <SheetContent
         className="overflow-hidden"

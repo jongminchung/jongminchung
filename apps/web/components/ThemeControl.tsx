@@ -7,7 +7,6 @@ import {
   TooltipTrigger,
 } from "@jongminchung/ui/components/tooltip";
 import type { ThemeMode } from "#lib/theme";
-import { Icon, type IconType } from "./Icon";
 import { DarkThemeIcon, LightThemeIcon, SystemThemeIcon } from "./ThemeIcons";
 import { useTheme } from "./ThemeProvider";
 
@@ -17,7 +16,7 @@ const nextMode: Readonly<Record<ThemeMode, ThemeMode>> = {
   dark: "system",
 };
 
-const modeIcon: Readonly<Record<ThemeMode, IconType>> = {
+const modeIcon = {
   system: SystemThemeIcon,
   light: LightThemeIcon,
   dark: DarkThemeIcon,
@@ -30,6 +29,7 @@ export function ThemeControl({
   readonly labelTemplate: string;
 }) {
   const { mode, setMode } = useTheme();
+  const ModeIcon = modeIcon[mode];
   const label = labelTemplate.replace("{mode}", mode);
   return (
     <Tooltip>
@@ -43,7 +43,7 @@ export function ThemeControl({
             variant="ghost"
             size="icon"
           >
-            <Icon icon={modeIcon[mode]} />
+            <ModeIcon aria-hidden="true" className="size-4" />
           </Button>
         }
       />

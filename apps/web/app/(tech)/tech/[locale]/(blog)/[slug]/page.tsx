@@ -3,6 +3,7 @@ import {
   createBlogPostHref,
   displayTitleFor,
   isLocale,
+  locales,
 } from "#lib/content-model";
 import {
   findBlogPost,
@@ -12,7 +13,10 @@ import {
 } from "#lib/documents";
 import { alternateLocale } from "#lib/locale";
 import { techPageMetadata } from "#lib/tech/metadata";
-import { legacyVscodeArticleHref } from "#lib/tech/routing";
+import {
+  legacyVscodeArticleHref,
+  legacyVscodeArticleIds,
+} from "#lib/tech/routing";
 import { DocsShell } from "#tech-components/DocsShell";
 import { DocumentPage } from "#tech-components/DocumentPage";
 
@@ -21,7 +25,12 @@ export const instant = false;
 /** Blog 글과 과거 Docs canonical을 정적으로 열거함 */
 export async function generateStaticParams() {
   const posts = await getBlogPosts();
-  return posts.map(({ locale, id }) => ({ locale, slug: id }));
+  return [
+    ...posts.map(({ locale, id }) => ({ locale, slug: id })),
+    ...locales.flatMap((locale) =>
+      legacyVscodeArticleIds.map((slug) => ({ locale, slug })),
+    ),
+  ];
 }
 
 /** BlogPosting 메타데이터를 생성함 */

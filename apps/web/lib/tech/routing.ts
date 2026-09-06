@@ -33,6 +33,9 @@ const legacyVscodeArticles: Readonly<Record<string, string>> = {
   "vscode-tasks-ci": "tasks-ci",
 };
 
+/** 이전 주소의 redirect도 빌드 시 생성해 첫 요청부터 동일한 응답을 제공함 */
+export const legacyVscodeArticleIds = Object.keys(legacyVscodeArticles);
+
 /** 이전 VS Code 블로그 주소를 Docs의 canonical 주소로 연결함 */
 export function legacyVscodeArticleHref(
   locale: Locale,
