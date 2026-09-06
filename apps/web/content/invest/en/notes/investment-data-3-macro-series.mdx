@@ -1,0 +1,134 @@
+---
+id: "investment-data-3-macro-series"
+locale: "en"
+title: "3. A macro chart needs more than a FRED link"
+description: "Locate macro series in FRED, BLS, BEA, ECOS, and FedWatch, with units, seasonal adjustment, release dates, and revisions intact."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+status: "published"
+tags: ["investment-data", "source-checking", "research"]
+series: "투자 데이터의 출처"
+image: "/invest/direction-of-money-market-leadership.png"
+imageAlt: "Market data passing through several analytical areas and narrowing into a few paths"
+sources:
+    - kind: article
+      title: "Consumer Price Index for All Urban Consumers: All Items — CPIAUCSL"
+      creator: "U.S. Bureau of Labor Statistics · FRED"
+      url: "https://fred.stlouisfed.org/series/CPIAUCSL"
+    - kind: article
+      title: "Consumer Price Index"
+      creator: "U.S. Bureau of Labor Statistics"
+      url: "https://www.bls.gov/cpi/"
+    - kind: article
+      title: "Personal Consumption Expenditures Price Index"
+      creator: "U.S. Bureau of Economic Analysis"
+      url: "https://www.bea.gov/data/personal-consumption-expenditures-price-index"
+    - kind: article
+      title: "Unemployment Rate — UNRATE"
+      creator: "U.S. Bureau of Labor Statistics · FRED"
+      url: "https://fred.stlouisfed.org/series/UNRATE"
+    - kind: article
+      title: "Market Yield on U.S. Treasury Securities at 10-Year Constant Maturity — DGS10"
+      creator: "Board of Governors of the Federal Reserve System · FRED"
+      url: "https://fred.stlouisfed.org/series/DGS10"
+    - kind: article
+      title: "M2 — M2SL"
+      creator: "Board of Governors of the Federal Reserve System · FRED"
+      url: "https://fred.stlouisfed.org/series/M2SL"
+    - kind: article
+      title: "Archival FRED"
+      creator: "Federal Reserve Bank of St. Louis"
+      url: "https://alfred.stlouisfed.org/"
+    - kind: article
+      title: "Understanding the CME Group FedWatch Tool Methodology"
+      creator: "CME Group"
+      url: "https://www.cmegroup.com/articles/2023/understanding-the-cme-group-fedwatch-tool-methodology.html"
+    - kind: article
+      title: "경제통계시스템 ECOS"
+      creator: "한국은행"
+      url: "https://ecos.bok.or.kr/"
+    - kind: article
+      title: "김기열의 돈공부 4화 · 경제지표"
+      creator: "한국은행"
+      url: "https://www.bok.or.kr/portal/bbs/B0000521/view.do?depth=201691&menuNo=201691&nttId=10074148&oldMenuNo=201151&programType=multiCont&relate=Y"
+---
+
+_Sources and service documentation checked on September 6, 2026. Numerical worked examples are hypothetical, not reported investment results._
+
+A video says inflation is falling, but your groceries still feel expensive. Is the chart wrong? Before deciding, check whether it plots the level of prices or the speed at which prices are rising.
+
+Economic series with similar names can answer different questions. Saving a chart as “U.S. inflation” leaves too much unspecified. Keep the series identifier and units with it.
+
+## Use FRED as an entry point
+
+FRED’s `CPIAUCSL` is the all-items consumer price index for urban U.S. consumers. Its metadata identifies monthly frequency, seasonal adjustment, a 1982–1984 index base, and the Bureau of Labor Statistics as the source. The index level displayed is not itself the inflation rate.[^source-1]
+
+| Question                    | Starting series     | Metadata to preserve                              |
+| --------------------------- | ------------------- | ------------------------------------------------- |
+| Consumer price level        | CPIAUCSL[^source-1] | Index; monthly; seasonally adjusted               |
+| Unemployment rate           | UNRATE[^source-2]   | Percent; monthly; seasonally adjusted             |
+| U.S. 10-year Treasury yield | DGS10[^source-3]    | Percent; daily; constant maturity                 |
+| U.S. M2 money stock         | M2SL[^source-4]     | Billions of dollars; monthly; seasonally adjusted |
+
+Follow the source further when needed: BLS publishes CPI material[^source-5], while BEA publishes the PCE price index[^source-6]. CPI and PCE are not interchangeable labels. First establish which one the presenter used.
+
+## Monthly and annual changes answer different questions
+
+Suppose an imaginary price index was 100 a year ago, 109 last month, and 110 this month. The annual increase is 10%, while the monthly increase is roughly 0.92%.
+
+- Year over year: `(110 / 100 − 1) × 100 = 10%`
+- Month over month: `(110 / 109 − 1) × 100 ≈ 0.92%`
+
+Both calculations are correct. They compare different dates. Similarly, inflation slowing from 10% to 3% can mean prices are still rising, just less quickly.
+
+When transforming an index into a percentage change, match the original series too. Seasonally adjusted and unadjusted inputs are different. Seasonal adjustment addresses recurring patterns; it does not eliminate every source of error. BLS provides both kinds of CPI data.[^source-5]
+
+A longer chart title is useful here: “U.S. CPI, year-over-year change calculated from the seasonally adjusted series.” It leaves less to reconstruct later.
+
+## Historical data has versions
+
+An old video’s employment figure may differ from the historical value downloaded today because economic statistics can be revised. Evaluating the old decision with today’s revised dataset can introduce information that was unavailable at the time.
+
+ALFRED provides vintages of economic releases available on particular historical dates. It is useful when checking an old broadcast or reconstructing a strategy using information available then.[^source-7]
+
+Record two dates: the period the number describes and the date it became available. A June statistic released in July cannot be treated as information known in early June. Keep initial and revised values separate when they differ.
+
+## FedWatch probabilities are not Federal Reserve promises
+
+CME FedWatch derives meeting-outcome probabilities from federal funds futures prices under methodological assumptions, including assumptions about rate-change increments. The output reflects market prices and a calculation, rather than a probability promised by the Federal Reserve.[^source-8]
+
+A screenshot showing “70%” needs a meeting date, a target-rate outcome, and an observation timestamp. Even a comparison between yesterday and today requires checking that both screens refer to the same meeting.
+
+## Keep ECOS nearby for Korean statistics
+
+The Bank of Korea’s economic-indicator video points viewers to ECOS. For Korean interest-rate or exchange-rate research, search the relevant indicator and preserve its table name and item definition. Those identifiers are more durable than remembering where a menu appeared.[^source-9][^source-10]
+
+The policy rate, a government bond yield, and a bank lending rate measure different things. Exchange-rate observations and period averages differ too. Before drawing conclusions from two similar-looking lines, align their periods, frequency, and units. Even after that, similar movement alone does not establish causation.
+
+## Read the series
+
+1. [Where investing YouTubers get their numbers](/en/notes/investment-data-1-follow-the-source)
+2. [Follow earnings tables back to filings and investor relations](/en/notes/investment-data-2-company-filings)
+3. [A macro chart needs more than a FRED link](/en/notes/investment-data-3-macro-series) — this article
+4. [What does “big money is buying” actually measure?](/en/notes/investment-data-4-flows-and-holdings)
+5. [Rebuild the chart before accepting the conclusion](/en/notes/investment-data-5-build-your-own-check)
+
+[^source-1]: U.S. Bureau of Labor Statistics · FRED, [Consumer Price Index for All Urban Consumers: All Items — CPIAUCSL](https://fred.stlouisfed.org/series/CPIAUCSL). Accessed September 6, 2026.
+
+[^source-2]: U.S. Bureau of Labor Statistics · FRED, [Unemployment Rate — UNRATE](https://fred.stlouisfed.org/series/UNRATE). Accessed September 6, 2026.
+
+[^source-3]: Board of Governors of the Federal Reserve System · FRED, [Market Yield on U.S. Treasury Securities at 10-Year Constant Maturity — DGS10](https://fred.stlouisfed.org/series/DGS10). Accessed September 6, 2026.
+
+[^source-4]: Board of Governors of the Federal Reserve System · FRED, [M2 — M2SL](https://fred.stlouisfed.org/series/M2SL). Accessed September 6, 2026.
+
+[^source-5]: U.S. Bureau of Labor Statistics, [Consumer Price Index](https://www.bls.gov/cpi/). Accessed September 6, 2026.
+
+[^source-6]: U.S. Bureau of Economic Analysis, [Personal Consumption Expenditures Price Index](https://www.bea.gov/data/personal-consumption-expenditures-price-index). Accessed September 6, 2026.
+
+[^source-7]: Federal Reserve Bank of St. Louis, [Archival FRED](https://alfred.stlouisfed.org/). Accessed September 6, 2026.
+
+[^source-8]: CME Group, [Understanding the CME Group FedWatch Tool Methodology](https://www.cmegroup.com/articles/2023/understanding-the-cme-group-fedwatch-tool-methodology.html). Accessed September 6, 2026.
+
+[^source-9]: 한국은행, [경제통계시스템 ECOS](https://ecos.bok.or.kr/). Accessed September 6, 2026.
+
+[^source-10]: 한국은행, [김기열의 돈공부 4화 · 경제지표](https://www.bok.or.kr/portal/bbs/B0000521/view.do?depth=201691&menuNo=201691&nttId=10074148&oldMenuNo=201151&programType=multiCont&relate=Y). Accessed September 6, 2026.

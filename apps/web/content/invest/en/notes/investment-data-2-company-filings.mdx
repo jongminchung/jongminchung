@@ -1,0 +1,112 @@
+---
+id: "investment-data-2-company-filings"
+locale: "en"
+title: "2. Follow earnings tables back to filings and investor relations"
+description: "Find reported results and estimates in DART, EDGAR, company IR, and FnGuide, then reconcile reporting periods and earnings definitions."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+status: "published"
+tags: ["investment-data", "source-checking", "research"]
+series: "투자 데이터의 출처"
+image: "/invest/direction-of-money-market-leadership.png"
+imageAlt: "Market data passing through several analytical areas and narrowing into a few paths"
+sources:
+    - kind: article
+      title: "기업공시 길라잡이"
+      creator: "금융감독원 DART"
+      url: "https://dart.fss.or.kr/info/main.do?menu=210"
+    - kind: article
+      title: "전자공시 OPENDART 시스템"
+      creator: "금융감독원"
+      url: "https://opendart.fss.or.kr/"
+    - kind: article
+      title: "How to Read a 10-K"
+      creator: "U.S. Securities and Exchange Commission"
+      url: "https://www.sec.gov/answers/reada10k.htm"
+    - kind: article
+      title: "Earnings Releases"
+      creator: "Samsung Electronics Investor Relations"
+      url: "https://www.samsung.com/global/ir/financial-information/earnings-release/"
+    - kind: article
+      title: "삼성전자 Snapshot · Company Guide"
+      creator: "FnGuide"
+      url: "https://wcomp.fnguide.com/"
+    - kind: article
+      title: "Data Overview"
+      creator: "Koyfin"
+      url: "https://www.koyfin.com/help/data-overview/"
+    - kind: article
+      title: "EDGAR Full Text Search"
+      creator: "U.S. Securities and Exchange Commission"
+      url: "https://www.sec.gov/edgar/search/"
+---
+
+_Sources and service documentation checked on September 6, 2026. Numerical worked examples are hypothetical, not reported investment results._
+
+“The company beat earnings expectations.” That sentence contains two different figures: what the company reported and what somebody expected before the release. Seeing both in one table does not mean they share a source.
+
+Keep two tabs open when checking an earnings video. One is for reported results. The other is for expectations. Each answers a different part of the claim.
+
+## Open DART beside investor relations
+
+For a Korean company, search DART for its annual, half-year, or quarterly report. Check whether the financial statements are consolidated or separate. DART’s disclosure guide distinguishes consolidated reporting for companies with subsidiaries from the inclusion of separate statements. Mixing the two can make apparently identical revenue figures impossible to reconcile.[^source-1]
+
+Investor relations, usually shortened to IR, is the company’s own resource for investors. Samsung Electronics’ earnings archive organizes materials by reporting period. Reading the presentation first can help locate the business division or expense discussed in the video before returning to the filing.[^source-2]
+
+Record the period and unit alongside every number. “Revenue: 120” is almost useless once you forget whether the unit was millions or billions. If the report has been amended, inspect what changed and whether your calculation used an older copy.
+
+For repeated collection, OpenDART provides an official route to disclosure and financial information. Automation still requires the right reporting period and consolidation choice. Check the first result against the report itself.[^source-3]
+
+## EDGAR plays a similar role for U.S. companies
+
+Search the SEC’s EDGAR system[^source-4] by company name or ticker to find an annual 10-K. The SEC’s guide describes sections covering the business, risks, management’s discussion, and financial statements. The company prepares and files the document; the SEC does not write the company’s numbers.[^source-5]
+
+Start with the claim you heard. For revenue, locate the table and the discussion of business segments. For cash concerns, inspect cash flows and the relevant debt notes. Finding one row without its explanation rarely settles why it changed.
+
+## Estimates belong in a different column
+
+FnGuide’s Company Guide separates financial statements from consensus information. Its Samsung page also distinguishes a P/E using the latest annual earnings from one using forward 12-month earnings. A quoted multiple is incomplete without its denominator.[^source-6]
+
+Koyfin identifies Capital IQ as the source of its EPS, revenue, and EBITDA consensus estimates. The platform on screen may therefore sit one step beyond the provider collecting the estimates.[^source-7]
+
+Suppose a stock costs 100 and reported EPS is 4. Its multiple is 25. Using expected EPS of 5 produces a multiple of 20. Neither calculation is inherently wrong, but the expectation may never materialize.
+
+Timing matters too. Consensus updated after an earnings release cannot simply stand in for expectations immediately before it. Record when the estimates were collected, as well as the fiscal period they describe. If the earlier snapshot is unavailable, say that the original expectation has not been reproduced.
+
+## Cumulative results are not quarterly results
+
+Consider a hypothetical company reporting on a consistent consolidated basis:
+
+| Document             | Revenue shown   | Period covered      |
+| -------------------- | --------------- | ------------------- |
+| First-quarter report | 100             | First three months  |
+| Half-year report     | 230             | First six months    |
+| Your calculation     | 230 − 100 = 130 | Second three months |
+
+Comparing 230 directly with 100 and declaring 130% quarterly growth mixes periods. Second-quarter revenue is 130, up 30% from the first quarter. Even that subtraction assumes consistent scope and accounting treatment.
+
+Keep adjusted earnings clearly labeled as well. Joining adjusted EPS and accounting-standard EPS in one historical column can distort the apparent trend. Read the company’s reconciliation to understand the exclusions.
+
+For your next earnings video, copy only revenue, operating profit, and EPS. Beside each, record the document, period, unit, consolidation basis, and whether it is reported or estimated. Getting those three rows right will make the next video easier to follow than saving dozens of unexplained ratios.
+
+## Read the series
+
+1. [Where investing YouTubers get their numbers](/en/notes/investment-data-1-follow-the-source)
+2. [Follow earnings tables back to filings and investor relations](/en/notes/investment-data-2-company-filings) — this article
+3. [A macro chart needs more than a FRED link](/en/notes/investment-data-3-macro-series)
+4. [What does “big money is buying” actually measure?](/en/notes/investment-data-4-flows-and-holdings)
+5. [Rebuild the chart before accepting the conclusion](/en/notes/investment-data-5-build-your-own-check)
+
+[^source-1]: 금융감독원 DART, [기업공시 길라잡이](https://dart.fss.or.kr/info/main.do?menu=210). Accessed September 6, 2026.
+
+[^source-2]: Samsung Electronics Investor Relations, [Earnings Releases](https://www.samsung.com/global/ir/financial-information/earnings-release/). Accessed September 6, 2026.
+
+[^source-3]: 금융감독원, [전자공시 OPENDART 시스템](https://opendart.fss.or.kr/). Accessed September 6, 2026.
+
+[^source-4]: U.S. Securities and Exchange Commission, [EDGAR Full Text Search](https://www.sec.gov/edgar/search/). Accessed September 6, 2026.
+
+[^source-5]: U.S. Securities and Exchange Commission, [How to Read a 10-K](https://www.sec.gov/answers/reada10k.htm). Accessed September 6, 2026.
+
+[^source-6]: FnGuide, [삼성전자 Snapshot · Company Guide](https://wcomp.fnguide.com/). Accessed September 6, 2026.
+
+[^source-7]: Koyfin, [Data Overview](https://www.koyfin.com/help/data-overview/). Accessed September 6, 2026.

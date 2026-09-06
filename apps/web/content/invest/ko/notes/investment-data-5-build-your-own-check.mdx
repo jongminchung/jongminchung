@@ -1,0 +1,126 @@
+---
+id: "investment-data-5-build-your-own-check"
+locale: "ko"
+title: "5. 영상 속 차트를 내 손으로 확인하는 순서"
+description: "Finviz·TradingView·Koyfin의 화면을 읽고 무료 원자료로 확인하는 작은 조사 노트를 만듭니다."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+status: "published"
+tags: ["investment-data", "source-checking", "research"]
+series: "투자 데이터의 출처"
+image: "/invest/direction-of-money-market-leadership.png"
+imageAlt: "여러 분석 영역을 통과하며 소수의 경로로 좁혀지는 시장 데이터"
+sources:
+    - kind: article
+      title: "Map View"
+      creator: "Finviz"
+      url: "https://finviz.com/knowledge-base/market-data-research/maps-groups/map-view"
+    - kind: article
+      title: "Is US stock market data free by default?"
+      creator: "TradingView"
+      url: "https://www.tradingview.com/support/solutions/43000473924-is-us-stock-market-data-free-by-default/"
+    - kind: article
+      title: "Data Overview"
+      creator: "Koyfin"
+      url: "https://www.koyfin.com/help/data-overview/"
+    - kind: article
+      title: "Pricing plans and subscription FAQ"
+      creator: "Koyfin"
+      url: "https://www.koyfin.com/pricing/"
+    - kind: article
+      title: "Consumer Price Index for All Urban Consumers: All Items — CPIAUCSL"
+      creator: "U.S. Bureau of Labor Statistics · FRED"
+      url: "https://fred.stlouisfed.org/series/CPIAUCSL"
+    - kind: article
+      title: "iShares Core S&P 500 ETF · IVV"
+      creator: "BlackRock · iShares"
+      url: "https://www.ishares.com/us/products/239726/ishares-core-sp-500-etf"
+---
+
+_출처와 서비스 안내 확인: 2026년 9월 6일. 아래 계산 예시는 실제 투자 성과가 아닌 설명용 가정입니다._
+
+데이터 사이트를 여러 개 알아도 영상 하나를 확인하는 데 한참 걸릴 수 있다. 사이트마다 같은 이름의 지표가 조금씩 다르기 때문이다. 즐겨찾기를 늘리기 전에, 영상에서 본 주장 하나를 끝까지 확인하는 작은 작업을 해보자.
+
+이 마지막 편에서는 시장 화면을 읽는 법부터 조사 노트를 남기는 순서까지 연결한다. 결론은 영상과 같을 수도 있고 다를 수도 있다. 목표는 같은 자료를 다시 열었을 때 내가 왜 그렇게 생각했는지 설명할 수 있는 상태다.
+
+## 빨간 네모가 많다는 말부터 확인한다
+
+Finviz의 Map은 주식을 네모로 묶어 보여주는 시장 화면이다. 지도를 읽을 때는 종목을 고른 범위, 사각형 크기를 정한 기준, 색상이 나타내는 항목을 확인한다. 화면이 비슷해도 기간이나 표시 지표가 다르면 같은 지도가 아니다.[^source-1]
+
+시가총액으로 크기를 정한 지도라면 대형주 몇 개가 화면 대부분을 차지할 수 있다. 화면이 초록색으로 가득하다는 인상과 대부분의 종목이 상승했다는 주장은 다르다. 후자를 확인하려면 상승 종목 수와 하락 종목 수처럼 종목 개수에 관한 자료가 필요하다.
+
+영상에 나온 히트맵을 재현할 때는 먼저 세 줄을 적자. `대상: S&P 500`, `색: 하루 등락률`, `크기: 시가총액` 같은 식이다. 실제 화면에서 확인하지 못한 설정은 추정이라고 남긴다.
+
+## 같은 종목인데 차트 가격이 다를 때
+
+TradingView는 미국 주식의 기본 실시간 데이터가 Cboe에서 제공되며, 다른 거래소 자료와 차이가 있을 수 있다고 설명한다. 특히 짧은 시간 간격이나 거래가 드문 구간에서 차이가 눈에 띌 수 있다. “실시간”이라는 표시만으로 모든 체결을 같은 방식으로 반영한다고 볼 수는 없다.[^source-2]
+
+또 Koyfin은 주식과 ETF의 가격 이력을 기본적으로 배당과 분할에 맞춰 조정한다고 밝힌다. 장기간 비교에서 차트가 다르면 가격 조정 설정부터 확인할 이유가 있다.[^source-3]
+
+예를 들어 100에 산 주식이 연말에도 100이고 중간에 배당 3을 받았다면, 가격 변화는 0%다. 세금·비용을 제외하고 배당을 현금으로 보유했다는 가정 아래 단순 보유수익률은 3%다. 배당 재투자 수익률을 보여주는 그래프와 가격만 그린 그래프를 비교하면 출발부터 서로 다른 것을 측정하게 된다.
+
+그래서 긴 성과 비교에는 기간, 통화, 배당 처리, 수수료·세금 포함 여부를 붙여야 한다. 원화로 생활하는 투자자가 달러 기준 성과를 볼 때는 환율을 포함한 계좌 수익과 차이가 나는 이유도 따로 생각해야 한다.
+
+## 필요한 도구는 질문에 따라 달라진다
+
+| 오늘 확인할 질문            | 먼저 열어둘 자료   | 저장할 것                    |
+| --------------------------- | ------------------ | ---------------------------- |
+| 실제 이익이 늘었나          | 기업 공시와 IR     | 보고서, 표 이름, 회계기간    |
+| 물가상승 속도가 줄었나      | FRED와 발표기관    | 지표 코드, 단위, 발표일      |
+| ETF가 무엇을 담고 있나      | 운용사 보유내역    | CSV와 보유 기준일            |
+| 시장의 어느 부분이 움직였나 | 히트맵과 가격 자료 | 대상 종목군, 기간, 가격 기준 |
+
+처음 세 가지 질문은 앞선 편에서 다룬 공개 자료로 시작할 수 있다. 여러 기업을 반복 비교하거나 과거 전망치가 필요해질 때 유료 도구의 효용을 따져보면 된다. Koyfin의 요금제도 제공되는 재무 이력과 기능의 범위를 구분하므로, 결제 전 현재 안내에서 필요한 항목을 확인해야 한다. 여기서는 자주 바뀌는 가격을 고정해 적지 않았다.[^source-4]
+
+한 번의 조사에서 불편했던 일을 적어두는 것도 방법이다. “표를 옮기는 데 시간이 오래 걸렸다”와 “발표 직전 전망치가 없었다”는 전혀 다른 요구다. 전자는 작업 편의의 문제이고 후자는 데이터 확보의 문제다. 기능 이름이 많다는 이유만으로 두 문제를 모두 해결해 주지는 않는다.
+
+## 한 주장만 골라 끝까지 확인해 보자
+
+연습할 문장을 “미국 물가상승률이 둔화했다”로 정하자. 이 정도로 범위를 좁혀야 검색 결과에 끌려다니지 않는다.
+
+1. 영상의 제목과 시각을 기록하고, 비교한 두 달을 적는다. 달이 나오지 않으면 미확인으로 남긴다.
+2. CPI인지 PCE인지 확인한다. CPI라면 전체 품목인지 근원인지도 적는다.
+3. 해당 시계열에서 두 달의 값을 구한다. 예를 들어 `CPIAUCSL`을 사용한다면 계절조정 지수라는 조건을 유지한다.[^source-5]
+4. 전년 동월 대비인지 전월 대비인지 맞춰 계산한다. 과거 영상이면 그 시점 이후 수정된 값인지도 확인한다.
+5. 계산 결과가 일치하더라도 “곧 주가가 오른다”는 결론은 별도 문장으로 둔다. 물가 자료를 맞춘 것만으로 주가 예측까지 검증한 것은 아니다.
+
+다른 연습으로는 ETF 보유내역을 내려받아 상위 종목 비중을 더해볼 수 있다. IVV 페이지는 보유내역 CSV를 제공하므로, 그 파일의 기준일과 비중 열을 확인한 뒤 계산하면 된다. 실제 값은 내려받은 날의 파일에서 읽고, 글에 박아 넣은 오래된 수치로 대신하지 않는다.[^source-6]
+
+## 다음 달에도 읽을 수 있는 노트
+
+아래 형식이면 충분하다. 빈칸을 채우기 위해 추정하지 않아도 된다.
+
+```text
+확인할 주장:
+영상 주소와 해당 시각:
+원자료 주소와 지표 코드 또는 표 이름:
+자료가 설명하는 기간:
+발표일 / 내려받은 날짜:
+단위와 조정 방식:
+직접 한 계산:
+일치한 부분:
+아직 확인하지 못한 부분:
+다음에 다시 볼 조건:
+```
+
+표와 계산 파일을 함께 남기면 같은 영상을 다시 보지 않아도 된다. 이번에는 단위가 달라 비교할 수 없었다고 끝나도 괜찮다. 다음 영상에서 그 단위부터 보게 된다면, 데이터를 찾는 방법을 하나 배운 셈이다.
+
+## 이 시리즈의 글
+
+1. [투자 유튜버의 숫자는 어디서 오는 걸까](/ko/notes/investment-data-1-follow-the-source)
+2. [실적표의 출처를 따라가면 DART와 IR이 나온다](/ko/notes/investment-data-2-company-filings)
+3. [금리와 물가 차트는 FRED에서 끝나지 않는다](/ko/notes/investment-data-3-macro-series)
+4. [큰손이 샀다는 말, 어느 날짜의 어떤 숫자일까](/ko/notes/investment-data-4-flows-and-holdings)
+5. [영상 속 차트를 내 손으로 확인하는 순서](/ko/notes/investment-data-5-build-your-own-check) — 현재 글
+
+[^source-1]: Finviz, [Map View](https://finviz.com/knowledge-base/market-data-research/maps-groups/map-view). 2026년 9월 6일 확인.
+
+[^source-2]: TradingView, [Is US stock market data free by default?](https://www.tradingview.com/support/solutions/43000473924-is-us-stock-market-data-free-by-default/). 2026년 9월 6일 확인.
+
+[^source-3]: Koyfin, [Data Overview](https://www.koyfin.com/help/data-overview/). 2026년 9월 6일 확인.
+
+[^source-4]: Koyfin, [Pricing plans and subscription FAQ](https://www.koyfin.com/pricing/). 2026년 9월 6일 확인.
+
+[^source-5]: U.S. Bureau of Labor Statistics · FRED, [Consumer Price Index for All Urban Consumers: All Items — CPIAUCSL](https://fred.stlouisfed.org/series/CPIAUCSL). 2026년 9월 6일 확인.
+
+[^source-6]: BlackRock · iShares, [iShares Core S&P 500 ETF · IVV](https://www.ishares.com/us/products/239726/ishares-core-sp-500-etf). 2026년 9월 6일 확인.

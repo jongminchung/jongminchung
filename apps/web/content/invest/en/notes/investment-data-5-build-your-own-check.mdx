@@ -1,0 +1,126 @@
+---
+id: "investment-data-5-build-your-own-check"
+locale: "en"
+title: "5. Rebuild the chart before accepting the conclusion"
+description: "Read Finviz, TradingView, and Koyfin displays, then build a small research note that can be checked against public data."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+status: "published"
+tags: ["investment-data", "source-checking", "research"]
+series: "투자 데이터의 출처"
+image: "/invest/direction-of-money-market-leadership.png"
+imageAlt: "Market data passing through several analytical areas and narrowing into a few paths"
+sources:
+    - kind: article
+      title: "Map View"
+      creator: "Finviz"
+      url: "https://finviz.com/knowledge-base/market-data-research/maps-groups/map-view"
+    - kind: article
+      title: "Is US stock market data free by default?"
+      creator: "TradingView"
+      url: "https://www.tradingview.com/support/solutions/43000473924-is-us-stock-market-data-free-by-default/"
+    - kind: article
+      title: "Data Overview"
+      creator: "Koyfin"
+      url: "https://www.koyfin.com/help/data-overview/"
+    - kind: article
+      title: "Pricing plans and subscription FAQ"
+      creator: "Koyfin"
+      url: "https://www.koyfin.com/pricing/"
+    - kind: article
+      title: "Consumer Price Index for All Urban Consumers: All Items — CPIAUCSL"
+      creator: "U.S. Bureau of Labor Statistics · FRED"
+      url: "https://fred.stlouisfed.org/series/CPIAUCSL"
+    - kind: article
+      title: "iShares Core S&P 500 ETF · IVV"
+      creator: "BlackRock · iShares"
+      url: "https://www.ishares.com/us/products/239726/ishares-core-sp-500-etf"
+---
+
+_Sources and service documentation checked on September 6, 2026. Numerical worked examples are hypothetical, not reported investment results._
+
+Knowing several data sites does not necessarily make a video easy to verify. Similar labels can conceal different definitions. Before expanding your bookmarks, take one claim all the way back to its source.
+
+This final installment connects market displays to a small research note. You may agree with the presenter or reach a different conclusion. Either way, you should be able to reopen the material and explain how you got there.
+
+## Read the settings behind the colored rectangles
+
+Finviz’s Map displays groups of stocks as rectangles. Identify the selected universe, the sizing rule, and the metric represented by color. Similar-looking maps can describe different periods or measures.[^source-1]
+
+In a market-cap-weighted display, a few large stocks can occupy most of the screen. A mostly green image is not the same claim as “most stocks rose.” The latter requires evidence about stock counts, such as advancing and declining issues.
+
+Write down three settings before attempting to reproduce the image: for example, S&P 500 constituents, one-day price changes, and market-cap sizing. Mark any setting you could not actually verify as an inference.
+
+## When the same stock has different charts
+
+TradingView explains that its default real-time U.S. stock data comes from Cboe and can differ from other exchange feeds, particularly at short intervals or in less active trading. The word “real-time” does not establish identical trade coverage.[^source-2]
+
+Koyfin states that its stock and ETF price histories are adjusted for dividends and splits by default. For longer comparisons, inspect adjustment settings before treating different charts as errors.[^source-3]
+
+Suppose a stock bought for 100 ends the year at 100 and pays a dividend of 3. Its price change is zero. With the dividend held in cash and taxes and costs ignored, the simple holding-period return is 3%. A dividend-reinvestment chart measures something different again.
+
+Long-term comparisons need a period, currency, dividend treatment, and treatment of costs and taxes. A Korean investor looking at dollar returns also needs to distinguish them from returns in a won-denominated account.
+
+## Choose tools around the question
+
+| What you want to check          | First resource                             | What to save                    |
+| ------------------------------- | ------------------------------------------ | ------------------------------- |
+| Did actual earnings grow?       | Filings and investor relations             | Report, table, reporting period |
+| Did inflation slow?             | Series database and publishing institution | Series ID, units, release date  |
+| What does an ETF own?           | Issuer’s holdings disclosure               | File and holdings date          |
+| Which part of the market moved? | Heatmap and price data                     | Universe, period, price basis   |
+
+The first three tasks can begin with the public resources covered earlier. Repeated company comparisons or historical estimates may make a paid service useful. Koyfin’s plans distinguish financial-history depth and features; check the current table against the specific task before subscribing. This article avoids fixing a changing subscription price in the text.[^source-4]
+
+Keep a note of the obstacle you encountered. “Copying tables took too long” and “the pre-release estimate snapshot was unavailable” are different problems. One concerns workflow; the other concerns access to information. A long feature list does not automatically solve both.
+
+## Follow one claim to completion
+
+Use “U.S. inflation slowed” as the practice claim. A narrow question makes it easier to resist unrelated search results.
+
+1. Save the video and timestamp, then identify the two months being compared. Leave unstated dates unresolved.
+2. Establish whether the claim concerns CPI or PCE, and whether it refers to headline or core inflation.
+3. Retrieve the corresponding observations. If using `CPIAUCSL`, retain its seasonally adjusted basis.[^source-5]
+4. Match the monthly or annual percentage-change calculation. For an old video, check whether later revisions affected the values.
+5. Keep any prediction that stocks will rise as a separate claim. Reproducing an inflation calculation does not validate a market forecast.
+
+Another exercise is to download an ETF’s holdings and add the largest weights. IVV provides a holdings CSV: inspect its date and weight column, then calculate from that file rather than reusing stale figures from an article.[^source-6]
+
+## Leave a note you can use next month
+
+This format is enough. You do not need to guess to fill every field.
+
+```text
+Claim being checked:
+Video URL and timestamp:
+Original URL and series ID or table name:
+Period described:
+Publication date / download date:
+Units and adjustments:
+My calculation:
+What matched:
+What remains unverified:
+Condition for checking again:
+```
+
+Keep the source table with your calculation. You can then revisit the work without replaying the whole video. An investigation that ends with “these units are not comparable” still teaches something useful. Next time, you will know to inspect the units first.
+
+## Read the series
+
+1. [Where investing YouTubers get their numbers](/en/notes/investment-data-1-follow-the-source)
+2. [Follow earnings tables back to filings and investor relations](/en/notes/investment-data-2-company-filings)
+3. [A macro chart needs more than a FRED link](/en/notes/investment-data-3-macro-series)
+4. [What does “big money is buying” actually measure?](/en/notes/investment-data-4-flows-and-holdings)
+5. [Rebuild the chart before accepting the conclusion](/en/notes/investment-data-5-build-your-own-check) — this article
+
+[^source-1]: Finviz, [Map View](https://finviz.com/knowledge-base/market-data-research/maps-groups/map-view). Accessed September 6, 2026.
+
+[^source-2]: TradingView, [Is US stock market data free by default?](https://www.tradingview.com/support/solutions/43000473924-is-us-stock-market-data-free-by-default/). Accessed September 6, 2026.
+
+[^source-3]: Koyfin, [Data Overview](https://www.koyfin.com/help/data-overview/). Accessed September 6, 2026.
+
+[^source-4]: Koyfin, [Pricing plans and subscription FAQ](https://www.koyfin.com/pricing/). Accessed September 6, 2026.
+
+[^source-5]: U.S. Bureau of Labor Statistics · FRED, [Consumer Price Index for All Urban Consumers: All Items — CPIAUCSL](https://fred.stlouisfed.org/series/CPIAUCSL). Accessed September 6, 2026.
+
+[^source-6]: BlackRock · iShares, [iShares Core S&P 500 ETF · IVV](https://www.ishares.com/us/products/239726/ishares-core-sp-500-etf). Accessed September 6, 2026.

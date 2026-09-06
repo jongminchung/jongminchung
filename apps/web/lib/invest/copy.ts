@@ -6,6 +6,7 @@ interface InvestmentMessages {
     readonly navigation: string;
     readonly notes: string;
     readonly books: string;
+    readonly series: string;
     readonly explore: string;
     readonly sources: string;
     readonly mobileMenu: string;
@@ -38,6 +39,7 @@ const messages = {
       navigation: "투자 콘텐츠 탐색",
       notes: "노트",
       books: "책",
+      series: "시리즈",
       explore: "탐색",
       sources: "출처",
       mobileMenu: "투자 콘텐츠 메뉴",
@@ -86,6 +88,7 @@ const messages = {
       navigation: "Investment content navigation",
       notes: "Notes",
       books: "Books",
+      series: "Series",
       explore: "Explore",
       sources: "Sources",
       mobileMenu: "Investment content menu",

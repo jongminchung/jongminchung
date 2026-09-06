@@ -66,6 +66,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
         lastModified,
         alternates: localizedNotes,
       },
+      {
+        url: `${origin}/${locale}/series`,
+        lastModified: "2026-09-06",
+        alternates: alternates("/ko/series", "/en/series"),
+      },
     ];
   });
   const sources = locales.flatMap((locale) =>

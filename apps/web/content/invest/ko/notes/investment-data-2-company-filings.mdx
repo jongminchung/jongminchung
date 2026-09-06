@@ -1,0 +1,112 @@
+---
+id: "investment-data-2-company-filings"
+locale: "ko"
+title: "2. 실적표의 출처를 따라가면 DART와 IR이 나온다"
+description: "DART·EDGAR·기업 IR·FnGuide에서 실적과 전망치를 찾고 연결·별도, 분기·누적, PER 기준을 맞춥니다."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+status: "published"
+tags: ["investment-data", "source-checking", "research"]
+series: "투자 데이터의 출처"
+image: "/invest/direction-of-money-market-leadership.png"
+imageAlt: "여러 분석 영역을 통과하며 소수의 경로로 좁혀지는 시장 데이터"
+sources:
+    - kind: article
+      title: "기업공시 길라잡이"
+      creator: "금융감독원 DART"
+      url: "https://dart.fss.or.kr/info/main.do?menu=210"
+    - kind: article
+      title: "전자공시 OPENDART 시스템"
+      creator: "금융감독원"
+      url: "https://opendart.fss.or.kr/"
+    - kind: article
+      title: "How to Read a 10-K"
+      creator: "U.S. Securities and Exchange Commission"
+      url: "https://www.sec.gov/answers/reada10k.htm"
+    - kind: article
+      title: "Earnings Releases"
+      creator: "Samsung Electronics Investor Relations"
+      url: "https://www.samsung.com/global/ir/financial-information/earnings-release/"
+    - kind: article
+      title: "삼성전자 Snapshot · Company Guide"
+      creator: "FnGuide"
+      url: "https://wcomp.fnguide.com/"
+    - kind: article
+      title: "Data Overview"
+      creator: "Koyfin"
+      url: "https://www.koyfin.com/help/data-overview/"
+    - kind: article
+      title: "EDGAR Full Text Search"
+      creator: "U.S. Securities and Exchange Commission"
+      url: "https://www.sec.gov/edgar/search/"
+---
+
+_출처와 서비스 안내 확인: 2026년 9월 6일. 아래 계산 예시는 실제 투자 성과가 아닌 설명용 가정입니다._
+
+“이번 분기 실적이 예상보다 좋았다.” 이 문장에는 서로 다른 숫자 두 개가 들어 있다. 회사가 발표한 실적과, 발표 전에 누군가 예상한 실적이다. 둘을 한 표에서 볼 수 있다고 해서 출처도 같은 것은 아니다.
+
+실적 영상을 직접 확인하려면 공시 탭과 전망치 탭을 나눠 열어두면 편하다. 첫 번째는 회사가 무엇을 보고했는지, 두 번째는 시장에서 무엇을 기대했는지 읽는 자리다.
+
+## 한국 기업은 DART와 IR을 나란히 연다
+
+DART에서 회사명을 검색해 사업보고서·반기보고서·분기보고서를 찾는다. 재무에 관한 사항을 볼 때는 연결재무제표인지 별도재무제표인지부터 확인한다. DART의 기업공시 안내도 종속회사가 있는 회사의 연결 기준 작성과 별도재무제표 포함을 구별해 설명한다. 두 표를 섞으면 같은 회사의 매출을 옮겼는데도 숫자가 맞지 않게 된다.[^source-1]
+
+IR은 Investor Relations, 투자자를 위한 회사의 자료실이다. 삼성전자 IR의 실적발표 페이지처럼 분기별 자료를 모아둔 곳에서는 발표자료와 실적 설명을 찾기 쉽다. 회사가 이번 분기에 강조하는 사업부나 비용 요인을 파악한 뒤 공시의 해당 표로 돌아가면 긴 보고서를 읽는 부담이 줄어든다.[^source-2]
+
+숫자를 옮길 때는 보고서명 옆에 기간과 단위를 같이 적자. `매출 120`이라고만 써놓으면 며칠 뒤에는 억 원인지 십억 원인지도 헷갈린다. 보고서에 정정 표시가 있으면 먼저 어떤 부분이 수정됐는지 읽고, 이전 파일을 가지고 계산했는지도 확인한다.
+
+표를 자주 내려받게 된다면 OpenDART도 살펴볼 만하다. 공시정보와 재무정보를 활용할 수 있는 공식 경로다. 다만 API를 쓴다고 연결·별도나 기간 선택이 자동으로 올바르게 되는 것은 아니다. 처음 한 번은 보고서 화면과 결과를 대조하는 편이 좋다.[^source-3]
+
+## 미국 기업에서는 EDGAR가 같은 역할을 한다
+
+미국 기업의 연간 보고서를 찾을 때는 SEC의 EDGAR[^source-4]에서 회사명이나 티커로 검색해 10-K를 확인한다. SEC의 안내에 따르면 10-K에는 사업 설명, 위험 요인, 경영진의 실적 분석, 재무제표 등이 담긴다. SEC가 숫자를 작성하는 것이 아니라 회사가 제출한다는 점도 기억해 둘 만하다.[^source-5]
+
+처음부터 문서를 끝까지 읽기보다 영상에서 다룬 항목을 검색해 보자. 매출 이야기라면 매출 표와 사업부 설명을, 현금이 부족하다는 이야기라면 현금흐름표와 부채 관련 주석을 함께 보는 식이다. 표 한 줄을 찾고 바로 닫으면 그 숫자가 변한 이유는 놓치기 쉽다.
+
+## 전망치는 공시에서 찾을 수 없는 숫자다
+
+FnGuide Company Guide에는 재무제표와 컨센서스 메뉴가 나뉘어 있다. 삼성전자 화면의 PER 설명도 최근 결산 EPS를 쓰는 값과 향후 12개월 EPS를 쓰는 값을 구분한다. “PER이 몇 배다”라는 말에는 어떤 이익을 분모에 넣었는지가 빠져 있을 수 있다.[^source-6]
+
+Koyfin은 데이터 안내에서 EPS·매출·EBITDA 컨센서스의 출처를 Capital IQ라고 밝힌다. 서비스 이름 뒤에 추정치를 취합한 공급업체가 한 단계 더 있는 셈이다.[^source-7]
+
+가령 주가가 100이고 최근 실적 EPS가 4라면 PER은 25배다. 내년 예상 EPS 5를 넣으면 20배가 된다. 두 화면이 다르다고 한쪽이 틀린 것은 아니다. 예상 EPS가 실제로 실현될지도 별개의 문제다.
+
+또 이미 발표가 끝난 뒤 갱신된 컨센서스로 과거의 어닝 서프라이즈를 계산하면 당시의 기대와 달라질 수 있다. 전망치에는 회계연도만 아니라 **언제 모은 전망인지**도 필요하다. 발표 직전 자료를 확보하지 못했다면 당시 기대를 정확히 재현하지 못했다고 적는 것이 맞다.
+
+## 누적 실적을 분기 실적으로 착각하지 않기
+
+아래는 단순한 계산 예시다. 한 회사가 같은 연결 기준으로 1분기 누적 매출 100, 상반기 누적 매출 230을 보고했다고 하자.
+
+| 자료         | 표에 적힌 매출  | 뜻                   |
+| ------------ | --------------- | -------------------- |
+| 1분기 보고서 | 100             | 첫 3개월의 매출      |
+| 반기 보고서  | 230             | 첫 6개월의 매출      |
+| 직접 계산    | 230 − 100 = 130 | 두 번째 3개월의 매출 |
+
+230을 100과 바로 비교해 “분기 매출이 130% 늘었다”고 말하면 기간을 잘못 맞춘 것이다. 두 번째 분기 매출은 130이고, 첫 번째 분기 대비 증가는 30%다. 이 계산도 보고 범위와 회계 기준이 같다는 가정 아래에서만 성립한다.
+
+미국 기업의 조정 이익을 볼 때도 이름을 줄이지 말자. 회사가 말하는 adjusted EPS와 회계기준에 따른 EPS를 한 열에 이어 붙이면 추세가 달라질 수 있다. 조정 수치를 사용했다면 회사가 무엇을 제외했는지 보여주는 조정표까지 읽어야 한다.
+
+다음 실적 영상을 볼 때는 매출, 영업이익, EPS 세 줄만 직접 옮겨보자. 옆에는 `보고서 / 기간 / 단위 / 연결 여부 / 실적 또는 추정`을 적는다. 세 줄을 제대로 맞추는 경험이 지표 수십 개를 저장하는 것보다 다음 영상을 이해하는 데 도움이 된다.
+
+## 이 시리즈의 글
+
+1. [투자 유튜버의 숫자는 어디서 오는 걸까](/ko/notes/investment-data-1-follow-the-source)
+2. [실적표의 출처를 따라가면 DART와 IR이 나온다](/ko/notes/investment-data-2-company-filings) — 현재 글
+3. [금리와 물가 차트는 FRED에서 끝나지 않는다](/ko/notes/investment-data-3-macro-series)
+4. [큰손이 샀다는 말, 어느 날짜의 어떤 숫자일까](/ko/notes/investment-data-4-flows-and-holdings)
+5. [영상 속 차트를 내 손으로 확인하는 순서](/ko/notes/investment-data-5-build-your-own-check)
+
+[^source-1]: 금융감독원 DART, [기업공시 길라잡이](https://dart.fss.or.kr/info/main.do?menu=210). 2026년 9월 6일 확인.
+
+[^source-2]: Samsung Electronics Investor Relations, [Earnings Releases](https://www.samsung.com/global/ir/financial-information/earnings-release/). 2026년 9월 6일 확인.
+
+[^source-3]: 금융감독원, [전자공시 OPENDART 시스템](https://opendart.fss.or.kr/). 2026년 9월 6일 확인.
+
+[^source-4]: U.S. Securities and Exchange Commission, [EDGAR Full Text Search](https://www.sec.gov/edgar/search/). 2026년 9월 6일 확인.
+
+[^source-5]: U.S. Securities and Exchange Commission, [How to Read a 10-K](https://www.sec.gov/answers/reada10k.htm). 2026년 9월 6일 확인.
+
+[^source-6]: FnGuide, [삼성전자 Snapshot · Company Guide](https://wcomp.fnguide.com/). 2026년 9월 6일 확인.
+
+[^source-7]: Koyfin, [Data Overview](https://www.koyfin.com/help/data-overview/). 2026년 9월 6일 확인.

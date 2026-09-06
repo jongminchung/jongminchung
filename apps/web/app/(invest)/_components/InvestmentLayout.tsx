@@ -37,6 +37,7 @@ export function InvestmentLayout({
         mobileMenuLabel={text.mobileMenu}
         navigation={[
           { href: `/${locale}/notes`, label: text.notes },
+          { href: `/${locale}/series`, label: text.series },
           { href: `/${locale}/sources/book`, label: text.books },
         ]}
       />
@@ -56,6 +57,7 @@ export function InvestmentLayout({
             links: [
               { href: `/${locale}`, label: "Home" },
               { href: `/${locale}/notes`, label: text.notes },
+              { href: `/${locale}/series`, label: text.series },
             ],
           },
           {

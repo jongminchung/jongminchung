@@ -1,0 +1,104 @@
+---
+id: "investment-data-4-flows-and-holdings"
+locale: "en"
+title: "4. What does “big money is buying” actually measure?"
+description: "Separate trades from holdings in KRX data, 13F filings, ETF disclosures, and short-selling statistics."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+status: "published"
+tags: ["investment-data", "source-checking", "research"]
+series: "투자 데이터의 출처"
+image: "/invest/direction-of-money-market-leadership.png"
+imageAlt: "Market data passing through several analytical areas and narrowing into a few paths"
+sources:
+    - kind: article
+      title: "KRX Data Marketplace"
+      creator: "한국거래소"
+      url: "https://data.krx.co.kr/contents/MDC/MAIN/main/index.cmd"
+    - kind: article
+      title: "Frequently Asked Questions About Form 13F"
+      creator: "U.S. Securities and Exchange Commission"
+      url: "https://www.sec.gov/rules-regulations/staff-guidance/division-investment-management-frequently-asked-questions/frequently-asked-questions-about-form-13f"
+    - kind: article
+      title: "iShares Core S&P 500 ETF · IVV"
+      creator: "BlackRock · iShares"
+      url: "https://www.ishares.com/us/products/239726/ishares-core-sp-500-etf"
+    - kind: article
+      title: "Short Interest – What It Is, What It Is Not"
+      creator: "FINRA"
+      url: "https://www.finra.org/investors/insights/short-interest"
+    - kind: article
+      title: "Short Sale Volume"
+      creator: "FINRA"
+      url: "https://www.finra.org/finra-data/browse-catalog/short-sale-volume"
+---
+
+_Sources and service documentation checked on September 6, 2026. Numerical worked examples are hypothetical, not reported investment results._
+
+“Institutions are buying.” “Buffett bought it.” “Money is flooding into the ETF.” These sound like descriptions of the same phenomenon, but their supporting tables can measure daily transactions, weeks-old holdings, or asset growth caused by rising prices.
+
+Break the sentence into four parts before opening a data service: who, what, when, and how much. Missing pieces make it difficult to know what evidence would settle the claim.
+
+## Match the scope of Korean trading data
+
+KRX’s data system provides investor-category trading statistics alongside stock and ETF data. It is a starting point for investigating foreign or institutional trading in Korea.[^source-1]
+
+Check whether the table covers one security or a market, shares or money, and a day or a month. Also record whether the selected scope is exchange-specific or consolidated. Different query settings can produce different conclusions about the same investor category.
+
+If purchases total 120 and sales total 100, net buying is 20. That describes the difference during the selected period. It does not reveal the investor’s starting holdings or offsetting positions elsewhere.
+
+Saying that institutions bought because they liked the company adds an interpretation. Index changes and portfolio adjustments are possible explanations too. A trading table does not disclose an unreported motive.
+
+## A 13F is not a purchase receipt
+
+Form 13F is generally due within 45 days of quarter-end. SEC guidance explains that short positions are neither reported nor deducted from long positions. The filing concerns reportable securities, rather than every asset and hedge in the manager’s portfolio.[^source-2]
+
+A video published in August may therefore describe holdings at an earlier quarter-end. Separate the holdings date from the filing date. A famous manager’s name also does not necessarily identify the individual who made each investment decision.
+
+An increase in reported market value need not mean additional buying. Consider two hypothetical quarter-ends:
+
+| Item            | Previous quarter | Current quarter |
+| --------------- | ---------------- | --------------- |
+| Shares held     | 100              | 100             |
+| Price per share | $10              | $12             |
+| Market value    | $1,000           | $1,200          |
+
+Value rose 20%, but the share count did not change. This table cannot support a claim of additional purchases. Even an increase in shares requires checking for splits and other corporate actions, and confirming that the securities being compared match.
+
+A newly appearing line is a reason to investigate differences between filings. It does not reveal an exact purchase date or entry price. When using a holdings-summary service, return to the SEC document and reporting period before drawing a stronger conclusion.
+
+## ETF asset growth is not the same as inflow
+
+The official IVV page includes net assets, shares outstanding, a holdings CSV, performance, and distributions. It provides a concrete starting point for examining an ETF’s contents. Read the date attached to each field rather than assuming everything shares one reference date.[^source-3]
+
+Imagine a fund beginning with 1,000 in assets. If its investments rise 10% with no new money, it ends with 1,100. The increase of 100 is not an inflow.
+
+A simplified flow estimate subtracts `starting assets × (1 + period return)` from ending assets. Actual calculations are affected by the timing of flows and distribution treatment, so this approximation should not be presented as a precise creation-and-redemption total. Assets, exchange trading volume, and creations or redemptions are different measurements.
+
+Holdings weights can also change without a trade. A stock that outperforms the rest of the portfolio takes up a larger share. “The manager increased the weight” needs to distinguish a purchase decision from a price-driven change.
+
+## Short volume and short interest are different
+
+FINRA distinguishes daily short-sale volume from outstanding short positions at a particular date. Transactions may be closed during the day, so accumulating daily short volume does not reconstruct the remaining position.[^source-4]
+
+Coverage matters too. FINRA’s volume files have a defined reporting scope. Dividing their figures by an unrelated market-wide volume total can mismatch numerator and denominator.[^source-5]
+
+Try replacing “big money” in today’s video with the precise institution and reference date. The resulting sentence may be longer: “The reported share count for this security increased between these quarter-ends.” It also makes the boundary between evidence and interpretation much easier to see.
+
+## Read the series
+
+1. [Where investing YouTubers get their numbers](/en/notes/investment-data-1-follow-the-source)
+2. [Follow earnings tables back to filings and investor relations](/en/notes/investment-data-2-company-filings)
+3. [A macro chart needs more than a FRED link](/en/notes/investment-data-3-macro-series)
+4. [What does “big money is buying” actually measure?](/en/notes/investment-data-4-flows-and-holdings) — this article
+5. [Rebuild the chart before accepting the conclusion](/en/notes/investment-data-5-build-your-own-check)
+
+[^source-1]: 한국거래소, [KRX Data Marketplace](https://data.krx.co.kr/contents/MDC/MAIN/main/index.cmd). Accessed September 6, 2026.
+
+[^source-2]: U.S. Securities and Exchange Commission, [Frequently Asked Questions About Form 13F](https://www.sec.gov/rules-regulations/staff-guidance/division-investment-management-frequently-asked-questions/frequently-asked-questions-about-form-13f). Accessed September 6, 2026.
+
+[^source-3]: BlackRock · iShares, [iShares Core S&P 500 ETF · IVV](https://www.ishares.com/us/products/239726/ishares-core-sp-500-etf). Accessed September 6, 2026.
+
+[^source-4]: FINRA, [Short Interest – What It Is, What It Is Not](https://www.finra.org/investors/insights/short-interest). Accessed September 6, 2026.
+
+[^source-5]: FINRA, [Short Sale Volume](https://www.finra.org/finra-data/browse-catalog/short-sale-volume). Accessed September 6, 2026.

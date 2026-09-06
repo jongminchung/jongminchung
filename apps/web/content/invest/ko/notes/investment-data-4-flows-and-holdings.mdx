@@ -1,0 +1,104 @@
+---
+id: "investment-data-4-flows-and-holdings"
+locale: "ko"
+title: "4. 큰손이 샀다는 말, 어느 날짜의 어떤 숫자일까"
+description: "KRX 수급, 13F, ETF 보유내역, 공매도 통계에서 거래와 잔고를 구별하고 공개 시차를 확인합니다."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+status: "published"
+tags: ["investment-data", "source-checking", "research"]
+series: "투자 데이터의 출처"
+image: "/invest/direction-of-money-market-leadership.png"
+imageAlt: "여러 분석 영역을 통과하며 소수의 경로로 좁혀지는 시장 데이터"
+sources:
+    - kind: article
+      title: "KRX Data Marketplace"
+      creator: "한국거래소"
+      url: "https://data.krx.co.kr/contents/MDC/MAIN/main/index.cmd"
+    - kind: article
+      title: "Frequently Asked Questions About Form 13F"
+      creator: "U.S. Securities and Exchange Commission"
+      url: "https://www.sec.gov/rules-regulations/staff-guidance/division-investment-management-frequently-asked-questions/frequently-asked-questions-about-form-13f"
+    - kind: article
+      title: "iShares Core S&P 500 ETF · IVV"
+      creator: "BlackRock · iShares"
+      url: "https://www.ishares.com/us/products/239726/ishares-core-sp-500-etf"
+    - kind: article
+      title: "Short Interest – What It Is, What It Is Not"
+      creator: "FINRA"
+      url: "https://www.finra.org/investors/insights/short-interest"
+    - kind: article
+      title: "Short Sale Volume"
+      creator: "FINRA"
+      url: "https://www.finra.org/finra-data/browse-catalog/short-sale-volume"
+---
+
+_출처와 서비스 안내 확인: 2026년 9월 6일. 아래 계산 예시는 실제 투자 성과가 아닌 설명용 가정입니다._
+
+“기관이 담고 있다.” “버핏이 샀다.” “ETF에 돈이 몰린다.” 모두 돈의 움직임을 설명하는 말처럼 들리지만, 근거로 삼는 표는 제각각이다. 어떤 것은 하루 동안의 거래이고, 어떤 것은 몇 주 전 보유 잔고이며, 어떤 것은 자산 가격이 올라 커진 펀드 규모다.
+
+숫자를 찾기 전에 문장을 잘라보는 편이 빠르다. 누가, 무엇을, 언제, 얼마만큼 샀다는 것인가. 이 네 칸이 비어 있으면 데이터 사이트를 열어도 확인할 대상이 흐릿하다.
+
+## 국내 수급은 KRX에서 거래의 범위를 맞춘다
+
+KRX 정보데이터시스템에는 투자자별 거래실적을 비롯한 주식·ETF 통계가 있다. 국내 시장에서 외국인이나 기관의 매매를 확인할 때 출발할 곳이다.[^source-1]
+
+시장 전체를 본 것인지 특정 종목을 본 것인지, 거래대금인지 거래량인지, 하루인지 한 달인지 먼저 맞추자. 다른 조건으로 조회한 표를 비교하면 같은 투자자 분류라도 결론이 달라질 수 있다. 거래소별 또는 통합 집계 여부도 조회 화면의 범위를 확인해 기록한다.
+
+예를 들어 어떤 기간에 매수대금이 120, 매도대금이 100이면 순매수는 20이다. 여기에서 알 수 있는 것은 그 기간의 매수와 매도 차이다. 기존 보유분이 얼마였는지, 다른 자산에서 반대 포지션을 잡았는지까지는 이 숫자 하나로 알 수 없다.
+
+“기관이 샀으니 기업을 좋게 본다”는 말은 거래 기록 위에 얹힌 해석이다. 지수 편입에 따른 매매나 다른 포지션의 조정 등 여러 이유가 가능하다. 공시되지 않은 매매 동기를 수급표가 알려주지는 않는다.
+
+## 13F는 매수 영수증이 아니다
+
+미국 기관 보유 공시인 13F는 일반적으로 분기 종료 후 45일 이내 제출된다. SEC 안내에 따르면 공매도 포지션은 보고되지 않고, 매수 포지션에서 차감하지도 않는다. 표가 다루는 것은 보고 대상 증권의 보유 내역이며 운용사의 모든 자산과 헤지를 보여주는 것은 아니다.[^source-2]
+
+그래서 8월에 올라온 영상을 보고 “오늘 샀다”고 받아들이면 시점이 어긋날 수 있다. 먼저 공시의 분기 말 기준일과 제출일을 따로 본다. 운용사 이름이 유명하더라도 실제 투자 결정을 어느 개인이 했는지 공시만으로 특정하기 어려운 경우도 있다.
+
+보유 평가액의 증가를 추가 매수로 읽는 것도 흔한 실수다. 아래는 가상의 두 분기다.
+
+| 항목         | 이전 분기 말 | 이번 분기 말 |
+| ------------ | ------------ | ------------ |
+| 보유 주식 수 | 100주        | 100주        |
+| 주당 가격    | 10달러       | 12달러       |
+| 평가액       | 1,000달러    | 1,200달러    |
+
+평가액은 20% 늘었지만 주식 수는 그대로다. 이 표만으로 추가 매수를 주장할 수 없다. 반대로 주식 수가 늘었어도 분할 같은 기업행동이 있었는지 확인해야 한다. 서로 같은 증권을 비교하고 있는지도 중요하다.
+
+새로 등장한 항목은 이전 공시와의 차이를 확인할 단서다. 정확한 매수 날짜나 매입 단가까지 복원해 주지는 않는다. 보유 공시를 요약해 주는 서비스를 보더라도, 최종적으로는 SEC의 원문과 보고 기간을 대조하는 편이 좋다.
+
+## ETF의 몸집이 커졌다고 그만큼 돈이 들어온 것은 아니다
+
+iShares의 IVV 상품 페이지에는 순자산, 발행좌수, 보유종목 CSV, 성과와 분배금 항목이 있다. ETF 안에 무엇이 들어 있는지 확인하려면 운용사 자료가 구체적인 출발점이 된다. 항목마다 기준일이 같다고 가정하지 말고 각 날짜를 확인한다.[^source-3]
+
+가상의 펀드가 1,000으로 시작해 새 자금 없이 보유자산 가격만 10% 올랐다면 순자산은 1,100이 된다. 순자산이 100 늘었다고 자금이 100 유입된 것은 아니다.
+
+단순화하면 기간 말 자산에서 `기간 초 자산 × (1 + 기간 수익률)`을 뺀 값으로 순유입을 추정해 볼 수 있다. 다만 실제 자료에서는 기간 중 유입 시점과 분배금 처리 등에 따라 차이가 나므로, 이 계산을 정밀한 설정·환매 집계처럼 제시하면 안 된다. 순자산 증가, 거래소 거래량, 설정·환매는 각각 다른 항목이다.
+
+보유 비중도 매매 없이 달라질 수 있다. 한 종목의 가격이 다른 종목보다 많이 오르면 그 비중이 커진다. “운용사가 비중을 높였다”는 표현을 쓸 때는 능동적으로 더 샀다는 뜻인지, 가격 변화로 비중이 커졌다는 뜻인지 분명히 해야 한다.
+
+## 공매도 거래량과 잔고는 서로 바꿔 쓸 수 없다
+
+FINRA는 일별 공매도 거래량과 특정 시점의 공매도 잔고를 구별한다. 하루의 공매도 거래 중에는 당일 청산되는 거래도 있을 수 있으므로, 거래량을 누적해서 남아 있는 잔고로 취급하면 안 된다.[^source-4]
+
+집계 범위도 확인해야 한다. FINRA의 거래량 자료는 해당 보고 범위의 거래를 다루므로, 그 수치를 아무 시장 전체 거래량으로 나눠 비율을 만들면 분자와 분모가 어긋날 수 있다.[^source-5]
+
+오늘 본 영상에서 “큰손”이라는 단어를 지우고 정확한 주체와 기준일을 넣어보자. 문장이 길어져도 괜찮다. “분기 말 기준으로 보고된 이 증권의 주식 수가 직전 분기보다 늘었다”까지 확인했다면, 어디까지 알고 어디부터 추측하는지 훨씬 또렷해진다.
+
+## 이 시리즈의 글
+
+1. [투자 유튜버의 숫자는 어디서 오는 걸까](/ko/notes/investment-data-1-follow-the-source)
+2. [실적표의 출처를 따라가면 DART와 IR이 나온다](/ko/notes/investment-data-2-company-filings)
+3. [금리와 물가 차트는 FRED에서 끝나지 않는다](/ko/notes/investment-data-3-macro-series)
+4. [큰손이 샀다는 말, 어느 날짜의 어떤 숫자일까](/ko/notes/investment-data-4-flows-and-holdings) — 현재 글
+5. [영상 속 차트를 내 손으로 확인하는 순서](/ko/notes/investment-data-5-build-your-own-check)
+
+[^source-1]: 한국거래소, [KRX Data Marketplace](https://data.krx.co.kr/contents/MDC/MAIN/main/index.cmd). 2026년 9월 6일 확인.
+
+[^source-2]: U.S. Securities and Exchange Commission, [Frequently Asked Questions About Form 13F](https://www.sec.gov/rules-regulations/staff-guidance/division-investment-management-frequently-asked-questions/frequently-asked-questions-about-form-13f). 2026년 9월 6일 확인.
+
+[^source-3]: BlackRock · iShares, [iShares Core S&P 500 ETF · IVV](https://www.ishares.com/us/products/239726/ishares-core-sp-500-etf). 2026년 9월 6일 확인.
+
+[^source-4]: FINRA, [Short Interest – What It Is, What It Is Not](https://www.finra.org/investors/insights/short-interest). 2026년 9월 6일 확인.
+
+[^source-5]: FINRA, [Short Sale Volume](https://www.finra.org/finra-data/browse-catalog/short-sale-volume). 2026년 9월 6일 확인.

@@ -1,0 +1,134 @@
+---
+id: "investment-data-3-macro-series"
+locale: "ko"
+title: "3. 금리와 물가 차트는 FRED에서 끝나지 않는다"
+description: "FRED·BLS·BEA·ECOS·FedWatch에서 지표를 찾고 단위, 계절조정, 발표일과 수정 이력을 읽습니다."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+status: "published"
+tags: ["investment-data", "source-checking", "research"]
+series: "투자 데이터의 출처"
+image: "/invest/direction-of-money-market-leadership.png"
+imageAlt: "여러 분석 영역을 통과하며 소수의 경로로 좁혀지는 시장 데이터"
+sources:
+    - kind: article
+      title: "Consumer Price Index for All Urban Consumers: All Items — CPIAUCSL"
+      creator: "U.S. Bureau of Labor Statistics · FRED"
+      url: "https://fred.stlouisfed.org/series/CPIAUCSL"
+    - kind: article
+      title: "Consumer Price Index"
+      creator: "U.S. Bureau of Labor Statistics"
+      url: "https://www.bls.gov/cpi/"
+    - kind: article
+      title: "Personal Consumption Expenditures Price Index"
+      creator: "U.S. Bureau of Economic Analysis"
+      url: "https://www.bea.gov/data/personal-consumption-expenditures-price-index"
+    - kind: article
+      title: "Unemployment Rate — UNRATE"
+      creator: "U.S. Bureau of Labor Statistics · FRED"
+      url: "https://fred.stlouisfed.org/series/UNRATE"
+    - kind: article
+      title: "Market Yield on U.S. Treasury Securities at 10-Year Constant Maturity — DGS10"
+      creator: "Board of Governors of the Federal Reserve System · FRED"
+      url: "https://fred.stlouisfed.org/series/DGS10"
+    - kind: article
+      title: "M2 — M2SL"
+      creator: "Board of Governors of the Federal Reserve System · FRED"
+      url: "https://fred.stlouisfed.org/series/M2SL"
+    - kind: article
+      title: "Archival FRED"
+      creator: "Federal Reserve Bank of St. Louis"
+      url: "https://alfred.stlouisfed.org/"
+    - kind: article
+      title: "Understanding the CME Group FedWatch Tool Methodology"
+      creator: "CME Group"
+      url: "https://www.cmegroup.com/articles/2023/understanding-the-cme-group-fedwatch-tool-methodology.html"
+    - kind: article
+      title: "경제통계시스템 ECOS"
+      creator: "한국은행"
+      url: "https://ecos.bok.or.kr/"
+    - kind: article
+      title: "김기열의 돈공부 4화 · 경제지표"
+      creator: "한국은행"
+      url: "https://www.bok.or.kr/portal/bbs/B0000521/view.do?depth=201691&menuNo=201691&nttId=10074148&oldMenuNo=201151&programType=multiCont&relate=Y"
+---
+
+_출처와 서비스 안내 확인: 2026년 9월 6일. 아래 계산 예시는 실제 투자 성과가 아닌 설명용 가정입니다._
+
+물가상승률이 내려갔다는 영상을 보고 장을 보러 갔는데, 물건값은 여전히 비싸다. 차트가 틀린 걸까. 그럴 수도 있지만, 먼저 확인할 것은 그래프가 가격의 수준을 그린 것인지 가격이 오르는 속도를 그린 것인지다.
+
+경제지표는 검색어가 같아도 단위가 다르면 다른 이야기가 된다. “미국 물가”라는 제목만 저장해 두면 나중에 같은 차트를 찾기 어렵다. 지표 코드와 단위를 함께 남겨야 한다.
+
+## FRED에서 숫자를 찾고 발표기관으로 내려간다
+
+FRED의 `CPIAUCSL`은 미국 도시 소비자의 전체 품목 소비자물가지수다. 페이지에는 월간 자료, 계절조정, 1982~1984년을 100으로 둔 지수라는 정보와 원출처인 미국 노동통계국 BLS가 표시된다. 처음 보이는 지수 값 자체가 물가상승률은 아니다.[^source-1]
+
+| 확인하고 싶은 것           | 출발할 시계열       | 원자료를 읽을 때 볼 항목     |
+| -------------------------- | ------------------- | ---------------------------- |
+| 소비자물가의 수준          | CPIAUCSL[^source-1] | 지수, 월간, 계절조정         |
+| 실업률                     | UNRATE[^source-2]   | 퍼센트, 월간, 계절조정       |
+| 미국 10년 만기 국채 수익률 | DGS10[^source-3]    | 퍼센트, 일간, 일정 만기 기준 |
+| 미국 M2 통화량             | M2SL[^source-4]     | 십억 달러, 월간, 계절조정    |
+
+FRED는 지표를 모아 찾아보기 편하게 해주는 출발점이다. 소비자물가의 발표 내용은 BLS의 CPI 페이지[^source-5]로, 개인소비지출 물가지수는 BEA의 PCE 페이지[^source-6]로 이동한다. CPI와 PCE는 이름만 다른 동일 지표가 아니다. 영상에서 어느 지표를 말했는지 먼저 고정해야 한다.
+
+## 전월비와 전년비는 다른 질문에 답한다
+
+가상의 물가지수가 작년 같은 달 100, 지난달 109, 이번 달 110이라고 하자. 전년 동월 대비 상승률은 10%지만 전월 대비 상승률은 약 0.92%다.
+
+- 전년 동월 대비: `(110 / 100 − 1) × 100 = 10%`
+- 전월 대비: `(110 / 109 − 1) × 100 ≈ 0.92%`
+
+어느 쪽도 계산이 틀리지 않았다. 비교한 시점이 다를 뿐이다. 또 상승률이 10%에서 3%로 낮아져도 물가가 내려간 것은 아니다. 이전보다 천천히 오르는 경우가 포함된다.
+
+FRED에서 같은 지수를 그래프로 그릴 때 단위를 전년 대비 변화율로 바꿀 수 있지만, 영상이 원계열을 썼는지 계절조정 계열을 썼는지도 맞춰야 한다. 계절조정은 반복되는 계절 패턴을 조정한 것이지 오차를 모두 없앤 데이터라는 뜻은 아니다. BLS는 계절조정과 비조정 자료를 함께 제공한다.[^source-5]
+
+이제 저장할 제목은 “미국 물가”보다 “미국 CPI, 전년 동월 대비, 계절조정 계열로 계산”처럼 길어지는 편이 낫다. 제목이 길어지는 대신 나중에 오해할 여지가 줄어든다.
+
+## 과거의 차트에도 버전이 있다
+
+몇 년 전 영상의 고용 수치와 지금 내려받은 과거 자료가 다를 때가 있다. 경제통계는 수정될 수 있기 때문이다. 지금 보이는 자료로 당시 판단을 평가하면, 당시에는 알 수 없었던 수정값을 사용하게 될 수 있다.
+
+ALFRED는 과거 특정 날짜에 이용 가능했던 경제통계 버전을 찾는 서비스다. 옛 방송을 검증하거나 과거 시점의 전략을 계산할 때 유용하다.[^source-7]
+
+조사 노트에는 날짜를 두 개 적는다. 지표가 설명하는 달과 실제 발표된 날짜다. 6월 경제를 설명하는 통계를 7월에 받았다면, 6월 초에 그 수치를 알고 투자했다고 계산할 수 없다. 발표 직후 수치와 수정 후 수치가 다르면 두 값을 별도로 남긴다.
+
+## 금리 인하 확률은 연준의 발표문이 아니다
+
+CME FedWatch는 연방기금금리 선물 가격을 이용해 회의 결과의 확률을 계산한다. 방법론에는 금리 변동 폭 등에 관한 가정이 들어 있다. 따라서 화면의 확률은 시장가격과 계산 가정에서 나온 값이며, 연준이 약속한 확률로 읽으면 안 된다.[^source-8]
+
+“인하 확률 70%”라는 캡처에는 어느 회의인지, 어느 목표금리 구간인지, 언제 확인했는지가 붙어야 한다. 어제의 화면과 오늘의 화면을 비교할 때도 같은 회의를 선택했는지 먼저 본다.
+
+## 한국 지표를 찾을 때는 ECOS를 곁에 둔다
+
+한국은행은 경제지표 교육 영상에서 ECOS를 통계 조회 경로로 안내한다. 한국 금리·환율 등을 조사할 때는 ECOS[^source-9]에서 지표를 검색하고 통계표 이름과 항목을 기록하면 된다. 화면의 위치를 외우기보다 정확한 지표 이름을 남기는 편이 오래 쓸 수 있다.[^source-10]
+
+금리도 한국은행 기준금리, 국고채 수익률, 은행 대출금리가 서로 다르다. 환율 역시 일중 가격인지 기간 평균인지부터 맞춰야 한다. 그래프 두 개를 겹쳤을 때 선이 비슷하게 움직인다는 사실만으로 한쪽이 다른 쪽의 원인이라고 결론 내리지는 말자. 우선 같은 기간, 같은 빈도, 같은 단위로 보고 있는지 확인할 일이 남아 있다.
+
+## 이 시리즈의 글
+
+1. [투자 유튜버의 숫자는 어디서 오는 걸까](/ko/notes/investment-data-1-follow-the-source)
+2. [실적표의 출처를 따라가면 DART와 IR이 나온다](/ko/notes/investment-data-2-company-filings)
+3. [금리와 물가 차트는 FRED에서 끝나지 않는다](/ko/notes/investment-data-3-macro-series) — 현재 글
+4. [큰손이 샀다는 말, 어느 날짜의 어떤 숫자일까](/ko/notes/investment-data-4-flows-and-holdings)
+5. [영상 속 차트를 내 손으로 확인하는 순서](/ko/notes/investment-data-5-build-your-own-check)
+
+[^source-1]: U.S. Bureau of Labor Statistics · FRED, [Consumer Price Index for All Urban Consumers: All Items — CPIAUCSL](https://fred.stlouisfed.org/series/CPIAUCSL). 2026년 9월 6일 확인.
+
+[^source-2]: U.S. Bureau of Labor Statistics · FRED, [Unemployment Rate — UNRATE](https://fred.stlouisfed.org/series/UNRATE). 2026년 9월 6일 확인.
+
+[^source-3]: Board of Governors of the Federal Reserve System · FRED, [Market Yield on U.S. Treasury Securities at 10-Year Constant Maturity — DGS10](https://fred.stlouisfed.org/series/DGS10). 2026년 9월 6일 확인.
+
+[^source-4]: Board of Governors of the Federal Reserve System · FRED, [M2 — M2SL](https://fred.stlouisfed.org/series/M2SL). 2026년 9월 6일 확인.
+
+[^source-5]: U.S. Bureau of Labor Statistics, [Consumer Price Index](https://www.bls.gov/cpi/). 2026년 9월 6일 확인.
+
+[^source-6]: U.S. Bureau of Economic Analysis, [Personal Consumption Expenditures Price Index](https://www.bea.gov/data/personal-consumption-expenditures-price-index). 2026년 9월 6일 확인.
+
+[^source-7]: Federal Reserve Bank of St. Louis, [Archival FRED](https://alfred.stlouisfed.org/). 2026년 9월 6일 확인.
+
+[^source-8]: CME Group, [Understanding the CME Group FedWatch Tool Methodology](https://www.cmegroup.com/articles/2023/understanding-the-cme-group-fedwatch-tool-methodology.html). 2026년 9월 6일 확인.
+
+[^source-9]: 한국은행, [경제통계시스템 ECOS](https://ecos.bok.or.kr/). 2026년 9월 6일 확인.
+
+[^source-10]: 한국은행, [김기열의 돈공부 4화 · 경제지표](https://www.bok.or.kr/portal/bbs/B0000521/view.do?depth=201691&menuNo=201691&nttId=10074148&oldMenuNo=201151&programType=multiCont&relate=Y). 2026년 9월 6일 확인.
