@@ -1,6 +1,8 @@
 # 프론트엔드 개선 기록
 
-- 기준일은 2026-09-05이며 현재 작업 트리의 구현과 로컬 검증을 기록함
+> 이 문서는 2026-09-05 당시 작업 트리의 구현과 로컬 검증 기록이다. 아래 Compiler 모드·적용 함수 수·측정값·테스트 개수는 현재 보장이 아니며 원래 결과를 보존한다.
+> 현재 Compiler는 `infer` 모드이며 정책은 [기여 가이드](../../CONTRIBUTING.md#타입-검사와-테스트), 실행 절차는 [Web 안내](README.md), 전송 상한은 [현재 예산 파일](../../apps/web/initial-transfer-budget.json)을 따른다. 후속 우선순위는 재검토 후보이며 진행 상태는 [이슈 인덱스](../issues/README.md)에서 확인한다.
+
 - 검색창 JavaScript를 최초 열기 시점으로 분리하고 첫 화면 이미지의 로딩 우선순위를 명시함
 - 영문에 작은 가변 폰트를 우선 적용하고 나머지 문자는 기존 dynamic subset으로 보완함
 - 문서 CSS의 사용 범위를 줄이고 검색창 초점 제어를 공용 UI primitive에 위임함
@@ -109,7 +111,7 @@
 
 ## 후속 개선: React Compiler 적용 범위
 
-- `annotation` 모드를 유지하고 [SearchDialog](<../../apps/web/app/(tech)/_components/SearchDialog.tsx>)에만 `use memo`를 추가함. 기존 `BrandWordmark`를 포함해 적용 함수는 2개임
+- 당시 `annotation` 모드를 유지하고 [SearchDialog](<../../apps/web/app/(tech)/_components/SearchDialog.tsx>)에만 `use memo`를 추가함. 기존 `BrandWordmark`를 포함해 적용 함수는 2개임
 - `query` 자체 대신 표시 개수인 `resultLimit`을 결과 변환의 `useMemo` 의존성으로 사용함. 빈 검색은 8개, 검색어가 있으면 32개를 표시하며 같은 응답을 유지하는 입력 구간에 배열을 재생성하지 않음
 - 검색 client·재시도 의존성·결과 변환의 기존 `useMemo`는 유지함. [React Compiler 안내](https://react.dev/learn/react-compiler/introduction)의 기존 memoization 유지 권장과 [점진적 적용](https://react.dev/learn/react-compiler/incremental-adoption)을 따름
 - 검색 응답·locale·번역 함수·표시 개수가 바뀌면 결과를 다시 계산함. 검색 결과 갱신·선택·오류 재시도·닫기·초점 복귀 동작을 검증함

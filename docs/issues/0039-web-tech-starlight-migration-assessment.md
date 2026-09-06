@@ -92,6 +92,8 @@
 
 ## workspace와 파일 소유권이 재편됨
 
+> 아래 `@jongminchung/tech-docs` workspace와 script는 재개 시 만들 제안이다. 현재 manifest에는 없으며 실행할 수 없다. 기존 workspace의 명령만 현재 실행 가능하다.
+
 - **목표 구조는 Tech를 새 workspace로 분리하는 형태가 적절함**
 
     ```text
@@ -113,8 +115,8 @@
     - `@mdx-js/mdx`처럼 Invest도 사용하는 dependency는 `apps/web`에 남겨야 함
 - **새 workspace는 Astro 명령을 직접 소유해야 함**
     - `dev`, `build`, `typecheck`, `test`, `test:e2e`를 `apps/tech-docs/package.json`에 둠
-    - 단일 workspace 실행은 `pnpm --filter @jongminchung/tech-docs run <script>`로 수행함
-    - root 별칭을 추가하지 않고 기존 `pnpm -r --if-present` orchestration에 참여시킴
+    - 단일 workspace 실행은 `bun run --filter @jongminchung/tech-docs <script>`로 수행함
+    - root 별칭을 추가하지 않고 기존 `bun run --workspaces --if-present <script>` orchestration에 참여시킴
 - **Home의 최신 Tech 글 조회 때문에 content 소유권을 별도로 결정해야 함**
     - 현재 `WritingSection`은 `getLocalizedDocuments()`로 Tech 원본을 같은 process에서 직접 읽음
     - 분리 후 network fetch를 Next build의 필수 조건으로 만들면 두 배포물의 가용성과 build 순서가 결합됨
@@ -180,12 +182,12 @@
     - keyboard navigation·theme·language switch·mobile sidebar·Excalidraw 접근성 E2E가 통과함
     - 제거 대상 Next Tech code와 dependency에 consumer가 남지 않음
 - **구현 시 workspace와 전체 저장소 계약을 함께 검증함**
-    - `pnpm --filter @jongminchung/tech-docs run typecheck`
-    - `pnpm --filter @jongminchung/tech-docs run test`
-    - `pnpm --filter @jongminchung/tech-docs run build`
-    - `pnpm --filter @jongminchung/tech-docs run test:e2e`
-    - `pnpm --filter @jongminchung/web run typecheck`
-    - `pnpm --filter @jongminchung/web run test`
-    - `pnpm --filter @jongminchung/web run build`
-    - `pnpm run check`
+    - `bun run --filter @jongminchung/tech-docs typecheck`
+    - `bun run --filter @jongminchung/tech-docs test`
+    - `bun run --filter @jongminchung/tech-docs build`
+    - `bun run --filter @jongminchung/tech-docs test:e2e`
+    - `bun run --filter @jongminchung/web typecheck`
+    - `bun run --filter @jongminchung/web test`
+    - `bun run --filter @jongminchung/web build`
+    - `bun run check`
     - `git diff --check`

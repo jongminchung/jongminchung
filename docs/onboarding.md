@@ -1,6 +1,6 @@
 # `jongminchung` 기술·아키텍처·유지보수 온보딩
 
-> 기준일 `2026-09-03` · 저장소의 manifest, 설정, 소스와 workflow를 기준으로 검증함
+> 최초 기준일 `2026-09-03` · `2026-09-06` 현재 작업 트리의 Compiler·런타임·명령·게시 계약을 대조함. 운영 배포 상태를 검증한 기록은 아님
 
 ## 핵심 요약
 
@@ -213,7 +213,7 @@ bun run check
     - `apps/web/docker/Dockerfile`은 Bun 1 Alpine, 비루트 `bun` 사용자, `PORT=3000`, multi-stage build를 사용함
     - `/healthz`는 공통 JSON health endpoint이며 Host rewrite보다 먼저 통과함
 - **공유 package 게시와 Web 배포는 서로 다른 운영 흐름임**
-    - `Publish Packages` workflow는 수동 실행되며 `tooling`, `ui`를 검사한 뒤 기존 `1.0.0`을 삭제하고 다시 게시함
+    - `Publish Packages` workflow는 수동 실행되며 `package` 입력으로 선택한 `tooling`·`ui`를 Node 24·26에서 검사하고 archive를 만든 뒤 기존 `1.0.0`을 교체함. 실행·복구는 [배포 안내](runbooks/release.md)를 따름
     - Web의 `Web` workflow는 PR·main push·주간 schedule에서 typecheck·test·build·E2E 또는 콘텐츠 evidence를 수행함
     - `Links` workflow는 Markdown·HTML 로컬 링크를 검사함
     - `Waka Readme` workflow는 README 통계 구간을 갱신함
@@ -236,7 +236,8 @@ bun run check
     - `[locale]`, `[slug]`, `[[...slug]]`는 동적·선택적 catch-all segment임
     - `page.tsx`는 화면, `layout.tsx`는 공유 UI, `route.ts`는 HTTP handler, `sitemap.ts`와 metadata 함수는 검색 노출 계약임
     - 공식 학습 자료는 [프로젝트 구조](https://nextjs.org/docs/app/getting-started/project-structure), [layout과 page](https://nextjs.org/docs/app/getting-started/layouts-and-pages), [route handler](https://nextjs.org/docs/app/getting-started/route-handlers-and-middleware) 문서임
-- **React Compiler는 annotation mode이며 자동 최적화에 맡길 함수만 명시적으로 컴파일하는 정책임**
+- **React Compiler는 `infer` 모드로 컴포넌트와 Hook을 자동 판별하는 정책임**
+    - `use no memo` 예외는 Fumadocs Hook adapter와 Compiler 1.0이 처리하지 못하는 구문에 한정하고 함수에 이유를 기록함. 업그레이드 시 예외를 재검토하며 실제 성능은 화면별로 측정함
     - compiler를 우회하기 위한 습관적 `useMemo`·`useCallback` 추가보다 purity와 데이터 흐름을 먼저 바로잡음
     - `react/react-compiler`와 Hooks rule이 Oxlint error로 활성화됨
     - 공식 기준은 [React Compiler 문서](https://react.dev/learn/react-compiler)와 저장소의 `next.config.ts`임

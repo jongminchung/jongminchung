@@ -266,14 +266,14 @@
 ## 실행 명령과 완료 조건
 
 - **각 단계는 가장 가까운 Web 검증을 먼저 실행해야 함**
-    - `pnpm --filter @jongminchung/web run typecheck`
-    - `pnpm --filter @jongminchung/web run test`
-    - `pnpm --filter @jongminchung/web run build`
+    - `bun run --filter @jongminchung/web typecheck`
+    - `bun run --filter @jongminchung/web test`
+    - `bun run --filter @jongminchung/web build`
 - **통합 전에는 production browser와 asset 검증을 실행해야 함**
-    - `pnpm --filter @jongminchung/web exec playwright test app/initial-transfer.e2e.test.ts --project tech-chromium`
-    - `pnpm --filter @jongminchung/web run test:e2e`
+    - `bun run --filter @jongminchung/web test:e2e app/initial-transfer.e2e.test.ts --project tech-chromium`
+    - `bun run --filter @jongminchung/web test:e2e`
 - **마지막으로 저장소 전체 계약과 변경 범위를 검증해야 함**
-    - `pnpm run check`
+    - `bun run check`
     - `git diff --check`
     - `git status --short`
 - **완료는 모든 TODO와 검증 기준의 증거가 이슈에 기록된 경우에만 선언함**

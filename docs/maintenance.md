@@ -1,6 +1,8 @@
 # 유지보수 가이드
 
 이 문서는 Bun 모노레포를 직접 운영할 때 반복되는 점검과 배포 절차를 정리한다.
+처음 작업할 때는 [첫 변경 절차](runbooks/start.md), 장애 발생 시에는
+[진단과 복구](runbooks/recovery.md), 게시 시에는 [배포·인수인계](runbooks/release.md)를 따른다.
 일반 개발 규칙은 [기여 가이드](CONTRIBUTING.md)를 따른다. `plugins/go-lsp`는 이 문서의
 범위에서 제외한다.
 
@@ -10,7 +12,7 @@
 | -------------- | ----------------------------------------------------------------- |
 | 변경 시작 전   | `git status --short --branch`, Bun·Node 버전, 관련 workspace 문서 |
 | 일반 변경 후   | 관련 typecheck·test, `bun run check`, `git diff --check`          |
-| 문서 변경 후   | `bun run links:check`                                             |
+| 문서 변경 후   | `bun run fmt:check`, `bun run links:check`, manifest와 명령 대조  |
 | UI·E2E 변경 후 | 관련 Playwright와 screenshot·trace·snapshot diff                  |
 | 의존성 변경 후 | manifest·catalog·lockfile·공식 release note, `check:full`         |
 | 릴리스 전      | `check:full`, `audit`, 해당 package·app dry-run                   |
@@ -75,7 +77,7 @@ Renovate PR도 같은 기준으로 manifest, lockfile, release note, peer 범위
 bun run audit
 ```
 
-이 명령은 production dependency의 high 이상 advisory에서 실패하며 registry 네트워크를
+이 명령은 `bun audit --audit-level high`를 실행하며 registry 네트워크를
 사용한다. 현재 별도의 scheduled security workflow는 없으므로 정기 점검과 릴리스 전에
 수동 실행한다.
 
@@ -100,12 +102,12 @@ Web MDX의 app route는 기존 content validation과 build가 별도로 검증�
 
 ## 생성물 관리
 
-| 대상                 | 원본                             | 갱신                             | 검증                           |
-| -------------------- | -------------------------------- | -------------------------------- | ------------------------------ |
-| Web 콘텐츠 원본      | `content/tech`, `content/invest` | MDX 직접 수정                    | Next.js build와 route contract |
-| Fumadocs entry       | `source.config.ts`와 MDX 원본    | Web install·build lifecycle      | Web typecheck·build            |
-| Excalidraw 정적 자산 | Excalidraw source asset          | Web `dev`·`build` lifecycle      | Web `build`                    |
-| Playwright snapshot  | 렌더링 결과                      | `test:e2e -- --update-snapshots` | visual test와 diff 직접 검토   |
+| 대상                 | 원본                             | 갱신                                                             | 검증                           |
+| -------------------- | -------------------------------- | ---------------------------------------------------------------- | ------------------------------ |
+| Web 콘텐츠 원본      | `content/tech`, `content/invest` | MDX 직접 수정                                                    | Next.js build와 route contract |
+| Fumadocs entry       | `source.config.ts`와 MDX 원본    | Web install·build lifecycle                                      | Web typecheck·build            |
+| Excalidraw 정적 자산 | Excalidraw source asset          | Web `dev`·`build` lifecycle                                      | Web `build`                    |
+| Playwright snapshot  | 렌더링 결과                      | `bun run --filter @jongminchung/web test:e2e --update-snapshots` | visual test와 diff 직접 검토   |
 
 - `.source`는 Fumadocs가 생성하는 비커밋 산출물이므로 직접 수정하지 않음
     - 새 MDX 추가 후 `bun run --filter @jongminchung/web postinstall` 또는 Web `build`로 다시 생성함
@@ -113,14 +115,14 @@ Web MDX의 app route는 기존 content validation과 build가 별도로 검증�
 
 ## GitHub Actions
 
-현재 저장소에는 네 workflow가 있다.
+유지보수 관련 주요 workflow는 다음과 같다. 실제 목록과 실행 조건은 `.github/workflows`를 확인한다.
 
-| Workflow           | Trigger                       | 역할                                                   | 주요 secret                    |
-| ------------------ | ----------------------------- | ------------------------------------------------------ | ------------------------------ |
-| `Publish Packages` | `workflow_dispatch`           | 검사 후 `tooling`, `ui`의 GitHub Packages `1.0.0` 교체 | `GH_PAT`                       |
-| `Waka Readme`      | 매일 `15:00 UTC`, 수동 실행   | README Waka 통계 구간 갱신                             | `WAKATIME_API_KEY`, `GH_TOKEN` |
-| `Links`            | 문서 PR·`main` push           | Docker 기반 Markdown·HTML 로컬 링크 검사               | 없음                           |
-| `Web`              | PR·관련 `main` push·주간 예약 | Web 검사·브라우저 회귀, 주간 콘텐츠 근거 보고서        | 없음                           |
+| Workflow           | Trigger                       | 역할                                                 | 주요 secret                    |
+| ------------------ | ----------------------------- | ---------------------------------------------------- | ------------------------------ |
+| `Publish Packages` | `workflow_dispatch`           | 선택한 `tooling`·`ui`의 GitHub Packages `1.0.0` 교체 | `GH_PAT`                       |
+| `Waka Readme`      | 매일 `15:00 UTC`, 수동 실행   | README Waka 통계 구간 갱신                           | `WAKATIME_API_KEY`, `GH_TOKEN` |
+| `Links`            | 문서 PR·`main` push           | Docker 기반 Markdown·HTML 로컬 링크 검사             | 없음                           |
+| `Web`              | PR·관련 `main` push·주간 예약 | Web 검사·브라우저 회귀, 주간 콘텐츠 근거 보고서      | 없음                           |
 
 ## 패키지 게시
 
@@ -140,19 +142,27 @@ JavaScript entry point별 `import` 조건을 유지하고 CommonJS 산출물과 
 재도입 조건을 충족할 때만 다시 검토한다.
 
 ```sh
-bun install --filter @jongminchung/tooling --filter @jongminchung/ui --frozen-lockfile --ignore-scripts
+bun install --frozen-lockfile --ignore-scripts
 bun run --filter @jongminchung/tooling --filter @jongminchung/ui typecheck
-bun run --filter @jongminchung/tooling --filter @jongminchung/ui test
+bun run --filter @jongminchung/tooling --filter @jongminchung/ui test:coverage
+bun run --filter @jongminchung/tooling --filter @jongminchung/ui test:node
 bun run --filter @jongminchung/tooling --filter @jongminchung/ui publish:dry-run
 ```
 
 dry-run의 포함 파일, ESM JavaScript·declaration, named export와 package export를 검토한 뒤
-`main`에서 `Publish Packages` workflow를 수동 실행한다. workflow는 `tooling`과 `ui`를 설치·
-typecheck·test한 뒤 두 package별 기존 `1.0.0`을 병렬 삭제하고 `bun publish`로 병렬 게시한다.
+검증한 `main` ref에서 `Publish Packages` workflow를 수동 실행한다. `package` 입력으로
+`tooling`, `ui`, `all` 중 대상을 선택하며 기본값은 `tooling`이다. 선택한 패키지를 Node
+24·26에서 검사하고, 게시할 tarball을 만든 뒤 기존 `1.0.0`을 삭제하고 `npm publish`로
+해당 archive를 게시한다. 게시 후 registry integrity와 소비자 import도 검증한다.
+`all`은 패키지별 병렬 실행이므로 부분 실패가 가능하다. 삭제 전 정상 archive를 보관하고
+[게시·복구 절차](runbooks/release.md)에 따라 대상별 결과를 확인한다.
 
 ## 문서 유지보수
 
 - 새 문서는 [문서 인덱스](README.md)에 연결한다.
+- 완료 TODO는 [완료 기록 보관함](archive/README.md)에 보존하고 완료일을 추정하지 않는다.
+- 이슈의 최초 문제·현재 구현·남은 작업을 구분한다. 구현 완료·반영 대기는 운영 확인 없이 완료로 바꾸지 않는다.
+- 과거 명령·측정값·테스트 개수는 당시 기록으로 표시하고 현재 절차는 기여·유지보수 문서로 연결한다.
 - 외부 직접 의존성 추가·삭제·버전 변경 시 manifest·catalog·lockfile과 공식 release note를 함께 검토한다.
 - 공식 문서 전용 사이트를 우선하고 없으면 maintainer의 공식 저장소 README를 연결한다.
 - 특정 버전 문서가 제공되면 현재 major와 맞는 페이지를 사용한다.

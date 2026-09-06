@@ -94,8 +94,8 @@
 
 - **pilot이 시작되기 전까지 별도 검증 명령을 추가하지 않음**
 - **pilot 구현 시 package와 앱 검증에 clean consumer 설치 테스트를 추가함**
-    - `pnpm --filter @jongminchung/ui run typecheck`
-    - `pnpm --filter @jongminchung/ui run test`
+    - `bun run --filter @jongminchung/ui typecheck`
+    - `bun run --filter @jongminchung/ui test`
     - 영향받는 앱 build와 browser test
     - registry install 후 consumer typecheck와 production build
 

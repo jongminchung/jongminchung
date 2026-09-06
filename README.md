@@ -54,20 +54,25 @@ bun run --filter @jongminchung/web build
 
 ## Version Policy
 
-The manually triggered package workflow always republishes the personal packages as `1.0.0`.
+The manually triggered package workflow replaces selected personal packages at `1.0.0`.
+Its `package` input accepts `tooling` (the default), `ui`, or `all`.
 This is a mutable snapshot channel: the same version can have different API, contents, and
 integrity, so SemVer compatibility and lockfile reproducibility are not guaranteed. Consumers must
 force a new resolution, such as `bun update --force <package>@1.0.0`, and commit the resulting
 lockfile whenever they adopt a replacement.
 
-The workflow installs the shared lockfile from the repository root, then typechecks and tests only
-the publish packages. It deletes the fixed version, then publishes the two packages in parallel.
+The workflow installs the shared lockfile from the repository root, then lints, typechecks, and
+runs coverage and Node consumer checks for the selected packages on Node 24 and 26. It builds each
+archive before deleting the fixed version, publishes that archive, and verifies registry integrity
+and consumer imports. Selecting `all` publishes the packages in parallel and can partially fail; see
+the [release and recovery runbook](./docs/runbooks/release.md).
 GitHub authentication is supplied only through the `GH_PAT` Actions secret.
 
 ```bash
 bun install --frozen-lockfile --ignore-scripts
 bun run --filter @jongminchung/tooling --filter @jongminchung/ui typecheck
-bun run --filter @jongminchung/tooling --filter @jongminchung/ui test
+bun run --filter @jongminchung/tooling --filter @jongminchung/ui test:coverage
+bun run --filter @jongminchung/tooling --filter @jongminchung/ui test:node
 bun run --filter @jongminchung/tooling --filter @jongminchung/ui publish:dry-run
 ```
 

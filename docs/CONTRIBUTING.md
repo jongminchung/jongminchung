@@ -3,13 +3,19 @@
 이 문서는 Bun 모노레포의 공통 개발·검증 절차를 설명한다. `plugins/go-lsp`는 별도
 빌드이므로 이 문서의 범위에 포함하지 않는다.
 
+처음 맡은 작업은 [AI 없이 첫 변경 완료하기](runbooks/start.md)의 순서로 진행한다.
+루트 [기여 가이드](../CONTRIBUTING.md)는 공통 도구 설정과 명령 정책을 설명한다.
+
 ## 개발 환경
 
-| 도구    | 버전·조건                        | 기준 파일                      |
-| ------- | -------------------------------- | ------------------------------ |
-| Bun     | `1.4.0`                          | `.bun-version`, `package.json` |
-| Node.js | 공개 패키지 검증용 `24.0.0` 이상 | `.node-version`, `packages/*`  |
-| Git     | 일반 개발에 필요                 | 시스템 설치                    |
+| 도구     | 버전·조건                                     | 기준 파일                            |
+| -------- | --------------------------------------------- | ------------------------------------ |
+| Bun      | `1.4.0`                                       | `.bun-version`, `package.json`       |
+| Node.js  | 개발은 `.node-version`, 공개 패키지는 24 이상 | `.node-version`, `packages/*`        |
+| shfmt    | `mise.toml`의 버전, 셸 형식 검사              | `mise.toml`                          |
+| Make·Bun | 공통 format·lint 실행                         | `Makefile`, `scripts/style-shell.ts` |
+| Docker   | Markdown·HTML 링크 검사와 컨테이너 검증       | `scripts/check-links.ts`             |
+| Git      | 일반 개발에 필요                              | 시스템 설치                          |
 
 저장소 루트에서 버전을 확인하고 잠금 파일을 변경하지 않는 설치를 수행한다.
 
@@ -48,19 +54,22 @@ bun run --filter @jongminchung/ui test
 
 | 명령                  | 검증 범위                                                                |
 | --------------------- | ------------------------------------------------------------------------ |
-| `bun run fmt:check`   | Oxfmt 형식 검사                                                          |
+| `bun run fmt:check`   | Oxfmt와 shfmt 형식 검사                                                  |
 | `bun run lint`        | Oxlint 정적 분석                                                         |
 | `bun run typecheck`   | 루트와 모든 workspace TypeScript 검사                                    |
 | `bun run deadcode`    | 미사용 파일·의존성·catalog, 미선언 의존성·catalog 참조, 중복 export 검사 |
 | `bun run links:check` | Docker 기반 Markdown·HTML 로컬 링크 검사                                 |
-| `bun run test`        | Bun Unit·Integration과 Node package runtime smoke                        |
+| `bun run test`        | workspace별 Bun coverage 검사와 Node package runtime smoke               |
 | `bun run test:e2e`    | build 후 앱별 Playwright E2E                                             |
 | `bun run check`       | format, lint, typecheck, deadcode와 전체 로컬 테스트                     |
 | `bun run check:full`  | `check`와 production build·전체 Playwright E2E                           |
 
 테스트 계약은 Bun 내장 runner의 Unit·Integration, 공개 package의 Node runtime smoke,
 build된 앱을 검증하는 Playwright E2E로 구분한다. workspace별 Bun coverage 결과는
-`coverage/{web,tooling,ui}`에서 검토한다.
+`coverage/{web,tooling,ui}`에서 검토한다. Unit·Integration은 테스트 책임의 구분이며
+별도 `test:unit`·`test:integration` script는 없다. Web의 `test`는 둘을 함께 실행하고,
+`test:coverage`는 같은 테스트에 coverage 기준을 적용한다. 현재 Compiler 정책은
+[루트 기여 가이드](../CONTRIBUTING.md#타입-검사와-테스트)를 따른다.
 
 ```sh
 bun run test
@@ -181,17 +190,19 @@ bunx --bun shadcn add <component> -c packages/ui
 - 번들러 재도입 조건은 [ADR 0001](adr/0001-node-library-tsc-build.md)을 따른다.
 
 ```sh
-bun install --filter @jongminchung/tooling --filter @jongminchung/ui --frozen-lockfile --ignore-scripts
+bun install --frozen-lockfile --ignore-scripts
 bun run --filter @jongminchung/tooling --filter @jongminchung/ui typecheck
-bun run --filter @jongminchung/tooling --filter @jongminchung/ui test
+bun run --filter @jongminchung/tooling --filter @jongminchung/ui test:coverage
+bun run --filter @jongminchung/tooling --filter @jongminchung/ui test:node
 bun run --filter @jongminchung/tooling --filter @jongminchung/ui publish:dry-run
 ```
 
 `@jongminchung/tooling`, `@jongminchung/ui`는 GitHub Actions의 수동
 `Publish Packages` workflow가 GitHub Packages의 고정 `1.0.0` snapshot을 교체한다. 동일
 version의 API·내용·integrity가 바뀔 수 있으므로 SemVer 호환성과 lockfile 재현성을 보장하지
-않는다. workflow는 publish package만 설치·typecheck·test한 뒤, 기존 `1.0.0`을 삭제하고 두
-package를 병렬 게시한다.
+않는다. workflow의 `package` 입력으로 `tooling`, `ui`, `all`을 선택한다. 선택 대상을
+Node 24·26에서 검증하고 tarball을 먼저 생성한 뒤 기존 `1.0.0`을 삭제·게시한다.
+게시 후 소비자 검증과 부분 실패 대응은 [배포·복구 절차](runbooks/release.md)를 따른다.
 
 ## 제출 체크리스트
 

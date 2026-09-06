@@ -1,0 +1,6 @@
+# 런타임 버전은 기존 파일을 읽어 버전 정보의 중복을 방지함.
+# https://mise.jdx.dev/templates.html
+[tools]
+node = "{{ read_file(path=config_root ~ '/.node-version') | trim }}"
+bun = "{{ read_file(path=config_root ~ '/.bun-version') | trim }}"
+shfmt = "3.12.0"

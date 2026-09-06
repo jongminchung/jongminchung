@@ -3,6 +3,8 @@
 - 이 디렉터리는 OSS 저장소를 분석해 현재 저장소의 제품 가치와 유지보수성을 높일 작업을 관리함
 - 진행 중이거나 재개 조건을 기다리는 이슈만 이 디렉터리의 최상위에 유지함
 - 완료된 이슈는 연도별 `archive`로 이동하고 구현 근거와 검증 기록으로 보존함
+- 과거 실행 명령·측정값은 당시 기록으로 보존하며 현재 명령은 [기여 가이드](../CONTRIBUTING.md)를 따름
+- 이슈 외 완료 TODO는 [완료 기록 보관함](../archive/README.md)에서 확인함
 
 ## 핵심 요약
 
@@ -37,7 +39,8 @@
 - [`0034`: Web multi-site URL과 feed 계약 통합](0034-web-multisite-url-feed-contract.md)
     - 상태: 진행 중
     - 우선순위: P2
-    - 구현 범위: site origin 단일 기준과 Tech·Invest RSS protocol helper 도입
+    - 현재 구현: `siteOrigins`·locale protocol·robots helper 공유
+    - 남은 작업: Tech·Invest RSS serialization·response helper 통합과 공통 fixture 검증
 - [`0035`: Web test 의도와 corpus fixture 경계 정리](0035-web-test-intent-and-corpus-fixtures.md)
     - 상태: 진행 중
     - 우선순위: P3
@@ -53,7 +56,8 @@
 - [`0038`: Web 응답 보안 헤더와 배포 소유권 정리](0038-web-response-security-header-contract.md)
     - 상태: 진행 중
     - 우선순위: P2
-    - 구현 범위: application·Ingress header owner 확정, 정적 방어 헤더와 CSP 단계 분리
+    - 현재 구현: Next 설정의 정적 방어 헤더 4개
+    - 남은 작업: application·Ingress owner 확인, framework 노출 제거, 응답 검증과 CSP 단계 결정
 - [`0041`: OpenAI 공개 참조 디자인 시스템을 Web 세 사이트에 적용](0041-web-openai-reference-design-system-application.md)
     - 상태: 진행 중
     - 우선순위: P2

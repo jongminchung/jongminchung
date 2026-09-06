@@ -13,7 +13,9 @@
   [initial transfer test](../../apps/web/app/initial-transfer.e2e.test.ts),
   [initial transfer budget](../../apps/web/initial-transfer-budget.json)
 
-## 핵심 요약
+> 현재 전송 상한은 [예산 파일](../../apps/web/initial-transfer-budget.json)을 따른다. 최초 문제와 처리 결과의 명령·수치·테스트 개수는 당시 기록이다. 현재 재검증은 아래 검증 절과 [테스트 전략](../web-testing-strategy.md)을 따른다. 구현 완료·반영 대기는 유지하며 원격 반영·운영 확인 후 상태를 갱신한다.
+
+## 2026-09-05 구현·측정 요약
 
 - **영문 세 사이트는 초기 폰트 요청 1개와 45,176 bytes 전송으로 수렴함**
 - **Latin·기호·한국어 전환 라벨을 포함한 44,876 bytes 가변 subset을 self-host함**
@@ -78,7 +80,7 @@
 - **font 증가가 route별 JavaScript·CSS 예산과 구분되어 PR에서 확인 가능함**
 - **font baseline 변경에 전후 byte와 선택 이유가 기록됨**
 
-## 검증
+## 현재 재검증
 
 - `bun run --filter @jongminchung/web build`
 - `bun run --filter @jongminchung/web test:e2e --grep 'initial transfer budget'`

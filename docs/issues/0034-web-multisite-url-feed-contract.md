@@ -10,30 +10,28 @@
   [Invest RSS](<../../apps/web/app/(invest)/invest/[locale]/rss.xml/route.ts>),
   [metadata route tests](../../apps/web/app/metadata-routes.test.ts)
 
-## 핵심 요약
+## 현재 상태 — 2026-09-06 작업 트리
 
-- **production host mapping은 `site-routing.ts`에 있지만 canonical origin은 metadata·sitemap·robots·RSS와 Home link에 반복됨**
-- **Tech와 Invest RSS route가 XML escape·locale parameter·item markup·response header를 각각 구현함**
-- **같은 도메인과 feed 규칙을 여러 위치에서 수정해야 하므로 site 추가·origin 변경·feed 수정 시 drift 가능성이 있음**
-- **site identity와 공통 protocol helper만 통합하고 도메인별 콘텐츠 선택은 각 route에 유지해야 함**
-- **CI 변경 없이 multi-domain 제품 코드의 단일 기준을 만드는 작업임**
+- **`site-routing.ts`의 `siteOrigins`가 production origin의 단일 기준이며 production host mapping도 여기서 파생됨**
+    - Home·Tech·Invest의 layout·sitemap·robots·RSS와 Home 외부 링크가 이를 참조함
+    - `createRobotsResponse`와 `getLocaleProtocol`도 공통 helper로 사용함
+- **Tech·Invest RSS의 `escapeXml`, item·channel serialization과 cache header는 각 route에 남아 있음**
+- **origin 통합은 반영됐지만 RSS protocol 통합과 공통 fixture 검증이 남아 있어 진행 중 상태를 유지함**
+- 이 절은 소스 대조 결과이며 운영 응답을 검증한 기록은 아님
 
-## 현재 문제와 근거
+## 최초 문제와 근거 — 2026-08-20
 
-- **site identity의 한 부분만 canonical source를 가짐**
-    - `siteIds`와 production host mapping은 `site-routing.ts`가 소유함
-    - `https://jamie.kr`, `https://tech.jamie.kr`, `https://invest.jamie.kr` origin은 여러 layout·sitemap·robots·RSS·component에 직접 작성됨
-    - host와 origin이 다른 변경에서 독립적으로 drift할 수 있음
-- **RSS protocol 구현이 두 route에 중복됨**
-    - `escapeXml` 구현이 동일함
-    - `ko-KR`·`en-US` language mapping과 cache header가 동일함
-    - title·link·guid·description·publication date item template가 동일함
-    - route별 차이는 origin·channel copy·item source뿐임
-- **metadata route test가 Tech 중심으로 제한됨**
-    - Tech sitemap과 robots 연결은 검증함
-    - Home·Invest robots와 두 RSS feed의 escaping·language·header 계약은 직접 검증하지 않음
+- production host mapping만 `site-routing.ts`에 있고 origin 문자열은 metadata·sitemap·robots·RSS·Home 링크에 반복됐음
+- Tech·Invest RSS는 XML escape·locale language·item markup·response header를 각각 구현했음
+- metadata route 검증은 Tech 중심이어서 세 사이트와 두 RSS의 공통 protocol 계약을 충분히 검증하지 못했음
 
-## 채택할 내용
+## 남은 작업의 근거
+
+- 두 RSS route에 별도의 `escapeXml`과 동일한 item template·cache header가 남아 있음
+- 현재 metadata route test는 Tech sitemap·robots와 Invest sitemap을 검사하지만 Home·Invest robots와 두 RSS의 escaping·language·header 공통 fixture는 없음
+- 도메인별 콘텐츠 선택과 channel 문구는 각 route에 두고 공통 XML·response 규칙만 추출해야 함
+
+## 채택한 방향
 
 - **site ID별 production identity를 한 module에서 관리함**
     - production host
@@ -57,14 +55,14 @@
 - **현재 public URL과 cache policy를 변경하지 않음**
 - **deployment·proxy·GitHub Actions 설정을 변경하지 않음**
 
-## 실행 작업
+## 실행 작업과 남은 범위
 
-- **`SiteId`별 production host와 origin을 제공하는 site identity 계약을 추가함**
-- **기존 `resolveSite`가 같은 identity source에서 host mapping을 구성하도록 함**
-- **RSS XML과 response helper를 `apps/web/lib` 내부에 추가함**
-- **Tech와 Invest RSS route에서 중복 protocol 코드를 제거함**
-- **metadata·sitemap·robots의 직접 origin 문자열을 site identity 참조로 단계적으로 교체함**
-- **세 site origin과 두 RSS output을 fixture로 검증함**
+- [x] `SiteId`별 production origin을 `siteOrigins`로 제공함
+- [x] 기존 `resolveSite`가 같은 origin에서 파생된 host mapping을 사용함
+- [ ] RSS XML과 response helper를 `apps/web/lib` 내부에 추가함
+- [ ] Tech와 Invest RSS route에서 중복 protocol 코드를 제거함
+- [x] metadata·sitemap·robots·RSS와 Home 링크가 `siteOrigins`를 참조함
+- [ ] 세 site origin과 두 RSS output을 fixture로 검증함
 
 ## 완료 조건
 
@@ -74,12 +72,12 @@
 - **robots와 sitemap URL이 site identity origin과 일치함**
 - **기존 multi-domain route와 canonical URL이 변경되지 않음**
 
-## 검증
+## 현재 재검증
 
-- `pnpm --filter @jongminchung/web run typecheck`
-- `pnpm --filter @jongminchung/web run test`
-- `pnpm --filter @jongminchung/web run build`
+- `bun run --filter @jongminchung/web typecheck`
+- `bun run --filter @jongminchung/web test`
+- `bun run --filter @jongminchung/web build`
 - metadata route focused test
 - RSS route focused test
-- `pnpm run check`
+- `bun run check`
 - `git diff --check`

@@ -10,28 +10,35 @@
   [deployment contract](../../apps/web/DEPLOYMENT.md),
   [Web workflow](../../.github/workflows/web.yml)
 
-## 핵심 요약
+## 현재 상태 — 2026-09-06 작업 트리
 
-- **저장소의 HTML 응답에는 framing·MIME sniffing·referrer·browser permission을 제한하는 명시적 보안 헤더 계약이 없음**
-- **로컬 production 응답은 `X-Powered-By: Next.js`를 노출하고 주요 방어 헤더를 제공하지 않음**
-- **Ingress가 별도 저장소에 있어 production edge가 헤더를 소유할 가능성은 있지만 현재 `DEPLOYMENT.md`와 smoke test에서 확인할 수 없음**
-- **저위험 정적 헤더와 CSP를 분리하고 Home·Tech·Invest의 실제 inline script 요구를 기준으로 단계적으로 적용해야 함**
-- **Cache Components와 정적 응답을 포기하지 않고 application·Ingress 중 한 곳을 canonical owner로 정해야 함**
+- **`next.config.ts`의 `headers()`가 `/(.*)`에 정적 방어 헤더 4개를 설정함**
 
-## 현재 문제와 근거
+| 헤더                     | 설정값                                     |
+| ------------------------ | ------------------------------------------ |
+| `X-Content-Type-Options` | `nosniff`                                  |
+| `X-Frame-Options`        | `SAMEORIGIN`                               |
+| `Referrer-Policy`        | `strict-origin-when-cross-origin`          |
+| `Permissions-Policy`     | `camera=(), geolocation=(), microphone=()` |
 
-- **application configuration에 공통 response header 정책이 없음**
-    - `next.config.ts`에 `headers`와 `poweredByHeader` 설정이 없음
-    - `proxy.ts`는 locale·rewrite·cache 관련 header만 설정함
-    - local production HTML은 `X-Powered-By: Next.js`를 제공함
-- **배포 문서가 security header owner를 정의하지 않음**
-    - `DEPLOYMENT.md`는 Host 보존·standalone container·health probe 계약을 설명함
-    - Ingress manifest는 외부 저장소가 소유하지만 CSP·frame policy·HSTS의 책임 위치는 명시하지 않음
-    - CI와 E2E는 locale·routing·accessibility를 검사하지만 response security header를 검사하지 않음
-- **CSP는 단순한 정적 문자열로 추가하기 어려움**
-    - 초기 theme script와 Tech의 Excalidraw asset path script가 inline으로 실행됨
-    - Next가 RSC bootstrap과 hydration을 위한 inline script를 생성함
-    - nonce 기반 정책이 dynamic rendering을 요구하면 현재 Cache Components·prerender 계약에 영향을 줄 수 있음
+- **`poweredByHeader: false`는 아직 없으며 CSP·HSTS도 Next 설정에서 제공하지 않음**
+- **정적 헤더의 application 구현과 운영 edge 소유권 확인은 별개임**
+    - `DEPLOYMENT.md`에 application·Ingress의 security header owner가 명시되지 않음
+    - 현재 configuration test와 E2E에는 위 네 헤더의 응답 계약 검증이 없음
+    - 이 점검은 소스 대조이며 local production·운영 응답을 새로 측정하지 않았음
+- **남은 작업은 owner·응답 inventory 확인, framework 노출 제거, 응답 계약 테스트와 CSP 단계 결정임**
+
+## 최초 문제와 근거 — 2026-08-20
+
+- 당시 application configuration에 `headers`와 `poweredByHeader` 설정이 없었음
+- 당시 local production HTML에서 `X-Powered-By: Next.js`를 관찰했고 주요 방어 헤더는 없었음
+- 배포 문서와 smoke test에서 production edge의 보안 헤더 책임을 확인할 수 없었음
+
+## CSP 검토가 남은 이유
+
+- 초기 theme script·Tech Excalidraw asset path script와 Next RSC bootstrap·hydration script가 inline으로 실행됨
+- nonce 기반 정책이 dynamic rendering을 요구하면 Cache Components·prerender 계약에 영향을 줄 수 있음
+- 실제 source inventory와 report-only 결과를 확인한 뒤 enforce 여부를 결정해야 함
 
 ## 채택할 내용
 
@@ -59,11 +66,12 @@
 - **HSTS preload를 local Next configuration만으로 선언하지 않음**
 - **정적 콘텐츠 사이트에 존재하지 않는 인증·세션·API 보안 범위를 추가하지 않음**
 
-## 실행 작업
+## 실행 작업과 남은 범위
 
 - **세 public domain과 local standalone의 response header inventory를 기록함**
 - **application 또는 Ingress 중 canonical owner를 `DEPLOYMENT.md`에 명시함**
-- **저위험 정적 헤더와 framework 노출 제거를 먼저 적용함**
+- [x] application의 정적 방어 헤더 4개를 설정함
+- [ ] `poweredByHeader: false`로 framework 노출을 제거하고 실제 응답을 검증함
 - **Home·Tech·Invest와 non-HTML route의 header contract test를 추가함**
 - **CSP report-only pilot에서 inline script와 lazy Excalidraw 경로를 검증함**
 - **cache·prerender·browser 동작 변화가 없는지 production build와 E2E로 확인함**
@@ -76,12 +84,12 @@
 - **CSP를 enforce하지 않는 경우 report-only 결과와 보류 이유·재개 조건이 기록됨**
 - **header 적용 뒤 Cache Components·static asset·RSS·검색·OG·Excalidraw 동작이 유지됨**
 
-## 검증
+## 현재 재검증
 
-- `pnpm --filter @jongminchung/web run typecheck`
-- `pnpm --filter @jongminchung/web run test`
-- `pnpm --filter @jongminchung/web run build`
+- `bun run --filter @jongminchung/web typecheck`
+- `bun run --filter @jongminchung/web test`
+- `bun run --filter @jongminchung/web build`
 - Home·Tech·Invest response header focused test
 - production domain header smoke
-- `pnpm --filter @jongminchung/web run test:e2e`
+- `bun run --filter @jongminchung/web test:e2e`
 - `git diff --check`

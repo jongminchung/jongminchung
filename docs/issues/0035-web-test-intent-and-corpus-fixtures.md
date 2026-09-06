@@ -10,7 +10,15 @@
   [UI primitive interaction tests](<../../apps/web/app/(tech)/ui-primitives.e2e.test.ts>),
   [Tech navigation tests](<../../apps/web/app/(tech)/tech.e2e.test.ts>)
 
-## 핵심 요약
+## 현재 구현과 남은 작업 — 2026-09-06 작업 트리
+
+- `documents.test.ts`는 게시일 정렬과 Blog·Docs 조회를 설명하는 이름으로 검사하며 과거 Deep Dive 29개 ID 전체 배열은 더 이상 현재 구조를 나타내지 않음
+- `proxy.test.ts`의 `제조원`, `site-routing.test.ts`의 `표시되지 않고 외부 외부를 생성함`처럼 의미가 불명확한 이름은 남아 있음
+- 남은 작업은 현재 assertion inventory를 다시 확인하고, 이름 정리와 정렬·related ranking의 작은 fixture 및 corpus smoke 경계를 검증하는 것임
+- 아래 최초 문제의 문서 수·이름 목록은 당시 근거임. 실행 작업의 과거 29개 배열은 재도입하지 않고 현재 corpus 결합을 기준으로 점검함
+- 현재 Unit·Integration은 Bun `test`·`test:coverage`에서 함께 실행하며 별도 `test:unit`·`test:integration` script는 없음
+
+## 최초 문제 요약
 
 - **일부 Web test 이름이 assertion의 조건과 기대 결과를 설명하지 못함**
 - **문서 정렬 test가 실제 Deep Dive 문서 29개 ID 전체를 고정해 콘텐츠 추가와 알고리즘 변경을 같은 실패로 처리함**
@@ -18,7 +26,7 @@
 - **제품 동작이나 coverage threshold를 변경하지 않고 실패 진단과 변경 내성을 높이는 작업임**
 - **광범위한 snapshot 재생성이 아니라 의미가 불명확한 test와 corpus 결합만 대상으로 함**
 
-## 현재 문제와 근거
+## 최초 문제와 근거 — 2026-08-20
 
 - **test 이름과 검증 내용의 연결이 약한 사례가 있음**
     - `업데이트 휴가 휴가 목록`
@@ -77,9 +85,9 @@
 
 ## 검증
 
-- `pnpm --filter @jongminchung/web run test`
-- `pnpm run test:unit`
-- `pnpm run test:integration`
+- `bun run --filter @jongminchung/web test`
+- `bun run --filter @jongminchung/web test:coverage`
+- `bun run test`
 - 관련 Web Playwright test
-- `pnpm --filter @jongminchung/web run typecheck`
+- `bun run --filter @jongminchung/web typecheck`
 - `git diff --check`

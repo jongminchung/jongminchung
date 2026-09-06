@@ -12,7 +12,13 @@
   [`llms.txt`](<../../apps/web/app/(tech)/tech/llms.txt/route.ts>),
   [Home writing](<../../apps/web/app/(home)/_components/HomeWritingSection.tsx>)
 
-## 핵심 요약
+> 최초 문제와 처리 결과의 명령·수치·테스트 개수는 당시 기록이다. 현재 재검증은 아래 검증 절과 [테스트 전략](../web-testing-strategy.md)을 따른다. 구현 완료·반영 대기는 유지하며 원격 반영·운영 확인 후 상태를 갱신한다.
+
+## 현재 구현 — 2026-09-06 작업 트리
+
+현재 공개 상태 selector는 `lib/tech/publication.ts`에 있고, `content-repository.ts`는 공개 collection에 `publishedContentOnly`를 적용한다. 소스 검증과 공개 조회 경계는 구현되어 있으며 배포 반영 확인은 별도로 남아 있다.
+
+## 최초 문제 요약
 
 - **Tech metadata는 `publicationStatus: draft`를 지원하지만 공개 document query는 상태를 필터링하지 않음**
 - **RSS만 published 문서를 선택하고 page·navigation·Home·검색·sitemap·`llms.txt`는 전체 문서를 사용함**
@@ -20,7 +26,7 @@
 - **source validation용 전체 collection과 사용자에게 제공할 published collection을 명시적으로 분리해야 함**
 - **인증된 preview 요구가 없는 현재 제품에서는 draft route를 404로 처리하는 것이 안전한 기본값임**
 
-## 현재 문제와 근거
+## 최초 문제와 근거
 
 - **source 계약과 public query 계약의 의미가 다름**
     - `publicationStatuses`는 `published`와 `draft`를 허용함
@@ -81,16 +87,16 @@
 - **published 문서의 URL·navigation order·검색 baseline·feed 결과가 유지됨**
 - **public consumer가 raw source collection을 직접 사용할 수 없는 명확한 API 경계를 가짐**
 
-## 검증
+## 현재 재검증
 
-- `pnpm --filter @jongminchung/web run typecheck`
-- `pnpm --filter @jongminchung/web run test`
-- `pnpm --filter @jongminchung/web run build`
+- `bun run --filter @jongminchung/web typecheck`
+- `bun run --filter @jongminchung/web test`
+- `bun run --filter @jongminchung/web build`
 - draft route·navigation·search·metadata focused test
-- `pnpm run check`
+- `bun run check`
 - `git diff --check`
 
-## 처리 결과
+## 처리 결과 (당시 구현·검증 기록)
 
 - **content snapshot을 `sourceTech`와 `publishedTech` collection으로 분리함**
     - locale pair·metadata·path·내부 링크와 evidence 검사는 draft를 포함한 전체 source collection을 사용함

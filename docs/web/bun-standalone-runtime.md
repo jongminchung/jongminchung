@@ -13,7 +13,8 @@
     - Unit·Integration은 Bun 내장 test runner에서 실행하고 Playwright는 자체 Node 실행 계약을 유지함
 
 - **Fumadocs와 Turbopack이 요구하는 loader worker만 Node.js로 격리함**
-    - `validate-fumadocs-content.ts`와 `content-evidence.ts`는 `fumadocs-mdx/node`가 등록하는 MDX query loader를 사용함
+    - 콘텐츠 CLI인 `validate-fumadocs-content.ts`와 `content-evidence.ts`는 Bun의 `--preload ./scripts/register-content-plugin.ts`로 `fumadocs-mdx/bun` plugin과 서버용 `server-only` 처리를 등록함
+    - build의 콘텐츠 검증 단계만 `JAMIE_MDX_METADATA_ONLY=1`을 사용함. 이 preload는 Next 빌드에 적용하지 않으며 실제 페이지는 Next의 MDX loader를 사용함
     - `next.config.ts`는 Bun의 재귀적 `node` 별칭을 loader worker에서만 제거해 Turbopack worker가 실제 Node IPC를 사용하게 함
     - Web build의 Fumadocs 생성·자산 준비·Next.js main process와 실제 server runtime은 Bun을 유지함
     - CI와 Docker builder에는 build-time loader worker용 Node.js가 필요하지만 배포 runner에는 필요하지 않음

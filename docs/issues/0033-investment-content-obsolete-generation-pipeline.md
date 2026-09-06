@@ -10,7 +10,13 @@
   [generation utilities](../../apps/web/scripts/generation-utils.ts),
   [Web package](../../apps/web/package.json)
 
-## 핵심 요약
+> 최초 문제와 처리 결과의 명령·수치·테스트 개수는 당시 기록이다. 현재 재검증은 아래 검증 절과 [테스트 전략](../web-testing-strategy.md)을 따른다. 구현 완료·반영 대기는 유지하며 원격 반영·운영 확인 후 상태를 갱신한다.
+
+## 현재 구현 — 2026-09-06 작업 트리
+
+현재 `lib/invest/source.ts`가 Fumadocs source에서 collection을 구성·검증하고 본문을 로드한다. `content-repository.ts`는 이 source 경계를 사용하며 과거 `investment:build` CLI를 복원할 필요가 없다.
+
+## 최초 문제 요약
 
 - **Investment runtime이 과거 artifact 생성 CLI에서 source reader와 locale validator를 import함**
 - **같은 CLI에는 consumer가 없는 generated manifest·loader 생성 코드가 남아 있음**
@@ -18,7 +24,7 @@
 - **실제 runtime에 필요한 source parsing과 collection validation만 명확한 module로 남겨야 함**
 - **도달 불가능한 생성 코드를 제거해 Investment content의 변경 경로를 하나로 축소하는 작업임**
 
-## 현재 문제와 근거
+## 최초 문제와 근거
 
 - **runtime module에서 CLI module로 향하는 의존성이 있음**
     - `content-repository.ts`가 `scripts/build-investment-content.ts`의 `readInvestmentNotes`와 `validateInvestmentTranslations`를 사용함
@@ -74,16 +80,16 @@
 - **잘못된 locale pair·metadata·path·본문 section이 fixture test에서 구분됨**
 - **기존 Investment route와 MDX 렌더링 결과가 유지됨**
 
-## 검증
+## 현재 재검증
 
 - `rg -n 'build-investment-content|generated/investment|investment:build' apps/web`
-- `pnpm --filter @jongminchung/web run typecheck`
-- `pnpm --filter @jongminchung/web run test`
-- `pnpm --filter @jongminchung/web run build`
-- `pnpm run check`
+- `bun run --filter @jongminchung/web typecheck`
+- `bun run --filter @jongminchung/web test`
+- `bun run --filter @jongminchung/web build`
+- `bun run check`
 - `git diff --check`
 
-## 처리 결과
+## 처리 결과 (당시 구현·검증 기록)
 
 - **Investment source collection의 소유권을 `lib/invest/source.ts`로 분리함**
     - Fumadocs source를 manifest로 변환하고 locale pair·metadata·path·본문 section을 한 경계에서 검증함

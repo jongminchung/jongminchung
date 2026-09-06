@@ -4,6 +4,9 @@
 저장소 루트에서 실행한다. 설치는 [기여 가이드](../../CONTRIBUTING.md),
 검증 기준은 [Web 테스트 전략](../web-testing-strategy.md)을 참고한다.
 
+글을 추가하거나 발행할 때는 [콘텐츠 편집 절차](../runbooks/content.md),
+검사나 운영 응답에 문제가 생기면 [장애 진단](../runbooks/recovery.md)을 따른다.
+
 ## 먼저 실행하기
 
 ```sh
@@ -122,6 +125,8 @@ Playwright는 3100 포트에 테스트 서버가 없으면 fixture를 포함한 
 | Knip 의존성 오류          | 실제 import·CLI·생성 script 사용처; 자동 삭제하지 않기 |
 | 브라우저 interaction      | `apps/web/test-results/`의 screenshot·trace와 해당 E2E |
 | 시각 회귀                 | 같은 OS·브라우저에서 actual·expected·diff 비교         |
+
+공용 헤더의 구성과 변경 기준은 [공용 헤더 안내](header-unification.md)를 따른다.
 
 배포 환경과 standalone 실행은 [배포 계약](../../apps/web/DEPLOYMENT.md),
 런타임 선택은 [Bun standalone 런타임](bun-standalone-runtime.md)을 참고한다.

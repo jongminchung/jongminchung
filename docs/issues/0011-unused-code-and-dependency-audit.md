@@ -78,15 +78,17 @@
 ## 검증
 
 - **삭제 후보가 생기면 영향받는 workspace부터 확인함**
-    - `pnpm --filter <package-name> run typecheck`
-    - `pnpm --filter <package-name> run test`
-    - `pnpm --filter <package-name> run build`
+    - `bun run --filter <package-name> typecheck`
+    - `bun run --filter <package-name> test`
+    - `bun run --filter <package-name> build`
 - **entry point 변경 시 해당 runtime test를 추가함**
     - Web route는 Playwright E2E
     - package export는 dry-run tarball과 consumer import
-    - 최종 `pnpm run check`
+    - 최종 `bun run check`
 
 ## 2026-08-20 pilot 결과
+
+아래 pnpm 명령·수치·도입 보류 판단은 당시 기록이다. 현재 적용 범위는 다음 제한적 도입 결과와 [유지보수 가이드](../maintenance.md)를 따른다.
 
 - **dependency를 설치하지 않는 `pnpm dlx knip@latest` 일회성 report-only pilot을 실행함**
     - 기본 report는 unused file 74개, export 57개, exported type 50개와 duplicate export 2개를 후보로 출력함

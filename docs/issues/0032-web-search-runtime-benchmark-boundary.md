@@ -9,7 +9,13 @@
   [실제 corpus benchmark](../../apps/web/lib/tech/search-benchmark.integration.test.ts),
   [검색 UI](<../../apps/web/app/(tech)/_components/SearchDialog.tsx>)
 
-## 핵심 요약
+> 최초 문제와 처리 결과의 명령·수치·테스트 개수는 당시 기록이다. 현재 재검증은 아래 검증 절과 [테스트 전략](../web-testing-strategy.md)을 따른다. 구현 완료·반영 대기는 유지하며 원격 반영·운영 확인 후 상태를 갱신한다.
+
+## 현재 구현 — 2026-09-06 작업 트리
+
+현재 제품 검색 규칙은 `lib/tech/search.ts`, 서버 검색과 benchmark 실행은 별도 module·script로 분리되어 있다. `search-benchmark.integration.test.ts`는 Bun subprocess와 콘텐츠 plugin preload로 40개 query를 검증하며 파일별 300초 제한을 둔다. 현재 `test:coverage`도 이 파일을 함께 실행한다.
+
+## 최초 문제 요약
 
 - **현재 `search.ts`가 사용자 검색 runtime과 benchmark 평가·비용 측정·threshold 검증을 함께 소유함**
 - **검색 UI는 runtime API만 사용하지만 같은 module에 제품에서 사용하지 않는 benchmark 책임이 포함됨**
@@ -17,7 +23,7 @@
 - **작은 검색 fixture는 unit test로 유지하고 실제 corpus 품질 검증은 integration test로 분리해야 함**
 - **CI workflow 변경 없이 앱 module과 test 실행 경계만 정리하는 작업임**
 
-## 현재 문제와 근거
+## 최초 문제와 근거
 
 - **`search.ts` 364줄에 서로 다른 변경 이유가 결합되어 있음**
     - tokenization·field score·snippet·결과 정렬은 제품 runtime 책임임
@@ -72,16 +78,18 @@
 - **coverage unit 실행에서 Web 검색 test가 timeout을 발생시키지 않음**
 - **검색 결과와 serialized index byte baseline이 변경되지 않음**
 
-## 검증
+## 현재 재검증
 
-- `pnpm run test:unit`
-- `pnpm run test:integration`
-- `pnpm --filter @jongminchung/web run typecheck`
-- `pnpm --filter @jongminchung/web run test`
-- `pnpm --filter @jongminchung/web run build`
+현재 Bun `test`·`test:coverage`는 unit·integration 파일을 함께 실행한다. 과거 Vitest project 구분과 `test:unit`·`test:integration` 명령은 현재 실행 계약이 아니다. 아래 focused 명령은 corpus 파일을 선택한다.
+
+- `bun run --filter @jongminchung/web test:coverage`
+- `bun run --filter @jongminchung/web test search-benchmark.integration.test.ts`
+- `bun run --filter @jongminchung/web typecheck`
+- `bun run --filter @jongminchung/web test`
+- `bun run --filter @jongminchung/web build`
 - `git diff --check`
 
-## 처리 결과
+## 처리 결과 (당시 구현·검증 기록)
 
 - **제품 검색 규칙을 `search.ts`의 순수 runtime API로 분리함**
     - Unicode 정규화·질의 분해·별칭·결과 필터·source interleave가 Fumadocs source와 benchmark 정의에 의존하지 않음
