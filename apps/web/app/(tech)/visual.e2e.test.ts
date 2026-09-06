@@ -46,6 +46,22 @@ const cases = [
     theme: "light",
   },
   {
+    name: "ddd-ultrawide-light",
+    path: "/ko/docs/be/ddd",
+    heading: "실전 도메인 주도 설계 핸드북",
+    width: 2560,
+    height: 1000,
+    theme: "light",
+  },
+  {
+    name: "ddd-ultrawide-dark",
+    path: "/ko/docs/be/ddd",
+    heading: "실전 도메인 주도 설계 핸드북",
+    width: 2560,
+    height: 1000,
+    theme: "dark",
+  },
+  {
     name: "server-monitoring-wide-light",
     path: "/ko/server-monitoring-analysis-guide",
     heading: "서버 모니터링 분석 가이드",
