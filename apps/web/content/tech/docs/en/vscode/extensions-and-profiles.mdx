@@ -167,6 +167,90 @@ Consider a maintained Pack when several repositories need the same distributable
 
 `extensionPack` lists bundled installations; `extensionDependencies` declares runtime dependencies of an extension. A recommendations file is not a Pack. Saving this manifest in a repository does not install anything: package/install a VSIX or publish through Marketplace. A Pack does not install JDKs, Python, or npm dependencies. [Extension manifest](https://code.visualstudio.com/api/references/extension-manifest)
 
+## Choose a method for the project
+
+Start with repository recommendations and a personal Profile matching the languages you work on. Use the Java Pack when onboarding needs its broader feature set. Decide by an actual task, rather than by the number of installed extensions.
+
+| Situation                      | Method                                 | Completion check                          |
+| ------------------------------ | -------------------------------------- | ----------------------------------------- |
+| Joining an existing repository | Install relevant recommendations       | The project formatter is available        |
+| Starting Java development      | Install the Java Pack                  | Import, test, and debug the project       |
+| Working on Web and Python      | Install into an empty combined Profile | Both languages work in one project window |
+| Moving to another computer     | Export/import a Profile file           | Compare extensions and verify SDKs        |
+
+### Install recommendations in the UI
+
+1. Open the repository root and create or inspect `.vscode/extensions.json` using the example above.
+2. Open Extensions with `Ctrl+Shift+X` on Windows/Linux or `Cmd+Shift+X` on macOS.
+3. Search `@recommended` and identify **Workspace Recommendations**, separately from other recommendation groups.
+4. Check publisher IDs before installing individual items. Installing that whole group can include languages outside your own work.
+5. Open a `.ts` or `.py` file and check that Format Document can select the intended provider.
+
+Deleting a recommendation does not remove an installed extension. Inspect `@installed` afterward. [Recommendations and management](https://code.visualstudio.com/docs/configure/extensions/extension-marketplace)
+
+### Install the Java Pack through the UI or CLI
+
+1. Search Extensions for `@id:vscjava.vscode-java-pack`.
+2. Inspect its Extension Pack section. For example, the included Gradle extension can be installed even when your project only uses Maven.
+3. Install, then check the language support, debugger, and test runner in `@installed`.
+4. Prepare the JDK and build wrapper using the [Java guide](/en/docs/vscode/java).
+
+For CLI installation, first create the `Web + Java` Profile. **Run the second command only for a Spring project.**
+
+```sh
+code --profile "Web + Java" --install-extension vscjava.vscode-java-pack
+```
+
+```sh
+code --profile "Web + Java" --install-extension vmware.vscode-boot-dev-pack
+```
+
+```sh
+code --profile "Web + Java" --list-extensions --show-versions
+```
+
+This adds Java extensions. Use the earlier `web-java` combination to add Web tools too. Check diagnostics, a JUnit run, and a breakpoint instead of merely counting installed items. [Java Pack](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-pack), [Spring Pack](https://marketplace.visualstudio.com/items?itemName=vmware.vscode-boot-dev-pack)
+
+### Associate a Profile with a project
+
+1. Open Profiles from Manage and choose New Profile.
+2. Name it `Web + Python`, select Empty Profile as the source, and create it.
+3. Open the project folder and select it with `Profiles: Switch Profile`.
+4. Confirm the active name, then use the earlier CLI commands or `web-python` script.
+5. Reopen the project after visiting another folder and check the selected Profile.
+
+Use a combined Profile for two languages in one monorepo window. Use separate windows for separate work. [Profile creation and folder associations](https://code.visualstudio.com/docs/configure/profiles)
+
+### Move a Profile to another computer
+
+Export the selected Profile with the desired contents to a local `.code-profile` file. On the target computer, use Import Profile and select the imported Profile. This workflow needs no public upload or account synchronization.
+
+Compare `code --profile "Web + Python" --list-extensions --show-versions` on both computers. Adjust local paths and install runtimes and project dependencies separately. Matching themes are not proof of a working development environment. [Profile sharing](https://code.visualstudio.com/docs/configure/profiles#_share-profiles)
+
+## Remove an oversized setup
+
+Try **Disable (Workspace)** from the extension's Manage menu and check that diagnostics, tests, and formatting still work. Restore it with Enable (Workspace) when needed.
+
+When removal is appropriate, specify the Profile and inspect the resulting list. This example removes a Java Pack accidentally installed in Web + Python:
+
+```sh
+code --profile "Web + Python" --uninstall-extension vscjava.vscode-java-pack
+code --profile "Web + Python" --list-extensions --show-versions
+```
+
+Inspect the removal UI and remaining extensions; do not equate removing a Pack with removing every member. Other workflows may use those members. Also check extensions applied to all Profiles. [Disabling and uninstalling](https://code.visualstudio.com/docs/configure/extensions/extension-marketplace)
+
+## Troubleshooting checkpoints
+
+| Symptom                                        | First check                                                                                                              |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Recommendations exist but nothing is installed | Install from Workspace Recommendations                                                                                   |
+| `Profile ... not found`                        | Finish creating the exact Profile name                                                                                   |
+| More extensions than expected                  | Inspect Pack members and Python companions                                                                               |
+| Installed but no definition navigation         | Check language mode, active Profile, and project recognition                                                             |
+| Works locally but fails over SSH               | Inspect remote installation and SDK paths                                                                                |
+| Saving differs from the CLI                    | Align provider, settings, versions, and working directory using [format ownership](/en/docs/vscode/format-lint-contract) |
+
 ## Verify the result
 
 Record the Profile's extension list, then test definition navigation, Rename, test debugging, and formatting. Use the [shortcut reference](/en/docs/vscode/keyboard-shortcuts) and the SDK checks in [Java](/en/docs/vscode/java), [TypeScript](/en/docs/vscode/typescript), [Go](/en/docs/vscode/go), and [Python](/en/docs/vscode/python).
