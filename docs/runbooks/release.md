@@ -66,10 +66,12 @@ image digest로 복구하고 같은 확인을 반복한다. 복구 위치와 조
 
 ## 공용 패키지 게시
 
-폐기한 공용 설정 패키지의 기존 설치는 보존한다. `Retire Tooling Package` 수동
-workflow는 레지스트리의 기존 버전에 사용 중단 안내를 표시하고 결과를 확인한다.
-이 작업은 패키지를 삭제하거나 새 버전을 게시하지 않는다. 소비 저장소는 Oxfmt·Oxlint를
-직접 설치하고 로컬 설정을 관리한다.
+폐기한 공용 설정 패키지는 GitHub Packages에서 `npm deprecate`를 실행하면
+`version.ID cannot be empty` 오류가 발생한다. `Retire Tooling Package` 수동 workflow는
+기존 `1.0.0`의 tarball·메타데이터·checksum을 먼저 artifact로 보관한다. 기본값은
+보관만 하며, `delete`를 켠 경우에만 패키지를 삭제하고 결과를 확인한다. 삭제 후 과거
+버전을 새로 설치할 수 없으므로 artifact를 별도로 내려받아 보관한다. 소비 저장소는
+Oxfmt·Oxlint를 직접 설치하고 로컬 설정을 관리한다.
 
 [Publish Packages workflow](../../.github/workflows/publish-packages.yml)는 수동 실행한다.
 UI 패키지만 검증하고 게시한다.

@@ -55,6 +55,11 @@ test("[성공] Menu를 Escape로 닫고 trigger focus를 복원함", async ({ pa
 test("[성공] Command active descendant를 option과 연결함", async ({ page }) => {
   const input = page.getByRole("combobox", { name: "Filter commands" });
   await input.focus();
+  await input.press("Home");
+  // SSR markup와 cmdk 등록 완료를 구분하고 시작 선택을 명시함.
+  await expect(
+    page.getByRole("option", { name: "Open repository", exact: true }),
+  ).toHaveAttribute("aria-selected", "true");
   await input.press("ArrowDown");
 
   await expect(input).toHaveAttribute("aria-activedescendant", /.+/u);

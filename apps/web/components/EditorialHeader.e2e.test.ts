@@ -146,9 +146,12 @@ for (const site of sites) {
     await trigger.click();
     const language = dialog.getByRole("link", { name: "한국어로 읽기" });
     await expect(language).toHaveAttribute("href", `/ko${site.path}`);
-    const languageBox = await language.boundingBox();
-    expect(languageBox?.width).toBeGreaterThanOrEqual(44);
-    expect(languageBox?.height).toBeGreaterThanOrEqual(44);
+    await expect
+      .poll(async () => (await language.boundingBox())?.width)
+      .toBeGreaterThanOrEqual(44);
+    await expect
+      .poll(async () => (await language.boundingBox())?.height)
+      .toBeGreaterThanOrEqual(44);
     await language.click();
     await expect(page).toHaveURL(`${site.origin}/ko${site.path}`);
     await expect(page.locator("html")).toHaveAttribute("lang", "ko");

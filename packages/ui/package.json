@@ -15,7 +15,9 @@
     "src/lib/*.ts",
     "src/styles/*.css",
     "LICENSE",
-    "README.md"
+    "README.md",
+    "SHADCN.md",
+    "shadcn-baseline.json"
   ],
   "type": "module",
   "sideEffects": [

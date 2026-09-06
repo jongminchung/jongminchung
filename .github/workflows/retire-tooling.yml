@@ -2,6 +2,12 @@ name: Retire Tooling Package
 
 on:
   workflow_dispatch:
+    inputs:
+      delete:
+        description: Delete the retired tooling package after archiving version 1.0.0
+        type: boolean
+        default: false
+        required: true
 
 concurrency:
   group: publish-personal-packages
@@ -12,7 +18,7 @@ permissions:
   packages: write
 
 jobs:
-  deprecate:
+  retire:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -21,24 +27,30 @@ jobs:
           node-version-file: .node-version
           registry-url: https://npm.pkg.github.com
           scope: "@jongminchung"
-      - name: Deprecate the retired package while preserving installed versions
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GH_PAT }}
-        run: >-
-          npm deprecate '@jongminchung/tooling@*'
-          'Retired: own oxfmt.config.ts and oxlint.config.ts in each repository and install Oxfmt/Oxlint directly.'
-          --registry https://npm.pkg.github.com
-      - name: Verify the published deprecation notice
+      - name: Archive the published version before retirement
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          npm view '@jongminchung/tooling@*' deprecated --json --registry https://npm.pkg.github.com > "${RUNNER_TEMP}/tooling-deprecation.json"
-          node --input-type=module <<'JS'
-          import assert from 'node:assert/strict';
-          import { readFileSync } from 'node:fs';
-          const result = JSON.parse(readFileSync(`${process.env.RUNNER_TEMP}/tooling-deprecation.json`, 'utf8'));
-          const notices = Array.isArray(result) ? result : [result];
-          assert.ok(notices.length > 0);
-          for (const notice of notices) assert.equal(notice, 'Retired: own oxfmt.config.ts and oxlint.config.ts in each repository and install Oxfmt/Oxlint directly.');
-          console.log(`Verified deprecation for ${notices.length} published version(s).`);
-          JS
+          mkdir -p "${RUNNER_TEMP}/tooling-archive"
+          npm view '@jongminchung/tooling@1.0.0' --json --registry https://npm.pkg.github.com > "${RUNNER_TEMP}/tooling-archive/metadata.json"
+          npm pack '@jongminchung/tooling@1.0.0' --ignore-scripts --pack-destination "${RUNNER_TEMP}/tooling-archive" --registry https://npm.pkg.github.com
+          cd "${RUNNER_TEMP}/tooling-archive"
+          sha256sum ./*.tgz > SHA256SUMS
+      - uses: actions/upload-artifact@v7
+        with:
+          name: retired-tooling-1.0.0
+          path: ${{ runner.temp }}/tooling-archive/
+          retention-days: 90
+          if-no-files-found: error
+      - name: Delete the explicitly selected retired package
+        if: ${{ inputs.delete }}
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: gh api --method DELETE /users/jongminchung/packages/npm/tooling
+      - name: Verify the package is absent
+        if: ${{ inputs.delete }}
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          remaining=$(gh api --paginate '/users/jongminchung/packages?package_type=npm' --jq '.[] | select(.name == "tooling") | .id')
+          test -z "$remaining"
