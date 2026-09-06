@@ -1,4 +1,5 @@
 import { cn } from "@jongminchung/ui/lib/utils";
+import { ChevronDownIcon } from "lucide-react";
 import Link from "next/link";
 import type { ComponentType } from "react";
 import {
@@ -48,7 +49,9 @@ export function EditorialIndex({
   Results = EditorialInfiniteResults,
   headerClassName,
   navigationClassName,
-  tagClassName,
+  quickTagClassName,
+  expandedTagClassName,
+  tagBrowserClassName,
   resultsClassName,
   pagination,
 }: {
@@ -62,14 +65,21 @@ export function EditorialIndex({
   readonly Results?: ComponentType<EditorialInfiniteResultsProps>;
   readonly headerClassName?: string;
   readonly navigationClassName?: string;
-  readonly tagClassName?: string;
+  readonly quickTagClassName?: string;
+  readonly expandedTagClassName?: string;
+  readonly tagBrowserClassName?: string;
   readonly resultsClassName?: string;
   readonly pagination: "links" | "infinite";
 }): React.JSX.Element {
-  const tagLinkClassName = cn(
+  const quickTagLinkClassName = cn(
     "shrink-0 rounded-lg text-xs transition-colors aria-[current=page]:font-medium aria-[current=page]:text-foreground",
     "border px-3 py-1.5 hover:bg-accent aria-[current=page]:border-secondary aria-[current=page]:bg-secondary",
-    tagClassName,
+    quickTagClassName,
+  );
+  const expandedTagLinkClassName = cn(
+    "inline-flex max-w-full min-w-0 items-baseline gap-2 rounded-full border bg-background/70 px-3 py-2 text-xs transition-colors",
+    "hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+    expandedTagClassName,
   );
   const tagPriority = new Map(
     promotedTags.map((tag, index) => [tag, index] as const),
@@ -115,11 +125,12 @@ export function EditorialIndex({
           "flex gap-2 overflow-x-auto border-b py-4",
           navigationClassName,
         )}
+        data-editorial-quick-tags="true"
         aria-label={copy.all}
       >
         <Link
           aria-current={query.tag === undefined ? "page" : undefined}
-          className={tagLinkClassName}
+          className={quickTagLinkClassName}
           href={queryHref(pathname, currentQuery, { tag: undefined, page: 1 })}
         >
           {copy.all}
@@ -127,7 +138,7 @@ export function EditorialIndex({
         {visibleTags.map(({ tag, count }) => (
           <Link
             aria-current={query.tag === tag ? "page" : undefined}
-            className={tagLinkClassName}
+            className={quickTagLinkClassName}
             href={queryHref(pathname, currentQuery, { tag, page: 1 })}
             key={tag}
           >
@@ -137,19 +148,39 @@ export function EditorialIndex({
         ))}
       </nav>
       {remainingTags.length > 0 ? (
-        <details className="border-b py-3" key={query.tag ?? "all"}>
-          <summary className="cursor-pointer text-sm focus-visible:outline-2 focus-visible:outline-ring">
-            {copy.allTags}
+        <details
+          className={cn(
+            "group overflow-hidden rounded-xl border bg-muted/25",
+            tagBrowserClassName,
+          )}
+          data-editorial-tag-browser="true"
+          key={query.tag ?? "all"}
+        >
+          <summary className="flex min-h-12 w-full cursor-pointer list-none items-center justify-between gap-4 px-4 py-3 text-sm font-medium transition-colors hover:bg-muted/50 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring [&::-webkit-details-marker]:hidden">
+            <span>{copy.browseTags(remainingTags.length)}</span>
+            <ChevronDownIcon
+              aria-hidden="true"
+              className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
+              data-editorial-tag-chevron="true"
+            />
           </summary>
-          <nav aria-label={copy.allTags} className="flex flex-wrap gap-3 pt-4">
+          <nav
+            aria-label={copy.browseTags(remainingTags.length)}
+            className="flex flex-wrap gap-2 border-t px-4 py-4"
+            data-editorial-tag-panel="true"
+          >
             {remainingTags.map(({ tag, count }) => (
               <Link
-                className={tagLinkClassName}
+                className={expandedTagLinkClassName}
                 href={queryHref(pathname, currentQuery, { tag, page: 1 })}
                 key={tag}
               >
-                {tagLabels[tag] ?? tag}{" "}
-                <span className="font-mono text-metadata">{count}</span>
+                <span className="min-w-0 [overflow-wrap:anywhere]">
+                  {tagLabels[tag] ?? tag}
+                </span>
+                <span className="shrink-0 font-mono text-metadata text-muted-foreground">
+                  {count}
+                </span>
               </Link>
             ))}
           </nav>

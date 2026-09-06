@@ -29,7 +29,7 @@ export interface EditorialCopy {
   readonly empty: string;
   readonly related: string;
   readonly controls: string;
-  readonly allTags: string;
+  readonly browseTags: (count: number) => string;
   readonly previousPage: string;
   readonly nextPage: string;
   readonly pagination: string;

@@ -25,7 +25,7 @@ const copy: Record<Locale, EditorialCopy> = {
     grid: "그리드",
     list: "목록",
     loadMore: "더 보기",
-    allTags: "전체 태그",
+    browseTags: (count) => `태그 둘러보기 · ${count}개`,
     previousPage: "이전 페이지",
     nextPage: "다음 페이지",
     pagination: "페이지 탐색",
@@ -46,7 +46,7 @@ const copy: Record<Locale, EditorialCopy> = {
     grid: "Grid",
     list: "List",
     loadMore: "Load more",
-    allTags: "All tags",
+    browseTags: (count) => `Browse tags · ${count}`,
     previousPage: "Previous page",
     nextPage: "Next page",
     pagination: "Pagination",
@@ -89,7 +89,7 @@ export function BlogIndex({
       Results={EngineeringInfiniteResults}
       headerClassName="max-w-none border-b-0 pb-3"
       navigationClassName="gap-5 border-b-0 py-5"
-      tagClassName="border-0 p-0 text-muted-foreground hover:bg-transparent aria-[current=page]:bg-transparent"
+      quickTagClassName="border-0 p-0 text-muted-foreground hover:bg-transparent aria-[current=page]:bg-transparent"
       resultsClassName="pt-6"
     />
   );

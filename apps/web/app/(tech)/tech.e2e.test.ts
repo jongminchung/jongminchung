@@ -124,6 +124,25 @@ test("[성공] 다음 글 응답이 진행 중인 페이지 탐색을 취소하�
 test.describe("JavaScript가 비활성화된 환경", () => {
   test.use({ javaScriptEnabled: false });
 
+  test("태그 패널을 키보드로 열고 모든 후순위 태그를 탐색함", async ({
+    page,
+  }) => {
+    await page.goto("/en", { waitUntil: "domcontentloaded" });
+    const tagBrowser = page.locator('[data-editorial-tag-browser="true"]');
+    const summary = tagBrowser.locator("summary");
+    const label = await summary.textContent();
+    const remainingTagCount = Number(label?.match(/\d+/u)?.[0]);
+
+    expect(remainingTagCount).toBeGreaterThan(0);
+    await expect(summary).toContainText(`Browse tags · ${remainingTagCount}`);
+    await summary.focus();
+    await summary.press("Enter");
+    await expect(tagBrowser).toHaveAttribute("open", "");
+    await expect(
+      tagBrowser.locator('[data-editorial-tag-panel="true"] a'),
+    ).toHaveCount(remainingTagCount);
+  });
+
   test("[성공] 다음 페이지 링크로 이후 글을 계속 탐색함", async ({ page }) => {
     await page.goto("/en?sort=oldest&view=list", {
       waitUntil: "domcontentloaded",

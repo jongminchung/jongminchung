@@ -246,14 +246,33 @@ test("태그 전체 탐색과 선택 상태를 유지하며 이전·다음 페�
   page,
 }) => {
   await page.goto("/en?sort=oldest&view=list");
-  const allTags = page.getByText("All tags", { exact: true });
-  await allTags.focus();
-  await allTags.press("Enter");
-  const tagLink = page
-    .getByRole("navigation", { name: "All tags", exact: true })
-    .getByRole("link")
-    .first();
+  const tagBrowser = page.locator('[data-editorial-tag-browser="true"]');
+  const tagBrowserSummary = tagBrowser.locator("summary");
+  const tagBrowserLabel = await tagBrowserSummary.textContent();
+  const remainingTagCount = Number(tagBrowserLabel?.match(/\d+/u)?.[0]);
+  expect(remainingTagCount).toBeGreaterThan(0);
+  await expect(tagBrowser).not.toHaveAttribute("open", "");
+  const chevron = tagBrowser.locator('[data-editorial-tag-chevron="true"]');
+  await expect(chevron).toBeVisible();
+  const collapsedRotation = await chevron.evaluate(
+    (element) => getComputedStyle(element).rotate,
+  );
+
+  await tagBrowserSummary.focus();
+  await tagBrowserSummary.press("Enter");
+  await expect(tagBrowser).toHaveAttribute("open", "");
+  await expect
+    .poll(() => chevron.evaluate((element) => getComputedStyle(element).rotate))
+    .not.toBe(collapsedRotation);
+  const tagPanel = tagBrowser.locator('[data-editorial-tag-panel="true"]');
+  await expect(tagPanel.getByRole("link")).toHaveCount(remainingTagCount);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expectNoHorizontalOverflow(page);
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await expectNoHorizontalOverflow(page);
+  const tagLink = tagPanel.getByRole("link").first();
   const tagHref = await tagLink.getAttribute("href");
+  const tagCount = Number(await tagLink.locator("span").last().textContent());
   expect(tagHref).not.toBeNull();
   await tagLink.click();
   await expect(page).toHaveURL(
@@ -261,7 +280,12 @@ test("태그 전체 탐색과 선택 상태를 유지하며 이전·다음 페�
       `tag=${new URL(tagHref!, "http://localhost").searchParams.get("tag")}`,
     ),
   );
-  await expect(page.locator('nav a[aria-current="page"]')).toBeVisible();
+  const quickTags = page.locator('[data-editorial-quick-tags="true"]');
+  await expect(quickTags.locator('a[aria-current="page"]')).toBeVisible();
+  await expect(tagBrowser).not.toHaveAttribute("open", "");
+  await expect(page.locator("#editorial-results")).toContainText(
+    String(tagCount).padStart(2, "0"),
+  );
 
   await page.goto("/en?sort=oldest&view=list");
   const pagination = page.getByRole("navigation", {
