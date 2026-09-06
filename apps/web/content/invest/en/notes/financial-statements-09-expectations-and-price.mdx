@@ -1,0 +1,67 @@
+---
+id: "financial-statements-09-expectations-and-price"
+locale: "en"
+title: "09. Why can a stock fall after good earnings?"
+description: "Value future cash under explicit scenarios and reverse the expectations in the price."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+status: "published"
+tags: ["financial-statements", "stocks", "valuation"]
+series: "Financial Statements to Stock Valuation"
+image: /invest/direction-of-money-financial-health.png
+imageAlt: Two independent verification paths recombining inside a valuation range while a failed fragment falls beyond an exit boundary
+sources:
+    - kind: article
+      title: "Valuation"
+      creator: "Aswath Damodaran, NYU Stern"
+      url: "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/lectures/val.html"
+    - kind: article
+      title: "Terminal Value Approaches"
+      creator: "Aswath Damodaran, NYU Stern"
+      url: "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/valquestions/termvalapproaches.htm"
+---
+
+When earnings improve and a stock falls, ask what the improvement was compared with. Last year's profit and the future cash required to support today's price are different benchmarks. Reverse the valuation to identify the assumptions behind Hanbit's hypothetical KRW 12,000 quote.
+
+## Move from recorded results to an explicit forecast
+
+First-year simple FCF was −43.2: operating cash flow of −3.2 less equipment spending of 40. Do not perpetuate that number automatically, or substitute net income of 28.8 as permanent cash. Here we introduce a **separate assumption that operations immediately reach a stable state after year one**. Next-year FCFF already deducts the reinvestment needed for the assumed growth.
+
+FCFF belongs to all capital providers and requires a matching discount rate. Equity cash flow discounted at the cost of equity is a different calculation.[^valuation] The rates below are educational assumptions, not an estimate of Hanbit's actual financing cost.
+
+## Calculate conditional values
+
+The constant-growth perpetuity is `operating value = next-year FCFF ÷ (discount rate − perpetual growth)`. The discount rate must exceed growth, and long-run growth and reinvestment assumptions must be sustainable together.[^terminal]
+
+| Scenario     | Next-year FCFF | Discount rate | Growth | Operating value | Equity per share |
+| ------------ | -------------: | ------------: | -----: | --------------: | ---------------: |
+| Conservative |              8 |           12% |     1% |           72.73 |  About KRW 4,953 |
+| Base         |             10 |           10% |     2% |          125.00 |       KRW 10,180 |
+| Optimistic   |             12 |            9% |     3% |          200.00 |       KRW 17,680 |
+
+Amounts other than share prices are KRW million. Each row adds excess cash of 36.8, subtracts bank debt of 60, and divides by 10,000 shares. Required operating cash of 20 stays within operations and is not added again. The base case gives equity of `125 + 36.8 − 60 = 101.8`.
+
+The table varies three assumptions together. To isolate one variable's effect, hold the others fixed. A real early-stage business would usually need explicit transition years before a stable terminal period. Raising perpetual growth without allowing for its reinvestment needs can overstate value.
+
+## Reverse the current price
+
+A KRW 12,000 quote implies market capitalization of 120 and operating value, after excess cash, of `120 + 60 − 36.8 = 143.2`. Holding the discount rate at 10% and growth at 2%, required next-year FCFF is `143.2 × 8% = 11.456`. That is 14.56% above the base assumption of 10.
+
+The question becomes: can Hanbit sustain FCFF of 11.456 after reinvestment from next year onward? Customer collections, gross margin, and equipment replacement now connect directly to price. Different discount or growth assumptions would change the required cash flow.
+
+## Read an earnings release against recorded expectations
+
+Compare the release with the sales, margins, collection assumptions, and outlook you wrote beforehand. Better historical results can accompany a weaker forecast or higher reinvestment needs, lowering your estimated value. Do not assign a daily price move to one cause without evidence: rates, flows, and other news may change simultaneously.
+
+Keep an input table with evidence and conditions that would invalidate each assumption. The result is a testable analysis rather than a single unexplained target price.
+
+## Continue reading
+
+- [Previous: Is a low P/E stock really cheap?](/en/notes/financial-statements-08-price-and-multiples)
+- [Next: How dividends, buybacks, and share issues change your stake](/en/notes/financial-statements-10-capital-allocation)
+- [Financial statements to stock valuation · full series](/en/series/financial-statements-to-stock-valuation)
+- [All Invest series](/en/series)
+
+[^valuation]: Aswath Damodaran, NYU Stern, [Valuation](https://pages.stern.nyu.edu/~adamodar/New_Home_Page/lectures/val.html). Matching cash flows and discount rates.
+
+[^terminal]: Aswath Damodaran, NYU Stern, [Terminal Value Approaches](https://pages.stern.nyu.edu/~adamodar/New_Home_Page/valquestions/termvalapproaches.htm). Stable growth and sustainable terminal assumptions.

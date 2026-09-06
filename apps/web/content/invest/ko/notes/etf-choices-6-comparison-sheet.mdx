@@ -1,0 +1,101 @@
+---
+id: "etf-choices-6-comparison-sheet"
+locale: "ko"
+title: "6. 내 목적에 맞는 ETF 비교표 완성하기"
+description: "앞선 다섯 편의 기록을 비교표로 모으고 가상의 후보를 걸러낸 뒤 매수·보류·재검토 기준을 정합니다."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+status: "published"
+tags: ["etfs", "portfolio", "investment-accounts"]
+series: "같은 투자, 다른 결과: ETF와 계좌를 고르는 법"
+image: "/invest/direction-of-money-global-portfolio.png"
+imageAlt: "서로 다른 시장 신호들이 하나의 정규화 격자를 지나 다섯 포트폴리오 구획으로 배분되는 장면"
+sources:
+    - kind: article
+      title: "Nasdaq 100 Covered Call ETF — QYLD"
+      creator: "Global X"
+      url: "https://www.globalxetfs.com/funds/qyld"
+    - kind: article
+      title: "Kodex 중개형 ISA 투자 가이드북 — 2026.01"
+      creator: "삼성자산운용 · Samsung Asset Management"
+      url: "https://www.samsungfund.com/upload/kodex/newsroom/2026011317101936.pdf"
+    - kind: article
+      title: "iShares Core S&P 500 ETF — Portfolio, Performance and Documents"
+      creator: "BlackRock · iShares"
+      url: "https://www.ishares.com/us/products/239726/ishares-core-sp-500-etf"
+    - kind: article
+      title: "ETP 종목정보 및 지표 설명"
+      creator: "한국거래소 · Korea Exchange"
+      url: "https://m.krx.co.kr/contents/02/0204/020401/JHPETP020401M01.jsp"
+---
+
+_공식 자료 확인: 2026년 9월 6일. 상품명으로 명시한 사례 외의 후보와 계산 수치는 설명을 위한 가정입니다._
+
+ETF를 비교하다 보면 표가 계속 넓어진다. 보수 옆에 거래량을 붙이고, 수익률 옆에 분배율을 붙인다. 그런데 맨 왼쪽에 내 돈의 용도가 없으면 숫자가 많아질수록 선택이 어려워진다.
+
+마지막 편에서는 앞선 다섯 편의 기록을 한 장으로 모은다. [ETF 비교표 CSV 내려받기](/invest/etf-comparison-template-ko.csv)를 열어 후보 이름부터 넣지 말고, 먼저 자금 목적과 사용 시점을 채워 보자. 스프레드시트에서 읽을 수 있는 빈 양식이며 실시간 시세나 자동 세금 계산은 들어 있지 않다.
+
+## 조건에 맞지 않는 후보부터 제외한다
+
+가상의 독자를 정해 보자. 한국에서 생활하고, 15년 뒤 쓸 장기 투자금을 모은다. 가까운 지출은 별도로 준비했고, 이번에는 미국 대형주 지수에 투자할 부분만 고른다. 분배금은 모두 재투자하며 중개형 ISA 사용을 검토한다. 이 설정이 모든 사람에게 맞는 포트폴리오라는 뜻은 아니다.
+
+| 항목      | 후보 A                    | 후보 B                    | 후보 C                      |
+| --------- | ------------------------- | ------------------------- | --------------------------- |
+| 상장시장  | 한국                      | 한국                      | 미국                        |
+| 전략      | 단순 지수 추종            | 지수 보유와 콜옵션 매도   | 단순 지수 추종              |
+| 통화 노출 | 달러 노출, 원화 헤지 없음 | 달러 노출, 원화 헤지 없음 | 달러 노출                   |
+| 현금 사용 | 재투자 예정               | 높은 분배를 강조          | 재투자 예정                 |
+| 이번 결정 | 비용·추종 성과 확인 계속  | 원하는 전략과 달라 제외   | ISA 직접 매수 대상에서 제외 |
+
+세 후보는 실제 상품을 축약한 것이 아니라 의사결정 연습용이다. B는 분배율이 낮아서 탈락한 게 아니다. 독자가 선택한 단순 지수 추종과 다른 전략이어서 제외했다. C는 성과가 나빠서가 아니라 이번에 검토하는 계좌와 맞지 않는다. 옵션 매도 구조와 ISA의 편입 범위는 실제 후보의 공식 문서에서도 확인한다.[^globalx][^isabook]
+
+A가 남았다고 바로 사는 것도 아니다. 비용 자료가 없거나 거래하려는 수량의 호가가 불리하면 보류할 수 있다. 후보를 모두 탈락시키는 표도 제 역할을 한 표다.
+
+## 숫자 옆에는 출처와 날짜를 둔다
+
+비교표에서 보수는 적용일, 추적차이는 측정기간, 보유종목은 기준일, 호가는 관찰 시각을 함께 적는다. 이 날짜들은 서로 다른 이유로 필요하다. 지난달 보유종목으로 겹침을 계산하면서 오늘 바뀐 구성이라고 쓰면 안 된다.
+
+| 필요한 자료      | 공식 자료에서 확인할 위치       |
+| ---------------- | ------------------------------- |
+| 전략과 위험      | 후보 ETF의 최신 투자설명서      |
+| 보수와 실제 비용 | 비용 표와 최근 운용보고서       |
+| 추종 성과        | NAV 성과와 동일 기준의 비교지수 |
+| 괴리와 거래 조건 | KRX 지표 설명, 매수·매도 호가   |
+| 계좌 조건        | 판매회사 계좌 약관과 적용 세법  |
+
+운용사 자료실에서 보유종목 파일까지 내려받는 습관을 들이면 상품 이름보다 실제 투자를 보게 된다. IVV 공식 페이지는 이런 자료 배치의 한 사례다. KRX 지표는 계산 기준을 먼저 읽고 사용한다.[^ivv][^krx]
+
+## ETF 개수 대신 겹치는 자산을 계산한다
+
+이미 ETF를 가지고 있다면 새 후보 하나만 비교해서는 부족하다. 기존 A와 새 B에 절반씩 투자하는데, 동일 기업 X의 비중이 A에서 8%, B에서 12%라면 전체 투자금의 X 노출은 다음과 같다.
+
+```text
+기업 X 비중 = 50% × 8% + 50% × 12% = 10%
+```
+
+이는 현물 주식 비중만 사용하는 단순 예시다. 파생상품이나 레버리지가 들어가면 보유금액 비중만으로 경제적 노출이 충분히 설명되지 않을 수 있다. 우선 비교 가능한 현물 상품부터 같은 기준일로 계산하자. ETF를 두 개 샀다는 사실보다 같은 기업에 얼마를 걸었는지가 더 구체적인 정보다.
+
+## 매수한 다음에 읽을 문장도 남긴다
+
+비교표 마지막에는 ‘선택 이유’를 한 문장으로 쓴다. ‘좋아 보여서’보다는 ‘15년 뒤 쓸 미국 주식 투자금이며, 지수와 통화 노출이 목적에 맞고 계좌 편입을 확인했다’처럼 나중에 검증할 수 있는 문장이 낫다.
+
+재검토 날짜와 조건도 적는다. 예를 들어 반년에 한 번 자료를 갱신하되, 지수·헤지 정책·계좌 조건이 바뀌면 먼저 확인한다. 이는 이 글의 관리 방식 제안이며 제도가 정한 주기는 아니다. 단기 수익률 순위가 바뀌었다는 이유만으로 처음부터 다시 쇼핑할 필요는 없다.
+
+여섯 편을 읽고 남아야 할 것은 추천 종목 하나보다 설명 가능한 선택이다. 무엇을 샀는지, 어떤 비용을 감수했는지, 돈을 언제 어떻게 쓸지 기록해 두면 다음 투자에서도 같은 표를 꺼내 쓸 수 있다.
+
+## 시리즈 이어 읽기
+
+1. [같은 지수를 추종하는 ETF는 정말 같을까](/ko/notes/etf-choices-1-same-index)
+2. [총보수만 비교하면 놓치는 비용](/ko/notes/etf-choices-2-costs-and-tracking)
+3. [분배금이 많으면 더 좋은 투자일까](/ko/notes/etf-choices-3-distributions-and-return)
+4. [원화로 산 해외 ETF에도 환율이 영향을 줄까](/ko/notes/etf-choices-4-currency-and-hedging)
+5. [일반계좌·ISA·연금계좌에서는 무엇을 따로 확인할까](/ko/notes/etf-choices-5-accounts-and-taxes)
+6. [내 목적에 맞는 ETF 비교표 완성하기](/ko/notes/etf-choices-6-comparison-sheet)
+
+[^globalx]: Global X, [Nasdaq 100 Covered Call ETF — QYLD](https://www.globalxetfs.com/funds/qyld). 2026년 9월 6일 확인.
+
+[^isabook]: 삼성자산운용 · Samsung Asset Management, [Kodex 중개형 ISA 투자 가이드북 — 2026.01](https://www.samsungfund.com/upload/kodex/newsroom/2026011317101936.pdf). 2026년 9월 6일 확인.
+
+[^ivv]: BlackRock · iShares, [iShares Core S&P 500 ETF — Portfolio, Performance and Documents](https://www.ishares.com/us/products/239726/ishares-core-sp-500-etf). 2026년 9월 6일 확인.
+
+[^krx]: 한국거래소 · Korea Exchange, [ETP 종목정보 및 지표 설명](https://m.krx.co.kr/contents/02/0204/020401/JHPETP020401M01.jsp). 2026년 9월 6일 확인.

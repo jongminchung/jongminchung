@@ -143,6 +143,11 @@ export function investmentSeriesDescription(
   locale: Locale,
   series: string,
 ): string {
+  if (series === "Financial Statements to Stock Valuation") {
+    return locale === "ko"
+      ? "재무제표에서 주식 가치평가까지, 총 12편. 가상의 공구 유통회사로 손익·현금흐름·부채·투자·주당 가치를 연결하고 공식 자료의 각주로 확인합니다."
+      : "Twelve chapters from financial statements to stock valuation. Follow a fictional tool distributor through profit, cash flow, debt, investment, and per-share value, with references to original sources.";
+  }
   return locale === "ko"
     ? `${series} 주제를 순서대로 연결한 투자 리서치 글 모음`
     : `An ordered collection of investment research essays in the ${series} series.`;

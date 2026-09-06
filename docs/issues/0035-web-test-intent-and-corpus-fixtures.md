@@ -13,7 +13,7 @@
 ## 현재 구현과 남은 작업 — 2026-09-06 작업 트리
 
 - `documents.test.ts`는 게시일 정렬과 Blog·Docs 조회를 설명하는 이름으로 검사하며 과거 Deep Dive 29개 ID 전체 배열은 더 이상 현재 구조를 나타내지 않음
-- `proxy.test.ts`의 `제조원`, `site-routing.test.ts`의 `표시되지 않고 외부 외부를 생성함`처럼 의미가 불명확한 이름은 남아 있음
+- `proxy.test.ts`·`site-routing.test.ts`·Excalidraw scene·tooling 구성 테스트의 불명확한 이름을 실제 assertion의 입력과 기대 동작으로 수정함
 - 남은 작업은 현재 assertion inventory를 다시 확인하고, 이름 정리와 정렬·related ranking의 작은 fixture 및 corpus smoke 경계를 검증하는 것임
 - 아래 최초 문제의 문서 수·이름 목록은 당시 근거임. 실행 작업의 과거 29개 배열은 재도입하지 않고 현재 corpus 결합을 기준으로 점검함
 - 현재 Unit·Integration은 Bun `test`·`test:coverage`에서 함께 실행하며 별도 `test:unit`·`test:integration` script는 없음

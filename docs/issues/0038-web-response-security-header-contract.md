@@ -21,12 +21,10 @@
 | `Referrer-Policy`        | `strict-origin-when-cross-origin`          |
 | `Permissions-Policy`     | `camera=(), geolocation=(), microphone=()` |
 
-- **`poweredByHeader: false`는 아직 없으며 CSP·HSTS도 Next 설정에서 제공하지 않음**
-- **정적 헤더의 application 구현과 운영 edge 소유권 확인은 별개임**
-    - `DEPLOYMENT.md`에 application·Ingress의 security header owner가 명시되지 않음
-    - 현재 configuration test와 E2E에는 위 네 헤더의 응답 계약 검증이 없음
-    - 이 점검은 소스 대조이며 local production·운영 응답을 새로 측정하지 않았음
-- **남은 작업은 owner·응답 inventory 확인, framework 노출 제거, 응답 계약 테스트와 CSP 단계 결정임**
+- **`poweredByHeader: false`를 명시하고 application을 정적 방어 헤더의 canonical owner로 `DEPLOYMENT.md`에 기록함**
+- **2026-09-06 공개 세 사이트 `/ko`는 200과 네 헤더를 제공하며 `X-Powered-By`·CSP·Report-Only는 관찰되지 않음**
+- **HTML·RSS·검색·OG·robots·sitemap 응답 회귀 검사를 추가함**
+- **CSP pilot은 보고 수집 위치·보존 정책·운영 담당자와 browser source inventory 확보 후 재개함. 배포 대시보드 override의 실제 구성은 별도 운영 확인 대상임**
 
 ## 최초 문제와 근거 — 2026-08-20
 
@@ -71,7 +69,7 @@
 - **세 public domain과 local standalone의 response header inventory를 기록함**
 - **application 또는 Ingress 중 canonical owner를 `DEPLOYMENT.md`에 명시함**
 - [x] application의 정적 방어 헤더 4개를 설정함
-- [ ] `poweredByHeader: false`로 framework 노출을 제거하고 실제 응답을 검증함
+- [x] `poweredByHeader: false`로 framework 노출을 제거하고 실제 응답을 검증함
 - **Home·Tech·Invest와 non-HTML route의 header contract test를 추가함**
 - **CSP report-only pilot에서 inline script와 lazy Excalidraw 경로를 검증함**
 - **cache·prerender·browser 동작 변화가 없는지 production build와 E2E로 확인함**
@@ -93,3 +91,11 @@
 - production domain header smoke
 - `bun run --filter @jongminchung/web test:e2e`
 - `git diff --check`
+
+## 2026-09-06 로컬 검증 결과
+
+- production build와 `bun run check` 통과.
+- 세 사이트 HTML·RSS·검색·OG·robots·sitemap의 보안 헤더 응답 검사 12건 통과.
+- 전체 E2E 133건 중 최초 130건 통과. 모바일 2건은 전체 load 대기를 DOMContentLoaded와 화면 assertion으로 바꾼 뒤 통과.
+- 시각 회귀 1건은 이미지 로드 실패가 관찰되었고 원본·최적화 이미지 200 확인 후 재검증에서 통과. snapshot은 변경하지 않음.
+- 초기 `links:check`는 Docker 미설치로 실행하지 못했으나, Podman 우선·Docker 대체 실행을 지원한 뒤 전체 검사에서 670개 링크·오류 0건을 확인함.

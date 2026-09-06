@@ -37,10 +37,11 @@
     - 우선순위: P1
     - 구현 범위: runtime source loader 분리, consumer 없는 generated manifest·loader·CLI 제거
 - [`0034`: Web multi-site URL과 feed 계약 통합](0034-web-multisite-url-feed-contract.md)
-    - 상태: 진행 중
+    - 상태: 구현 완료·반영 대기
     - 우선순위: P2
-    - 현재 구현: `siteOrigins`·locale protocol·robots helper 공유
-    - 남은 작업: Tech·Invest RSS serialization·response helper 통합과 공통 fixture 검증
+    - 현재 구현: `siteOrigins`·locale protocol·robots·RSS helper 공유
+    - 구현 완료: Tech·Invest RSS helper 통합, 특수문자·locale·날짜 fixture와 세 사이트 metadata 검증
+    - 남은 작업: 배포 후 RSS 응답 확인
 - [`0035`: Web test 의도와 corpus fixture 경계 정리](0035-web-test-intent-and-corpus-fixtures.md)
     - 상태: 진행 중
     - 우선순위: P3
@@ -57,7 +58,8 @@
     - 상태: 진행 중
     - 우선순위: P2
     - 현재 구현: Next 설정의 정적 방어 헤더 4개
-    - 남은 작업: application·Ingress owner 확인, framework 노출 제거, 응답 검증과 CSP 단계 결정
+    - 구현 완료: application owner 문서화, framework 헤더 제거와 응답 회귀 검사 추가
+    - 남은 작업: 배포 설정 override 확인과 조건 충족 후 CSP report-only pilot
 - [`0041`: OpenAI 공개 참조 디자인 시스템을 Web 세 사이트에 적용](0041-web-openai-reference-design-system-application.md)
     - 상태: 진행 중
     - 우선순위: P2

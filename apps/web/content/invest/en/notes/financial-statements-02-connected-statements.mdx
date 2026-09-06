@@ -1,0 +1,85 @@
+---
+id: "financial-statements-02-connected-statements"
+locale: "en"
+title: "02. Reading the financial statements together"
+description: "Reconcile the same transactions across profit, the balance sheet, and cash flow."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+status: "published"
+tags: ["financial-statements", "stocks", "valuation"]
+series: "Financial Statements to Stock Valuation"
+image: /invest/direction-of-money-financial-health.png
+imageAlt: Two independent verification paths recombining inside a valuation range while a failed fragment falls beyond an exit boundary
+sources:
+    - kind: article
+      title: "IFRS 10 Consolidated Financial Statements"
+      creator: "IFRS Foundation"
+      url: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-10-consolidated-financial-statements/"
+    - kind: article
+      title: "IAS 1 Presentation of Financial Statements"
+      creator: "IFRS Foundation"
+      url: "https://www.ifrs.org/issued-standards/list-of-standards/ias-1-presentation-of-financial-statements/"
+    - kind: article
+      title: "IAS 7 Statement of Cash Flows"
+      creator: "IFRS Foundation"
+      url: "https://www.ifrs.org/issued-standards/list-of-standards/ias-7-statement-of-cash-flows/"
+---
+
+A balance sheet, income statement, and cash flow statement describe the same company from different angles. Read them together by following transactions. Hanbit Tools starts its first operating year with cash 100, bank debt 60, and equity 40. All amounts below are KRW million.
+
+## Establish the reporting boundary
+
+Record the entity, period, currency, unit, and accounting framework before comparing numbers. Consolidated accounts include controlled subsidiaries under the applicable consolidation rules; separate parent accounts describe a different reporting boundary.[^group] A complete reporting package also contains equity movements, notes, and other required statements and disclosures beyond these three introductory views.[^presentation]
+
+Our fictional distributor has no subsidiaries. The exercise omits VAT, deferred tax, leases, bad debts, foreign currency, dividends, and other comprehensive income. Interest and tax payments are classified as operating cash flows **for this example**, not as a universal rule for every reporting framework or period.
+
+## Follow the year's transactions
+
+| Transaction                                 | Accounting effect                   | Cash movement |
+| ------------------------------------------- | ----------------------------------- | ------------: |
+| Buy inventory for 130, pay 110              | Closing trade payable 20            |          −110 |
+| Sell goods costing 120 for 200; collect 150 | Receivable 50, closing inventory 10 |          +150 |
+| Pay operating expenses                      | Expense 30                          |           −30 |
+| Buy equipment for sales and administration  | Asset cost 40                       |           −40 |
+| Depreciate that equipment                   | Expense 8, net equipment 32         |             0 |
+| Pay bank interest                           | Expense 6                           |            −6 |
+| Pay assumed 20% tax on pretax profit 36     | Tax expense 7.2                     |          −7.2 |
+
+The equipment is ready for use at the start of the year. Its assumed five-year life, zero residual value, and straight-line depreciation produce the charge of 8. This distributor's depreciation is a sales and administration expense rather than part of inventory cost.
+
+## Reconcile profit and equity
+
+Revenue 200 less cost of goods sold 120 leaves gross profit 80. Subtract operating expenses 30 and depreciation 8 to obtain EBIT 42. Interest 6 leaves pretax profit 36; assumed tax 7.2 leaves net income **28.8**.
+
+With no distributions or new shares, ending equity is `40 + 28.8 = 68.8`. The closing balance sheet is:
+
+| Assets        | Amount | Liabilities and equity | Amount |
+| ------------- | -----: | ---------------------- | -----: |
+| Cash          |   56.8 | Bank debt              |     60 |
+| Receivables   |     50 | Trade payables         |     20 |
+| Inventory     |     10 | Equity                 |   68.8 |
+| Net equipment |     32 |                        |        |
+| Total         |  148.8 | Total                  |  148.8 |
+
+## Reconcile the cash balance
+
+Operating cash flow is `150 − 110 − 30 − 6 − 7.2 = −3.2`. Equipment purchases produce investing cash flow of −40. Financing cash flow during the year is zero: the initial borrowing and share issue happened before the opening balance.
+
+Consequently, ending cash is `100 − 3.2 − 40 = 56.8`. Indirect operating cash flow reaches the same answer: `28.8 + 8 − 50 − 10 + 20 = −3.2`. IAS 7 explains the cash flow categories and adjustments for noncash items.[^cashflow]
+
+## Try the connection yourself
+
+Cover the ending cash figure and reconstruct it using both methods. Then explain why receivables appear as an asset while their increase is subtracted in the indirect cash flow calculation. You have recognized sales without collecting all the corresponding money. That timing difference will drive the next two chapters.
+
+## Continue reading
+
+- [Previous: What do you own when you buy a share?](/en/notes/financial-statements-01-owning-a-business)
+- [Next: Why profit can fall while revenue grows](/en/notes/financial-statements-03-revenue-and-margins)
+- [Financial statements to stock valuation · full series](/en/series/financial-statements-to-stock-valuation)
+- [All Invest series](/en/series)
+
+[^group]: IFRS Foundation, [IFRS 10 Consolidated Financial Statements](https://www.ifrs.org/issued-standards/list-of-standards/ifrs-10-consolidated-financial-statements/). Control and consolidation.
+
+[^presentation]: IFRS Foundation, [IAS 1 Presentation of Financial Statements](https://www.ifrs.org/issued-standards/list-of-standards/ias-1-presentation-of-financial-statements/). Components of a complete reporting package; check the standards applicable to each report.
+
+[^cashflow]: IFRS Foundation, [IAS 7 Statement of Cash Flows](https://www.ifrs.org/issued-standards/list-of-standards/ias-7-statement-of-cash-flows/). Cash flow categories and indirect reconciliation.

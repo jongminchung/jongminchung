@@ -296,7 +296,9 @@ test("[성공] 모바일 블로그에서 전체 탐색과 글 목차를 유지�
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/ko/building-coding-agent");
+  await page.goto("/ko/building-coding-agent", {
+    waitUntil: "domcontentloaded",
+  });
 
   await page.getByRole("button", { name: "기술 콘텐츠 메뉴" }).click();
   const menu = page.getByRole("dialog", { name: "기술 콘텐츠 메뉴" });
@@ -327,7 +329,9 @@ test("[성공] 한글 글의 줄바꿈·날짜·복사·터치 영역을 현지�
 }) => {
   await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/ko/building-coding-agent");
+  await page.goto("/ko/building-coding-agent", {
+    waitUntil: "domcontentloaded",
+  });
 
   const title = page.getByRole("heading", {
     level: 1,

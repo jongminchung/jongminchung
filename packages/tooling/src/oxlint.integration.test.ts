@@ -21,7 +21,7 @@ function readResolvedConfig(): PrintedOxlintConfig {
 }
 
 describe("해결된 Oxlint 구성", () => {
-  it("[성공] 기준점과 기준점 규칙을", () => {
+  it("[성공] 실제 Oxlint CLI가 공통 플러그인과 규칙을 적용함", () => {
     const config = readResolvedConfig();
 
     expect(config.categories.correctness).toBe("deny");

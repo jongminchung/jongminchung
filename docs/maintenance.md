@@ -95,7 +95,9 @@ advisory가 발견되면 다음 순서로 처리한다.
 bun run links:check
 ```
 
-이 명령은 `lycheeverse/lychee:0.24.2` Docker image를 실행해 저장소를 read-only로 mount한다.
+이 명령은 PATH에서 Podman을 먼저 찾고, 없으면 Docker를 사용해
+`docker.io/lycheeverse/lychee:0.24.2` image를 실행하고 저장소를 read-only로 mount한다.
+둘 다 없으면 설치 안내와 함께 실패한다. 선택한 runtime의 실행 실패는 그대로 보고한다.
 Markdown과 HTML의 로컬 링크·anchor만 검사하며 외부 URL에는 network request를 보내지 않는다.
 image를 일시적으로 바꿔 검증할 때는 `LYCHEE_IMAGE` 환경 변수를 사용한다.
 Web MDX의 app route는 기존 content validation과 build가 별도로 검증한다.
@@ -121,7 +123,7 @@ Web MDX의 app route는 기존 content validation과 build가 별도로 검증�
 | ------------------ | ----------------------------- | ---------------------------------------------------- | ------------------------------ |
 | `Publish Packages` | `workflow_dispatch`           | 선택한 `tooling`·`ui`의 GitHub Packages `1.0.0` 교체 | `GH_PAT`                       |
 | `Waka Readme`      | 매일 `15:00 UTC`, 수동 실행   | README Waka 통계 구간 갱신                           | `WAKATIME_API_KEY`, `GH_TOKEN` |
-| `Links`            | 문서 PR·`main` push           | Docker 기반 Markdown·HTML 로컬 링크 검사             | 없음                           |
+| `Links`            | 문서 PR·`main` push           | Podman 우선·Docker 대체 Markdown·HTML 로컬 링크 검사 | 없음                           |
 | `Web`              | PR·관련 `main` push·주간 예약 | Web 검사·브라우저 회귀, 주간 콘텐츠 근거 보고서      | 없음                           |
 
 ## 패키지 게시
@@ -168,3 +170,13 @@ dry-run의 포함 파일, ESM JavaScript·declaration, named export와 package e
 - 특정 버전 문서가 제공되면 현재 major와 맞는 페이지를 사용한다.
 - redirect, 폐기된 문서, 저장소 이전 여부를 의존성 업데이트 시 다시 확인한다.
 - 명령, port, workflow와 secret 이름은 설명보다 실제 manifest·config를 기준으로 검증한다.
+
+## 콘텐츠 출처 응답 점검
+
+`bun run --filter @jongminchung/web content:evidence -- --network`는 HEAD 응답을 분류한다.
+2xx만 `ok`이며, 401·403은 `access-denied`, 405·501은 `method-not-supported`,
+404·410은 `missing`, 408·429와 나머지 5xx는 `temporary-failure`,
+3xx는 `redirect`, 그 밖의 오류 응답은 `http-error`다.
+`missing`은 `review-required`, 그 외 비정상 응답은 `warning`으로 검토한다.
+HEAD 미지원은 링크 삭제 근거가 아니므로 브라우저 또는 GET으로 확인한 뒤 판단한다.
+네트워크 없이 실행한 `not-checked`는 출처 접근 성공을 뜻하지 않는다.

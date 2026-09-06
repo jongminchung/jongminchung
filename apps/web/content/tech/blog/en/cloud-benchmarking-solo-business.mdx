@@ -1,0 +1,283 @@
+---
+title: "Building a Korean B2B Cloud Operations Business"
+description: "Prepare a small Korean B2B cloud business while employed, linking public support to resource delivery, contracts, a modest budget, six months of validation, and a decision on full-time work."
+thesis: "A Korean B2B cloud operations business becomes viable when operational responsibility, acceptance criteria, and recurring costs fit the customer company’s budget and approval process."
+counterargument: "Existing MSPs and development maintenance providers already offer operations, so a solo business needs a specific advantage in handover, recovery, or reporting to earn a company’s trust."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: [cloud, benchmarking, business, b2b, korea, infrastructure, operations]
+status: experimental
+publicationStatus: published
+sourceUrl: https://docs.aws.amazon.com/wellarchitected/latest/framework/perf_process_culture_load_test.html
+---
+
+Could renting cheap servers and selling access at a markup become a cloud business? The arithmetic looks straightforward until customers arrive. Who restores an app at night? What happens when one customer consumes all available memory? How does a departing customer retrieve their data? The price must cover the work required to answer these questions.
+
+This article designs a **solo B2B cloud operations business serving Korean SMEs and web development agencies**. The contracting and billing unit is a company. The product covers migration, deployment, backups, recovery, and monthly reporting for business web applications. Supported runtimes and databases are limited, with operating scope agreed per company. The provider may start alone, but the buyer contracts against a business budget.
+
+The starting assumption is employment at a private company, ten hours a week for preparation, and a small experiment budget. Begin with scheduled assessments, restoration tests, and automation projects. Expand into recurring operations after securing daytime coverage or moving into the business full time. Public support can contribute education, validation, and product-development resources.
+
+The initial market is operations for business applications delivered by Korean web agencies. Either the agency contracts directly for operations or it introduces the provider to the end company for a direct agreement. Define the approver, support contact, and billing entity for each route.
+
+Benchmarking has two meanings here. Product research studies how existing clouds turn customer work into a service. Workload testing measures performance and cost. The first identifies what to sell; the second establishes what can be promised. The configurations, prices, and acceptance criteria below are business hypotheses, not results from customer interviews or executed performance tests. Official documentation was checked on September 6, 2026.
+
+## Narrow the first contracting customer in Korea
+
+A first product described as “as much CPU and memory as you want” invites an expanding range of operating systems, runtimes, networking requirements, and security questions. A more manageable starting scope is migrating supported web apps and managing subsequent deployments and recovery.
+
+| Candidate product      | What the customer pays for                            | Operator responsibilities                       | Initial assessment                                           |
+| ---------------------- | ----------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------ |
+| General-purpose VMs    | Server access and resources                           | Abuse handling, networking, varied OS support   | Broad support scope and price competition                    |
+| Managed app operations | Less time spent on deployment, backups, and incidents | Migration and operations for supported stacks   | The first hypothesis in this article                         |
+| Managed databases      | Data preservation and recovery                        | Replication, upgrades, recovery, access control | Consider after establishing recovery capability and coverage |
+| GPU inference API      | Results for a specific task                           | Model quality, GPU utilization, queues, billing | Validate separately against a specific demand                |
+
+A small agency may have several delivered applications. Each app is small, but domains, certificates, failed deployments, and backup checks still require attention. The buying questions might be whether a new client app can be migrated within a day, whether a former developer's access can be revoked promptly, and whether someone owns recovery. Interviews must establish whether these concerns matter more than a vCPU specification.
+
+Some teams already solve these problems with a PaaS. A cheaper server alone gives them little reason to migrate. Ask about recent incidents, monthly operations time, existing spending, and purchasing authority to find customers with unresolved work.
+
+Use the following as initial customer hypotheses. Company sizes and priorities are proposed sales criteria, not market statistics.
+
+| Customer company                                                                   | Work and purchase trigger                                                                     | People involved                                    | Initial approach                                                           |
+| ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | -------------------------------------------------- | -------------------------------------------------------------------------- |
+| Korean web agencies and SI firms with 5–30 staff                                   | Post-delivery operations interrupt new development; maintenance renewal                       | Owner, engineering lead, project manager           | First priority: a paid pilot for one or two supported apps                 |
+| Korean distribution, manufacturing, or professional-service SMEs with 20–100 staff | Take over quotation, inventory lookup, or reporting apps after an outsourced developer leaves | Business manager, IT contact, owner or procurement | Approach through an agency; verify documentation, source, and access first |
+| Core transaction or production systems requiring around-the-clock response         | High interruption costs and recovery responsibility                                           | Business, security, and procurement stakeholders   | Outside initial scope; revisit after securing response partners            |
+
+Make the first offer concrete: deployment, backups, and monthly checks for two business web apps and one database. Specify the stack, environment counts, data size, and support hours. Business stakeholders assess interruption and reporting delays; technical contacts assess handover feasibility; budget owners authorize spending. One person may hold several roles, but each question still needs an answer.
+
+For agency arrangements, define where the end company reports incidents and who approves changes. Report and bill to the agency when it is the customer; obtain acceptance and approval from the end company when contracting directly. Bundling multiple end-client applications into one agency agreement does not remove their operating costs.
+
+## What to benchmark in existing clouds
+
+Study Korean managed service providers (MSPs) alongside cloud product capabilities. NAVER Cloud’s partner directory includes companies offering consulting, migration, and managed services. Use it as a starting point for competitor research; a directory listing establishes neither actual service quality nor demand for this business. [NAVER Cloud partner directory](https://www.ncloud.com/partner/partners).
+
+Compare published migration deliverables, support hours, customer approval responsibilities, monthly reporting, and termination handover. Evaluate whether a company can understand a proposal and obtain internal approval for its operating scope.
+
+| Reference                          | What to examine in official documentation                             | Question for our service                                           |
+| ---------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| AWS workload testing guidance      | Production-like environments, full request paths, bottlenecks, limits | How will we validate supported applications and loads?             |
+| Hetzner shared and dedicated vCPUs | Shared resource behavior and resource selection                       | Are we selling low average cost or more consistent response times? |
+| Render health checks               | Readiness before a new deployment receives traffic                    | Can a failed deployment leave the existing service available?      |
+| Render rollbacks                   | Artifact reuse and the scope of restoration                           | How will we distinguish app rollback from data recovery?           |
+
+AWS identifies testing only individual components or using an environment unlike production as pitfalls. Hetzner explains that other users' activity can affect response times on shared vCPUs. Identical “2 vCPU” labels therefore do not establish identical service quality. [AWS load testing guidance](https://docs.aws.amazon.com/wellarchitected/latest/framework/perf_process_culture_load_test.html), [Hetzner server FAQ](https://docs.hetzner.com/cloud/servers/faq/).
+
+Render routes traffic to new instances after health checks succeed and supports rollback using earlier build artifacts. Deployment rollback does not restore the state of disk data. A small service needs this distinction too: the useful lesson is the meaning of success, failure, and recovery communicated to customers. [Render health checks](https://render.com/docs/health-checks), [Render rollbacks](https://render.com/docs/rollbacks).
+
+For Korean business customers, also benchmark ownership and cost explanations. NAVER Cloud Sub Account supports resource management through assigned permissions, and its pricing guide provides a starting point for examining service costs. Test delegated access creation and revocation, and company-specific cost reporting. [Sub Account overview](https://guide.ncloud-docs.com/docs/subaccount-overview), [NAVER Cloud pricing](https://www.ncloud.com/charge/price/ko).
+
+Measure time from approved access to deployment, failed-deployment explanations, recovery steps, and export time using the same scenario. Keep documented capabilities separate from observed results. If a contract requires a Korean region, compare performance and costs among candidates meeting that requirement. Lessons from an overseas provider such as Hetzner do not establish suitability for the customer’s actual deployment.
+
+## Turn performance measurements into saleable limits
+
+Begin with a representative customer application. Exercise authenticated API calls, database reads and writes, file uploads, and scheduled work in defined proportions. Use synthetic data rather than sensitive customer records. Testing the complete workload follows [AWS load testing guidance](https://docs.aws.amazon.com/wellarchitected/latest/framework/perf_process_culture_load_test.html). The following thresholds and sequence are proposals for this business.
+
+Compare shared VMs, dedicated-vCPU VMs, and a managed platform under comparable regional conditions and software versions. Use the same image digest, database size, request mix, and cache conditions. For Korean customers, measure round-trip latency from a load generator in Korea and collect server-side processing time separately. Disclose regional differences when comparing providers.
+
+| Measurement       | Values to record                                                   | Product decision                      |
+| ----------------- | ------------------------------------------------------------------ | ------------------------------------- |
+| Request quality   | p50, p95, p99 latency; error rate; successful throughput           | Maximum supported sustained load      |
+| Resource pressure | CPU, peak memory, OOM events, disk latency, DB connections         | Plan limits and scaling triggers      |
+| Waiting work      | Queue depth and oldest waiting job age                             | Concurrency and rejection policy      |
+| Recovery          | Deployment, rollback, fresh-VM restoration time, data loss window  | Support scope and recovery objectives |
+| Total cost        | Active and idle compute, storage, transfer, backups, operator time | Minimum sustainable price             |
+
+An initial sequence could include ten minutes of warm-up, thirty minutes of sustained load, incremental overload, terminating a worker process, and restoring a backup. Repeat at least three times at different times of day, then run surviving candidates for at least twenty-four hours. Do not set shared-resource capacity from a single peak score. Verify that the load generator itself is not the bottleneck.
+
+Write acceptance criteria before running the experiment: for example, p95 below 300 ms and an error rate below 0.1% for the representative API. These are example targets, not service guarantees. Retain visibility into slow failed requests and judge latency together with errors. Report cold starts and cache-hit conditions separately.
+
+Suppose a test eventually finds a maximum of 100 RPS that meets those conditions. An initial planning cap might be 60%, or 60 RPS, subject to further testing. This is an illustration, not a measured result. Different apps place different loads on their databases, so it cannot become a universal “60 RPS per app” guarantee. Publish memory, concurrency, storage, and transfer limits, then validate suitability through an acceptance test of each customer workload.
+
+Keep reproducible records: provider, plan, region, execution time, image version, configuration, raw measurements, cost calculation period, and rejection reasons. Those records make later comparisons meaningful.
+
+## Start resource delivery with a VM per customer
+
+The initial architecture rents provider VMs and separates customer runtimes by VM. Containers package applications and enforce resource limits. Hardware purchases or a shared Kubernetes cluster can be evaluated after rental-based operations establish demand and cost.
+
+The default product is **BYOC operations in a cloud account owned by the customer company**. The company pays its infrastructure provider directly, while this business bills for handover, automation, and recurring operations. The customer retains account ownership and billing information, delegating limited permissions for specific work. At termination, it must be able to revoke access and hand over to another operator.
+
+List provider, region, account owner, estimated infrastructure costs, and management fees separately in the proposal. Agree on data and backup locations and the logs sent to support tools. If Korean-region placement is required, examine both production data and backups. Bundled hosting in an operator-owned account is a separate future product, subject to provider terms and the ability to absorb receivables and cost variability.
+
+```text
+Customer deployment request
+  → Management API: authentication, plan, authorization
+  → Job database and queue: request ID, target version, state
+  → Reconciliation worker: VM, DNS, certificate, deployment state
+
+Application user
+  → DNS / TLS entry point
+  → Proxy on the customer's VM
+  → App container → Customer database
+                  → Object storage
+
+Separate observation path: external checks, metrics, audit logs
+Separate recovery path: off-VM backups → restore to a fresh VM
+```
+
+Existing apps should continue serving if the management API stops. The management layer owns accounts, plans, and deployment state; application traffic flows directly to customer VMs. This separation does not make an app or database highly available. A single-VM failure still causes downtime until recovery finishes.
+
+The first management interface can be small: an authenticated request form, reviewed configuration, and repeatable provisioning jobs. If a worker crashes just after creating a VM, its retry must find the same resource. Use request IDs to prevent duplicates and store transitions such as `requested → provisioning → deploying → ready`, plus failure and deletion states. Reconcile actual resources with records periodically to find orphaned VMs and missing charges.
+
+Limit more than CPU and memory. Disk space, upload size, request body size, execution time, database connections, job concurrency, and monthly transfer all affect overload and cost. Publish rules such as an alert at 80% usage, an upgrade or restriction at the limit, and advance consent for overage billing. Do not automatically increase charges for customers who have not accepted overages.
+
+If the service later adopts shared Kubernetes, creating a namespace does not complete tenant isolation. Official guidance describes additional network policies, access controls, and resource allocation. Running untrusted customer code needs a deliberate isolation design. [Kubernetes multi-tenancy](https://kubernetes.io/docs/concepts/security/multi-tenancy/).
+
+For this business, use customer-specific credentials, least privilege, encrypted secret storage, private database access, and management audit records. Build applications on separate workers to limit build contention and secret access. Customer-specific VMs cannot compensate for shared credentials or authorization errors in the management API.
+
+## Recovery and offboarding complete the product
+
+Record the image digest and configuration version for each deployment. Check the new version's readiness before switching traffic, retaining the existing version on failure. Sequence database changes through expansion, transition, and cleanup so old and new application versions can coexist. Rolling back an image may not recover a service after a destructive schema change.
+
+Store backups outside the production VM with customer-specific access. Independently of backup success notifications, restore onto a fresh VM and verify that the application can read and write data. During onboarding and recurring recovery drills, record data size, restoration duration, and the latest recoverable point.
+
+Consider pilot objectives of a 24-hour RPO and a four-hour RTO. RPO describes acceptable data loss in time; RTO describes the recovery time objective. Daily backups must keep succeeding to approach that RPO, and an unnoticed failed backup can exceed it. Define when the RTO clock starts, such as the beginning of service interruption. If nobody responds overnight, promising recovery within four hours of an overnight incident is difficult. Customers requiring around-the-clock recovery objectives need a plan with automated recovery or staffed coverage.
+
+Publish support hours and first-response objectives separately from restoration time. A solo operator also needs backup coverage for holidays and extended absence, including a procedure for granting access. Do not present internal objectives as contractual SLAs before measurements and response capability support them.
+
+For changes involving business interruption, record the customer approver, maintenance window in Korean time, and rollback criteria beforehand. Agree on preauthorized emergency actions. During incidents, communicate impact, temporary measures, and the next update time to the designated company contact; follow with causes and preventive actions. Monthly reports cover cost changes, deployments, backup and restoration checks, outstanding risks, and next month’s work.
+
+Implement offboarding early. Customers must be able to export databases and files and establish ownership of domains and accounts. Explain the service end date, export window, production-data deletion date, and backup expiry before purchase. Specify support scope, responsibilities, data handling, usage restrictions, refunds, and termination in the agreement. During onboarding, collect business identification details, the settlement contact, the required transaction-document delivery method, and payment dates. Confirm actual tax treatment, including tax invoice issuance, and personal-data processing arrangements for the business type, transaction, and data involved.
+
+## Connect business purchasing to concrete deliverables
+
+Design the sales process as `introduction → problem discovery → paid assessment → proposal and quote → contract → handover and acceptance → monthly operations → renewal`. Companies vary, so the first meeting should establish vendor registration, decision authority, security review, budget timing, and payment terms.
+
+| Stage                   | Deliverable                                                                               | Customer decision                                          |
+| ----------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| Paid assessment         | Resource inventory, access and backup status, operations gaps, handover risks             | Whether takeover is feasible and which work comes first    |
+| Proposal and quote      | Statement of work, infrastructure estimate, one-time handover fee, monthly operations fee | Budget owner and purchasing schedule                       |
+| Contract                | Support hours, responsibilities, change approval, acceptance, payment, exit terms         | Signatory and business, technical, and settlement contacts |
+| Handover and acceptance | Deployment and restoration records, handover inventory, access specification              | Agreed checks passed and operations start date             |
+| Operations and renewal  | Monthly report, change history, usage, next-period proposal                               | Maintain, expand, or end the scope                         |
+
+Avoid acceptance language such as “stabilization completed.” Use checks such as deployment in the new environment, restoration of agreed sample data, incident notification delivery, customer administrator access, and export testing. Agree on the acceptance deadline and treatment of incomplete items before contracting. An assessment investigates whether operations can be taken over; it does not imply repairing every defect in the existing application.
+
+## Price an operations agreement per company
+
+The following monthly product and economics assume **full-time availability or partner coverage during business hours**. They are distinct from the time and cash budget for preparation while employed.
+
+Separate one-time assessment and handover fees from monthly operations fees. BYOC infrastructure is paid directly by the customer. An example monthly scope covers two web apps and one database, one development and one production environment, weekday support from 09:00 to 18:00 Korean time, two scheduled changes, and a monthly report. Specify supported stacks and resource limits in an attachment. Assume a six-hour monthly work allowance covering meetings, support, changes, and reporting. Additional work requires a quote and customer approval. Around-the-clock response, feature development, and new system construction are separate scopes.
+
+The following is a **hypothetical Korean B2B BYOC operations agreement**, not a local market rate or provider quote. Amounts are monthly Korean won excluding VAT. Customer-paid infrastructure is excluded from this provider’s operating revenue and costs.
+
+| Item                                                  | Assumption per customer company |
+| ----------------------------------------------------- | ------------------------------: |
+| Monthly operations fee                                |                   KRW 1,200,000 |
+| Company-specific observation and operations tools     |                     KRW 100,000 |
+| Operations, meetings, reporting: 6 hours × KRW 50,000 |                     KRW 300,000 |
+| Expected rework and incident credits                  |                     KRW 100,000 |
+| Monthly contribution per company                      |                     KRW 700,000 |
+
+```text
+Contribution = monthly operations fee - company-specific tools, time, and expected credits
+Monthly fixed cost = shared tools and management infrastructure: KRW 1,000,000
+                   + sales, development, shared administration: 50 hours × KRW 50,000
+                   = KRW 3,500,000
+Economic break-even customer companies = ceil(3,500,000 / 700,000) = 5
+```
+
+Eight companies produce KRW 9.6 million in monthly operating revenue, KRW 5.6 million in contribution, and KRW 2.1 million after fixed costs. This economic calculation includes a value for founder time and does not represent after-tax profit or cash balance. Exclude one-time assessment and handover revenue from recurring break-even calculations.
+
+If work rises from six to twelve hours per company, time cost becomes KRW 600,000, contribution falls to KRW 400,000, and break-even rises to nine companies. That requires 108 customer-work hours plus fifty hours of shared work. It exceeds a sixty-hour customer-work budget. Change scope or pricing, or secure delivery capacity, before adding contracts.
+
+Six hours per customer gives an arithmetic ceiling of ten companies. Start with three and set the actual cap with room for simultaneous incidents, holidays, and handovers. When an agency adds end-client apps, costs rise even if contract count stays unchanged. Track each company’s share of revenue alongside workload to manage account concentration.
+
+Estimate assessment and handover fees separately from hours and acceptance deliverables. Acquisition cost includes discovery meetings, technical investigation, proposals, and security questionnaires; avoid counting those hours twice in customer-level economics. Distinguish signed contract value from collected cash. Agree on deposits and balances, acceptance dates, monthly billing dates, and payment deadlines, then calculate cash needed for delays. Adding bundled hosting requires a new model that includes provider payments and unpaid customer bills.
+
+## Validate scheduled work within ten hours a week while employed
+
+Start with work that has defined completion criteria and a bounded schedule: read-only infrastructure assessments, backup restoration in an isolated test environment, or deployment automation. Existing customer staff or a separately contracted operating partner retain daytime incident responsibility. Automated alerts do not provide daytime response coverage. Production changes require an approved window and a person available to restore service.
+
+For private-sector employment, review the employment contract and workplace rules on outside work. Ministry of Employment and Labor guidance also directs employees to check workplace restrictions. This is not blanket permission for every workplace or activity. Civil servants and public-institution staff need to check the separate rules governing their status and institution. [MOEL guidance on concurrent work](https://1350.moel.go.kr/rtmview.do?id=1000310673).
+
+Use personal equipment, accounts, repositories, and cloud spending. Keep employer code, customer lists, internal documents, and working time out of the business. If the business overlaps with the employer’s work, clarify outside-work approval, conflicts, confidentiality, and ownership of results in writing. Complete required approvals before paid agreements, and do not use employer accounts as a personal sales channel without authorization.
+
+Use the following **ten-hour weekly limit** as a planning hypothesis. If customers only meet during business hours, arrange approved leave or mutually suitable time outside work and reduce development time that week. Grant presentations and education also consume this budget.
+
+| Time allocation                  | Work                                                                | Weekly result                             |
+| -------------------------------- | ------------------------------------------------------------------- | ----------------------------------------- |
+| Two weekday evenings × two hours | Representative-app benchmarks and recovery or deployment automation | One reproducible test                     |
+| Three weekend hours              | Demo and assessment report                                          | One customer-facing deliverable           |
+| Two flexibly scheduled hours     | Customer interviews and booked meetings                             | Problem, budget, and approver notes       |
+| One weekend hour                 | Support notices, spending, next week’s schedule                     | Updated funding shortlist and cash record |
+
+Limit concurrent paid assessments to one initially. If delivery takes eight hours, record proposal, meeting, and revision time too. If demand consistently requires unscheduled response, secure a delivery partner or defer that agreement before accepting ongoing responsibility.
+
+## Match public support to the current stage
+
+The following links are **official resources checked on September 6, 2026**. Eligibility is not established without age, location, registration and corporate-representative history, and previous support history. Closed calls provide preparation references; they do not establish next year’s timetable or guarantee another call with identical terms.
+
+| Route                                                                                                                                               | Verified support and audience                                                                  | Connection to this business                                                       | Application status and conditions                                                                                                                                   |
+| --------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Startup Edu](https://www.k-startup.go.kr/edu/)                                                                                                     | Free online startup education for prospective and existing founders                            | Learn customer discovery, business models, and planning                           | A current learning route; check availability per course                                                                                                             |
+| [2026 revised Pre-startup Package notice](https://www.bizinfo.go.kr/sii/siia/selectSIIA200Detail.do?pblancId=PBLN_000000000119859)                  | Commercialization funding and programs for prospective founders                                | Recovery-validation and cost-reporting MVP, customer validation                   | March 6–26 window closed; registration and legal-representation reference date stated as January 22, 2026                                                           |
+| [Initial Startup Package](https://www.kised.or.kr/menu.es?mid=a10205020000)                                                                         | Commercialization and market-entry support for businesses within three years of founding       | Productize common tools and run paid pilots after registration                    | [2026 general-track application](https://www.mss.go.kr/site/smba/ex/bbs/View.do?bcIdx=1065015&cbIdx=310&parentSeq=1065015) ran January 23–February 13 and is closed |
+| [2026 Startup-focused University recruitment](https://www.bizinfo.go.kr/biz/biza/selectBIZA200Detail.do?policyNewsId=NEWS_000000000000176&target=M) | University-origin and region-based startup support                                             | Validate the business through an institution matching location or university ties | March 3–23 recruitment closed; read the notice for the specific track                                                                                               |
+| [Middle-aged Technology Startup Centers](https://www.kised.or.kr/menu.es?mid=a10211060000)                                                          | Education, incubation, and workspace for prospective and existing founders aged forty or older | Career-based B2B planning and regional contacts                                   | Schedules vary by center; check employment and attendance conditions separately for education and residency                                                         |
+
+Find notices on [K-Startup](https://www.k-startup.go.kr/web) and [Bizinfo](https://www.bizinfo.go.kr/) by stage, region, education, and commercialization. Shortlist at most two programs. Give the administering institution your employment arrangement, age, region, registration history, and available time when checking fit. Consider workspace support only if you can actually meet its usage requirements.
+
+**Business registration and employment are separate eligibility questions.** The revised Pre-startup Package notice uses a specific reference date for registration and legal corporate representation. Do not reduce it to “unregistered means eligible” or a blanket rule about employees. Verify continued employment, required founding dates after selection, founder participation, and weekday education or presentations against that year’s notice, FAQ, and the administering institution’s response. Keep the response. This article does not establish eligibility to remain employed.
+
+Choose between two preparation routes. A **pre-startup-support-first route** validates demand through interviews, synthetic-data demos, and nonbinding purchase interest while checking registration timing. An **immediate-paid-assessment route** resolves outside-work permission, registration, and tax arrangements first, then searches for early-stage or regional support matching that history. Do not conceal real trading or registration history to preserve eligibility. Decide on incorporation once customer requirements, shared ownership or investment plans, and administration costs are concrete.
+
+## Connect an application to customer evidence and automation deliverables
+
+One possible supported project is a tool that repeatedly verifies recoverability and operating cost for applications delivered by small Korean agencies. Choose this direction when genuinely planning reusable software from manual operations work. Do not relabel ordinary service delivery as technology development. Selection depends on program purpose and assessment; if the business fits service delivery better, build around customer revenue, education, and consultation.
+
+Collect the following evidence using the current application format. This is a preparation checklist for this business, not an official scoring scheme.
+
+- Customer problem: interview records excluding employer materials, recurring incidents and recovery gaps, budget-owner requirements.
+- Solution: a demonstration of deployment, restoration testing, and cost reporting in isolated customer environments.
+- Outcome targets: assessment duration, restoration success, report-writing time, paid acceptance and collection records. Label unmeasured values as targets.
+- Delivery plan: available time while employed, responsibilities, weekday attendance and coverage, outsourced scope and deliverables.
+- Budget evidence: quotes for infrastructure, testing, and development; expenditure dates; available matching cash and settlement records.
+
+Maintain a program sheet with notice version, deadline, eligibility reference date, age, region, industry, employment terms, prior awards, overlapping-project restrictions, cash and in-kind contributions, allowable spending, required attendance, and founding or performance obligations. Schedule application, assessment, selection, agreement, expenditure and reporting, and settlement separately. Before spending, verify treatment of pre-agreement costs, VAT, founder compensation, and cloud fees. Charge only items allowed by the notice and agreement to the project.
+
+For planning, treat commercialization support as purpose-bound money requiring expenditure records. Exclude it from living-expense funding and unrestricted customer revenue. Treat loans and guarantees as separate financing with repayment and guarantee conditions, and distinguish private cloud credits from cash grants. Put unapproved support and expected future awards at zero in the baseline cash plan.
+
+## Prepare for six months with a KRW 3 million cash limit
+
+The following assumes **ten hours a week and KRW 3 million for six months of experiments**. These are author-proposed limits, not government budgets or award amounts. Personal living costs and already-owned equipment are excluded. Reserve KRW 300,000 per month for six months for test cloud resources, tools, and meetings; retain the remaining KRW 1.2 million as a ceiling for necessary contract or tax consultation and unexpected experiment costs. Obtain quotes before spending and reduce scope if costs exceed the limit. Use free education and defer office leases, equipment purchases, and long-term server commitments until demand is validated.
+
+| Period  | Work while employed                                                               | Public-support connection                                               | Evidence to proceed                                                                              |
+| ------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Month 1 | Review outside-work and ownership boundaries; interview five companies            | Startup Edu; shortlist K-Startup and Bizinfo notices                    | Repeated problem and actual approvers identified                                                 |
+| Month 2 | Synthetic-data assessment, restoration, and reporting demo                        | Ask institutions about employment, registration, and attendance         | Written guidance and reproducible demo                                                           |
+| Month 3 | Reach ten interviews; choose support-first or revenue-first route                 | Prepare for a suitable open call, or continue validation without one    | Registration plan or readiness to contract for one scheduled assessment                          |
+| Month 4 | Deliver and obtain acceptance for one paid assessment where prerequisites are met | Organize evidence permitted by the relevant program                     | Collection, real hours, and costs; pre-registration route continues purchase-interest validation |
+| Month 5 | Validate the same scope with a second company; automate common work               | Apply, attend assessment, or monitor suitable later calls               | Delivery is repeatable across customers                                                          |
+| Month 6 | Review revenue, time, coverage, and living costs                                  | If selected, recheck agreement obligations and employment compatibility | Choose continued employment, partner delivery, or full-time work                                 |
+
+Interviews, demos, and scheduled assessments remain useful if an application is rejected or no suitable call exists. Starting in September 2026 carries this plan into early 2027, but next year’s dates and terms must remain unconfirmed until published. Keep application preparation within the weekly limit so paperwork does not displace customer validation.
+
+Make the decision to work full time separately from receiving an award. Example evidence includes acceptance and payment from at least two independent companies, three months of recurring demand and measured delivery costs, a daytime coverage plan, and an exit handover procedure. These are personal decision thresholds, not universal requirements. Calculate six to twelve months of necessary living costs and fixed business cash outgoings separately from restricted support and receivables, including the loss of the largest customer. Avoid adding the earlier economic cost of founder time again on top of cash needed for living expenses. If demand and cash are insufficient, remain employed and repeat bounded work.
+
+## Use the first ninety days to validate three Korean business accounts
+
+This ninety-day expansion plan begins **after daytime coverage and contracting and settlement processes are in place**. For solo preparation while employed, use the preceding six-month plan with one concurrent assessment. The schedule and gates below are proposals, not evidence of validated demand or profitability. If approval or acceptance takes longer than ninety days, record the reason and next decision date. Annual agreements cannot demonstrate renewal within this window; distinguish pilot conversion and collected monthly fees from renewal.
+
+| Period     | Work                                                                                        | Evidence required to proceed                                                          |
+| ---------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Weeks 1–2  | Interview ten Korean agencies or referred SMEs about budget, approvers, and operations gaps | Three customers with the same problem request a concrete paid pilot proposal          |
+| Weeks 3–4  | Select a representative app, test infrastructure and recovery, prepare scope and pricing    | Test records, statement of work, quote, and a first paid assessment or pilot contract |
+| Weeks 5–6  | Migrate at most three customers; exercise deployment, backup, and export                    | Company acceptance, handover hours, per-job costs, and collected payments             |
+| Weeks 7–8  | Add usage alerts, automate repeated tasks, run incident and recovery drills                 | Complete cost records, repeatable recovery, measured support time                     |
+| Weeks 9–12 | Propose renewals, adjust scope and price, write a case study with customer consent          | Renewal payments and an expansion decision based on contribution and support time     |
+
+Ask how a customer resolved their last incident and how long it took, rather than whether they would use a proposed service. Interest, quote requests, agreements, payments, and renewals are different kinds of evidence. Free user counts do not establish paid demand.
+
+Start with a proposed list of twenty Korean web agencies, examining supported stacks, project types, and maintenance staffing. Seek introductions through development contacts and request a meeting around one offer: taking over post-delivery operations. Propose a bounded paid assessment to companies that express relevant interest. For agency collaboration, agree on referral fees or subcontracting, permissible end-client contact, and incident intake ownership. Claim official cloud partner status or resale rights only when actually obtained.
+
+Assessment reports should show current costs, operations gaps, handover work, and monthly scope. Track opportunities with identified budget owners, assessment contracts, acceptance, collections, and conversion to operations. Obtain consent before publishing company names, system screens, or savings case studies.
+
+Price migration from recorded work and quote it separately from the first monthly operations fee. Early on, accurately communicating costs, deployment history, backup status, and support records matters more than building a large shared dashboard. Automate recurring manual work when it starts consuming time every week.
+
+After ninety days, review actual contracting-company counts and renewal denominators, contribution per company, average and upper-range support time, recovery performance, acquisition cost, and collection time. Three pilots are too few to infer a whole market from renewal rate alone. Include assessment and sales conversation time in acquisition costs.
+
+Expand within the same customer group if customers renew and the agreed scope leaves contribution and operating capacity. If demand exists but one stack consumes excessive support, change scope and pricing. If customers do not renew, or only buy promises beyond your recovery capability, stop expanding infrastructure and revisit the customer group or product.
+
+The output of cloud benchmarking extends beyond a server specification sheet. It connects the operational work a customer will delegate, the load the service can handle, the recovery procedure, and the margin left after fulfilling that promise. A small infrastructure operation becomes a Korean B2B business when company contacts can obtain budget approval, pay for accepted operational results, and entrust the next operating period to the provider.

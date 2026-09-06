@@ -8,14 +8,14 @@
 
 ## 개발 환경
 
-| 도구     | 버전·조건                                     | 기준 파일                            |
-| -------- | --------------------------------------------- | ------------------------------------ |
-| Bun      | `1.4.0`                                       | `.bun-version`, `package.json`       |
-| Node.js  | 개발은 `.node-version`, 공개 패키지는 24 이상 | `.node-version`, `packages/*`        |
-| shfmt    | `mise.toml`의 버전, 셸 형식 검사              | `mise.toml`                          |
-| Make·Bun | 공통 format·lint 실행                         | `Makefile`, `scripts/style-shell.ts` |
-| Docker   | Markdown·HTML 링크 검사와 컨테이너 검증       | `scripts/check-links.ts`             |
-| Git      | 일반 개발에 필요                              | 시스템 설치                          |
+| 도구               | 버전·조건                                     | 기준 파일                            |
+| ------------------ | --------------------------------------------- | ------------------------------------ |
+| Bun                | `1.4.0`                                       | `.bun-version`, `package.json`       |
+| Node.js            | 개발은 `.node-version`, 공개 패키지는 24 이상 | `.node-version`, `packages/*`        |
+| shfmt              | `mise.toml`의 버전, 셸 형식 검사              | `mise.toml`                          |
+| Make·Bun           | 공통 format·lint 실행                         | `Makefile`, `scripts/style-shell.ts` |
+| Podman 또는 Docker | Markdown·HTML 링크 검사와 컨테이너 검증       | `scripts/check-links.ts`             |
+| Git                | 일반 개발에 필요                              | 시스템 설치                          |
 
 저장소 루트에서 버전을 확인하고 잠금 파일을 변경하지 않는 설치를 수행한다.
 
@@ -58,7 +58,7 @@ bun run --filter @jongminchung/ui test
 | `bun run lint`        | Oxlint 정적 분석                                                         |
 | `bun run typecheck`   | 루트와 모든 workspace TypeScript 검사                                    |
 | `bun run deadcode`    | 미사용 파일·의존성·catalog, 미선언 의존성·catalog 참조, 중복 export 검사 |
-| `bun run links:check` | Docker 기반 Markdown·HTML 로컬 링크 검사                                 |
+| `bun run links:check` | Podman 우선·Docker 대체 Markdown·HTML 로컬 링크 검사                     |
 | `bun run test`        | workspace별 Bun coverage 검사와 Node package runtime smoke               |
 | `bun run test:e2e`    | build 후 앱별 Playwright E2E                                             |
 | `bun run check`       | format, lint, typecheck, deadcode와 전체 로컬 테스트                     |

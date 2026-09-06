@@ -71,3 +71,54 @@ describe("블로그 메타데이터 경로", () => {
     ).toBe(true);
   });
 });
+
+// 각 route가 공통 protocol에 올바른 사이트와 locale을 전달하는지 검증함.
+describe("멀티사이트 metadata protocol", () => {
+  it("세 사이트의 robots와 sitemap이 해당 origin을 사용함", async () => {
+    const { GET: homeRobots } = await import("./(home)/home/robots.txt/route");
+    const { GET: investRobots } =
+      await import("./(invest)/invest/robots.txt/route");
+    const { default: homeSitemap } = await import("./(home)/home/sitemap");
+    for (const [origin, robots, sitemap] of [
+      ["https://www.jamie.kr", homeRobots(), homeSitemap()],
+      ["https://tech.jamie.kr", getRobots(), await techSitemap()],
+      ["https://invest.jamie.kr", investRobots(), investSitemap()],
+    ] as const) {
+      expect(await robots.text()).toContain(`Sitemap: ${origin}/sitemap.xml`);
+      expect(sitemap.length).toBeGreaterThan(0);
+      expect(sitemap.every(({ url }) => new URL(url).origin === origin)).toBe(
+        true,
+      );
+    }
+  });
+  it("두 RSS route가 locale과 site origin을 유지하고 잘못된 locale을 거부함", async () => {
+    const { GET: techRss } =
+      await import("./(tech)/tech/[locale]/rss.xml/route");
+    const { GET: investRss } =
+      await import("./(invest)/invest/[locale]/rss.xml/route");
+    for (const [origin, handler] of [
+      ["https://tech.jamie.kr", techRss],
+      ["https://invest.jamie.kr", investRss],
+    ] as const) {
+      for (const locale of locales) {
+        const response = await handler(
+          new Request(`${origin}/${locale}/rss.xml`),
+          { params: Promise.resolve({ locale }) },
+        );
+        const xml = await response.text();
+        expect(xml).toContain(`<link>${origin}/${locale}</link>`);
+        expect(xml).toContain(
+          `<language>${locale === "ko" ? "ko-KR" : "en-US"}</language>`,
+        );
+        expect(xml).toContain(`<guid isPermaLink="true">${origin}/${locale}/`);
+        expect(response.headers.get("Content-Type")).toBe(
+          "application/rss+xml; charset=utf-8",
+        );
+      }
+      const response = await handler(new Request(`${origin}/fr/rss.xml`), {
+        params: Promise.resolve({ locale: "fr" }),
+      });
+      expect(response.status).toBe(404);
+    }
+  });
+});

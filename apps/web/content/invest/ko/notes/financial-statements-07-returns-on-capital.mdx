@@ -1,0 +1,57 @@
+---
+id: "financial-statements-07-returns-on-capital"
+locale: "ko"
+title: "07. ROE가 높으면 좋은 기업일까"
+description: "평균 자본과 듀퐁 분해로 ROE를 읽고 신규 투자 수익률과 구분합니다."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+status: "published"
+tags: ["financial-statements", "stocks", "valuation"]
+series: "Financial Statements to Stock Valuation"
+image: /invest/direction-of-money-financial-health.png
+imageAlt: 두 독립 검증 경로가 가치 범위에서 합쳐지고 실패 조각은 출구 경계 아래로 떨어지는 장면
+sources:
+    - kind: article
+      title: "Return on Capital, Return on Invested Capital and Return on Equity: Measurement and Implications"
+      creator: "Aswath Damodaran, NYU Stern"
+      url: "https://pages.stern.nyu.edu/~adamodar/pdfiles/papers/returnmeasures.pdf"
+---
+
+높은 ROE는 관심을 가질 이유가 될 수 있다. 그러나 분모가 작거나 빚이 많아도 비율은 올라간다. 한빛공구의 첫해 ROE 52.9%가 어디서 나오는지 분해하고, 다음 투자에도 같은 수익률을 기대할 수 있는지 따져보자.
+
+## 분자는 기간, 분모는 평균으로 맞춘다
+
+첫해 순이익은 28.8, 기초 자본은 40, 기말 자본은 68.8이다. 이 글은 단순 기초·기말 평균 자본 54.4를 사용하므로 `ROE = 28.8 ÷ 54.4 = 52.9%`다. 기말 자본만 사용하면 41.9%로 달라진다. 둘 중 하나를 계산하고 다른 정의의 비교 기업과 나란히 놓으면 순위가 왜곡된다.
+
+실제 분석에서는 대규모 증자나 자사주 매입이 연중에 있었다면 분기 또는 더 세밀한 평균이 필요할 수 있다. 보통주 수익률을 구한다면 이익과 자본의 귀속 범위도 맞춘다. 이 사례는 모든 자본과 이익이 보통주주에게 귀속되도록 단순화했다.
+
+## ROE를 세 부분으로 나누면 원인이 보인다
+
+| 요소         | 계산                   |      값 |
+| ------------ | ---------------------- | ------: |
+| 순이익률     | 28.8 ÷ 200             |   14.4% |
+| 자산회전율   | 200 ÷ 평균 자산 124.4  | 1.608배 |
+| 자기자본승수 | 124.4 ÷ 평균 자본 54.4 | 2.287배 |
+
+반올림 전 값을 곱하면 ROE 52.9%로 돌아간다. 분수의 매출과 평균 자산이 약분되는 항등식이다. 높은 마진, 적은 자산으로 많은 매출을 만드는 구조, 자본보다 큰 자산을 운용하는 구조 중 무엇이 결과를 만들었는지 읽기 위한 도구다. 수익률 지표의 정의와 자본 측정 방식이 해석에 영향을 준다는 점은 Damodaran의 수익률 분석에서도 다룬다.[^returns]
+
+한빛공구는 자기자본 40에 차입금 60을 더해 출발했다. 설립 첫해의 작은 자본과 초기 차입 구조가 비율에 영향을 준다. 일회성 이익이나 자본 감소로 높아진 ROE도 같은 숫자로 나타날 수 있다. 평균 자본이 0에 가깝거나 음수라면 순위 지표로 쓰기보다 원래 손익과 자본 변동을 먼저 본다.
+
+## ROIC는 다른 질문을 한다
+
+ROIC는 일반적으로 세후 영업이익을 투자자본과 비교한다. 주주뿐 아니라 채권자가 제공한 사업 자금도 고려하는 접근이지만, 초과 현금·영업권·리스와 세금의 처리에 따라 결과가 달라진다.[^returns] 높은 ROE만 보고 사업 자체의 효율이 높다고 결론 내리기 전에 이 정의를 맞춰보는 이유다.
+
+여기서는 불확실한 투자자본 분류로 비율 하나를 더 만들기보다 신규 투자부터 살펴보자. 기존 사업과 별도로 장비와 운전자본에 20을 추가 투입해 연간 세후 영업이익 2를 얻는다고 가정하면 단순 증분 수익률은 10%다. 기존 ROE 52.9%와 같지 않다. 투자 시점과 현금 회수, 위험까지 포함한 최종 판단에는 프로젝트 현금흐름 분석이 필요하다.
+
+## 이번 장에서 남길 기록
+
+ROE가 상승한 해에 순이익률, 자산회전율, 부채, 자본 변동을 각각 확인한다. 이어 “앞으로 투자할 1원이 과거와 같은 수익을 낼 근거가 있는가”를 적는다. 높은 과거 수익률, 성장할 시장, 좋은 조건의 재투자 기회는 서로 다른 주장이다. 세 가지를 구분해야 좋은 기업을 비싼 가격에 사는 문제까지 다음 장에서 검토할 수 있다.
+
+## 이어서 읽기
+
+- [이전: 회사가 번 돈은 어디로 갔을까](/ko/notes/financial-statements-06-capex-and-free-cash-flow)
+- [다음: PER이 낮은 주식은 정말 쌀까](/ko/notes/financial-statements-08-price-and-multiples)
+- [재무제표에서 주식 가치평가까지 · 전체 시리즈](/ko/series/financial-statements-to-stock-valuation)
+- [모든 Invest 시리즈](/ko/series)
+
+[^returns]: Aswath Damodaran, NYU Stern, [Return on Capital, Return on Invested Capital and Return on Equity: Measurement and Implications](https://pages.stern.nyu.edu/~adamodar/pdfiles/papers/returnmeasures.pdf). 회계상 수익률 측정, 분모의 자본과 레버리지, 투자 수익률 해석을 다룬 연구 자료.

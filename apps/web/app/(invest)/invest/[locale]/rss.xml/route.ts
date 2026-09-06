@@ -1,15 +1,6 @@
 import { getInvestmentNotes } from "#lib/invest/notes";
-import { getLocaleProtocol } from "#lib/locale";
+import { createRssResponse } from "#lib/rss";
 import { isLocale, siteOrigins } from "#lib/site-routing";
-
-function escapeXml(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&apos;");
-}
 
 /** 정적 생성에 사용할 경로 매개변수를 반환함 */
 export function generateStaticParams() {
@@ -23,17 +14,11 @@ export async function GET(
 ): Promise<Response> {
   const { locale } = await params;
   if (!isLocale(locale)) return new Response("Not found", { status: 404 });
-  const items = getInvestmentNotes(locale)
-    .map(
-      (note) =>
-        `<item><title>${escapeXml(note.title)}</title><link>${siteOrigins.invest}${note.href}</link><guid isPermaLink="true">${siteOrigins.invest}${note.href}</guid><description>${escapeXml(note.description)}</description><pubDate>${new Date(`${note.publishedAt}T00:00:00Z`).toUTCString()}</pubDate></item>`,
-    )
-    .join("");
-  const body = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Investment Notes</title><link>${siteOrigins.invest}/${locale}</link><description>Source-grounded investment research notes</description><language>${getLocaleProtocol(locale).rss}</language>${items}</channel></rss>`;
-  return new Response(body, {
-    headers: {
-      "Content-Type": "application/rss+xml; charset=utf-8",
-      "Cache-Control": "public, max-age=3600, s-maxage=86400",
-    },
+  return createRssResponse({
+    origin: siteOrigins.invest,
+    locale,
+    title: "Investment Notes",
+    description: "Source-grounded investment research notes",
+    items: getInvestmentNotes(locale),
   });
 }

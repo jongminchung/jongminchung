@@ -37,6 +37,7 @@ const securityHeaders = [
 const nextConfig = {
   // 정적 shell과 동적 스트리밍을 함께 사용하고 use cache로 캐시 범위를 명시함.
   cacheComponents: true,
+  poweredByHeader: false,
   experimental: {
     // 여러 root layout 바깥에서도 공통 global-not-found 응답을 제공함.
     globalNotFound: true,

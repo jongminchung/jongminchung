@@ -11,7 +11,7 @@ import {
   selectLocale,
 } from "./site-routing";
 
-describe("여러 개의 사이트에 속해 있음", () => {
+describe("멀티사이트 host와 locale 라우팅", () => {
   it.each([
     ["jamie.kr", "home"],
     ["www.jamie.kr", "home"],
@@ -24,7 +24,7 @@ describe("여러 개의 사이트에 속해 있음", () => {
     expect(resolveSite(normalizeHost(host))).toBe(site);
   });
 
-  it("[실패] 표준 호스트 값을 정규화하고 알 수 없는 호스트가 있음", () => {
+  it("[실패] host를 정규화하고 미등록 host를 거부함", () => {
     expect(normalizeHost("TECH.JAMIE.KR:443")).toBe("tech.jamie.kr");
     expect(
       resolveSite(normalizeHost("tech.jamie.kr, ingress.local")),
@@ -61,19 +61,19 @@ describe("여러 개의 사이트에 속해 있음", () => {
     );
   });
 
-  it("[실패] 표시되지 않고 외부 외부를 생성함", () => {
+  it("[성공] 공개 pathname 앞에 사이트 내부 prefix를 붙임", () => {
     expect(createInternalSitePath("home", "/")).toBe("/home");
     expect(createInternalSitePath("tech", "/ko/articles/modeling")).toBe(
       "/tech/ko/articles/modeling",
     );
   });
 
-  it("[성공] 브라우저의 기본 설정은 저장되어 있음", () => {
+  it("[성공] 저장된 locale을 브라우저 언어보다 우선함", () => {
     expect(selectLocale("en", "ko-KR,ko;q=0.9")).toBe("en");
     expect(selectLocale("invalid", "ko-KR,ko;q=0.9")).toBe("ko");
   });
 
-  it("[성공] 품질과 시간에 따라 지원되는 Accept-Language 값을 계약함", () => {
+  it("[성공] Accept-Language의 품질값과 입력 순서로 지원 언어를 선택함", () => {
     expect(selectLocale(undefined, "ko-KR,ko;q=0.9")).toBe("ko");
     expect(selectLocale(undefined, "en-US,en;q=0.9")).toBe("en");
     expect(selectLocale(undefined, "fr, ko;q=0.8, en;q=0.5")).toBe("ko");
@@ -85,7 +85,7 @@ describe("여러 개의 사이트에 속해 있음", () => {
     expect(selectLocale(undefined, null)).toBe("en");
   });
 
-  it("[성공] 경고 URL에서 제외 로케일을 파생함", () => {
+  it("[성공] URL의 locale과 사이트별 locale 쿠키 이름을 반환함", () => {
     expect(localeFromPath("/ko/articles/modeling")).toBe("ko");
     expect(localeFromPath("/articles/modeling")).toBeNull();
     expect(localeCookieName("invest")).toBe("invest-locale");

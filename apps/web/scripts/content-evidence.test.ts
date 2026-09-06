@@ -1,6 +1,9 @@
-// @ts-nocheck
 import { describe, expect, it } from "bun:test";
-import { assessFreshness, freshnessPolicyFor } from "./content-evidence.ts";
+import {
+  assessFreshness,
+  checkSource,
+  freshnessPolicyFor,
+} from "./content-evidence.ts";
 
 const base = {
   section: "deep-dive" as const,
@@ -15,9 +18,12 @@ describe("content evidence", () => {
     expect(freshnessPolicyFor({ ...base, packageName: undefined })).toBe(
       "upstream-api",
     );
-    expect(freshnessPolicyFor({ ...base, packageName: undefined })).toBe(
-      "upstream-api",
-    );
+    expect(
+      freshnessPolicyFor({ sourceUrl: "https://kciter.so/posts/example" }),
+    ).toBe("imported-source");
+    expect(
+      freshnessPolicyFor({ sourceUrl: "https://example.com/concepts" }),
+    ).toBe("evergreen-concept");
   });
 
   it("[성공] threshold 경계와 미검증 문서를 구분함", () => {
@@ -48,5 +54,46 @@ describe("content evidence", () => {
         now,
       ),
     ).toMatchObject({ ageDays: null, stale: true });
+  });
+});
+
+describe("출처 HTTP 상태 분류", () => {
+  const cases = [
+    [200, "ok"],
+    [204, "ok"],
+    [301, "redirect"],
+    [302, "redirect"],
+    [400, "http-error"],
+    [401, "access-denied"],
+    [403, "access-denied"],
+    [404, "missing"],
+    [405, "method-not-supported"],
+    [408, "temporary-failure"],
+    [410, "missing"],
+    [429, "temporary-failure"],
+    [500, "temporary-failure"],
+    [501, "method-not-supported"],
+    [503, "temporary-failure"],
+  ] as const;
+  for (const [status, state] of cases) {
+    it(`${status} 응답을 ${state}로 분류함`, async () => {
+      const result = await checkSource(
+        "https://example.com/docs",
+        async (_url, init) => {
+          expect(init.method).toBe("HEAD");
+          expect(init.redirect).toBe("manual");
+          return new Response(null, { status, headers: { location: "/new" } });
+        },
+      );
+      expect(result).toMatchObject({ state, status });
+      if (state === "redirect") expect(result.destination).toBe("/new");
+    });
+  }
+  it("네트워크 오류를 일시 실패로 분류함", async () => {
+    expect(
+      await checkSource("https://example.com", async () => {
+        throw new Error("timeout");
+      }),
+    ).toEqual({ state: "temporary-failure" });
   });
 });

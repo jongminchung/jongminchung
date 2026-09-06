@@ -2,7 +2,7 @@ import { describe, expect, it } from "bun:test";
 import { defineOxlintConfig, sharedOxlintConfig } from "./index.js";
 
 describe("옥린트 구성", () => {
-  it("[성공] 모든 것을 공유하는 휴가를 기뻐함", () => {
+  it("[성공] 기본 설정을 반환하고 내부 참조를 복제함", () => {
     const config = defineOxlintConfig();
 
     expect(config).toEqual({
@@ -39,7 +39,7 @@ describe("옥린트 구성", () => {
     expect(config.rules).not.toBe(sharedOxlintConfig.rules);
   });
 
-  it("[성공] 소비자 카테고리, 파생, 옵션, 규칙 및 재정의 형식", () => {
+  it("[성공] 사용자 카테고리·플러그인·옵션·규칙·override를 병합함", () => {
     const override = {
       files: ["**/*.test.ts"],
       rules: { "typescript/no-explicit-any": "off" as const },

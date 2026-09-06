@@ -42,7 +42,8 @@ Always include `run` for package scripts so commands are visibly distinguished f
 requires network access and is run manually during maintenance and before releases instead of being
 part of the offline-reproducible `check` chain.
 
-`links:check` runs the pinned Lychee container with the repository mounted read-only. It checks
+`links:check` uses Podman when available, otherwise Docker, to run the pinned Lychee container
+with the repository mounted read-only. It checks
 local links and anchors in Markdown and HTML without making network requests.
 
 Each workspace owns its build, typecheck, and test commands. Select one with a filter instead of
@@ -131,4 +132,4 @@ Codex-Vscode             0 lines             ░░░░░░░░░░░�
 
 <!-- prettier-ignore-end -->
 
-- 설치와 공통 `make fmt`·`make lint` 사용법은 [기여 가이드](CONTRIBUTING.md)를 참고함
+- 설치와 공통 `make fmt`·`make lint` 사용법은 [기여 가이드](docs/CONTRIBUTING.md)를 참고함

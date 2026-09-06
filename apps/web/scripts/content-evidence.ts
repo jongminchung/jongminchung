@@ -61,14 +61,20 @@ type SourceResult = {
     | "ok"
     | "redirect"
     | "missing"
-    | "temporary-failure";
+    | "temporary-failure"
+    | "access-denied"
+    | "method-not-supported"
+    | "http-error";
   readonly status?: number;
   readonly destination?: string;
 };
 
-async function checkSource(url: string): Promise<SourceResult> {
+export async function checkSource(
+  url: string,
+  request: (url: string, init: RequestInit) => Promise<Response> = fetch,
+): Promise<SourceResult> {
   try {
-    const response = await fetch(url, {
+    const response = await request(url, {
       method: "HEAD",
       redirect: "manual",
       signal: AbortSignal.timeout(8_000),
@@ -86,10 +92,17 @@ async function checkSource(url: string): Promise<SourceResult> {
     if (
       response.status === 408 ||
       response.status === 429 ||
-      response.status >= 500
+      (response.status >= 500 && response.status !== 501)
     )
       return { state: "temporary-failure", status: response.status };
-    return { state: "ok", status: response.status };
+    if (response.status === 401 || response.status === 403)
+      return { state: "access-denied", status: response.status };
+    if (response.status === 405 || response.status === 501)
+      return { state: "method-not-supported", status: response.status };
+    return {
+      state: response.ok ? "ok" : "http-error",
+      status: response.status,
+    };
   } catch {
     return { state: "temporary-failure" };
   }
@@ -106,7 +119,7 @@ export async function createEvidenceReport(
     const urls = [...new Set(documents.map(({ sourceUrl }) => sourceUrl))];
     for (let index = 0; index < urls.length; index += 5) {
       const batch = urls.slice(index, index + 5);
-      const results = await Promise.all(batch.map(checkSource));
+      const results = await Promise.all(batch.map((url) => checkSource(url)));
       batch.forEach((url, resultIndex) =>
         sourceResults.set(url, results[resultIndex]!),
       );
@@ -121,8 +134,7 @@ export async function createEvidenceReport(
       source.state === "missing"
         ? "review-required"
         : freshness.stale ||
-            source.state === "temporary-failure" ||
-            source.state === "redirect"
+            (source.state !== "ok" && source.state !== "not-checked")
           ? "warning"
           : "none";
     return {

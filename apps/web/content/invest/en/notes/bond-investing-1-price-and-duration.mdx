@@ -1,0 +1,113 @@
+---
+id: "bond-investing-1-price-and-duration"
+locale: "en"
+title: "1. Why a Treasury investment can lose money"
+description: "Separate coupons, yield to maturity, and duration, and calculate how changing yields affect a bond price."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+status: "published"
+tags: ["bonds", "us-treasuries", "interest-rates", "real-estate"]
+series: "금리에서 시작하는 채권 투자"
+image: "/invest/direction-of-money-liquidity-cycle.png"
+imageAlt: "Liquidity moving through layers of capital spending and branching into several market paths"
+sources:
+    - kind: article
+      title: "Treasury Notes"
+      creator: "U.S. Department of the Treasury"
+      url: "https://www.treasurydirect.gov/marketable-securities/treasury-notes/"
+    - kind: article
+      title: "Treasury Bonds"
+      creator: "U.S. Department of the Treasury"
+      url: "https://www.treasurydirect.gov/marketable-securities/treasury-bonds/"
+    - kind: article
+      title: "Understanding Pricing and Interest Rates"
+      creator: "U.S. Department of the Treasury"
+      url: "https://www.treasurydirect.gov/marketable-securities/understanding-pricing/"
+    - kind: article
+      title: "Understanding Bond Yield and Return"
+      creator: "FINRA"
+      url: "https://www.finra.org/investors/insights/bond-yield-return"
+    - kind: article
+      title: "Bonds, Interest Rate Changes, and Duration"
+      creator: "FINRA"
+      url: "https://www.finra.org/investors/insights/bonds-interest-rate-changes-duration"
+    - kind: article
+      title: "What Are Corporate Bonds?"
+      creator: "U.S. Securities and Exchange Commission · Investor.gov"
+      url: "https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins/what-are"
+---
+
+_Official sources checked September 6, 2026. Unless stated otherwise, numbers and scenarios are hypothetical, not current rates or product returns._
+
+You buy U.S. Treasuries because stocks feel risky, then see a loss in the account. There has been no missed interest payment. Why has the price fallen?
+
+Two questions help: will the promised payments arrive, and what would somebody pay for those payments today? The first concerns the issuer’s ability to pay. The second concerns market value. The Treasury label does not answer both at once.
+
+## A payment contract has a price
+
+Consider an imaginary bond with a $1,000 face value, ten years to maturity, and a $40 annual coupon. Annual payments keep the arithmetic simple. Actual Treasury notes and bonds pay interest every six months.[^notes][^bonds]
+
+If investors require a 4% annual yield, the imaginary bond is worth $1,000. At a required yield of 5%, the old $40 payment stream becomes less attractive at that price. Its price must fall. This is the basic inverse relationship between bond prices and market yields.[^pricing]
+
+Discount each future payment to its present value:
+
+```text
+Price = 40/(1+y) + 40/(1+y)^2 + ... + 1,040/(1+y)^10
+```
+
+| Required yield y | Calculated price | Change from $1,000 |
+| ---------------- | ---------------- | ------------------ |
+| 3%               | About $1,085.30  | About +8.53%       |
+| 4%               | $1,000           | 0%                 |
+| 5%               | About $922.78    | About −7.72%       |
+
+These are prices at the same instant, changing only the discount rate. They are not holding-period returns or forecasts of next year’s account balance. Notice that the effects of an equal yield increase and decrease are not perfectly symmetrical.
+
+## A 4% coupon is not necessarily your return
+
+The coupon rate determines interest on face value. Yield to maturity, or YTM, incorporates the purchase price and remaining payments. FINRA distinguishes coupon yield, current yield, and YTM.[^yield]
+
+If you pay $1,050 for a bond with $1,000 face value, the maturity payment is $1,000, not your entire purchase price. Interest received along the way also belongs in the return calculation.
+
+YTM does not guarantee your account’s compound return. Payments must arrive as promised, and holding to maturity matters. The final compounded result also depends on the rate at which intermediate coupons are reinvested. Taxes, costs, and conversion into won are separate.[^yield]
+
+## Duration measures sensitivity
+
+Duration helps estimate how sensitive a price is to yields. Longer maturities and smaller intermediate payments generally increase sensitivity, but duration and maturity are different concepts.[^duration]
+
+For a small yield change, modified duration gives a first-order approximation:
+
+```text
+Percentage price change ≈ −modified duration × yield change
+```
+
+With modified duration of 8, a 0.5-percentage-point rise gives `−8 × 0.005 = −4%`. Use 0.005, not 0.5. Other conditions must remain comparable; larger moves require considering convexity and other effects. Effective duration reported for funds is also a sensitivity measure, though its method can account for different cash-flow and option characteristics.
+
+## Holding to maturity requires time you actually have
+
+A Treasury’s dollar payment schedule may fit a future dollar expense. That can give you a reason to tolerate interim price changes. But if a ten-year bond must finance next year’s home purchase, you may have to sell at next year’s market price. A maturity date helps only if you can wait for it.
+
+Corporate bonds add questions about credit and liquidity. A higher yield than a Treasury’s can be compensation for additional risk.[^credit]
+
+Before continuing, write one sentence: “I need this amount, in this currency, on this date.” It will help distinguish investing for scheduled payments from taking a position on falling yields. A rate forecast comes after that distinction.
+
+## Read the series
+
+1. [Why a Treasury investment can lose money](/en/notes/bond-investing-1-price-and-duration)
+2. [Why long yields can rise when the Fed cuts](/en/notes/bond-investing-2-fed-and-long-rates)
+3. [How Treasury yields reach the housing market](/en/notes/bond-investing-3-mortgages-and-property)
+4. [What to read before buying a Treasury](/en/notes/bond-investing-4-buying-treasuries)
+5. [Choosing between bond ETFs, TIPS, and currency exposure](/en/notes/bond-investing-5-etfs-tips-and-currency)
+6. [Build the bond plan before the rate forecast](/en/notes/bond-investing-6-ladders-and-planning)
+
+[^notes]: U.S. Department of the Treasury, [Treasury Notes](https://www.treasurydirect.gov/marketable-securities/treasury-notes/). Accessed September 6, 2026.
+
+[^bonds]: U.S. Department of the Treasury, [Treasury Bonds](https://www.treasurydirect.gov/marketable-securities/treasury-bonds/). Accessed September 6, 2026.
+
+[^pricing]: U.S. Department of the Treasury, [Understanding Pricing and Interest Rates](https://www.treasurydirect.gov/marketable-securities/understanding-pricing/). Accessed September 6, 2026.
+
+[^yield]: FINRA, [Understanding Bond Yield and Return](https://www.finra.org/investors/insights/bond-yield-return). Accessed September 6, 2026.
+
+[^duration]: FINRA, [Bonds, Interest Rate Changes, and Duration](https://www.finra.org/investors/insights/bonds-interest-rate-changes-duration). Accessed September 6, 2026.
+
+[^credit]: U.S. Securities and Exchange Commission · Investor.gov, [What Are Corporate Bonds?](https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins/what-are). Accessed September 6, 2026.

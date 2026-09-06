@@ -1,0 +1,75 @@
+---
+id: "etf-choices-4-currency-and-hedging"
+locale: "ko"
+title: "4. 원화로 산 해외 ETF에도 환율이 영향을 줄까"
+description: "결제통화와 자산의 통화 노출을 나누고 환율 변화가 원화 수익률에 미치는 영향을 계산합니다."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+status: "published"
+tags: ["etfs", "portfolio", "investment-accounts"]
+series: "같은 투자, 다른 결과: ETF와 계좌를 고르는 법"
+image: "/invest/direction-of-money-global-portfolio.png"
+imageAlt: "서로 다른 시장 신호들이 하나의 정규화 격자를 지나 다섯 포트폴리오 구획으로 배분되는 장면"
+sources:
+    - kind: article
+      title: "International Investing"
+      creator: "SEC · Investor.gov"
+      url: "https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins/international-investing"
+    - kind: article
+      title: "Statement of Additional Information — Currency Hedged ETFs"
+      creator: "BlackRock · iShares"
+      url: "https://www.ishares.com/us/literature/sai/sai-ishares-currency-hedged-etfs-7-31.pdf"
+---
+
+_공식 자료 확인: 2026년 9월 6일. 상품명으로 명시한 사례 외의 후보와 계산 수치는 설명을 위한 가정입니다._
+
+한국 증권사 앱에서 원화로 주문했는데 달러가 내려가자 ETF도 영향을 받는다. 직접 환전한 적이 없으니 이상하게 느껴질 수 있다. 하지만 주문할 때 쓴 돈의 단위와 펀드가 가진 자산의 통화는 별개다. 해외투자 수익에 환율 변동이 영향을 줄 수 있다는 점은 SEC의 해외투자 안내에서도 다룬다.[^fx]
+
+## 달러 자산을 원화로 평가하면
+
+환헤지를 하지 않는 달러 자산을 가정하자. 세금, 비용, 분배금은 잠시 제외한다. 달러 기준 자산 수익률이 10%이고, 원/달러 환율이 달러당 1,400원에서 1,260원으로 10% 내려갔다면 원화 수익률은 다음과 같다.
+
+```text
+원화 수익률 = (1 + 달러 자산 수익률) × (기말 원/달러 ÷ 기초 원/달러) - 1
+           = 1.10 × 0.90 - 1
+           = -1%
+```
+
+처음 1천달러어치를 140만원에 샀다면 자산은 1,100달러가 되었지만, 원화로는 138만6천원이다. 미국 주가가 10% 올랐다는 뉴스와 내 계좌의 -1%는 함께 성립할 수 있다.
+
+| 달러 자산 수익률 | 원/달러 환율 변화 | 원화 수익률 |
+| ---------------- | ----------------- | ----------- |
+| +10%             | -10%              | -1%         |
+| +10%             | +10%              | +21%        |
+| -10%             | +10%              | -1%         |
+
+수익률 둘을 그냥 더하면 첫 번째와 세 번째 줄을 0%로 잘못 읽는다. 기준 통화를 바꾸는 것은 곱셈이다. 여러 통화 자산과 분배금이 섞인 실제 ETF는 현금흐름 시점까지 봐야 하므로 이 한 줄이 모든 상품의 수익률 공식은 아니다.
+
+## 환헤지를 하면 무엇이 달라질까
+
+환헤지는 특정 통화 사이의 변동 영향을 줄이려는 운용이다. 어떤 통화를 어떤 기준 통화에 대해 얼마나 헤지하는지 확인해야 한다. 미국 투자자를 위해 달러로 환헤지하는 ETF가 한국 투자자의 원/달러 위험까지 없애주는 것은 아니다. iShares의 통화헤지 ETF 추가설명서는 헤지 거래가 완벽하지 않을 수 있고 별도 비용이나 손익을 만들 수 있음을 설명한다.[^hedge]
+
+이 자료는 미국 상품의 구조 설명이다. 국내 후보의 실제 원화 헤지 비율과 비용은 그 후보의 투자설명서에서 다시 확인한다. 상품명에 `(H)`가 보인다는 이유만으로 매일 100% 고정 헤지가 된다고 가정하지 않는다.
+
+헤지 비용을 고정된 연간 수수료처럼 임의로 빼는 것도 피한다. 계약 조건과 시장 상황이 영향을 주기 때문이다. 이미 비용과 헤지 손익이 반영된 과거 NAV 성과를 사용한다면 같은 항목을 다시 차감하지 않는다.
+
+## 결국 어느 통화로 쓸 돈인가
+
+3년 뒤 한국에서 전세보증금을 늘릴 돈과, 미국에서 달러로 학비를 낼 돈은 목적이 다르다. 달러로 쓸 돈을 달러 기준으로 보면 원화 환산액이 흔들리는 것만으로 필요한 달러가 줄어든 것은 아니다. 반대로 원화 지출을 앞두고 있다면 달러 기준 수익이 좋아도 원화 부족이 생길 수 있다.
+
+그렇다고 달러 학비를 미국 주식 ETF에 넣으면 문제가 해결되는 것은 아니다. 통화를 맞춰도 주가 하락 위험은 남는다. 지출 시점과 자산의 가격 위험은 별도로 맞춰야 한다.
+
+비교표에는 **거래통화, 주요 자산통화, 헤지 대상·비율, 나중에 쓸 통화**를 각각 적는다. ‘해외 ETF’라는 한 칸으로 묶어두면 보이지 않던 차이가 드러난다. 다음 편에서는 이 투자에 어떤 계좌를 쓸 수 있는지 확인한다.
+
+## 시리즈 이어 읽기
+
+1. [같은 지수를 추종하는 ETF는 정말 같을까](/ko/notes/etf-choices-1-same-index)
+2. [총보수만 비교하면 놓치는 비용](/ko/notes/etf-choices-2-costs-and-tracking)
+3. [분배금이 많으면 더 좋은 투자일까](/ko/notes/etf-choices-3-distributions-and-return)
+4. [원화로 산 해외 ETF에도 환율이 영향을 줄까](/ko/notes/etf-choices-4-currency-and-hedging)
+5. [일반계좌·ISA·연금계좌에서는 무엇을 따로 확인할까](/ko/notes/etf-choices-5-accounts-and-taxes)
+6. [내 목적에 맞는 ETF 비교표 완성하기](/ko/notes/etf-choices-6-comparison-sheet)
+
+[^fx]: SEC · Investor.gov, [International Investing](https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins/international-investing). 2026년 9월 6일 확인.
+
+[^hedge]: BlackRock · iShares, [Statement of Additional Information — Currency Hedged ETFs](https://www.ishares.com/us/literature/sai/sai-ishares-currency-hedged-etfs-7-31.pdf). 2026년 9월 6일 확인.

@@ -17,7 +17,7 @@ function createRequest(
   });
 }
 
-describe("제조원", () => {
+describe("멀티사이트 proxy", () => {
   const originalNodeEnv = process.env.NODE_ENV;
   const originalLocalSite = process.env.JAMIE_LOCAL_SITE;
 
@@ -26,7 +26,7 @@ describe("제조원", () => {
     restoreEnvironmentVariable("JAMIE_LOCAL_SITE", originalLocalSite);
   });
 
-  it("[성공] 쿠키 및 Accept-Language를 통해 사이트를 종료함", () => {
+  it("[성공] 루트 요청을 쿠키 우선·Accept-Language 차순으로 locale에 redirect함", () => {
     const saved = proxy(
       createRequest("/", {
         headers: {
@@ -61,7 +61,7 @@ describe("제조원", () => {
     expect(production.headers.get("location")).toBe("http://jamie.kr/ko");
   });
 
-  it("[성공] 지역적으로 다시 작성하고 표현적인 언어를 선언함", () => {
+  it("[성공] 사이트 내부 경로로 rewrite하고 Content-Language를 설정함", () => {
     const response = proxy(createRequest("/ko/articles/ddd"));
     expect(response.status).toBe(200);
     expect(response.headers.get("content-language")).toBe("ko");
@@ -90,7 +90,7 @@ describe("제조원", () => {
     );
   });
 
-  it("[실패] 스푸핑된 내부 헤더 및 개인 위치를 유지함", () => {
+  it("[실패] 위조된 내부 헤더를 라우팅에 사용하지 않고 내부 경로 직접 접근을 차단함", () => {
     const headers = {
       "x-jamie-internal-rewrite": "1",
       "x-jamie-locale": "ko",

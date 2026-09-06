@@ -1,0 +1,76 @@
+---
+id: "financial-statements-03-revenue-and-margins"
+locale: "ko"
+title: "03. 매출은 늘었는데 왜 이익은 줄었을까"
+description: "매출 인식과 원가 구조를 구분하고 성장 속 이익 감소를 계산합니다."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+status: "published"
+tags: ["financial-statements", "stocks", "valuation"]
+series: "Financial Statements to Stock Valuation"
+image: /invest/direction-of-money-financial-health.png
+imageAlt: 두 독립 검증 경로가 가치 범위에서 합쳐지고 실패 조각은 출구 경계 아래로 떨어지는 장면
+sources:
+    - kind: article
+      title: "IFRS 15 Revenue from Contracts with Customers"
+      creator: "IFRS Foundation"
+      url: "https://www.ifrs.org/issued-standards/list-of-standards/ifrs-15-revenue-from-contracts-with-customers/"
+    - kind: article
+      title: "IAS 2 Inventories"
+      creator: "IFRS Foundation"
+      url: "https://www.ifrs.org/issued-standards/list-of-standards/ias-2-inventories/"
+    - kind: article
+      title: "2025 Form 10-K"
+      creator: "Apple"
+      url: "https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm"
+---
+
+“매출이 20% 성장했다”는 문장에는 무엇을 얼마에 얼마나 팔았는지가 빠져 있다. 판매량이 늘었는지 가격이 올랐는지, 낮은 이익률의 상품 비중이 커졌는지를 나누어야 다음 해의 수익성을 생각할 수 있다.
+
+## 매출이 잡히는 시점부터 확인한다
+
+IFRS 15는 고객에게 약속한 재화나 서비스의 통제가 이전되어 수행의무를 충족할 때 수익을 인식하는 원칙을 제시한다.[^revenue] 계약금 입금, 주문 접수, 제품 인도가 항상 같은 날 발생하는 것은 아니다.
+
+한빛공구의 매출 200은 고객에게 상품의 통제가 이전되었고 반품·변동대가 문제는 없다는 가정이다. 수금은 150만 끝났으므로 50이 매출채권으로 남는다. 반대로 상품을 아직 넘기지 않았는데 먼저 돈을 받았다면 이 사례의 완료된 매출과 같은 것으로 취급하지 않는다.
+
+## 이익의 계단을 내려가 본다
+
+| 손익 단계             | 첫해 금액 | 매출 대비 |
+| --------------------- | --------: | --------: |
+| 매출                  |       200 |      100% |
+| 매출원가              |       120 |       60% |
+| 매출총이익            |        80 |       40% |
+| 현금 운영비           |        30 |       15% |
+| 감가상각              |         8 |        4% |
+| 영업이익              |        42 |       21% |
+| 이자 차감 후 세전이익 |        36 |       18% |
+| 순이익                |      28.8 |     14.4% |
+
+재고 매입액 130을 전부 매출원가로 넣지 않은 이유는 팔리지 않은 10이 남아 있기 때문이다. IAS 2는 판매한 재고의 장부금액을 관련 수익이 인식되는 기간에 비용으로 인식하도록 설명한다.[^inventory]
+
+이 사례는 감가상각을 별도 판매·관리 비용으로 표시했다. 실제 제조기업은 생산설비 감가상각을 재고원가에 포함할 수 있으므로 표의 줄 이름만 보고 기업끼리 비교하지 않는다. 주석에서 비용의 기능과 성격을 확인할 질문으로 남긴다.
+
+## 성장해도 이익이 줄어드는 가상 다음 해
+
+첫해와 독립적으로 비교할 다음 해 시나리오를 만들자. 매출 240, 매출원가 168, 현금 운영비 38, 감가상각 10이면 영업이익은 24다. 매출은 20% 늘었지만 영업이익은 약 42.9% 줄었다. 총이익률이 40%에서 30%로 떨어지고 운영 부담도 늘어난 결과다.
+
+원인을 나눌 때는 판매량·단가·상품 구성·매입단가·인력과 물류비를 각각 적는다. 매출총이익률 하락을 무조건 가격 경쟁 때문이라고 결론 내리지 않는다. 어떤 원인이 맞는지 사업부 자료와 경영진 설명에서 증거를 찾는 것이 다음 단계다.
+
+## 실제 공시에서 사업을 나누어 보기
+
+Apple의 2025 회계연도 10-K는 총매출 416,161과 Services 매출 109,158을 제시한다. 단위는 **백만 달러**이고 2025년 9월 27일 종료 회계연도다.[^apple] 직접 나누면 Services 비중은 약 26.2%다. 매출 비중만으로 그 부문의 기업가치 기여도까지 정할 수는 없다.
+
+오늘은 관심 기업의 매출 증가를 세 요인으로 설명해보자. 공시에 없는 판매량이나 가격 효과는 빈칸으로 두고 “확인하지 못함”이라고 쓴다. 다음 장에서는 인식된 매출이 통장에 들어오기까지의 시간을 살펴본다.
+
+## 이어서 읽기
+
+- [이전: 재무제표는 어떤 순서로 읽어야 할까](/ko/notes/financial-statements-02-connected-statements)
+- [다음: 흑자인 회사에 현금이 부족한 이유](/ko/notes/financial-statements-04-profit-and-cash)
+- [재무제표에서 주식 가치평가까지 · 전체 시리즈](/ko/series/financial-statements-to-stock-valuation)
+- [모든 Invest 시리즈](/ko/series)
+
+[^revenue]: IFRS Foundation, [IFRS 15 Revenue from Contracts with Customers](https://www.ifrs.org/issued-standards/list-of-standards/ifrs-15-revenue-from-contracts-with-customers/). 수행의무, 통제 이전과 수익 인식.
+
+[^inventory]: IFRS Foundation, [IAS 2 Inventories](https://www.ifrs.org/issued-standards/list-of-standards/ias-2-inventories/). 재고원가와 판매 시 비용 인식.
+
+[^apple]: Apple, [2025 Form 10-K](https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm), Products and Services Performance, 인쇄 쪽수 23 및 Note 2, Revenue. 미국 회계기준 공시 사례이며 비중은 작성자 계산이다.

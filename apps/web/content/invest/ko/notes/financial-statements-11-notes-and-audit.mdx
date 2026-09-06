@@ -1,0 +1,83 @@
+---
+id: "financial-statements-11-notes-and-audit"
+locale: "ko"
+title: "11. 재무제표 주석에서 놓치기 쉬운 것들"
+description: "재고 평가, 자산 손상, 우발항목, 특수관계자와 감사보고서를 질문으로 읽습니다."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+status: "published"
+tags: ["financial-statements", "stocks", "valuation"]
+series: "Financial Statements to Stock Valuation"
+image: /invest/direction-of-money-financial-health.png
+imageAlt: 두 독립 검증 경로가 가치 범위에서 합쳐지고 실패 조각은 출구 경계 아래로 떨어지는 장면
+sources:
+    - kind: article
+      title: "IAS 2 Inventories"
+      creator: "IFRS Foundation"
+      url: "https://www.ifrs.org/issued-standards/list-of-standards/ias-2-inventories/"
+    - kind: article
+      title: "IAS 36 Impairment of Assets"
+      creator: "IFRS Foundation"
+      url: "https://www.ifrs.org/issued-standards/list-of-standards/ias-36-impairment-of-assets/"
+    - kind: article
+      title: "IAS 37 Provisions, Contingent Liabilities and Contingent Assets"
+      creator: "IFRS Foundation"
+      url: "https://www.ifrs.org/issued-standards/list-of-standards/ias-37-provisions-contingent-liabilities-and-contingent-assets/"
+    - kind: article
+      title: "IAS 24 Related Party Disclosures"
+      creator: "IFRS Foundation"
+      url: "https://www.ifrs.org/issued-standards/list-of-standards/ias-24-related-party-disclosures/"
+    - kind: article
+      title: "AS 3101: The Auditor’s Report on an Audit of Financial Statements When the Auditor Expresses an Unqualified Opinion"
+      creator: "PCAOB"
+      url: "https://pcaobus.org/oversight/standards/auditing-standards/details/AS3101"
+    - kind: article
+      title: "2025 Form 10-K"
+      creator: "Apple"
+      url: "https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm"
+---
+
+요약 재무제표에서 이상한 숫자를 발견했다면 답은 종종 주석에 있다. 주석은 처음부터 전부 외우는 문서가 아니라 본문에서 생긴 질문을 풀기 위해 돌아가는 설명서다. 한빛공구의 외상채권 50, 재고 10, 장비 32를 출발점으로 읽을 위치를 정해보자.
+
+## 자산의 장부 금액이 그대로 회수될까
+
+외상채권 50에는 연체 기간, 고객 집중도, 손실충당금과 결산 후 회수 정보를 찾는다. 첫해 사례는 대손을 생략했지만 실제 기업 분석에서 미회수 가능성을 0으로 두겠다는 뜻은 아니다. “큰 고객이니까 받는다”는 설명 대신 회수 내역과 계약 조건을 확인한다.
+
+재고는 원가와 순실현가능가치 중 낮은 금액으로 측정하는 것이 IAS 2의 원칙이다.[^inventory] 한빛공구 재고 10을 파는 데 예상 판매가격 9, 필요한 완성·판매 비용 1이 드는 독립 시나리오라면 순실현가능가치는 8이다. 다른 조건이 없다면 2의 평가손실을 고려하게 된다. 이 가정은 기존 첫해 숫자에 이미 반영된 사건이 아니다.
+
+장비 같은 IAS 36 적용 자산은 손상 검토의 체계가 다르다. 회수가능액은 사용가치와 처분부대원가를 뺀 공정가치 중 큰 값으로 정하며, 재고 평가에 같은 기준을 그대로 적용하지 않는다.[^impairment] 장비 32에 대해 별도 평가한 회수가능액이 25라고 가정하면 7의 차이가 생긴다. 실제로는 개별 자산인지 현금창출단위인지부터 확인해야 한다.
+
+## 장부 밖의 조건도 현금에 영향을 준다
+
+소송, 지급보증과 구매 약정은 금액 하나만으로 읽기 어렵다. 충당부채와 우발부채는 인식과 공시 기준이 다르므로 사건의 상태와 유출 가능성, 추정의 불확실성을 함께 확인한다.[^provisions] 모든 최대 청구액을 당장 갚을 빚으로 더하거나, 재무상태표에 없다고 0으로 보는 두 방식 모두 조심해야 한다.
+
+특수관계자 거래에서는 상대방, 거래 금액, 남은 잔액과 조건을 살핀다. IAS 24는 관계와 거래 등을 이해할 수 있는 공시를 다룬다.[^related] 거래 자체만으로 부당하다고 판단하지 않는다. 외부 고객과의 거래와 비교할 수 있는지, 특정 관계회사에 현금 회수가 집중되는지를 질문한다.
+
+## 감사의견이 알려주는 범위를 이해한다
+
+감사는 적용 기준에 따른 재무제표의 중요한 왜곡 여부에 대한 합리적 확신을 다루며, 미래 주가나 기업의 생존을 보장하는 절차가 아니다. 미국 PCAOB 보고서의 CAM은 특히 어려운 감사 판단 등을 전달하며 그 자체가 해당 항목에 대한 별도 의견은 아니다.[^audit]
+
+실제 비교 사례로 Apple의 2025년 10-K 감사보고서에는 불확실한 세무 포지션이 CAM으로 제시된다. 관련 세금 주석은 Note 7이다.[^apple] 이것을 곧바로 부적정의견이나 확정 세금 고지서로 읽어서는 안 된다. 한국 보고서의 핵심감사사항과 미국의 CAM도 각각 적용 기준과 보고서 문구를 확인한다.
+
+## 이번 장에서 남길 기록
+
+주석을 읽은 뒤 “회수가 불확실한 자산”, “미래 지급을 만들 조건”, “경영진 추정에 민감한 금액”을 각각 하나씩 적는다. 발견한 내용을 바로 손익에서 임의로 빼기보다, 공시 사실과 자신의 시나리오를 분리한다. 마지막 장에서는 이 구분을 지키면서 투자 판단 메모를 완성한다.
+
+## 이어서 읽기
+
+- [이전: 배당·자사주·유상증자는 내 몫을 어떻게 바꿀까](/ko/notes/financial-statements-10-capital-allocation)
+- [다음: 기업 하나를 끝까지 분석해보기](/ko/notes/financial-statements-12-company-analysis)
+- [재무제표에서 주식 가치평가까지 · 전체 시리즈](/ko/series/financial-statements-to-stock-valuation)
+- [모든 Invest 시리즈](/ko/series)
+
+[^inventory]: IFRS Foundation, [IAS 2 Inventories](https://www.ifrs.org/issued-standards/list-of-standards/ias-2-inventories/). 재고의 원가와 순실현가능가치 측정.
+
+[^impairment]: IFRS Foundation, [IAS 36 Impairment of Assets](https://www.ifrs.org/issued-standards/list-of-standards/ias-36-impairment-of-assets/). 회수가능액의 정의와 기준 적용 범위.
+
+[^provisions]: IFRS Foundation, [IAS 37 Provisions, Contingent Liabilities and Contingent Assets](https://www.ifrs.org/issued-standards/list-of-standards/ias-37-provisions-contingent-liabilities-and-contingent-assets/). 충당부채와 우발항목의 처리.
+
+[^related]: IFRS Foundation, [IAS 24 Related Party Disclosures](https://www.ifrs.org/issued-standards/list-of-standards/ias-24-related-party-disclosures/). 특수관계자 관계와 거래 공시.
+
+[^audit]: PCAOB, [AS 3101: The Auditor’s Report on an Audit of Financial Statements When the Auditor Expresses an Unqualified Opinion](https://pcaobus.org/oversight/standards/auditing-standards/details/AS3101). 감사보고서의 의견과 CAM에 관한 기준.
+
+[^apple]: Apple, [2025 Form 10-K](https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm). 인쇄 페이지 49의 감사보고서와 Note 7을 연결해 읽는 사례. US GAAP 공시이며 한빛공구와 회계 기준을 같다고 가정하지 않는다.

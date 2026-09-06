@@ -1,0 +1,71 @@
+---
+id: "financial-statements-08-price-and-multiples"
+locale: "en"
+title: "08. Is a low P/E stock really cheap?"
+description: "Calculate EPS and valuation multiples while checking scope and sustainable earnings."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+status: "published"
+tags: ["financial-statements", "stocks", "valuation"]
+series: "Financial Statements to Stock Valuation"
+image: /invest/direction-of-money-financial-health.png
+imageAlt: Two independent verification paths recombining inside a valuation range while a failed fragment falls beyond an exit boundary
+sources:
+    - kind: article
+      title: "IAS 33 Earnings per Share"
+      creator: "IFRS Foundation"
+      url: "https://www.ifrs.org/issued-standards/list-of-standards/ias-33-earnings-per-share/"
+    - kind: article
+      title: "Valuation"
+      creator: "Aswath Damodaran, NYU Stern"
+      url: "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/lectures/val.html"
+    - kind: article
+      title: "Non-GAAP Financial Measures"
+      creator: "SEC"
+      url: "https://www.sec.gov/rules-regulations/staff-guidance/corporation-finance-interpretations/non-gaap-financial-measures"
+---
+
+At an assumed year-end quote of KRW 12,000, Hanbit's P/E is about 4.2. That looks low, but it does not establish that the first-year earnings will recur or become distributable cash. Treat a multiple as the beginning of a question.
+
+## Align the per-share denominator
+
+Hanbit has 10,000 ordinary shares throughout the year. EPS is therefore `28.8 million ÷ 10,000 = KRW 2,880`. Actual basic EPS uses weighted-average shares outstanding; diluted EPS incorporates dilutive potential ordinary shares under the applicable rules.[^eps] Closing shares are not always a valid substitute.
+
+| Measure       | Hanbit calculation                        | Check first                                    |
+| ------------- | ----------------------------------------- | ---------------------------------------------- |
+| P/E           | 12,000 ÷ 2,880 = 4.17 times               | Historical or forecast earnings; unusual items |
+| P/B           | Market cap 120 ÷ equity 68.8 = 1.74 times | Asset recoverability and accounting policies   |
+| Simple EBITDA | EBIT 42 + depreciation 8 = 50             | Definition and adjustments                     |
+
+P/E of 4.17 does not mean your investment will be repaid in 4.17 years. Earnings must convert into cash and reach shareholders, and future business conditions can change. Hanbit paid no dividend and generated negative operating cash flow in its first year.
+
+## Keep operations and equity separate
+
+To match the later valuation, assume required operating cash of 20 and excess cash of 36.8 out of total cash 56.8. Our explicitly defined **operating value after deducting excess cash** is `market cap 120 + bank debt 60 − excess cash 36.8 = 143.2`. Relative to simple EBITDA of 50, that is 2.864 times.
+
+A provider subtracting all cash would report `120 + 60 − 56.8 = 123.2` instead. Preserve the definition with the number. Actual companies may also require consistent treatment of leases, preferred stock, and noncontrolling interests. The distinction between operating and equity value carries into discounted cash flow analysis.[^valuation]
+
+EBITDA has not deducted capital expenditure or working capital investment. That is why EBITDA of 50 can coexist with simple FCF of −43.2. If management presents adjusted EBITDA, inspect its reconciliation to the reported accounting result.[^nongaap]
+
+## A low multiple can support competing explanations
+
+In an independent next-year scenario, suppose earnings halve to 14.4 while shares and price stay unchanged. P/E becomes 8.33. Today's low ratio might reflect market mispricing, or it might reflect an expectation that current earnings are unusually high. The historical ratio alone cannot decide between those explanations.
+
+A peer comparison should include business mix, reporting date, consolidation boundary, earnings period, and financing. Banks and tool distributors use funding and assets differently; an identical EBITDA ranking would hide that distinction. Even within one industry, growth, collection quality, and customer concentration can justify different prices.
+
+## Keep a short record
+
+When you find a low P/E, write what must remain true for current earnings to recur. For Hanbit, investigate the 40% gross margin, collection of customer credit, and further investment needs. Next we translate those conditions into future cash and an implied share value.
+
+## Continue reading
+
+- [Previous: Does high ROE mean a good business?](/en/notes/financial-statements-07-returns-on-capital)
+- [Next: Why can a stock fall after good earnings?](/en/notes/financial-statements-09-expectations-and-price)
+- [Financial statements to stock valuation · full series](/en/series/financial-statements-to-stock-valuation)
+- [All Invest series](/en/series)
+
+[^eps]: IFRS Foundation, [IAS 33 Earnings per Share](https://www.ifrs.org/issued-standards/list-of-standards/ias-33-earnings-per-share/). Basic and diluted EPS measurement.
+
+[^valuation]: Aswath Damodaran, NYU Stern, [Valuation](https://pages.stern.nyu.edu/~adamodar/New_Home_Page/lectures/val.html). Firm and equity valuation boundaries.
+
+[^nongaap]: SEC, [Non-GAAP Financial Measures](https://www.sec.gov/rules-regulations/staff-guidance/corporation-finance-interpretations/non-gaap-financial-measures). EBITDA and adjusted performance measure guidance.

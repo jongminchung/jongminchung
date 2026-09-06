@@ -43,3 +43,24 @@ curl --fail -H 'Host: www.jamie.kr' http://127.0.0.1:3000/ko
 curl --fail -H 'Host: tech.jamie.kr' http://127.0.0.1:3000/ko
 curl --fail -H 'Host: invest.jamie.kr' http://127.0.0.1:3000/ko
 ```
+
+## 응답 보안 헤더 소유권
+
+정적 방어 헤더의 canonical owner는 application의 `next.config.ts`다.
+Vercel과 Container 모두 같은 설정에서 `X-Content-Type-Options: nosniff`,
+`X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: strict-origin-when-cross-origin`,
+`Permissions-Policy: camera=(), geolocation=(), microphone=()`를 제공한다.
+`poweredByHeader: false`로 standalone에서도 framework 헤더를 제거한다.
+Ingress와 CDN은 이 헤더를 보존하며 별도 override를 추가할 때는 이 계약과 응답 검증을 함께 변경한다.
+TLS 종료와 HSTS는 배포 계층의 책임이며 application에서 preload를 선언하지 않는다.
+
+2026-09-06 공개 Home·Tech·Invest `/ko` 응답 점검에서는 모두 200과 위 네 헤더를
+확인했으며 `X-Powered-By`, CSP, CSP Report-Only는 관찰되지 않았다.
+이 측정만으로 배포 대시보드의 추가 header override 유무를 확정할 수는 없다.
+로컬 HTML·RSS·검색·OG·robots·sitemap 응답은 `app/security-headers.e2e.test.ts`로 검증한다.
+
+CSP는 현재 보류한다. Next hydration과 theme 초기화의 inline script,
+Excalidraw 지연 로드, Kroki 이미지 source가 있어 검증 없이 enforce하지 않는다.
+Report-Only pilot은 보고 수집 위치·보존 정책과 운영 담당자가 정해지고 실제 browser source
+inventory를 확보했을 때 재개한다. nonce를 위해 전체 route를 동적으로 바꾸거나
+`unsafe-inline`을 최종 정책으로 고정하지 않는다.

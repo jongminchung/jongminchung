@@ -18,7 +18,7 @@ describe("oxfmt 구성", () => {
     });
   });
 
-  it("[성공] 뒤에는 반대하는 태도를 추가함", () => {
+  it("[성공] 기본 제외 경로 뒤에 사용자 제외 경로를 추가함", () => {
     const config = defineOxfmtConfig({
       ignorePatterns: ["fixtures/generated/"],
     });
@@ -35,7 +35,7 @@ describe("oxfmt 구성", () => {
     expect(config.overrides).not.toBe(overrides);
   });
 
-  it("[성공] Oxfmt zero-config는 일체형이 아닙니다", () => {
+  it("[성공] 명시하지 않은 포맷 옵션은 Oxfmt 기본값에 위임함", () => {
     const config = defineOxfmtConfig();
 
     expect(config).not.toHaveProperty("printWidth");
@@ -47,7 +47,7 @@ describe("oxfmt 구성", () => {
     expect(config.sortPackageJson).toBe(false);
   });
 
-  it("[성공] 현재 Oxfmt 옵션을 존중하고 존중하는 구성을 선언함", () => {
+  it("[성공] 사용자가 지정한 포맷과 정렬 옵션을 보존함", () => {
     const config = defineOxfmtConfig({
       insertFinalNewline: false,
       objectWrap: "collapse",
@@ -66,7 +66,7 @@ describe("oxfmt 구성", () => {
     expect(config.sortTailwindcss).toBe(true);
   });
 
-  it("[실패] 존재하는 것을 받아들이지 않고 반환되는 구성을 찾을 수 있음", () => {
+  it("[성공] 정렬 비활성화 옵션을 그대로 보존함", () => {
     const config = defineOxfmtConfig({
       sortImports: false,
       sortPackageJson: false,
@@ -87,7 +87,7 @@ describe("oxfmt 구성", () => {
     ).toEqual({ sortScripts: false });
   });
 
-  it("[성공] 구성하면 상관없을 것 같습니다", () => {
+  it("[성공] 한 구성의 정렬 옵션 변경이 다른 구성에 영향을 주지 않음", () => {
     const first = defineOxfmtConfig();
     const second = defineOxfmtConfig();
 
@@ -108,7 +108,7 @@ describe("oxfmt 구성", () => {
     expect(config.sortPackageJson).not.toBe(options);
   });
 
-  it("[성공] 공식 Oxfmt에 대한 응답을 사용함", () => {
+  it("[성공] 공식 Oxfmt 타입이 잘못된 옵션을 거부함", () => {
     const compileTimeOnly = () => {
       // @ts-expect-error Oxfmt only accepts its documented arrowParens values.
       defineOxfmtConfig({ arrowParens: "sometimes" });

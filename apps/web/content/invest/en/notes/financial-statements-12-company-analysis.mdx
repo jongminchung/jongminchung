@@ -1,0 +1,76 @@
+---
+id: "financial-statements-12-company-analysis"
+locale: "en"
+title: "12. Analyzing one company from start to finish"
+description: "Build an analysis memo with reconciled accounts, valuation assumptions, and review conditions."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+status: "published"
+tags: ["financial-statements", "stocks", "valuation"]
+series: "Financial Statements to Stock Valuation"
+image: /invest/direction-of-money-financial-health.png
+imageAlt: Two independent verification paths recombining inside a valuation range while a failed fragment falls beyond an exit boundary
+sources:
+    - kind: article
+      title: "DART filing search"
+      creator: "Financial Supervisory Service"
+      url: "https://dart.fss.or.kr/dsab009/main.do"
+    - kind: article
+      title: "Valuation"
+      creator: "Aswath Damodaran, NYU Stern"
+      url: "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/lectures/val.html"
+---
+
+You can now turn Hanbit Tools into a one-page analysis memo. The aim is to identify **what is known and which assumptions explain the price**. Apply the same sequence to a real company while leaving unanswered questions visible.
+
+## Fix the source and reporting boundary
+
+For a Korean company, use DART to locate annual filings, amendments, audited statements, and consolidated notes.[^dart] For a US company, use its SEC filing. Record the entity, period end, filing date, currency, units, consolidation scope, and accounting framework. If you combine a current quote with historical results, preserve both dates.
+
+Hanbit is a fictional distributor, not a listed company. The memo describes its first year and assumes a KRW 12,000 quote. It omits VAT, deferred tax, leases, bad debts, and share count changes. Interest and tax payments are operating cash flows in this exercise. Do not import the losses or financing transactions from the separate scenarios into these base accounts.
+
+## Explain the accounts in three sentences
+
+First, sales of 200 less goods costing 120 and operating expenses including depreciation of 38 produce EBIT of 42. Second, interest of 6 and assumed 20% income tax of 7.2 leave net income of 28.8. Third, receivables and inventory absorb cash, so operating cash flow is −3.2; equipment spending of 40 then reduces cash from 100 to 56.8.
+
+| Reconciliation                | Equation, in KRW million       |
+| ----------------------------- | ------------------------------ |
+| Ending assets                 | 56.8 + 50 + 10 + 32 = 148.8    |
+| Ending liabilities and equity | 60 + 20 + 68.8 = 148.8         |
+| Equity movement               | 40 + net income 28.8 = 68.8    |
+| Operating cash flow           | 28.8 + 8 − 50 − 10 + 20 = −3.2 |
+| Ending cash                   | 100 − 3.2 − 40 = 56.8          |
+
+If these bridges do not reconcile, resolve the missing transaction before valuing the business. In a real company, dividends, other comprehensive income, currency movements, acquisitions, and equity issuance can change the bridges. Inspect the equity statement and cash flow notes rather than forcing the difference into an unexplained “other” balance.
+
+## Separate facts, assumptions, and judgment
+
+| Category              | Hanbit memo                                                            |
+| --------------------- | ---------------------------------------------------------------------- |
+| Given case facts      | Net income 28.8; operating cash flow −3.2; receivables 50              |
+| Valuation assumptions | Operating cash 20; excess cash 36.8; stable next-year FCFF 10          |
+| Price assumptions     | KRW 12,000; 10,000 shares; market capitalization 120                   |
+| Calculated result     | KRW 10,180 per share at 10% discount rate and 2% growth                |
+| Open questions        | Collections, margin persistence, replacement investment, debt maturity |
+
+Matching the cash flow with its discount rate is essential.[^valuation] Moving from first-year simple FCF of −43.2 to stable FCFF of 10 is an additional assumption, not a verified recovery. Without an operating plan connecting them, confidence in the base valuation should remain limited.
+
+## State the judgment and the next evidence needed
+
+A reasonable conclusion here is that the low P/E alone does not establish an attractive price. The conservative, base, and optimistic values range from approximately KRW 4,953 through KRW 10,180 to KRW 17,680. They are conditional scenarios, not probabilities or recommended purchase prices.
+
+Next, examine whether receivables keep growing faster than sales, what supports the 40% gross margin, and whether cash after reinvestment can reach the price-implied FCFF of 11.456. That final threshold assumes the same 10% discount rate and 2% growth rate.
+
+## Write your own memo
+
+Choose one company. Record its business in one sentence, several years of earnings and cash changes, major maturities, share count movements, three valuation scenarios, and conditions that would change your judgment. Attach the original source location to every factual number and label estimates as assumptions. The discipline is to make missing evidence visible rather than filling it with confidence.
+
+## Continue reading
+
+- [Previous: What to look for in the financial statement notes](/en/notes/financial-statements-11-notes-and-audit)
+- [Financial statements to stock valuation · full series](/en/series/financial-statements-to-stock-valuation)
+- [All Invest series](/en/series)
+
+[^dart]: Financial Supervisory Service, [DART filing search](https://dart.fss.or.kr/dsab009/main.do). Official company disclosure search.
+
+[^valuation]: Aswath Damodaran, NYU Stern, [Valuation](https://pages.stern.nyu.edu/~adamodar/New_Home_Page/lectures/val.html). Consistent firm and equity valuation.

@@ -1,6 +1,6 @@
 # Issue 0034: Web multi-site URL과 feed 계약 통합
 
-- 상태: 진행 중
+- 상태: 구현 완료·반영 대기
 - 우선순위: P2
 - 기준일: 2026-08-20
 - 영향 범위:
@@ -15,9 +15,8 @@
 - **`site-routing.ts`의 `siteOrigins`가 production origin의 단일 기준이며 production host mapping도 여기서 파생됨**
     - Home·Tech·Invest의 layout·sitemap·robots·RSS와 Home 외부 링크가 이를 참조함
     - `createRobotsResponse`와 `getLocaleProtocol`도 공통 helper로 사용함
-- **Tech·Invest RSS의 `escapeXml`, item·channel serialization과 cache header는 각 route에 남아 있음**
-- **origin 통합은 반영됐지만 RSS protocol 통합과 공통 fixture 검증이 남아 있어 진행 중 상태를 유지함**
-- 이 절은 소스 대조 결과이며 운영 응답을 검증한 기록은 아님
+- **`lib/rss.ts`가 XML escaping·직렬화·locale·cache header를 소유하며 각 route는 콘텐츠 선택과 channel 문구만 제공함**
+- **공통 fixture는 두 사이트·두 언어의 특수문자·URL·날짜·빈 collection을 검증하고 metadata route test는 세 사이트 robots·sitemap과 두 RSS를 검증함**
 
 ## 최초 문제와 근거 — 2026-08-20
 
@@ -25,7 +24,7 @@
 - Tech·Invest RSS는 XML escape·locale language·item markup·response header를 각각 구현했음
 - metadata route 검증은 Tech 중심이어서 세 사이트와 두 RSS의 공통 protocol 계약을 충분히 검증하지 못했음
 
-## 남은 작업의 근거
+## 구현 전 남은 작업의 근거
 
 - 두 RSS route에 별도의 `escapeXml`과 동일한 item template·cache header가 남아 있음
 - 현재 metadata route test는 Tech sitemap·robots와 Invest sitemap을 검사하지만 Home·Invest robots와 두 RSS의 escaping·language·header 공통 fixture는 없음
@@ -59,10 +58,10 @@
 
 - [x] `SiteId`별 production origin을 `siteOrigins`로 제공함
 - [x] 기존 `resolveSite`가 같은 origin에서 파생된 host mapping을 사용함
-- [ ] RSS XML과 response helper를 `apps/web/lib` 내부에 추가함
-- [ ] Tech와 Invest RSS route에서 중복 protocol 코드를 제거함
+- [x] RSS XML과 response helper를 `apps/web/lib` 내부에 추가함
+- [x] Tech와 Invest RSS route에서 중복 protocol 코드를 제거함
 - [x] metadata·sitemap·robots·RSS와 Home 링크가 `siteOrigins`를 참조함
-- [ ] 세 site origin과 두 RSS output을 fixture로 검증함
+- [x] 세 site origin과 두 RSS output을 fixture로 검증함
 
 ## 완료 조건
 
@@ -81,3 +80,10 @@
 - RSS route focused test
 - `bun run check`
 - `git diff --check`
+
+## 2026-09-06 후속 구현 검증
+
+- 공통 RSS fixture 5건과 metadata route 5건을 통과함.
+- `bun run check`가 포맷·린트·타입·미사용 dependency·coverage·Node consumer 검사를 통과함.
+- Web coverage는 46개 파일·198개 테스트를 통과함.
+- 공개 환경 반영은 배포 후 RSS 응답 확인을 통해 별도로 완료함.

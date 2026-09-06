@@ -1,0 +1,90 @@
+---
+id: "etf-choices-1-same-index"
+locale: "ko"
+title: "1. 같은 지수를 추종하는 ETF는 정말 같을까"
+description: "지수 이름부터 배당 처리, 복제 방식, 거래가격까지 비교하면서 ETF 후보를 같은 기준에 올려놓습니다."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+status: "published"
+tags: ["etfs", "portfolio", "investment-accounts"]
+series: "같은 투자, 다른 결과: ETF와 계좌를 고르는 법"
+image: "/invest/direction-of-money-global-portfolio.png"
+imageAlt: "서로 다른 시장 신호들이 하나의 정규화 격자를 지나 다섯 포트폴리오 구획으로 배분되는 장면"
+sources:
+    - kind: article
+      title: "Index Basics: Calculating an Index’s Total Return"
+      creator: "S&P Dow Jones Indices"
+      url: "https://www.indexologyblog.com/2017/02/07/index-basics-calculating-an-indexs-total-return/"
+    - kind: article
+      title: "Exchange-Traded Funds and Products"
+      creator: "FINRA"
+      url: "https://www.finra.org/investors/investing/investment-products/exchange-traded-funds-and-products"
+    - kind: article
+      title: "iShares Core S&P 500 ETF — Portfolio, Performance and Documents"
+      creator: "BlackRock · iShares"
+      url: "https://www.ishares.com/us/products/239726/ishares-core-sp-500-etf"
+    - kind: article
+      title: "Updated Investor Bulletin: Exchange-Traded Funds (ETFs)"
+      creator: "SEC · Investor.gov"
+      url: "https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins-24"
+    - kind: article
+      title: "ETP 종목정보 및 지표 설명"
+      creator: "한국거래소 · Korea Exchange"
+      url: "https://m.krx.co.kr/contents/02/0204/020401/JHPETP020401M01.jsp"
+---
+
+_공식 자료 확인: 2026년 9월 6일. 상품명으로 명시한 사례 외의 후보와 계산 수치는 설명을 위한 가정입니다._
+
+검색창에 S&P 500을 넣으면 비슷한 이름의 ETF가 줄줄이 나온다. 어차피 같은 미국 기업에 투자한다면 가장 싼 것을 사면 될 것 같다. 그런데 무엇이 싸다는 뜻일까. 한 주 가격일까, 보수일까, 아니면 내가 실제로 내는 돈일까.
+
+이 시리즈에서는 상품 이름을 고르기 전에 비교표를 만든다. 한 편마다 몇 칸씩 채우고, 마지막에는 매수 여부를 판단할 수 있는 한 장을 남긴다. 첫 칸은 수익률이 아니라 **정확히 무엇을 따라가는가**다.
+
+## S&P 500 뒤에 붙는 설명을 읽는다
+
+가상의 두 상품이 모두 S&P 500이라는 이름을 쓴다고 하자. A의 비교지수는 가격수익지수이고, B는 배당 재투자를 반영한 총수익지수다. 두 차트의 상승률을 그대로 비교하면 운용 능력과 배당 처리 방식이 뒤섞인다. 지수 회사가 설명하는 가격수익과 총수익의 차이부터 맞춰야 한다.[^index]
+
+여기에 환헤지, 옵션 매도, 레버리지 같은 조건이 붙으면 투자 전략 자체가 달라진다. 이름 앞부분이 같다고 같은 후보로 묶지 말자. ETF와 ETN도 구별해야 한다. ETN은 발행자의 채무증권이어서 발행자 신용위험을 따로 봐야 한다.[^finra]
+
+나는 먼저 아래 네 줄을 채운 뒤 비용을 비교하겠다.
+
+| 확인할 내용     | 비교표에 남길 기록                       |
+| --------------- | ---------------------------------------- |
+| 정확한 기초지수 | 지수의 전체 이름과 산출 통화             |
+| 배당 처리       | 가격수익인지 총수익인지, 세전·세후 기준  |
+| 투자 방식       | 현물 보유, 표본 추출, 파생상품 사용 여부 |
+| 추가 전략       | 환헤지, 옵션 매도, 레버리지 유무         |
+
+운용사 홈페이지는 여기서 쓸 만하다. 예를 들어 iShares의 IVV 공식 페이지에는 보유종목, 성과, 투자설명서가 모여 있다. 특정 ETF를 추천하려는 예시가 아니라, 상품 소개 문구에서 실제 문서로 내려가는 경로다. 후보마다 같은 기준일의 보유종목 파일과 최신 투자설명서를 저장한다.[^ivv]
+
+## 한 주 가격이 낮다고 저평가된 것은 아니다
+
+A는 한 주에 1만원이고 B는 5만원이라고 하자. 각각 100주와 20주를 사면 투자금은 둘 다 100만원이다. 두 상품의 경제적 노출과 수익률이 같다면 주당 가격 차이만으로 유리한 쪽을 정할 수 없다. 다만 정수 단위로 주문해야 하는 계좌에서는 남는 현금이 달라질 수 있다. 월 투자금이 12만원이라면 A는 전액을 쓰지만 B는 2만원이 남는다. 이것은 가치평가보다 매수 단위의 문제다.
+
+ETF에는 시장에서 거래되는 가격과 보유자산에서 계산한 순자산가치(NAV)가 따로 있다. 시장가격이 NAV보다 높은 프리미엄이나 낮은 할인 상태로 거래될 수 있다.[^etf]
+
+가령 같은 시점의 NAV가 1만원인데 1만100원에 샀다면 프리미엄은 1%다. 이후 NAV가 그대로이고 프리미엄만 사라져 1만원에 팔면, 수수료 전 손실률도 매수가 기준 약 0.99%다. 지수를 잘 골랐어도 매수가격 때문에 손실을 볼 수 있다는 뜻이다.
+
+## 비교할 시간을 맞춰야 하는 이유
+
+한국 낮에는 미국 현물시장이 닫혀 있다. 화면의 NAV가 어떤 자산가격과 환율을 반영한 값인지 확인하지 않고 가격 차이를 전부 오가격이라고 단정하면 곤란하다. KRX의 지표 설명도 해외 지수와 원화 기준 자산가치를 비교할 때 통화 차이를 살피도록 안내한다.[^krx]
+
+후보 두 개의 지수, 전략, 통화, 기준일이 일치하면 오늘 할 일은 끝이다. 서로 다르면 어느 쪽이 우수한지 채점하기 전에 비교군부터 나눈다. 다음 편에서는 이렇게 남긴 후보의 비용을 살핀다. 광고에 적힌 보수 한 줄보다 볼 것이 조금 더 있다.
+
+## 시리즈 이어 읽기
+
+1. [같은 지수를 추종하는 ETF는 정말 같을까](/ko/notes/etf-choices-1-same-index)
+2. [총보수만 비교하면 놓치는 비용](/ko/notes/etf-choices-2-costs-and-tracking)
+3. [분배금이 많으면 더 좋은 투자일까](/ko/notes/etf-choices-3-distributions-and-return)
+4. [원화로 산 해외 ETF에도 환율이 영향을 줄까](/ko/notes/etf-choices-4-currency-and-hedging)
+5. [일반계좌·ISA·연금계좌에서는 무엇을 따로 확인할까](/ko/notes/etf-choices-5-accounts-and-taxes)
+6. [내 목적에 맞는 ETF 비교표 완성하기](/ko/notes/etf-choices-6-comparison-sheet)
+
+[^index]: S&P Dow Jones Indices, [Index Basics: Calculating an Index’s Total Return](https://www.indexologyblog.com/2017/02/07/index-basics-calculating-an-indexs-total-return/). 2026년 9월 6일 확인.
+
+[^finra]: FINRA, [Exchange-Traded Funds and Products](https://www.finra.org/investors/investing/investment-products/exchange-traded-funds-and-products). 2026년 9월 6일 확인.
+
+[^ivv]: BlackRock · iShares, [iShares Core S&P 500 ETF — Portfolio, Performance and Documents](https://www.ishares.com/us/products/239726/ishares-core-sp-500-etf). 2026년 9월 6일 확인.
+
+[^etf]: SEC · Investor.gov, [Updated Investor Bulletin: Exchange-Traded Funds (ETFs)](https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins-24). 2026년 9월 6일 확인.
+
+[^krx]: 한국거래소 · Korea Exchange, [ETP 종목정보 및 지표 설명](https://m.krx.co.kr/contents/02/0204/020401/JHPETP020401M01.jsp). 2026년 9월 6일 확인.

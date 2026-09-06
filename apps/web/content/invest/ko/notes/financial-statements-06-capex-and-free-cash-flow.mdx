@@ -1,0 +1,73 @@
+---
+id: "financial-statements-06-capex-and-free-cash-flow"
+locale: "ko"
+title: "06. 회사가 번 돈은 어디로 갔을까"
+description: "감가상각과 설비투자, 유지·성장 투자, 잉여현금흐름의 정의를 연결합니다."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+status: "published"
+tags: ["financial-statements", "stocks", "valuation"]
+series: "Financial Statements to Stock Valuation"
+image: /invest/direction-of-money-financial-health.png
+imageAlt: 두 독립 검증 경로가 가치 범위에서 합쳐지고 실패 조각은 출구 경계 아래로 떨어지는 장면
+sources:
+    - kind: article
+      title: "IAS 16 Property, Plant and Equipment"
+      creator: "IFRS Foundation"
+      url: "https://www.ifrs.org/issued-standards/list-of-standards/ias-16-property-plant-and-equipment/"
+    - kind: article
+      title: "IAS 7 Statement of Cash Flows"
+      creator: "IFRS Foundation"
+      url: "https://www.ifrs.org/issued-standards/list-of-standards/ias-7-statement-of-cash-flows/"
+    - kind: article
+      title: "Non-GAAP Financial Measures"
+      creator: "SEC"
+      url: "https://www.sec.gov/rules-regulations/staff-guidance/corporation-finance-interpretations/non-gaap-financial-measures"
+---
+
+현금이 줄었다고 모두 낭비는 아니다. 오늘 산 설비가 앞으로 수년간 일을 할 수도 있다. 그렇다고 투자라는 이름을 붙인 지출이 모두 좋은 것도 아니다. 한빛공구가 장비를 사는 데 쓴 40을 따라가며 비용, 투자, 잉여현금흐름을 구분해보자.
+
+## 지출한 해와 비용을 인식하는 해가 다르다
+
+한빛공구는 첫해 초 판매·관리용 장비를 40에 사서 즉시 사용했다. 내용연수 5년, 잔존가치 0, 정액법이라는 가정이면 연 감가상각은 8이다. 첫해 말 장부에 남은 장비는 32다. 이 사례에서는 해당 장비의 감가상각을 판매·관리비로 처리했다. 실제 회계에서는 자산의 사용 목적에 따라 재고 원가 등에 포함될 수도 있다.[^ppe]
+
+| 관점                          | 첫해 반영 |
+| ----------------------------- | --------: |
+| 손익계산서 감가상각비         |         8 |
+| 투자현금흐름의 장비 취득 지출 |        40 |
+| 기말 재무상태표 순장부금액    |        32 |
+
+간접법 영업현금흐름 계산에서 감가상각 8을 더하는 것은, 이미 이익에서 빠졌지만 그 항목 자체로 당기 영업현금이 나간 것은 아니라는 조정이다. 장비가 공짜라는 뜻은 아니다. 현금 지출 40은 투자현금흐름에 남아 있다.[^cashflow]
+
+## 이 글에서 잉여현금흐름은 어떻게 계산할까
+
+먼저 간단한 정의인 `영업현금흐름 − 설비투자 지출`을 쓰면 `−3.2 − 40 = −43.2`다. 첫해 영업과 장비 투자가 기초 현금 100을 56.8로 줄였다. FCF는 정의가 하나로 고정된 회계 항목이 아니므로 회사 간 비교 전 조정 항목을 확인해야 한다.[^fcf]
+
+이 값은 후반부 기업가치 할인에 쓸 FCFF와 다르다. 이번 영업현금흐름에는 이자 지급 6이 들어 있다. 반면 FCFF는 자금 제공자 전체를 위한 영업현금흐름으로, 금융비용의 영향을 제거하고 재투자를 차감한 정의와 이에 맞는 할인율이 필요하다. 단순 FCF에 회사 전체의 할인율을 기계적으로 붙이면 범위가 어긋난다.
+
+같은 첫해를 단순 FCFF로 다시 계산하면 `영업이익 × (1 − 세율) + 감가상각 − 설비투자 − 운전자본 증가`다. 가정 세율 20%를 그대로 적용하면 `42 × 0.8 + 8 − 40 − 40 = −38.4`가 된다. 앞의 −43.2에 세후 이자 `6 × 0.8 = 4.8`을 더한 값과 같다. 이 역시 첫해의 음수 현금흐름이며, 9장에서 쓰는 안정기 FCFF 10은 별도 미래 가정이다.
+
+## 유지 투자와 성장 투자는 질문으로 구분한다
+
+장비 40 전부를 성장 투자라 부르고 계산에서 빼면 현금 사정이 좋아 보인다. 그러나 그 장비가 없으면 현재 영업 자체가 불가능할 수 있다. 사업을 그대로 유지하는 데 필요한 지출과 추가 매출을 만드는 지출은 목적을 기준으로 판단하되, 회사가 분리 공시하지 않으면 정확한 비중을 안다고 쓰지 않는다.
+
+다음 해에 대한 별도 가정을 해보자. 순이익 28.8과 감가상각 8은 같고 운전자본 증가가 0이면 영업현금흐름은 36.8이다. 교체 투자 8만 필요하다면 단순 FCF는 28.8이 된다. 반대로 운전자본이 다시 40 늘고 장비에 40을 써야 한다면 다시 −43.2다. 이익은 같아도 돈을 묶어두는 방식이 결과를 바꾼다.
+
+이 계산은 첫해 이후 자동으로 현금이 좋아진다는 예측이 아니다. 판매 확대에 외상채권과 재고가 계속 필요하다면 운전자본 증가를 0으로 놓을 근거부터 입증해야 한다. 몇 년 치 투자 계획과 현금 회수 속도를 함께 읽는다.
+
+## 이번 장에서 남길 기록
+
+영업현금흐름 옆에 설비 취득, 무형자산 취득, 인수 대금, 리스 관련 지급을 각각 적는다. 공시된 FCF가 어떤 항목을 포함하는지도 표시한다. “투자 때문에 현금이 줄었다”에서 끝내지 말고, 투자 금액과 기대되는 추가 현금, 그 현금이 시작될 시점을 한 줄로 연결한다.
+
+## 이어서 읽기
+
+- [이전: 부채가 많은 회사는 모두 위험할까](/ko/notes/financial-statements-05-debt-and-solvency)
+- [다음: ROE가 높으면 좋은 기업일까](/ko/notes/financial-statements-07-returns-on-capital)
+- [재무제표에서 주식 가치평가까지 · 전체 시리즈](/ko/series/financial-statements-to-stock-valuation)
+- [모든 Invest 시리즈](/ko/series)
+
+[^ppe]: IFRS Foundation, [IAS 16 Property, Plant and Equipment](https://www.ifrs.org/issued-standards/list-of-standards/ias-16-property-plant-and-equipment/). 유형자산의 인식·측정과 감가상각에 관한 기준. 이 글의 연수와 잔존가치는 교육용 가정이다.
+
+[^cashflow]: IFRS Foundation, [IAS 7 Statement of Cash Flows](https://www.ifrs.org/issued-standards/list-of-standards/ias-7-statement-of-cash-flows/). 현금흐름 구분과 간접법의 비현금 항목 조정.
+
+[^fcf]: SEC, [Non-GAAP Financial Measures](https://www.sec.gov/rules-regulations/staff-guidance/corporation-finance-interpretations/non-gaap-financial-measures). 질문 102.07은 free cash flow의 통일된 정의가 없음을 설명한다.

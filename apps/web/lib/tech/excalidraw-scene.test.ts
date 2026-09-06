@@ -32,8 +32,8 @@ function createScene(
   });
 }
 
-describe("구문 분석ExcalidrawSource", () => {
-  it("[성공] 인증된 인정을 인정하고 인증 데이터를 준수함", () => {
+describe("Excalidraw source 파싱", () => {
+  it("[성공] 유효한 scene을 파싱하고 결과와 요소 배열을 동결함", () => {
     const scene = parseExcalidrawSource(createScene(), "fixture.excalidraw");
 
     expect(scene).toMatchObject({
@@ -46,7 +46,7 @@ describe("구문 분석ExcalidrawSource", () => {
     expect(Object.isFrozen(scene.elements)).toBe(true);
   });
 
-  it("[실패] 잘못된 JSON, 잘못된 존재 및 존재한 사건이 있었습니다", () => {
+  it("[실패] 잘못된 JSON·scene 유형·빈 요소 배열을 거부함", () => {
     expect(() => parseExcalidrawSource("{", "broken.excalidraw")).toThrow(
       /broken\.excalidraw: invalid JSON/u,
     );
@@ -58,7 +58,7 @@ describe("구문 분석ExcalidrawSource", () => {
     );
   });
 
-  it("[실패] 불완전한 요소 ID 및 유효하지 않은 경계가 있음", () => {
+  it("[실패] 중복 요소 ID와 비어 있는 경계를 거부함", () => {
     const duplicate = {
       id: "same",
       type: "rectangle",
@@ -79,7 +79,7 @@ describe("구문 분석ExcalidrawSource", () => {
     ).toThrow(/non-negative, non-empty bounds/u);
   });
 
-  it("[실패] 바이너리 파일이 라벨링된 이미지 요소를 포함함", () => {
+  it("[실패] 존재하지 않는 바이너리 파일을 참조하는 이미지를 거부함", () => {
     expect(() =>
       parseExcalidrawSource(
         createScene({
@@ -100,8 +100,8 @@ describe("구문 분석ExcalidrawSource", () => {
   });
 });
 
-describe("Excalidraw 세트가 어떻게 되나요?", () => {
-  it("[성공] 사업자 등록 파일 이름을 하나의 표시 URL에 매핑함", () => {
+describe("Excalidraw asset 경로", () => {
+  it("[성공] 파일 이름을 slug와 공개 diagram URL로 변환함", () => {
     expect(parseExcalidrawFilename("operating-system.excalidraw")).toEqual({
       filename: "operating-system.excalidraw",
       slug: "operating-system",
@@ -112,7 +112,7 @@ describe("Excalidraw 세트가 어떻게 되나요?", () => {
     ).toBe("operating-system");
   });
 
-  it("[실패] 외부 및 상위 경로에 있음", () => {
+  it("[실패] 외부 URL과 상위 디렉터리 접근을 거부함", () => {
     expect(() =>
       parseExcalidrawAssetSrc("https://example.com/diagram.excalidraw"),
     ).toThrow(/must use \/diagrams\//u);

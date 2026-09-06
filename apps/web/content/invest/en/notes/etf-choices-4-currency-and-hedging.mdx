@@ -1,0 +1,75 @@
+---
+id: "etf-choices-4-currency-and-hedging"
+locale: "en"
+title: "4. Does currency matter when you buy an overseas ETF in won?"
+description: "Separate settlement currency from economic exposure and calculate returns in your spending currency."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+status: "published"
+tags: ["etfs", "portfolio", "investment-accounts"]
+series: "같은 투자, 다른 결과: ETF와 계좌를 고르는 법"
+image: "/invest/direction-of-money-global-portfolio.png"
+imageAlt: "Different market signals pass through a common grid into five portfolio compartments"
+sources:
+    - kind: article
+      title: "International Investing"
+      creator: "SEC · Investor.gov"
+      url: "https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins/international-investing"
+    - kind: article
+      title: "Statement of Additional Information — Currency Hedged ETFs"
+      creator: "BlackRock · iShares"
+      url: "https://www.ishares.com/us/literature/sai/sai-ishares-currency-hedged-etfs-7-31.pdf"
+---
+
+_Official sources checked September 6, 2026. Unnamed candidates and numerical illustrations are hypothetical._
+
+You place an order in won through a Korean brokerage app. Then the dollar weakens and the ETF is affected, even though you never exchanged currency yourself. The missing distinction is between settlement currency and the currencies behind the investment. The SEC’s international-investing bulletin discusses exchange rates as a source of investment risk.[^fx]
+
+## Translate the asset back into won
+
+Assume an unhedged dollar asset and temporarily exclude fees, taxes and distributions. The asset gains 10% in dollars while the exchange rate falls from KRW 1,400 to KRW 1,260 per dollar, a 10% decline.
+
+```text
+KRW return = (1 + USD asset return) × (ending KRW per USD / starting KRW per USD) - 1
+           = 1.10 × 0.90 - 1
+           = -1%
+```
+
+An initial USD 1,000 investment costs KRW 1.4 million. It grows to USD 1,100, now worth KRW 1.386 million. A headline reporting a 10% US-market gain and your account showing a 1% loss can both be correct.
+
+| USD asset return | Change in KRW per USD | KRW return |
+| ---------------- | --------------------- | ---------- |
+| +10%             | -10%                  | -1%        |
+| +10%             | +10%                  | +21%       |
+| -10%             | +10%                  | -1%        |
+
+Adding the two percentage changes incorrectly produces zero in the first and third rows. Currency conversion is multiplicative. A real fund with multiple currencies and interim distributions requires more detailed cash-flow accounting; this single-asset illustration is not a universal ETF performance formula.
+
+## What a currency hedge actually targets
+
+Identify which currency is being hedged against which reference currency, and to what extent. An ETF hedging foreign currencies into dollars for US investors does not thereby remove a Korean investor’s dollar/won exposure. The iShares currency-hedged ETF statement explains that hedging can be imperfect and can generate additional costs or gains and losses.[^hedge]
+
+That document describes US funds. For a Korean candidate, obtain its own prospectus to verify the actual won-hedging policy. An `(H)` label alone is insufficient evidence of a constant 100% daily hedge.
+
+Avoid inventing a fixed annual hedging charge either. Contract terms and market conditions matter. If historical NAV performance already reflects hedging transactions and expenses, do not deduct them again.
+
+## What currency will you eventually spend?
+
+Money for a Korean housing deposit in three years serves a different purpose from money for tuition payable in dollars. If the liability is in dollars, a fluctuating won valuation does not by itself change the number of dollars available. If the liability is in won, a positive dollar return can still leave a shortfall.
+
+Matching currency does not remove asset-price risk. Putting dollar tuition money into US equities still leaves the possibility of a stock-market decline before payment is due. Spending date and asset risk need their own checks.
+
+Record settlement currency, major asset currencies, hedging target and ratio, and eventual spending currency as separate fields. The next installment asks which account can hold the investment and under what conditions.
+
+## Continue the series
+
+1. [Are ETFs tracking the same index really the same?](/en/notes/etf-choices-1-same-index)
+2. [The costs a headline expense ratio leaves out](/en/notes/etf-choices-2-costs-and-tracking)
+3. [Does a larger distribution mean a better investment?](/en/notes/etf-choices-3-distributions-and-return)
+4. [Does currency matter when you buy an overseas ETF in won?](/en/notes/etf-choices-4-currency-and-hedging)
+5. [What changes across a regular account, ISA and pension account?](/en/notes/etf-choices-5-accounts-and-taxes)
+6. [Finish an ETF comparison sheet for your own purpose](/en/notes/etf-choices-6-comparison-sheet)
+
+[^fx]: SEC · Investor.gov, [International Investing](https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins/international-investing). Accessed September 6, 2026.
+
+[^hedge]: BlackRock · iShares, [Statement of Additional Information — Currency Hedged ETFs](https://www.ishares.com/us/literature/sai/sai-ishares-currency-hedged-etfs-7-31.pdf). Accessed September 6, 2026.
