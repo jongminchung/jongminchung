@@ -14,7 +14,6 @@ System_Boundary(repository, "jongminchung 모노레포") {
   Container(web, "@jongminchung/web", "Next.js, React, TypeScript", "Host와 locale을 분기하고 Home·Tech·Invest 화면과 시스템 route를 제공함")
   Container(content, "콘텐츠 원본", "MDX, JSON, Excalidraw", "기술 문서·블로그·투자 노트와 다이어그램을 보관함")
   Container(ui, "@jongminchung/ui", "React, Tailwind CSS, Base UI", "공유 primitive·semantic token·전역 스타일을 제공함")
-  Container(tooling, "@jongminchung/tooling", "Oxfmt, Oxlint", "공용 형식·정적 분석 설정을 제공함")
   Container(automation, "저장소 자동화", "Bun test, Node.js, Playwright, GitHub Actions", "Bun 앱과 Node 호환 패키지의 검사·게시를 조정함")
 }
 
@@ -26,9 +25,7 @@ Rel(web, ui, "source-first subpath import", "workspace:*")
 Rel(web, kroki, "PlantUML 이미지 URL 노출", "HTTPS")
 Rel(automation, web, "typecheck·unit·integration·build·E2E")
 Rel(automation, ui, "typecheck·test·build·publish")
-Rel(automation, tooling, "typecheck·test·build·publish")
 Rel(ui, packages, "ESM·CSS 스냅샷 게시", "npm protocol")
-Rel(tooling, packages, "ESM 설정 스냅샷 게시", "npm protocol")
 
 SHOW_LEGEND()
 @enduml

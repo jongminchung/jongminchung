@@ -4,7 +4,8 @@
 - 결정일: 2026-08-11
 
 > 후속 상태: `@jongminchung/remark-plantuml` workspace는 2026-08-12에 제거되었으며 이 결정은
-> 현재 `@jongminchung/tooling`에 적용된다
+> 이후 `@jongminchung/tooling`도 폐기되었다. 현재 공개 패키지 `@jongminchung/ui`는
+> 이 문서의 `tsc` 빌드 원칙을 따른다. 아래 배경은 결정 당시의 기록이다.
 
 ## 배경
 

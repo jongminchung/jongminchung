@@ -45,4 +45,3 @@ AI 대화 기록 없이도 작업할 수 있도록 수정 위치, 실행 명령,
 - [공용 헤더 안내](web/header-unification.md): Home·Tech·Invest 헤더 구성과 유지보수 경계
 - [Web 테스트 전략](web-testing-strategy.md): Bun 내장 test runner와 Playwright의 테스트 분류 및 실행 기준
 - [Web 컨테이너 배포 계약](../apps/web/DEPLOYMENT.md)
-- [`@jongminchung/tooling`](../packages/tooling/README.md): Oxc 설정과 package map

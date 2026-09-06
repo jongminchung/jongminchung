@@ -124,8 +124,8 @@ change follows an agreed direction, has local impact, is easy to reverse, and ha
 validation.
 
 The [DDD handbook](/en/docs/be/ddd) explains how to define the problem space and language before a
-feature list, while the [tooling package](https://github.com/jongminchung/jongminchung/tree/main/packages/tooling) turns repeated repository
-policy into a public contract. These experiences led me to favor feature documents that show
+feature list, while the [Oxlint configuration](https://github.com/jongminchung/jongminchung/blob/main/oxlint.config.ts) turns repeated repository
+policy into executable checks. These experiences led me to favor feature documents that show
 boundaries, consumers, compatibility, and validation before a list of screens; implementation and
 review become shorter when those decisions are visible.
 
@@ -161,11 +161,11 @@ Compatibility, remaining risk, and separately tracked work
 
 ## Experience connected through documentation
 
-| Document                                                                           | Experience reused in collaboration                                    |
-| ---------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| [DDD handbook](/en/docs/be/ddd)                                                    | Align the problem and ubiquitous language before implementation.      |
-| [tooling](https://github.com/jongminchung/jongminchung/tree/main/packages/tooling) | Turn repeated team rules into an executable shared contract.          |
-| [Deep Dives](/en/docs/fe/nextjs-16)                                                | Make technical answers reusable with a version and verification date. |
+| Document                                                                                        | Experience reused in collaboration                                    |
+| ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| [DDD handbook](/en/docs/be/ddd)                                                                 | Align the problem and ubiquitous language before implementation.      |
+| [Oxlint configuration](https://github.com/jongminchung/jongminchung/blob/main/oxlint.config.ts) | Turn repeated team rules into executable checks.                      |
+| [Deep Dives](/en/docs/fe/nextjs-16)                                                             | Make technical answers reusable with a version and verification date. |
 
 These documents cover different subjects but follow the same flow: understand people and problems
 first, make boundaries explicit, and leave executable evidence. Collaboration rules are not meant to

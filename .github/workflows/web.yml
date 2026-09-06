@@ -10,7 +10,6 @@ on:
       - ".github/workflows/web.yml"
       - "apps/web/**"
       - "packages/ui/**"
-      - "packages/tooling/**"
       - ".bun-version"
       - "package.json"
       - "bun.lock"
@@ -47,7 +46,6 @@ jobs:
               - '.github/workflows/web.yml'
               - 'apps/web/**'
               - 'packages/ui/**'
-              - 'packages/tooling/**'
               - '.bun-version'
               - 'package.json'
               - 'bun.lock'

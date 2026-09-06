@@ -24,7 +24,7 @@ Rel(github, vercelWeb, "Git 연동 배포로 추정됨", "저장소 밖 설정")
 Rel(github, standaloneWeb, "Dockerfile로 이미지 빌드 가능", "명시적 배포 자동화는 저장소 밖")
 Rel(browser, vercelWeb, "Home·Tech·Invest", "HTTPS")
 Rel(browser, standaloneWeb, "Home·Tech·Invest", "HTTP/HTTPS ingress")
-Rel(github, registry, "tooling·ui의 1.0.0 교체 게시", "수동 Actions")
+Rel(github, registry, "ui의 1.0.0 교체 게시", "수동 Actions")
 
 SHOW_LEGEND()
 @enduml

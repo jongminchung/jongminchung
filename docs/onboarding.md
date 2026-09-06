@@ -4,7 +4,7 @@
 
 ## 핵심 요약
 
-- **이 저장소는 Bun 모노레포이며 `apps/web`, `packages/ui`, `packages/tooling`의 세 workspace를 하나의 루트 검증 계약으로 관리함**
+- **이 저장소는 Bun 모노레포이며 `apps/web`, `packages/ui`의 두 workspace를 하나의 루트 검증 계약으로 관리함**
 - **Web은 React 19와 Next.js 16 App Router로 구현된 단일 배포물이며 요청 Host에 따라 Home·Tech Docs·Invest 사이트를 분리함**
 - **콘텐츠는 외부 CMS나 데이터베이스가 아니라 저장소의 MDX·Excalidraw 원본이며 Fumadocs와 Zod가 빌드 시 구조와 게시 계약을 검증함**
 - **스타일은 Tailwind CSS 4의 CSS-first 방식과 `@jongminchung/ui`의 semantic token·Base UI primitive를 사용하며 제품 조합은 `apps/web`이 소유함**
@@ -98,7 +98,7 @@ bun run check
     - 방문자는 Home·Tech·Invest의 공개 콘텐츠와 검색·RSS·sitemap·OG metadata를 소비함
     - 콘텐츠 작성자는 한국어·영어 MDX와 출처·검증일·게시 상태를 관리함
     - 프론트엔드 유지보수자는 route·React component·스타일·접근성·성능을 관리함
-    - 패키지 소비자는 `@jongminchung/ui`와 `@jongminchung/tooling`의 ESM·CSS 공개 subpath를 사용함
+    - 패키지 소비자는 `@jongminchung/ui`의 ESM·CSS 공개 subpath를 사용함
     - 운영자는 GitHub Actions, Vercel 또는 standalone container, GitHub Packages를 관리함
 - **최상위 품질 목표는 변경 안전성, 콘텐츠 신뢰성, 접근성, 작은 client 경계, 소유권이 분명한 UI임**
     - 변경 안전성은 strict TypeScript, 정적 분석, coverage, build, Playwright로 확보함
@@ -117,7 +117,7 @@ bun run check
     - `apps/web/AGENTS.md`는 현재 Next.js의 breaking change 가능성 때문에 `apps/web/node_modules/next/dist/docs/`를 기준으로 작업하도록 요구함
     - 온라인 공식 문서는 개념과 최신 공개 설명에 유용하지만 실제 코드 변경은 lockfile에 설치된 버전과 로컬 문서가 우선함
 - **공개 패키지는 ESM과 명시적 subpath만 지원하며 root barrel과 CommonJS 호환 계층을 추가하지 않음**
-    - `packages/ui`와 `packages/tooling`은 `tsc`로 ESM JavaScript와 declaration을 생성함
+    - `packages/ui`는 `tsc`로 ESM JavaScript와 declaration을 생성함
     - Web workspace에서는 TypeScript path와 package의 `source` condition으로 소스를 직접 검사함
     - 외부 게시물은 고정 `1.0.0`을 교체하는 개인용 mutable snapshot이며 일반적인 SemVer 불변성을 제공하지 않음
 - **기존 작업 트리의 변경은 다른 사람의 작업으로 간주하고 관련 없는 파일을 되돌리거나 포맷하지 않음**
@@ -131,7 +131,7 @@ bun run check
     - 기여자의 변경은 GitHub와 CI를 거쳐 검증됨
     - 외부 소비자는 Web이 아니라 GitHub Packages에서 두 package를 받음
     - PlantUML 다이어그램은 정적 이미지가 아닌 Kroki URL을 통해 브라우저에서 렌더됨
-- ![jongminchung 시스템 컨텍스트 C4 Level 1](https://kroki.io/plantuml/svg/eNptlFtPGkEUx9_5FKc8aUK8JD42jRatmHohXLR9MogTXF12Lbtr9A0FjPUSTQp2MavdJrRigwmKCk31hY_DzHyHnlm5eXkgy8zu-f_PmfObM6zpkYRuxGXXG0mJysYigbfeoX7v0LxXVXSyrr9zuXRJlwksq0osjt8sGUoM2J7Fdgs8YwH7V-SZA7HYrUG9Ct4hmCRrRIZBl2ty5PNMODQ_OfYhNB-YGPeFenpdLj9JaKrSsyZpkq4mPOCm5QtaqrGzIzcueM5q3F6y45t6lZmb-KQ_LfCpceKBEIkuwaga1TwwoawRTQf2YPLMEavZ9Nc98NQRS33luaK7t-URj0iKjj8ibBq1MvteQhtUtmx2nqSVG7ZjNn1DG6skGE1Iq0I1S79ZHpga_dRx8EB4Avh-kW8VMJTlk4CB9DDP81lhTivJxvXDo3lwQ9NJvKf7vNCgeykM3xsKzJEFoOUyPyzR0n2jcg_TKp4_N2s8b0Kjcot5djyFDdvexz2eM-luFuifIs3UqL2D8W3b-bF1vScm6UvGApqMS7rPWBB2InK3UK_6DVmGAPli4PnVqyNRXVIVDbcj0ZVIjGiOiW2hd3ctjugaSUSJjFKzzh-g5pHIYsY7AfRHmaeS7CwtnKYRmr5lzSmO5a7YabpZI6bdqNjgC4X8QWAnWXZ9KV6ya5P-Lr2wW0moKxLKfRRPoeuXI4oenpps9kdkGpwdF3hQe58eZOn55guRKBZnxJ32s3yN3iXFCdK_aeDZNEYy-xSpFeLD3e3pNyTR4Kd7uqrKkhJzMt4qsZOLRzNXgMgdlp_1vE1PE07h5JSPgSKum88XoaLIelXcjLTV5Mv92FIPIDyvSLTb7g9A4zrJt22H0x0TOe1whK_28friFS7w4xcptTSepYNyomqUe67jbmMGTZqaSk8V2vQ4WGyV2Z2FzDfJ6MYmHlEQxMUWXjielMWIrCrkVdkWJXSvwE5vcFw0qjV6VoRwADlJnbL01RN0VEwDusvtANI-PGSU2TkY7BvoGwC8MzSVYakqCIcTMY2wLV01ty6OQCHom5nDYTc-Nj2Kg26YKItirv4HFcR8BQ)
+- ![jongminchung 시스템 컨텍스트 C4 Level 1](https://kroki.io/plantuml/svg/eNptlFlPGlEUx9_5FKc8aUJcEh-bRotWTF0IoLZPBuEGR4cZy8wYfUMBY12iScEOZrTThFZsMEFRoam-8HG4936HnjuyuTyQYZbz_5_ld8-wpocTuhGXXW8kJSIbUQJvvUP93qEFr6roZF1_53Lpki4TWFaVWBy_WTKUGLA9i-0WeMYC9q_IMwfiZrcG9Sp4h2CSrBEZBl2uyZHPM7OhhcmxD6GFwMS4L9TT63L5SUJTlZ41SZN0NeEBNy1f0FKNnR258YbnrMbtJTu-qVeZuYlX-tMCnxonHgiRyBKMqhHNAxPKGtF0YA8mzxyxmk1_3QNPHbHUV54runtbHvGwpOj4I8KmUSuz7yW0QWXLZudJWrlhO2bTN7SxSoKRhLQqVLP0m-WBqdFPHQcPzE4A3y_yrQKGsnwSMJAe5nk-K8xpJdm4fng0D25oOon3dPcLDbpvheF7Q4F5sgi0XOaHJVq6b1TuYVrF_nOzxvMmNCq3mGfHU9iw7X18xnMm3c0C_VOkmRq1dzC-bbswtq73xCR9yVhEk3FJ9xmLwk5E7hbqVb8hyxAgXwzsX706EtElVdHwcTiyEo4RzTGxLfTursURXSOJCJFRas75A9Q8ElnMeCeA_ijzVJKdpYXTNELTt6w5xbHcFTtNN2vEtBsVG3yhkD8I7CTLri_FS3Zt0t-lF3YrCXVFQrmP4ip0_XJY0WenJpvzEZkG58YFHtTepwdZer75QiSCxRlxZ_wsX6N3SdFB-jcNPJvGSGafIrVCfLh7PP2G5PRhq8ROLh41XQEid5B9Nto2JE0GhaBTJQaKuG4MX4SKWupVcQDSVhMj9-PkPICMvCLRnq4_AI3rJN-2HRx3TMSxgwu-2sdTiie1wI9fpNTSeJYOyomqUe65jrtNEzShaSo9VWhD4kx_q8zuLES7CUA3HfGwgrxFWxThFlKiYVlVyKuyLRjoXoGd3uBWaFRr9KwIswHEIXXK0ldPCFExDegut8NBu3mIIrNzMNg30DcAeDRoKsNSVRAOJ2Lp4Fi6am6dD4FC0DczjzttfGx6FPfZMFGiYn3-B3j7ca0)
     - 수정 원본은 [`diagrams/onboarding-context.puml`](diagrams/onboarding-context.puml)임
 - **Vercel Git 연동과 OCI image 배포 대상의 세부 설정은 저장소 밖에 있을 가능성이 있으며 문서의 연결선은 코드와 `vercel.json`·Dockerfile에 근거한 추론임**
     - 저장소 안 GitHub Actions의 `Web` workflow는 검증을 수행하지만 production 배포 명령은 포함하지 않음
@@ -158,18 +158,18 @@ bun run check
 
 ### arc42 5 · C4 Container로 workspace 책임을 구분함
 
-- **세 workspace와 콘텐츠·자동화의 책임을 섞지 않는 것이 유지보수의 핵심 경계임**
+- **두 workspace와 콘텐츠·자동화의 책임을 섞지 않는 것이 유지보수의 핵심 경계임**
     - `apps/web`은 제품 route, 제품 component, 콘텐츠 domain rule, metadata와 배포물을 소유함
     - `packages/ui`는 제품 중립 primitive, `cn`, semantic token, 기본 theme와 Tailwind 진입점을 소유함
-    - `packages/tooling`은 Oxfmt·Oxlint의 공유 설정 API를 소유함
+    - 루트 `oxfmt.config.ts`·`oxlint.config.ts`가 저장소의 포맷·린트 설정을 소유함
     - `apps/web/content`는 사람이 수정하는 MDX 원본을 소유함
     - 루트 script와 GitHub Actions는 여러 workspace를 묶는 검증·게시 흐름을 소유함
-- ![jongminchung 컨테이너 C4 Level 2](https://kroki.io/plantuml/svg/eNqNVd9PG0cQfr-_YuonUrmNFPFUVRWBOEDLL2GTtk_oOG_sje9urbs9wIoqOWAqFNyGStAYYlMjkQYqqrrYyZ0U-nJ_jnfvf-js2YApNMrTnXbnm_lm5pvZEZfrDvcsU_uE2obpZQl8OTZ8d2x4cYzZXKc2cb7SNE65SeAJs3MWWuU9Owfy_XG0UZWNjqhsQujD2DBMkWViwj1Nm7r__exCZnEq9TCzOD85PpEZuqNpc8RxmT20TF3KmZOEhGidiNNAHmwn7lxcWhiwFxTvu0FLvjzF-9CX9aZ8Uxbtjtys9QDpksuJtZha5UMFhxUo2n-jvgn8mTN1my9MT0H60TiIZlX8tCN-O70OKupGQc8RF83HKZ_wlmCuf6I8dFt12QhAnO3IegXsogUOyVGXOyX0cuFmlHl2VndKQw4psjipEkKvFUn8cSw2AtHcjF5gfHiqAVyWdWiFLKH9yCDgLp6p-DNklX_-BMnNE93gSciUiiRtOLTI1e0Ec7ncK4PJDN0kslEB8a6C1Yp2a912EyaYRUI_Q4x86E_ay8TlEO3tiJNOt30Ocqsunx9FG3VwmMeJeI1HzXq3_TbaPcbcBvkZ-EdsjJ6Q_9SijW0ZNEG-2hbtQJGYfvBdEr5Oz84kIbWKPGjW0VcS_bZtNkG1tlIPfRHsiMN61w9CP9pU3QSsSPQ8UAmIrSMUkPy1g9fi4DjOpN3pdso3yXj0Rq28uNkXFdKpuULtLIyl00kY1V0CC5MxnfZbVA8UHWpRTpexMi6xUB_UAM4KxEZxNSvy5Z-gyrJelo1zReP_asIZM6mdu8Glf64Czq4-tpDQ7Coe8AsG-ycQ1XblVkOF25XNZ6plstIAWTlSBx8IqXucWTqnzFadaJblwWv5YxWwkuLFHjZWhRj18HKGZUksmkeUY9OTgHNQWnFoLo__fZHfN5Qjt48Bufu3EoVCIr8g2qtBVD2O1o5w2mSjBt2zslw7Df3uWRWFE4vlsIV8eyx_0LR5Yl5NdE_QCMCmYodB9Xb_JFZsJjOXRoQyH5zxK4mhnJQiMCu51oLo50C--SXRG85bcL1IsYJD32BWkdnoJvSzTFmB4-G2us1HjLsK6hp51EKc5e8NiF5hE953oiputXPs02Er2q8q_EPP0rPMcAFJDjqKNekyzzHIZ4-pg3PmektFneeBIiMnbv4KcwouLhvyxaeD0Iuddbmq1CL9CwmXYWF-So2IfFf_b-UGldCrAMe9gDkYhdD3bIoFwBKRnBPbhP6SR81s6KfupW5xEJMfwCvJXEKK3pJJ3fwtsKsB-DisCjOwa1Pp6dDHEVXTJtY35LoPPW2pXNWeLTqMM4OZffhluOs--mPzMV609MTst_gUjadmHuAzNELsrHrt_gVy2Ahq)
+- ![jongminchung 컨테이너 C4 Level 2](https://kroki.io/plantuml/svg/eNp1VF1PG0cUffevuPUTqdxGiniqqorgOEDLl7DpxxNa1lN74t0da3YWY0WVLDAVStyGStCYxKZGIg1UVHWxk10p9GV_jmf2P_TOGoPT0KddzdxzP845c6dcYXDh2VbiI-qYlpcn8Hl68m56ci3NHGFQh_AvEglBhUXgEXMKNkYVPacA6t1ptNNQ7b6s70LoQ3oS5skGseBeIjF__7ul1dzafOZhbm1lbmY2N3EnkVgm3GXOxAZ1qWA8BUnZPZPngTraS94ZXdpYcFgU7wdBVz0_x_vQV62Oel2Tvb7abQ4B2aoriL2W2RQTJc5KFOO_0t8k_ixbhiNWF-Yh-_UMyE5D_rQvfzt_H1Q2zJJRIC6Gz1Ax663D8tWJzjDotlQ7AHmxr1p1cMo2cFKgruBVzDJKM808J2_w6gQnZRYPVUXoeyTJP07lTiA7u9EzrA-PEwDXtE5UyDrGT40D7uKZrr9INsWnj7C5FWKYIgW5aplkTU7LQt_OMleowxpYzDQsotp1kG_ryFZ00Bz0OjDLbBL6OWIWQ3_O2SCugOhwX571B71LUE9b6slJtNMCzjxB5Cs86rQGvTfRwSnONt6fiX_EwepJ9U8z2tlTQQfUyz3ZC3QTCw--TcGX2aXFFGQ2sQ-a50YleSXbbge0tPVW6MtgXx63Bn4Q-tGuVhOQkehJoAeQT0_QQOrXPl7Lo9N4kl5_0K992IxHP-DKi8UeMWRQq0KdPKSz2RRMGy6B1bm4nd4bdA-UObWpoBvIjEts9Ac1QbAScdBcnbp6_idoWrZrqn2p2_g_TgxPMNsQlDmalk5NHb1SPzYAx5LPDpFlXXHac0Ag6ylYZHkSy4iOrFY4LRTx8Mpu902dxR0B1MHfWh6NgKgZRIdNiBqn0dYJ-l61mzC4qKmt89AfXDRQwli2467qHAxb_CGRWCHWzdsaWgsBSC9yDZrlF2exd3K55SwidPj4a7sRG4XV2uBIaqsL0c-Bev1LcvhMbsENK8VeCn2T2WXmYJrQzzMdBdzDvXFbjhh3U9Q1i6hKPOXvbYheogLv-lED98slCnTcjV40NP6hZxt5ZrqATY4nit3hMo-b5JPvKUfHu9562RBFoNgRj19NhfGSi8-efPbxOHS0Pa6Xhl5pf2HDNVhdmddmVW9b_2Vu3AZDBgS-UJzBLIW-51AkACkiBR7HhP66R6186GfuZW5JEDc_htfeuYaUvXWLusUrmA4d21yZ7ELoo-G1d-X2jtr2YegP3a_eWmXOBDOZFW-t2aVvcCXPZBYf4DqeIk5eb_1_AUf0mts)
     - 수정 원본은 [`diagrams/onboarding-containers.puml`](diagrams/onboarding-containers.puml)임
 - **변경 위치는 재사용 횟수가 아니라 추상화 책임으로 결정함**
     - 제품 이름·locale 문구·site navigation·콘텐츠 의미가 있으면 `apps/web`에 둠
     - 제품과 무관한 상호작용 primitive·token schema이면 `packages/ui`에 둠
-    - 여러 저장소가 공유할 정적 분석 정책이면 `packages/tooling`에 둠
+    - 정적 분석 정책은 각 저장소의 `oxlint.config.ts`에 둠
     - root barrel로 편의를 만들기보다 명시적 subpath import로 의존 경계를 드러냄
 
 ### arc42 5 · C4 Component로 Web 내부 책임을 추적함
@@ -213,11 +213,11 @@ bun run check
     - `apps/web/docker/Dockerfile`은 Bun 1 Alpine, 비루트 `bun` 사용자, `PORT=3000`, multi-stage build를 사용함
     - `/healthz`는 공통 JSON health endpoint이며 Host rewrite보다 먼저 통과함
 - **공유 package 게시와 Web 배포는 서로 다른 운영 흐름임**
-    - `Publish Packages` workflow는 수동 실행되며 `package` 입력으로 선택한 `tooling`·`ui`를 Node 24·26에서 검사하고 archive를 만든 뒤 기존 `1.0.0`을 교체함. 실행·복구는 [배포 안내](runbooks/release.md)를 따름
+    - `Publish Packages` workflow는 수동 실행되며 UI를 Node 24·26에서 검사하고 archive를 만든 뒤 기존 `1.0.0`을 교체함. 실행·복구는 [배포 안내](runbooks/release.md)를 따름
     - Web의 `Web` workflow는 PR·main push·주간 schedule에서 typecheck·test·build·E2E 또는 콘텐츠 evidence를 수행함
     - `Links` workflow는 Markdown·HTML 로컬 링크를 검사함
     - `Waka Readme` workflow는 README 통계 구간을 갱신함
-- ![배포 관점](https://kroki.io/plantuml/svg/eNp1VF1PE0EUfd9fce1TSaQU7ZMxBi2Ekig00MBjs90dysp2ZrM7WyCGpGI1iE1oYisfKVgTUTRNXBAtJvjSn9OZ_gfv1tIuNb5sJnPvOffOuefuhMNVm7s5U7llUM10dQL347GxeCw9SSyTbeQI5Q8UhRvcJCA8r7PbgPZFQdbL0GqCamuxOzDIhEWDrClKktgOo2Gd5InJLGLfhlD70pN7DXlcDo0oCxsOJ7n01DoPZw2-4mYwPm3whJsBWS_I4xP5qtRqPtS4waiD-cqgQHqW6SScJ7ZGTEQtdg8hPD1RqZolOjxyKYyD7VJu5EhoBJ4pAHFGuWpQYveAS8SviF_Q-8Q-xyxZ55GnDuR6XMzllsuBUZ811C8Hqq5anNhtrwDtHw1ZPOtUa-DTyeoZtrv5b8NMMxAuSgVZ3Ya5-Ax0Dvbb5799zn5zQ00PU2jXeYhheULHMi69Nx6JRaKjqmlhwCejjI7ajHHAILiOn5ycm0_B3Wg02uMNyoGzp7pqMkoGkgzugpIMbgFZUUY_KOtVWX8OOFS55bW_X4HlZkxDA1GpiPrrTtETnxri5ArQM53qqS-SeO91XuCEiygTwKYvVcAMGZutdXsOya2GPPyCxCAuS-LoSh566Iyb1rFJ1nC4vTEwT1LVVnFwXcvMEzPov77PLNdZaTWT863mGrNXl022ltYNx1K5toIwH3WdGvQKFgC554ndg94OiA81kD8rqIAon_7VomdcTHgHsvgRQ0OEw2pPMm2V2MuGSbpsRxfi26X8XADxqyTe1gDtJXZOfG7x9aV8U_Ol7i0gCoOtdA4qYqcCNyr3SvaVDD4iwXKk1UwRDQWYoXnidE2fSKWSC8Ow4Vb_Dx3r4sGgWZs4ztCLAyPijJmY1Gq6hjzah_FINBLF7SnL8wton5fwfV0Vt_d9jQOrv5CYW0o_npqemp0MjygThOr-v-oPzI3v5g)
+- ![배포 관점](https://kroki.io/plantuml/svg/eNp1VF1PE0EUfd9fce1TSaQU7ZMxBi2Ekig00MBjs90dysp2ZrM7WyCGpGI1iE1oYisfKVgTUTRNXBAtJvjSn9OZ_gfv1tIuNb5sJnPvOffOuefuhMNVm7s5U7llUM10dQL347GxeCw9SSyTbeQI5Q8UhRvcJCA8r7PbgPZFQdbL0GqCamuxOzDIhEWDrClKktgOo2Gd5InJLGLfhlD70pN7DXlcDo0oCxsOJ7n01DoPZw2-4mYwPm3whJsBWS_I4xP5qtRqPtS4waiD-cqgQHqW6SScJ7ZGTEQtdg8hPD1RqZolOjxyKYyD7VJu5EhoBJ4pAHFGuWpQYveAS8SviF_Q-8Q-xyxZ55GnDuR6XMzllsuBUZ811C8Hqq5anNhtrwDtHw1ZPOtUa-DTyeoZtrv5b8NMMxAuSgVZ3Ya5-Ax0Dvbb5799zn5zQ00PU2jXeYhheULHMi69Nx6JRaKjqmlhwCejjI7ajHHAILiOn5ycm0_B3Wg02uMNyoGzp7pqMkoGkgzugpIMbgFZUUY_KOtVWX8OOFS55bW_X4HlZkxDA1GpiPrrTtETnxri5ArQM53qqS-SeO91XuCEiygTwKYvVcAMGZutdXsOya2GPPyCxCAuS-LoSh566Iyb1rFJ1nC4vTEwT1LVVnFwXcvMEzPov77PLNdZaTWT863mGrNXl022ltYNx1K5toIwH3WdGvQKFgC554ndg94OiA81kD8rqIAon_7VomdcTHgHsvgRQ0OEw2pPMm2V2MuGSbpsRxfi26X8XADxqyTe1gDtJXZOfG7x9aV8U_Ol7i0gCoOtdA4qYqcCNyr3SvaVDD4iwXKk1UwRDQWYoXnidE2fSKWSC8Ow4Vb_Dx3r4sGgWZs4ztCLAyNyDXm0D-ORaCSKS1OW5xfQPi_hs7ribe_70gY2fiExt5R-PDU9NTsZHlEmCNX9X9QfNMHrcQ)
     - 수정 원본은 [`diagrams/onboarding-deployment.puml`](diagrams/onboarding-deployment.puml)임
 - **배포 전에는 [Next.js 배포 공식 문서](https://nextjs.org/docs/app/getting-started/deploying), [Vercel Next.js 공식 문서](https://vercel.com/docs/frameworks/full-stack/nextjs), [GitHub Packages npm 공식 문서](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry)를 현재 운영 설정과 함께 확인함**
     - 공식 문서는 가능한 배포 방식을 설명하지만 실제 project ID·domain·rollback·registry retention은 저장소 밖 운영 설정이 최종 기준임
@@ -414,12 +414,10 @@ bun run --filter @jongminchung/ui build
 bun run --filter @jongminchung/web typecheck
 ```
 
-- **공유 tooling 변경은 package API와 실제 root 소비 설정을 함께 검사함**
+- **Oxfmt·Oxlint 설정 변경은 루트 검사로 검증함**
 
 ```sh
-bun run --filter @jongminchung/tooling typecheck
-bun run --filter @jongminchung/tooling test
-bun run --filter @jongminchung/tooling build
+bun run check
 bun run lint
 bun run fmt:check
 ```

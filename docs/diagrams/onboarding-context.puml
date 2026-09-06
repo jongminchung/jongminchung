@@ -11,7 +11,7 @@ System(jongminchung, "jongminchung", "Bun Web 배포물과 Node 호환 공유 �
 System_Ext(github, "GitHub", "소스·Pull Request·Actions·Packages를 제공함")
 System_Ext(vercel, "Vercel 또는 OCI 런타임", "Next.js Web 앱을 배포하고 HTTPS 요청을 처리함")
 System_Ext(kroki, "Kroki", "PlantUML 코드를 SVG로 렌더링함")
-System_Ext(consumer, "외부 소비 프로젝트", "@jongminchung/ui와 @jongminchung/tooling을 사용함")
+System_Ext(consumer, "외부 소비 프로젝트", "@jongminchung/ui를 사용함")
 
 Rel(visitor, jongminchung, "콘텐츠 탐색", "HTTPS")
 Rel(maintainer, jongminchung, "코드·문서 변경", "Git, Bun")

@@ -2,10 +2,7 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {
     ".": {
-      "ignoreDependencies": [
-        "@jongminchung/generate-article-image-skill",
-        "@jongminchung/tooling"
-      ]
+      "ignoreDependencies": ["@jongminchung/generate-article-image-skill"]
     },
     ".agents/skills/generate-article-image": {
       "entry": ["scripts/generate-article-image.ts"]

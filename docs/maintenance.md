@@ -63,8 +63,7 @@ major update의 rollback 조건을 포함한다. shadcn CLI package version 갱�
 `bun run deadcode`는 미사용 파일·의존성·catalog 항목, 미선언 의존성,
 해석할 수 없는 catalog 참조, 중복 export를 검사한다.
 catalog는 소비 workspace가 있는 항목만 유지한다. `knip.json`의 루트 의존성 예외는
-CLI를 설치하는 `@jongminchung/generate-article-image-skill`과, 로컬 source로 설정을 읽는
-workspace 연결인 `@jongminchung/tooling` 두 개다. Excalidraw는 생성 script의
+CLI를 설치하는 `@jongminchung/generate-article-image-skill`이다. Excalidraw는 생성 script의
 `import.meta.resolve`로 사용처를 명시한다. 새 예외는 실제 사용 경로를 확인하고 여기에
 이유를 기록한다. 의존성 갱신 시 예외가 여전히 필요한지도 다시 확인한다.
 
@@ -121,23 +120,23 @@ Web MDX의 app route는 기존 content validation과 build가 별도로 검증�
 
 | Workflow           | Trigger                       | 역할                                                 | 주요 secret                    |
 | ------------------ | ----------------------------- | ---------------------------------------------------- | ------------------------------ |
-| `Publish Packages` | `workflow_dispatch`           | 선택한 `tooling`·`ui`의 GitHub Packages `1.0.0` 교체 | `GH_PAT`                       |
+| `Publish Packages` | `workflow_dispatch`           | `ui`의 GitHub Packages `1.0.0` 교체                  | `GH_PAT`                       |
 | `Waka Readme`      | 매일 `15:00 UTC`, 수동 실행   | README Waka 통계 구간 갱신                           | `WAKATIME_API_KEY`, `GH_TOKEN` |
 | `Links`            | 문서 PR·`main` push           | Podman 우선·Docker 대체 Markdown·HTML 로컬 링크 검사 | 없음                           |
 | `Web`              | PR·관련 `main` push·주간 예약 | Web 검사·브라우저 회귀, 주간 콘텐츠 근거 보고서      | 없음                           |
 
 ## 패키지 게시
 
-`@jongminchung/tooling`, `@jongminchung/ui`는 고정 `1.0.0` 정책을 사용한다.
+`@jongminchung/ui`는 고정 `1.0.0` 정책을 사용한다.
 이는 동일 version의 API·내용·integrity가 달라질 수 있는 mutable personal snapshot 채널이며
 SemVer 호환성과 lockfile 재현성을 지원하지 않는다. 소비자는 교체된 snapshot을 적용할 때
 `bun update --force <package>@1.0.0`으로 다시 해석하고 변경된 lockfile을 함께 반영한다.
-두 패키지는 Node.js 24 이상에서 동작하는 ESM 전용 패키지이며 공개 runtime API는 named
+UI는 Node.js 24 이상에서 동작하는 ESM 전용 패키지이며 공개 runtime API는 named
 export만 제공한다. `package.json`에는 `type: "module"`, `engines.node: ">=24.0.0"`,
 JavaScript entry point별 `import` 조건을 유지하고 CommonJS 산출물과 `require` 조건을 추가하지
 않는다.
 
-두 패키지의 `build`는 공통 `tsconfig.base.json`의 strict 검사를 상속하고 패키지별
+UI의 `build`는 공통 `tsconfig.base.json`의 strict 검사를 상속하고 패키지별
 `tsconfig.build.json`에 선언·출력 옵션만 명시해 `tsc`로 ESM JavaScript와 declaration을
 생성한다. CSS·JSON subpath는 tarball에 포함된 원본 자산을 직접 가리킨다. 번들링·축소·복수
 모듈 형식이나 빌드 플러그인은 기본 배포 경계가 아니며, [ADR 0001](adr/0001-node-library-tsc-build.md)의
@@ -145,19 +144,18 @@ JavaScript entry point별 `import` 조건을 유지하고 CommonJS 산출물과 
 
 ```sh
 bun install --frozen-lockfile --ignore-scripts
-bun run --filter @jongminchung/tooling --filter @jongminchung/ui typecheck
-bun run --filter @jongminchung/tooling --filter @jongminchung/ui test:coverage
-bun run --filter @jongminchung/tooling --filter @jongminchung/ui test:node
-bun run --filter @jongminchung/tooling --filter @jongminchung/ui publish:dry-run
+bun run --filter @jongminchung/ui typecheck
+bun run --filter @jongminchung/ui test:coverage
+bun run --filter @jongminchung/ui test:node
+bun run --filter @jongminchung/ui publish:dry-run
 ```
 
 dry-run의 포함 파일, ESM JavaScript·declaration, named export와 package export를 검토한 뒤
-검증한 `main` ref에서 `Publish Packages` workflow를 수동 실행한다. `package` 입력으로
-`tooling`, `ui`, `all` 중 대상을 선택하며 기본값은 `tooling`이다. 선택한 패키지를 Node
+검증한 `main` ref에서 `Publish Packages` workflow를 수동 실행한다. UI를 Node
 24·26에서 검사하고, 게시할 tarball을 만든 뒤 기존 `1.0.0`을 삭제하고 `npm publish`로
 해당 archive를 게시한다. 게시 후 registry integrity와 소비자 import도 검증한다.
-`all`은 패키지별 병렬 실행이므로 부분 실패가 가능하다. 삭제 전 정상 archive를 보관하고
-[게시·복구 절차](runbooks/release.md)에 따라 대상별 결과를 확인한다.
+삭제 전 정상 archive를 보관하고
+[게시·복구 절차](runbooks/release.md)에 따라 결과를 확인한다.
 
 ## 문서 유지보수
 

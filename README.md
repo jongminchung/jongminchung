@@ -2,7 +2,6 @@
 
 This repository owns the shared `@jongminchung` packages used by downstream projects.
 
-- `@jongminchung/tooling`: shared `oxfmt` and `oxlint` configuration.
 - `@jongminchung/ui`: published UI primitives, a default neutral theme, shared Tailwind styles,
   and semantic tokens.
 
@@ -55,26 +54,24 @@ bun run --filter @jongminchung/web build
 
 ## Version Policy
 
-The manually triggered package workflow replaces selected personal packages at `1.0.0`.
-Its `package` input accepts `tooling` (the default), `ui`, or `all`.
+The manually triggered package workflow replaces `@jongminchung/ui` at `1.0.0`.
 This is a mutable snapshot channel: the same version can have different API, contents, and
 integrity, so SemVer compatibility and lockfile reproducibility are not guaranteed. Consumers must
 force a new resolution, such as `bun update --force <package>@1.0.0`, and commit the resulting
 lockfile whenever they adopt a replacement.
 
 The workflow installs the shared lockfile from the repository root, then lints, typechecks, and
-runs coverage and Node consumer checks for the selected packages on Node 24 and 26. It builds each
+runs coverage and Node consumer checks for UI on Node 24 and 26. It builds the
 archive before deleting the fixed version, publishes that archive, and verifies registry integrity
-and consumer imports. Selecting `all` publishes the packages in parallel and can partially fail; see
-the [release and recovery runbook](./docs/runbooks/release.md).
+and consumer imports. See the [release and recovery runbook](./docs/runbooks/release.md).
 GitHub authentication is supplied only through the `GH_PAT` Actions secret.
 
 ```bash
 bun install --frozen-lockfile --ignore-scripts
-bun run --filter @jongminchung/tooling --filter @jongminchung/ui typecheck
-bun run --filter @jongminchung/tooling --filter @jongminchung/ui test:coverage
-bun run --filter @jongminchung/tooling --filter @jongminchung/ui test:node
-bun run --filter @jongminchung/tooling --filter @jongminchung/ui publish:dry-run
+bun run --filter @jongminchung/ui typecheck
+bun run --filter @jongminchung/ui test:coverage
+bun run --filter @jongminchung/ui test:node
+bun run --filter @jongminchung/ui publish:dry-run
 ```
 
 <!-- prettier-ignore-start -->

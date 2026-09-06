@@ -115,7 +115,7 @@ Node.js와 TypeScript에 관한 질문을 버전이 명시된 Deep Dive로 남�
 방향 안에 있고, 영향 범위가 국소적이며, 쉽게 되돌릴 수 있고, 검증 방법이 명확하다는 뜻이다.
 
 [DDD 핸드북](/ko/docs/be/ddd)은 기능 목록보다 문제 공간과 언어를 먼저 정하는 방법을 설명하고,
-[tooling 패키지](https://github.com/jongminchung/jongminchung/tree/main/packages/tooling)는 반복되는 저장소 정책을 공개 계약으로 바꾼 사례다. 이 경험에서
+[Oxlint 설정](https://github.com/jongminchung/jongminchung/blob/main/oxlint.config.ts)은 반복되는 저장소 정책을 실행 가능한 검사로 만든 사례다. 이 경험에서
 기능 문서는 화면 목록보다 경계, 소비자, 호환성과 검증 방법을 먼저 보여 줄수록 구현과 리뷰가
 짧아진다는 원칙을 얻었다.
 
@@ -150,11 +150,11 @@ Node.js와 TypeScript에 관한 질문을 버전이 명시된 Deep Dive로 남�
 
 ## 문서로 연결된 경험
 
-| 문서                                                                               | 협업에서 다시 사용하는 경험                          |
-| ---------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| [DDD 핸드북](/ko/docs/be/ddd)                                                      | 구현 전에 문제와 보편 언어를 맞춘다.                 |
-| [tooling](https://github.com/jongminchung/jongminchung/tree/main/packages/tooling) | 반복되는 팀 규칙을 실행 가능한 공유 계약으로 만든다. |
-| [Deep Dive](/ko/docs/fe/nextjs-16)                                                 | 버전과 검증일을 붙여 기술 질문의 답을 재사용한다.    |
+| 문서                                                                                   | 협업에서 다시 사용하는 경험                       |
+| -------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| [DDD 핸드북](/ko/docs/be/ddd)                                                          | 구현 전에 문제와 보편 언어를 맞춘다.              |
+| [Oxlint 설정](https://github.com/jongminchung/jongminchung/blob/main/oxlint.config.ts) | 반복되는 팀 규칙을 실행 가능한 검사로 만든다.     |
+| [Deep Dive](/ko/docs/fe/nextjs-16)                                                     | 버전과 검증일을 붙여 기술 질문의 답을 재사용한다. |
 
 이 문서들은 별개의 주제를 설명하지만 같은 흐름을 따른다. 사람과 문제를 먼저 이해하고, 경계를
 명시하며, 실행 가능한 증거를 남긴다. 협업 규칙의 목적은 절차를 늘리는 것이 아니라 다음 사람이

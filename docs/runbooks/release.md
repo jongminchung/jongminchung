@@ -67,34 +67,32 @@ image digest로 복구하고 같은 확인을 반복한다. 복구 위치와 조
 ## 공용 패키지 게시
 
 [Publish Packages workflow](../../.github/workflows/publish-packages.yml)는 수동 실행한다.
-입력 `package`는 `tooling`, `ui`, `all`이며 기본값은 `tooling`이다. 두 패키지를 항상
-게시하는 흐름이 아니다. 변경 대상만 선택한다.
+UI 패키지만 검증하고 게시한다.
 
-두 패키지는 GitHub Packages의 동일한 `1.0.0`을 삭제한 뒤 다시 게시하는 정책이다.
+UI는 GitHub Packages의 동일한 `1.0.0`을 삭제한 뒤 다시 게시하는 정책이다.
 이전 lockfile의 integrity와 새 내용이 다를 수 있고 삭제·게시 사이에 설치가 실패할 수 있다.
 게시 전에 이전 정상 tarball·checksum과 소비자 lockfile을 보관한다. Git SHA만으로는
 동일한 과거 tarball을 복원했다고 증명할 수 없다.
 
-로컬 사전 검증은 두 패키지를 함께 검사하는 아래 명령을 사용할 수 있다.
+로컬 사전 검증은 UI를 검사하는 아래 명령을 사용할 수 있다.
 
 ```sh
 bun install --frozen-lockfile --ignore-scripts
-bun run --filter @jongminchung/tooling --filter @jongminchung/ui typecheck
-bun run --filter @jongminchung/tooling --filter @jongminchung/ui test:coverage
-bun run --filter @jongminchung/tooling --filter @jongminchung/ui test:node
-bun run --filter @jongminchung/tooling --filter @jongminchung/ui publish:dry-run
+bun run --filter @jongminchung/ui typecheck
+bun run --filter @jongminchung/ui test:coverage
+bun run --filter @jongminchung/ui test:node
+bun run --filter @jongminchung/ui publish:dry-run
 ```
 
 `--ignore-scripts` 설치 후 Web 작업으로 돌아갈 때는 Web `postinstall`로 MDX entry를
 생성한다. dry-run의 포함 파일·ESM JavaScript·타입 선언·공개 export를 확인한다.
 
-workflow는 선택 패키지를 Node 24·26에서 검사하고, 게시할 정확한 tarball을 먼저
-만든다. Tooling은 formatter-only·전체 lint 소비자도 검증한다. 그 뒤 `GH_PAT`로 인증해
+workflow는 UI를 Node 24·26에서 검사하고, 게시할 정확한 tarball을 먼저
+만든다. 그 뒤 `GH_PAT`로 인증해
 기존 버전을 삭제하고 `npm publish`로 해당 tarball을 게시한다. 게시 후 registry
-integrity·깨끗한 소비자 import를 검사한다. `all`은 패키지별 병렬 실행이며 원자적
-교체가 아니므로 각 패키지의 성공 여부를 따로 확인한다.
+integrity·깨끗한 소비자 import를 검사한다.
 
-GitHub Actions에서 검증한 ref와 `package` 입력을 확인해 실행하고, 최종 소비자 검증
+GitHub Actions에서 검증한 ref를 확인해 실행하고, 최종 소비자 검증
 단계까지 성공했는지 확인한다. 외부 소비자는 `@jongminchung` scope의 registry 설정과
 `read:packages` 권한의 classic PAT가 필요하다. 인증값은 환경에서 공급한다.
 소비자가 교체본을 채택할 때는 재해석 후 lockfile을 함께 반영한다.
@@ -104,8 +102,7 @@ GitHub Actions에서 검증한 ref와 `package` 입력을 확인해 실행하고
 bun update --force @jongminchung/ui@1.0.0
 ```
 
-Tooling 소비자는 패키지명을 바꾸고 [기여 가이드](../../CONTRIBUTING.md)의 재설치
-절차도 참고한다. 소비 저장소 자체의 검사·build를 통과시켜야 교체가 완료된다.
+소비 저장소 자체의 검사·build를 통과시켜야 교체가 완료된다.
 
 ## 게시 실패와 복구
 
@@ -115,7 +112,6 @@ Tooling 소비자는 패키지명을 바꾸고 [기여 가이드](../../CONTRIBU
 | 인증·삭제 실패                  | `GH_PAT` 존재·권한·만료와 기존 버전 상태 확인. token을 로그로 출력하지 않음                                                      |
 | 삭제 후 publish 실패            | registry에서 버전 존재 여부 확인. 원인을 해결한 뒤 검증된 ref와 대상만 재실행하거나 보관한 정상 archive 복구                     |
 | publish 후 소비자 검증 실패     | 게시 성공으로 종료하지 않음. tarball·registry integrity·공개 import·peer dependency를 조사하고 정상 archive 또는 수정본으로 교체 |
-| `all` 중 하나만 성공            | 패키지별 실제 상태 기록. 성공한 패키지를 불필요하게 재삭제하지 않고 실패한 대상 선택                                             |
 
 동일 `1.0.0` 정책에는 버전 번호를 낮추는 일반적인 rollback이 없다. 보관한 정상
 archive를 같은 registry에 재게시하려면 현재 버전 처리와 게시 권한이 필요하며,

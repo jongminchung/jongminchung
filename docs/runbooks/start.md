@@ -51,11 +51,11 @@ bun run --filter @jongminchung/web dev:tech
 | MDX 원본 수정          | Web `typecheck`, `test`, `build`                                                      | 번역·schema·본문·경로 검증 통과, 두 언어 화면 확인 |
 | Web 코드 수정          | Web `typecheck`, `test`, `test:e2e`, 루트 `check`                                     | 규칙 검사와 해당 브라우저 시나리오 통과            |
 | 공용 UI 수정           | UI `typecheck`, `test:coverage`, `test:node`, Web `typecheck`, 관련 E2E, 루트 `check` | 소스와 배포 import, 소비 화면 확인                 |
-| 공용 tooling 수정      | Tooling `typecheck`, `test:coverage`, `test:node`, 루트 `check`                       | 설정 소비와 배포 패키지 검증 통과                  |
+| Oxfmt·Oxlint 설정 수정 | 루트 `check`                                                                          | 로컬 설정과 전체 검사 통과                         |
 | 의존성 또는 배포 변경  | `bun run check:full`, `bun run audit`, 대상 배포 사전 검증                            | 전체 검사와 보안 점검, 배포 대상 확인              |
 
-표에서 Web 명령은 `bun run --filter @jongminchung/web <script>`, UI와 Tooling은
-각각 `@jongminchung/ui`, `@jongminchung/tooling` 필터를 사용한다.
+표에서 Web 명령은 `bun run --filter @jongminchung/web <script>`, UI는
+`@jongminchung/ui` 필터를 사용한다.
 `bun run check`는 `make lint` → 타입 검사 → Knip → 커버리지 테스트와 Node
 패키지 검증을 실행한다. `check:full`은 여기에 E2E를 더한다.
 

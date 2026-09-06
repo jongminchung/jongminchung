@@ -11,9 +11,6 @@
 # mise 설치 후 저장소의 도구 설정을 확인하고 신뢰 등록함
 mise trust
 mise install
-# read:packages 권한의 인증값을 환경에 설정함
-export GITHUB_PACKAGES_TOKEN
-# jongminchung 저장소 자체는 workspace 패키지를 사용함
 mise exec -- bun install --frozen-lockfile
 
 mise exec -- make fmt
@@ -31,8 +28,7 @@ mise exec -- make lint
 - `oxfmt`와 `shfmt`에는 들여쓰기·줄 길이를 덮어쓰는 옵션을 추가하지 않음
 - Python 저장소의 `pyproject.toml`에 있는 `tool.ruff` 값은 `.editorconfig` 변경 시 함께 갱신함
 - 암호화 파일·템플릿·외부 원본·생성물의 제외 범위는 `oxfmt.config.ts`와 셸 검사 스크립트에서 관리함
-- 공통 함수는 `@jongminchung/tooling/oxfmt`와 `@jongminchung/tooling/oxlint`에서 가져오며 실제 도구는 각 소비 저장소가 설치함
-- 공통 패키지 `1.0.0` 재배포 후 `bun remove --ignore-scripts @jongminchung/tooling` 후 `bun add --dev --exact --ignore-scripts --no-cache @jongminchung/tooling@1.0.0`으로 기존 해석 결과를 버리고 잠금 파일을 함께 반영함
+- `oxfmt.config.ts`와 `oxlint.config.ts`가 설정을 직접 소유하며 도구는 루트 catalog에서 관리함
 
 - `bun run check`로 타입 검사·사용하지 않는 코드 검사·테스트를 실행함
 - 단일 workspace 작업은 `bun run --filter <package-name> <script>`로 실행함
@@ -41,7 +37,7 @@ mise exec -- make lint
 
 - `bun run typecheck`는 루트·공유 패키지·웹을 검사하며 웹의 Playwright 설정과 E2E 타입 검사도 포함함
 - 개별 테스트는 `bun run --filter @jongminchung/web test next.config.test.ts`처럼 실행함
-- workspace 전체 커버리지는 `bun run --filter @jongminchung/web test:coverage`로 검사함. UI·Tooling에도 같은 script가 있음
+- workspace 전체 커버리지는 `bun run --filter @jongminchung/web test:coverage`로 검사함. UI에도 같은 script가 있음
 - `bun run test`와 `bun run check`는 전체 workspace의 커버리지 기준과 Node 배포 패키지 검증을 유지함
 - 공통 tsconfig는 ECMAScript·Node 환경을 사용하고 DOM 타입은 웹·UI workspace에서만 추가함
 - optional 속성은 생략과 `undefined`를 구분함. 외부 API에 선택 값을 전달할 때는 값이 있는 경우에만 속성을 추가함

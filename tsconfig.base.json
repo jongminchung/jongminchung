@@ -42,10 +42,6 @@
     // 저장소 안에서는 공유 패키지 소스를 직접 타입 검사함.
     // paths는 런타임 import를 바꾸지 않으므로 package exports·Next 설정과 함께 유지함.
     "paths": {
-      "@jongminchung/tooling/oxfmt": ["./packages/tooling/src/oxfmt/index.ts"],
-      "@jongminchung/tooling/oxlint": [
-        "./packages/tooling/src/oxlint/index.ts"
-      ],
       // Workspace에서는 UI 공개 subpath를 source로 해석해 consumer와 같은 graph를 검사함
       "@jongminchung/ui/components/*": ["./packages/ui/src/components/*.tsx"],
       "@jongminchung/ui/globals.css": ["./packages/ui/src/styles/globals.css"],

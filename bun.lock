@@ -6,7 +6,6 @@
       "name": "jongminchung",
       "devDependencies": {
         "@jongminchung/generate-article-image-skill": "file:.agents/skills/generate-article-image",
-        "@jongminchung/tooling": "workspace:*",
         "@types/bun": "catalog:",
         "@types/node": "catalog:",
         "knip": "catalog:",
@@ -55,27 +54,6 @@
         "typescript": "catalog:",
         "unist-util-visit": "catalog:",
       },
-    },
-    "packages/tooling": {
-      "name": "@jongminchung/tooling",
-      "version": "1.0.0",
-      "devDependencies": {
-        "@types/bun": "catalog:",
-        "@types/node": "catalog:",
-        "oxfmt": "catalog:",
-        "oxlint": "catalog:",
-        "oxlint-tsgolint": "catalog:",
-        "typescript": "catalog:",
-      },
-      "peerDependencies": {
-        "oxfmt": "catalog:tooling-peer",
-        "oxlint": "catalog:tooling-peer",
-        "oxlint-tsgolint": "catalog:tooling-peer",
-      },
-      "optionalPeers": [
-        "oxlint",
-        "oxlint-tsgolint",
-      ],
     },
     "packages/ui": {
       "name": "@jongminchung/ui",
@@ -162,11 +140,6 @@
     "zod": "4.4.3",
   },
   "catalogs": {
-    "tooling-peer": {
-      "oxfmt": ">=0.66.0 <1.0.0",
-      "oxlint": ">=1.81.0 <2.0.0",
-      "oxlint-tsgolint": ">=7.0.2001 <8.0.0",
-    },
     "ui-peer": {
       "react": "^19.2.0",
       "react-dom": "^19.2.0",
@@ -415,8 +388,6 @@
     "@img/sharp-win32-x64": ["@img/sharp-win32-x64@0.35.3", "", { "os": "win32", "cpu": "x64" }, "sha512-D4y1vNeZrIIJCN+uHaWVtH86B+aCrdMYYjicy9pXHvbGZeGYLLSd3wdVuC37FxVXlU1ARsk84eKWfWMXGYEqvA=="],
 
     "@jongminchung/generate-article-image-skill": ["@jongminchung/generate-article-image-skill@file:.agents/skills/generate-article-image", { "dependencies": { "sharp": "0.35.3" }, "bin": { "generate-article-image": "./scripts/generate-article-image.ts" } }],
-
-    "@jongminchung/tooling": ["@jongminchung/tooling@workspace:packages/tooling"],
 
     "@jongminchung/ui": ["@jongminchung/ui@workspace:packages/ui"],
 

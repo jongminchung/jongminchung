@@ -2,13 +2,6 @@ name: Publish Packages
 
 on:
   workflow_dispatch:
-    inputs:
-      package:
-        description: Package to replace at version 1.0.0
-        type: choice
-        required: true
-        default: tooling
-        options: [tooling, ui, all]
 
 concurrency:
   group: publish-personal-packages
@@ -20,12 +13,11 @@ permissions:
 
 jobs:
   validate:
-    name: Validate ${{ matrix.package }} on Node ${{ matrix.node-version }}
+    name: Validate ui on Node ${{ matrix.node-version }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        package: ${{ fromJSON(inputs.package == 'all' && '["tooling","ui"]' || format('["{0}"]', inputs.package)) }}
         node-version: [24, 26]
     steps:
       - uses: actions/checkout@v7
@@ -39,20 +31,16 @@ jobs:
         run: bun install --frozen-lockfile --ignore-scripts
       - run: >-
           bunx oxlint --config oxlint.config.ts
-          packages/${{ matrix.package }}
-      - run: bun run --filter @jongminchung/${{ matrix.package }} typecheck
-      - run: bun run --filter @jongminchung/${{ matrix.package }} test:coverage
-      - run: bun run --filter @jongminchung/${{ matrix.package }} test:node
-      - run: bun pm pack --cwd packages/${{ matrix.package }} --dry-run
+          packages/ui
+      - run: bun run --filter @jongminchung/ui typecheck
+      - run: bun run --filter @jongminchung/ui test:coverage
+      - run: bun run --filter @jongminchung/ui test:node
+      - run: bun pm pack --cwd packages/ui --dry-run
 
   publish:
-    name: Publish ${{ matrix.package }}@1.0.0
+    name: Publish ui@1.0.0
     needs: validate
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        package: ${{ fromJSON(inputs.package == 'all' && '["tooling","ui"]' || format('["{0}"]', inputs.package)) }}
     steps:
       - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
@@ -66,10 +54,7 @@ jobs:
         run: bun install --frozen-lockfile --ignore-scripts
 
       - name: Build the exact archive before replacing the published version
-        run: bun pm pack --cwd packages/${{ matrix.package }} --filename "${RUNNER_TEMP}/package.tgz"
-      - name: Verify formatter-only and full lint consumers
-        if: matrix.package == 'tooling'
-        run: node .github/scripts/verify-tooling-consumers.ts "${RUNNER_TEMP}/package.tgz"
+        run: bun pm pack --cwd packages/ui --filename "${RUNNER_TEMP}/package.tgz"
       - name: Configure GitHub Packages auth
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
@@ -82,18 +67,13 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: >-
           bun .github/scripts/delete-version-ids-script.ts
-          "$GITHUB_REPOSITORY_OWNER" "${{ matrix.package }}" "1.0.0"
+          "$GITHUB_REPOSITORY_OWNER" "ui" "1.0.0"
       - run: npm publish "${RUNNER_TEMP}/package.tgz" --access public --registry https://npm.pkg.github.com
       - name: Verify registry integrity and clean consumer import
         run: >-
           node .github/scripts/verify-published-package.ts
-          "@jongminchung/${{ matrix.package }}" "1.0.0"
-          "${{ matrix.package == 'tooling' && '@jongminchung/tooling/oxfmt' || '@jongminchung/ui/lib/utils' }}"
-      - name: Verify exact tooling archive and both published consumer profiles
-        if: matrix.package == 'tooling'
-        env:
-          GITHUB_PACKAGES_TOKEN: ${{ secrets.GH_PAT }}
-        run: node .github/scripts/verify-tooling-consumers.ts "${RUNNER_TEMP}/package.tgz" --published
+          "@jongminchung/ui" "1.0.0"
+          "@jongminchung/ui/lib/utils"
       - name: Remove GitHub Packages auth
         if: ${{ always() }}
         run: |

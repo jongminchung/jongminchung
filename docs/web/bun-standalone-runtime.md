@@ -41,8 +41,8 @@
 
 ## 공개 패키지의 Node 호환성을 별도로 검증함
 
-- **`packages/tooling`과 `packages/ui`는 Bun 전용 API를 사용하지 않음**
-    - 두 package는 `engines.node: ">=24.0.0"`, ESM JavaScript와 declaration 산출물을 유지함
+- **`packages/ui`는 Bun 전용 API를 사용하지 않음**
+    - UI package는 `engines.node: ">=24.0.0"`, ESM JavaScript와 declaration 산출물을 유지함
     - package test는 Bun 내장 runner로 실행하되 build된 공개 entry를 Node 24·26에서 별도 import해 runtime 호환성을 검증함
 
 - **게시 후 검증은 깨끗한 npm 소비자에서 Node import를 실행함**

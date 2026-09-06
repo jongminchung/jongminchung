@@ -30,11 +30,10 @@ bun install --frozen-lockfile
 
 ## Workspace 구조
 
-| Workspace          | 역할                                        | 주요 개발 명령                                |
-| ------------------ | ------------------------------------------- | --------------------------------------------- |
-| `apps/web`         | 프로필·기술·투자 멀티도메인 Next.js 앱      | `bun run --filter @jongminchung/web dev`      |
-| `packages/ui`      | 공개 UI primitive·기본 theme·semantic token | `bun run --filter @jongminchung/ui build`     |
-| `packages/tooling` | Oxc 공용 설정                               | `bun run --filter @jongminchung/tooling test` |
+| Workspace     | 역할                                        | 주요 개발 명령                            |
+| ------------- | ------------------------------------------- | ----------------------------------------- |
+| `apps/web`    | 프로필·기술·투자 멀티도메인 Next.js 앱      | `bun run --filter @jongminchung/web dev`  |
+| `packages/ui` | 공개 UI primitive·기본 theme·semantic token | `bun run --filter @jongminchung/ui build` |
 
 공용 UI의 소유권, token과 component 추가 규칙은 [디자인 시스템](../DESIGN_SYSTEM.md)을
 따른다. 앱별 product component를 `packages/ui`로 옮기거나 앱에서 공용 primitive를 복제하지
@@ -66,7 +65,7 @@ bun run --filter @jongminchung/ui test
 
 테스트 계약은 Bun 내장 runner의 Unit·Integration, 공개 package의 Node runtime smoke,
 build된 앱을 검증하는 Playwright E2E로 구분한다. workspace별 Bun coverage 결과는
-`coverage/{web,tooling,ui}`에서 검토한다. Unit·Integration은 테스트 책임의 구분이며
+`coverage/{web,ui}`에서 검토한다. Unit·Integration은 테스트 책임의 구분이며
 별도 `test:unit`·`test:integration` script는 없다. Web의 `test`는 둘을 함께 실행하고,
 `test:coverage`는 같은 테스트에 coverage 기준을 적용한다. 현재 Compiler 정책은
 [루트 기여 가이드](../CONTRIBUTING.md#타입-검사와-테스트)를 따른다.
@@ -75,7 +74,6 @@ build된 앱을 검증하는 Playwright E2E로 구분한다. workspace별 Bun co
 bun run test
 bun run --filter @jongminchung/web test
 bun run --filter @jongminchung/ui test
-bun run --filter @jongminchung/tooling test
 bun run test:e2e
 ```
 
@@ -191,18 +189,18 @@ bunx --bun shadcn add <component> -c packages/ui
 
 ```sh
 bun install --frozen-lockfile --ignore-scripts
-bun run --filter @jongminchung/tooling --filter @jongminchung/ui typecheck
-bun run --filter @jongminchung/tooling --filter @jongminchung/ui test:coverage
-bun run --filter @jongminchung/tooling --filter @jongminchung/ui test:node
-bun run --filter @jongminchung/tooling --filter @jongminchung/ui publish:dry-run
+bun run --filter @jongminchung/ui typecheck
+bun run --filter @jongminchung/ui test:coverage
+bun run --filter @jongminchung/ui test:node
+bun run --filter @jongminchung/ui publish:dry-run
 ```
 
-`@jongminchung/tooling`, `@jongminchung/ui`는 GitHub Actions의 수동
+`@jongminchung/ui`는 GitHub Actions의 수동
 `Publish Packages` workflow가 GitHub Packages의 고정 `1.0.0` snapshot을 교체한다. 동일
 version의 API·내용·integrity가 바뀔 수 있으므로 SemVer 호환성과 lockfile 재현성을 보장하지
-않는다. workflow의 `package` 입력으로 `tooling`, `ui`, `all`을 선택한다. 선택 대상을
+않는다. workflow는 UI를
 Node 24·26에서 검증하고 tarball을 먼저 생성한 뒤 기존 `1.0.0`을 삭제·게시한다.
-게시 후 소비자 검증과 부분 실패 대응은 [배포·복구 절차](runbooks/release.md)를 따른다.
+게시 후 소비자 검증과 실패 대응은 [배포·복구 절차](runbooks/release.md)를 따른다.
 
 ## 제출 체크리스트
 
