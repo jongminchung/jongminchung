@@ -2,12 +2,12 @@
 series: subscription-first-ai-workspace
 seriesOrder: 1
 title: "Comparing US$20 AI coding subscriptions without API keys"
-description: "Compare the roughly US$20 Gemini CLI, Codex, and Claude Code subscriptions with Z.ai, Kimi Code, and OpenCode Go, then design a no-key workflow that reduces usage per completed task."
+description: "Compare the roughly US$20 Gemini CLI, Codex, Claude Code, and Cursor Pro subscriptions with SuperGrok, Z.ai, Kimi Code, and OpenCode Go, then design a no-key workflow that reduces usage per completed task."
 thesis: "A subscription AI workflow is more efficient when official clients have distinct roles and exchange a shared task contract than when one service is asked to do every kind of work."
 counterargument: "Parallel subscriptions add switching cost and fixed monthly spend, so a single subscription can be more economical when its quality and allowance already meet a user's needs."
 publishedAt: "2026-09-04"
-updatedAt: "2026-09-04"
-verifiedAt: "2026-09-04"
+updatedAt: "2026-09-07"
+verifiedAt: "2026-09-07"
 tags: [ai, coding, subscriptions, productivity]
 status: experimental
 publicationStatus: published
@@ -17,8 +17,9 @@ sourceUrl: https://learn.chatgpt.com/docs/pricing
 ## Key takeaways
 
 - **Without API keys, subscriptions cannot be combined behind one model coordinator; use each provider's official client against the same repository instead**
-- **Use `Google AI Pro` at US$19.99, `ChatGPT Plus` at US$20, and `Claude Pro` at US$20 as the same-budget core comparison**
-- **The units are not identical, but the published allowances support a rough volume comparison: high for Gemini CLI, medium to high for Codex depending on model, and low to medium for Claude Code**
+- **Use `Google AI Pro` at US$19.99 and `ChatGPT Plus`, `Claude Pro`, and `Cursor Pro` at US$20 as the same-budget core comparison**
+- **The units are not identical, but published allowances support a rough volume comparison: high for Gemini CLI, medium to high for Codex depending on model, low to medium for Claude Code, and official user-profile guidance plus published comparisons for Cursor Pro**
+- **At US$30, `SuperGrok` sits outside the same-budget core but belongs in the comparison as an independent, no-key subscription for the official `Grok Build` coding client**
 - **`Z.ai GLM Coding Plan` and `OpenCode Go` also sell subscription model access, but both official connection flows require API keys, so they are excluded from the no-key workflow's execution candidates**
 - **The largest token-saving lever is task design: clear sessions between tasks, bound files and verification commands, and keep an explicit handoff instead of pasting chats**
 - **Use rough published-volume bands to shortlist subscriptions, then judge actual savings by allowance consumed per accepted, verified task and rework rate**
@@ -46,7 +47,7 @@ sourceUrl: https://learn.chatgpt.com/docs/pricing
     - It excludes API billing, API keys, automatic credit reloads, and key-based configuration of third-party clients
     - It also excludes optional overage credits from the base subscription comparison
 
-- **Prices are public monthly list prices checked on 2026-09-04 and can vary by country, tax, annual billing, and promotions**
+- **Prices are public monthly list prices checked on 2026-09-07 and can vary by country, tax, annual billing, and promotions**
     - Price narrows the shortlist; it is not a defensible cross-vendor “price per token” calculation
 
 | Service                 | Representative personal entry point                              | How coding usage is metered                                                    | Connection allowed without an API key                          | Role under this constraint                                                 |
@@ -54,6 +55,8 @@ sourceUrl: https://learn.chatgpt.com/docs/pricing
 | Google `Gemini CLI`     | `Google AI Pro` US$19.99[^gemini-pricing]                        | Paid fixed-price access provides a daily per-user model-request allowance      | Sign in to the official CLI with the subscribed Google account | Repository exploration, alternate implementation, independent verification |
 | OpenAI `Codex`          | `ChatGPT Plus` US$20[^openai-pricing]                            | Codex and other agentic ChatGPT features share an allowance                    | Sign in to the official Codex app or CLI with ChatGPT          | Difficult implementation, review, final verification                       |
 | Anthropic `Claude Code` | `Pro` US$20[^claude-plan]                                        | Claude and Claude Code share usage limits                                      | Sign in to the official CLI or supported IDE with Claude       | Planning, broad changes, explanation                                       |
+| Anysphere `Cursor`      | `Pro` US$20[^cursor-pricing]                                     | Separate monthly pools for Cursor models and third-party models                | Sign in to the editor or Agent CLI with a Cursor account       | IDE-centered implementation, refactoring, and multi-model work             |
+| xAI `Grok Build`        | `SuperGrok` US$30[^grok-pricing]                                 | Build, Chat, and other Grok products share one weekly usage pool               | Sign in to the official CLI with the SuperGrok account         | Plan review, independent implementation, and headless automation           |
 | Z.ai `GLM Coding Plan`  | `Lite` US$18, `Pro` US$80, `Max` US$168[^zai-pricing]            | Credits plus five-hour and weekly limits                                       | Official setup requires a Coding Plan API key                  | Comparison candidate if keys are allowed                                   |
 | Moonshot `Kimi Code`    | `Andante` ¥49, `Moderato` ¥99, `Allegretto` ¥199, `Allegro` ¥699 | Shared membership credits plus separate coding limits                          | Use the official Kimi Code CLI or VS Code OAuth                | Large-context exploration and independent auxiliary work                   |
 | `OpenCode Go`           | US$10[^opencode-go]                                              | Model-priced dollar-value limits across five-hour, weekly, and monthly windows | Official setup requires an OpenCode Go API key                 | Multi-model comparison candidate if keys are allowed                       |
@@ -72,19 +75,36 @@ sourceUrl: https://learn.chatgpt.com/docs/pricing
     - An officially published Anthropic guidance page estimated 10–40 Claude Code prompts per five hours for Pro; treat it as a historical reference for light coding on a small repository, not a guaranteed current quota[^claude-estimate]
     - Its Claude Code guide says each turn includes prior conversation, project instructions, files read, and the new prompt[^claude-limits]
 
+- **Cursor Pro matches the US$20 core budget but cannot be reduced to a published fixed request count**
+    - Pro includes a Cursor Models pool for `Cursor Grok 4.6`, `Grok 4.5`, and `Composer 2.5`, plus an Other Models pool for providers such as Anthropic, Google, and OpenAI; both reset with the monthly billing cycle[^cursor-pricing]
+    - Cursor's official user profiles say limited Agent users often stay within included usage, while daily Agent users typically consume US$60–100 in total monthly usage[^cursor-pricing]
+    - An independent comparison of the US$20 plans frames Cursor Pro's advantage as multi-model, Tab, and Agent integration and its caveat as a bill that can rise when on-demand usage is enabled[^cursor-public-comparison]
+
+- **SuperGrok bundles an official coding CLI with the broader Grok product at a separate US$30 price point**
+    - SuperGrok subscribers can install and sign in to the official `Grok Build` client, which supports plan approval, diff review, and headless operation[^grok-build]
+    - Paid Grok products share one weekly pool across Build, Chat, Imagine, Voice, and other features, while a long coding task consumes more than a short chat message[^grok-usage]
+    - A July 2026 comparison based on more than 50 hours of use favored the then-current Claude Code for difficult repositories and ecosystem maturity while positioning Grok Build for cost-sensitive parallel work and experimentation[^grok-hands-on]
+
 - **The core subscriptions' nominal iteration capacity can be compared approximately as follows**
 
-| Core subscription            | Published allowance                                         | Rough volume band | Conditions                                                        |
-| ---------------------------- | ----------------------------------------------------------- | ----------------- | ----------------------------------------------------------------- |
-| `Google AI Pro`·`Gemini CLI` | 1,500 model requests/day                                    | High              | One prompt can generate multiple model requests                   |
-| `ChatGPT Plus`·`Codex Terra` | 25–200 local messages/five hours                            | Medium–high       | Daily-work model; `Sol` is 10–100 and `Luna` is 250–2,000         |
-| `Claude Pro`·`Claude Code`   | Reference estimate of 10–40 prompts/five hours; now dynamic | Low–medium        | Depends on codebase, conversation, model, and shared Claude usage |
+| Core subscription            | Published allowance                                                        | Rough volume band | Conditions                                                        |
+| ---------------------------- | -------------------------------------------------------------------------- | ----------------- | ----------------------------------------------------------------- |
+| `Google AI Pro`·`Gemini CLI` | 1,500 model requests/day                                                   | High              | One prompt can generate multiple model requests                   |
+| `ChatGPT Plus`·`Codex Terra` | 25–200 local messages/five hours                                           | Medium–high       | Daily-work model; `Sol` is 10–100 and `Luna` is 250–2,000         |
+| `Claude Pro`·`Claude Code`   | Reference estimate of 10–40 prompts/five hours; now dynamic                | Low–medium        | Depends on codebase, conversation, model, and shared Claude usage |
+| `Cursor Pro`·`Cursor Agent`  | Limited Agent users often fit; daily users typically total US$60–100/month | Fits limited use  | Varies by model price and choice of Cursor or third-party pool    |
 
 - **These bands describe nominal opportunities to iterate, not quality or completed work**
     - Ten Claude Code prompts may complete more work than ten Gemini model requests, so a higher band does not automatically mean better value
     - The table is useful for choosing high-headroom candidates for small repeated tasks and high-completion candidates for long refactors
 
-- **Treat Z.ai, Kimi, and OpenCode Go as reference groups with different prices or authentication—not as candidates for winning the US$20 core comparison**
+- **Published comparisons should inform role hypotheses rather than a permanent overall ranking**
+    - An MSR 2026 study of 7,156 pull requests found that no agent led every task type and that task category had a larger effect than typical differences between tools[^agent-pr-study]
+    - Cursor performed strongly on fix tasks in that study, while an independent US$20-plan comparison recommends Cursor Pro when integrated multi-model editing and completion matter[^agent-pr-study][^cursor-public-comparison]
+    - A July 2026, 50-plus-hour Grok Build comparison gave the then-current Claude Code the stronger overall score but identified parallel execution and cost efficiency as Grok Build's advantages, supporting its use first on separable auxiliary tasks rather than as the sole agent for a broad change[^grok-hands-on]
+
+- **Treat SuperGrok, Z.ai, Kimi, and OpenCode Go as reference groups with different prices or authentication—not as candidates for winning the US$20 core comparison**
+    - SuperGrok costs US$30 and shares its weekly allowance across Grok features, so a coding-only nominal volume cannot be isolated[^grok-pricing][^grok-usage]
     - Z.ai combines five-hour and seven-day limits and shares its subscription quota across supported tools[^zai-faq]
     - Kimi shares one credit pool across membership features and adds separate five-hour and weekly Kimi Code limits[^kimi-membership]
     - Preserve each provider's credits, prompts, or dollar-value allowance and add a low, medium, or high volume band beside it
@@ -92,8 +112,9 @@ sourceUrl: https://learn.chatgpt.com/docs/pricing
 ## The no-key rule changes what “connected” means
 
 - **Connecting subscriptions must mean that official clients read the same Git task contract, not that one CLI routes to another provider's model**
-    - Use Google login for Gemini CLI, ChatGPT login for Codex, Claude login for Claude Code, and Kimi OAuth for Kimi Code
+    - Use Google login for Gemini CLI, ChatGPT login for Codex, Claude login for Claude Code, Cursor browser login for Cursor Agent, a SuperGrok account for Grok Build, and Kimi OAuth for Kimi Code
     - Gemini CLI explicitly recommends `Login with Google` for Google AI Pro subscribers, so no API key is required[^gemini-auth]
+    - Cursor Agent CLI likewise recommends browser-based account login, while Grok Build provides an official SuperGrok account sign-in flow[^cursor-auth][^grok-build]
     - Keep credentials in each application's login store; never place keys in repository `.env` files, `settings.json`, shell configuration, or documentation
 
 - **Exclude Z.ai GLM Coding Plan under this condition**
@@ -112,7 +133,12 @@ sourceUrl: https://learn.chatgpt.com/docs/pricing
     - Subscriptions are tied to personal accounts and supported tools; Z.ai also restricts general API and unsupported-tool use of its coding-plan quota[^zai-terms]
     - Respecting that boundary still permits a handoff to the next official client when a provider is at its limit or unavailable
 
-## Compare subscription model gateways in their own unit
+## Compare reference subscriptions and model gateways in their own unit
+
+- **Grok access in SuperGrok and Cursor Pro does not represent one interchangeable subscription allowance**
+    - SuperGrok shares a weekly pool between xAI's official Grok Build client and other Grok app features[^grok-usage]
+    - Cursor Pro supplies `Cursor Grok 4.6`, `Grok 4.5`, and `Composer 2.5` from its monthly Cursor Models pool while tracking third-party models separately[^cursor-pricing]
+    - There is no basis for transferring remaining allowance between them, so record completed-task consumption separately even when both products expose a Grok-family model
 
 - **Z.ai GLM Coding Plan is a subscription that provides its own model family through supported tools**
     - The current FAQ says every plan supports `GLM-5.3` and `GLM-5.3-Flash`, with supported tools sharing one plan allowance[^zai-faq]
@@ -152,7 +178,7 @@ repository/
 └── worktrees/
     ├── feature-a/            # Codex worktree
     ├── explore-a/            # Gemini exploration worktree
-    └── review-a/             # Claude or Kimi review worktree
+    └── review-a/             # Claude, Grok, or Cursor review worktree
 ```
 
 - **Put only durable project rules in `AGENTS.md`**
@@ -190,14 +216,14 @@ repository/
     - Enable web search, large MCP tools, full tests, and auto-approved commands only when the completion criterion requires them
 
 - **Assign non-overlapping default roles to subscriptions**
-    - Give only one primary agent—Codex or Claude Code—write authority
+    - Give only one primary agent—Codex, Claude Code, Cursor Agent, or Grok Build—write authority
     - Give Gemini CLI broad repository exploration or independent alternative verification, and use other subscriptions for plan review, failure analysis, or diff review so they do not repeat the same exploration
-    - Start independent Kimi Code or ZCode worktree implementation only when the primary plan's remaining allowance is the real bottleneck
+    - Start independent Grok Build, Kimi Code, or ZCode worktree implementation only when the primary plan's remaining allowance is the real bottleneck
 
 ## Approximate first, then validate savings per accepted task
 
 - **It is reasonable to compare different provider units as low, medium, or high volume, but not as a precise token ranking**
-    - Kimi exposes shared credits, Z.ai combines credits and time windows, OpenCode Go uses model-priced dollar-value limits, and OpenAI and Anthropic share limits across product surfaces
+    - Grok exposes weekly usage percentage, Cursor has two monthly pools, Kimi exposes shared credits, Z.ai combines credits and time windows, OpenCode Go uses model-priced dollar-value limits, and OpenAI and Anthropic share limits across product surfaces
     - Use published figures to form a pre-purchase throughput hypothesis, then correct for model, caching, and tool differences with observed task outcomes
 
 - **Compare before and after on a representative task sample**
@@ -224,15 +250,16 @@ WEB-42,review,claude,sonnet,10:05,10:17,55%,52%,4,true,true,6
     - Gemini CLI exposes tokens, tool calls, and session duration through `/stats`, but Google OAuth does not expose cached-token savings, so record total usage with the completed outcome[^gemini-stats]
     - OpenAI directs Codex users to the usage dashboard and CLI `/status` for limits and reset time[^openai-usage]
     - Claude Code exposes subscription status and context through `/usage` and `/context`[^claude-cheatsheet]
+    - Grok shows weekly usage and a product breakdown including Build under Settings → Usage, while Cursor shows both monthly pools in its Spending dashboard[^grok-usage][^cursor-usage]
     - Kimi describes a subscription view with remaining credits, next reset, and recent usage records[^kimi-membership]
     - Record snapshots immediately before and after a task, and do not confuse them with month-end billed amounts
 
 ## Recommended rollout
 
-- **For the first month, choose one of Gemini CLI, Codex, or Claude Code as the sole primary editing agent and keep subscriptions already owned in read-only review roles**
-    - Measure all three against the same task sample at roughly US$20 before adding a reference subscription or higher tier
+- **For the first month, choose one of Gemini CLI, Codex, Claude Code, or Cursor Agent as the sole primary editing agent and keep subscriptions already owned in read-only review roles**
+    - Measure all four against the same task sample at roughly US$20 before adding a reference subscription such as US$30 SuperGrok or a higher tier
 
-- **For a no-key configuration, consider only Gemini CLI, Codex, Claude Code, and the official Kimi CLI or VS Code extension as execution slots**
+- **For a no-key configuration, consider only Gemini CLI, Codex, Claude Code, Cursor Agent, Grok Build, and the official Kimi CLI or VS Code extension as execution slots**
     - Z.ai GLM Coding Plan and OpenCode Go remain useful subscription comparison points, but their current official connection flows require keys and belong in a separate key-permitted experiment
 
 - **Record 20 tasks over two weeks and retain only roles that improve allowance per task, acceptance rate, or rework time**
@@ -275,3 +302,21 @@ WEB-42,review,claude,sonnet,10:05,10:17,55%,52%,4,true,true,6
 [^opencode-go]: [OpenCode: Go subscription documentation](https://dev.opencode.ai/docs/go/) — price, key-based connection, current model catalog, and per-model allowance estimates
 
 [^claude-cheatsheet]: [Anthropic: Claude Code cheatsheet](https://support.claude.com/en/articles/14553413-claude-code-cheatsheet) — `/usage` and `/context`
+
+[^cursor-pricing]: [Cursor: models and pricing](https://cursor.com/docs/models-and-pricing) — Pro's monthly price, Cursor Models and Other Models pools, and model-dependent consumption
+
+[^cursor-auth]: [Cursor: Agent CLI authentication](https://prod.cursor.com/docs/cli/reference/authentication) — browser-based Cursor account login without an API key
+
+[^cursor-usage]: [Cursor: usage and limits](https://prod.cursor.com/help/models-and-usage/usage-limits) — monthly pool resets, the Spending dashboard, and optional on-demand usage
+
+[^grok-pricing]: [xAI: Grok plans](https://x.ai/pricing) — the US$30 monthly list price and included SuperGrok features
+
+[^grok-build]: [xAI: introducing Grok Build](https://x.ai/news/grok-build-cli) — the official coding CLI's SuperGrok login, planning, diff, and headless features
+
+[^grok-usage]: [xAI: Grok app FAQ](https://docs.x.ai/grok/faq) — the weekly pool shared by Build, Chat, Imagine, Voice, and other features, compute weighting, and usage screen
+
+[^cursor-public-comparison]: [1DevTool: independent Claude Pro vs ChatGPT Plus vs Cursor Pro comparison](https://1devtool.com/compare/claude-pro-vs-chatgpt-plus-vs-cursor-pro) — compares post-limit behavior, model choice, access, and suitable users across the three US$20 subscriptions
+
+[^agent-pr-study]: [Pinna et al.: task-stratified pull-request acceptance across AI coding agents](https://arxiv.org/abs/2602.08915) — an MSR 2026 study of 7,156 pull requests across Codex, Cursor, Claude Code, and two other agents
+
+[^grok-hands-on]: [Composio: Grok Build vs Claude Code after more than 50 hours](https://composio.dev/content/grok-build-cli-vs-claude-code) — a hands-on comparison of price, cost per completed task, parallelism, ecosystem maturity, and suitable roles

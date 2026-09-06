@@ -2,12 +2,12 @@
 series: subscription-first-ai-workspace
 seriesOrder: 1
 title: "월 US$20 AI 코딩 구독 비교와 API 키 없는 워크스페이스"
-description: "Gemini CLI, Codex, Claude Code의 월 US$20 구독을 중심으로 Z.ai, Kimi Code, OpenCode Go의 비용·한도·연결 조건을 비교하고, API 키 없이 완료 작업당 사용량을 낮추는 워크스페이스를 설계합니다."
+description: "Gemini CLI, Codex, Claude Code, Cursor Pro의 월 약 US$20 구독을 중심으로 SuperGrok, Z.ai, Kimi Code, OpenCode Go의 비용·한도·연결 조건을 비교하고, API 키 없이 완료 작업당 사용량을 낮추는 워크스페이스를 설계합니다."
 thesis: "구독형 AI 도구의 효율은 한 서비스에 모든 일을 몰아넣는 방식보다, 공식 클라이언트를 역할별로 분리하고 공통 작업 계약으로 넘겨주는 방식에서 높아집니다."
 counterargument: "여러 구독을 병렬로 쓰면 전환 비용과 월 고정비가 늘어나므로, 한 모델의 품질과 사용 한도가 충분한 사용자에게는 단일 구독이 더 경제적일 수 있습니다."
 publishedAt: "2026-09-04"
-updatedAt: "2026-09-04"
-verifiedAt: "2026-09-04"
+updatedAt: "2026-09-07"
+verifiedAt: "2026-09-07"
 tags: [ai, coding, subscriptions, productivity]
 status: experimental
 publicationStatus: published
@@ -17,8 +17,9 @@ sourceUrl: https://learn.chatgpt.com/docs/pricing
 ## 핵심 요약
 
 - **API 키를 쓰지 않는 조건에서는 여러 구독을 하나의 모델 라우터에 합칠 수 없으며, 각 공급자의 공식 클라이언트를 같은 저장소에서 병렬로 쓰는 구성이 정직한 해법임**
-- **동일 예산 비교의 핵심군은 월 US$19.99의 `Google AI Pro`, US$20의 `ChatGPT Plus`, US$20의 `Claude Pro`로 잡는 것이 적절함**
-- **서로 다른 단위를 완전히 동일시할 수는 없지만, 공개 한도를 기준으로 `Gemini CLI`는 명목 사용량이 많음, `Codex`는 모델에 따라 중간에서 많음, `Claude Code`는 적음에서 중간 정도로 대략 비교할 수 있음**
+- **동일 예산 비교의 핵심군은 월 US$19.99의 `Google AI Pro`와 US$20의 `ChatGPT Plus`·`Claude Pro`·`Cursor Pro`로 잡는 것이 적절함**
+- **서로 다른 단위를 완전히 동일시할 수는 없지만, 공개 한도를 기준으로 `Gemini CLI`는 명목 사용량이 많음, `Codex`는 모델에 따라 중간에서 많음, `Claude Code`는 적음에서 중간 정도이며, `Cursor Pro`는 공식 사용자 유형 안내와 공개 비교 사례를 함께 봐야 함**
+- **월 US$30의 `SuperGrok`은 동일 예산 핵심군 밖이지만, API 키 없이 공식 `Grok Build`를 쓰는 독립 코딩 구독으로 함께 비교할 가치가 있음**
 - **`Z.ai GLM Coding Plan`과 `OpenCode Go`도 구독형 모델 접근을 제공하지만, 두 서비스 모두 공식 연결 절차가 API 키를 요구하므로 API 키 금지 워크스페이스의 실행 후보에서는 제외해야 함**
 - **토큰을 아끼는 가장 큰 수단은 더 싼 모델로 바꾸는 일이 아니라, 작업마다 세션을 비우고 읽을 파일·검증 명령·완료 조건을 먼저 제한하는 일임**
 - **공개 수치의 대략적 등급은 구독 후보를 고르는 데 쓰고, 실제 절감 여부는 동일 작업 표본의 ‘검증 통과한 완료 작업 1건당 소진한 할당량’과 재작업률로 판정해야 함**
@@ -46,17 +47,19 @@ sourceUrl: https://learn.chatgpt.com/docs/pricing
     - API 종량제, API 키, 크레딧 자동 충전, 키를 환경 변수에 넣어 타사 클라이언트를 연결하는 방법은 제외함
     - 구독 한도를 넘긴 뒤 제시되는 별도 사용 크레딧도 기본 비용 비교에는 포함하지 않음
 
-- **표의 가격은 2026-09-04에 각 공급자가 공개한 월간 기준 목록가이며, 국가·세금·연간 결제 할인·프로모션에 따라 실제 청구액이 달라질 수 있음**
+- **표의 가격은 2026-09-07에 각 공급자가 공개한 월간 기준 목록가이며, 국가·세금·연간 결제 할인·프로모션에 따라 실제 청구액이 달라질 수 있음**
     - 따라서 가격은 구독 후보를 좁히는 기준일 뿐, ‘토큰당 가격’으로 환산해 우열을 단정하는 근거가 될 수 없음
 
-| 서비스                  | 개인 구독의 대표 시작점                                          | 코딩 사용량의 성격                                           | API 키 없이 허용되는 연결                      | 이 조건에서의 역할                 |
-| ----------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------- | ---------------------------------- |
-| Google `Gemini CLI`     | `Google AI Pro` US$19.99[^gemini-pricing]                        | 유료 고정 요금제는 사용자당 일일 모델 요청 한도를 제공함     | 구독 Google 계정으로 공식 CLI 로그인           | 저장소 탐색·대안 구현·독립 검증    |
-| OpenAI `Codex`          | `ChatGPT Plus` US$20[^openai-pricing]                            | Codex·ChatGPT Work 등 에이전트 기능이 공용 할당량을 공유함   | ChatGPT 계정으로 Codex 공식 앱·CLI 로그인      | 어려운 구현·리뷰·최종 검증         |
-| Anthropic `Claude Code` | `Pro` US$20[^claude-plan]                                        | Claude와 Claude Code가 같은 사용 한도를 공유함               | Claude 계정으로 공식 CLI·지원 IDE 로그인       | 계획 수립·넓은 변경·설명           |
-| Z.ai `GLM Coding Plan`  | `Lite` US$18, `Pro` US$80, `Max` US$168[^zai-pricing]            | 5시간 및 주간 한도와 크레딧으로 관리됨                       | 공식 절차가 Coding Plan API 키를 요구함        | API 키 허용 시 비교 후보           |
-| Moonshot `Kimi Code`    | `Andante` ¥49, `Moderato` ¥99, `Allegretto` ¥199, `Allegro` ¥699 | 멤버십 공용 크레딧과 별도 5시간·주간 코딩 한도가 함께 적용됨 | 공식 Kimi Code CLI·VS Code 확장의 OAuth 로그인 | 대용량 탐색·독립 보조 작업         |
-| `OpenCode Go`           | US$10[^opencode-go]                                              | 모델별 달러 가치 한도와 5시간·주간·월간 한도로 관리됨        | 공식 절차가 OpenCode Go API 키를 요구함        | API 키 허용 시 다중 모델 비교 후보 |
+| 서비스                  | 개인 구독의 대표 시작점                                          | 코딩 사용량의 성격                                           | API 키 없이 허용되는 연결                      | 이 조건에서의 역할                  |
+| ----------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------- | ----------------------------------- |
+| Google `Gemini CLI`     | `Google AI Pro` US$19.99[^gemini-pricing]                        | 유료 고정 요금제는 사용자당 일일 모델 요청 한도를 제공함     | 구독 Google 계정으로 공식 CLI 로그인           | 저장소 탐색·대안 구현·독립 검증     |
+| OpenAI `Codex`          | `ChatGPT Plus` US$20[^openai-pricing]                            | Codex·ChatGPT Work 등 에이전트 기능이 공용 할당량을 공유함   | ChatGPT 계정으로 Codex 공식 앱·CLI 로그인      | 어려운 구현·리뷰·최종 검증          |
+| Anthropic `Claude Code` | `Pro` US$20[^claude-plan]                                        | Claude와 Claude Code가 같은 사용 한도를 공유함               | Claude 계정으로 공식 CLI·지원 IDE 로그인       | 계획 수립·넓은 변경·설명            |
+| Anysphere `Cursor`      | `Pro` US$20[^cursor-pricing]                                     | Cursor 모델·타사 모델의 월간 사용량 풀을 따로 관리함         | Cursor 편집기·Agent CLI에서 계정 로그인        | IDE 중심 구현·리팩터링·다중 모델    |
+| xAI `Grok Build`        | `SuperGrok` US$30[^grok-pricing]                                 | Build·Chat 등 Grok 제품이 하나의 주간 사용량 풀을 공유함     | 공식 CLI에서 SuperGrok 계정 로그인             | 계획 검토·독립 구현·헤드리스 자동화 |
+| Z.ai `GLM Coding Plan`  | `Lite` US$18, `Pro` US$80, `Max` US$168[^zai-pricing]            | 5시간 및 주간 한도와 크레딧으로 관리됨                       | 공식 절차가 Coding Plan API 키를 요구함        | API 키 허용 시 비교 후보            |
+| Moonshot `Kimi Code`    | `Andante` ¥49, `Moderato` ¥99, `Allegretto` ¥199, `Allegro` ¥699 | 멤버십 공용 크레딧과 별도 5시간·주간 코딩 한도가 함께 적용됨 | 공식 Kimi Code CLI·VS Code 확장의 OAuth 로그인 | 대용량 탐색·독립 보조 작업          |
+| `OpenCode Go`           | US$10[^opencode-go]                                              | 모델별 달러 가치 한도와 5시간·주간·월간 한도로 관리됨        | 공식 절차가 OpenCode Go API 키를 요구함        | API 키 허용 시 다중 모델 비교 후보  |
 
 - **`Gemini CLI`는 핵심군에서 가장 명시적인 요청 한도를 공개함**
     - Google은 `Google AI Pro` 구독자에게 Gemini CLI·Code Assist의 상향된 한도를 제공한다고 밝히며, 연결된 공식 할당량 표는 `Gemini Code Assist Standard` 기준 사용자당 하루 1,500회의 모델 요청 한도를 제시함[^gemini-cli-quota]
@@ -73,19 +76,36 @@ sourceUrl: https://learn.chatgpt.com/docs/pricing
     - Anthropic이 공식 도움말에서 제시한 과거 대표 추정치는 `Claude Code` 프롬프트 10–40회/5시간이며, 현재 정책에서는 보장값이 아니라 작은 저장소의 가벼운 코딩을 가정한 참고값으로만 사용할 수 있음[^claude-estimate]
     - Claude Code 공식 안내는 이전 대화, 프로젝트 지침, 읽은 파일, 새 프롬프트가 모두 매 턴 전송되며 긴 세션이 비용과 컨텍스트 한도의 원인이라고 설명함[^claude-limits]
 
+- **`Cursor Pro`는 핵심군과 같은 US$20이지만 공개된 고정 요청 수로 비교할 수 없음**
+    - Pro는 `Cursor Grok 4.6`·`Grok 4.5`·`Composer 2.5`용 Cursor Models 풀과 Anthropic·Google·OpenAI 등 타사 모델용 Other Models 풀을 포함하며, 두 풀은 월 결제 주기마다 재설정됨[^cursor-pricing]
+    - Cursor의 공식 사용자 유형 안내는 제한적으로 Agent를 쓰는 사용자는 대체로 포함량 안에 머물지만, 매일 Agent를 쓰는 사용자는 월 총 US$60–100 사용량이 일반적이라고 제시함[^cursor-pricing]
+    - 독립적인 US$20 요금제 비교는 Cursor Pro의 장점을 다중 모델·Tab·Agent 통합으로, 주의점은 한도 뒤 종량제가 켜져 있으면 청구액이 늘어나는 구조로 정리함[^cursor-public-comparison]
+
+- **`SuperGrok`은 US$30의 별도 가격대에서 공식 코딩 CLI와 Grok 제품군을 묶음**
+    - SuperGrok 구독자는 계정 로그인으로 공식 `Grok Build`를 설치해 쓸 수 있고, Build는 계획 승인·diff 검토·헤드리스 모드를 지원함[^grok-build]
+    - 유료 Grok 제품은 Build·Chat·Imagine·Voice 등에 하나의 주간 사용량 풀을 공유하며, 긴 코딩 작업은 짧은 채팅보다 더 많은 양을 소진함[^grok-usage]
+    - 2026년 7월 공개된 50시간 이상 사용 비교는 당시 Claude Code를 어려운 저장소·성숙한 확장 생태계에, Grok Build를 비용에 민감한 병렬 작업·실험에 더 적합한 후보로 평가했으므로 제품 역할을 나누는 참고 사례로 쓸 수 있음[^grok-hands-on]
+
 - **월 약 US$20 핵심군의 명목 반복 가능량은 다음처럼 대략 비교할 수 있음**
 
-| 핵심 구독                    | 공식 공개 수치                                            | 대략적 사용량 등급 | 해석 조건                                                      |
-| ---------------------------- | --------------------------------------------------------- | ------------------ | -------------------------------------------------------------- |
-| `Google AI Pro`·`Gemini CLI` | 모델 요청 1,500회/일                                      | 많음               | 한 프롬프트가 여러 모델 요청을 만들므로 실제 지시 수는 더 적음 |
-| `ChatGPT Plus`·`Codex Terra` | 로컬 메시지 25–200회/5시간                                | 중간–많음          | 일상 코딩 기준이며 `Sol`은 10–100회, `Luna`는 250–2,000회임    |
-| `Claude Pro`·`Claude Code`   | 대표 추정 프롬프트 10–40회/5시간, 현재는 변동 한도만 명시 | 적음–중간          | 코드베이스·대화 길이·모델과 Claude 채팅 사용량에 좌우됨        |
+| 핵심 구독                    | 공식 공개 수치                                                       | 대략적 사용량 등급 | 해석 조건                                                      |
+| ---------------------------- | -------------------------------------------------------------------- | ------------------ | -------------------------------------------------------------- |
+| `Google AI Pro`·`Gemini CLI` | 모델 요청 1,500회/일                                                 | 많음               | 한 프롬프트가 여러 모델 요청을 만들므로 실제 지시 수는 더 적음 |
+| `ChatGPT Plus`·`Codex Terra` | 로컬 메시지 25–200회/5시간                                           | 중간–많음          | 일상 코딩 기준이며 `Sol`은 10–100회, `Luna`는 250–2,000회임    |
+| `Claude Pro`·`Claude Code`   | 대표 추정 프롬프트 10–40회/5시간, 현재는 변동 한도만 명시            | 적음–중간          | 코드베이스·대화 길이·모델과 Claude 채팅 사용량에 좌우됨        |
+| `Cursor Pro`·`Cursor Agent`  | 제한적 Agent 사용은 보통 포함량 안, 일일 사용은 월 총 US$60–100 안내 | 제한적 사용에 적합 | 모델별 가격과 Cursor 모델·타사 모델 풀 선택에 따라 달라짐      |
 
 - **이 등급은 처리 품질이나 완료 작업 수가 아니라 사용자가 반복을 시도할 수 있는 명목 여유를 뜻함**
     - `Claude Code`의 10회가 `Gemini CLI` 모델 요청 10회보다 더 많은 작업을 끝낼 수 있으므로 ‘많음’이 곧 더 높은 가성비를 의미하지 않음
     - 비교표의 실용적 용도는 대량의 작은 작업에는 명목 한도가 큰 후보를, 긴 리팩터링에는 완료율이 높은 후보를 먼저 시험하는 우선순위 설정임
 
-- **`Z.ai`·`Kimi`·`OpenCode Go`는 US$20 핵심군의 승자를 정하는 제품이 아니라 가격·인증 조건이 다른 보조 비교군임**
+- **공개 비교도 제품 전체의 영구 순위가 아니라 역할 가설로 읽어야 함**
+    - MSR 2026에 채택된 7,156개 PR 분석은 어떤 에이전트도 모든 작업 유형에서 최고가 아니며, 도구 차이보다 작업 유형의 영향이 크다고 결론지음[^agent-pr-study]
+    - 같은 연구에서 Cursor는 수정 작업에서 강한 결과를 보였고, 독립적인 US$20 요금제 비교는 Cursor Pro를 편집기 안에서 여러 모델과 자동완성을 함께 쓰려는 경우에 적합하다고 평가함[^agent-pr-study][^cursor-public-comparison]
+    - 2026년 7월 Grok Build의 50시간 이상 사용 비교는 당시 Claude Code에 전체 점수 우위를 주면서도 Grok Build의 병렬 실행과 비용 효율을 장점으로 꼽았으므로, 큰 변경의 단독 주 에이전트보다 분리 가능한 보조 작업부터 검토하는 근거가 됨[^grok-hands-on]
+
+- **`SuperGrok`·`Z.ai`·`Kimi`·`OpenCode Go`는 US$20 핵심군의 승자를 정하는 제품이 아니라 가격·인증 조건이 다른 보조 비교군임**
+    - SuperGrok은 US$30이며 Grok 기능 전체에 주간 사용량을 공유하므로 코딩 전용 명목량을 분리할 수 없음[^grok-pricing][^grok-usage]
     - Z.ai는 5시간 한도 외에 7일 주기 주간 한도가 있고, 지원 도구가 같은 구독 할당량을 공유한다고 안내함[^zai-faq]
     - Kimi는 모든 멤버십 기능이 크레딧 풀을 공유하고 Kimi Code에는 별도 5시간·주간 한도가 적용된다고 설명함[^kimi-membership]
     - 각 제품의 크레딧·프롬프트·달러 가치 원단위를 보존하면서 적음·중간·많음 등급을 함께 기록해야 함
@@ -93,8 +113,9 @@ sourceUrl: https://learn.chatgpt.com/docs/pricing
 ## API 키 금지 조건은 연결 방식을 바꿈
 
 - **‘여러 구독을 연결한다’는 말은 한 CLI에 타사 모델을 주입한다는 뜻이 아니라, 같은 Git 작업 계약을 여러 공식 클라이언트가 읽는다는 뜻으로 바꿔야 함**
-    - `Gemini CLI`에는 Google 로그인, `Codex`에는 ChatGPT 로그인, `Claude Code`에는 Claude 로그인, `Kimi Code`에는 Kimi OAuth 로그인만 사용함
+    - `Gemini CLI`에는 Google 로그인, `Codex`에는 ChatGPT 로그인, `Claude Code`에는 Claude 로그인, `Cursor Agent`에는 Cursor 브라우저 로그인, `Grok Build`에는 SuperGrok 계정 로그인, `Kimi Code`에는 Kimi OAuth 로그인만 사용함
     - Gemini CLI 공식 인증 안내는 `Google AI Pro` 구독 계정에 `Login with Google` 방식을 사용하라고 명시하므로 API 키가 필요하지 않음[^gemini-auth]
+    - Cursor Agent CLI도 브라우저 기반 계정 로그인을 권장하며, Grok Build 역시 SuperGrok 계정으로 로그인하는 공식 절차를 제공함[^cursor-auth][^grok-build]
     - 공급자별 자격 증명은 각 앱의 로그인 저장소에만 두고, 저장소의 `.env`, `settings.json`, 셸 설정과 문서에 키를 넣지 않음
 
 - **`Z.ai GLM Coding Plan`은 이 조건에서 제외해야 함**
@@ -109,7 +130,12 @@ sourceUrl: https://learn.chatgpt.com/docs/pricing
     - OpenCode는 월 US$10 구독 후 키를 복사해 `/connect`에 붙여 넣는 절차를 공식 안내함[^opencode-go]
     - 따라서 OpenCode Go는 ‘구독형 다중 모델 접근’ 비교에는 포함하되, 이 글의 API 키 금지 워크스페이스에는 연결하지 않음
 
-## 구독형 모델 게이트웨이는 별도 단위로 비교해야 함
+## 보조 구독과 모델 게이트웨이는 별도 단위로 비교해야 함
+
+- **SuperGrok과 Cursor Pro에서 보이는 Grok은 같은 구독 할당량이 아님**
+    - SuperGrok은 xAI의 공식 Grok Build와 Grok 앱 기능이 주간 풀을 공유함[^grok-usage]
+    - Cursor Pro는 `Cursor Grok 4.6`·`Grok 4.5`·`Composer 2.5`를 Cursor Models 월간 풀에서 제공하고 타사 모델 풀은 별도로 관리함[^cursor-pricing]
+    - 한쪽 구독의 잔여량이 다른 쪽으로 이전된다고 볼 근거가 없으므로, 같은 Grok 계열을 선택해도 완료 작업당 소진량은 제품별로 따로 기록해야 함
 
 - **`Z.ai GLM Coding Plan`은 자체 모델군을 지원 도구에 제공하는 구독제임**
     - 현재 FAQ 기준 전 요금제는 `GLM-5.3`과 `GLM-5.3-Flash`를 지원하며, 지원 도구 전체가 동일 구독 할당량을 공유함[^zai-faq]
@@ -153,7 +179,7 @@ repository/
 └── worktrees/
     ├── feature-a/            # Codex 작업 공간
     ├── explore-a/            # Gemini 탐색 공간
-    └── review-a/             # Claude 또는 Kimi 검토 공간
+    └── review-a/             # Claude, Grok 또는 Cursor 검토 공간
 ```
 
 - **`AGENTS.md`에는 자주 바뀌지 않는 규칙만 두어야 함**
@@ -191,14 +217,14 @@ repository/
     - 웹 검색, 대형 MCP, 전체 테스트, 자동 승인 명령은 완료 조건에 필요할 때만 켜며, 특히 연결 도구의 출력은 요약을 우선 요청함
 
 - **각 구독에는 겹치지 않는 기본 역할을 부여해야 함**
-    - `Codex` 또는 `Claude Code` 중 주 에이전트 하나만 수정 권한을 가지게 함
+    - `Codex`·`Claude Code`·`Cursor Agent`·`Grok Build` 중 주 에이전트 하나만 수정 권한을 가지게 함
     - `Gemini CLI`는 넓은 저장소 탐색이나 독립 대안 검증을 맡기고, 다른 구독은 계획 검토·테스트 실패 분석·diff 리뷰처럼 읽기 중심 역할을 맡겨 동일한 탐색을 반복하지 않게 함
-    - 주 구독의 남은 한도가 실제로 병목일 때만 `Kimi Code` 또는 `ZCode`에서 독립 worktree 작업을 시작함
+    - 주 구독의 남은 한도가 실제로 병목일 때만 `Grok Build`·`Kimi Code` 또는 `ZCode`에서 독립 worktree 작업을 시작함
 
 ## 절감 평가는 대략적 환산 뒤 완료 작업당 할당량으로 확정함
 
 - **서로 다른 공급자의 수치를 적음·중간·많음으로 대략 비교하는 것은 가능하지만 정밀한 토큰 순위로 표현하면 안 됨**
-    - Kimi는 기능 전체에 공용 크레딧을 차감하고, Z.ai는 크레딧과 시간·주간 한도를 함께 관리하며, OpenCode Go는 모델별 달러 가치 한도를 사용하고, OpenAI와 Claude도 제품 기능 간 공용 한도를 둠
+    - Grok은 주간 사용률, Cursor는 두 개의 월간 풀, Kimi는 공용 크레딧, Z.ai는 크레딧과 시간·주간 한도, OpenCode Go는 모델별 달러 가치 한도를 사용하고, OpenAI와 Claude도 제품 기능 간 공용 한도를 둠
     - 공개 수치는 구매 전 처리량 가설을 세우는 데 사용하고, 모델·캐시·도구 호출 차이는 실제 작업 측정으로 보정해야 함
 
 - **같은 난이도의 작업 표본으로 변경 전후를 비교해야 함**
@@ -225,15 +251,16 @@ WEB-42,review,claude,sonnet,10:05,10:17,55%,52%,4,true,true,6
     - Gemini CLI는 `/stats`에서 현재 세션의 토큰·도구 호출·시간을 확인할 수 있지만, Google OAuth에서는 캐시 절감량을 표시하지 않으므로 총 토큰과 완료 결과를 함께 기록해야 함[^gemini-stats]
     - Codex는 사용량 대시보드와 CLI의 `/status`에서 한도·재설정 시점을 확인하도록 안내함[^openai-usage]
     - Claude Code는 `/usage`와 `/context`로 구독 상태와 컨텍스트 점유를 확인할 수 있음[^claude-cheatsheet]
+    - Grok은 Settings의 Usage에서 주간 사용률과 Build 등 제품별 비중을, Cursor는 Spending 대시보드에서 두 월간 풀의 잔여량을 확인할 수 있음[^grok-usage][^cursor-usage]
     - Kimi는 구독 화면에서 남은 크레딧, 재설정 시점, 최근 사용 기록을 제공한다고 설명함[^kimi-membership]
     - 이 값은 시점별 스냅샷이므로, 작업 시작·종료 직후에 기록하고 월말 청구 금액과 혼동하지 않음
 
 ## 실행 제안
 
-- **첫 달에는 `Gemini CLI`·`Codex`·`Claude Code` 중 한 개만 주 수정 에이전트로 선택하고, 이미 보유한 다른 구독은 읽기 전용 검토 역할로 제한하는 구성이 적절함**
-    - 월 약 US$20 구간의 세 구독을 같은 작업 표본으로 측정한 뒤 보조 구독이나 상위 요금제를 추가하는 편이 고정비 위험을 낮춤
+- **첫 달에는 `Gemini CLI`·`Codex`·`Claude Code`·`Cursor Agent` 중 한 개만 주 수정 에이전트로 선택하고, 이미 보유한 다른 구독은 읽기 전용 검토 역할로 제한하는 구성이 적절함**
+    - 월 약 US$20 구간의 네 구독을 같은 작업 표본으로 측정한 뒤 US$30의 SuperGrok 같은 보조 구독이나 상위 요금제를 추가하는 편이 고정비 위험을 낮춤
 
-- **API 키 금지 구성에서는 `Gemini CLI`·`Codex`·`Claude Code`·Kimi 공식 CLI 또는 VS Code 확장만 실행 슬롯으로 검토해야 함**
+- **API 키 금지 구성에서는 `Gemini CLI`·`Codex`·`Claude Code`·`Cursor Agent`·`Grok Build`·Kimi 공식 CLI 또는 VS Code 확장만 실행 슬롯으로 검토해야 함**
     - `Z.ai GLM Coding Plan`과 `OpenCode Go`는 유용한 구독 비교 대상이지만, 현재 공식 연결 절차가 키 생성을 전제하므로 별도 API 키 허용 실험으로 분리해야 함
 
 - **2주 동안 20건을 기록해 ‘작업당 소진량·수용률·재작업 시간’을 비교하고, 개선이 확인된 역할만 유지해야 함**
@@ -276,3 +303,21 @@ WEB-42,review,claude,sonnet,10:05,10:17,55%,52%,4,true,true,6
 [^opencode-go]: [OpenCode, Go 구독 문서](https://dev.opencode.ai/docs/go/) — 월 요금, 키 기반 연결, 현재 모델 목록, 모델별 사용량 한도와 요청 수 추정치를 제시함
 
 [^claude-cheatsheet]: [Anthropic, Claude Code 명령 요약](https://support.claude.com/en/articles/14553413-claude-code-cheatsheet) — `/usage`와 `/context`의 상태 확인 방법을 설명함
+
+[^cursor-pricing]: [Cursor, 모델과 가격](https://cursor.com/docs/models-and-pricing) — Pro 월 요금, Cursor Models와 Other Models 풀, 모델별 소진 구조를 설명함
+
+[^cursor-auth]: [Cursor, Agent CLI 인증](https://prod.cursor.com/docs/cli/reference/authentication) — API 키 없이 쓰는 브라우저 기반 Cursor 계정 로그인을 안내함
+
+[^cursor-usage]: [Cursor, 사용량과 한도](https://prod.cursor.com/help/models-and-usage/usage-limits) — 두 월간 사용량 풀의 재설정, Spending 대시보드, 선택형 초과 사용을 설명함
+
+[^grok-pricing]: [xAI, Grok 요금제](https://x.ai/pricing) — SuperGrok의 월 US$30 목록가와 포함 기능을 제시함
+
+[^grok-build]: [xAI, Grok Build 소개](https://x.ai/news/grok-build-cli) — SuperGrok 계정으로 로그인하는 공식 코딩 CLI와 계획·diff·헤드리스 기능을 설명함
+
+[^grok-usage]: [xAI, Grok 앱 FAQ](https://docs.x.ai/grok/faq) — Build·Chat·Imagine·Voice 등이 공유하는 주간 사용량 풀, 작업별 가중치와 Usage 화면을 설명함
+
+[^cursor-public-comparison]: [1DevTool, Claude Pro·ChatGPT Plus·Cursor Pro 독립 비교](https://1devtool.com/compare/claude-pro-vs-chatgpt-plus-vs-cursor-pro) — 세 US$20 구독의 한도 이후 동작, 모델 선택, 접근 방식과 적합한 사용자를 비교함
+
+[^agent-pr-study]: [Pinna 외, AI 코딩 에이전트의 작업 유형별 PR 수용률 비교](https://arxiv.org/abs/2602.08915) — MSR 2026에 채택된 7,156개 PR 분석으로 Codex·Cursor·Claude Code 등 다섯 에이전트의 작업별 차이를 제시함
+
+[^grok-hands-on]: [Composio, 50시간 이상 사용한 Grok Build와 Claude Code 비교](https://composio.dev/content/grok-build-cli-vs-claude-code) — 실제 사용을 바탕으로 가격, 완료 작업 비용, 병렬성, 생태계와 적합한 역할을 비교함
