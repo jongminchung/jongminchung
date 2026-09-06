@@ -123,15 +123,18 @@ for (const site of sites) {
     await expect(
       dialog.getByRole("link", { name: site.link, exact: true }),
     ).toBeVisible();
-    for (let i = 0; i < 15; i++) {
-      await page.keyboard.press("Tab");
-      await expect
-        .poll(() =>
-          dialog.evaluate((element) =>
-            element.contains(document.activeElement),
-          ),
-        )
-        .toBe(true);
+    // 정방향과 역방향 모두 메뉴 밖으로 focus가 빠져나가지 않아야 함.
+    for (const key of ["Tab", "Shift+Tab"]) {
+      for (let i = 0; i < 15; i++) {
+        await page.keyboard.press(key);
+        await expect
+          .poll(() =>
+            dialog.evaluate((element) =>
+              element.contains(document.activeElement),
+            ),
+          )
+          .toBe(true);
+      }
     }
     await page.keyboard.press("Escape");
     await expect(dialog).toBeHidden();

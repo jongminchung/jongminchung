@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Request } from "@playwright/test";
 
 interface InitialTransferBudgetRoute {
   readonly site: "home" | "tech" | "invest";
@@ -30,9 +30,28 @@ for (const route of budget.routes) {
   test(`initial transfer budget: ${route.site}/${route.locale}`, async ({
     page,
   }, testInfo) => {
-    const response = await page.goto(route.url, { waitUntil: "networkidle" });
+    // 측정 대상인 font·CSS·JS만 기다려 지연 이미지와 라우트 prefetch의 영향을 제외함.
+    const pendingAssets = new Set<Request>();
+    let lastAssetActivity = Date.now();
+    page.on("request", (request) => {
+      if (["font", "stylesheet", "script"].includes(request.resourceType())) {
+        pendingAssets.add(request);
+        lastAssetActivity = Date.now();
+      }
+    });
+    const finishAsset = (request: Request) => {
+      if (pendingAssets.delete(request)) lastAssetActivity = Date.now();
+    };
+    page.on("requestfinished", finishAsset);
+    page.on("requestfailed", finishAsset);
+    const response = await page.goto(route.url);
     expect(response?.ok()).toBe(true);
     await page.evaluate(() => document.fonts.ready);
+    await expect
+      .poll(
+        () => pendingAssets.size === 0 && Date.now() - lastAssetActivity >= 500,
+      )
+      .toBe(true);
     const measurement = await page.evaluate(() => {
       const resources = performance.getEntriesByType(
         "resource",

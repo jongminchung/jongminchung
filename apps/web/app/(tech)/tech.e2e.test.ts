@@ -174,7 +174,8 @@ test("[성공] 문서 CSS를 탐색 시 로드하고 목록 복귀 시 shell 스
       );
     }
   });
-  await page.goto("/en", { waitUntil: "networkidle" });
+  // 지연 이미지·백그라운드 요청 대신 문서 load와 필요한 CSS 응답만 기다림.
+  await page.goto("/en");
   await Promise.all(styles);
   expect(stylesheets.some((css) => css.includes(".shiki"))).toBe(false);
   expect(
@@ -208,9 +209,9 @@ test("[성공] 문서 CSS를 탐색 시 로드하고 목록 복귀 시 shell 스
   await expect(page).toHaveURL(/\/en\/docs\/fe\/nextjs-16$/u);
   await expect(page.locator("#nd-docs-layout")).toHaveCSS("display", "grid");
   await expect(page.locator("[data-docs-code-block]").first()).toBeVisible();
-  await page.waitForLoadState("networkidle");
-  await Promise.all(styles);
-  expect(stylesheets.some((css) => css.includes(".shiki"))).toBe(true);
+  await expect
+    .poll(() => stylesheets.some((css) => css.includes(".shiki")))
+    .toBe(true);
   await page.goBack();
   await expect(page).toHaveURL(/\/en$/u);
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
