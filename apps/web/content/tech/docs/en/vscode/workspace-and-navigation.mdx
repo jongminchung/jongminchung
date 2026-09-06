@@ -1,0 +1,89 @@
+---
+documentKind: "how-to"
+title: "Project Setup, Navigation, and Refactoring"
+description: "Connect profiles, workspaces, semantic navigation, and Git review into an editing workflow."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "development-workflow"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://code.visualstudio.com/docs/editing/editingevolved"
+---
+
+## Open a project rather than a single file
+
+Start from the build root: `pom.xml` or Gradle settings for Java, package.json and tsconfig for TypeScript, go.mod/go.work for Go, and pyproject.toml for Python. Run the existing build or test command before changing editor settings.
+
+Use one repository root when it represents one build graph. Use [multi-root workspaces](https://code.visualstudio.com/docs/editing/workspaces/multi-root-workspaces) for independently configured services. Avoid including the same source through both a parent and child folder.
+
+## Separate personal profiles from shared project settings
+
+Create a profile with **Profiles: Create Profile**. Keep fonts and keymaps in User/Profile settings; keep formatter ownership and task commands in the repository. A profile export does not lock tool versions. [Profiles](https://code.visualstudio.com/docs/configure/profiles)
+
+| Location                 | Keep here                               | Avoid                               |
+| ------------------------ | --------------------------------------- | ----------------------------------- |
+| User/Profile             | Theme, keymap, personal SDK paths       | Shared policy hidden in one machine |
+| .vscode/settings.json    | Language providers and test integration | Home paths or credentials           |
+| .vscode/extensions.json  | Recommended extension IDs               | Assuming versions are locked        |
+| Build/tool configuration | Rules, versions, dependency locks       | Editor-only build requirements      |
+
+Inspect publisher and extension IDs. Record installed versions with `code --list-extensions --show-versions`. Recommendations do not automatically install or pin extensions. [Extension management](https://code.visualstudio.com/docs/configure/extensions/extension-marketplace)
+
+For a new learning project, begin with automatic transformations disabled. Enable the appropriate language settings later through the [formatting lab](/en/docs/vscode/editorconfig).
+
+```json
+{
+    "files.autoSave": "off",
+    "editor.formatOnSave": false,
+    "editor.formatOnPaste": false,
+    "editor.formatOnType": false,
+    "editor.formatOnSaveMode": "file",
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "never",
+        "source.organizeImports": "never"
+    },
+    "editor.bracketPairColorization.enabled": true,
+    "editor.guides.bracketPairs": true,
+    "editor.stickyScroll.enabled": true
+}
+```
+
+Language overrides can still take precedence. Search Settings using `@modified`, `@lang:go`, or `@ext:golang.go` before diagnosing a provider. [Settings scopes](https://code.visualstudio.com/docs/configure/settings)
+
+## Learn commands by the task they solve
+
+These are common default bindings; verify the active OS and keymap in Keyboard Shortcuts. Linux desktop bindings can intercept function keys.
+
+| Task              | Command                   | Windows/Linux | macOS       |
+| ----------------- | ------------------------- | ------------- | ----------- |
+| Find a command    | Command Palette           | Ctrl+Shift+P  | Cmd+Shift+P |
+| Find a file       | Quick Open                | Ctrl+P        | Cmd+P       |
+| File symbols      | Go to Symbol in Editor    | Ctrl+Shift+O  | Cmd+Shift+O |
+| Workspace symbols | Go to Symbol in Workspace | Ctrl+T        | Cmd+T       |
+| Definition        | Go to Definition          | F12           | F12         |
+| References        | Go to References          | Shift+F12     | Shift+F12   |
+| Rename            | Rename Symbol             | F2            | F2          |
+| Quick fix         | Quick Fix                 | Ctrl+.        | Cmd+.       |
+| Diagnostics       | Problems                  | Ctrl+Shift+M  | Cmd+Shift+M |
+| Text search       | Search                    | Ctrl+Shift+F  | Cmd+Shift+F |
+
+In Quick Open, append `:42` to jump to a line. Use Outline, Breadcrumbs, implementations, and call hierarchy to understand structure. Search text for configuration keys or log strings; use semantic Rename for functions. [Keybindings](https://code.visualstudio.com/docs/configure/keybindings), [navigation](https://code.visualstudio.com/docs/editing/editingevolved)
+
+## Make refactoring reviewable
+
+Find references to `calculateTotal`, rename it to `calculateSubtotal`, inspect the diff, and run focused tests. Search separately for serialized names, SQL, reflection, and string-based dependency injection. Language services cannot promise to update those contracts.
+
+Select an expression or block and inspect **Refactor…** for extraction actions. Availability depends on language and selection. Use multi-cursors for repeated text, preview regex replacements, and stage only intended hunks. [Refactoring](https://code.visualstudio.com/docs/editing/refactoring), [basic editing](https://code.visualstudio.com/docs/editing/codebasics), [Source Control](https://code.visualstudio.com/docs/sourcecontrol/overview)
+
+## Twenty-minute exercise and videos
+
+1. Open a small project and run its tests.
+2. Navigate from a symbol to its definition, references, and back.
+3. Rename an internal function and inspect callers in other files.
+4. Extract part of a function, then rerun the same tests.
+5. Review the diff for unintended formatting.
+
+Watch [Fireship's 25 VS Code Productivity Tips and Speed Hacks](https://www.youtube.com/watch?v=ifTF3ags0XI): publisher chapters at 02:43, 07:14, and 10:50 cover symbols, Tasks, and Rename. Reproduce those three tasks instead of installing every demonstrated extension. For a broader introduction, use [freeCodeCamp.org's Visual Studio Code Crash Course](https://www.youtube.com/watch?v=WPqXP_kLzpo).
+
+The official [Profiles video](https://www.youtube.com/watch?v=QjvvqR9KyVo) provides a profile workflow. Use current [reference material](/en/docs/vscode/resources) for settings, and measure success by completing the exercise with passing tests.

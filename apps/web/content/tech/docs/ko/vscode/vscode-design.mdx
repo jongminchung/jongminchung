@@ -1,0 +1,47 @@
+---
+documentKind: "explanation"
+title: "VS Code의 구조와 도구 선택 기준"
+description: "언어 서버·디버거·원격 실행의 경계를 이해하고 실제 작업 결과로 개발 도구를 평가합니다."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "development-workflow"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://microsoft.github.io/language-server-protocol/"
+---
+
+## 편집기와 실행 환경의 경계
+
+VS Code를 잘 쓰려면 화면의 기능과 실제 작업을 수행하는 도구를 함께 이해해야 합니다. 편집기는 파일과 UI를 제공하고, 언어 서비스는 심볼·타입을 분석하며, 디버거는 실행 중인 프로세스를 관찰합니다. formatter와 linter는 별도의 설정과 실행 파일을 사용할 수 있습니다.
+
+| 기능                | 확인할 실제 대상             | 장애를 좁히는 질문                    |
+| ------------------- | ---------------------------- | ------------------------------------- |
+| 자동 완성·정의·참조 | 언어 서비스와 프로젝트 모델  | 어떤 SDK와 source root를 읽는가?      |
+| breakpoint          | 디버거와 실행 프로세스       | 어느 프로세스의 어느 소스에 붙었는가? |
+| 저장 포맷           | formatter 실행 파일과 설정   | CLI와 같은 버전·경로인가?             |
+| 원격 편집           | 원격 extension host·SDK·파일 | 설치와 실행이 같은 머신에 있는가?     |
+
+LSP는 편집기와 언어 서버가 기능을 주고받는 프로토콜입니다. 공통 프로토콜을 사용해도 서버의 지원 기능과 프로젝트 이해도가 같아지는 것은 아닙니다. [LSP 공식 소개](https://microsoft.github.io/language-server-protocol/)
+
+## 개방성과 배포판을 구분합니다
+
+VS Code의 공개 저장소와 배포 제품은 동일한 개념이 아닙니다. 다른 배포판을 검토할 때는 코드뿐 아니라 실제 필요한 확장·서비스·설치 환경이 지원되는지 확인합니다. 이 문서의 선택 기준은 브랜드보다 프로젝트에서 탐색·테스트·디버깅을 끝낼 수 있는가입니다. [VS Code 저장소](https://github.com/microsoft/vscode)
+
+팀의 기준 도구를 바꿀 때는 대표 업무 하나를 [검증 실습](/ko/docs/vscode/graduation-lab)으로 수행합니다. framework 문자열 참조, 생성 코드, DB 도구, 원격 디버깅처럼 언어 서버만으로 해결되지 않는 작업의 차이도 기록합니다.
+
+## 원격 개발과 접근성을 작업 조건에 포함합니다
+
+개발 머신과 배포 환경이 다르면 같은 코드도 다른 의존성과 경로를 읽을 수 있습니다. Remote SSH·WSL·Dev Containers는 실행 위치를 명확하게 선택하는 방법입니다. 연결 성공 뒤에 실제 SDK·확장·작업 폴더를 확인합니다. [원격 개발](https://code.visualstudio.com/docs/remote/remote-overview)
+
+단축키, 화면 읽기 도구, 대비와 키보드 탐색은 개인 작업 조건에 맞춥니다. 도구 숙련도는 특정 마우스 동작에 익숙한 정도가 아니라 자신의 입력·출력 방식으로 작업을 끝낼 수 있는 정도로 평가합니다. [VS Code 접근성](https://code.visualstudio.com/docs/configure/accessibility/accessibility)
+
+## 자동화 결과를 검토하는 기준
+
+자동 생성된 코드나 설정에도 같은 완료 조건을 적용합니다. 요구사항과 변경 파일의 관계를 설명하고, 실제 실행한 검사 결과를 남기며, 필요한 변경만 선택해 stage합니다. 생성량보다 검토와 재현에 걸리는 시간을 기준으로 자동화의 효과를 판단합니다.
+
+## 함께 볼 다큐멘터리
+
+[The Story of VS Code — Visual Studio Code](https://www.youtube.com/watch?v=kHL3XzjpT5w)와 [Microsoft Reactor의 공식 소개](https://developer.microsoft.com/en-us/reactor/events/27557/)를 연결해 봅니다. 공개 설명과 챕터 정보로 주제를 확인했으며 전체 영상의 개별 인터뷰를 검증한 문서는 아닙니다.
+
+시청 후에는 다음 질문을 자기 프로젝트에 적용합니다. 언어 서버가 이해하는 경계는 어디인가? 원격 창에서 도구는 어디서 실행되는가? 다른 도구로 바꿔도 팀의 검사 명령은 유지되는가? 답은 설치된 확장 목록보다 실제 작업 결과로 남깁니다.

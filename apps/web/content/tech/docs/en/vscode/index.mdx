@@ -1,0 +1,56 @@
+---
+documentKind: "explanation"
+title: "Working Effectively with VS Code"
+description: "A practical VS Code guide from project setup to navigation, debugging, formatting, linting, and remote work."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "development-workflow"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://code.visualstudio.com/docs"
+---
+
+## Complete real work with VS Code
+
+This site's maintained VS Code documentation aims to make a change reproducible from project setup and navigation through debugging, refactoring, formatting, linting, Git review, and remote development.
+
+Start with navigation if new to VS Code, or choose the guide for the task at hand. Language guides use independent learning projects; the formatting tutorials share format-lab. Do not overwrite one project's settings with every alternative example.
+
+## Find documentation by task
+
+| Task                         | Guide                                                                     | Completion evidence                        |
+| ---------------------------- | ------------------------------------------------------------------------- | ------------------------------------------ |
+| Start editing and navigating | [Project setup and refactoring](/en/docs/vscode/workspace-and-navigation) | Find callers, rename, and pass tests       |
+| Work on Java services        | [Java and Spring Boot](/en/docs/vscode/java)                              | Align JDKs, import, and JUnit debugging    |
+| Work on web or Node code     | [TypeScript](/en/docs/vscode/typescript)                                  | Inspect compiler, service, and source maps |
+| Work on Go services          | [Go, gopls, and Delve](/en/docs/vscode/go)                                | Debug a test and reproduce CLI checks      |
+| Work on Python               | [Python, pytest, and debugpy](/en/docs/vscode/python)                     | Use the same environment for all tools     |
+| Fix competing save actions   | [Formatting conflicts](/en/docs/vscode/format-lint-contract)              | Editor/CLI/repeated output agrees          |
+| Configure team environments  | [Tasks and remote work](/en/docs/vscode/remote-and-team-workflow)         | Reproduce work in another environment      |
+| Validate proficiency         | [Bug-fix exercise](/en/docs/vscode/graduation-lab)                        | Turn a failure into a reviewable change    |
+
+## Apply formatters and linters directly
+
+Start with [EditorConfig](/en/docs/vscode/editorconfig) to create the shared lab. Install tools directly, keep small project-owned configuration files, and connect their commands to the editor.
+
+| Files       | Tutorial                                             | Distinction to learn                   |
+| ----------- | ---------------------------------------------------- | -------------------------------------- |
+| JS/TS       | [Oxfmt and Oxlint](/en/docs/vscode/oxfmt-oxlint)     | Format, lint, and types                |
+| YAML        | [Oxfmt, yamllint, and schemas](/en/docs/vscode/yaml) | Layout, notation, application contract |
+| Shell       | [shfmt and ShellCheck](/en/docs/vscode/shell)        | Indentation, quoting, runtime output   |
+| Go          | [gofmt](/en/docs/vscode/go-format)                   | Listed differences versus exit status  |
+| Python      | [Ruff](/en/docs/vscode/ruff)                         | Format, check, imports                 |
+| Integration | [CLI, Tasks, and CI](/en/docs/vscode/tasks-ci)       | Configuration, versions, scope, cwd    |
+
+## Learn with official sources and videos
+
+The [reference library](/en/docs/vscode/resources) connects official sources and YouTube videos to exercises. Use Fireship's productivity walkthrough, freeCodeCamp's introductory course, and language sessions from VS Code, Microsoft Developer, and SpringDeveloper. Verify current settings against the tool author's documentation.
+
+Read [architecture and tool selection](/en/docs/vscode/vscode-design) to understand language services, debuggers, and remote execution boundaries.
+
+## Maintenance and verification
+
+Tutorial, How-to, Reference, and Explanation pages are maintained independently by topic. Each page records its source and verification date. Examples state prerequisites and limitations; merge relevant keys into the learning project's .vscode files.
+
+Align executables, configuration, file scope, and working directory before comparing results. Record CLI checks separately from actual editor saves, breakpoints, and remote interaction.

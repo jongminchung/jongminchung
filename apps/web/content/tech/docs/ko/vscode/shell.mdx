@@ -1,0 +1,98 @@
+---
+documentKind: tutorial
+title: "shfmt와 ShellCheck로 Shell 다듬기"
+description: "shfmt와 ShellCheck를 연결하고 인용되지 않은 변수 예제로 포맷·정적 분석·실행 검사의 차이를 확인합니다."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "formatting", "linting"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://github.com/mvdan/sh"
+---
+
+자료 확인일: 2026-09-06. 예제는 별도 `format-lab` 프로젝트에서 순서대로 적용합니다. 명령은 macOS·Linux·WSL의 프로젝트 루트 기준이며, 기존 설정에는 필요한 키를 병합합니다.
+
+## 모양이 맞아도 단어 분리는 남습니다
+
+shfmt는 Shell 구문을 정리하고 ShellCheck는 인용 누락 같은 문제를 찾습니다. 이 문서은 모든 `scripts/*.sh`가 Bash라는 실습 조건을 사용합니다. POSIX sh와 Bash가 섞인 저장소에서는 경로별 방언과 shebang을 구분합니다.
+
+Go SDK와 ShellCheck를 준비합니다. ShellCheck는 macOS의 `brew install shellcheck`, Ubuntu의 `sudo apt-get install shellcheck`처럼 환경의 패키지 관리자로 설치할 수 있습니다. [ShellCheck 설치](https://github.com/koalaman/shellcheck#installing)
+
+```sh
+go install mvdan.cc/sh/v3/cmd/shfmt@v3.12.0
+shfmt --version
+shellcheck --version
+code --install-extension foxundermoon.shell-format
+code --install-extension timonwong.shellcheck
+command -v shfmt
+```
+
+`go install` 결과 경로는 보통 `$(go env GOPATH)/bin`이며 GOBIN을 지정했다면 그곳입니다. 해당 디렉터리를 PATH에 넣습니다. 편집기와 터미널의 PATH가 다르면 `.vscode/settings.json`의 `shellformat.path`에 `command -v shfmt`로 확인한 **절대 경로**를 지정합니다. 개인 절대 경로는 팀 공통 설정 대신 로컬 설정에 둡니다.
+
+## 저장과 CLI의 옵션을 맞춥니다
+
+```json
+{
+    "[shellscript]": {
+        "editor.defaultFormatter": "foxundermoon.shell-format"
+    },
+    "shellformat.flag": "-ln bash -i 2",
+    "shellformat.useEditorConfig": false,
+    "shellformat.effectLanguages": ["shellscript"]
+}
+```
+
+이번 예제는 `-ln bash -i 2`를 CLI와 확장에 명시해 일치시킵니다. shfmt의 EditorConfig 지원도 있지만 이 실습은 Shell 옵션 전달 경로를 하나로 보이게 하기 위해 사용하지 않습니다. 전체 프로젝트에서 EditorConfig로 전환한다면 확장의 `useEditorConfig`를 켜고 충돌하는 flag를 제거한 뒤 결과를 재검증합니다. [shfmt 옵션](https://github.com/mvdan/sh/blob/master/cmd/shfmt/shfmt.1.scd), [shell-format 설정](https://github.com/foxundermoon/vs-shell-format)
+
+## 실제 출력까지 비교합니다
+
+`scripts/greet.sh`를 만듭니다.
+
+```bash
+#!/usr/bin/env bash
+name="Ada Lovelace"
+if [ -n "$name" ]; then
+printf '%s\n' $name
+fi
+```
+
+아래 명령을 한 줄씩 실행합니다. `-d`는 수정할 diff를 보여주고 차이가 있으면 실패합니다. `-w`가 실제 파일을 수정합니다.
+
+```sh
+shfmt -ln bash -i 2 -d scripts/greet.sh
+shfmt -ln bash -i 2 -w scripts/greet.sh
+shellcheck scripts/greet.sh
+bash -n scripts/greet.sh
+bash scripts/greet.sh
+```
+
+포맷 후 들여쓰기는 2칸이 되지만 `$name`은 여전히 인용되지 않았습니다. ShellCheck는 SC2086을 보여주고, 실행 결과는 `Ada`와 `Lovelace`가 두 줄로 갈라집니다. `bash -n`은 구문만 검사하므로 이 문제를 잡지 못합니다.
+
+변수 사용을 고치면 한 사람의 이름을 한 인수로 전달합니다.
+
+```bash
+#!/usr/bin/env bash
+name="Ada Lovelace"
+if [ -n "$name" ]; then
+  printf '%s\n' "$name"
+fi
+```
+
+이제 출력은 한 줄 `Ada Lovelace`입니다. 테스트에서 값에 공백을 넣어야 인용 문제가 드러납니다. 경고를 끄는 주석을 추가하기보다 입력과 의도부터 확인합니다.
+
+## 파일 범위와 편집기 진단을 확인합니다
+
+```sh
+shfmt -ln bash -i 2 -d scripts
+shellcheck scripts/*.sh
+bash -n scripts/greet.sh
+```
+
+여기서 `scripts/*.sh`는 바로 아래 파일만 검사합니다. 중첩 파일을 추가하면 명령도 그 범위에 맞게 바꿉니다. 저장소 전체 재귀 검사를 하면서 vendor·생성 스크립트까지 뜻하지 않게 수정하지 않도록 실제 대상을 확인합니다.
+
+VS Code에서 ShellCheck 확장 진단의 출처와 실행 경로를 확인합니다. shfmt를 default formatter로 지정했다고 ShellCheck가 설치되는 것은 아닙니다. 원격 창에서는 서버 쪽 바이너리와 확장이 필요합니다. [ShellCheck 확장](https://github.com/vscode-shellcheck/vscode-shellcheck)
+
+완료 조건은 포맷 diff 없음, ShellCheck 통과, 구문 검사 통과, 공백을 포함한 이름이 한 줄로 출력되는 것입니다.
+
+[이전 실습](/ko/docs/vscode/yaml) · [다음 실습](/ko/docs/vscode/go-format)

@@ -1,0 +1,47 @@
+---
+documentKind: "explanation"
+title: "VS Code Architecture and Tool Selection"
+description: "Understand language-service, debugger, and remote-execution boundaries and evaluate tools through real work."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "development-workflow"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://microsoft.github.io/language-server-protocol/"
+---
+
+## Understand the boundaries behind the UI
+
+The editor provides files and interaction; language services analyze symbols and types; debuggers inspect running processes. Formatters and linters can use separate executables and configuration.
+
+| Feature                   | Actual dependency                  | Diagnostic question                |
+| ------------------------- | ---------------------------------- | ---------------------------------- |
+| Completion and references | Language service and project model | Which SDK and source roots?        |
+| Breakpoints               | Debugger and process               | Which process and source version?  |
+| Save formatting           | Formatter executable/config        | Same version and path as CLI?      |
+| Remote editing            | Remote host, SDK, and files        | Where are tools installed and run? |
+
+LSP is a protocol between editor and language server. Sharing a protocol does not make every server's capabilities or project understanding identical. [Language Server Protocol](https://microsoft.github.io/language-server-protocol/)
+
+## Evaluate the distribution and actual workflow
+
+The open repository and distributed VS Code product are distinct. When considering another distribution, check required extensions, services, and execution environments. Evaluate whether a real project can complete navigation, testing, and debugging. [VS Code repository](https://github.com/microsoft/vscode)
+
+Use the [end-to-end exercise](/en/docs/vscode/graduation-lab) before changing a team's default environment. Record differences in framework string references, generated code, database tools, and remote debugging.
+
+## Include remote development and accessibility
+
+SSH, WSL, and containers make the execution environment explicit. After connecting, inspect actual SDKs, extension locations, and working directories. [Remote development](https://code.visualstudio.com/docs/remote/remote-overview)
+
+Adapt keyboard navigation, screen-reader support, contrast, and input methods to the developer. Proficiency means completing work using the required interaction methods. [Accessibility](https://code.visualstudio.com/docs/configure/accessibility/accessibility)
+
+## Keep automation reviewable
+
+Generated code and configuration need the same completion criteria as manual work. Explain why files changed, record checks actually run, and stage the intended result. Evaluate automation through review and reproduction costs, not only the amount generated.
+
+## Watch and apply the documentary
+
+Connect [The Story of VS Code](https://www.youtube.com/watch?v=kHL3XzjpT5w) from the official channel with [Microsoft Reactor's introduction](https://developer.microsoft.com/en-us/reactor/events/27557/). Selection used public description and chapter information; this page does not claim full verification of individual interviews.
+
+After watching, identify the language server's project boundary, the location of remote execution, and which team checks survive switching editors. Record actual work outcomes rather than only installed extensions.

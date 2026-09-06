@@ -1,0 +1,114 @@
+---
+documentKind: "how-to"
+title: "Tasks, Remote Development, and Team Workflows"
+description: "Make execution paths, multi-root, SSH, WSL, containers, Git review, and performance diagnosis repeatable."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "development-workflow"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://code.visualstudio.com/docs/remote/remote-overview"
+---
+
+## Use Tasks for commands and launch configurations for debugging
+
+Tasks execute builds, checks, and other commands. Launch configurations start or attach a debugger. preLaunchTask connects them by label; distinguish a finite build from a long-running server. [Tasks](https://code.visualstudio.com/docs/debugtest/tasks)
+
+This example specifically targets the jongminchung repository, with Bun available on PATH. For the independent format-lab project, use its [check task](/en/docs/vscode/tasks-ci) instead.
+
+```json
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "repo: format check",
+            "type": "process",
+            "command": "bun",
+            "args": ["run", "fmt:check"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "problemMatcher": []
+        },
+        {
+            "label": "repo: lint",
+            "type": "process",
+            "command": "bun",
+            "args": ["run", "lint"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "problemMatcher": []
+        },
+        {
+            "label": "web: typecheck",
+            "type": "process",
+            "command": "bun",
+            "args": ["run", "--filter", "@jongminchung/web", "typecheck"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "problemMatcher": []
+        },
+        {
+            "label": "repo: review checks",
+            "dependsOrder": "sequence",
+            "dependsOn": ["repo: format check", "repo: lint", "web: typecheck"],
+            "problemMatcher": []
+        }
+    ]
+}
+```
+
+This task group is a limited review check, not the repository's complete check/E2E contract. An empty problemMatcher leaves output in the terminal. Use a matcher such as $tsc only after confirming the actual output format; watchers also need a correct background matcher.
+
+## Make process startup reproducible
+
+A compound launch starts multiple configurations but does not prove server readiness. Start the server, observe a health response or readiness log, then launch the browser. Automate only after matching the background task patterns to real logs. [Debug configuration](https://code.visualstudio.com/docs/debugtest/debugging-configuration)
+
+Record runtime, cwd, entry point, args, and env. Share ports and profile names, keep credentials and personal paths out of shared files, and connect debug ports through loopback or an SSH tunnel.
+
+## Choose a workspace boundary
+
+Keep a single root when all tools correctly interpret one build graph. Use multi-root folder settings for independent environments. In a separate repository containing api and web, create team.code-workspace:
+
+```json
+{
+    "folders": [
+        { "name": "api", "path": "api" },
+        { "name": "web", "path": "web" }
+    ],
+    "settings": {
+        "files.autoSave": "off"
+    }
+}
+```
+
+Tasks can use `${workspaceFolder:api}` instead of an ambiguous root variable. Editor folders do not replace Maven modules, Go workspaces, Python environments, or package-manager workspaces. [Multi-root workspaces](https://code.visualstudio.com/docs/editing/workspaces/multi-root-workspaces)
+
+## Connect remote environments
+
+Choose the execution environment first. SSH runs tools against remote sources; WSL uses Linux tools from a Windows UI; Dev Containers define an environment through an image and configuration. [SSH](https://code.visualstudio.com/docs/remote/ssh), [WSL](https://code.visualstudio.com/docs/remote/wsl), [Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers)
+
+| Check                  | Evidence                                        |
+| ---------------------- | ----------------------------------------------- |
+| Active environment     | Remote indicator and terminal cwd               |
+| SDK location           | Runtime version and path in the remote terminal |
+| Extension location     | Local/SSH/WSL/Container install location        |
+| Port routing           | Ports view, tunnel, and listen address          |
+| Formatting consistency | Remote Output and CLI versions                  |
+
+Keep WSL sources and toolchains on the Linux side. Container launch paths must use mounted paths, not host absolute paths. Start with **Dev Containers: Add Dev Container Configuration Files…**, then record OS, runtime, packages, extensions, and installation commands. Pin versions or image digests to the reproducibility level required by the team. A container build does not verify extension activation.
+
+## Include Git, HTTP, and database work
+
+Review and stage intended hunks. Resolve merges by checking both inputs and the result, then test. Preserve other work in a shared worktree. [Merge conflicts](https://code.visualstudio.com/docs/sourcecontrol/merge-conflicts)
+
+Keep reproducible HTTP requests with host, profile, payload, and expected status. Record database migration/query checks in project tooling. A connection button alone does not validate a query or migration.
+
+## Diagnose slowness rather than hiding it
+
+1. Inspect **Developer: Show Running Extensions**.
+2. Open Process Explorer and distinguish renderer, extension host, and language server.
+3. Use extension bisect with a saved reproduction.
+4. Inspect language Output for indexing or lint delays.
+5. Compare another project or an empty profile.
+
+[Performance diagnostics](https://github.com/microsoft/vscode/wiki/Performance-Issues) help locate the cost. Search exclusions, Explorer exclusions, and watcher exclusions have distinct scopes; they do not automatically remove files from every language server. Keep generated declarations resolvable when narrowing analysis.
+
+A team handoff is complete when another developer can install the environment, run checks, and debug one test using the documented settings, versions, paths, and commands. Use the [end-to-end exercise](/en/docs/vscode/graduation-lab) to demonstrate that outcome.

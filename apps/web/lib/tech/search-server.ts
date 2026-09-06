@@ -144,7 +144,7 @@ function emptyQueryResults(locale: Locale): readonly SortedResult[] {
         getDocsCategory(area, locale).title,
       ],
     }));
-  return interleaveSearchResults(blog, docs, 8);
+  return interleaveSearchResults(blog, docs, blog.length + docs.length);
 }
 
 /** Blog와 Docs 색인을 locale 범위에서 결정적으로 통합함 */

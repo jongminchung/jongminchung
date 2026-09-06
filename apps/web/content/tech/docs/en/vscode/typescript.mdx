@@ -1,0 +1,135 @@
+---
+documentKind: "how-to"
+title: "TypeScript Language Services and Debugging"
+description: "Distinguish compiler, language service, source maps, and test runners while debugging a small Node project."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "development-workflow"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://code.visualstudio.com/docs/typescript/typescript-debugging"
+---
+
+## Compare the language service with the compiler
+
+Open the package and tsconfig root. Run the project type-check script and inspect the active TypeScript service in Language Status. Editor diagnostics, compiler errors, lint, and browser failures are separate evidence. [Compiler and language service](https://code.visualstudio.com/docs/typescript/typescript-transpiling)
+
+Current documentation uses `js/ts.*` settings. Inspect the installed editor's SDK settings rather than blindly copying older typescript.tsdk examples. TypeScript 7's native compiler/service is a separate compatibility boundary; do not assume a legacy lib path selects it. [TS 7 integration](https://code.visualstudio.com/blogs/2026/06/26/iterating-faster-with-ts-7), [repository compatibility guide](/en/docs/fe/typescript-7-compatibility)
+
+VS Code includes TypeScript editing and JavaScript debugging. Add only your project's formatter, linter, and runner integrations. Use the [Oxc lab](/en/docs/vscode/oxfmt-oxlint) or the separate [Prettier/ESLint alternative](/en/docs/vscode/format-lint-contract).
+
+## Navigate with types
+
+Use Hover and Signature Help before editing. Parameter-name inlay hints can start at literals; enable References or Implementations CodeLens when useful. Current keys include `js/ts.inlayHints.parameterNames.enabled`, `js/ts.referencesCodeLens.enabled`, and `js/ts.implementationsCodeLens.enabled`. [TypeScript editing](https://code.visualstudio.com/docs/typescript/typescript-editing)
+
+Rename with F2, extract expressions through Refactor, and inspect import changes when moving files. TypeScript aliases must also work in the runtime or bundler. React/Next changes need component and framework checks in addition to types. [Refactoring](https://code.visualstudio.com/docs/typescript/typescript-refactoring)
+
+## Debug a small compiled Node ESM project
+
+Use a separate learning directory, not the formatter lab's no-emit tsconfig. Run `npm init -y` and `npm install --save-dev --save-exact typescript @types/node`, then merge into package.json:
+
+```json
+{
+    "type": "module",
+    "scripts": {
+        "build": "tsc -p tsconfig.json",
+        "typecheck": "tsc -p tsconfig.json --noEmit"
+    }
+}
+```
+
+Create tsconfig.json:
+
+```json
+{
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "lib": ["ES2022"],
+        "types": ["node"],
+        "rootDir": "src",
+        "outDir": "dist",
+        "strict": true,
+        "sourceMap": true
+    },
+    "include": ["src/**/*.ts"]
+}
+```
+
+Create src/main.ts:
+
+```ts
+function total(price: number, quantity: number): number {
+    return price * quantity;
+}
+
+const result = total(1200, 3);
+console.log({ result });
+```
+
+Create `.vscode/tasks.json` to run the same build script:
+
+```json
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "ts: build",
+            "type": "shell",
+            "command": "npm",
+            "args": ["run", "build"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "problemMatcher": ["$tsc"],
+            "group": "build"
+        }
+    ]
+}
+```
+
+Create `.vscode/launch.json`. It launches emitted JavaScript and maps back to TypeScript:
+
+```json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "name": "TS: compiled Node program",
+            "request": "launch",
+            "program": "${workspaceFolder}/dist/main.js",
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "ts: build",
+            "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+            "sourceMaps": true,
+            "skipFiles": ["<node_internals>/**"]
+        }
+    ]
+}
+```
+
+Break on return and press F5. Inspect price 1200, quantity 3, and result 3600. For an unbound breakpoint, check emitted JS/maps, original source paths, the process, and exact preLaunchTask label. [TypeScript debugging](https://code.visualstudio.com/docs/typescript/typescript-debugging)
+
+## Distinguish browser, Node, and Bun processes
+
+Browser debugging needs the development URL and matching webRoot. Node servers can start in JavaScript Debug Terminal or use attach. In SSR applications, place separate breakpoints in server functions and browser event handlers. [Node debugging](https://code.visualstudio.com/docs/nodejs/nodejs-debugging)
+
+Use Bun's documented debugging path for Bun processes instead of assuming the Node inspector contract. [Bun debugger](https://bun.sh/docs/runtime/debugger)
+
+Run the actual test runner. Vitest, Jest, Bun test, and Playwright are different systems. Unit-test discovery does not validate a production browser flow.
+
+## Diagnose discrepancies
+
+| Symptom                       | Inspect                                          |
+| ----------------------------- | ------------------------------------------------ |
+| Editor-only type errors       | Active service version and owning tsconfig       |
+| One package lacks lint        | Actual cwd/config and workingDirectories         |
+| Typed lint cannot read a file | Project service and include scope                |
+| Alias fails at runtime        | Runtime/bundler resolution and package exports   |
+| Slow saves                    | Formatter and type-aware lint timings separately |
+| Browser-only failures         | Execution side, source maps, and network         |
+
+Select explicit package roots if automatic working-directory detection is wrong. Enable typed lint for concrete rules and a deliberate scope. [ESLint extension](https://github.com/microsoft/vscode-eslint), [typed linting](https://typescript-eslint.io/getting-started/typed-linting/)
+
+The [Train To Code walkthrough](https://www.youtube.com/watch?v=_hKYFKZPZmc) demonstrates local compilation and debugging. Use current SDK settings rather than copying historical setup details.

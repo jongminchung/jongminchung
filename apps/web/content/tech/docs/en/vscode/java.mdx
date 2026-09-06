@@ -1,0 +1,156 @@
+---
+documentKind: "how-to"
+title: "Java and Spring Boot Projects and Debugging"
+description: "Align JDKs, Maven or Gradle, Java tooling, JUnit debugging, and formatting policies."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "development-workflow"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://code.visualstudio.com/docs/languages/java"
+---
+
+## Repair the project model before adding editor features
+
+Install the [Java Extension Pack](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-pack). It connects language support, debugging, testing, projects, and Maven. Add Gradle or the [Spring Boot pack](https://marketplace.visualstudio.com/items?itemName=vmware.vscode-boot-dev-pack) when the project needs them. [Java overview](https://code.visualstudio.com/docs/languages/java), [build support](https://code.visualstudio.com/docs/java/java-build)
+
+Distinguish the Java runtime for the language server, the build tool, and the application. They need compatibility, not necessarily identical versions. Supported platform distributions of the Red Hat extension bundle a tooling runtime; a manually configured tooling JDK must meet the extension's requirements. Do not raise an application's Java target merely to start its language server. [Tooling and project JDKs](https://github.com/redhat-developer/vscode-java)
+
+Use the existing wrapper from the project root. Choose Maven:
+
+```sh
+java -version
+./mvnw -version
+./mvnw test
+```
+
+Or Gradle; Windows uses `mvnw.cmd` or `gradlew.bat`:
+
+```sh
+java -version
+./gradlew --version
+./gradlew test
+```
+
+Use **Java: Configure Java Runtime** to inspect project runtimes. Personal installation paths belong in User settings. The default runtime for unmanaged folders does not replace Maven/Gradle toolchain configuration. [Java projects](https://code.visualstudio.com/docs/java/java-project)
+
+## Import, navigate, and refactor
+
+Open the aggregator root, wait for modules and dependencies in Java Projects, and use Standard Mode for full project analysis. Compare editor test discovery with wrapper tests. Reload the project after changing build files. Existing repositories should retain their wrapper and build profiles.
+
+Use implementations, type hierarchy, references, and call hierarchy to trace a service. Inspect Extract Method and source actions in the actual context. Rename with F2, then search JSON fixtures, annotations, OpenAPI documents, and serialized names separately. [Java refactoring](https://code.visualstudio.com/docs/java/java-refactoring)
+
+## Make execution repeatable
+
+First try Run/Debug above main. For repeated execution, create `.vscode/launch.json`. Replace `com.example.App` with the actual fully qualified main class; add `projectName` if several modules contain that class.
+
+```json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Java: application",
+            "request": "launch",
+            "mainClass": "com.example.App",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "args": ["--mode", "local"],
+            "vmArgs": "-Dfile.encoding=UTF-8"
+        },
+        {
+            "type": "java",
+            "name": "Java: attach localhost:5005",
+            "request": "attach",
+            "hostName": "127.0.0.1",
+            "port": 5005
+        }
+    ]
+}
+```
+
+Application arguments belong in args, JVM arguments in vmArgs. Spring profile arguments apply to Spring apps. Supply environment values through launch configuration or the team's wrapper; do not assume every Java launcher reads `.env`.
+
+To attach, first launch a real artifact with JDWP listening on loopback; replace the JAR path:
+
+```sh
+java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=127.0.0.1:5005 -jar build/libs/app.jar
+```
+
+Start the attach configuration and inspect variables, Watch, and Call Stack. Conditional and exception breakpoints narrow failures. Expression evaluation can invoke code. Hot Code Replace is limited; structural or dependency changes may require restart. [Java debugging](https://code.visualstudio.com/docs/java/java-debugging)
+
+## Debug one test, then widen validation
+
+Discover JUnit/TestNG tests in Testing, debug the failing method, and widen from method to class, module, and repository. [Java testing](https://code.visualstudio.com/docs/java/java-testing)
+
+Replace these names with your actual test:
+
+```sh
+./mvnw -Dtest=PriceServiceTest#rejectsNegativeQuantity test
+```
+
+```sh
+./gradlew test --tests 'com.example.PriceServiceTest.rejectsNegativeQuantity'
+```
+
+IDE tests do not necessarily run Maven Failsafe or every integration-test task. Run the team's verify/check lifecycle and provide the required database and profile.
+
+## Select one formatting pipeline
+
+For Eclipse-style formatting, use JDT. Commit the shared Eclipse profile if needed, and configure `java.format.settings.url` and `java.format.settings.profile`. Use the same engine/profile in CI. IntelliJ code-style XML is not an Eclipse profile. [Java formatting](https://code.visualstudio.com/docs/java/java-linting)
+
+```json
+{
+    "[java]": {
+        "editor.defaultFormatter": "redhat.java",
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": false,
+        "editor.formatOnType": false,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "never",
+            "source.organizeImports": "explicit"
+        }
+    }
+}
+```
+
+If the build instead owns Google Java Format through Spotless, disable competing JDT transformations:
+
+```json
+{
+    "[java]": {
+        "editor.formatOnSave": false,
+        "editor.formatOnPaste": false,
+        "editor.formatOnType": false,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "never",
+            "source.organizeImports": "never"
+        }
+    }
+}
+```
+
+In a Gradle project that already configures Spotless, run:
+
+```sh
+./gradlew spotlessApply
+./gradlew spotlessCheck check
+```
+
+Pin the plugin and formatter in the build first if these tasks do not exist. Connect the same commands through Tasks. Checkstyle is an analyzer, not the formatting engine. [Spotless Gradle](https://github.com/diffplug/spotless/tree/main/plugin-gradle)
+
+## Diagnose framework and environment differences
+
+| Symptom                     | First checks                                        |
+| --------------------------- | --------------------------------------------------- |
+| Every import is red         | Wrapper build, dependency download, JDK, import log |
+| CLI passes but IDE fails    | Runtime selection, Standard Mode, missing module    |
+| Generated types are missing | Annotation processing and generated source roots    |
+| Unbound breakpoint          | Actual JVM, class, source, and artifact version     |
+| No tests discovered         | Project import, dependencies, Test Runner Output    |
+| Save conflicts with CI      | JDT versus Spotless ownership                       |
+
+Test the application in the intended Spring profile after changing bean wiring. JPA query strings, custom processors, legacy servers, and database migrations need their own representative checks. Clean the Java language-server workspace only after investigating configuration and logs.
+
+Practice renaming a service method, debugging a failing JUnit test, formatting twice, and running wrapper checks. Watch [Microsoft's Java introduction](https://www.youtube.com/watch?v=ZHHUZyy_fOo) and [SpringDeveloper's VS Code session](https://www.youtube.com/watch?v=ztc2C99hhvw) alongside the current documentation.

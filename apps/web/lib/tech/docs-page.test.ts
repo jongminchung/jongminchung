@@ -1,9 +1,34 @@
 import { describe, expect, it } from "bun:test";
 import { readPublishedTechContent } from "../content-repository";
 import { resolveTechDocsPageFromContent } from "./docs-page";
+import { docsOverviewForSeries, legacyVscodeArticleHref } from "./routing";
 
 describe("Tech Docs page model", () => {
   const content = readPublishedTechContent();
+
+  it("[성공] VS Code를 번역·탐색 가능한 Docs로 제공하고 이전 주소를 연결함", () => {
+    for (const locale of ["ko", "en"] as const) {
+      const model = resolveTechDocsPageFromContent(locale, ["vscode"], content);
+      expect(model.kind).toBe("article");
+      if (model.kind !== "article")
+        throw new Error("Missing VS Code Docs area.");
+      expect(model.page.href).toBe(`/${locale}/docs/vscode`);
+      expect(model.publicUrls).toContain(`/${locale}/docs/vscode/resources`);
+      expect(model.publicUrls).toContain(`/${locale}/docs/vscode/oxfmt-oxlint`);
+      expect(model.alternatePage.locale).not.toBe(locale);
+      expect(
+        content.blogPosts.some((post) => post.id === "vscode-editorconfig"),
+      ).toBe(false);
+      expect(docsOverviewForSeries(locale, "vscode-format-and-lint")).toBe(
+        model.page.href,
+      );
+      expect(legacyVscodeArticleHref(locale, "vscode-go")).toBe(
+        `/${locale}/docs/vscode/go-format`,
+      );
+    }
+    expect(legacyVscodeArticleHref("ko", "constructor")).toBeNull();
+    expect(legacyVscodeArticleHref("ko", "unknown")).toBeNull();
+  });
 
   it("[성공] root landing과 localized counterpart를 같은 model로 조립함", () => {
     const model = resolveTechDocsPageFromContent("en", [], content);

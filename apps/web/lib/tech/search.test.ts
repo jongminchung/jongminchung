@@ -70,7 +70,7 @@ describe("검색 runtime", () => {
     );
   });
 
-  it("빈 검색 추천에는 공개 rke2spray·FE·BE·K8s landing만 포함함", async () => {
+  it("빈 검색 추천에는 공개 rke2spray·FE·BE·K8s·VS Code landing만 포함함", async () => {
     const results = await searchTechDocuments("", "en");
     const docsUrls = results
       .filter(({ type, url }) => type === "page" && url.includes("/docs/"))
@@ -80,6 +80,7 @@ describe("검색 runtime", () => {
       "/en/docs/fe",
       "/en/docs/be",
       "/en/docs/k8s",
+      "/en/docs/vscode",
     ]);
     expect(docsUrls.some((url) => url.includes("ansible"))).toBe(false);
   });

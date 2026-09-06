@@ -1,0 +1,110 @@
+---
+documentKind: "tutorial"
+title: "From Test Debugging to a Reviewable Change"
+description: "Reproduce a failing test, debug, fix, refactor, format, and validate a reviewable change."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "development-workflow"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://code.visualstudio.com/docs/debugtest/debugging"
+---
+
+## Goal: complete a reviewable bug fix
+
+Use the small project from the [TypeScript](/en/docs/vscode/typescript), [Go](/en/docs/vscode/go), or [Python](/en/docs/vscode/python) guide, or an equivalent existing Java service. Successful editor installation is not the goal: reproduce a failure, inspect it in a debugger, fix it, refactor, and submit a checked change.
+
+The total function returns 3600 for price=1200 and quantity=3. A negative quantity must be rejected instead of returning a negative amount. The tutorial implementations deliberately lack that validation.
+
+| Language   | Regression assertion         | Intended behavior                         |
+| ---------- | ---------------------------- | ----------------------------------------- |
+| Java       | JUnit assertThrows           | IllegalArgumentException                  |
+| TypeScript | Test-runner throws assertion | RangeError                                |
+| Go         | Check an error return        | Change to (int, error) and update callers |
+| Python     | pytest.raises                | ValueError                                |
+
+Add this failing test to the Python project's tests:
+
+```python
+import pytest
+
+from main import total
+
+
+def test_negative_quantity_is_rejected() -> None:
+    with pytest.raises(ValueError):
+        total(1200, -1)
+```
+
+Run it before changing total. Break inside total and inspect quantity=-1. Add validation, preserve the positive test, and rerun. If renaming total to subtotal, use Rename Symbol and inspect the diff. Go's return-type change also requires updating callers and tests.
+
+## Complete the workflow
+
+1. Record Git state, tool versions, and baseline tests.
+2. Add a regression test and confirm its intended failure.
+3. Inspect definitions, references, and the call hierarchy.
+4. Debug one test and observe inputs and stack.
+5. Add validation and widen tests gradually.
+6. Rename or extract, then review the diff.
+7. Compare editor and CLI transformations.
+8. Run non-mutating format, lint, type, and test checks.
+9. Stage intended files and record rationale and validation.
+10. Reproduce the workflow in another profile or remote environment.
+
+Use the [debugger documentation](https://code.visualstudio.com/docs/debugtest/debugging) for controls and the language guide for launch details.
+
+## Prove convergence
+
+Save main.py in the Python learning project, then run this POSIX-shell comparison. Fixed temporary filenames are for this single-user exercise; use a unique directory for concurrent runs.
+
+```sh
+cp main.py /tmp/vscode-lab-editor.py
+uv run ruff check main.py --fix
+uv run ruff format main.py
+cmp main.py /tmp/vscode-lab-editor.py
+cp main.py /tmp/vscode-lab-first.py
+uv run ruff check main.py --fix
+uv run ruff format main.py
+cmp main.py /tmp/vscode-lab-first.py
+```
+
+The first comparison checks editor versus CLI; the second checks repeated CLI transformations. Reintroduce a harmless space and save again. PowerShell users can use Copy-Item and Get-FileHash. A repository-wide Git diff is unsuitable when unrelated edits already exist.
+
+## Decide whether the workflow is ready
+
+| Area          | Passing evidence                                         |
+| ------------- | -------------------------------------------------------- |
+| Project model | Dependencies, generated code, and tests resolve          |
+| Refactoring   | Intended references updated and checks pass              |
+| Debugging     | Actual failing inputs and stack observed                 |
+| Format/lint   | Editor, CLI, and second-run output agree                 |
+| Framework     | Representative Spring, React, or CLI flow works          |
+| HTTP/database | Requests, queries, and migrations are reproduced         |
+| Remote        | Same checks and test debugging work remotely             |
+| Handoff       | Another developer follows the documentation successfully |
+
+If a framework refactoring remains unsupported, record that task's cost and keep an appropriate tool for it. Evaluate completed work rather than an abstract claim of IDE feature parity.
+
+## Record evidence
+
+```text
+Project and commit:
+OS and local/SSH/WSL/container environment:
+VS Code and extension versions:
+Runtime, compiler, formatter, and linter versions:
+Regression test and initial failure:
+Values observed in debugger:
+Fix and refactoring scope:
+Editor/CLI/repeated-run comparison:
+Final commands and results:
+Remaining framework or tooling limitations:
+```
+
+## Earlier CLI verification record
+
+The source guide recorded a 2026-09-06 Linux amd64 verification in temporary projects: JSON/TOML parsing; TypeScript formatting, lint, typecheck, build, and output 3600; Go tests, vet, and race checks; Python pytest, Ruff, Pyright, output 3600, and a negative-input regression; repeated-format convergence.
+
+Its recorded versions were Node 26.8.1, TypeScript 6.0.3, ESLint 10.10.0, Prettier 3.9.6, typescript-eslint 8.69.0, Go 1.27.1, Python 3.12.3, pytest 9.1.1, Ruff 0.16.6, and Pyright 1.1.411. These are historical verification versions, not a latest-version recommendation or the repository's TS 7 contract.
+
+Java execution lacked a JDK. GUI save actions, breakpoints, refactoring, Spring, and remote end-to-end behavior were not verified. This migration does not claim to have repeated those experiments. Follow the exercise in your own environment; the separate [formatting lab record](/en/docs/vscode/tasks-ci) describes its own CLI checks.

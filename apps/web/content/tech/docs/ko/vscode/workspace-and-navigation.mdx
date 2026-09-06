@@ -1,6 +1,15 @@
-# 01. 작업 환경을 만들고 IntelliJ의 작업 습관을 옮기기
-
-[시리즈 목차](README.md) · 다음: [포맷·lint 충돌 방지](02-format-lint-contract.md)
+---
+documentKind: "how-to"
+title: "프로젝트 설정과 탐색·리팩터링"
+description: "Profile·workspace·심볼 탐색·Git 검토를 연결해 코드를 읽고 수정하는 작업 흐름을 만듭니다."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "development-workflow"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://code.visualstudio.com/docs/editing/editingevolved"
+---
 
 목표는 메뉴를 비슷하게 만드는 것이 아니라 코드를 읽고 바꾸는 시간을 줄이는 것이다.
 처음 30분은 테마 선택보다 프로젝트 열기, SDK 확인, 심볼 탐색에 사용한다.
@@ -36,7 +45,7 @@ Profile 내보내기는 초기 설정 공유에 유용하지만 빌드 도구 �
 `code --list-extensions --show-versions`로 기록할 수 있다.
 [확장 관리](https://code.visualstudio.com/docs/configure/extensions/extension-marketplace)
 
-학습용 프로젝트의 공통 시작 설정은 다음과 같다. 저장 자동 수정은 02편에서 언어별로 켠다.
+학습용 프로젝트의 공통 시작 설정은 다음과 같다. 저장 자동 수정은 [포맷 충돌 해결](/ko/docs/vscode/format-lint-contract)에서 언어별로 켠다.
 
 ```json
 {
@@ -114,8 +123,14 @@ Outline으로 구조를 보고, 인터페이스에서는 Go to Implementations�
 5. Source Control에서 의도하지 않은 포맷 변경이 없는지 확인한다.
 
 통과 기준은 파일 탐색기를 반복해서 펼치지 않고 호출 경로를 찾고, 테스트를 유지하며 변경을
-검토하는 것이다. 언어 오류가 있으면 다음 확장을 추가하기보다 해당 언어 편의 복구 절차를 따른다.
+검토하는 것이다. 언어 오류가 있으면 다음 확장을 추가하기보다 해당 언어 가이드의 복구 절차를 따른다.
 
 영상 실습: [Code Customization 101: Supercharge VS Code with Profiles](https://www.youtube.com/watch?v=QjvvqR9KyVo)
 — Visual Studio Code, 2023-06-29. Profile 생성·전환·내보내기를 따라 하되 프로젝트 설정은
-저장소 파일로 관리한다. 자세한 시청 안내는 [자료실](resources.md)에 있다.
+저장소 파일로 관리한다. 자세한 시청 안내는 [자료실](/ko/docs/vscode/resources)에 있다.
+
+## 생산성 팁을 자기 작업으로 바꾸기
+
+[Fireship의 25 VS Code Productivity Tips and Speed Hacks](https://www.youtube.com/watch?v=ifTF3ags0XI)는 탐색과 편집 기능을 빠르게 훑는 자료입니다. 02:43 심볼 찾기, 07:14 Tasks, 10:50 Rename Symbol을 보고 각 기능을 자기 프로젝트에서 한 번씩 재현합니다. 영상의 확장을 전부 설치하는 대신 반복하는 작업 세 개를 골라 단축키와 완료 시간을 기록합니다. 시간은 게시자 챕터 기준입니다.
+
+처음 시작한다면 [freeCodeCamp.org의 Visual Studio Code Crash Course](https://www.youtube.com/watch?v=WPqXP_kLzpo)로 화면 구조를 익힌 뒤 이 문서의 20분 실습을 진행합니다. 최신 설정 키는 [공식 자료실](/ko/docs/vscode/resources)에서 확인합니다.

@@ -1,0 +1,98 @@
+---
+documentKind: tutorial
+title: "Shell Formatting with shfmt and ShellCheck"
+description: "Connect shfmt and ShellCheck and use an unquoted variable to compare formatting, static analysis, and runtime checks."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "formatting", "linting"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://github.com/mvdan/sh"
+---
+
+Sources checked on 2026-09-06. Apply the examples sequentially in a separate `format-lab` project. Commands run from its root on macOS, Linux, or WSL. Merge the relevant keys into existing configuration files.
+
+## Correct layout does not prevent word splitting
+
+shfmt formats Shell syntax; ShellCheck finds problems such as missing quotes. This lab assumes every `scripts/*.sh` file uses Bash. Mixed repositories need explicit dialect boundaries and appropriate shebangs.
+
+Prepare the Go SDK and ShellCheck. Install ShellCheck through your platform, for example `brew install shellcheck` on macOS or `sudo apt-get install shellcheck` on Ubuntu. [ShellCheck installation](https://github.com/koalaman/shellcheck#installing)
+
+```sh
+go install mvdan.cc/sh/v3/cmd/shfmt@v3.12.0
+shfmt --version
+shellcheck --version
+code --install-extension foxundermoon.shell-format
+code --install-extension timonwong.shellcheck
+command -v shfmt
+```
+
+The Go-installed binary normally goes to `$(go env GOPATH)/bin`, unless GOBIN overrides it. Add that directory to PATH. If VS Code sees a different PATH, set `shellformat.path` to the absolute path printed by `command -v shfmt`. Keep personal paths in local settings.
+
+## Match editor and CLI options
+
+```json
+{
+    "[shellscript]": {
+        "editor.defaultFormatter": "foxundermoon.shell-format"
+    },
+    "shellformat.flag": "-ln bash -i 2",
+    "shellformat.useEditorConfig": false,
+    "shellformat.effectLanguages": ["shellscript"]
+}
+```
+
+This lab explicitly uses `-ln bash -i 2` in both places. shfmt also supports EditorConfig. To adopt it later, enable the extension's EditorConfig mode, remove conflicting flags, and verify the output again. [shfmt options](https://github.com/mvdan/sh/blob/master/cmd/shfmt/shfmt.1.scd), [shell-format configuration](https://github.com/foxundermoon/vs-shell-format)
+
+## Compare actual program output
+
+Create `scripts/greet.sh`:
+
+```bash
+#!/usr/bin/env bash
+name="Ada Lovelace"
+if [ -n "$name" ]; then
+printf '%s\n' $name
+fi
+```
+
+Run each command separately. The diff command fails when changes are needed; the write command changes the file.
+
+```sh
+shfmt -ln bash -i 2 -d scripts/greet.sh
+shfmt -ln bash -i 2 -w scripts/greet.sh
+shellcheck scripts/greet.sh
+bash -n scripts/greet.sh
+bash scripts/greet.sh
+```
+
+Formatting fixes indentation but leaves the expansion unquoted. ShellCheck reports SC2086. Execution prints `Ada` and `Lovelace` on separate lines, while `bash -n` passes because the syntax is legal.
+
+Quote the expansion to pass the name as one argument:
+
+```bash
+#!/usr/bin/env bash
+name="Ada Lovelace"
+if [ -n "$name" ]; then
+  printf '%s\n' "$name"
+fi
+```
+
+The result is one line: `Ada Lovelace`. A fixture containing a space exposes the bug. Understand the input contract before suppressing a warning.
+
+## Verify scope and editor diagnostics
+
+```sh
+shfmt -ln bash -i 2 -d scripts
+shellcheck scripts/*.sh
+bash -n scripts/greet.sh
+```
+
+The glob checks only immediate `.sh` children. Expand the command when adding nested scripts. Inspect targets before recursively formatting vendor or generated code.
+
+Inspect the ShellCheck diagnostic provider and binary in VS Code. Selecting shfmt as formatter does not install ShellCheck. Remote windows need the tools and extensions in the remote environment. [ShellCheck extension](https://github.com/vscode-shellcheck/vscode-shellcheck)
+
+Finish when formatting produces no diff, lint and syntax checks pass, and the spaced name prints on one line.
+
+[Previous](/en/docs/vscode/yaml) · [Next](/en/docs/vscode/go-format)

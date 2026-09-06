@@ -1,0 +1,119 @@
+---
+documentKind: tutorial
+title: "Ruff로 Python 포맷과 린트 연결하기"
+description: "Ruff format·check·import 정리를 나누고 uv 가상환경과 VS Code 실행 파일을 같은 프로젝트에 연결합니다."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "formatting", "linting"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://docs.astral.sh/ruff/configuration/"
+---
+
+자료 확인일: 2026-09-06. 예제는 별도 `format-lab` 프로젝트에서 순서대로 적용합니다. 명령은 macOS·Linux·WSL의 프로젝트 루트 기준이며, 기존 설정에는 필요한 키를 병합합니다.
+
+## Ruff의 format과 check는 다른 명령입니다
+
+Ruff formatter는 코드 배치를, Ruff linter는 선택한 규칙을 검사합니다. `ruff format`을 실행했다고 미사용 import가 모두 지워지는 것은 아닙니다. 이 문서은 import 정리를 Ruff의 I 규칙에 맡기고 Pylance는 타입·탐색 기능에 사용합니다.
+
+[YAML](/ko/docs/vscode/yaml) 실습에서 만든 `pyproject.toml`과 `uv.lock`을 이어서 씁니다. 이 문서부터 시작한다면 프로젝트 루트에서 먼저 `uv init --bare`를 실행합니다. [uv 프로젝트 의존성 관리](https://docs.astral.sh/uv/concepts/projects/dependencies/)
+
+```sh
+uv add --dev --bounds exact ruff
+uv sync --locked
+uv run --locked ruff --version
+code --install-extension ms-python.python
+code --install-extension ms-python.vscode-pylance
+code --install-extension charliermarsh.ruff
+```
+
+VS Code의 **Python: Select Interpreter**에서 이 프로젝트의 `.venv`를 선택합니다. Python 실행 환경 선택과 Ruff 실행 파일 선택은 별도이므로 둘 다 확인합니다.
+
+## Python 규칙을 `pyproject.toml`에 둡니다
+
+기존 project·dependency 섹션 아래에 다음을 추가합니다. `target-version`은 예제의 Python 3.11 이상 문법 기준이며 인터프리터를 설치하는 옵션이 아닙니다.
+
+```toml
+[tool.ruff]
+line-length = 80
+indent-width = 4
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+```
+
+Ruff 설정 파일에 폭 80과 들여쓰기 4를 명시해 [EditorConfig](/ko/docs/vscode/editorconfig) 실습의 텍스트 기준과 맞춥니다. Ruff 설정을 `.editorconfig`만으로 전달한다고 가정하지 않습니다. `I` 규칙이 import 정리를 담당하고 `F`에는 미사용 import 같은 진단이 포함됩니다. [Ruff 설정](https://docs.astral.sh/ruff/configuration/)
+
+## 편집기는 프로젝트 Ruff를 실행하게 합니다
+
+`.vscode/settings.json`에 병합합니다. 경로는 macOS·Linux·WSL 기준입니다. Windows 네이티브 환경에서는 `.venv/Scripts/ruff.exe`를 사용합니다.
+
+```json
+{
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.codeActionsOnSave": {
+            "source.fixAll.ruff": "explicit",
+            "source.organizeImports.ruff": "explicit"
+        }
+    },
+    "ruff.path": ["${workspaceFolder}/.venv/bin/ruff"]
+}
+```
+
+`ruff.path`는 실행 파일 선택입니다. `ruff.configuration`은 설정 파일 선택이므로 서로 바꾸어 쓰지 않습니다. 같은 규칙을 `.vscode`의 `ruff.lint.select` 등에 다시 선언하면 CLI와 달라질 수 있습니다. [Ruff 에디터 설정](https://docs.astral.sh/ruff/editors/settings/)
+
+기존 Black formatter, isort 저장 액션, 범용 Organize Imports가 함께 있다면 해당 Python 저장 설정을 정리합니다. Pylance의 타입 검사를 끌 필요는 없습니다. [Ruff VS Code 통합](https://github.com/astral-sh/ruff-vscode)
+
+## 포맷 후에도 남는 진단을 봅니다
+
+`python-example/report.py`:
+
+```python
+import sys
+from pathlib import Path
+
+def filename(path: str) -> str:
+ return Path(path).name
+
+print(filename('reports/daily.csv'))
+```
+
+다음을 한 줄씩 실행합니다. 첫 format 뒤에도 `sys`는 남습니다. 다음 check는 미사용 import를 진단하며, fix 이후 다시 format을 적용합니다.
+
+```sh
+uv run --locked ruff format python-example
+uv run --locked ruff check python-example
+uv run --locked ruff check --fix python-example
+uv run --locked ruff format python-example
+uv run --locked ruff format --check python-example
+uv run --locked ruff check python-example
+uv run --locked python python-example/report.py
+```
+
+최종 코드는 다음과 같고 출력은 `daily.csv`입니다.
+
+```python
+from pathlib import Path
+
+
+def filename(path: str) -> str:
+    return Path(path).name
+
+
+print(filename("reports/daily.csv"))
+```
+
+`ruff check --fix`가 모든 문제를 고친다고 가정하지 않습니다. 안전하지 않은 수정은 기본 저장 흐름에 넣지 말고 의도를 검토합니다. [Ruff 수정 정책](https://docs.astral.sh/ruff/linter/#fix-safety)
+
+추가로 `print(filename(123))`를 입력해 봅니다. 타입 주석이 있다고 Ruff가 전체 타입 검사를 하는 것은 아닙니다. 별도 타입 검사기가 필요하고, 실제 실행도 실패합니다. 원래 문자열 입력으로 돌린 뒤 검사를 마칩니다.
+
+완료 기준은 저장 직후 CLI format check와 lint가 통과하고, 재저장에 새 변경이 없으며, Ruff Output의 실행 파일이 프로젝트 `.venv`를 가리키는 것입니다. SSH·컨테이너에서도 그쪽 `.venv`를 만들어야 합니다.
+
+[이전 실습](/ko/docs/vscode/go-format) · [다음 실습](/ko/docs/vscode/tasks-ci)

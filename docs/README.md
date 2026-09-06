@@ -27,7 +27,7 @@ AI 대화 기록 없이도 작업할 수 있도록 수정 위치, 실행 명령,
 
 ## 기술 기록
 
-- [VS Code를 주 IDE로 쓰는 실전 시리즈](vscode/README.md): IntelliJ 작업 흐름 전환, Java·TS·Go·Python, formatter·lint 충돌 방지와 공식 문서·YouTube 자료
+- [VS Code 잘 쓰는 법](../apps/web/content/tech/docs/ko/vscode/index.mdx): Tech Docs에서 유지하는 프로젝트 설정·탐색·언어별 디버깅·포맷·린트·원격 개발과 공식 자료
 
 - [프론트엔드 개선 기록](web/frontend-improvements.md): 당시 구현·측정·검증 결과와 후속 검토 후보
 - [완료 기록 보관함](archive/README.md): 완료 TODO와 기존 완료 이슈 아카이브

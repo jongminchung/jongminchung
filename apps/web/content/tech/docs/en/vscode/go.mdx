@@ -1,0 +1,162 @@
+---
+documentKind: "how-to"
+title: "Go Modules, gopls, Delve, and Tests"
+description: "Connect module discovery, test debugging, race checks, profiling, and multi-module workflows."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "development-workflow"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://github.com/golang/vscode-go"
+---
+
+This guide covers development and debugging in a single Go module. For formatting alone, use the [gofmt lab](/en/docs/vscode/go-format). This guide also assigns import organization to gopls; do not blindly merge the two alternative save configurations.
+
+## Align Go, gopls, and Delve
+
+Install the official Go extension (`golang.go`). Use **Go: Install/Update Tools** for gopls and dlv, then **Go: Locate Configured Go Tools** to inspect actual paths. Record team-pinned versions. [Go extension](https://github.com/golang/vscode-go)
+
+Run from the module root:
+
+```sh
+go version
+go env GOMOD GOWORK GOPATH GOTOOLCHAIN
+go test ./...
+```
+
+Fix the open folder and cwd if GOMOD is unexpected. CLI Go, language server, and debugger must agree about the project.
+
+## Assign formatting and imports to gopls
+
+Merge into settings.json:
+
+```json
+{
+    "go.useLanguageServer": true,
+    "go.formatTool": "default",
+    "[go]": {
+        "editor.defaultFormatter": "golang.go",
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": false,
+        "editor.formatOnType": false,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "never",
+            "source.organizeImports": "explicit"
+        }
+    }
+}
+```
+
+Formatting and Organize Imports are different requests. Do not add another save-time goimports extension. If local import grouping is required, align gopls settings with CLI goimports -local. [Extension settings](https://github.com/golang/vscode-go/blob/master/docs/settings.md), [gopls settings](https://go.dev/gopls/settings)
+
+With a separately installed, pinned goimports tool in a small authored-only module:
+
+```sh
+goimports -w .
+gofmt -l .
+go test ./...
+go vet ./...
+```
+
+Exclude vendor/generated files deliberately. gofmt and goimports list output must be checked for emptiness in CI; listing differences alone does not guarantee failure. Use the [explicit format gate](/en/docs/vscode/go-format). If choosing gofumpt, align both editor and CLI policy.
+
+## Build a small module
+
+Run `go mod init example.com/vscode-lab` in an empty learning directory. Create main.go:
+
+```go
+package main
+
+import "fmt"
+
+func total(price, quantity int) int {
+	return price * quantity
+}
+
+func main() {
+	fmt.Println(total(1200, 3))
+}
+```
+
+Create main_test.go:
+
+```go
+package main
+
+import "testing"
+
+func TestTotal(t *testing.T) {
+	if got := total(1200, 3); got != 3600 {
+		t.Fatalf("total = %d, want 3600", got)
+	}
+}
+```
+
+Find callers with References, rename total to subtotal with F2, and run/debug TestTotal through Testing or CodeLens. Available extraction and implementation actions depend on context. [Editing and testing features](https://github.com/golang/vscode-go/wiki/features)
+
+Launch a package directory rather than an isolated file:
+
+```json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Go: package",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Go: TestTotal",
+            "type": "go",
+            "request": "launch",
+            "mode": "test",
+            "program": "${workspaceFolder}",
+            "args": ["-test.run", "^TestTotal$", "-test.v"]
+        }
+    ]
+}
+```
+
+Change program to a package such as `${workspaceFolder}/cmd/api` when appropriate. Rename the test filter if you rename the test. Debug-test arguments go to the test binary, hence `-test.run`. [Go debugging](https://github.com/golang/vscode-go/blob/master/docs/debugging.md)
+
+Inspect Call Stack and goroutines. For missing variables during attach, compare optimization, source paths, and artifact version; begin with the extension's ordinary debug build.
+
+## Separate tests, race detection, and performance
+
+```sh
+go test ./... -run '^TestTotal$' -count=1
+go test ./... -cover
+go test -race ./...
+go vet ./...
+```
+
+Use count=1 when eliminating test-cache effects. Race detection needs a supported platform and toolchain; it is different evidence from unit tests. [Go test](https://pkg.go.dev/cmd/go#hdr-Test_packages), [race detector](https://go.dev/doc/articles/race_detector)
+
+Only in a package defining BenchmarkTotal:
+
+```sh
+go test -run '^$' -bench '^BenchmarkTotal$' -cpuprofile cpu.out .
+go tool pprof -http=127.0.0.1:8081 cpu.out
+```
+
+Record workload and execution environment, inspect the profile, and compare changes under the same conditions. [Diagnostics](https://go.dev/doc/diagnostics)
+
+## Multiple modules and troubleshooting
+
+Use go.work to describe modules developed together. A workspace root that is not itself a module does not make `go test ./...` test every nested module; run tasks with each module as cwd. Check independent CI resolution too. [Go workspaces](https://go.dev/doc/tutorial/workspaces)
+
+Add golangci-lint only for the team's required analysis. Align configuration major versions and validate the config before running it. [Quick start](https://golangci-lint.run/docs/welcome/quick-start/)
+
+| Symptom                | Check                                      |
+| ---------------------- | ------------------------------------------ |
+| Package cannot resolve | GOMOD, GOWORK, proxy, auth, module cache   |
+| Only some files fail   | Build tags, GOOS/GOARCH, CGO, test files   |
+| Delve will not launch  | dlv path, Go compatibility, architecture   |
+| IDE differs from CLI   | Go/gopls paths and Output                  |
+| Imports differ in CI   | Local grouping, gofumpt, duplicate actions |
+
+Watch the official [Go editing and debugging session](https://www.youtube.com/watch?v=6r08zGi38Tk), then reproduce navigation, a test breakpoint, and CLI checks in your module.

@@ -1,0 +1,149 @@
+---
+documentKind: tutorial
+title: "Connect Oxfmt and Oxlint Directly"
+description: "Install Oxfmt and Oxlint, connect JSON configuration and save actions, and reproduce the difference between formatting and diagnostics."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "formatting", "linting"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://oxc.rs/docs/guide/usage/linter/config"
+---
+
+Sources checked on 2026-09-06. Apply the examples sequentially in a separate `format-lab` project. Commands run from its root on macOS, Linux, or WSL. Merge the relevant keys into existing configuration files.
+
+## Install the tools directly
+
+Use Node.js and npm in the lab from [EditorConfig](/en/docs/vscode/editorconfig). The Oxc versions below define this example, not a claim about the latest release. Commit the generated `package-lock.json` and subsequently use `npm ci`. Existing Bun projects should retain their own package manager and lockfile.
+
+```sh
+npm init -y
+npm install --save-dev --save-exact oxfmt@0.66.0 oxlint@1.81.0 typescript
+code --install-extension oxc.oxc-vscode
+```
+
+Create `.oxfmtrc.json`. Width and indentation come from [EditorConfig](/en/docs/vscode/editorconfig); import sorting is an explicit project choice.
+
+```json
+{
+    "$schema": "./node_modules/oxfmt/configuration_schema.json",
+    "sortImports": { "newlinesBetween": false },
+    "sortPackageJson": false,
+    "ignorePatterns": ["node_modules/", "dist/", "coverage/", ".venv/"]
+}
+```
+
+Create `.oxlintrc.json` for code diagnostics. Add React and accessibility plugins when the project needs them; infrastructure scripts need not inherit UI component exceptions.
+
+```json
+{
+    "$schema": "./node_modules/oxlint/configuration_schema.json",
+    "categories": { "correctness": "error" },
+    "plugins": ["typescript", "unicorn", "oxc"],
+    "rules": {
+        "eslint/prefer-const": "error",
+        "typescript/no-explicit-any": "error"
+    },
+    "ignorePatterns": ["node_modules/", "dist/", "coverage/"]
+}
+```
+
+JSON gives schema completion without executing a configuration module. TypeScript configuration is also available when composition is useful. [Oxlint configuration](https://oxc.rs/docs/guide/usage/linter/config)
+
+## Observe formatting and linting separately
+
+Put this in `src/greet.ts`:
+
+{/* prettier-ignore */}
+```ts
+export function greet(name:any){let message='Hello, '+name;return message}
+```
+
+Oxfmt changes layout and quotes. Oxlint reports the mutable binding and explicit `any`. Apply available fixes, then decide that this function accepts a string:
+
+{/* prettier-ignore */}
+```ts
+export function greet(name: string) {
+  const message = "Hello, " + name;
+  return message;
+}
+```
+
+Blindly replacing `any` with `unknown` does not define the boundary. Validate external input when necessary.
+
+## Connect scripts and the editor
+
+Merge these scripts into `package.json`:
+
+```json
+{
+    "scripts": {
+        "fmt": "oxfmt .",
+        "fmt:check": "oxfmt --check .",
+        "lint": "oxlint .",
+        "lint:fix": "oxlint --fix .",
+        "typecheck": "tsc --noEmit"
+    }
+}
+```
+
+Create `tsconfig.json` for the type-checking command:
+
+```json
+{
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
+        "strict": true,
+        "noEmit": true
+    },
+    "include": ["src/**/*.ts"]
+}
+```
+
+Merge these language blocks into `.vscode/settings.json`, retaining [EditorConfig](/en/docs/vscode/editorconfig)'s save settings. Add equivalent `typescriptreact` and `javascriptreact` blocks when using TSX or JSX.
+
+```json
+{
+    "[typescript]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode",
+        "editor.codeActionsOnSave": {
+            "source.fixAll.oxc": "explicit",
+            "source.organizeImports": "never",
+            "source.fixAll.eslint": "never"
+        }
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode",
+        "editor.codeActionsOnSave": {
+            "source.fixAll.oxc": "explicit",
+            "source.organizeImports": "never",
+            "source.fixAll.eslint": "never"
+        }
+    }
+}
+```
+
+Oxfmt owns import ordering. TypeScript Organize Imports can also remove unused imports, so it is not equivalent. Inspect existing generic fix actions and other save extensions. Start with explicit manual saves. [Oxc extension settings](https://github.com/oxc-project/oxc-vscode)
+
+## Separate changing files from checking them
+
+```sh
+npm run fmt
+npm run lint
+npm run lint:fix
+npm run fmt
+npm run fmt:check
+npm run lint
+npm run typecheck
+```
+
+The first lint run intentionally fails. After automatic fixes, manually change `any` to `string` before continuing. The final three commands check without rewriting. Confirm they pass after saving, and another save produces no further diff.
+
+For type-aware linting, install `oxlint-tsgolint` with `npm install --save-dev --save-exact oxlint-tsgolint` and merge `"options": { "typeAware": true }` into the lint configuration. Enable a rule such as `typescript/no-floating-promises` to find unhandled promises. This requires a working TypeScript project and does not replace the separate type check. [Type-aware linting](https://oxc.rs/docs/guide/usage/linter/type-aware)
+
+If only the editor fails, inspect **Oxc (Lint)** and **Oxc (Fmt)** in Output. This lab uses root discovery. Explicit CLI configuration changes nested lookup; if you pin a config path, align the editor's separate lint and formatter paths too.
+
+[Previous](/en/docs/vscode/editorconfig) · [Next](/en/docs/vscode/yaml)

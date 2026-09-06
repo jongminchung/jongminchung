@@ -1,0 +1,180 @@
+---
+documentKind: "how-to"
+title: "Python Environments, Pylance, pytest, and debugpy"
+description: "Configure the environment, editor, tests, type checks, and debugger to use the same Python project."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "development-workflow"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://code.visualstudio.com/docs/python/environments"
+---
+
+This guide uses a separate Python development/test project. Its width and file layout differ from the [Ruff formatting lab](/en/docs/vscode/ruff); choose the configuration for the project you are opening.
+
+## Separate extension responsibilities
+
+| Extension ID                 | Responsibility                        |
+| ---------------------------- | ------------------------------------- |
+| ms-python.python             | Project execution and tests           |
+| ms-python.vscode-pylance     | Completion, navigation, type analysis |
+| ms-python.debugpy            | Debugging                             |
+| charliermarsh.ruff           | Lint, format, imports                 |
+| ms-python.vscode-python-envs | Optional environment/package UI       |
+| ms-toolsai.jupyter           | Notebooks, when needed                |
+
+Compare existing Black/isort/Flake8 behavior before migrating a real team. Ruff does not replace type checking or tests. [Python environments](https://code.visualstudio.com/docs/python/environments), [Ruff extension](https://github.com/astral-sh/ruff-vscode)
+
+## Match the selected interpreter to execution
+
+In an empty directory, prepare uv using its [installation guide](https://docs.astral.sh/uv/getting-started/installation/) and run:
+
+```sh
+uv init --name vscode-python-lab --python 3.12
+uv add --dev ruff pytest pyright
+uv sync --locked
+uv run python -c "import sys; print(sys.executable); print(sys.version)"
+```
+
+Commit pyproject.toml, .python-version, and uv.lock; exclude .venv. Retain an existing Poetry, Conda, or pip-tools workflow in other projects. [uv projects](https://docs.astral.sh/uv/guides/projects/)
+
+Use **Python: Select Interpreter** to select .venv. Open a fresh terminal and compare `python -c "import sys; print(sys.executable)"` with uv's output. Windows uses .venv/Scripts/python.exe; POSIX uses .venv/bin/python. Notebooks require a separate kernel check. [Kernel management](https://code.visualstudio.com/docs/datascience/jupyter-kernel-management)
+
+## Configure format, imports, types, and tests
+
+Merge into pyproject.toml, preserving generated project/dependency sections:
+
+```toml
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.pyright]
+typeCheckingMode = "standard"
+include = ["main.py", "tests"]
+venvPath = "."
+venv = ".venv"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+```
+
+I rules organize imports. Apply lint fixes before formatting; do not enable competing layout lint rules. Align width with your text policy. Pylance and CLI Pyright can differ by release, so compare diagnostic codes and versions when necessary. [Ruff formatting](https://docs.astral.sh/ruff/formatter/), [Pyright configuration](https://github.com/microsoft/pyright/blob/main/docs/configuration.md)
+
+Merge settings.json:
+
+```json
+{
+    "python.testing.pytestEnabled": true,
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestArgs": ["tests"],
+    "python.analysis.autoImportCompletions": true,
+    "ruff.importStrategy": "fromEnvironment",
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": false,
+        "editor.formatOnType": false,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "never",
+            "source.organizeImports": "never",
+            "source.fixAll.ruff": "explicit",
+            "source.organizeImports.ruff": "explicit"
+        }
+    }
+}
+```
+
+Keep Pylance diagnostics. Do not hide all type analysis to remove overlapping warnings. Ruff's fromEnvironment strategy can fall back to a bundled executable; inspect Output and compare `uv run ruff --version`. Avoid legacy python.formatting.provider, python.linting.\*, or python.pythonPath examples. [Ruff editor settings](https://docs.astral.sh/ruff/editors/settings/), [Python formatting](https://code.visualstudio.com/docs/python/formatting)
+
+## Add a runnable test
+
+Create main.py:
+
+```python
+def total(price: int, quantity: int) -> int:
+    return price * quantity
+
+
+if __name__ == "__main__":
+    print(total(1200, 3))
+```
+
+Create tests/test_main.py:
+
+```python
+from main import total
+
+
+def test_total() -> None:
+    assert total(1200, 3) == 3600
+```
+
+Run:
+
+```sh
+uv run python -m pytest
+uv run ruff check .
+uv run ruff format --check .
+uv run pyright
+```
+
+Discover and debug test_total in Testing with a breakpoint in total. If discovery fails, inspect Python Test Log and `uv run python -m pytest --collect-only`. Apply Ruff fixes, then format, review, and rerun all checks. [Python testing](https://code.visualstudio.com/docs/python/testing)
+
+## Launch with debugpy
+
+Create launch.json:
+
+```json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: project main",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: pytest",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": ["tests", "-q"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
+}
+```
+
+Use module mode for package entry points when appropriate. Without an explicit Python override, launch uses the selected interpreter. Set justMyCode false only when investigating dependencies. [Python debugging](https://code.visualstudio.com/docs/python/debugging)
+
+For FastAPI/Django reloaders, identify the actual child process; start with reload disabled to narrow a reproduction. Check an actual request rather than only successful startup.
+
+## Diagnose differences
+
+Try navigation, Rename, and Extract on a small tested function first. Dynamic attributes and decorators need additional review. Fix package installation and source layout before adding arbitrary extraPaths. [Python editing](https://code.visualstudio.com/docs/python/editing)
+
+| Symptom                         | Check                                                   |
+| ------------------------------- | ------------------------------------------------------- |
+| Installed package cannot import | sys.executable, selected environment, lock installation |
+| Ruff and Black oscillate        | Default formatter and save hooks                        |
+| Imports oscillate               | Ruff I, isort, language-service actions                 |
+| Type errors disappeared         | Ignore settings, mode, includes                         |
+| No pytest tests                 | Environment, testpaths, cwd, discovery log              |
+| Notebook differs                | Kernel path and stale execution state                   |
+
+Use the official [Python getting-started video](https://www.youtube.com/watch?v=D2cwvpJSBX4) for the environment and debugging flow, and this guide for Ruff settings.

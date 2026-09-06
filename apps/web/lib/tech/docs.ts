@@ -11,7 +11,13 @@ import {
 } from "../content-model.ts";
 
 export const registeredDocsCategoryIds = docsAreas;
-export const docsCategoryIds = ["rke2spray", "fe", "be", "k8s"] as const;
+export const docsCategoryIds = [
+  "rke2spray",
+  "fe",
+  "be",
+  "k8s",
+  "vscode",
+] as const;
 export type DocsCategoryId = DocsArea;
 
 const docsCategoryRegistry = {
@@ -45,6 +51,14 @@ const docsCategoryRegistry = {
     description: {
       ko: "RKE2 플랫폼 자동화, GitOps와 Cilium Gateway API 운영을 위한 문서",
       en: "Documentation for RKE2 platform automation, GitOps, and Cilium Gateway API operations.",
+    },
+  },
+  vscode: {
+    label: "VS Code",
+    title: { ko: "VS Code", en: "VS Code" },
+    description: {
+      ko: "프로젝트 설정, 탐색·리팩터링, 언어별 디버깅, 포맷·린트와 원격 개발을 연결하는 실무 가이드",
+      en: "Practical documentation for project setup, navigation, refactoring, language debugging, formatting, linting, and remote development.",
     },
   },
   ansible: {

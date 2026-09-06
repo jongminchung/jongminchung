@@ -1,0 +1,137 @@
+---
+documentKind: "how-to"
+title: "Resolve Editor and CLI Formatting Conflicts"
+description: "Diagnose provider ownership, import actions, and configuration precedence when saves differ from CLI output."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "development-workflow"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://code.visualstudio.com/docs/configure/settings"
+---
+
+For the direct Oxc setup, start with the [EditorConfig lab](/en/docs/vscode/editorconfig). Use this page to diagnose competing tools or maintain a project that already uses Prettier and ESLint.
+
+## Assign each transformation an owner
+
+A formatter owns layout, a linter owns code rules, and a type checker owns type contracts. Import organization is a separate decision because language services, linters, and formatters can all provide it.
+
+| Project             | Layout                    | Imports                          | Additional checks          |
+| ------------------- | ------------------------- | -------------------------------- | -------------------------- |
+| Eclipse-style Java  | JDT                       | Java language service            | Compiler and team analysis |
+| Google-style Java   | Build's Spotless pipeline | Same pipeline                    | Compiler and team analysis |
+| Prettier TypeScript | Prettier                  | Explicit action or one lint rule | ESLint and TypeScript      |
+| Oxc TypeScript      | Oxfmt                     | Oxfmt sorting                    | Oxlint and TypeScript      |
+| Go                  | gofmt-style gopls         | gopls                            | Compiler, vet, tests       |
+| Python              | Ruff format               | Ruff I rules                     | Ruff, type checking, tests |
+
+Disable conflicting stylistic lint rules when using a formatter. [Prettier and linters](https://prettier.io/docs/integrating-with-linters)
+
+## Inspect save actions and configuration scopes
+
+Default Formatter selects the formatting provider; it does not disable other fix, import, or Run on Save actions. Prefer provider-specific actions. Start with manual saves and verify your Auto Save mode separately. Language settings can override general workspace settings. [Save actions](https://code.visualstudio.com/updates/v1_83), [settings precedence](https://code.visualstudio.com/docs/configure/settings)
+
+EditorConfig support varies. Explicitly align Ruff settings and Java formatter profiles with the chosen text policy. [Oxfmt configuration](https://oxc.rs/docs/guide/usage/formatter/config)
+
+## Alternative: a separate Prettier and ESLint learning project
+
+Do not merge this alternative with the Oxc lab. In an existing TypeScript project, retain its package manager and lockfile:
+
+```sh
+npm install --save-dev --save-exact prettier eslint @eslint/js typescript-eslint eslint-config-prettier typescript
+```
+
+Create `eslint.config.mjs`, placing compatibility configuration last. This enables recommended TypeScript rules, not all type-aware rules. [typescript-eslint](https://typescript-eslint.io/getting-started/), [eslint-config-prettier](https://github.com/prettier/eslint-config-prettier)
+
+```js
+import js from "@eslint/js";
+import tseslint from "typescript-eslint";
+import eslintConfigPrettier from "eslint-config-prettier/flat";
+
+export default [
+    { ignores: ["dist/**", "coverage/**", ".next/**"] },
+    js.configs.recommended,
+    ...tseslint.configs.recommended,
+    eslintConfigPrettier,
+];
+```
+
+Create `.prettierrc.json` and `.prettierignore`:
+
+```json
+{
+    "singleQuote": false,
+    "semi": true
+}
+```
+
+```gitignore
+node_modules/
+dist/
+coverage/
+.next/
+```
+
+Merge the TS and TSX provider settings into `.vscode/settings.json`. Add equivalent JavaScript blocks if applicable. Inspect the loaded local Prettier package in Output. [Prettier extension](https://github.com/prettier/prettier-vscode)
+
+```json
+{
+    "prettier.requireConfig": true,
+    "eslint.format.enable": false,
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": false,
+        "editor.formatOnType": false,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "never",
+            "source.fixAll.eslint": "explicit",
+            "source.organizeImports": "never"
+        }
+    },
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": false,
+        "editor.formatOnType": false,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "never",
+            "source.fixAll.eslint": "explicit",
+            "source.organizeImports": "never"
+        }
+    }
+}
+```
+
+Automatic import organization is disabled here. If CI needs an import policy, select one rule and remove competing organizers. Compatibility configuration does not resolve every third-party import plugin conflict.
+
+Merge scripts into package.json; provide the project's existing tsconfig for type checking:
+
+```json
+{
+    "scripts": {
+        "fmt": "eslint . --fix && prettier . --write",
+        "fmt:check": "prettier . --check",
+        "lint": "eslint . --max-warnings 0",
+        "typecheck": "tsc --noEmit",
+        "check": "npm run fmt:check && npm run lint && npm run typecheck"
+    }
+}
+```
+
+Use `npm ci`, `npm run check`, and project tests in CI. Review fixes locally. For Oxc, use the separate [Oxfmt and Oxlint guide](/en/docs/vscode/oxfmt-oxlint).
+
+## Diagnose repeated changes
+
+| Symptom                         | Inspection order                                   |
+| ------------------------------- | -------------------------------------------------- |
+| Quotes or line breaks oscillate | Format Document With → config path → local version |
+| Imports oscillate               | Language service → lint rules → formatter plugins  |
+| Only CLI fails                  | cwd → ignores → configuration → locked versions    |
+| Save actions do not run         | Auto Save mode → action value → Output             |
+| Only TSX differs                | typescriptreact scope and user settings            |
+| Formatting runs twice           | Save extensions, watchers, and hooks               |
+| Saves are slow                  | Measure formatting and type-aware lint separately  |
+
+Run one formatter manually, then enable other save actions one at a time. Save a fixture, apply CLI fixes, save again, and repeat CLI fixes. Completion means no new changes on the second pass and passing lint/type checks—not only attractive formatting.

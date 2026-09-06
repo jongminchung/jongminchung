@@ -282,7 +282,7 @@ test("[성공] Docs 루트에는 sidebar가 없고 분야별 sidebar는 현재 �
   await docsTrigger.click();
   const docsMenu = page.getByRole("menu", { name: "문서 분야 선택" });
   await expect(docsMenu).toBeVisible();
-  await expect(docsMenu.locator('[role="menuitem"]')).toHaveCount(5);
+  await expect(docsMenu.locator('[role="menuitem"]')).toHaveCount(6);
   await docsMenu
     .locator('[role="menuitem"]', { hasText: "FE · 프론트엔드" })
     .click();
@@ -391,4 +391,46 @@ test("[성공] Docs OG 이미지는 canonical 경로를 사용하고 정적 이�
   expect([...(await image.body()).subarray(0, 8)]).toEqual([
     137, 80, 78, 71, 13, 10, 26, 10,
   ]);
+});
+
+test("[성공] VS Code Docs는 양쪽 언어의 탐색·자료·이전 주소를 연결함", async ({
+  page,
+  siteRequest,
+}) => {
+  for (const locale of ["ko", "en"]) {
+    const base = `/${locale}/docs/vscode`;
+    await page.goto(`/${locale}/docs`);
+    await expect(page.locator(`a[href="${base}"]`).first()).toBeVisible();
+    await page.goto(base);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      "href",
+      `https://tech.jamie.kr${base}`,
+    );
+    await expect(
+      page.locator(`#nd-sidebar a[href="${base}/oxfmt-oxlint"]`),
+    ).toBeVisible();
+    await page.goto(`${base}/resources`);
+    await expect(
+      page
+        .locator('a[href="https://www.youtube.com/watch?v=ifTF3ags0XI"]')
+        .first(),
+    ).toBeVisible();
+    await expect(
+      page
+        .locator(
+          'a[href="https://code.visualstudio.com/docs/getstarted/introvideos"]',
+        )
+        .first(),
+    ).toBeVisible();
+
+    for (const [source, target] of [
+      [`/${locale}/vscode-oxfmt-oxlint`, `${base}/oxfmt-oxlint`],
+      [`/${locale}/series/vscode-format-and-lint`, base],
+    ] as const) {
+      const response = await siteRequest.get(source, { maxRedirects: 0 });
+      expect(response.status()).toBe(308);
+      expect(response.headers().location).toBe(target);
+      expect((await siteRequest.get(target)).status()).toBe(200);
+    }
+  }
 });

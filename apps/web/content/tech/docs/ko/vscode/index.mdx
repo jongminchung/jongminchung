@@ -1,0 +1,56 @@
+---
+documentKind: "explanation"
+title: "VS Code 잘 쓰는 법"
+description: "프로젝트 설정부터 탐색·디버깅·포맷·린트·원격 개발까지 실무 작업을 완성하는 VS Code 가이드"
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "development-workflow"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://code.visualstudio.com/docs"
+---
+
+## VS Code로 작업 하나를 끝내는 법
+
+이 사이트가 유지관리하는 VS Code 실무 문서입니다. 프로젝트를 열고 코드를 탐색하는 것부터 테스트 디버깅, 리팩터링, 포맷·린트, Git 검토와 원격 개발까지 **하나의 변경을 재현 가능하게 완성하는 것**을 목표로 합니다.
+
+VS Code를 처음 쓰면 시작 가이드를, 이미 작업 중이면 필요한 작업 문서를 선택합니다. Java·TypeScript·Go·Python 가이드는 각각 별도 학습 프로젝트를 사용하고, 포맷 실습은 공통 `format-lab`에서 이어집니다. 서로 다른 예제의 manifest와 settings를 한 폴더에 모두 덮어쓰지 않습니다.
+
+## 목적별로 찾기
+
+| 목적              | 문서                                                                    | 완료 기준                               |
+| ----------------- | ----------------------------------------------------------------------- | --------------------------------------- |
+| 편집과 탐색 시작  | [프로젝트 설정·탐색·리팩터링](/ko/docs/vscode/workspace-and-navigation) | 호출자를 찾고 Rename 후 테스트 통과     |
+| Java 서비스 작업  | [Java·Spring Boot](/ko/docs/vscode/java)                                | JDK·프로젝트 import·JUnit 디버깅 연결   |
+| 웹·Node 작업      | [TypeScript](/ko/docs/vscode/typescript)                                | compiler·언어 서비스·source map 확인    |
+| Go 서비스 작업    | [Go·gopls·Delve](/ko/docs/vscode/go)                                    | 단일 테스트 debug와 CLI 검사 일치       |
+| Python 작업       | [Python·pytest·debugpy](/ko/docs/vscode/python)                         | 동일 가상환경에서 실행·테스트·타입 검사 |
+| 저장 결과가 다름  | [포맷 충돌 해결](/ko/docs/vscode/format-lint-contract)                  | 저장·CLI·재실행 결과가 같음             |
+| 원격·팀 환경 구성 | [Tasks·SSH·WSL·컨테이너](/ko/docs/vscode/remote-and-team-workflow)      | 다른 환경에서 같은 작업 재현            |
+| 실제 숙련도 확인  | [버그 수정과 제출 실습](/ko/docs/vscode/graduation-lab)                 | 실패 재현부터 검토 가능한 변경 완성     |
+
+## 포맷터·린터 직접 적용 실습
+
+[EditorConfig](/ko/docs/vscode/editorconfig)에서 공통 폴더와 텍스트 규칙을 만들고 필요한 도구를 직접 설치합니다. 모든 도구를 감싸는 공통 패키지를 먼저 만들지 않습니다. 프로젝트가 소유하는 작은 설정과 CLI 명령을 편집기에 연결합니다.
+
+| 대상   | 설정과 CLI 실습                               | 핵심 구분                        |
+| ------ | --------------------------------------------- | -------------------------------- |
+| JS·TS  | [Oxfmt·Oxlint](/ko/docs/vscode/oxfmt-oxlint)  | 포맷·lint·타입 검사              |
+| YAML   | [Oxfmt·yamllint·스키마](/ko/docs/vscode/yaml) | 모양·표기 규칙·애플리케이션 계약 |
+| Shell  | [shfmt·ShellCheck](/ko/docs/vscode/shell)     | 들여쓰기·인용 오류·실행 결과     |
+| Go     | [gofmt](/ko/docs/vscode/go-format)            | 차이 출력과 실패 종료 코드       |
+| Python | [Ruff](/ko/docs/vscode/ruff)                  | format·check·import 정리         |
+| 통합   | [CLI·Tasks·CI](/ko/docs/vscode/tasks-ci)      | 같은 설정·버전·파일 범위·cwd     |
+
+## 공식 자료와 영상으로 넓히기
+
+[공식 문서와 YouTube 자료실](/ko/docs/vscode/resources)은 주제별 원문과 영상, 시청 후 수행할 과제를 연결합니다. Fireship의 빠른 생산성 팁, freeCodeCamp의 입문 강의, VS Code·Microsoft Developer·SpringDeveloper의 언어별 실습을 활용합니다. 설정의 현재 동작은 제작자 공식 문서를 기준으로 확인합니다.
+
+[VS Code의 구조와 도구 선택 기준](/ko/docs/vscode/vscode-design)에서는 언어 서버·디버거·원격 실행의 경계와 실제 업무를 기준으로 도구를 평가하는 방법을 설명합니다.
+
+## 문서 운영과 검증
+
+문서는 Tutorial·How-to·Reference·Explanation으로 분류하고 주제별로 독립 갱신합니다. 각 문서의 확인일과 공식 출처를 함께 관리하며, 코드 예제의 실행 조건과 미검증 범위를 표시합니다. 설정 파일은 해당 학습 프로젝트의 `.vscode/` 아래에 두고 기존 파일에는 필요한 키만 병합합니다.
+
+공통 완료 기준은 실행 파일, 설정, 대상 파일, 작업 폴더를 맞춘 뒤 같은 검사가 같은 결론을 내는 것입니다. CLI 성공과 실제 VS Code 저장·breakpoint·원격 실행 확인은 각각 기록합니다.

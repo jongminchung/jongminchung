@@ -1,0 +1,28 @@
+{
+  "title": "VS Code",
+  "defaultOpen": true,
+  "pages": [
+    "index",
+    "---Start and practice---",
+    "workspace-and-navigation",
+    "graduation-lab",
+    "---Language workflows---",
+    "java",
+    "typescript",
+    "go",
+    "python",
+    "---Formatting and linting---",
+    "editorconfig",
+    "oxfmt-oxlint",
+    "yaml",
+    "shell",
+    "go-format",
+    "ruff",
+    "tasks-ci",
+    "---Operations and references---",
+    "format-lint-contract",
+    "remote-and-team-workflow",
+    "resources",
+    "vscode-design"
+  ]
+}

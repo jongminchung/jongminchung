@@ -1,0 +1,102 @@
+---
+documentKind: tutorial
+title: "EditorConfig and a Predictable Save"
+description: "Define formatter ownership and EditorConfig conventions for reproducible editor and CLI results."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "formatting", "linting"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://editorconfig.org/"
+---
+
+Sources checked on 2026-09-06. Apply the examples sequentially in a separate `format-lab` project. Commands run from its root on macOS, Linux, or WSL. Merge the relevant keys into existing configuration files.
+
+## Start with what a save changes
+
+When CI rejects a file that looked fine after saving, compare four things: **executable, configuration, file scope, and working directory**. This lab installs tools directly in each project and commits small configuration files. Consider a shared package once multiple projects actually need to change the same policy together.
+
+| Files  | Formatter   | Rule checks      | Additional checks                |
+| ------ | ----------- | ---------------- | -------------------------------- |
+| JS·TS  | Oxfmt       | Oxlint           | TypeScript                       |
+| YAML   | Oxfmt       | yamllint         | Schema and consuming application |
+| Shell  | shfmt       | ShellCheck       | bash -n and execution tests      |
+| Go     | gofmt       | go vet and gopls | go test                          |
+| Python | Ruff format | Ruff check       | Type checking and tests          |
+
+A formatter changes layout. A linter reports suspicious code or policy violations; some diagnostics have automatic fixes. EditorConfig communicates text conventions and does not run these programs.
+
+## Create the lab and text conventions
+
+Install VS Code and make its `code` command available on PATH. If unavailable, use the command palette's PATH installation command or open the folder through the UI.
+
+```sh
+mkdir format-lab
+cd format-lab
+git init
+mkdir -p .vscode src config scripts go-example python-example
+code --install-extension EditorConfig.EditorConfig
+code .
+```
+
+Create `.editorconfig` at the root. Python gets four spaces; Go and Makefiles get tabs. Preserve meaningful Markdown trailing spaces. A width preference is not a command to split every long line.
+
+```ini
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+max_line_length = 80
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.py]
+indent_size = 4
+
+[*.{md,mdx}]
+trim_trailing_whitespace = false
+
+[*.go]
+indent_style = tab
+indent_size = tab
+
+[{Makefile,*.mk}]
+indent_style = tab
+indent_size = tab
+```
+
+Compatible editors apply matching sections; the standard `root = true` stops parent discovery. Individual formatters can implement only part of that behavior. [EditorConfig rules](https://editorconfig.org/)
+
+Run Oxfmt from the lab root: it reads supported properties as fallbacks, with limitations on nested EditorConfig merging. [Ruff](/en/docs/vscode/ruff) explicitly configures Ruff width in `pyproject.toml`; gofmt uses Go conventions. [Oxfmt EditorConfig support](https://oxc.rs/docs/guide/usage/formatter/config)
+
+## Connect saving in `.vscode/settings.json`
+
+```json
+{
+    "files.autoSave": "off",
+    "editor.formatOnSave": true,
+    "editor.formatOnSaveMode": "file",
+    "editor.detectIndentation": false
+}
+```
+
+These are shared save settings. Add language-specific formatter providers in subsequent lab pages. Disabling indentation detection makes this lab follow settings instead of inferring indentation from existing text.
+
+User, workspace, and language-specific settings have different scopes. A global formatter does not remove another extension's save actions. Open **Format Document With… → Configure Default Formatter** on the actual file to inspect its provider. [VS Code settings precedence](https://code.visualstudio.com/docs/configure/settings)
+
+## Learning sequence
+
+1. [Oxfmt and Oxlint](/en/docs/vscode/oxfmt-oxlint): distinguish layout from code diagnostics.
+2. [YAML](/en/docs/vscode/yaml): separate formatting, lint rules, and schemas.
+3. [Shell](/en/docs/vscode/shell): reproduce a ShellCheck problem that formatting cannot fix.
+4. [Go](/en/docs/vscode/go-format): turn gofmt differences into a failing CI check.
+5. [Python](/en/docs/vscode/ruff): connect format, lint, and import sorting.
+6. [Tasks and CI](/en/docs/vscode/tasks-ci): reuse the same checking commands.
+
+Check new-line indentation in a Python file and a Makefile using the status bar and whitespace rendering. In the next part, save, run CLI checks, and save again. Completion means that the second cycle produces no new changes.
+
+[Next](/en/docs/vscode/oxfmt-oxlint)

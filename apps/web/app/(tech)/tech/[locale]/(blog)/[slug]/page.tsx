@@ -12,6 +12,7 @@ import {
 } from "#lib/documents";
 import { alternateLocale } from "#lib/locale";
 import { techPageMetadata } from "#lib/tech/metadata";
+import { legacyVscodeArticleHref } from "#lib/tech/routing";
 import { DocsShell } from "#tech-components/DocsShell";
 import { DocumentPage } from "#tech-components/DocumentPage";
 
@@ -53,6 +54,8 @@ export default async function BlogArticlePage({
   if (!isLocale(locale)) notFound();
   const document = await loadBlogPost(locale, slug);
   if (document === null) {
+    const movedVscodeArticle = legacyVscodeArticleHref(locale, slug);
+    if (movedVscodeArticle !== null) permanentRedirect(movedVscodeArticle);
     const moved = (await getDocsPages()).find(
       (page) => page.locale === locale && page.id === slug,
     );

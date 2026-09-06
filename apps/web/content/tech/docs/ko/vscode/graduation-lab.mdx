@@ -1,15 +1,24 @@
-# 08. IntelliJ 없이 버그 하나를 수정하고 제출하기
-
-[이전: 원격·팀 운영](07-remote-and-team-workflow.md) · [목차](README.md) · [자료실](resources.md)
+---
+documentKind: "tutorial"
+title: "테스트 디버깅부터 변경 제출까지"
+description: "실패 테스트를 재현하고 디버깅·수정·리팩터링·포맷·검사를 거쳐 검토 가능한 변경을 완성합니다."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "development-workflow"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://code.visualstudio.com/docs/debugtest/debugging"
+---
 
 최종 실습은 IDE를 실행했다는 확인을 넘어선다. **실패를 재현하고 원인을 관찰한 뒤,
-리팩터링과 포맷까지 완료한 변경을 제출할 수 있는지** 확인한다. 아래 과제는 이 시리즈의
+리팩터링과 포맷까지 완료한 변경을 제출할 수 있는지** 확인한다. 아래 과제는 이 문서 모음의
 편집 판단으로 설계한 작업 기준이다.
 
 ## 공통 문제: 음수 수량을 허용하는 가격 계산
 
 입력은 `price=1200`, `quantity=3`이고 정상 결과는 `3600`이다. `quantity=-1`은 음수 금액을
-만드는 대신 명시적 오류로 거부해야 한다. 04·05·06편의 `total` 구현은 의도적으로 이 검증이
+만드는 대신 명시적 오류로 거부해야 한다. 04·05·[Python](/ko/docs/vscode/python)의 `total` 구현은 의도적으로 이 검증이
 없다. **첫 테스트가 실패하는 것이 출발점**이다.
 
 | 언어   | 추가할 테스트                           | 수정할 동작                           |
@@ -54,7 +63,7 @@ def test_negative_quantity_is_rejected() -> None:
 10. **환경 재현**: 다른 Profile 또는 원격 창에서 같은 프로젝트·명령으로 재검증한다.
 
 기본 debugger 조작은 [공식 debugging 안내](https://code.visualstudio.com/docs/debugtest/debugging),
-언어별 launch 세부 값은 각 편의 공식 문서를 따른다.
+언어별 launch 세부 값은 각 가이드의 공식 문서를 따른다.
 
 ## 저장과 CLI가 같은 결과인지 증명한다
 
@@ -62,7 +71,7 @@ def test_negative_quantity_is_rejected() -> None:
 `git diff --exit-code` 전체를 사용하면 이번 포맷 변화와 기존 diff를 구분하지 못하므로
 파일 복사와 `cmp`로 이번 실습의 결과만 비교한다.
 
-아래는 06편 Python 프로젝트의 POSIX 셸 예제다. CLI 수정 전에 편집기에서 파일을 저장한다.
+아래는 [Python](/ko/docs/vscode/python) Python 프로젝트의 POSIX 셸 예제다. CLI 수정 전에 편집기에서 파일을 저장한다.
 
 ```sh
 cp main.py /tmp/vscode-lab-editor.py
@@ -81,7 +90,7 @@ Windows PowerShell에서는 별도 임시 폴더에 `Copy-Item`으로 보관하�
 
 다른 언어도 같은 구조로 검사한다. Java는 선택한 formatter task, TS는 팀의 fmt script,
 Go는 선택한 gofmt/goimports 조합을 사용한다. 두 번째 실행에서도 diff가 생기면
-[02편](02-format-lint-contract.md)의 제공자·설정 경로·버전 진단으로 돌아간다.
+[[포맷 충돌 해결](/ko/docs/vscode/format-lint-contract)](/ko/docs/vscode/format-lint-contract)의 제공자·설정 경로·버전 진단으로 돌아간다.
 
 ## 실제 프로젝트 전환 판단
 
@@ -117,9 +126,9 @@ editor → CLI → 재실행 파일 비교:
 남은 framework·도구 차이:
 ```
 
-## 문서 검증 기록
+## 이관 전 CLI 검증 기록
 
-2026-09-06, Linux amd64의 임시 프로젝트에 본문 code block을 추출해 검증했다.
+기존 가이드에 기록된 2026-09-06 Linux amd64 임시 프로젝트 검증 결과다. 이번 Docs 이관에서 이 모든 GUI·런타임 실험을 새로 수행했다는 뜻은 아니다.
 학습용 의존성은 임시 폴더에만 설치했고 이 저장소의 manifest·lockfile·VS Code 설정은 바꾸지 않았다.
 
 | 대상             | 실제 확인한 결과                                                           |

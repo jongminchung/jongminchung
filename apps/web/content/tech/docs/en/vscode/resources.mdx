@@ -1,0 +1,95 @@
+---
+documentKind: "reference"
+title: "Official Documentation and YouTube Resources"
+description: "Connect official documentation and videos from Fireship, freeCodeCamp, and official channels to concrete exercises."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "development-workflow"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://code.visualstudio.com/docs/getstarted/introvideos"
+---
+
+## How to use these references
+
+Checked on 2026-09-06. Use official VS Code and tool documentation for settings and behavior; use videos for UI workflows and practice. Historical video setup commands should be compared with current project versions.
+
+The titles and publishers of all ten YouTube links were checked through YouTube oEmbed. This is not a record of watching every video or verifying every transcript. Selection is based on the accompanying exercise, not a popularity ranking.
+
+## YouTube connected to exercises
+
+| Video and channel                                                                                                                         | Guide and exercise                                                                               |
+| ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| [25 VS Code Productivity Tips and Speed Hacks](https://www.youtube.com/watch?v=ifTF3ags0XI) — Fireship                                    | [Reproduce symbol navigation, Tasks, and Rename](/en/docs/vscode/workspace-and-navigation)       |
+| [Visual Studio Code Crash Course](https://www.youtube.com/watch?v=WPqXP_kLzpo) — freeCodeCamp.org                                         | [Learn the UI, then complete the navigation exercise](/en/docs/vscode/workspace-and-navigation)  |
+| [Code Customization 101: Supercharge VS Code with Profiles](https://www.youtube.com/watch?v=QjvvqR9KyVo) — Visual Studio Code             | [Create a profile and separate personal/team settings](/en/docs/vscode/workspace-and-navigation) |
+| [Working with Java in Visual Studio Code — Java for Beginners](https://www.youtube.com/watch?v=ZHHUZyy_fOo) — Microsoft Developer         | [Inspect project import, JDKs, and tests](/en/docs/vscode/java)                                  |
+| [From Zero to Hero: Coding Spring Boot Applications in Visual Studio Code](https://www.youtube.com/watch?v=ztc2C99hhvw) — SpringDeveloper | [Run a Spring service and debug a JUnit test](/en/docs/vscode/java)                              |
+| [How to Run Typescript in VS Code](https://www.youtube.com/watch?v=_hKYFKZPZmc) — Train To Code                                           | [Use a local compiler and source-map debugging](/en/docs/vscode/typescript)                      |
+| [Go - Writing and debugging fast, reliable and efficient software](https://www.youtube.com/watch?v=6r08zGi38Tk) — Visual Studio Code      | [Debug one Go test and compare CLI execution](/en/docs/vscode/go)                                |
+| [Getting Started with Python in VS Code (Official Video)](https://www.youtube.com/watch?v=D2cwvpJSBX4) — Visual Studio Code               | [Select an environment and inspect test variables](/en/docs/vscode/python)                       |
+| [Setting up VS Code for Python Beginners](https://www.youtube.com/watch?v=7FltByLPnrg) — Visual Studio Code                               | [Compare interpreter and terminal paths](/en/docs/vscode/python)                                 |
+| [The Story of VS Code — Official Documentary](https://www.youtube.com/watch?v=kHL3XzjpT5w) — Visual Studio Code                           | [Explain language-service, remote, and extension boundaries](/en/docs/vscode/vscode-design)      |
+
+Fireship's publisher chapters at 02:43, 07:14, and 10:50 connect to symbols, Tasks, and Rename. Use freeCodeCamp for an initial UI walkthrough and official language sessions to reproduce execution/testing in an existing project. Find newer material through the [official video guide](https://code.visualstudio.com/docs/getstarted/introvideos) and [VS Code channel](https://www.youtube.com/@code).
+
+## Editing and configuration
+
+| Official source                                                                             | Use it for                                       |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| [Settings](https://code.visualstudio.com/docs/configure/settings)                           | User, remote, workspace, and language precedence |
+| [Profiles](https://code.visualstudio.com/docs/configure/profiles)                           | Create, import, and export profiles              |
+| [Keyboard shortcuts](https://code.visualstudio.com/docs/configure/keybindings)              | Current keymap and command bindings              |
+| [Basic editing](https://code.visualstudio.com/docs/editing/codebasics)                      | Search, replacement, and multi-cursors           |
+| [Navigation](https://code.visualstudio.com/docs/editing/editingevolved)                     | Symbols, definitions, and references             |
+| [Refactoring](https://code.visualstudio.com/docs/editing/refactoring)                       | Rename and language-specific actions             |
+| [Tasks](https://code.visualstudio.com/docs/debugtest/tasks)                                 | Commands, cwd, matchers, background tasks        |
+| [Debug configuration](https://code.visualstudio.com/docs/debugtest/debugging-configuration) | Launch, attach, compounds, preLaunchTask         |
+| [Multi-root](https://code.visualstudio.com/docs/editing/workspaces/multi-root-workspaces)   | Folder settings and named variables              |
+| [Source Control](https://code.visualstudio.com/docs/sourcecontrol/overview)                 | Diff, stage, commit                              |
+| [Merge conflicts](https://code.visualstudio.com/docs/sourcecontrol/merge-conflicts)         | Review merge inputs and result                   |
+| [Performance](https://github.com/microsoft/vscode/wiki/Performance-Issues)                  | Process and extension diagnosis                  |
+
+## Formatting and linting
+
+| Official source                                                           | Use it for                               |
+| ------------------------------------------------------------------------- | ---------------------------------------- |
+| [EditorConfig](https://editorconfig.org/)                                 | Text properties and matching sections    |
+| [Oxfmt configuration](https://oxc.rs/docs/guide/usage/formatter/config)   | Discovery, ignores, EditorConfig support |
+| [Oxc extension](https://github.com/oxc-project/oxc-vscode)                | Executables and save actions             |
+| [Oxlint](https://oxc.rs/docs/guide/usage/linter/config)                   | Categories, rules, and overrides         |
+| [Prettier and linters](https://prettier.io/docs/integrating-with-linters) | Disable overlapping layout rules         |
+| [ESLint extension](https://github.com/microsoft/vscode-eslint)            | Working directories and fixes            |
+| [typescript-eslint](https://typescript-eslint.io/getting-started/)        | TypeScript lint configuration            |
+| [yamllint](https://yamllint.readthedocs.io/en/stable/configuration.html)  | YAML rules and scope                     |
+| [YAML extension](https://github.com/redhat-developer/vscode-yaml)         | Schema diagnostics                       |
+| [shfmt](https://github.com/mvdan/sh)                                      | Shell dialect and formatting             |
+| [ShellCheck](https://github.com/koalaman/shellcheck)                      | Shell diagnostics                        |
+| [Ruff configuration](https://docs.astral.sh/ruff/configuration/)          | Rules, width, imports                    |
+| [Ruff editor settings](https://docs.astral.sh/ruff/editors/settings/)     | Executable and config selection          |
+
+## Languages and remote work
+
+| Official source                                                                            | Use it for                          |
+| ------------------------------------------------------------------------------------------ | ----------------------------------- |
+| [Java projects](https://code.visualstudio.com/docs/java/java-project)                      | JDKs and project import             |
+| [Java debugging](https://code.visualstudio.com/docs/java/java-debugging)                   | Launch, attach, and breakpoints     |
+| [Java testing](https://code.visualstudio.com/docs/java/java-testing)                       | Test discovery and debugging        |
+| [Spring Boot](https://code.visualstudio.com/docs/java/java-spring-boot)                    | Initializr and Boot integration     |
+| [TypeScript debugging](https://code.visualstudio.com/docs/typescript/typescript-debugging) | Source maps and output files        |
+| [TypeScript editing](https://code.visualstudio.com/docs/typescript/typescript-editing)     | Current language-service settings   |
+| [Go extension](https://github.com/golang/vscode-go)                                        | Tool installation and configuration |
+| [gopls](https://go.dev/gopls/settings)                                                     | Analysis and formatting settings    |
+| [gofmt](https://pkg.go.dev/cmd/gofmt)                                                      | Formatting and file lists           |
+| [Python environments](https://code.visualstudio.com/docs/python/environments)              | Interpreter selection               |
+| [Python testing](https://code.visualstudio.com/docs/python/testing)                        | pytest discovery and debugging      |
+| [Python debugging](https://code.visualstudio.com/docs/python/debugging)                    | debugpy launch and module mode      |
+| [uv](https://docs.astral.sh/uv/guides/projects/)                                           | Lock, sync, and run                 |
+| [Remote SSH](https://code.visualstudio.com/docs/remote/ssh)                                | Hosts, extensions, and ports        |
+| [WSL](https://code.visualstudio.com/docs/remote/wsl)                                       | Linux tools with a Windows UI       |
+| [Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers)              | Images, mounts, and tools           |
+
+## Maintenance policy
+
+When keys, extension IDs, or runtime requirements change, update the example and CLI commands together. Update verification dates with their actual scope. Check unavailable videos before replacing them with current official material. Maintain the source documentation in this Docs area.

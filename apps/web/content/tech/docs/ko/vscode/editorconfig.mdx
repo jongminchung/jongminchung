@@ -1,0 +1,102 @@
+---
+documentKind: tutorial
+title: "EditorConfig와 저장 동작의 기준 세우기"
+description: "언어별 formatter·linter의 책임과 EditorConfig 설정을 정하고 VS Code 저장과 CLI가 같은 결과를 내는 실습 환경을 만듭니다."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "formatting", "linting"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://editorconfig.org/"
+---
+
+자료 확인일: 2026-09-06. 예제는 별도 `format-lab` 프로젝트에서 순서대로 적용합니다. 명령은 macOS·Linux·WSL의 프로젝트 루트 기준이며, 기존 설정에는 필요한 키를 병합합니다.
+
+## 저장 한 번이 무엇을 바꾸는지부터 정합니다
+
+저장 뒤에는 멀쩡해 보였는데 CI가 실패한다면, 확장의 수보다 **실행 파일·설정·대상 파일·작업 폴더**를 먼저 비교해야 합니다. 이 실습는 도구를 각 프로젝트에 직접 설치하고 작은 설정을 저장소에 남기는 방식으로 시작합니다. 공통 패키지는 여러 프로젝트가 실제로 같은 정책을 함께 변경해야 할 때 검토합니다.
+
+| 대상   | 포맷 담당   | 규칙 검사 담당 | 별도 확인                 |
+| ------ | ----------- | -------------- | ------------------------- |
+| JS·TS  | Oxfmt       | Oxlint         | TypeScript 타입 검사      |
+| YAML   | Oxfmt       | yamllint       | 스키마·실제 소비 프로그램 |
+| Shell  | shfmt       | ShellCheck     | bash -n, 실행 테스트      |
+| Go     | gofmt       | go vet·gopls   | go test                   |
+| Python | Ruff format | Ruff check     | 타입 검사·테스트          |
+
+formatter는 공백과 줄 배치를 바꿉니다. linter는 의심스러운 코드나 합의한 규칙 위반을 찾습니다. 자동 수정이 있는 linter도 있지만 모든 진단이 수정 가능한 것은 아닙니다. EditorConfig는 이 도구들을 실행하는 프로그램이 아니라 텍스트 편집 규칙을 전달하는 파일입니다.
+
+## 실습 폴더와 공통 텍스트 규칙
+
+VS Code와 터미널의 `code` 명령을 준비합니다. `code`가 없다면 명령 팔레트의 PATH 설치 명령을 사용하거나 VS Code의 폴더 열기로 같은 폴더를 엽니다.
+
+```sh
+mkdir format-lab
+cd format-lab
+git init
+mkdir -p .vscode src config scripts go-example python-example
+code --install-extension EditorConfig.EditorConfig
+code .
+```
+
+루트 `.editorconfig`를 다음처럼 만듭니다. Python은 4칸, Go와 Makefile은 탭을 쓰고 Markdown의 의미 있는 줄 끝 공백은 보존합니다. `max_line_length`는 도구가 지원할 때 전달되는 기준이며 모든 줄을 강제로 자르는 명령이 아닙니다.
+
+```ini
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+max_line_length = 80
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.py]
+indent_size = 4
+
+[*.{md,mdx}]
+trim_trailing_whitespace = false
+
+[*.go]
+indent_style = tab
+indent_size = tab
+
+[{Makefile,*.mk}]
+indent_style = tab
+indent_size = tab
+```
+
+EditorConfig를 지원하는 편집기는 경로에 맞는 섹션을 읽습니다. `root = true`는 상위 디렉터리 탐색을 멈추는 표준 규칙입니다. 다만 개별 formatter의 구현이 이 탐색 규칙을 모두 따르는지는 별도로 확인해야 합니다. [EditorConfig 규칙](https://editorconfig.org/)
+
+이 실습의 Oxfmt는 루트 한 곳에서 실행합니다. Oxfmt는 지원하는 EditorConfig 키를 fallback으로 읽으며 중첩 EditorConfig를 표준 방식으로 병합하지 않는 제한이 있습니다. Ruff의 폭과 들여쓰기는 [Ruff](/ko/docs/vscode/ruff) 실습의 `pyproject.toml`에 명시하고, gofmt의 들여쓰기는 Go 표준을 따릅니다. [Oxfmt의 EditorConfig 처리](https://oxc.rs/docs/guide/usage/formatter/config)
+
+## `.vscode/settings.json`은 실행 연결을 맡습니다
+
+```json
+{
+    "files.autoSave": "off",
+    "editor.formatOnSave": true,
+    "editor.formatOnSaveMode": "file",
+    "editor.detectIndentation": false
+}
+```
+
+여기에는 공통 저장 동작만 둡니다. 실제 formatter는 다음 실습부터 언어별로 지정합니다. `editor.detectIndentation: false`는 기존 파일의 들여쓰기 추측보다 설정을 따르려는 실습 선택입니다.
+
+User 설정, Workspace 설정, 언어별 설정은 서로 다른 범위입니다. 전역 formatter 하나를 지정해도 언어별 formatter나 다른 확장의 저장 Code Action이 남을 수 있습니다. 파일을 열고 **Format Document With… → Configure Default Formatter**로 실제 제공자를 확인합니다. [VS Code 설정 우선순위](https://code.visualstudio.com/docs/configure/settings)
+
+## 포맷 실습 경로
+
+1. [Oxfmt·Oxlint](/ko/docs/vscode/oxfmt-oxlint): JS·TS 포맷과 코드 진단을 구분합니다.
+2. [YAML](/ko/docs/vscode/yaml): Oxfmt, yamllint, 스키마 검사의 경계를 만듭니다.
+3. [Shell](/ko/docs/vscode/shell): shfmt로 모양을 고쳐도 ShellCheck 오류가 남는 이유를 재현합니다.
+4. [Go](/ko/docs/vscode/go-format): gofmt 검사 결과를 CI의 실패로 연결합니다.
+5. [Python](/ko/docs/vscode/ruff): Ruff의 format·check·import 정리를 연결합니다.
+6. [Tasks·CI](/ko/docs/vscode/tasks-ci): 같은 검사 명령을 편집기와 CI에서 실행합니다.
+
+완료 기준은 `.editorconfig`가 존재하는 것만이 아닙니다. Python 파일에서 새 줄이 4칸으로, Makefile에서 탭으로 입력되는지 상태 표시줄과 공백 표시로 확인합니다. 다음 실습에서 저장 → CLI 검사 → 재저장을 반복해 더 이상 변경되지 않는지 확인합니다.
+
+[다음 실습](/ko/docs/vscode/oxfmt-oxlint)

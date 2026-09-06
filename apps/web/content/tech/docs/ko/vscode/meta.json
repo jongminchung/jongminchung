@@ -1,0 +1,28 @@
+{
+  "title": "VS Code",
+  "defaultOpen": true,
+  "pages": [
+    "index",
+    "---시작과 검증---",
+    "workspace-and-navigation",
+    "graduation-lab",
+    "---언어별 개발---",
+    "java",
+    "typescript",
+    "go",
+    "python",
+    "---포맷·린트 실습---",
+    "editorconfig",
+    "oxfmt-oxlint",
+    "yaml",
+    "shell",
+    "go-format",
+    "ruff",
+    "tasks-ci",
+    "---운영과 참고 자료---",
+    "format-lint-contract",
+    "remote-and-team-workflow",
+    "resources",
+    "vscode-design"
+  ]
+}

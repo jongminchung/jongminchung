@@ -1,0 +1,103 @@
+---
+documentKind: tutorial
+title: "gofmt and Go Diagnostics in One Environment"
+description: "Connect Go formatting, inspect vet diagnostics and module paths, and make formatting differences fail CI."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "formatting", "linting"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://pkg.go.dev/cmd/gofmt"
+---
+
+Sources checked on 2026-09-06. Apply the examples sequentially in a separate `format-lab` project. Commands run from its root on macOS, Linux, or WSL. Merge the relevant keys into existing configuration files.
+
+## Separate gofmt from gopls
+
+The Go extension connects VS Code to tooling, gopls provides navigation and diagnostics, and gofmt provides standard formatting. This lab explicitly selects gofmt to compare editor output with CLI output. The extension normally uses gopls as its formatter. [Go extension settings](https://github.com/golang/vscode-go/wiki/settings)
+
+Install the Go SDK and create a module from the lab root. Skip initialization if a module already exists.
+
+```sh
+go version
+code --install-extension golang.Go
+cd go-example
+go mod init example.com/format-lab
+cd ..
+```
+
+Use **Go: Install/Update Tools** to install gopls when prompted. If the nested module is not discovered, add `go-example` as a workspace folder or open it directly. Run module commands in that same module directory.
+
+## Specify save transformations
+
+```json
+{
+    "[go]": {
+        "editor.defaultFormatter": "golang.go",
+        "editor.insertSpaces": false,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "never"
+        }
+    },
+    "go.formatTool": "gofmt"
+}
+```
+
+This example disables automatic import organization. You can enable gopls import actions later, but they perform additional transformations beyond gofmt. gofmt does not find and add missing imports.
+
+The EditorConfig tab preference aligns typing with Go output. Do not attempt to configure gofmt to use a two-space style.
+
+## A formatted Printf call can still be wrong
+
+Create `go-example/main.go`:
+
+```go
+package main
+import "fmt"
+func main(){fmt.Printf("%d\n", "hello")}
+```
+
+Run the commands individually:
+
+```sh
+gofmt -w go-example/main.go
+cd go-example
+go vet ./...
+go test ./...
+cd ..
+```
+
+gofmt repairs layout but leaves `%d` paired with a string. `go vet` reports the mismatch; `go test` can also reject it through its default vet checks. Change the verb to `%s`:
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	fmt.Printf("%s\n", "hello")
+}
+```
+
+Rerun vet and test. This tiny module can report that it has no test files. A passing command is not evidence of a behavioral test suite.
+
+## Make formatting differences fail CI
+
+`gofmt -l go-example` lists files requiring changes but does not fail merely because they differ. Save this as `scripts/check-go-format.sh` and run it with Bash. `set -e` propagates syntax failures; the explicit condition rejects layout differences. [gofmt command](https://pkg.go.dev/cmd/gofmt)
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+unformatted=$(gofmt -l go-example)
+if [[ -n "$unformatted" ]]; then
+  printf '%s\n' "$unformatted"
+  exit 1
+fi
+```
+
+Keep only authored code in this lab directory. Real repositories should define scopes for vendor and generated files. Align Go SDK versions locally and in CI; inspect `go version` and executable paths instead of looking for a gofmt version flag.
+
+Collapse main.go to one line and confirm the check fails. Save or run `gofmt -w` and confirm it passes. If editor diagnostics differ, inspect **Go: Locate Configured Go Tools** and gopls Output.
+
+[Previous](/en/docs/vscode/shell) · [Next](/en/docs/vscode/ruff)

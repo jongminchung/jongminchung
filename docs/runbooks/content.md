@@ -110,7 +110,7 @@ bun run --filter @jongminchung/web build
 
 현재 production build는 `validate-fumadocs-content.ts`에서 `enforceInventory: true`를
 사용한다. 따라서 새 글은 초안이어도 기존 corpus 개수 제한에 걸릴 수 있다.
-현재 기준은 언어별 Blog 33개, Docs 전체 39개·일반 문서 30개이며 최종 기준은
+현재 기준은 언어별 Blog 33개, Docs 전체 57개·일반 문서 47개이며 최종 기준은
 `lib/content-validation.ts`다. 새 파일 추가·삭제 시 다음을 함께 처리한다.
 
 1. 양 언어의 실제 파일 수와 추가한 종류를 확인한다. 번역 한쪽 누락을 개수 변경으로

@@ -1,0 +1,144 @@
+---
+documentKind: tutorial
+title: "Connect Saves, CLI Commands, Tasks, and CI"
+description: "Connect language checks through Bash, VS Code Tasks, and CI, and diagnose version, path, and configuration mismatches."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "formatting", "linting"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://code.visualstudio.com/docs/debugtest/tasks"
+---
+
+Sources checked on 2026-09-06. Apply the examples sequentially in a separate `format-lab` project. Commands run from its root on macOS, Linux, or WSL. Merge the relevant keys into existing configuration files.
+
+## Finish with one checking entry point
+
+Saving handles the current file; CLI checks cover the agreed repository scope. Share commands that read the same configuration instead of attempting to replay editor hooks in CI.
+
+| Entry point  | Responsibility                           | Success                         |
+| ------------ | ---------------------------------------- | ------------------------------- |
+| Editor save  | Language formatter and selected fixes    | Saved file passes CLI checks    |
+| CLI check    | Agreed repository scope                  | Every command exits zero        |
+| VS Code Task | Invoke CLI check                         | Same terminal output and status |
+| CI           | Install pinned environment and run check | Pass from a clean checkout      |
+
+## Create a checking script
+
+This requires the files from all prerequisite lab pages. Save as `scripts/check.sh`. It changes to the lab root relative to its own location, making configuration lookup independent of the caller's directory.
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+npm run fmt:check
+npm run lint
+npm run typecheck
+uv run --locked yamllint -c .yamllint.yaml -s config
+shfmt -ln bash -i 2 -d scripts
+shellcheck scripts/*.sh
+for script in scripts/*.sh; do
+  bash -n "$script"
+done
+bash scripts/check-go-format.sh
+(cd go-example && go vet ./... && go test ./...)
+uv run --locked ruff format --check python-example
+uv run --locked ruff check python-example
+```
+
+The script stops at the first failure. Go runs inside a subshell so Python commands still use the root. Include `check-go-format.sh` from [Go formatting](/en/docs/vscode/go-format).
+
+Keep write and fix options out of this entry point. The lab scopes YAML and Python checks to example directories, ShellCheck to immediate scripts, and Oxc to its configured exclusions. Update those scopes when adding directories.
+
+This script does not validate the YAML application schema or perform complete Python type checking. Add those commands when required. Running Go tests with no test files is also not a behavioral test suite.
+
+## Apply fixes separately
+
+First complete each example's manual corrections. Run these commands individually; resolve remaining diagnostics before continuing.
+
+```sh
+npm run lint:fix
+npm run fmt
+shfmt -ln bash -i 2 -w scripts
+gofmt -w go-example
+uv run --locked ruff check --fix python-example
+uv run --locked ruff format python-example
+bash scripts/check.sh
+git diff --check
+git diff
+```
+
+The first pass can also format configuration files and scripts. Review the diff, repeat the commands, and confirm no additional changes. `git diff --check` checks whitespace errors and does not replace language tools.
+
+## Let a VS Code Task call the entry point
+
+Append this object to the `tasks` array from [YAML](/en/docs/vscode/yaml):
+
+```json
+{
+    "label": "check",
+    "type": "process",
+    "command": "bash",
+    "args": ["scripts/check.sh"],
+    "options": { "cwd": "${workspaceFolder}" },
+    "group": { "kind": "test", "isDefault": true },
+    "problemMatcher": []
+}
+```
+
+Run **Tasks: Run Task → check**. This task uses terminal output; use [YAML](/en/docs/vscode/yaml)'s dedicated YAML task for navigable YAML diagnostics. A process task and argument array avoid constructing shell command strings. [VS Code Tasks](https://code.visualstudio.com/docs/debugtest/tasks)
+
+## Run the same commands in CI
+
+Provision Node.js/npm, uv/Python, the Go SDK, shfmt, and ShellCheck first. These are the commands **after tool installation**, not a complete runner provisioning workflow:
+
+```sh
+npm ci
+uv sync --locked
+bash scripts/check.sh
+```
+
+Commit both lockfiles. Pin Node, uv, Go, shfmt, and ShellCheck through the runner image or tool version configuration too. Resolving latest tools on every run cannot be made reproducible by JavaScript and Python lockfiles alone.
+
+Compare these outputs locally and in CI:
+
+```sh
+node --version
+npm --version
+npm exec -- oxfmt --version
+npm exec -- oxlint --version
+uv --version
+uv run --locked ruff --version
+uv run --locked yamllint --version
+go version
+shfmt --version
+shellcheck --version
+```
+
+## Diagnose differences in order
+
+| Symptom                                | Inspect                             | Action                                |
+| -------------------------------------- | ----------------------------------- | ------------------------------------- |
+| Saving and CLI repeatedly undo changes | Competing format and import actions | Assign language-specific providers    |
+| Only the terminal finds a tool         | Extension host PATH                 | Inspect Output and executable path    |
+| Only a subfolder differs               | cwd, nested configs, ignores        | Compare discovery and file scope      |
+| Local passes, CI fails                 | Versions, locks, untracked files    | Reproduce from a clean checkout       |
+| Only a remote window fails             | Local versus remote execution       | Install tools and extensions remotely |
+
+Keep personal absolute paths and OS-specific settings separate when sharing workspace configuration. Extension recommendations guide installation; they do not install CLI tools or enforce policies.
+
+## Final exercise
+
+Reintroduce TS `any`, a YAML duplicate key, unquoted Shell expansion, a mismatched Go Printf verb, and an unused Python import one at a time. Record which command fails and which still passes. After fixing them, compare **save → check Task → CLI check → clean-checkout CI check**.
+
+Sources were checked against official documentation and configuration contracts. Verify actual editor save actions, Problems navigation, and remote extension behavior in your environment using the exercises. A passing CLI check is not evidence that those GUI interactions were tested.
+
+## CLI verification record
+
+On 2026-09-06, the code blocks were extracted into a temporary project and exercised with Oxfmt 0.66.0, Oxlint 1.81.0, shfmt 3.12.0, ShellCheck 0.9.0, Go 1.27.1, Ruff 0.16.6, and yamllint 1.38.0. Oxc and TypeScript reused the workspace installation; Python tools were installed separately through uv.
+
+Checks covered expected failures, corrected examples, Shell output with spaces, the yamllint diagnostic regex, the combined `check.sh`, and no additional changes on a second format pass. VS Code GUI interactions and an actual CI runner were outside this verification.
+
+[Previous](/en/docs/vscode/ruff)

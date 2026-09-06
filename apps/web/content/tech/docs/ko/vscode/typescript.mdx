@@ -1,6 +1,15 @@
-# 04. TypeScript의 언어 서비스·검사·디버깅을 일치시키기
-
-[이전: Java](03-java.md) · [목차](README.md) · [다음: Go](05-go.md)
+---
+documentKind: "how-to"
+title: "TypeScript 언어 서비스와 디버깅"
+description: "프로젝트 compiler·언어 서비스·source map·테스트 실행기를 구분하고 작은 Node 프로젝트를 디버깅합니다."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "development-workflow"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://code.visualstudio.com/docs/typescript/typescript-debugging"
+---
 
 TS에서 편집기 밑줄, `tsc`, lint, 브라우저 오류는 서로 다른 검사다. 이 네 가지의 실행 환경을
 확인하면 VS Code의 기본 기능만으로도 탐색·리팩터링·디버깅 흐름을 만들 수 있다.
@@ -23,7 +32,7 @@ TypeScript 7의 native compiler·language server는 별도의 호환성 경계�
 Microsoft의 Native Preview 경로를 공식 안내와 함께 확인한다.
 [VS Code 팀의 TS 7 전환 기록](https://code.visualstudio.com/blogs/2026/06/26/iterating-faster-with-ts-7)
 
-이 저장소는 [TypeScript 7 호환성 보고서](../../apps/web/content/tech/docs/ko/fe/typescript-7-compatibility.mdx)가
+이 저장소는 [TypeScript 7 호환성 보고서](/ko/docs/fe/typescript-7-compatibility)가
 기준이다. compiler API를 사용하는 lint·plugin의 호환성도 별도로 확인하며 편집기 오류를 숨기려고
 타입 검사를 끄지 않는다.
 
@@ -34,12 +43,12 @@ Microsoft의 Native Preview 경로를 공식 안내와 함께 확인한다.
 [TypeScript 개요](https://code.visualstudio.com/docs/languages/typescript),
 [TS debugging](https://code.visualstudio.com/docs/typescript/typescript-debugging)
 
-| 프로젝트             | 추가할 확장                                        | 유지할 경계                       |
-| -------------------- | -------------------------------------------------- | --------------------------------- |
-| Prettier·ESLint      | `esbenp.prettier-vscode`, `dbaeumer.vscode-eslint` | 02편의 스타일 규칙 분리           |
-| 이 저장소의 Oxc      | `oxc.oxc-vscode`                                   | 기존 Oxfmt·Oxlint 설정 사용       |
-| React·Next           | 사용하는 framework에 필요한 기능만                 | built-in TS 기능과 중복 여부 확인 |
-| Vitest·Playwright 등 | 실제 test runner의 공식 통합                       | 테스트 실행과 타입 검사 구분      |
+| 프로젝트             | 추가할 확장                                        | 유지할 경계                                                               |
+| -------------------- | -------------------------------------------------- | ------------------------------------------------------------------------- |
+| Prettier·ESLint      | `esbenp.prettier-vscode`, `dbaeumer.vscode-eslint` | [포맷 충돌 해결](/ko/docs/vscode/format-lint-contract)의 스타일 규칙 분리 |
+| 이 저장소의 Oxc      | `oxc.oxc-vscode`                                   | 기존 Oxfmt·Oxlint 설정 사용                                               |
+| React·Next           | 사용하는 framework에 필요한 기능만                 | built-in TS 기능과 중복 여부 확인                                         |
+| Vitest·Playwright 등 | 실제 test runner의 공식 통합                       | 테스트 실행과 타입 검사 구분                                              |
 
 ## 타입을 보면서 코드를 읽는다
 
@@ -56,7 +65,7 @@ CodeLens도 필요한 경우에만 켠다. 현재 설정 키는 각각 `js/ts.in
 
 React에서는 컴포넌트를 별도 파일로 옮긴 뒤 props 타입, JSX import, 실제 화면 테스트를 확인한다.
 Next의 Server/Client Component 경계와 route 생성 타입은 framework build도 검사해야 한다.
-이 저장소에서는 [Web 가이드](../web/README.md)의 명령을 사용한다.
+이 저장소에서는 [Web 가이드](https://github.com/jongminchung/jongminchung/blob/main/docs/web/README.md)의 명령을 사용한다.
 
 ## 디버깅: 먼저 작은 Node ESM 프로젝트
 
@@ -159,7 +168,7 @@ SSR 앱은 서버에서 실행되는 함수와 브라우저 event handler에 각
 Bun으로 실행하는 프로세스에는 Node inspector 설정을 그대로 적용하지 않는다. Bun의
 공식 debugging 절차를 따르고, 브라우저 디버깅은 별도 세션으로 다룬다.
 [Bun debugging](https://bun.sh/docs/runtime/debugger)
-이 저장소의 Next main·standalone은 Bun이라는 점은 [런타임 안내](../web/bun-standalone-runtime.md)를 따른다.
+이 저장소의 Next main·standalone은 Bun이라는 점은 [런타임 안내](https://github.com/jongminchung/jongminchung/blob/main/docs/web/bun-standalone-runtime.md)를 따른다.
 
 테스트는 실제 runner의 CLI와 통합을 사용한다. Vitest·Jest·Bun test 설정을 서로 복사하지 않는다.
 이 저장소의 focused 검사 예시는 다음과 같다.

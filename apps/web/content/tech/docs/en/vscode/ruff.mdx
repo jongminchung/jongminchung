@@ -1,0 +1,119 @@
+---
+documentKind: tutorial
+title: "Python Formatting and Linting with Ruff"
+description: "Connect Ruff formatting, linting, and import organization to the same uv environment used by VS Code."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "formatting", "linting"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://docs.astral.sh/ruff/configuration/"
+---
+
+Sources checked on 2026-09-06. Apply the examples sequentially in a separate `format-lab` project. Commands run from its root on macOS, Linux, or WSL. Merge the relevant keys into existing configuration files.
+
+## Ruff format and check are different commands
+
+The formatter owns layout; the linter applies selected rules. Formatting does not necessarily remove unused imports. This lab assigns import organization to Ruff's I rules and keeps Pylance for type information and navigation.
+
+Continue using `pyproject.toml` and `uv.lock` from [YAML](/en/docs/vscode/yaml). If starting here, first run `uv init --bare` in the lab root. [uv project dependencies](https://docs.astral.sh/uv/concepts/projects/dependencies/)
+
+```sh
+uv add --dev --bounds exact ruff
+uv sync --locked
+uv run --locked ruff --version
+code --install-extension ms-python.python
+code --install-extension ms-python.vscode-pylance
+code --install-extension charliermarsh.ruff
+```
+
+Select this project's `.venv` with **Python: Select Interpreter**. Python interpreter selection and Ruff executable selection are separate; verify both.
+
+## Put Python policies in `pyproject.toml`
+
+Append this below the existing project and dependency sections. The target version describes Python syntax compatibility; it does not install an interpreter.
+
+```toml
+[tool.ruff]
+line-length = 80
+indent-width = 4
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+```
+
+Explicitly match [EditorConfig](/en/docs/vscode/editorconfig)'s width and indentation. Do not assume EditorConfig alone configures Ruff. I rules organize imports; F includes diagnostics such as unused imports. [Ruff configuration](https://docs.astral.sh/ruff/configuration/)
+
+## Run the project Ruff from the editor
+
+Merge into `.vscode/settings.json`. This path is for macOS, Linux, or WSL; native Windows uses `.venv/Scripts/ruff.exe`.
+
+```json
+{
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.codeActionsOnSave": {
+            "source.fixAll.ruff": "explicit",
+            "source.organizeImports.ruff": "explicit"
+        }
+    },
+    "ruff.path": ["${workspaceFolder}/.venv/bin/ruff"]
+}
+```
+
+`ruff.path` selects an executable; `ruff.configuration` selects configuration. Avoid duplicating rule policy in editor-only settings. [Ruff editor settings](https://docs.astral.sh/ruff/editors/settings/)
+
+Remove competing Black, isort, or generic import save actions for Python. Keep Pylance type checking. [Ruff VS Code integration](https://github.com/astral-sh/ruff-vscode)
+
+## Observe diagnostics after formatting
+
+Create `python-example/report.py`:
+
+```python
+import sys
+from pathlib import Path
+
+def filename(path: str) -> str:
+ return Path(path).name
+
+print(filename('reports/daily.csv'))
+```
+
+Run commands individually. Formatting leaves `sys`; the next check reports it. Apply fixes and format again.
+
+```sh
+uv run --locked ruff format python-example
+uv run --locked ruff check python-example
+uv run --locked ruff check --fix python-example
+uv run --locked ruff format python-example
+uv run --locked ruff format --check python-example
+uv run --locked ruff check python-example
+uv run --locked python python-example/report.py
+```
+
+The resulting file prints `daily.csv`:
+
+```python
+from pathlib import Path
+
+
+def filename(path: str) -> str:
+    return Path(path).name
+
+
+print(filename("reports/daily.csv"))
+```
+
+Some diagnostics require manual decisions. Review unsafe fixes before adding them to any automated workflow. [Ruff fix safety](https://docs.astral.sh/ruff/linter/#fix-safety)
+
+Try `print(filename(123))`. Type annotations do not turn Ruff into a complete type checker. A separate type checker is needed, and this call also fails at runtime. Restore the string input afterward.
+
+Finish when CLI formatting and lint checks pass after a save, a second save makes no new changes, and Ruff Output identifies the project's executable. Remote environments need their own `.venv` too.
+
+[Previous](/en/docs/vscode/go-format) · [Next](/en/docs/vscode/tasks-ci)

@@ -1,6 +1,17 @@
-# 05. Go에서 gopls·Delve·테스트를 하나의 흐름으로 쓰기
+---
+documentKind: "how-to"
+title: "Go 모듈·gopls·Delve와 테스트"
+description: "Go 프로젝트 인식부터 테스트 디버깅, race 검사, 프로파일링과 여러 모듈 운영까지 연결합니다."
+publishedAt: "2026-09-06"
+updatedAt: "2026-09-06"
+verifiedAt: "2026-09-06"
+tags: ["vscode", "development-workflow"]
+status: "stable"
+publicationStatus: "published"
+sourceUrl: "https://github.com/golang/vscode-go"
+---
 
-[이전: TypeScript](04-typescript.md) · [목차](README.md) · [다음: Python](06-python.md)
+이 문서는 단일 Go 모듈의 개발·디버깅 가이드입니다. 포맷만 먼저 연결하려면 [gofmt 실습](/ko/docs/vscode/go-format)을 사용합니다. 여기서는 import 정리도 gopls에 맡기므로 두 실습의 저장 설정을 동시에 병합하지 않습니다.
 
 Go는 표준 CLI를 그대로 IDE에 연결하기 좋은 언어다. 모듈을 잘못 열거나 Go 버전이 어긋나면
 이 장점이 사라진다. 먼저 터미널의 Go, 언어 서버 gopls, 디버거 Delve가 같은 프로젝트를 보는지 확인한다.
@@ -69,7 +80,7 @@ goimports의 `-l`도 같은 방식으로 다룬다.
 [gofmt](https://pkg.go.dev/cmd/gofmt), [goimports](https://pkg.go.dev/golang.org/x/tools/cmd/goimports)
 
 gofumpt를 팀 기준으로 채택했다면 gopls의 gofumpt 옵션과 CLI 버전을 함께 맞춘다.
-VS Code에서만 더 엄격한 포맷을 쓰는 구성이 되지 않도록 02편의 두 번 실행 검사를 수행한다.
+VS Code에서만 더 엄격한 포맷을 쓰는 구성이 되지 않도록 [포맷 충돌 해결](/ko/docs/vscode/format-lint-contract)의 두 번 실행 검사를 수행한다.
 
 ## 작은 모듈로 탐색·테스트·디버깅 익히기
 
