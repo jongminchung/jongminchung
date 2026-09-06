@@ -1,0 +1,194 @@
+# 02. 저장해도 코드가 싸우지 않는 formatter·lint 계약
+
+[이전](01-workspace-and-navigation.md) · [목차](README.md) · [다음: Java](03-java.md)
+
+저장하면 작은따옴표가 큰따옴표로 바뀌고, CLI를 실행하면 다시 돌아온다면 도구를 더 설치할
+문제가 아니다. **같은 파일의 같은 변환을 누가 소유하는지** 먼저 정해야 한다.
+`fmt`는 특정 제품 이름이 아니라 프로젝트가 정의한 명령 이름일 수 있다. 실제 script를 읽는다.
+
+## 파일마다 세 가지 책임을 적는다
+
+formatter는 배치와 공백을, lint는 코드 규칙을, type checker는 타입 계약을 검사한다.
+import 정렬은 formatter·linter·언어 서버 모두 제공할 수 있어 별도로 한 소유자를 정한다.
+다음 표는 학습용 권장 조합이다. 기존 팀의 규칙이 있으면 그 조합을 유지한다.
+
+| 대상                     | 포맷               | import 정리                                  | 오류·정적 분석                       |
+| ------------------------ | ------------------ | -------------------------------------------- | ------------------------------------ |
+| Java, Eclipse 스타일     | JDT formatter      | Java 언어 서버                               | Java compiler·팀 Checkstyle/SpotBugs |
+| Java, Google Java Format | 빌드의 Spotless    | Spotless에 합의한 단계                       | Java compiler·팀 분석 도구           |
+| TS, Prettier 팀          | Prettier           | TS 명령을 수동 사용하거나 선택한 ESLint 규칙 | TypeScript·ESLint                    |
+| TS, 이 저장소            | Oxfmt              | Oxfmt의 기존 import 설정                     | TypeScript·Oxlint                    |
+| Go                       | gopls의 gofmt 방식 | gopls                                        | compiler·gopls·go vet·팀 lint        |
+| Python                   | Ruff formatter     | Ruff의 I 규칙                                | Ruff·Pylance/Pyright                 |
+
+Prettier와 lint를 같이 쓸 때 겹치는 스타일 규칙은 끈다. Prettier를 ESLint 규칙으로
+감싸 실행하는 구성이 꼭 필요한 것은 아니다.
+[Prettier의 linter 통합 안내](https://prettier.io/docs/integrating-with-linters)
+
+## `.editorconfig`는 모든 도구의 설정 파일이 아니다
+
+들여쓰기·LF·최종 개행 등 공통 기준은 `.editorconfig`에 둔다. 하지만 formatter가 읽는
+키와 우선순위는 도구마다 다르다. Python Ruff의 `line-length`는 `pyproject.toml`에도
+맞춰야 하고 Java formatter profile은 별도로 필요할 수 있다. CLI에 `--print-width`를
+따로 주면서 편집기만 다른 설정을 읽게 만들지 않는다.
+
+이 저장소의 [`.editorconfig`](../../.editorconfig)는 Markdown·Python 4칸, Go·Makefile 탭을
+구분한다. Markdown 줄 끝 공백은 의미가 있으므로 일괄 제거하지 않는다.
+Oxfmt도 읽는 EditorConfig 속성과 중첩 파일 처리에 제한이 있다.
+[Oxfmt 설정](https://oxc.rs/docs/guide/usage/formatter/config)
+
+## 저장 동작을 명시한다
+
+`editor.defaultFormatter`는 Format Document의 제공자만 정한다. 다른 확장의
+`source.fixAll`, import 정리, 저장 시 실행 script까지 모두 끄지는 않는다.
+일반 `source.fixAll`보다 `source.fixAll.eslint`·`source.fixAll.ruff`처럼 소유자가 드러나는
+설정을 사용한다. 사용하지 않을 기존 제공자의 키도 같은 언어 범위에서 제거하거나 `never`로 둔다.
+
+`explicit`은 명시적 저장에서 실행한다. `always`는 지원되는 자동 저장 이벤트까지 포함하지만
+모든 자동 저장 방식이 수동 저장과 같다고 가정하지 않는다. 처음에는 Auto Save를 끄고
+Ctrl/Cmd+S로 검증한 뒤 팀이 쓰는 자동 저장 방식도 따로 시험한다.
+[VS Code 저장 Code Actions](https://code.visualstudio.com/updates/v1_83),
+[ESLint 확장의 저장 설정](https://github.com/microsoft/vscode-eslint)
+
+언어별 설정은 일반 설정보다 우선한다. 개인 `[typescript]` 설정은 workspace의 일반
+formatter 설정보다 우선할 수 있다. `[javascript][typescript]` 묶음과 `[typescript]`를
+같은 키라고 생각하지 않는다. 문제를 좁힐 때는 파일의 언어 ID별 블록으로 작성한다.
+[설정 우선순위](https://code.visualstudio.com/docs/configure/settings)
+
+## Prettier + ESLint: TS 전용 학습 예제
+
+**이 저장소에 설치하는 명령이 아니다.** 별도의 TS 프로젝트에서 실행하며 기존 파일에는
+필요한 항목만 병합한다. npm을 예시로 사용하되 프로젝트의 package manager와 lockfile은 하나로 유지한다.
+
+```sh
+npm install --save-dev --save-exact prettier eslint @eslint/js typescript-eslint eslint-config-prettier typescript
+```
+
+`eslint.config.mjs`에서 스타일 충돌 해제 설정을 마지막에 둔다. 이 예제는 TS의 기본
+권장 lint이며 타입 정보를 사용하는 모든 검사까지 켜지는 것은 아니다.
+[typescript-eslint 시작 설정](https://typescript-eslint.io/getting-started/),
+[eslint-config-prettier](https://github.com/prettier/eslint-config-prettier)
+
+```js
+import js from "@eslint/js";
+import tseslint from "typescript-eslint";
+import eslintConfigPrettier from "eslint-config-prettier/flat";
+
+export default [
+    { ignores: ["dist/**", "coverage/**", ".next/**"] },
+    js.configs.recommended,
+    ...tseslint.configs.recommended,
+    eslintConfigPrettier,
+];
+```
+
+`.prettierrc.json`와 `.prettierignore`를 둔다. 전자는 학습용 스타일 선택이고 후자는 검사 대상 경계다.
+
+```json
+{
+    "singleQuote": false,
+    "semi": true
+}
+```
+
+```gitignore
+node_modules/
+dist/
+coverage/
+.next/
+```
+
+`.vscode/settings.json`의 TS·TSX 예제다. JS·JSX도 사용하는 프로젝트는
+`[javascript]`·`[javascriptreact]`에 같은 편집기 키를 추가하고 ESLint 환경 설정도 구성한다.
+Prettier는 로컬 package를 사용하게 설치하고 실제 로딩 경로를 Output에서 확인한다.
+`prettier.requireConfig`는 설정 없는 다른 폴더를 우연히 포맷하는 것을 줄인다.
+[Prettier 확장 설정](https://github.com/prettier/prettier-vscode)
+
+```json
+{
+    "prettier.requireConfig": true,
+    "eslint.format.enable": false,
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": false,
+        "editor.formatOnType": false,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "never",
+            "source.fixAll.eslint": "explicit",
+            "source.organizeImports": "never"
+        }
+    },
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": false,
+        "editor.formatOnType": false,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "never",
+            "source.fixAll.eslint": "explicit",
+            "source.organizeImports": "never"
+        }
+    }
+}
+```
+
+이 예제는 저장 시 자동 import 정렬을 끈다. 필요할 때 Organize Imports를 명시적으로 실행한다.
+import 순서를 CI에서도 강제하려면 ESLint 규칙 하나를 선택하고, TS 저장 action·Prettier import
+plugin 등 다른 정렬기를 함께 켜지 않는다. `eslint-config-prettier`는 모든 import plugin의
+충돌을 자동 해결하는 도구가 아니다.
+
+`package.json`의 scripts에 다음을 병합한다. `fmt`는 수정하고 `check`는 검사만 한다.
+
+```json
+{
+    "scripts": {
+        "fmt": "eslint . --fix && prettier . --write",
+        "fmt:check": "prettier . --check",
+        "lint": "eslint . --max-warnings 0",
+        "typecheck": "tsc --noEmit",
+        "check": "npm run fmt:check && npm run lint && npm run typecheck"
+    }
+}
+```
+
+CI에서는 `npm ci` 후 `npm run check`와 프로젝트 테스트를 실행한다. 자동 수정은 CI 밖에서
+리뷰한다. formatter와 lint의 실행 순서는 하나로 기록하되, 저장 action의 내부 순서에
+의존해 서로 충돌하는 규칙을 유지하지 않는다.
+
+## 이 저장소의 Oxfmt + Oxlint
+
+기존 [VS Code 설정](../../.vscode/settings.json)은 `oxc.oxc-vscode`를 사용한다.
+프로젝트에 설치된 Oxfmt를 읽는 것이 공식 통합 방식이며, CLI와 편집기에서 설정 파일과 버전을
+함께 확인한다. [Oxfmt 편집기 연결](https://oxc.rs/docs/guide/usage/formatter/editors)
+
+문제가 생기면 Prettier를 이 workspace에서 비활성화하고 개인의 단일 언어 formatter override를
+확인한다. TS Organize Imports와 Oxfmt import 정렬을 저장 시 중복 실행하지 않는다.
+저장소 루트의 아래 명령을 최종 기준으로 사용한다.
+
+```sh
+bun run fmt:check
+bun run lint
+bun run typecheck
+```
+
+## 두 번 실행해도 같은가
+
+먼저 변경을 검토할 수 있는 학습 파일 하나를 만든다. 형식 오류·사용하지 않는 변수·뒤섞인
+import를 넣는다. 저장 한 번 → CLI 자동 수정 → 저장 두 번 → CLI 자동 수정 두 번의 결과를
+비교한다. 저장 결과가 CLI에 의해 다시 바뀌거나 두 번째 실행에서 변화가 생기면 미완성이다.
+포맷만 통과해도 타입 오류·미사용 변수는 남을 수 있으므로 검사 명령도 실행한다.
+
+| 증상                      | 확인 순서                                                        |
+| ------------------------- | ---------------------------------------------------------------- |
+| 저장할 때마다 줄바꿈 왕복 | Format Document With 제공자 → Output의 설정 경로 → 로컬 버전     |
+| import만 계속 바뀜        | 언어 서버·lint·formatter plugin 중 중복 소유자                   |
+| CLI만 실패                | 실행 cwd → ignore → 설정 파일 → 잠긴 package 버전                |
+| 저장 수정이 누락됨        | Auto Save 종류 → Code Actions 실행값 → 확장 Output 오류          |
+| TSX만 다름                | `[typescriptreact]`와 사용자 설정                                |
+| formatter가 두 번 실행됨  | Run on Save 확장·파일 watcher·Git hook도 확인                    |
+| 저장이 느림               | 전체 workspace 검사/타입 기반 lint를 저장 경로에서 분리할지 검토 |
+
+추가 옵션으로 증상을 가리기 전에 `Format Document With...`에서 한 제공자를 수동 실행한다.
+그 결과가 정상이라면 저장 시 개입하는 action을 하나씩 켠다. 확장을 모두 재설치하는 것보다
+어느 단계가 파일을 바꾸는지 확인하는 편이 원인을 보존한다.

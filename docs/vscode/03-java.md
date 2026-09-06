@@ -1,0 +1,221 @@
+# 03. Java·Spring Boot를 프로젝트 모델부터 연결하기
+
+[이전](02-format-lint-contract.md) · [목차](README.md) · [다음: TypeScript](04-typescript.md)
+
+Java에서 체감 차이를 만드는 것은 자동 완성 목록보다 **빌드 파일을 정확히 읽었는가**다.
+클래스는 보이는데 Spring 타입·테스트·생성 코드가 빨갛다면 먼저 JDK와 프로젝트 import를 고친다.
+
+## 필요한 확장과 JDK
+
+기본은 [Extension Pack for Java](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-pack)다.
+언어 지원 `redhat.java`, 디버거 `vscjava.vscode-java-debug`, 테스트
+`vscjava.vscode-java-test`, 프로젝트·Maven 지원을 연결한다.
+Gradle 작업 UI가 필요하면 `vscjava.vscode-gradle`, Spring 프로젝트에는
+[Spring Boot Extension Pack](https://marketplace.visualstudio.com/items?itemName=vmware.vscode-boot-dev-pack)을 추가한다.
+[Java 개요](https://code.visualstudio.com/docs/languages/java),
+[빌드 도구 지원](https://code.visualstudio.com/docs/java/java-build)
+
+JDK는 세 관점에서 확인한다. 언어 서버를 실행하는 Java, Maven/Gradle을 실행하는 Java,
+애플리케이션을 컴파일·실행하는 Java가 같을 필요는 없지만 서로 호환되어야 한다.
+Red Hat 확장의 지원 플랫폼용 배포에는 언어 서버용 JRE가 포함된다. universal 배포 등
+직접 tooling JDK를 지정하는 경우 현재 문서의 최소 요구는 Java 21이다. 프로젝트 JDK와
+혼동해 오래된 서비스의 target을 임의로 올리지 않는다.
+[확장의 Tooling JDK·Project JDK 설명](https://github.com/redhat-developer/vscode-java)
+
+프로젝트 루트에서 실행한다. wrapper가 있는 빌드 도구 **하나만** 선택한다.
+
+```sh
+java -version
+./mvnw -version
+./mvnw test
+```
+
+Gradle 프로젝트라면 다음으로 대체한다. Windows에서는 `mvnw.cmd`·`gradlew.bat`를 사용한다.
+
+```sh
+java -version
+./gradlew --version
+./gradlew test
+```
+
+`Java: Configure Java Runtime`에서 프로젝트별 JDK를 확인한다. 개인 설치 위치가 필요하면
+User settings의 `java.configuration.runtimes`에 실제 경로를 등록한다. `default`는 unmanaged
+폴더의 기본값이며 Maven/Gradle의 toolchain·release 설정을 대신하지 않는다.
+[Java 프로젝트 관리](https://code.visualstudio.com/docs/java/java-project)
+
+## 프로젝트 import가 끝난 뒤 편집한다
+
+1. `pom.xml` 또는 Gradle settings 파일이 있는 루트를 연다. 멀티모듈은 aggregator 루트를 연다.
+2. Java Projects에 예상 모듈과 dependency가 나타날 때까지 기다린다.
+3. Lightweight Mode라면 Standard Mode로 전환해 프로젝트 분석을 사용한다.
+4. wrapper 테스트와 편집기의 테스트 목록이 같은 모듈을 가리키는지 확인한다.
+5. 빌드 파일 변경 뒤에는 Java 프로젝트 reload/import를 수행한다.
+
+Spring Initializr로 시작한다면 Java·Spring Boot 버전, Maven/Gradle, 의존성을 선택해
+생성한 프로젝트를 연다. 이미 회사 저장소가 있다면 새 프로젝트를 다시 만들지 않고 기존
+wrapper·프로파일·의존성 잠금 정책을 유지한다.
+[Spring Boot 지원](https://code.visualstudio.com/docs/java/java-spring-boot)
+
+## IntelliJ에서 자주 쓰던 탐색·리팩터링
+
+| 작업             | VS Code에서 실행                      | 확인할 결과                                |
+| ---------------- | ------------------------------------- | ------------------------------------------ |
+| 구현 클래스 찾기 | Go to Implementations·Type Hierarchy  | 구현체와 상속 경계                         |
+| 호출 경로 보기   | Call Hierarchy·References             | 실제 호출자와 override                     |
+| 메서드 추출      | 코드 선택 → Refactor → Extract Method | 인자·반환값과 접근 범위                    |
+| 생성 코드        | Source Action의 생성 명령             | constructor·getter/setter·override 등 제안 |
+| 이름 변경        | F2 → diff 검토                        | Java 참조 외 설정·직렬화 이름은 별도 검색  |
+| API 설명         | Hover·Go to Definition                | 소스·Javadoc 접근                          |
+
+메뉴는 현재 문맥에 따라 달라진다. 실제 제공되는 리팩터링은
+[Java refactoring 목록](https://code.visualstudio.com/docs/java/java-refactoring)을 기준으로 확인한다.
+특히 DTO 이름 변경은 Jackson annotation, JSON fixture, OpenAPI 파일까지 테스트해야 한다.
+언어 수준 Rename 성공만으로 외부 API 호환성을 판단하지 않는다.
+
+## Run Configuration을 파일로 만든다
+
+먼저 `main` 위의 Run/Debug CodeLens로 한 번 실행한다. 반복할 실행은 `launch.json`에 기록한다.
+아래는 `com.example.App`이라는 main 클래스가 있는 프로젝트 예제다. 자신의 FQCN으로 바꾸고,
+같은 클래스가 여러 모듈에 있으면 Java Projects의 이름을 확인해 `projectName`도 지정한다.
+
+```json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Java: application",
+            "request": "launch",
+            "mainClass": "com.example.App",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "args": ["--mode", "local"],
+            "vmArgs": "-Dfile.encoding=UTF-8"
+        },
+        {
+            "type": "java",
+            "name": "Java: attach localhost:5005",
+            "request": "attach",
+            "hostName": "127.0.0.1",
+            "port": 5005
+        }
+    ]
+}
+```
+
+`args`는 main의 인자이고 `vmArgs`는 JVM 인자다. Spring profile은 Spring Boot 앱에서만
+`--spring.profiles.active=local` 같은 애플리케이션 인자로 추가한다. `.env`를 모든 Java 실행기가
+자동으로 읽는다고 가정하지 말고 launch의 `env`나 팀의 실행 wrapper로 주입한다.
+인증값은 공유 launch 파일에 쓰지 않는다.
+
+외부 JVM에 붙으려면 그 프로세스가 먼저 JDWP를 열어야 한다. JAR 경로를 실제 산출물로 바꾸어 실행한다.
+
+```sh
+java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=127.0.0.1:5005 -jar build/libs/app.jar
+```
+
+attach 설정을 F5로 시작한 뒤 브레이크포인트에서 지역 변수·Watch·Call Stack을 확인한다.
+조건부 breakpoint와 exception breakpoint로 실패하는 요청만 멈춘다. Debug Console의
+표현식 평가가 함수를 호출하면 프로그램 상태를 바꿀 수 있으므로 관찰 대상도 주의해서 고른다.
+Hot Code Replace는 지원되는 변경에 사용하고 클래스 구조·의존성 변경까지 재시작 없이
+적용된다고 기대하지 않는다. [Java debugging](https://code.visualstudio.com/docs/java/java-debugging)
+
+## 테스트 한 개에서 전체 검증으로 넓힌다
+
+Testing 뷰에서 JUnit/TestNG 테스트를 검색하고 실패 테스트의 Debug를 누른다.
+입력·실제값·기대값을 확인한 뒤 수정하고, 메서드 → 클래스 → 모듈 → 전체 테스트 순으로 넓힌다.
+실행기와 framework의 지원 범위는 [Java testing 문서](https://code.visualstudio.com/docs/java/java-testing)를 따른다.
+
+CLI 재현도 남긴다. 아래 클래스·메서드는 자신의 테스트로 바꾼다.
+
+```sh
+./mvnw -Dtest=PriceServiceTest#rejectsNegativeQuantity test
+```
+
+Gradle에서 대응하는 명령은 다음과 같다.
+
+```sh
+./gradlew test --tests 'com.example.PriceServiceTest.rejectsNegativeQuantity'
+```
+
+IDE 테스트 실행은 빌드의 별도 integration-test task나 Maven Failsafe lifecycle 전체와 같지 않을
+수 있다. 제출 전에는 팀의 `verify`·`check`와 통합 테스트 명령을 실행한다.
+DB가 필요한 테스트는 개발 DB·컨테이너와 profile이 명시되어야 한다.
+
+## 포맷: Eclipse와 Google Java Format 중 하나
+
+**Eclipse formatter를 팀 기준으로 쓰는 경우** 다음 설정을 사용한다. 기존 Eclipse XML profile이
+있다면 저장소에 두고 `java.format.settings.url`·`java.format.settings.profile`로 연결한다.
+CI의 formatter도 같은 엔진·버전·profile을 사용하고 결과를 비교한다. IntelliJ 전용 code style
+XML을 Eclipse formatter 파일처럼 넣지 않는다.
+[Java formatting](https://code.visualstudio.com/docs/java/java-linting)
+
+```json
+{
+    "[java]": {
+        "editor.defaultFormatter": "redhat.java",
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": false,
+        "editor.formatOnType": false,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "never",
+            "source.organizeImports": "explicit"
+        }
+    }
+}
+```
+
+**Spotless의 Google Java Format이 팀 기준인 경우** JDT 저장 포맷과 import action을 끈다.
+빌드에서 formatter·import 제거·정렬 단계를 합의하고 그 task를 명시적으로 실행한다.
+Checkstyle은 포맷 엔진이 아니므로 Google Java Format과 충돌하는 공백·줄바꿈 규칙을 별도로
+정리해야 한다. [Spotless Gradle 설정](https://github.com/diffplug/spotless/tree/main/plugin-gradle)
+
+```json
+{
+    "[java]": {
+        "editor.formatOnSave": false,
+        "editor.formatOnPaste": false,
+        "editor.formatOnType": false,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "never",
+            "source.organizeImports": "never"
+        }
+    }
+}
+```
+
+Spotless plugin이 **이미 설정된 Gradle 프로젝트**에서만 다음 명령이 존재한다.
+설정이 없다면 위 공식 문서로 plugin과 formatter 버전을 먼저 빌드에 고정한다.
+
+```sh
+./gradlew spotlessApply
+./gradlew spotlessCheck check
+```
+
+편집기에서 실행하려면 Tasks에 같은 명령을 연결한다. formatter 확장을 추가로 쓰고 싶다면
+같은 버전·옵션·import 정책으로 저장 결과와 `spotlessApply` 결과가 동일한지 먼저 시험한다.
+
+## Spring에서 더 확인할 것
+
+Spring 확장의 설정 자동 완성, bean 관련 탐색, Boot Dashboard를 사용한다. DI 구성을 바꾼 뒤
+프로젝트가 시작되고 필요한 profile에서 bean이 연결되는지도 테스트한다. JPA의 문자열 쿼리,
+커스텀 annotation processor, Kotlin DSL, 레거시 앱 서버는 각각 대표 파일과 실행으로 검증한다.
+SQL 실행·스키마 조회는 팀 DB 클라이언트를 연결하고, ORM 쿼리의 의미 검증까지 Java 컴파일러가
+해 준다고 생각하지 않는다.
+
+| 문제                            | 첫 확인                               | 다음 조치                              |
+| ------------------------------- | ------------------------------------- | -------------------------------------- |
+| 모든 import가 오류              | wrapper 빌드·의존성 다운로드·JDK      | 프로젝트 reload와 Language Server log  |
+| CLI 성공, IDE 실패              | Java Runtime·Standard Mode·모듈 누락  | 빌드 설정 다시 import                  |
+| Lombok·MapStruct 생성 타입 누락 | CLI annotation processing·생성 source | 해당 빌드/확장 지원과 source root 확인 |
+| breakpoint가 비어 있음          | 실제 JVM·클래스·산출물 버전           | rebuild·재시작·attach 대상 확인        |
+| 테스트가 안 보임                | 프로젝트 import·test dependency       | Java Test Runner Output 확인           |
+| 저장 후 CI 포맷 실패            | JDT와 Spotless 중복                   | formatter·import 소유자 하나로 정리    |
+
+캐시 정리는 첫 처방이 아니다. 로그와 프로젝트 설정이 맞는데도 인식이 남아 있으면
+`Java: Clean Java Language Server Workspace`를 마지막 복구 수단으로 사용한다.
+
+실습: 서비스 메서드 이름 변경 → 실패하는 JUnit 테스트 디버깅 → formatter 두 번 실행 →
+wrapper 전체 검사까지 완료한다. 영상은
+[Microsoft의 Java 입문](https://www.youtube.com/watch?v=ZHHUZyy_fOo)과
+[Spring 팀의 VS Code 실습](https://www.youtube.com/watch?v=ztc2C99hhvw)을 연결해 본다.

@@ -1,0 +1,222 @@
+# 06. Python의 가상환경·Pylance·Ruff·테스트를 맞추기
+
+[이전: Go](05-go.md) · [목차](README.md) · [다음: 원격·팀 운영](07-remote-and-team-workflow.md)
+
+Python에서 “터미널은 되는데 VS Code는 안 된다”는 문제는 대부분 실행 환경을 비교하는 데서
+출발한다. 환경을 확인한 뒤 탐색·타입 검사·formatter·테스트를 연결한다.
+
+## 확장별 역할을 나눈다
+
+| 확장 ID                        | 역할                               |
+| ------------------------------ | ---------------------------------- |
+| `ms-python.python`             | Python 프로젝트·실행·테스트 통합   |
+| `ms-python.vscode-pylance`     | 자동 완성·정의·참조·타입 분석      |
+| `ms-python.debugpy`            | Python 디버거                      |
+| `charliermarsh.ruff`           | Ruff lint·format·import action     |
+| `ms-python.vscode-python-envs` | 환경·package 관리 UI가 필요한 경우 |
+| `ms-toolsai.jupyter`           | notebook을 사용하는 경우만         |
+
+Ruff의 확장 ID는 게시 조직의 현재 이름과 다르게 `charliermarsh.ruff`다.
+표시 이름만 보고 비슷한 확장을 여러 개 설치하지 않는다.
+[Python 환경 지원](https://code.visualstudio.com/docs/python/environments),
+[Ruff 공식 확장](https://github.com/astral-sh/ruff-vscode)
+
+이 편은 Ruff로 format·lint·import를 모으는 구성이다. 이미 Black·isort·Flake8을 쓰는 팀은
+한 번에 교체하지 않고 규칙·결과 diff를 먼저 비교한다. Ruff는 타입 검사기와 테스트를 대신하지 않는다.
+
+## 선택한 interpreter와 실제 실행 파일을 비교한다
+
+빈 실습 폴더에서 다음 명령으로 uv 프로젝트를 만든다. uv가 없다면
+[공식 설치 안내](https://docs.astral.sh/uv/getting-started/installation/)를 먼저 따른다.
+Python 버전은 예제의 3.12가 아니라 팀 기준 버전으로 정해도 되지만 프로젝트에 기록한다.
+
+```sh
+uv init --name vscode-python-lab --python 3.12
+uv add --dev ruff pytest pyright
+uv sync --locked
+uv run python -c "import sys; print(sys.executable); print(sys.version)"
+```
+
+`pyproject.toml`, `.python-version`, `uv.lock`을 공유하고 `.venv`는 커밋하지 않는다.
+재설치는 `uv sync --locked`로 수행한다. 이미 Poetry·pip-tools·Conda를 쓰는 저장소라면 그
+잠금·설치 절차를 유지한다. [uv 프로젝트 workflow](https://docs.astral.sh/uv/guides/projects/)
+
+`Python: Select Interpreter`에서 이 프로젝트의 `.venv`를 선택한다. 새 터미널에서
+`python -c "import sys; print(sys.executable)"`를 실행하고 uv 출력과 비교한다. Windows의 경로는
+`.venv\Scripts\python.exe`, POSIX는 `.venv/bin/python`이다. 경로를 공유 설정에 OS별 절대 경로로
+박아 넣지 않는다. 환경을 바꾼 뒤 기존 터미널은 이전 활성화를 유지할 수 있어 다시 연다.
+
+notebook은 별도 kernel 선택도 확인한다. interpreter를 바꿨다고 이미 실행 중인 notebook의
+kernel이 자동으로 바뀌었다고 판단하지 않는다.
+[환경 선택](https://code.visualstudio.com/docs/python/environments),
+[Jupyter kernel 관리](https://code.visualstudio.com/docs/datascience/jupyter-kernel-management)
+
+## 포맷·import·타입 규칙을 프로젝트에 둔다
+
+다음은 `pyproject.toml`에 병합할 학습용 설정이다. 생성된 `[project]`·의존성·build-system은
+유지한다. 실제 source layout이 다르면 include·pytest 경로를 수정한다.
+
+```toml
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.pyright]
+typeCheckingMode = "standard"
+include = ["main.py", "tests"]
+venvPath = "."
+venv = ".venv"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+```
+
+`I`는 import 규칙이다. lint fix 후 format 순서를 CLI에서도 유지한다.
+Ruff formatter와 충돌하는 quote·indent 등의 lint 규칙을 다시 켜지 않는다.
+[Ruff formatter와 lint 호환성](https://docs.astral.sh/ruff/formatter/),
+[Pyright configuration](https://github.com/microsoft/pyright/blob/main/docs/configuration.md)
+
+Ruff는 EditorConfig를 Python 스타일의 유일한 입력으로 가정할 수 없다. 예제의 88과 팀의
+`.editorconfig` 줄 길이가 다르면 하나로 합의한다. Pylance는 선택 interpreter로 import를 해석하고
+Pyright CLI는 여기의 환경 설정을 사용한다. 둘은 배포 버전이 다를 수 있으므로 같은 설정이
+모든 진단의 완전한 동등성을 보장하지는 않는다. 차이는 버전과 진단 코드를 기록해 비교한다.
+
+`settings.json`:
+
+```json
+{
+    "python.testing.pytestEnabled": true,
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestArgs": ["tests"],
+    "python.analysis.autoImportCompletions": true,
+    "ruff.importStrategy": "fromEnvironment",
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": false,
+        "editor.formatOnType": false,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "never",
+            "source.organizeImports": "never",
+            "source.fixAll.ruff": "explicit",
+            "source.organizeImports.ruff": "explicit"
+        }
+    }
+}
+```
+
+Pylance 진단을 유지하고 Ruff와 겹치는 개별 진단만 근거를 확인한 뒤 조정한다.
+`python.analysis.ignore: ["*"]`처럼 전체 타입 진단을 숨겨 중복 문제를 해결하지 않는다.
+
+Ruff의 `fromEnvironment`는 선택 환경의 Ruff 사용을 시도한다. 찾지 못했을 때 bundled 도구로
+대체될 수 있으므로 Output에서 실제 버전을 확인하고 `uv run ruff --version`과 비교한다.
+환경에 설치했다는 사실만으로 일치한다고 판단하지 않는다.
+[Ruff 확장 설정](https://docs.astral.sh/ruff/editors/settings/),
+[저장 action 구성](https://docs.astral.sh/ruff/editors/setup/)
+
+`python.formatting.provider`, `python.linting.*`, `python.pythonPath`가 있는 오래된 예제를
+새 설정과 섞지 않는다. Python format·lint는 해당 도구 확장, interpreter는 환경 선택 기능으로
+관리한다. [Python formatting](https://code.visualstudio.com/docs/python/formatting)
+
+## 실행 가능한 작은 테스트
+
+`main.py`를 다음으로 만들고 `tests/test_main.py`를 추가한다.
+
+```python
+def total(price: int, quantity: int) -> int:
+    return price * quantity
+
+
+if __name__ == "__main__":
+    print(total(1200, 3))
+```
+
+```python
+from main import total
+
+
+def test_total() -> None:
+    assert total(1200, 3) == 3600
+```
+
+```sh
+uv run python -m pytest
+uv run ruff check .
+uv run ruff format --check .
+uv run pyright
+```
+
+Testing 뷰에서 discovery를 실행하고 `test_total`을 Debug한다. `total` 안에 breakpoint를 넣고
+인자와 호출 스택을 본다. 실패하면 Python Test Log와 CLI의 `python -m pytest --collect-only`
+결과를 비교한다. 터미널의 bare `pytest`가 다른 환경에 설치되어 있는 상황도 피할 수 있다.
+[Python testing](https://code.visualstudio.com/docs/python/testing)
+
+수정 명령은 `uv run ruff check . --fix` 후 `uv run ruff format .`이다. unsafe fix는
+기본 저장 경로에 추가하지 않는다. diff를 검토한 뒤 위 검사 네 개를 다시 실행한다.
+
+## 실행·디버깅은 debugpy로
+
+`launch.json`:
+
+```json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: project main",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: pytest",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": ["tests", "-q"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
+}
+```
+
+패키지 프로그램이라면 임의 파일 실행보다 `module: "your_package"` 방식으로 package entry를
+실행한다. launch에서 `python`을 별도로 지정하지 않으면 선택 interpreter를 사용한다.
+`justMyCode: false`는 dependency 내부를 조사할 때만 켠다.
+[Python debugging](https://code.visualstudio.com/docs/python/debugging)
+
+FastAPI·Django는 framework별 launch를 사용한다. reloader가 자식 프로세스를 만들면
+어느 프로세스를 디버깅하는지 확인하고, 처음 재현은 reload를 끈 단일 프로세스로 좁힌다.
+브라우저에서 요청을 한 번 보내는 것과 앱이 시작된 것만 확인하는 것은 다른 검증이다.
+
+## 탐색·리팩터링·장애 해결
+
+F12·References·Rename·Extract를 작은 함수와 테스트에서 먼저 수행한다.
+타입 힌트가 없는 동적 속성, decorator가 생성하는 이름, reflection은 별도 테스트가 필요하다.
+import 오류를 없애려고 `extraPaths`를 무작정 늘리지 말고 editable install·src layout·패키지 구조부터
+확인한다. [Python editing](https://code.visualstudio.com/docs/python/editing)
+
+| 증상                        | 확인할 것                                        |
+| --------------------------- | ------------------------------------------------ |
+| 설치했는데 module을 못 찾음 | `sys.executable`·선택 interpreter·lock 설치 결과 |
+| Ruff와 Black이 번갈아 수정  | Python default formatter·저장 확장·hook          |
+| import가 왕복               | Ruff I·isort·Pylance 저장 organize의 중복        |
+| 타입 오류가 사라짐          | 진단 ignore·typeCheckingMode·해당 파일 include   |
+| pytest가 안 보임            | 환경의 pytest·testpaths·cwd·discovery 로그       |
+| notebook만 결과가 다름      | kernel 경로·오래된 cell 상태·재시작 후 전체 실행 |
+
+영상: [Getting Started with Python in VS Code](https://www.youtube.com/watch?v=D2cwvpJSBX4)
+— Visual Studio Code, 2024-08-12. interpreter·가상환경·디버깅 흐름을 따라 하고 Ruff는 이 편의
+현재 설정을 사용한다.

@@ -1,0 +1,157 @@
+# 07. Run Configuration·원격 환경·팀 검사로 작업을 완성하기
+
+[이전: Python](06-python.md) · [목차](README.md) · [다음: 최종 실습](08-graduation-lab.md)
+
+설정이 익숙해져도 사람마다 실행 인자와 작업 폴더가 다르면 같은 오류를 재현할 수 없다.
+이번 편은 로컬·모노레포·원격 환경에서 실행과 검사를 반복 가능한 형태로 연결한다.
+
+## Tasks와 Debug Configuration은 역할이 다르다
+
+`tasks.json`은 build·test·format 같은 외부 명령을 실행한다. `launch.json`은 debugger가
+프로그램을 시작하거나 이미 실행 중인 프로세스에 붙는 방법을 정의한다. `preLaunchTask`는
+디버깅 전 task를 연결한다. label을 일치시키고 끝나는 build task와 계속 실행되는 dev server를
+구분해야 한다. [Tasks 공식 문서](https://code.visualstudio.com/docs/debugtest/tasks)
+
+다음은 **jongminchung 루트에서 사용하는 학습용 Tasks 예제**다. 현재 문서만 작성하므로
+실제 `.vscode/tasks.json`에는 자동 반영하지 않는다. 셸을 통하지 않는 `process` task는 명령과
+인자를 분리하기 좋다. Linux/macOS/WSL의 PATH에 Bun이 준비되어 있어야 한다.
+
+```json
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "repo: format check",
+            "type": "process",
+            "command": "bun",
+            "args": ["run", "fmt:check"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "problemMatcher": []
+        },
+        {
+            "label": "repo: lint",
+            "type": "process",
+            "command": "bun",
+            "args": ["run", "lint"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "problemMatcher": []
+        },
+        {
+            "label": "web: typecheck",
+            "type": "process",
+            "command": "bun",
+            "args": ["run", "--filter", "@jongminchung/web", "typecheck"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "problemMatcher": []
+        },
+        {
+            "label": "repo: review checks",
+            "dependsOrder": "sequence",
+            "dependsOn": ["repo: format check", "repo: lint", "web: typecheck"],
+            "problemMatcher": []
+        }
+    ]
+}
+```
+
+이 묶음은 간단한 리뷰 검사이며 전체 `bun run check`·E2E를 대체하지 않는다.
+`problemMatcher: []`는 명령 출력을 Problems로 파싱하지 않는다는 뜻이다. 존재하지 않는
+matcher를 붙여 오류 위치가 수집되는 것처럼 보이게 하지 않는다. TS CLI의 실제 출력 형식이
+맞는 task에는 `$tsc`, watcher에는 해당 background matcher를 검증 후 연결한다.
+
+## 여러 서비스를 시작할 때
+
+서버와 브라우저 디버깅을 함께 시작하려면 launch의 `compounds`에서 두 configuration 이름을
+연결할 수 있다. 하지만 compound 시작은 서버의 readiness 보장이 아니다. 처음에는 서버 task를
+실행해 준비 로그·health 응답을 확인한 뒤 browser launch를 시작한다. 자동화하려면 background
+task의 시작·완료 패턴을 실제 로그와 맞춰 설정한다.
+[Debug configuration](https://code.visualstudio.com/docs/debugtest/debugging-configuration)
+
+실행마다 다음 다섯 값을 확인한다: **runtime, cwd, entry point, args, env**.
+예를 들어 같은 Python module도 cwd에 따라 config 파일을 다르게 읽을 수 있다.
+개발 profile 이름과 포트는 공유하되 token·개인 경로는 공유 파일에 넣지 않는다.
+JDWP·Delve·debugpy·Node inspector 포트는 로컬 loopback 또는 SSH 터널로 연결한다.
+
+## 모노레포에서 무엇을 공유할지
+
+단일 루트에서 모든 언어가 정상 동작하면 그 구조를 유지한다. 독립 환경이 명확하면
+multi-root의 folder settings로 Python 환경·ESLint cwd·Go 모듈을 분리한다.
+아래는 `api/`·`web/` 폴더가 있는 별도 학습 저장소의 `team.code-workspace` 예제다.
+
+```json
+{
+    "folders": [
+        { "name": "api", "path": "api" },
+        { "name": "web", "path": "web" }
+    ],
+    "settings": {
+        "files.autoSave": "off"
+    }
+}
+```
+
+Tasks에서 모호한 `${workspaceFolder}` 대신 `${workspaceFolder:api}`처럼 이름을 지정할 수 있다.
+VS Code workspace 경계와 Maven module·Go workspace·Python environment·JS package workspace는
+같은 개념이 아니다. editor 폴더를 나눈 뒤에도 CLI의 build graph는 유지한다.
+[Multi-root workspaces](https://code.visualstudio.com/docs/editing/workspaces/multi-root-workspaces)
+
+## Remote SSH·WSL·Dev Containers
+
+Remote SSH는 서버의 소스·SDK를 사용하고 UI는 로컬에서 보여 준다. WSL은 Linux 개발 환경을
+Windows UI에서 사용한다. Dev Containers는 이미지·설정으로 도구 환경을 구성한다.
+실행 위치를 먼저 선택한 뒤 확장을 그 위치에 설치한다.
+[Remote SSH](https://code.visualstudio.com/docs/remote/ssh),
+[WSL](https://code.visualstudio.com/docs/remote/wsl),
+[Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers)
+
+| 확인 항목                 | 방법                                                       |
+| ------------------------- | ---------------------------------------------------------- |
+| 지금 어느 환경인가        | 창의 원격 상태 표시·터미널 cwd                             |
+| SDK가 어디 있는가         | 원격 터미널의 `java -version`, `go version`, `python` 경로 |
+| 확장이 어디서 실행되는가  | Extensions의 Local·SSH·WSL·Container 설치 위치             |
+| 포트가 어떻게 연결되는가  | Ports 뷰·SSH tunnel·앱 listen 주소                         |
+| formatter는 어느 버전인가 | 원격 Output·CLI 버전 비교                                  |
+
+WSL에서는 프로젝트와 toolchain을 Linux 쪽에 두고 그 창에서 연다. Windows Node·Python과
+WSL package를 한 프로젝트 실행에 섞지 않는다. 컨테이너에서는 host 절대 경로가 그대로
+통하지 않으므로 mount 경로를 기준으로 launch를 구성한다.
+
+Dev Containers 도입은 `Dev Containers: Add Dev Container Configuration Files...`에서
+해당 언어 template로 시작한다. OS·런타임·필수 package·확장·설치 명령을 함께 기록한다.
+이미지 tag만으로 재현성이 충분한지 검토하고 팀 요구에 따라 digest·도구 버전을 고정한다.
+일반적인 컨테이너 build 성공만으로 IDE 확장 활성화까지 검증한 것으로 기록하지 않는다.
+
+## Git·HTTP·DB도 작업 루틴에 넣는다
+
+Source Control에서 변경 파일·hunk를 검토하고 stage한다. 충돌은 Merge Editor에서 양쪽 변경과
+결과를 확인한 뒤 테스트한다. 다른 사람의 코드가 섞인 작업 트리에서 “Discard All”을 복구
+방법으로 사용하지 않는다. [Git과 merge 충돌](https://code.visualstudio.com/docs/sourcecontrol/merge-conflicts)
+
+HTTP 요청은 팀이 합의한 curl script나 REST client의 요청 파일로 남긴다. API 테스트에 host,
+profile, 입력 JSON, 기대 status를 포함한다. DB 연결·migration·query 검토는 사용하는 DB 도구와
+프로젝트 테스트로 확인한다. IDE에 연결 버튼이 있다는 사실과 쿼리·migration의 정확성은 별개다.
+
+외부 API·DB 도구의 인증값을 요청 예제·launch·workspace에 하드코딩하지 않는다. 이 원칙은
+실제로 실행하는 개발 연결에 적용되며 문서에 비밀값 예시를 만들 필요는 없다.
+
+## 느릴 때는 어디가 느린지 측정한다
+
+1. `Developer: Show Running Extensions`에서 활성화·실행 상태를 본다.
+2. `Developer: Open Process Explorer`로 extension host·language server·renderer를 구분한다.
+3. extension bisect로 확장 충돌을 좁힌다. 작업 결과를 저장하고 재현 절차를 준비한다.
+4. 언어별 Output에서 import·indexing·lint 지연을 확인한다.
+5. 문제가 한 프로젝트인지 빈 Profile에서도 재현되는지 비교한다.
+
+확장 성능 진단 절차는 [VS Code 성능 문제 가이드](https://github.com/microsoft/vscode/wiki/Performance-Issues)를 따른다.
+메모리 상한을 무작정 올리거나 language service를 꺼서 진단을 없애지 않는다.
+
+`search.exclude`는 검색 결과, `files.exclude`는 Explorer 표시, `files.watcherExclude`는
+watcher에 영향을 준다. 어느 하나로 언어 서버 분석 범위까지 모두 제외된다고 생각하지 않는다.
+언어별 source include·exclude를 사용하고 생성 폴더를 분석에서 제외해도 필요한 declaration·generated
+source가 해석되는지 확인한다. [설정 문서](https://code.visualstudio.com/docs/configure/settings)
+
+## 팀에 남길 최소 산출물
+
+`settings.json`의 소유자, 확장 권장 목록, runtime 버전·lockfile, Tasks/launch의 실행 위치,
+CLI 검사 명령, 알려진 차이를 기록한다. 새 동료가 환경을 만들고 테스트 하나를 디버깅할 수
+있으면 공유가 완료된 것이다. 다음 편에서 실제 버그 한 건으로 이를 검증한다.
