@@ -17,6 +17,25 @@ describe("투자 collection 라우팅", () => {
     );
   });
 
+  it("한글 시리즈 URL은 헤더에 안전하게 인코딩하고 중복 인코딩하지 않음", () => {
+    const slug = "채권-투자";
+    const href = `/ko/series/${encodeURIComponent(slug)}`;
+    expect(createInvestmentSeriesHref("ko", "채권 투자")).toBe(href);
+    expect(createInvestmentSeriesHref("ko", encodeURIComponent(slug))).toBe(
+      href,
+    );
+    const response = Response.redirect(
+      new URL(
+        createInvestmentSeriesHref("ko", "채권 투자"),
+        "https://invest.jamie.kr",
+      ),
+      308,
+    );
+    expect(response.headers.get("location")).toBe(
+      `https://invest.jamie.kr${href}`,
+    );
+  });
+
   it("[성공] tag와 source URL을 locale별로 생성함", () => {
     expect(createInvestmentTagHref("en", "capital-allocation")).toBe(
       "/en/tags/capital-allocation",

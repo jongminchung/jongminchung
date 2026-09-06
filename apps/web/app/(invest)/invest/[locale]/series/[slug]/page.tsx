@@ -33,8 +33,8 @@ export function generateStaticParams() {
 
 function getSeriesCollection(locale: Locale, slug: string) {
   const normalizedSlug = investmentSeriesSlug(slug);
-  if (normalizedSlug !== slug)
-    permanentRedirect(`/${locale}/series/${normalizedSlug}`);
+  if (normalizedSlug !== slug && encodeURIComponent(normalizedSlug) !== slug)
+    permanentRedirect(createInvestmentSeriesHref(locale, normalizedSlug));
   const notes = getNotesBySeriesSlug(locale, slug);
   const series = notes[0]?.series;
   if (series === undefined) notFound();

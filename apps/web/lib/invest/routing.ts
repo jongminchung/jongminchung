@@ -58,7 +58,7 @@ export function createInvestmentSeriesHref(
   locale: Locale,
   series: string,
 ): string {
-  return `/${locale}/series/${investmentSeriesSlug(series)}`;
+  return `/${locale}/series/${encodeURIComponent(investmentSeriesSlug(series))}`;
 }
 
 /** `createInvestmentTagHref` 투자 tag URL을 생성함 */
