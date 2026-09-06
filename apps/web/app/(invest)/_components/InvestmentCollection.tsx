@@ -52,7 +52,6 @@ export function InvestmentCollection({
           searchParams,
           items.flatMap((item) => item.tags),
         )}
-        variant="default"
       />
     </>
   );

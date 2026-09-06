@@ -154,3 +154,33 @@ it("모든 UI 공개 source 경로를 TypeScript와 shadcn에서 해석함", asy
     expect(matches, alias).toBe(true);
   }
 });
+
+// 앱의 제품 표현 selector만 금지한다. 공용 primitive의 상태·size API는 유지한다.
+const productVariantSelector =
+  /(?:data-\[variant\s*=|\[data-variant(?:\s*=|\]))/u;
+
+it.each([
+  ["data-[variant=engineering]:p-4", true],
+  ["group-data-[variant=research]/card:bg-card", true],
+  ['[data-variant="engineering"] { color: red; }', true],
+  ["data-[state=open]:block aria-current:font-medium", false],
+  ["data-[side=right]:w-64 data-[size=default]:h-10", false],
+  ['<Button variant="outline" />', false],
+] as const)("제품 selector 경계를 구분함: %s", (source, forbidden) => {
+  expect(productVariantSelector.test(source)).toBe(forbidden);
+});
+
+it("앱에서 제품별 data-variant 스타일을 다시 도입하지 않음", async () => {
+  const files = await sourceFiles(
+    "apps/*/{app,components,src}/**/*.{ts,tsx,css}",
+  );
+  const violations = await Promise.all(
+    files
+      .filter((file) => !/\.(?:test|spec)\.[cm]?[jt]sx?$/u.test(file))
+      .map(async (file) => {
+        const source = await readFile(resolve(repositoryRoot, file), "utf8");
+        return productVariantSelector.test(source) ? file : null;
+      }),
+  );
+  expect(violations.filter((file) => file !== null)).toEqual([]);
+});

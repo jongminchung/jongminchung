@@ -92,27 +92,28 @@ export function SearchDialog({
 
   return (
     <Dialog open={open} onOpenChange={changeOpen}>
+      {/* Preserve the existing compact desktop width and mobile full-width search. */}
       <DialogContent
         initialFocus={inputRef}
         finalFocus={finalFocus}
-        className="max-w-xl overflow-hidden p-0"
+        className="max-w-xl overflow-hidden p-0 sm:max-w-sm"
         aria-describedby={undefined}
         showCloseButton={false}
       >
         <DialogTitle className="sr-only">{t("dialogTitle")}</DialogTitle>
-        <Command
-          key={`${locale}:${String(open)}`}
-          className="rounded-lg"
-          shouldFilter={false}
-        >
-          <div className="flex min-h-[54px] items-center gap-2.5 border-b px-4 [&_[data-slot=command-input-wrapper]]:min-w-0 [&_[data-slot=command-input-wrapper]]:flex-1 [&_input]:min-w-0 [&_input]:flex-1 [&_input]:border-0 [&_input]:bg-transparent [&_input]:outline-none [&_kbd]:rounded-[var(--radius-xs)] [&_kbd]:border [&_kbd]:px-1.5 [&_kbd]:py-0.5 [&_kbd]:text-[10px] [&_kbd]:text-muted-foreground">
+        <Command key={`${locale}:${String(open)}`} shouldFilter={false}>
+          <div className="flex min-h-[54px] items-center gap-2.5 border-b px-4">
             <CommandInput
               ref={inputRef}
+              wrapperClassName="min-w-0 flex-1"
+              className="min-w-0 flex-1 border-0 bg-transparent outline-none"
               value={query}
               onValueChange={setQuery}
               placeholder={t("placeholder")}
             />
-            <kbd>Esc</kbd>
+            <kbd className="rounded-xs border px-1.5 py-0.5 text-[10px] text-muted-foreground">
+              Esc
+            </kbd>
           </div>
           <CommandList
             className="grid max-h-[min(460px,60dvh)] gap-0.5 overflow-y-auto p-1.5"
@@ -153,15 +154,19 @@ export function SearchDialog({
                       value={`${item.href} ${item.label} ${item.matchText}`}
                       onSelect={() => select(item)}
                     >
-                      <span className="grid min-w-0 gap-1 [&_strong]:overflow-hidden [&_strong]:text-ellipsis [&_strong]:whitespace-nowrap">
+                      <span className="grid min-w-0 gap-1">
                         <span className="flex min-w-0 items-center gap-2">
                           <Badge className="shrink-0" variant="secondary">
                             {item.badge}
                           </Badge>
-                          <strong>{item.label}</strong>
+                          <strong className="overflow-hidden text-ellipsis whitespace-nowrap">
+                            {item.label}
+                          </strong>
                         </span>
-                        <span className="flex gap-1.5 overflow-hidden text-xs text-ellipsis whitespace-nowrap text-muted-foreground [&>span]:shrink-0 [&>span]:font-semibold [&>span]:text-primary">
-                          <span>{item.matchLabel}</span>
+                        <span className="flex gap-1.5 overflow-hidden text-xs text-ellipsis whitespace-nowrap text-muted-foreground">
+                          <span className="shrink-0 font-semibold text-primary">
+                            {item.matchLabel}
+                          </span>
                           {item.matchText}
                         </span>
                       </span>

@@ -12,12 +12,13 @@ function OutlineItems({ items }: { readonly items: readonly TOCItemType[] }) {
   const activeId = useActiveAnchor();
 
   return (
-    <ul className="relative m-0 grid list-none gap-1 p-0 [&_a]:block [&_a]:rounded-lg [&_a]:px-3 [&_a]:py-1.5 [&_a]:text-sm [&_a]:leading-5 [&_a]:text-muted-foreground [&_a]:transition-colors [&_a:hover]:bg-accent [&_a:hover]:text-foreground [&_a[data-active=true]]:bg-secondary [&_a[data-active=true]]:font-medium [&_a[data-active=true]]:text-foreground">
+    <ul className="relative m-0 grid list-none gap-1 p-0">
       {items.map((item) => {
         const id = item.url.replace(/^#/u, "");
         return (
           <li key={item.url} data-level={item.depth}>
             <TOCItem
+              className="block rounded-lg px-3 py-1.5 text-sm leading-5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground data-[active=true]:bg-secondary data-[active=true]:font-medium data-[active=true]:text-foreground data-[active=true]:hover:bg-secondary"
               aria-current={activeId === id ? "location" : undefined}
               href={item.url}
             >

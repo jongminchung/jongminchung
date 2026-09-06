@@ -77,7 +77,6 @@ export function SearchTrigger({
     <Button
       aria-label={label}
       className={cn(
-        "[&_kbd]:rounded-xs [&_kbd]:border [&_kbd]:border-border [&_kbd]:px-1.5 [&_kbd]:py-0.5 [&_kbd]:text-[10px] [&_kbd]:text-foreground",
         compact
           ? "min-h-11 min-w-11 px-[7px]"
           : "h-8 w-full justify-between px-3 text-xs",
@@ -96,7 +95,12 @@ export function SearchTrigger({
       {showShortcut && !compact ? (
         <span aria-hidden="true" className="inline-flex gap-0.5">
           {search.hotKey.map((hotKey, index) => (
-            <kbd key={index}>{hotKey.display}</kbd>
+            <kbd
+              className="rounded-xs border border-border px-1.5 py-0.5 text-[10px] text-foreground"
+              key={index}
+            >
+              {hotKey.display}
+            </kbd>
           ))}
         </span>
       ) : null}

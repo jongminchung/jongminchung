@@ -29,7 +29,7 @@ export function ExcalidrawDiagram(
       className={
         variant === "standalone"
           ? "flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-card"
-          : "flex min-h-[clamp(320px,52vw,520px)] min-w-0 flex-col overflow-hidden rounded-[var(--radius-md)] border bg-card"
+          : "flex min-h-[clamp(320px,52vw,520px)] min-w-0 flex-col overflow-hidden rounded-md border bg-card"
       }
       data-excalidraw-state="ready"
       data-rendered-element-count={scene.elementCount}
@@ -39,7 +39,7 @@ export function ExcalidrawDiagram(
       {props.downloadSrc === undefined ? null : (
         <div className="flex min-h-11 items-center justify-end border-b bg-card px-2.5 py-1.5">
           <a
-            className="inline-flex min-h-[30px] items-center rounded-[var(--radius-sm)] border px-2.5 py-[5px] text-xs leading-[1.2] no-underline hover:border-input"
+            className="inline-flex min-h-[30px] items-center rounded-sm border px-2.5 py-[5px] text-xs leading-[1.2] no-underline hover:border-input"
             download
             href={props.downloadSrc}
           >

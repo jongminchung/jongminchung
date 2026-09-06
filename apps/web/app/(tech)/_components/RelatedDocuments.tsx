@@ -1,7 +1,7 @@
-import { EditorialCard } from "#components/EditorialCard";
 import type { ContentManifestEntry, Locale } from "#lib/content-model";
 import { toTechEditorialItem } from "#lib/editorial-adapters";
 import { getTechMessages } from "#lib/tech/copy";
+import { EngineeringCard } from "./EngineeringCard";
 
 /** `RelatedDocuments` UI 컴포넌트를 렌더링함 */
 export function RelatedDocuments({
@@ -26,10 +26,9 @@ export function RelatedDocuments({
       </h2>
       <div className="grid grid-cols-3 gap-[14px] max-[760px]:grid-cols-1">
         {documents.map((document) => (
-          <EditorialCard
+          <EngineeringCard
             item={toTechEditorialItem(document, locale)}
             key={document.id}
-            variant="engineering"
           />
         ))}
       </div>

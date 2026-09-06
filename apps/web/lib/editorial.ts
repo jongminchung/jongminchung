@@ -29,6 +29,11 @@ export interface EditorialCopy {
   readonly empty: string;
   readonly related: string;
   readonly controls: string;
+  readonly allTags: string;
+  readonly previousPage: string;
+  readonly nextPage: string;
+  readonly pagination: string;
+  readonly pageLabel: (page: number, total: number) => string;
 }
 
 export type EditorialSort = "newest" | "oldest";
@@ -111,9 +116,18 @@ export function paginateEditorialItems(
   items: readonly EditorialItem[],
   page: number,
   pageSize = 9,
-): { readonly items: readonly EditorialItem[]; readonly hasMore: boolean } {
-  const start = (page - 1) * pageSize;
+): {
+  readonly items: readonly EditorialItem[];
+  readonly hasMore: boolean;
+  readonly page: number;
+  readonly totalPages: number;
+} {
+  const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+  const currentPage = Math.min(Math.max(1, page), totalPages);
+  const start = (currentPage - 1) * pageSize;
   return Object.freeze({
+    page: currentPage,
+    totalPages,
     items: items.slice(start, start + pageSize),
     hasMore: start + pageSize < items.length,
   });

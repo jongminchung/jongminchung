@@ -28,7 +28,7 @@ export default async function DiagramsPage(): Promise<React.JSX.Element> {
         <ul className="m-0 grid list-none gap-3 p-0">
           {assets.map((asset) => (
             <li
-              className="flex min-w-0 items-center justify-between gap-5 rounded-[var(--radius-md)] border bg-card p-5 max-[520px]:flex-col max-[520px]:items-start max-[520px]:gap-3"
+              className="flex min-w-0 items-center justify-between gap-5 rounded-md border bg-card p-5 max-[520px]:flex-col max-[520px]:items-start max-[520px]:gap-3"
               key={asset.filename}
             >
               <Link

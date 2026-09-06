@@ -87,7 +87,27 @@ inventory is empty or a breaking release is prepared.
 Set `data-theme="dark"` on the root element to enable the dark theme. Product-specific tokens,
 layout, state, and behavior remain the responsibility of each application.
 
+## Consumer styling
+
+Use semantic Tailwind utilities directly in JSX and pass `className` last through `cn`.
+Keep product appearance in application compositions instead of adding product variants.
+Classes with different breakpoints do not replace each other: overriding a `sm:max-w-sm`
+default requires an explicit `sm:max-w-*` class.
+
+`CommandInput.className` styles the input; `wrapperClassName` styles its surrounding layout.
+Consumers do not need to select the internal wrapper or input from a parent. Command defaults
+use ordinary utilities so consumers can override them without `!important`. Application search
+keeps the original `rounded-xl` appearance and compact desktop width explicitly.
+
+Review upstream changes against these local contracts, including translated accessible labels,
+consumer overrides, and semantic tokens. The Web UI fixture includes the actual Korean search
+composition and long-title cards for mobile and dark-theme review.
+
+Typography utilities `text-metadata` (10px), `text-caption` (11px), and `tracking-metadata` (0.08em) retain inherited line height. `cn` registers their merge groups so font size, tracking, and text color remain independent.
+
 ## shadcn source workflow
+
+Component-specific preservation contracts and the update record are in [SHADCN.md](./SHADCN.md).
 
 `packages/ui/components.json` is the canonical shadcn configuration for shared primitives. Run the
 CLI from this workspace, inspect the dry run, and review generated dependencies and source before

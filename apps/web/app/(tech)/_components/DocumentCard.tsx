@@ -1,3 +1,4 @@
+import { cn } from "@jongminchung/ui/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { EditorialImage } from "#components/EditorialImage";
@@ -30,13 +31,20 @@ export function DocumentCard({
   const title = displayTitleFor(document);
   const text = getTechMessages(locale).article;
   const isBlogPost = document.contentType === "blog";
-  const imageClassName =
-    "block min-h-[150px] w-[210px] shrink-0 self-stretch border-r bg-muted object-cover group-data-[variant=featured]:aspect-[1200/630] group-data-[variant=featured]:min-h-0 group-data-[variant=featured]:w-full group-data-[variant=featured]:border-r-0 group-data-[variant=featured]:border-b group-data-[variant=related]:aspect-[1200/630] group-data-[variant=related]:min-h-0 group-data-[variant=related]:w-full group-data-[variant=related]:border-r-0 group-data-[variant=related]:border-b max-[680px]:aspect-[1200/630] max-[680px]:min-h-0 max-[680px]:w-full max-[680px]:border-r-0 max-[680px]:border-b";
+  const imageClassName = cn(
+    "block shrink-0 self-stretch bg-muted object-cover max-[680px]:aspect-[1200/630] max-[680px]:min-h-0 max-[680px]:w-full max-[680px]:border-r-0 max-[680px]:border-b",
+    variant === "list"
+      ? "min-h-[150px] w-[210px] border-r"
+      : "aspect-[1200/630] min-h-0 w-full border-b",
+  );
   return (
     <Link
       aria-label={title}
-      className="group flex overflow-hidden rounded-[var(--radius)] border bg-card text-card-foreground transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-input hover:shadow-[var(--elevation-medium)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[variant=featured]:block data-[variant=related]:block max-[680px]:block"
-      data-variant={variant}
+      className={cn(
+        "group flex overflow-hidden rounded-lg border bg-card text-card-foreground transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-input hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring max-[680px]:block",
+        variant === "featured" && "block",
+        variant === "related" && "block",
+      )}
       href={document.href}
     >
       {isBlogPost ? (
@@ -60,7 +68,13 @@ export function DocumentCard({
           width={1200}
         />
       )}
-      <span className="flex min-w-0 flex-1 flex-col justify-center px-[22px] py-5 group-data-[variant=featured]:px-[26px] group-data-[variant=featured]:pt-6 group-data-[variant=featured]:pb-[26px] group-data-[variant=related]:min-h-[148px] group-data-[variant=related]:justify-start group-data-[variant=related]:p-4 max-[680px]:p-[18px]">
+      <span
+        className={cn(
+          "flex min-w-0 flex-1 flex-col justify-center px-[22px] py-5 max-[680px]:p-[18px]",
+          variant === "featured" && "px-[26px] pt-6 pb-[26px]",
+          variant === "related" && "min-h-[148px] justify-start p-4",
+        )}
+      >
         <span className="mb-2.5 flex flex-wrap items-center gap-2 font-mono text-[10px] font-medium tracking-[.08em] text-muted-foreground uppercase">
           {label ??
             series ??
@@ -72,10 +86,21 @@ export function DocumentCard({
           <span aria-hidden="true">·</span>
           {document.status}
         </span>
-        <span className="text-[19px] leading-[1.25] font-[550] tracking-[-.015em] text-foreground group-data-[variant=featured]:text-[26px] group-data-[variant=related]:text-base max-[680px]:group-data-[variant=featured]:text-[22px]">
+        <span
+          className={cn(
+            "text-[19px] leading-[1.25] font-[550] tracking-[-.015em] text-foreground",
+            variant === "featured" && "text-[26px] max-[680px]:text-[22px]",
+            variant === "related" && "text-base",
+          )}
+        >
           {title}
         </span>
-        <span className="mt-2.5 line-clamp-2 text-[13px] leading-[1.35rem] text-muted-foreground group-data-[variant=related]:text-xs group-data-[variant=related]:leading-[1.2rem]">
+        <span
+          className={cn(
+            "mt-2.5 line-clamp-2 text-[13px] leading-[1.35rem] text-muted-foreground",
+            variant === "related" && "text-xs leading-[1.2rem]",
+          )}
+        >
           {document.description}
         </span>
       </span>

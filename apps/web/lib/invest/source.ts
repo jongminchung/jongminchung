@@ -1,7 +1,11 @@
+import { loader } from "fumadocs-core/source";
+import { toFumadocsSource } from "fumadocs-mdx/runtime/server";
+import { investmentCollection } from "../../.source/server.ts";
+import "server-only";
 import type { Locale } from "../content-contracts.ts";
+import { contentI18n } from "../content-i18n.ts";
 import type { ValidatedContentSource } from "../content-validation.ts";
 import { validateInvestmentNotes } from "../content-validation.ts";
-import { investmentSource } from "../fumadocs-source.ts";
 import {
   createInvestmentNoteHref,
   investmentNoteMetadataSchema,
@@ -88,3 +92,20 @@ export async function loadInvestmentContent(locale: Locale, id: string) {
     (await investmentSource.getPage(["notes", id], locale)?.data.load()) ?? null
   );
 }
+
+let productionNotes: readonly InvestmentNoteManifestEntry[] | undefined;
+
+/** Invest 메타데이터만 검증하고 production에서 재사용함. 개발 중에는 콘텐츠 변경을 반영함. */
+export function readInvestmentNotes(): readonly InvestmentNoteManifestEntry[] {
+  if (process.env.NODE_ENV === "development")
+    return readInvestmentNoteCollection();
+  productionNotes ??= readInvestmentNoteCollection();
+  return productionNotes;
+}
+
+const investmentSource = loader({
+  baseUrl: "/",
+  source: toFumadocsSource(investmentCollection, []),
+  i18n: contentI18n,
+  url: (slugs, locale) => `/${locale ?? "en"}/notes/${slugs.at(-1) ?? ""}`,
+});

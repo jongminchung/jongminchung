@@ -113,9 +113,9 @@ Docs의 `verifiedAt`은 필수이며 `publishedAt <= updatedAt <= verifiedAt`이
 
 ## 검증하고 유지하기
 
-[공통 발행 절차](content.md)에 따라 번역·링크·파일 개수·build를 검증한다. 위 예제처럼
-일반 문서 한영 쌍을 추가하면 언어별 `docsPagesPerLocale`와 `docsInventoryPerLocale`를
-각각 1씩 늘린다. 개요 한영 쌍이면 전체 개수만 늘린다.
+[공통 발행 절차](content.md)에 따라 번역·공개 링크·필수 영역·build를 검증한다.
+새 문서 추가 시 개수 상수나 기존 문서 기준 목록을 수정할 필요는 없다.
+기준 목록에 있는 기존 경로를 바꿀 때는 변경 이유와 참조 링크를 함께 정리한다.
 
 로컬에서 공개 상태로 미리 볼 때 Sidebar 순서, 제목과 목차, 코드·표·Callout,
 관련 문서 이동과 언어 전환을 확인한다. 실제 명령은 문서에서 명시한 검증 환경에서

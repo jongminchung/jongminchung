@@ -1,3 +1,4 @@
+import type { Route } from "@playwright/test";
 import {
   expectNoAccessibilityViolations,
   expectNoHorizontalOverflow,
@@ -42,19 +43,82 @@ test("[성공] 목록 제어를 URL과 동기화하고 다음 글을 자동으�
   const nextPageResponse = page.waitForResponse((response) => {
     const url = new URL(response.url());
     return (
-      response.request().headers().rsc === "1" &&
-      url.searchParams.get("page") === "2"
+      url.pathname === "/en/articles" && url.searchParams.get("page") === "2"
     );
   });
   await page
     .locator('[data-infinite-scroll-sentinel="true"]')
     .scrollIntoViewIfNeeded();
-  await nextPageResponse;
+  const nextBatch = await nextPageResponse;
+  const payload = (await nextBatch.json()) as { items: { href: string }[] };
+  expect(payload.items).toHaveLength(9);
+  const firstPageHrefs = await results
+    .locator(":scope > a")
+    .evaluateAll((links) =>
+      links.slice(0, 9).map((link) => link.getAttribute("href")),
+    );
+  expect(
+    payload.items.every((item) => !firstPageHrefs.includes(item.href)),
+  ).toBe(true);
   await expect.poll(() => results.locator(":scope > a").count()).toBe(18);
   await expect(page).toHaveURL(/page=2/u);
+  await expect(
+    page.getByRole("link", { name: "Grid", exact: true }),
+  ).toHaveAttribute("href", /page=2/u);
 
-  await page.reload();
+  await results.locator(":scope > a").first().click();
+  await expect(
+    page.getByRole("button", { name: "Copy article", exact: true }),
+  ).toBeVisible();
+  await page.goBack({ waitUntil: "domcontentloaded" });
+  await expect(page).toHaveURL(/page=2/u);
+  await expect(page.locator("[data-view=list]:visible > a")).toHaveCount(18);
+
+  await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.locator("[data-view=list] > a")).toHaveCount(18);
+});
+
+test("[성공] 다음 글 응답이 진행 중인 페이지 탐색을 취소하지 않음", async ({
+  page,
+  siteRequest,
+}) => {
+  const articles = Promise.withResolvers<Route>();
+  const showcase = Promise.withResolvers<void>();
+  const releaseShowcase = Promise.withResolvers<void>();
+  await page.route("**/en/articles?*", (route) => articles.resolve(route));
+  await page.route("**/en/showcase?*", async (route) => {
+    showcase.resolve();
+    await releaseShowcase.promise;
+    await route.continue();
+  });
+  await page.goto("/en");
+  const articlesRoute = await articles.promise;
+  await page
+    .getByRole("link", { name: "Showcase", exact: true })
+    .first()
+    .click();
+  await showcase.promise;
+
+  // 목적지 응답을 보류한 동안 목록 응답부터 완료하여 탐색 충돌을 재현함.
+  const articleResponse = page.waitForResponse("**/en/articles?*");
+  await articlesRoute.fulfill({
+    response: await siteRequest.get("/en/articles?page=2"),
+  });
+  await articleResponse;
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) => {
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+      }),
+  );
+  releaseShowcase.resolve();
+  await expect(page).toHaveURL(/\/en\/showcase$/u);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Showcase");
+  await page.goBack();
+  await expect(page).toHaveURL(/\/en\?page=2$/u);
+  await expect(page.locator('[data-view="grid"]:visible > a')).toHaveCount(18);
+  await page.goForward();
+  await expect(page).toHaveURL(/\/en\/showcase$/u);
 });
 
 test.describe("JavaScript가 비활성화된 환경", () => {
@@ -190,6 +254,9 @@ test("[성공] 문서 CSS를 탐색 시 로드하고 목록 복귀 시 shell 스
       background: style.backgroundColor,
     };
   });
+  // 현재 viewport에서는 다음 페이지를 미리 읽음. 복귀 시 로딩된 범위를 유지해야 함.
+  await expect(page).toHaveURL(/\/en\?page=2$/u);
+  const listingUrl = page.url();
   // 검색 결과를 통한 App Router 전환에서도 문서 전용 CSS가 따라와야 함.
   await page.route("**/en/search*", (route) =>
     route.fulfill({
@@ -213,7 +280,8 @@ test("[성공] 문서 CSS를 탐색 시 로드하고 목록 복귀 시 shell 스
     .poll(() => stylesheets.some((css) => css.includes(".shiki")))
     .toBe(true);
   await page.goBack();
-  await expect(page).toHaveURL(/\/en$/u);
+  await expect(page).toHaveURL(listingUrl);
+  await expect(page.locator('[data-view="grid"]:visible > a')).toHaveCount(18);
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "Engineering",
   );
@@ -232,13 +300,16 @@ test("[성공] 문서 CSS를 탐색 시 로드하고 목록 복귀 시 shell 스
 
 test("[성공] 브라우저 기록과 문서 내부 링크로 이동함", async ({ page }) => {
   await page.goto("/en");
+  await expect(page).toHaveURL(/\/en\?page=2$/u);
+  const listingUrl = page.url();
   await page.getByRole("link", { name: "Series" }).first().click();
   await expect(page).toHaveURL(/\/en\/series$/u);
   await expect(
     page.getByRole("link", { name: /Building from First Principles/u }),
   ).toBeVisible();
   await page.goBack();
-  await expect(page).toHaveURL(/\/en$/u);
+  await expect(page).toHaveURL(listingUrl);
+  await expect(page.locator('[data-view="grid"]:visible > a')).toHaveCount(18);
 
   await page.goto("/en/docs/fe/nextjs-16");
   const hashLink = page.locator('a[href^="#"]:visible').first();
@@ -547,4 +618,74 @@ test("[성공] 저장된 Tech 테마를 복원하고 변경함", async ({ page }
     .poll(() => page.evaluate(() => localStorage.getItem("tech-theme")))
     .toBe("system");
   await expect(editorialImage).toHaveAttribute("src", imageSrc ?? "");
+});
+
+test("[성공] 글 사이를 이동한 뒤 현재 글만 복사함", async ({ page }) => {
+  await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.goto("/ko/building-coding-agent");
+  const oldTitle = await page.getByRole("heading", { level: 1 }).innerText();
+  const nextArticle = page
+    .getByRole("navigation", { name: "이전 및 다음 문서", exact: true })
+    .getByRole("link")
+    .first();
+  const href = await nextArticle.getAttribute("href");
+  if (href === null) throw new Error("Article link has no href");
+  await nextArticle.click();
+  await expect(page).toHaveURL(href);
+  const title = await page.getByRole("heading", { level: 1 }).innerText();
+  expect(title).not.toBe(oldTitle);
+  await page.getByRole("button", { name: "본문 복사", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "복사됨", exact: true }),
+  ).toBeVisible();
+  const clipboard = await page.evaluate(() => navigator.clipboard.readText());
+  expect(clipboard.startsWith(title)).toBe(true);
+  const body = await page.locator("[data-copy-article]:visible").innerText();
+  expect(clipboard).toContain(body.trim());
+});
+
+test("[성공] 다음 글 요청 실패 시 링크로 탐색을 계속함", async ({ page }) => {
+  await page.route("**/en/articles?**", (route) =>
+    route.fulfill({ status: 503, body: "Unavailable" }),
+  );
+  await page.goto("/en?sort=oldest&view=list");
+  const failedResponse = page.waitForResponse(
+    (response) =>
+      response.url().includes("/en/articles?") && response.status() === 503,
+  );
+  await page
+    .locator('[data-infinite-scroll-sentinel="true"]')
+    .scrollIntoViewIfNeeded();
+  await failedResponse;
+  const more = page.getByRole("link", { name: "Load more" });
+  await expect(more).toHaveAttribute("aria-disabled", "false");
+  await more.click();
+  await expect(page).toHaveURL(/page=2/u);
+  await expect(page.locator("[data-view=list]:visible > a")).toHaveCount(18);
+});
+
+test("[성공] 추가 글 API는 locale과 페이지 범위를 지킴", async ({
+  siteRequest,
+}) => {
+  const first = await siteRequest.get("/en/articles?sort=oldest&page=1");
+  const second = await siteRequest.get("/en/articles?sort=oldest&page=2");
+  expect(first.status()).toBe(200);
+  expect(second.status()).toBe(200);
+  const firstPage = (await first.json()) as {
+    items: { id: string; href: string }[];
+  };
+  const secondPage = (await second.json()) as {
+    items: { id: string; href: string }[];
+    page: number;
+  };
+  expect(firstPage.items).toHaveLength(9);
+  expect(secondPage.items).toHaveLength(9);
+  expect(secondPage.page).toBe(2);
+  const firstIds = new Set(firstPage.items.map((item) => item.id));
+  expect(
+    secondPage.items.every(
+      (item) => !firstIds.has(item.id) && item.href.startsWith("/en/"),
+    ),
+  ).toBe(true);
+  expect((await siteRequest.get("/fr/articles")).status()).toBe(404);
 });

@@ -1,4 +1,7 @@
 @theme inline {
+  --text-metadata: var(--font-size-metadata);
+  --text-caption: var(--font-size-caption);
+  --tracking-metadata: var(--letter-spacing-metadata);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

@@ -1,7 +1,7 @@
 import type { SortedResult } from "fumadocs-core/search";
 import { createFromSource } from "fumadocs-core/search/server";
 import { displayTitleFor, type Locale } from "../content-model.ts";
-import { readContentSnapshot } from "../content-repository.ts";
+import { readTechContentSnapshot } from "../content-repository.ts";
 import { blogSource, docsSource } from "../fumadocs-source.ts";
 import { docsCategoryIds, getDocsCategory } from "./docs.ts";
 import { isPublishedContent } from "./publication.ts";
@@ -112,7 +112,7 @@ const docsSearch = createFromSource(publicDocsSource, {
 });
 
 function emptyQueryResults(locale: Locale): readonly SortedResult[] {
-  const snapshot = readContentSnapshot();
+  const snapshot = readTechContentSnapshot();
   const blog = snapshot.publishedTech.blogPosts
     .filter((post) => post.locale === locale)
     .slice(0, 4)

@@ -1,4 +1,6 @@
+import { cn } from "@jongminchung/ui/lib/utils";
 import Link from "next/link";
+import type { ComponentType } from "react";
 import {
   filterEditorialItems,
   getEditorialTags,
@@ -7,13 +9,14 @@ import {
   type EditorialItem,
   type EditorialQuery,
 } from "#lib/editorial";
-import { EditorialCard } from "./EditorialCard";
-import { EditorialInfiniteResults } from "./EditorialInfiniteResults";
+import { EditorialCard, type EditorialCardProps } from "./EditorialCard";
+import {
+  EditorialInfiniteResults,
+  type EditorialInfiniteResultsProps,
+} from "./EditorialInfiniteResults";
+import { EditorialViewLink } from "./EditorialViewLink";
 
 const PAGE_SIZE = 9;
-
-const tagLinkClassName =
-  "shrink-0 rounded-lg border px-3 py-1.5 text-xs transition-colors hover:bg-accent data-[current=true]:border-secondary data-[current=true]:bg-secondary data-[current=true]:font-medium data-[current=true]:text-foreground data-[variant=engineering]:border-0 data-[variant=engineering]:p-0 data-[variant=engineering]:text-muted-foreground data-[variant=engineering]:hover:bg-transparent data-[variant=engineering]:data-[current=true]:bg-transparent data-[variant=engineering]:data-[current=true]:font-medium data-[variant=engineering]:data-[current=true]:text-foreground";
 
 const controlLinkClassName =
   "rounded-md border px-2.5 py-1.5 transition-colors hover:bg-accent aria-[current=page]:bg-secondary";
@@ -41,7 +44,12 @@ export function EditorialIndex({
   copy,
   promotedTags = [],
   tagLabels = {},
-  variant,
+  Card = EditorialCard,
+  Results = EditorialInfiniteResults,
+  headerClassName,
+  navigationClassName,
+  tagClassName,
+  resultsClassName,
   pagination,
 }: {
   readonly pathname: string;
@@ -50,9 +58,19 @@ export function EditorialIndex({
   readonly copy: EditorialCopy;
   readonly promotedTags?: readonly string[];
   readonly tagLabels?: Readonly<Record<string, string>>;
-  readonly variant: "default" | "engineering";
+  readonly Card?: ComponentType<EditorialCardProps>;
+  readonly Results?: ComponentType<EditorialInfiniteResultsProps>;
+  readonly headerClassName?: string;
+  readonly navigationClassName?: string;
+  readonly tagClassName?: string;
+  readonly resultsClassName?: string;
   readonly pagination: "links" | "infinite";
 }): React.JSX.Element {
+  const tagLinkClassName = cn(
+    "shrink-0 rounded-lg text-xs transition-colors aria-[current=page]:font-medium aria-[current=page]:text-foreground",
+    "border px-3 py-1.5 hover:bg-accent aria-[current=page]:border-secondary aria-[current=page]:bg-secondary",
+    tagClassName,
+  );
   const tagPriority = new Map(
     promotedTags.map((tag, index) => [tag, index] as const),
   );
@@ -68,21 +86,24 @@ export function EditorialIndex({
   });
   const selected = filterEditorialItems(items, query);
   const page = paginateEditorialItems(selected, query.page, PAGE_SIZE);
-  const infiniteItems = selected.slice(0, query.page * PAGE_SIZE);
+  const currentQuery = { ...query, page: page.page };
+  const infiniteItems = selected.slice(0, page.page * PAGE_SIZE);
+  const visibleTags = [
+    ...tags.filter(({ tag }) => tag === query.tag),
+    ...tags.slice(0, 7).filter(({ tag }) => tag !== query.tag),
+  ];
+  const remainingTags = tags.filter((entry) => !visibleTags.includes(entry));
   const resultClassName =
     query.view === "grid"
       ? "grid grid-cols-3 gap-x-5 gap-y-12 max-[840px]:grid-cols-2 max-[560px]:grid-cols-1"
       : "grid gap-4";
   return (
-    <main
-      className="mx-auto w-full max-w-[1200px] px-6 pt-[clamp(56px,7vw,88px)] pb-24 data-[variant=engineering]:pt-[clamp(56px,7vw,88px)] max-[680px]:px-4 max-[680px]:pt-10"
-      data-variant={variant}
-    >
-      <header className="max-w-[760px] border-b pb-10 data-[variant=engineering]:max-w-none data-[variant=engineering]:border-b-0 data-[variant=engineering]:pb-3">
+    <main className="mx-auto w-full max-w-[1200px] px-6 pt-[clamp(56px,7vw,88px)] pb-24 max-[680px]:px-4 max-[680px]:pt-10">
+      <header className={cn("max-w-[760px] border-b pb-10", headerClassName)}>
         <p className="text-xs font-medium tracking-[.02em] text-muted-foreground">
           {copy.eyebrow}
         </p>
-        <h1 className="mt-4 mb-0 text-[clamp(40px,5vw,56px)] leading-[1.02] font-semibold tracking-[-.04em] data-[variant=engineering]:text-[clamp(40px,5vw,56px)]">
+        <h1 className="mt-4 mb-0 text-[clamp(40px,5vw,56px)] leading-[1.02] font-semibold tracking-[-.04em]">
           {copy.title}
         </h1>
         <p className="mt-5 mb-0 text-[clamp(16px,2vw,18px)] leading-[1.6] text-muted-foreground">
@@ -90,41 +111,57 @@ export function EditorialIndex({
         </p>
       </header>
       <nav
-        className="flex gap-2 overflow-x-auto border-b py-4 data-[variant=engineering]:gap-5 data-[variant=engineering]:border-b-0 data-[variant=engineering]:py-5"
+        className={cn(
+          "flex gap-2 overflow-x-auto border-b py-4",
+          navigationClassName,
+        )}
         aria-label={copy.all}
-        data-variant={variant}
       >
         <Link
           aria-current={query.tag === undefined ? "page" : undefined}
           className={tagLinkClassName}
-          data-current={query.tag === undefined}
-          data-variant={variant}
-          href={queryHref(pathname, query, { tag: undefined, page: 1 })}
+          href={queryHref(pathname, currentQuery, { tag: undefined, page: 1 })}
         >
           {copy.all}
         </Link>
-        {tags.slice(0, 7).map(({ tag, count }) => (
+        {visibleTags.map(({ tag, count }) => (
           <Link
             aria-current={query.tag === tag ? "page" : undefined}
             className={tagLinkClassName}
-            data-current={query.tag === tag}
-            data-variant={variant}
-            href={queryHref(pathname, query, { tag, page: 1 })}
+            href={queryHref(pathname, currentQuery, { tag, page: 1 })}
             key={tag}
           >
             {tagLabels[tag] ?? tag}{" "}
-            <span className="font-mono text-[10px]">{count}</span>
+            <span className="font-mono text-metadata">{count}</span>
           </Link>
         ))}
       </nav>
+      {remainingTags.length > 0 ? (
+        <details className="border-b py-3" key={query.tag ?? "all"}>
+          <summary className="cursor-pointer text-sm focus-visible:outline-2 focus-visible:outline-ring">
+            {copy.allTags}
+          </summary>
+          <nav aria-label={copy.allTags} className="flex flex-wrap gap-3 pt-4">
+            {remainingTags.map(({ tag, count }) => (
+              <Link
+                className={tagLinkClassName}
+                href={queryHref(pathname, currentQuery, { tag, page: 1 })}
+                key={tag}
+              >
+                {tagLabels[tag] ?? tag}{" "}
+                <span className="font-mono text-metadata">{count}</span>
+              </Link>
+            ))}
+          </nav>
+        </details>
+      ) : null}
       <section
         aria-labelledby="editorial-results"
-        className="pt-7 data-[variant=engineering]:pt-6"
-        data-variant={variant}
+        className={cn("pt-7", resultsClassName)}
       >
         <div className="mb-7 flex flex-wrap items-center justify-between gap-4">
           <h2
-            className="m-0 font-mono text-[11px] tracking-[.08em] text-muted-foreground uppercase"
+            className="m-0 font-mono text-caption tracking-metadata text-muted-foreground uppercase"
             id="editorial-results"
           >
             {copy.all} / {String(selected.length).padStart(2, "0")}
@@ -136,32 +173,38 @@ export function EditorialIndex({
             <Link
               aria-current={query.sort === "newest" ? "page" : undefined}
               className={controlLinkClassName}
-              href={queryHref(pathname, query, { sort: "newest", page: 1 })}
+              href={queryHref(pathname, currentQuery, {
+                sort: "newest",
+                page: 1,
+              })}
             >
               {copy.newest}
             </Link>
             <Link
               aria-current={query.sort === "oldest" ? "page" : undefined}
               className={controlLinkClassName}
-              href={queryHref(pathname, query, { sort: "oldest", page: 1 })}
+              href={queryHref(pathname, currentQuery, {
+                sort: "oldest",
+                page: 1,
+              })}
             >
               {copy.oldest}
             </Link>
             <span aria-hidden="true" className="mx-1 h-4 border-l" />
-            <Link
+            <EditorialViewLink
               aria-current={query.view === "grid" ? "page" : undefined}
               className={controlLinkClassName}
-              href={queryHref(pathname, query, { view: "grid" })}
+              href={queryHref(pathname, currentQuery, { view: "grid" })}
             >
               {copy.grid}
-            </Link>
-            <Link
+            </EditorialViewLink>
+            <EditorialViewLink
               aria-current={query.view === "list" ? "page" : undefined}
               className={controlLinkClassName}
-              href={queryHref(pathname, query, { view: "list" })}
+              href={queryHref(pathname, currentQuery, { view: "list" })}
             >
               {copy.list}
-            </Link>
+            </EditorialViewLink>
           </div>
         </div>
         {selected.length === 0 ? (
@@ -169,26 +212,21 @@ export function EditorialIndex({
             {copy.empty}
           </p>
         ) : pagination === "infinite" ? (
-          <EditorialInfiniteResults
+          <Results
             className={resultClassName}
             endLabel={copy.end ?? copy.empty}
             hasMore={infiniteItems.length < selected.length}
-            nextPageHref={queryHref(pathname, query, {
-              page: query.page + 1,
+            nextPageHref={queryHref(pathname, currentQuery, {
+              page: page.page + 1,
             })}
-            key={`${query.tag ?? "all"}:${query.sort}:${query.view}`}
+            key={`${pathname}:${query.tag ?? "all"}:${query.sort}:${query.view}:${page.page}`}
             loadMoreLabel={copy.loadMore}
             view={query.view}
           >
             {infiniteItems.map((item, index) => (
-              <EditorialCard
-                eager={index < 3}
-                item={item}
-                key={item.id}
-                variant={variant}
-              />
+              <Card eager={index < 3} item={item} key={item.id} />
             ))}
-          </EditorialInfiniteResults>
+          </Results>
         ) : (
           <div
             className={resultClassName}
@@ -196,24 +234,41 @@ export function EditorialIndex({
             data-view={query.view}
           >
             {page.items.map((item, index) => (
-              <EditorialCard
-                eager={index < 3}
-                item={item}
-                key={item.id}
-                variant={variant}
-              />
+              <Card eager={index < 3} item={item} key={item.id} />
             ))}
           </div>
         )}
-        {pagination === "links" && page.hasMore ? (
-          <div className="mt-10 flex justify-center">
-            <Link
-              className="border px-5 py-3 text-sm hover:bg-muted"
-              href={queryHref(pathname, query, { page: query.page + 1 })}
-            >
-              {copy.loadMore}
-            </Link>
-          </div>
+        {pagination === "links" && page.totalPages > 1 ? (
+          <nav
+            aria-label={copy.pagination}
+            className="mt-10 flex flex-wrap items-center justify-center gap-4"
+          >
+            {page.page > 1 ? (
+              <Link
+                className={controlLinkClassName}
+                rel="prev"
+                href={queryHref(pathname, currentQuery, {
+                  page: page.page - 1,
+                })}
+              >
+                {copy.previousPage}
+              </Link>
+            ) : null}
+            <span role="status" className="text-sm text-muted-foreground">
+              {copy.pageLabel(page.page, page.totalPages)}
+            </span>
+            {page.hasMore ? (
+              <Link
+                className={controlLinkClassName}
+                rel="next"
+                href={queryHref(pathname, currentQuery, {
+                  page: page.page + 1,
+                })}
+              >
+                {copy.nextPage}
+              </Link>
+            ) : null}
+          </nav>
         ) : null}
       </section>
     </main>

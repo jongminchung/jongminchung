@@ -18,11 +18,6 @@ const appRoot = process.cwd().endsWith("/apps/web")
   : resolve(process.cwd(), "apps/web");
 const workspaceRoot = resolve(appRoot, "../..");
 
-/** locale별 overview를 제외한 canonical Docs inventory임 */
-export const docsInventoryPerLocale = 49;
-/** locale별 root·영역 landing을 포함한 전체 Docs 파일 수임 */
-export const docsPagesPerLocale = 59;
-
 export interface ContentEntry<Metadata> {
   readonly metadata: Metadata;
   readonly body: string;
@@ -208,7 +203,7 @@ function validateInternalLinks(
   }
 }
 
-/** Blog collection의 개수·번역·canonical 계약을 검증함 */
+/** Blog collection의 번역·canonical 계약을 검증함 */
 export function validateBlogPosts(
   posts: readonly ValidatedContentSource<BlogPostMetadata>[],
 ): void {
@@ -217,30 +212,19 @@ export function validateBlogPosts(
   validateSeriesOrders(posts);
 }
 
-/** Docs collection의 개수·영역·번역·canonical 계약을 검증함 */
+/** Docs collection의 영역·번역·canonical 계약을 검증함 */
 export function validateDocsPages(
   pages: readonly ValidatedContentSource<DocsPageMetadata>[],
-  enforceInventory = false,
+  requireAreas = false,
 ): void {
   for (const page of pages) validateDocsPageEntry(page);
   validateLocalizedPairs("Docs page", pages, docsLocalizedMetadataFields);
 
-  if (!enforceInventory) return;
+  if (!requireAreas) return;
   for (const locale of locales) {
     const localized = pages.filter(
       ({ metadata }) => metadata.locale === locale,
     );
-    if (localized.length !== docsPagesPerLocale)
-      throw new Error(
-        `Docs ${locale} must contain ${String(docsPagesPerLocale)} pages; found ${localized.length}.`,
-      );
-    const migrated = localized.filter(
-      ({ metadata }) => !metadata.id.endsWith("-overview"),
-    );
-    if (migrated.length !== docsInventoryPerLocale)
-      throw new Error(
-        `Docs ${locale} must contain ${String(docsInventoryPerLocale)} migrated pages; found ${migrated.length}.`,
-      );
     for (const area of publicDocsAreas) {
       if (!localized.some(({ metadata }) => metadata.area === area))
         throw new Error(`Docs ${locale} is missing area ${area}.`);
@@ -256,22 +240,10 @@ export function validateDocsPages(
 export function validateTechContent(
   posts: readonly ValidatedContentSource<BlogPostMetadata>[],
   pages: readonly ValidatedContentSource<DocsPageMetadata>[],
-  options: Readonly<{ enforceInventory?: boolean }> = {},
+  options: Readonly<{ requireAreas?: boolean }> = {},
 ): void {
   validateBlogPosts(posts);
-  validateDocsPages(pages, options.enforceInventory);
-
-  if (options.enforceInventory === true) {
-    for (const locale of locales) {
-      const count = posts.filter(
-        ({ metadata }) => metadata.locale === locale,
-      ).length;
-      if (count !== 34)
-        throw new Error(
-          `Blog ${locale} must contain 34 posts; found ${count}.`,
-        );
-    }
-  }
+  validateDocsPages(pages, options.requireAreas);
 
   const blogIds = new Set(posts.map(({ metadata }) => metadata.id));
   const duplicateId = pages.find(({ metadata }) => blogIds.has(metadata.id));
@@ -287,7 +259,27 @@ export function validateTechContent(
   const knownPaths = new Set([...blogPaths, ...docsPaths]);
   if (knownPaths.size !== blogPaths.length + docsPaths.length)
     throw new Error("Blog and Docs canonical URL sets overlap.");
-  validateInternalLinks([...posts, ...pages], knownPaths);
+  const publicPaths = new Set([
+    ...posts
+      .filter(({ metadata }) => metadata.publicationStatus === "published")
+      .map(({ metadata }) => createBlogPostHref(metadata.locale, metadata.id)),
+    ...pages
+      .filter(({ metadata }) => metadata.publicationStatus === "published")
+      .map(({ relativePath }) => docsHrefFromRelativePath(relativePath)),
+  ]);
+  const documents = [...posts, ...pages];
+  validateInternalLinks(
+    documents.filter(
+      ({ metadata }) => metadata.publicationStatus === "published",
+    ),
+    publicPaths,
+  );
+  validateInternalLinks(
+    documents.filter(
+      ({ metadata }) => metadata.publicationStatus !== "published",
+    ),
+    knownPaths,
+  );
 }
 
 /** 단일 투자 노트의 경로와 필수 본문 계약을 검증함 */

@@ -1,4 +1,7 @@
 :where(:root) {
+  --font-size-metadata: 10px;
+  --font-size-caption: 11px;
+  --letter-spacing-metadata: 0.08em;
   --radius: 0.5rem;
   --background: #fff;
   --foreground: #0d0d0d;

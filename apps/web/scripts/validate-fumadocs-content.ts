@@ -13,6 +13,7 @@ import {
   type ValidatedContentSource,
 } from "../lib/content-validation.ts";
 import type { InvestmentNoteMetadata } from "../lib/invest/content.ts";
+import docsBaseline from "./tech-docs-baseline.json";
 
 async function validateTech(): Promise<void> {
   const [blogSources, docsSources] = await Promise.all([
@@ -45,7 +46,17 @@ async function validateTech(): Promise<void> {
       ),
     ),
   ]);
-  validateTechContent(blogSources, docsSources, { enforceInventory: true });
+  validateTechContent(blogSources, docsSources, { requireAreas: true });
+  for (const locale of ["ko", "en"] as const) {
+    const paths = new Set(docsSources.map((page) => page.relativePath));
+    const missing = docsBaseline.filter(
+      (path) => !paths.has(`${locale}/${path}`),
+    );
+    if (missing.length > 0)
+      throw new Error(
+        `Docs ${locale} is missing baseline pages: ${missing.join(", ")}`,
+      );
+  }
 }
 
 async function validateInvestment(): Promise<void> {

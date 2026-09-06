@@ -1,24 +1,16 @@
 import type { Locale } from "../content-contracts.ts";
-import {
-  notesBySource,
-  publishedInvestmentNotes,
-  readContentSnapshot,
-} from "../content-repository.ts";
 import type {
   InvestmentNoteManifestEntry,
   InvestmentSourceKind,
 } from "./content.ts";
 import { investmentSeriesSlug } from "./routing.ts";
-import { loadInvestmentContent } from "./source.ts";
+import { loadInvestmentContent, readInvestmentNotes } from "./source.ts";
 
 /** `getInvestmentNotes` 데이터를 조회함 */
 export function getInvestmentNotes(
   locale: Locale,
 ): readonly InvestmentNoteManifestEntry[] {
-  return publishedInvestmentNotes(
-    readContentSnapshot().investmentNotes,
-    locale,
-  );
+  return publishedInvestmentNotes(readInvestmentNotes(), locale);
 }
 
 /** `getNotesBySource` 데이터를 조회함 */
@@ -26,7 +18,7 @@ export function getNotesBySource(
   locale: Locale,
   kind: InvestmentSourceKind,
 ): readonly InvestmentNoteManifestEntry[] {
-  return notesBySource(readContentSnapshot().investmentNotes, locale, kind);
+  return notesBySource(readInvestmentNotes(), locale, kind);
 }
 
 /** `getNotesByTag` tag에 속한 공개 투자 노트를 반환함 */
@@ -67,4 +59,25 @@ export async function loadInvestmentNote(locale: Locale, id: string) {
     Content: compiled.body,
     toc: compiled.toc,
   });
+}
+
+/** 게시된 투자 노트를 반환함 */
+function publishedInvestmentNotes(
+  notes: readonly InvestmentNoteManifestEntry[],
+  locale: Locale,
+): readonly InvestmentNoteManifestEntry[] {
+  return notes.filter(
+    (note) => note.locale === locale && note.status === "published",
+  );
+}
+
+/** source 종류에 맞는 투자 노트를 반환함 */
+function notesBySource(
+  notes: readonly InvestmentNoteManifestEntry[],
+  locale: Locale,
+  kind: InvestmentSourceKind,
+): readonly InvestmentNoteManifestEntry[] {
+  return publishedInvestmentNotes(notes, locale).filter((note) =>
+    note.sources.some((source) => source.kind === kind),
+  );
 }

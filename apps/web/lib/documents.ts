@@ -11,7 +11,7 @@ import {
 import {
   loadBlogContent,
   loadDocsContent,
-  readContentSnapshot,
+  readTechContentSnapshot,
 } from "./content-repository.ts";
 
 export interface LoadedDocument {
@@ -27,26 +27,26 @@ export interface LoadedDocument {
 export async function getSourceDocuments(): Promise<
   readonly ContentManifestEntry[]
 > {
-  return readContentSnapshot().sourceTech.documents;
+  return readTechContentSnapshot().sourceTech.documents;
 }
 
 /** 공개된 Blog와 Docs 문서만 반환함 */
 export async function getDocuments(): Promise<readonly ContentManifestEntry[]> {
-  return readContentSnapshot().publishedTech.documents;
+  return readTechContentSnapshot().publishedTech.documents;
 }
 
 /** 전체 Blog 글을 반환함 */
 export async function getBlogPosts(): Promise<
   readonly BlogPostManifestEntry[]
 > {
-  return readContentSnapshot().publishedTech.blogPosts;
+  return readTechContentSnapshot().publishedTech.blogPosts;
 }
 
 /** 전체 Docs 페이지를 반환함 */
 export async function getDocsPages(): Promise<
   readonly DocsPageManifestEntry[]
 > {
-  return readContentSnapshot().publishedTech.docsPages;
+  return readTechContentSnapshot().publishedTech.docsPages;
 }
 
 /** `getLocalizedDocuments` 데이터를 조회함 */

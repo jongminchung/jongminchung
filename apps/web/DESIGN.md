@@ -54,13 +54,25 @@
 - **responsive 기준은 390px, tablet, desktop 및 200% zoom에서 읽기 폭과 overflow를 확인함**
     - 본문은 overflow wrap, 표·코드는 수평 스크롤, navigation은 sheet 또는 축소 rail을 사용함
 
+## Tailwind 클래스 적용
+
+- 디자인 토큰을 유지하고 화면 스타일은 JSX의 `className`에 Tailwind utility로 직접 작성함.
+- 제품별 표현을 위해 `data-[variant=...]`, `group-data-[variant=...]` 또는 새 CVA variant를 추가하지 않음.
+- 단순한 상태 분기는 JSX 조건식과 `cn`으로 완전한 클래스 문자열을 선택함. 동적으로 클래스 이름을 조립하지 않음.
+- 제품별 카드 구조는 제품 컴포넌트에서 직접 조합함. `EngineeringCard`는 Tech가 소유하고 공용 미디어·메타데이터만 재사용함. 초기 목록과 추가 로딩은 같은 카드 조합을 사용함.
+- 이미 매핑된 토큰은 `rounded-md`, `rounded-lg`, `shadow-md`처럼 semantic utility로 사용함. 기존 값과 다른 크기·간격으로 바꾸는 작업은 별도의 디자인 변경으로 다룸.
+- 직접 작성한 자식 요소에는 클래스를 직접 지정함. 공용 컴포넌트 내부 wrapper는 명시적인 `className` prop으로 조정하고 소비자가 DOM 구조 selector로 접근하지 않음.
+- 공용 기본값의 재정의는 같은 breakpoint에서 적용함. 검색창의 기존 `max-w-xl sm:max-w-sm`을 유지하며 너비 확대는 별도 UI 변경임.
+- 스타일 정리에서 `!important`를 제거할 때 기존의 실제 computed style을 소비 클래스에 보존함. 전후 production 화면과 keyboard 동작으로 확인함.
+- `hover:`, `focus-visible:`, responsive 및 `aria-*`·primitive의 실제 상태 selector는 계속 사용함.
+
 ## 컴포넌트 경계
 
 - **`packages/ui`는 제품 중립 primitive와 여러 제품에 공통인 상태 variant만 소유함**
     - `Button`, `Card`, `Badge`, `Alert`, `Table`, `Input`, `Dialog`는 semantic token으로만 확장함
 - **도메인 composition은 각 route group이 소유함**
     - 문서 코드·현재 navigation·outline은 Tech composition에, source·judgment·evidence는 Invest composition에 둠
-- **공통 editorial composition은 `apps/web/components/Editorial.tsx`가 소유함**
+- **공통 editorial composition은 `apps/web/components/EditorialIndex.tsx`가 소유함**
     - 목록 query는 `tag`, `sort=newest|oldest`, `view=grid|list`, `page`로 URL과 동기화함
     - Tech와 Invest adapter는 같은 item contract를 제공하고 domain 전용 primitive를 추가하지 않음
 - **새 공용 variant는 의미·접근성·상호작용이 세 사이트에서 같을 때만 추가함**
@@ -74,3 +86,18 @@
     - 대표 route는 desktop·tablet·390px mobile과 200% zoom에서 확인함
 - **visual baseline은 의도된 변경만 darwin·Linux Chromium에서 검토 후 갱신함**
     - font loading, client boundary, route별 초기 전송량, asset loading 변화를 release 전에 확인함
+
+## 유지보수 계약과 검증
+
+제품별 variant를 추가하지 않고 기존 computed style을 보존하도록 다음 항목을 적용함.
+
+| 적용 항목                          | 구현·검증 위치                                                                                           | 보존하는 계약                                                                                                                                                                                            |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 직접 소유한 자식의 Tailwind 클래스 | `DocumentOutline.tsx`, `DocumentPager.tsx`, `PlatformArchitectureVisuals.tsx`                            | 목차의 선택·hover 우선순위, 빈 pager 칸의 최소 높이, 기존 selector가 덮어쓰던 다이어그램 번호의 block·색상·크기까지 보존함.                                                                              |
+| 제품 selector 재도입 방지          | `packages/ui/src/architecture-contract.test.ts`                                                          | 앱의 data-variant 스타일은 차단하고 primitive의 실제 상태·size·side 및 기존 공용 API는 허용함.                                                                                                           |
+| 반복 타이포그래피 토큰             | `packages/ui/src/styles/theme.css`, `tokens.css`                                                         | `text-metadata` 10px, `text-caption` 11px, `tracking-metadata` 0.08em. 기존 상속 line-height를 유지하고 일회성 카드 제목 크기는 그대로 둠.                                                               |
+| 소비자의 클래스 재정의             | `packages/ui/src/lib/utils.ts`, `utils.test.ts`, `ConsumerStyleFixture.tsx`, `ui-primitives.e2e.test.ts` | 글자 크기·색상·자간 병합을 구분하고 390px·1440px에서 Dialog·Sheet·Select의 크기·반경·간격과 ESC focus 복귀를 검사함.                                                                                     |
+| 실제 검색 composition 환경 검사    | `ui-primitives.e2e.test.ts`                                                                              | 390px dark, 1440px light, 1024px tablet, CSS zoom 200%, forced-colors 환경에서 긴 한글 결과·overflow·키보드 선택·ESC 복귀를 확인함. CSS zoom 검사는 OS나 브라우저 메뉴 확대를 직접 조작하는 검사가 아님. |
+| shadcn 소스 갱신 기록              | [공용 UI 갱신 기록](../../packages/ui/SHADCN.md)                                                         | 29개 primitive의 보존 계약, 현재 비교 환경, 원래 registry revision 미기록 사실과 다음 갱신 시 남길 증거를 명시함.                                                                                        |
+
+Fumadocs가 생성하는 MDX 내부 요소의 selector는 앱이 직접 소유한 JSX 자식과 구분함. `DocsMdxPrimitives`의 문단·제목 구조와 `DocsCodeBlock`의 생성된 code 요소에 대한 selector는 통합 경계로 유지함.

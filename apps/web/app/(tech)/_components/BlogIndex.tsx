@@ -11,6 +11,8 @@ import {
 } from "#lib/editorial";
 import { toTechEditorialItem } from "#lib/editorial-adapters";
 import { documentKindLabel } from "#lib/tech/document-kind";
+import { EngineeringCard } from "./EngineeringCard";
+import { EngineeringInfiniteResults } from "./EngineeringInfiniteResults";
 
 const copy: Record<Locale, EditorialCopy> = {
   ko: {
@@ -23,6 +25,11 @@ const copy: Record<Locale, EditorialCopy> = {
     grid: "그리드",
     list: "목록",
     loadMore: "더 보기",
+    allTags: "전체 태그",
+    previousPage: "이전 페이지",
+    nextPage: "다음 페이지",
+    pagination: "페이지 탐색",
+    pageLabel: (page, total) => `${page} / ${total} 페이지`,
     end: "모든 글을 불러왔습니다",
     empty: "선택한 조건과 일치하는 글이 없습니다",
     related: "관련 글",
@@ -39,6 +46,11 @@ const copy: Record<Locale, EditorialCopy> = {
     grid: "Grid",
     list: "List",
     loadMore: "Load more",
+    allTags: "All tags",
+    previousPage: "Previous page",
+    nextPage: "Next page",
+    pagination: "Pagination",
+    pageLabel: (page, total) => `Page ${page} of ${total}`,
     end: "All articles loaded",
     empty: "No articles match the selected filters.",
     related: "Related articles",
@@ -73,7 +85,12 @@ export function BlogIndex({
       tagLabels={Object.fromEntries(
         documentKinds.map((kind) => [kind, documentKindLabel(locale, kind)]),
       )}
-      variant="engineering"
+      Card={EngineeringCard}
+      Results={EngineeringInfiniteResults}
+      headerClassName="max-w-none border-b-0 pb-3"
+      navigationClassName="gap-5 border-b-0 py-5"
+      tagClassName="border-0 p-0 text-muted-foreground hover:bg-transparent aria-[current=page]:bg-transparent"
+      resultsClassName="pt-6"
     />
   );
 }

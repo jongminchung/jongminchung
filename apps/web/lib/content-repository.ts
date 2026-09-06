@@ -15,11 +15,6 @@ import {
   type ValidatedContentSource,
 } from "./content-validation.ts";
 import { blogSource, docsSource } from "./fumadocs-source.ts";
-import {
-  type InvestmentNoteManifestEntry,
-  type InvestmentSourceKind,
-} from "./invest/content.ts";
-import { readInvestmentNoteCollection } from "./invest/source.ts";
 import { publishedContentOnly } from "./tech/publication.ts";
 
 export interface TechContentCollection {
@@ -28,13 +23,12 @@ export interface TechContentCollection {
   readonly documents: readonly ContentManifestEntry[];
 }
 
-export interface ContentSnapshot {
+export interface TechContentSnapshot {
   readonly sourceTech: TechContentCollection;
   readonly publishedTech: TechContentCollection;
-  readonly investmentNotes: readonly InvestmentNoteManifestEntry[];
 }
 
-let productionSnapshot: ContentSnapshot | undefined;
+let productionSnapshot: TechContentSnapshot | undefined;
 
 function relativePath(path: string): string {
   return path.replace(/^[/\\]+/u, "").replaceAll("\\", "/");
@@ -118,13 +112,13 @@ function loadDocsPages() {
   });
 }
 
-function createContentSnapshot(): ContentSnapshot {
+function createTechContentSnapshot(): TechContentSnapshot {
   const blog = loadBlogPosts();
   const docs = loadDocsPages();
   validateTechContent(
     blog.map(({ validationSource }) => validationSource),
     docs.map(({ validationSource }) => validationSource),
-    { enforceInventory: true },
+    { requireAreas: true },
   );
   const blogPosts = Object.freeze(
     blog.map(({ manifest }) => manifest).sort(compareDocumentMetadata),
@@ -147,20 +141,20 @@ function createContentSnapshot(): ContentSnapshot {
   return Object.freeze({
     sourceTech,
     publishedTech,
-    investmentNotes: readInvestmentNoteCollection(),
   });
 }
 
 /** Fumadocs 컬렉션을 검증된 제품 도메인 스냅샷으로 변환함 */
-export function readContentSnapshot(): ContentSnapshot {
-  if (process.env.NODE_ENV === "development") return createContentSnapshot();
-  productionSnapshot ??= createContentSnapshot();
+export function readTechContentSnapshot(): TechContentSnapshot {
+  if (process.env.NODE_ENV === "development")
+    return createTechContentSnapshot();
+  productionSnapshot ??= createTechContentSnapshot();
   return productionSnapshot;
 }
 
 /** 공개 Tech collection을 한 번의 repository snapshot에서 반환함 */
 export function readPublishedTechContent(): TechContentCollection {
-  return readContentSnapshot().publishedTech;
+  return readTechContentSnapshot().publishedTech;
 }
 
 /** Fumadocs가 색인한 Blog 본문을 locale과 공개 ID로 조회함 */
@@ -171,25 +165,4 @@ export async function loadBlogContent(locale: Locale, id: string) {
 /** Fumadocs가 색인한 Docs 본문을 locale과 slugs로 조회함 */
 export async function loadDocsContent(locale: Locale, slugs: string[]) {
   return (await docsSource.getPage(slugs, locale)?.data.load()) ?? null;
-}
-
-/** 게시된 투자 노트를 반환함 */
-export function publishedInvestmentNotes(
-  notes: readonly InvestmentNoteManifestEntry[],
-  locale: Locale,
-): readonly InvestmentNoteManifestEntry[] {
-  return notes.filter(
-    (note) => note.locale === locale && note.status === "published",
-  );
-}
-
-/** source 종류에 맞는 투자 노트를 반환함 */
-export function notesBySource(
-  notes: readonly InvestmentNoteManifestEntry[],
-  locale: Locale,
-  kind: InvestmentSourceKind,
-): readonly InvestmentNoteManifestEntry[] {
-  return publishedInvestmentNotes(notes, locale).filter((note) =>
-    note.sources.some((source) => source.kind === kind),
-  );
 }

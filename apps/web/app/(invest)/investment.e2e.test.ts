@@ -241,3 +241,62 @@ test("[성공] Invest 테마 선택을 적용하고 사이트별로 저장함", 
     .toBe("system");
   await expect(editorialImage).toHaveAttribute("src", imageSrc ?? "");
 });
+
+test("태그 전체 탐색과 선택 상태를 유지하며 이전·다음 페이지로 이동함", async ({
+  page,
+}) => {
+  await page.goto("/en?sort=oldest&view=list");
+  const allTags = page.getByText("All tags", { exact: true });
+  await allTags.focus();
+  await allTags.press("Enter");
+  const tagLink = page
+    .getByRole("navigation", { name: "All tags", exact: true })
+    .getByRole("link")
+    .first();
+  const tagHref = await tagLink.getAttribute("href");
+  expect(tagHref).not.toBeNull();
+  await tagLink.click();
+  await expect(page).toHaveURL(
+    new RegExp(
+      `tag=${new URL(tagHref!, "http://localhost").searchParams.get("tag")}`,
+    ),
+  );
+  await expect(page.locator('nav a[aria-current="page"]')).toBeVisible();
+
+  await page.goto("/en?sort=oldest&view=list");
+  const pagination = page.getByRole("navigation", {
+    name: "Pagination",
+    exact: true,
+  });
+  await expect(
+    pagination.getByRole("link", { name: "Previous page" }),
+  ).toHaveCount(0);
+  const firstHref = await page
+    .locator('[data-view="list"] a')
+    .first()
+    .getAttribute("href");
+  await pagination.getByRole("link", { name: "Next page" }).click();
+  await expect(page).toHaveURL(/sort=oldest&view=list&page=2/u);
+  await expect(pagination.getByRole("status")).toContainText("Page 2 of");
+  await expect(
+    page.locator('[data-view="list"] a').first(),
+  ).not.toHaveAttribute("href", firstHref!);
+  await pagination.getByRole("link", { name: "Previous page" }).click();
+  await expect(page.locator('[data-view="list"] a').first()).toHaveAttribute(
+    "href",
+    firstHref!,
+  );
+  await expect(page).toHaveTitle(/Investment Notes/u);
+  await expectNoAccessibilityViolations(page);
+});
+
+test("한글 시리즈 canonical URL은 리다이렉트 반복 없이 열림", async ({
+  siteRequest,
+}) => {
+  const slug = "같은-투자-다른-결과-etf와-계좌를-고르는-법";
+  const response = await siteRequest.get(
+    `/ko/series/${encodeURIComponent(slug)}`,
+    { maxRedirects: 0 },
+  );
+  expect(response.status()).toBe(200);
+});

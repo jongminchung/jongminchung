@@ -18,7 +18,7 @@ interface NodeCopy {
 }
 
 const figureClassName =
-  "relative my-6! overflow-hidden rounded-[var(--radius-md)] border bg-card";
+  "relative my-6! overflow-hidden rounded-md border bg-card";
 const figureHeaderClassName =
   "flex items-center justify-between gap-4 border-b px-4 py-[.8rem]";
 const eyebrowClassName =
@@ -27,7 +27,7 @@ const canvasClassName = "relative p-[clamp(1rem,3vw,1.75rem)]";
 const legendClassName =
   "m-0! flex flex-wrap gap-x-4 gap-y-2 border-t px-4 py-[.7rem] text-[.72rem] leading-[1.45] text-muted-foreground";
 const nodeClassName =
-  "relative z-[1] min-w-0 rounded-[var(--radius-sm)] border bg-[color-mix(in_oklab,var(--card)_93%,var(--architecture-accent))] p-[.85rem] shadow-[0_8px_26px_color-mix(in_oklab,var(--foreground)_7%,transparent)] data-[kind=system]:border-[color-mix(in_oklab,var(--architecture-accent)_60%,var(--border))] data-[kind=system]:bg-[color-mix(in_oklab,var(--card)_86%,var(--architecture-accent))] [&_span]:mt-[.28rem] [&_span]:block [&_span]:text-[.72rem] [&_span]:leading-[1.45] [&_span]:text-muted-foreground [&_strong]:block [&_strong]:text-[.86rem] [&_strong]:[overflow-wrap:anywhere]";
+  "relative z-[1] min-w-0 rounded-sm border bg-[color-mix(in_oklab,var(--card)_93%,var(--architecture-accent))] p-[.85rem] shadow-[0_8px_26px_color-mix(in_oklab,var(--foreground)_7%,transparent)] data-[kind=system]:border-[color-mix(in_oklab,var(--architecture-accent)_60%,var(--border))] data-[kind=system]:bg-[color-mix(in_oklab,var(--card)_86%,var(--architecture-accent))]";
 const containerNodeClassName =
   "min-h-[7.4rem] before:absolute before:top-[.7rem] before:right-[.7rem] before:size-[.45rem] before:animate-[architecture-node-pulse_5s_ease-in-out_infinite] before:rounded-full before:bg-[var(--architecture-accent)] before:opacity-25 before:[animation-delay:var(--architecture-delay)] before:content-[''] max-[760px]:min-h-0";
 const connectedNodeClassName =
@@ -35,7 +35,7 @@ const connectedNodeClassName =
 const timelineClassName =
   "relative m-0! grid list-none grid-cols-5 gap-[clamp(.5rem,1.4vw,.9rem)] p-0! before:absolute before:top-[3.55rem] before:right-[clamp(1.4rem,4vw,2.6rem)] before:left-[clamp(1.4rem,4vw,2.6rem)] before:h-0.5 before:bg-[color-mix(in_oklab,var(--architecture-accent)_30%,var(--border))] before:content-[''] max-[760px]:grid-cols-1 max-[760px]:before:hidden";
 const timelineItemClassName =
-  "relative z-[1] min-w-0 pt-[2.2rem] text-center before:absolute before:top-[1.65rem] before:left-1/2 before:size-[.9rem] before:-translate-x-1/2 before:-translate-y-1/2 before:animate-[architecture-stage_10s_ease-in-out_infinite] before:rounded-full before:border-2 before:border-card before:bg-muted-foreground before:shadow-[0_0_0_1px_var(--border)] before:[animation-delay:var(--architecture-delay)] before:content-[''] [&_span]:mt-[.3rem] [&_span]:block [&_span]:text-[.68rem] [&_span]:leading-[1.4] [&_span]:text-muted-foreground [&_strong]:block [&_strong]:text-[.78rem] [&_strong]:[overflow-wrap:anywhere] max-[760px]:pt-0 max-[760px]:pb-0 max-[760px]:pl-[2.2rem] max-[760px]:text-left max-[760px]:before:top-2 max-[760px]:before:left-[.55rem]";
+  "relative z-[1] min-w-0 pt-[2.2rem] text-center before:absolute before:top-[1.65rem] before:left-1/2 before:size-[.9rem] before:-translate-x-1/2 before:-translate-y-1/2 before:animate-[architecture-stage_10s_ease-in-out_infinite] before:rounded-full before:border-2 before:border-card before:bg-muted-foreground before:shadow-[0_0_0_1px_var(--border)] before:[animation-delay:var(--architecture-delay)] before:content-[''] max-[760px]:pt-0 max-[760px]:pb-0 max-[760px]:pl-[2.2rem] max-[760px]:text-left max-[760px]:before:top-2 max-[760px]:before:left-[.55rem]";
 
 const architectureMotionStyles = `
 @keyframes architecture-context-traverse {
@@ -400,10 +400,11 @@ function ArchitectureFigure({
       <div className={figureHeaderClassName}>
         <p className={eyebrowClassName}>{eyebrow}</p>
         <label
-          className="inline-flex min-h-8 cursor-pointer items-center gap-[.45rem] rounded-[var(--radius-sm)] border px-[.65rem] text-xs text-muted-foreground select-none hover:text-foreground [&_input]:accent-[var(--architecture-accent)]"
+          className="inline-flex min-h-8 cursor-pointer items-center gap-[.45rem] rounded-sm border px-[.65rem] text-xs text-muted-foreground select-none hover:text-foreground"
           htmlFor={controlId}
         >
           <input
+            className="accent-[var(--architecture-accent)]"
             data-architecture-motion="true"
             id={controlId}
             type="checkbox"
@@ -443,8 +444,12 @@ function ArchitectureNode({
           : ({ "--architecture-delay": `${containerIndex}s` } as CSSProperties)
       }
     >
-      <strong>{nodeCopy.name}</strong>
-      <span>{nodeCopy.detail}</span>
+      <strong className="block text-[.86rem] [overflow-wrap:anywhere]">
+        {nodeCopy.name}
+      </strong>
+      <span className="mt-[.28rem] block text-[.72rem] leading-[1.45] text-muted-foreground">
+        {nodeCopy.detail}
+      </span>
     </div>
   );
 }
@@ -468,8 +473,12 @@ function ArchitectureTimeline({
           key={stage.name}
           style={{ "--architecture-delay": `${index * 2}s` } as CSSProperties}
         >
-          <strong>{stage.name}</strong>
-          <span>{stage.detail}</span>
+          <strong className="block text-[.78rem] [overflow-wrap:anywhere]">
+            {stage.name}
+          </strong>
+          <span className="mt-[.3rem] block text-[.68rem] leading-[1.4] text-muted-foreground">
+            {stage.detail}
+          </span>
         </li>
       ))}
     </ol>
@@ -610,15 +619,17 @@ export function Arc42CoverageMap({
         >
           {view.items.map(([number, title, detail]) => (
             <div
-              className="grid min-w-0 grid-cols-[2rem_minmax(0,1fr)] items-start gap-[.6rem] rounded-[var(--radius-sm)] border bg-[color-mix(in_oklab,var(--card)_96%,var(--architecture-accent))] p-3 [&_span]:mt-[.22rem] [&_span]:block [&_span]:text-[.68rem] [&_span]:leading-[1.4] [&_span]:text-muted-foreground [&_strong]:block [&_strong]:text-[.78rem]"
+              className="grid min-w-0 grid-cols-[2rem_minmax(0,1fr)] items-start gap-[.6rem] rounded-sm border bg-[color-mix(in_oklab,var(--card)_96%,var(--architecture-accent))] p-3"
               key={number}
             >
-              <span className="grid size-8 place-items-center rounded-full bg-[color-mix(in_oklab,var(--architecture-accent)_16%,var(--muted))] font-mono text-[.7rem] font-bold text-foreground">
+              <span className="mt-[.22rem] block size-8 place-items-center rounded-full bg-[color-mix(in_oklab,var(--architecture-accent)_16%,var(--muted))] font-mono text-[.68rem] leading-[1.4] font-bold text-muted-foreground">
                 {number}
               </span>
-              <span>
-                <strong>{title}</strong>
-                <span>{detail}</span>
+              <span className="mt-[.22rem] block text-[.68rem] leading-[1.4] text-muted-foreground">
+                <strong className="block text-[.78rem]">{title}</strong>
+                <span className="mt-[.22rem] block text-[.68rem] leading-[1.4] text-muted-foreground">
+                  {detail}
+                </span>
               </span>
             </div>
           ))}

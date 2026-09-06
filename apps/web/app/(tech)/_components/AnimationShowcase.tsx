@@ -136,7 +136,7 @@ function InteractiveTimeline({ locale }: { readonly locale: Locale }) {
         : "database";
 
   return (
-    <article className="overflow-hidden rounded-[var(--radius)] border bg-card">
+    <article className="overflow-hidden rounded-lg border bg-card">
       <div className="border-b p-6 max-[560px]:p-5">
         <div className="mb-5 flex items-center justify-between gap-4 font-mono text-[10px] tracking-[.08em] uppercase">
           <span className="text-primary">{text.index}</span>
@@ -305,7 +305,7 @@ function InteractiveTimeline({ locale }: { readonly locale: Locale }) {
           <label className="ml-auto flex items-center gap-2 font-mono text-[10px] text-muted-foreground uppercase">
             {text.speed}
             <select
-              className="h-8 rounded-[var(--radius-xs)] border bg-background px-2 text-foreground"
+              className="h-8 rounded-xs border bg-background px-2 text-foreground"
               onChange={(event) => setSpeed(Number(event.target.value))}
               value={speed}
             >
@@ -332,7 +332,7 @@ function RenderedSequence({ locale }: { readonly locale: Locale }) {
   const text = copy[locale].rendered;
   const nodes = [text.client, text.api, text.worker, text.store];
   return (
-    <article className="overflow-hidden rounded-[var(--radius)] border bg-card">
+    <article className="overflow-hidden rounded-lg border bg-card">
       <div className="border-b p-6 max-[560px]:p-5">
         <div className="mb-5 flex items-center justify-between gap-4 font-mono text-[10px] tracking-[.08em] uppercase">
           <span className="text-primary">{text.index}</span>

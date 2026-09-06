@@ -122,6 +122,53 @@ describe("Blog·Docs 콘텐츠 계약", () => {
     ).not.toThrow();
   });
 
+  test("새 번역 쌍을 추가해도 콘텐츠 개수를 고정하지 않음", () => {
+    const posts = Array.from({ length: 35 }, (_, index) =>
+      (["ko", "en"] as const).map((locale) =>
+        createBlogPost(locale, `post-${index}`),
+      ),
+    ).flat();
+    const pages = (["ko", "en"] as const).flatMap((locale) =>
+      (["rke2spray", "fe", "be", "k8s", "vscode"] as const).map((area) =>
+        createDocsPage(locale, `${area}-article`, { area }),
+      ),
+    );
+    expect(() =>
+      validateTechContent(posts, pages, { requireAreas: true }),
+    ).not.toThrow();
+    expect(() =>
+      validateTechContent(posts, localizedDocsPages(), { requireAreas: true }),
+    ).toThrow("missing area");
+  });
+
+  test("공개 문서에서 초안 링크는 거부하고 초안 간 링크는 허용함", () => {
+    const drafts = localizedDocsPages().map((page) => ({
+      ...page,
+      metadata: { ...page.metadata, publicationStatus: "draft" as const },
+    }));
+    const posts = localizedBlogPosts().map((post) => ({
+      ...post,
+      extractedReferences: [
+        { href: `/${post.metadata.locale}/docs/fe/docs-page#section` },
+      ],
+    }));
+    expect(() => validateTechContent(posts, drafts)).toThrow(
+      "broken internal link",
+    );
+    expect(() =>
+      validateTechContent(posts, localizedDocsPages()),
+    ).not.toThrow();
+    expect(() =>
+      validateTechContent(
+        posts.map((post) => ({
+          ...post,
+          metadata: { ...post.metadata, publicationStatus: "draft" as const },
+        })),
+        drafts,
+      ),
+    ).not.toThrow();
+  });
+
   test("물리적 경로와 locale 누락을 보고함", () => {
     expect(() =>
       validateBlogPosts([

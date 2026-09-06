@@ -96,7 +96,6 @@ export function DocumentPage({
       <EditorialArticle
         header={<DocumentPageHeader locale={locale} document={document} />}
         rail={<DocumentOutline items={document.toc} labels={outlineLabels} />}
-        variant="engineering"
       >
         <TechDocsMobileToc
           backToTopLabel={outlineLabels.backToTop}
@@ -116,7 +115,7 @@ export function DocumentPage({
                 <figure className="mt-0 mb-10" data-tech-article-hero="true">
                   <EditorialImage
                     alt={displayTitleFor(metadata)}
-                    className="aspect-[1.6] w-full rounded-[var(--radius)] border object-cover"
+                    className="aspect-[1.6] w-full rounded-lg border object-cover"
                     eager
                     height={1024}
                     sizes="(max-width: 600px) calc(100vw - 32px), (max-width: 1279px) calc(100vw - 64px), 760px"

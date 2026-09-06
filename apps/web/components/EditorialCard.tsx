@@ -1,56 +1,67 @@
+import type { ReactNode } from "react";
 import type { EditorialItem } from "#lib/editorial";
 import { EditorialGraphic } from "./EditorialGraphic";
 import { EditorialImage } from "./EditorialImage";
 import { IntentLink } from "./IntentLink";
 
-/** `EditorialCard` type·date·title·summary 순서의 단일 링크 카드임 */
+export interface EditorialCardProps {
+  readonly item: EditorialItem;
+  readonly eager?: boolean;
+}
+
+/** 카드 사이에서 동일한 이미지 로딩 계약만 공유함. */
+export function EditorialCardMedia({
+  item,
+  eager = false,
+  fallback,
+}: EditorialCardProps & { readonly fallback?: ReactNode }): React.JSX.Element {
+  return item.image === undefined ? (
+    <>{fallback ?? <EditorialGraphic seed={item.mediaSeed} />}</>
+  ) : (
+    <EditorialImage
+      alt={item.image.alt}
+      className="aspect-[1.6] w-full border-b object-cover"
+      data-editorial-image="true"
+      eager={eager}
+      height={1000}
+      sizes="(max-width: 560px) calc(100vw - 32px), (max-width: 840px) calc((100vw - 68px) / 2), 373px"
+      src={item.image.src}
+      width={1600}
+    />
+  );
+}
+
+export function EditorialCardMetadata({
+  item,
+}: Pick<EditorialCardProps, "item">): React.JSX.Element {
+  return (
+    <span className="flex flex-wrap items-center gap-2 font-mono text-metadata tracking-metadata text-muted-foreground uppercase">
+      <span>{item.kind}</span>
+      <span aria-hidden="true">·</span>
+      <time dateTime={item.publishedAt}>{item.publishedAt}</time>
+    </span>
+  );
+}
+
+/** 기본 editorial 카드의 type·date·title·summary 읽기 순서를 유지함. */
 export function EditorialCard({
   item,
   eager = false,
-  variant = "default",
-}: {
-  readonly item: EditorialItem;
-  readonly eager?: boolean;
-  readonly variant?: "default" | "engineering";
-}): React.JSX.Element {
+}: EditorialCardProps): React.JSX.Element {
   return (
     <IntentLink
-      className="group block overflow-hidden rounded-lg border bg-card text-card-foreground transition-[border-color,background-color] hover:border-input hover:bg-muted/35 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[variant=engineering]:overflow-visible data-[variant=engineering]:rounded-none data-[variant=engineering]:border-0 data-[variant=engineering]:bg-transparent data-[variant=engineering]:hover:bg-transparent"
-      data-variant={variant}
+      className="group block overflow-hidden rounded-lg border bg-card text-card-foreground transition-[border-color,background-color] hover:border-input hover:bg-muted/35 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
       href={item.href}
     >
-      <span
-        className="block data-[variant=engineering]:overflow-hidden data-[variant=engineering]:rounded-lg"
-        data-variant={variant}
-      >
-        {item.image === undefined ? (
-          <EditorialGraphic seed={item.mediaSeed} variant={variant} />
-        ) : (
-          <EditorialImage
-            alt={item.image.alt}
-            className="aspect-[1.6] w-full border-b object-cover"
-            data-editorial-image="true"
-            eager={eager}
-            height={1000}
-            sizes="(max-width: 560px) calc(100vw - 32px), (max-width: 840px) calc((100vw - 68px) / 2), 373px"
-            src={item.image.src}
-            width={1600}
-          />
-        )}
+      <span className="block">
+        <EditorialCardMedia item={item} eager={eager} />
       </span>
-      <span
-        className="block p-5 data-[variant=engineering]:px-0 data-[variant=engineering]:pt-3 data-[variant=engineering]:pb-0"
-        data-variant={variant}
-      >
-        <span className="flex flex-wrap items-center gap-2 font-mono text-[10px] tracking-[.08em] text-muted-foreground uppercase">
-          <span>{item.kind}</span>
-          <span aria-hidden="true">·</span>
-          <time dateTime={item.publishedAt}>{item.publishedAt}</time>
-        </span>
-        <span className="mt-3 block text-[20px] leading-[1.18] font-medium tracking-[-.025em] text-foreground data-[variant=engineering]:mt-2 data-[variant=engineering]:text-[15px] data-[variant=engineering]:leading-[1.25] data-[variant=engineering]:tracking-[-.015em]">
+      <span className="block p-5">
+        <EditorialCardMetadata item={item} />
+        <span className="mt-3 block text-[20px] leading-[1.18] font-medium tracking-[-.025em] text-foreground">
           {item.title}
         </span>
-        <span className="mt-3 block text-sm leading-[1.5] text-muted-foreground data-[variant=engineering]:hidden">
+        <span className="mt-3 block text-sm leading-[1.5] text-muted-foreground">
           {item.description}
         </span>
       </span>

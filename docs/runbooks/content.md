@@ -108,23 +108,19 @@ bun run --filter @jongminchung/web build
 해당 사이트의 feed·sitemap에도 의도대로 노출되는지 확인한다.
 공개 상태·URL 규칙을 바꿨다면 관련 E2E도 실행한다.
 
-현재 production build는 `validate-fumadocs-content.ts`에서 `enforceInventory: true`를
-사용한다. 따라서 새 글은 초안이어도 기존 corpus 개수 제한에 걸릴 수 있다.
-현재 기준은 언어별 Blog 33개, Docs 전체 59개·일반 문서 49개이며 최종 기준은
-`lib/content-validation.ts`다. 새 파일 추가·삭제 시 다음을 함께 처리한다.
+콘텐츠 개수는 고정하지 않는다. 새 글은 한영 번역 쌍과 고유 ID·URL, 필수 Docs 영역을
+유지하면 validator의 숫자 변경 없이 추가할 수 있다. 공개 Tech 문서의 내부 링크는
+공개된 문서만 대상으로 삼아야 한다. 초안은 다른 초안을 참조할 수 있다.
 
-1. 양 언어의 실제 파일 수와 추가한 종류를 확인한다. 번역 한쪽 누락을 개수 변경으로
-   우회하지 않는다.
-2. Blog는 `validateTechContent`의 개수 기대값, Docs는 `docsPagesPerLocale`와
-   `docsInventoryPerLocale` 중 영향을 받는 값을 조정한다. Docs 개요는 일반 문서
-   개수에 포함되지 않는다. 오류 메시지의 기대값도 일치시킨다.
-3. `rg -n 'enforceInventory|docsPagesPerLocale|docsInventoryPerLocale' apps/web`로
-   소비 검사와 테스트를 찾는다. 실제 corpus 기대값과 독립 fixture 개수를 구분해
-   필요한 곳만 수정한다. 새 개수와 이유를 변경 설명에 기록한다.
-4. Web `test`·`build`와 루트 `check`를 실행한다. 개수 검증을 통째로 끄지 않는다.
+기존 Docs 누락은 build에서 `apps/web/scripts/tech-docs-baseline.json`의 상대 경로
+목록으로 검사한다. 이 목록은 2026-09-06의 기존 문서를 보존하기 위한 기준이며 새 글을
+추가할 때 갱신하지 않는다. 기존 문서를 의도적으로 삭제하거나 경로를 변경할 때만
+이동·삭제 이유와 함께 기준 목록을 조정하고 해당 문서의 참조 링크도 갱신한다.
+Web `test`·`build`와 루트 `check`로 번역·URL·공개 링크 계약을 검증한다.
 
-이 제한 때문에 새 글 추가는 MDX만의 변경으로 끝나지 않을 수 있다. 기존 글의
-오탈자 수정이나 파일 수가 바뀌지 않는 공개 상태 전환은 개수 변경이 필요 없다.
+Tech와 Invest는 각 도메인의 메타데이터 snapshot을 독립적으로 검증·재사용한다.
+production에서는 각 snapshot을 캐시하고 development에서는 콘텐츠 변경을 반영하기
+위해 다시 읽는다. 전체 production build는 두 도메인을 모두 검증한다.
 
 production은 빌드된 콘텐츠를 사용한다. Git 수정만으로 운영 화면이 바뀌지는 않으며
 [배포 절차](release.md)를 거쳐야 한다. 발행 취소도 공개 상태를 수정하고 다시 검증·

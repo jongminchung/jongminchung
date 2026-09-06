@@ -156,12 +156,11 @@ export function InvestmentNotePage({
             labels={documentOutlineLabelsFor(locale)}
           />
         }
-        variant="engineering"
       >
         <figure className="mt-0 mb-10">
           <EditorialImage
             alt={note.imageAlt}
-            className="aspect-[1.6] w-full rounded-[var(--radius)] border object-cover"
+            className="aspect-[1.6] w-full rounded-lg border object-cover"
             data-investment-hero="true"
             eager
             height={1000}

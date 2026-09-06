@@ -34,11 +34,12 @@ export function ArticleCopyButton({
         ? failedLabel
         : copyLabel;
 
-  const copyArticle = async (): Promise<void> => {
+  const copyArticle = async (button: HTMLButtonElement): Promise<void> => {
+    const article = button.closest("main");
     const content = [
-      document.querySelector<HTMLElement>("[data-copy-title]"),
-      document.querySelector<HTMLElement>("[data-copy-description]"),
-      document.querySelector<HTMLElement>("[data-copy-article]"),
+      article?.querySelector<HTMLElement>("[data-copy-title]"),
+      article?.querySelector<HTMLElement>("[data-copy-description]"),
+      article?.querySelector<HTMLElement>("[data-copy-article]"),
     ]
       .map((element) => element?.innerText.trim() ?? "")
       .filter(Boolean)
@@ -61,8 +62,8 @@ export function ArticleCopyButton({
       aria-label={label}
       className="-my-2 h-11 px-3 text-xs"
       data-article-copy="true"
-      onClick={() => {
-        void copyArticle();
+      onClick={(event) => {
+        void copyArticle(event.currentTarget);
       }}
       type="button"
       variant="outline"

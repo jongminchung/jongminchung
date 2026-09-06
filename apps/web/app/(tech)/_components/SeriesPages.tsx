@@ -41,7 +41,7 @@ export function SeriesIndex({
           .sort(([, left], [, right]) => left.order - right.order)
           .map(([id, series]) => (
             <Link
-              className="rounded-[var(--radius)] border bg-card p-6 transition-colors hover:bg-muted"
+              className="rounded-lg border bg-card p-6 transition-colors hover:bg-muted"
               href={createSeriesHref(locale, id)}
               key={id}
             >

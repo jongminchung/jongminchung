@@ -53,16 +53,16 @@ export function DocumentPager({
   const text = getTechMessages(locale).article;
   return (
     <nav
-      className="mt-[72px] grid grid-cols-2 gap-3 border-t border-border pt-6 max-[600px]:grid-cols-1 [&>*]:min-h-[68px]"
+      className="mt-[72px] grid grid-cols-2 gap-3 border-t border-border pt-6 max-[600px]:grid-cols-1"
       aria-label={text.pagination}
     >
       {previous === null ? (
-        <span />
+        <span className="min-h-[68px]" />
       ) : (
         <PageLink direction="previous" document={previous} locale={locale} />
       )}
       {next === null ? (
-        <span />
+        <span className="min-h-[68px]" />
       ) : (
         <PageLink direction="next" document={next} locale={locale} />
       )}

@@ -28,10 +28,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@jongminchung/ui/components/select";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
+import { ConsumerStyleFixture } from "./ConsumerStyleFixture";
 
 /** 공용 primitive의 keyboard·focus browser 계약만 렌더링함 */
-export function PrimitiveInteractionFixture(): React.JSX.Element {
+export function PrimitiveInteractionFixture({
+  children,
+}: {
+  readonly children?: ReactNode;
+}): React.JSX.Element {
   const [commandResult, setCommandResult] = useState("No command selected");
 
   return (
@@ -111,6 +116,19 @@ export function PrimitiveInteractionFixture(): React.JSX.Element {
         </Command>
         <p role="status">{commandResult}</p>
       </section>
+      <section className="grid gap-3" aria-labelledby="command-override-title">
+        <h2 id="command-override-title" className="text-lg font-medium">
+          Command consumer styles
+        </h2>
+        <Command label="Custom command" className="rounded-none border">
+          <CommandInput wrapperClassName="p-0" className="text-base" />
+          <CommandList>
+            <CommandItem value="custom-item">Custom item</CommandItem>
+          </CommandList>
+        </Command>
+      </section>
+      <ConsumerStyleFixture />
+      {children}
     </main>
   );
 }
