@@ -3,20 +3,9 @@
 @plugin "@fumadocs/tailwind/typography";
 @source inline("prose");
 
-/* 초광폭 중앙 정렬 여백을 실제 sidebar surface와 시각적으로 분리함 */
+/* 초광폭에서 실제 sidebar만 viewport 왼쪽에 고정함 */
 @media (min-width: 97rem) {
   #nd-sidebar[data-collapsed="false"] {
-    background-color: transparent;
-  }
-
-  #nd-sidebar[data-collapsed="false"]::before {
-    position: absolute;
-    inset-block: 0;
-    inset-inline-end: 0;
     width: var(--fd-sidebar-width);
-    border-inline-start: 1px solid var(--sidebar-border);
-    background-color: var(--sidebar);
-    content: "";
-    pointer-events: none;
   }
 }

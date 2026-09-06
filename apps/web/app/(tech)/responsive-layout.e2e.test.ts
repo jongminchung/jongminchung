@@ -95,4 +95,33 @@ test.describe("Tech 반응형 레이아웃 계약", () => {
       page.getByRole("button", { name: "Open Sidebar" }),
     ).toBeVisible();
   });
+
+  test("초광폭 Docs에서 sidebar는 왼쪽에 붙고 본문은 중앙을 유지함", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 2560, height: 1000 });
+    await page.goto("/ko/docs/be/ddd");
+
+    const sidebar = page.locator("#nd-sidebar");
+    const article = page.locator("#nd-page");
+    await expect(sidebar).toBeVisible();
+    await expect(article).toBeVisible();
+    await expect
+      .poll(async () => {
+        const box = await sidebar.boundingBox();
+        return box === null ? null : { width: box.width, x: box.x };
+      })
+      .toEqual({ width: 268, x: 0 });
+
+    const articleBox = await article.boundingBox();
+    const viewportCenter = await page.evaluate(
+      () => document.documentElement.getBoundingClientRect().width / 2,
+    );
+    expect(articleBox).not.toBeNull();
+    expect(articleBox!.x + articleBox!.width / 2).toBeCloseTo(
+      viewportCenter,
+      5,
+    );
+    await expectNoHorizontalOverflow(page);
+  });
 });
