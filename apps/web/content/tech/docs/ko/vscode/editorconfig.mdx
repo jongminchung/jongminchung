@@ -40,7 +40,9 @@ code --install-extension EditorConfig.EditorConfig
 code .
 ```
 
-루트 `.editorconfig`를 다음처럼 만듭니다. Python은 4칸, Go와 Makefile은 탭을 쓰고 Markdown의 의미 있는 줄 끝 공백은 보존합니다. `max_line_length`는 도구가 지원할 때 전달되는 기준이며 모든 줄을 강제로 자르는 명령이 아닙니다.
+루트 `.editorconfig`를 다음처럼 만듭니다. Python은 4칸, Go와 Makefile은 탭을 쓰고 Markdown의 의미 있는 줄 끝 공백은 보존합니다.
+
+`max_line_length`는 도구가 지원할 때 전달되는 기준이며 모든 줄을 강제로 자르는 명령이 아닙니다.
 
 ```ini
 root = true
@@ -77,10 +79,10 @@ EditorConfig를 지원하는 편집기는 경로에 맞는 섹션을 읽습니�
 
 ```json
 {
-    "files.autoSave": "off",
-    "editor.formatOnSave": true,
-    "editor.formatOnSaveMode": "file",
-    "editor.detectIndentation": false
+  "files.autoSave": "off",
+  "editor.formatOnSave": true,
+  "editor.formatOnSaveMode": "file",
+  "editor.detectIndentation": false
 }
 ```
 

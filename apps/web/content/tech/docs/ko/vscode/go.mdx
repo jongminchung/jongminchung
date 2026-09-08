@@ -43,18 +43,18 @@ go test ./...
 
 ```json
 {
-    "go.useLanguageServer": true,
-    "go.formatTool": "default",
-    "[go]": {
-        "editor.defaultFormatter": "golang.go",
-        "editor.formatOnSave": true,
-        "editor.formatOnPaste": false,
-        "editor.formatOnType": false,
-        "editor.codeActionsOnSave": {
-            "source.fixAll": "never",
-            "source.organizeImports": "explicit"
-        }
+  "go.useLanguageServer": true,
+  "go.formatTool": "default",
+  "[go]": {
+    "editor.defaultFormatter": "golang.go",
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": false,
+    "editor.formatOnType": false,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "never",
+      "source.organizeImports": "explicit"
     }
+  }
 }
 ```
 
@@ -127,25 +127,25 @@ gopls가 제공하는 Extract·interface 구현 등 Code Action은 선택한 문
 
 ```json
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Go: package",
-            "type": "go",
-            "request": "launch",
-            "mode": "debug",
-            "program": "${workspaceFolder}",
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "name": "Go: TestTotal",
-            "type": "go",
-            "request": "launch",
-            "mode": "test",
-            "program": "${workspaceFolder}",
-            "args": ["-test.run", "^TestTotal$", "-test.v"]
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Go: package",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Go: TestTotal",
+      "type": "go",
+      "request": "launch",
+      "mode": "test",
+      "program": "${workspaceFolder}",
+      "args": ["-test.run", "^TestTotal$", "-test.v"]
+    }
+  ]
 }
 ```
 

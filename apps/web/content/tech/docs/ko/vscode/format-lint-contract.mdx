@@ -86,10 +86,10 @@ import tseslint from "typescript-eslint";
 import eslintConfigPrettier from "eslint-config-prettier/flat";
 
 export default [
-    { ignores: ["dist/**", "coverage/**", ".next/**"] },
-    js.configs.recommended,
-    ...tseslint.configs.recommended,
-    eslintConfigPrettier,
+  { ignores: ["dist/**", "coverage/**", ".next/**"] },
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+  eslintConfigPrettier,
 ];
 ```
 
@@ -97,8 +97,8 @@ export default [
 
 ```json
 {
-    "singleQuote": false,
-    "semi": true
+  "singleQuote": false,
+  "semi": true
 }
 ```
 
@@ -117,30 +117,30 @@ Prettier는 로컬 package를 사용하게 설치하고 실제 로딩 경로를 
 
 ```json
 {
-    "prettier.requireConfig": true,
-    "eslint.format.enable": false,
-    "[typescript]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
-        "editor.formatOnSave": true,
-        "editor.formatOnPaste": false,
-        "editor.formatOnType": false,
-        "editor.codeActionsOnSave": {
-            "source.fixAll": "never",
-            "source.fixAll.eslint": "explicit",
-            "source.organizeImports": "never"
-        }
-    },
-    "[typescriptreact]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
-        "editor.formatOnSave": true,
-        "editor.formatOnPaste": false,
-        "editor.formatOnType": false,
-        "editor.codeActionsOnSave": {
-            "source.fixAll": "never",
-            "source.fixAll.eslint": "explicit",
-            "source.organizeImports": "never"
-        }
+  "prettier.requireConfig": true,
+  "eslint.format.enable": false,
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": false,
+    "editor.formatOnType": false,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "never",
+      "source.fixAll.eslint": "explicit",
+      "source.organizeImports": "never"
     }
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": false,
+    "editor.formatOnType": false,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "never",
+      "source.fixAll.eslint": "explicit",
+      "source.organizeImports": "never"
+    }
+  }
 }
 ```
 
@@ -153,13 +153,13 @@ plugin 등 다른 정렬기를 함께 켜지 않는다. `eslint-config-prettier`
 
 ```json
 {
-    "scripts": {
-        "fmt": "eslint . --fix && prettier . --write",
-        "fmt:check": "prettier . --check",
-        "lint": "eslint . --max-warnings 0",
-        "typecheck": "tsc --noEmit",
-        "check": "npm run fmt:check && npm run lint && npm run typecheck"
-    }
+  "scripts": {
+    "fmt": "eslint . --fix && prettier . --write",
+    "fmt:check": "prettier . --check",
+    "lint": "eslint . --max-warnings 0",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run fmt:check && npm run lint && npm run typecheck"
+  }
 }
 ```
 

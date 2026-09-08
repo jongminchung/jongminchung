@@ -1,10 +1,10 @@
 ---
 documentKind: "reference"
 title: "꼭 알아야 할 단축키"
-description: "Windows·Linux·macOS별 탐색·편집·디버깅 단축키와 충돌 진단"
+description: "Windows·Linux·macOS별 단축키, Mac에서 VS Code·IntelliJ 비교와 충돌 진단"
 publishedAt: "2026-09-06"
-updatedAt: "2026-09-06"
-verifiedAt: "2026-09-06"
+updatedAt: "2026-09-08"
+verifiedAt: "2026-09-08"
 tags: ["vscode", "development-workflow"]
 status: "stable"
 publicationStatus: "published"
@@ -48,6 +48,36 @@ sourceUrl: "https://code.visualstudio.com/docs/reference/default-keybindings"
 | 디버깅 종료 · Stop Debugging                      | Shift+F5        | Shift+F5        | Shift+F5       |
 
 출처: [기본 명령 표](https://code.visualstudio.com/docs/reference/default-keybindings), [Windows PDF](https://code.visualstudio.com/shortcuts/keyboard-shortcuts-windows.pdf), [Linux PDF](https://code.visualstudio.com/shortcuts/keyboard-shortcuts-linux.pdf), [macOS PDF](https://code.visualstudio.com/shortcuts/keyboard-shortcuts-macos.pdf).
+
+## Mac에서 VS Code와 IntelliJ IDEA 비교
+
+기본 macOS 키맵끼리 비교한 표입니다. IntelliJ IDEA에서 `⌥`를 두 번 누른다는 표기는
+Option 키를 빠르게 두 번 누른 뒤 두 번째 누름을 유지한 채 화살표 키를 누르는 동작입니다.
+VS Code의 `Cmd+Option+↑/↓`와 이름은 비슷하지만 같은 키 조합은 아닙니다. 언어 서버나
+프로젝트 분석이 준비되지 않은 상태에서는 정의 이동·리팩터링 결과가 달라질 수 있습니다.
+
+| 작업                     | VS Code (macOS)                    | IntelliJ IDEA (macOS 기본 키맵)    | 메모                                                        |
+| ------------------------ | ---------------------------------- | ---------------------------------- | ----------------------------------------------------------- |
+| 명령 찾기                | Cmd+Shift+P                        | Cmd+Shift+A                        | IntelliJ에서는 Find Action                                  |
+| 파일 찾기                | Cmd+P                              | Cmd+Shift+O                        | IntelliJ의 Navigate to File                                 |
+| 프로젝트 심볼 찾기       | Cmd+T                              | Cmd+O(클래스) / Cmd+Option+O(심볼) | 대상 종류를 나누어 찾음                                     |
+| 정의로 이동              | F12                                | Cmd+B                              | IntelliJ는 선언 이동 명령                                   |
+| 사용처 찾기              | Shift+F12                          | Option+F7                          | 의미 기반 사용처 검색                                       |
+| 이름 변경                | F2                                 | Shift+F6                           | 적용 전 preview와 외부 계약을 검토                          |
+| 빠른 수정·Intention      | Cmd+.                              | Option+Enter                       | 현재 위치의 제안 목록을 엶                                  |
+| 변수 추출                | Refactor 메뉴에서 Extract Variable | Cmd+Option+V                       | IntelliJ의 Extract Variable; 선택 표현식을 지역 변수로 분리 |
+| 메서드 추출              | Refactor 메뉴에서 Extract Method   | Cmd+Option+M                       | 언어별 제공 여부와 결과를 확인                              |
+| 문서 포맷                | Shift+Option+F                     | Cmd+Option+L                       | 선택한 formatter·code style을 실행                          |
+| 줄 이동                  | Option+↑/↓                         | Option+Shift+↑/↓                   | IntelliJ는 Shift가 추가됨                                   |
+| 다음 일치 항목 추가      | Cmd+D                              | Ctrl+G                             | 심볼 Rename을 대체하지 않음                                 |
+| 위·아래에 커서 추가      | Cmd+Option+↑/↓                     | Option을 두 번 누른 채 ↑/↓         | IntelliJ의 Clone Caret Above/Below                          |
+| 선택한 각 줄에 커서 추가 | Shift+Option+I                     | Option+Shift+G                     | 여러 줄을 동시에 편집                                       |
+| 줄 주석                  | Cmd+/                              | Cmd+/                              | 동일한 기본 키                                              |
+
+IntelliJ IDEA의 기본 키맵은 [macOS 키맵 문서](https://www.jetbrains.com/help/idea/reference-keymap-mac-default.html),
+변수 추출의 선택·적용 흐름은 [Extract Variable 안내](https://www.jetbrains.com/guide/java/tips/extract-variable/)를
+기준으로 확인했습니다. IntelliJ IDEA Keymap을 변경했거나 VS Code에 IntelliJ Keymap 확장을 적용했다면
+이 표 대신 각 편집기의 Keyboard Shortcuts/Keymap에서 실제 할당을 확인합니다.
 
 ## 동작하지 않는 키 찾기
 
