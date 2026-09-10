@@ -22,21 +22,21 @@ sourceUrl: https://github.com/jongminchung/jongminchung/blob/main/apps/web/conte
 ## Gateway API separates roles from the data path
 
 - **Gateway API separates infrastructure ownership from application routing ownership**
-  - Platform teams own the implementation, listeners, and TLS boundary through `GatewayClass` and `Gateway`
-  - Application teams own host, path, and backend rules through `HTTPRoute` and `GRPCRoute`
+    - Platform teams own the implementation, listeners, and TLS boundary through `GatewayClass` and `Gateway`
+    - Application teams own host, path, and backend rules through `HTTPRoute` and `GRPCRoute`
 
 - **Cilium Gateway API is integrated into the CNI data path rather than being only another ingress-controller Deployment**
-  - The Cilium operator validates resources and produces `CiliumEnvoyConfig`
-  - Cilium eBPF intercepts Service or host-port traffic and transparently directs it to Envoy
-  - Envoy performs L7 routing and TLS termination before opening a connection to the backend Service
+    - The Cilium operator validates resources and produces `CiliumEnvoyConfig`
+    - Cilium eBPF intercepts Service or host-port traffic and transparently directs it to Envoy
+    - Envoy performs L7 routing and TLS termination before opening a connection to the backend Service
 
 ![Cilium Gateway API control plane and data plane](https://kroki.io/plantuml/svg/eNptkEFPwkAQhe_zKyY96QG492CgBJRooAEOmngZtgNt2O6Q3WmxMf530xaFRG_7Zr738mbHQclrVVoIx8KdyFOJRsqTOHa60cYyejZK7mD5Bgk5ZXIu3AH3ZAMDGRWPU1uwUzBWqgyj2Yeyd2SRnfrm3b0kOMKlZJyKVxxhLkGXrGfxxwgp4KzFwEnGGD1XO_aOlQO2gwg_Aa-9MJoWtqhK5CSdd94knf8LzFwtzSW9lga-4IZJyBzZZbhhXxeGO-zyhr9RcmJPKr7DVhcBGSntKDBGj6R8pgZH-LTdpmuptE-cpAuA_mdwMHjoz8S4o-4299DrdpOkc4zRidd8EKTSHNXTfl8YaDe9t5bWu03Xq9c36GW7uNTGGANbNsoZ7vrrYJIuOuSnMsZ4JjU5_A6Gw2tyf2ynpuL2xQHG7LKqtN83S7s9)
 
 ## Establish the common prerequisites first
 
 - **The examples are verified against Cilium `1.20.1` and Gateway API `1.6.1`**
-  - Check the documentation and upgrade guide for the exact Cilium version deployed in the cluster
-  - Treat `CiliumGatewayClassConfig` as a `v2alpha1` API that can change between releases
+    - Check the documentation and upgrade guide for the exact Cilium version deployed in the cluster
+    - Treat `CiliumGatewayClassConfig` as a `v2alpha1` API that can change between releases
 
 - **Cilium Gateway API requires kube-proxy replacement and the L7 proxy**
 
@@ -44,7 +44,7 @@ sourceUrl: https://github.com/jongminchung/jongminchung/blob/main/apps/web/conte
 kubeProxyReplacement: true
 l7Proxy: true
 gatewayAPI:
-  enabled: true
+    enabled: true
 ```
 
 - **Install compatible Gateway API CRDs before enabling the controller**
@@ -78,13 +78,13 @@ kubectl get gatewayclass cilium
 | Per-node cloud public IP      | `hostNetwork`               | Provider SDN and DNS   | Per-node association and failed-address removal    |
 
 - **LB IPAM allocates an address but does not make it reachable by itself**
-  - Use Cilium BGP Control Plane when routers can learn the Service VIP over BGP
-  - Use L2 Announcements when the VIP is reachable on the same L2 network
-  - Use `hostNetwork` and external DNS when provider SDN associates a distinct public IP with each node vNIC
+    - Use Cilium BGP Control Plane when routers can learn the Service VIP over BGP
+    - Use L2 Announcements when the VIP is reachable on the same L2 network
+    - Use `hostNetwork` and external DNS when provider SDN associates a distinct public IP with each node vNIC
 
 - **`hostNetwork` and the default `LoadBalancer` Service mode are mutually exclusive**
-  - Host-network listeners bind on all interfaces of selected nodes
-  - Review the current limitations before selecting it when `TCPRoute` or `UDPRoute` is required
+    - Host-network listeners bind on all interfaces of selected nodes
+    - Review the current limitations before selecting it when `TCPRoute` or `UDPRoute` is required
 
 ## Keep one portable Gateway contract
 
@@ -94,57 +94,57 @@ kubectl get gatewayclass cilium
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: public
-  namespace: edge
+    name: public
+    namespace: edge
 spec:
-  gatewayClassName: cilium
-  listeners:
-    - name: https
-      protocol: HTTPS
-      port: 443
-      hostname: "*.example.com"
-      tls:
-        mode: Terminate
-        certificateRefs:
-          - kind: Secret
-            name: wildcard-example-com
-      allowedRoutes:
-        namespaces:
-          from: Selector
-          selector:
-            matchLabels:
-              gateway-access: public
+    gatewayClassName: cilium
+    listeners:
+        - name: https
+          protocol: HTTPS
+          port: 443
+          hostname: "*.example.com"
+          tls:
+              mode: Terminate
+              certificateRefs:
+                  - kind: Secret
+                    name: wildcard-example-com
+          allowedRoutes:
+              namespaces:
+                  from: Selector
+                  selector:
+                      matchLabels:
+                          gateway-access: public
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: shop
-  namespace: shop
+    name: shop
+    namespace: shop
 spec:
-  parentRefs:
-    - name: public
-      namespace: edge
-  hostnames: ["shop.example.com"]
-  rules:
-    - backendRefs:
-        - name: shop-web
-          port: 8080
+    parentRefs:
+        - name: public
+          namespace: edge
+    hostnames: ["shop.example.com"]
+    rules:
+        - backendRefs:
+              - name: shop-web
+                port: 8080
 ```
 
 - **Cross-namespace attachment requires explicit permission on both sides**
-  - `allowedRoutes` must admit the Route namespace
-  - Cross-namespace backend or Secret references require a `ReferenceGrant` owned by the target namespace
+    - `allowedRoutes` must admit the Route namespace
+    - Cross-namespace backend or Secret references require a `ReferenceGrant` owned by the target namespace
 
 ## Design policy and client-IP trust together
 
 - **Cilium policy sees the external-to-Envoy and Envoy-to-backend segments as distinct flows**
-  - The first segment is commonly `world` to the `ingress` identity
-  - The second segment is the `ingress` identity to the application identity
+    - The first segment is commonly `world` to the `ingress` identity
+    - The second segment is the `ingress` identity to the application identity
 
 - **An external LB requires an explicit authority for client IP information**
-  - Keep the default remote-address behavior when an L4 LB preserves source IP
-  - Trust `X-Forwarded-For` only when a controlled L7 LB creates it and direct node access is blocked
-  - An Internet client must never be able to inject a header that bypasses IP policy or audit attribution
+    - Keep the default remote-address behavior when an L4 LB preserves source IP
+    - Trust `X-Forwarded-For` only when a controlled L7 LB creates it and direct node access is blocked
+    - An Internet client must never be able to inject a header that bypasses IP policy or audit attribution
 
 ## Verify the request path, not just the address
 
@@ -169,9 +169,9 @@ curl --fail-with-body --resolve shop.example.com:443:203.0.113.10 \
 ```
 
 - **The remaining articles keep this Gateway contract and change only the entry-point topology**
-  - [External load balancer](/en/docs/k8s/cilium-gateway-api-external-load-balancer)
-  - [Highly available control plane](/en/docs/k8s/cilium-gateway-api-multi-control-plane)
-  - [Per-node cloud public IPs without an LB](/en/docs/k8s/cilium-gateway-api-direct-public-ip)
+    - [External load balancer](/en/docs/k8s/cilium-gateway-api-external-load-balancer)
+    - [Highly available control plane](/en/docs/k8s/cilium-gateway-api-multi-control-plane)
+    - [Per-node cloud public IPs without an LB](/en/docs/k8s/cilium-gateway-api-direct-public-ip)
 
 ## References
 

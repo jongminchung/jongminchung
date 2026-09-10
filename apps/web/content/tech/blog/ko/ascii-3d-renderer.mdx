@@ -150,22 +150,22 @@ sourceUrl: https://kciter.so/posts/ascii-3d-renderer/
 
 ```ts
 class Matrix44 {
-  /* ... */
+    /* ... */
 }
 class Vector2 {
-  /* ... */
+    /* ... */
 }
 class Vector3 {
-  /* ... */
+    /* ... */
 }
 class Vector4 {
-  /* ... */
+    /* ... */
 }
 ```
 
 <figcaption style={{ marginTop: -24 }}>
-  [소스 코드
-  링크](https://github.com/kciter/ascii-3d-renderer.js/tree/main/src/math)
+    [소스 코드
+    링크](https://github.com/kciter/ascii-3d-renderer.js/tree/main/src/math)
 </figcaption>
 
 여기서 자세한 코드는 적지 않지만 각 클래스는 기본적인 더하기 빼기 곱하기 나누기 연산을 포함하여 앞서 설명한 회전 변환, 크기 변환, 이동 변환 등을 처리할 수 있도록 구현해야 한다.
@@ -202,49 +202,49 @@ f 5 1 2
 
 ```ts
 class Loader {
-  static loadFromFile(file: File): Promise<Polygon[]> {
-    /* ... */
-  }
-
-  static loadFromString(string: string): Polygon[] {
-    return this.parseOBJ(string);
-  }
-
-  private static parseOBJ(data: string): Polygon[] {
-    const lines = data.split("\n");
-
-    const vertices: Vector3[] = [];
-    const polygons: Polygon[] = [];
-
-    for (const line of lines) {
-      const parts = line.trim().split(" ");
-      if (parts[0] === "v") {
-        vertices.push(
-          new Vector3(
-            parseFloat(parts[1]),
-            parseFloat(parts[2]),
-            parseFloat(parts[3]),
-          ),
-        );
-      } else if (parts[0] === "f") {
-        polygons.push(
-          new Polygon([
-            vertices[parseInt(parts[1]) - 1],
-            vertices[parseInt(parts[2]) - 1],
-            vertices[parseInt(parts[3]) - 1],
-          ]),
-        );
-      }
+    static loadFromFile(file: File): Promise<Polygon[]> {
+        /* ... */
     }
 
-    return polygons;
-  }
+    static loadFromString(string: string): Polygon[] {
+        return this.parseOBJ(string);
+    }
+
+    private static parseOBJ(data: string): Polygon[] {
+        const lines = data.split("\n");
+
+        const vertices: Vector3[] = [];
+        const polygons: Polygon[] = [];
+
+        for (const line of lines) {
+            const parts = line.trim().split(" ");
+            if (parts[0] === "v") {
+                vertices.push(
+                    new Vector3(
+                        parseFloat(parts[1]),
+                        parseFloat(parts[2]),
+                        parseFloat(parts[3]),
+                    ),
+                );
+            } else if (parts[0] === "f") {
+                polygons.push(
+                    new Polygon([
+                        vertices[parseInt(parts[1]) - 1],
+                        vertices[parseInt(parts[2]) - 1],
+                        vertices[parseInt(parts[3]) - 1],
+                    ]),
+                );
+            }
+        }
+
+        return polygons;
+    }
 }
 ```
 
 <figcaption style={{ marginTop: -24 }}>
-  [소스 코드
-  링크](https://github.com/kciter/ascii-3d-renderer.js/blob/main/src/loader.ts)
+    [소스 코드
+    링크](https://github.com/kciter/ascii-3d-renderer.js/blob/main/src/loader.ts)
 </figcaption>
 
 위 코드는 `obj` 내용을 파싱하여 버텍스와 폴리곤을 추출하는 역할을 한다. 코드 내용은 어렵지 않다. 단순히 whitespace를 기준으로 문자열을 나누고 값을 넣어줬을 뿐이다. 그리고 폴리곤 구성은 이미 정리한 버텍스 정보를 이용하여 만들었다.
@@ -264,57 +264,57 @@ class Loader {
 
 ```ts
 export class ASCII3DRenderer {
-  el: HTMLElement;
-  width: number;
-  height: number;
-  frameBuffer: string[][];
-  depthBuffer: number[][];
+    el: HTMLElement;
+    width: number;
+    height: number;
+    frameBuffer: string[][];
+    depthBuffer: number[][];
 
-  private Shade = ".;ox%@";
+    private Shade = ".;ox%@";
 
-  constructor(_el: HTMLElement, width: number, height: number) {
-    this.el = _el;
-    this.width = width;
-    this.height = height;
-    this.frameBuffer = new Array(height + 1)
-      .fill(null)
-      .map(() => new Array(width + 1).fill(" "));
-    this.depthBuffer = new Array(height + 1)
-      .fill(null)
-      .map(() => new Array(width + 1).fill(255));
-  }
+    constructor(_el: HTMLElement, width: number, height: number) {
+        this.el = _el;
+        this.width = width;
+        this.height = height;
+        this.frameBuffer = new Array(height + 1)
+            .fill(null)
+            .map(() => new Array(width + 1).fill(" "));
+        this.depthBuffer = new Array(height + 1)
+            .fill(null)
+            .map(() => new Array(width + 1).fill(255));
+    }
 
-  run() {
-    // FPS 계산 로직
-  }
+    run() {
+        // FPS 계산 로직
+    }
 
-  private render() {
-    this.clearFrameBuffer();
-    this.process();
-    this.drawFrameBuffer();
-  }
+    private render() {
+        this.clearFrameBuffer();
+        this.process();
+        this.drawFrameBuffer();
+    }
 
-  private update() {
-    // ...
-  }
+    private update() {
+        // ...
+    }
 
-  private process() {
-    // ...
-  }
+    private process() {
+        // ...
+    }
 
-  private clearFrameBuffer() {
-    // 버퍼 초기화
-  }
+    private clearFrameBuffer() {
+        // 버퍼 초기화
+    }
 
-  private drawFrameBuffer() {
-    // 화면에 출력
-  }
+    private drawFrameBuffer() {
+        // 화면에 출력
+    }
 }
 ```
 
 <figcaption style={{ marginTop: -24 }}>
-  [소스 코드
-  링크](https://github.com/kciter/ascii-3d-renderer.js/blob/main/src/renderer.ts)
+    [소스 코드
+    링크](https://github.com/kciter/ascii-3d-renderer.js/blob/main/src/renderer.ts)
 </figcaption>
 
 틀이라고 했지만 코드가 짧지는 않다. 클래스 내 각 필드는 렌더링에 필요한 정보를 담고 있다. `el`은 렌더링 결과를 출력할 엘리먼트, `width`와 `height`는 렌더링 결과의 크기, `frameBuffer`는 렌더링 결과를 담을 공간, `depthBuffer`는 깊이 버퍼로 렌더링 결과의 깊이를 담는다. 결과의 깊이라는 것은 카메라와의 거리를 말한다고 볼 수 있다.
@@ -342,73 +342,73 @@ export class ASCII3DRenderer {
 
 ```ts
 export class Object {
-  mesh: Polygon[]; // 폴리곤 메시
-  position: Vector3; // 위치
-  rotate: Vector3; // 회전
-  scale: Vector3; // 크기
+    mesh: Polygon[]; // 폴리곤 메시
+    position: Vector3; // 위치
+    rotate: Vector3; // 회전
+    scale: Vector3; // 크기
 
-  constructor() {
-    // 초기화
-    this.mesh = [];
-    this.position = new Vector3(0, 0, 0);
-    this.rotate = new Vector3(0, 0, 0);
-    this.scale = new Vector3(1, 1, 1);
-  }
+    constructor() {
+        // 초기화
+        this.mesh = [];
+        this.position = new Vector3(0, 0, 0);
+        this.rotate = new Vector3(0, 0, 0);
+        this.scale = new Vector3(1, 1, 1);
+    }
 
-  // obj 파일로부터 폴리곤 메시를 불러온다
-  async loadFromFile(file: File) {
-    this.mesh = await Loader.loadFromFile(file);
-  }
+    // obj 파일로부터 폴리곤 메시를 불러온다
+    async loadFromFile(file: File) {
+        this.mesh = await Loader.loadFromFile(file);
+    }
 
-  // obj 문자열로부터 폴리곤 메시를 불러온다
-  async loadFromString(string: string) {
-    this.mesh = await Loader.loadFromString(string);
-  }
+    // obj 문자열로부터 폴리곤 메시를 불러온다
+    async loadFromString(string: string) {
+        this.mesh = await Loader.loadFromString(string);
+    }
 
-  // 프레임마다 오브젝트를 변화시킬 수 있는 메서드
-  update() {
-    // override this method
-  }
+    // 프레임마다 오브젝트를 변화시킬 수 있는 메서드
+    update() {
+        // override this method
+    }
 
-  // 월드 변환
-  transform(v: Vector4) {
-    const matrix = Matrix44.identity()
-      .multiply(Matrix44.rotateX(this.rotate.x))
-      .multiply(Matrix44.rotateY(this.rotate.y))
-      .multiply(Matrix44.rotateZ(this.rotate.z))
-      .multiply(Matrix44.scale(this.scale))
-      .multiply(Matrix44.translate(this.position));
+    // 월드 변환
+    transform(v: Vector4) {
+        const matrix = Matrix44.identity()
+            .multiply(Matrix44.rotateX(this.rotate.x))
+            .multiply(Matrix44.rotateY(this.rotate.y))
+            .multiply(Matrix44.rotateZ(this.rotate.z))
+            .multiply(Matrix44.scale(this.scale))
+            .multiply(Matrix44.translate(this.position));
 
-    return v.transform(matrix);
-  }
+        return v.transform(matrix);
+    }
 
-  /* Setter */
+    /* Setter */
 
-  setTranslate(v: Vector3) {
-    this.position = v;
-  }
+    setTranslate(v: Vector3) {
+        this.position = v;
+    }
 
-  setScale(v: Vector3) {
-    this.scale = v;
-  }
+    setScale(v: Vector3) {
+        this.scale = v;
+    }
 
-  setRotateX(angle: number) {
-    this.rotate.x = angle;
-  }
+    setRotateX(angle: number) {
+        this.rotate.x = angle;
+    }
 
-  setRotateY(angle: number) {
-    this.rotate.y = angle;
-  }
+    setRotateY(angle: number) {
+        this.rotate.y = angle;
+    }
 
-  setRotateZ(angle: number) {
-    this.rotate.z = angle;
-  }
+    setRotateZ(angle: number) {
+        this.rotate.z = angle;
+    }
 }
 ```
 
 <figcaption style={{ marginTop: -24 }}>
-  [소스 코드
-  링크](https://github.com/kciter/ascii-3d-renderer.js/blob/main/src/object.ts)
+    [소스 코드
+    링크](https://github.com/kciter/ascii-3d-renderer.js/blob/main/src/object.ts)
 </figcaption>
 
 위 코드는 `Object` 클래스를 구현한 것이다. `Object`는 `mesh` 필드에 폴리곤 메시를 가지며 `position`, `rotate`, `scale` 필드에 각각 위치, 회전, 크기를 가진다. 또한 `loadFromFile`과 `loadFromString` 메서드를 통해 `obj` 파일을 불러와 폴리곤 메시를 설정할 수 있다. 그리고 `transform` 메서드를 통해 버텍스를 변환할 수 있다.
@@ -421,13 +421,13 @@ export class Object {
 
 ```ts
 export class ASCII3DRenderer {
-  objects: Object[] = [];
+    objects: Object[] = [];
 
-  placeObject(object: Object) {
-    this.objects.push(object);
-  }
+    placeObject(object: Object) {
+        this.objects.push(object);
+    }
 
-  // ...
+    // ...
 }
 ```
 
@@ -439,40 +439,40 @@ export class ASCII3DRenderer {
 
 ```ts
 export class ASCII3DRenderer {
-  // ...
+    // ...
 
-  private process() {
-    for (const object of this.objects) {
-      for (const polygon of object.mesh) {
-        // 4x4 행렬 연산을 위해 Vector4로 변환
-        let v1 = new Vector4(
-          polygon.vertices[0].x,
-          polygon.vertices[0].y,
-          polygon.vertices[0].z,
-          1,
-        );
-        let v2 = new Vector4(
-          polygon.vertices[1].x,
-          polygon.vertices[1].y,
-          polygon.vertices[1].z,
-          1,
-        );
-        let v3 = new Vector4(
-          polygon.vertices[2].x,
-          polygon.vertices[2].y,
-          polygon.vertices[2].z,
-          1,
-        );
+    private process() {
+        for (const object of this.objects) {
+            for (const polygon of object.mesh) {
+                // 4x4 행렬 연산을 위해 Vector4로 변환
+                let v1 = new Vector4(
+                    polygon.vertices[0].x,
+                    polygon.vertices[0].y,
+                    polygon.vertices[0].z,
+                    1,
+                );
+                let v2 = new Vector4(
+                    polygon.vertices[1].x,
+                    polygon.vertices[1].y,
+                    polygon.vertices[1].z,
+                    1,
+                );
+                let v3 = new Vector4(
+                    polygon.vertices[2].x,
+                    polygon.vertices[2].y,
+                    polygon.vertices[2].z,
+                    1,
+                );
 
-        // 월드 변환
-        v1 = object.transform(v1);
-        v2 = object.transform(v2);
-        v3 = object.transform(v3);
+                // 월드 변환
+                v1 = object.transform(v1);
+                v2 = object.transform(v2);
+                v3 = object.transform(v3);
 
-        // ...
-      }
+                // ...
+            }
+        }
     }
-  }
 }
 ```
 
@@ -480,52 +480,52 @@ export class ASCII3DRenderer {
 
 ```ts
 export class Camera {
-  eye: Vector3; // 카메라의 위치
-  look: Vector3; // 카메라가 바라보는 방향
-  up: Vector3; // 카메라의 상단 방향
-  rotate: Vector3; // 카메라의 회전 각도
+    eye: Vector3; // 카메라의 위치
+    look: Vector3; // 카메라가 바라보는 방향
+    up: Vector3; // 카메라의 상단 방향
+    rotate: Vector3; // 카메라의 회전 각도
 
-  constructor() {
-    // 카메라의 초기 위치, 방향, 상단 방향, 회전 각도를 설정
-    this.eye = new Vector3(0, 0, 0);
-    this.look = new Vector3(0, 0, 1);
-    this.up = new Vector3(0, 1, 0);
-    this.rotate = new Vector3(0, 0, 0); // x, y, z 축을 중심으로 회전 각도를 나타낸다
-  }
+    constructor() {
+        // 카메라의 초기 위치, 방향, 상단 방향, 회전 각도를 설정
+        this.eye = new Vector3(0, 0, 0);
+        this.look = new Vector3(0, 0, 1);
+        this.up = new Vector3(0, 1, 0);
+        this.rotate = new Vector3(0, 0, 0); // x, y, z 축을 중심으로 회전 각도를 나타낸다
+    }
 
-  transform(v: Vector4) {
-    // 카메라의 전방, 오른쪽, 상단 벡터를 계산
-    const forward = this.look.subtract(this.eye).normalize();
-    const newUp = forward.cross(this.up).normalize();
-    const right = newUp.cross(forward);
+    transform(v: Vector4) {
+        // 카메라의 전방, 오른쪽, 상단 벡터를 계산
+        const forward = this.look.subtract(this.eye).normalize();
+        const newUp = forward.cross(this.up).normalize();
+        const right = newUp.cross(forward);
 
-    const matrix = new Matrix44(
-      right.x,
-      right.y,
-      right.z,
-      0,
-      newUp.x,
-      newUp.y,
-      newUp.z,
-      0,
-      forward.x,
-      forward.y,
-      forward.z,
-      0,
-      this.eye.x,
-      this.eye.y,
-      this.eye.z,
-      1,
-    );
+        const matrix = new Matrix44(
+            right.x,
+            right.y,
+            right.z,
+            0,
+            newUp.x,
+            newUp.y,
+            newUp.z,
+            0,
+            forward.x,
+            forward.y,
+            forward.z,
+            0,
+            this.eye.x,
+            this.eye.y,
+            this.eye.z,
+            1,
+        );
 
-    return v.transform(matrix);
-  }
+        return v.transform(matrix);
+    }
 }
 ```
 
 <figcaption style={{ marginTop: -24 }}>
-  [소스 코드
-  링크](https://github.com/kciter/ascii-3d-renderer.js/blob/main/src/camera.ts)
+    [소스 코드
+    링크](https://github.com/kciter/ascii-3d-renderer.js/blob/main/src/camera.ts)
 </figcaption>
 
 위 코드는 `Camera` 클래스를 구현한 것으로 `eye`, `look`, `up`, `rotate` 필드를 가진다. 각 필드는 카메라의 위치, 방향, 업 벡터, 회전을 나타낸다. 그리고 `transform` 메서드를 통해 뷰 변환을 적용할 수 있다. 구현을 살펴보면 월드 변환보다 복잡하다는 것을 알 수 있다. 하나씩 살펴보자.
@@ -540,49 +540,49 @@ export class Camera {
 
 ```ts
 export class ASCII3DRenderer {
-  // ...
+    // ...
 
-  camera: Camera = new Camera();
+    camera: Camera = new Camera();
 
-  private process() {
-    this.camera.eye = new Vector3(0, 0, -3);
+    private process() {
+        this.camera.eye = new Vector3(0, 0, -3);
 
-    for (const object of this.objects) {
-      for (const polygon of object.mesh) {
-        // 4x4 행렬 연산을 위해 Vector4로 변환
-        let v1 = new Vector4(
-          polygon.vertices[0].x,
-          polygon.vertices[0].y,
-          polygon.vertices[0].z,
-          1,
-        );
-        let v2 = new Vector4(
-          polygon.vertices[1].x,
-          polygon.vertices[1].y,
-          polygon.vertices[1].z,
-          1,
-        );
-        let v3 = new Vector4(
-          polygon.vertices[2].x,
-          polygon.vertices[2].y,
-          polygon.vertices[2].z,
-          1,
-        );
+        for (const object of this.objects) {
+            for (const polygon of object.mesh) {
+                // 4x4 행렬 연산을 위해 Vector4로 변환
+                let v1 = new Vector4(
+                    polygon.vertices[0].x,
+                    polygon.vertices[0].y,
+                    polygon.vertices[0].z,
+                    1,
+                );
+                let v2 = new Vector4(
+                    polygon.vertices[1].x,
+                    polygon.vertices[1].y,
+                    polygon.vertices[1].z,
+                    1,
+                );
+                let v3 = new Vector4(
+                    polygon.vertices[2].x,
+                    polygon.vertices[2].y,
+                    polygon.vertices[2].z,
+                    1,
+                );
 
-        // 월드 변환
-        v1 = object.transform(v1);
-        v2 = object.transform(v2);
-        v3 = object.transform(v3);
+                // 월드 변환
+                v1 = object.transform(v1);
+                v2 = object.transform(v2);
+                v3 = object.transform(v3);
 
-        // 뷰 변환
-        v1 = this.camera.transform(v1);
-        v2 = this.camera.transform(v2);
-        v3 = this.camera.transform(v3);
+                // 뷰 변환
+                v1 = this.camera.transform(v1);
+                v2 = this.camera.transform(v2);
+                v3 = this.camera.transform(v3);
 
-        // ...
-      }
+                // ...
+            }
+        }
     }
-  }
 }
 ```
 
@@ -590,39 +590,39 @@ export class ASCII3DRenderer {
 
 ```ts
 export class Projection {
-  fov: number;
-  aspect: number;
-  near: number;
-  far: number;
+    fov: number;
+    aspect: number;
+    near: number;
+    far: number;
 
-  constructor(fov: number, aspect: number, near: number, far: number) {
-    this.fov = fov;
-    this.aspect = aspect;
-    this.near = near;
-    this.far = far;
-  }
+    constructor(fov: number, aspect: number, near: number, far: number) {
+        this.fov = fov;
+        this.aspect = aspect;
+        this.near = near;
+        this.far = far;
+    }
 
-  transform(v: Vector4) {
-    const fovRad = this.fov * (Math.PI / 180);
-    const f = 1.0 / Math.tan(fovRad / 2);
-    const rangeInv = 1.0 / (this.near - this.far);
+    transform(v: Vector4) {
+        const fovRad = this.fov * (Math.PI / 180);
+        const f = 1.0 / Math.tan(fovRad / 2);
+        const rangeInv = 1.0 / (this.near - this.far);
 
-    // prettier-ignore
-    const matrix = new Matrix44(
+        // prettier-ignore
+        const matrix = new Matrix44(
       f / this.aspect, 0, 0, 0,
       0, f, 0, 0,
       0, 0, (this.near + this.far) * rangeInv, -1,
       0, 0, this.near * this.far * rangeInv * 2, 0
     );
 
-    const transformed = v.transform(matrix);
+        const transformed = v.transform(matrix);
 
-    transformed.x /= transformed.w;
-    transformed.y /= transformed.w;
-    transformed.z /= transformed.w;
+        transformed.x /= transformed.w;
+        transformed.y /= transformed.w;
+        transformed.z /= transformed.w;
 
-    return transformed;
-  }
+        return transformed;
+    }
 }
 ```
 
@@ -630,56 +630,56 @@ export class Projection {
 
 ```ts
 export class ASCII3DRenderer {
-  // ...
-  projection: Projection;
-
-  constructor(_el: HTMLElement, width: number, height: number) {
     // ...
-    this.projection = new Projection(70, width / 2 / height, 0.1, 100);
-  }
+    projection: Projection;
 
-  private process() {
-    this.camera.eye = new Vector3(0, 0, -3);
-
-    for (const object of this.objects) {
-      for (const polygon of object.mesh) {
-        // 4x4 행렬 연산을 위해 Vector4로 변환
-        let v1 = new Vector4(
-          polygon.vertices[0].x,
-          polygon.vertices[0].y,
-          polygon.vertices[0].z,
-          1,
-        );
-        let v2 = new Vector4(
-          polygon.vertices[1].x,
-          polygon.vertices[1].y,
-          polygon.vertices[1].z,
-          1,
-        );
-        let v3 = new Vector4(
-          polygon.vertices[2].x,
-          polygon.vertices[2].y,
-          polygon.vertices[2].z,
-          1,
-        );
-
-        // 월드 변환
-        v1 = object.transform(v1);
-        v2 = object.transform(v2);
-        v3 = object.transform(v3);
-
-        // 뷰 변환
-        v1 = this.camera.transform(v1);
-        v2 = this.camera.transform(v2);
-        v3 = this.camera.transform(v3);
-
-        // 투영 변환
-        v1 = this.projection.transform(v1);
-        v2 = this.projection.transform(v2);
-        v3 = this.projection.transform(v3);
-      }
+    constructor(_el: HTMLElement, width: number, height: number) {
+        // ...
+        this.projection = new Projection(70, width / 2 / height, 0.1, 100);
     }
-  }
+
+    private process() {
+        this.camera.eye = new Vector3(0, 0, -3);
+
+        for (const object of this.objects) {
+            for (const polygon of object.mesh) {
+                // 4x4 행렬 연산을 위해 Vector4로 변환
+                let v1 = new Vector4(
+                    polygon.vertices[0].x,
+                    polygon.vertices[0].y,
+                    polygon.vertices[0].z,
+                    1,
+                );
+                let v2 = new Vector4(
+                    polygon.vertices[1].x,
+                    polygon.vertices[1].y,
+                    polygon.vertices[1].z,
+                    1,
+                );
+                let v3 = new Vector4(
+                    polygon.vertices[2].x,
+                    polygon.vertices[2].y,
+                    polygon.vertices[2].z,
+                    1,
+                );
+
+                // 월드 변환
+                v1 = object.transform(v1);
+                v2 = object.transform(v2);
+                v3 = object.transform(v3);
+
+                // 뷰 변환
+                v1 = this.camera.transform(v1);
+                v2 = this.camera.transform(v2);
+                v3 = this.camera.transform(v3);
+
+                // 투영 변환
+                v1 = this.projection.transform(v1);
+                v2 = this.projection.transform(v2);
+                v3 = this.projection.transform(v3);
+            }
+        }
+    }
 }
 ```
 
@@ -691,55 +691,55 @@ export class ASCII3DRenderer {
 
 ```ts
 export class ASCII3DRenderer {
-  private process() {
-    this.camera.eye = new Vector3(0, 0, -3);
+    private process() {
+        this.camera.eye = new Vector3(0, 0, -3);
 
-    for (const object of this.objects) {
-      for (const polygon of object.mesh) {
-        // ...
+        for (const object of this.objects) {
+            for (const polygon of object.mesh) {
+                // ...
 
-        // 래스터화
-        this.rasterize(v1, v2, v3);
-      }
+                // 래스터화
+                this.rasterize(v1, v2, v3);
+            }
+        }
     }
-  }
 
-  private rasterize(v1: Vector4, v2: Vector4, v3: Vector4) {
-    // 점들을 화면 좌표로 변환
-    const p1 = new Vector2(
-      ((v1.x + 1) * this.width) / 2,
-      ((1 - v1.y) * this.height) / 2,
-    );
-    const p2 = new Vector2(
-      ((v2.x + 1) * this.width) / 2,
-      ((1 - v2.y) * this.height) / 2,
-    );
-    const p3 = new Vector2(
-      ((v3.x + 1) * this.width) / 2,
-      ((1 - v3.y) * this.height) / 2,
-    );
+    private rasterize(v1: Vector4, v2: Vector4, v3: Vector4) {
+        // 점들을 화면 좌표로 변환
+        const p1 = new Vector2(
+            ((v1.x + 1) * this.width) / 2,
+            ((1 - v1.y) * this.height) / 2,
+        );
+        const p2 = new Vector2(
+            ((v2.x + 1) * this.width) / 2,
+            ((1 - v2.y) * this.height) / 2,
+        );
+        const p3 = new Vector2(
+            ((v3.x + 1) * this.width) / 2,
+            ((1 - v3.y) * this.height) / 2,
+        );
 
-    // 선 그리기
-    this.drawLine(p1, p2);
-    this.drawLine(p2, p3);
-    this.drawLine(p3, p1);
-  }
-
-  private drawLine(p1: Vector2, p2: Vector2) {
-    const result = p2.subtract(p1);
-    const len = result.length();
-    const normalized = result.normalize();
-
-    for (let i = 0; i < len; i++) {
-      const current = normalized.multiply(i);
-      const p = p1.add(current);
-
-      // 화면을 벗어나는 좌표는 무시
-      if (p.x >= 0 && p.x < this.width && p.y >= 0 && p.y < this.height) {
-        this.frameBuffer[Math.floor(p.y)][Math.floor(p.x)] = "#";
-      }
+        // 선 그리기
+        this.drawLine(p1, p2);
+        this.drawLine(p2, p3);
+        this.drawLine(p3, p1);
     }
-  }
+
+    private drawLine(p1: Vector2, p2: Vector2) {
+        const result = p2.subtract(p1);
+        const len = result.length();
+        const normalized = result.normalize();
+
+        for (let i = 0; i < len; i++) {
+            const current = normalized.multiply(i);
+            const p = p1.add(current);
+
+            // 화면을 벗어나는 좌표는 무시
+            if (p.x >= 0 && p.x < this.width && p.y >= 0 && p.y < this.height) {
+                this.frameBuffer[Math.floor(p.y)][Math.floor(p.x)] = "#";
+            }
+        }
+    }
 }
 ```
 
@@ -784,68 +784,72 @@ renderer.run();
 
 ```ts
 export class ASCII3DRenderer {
-  private process() {
-    this.camera.eye = new Vector3(0, 0, -3);
+    private process() {
+        this.camera.eye = new Vector3(0, 0, -3);
 
-    for (const object of this.objects) {
-      for (const polygon of object.mesh) {
-        // ...
+        for (const object of this.objects) {
+            for (const polygon of object.mesh) {
+                // ...
 
-        // 래스터화
-        this.rasterize(v1, v2, v3);
-      }
-    }
-  }
-
-  private rasterize(v1: Vector4, v2: Vector4, v3: Vector4) {
-    // 점들을 화면 좌표로 변환
-    const p1 = new Vector2(
-      ((v1.x + 1) * this.width) / 2,
-      ((1 - v1.y) * this.height) / 2,
-    );
-    const p2 = new Vector2(
-      ((v2.x + 1) * this.width) / 2,
-      ((1 - v2.y) * this.height) / 2,
-    );
-    const p3 = new Vector2(
-      ((v3.x + 1) * this.width) / 2,
-      ((1 - v3.y) * this.height) / 2,
-    );
-
-    // 삼각형의 경계 박스 계산
-    const minX = Math.floor(Math.max(0, Math.min(p1.x, p2.x, p3.x)));
-    const minY = Math.floor(Math.max(0, Math.min(p1.y, p2.y, p3.y)));
-    const maxX = Math.floor(Math.min(this.width, Math.max(p1.x, p2.x, p3.x)));
-    const maxY = Math.floor(Math.min(this.height, Math.max(p1.y, p2.y, p3.y)));
-
-    for (let x = minX; x <= maxX; x++) {
-      for (let y = minY; y <= maxY; y++) {
-        const p = new Vector2(x, y);
-
-        // 삼각형 내부에 있다면
-        if (this.isPointInTriangle(p, p1, p2, p3)) {
-          this.setPixel(x, y);
+                // 래스터화
+                this.rasterize(v1, v2, v3);
+            }
         }
-      }
     }
-  }
 
-  private isPointInTriangle(
-    p: Vector2,
-    p1: Vector2,
-    p2: Vector2,
-    p3: Vector2,
-  ): boolean {
-    // 세 개의 부분 삼각형의 부호 계산
-    const b1 = this.sign(p, p1, p2) < 0;
-    const b2 = this.sign(p, p2, p3) < 0;
-    const b3 = this.sign(p, p3, p1) < 0;
+    private rasterize(v1: Vector4, v2: Vector4, v3: Vector4) {
+        // 점들을 화면 좌표로 변환
+        const p1 = new Vector2(
+            ((v1.x + 1) * this.width) / 2,
+            ((1 - v1.y) * this.height) / 2,
+        );
+        const p2 = new Vector2(
+            ((v2.x + 1) * this.width) / 2,
+            ((1 - v2.y) * this.height) / 2,
+        );
+        const p3 = new Vector2(
+            ((v3.x + 1) * this.width) / 2,
+            ((1 - v3.y) * this.height) / 2,
+        );
 
-    // 모든 부분 삼각형의 부호가 같으면 삼각형 내부에 있는 것으로 간주
-    return b1 === b2 && b2 === b3;
-  }
+        // 삼각형의 경계 박스 계산
+        const minX = Math.floor(Math.max(0, Math.min(p1.x, p2.x, p3.x)));
+        const minY = Math.floor(Math.max(0, Math.min(p1.y, p2.y, p3.y)));
+        const maxX = Math.floor(
+            Math.min(this.width, Math.max(p1.x, p2.x, p3.x)),
+        );
+        const maxY = Math.floor(
+            Math.min(this.height, Math.max(p1.y, p2.y, p3.y)),
+        );
 
-  // ...
+        for (let x = minX; x <= maxX; x++) {
+            for (let y = minY; y <= maxY; y++) {
+                const p = new Vector2(x, y);
+
+                // 삼각형 내부에 있다면
+                if (this.isPointInTriangle(p, p1, p2, p3)) {
+                    this.setPixel(x, y);
+                }
+            }
+        }
+    }
+
+    private isPointInTriangle(
+        p: Vector2,
+        p1: Vector2,
+        p2: Vector2,
+        p3: Vector2,
+    ): boolean {
+        // 세 개의 부분 삼각형의 부호 계산
+        const b1 = this.sign(p, p1, p2) < 0;
+        const b2 = this.sign(p, p2, p3) < 0;
+        const b3 = this.sign(p, p3, p1) < 0;
+
+        // 모든 부분 삼각형의 부호가 같으면 삼각형 내부에 있는 것으로 간주
+        return b1 === b2 && b2 === b3;
+    }
+
+    // ...
 }
 ```
 
@@ -857,92 +861,92 @@ export class ASCII3DRenderer {
 
 ```ts
 export class ASCII3DRenderer {
-  // ...
+    // ...
 
-  private process() {
-    this.camera.eye = new Vector3(0, 0, -2);
+    private process() {
+        this.camera.eye = new Vector3(0, 0, -2);
 
-    for (const object of this.objects) {
-      for (const polygon of object.mesh) {
-        // 4x4 행렬 연산을 위해 Vector4로 변환
-        let v1 = new Vector4(
-          polygon.vertices[0].x,
-          polygon.vertices[0].y,
-          polygon.vertices[0].z,
-          1,
-        );
-        let v2 = new Vector4(
-          polygon.vertices[1].x,
-          polygon.vertices[1].y,
-          polygon.vertices[1].z,
-          1,
-        );
-        let v3 = new Vector4(
-          polygon.vertices[2].x,
-          polygon.vertices[2].y,
-          polygon.vertices[2].z,
-          1,
-        );
+        for (const object of this.objects) {
+            for (const polygon of object.mesh) {
+                // 4x4 행렬 연산을 위해 Vector4로 변환
+                let v1 = new Vector4(
+                    polygon.vertices[0].x,
+                    polygon.vertices[0].y,
+                    polygon.vertices[0].z,
+                    1,
+                );
+                let v2 = new Vector4(
+                    polygon.vertices[1].x,
+                    polygon.vertices[1].y,
+                    polygon.vertices[1].z,
+                    1,
+                );
+                let v3 = new Vector4(
+                    polygon.vertices[2].x,
+                    polygon.vertices[2].y,
+                    polygon.vertices[2].z,
+                    1,
+                );
 
-        // 월드 변환
-        v1 = object.transform(v1);
-        v2 = object.transform(v2);
-        v3 = object.transform(v3);
+                // 월드 변환
+                v1 = object.transform(v1);
+                v2 = object.transform(v2);
+                v3 = object.transform(v3);
 
-        // 뷰 변환
-        v1 = this.camera.transform(v1);
-        v2 = this.camera.transform(v2);
-        v3 = this.camera.transform(v3);
+                // 뷰 변환
+                v1 = this.camera.transform(v1);
+                v2 = this.camera.transform(v2);
+                v3 = this.camera.transform(v3);
 
-        // 광원 계산
-        const brightness = this.calculateLight(v1, v2, v3);
+                // 광원 계산
+                const brightness = this.calculateLight(v1, v2, v3);
 
-        // 투영 변환
-        v1 = this.projection.transform(v1);
-        v2 = this.projection.transform(v2);
-        v3 = this.projection.transform(v3);
+                // 투영 변환
+                v1 = this.projection.transform(v1);
+                v2 = this.projection.transform(v2);
+                v3 = this.projection.transform(v3);
 
-        // 래스터화
-        this.rasterize(v1, v2, v3, brightness);
-      }
+                // 래스터화
+                this.rasterize(v1, v2, v3, brightness);
+            }
+        }
     }
-  }
 
-  private calculateLight(v1: Vector4, v2: Vector4, v3: Vector4): number {
-    // 광원의 방향 벡터
-    // 카메라가 바라보는 방향 (0, 0, 1)을 사용함
-    const lightDirection = new Vector3(0, 0, 1).normalize();
+    private calculateLight(v1: Vector4, v2: Vector4, v3: Vector4): number {
+        // 광원의 방향 벡터
+        // 카메라가 바라보는 방향 (0, 0, 1)을 사용함
+        const lightDirection = new Vector3(0, 0, 1).normalize();
 
-    // 삼각형의 표면 법선 벡터 계산
-    const normal = this.calculateSurfaceNormal(
-      new Vector3(v1.x, v1.y, v1.z),
-      new Vector3(v2.x, v2.y, v2.z),
-      new Vector3(v3.x, v3.y, v3.z),
-    );
+        // 삼각형의 표면 법선 벡터 계산
+        const normal = this.calculateSurfaceNormal(
+            new Vector3(v1.x, v1.y, v1.z),
+            new Vector3(v2.x, v2.y, v2.z),
+            new Vector3(v3.x, v3.y, v3.z),
+        );
 
-    // 광원과 표면 법선 벡터 간의 각도 계산
-    const cosAngle = normal.dot(lightDirection);
+        // 광원과 표면 법선 벡터 간의 각도 계산
+        const cosAngle = normal.dot(lightDirection);
 
-    // 광원 각도에 따라 픽셀의 밝기 결정
-    const brightness = Math.max(0, cosAngle);
+        // 광원 각도에 따라 픽셀의 밝기 결정
+        const brightness = Math.max(0, cosAngle);
 
-    return brightness;
-  }
+        return brightness;
+    }
 
-  private calculateSurfaceNormal(
-    v1: Vector3,
-    v2: Vector3,
-    v3: Vector3,
-  ): Vector3 {
-    // 두 변을 정의
-    const edge1 = v3.subtract(v2);
-    const edge2 = v1.subtract(v3);
+    private calculateSurfaceNormal(
+        v1: Vector3,
+        v2: Vector3,
+        v3: Vector3,
+    ): Vector3 {
+        // 두 변을 정의
+        const edge1 = v3.subtract(v2);
+        const edge2 = v1.subtract(v3);
 
-    // 외적을 계산하여 표면 법선 벡터 반환
-    return edge1.cross(edge2).normalize();
-  }
+        // 외적을 계산하여 표면 법선 벡터 반환
+        return edge1.cross(edge2).normalize();
+    }
 
-  // ...
+    // ...
 }
 ```
 
@@ -952,103 +956,114 @@ export class ASCII3DRenderer {
 
 ```ts
 export class ASCII3DRenderer {
-  // ...
+    // ...
 
-  private process() {
-    this.camera.eye = new Vector3(0, 0, -2);
+    private process() {
+        this.camera.eye = new Vector3(0, 0, -2);
 
-    for (const object of this.objects) {
-      for (const polygon of object.mesh) {
-        // 4x4 행렬 연산을 위해 Vector4로 변환
-        let v1 = new Vector4(
-          polygon.vertices[0].x,
-          polygon.vertices[0].y,
-          polygon.vertices[0].z,
-          1,
-        );
-        let v2 = new Vector4(
-          polygon.vertices[1].x,
-          polygon.vertices[1].y,
-          polygon.vertices[1].z,
-          1,
-        );
-        let v3 = new Vector4(
-          polygon.vertices[2].x,
-          polygon.vertices[2].y,
-          polygon.vertices[2].z,
-          1,
-        );
+        for (const object of this.objects) {
+            for (const polygon of object.mesh) {
+                // 4x4 행렬 연산을 위해 Vector4로 변환
+                let v1 = new Vector4(
+                    polygon.vertices[0].x,
+                    polygon.vertices[0].y,
+                    polygon.vertices[0].z,
+                    1,
+                );
+                let v2 = new Vector4(
+                    polygon.vertices[1].x,
+                    polygon.vertices[1].y,
+                    polygon.vertices[1].z,
+                    1,
+                );
+                let v3 = new Vector4(
+                    polygon.vertices[2].x,
+                    polygon.vertices[2].y,
+                    polygon.vertices[2].z,
+                    1,
+                );
 
-        // 월드 변환
-        v1 = object.transform(v1);
-        v2 = object.transform(v2);
-        v3 = object.transform(v3);
+                // 월드 변환
+                v1 = object.transform(v1);
+                v2 = object.transform(v2);
+                v3 = object.transform(v3);
 
-        // 뷰 변환
-        v1 = this.camera.transform(v1);
-        v2 = this.camera.transform(v2);
-        v3 = this.camera.transform(v3);
+                // 뷰 변환
+                v1 = this.camera.transform(v1);
+                v2 = this.camera.transform(v2);
+                v3 = this.camera.transform(v3);
 
-        // 광원 계산
-        const brightness = this.calculateLight(v1, v2, v3);
+                // 광원 계산
+                const brightness = this.calculateLight(v1, v2, v3);
 
-        // 투영 변환
-        v1 = this.projection.transform(v1);
-        v2 = this.projection.transform(v2);
-        v3 = this.projection.transform(v3);
+                // 투영 변환
+                v1 = this.projection.transform(v1);
+                v2 = this.projection.transform(v2);
+                v3 = this.projection.transform(v3);
 
-        // 래스터화
-        this.rasterize(v1, v2, v3, brightness);
-      }
-    }
-  }
-
-  private rasterize(v1: Vector4, v2: Vector4, v3: Vector4, brightness: number) {
-    // 점들을 화면 좌표로 변환
-    const p1 = new Vector2(
-      ((v1.x + 1) * this.width) / 2,
-      ((1 - v1.y) * this.height) / 2,
-    );
-    const p2 = new Vector2(
-      ((v2.x + 1) * this.width) / 2,
-      ((1 - v2.y) * this.height) / 2,
-    );
-    const p3 = new Vector2(
-      ((v3.x + 1) * this.width) / 2,
-      ((1 - v3.y) * this.height) / 2,
-    );
-
-    // 삼각형의 경계 박스 계산
-    const minX = Math.floor(Math.max(0, Math.min(p1.x, p2.x, p3.x)));
-    const minY = Math.floor(Math.max(0, Math.min(p1.y, p2.y, p3.y)));
-    const maxX = Math.floor(Math.min(this.width, Math.max(p1.x, p2.x, p3.x)));
-    const maxY = Math.floor(Math.min(this.height, Math.max(p1.y, p2.y, p3.y)));
-
-    // 박스 내부 순회
-    for (let y = minY; y <= maxY; y++) {
-      for (let x = minX; x <= maxX; x++) {
-        // 화면 밖이라면 무시
-        if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
-          continue;
+                // 래스터화
+                this.rasterize(v1, v2, v3, brightness);
+            }
         }
-
-        const p = new Vector2(x, y);
-
-        // 삼각형 내부에 있다면
-        if (this.isPointInTriangle(p, p1, p2, p3)) {
-          // 더 낮은 깊이라면 덮어쓴다
-          if ((v1.w + v2.w + v3.w) / 3.0 <= this.depthBuffer[y][x]) {
-            const shade =
-              this.Shade[Math.round(brightness * (this.Shade.length - 1))];
-            this.frameBuffer[y][x] = shade;
-            this.depthBuffer[y][x] = (v1.w + v2.w + v3.w) / 3.0;
-          }
-        }
-      }
     }
-  }
 
-  // ...
+    private rasterize(
+        v1: Vector4,
+        v2: Vector4,
+        v3: Vector4,
+        brightness: number,
+    ) {
+        // 점들을 화면 좌표로 변환
+        const p1 = new Vector2(
+            ((v1.x + 1) * this.width) / 2,
+            ((1 - v1.y) * this.height) / 2,
+        );
+        const p2 = new Vector2(
+            ((v2.x + 1) * this.width) / 2,
+            ((1 - v2.y) * this.height) / 2,
+        );
+        const p3 = new Vector2(
+            ((v3.x + 1) * this.width) / 2,
+            ((1 - v3.y) * this.height) / 2,
+        );
+
+        // 삼각형의 경계 박스 계산
+        const minX = Math.floor(Math.max(0, Math.min(p1.x, p2.x, p3.x)));
+        const minY = Math.floor(Math.max(0, Math.min(p1.y, p2.y, p3.y)));
+        const maxX = Math.floor(
+            Math.min(this.width, Math.max(p1.x, p2.x, p3.x)),
+        );
+        const maxY = Math.floor(
+            Math.min(this.height, Math.max(p1.y, p2.y, p3.y)),
+        );
+
+        // 박스 내부 순회
+        for (let y = minY; y <= maxY; y++) {
+            for (let x = minX; x <= maxX; x++) {
+                // 화면 밖이라면 무시
+                if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
+                    continue;
+                }
+
+                const p = new Vector2(x, y);
+
+                // 삼각형 내부에 있다면
+                if (this.isPointInTriangle(p, p1, p2, p3)) {
+                    // 더 낮은 깊이라면 덮어쓴다
+                    if ((v1.w + v2.w + v3.w) / 3.0 <= this.depthBuffer[y][x]) {
+                        const shade =
+                            this.Shade[
+                                Math.round(brightness * (this.Shade.length - 1))
+                            ];
+                        this.frameBuffer[y][x] = shade;
+                        this.depthBuffer[y][x] = (v1.w + v2.w + v3.w) / 3.0;
+                    }
+                }
+            }
+        }
+    }
+
+    // ...
 }
 ```
 

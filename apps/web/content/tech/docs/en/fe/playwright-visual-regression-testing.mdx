@@ -12,9 +12,9 @@ sourceUrl: https://playwright.dev/docs/test-snapshots
 ---
 
 <Callout title="Core principle" type="info">
-  Matching screenshots alone do not prove that a feature works. A visual test
-  becomes a product contract when assertions verify user-visible behavior and
-  the resulting stable screen is compared against a reviewed baseline.
+    Matching screenshots alone do not prove that a feature works. A visual test
+    becomes a product contract when assertions verify user-visible behavior and
+    the resulting stable screen is compared against a reviewed baseline.
 </Callout>
 
 Playwright's [`toHaveScreenshot()`](https://playwright.dev/docs/test-snapshots) creates a reference image on the first run and compares subsequent renders with it. This comparison can catch changes to layout, color, typography, and responsive placement at once. It becomes untrustworthy, however, when data or execution environments drift, or when updated baselines are approved without review.
@@ -43,22 +43,22 @@ Judge meaningfulness by the product risk a failure explains, not by the number o
 
 ```ts
 test("visual: overview-wide-light", async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.addInitScript(() => {
-    localStorage.setItem("tech-theme", "light");
-  });
-  await page.goto("/en");
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.addInitScript(() => {
+        localStorage.setItem("tech-theme", "light");
+    });
+    await page.goto("/en");
 
-  await expect(
-    page.getByRole("heading", { level: 1, name: "Engineering" }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("navigation", { name: "Editorial navigation" }),
-  ).toBeVisible();
+    await expect(
+        page.getByRole("heading", { level: 1, name: "Engineering" }),
+    ).toBeVisible();
+    await expect(
+        page.getByRole("navigation", { name: "Editorial navigation" }),
+    ).toBeVisible();
 
-  await expect(page).toHaveScreenshot("overview-wide-light.png", {
-    fullPage: true,
-  });
+    await expect(page).toHaveScreenshot("overview-wide-light.png", {
+        fullPage: true,
+    });
 });
 ```
 

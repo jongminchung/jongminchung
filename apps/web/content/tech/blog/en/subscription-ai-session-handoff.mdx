@@ -25,44 +25,44 @@ sourceUrl: https://support.claude.com/en/articles/14552983-models-usage-and-limi
 ## Treat session transitions as a state machine
 
 - **Move each session through `fresh → active → compact or handoff → closed`**
-  - `fresh` reads Part 3's guidance and the current task contract
-  - `active` accumulates only evidence needed for the task
-  - `compact` applies only while the same goal continues
-  - `handoff` closes a session or changes its owner
+    - `fresh` reads Part 3's guidance and the current task contract
+    - `active` accumulates only evidence needed for the task
+    - `compact` applies only while the same goal continues
+    - `handoff` closes a session or changes its owner
 
 - **A new goal creates a stronger boundary than the convenience of the current chat**
-  - An unrelated review request during a bug fix is a new task
-  - Analyzing a test failure caused by that fix remains a substep of the same task
+    - An unrelated review request during a bug fix is a new task
+    - Analyzing a test failure caused by that fix remains a substep of the same task
 
 - **Anthropic says each turn sends prior conversation, project context and read files, plus the new prompt[^claude-limits]**
-  - It recommends `/clear` for a task change and `/compact` for a long continuation
-  - This is documented Claude Code behavior; do not assume every product meters identically
+    - It recommends `/clear` for a task change and `/compact` for a long continuation
+    - This is documented Claude Code behavior; do not assume every product meters identically
 
 ## Decide between fresh and compact
 
 - **Continue only when all three answers are yes**
-  - The completion condition remains the same
-  - The allowed paths substantially overlap
-  - Existing session evidence directly supports the next decision
+    - The completion condition remains the same
+    - The allowed paths substantially overlap
+    - Existing session evidence directly supports the next decision
 
 - **Compaction reduces a conversation; it does not create a task boundary**
-  - Compacting between diagnosis and implementation of one bug can be appropriate
-  - Start fresh when moving from the finished bug to a new feature
+    - Compacting between diagnosis and implementation of one bug can be appropriate
+    - Start fresh when moving from the finished bug to a new feature
 
 - **Gemini CLI exposes maximum retained turns and a compression threshold[^gemini-config]**
-  - `model.maxSessionTurns` bounds user, model, and tool turns kept in a session
-  - `model.chatCompression.contextPercentageThreshold` controls automatic and manual compression timing
-  - An aggressive value can lose evidence, so validate it against the baseline
+    - `model.maxSessionTurns` bounds user, model, and tool turns kept in a session
+    - `model.chatCompression.contextPercentageThreshold` controls automatic and manual compression timing
+    - An aggressive value can lose evidence, so validate it against the baseline
 
 ## Transfer evidence instead of conversation
 
 - **Use six provider-neutral Markdown fields**
-  - Goal and completion condition
-  - Current commit and changed files
-  - Commands run and results
-  - Confirmed facts
-  - Rejected hypotheses with reasons
-  - One next action or unresolved question
+    - Goal and completion condition
+    - Current commit and changed files
+    - Commands run and results
+    - Confirmed facts
+    - Rejected hypotheses with reasons
+    - One next action or unresolved question
 
 ```md
 # WEB-41 handoff
@@ -76,38 +76,38 @@ sourceUrl: https://support.claude.com/en/articles/14552983-models-usage-and-limi
 ```
 
 - **Avoid both raw transcripts and narrative summaries**
-  - A transcript forces the next session to re-read failed attempts and outputs
-  - Long prose blurs confirmed fact, inference, and next action
+    - A transcript forces the next session to re-read failed attempts and outputs
+    - Long prose blurs confirmed fact, inference, and next action
 
 - **Label inference separately from fact**
-  - Put executed and observed results under `Facts`
-  - Put possibilities under `Open questions` so the next agent revalidates them
+    - Put executed and observed results under `Facts`
+    - Put possibilities under `Open questions` so the next agent revalidates them
 
 ## Test whether the handoff actually recovers work
 
 - **A fresh session without the original chat should complete the next verification from the handoff alone**
-  - Three repeated questions suggest missing essential evidence
-  - Broad re-exploration suggests missing paths or confirmed facts
+    - Three repeated questions suggest missing essential evidence
+    - Broad re-exploration suggests missing paths or confirmed facts
 
 - **Measure recovery cost, not handoff brevity by itself**
-  - Count turns to the first valid change
-  - Count duplicate commands and human hints
-  - Record changes reverted because of a handoff error
+    - Count turns to the first valid change
+    - Count duplicate commands and human hints
+    - Record changes reverted because of a handoff error
 
 - **Frequent handoffs do not always save usage**
-  - A tiny single-file edit can cost less than documenting its state
-  - A reasoning-heavy design task may first need a stronger decision record
+    - A tiny single-file edit can cost less than documenting its state
+    - A reasoning-heavy design task may first need a stronger decision record
 
 ## Hand output boundaries to the next part
 
 - **Part 5 caps the evidence inserted into a handoff**
-  - Keep only command, count, and duration for passing tests
-  - Keep the first error and nearby context for failures
-  - Pass a file list and relevant hunks instead of an unbounded diff
+    - Keep only command, count, and duration for passing tests
+    - Keep the first error and nearby context for failures
+    - Pass a file list and relevant hunks instead of an unbounded diff
 
 - **Part 4 is complete when a new provider session resumes without a transcript**
-  - Test one Codex-to-Claude or Claude-to-Codex transition
-  - Keep Part 1's restriction to official subscription sign-in without API keys
+    - Test one Codex-to-Claude or Claude-to-Codex transition
+    - Keep Part 1's restriction to official subscription sign-in without API keys
 
 ## Action plan
 

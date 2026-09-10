@@ -27,10 +27,10 @@ Create `.oxfmtrc.json`. Width and indentation come from [EditorConfig](/en/docs/
 
 ```json
 {
-  "$schema": "./node_modules/oxfmt/configuration_schema.json",
-  "sortImports": { "newlinesBetween": false },
-  "sortPackageJson": false,
-  "ignorePatterns": ["node_modules/", "dist/", "coverage/", ".venv/"]
+    "$schema": "./node_modules/oxfmt/configuration_schema.json",
+    "sortImports": { "newlinesBetween": false },
+    "sortPackageJson": false,
+    "ignorePatterns": ["node_modules/", "dist/", "coverage/", ".venv/"]
 }
 ```
 
@@ -38,14 +38,14 @@ Create `.oxlintrc.json` for code diagnostics. Add React and accessibility plugin
 
 ```json
 {
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "categories": { "correctness": "error" },
-  "plugins": ["typescript", "unicorn", "oxc"],
-  "rules": {
-    "eslint/prefer-const": "error",
-    "typescript/no-explicit-any": "error"
-  },
-  "ignorePatterns": ["node_modules/", "dist/", "coverage/"]
+    "$schema": "./node_modules/oxlint/configuration_schema.json",
+    "categories": { "correctness": "error" },
+    "plugins": ["typescript", "unicorn", "oxc"],
+    "rules": {
+        "eslint/prefer-const": "error",
+        "typescript/no-explicit-any": "error"
+    },
+    "ignorePatterns": ["node_modules/", "dist/", "coverage/"]
 }
 ```
 
@@ -78,13 +78,13 @@ Merge these scripts into `package.json`:
 
 ```json
 {
-  "scripts": {
-    "fmt": "oxfmt .",
-    "fmt:check": "oxfmt --check .",
-    "lint": "oxlint .",
-    "lint:fix": "oxlint --fix .",
-    "typecheck": "tsc --noEmit"
-  }
+    "scripts": {
+        "fmt": "oxfmt .",
+        "fmt:check": "oxfmt --check .",
+        "lint": "oxlint .",
+        "lint:fix": "oxlint --fix .",
+        "typecheck": "tsc --noEmit"
+    }
 }
 ```
 
@@ -92,14 +92,14 @@ Create `tsconfig.json` for the type-checking command:
 
 ```json
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "strict": true,
-    "noEmit": true
-  },
-  "include": ["src/**/*.ts"]
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
+        "strict": true,
+        "noEmit": true
+    },
+    "include": ["src/**/*.ts"]
 }
 ```
 
@@ -107,22 +107,22 @@ Merge these language blocks into `.vscode/settings.json`, retaining [EditorConfi
 
 ```json
 {
-  "[typescript]": {
-    "editor.defaultFormatter": "oxc.oxc-vscode",
-    "editor.codeActionsOnSave": {
-      "source.fixAll.oxc": "explicit",
-      "source.organizeImports": "never",
-      "source.fixAll.eslint": "never"
+    "[typescript]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode",
+        "editor.codeActionsOnSave": {
+            "source.fixAll.oxc": "explicit",
+            "source.organizeImports": "never",
+            "source.fixAll.eslint": "never"
+        }
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode",
+        "editor.codeActionsOnSave": {
+            "source.fixAll.oxc": "explicit",
+            "source.organizeImports": "never",
+            "source.fixAll.eslint": "never"
+        }
     }
-  },
-  "[javascript]": {
-    "editor.defaultFormatter": "oxc.oxc-vscode",
-    "editor.codeActionsOnSave": {
-      "source.fixAll.oxc": "explicit",
-      "source.organizeImports": "never",
-      "source.fixAll.eslint": "never"
-    }
-  }
 }
 ```
 

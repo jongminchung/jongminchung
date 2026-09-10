@@ -77,11 +77,11 @@ Next의 Server/Client Component 경계와 route 생성 타입은 framework build
 
 ```json
 {
-  "type": "module",
-  "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
-  }
+    "type": "module",
+    "scripts": {
+        "build": "tsc -p tsconfig.json",
+        "typecheck": "tsc -p tsconfig.json --noEmit"
+    }
 }
 ```
 
@@ -89,18 +89,18 @@ Next의 Server/Client Component 경계와 route 생성 타입은 framework build
 
 ```json
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "lib": ["ES2022"],
-    "types": ["node"],
-    "rootDir": "src",
-    "outDir": "dist",
-    "strict": true,
-    "sourceMap": true
-  },
-  "include": ["src/**/*.ts"]
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "lib": ["ES2022"],
+        "types": ["node"],
+        "rootDir": "src",
+        "outDir": "dist",
+        "strict": true,
+        "sourceMap": true
+    },
+    "include": ["src/**/*.ts"]
 }
 ```
 
@@ -108,7 +108,7 @@ Next의 Server/Client Component 경계와 route 생성 타입은 framework build
 
 ```ts
 function total(price: number, quantity: number): number {
-  return price * quantity;
+    return price * quantity;
 }
 
 const result = total(1200, 3);
@@ -119,18 +119,18 @@ console.log({ result });
 
 ```json
 {
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "ts: build",
-      "type": "shell",
-      "command": "npm",
-      "args": ["run", "build"],
-      "options": { "cwd": "${workspaceFolder}" },
-      "problemMatcher": ["$tsc"],
-      "group": "build"
-    }
-  ]
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "ts: build",
+            "type": "shell",
+            "command": "npm",
+            "args": ["run", "build"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "problemMatcher": ["$tsc"],
+            "group": "build"
+        }
+    ]
 }
 ```
 
@@ -138,20 +138,20 @@ console.log({ result });
 
 ```json
 {
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "type": "node",
-      "name": "TS: compiled Node program",
-      "request": "launch",
-      "program": "${workspaceFolder}/dist/main.js",
-      "cwd": "${workspaceFolder}",
-      "preLaunchTask": "ts: build",
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "sourceMaps": true,
-      "skipFiles": ["<node_internals>/**"]
-    }
-  ]
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "name": "TS: compiled Node program",
+            "request": "launch",
+            "program": "${workspaceFolder}/dist/main.js",
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "ts: build",
+            "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+            "sourceMaps": true,
+            "skipFiles": ["<node_internals>/**"]
+        }
+    ]
 }
 ```
 

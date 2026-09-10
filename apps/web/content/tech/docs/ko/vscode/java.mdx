@@ -91,26 +91,26 @@ wrapper·프로파일·의존성 잠금 정책을 유지한다.
 
 ```json
 {
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "type": "java",
-      "name": "Java: application",
-      "request": "launch",
-      "mainClass": "com.example.App",
-      "cwd": "${workspaceFolder}",
-      "console": "integratedTerminal",
-      "args": ["--mode", "local"],
-      "vmArgs": "-Dfile.encoding=UTF-8"
-    },
-    {
-      "type": "java",
-      "name": "Java: attach localhost:5005",
-      "request": "attach",
-      "hostName": "127.0.0.1",
-      "port": 5005
-    }
-  ]
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Java: application",
+            "request": "launch",
+            "mainClass": "com.example.App",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "args": ["--mode", "local"],
+            "vmArgs": "-Dfile.encoding=UTF-8"
+        },
+        {
+            "type": "java",
+            "name": "Java: attach localhost:5005",
+            "request": "attach",
+            "hostName": "127.0.0.1",
+            "port": 5005
+        }
+    ]
 }
 ```
 
@@ -163,16 +163,16 @@ XML을 Eclipse formatter 파일처럼 넣지 않는다.
 
 ```json
 {
-  "[java]": {
-    "editor.defaultFormatter": "redhat.java",
-    "editor.formatOnSave": true,
-    "editor.formatOnPaste": false,
-    "editor.formatOnType": false,
-    "editor.codeActionsOnSave": {
-      "source.fixAll": "never",
-      "source.organizeImports": "explicit"
+    "[java]": {
+        "editor.defaultFormatter": "redhat.java",
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": false,
+        "editor.formatOnType": false,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "never",
+            "source.organizeImports": "explicit"
+        }
     }
-  }
 }
 ```
 
@@ -183,15 +183,15 @@ Checkstyle은 포맷 엔진이 아니므로 Google Java Format과 충돌하는 �
 
 ```json
 {
-  "[java]": {
-    "editor.formatOnSave": false,
-    "editor.formatOnPaste": false,
-    "editor.formatOnType": false,
-    "editor.codeActionsOnSave": {
-      "source.fixAll": "never",
-      "source.organizeImports": "never"
+    "[java]": {
+        "editor.formatOnSave": false,
+        "editor.formatOnPaste": false,
+        "editor.formatOnType": false,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "never",
+            "source.organizeImports": "never"
+        }
     }
-  }
 }
 ```
 

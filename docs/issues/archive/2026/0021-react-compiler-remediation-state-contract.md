@@ -28,51 +28,51 @@
 ## OSS 기준에서 확인한 원칙
 
 - **Oxlint의 `react/react-compiler`는 React Compiler 분석을 lint-only로 실행하는 experimental rule임**
-  - rule 통과가 React Compiler transform 활성화를 의미하지 않음
-  - compiler가 거부한 구조를 timer나 frame callback으로 감추는 것이 완료 조건이 될 수 없음
+    - rule 통과가 React Compiler transform 활성화를 의미하지 않음
+    - compiler가 거부한 구조를 timer나 frame callback으로 감추는 것이 완료 조건이 될 수 없음
 - **React는 identity가 바뀔 때 전체 local state를 초기화하려면 `key`를 사용하는 방식을 권장함**
-  - route, locale 또는 scene이 component identity라면 state owner 경계에 key를 둠
-  - 이전 identity의 state를 문자열 비교로 숨긴 채 보존하지 않음
+    - route, locale 또는 scene이 component identity라면 state owner 경계에 key를 둠
+    - 이전 identity의 state를 문자열 비교로 숨긴 채 보존하지 않음
 - **외부 browser 상태는 subscription과 snapshot으로 모델링할 수 있음**
-  - document language는 이번 commit에서 `useSyncExternalStore`로 올바르게 전환됨
-  - local storage와 system theme도 같은 원칙으로 별도 store 계약을 만들 수 있음
+    - document language는 이번 commit에서 `useSyncExternalStore`로 올바르게 전환됨
+    - local storage와 system theme도 같은 원칙으로 별도 store 계약을 만들 수 있음
 
 ## 현재 저장소에서 확인한 회귀와 위험
 
 - **route sheet는 닫힌 상태가 아니라 마지막으로 열었던 pathname을 저장함**
-  - A에서 열기: `openedPathname = A`, `isOpen = true`
-  - B로 이동: `openedPathname = A`, `isOpen = false`
-  - browser back으로 A 복귀: 값이 그대로이므로 `isOpen = true`
-  - 이전 effect 구현은 최초 route 변경 시 state를 `false`로 확정했음
+    - A에서 열기: `openedPathname = A`, `isOpen = true`
+    - B로 이동: `openedPathname = A`, `isOpen = false`
+    - browser back으로 A 복귀: 값이 그대로이므로 `isOpen = true`
+    - 이전 effect 구현은 최초 route 변경 시 state를 `false`로 확정했음
 - **theme 초기화는 state 적용을 다음 animation frame으로 미룸**
-  - DOM의 `data-theme`는 effect에서 즉시 바뀜
-  - context의 `mode`는 최소 한 frame 동안 `system`을 유지함
-  - frame 전에 다른 update가 생기면 예약된 초기값이 더 최신 state 뒤에 실행될 수 있음
+    - DOM의 `data-theme`는 effect에서 즉시 바뀜
+    - context의 `mode`는 최소 한 frame 동안 `system`을 유지함
+    - frame 전에 다른 update가 생기면 예약된 초기값이 더 최신 state 뒤에 실행될 수 있음
 - **Excalidraw는 readiness identity와 실제 renderer identity가 분리됨**
-  - parent의 `onReady` callback은 scene identity마다 새로 생성됨
-  - child effect는 새 callback으로 다시 실행되지만 `initialData`는 이미 mount된 Excalidraw의 초기 입력임
-  - scene 교체 시 실제 element가 갱신되지 않아도 새 scene의 identity로 element count를 보고할 수 있음
+    - parent의 `onReady` callback은 scene identity마다 새로 생성됨
+    - child effect는 새 callback으로 다시 실행되지만 `initialData`는 이미 mount된 Excalidraw의 초기 입력임
+    - scene 교체 시 실제 element가 갱신되지 않아도 새 scene의 identity로 element count를 보고할 수 있음
 - **현재 콘텐츠는 standalone scene 한 개와 inline scene 0개라 scene 교체 회귀가 아직 제품 경로에서 드러나지 않음**
-  - component 공개 계약은 `source`와 `src` 변경을 허용함
-  - 두 번째 diagram 또는 client navigation이 추가되기 전에 회귀 test가 필요함
+    - component 공개 계약은 `source`와 `src` 변경을 허용함
+    - 두 번째 diagram 또는 client navigation이 추가되기 전에 회귀 test가 필요함
 
 ## 채택할 내용
 
 - **route sheet state owner를 route identity로 재생성함**
-  - pathname 또는 안정된 current route key를 state owner의 `key`로 사용함
-  - route 이동과 browser history 복귀 모두 닫힌 상태로 시작함
-  - focus restoration은 사용자가 명시적으로 닫은 경우와 route unmount를 구분함
+    - pathname 또는 안정된 current route key를 state owner의 `key`로 사용함
+    - route 이동과 browser history 복귀 모두 닫힌 상태로 시작함
+    - focus restoration은 사용자가 명시적으로 닫은 경우와 route unmount를 구분함
 - **theme를 timer 없이 일관된 snapshot으로 제공함**
-  - local storage mode와 system preference를 하나의 external store 또는 bootstrap snapshot으로 모델링함
-  - DOM theme와 context mode가 같은 commit에서 관찰되도록 함
-  - storage event를 지원할지 여부를 명시적으로 결정함
+    - local storage mode와 system preference를 하나의 external store 또는 bootstrap snapshot으로 모델링함
+    - DOM theme와 context mode가 같은 commit에서 관찰되도록 함
+    - storage event를 지원할지 여부를 명시적으로 결정함
 - **Excalidraw renderer를 scene identity와 함께 갱신함**
-  - `<Canvas key={sceneIdentity}>`로 remount하거나 Excalidraw API의 명시적 scene update를 사용함
-  - readiness는 실제 API가 반환한 element와 expected scene identity를 함께 확인함
-  - 두 scene 간 전환 test를 추가함
+    - `<Canvas key={sceneIdentity}>`로 remount하거나 Excalidraw API의 명시적 scene update를 사용함
+    - readiness는 실제 API가 반환한 element와 expected scene identity를 함께 확인함
+    - 두 scene 간 전환 test를 추가함
 - **compiler lint를 유지하고 회귀 test를 먼저 추가함**
-  - timer·RAF·숨겨진 stale state로 lint만 우회하는 변경을 금지함
-  - 사용자에게 보이는 상태 전이를 완료 조건으로 둠
+    - timer·RAF·숨겨진 stale state로 lint만 우회하는 변경을 금지함
+    - 사용자에게 보이는 상태 전이를 완료 조건으로 둠
 
 ## 채택하지 않을 내용
 
@@ -92,21 +92,21 @@
 ## 검증
 
 - **Web의 가까운 검증부터 실행함**
-  - `pnpm --filter @jongminchung/web run typecheck`
-  - `pnpm --filter @jongminchung/web run test`
-  - `pnpm --filter @jongminchung/web run build`
-  - route sheet·theme·diagram 관련 Playwright test
+    - `pnpm --filter @jongminchung/web run typecheck`
+    - `pnpm --filter @jongminchung/web run test`
+    - `pnpm --filter @jongminchung/web run build`
+    - route sheet·theme·diagram 관련 Playwright test
 - **browser history, stored mode, system mode와 두 scene 전환을 각각 검증함**
 - **최종 `pnpm run check`, `git diff --check`, `git status --short`를 실행함**
 
 ## 구현 결과
 
 - **route sheet와 theme 상태 계약을 완료함**
-  - sheet state를 boolean으로 단순화하고 route identity에서 owner를 재생성함
-  - browser back으로 돌아와도 닫힌 상태임을 E2E로 검증함
-  - theme를 `useSyncExternalStore` snapshot으로 전환해 animation frame 지연을 제거함
+    - sheet state를 boolean으로 단순화하고 route identity에서 owner를 재생성함
+    - browser back으로 돌아와도 닫힌 상태임을 E2E로 검증함
+    - theme를 `useSyncExternalStore` snapshot으로 전환해 animation frame 지연을 제거함
 - **Excalidraw renderer identity와 전용 fixture를 완료함**
-  - scene identity가 바뀌면 canvas를 remount하도록 연결함
-  - 같은 element 수이지만 text가 다른 두 scene을 Playwright fixture에서 전환함
-  - 실제 renderer API의 element 수와 text content가 새 scene과 일치해야 `ready`가 되도록 함
-  - fixture route는 `PLAYWRIGHT_TEST=1`에서만 제공하고 일반 production 실행에서는 404를 유지함
+    - scene identity가 바뀌면 canvas를 remount하도록 연결함
+    - 같은 element 수이지만 text가 다른 두 scene을 Playwright fixture에서 전환함
+    - 실제 renderer API의 element 수와 text content가 새 scene과 일치해야 `ready`가 되도록 함
+    - fixture route는 `PLAYWRIGHT_TEST=1`에서만 제공하고 일반 production 실행에서는 404를 유지함

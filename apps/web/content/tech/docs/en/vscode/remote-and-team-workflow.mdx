@@ -19,39 +19,39 @@ This example specifically targets the jongminchung repository, with Bun availabl
 
 ```json
 {
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "repo: format check",
-      "type": "process",
-      "command": "bun",
-      "args": ["run", "fmt:check"],
-      "options": { "cwd": "${workspaceFolder}" },
-      "problemMatcher": []
-    },
-    {
-      "label": "repo: lint",
-      "type": "process",
-      "command": "bun",
-      "args": ["run", "lint"],
-      "options": { "cwd": "${workspaceFolder}" },
-      "problemMatcher": []
-    },
-    {
-      "label": "web: typecheck",
-      "type": "process",
-      "command": "bun",
-      "args": ["run", "--filter", "@jongminchung/web", "typecheck"],
-      "options": { "cwd": "${workspaceFolder}" },
-      "problemMatcher": []
-    },
-    {
-      "label": "repo: review checks",
-      "dependsOrder": "sequence",
-      "dependsOn": ["repo: format check", "repo: lint", "web: typecheck"],
-      "problemMatcher": []
-    }
-  ]
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "repo: format check",
+            "type": "process",
+            "command": "bun",
+            "args": ["run", "fmt:check"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "problemMatcher": []
+        },
+        {
+            "label": "repo: lint",
+            "type": "process",
+            "command": "bun",
+            "args": ["run", "lint"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "problemMatcher": []
+        },
+        {
+            "label": "web: typecheck",
+            "type": "process",
+            "command": "bun",
+            "args": ["run", "--filter", "@jongminchung/web", "typecheck"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "problemMatcher": []
+        },
+        {
+            "label": "repo: review checks",
+            "dependsOrder": "sequence",
+            "dependsOn": ["repo: format check", "repo: lint", "web: typecheck"],
+            "problemMatcher": []
+        }
+    ]
 }
 ```
 
@@ -69,13 +69,13 @@ Keep a single root when all tools correctly interpret one build graph. Use multi
 
 ```json
 {
-  "folders": [
-    { "name": "api", "path": "api" },
-    { "name": "web", "path": "web" }
-  ],
-  "settings": {
-    "files.autoSave": "off"
-  }
+    "folders": [
+        { "name": "api", "path": "api" },
+        { "name": "web", "path": "web" }
+    ],
+    "settings": {
+        "files.autoSave": "off"
+    }
 }
 ```
 

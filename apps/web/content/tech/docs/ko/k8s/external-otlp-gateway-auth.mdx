@@ -6,7 +6,14 @@ publishedAt: "2026-09-02"
 updatedAt: "2026-09-02"
 verifiedAt: "2026-09-02"
 tags:
-  [kubernetes, gateway-api, opentelemetry, otlp, authentication, observability]
+    [
+        kubernetes,
+        gateway-api,
+        opentelemetry,
+        otlp,
+        authentication,
+        observability,
+    ]
 status: stable
 publicationStatus: published
 sourceUrl: https://github.com/jongminchung/jongminchung/blob/main/apps/web/content/tech/docs/ko/k8s/external-otlp-gateway-auth.mdx
@@ -23,12 +30,12 @@ sourceUrl: https://github.com/jongminchung/jongminchung/blob/main/apps/web/conte
 ## 적용 조건을 확인함
 
 - **Gateway controller가 `HTTPRoute`의 `ExternalAuth` filter를 지원해야 함**
-  - `ExternalAuth`는 controller 지원 범위에 영향을 받으므로 다른 Gateway 구현으로 이동할 때 호환성을 다시 검증해야 함
-  - Gateway listener는 HTTP/2와 TLS를 지원해야 OTLP/gRPC 요청을 같은 `443` endpoint에서 받을 수 있음
+    - `ExternalAuth`는 controller 지원 범위에 영향을 받으므로 다른 Gateway 구현으로 이동할 때 호환성을 다시 검증해야 함
+    - Gateway listener는 HTTP/2와 TLS를 지원해야 OTLP/gRPC 요청을 같은 `443` endpoint에서 받을 수 있음
 - **OTel Collector는 클러스터 내부에서 OTLP/gRPC `4317`과 OTLP/HTTP `4318`을 수신해야 함**
-  - 외부 클라이언트가 Collector Service나 NodePort에 직접 접근할 수 없어야 함
+    - 외부 클라이언트가 Collector Service나 NodePort에 직접 접근할 수 없어야 함
 - **DNS와 TLS 인증서가 공개 OTLP hostname을 포함해야 함**
-  - 이 문서의 검증된 예시는 `otel.jamie.kr`을 사용함
+    - 이 문서의 검증된 예시는 `otel.jamie.kr`을 사용함
 
 ## 요청 경로를 두 개의 신뢰 경계로 분리함
 
@@ -65,16 +72,16 @@ openssl rand -hex 32 | \
 apiVersion: v1
 kind: Secret
 metadata:
-  name: otel-external-auth-token
-  namespace: observability
+    name: otel-external-auth-token
+    namespace: observability
 type: Opaque
 stringData:
-  token: "{{ .Values.hyperdx.secrets.OTLP_INGEST_TOKEN }}"
+    token: "{{ .Values.hyperdx.secrets.OTLP_INGEST_TOKEN }}"
 ```
 
 - **Git에는 SOPS ciphertext만 남아야 함**
-  - `git diff`와 secret scanner로 token 원문이 포함되지 않았는지 확인함
-  - Kubernetes Secret은 암호화된 Git 저장 형식이 아니라 배포 시점의 런타임 자격 증명임
+    - `git diff`와 secret scanner로 token 원문이 포함되지 않았는지 확인함
+    - Kubernetes Secret은 암호화된 Git 저장 형식이 아니라 배포 시점의 런타임 자격 증명임
 
 ## 최소 인증 Service를 구성함
 
@@ -101,10 +108,10 @@ stringData:
 ```
 
 - **Deployment는 token을 `Secret`에서 환경 변수로 읽고 Service는 `ClusterIP:8080`만 제공함**
-  - `automountServiceAccountToken: false`를 사용함
-  - non-root, read-only root filesystem과 drop-all capabilities를 적용함
-  - readiness와 liveness는 인증이 필요 없는 `/healthz`를 사용함
-  - 두 replica와 `PodDisruptionBudget`으로 단일 Pod 교체가 인증 경로 전체 장애가 되지 않게 함
+    - `automountServiceAccountToken: false`를 사용함
+    - non-root, read-only root filesystem과 drop-all capabilities를 적용함
+    - readiness와 liveness는 인증이 필요 없는 `/healthz`를 사용함
+    - 두 replica와 `PodDisruptionBudget`으로 단일 Pod 교체가 인증 경로 전체 장애가 되지 않게 함
 
 ## OTLP signal만 정확한 path로 허용함
 
@@ -114,57 +121,57 @@ stringData:
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: otel-external
-  namespace: observability
+    name: otel-external
+    namespace: observability
 spec:
-  parentRefs:
-    - name: public
-      namespace: gateway-system
-      sectionName: apps-https
-  hostnames: [otel.jamie.kr]
-  rules:
-    - matches:
-        - path:
-            type: Exact
-            value: /opentelemetry.proto.collector.logs.v1.LogsService/Export
-        - path:
-            type: Exact
-            value: /opentelemetry.proto.collector.metrics.v1.MetricsService/Export
-        - path:
-            type: Exact
-            value: /opentelemetry.proto.collector.trace.v1.TraceService/Export
-      filters:
-        - type: ExternalAuth
-          externalAuth:
-            protocol: HTTP
-            backendRef:
-              name: otel-external-auth
-              port: 8080
-            http:
-              path: /authorize
-              allowedHeaders: [Authorization]
-              allowedResponseHeaders: [X-OTLP-Authenticated]
-      backendRefs:
-        - name: otel-gateway
-          port: 4317
-    - matches:
-        - path: { type: Exact, value: /v1/logs }
-        - path: { type: Exact, value: /v1/metrics }
-        - path: { type: Exact, value: /v1/traces }
-      filters:
-        - type: ExternalAuth
-          externalAuth:
-            protocol: HTTP
-            backendRef:
-              name: otel-external-auth
-              port: 8080
-            http:
-              path: /authorize
-              allowedHeaders: [Authorization]
-              allowedResponseHeaders: [X-OTLP-Authenticated]
-      backendRefs:
-        - name: otel-gateway
-          port: 4318
+    parentRefs:
+        - name: public
+          namespace: gateway-system
+          sectionName: apps-https
+    hostnames: [otel.jamie.kr]
+    rules:
+        - matches:
+              - path:
+                    type: Exact
+                    value: /opentelemetry.proto.collector.logs.v1.LogsService/Export
+              - path:
+                    type: Exact
+                    value: /opentelemetry.proto.collector.metrics.v1.MetricsService/Export
+              - path:
+                    type: Exact
+                    value: /opentelemetry.proto.collector.trace.v1.TraceService/Export
+          filters:
+              - type: ExternalAuth
+                externalAuth:
+                    protocol: HTTP
+                    backendRef:
+                        name: otel-external-auth
+                        port: 8080
+                    http:
+                        path: /authorize
+                        allowedHeaders: [Authorization]
+                        allowedResponseHeaders: [X-OTLP-Authenticated]
+          backendRefs:
+              - name: otel-gateway
+                port: 4317
+        - matches:
+              - path: { type: Exact, value: /v1/logs }
+              - path: { type: Exact, value: /v1/metrics }
+              - path: { type: Exact, value: /v1/traces }
+          filters:
+              - type: ExternalAuth
+                externalAuth:
+                    protocol: HTTP
+                    backendRef:
+                        name: otel-external-auth
+                        port: 8080
+                    http:
+                        path: /authorize
+                        allowedHeaders: [Authorization]
+                        allowedResponseHeaders: [X-OTLP-Authenticated]
+          backendRefs:
+              - name: otel-gateway
+                port: 4318
 ```
 
 - **`Exact` path match는 OTLP 이외의 임의 경로가 Collector에 도달하지 않도록 제한함**
@@ -198,8 +205,8 @@ trace_exporter = { otlp-http = { endpoint = "https://otel.jamie.kr/v1/traces", p
 ```
 
 - **검증일 기준 Codex `0.151.0`은 `headers = { Authorization = "${TOKEN}" }` 값을 치환하지 않고 문자열 그대로 전송함**
-  - 표준 OpenTelemetry 환경 변수 `OTEL_EXPORTER_OTLP_HEADERS`를 사용해야 함
-  - 환경 변수와 설정은 process 시작 시 읽으므로 이미 실행 중인 Codex를 재시작해야 함
+    - 표준 OpenTelemetry 환경 변수 `OTEL_EXPORTER_OTLP_HEADERS`를 사용해야 함
+    - 환경 변수와 설정은 process 시작 시 읽으므로 이미 실행 중인 Codex를 재시작해야 함
 
 ```bash
 mise exec -- codex
@@ -242,17 +249,17 @@ kubectl -n observability rollout status statefulset/otel-gateway
 ```
 
 - **실제 완료 조건은 인증 성공뿐 아니라 logs, metrics와 traces가 저장 backend에서 조회되는 상태임**
-  - 짧은 Codex 시작 검증은 log만 생성할 수 있으므로 실제 turn 이후 세 signal을 각각 확인함
+    - 짧은 Codex 시작 검증은 log만 생성할 수 있으므로 실제 turn 이후 세 signal을 각각 확인함
 
 ## token 회전과 한계를 관리함
 
 - **새 token을 SOPS에 반영하고 auth Deployment가 새 Secret으로 재시작된 뒤 클라이언트를 갱신함**
 - **단일 token 비교 방식은 이전 token과 새 token의 무중단 중첩 기간을 제공하지 않음**
-  - 무중단 회전이 필요하면 인증 Service가 두 token을 한시적으로 허용하도록 별도 계약이 필요함
+    - 무중단 회전이 필요하면 인증 Service가 두 token을 한시적으로 허용하도록 별도 계약이 필요함
 - **Bearer token은 클라이언트 식별, 세분화된 권한과 사용량 제한을 제공하지 않음**
-  - 클라이언트별 폐기와 감사가 필요하면 token hash registry, mTLS 또는 OIDC 기반 인증을 검토함
+    - 클라이언트별 폐기와 감사가 필요하면 token hash registry, mTLS 또는 OIDC 기반 인증을 검토함
 - **인증은 과도한 telemetry 전송을 막지 않음**
-  - Gateway 또는 Collector에 request size, rate limit, queue와 memory limit을 별도로 적용해야 함
+    - Gateway 또는 Collector에 request size, rate limit, queue와 memory limit을 별도로 적용해야 함
 
 ## 실행 제안
 

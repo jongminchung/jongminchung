@@ -11,14 +11,14 @@
 ## 모노레포 명령 정책
 
 - 루트 script는 다음 조건 중 하나를 만족할 때만 추가하거나 유지함
-  - 여러 workspace를 하나의 빌드·검사·배포 흐름으로 조정함
-  - 저장소 전체 format, lint, typecheck, test, dependency 또는 release 계약을 제공함
-  - 아이콘처럼 여러 앱이 공유하는 canonical source 작업을 제공함
+    - 여러 workspace를 하나의 빌드·검사·배포 흐름으로 조정함
+    - 저장소 전체 format, lint, typecheck, test, dependency 또는 release 계약을 제공함
+    - 아이콘처럼 여러 앱이 공유하는 canonical source 작업을 제공함
 - 하나의 workspace script를 이름만 바꿔 전달하는 루트 별칭은 추가하지 않음
-  - workspace 이름을 붙인 `dev:*` 전달 별칭을 만들지 않음
-  - 범용 루트 `dev` 명령으로 여러 앱 실행을 암묵적으로 결합하지 않음
+    - workspace 이름을 붙인 `dev:*` 전달 별칭을 만들지 않음
+    - 범용 루트 `dev` 명령으로 여러 앱 실행을 암묵적으로 결합하지 않음
 - 단일 workspace 명령은 `bun run --filter <package-name> <script>` 형식으로 실행함
-  - 멀티도메인 Web 개발 서버는 `bun run --filter @jongminchung/web dev`로 실행함
+    - 멀티도메인 Web 개발 서버는 `bun run --filter @jongminchung/web dev`로 실행함
 - package script를 호출할 때는 `run`을 명시함
 - 루트 script를 추가하기 전에 기존 workspace script와 `bun run --workspaces --if-present <script>` 조합으로 해결 가능한지 먼저 확인함
 

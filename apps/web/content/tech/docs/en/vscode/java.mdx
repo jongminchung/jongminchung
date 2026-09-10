@@ -49,26 +49,26 @@ First try Run/Debug above main. For repeated execution, create `.vscode/launch.j
 
 ```json
 {
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "type": "java",
-      "name": "Java: application",
-      "request": "launch",
-      "mainClass": "com.example.App",
-      "cwd": "${workspaceFolder}",
-      "console": "integratedTerminal",
-      "args": ["--mode", "local"],
-      "vmArgs": "-Dfile.encoding=UTF-8"
-    },
-    {
-      "type": "java",
-      "name": "Java: attach localhost:5005",
-      "request": "attach",
-      "hostName": "127.0.0.1",
-      "port": 5005
-    }
-  ]
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Java: application",
+            "request": "launch",
+            "mainClass": "com.example.App",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "args": ["--mode", "local"],
+            "vmArgs": "-Dfile.encoding=UTF-8"
+        },
+        {
+            "type": "java",
+            "name": "Java: attach localhost:5005",
+            "request": "attach",
+            "hostName": "127.0.0.1",
+            "port": 5005
+        }
+    ]
 }
 ```
 
@@ -104,16 +104,16 @@ For Eclipse-style formatting, use JDT. Commit the shared Eclipse profile if need
 
 ```json
 {
-  "[java]": {
-    "editor.defaultFormatter": "redhat.java",
-    "editor.formatOnSave": true,
-    "editor.formatOnPaste": false,
-    "editor.formatOnType": false,
-    "editor.codeActionsOnSave": {
-      "source.fixAll": "never",
-      "source.organizeImports": "explicit"
+    "[java]": {
+        "editor.defaultFormatter": "redhat.java",
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": false,
+        "editor.formatOnType": false,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "never",
+            "source.organizeImports": "explicit"
+        }
     }
-  }
 }
 ```
 
@@ -121,15 +121,15 @@ If the build instead owns Google Java Format through Spotless, disable competing
 
 ```json
 {
-  "[java]": {
-    "editor.formatOnSave": false,
-    "editor.formatOnPaste": false,
-    "editor.formatOnType": false,
-    "editor.codeActionsOnSave": {
-      "source.fixAll": "never",
-      "source.organizeImports": "never"
+    "[java]": {
+        "editor.formatOnSave": false,
+        "editor.formatOnPaste": false,
+        "editor.formatOnType": false,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "never",
+            "source.organizeImports": "never"
+        }
     }
-  }
 }
 ```
 

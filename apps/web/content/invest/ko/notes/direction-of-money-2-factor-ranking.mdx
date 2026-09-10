@@ -11,40 +11,40 @@ series: Direction of Money
 image: /invest/direction-of-money-factor-ranking.png
 imageAlt: 서로 다른 모양의 후보들이 네 개의 정규화 평면을 지나 소수의 순위 후보로 정렬되는 장면
 sources:
-  - kind: article
-    title: Foundations of Factor Investing
-    creator: Dimitris Melas · Remy Briand · Subramanian Aylur · MSCI
-    url: https://www.msci.com/research-and-insights/paper/foundations-of-factor-investing
-    publishedAt: "2013-01-31"
-  - kind: article
-    title: Kenneth R. French Data Library
-    creator: Kenneth R. French · Dartmouth College
-    url: https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/data_Library.html
-  - kind: article
-    title: Value and Momentum Everywhere
-    creator: Cliff Asness · Tobias Moskowitz · Lasse Pedersen · AQR
-    url: https://www.aqr.com/insights/research/journal-article/value-and-momentum-everywhere
-    publishedAt: "2013-06-01"
-  - kind: article
-    title: Factor Momentum Everywhere
-    creator: Tarun Gupta · Bryan Kelly · AQR
-    url: https://www.aqr.com/Insights/Research/Working-Paper/Factor-Momentum-Everywhere
-    publishedAt: "2019-02-28"
-  - kind: article
-    title: Asset Allocation and Diversification
-    creator: U.S. Securities and Exchange Commission · Investor.gov
-    url: https://www.investor.gov/introduction-investing/getting-started/asset-allocation
+    - kind: article
+      title: Foundations of Factor Investing
+      creator: Dimitris Melas · Remy Briand · Subramanian Aylur · MSCI
+      url: https://www.msci.com/research-and-insights/paper/foundations-of-factor-investing
+      publishedAt: "2013-01-31"
+    - kind: article
+      title: Kenneth R. French Data Library
+      creator: Kenneth R. French · Dartmouth College
+      url: https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/data_Library.html
+    - kind: article
+      title: Value and Momentum Everywhere
+      creator: Cliff Asness · Tobias Moskowitz · Lasse Pedersen · AQR
+      url: https://www.aqr.com/insights/research/journal-article/value-and-momentum-everywhere
+      publishedAt: "2013-06-01"
+    - kind: article
+      title: Factor Momentum Everywhere
+      creator: Tarun Gupta · Bryan Kelly · AQR
+      url: https://www.aqr.com/Insights/Research/Working-Paper/Factor-Momentum-Everywhere
+      publishedAt: "2019-02-28"
+    - kind: article
+      title: Asset Allocation and Diversification
+      creator: U.S. Securities and Exchange Commission · Investor.gov
+      url: https://www.investor.gov/introduction-investing/getting-started/asset-allocation
 ---
 
 <KeyPoints
-  title="핵심 요약"
-  items={[
-    "자금 이동은 시장 전체의 위험 선호, 섹터의 상대 강도, 개별 종목의 실적과 가격 확인이라는 세 층으로 읽는 편이 안정적임",
-    "서로 단위가 다른 지표는 동일한 비교 집단 안에서 백분위 순위로 바꾸면 결합할 수 있지만 극단값의 크기 정보는 사라짐",
-    "COMP는 이 글에서 사용하는 비교 기반 복합점수로 모멘텀 40·퀄리티 30·성장 20·가치 10의 출발 가중치를 뜻함",
-    "스마트머니는 직접 관찰할 수 있는 변수가 아니므로 거래대금·공시·추정치 변화는 지연된 대리변수로만 취급해야 함",
-    "52주 기록은 수익률 자랑이 아니라 신호·주문·비용·탈락 사유를 남겨 전략이 실제로 작동했는지 검증하는 장부여야 함",
-  ]}
+    title="핵심 요약"
+    items={[
+        "자금 이동은 시장 전체의 위험 선호, 섹터의 상대 강도, 개별 종목의 실적과 가격 확인이라는 세 층으로 읽는 편이 안정적임",
+        "서로 단위가 다른 지표는 동일한 비교 집단 안에서 백분위 순위로 바꾸면 결합할 수 있지만 극단값의 크기 정보는 사라짐",
+        "COMP는 이 글에서 사용하는 비교 기반 복합점수로 모멘텀 40·퀄리티 30·성장 20·가치 10의 출발 가중치를 뜻함",
+        "스마트머니는 직접 관찰할 수 있는 변수가 아니므로 거래대금·공시·추정치 변화는 지연된 대리변수로만 취급해야 함",
+        "52주 기록은 수익률 자랑이 아니라 신호·주문·비용·탈락 사유를 남겨 전략이 실제로 작동했는지 검증하는 장부여야 함",
+    ]}
 />
 
 ## 1장. 주도주를 찾기 전에, 돈이 어디로 흐르는지 본다
@@ -116,35 +116,35 @@ sources:
 가중치는 예측의 진리가 아니라 투자 철학을 드러내는 설정입니다. 데이터가 충분하지 않은 시장에서는 동일 가중을 기준선으로 두고, 가중치 변경 전후의 회전율과 최대 낙폭을 비교해야 합니다.
 
 <ComparisonTable
-  caption="COMP 출발점과 실패 방지 조건"
-  headers={["기둥", "출발 가중치", "대표 질문", "별도 제외 조건"]}
-  rows={[
-    [
-      "모멘텀",
-      "40",
-      "시장보다 강하고 추세가 지속되는가",
-      "거래 중단·극단적 유동성 부족",
-    ],
-    [
-      "퀄리티",
-      "30",
-      "이익이 현금으로 전환되고 부채를 감당하는가",
-      "감사의견·계속기업 불확실성",
-    ],
-    [
-      "성장",
-      "20",
-      "성장과 추정치가 함께 상향되는가",
-      "일회성 인수 효과만으로 증가",
-    ],
-    [
-      "가치",
-      "10",
-      "현재 가격이 기대 오류를 견딜 수 있는가",
-      "역산 기대가 현실 범위를 이탈",
-    ],
-  ]}
-  note="가중치는 검증 전의 기본값이며 시장·데이터·비용에 맞춰 사전 규칙으로 조정해야 함"
+    caption="COMP 출발점과 실패 방지 조건"
+    headers={["기둥", "출발 가중치", "대표 질문", "별도 제외 조건"]}
+    rows={[
+        [
+            "모멘텀",
+            "40",
+            "시장보다 강하고 추세가 지속되는가",
+            "거래 중단·극단적 유동성 부족",
+        ],
+        [
+            "퀄리티",
+            "30",
+            "이익이 현금으로 전환되고 부채를 감당하는가",
+            "감사의견·계속기업 불확실성",
+        ],
+        [
+            "성장",
+            "20",
+            "성장과 추정치가 함께 상향되는가",
+            "일회성 인수 효과만으로 증가",
+        ],
+        [
+            "가치",
+            "10",
+            "현재 가격이 기대 오류를 견딜 수 있는가",
+            "역산 기대가 현실 범위를 이탈",
+        ],
+    ]}
+    note="가중치는 검증 전의 기본값이며 시장·데이터·비용에 맞춰 사전 규칙으로 조정해야 함"
 />
 
 ### 실전 52주의 기록: 작동했는가

@@ -76,9 +76,9 @@ const GENOME_LEN = N_IN * N_HID + N_HID + N_HID + 1; // 30 + 6 + 6 + 1 = 43
 
 // 무작위 유전자 하나 만들기 (-1 ~ 1 사이 난수 43개)
 function randomGenome(rand) {
-  const g = new Float32Array(GENOME_LEN);
-  for (let i = 0; i < GENOME_LEN; i++) g[i] = rand() * 2 - 1;
-  return g;
+    const g = new Float32Array(GENOME_LEN);
+    for (let i = 0; i < GENOME_LEN; i++) g[i] = rand() * 2 - 1;
+    return g;
 }
 ```
 
@@ -88,19 +88,19 @@ function randomGenome(rand) {
 // 유전자(가중치 43개)를 신경망에 꽂아 핸들값을 계산한다
 // 유전자 배치: [입력→은닉 가중치 30, 은닉 편향 6, 은닉→출력 가중치 6, 출력 편향 1]
 function forward(genome, sensors, hid) {
-  let g = 0;
-  // 입력 5개 → 은닉 6개
-  for (let h = 0; h < N_HID; h++) {
-    let sum = 0;
-    for (let i = 0; i < N_IN; i++) sum += genome[g++] * sensors[i];
-    hid[h] = sum;
-  }
-  // 은닉 노드에 편향을 더하고 tanh로 눌러준다 (-1 ~ 1로)
-  for (let h = 0; h < N_HID; h++) hid[h] = Math.tanh(hid[h] + genome[g++]);
-  // 은닉 6개 → 출력 1개
-  let out = 0;
-  for (let h = 0; h < N_HID; h++) out += genome[g++] * hid[h];
-  return Math.tanh(out + genome[g++]); // -1(좌회전) ~ +1(우회전)
+    let g = 0;
+    // 입력 5개 → 은닉 6개
+    for (let h = 0; h < N_HID; h++) {
+        let sum = 0;
+        for (let i = 0; i < N_IN; i++) sum += genome[g++] * sensors[i];
+        hid[h] = sum;
+    }
+    // 은닉 노드에 편향을 더하고 tanh로 눌러준다 (-1 ~ 1로)
+    for (let h = 0; h < N_HID; h++) hid[h] = Math.tanh(hid[h] + genome[g++]);
+    // 은닉 6개 → 출력 1개
+    let out = 0;
+    for (let h = 0; h < N_HID; h++) out += genome[g++] * hid[h];
+    return Math.tanh(out + genome[g++]); // -1(좌회전) ~ +1(우회전)
 }
 ```
 
@@ -115,16 +115,16 @@ function forward(genome, sensors, hid) {
 ```js
 // 자동차 한 대를 트랙에서 굴려보고 살아남은 프레임 수를 잰다
 function evaluate(track, genome, maxFrames) {
-  const car = spawnCar(track, genome); // 출발선에 세운다
-  for (let f = 0; f < maxFrames; f++) {
-    senseRays(track, car); // 감지선 5개로 벽까지 거리 측정
-    const steer = forward(genome, car.sensors, car.hid); // 두뇌가 핸들 결정
-    car.heading += steer * MAX_TURN * DT; // 핸들만큼 방향 전환
-    car.x += Math.cos(car.heading) * SPEED * DT; // 전진
-    car.y += Math.sin(car.heading) * SPEED * DT;
-    if (!track.inside(car.x, car.y)) return f; // 벽 밖이면 죽음, 여기까지가 점수
-  }
-  return maxFrames; // 끝까지 살아남으면 만점
+    const car = spawnCar(track, genome); // 출발선에 세운다
+    for (let f = 0; f < maxFrames; f++) {
+        senseRays(track, car); // 감지선 5개로 벽까지 거리 측정
+        const steer = forward(genome, car.sensors, car.hid); // 두뇌가 핸들 결정
+        car.heading += steer * MAX_TURN * DT; // 핸들만큼 방향 전환
+        car.x += Math.cos(car.heading) * SPEED * DT; // 전진
+        car.y += Math.sin(car.heading) * SPEED * DT;
+        if (!track.inside(car.x, car.y)) return f; // 벽 밖이면 죽음, 여기까지가 점수
+    }
+    return maxFrames; // 끝까지 살아남으면 만점
 }
 ```
 
@@ -159,14 +159,14 @@ function evaluate(track, genome, maxFrames) {
 ```js
 // 점수(fits)에 비례하는 확률로 개체 하나를 고른다
 function rouletteSelect(pop, fits, rand) {
-  let total = 0;
-  for (const f of fits) total += f; // 전체 점수 합 = 룰렛 둘레
-  let r = rand() * total; // 둘레 위의 무작위 지점
-  for (let i = 0; i < pop.length; i++) {
-    r -= fits[i]; // 각 개체의 칸을 지나가며
-    if (r <= 0) return pop[i]; // 무작위 지점이 걸린 칸의 개체를 반환
-  }
-  return pop[pop.length - 1];
+    let total = 0;
+    for (const f of fits) total += f; // 전체 점수 합 = 룰렛 둘레
+    let r = rand() * total; // 둘레 위의 무작위 지점
+    for (let i = 0; i < pop.length; i++) {
+        r -= fits[i]; // 각 개체의 칸을 지나가며
+        if (r <= 0) return pop[i]; // 무작위 지점이 걸린 칸의 개체를 반환
+    }
+    return pop[pop.length - 1];
 }
 ```
 
@@ -179,12 +179,12 @@ function rouletteSelect(pop, fits, rand) {
 ```js
 // 무작위 k마리를 뽑아 그중 최고를 부모로 삼는다
 function tournamentSelect(pop, fits, k, rand) {
-  let best = -1;
-  for (let i = 0; i < k; i++) {
-    const c = Math.floor(rand() * pop.length); // 무작위 도전자
-    if (best < 0 || fits[c] > fits[best]) best = c;
-  }
-  return pop[best];
+    let best = -1;
+    for (let i = 0; i < k; i++) {
+        const c = Math.floor(rand() * pop.length); // 무작위 도전자
+        if (best < 0 || fits[c] > fits[best]) best = c;
+    }
+    return pop[best];
 }
 ```
 
@@ -215,10 +215,10 @@ function tournamentSelect(pop, fits, k, rand) {
 
 ```js
 function crossoverOnePoint(a, b, rand) {
-  const c = new Float32Array(GENOME_LEN);
-  const p = 1 + Math.floor(rand() * (GENOME_LEN - 1)); // 자를 지점
-  for (let i = 0; i < GENOME_LEN; i++) c[i] = i < p ? a[i] : b[i];
-  return c;
+    const c = new Float32Array(GENOME_LEN);
+    const p = 1 + Math.floor(rand() * (GENOME_LEN - 1)); // 자를 지점
+    for (let i = 0; i < GENOME_LEN; i++) c[i] = i < p ? a[i] : b[i];
+    return c;
 }
 ```
 
@@ -226,9 +226,9 @@ function crossoverOnePoint(a, b, rand) {
 
 ```js
 function crossoverUniform(a, b, rand) {
-  const c = new Float32Array(GENOME_LEN);
-  for (let i = 0; i < GENOME_LEN; i++) c[i] = rand() < 0.5 ? a[i] : b[i]; // 자리마다 동전
-  return c;
+    const c = new Float32Array(GENOME_LEN);
+    for (let i = 0; i < GENOME_LEN; i++) c[i] = rand() < 0.5 ? a[i] : b[i]; // 자리마다 동전
+    return c;
 }
 ```
 
@@ -255,9 +255,9 @@ function crossoverUniform(a, b, rand) {
 ```js
 // 각 유전자 자리를 rate 확률로 살짝 흔든다
 function mutate(genome, rate, sigma, rand) {
-  for (let i = 0; i < GENOME_LEN; i++) {
-    if (rand() < rate) genome[i] += gaussian(rand) * sigma; // 작은 난수를 더한다
-  }
+    for (let i = 0; i < GENOME_LEN; i++) {
+        if (rand() < rate) genome[i] += gaussian(rand) * sigma; // 작은 난수를 더한다
+    }
 }
 ```
 
@@ -310,21 +310,21 @@ function mutate(genome, rate, sigma, rand) {
 ```js
 // 평가가 끝난 개체군으로 다음 세대를 만든다 (대치)
 function nextGeneration(pop, fits, opts, rand) {
-  const idx = fits.map((_, i) => i).sort((a, b) => fits[b] - fits[a]); // 점수 내림차순 정렬
-  const next = [];
+    const idx = fits.map((_, i) => i).sort((a, b) => fits[b] - fits[a]); // 점수 내림차순 정렬
+    const next = [];
 
-  // 엘리트 보존: 상위 몇 마리는 변형 없이 그대로 다음 세대로
-  for (let e = 0; e < opts.elitism; e++) next.push(pop[idx[e]]);
+    // 엘리트 보존: 상위 몇 마리는 변형 없이 그대로 다음 세대로
+    for (let e = 0; e < opts.elitism; e++) next.push(pop[idx[e]]);
 
-  // 나머지는 선택 → 교차 → 변이로 채운다
-  while (next.length < opts.popSize) {
-    const p1 = tournamentSelect(pop, fits, opts.tournamentK, rand);
-    const p2 = tournamentSelect(pop, fits, opts.tournamentK, rand);
-    const child = crossoverUniform(p1, p2, rand);
-    mutate(child, opts.mutRate, opts.mutSigma, rand);
-    next.push(child);
-  }
-  return next;
+    // 나머지는 선택 → 교차 → 변이로 채운다
+    while (next.length < opts.popSize) {
+        const p1 = tournamentSelect(pop, fits, opts.tournamentK, rand);
+        const p2 = tournamentSelect(pop, fits, opts.tournamentK, rand);
+        const child = crossoverUniform(p1, p2, rand);
+        mutate(child, opts.mutRate, opts.mutSigma, rand);
+        next.push(child);
+    }
+    return next;
 }
 ```
 
@@ -347,18 +347,18 @@ function nextGeneration(pop, fits, opts, rand) {
 
 ```js
 function evolve(track, opts) {
-  const rand = mulberry32(opts.seed);
-  // 1. 개체군: 무작위 유전자 popSize개
-  let pop = Array.from({ length: opts.popSize }, () => randomGenome(rand));
+    const rand = mulberry32(opts.seed);
+    // 1. 개체군: 무작위 유전자 popSize개
+    let pop = Array.from({ length: opts.popSize }, () => randomGenome(rand));
 
-  for (let gen = 0; gen < opts.generations; gen++) {
-    // 2. 평가: 각 개체를 트랙에서 굴려 살아남은 프레임 수를 잰다
-    const fits = pop.map((g) => evaluate(track, g, opts.maxFrames));
+    for (let gen = 0; gen < opts.generations; gen++) {
+        // 2. 평가: 각 개체를 트랙에서 굴려 살아남은 프레임 수를 잰다
+        const fits = pop.map((g) => evaluate(track, g, opts.maxFrames));
 
-    // 3~6. 선택·교차·변이·대치로 다음 세대를 만든다
-    pop = nextGeneration(pop, fits, opts, rand);
-  }
-  return pop;
+        // 3~6. 선택·교차·변이·대치로 다음 세대를 만든다
+        pop = nextGeneration(pop, fits, opts, rand);
+    }
+    return pop;
 }
 ```
 

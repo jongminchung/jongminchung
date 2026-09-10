@@ -172,7 +172,7 @@ description: <무엇을 할 때 쓰는가. 트리거가 될 상황을 구체적�
 ---
 name: commit-message
 description: 커밋 메시지를 작성하거나 다듬을 때 사용한다.
-  diff를 보고 커밋 메시지를 만들어달라는 요청이면 이 스킬을 따른다.
+    diff를 보고 커밋 메시지를 만들어달라는 요청이면 이 스킬을 따른다.
 ---
 
 너는 이 저장소의 커밋 메시지를 관리한다. 아래 형식과 판정 순서를 따른다.
@@ -225,7 +225,7 @@ description: 커밋 메시지 컨벤션
 
 # 벼린 description — 발동할 상황을 적었다
 description: 커밋 메시지를 작성하거나 다듬을 때 사용한다.
-  diff를 보고 커밋 메시지를 만들어달라는 요청이면 이 스킬을 따른다.
+    diff를 보고 커밋 메시지를 만들어달라는 요청이면 이 스킬을 따른다.
 ```
 
 ### 이렇게 깎으면 망한다
@@ -301,16 +301,16 @@ done
 ```javascript
 // grade.mjs — 결과를 기계적으로 검사한다
 function grade(text) {
-  const lines = strip(text).split("\n");
-  const subject = lines[0].trim();
-  const type = subject.match(/^([a-z]+):\s/)?.[1] ?? null;
-  return {
-    hasPrefix: TYPES.includes(type),
-    typeOk: type === EXPECTED_TYPE[task],
-    subjectOk: [...subject].length <= 50,
-    noPeriod: !subject.endsWith("."),
-    hasBody: lines[1] === "" && lines.slice(2).join("").trim().length > 0,
-  };
+    const lines = strip(text).split("\n");
+    const subject = lines[0].trim();
+    const type = subject.match(/^([a-z]+):\s/)?.[1] ?? null;
+    return {
+        hasPrefix: TYPES.includes(type),
+        typeOk: type === EXPECTED_TYPE[task],
+        subjectOk: [...subject].length <= 50,
+        noPeriod: !subject.endsWith("."),
+        hasBody: lines[1] === "" && lines.slice(2).join("").trim().length > 0,
+    };
 }
 ```
 
@@ -365,17 +365,17 @@ function grade(text) {
 # .github/workflows/skill-regression.yml
 name: skill-regression
 on:
-  pull_request:
-    paths: [".claude/skills/**"] # 스킬을 고치면 재측정
-  schedule:
-    - cron: "0 0 * * 1" # 모델은 조용히 바뀌므로 매주 한 번 재측정
+    pull_request:
+        paths: [".claude/skills/**"] # 스킬을 고치면 재측정
+    schedule:
+        - cron: "0 0 * * 1" # 모델은 조용히 바뀌므로 매주 한 번 재측정
 jobs:
-  bench:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: npx promptfoo@latest eval -c benchmarks/promptfooconfig.yaml --repeat 5
-      - run: node benchmarks/assert-threshold.mjs # 통과율이 기준 아래면 실패
+    bench:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - run: npx promptfoo@latest eval -c benchmarks/promptfooconfig.yaml --repeat 5
+            - run: node benchmarks/assert-threshold.mjs # 통과율이 기준 아래면 실패
 ```
 
 PR 트리거는 "이번 수정이 스킬을 더 좋게 만들었는가"를, 스케줄 트리거는 "모델이 바뀌어도 스킬이 여전히 유효한가"를 지킨다. 벤치마크 결과를 PR 코멘트로 남겨두면 스킬 diff 리뷰가 숫자 위에서 이루어진다.

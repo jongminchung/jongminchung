@@ -25,32 +25,32 @@ sourceUrl: https://google-gemini.github.io/gemini-cli/docs/cli/commands.html
 ## Turn Part 1's bands into testable hypotheses
 
 - **The low, medium, and high bands in Part 1 shortlist products; they are not a final performance ranking**
-  - A Gemini model request, a Codex message, and a Claude Code prompt can contain different amounts of internal work
-  - Converting them to one precise-looking number would likely hide rather than remove that difference
+    - A Gemini model request, a Codex message, and a Claude Code prompt can contain different amounts of internal work
+    - Converting them to one precise-looking number would likely hide rather than remove that difference
 
 - **Separate within-provider and cross-provider comparisons**
-  - Within a provider, compare the difference between its own start and end readings
-  - Across providers, compare accepted tasks before a limit, rework time, and task completion rate
+    - Within a provider, compare the difference between its own start and end readings
+    - Across providers, compare accepted tasks before a limit, rework time, and task completion rate
 
 - **Use subscription sign-in only throughout the experiment**
-  - Anthropic says sign-in determines whether Claude Code consumes an included subscription allowance or incurs API billing[^claude-metering]
-  - Record authentication state before a run because a leftover API-key environment variable can invalidate a subscription-only comparison
+    - Anthropic says sign-in determines whether Claude Code consumes an included subscription allowance or incurs API billing[^claude-metering]
+    - Record authentication state before a run because a leftover API-key environment variable can invalidate a subscription-only comparison
 
 ## Build a small, repeatable work sample
 
 - **Start with 20 tasks: five each for bug fixes, small features, test additions, and refactors**
-  - A bug fix needs a reproducible failure
-  - A feature needs limited paths and explicit acceptance criteria
-  - A test task should add a failure boundary without product-code changes
-  - A refactor should preserve externally observable behavior
+    - A bug fix needs a reproducible failure
+    - A feature needs limited paths and explicit acceptance criteria
+    - A test task should add a failure boundary without product-code changes
+    - A refactor should preserve externally observable behavior
 
 - **Start every candidate from the same repository state and verification command**
-  - Fix the branch, commit, dependencies, allowed paths, and command in `tasks.csv`
-  - Rotate provider order so the learning benefit of the first run does not consistently favor one product
+    - Fix the branch, commit, dependencies, allowed paths, and command in `tasks.csv`
+    - Rotate provider order so the learning benefit of the first run does not consistently favor one product
 
 - **Set a stopping rule before a failing run grows into a session-length test**
-  - Use a turn cap or a 30-minute boundary
-  - Record human hints separately so assisted completion is not mistaken for independent completion
+    - Use a turn cap or a 30-minute boundary
+    - Record human hints separately so assisted completion is not mistaken for independent completion
 
 ```csv
 task_id,kind,commit,allowed_paths,verify_command,time_limit_minutes
@@ -61,13 +61,13 @@ WEB-02,test,def456,apps/web/lib/documents,bun run --filter @jongminchung/web tes
 ## Keep raw readings and outcomes on one row
 
 - **Preserve the unit shown by the provider in `baseline.csv`**
-  - Store percentage, credit, message, or token beside `quota_unit`
-  - If a product shows no number, retain a status snapshot or limit band instead of inventing a token equivalent
+    - Store percentage, credit, message, or token beside `quota_unit`
+    - If a product shows no number, retain a status snapshot or limit band instead of inventing a token equivalent
 
 - **Capture client status immediately before and after each task**
-  - Gemini CLI `/stats` shows current-session tokens, cache savings when available, and duration[^gemini-stats]
-  - Codex documents its usage dashboard and `/status` for current limits[^codex-pricing]
-  - Claude Code exposes plan limits through `/usage` and context composition through `/context`[^claude-cheatsheet]
+    - Gemini CLI `/stats` shows current-session tokens, cache savings when available, and duration[^gemini-stats]
+    - Codex documents its usage dashboard and `/status` for current limits[^codex-pricing]
+    - Claude Code exposes plan limits through `/usage` and context composition through `/context`[^claude-cheatsheet]
 
 ```csv
 task_id,provider,model,quota_unit,before,after,turns,tool_calls,minutes,tests_passed,accepted,rework_minutes
@@ -76,34 +76,34 @@ WEB-02,claude,sonnet,percent,55,52,4,11,12,true,true,6
 ```
 
 - **Define the primary measure as consumed allowance per verified task**
-  - Calculate `before - after` only within the same provider and unit
-  - Define completion as both verification passing and human acceptance
-  - Keep the allowance spent on failures in the total so failure cost remains visible
+    - Calculate `before - after` only within the same provider and unit
+    - Define completion as both verification passing and human acceptance
+    - Keep the allowance spent on failures in the total so failure cost remains visible
 
 ## Use medians and quality floors
 
 - **Prefer the median and interquartile range over the mean**
-  - One unusually difficult debugging task can dominate the mean
-  - Report medians by task type as well as overall to expose an easy-task imbalance
+    - One unusually difficult debugging task can dominate the mean
+    - Report medians by task type as well as overall to expose an easy-task imbalance
 
 - **The series uses an author-defined operating threshold, not a provider guarantee**
-  - Median allowance per completed task should improve by at least 20% within a provider
-  - Test and acceptance rates should not fall by more than five percentage points
-  - Median rework time should not increase
+    - Median allowance per completed task should improve by at least 20% within a provider
+    - Test and acceptance rates should not fall by more than five percentage points
+    - Median rework time should not increase
 
 - **Declare no winner when the difference is small**
-  - Twenty tasks can guide a personal workflow but cannot establish a general model benchmark
-  - A provider policy, model revision, or repository change can invalidate the result
+    - Twenty tasks can guide a personal workflow but cannot establish a general model benchmark
+    - A provider policy, model revision, or repository change can invalidate the result
 
 ## Hand the baseline to the next part
 
 - **Part 2 is complete when `tasks.csv` and an unoptimized `baseline.csv` exist**
-  - Do not shorten instructions or change models yet
-  - Leave an unavailable reading blank with a reason rather than estimating it
+    - Do not shorten instructions or change models yet
+    - Leave an unavailable reading blank with a reason rather than estimating it
 
 - **Part 3 applies a context budget to only one side of matched tasks**
-  - The control keeps the current instructions and natural exploration
-  - The treatment uses thin durable instructions, an eight-line task contract, and a limited initial file set
+    - The control keeps the current instructions and natural exploration
+    - The treatment uses thin durable instructions, an eight-line task contract, and a limited initial file set
 
 ## Action plan
 

@@ -22,15 +22,15 @@ sourceUrl: https://github.com/jongminchung/jongminchung/blob/main/apps/web/conte
 ## 노드별 공인 IP의 전달 계층을 구분함
 
 - **공급자 공인 IP와 게스트 OS의 인터페이스 주소는 서로 다른 관리 계층에 존재할 수 있음**
-  - 공급자 제어 계층은 `203.0.113.11`을 `cp-a`의 vNIC와 연결함
-  - 게스트 OS의 `eth0`에는 fixed IP인 `10.0.0.11/24`만 표시될 수 있음
-  - 이 상태는 공인 IP 연결이 없다는 뜻이 아니며 NAT를 사용한다는 증거도 아님
+    - 공급자 제어 계층은 `203.0.113.11`을 `cp-a`의 vNIC와 연결함
+    - 게스트 OS의 `eth0`에는 fixed IP인 `10.0.0.11/24`만 표시될 수 있음
+    - 이 상태는 공인 IP 연결이 없다는 뜻이 아니며 NAT를 사용한다는 증거도 아님
 
 ![Provider SDN steering per-node public IPs to Cilium host network listeners](https://kroki.io/plantuml/svg/eNqlkj9v2zAQxXd-igftkv9l0hBEtjt4qCBAQCYtNHVxCFOkQFJKjCLfvSDl2nLbpehGPL539yPvXpzn1g-dYu4sdc8t7yBM1xtN2tf-ogiWhOf6pGhmce-8NR9Sn_DGlSPGhTcWOyVJeyaUGVok-7JuNO_7jD551yvKhOka3Q3Ky14RCixQFEUR6hvbugTcYV_W7NYPSWXNKFuyiCUT_GC40yGpyKbatIR-OCopcKjAnTNCci-Ndo1eLzfZMlutNtlqhfQZok_5g7q-qsfYvYplDpULbaZH3AjqfYlFo0dp_cAVNPkPY89wnshKfYr5el8yIBIloRVev0_MD9RjedhhgTf5SS0OVaNXy2wZgWKRVy1F8XtmJ5UcOrwb58tr5296NJdGT9ll_vS0ifEoh_zXHOX4jyjrG8r2P1G2EeWLzSpsuTiTblGTHaWg6L1qjE07hDR9DsuAHJacUSPNL25zQg5HioSn9r4D7H4dzGEoYXjhHP8W-XxL4E1ciwfP9q-eI5vywTV9M3IoI7hCS0qOZC9sSt8c2z8d12Sw_Hr01TqXXki3Q6d-AvAvJ4Q)
 
 - **기본 데이터 경로는 `공인 IP → 공급자 SDN·가상 스위치 → 대상 VM vNIC·fixed IP → Cilium hostNetwork Envoy` 순서로 이해함**
-  - 공급자 구현에 따라 VM에서 보이는 최종 목적지가 fixed IP일 수도 있고 공인 `/32`일 수도 있음
-  - 특정 공급자의 주소 변환, 라우팅, 가상 NIC 동작은 해당 공급자 문서로 확인해야 함
+    - 공급자 구현에 따라 VM에서 보이는 최종 목적지가 fixed IP일 수도 있고 공인 `/32`일 수도 있음
+    - 특정 공급자의 주소 변환, 라우팅, 가상 NIC 동작은 해당 공급자 문서로 확인해야 함
 
 ## VM에서 목적지 주소를 먼저 판별함
 
@@ -45,9 +45,9 @@ sudo ss -lntp '( sport = :80 or sport = :443 )'
 ```
 
 - **패킷 목적지가 노드 fixed IP이면 wildcard `hostNetwork` 리스너로 local delivery되는 경로를 점검함**
-  - `10.0.0.11:443`과 같은 SYN이 보이면 로컬 방화벽과 `0.0.0.0:443` 리스너를 확인함
-  - SYN은 도착하지만 응답이 없으면 리스너 상태, 로컬 방화벽, 반환 경로를 확인함
-  - 패킷이 전혀 보이지 않으면 공인 IP 연결 대상, 공급자 방화벽, 보안 그룹, 네트워크 ACL을 확인함
+    - `10.0.0.11:443`과 같은 SYN이 보이면 로컬 방화벽과 `0.0.0.0:443` 리스너를 확인함
+    - SYN은 도착하지만 응답이 없으면 리스너 상태, 로컬 방화벽, 반환 경로를 확인함
+    - 패킷이 전혀 보이지 않으면 공인 IP 연결 대상, 공급자 방화벽, 보안 그룹, 네트워크 ACL을 확인함
 
 - **패킷 목적지가 공인 `/32`로 유지되면 Linux가 그 주소를 local address로 인식하는지 별도로 확인함**
 
@@ -58,16 +58,16 @@ ip route show table local
 ```
 
 - **공인 목적지가 local address로 인식되지 않으면 `hostNetwork` 활성화만으로 수신 문제를 해결할 수 없음**
-  - 공급자 문서에 따라 공인 `/32`, local route, 추가 가상 NIC 중 필요한 구성을 적용해야 함
-  - 공급자가 관리하는 주소를 임의로 `eth0`에 추가하면 중복 주소나 잘못된 반환 경로가 생길 수 있음
-  - `net.ipv4.ip_nonlocal_bind=1`은 로컬에 없는 주소로의 bind만 허용하며 패킷을 local delivery로 전환하지 않으므로 일반 해결책이 아님
+    - 공급자 문서에 따라 공인 `/32`, local route, 추가 가상 NIC 중 필요한 구성을 적용해야 함
+    - 공급자가 관리하는 주소를 임의로 `eth0`에 추가하면 중복 주소나 잘못된 반환 경로가 생길 수 있음
+    - `net.ipv4.ip_nonlocal_bind=1`은 로컬에 없는 주소로의 bind만 허용하며 패킷을 local delivery로 전환하지 않으므로 일반 해결책이 아님
 
 ## hostNetwork를 선택 노드에만 활성화함
 
 - **Cilium `hostNetwork`는 Gateway listener를 선택 노드의 모든 인터페이스에 `0.0.0.0` 또는 `::`로 노출함**
-  - 기본 `LoadBalancer` Service 모드는 자동 비활성화되므로 두 모드는 상호 배타적임
-  - 모든 Gateway의 listener port는 선택 노드에서 충돌하지 않도록 고유해야 함
-  - `TCPRoute`와 `UDPRoute`는 host network 모드와 호환되지 않음
+    - 기본 `LoadBalancer` Service 모드는 자동 비활성화되므로 두 모드는 상호 배타적임
+    - 모든 Gateway의 listener port는 선택 노드에서 충돌하지 않도록 고유해야 함
+    - `TCPRoute`와 `UDPRoute`는 host network 모드와 호환되지 않음
 
 ```bash
 kubectl label node cp-a cp-b cp-c gateway.cilium.io/public=true
@@ -75,26 +75,26 @@ kubectl label node cp-a cp-b cp-c gateway.cilium.io/public=true
 
 ```yaml title="values-direct-public-ip.yaml"
 gatewayAPI:
-  enabled: true
-  hostNetwork:
     enabled: true
-    nodes:
-      matchLabels:
-        gateway.cilium.io/public: "true"
+    hostNetwork:
+        enabled: true
+        nodes:
+            matchLabels:
+                gateway.cilium.io/public: "true"
 
 envoy:
-  enabled: true
-  securityContext:
-    capabilities:
-      keepCapNetBindService: true
-      envoy:
-        - NET_BIND_SERVICE
+    enabled: true
+    securityContext:
+        capabilities:
+            keepCapNetBindService: true
+            envoy:
+                - NET_BIND_SERVICE
 ```
 
 - **`80/443`처럼 `1023` 이하 포트에 바인딩하려면 `NET_BIND_SERVICE` capability가 필요함**
-  - 기존 capability 목록을 교체하지 않고 설치된 chart의 기본 목록에 `NET_BIND_SERVICE`를 추가해야 함
-  - 위 예시는 standalone Envoy DaemonSet 모드의 핵심 값만 표시함
-  - embedded Envoy 모드는 `securityContext.capabilities.ciliumAgent`에 추가해야 함
+    - 기존 capability 목록을 교체하지 않고 설치된 chart의 기본 목록에 `NET_BIND_SERVICE`를 추가해야 함
+    - 위 예시는 standalone Envoy DaemonSet 모드의 핵심 값만 표시함
+    - embedded Envoy 모드는 `securityContext.capabilities.ciliumAgent`에 추가해야 함
 
 ```bash
 helm upgrade cilium cilium/cilium \
@@ -108,14 +108,14 @@ kubectl -n kube-system rollout status ds/cilium-envoy
 ## Gateway 주소와 공급자 인벤토리를 분리함
 
 - **host network 모드의 `Gateway.status.addresses`에는 Kubernetes Node가 보고한 `InternalIP` 또는 `ExternalIP`가 나타날 수 있음**
-  - Node가 fixed IP만 `InternalIP`로 보고하면 Gateway status에도 사설 주소만 표시될 수 있음
-  - Cilium은 노드 주소를 정렬하며 Gateway status에는 최대 16개 주소를 게시함
-  - 공급자 공인 IP가 status에 없더라도 Envoy 프로그래밍 실패를 의미하지 않음
+    - Node가 fixed IP만 `InternalIP`로 보고하면 Gateway status에도 사설 주소만 표시될 수 있음
+    - Cilium은 노드 주소를 정렬하며 Gateway status에는 최대 16개 주소를 게시함
+    - 공급자 공인 IP가 status에 없더라도 Envoy 프로그래밍 실패를 의미하지 않음
 
 - **공급자 공인 IP를 LB IPAM용 `Gateway.spec.addresses`에 선언하지 않음**
-  - Cilium의 `spec.addresses` 지원은 LB IPAM과 함께 Service VIP를 지정하는 기능임
-  - 이 필드가 공급자 SDN의 공인 IP 연결이나 VM 라우팅을 생성하지 않음
-  - 노드별 공인 IP 연결은 클라우드 인프라 인벤토리에서 관리함
+    - Cilium의 `spec.addresses` 지원은 LB IPAM과 함께 Service VIP를 지정하는 기능임
+    - 이 필드가 공급자 SDN의 공인 IP 연결이나 VM 라우팅을 생성하지 않음
+    - 노드별 공인 IP 연결은 클라우드 인프라 인벤토리에서 관리함
 
 - **DNS는 각 노드에 연결된 서로 다른 공인 IP를 모두 가리키도록 구성함**
 
@@ -126,53 +126,53 @@ app.example.com.  60  IN  A  203.0.113.13
 ```
 
 - **인증서는 공인 IP가 아니라 Gateway listener의 hostname을 기준으로 발급함**
-  - HTTP-01 challenge를 사용하면 모든 DNS 대상 노드에서 challenge Route가 도달해야 함
-  - DNS-01 challenge는 노드별 HTTP 도달성에 덜 의존함
+    - HTTP-01 challenge를 사용하면 모든 DNS 대상 노드에서 challenge Route가 도달해야 함
+    - DNS-01 challenge는 노드별 HTTP 도달성에 덜 의존함
 
 ## 방화벽과 소스 IP를 관측으로 검증함
 
 - **클라우드 방화벽과 노드 방화벽에는 실제 listener 포트인 `80/443`만 필요한 출발지 범위에 허용함**
-  - Kubernetes API `6443`은 관리자 VPN과 노드 CIDR로 제한함
-  - etcd, kubelet, Cilium 관리 포트는 인터넷에 공개하지 않음
+    - Kubernetes API `6443`은 관리자 VPN과 노드 CIDR로 제한함
+    - etcd, kubelet, Cilium 관리 포트는 인터넷에 공개하지 않음
 
 - **공급자 네트워크가 원본 소스 IP를 보존하는지는 구현에 따라 달라질 수 있으므로 단정하지 않음**
-  - VM의 `tcpdump`에서 SYN의 출발지 주소를 확인함
-  - Cilium Envoy access log에서 downstream remote address와 전달 헤더를 확인함
-  - 관측 결과를 기준으로 네트워크 정책, rate limit, 감사 로그의 신뢰 경계를 정함
+    - VM의 `tcpdump`에서 SYN의 출발지 주소를 확인함
+    - Cilium Envoy access log에서 downstream remote address와 전달 헤더를 확인함
+    - 관측 결과를 기준으로 네트워크 정책, rate limit, 감사 로그의 신뢰 경계를 정함
 
 ```yaml title="gateway-direct-public-ip.yaml"
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: public
-  namespace: edge
+    name: public
+    namespace: edge
 spec:
-  gatewayClassName: cilium
-  listeners:
-    - name: https
-      hostname: "*.example.com"
-      protocol: HTTPS
-      port: 443
-      tls:
-        mode: Terminate
-        certificateRefs:
-          - name: wildcard-example-com
+    gatewayClassName: cilium
+    listeners:
+        - name: https
+          hostname: "*.example.com"
+          protocol: HTTPS
+          port: 443
+          tls:
+              mode: Terminate
+              certificateRefs:
+                  - name: wildcard-example-com
 ```
 
 ## DNS 기반 분산의 한계를 수용함
 
 - **여러 `A/AAAA` 레코드는 클라이언트에 후보를 제공하지만 중앙 LB처럼 매 요청의 정상 노드를 선택하지 않음**
-  - resolver와 클라이언트가 TTL보다 오래 주소를 캐시할 수 있음
-  - 기존 TCP 연결은 DNS 변경과 무관하게 실패 노드에 남을 수 있음
-  - 재시도와 주소 순회 동작은 클라이언트마다 다름
+    - resolver와 클라이언트가 TTL보다 오래 주소를 캐시할 수 있음
+    - 기존 TCP 연결은 DNS 변경과 무관하게 실패 노드에 남을 수 있음
+    - 재시도와 주소 순회 동작은 클라이언트마다 다름
 
 - **요구 RTO가 단순 DNS 제거 시간보다 짧으면 health-checked DNS 또는 외부 LB가 필요함**
-  - health-checked DNS는 장애 감지, TTL, 전파, 클라이언트 캐시 시간을 합산해 평가함
-  - 수 초 단위의 일관된 failover와 연결 단위 health check가 필요하면 외부 LB가 더 적합함
+    - health-checked DNS는 장애 감지, TTL, 전파, 클라이언트 캐시 시간을 합산해 평가함
+    - 수 초 단위의 일관된 failover와 연결 단위 health check가 필요하면 외부 LB가 더 적합함
 
 - **control-plane 노드를 직접 공개하면 관리 트래픽과 사용자 트래픽이 같은 서버 자원을 공유함**
-  - 가능한 경우 공인 IP와 Gateway listener를 전용 infra 노드로 이동함
-  - 불가피하면 Envoy connection limit, rate limit, resource limit와 API server 보호 지표를 설정함
+    - 가능한 경우 공인 IP와 Gateway listener를 전용 infra 노드로 이동함
+    - 불가피하면 Envoy connection limit, rate limit, resource limit와 API server 보호 지표를 설정함
 
 ## 각 공인 IP를 외부에서 독립 검증함
 
@@ -194,9 +194,9 @@ done
 ```
 
 - **공인 IP별 검사에서 TLS, Route, 백엔드 경로를 한 요청으로 검증함**
-  - 한 노드를 중지하고 health-checked DNS가 실패 주소를 제거하는 시간을 측정함
-  - 복구 노드가 listener와 최신 Envoy 설정을 받은 뒤 DNS 대상에 복귀하는지 확인함
-  - 패킷 캡처와 Envoy access log를 함께 비교해 소스 IP 보존 여부를 확인함
+    - 한 노드를 중지하고 health-checked DNS가 실패 주소를 제거하는 시간을 측정함
+    - 복구 노드가 listener와 최신 Envoy 설정을 받은 뒤 DNS 대상에 복귀하는지 확인함
+    - 패킷 캡처와 Envoy access log를 함께 비교해 소스 IP 보존 여부를 확인함
 
 ## 실행 제안
 

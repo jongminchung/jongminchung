@@ -79,19 +79,19 @@ At the code level, the classic way to yield is `setTimeout`, pushing the continu
 ```js
 // A batch of chat messages arrives at once
 socket.on("messages", (chats) => {
-  renderChats(chats);
+    renderChats(chats);
 });
 
 // Draw the messages, yielding the main thread after every 20
 async function renderChats(chats) {
-  let count = 0;
-  for (const chat of chats) {
-    appendChatNode(chat); // draw one message
+    let count = 0;
+    for (const chat of chats) {
+        appendChatNode(chat); // draw one message
 
-    if (++count % 20 === 0) {
-      await new Promise((resolve) => setTimeout(resolve, 0)); // yield here
+        if (++count % 20 === 0) {
+            await new Promise((resolve) => setTimeout(resolve, 0)); // yield here
+        }
     }
-  }
 }
 ```
 
@@ -103,15 +103,15 @@ The example above split the incoming work by **count**. But if an animation is a
 
 ```js
 async function processDuringAnimation(items) {
-  let i = 0;
-  let frameStart = performance.now();
-  while (i < items.length) {
-    // Work only until 5ms have passed since the frame started
-    while (i < items.length && performance.now() - frameStart < 5) {
-      doWork(items[i++]);
+    let i = 0;
+    let frameStart = performance.now();
+    while (i < items.length) {
+        // Work only until 5ms have passed since the frame started
+        while (i < items.length && performance.now() - frameStart < 5) {
+            doWork(items[i++]);
+        }
+        frameStart = await new Promise(requestAnimationFrame); // resume with the next frame's start time
     }
-    frameStart = await new Promise(requestAnimationFrame); // resume with the next frame's start time
-  }
 }
 ```
 
@@ -151,13 +151,13 @@ For visual updates there's `requestAnimationFrame`. The screen only gets drawn o
 let scheduled = false;
 
 socket.on("tick", (tick) => {
-  chart.push(tick); // keep every data point — nothing is thrown away
-  if (scheduled) return; // this frame's draw is already booked
-  scheduled = true;
-  requestAnimationFrame(() => {
-    renderBoard(); // draw once per frame
-    scheduled = false;
-  });
+    chart.push(tick); // keep every data point — nothing is thrown away
+    if (scheduled) return; // this frame's draw is already booked
+    scheduled = true;
+    requestAnimationFrame(() => {
+        renderBoard(); // draw once per frame
+        scheduled = false;
+    });
 });
 ```
 
@@ -179,17 +179,17 @@ const channel = new MessageChannel();
 
 // One message = one task. Process a piece, then book the next one
 channel.port1.onmessage = () => {
-  const job = queue.shift(); // take whatever is at the front right now
-  if (!job) return; // guard against duplicate bookings
-  job();
-  if (queue.length > 0) channel.port2.postMessage(null);
+    const job = queue.shift(); // take whatever is at the front right now
+    if (!job) return; // guard against duplicate bookings
+    job();
+    if (queue.length > 0) channel.port2.postMessage(null);
 };
 
 function postJob(job, urgent = false) {
-  if (urgent)
-    queue.unshift(job); // urgent jobs cut to the front
-  else queue.push(job);
-  if (queue.length === 1) channel.port2.postMessage(null);
+    if (urgent)
+        queue.unshift(job); // urgent jobs cut to the front
+    else queue.push(job);
+    if (queue.length === 1) channel.port2.postMessage(null);
 }
 ```
 
@@ -202,15 +202,15 @@ But the instant the user clicks a specific photo to check that it attached prope
 ```js
 // Build previews for the attached photos, in order
 files.forEach((file, i) => {
-  const job = () => createPreview(file, i);
-  job.photoId = i; // tag it so we can find it in the queue later
-  postJob(job);
+    const job = () => createPreview(file, i);
+    job.photoId = i; // tag it so we can find it in the queue later
+    postJob(job);
 });
 
 // Clicking a photo that isn't ready pulls its job to the front → priority bump
 onClickPhoto((i) => {
-  const idx = queue.findIndex((job) => job.photoId === i);
-  if (idx > 0) queue.unshift(queue.splice(idx, 1)[0]);
+    const idx = queue.findIndex((job) => job.photoId === i);
+    if (idx > 0) queue.unshift(queue.splice(idx, 1)[0]);
 });
 ```
 
@@ -230,14 +230,14 @@ You can defer rendering itself, too. Think of a social feed. Some apps freeze fo
 
 ```js
 const io = new IntersectionObserver(
-  (entries) => {
-    for (const entry of entries) {
-      if (entry.isIntersecting)
-        fill(entry.target); // fill as it approaches
-      else empty(entry.target); // empty it when it leaves, keeping its place
-    }
-  },
-  { rootMargin: "400px" }, // headroom to fill before the scroll arrives
+    (entries) => {
+        for (const entry of entries) {
+            if (entry.isIntersecting)
+                fill(entry.target); // fill as it approaches
+            else empty(entry.target); // empty it when it leaves, keeping its place
+        }
+    },
+    { rootMargin: "400px" }, // headroom to fill before the scroll arrives
 );
 
 feed.querySelectorAll(".feed-item").forEach((el) => io.observe(el));
@@ -290,11 +290,11 @@ const dy = first.top - last.top;
 
 // Invert: make it look like it's back at the old position → Play: release it
 el.animate(
-  [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "none" }],
-  {
-    duration: 300,
-    easing: "ease-in-out",
-  },
+    [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "none" }],
+    {
+        duration: 300,
+        easing: "ease-in-out",
+    },
 );
 ```
 
@@ -309,14 +309,14 @@ The other is reading layout values, which you just saw in the FLIP code. Get the
 ```js
 // 🔴 Reads and writes interleaved — forces a layout recalculation every iteration
 for (const el of elements) {
-  const width = el.offsetWidth; // read (needs layout)
-  el.style.width = width + 10 + "px"; // write (invalidates layout)
+    const width = el.offsetWidth; // read (needs layout)
+    el.style.width = width + 10 + "px"; // write (invalidates layout)
 }
 
 // 🟢 Finish all the reads, then do the writes together
 const widths = elements.map((el) => el.offsetWidth); // gather reads
 elements.forEach((el, i) => {
-  el.style.width = widths[i] + 10 + "px"; // gather writes
+    el.style.width = widths[i] + 10 + "px"; // gather writes
 });
 ```
 
@@ -333,7 +333,7 @@ A worker runs JavaScript on its own thread, fully separated from the main one. H
 const worker = new Worker("parser.js");
 worker.postMessage(hugeRawData);
 worker.onmessage = (e) => {
-  render(e.data); // receive only the result and put it on screen
+    render(e.data); // receive only the result and put it on screen
 };
 ```
 

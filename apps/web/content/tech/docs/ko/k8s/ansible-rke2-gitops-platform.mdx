@@ -24,9 +24,9 @@ sourceUrl: https://github.com/jongminchung/rke2spray
 ## 1. 목표와 검증 기준
 
 - **검증 기준일은 `2026-08-30`이며 두 저장소의 현재 `main` 코드를 기준으로 함**
-  - `rke2spray` 기준 저장소는 [`jongminchung/rke2spray`](https://github.com/jongminchung/rke2spray)임
-  - GitOps 기준은 대상 저장소의 `bootstrap/`, `apps/`와 `tests/` 코드임
-  - README와 실행 코드가 다르면 Inventory, Playbook, manifest와 검증 script를 우선함
+    - `rke2spray` 기준 저장소는 [`jongminchung/rke2spray`](https://github.com/jongminchung/rke2spray)임
+    - GitOps 기준은 대상 저장소의 `bootstrap/`, `apps/`와 `tests/` 코드임
+    - README와 실행 코드가 다르면 Inventory, Playbook, manifest와 검증 script를 우선함
 
 | 조회 대상              | 기준 코드                                           |
 | ---------------------- | --------------------------------------------------- |
@@ -41,13 +41,13 @@ sourceUrl: https://github.com/jongminchung/rke2spray
 ## 2. 아키텍처 제약
 
 - **Kubernetes 배포판은 `RKE2 v1.36.3+rke2r1`, CNI는 `Cilium 1.20.1`로 고정됨**
-  - `jamie-kr-gitops/ansible/rke2spray.rev`가 검증된 `rke2spray` commit을 선택함
+    - `jamie-kr-gitops/ansible/rke2spray.rev`가 검증된 `rke2spray` commit을 선택함
 - **Control plane API와 Gateway 트래픽은 저장소 밖의 stable external TCP load balancer에 의존함**
-  - LB backend 제거는 server 제거보다 먼저 수행해야 함
+    - LB backend 제거는 server 제거보다 먼저 수행해야 함
 - **영속 workload는 현재 하나의 관리형 NFS endpoint를 공유함**
-  - `durable-rwo`와 replica 분산은 NFS 자체의 장애나 손실을 격리하지 못함
+    - `durable-rwo`와 replica 분산은 NFS 자체의 장애나 손실을 격리하지 못함
 - **비밀정보 평문은 Git에 저장하지 않음**
-  - Host bootstrap 값은 Ansible Vault, Kubernetes 애플리케이션 값은 SOPS와 age 경계를 사용함
+    - Host bootstrap 값은 Ansible Vault, Kubernetes 애플리케이션 값은 SOPS와 age 경계를 사용함
 
 ## 3. 시스템 컨텍스트와 저장소 소유권
 
@@ -68,21 +68,21 @@ sourceUrl: https://github.com/jongminchung/rke2spray
 | Rancher·HyperDX 공개 경로                  | GitOps 저장소 | `apps/platform-routes`                                                 |
 
 - **동일 Kubernetes 리소스의 동시 소유는 허용되지 않음**
-  - RKE2 manifest owner는 `/var/lib/rancher/rke2/server/manifests/<owner>`에 대응함
-  - AddOn 소유권 이전은 `native-addons-handoff`의 owner·basename·checksum 검증을 사용함
-  - `ownership-only` ledger 항목은 Kubernetes 리소스를 삭제하지 않고 소유권만 이전함
-  - `prune` ledger 항목은 정확한 확인 문자열과 일치할 때만 제거 대상이 됨
+    - RKE2 manifest owner는 `/var/lib/rancher/rke2/server/manifests/<owner>`에 대응함
+    - AddOn 소유권 이전은 `native-addons-handoff`의 owner·basename·checksum 검증을 사용함
+    - `ownership-only` ledger 항목은 Kubernetes 리소스를 삭제하지 않고 소유권만 이전함
+    - `prune` ledger 항목은 정확한 확인 문자열과 일치할 때만 제거 대상이 됨
 
 ## 4. 솔루션 전략은 API 준비 전후에 수렴 엔진을 전환함
 
 - **`rke2spray`가 Kubernetes API 생성 전 host와 RKE2 desired state를 수렴함**
-  - Kubespray 형태의 Inventory를 검증하고 RKE2 server·agent lifecycle로 변환함
+    - Kubespray 형태의 Inventory를 검증하고 RKE2 server·agent lifecycle로 변환함
 - **Bootstrap gate가 API 생성과 플랫폼 준비의 경계를 실행 가능한 조건으로 고정함**
-  - Node, Cilium, CoreDNS, Gateway API, cert-manager와 NFS CSI 준비 상태를 검사함
+    - Node, Cilium, CoreDNS, Gateway API, cert-manager와 NFS CSI 준비 상태를 검사함
 - **Argo CD가 API 생성 후 애플리케이션 desired state를 지속적으로 수렴함**
-  - Root Application이 역할별 child Application과 sync wave를 생성함
+    - Root Application이 역할별 child Application과 sync wave를 생성함
 - **두 엔진은 같은 환경 release를 소비하지만 동일 리소스를 동시에 소유하지 않음**
-  - 이 경계가 Ansible IaC와 GitOps를 한 저장소에서 안전하게 결합하는 전제임
+    - 이 경계가 Ansible IaC와 GitOps를 한 저장소에서 안전하게 결합하는 전제임
 
 <C4ArchitectureMap level="container" locale="ko" />
 
@@ -170,9 +170,9 @@ sourceUrl: https://github.com/jongminchung/rke2spray
 | `make gitops-integration`                              | `GITOPS_INTEGRATION_SCRIPT`        | GitOps integration script를 bootstrap server에서 실행 |
 
 - **`cluster-reset`, `cluster-recover`, `cluster-remove-node`, AddOn prune과 장애 검증은 파괴 가능 작업임**
-  - 각 target은 대상, 확인 문자열 또는 opt-in 환경변수를 요구함
-  - server 제거 전 외부 LB의 `80`, `443`, `6443`, `9345` backend 제거 상태가 필요함
-  - snapshot의 off-host 복사와 보관은 `rke2spray` 범위에 포함되지 않음
+    - 각 target은 대상, 확인 문자열 또는 opt-in 환경변수를 요구함
+    - server 제거 전 외부 LB의 `80`, `443`, `6443`, `9345` backend 제거 상태가 필요함
+    - snapshot의 off-host 복사와 보관은 `rke2spray` 범위에 포함되지 않음
 
 ## 6. GitOps 인계 Runtime
 
@@ -193,23 +193,23 @@ sourceUrl: https://github.com/jongminchung/rke2spray
 ### Bootstrap gate
 
 - **`extra_playbooks/gitops_bootstrap.yml`은 다음 조건을 모두 검사함**
-  - RKE2 API `/readyz` 응답이 `ok`인 상태
-  - 모든 RKE2 Node가 `Ready`인 상태
-  - Cilium과 CoreDNS rollout이 완료된 상태
-  - Gateway API CRD가 `Established`이고 Cilium `GatewayClass`가 `Accepted`인 상태
-  - cert-manager와 NFS CSI rollout이 완료된 상태
-  - NFS migration gate의 status, database status, StorageClass UID와 cluster UID가 일치하는 상태
+    - RKE2 API `/readyz` 응답이 `ok`인 상태
+    - 모든 RKE2 Node가 `Ready`인 상태
+    - Cilium과 CoreDNS rollout이 완료된 상태
+    - Gateway API CRD가 `Established`이고 Cilium `GatewayClass`가 `Accepted`인 상태
+    - cert-manager와 NFS CSI rollout이 완료된 상태
+    - NFS migration gate의 status, database status, StorageClass UID와 cluster UID가 일치하는 상태
 
 - **비밀정보는 Ansible Vault에서 Argo CD Secret으로 전달됨**
-  - Git repository용 read-only SSH private key
-  - GitHub known-hosts 값
-  - SOPS age private key
-  - 평문 private key는 두 저장소에 저장되지 않음
+    - Git repository용 read-only SSH private key
+    - GitHub known-hosts 값
+    - SOPS age private key
+    - 평문 private key는 두 저장소에 저장되지 않음
 
 <ExcalidrawAssetDiagram
-  ariaLabel="jamie-kr-gitops와 rke2spray의 소유권과 수렴 엔진 경계"
-  caption="환경 저장소의 두 선언 영역이 rke2spray와 Argo CD라는 서로 다른 수렴 엔진으로 전달됨"
-  src="/diagrams/rke2-gitops-ownership.excalidraw"
+    ariaLabel="jamie-kr-gitops와 rke2spray의 소유권과 수렴 엔진 경계"
+    caption="환경 저장소의 두 선언 영역이 rke2spray와 Argo CD라는 서로 다른 수렴 엔진으로 전달됨"
+    src="/diagrams/rke2-gitops-ownership.excalidraw"
 />
 
 <PlatformConvergenceFlow locale="ko" />
@@ -305,19 +305,19 @@ sourceUrl: https://github.com/jongminchung/rke2spray
 ### Live cluster 검증
 
 - **`tests/integration/verify.sh`은 다음 상태를 완료 계약으로 사용함**
-  - 15개 Argo CD Application이 모두 `Synced`·`Healthy`인 상태
-  - Stateful·stateless Application의 prune과 finalizer 정책이 일치하는 상태
-  - 세 replica workload가 서로 다른 세 worker에서 `Ready`인 상태
-  - 공개 금지 Service가 모두 `ClusterIP`인 상태
-  - Pending Pod가 없고 모든 Node root filesystem 사용률이 `60%` 미만인 상태
-  - `durable-rwo`가 `nfs.csi.k8s.io`, `Immediate`, `Retain`, `onDelete=retain`인 상태
-  - 대상 PVC가 모두 `durable-rwo`를 사용하고 논리 합계가 `299Gi`인 상태
-  - Gateway `HTTPRoute`가 `Accepted=True`·`ResolvedRefs=True`인 상태
+    - 15개 Argo CD Application이 모두 `Synced`·`Healthy`인 상태
+    - Stateful·stateless Application의 prune과 finalizer 정책이 일치하는 상태
+    - 세 replica workload가 서로 다른 세 worker에서 `Ready`인 상태
+    - 공개 금지 Service가 모두 `ClusterIP`인 상태
+    - Pending Pod가 없고 모든 Node root filesystem 사용률이 `60%` 미만인 상태
+    - `durable-rwo`가 `nfs.csi.k8s.io`, `Immediate`, `Retain`, `onDelete=retain`인 상태
+    - 대상 PVC가 모두 `durable-rwo`를 사용하고 논리 합계가 `299Gi`인 상태
+    - Gateway `HTTPRoute`가 `Accepted=True`·`ResolvedRefs=True`인 상태
 
 - **쓰기·삭제를 포함하는 검증은 명시적인 opt-in 변수를 요구함**
-  - NFS 성능 gate는 `RUN_NFS_PERFORMANCE_GATE=true`를 요구함
-  - Database gate는 `RUN_NFS_DATABASE_GATE=true`를 요구함
-  - Workload 장애 검증은 `RUN_DISRUPTIVE_TESTS=true`를 요구함
+    - NFS 성능 gate는 `RUN_NFS_PERFORMANCE_GATE=true`를 요구함
+    - Database gate는 `RUN_NFS_DATABASE_GATE=true`를 요구함
+    - Workload 장애 검증은 `RUN_DISRUPTIVE_TESTS=true`를 요구함
 
 ## 11. 위험과 복구 경계
 
@@ -347,9 +347,9 @@ sourceUrl: https://github.com/jongminchung/rke2spray
 ## 문서 갱신 계약
 
 - **다음 코드가 변경되면 이 참조 문서의 `updatedAt`과 `verifiedAt`을 갱신해야 함**
-  - `inventory/`의 version, topology, network 또는 storage 입력
-  - `Makefile`의 공개 운영 target과 필수 변수
-  - `gitops_bootstrap.yml`의 readiness gate
-  - `bootstrap/templates/applications.yaml`의 Application, wave, chart version 또는 prune 정책
-  - `apps/`의 replica, PVC, Service 또는 공개 route
-  - `tests/integration/verify.sh`의 완료 조건
+    - `inventory/`의 version, topology, network 또는 storage 입력
+    - `Makefile`의 공개 운영 target과 필수 변수
+    - `gitops_bootstrap.yml`의 readiness gate
+    - `bootstrap/templates/applications.yaml`의 Application, wave, chart version 또는 prune 정책
+    - `apps/`의 replica, PVC, Service 또는 공개 route
+    - `tests/integration/verify.sh`의 완료 조건

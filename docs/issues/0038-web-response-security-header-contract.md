@@ -41,19 +41,19 @@
 ## 채택할 내용
 
 - **먼저 application과 production edge의 실제 header inventory를 작성함**
-  - Home·Tech·Invest HTML
-  - RSS·search index·OG image 같은 non-HTML response
-  - local standalone과 production Ingress 결과 차이
+    - Home·Tech·Invest HTML
+    - RSS·search index·OG image 같은 non-HTML response
+    - local standalone과 production Ingress 결과 차이
 - **정적 방어 헤더를 명확한 owner 한 곳에서 제공함**
-  - `X-Content-Type-Options: nosniff`
-  - `Referrer-Policy`
-  - 사용하지 않는 camera·microphone·geolocation 등을 제한하는 `Permissions-Policy`
-  - CSP `frame-ancestors` 또는 호환 가능한 framing 방어
-  - `poweredByHeader: false`
+    - `X-Content-Type-Options: nosniff`
+    - `Referrer-Policy`
+    - 사용하지 않는 camera·microphone·geolocation 등을 제한하는 `Permissions-Policy`
+    - CSP `frame-ancestors` 또는 호환 가능한 framing 방어
+    - `poweredByHeader: false`
 - **CSP는 report-only와 enforce 단계를 분리함**
-  - 실제 script·style·font·image·connect source inventory를 먼저 수집함
-  - inline script hash·nonce·framework 지원 경로를 Cache Components와 함께 비교함
-  - violation report와 browser regression 확인 뒤 enforce 여부를 결정함
+    - 실제 script·style·font·image·connect source inventory를 먼저 수집함
+    - inline script hash·nonce·framework 지원 경로를 Cache Components와 함께 비교함
+    - violation report와 browser regression 확인 뒤 enforce 여부를 결정함
 - **TLS termination에 의존하는 HSTS는 Ingress owner와 preload 조건을 확인한 뒤 별도로 결정함**
 
 ## 채택하지 않을 내용

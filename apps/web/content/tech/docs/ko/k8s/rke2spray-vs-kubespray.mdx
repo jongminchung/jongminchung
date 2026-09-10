@@ -33,19 +33,19 @@ sourceUrl: https://github.com/jongminchung/rke2spray/blob/main/docs/kubespray-co
 - **이 문서의 `rke2spray` 판정 기준은 검증일의 `main`과 `docs/kubespray-api-compatibility.yml`**임
 
 <ExcalidrawAssetDiagram
-  ariaLabel="Kubespray와 rke2spray가 공유 API 형태를 서로 다른 실행 모델로 해석하는 구조"
-  caption="같은 Inventory·Playbook·Role 이름은 공통 진입 형태이며 kubeadm과 RKE2의 내부 task graph는 서로 다름"
-  src="/diagrams/rke2spray-kubespray-execution-models.excalidraw"
+    ariaLabel="Kubespray와 rke2spray가 공유 API 형태를 서로 다른 실행 모델로 해석하는 구조"
+    caption="같은 Inventory·Playbook·Role 이름은 공통 진입 형태이며 kubeadm과 RKE2의 내부 task graph는 서로 다름"
+    src="/diagrams/rke2spray-kubespray-execution-models.excalidraw"
 />
 
 ## 실제 Inventory는 jamie-kr-gitops가 소유함
 
 - **`rke2spray`와 `jamie-kr-gitops`는 제공자와 소비자 관계로 분리함**
-  - `rke2spray`는 범용 Playbook·Role·plugin·defaults·`inventory/sample`을 제공함
-  - `jamie-kr-gitops`는 실제 host·group 변수·host 변수·암호화된 Vault 값과 실행 wrapper를 소유함
+    - `rke2spray`는 범용 Playbook·Role·plugin·defaults·`inventory/sample`을 제공함
+    - `jamie-kr-gitops`는 실제 host·group 변수·host 변수·암호화된 Vault 값과 실행 wrapper를 소유함
 - **의존 방향은 `jamie-kr-gitops`가 고정된 `rke2spray` release를 선택하는 단방향으로 유지함**
-  - `rke2spray` 코어에서 `jamie-kr` 이름·주소·도메인·토폴로지를 참조하지 않음
-  - `jamie-kr-gitops`에서 Collection 또는 고정된 checkout을 통해 `rke2spray`를 호출함
+    - `rke2spray` 코어에서 `jamie-kr` 이름·주소·도메인·토폴로지를 참조하지 않음
+    - `jamie-kr-gitops`에서 Collection 또는 고정된 checkout을 통해 `rke2spray`를 호출함
 
 ```text
 jamie-kr-gitops/
@@ -69,8 +69,8 @@ rke2spray/
 ```
 
 - **`jamie-kr-gitops`는 Ansible IaC와 Argo CD GitOps의 환경 선언을 함께 관리함**
-  - `inventory/`와 `ansible/rke2spray.rev`는 Kubernetes API 생성 전 수렴 입력임
-  - `bootstrap/`과 `apps/`는 Kubernetes API 생성 후 Argo CD 수렴 입력임
+    - `inventory/`와 `ansible/rke2spray.rev`는 Kubernetes API 생성 전 수렴 입력임
+    - `bootstrap/`과 `apps/`는 Kubernetes API 생성 후 Argo CD 수렴 입력임
 - **Inventory 이동 후 실행 기준 경로는 `jamie-kr-gitops` 저장소임**
 
 ```bash
@@ -81,9 +81,9 @@ make gitops-bootstrap
 ```
 
 - **저장소 이름의 GitOps는 관리 기법이고 Ansible IaC 소유를 배제하는 경계가 아님**
-  - Inventory는 Kubernetes API가 생성되기 전의 선언적 cluster desired state임
-  - `apps/`는 Kubernetes API가 생성된 후 Argo CD가 수렴하는 platform desired state임
-  - 두 상태는 같은 환경 release로 검토할 수 있지만 각 실행 엔진은 `rke2spray`와 Argo CD로 구분됨
+    - Inventory는 Kubernetes API가 생성되기 전의 선언적 cluster desired state임
+    - `apps/`는 Kubernetes API가 생성된 후 Argo CD가 수렴하는 platform desired state임
+    - 두 상태는 같은 환경 release로 검토할 수 있지만 각 실행 엔진은 `rke2spray`와 Argo CD로 구분됨
 
 <C4ArchitectureMap level="context" locale="ko" />
 
@@ -104,11 +104,11 @@ make gitops-bootstrap
 | 변경 수용       | Kubespray release·`master` 변경을 직접 소유            | baseline 갱신 PR에서 mapping·예외·test를 검토한 후 수용       |
 
 - **Ansible 관점의 핵심 차이는 “같은 이름이 어떤 task graph로 해석되는가”**임
-  - Kubespray의 `kubernetes/kubeadm`은 kubeadm task를 실행함
-  - `rke2spray`의 `kubernetes/kubeadm`은 RKE2 bootstrap·node·control-plane Role을 연결하는 adapter임
+    - Kubespray의 `kubernetes/kubeadm`은 kubeadm task를 실행함
+    - `rke2spray`의 `kubernetes/kubeadm`은 RKE2 bootstrap·node·control-plane Role을 연결하는 adapter임
 - **`rke2spray`의 변수 존재는 기능 지원을 자동으로 의미하지 않음**
-  - `container_manager: docker`, `container_manager: crio`, kubeadm patch와 external CNI 직접 설치 입력은 현재 계약에서 거부됨
-  - 변환 가능한 registry mirror·auth·TLS는 RKE2 `registries.yaml`로 mapping됨
+    - `container_manager: docker`, `container_manager: crio`, kubeadm patch와 external CNI 직접 설치 입력은 현재 계약에서 거부됨
+    - 변환 가능한 registry mirror·auth·TLS는 RKE2 `registries.yaml`로 mapping됨
 - **공통 Inventory와 Playbook 이름은 runbook 전환 비용을 줄일 수 있으나 drop-in compatibility를 만들지 않음**
 
 ## kubeadm 관점에서 Kubespray의 실행 모델을 봄
@@ -192,8 +192,8 @@ make gitops-bootstrap
 | Kubespray·RKE2 두 upstream adapter를 전담할 소유자가 있음     | `rke2spray` | baseline·mapping·acceptance 유지보수 책임을 감수함 |
 
 - **기존 Kubespray 클러스터를 `rke2spray`로 바꾸는 작업은 Ansible 저장소 교체가 아닌 Kubernetes 엔진 migration으로 계획해야 함**
-  - 공통 Inventory group이 기존 cluster state·PKI·datastore·CNI를 자동 변환하지 않음
-  - 기존 변수와 custom Role을 compatibility contract의 `supported`·`adapter`·`conditional`·`unsupported` 분류와 대조해야 함
+    - 공통 Inventory group이 기존 cluster state·PKI·datastore·CNI를 자동 변환하지 않음
+    - 기존 변수와 custom Role을 compatibility contract의 `supported`·`adapter`·`conditional`·`unsupported` 분류와 대조해야 함
 
 ## 결론과 실행 제안
 

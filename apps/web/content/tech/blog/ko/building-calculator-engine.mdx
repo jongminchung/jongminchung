@@ -52,12 +52,12 @@ JavaScript 개발자라면 이 시점에 한 가지 유혹이 스친다. `eval("
 
 ```typescript
 type TokenType =
-  "number" | "ident" | "op" | "lparen" | "rparen" | "comma" | "eof";
+    "number" | "ident" | "op" | "lparen" | "rparen" | "comma" | "eof";
 
 interface Token {
-  type: TokenType;
-  value: string;
-  pos: number; // 원본 문자열에서의 시작 위치
+    type: TokenType;
+    value: string;
+    pos: number; // 원본 문자열에서의 시작 위치
 }
 ```
 
@@ -69,73 +69,77 @@ interface Token {
 
 ```typescript
 function tokenize(input: string): Token[] {
-  const tokens: Token[] = [];
-  let i = 0;
+    const tokens: Token[] = [];
+    let i = 0;
 
-  while (i < input.length) {
-    const ch = input[i];
+    while (i < input.length) {
+        const ch = input[i];
 
-    // 공백은 토큰이 아니다. 그냥 지나간다.
-    if (ch === " " || ch === "\t") {
-      i++;
-      continue;
+        // 공백은 토큰이 아니다. 그냥 지나간다.
+        if (ch === " " || ch === "\t") {
+            i++;
+            continue;
+        }
+
+        // 숫자: 연속된 숫자를 소수점 하나까지 포함해 통째로 읽는다
+        if (isDigit(ch)) {
+            const start = i;
+            while (i < input.length && isDigit(input[i])) i++;
+            if (input[i] === "." && isDigit(input[i + 1])) {
+                i++; // 소수점
+                while (i < input.length && isDigit(input[i])) i++;
+            }
+            tokens.push({
+                type: "number",
+                value: input.slice(start, i),
+                pos: start,
+            });
+            continue;
+        }
+
+        // 이름: 변수나 함수 이름이 될 글자 덩어리
+        if (isLetter(ch)) {
+            const start = i;
+            while (
+                i < input.length &&
+                (isLetter(input[i]) || isDigit(input[i]))
+            )
+                i++;
+            tokens.push({
+                type: "ident",
+                value: input.slice(start, i),
+                pos: start,
+            });
+            continue;
+        }
+
+        // 연산자와 구분자
+        if ("+-*/^".includes(ch)) {
+            tokens.push({ type: "op", value: ch, pos: i });
+            i++;
+            continue;
+        }
+        if (ch === "(") {
+            tokens.push({ type: "lparen", value: ch, pos: i });
+            i++;
+            continue;
+        }
+        if (ch === ")") {
+            tokens.push({ type: "rparen", value: ch, pos: i });
+            i++;
+            continue;
+        }
+        if (ch === ",") {
+            tokens.push({ type: "comma", value: ch, pos: i });
+            i++;
+            continue;
+        }
+
+        throw new Error(`이해할 수 없는 문자 '${ch}' (위치 ${i})`);
     }
 
-    // 숫자: 연속된 숫자를 소수점 하나까지 포함해 통째로 읽는다
-    if (isDigit(ch)) {
-      const start = i;
-      while (i < input.length && isDigit(input[i])) i++;
-      if (input[i] === "." && isDigit(input[i + 1])) {
-        i++; // 소수점
-        while (i < input.length && isDigit(input[i])) i++;
-      }
-      tokens.push({
-        type: "number",
-        value: input.slice(start, i),
-        pos: start,
-      });
-      continue;
-    }
-
-    // 이름: 변수나 함수 이름이 될 글자 덩어리
-    if (isLetter(ch)) {
-      const start = i;
-      while (i < input.length && (isLetter(input[i]) || isDigit(input[i]))) i++;
-      tokens.push({
-        type: "ident",
-        value: input.slice(start, i),
-        pos: start,
-      });
-      continue;
-    }
-
-    // 연산자와 구분자
-    if ("+-*/^".includes(ch)) {
-      tokens.push({ type: "op", value: ch, pos: i });
-      i++;
-      continue;
-    }
-    if (ch === "(") {
-      tokens.push({ type: "lparen", value: ch, pos: i });
-      i++;
-      continue;
-    }
-    if (ch === ")") {
-      tokens.push({ type: "rparen", value: ch, pos: i });
-      i++;
-      continue;
-    }
-    if (ch === ",") {
-      tokens.push({ type: "comma", value: ch, pos: i });
-      i++;
-      continue;
-    }
-
-    throw new Error(`이해할 수 없는 문자 '${ch}' (위치 ${i})`);
-  }
-
-  tokens.push({ type: "eof", value: "", pos: input.length });
-  return tokens;
+    tokens.push({ type: "eof", value: "", pos: input.length });
+    return tokens;
 }
 ```
 
@@ -184,11 +188,11 @@ const isLetter = (ch: string) => /[a-zA-Z가-힣_]/.test(ch);
 
 ```typescript
 type Node =
-  | { type: "num"; value: number } // 3.5
-  | { type: "ident"; name: string } // pi
-  | { type: "unary"; op: string; operand: Node } // -x
-  | { type: "binary"; op: string; left: Node; right: Node } // a + b
-  | { type: "call"; name: string; args: Node[] }; // max(a, b)
+    | { type: "num"; value: number } // 3.5
+    | { type: "ident"; name: string } // pi
+    | { type: "unary"; op: string; operand: Node } // -x
+    | { type: "binary"; op: string; left: Node; right: Node } // a + b
+    | { type: "call"; name: string; args: Node[] }; // max(a, b)
 ```
 
 `binary` 노드의 `left`와 `right`가 다시 `Node`라는 점이 핵심이다. 노드 안에 노드가 들어가는 재귀적 정의라서 아무리 복잡한 수식도 담을 수 있다. `1 + 2 * 3`은 이렇게 표현된다.
@@ -239,33 +243,33 @@ primary    := NUMBER | IDENT | IDENT "(" args ")" | "(" expression ")"
 
 ```typescript
 class Parser {
-  private tokens: Token[];
-  private current = 0;
+    private tokens: Token[];
+    private current = 0;
 
-  constructor(tokens: Token[]) {
-    this.tokens = tokens;
-  }
-
-  private peek(): Token {
-    // 현재 토큰을 확인만 한다
-    return this.tokens[this.current];
-  }
-
-  private next(): Token {
-    // 현재 토큰을 소비하고 다음으로 넘어간다
-    return this.tokens[this.current++];
-  }
-
-  private expect(type: TokenType): Token {
-    // 기대한 토큰이 아니면 에러
-    const token = this.peek();
-    if (token.type !== type) {
-      throw new Error(
-        `${type}이 와야 하는데 '${token.value || "입력 끝"}'을 만났다 (위치 ${token.pos})`,
-      );
+    constructor(tokens: Token[]) {
+        this.tokens = tokens;
     }
-    return this.next();
-  }
+
+    private peek(): Token {
+        // 현재 토큰을 확인만 한다
+        return this.tokens[this.current];
+    }
+
+    private next(): Token {
+        // 현재 토큰을 소비하고 다음으로 넘어간다
+        return this.tokens[this.current++];
+    }
+
+    private expect(type: TokenType): Token {
+        // 기대한 토큰이 아니면 에러
+        const token = this.peek();
+        if (token.type !== type) {
+            throw new Error(
+                `${type}이 와야 하는데 '${token.value || "입력 끝"}'을 만났다 (위치 ${token.pos})`,
+            );
+        }
+        return this.next();
+    }
 }
 ```
 
@@ -381,11 +385,11 @@ private primary(): Node {
 ```typescript
 // [왼쪽 힘, 오른쪽 힘] — 왼쪽 힘 < 오른쪽 힘이면 좌결합, 반대면 우결합
 const BINDING_POWER: Record<string, [number, number]> = {
-  "+": [10, 11],
-  "-": [10, 11],
-  "*": [20, 21],
-  "/": [20, 21],
-  "^": [31, 30], // 우결합
+    "+": [10, 11],
+    "-": [10, 11],
+    "*": [20, 21],
+    "/": [20, 21],
+    "^": [31, 30], // 우결합
 };
 ```
 
@@ -471,35 +475,35 @@ case '<': return left < right ? 1 : 0; // 평가기에 한 줄
 
 ```typescript
 function evaluate(node: Node, env: Environment): number {
-  switch (node.type) {
-    case "num":
-      return node.value;
+    switch (node.type) {
+        case "num":
+            return node.value;
 
-    case "unary":
-      return -evaluate(node.operand, env);
+        case "unary":
+            return -evaluate(node.operand, env);
 
-    case "binary": {
-      const left = evaluate(node.left, env);
-      const right = evaluate(node.right, env);
-      switch (node.op) {
-        case "+":
-          return left + right;
-        case "-":
-          return left - right;
-        case "*":
-          return left * right;
-        case "/":
-          if (right === 0) throw new Error("0으로 나눌 수 없다");
-          return left / right;
-        case "^":
-          return left ** right;
-        default:
-          throw new Error(`모르는 연산자: ${node.op}`);
-      }
+        case "binary": {
+            const left = evaluate(node.left, env);
+            const right = evaluate(node.right, env);
+            switch (node.op) {
+                case "+":
+                    return left + right;
+                case "-":
+                    return left - right;
+                case "*":
+                    return left * right;
+                case "/":
+                    if (right === 0) throw new Error("0으로 나눌 수 없다");
+                    return left / right;
+                case "^":
+                    return left ** right;
+                default:
+                    throw new Error(`모르는 연산자: ${node.op}`);
+            }
+        }
+
+        // ident와 call은 다음 장에서
     }
-
-    // ident와 call은 다음 장에서
-  }
 }
 ```
 
@@ -509,9 +513,9 @@ function evaluate(node: Node, env: Environment): number {
 
 ```typescript
 function calculate(input: string): number {
-  const tokens = tokenize(input); // "1 + 2 * 3"
-  const ast = new PrattParser(tokens).parse(); // → 트리
-  return evaluate(ast, createEnvironment()); // → 7
+    const tokens = tokenize(input); // "1 + 2 * 3"
+    const ast = new PrattParser(tokens).parse(); // → 트리
+    return evaluate(ast, createEnvironment()); // → 7
 }
 ```
 
@@ -564,29 +568,29 @@ calculate('0.1 + 0.2')  // 0.30000000000000004
 
 ```typescript
 interface Decimal {
-  coef: bigint; // 정수 계수
-  exp: number; // 10의 지수
+    coef: bigint; // 정수 계수
+    exp: number; // 10의 지수
 }
 
 function decimalFromString(s: string): Decimal {
-  const dot = s.indexOf(".");
-  if (dot === -1) return { coef: BigInt(s), exp: 0 };
-  const digits = s.replace(".", "");
-  const fractionLength = s.length - dot - 1;
-  return { coef: BigInt(digits), exp: -fractionLength };
+    const dot = s.indexOf(".");
+    if (dot === -1) return { coef: BigInt(s), exp: 0 };
+    const digits = s.replace(".", "");
+    const fractionLength = s.length - dot - 1;
+    return { coef: BigInt(digits), exp: -fractionLength };
 }
 
 // 지수를 맞춘 뒤 계수끼리 더한다. 자릿수를 맞춰 세로셈을 하는 것과 같다.
 function decimalAdd(a: Decimal, b: Decimal): Decimal {
-  const exp = Math.min(a.exp, b.exp);
-  const coefA = a.coef * 10n ** BigInt(a.exp - exp);
-  const coefB = b.coef * 10n ** BigInt(b.exp - exp);
-  return { coef: coefA + coefB, exp };
+    const exp = Math.min(a.exp, b.exp);
+    const coefA = a.coef * 10n ** BigInt(a.exp - exp);
+    const coefB = b.coef * 10n ** BigInt(b.exp - exp);
+    return { coef: coefA + coefB, exp };
 }
 
 // 계수는 곱하고 지수는 더한다
 function decimalMul(a: Decimal, b: Decimal): Decimal {
-  return { coef: a.coef * b.coef, exp: a.exp + b.exp };
+    return { coef: a.coef * b.coef, exp: a.exp + b.exp };
 }
 ```
 
@@ -594,11 +598,11 @@ function decimalMul(a: Decimal, b: Decimal): Decimal {
 
 ```typescript
 function decimalToString(d: Decimal): string {
-  if (d.exp >= 0) return (d.coef * 10n ** BigInt(d.exp)).toString();
-  const s = d.coef.toString().padStart(-d.exp + 1, "0");
-  const intPart = s.slice(0, s.length + d.exp);
-  const fracPart = s.slice(s.length + d.exp).replace(/0+$/, "");
-  return fracPart ? `${intPart}.${fracPart}` : intPart;
+    if (d.exp >= 0) return (d.coef * 10n ** BigInt(d.exp)).toString();
+    const s = d.coef.toString().padStart(-d.exp + 1, "0");
+    const intPart = s.slice(0, s.length + d.exp);
+    const fracPart = s.slice(s.length + d.exp).replace(/0+$/, "");
+    return fracPart ? `${intPart}.${fracPart}` : intPart;
 }
 ```
 
@@ -627,24 +631,24 @@ function decimalToString(d: Decimal): string {
 
 ```typescript
 interface Environment {
-  variables: Map<string, number>;
-  functions: Map<string, (...args: number[]) => number>;
+    variables: Map<string, number>;
+    functions: Map<string, (...args: number[]) => number>;
 }
 
 function createEnvironment(): Environment {
-  return {
-    variables: new Map([
-      ["pi", Math.PI],
-      ["e", Math.E],
-    ]),
-    functions: new Map([
-      ["sqrt", Math.sqrt],
-      ["round", Math.round],
-      ["min", Math.min],
-      ["max", Math.max],
-      // ...
-    ]),
-  };
+    return {
+        variables: new Map([
+            ["pi", Math.PI],
+            ["e", Math.E],
+        ]),
+        functions: new Map([
+            ["sqrt", Math.sqrt],
+            ["round", Math.round],
+            ["min", Math.min],
+            ["max", Math.max],
+            // ...
+        ]),
+    };
 }
 ```
 
@@ -671,39 +675,39 @@ case 'call': {
 
 ```typescript
 function runNotepad(source: string): LineResult[] {
-  const env = createEnvironment();
-  const results: LineResult[] = [];
+    const env = createEnvironment();
+    const results: LineResult[] = [];
 
-  for (const line of source.split("\n")) {
-    if (line.trim() === "") continue;
+    for (const line of source.split("\n")) {
+        if (line.trim() === "") continue;
 
-    try {
-      const tokens = tokenize(line);
+        try {
+            const tokens = tokenize(line);
 
-      // "이름 = 수식" 꼴이면 할당문이다
-      let target: string | null = null;
-      let exprTokens = tokens;
-      if (
-        tokens[0].type === "ident" &&
-        tokens[1]?.type === "op" &&
-        tokens[1].value === "="
-      ) {
-        target = tokens[0].value;
-        exprTokens = tokens.slice(2);
-      }
+            // "이름 = 수식" 꼴이면 할당문이다
+            let target: string | null = null;
+            let exprTokens = tokens;
+            if (
+                tokens[0].type === "ident" &&
+                tokens[1]?.type === "op" &&
+                tokens[1].value === "="
+            ) {
+                target = tokens[0].value;
+                exprTokens = tokens.slice(2);
+            }
 
-      const ast = new PrattParser(exprTokens).parse();
-      const value = evaluate(ast, env);
+            const ast = new PrattParser(exprTokens).parse();
+            const value = evaluate(ast, env);
 
-      if (target) env.variables.set(target, value);
-      env.variables.set("ans", value); // 직전 결과
-      results.push({ input: line, value });
-    } catch (e) {
-      results.push({ input: line, error: (e as Error).message });
+            if (target) env.variables.set(target, value);
+            env.variables.set("ans", value); // 직전 결과
+            results.push({ input: line, value });
+        } catch (e) {
+            results.push({ input: line, error: (e as Error).message });
+        }
     }
-  }
 
-  return results;
+    return results;
 }
 ```
 
@@ -733,23 +737,23 @@ ans / 4              => 1250
 
 ```typescript
 interface Dimension {
-  length: number; // 길이의 지수
-  time: number; // 시간의 지수
-  mass: number; // 질량의 지수
+    length: number; // 길이의 지수
+    time: number; // 시간의 지수
+    mass: number; // 질량의 지수
 }
 
 interface Quantity {
-  value: number; // 기준 단위(m, s, kg)로 정규화한 값
-  dim: Dimension;
+    value: number; // 기준 단위(m, s, kg)로 정규화한 값
+    dim: Dimension;
 }
 
 // 단위 표: 기준 단위에 대한 배율과 차원
 const UNITS: Record<string, { factor: number; dim: Dimension }> = {
-  m: { factor: 1, dim: { length: 1, time: 0, mass: 0 } },
-  km: { factor: 1000, dim: { length: 1, time: 0, mass: 0 } },
-  h: { factor: 3600, dim: { length: 0, time: 1, mass: 0 } },
-  kg: { factor: 1, dim: { length: 0, time: 0, mass: 1 } },
-  // ...
+    m: { factor: 1, dim: { length: 1, time: 0, mass: 0 } },
+    km: { factor: 1000, dim: { length: 1, time: 0, mass: 0 } },
+    h: { factor: 3600, dim: { length: 0, time: 1, mass: 0 } },
+    kg: { factor: 1, dim: { length: 0, time: 0, mass: 1 } },
+    // ...
 };
 ```
 
@@ -760,24 +764,24 @@ const UNITS: Record<string, { factor: number; dim: Dimension }> = {
 ```typescript
 // 덧셈: 차원이 같아야만 허용된다
 function qAdd(a: Quantity, b: Quantity): Quantity {
-  if (!sameDim(a.dim, b.dim)) {
-    throw new Error(
-      `${dimToString(a.dim)}와 ${dimToString(b.dim)}는 더할 수 없다`,
-    );
-  }
-  return { value: a.value + b.value, dim: a.dim };
+    if (!sameDim(a.dim, b.dim)) {
+        throw new Error(
+            `${dimToString(a.dim)}와 ${dimToString(b.dim)}는 더할 수 없다`,
+        );
+    }
+    return { value: a.value + b.value, dim: a.dim };
 }
 
 // 곱셈: 차원의 지수를 더한다. km × km = km²가 되는 이유다.
 function qMul(a: Quantity, b: Quantity): Quantity {
-  return {
-    value: a.value * b.value,
-    dim: {
-      length: a.dim.length + b.dim.length,
-      time: a.dim.time + b.dim.time,
-      mass: a.dim.mass + b.dim.mass,
-    },
-  };
+    return {
+        value: a.value * b.value,
+        dim: {
+            length: a.dim.length + b.dim.length,
+            time: a.dim.time + b.dim.time,
+            mass: a.dim.mass + b.dim.mass,
+        },
+    };
 }
 ```
 
@@ -810,12 +814,12 @@ Soulver류 앱의 진짜 발명품은 파서가 아니라 태도다. **모르는
 
 ```typescript
 if (isLetter(ch)) {
-  const start = i;
-  while (i < input.length && isLetter(input[i])) i++;
-  const word = input.slice(start, i);
-  // 아는 단어만 토큰이 된다. 나머지는 없는 셈 친다.
-  if (word === "of") tokens.push({ type: "of", value: word, pos: start });
-  continue;
+    const start = i;
+    while (i < input.length && isLetter(input[i])) i++;
+    const word = input.slice(start, i);
+    // 아는 단어만 토큰이 된다. 나머지는 없는 셈 친다.
+    if (word === "of") tokens.push({ type: "of", value: word, pos: start });
+    continue;
 }
 
 // ...
@@ -837,9 +841,9 @@ i++;
 ```typescript
 // parseExpression의 while 루프 안
 if (token.type === "op" && token.value === "%" && PERCENT_BP >= minBp) {
-  this.next();
-  left = { type: "percent", operand: left };
-  continue;
+    this.next();
+    left = { type: "percent", operand: left };
+    continue;
 }
 ```
 

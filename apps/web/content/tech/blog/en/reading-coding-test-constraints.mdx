@@ -23,22 +23,22 @@ sourceUrl: https://kciter.so/posts/coding-test-story
 ## A coding test asks for a correct answer within a budget
 
 - **A coding test is closer to building a correct program within time and memory limits than naming an algorithm**
-  - Two programs can return the same answer while an `O(N²)` version and an `O(N log N)` version behave completely differently as the input grows
-  - Deriving the acceptable complexity before searching for a solution is more reliable than estimating it after the code is written
+    - Two programs can return the same answer while an `O(N²)` version and an `O(N log N)` version behave completely differently as the input grows
+    - Deriving the acceptable complexity before searching for a solution is more reliable than estimating it after the code is written
 
 - **Algorithm knowledge and implementation fluency are equally necessary**
-  - Candidates need to manipulate arrays and maps, express boundary conditions, and estimate the cost of their loops without friction
-  - Recognizing a pattern does not produce a correct answer when indices or state transitions are wrong
+    - Candidates need to manipulate arrays and maps, express boundary conditions, and estimate the cost of their loops without friction
+    - Recognizing a pattern does not produce a correct answer when indices or state transitions are wrong
 
 - **A useful preparation goal is a process for decomposing unfamiliar problems rather than memorizing every algorithm**
-  - Splitting a story into input, state, operations, and output makes even a long statement concrete
-  - This article draws substantial inspiration from the problem-solving and study perspectives in [A Collection of Thoughts on Coding Tests](https://kciter.so/posts/coding-test-story)
+    - Splitting a story into input, state, operations, and output makes even a long statement concrete
+    - This article draws substantial inspiration from the problem-solving and study perspectives in [A Collection of Thoughts on Coding Tests](https://kciter.so/posts/coding-test-story)
 
 ## Input size filters the solution space
 
 - **The constraints indirectly reveal the amount of computation the setter expects**
-  - Small `N` can permit exhaustive search or detailed state exploration
-  - Large `N` usually points toward a linear pass or sorting followed by linear processing
+    - Small `N` can permit exhaustive search or detailed state exploration
+    - Large `N` usually points toward a linear pass or sorting followed by linear processing
 
 - **The following table is a first-pass guide under a typical time limit and a single test case**
 
@@ -55,93 +55,93 @@ sourceUrl: https://kciter.so/posts/coding-test-story
 | `O(N!)`         | About `N ≤ 10` |    Infeasible |        Infeasible | Permutation enumeration |
 
 - **“Feasible” is not a guarantee, while “infeasible” means micro-optimization is unlikely to save the approach**
-  - An `O(N log N)` solution can still time out when comparisons are expensive or the same work is repeated
-  - An `O(N²)` solution at `N = 1,000` performs roughly one million comparisons and can be perfectly reasonable
-  - An `O(N³)` solution at `N = 1,000` approaches one billion combinations, so the table's caution label usually demands aggressive pruning or additional structure
+    - An `O(N log N)` solution can still time out when comparisons are expensive or the same work is repeated
+    - An `O(N²)` solution at `N = 1,000` performs roughly one million comparisons and can be perfectly reasonable
+    - An `O(N³)` solution at `N = 1,000` approaches one billion combinations, so the table's caution label usually demands aggressive pruning or additional structure
 
 - **The true operation count must include every maximum constraint**
-  - With `T` test cases, the total cost is generally `O(T × f(N))`
-  - When vertices `V` and edges `E` are separate, graph traversal should be evaluated as `O(V + E)`
-  - When the total string length has a fixed cap, that total can matter more than the maximum length of one string
+    - With `T` test cases, the total cost is generally `O(T × f(N))`
+    - When vertices `V` and edges `E` are separate, graph traversal should be evaluated as `O(V + E)`
+    - When the total string length has a fixed cap, that total can matter more than the maximum length of one string
 
 ## Derive algorithm candidates from the constraints
 
 - **Start with the simplest correct solution to expose the work that must be removed**
-  - If comparing every pair costs `O(N²)`, consider whether a map can answer the same lookup directly
-  - If every range sum is recomputed, consider whether prefix sums can eliminate the repeated work
-  - If every minimum is found with a scan, consider a heap or an ordered representation
+    - If comparing every pair costs `O(N²)`, consider whether a map can answer the same lookup directly
+    - If every range sum is recomputed, consider whether prefix sums can eliminate the repeated work
+    - If every minimum is found with a scan, consider a heap or an ordered representation
 
 - **Input shapes and requested operations suggest common candidates**
-  - Searching for a value or boundary in sorted data suggests binary search
-  - Continuous range sums, counts, or extrema suggest prefix sums, sliding windows, or two pointers
-  - Connectivity and minimum hop counts suggest graph traversal and breadth-first search
-  - Repeatedly removing the smallest or largest value suggests a heap
-  - Choosing every combination at small `N` suggests bitmasks and subset search
-  - Reused subproblems where earlier choices influence later outcomes suggest dynamic programming
+    - Searching for a value or boundary in sorted data suggests binary search
+    - Continuous range sums, counts, or extrema suggest prefix sums, sliding windows, or two pointers
+    - Connectivity and minimum hop counts suggest graph traversal and breadth-first search
+    - Repeatedly removing the smallest or largest value suggests a heap
+    - Choosing every combination at small `N` suggests bitmasks and subset search
+    - Reused subproblems where earlier choices influence later outcomes suggest dynamic programming
 
 - **A keyword forms a hypothesis, not a final answer**
-  - “Shortest path” can mean breadth-first search without weights but requires a different method with negative weights
-  - A statement may mention sorting even when only an order property is needed
-  - After choosing a candidate, verify that every precondition of the algorithm matches the input
+    - “Shortest path” can mean breadth-first search without weights but requires a different method with negative weights
+    - A statement may mention sorting even when only an order property is needed
+    - After choosing a candidate, verify that every precondition of the algorithm matches the input
 
 ## A repeatable workflow matters more than a flash of insight
 
 - **First, restate the input-output contract in one sentence**
-  - Separate the state, repeated operation, and final output
-  - Examples illustrate the rules but do not replace the formal statement
+    - Separate the state, repeated operation, and final output
+    - Examples illustrate the rules but do not replace the formal statement
 
 - **Second, calculate the complexity of the simplest correct method**
-  - If exhaustive search fits, a more sophisticated algorithm is unnecessary
-  - If it does not fit, identify exactly which loop dimension must disappear
+    - If exhaustive search fits, a more sophisticated algorithm is unnecessary
+    - If it does not fit, identify exactly which loop dimension must disappear
 
 - **Third, replace the repeated work with a data structure or preprocessing**
-  - Repeated lookup can become a hash map, repeated range calculation can become a prefix sum, and ordered boundary search can become binary search
-  - These changes often trade additional memory for lower running time
+    - Repeated lookup can become a hash map, repeated range calculation can become a prefix sum, and ordered boundary search can become binary search
+    - These changes often trade additional memory for lower running time
 
 - **Fourth, define the invariant and termination condition before coding**
-  - For two pointers, explain when each pointer moves and why discarded ranges never need to be revisited
-  - For binary search, define the region that can still contain the answer after each `mid` decision
+    - For two pointers, explain when each pointer moves and why discarded ranges never need to be revisited
+    - For binary search, define the region that can still contain the answer after each `mid` decision
 
 - **Fifth, try to break the hypothesis with small counterexamples**
-  - Check empty ranges, one element, all equal values, sorted and reverse-sorted input, and numeric extremes
-  - Check integer ranges for sums and products, and disconnected components or duplicate edges in graphs
+    - Check empty ranges, one element, all equal values, sorted and reverse-sorted input, and numeric extremes
+    - Check integer ranges for sums and products, and disconnected components or duplicate edges in graphs
 
 ## Implementation must preserve correctness and complexity
 
 - **The reason for each data structure should remain visible in the code**
-  - Use a set for membership, a map for keyed aggregation, and a deque for efficient work at both ends
-  - Repeated middle deletion from an array can turn an intended `O(N)` solution into `O(N²)`
+    - Use a set for membership, a map for keyed aggregation, and a deque for efficient work at both ends
+    - Repeated middle deletion from an array can turn an intended `O(N)` solution into `O(N²)`
 
 - **The total number of iterations in every loop should be explainable**
-  - Nested loops are not always `O(N²)` when two pointers each move forward at most `N` times
-  - A one-line library call can hide sorting or copying costs
+    - Nested loops are not always `O(N²)` when two pointers each move forward at most `N` times
+    - A one-line library call can hide sorting or copying costs
 
 - **I/O and numeric representation are part of the algorithm**
-  - Tokenization and output assembly can matter for very large inputs
-  - Estimate the largest possible sum as `maximum element × number of elements` before choosing a numeric type
+    - Tokenization and output assembly can matter for very large inputs
+    - Estimate the largest possible sum as `maximum element × number of elements` before choosing a numeric type
 
 - **A short pre-submission checklist catches common failures**
-  - Confirm that worst-case time fits the limit
-  - Confirm that additional memory fits the limit
-  - Confirm inclusive and exclusive boundaries at both ends
-  - Confirm whether input may be mutated and whether values can repeat
-  - Remove debug output and unnecessary conversions
+    - Confirm that worst-case time fits the limit
+    - Confirm that additional memory fits the limit
+    - Confirm inclusive and exclusive boundaries at both ends
+    - Confirm whether input may be mutated and whether values can repeat
+    - Remove debug output and unnecessary conversions
 
 ## Review quality matters more than the number of solved problems
 
 - **Record the decision process after solving a problem instead of saving only the accepted code**
-  - Note which constraint eliminated brute force
-  - Note which phrase suggested the successful algorithm
-  - Note why the first approach failed and which counterexample exposes it
+    - Note which constraint eliminated brute force
+    - Note which phrase suggested the successful algorithm
+    - Note why the first approach failed and which counterexample exposes it
 
 - **Use editorials as learning material after a deliberate attempt**
-  - When the key transition remains hidden, find the reason for the algorithm rather than copying its name
-  - Close the editorial and reimplement the solution in your own words
-  - Revisit the same or a similar problem after several days so recognition becomes durable
+    - When the key transition remains hidden, find the reason for the algorithm rather than copying its name
+    - Close the editorial and reimplement the solution in your own words
+    - Revisit the same or a similar problem after several days so recognition becomes durable
 
 - **Implementation problems and pattern problems require different practice**
-  - Implementation problems reward decomposing state and controlling edge cases through repeated coding
-  - Pattern problems require learning an algorithm's preconditions, complexity, and recognition signals together
+    - Implementation problems reward decomposing state and controlling edge cases through repeated coding
+    - Pattern problems require learning an algorithm's preconditions, complexity, and recognition signals together
 
 ## End with a one-sentence complexity argument
 

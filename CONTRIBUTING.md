@@ -22,9 +22,9 @@ mise exec -- make lint
 - mise 설정 문법은 [공식 템플릿 문서](https://mise.jdx.dev/templates.html)를 참고함
 
 - `.editorconfig`를 스타일 기준으로 유지함
-  - 기본 공백 2칸·줄 길이 80·LF·마지막 개행을 사용함
-  - Python·Markdown·MDX는 공백 4칸, Go·Makefile은 탭을 사용함
-  - Markdown의 의미 있는 줄 끝 공백과 목록 계층을 보존함
+    - 기본 공백 2칸·줄 길이 80·LF·마지막 개행을 사용함
+    - Python·Markdown·MDX는 공백 4칸, Go·Makefile은 탭을 사용함
+    - Markdown의 의미 있는 줄 끝 공백과 목록 계층을 보존함
 - `oxfmt`와 `shfmt`에는 들여쓰기·줄 길이를 덮어쓰는 옵션을 추가하지 않음
 - Python 저장소의 `pyproject.toml`에 있는 `tool.ruff` 값은 `.editorconfig` 변경 시 함께 갱신함
 - 암호화 파일·템플릿·외부 원본·생성물의 제외 범위는 `oxfmt.config.ts`와 셸 검사 스크립트에서 관리함

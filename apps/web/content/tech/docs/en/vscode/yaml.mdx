@@ -32,18 +32,18 @@ Create `.yamllint.yaml`:
 ```yaml
 extends: default
 rules:
-  document-start: disable
-  line-length: disable
-  braces:
-    min-spaces-inside: 0
-    max-spaces-inside: 1
-  truthy:
-    allowed-values: ["true", "false"]
-    check-keys: false
+    document-start: disable
+    line-length: disable
+    braces:
+        min-spaces-inside: 0
+        max-spaces-inside: 1
+    truthy:
+        allowed-values: ["true", "false"]
+        check-keys: false
 ignore: |
-  node_modules/
-  .venv/
-  dist/
+    node_modules/
+    .venv/
+    dist/
 ```
 
 This lab makes the document marker optional and disables line-length enforcement to avoid fighting the formatter. Flow mapping spaces allow Oxfmt output. Exempting keys from truthy checks accommodates keys such as GitHub Actions `on`; values such as `yes` still trigger diagnostics. Tighten these choices when appropriate. [yamllint configuration](https://yamllint.readthedocs.io/en/stable/configuration.html)
@@ -52,14 +52,14 @@ Merge the following editor settings. Disable the YAML extension's formatting pro
 
 ```json
 {
-  "[yaml]": {
-    "editor.defaultFormatter": "oxc.oxc-vscode"
-  },
-  "yaml.format.enable": false,
-  "yaml.validate": true,
-  "yaml.schemas": {
-    "./config/app.schema.json": "config/app.yaml"
-  }
+    "[yaml]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+    },
+    "yaml.format.enable": false,
+    "yaml.validate": true,
+    "yaml.schemas": {
+        "./config/app.schema.json": "config/app.yaml"
+    }
 }
 ```
 
@@ -67,15 +67,15 @@ Create `config/app.schema.json` to experiment without downloading a schema:
 
 ```json
 {
-  "$schema": "https://json-schema.org/draft-07/schema#",
-  "type": "object",
-  "additionalProperties": false,
-  "required": ["name", "enabled", "replicas"],
-  "properties": {
-    "name": { "type": "string" },
-    "enabled": { "type": "boolean" },
-    "replicas": { "type": "integer", "minimum": 1 }
-  }
+    "$schema": "https://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["name", "enabled", "replicas"],
+    "properties": {
+        "name": { "type": "string" },
+        "enabled": { "type": "boolean" },
+        "replicas": { "type": "integer", "minimum": 1 }
+    }
 }
 ```
 
@@ -116,38 +116,38 @@ Create `.vscode/tasks.json`. Invoke **Tasks: Run Task → lint:yaml**; this task
 
 ```json
 {
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "lint:yaml",
-      "type": "process",
-      "command": "uv",
-      "args": [
-        "run",
-        "--locked",
-        "yamllint",
-        "-c",
-        ".yamllint.yaml",
-        "-f",
-        "parsable",
-        "-s",
-        "config"
-      ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "problemMatcher": {
-        "owner": "yamllint",
-        "fileLocation": ["relative", "${workspaceFolder}"],
-        "pattern": {
-          "regexp": "^(.+):(\\d+):(\\d+): \\[(warning|error)\\] (.+)$",
-          "file": 1,
-          "line": 2,
-          "column": 3,
-          "severity": 4,
-          "message": 5
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "lint:yaml",
+            "type": "process",
+            "command": "uv",
+            "args": [
+                "run",
+                "--locked",
+                "yamllint",
+                "-c",
+                ".yamllint.yaml",
+                "-f",
+                "parsable",
+                "-s",
+                "config"
+            ],
+            "options": { "cwd": "${workspaceFolder}" },
+            "problemMatcher": {
+                "owner": "yamllint",
+                "fileLocation": ["relative", "${workspaceFolder}"],
+                "pattern": {
+                    "regexp": "^(.+):(\\d+):(\\d+): \\[(warning|error)\\] (.+)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            }
         }
-      }
-    }
-  ]
+    ]
 }
 ```
 

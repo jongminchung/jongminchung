@@ -33,11 +33,11 @@ Use a separate learning directory, not the formatter lab's no-emit tsconfig. Run
 
 ```json
 {
-  "type": "module",
-  "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
-  }
+    "type": "module",
+    "scripts": {
+        "build": "tsc -p tsconfig.json",
+        "typecheck": "tsc -p tsconfig.json --noEmit"
+    }
 }
 ```
 
@@ -45,18 +45,18 @@ Create tsconfig.json:
 
 ```json
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "lib": ["ES2022"],
-    "types": ["node"],
-    "rootDir": "src",
-    "outDir": "dist",
-    "strict": true,
-    "sourceMap": true
-  },
-  "include": ["src/**/*.ts"]
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "lib": ["ES2022"],
+        "types": ["node"],
+        "rootDir": "src",
+        "outDir": "dist",
+        "strict": true,
+        "sourceMap": true
+    },
+    "include": ["src/**/*.ts"]
 }
 ```
 
@@ -64,7 +64,7 @@ Create src/main.ts:
 
 ```ts
 function total(price: number, quantity: number): number {
-  return price * quantity;
+    return price * quantity;
 }
 
 const result = total(1200, 3);
@@ -75,18 +75,18 @@ Create `.vscode/tasks.json` to run the same build script:
 
 ```json
 {
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "ts: build",
-      "type": "shell",
-      "command": "npm",
-      "args": ["run", "build"],
-      "options": { "cwd": "${workspaceFolder}" },
-      "problemMatcher": ["$tsc"],
-      "group": "build"
-    }
-  ]
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "ts: build",
+            "type": "shell",
+            "command": "npm",
+            "args": ["run", "build"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "problemMatcher": ["$tsc"],
+            "group": "build"
+        }
+    ]
 }
 ```
 
@@ -94,20 +94,20 @@ Create `.vscode/launch.json`. It launches emitted JavaScript and maps back to Ty
 
 ```json
 {
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "type": "node",
-      "name": "TS: compiled Node program",
-      "request": "launch",
-      "program": "${workspaceFolder}/dist/main.js",
-      "cwd": "${workspaceFolder}",
-      "preLaunchTask": "ts: build",
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "sourceMaps": true,
-      "skipFiles": ["<node_internals>/**"]
-    }
-  ]
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "name": "TS: compiled Node program",
+            "request": "launch",
+            "program": "${workspaceFolder}/dist/main.js",
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "ts: build",
+            "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+            "sourceMaps": true,
+            "skipFiles": ["<node_internals>/**"]
+        }
+    ]
 }
 ```
 

@@ -23,56 +23,56 @@ sourceUrl: https://github.com/jongminchung/jongminchung/blob/main/apps/web/conte
 ## One happy path expands into many failure paths
 
 - **An order, inventory, and payment flow has three happy-path steps but far more than three operational states**
-  - The order can be cancelled before payment begins
-  - Inventory reservation can time out even though it succeeded remotely
-  - Payment can succeed while the order service loses the result event
-  - Inventory release can fail during compensation
-  - A late automatic compensation can arrive after an operator issues a manual refund
+    - The order can be cancelled before payment begins
+    - Inventory reservation can time out even though it succeeded remotely
+    - Payment can succeed while the order service loses the result event
+    - Inventory release can fail during compensation
+    - A late automatic compensation can arrive after an operator issues a manual refund
 
 - **Every remote step has at least five classes of outcome**
-  - `pending` before execution
-  - `running` at the participant
-  - confirmed `succeeded`
-  - confirmed `failed`
-  - outcome `unknown`
+    - `pending` before execution
+    - `running` at the participant
+    - confirmed `succeeded`
+    - confirmed `failed`
+    - outcome `unknown`
 
 - **Independent booleans express invalid combinations as ordinary program states**
-  - `inventoryReserved=true`, `paymentCaptured=true`, and `orderCancelled=true` can coexist
-  - Replacing booleans with an enum still leaves invalid event ordering and duplication
-  - A state model includes allowed commands, guards, side effects, and recovery ownership as well as stored values
+    - `inventoryReserved=true`, `paymentCaptured=true`, and `orderCancelled=true` can coexist
+    - Replacing booleans with an enum still leaves invalid event ordering and duplication
+    - A state model includes allowed commands, guards, side effects, and recovery ownership as well as stored values
 
 ![Forward, unknown, and compensation paths in an order workflow](https://kroki.io/plantuml/svg/eNptj0FrwzAMhe_-FToP-gdyGIXCboMy2GnsIGyl1SrLwZaT9d-PJNtI0txkve89-R2LYbYaxZUba4cZI5QrhjSwXqBFKeQ-nj7hcHiGM2lgvZzxHknNrZ8zgRygge535ZO2nCOFfXaa3_WmaVBowDhSquY2wiI3k0_qWRiNk_7Flz3HCdWTCO3YMn2Rt9HFYWJfqrQsMhYe4UK5J2DtSS3lu1vIU3KKnZBNye0sbcruGEgL2nygoxxRR0eLLDWTWwGPn2-rhkX6A_2KWlHeqGcaoAH_rycF-r5iLUbBrajtkdRRRkt5bJ-kp-KOpKFG-QGXoMHb)
 
 ## Saga inherits problems that ACID rollback hides
 
 - **Saga sequences local transactions and chooses forward recovery or compensation after failure**
-  - A transient infrastructure fault can retry the current step and continue forward
-  - A permanent business failure can compensate already completed steps
-  - After a pivot, completing the remaining retryable steps can be safer than attempting reversal
+    - A transient infrastructure fault can retry the current step and continue forward
+    - A permanent business failure can compensate already completed steps
+    - After a pivot, completing the remaining retryable steps can be safer than attempting reversal
 
 - **Saga does not provide the isolation of one ACID transaction**
-  - Other commands can observe or change intermediate state
-  - New legitimate transactions can modify the same data before compensation begins
-  - Restoring an old value can overwrite changes made by those transactions
+    - Other commands can observe or change intermediate state
+    - New legitimate transactions can modify the same data before compensation begins
+    - Restoring an old value can overwrite changes made by those transactions
 
 - **Compensation is a domain transaction rather than a mathematical inverse**
-  - Payment cancellation creates a refund or reversal ledger entry instead of deleting the payment
-  - Reservation cancellation can apply time-dependent fees and refund rules
-  - Email, shipping, and external ledgers can contain irreversible side effects
-  - Compensation has its own timeout, duplication, and permanent-failure modes
+    - Payment cancellation creates a refund or reversal ledger entry instead of deleting the payment
+    - Reservation cancellation can apply time-dependent fees and refund rules
+    - Email, shipping, and external ledgers can contain irreversible side effects
+    - Compensation has its own timeout, duplication, and permanent-failure modes
 
 - **The decision to compensate is itself business policy**
-  - A hotel failure can cancel flights or trigger a search for another hotel
-  - Inventory shortage after payment can create a backorder or refund
-  - High-value and ambiguous outcomes may require operator approval
+    - A hotel failure can cancel flights or trigger a search for another hotel
+    - Inventory shortage after payment can create a backorder or refund
+    - High-value and ambiguous outcomes may require operator approval
 
 ## State machines are difficult across time and versions
 
 - **Event lifecycle design costs more than listing state names**
-  - A duplicate event must be ignored after the first application
-  - A stale event arriving after a newer transition must be rejected or recorded separately
-  - Concurrent workers require conditional update or version checks
-  - An owner must move a state after its deadline expires
+    - A duplicate event must be ignored after the first application
+    - A stale event arriving after a newer transition must be rejected or recorded separately
+    - Concurrent workers require conditional update or version checks
+    - An owner must move a state after its deadline expires
 
 - **An explicit state machine reveals missing paths without eliminating the state space**
 
@@ -86,50 +86,50 @@ sourceUrl: https://github.com/jongminchung/jongminchung/blob/main/apps/web/conte
 | Deployment during workflow | Workflow version, old handlers, and migration               |
 
 - **Deploying a long-running workflow becomes a data-migration problem**
-  - Yesterday's execution can reference a state name removed today
-  - New code must read old event payloads
-  - A reordered flow changes the resume point of executions already in progress
-  - Replay-based engines require workflow code to follow determinism and versioning rules
+    - Yesterday's execution can reference a state name removed today
+    - New code must read old event payloads
+    - A reordered flow changes the resume point of executions already in progress
+    - Replay-based engines require workflow code to follow determinism and versioning rules
 
 - **One generic `failed` state cannot support recovery operations**
-  - Transient failure, permanent failure, unknown outcome, compensation failure, and manual review require distinct handling
-  - State needs a reason or condition that exposes its next command and owning team
-  - A terminal-looking state must be distinguishable from one that still requires reconciliation
+    - Transient failure, permanent failure, unknown outcome, compensation failure, and manual review require distinct handling
+    - State needs a reason or condition that exposes its next command and owning team
+    - A terminal-looking state must be distinguishable from one that still requires reconciliation
 
 ## An orchestrator becomes another stateful service
 
 - **An orchestrator provides one place to inspect and control the whole workflow**
-  - Participants can implement only their local commands
-  - Timeouts, retries, branches, and compensation order can use central policy
-  - One `workflow_id` can connect audit and operational views
+    - Participants can implement only their local commands
+    - Timeouts, retries, branches, and compensation order can use central policy
+    - One `workflow_id` can connect audit and operational views
 
 - **Central visibility creates central operating responsibility**
-  - The orchestrator database and queue require durability and high availability
-  - Schedulers, timers, and workers must remain safe under duplicate execution
-  - Workflow definitions and participant APIs require compatible deployments
-  - Operators need tools to inspect, edit, resume, and terminate stuck executions
+    - The orchestrator database and queue require durability and high availability
+    - Schedulers, timers, and workers must remain safe under duplicate execution
+    - Workflow definitions and participant APIs require compatible deployments
+    - Operators need tools to inspect, edit, resume, and terminate stuck executions
 
 - **A missing success event forces the orchestrator to query the participant's authoritative state**
-  - Blind re-execution can duplicate an external side effect
-  - Orchestrator state alone cannot distinguish event loss from participant failure
-  - Each participant still needs idempotent commands and an authoritative status API
+    - Blind re-execution can duplicate an external side effect
+    - Orchestrator state alone cannot distinguish event loss from participant failure
+    - Each participant still needs idempotent commands and an authoritative status API
 
 - **More orchestrator replicas do not complete high availability by themselves**
-  - Leader election or competing-consumer policy is required
-  - Fencing is needed when an expired worker continues as a zombie
-  - Co-located databases, brokers, and timer stores can share one fault domain despite many replicas
+    - Leader election or competing-consumer policy is required
+    - Fencing is needed when an expired worker continues as a zombie
+    - Co-located databases, brokers, and timer stores can share one fault domain despite many replicas
 
 ## Choreography and orchestration place cost differently
 
 - **Choreography distributes decisions across services reacting to events**
-  - A small flow can start without a central coordinator
-  - Producers and consumers can deploy loosely
-  - One central engine does not become the failure point for every flow
+    - A small flow can start without a central coordinator
+    - Producers and consumers can deploy loosely
+    - One central engine does not become the failure point for every flow
 
 - **A larger choreography scatters workflow logic across codebases and topics**
-  - Explaining the full order requires reading multiple repositories and schemas
-  - Cyclic event dependencies and unintended re-entry can appear
-  - Global timeout, compensation order, and progress become difficult to evaluate centrally
+    - Explaining the full order requires reading multiple repositories and schemas
+    - Cyclic event dependencies and unintended re-entry can appear
+    - Global timeout, compensation order, and progress become difficult to evaluate centrally
 
 | Criterion                | Choreography                          | Orchestration                             |
 | ------------------------ | ------------------------------------- | ----------------------------------------- |
@@ -141,8 +141,8 @@ sourceUrl: https://github.com/jongminchung/jongminchung/blob/main/apps/web/conte
 | Natural scale            | Few participants and simple reactions | Many steps and explicit central policy    |
 
 - **Neither approach removes idempotency, Outbox, schema versioning, or observability**
-  - Choreography repeats these responsibilities in every participant
-  - Orchestration moves them into the contract between the engine and participants
+    - Choreography repeats these responsibilities in every participant
+    - Orchestration moves them into the contract between the engine and participants
 
 ## Choose patterns with a complexity budget
 
@@ -158,17 +158,17 @@ sourceUrl: https://github.com/jongminchung/jongminchung/blob/main/apps/web/conte
 | Dedicated workflow orchestrator | Branching, timers, parallelism, and durable resume dominate | Platform, versioning, and operating staff      |
 
 - **Saga is likely excessive for a two-step flow that one team can reduce to one database**
-  - Reconsider data ownership before locking in service separation
-  - Rare exceptions can be cheaper with a `failed_operations` view and an approved replay command
-  - Test whether one status column and conditional `UPDATE` are sufficient
+    - Reconsider data ownership before locking in service separation
+    - Rare exceptions can be cheaper with a `failed_operations` view and an approved replay command
+    - Test whether one status column and conditional `UPDATE` are sufficient
 
 - **Saga earns its cost only when every adoption question has an answer**
-  - A documented reason prevents reduction to one atomic store
-  - The business accepts externally visible intermediate state
-  - Every step exposes idempotency and authoritative result lookup
-  - Compensable, pivot, and retryable steps are classified
-  - Compensation failure and manual intervention have named owners
-  - A team owns workflow-version migration and retention
+    - A documented reason prevents reduction to one atomic store
+    - The business accepts externally visible intermediate state
+    - Every step exposes idempotency and authoritative result lookup
+    - Compensable, pivot, and retryable steps are classified
+    - Compensation failure and manual intervention have named owners
+    - A team owns workflow-version migration and retention
 
 ## Conclusion and related document
 

@@ -32,18 +32,18 @@ code --install-extension redhat.vscode-yaml
 ```yaml
 extends: default
 rules:
-  document-start: disable
-  line-length: disable
-  braces:
-    min-spaces-inside: 0
-    max-spaces-inside: 1
-  truthy:
-    allowed-values: ["true", "false"]
-    check-keys: false
+    document-start: disable
+    line-length: disable
+    braces:
+        min-spaces-inside: 0
+        max-spaces-inside: 1
+    truthy:
+        allowed-values: ["true", "false"]
+        check-keys: false
 ignore: |
-  node_modules/
-  .venv/
-  dist/
+    node_modules/
+    .venv/
+    dist/
 ```
 
 문서 시작 `---`는 선택 사항으로 두고 줄 길이는 formatter와 충돌하지 않게 끕니다. 중괄호 안 공백은 Oxfmt의 flow mapping 출력도 허용합니다. `truthy.check-keys: false`는 GitHub Actions의 `on` 같은 키를 허용하기 위한 선택이며 값의 `yes`는 계속 진단합니다. 프로젝트에 필요 없는 완화는 되돌려도 됩니다. [yamllint 설정](https://yamllint.readthedocs.io/en/stable/configuration.html)
@@ -52,14 +52,14 @@ ignore: |
 
 ```json
 {
-  "[yaml]": {
-    "editor.defaultFormatter": "oxc.oxc-vscode"
-  },
-  "yaml.format.enable": false,
-  "yaml.validate": true,
-  "yaml.schemas": {
-    "./config/app.schema.json": "config/app.yaml"
-  }
+    "[yaml]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+    },
+    "yaml.format.enable": false,
+    "yaml.validate": true,
+    "yaml.schemas": {
+        "./config/app.schema.json": "config/app.yaml"
+    }
 }
 ```
 
@@ -67,15 +67,15 @@ ignore: |
 
 ```json
 {
-  "$schema": "https://json-schema.org/draft-07/schema#",
-  "type": "object",
-  "additionalProperties": false,
-  "required": ["name", "enabled", "replicas"],
-  "properties": {
-    "name": { "type": "string" },
-    "enabled": { "type": "boolean" },
-    "replicas": { "type": "integer", "minimum": 1 }
-  }
+    "$schema": "https://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["name", "enabled", "replicas"],
+    "properties": {
+        "name": { "type": "string" },
+        "enabled": { "type": "boolean" },
+        "replicas": { "type": "integer", "minimum": 1 }
+    }
 }
 ```
 
@@ -116,38 +116,38 @@ npm exec -- oxfmt --check config/app.yaml
 
 ```json
 {
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "lint:yaml",
-      "type": "process",
-      "command": "uv",
-      "args": [
-        "run",
-        "--locked",
-        "yamllint",
-        "-c",
-        ".yamllint.yaml",
-        "-f",
-        "parsable",
-        "-s",
-        "config"
-      ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "problemMatcher": {
-        "owner": "yamllint",
-        "fileLocation": ["relative", "${workspaceFolder}"],
-        "pattern": {
-          "regexp": "^(.+):(\\d+):(\\d+): \\[(warning|error)\\] (.+)$",
-          "file": 1,
-          "line": 2,
-          "column": 3,
-          "severity": 4,
-          "message": 5
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "lint:yaml",
+            "type": "process",
+            "command": "uv",
+            "args": [
+                "run",
+                "--locked",
+                "yamllint",
+                "-c",
+                ".yamllint.yaml",
+                "-f",
+                "parsable",
+                "-s",
+                "config"
+            ],
+            "options": { "cwd": "${workspaceFolder}" },
+            "problemMatcher": {
+                "owner": "yamllint",
+                "fileLocation": ["relative", "${workspaceFolder}"],
+                "pattern": {
+                    "regexp": "^(.+):(\\d+):(\\d+): \\[(warning|error)\\] (.+)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            }
         }
-      }
-    }
-  ]
+    ]
 }
 ```
 

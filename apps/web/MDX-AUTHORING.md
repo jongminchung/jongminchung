@@ -75,8 +75,8 @@ Tech Blog·Docs·Invest Note에서 같은 문법을 사용한다. 기존 bold·�
 </details>
 
 <dl>
-  <dt id="idempotency">멱등성</dt>
-  <dd>같은 작업을 반복해도 한 번 수행한 것과 같은 결과가 되는 성질입니다.</dd>
+    <dt id="idempotency">멱등성</dt>
+    <dd>같은 작업을 반복해도 한 번 수행한 것과 같은 결과가 되는 성질입니다.</dd>
 </dl>
 
 자세한 의미는 [멱등성](#idempotency)을 참고하세요.
@@ -98,8 +98,8 @@ const key = userId + ":" + requestId; // [!code highlight]
 ```
 
 <CodeNotes>
-  <CodeNote lines="1–2행">사용자와 요청을 식별합니다.</CodeNote>
-  <CodeNote lines="3행">사용자별 요청 키를 만듭니다.</CodeNote>
+    <CodeNote lines="1–2행">사용자와 요청을 식별합니다.</CodeNote>
+    <CodeNote lines="3행">사용자별 요청 키를 만듭니다.</CodeNote>
 </CodeNotes>
 
 </CodeExample>
@@ -115,12 +115,12 @@ const key = userId + ":" + requestId; // [!code highlight]
 
 ```mdx
 <Comparison title="요청 키의 변경">
-  <ComparisonItem title="변경 전">
-    사용자 식별자만 사용하면 다른 요청도 같은 키를 가집니다.
-  </ComparisonItem>
-  <ComparisonItem title="변경 후">
-    사용자와 요청 식별자를 함께 사용합니다.
-  </ComparisonItem>
+    <ComparisonItem title="변경 전">
+        사용자 식별자만 사용하면 다른 요청도 같은 키를 가집니다.
+    </ComparisonItem>
+    <ComparisonItem title="변경 후">
+        사용자와 요청 식별자를 함께 사용합니다.
+    </ComparisonItem>
 </Comparison>
 ```
 

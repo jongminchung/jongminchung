@@ -23,35 +23,35 @@
 ## 확인된 실제 실행 경로
 
 - **`content-repository.ts`가 MDX source를 읽고 runtime manifest와 검색 문서를 구성함**
-  - `readDocuments`가 frontmatter·본문·outline을 정규화함
-  - `validateDocuments`가 locale pair·navigation order·internal link를 검증함
-  - `createSearchDocuments`가 요청 시 runtime 검색 문서를 구성함
+    - `readDocuments`가 frontmatter·본문·outline을 정규화함
+    - `validateDocuments`가 locale pair·navigation order·internal link를 검증함
+    - `createSearchDocuments`가 요청 시 runtime 검색 문서를 구성함
 - **기존 생성 artifact 경로는 실행되지 않음**
-  - `apps/web/package.json`과 root script에 `build-content.ts` 호출이 없음
-  - `apps/web/generated`와 `apps/web/public/search`는 존재하지 않음
-  - generated loader·manifest를 import하는 runtime consumer가 없음
+    - `apps/web/package.json`과 root script에 `build-content.ts` 호출이 없음
+    - `apps/web/generated`와 `apps/web/public/search`는 존재하지 않음
+    - generated loader·manifest를 import하는 runtime consumer가 없음
 - **package API 검사는 구현만 존재하고 CLI에서도 호출되지 않음**
-  - 활성화 시 현재 tooling 공개 symbol 8개가 문서 metadata에 없어 즉시 실패함
-  - 사용되지 않는 검사를 보존하거나 조용히 CI gate로 활성화하지 않고 제거함
+    - 활성화 시 현재 tooling 공개 symbol 8개가 문서 metadata에 없어 즉시 실패함
+    - 사용되지 않는 검사를 보존하거나 조용히 CI gate로 활성화하지 않고 제거함
 
 ## 구현 결과
 
 - **source 책임을 `content-source.ts`로 분리함**
-  - MDX file discovery·frontmatter parsing·outline 생성·검색 본문 정규화를 소유함
-  - `content-repository.ts`에 중복되어 있던 검색 본문 정규화를 제거함
+    - MDX file discovery·frontmatter parsing·outline 생성·검색 본문 정규화를 소유함
+    - `content-repository.ts`에 중복되어 있던 검색 본문 정규화를 제거함
 - **collection 검증을 `content-validation.ts`로 분리함**
-  - locale pair와 번역 metadata 일관성을 검증함
-  - URL·navigation order·internal link를 검증함
+    - locale pair와 번역 metadata 일관성을 검증함
+    - URL·navigation order·internal link를 검증함
 - **도달 불가능 코드를 제거함**
-  - `build-content.ts` CLI를 제거함
-  - generated manifest·loader·search artifact 구성을 제거함
-  - 호출되지 않던 TypeScript Compiler API 기반 package 검사를 제거함
+    - `build-content.ts` CLI를 제거함
+    - generated manifest·loader·search artifact 구성을 제거함
+    - 호출되지 않던 TypeScript Compiler API 기반 package 검사를 제거함
 - **fixture 검증을 추가함**
-  - 정상 locale·section matrix
-  - locale 누락과 번역 metadata 불일치
-  - navigation order 중복과 gap
-  - broken internal link
-  - h2·h3 outline과 검색 본문 정규화
+    - 정상 locale·section matrix
+    - locale 누락과 번역 metadata 불일치
+    - navigation order 중복과 gap
+    - broken internal link
+    - h2·h3 outline과 검색 본문 정규화
 
 ## 채택하지 않은 내용
 

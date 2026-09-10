@@ -13,10 +13,10 @@ packageVersion: "16.3.1"
 ---
 
 <Callout title="Core decision" type="info">
-  Production browsers do not download TypeScript source, but they do download
-  and execute JavaScript reachable from Client Components. Fonts do not execute
-  like JavaScript, yet they compete for the same network bandwidth, so optimize
-  route glyph coverage and client boundaries together.
+    Production browsers do not download TypeScript source, but they do download
+    and execute JavaScript reachable from Client Components. Fonts do not
+    execute like JavaScript, yet they compete for the same network bandwidth, so
+    optimize route glyph coverage and client boundaries together.
 </Callout>
 
 ## Separate the resources a browser receives
@@ -100,9 +100,9 @@ The [Next.js lazy-loading guide](https://nextjs.org/docs/app/guides/lazy-loading
 import { lazy } from "react";
 
 const SearchDialog = lazy(() =>
-  import("./SearchDialog").then((module) => ({
-    default: module.SearchDialog,
-  })),
+    import("./SearchDialog").then((module) => ({
+        default: module.SearchDialog,
+    })),
 );
 ```
 

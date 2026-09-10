@@ -25,9 +25,9 @@ sourceUrl: https://github.com/jongminchung/rke2spray
 ## 1. Goals and verification baseline
 
 - **This page was verified on `2026-08-30` against the current `main` code in both repositories**
-  - [`jongminchung/rke2spray`](https://github.com/jongminchung/rke2spray) is the cluster source
-  - The target repository's `bootstrap/`, `apps/`, and `tests/` directories define the GitOps contract
-  - When prose differs from executable code, inventory, Playbooks, manifests, and verification scripts are authoritative
+    - [`jongminchung/rke2spray`](https://github.com/jongminchung/rke2spray) is the cluster source
+    - The target repository's `bootstrap/`, `apps/`, and `tests/` directories define the GitOps contract
+    - When prose differs from executable code, inventory, Playbooks, manifests, and verification scripts are authoritative
 
 | Information                   | Authoritative code                                      |
 | ----------------------------- | ------------------------------------------------------- |
@@ -42,15 +42,15 @@ sourceUrl: https://github.com/jongminchung/rke2spray
 ## 2. Architecture constraints
 
 - **The Kubernetes distribution is fixed at `RKE2 v1.36.3+rke2r1`, with `Cilium 1.20.1` as its CNI**
-  - `jamie-kr-gitops/ansible/rke2spray.rev` selects the verified `rke2spray` commit
+    - `jamie-kr-gitops/ansible/rke2spray.rev` selects the verified `rke2spray` commit
 - **ClickHouse Server and Keeper use the supported `26.3.25` LTS line**
-  - Merge concurrency and memory reservations are bounded for the three-replica observability workload
+    - Merge concurrency and memory reservations are bounded for the three-replica observability workload
 - **Control-plane API and Gateway traffic depend on a stable external TCP load balancer outside both repositories**
-  - A server must leave LB backend pools before node removal begins
+    - A server must leave LB backend pools before node removal begins
 - **Persistent workloads currently share one managed NFS endpoint**
-  - `durable-rwo` and replica spreading do not isolate an NFS service failure or data loss
+    - `durable-rwo` and replica spreading do not isolate an NFS service failure or data loss
 - **Plaintext secrets are not stored in Git**
-  - Host bootstrap values use Ansible Vault, while Kubernetes application values use the SOPS and age boundary
+    - Host bootstrap values use Ansible Vault, while Kubernetes application values use the SOPS and age boundary
 
 ## 3. System context and repository ownership
 
@@ -71,21 +71,21 @@ sourceUrl: https://github.com/jongminchung/rke2spray
 | Rancher and HyperDX public routes                    | GitOps repository | `apps/platform-routes`                                                 |
 
 - **Concurrent ownership of the same Kubernetes resource is not supported**
-  - An RKE2 manifest owner maps to `/var/lib/rancher/rke2/server/manifests/<owner>`
-  - `native-addons-handoff` verifies owner, basename, and checksum during an ownership transfer
-  - An `ownership-only` ledger entry transfers ownership without deleting the Kubernetes resource
-  - A `prune` ledger entry is removable only with the exact confirmation value
+    - An RKE2 manifest owner maps to `/var/lib/rancher/rke2/server/manifests/<owner>`
+    - `native-addons-handoff` verifies owner, basename, and checksum during an ownership transfer
+    - An `ownership-only` ledger entry transfers ownership without deleting the Kubernetes resource
+    - A `prune` ledger entry is removable only with the exact confirmation value
 
 ## 4. The solution strategy switches reconciliation engines at API readiness
 
 - **`rke2spray` reconciles hosts and RKE2 desired state before the Kubernetes API exists**
-  - It validates Kubespray-shaped inventory and translates it into the RKE2 server and agent lifecycle
+    - It validates Kubespray-shaped inventory and translates it into the RKE2 server and agent lifecycle
 - **The bootstrap gate turns API creation and platform readiness into executable conditions**
-  - It checks nodes, Cilium, CoreDNS, Gateway API, cert-manager, and NFS CSI readiness
+    - It checks nodes, Cilium, CoreDNS, Gateway API, cert-manager, and NFS CSI readiness
 - **Argo CD continuously reconciles application desired state after API creation**
-  - The root Application creates role-scoped child Applications and sync waves
+    - The root Application creates role-scoped child Applications and sync waves
 - **Both engines consume one environment release without concurrently owning the same resource**
-  - This boundary is the condition for safely combining Ansible IaC and GitOps in one repository
+    - This boundary is the condition for safely combining Ansible IaC and GitOps in one repository
 
 <C4ArchitectureMap level="container" locale="en" />
 
@@ -173,15 +173,15 @@ sourceUrl: https://github.com/jongminchung/rke2spray
 | `make gitops-integration`                              | `GITOPS_INTEGRATION_SCRIPT`        | Run a GitOps integration script on the bootstrap server      |
 
 - **Cluster access does not copy a long-lived kubeconfig into the environment repository**
-  - `kubeconfig_localhost: false` and `kubectl_localhost: false` keep Ansible-controller artifacts disabled
-  - Read-only checks should run the bundled `kubectl` remotely through `scripts/run_with_ssh_jump.py`
-  - Local integration tests use `operations/with-cluster-kubeconfig.sh`, which retrieves `/etc/rancher/rke2/rke2.yaml` into `XDG_RUNTIME_DIR`, opens a loopback SSH tunnel, verifies `/readyz`, and removes the credential on exit
-  - `operations/cluster-kubeconfig.md` is the detailed issuance, validation, cleanup, and incident-response runbook
+    - `kubeconfig_localhost: false` and `kubectl_localhost: false` keep Ansible-controller artifacts disabled
+    - Read-only checks should run the bundled `kubectl` remotely through `scripts/run_with_ssh_jump.py`
+    - Local integration tests use `operations/with-cluster-kubeconfig.sh`, which retrieves `/etc/rancher/rke2/rke2.yaml` into `XDG_RUNTIME_DIR`, opens a loopback SSH tunnel, verifies `/readyz`, and removes the credential on exit
+    - `operations/cluster-kubeconfig.md` is the detailed issuance, validation, cleanup, and incident-response runbook
 
 - **`cluster-reset`, `cluster-recover`, `cluster-remove-node`, add-on pruning, and failure probes can destroy or interrupt state**
-  - Each target requires a bounded target, confirmation value, or opt-in environment variable
-  - Server removal requires prior removal from external LB backends on ports `80`, `443`, `6443`, and `9345`
-  - Off-host snapshot transfer and retention are outside the `rke2spray` contract
+    - Each target requires a bounded target, confirmation value, or opt-in environment variable
+    - Server removal requires prior removal from external LB backends on ports `80`, `443`, `6443`, and `9345`
+    - Off-host snapshot transfer and retention are outside the `rke2spray` contract
 
 ## 6. GitOps handoff runtime
 
@@ -202,23 +202,23 @@ sourceUrl: https://github.com/jongminchung/rke2spray
 ### Bootstrap gates
 
 - **`extra_playbooks/gitops_bootstrap.yml` requires all of the following conditions**
-  - RKE2 API `/readyz` returns `ok`
-  - Every RKE2 Node reports `Ready`
-  - Cilium and CoreDNS rollouts are complete
-  - Gateway API CRDs report `Established` and the Cilium `GatewayClass` reports `Accepted`
-  - cert-manager and NFS CSI rollouts are complete
-  - NFS migration-gate status, database status, StorageClass UID, and cluster UID match the live cluster
+    - RKE2 API `/readyz` returns `ok`
+    - Every RKE2 Node reports `Ready`
+    - Cilium and CoreDNS rollouts are complete
+    - Gateway API CRDs report `Established` and the Cilium `GatewayClass` reports `Accepted`
+    - cert-manager and NFS CSI rollouts are complete
+    - NFS migration-gate status, database status, StorageClass UID, and cluster UID match the live cluster
 
 - **Secrets move from Ansible Vault into Argo CD Secrets**
-  - Read-only SSH private key for the Git repository
-  - GitHub known-hosts value
-  - SOPS age private key
-  - Neither repository stores plaintext private keys
+    - Read-only SSH private key for the Git repository
+    - GitHub known-hosts value
+    - SOPS age private key
+    - Neither repository stores plaintext private keys
 
 <ExcalidrawAssetDiagram
-  ariaLabel="Ownership and reconciliation-engine boundary between jamie-kr-gitops and rke2spray"
-  caption="The environment repository sends two declarative domains to separate reconciliation engines: rke2spray and Argo CD"
-  src="/diagrams/rke2-gitops-ownership.excalidraw"
+    ariaLabel="Ownership and reconciliation-engine boundary between jamie-kr-gitops and rke2spray"
+    caption="The environment repository sends two declarative domains to separate reconciliation engines: rke2spray and Argo CD"
+    src="/diagrams/rke2-gitops-ownership.excalidraw"
 />
 
 <PlatformConvergenceFlow locale="en" />
@@ -305,33 +305,33 @@ sourceUrl: https://github.com/jongminchung/rke2spray
 <ObservabilityPipelineFlow locale="en" />
 
 - **Every telemetry signal enters through the two-replica OTel Gateway**
-  - Agent, Cluster Collector, and application OTLP traffic share the same batch, infinite retry, and `1Gi` PVC queue boundary
-  - The Gateway authenticates to ClickStack ingestion with the protected HyperDX API credential
+    - Agent, Cluster Collector, and application OTLP traffic share the same batch, infinite retry, and `1Gi` PVC queue boundary
+    - The Gateway authenticates to ClickStack ingestion with the protected HyperDX API credential
 - **ClickStack ingestion is a two-replica StatefulSet with a second persistent queue boundary**
-  - Both ClickHouse exporters use `file_storage`, queue size `8192`, and infinite retry
-  - A ClickHouse outage after Gateway delivery therefore remains recoverable from the ingestion PVC queue
+    - Both ClickHouse exporters use `file_storage`, queue size `8192`, and infinite retry
+    - A ClickHouse outage after Gateway delivery therefore remains recoverable from the ingestion PVC queue
 - **Resource identity preserves application semantics**
-  - Collectors add `k8s.cluster.name=jamie-kr` and their platform role
-  - They do not overwrite an SDK-provided `service.namespace`
+    - Collectors add `k8s.cluster.name=jamie-kr` and their platform role
+    - They do not overwrite an SDK-provided `service.namespace`
 - **NetworkPolicies limit OTLP and S3 ingress**
-  - Only the OTel Gateway and HyperDX can reach ClickStack ingestion ports
-  - Only ClickHouse can reach the private S3 data port, while the Cluster Collector can reach its metrics port
+    - Only the OTel Gateway and HyperDX can reach ClickStack ingestion ports
+    - Only ClickHouse can reach the private S3 data port, while the Cluster Collector can reach its metrics port
 
 ### Compression and cold-storage lifecycle
 
 <TelemetryStorageLifecycle locale="en" />
 
 - **All nine ClickStack telemetry tables use the `hot_cold` ClickHouse storage policy**
-  - New replicated parts start on the `default` hot volume backed by `durable-rwo`
-  - Eligible parts are recompressed with `CODEC(ZSTD(3))` after two days
-  - Parts move to the `cold_s3` volume after three days
-  - ClickHouse deletes table parts and their owned S3 objects after 14 days
+    - New replicated parts start on the `default` hot volume backed by `durable-rwo`
+    - Eligible parts are recompressed with `CODEC(ZSTD(3))` after two days
+    - Parts move to the `cold_s3` volume after three days
+    - ClickHouse deletes table parts and their owned S3 objects after 14 days
 - **ClickHouse is the single lifecycle owner**
-  - SeaweedFS does not apply an independent bucket TTL that could remove objects before ClickHouse metadata changes
-  - The PostSync retention Job creates the private bucket idempotently before applying table settings and TTL expressions
+    - SeaweedFS does not apply an independent bucket TTL that could remove objects before ClickHouse metadata changes
+    - The PostSync retention Job creates the private bucket idempotently before applying table settings and TTL expressions
 - **Cold storage reduces hot PVC pressure but is not a backup**
-  - ClickHouse replicas use separate S3 prefixes and still depend on the same SeaweedFS and NFS failure domain
-  - Deletion, corruption, or loss of the shared storage layer is not recoverable from Git
+    - ClickHouse replicas use separate S3 prefixes and still depend on the same SeaweedFS and NFS failure domain
+    - Deletion, corruption, or loss of the shared storage layer is not recoverable from Git
 
 ## 9. Architecture decisions for telemetry retention
 
@@ -364,30 +364,30 @@ sourceUrl: https://github.com/jongminchung/rke2spray
 ### Live-cluster verification
 
 - **`tests/integration/verify.sh` defines the following completion state**
-  - All 15 Argo CD Applications report `Synced` and `Healthy`
-  - Stateful and stateless Application prune and finalizer policies match
-  - Three-replica workloads are `Ready` on three distinct workers
-  - Services excluded from public exposure remain `ClusterIP`
-  - No Pod is Pending and every Node root filesystem remains below `60%` usage
-  - `durable-rwo` uses `nfs.csi.k8s.io`, `Immediate`, `Retain`, and `onDelete=retain`
-  - All target PVCs use `durable-rwo` and total `301Gi`
-  - ClickStack ingestion has two ready replicas, while the private S3 gateway has three ready replicas on distinct workers
-  - SeaweedFS master and filer commands retain the `001` two-copy replication placement
-  - Collector self-metrics include the `otelcol_*` family in ClickHouse
-  - All nine telemetry tables use `hot_cold`, `ZSTD(3)`, three-day cold movement, and fourteen-day deletion
-  - The `cold_s3` disk is visible in `system.disks`
-  - Gateway `HTTPRoute` resources report `Accepted=True` and `ResolvedRefs=True`
+    - All 15 Argo CD Applications report `Synced` and `Healthy`
+    - Stateful and stateless Application prune and finalizer policies match
+    - Three-replica workloads are `Ready` on three distinct workers
+    - Services excluded from public exposure remain `ClusterIP`
+    - No Pod is Pending and every Node root filesystem remains below `60%` usage
+    - `durable-rwo` uses `nfs.csi.k8s.io`, `Immediate`, `Retain`, and `onDelete=retain`
+    - All target PVCs use `durable-rwo` and total `301Gi`
+    - ClickStack ingestion has two ready replicas, while the private S3 gateway has three ready replicas on distinct workers
+    - SeaweedFS master and filer commands retain the `001` two-copy replication placement
+    - Collector self-metrics include the `otelcol_*` family in ClickHouse
+    - All nine telemetry tables use `hot_cold`, `ZSTD(3)`, three-day cold movement, and fourteen-day deletion
+    - The `cold_s3` disk is visible in `system.disks`
+    - Gateway `HTTPRoute` resources report `Accepted=True` and `ResolvedRefs=True`
 
 - **Verification that writes or deletes state requires an explicit opt-in variable**
-  - The NFS performance gate requires `RUN_NFS_PERFORMANCE_GATE=true`
-  - The database gate requires `RUN_NFS_DATABASE_GATE=true`
-  - Tri-signal telemetry generation requires `RUN_TELEMETRY_E2E=true`
-  - Workload disruption checks require `RUN_DISRUPTIVE_TESTS=true`
+    - The NFS performance gate requires `RUN_NFS_PERFORMANCE_GATE=true`
+    - The database gate requires `RUN_NFS_DATABASE_GATE=true`
+    - Tri-signal telemetry generation requires `RUN_TELEMETRY_E2E=true`
+    - Workload disruption checks require `RUN_DISRUPTIVE_TESTS=true`
 
 - **The tri-signal E2E gate proves the complete write path**
-  - A digest-pinned `telemetrygen` Pod emits logs, metrics, and traces with a unique `service.name`
-  - Queries require all three signal families and `k8s.cluster.name=jamie-kr` to appear in ClickHouse
-  - Generator Pods are removed after the test, while their small telemetry payload follows the normal retention lifecycle
+    - A digest-pinned `telemetrygen` Pod emits logs, metrics, and traces with a unique `service.name`
+    - Queries require all three signal families and `k8s.cluster.name=jamie-kr` to appear in ClickHouse
+    - Generator Pods are removed after the test, while their small telemetry payload follows the normal retention lifecycle
 
 ## 11. Risks and recovery boundaries
 
@@ -419,10 +419,10 @@ sourceUrl: https://github.com/jongminchung/rke2spray
 ## Documentation update contract
 
 - **Update this page's `updatedAt` and `verifiedAt` when any of the following code changes**
-  - Version, topology, network, or storage inputs in `inventory/`
-  - Public operator targets or required variables in `Makefile`
-  - Readiness gates in `gitops_bootstrap.yml`
-  - Applications, waves, chart versions, or prune policies in `bootstrap/templates/applications.yaml`
-  - Replicas, PVCs, Services, or public routes under `apps/`
-  - Completion assertions in `tests/integration/verify.sh`
-  - Kubeconfig issuance or cleanup behavior in `operations/cluster-kubeconfig.md` and `operations/with-cluster-kubeconfig.sh`
+    - Version, topology, network, or storage inputs in `inventory/`
+    - Public operator targets or required variables in `Makefile`
+    - Readiness gates in `gitops_bootstrap.yml`
+    - Applications, waves, chart versions, or prune policies in `bootstrap/templates/applications.yaml`
+    - Replicas, PVCs, Services, or public routes under `apps/`
+    - Completion assertions in `tests/integration/verify.sh`
+    - Kubeconfig issuance or cleanup behavior in `operations/cluster-kubeconfig.md` and `operations/with-cluster-kubeconfig.sh`

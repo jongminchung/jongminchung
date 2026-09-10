@@ -25,33 +25,33 @@ sourceUrl: https://learn.chatgpt.com/docs/extend/mcp
 ## Tool output is the largest handoff payload
 
 - **A short handoff does not undo an unbounded log already loaded into the session**
-  - Full test output, minified stack traces, and thousands of search matches are common sources
-  - Control output volume before optimizing command count
+    - Full test output, minified stack traces, and thousands of search matches are common sources
+    - Control output volume before optimizing command count
 
 - **Use a wide-to-narrow diagnostic funnel**
-  - Find filenames, symbols, or error-code locations first
-  - Open nearby context from the strongest candidates second
-  - Read the full range only when it can distinguish competing hypotheses
+    - Find filenames, symbols, or error-code locations first
+    - Open nearby context from the strongest candidates second
+    - Read the full range only when it can distinguish competing hypotheses
 
 - **Anthropic recommends trimming long logs to the relevant section or roughly the last 20–30 lines[^claude-limits]**
-  - Treat that number as an initial diagnostic window rather than a universal hard cap
-  - Expand a named range when the earliest cause or a failure chain falls outside it
+    - Treat that number as an initial diagnostic window rather than a universal hard cap
+    - Expand a named range when the earliest cause or a failure chain falls outside it
 
 ## Set a default budget by output type
 
 - **Bound both search result count and fields**
-  - Start with 50 file paths or 30 text matches including line numbers
-  - Narrow by extension, path, or symbol before asking for more results
+    - Start with 50 file paths or 30 text matches including line numbers
+    - Narrow by extension, path, or symbol before asking for more results
 
 - **Make tests failure-first**
-  - On success, retain the command, pass count, and duration
-  - On failure, read one message and about 20–30 stack lines before the next failure
-  - Run the full suite for completion, but do not paste its complete success stream
+    - On success, retain the command, pass count, and duration
+    - On failure, read one message and about 20–30 stack lines before the next failure
+    - Run the full suite for completion, but do not paste its complete success stream
 
 - **Move from diff size to content progressively**
-  - Inspect `git diff --stat` and changed files first
-  - Review relevant hunks second
-  - Read the complete diff during final verification, treating generated files separately
+    - Inspect `git diff --stat` and changed files first
+    - Review relevant hunks second
+    - Read the complete diff during final verification, treating generated files separately
 
 | Output        |              Starting budget | Expand when                          |
 | ------------- | ---------------------------: | ------------------------------------ |
@@ -63,47 +63,47 @@ sourceUrl: https://learn.chatgpt.com/docs/extend/mcp
 | Web or MCP    | relevant fields per question | evidence conflicts or is incomplete  |
 
 - **These are author-defined starting values**
-  - A compiler error and a distributed trace need different windows
-  - Tune the values against real missed diagnoses
+    - A compiler error and a distributed trace need different windows
+    - Tune the values against real missed diagnoses
 
 ## Use client-side output controls
 
 - **Gemini CLI can assign a token budget to shell-output summarization[^gemini-config]**
-  - `model.summarizeToolOutput.run_shell_command.tokenBudget` bounds the summary
-  - Preserve where the raw log lives and how to query it because summarization can omit an important row
+    - `model.summarizeToolOutput.run_shell_command.tokenBudget` bounds the summary
+    - Preserve where the raw log lives and how to query it because summarization can omit an important row
 
 - **Codex MCP configuration supports tool allowlists and per-tool output token limits[^codex-mcp]**
-  - `enabled_tools` can remove irrelevant tools and their accidental invocation paths
-  - `tools.<tool>.output_token_limit` is particularly useful for large search or issue responses
+    - `enabled_tools` can remove irrelevant tools and their accidental invocation paths
+    - `tools.<tool>.output_token_limit` is particularly useful for large search or issue responses
 
 - **MCP tool instructions also consume context**
-  - OpenAI says the first 512 characters of server `instructions` should make sense on their own[^codex-mcp]
-  - Put essential constraints first and move long examples into on-demand documentation
+    - OpenAI says the first 512 characters of server `instructions` should make sense on their own[^codex-mcp]
+    - Put essential constraints first and move long examples into on-demand documentation
 
 ## Detect over-truncation through retry cost
 
 - **Record total output and repeated diagnosis together**
-  - Add `tool_output_lines`, `tool_calls`, `repeated_calls`, and `time_to_first_hypothesis`
-  - Three widening reruns of the same command suggest that its initial window may be too small
+    - Add `tool_output_lines`, `tool_calls`, `repeated_calls`, and `time_to_first_hypothesis`
+    - Three widening reruns of the same command suggest that its initial window may be too small
 
 - **A successful budget improves completed-work output without lowering diagnostic quality**
-  - Median output per completed task should fall
-  - Time to the first correct hypothesis and test pass rate should not worsen
-  - Human time spent reopening truncated logs must not rise
+    - Median output per completed task should fall
+    - Time to the first correct hypothesis and test pass rate should not worsen
+    - Human time spent reopening truncated logs must not rise
 
 - **Sensitive-data removal remains a separate, stronger constraint**
-  - Remove credentials, personal information, and private URLs before summarization
-  - A shorter output is not automatically safe to send to an external model
+    - Remove credentials, personal information, and private URLs before summarization
+    - A shorter output is not automatically safe to send to an external model
 
 ## Hand difficulty signals to the next part
 
 - **Record both the default budget and the conditions that expand it in `tool-budget.md`**
-  - Failures across packages, non-reproducible errors, and a third failed hypothesis signal higher difficulty
-  - A single file, clear error, and one verifier signal a lightweight-model candidate
+    - Failures across packages, non-reproducible errors, and a third failed hypothesis signal higher difficulty
+    - A single file, clear error, and one verifier signal a lightweight-model candidate
 
 - **Part 6 does not choose a stronger model merely because raw output is large**
-  - Narrow the output first, then route on the remaining reasoning difficulty
-  - Escalate only at observable events such as two failed verification hypotheses
+    - Narrow the output first, then route on the remaining reasoning difficulty
+    - Escalate only at observable events such as two failed verification hypotheses
 
 ## Action plan
 
