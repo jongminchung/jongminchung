@@ -82,10 +82,10 @@ bun run --filter @jongminchung/ui publish:dry-run
 **I'm a Night 🦉** 
 
 ```text
-🌞 Morning                925 commits         ███░░░░░░░░░░░░░░░░░░░░░░   10.76 % 
-🌆 Daytime                2052 commits        ██████░░░░░░░░░░░░░░░░░░░   23.87 % 
-🌃 Evening                3258 commits        █████████░░░░░░░░░░░░░░░░   37.89 % 
-🌙 Night                  2363 commits        ███████░░░░░░░░░░░░░░░░░░   27.48 % 
+🌞 Morning                994 commits         ███░░░░░░░░░░░░░░░░░░░░░░   11.21 % 
+🌆 Daytime                2119 commits        ██████░░░░░░░░░░░░░░░░░░░   23.89 % 
+🌃 Evening                3368 commits        █████████░░░░░░░░░░░░░░░░   37.97 % 
+🌙 Night                  2390 commits        ███████░░░░░░░░░░░░░░░░░░   26.94 % 
 ```
 
 
@@ -93,36 +93,36 @@ bun run --filter @jongminchung/ui publish:dry-run
 
 ```text
 💬 Programming Languages: 
-Java                     8 hrs 22 mins       ███████░░░░░░░░░░░░░░░░░░   28.63 % 
-Markdown                 4 hrs 57 mins       ████░░░░░░░░░░░░░░░░░░░░░   16.95 % 
-YAML                     4 hrs 14 mins       ████░░░░░░░░░░░░░░░░░░░░░   14.47 % 
-TypeScript               2 hrs 41 mins       ██░░░░░░░░░░░░░░░░░░░░░░░   09.19 % 
-Python                   1 hr 46 mins        ██░░░░░░░░░░░░░░░░░░░░░░░   06.05 % 
+Java                     5 hrs 45 mins       █████░░░░░░░░░░░░░░░░░░░░   21.62 % 
+Markdown                 4 hrs 56 mins       █████░░░░░░░░░░░░░░░░░░░░   18.56 % 
+YAML                     3 hrs 29 mins       ███░░░░░░░░░░░░░░░░░░░░░░   13.15 % 
+Kotlin                   2 hrs 49 mins       ███░░░░░░░░░░░░░░░░░░░░░░   10.62 % 
+Python                   2 hrs 48 mins       ███░░░░░░░░░░░░░░░░░░░░░░   10.54 % 
 ```
 
 🤖 **AI Coding This Week** 
 
 ```text
-⏱ AI Coding Time: 16 hrs 57 mins (57.93%)
+⏱ AI Coding Time: 13 hrs 20 mins (50.16%)
 
-✍️ 23,166 lines written by AI, 29,151 lines written by hand (44.28% AI-written)
+✍️ 3,400 lines written by AI, 9,443 lines written by hand (26.47% AI-written)
 
-🔤 20,476,375 Input Tokens, 3,610,694 Output Tokens
+🔤 7,135,783 Input Tokens, 932,988 Output Tokens
 
-💵 $839.23 Estimated AI Cost This Week
+💵 $85.95 Estimated AI Cost This Week
 
-🧠 73 AI Sessions, 239 AI Prompts
+🧠 66 AI Sessions, 186 AI Prompts
 
-GPT                      23,688 lines        █████████████████████████   99.99 % 
-Sonnet                   2 lines             ░░░░░░░░░░░░░░░░░░░░░░░░░   00.01 % 
-Codex-Cli                0 lines             ░░░░░░░░░░░░░░░░░░░░░░░░░   00.00 % 
+GPT                      4,023 lines         █████████████████████████   99.90 % 
+Codex-Cli                4 lines             ░░░░░░░░░░░░░░░░░░░░░░░░░   00.10 % 
+Opencode-Cli             0 lines             ░░░░░░░░░░░░░░░░░░░░░░░░░   00.00 % 
 Codex-Vscode             0 lines             ░░░░░░░░░░░░░░░░░░░░░░░░░   00.00 % 
 
 🔎 AI Coding Insights:
-⚖️ Balanced with AI — 44.28% of written lines came from AI
-📄 Detailed Prompter — average 534 characters per prompt
+🧑‍💻 Mostly Hands-On — 26.47% of written lines came from AI
+📄 Detailed Prompter — average 912 characters per prompt
 🔁 Iterative Prompter — average 3 prompts per session
-🔍 Hands-On Reviewer — 59.3% of changed lines were hand-edited
+🔍 Hands-On Reviewer — 78.21% of changed lines were hand-edited
 ```
 
 
