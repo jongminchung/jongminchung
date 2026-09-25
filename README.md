@@ -93,35 +93,35 @@ bun run --filter @jongminchung/ui publish:dry-run
 
 ```text
 💬 Programming Languages: 
-Java                     3 hrs 37 mins       ██████░░░░░░░░░░░░░░░░░░░   23.79 % 
-Markdown                 3 hrs 23 mins       ██████░░░░░░░░░░░░░░░░░░░   22.17 % 
-TypeScript               2 hrs 11 mins       ████░░░░░░░░░░░░░░░░░░░░░   14.34 % 
-YAML                     1 hr 51 mins        ███░░░░░░░░░░░░░░░░░░░░░░   12.15 % 
-PlantUML                 1 hr 4 mins         ██░░░░░░░░░░░░░░░░░░░░░░░   07.08 % 
+Markdown                 2 hrs 38 mins       ███████░░░░░░░░░░░░░░░░░░   28.06 % 
+YAML                     1 hr 43 mins        █████░░░░░░░░░░░░░░░░░░░░   18.30 % 
+PlantUML                 1 hr 1 min          ███░░░░░░░░░░░░░░░░░░░░░░   10.84 % 
+Java                     1 hr 1 min          ███░░░░░░░░░░░░░░░░░░░░░░   10.78 % 
+TypeScript               44 mins             ██░░░░░░░░░░░░░░░░░░░░░░░   07.84 % 
 ```
 
 🤖 **AI Coding This Week** 
 
 ```text
-⏱ AI Coding Time: 8 hrs 49 mins (57.84%)
+⏱ AI Coding Time: 6 hrs 6 mins (64.73%)
 
-✍️ 3,294 lines written by AI, 1,040 lines written by hand (76.0% AI-written)
+✍️ 3,166 lines written by AI, 531 lines written by hand (85.64% AI-written)
 
-🔤 7,578,899 Input Tokens, 835,302 Output Tokens
+🔤 6,094,744 Input Tokens, 585,724 Output Tokens
 
-💵 $109.23 Estimated AI Cost This Week
+💵 $99.74 Estimated AI Cost This Week
 
-🧠 28 AI Sessions, 98 AI Prompts
+🧠 19 AI Sessions, 69 AI Prompts
 
-GPT                      3,398 lines         █████████████████████████   100.00 % 
+GPT                      3,262 lines         █████████████████████████   100.00 % 
 Opencode-Cli             0 lines             ░░░░░░░░░░░░░░░░░░░░░░░░░   00.00 % 
 Codex-Cli                0 lines             ░░░░░░░░░░░░░░░░░░░░░░░░░   00.00 % 
 
 🔎 AI Coding Insights:
-🤖 AI-Driven — 76.0% of written lines came from AI
-📄 Detailed Prompter — average 1,093 characters per prompt
+🤖 AI-Driven — 85.64% of written lines came from AI
+📄 Detailed Prompter — average 1,078 characters per prompt
 🔁 Iterative Prompter — average 4 prompts per session
-🚀 High AI Trust — 43.06% of changed lines were hand-edited
+🚀 High AI Trust — 31.21% of changed lines were hand-edited
 ```
 
 
