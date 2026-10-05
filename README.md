@@ -93,35 +93,35 @@ bun run --filter @jongminchung/ui publish:dry-run
 
 ```text
 💬 Programming Languages: 
-Java                     13 hrs 34 mins      ███████████░░░░░░░░░░░░░░   42.63 % 
-YAML                     7 hrs 9 mins        ██████░░░░░░░░░░░░░░░░░░░   22.51 % 
-Other                    2 hrs 52 mins       ██░░░░░░░░░░░░░░░░░░░░░░░   09.04 % 
-TypeScript               2 hrs 18 mins       ██░░░░░░░░░░░░░░░░░░░░░░░   07.25 % 
-JSON                     1 hr 36 mins        █░░░░░░░░░░░░░░░░░░░░░░░░   05.06 % 
+Java                     10 hrs 14 mins      ██████████░░░░░░░░░░░░░░░   41.54 % 
+YAML                     6 hrs 44 mins       ███████░░░░░░░░░░░░░░░░░░   27.34 % 
+Other                    2 hrs 8 mins        ██░░░░░░░░░░░░░░░░░░░░░░░   08.66 % 
+JSON                     1 hr 25 mins        █░░░░░░░░░░░░░░░░░░░░░░░░   05.76 % 
+Bash                     1 hr 13 mins        █░░░░░░░░░░░░░░░░░░░░░░░░   04.95 % 
 ```
 
 🤖 **AI Coding This Week** 
 
 ```text
-⏱ AI Coding Time: 15 hrs 23 mins (48.37%)
+⏱ AI Coding Time: 12 hrs 33 mins (50.91%)
 
-✍️ 3,094 lines written by AI, 1,885 lines written by hand (62.14% AI-written)
+✍️ 2,579 lines written by AI, 1,627 lines written by hand (61.32% AI-written)
 
-🔤 6,801,300 Input Tokens, 781,876 Output Tokens
+🔤 5,618,056 Input Tokens, 615,348 Output Tokens
 
-💵 $74.14 Estimated AI Cost This Week
+💵 $41.80 Estimated AI Cost This Week
 
-🧠 68 AI Sessions, 239 AI Prompts
+🧠 60 AI Sessions, 208 AI Prompts
 
-GPT                      3,571 lines         █████████████████████████   100.00 % 
-Opencode-Cli             0 lines             ░░░░░░░░░░░░░░░░░░░░░░░░░   00.00 % 
+GPT                      2,953 lines         █████████████████████████   100.00 % 
 Codex-Vscode             0 lines             ░░░░░░░░░░░░░░░░░░░░░░░░░   00.00 % 
+Opencode-Cli             0 lines             ░░░░░░░░░░░░░░░░░░░░░░░░░   00.00 % 
 
 🔎 AI Coding Insights:
-⚖️ Balanced with AI — 62.14% of written lines came from AI
-📄 Detailed Prompter — average 1,033 characters per prompt
-🔁 Iterative Prompter — average 4 prompts per session
-🚀 High AI Trust — 47.58% of changed lines were hand-edited
+⚖️ Balanced with AI — 61.32% of written lines came from AI
+📄 Detailed Prompter — average 993 characters per prompt
+🔁 Iterative Prompter — average 3 prompts per session
+🚀 High AI Trust — 47.28% of changed lines were hand-edited
 ```
 
 
