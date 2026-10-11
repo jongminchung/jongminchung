@@ -82,10 +82,10 @@ bun run --filter @jongminchung/ui publish:dry-run
 **I'm a Night 🦉** 
 
 ```text
-🌞 Morning                988 commits         ███░░░░░░░░░░░░░░░░░░░░░░   11.12 % 
-🌆 Daytime                2135 commits        ██████░░░░░░░░░░░░░░░░░░░   24.03 % 
-🌃 Evening                3369 commits        █████████░░░░░░░░░░░░░░░░   37.93 % 
-🌙 Night                  2391 commits        ███████░░░░░░░░░░░░░░░░░░   26.92 % 
+🌞 Morning                924 commits         ███░░░░░░░░░░░░░░░░░░░░░░   10.72 % 
+🌆 Daytime                2068 commits        ██████░░░░░░░░░░░░░░░░░░░   24.00 % 
+🌃 Evening                3260 commits        █████████░░░░░░░░░░░░░░░░   37.83 % 
+🌙 Night                  2365 commits        ███████░░░░░░░░░░░░░░░░░░   27.45 % 
 ```
 
 
@@ -93,25 +93,25 @@ bun run --filter @jongminchung/ui publish:dry-run
 
 ```text
 💬 Programming Languages: 
-Markdown                 3 hrs 38 mins       ███████░░░░░░░░░░░░░░░░░░   26.01 % 
-Java                     2 hrs 48 mins       █████░░░░░░░░░░░░░░░░░░░░   20.03 % 
-Other                    1 hr 38 mins        ███░░░░░░░░░░░░░░░░░░░░░░   11.78 % 
-Bash                     1 hr 10 mins        ██░░░░░░░░░░░░░░░░░░░░░░░   08.36 % 
-YAML                     59 mins             ██░░░░░░░░░░░░░░░░░░░░░░░   07.04 % 
+Markdown                 3 hrs 38 mins       ██████░░░░░░░░░░░░░░░░░░░   25.07 % 
+Java                     2 hrs 48 mins       █████░░░░░░░░░░░░░░░░░░░░   19.31 % 
+Other                    2 hrs 10 mins       ████░░░░░░░░░░░░░░░░░░░░░   14.98 % 
+Bash                     1 hr 10 mins        ██░░░░░░░░░░░░░░░░░░░░░░░   08.06 % 
+YAML                     59 mins             ██░░░░░░░░░░░░░░░░░░░░░░░   06.78 % 
 ```
 
 🤖 **AI Coding This Week** 
 
 ```text
-⏱ AI Coding Time: 9 hrs 9 mins (65.56%)
+⏱ AI Coding Time: 9 hrs 41 mins (66.81%)
 
 ✍️ 988 lines written by AI, 1,587 lines written by hand (38.37% AI-written)
 
-🔤 6,907,649 Input Tokens, 473,235 Output Tokens
+🔤 7,220,975 Input Tokens, 500,377 Output Tokens
 
-💵 $54.00 Estimated AI Cost This Week
+💵 $55.45 Estimated AI Cost This Week
 
-🧠 35 AI Sessions, 112 AI Prompts
+🧠 40 AI Sessions, 119 AI Prompts
 
 GPT                      1,193 lines         █████████████████████████   100.00 % 
 Opencode-Cli             0 lines             ░░░░░░░░░░░░░░░░░░░░░░░░░   00.00 % 
@@ -119,7 +119,7 @@ Codex-Vscode             0 lines             ░░░░░░░░░░░�
 
 🔎 AI Coding Insights:
 ⚖️ Balanced with AI — 38.37% of written lines came from AI
-📚 Verbose Prompter — average 2,937 characters per prompt
+📚 Verbose Prompter — average 2,785 characters per prompt
 🔁 Iterative Prompter — average 3 prompts per session
 🔍 Hands-On Reviewer — 58.49% of changed lines were hand-edited
 ```
