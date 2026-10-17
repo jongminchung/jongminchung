@@ -77,15 +77,15 @@ bun run --filter @jongminchung/ui publish:dry-run
 <!-- prettier-ignore-start -->
 
 <!--START_SECTION:waka-->
-![AI Code Time](http://img.shields.io/badge/AI%20Code%20Time-867%20hrs%2012%20mins-blue?style=flat)
+![AI Code Time](http://img.shields.io/badge/AI%20Code%20Time-872%20hrs%2037%20mins-blue?style=flat)
 
 **I'm a Night 🦉** 
 
 ```text
-🌞 Morning                928 commits         ███░░░░░░░░░░░░░░░░░░░░░░   10.75 % 
-🌆 Daytime                2070 commits        ██████░░░░░░░░░░░░░░░░░░░   23.99 % 
-🌃 Evening                3266 commits        █████████░░░░░░░░░░░░░░░░   37.84 % 
-🌙 Night                  2366 commits        ███████░░░░░░░░░░░░░░░░░░   27.42 % 
+🌞 Morning                992 commits         ███░░░░░░░░░░░░░░░░░░░░░░   11.15 % 
+🌆 Daytime                2137 commits        ██████░░░░░░░░░░░░░░░░░░░   24.02 % 
+🌃 Evening                3375 commits        █████████░░░░░░░░░░░░░░░░   37.94 % 
+🌙 Night                  2392 commits        ███████░░░░░░░░░░░░░░░░░░   26.89 % 
 ```
 
 
