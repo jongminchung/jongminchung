@@ -82,10 +82,10 @@ bun run --filter @jongminchung/ui publish:dry-run
 **I'm a Night 🦉** 
 
 ```text
-🌞 Morning                992 commits         ███░░░░░░░░░░░░░░░░░░░░░░   11.15 % 
-🌆 Daytime                2137 commits        ██████░░░░░░░░░░░░░░░░░░░   24.02 % 
-🌃 Evening                3375 commits        █████████░░░░░░░░░░░░░░░░   37.94 % 
-🌙 Night                  2392 commits        ███████░░░░░░░░░░░░░░░░░░   26.89 % 
+🌞 Morning                828 commits         ███░░░░░░░░░░░░░░░░░░░░░░   10.24 % 
+🌆 Daytime                1922 commits        ██████░░░░░░░░░░░░░░░░░░░   23.76 % 
+🌃 Evening                3076 commits        ██████████░░░░░░░░░░░░░░░   38.03 % 
+🌙 Night                  2262 commits        ███████░░░░░░░░░░░░░░░░░░   27.97 % 
 ```
 
 
