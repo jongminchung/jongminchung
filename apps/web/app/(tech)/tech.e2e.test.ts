@@ -78,7 +78,7 @@ test("[성공] 목록 제어를 URL과 동기화하고 다음 글을 자동으�
   await expect(page.locator("[data-view=list] > a")).toHaveCount(18);
 });
 
-test("[성공] 다음 글 응답이 진행 중인 페이지 탐색을 취소하지 않음", async ({
+test("[성공] 진행 중인 추가 글 응답이 페이지 탐색을 취소하지 않음", async ({
   page,
   siteRequest,
 }) => {
@@ -115,8 +115,8 @@ test("[성공] 다음 글 응답이 진행 중인 페이지 탐색을 취소하�
   await expect(page).toHaveURL(/\/en\/showcase$/u);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Showcase");
   await page.goBack();
-  await expect(page).toHaveURL(/\/en\?page=2$/u);
-  await expect(page.locator('[data-view="grid"]:visible > a')).toHaveCount(18);
+  await expect(page).toHaveURL(/\/en$/u);
+  await expect(page.locator('[data-view="grid"]:visible > a')).toHaveCount(9);
   await page.goForward();
   await expect(page).toHaveURL(/\/en\/showcase$/u);
 });

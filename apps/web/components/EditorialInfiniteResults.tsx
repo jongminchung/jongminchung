@@ -38,6 +38,7 @@ export function EditorialInfiniteResults({
 }): React.JSX.Element {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const requestRef = useRef<AbortController | null>(null);
+  const navigationPendingRef = useRef(false);
   const [items, setItems] = useState<readonly EditorialItem[]>([]);
   const [nextHref, setNextHref] = useState(hasMore ? nextPageHref : null);
   const [loading, setLoading] = useState(false);
@@ -49,7 +50,7 @@ export function EditorialInfiniteResults({
   } | null>(null);
 
   useEffect(() => {
-    if (loadedLocation === null) return;
+    if (loadedLocation === null || navigationPendingRef.current) return;
     const current = new URL(window.location.href);
     if (`${current.pathname}${current.search}` !== loadedLocation.source)
       return;
@@ -78,7 +79,7 @@ export function EditorialInfiniteResults({
       const page = (await response.json()) as ReturnType<
         typeof paginateEditorialItems
       >;
-      if (controller.signal.aborted) return;
+      if (controller.signal.aborted || navigationPendingRef.current) return;
       const loadedHref = `${destination.pathname}${destination.search}`;
       destination.searchParams.set("page", String(page.page + 1));
       startTransition(() => {
@@ -130,6 +131,37 @@ export function EditorialInfiniteResults({
     },
     [],
   );
+
+  useEffect(() => {
+    function preserveNavigation(event: MouseEvent): void {
+      if (!(event.target instanceof Element)) return;
+      const anchor = event.target.closest("a[href]");
+      if (
+        !(anchor instanceof HTMLAnchorElement) ||
+        anchor.hasAttribute("data-infinite-scroll-fallback") ||
+        anchor.target === "_blank" ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      )
+        return;
+      const destination = new URL(anchor.href, window.location.href);
+      if (
+        destination.origin !== window.location.origin ||
+        (destination.pathname === window.location.pathname &&
+          destination.search === window.location.search &&
+          destination.hash === window.location.hash)
+      )
+        return;
+      navigationPendingRef.current = true;
+    }
+
+    document.addEventListener("click", preserveNavigation, true);
+    return () =>
+      document.removeEventListener("click", preserveNavigation, true);
+  }, []);
 
   return (
     <>
