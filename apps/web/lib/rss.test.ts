@@ -1,5 +1,5 @@
-import { describe, expect, it } from "bun:test";
 import { Window } from "happy-dom";
+import { describe, expect, it } from "vite-plus/test";
 import { createRssResponse } from "./rss";
 import { siteOrigins } from "./site-routing";
 

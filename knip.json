@@ -2,15 +2,21 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {
     ".": {
-      "ignoreDependencies": ["@jongminchung/generate-article-image-skill"]
+      "entry": ["scripts/style-shell.ts"],
+      "ignoreDependencies": [
+        "@jongminchung/generate-article-image-skill",
+        "tsx"
+      ]
     },
     ".agents/skills/generate-article-image": {
-      "entry": ["scripts/generate-article-image.ts"]
+      "entry": ["scripts/generate-article-image.ts"],
+      "ignoreDependencies": ["tsx"]
     },
     "apps/web": {
       "entry": [
         "scripts/search-benchmark-runner.ts",
-        "scripts/verify-reading-roundtrip.ts"
+        "scripts/verify-reading-roundtrip.ts",
+        "scripts/test-server-only.ts"
       ],
       "ignore": ["public/fonts/pretendard-variable/dynamic-subset.css"]
     }

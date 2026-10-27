@@ -1,5 +1,5 @@
-import { describe, expect, test } from "bun:test";
 import type { Root } from "mdast";
+import { describe, expect, test } from "vite-plus/test";
 import {
   remarkReadingAnnotations,
   readingStructureOptions,

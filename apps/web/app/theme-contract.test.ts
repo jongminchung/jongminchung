@@ -1,9 +1,9 @@
-import { describe, expect, it } from "bun:test";
 import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/postcss";
 import postcss from "postcss";
+import { describe, expect, it } from "vite-plus/test";
 
 const root = resolve(fileURLToPath(new URL("../../..", import.meta.url)));
 const read = (path: string): string =>

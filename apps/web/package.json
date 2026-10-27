@@ -12,20 +12,20 @@
     "#tech-components/*": "./app/(tech)/_components/*.tsx"
   },
   "scripts": {
-    "build": "bun run --bun fumadocs-mdx && JAMIE_MDX_METADATA_ONLY=1 bun --preload ./scripts/register-content-plugin.ts scripts/validate-fumadocs-content.ts && bun scripts/check-excalidraw.ts && bun run --bun next build",
-    "content:evidence": "bun --preload ./scripts/register-content-plugin.ts scripts/content-evidence.ts",
-    "dev": "bun run --bun next dev",
-    "dev:home": "JAMIE_LOCAL_SITE=home bun run dev",
-    "dev:invest": "JAMIE_LOCAL_SITE=invest bun run dev",
-    "dev:tech": "JAMIE_LOCAL_SITE=tech bun run dev",
-    "prebuild": "bun scripts/prepare-excalidraw-assets.ts",
-    "predev": "bun scripts/prepare-excalidraw-assets.ts",
-    "postinstall": "bun run --bun fumadocs-mdx",
-    "start": "bun scripts/prepare-standalone.ts && bun .next/standalone/apps/web/server.js",
-    "test": "bun test --timeout 60000",
+    "build": "fumadocs-mdx && JAMIE_MDX_METADATA_ONLY=1 node --import tsx --import ./scripts/register-content-plugin.ts scripts/validate-fumadocs-content.ts && node --import tsx scripts/check-excalidraw.ts && next build",
+    "content:evidence": "node --import tsx --import ./scripts/register-content-plugin.ts scripts/content-evidence.ts",
+    "dev": "next dev",
+    "dev:home": "JAMIE_LOCAL_SITE=home pnpm run dev",
+    "dev:invest": "JAMIE_LOCAL_SITE=invest pnpm run dev",
+    "dev:tech": "JAMIE_LOCAL_SITE=tech pnpm run dev",
+    "prebuild": "node --import tsx scripts/prepare-excalidraw-assets.ts",
+    "predev": "node --import tsx scripts/prepare-excalidraw-assets.ts",
+    "postinstall": "fumadocs-mdx",
+    "start": "node --import tsx scripts/prepare-standalone.ts && node .next/standalone/apps/web/server.js",
+    "test": "vp test",
     "test:e2e": "playwright test",
-    "typecheck": "bun run --bun next typegen && bun run --bun tsc --noEmit && bun run --bun tsc -p tsconfig.e2e.json --noEmit",
-    "test:coverage": "bun test --coverage --timeout 60000"
+    "typecheck": "next typegen && tsc --noEmit && tsc -p tsconfig.e2e.json --noEmit",
+    "test:coverage": "vp test --coverage"
   },
   "dependencies": {
     "@excalidraw/excalidraw": "catalog:",
@@ -48,7 +48,6 @@
     "@fumadocs/tailwind": "catalog:",
     "@playwright/test": "catalog:",
     "@tailwindcss/postcss": "catalog:",
-    "@types/bun": "catalog:",
     "@types/mdast": "catalog:",
     "@types/mdx": "catalog:",
     "@types/node": "catalog:",
@@ -60,7 +59,9 @@
     "mdast-util-mdx-jsx": "catalog:",
     "postcss": "catalog:",
     "typescript": "catalog:",
-    "unist-util-visit": "catalog:"
+    "unist-util-visit": "catalog:",
+    "vite-plus": "catalog:",
+    "tsx": "catalog:"
   },
   "//": [
     "next는 App Router·서버 렌더링·빌드를, react는 컴포넌트 모델을, react-dom은 DOM 렌더링과 hydration을 제공함.",
@@ -74,7 +75,10 @@
     "@jongminchung/ui는 공용 UI와 스타일을, lucide-react는 React 아이콘을 제공함.",
     "@tailwindcss/postcss·postcss는 Tailwind CSS 빌드에, @fumadocs/tailwind는 문서 스타일 통합에 사용함.",
     "@playwright/test는 실제 브라우저 E2E·시각 회귀를, @axe-core/playwright는 자동 접근성 검사를 담당함.",
-    "happy-dom은 Bun 컴포넌트 테스트의 DOM 환경임. 실제 브라우저 렌더링 검증은 Playwright가 담당함.",
+    "happy-dom은 Vite+ 컴포넌트 테스트의 DOM 환경임. 실제 브라우저 렌더링 검증은 Playwright가 담당함.",
     "React Compiler는 infer 모드로 적용하며 성능 효과는 화면별로 측정함. 설정 근거: https://nextjs.org/docs/app/api-reference/config/next-config-js/reactCompiler"
-  ]
+  ],
+  "engines": {
+    "node": ">=24.11.0"
+  }
 }

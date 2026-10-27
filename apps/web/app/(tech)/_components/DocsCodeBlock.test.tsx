@@ -1,5 +1,5 @@
-import { describe, expect, it } from "bun:test";
 import { renderToStaticMarkup } from "react-dom/server";
+import { describe, expect, it } from "vite-plus/test";
 import { DocsCodeBlock } from "./DocsCodeBlock";
 
 describe("Fumadocs Tech code block", () => {
@@ -24,7 +24,7 @@ describe("Fumadocs Tech code block", () => {
     expect(html).toContain(">config.ts</figcaption>");
     expect(html).toContain('data-code-icon="typescript"');
     expect(html).toContain('class="line highlighted"');
-    expect(html).toContain('aria-label="Copy Text"');
+    expect(html).toContain('<span class="sr-only">Copy Text</span>');
     expect(html).toContain('aria-label="Code block: config.ts (');
     expect(html).toContain("font-size:13px");
     expect(html).toContain("letter-spacing:0px");
@@ -38,7 +38,7 @@ describe("Fumadocs Tech code block", () => {
       </DocsCodeBlock>,
     );
 
-    expect(html).not.toContain('aria-label="Copy Text"');
+    expect(html).not.toContain('<span class="sr-only">Copy Text</span>');
     expect(html).toContain("pnpm run build");
   });
 

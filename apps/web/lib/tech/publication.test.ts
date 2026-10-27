@@ -1,5 +1,5 @@
-import { describe, expect, it } from "bun:test";
 import type { Root } from "fumadocs-core/page-tree";
+import { describe, expect, it } from "vite-plus/test";
 import {
   publicPageTree,
   publicPageTreeForArea,

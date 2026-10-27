@@ -1,5 +1,5 @@
-import { afterEach, describe, expect, it } from "bun:test";
 import { NextRequest } from "next/server";
+import { afterEach, describe, expect, it } from "vite-plus/test";
 import { proxy } from "./proxy";
 
 function createRequest(

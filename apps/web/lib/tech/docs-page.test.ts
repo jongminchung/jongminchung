@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vite-plus/test";
 import { readPublishedTechContent } from "../content-repository";
 import { resolveTechDocsPageFromContent } from "./docs-page";
 import { docsOverviewForSeries, legacyVscodeArticleHref } from "./routing";

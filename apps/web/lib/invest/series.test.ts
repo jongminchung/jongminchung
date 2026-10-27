@@ -1,7 +1,7 @@
-import { describe, expect, it } from "bun:test";
 import { Window } from "happy-dom";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { describe, expect, it } from "vite-plus/test";
 import { locales } from "../site-routing.ts";
 import { getInvestmentSeriesGuide } from "./series.ts";
 import {

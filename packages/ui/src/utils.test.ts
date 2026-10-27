@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vite-plus/test";
 import { cn } from "./lib/utils";
 
 describe("semantic Tailwind utility 병합", () => {

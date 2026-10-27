@@ -1,12 +1,11 @@
 .DEFAULT_GOAL := lint
 
-BUN ?= bun
-
 .PHONY: fmt lint
 
 fmt:
-	$(BUN) run fmt
+	pnpm exec vp fmt .
+	node scripts/style-shell.ts write
 
 lint:
-	$(BUN) run fmt:check
-	$(BUN) run lint
+	pnpm exec vp check
+	node scripts/style-shell.ts check

@@ -4,8 +4,8 @@
   "compilerOptions": {
     // 브라우저 UI가 사용하는 DOM API 타입을 이 workspace에만 추가함.
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
-    // Bun 테스트와 Node API에 필요한 전역 타입을 포함함. UI의 React 타입도 명시함.
-    "types": ["bun", "node", "react", "react-dom"]
+    // 테스트와 Node API에 필요한 전역 타입을 포함함. UI의 React 타입도 명시함.
+    "types": ["node", "react", "react-dom"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "scripts/**/*.ts", "*.ts"],
   "exclude": ["node_modules"]

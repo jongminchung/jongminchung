@@ -1,22 +1,35 @@
+import { spawnSync } from "node:child_process";
 import { resolve } from "node:path";
-import { $ } from "bun";
 
-const repositoryRoot = resolve(import.meta.dir, "..");
+const repositoryRoot = resolve(import.meta.dirname, "..");
 const lycheeImage =
   process.env.LYCHEE_IMAGE || "docker.io/lycheeverse/lychee:0.24.2";
-const containerRuntime = Bun.which("podman") ?? Bun.which("docker");
-
-if (containerRuntime === null) {
+const containerRuntime = ["podman", "docker"].find(
+  (name) => spawnSync("which", [name], { stdio: "ignore" }).status === 0,
+);
+if (!containerRuntime) {
   console.error("Podman or Docker is required to run the link checker");
   process.exit(1);
 }
-
-await $`${containerRuntime} run --init --rm \
-  --volume ${`${repositoryRoot}:/workspace:ro`} \
-  --workdir /workspace \
-  ${lycheeImage} \
-  --offline \
-  --no-progress \
-  --include-fragments=anchor-only \
-  --extensions md,html \
-  .`;
+const result = spawnSync(
+  containerRuntime,
+  [
+    "run",
+    "--init",
+    "--rm",
+    "--volume",
+    `${repositoryRoot}:/workspace:ro`,
+    "--workdir",
+    "/workspace",
+    lycheeImage,
+    "--offline",
+    "--no-progress",
+    "--include-fragments=anchor-only",
+    "--extensions",
+    "md,html",
+    ".",
+  ],
+  { stdio: "inherit" },
+);
+if (result.error) throw result.error;
+process.exitCode = result.status ?? 1;

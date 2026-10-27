@@ -1,12 +1,16 @@
 {
   "editor.formatOnSave": true,
   "editor.formatOnSaveMode": "file",
-  "oxc.configPath": "${workspaceFolder}/oxlint.config.ts",
+  "oxc.configPath": "${workspaceFolder}/vite.config.ts",
 
   "[markdown][mdx][yaml][typescript][typescriptreact][javascript][javascriptreact][json][html][css]": {
     "editor.defaultFormatter": "oxc.oxc-vscode"
   },
   "[mdx]": {
-    "editor.defaultFormatter": "oxc.oxc-vscode"
+    "editor.defaultFormatter": "oxc.oxc-vscode",
+    "editor.detectIndentation": false,
+    "editor.tabSize": 4,
+    "editor.indentSize": 4,
+    "editor.insertSpaces": true
   }
 }

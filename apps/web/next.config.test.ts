@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vite-plus/test";
 import nextConfig from "./next.config.ts";
 
 describe("Next.js framework configuration", () => {

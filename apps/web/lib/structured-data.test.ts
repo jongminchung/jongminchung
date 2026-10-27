@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vite-plus/test";
 import type { ContentManifestEntry } from "./content-model";
 import type { InvestmentNoteManifestEntry } from "./invest/content";
 import {

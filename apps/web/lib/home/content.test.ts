@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vite-plus/test";
 import { siteOrigins } from "../site-routing";
 import { getHomeContent, personSchema } from "./content";
 

@@ -9,7 +9,11 @@ max_line_length = 80
 trim_trailing_whitespace = true
 insert_final_newline = true
 
-[*.{md,mdx}]
+[*.md]
+indent_size = 4
+trim_trailing_whitespace = false
+
+[*.mdx]
 indent_size = 4
 trim_trailing_whitespace = false
 

@@ -1,25 +1,7 @@
-import { realpathSync } from "node:fs";
-import { delimiter, dirname, resolve } from "node:path";
+import { resolve } from "node:path";
 import { createMDX } from "fumadocs-mdx/next";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
-
-function restoreSystemNodeForBuildWorkers(): void {
-  if (typeof Bun === "undefined" || process.env.PATH === undefined) return;
-  const nodeExecutable = Bun.which("node");
-  if (
-    nodeExecutable === null ||
-    realpathSync(nodeExecutable) !== realpathSync(process.execPath)
-  )
-    return;
-  const bunNodeShimDirectory = resolve(dirname(nodeExecutable));
-  process.env.PATH = process.env.PATH.split(delimiter)
-    .filter((entry) => resolve(entry) !== bunNodeShimDirectory)
-    .join(delimiter);
-}
-
-// `--bun`으로 Next 본체를 실행하되 Turbopack의 Node loader worker는 실제 Node IPC를 사용함
-restoreSystemNodeForBuildWorkers();
 
 const appRoot = import.meta.dirname;
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");

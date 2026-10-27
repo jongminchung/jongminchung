@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   // 공통 옵션의 의미: https://www.typescriptlang.org/tsconfig/
   "compilerOptions": {
-    // Bun이 직접 실행하는 스크립트의 .ts import를 허용함. JS 배포 빌드에서는 끔.
+    // Node가 실행하는 스크립트의 .ts import를 허용함. JS 배포 빌드에서는 끔.
     "allowImportingTsExtensions": true,
     // 검사 진입점은 TS/TSX로 제한함. JS 설정 파일은 이 옵션으로 검사되지 않음.
     "allowJs": false,
@@ -16,7 +16,7 @@
     "lib": ["ESNext"],
     // 외부 @typescript/lib-* 대신 설치된 TypeScript의 표준 lib 선언을 사용함.
     "libReplacement": false,
-    // import 구문을 유지하고 실제 변환은 Bun·Next에 맡김.
+    // import 구문을 유지하고 실제 변환은 Node·Next에 맡김.
     "module": "Preserve",
     // import가 없는 파일도 모듈로 취급해 파일 간 전역 이름 충돌을 막음.
     "moduleDetection": "force",

@@ -1,5 +1,5 @@
-import { describe, expect, it } from "bun:test";
 import { renderToStaticMarkup } from "react-dom/server";
+import { describe, expect, it } from "vite-plus/test";
 import { EditorialImage } from "./EditorialImage";
 
 describe("EditorialImage", () => {

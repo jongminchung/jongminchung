@@ -1,6 +1,6 @@
-import { describe, expect, test } from "bun:test";
 import { inflateSync } from "node:zlib";
 import type { Root } from "mdast";
+import { describe, expect, test } from "vite-plus/test";
 import { remarkKrokiUrl } from "./remark-kroki-url.ts";
 
 function transform(tree: Root): Root {

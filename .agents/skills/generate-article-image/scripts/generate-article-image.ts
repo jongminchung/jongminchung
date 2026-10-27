@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env tsx
 
 import { existsSync } from "node:fs";
 import {
@@ -674,10 +674,10 @@ export async function finalizeImage(
 
 function printUsage(): void {
   process.stdout.write(`Usage:
-  bunx --bun generate-article-image prepare --article <mdx-path> [--reference <role>=<filename> ...]
-  bunx --bun generate-article-image analyze --article <mdx-path> --input <generated-image> --reference <role>=<filename> ...
-  bunx --bun generate-article-image finalize --article <mdx-path> --input <generated-image> --reference <role>=<filename> ...
-  bunx --bun generate-article-image validate --article <mdx-path>
+  pnpm exec generate-article-image prepare --article <mdx-path> [--reference <role>=<filename> ...]
+  pnpm exec generate-article-image analyze --article <mdx-path> --input <generated-image> --reference <role>=<filename> ...
+  pnpm exec generate-article-image finalize --article <mdx-path> --input <generated-image> --reference <role>=<filename> ...
+  pnpm exec generate-article-image validate --article <mdx-path>
 
 Required reference roles: composition, palette, material
 Optional reference roles: contrast, motion
@@ -687,7 +687,7 @@ Optional reference roles: contrast, motion
 async function main(): Promise<void> {
   const { positionals, values } = parseArgs({
     allowPositionals: true,
-    args: Bun.argv.slice(2),
+    args: process.argv.slice(2),
     options: {
       article: { short: "a", type: "string" },
       help: { short: "h", type: "boolean" },

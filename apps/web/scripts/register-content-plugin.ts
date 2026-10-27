@@ -1,16 +1,16 @@
-import { plugin } from "bun";
-import { createMdxPlugin } from "fumadocs-mdx/bun";
+import { registerHooks } from "node:module";
+import { register } from "fumadocs-mdx/node";
 
-// 이 preload는 서버에서 실행하는 Bun 테스트·콘텐츠 CLI에만 사용한다.
-// Next 빌드는 이 파일을 로드하지 않으므로 client의 server-only import를 계속 거부한다.
-plugin({
-  name: "bun-server-only",
-  setup(build) {
-    build.module("server-only", () => ({
-      exports: {},
-      loader: "object",
-    }));
+// 콘텐츠 CLI에서만 서버 전용 표시자를 빈 모듈로 해석한다.
+registerHooks({
+  resolve(specifier, context, nextResolve) {
+    if (specifier === "server-only") {
+      return {
+        url: "data:text/javascript,export%20%7B%7D",
+        shortCircuit: true,
+      };
+    }
+    return nextResolve(specifier, context);
   },
 });
-
-await plugin(createMdxPlugin());
+register();

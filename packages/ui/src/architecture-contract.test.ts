@@ -1,6 +1,7 @@
-import { describe, expect, it } from "bun:test";
+import { spawnSync } from "node:child_process";
 import { glob, readFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { describe, expect, it } from "vite-plus/test";
 
 const repositoryRoot = resolve(import.meta.dirname, "../../..");
 
@@ -116,11 +117,12 @@ describe("공유 UI architecture 계약", () => {
 
 // manifest·편집기·shadcn이 서로 다른 경로를 가리키는 변경을 막음.
 it("모든 UI 공개 source 경로를 TypeScript와 shadcn에서 해석함", async () => {
-  const command = Bun.spawnSync(
-    ["bun", "run", "--bun", "tsc", "--showConfig", "-p", "tsconfig.json"],
+  const command = spawnSync(
+    "pnpm",
+    ["exec", "tsc", "--showConfig", "-p", "tsconfig.json"],
     { cwd: repositoryRoot },
   );
-  expect(command.exitCode, command.stderr.toString()).toBe(0);
+  expect(command.status, command.stderr.toString()).toBe(0);
   const config = JSON.parse(command.stdout.toString()) as {
     compilerOptions: { paths: Record<string, string[]> };
   };

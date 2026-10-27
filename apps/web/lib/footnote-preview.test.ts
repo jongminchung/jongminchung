@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it } from "bun:test";
 import { Window } from "happy-dom";
+import { beforeEach, describe, expect, it } from "vite-plus/test";
 import {
   createFootnotePreviewHtml,
   footnotePreviewLabel,

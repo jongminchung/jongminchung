@@ -9,7 +9,7 @@
     ":semanticCommitTypeAll(chore)"
   ],
   "timezone": "Asia/Seoul",
-  "enabledManagers": ["bun", "bun-version", "dockerfile", "github-actions"],
+  "enabledManagers": ["npm", "dockerfile", "github-actions"],
   "labels": ["dependencies"],
   "dependencyDashboardTitle": "Dependency Dashboard",
   "prConcurrentLimit": 5,
@@ -21,7 +21,7 @@
   "packageRules": [
     {
       "description": "Keep workspace package ranges moving without pinning published package dependencies.",
-      "matchManagers": ["bun"],
+      "matchManagers": ["npm"],
       "rangeStrategy": "bump"
     },
     {
@@ -71,21 +71,23 @@
         "esbuild",
         "gray-matter",
         "hast-util-to-string",
-        "oxfmt",
-        "oxlint",
-        "oxlint-tsgolint",
         "postcss",
         "rehype-slug",
         "remark-*",
         "typescript",
         "unist-util-visit",
-        "vite"
+        "vite",
+        "@vitest/**",
+        "@voidzero-dev/vite-plus-core",
+        "tsx",
+        "vite-plus",
+        "vitest"
       ],
       "groupName": "tooling dependencies",
       "groupSlug": "tooling-dependencies"
     },
     {
-      "description": "Require dashboard approval before opening major Bun dependency updates.",
+      "description": "Require dashboard approval before opening major pnpm dependency updates.",
       "matchDatasources": ["npm"],
       "matchUpdateTypes": ["major"],
       "dependencyDashboardApproval": true

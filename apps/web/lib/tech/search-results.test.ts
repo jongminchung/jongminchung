@@ -1,5 +1,5 @@
-import { describe, expect, it } from "bun:test";
 import type { SortedResult } from "fumadocs-core/search";
+import { describe, expect, it } from "vite-plus/test";
 import { toSearchItems } from "./search-results";
 
 const copy = {

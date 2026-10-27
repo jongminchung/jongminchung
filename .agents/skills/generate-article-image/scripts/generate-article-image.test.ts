@@ -1,8 +1,9 @@
-import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { access } from "node:fs/promises";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import sharp from "sharp";
+import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test";
 import {
   analyzeEditorialStyle,
   finalizeImage,
@@ -144,7 +145,7 @@ describe("analyzeEditorialStyle", () => {
     const candidate = await createImage("finalize-dark.png", "#030617");
     const output = join(temporaryDirectory, "finalize-output.png");
 
-    expect(
+    await expect(
       finalizeImage(candidate, output, [
         {
           filename: "finalize-composition.png",
@@ -163,7 +164,12 @@ describe("analyzeEditorialStyle", () => {
         },
       ]),
     ).rejects.toThrow("Editorial tone analysis failed");
-    expect(await Bun.file(output).exists()).toBe(false);
+    expect(
+      await access(output).then(
+        () => true,
+        () => false,
+      ),
+    ).toBe(false);
   });
 
   test("normalizes an approved candidate to the canonical image contract", async () => {

@@ -1,7 +1,7 @@
-import { describe, expect, it } from "bun:test";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
+import { describe, expect, it } from "vite-plus/test";
 import { excalidrawSceneId } from "#lib/tech/excalidraw-scene";
 import {
   ExcalidrawAssetDiagram,

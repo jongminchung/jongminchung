@@ -1,16 +1,14 @@
-import { afterAll, describe, expect, it, mock } from "bun:test";
 import { Window } from "happy-dom";
 import { renderToStaticMarkup } from "react-dom/server";
+import { describe, expect, it, vi } from "vite-plus/test";
 import type { EditorialCopy, EditorialItem } from "#lib/editorial";
 import type { EditorialCardProps } from "./EditorialCard";
 
-await mock.module("next/navigation", () => ({
+vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
 const { EditorialIndex } = await import("./EditorialIndex");
-
-afterAll(() => mock.restore());
 
 const copy = {
   eyebrow: "Notes",

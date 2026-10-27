@@ -1,21 +1,20 @@
-import { expect, test } from "bun:test";
+import { execFileSync } from "node:child_process";
+import { expect, test } from "vite-plus/test";
 import { blogCollection, docsCollection } from "../.source/server";
 import { GET as techRss } from "../app/(tech)/tech/[locale]/rss.xml/route";
 import techSitemap from "../app/(tech)/tech/sitemap";
 import { searchTechDocuments } from "./tech/search-server";
 
 test("all copied MDX recompiles with the production compiler runtime", async () => {
-  const result = Bun.spawn(["node", "scripts/verify-reading-roundtrip.ts"], {
-    cwd: new URL("..", import.meta.url).pathname,
-    stdout: "pipe",
-    stderr: "pipe",
-  });
-  const [code, stdout, stderr] = await Promise.all([
-    result.exited,
-    new Response(result.stdout).text(),
-    new Response(result.stderr).text(),
-  ]);
-  expect(code, stderr).toBe(0);
+  const stdout = execFileSync(
+    process.execPath,
+    ["--import", "tsx", "scripts/verify-reading-roundtrip.ts"],
+    {
+      cwd: new URL("..", import.meta.url),
+      encoding: "utf8",
+      timeout: 60000,
+    },
+  );
   expect(stdout).toContain(
     "Verified all 16 MDX source exports and recompilations.",
   );

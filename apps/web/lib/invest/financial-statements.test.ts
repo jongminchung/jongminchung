@@ -1,7 +1,7 @@
-import { describe, expect, it } from "bun:test";
 import { Window } from "happy-dom";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { describe, expect, it } from "vite-plus/test";
 import { locales } from "../site-routing.ts";
 import {
   loadInvestmentContent,
@@ -21,9 +21,11 @@ describe("재무제표·주식 가치평가 시리즈 읽기 계약", () => {
         .toSorted((left, right) => left.id.localeCompare(right.id));
       expect(chapters).toHaveLength(12);
       for (const [index, chapter] of chapters.entries()) {
-        expect(chapter.id).toStartWith(
-          `financial-statements-${String(index + 1).padStart(2, "0")}-`,
-        );
+        expect(
+          chapter.id.startsWith(
+            `financial-statements-${String(index + 1).padStart(2, "0")}-`,
+          ),
+        ).toBe(true);
         const note = notes.find(
           (entry) => entry.locale === locale && entry.id === chapter.id,
         );

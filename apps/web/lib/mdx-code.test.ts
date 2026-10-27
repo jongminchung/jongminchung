@@ -1,5 +1,5 @@
-import { describe, expect, it } from "bun:test";
 import { createElement } from "react";
+import { describe, expect, it } from "vite-plus/test";
 import {
   classifyMdxCodeBlock,
   codeLanguage,

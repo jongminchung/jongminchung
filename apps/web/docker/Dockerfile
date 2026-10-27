@@ -1,25 +1,25 @@
-FROM oven/bun:1.4.0-alpine AS dependencies
+FROM node:26.7.0-alpine AS dependencies
 
 WORKDIR /workspace
-RUN apk add --no-cache nodejs
+RUN npm install --global pnpm@12.15.0
 COPY . .
-RUN bun install --frozen-lockfile
+RUN pnpm install --frozen-lockfile
 
 FROM dependencies AS builder
-RUN bun run --filter @jongminchung/web build
+RUN pnpm --filter @jongminchung/web run build
 
-FROM oven/bun:1.4.0-alpine AS runner
+FROM node:26.7.0-alpine AS runner
 
 ENV NODE_ENV=production
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
 WORKDIR /app/apps/web
 
-COPY --from=builder --chown=bun:bun /workspace/apps/web/.next/standalone /app
-COPY --from=builder --chown=bun:bun /workspace/apps/web/public ./public
-COPY --from=builder --chown=bun:bun /workspace/apps/web/.next/static ./.next/static
+COPY --from=builder --chown=node:node /workspace/apps/web/.next/standalone /app
+COPY --from=builder --chown=node:node /workspace/apps/web/public ./public
+COPY --from=builder --chown=node:node /workspace/apps/web/.next/static ./.next/static
 
-USER bun
+USER node
 EXPOSE 3000
 
-CMD ["bun", "server.js"]
+CMD ["node", "server.js"]

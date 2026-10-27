@@ -1,7 +1,7 @@
-import { describe, expect, it } from "bun:test";
 import { execFile } from "node:child_process";
 import { resolve } from "node:path";
 import { promisify } from "node:util";
+import { describe, expect, it } from "vite-plus/test";
 import type { ServerSearchBenchmarkReport } from "../../scripts/search-benchmark-runner.ts";
 import {
   bilingualSearchBenchmarkBaseline,
@@ -21,7 +21,9 @@ describe("ZBSearch 한영 relevance benchmark", () => {
       const { stdout } = await execFileAsync(
         process.execPath,
         [
-          "--preload",
+          "--import",
+          "tsx",
+          "--import",
           "./scripts/register-content-plugin.ts",
           "./scripts/search-benchmark-runner.ts",
         ],
