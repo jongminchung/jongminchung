@@ -26,10 +26,10 @@ secret 관리자 또는 GitHub Actions secret의 위치를 기록한다.
 ## Web 배포 전 확인
 
 ```sh
-bun install --frozen-lockfile
-bun run check:full
-bun run audit
-bun run --filter @jongminchung/web build
+pnpm install --frozen-lockfile
+pnpm run check:full
+pnpm run audit
+pnpm --filter @jongminchung/web run build
 ```
 
 마지막 명령은 테스트 fixture용 build와 별도로 일반 배포 build를 확인한다.
@@ -84,11 +84,11 @@ UI는 GitHub Packages의 동일한 `1.0.0`을 삭제한 뒤 다시 게시하는 
 로컬 사전 검증은 UI를 검사하는 아래 명령을 사용할 수 있다.
 
 ```sh
-bun install --frozen-lockfile --ignore-scripts
-bun run --filter @jongminchung/ui typecheck
-bun run --filter @jongminchung/ui test:coverage
-bun run --filter @jongminchung/ui test:node
-bun run --filter @jongminchung/ui publish:dry-run
+pnpm install --frozen-lockfile --ignore-scripts
+pnpm --filter @jongminchung/ui run typecheck
+pnpm --filter @jongminchung/ui run test:coverage
+pnpm --filter @jongminchung/ui run test:node
+pnpm --filter @jongminchung/ui run publish:dry-run
 ```
 
 `--ignore-scripts` 설치 후 Web 작업으로 돌아갈 때는 Web `postinstall`로 MDX entry를
@@ -106,7 +106,7 @@ GitHub Actions에서 검증한 ref를 확인해 실행하고, 최종 소비자 �
 
 ```sh
 # 해당 패키지를 사용하는 외부 소비 저장소에서 실행
-bun update --force @jongminchung/ui@1.0.0
+pnpm update --force @jongminchung/ui@1.0.0
 ```
 
 소비 저장소 자체의 검사·build를 통과시켜야 교체가 완료된다.
@@ -129,7 +129,7 @@ archive를 같은 registry에 재게시하려면 현재 버전 처리와 게시 
 
 | 시점                  | 확인                                                                                |
 | --------------------- | ----------------------------------------------------------------------------------- |
-| 매주                  | `bun run audit`, Renovate PR, Web 예약 실행의 `content-evidence` artifact 검토      |
+| 매주                  | `pnpm run audit`, Renovate PR, Web 예약 실행의 `content-evidence` artifact 검토     |
 | 배포 전후             | SHA·artifact·실행자·확인 결과·복구 대상을 운영 기록에 추가                          |
 | 의존성 갱신 시        | catalog·lockfile·peer 범위·공식 변경 내역과 [유지보수 절차](../maintenance.md) 확인 |
 | 담당자 교체 시        | 새 환경에서 [첫 실행](start.md), Preview 또는 로컬 복구 연습, 계정·로그 접근 확인   |

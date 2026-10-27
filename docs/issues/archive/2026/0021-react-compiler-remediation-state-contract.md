@@ -7,7 +7,7 @@
 - 기준일: 2026-08-19
 - 기준 commit: `f8ece16`
 - 영향 범위:
-  [Oxlint 설정](../../../../oxlint.config.ts),
+  [Oxlint 설정](../../../../vite.config.ts),
   route sheet hook `apps/web/app/(tech)/_components/useRouteSheet.ts` (제거됨),
   [ThemeProvider](../../../../apps/web/components/ThemeProvider.tsx),
   [ExcalidrawDiagram](<../../../../apps/web/app/(tech)/_components/ExcalidrawDiagram.tsx>),

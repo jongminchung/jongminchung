@@ -33,8 +33,8 @@ every direct dependency, then follow transitive packages that declare a TypeScri
 the Compiler API.
 
 ```sh
-bun pm ls --all
-rg '"typescript"' package.json bun.lock apps packages
+pnpm list --depth Infinity
+rg '"typescript"' package.json pnpm-workspace.yaml pnpm-lock.yaml apps packages
 rg 'typescript/lib/typescript|require\\(.typescript.|from .typescript.' node_modules
 ```
 
@@ -64,7 +64,7 @@ success as a vendor support commitment.
 
 The [TypeScript 7 announcement](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/)
 describes the native Go compiler and states that 7.0 has no stable Compiler API. This repository does
-not import that API directly and transforms MDX through Fumadocs's Bun plugin, so source compatibility
+not import that API directly and transforms MDX through Fumadocs's Node and Vite plugins, so source compatibility
 and embedded-language toolchain compatibility remain separate decisions.
 
 ## 4. Map ecosystem-specific migration routes
@@ -79,7 +79,7 @@ Current direct dependencies fit into the following migration domains.
 | --------------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------- |
 | Compiler              | `typescript`                                                                | CLI checks, declaration emit, and framework integration        |
 | Next.js and content   | `next`, `fumadocs-mdx`, `fumadocs-core`, `@types/mdx`                       | Next CLI checker, MDX compilation, and runtime content loading |
-| Build, lint, and test | `esbuild`, `bun:test`, `oxlint`, `oxlint-tsgolint`, `@playwright/test`      | Declaration emit, type-aware lint, unit tests, and E2E         |
+| Build, lint, and test | `esbuild`, `vite-plus`, `@playwright/test`                                  | Declaration emit, type-aware lint, unit tests, and E2E         |
 | CSS                   | `tailwindcss`, `@tailwindcss/postcss`, `postcss`, `tw-animate-css`          | Next production CSS build                                      |
 | React and UI          | `react`, `react-dom`, `@base-ui/react`, `lucide-react`, `cmdk`, `zod`       | JSX declaration checks and real application builds             |
 | Development CLIs      | `shadcn`                                                                    | CLI smoke tests and an explicit TypeScript migration           |
@@ -96,9 +96,9 @@ The important official routes are:
   newer and `oxlint-tsgolint@7`.
 - [TypeScript declaration emit](https://www.typescriptlang.org/tsconfig/declaration.html) runs in the
   same compiler boundary as JavaScript emit for the public packages.
-- [Playwright](https://playwright.dev/docs/test-typescript) and [Bun test](https://bun.sh/docs/test)
-  separate TypeScript execution from type checking, so `bun run typecheck` remains a distinct
-  release gate.
+- [Playwright](https://playwright.dev/docs/test-typescript) and [Vite+ test](https://github.com/voidzero-dev/vite-plus/blob/main/docs/guide/test.md)
+  separate TypeScript execution from type checking, so the repository `pnpm run check` keeps an
+  explicit type-check step in its release gate.
 
 Do not interpret the absence of a dedicated migration guide as lack of support. Conversely, packages
 that only expose declarations, such as React, CodeMirror, and Tailwind integrations, are not verified
@@ -112,8 +112,8 @@ copy or isolated branch, but do not commit compiler aliases or a split compiler 
 configuration.
 
 ```sh
-bun run tsc --version
-bun pm ls --all | rg typescript
+pnpm run tsc --version
+pnpm list --depth Infinity | rg typescript
 ```
 
 The compiler version, the package imported as `typescript`, and framework-owned type checking must
@@ -122,7 +122,7 @@ future migration, not permission to mix compiler roles in the tracked workspace.
 
 This repository installs only TypeScript `7.0.2` across every workspace without a compiler alias.
 Next.js uses `experimental.useTypeScriptCli: true`, while Fumadocs tests and scripts use the
-`fumadocs-mdx/bun` plugin without introducing a Compiler API dependency.
+`fumadocs-mdx/node`·`fumadocs-mdx/vite` plugin without introducing a Compiler API dependency.
 
 ## 6. Surface configuration changes first
 
@@ -131,8 +131,8 @@ removed options in TypeScript 7. Compare the effective values of `rootDir`, `typ
 `moduleResolution`, `strict`, `noUncheckedSideEffectImports`, and `libReplacement`.
 
 ```sh
-bun run tsc --showConfig -p tsconfig.json
-bun run tsc --noEmit --incremental false -p tsconfig.json
+pnpm run tsc --showConfig -p tsconfig.json
+pnpm run tsc --noEmit --incremental false -p tsconfig.json
 ```
 
 Run every tsconfig explicitly. A root check does not necessarily include application, package build,
@@ -185,7 +185,7 @@ framework build, and editor and watch workflow.
 Update the workspace manifests and lockfile together, then run the full validation suite. Roll back
 the single version change if any required boundary fails.
 
-The current adoption runs root and workspace type checks, public-package declaration emit, Bun tests,
+The current adoption runs root and workspace type checks, public-package declaration emit, Vite+ tests,
 the Next.js production build, and Node runtime smoke checks with one TypeScript `7.0.2` installation.
 The current decision is to keep this single compiler boundary without TS 7 aliases or per-workspace
 compiler splits.
@@ -197,5 +197,5 @@ compiler splits.
 - [Next.js 16.3.1 TypeScript setup](https://github.com/vercel/next.js/blob/v16.3.1/packages/next/src/lib/verify-typescript-setup.ts)
 - [Oxlint type-aware linting](https://oxc.rs/docs/guide/usage/linter/type-aware.html)
 - [TypeScript declaration](https://www.typescriptlang.org/tsconfig/declaration.html)
-- [Bun test runner](https://bun.sh/docs/test)
+- [Vite+ test](https://github.com/voidzero-dev/vite-plus/blob/main/docs/guide/test.md)
 - [Playwright TypeScript](https://playwright.dev/docs/test-typescript)

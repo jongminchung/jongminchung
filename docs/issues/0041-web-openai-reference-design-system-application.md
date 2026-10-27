@@ -120,13 +120,13 @@
 
     ```tsx
     <html
-    lang={locale}
-    className={pretendard.variable}
-    data-site="tech"
-    data-theme="light"
-    suppressHydrationWarning
+        lang={locale}
+        className={pretendard.variable}
+        data-site="tech"
+        data-theme="light"
+        suppressHydrationWarning
     >
-    <body>{children}</body>
+        <body>{children}</body>
     </html>
     <!-- prettier-ignore -->
     ```
@@ -143,15 +143,15 @@
     ```tsx
     // packages/ui/src/components/badge.tsx
     const badgeVariants = cva("inline-flex items-center rounded-full", {
-    variants: {
-      variant: {
-        default: "bg-primary text-primary-foreground",
-        secondary: "bg-secondary text-secondary-foreground",
-        outline: "border-border text-foreground",
-        destructive: "bg-destructive/10 text-destructive",
-      },
-    },
-    defaultVariants: { variant: "default" },
+        variants: {
+            variant: {
+                default: "bg-primary text-primary-foreground",
+                secondary: "bg-secondary text-secondary-foreground",
+                outline: "border-border text-foreground",
+                destructive: "bg-destructive/10 text-destructive",
+            },
+        },
+        defaultVariants: { variant: "default" },
     });
     <!-- prettier-ignore -->
     ```
@@ -187,9 +187,9 @@
 
     ```ts
     for (const theme of ["light", "dark"]) {
-    expect(genericThemeBlock(theme)).toContain("--background:");
-    expect(genericThemeBlock(theme)).toContain("--foreground:");
-    expect(genericThemeBlock(theme)).toContain("--ring:");
+        expect(genericThemeBlock(theme)).toContain("--background:");
+        expect(genericThemeBlock(theme)).toContain("--foreground:");
+        expect(genericThemeBlock(theme)).toContain("--ring:");
     }
 
     expect(homeCss).not.toMatch(/^\s*--[\w-]+\s*:/mu);

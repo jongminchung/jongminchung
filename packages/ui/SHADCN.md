@@ -5,17 +5,17 @@
 `components.json`, [검토한 로컬 소스의 SHA-256 목록](./shadcn-baseline.json), 현재 Git diff를 비교의 출발점으로 사용한다. `files`의 SHA-256은 이 검토 시점의 실제 로컬 파일을 식별한다. `registry.files`에는 비교에 사용한 upstream 응답의 URL과 SHA-256을 별도로 기록한다. 갱신 후 계약 검증을 완료했을 때 해당 파일 hash와 검토일·비교 환경을 함께 갱신한다. registry 응답은 CLI 버전을 고정해도 바뀔 수 있으므로, 갱신할 때 dry-run·diff 원문을 PR에 첨부하고 실제 사용한 registry URL·조회일·응답 SHA-256을 기록한다. 최초 생성 시점의 upstream revision과 이번 조회 결과를 혼동하지 않는다.
 
 ```bash
-bunx --bun shadcn@4.21.0 add <component> --dry-run -c packages/ui
-bunx --bun shadcn@4.21.0 add <component> --diff -c packages/ui
+pnpm dlx shadcn@4.21.0 add <component> --dry-run -c packages/ui
+pnpm dlx shadcn@4.21.0 add <component> --diff -c packages/ui
 ```
 
 먼저 위 결과와 아래 공개 계약을 비교하고, 변경을 병합한 후 다음 검사를 수행한다.
 
 ```bash
-bun run --filter @jongminchung/ui test
-bun run --filter @jongminchung/ui typecheck
-bun run --filter @jongminchung/web typecheck
-bun run --filter @jongminchung/web test:e2e ui-primitives.e2e.test.ts
+pnpm --filter @jongminchung/ui run test
+pnpm --filter @jongminchung/ui run typecheck
+pnpm --filter @jongminchung/web run typecheck
+pnpm --filter @jongminchung/web run test:e2e ui-primitives.e2e.test.ts
 ```
 
 앱은 source 조건으로 UI를 사용하므로 갱신 검증 시 기존 production 서버를 종료하고 Playwright가 변경된 소스를 빌드하도록 한다. 화면에 영향을 주는 변경은 변경 전후 production 캡처도 비교한다.

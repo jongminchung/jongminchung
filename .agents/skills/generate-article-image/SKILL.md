@@ -7,7 +7,7 @@ description: Generate, regenerate, or review canonical editorial images for Jong
 
 Create one original editorial image from the live article content. Do not use an
 article-to-prompt map. Run every command from the repository root with
-`bunx --bun`.
+`pnpm exec`.
 
 ## Resolve the article contract
 
@@ -19,7 +19,7 @@ article-to-prompt map. Run every command from the repository root with
   references with the CLI
 
 ```bash
-bunx --bun generate-article-image prepare --article <mdx-path>
+pnpm exec generate-article-image prepare --article <mdx-path>
 ```
 
 - Treat the returned JSON as the source of truth
@@ -47,7 +47,7 @@ bunx --bun generate-article-image prepare --article <mdx-path>
 - Record and validate the exact set by rerunning `prepare`
 
 ```bash
-bunx --bun generate-article-image prepare \
+pnpm exec generate-article-image prepare \
   --article <mdx-path> \
   --reference composition=<filename> \
   --reference palette=<filename> \
@@ -72,7 +72,7 @@ bunx --bun generate-article-image prepare \
   deciding whether a result is acceptable
 
 ```bash
-bunx --bun generate-article-image analyze \
+pnpm exec generate-article-image analyze \
   --article <mdx-path> \
   --input <generated-image-path> \
   --reference composition=<filename> \
@@ -99,7 +99,7 @@ bunx --bun generate-article-image analyze \
   before replacing the canonical image
 
 ```bash
-bunx --bun generate-article-image finalize \
+pnpm exec generate-article-image finalize \
   --article <mdx-path> \
   --input <generated-image-path> \
   --reference composition=<filename> \
@@ -116,7 +116,7 @@ bunx --bun generate-article-image finalize \
 - Verify the canonical asset and repository state
 
 ```bash
-bunx --bun generate-article-image validate --article <mdx-path>
+pnpm exec generate-article-image validate --article <mdx-path>
 git diff --check
 git status --short
 ```

@@ -170,15 +170,15 @@ SSR 앱은 서버에서 실행되는 함수와 브라우저 event handler에 각
 Bun으로 실행하는 프로세스에는 Node inspector 설정을 그대로 적용하지 않는다. Bun의
 공식 debugging 절차를 따르고, 브라우저 디버깅은 별도 세션으로 다룬다.
 [Bun debugging](https://bun.sh/docs/runtime/debugger)
-이 저장소의 Next main·standalone은 Bun이라는 점은 [런타임 안내](https://github.com/jongminchung/jongminchung/blob/main/docs/web/bun-standalone-runtime.md)를 따른다.
+이 저장소의 Next main·standalone은 Node.js라는 점은 [런타임 안내](https://github.com/jongminchung/jongminchung/blob/main/docs/web/node-standalone-runtime.md)를 따른다.
 
 테스트는 실제 runner의 CLI와 통합을 사용한다. Vitest·Jest·Bun test 설정을 서로 복사하지 않는다.
 이 저장소의 focused 검사 예시는 다음과 같다.
 
 ```sh
-bun run --filter @jongminchung/web test next.config.test.ts
-bun run --filter @jongminchung/web typecheck
-bun run --filter @jongminchung/web test:e2e --grep "mobile keyboard"
+pnpm --filter @jongminchung/web run test next.config.test.ts
+pnpm --filter @jongminchung/web run typecheck
+pnpm --filter @jongminchung/web run test:e2e --grep "mobile keyboard"
 ```
 
 마지막 명령은 Playwright이며 Node 단위 테스트와 다르다. 테스트 발견·단위 테스트 성공과

@@ -15,47 +15,25 @@ sourceUrl: "https://code.visualstudio.com/docs/remote/remote-overview"
 
 Tasks execute builds, checks, and other commands. Launch configurations start or attach a debugger. preLaunchTask connects them by label; distinguish a finite build from a long-running server. [Tasks](https://code.visualstudio.com/docs/debugtest/tasks)
 
-This example specifically targets the jongminchung repository, with Bun available on PATH. For the independent format-lab project, use its [check task](/en/docs/vscode/tasks-ci) instead.
+This example specifically targets the jongminchung repository, with pnpm and Node.js available on PATH. For the independent format-lab project, use its [check task](/en/docs/vscode/tasks-ci) instead.
 
 ```json
 {
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "repo: format check",
+            "label": "repo: check",
             "type": "process",
-            "command": "bun",
-            "args": ["run", "fmt:check"],
+            "command": "pnpm",
+            "args": ["run", "check"],
             "options": { "cwd": "${workspaceFolder}" },
-            "problemMatcher": []
-        },
-        {
-            "label": "repo: lint",
-            "type": "process",
-            "command": "bun",
-            "args": ["run", "lint"],
-            "options": { "cwd": "${workspaceFolder}" },
-            "problemMatcher": []
-        },
-        {
-            "label": "web: typecheck",
-            "type": "process",
-            "command": "bun",
-            "args": ["run", "--filter", "@jongminchung/web", "typecheck"],
-            "options": { "cwd": "${workspaceFolder}" },
-            "problemMatcher": []
-        },
-        {
-            "label": "repo: review checks",
-            "dependsOrder": "sequence",
-            "dependsOn": ["repo: format check", "repo: lint", "web: typecheck"],
             "problemMatcher": []
         }
     ]
 }
 ```
 
-This task group is a limited review check, not the repository's complete check/E2E contract. An empty problemMatcher leaves output in the terminal. Use a matcher such as $tsc only after confirming the actual output format; watchers also need a correct background matcher.
+This task runs the repository check; run E2E separately. An empty problemMatcher leaves output in the terminal. Use a matcher such as $tsc only after confirming the actual output format; watchers also need a correct background matcher.
 
 ## Make process startup reproducible
 

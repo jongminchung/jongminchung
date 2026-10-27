@@ -96,14 +96,14 @@
 
     ```ts
     type ResolvedTechDocsPage =
-    | Readonly<{ kind: "not-found" }>
-    | Readonly<{ kind: "redirect"; destination: string }>
-    | Readonly<{
-        kind: "landing" | "article";
-        locale: Locale;
-        page: DocsPageManifestEntry;
-        alternatePage: DocsPageManifestEntry;
-      }>;
+        | Readonly<{ kind: "not-found" }>
+        | Readonly<{ kind: "redirect"; destination: string }>
+        | Readonly<{
+              kind: "landing" | "article";
+              locale: Locale;
+              page: DocsPageManifestEntry;
+              alternatePage: DocsPageManifestEntry;
+          }>;
     <!-- prettier-ignore -->
     ```
 

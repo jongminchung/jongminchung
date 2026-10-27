@@ -4,11 +4,11 @@
 
 ## 핵심 요약
 
-- **이 저장소는 Bun 모노레포이며 `apps/web`, `packages/ui`의 두 workspace를 하나의 루트 검증 계약으로 관리함**
+- **이 저장소는 pnpm 모노레포이며 `apps/web`, `packages/ui`의 두 workspace에서 Node.js와 Vite+ 검사를 사용함**
 - **Web은 React 19와 Next.js 16 App Router로 구현된 단일 배포물이며 요청 Host에 따라 Home·Tech Docs·Invest 사이트를 분리함**
 - **콘텐츠는 외부 CMS나 데이터베이스가 아니라 저장소의 MDX·Excalidraw 원본이며 Fumadocs와 Zod가 빌드 시 구조와 게시 계약을 검증함**
 - **스타일은 Tailwind CSS 4의 CSS-first 방식과 `@jongminchung/ui`의 semantic token·Base UI primitive를 사용하며 제품 조합은 `apps/web`이 소유함**
-- **일상 변경은 가장 가까운 workspace 검사 후 `bun run check`로 닫고 route·UI·배포 변경은 build와 Playwright E2E까지 검증함**
+- **일상 변경은 가장 가까운 workspace 검사 후 `pnpm run check`로 닫고 route·UI·배포 변경은 build와 Playwright E2E까지 검증함**
 - **이 문서는 arc42의 12개 관점과 C4의 Context·Container·Component 관점을 연결하며 모든 다이어그램은 수정 가능한 PlantUML 원본을 가짐**
 
 ## 문서를 읽고 첫 실행까지 완료함
@@ -30,11 +30,10 @@
 
 ### 개발 환경을 저장소 계약과 일치시킴
 
-- **정확한 앱·도구 기준은 `.bun-version`과 루트 `package.json#packageManager`의 Bun `1.4.0`임**
-    - 루트 engine은 Bun `>=1.4.0`의 허용 범위를 제공하지만 재현 가능한 온보딩에는 고정 버전을 권장함
-    - Bun은 workspace 연결, 단일 lockfile, catalog·filter 명령과 Web의 Next.js main·standalone 런타임을 제공함
-    - `.node-version`의 Node.js `26.7.0`은 Fumadocs·Turbopack loader worker, 공개 `packages/*`의 호환 테스트와 게시 후 소비자 검증에 사용함
-    - 공식 학습 자료는 [Bun runtime](https://bun.sh/docs/runtime), [workspace](https://bun.sh/docs/pm/workspaces), [catalog](https://bun.sh/docs/pm/catalogs), [filter](https://bun.sh/docs/pm/filter) 문서임
+- **패키지 매니저는 pnpm `12.15.0`, 전역 런타임은 Node.js `26.7.0`을 사용함**
+    - pnpm은 workspace 연결·lockfile·catalog·filter를 제공하고 Node.js와 Vite+는 앱 실행과 검사를 담당함
+    - Node.js는 Next.js·콘텐츠 CLI·standalone 서버와 공개 패키지 호환 검증에 사용하며 `.node-version`은 CI 버전을 기록함
+    - 공식 학습 자료는 [pnpm workspace](https://pnpm.io/workspaces), [catalog](https://pnpm.io/catalogs), [filter](https://pnpm.io/filter), [Vite+ test](https://github.com/voidzero-dev/vite-plus/blob/main/docs/guide/test.md) 문서임
 - **일반 로컬 개발에는 애플리케이션 secret이나 외부 데이터베이스가 필요하지 않음**
     - 코드가 직접 읽는 개발 선택값은 `JAMIE_LOCAL_SITE`이며 `dev:home`, `dev:tech`, `dev:invest` script가 안전한 값으로 설정함
     - `VERCEL`, `CI`, `PLAYWRIGHT_TEST`, `NODE_ENV`는 배포·CI·테스트 도구가 설정하는 실행 경계임
@@ -44,9 +43,9 @@
 ```sh
 git clone https://github.com/jongminchung/jongminchung.git
 cd jongminchung
-bun --version
 node --version
-bun install --frozen-lockfile
+pnpm --version
+pnpm install --frozen-lockfile
 ```
 
 - **설치가 실패하면 lockfile을 재작성하기 전에 런타임 버전과 registry 접근 여부를 먼저 확인함**
@@ -59,7 +58,7 @@ bun install --frozen-lockfile
 - **첫 실행은 Home 하나를 loopback Host에서 여는 다음 명령으로 시작함**
 
 ```sh
-bun run --filter @jongminchung/web dev
+pnpm --filter @jongminchung/web run dev
 ```
 
 - **개발 서버가 준비되면 Host별 공개 경계를 확인함**
@@ -70,9 +69,9 @@ bun run --filter @jongminchung/web dev
 - **하나의 사이트만 `localhost`로 확인할 때는 명시적 site 선택 script를 사용함**
 
 ```sh
-bun run --filter @jongminchung/web dev:home
-bun run --filter @jongminchung/web dev:tech
-bun run --filter @jongminchung/web dev:invest
+pnpm --filter @jongminchung/web run dev:home
+pnpm --filter @jongminchung/web run dev:tech
+pnpm --filter @jongminchung/web run dev:invest
 ```
 
 - **첫 코드 탐색은 다음 파일을 순서대로 열어 요청이 화면으로 바뀌는 경로를 따라감**
@@ -85,9 +84,9 @@ bun run --filter @jongminchung/web dev:invest
 - **기본 상태 확인은 가장 가까운 Web 검사와 저장소 전체 검사로 완료함**
 
 ```sh
-bun run --filter @jongminchung/web typecheck
-bun run --filter @jongminchung/web test
-bun run check
+pnpm --filter @jongminchung/web run typecheck
+pnpm --filter @jongminchung/web run test
+pnpm run check
 ```
 
 ## 목표·제약·시스템 경계를 파악함
@@ -110,9 +109,9 @@ bun run check
 ### arc42 2 · 기술과 조직 제약을 변경 전에 확인함
 
 - **루트 `package.json`은 저장소 전체 orchestration만 소유하며 단일 workspace 명령의 전달 별칭을 만들지 않음**
-    - 단일 workspace는 `bun run --filter <package-name> <script>` 형식으로 실행함
+    - 단일 workspace는 `pnpm --filter <package-name> run <script>` 형식으로 실행함
     - package script를 실행할 때는 시스템 명령과의 충돌을 막기 위해 `run`을 생략하지 않음
-    - 공통 버전은 루트 `package.json#workspaces.catalog`에 고정하고 내부 package는 `workspace:*`로 연결함
+    - 공통 버전은 루트 `pnpm-workspace.yaml#catalog`에 고정하고 내부 package는 `workspace:*`로 연결함
 - **Web 코드를 변경하기 전 설치된 Next.js 버전의 로컬 문서를 우선 확인해야 함**
     - `apps/web/AGENTS.md`는 현재 Next.js의 breaking change 가능성 때문에 `apps/web/node_modules/next/dist/docs/`를 기준으로 작업하도록 요구함
     - 온라인 공식 문서는 개념과 최신 공개 설명에 유용하지만 실제 코드 변경은 lockfile에 설치된 버전과 로컬 문서가 우선함
@@ -161,7 +160,7 @@ bun run check
 - **두 workspace와 콘텐츠·자동화의 책임을 섞지 않는 것이 유지보수의 핵심 경계임**
     - `apps/web`은 제품 route, 제품 component, 콘텐츠 domain rule, metadata와 배포물을 소유함
     - `packages/ui`는 제품 중립 primitive, `cn`, semantic token, 기본 theme와 Tailwind 진입점을 소유함
-    - 루트 `oxfmt.config.ts`·`oxlint.config.ts`가 저장소의 포맷·린트 설정을 소유함
+    - 루트 `vite.config.ts`가 Vite+의 포맷·린트 설정을 소유함
     - `apps/web/content`는 사람이 수정하는 MDX 원본을 소유함
     - 루트 script와 GitHub Actions는 여러 workspace를 묶는 검증·게시 흐름을 소유함
 - ![jongminchung 컨테이너 C4 Level 2](https://kroki.io/plantuml/svg/eNp1VF1PG0cUffevuPUTqdxGiniqqorgOEDLl7DpxxNa1lN74t0da3YWY0WVLDAVStyGStCYxKZGIg1UVHWxk10p9GV_jmf2P_TOGoPT0KddzdxzP845c6dcYXDh2VbiI-qYlpcn8Hl68m56ci3NHGFQh_AvEglBhUXgEXMKNkYVPacA6t1ptNNQ7b6s70LoQ3oS5skGseBeIjF__7ul1dzafOZhbm1lbmY2N3EnkVgm3GXOxAZ1qWA8BUnZPZPngTraS94ZXdpYcFgU7wdBVz0_x_vQV62Oel2Tvb7abQ4B2aoriL2W2RQTJc5KFOO_0t8k_ixbhiNWF-Yh-_UMyE5D_rQvfzt_H1Q2zJJRIC6Gz1Ax663D8tWJzjDotlQ7AHmxr1p1cMo2cFKgruBVzDJKM808J2_w6gQnZRYPVUXoeyTJP07lTiA7u9EzrA-PEwDXtE5UyDrGT40D7uKZrr9INsWnj7C5FWKYIgW5aplkTU7LQt_OMleowxpYzDQsotp1kG_ryFZ00Bz0OjDLbBL6OWIWQ3_O2SCugOhwX571B71LUE9b6slJtNMCzjxB5Cs86rQGvTfRwSnONt6fiX_EwepJ9U8z2tlTQQfUyz3ZC3QTCw--TcGX2aXFFGQ2sQ-a50YleSXbbge0tPVW6MtgXx63Bn4Q-tGuVhOQkehJoAeQT0_QQOrXPl7Lo9N4kl5_0K992IxHP-DKi8UeMWRQq0KdPKSz2RRMGy6B1bm4nd4bdA-UObWpoBvIjEts9Ac1QbAScdBcnbp6_idoWrZrqn2p2_g_TgxPMNsQlDmalk5NHb1SPzYAx5LPDpFlXXHac0Ag6ylYZHkSy4iOrFY4LRTx8Mpu902dxR0B1MHfWh6NgKgZRIdNiBqn0dYJ-l61mzC4qKmt89AfXDRQwli2467qHAxb_CGRWCHWzdsaWgsBSC9yDZrlF2exd3K55SwidPj4a7sRG4XV2uBIaqsL0c-Bev1LcvhMbsENK8VeCn2T2WXmYJrQzzMdBdzDvXFbjhh3U9Q1i6hKPOXvbYheogLv-lED98slCnTcjV40NP6hZxt5ZrqATY4nit3hMo-b5JPvKUfHu9562RBFoNgRj19NhfGSi8-efPbxOHS0Pa6Xhl5pf2HDNVhdmddmVW9b_2Vu3AZDBgS-UJzBLIW-51AkACkiBR7HhP66R6186GfuZW5JEDc_htfeuYaUvXWLusUrmA4d21yZ7ELoo-G1d-X2jtr2YegP3a_eWmXOBDOZFW-t2aVvcCXPZBYf4DqeIk5eb_1_AUf0mts)
@@ -169,7 +168,7 @@ bun run check
 - **변경 위치는 재사용 횟수가 아니라 추상화 책임으로 결정함**
     - 제품 이름·locale 문구·site navigation·콘텐츠 의미가 있으면 `apps/web`에 둠
     - 제품과 무관한 상호작용 primitive·token schema이면 `packages/ui`에 둠
-    - 정적 분석 정책은 각 저장소의 `oxlint.config.ts`에 둠
+    - 정적 분석 정책은 저장소 루트 `vite.config.ts`의 lint 설정에 둠
     - root barrel로 편의를 만들기보다 명시적 subpath import로 의존 경계를 드러냄
 
 ### arc42 5 · C4 Component로 Web 내부 책임을 추적함
@@ -183,7 +182,7 @@ bun run check
     - 수정 원본은 [`diagrams/onboarding-web-components.puml`](diagrams/onboarding-web-components.puml)임
 - **새 기능은 route에서 모든 로직을 작성하기보다 규칙의 수명에 맞는 계층으로 분리함**
     - HTTP parameter와 redirect·not-found는 route에 둠
-    - 반복 계산과 validation·ranking은 `lib`의 순수 함수로 두고 Bun 내장 test runner로 검사함
+    - 반복 계산과 validation·ranking은 `lib`의 순수 함수로 두고 Vite+ test runner로 검사함
     - 사용자 interaction과 시각 조합은 component에 두고 필요한 경우에만 client boundary로 만듦
     - 재사용 가능한 접근성 primitive가 없을 때만 `packages/ui`의 shadcn source workflow를 사용함
 
@@ -210,7 +209,7 @@ bun run check
 - **Web은 Vercel managed output과 Next.js standalone container의 두 빌드 경계를 코드로 지원함**
     - `VERCEL=1`이면 Vercel adapter가 output을 구성하도록 `output: standalone`을 생략함
     - 그 외 build는 monorepo tracing root를 가진 standalone output을 생성함
-    - `apps/web/docker/Dockerfile`은 Bun 1 Alpine, 비루트 `bun` 사용자, `PORT=3000`, multi-stage build를 사용함
+    - `apps/web/docker/Dockerfile`은 Node.js 26 Alpine, 비루트 `node` 사용자, `PORT=3000`, multi-stage build를 사용함
     - `/healthz`는 공통 JSON health endpoint이며 Host rewrite보다 먼저 통과함
 - **공유 package 게시와 Web 배포는 서로 다른 운영 흐름임**
     - `Publish Packages` workflow는 수동 실행되며 UI를 Node 24·26에서 검사하고 archive를 만든 뒤 기존 `1.0.0`을 교체함. 실행·복구는 [배포 안내](runbooks/release.md)를 따름
@@ -262,9 +261,9 @@ bun run check
 - **공유 primitive 추가는 dry-run → 실제 생성 → diff 검토 순서로 수행함**
 
 ```sh
-bunx --bun shadcn add <component> --dry-run -c packages/ui
-bunx --bun shadcn add <component> -c packages/ui
-bunx --bun shadcn add <component> --diff -c packages/ui
+pnpm exec shadcn add <component> --dry-run -c packages/ui
+pnpm exec shadcn add <component> -c packages/ui
+pnpm exec shadcn add <component> --diff -c packages/ui
 ```
 
 ### arc42 8 · TypeScript·콘텐츠·국제화 계약을 이해함
@@ -291,11 +290,11 @@ bunx --bun shadcn add <component> --diff -c packages/ui
 
 ### arc42 8 · 테스트·정적 분석·의존성 자동화를 이해함
 
-- **Bun `1.4.0`의 내장 test runner는 TypeScript·JSX·mock·coverage를 별도 runner dependency 없이 실행함**
+- **Vite+의 `vp test`는 Vitest로 TypeScript·JSX·mock·coverage를 실행함**
     - unit은 `*.test.ts(x)`, integration은 `*.integration.test.ts(x)`를 사용하며 같은 workspace process에서 실행함
-    - Web은 공식 `fumadocs-mdx/bun` plugin을 preload해 실제 MDX collection을 로드함
-    - coverage는 workspace별 `bunfig.toml`에서 파일별 line threshold와 LCOV 출력 위치를 관리함
-    - 공식 자료는 [Bun test runner](https://bun.sh/docs/test), [Bun test 설정](https://bun.sh/docs/test/configuration), [Bun coverage](https://bun.sh/docs/test/code-coverage) 문서임
+    - Web 테스트는 공식 `fumadocs-mdx/vite` plugin으로 실제 MDX collection을 로드함
+    - coverage는 workspace별 `vite.config.ts`에서 파일별 line threshold와 LCOV 출력 위치를 관리함
+    - 공식 자료는 [Vite+ test](https://github.com/voidzero-dev/vite-plus/blob/main/docs/guide/test.md), [Vitest coverage](https://vitest.dev/guide/coverage) 문서임
 - **Playwright `1.62.1`은 production build와 standalone server를 띄워 실제 Host·route·브라우저 동작을 검사함**
     - Home·Tech·Invest project가 서로 다른 base URL을 사용함
     - visual snapshot은 animation과 caret을 통제하고 `0.001`의 pixel ratio 기준을 사용함
@@ -303,12 +302,11 @@ bunx --bun shadcn add <component> --diff -c packages/ui
     - snapshot 갱신 전 diff를 직접 확인하고 환경 차이인지 의도한 디자인 변경인지 판별함
     - 공식 자료는 [Playwright Test](https://playwright.dev/docs/intro), [visual comparison](https://playwright.dev/docs/test-snapshots), [Trace Viewer](https://playwright.dev/docs/trace-viewer) 문서임
 - **Oxfmt·Oxlint·Knip은 형식, correctness·React·a11y 규칙, 미사용 파일·의존성·중복 export와 미선언 의존성을 각각 담당함**
-    - `bun run fmt`는 저장소를 수정하고 `bun run fmt:check`는 수정 없이 검사함
-    - `bun run lint`는 type-aware rule을 포함한 공유 Oxc 정책을 적용함
-    - `bun run deadcode`는 Knip으로 파일·의존성·catalog·중복 export와 미선언 참조를 검사함
+    - `make fmt`는 저장소를 수정하고 `pnpm run check`는 수정 없이 포맷·lint·타입을 검사함
+    - `pnpm run deadcode`는 Knip으로 파일·의존성·catalog·중복 export와 미선언 참조를 검사함
     - 공식 자료는 [Oxfmt](https://oxc.rs/docs/guide/usage/formatter), [Oxlint](https://oxc.rs/docs/guide/usage/linter), [Knip](https://knip.dev/overview/getting-started) 문서임
 - **Renovate는 framework·UI·test·tooling lane별로 dependency PR을 묶고 major는 dashboard 승인을 요구함**
-    - 공통 version은 catalog 한 곳에서 바꾸고 lockfile을 `bun install`로 재계산함
+    - 공통 version은 catalog 한 곳에서 바꾸고 lockfile을 `pnpm install`로 재계산함
     - security override는 제거 조건과 upstream fix version을 남김
     - 공식 자료는 [Renovate 공식 문서](https://docs.renovatebot.com/)임
 
@@ -349,7 +347,7 @@ bunx --bun shadcn add <component> --diff -c packages/ui
 ### arc42 11 · 현재 위험과 기술 부채를 인지함
 
 - **가장 큰 package 위험은 같은 `1.0.0`이 다른 내용과 integrity로 교체되는 mutable snapshot 정책임**
-    - 외부 소비자는 `bun update --force <package>@1.0.0`으로 다시 resolve하고 lockfile을 커밋해야 함
+    - 외부 소비자는 `pnpm update --force <package>@1.0.0`으로 다시 resolve하고 lockfile을 커밋해야 함
     - 독립된 외부 소비자가 생기기 전 immutable SemVer·changelog·migration·rollback으로 전환할 필요가 있음
 - **Web production 배포와 rollback의 실제 소유권이 저장소 안 workflow에 완전히 표현되지 않은 운영 위험이 있음**
     - Vercel Git integration, OCI registry, domain과 rollback runbook을 운영 시스템에서 별도로 확인해야 함
@@ -358,7 +356,7 @@ bunx --bun shadcn add <component> --diff -c packages/ui
     - 중요한 운영 diagram은 `.puml` 원본을 반드시 함께 보존함
     - 완전한 독립성이 필요해지면 CI에서 SVG를 생성해 같은 PR에서 source와 결과를 검증하는 방식을 검토할 수 있음
 - **빠르게 움직이는 framework version과 수동 문서 version이 어긋날 위험이 있음**
-    - version 사실은 `.bun-version`, `.node-version`, `package.json`, `bun.lock`이 우선함
+    - version 사실은 `.node-version`, `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`이 우선함
     - 의존성 PR은 onboarding의 version과 공식 release note link도 함께 검토함
 - **단일 Web deployment는 재사용과 운영 단순성을 주지만 한 site의 build·runtime 결함이 세 site의 release를 함께 막을 수 있음**
     - site별 E2E와 route group 경계로 회귀 범위를 줄임
@@ -391,52 +389,50 @@ bunx --bun shadcn add <component> --diff -c packages/ui
 - **Markdown·일반 문서 변경은 형식과 로컬 링크를 검사함**
 
 ```sh
-bun run fmt:check
-bun run links:check
+pnpm run check
+pnpm run links:check
 git diff --check
 ```
 
 - **React·CSS·Web domain rule 변경은 typecheck·unit test와 관련 E2E를 실행함**
 
 ```sh
-bun run --filter @jongminchung/web typecheck
-bun run --filter @jongminchung/web test
-bun run --filter @jongminchung/web build
-bun run --filter @jongminchung/web test:e2e
+pnpm --filter @jongminchung/web run typecheck
+pnpm --filter @jongminchung/web run test
+pnpm --filter @jongminchung/web run build
+pnpm --filter @jongminchung/web run test:e2e
 ```
 
 - **공유 UI 변경은 package와 소비 Web을 함께 검사함**
 
 ```sh
-bun run --filter @jongminchung/ui typecheck
-bun run --filter @jongminchung/ui test
-bun run --filter @jongminchung/ui build
-bun run --filter @jongminchung/web typecheck
+pnpm --filter @jongminchung/ui run typecheck
+pnpm --filter @jongminchung/ui run test
+pnpm --filter @jongminchung/ui run build
+pnpm --filter @jongminchung/web run typecheck
 ```
 
 - **Oxfmt·Oxlint 설정 변경은 루트 검사로 검증함**
 
 ```sh
-bun run check
-bun run lint
-bun run fmt:check
+pnpm run check
 ```
 
 - **의존성 변경은 lane을 하나로 제한하고 manifest·catalog·lockfile·release note를 함께 검토함**
 
 ```sh
-bun outdated --recursive
+pnpm outdated -r
 # 루트 catalog 또는 대상 package.json 변경
-bun install
-bun run check:full
-bun run audit
+pnpm install
+pnpm run check:full
+pnpm run audit
 ```
 
 - **저장소 전체 기본 gate와 고위험 gate를 구분함**
-    - `bun run check`는 format, lint, typecheck, deadcode, unit, integration을 실행함
-    - `bun run check:full`은 기본 gate 뒤에 build와 Playwright E2E를 실행함
-    - `bun run audit`는 registry advisory database가 필요하므로 네트워크 의존 gate로 별도 실행함
-    - `bun run links:check`는 고정 Lychee container로 Markdown·HTML의 로컬 link와 anchor를 검사함
+    - `pnpm run check`는 format, lint, typecheck, deadcode, unit, integration을 실행함
+    - `pnpm run check:full`은 기본 gate 뒤에 build와 Playwright E2E를 실행함
+    - `pnpm run audit`는 registry advisory database가 필요하므로 네트워크 의존 gate로 별도 실행함
+    - `pnpm run links:check`는 고정 Lychee container로 Markdown·HTML의 로컬 link와 anchor를 검사함
 
 ### 첫 기여를 작은 수직 변경으로 완료함
 
@@ -454,12 +450,12 @@ bun run audit
     - 2일차에는 하나의 Tech Docs request를 proxy부터 MDX component까지 추적할 수 있어야 함
     - 3일차에는 Tailwind token과 shared primitive·product component의 소유권을 구분할 수 있어야 함
     - 4일차에는 unit·integration·E2E 실패 artifact를 읽고 적절한 최소 검사를 선택할 수 있어야 함
-    - 5일차에는 작은 수직 변경을 `bun run check`와 필요한 추가 gate까지 통과시킬 수 있어야 함
+    - 5일차에는 작은 수직 변경을 `pnpm run check`와 필요한 추가 gate까지 통과시킬 수 있어야 함
 
 ## 결론과 실행 제안
 
-- **지금 바로 `bun install --frozen-lockfile`과 Web 개발 서버를 실행하고 Home·Tech·Invest 세 Host를 확인하는 것이 첫 단계임**
+- **지금 바로 `pnpm install --frozen-lockfile`과 Web 개발 서버를 실행하고 Home·Tech·Invest 세 Host를 확인하는 것이 첫 단계임**
 - **그다음 `proxy.ts`에서 Tech Docs page까지 한 요청을 추적하고 C4 Component 그림의 각 상자를 실제 파일과 대응시키는 것이 두 번째 단계임**
-- **첫 변경은 하나의 workspace에 제한하고 가장 가까운 검사 뒤 `bun run check`를 실행하는 것이 안전한 완료 기준임**
+- **첫 변경은 하나의 workspace에 제한하고 가장 가까운 검사 뒤 `pnpm run check`를 실행하는 것이 안전한 완료 기준임**
 - **architecture·package export·배포·데이터 원천을 바꾸는 제안은 구현 전에 arc42 품질 목표와 위험을 갱신하고 ADR로 결정하는 것이 필요함**
 - **의존성이나 실행 계약이 바뀔 때 이 문서의 version·공식 링크·다이어그램·명령을 같은 PR에서 갱신해야 문서 단독 온보딩 가치가 유지됨**

@@ -23,47 +23,25 @@ sourceUrl: "https://code.visualstudio.com/docs/remote/remote-overview"
 
 다음은 **jongminchung 루트에서 사용하는 학습용 Tasks 예제**다. 현재 문서만 작성하므로
 실제 `.vscode/tasks.json`에는 자동 반영하지 않는다. 셸을 통하지 않는 `process` task는 명령과
-인자를 분리하기 좋다. Linux/macOS/WSL의 PATH에 Bun이 준비되어 있어야 한다.
+인자를 분리하기 좋다. Linux/macOS/WSL의 PATH에 pnpm과 Node.js가 준비되어 있어야 한다.
 
 ```json
 {
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "repo: format check",
+            "label": "repo: check",
             "type": "process",
-            "command": "bun",
-            "args": ["run", "fmt:check"],
+            "command": "pnpm",
+            "args": ["run", "check"],
             "options": { "cwd": "${workspaceFolder}" },
-            "problemMatcher": []
-        },
-        {
-            "label": "repo: lint",
-            "type": "process",
-            "command": "bun",
-            "args": ["run", "lint"],
-            "options": { "cwd": "${workspaceFolder}" },
-            "problemMatcher": []
-        },
-        {
-            "label": "web: typecheck",
-            "type": "process",
-            "command": "bun",
-            "args": ["run", "--filter", "@jongminchung/web", "typecheck"],
-            "options": { "cwd": "${workspaceFolder}" },
-            "problemMatcher": []
-        },
-        {
-            "label": "repo: review checks",
-            "dependsOrder": "sequence",
-            "dependsOn": ["repo: format check", "repo: lint", "web: typecheck"],
             "problemMatcher": []
         }
     ]
 }
 ```
 
-이 묶음은 간단한 리뷰 검사이며 전체 `bun run check`·E2E를 대체하지 않는다.
+이 작업은 전체 `pnpm run check`를 실행하며 E2E는 별도로 실행한다.
 `problemMatcher: []`는 명령 출력을 Problems로 파싱하지 않는다는 뜻이다. 존재하지 않는
 matcher를 붙여 오류 위치가 수집되는 것처럼 보이게 하지 않는다. TS CLI의 실제 출력 형식이
 맞는 task에는 `$tsc`, watcher에는 해당 background matcher를 검증 후 연결한다.

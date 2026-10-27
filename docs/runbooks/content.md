@@ -87,10 +87,10 @@ Tech는 언어별 공개 상태를 별도로 둘 수 있다. 번역 파일 자�
 ## 검증하고 공개하기
 
 ```sh
-bun run --filter @jongminchung/web postinstall
-bun run --filter @jongminchung/web typecheck
-bun run --filter @jongminchung/web test
-bun run --filter @jongminchung/web build
+pnpm --filter @jongminchung/web run postinstall
+pnpm --filter @jongminchung/web run typecheck
+pnpm --filter @jongminchung/web run test
+pnpm --filter @jongminchung/web run build
 ```
 
 `postinstall`은 새 MDX의 `.source` entry를 생성한다. build는 entry 재생성,

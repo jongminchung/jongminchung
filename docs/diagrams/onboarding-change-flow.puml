@@ -6,8 +6,8 @@ start
 :변경 소유 workspace와 경계 식별;
 
 if (문서만 변경함?) then (예)
-  :bun run fmt:check;
-  :bun run links:check;
+  :pnpm run check;
+  :pnpm run links:check;
 else (아니오)
   :가장 가까운 typecheck·test 실행;
   if (React·CSS·route 변경임?) then (예)
@@ -16,12 +16,12 @@ else (아니오)
   if (공유 package 변경임?) then (예)
     :package build·test와 Web 소비 typecheck 실행;
   endif
-  :bun run check;
+  :pnpm run check;
 endif
 
 if (릴리스·배포·고위험 변경임?) then (예)
-  :bun run check:full;
-  :bun run audit;
+  :pnpm run check:full;
+  :pnpm run audit;
 endif
 
 :git diff --check;

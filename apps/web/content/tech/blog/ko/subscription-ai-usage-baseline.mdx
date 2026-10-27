@@ -54,8 +54,8 @@ sourceUrl: https://google-gemini.github.io/gemini-cli/docs/cli/commands.html
 
 ```csv
 task_id,kind,commit,allowed_paths,verify_command,time_limit_minutes
-WEB-01,bugfix,abc123,apps/web/lib/search,bun run --filter @jongminchung/web test,30
-WEB-02,test,def456,apps/web/lib/documents,bun run --filter @jongminchung/web test,30
+WEB-01,bugfix,abc123,apps/web/lib/search,pnpm --filter @jongminchung/web run test,30
+WEB-02,test,def456,apps/web/lib/documents,pnpm --filter @jongminchung/web run test,30
 ```
 
 ## 원자료와 판정 지표를 한 행에 남김

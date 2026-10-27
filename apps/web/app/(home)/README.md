@@ -20,9 +20,9 @@ Home은 개인 소개와 **Tech·Invest 두 공간**을 연결한다. 한영 전
 저장소 루트에서 확인한다.
 
 ```sh
-bun run --filter @jongminchung/web dev:home
-bun run --filter @jongminchung/web typecheck
-bun run --filter @jongminchung/web test:e2e --project=home-chromium --workers=2
+pnpm --filter @jongminchung/web run dev:home
+pnpm --filter @jongminchung/web run typecheck
+pnpm --filter @jongminchung/web run test:e2e --project=home-chromium --workers=2
 ```
 
 화면을 의도적으로 바꾼 경우에만 실제 한영·모바일·테마 화면을 검토한 뒤 Home의

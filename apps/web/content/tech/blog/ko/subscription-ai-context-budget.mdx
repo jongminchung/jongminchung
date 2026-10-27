@@ -74,7 +74,7 @@ docs/ai/context.md       # temporary evidence
 - Symptom: 같은 점수 문서의 순서가 실행마다 달라짐
 - Allowed: apps/web/lib/tech/search*
 - Protected: UI와 콘텐츠 파일
-- Verify: bun run --filter @jongminchung/web test
+- Verify: pnpm --filter @jongminchung/web run test
 - Done: 회귀 테스트 통과와 기존 검색 benchmark 유지
 - Known: 점수 계산은 안정적임
 - Unknown: 최종 tie-breaker의 locale 영향

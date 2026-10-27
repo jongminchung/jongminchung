@@ -10,8 +10,8 @@
 ## 먼저 실행하기
 
 ```sh
-bun install --frozen-lockfile
-bun run --filter @jongminchung/web dev:tech
+pnpm install --frozen-lockfile
+pnpm --filter @jongminchung/web run dev:tech
 ```
 
 `http://localhost:3000/en` 또는 `/ko`에서 확인한다. Home과 Invest는 각각
@@ -53,7 +53,7 @@ host에만 적용된다.
 | 검색 규칙 변경        | `lib/tech/search.ts`, `search-server.ts`, `search-results.ts`                                                  | 결과·오류 재시도·키보드 선택                  |
 | 테마·공용 버튼 변경   | 저장소의 `packages/ui/src/styles/`, `packages/ui/src/components/`                                              | 세 사이트와 공용 UI interaction fixture       |
 | 본문 스타일 변경      | `app/mdx-theme.css`, Tech의 `tech-document.css`·`tech-docs.css`, Invest의 `invest-code.css`                    | 직접 진입과 목록에서 본문으로 이동한 경우     |
-| 라이브러리 버전 변경  | 루트 catalog, 소비 workspace manifest                                                                          | lockfile, 공식 변경 내역, 전체 검사           |
+| 라이브러리 버전 변경  | `pnpm-workspace.yaml#catalog`, 소비 workspace manifest                                                         | lockfile, 공식 변경 내역, 전체 검사           |
 
 Client용 JSON과 서버용 `copy.ts`의 구분은 브라우저로 보내는 메시지 범위를 제한하기
 위한 것이다. 서버 문구를 바꿀 때 client provider에 전체 사전을 추가하지 않는다.
@@ -76,7 +76,7 @@ content/**/*.mdx + source.config.ts
 - Next는 route 타입과 서버·클라이언트 경계를, Fumadocs는 MDX·검색 엔진·목차 관찰을
   담당한다. 경로 타입을 수동으로 복제하거나 별도 목차 observer를 만들지 않는다.
 - `fumadocs-source.ts`의 `server-only`는 콘텐츠를 client에서 가져오는 실수를 빌드에서
-  차단한다. Bun 테스트·콘텐츠 CLI는 기존 `scripts/register-content-plugin.ts` preload에서
+  차단한다. Vite+ 테스트는 Vite 설정에서, Node 콘텐츠 CLI는 `scripts/register-content-plugin.ts` preload에서
   이 표시를 서버 모듈로 등록한다. 이 preload는 Next 빌드에 적용되지 않는다.
 - Base UI는 dialog·메뉴의 초점과 키보드 동작을, `next-themes`는 테마 동기화를 담당한다.
   제품 component는 공용 UI wrapper의 props로 동작을 조정한다.
@@ -88,12 +88,12 @@ content/**/*.mdx + source.config.ts
 
 ## 생성물을 직접 수정하지 않기
 
-| 생성물                                    | 원본                                        | 다시 만드는 명령                                 |
-| ----------------------------------------- | ------------------------------------------- | ------------------------------------------------ |
-| `.source/`                                | MDX와 `source.config.ts`                    | `bun run --filter @jongminchung/web postinstall` |
-| `.next/types/`                            | `app/`의 route                              | `bun run --filter @jongminchung/web typecheck`   |
-| `generated/`, `public/excalidraw-assets/` | `public/diagrams/`와 MDX의 Excalidraw scene | Web `dev` 또는 `build`                           |
-| Playwright 기준 이미지                    | 브라우저 렌더링                             | 의도한 디자인 변경에서만 diff 검토 후 갱신       |
+| 생성물                                    | 원본                                        | 다시 만드는 명령                                  |
+| ----------------------------------------- | ------------------------------------------- | ------------------------------------------------- |
+| `.source/`                                | MDX와 `source.config.ts`                    | `pnpm --filter @jongminchung/web run postinstall` |
+| `.next/types/`                            | `app/`의 route                              | `pnpm --filter @jongminchung/web run typecheck`   |
+| `generated/`, `public/excalidraw-assets/` | `public/diagrams/`와 MDX의 Excalidraw scene | Web `dev` 또는 `build`                            |
+| Playwright 기준 이미지                    | 브라우저 렌더링                             | 의도한 디자인 변경에서만 diff 검토 후 갱신        |
 
 새 MDX 파일이 조회되지 않으면 `.source/`를 재생성한다. Excalidraw는 build 전에 SVG를
 생성한다. 검색은 별도 JSON 파일을 편집하지 않고 locale별 검색 route에서 제공한다.
@@ -103,14 +103,14 @@ content/**/*.mdx + source.config.ts
 
 ```sh
 # Web 타입과 규칙부터 확인
-bun run --filter @jongminchung/web typecheck
-bun run --filter @jongminchung/web test
+pnpm --filter @jongminchung/web run typecheck
+pnpm --filter @jongminchung/web run test
 
 # 저장소 공통 검사
-bun run check
+pnpm run check
 
 # production build와 세 사이트의 브라우저·시각 회귀 검사
-bun run --filter @jongminchung/web test:e2e --workers=2
+pnpm --filter @jongminchung/web run test:e2e --workers=2
 ```
 
 Playwright는 3100 포트에 테스트 서버가 없으면 fixture를 포함한 production build 후
@@ -129,4 +129,4 @@ Playwright는 3100 포트에 테스트 서버가 없으면 fixture를 포함한 
 공용 헤더의 구성과 변경 기준은 [공용 헤더 안내](header-unification.md)를 따른다.
 
 배포 환경과 standalone 실행은 [배포 계약](../../apps/web/DEPLOYMENT.md),
-런타임 선택은 [Bun standalone 런타임](bun-standalone-runtime.md)을 참고한다.
+런타임 선택은 [Node standalone 런타임](node-standalone-runtime.md)을 참고한다.

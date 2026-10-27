@@ -114,9 +114,9 @@ CLI from this workspace, inspect the dry run, and review generated dependencies 
 committing:
 
 ```bash
-bunx --bun shadcn add <component> --dry-run -c packages/ui
-bunx --bun shadcn add <component> -c packages/ui
-bunx --bun shadcn add <component> --diff -c packages/ui
+pnpm exec shadcn add <component> --dry-run -c packages/ui
+pnpm exec shadcn add <component> -c packages/ui
+pnpm exec shadcn add <component> --diff -c packages/ui
 ```
 
 `apps/web/components.json` describes consumer aliases and is not the add or update entry point for
@@ -126,8 +126,8 @@ merging local accessibility, semantic token, and public API decisions.
 ## Build and pack
 
 ```bash
-bun run build
-bun publish --dry-run --access public
+pnpm --filter @jongminchung/ui run build
+pnpm --filter @jongminchung/ui run publish:dry-run
 ```
 
 The package includes compiled ESM JavaScript, generated declarations, source components for
@@ -143,7 +143,7 @@ contents, and integrity. Force a new resolution and commit the updated downstrea
 replacement is published:
 
 ```bash
-bun update --force @jongminchung/ui@1.0.0
+pnpm update --force @jongminchung/ui@1.0.0
 ```
 
 This policy is limited to source-first workspace consumers and explicitly coordinated personal

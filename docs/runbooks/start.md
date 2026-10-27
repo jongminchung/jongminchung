@@ -8,18 +8,16 @@ AI 대화 기록이나 에이전트 skill을 읽어야만 알 수 있는 작업 
 
 1. `git status --short --branch`로 기존 변경을 확인한다. 다른 사람의 변경이
    있으면 담당 범위를 확인하고, 새 작업은 별도 브랜치나 worktree에서 진행한다.
-2. [.bun-version](../../.bun-version), [.node-version](../../.node-version),
-   [mise.toml](../../mise.toml)의 도구를 설치한다. `make`, Bash와 Git도 필요하다.
-   mise를 쓰지 않아도 같은 버전의 Bun, Node, shfmt를 PATH에 설치하면 된다.
-3. 아래 명령으로 설치하고 Tech 화면을 연다. mise 사용자는 먼저 `mise trust`,
-   `mise install`을 실행하고 명령 앞에 `mise exec --`를 붙일 수 있다.
+2. Node.js `26.7.0`, pnpm, shfmt를 전역 PATH에 설치한다. `make`, Bash와 Git도 필요하다.
+   [.node-version](../../.node-version)은 CI에서 사용할 Node 버전을 기록한다.
+3. 아래 명령으로 설치하고 Tech 화면을 연다.
 
 ```sh
-bun --version
 node --version
+pnpm --version
 shfmt --version
-bun install --frozen-lockfile
-bun run --filter @jongminchung/web dev:tech
+pnpm install --frozen-lockfile
+pnpm --filter @jongminchung/web run dev:tech
 ```
 
 브라우저에서 `http://localhost:3000/ko`와 `http://localhost:3000/en`을 확인한다.
@@ -47,23 +45,23 @@ bun run --filter @jongminchung/web dev:tech
 
 | 변경                   | 실행할 검사                                                                           | 성공 판단                                          |
 | ---------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| `docs` Markdown만 수정 | `bun run fmt:check`, `bun run links:check`                                            | 형식과 로컬 링크·anchor 오류 없음                  |
+| `docs` Markdown만 수정 | `pnpm run check`, `pnpm run links:check`                                              | 형식·정적 검사와 로컬 링크·anchor 오류 없음        |
 | MDX 원본 수정          | Web `typecheck`, `test`, `build`                                                      | 번역·schema·본문·경로 검증 통과, 두 언어 화면 확인 |
 | Web 코드 수정          | Web `typecheck`, `test`, `test:e2e`, 루트 `check`                                     | 규칙 검사와 해당 브라우저 시나리오 통과            |
 | 공용 UI 수정           | UI `typecheck`, `test:coverage`, `test:node`, Web `typecheck`, 관련 E2E, 루트 `check` | 소스와 배포 import, 소비 화면 확인                 |
 | Oxfmt·Oxlint 설정 수정 | 루트 `check`                                                                          | 로컬 설정과 전체 검사 통과                         |
-| 의존성 또는 배포 변경  | `bun run check:full`, `bun run audit`, 대상 배포 사전 검증                            | 전체 검사와 보안 점검, 배포 대상 확인              |
+| 의존성 또는 배포 변경  | `pnpm run check:full`, `pnpm run audit`, 대상 배포 사전 검증                          | 전체 검사와 보안 점검, 배포 대상 확인              |
 
-표에서 Web 명령은 `bun run --filter @jongminchung/web <script>`, UI는
+표에서 Web 명령은 `pnpm --filter @jongminchung/web run <script>`, UI는
 `@jongminchung/ui` 필터를 사용한다.
-`bun run check`는 `make lint` → 타입 검사 → Knip → 커버리지 테스트와 Node
+`pnpm run check`는 형식·정적 검사 → 타입 검사 → Knip → 커버리지 테스트와 Node
 패키지 검증을 실행한다. `check:full`은 여기에 E2E를 더한다.
 
 Playwright 최초 실행에는 Chromium과 시스템 의존성이 필요하다.
 
 ```sh
-bunx playwright install --with-deps chromium
-bun run --filter @jongminchung/web test:e2e --workers=2
+pnpm exec playwright install --with-deps chromium
+pnpm --filter @jongminchung/web run test:e2e --workers=2
 ```
 
 Playwright는 3100 포트에 서버가 없으면 테스트용 production build와 서버 시작을

@@ -31,8 +31,8 @@ CLI 경로를 사용한다. 아래 절차는 현재 채택 근거와 다음 comp
 패키지까지 추적한다.
 
 ```sh
-bun pm ls --all
-rg '"typescript"' package.json bun.lock apps packages
+pnpm list --depth Infinity
+rg '"typescript"' package.json pnpm-workspace.yaml pnpm-lock.yaml apps packages
 rg 'typescript/lib/typescript|require\\(.typescript.|from .typescript.' node_modules
 ```
 
@@ -62,7 +62,7 @@ rg 'typescript/lib/typescript|require\\(.typescript.|from .typescript.' node_mod
 
 TypeScript 7.0은 [공식 발표](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/)에서
 Go 기반 native compiler로 전환됐으며 안정적인 Compiler API는 아직 제공하지 않는다고 명시한다.
-이 저장소는 Compiler API를 직접 import하지 않고 MDX는 Fumadocs의 Bun plugin으로 변환하므로,
+이 저장소는 Compiler API를 직접 import하지 않고 MDX는 Fumadocs의 Node·Vite plugin으로 변환하므로,
 일반적인 `.ts` 소스 호환성과 embedded-language 도구 체인 호환성을 별도로 검증한다.
 
 ## 4. 생태계별 전환 경로를 만든다
@@ -77,7 +77,7 @@ build, packaging과 smoke test를 근거로 판단한다.
 | --------------- | --------------------------------------------------------------------------- | -------------------------------------------------- |
 | compiler        | `typescript`                                                                | CLI 검사, declaration emit, framework 통합         |
 | Next.js·content | `next`, `fumadocs-mdx`, `fumadocs-core`, `@types/mdx`                       | Next CLI checker, MDX compile, runtime 콘텐츠 로딩 |
-| build·lint·test | `esbuild`, `bun:test`, `oxlint`, `oxlint-tsgolint`, `@playwright/test`      | declaration emit, type-aware lint, unit·E2E        |
+| build·lint·test | `esbuild`, `vite-plus`, `@playwright/test`                                  | declaration emit, type-aware lint, unit·E2E        |
 | CSS             | `tailwindcss`, `@tailwindcss/postcss`, `postcss`, `tw-animate-css`          | Next production CSS build                          |
 | React·UI        | `react`, `react-dom`, `@base-ui/react`, `lucide-react`, `cmdk`, `zod`       | JSX 선언 검사와 실제 앱 build                      |
 | 개발 CLI        | `shadcn`                                                                    | CLI smoke와 명시적인 TypeScript 전환               |
@@ -95,8 +95,8 @@ build, packaging과 smoke test를 근거로 판단한다.
   `oxlint-tsgolint@7`을 요구한다.
 - [TypeScript declaration 생성](https://www.typescriptlang.org/tsconfig/declaration.html)은 공개
   패키지의 JavaScript emit과 같은 compiler 경계에서 실행한다.
-- [Playwright](https://playwright.dev/docs/test-typescript)와 [Bun test](https://bun.sh/docs/test)는
-  TypeScript 실행과 타입 검사를 분리하므로 `bun run typecheck`를 별도 release gate로 실행한다.
+- [Playwright](https://playwright.dev/docs/test-typescript)와 [Vite+ test](https://github.com/voidzero-dev/vite-plus/blob/main/docs/guide/test.md)는
+  TypeScript 실행과 타입 검사를 분리하므로 저장소 `pnpm run check`에 명시적 타입 검사 단계를 둔다.
 
 공식 전환 경로가 없다는 사실을 미지원으로 단정하지 않는다. 반대로 React, CodeMirror,
 Tailwind처럼 선언만 소비하는 패키지도 실제 application build를 통과하기 전에는 지원 확인으로
@@ -110,8 +110,8 @@ production 경계 중 하나라도 현재 compiler가 제공하지 않는 Compil
 커밋하지 않는다.
 
 ```sh
-bun run tsc --version
-bun pm ls --all | rg typescript
+pnpm run tsc --version
+pnpm list --depth Infinity | rg typescript
 ```
 
 compiler 버전, `typescript`로 import되는 패키지, 프레임워크 자체 타입 검사가 모두 같은
@@ -120,7 +120,7 @@ workspace에서 compiler 역할을 나눌 근거가 아니다.
 
 이 저장소는 compiler alias를 만들지 않고 모든 workspace에 TypeScript `7.0.2` 하나만 설치한다.
 Next.js는 `experimental.useTypeScriptCli: true`, Fumadocs 테스트·스크립트는
-`fumadocs-mdx/bun` plugin을 사용해 Compiler API 결합을 만들지 않는다.
+`fumadocs-mdx/node`·`fumadocs-mdx/vite` plugin을 사용해 Compiler API 결합을 만들지 않는다.
 
 ## 6. 설정 변경을 먼저 드러낸다
 
@@ -129,8 +129,8 @@ TypeScript 6에서 임시 `ignoreDeprecations`를 제거하고 TS 7의 기본값
 `noUncheckedSideEffectImports`, `libReplacement`을 실제 `--showConfig` 결과로 비교한다.
 
 ```sh
-bun run tsc --showConfig -p tsconfig.json
-bun run tsc --noEmit --incremental false -p tsconfig.json
+pnpm run tsc --showConfig -p tsconfig.json
+pnpm run tsc --noEmit --incremental false -p tsconfig.json
 ```
 
 모든 tsconfig를 개별 실행한다. 루트 검사 하나가 앱, 패키지 build config를 포함한다고 가정하지
@@ -183,7 +183,7 @@ lockfile을 함께 바꾸고 전체 검증을 실행한다. 필수 경계 하나
 되돌린다.
 
 현재 채택에서는 단일 TypeScript `7.0.2`로 루트와 모든 workspace typecheck, 공개 package의
-declaration emit, Bun test, Next.js production build와 Node runtime smoke를 실행한다. 현재 결정은
+declaration emit, Vite+ test, Next.js production build와 Node runtime smoke를 실행한다. 현재 결정은
 TS 7 alias나 workspace별 compiler 분리 없이 이 단일 compiler 경계를 유지하는 것이다.
 
 ## 참고 자료
@@ -193,5 +193,5 @@ TS 7 alias나 workspace별 compiler 분리 없이 이 단일 compiler 경계를 
 - [Next.js 16.3.1 TypeScript setup](https://github.com/vercel/next.js/blob/v16.3.1/packages/next/src/lib/verify-typescript-setup.ts)
 - [Oxlint type-aware linting](https://oxc.rs/docs/guide/usage/linter/type-aware.html)
 - [TypeScript declaration](https://www.typescriptlang.org/tsconfig/declaration.html)
-- [Bun test runner](https://bun.sh/docs/test)
+- [Vite+ test](https://github.com/voidzero-dev/vite-plus/blob/main/docs/guide/test.md)
 - [Playwright TypeScript](https://playwright.dev/docs/test-typescript)

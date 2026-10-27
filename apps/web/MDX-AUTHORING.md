@@ -21,7 +21,7 @@ Tech Blog·Docs·Invest Note에서 같은 문법을 사용한다. 기존 bold·�
 > 이 설정은 프로젝트 전체에 적용됩니다.
 
 > [!TIP]
-> 변경 전에 `bun run check`로 현재 상태를 확인하세요.
+> 변경 전에 `pnpm run check`로 현재 상태를 확인하세요.
 
 > [!IMPORTANT]
 > 먼저 기존 설정을 백업하세요.
@@ -45,7 +45,7 @@ Tech Blog·Docs·Invest Note에서 같은 문법을 사용한다. 기존 bold·�
 > 2. 검사를 실행합니다.
 >
 > ```sh
-> bun run check
+> pnpm run check
 > ```
 ````
 

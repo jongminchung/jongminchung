@@ -29,13 +29,14 @@ contract, component ownership rules, and runtime exception policy.
 Repository-wide scripts are owned by the workspace root and are run from that directory:
 
 ```bash
-bun run fmt
-bun run check
-bun run links:check
-bun run audit
+pnpm run check
+pnpm run links:check
+pnpm run audit
 ```
 
-Always include `run` for package scripts so commands are visibly distinguished from Bun subcommands.
+Use `make fmt` when you want to apply formatting fixes.
+
+Always include `run` for package scripts so commands are visibly distinguished from pnpm subcommands.
 
 `audit` queries the registry advisory database and fails on high-severity dependency findings. It
 requires network access and is run manually during maintenance and before releases instead of being
@@ -49,7 +50,7 @@ Each workspace owns its build, typecheck, and test commands. Select one with a f
 adding a package-specific wrapper to the root manifest:
 
 ```bash
-bun run --filter @jongminchung/web build
+pnpm --filter @jongminchung/web run build
 ```
 
 ## Version Policy
@@ -57,7 +58,7 @@ bun run --filter @jongminchung/web build
 The manually triggered package workflow replaces `@jongminchung/ui` at `1.0.0`.
 This is a mutable snapshot channel: the same version can have different API, contents, and
 integrity, so SemVer compatibility and lockfile reproducibility are not guaranteed. Consumers must
-force a new resolution, such as `bun update --force <package>@1.0.0`, and commit the resulting
+force a new resolution, such as `pnpm update --force <package>@1.0.0`, and commit the resulting
 lockfile whenever they adopt a replacement.
 
 The workflow installs the shared lockfile from the repository root, then lints, typechecks, and
@@ -67,11 +68,11 @@ and consumer imports. See the [release and recovery runbook](./docs/runbooks/rel
 GitHub authentication is supplied only through the `GH_PAT` Actions secret.
 
 ```bash
-bun install --frozen-lockfile --ignore-scripts
-bun run --filter @jongminchung/ui typecheck
-bun run --filter @jongminchung/ui test:coverage
-bun run --filter @jongminchung/ui test:node
-bun run --filter @jongminchung/ui publish:dry-run
+pnpm install --frozen-lockfile --ignore-scripts
+pnpm --filter @jongminchung/ui run typecheck
+pnpm --filter @jongminchung/ui run test:coverage
+pnpm --filter @jongminchung/ui run test:node
+pnpm --filter @jongminchung/ui run publish:dry-run
 ```
 
 <!-- prettier-ignore-start -->
@@ -128,4 +129,4 @@ DeepSeek                 416 lines           █░░░░░░░░░░�
 
 <!-- prettier-ignore-end -->
 
-- 설치와 공통 `make fmt`·`make lint` 사용법은 [기여 가이드](docs/CONTRIBUTING.md)를 참고함
+- 설치와 공통 `make fmt`·`pnpm run check` 사용법은 [기여 가이드](docs/CONTRIBUTING.md)를 참고함

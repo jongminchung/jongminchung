@@ -1,6 +1,6 @@
 # 저장소 문서
 
-이 디렉터리는 Bun 모노레포의 기술 선택, 유지보수 절차와 의사결정 기록을 관리한다.
+이 디렉터리는 pnpm workspace와 Node.js·Vite+을 사용하는 저장소의 기술 선택, 유지보수 절차와 의사결정 기록을 관리한다.
 별도 안내가 없으면 명령은 저장소 루트에서 실행한다. `plugins/go-lsp` 문서는 이 인덱스의
 범위에 포함하지 않는다.
 
@@ -43,5 +43,5 @@ AI 대화 기록 없이도 작업할 수 있도록 수정 위치, 실행 명령,
 
 - [Web 앱 구조와 직접 유지보수](web/README.md): 작업별 수정 파일, 다중 도메인 routing, 라이브러리 역할, 생성물과 오류 확인 순서
 - [공용 헤더 안내](web/header-unification.md): Home·Tech·Invest 헤더 구성과 유지보수 경계
-- [Web 테스트 전략](web-testing-strategy.md): Bun 내장 test runner와 Playwright의 테스트 분류 및 실행 기준
+- [Web 테스트 전략](web-testing-strategy.md): Vite+ test runner와 Playwright의 테스트 분류 및 실행 기준
 - [Web 컨테이너 배포 계약](../apps/web/DEPLOYMENT.md)
