@@ -44,7 +44,6 @@ export function DocsShell({
               </>
             }
             brand={<BrandWordmark suffix="tech" />}
-            brandLabel="jongminchung tech"
             navigationLabel={labels.navigation}
             homeHref={`/${locale}`}
             localeControl={

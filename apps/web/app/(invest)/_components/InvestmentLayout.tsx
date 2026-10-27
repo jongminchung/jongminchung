@@ -27,7 +27,6 @@ export function InvestmentLayout({
       <EditorialHeader
         actions={<ThemeControl labelTemplate={themeLabelTemplateFor(locale)} />}
         brand={<BrandWordmark suffix="invest" />}
-        brandLabel="jongminchung invest"
         navigationLabel={text.navigation}
         homeHref={`/${locale}`}
         localeHref={`/${alternate}`}

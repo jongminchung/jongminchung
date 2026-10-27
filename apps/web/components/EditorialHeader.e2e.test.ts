@@ -45,7 +45,7 @@ for (const site of sites) {
         for (const width of [320, 390, 767, 768, 1024, 1440]) {
           await page.setViewportSize({ width, height: 1000 });
           await expect(header).toHaveCSS("height", "64px");
-          await expect(brand.locator(":scope > span")).toHaveCSS(
+          await expect(brand.locator(":scope > span").first()).toHaveCSS(
             "font-size",
             "20px",
           );

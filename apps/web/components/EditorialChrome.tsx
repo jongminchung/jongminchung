@@ -18,7 +18,6 @@ export interface EditorialNavigationItem {
 /** 세 사이트의 공통 header 탐색을 렌더링함 */
 export function EditorialHeader({
   brand,
-  brandLabel,
   navigationLabel,
   homeHref,
   navigation,
@@ -30,7 +29,6 @@ export function EditorialHeader({
   mobileMenuCloseLabel,
 }: {
   readonly brand: ReactNode;
-  readonly brandLabel: string;
   readonly navigationLabel: string;
   readonly homeHref: string;
   readonly navigation: readonly EditorialNavigationItem[];
@@ -55,7 +53,6 @@ export function EditorialHeader({
       <header className="sticky top-0 z-40 h-16 border-b bg-background/95 backdrop-blur-xl">
         <div className="flex h-full w-full items-center gap-0 px-4 text-sm md:grid md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:gap-4 md:px-8">
           <Link
-            aria-label={brandLabel}
             className="flex min-h-11 min-w-11 shrink-0 items-center font-semibold tracking-[-.045em] md:justify-self-start"
             href={homeHref}
           >

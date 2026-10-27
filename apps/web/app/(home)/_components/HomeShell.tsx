@@ -21,8 +21,12 @@ export function HomeHeader({ locale }: { readonly locale: Locale }) {
         {navigation.skipToContent}
       </a>
       <EditorialHeader
-        brand={<BrandWordmark />}
-        brandLabel="jongminchung home"
+        brand={
+          <>
+            <BrandWordmark />
+            <span className="sr-only">home</span>
+          </>
+        }
         homeHref={`/${locale}`}
         navigationLabel={navigation.label}
         navigation={[
@@ -40,7 +44,7 @@ export function HomeHeader({ locale }: { readonly locale: Locale }) {
             className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md font-mono text-[11px] hover:bg-muted"
             href={`/${alternate}`}
             hrefLang={alternate}
-            aria-label={navigation.switchLocale}
+            aria-label={`${alternate.toUpperCase()} · ${navigation.switchLocale}`}
           >
             {alternate.toUpperCase()}
           </a>
