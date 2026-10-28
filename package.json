@@ -9,7 +9,7 @@
   "scripts": {
     "audit": "pnpm audit --audit-level high",
     "build": "pnpm -r --if-present run build",
-    "check": "make lint && pnpm exec tsc --noEmit && pnpm -r --if-present run typecheck && pnpm run deadcode && pnpm run test",
+    "check": "make check && pnpm exec tsc --noEmit && pnpm -r --if-present run typecheck && pnpm run deadcode && pnpm run test",
     "check:full": "pnpm run check && pnpm run test:e2e",
     "deadcode": "knip --include files,duplicates,dependencies,unlisted,catalog,catalogReferences --no-config-hints",
     "links:check": "node scripts/check-links.ts",

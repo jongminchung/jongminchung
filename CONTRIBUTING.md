@@ -2,7 +2,7 @@
 
 ## 포맷과 린트
 
-- `make fmt`는 소스를 자동 수정하고 `pnpm run check`는 포맷·정적 분석·타입·테스트를 검사함
+- `make check`는 포맷·린트를 자동 수정하고, `pnpm run check`는 workspace 타입·deadcode·테스트까지 검사함
 - Node.js `26.7.0`과 pnpm을 전역 PATH에서 사용하며 `.node-version`은 CI의 Node 버전을 기록함
 
 ```bash
@@ -10,10 +10,9 @@ node --version
 pnpm --version
 pnpm install --frozen-lockfile
 
-make fmt
+make check
 pnpm run check
 ```
-
 
 - `.editorconfig`를 스타일 기준으로 유지함
     - 기본 공백 2칸·줄 길이 80·LF·마지막 개행을 사용함

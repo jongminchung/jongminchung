@@ -1,6 +1,4 @@
-import { defineConfig } from "vite-plus";
-
-export default defineConfig({
+export default {
   lint: {
     // Oxlint의 공식 권장 기본값을 오류로 적용함
     // 나쁜 예: if (value = nextValue)처럼 조건식에서 값을 대입함
@@ -117,4 +115,4 @@ export default defineConfig({
     include: [".agents/skills/generate-article-image/scripts/**/*.test.ts"],
     testTimeout: 60000,
   },
-});
+};

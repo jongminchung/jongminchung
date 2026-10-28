@@ -34,7 +34,7 @@ pnpm run links:check
 pnpm run audit
 ```
 
-Use `make fmt` when you want to apply formatting fixes.
+Use `make check` to apply formatting fixes and run lint and type checks.
 
 Always include `run` for package scripts so commands are visibly distinguished from pnpm subcommands.
 
@@ -129,4 +129,4 @@ DeepSeek                 416 lines           █░░░░░░░░░░�
 
 <!-- prettier-ignore-end -->
 
-- 설치와 공통 `make fmt`·`pnpm run check` 사용법은 [기여 가이드](docs/CONTRIBUTING.md)를 참고함
+- 설치와 공통 `make check`·`pnpm run check` 사용법은 [기여 가이드](docs/CONTRIBUTING.md)를 참고함

@@ -29,3 +29,27 @@ apps/web/public/search/
 # Intellij
 .idea/
 .vercel
+apps/web/content/tech/docs/en/vscode/editorconfig.mdx
+apps/web/content/tech/docs/en/vscode/extensions-and-profiles.mdx
+apps/web/content/tech/docs/en/vscode/tasks-ci.mdx
+apps/web/content/tech/docs/en/vscode/editorconfig.mdx
+apps/web/content/tech/docs/en/vscode/extensions-and-profiles.mdx
+apps/web/content/tech/docs/en/vscode/tasks-ci.mdx
+apps/web/content/tech/docs/ko/vscode/editorconfig.mdx
+apps/web/content/tech/docs/ko/vscode/extensions-and-profiles.mdx
+apps/web/content/tech/docs/ko/vscode/tasks-ci.mdx
+apps/web/content/tech/docs/ko/vscode/editorconfig.mdx
+apps/web/content/tech/docs/ko/vscode/extensions-and-profiles.mdx
+apps/web/content/tech/docs/ko/vscode/tasks-ci.mdx
+docs/CONTRIBUTING.md
+docs/onboarding.md
+docs/runbooks/start.md
+docs/runbooks/start.md
+docs/runbooks/start.md
+docs/CONTRIBUTING.md
+docs/onboarding.md
+CONTRIBUTING.md
+Makefile
+package.json
+README.md
+vite.config.ts

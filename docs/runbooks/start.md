@@ -9,7 +9,7 @@ AI 대화 기록이나 에이전트 skill을 읽어야만 알 수 있는 작업 
 1. `git status --short --branch`로 기존 변경을 확인한다. 다른 사람의 변경이
    있으면 담당 범위를 확인하고, 새 작업은 별도 브랜치나 worktree에서 진행한다.
    [.node-version](../../.node-version)은 CI에서 사용할 Node 버전을 기록한다.
-3. 아래 명령으로 설치하고 Tech 화면을 연다.
+2. 아래 명령으로 설치하고 Tech 화면을 연다.
 
 ```sh
 node --version

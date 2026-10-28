@@ -8,13 +8,13 @@
 
 ## 개발 환경
 
-| 도구               | 버전·조건                               | 기준 파일                            |
-| ------------------ | --------------------------------------- | ------------------------------------ |
-| pnpm               | `12.15.0`                               | `package.json#packageManager`        |
-| Node.js            | 전역 `26.7.0`, 공개 패키지는 24 이상    | `.node-version`, `packages/*`        |
-| Make·Node          | 공통 format·lint 실행                   | `Makefile`                            |
-| Podman 또는 Docker | Markdown·HTML 링크 검사와 컨테이너 검증 | `scripts/check-links.ts`             |
-| Git                | 일반 개발에 필요                        | 시스템 설치                          |
+| 도구               | 버전·조건                               | 기준 파일                     |
+| ------------------ | --------------------------------------- | ----------------------------- |
+| pnpm               | `12.15.0`                               | `package.json#packageManager` |
+| Node.js            | 전역 `26.7.0`, 공개 패키지는 24 이상    | `.node-version`, `packages/*` |
+| Make·Node          | 공통 format·lint 실행                   | `Makefile`                    |
+| Podman 또는 Docker | Markdown·HTML 링크 검사와 컨테이너 검증 | `scripts/check-links.ts`      |
+| Git                | 일반 개발에 필요                        | 시스템 설치                   |
 
 저장소 루트에서 버전을 확인하고 잠금 파일을 변경하지 않는 설치를 수행한다.
 
@@ -56,7 +56,7 @@ pnpm --filter @jongminchung/ui run test
 | `pnpm run links:check` | Podman 우선·Docker 대체 Markdown·HTML 로컬 링크 검사                     |
 | `pnpm run test`        | workspace별 Vite+ coverage 검사와 Node package runtime smoke             |
 | `pnpm run test:e2e`    | build 후 앱별 Playwright E2E                                             |
-| `pnpm run check`       | Oxfmt·Oxlint·TypeScript·deadcode와 전체 로컬 테스트                       |
+| `pnpm run check`       | Oxfmt·Oxlint·TypeScript·deadcode와 전체 로컬 테스트                      |
 | `pnpm run check:full`  | `check`와 production build·전체 Playwright E2E                           |
 
 테스트 계약은 Vite+ `vp test`의 Unit·Integration, 공개 package의 Node runtime smoke,
@@ -79,7 +79,7 @@ pnpm run test:e2e
 
 | 변경 유형                    | 최소 검증                                                               |
 | ---------------------------- | ----------------------------------------------------------------------- |
-| Markdown·설정 문서           | `make lint`, `pnpm run links:check`, 명령 직접 확인                     |
+| Markdown·설정 문서           | `make check`, `pnpm run links:check`, 명령 직접 확인                    |
 | React·CSS·공용 UI            | 해당 workspace typecheck·test, 관련 Playwright, `DESIGN_SYSTEM.md` 계약 |
 | Next.js route·MDX 파이프라인 | 해당 앱 typecheck·test·build, core E2E                                  |
 | 공용 패키지                  | 해당 패키지 typecheck·test·build, 소비 앱 typecheck                     |

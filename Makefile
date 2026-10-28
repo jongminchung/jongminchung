@@ -1,9 +1,6 @@
-.DEFAULT_GOAL := lint
+.DEFAULT_GOAL := check
 
-.PHONY: fmt lint
+.PHONY: check
 
-fmt:
-	pnpm exec vp fmt .
-
-lint:
-	pnpm exec vp check
+check:
+	vp check --fix

@@ -90,13 +90,11 @@ Run **Tasks: Run Task → check**. This task uses terminal output; use [YAML](/e
 
 ## Run the same commands in CI
 
-
 ```sh
 npm ci
 uv sync --locked
 bash scripts/check.sh
 ```
-
 
 Compare these outputs locally and in CI:
 
@@ -131,7 +129,6 @@ Reintroduce TS `any`, a YAML duplicate key, unquoted Shell expansion, a mismatch
 Sources were checked against official documentation and configuration contracts. Verify actual editor save actions, Problems navigation, and remote extension behavior in your environment using the exercises. A passing CLI check is not evidence that those GUI interactions were tested.
 
 ## CLI verification record
-
 
 Checks covered expected failures, corrected examples, Shell output with spaces, the yamllint diagnostic regex, the combined `check.sh`, and no additional changes on a second format pass. VS Code GUI interactions and an actual CI runner were outside this verification.
 
