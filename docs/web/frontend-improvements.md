@@ -158,13 +158,11 @@
 
 ## 후속 개선 최종 검증
 
-- `mise exec shfmt@3.12.0 -- bun run check` 통과: format·lint·typecheck·deadcode, Web 171개·UI 13개·Tooling 14개 테스트, Node ESM consumer 검사를 포함함
 - `PLAYWRIGHT_TEST=1 bun run --filter @jongminchung/web build`로 프로덕션 빌드를 확인함
 - 빌드한 standalone 서버에서 `bun run --filter @jongminchung/web test:e2e --workers=2`의 84개 테스트가 모두 통과함
 - 기준 화면 12개를 갱신하지 않고 통과함. Docs 모바일 목차·sidebar, 본문 typography, Blog·Docs 탐색, 검색의 재시도·이동·초점 복귀를 포함함
 - 새로 좁힌 전송 예산을 6개 초기 경로에서 통과하고 검색창 chunk가 영문·한글 Tech 목록의 초기 요청에 없음을 확인함
 - 이 문서의 로컬 파일 링크와 `git diff --check`를 확인함
-- 환경은 Bun 1.4.1·Node 26.8.1·Playwright 1.62.1·Chromium 151.0.7922.34임. 이 환경에 없던 Chromium 시스템 의존성과 저장소가 지정한 shfmt 3.12.0을 설치하여 검사함
 - 로컬 작업 트리 검증이며 원격 CI·배포 결과를 뜻하지 않음
 
 ## 남은 개선 우선순위

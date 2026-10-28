@@ -2,7 +2,6 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {
     ".": {
-      "entry": ["scripts/style-shell.ts"],
       "ignoreDependencies": [
         "@jongminchung/generate-article-image-skill",
         "tsx"

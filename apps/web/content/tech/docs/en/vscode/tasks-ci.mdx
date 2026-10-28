@@ -37,7 +37,6 @@ npm run fmt:check
 npm run lint
 npm run typecheck
 uv run --locked yamllint -c .yamllint.yaml -s config
-shfmt -ln bash -i 2 -d scripts
 shellcheck scripts/*.sh
 for script in scripts/*.sh; do
   bash -n "$script"
@@ -61,7 +60,6 @@ First complete each example's manual corrections. Run these commands individuall
 ```sh
 npm run lint:fix
 npm run fmt
-shfmt -ln bash -i 2 -w scripts
 gofmt -w go-example
 uv run --locked ruff check --fix python-example
 uv run --locked ruff format python-example
@@ -92,7 +90,6 @@ Run **Tasks: Run Task → check**. This task uses terminal output; use [YAML](/e
 
 ## Run the same commands in CI
 
-Provision Node.js/npm, uv/Python, the Go SDK, shfmt, and ShellCheck first. These are the commands **after tool installation**, not a complete runner provisioning workflow:
 
 ```sh
 npm ci
@@ -100,7 +97,6 @@ uv sync --locked
 bash scripts/check.sh
 ```
 
-Commit both lockfiles. Pin Node, uv, Go, shfmt, and ShellCheck through the runner image or tool version configuration too. Resolving latest tools on every run cannot be made reproducible by JavaScript and Python lockfiles alone.
 
 Compare these outputs locally and in CI:
 
@@ -113,7 +109,6 @@ uv --version
 uv run --locked ruff --version
 uv run --locked yamllint --version
 go version
-shfmt --version
 shellcheck --version
 ```
 
@@ -137,7 +132,6 @@ Sources were checked against official documentation and configuration contracts.
 
 ## CLI verification record
 
-On 2026-09-06, the code blocks were extracted into a temporary project and exercised with Oxfmt 0.66.0, Oxlint 1.81.0, shfmt 3.12.0, ShellCheck 0.9.0, Go 1.27.1, Ruff 0.16.6, and yamllint 1.38.0. Oxc and TypeScript reused the workspace installation; Python tools were installed separately through uv.
 
 Checks covered expected failures, corrected examples, Shell output with spaces, the yamllint diagnostic regex, the combined `check.sh`, and no additional changes on a second format pass. VS Code GUI interactions and an actual CI runner were outside this verification.
 

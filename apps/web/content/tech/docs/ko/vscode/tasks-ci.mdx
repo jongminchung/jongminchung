@@ -37,7 +37,6 @@ npm run fmt:check
 npm run lint
 npm run typecheck
 uv run --locked yamllint -c .yamllint.yaml -s config
-shfmt -ln bash -i 2 -d scripts
 shellcheck scripts/*.sh
 for script in scripts/*.sh; do
   bash -n "$script"
@@ -61,7 +60,6 @@ uv run --locked ruff check python-example
 ```sh
 npm run lint:fix
 npm run fmt
-shfmt -ln bash -i 2 -w scripts
 gofmt -w go-example
 uv run --locked ruff check --fix python-example
 uv run --locked ruff format python-example
@@ -92,7 +90,6 @@ git diff
 
 ## CI도 동일 명령으로 시작합니다
 
-CI runner에는 Node.js·npm, uv·Python, Go SDK, shfmt, ShellCheck를 먼저 설치합니다. 아래는 그 **설치 단계 이후**의 명령입니다. 완전한 runner provisioning 예제가 아니며 프로젝트가 선택한 CI의 실행 단계에 넣습니다.
 
 ```sh
 npm ci
@@ -100,7 +97,6 @@ uv sync --locked
 bash scripts/check.sh
 ```
 
-`package-lock.json`과 `uv.lock`은 반드시 커밋합니다. JS·Python 도구 외에 Go SDK, shfmt, ShellCheck, uv, Node 버전도 runner 이미지나 도구 버전 파일에 고정합니다. 설치 때마다 latest를 고르면 lockfile만으로 전체 환경이 재현되지 않습니다.
 
 다음 출력을 CI 로그와 로컬에서 비교할 수 있습니다.
 
@@ -113,7 +109,6 @@ uv --version
 uv run --locked ruff --version
 uv run --locked yamllint --version
 go version
-shfmt --version
 shellcheck --version
 ```
 
@@ -137,7 +132,6 @@ TS의 `any`, YAML의 중복 키, Shell의 인용 누락, Go의 잘못된 Printf,
 
 ## 이 글의 CLI 검증 기록
 
-2026-09-06에 본문의 코드 블록을 임시 프로젝트로 추출해 Oxfmt 0.66.0, Oxlint 1.81.0, shfmt 3.12.0, ShellCheck 0.9.0, Go 1.27.1, Ruff 0.16.6, yamllint 1.38.0으로 실행했습니다. Oxc와 TypeScript는 작업 환경의 설치본을 사용했고 Python 도구는 uv로 별도 설치했습니다.
 
 잘못된 예제의 예상 실패, 수정 후 통과, 공백을 포함한 Shell 출력, yamllint Problems 정규식, 통합 `check.sh`, 두 번째 포맷의 추가 변경 없음을 확인했습니다. VS Code GUI와 실제 CI runner 실행은 이 검증에 포함하지 않았습니다.
 

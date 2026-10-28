@@ -4,7 +4,6 @@
 
 - `make fmt`는 소스를 자동 수정하고 `pnpm run check`는 포맷·정적 분석·타입·테스트를 검사함
 - Node.js `26.7.0`과 pnpm을 전역 PATH에서 사용하며 `.node-version`은 CI의 Node 버전을 기록함
-- pnpm 버전은 `package.json#packageManager`를, shfmt 버전은 CI의 `3.12.0`을 기준으로 함
 
 ```bash
 node --version
@@ -15,13 +14,11 @@ make fmt
 pnpm run check
 ```
 
-- 위 버전의 도구를 PATH에 설치함. shfmt 경로가 다르면 `SHFMT_BIN=/path/to/shfmt`로 지정함
 
 - `.editorconfig`를 스타일 기준으로 유지함
     - 기본 공백 2칸·줄 길이 80·LF·마지막 개행을 사용함
     - Python·Markdown·MDX는 공백 4칸, Go·Makefile은 탭을 사용함
     - Markdown의 의미 있는 줄 끝 공백과 목록 계층을 보존함
-- `oxfmt`와 `shfmt`에는 들여쓰기·줄 길이를 덮어쓰는 옵션을 추가하지 않음
 - Python 저장소의 `pyproject.toml`에 있는 `tool.ruff` 값은 `.editorconfig` 변경 시 함께 갱신함
 - 암호화 파일·템플릿·외부 원본·생성물의 제외 범위는 `vite.config.ts`의 fmt 설정과 셸 검사 스크립트에서 관리함
 - `vite.config.ts`가 Vite+의 `fmt`·`lint` 설정을 소유하며 `vite-plus` 버전은 루트 manifest에서 관리함

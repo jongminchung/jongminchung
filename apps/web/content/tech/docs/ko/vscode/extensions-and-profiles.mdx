@@ -40,7 +40,6 @@ sourceUrl: "https://code.visualstudio.com/docs/configure/extensions/extension-ma
 | Go                  | [golang.Go](https://marketplace.visualstudio.com/items?itemName=golang.Go)                                                                                                                                   | Go SDK, gopls, 디버깅용 Delve 확인; 별도 gofmt 확장은 불필요                                                                                                                                                                                                                                                 |
 | Python              | [ms-python.python](https://marketplace.visualstudio.com/items?itemName=ms-python.python), [charliermarsh.ruff](https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff)                       | Python·가상환경·pytest 별도; 노트북에만 `ms-toolsai.jupyter` 추가                                                                                                                                                                                                                                            |
 | YAML                | [redhat.vscode-yaml](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml)                                                                                                                 | yamllint는 별도 CLI·Task; Oxfmt를 쓰면 YAML 확장의 formatter와 역할 조정                                                                                                                                                                                                                                     |
-| Shell               | [foxundermoon.shell-format](https://marketplace.visualstudio.com/items?itemName=foxundermoon.shell-format), [timonwong.shellcheck](https://marketplace.visualstudio.com/items?itemName=timonwong.shellcheck) | shfmt·ShellCheck 실행 파일 경로 확인                                                                                                                                                                                                                                                                         |
 | 공통 텍스트 규칙    | [EditorConfig.EditorConfig](https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig)                                                                                                   | 저장소 `.editorconfig` 작성                                                                                                                                                                                                                                                                                  |
 
 Java Pack은 확인일 기준 언어 지원·디버거·테스트·Maven·Gradle·프로젝트 관리 확장을 포함합니다. 이 중 일부만 원하면 Pack 대신 `redhat.java`, `vscjava.vscode-java-debug`, `vscjava.vscode-java-test`처럼 필요한 ID를 개별 설치합니다. Spring Pack은 별도 선택입니다. [Java Pack 구성](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-pack)
@@ -103,7 +102,7 @@ case "$choice" in
     ;;
   go-infra)
     profile="Go + Infra"
-    extensions=(golang.Go redhat.vscode-yaml foxundermoon.shell-format timonwong.shellcheck)
+    extensions=(golang.Go redhat.vscode-yaml timonwong.shellcheck)
     ;;
   *)
     printf 'Usage: %s {web-python|web-java|go-infra}\n' "$0" >&2

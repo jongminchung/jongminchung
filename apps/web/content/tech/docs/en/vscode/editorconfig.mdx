@@ -21,7 +21,6 @@ When CI rejects a file that looked fine after saving, compare four things: **exe
 | ------ | ----------- | ---------------- | -------------------------------- |
 | JS·TS  | Oxfmt       | Oxlint           | TypeScript                       |
 | YAML   | Oxfmt       | yamllint         | Schema and consuming application |
-| Shell  | shfmt       | ShellCheck       | bash -n and execution tests      |
 | Go     | gofmt       | go vet and gopls | go test                          |
 | Python | Ruff format | Ruff check       | Type checking and tests          |
 
@@ -92,7 +91,6 @@ User, workspace, and language-specific settings have different scopes. A global 
 
 1. [Oxfmt and Oxlint](/en/docs/vscode/oxfmt-oxlint): distinguish layout from code diagnostics.
 2. [YAML](/en/docs/vscode/yaml): separate formatting, lint rules, and schemas.
-3. [Shell](/en/docs/vscode/shell): reproduce a ShellCheck problem that formatting cannot fix.
 4. [Go](/en/docs/vscode/go-format): turn gofmt differences into a failing CI check.
 5. [Python](/en/docs/vscode/ruff): connect format, lint, and import sorting.
 6. [Tasks and CI](/en/docs/vscode/tasks-ci): reuse the same checking commands.

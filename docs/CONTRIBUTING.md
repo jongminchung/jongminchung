@@ -12,8 +12,7 @@
 | ------------------ | --------------------------------------- | ------------------------------------ |
 | pnpm               | `12.15.0`                               | `package.json#packageManager`        |
 | Node.js            | 전역 `26.7.0`, 공개 패키지는 24 이상    | `.node-version`, `packages/*`        |
-| shfmt              | `3.12.0`, 셸 형식 검사                  | `.github/workflows/web.yml`          |
-| Make·Node          | 공통 format·lint 실행                   | `Makefile`, `scripts/style-shell.ts` |
+| Make·Node          | 공통 format·lint 실행                   | `Makefile`                            |
 | Podman 또는 Docker | Markdown·HTML 링크 검사와 컨테이너 검증 | `scripts/check-links.ts`             |
 | Git                | 일반 개발에 필요                        | 시스템 설치                          |
 
@@ -57,7 +56,7 @@ pnpm --filter @jongminchung/ui run test
 | `pnpm run links:check` | Podman 우선·Docker 대체 Markdown·HTML 로컬 링크 검사                     |
 | `pnpm run test`        | workspace별 Vite+ coverage 검사와 Node package runtime smoke             |
 | `pnpm run test:e2e`    | build 후 앱별 Playwright E2E                                             |
-| `pnpm run check`       | Oxfmt·shfmt·Oxlint·TypeScript·deadcode와 전체 로컬 테스트                |
+| `pnpm run check`       | Oxfmt·Oxlint·TypeScript·deadcode와 전체 로컬 테스트                       |
 | `pnpm run check:full`  | `check`와 production build·전체 Playwright E2E                           |
 
 테스트 계약은 Vite+ `vp test`의 Unit·Integration, 공개 package의 Node runtime smoke,

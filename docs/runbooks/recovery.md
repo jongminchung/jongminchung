@@ -10,7 +10,6 @@ pnpm·Node·Vite+ 버전, 발생 URL·Host·언어, 마지막 정상 시점을 �
 | 증상                          | 확인과 조치                                                                                                                                        | 다시 확인                          |
 | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
 | frozen lockfile 설치 실패     | pnpm pin, manifest·workspace·lockfile diff 확인. 일반 작업에서 lockfile을 지워 해결하지 않는다. 의도한 의존성 변경이면 `pnpm install` 후 diff 검토 | `pnpm install --frozen-lockfile`   |
-| `shfmt` 또는 `make` 없음      | 도구 설치와 PATH 확인. 별도 shfmt는 `SHFMT_BIN`으로 지정                                                                                           | `make lint`                        |
 | `.source` 또는 새 MDX 누락    | MDX 경로·schema 확인 후 Web `postinstall` 실행                                                                                                     | Web `typecheck`, `build`           |
 | route 타입 불일치             | 실제 내부 App Router 경로와 `PageProps` 인자 확인                                                                                                  | Web `typecheck`로 Next 타입 재생성 |
 | 번역·metadata·내부 링크 오류  | 오류에 나온 파일과 한영 쌍, [콘텐츠 절차](content.md) 확인                                                                                         | Web `test`, `build`                |
