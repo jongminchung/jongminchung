@@ -56,14 +56,14 @@ Ruff 설정 파일에 폭 80과 들여쓰기 4를 명시해 [EditorConfig](/ko/d
 
 ```json
 {
-    "[python]": {
-        "editor.defaultFormatter": "charliermarsh.ruff",
-        "editor.codeActionsOnSave": {
-            "source.fixAll.ruff": "explicit",
-            "source.organizeImports.ruff": "explicit"
-        }
-    },
-    "ruff.path": ["${workspaceFolder}/.venv/bin/ruff"]
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    }
+  },
+  "ruff.path": ["${workspaceFolder}/.venv/bin/ruff"]
 }
 ```
 

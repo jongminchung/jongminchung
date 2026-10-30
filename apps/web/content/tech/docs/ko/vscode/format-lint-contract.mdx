@@ -43,7 +43,7 @@ Prettier와 lint를 같이 쓸 때 겹치는 스타일 규칙은 끈다. Prettie
 맞춰야 하고 Java formatter profile은 별도로 필요할 수 있다. CLI에 `--print-width`를
 따로 주면서 편집기만 다른 설정을 읽게 만들지 않는다.
 
-이 저장소의 [`.editorconfig`](https://github.com/jongminchung/jongminchung/blob/main/.editorconfig)는 Markdown·Python 4칸, Go·Makefile 탭을
+이 저장소의 [`.editorconfig`](https://github.com/jongminchung/jongminchung/blob/main/.editorconfig)는 Markdown 2칸, Python 4칸, Go·Makefile 탭을
 구분한다. Markdown 줄 끝 공백은 의미가 있으므로 일괄 제거하지 않는다.
 Oxfmt도 읽는 EditorConfig 속성과 중첩 파일 처리에 제한이 있다.
 [Oxfmt 설정](https://oxc.rs/docs/guide/usage/formatter/config)
@@ -86,10 +86,10 @@ import tseslint from "typescript-eslint";
 import eslintConfigPrettier from "eslint-config-prettier/flat";
 
 export default [
-    { ignores: ["dist/**", "coverage/**", ".next/**"] },
-    js.configs.recommended,
-    ...tseslint.configs.recommended,
-    eslintConfigPrettier,
+  { ignores: ["dist/**", "coverage/**", ".next/**"] },
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+  eslintConfigPrettier,
 ];
 ```
 
@@ -97,8 +97,8 @@ export default [
 
 ```json
 {
-    "singleQuote": false,
-    "semi": true
+  "singleQuote": false,
+  "semi": true
 }
 ```
 
@@ -117,30 +117,30 @@ Prettier는 로컬 package를 사용하게 설치하고 실제 로딩 경로를 
 
 ```json
 {
-    "prettier.requireConfig": true,
-    "eslint.format.enable": false,
-    "[typescript]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
-        "editor.formatOnSave": true,
-        "editor.formatOnPaste": false,
-        "editor.formatOnType": false,
-        "editor.codeActionsOnSave": {
-            "source.fixAll": "never",
-            "source.fixAll.eslint": "explicit",
-            "source.organizeImports": "never"
-        }
-    },
-    "[typescriptreact]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
-        "editor.formatOnSave": true,
-        "editor.formatOnPaste": false,
-        "editor.formatOnType": false,
-        "editor.codeActionsOnSave": {
-            "source.fixAll": "never",
-            "source.fixAll.eslint": "explicit",
-            "source.organizeImports": "never"
-        }
+  "prettier.requireConfig": true,
+  "eslint.format.enable": false,
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": false,
+    "editor.formatOnType": false,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "never",
+      "source.fixAll.eslint": "explicit",
+      "source.organizeImports": "never"
     }
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": false,
+    "editor.formatOnType": false,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "never",
+      "source.fixAll.eslint": "explicit",
+      "source.organizeImports": "never"
+    }
+  }
 }
 ```
 
@@ -153,13 +153,13 @@ plugin 등 다른 정렬기를 함께 켜지 않는다. `eslint-config-prettier`
 
 ```json
 {
-    "scripts": {
-        "fmt": "eslint . --fix && prettier . --write",
-        "fmt:check": "prettier . --check",
-        "lint": "eslint . --max-warnings 0",
-        "typecheck": "tsc --noEmit",
-        "check": "npm run fmt:check && npm run lint && npm run typecheck"
-    }
+  "scripts": {
+    "fmt": "eslint . --fix && prettier . --write",
+    "fmt:check": "prettier . --check",
+    "lint": "eslint . --max-warnings 0",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run fmt:check && npm run lint && npm run typecheck"
+  }
 }
 ```
 

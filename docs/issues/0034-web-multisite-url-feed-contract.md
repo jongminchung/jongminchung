@@ -13,8 +13,8 @@
 ## 현재 상태 — 2026-09-06 작업 트리
 
 - **`site-routing.ts`의 `siteOrigins`가 production origin의 단일 기준이며 production host mapping도 여기서 파생됨**
-    - Home·Tech·Invest의 layout·sitemap·robots·RSS와 Home 외부 링크가 이를 참조함
-    - `createRobotsResponse`와 `getLocaleProtocol`도 공통 helper로 사용함
+  - Home·Tech·Invest의 layout·sitemap·robots·RSS와 Home 외부 링크가 이를 참조함
+  - `createRobotsResponse`와 `getLocaleProtocol`도 공통 helper로 사용함
 - **`lib/rss.ts`가 XML escaping·직렬화·locale·cache header를 소유하며 각 route는 콘텐츠 선택과 channel 문구만 제공함**
 - **공통 fixture는 두 사이트·두 언어의 특수문자·URL·날짜·빈 collection을 검증하고 metadata route test는 세 사이트 robots·sitemap과 두 RSS를 검증함**
 
@@ -33,17 +33,17 @@
 ## 채택한 방향
 
 - **site ID별 production identity를 한 module에서 관리함**
-    - production host
-    - canonical origin
-    - locale cookie key와 내부 path는 기존 routing 계약을 유지함
+  - production host
+  - canonical origin
+  - locale cookie key와 내부 path는 기존 routing 계약을 유지함
 - **RSS protocol helper를 작게 추출함**
-    - XML text escaping
-    - locale language tag
-    - item serialization
-    - channel response와 공통 cache header
+  - XML text escaping
+  - locale language tag
+  - item serialization
+  - channel response와 공통 cache header
 - **각 route는 제품별 data selection과 channel copy만 소유함**
-    - Tech는 published article selection과 최신순 정렬을 소유함
-    - Invest는 published note selection을 소유함
+  - Tech는 published article selection과 최신순 정렬을 소유함
+  - Invest는 published note selection을 소유함
 - **robots·sitemap·RSS가 같은 site origin을 사용하는 contract test를 추가함**
 
 ## 채택하지 않을 내용

@@ -19,17 +19,17 @@ This example specifically targets the jongminchung repository, with pnpm and Nod
 
 ```json
 {
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "repo: check",
-            "type": "process",
-            "command": "pnpm",
-            "args": ["run", "check"],
-            "options": { "cwd": "${workspaceFolder}" },
-            "problemMatcher": []
-        }
-    ]
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "repo: check",
+      "type": "process",
+      "command": "pnpm",
+      "args": ["run", "check"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    }
+  ]
 }
 ```
 
@@ -47,13 +47,13 @@ Keep a single root when all tools correctly interpret one build graph. Use multi
 
 ```json
 {
-    "folders": [
-        { "name": "api", "path": "api" },
-        { "name": "web", "path": "web" }
-    ],
-    "settings": {
-        "files.autoSave": "off"
-    }
+  "folders": [
+    { "name": "api", "path": "api" },
+    { "name": "web", "path": "web" }
+  ],
+  "settings": {
+    "files.autoSave": "off"
+  }
 }
 ```
 
