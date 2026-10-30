@@ -78,14 +78,14 @@ pnpm --filter @jongminchung/ui run publish:dry-run
 <!-- prettier-ignore-start -->
 
 <!--START_SECTION:waka-->
-![AI Code Time](http://img.shields.io/badge/AI%20Code%20Time-907%20hrs%2022%20mins-blue?style=flat)
+![AI Code Time](http://img.shields.io/badge/AI%20Code%20Time-910%20hrs%208%20mins-blue?style=flat)
 
 **I'm a Night 🦉** 
 
 ```text
 🌞 Morning                976 commits         ███░░░░░░░░░░░░░░░░░░░░░░   11.01 % 
 🌆 Daytime                2180 commits        ██████░░░░░░░░░░░░░░░░░░░   24.59 % 
-🌃 Evening                3335 commits        █████████░░░░░░░░░░░░░░░░   37.61 % 
+🌃 Evening                3334 commits        █████████░░░░░░░░░░░░░░░░   37.60 % 
 🌙 Night                  2376 commits        ███████░░░░░░░░░░░░░░░░░░   26.80 % 
 ```
 
@@ -94,37 +94,37 @@ pnpm --filter @jongminchung/ui run publish:dry-run
 
 ```text
 💬 Programming Languages: 
-Java                     5 hrs 7 mins        ████░░░░░░░░░░░░░░░░░░░░░   17.00 % 
-Python                   5 hrs 7 mins        ████░░░░░░░░░░░░░░░░░░░░░   16.97 % 
-YAML                     3 hrs 41 mins       ███░░░░░░░░░░░░░░░░░░░░░░   12.22 % 
-Markdown                 3 hrs 21 mins       ███░░░░░░░░░░░░░░░░░░░░░░   11.13 % 
-Go                       2 hrs 35 mins       ██░░░░░░░░░░░░░░░░░░░░░░░   08.60 % 
+Markdown                 6 hrs 37 mins       █████░░░░░░░░░░░░░░░░░░░░   18.29 % 
+YAML                     5 hrs 44 mins       ████░░░░░░░░░░░░░░░░░░░░░   15.88 % 
+Java                     5 hrs 26 mins       ████░░░░░░░░░░░░░░░░░░░░░   15.06 % 
+Python                   5 hrs 7 mins        ████░░░░░░░░░░░░░░░░░░░░░   14.15 % 
+Go                       2 hrs 35 mins       ██░░░░░░░░░░░░░░░░░░░░░░░   07.17 % 
 ```
 
 🤖 **AI Coding This Week** 
 
 ```text
-⏱ AI Coding Time: 19 hrs 44 mins (65.45%)
+⏱ AI Coding Time: 21 hrs 58 mins (60.74%)
 
-✍️ 10,433 lines written by AI, 1,330 lines written by hand (88.69% AI-written)
+✍️ 10,544 lines written by AI, 2,329 lines written by hand (81.91% AI-written)
 
-🔤 8,972,515 Input Tokens, 1,555,149 Output Tokens
+🔤 9,637,647 Input Tokens, 1,623,800 Output Tokens
 
-💵 $215.05 Estimated AI Cost This Week
+💵 $226.34 Estimated AI Cost This Week
 
-🧠 102 AI Sessions, 420 AI Prompts
+🧠 113 AI Sessions, 481 AI Prompts
 
-GPT                      11,201 lines        ████████████████████████░   96.42 % 
-DeepSeek                 416 lines           █░░░░░░░░░░░░░░░░░░░░░░░░   03.58 % 
+GPT                      11,379 lines        ████████████████████████░   96.47 % 
+DeepSeek                 416 lines           █░░░░░░░░░░░░░░░░░░░░░░░░   03.53 % 
 Gemini                   0 lines             ░░░░░░░░░░░░░░░░░░░░░░░░░   00.00 % 
 Oss                      0 lines             ░░░░░░░░░░░░░░░░░░░░░░░░░   00.00 % 
 Sonnet                   0 lines             ░░░░░░░░░░░░░░░░░░░░░░░░░   00.00 % 
 
 🔎 AI Coding Insights:
-🤖 AI-Driven — 88.69% of written lines came from AI
-📄 Detailed Prompter — average 570 characters per prompt
+🤖 AI-Driven — 81.91% of written lines came from AI
+📄 Detailed Prompter — average 541 characters per prompt
 🔁 Iterative Prompter — average 4 prompts per session
-🚀 High AI Trust — 20.17% of changed lines were hand-edited
+🚀 High AI Trust — 27.15% of changed lines were hand-edited
 ```
 
 
