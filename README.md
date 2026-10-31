@@ -78,7 +78,7 @@ pnpm --filter @jongminchung/ui run publish:dry-run
 <!-- prettier-ignore-start -->
 
 <!--START_SECTION:waka-->
-![AI Code Time](http://img.shields.io/badge/AI%20Code%20Time-910%20hrs%208%20mins-blue?style=flat)
+![AI Code Time](http://img.shields.io/badge/AI%20Code%20Time-912%20hrs%2028%20mins-blue?style=flat)
 
 **I'm a Night 🦉** 
 
@@ -94,37 +94,37 @@ pnpm --filter @jongminchung/ui run publish:dry-run
 
 ```text
 💬 Programming Languages: 
-Markdown                 6 hrs 37 mins       █████░░░░░░░░░░░░░░░░░░░░   18.29 % 
-YAML                     5 hrs 44 mins       ████░░░░░░░░░░░░░░░░░░░░░   15.88 % 
-Java                     5 hrs 26 mins       ████░░░░░░░░░░░░░░░░░░░░░   15.06 % 
-Python                   5 hrs 7 mins        ████░░░░░░░░░░░░░░░░░░░░░   14.15 % 
-Go                       2 hrs 35 mins       ██░░░░░░░░░░░░░░░░░░░░░░░   07.17 % 
+Markdown                 7 hrs 58 mins       █████░░░░░░░░░░░░░░░░░░░░   19.94 % 
+Python                   7 hrs 25 mins       █████░░░░░░░░░░░░░░░░░░░░   18.59 % 
+YAML                     5 hrs 59 mins       ████░░░░░░░░░░░░░░░░░░░░░   14.99 % 
+Java                     5 hrs 26 mins       ███░░░░░░░░░░░░░░░░░░░░░░   13.63 % 
+Go                       2 hrs 35 mins       ██░░░░░░░░░░░░░░░░░░░░░░░   06.49 % 
 ```
 
 🤖 **AI Coding This Week** 
 
 ```text
-⏱ AI Coding Time: 21 hrs 58 mins (60.74%)
+⏱ AI Coding Time: 25 hrs 54 mins (64.82%)
 
-✍️ 10,544 lines written by AI, 2,329 lines written by hand (81.91% AI-written)
+✍️ 14,581 lines written by AI, 2,326 lines written by hand (86.24% AI-written)
 
-🔤 9,637,647 Input Tokens, 1,623,800 Output Tokens
+🔤 13,392,914 Input Tokens, 2,539,797 Output Tokens
 
-💵 $226.34 Estimated AI Cost This Week
+💵 $230.71 Estimated AI Cost This Week
 
-🧠 113 AI Sessions, 481 AI Prompts
+🧠 113 AI Sessions, 483 AI Prompts
 
-GPT                      11,379 lines        ████████████████████████░   96.47 % 
-DeepSeek                 416 lines           █░░░░░░░░░░░░░░░░░░░░░░░░   03.53 % 
+GPT                      15,596 lines        ████████████████████████░   97.40 % 
+DeepSeek                 416 lines           █░░░░░░░░░░░░░░░░░░░░░░░░   02.60 % 
 Gemini                   0 lines             ░░░░░░░░░░░░░░░░░░░░░░░░░   00.00 % 
 Oss                      0 lines             ░░░░░░░░░░░░░░░░░░░░░░░░░   00.00 % 
 Sonnet                   0 lines             ░░░░░░░░░░░░░░░░░░░░░░░░░   00.00 % 
 
 🔎 AI Coding Insights:
-🤖 AI-Driven — 81.91% of written lines came from AI
-📄 Detailed Prompter — average 541 characters per prompt
+🤖 AI-Driven — 86.24% of written lines came from AI
+📄 Detailed Prompter — average 542 characters per prompt
 🔁 Iterative Prompter — average 4 prompts per session
-🚀 High AI Trust — 27.15% of changed lines were hand-edited
+🚀 High AI Trust — 21.48% of changed lines were hand-edited
 ```
 
 
